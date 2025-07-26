@@ -1,0 +1,19 @@
+{
+  "name": "fsm-demo-rust",
+  "scripts": {
+    "watch": "cargo-watch -x run -w src -w assets",
+    "test:minion": "cargo-watch -x \"test --test minion -- --show-output > test.log\" -w src -w tests",
+    "transform:data": "npx tsx scripts/transform.ts",
+    "example:classic_fiora": "cargo.exe run --package moon_lol --example classic_fiora"
+  },
+  "dependencies": {
+    "@gltf-transform/core": "^4.2.0",
+    "@gltf-transform/extensions": "^4.2.0",
+    "@types/node": "^24.0.14",
+    "three": "^0.178.0",
+    "vite": "^6.0.6"
+  },
+  "devDependencies": {
+    "@types/three": "^0.178.1"
+  }
+}

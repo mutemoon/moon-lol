@@ -1,0 +1,8 @@
+target
+*.log
+
+node_modules
+
+assets
+
+*.db
