@@ -8,7 +8,7 @@ pub const CAMERA_OFFSET_Z: f32 = 769.56;
 pub const CAMERA_OFFSET: Vec3 = Vec3::new(CAMERA_OFFSET_X, CAMERA_OFFSET_Y, CAMERA_OFFSET_Z);
 pub const CAMERA_START_POSITION: Vec3 = Vec3::new(2500.0, 0.0, -2500.0);
 
-pub const CAMERA_MOVE_SPEED: f32 = 25.0;
+pub const CAMERA_MOVE_SPEED: f32 = 125.0;
 
 #[derive(Component)]
 pub struct Focus;

@@ -4,8 +4,11 @@ use bevy::ecs::resource::{self, Resource};
 use bevy::image::{dds_buffer_to_image, CompressedImageFormats, Image};
 use binrw::{args, Endian};
 use binrw::{binread, io::NoSeek, BinRead};
-use cdragon_prop::PropFile;
+use cdragon_prop::{BinEntry, PropFile};
 use std::hash::Hasher;
+#[cfg(unix)]
+use std::os::unix::fs::FileExt;
+#[cfg(windows)]
 use std::os::windows::fs::FileExt;
 use std::{
     collections::HashMap,
@@ -41,6 +44,11 @@ pub struct LeagueWad {
 impl LeagueWad {
     pub fn get_entry_reader() {}
 }
+
+pub struct LeagueProp(pub PropFile);
+
+unsafe impl Sync for LeagueProp {}
+unsafe impl Send for LeagueProp {}
 
 #[binread]
 #[derive(Debug, Clone, Copy)]
@@ -110,6 +118,8 @@ pub struct LeagueLoader {
     pub sub_chunk: LeagueWadSubchunk,
 
     pub wad: LeagueWad,
+    pub map_geo: LeagueMapGeo,
+    pub map_materials: LeagueProp,
 }
 
 pub struct ArcFileReader {
@@ -132,6 +142,8 @@ impl Read for ArcFileReader {
     fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
         let absolute_offset = self.start_offset + self.current_pos;
 
+        #[cfg(unix)]
+        let bytes_read = self.file.read_at(buf, absolute_offset)?;
         #[cfg(windows)]
         let bytes_read = self.file.seek_read(buf, absolute_offset)?;
 
@@ -167,7 +179,7 @@ impl Seek for ArcFileReader {
 }
 
 impl LeagueLoader {
-    pub fn new(root_dir: &str, map_path: &str) -> io::Result<LeagueLoader> {
+    pub fn new(root_dir: &str, map_path: &str, map_geo_path: &str) -> io::Result<LeagueLoader> {
         let root_dir = Path::new(root_dir);
         let map_relative_path = Path::new(map_path);
 
@@ -179,21 +191,46 @@ impl LeagueLoader {
 
         let entry = LeagueLoader::get_wad_subchunk_entry(&wad, map_path);
 
-        let reader = LeagueLoader::get_wad_zstd_entry_reader(file.clone(), &entry).unwrap();
+        let reader = LeagueLoader::get_wad_zstd_entry_reader(&file, &entry).unwrap();
 
-        let texture = LeagueWadSubchunk::read_options(
+        let sub_chunk = LeagueWadSubchunk::read_options(
             &mut NoSeek::new(reader),
             Endian::Little,
             args! { count: entry.target_size / 16 },
         )
         .unwrap();
 
+        let entry =
+            LeagueLoader::get_wad_entry(&wad, LeagueLoader::compute_wad_hash(&map_geo_path));
+
+        let reader = LeagueLoader::get_wad_zstd_entry_reader(&file, &entry)?;
+
+        let map_geo = LeagueMapGeo::read(&mut NoSeek::new(reader)).unwrap();
+
+        let map_materials_path = map_geo_path
+            .replace(".mapgeo", ".materials.bin")
+            .replace("\\", "/")
+            .to_lowercase();
+
+        let entry =
+            LeagueLoader::get_wad_entry(&wad, LeagueLoader::compute_wad_hash(&map_materials_path));
+        let mut reader = LeagueLoader::get_wad_zstd_entry_reader(&file, &entry)?;
+        let data = {
+            let mut data: Vec<u8> = Vec::new();
+            reader.read_to_end(&mut data)?;
+            data
+        };
+
+        let map_materials = PropFile::from_slice(&data).unwrap();
+
         Ok(LeagueLoader {
             root_dir: root_dir.to_path_buf(),
             map_path: map_relative_path.to_path_buf(),
             wad_file: file,
-            sub_chunk: texture,
+            sub_chunk,
             wad,
+            map_geo,
+            map_materials: LeagueProp(map_materials),
         })
     }
 
@@ -205,39 +242,12 @@ impl LeagueLoader {
         self.get_wad_entry_by_hash(LeagueLoader::compute_wad_hash(&path.to_lowercase()))
     }
 
-    pub fn get_wad_entry(wad: &LeagueWad, hash: u64) -> LeagueWadEntry {
-        wad.entries.get(&hash).unwrap().clone()
-    }
-
-    pub fn get_wad_subchunk_entry(wad: &LeagueWad, map_path: &str) -> LeagueWadEntry {
-        let subchunk_path = map_path
-            .replace(".client", ".subchunktoc")
-            .replace("\\", "/")
-            .to_lowercase();
-
-        LeagueLoader::get_wad_entry(wad, LeagueLoader::compute_wad_hash(&subchunk_path))
-    }
-
-    pub fn get_wad_zstd_entry_reader(
-        wad_file: Arc<File>,
-        entry: &LeagueWadEntry,
-    ) -> io::Result<Box<dyn Read>> {
-        Ok(Box::new(
-            Decoder::new(
-                ArcFileReader::new(wad_file.clone(), entry.offset as u64).take(entry.size as u64),
-            )
-            .unwrap(),
-        ))
-    }
-
     pub fn get_wad_entry_reader(&self, entry: &LeagueWadEntry) -> io::Result<Box<dyn Read + '_>> {
         match entry.format {
             WadDataFormat::Uncompressed => todo!(),
             WadDataFormat::Gzip => todo!(),
             WadDataFormat::Redirection => todo!(),
-            WadDataFormat::Zstd => {
-                LeagueLoader::get_wad_zstd_entry_reader(self.wad_file.clone(), entry)
-            }
+            WadDataFormat::Zstd => LeagueLoader::get_wad_zstd_entry_reader(&self.wad_file, entry),
             WadDataFormat::Chunked(subchunk_count) => {
                 if self.sub_chunk.chunks.is_empty() {
                     Err(io::ErrorKind::AlreadyExists.into())
@@ -310,11 +320,6 @@ impl LeagueLoader {
         }
     }
 
-    pub fn get_map_geo_by_path(&self, path: &str) -> io::Result<LeagueMapGeo> {
-        let reader = self.get_wad_entry_reader_by_path(path)?;
-        Ok(LeagueMapGeo::read(&mut NoSeek::new(reader)).unwrap())
-    }
-
     pub fn get_prop_bin_by_path(&self, path: &str) -> io::Result<PropFile> {
         let mut reader = self.get_wad_entry_reader_by_path(path)?;
         let data = {
@@ -335,5 +340,30 @@ impl LeagueLoader {
         s.to_ascii_lowercase().bytes().fold(0x811c9dc5_u32, |h, b| {
             (h ^ b as u32).wrapping_mul(0x01000193)
         })
+    }
+
+    pub fn get_wad_entry(wad: &LeagueWad, hash: u64) -> LeagueWadEntry {
+        wad.entries.get(&hash).unwrap().clone()
+    }
+
+    pub fn get_wad_subchunk_entry(wad: &LeagueWad, map_path: &str) -> LeagueWadEntry {
+        let subchunk_path = map_path
+            .replace(".client", ".subchunktoc")
+            .replace("\\", "/")
+            .to_lowercase();
+
+        LeagueLoader::get_wad_entry(wad, LeagueLoader::compute_wad_hash(&subchunk_path))
+    }
+
+    pub fn get_wad_zstd_entry_reader(
+        wad_file: &Arc<File>,
+        entry: &LeagueWadEntry,
+    ) -> io::Result<Box<dyn Read>> {
+        Ok(Box::new(
+            Decoder::new(
+                ArcFileReader::new(wad_file.clone(), entry.offset as u64).take(entry.size as u64),
+            )
+            .unwrap(),
+        ))
     }
 }

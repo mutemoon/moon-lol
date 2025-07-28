@@ -4,7 +4,7 @@
     "watch": "cargo-watch -x run -w src -w assets",
     "test:minion": "cargo-watch -x \"test --test minion -- --show-output > test.log\" -w src -w tests",
     "transform:data": "npx tsx scripts/transform.ts",
-    "example:classic_fiora": "cargo.exe run --package moon_lol --example classic_fiora"
+    "example:classic_fiora": "WGPU_ALLOW_UNDERLYING_NONCOMPLIANT_ADAPTER=1 cargo run --package moon_lol --example classic_fiora"
   },
   "dependencies": {
     "@gltf-transform/core": "^4.2.0",

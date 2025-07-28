@@ -9,19 +9,15 @@ pub struct WadRes {
     pub loader: LeagueLoader,
 }
 
-pub struct PROP(pub PropFile);
-
-unsafe impl Sync for PROP {}
-unsafe impl Send for PROP {}
-
 pub struct PluginResource;
 
 impl Plugin for PluginResource {
     fn build(&self, app: &mut App) {
         app.insert_resource::<WadRes>(WadRes {
             loader: LeagueLoader::new(
-                r"C:\Program Files (x86)\WeGameApps\英雄联盟\Game\",
-                r"DATA\FINAL\Maps\Shipping\Map11.wad.client",
+                r"/mnt/c/Program Files (x86)/WeGameApps/英雄联盟/game",
+                r"DATA/FINAL/Maps/Shipping/Map11.wad.client",
+                r"data/maps/mapgeometry/map11/bloom.mapgeo",
             )
             .unwrap(),
         });

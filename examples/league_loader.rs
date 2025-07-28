@@ -3,8 +3,9 @@ use moon_lol::render::LeagueLoader;
 
 fn main() {
     let loader = LeagueLoader::new(
-        r"C:\Program Files (x86)\WeGameApps\英雄联盟\Game\",
-        r"DATA\FINAL\Maps\Shipping\Map11.wad.client",
+        r"/mnt/c/Program Files (x86)/WeGameApps/英雄联盟/game",
+        r"DATA/FINAL/Maps/Shipping/Map11.wad.client",
+        r"data/maps/mapgeometry/map11/bloom.mapgeo",
     )
     .unwrap();
 
