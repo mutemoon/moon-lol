@@ -326,14 +326,27 @@ fn setup_map_placeble(
                 v.1.getv::<BinStruct>(LeagueLoader::compute_binhash("definition").into())
                     .unwrap();
 
+            let character_record_key = &definition
+                .getv::<BinString>(LeagueLoader::compute_binhash("CharacterRecord").into())
+                .unwrap()
+                .0;
+
+            println!("{:#?}", character_record_key);
+
+            let character_record = res_wad
+                .loader
+                .character_map
+                .get(&LeagueLoader::compute_binhash(character_record_key))
+                .unwrap();
+
+            println!("{:#?}", character_record);
+
             let skin_path = "data/".to_owned()
                 + &definition
                     .getv::<BinString>(LeagueLoader::compute_binhash("Skin").into())
                     .unwrap()
                     .0
                 + ".bin";
-
-            println!("{}", skin_path);
 
             let skin_bin = res_wad.loader.get_prop_bin_by_path(&skin_path).unwrap();
 
@@ -372,8 +385,6 @@ fn setup_map_placeble(
             );
 
             let texu = res_image.add(image);
-
-            println!("len: {}", skinned_mesh.ranges.len());
 
             for i in 0..skinned_mesh.ranges.len() {
                 let mesh = skinned_mesh.to_bevy_mesh(i).unwrap();

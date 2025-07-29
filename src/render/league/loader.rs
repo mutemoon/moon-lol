@@ -4,7 +4,7 @@ use bevy::ecs::resource::Resource;
 use bevy::image::{dds_buffer_to_image, CompressedImageFormats, Image};
 use binrw::{args, binread, io::NoSeek, BinRead, Endian};
 use cdragon_hashes::wad::compute_wad_hash;
-use cdragon_prop::{BinString, PropFile};
+use cdragon_prop::{BinFloat, BinString, PropFile};
 use std::{
     collections::HashMap,
     fs::File,
@@ -272,10 +272,37 @@ impl LeagueLoader {
         file: &Arc<File>,
     ) -> io::Result<HashMap<u32, CharacterRecord>> {
         const MAP11_PATH: &str = "data/maps/shipping/map11/map11.bin";
-        const CHARACTER_HASH: u32 = 0x5c4b8f72; // Pre-computed hash for "Character"
-        const CHARACTER_RECORD_HASH: u32 = 0x8a8b1b7c; // Pre-computed hash for "CharacterRecord"
-        const NAME_HASH: u32 = 0x7c9d4f2a; // Pre-computed hash for "name"
-        const CHAR_NAME_HASH: u32 = 0x9f8e5d3b; // Pre-computed hash for "mCharacterName"
+        let character_hash = LeagueLoader::compute_binhash("Character");
+        let character_record_hash = LeagueLoader::compute_binhash("CharacterRecord");
+        let name_hash = LeagueLoader::compute_binhash("name");
+        let char_name_hash = LeagueLoader::compute_binhash("mCharacterName");
+
+        // Compute field hashes at runtime
+        let fallback_char_name_hash = Self::compute_binhash("mFallbackCharacterName");
+        let base_hp_hash = Self::compute_binhash("baseHP");
+        let base_static_hp_regen_hash = Self::compute_binhash("baseStaticHPRegen");
+        let health_bar_height_hash = Self::compute_binhash("healthBarHeight");
+        let base_damage_hash = Self::compute_binhash("baseDamage");
+        let base_armor_hash = Self::compute_binhash("baseArmor");
+        let base_spell_block_hash = Self::compute_binhash("baseSpellBlock");
+        let base_move_speed_hash = Self::compute_binhash("baseMoveSpeed");
+        let attack_range_hash = Self::compute_binhash("attackRange");
+        let attack_speed_hash = Self::compute_binhash("attackSpeed");
+        let attack_speed_ratio_hash = Self::compute_binhash("attackSpeedRatio");
+        let attack_speed_per_level_hash = Self::compute_binhash("attackSpeedPerLevel");
+        let exp_given_on_death_hash = Self::compute_binhash("expGivenOnDeath");
+        let gold_given_on_death_hash = Self::compute_binhash("goldGivenOnDeath");
+        let local_gold_given_on_death_hash = Self::compute_binhash("localGoldGivenOnDeath");
+        let global_gold_given_on_death_hash = Self::compute_binhash("globalGoldGivenOnDeath");
+        let display_name_hash = Self::compute_binhash("name");
+        let hit_fx_scale_hash = Self::compute_binhash("hitFxScale");
+        let selection_height_hash = Self::compute_binhash("selectionHeight");
+        let selection_radius_hash = Self::compute_binhash("selectionRadius");
+        let pathfinding_collision_radius_hash = Self::compute_binhash("pathfindingCollisionRadius");
+        let gameplay_collision_radius_hash =
+            Self::compute_binhash("overrideGameplayCollisionRadius");
+        let unit_tags_hash = Self::compute_binhash("unitTagsString");
+        let description_hash = Self::compute_binhash("description");
 
         let entry = Self::get_wad_entry(wad, Self::compute_wad_hash(MAP11_PATH));
         let mut reader = Self::get_wad_zstd_entry_reader(file, &entry)?;
@@ -286,11 +313,11 @@ impl LeagueLoader {
         let map_shipping = PropFile::from_slice(&data)
             .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?;
 
-        let character_map = map_shipping
+        let character_map: HashMap<u32, CharacterRecord> = map_shipping
             .entries
             .iter()
-            .filter(|v| v.ctype.hash == CHARACTER_HASH)
-            .filter_map(|v| v.getv::<BinString>(NAME_HASH.into()))
+            .filter(|v| v.ctype.hash == character_hash)
+            .filter_map(|v| v.getv::<BinString>(name_hash.into()))
             .filter_map(|v| {
                 let char_path = format!("data/characters/{0}/{0}.bin", v.0.to_lowercase());
                 let entry = Self::get_wad_entry(wad, compute_wad_hash(&char_path));
@@ -305,14 +332,113 @@ impl LeagueLoader {
                 prop_file
                     .entries
                     .into_iter()
-                    .filter(|v| v.ctype.hash == CHARACTER_RECORD_HASH)
+                    .filter(|v| v.ctype.hash == character_record_hash)
             })
             .filter_map(|entry| {
-                let character_name = entry.getv::<BinString>(CHAR_NAME_HASH.into())?.0.clone();
+                let character_name = entry.getv::<BinString>(char_name_hash.into())?.0.clone();
 
-                Some((entry.path.hash, CharacterRecord { character_name }))
+                // Extract additional fields
+                let fallback_character_name = entry
+                    .getv::<BinString>(fallback_char_name_hash.into())
+                    .map(|s| s.0.clone());
+                let base_hp = entry.getv::<BinFloat>(base_hp_hash.into()).map(|f| f.0);
+                let base_static_hp_regen = entry
+                    .getv::<BinFloat>(base_static_hp_regen_hash.into())
+                    .map(|f| f.0);
+                let health_bar_height = entry
+                    .getv::<BinFloat>(health_bar_height_hash.into())
+                    .map(|f| f.0);
+                let base_damage = entry.getv::<BinFloat>(base_damage_hash.into()).map(|f| f.0);
+                let base_armor = entry.getv::<BinFloat>(base_armor_hash.into()).map(|f| f.0);
+                let base_spell_block = entry
+                    .getv::<BinFloat>(base_spell_block_hash.into())
+                    .map(|f| f.0);
+                let base_move_speed = entry
+                    .getv::<BinFloat>(base_move_speed_hash.into())
+                    .map(|f| f.0);
+                let attack_range = entry
+                    .getv::<BinFloat>(attack_range_hash.into())
+                    .map(|f| f.0);
+                let attack_speed = entry
+                    .getv::<BinFloat>(attack_speed_hash.into())
+                    .map(|f| f.0);
+                let attack_speed_ratio = entry
+                    .getv::<BinFloat>(attack_speed_ratio_hash.into())
+                    .map(|f| f.0);
+                let attack_speed_per_level = entry
+                    .getv::<BinFloat>(attack_speed_per_level_hash.into())
+                    .map(|f| f.0);
+                let exp_given_on_death = entry
+                    .getv::<BinFloat>(exp_given_on_death_hash.into())
+                    .map(|f| f.0);
+                let gold_given_on_death = entry
+                    .getv::<BinFloat>(gold_given_on_death_hash.into())
+                    .map(|f| f.0);
+                let local_gold_given_on_death = entry
+                    .getv::<BinFloat>(local_gold_given_on_death_hash.into())
+                    .map(|f| f.0);
+                let global_gold_given_on_death = entry
+                    .getv::<BinFloat>(global_gold_given_on_death_hash.into())
+                    .map(|f| f.0);
+                let display_name = entry
+                    .getv::<BinString>(display_name_hash.into())
+                    .map(|s| s.0.clone());
+                let hit_fx_scale = entry
+                    .getv::<BinFloat>(hit_fx_scale_hash.into())
+                    .map(|f| f.0);
+                let selection_height = entry
+                    .getv::<BinFloat>(selection_height_hash.into())
+                    .map(|f| f.0);
+                let selection_radius = entry
+                    .getv::<BinFloat>(selection_radius_hash.into())
+                    .map(|f| f.0);
+                let pathfinding_collision_radius = entry
+                    .getv::<BinFloat>(pathfinding_collision_radius_hash.into())
+                    .map(|f| f.0);
+                let gameplay_collision_radius = entry
+                    .getv::<BinFloat>(gameplay_collision_radius_hash.into())
+                    .map(|f| f.0);
+                let unit_tags = entry
+                    .getv::<BinString>(unit_tags_hash.into())
+                    .map(|s| s.0.clone());
+                let description = entry
+                    .getv::<BinString>(description_hash.into())
+                    .map(|s| s.0.clone());
+
+                Some((
+                    entry.path.hash,
+                    CharacterRecord {
+                        character_name,
+                        fallback_character_name,
+                        base_hp,
+                        base_static_hp_regen,
+                        health_bar_height,
+                        base_damage,
+                        base_armor,
+                        base_spell_block,
+                        base_move_speed,
+                        attack_range,
+                        attack_speed,
+                        attack_speed_ratio,
+                        attack_speed_per_level,
+                        exp_given_on_death,
+                        gold_given_on_death,
+                        local_gold_given_on_death,
+                        global_gold_given_on_death,
+                        display_name,
+                        hit_fx_scale,
+                        selection_height,
+                        selection_radius,
+                        pathfinding_collision_radius,
+                        gameplay_collision_radius,
+                        unit_tags,
+                        description,
+                    },
+                ))
             })
             .collect();
+
+        println!("{:#?}", character_map.keys());
 
         Ok(character_map)
     }
