@@ -1,10 +1,7 @@
 use bevy::prelude::*;
 
-use crate::{
-    combat::{Bounding, Obstacle, Team},
-    config::*,
-};
+use crate::combat::Obstacle;
 
 #[derive(Component)]
-#[require(Transform, Team, Bounding = Bounding { radius: NEXUS_RADIUS, sides: NEXUS_SIDES, height: NEXUS_HEIGHT }, Obstacle)]
+#[require(Transform, Obstacle)]
 pub struct Nexus;

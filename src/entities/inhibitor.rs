@@ -1,10 +1,7 @@
 use bevy::prelude::*;
 
-use crate::{
-    combat::{Bounding, Obstacle, Team},
-    config::*,
-};
+use crate::combat::{Obstacle, Team};
 
 #[derive(Component)]
-#[require(Transform, Team, Bounding = Bounding { radius: INHIBITOR_RADIUS, sides: INHIBITOR_SIDES, height: INHIBITOR_HEIGHT }, Obstacle)]
+#[require(Transform, Team, Obstacle)]
 pub struct Inhibitor;

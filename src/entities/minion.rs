@@ -1,11 +1,10 @@
-use crate::{combat::*, config::*, map::Lane};
+use crate::{combat::*,  map::Lane};
 use bevy::{
     app::Plugin,
-    math::{vec2, vec3},
     prelude::*,
     time::common_conditions::on_timer,
 };
-use std::{f32::consts::SQRT_2, time::Duration};
+use std::time::Duration;
 
 #[derive(Component, Default)]
 pub struct AggroInfo {
@@ -61,99 +60,9 @@ pub enum Minion {
     Ranged,
 }
 
-impl Minion {
-    pub fn path(team: Team, lane: Lane) -> Vec<Vec2> {
-        // let spawn_position = get_spawn_position(&team, &lane);
-        let target_position = get_mirror_spawn_position(&team, &lane);
-
-        match lane {
-            Lane::Top => vec![vec2(1312.4326, 11431.377), target_position.xy()],
-            Lane::Mid => vec![target_position.xy()],
-            Lane::Bottom => vec![
-                (vec2(1312.4326, 11431.377) - NEXUS_BLUE_POSITION.xy()).yx()
-                    + NEXUS_BLUE_POSITION.xy(),
-                target_position.xy(),
-            ],
-        }
-    }
-
-    pub fn bundle(
-        minion_type: Minion,
-        team: Team,
-        lane: Lane,
-    ) -> (
-        Minion,
-        Team,
-        Lane,
-        MinionPath,
-        Health,
-        AttackRange,
-        Bounding,
-        Transform,
-    ) {
-        let health = match minion_type {
-            Minion::Siege => MINION_SIEGE_HEALTH,
-            Minion::Melee => MINION_MELEE_HEALTH,
-            Minion::Ranged => MINION_RANGED_HEALTH,
-        };
-
-        let spawn_position = get_spawn_position(&team, &lane);
-        let path = Minion::path(team, lane);
-        let minion_path = MinionPath(path);
-
-        (
-            minion_type,
-            team,
-            lane,
-            minion_path,
-            Health {
-                value: health,
-                max: health,
-            },
-            match minion_type {
-                Minion::Siege => AttackRange(MINION_SIEGE_ATTACK_RANGE),
-                Minion::Melee => AttackRange(MINION_MELEE_ATTACK_RANGE),
-                Minion::Ranged => AttackRange(MINION_RANGED_ATTACK_RANGE),
-            },
-            match minion_type {
-                Minion::Siege => Bounding {
-                    radius: MINION_SIEGE_RADIUS,
-                    sides: MINION_SIEGE_SIDES,
-                    height: MINION_SIEGE_HEIGHT,
-                },
-                Minion::Melee => Bounding {
-                    radius: MINION_MELEE_RADIUS,
-                    sides: MINION_MELEE_SIDES,
-                    height: MINION_MELEE_HEIGHT,
-                },
-                Minion::Ranged => Bounding {
-                    radius: MINION_RANGED_RADIUS,
-                    sides: MINION_RANGED_SIDES,
-                    height: MINION_RANGED_HEIGHT,
-                },
-            },
-            Transform::from_translation(spawn_position).with_scale(
-                Vec3::ONE
-                    * match minion_type {
-                        Minion::Siege => MINION_SIEGE_SKIN_SCALE,
-                        Minion::Melee => MINION_MELEE_SKIN_SCALE,
-                        Minion::Ranged => MINION_RANGED_SKIN_SCALE,
-                    },
-            ),
-        )
-    }
-}
+impl Minion {}
 
 pub const AGGRO_RANGE: f32 = 500.0;
-
-const MINION_SPAWN_RADIUS: f32 = NEXUS_RADIUS + 700.0;
-const MINION_SPAWN_TOP_OFFSET: Vec3 = vec3(0.0, MINION_SPAWN_RADIUS, 0.0);
-const MINION_SPAWN_MID_OFFSET: Vec3 = vec3(
-    MINION_SPAWN_RADIUS / SQRT_2,
-    MINION_SPAWN_RADIUS / SQRT_2,
-    0.0,
-);
-const MINION_SPAWN_BOTTOM_OFFSET: Vec3 = vec3(MINION_SPAWN_RADIUS, 0.0, 0.0);
 
 pub struct PluginMinion;
 
@@ -186,7 +95,7 @@ struct SpawnTimer {
     minion_type_index: usize,
 }
 
-fn spawn_next_minion(mut commands: Commands, mut spawn_timer: ResMut<SpawnTimer>) {
+fn spawn_next_minion(commands: Commands, mut spawn_timer: ResMut<SpawnTimer>) {
     let lanes = [Lane::Mid];
     let teams = [Team::Blue, Team::Red];
     let minion_types = [
@@ -206,11 +115,11 @@ fn spawn_next_minion(mut commands: Commands, mut spawn_timer: ResMut<SpawnTimer>
     if spawn_timer.minion_type_index < minion_types.len() {
         let minion_type = minion_types[spawn_timer.minion_type_index];
 
-        for &team in teams.iter() {
-            for &lane in lanes.iter() {
-                commands.spawn(Minion::bundle(minion_type, team, lane));
-            }
-        }
+        // for &team in teams.iter() {
+        //     for &lane in lanes.iter() {
+        //         commands.spawn(Minion::bundle(minion_type, team, lane));
+        //     }
+        // }
 
         spawn_timer.minion_type_index += 1;
     }
@@ -221,27 +130,12 @@ fn setup(mut spawn_timer: ResMut<SpawnTimer>) {
     *spawn_timer = SpawnTimer::default();
 }
 
-fn get_spawn_position(team: &Team, lane: &Lane) -> Vec3 {
-    match team {
-        Team::Blue => match lane {
-            Lane::Top => NEXUS_BLUE_POSITION + MINION_SPAWN_TOP_OFFSET,
-            Lane::Mid => NEXUS_BLUE_POSITION + MINION_SPAWN_MID_OFFSET,
-            Lane::Bottom => NEXUS_BLUE_POSITION + MINION_SPAWN_BOTTOM_OFFSET,
-        },
-        Team::Red => match lane {
-            Lane::Top => NEXUS_RED_POSITION - MINION_SPAWN_TOP_OFFSET,
-            Lane::Mid => NEXUS_RED_POSITION - MINION_SPAWN_MID_OFFSET,
-            Lane::Bottom => NEXUS_RED_POSITION - MINION_SPAWN_BOTTOM_OFFSET,
-        },
-    }
-}
-
-fn get_mirror_spawn_position(team: &Team, lane: &Lane) -> Vec3 {
-    match team {
-        Team::Blue => get_spawn_position(&Team::Red, &lane),
-        Team::Red => get_spawn_position(&Team::Blue, &lane),
-    }
-}
+// fn get_mirror_spawn_position(team: &Team, lane: &Lane) -> Vec3 {
+//     match team {
+//         Team::Blue => get_spawn_position(&Team::Red, &lane),
+//         Team::Red => get_spawn_position(&Team::Blue, &lane),
+//     }
+// }
 
 pub fn minion_aggro(
     mut commands: Commands,

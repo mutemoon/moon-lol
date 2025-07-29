@@ -5,7 +5,7 @@ mod tests {
         classic::PluginClassic,
         combat::PluginMove,
         combat::{Health, PluginCombat},
-        entities::{Minion, PluginMinion},
+        entities::Minion,
     };
     use std::time::{Duration, Instant};
 

@@ -1,10 +1,12 @@
-use crate::render::{LeagueMapGeo, LeagueTexture};
+use crate::render::{CharacterRecord, LeagueMapGeo, LeagueTexture};
 use bevy::asset::RenderAssetUsages;
 use bevy::ecs::resource::Resource;
 use bevy::image::{dds_buffer_to_image, CompressedImageFormats, Image};
 use binrw::{args, Endian};
 use binrw::{binread, io::NoSeek, BinRead};
-use cdragon_prop::PropFile;
+use cdragon_hashes::wad::compute_wad_hash;
+use cdragon_prop::{BinEntry, BinString, PropFile};
+use std::fmt::format;
 use std::hash::Hasher;
 #[cfg(unix)]
 use std::os::unix::fs::FileExt;
@@ -120,6 +122,8 @@ pub struct LeagueLoader {
     pub wad: LeagueWad,
     pub map_geo: LeagueMapGeo,
     pub map_materials: LeagueProp,
+
+    pub character_map: HashMap<u32, CharacterRecord>,
 }
 
 pub struct ArcFileReader {
@@ -223,6 +227,54 @@ impl LeagueLoader {
 
         let map_materials = PropFile::from_slice(&data).unwrap();
 
+        let map11_path = "data/maps/shipping/map11/map11.bin";
+
+        let entry = LeagueLoader::get_wad_entry(&wad, LeagueLoader::compute_wad_hash(&map11_path));
+        let mut reader = LeagueLoader::get_wad_zstd_entry_reader(&file, &entry)?;
+        let data = {
+            let mut data: Vec<u8> = Vec::new();
+            reader.read_to_end(&mut data)?;
+            data
+        };
+
+        let map_shipping = PropFile::from_slice(&data).unwrap();
+
+        let ship: HashMap<u32, CharacterRecord> = map_shipping
+            .entries
+            .iter()
+            .filter(|v| v.ctype.hash == LeagueLoader::compute_binhash("Character"))
+            .filter_map(|v| v.getv::<BinString>(LeagueLoader::compute_binhash("name").into()))
+            .map(|v| format!("data/characters/{0}/{0}.bin", v.0))
+            .map(|v| LeagueLoader::get_wad_entry(&wad, compute_wad_hash(&v.to_lowercase())))
+            .filter_map(|v| LeagueLoader::get_wad_zstd_entry_reader(&file, &v).ok())
+            .filter_map(|mut v| {
+                let mut data: Vec<u8> = Vec::new();
+                v.read_to_end(&mut data).ok()?;
+                Some(data)
+            })
+            .filter_map(|v| PropFile::from_slice(&v).ok())
+            .flat_map(|v| {
+                v.entries
+                    .into_iter()
+                    .filter(|v| v.ctype.hash == LeagueLoader::compute_binhash("CharacterRecord"))
+                    .collect::<Vec<BinEntry>>()
+            })
+            .map(|v| {
+                (
+                    v.path.hash,
+                    CharacterRecord {
+                        character_name: v
+                            .getv::<BinString>(
+                                LeagueLoader::compute_binhash("mCharacterName").into(),
+                            )
+                            .unwrap()
+                            .0
+                            .clone(),
+                    },
+                )
+            })
+            .collect();
+
         Ok(LeagueLoader {
             root_dir: root_dir.to_path_buf(),
             map_path: map_relative_path.to_path_buf(),
@@ -231,6 +283,7 @@ impl LeagueLoader {
             wad,
             map_geo,
             map_materials: LeagueProp(map_materials),
+            character_map: ship,
         })
     }
 

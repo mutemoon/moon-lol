@@ -1,22 +1,11 @@
 use bevy::{
     prelude::*,
     render::{
-        settings::{
-            Backends, InstanceFlags, RenderCreation, WgpuFeatures, WgpuLimits, WgpuSettings,
-        },
+        settings::{Backends, RenderCreation, WgpuSettings},
         RenderPlugin,
     },
 };
-use moon_lol::{
-    classic::PluginClassic,
-    combat::*,
-    config::NEXUS_BLUE_POSITION,
-    controller::Controller,
-    entities::Fiora,
-    game::GameState,
-    logging::PluginLogging,
-    render::{Focus, PluginEntities, PluginRender},
-};
+use moon_lol::render::PluginRender;
 
 fn main() {
     App::new()
@@ -45,19 +34,5 @@ fn main() {
             PluginRender,
             // PluginClassic,
         ))
-        .add_systems(OnEnter(GameState::Setup), setup)
         .run();
-}
-
-pub fn setup(mut commands: Commands) {
-    // commands.spawn((
-    //     Fiora,
-    //     Controller,
-    //     Focus,
-    //     Transform::from_xyz(
-    //         NEXUS_BLUE_POSITION.x + 500.0,
-    //         NEXUS_BLUE_POSITION.y + 500.0,
-    //         88.0,
-    //     ),
-    // ));
 }
