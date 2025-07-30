@@ -1,8 +1,10 @@
 mod compressed;
+mod skeleton;
 mod uncompressed;
 
 use binrw::binread;
 pub use compressed::*;
+pub use skeleton::*;
 pub use uncompressed::*;
 
 #[binread]

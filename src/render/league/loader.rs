@@ -586,6 +586,39 @@ impl LeagueLoader {
         })
     }
 
+    // public static uint Hash(string toHash)
+    // {
+    //     uint hash = 0;
+    //     uint high = 0;
+    //     for (int i = 0; i < toHash.Length; i++)
+    //     {
+    //         hash = (hash << 4) + (byte)toHash[i];
+
+    //         if ((high = hash & 0xF0000000) != 0)
+    //         {
+    //             hash ^= high >> 24;
+    //         }
+
+    //         hash &= ~high;
+    //     }
+
+    //     return hash;
+    // }
+
+    pub fn compute_joint_hash(s: &str) -> u32 {
+        let mut hash = 0u32;
+        let mut high = 0u32;
+        for b in s.to_ascii_lowercase().bytes() {
+            hash = (hash << 4) + (b as u32);
+            high = hash & 0xf0000000;
+            if hash != 0 {
+                hash ^= high >> 24;
+            }
+            hash &= !high;
+        }
+        hash
+    }
+
     #[inline]
     fn get_wad_entry(wad: &LeagueWad, hash: u64) -> LeagueWadEntry {
         *wad.entries.get(&hash).expect("WAD entry not found")
