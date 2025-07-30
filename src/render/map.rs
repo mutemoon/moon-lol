@@ -331,15 +331,11 @@ fn setup_map_placeble(
                 .unwrap()
                 .0;
 
-            println!("{:#?}", character_record_key);
-
             let character_record = res_wad
                 .loader
                 .character_map
                 .get(&LeagueLoader::compute_binhash(character_record_key))
                 .unwrap();
-
-            println!("{:#?}", character_record);
 
             let skin_path = "data/".to_owned()
                 + &definition
@@ -387,6 +383,10 @@ fn setup_map_placeble(
             let texu = res_image.add(image);
 
             for i in 0..skinned_mesh.ranges.len() {
+                if character_record.character_name == "Turret" {
+                    println!("{}", skinned_mesh.ranges.get(i).unwrap().name);
+                }
+
                 let mesh = skinned_mesh.to_bevy_mesh(i).unwrap();
                 // 使用提取出的列向量来构造 Mat4
                 let mat = Mat4::from_cols_array_2d(&transform);

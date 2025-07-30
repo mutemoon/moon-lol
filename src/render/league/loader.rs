@@ -438,8 +438,6 @@ impl LeagueLoader {
             })
             .collect();
 
-        println!("{:#?}", character_map.keys());
-
         Ok(character_map)
     }
 
