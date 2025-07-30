@@ -1,6 +1,6 @@
 use crate::render::{
-    BoundingBox, ElementFormat, ElementName, EnvironmentVisibility, LeagueMapGeoMesh, Matrix4x4,
-    SizedString, Vector3,
+    BinVec3, BoundingBox, ElementFormat, ElementName, EnvironmentVisibility, LeagueMapGeoMesh,
+    Matrix4x4, SizedString,
 };
 use binrw::binread;
 
@@ -65,7 +65,7 @@ pub struct SceneGraph {
 
     #[br(if(!is_disabled))]
     #[br(count = vertex_count)]
-    pub vertices: Vec<Vector3>,
+    pub vertices: Vec<BinVec3>,
 
     #[br(if(!is_disabled))]
     #[br(count = index_count)]
@@ -98,7 +98,7 @@ pub struct GeometryBucket {
 pub struct PlanarReflector {
     pub transform: Matrix4x4,
     pub bounds: BoundingBox,
-    pub normal: Vector3,
+    pub normal: BinVec3,
 }
 
 #[binread]

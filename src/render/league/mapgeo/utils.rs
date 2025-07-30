@@ -1,3 +1,4 @@
+use bevy::math::{Quat, Vec3};
 use binrw::binread;
 
 #[binread]
@@ -18,13 +19,16 @@ pub struct Vector2 {
 }
 
 #[binread]
-#[derive(Debug, Clone)]
 #[br(little)]
-pub struct Vector3 {
-    pub x: f32,
-    pub y: f32,
-    pub z: f32,
-}
+#[derive(Debug, Clone)]
+pub struct BinVec3(#[br(map = |(x, y, z): (f32, f32, f32)| Vec3::new(x, y, z))] pub Vec3);
+
+#[binread]
+#[br(little)]
+#[derive(Debug, Clone)]
+pub struct BinQuat(
+    #[br(map = |(x, y, z, w): (f32, f32, f32, f32)| Quat::from_xyzw(x, y, z, w))] pub Quat,
+);
 
 #[binread]
 #[derive(Debug, Clone)]
@@ -38,6 +42,6 @@ pub struct Matrix4x4 {
 #[derive(Debug, Clone)]
 #[br(little)]
 pub struct BoundingBox {
-    pub min: Vector3,
-    pub max: Vector3,
+    pub min: BinVec3,
+    pub max: BinVec3,
 }
