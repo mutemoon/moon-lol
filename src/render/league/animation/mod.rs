@@ -3,9 +3,7 @@ mod skeleton;
 mod uncompressed;
 
 use crate::render::{BinQuat, BinVec3};
-use bevy::math::{Quat, Vec3};
 use binrw::binread;
-use std::collections::HashMap;
 
 pub use compressed::*;
 pub use skeleton::*;
@@ -125,6 +123,10 @@ impl From<CompressedAnimationAsset> for AnimationData {
 
 impl From<UncompressedAnimationAsset> for AnimationData {
     fn from(uncompressed: UncompressedAnimationAsset) -> Self {
+        println!(
+            "Converting uncompressed animation, version: {}",
+            uncompressed.version
+        );
         match &uncompressed.data {
             UncompressedData::V3(v3) => {
                 // 转换V3格式的帧数据为统一格式
@@ -190,14 +192,28 @@ impl From<UncompressedAnimationAsset> for AnimationData {
                 let mut frames = Vec::new();
                 let frames_per_joint = v5.frames.len() / v5.joint_hashes.len();
 
+                // 调试输出
+                println!(
+                    "V5 Debug: frame_duration={}, frame_count={}, frames_per_joint={}",
+                    v5.frame_duration, v5.frame_count, frames_per_joint
+                );
+
+                // 计算正确的帧时间间隔 - V5格式中frame_duration是每帧的时间
+                let time_per_frame = v5.frame_duration;
+                let total_duration = v5.frame_duration * frames_per_joint as f32;
+
                 for (joint_idx, &joint_hash) in v5.joint_hashes.iter().enumerate() {
                     let start_idx = joint_idx * frames_per_joint;
                     for (frame_idx, frame) in v5.frames[start_idx..start_idx + frames_per_joint]
                         .iter()
                         .enumerate()
                     {
+                        let frame_time = frame_idx as f32 * time_per_frame;
+                        if joint_idx == 0 && frame_idx < 3 {
+                            println!("Frame {}: time={}", frame_idx, frame_time);
+                        }
                         frames.push(UnifiedFrame {
-                            time: frame_idx as f32 * v5.frame_duration,
+                            time: frame_time,
                             joint_hash,
                             translation_id: frame.translation_id,
                             scale_id: frame.scale_id,
@@ -211,7 +227,7 @@ impl From<UncompressedAnimationAsset> for AnimationData {
                     flags: v5.flags,
                     joint_count: v5.track_count,
                     frame_count: v5.frame_count,
-                    duration: v5.frame_duration * v5.frame_count as f32,
+                    duration: total_duration,
                     fps: 1.0 / v5.frame_duration,
                     joint_hashes: v5.joint_hashes.clone(),
                     frames,

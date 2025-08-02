@@ -269,14 +269,22 @@ fn animate_joints(
         };
 
         // [调试日志] 打印特定关节的详细信息，以防日志刷屏
-        if name.as_str() == "Turret_Base_Better" && (animated.time as i32 % 1 == 0) {
+        if name.as_str() == "Root" && (animated.time as i32 % 1 == 0) {
             info!(
-                "关节: {}, hash: {}, t: {:.2}, factor: {:.2}",
-                name, animated.joint_hash, t, factor
+                "关节: {}, hash: {:x}, t: {:.2}, frames: {}, factor: {:.2}",
+                name,
+                animated.joint_hash,
+                t,
+                joint_frames.len(),
+                factor
             );
             info!(
                 "  -> pos: ({:.2}, {:.2}, {:.2}), rot: ({:.2}, {:.2}, {:.2}, {:.2})",
                 trans.x, trans.y, trans.z, rot.x, rot.y, rot.z, rot.w
+            );
+            info!(
+                "  -> current_frame.time: {:.2}, next_frame.time: {:.2}, duration: {:.2}",
+                current_frame.time, next_frame.time, total_duration
             );
         }
 
