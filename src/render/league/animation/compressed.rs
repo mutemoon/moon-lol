@@ -1,7 +1,9 @@
 use crate::render::BinVec3;
+use bevy::math::{Quat, Vec3};
 use binrw::io::{Read, Seek, SeekFrom};
 use binrw::{binread, BinRead};
 use binrw::{prelude::*, Endian};
+use std::f32::consts::SQRT_2;
 use std::fmt::Debug;
 
 #[binread]
@@ -79,23 +81,41 @@ pub struct CompressedData {
     pub jump_caches: JumpCaches,
 }
 
+#[derive(Debug, PartialEq)]
+pub enum CompressedTransformType {
+    Translation,
+    Rotation,
+    Scale,
+}
+
+impl From<u16> for CompressedTransformType {
+    fn from(value: u16) -> Self {
+        match value {
+            0 => CompressedTransformType::Rotation,
+            1 => CompressedTransformType::Translation,
+            2 => CompressedTransformType::Scale,
+            _ => panic!("未知的动画数据类型"),
+        }
+    }
+}
+
+// 2. 定义最终的 Frame 结构
 #[binread]
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 #[br(little)]
 pub struct CompressedFrame {
     pub time: u16,
-    packed_data: u16,
+
+    #[br(temp)]
+    joint_id_and_type: u16,
+
     pub value: [u16; 3],
-}
 
-impl CompressedFrame {
-    pub fn get_joint_id(&self) -> u16 {
-        self.packed_data & 0x3FFF
-    }
+    #[br(calc = (joint_id_and_type >> 14).into())]
+    pub transform_type: CompressedTransformType,
 
-    pub fn get_transform_type(&self) -> u16 {
-        self.packed_data >> 14
-    }
+    #[br(calc = joint_id_and_type & 0x3FFF)]
+    pub joint_id: u16,
 }
 
 #[binread]
@@ -148,5 +168,59 @@ fn parse_jump_caches<R: Read + Seek>(
             frames.push(JumpFrameU32::read_options(reader, options, ())?);
         }
         Ok(JumpCaches::U32(frames))
+    }
+}
+
+const ONE_OVER_USHORT_MAX: f32 = 1.0 / 65535.0; // 0.000015259022f in C#
+const ONE_OVER_SQRT_2: f32 = 1.0 / SQRT_2;
+
+/// 从 u16 解压缩时间
+pub fn decompress_time(time: u16, duration: f32) -> f32 {
+    time as f32 * ONE_OVER_USHORT_MAX * duration
+}
+
+/// 从 [u16; 3] 解压缩 Vec3 (用于位移和缩放)
+pub fn decompress_vector3(value: &[u16; 3], min: &BinVec3, max: &BinVec3) -> Vec3 {
+    // 假设 BinVec3 可以转换为 bevy::Vec3，或者有可访问的 x, y, z 字段
+    // 如果 BinVec3 是 (f32, f32, f32)，使用 min.0, min.1, ...
+    let min_vec = Vec3::new(min.0.x, min.0.y, min.0.z);
+    let max_vec = Vec3::new(max.0.x, max.0.y, max.0.z);
+
+    let mut uncompressed = max_vec - min_vec;
+
+    uncompressed.x *= value[0] as f32 * ONE_OVER_USHORT_MAX;
+    uncompressed.y *= value[1] as f32 * ONE_OVER_USHORT_MAX;
+    uncompressed.z *= value[2] as f32 * ONE_OVER_USHORT_MAX;
+
+    uncompressed + min_vec
+}
+
+/// 从 [u16; 3] 解压缩四元数 (用于旋转)
+pub fn decompress_quat(value: &[u16; 3]) -> Quat {
+    // 将三个 u16 合并成一个 u64
+    let bits = (value[0] as u64) | ((value[1] as u64) << 16) | ((value[2] as u64) << 32);
+
+    // 提取数据
+    let max_index = (bits >> 45) & 0x03;
+    let v_a = (bits >> 30) & 0x7FFF;
+    let v_b = (bits >> 15) & 0x7FFF;
+    let v_c = bits & 0x7FFF;
+
+    // 将 15-bit 整数转换为浮点数分量
+    let a = (v_a as f32 / 32767.0) * SQRT_2 - ONE_OVER_SQRT_2;
+    let b = (v_b as f32 / 32767.0) * SQRT_2 - ONE_OVER_SQRT_2;
+    let c = (v_c as f32 / 32767.0) * SQRT_2 - ONE_OVER_SQRT_2;
+
+    // 计算第四个分量，确保四元数是单位长度
+    let sub = 1.0 - (a * a + b * b + c * c);
+    let d = f32::sqrt(f32::max(0.0, sub));
+
+    // 根据 max_index 重建四元数
+    // Bevy 的 Quat::from_xyzw(x, y, z, w) 构造函数与 C# 的 new Quaternion(x, y, z, w) 顺序一致
+    match max_index {
+        0 => Quat::from_xyzw(d, a, b, c),
+        1 => Quat::from_xyzw(a, d, b, c),
+        2 => Quat::from_xyzw(a, b, d, c),
+        _ => Quat::from_xyzw(a, b, c, d),
     }
 }

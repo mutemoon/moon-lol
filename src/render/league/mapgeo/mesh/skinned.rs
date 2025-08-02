@@ -1,7 +1,7 @@
 use crate::render::BoundingBox;
 use bevy::asset::RenderAssetUsages;
 use bevy::prelude::*;
-use bevy::render::mesh::{Indices, PrimitiveTopology};
+use bevy::render::mesh::{Indices, PrimitiveTopology, VertexAttributeValues};
 use binrw::binread;
 
 #[binread]
@@ -113,7 +113,7 @@ impl LeagueSkinnedMesh {
             let x_pos = f32::from_le_bytes(v_chunk[offset..offset + 4].try_into().unwrap());
             let y_pos = f32::from_le_bytes(v_chunk[offset + 4..offset + 8].try_into().unwrap());
             let z_pos = f32::from_le_bytes(v_chunk[offset + 8..offset + 12].try_into().unwrap());
-            positions.push([x_pos, y_pos, -z_pos]); // 翻转Z轴以适应Bevy的右手坐标系
+            positions.push([x_pos, y_pos, z_pos]); // 翻转Z轴以适应Bevy的右手坐标系
             offset += 12;
 
             // 骨骼索引 (4 bytes, u8 -> u16)
@@ -140,7 +140,7 @@ impl LeagueSkinnedMesh {
             let x_norm = f32::from_le_bytes(v_chunk[offset..offset + 4].try_into().unwrap());
             let y_norm = f32::from_le_bytes(v_chunk[offset + 4..offset + 8].try_into().unwrap());
             let z_norm = f32::from_le_bytes(v_chunk[offset + 8..offset + 12].try_into().unwrap());
-            normals.push([x_norm, y_norm, -z_norm]); // 同样翻转Z轴
+            normals.push([x_norm, y_norm, z_norm]); // 同样翻转Z轴
             offset += 12;
 
             // --- 修正点 2: UV坐标是两个f32 (8字节)，不是两个f16 (4字节) ---
@@ -172,7 +172,7 @@ impl LeagueSkinnedMesh {
                 let tan_w =
                     f32::from_le_bytes(v_chunk[offset + 12..offset + 16].try_into().unwrap());
                 // 同样翻转Z轴
-                tangents_vec.push([tan_x, tan_y, -tan_z, tan_w]);
+                tangents_vec.push([tan_x, tan_y, tan_z, tan_w]);
                 // offset += 16; // 已是最后一个元素，无需增加offset
             }
         }
@@ -189,9 +189,9 @@ impl LeagueSkinnedMesh {
             .collect();
 
         // 7. 修正因Z轴翻转导致的三角形环绕顺序问题
-        for tri_indices in local_indices.chunks_exact_mut(3) {
-            tri_indices.swap(1, 2); // 从 [0, 1, 2] -> [0, 2, 1]
-        }
+        // for tri_indices in local_indices.chunks_exact_mut(3) {
+        //     tri_indices.swap(1, 2); // 从 [0, 1, 2] -> [0, 2, 1]
+        // }
 
         // 8. 创建 Bevy Mesh 并插入所有顶点属性
         let mut bevy_mesh = Mesh::new(
@@ -204,11 +204,11 @@ impl LeagueSkinnedMesh {
         bevy_mesh.insert_attribute(Mesh::ATTRIBUTE_UV_0, uvs);
 
         // --- 修正点 3: 启用蒙皮和颜色属性 ---
-        // bevy_mesh.insert_attribute(
-        //     Mesh::ATTRIBUTE_JOINT_INDEX,
-        //     VertexAttributeValues::Uint16x4(joint_indices),
-        // );
-        // bevy_mesh.insert_attribute(Mesh::ATTRIBUTE_JOINT_WEIGHT, joint_weights);
+        bevy_mesh.insert_attribute(
+            Mesh::ATTRIBUTE_JOINT_INDEX,
+            VertexAttributeValues::Uint16x4(joint_indices),
+        );
+        bevy_mesh.insert_attribute(Mesh::ATTRIBUTE_JOINT_WEIGHT, joint_weights);
 
         if let Some(colors_data) = colors {
             bevy_mesh.insert_attribute(Mesh::ATTRIBUTE_COLOR, colors_data);
