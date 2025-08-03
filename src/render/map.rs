@@ -1,7 +1,7 @@
 use crate::combat::{AttackInfo, MoveDestination, Target};
 use crate::render::{
     load_character, process_map_geo_mesh, EnvironmentVisibility, LayerTransitionBehavior,
-    LeagueLoader, LeagueMinionPath, WadRes,
+    LeagueBarrack, LeagueLoader, LeagueMinionPath, WadRes,
 };
 use bevy::animation::{animated_field, AnimationTarget, AnimationTargetId};
 use bevy::asset::RenderAssetUsages;
@@ -481,7 +481,7 @@ fn setup_map_placeble(
 
                 let mut transform = Transform::from_matrix(v.transform);
 
-                transform.translation.y = transform.translation.y + 200.0;
+                transform.translation.y = transform.translation.y;
                 transform.translation.z = -transform.translation.z;
 
                 // 这个部分保持不变，用于在路径起点生成一个红色的球体
@@ -533,6 +533,18 @@ fn setup_map_placeble(
                     // 3. 生成包含这条完整路径的单个实体
                     commands.entity(root).add_child(child);
                 }
+            }
+            0x71d0eabd => {
+                let barrack: LeagueBarrack = (&v.1).into();
+                println!("{:#?}", barrack);
+                commands.spawn((
+                    Transform::from_matrix(barrack.transform),
+                    Mesh3d(res_meshes.add(Sphere::new(30.0))),
+                    MeshMaterial3d(res_materials.add(StandardMaterial {
+                        base_color: palettes::tailwind::PURPLE_500.into(),
+                        ..default()
+                    })),
+                ));
             }
             _ => {}
         });

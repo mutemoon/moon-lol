@@ -3,7 +3,6 @@ use bevy::math::{Mat4, Vec3};
 use cdragon_prop::{
     BinEmbed, BinEntry, BinFloat, BinList, BinMatrix, BinS32, BinString, BinStruct, BinU8, BinVec3,
 };
-use std::collections::HashMap;
 
 #[derive(Debug)]
 pub struct LeagueMinionPath {
@@ -40,66 +39,77 @@ impl From<&BinStruct> for LeagueMinionPath {
 }
 
 #[derive(Debug)]
-pub struct LeagueBarracksMinionConfig {
-    pub initial_spawn_time_secs: Option<f32>,
-    pub wave_spawn_interval_secs: Option<f32>,
-    pub minion_spawn_interval_secs: Option<f32>,
-    pub upgrade_interval_secs: Option<f32>,
-    pub upgrades_before_late_game_scaling: Option<i32>,
-    pub move_speed_increase_initial_delay_secs: Option<f32>,
-    pub move_speed_increase_interval_secs: Option<f32>,
-    pub move_speed_increase_increment: Option<i32>,
-    pub move_speed_increase_max_times: Option<i32>,
-    pub exp_radius: Option<f32>,
-    pub gold_radius: Option<f32>,
+pub struct LeagueBarracksConfig {
+    pub initial_spawn_time_secs: f32,
+    pub wave_spawn_interval_secs: f32,
+    pub minion_spawn_interval_secs: f32,
+    pub upgrade_interval_secs: f32,
+    pub upgrades_before_late_game_scaling: i32,
+    pub move_speed_increase_initial_delay_secs: f32,
+    pub move_speed_increase_interval_secs: f32,
+    pub move_speed_increase_increment: i32,
+    pub move_speed_increase_max_times: i32,
+    pub exp_radius: f32,
+    pub gold_radius: f32,
     pub units: Vec<BarracksMinionConfig>,
 }
 
-impl From<&BinEntry> for LeagueBarracksMinionConfig {
+impl From<&BinEntry> for LeagueBarracksConfig {
     fn from(value: &BinEntry) -> Self {
         let initial_spawn_time_secs = value
             .getv::<BinFloat>(LeagueLoader::hash_bin("InitialSpawnTimeSecs").into())
-            .map(|f| f.0);
+            .map(|f| f.0)
+            .unwrap();
 
         let wave_spawn_interval_secs = value
             .getv::<BinFloat>(LeagueLoader::hash_bin("WaveSpawnIntervalSecs").into())
-            .map(|f| f.0);
+            .map(|f| f.0)
+            .unwrap();
 
         let minion_spawn_interval_secs = value
             .getv::<BinFloat>(LeagueLoader::hash_bin("MinionSpawnIntervalSecs").into())
-            .map(|f| f.0);
+            .map(|f| f.0)
+            .unwrap();
 
         let upgrade_interval_secs = value
             .getv::<BinFloat>(LeagueLoader::hash_bin("UpgradeIntervalSecs").into())
-            .map(|f| f.0);
+            .map(|f| f.0)
+            .unwrap();
 
         let upgrades_before_late_game_scaling = value
             .getv::<BinS32>(LeagueLoader::hash_bin("UpgradesBeforeLateGameScaling").into())
-            .map(|i| i.0);
+            .map(|i| i.0)
+            .unwrap();
 
         let move_speed_increase_initial_delay_secs = value
             .getv::<BinFloat>(LeagueLoader::hash_bin("MoveSpeedIncreaseInitialDelaySecs").into())
-            .map(|f| f.0);
+            .map(|f| f.0)
+            .unwrap();
 
         let move_speed_increase_interval_secs = value
             .getv::<BinFloat>(LeagueLoader::hash_bin("MoveSpeedIncreaseIntervalSecs").into())
-            .map(|f| f.0);
+            .map(|f| f.0)
+            .unwrap();
 
         let move_speed_increase_increment = value
             .getv::<BinS32>(LeagueLoader::hash_bin("MoveSpeedIncreaseIncrement").into())
-            .map(|i| i.0);
+            .map(|i| i.0)
+            .unwrap();
 
         let move_speed_increase_max_times = value
             .getv::<BinS32>(LeagueLoader::hash_bin("MoveSpeedIncreaseMaxTimes").into())
-            .map(|i| i.0);
+            .map(|i| i.0)
+            .unwrap();
 
         let exp_radius = value
             .getv::<BinFloat>(LeagueLoader::hash_bin("ExpRadius").into())
-            .map(|f| f.0);
+            .map(|f| f.0)
+            .unwrap();
 
         let gold_radius = value
             .getv::<BinFloat>(LeagueLoader::hash_bin("goldRadius").into())
-            .map(|f| f.0);
+            .map(|f| f.0)
+            .unwrap();
 
         let units = value
             .getv::<BinList>(LeagueLoader::hash_bin("units").into())
@@ -110,7 +120,7 @@ impl From<&BinEntry> for LeagueBarracksMinionConfig {
                     .map(|embed| BarracksMinionConfig::from(embed))
                     .collect()
             })
-            .unwrap_or_default();
+            .unwrap();
 
         Self {
             initial_spawn_time_secs,
@@ -131,24 +141,27 @@ impl From<&BinEntry> for LeagueBarracksMinionConfig {
 
 #[derive(Debug)]
 pub struct BarracksMinionConfig {
-    pub minion_type: Option<u8>,
-    pub wave_behavior: Option<WaveBehavior>,
-    pub minion_upgrade_stats: Option<MinionUpgradeConfig>,
+    pub minion_type: u8,
+    pub wave_behavior: WaveBehavior,
+    pub minion_upgrade_stats: MinionUpgradeConfig,
 }
 
 impl From<&BinEmbed> for BarracksMinionConfig {
     fn from(value: &BinEmbed) -> Self {
         let minion_type = value
             .getv::<BinU8>(LeagueLoader::hash_bin("MinionType").into())
-            .map(|u| u.0);
+            .map(|u| u.0)
+            .unwrap();
 
         let wave_behavior = value
             .getv::<BinStruct>(LeagueLoader::hash_bin("WaveBehavior").into())
-            .map(|s| WaveBehavior::from(s));
+            .map(|s| WaveBehavior::from(s))
+            .unwrap();
 
         let minion_upgrade_stats = value
             .getv::<BinEmbed>(LeagueLoader::hash_bin("MinionUpgradeStats").into())
-            .map(|e| MinionUpgradeConfig::from(e));
+            .map(|e| MinionUpgradeConfig::from(e))
+            .unwrap();
 
         Self {
             minion_type,
@@ -193,7 +206,7 @@ impl From<&BinStruct> for WaveBehavior {
                             .map(|i| i.0)
                             .collect()
                     })
-                    .unwrap_or_default();
+                    .unwrap();
 
                 WaveBehavior::InhibitorWaveBehavior {
                     spawn_count_per_inhibitor_down,
@@ -203,7 +216,7 @@ impl From<&BinStruct> for WaveBehavior {
                 let spawn_count = value
                     .getv::<BinS32>(LeagueLoader::hash_bin("SpawnCount").into())
                     .map(|i| i.0)
-                    .unwrap_or(0);
+                    .unwrap();
 
                 WaveBehavior::ConstantWaveBehavior { spawn_count }
             }
@@ -217,7 +230,7 @@ impl From<&BinStruct> for WaveBehavior {
                             .map(|embed| TimedWaveBehaviorInfo::from(embed))
                             .collect()
                     })
-                    .unwrap_or_default();
+                    .unwrap();
 
                 WaveBehavior::TimedVariableWaveBehavior { behaviors }
             }
@@ -231,7 +244,7 @@ impl From<&BinStruct> for WaveBehavior {
                             .map(|i| i.0)
                             .collect()
                     })
-                    .unwrap_or_default();
+                    .unwrap();
 
                 WaveBehavior::RotatingWaveBehavior {
                     spawn_counts_by_wave,
@@ -244,19 +257,21 @@ impl From<&BinStruct> for WaveBehavior {
 
 #[derive(Debug)]
 pub struct TimedWaveBehaviorInfo {
-    pub start_time_secs: Option<i32>,
-    pub behavior: Option<WaveBehavior>,
+    pub start_time_secs: i32,
+    pub behavior: WaveBehavior,
 }
 
 impl From<&BinEmbed> for TimedWaveBehaviorInfo {
     fn from(value: &BinEmbed) -> Self {
         let start_time_secs = value
             .getv::<BinS32>(LeagueLoader::hash_bin("StartTimeSecs").into())
-            .map(|i| i.0);
+            .map(|i| i.0)
+            .unwrap();
 
         let behavior = value
             .getv::<BinStruct>(LeagueLoader::hash_bin("Behavior").into())
-            .map(|s| WaveBehavior::from(s));
+            .map(|s| WaveBehavior::from(s))
+            .unwrap();
 
         Self {
             start_time_secs,
@@ -265,51 +280,59 @@ impl From<&BinEmbed> for TimedWaveBehaviorInfo {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct MinionUpgradeConfig {
-    pub armor_max: Option<f32>,
-    pub armor_upgrade_growth: Option<f32>,
-    pub hp_max_bonus: Option<f32>,
-    pub hp_upgrade: Option<f32>,
-    pub hp_upgrade_late: Option<f32>,
-    pub damage_max: Option<f32>,
-    pub damage_upgrade: Option<f32>,
-    pub damage_upgrade_late: Option<f32>,
+    pub armor_max: f32,
+    pub armor_upgrade_growth: f32,
+    pub hp_max_bonus: f32,
+    pub hp_upgrade: f32,
+    pub hp_upgrade_late: f32,
+    pub damage_max: f32,
+    pub damage_upgrade: f32,
+    pub damage_upgrade_late: f32,
 }
 
 impl From<&BinEmbed> for MinionUpgradeConfig {
     fn from(value: &BinEmbed) -> Self {
         let armor_max = value
             .getv::<BinFloat>(LeagueLoader::hash_bin("ArmorMax").into())
-            .map(|f| f.0);
+            .map(|f| f.0)
+            .unwrap();
 
         let armor_upgrade_growth = value
             .getv::<BinFloat>(LeagueLoader::hash_bin("ArmorUpgradeGrowth").into())
-            .map(|f| f.0);
+            .map(|f| f.0)
+            .unwrap();
 
         let hp_max_bonus = value
             .getv::<BinFloat>(LeagueLoader::hash_bin("HpMaxBonus").into())
-            .map(|f| f.0);
+            .map(|f| f.0)
+            .unwrap();
 
         let hp_upgrade = value
             .getv::<BinFloat>(LeagueLoader::hash_bin("HPUpgrade").into())
-            .map(|f| f.0);
+            .map(|f| f.0)
+            .unwrap();
 
         let hp_upgrade_late = value
             .getv::<BinFloat>(LeagueLoader::hash_bin("HPUpgradeLate").into())
-            .map(|f| f.0);
+            .map(|f| f.0)
+            .unwrap();
 
         let damage_max = value
             .getv::<BinFloat>(LeagueLoader::hash_bin("DamageMax").into())
-            .map(|f| f.0);
+            .map(|f| f.0)
+            .unwrap();
 
         let damage_upgrade = value
             .getv::<BinFloat>(LeagueLoader::hash_bin("DamageUpgrade").into())
-            .map(|f| f.0);
+            .map(|f| f.0)
+            .unwrap();
 
         let damage_upgrade_late = value
             .getv::<BinFloat>(LeagueLoader::hash_bin("DamageUpgradeLate").into())
-            .map(|f| f.0);
+            .map(|f| f.0)
+            .unwrap();
 
         Self {
             armor_max,

@@ -1,4 +1,5 @@
 mod animation;
+mod barrack;
 mod character;
 mod loader;
 mod mapgeo;
@@ -6,6 +7,7 @@ mod minion;
 mod texture;
 
 pub use animation::*;
+pub use barrack::*;
 pub use character::*;
 pub use loader::*;
 pub use mapgeo::*;
