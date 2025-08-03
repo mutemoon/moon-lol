@@ -1,16 +1,15 @@
 use crate::combat::{AttackInfo, MoveDestination, Target};
 use crate::render::{
-    load_character, process_map_geo_mesh, CharacterMapRecordDefinition, EnvironmentVisibility,
-    Focus, LayerTransitionBehavior, LeagueBinMaybeCharacterMapRecord, LeagueLoader,
-    LeagueSkinnedMesh, LeagueSkinnedMeshInternal, SkinCharacterDataProperties, WadRes,
+    load_character, process_map_geo_mesh, EnvironmentVisibility, LayerTransitionBehavior,
+    LeagueLoader, LeagueMinionPath, WadRes,
 };
 use bevy::animation::{animated_field, AnimationTarget, AnimationTargetId};
+use bevy::asset::RenderAssetUsages;
 use bevy::render::mesh::skinning::{SkinnedMesh, SkinnedMeshInverseBindposes};
+use bevy::render::mesh::PrimitiveTopology;
 use bevy::{color::palettes, prelude::*};
 use bevy_egui::EguiPlugin;
-use binrw::io::NoSeek;
-use binrw::BinRead;
-use cdragon_prop::{BinEmbed, BinHash, BinMap, BinMatrix, BinString, BinStruct};
+use cdragon_prop::{BinHash, BinMap, BinStruct};
 
 pub struct PluginMap;
 
@@ -299,7 +298,7 @@ fn setup_map_placeble(
     mut animation_graphs: ResMut<Assets<AnimationGraph>>,
 ) {
     let start_time = std::time::Instant::now();
-    let objs: Vec<_> = res_wad
+    res_wad
         .loader
         .map_materials
         .0
@@ -309,206 +308,234 @@ fn setup_map_placeble(
         .filter_map(|v| v.getv::<BinMap>(LeagueLoader::hash_bin("items").into()))
         .filter_map(|v| v.downcast::<BinHash, BinStruct>())
         .flatten()
-        .filter(|v| v.1.ctype.hash == 0x1e1cce2)
-        .collect();
+        .for_each(|v| match v.1.ctype.hash {
+            0x1e1cce2 => {
+                {
+                    let (
+                        league_bin_maybe_character_map_record,
+                        league_bin_character_record,
+                        image,
+                        league_skinned_mesh,
+                        league_skeleton,
+                        animation_data,
+                    ) = load_character(&res_wad.loader, &v.1);
 
-    objs.iter().for_each(|v| {
-        let (
-            league_bin_maybe_character_map_record,
-            league_bin_character_record,
-            image,
-            league_skinned_mesh,
-            league_skeleton,
-            animation_data,
-        ) = load_character(&res_wad.loader, &v.1);
+                    let mut clip = AnimationClip::default();
 
-        let mut clip = AnimationClip::default();
+                    let mut index_to_entity =
+                        vec![Entity::PLACEHOLDER; league_skeleton.modern_data.joints.len()];
+                    let mut joint_inverse_matrix =
+                        vec![Mat4::default(); league_skeleton.modern_data.joints.len()];
 
-        let mut index_to_entity =
-            vec![Entity::PLACEHOLDER; league_skeleton.modern_data.joints.len()];
-        let mut joint_inverse_matrix =
-            vec![Mat4::default(); league_skeleton.modern_data.joints.len()];
+                    let mut transform =
+                        Transform::from_matrix(league_bin_maybe_character_map_record.transform);
 
-        let mut transform = Transform::from_matrix(league_bin_maybe_character_map_record.transform);
+                    transform.translation.z = -transform.translation.z;
 
-        transform.translation.z = -transform.translation.z;
+                    let player_entity = commands.spawn(transform).id();
 
-        let player_entity = commands.spawn(transform).id();
+                    let sphere = res_meshes.add(Sphere::new(50.0));
 
-        let sphere = res_meshes.add(Sphere::new(50.0));
+                    let mat = res_materials.add(Color::srgb(1.0, 0.2, 0.2));
 
-        let mat = res_materials.add(Color::srgb(1.0, 0.2, 0.2));
+                    for (i, joint) in league_skeleton.modern_data.joints.iter().enumerate() {
+                        let joint_name_str = joint.name.clone();
+                        let name = Name::new(joint_name_str.clone());
+                        let hash = LeagueLoader::compute_joint_hash(&joint.name);
 
-        for (i, joint) in league_skeleton.modern_data.joints.iter().enumerate() {
-            let joint_name_str = joint.name.clone();
-            let name = Name::new(joint_name_str.clone());
-            let hash = LeagueLoader::compute_joint_hash(&joint.name);
+                        let target_id = AnimationTargetId::from_name(&name);
 
-            let target_id = AnimationTargetId::from_name(&name);
+                        match animation_data {
+                            Some(ref animation_data) => {
+                                if let Some(anim_track_index) =
+                                    animation_data.joint_hashes.iter().position(|v| *v == hash)
+                                {
+                                    if let Some(data) =
+                                        animation_data.translates.get(anim_track_index)
+                                    {
+                                        clip.add_curve_to_target(
+                                            target_id,
+                                            AnimatableCurve::new(
+                                                animated_field!(Transform::translation),
+                                                AnimatableKeyframeCurve::new(
+                                                    data.clone().into_iter(),
+                                                )
+                                                .unwrap(),
+                                            ),
+                                        );
+                                    }
 
-            match animation_data {
-                Some(ref animation_data) => {
-                    if let Some(anim_track_index) =
-                        animation_data.joint_hashes.iter().position(|v| *v == hash)
-                    {
-                        if let Some(data) = animation_data.translates.get(anim_track_index) {
-                            clip.add_curve_to_target(
-                                target_id,
-                                AnimatableCurve::new(
-                                    animated_field!(Transform::translation),
-                                    AnimatableKeyframeCurve::new(data.clone().into_iter()).unwrap(),
-                                ),
-                            );
+                                    if let Some(data) =
+                                        animation_data.rotations.get(anim_track_index)
+                                    {
+                                        clip.add_curve_to_target(
+                                            target_id,
+                                            AnimatableCurve::new(
+                                                animated_field!(Transform::rotation),
+                                                AnimatableKeyframeCurve::new(
+                                                    data.clone().into_iter(),
+                                                )
+                                                .unwrap(),
+                                            ),
+                                        );
+                                    }
+
+                                    if let Some(data) = animation_data.scales.get(anim_track_index)
+                                    {
+                                        clip.add_curve_to_target(
+                                            target_id,
+                                            AnimatableCurve::new(
+                                                animated_field!(Transform::scale),
+                                                AnimatableKeyframeCurve::new(
+                                                    data.clone().into_iter(),
+                                                )
+                                                .unwrap(),
+                                            ),
+                                        );
+                                    }
+                                }
+                            }
+                            None => {}
                         }
 
-                        if let Some(data) = animation_data.rotations.get(anim_track_index) {
-                            clip.add_curve_to_target(
-                                target_id,
-                                AnimatableCurve::new(
-                                    animated_field!(Transform::rotation),
-                                    AnimatableKeyframeCurve::new(data.clone().into_iter()).unwrap(),
-                                ),
-                            );
-                        }
+                        let ent = commands
+                            .spawn((
+                                // Mesh3d(sphere.clone()),
+                                // MeshMaterial3d(mat.clone()),
+                                Transform::from_matrix(joint.local_transform),
+                                name,
+                                AnimationTarget {
+                                    id: target_id,
+                                    player: player_entity,
+                                },
+                            ))
+                            .id();
+                        index_to_entity[i] = ent;
+                        joint_inverse_matrix[i] = joint.inverse_bind_transform;
+                    }
 
-                        if let Some(data) = animation_data.scales.get(anim_track_index) {
-                            clip.add_curve_to_target(
-                                target_id,
-                                AnimatableCurve::new(
-                                    animated_field!(Transform::scale),
-                                    AnimatableKeyframeCurve::new(data.clone().into_iter()).unwrap(),
-                                ),
-                            );
+                    for (i, joint) in league_skeleton.modern_data.joints.iter().enumerate() {
+                        if joint.parent_id >= 0 {
+                            let parent_entity = index_to_entity[joint.parent_id as usize];
+                            commands.entity(parent_entity).add_child(index_to_entity[i]);
+                        } else {
+                            commands.entity(player_entity).add_child(index_to_entity[i]);
                         }
                     }
+
+                    let texu = res_image.add(image);
+
+                    let clip_handle = animation_clips.add(clip);
+
+                    let (graph, animation_node_index) = AnimationGraph::from_clip(clip_handle);
+                    let graph_handle = animation_graphs.add(graph);
+
+                    let mut player = AnimationPlayer::default();
+                    player.play(animation_node_index).repeat();
+
+                    commands
+                        .entity(player_entity)
+                        .insert((player, AnimationGraphHandle(graph_handle)));
+
+                    for i in 0..league_skinned_mesh.ranges.len() {
+                        let mesh = league_skinned_mesh.to_bevy_mesh(i).unwrap();
+
+                        let child = commands
+                            .spawn((
+                                Transform::default(),
+                                Mesh3d(res_meshes.add(mesh)),
+                                MeshMaterial3d(res_materials.add(StandardMaterial {
+                                    base_color_texture: Some(texu.clone()),
+                                    unlit: true,
+                                    cull_mode: None,
+                                    alpha_mode: AlphaMode::Opaque,
+                                    ..Default::default()
+                                })),
+                                SkinnedMesh {
+                                    inverse_bindposes: skinned_mesh_inverse_bindposes.add(
+                                        SkinnedMeshInverseBindposes::from(
+                                            league_skeleton
+                                                .modern_data
+                                                .influences
+                                                .iter()
+                                                .map(|v| joint_inverse_matrix[*v as usize])
+                                                .collect::<Vec<_>>(),
+                                        ),
+                                    ),
+                                    joints: league_skeleton
+                                        .modern_data
+                                        .influences
+                                        .iter()
+                                        .map(|v| index_to_entity[*v as usize])
+                                        .collect::<Vec<_>>(),
+                                },
+                            ))
+                            .id();
+                        commands.entity(player_entity).add_child(child);
+                    }
                 }
-                None => {}
             }
+            0x3c995caf => {
+                let v: LeagueMinionPath = (&v.1).into();
+                println!("{:#?}", v);
 
-            let ent = commands
-                .spawn((
-                    // Mesh3d(sphere.clone()),
-                    // MeshMaterial3d(mat.clone()),
-                    Transform::from_matrix(joint.local_transform),
-                    name,
-                    AnimationTarget {
-                        id: target_id,
-                        player: player_entity,
-                    },
-                ))
-                .id();
-            index_to_entity[i] = ent;
-            joint_inverse_matrix[i] = joint.inverse_bind_transform;
-        }
-        for (i, joint) in league_skeleton.modern_data.joints.iter().enumerate() {
-            if joint.parent_id >= 0 {
-                let parent_entity = index_to_entity[joint.parent_id as usize];
-                commands.entity(parent_entity).add_child(index_to_entity[i]);
-            } else {
-                commands.entity(player_entity).add_child(index_to_entity[i]);
-            }
-        }
+                let mut transform = Transform::from_matrix(v.transform);
 
-        let texu = res_image.add(image);
+                transform.translation.y = transform.translation.y + 200.0;
+                transform.translation.z = -transform.translation.z;
 
-        let clip_handle = animation_clips.add(clip);
+                // 这个部分保持不变，用于在路径起点生成一个红色的球体
+                let root = commands
+                    .spawn((
+                        transform,
+                        Mesh3d(res_meshes.add(Sphere::new(30.0))),
+                        MeshMaterial3d(res_materials.add(StandardMaterial {
+                            base_color: palettes::tailwind::RED_500.into(),
+                            ..default()
+                        })),
+                    ))
+                    .id();
 
-        let (graph, animation_node_index) = AnimationGraph::from_clip(clip_handle);
-        let graph_handle = animation_graphs.add(graph);
+                if v.segments.len() > 1 {
+                    // 1. 创建一个新的 Mesh，并指定其拓扑为 LineStrip
+                    // LineStrip 会按顺序连接所有顶点，例如 0-1, 1-2, 2-3, ...
+                    let mut line_mesh =
+                        Mesh::new(PrimitiveTopology::LineStrip, RenderAssetUsages::default());
 
-        let mut player = AnimationPlayer::default();
-        player.play(animation_node_index).repeat();
-
-        commands
-            .entity(player_entity)
-            .insert((player, AnimationGraphHandle(graph_handle)));
-
-        for i in 0..league_skinned_mesh.ranges.len() {
-            let mesh = league_skinned_mesh.to_bevy_mesh(i).unwrap();
-
-            let child = commands
-                .spawn((
-                    Transform::default(),
-                    Mesh3d(res_meshes.add(mesh)),
-                    MeshMaterial3d(res_materials.add(StandardMaterial {
-                        base_color_texture: Some(texu.clone()),
-                        unlit: true,
-                        cull_mode: None,
-                        alpha_mode: AlphaMode::Opaque,
-                        ..Default::default()
-                    })),
-                    SkinnedMesh {
-                        inverse_bindposes: skinned_mesh_inverse_bindposes.add(
-                            SkinnedMeshInverseBindposes::from(
-                                league_skeleton
-                                    .modern_data
-                                    .influences
-                                    .iter()
-                                    .map(|v| joint_inverse_matrix[*v as usize])
-                                    .collect::<Vec<_>>(),
-                            ),
-                        ),
-                        joints: league_skeleton
-                            .modern_data
-                            .influences
+                    // 2. 将路径的所有点作为顶点位置属性插入到 Mesh 中
+                    line_mesh.insert_attribute(
+                        Mesh::ATTRIBUTE_POSITION,
+                        v.segments
                             .iter()
-                            .map(|v| index_to_entity[*v as usize])
-                            .collect::<Vec<_>>(),
-                    },
-                ))
-                .id();
-            commands.entity(player_entity).add_child(child);
-        }
-    });
+                            .map(|v| {
+                                let mut v = v.clone();
+                                v.z = -v.z;
+                                v
+                            })
+                            .collect::<Vec<Vec3>>()
+                            .clone(),
+                    );
+
+                    let child = commands
+                        .spawn((
+                            Mesh3d(res_meshes.add(line_mesh)),
+                            MeshMaterial3d(res_materials.add(StandardMaterial {
+                                base_color: palettes::tailwind::GREEN_500.into(),
+                                // 对于调试线条，通常设置为 unlit 效果更好，使其不受光照影响
+                                unlit: true,
+                                ..default()
+                            })),
+                            // 由于顶点坐标已经是世界坐标，所以 Transform 可以是默认的
+                            Transform::default(),
+                        ))
+                        .id();
+
+                    // 3. 生成包含这条完整路径的单个实体
+                    commands.entity(root).add_child(child);
+                }
+            }
+            _ => {}
+        });
 
     println!("map objects loaded in {:?}", start_time.elapsed());
 }
-
-// use thiserror::Error; // Assuming you're using thiserror
-// #[derive(Debug, Error)]
-// enum ImageSaveError {
-//     #[error("Image format not supported for saving: {0:?}")]
-//     UnsupportedFormat(TextureFormat),
-//     #[error("Image data is not available on the CPU")]
-//     ImageDataNotAvailable,
-//     #[error("Failed to create image buffer from raw data")]
-//     BufferCreation,
-//     #[error("Image crate error: {0}")]
-//     ImageError(#[from] image::ImageError),
-// }
-
-// fn save_image_to_disk(image: &Image, path: &str) -> Result<(), ImageSaveError> {
-//     let width = image.size().x;
-//     let height = image.size().y;
-
-//     // First, get the raw data out of the Option
-//     let Some(data) = &image.data else {
-//         // If data is None, we cannot proceed.
-//         return Err(ImageSaveError::ImageDataNotAvailable);
-//     };
-
-//     let buffer = match image.texture_descriptor.format {
-//         TextureFormat::Bc3RgbaUnormSrgb => {
-//             let format = texpresso::Format::Bc3;
-//             let mut decompressed_data = vec![0u8; (width * height * 4) as usize];
-
-//             // Now 'data' is correctly typed as &[u8]
-//             format.decompress(
-//                 data,
-//                 width as usize,
-//                 height as usize,
-//                 &mut decompressed_data,
-//             );
-
-//             ImageBuffer::<Rgba<u8>, _>::from_raw(width, height, decompressed_data)
-//                 .ok_or(ImageSaveError::BufferCreation)?
-//         }
-//         unsupported_format => {
-//             return Err(ImageSaveError::UnsupportedFormat(unsupported_format));
-//         }
-//     };
-
-//     buffer.save(path)?;
-
-//     Ok(())
-// }

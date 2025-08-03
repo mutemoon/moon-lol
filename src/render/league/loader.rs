@@ -4,8 +4,7 @@ use bevy::ecs::resource::Resource;
 use bevy::image::{dds_buffer_to_image, CompressedImageFormats, Image};
 use binrw::{args, binread, io::NoSeek, BinRead, Endian};
 use cdragon_hashes::wad::compute_wad_hash;
-use cdragon_prop::{BinFloat, BinString, PropFile};
-use image::buffer;
+use cdragon_prop::{BinString, PropFile};
 use std::io::BufReader;
 use std::{
     collections::HashMap,

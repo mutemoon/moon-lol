@@ -4,7 +4,6 @@ use binrw::io::{Read, Seek, SeekFrom};
 use binrw::{binread, BinRead};
 use binrw::{prelude::*, Endian};
 use std::collections::HashMap;
-use std::f32::consts::SQRT_2;
 use std::fmt::Debug;
 
 #[binread]
