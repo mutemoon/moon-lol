@@ -11,13 +11,5 @@ pub const MAP_OFFSET_Y: f32 = 500.0;
 #[require(Visibility)]
 pub struct Map;
 
-#[derive(Component, Copy, Clone, Default, Debug)]
-pub enum Lane {
-    #[default]
-    Top,
-    Mid,
-    Bottom,
-}
-
 #[derive(Resource)]
 pub struct LoadedNavMesh(pub NavMesh);

@@ -6,6 +6,10 @@ use binrw::{args, binread, io::NoSeek, BinRead, Endian};
 use cdragon_hashes::wad::compute_wad_hash;
 use cdragon_prop::{BinString, PropFile};
 use std::io::BufReader;
+#[cfg(unix)]
+use std::os::unix::fs::FileExt;
+#[cfg(windows)]
+use std::os::windows::fs::FileExt;
 use std::{
     collections::HashMap,
     fs::File,
@@ -16,11 +20,6 @@ use std::{
 };
 use twox_hash::XxHash64;
 use zstd::Decoder;
-
-#[cfg(unix)]
-use std::os::unix::fs::FileExt;
-#[cfg(windows)]
-use std::os::windows::fs::FileExt;
 
 #[binread]
 #[derive(Debug)]

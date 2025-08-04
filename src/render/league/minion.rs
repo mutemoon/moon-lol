@@ -40,77 +40,11 @@ impl From<&BinStruct> for LeagueMinionPath {
 
 #[derive(Debug)]
 pub struct LeagueBarracksConfig {
-    pub initial_spawn_time_secs: f32,
-    pub wave_spawn_interval_secs: f32,
-    pub minion_spawn_interval_secs: f32,
-    pub upgrade_interval_secs: f32,
-    pub upgrades_before_late_game_scaling: i32,
-    pub move_speed_increase_initial_delay_secs: f32,
-    pub move_speed_increase_interval_secs: f32,
-    pub move_speed_increase_increment: i32,
-    pub move_speed_increase_max_times: i32,
-    pub exp_radius: f32,
-    pub gold_radius: f32,
     pub units: Vec<BarracksMinionConfig>,
 }
 
 impl From<&BinEntry> for LeagueBarracksConfig {
     fn from(value: &BinEntry) -> Self {
-        let initial_spawn_time_secs = value
-            .getv::<BinFloat>(LeagueLoader::hash_bin("InitialSpawnTimeSecs").into())
-            .map(|f| f.0)
-            .unwrap();
-
-        let wave_spawn_interval_secs = value
-            .getv::<BinFloat>(LeagueLoader::hash_bin("WaveSpawnIntervalSecs").into())
-            .map(|f| f.0)
-            .unwrap();
-
-        let minion_spawn_interval_secs = value
-            .getv::<BinFloat>(LeagueLoader::hash_bin("MinionSpawnIntervalSecs").into())
-            .map(|f| f.0)
-            .unwrap();
-
-        let upgrade_interval_secs = value
-            .getv::<BinFloat>(LeagueLoader::hash_bin("UpgradeIntervalSecs").into())
-            .map(|f| f.0)
-            .unwrap();
-
-        let upgrades_before_late_game_scaling = value
-            .getv::<BinS32>(LeagueLoader::hash_bin("UpgradesBeforeLateGameScaling").into())
-            .map(|i| i.0)
-            .unwrap();
-
-        let move_speed_increase_initial_delay_secs = value
-            .getv::<BinFloat>(LeagueLoader::hash_bin("MoveSpeedIncreaseInitialDelaySecs").into())
-            .map(|f| f.0)
-            .unwrap();
-
-        let move_speed_increase_interval_secs = value
-            .getv::<BinFloat>(LeagueLoader::hash_bin("MoveSpeedIncreaseIntervalSecs").into())
-            .map(|f| f.0)
-            .unwrap();
-
-        let move_speed_increase_increment = value
-            .getv::<BinS32>(LeagueLoader::hash_bin("MoveSpeedIncreaseIncrement").into())
-            .map(|i| i.0)
-            .unwrap();
-
-        let move_speed_increase_max_times = value
-            .getv::<BinS32>(LeagueLoader::hash_bin("MoveSpeedIncreaseMaxTimes").into())
-            .map(|i| i.0)
-            .unwrap();
-
-        let exp_radius = value
-            .getv::<BinFloat>(LeagueLoader::hash_bin("ExpRadius").into())
-            .map(|f| f.0)
-            .unwrap();
-
-        let gold_radius = value
-            .getv::<BinFloat>(LeagueLoader::hash_bin("goldRadius").into())
-            .map(|f| f.0)
-            .unwrap();
-
         let units = value
             .getv::<BinList>(LeagueLoader::hash_bin("units").into())
             .map(|list| {
@@ -122,20 +56,7 @@ impl From<&BinEntry> for LeagueBarracksConfig {
             })
             .unwrap();
 
-        Self {
-            initial_spawn_time_secs,
-            wave_spawn_interval_secs,
-            minion_spawn_interval_secs,
-            upgrade_interval_secs,
-            upgrades_before_late_game_scaling,
-            move_speed_increase_initial_delay_secs,
-            move_speed_increase_interval_secs,
-            move_speed_increase_increment,
-            move_speed_increase_max_times,
-            exp_radius,
-            gold_radius,
-            units,
-        }
+        Self { units }
     }
 }
 

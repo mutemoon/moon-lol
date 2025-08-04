@@ -1,7 +1,7 @@
 use crate::combat::{AttackInfo, MoveDestination, Target};
 use crate::render::{
-    load_character, process_map_geo_mesh, EnvironmentVisibility, LayerTransitionBehavior,
-    LeagueBarrack, LeagueLoader, LeagueMinionPath, WadRes,
+    get_barrack_by_bin, load_character, process_map_geo_mesh, EnvironmentVisibility,
+    LayerTransitionBehavior, LeagueLoader, LeagueMinionPath, WadRes,
 };
 use bevy::animation::{animated_field, AnimationTarget, AnimationTargetId};
 use bevy::asset::RenderAssetUsages;
@@ -298,11 +298,9 @@ fn setup_map_placeble(
     mut animation_graphs: ResMut<Assets<AnimationGraph>>,
 ) {
     let start_time = std::time::Instant::now();
-    res_wad
-        .loader
-        .map_materials
-        .0
-        .entries
+    let bin = &res_wad.loader.map_materials.0;
+
+    bin.entries
         .iter()
         .filter(|v| v.ctype.hash == LeagueLoader::hash_bin("MapPlaceableContainer"))
         .filter_map(|v| v.getv::<BinMap>(LeagueLoader::hash_bin("items").into()))
@@ -535,10 +533,8 @@ fn setup_map_placeble(
                 }
             }
             0x71d0eabd => {
-                let barrack: LeagueBarrack = (&v.1).into();
-                println!("{:#?}", barrack);
                 commands.spawn((
-                    Transform::from_matrix(barrack.transform),
+                    get_barrack_by_bin(&bin, &v.1),
                     Mesh3d(res_meshes.add(Sphere::new(30.0))),
                     MeshMaterial3d(res_materials.add(StandardMaterial {
                         base_color: palettes::tailwind::PURPLE_500.into(),

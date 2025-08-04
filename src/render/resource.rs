@@ -1,7 +1,4 @@
-use crate::{
-    config::GameConfig,
-    render::{LeagueLoader, LeagueMinionPath},
-};
+use crate::{config::GameConfig, render::LeagueLoader};
 use bevy::prelude::*;
 use cdragon_prop::{BinHash, BinMap, BinStruct};
 

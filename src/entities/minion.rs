@@ -1,9 +1,5 @@
-use crate::{combat::*,  map::Lane};
-use bevy::{
-    app::Plugin,
-    prelude::*,
-    time::common_conditions::on_timer,
-};
+use crate::combat::*;
+use bevy::{app::Plugin, prelude::*, time::common_conditions::on_timer};
 use std::time::Duration;
 
 #[derive(Component, Default)]
@@ -97,7 +93,7 @@ struct SpawnTimer {
 
 fn spawn_next_minion(commands: Commands, mut spawn_timer: ResMut<SpawnTimer>) {
     let lanes = [Lane::Mid];
-    let teams = [Team::Blue, Team::Red];
+    let teams = [Team::Order, Team::Chaos];
     let minion_types = [
         Minion::Melee,
         Minion::Melee,

@@ -1,3 +1,4 @@
+mod barrack;
 mod champion;
 mod champions;
 mod inhibitor;
@@ -5,6 +6,7 @@ mod minion;
 mod nexus;
 mod turret;
 
+pub use barrack::*;
 pub use champion::*;
 pub use champions::*;
 pub use inhibitor::*;

@@ -14,15 +14,12 @@ impl Plugin for PluginAttack {
         app.add_event::<AttackRecover>();
         app.add_event::<CommandAttack>();
         app.add_event::<TargetInAttackRange>();
-        app.add_systems(
-            FixedUpdate,
-            (
-                attack_range_check,
-                trigger_lock,
-                trigger_attack,
-                trigger_recover,
-            ),
-        );
+
+        app.add_systems(FixedUpdate, attack_range_check);
+        app.add_systems(FixedUpdate, trigger_lock);
+        app.add_systems(FixedUpdate, trigger_attack);
+        app.add_systems(FixedUpdate, trigger_recover);
+
         app.add_observer(action_set_lock_time);
         app.add_observer(action_set_attack_time);
         app.add_observer(action_attack_damage);
