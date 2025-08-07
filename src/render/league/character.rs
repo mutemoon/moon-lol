@@ -401,7 +401,7 @@ pub fn spawn_character(
     for (i, joint) in league_skeleton.modern_data.joints.iter().enumerate() {
         let joint_name_str = joint.name.clone();
         let name = Name::new(joint_name_str.clone());
-        let hash = LeagueLoader::compute_joint_hash(&joint.name);
+        let hash = LeagueLoader::hash_joint(&joint.name);
 
         let target_id = AnimationTargetId::from_name(&name);
 

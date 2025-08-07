@@ -472,15 +472,17 @@ impl LeagueLoader {
         })
     }
 
-    pub fn compute_joint_hash(s: &str) -> u32 {
+    pub fn hash_joint(s: &str) -> u32 {
         let mut hash = 0u32;
-        let mut high = 0u32;
         for b in s.to_ascii_lowercase().bytes() {
             hash = (hash << 4) + (b as u32);
-            high = hash & 0xf0000000;
-            if hash != 0 {
+
+            let high = hash & 0xf0000000;
+
+            if high != 0 {
                 hash ^= high >> 24;
             }
+
             hash &= !high;
         }
         hash
