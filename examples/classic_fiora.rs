@@ -4,13 +4,9 @@ use bevy::{
         settings::{Backends, RenderCreation, WgpuSettings},
         RenderPlugin,
     },
-    state::commands,
 };
 use moon_lol::{
-    combat::{CommandMovementMoveTo, Movement, PluginCombat},
-    entities::PluginEntities,
-    logging::PluginLogging,
-    render::PluginRender,
+    combat::PluginCombat, entities::PluginEntities, logging::PluginLogging, render::PluginRender,
 };
 
 fn main() {
@@ -40,20 +36,5 @@ fn main() {
             PluginRender,
             PluginLogging,
         ))
-        // .add_systems(Startup, setup)
         .run();
-}
-
-fn setup(mut commands: Commands) {
-    let entity = commands
-        .spawn((Movement { speed: 325.0 }, Transform::default()))
-        .id();
-
-    commands.trigger_targets(CommandMovementMoveTo(Vec2::new(5000.0, 5000.0)), entity);
-
-    let entity = commands
-        .spawn((Movement { speed: 325.0 }, Transform::default()))
-        .id();
-
-    commands.trigger_targets(CommandMovementMoveTo(Vec2::new(5000.0, 5000.0)), entity);
 }

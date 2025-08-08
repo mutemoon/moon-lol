@@ -1,5 +1,6 @@
 mod animation;
 mod camera;
+mod character_cache;
 mod league;
 mod map;
 mod resource;
@@ -7,6 +8,7 @@ mod ui;
 
 pub use animation::*;
 pub use camera::*;
+pub use character_cache::*;
 pub use league::*;
 pub use map::*;
 pub use resource::*;
@@ -29,6 +31,7 @@ impl Plugin for PluginRender {
 
         app.add_plugins((PluginCamera, PluginResource, PluginMap));
         app.add_plugins(PluginAnimation);
+        app.init_resource::<CharacterResourceCache>();
     }
 }
 

@@ -82,7 +82,7 @@ fn setup(
 
 fn update(
     mut commands: Commands,
-    mut query: Query<(Entity, &Movement, &mut MovementState)>,
+    mut query: Query<(Entity, &Movement, &mut MovementState, &Bounding)>,
     mut q_transform: Query<&mut Transform>,
     timer: Res<Time<Fixed>>,
     obstacle_vertices_array: Res<ObstacleVerticesArray>,
@@ -98,7 +98,7 @@ fn update(
 
     let mut entity_to_index: HashMap<Entity, usize> = HashMap::new();
 
-    for (entity, movement, movement_state) in query.iter_mut() {
+    for (entity, movement, movement_state, bounding) in query.iter_mut() {
         let Some(destination) = movement_state.destination else {
             continue;
         };
@@ -120,11 +120,11 @@ fn update(
             (old_velocity, velocity)
         };
 
-        let neighbor_dist = 70.0;
+        let neighbor_dist = bounding.radius * 2.0;
         let max_neighbors = 25;
         let time_horizon = 10.0;
         let time_horizon_obst = 3.0;
-        let radius = 35.0;
+        let radius = bounding.radius;
         let max_speed = movement.get_speed_in_a_frame();
         let index = simulator.add_agent(
             &[position.x, position.y],
@@ -144,7 +144,7 @@ fn update(
 
     simulator.do_step();
 
-    for (entity, _, mut movement_state) in query.iter_mut() {
+    for (entity, _, mut movement_state, _) in query.iter_mut() {
         let Some(target) = movement_state.destination else {
             continue;
         };

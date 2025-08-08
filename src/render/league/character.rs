@@ -319,6 +319,119 @@ pub fn load_character_skin(
     (skin_mesh_properties.into(), flat_map)
 }
 
+pub fn spawn_character_cached(
+    commands: &mut Commands,
+    cache: &mut ResMut<crate::render::CharacterResourceCache>,
+    res_animation_clips: &mut ResMut<Assets<AnimationClip>>,
+    res_animation_graphs: &mut ResMut<Assets<AnimationGraph>>,
+    res_image: &mut ResMut<Assets<Image>>,
+    res_materials: &mut ResMut<Assets<StandardMaterial>>,
+    res_meshes: &mut ResMut<Assets<Mesh>>,
+    res_skinned_mesh_inverse_bindposes: &mut ResMut<Assets<SkinnedMeshInverseBindposes>>,
+    loader: &LeagueLoader,
+    transform: Mat4,
+    skin: &str,
+) -> Entity {
+    let cached_resources = cache.get_or_create_character_resources(
+        skin,
+        loader,
+        res_animation_clips,
+        res_animation_graphs,
+        res_image,
+        res_materials,
+        res_meshes,
+        res_skinned_mesh_inverse_bindposes,
+    );
+
+    let mut index_to_entity =
+        vec![Entity::PLACEHOLDER; cached_resources.skeleton_data.modern_data.joints.len()];
+
+    let transform = Transform::from_matrix(transform);
+    let player_entity = commands.spawn(transform).id();
+
+    // Create skeleton entities
+    for (i, joint) in cached_resources
+        .skeleton_data
+        .modern_data
+        .joints
+        .iter()
+        .enumerate()
+    {
+        let joint_name_str = joint.name.clone();
+        let name = Name::new(joint_name_str.clone());
+        let target_id = bevy::animation::AnimationTargetId::from_name(&name);
+
+        let ent = commands
+            .spawn((
+                Transform::from_matrix(joint.local_transform),
+                name,
+                bevy::animation::AnimationTarget {
+                    id: target_id,
+                    player: player_entity,
+                },
+            ))
+            .id();
+        index_to_entity[i] = ent;
+    }
+
+    // Set up skeleton hierarchy
+    for (i, joint) in cached_resources
+        .skeleton_data
+        .modern_data
+        .joints
+        .iter()
+        .enumerate()
+    {
+        if joint.parent_id >= 0 {
+            let parent_entity = index_to_entity[joint.parent_id as usize];
+            commands.entity(parent_entity).add_child(index_to_entity[i]);
+        } else {
+            commands.entity(player_entity).add_child(index_to_entity[i]);
+        }
+    }
+
+    // Add animation if available
+    if let (Some(_clip_handle), Some(graph_handle)) = (
+        &cached_resources.animation_clip_handle,
+        &cached_resources.animation_graph_handle,
+    ) {
+        let mut player = AnimationPlayer::default();
+        if let Some(graph) = res_animation_graphs.get(graph_handle) {
+            // Find the first node in the graph (should be our clip node)
+            if let Some(node_index) = graph.graph.node_indices().next() {
+                player.play(node_index).repeat();
+            }
+        }
+        commands
+            .entity(player_entity)
+            .insert((player, AnimationGraphHandle(graph_handle.clone())));
+    }
+
+    // Create mesh entities using cached resources
+    for (_i, mesh_handle) in cached_resources.mesh_handles.iter().enumerate() {
+        let child = commands
+            .spawn((
+                Transform::default(),
+                Mesh3d(mesh_handle.clone()),
+                MeshMaterial3d(cached_resources.material_handle.clone()),
+                SkinnedMesh {
+                    inverse_bindposes: cached_resources.inverse_bindposes_handle.clone(),
+                    joints: cached_resources
+                        .skeleton_data
+                        .modern_data
+                        .influences
+                        .iter()
+                        .map(|v| index_to_entity[*v as usize])
+                        .collect::<Vec<_>>(),
+                },
+            ))
+            .id();
+        commands.entity(player_entity).add_child(child);
+    }
+
+    player_entity
+}
+
 pub fn spawn_character(
     commands: &mut Commands,
     res_animation_clips: &mut ResMut<Assets<AnimationClip>>,
@@ -519,7 +632,7 @@ pub fn spawn_character(
 
 #[derive(Debug)]
 pub struct AnimationGraphData {
-    clip_data_map: HashMap<u32, AnimationClipData>,
+    pub clip_data_map: HashMap<u32, AnimationClipData>,
 }
 
 impl From<&BinEntry> for AnimationGraphData {
@@ -564,7 +677,7 @@ impl From<&BinStruct> for AnimationClipData {
 
 #[derive(Debug)]
 pub struct AnimationResourceData {
-    animation_file_path: String,
+    pub animation_file_path: String,
 }
 
 impl From<&BinEmbed> for AnimationResourceData {

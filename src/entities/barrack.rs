@@ -1,7 +1,7 @@
 use crate::{
     combat::{Armor, Bounding, CommandMovementMoveTo, Damage, Health, Movement, Team},
     entities::Minion,
-    render::{load_character_record, spawn_character, WadRes},
+    render::{load_character_record, WadRes},
 };
 use bevy::{prelude::*, render::mesh::skinning::SkinnedMeshInverseBindposes};
 use std::{collections::VecDeque, time::Duration};
@@ -162,6 +162,7 @@ fn setup_barracks_state(mut commands: Commands, query: Query<(Entity, &Barrack),
 /// 核心系统：处理兵营的计时、升级和生成逻辑
 fn barracks_spawning_system(
     mut commands: Commands,
+    mut character_cache: ResMut<crate::render::CharacterResourceCache>,
     mut res_animation_clips: ResMut<Assets<AnimationClip>>,
     mut res_animation_graphs: ResMut<Assets<AnimationGraph>>,
     mut res_image: ResMut<Assets<Image>>,
@@ -275,8 +276,9 @@ fn barracks_spawning_system(
                     let final_move_speed = record.base_move_speed.unwrap()
                         + (barrack.move_speed_increase_increment * move_speed_upgrade_count) as f32;
 
-                    let entity = spawn_character(
+                    let entity = crate::render::spawn_character_cached(
                         &mut commands,
+                        &mut character_cache,
                         &mut res_animation_clips,
                         &mut res_animation_graphs,
                         &mut res_image,
@@ -300,7 +302,7 @@ fn barracks_spawning_system(
                         Damage(final_damage),
                         Armor(final_armor),
                         Bounding {
-                            radius: 10.0,
+                            radius: record.pathfinding_collision_radius.unwrap(),
                             sides: 10,
                             height: 10.0,
                         },
@@ -308,7 +310,7 @@ fn barracks_spawning_system(
                     ));
 
                     commands
-                        .trigger_targets(CommandMovementMoveTo(Vec2::new(5000.0, -5000.0)), entity);
+                        .trigger_targets(CommandMovementMoveTo(Vec2::new(7000.0, -7000.0)), entity);
 
                     // 更新队列
                     current_spawn.count -= 1;

@@ -1,6 +1,6 @@
 use crate::combat::{AttackState, MovementState, Target};
 use crate::render::{
-    get_barrack_by_bin, neg_z, process_map_geo_mesh, spawn_character, EnvironmentVisibility,
+    get_barrack_by_bin, neg_z, process_map_geo_mesh, EnvironmentVisibility,
     LayerTransitionBehavior, LeagueBinMaybeCharacterMapRecord, LeagueLoader, LeagueMinionPath,
     WadRes,
 };
@@ -120,6 +120,7 @@ pub fn draw_attack(
 fn setup_map_placeble(
     res_wad: Res<WadRes>,
     mut commands: Commands,
+    mut character_cache: ResMut<crate::render::CharacterResourceCache>,
     mut res_animation_clips: ResMut<Assets<AnimationClip>>,
     mut res_animation_graphs: ResMut<Assets<AnimationGraph>>,
     mut res_image: ResMut<Assets<Image>>,
@@ -142,8 +143,9 @@ fn setup_map_placeble(
 
                 neg_z(&mut character_map_record.transform);
 
-                spawn_character(
+                crate::render::spawn_character_cached(
                     &mut commands,
+                    &mut character_cache,
                     &mut res_animation_clips,
                     &mut res_animation_graphs,
                     &mut res_image,
