@@ -1,7 +1,6 @@
 mod animation;
 mod camera;
 mod character_cache;
-mod league;
 mod map;
 mod resource;
 mod ui;
@@ -9,7 +8,6 @@ mod ui;
 pub use animation::*;
 pub use camera::*;
 pub use character_cache::*;
-pub use league::*;
 pub use map::*;
 pub use resource::*;
 pub use ui::*;

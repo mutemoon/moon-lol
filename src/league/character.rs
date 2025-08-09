@@ -1,7 +1,8 @@
-use crate::render::{
+use crate::league::{
     AnimationData, AnimationFile, LeagueLoader, LeagueSkeleton, LeagueSkinnedMesh,
     LeagueSkinnedMeshInternal,
 };
+use crate::render::CharacterResourceCache;
 use bevy::animation::{animated_field, AnimationTarget, AnimationTargetId};
 use bevy::prelude::*;
 use bevy::render::mesh::skinning::{SkinnedMesh, SkinnedMeshInverseBindposes};
@@ -321,7 +322,7 @@ pub fn load_character_skin(
 
 pub fn spawn_character_cached(
     commands: &mut Commands,
-    cache: &mut ResMut<crate::render::CharacterResourceCache>,
+    cache: &mut ResMut<CharacterResourceCache>,
     res_animation_clips: &mut ResMut<Assets<AnimationClip>>,
     res_animation_graphs: &mut ResMut<Assets<AnimationGraph>>,
     res_image: &mut ResMut<Assets<Image>>,

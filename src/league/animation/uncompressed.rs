@@ -1,4 +1,4 @@
-use crate::render::{decompress_quat, BinQuat, BinVec3, LeagueLoader};
+use crate::league::{decompress_quat, BinQuat, BinVec3, LeagueLoader};
 use bevy::math::{Quat, Vec3};
 use binrw::io::{Read, Seek, SeekFrom};
 use binrw::{binread, BinRead};

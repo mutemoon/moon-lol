@@ -1,6 +1,6 @@
-use crate::render::league::mapgeo::element_name::ElementName;
-use crate::render::league::mapgeo::mesh::static_mesh::LeagueMapGeoMesh;
-use crate::render::LeagueMapGeo;
+use crate::league::mapgeo::element_name::ElementName;
+use crate::league::mapgeo::mesh::static_mesh::LeagueMapGeoMesh;
+use crate::league::LeagueMapGeo;
 
 /// 从 MapGeoMesh 中解析出所有顶点属性，作为共享的全局数据池。
 /// 返回一个元组，包含所有顶点的位置、法线和 UV 坐标。

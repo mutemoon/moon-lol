@@ -1,5 +1,5 @@
 use binrw::BinRead;
-use moon_lol::render::LeagueMapGeo;
+use moon_lol::league::LeagueMapGeo;
 use std::fs::File;
 
 fn main() {

@@ -1,14 +1,14 @@
 use crate::{
     config::GameConfig,
-    render::{LeagueLoader, LeagueMinionPath},
+    league::{LeagueLoader, LeagueMinionPath},
 };
 use bevy::prelude::*;
 use cdragon_prop::{BinHash, BinMap, BinStruct};
 
-#[derive(Resource)]
-pub struct WadRes {
-    pub loader: LeagueLoader,
-}
+// #[derive(Resource)]
+// pub struct WadRes {
+//     pub loader: LeagueLoader,
+// }
 
 pub struct PluginResource;
 
@@ -29,24 +29,24 @@ impl Plugin for PluginResource {
         )
         .unwrap();
 
-        app.insert_resource::<GameConfig>(GameConfig {
-            minion_paths: loader
-                .map_materials
-                .0
-                .entries
-                .iter()
-                .filter(|v| v.ctype.hash == LeagueLoader::hash_bin("MapPlaceableContainer"))
-                .map(|v| {
-                    v.getv::<BinMap>(LeagueLoader::hash_bin("items").into())
-                        .unwrap()
-                })
-                .flat_map(|v| v.downcast::<BinHash, BinStruct>().unwrap())
-                .filter(|v| v.1.ctype.hash == 0x3c995caf)
-                .map(|v| LeagueMinionPath::from(&v.1))
-                .map(|v| (v.lane, v.path))
-                .collect(),
-        });
+        // app.insert_resource::<GameConfig>(GameConfig {
+        //     minion_paths: loader
+        //         .materials_bin
+        //         .0
+        //         .entries
+        //         .iter()
+        //         .filter(|v| v.ctype.hash == LeagueLoader::hash_bin("MapPlaceableContainer"))
+        //         .map(|v| {
+        //             v.getv::<BinMap>(LeagueLoader::hash_bin("items").into())
+        //                 .unwrap()
+        //         })
+        //         .flat_map(|v| v.downcast::<BinHash, BinStruct>().unwrap())
+        //         .filter(|v| v.1.ctype.hash == 0x3c995caf)
+        //         .map(|v| LeagueMinionPath::from(&v.1))
+        //         .map(|v| (v.lane, v.path))
+        //         .collect(),
+        // });
 
-        app.insert_resource::<WadRes>(WadRes { loader });
+        // app.insert_resource::<WadRes>(WadRes { loader });
     }
 }

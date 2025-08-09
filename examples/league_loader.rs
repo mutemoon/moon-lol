@@ -1,5 +1,5 @@
 use bevy::asset::RenderAssetUsages;
-use moon_lol::render::LeagueLoader;
+use moon_lol::league::LeagueLoader;
 
 fn main() {
     let loader = LeagueLoader::new(

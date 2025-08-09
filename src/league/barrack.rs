@@ -4,7 +4,7 @@ use crate::{
         Barrack, BarracksMinionConfig, Minion, MinionRecord, MinionUpgradeConfig,
         TimedWaveBehaviorInfo, WaveBehavior,
     },
-    render::{u16_to_lane, u32_option_to_team, LeagueLoader},
+    league::{u16_to_lane, u32_option_to_team, LeagueLoader},
 };
 use bevy::{math::Mat4, transform::components::Transform};
 use cdragon_prop::{

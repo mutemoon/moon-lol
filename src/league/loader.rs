@@ -1,4 +1,4 @@
-use crate::render::{LeagueMapGeo, LeagueTexture};
+use crate::league::{LeagueMapGeo, LeagueTexture};
 use bevy::asset::RenderAssetUsages;
 use bevy::ecs::resource::Resource;
 use bevy::image::{dds_buffer_to_image, CompressedImageFormats, Image};
@@ -122,8 +122,8 @@ pub struct LeagueLoader {
     pub sub_chunk: LeagueWadSubchunk,
 
     pub wad: LeagueWad,
-    pub map_geo: LeagueMapGeo,
-    pub map_materials: LeagueProp,
+    pub mapgeo: LeagueMapGeo,
+    pub materials_bin: LeagueProp,
 }
 
 pub struct ArcFileReader {
@@ -211,8 +211,8 @@ impl LeagueLoader {
             wad_file: file,
             sub_chunk,
             wad,
-            map_geo,
-            map_materials: LeagueProp(map_materials),
+            mapgeo: map_geo,
+            materials_bin: LeagueProp(map_materials),
         })
     }
 

@@ -1,4 +1,4 @@
-use crate::render::{
+use crate::league::{
     BinMat4, BinVec3, BoundingBox, ElementFormat, ElementName, EnvironmentVisibility,
     LeagueMapGeoMesh, SizedString,
 };

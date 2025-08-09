@@ -1,9 +1,7 @@
 use super::types::Submesh;
-use crate::render::LeagueLoader;
-use bevy::asset::RenderAssetUsages;
-use bevy::image::{Image, ImageSampler};
+use crate::league::LeagueLoader;
+use bevy::image::Image;
 use bevy::prelude::*;
-use bevy::render::render_resource::{Extent3d, TextureDimension, TextureFormat};
 use cdragon_prop::{BinEmbed, BinEntry, BinList, BinString, PropFile};
 
 /// 根据 submesh 的材质名，查找材质属性并加载对应的贴图文件。
@@ -12,48 +10,22 @@ pub fn find_and_load_image_for_submesh(
     submesh: &Submesh,
     map_materials: &PropFile,
     league_loader: &LeagueLoader,
-) -> Image {
-    let is_debug =
-        submesh.material_name.text == "Maps/KitPieces/SRX/Chemtech/Materials/Default/Chemtech_ChemtechDecal";
+) -> Option<Image> {
     // 1. 根据材质名查找 texturePath
     let binhash = LeagueLoader::hash_bin(&submesh.material_name.text);
-    if is_debug {
-        // println!("binhash: {:x}", binhash);
-    }
+
     for entry in &map_materials.entries {
         if entry.path.hash == binhash {
-            // ... 你原来的材质查找逻辑 ...
-            // 假设你找到了 texture_path: String
-            if is_debug {
-                // println!("found binhash: {:#?}", entry);
-            }
             if let Some(texture_path) = find_texture_path_in_material_entry(entry) {
-                if is_debug {
-                    // println!("texture_path: {}", texture_path);
-                }
                 match league_loader.get_image_by_texture_path(&texture_path) {
-                    Ok(image) => return image,
+                    Ok(image) => return Some(image),
                     Err(e) => warn!("Failed to load texture {}: {}", texture_path, e),
                 }
             }
         }
     }
 
-    println!("没找到{}，加载备用贴图", submesh.material_name.text);
-    // 2. 如果找不到或加载失败，返回一个备用贴图
-    let mut fallback = Image::new_fill(
-        Extent3d {
-            width: 1,
-            height: 1,
-            depth_or_array_layers: 1,
-        },
-        TextureDimension::D2,
-        &[255, 255, 255, 255], // White RGBA
-        TextureFormat::Rgba8Unorm,
-        RenderAssetUsages::default(),
-    );
-    fallback.sampler = ImageSampler::linear();
-    fallback
+    None
 }
 
 /// 在单个材质条目中查找 "texturePath" 的值。

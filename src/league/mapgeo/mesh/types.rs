@@ -1,4 +1,4 @@
-use crate::render::{SizedString, Vector2};
+use crate::league::{SizedString, Vector2};
 use binrw::binread;
 
 #[binread]

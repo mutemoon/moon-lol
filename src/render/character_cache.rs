@@ -1,4 +1,4 @@
-use crate::render::{
+use crate::league::{
     load_character_skin, AnimationClipData, AnimationData, AnimationFile, AnimationGraphData,
     LeagueLoader, LeagueSkeleton, LeagueSkinnedMesh, LeagueSkinnedMeshInternal,
     SkinCharacterDataProperties,

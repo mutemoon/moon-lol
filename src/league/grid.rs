@@ -1,4 +1,4 @@
-use crate::render::BinVec3;
+use crate::league::BinVec3;
 use bevy::prelude::*;
 use binrw::binread;
 

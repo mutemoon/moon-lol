@@ -1,4 +1,4 @@
-use crate::render::{BoundingBox, EnvironmentVisibility, Vector2};
+use crate::league::{BoundingBox, EnvironmentVisibility, Vector2};
 use binrw::binread;
 
 use super::enums::{parse_layer_transition_behavior, parse_quality_filter, LayerTransitionBehavior, QualityFilter};

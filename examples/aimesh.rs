@@ -1,9 +1,7 @@
 use bevy::prelude::*;
 use binrw::{io::BufReader, BinRead};
 use moon_lol::{
-    combat::PluginCombat,
-    entities::PluginEntities,
-    render::{AiMeshNGrid, PluginRender},
+    combat::PluginCombat, entities::PluginEntities, league::AiMeshNGrid, render::PluginRender,
 };
 use std::fs::File;
 
