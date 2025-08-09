@@ -33,7 +33,7 @@ pub struct BinQuat(
 #[binread]
 #[derive(Debug, Clone)]
 #[br(little)]
-pub struct Matrix4x4 {
+pub struct BinMat4 {
     #[br(count = 16)]
     pub data: Vec<f32>,
 }

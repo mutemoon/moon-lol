@@ -1,6 +1,7 @@
 mod animation;
 mod barrack;
 mod character;
+mod grid;
 mod lane;
 mod loader;
 mod mapgeo;
@@ -12,6 +13,7 @@ mod utils;
 pub use animation::*;
 pub use barrack::*;
 pub use character::*;
+pub use grid::*;
 pub use lane::*;
 pub use loader::*;
 pub use mapgeo::*;
