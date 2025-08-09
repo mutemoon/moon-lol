@@ -3,7 +3,7 @@ use crate::league::{
     LeagueSkinnedMeshInternal,
 };
 use crate::render::CharacterResourceCache;
-use bevy::animation::{animated_field, AnimationTarget, AnimationTargetId};
+use bevy::animation::{AnimationTarget, AnimationTargetId};
 use bevy::asset::uuid::Uuid;
 use bevy::prelude::*;
 use bevy::render::mesh::skinning::{SkinnedMesh, SkinnedMeshInverseBindposes};
