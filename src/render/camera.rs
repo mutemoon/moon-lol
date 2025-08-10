@@ -18,7 +18,7 @@ pub struct PluginCamera;
 impl Plugin for PluginCamera {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, setup);
-        app.add_systems(Startup, confine_cursor);
+        // app.add_systems(Startup, confine_cursor);
         app.add_systems(Update, camera_focus);
         app.add_systems(Update, camera_zoom);
         app.add_systems(Update, edge_scroll_camera);

@@ -1,9 +1,28 @@
-use crate::league::{LeagueMapGeo, LeagueTexture};
-use bevy::asset::RenderAssetUsages;
-use bevy::ecs::resource::Resource;
-use bevy::image::{dds_buffer_to_image, CompressedImageFormats, Image};
+use crate::config::{
+    ConfigAnimationGraph, ConfigEnvironmentObject, ConfigGeometryObject, ConfigJoint, Configs,
+};
+use crate::league::{
+    find_and_load_image_for_submesh, static_conversion::parse_vertex_data, LayerTransitionBehavior,
+    LeagueMapGeo, LeagueTexture,
+};
+use crate::league::{
+    get_barrack_by_bin, neg_mat_z, skinned_mesh_to_intermediate, submesh_to_intermediate,
+    AnimationClipData, AnimationGraphData, LeagueBinMaybeCharacterMapRecord, LeagueMaterial,
+    LeagueMinionPath, LeagueSkeleton, LeagueSkinnedMesh, LeagueSkinnedMeshInternal,
+    SkinCharacterDataProperties,
+};
+use bevy::ecs::entity::Entity;
+use bevy::math::Mat4;
+use bevy::transform::components::Transform;
+use bevy::{
+    image::TextureError,
+    scene::ron,
+    scene::ron::{de::SpannedError, ser::to_writer_pretty},
+};
+use binrw::BinWrite;
 use binrw::{args, binread, io::NoSeek, BinRead, Endian};
-use cdragon_prop::PropFile;
+use cdragon_prop::{BinEntry, BinHash, BinMap, BinStruct, PropError, PropFile};
+use serde::Serialize;
 use std::io::BufReader;
 #[cfg(unix)]
 use std::os::unix::fs::FileExt;
@@ -17,8 +36,30 @@ use std::{
     path::{Path, PathBuf},
     sync::Arc,
 };
+use tracing::info;
 use twox_hash::XxHash64;
 use zstd::Decoder;
+
+#[derive(thiserror::Error, Debug)]
+pub enum LeagueLoaderError {
+    #[error("Could not load mesh: {0}")]
+    Io(#[from] std::io::Error),
+
+    #[error("Could not load material: {0}")]
+    RonSpanned(#[from] SpannedError),
+
+    #[error("Could not load material: {0}")]
+    RON(#[from] ron::Error),
+
+    #[error("Could not load texture: {0}")]
+    BinRW(#[from] binrw::Error),
+
+    #[error("Could not load texture: {0}")]
+    Texture(#[from] TextureError),
+
+    #[error("Could not load prop file: {0}")]
+    PropError(#[from] PropError),
+}
 
 #[binread]
 #[derive(Debug)]
@@ -47,11 +88,6 @@ impl LeagueWad {
         self.entries.get(&hash)
     }
 }
-
-pub struct LeagueProp(pub PropFile);
-
-unsafe impl Sync for LeagueProp {}
-unsafe impl Send for LeagueProp {}
 
 #[binread]
 #[derive(Debug, Clone, Copy)]
@@ -113,7 +149,6 @@ pub struct LeagueWadSubchunkItem {
     pub data_hash: u64,
 }
 
-#[derive(Resource)]
 pub struct LeagueLoader {
     pub root_dir: PathBuf,
     pub map_path: PathBuf,
@@ -123,7 +158,7 @@ pub struct LeagueLoader {
 
     pub wad: LeagueWad,
     pub mapgeo: LeagueMapGeo,
-    pub materials_bin: LeagueProp,
+    pub materials_bin: PropFile,
 }
 
 pub struct ArcFileReader {
@@ -184,26 +219,23 @@ impl Seek for ArcFileReader {
 }
 
 impl LeagueLoader {
-    pub fn new(root_dir: &str, map_path: &str, map_geo_path: &str) -> io::Result<LeagueLoader> {
+    pub fn new(
+        root_dir: &str,
+        map_path: &str,
+        map_geo_path: &str,
+    ) -> Result<LeagueLoader, LeagueLoaderError> {
         let root_dir = Path::new(root_dir);
         let map_relative_path = Path::new(map_path);
         let map_absolute_path = root_dir.join(map_relative_path);
 
         let file = Arc::new(File::open(&map_absolute_path)?);
-        let wad = LeagueWad::read(&mut ArcFileReader::new(file.clone(), 0))
-            .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?;
+        let wad = LeagueWad::read(&mut ArcFileReader::new(file.clone(), 0))?;
 
-        // Load subchunk data
         let sub_chunk = Self::load_subchunk(&wad, &file, map_path)?;
 
-        // Load map geometry
         let map_geo = Self::load_map_geo(&wad, &file, map_geo_path)?;
 
-        // Load map materials
         let map_materials = Self::load_map_materials(&wad, &file, map_geo_path)?;
-
-        // Load character map
-        // let character_map = Self::load_character_map(&wad, &file)?;
 
         Ok(LeagueLoader {
             root_dir: root_dir.to_path_buf(),
@@ -212,43 +244,235 @@ impl LeagueLoader {
             sub_chunk,
             wad,
             mapgeo: map_geo,
-            materials_bin: LeagueProp(map_materials),
+            materials_bin: map_materials,
         })
+    }
+
+    pub fn to_configs(&self) -> Configs {
+        let mut configs = Configs::default();
+
+        for (i, map_mesh) in self.mapgeo.meshes.iter().enumerate() {
+            if map_mesh.layer_transition_behavior != LayerTransitionBehavior::Unaffected {
+                continue;
+            }
+
+            let (all_positions, all_normals, all_uvs) = parse_vertex_data(&self.mapgeo, map_mesh);
+
+            for (j, submesh) in map_mesh.submeshes.iter().enumerate() {
+                let intermediate_meshes = submesh_to_intermediate(
+                    &submesh,
+                    &self.mapgeo,
+                    map_mesh,
+                    &all_positions,
+                    &all_normals,
+                    &all_uvs,
+                );
+                let material = find_and_load_image_for_submesh(
+                    &submesh.material_name.text,
+                    &self.materials_bin,
+                )
+                .unwrap();
+
+                save_struct_to_file(&submesh.material_name.text, &material).unwrap();
+
+                self.save_wad_entry_to_file(&material.texture_path).unwrap();
+
+                let mesh_path = format!("mapgeo/meshes/{}_{}.mesh", i, j);
+
+                intermediate_meshes
+                    .write(&mut get_asset_writer(&mesh_path).unwrap())
+                    .unwrap();
+
+                configs.geometry_objects.push(ConfigGeometryObject {
+                    mesh_path,
+                    texture_path: submesh.material_name.text.clone(),
+                });
+            }
+        }
+
+        self.materials_bin
+            .entries
+            .iter()
+            .filter(|v| v.ctype.hash == LeagueLoader::hash_bin("MapPlaceableContainer"))
+            .filter_map(|v| v.getv::<BinMap>(LeagueLoader::hash_bin("items").into()))
+            .filter_map(|v| v.downcast::<BinHash, BinStruct>())
+            .flatten()
+            .for_each(|v| match v.1.ctype.hash {
+                0x1e1cce2 => {
+                    let mut character_map_record = LeagueBinMaybeCharacterMapRecord::from(&v.1);
+
+                    neg_mat_z(&mut character_map_record.transform);
+                    let transform = Transform::from_matrix(character_map_record.transform);
+
+                    let skin = character_map_record.definition.skin;
+
+                    let (skin_character_data_properties, flat_map) =
+                        self.load_character_skin(&skin);
+
+                    let texture_path = skin_character_data_properties.skin_mesh_properties.texture;
+
+                    let mut reader = self
+                        .get_wad_entry_no_seek_reader_by_path(
+                            &skin_character_data_properties
+                                .skin_mesh_properties
+                                .simple_skin,
+                        )
+                        .unwrap();
+
+                    let league_skinned_mesh = LeagueSkinnedMesh::from(
+                        LeagueSkinnedMeshInternal::read(&mut reader).unwrap(),
+                    );
+
+                    let league_skeleton = self
+                        .get_wad_entry_reader_by_path(
+                            &skin_character_data_properties.skin_mesh_properties.skeleton,
+                        )
+                        .map(|mut v| LeagueSkeleton::read(&mut v).unwrap())
+                        .unwrap();
+
+                    let skeleton_path =
+                        skin_character_data_properties.skin_mesh_properties.skeleton;
+
+                    self.save_wad_entry_to_file(&skeleton_path).unwrap();
+
+                    let animation_graph_data: AnimationGraphData = flat_map
+                        .get(
+                            &skin_character_data_properties
+                                .skin_animation_properties
+                                .animation_graph_data,
+                        )
+                        .unwrap()
+                        .into();
+
+                    let clip_paths = animation_graph_data
+                        .clip_data_map
+                        .iter()
+                        .filter_map(|(_, v)| match v {
+                            AnimationClipData::AtomicClipData {
+                                animation_resource_data,
+                            } => Some(animation_resource_data.animation_file_path.clone()),
+                            AnimationClipData::Unknown => None,
+                        })
+                        .collect::<Vec<_>>();
+
+                    let mut submesh_paths = Vec::new();
+
+                    for (i, range) in league_skinned_mesh.ranges.iter().enumerate() {
+                        let mesh = skinned_mesh_to_intermediate(&league_skinned_mesh, i).unwrap();
+
+                        let mesh_path = format!("skin_meshes/{}.mesh", &range.name);
+
+                        mesh.write(&mut get_asset_writer(&mesh_path).unwrap())
+                            .unwrap();
+
+                        submesh_paths.push(mesh_path);
+                    }
+
+                    configs.environment_objects.push((
+                        transform,
+                        ConfigEnvironmentObject {
+                            texture_path,
+                            submesh_paths,
+                            joint_influences_indices: league_skeleton.modern_data.influences,
+                            joints: league_skeleton
+                                .modern_data
+                                .joints
+                                .iter()
+                                .map(|v| ConfigJoint {
+                                    name: v.name.clone(),
+                                    transform: Transform::from_matrix(v.local_transform),
+                                    inverse_bind_pose: v.inverse_bind_transform,
+                                    parent_index: v.parent_index,
+                                })
+                                .collect(),
+                            animation_graph: ConfigAnimationGraph { clip_paths },
+                        },
+                    ));
+                }
+                0x71d0eabd => {
+                    let barrack = get_barrack_by_bin(&self.materials_bin, &v.1);
+                    configs.barracks.push(barrack);
+                }
+                _ => {}
+            });
+
+        let minion_paths: Vec<LeagueMinionPath> = self
+            .materials_bin
+            .entries
+            .iter()
+            .filter(|v| v.ctype.hash == LeagueLoader::hash_bin("MapPlaceableContainer"))
+            .map(|v| {
+                v.getv::<BinMap>(LeagueLoader::hash_bin("items").into())
+                    .unwrap()
+            })
+            .flat_map(|v| v.downcast::<BinHash, BinStruct>().unwrap())
+            .filter(|v| v.1.ctype.hash == 0x3c995caf)
+            .map(|v| LeagueMinionPath::from(&v.1))
+            .collect();
+
+        for path in minion_paths {
+            configs.minion_paths.insert(path.lane, path.path);
+        }
+
+        configs
+    }
+
+    pub fn load_character_skin(
+        &self,
+        skin: &str,
+    ) -> (SkinCharacterDataProperties, HashMap<u32, BinEntry>) {
+        let skin_path = format!("data/{}.bin", skin);
+
+        let skin_bin = self.get_prop_bin_by_path(&skin_path).unwrap();
+
+        let skin_mesh_properties = skin_bin
+            .entries
+            .iter()
+            .find(|v| v.ctype.hash == LeagueLoader::hash_bin("SkinCharacterDataProperties"))
+            .unwrap();
+
+        let flat_map: HashMap<_, _> = skin_bin
+            .linked_files
+            .iter()
+            .map(|v| self.get_prop_bin_by_path(v).unwrap())
+            .flat_map(|v| v.entries)
+            .map(|v| (v.path.hash, v))
+            .collect();
+
+        (skin_mesh_properties.into(), flat_map)
     }
 
     fn load_subchunk(
         wad: &LeagueWad,
         file: &Arc<File>,
         map_path: &str,
-    ) -> io::Result<LeagueWadSubchunk> {
+    ) -> Result<LeagueWadSubchunk, LeagueLoaderError> {
         let entry = Self::get_wad_subchunk_entry(wad, map_path);
         let reader = Self::get_wad_zstd_entry_reader(file, &entry)?;
 
-        LeagueWadSubchunk::read_options(
+        Ok(LeagueWadSubchunk::read_options(
             &mut NoSeek::new(reader),
             Endian::Little,
             args! { count: entry.target_size / 16 },
-        )
-        .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))
+        )?)
     }
 
     fn load_map_geo(
         wad: &LeagueWad,
         file: &Arc<File>,
         map_geo_path: &str,
-    ) -> io::Result<LeagueMapGeo> {
+    ) -> Result<LeagueMapGeo, LeagueLoaderError> {
         let entry = Self::get_wad_entry(wad, Self::compute_wad_hash(map_geo_path));
         let reader = Self::get_wad_zstd_entry_reader(file, &entry)?;
 
-        LeagueMapGeo::read(&mut NoSeek::new(reader))
-            .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))
+        Ok(LeagueMapGeo::read(&mut NoSeek::new(reader))?)
     }
 
     fn load_map_materials(
         wad: &LeagueWad,
         file: &Arc<File>,
         map_geo_path: &str,
-    ) -> io::Result<PropFile> {
+    ) -> Result<PropFile, LeagueLoaderError> {
         let map_materials_path = map_geo_path
             .replace(".mapgeo", ".materials.bin")
             .replace('\\', "/")
@@ -260,7 +484,7 @@ impl LeagueLoader {
         let mut data = Vec::with_capacity(entry.target_size as usize);
         reader.read_to_end(&mut data)?;
 
-        PropFile::from_slice(&data).map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))
+        Ok(PropFile::from_slice(&data)?)
     }
 
     #[inline]
@@ -273,16 +497,18 @@ impl LeagueLoader {
         self.get_wad_entry_by_hash(Self::compute_wad_hash(&path.to_lowercase()))
     }
 
-    pub fn get_wad_entry_reader(&self, entry: &LeagueWadEntry) -> io::Result<Box<dyn Read + '_>> {
+    pub fn get_wad_entry_reader(
+        &self,
+        entry: &LeagueWadEntry,
+    ) -> Result<Box<dyn Read + '_>, LeagueLoaderError> {
         match entry.format {
             WadDataFormat::Uncompressed => Ok(Box::new(
                 ArcFileReader::new(self.wad_file.clone(), entry.offset as u64)
                     .take(entry.size as u64),
             )),
-            WadDataFormat::Redirection | WadDataFormat::Gzip => Err(io::Error::new(
-                io::ErrorKind::Unsupported,
-                "wad entry format not supported",
-            )),
+            WadDataFormat::Redirection | WadDataFormat::Gzip => {
+                panic!("wad entry format not supported")
+            }
             WadDataFormat::Zstd => Self::get_wad_zstd_entry_reader(&self.wad_file, entry),
             WadDataFormat::Chunked(subchunk_count) => {
                 self.read_chunked_entry(entry, subchunk_count)
@@ -294,12 +520,9 @@ impl LeagueLoader {
         &self,
         entry: &LeagueWadEntry,
         subchunk_count: u8,
-    ) -> io::Result<Box<dyn Read + '_>> {
+    ) -> Result<Box<dyn Read + '_>, LeagueLoaderError> {
         if self.sub_chunk.chunks.is_empty() {
-            return Err(io::Error::new(
-                io::ErrorKind::InvalidData,
-                "No subchunk data available",
-            ));
+            panic!("No subchunk data available");
         }
 
         let mut offset = 0u64;
@@ -308,10 +531,7 @@ impl LeagueLoader {
         for i in 0..subchunk_count {
             let chunk_index = (entry.first_subchunk_index as usize) + (i as usize);
             if chunk_index >= self.sub_chunk.chunks.len() {
-                return Err(io::Error::new(
-                    io::ErrorKind::InvalidData,
-                    "Subchunk index out of bounds",
-                ));
+                panic!("Subchunk index out of bounds");
             }
 
             let subchunk_entry = &self.sub_chunk.chunks[chunk_index];
@@ -334,7 +554,7 @@ impl LeagueLoader {
     pub fn get_wad_entry_no_seek_reader_by_hash(
         &self,
         hash: u64,
-    ) -> io::Result<NoSeek<Box<dyn Read + '_>>> {
+    ) -> Result<NoSeek<Box<dyn Read + '_>>, LeagueLoaderError> {
         let entry = self
             .get_wad_entry_by_hash(hash)
             .ok_or_else(|| io::Error::new(io::ErrorKind::NotFound, "WAD entry not found"))?;
@@ -344,19 +564,19 @@ impl LeagueLoader {
     pub fn get_wad_entry_no_seek_reader_by_path(
         &self,
         path: &str,
-    ) -> io::Result<NoSeek<Box<dyn Read + '_>>> {
+    ) -> Result<NoSeek<Box<dyn Read + '_>>, LeagueLoaderError> {
         self.get_wad_entry_no_seek_reader_by_hash(Self::compute_wad_hash(path))
     }
 
     pub fn get_wad_entry_reader_by_path(
         &self,
         path: &str,
-    ) -> io::Result<BufReader<Cursor<Vec<u8>>>> {
+    ) -> Result<BufReader<Cursor<Vec<u8>>>, LeagueLoaderError> {
         self.get_wad_entry_buffer_by_path(path)
             .map(|v| BufReader::new(Cursor::new(v)))
     }
 
-    pub fn get_wad_entry_buffer_by_path(&self, path: &str) -> io::Result<Vec<u8>> {
+    pub fn get_wad_entry_buffer_by_path(&self, path: &str) -> Result<Vec<u8>, LeagueLoaderError> {
         let entry = self
             .get_wad_entry_by_path(path)
             .ok_or_else(|| io::Error::new(io::ErrorKind::NotFound, "WAD entry not found"))?;
@@ -367,49 +587,21 @@ impl LeagueLoader {
         })
     }
 
-    pub fn get_texture_by_hash(&self, hash: u64) -> io::Result<LeagueTexture> {
+    pub fn get_texture_by_hash(&self, hash: u64) -> Result<LeagueTexture, LeagueLoaderError> {
         let mut reader = self.get_wad_entry_no_seek_reader_by_hash(hash)?;
-        LeagueTexture::read(&mut reader).map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))
+        Ok(LeagueTexture::read(&mut reader)?)
     }
 
-    pub fn get_texture_by_path(&self, path: &str) -> io::Result<LeagueTexture> {
+    pub fn get_texture_by_path(&self, path: &str) -> Result<LeagueTexture, LeagueLoaderError> {
         let mut reader = self.get_wad_entry_no_seek_reader_by_path(path)?;
-        LeagueTexture::read(&mut reader).map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))
+        Ok(LeagueTexture::read(&mut reader)?)
     }
 
-    pub fn get_image_by_texture_path(&self, path: &str) -> io::Result<Image> {
-        match Path::new(path).extension().and_then(|ext| ext.to_str()) {
-            Some("tex") => {
-                let mut reader = self.get_wad_entry_no_seek_reader_by_path(path)?;
-                let texture = LeagueTexture::read(&mut reader)
-                    .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?;
-                texture
-                    .to_bevy_image(RenderAssetUsages::default())
-                    .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))
-            }
-            Some("dds") => {
-                let buffer = self.get_wad_entry_buffer_by_path(path)?;
-                dds_buffer_to_image(
-                    #[cfg(debug_assertions)]
-                    path.to_string(),
-                    &buffer,
-                    CompressedImageFormats::all(),
-                    false,
-                )
-                .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))
-            }
-            _ => Err(io::Error::new(
-                io::ErrorKind::Unsupported,
-                format!("Unsupported texture format: {}", path),
-            )),
-        }
-    }
-
-    pub fn get_prop_bin_by_path(&self, path: &str) -> io::Result<PropFile> {
+    pub fn get_prop_bin_by_path(&self, path: &str) -> Result<PropFile, LeagueLoaderError> {
         let mut reader = self.get_wad_entry_no_seek_reader_by_path(path)?;
         let mut data = Vec::new();
         reader.read_to_end(&mut data)?;
-        PropFile::from_slice(&data).map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))
+        Ok(PropFile::from_slice(&data)?)
     }
 
     #[inline]
@@ -459,11 +651,39 @@ impl LeagueLoader {
     fn get_wad_zstd_entry_reader(
         wad_file: &Arc<File>,
         entry: &LeagueWadEntry,
-    ) -> io::Result<Box<dyn Read>> {
+    ) -> Result<Box<dyn Read>, LeagueLoaderError> {
         let reader =
             ArcFileReader::new(wad_file.clone(), entry.offset as u64).take(entry.size as u64);
-        let decoder =
-            Decoder::new(reader).map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?;
+        let decoder = Decoder::new(reader)?;
         Ok(Box::new(decoder))
     }
+
+    pub fn save_wad_entry_to_file(&self, path: &str) -> Result<(), LeagueLoaderError> {
+        let mut reader = self.get_wad_entry_reader_by_path(path)?;
+        let mut file = get_asset_writer(path).unwrap();
+        io::copy(&mut reader, &mut file)?;
+        Ok(())
+    }
+}
+
+fn ensure_dir_exists(path: &str) -> Result<(), LeagueLoaderError> {
+    let dir = Path::new(path).parent().unwrap();
+    if !dir.exists() {
+        std::fs::create_dir_all(dir)?;
+    }
+    Ok(())
+}
+
+pub fn get_asset_writer(path: &str) -> Result<File, LeagueLoaderError> {
+    let path = format!("assets/{}", path);
+    println!("√ {}", path);
+    ensure_dir_exists(&path)?;
+    let file = File::create(path)?;
+    Ok(file)
+}
+
+pub fn save_struct_to_file<T: Serialize>(path: &str, data: &T) -> Result<(), LeagueLoaderError> {
+    let mut file = get_asset_writer(path)?;
+    to_writer_pretty(&mut file, data, Default::default())?;
+    Ok(())
 }

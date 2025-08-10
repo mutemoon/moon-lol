@@ -1,49 +1,49 @@
 use std::collections::HashMap;
 
-use bevy::{ecs::resource::Resource, math::Vec2};
+use bevy::{
+    ecs::resource::Resource,
+    math::{Mat4, Vec2},
+    transform::components::Transform,
+};
 use serde::{Deserialize, Serialize};
 
-use crate::combat::Lane;
+use crate::{
+    combat::{Lane, Team},
+    entities::Barrack,
+};
 
-#[derive(Resource, Serialize, Deserialize)]
-pub struct GameConfig {
-    pub environments: Vec<EnvironmentItem>,
+#[derive(Resource, Default, Serialize, Deserialize)]
+pub struct Configs {
+    pub geometry_objects: Vec<ConfigGeometryObject>,
+    pub environment_objects: Vec<(Transform, ConfigEnvironmentObject)>,
     pub minion_paths: HashMap<Lane, Vec<Vec2>>,
+    pub barracks: Vec<(Transform, Team, Lane, Barrack)>,
 }
 
 #[derive(Serialize, Deserialize)]
-pub struct EnvironmentItem {
-    pub name: String,
+pub struct ConfigGeometryObject {
     pub mesh_path: String,
     pub texture_path: String,
 }
 
-#[cfg(test)]
-mod tests {
-    use std::{fs::File, io::BufReader};
+#[derive(Serialize, Deserialize)]
+pub struct ConfigEnvironmentObject {
+    pub texture_path: String,
+    pub submesh_paths: Vec<String>,
+    pub joint_influences_indices: Vec<i16>,
+    pub joints: Vec<ConfigJoint>,
+    pub animation_graph: ConfigAnimationGraph,
+}
 
-    use bevy::scene::ron;
+#[derive(Serialize, Deserialize)]
+pub struct ConfigAnimationGraph {
+    pub clip_paths: Vec<String>,
+}
 
-    use super::*;
-
-    #[test]
-    fn test_environment_item() {
-        let environment_item = EnvironmentItem {
-            name: "Test Environment".to_string(),
-            mesh_path: "test_mesh".to_string(),
-            texture_path: "test_texture".to_string(),
-        };
-
-        let writer = File::create("assets/test.ron").unwrap();
-
-        let result = ron::ser::to_writer(writer, &environment_item);
-        assert_eq!(result.is_ok(), true);
-
-        let mut reader = BufReader::new(File::open("assets/test.ron").unwrap());
-        let environment_item: EnvironmentItem = ron::de::from_reader(&mut reader).unwrap();
-
-        assert_eq!(environment_item.name, "Test Environment");
-        assert_eq!(environment_item.mesh_path, "test_mesh");
-        assert_eq!(environment_item.texture_path, "test_texture");
-    }
+#[derive(Serialize, Deserialize)]
+pub struct ConfigJoint {
+    pub name: String,
+    pub transform: Transform,
+    pub inverse_bind_pose: Mat4,
+    pub parent_index: i16,
 }

@@ -8,7 +8,11 @@ use binrw::binread;
 #[derive(Debug, Clone)]
 #[br(little)]
 pub struct SkinnedMeshRange {
-    #[br(count = 64, try_map = |bytes: Vec<u8>| String::from_utf8(bytes))]
+    #[br(count = 64, try_map = |bytes: Vec<u8>| {
+        // 找到第一个 null 字符，如果有的话就截断
+        let end = bytes.iter().position(|&b| b == 0).unwrap_or(bytes.len());
+        String::from_utf8(bytes[..end].to_vec())
+    })]
     pub name: String,
     pub start_vertex: u32,
     pub vertex_count: u32,

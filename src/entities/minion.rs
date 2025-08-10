@@ -4,8 +4,9 @@ use crate::combat::{
     Target, Team,
 };
 use bevy::{app::Plugin, prelude::*};
+use serde::{Deserialize, Serialize};
 
-#[derive(Component, Debug, Clone, Copy)]
+#[derive(Component, Debug, Clone, Copy, Serialize, Deserialize)]
 #[require(MinionState, Navigator, Team, Obstacle, AggroInfo)]
 pub enum Minion {
     Siege,

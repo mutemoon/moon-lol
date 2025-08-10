@@ -1,20 +1,13 @@
 {
-	"version": "2.0.0",
-	"tasks": [
-		{
-			"type": "cargo",
-			"command": "run",
-			"args": [
-				"--package",
-				"moon_lol",
-				"--example",
-				"extract"
-			],
-			"problemMatcher": [
-				"$rustc"
-			],
-			"group": "build",
-			"label": "rust: run extract"
-		}
-	]
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "type": "cargo",
+      "command": "build",
+      "args": ["--example", "classic_fiora", "--package", "moon_lol"],
+      "problemMatcher": ["$rustc"],
+      "group": "build",
+      "label": "cargo build classic_fiora"
+    }
+  ]
 }

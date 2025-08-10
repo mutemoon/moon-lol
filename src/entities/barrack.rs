@@ -3,14 +3,15 @@ use crate::{
         Armor, Bounding, CommandMovementFollowPath, CommandMovementMoveTo, Damage, Health, Lane,
         Movement, Team,
     },
-    config::GameConfig,
+    config::Configs,
     entities::Minion,
 };
 // use crate::render::WasRes;
 use bevy::{prelude::*, render::mesh::skinning::SkinnedMeshInverseBindposes};
+use serde::{Deserialize, Serialize};
 use std::{collections::VecDeque, time::Duration};
 
-#[derive(Component, Debug)]
+#[derive(Component, Debug, Serialize, Deserialize)]
 pub struct Barrack {
     pub initial_spawn_time_secs: f32,
     pub wave_spawn_interval_secs: f32,
@@ -26,14 +27,14 @@ pub struct Barrack {
     pub units: Vec<BarracksMinionConfig>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct MinionRecord {
     pub team: Team,
     pub character_record: String,
     pub skin: String,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct BarracksMinionConfig {
     pub minion_type: Minion,
     pub minion_record: MinionRecord,
@@ -41,7 +42,7 @@ pub struct BarracksMinionConfig {
     pub minion_upgrade_stats: MinionUpgradeConfig,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub enum WaveBehavior {
     InhibitorWaveBehavior {
         spawn_count_per_inhibitor_down: Vec<i32>,
@@ -58,13 +59,13 @@ pub enum WaveBehavior {
     Unknown,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct TimedWaveBehaviorInfo {
     pub start_time_secs: i32,
     pub behavior: WaveBehavior,
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Serialize, Deserialize)]
 pub struct MinionUpgradeConfig {
     pub armor_max: f32,
     pub armor_upgrade_growth: f32,
@@ -98,7 +99,7 @@ pub struct BarrackState {
 }
 
 /// 用于在生成队列中存储信息
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct MinionSpawnInfo {
     /// 对应兵营 `units` Vec 中的索引
     pub config_index: usize,

@@ -17,12 +17,13 @@ impl Plugin for PluginLogging {
         let temp_dir = std::env::temp_dir();
         let timestamp = Utc::now().format("%Y%m%d_%H%M%S");
         let log_filename = format!("moon_lol_debug_{}.log", timestamp);
-        let log_path = temp_dir.join(log_filename);
+        // let log_path = temp_dir.join(log_filename);
+        let log_path = "moon_lol.log".to_string().into();
 
         // Set up file logging
         setup_file_logging(&log_path);
 
-        println!("🔍 Debug logs are being saved to: {}", log_path.display());
+        // println!("🔍 Debug logs are being saved to: {}", log_path.display());
 
         app.insert_resource(LogFilePath(log_path));
         app.add_systems(Startup, log_startup_info);
@@ -44,8 +45,8 @@ fn setup_file_logging(log_path: &PathBuf) {
         .with_line_number(true);
 
     // Set up environment filter - default to INFO level, but allow override
-    let env_filter =
-        EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info,moon_lol=debug"));
+    let env_filter = EnvFilter::try_from_default_env()
+        .unwrap_or_else(|_| EnvFilter::new("error,moon_lol=debug"));
 
     // Try to set up tracing subscriber with only file output, but don't panic if it's already initialized
     let _ = tracing_subscriber::registry()

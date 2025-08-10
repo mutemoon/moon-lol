@@ -34,8 +34,8 @@ pub struct SkeletonData {
 pub struct Joint {
     pub name: String,
     pub flags: u16,
-    pub id: i16,
-    pub parent_id: i16,
+    pub index: i16,
+    pub parent_index: i16,
     pub radius: f32,
     pub local_transform: Mat4,
     pub inverse_bind_transform: Mat4,
@@ -60,8 +60,8 @@ impl From<SkeletonDataKind> for SkeletonData {
                     .map(|j| Joint {
                         name: j.name,
                         flags: j.flags,
-                        id: j.id,
-                        parent_id: j.parent_id,
+                        index: j.id,
+                        parent_index: j.parent_id,
                         radius: j.radius,
                         local_transform: j.local_transform,
                         inverse_bind_transform: j.inverse_bind_transform,
@@ -237,8 +237,8 @@ impl LegacySkeletonData {
             .map(|(i, legacy_joint)| Joint {
                 name: legacy_joint.name.clone(),
                 flags: 0,
-                id: i as i16,
-                parent_id: legacy_joint.parent_id as i16,
+                index: i as i16,
+                parent_index: legacy_joint.parent_id as i16,
                 radius: legacy_joint.radius,
                 local_transform: local_transforms[i],
                 inverse_bind_transform: legacy_joint.global_transform.inverse(),

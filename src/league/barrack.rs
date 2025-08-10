@@ -12,7 +12,7 @@ use cdragon_prop::{
     BinU16, BinU32, BinU8, PropFile,
 };
 
-pub fn get_barrack_by_bin(bin: &PropFile, value: &BinStruct) -> (Barrack, Transform, Team, Lane) {
+pub fn get_barrack_by_bin(bin: &PropFile, value: &BinStruct) -> (Transform, Team, Lane, Barrack) {
     let transform = value
         .getv::<BinMatrix>(LeagueLoader::hash_bin("transform").into())
         .unwrap();
@@ -120,6 +120,9 @@ pub fn get_barrack_by_bin(bin: &PropFile, value: &BinStruct) -> (Barrack, Transf
         .unwrap();
 
     (
+        Transform::from_matrix(transform),
+        u32_option_to_team(team),
+        u16_to_lane(lane),
         Barrack {
             initial_spawn_time_secs,
             wave_spawn_interval_secs,
@@ -134,9 +137,6 @@ pub fn get_barrack_by_bin(bin: &PropFile, value: &BinStruct) -> (Barrack, Transf
             gold_radius,
             units,
         },
-        Transform::from_matrix(transform),
-        u32_option_to_team(team),
-        u16_to_lane(lane),
     )
 }
 
