@@ -19,7 +19,7 @@ async fn main() {
     .unwrap();
 
     let start = Instant::now();
-    loader.save_configs_async().await.unwrap();
+    loader.save_configs().await.unwrap();
     let end = Instant::now();
     println!("Time taken: {:?}", end.duration_since(start));
 }

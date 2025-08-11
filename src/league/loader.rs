@@ -13,11 +13,7 @@ use crate::league::{
     SkinCharacterDataProperties,
 };
 use bevy::transform::components::Transform;
-use bevy::{
-    image::TextureError,
-    scene::ron,
-    scene::ron::{de::SpannedError, ser::to_writer_pretty},
-};
+use bevy::{image::TextureError, scene::ron, scene::ron::de::SpannedError};
 use binrw::BinWrite;
 use binrw::{args, binread, io::NoSeek, BinRead, Endian};
 use cdragon_prop::{BinEntry, BinHash, BinMap, BinStruct, PropError, PropFile};
@@ -247,7 +243,7 @@ impl LeagueLoader {
         })
     }
 
-    pub async fn save_configs_async(&self) -> Result<Configs, LeagueLoaderError> {
+    pub async fn save_configs(&self) -> Result<Configs, LeagueLoaderError> {
         let mut configs = Configs::default();
 
         // 并行处理地图网格
@@ -278,10 +274,10 @@ impl LeagueLoader {
                 let texture_path = material.texture_path.clone();
 
                 // 分别保存，而不是在异步任务中
-                save_struct_to_file_async(&material_path, &material).await?;
-                self.save_wad_entry_to_file_async(&texture_path).await?;
+                save_struct_to_file(&material_path, &material).await?;
+                self.save_wad_entry_to_file(&texture_path).await?;
 
-                let mut file = get_async_asset_writer(&mesh_path).await?;
+                let mut file = get_asset_writer(&mesh_path).await?;
                 let mut buffer = Vec::new();
                 intermediate_meshes
                     .write(&mut Cursor::new(&mut buffer))
@@ -315,7 +311,7 @@ impl LeagueLoader {
                     let transform = Transform::from_matrix(character_map_record.transform);
                     let skin = character_map_record.definition.skin;
 
-                    let environment_object = self.save_environment_object_async(&skin).await?;
+                    let environment_object = self.save_environment_object(&skin).await?;
 
                     configs.environment_objects.push((
                         transform,
@@ -326,7 +322,7 @@ impl LeagueLoader {
                     ));
                 }
                 0x71d0eabd => {
-                    let barrack = self.save_barrack_async(&entry.1).await?;
+                    let barrack = self.save_barrack(&entry.1).await?;
                     configs.barracks.push(barrack);
                 }
                 _ => {}
@@ -353,116 +349,9 @@ impl LeagueLoader {
         }
 
         // 保存最终配置文件
-        save_struct_to_file_async("configs.ron", &configs).await?;
+        save_struct_to_file("configs.ron", &configs).await?;
 
         Ok(configs)
-    }
-
-    pub fn save_configs(&self) -> Configs {
-        let mut configs = Configs::default();
-
-        for (i, map_mesh) in self.mapgeo.meshes.iter().enumerate() {
-            if map_mesh.layer_transition_behavior != LayerTransitionBehavior::Unaffected {
-                continue;
-            }
-
-            let (all_positions, all_normals, all_uvs) = parse_vertex_data(&self.mapgeo, map_mesh);
-
-            for (j, submesh) in map_mesh.submeshes.iter().enumerate() {
-                let intermediate_meshes = submesh_to_intermediate(
-                    &submesh,
-                    &self.mapgeo,
-                    map_mesh,
-                    &all_positions,
-                    &all_normals,
-                    &all_uvs,
-                );
-                let material = find_and_load_image_for_submesh(
-                    &submesh.material_name.text,
-                    &self.materials_bin,
-                )
-                .unwrap();
-
-                save_struct_to_file(&submesh.material_name.text, &material).unwrap();
-
-                self.save_wad_entry_to_file(&material.texture_path).unwrap();
-
-                let mesh_path = format!("mapgeo/meshes/{}_{}.mesh", i, j);
-
-                intermediate_meshes
-                    .write(&mut get_asset_writer(&mesh_path).unwrap())
-                    .unwrap();
-
-                configs.geometry_objects.push(ConfigGeometryObject {
-                    mesh_path,
-                    material_path: submesh.material_name.text.clone(),
-                });
-            }
-        }
-
-        self.materials_bin
-            .entries
-            .iter()
-            .filter(|v| v.ctype.hash == LeagueLoader::hash_bin("MapPlaceableContainer"))
-            .filter_map(|v| v.getv::<BinMap>(LeagueLoader::hash_bin("items").into()))
-            .filter_map(|v| v.downcast::<BinHash, BinStruct>())
-            .flatten()
-            .for_each(|v| match v.1.ctype.hash {
-                0x1e1cce2 => {
-                    let mut character_map_record = LeagueBinMaybeCharacterMapRecord::from(&v.1);
-
-                    neg_mat_z(&mut character_map_record.transform);
-
-                    let character_record = self
-                        .load_character_record(&character_map_record.definition.character_record);
-
-                    let transform = Transform::from_matrix(character_map_record.transform);
-
-                    let skin = character_map_record.definition.skin;
-
-                    let environment_object = self.save_environment_object(&skin).unwrap();
-
-                    configs.environment_objects.push((
-                        transform,
-                        environment_object,
-                        character_record
-                            .base_hp
-                            .map(|v| Health { value: v, max: v }),
-                    ));
-                }
-                0x71d0eabd => {
-                    let barrack = self.save_barrack(&v.1).unwrap();
-                    configs.barracks.push(barrack);
-                }
-                _ => {}
-            });
-
-        let minion_paths: Vec<LeagueMinionPath> = self
-            .materials_bin
-            .entries
-            .iter()
-            .filter(|v| v.ctype.hash == LeagueLoader::hash_bin("MapPlaceableContainer"))
-            .map(|v| {
-                v.getv::<BinMap>(LeagueLoader::hash_bin("items").into())
-                    .unwrap()
-            })
-            .flat_map(|v| v.downcast::<BinHash, BinStruct>().unwrap())
-            .filter(|v| v.1.ctype.hash == 0x3c995caf)
-            .map(|v| LeagueMinionPath::from(&v.1))
-            .collect();
-
-        for path in minion_paths {
-            configs.minion_paths.insert(path.lane, path.path);
-        }
-
-        to_writer_pretty(
-            &mut get_asset_writer("configs.ron").unwrap(),
-            &configs,
-            Default::default(),
-        )
-        .unwrap();
-
-        configs
     }
 
     pub fn load_character_record(&self, character_record: &str) -> LeagueBinCharacterRecord {
@@ -483,95 +372,7 @@ impl LeagueLoader {
         character_record
     }
 
-    pub fn save_environment_object(
-        &self,
-        skin: &str,
-    ) -> Result<ConfigEnvironmentObject, LeagueLoaderError> {
-        let (skin_character_data_properties, flat_map) = self.load_character_skin(&skin);
-
-        let texture_path = skin_character_data_properties.skin_mesh_properties.texture;
-
-        self.save_wad_entry_to_file(&texture_path).unwrap();
-
-        let mut reader = self
-            .get_wad_entry_no_seek_reader_by_path(
-                &skin_character_data_properties
-                    .skin_mesh_properties
-                    .simple_skin,
-            )
-            .unwrap();
-
-        let league_skinned_mesh =
-            LeagueSkinnedMesh::from(LeagueSkinnedMeshInternal::read(&mut reader).unwrap());
-
-        let league_skeleton = self
-            .get_wad_entry_reader_by_path(
-                &skin_character_data_properties.skin_mesh_properties.skeleton,
-            )
-            .map(|mut v| LeagueSkeleton::read(&mut v).unwrap())
-            .unwrap();
-
-        let skeleton_path = skin_character_data_properties.skin_mesh_properties.skeleton;
-
-        self.save_wad_entry_to_file(&skeleton_path).unwrap();
-
-        let animation_graph_data: AnimationGraphData = flat_map
-            .get(
-                &skin_character_data_properties
-                    .skin_animation_properties
-                    .animation_graph_data,
-            )
-            .unwrap()
-            .into();
-
-        let clip_paths = animation_graph_data
-            .clip_data_map
-            .iter()
-            .filter_map(|(_, v)| match v {
-                AnimationClipData::AtomicClipData {
-                    animation_resource_data,
-                } => Some(animation_resource_data.animation_file_path.clone()),
-                AnimationClipData::Unknown => None,
-            })
-            .collect::<Vec<_>>();
-
-        clip_paths.iter().for_each(|v| {
-            self.save_wad_entry_to_file(v).unwrap();
-        });
-
-        let mut submesh_paths = Vec::new();
-
-        for (i, range) in league_skinned_mesh.ranges.iter().enumerate() {
-            let mesh = skinned_mesh_to_intermediate(&league_skinned_mesh, i).unwrap();
-
-            let mesh_path = format!("skin_meshes/{}.mesh", &range.name);
-
-            mesh.write(&mut get_asset_writer(&mesh_path).unwrap())
-                .unwrap();
-
-            submesh_paths.push(mesh_path);
-        }
-
-        Ok(ConfigEnvironmentObject {
-            texture_path,
-            submesh_paths,
-            joint_influences_indices: league_skeleton.modern_data.influences,
-            joints: league_skeleton
-                .modern_data
-                .joints
-                .iter()
-                .map(|v| ConfigJoint {
-                    name: v.name.clone(),
-                    transform: Transform::from_matrix(v.local_transform),
-                    inverse_bind_pose: v.inverse_bind_transform,
-                    parent_index: v.parent_index,
-                })
-                .collect(),
-            animation_graph: ConfigAnimationGraph { clip_paths },
-        })
-    }
-
-    pub async fn save_environment_object_async(
+    pub async fn save_environment_object(
         &self,
         skin: &str,
     ) -> Result<ConfigEnvironmentObject, LeagueLoaderError> {
@@ -623,12 +424,12 @@ impl LeagueLoader {
             .collect::<Vec<_>>();
 
         // 保存纹理和骨骼文件
-        self.save_wad_entry_to_file_async(&texture_path).await?;
-        self.save_wad_entry_to_file_async(&skeleton_path).await?;
+        self.save_wad_entry_to_file(&texture_path).await?;
+        self.save_wad_entry_to_file(&skeleton_path).await?;
 
         // 保存动画文件
         for clip_path in &clip_paths {
-            self.save_wad_entry_to_file_async(clip_path).await?;
+            self.save_wad_entry_to_file(clip_path).await?;
         }
 
         let mut submesh_paths = Vec::new();
@@ -637,7 +438,7 @@ impl LeagueLoader {
             let mesh = skinned_mesh_to_intermediate(&league_skinned_mesh, i).unwrap();
             let mesh_path = format!("skin_meshes/{}.mesh", &range.name);
 
-            let mut file = get_async_asset_writer(&mesh_path).await?;
+            let mut file = get_asset_writer(&mesh_path).await?;
             let mut buffer = Vec::new();
             mesh.write(&mut Cursor::new(&mut buffer))
                 .map_err(|e| LeagueLoaderError::Io(io::Error::new(io::ErrorKind::Other, e)))?;
@@ -907,16 +708,9 @@ impl LeagueLoader {
         Ok(Box::new(decoder))
     }
 
-    pub fn save_wad_entry_to_file(&self, path: &str) -> Result<(), LeagueLoaderError> {
-        let mut reader = self.get_wad_entry_reader_by_path(path)?;
-        let mut file = get_asset_writer(path).unwrap();
-        io::copy(&mut reader, &mut file)?;
-        Ok(())
-    }
-
-    pub async fn save_wad_entry_to_file_async(&self, path: &str) -> Result<(), LeagueLoaderError> {
+    pub async fn save_wad_entry_to_file(&self, path: &str) -> Result<(), LeagueLoaderError> {
         let buffer = self.get_wad_entry_buffer_by_path(path)?;
-        let mut file = get_async_asset_writer(path).await?;
+        let mut file = get_asset_writer(path).await?;
         file.write_all(&buffer).await?;
         file.flush().await?;
         Ok(())
@@ -931,22 +725,7 @@ fn ensure_dir_exists(path: &str) -> Result<(), LeagueLoaderError> {
     Ok(())
 }
 
-pub fn get_asset_writer(path: &str) -> Result<File, LeagueLoaderError> {
-    let path = format!("assets/{}", path);
-    println!("√ {}", path);
-    ensure_dir_exists(&path)?;
-    let file = File::create(path)?;
-    Ok(file)
-}
-
-pub fn save_struct_to_file<T: Serialize>(path: &str, data: &T) -> Result<(), LeagueLoaderError> {
-    let mut file = get_asset_writer(path)?;
-    to_writer_pretty(&mut file, data, Default::default())?;
-    Ok(())
-}
-
-// 异步版本的文件写入函数
-pub async fn get_async_asset_writer(path: &str) -> Result<AsyncFile, LeagueLoaderError> {
+pub async fn get_asset_writer(path: &str) -> Result<AsyncFile, LeagueLoaderError> {
     let path = format!("assets/{}", path);
     println!("√ {}", path);
     ensure_dir_exists(&path)?;
@@ -954,12 +733,12 @@ pub async fn get_async_asset_writer(path: &str) -> Result<AsyncFile, LeagueLoade
     Ok(file)
 }
 
-pub async fn save_struct_to_file_async<T: Serialize>(
+pub async fn save_struct_to_file<T: Serialize>(
     path: &str,
     data: &T,
 ) -> Result<(), LeagueLoaderError> {
     let serialized = ron::ser::to_string_pretty(data, Default::default())?;
-    let mut file = get_async_asset_writer(path).await?;
+    let mut file = get_asset_writer(path).await?;
     file.write_all(serialized.as_bytes()).await?;
     file.flush().await?;
     Ok(())
