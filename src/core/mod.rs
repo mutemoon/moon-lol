@@ -2,6 +2,7 @@ mod animation;
 mod attack;
 mod base;
 mod camera;
+mod config;
 mod damage;
 mod life;
 mod map;
@@ -10,9 +11,11 @@ mod navigation;
 mod resource;
 mod ui;
 
+pub use animation::*;
 pub use attack::*;
 pub use base::*;
 pub use camera::*;
+pub use config::*;
 pub use damage::*;
 pub use life::*;
 pub use map::*;
@@ -20,8 +23,6 @@ pub use movement::*;
 pub use navigation::*;
 pub use resource::*;
 pub use ui::*;
-
-use crate::core::animation::PluginAnimation;
 
 pub struct PluginCore;
 
@@ -33,7 +34,7 @@ impl bevy::app::Plugin for PluginCore {
             PluginLife,
             PluginTarget,
             PluginMovement,
-            // PluginNavigaton,
+            PluginNavigaton,
             PluginAnimation,
             PluginCamera,
             PluginMap,

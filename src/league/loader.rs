@@ -1,18 +1,17 @@
-use crate::config::{
+use crate::core::{
     ConfigAnimationGraph, ConfigEnvironmentObject, ConfigGeometryObject, ConfigJoint, Configs,
+    Health,
 };
 use crate::league::{
     find_and_load_image_for_submesh, static_conversion::parse_vertex_data, LayerTransitionBehavior,
     LeagueMapGeo, LeagueTexture,
 };
 use crate::league::{
-    get_barrack_by_bin, neg_mat_z, skinned_mesh_to_intermediate, submesh_to_intermediate,
-    AnimationClipData, AnimationGraphData, LeagueBinMaybeCharacterMapRecord, LeagueMaterial,
+    neg_mat_z, skinned_mesh_to_intermediate, submesh_to_intermediate, AnimationClipData,
+    AnimationGraphData, LeagueBinCharacterRecord, LeagueBinMaybeCharacterMapRecord,
     LeagueMinionPath, LeagueSkeleton, LeagueSkinnedMesh, LeagueSkinnedMeshInternal,
     SkinCharacterDataProperties,
 };
-use bevy::ecs::entity::Entity;
-use bevy::math::Mat4;
 use bevy::transform::components::Transform;
 use bevy::{
     image::TextureError,
@@ -36,7 +35,6 @@ use std::{
     path::{Path, PathBuf},
     sync::Arc,
 };
-use tracing::info;
 use twox_hash::XxHash64;
 use zstd::Decoder;
 
@@ -248,7 +246,7 @@ impl LeagueLoader {
         })
     }
 
-    pub fn to_configs(&self) -> Configs {
+    pub fn save_configs(&self) -> Configs {
         let mut configs = Configs::default();
 
         for (i, map_mesh) in self.mapgeo.meshes.iter().enumerate() {
@@ -302,101 +300,26 @@ impl LeagueLoader {
                     let mut character_map_record = LeagueBinMaybeCharacterMapRecord::from(&v.1);
 
                     neg_mat_z(&mut character_map_record.transform);
+
+                    let character_record = self
+                        .load_character_record(&character_map_record.definition.character_record);
+
                     let transform = Transform::from_matrix(character_map_record.transform);
 
                     let skin = character_map_record.definition.skin;
 
-                    let (skin_character_data_properties, flat_map) =
-                        self.load_character_skin(&skin);
-
-                    let texture_path = skin_character_data_properties.skin_mesh_properties.texture;
-
-                    self.save_wad_entry_to_file(&texture_path).unwrap();
-
-                    let mut reader = self
-                        .get_wad_entry_no_seek_reader_by_path(
-                            &skin_character_data_properties
-                                .skin_mesh_properties
-                                .simple_skin,
-                        )
-                        .unwrap();
-
-                    let league_skinned_mesh = LeagueSkinnedMesh::from(
-                        LeagueSkinnedMeshInternal::read(&mut reader).unwrap(),
-                    );
-
-                    let league_skeleton = self
-                        .get_wad_entry_reader_by_path(
-                            &skin_character_data_properties.skin_mesh_properties.skeleton,
-                        )
-                        .map(|mut v| LeagueSkeleton::read(&mut v).unwrap())
-                        .unwrap();
-
-                    let skeleton_path =
-                        skin_character_data_properties.skin_mesh_properties.skeleton;
-
-                    self.save_wad_entry_to_file(&skeleton_path).unwrap();
-
-                    let animation_graph_data: AnimationGraphData = flat_map
-                        .get(
-                            &skin_character_data_properties
-                                .skin_animation_properties
-                                .animation_graph_data,
-                        )
-                        .unwrap()
-                        .into();
-
-                    let clip_paths = animation_graph_data
-                        .clip_data_map
-                        .iter()
-                        .filter_map(|(_, v)| match v {
-                            AnimationClipData::AtomicClipData {
-                                animation_resource_data,
-                            } => Some(animation_resource_data.animation_file_path.clone()),
-                            AnimationClipData::Unknown => None,
-                        })
-                        .collect::<Vec<_>>();
-
-                    clip_paths.iter().for_each(|v| {
-                        self.save_wad_entry_to_file(v).unwrap();
-                    });
-
-                    let mut submesh_paths = Vec::new();
-
-                    for (i, range) in league_skinned_mesh.ranges.iter().enumerate() {
-                        let mesh = skinned_mesh_to_intermediate(&league_skinned_mesh, i).unwrap();
-
-                        let mesh_path = format!("skin_meshes/{}.mesh", &range.name);
-
-                        mesh.write(&mut get_asset_writer(&mesh_path).unwrap())
-                            .unwrap();
-
-                        submesh_paths.push(mesh_path);
-                    }
+                    let environment_object = self.save_environment_object(&skin).unwrap();
 
                     configs.environment_objects.push((
                         transform,
-                        ConfigEnvironmentObject {
-                            texture_path,
-                            submesh_paths,
-                            joint_influences_indices: league_skeleton.modern_data.influences,
-                            joints: league_skeleton
-                                .modern_data
-                                .joints
-                                .iter()
-                                .map(|v| ConfigJoint {
-                                    name: v.name.clone(),
-                                    transform: Transform::from_matrix(v.local_transform),
-                                    inverse_bind_pose: v.inverse_bind_transform,
-                                    parent_index: v.parent_index,
-                                })
-                                .collect(),
-                            animation_graph: ConfigAnimationGraph { clip_paths },
-                        },
+                        environment_object,
+                        character_record
+                            .base_hp
+                            .map(|v| Health { value: v, max: v }),
                     ));
                 }
                 0x71d0eabd => {
-                    let barrack = get_barrack_by_bin(&self.materials_bin, &v.1);
+                    let barrack = self.save_barrack(&v.1).unwrap();
                     configs.barracks.push(barrack);
                 }
                 _ => {}
@@ -428,6 +351,112 @@ impl LeagueLoader {
         .unwrap();
 
         configs
+    }
+
+    pub fn load_character_record(&self, character_record: &str) -> LeagueBinCharacterRecord {
+        let name = character_record.split("/").nth(1).unwrap();
+
+        let path = format!("data/characters/{0}/{0}.bin", name);
+
+        let character_bin = self.get_prop_bin_by_path(&path).unwrap();
+
+        let character_record = character_bin
+            .entries
+            .iter()
+            .find(|v| v.path.hash == LeagueLoader::hash_bin(&character_record))
+            .unwrap();
+
+        let character_record = character_record.into();
+
+        character_record
+    }
+
+    pub fn save_environment_object(
+        &self,
+        skin: &str,
+    ) -> Result<ConfigEnvironmentObject, LeagueLoaderError> {
+        let (skin_character_data_properties, flat_map) = self.load_character_skin(&skin);
+
+        let texture_path = skin_character_data_properties.skin_mesh_properties.texture;
+
+        self.save_wad_entry_to_file(&texture_path).unwrap();
+
+        let mut reader = self
+            .get_wad_entry_no_seek_reader_by_path(
+                &skin_character_data_properties
+                    .skin_mesh_properties
+                    .simple_skin,
+            )
+            .unwrap();
+
+        let league_skinned_mesh =
+            LeagueSkinnedMesh::from(LeagueSkinnedMeshInternal::read(&mut reader).unwrap());
+
+        let league_skeleton = self
+            .get_wad_entry_reader_by_path(
+                &skin_character_data_properties.skin_mesh_properties.skeleton,
+            )
+            .map(|mut v| LeagueSkeleton::read(&mut v).unwrap())
+            .unwrap();
+
+        let skeleton_path = skin_character_data_properties.skin_mesh_properties.skeleton;
+
+        self.save_wad_entry_to_file(&skeleton_path).unwrap();
+
+        let animation_graph_data: AnimationGraphData = flat_map
+            .get(
+                &skin_character_data_properties
+                    .skin_animation_properties
+                    .animation_graph_data,
+            )
+            .unwrap()
+            .into();
+
+        let clip_paths = animation_graph_data
+            .clip_data_map
+            .iter()
+            .filter_map(|(_, v)| match v {
+                AnimationClipData::AtomicClipData {
+                    animation_resource_data,
+                } => Some(animation_resource_data.animation_file_path.clone()),
+                AnimationClipData::Unknown => None,
+            })
+            .collect::<Vec<_>>();
+
+        clip_paths.iter().for_each(|v| {
+            self.save_wad_entry_to_file(v).unwrap();
+        });
+
+        let mut submesh_paths = Vec::new();
+
+        for (i, range) in league_skinned_mesh.ranges.iter().enumerate() {
+            let mesh = skinned_mesh_to_intermediate(&league_skinned_mesh, i).unwrap();
+
+            let mesh_path = format!("skin_meshes/{}.mesh", &range.name);
+
+            mesh.write(&mut get_asset_writer(&mesh_path).unwrap())
+                .unwrap();
+
+            submesh_paths.push(mesh_path);
+        }
+
+        Ok(ConfigEnvironmentObject {
+            texture_path,
+            submesh_paths,
+            joint_influences_indices: league_skeleton.modern_data.influences,
+            joints: league_skeleton
+                .modern_data
+                .joints
+                .iter()
+                .map(|v| ConfigJoint {
+                    name: v.name.clone(),
+                    transform: Transform::from_matrix(v.local_transform),
+                    inverse_bind_pose: v.inverse_bind_transform,
+                    parent_index: v.parent_index,
+                })
+                .collect(),
+            animation_graph: ConfigAnimationGraph { clip_paths },
+        })
     }
 
     pub fn load_character_skin(

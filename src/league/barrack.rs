@@ -1,147 +1,154 @@
 use crate::{
-    core::{Lane, Team},
+    core::{Armor, Bounding, Damage, Health, Lane, Movement, Team},
     entities::{
-        Barrack, BarracksMinionConfig, Minion, MinionRecord, MinionUpgradeConfig,
-        TimedWaveBehaviorInfo, WaveBehavior,
+        Barrack, BarracksMinionConfig, Minion, MinionUpgradeConfig, TimedWaveBehaviorInfo,
+        WaveBehavior,
     },
-    league::{u16_to_lane, u32_option_to_team, LeagueLoader},
+    league::{u16_to_lane, u32_option_to_team, LeagueLoader, LeagueLoaderError},
 };
 use bevy::{math::Mat4, transform::components::Transform};
 use cdragon_prop::{
-    BinEmbed, BinEntry, BinFloat, BinLink, BinList, BinMatrix, BinS32, BinString, BinStruct,
-    BinU16, BinU32, BinU8, PropFile,
+    BinEmbed, BinFloat, BinLink, BinList, BinMatrix, BinS32, BinString, BinStruct, BinU16, BinU32,
+    BinU8,
 };
 
-pub fn get_barrack_by_bin(bin: &PropFile, value: &BinStruct) -> (Transform, Team, Lane, Barrack) {
-    let transform = value
-        .getv::<BinMatrix>(LeagueLoader::hash_bin("transform").into())
-        .unwrap();
+impl LeagueLoader {
+    pub fn save_barrack(
+        &self,
+        value: &BinStruct,
+    ) -> Result<(Transform, Team, Lane, Barrack), LeagueLoaderError> {
+        let transform = value
+            .getv::<BinMatrix>(LeagueLoader::hash_bin("transform").into())
+            .unwrap();
 
-    let mut transform = Mat4::from_cols_array_2d(&transform.0);
-    transform.w_axis.z = -transform.w_axis.z;
+        let mut transform = Mat4::from_cols_array_2d(&transform.0);
+        transform.w_axis.z = -transform.w_axis.z;
 
-    let definition = value
-        .getv::<BinStruct>(LeagueLoader::hash_bin("definition").into())
-        .unwrap();
+        let definition = value
+            .getv::<BinStruct>(LeagueLoader::hash_bin("definition").into())
+            .unwrap();
 
-    let unknown_list = definition.getv::<BinList>(0xdbde2288.into()).unwrap();
+        let unknown_list = definition.getv::<BinList>(0xdbde2288.into()).unwrap();
 
-    let first_item = unknown_list
-        .downcast::<BinStruct>()
-        .unwrap()
-        .first()
-        .unwrap();
+        let first_item = unknown_list
+            .downcast::<BinStruct>()
+            .unwrap()
+            .first()
+            .unwrap();
 
-    let lane = first_item
-        .getv::<BinU16>(LeagueLoader::hash_bin("lane").into())
-        .map(|v| v.0)
-        .unwrap();
+        let lane = first_item
+            .getv::<BinU16>(LeagueLoader::hash_bin("lane").into())
+            .map(|v| v.0)
+            .unwrap();
 
-    let team = definition
-        .getv::<BinU32>(LeagueLoader::hash_bin("Team").into())
-        .map(|v| v.0);
+        let team = definition
+            .getv::<BinU32>(LeagueLoader::hash_bin("Team").into())
+            .map(|v| v.0);
 
-    let barracks_config = definition
-        .getv::<BinLink>(LeagueLoader::hash_bin("BarracksConfig").into())
-        .map(|v| v.0.hash)
-        .unwrap();
+        let barracks_config = definition
+            .getv::<BinLink>(LeagueLoader::hash_bin("BarracksConfig").into())
+            .map(|v| v.0.hash)
+            .unwrap();
 
-    let value = bin
-        .entries
-        .iter()
-        .find(|v| v.path.hash == barracks_config)
-        .unwrap();
+        let value = self
+            .materials_bin
+            .entries
+            .iter()
+            .find(|v| v.path.hash == barracks_config)
+            .unwrap();
 
-    // let initial_spawn_time_secs = value
-    //     .getv::<BinFloat>(LeagueLoader::hash_bin("InitialSpawnTimeSecs").into())
-    //     .map(|f| f.0)
-    //     .unwrap();
-    let initial_spawn_time_secs = 0.0;
+        // let initial_spawn_time_secs = value
+        //     .getv::<BinFloat>(LeagueLoader::hash_bin("InitialSpawnTimeSecs").into())
+        //     .map(|f| f.0)
+        //     .unwrap();
+        let initial_spawn_time_secs = 0.0;
 
-    let wave_spawn_interval_secs = value
-        .getv::<BinFloat>(LeagueLoader::hash_bin("WaveSpawnIntervalSecs").into())
-        .map(|f| f.0)
-        .unwrap();
+        let wave_spawn_interval_secs = value
+            .getv::<BinFloat>(LeagueLoader::hash_bin("WaveSpawnIntervalSecs").into())
+            .map(|f| f.0)
+            .unwrap();
 
-    let minion_spawn_interval_secs = value
-        .getv::<BinFloat>(LeagueLoader::hash_bin("MinionSpawnIntervalSecs").into())
-        .map(|f| f.0)
-        .unwrap();
+        let minion_spawn_interval_secs = value
+            .getv::<BinFloat>(LeagueLoader::hash_bin("MinionSpawnIntervalSecs").into())
+            .map(|f| f.0)
+            .unwrap();
 
-    let upgrade_interval_secs = value
-        .getv::<BinFloat>(LeagueLoader::hash_bin("UpgradeIntervalSecs").into())
-        .map(|f| f.0)
-        .unwrap();
+        let upgrade_interval_secs = value
+            .getv::<BinFloat>(LeagueLoader::hash_bin("UpgradeIntervalSecs").into())
+            .map(|f| f.0)
+            .unwrap();
 
-    let upgrades_before_late_game_scaling = value
-        .getv::<BinS32>(LeagueLoader::hash_bin("UpgradesBeforeLateGameScaling").into())
-        .map(|i| i.0)
-        .unwrap();
+        let upgrades_before_late_game_scaling = value
+            .getv::<BinS32>(LeagueLoader::hash_bin("UpgradesBeforeLateGameScaling").into())
+            .map(|i| i.0)
+            .unwrap();
 
-    let move_speed_increase_initial_delay_secs = value
-        .getv::<BinFloat>(LeagueLoader::hash_bin("MoveSpeedIncreaseInitialDelaySecs").into())
-        .map(|f| f.0)
-        .unwrap();
+        let move_speed_increase_initial_delay_secs = value
+            .getv::<BinFloat>(LeagueLoader::hash_bin("MoveSpeedIncreaseInitialDelaySecs").into())
+            .map(|f| f.0)
+            .unwrap();
 
-    let move_speed_increase_interval_secs = value
-        .getv::<BinFloat>(LeagueLoader::hash_bin("MoveSpeedIncreaseIntervalSecs").into())
-        .map(|f| f.0)
-        .unwrap();
+        let move_speed_increase_interval_secs = value
+            .getv::<BinFloat>(LeagueLoader::hash_bin("MoveSpeedIncreaseIntervalSecs").into())
+            .map(|f| f.0)
+            .unwrap();
 
-    let move_speed_increase_increment = value
-        .getv::<BinS32>(LeagueLoader::hash_bin("MoveSpeedIncreaseIncrement").into())
-        .map(|i| i.0)
-        .unwrap();
+        let move_speed_increase_increment = value
+            .getv::<BinS32>(LeagueLoader::hash_bin("MoveSpeedIncreaseIncrement").into())
+            .map(|i| i.0)
+            .unwrap();
 
-    let move_speed_increase_max_times = value
-        .getv::<BinS32>(LeagueLoader::hash_bin("MoveSpeedIncreaseMaxTimes").into())
-        .map(|i| i.0)
-        .unwrap();
+        let move_speed_increase_max_times = value
+            .getv::<BinS32>(LeagueLoader::hash_bin("MoveSpeedIncreaseMaxTimes").into())
+            .map(|i| i.0)
+            .unwrap();
 
-    let exp_radius = value
-        .getv::<BinFloat>(LeagueLoader::hash_bin("ExpRadius").into())
-        .map(|f| f.0)
-        .unwrap();
+        let exp_radius = value
+            .getv::<BinFloat>(LeagueLoader::hash_bin("ExpRadius").into())
+            .map(|f| f.0)
+            .unwrap();
 
-    let gold_radius = value
-        .getv::<BinFloat>(LeagueLoader::hash_bin("goldRadius").into())
-        .map(|f| f.0)
-        .unwrap();
+        let gold_radius = value
+            .getv::<BinFloat>(LeagueLoader::hash_bin("goldRadius").into())
+            .map(|f| f.0)
+            .unwrap();
 
-    let units = value
-        .getv::<BinList>(LeagueLoader::hash_bin("units").into())
-        .map(|list| {
-            list.downcast::<BinEmbed>()
-                .unwrap()
-                .iter()
-                .map(|embed| BarracksMinionConfig::from_embed(bin, embed))
-                .collect()
-        })
-        .unwrap();
+        let units = value
+            .getv::<BinList>(LeagueLoader::hash_bin("units").into())
+            .map(|list| {
+                list.downcast::<BinEmbed>()
+                    .unwrap()
+                    .iter()
+                    .map(|embed| self.load_barrack_minion_config(embed).unwrap())
+                    .collect()
+            })
+            .unwrap();
 
-    (
-        Transform::from_matrix(transform),
-        u32_option_to_team(team),
-        u16_to_lane(lane),
-        Barrack {
-            initial_spawn_time_secs,
-            wave_spawn_interval_secs,
-            minion_spawn_interval_secs,
-            upgrade_interval_secs,
-            upgrades_before_late_game_scaling,
-            move_speed_increase_initial_delay_secs,
-            move_speed_increase_interval_secs,
-            move_speed_increase_increment,
-            move_speed_increase_max_times,
-            exp_radius,
-            gold_radius,
-            units,
-        },
-    )
-}
+        Ok((
+            Transform::from_matrix(transform),
+            u32_option_to_team(team),
+            u16_to_lane(lane),
+            Barrack {
+                initial_spawn_time_secs,
+                wave_spawn_interval_secs,
+                minion_spawn_interval_secs,
+                upgrade_interval_secs,
+                upgrades_before_late_game_scaling,
+                move_speed_increase_initial_delay_secs,
+                move_speed_increase_interval_secs,
+                move_speed_increase_increment,
+                move_speed_increase_max_times,
+                exp_radius,
+                gold_radius,
+                units,
+            },
+        ))
+    }
 
-impl BarracksMinionConfig {
-    fn from_embed(file: &PropFile, value: &BinEmbed) -> Self {
+    fn load_barrack_minion_config(
+        &self,
+        value: &BinEmbed,
+    ) -> Result<BarracksMinionConfig, LeagueLoaderError> {
         let minion_type = value
             .getv::<BinU8>(LeagueLoader::hash_bin("MinionType").into())
             .map(|u| u.0)
@@ -162,13 +169,51 @@ impl BarracksMinionConfig {
             .map(|v| v.0.hash)
             .unwrap();
 
-        let character_record = file
+        let character_map_record = self
+            .materials_bin
             .entries
             .iter()
             .find(|v| v.path.hash == character_record)
             .unwrap();
 
-        Self {
+        // let team = character_map_record
+        //     .getv::<BinU32>(LeagueLoader::hash_bin("Team").into())
+        //     .map(|i| i.0);
+
+        let character_record_path = character_map_record
+            .getv::<BinString>(LeagueLoader::hash_bin("CharacterRecord").into())
+            .map(|i| i.0.clone())
+            .unwrap();
+
+        let skin = character_map_record
+            .getv::<BinString>(LeagueLoader::hash_bin("Skin").into())
+            .map(|i| i.0.clone())
+            .unwrap();
+
+        let character_record = self.load_character_record(&character_record_path);
+
+        let health = Health {
+            value: character_record.base_hp.unwrap(),
+            max: character_record.base_hp.unwrap(),
+        };
+
+        let movement = Movement {
+            speed: character_record.base_move_speed.unwrap(),
+        };
+
+        let bounding = Bounding {
+            radius: character_record.pathfinding_collision_radius.unwrap(),
+            sides: 10,
+            height: 10.0,
+        };
+
+        let damage = Damage(character_record.base_damage.unwrap());
+
+        let armor = Armor(character_record.base_armor.unwrap());
+
+        let environment_object = self.save_environment_object(&skin)?;
+
+        Ok(BarracksMinionConfig {
             minion_type: match minion_type {
                 4 => Minion::Melee,
                 6 => Minion::Siege,
@@ -176,34 +221,17 @@ impl BarracksMinionConfig {
                 7 => Minion::Super,
                 _ => panic!("unknown minion type"),
             },
-            minion_record: MinionRecord::from(character_record),
+            minion_object: (
+                health,
+                movement,
+                bounding,
+                damage,
+                armor,
+                environment_object,
+            ),
             wave_behavior,
             minion_upgrade_stats,
-        }
-    }
-}
-
-impl From<&BinEntry> for MinionRecord {
-    fn from(value: &BinEntry) -> Self {
-        let team = value
-            .getv::<BinU32>(LeagueLoader::hash_bin("Team").into())
-            .map(|i| i.0);
-
-        let character_record = value
-            .getv::<BinString>(LeagueLoader::hash_bin("CharacterRecord").into())
-            .map(|i| i.0.clone())
-            .unwrap();
-
-        let skin = value
-            .getv::<BinString>(LeagueLoader::hash_bin("Skin").into())
-            .map(|i| i.0.clone())
-            .unwrap();
-
-        Self {
-            team: u32_option_to_team(team),
-            character_record,
-            skin,
-        }
+        })
     }
 }
 

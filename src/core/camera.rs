@@ -1,4 +1,7 @@
-use crate::{system_debug, system_info};
+use crate::{
+    core::{map::MAP_HEIGHT, MAP_WIDTH},
+    system_debug, system_info,
+};
 use bevy::{input::mouse::MouseWheel, prelude::*, window::CursorGrabMode};
 
 pub const CAMERA_OFFSET_X: f32 = 0.0;
@@ -118,12 +121,12 @@ fn edge_scroll_camera(window: Query<&Window>, mut camera: Query<&mut Transform, 
             if let Ok(mut transform) = camera.single_mut() {
                 transform.translation += movement * CAMERA_MOVE_SPEED;
 
-                // transform.translation.x = transform.translation.x.clamp(0.0, MAP_WIDTH);
+                transform.translation.x = transform.translation.x.clamp(0.0, MAP_WIDTH);
 
-                // let min_y = transform.translation.z * CAMERA_OFFSET_Y / CAMERA_OFFSET_Z;
-                // let max_y = MAP_HEIGHT + min_y;
+                let min_y = transform.translation.z * CAMERA_OFFSET_Y / CAMERA_OFFSET_Z;
+                let max_y = MAP_HEIGHT + min_y;
 
-                // transform.translation.z = transform.translation.z.clamp(min_y, max_y);
+                transform.translation.z = transform.translation.z.clamp(min_y, max_y);
             }
         }
     }

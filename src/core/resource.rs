@@ -1,7 +1,7 @@
 use std::fs::File;
 
 use crate::{
-    config::Configs,
+    core::Configs,
     league::{LeagueLoaderAnimation, LeagueLoaderImage, LeagueLoaderMaterial, LeagueLoaderMesh},
 };
 use bevy::{prelude::*, scene::ron::de::from_reader};

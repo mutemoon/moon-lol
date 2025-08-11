@@ -16,5 +16,5 @@ fn main() {
     )
     .unwrap();
 
-    loader.to_configs();
+    loader.save_configs();
 }

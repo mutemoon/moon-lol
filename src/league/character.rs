@@ -1,4 +1,4 @@
-use crate::config::{ConfigEnvironmentObject, ConfigGeometryObject, Configs};
+use crate::core::{ConfigEnvironmentObject, ConfigGeometryObject, Configs};
 use crate::league::LeagueLoader;
 use bevy::animation::{AnimationTarget, AnimationTargetId};
 use bevy::asset::uuid::Uuid;
@@ -273,25 +273,6 @@ impl From<&BinEmbed> for SkinAnimationProperties {
     }
 }
 
-pub fn load_character_record(
-    loader: &LeagueLoader,
-    character_record: &str,
-) -> LeagueBinCharacterRecord {
-    let name = character_record.split("/").nth(1).unwrap();
-
-    let path = format!("data/characters/{0}/{0}.bin", name);
-
-    let character_bin = loader.get_prop_bin_by_path(&path).unwrap();
-
-    let character_record = character_bin
-        .entries
-        .iter()
-        .find(|v| v.path.hash == LeagueLoader::hash_bin(character_record))
-        .unwrap();
-
-    return character_record.into();
-}
-
 #[derive(Debug)]
 pub struct AnimationGraphData {
     pub clip_data_map: HashMap<u32, AnimationClipData>,
@@ -480,7 +461,7 @@ pub fn spawn_environment_objects_from_configs(
 ) -> Vec<Entity> {
     let mut entities = Vec::new();
 
-    for (transform, config_env_object) in &configs.environment_objects {
+    for (transform, config_env_object, _) in &configs.environment_objects {
         let entity = spawn_environment_object(
             commands,
             res_animation_graphs,

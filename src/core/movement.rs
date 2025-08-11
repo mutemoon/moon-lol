@@ -4,6 +4,7 @@ use crate::{
 };
 use bevy::prelude::*;
 use rvo2::RVOSimulatorWrapper;
+use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, time::Instant};
 use vleue_navigator::prelude::*;
 
@@ -24,7 +25,7 @@ impl Plugin for PluginMovement {
     }
 }
 
-#[derive(Component)]
+#[derive(Component, Clone, Serialize, Deserialize)]
 #[require(MovementVelocity)]
 pub struct Movement {
     pub speed: f32,

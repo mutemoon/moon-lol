@@ -1,6 +1,8 @@
 use crate::{system_debug, system_info, system_warn};
 use bevy::prelude::*;
-#[derive(Component, Default, Reflect)]
+use serde::{Deserialize, Serialize};
+
+#[derive(Component, Serialize, Deserialize, Clone)]
 pub struct Health {
     pub value: f32,
     pub max: f32,

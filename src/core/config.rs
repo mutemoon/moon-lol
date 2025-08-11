@@ -8,25 +8,25 @@ use bevy::{
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    core::{Lane, Team},
+    core::{Health, Lane, Team},
     entities::Barrack,
 };
 
 #[derive(Resource, Default, Serialize, Deserialize)]
 pub struct Configs {
     pub geometry_objects: Vec<ConfigGeometryObject>,
-    pub environment_objects: Vec<(Transform, ConfigEnvironmentObject)>,
+    pub environment_objects: Vec<(Transform, ConfigEnvironmentObject, Option<Health>)>,
     pub minion_paths: HashMap<Lane, Vec<Vec2>>,
     pub barracks: Vec<(Transform, Team, Lane, Barrack)>,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct ConfigGeometryObject {
     pub mesh_path: String,
     pub material_path: String,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct ConfigEnvironmentObject {
     pub texture_path: String,
     pub submesh_paths: Vec<String>,
@@ -35,12 +35,12 @@ pub struct ConfigEnvironmentObject {
     pub animation_graph: ConfigAnimationGraph,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct ConfigAnimationGraph {
     pub clip_paths: Vec<String>,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct ConfigJoint {
     pub name: String,
     pub transform: Transform,

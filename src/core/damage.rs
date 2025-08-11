@@ -1,11 +1,12 @@
 use crate::core::life::Health;
 use crate::{system_debug, system_info, system_warn};
 use bevy::prelude::*;
+use serde::{Deserialize, Serialize};
 
-#[derive(Component, Debug)]
+#[derive(Component, Clone, Serialize, Deserialize)]
 pub struct Damage(pub f32);
 
-#[derive(Component, Debug)]
+#[derive(Component, Clone, Serialize, Deserialize)]
 pub struct Armor(pub f32);
 
 /// 伤害类型枚举
