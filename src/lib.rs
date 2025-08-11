@@ -4,5 +4,4 @@ pub mod controller;
 pub mod entities;
 pub mod league;
 pub mod logging;
-pub mod map;
 pub mod render;

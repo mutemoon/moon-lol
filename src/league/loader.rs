@@ -311,6 +311,8 @@ impl LeagueLoader {
 
                     let texture_path = skin_character_data_properties.skin_mesh_properties.texture;
 
+                    self.save_wad_entry_to_file(&texture_path).unwrap();
+
                     let mut reader = self
                         .get_wad_entry_no_seek_reader_by_path(
                             &skin_character_data_properties
@@ -354,6 +356,10 @@ impl LeagueLoader {
                             AnimationClipData::Unknown => None,
                         })
                         .collect::<Vec<_>>();
+
+                    clip_paths.iter().for_each(|v| {
+                        self.save_wad_entry_to_file(v).unwrap();
+                    });
 
                     let mut submesh_paths = Vec::new();
 
@@ -413,6 +419,13 @@ impl LeagueLoader {
         for path in minion_paths {
             configs.minion_paths.insert(path.lane, path.path);
         }
+
+        to_writer_pretty(
+            &mut get_asset_writer("configs.ron").unwrap(),
+            &configs,
+            Default::default(),
+        )
+        .unwrap();
 
         configs
     }

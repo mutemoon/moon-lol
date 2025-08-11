@@ -1,5 +1,5 @@
 use super::{Movement, MovementDestination};
-use crate::map::{MAP_HEIGHT, MAP_WIDTH};
+use crate::render::{MAP_HEIGHT, MAP_WIDTH};
 use crate::{system_debug, system_info, system_warn};
 use bevy::{app::App, math::vec2, prelude::*};
 use vleue_navigator::{

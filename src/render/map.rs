@@ -1,13 +1,45 @@
 use crate::combat::{AttackState, MovementDestination, Target};
-use bevy::{color::palettes, prelude::*};
+use crate::config::Configs;
+use crate::league::spawn_environment_objects_from_configs;
+
+use bevy::color::palettes;
+use bevy::prelude::*;
+use bevy::render::mesh::skinning::SkinnedMeshInverseBindposes;
+
+pub const MAP_WIDTH: f32 = 17000.0;
+pub const MAP_HEIGHT: f32 = 17000.0;
+
+pub const MAP_OFFSET_X: f32 = 500.0;
+pub const MAP_OFFSET_Y: f32 = 500.0;
+
+#[derive(Component)]
+#[require(Visibility)]
+pub struct Map;
 
 pub struct PluginMap;
 
 impl Plugin for PluginMap {
     fn build(&self, app: &mut App) {
-        // app.add_systems(Startup, setup_map);
-        // app.add_systems(Startup, setup_map_placeble);
+        app.add_systems(Startup, setup);
     }
+}
+
+fn setup(
+    mut commands: Commands,
+    configs: Res<Configs>,
+    mut res_animation_graphs: ResMut<Assets<AnimationGraph>>,
+    mut res_materials: ResMut<Assets<StandardMaterial>>,
+    mut res_skinned_mesh_inverse_bindposes: ResMut<Assets<SkinnedMeshInverseBindposes>>,
+    asset_server: Res<AssetServer>,
+) {
+    spawn_environment_objects_from_configs(
+        &mut commands,
+        &mut res_animation_graphs,
+        &mut res_materials,
+        &mut res_skinned_mesh_inverse_bindposes,
+        &asset_server,
+        &configs,
+    );
 }
 
 pub fn draw_attack(

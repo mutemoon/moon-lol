@@ -1,11 +1,14 @@
 mod compressed;
+mod loader;
 mod skeleton;
 mod uncompressed;
 
 use std::collections::HashMap;
 
 pub use compressed::*;
+pub use loader::*;
 pub use skeleton::*;
+use tracing::info;
 pub use uncompressed::*;
 
 use bevy::prelude::AnimatedField;
@@ -257,34 +260,39 @@ impl From<AnimationData> for AnimationClip {
     fn from(value: AnimationData) -> Self {
         let mut clip = AnimationClip::default();
         for (i, join_hash) in value.joint_hashes.iter().enumerate() {
-            clip.add_curve_to_target(
-                AnimationTargetId(Uuid::from_u128(*join_hash as u128)),
-                AnimatableCurve::new(
-                    animated_field!(Transform::translation),
-                    AnimatableKeyframeCurve::new(
-                        value.translates.get(i).unwrap().clone().into_iter(),
-                    )
-                    .unwrap(),
-                ),
-            );
-            clip.add_curve_to_target(
-                AnimationTargetId(Uuid::from_u128(*join_hash as u128)),
-                AnimatableCurve::new(
-                    animated_field!(Transform::rotation),
-                    AnimatableKeyframeCurve::new(
-                        value.rotations.get(i).unwrap().clone().into_iter(),
-                    )
-                    .unwrap(),
-                ),
-            );
-            clip.add_curve_to_target(
-                AnimationTargetId(Uuid::from_u128(*join_hash as u128)),
-                AnimatableCurve::new(
-                    animated_field!(Transform::scale),
-                    AnimatableKeyframeCurve::new(value.scales.get(i).unwrap().clone().into_iter())
-                        .unwrap(),
-                ),
-            );
+            let translates = value.translates.get(i).unwrap();
+            let rotations = value.rotations.get(i).unwrap();
+            let scales = value.scales.get(i).unwrap();
+
+            if translates.len() >= 2 {
+                clip.add_curve_to_target(
+                    AnimationTargetId(Uuid::from_u128(*join_hash as u128)),
+                    AnimatableCurve::new(
+                        animated_field!(Transform::translation),
+                        AnimatableKeyframeCurve::new(translates.clone().into_iter()).unwrap(),
+                    ),
+                );
+            }
+
+            if rotations.len() >= 2 {
+                clip.add_curve_to_target(
+                    AnimationTargetId(Uuid::from_u128(*join_hash as u128)),
+                    AnimatableCurve::new(
+                        animated_field!(Transform::rotation),
+                        AnimatableKeyframeCurve::new(rotations.clone().into_iter()).unwrap(),
+                    ),
+                );
+            }
+
+            if scales.len() >= 2 {
+                clip.add_curve_to_target(
+                    AnimationTargetId(Uuid::from_u128(*join_hash as u128)),
+                    AnimatableCurve::new(
+                        animated_field!(Transform::scale),
+                        AnimatableKeyframeCurve::new(scales.clone().into_iter()).unwrap(),
+                    ),
+                );
+            }
         }
         clip
     }

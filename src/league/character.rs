@@ -1,14 +1,10 @@
-use crate::league::{
-    AnimationData, AnimationFile, LeagueLoader, LeagueSkeleton, LeagueSkinnedMesh,
-    LeagueSkinnedMeshInternal,
-};
-use crate::render::CharacterResourceCache;
+use crate::config::{ConfigEnvironmentObject, Configs};
+use crate::league::LeagueLoader;
 use bevy::animation::{AnimationTarget, AnimationTargetId};
 use bevy::asset::uuid::Uuid;
+use bevy::math::Mat4;
 use bevy::prelude::*;
 use bevy::render::mesh::skinning::{SkinnedMesh, SkinnedMeshInverseBindposes};
-use bevy::{image::Image, math::Mat4};
-use binrw::BinRead;
 use cdragon_prop::{
     BinEmbed, BinEntry, BinFloat, BinHash, BinLink, BinMap, BinMatrix, BinString, BinStruct, BinU32,
 };
@@ -358,3 +354,186 @@ impl From<&BinEmbed> for AnimationResourceData {
         }
     }
 }
+
+/// 从Config中的ConfigEnvironmentObject生成环境对象实体
+pub fn spawn_environment_object(
+    commands: &mut Commands,
+    res_animation_graphs: &mut ResMut<Assets<AnimationGraph>>,
+    res_materials: &mut ResMut<Assets<StandardMaterial>>,
+    res_skinned_mesh_inverse_bindposes: &mut ResMut<Assets<SkinnedMeshInverseBindposes>>,
+    asset_server: &Res<AssetServer>,
+    transform: Transform,
+    config_env_object: &ConfigEnvironmentObject,
+) -> Entity {
+    // 加载纹理
+    let texture_handle = asset_server.load(config_env_object.texture_path.clone());
+
+    // 创建父实体
+    let parent_entity = commands.spawn(transform).id();
+
+    // 构建骨骼实体映射
+    let mut index_to_entity = vec![Entity::PLACEHOLDER; config_env_object.joints.len()];
+    let mut joint_inverse_matrix = vec![Mat4::default(); config_env_object.joints.len()];
+
+    // 创建骨骼实体
+    for (i, joint) in config_env_object.joints.iter().enumerate() {
+        let joint_name_str = joint.name.clone();
+        let name = Name::new(joint_name_str.clone());
+        let hash = LeagueLoader::hash_joint(&joint.name);
+
+        let ent = commands
+            .spawn((
+                joint.transform,
+                name,
+                AnimationTarget {
+                    id: AnimationTargetId(Uuid::from_u128(hash as u128)),
+                    player: parent_entity,
+                },
+            ))
+            .id();
+        index_to_entity[i] = ent;
+        joint_inverse_matrix[i] = joint.inverse_bind_pose;
+    }
+
+    // 建立骨骼父子关系
+    for (i, joint) in config_env_object.joints.iter().enumerate() {
+        if joint.parent_index >= 0 {
+            let parent_entity_joint = index_to_entity[joint.parent_index as usize];
+            commands
+                .entity(parent_entity_joint)
+                .add_child(index_to_entity[i]);
+        } else {
+            commands.entity(parent_entity).add_child(index_to_entity[i]);
+        }
+    }
+
+    // 处理动画（如果有）
+    let mut animation_player = AnimationPlayer::default();
+    if !config_env_object.animation_graph.clip_paths.is_empty() {
+        // 加载第一个动画剪辑作为默认动画
+        let animation_clips = config_env_object
+            .animation_graph
+            .clip_paths
+            .iter()
+            .map(|v| asset_server.load(v.clone()))
+            .collect::<Vec<_>>();
+
+        let (graph, animation_node_indices) = AnimationGraph::from_clips(animation_clips);
+        let graph_handle = res_animation_graphs.add(graph);
+
+        animation_player.play(animation_node_indices[0]).repeat();
+
+        commands
+            .entity(parent_entity)
+            .insert((animation_player, AnimationGraphHandle(graph_handle)));
+    } else {
+        commands.entity(parent_entity).insert(animation_player);
+    }
+
+    // 加载和创建mesh实体
+    for submesh_path in &config_env_object.submesh_paths {
+        let mesh_handle = asset_server.load(submesh_path.clone());
+
+        let child = commands
+            .spawn((
+                Transform::default(),
+                Mesh3d(mesh_handle),
+                MeshMaterial3d(res_materials.add(StandardMaterial {
+                    base_color_texture: Some(texture_handle.clone()),
+                    unlit: true,
+                    cull_mode: None,
+                    alpha_mode: AlphaMode::Opaque,
+                    ..Default::default()
+                })),
+                SkinnedMesh {
+                    inverse_bindposes: res_skinned_mesh_inverse_bindposes.add(
+                        SkinnedMeshInverseBindposes::from(
+                            config_env_object
+                                .joint_influences_indices
+                                .iter()
+                                .map(|&v| joint_inverse_matrix[v as usize])
+                                .collect::<Vec<_>>(),
+                        ),
+                    ),
+                    joints: config_env_object
+                        .joint_influences_indices
+                        .iter()
+                        .map(|&v| index_to_entity[v as usize])
+                        .collect::<Vec<_>>(),
+                },
+            ))
+            .id();
+        commands.entity(parent_entity).add_child(child);
+    }
+
+    parent_entity
+}
+
+/// 从Configs批量生成所有环境对象
+pub fn spawn_environment_objects_from_configs(
+    commands: &mut Commands,
+    res_animation_graphs: &mut ResMut<Assets<AnimationGraph>>,
+    res_materials: &mut ResMut<Assets<StandardMaterial>>,
+    res_skinned_mesh_inverse_bindposes: &mut ResMut<Assets<SkinnedMeshInverseBindposes>>,
+    asset_server: &Res<AssetServer>,
+    configs: &Configs,
+) -> Vec<Entity> {
+    let mut entities = Vec::new();
+
+    for (transform, config_env_object) in &configs.environment_objects {
+        let entity = spawn_environment_object(
+            commands,
+            res_animation_graphs,
+            res_materials,
+            res_skinned_mesh_inverse_bindposes,
+            asset_server,
+            *transform,
+            config_env_object,
+        );
+        entities.push(entity);
+    }
+
+    entities
+}
+
+/*
+使用示例：
+
+```rust
+use bevy::prelude::*;
+use moon_lol::config::Configs;
+use moon_lol::league::spawn_environment_objects_from_configs;
+
+fn spawn_environment_system(
+    mut commands: Commands,
+    mut res_animation_graphs: ResMut<Assets<AnimationGraph>>,
+    mut res_materials: ResMut<Assets<StandardMaterial>>,
+    mut res_skinned_mesh_inverse_bindposes: ResMut<Assets<SkinnedMeshInverseBindposes>>,
+    asset_server: Res<AssetServer>,
+    configs: Res<Configs>,
+) {
+    // 批量加载所有环境对象
+    let _entities = spawn_environment_objects_from_configs(
+        &mut commands,
+        &mut res_animation_graphs,
+        &mut res_materials,
+        &mut res_skinned_mesh_inverse_bindposes,
+        &asset_server,
+        &configs,
+    );
+
+    // 或者单独加载一个环境对象
+    if let Some((transform, config_env_object)) = configs.environment_objects.first() {
+        let _entity = spawn_environment_object(
+            &mut commands,
+            &mut res_animation_graphs,
+            &mut res_materials,
+            &mut res_skinned_mesh_inverse_bindposes,
+            &asset_server,
+            *transform,
+            config_env_object,
+        );
+    }
+}
+```
+*/
