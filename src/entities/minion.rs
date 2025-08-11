@@ -1,7 +1,7 @@
 use crate::core::{
     Attack, AttackMachineState, AttackState, Bounding, CommandMovementMoveTo, CommandTargetRemove,
-    CommandTargetSet, Dead, EventAttackAttack, EventMovementMoveEnd, Health, Navigator, Obstacle,
-    Target, Team,
+    CommandTargetSet, EventAttackAttack, EventDead, EventMovementMoveEnd, Health, Navigator,
+    Obstacle, Target, Team,
 };
 use bevy::{app::Plugin, prelude::*};
 use serde::{Deserialize, Serialize};
@@ -261,7 +261,7 @@ pub fn action_attack_damage(
 }
 
 fn on_target_dead(
-    trigger: Trigger<Dead>,
+    trigger: Trigger<EventDead>,
     mut commands: Commands,
     mut q_minion_state: Query<(&mut MinionState, &Target)>,
 ) {

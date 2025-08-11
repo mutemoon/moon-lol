@@ -7,17 +7,17 @@ pub struct Health {
 }
 
 #[derive(Event, Debug)]
-pub struct Dead;
+pub struct EventDead;
 
 #[derive(Event, Debug)]
-pub struct Spawn;
+pub struct EventSpawn;
 
 pub struct PluginLife;
 
 impl Plugin for PluginLife {
     fn build(&self, app: &mut App) {
-        app.add_event::<Dead>();
-        app.add_event::<Spawn>();
+        app.add_event::<EventDead>();
+        app.add_event::<EventSpawn>();
         app.add_systems(FixedUpdate, (detect_death, spawn_event));
         app.add_observer(on_dead);
     }
@@ -39,7 +39,7 @@ pub fn spawn_event(mut commands: Commands, q_alive: Query<Entity, Added<Health>>
             "Triggering spawn event for entity {:?}",
             entity
         );
-        commands.trigger_targets(Spawn, entity);
+        commands.trigger_targets(EventSpawn, entity);
     }
 }
 
@@ -54,7 +54,7 @@ pub fn detect_death(mut commands: Commands, q_health: Query<(Entity, &Health)>) 
                 entity,
                 health.value
             );
-            commands.trigger_targets(Dead, entity);
+            commands.trigger_targets(EventDead, entity);
             death_count += 1;
         }
     }
@@ -64,7 +64,7 @@ pub fn detect_death(mut commands: Commands, q_health: Query<(Entity, &Health)>) 
     }
 }
 
-fn on_dead(trigger: Trigger<Dead>, mut commands: Commands) {
+fn on_dead(trigger: Trigger<EventDead>, mut commands: Commands) {
     let entity = trigger.target();
     system_info!("on_dead", "Despawning dead entity {:?}", entity);
     commands.entity(entity).despawn();
