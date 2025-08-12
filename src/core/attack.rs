@@ -20,12 +20,55 @@ impl Plugin for PluginAttack {
 pub struct Attack {
     pub range: f32,
     pub speed: f32,
+    pub cast_time: AttackCastTime,
+}
+
+#[derive(Component)]
+pub enum AttackCastTime {
+    CastTime(f32),
+    CastTimePercent(f32),
 }
 
 #[derive(Component, Default)]
 pub struct AttackState {
-    pub target: Option<Entity>,
-    pub last_lock_time: Option<f32>,
+    pub status: AttackStatus,
+}
+
+/// 攻击状态机 - 语义化的状态表示
+#[derive(Component, Default, Debug, Clone, PartialEq)]
+pub enum AttackStatus {
+    #[default]
+    Idle,
+    Locked {
+        target: Entity,
+        lock_time: f32,
+    },
+    Attacking {
+        target: Entity,
+        attack_start_time: f32,
+    },
+    Cooldown {
+        target: Entity,
+        cooldown_end_time: f32,
+    },
+}
+
+impl AttackState {
+    pub fn is_idle(&self) -> bool {
+        matches!(self.status, AttackStatus::Idle)
+    }
+
+    pub fn is_locked(&self) -> bool {
+        matches!(self.status, AttackStatus::Locked { .. })
+    }
+
+    pub fn is_attacking(&self) -> bool {
+        matches!(self.status, AttackStatus::Attacking { .. })
+    }
+
+    pub fn is_cooldown(&self) -> bool {
+        matches!(self.status, AttackStatus::Cooldown { .. })
+    }
 }
 
 #[derive(Event, Debug)]
@@ -56,10 +99,12 @@ fn on_command_attack_lock(
     let entity = trigger.target();
 
     if let Ok((mut attack_state, target)) = query.get_mut(entity) {
-        if attack_state.last_lock_time.is_none() {
-            attack_state.last_lock_time = Some(time.elapsed_secs());
-            attack_state.target = Some(target.0);
-
+        // 只有在空闲状态时才能锁定新目标
+        if attack_state.is_idle() {
+            attack_state.status = AttackStatus::Locked {
+                target: target.0,
+                lock_time: time.elapsed_secs(),
+            };
             commands.trigger_targets(EventAttackLock, entity);
         }
     }
@@ -84,7 +129,8 @@ mod tests {
             .spawn((
                 Attack {
                     range: 100.0,
-                    speed: 1.0,
+                    speed: 1.25,
+                    cast_time: AttackCastTime::CastTime(0.393),
                 },
                 AttackState::default(),
             ))
@@ -94,8 +140,7 @@ mod tests {
 
         {
             let attack_state = app.world().get::<AttackState>(attacker).unwrap();
-            assert_eq!(attack_state.last_lock_time, None);
-            assert_eq!(attack_state.target, None);
+            assert!(attack_state.is_idle());
         }
 
         app.world_mut()
@@ -105,8 +150,7 @@ mod tests {
 
         {
             let attack_state = app.world().get::<AttackState>(attacker).unwrap();
-            assert!(attack_state.last_lock_time.is_some());
-            assert_eq!(attack_state.target, Some(target));
+            assert!(attack_state.is_locked());
         }
     }
 }

@@ -70,7 +70,7 @@ impl Plugin for PluginAnimation {
 //     q_attack_state: Query<(Entity, &AttackState), (Changed<AttackState>, With<GltfAsset>)>,
 // ) {
 //     for (entity, attack_state) in q_attack_state.iter() {
-//         if *attack_state == AttackState::Locking {
+//         if attack_state.is_locked() || attack_state.is_attacking() {
 //             if let Ok(mut entity_commands) = commands.get_entity(entity) {
 //                 entity_commands.insert(AnimationInfo {
 //                     animation_type: AnimationType::Attack,
