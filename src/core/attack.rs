@@ -6,10 +6,9 @@ pub struct PluginAttack;
 
 impl Plugin for PluginAttack {
     fn build(&self, app: &mut App) {
-        app.add_event::<EventAttackWindupStart>();
-        app.add_event::<EventAttackWindupComplete>();
-        app.add_event::<EventAttackCooldownStart>();
-        app.add_event::<EventAttackCooldownComplete>();
+        app.add_event::<EventAttackCast>();
+        app.add_event::<EventAttackDone>();
+        app.add_event::<EventAttackCooldown>();
         app.add_event::<EventAttackReset>();
         app.add_event::<EventAttackCancel>();
         app.add_event::<CommandAttackCast>();
@@ -116,6 +115,8 @@ pub struct AttackState {
     pub status: AttackStatus,
     /// 当前阶段开始的时间
     pub cast_time: f32,
+    /// 是否继续攻击
+    pub continue_attack: bool,
 }
 
 /// 攻击状态 - 更详细的状态表示
@@ -166,22 +167,17 @@ pub struct CommandAttackReset;
 pub struct CommandAttackCancel;
 
 #[derive(Event, Debug)]
-pub struct EventAttackWindupStart {
+pub struct EventAttackCast {
     pub target: Entity,
 }
 
 #[derive(Event, Debug)]
-pub struct EventAttackWindupComplete {
+pub struct EventAttackDone {
     pub target: Entity,
 }
 
 #[derive(Event, Debug)]
-pub struct EventAttackCooldownStart {
-    pub target: Entity,
-}
-
-#[derive(Event, Debug)]
-pub struct EventAttackCooldownComplete;
+pub struct EventAttackCooldown;
 
 #[derive(Event, Debug)]
 pub struct EventAttackReset;
@@ -223,7 +219,7 @@ fn on_command_attack_cast(
         if attack_state.is_idle() {
             attack_state.status = AttackStatus::Windup { target: target.0 };
             attack_state.cast_time = time.elapsed_secs();
-            commands.trigger_targets(EventAttackWindupStart { target: target.0 }, entity);
+            commands.trigger_targets(EventAttackCast { target: target.0 }, entity);
         }
     }
 }
@@ -301,8 +297,7 @@ fn attack_state_machine_system(
                     attack_state.status = AttackStatus::Cooldown { target: *target };
                     attack_state.cast_time = current_time;
 
-                    commands.trigger_targets(EventAttackWindupComplete { target: *target }, entity);
-                    commands.trigger_targets(EventAttackCooldownStart { target: *target }, entity);
+                    commands.trigger_targets(EventAttackDone { target: *target }, entity);
                 }
             }
 
@@ -315,13 +310,12 @@ fn attack_state_machine_system(
                     attack_state.status = AttackStatus::Idle;
                     attack_state.cast_time = current_time;
 
-                    commands.trigger_targets(EventAttackCooldownComplete, entity);
+                    commands.trigger_targets(EventAttackCooldown, entity);
+                    commands.trigger_targets(CommandAttackCast, entity);
                 }
             }
 
-            AttackStatus::Idle => {
-                // 空闲状态，无需处理
-            }
+            AttackStatus::Idle => {}
         }
     }
 }
@@ -809,6 +803,7 @@ mod tests {
                     target: Entity::PLACEHOLDER,
                 },
                 cast_time: 0.0,
+                continue_attack: true,
             };
 
             let current_time = 0.1; // 前摇进行中
@@ -1048,6 +1043,7 @@ mod tests {
                 target: Entity::PLACEHOLDER,
             },
             cast_time: 0.0,
+            continue_attack: true,
         };
         assert!(!windup_state.is_idle());
         assert!(windup_state.is_windup());

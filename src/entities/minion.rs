@@ -1,7 +1,7 @@
 use crate::core::{
     Attack, Bounding, CommandMovementFollowPath, CommandMovementMoveTo, CommandTargetRemove,
-    CommandTargetSet, EventAttackWindupComplete, EventDead, EventMovementMoveEnd, Navigator,
-    Obstacle, Target, Team,
+    CommandTargetSet, EventAttackDone, EventDead, EventMovementMoveEnd, Navigator, Obstacle,
+    Target, Team,
 };
 use bevy::{app::Plugin, prelude::*};
 use serde::{Deserialize, Serialize};
@@ -195,7 +195,7 @@ fn on_found_aggro_target(
 }
 
 pub fn action_attack_damage(
-    trigger: Trigger<EventAttackWindupComplete>,
+    trigger: Trigger<EventAttackDone>,
     mut q_minion: Query<(Entity, &Team, &Transform, &mut AggroInfo), With<Minion>>,
     q_transform: Query<&Transform>,
     q_team: Query<&Team>,
