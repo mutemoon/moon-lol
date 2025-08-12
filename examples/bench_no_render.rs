@@ -7,7 +7,6 @@ fn main() {
         .add_plugins(MinimalPlugins)
         .add_systems(Startup, setup)
         .add_systems(FixedUpdate, update_fixed)
-        .add_systems(FixedPreUpdate, do_cost_time)
         .run();
 }
 
@@ -29,10 +28,4 @@ fn update_fixed(mut times: Local<u64>, fixed: Res<Time<Fixed>>, real: Res<Time<R
             real.elapsed_secs(),
         );
     }
-}
-
-fn do_cost_time() {
-    println!("start do");
-    std::thread::sleep(Duration::from_secs(1));
-    println!("end do");
 }

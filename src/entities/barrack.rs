@@ -3,7 +3,7 @@ use crate::{
         spawn_environment_object, Armor, Bounding, ConfigEnvironmentObject, Configs, Damage,
         Health, Lane, Movement, Team,
     },
-    entities::{CommandMinionContinuePath, Minion, MinionPath},
+    entities::{Minion, MinionPath},
 };
 use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -301,8 +301,6 @@ fn barracks_spawning_system(
                         bounding,
                         team.clone(),
                     ));
-
-                    commands.trigger_targets(CommandMinionContinuePath, entity);
 
                     // 更新队列
                     current_spawn.count -= 1;

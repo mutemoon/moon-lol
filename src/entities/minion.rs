@@ -1,7 +1,7 @@
 use crate::core::{
-    Attack, AttackMachineState, AttackState, Bounding, CommandMovementFollowPath,
-    CommandMovementMoveTo, CommandTargetRemove, CommandTargetSet, EventAttackAttack, EventDead,
-    EventMovementMoveEnd, Health, Navigator, Obstacle, Target, Team,
+    Attack, Bounding, CommandMovementFollowPath, CommandMovementMoveTo, CommandTargetRemove,
+    CommandTargetSet, EventAttackAttack, EventDead, EventMovementMoveEnd, Navigator, Obstacle,
+    Target, Team,
 };
 use bevy::{app::Plugin, prelude::*};
 use serde::{Deserialize, Serialize};
@@ -154,7 +154,6 @@ fn on_found_aggro_target(
     mut commands: Commands,
     mut q_minion_state: Query<&mut MinionState>,
 
-    q_attack_state: Query<&AttackState>,
     q_attack: Query<&Attack>,
     q_transform: Query<&Transform>,
     q_bounding: Query<&Bounding>,
@@ -181,13 +180,6 @@ fn on_found_aggro_target(
         }
     }
 
-    if let Ok(attack_state) = q_attack_state.get(entity) {
-        match attack_state.get_state() {
-            AttackMachineState::Idle => {}
-            _ => (),
-        }
-    }
-
     if let Ok(mut minion_state) = q_minion_state.get_mut(entity) {
         match *minion_state {
             MinionState::MovingOnPath => {
@@ -204,27 +196,17 @@ fn on_found_aggro_target(
 
 pub fn action_attack_damage(
     trigger: Trigger<EventAttackAttack>,
-    mut q_attack_info: Query<&mut AttackState>,
-    mut q_health: Query<&mut Health>,
     mut q_minion: Query<(Entity, &Team, &Transform, &mut AggroInfo), With<Minion>>,
     q_transform: Query<&Transform>,
     q_team: Query<&Team>,
 ) {
     let self_entity = trigger.target();
-    let Ok(attack_info) = q_attack_info.get_mut(self_entity) else {
-        return;
-    };
     let Ok(self_transform) = q_transform.get(self_entity) else {
         return;
     };
     let Ok(self_team) = q_team.get(self_entity) else {
         return;
     };
-    if let Some(target) = attack_info.target {
-        if let Ok(mut health) = q_health.get_mut(target) {
-            health.value -= 10.0;
-        }
-    }
     for (_, minion_team, minion_transform, mut aggro_info) in q_minion.iter_mut() {
         if self_team == minion_team {
             continue;

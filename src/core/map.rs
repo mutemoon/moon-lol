@@ -1,12 +1,9 @@
 use crate::core::Configs;
-use crate::core::{AttackState, MovementDestination, Target};
 use crate::core::{ConfigEnvironmentObject, ConfigGeometryObject};
-use crate::entities::DebugSphere;
-use crate::league::neg_mat_z;
+use crate::core::{MovementDestination, Target};
 use bevy::animation::{AnimationTarget, AnimationTargetId};
 use bevy::asset::uuid::Uuid;
 use bevy::color::palettes;
-use bevy::math::Mat4;
 use bevy::prelude::*;
 use bevy::render::mesh::skinning::SkinnedMesh;
 
@@ -36,16 +33,13 @@ fn setup(mut commands: Commands, configs: Res<Configs>, asset_server: Res<AssetS
 
 pub fn draw_attack(
     mut gizmos: Gizmos,
-    q_attack: Query<(&Transform, &AttackState)>,
+    q_attack: Query<(&Transform, &Target)>,
     q_movement_destination: Query<(&Transform, &MovementDestination)>,
     q_target: Query<(&Transform, &Target)>,
     q_transform: Query<&Transform>,
 ) {
-    for (transform, attack_info) in q_attack.iter() {
-        let Some(target) = attack_info.target else {
-            continue;
-        };
-        let Ok(target_transform) = q_transform.get(target) else {
+    for (transform, target) in q_attack.iter() {
+        let Ok(target_transform) = q_transform.get(target.0) else {
             continue;
         };
         gizmos.line(

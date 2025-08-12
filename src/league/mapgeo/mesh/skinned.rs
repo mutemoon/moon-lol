@@ -1,7 +1,5 @@
 use crate::league::BoundingBox;
-use bevy::asset::RenderAssetUsages;
 use bevy::prelude::*;
-use bevy::render::mesh::{Indices, PrimitiveTopology, VertexAttributeValues};
 use binrw::binread;
 
 #[binread]
