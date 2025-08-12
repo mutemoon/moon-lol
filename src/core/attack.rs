@@ -209,17 +209,41 @@ impl AttackState {
 fn on_command_attack_cast(
     trigger: Trigger<CommandAttackCast>,
     mut commands: Commands,
-    mut query: Query<(&mut AttackState, &Target)>,
+    mut query: Query<(&mut AttackState, &Target, &Attack)>,
     time: Res<Time<Fixed>>,
 ) {
     let entity = trigger.target();
 
-    if let Ok((mut attack_state, target)) = query.get_mut(entity) {
-        // 只有在空闲状态时才能锁定新目标
-        if attack_state.is_idle() {
-            attack_state.status = AttackStatus::Windup { target: target.0 };
-            attack_state.cast_time = time.elapsed_secs();
-            commands.trigger_targets(EventAttackCast { target: target.0 }, entity);
+    if let Ok((mut attack_state, target, attack)) = query.get_mut(entity) {
+        let current_time = time.elapsed_secs();
+
+        // 检查当前状态
+        match &attack_state.status {
+            AttackStatus::Idle => {
+                // 空闲状态：直接开始攻击
+                attack_state.status = AttackStatus::Windup { target: target.0 };
+                attack_state.cast_time = current_time;
+                commands.trigger_targets(EventAttackCast { target: target.0 }, entity);
+            }
+            AttackStatus::Windup {
+                target: _current_target,
+            } => {
+                // 前摇状态：检查是否可以取消
+                let windup_time = attack.windup_time();
+                if attack_state.can_cancel(current_time, windup_time) {
+                    // 可以取消：立即切换到新目标
+                    attack_state.status = AttackStatus::Windup { target: target.0 };
+                    attack_state.cast_time = current_time;
+                    commands.trigger_targets(EventAttackCancel, entity);
+                    commands.trigger_targets(EventAttackCast { target: target.0 }, entity);
+                }
+                // 如果不可取消，则忽略新命令
+            }
+            AttackStatus::Cooldown { .. } => {
+                // 后摇状态：忽略新命令，等待当前攻击完成
+                // 但可以更新目标，为下一次攻击做准备
+                // 这里不处理，让系统自然完成当前攻击
+            }
         }
     }
 }
@@ -397,10 +421,14 @@ mod tests {
         // 推进到后摇结束
         advance_time(&mut app, 0.7);
 
-        // 验证回到空闲状态
+        // 验证系统自动开始下一次攻击（因为后摇结束时会自动触发CommandAttackCast）
         let attack_state = app.world().get::<AttackState>(attacker).unwrap();
-        assert!(attack_state.is_idle());
-        assert!(attack_state.cast_time > initial_time);
+        assert!(attack_state.is_windup(), "后摇结束后应该自动开始下一次攻击");
+        assert_eq!(
+            attack_state.current_target(),
+            Some(target_entity),
+            "下一次攻击的目标应该相同"
+        );
     }
 
     /// 目标 2：连续攻击同一目标
@@ -433,9 +461,14 @@ mod tests {
         // 完成第一次攻击
         advance_time(&mut app, 1.0);
 
-        // 验证回到空闲状态
+        // 验证系统自动开始下一次攻击（因为后摇结束时会自动触发CommandAttackCast）
         let attack_state = app.world().get::<AttackState>(attacker).unwrap();
-        assert!(attack_state.is_idle());
+        assert!(attack_state.is_windup(), "后摇结束后应该自动开始下一次攻击");
+        assert_eq!(
+            attack_state.current_target(),
+            Some(target_entity),
+            "下一次攻击的目标应该相同"
+        );
 
         // 第二次攻击
         app.world_mut().trigger_targets(CommandAttackCast, attacker);
@@ -492,9 +525,14 @@ mod tests {
         // 等待后摇结束
         advance_time(&mut app, 0.7);
 
-        // 验证回到空闲状态
+        // 验证系统自动开始下一次攻击（因为后摇结束时会自动触发CommandAttackCast）
         let attack_state = app.world().get::<AttackState>(attacker).unwrap();
-        assert!(attack_state.is_idle());
+        assert!(attack_state.is_windup(), "后摇结束后应该自动开始下一次攻击");
+        assert_eq!(
+            attack_state.current_target(),
+            Some(target2),
+            "下一次攻击的目标应该是target2"
+        );
 
         // 现在可以攻击新目标
         app.world_mut().trigger_targets(CommandAttackCast, attacker);
@@ -1131,7 +1169,12 @@ mod tests {
         // 推进到后摇结束
         advance_time(&mut app, 0.375);
         let attack_state = app.world().get::<AttackState>(attacker).unwrap();
-        assert!(attack_state.is_idle());
+        assert!(attack_state.is_windup(), "后摇结束后应该自动开始下一次攻击");
+        assert_eq!(
+            attack_state.current_target(),
+            Some(target_entity),
+            "下一次攻击的目标应该相同"
+        );
     }
 
     #[test]
@@ -1147,5 +1190,172 @@ mod tests {
 
         // 前摇时间少于宽限期，所以整个前摇都不可取消
         assert!(attack.windup_time() < UNCANCELLABLE_GRACE_PERIOD);
+    }
+
+    // ===== 七、目标切换与攻击取消的交互 (Target Switching & Attack Cancellation Interaction) =====
+
+    /// 测试场景1：攻击目标A，在不可取消的两帧收到攻击目标B的命令
+    /// 期望：这一次还是会攻击目标A，但自动攻击的下一次攻击应该攻击的是目标B
+    #[test]
+    fn test_new_target_command_during_uncancellable_period() {
+        let mut app = create_test_app();
+
+        let target_a = app.world_mut().spawn_empty().id();
+        let target_b = app.world_mut().spawn_empty().id();
+        let attacker = app
+            .world_mut()
+            .spawn((
+                Attack {
+                    base_attack_speed: 1.0,                                     // 1秒攻击间隔
+                    windup_config: WindupConfig::Legacy { attack_offset: 0.0 }, // 0.3秒前摇
+                    ..Default::default()
+                },
+                AttackState::default(),
+                crate::core::Target(target_a), // 初始目标为A
+            ))
+            .id();
+
+        // 开始攻击目标A
+        app.world_mut().trigger_targets(CommandAttackCast, attacker);
+        app.update();
+
+        // 验证进入前摇状态，目标为A
+        let attack_state = app.world().get::<AttackState>(attacker).unwrap();
+        assert!(attack_state.is_windup());
+        assert_eq!(attack_state.current_target(), Some(target_a));
+
+        // 推进到攻击生效前的不可取消期 (0.3 - 0.066 = 0.234秒后)
+        advance_time(&mut app, 0.234);
+
+        // 验证此时不可取消
+        let can_cancel = {
+            let attack_state = app.world().get::<AttackState>(attacker).unwrap();
+            let attack = app.world().get::<Attack>(attacker).unwrap();
+            let current_time = app.world().resource::<Time<Fixed>>().elapsed_secs();
+            let windup_time = attack.windup_time();
+            attack_state.can_cancel(current_time, windup_time)
+        };
+        assert!(!can_cancel, "攻击生效前2帧应该不可取消");
+
+        // 在不可取消期间，切换目标到B
+        app.world_mut()
+            .entity_mut(attacker)
+            .insert(crate::core::Target(target_b));
+
+        // 继续推进时间，攻击应该正常完成，目标仍为A
+        advance_time(&mut app, 0.066);
+
+        // 验证进入后摇状态，目标仍为A（当前攻击的目标）
+        let attack_state = app.world().get::<AttackState>(attacker).unwrap();
+        assert!(attack_state.is_cooldown());
+        assert_eq!(
+            attack_state.current_target(),
+            Some(target_a),
+            "当前攻击的目标应该仍然是A"
+        );
+
+        // 等待后摇结束，系统应该自动开始下一次攻击
+        advance_time(&mut app, 0.7);
+
+        // 验证自动开始下一次攻击，目标应该是B
+        let attack_state = app.world().get::<AttackState>(attacker).unwrap();
+        assert!(attack_state.is_windup(), "应该自动开始下一次攻击");
+        assert_eq!(
+            attack_state.current_target(),
+            Some(target_b),
+            "下一次攻击的目标应该是B"
+        );
+    }
+
+    /// 测试场景2：攻击目标A，在可取消期间攻击目标B
+    /// 期望：会立即取消当前攻击攻击目标B且重新计时
+    #[test]
+    fn test_new_target_command_during_cancellable_period() {
+        let mut app = create_test_app();
+
+        let target_a = app.world_mut().spawn_empty().id();
+        let target_b = app.world_mut().spawn_empty().id();
+        let attacker = app
+            .world_mut()
+            .spawn((
+                Attack {
+                    base_attack_speed: 1.0,                                     // 1秒攻击间隔
+                    windup_config: WindupConfig::Legacy { attack_offset: 0.0 }, // 0.3秒前摇
+                    ..Default::default()
+                },
+                AttackState::default(),
+                crate::core::Target(target_a), // 初始目标为A
+            ))
+            .id();
+
+        // 开始攻击目标A
+        app.world_mut().trigger_targets(CommandAttackCast, attacker);
+        app.update();
+
+        // 验证进入前摇状态，目标为A
+        let attack_state = app.world().get::<AttackState>(attacker).unwrap();
+        assert!(attack_state.is_windup());
+        assert_eq!(attack_state.current_target(), Some(target_a));
+
+        // 等待到可取消期 (0.1秒后，距离攻击生效还有0.2秒，超过2帧宽限期)
+        advance_time(&mut app, 0.1);
+
+        // 验证现在可以取消
+        let can_cancel = {
+            let attack_state = app.world().get::<AttackState>(attacker).unwrap();
+            let attack = app.world().get::<Attack>(attacker).unwrap();
+            let current_time = app.world().resource::<Time<Fixed>>().elapsed_secs();
+            let windup_time = attack.windup_time();
+            attack_state.can_cancel(current_time, windup_time)
+        };
+        assert!(can_cancel, "攻击在不可取消期后应该可以取消");
+
+        // 记录当前时间，用于验证重新计时
+        let time_before_switch = app.world().resource::<Time<Fixed>>().elapsed_secs();
+
+        // 在可取消期间，切换目标到B并发送攻击命令
+        app.world_mut()
+            .entity_mut(attacker)
+            .insert(crate::core::Target(target_b));
+
+        // 发送新的攻击命令
+        app.world_mut().trigger_targets(CommandAttackCast, attacker);
+        app.update();
+
+        // 验证立即切换到目标B的前摇状态
+        let attack_state = app.world().get::<AttackState>(attacker).unwrap();
+        assert!(attack_state.is_windup(), "应该立即开始攻击目标B");
+        assert_eq!(
+            attack_state.current_target(),
+            Some(target_b),
+            "当前攻击的目标应该是B"
+        );
+
+        // 验证攻击时间重新计时
+        let attack_state = app.world().get::<AttackState>(attacker).unwrap();
+        assert!(
+            attack_state.cast_time >= time_before_switch,
+            "攻击时间应该重新计时"
+        );
+
+        // 验证攻击B的完整流程
+        advance_time(&mut app, 0.3); // 完成前摇
+
+        // 验证进入后摇状态
+        let attack_state = app.world().get::<AttackState>(attacker).unwrap();
+        assert!(attack_state.is_cooldown());
+        assert_eq!(attack_state.current_target(), Some(target_b));
+
+        // 完成后摇
+        advance_time(&mut app, 0.7);
+
+        // 验证系统自动开始下一次攻击（因为后摇结束时会自动触发CommandAttackCast）
+        let attack_state = app.world().get::<AttackState>(attacker).unwrap();
+        assert!(attack_state.is_windup(), "后摇结束后应该自动开始下一次攻击");
+        assert_eq!(
+            attack_state.current_target(),
+            Some(target_b),
+            "下一次攻击的目标应该是B"
+        );
     }
 }
