@@ -18,16 +18,13 @@ impl Plugin for PluginAttack {
         app.add_observer(on_command_attack_cast);
         app.add_observer(on_command_attack_reset);
         app.add_observer(on_command_attack_cancel);
-        app.add_systems(
-            FixedUpdate,
-            (attack_timer_system, attack_state_machine_system).chain(),
-        );
+        app.add_systems(FixedUpdate, attack_state_machine_system);
     }
 }
 
 /// 攻击组件 - 包含攻击的基础属性
 #[derive(Component)]
-#[require(AttackState, AttackTimer)]
+#[require(AttackState)]
 pub struct Attack {
     pub range: f32,
     /// 基础攻击速度 (1级时的每秒攻击次数)
@@ -113,21 +110,12 @@ pub enum WindupConfig {
     },
 }
 
-/// 攻击计时器 - 跟踪攻击的时间状态
-#[derive(Component, Default)]
-pub struct AttackTimer {
-    /// 当前阶段开始的时间
-    pub phase_start_time: f32,
-    /// 前摇是否不可取消 (uncancellable)
-    pub uncancellable_windup: bool,
-    /// 不可取消的剩余时间 (2 游戏帧 = 0.066秒宽限期)
-    pub uncancellable_remaining: f32,
-}
-
 /// 攻击状态机
 #[derive(Component, Default)]
 pub struct AttackState {
     pub status: AttackStatus,
+    /// 当前阶段开始的时间
+    pub phase_start_time: f32,
 }
 
 /// 攻击状态 - 更详细的状态表示
@@ -136,7 +124,7 @@ pub enum AttackStatus {
     #[default]
     Idle,
     /// 前摇阶段 - 举起武器准备攻击
-    Windup { target: Entity, can_cancel: bool },
+    Windup { target: Entity },
     /// 后摇阶段 - 武器收回，等待下一次攻击
     Cooldown { target: Entity },
 }
@@ -205,25 +193,36 @@ pub struct EventAttackCancel;
 const GAME_TICK_DURATION: f32 = 0.033; // 30 FPS 游戏帧
 const UNCANCELLABLE_GRACE_PERIOD: f32 = 2.0 * GAME_TICK_DURATION; // 0.066 秒
 
+impl AttackState {
+    /// 检查攻击是否可以取消
+    /// 攻击生效前的两帧不可取消
+    pub fn can_cancel(&self, current_time: f32, windup_time: f32) -> bool {
+        match &self.status {
+            AttackStatus::Windup { .. } => {
+                let elapsed = current_time - self.phase_start_time;
+                let time_until_hit = windup_time - elapsed;
+                // 如果距离攻击生效还有超过2帧的时间，则可以取消
+                time_until_hit > UNCANCELLABLE_GRACE_PERIOD
+            }
+            _ => true, // 其他状态都可以取消
+        }
+    }
+}
+
 // 观察者函数
 fn on_command_attack_cast(
     trigger: Trigger<CommandAttackCast>,
     mut commands: Commands,
-    mut query: Query<(&mut AttackState, &mut AttackTimer, &Target)>,
+    mut query: Query<(&mut AttackState, &Target)>,
     time: Res<Time<Fixed>>,
 ) {
     let entity = trigger.target();
 
-    if let Ok((mut attack_state, mut timer, target)) = query.get_mut(entity) {
+    if let Ok((mut attack_state, target)) = query.get_mut(entity) {
         // 只有在空闲状态时才能锁定新目标
         if attack_state.is_idle() {
-            attack_state.status = AttackStatus::Windup {
-                target: target.0,
-                can_cancel: false, // 初始时不可取消
-            };
-            timer.phase_start_time = time.elapsed_secs();
-            timer.uncancellable_windup = true;
-            timer.uncancellable_remaining = UNCANCELLABLE_GRACE_PERIOD;
+            attack_state.status = AttackStatus::Windup { target: target.0 };
+            attack_state.phase_start_time = time.elapsed_secs();
             commands.trigger_targets(EventAttackWindupStart { target: target.0 }, entity);
         }
     }
@@ -232,36 +231,31 @@ fn on_command_attack_cast(
 fn on_command_attack_reset(
     trigger: Trigger<CommandAttackReset>,
     mut commands: Commands,
-    mut query: Query<(&mut AttackState, &mut AttackTimer)>,
+    mut query: Query<&mut AttackState>,
     time: Res<Time<Fixed>>,
 ) {
     let entity = trigger.target();
 
-    if let Ok((mut attack_state, mut timer)) = query.get_mut(entity) {
+    if let Ok(mut attack_state) = query.get_mut(entity) {
         match &attack_state.status {
             // 在前摇阶段重置 = 取消当前攻击 (通常是坏事)
             AttackStatus::Windup { .. } => {
                 info!("Attack reset during windup - cancelling attack");
                 attack_state.status = AttackStatus::Idle;
-                timer.phase_start_time = time.elapsed_secs();
+                attack_state.phase_start_time = time.elapsed_secs();
                 commands.trigger_targets(EventAttackCancel, entity);
             }
             // 在后摇阶段重置 = 跳过后摇，立刻开始下一次攻击 (好事)
             AttackStatus::Cooldown { target } => {
                 info!("Attack reset during cooldown - skipping to next attack");
-                attack_state.status = AttackStatus::Windup {
-                    target: *target,
-                    can_cancel: false, // 重置后的攻击也有不可取消期
-                };
-                timer.phase_start_time = time.elapsed_secs();
-                timer.uncancellable_windup = true;
-                timer.uncancellable_remaining = UNCANCELLABLE_GRACE_PERIOD;
+                attack_state.status = AttackStatus::Windup { target: *target };
+                attack_state.phase_start_time = time.elapsed_secs();
                 commands.trigger_targets(EventAttackReset, entity);
             }
             _ => {
                 // 在其他状态下重置攻击计时
                 attack_state.status = AttackStatus::Idle;
-                timer.phase_start_time = time.elapsed_secs();
+                attack_state.phase_start_time = time.elapsed_secs();
             }
         }
     }
@@ -270,69 +264,42 @@ fn on_command_attack_reset(
 fn on_command_attack_cancel(
     trigger: Trigger<CommandAttackCancel>,
     mut commands: Commands,
-    mut query: Query<(&mut AttackState, &mut AttackTimer)>,
+    mut query: Query<(&mut AttackState, &Attack)>,
     time: Res<Time<Fixed>>,
 ) {
     let entity = trigger.target();
 
-    if let Ok((mut attack_state, mut timer)) = query.get_mut(entity) {
-        // 检查是否可以取消
-        let can_cancel = match &attack_state.status {
-            AttackStatus::Windup { can_cancel, .. } => *can_cancel,
-            _ => true, // 其他状态都可以取消
-        };
+    if let Ok((mut attack_state, attack)) = query.get_mut(entity) {
+        let current_time = time.elapsed_secs();
+        let windup_time = attack.windup_time();
 
-        if can_cancel {
+        // 检查是否可以取消
+        if attack_state.can_cancel(current_time, windup_time) {
             attack_state.status = AttackStatus::Idle;
-            timer.phase_start_time = time.elapsed_secs();
-            timer.uncancellable_windup = false;
-            timer.uncancellable_remaining = 0.0;
+            attack_state.phase_start_time = current_time;
             commands.trigger_targets(EventAttackCancel, entity);
         }
     }
 }
 
 // 系统函数
-fn attack_timer_system(mut query: Query<(&mut AttackTimer, &Attack)>, time: Res<Time<Fixed>>) {
-    for (mut timer, _attack) in query.iter_mut() {
-        // 更新不可取消的剩余时间
-        if timer.uncancellable_remaining > 0.0 {
-            timer.uncancellable_remaining -= time.delta_secs();
-            if timer.uncancellable_remaining <= 0.0 {
-                timer.uncancellable_windup = false;
-            }
-        }
-    }
-}
-
 fn attack_state_machine_system(
-    mut query: Query<(Entity, &mut AttackState, &mut AttackTimer, &Attack)>,
+    mut query: Query<(Entity, &mut AttackState, &Attack)>,
     mut commands: Commands,
     time: Res<Time<Fixed>>,
 ) {
     let current_time = time.elapsed_secs();
 
-    for (entity, mut attack_state, mut timer, attack) in query.iter_mut() {
+    for (entity, mut attack_state, attack) in query.iter_mut() {
         match &attack_state.status.clone() {
-            AttackStatus::Windup { target, can_cancel } => {
-                let elapsed = current_time - timer.phase_start_time;
+            AttackStatus::Windup { target } => {
+                let elapsed = current_time - attack_state.phase_start_time;
                 let windup_time = attack.windup_time();
-
-                // 更新是否可以取消
-                let new_can_cancel = !timer.uncancellable_windup;
-                if *can_cancel != new_can_cancel {
-                    attack_state.status = AttackStatus::Windup {
-                        target: *target,
-                        can_cancel: new_can_cancel,
-                    };
-                }
 
                 // 检查前摇是否完成
                 if elapsed >= windup_time {
                     attack_state.status = AttackStatus::Cooldown { target: *target };
-                    timer.phase_start_time = current_time;
-                    timer.uncancellable_windup = false;
-                    timer.uncancellable_remaining = 0.0;
+                    attack_state.phase_start_time = current_time;
 
                     commands.trigger_targets(EventAttackWindupComplete { target: *target }, entity);
                     commands.trigger_targets(EventAttackCooldownStart { target: *target }, entity);
@@ -340,13 +307,13 @@ fn attack_state_machine_system(
             }
 
             AttackStatus::Cooldown { target: _ } => {
-                let elapsed = current_time - timer.phase_start_time;
+                let elapsed = current_time - attack_state.phase_start_time;
                 let cooldown_time = attack.cooldown_time();
 
                 // 检查后摇是否完成
                 if elapsed >= cooldown_time {
                     attack_state.status = AttackStatus::Idle;
-                    timer.phase_start_time = current_time;
+                    attack_state.phase_start_time = current_time;
 
                     commands.trigger_targets(EventAttackCooldownComplete, entity);
                 }
@@ -552,21 +519,23 @@ mod tests {
         app.world_mut().trigger_targets(CommandAttackCast, attacker);
         app.update();
 
-        // 验证进入前摇状态，初始时不可取消
+        // 验证进入前摇状态
         let attack_state = app.world().get::<AttackState>(attacker).unwrap();
         assert!(attack_state.is_windup());
-        if let AttackStatus::Windup { can_cancel, .. } = &attack_state.status {
-            assert!(!*can_cancel, "攻击在不可取消期内应该不能取消");
-        }
 
-        // 在不可取消期内尝试取消 (0.03秒后，仍在2帧宽限期内)
-        advance_time(&mut app, 0.03);
+        // 推进到攻击生效前的不可取消期 (0.3 - 0.066 = 0.234秒后)
+        // 此时距离攻击生效还有0.066秒，应该不可取消
+        advance_time(&mut app, 0.234);
 
-        // 验证仍然不可取消
-        let attack_state = app.world().get::<AttackState>(attacker).unwrap();
-        if let AttackStatus::Windup { can_cancel, .. } = &attack_state.status {
-            assert!(!*can_cancel, "攻击在不可取消期内应该不能取消");
-        }
+        // 验证此时不可取消
+        let can_cancel = {
+            let attack_state = app.world().get::<AttackState>(attacker).unwrap();
+            let attack = app.world().get::<Attack>(attacker).unwrap();
+            let current_time = app.world().resource::<Time<Fixed>>().elapsed_secs();
+            let windup_time = attack.windup_time();
+            attack_state.can_cancel(current_time, windup_time)
+        };
+        assert!(!can_cancel, "攻击生效前2帧应该不可取消");
 
         // 发送取消命令 - 应该被忽略
         app.world_mut()
@@ -601,14 +570,18 @@ mod tests {
         app.world_mut().trigger_targets(CommandAttackCast, attacker);
         app.update();
 
-        // 等待不可取消期结束 (0.1秒后，超过2帧宽限期)
+        // 等待到可取消期 (0.1秒后，距离攻击生效还有0.2秒，超过2帧宽限期)
         advance_time(&mut app, 0.1);
 
         // 验证现在可以取消
-        let attack_state = app.world().get::<AttackState>(attacker).unwrap();
-        if let AttackStatus::Windup { can_cancel, .. } = &attack_state.status {
-            assert!(*can_cancel, "攻击在不可取消期后应该可以取消");
-        }
+        let can_cancel = {
+            let attack_state = app.world().get::<AttackState>(attacker).unwrap();
+            let attack = app.world().get::<Attack>(attacker).unwrap();
+            let current_time = app.world().resource::<Time<Fixed>>().elapsed_secs();
+            let windup_time = attack.windup_time();
+            attack_state.can_cancel(current_time, windup_time)
+        };
+        assert!(can_cancel, "攻击在不可取消期后应该可以取消");
 
         // 发送取消命令
         app.world_mut()

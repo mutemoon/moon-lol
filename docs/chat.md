@@ -7,3 +7,5 @@
 多想一些单元测试，测试中要使用 CommandCommandAttack 作为攻击命令，因为在 Command 系统中我组合了 Target 系统和 Attack 系统的原子 Command
 
 不要使用直接修改状态的 trick 通过测试
+
+你理解错了，不是发起攻击后的两帧不可取消，而是攻击生效前的两帧是不可取消的，而且 AttackTimer 可以直接去掉了，需要保存的信息直接放在 AttackState 中，不要在 Windup 中存放 can_cancel
