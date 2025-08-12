@@ -357,9 +357,34 @@ fn attack_state_machine_system(
 
 #[cfg(test)]
 mod tests {
-    use crate::core::{PluginTarget, Target};
+    use crate::core::{CommandCommandAttack, PluginCommand, PluginTarget};
 
     use super::*;
+
+    fn create_test_app() -> App {
+        let mut app = App::new();
+        app.add_plugins(MinimalPlugins);
+        app.add_plugins(PluginTarget);
+        app.add_plugins(PluginAttack);
+        app.add_plugins(PluginCommand);
+
+        // 设置固定时间步长为30 FPS
+        app.insert_resource(Time::<Fixed>::from_hz(30.0));
+        app
+    }
+
+    fn advance_time(app: &mut App, seconds: f32) {
+        let ticks = (seconds * 30.0).ceil() as u32; // 30 FPS
+        for _ in 0..ticks {
+            // 手动推进固定时间步长
+            let mut time = app.world_mut().resource_mut::<Time<Fixed>>();
+            time.advance_by(std::time::Duration::from_secs_f32(1.0 / 30.0));
+            drop(time);
+
+            // 手动运行FixedUpdate调度
+            app.world_mut().run_schedule(FixedUpdate);
+        }
+    }
 
     #[test]
     fn test_attack_speed_calculations() {
@@ -422,45 +447,413 @@ mod tests {
     }
 
     #[test]
-    fn test_attack_state_machine_progression() {
-        let mut app = App::new();
-        app.add_plugins(MinimalPlugins);
-        app.add_plugins(PluginTarget);
-        app.add_plugins(PluginAttack);
+    fn test_command_attack_same_target() {
+        let mut app = create_test_app();
 
         let target_entity = app.world_mut().spawn_empty().id();
-
         let attacker = app
             .world_mut()
-            .spawn((
-                Attack {
-                    windup_config: WindupConfig::Legacy { attack_offset: 0.1 }, // 0.1秒前摇
-                    base_attack_speed: 1.0,                                     // 每秒1次攻击
-                    ..Default::default()
-                },
-                Target(target_entity),
-            ))
+            .spawn(Attack {
+                base_attack_speed: 1.0,                                     // 1秒攻击间隔
+                windup_config: WindupConfig::Legacy { attack_offset: 0.0 }, // 0.3秒前摇
+                ..Default::default()
+            })
             .id();
 
-        // 开始时处于空闲状态
-        {
-            let attack_state = app.world().get::<AttackState>(attacker).unwrap();
-            assert!(attack_state.is_idle());
-        }
-
-        // 开始攻击目标
-        app.world_mut().trigger_targets(CommandAttackCast, attacker);
-
-        // 处理观察者和系统
+        // 第一次攻击命令
+        app.world_mut().trigger_targets(
+            CommandCommandAttack {
+                target: target_entity,
+            },
+            attacker,
+        );
         app.update();
 
-        // 观察者处理命令后应该处于前摇状态
+        // 验证进入前摇状态
+        let attack_state = app.world().get::<AttackState>(attacker).unwrap();
+        assert!(attack_state.is_windup());
+        assert_eq!(attack_state.current_target(), Some(target_entity));
+
+        // 对同一目标发起第二次攻击命令 - 应该被忽略
+        app.world_mut().trigger_targets(
+            CommandCommandAttack {
+                target: target_entity,
+            },
+            attacker,
+        );
+        app.update();
+
+        // 状态应该保持不变
+        let attack_state = app.world().get::<AttackState>(attacker).unwrap();
+        assert!(attack_state.is_windup());
+        assert_eq!(attack_state.current_target(), Some(target_entity));
+    }
+
+    #[test]
+    fn test_command_attack_different_target() {
+        let mut app = create_test_app();
+
+        let target1 = app.world_mut().spawn_empty().id();
+        let target2 = app.world_mut().spawn_empty().id();
+        let attacker = app
+            .world_mut()
+            .spawn(Attack {
+                base_attack_speed: 1.0,
+                windup_config: WindupConfig::Legacy { attack_offset: 0.0 },
+                ..Default::default()
+            })
+            .id();
+
+        // 攻击第一个目标
+        app.world_mut()
+            .trigger_targets(CommandCommandAttack { target: target1 }, attacker);
+        app.update();
+
+        let attack_state = app.world().get::<AttackState>(attacker).unwrap();
+        assert!(attack_state.is_windup());
+        assert_eq!(attack_state.current_target(), Some(target1));
+
+        // 尝试攻击不同目标 - 在前摇期间应该被忽略
+        app.world_mut()
+            .trigger_targets(CommandCommandAttack { target: target2 }, attacker);
+        app.update();
+
+        // 目标应该保持为第一个目标
+        let attack_state = app.world().get::<AttackState>(attacker).unwrap();
+        assert!(attack_state.is_windup());
+        assert_eq!(attack_state.current_target(), Some(target1));
+    }
+
+    #[test]
+    fn test_attack_cancel_during_windup_early() {
+        let mut app = create_test_app();
+
+        let target_entity = app.world_mut().spawn_empty().id();
+        let attacker = app
+            .world_mut()
+            .spawn(Attack {
+                base_attack_speed: 1.0,
+                windup_config: WindupConfig::Legacy { attack_offset: 0.0 }, // 0.3秒前摇
+                ..Default::default()
+            })
+            .id();
+
+        // 开始攻击
+        app.world_mut().trigger_targets(
+            CommandCommandAttack {
+                target: target_entity,
+            },
+            attacker,
+        );
+        app.update();
+
+        // 验证进入前摇状态
+        let attack_state = app.world().get::<AttackState>(attacker).unwrap();
+        assert!(attack_state.is_windup());
+
+        // 在前摇早期尝试取消 (0.1秒后，远早于2帧宽限期)
+        advance_time(&mut app, 0.1);
+
+        // 验证仍然可以取消
+        let attack_state = app.world().get::<AttackState>(attacker).unwrap();
+        if let AttackStatus::Windup { can_cancel, .. } = &attack_state.status {
+            assert!(*can_cancel, "攻击在前摇早期应该可以取消");
+        }
+
+        // 发送取消命令
+        app.world_mut()
+            .trigger_targets(CommandAttackCancel, attacker);
+        app.update();
+
+        // 验证攻击被取消
+        let attack_state = app.world().get::<AttackState>(attacker).unwrap();
+        assert!(attack_state.is_idle());
+    }
+
+    #[test]
+    fn test_attack_cancel_logic() {
+        // 这个测试验证取消逻辑的核心功能
+        let mut app = create_test_app();
+
+        let target_entity = app.world_mut().spawn_empty().id();
+        let attacker = app
+            .world_mut()
+            .spawn(Attack {
+                base_attack_speed: 1.0,
+                windup_config: WindupConfig::Legacy { attack_offset: 0.0 },
+                ..Default::default()
+            })
+            .id();
+
+        // 测试可取消的攻击
+        {
+            let mut attack_state = app.world_mut().get_mut::<AttackState>(attacker).unwrap();
+            attack_state.status = AttackStatus::Windup {
+                target: target_entity,
+                can_cancel: true,
+            };
+        }
+
+        // 验证可以取消
+        app.world_mut()
+            .trigger_targets(CommandAttackCancel, attacker);
+        app.world_mut().flush();
+
+        let attack_state = app.world().get::<AttackState>(attacker).unwrap();
+        assert!(attack_state.is_idle(), "可取消的攻击应该被取消");
+
+        // 测试不可取消的攻击
+        {
+            let mut attack_state = app.world_mut().get_mut::<AttackState>(attacker).unwrap();
+            attack_state.status = AttackStatus::Windup {
+                target: target_entity,
+                can_cancel: false,
+            };
+        }
+
+        // 验证不能取消
+        app.world_mut()
+            .trigger_targets(CommandAttackCancel, attacker);
+        app.world_mut().flush();
+
+        let attack_state = app.world().get::<AttackState>(attacker).unwrap();
+        assert!(attack_state.is_windup(), "不可取消的攻击不应该被取消");
+    }
+
+    #[test]
+    fn test_attack_speed_change_during_windup() {
+        let mut app = create_test_app();
+
+        let target_entity = app.world_mut().spawn_empty().id();
+        let attacker = app
+            .world_mut()
+            .spawn(Attack {
+                base_attack_speed: 1.0, // 1秒攻击间隔，0.3秒前摇
+                bonus_attack_speed: 0.0,
+                windup_config: WindupConfig::Legacy { attack_offset: 0.0 },
+                ..Default::default()
+            })
+            .id();
+
+        // 开始攻击
+        app.world_mut().trigger_targets(
+            CommandCommandAttack {
+                target: target_entity,
+            },
+            attacker,
+        );
+        app.update();
+
+        // 记录初始前摇时间
+        let initial_windup_time = {
+            let attack = app.world().get::<Attack>(attacker).unwrap();
+            attack.windup_time()
+        };
+        assert_eq!(initial_windup_time, 0.3);
+
+        // 在前摇期间增加攻击速度
+        advance_time(&mut app, 0.1); // 前摇进行了0.1秒
+        {
+            let mut attack = app.world_mut().get_mut::<Attack>(attacker).unwrap();
+            attack.bonus_attack_speed = 1.0; // 增加100%攻击速度
+        }
+
+        // 新的前摇时间应该更短，但已经开始的前摇不会改变生效时间
+        let new_windup_time = {
+            let attack = app.world().get::<Attack>(attacker).unwrap();
+            attack.windup_time()
+        };
+        assert_eq!(new_windup_time, 0.3); // Legacy模式下前摇时间固定
+
+        // 继续推进时间直到原定的前摇结束
+        advance_time(&mut app, 0.2); // 总共0.3秒
+
+        // 验证攻击生效
+        let attack_state = app.world().get::<AttackState>(attacker).unwrap();
+        assert!(attack_state.is_cooldown(), "攻击应该在原定时间生效");
+    }
+
+    #[test]
+    fn test_full_attack_cycle() {
+        let mut app = create_test_app();
+
+        let target_entity = app.world_mut().spawn_empty().id();
+        let attacker = app
+            .world_mut()
+            .spawn(Attack {
+                base_attack_speed: 2.0,                                     // 0.5秒攻击间隔
+                windup_config: WindupConfig::Legacy { attack_offset: 0.0 }, // 0.3秒前摇
+                ..Default::default()
+            })
+            .id();
+
+        // 确保attacker有Target组件
+        app.world_mut()
+            .entity_mut(attacker)
+            .insert(crate::core::Target(target_entity));
+
+        // 验证攻击时间计算
+        {
+            let attack = app.world().get::<Attack>(attacker).unwrap();
+            assert!((attack.attack_interval() - 0.5).abs() < 0.001);
+            assert!((attack.windup_time() - 0.3).abs() < 0.001);
+            assert!((attack.cooldown_time() - 0.2).abs() < 0.001);
+        }
+
+        // 开始攻击
+        app.world_mut().trigger_targets(
+            CommandCommandAttack {
+                target: target_entity,
+            },
+            attacker,
+        );
+        app.update();
+
+        // 验证前摇状态
         {
             let attack_state = app.world().get::<AttackState>(attacker).unwrap();
-            // 注意: 这个测试验证观察者是否工作，完整的状态机测试
-            // 需要更复杂的设置和适当的时间模拟
-            assert!(attack_state.is_windup());
+            assert!(attack_state.is_windup(), "应该处于前摇状态");
         }
+
+        // 推进到前摇结束 - 需要稍微多一点时间来确保状态转换
+        advance_time(&mut app, 0.35);
+
+        // 验证进入后摇状态
+        {
+            let attack_state = app.world().get::<AttackState>(attacker).unwrap();
+            assert!(attack_state.is_cooldown(), "应该处于后摇状态");
+        }
+
+        // 推进到后摇结束
+        advance_time(&mut app, 0.25);
+
+        // 验证回到空闲状态
+        {
+            let attack_state = app.world().get::<AttackState>(attacker).unwrap();
+            assert!(attack_state.is_idle(), "应该回到空闲状态");
+        }
+    }
+
+    #[test]
+    fn test_attack_reset_during_cooldown() {
+        let mut app = create_test_app();
+
+        let target_entity = app.world_mut().spawn_empty().id();
+        let attacker = app
+            .world_mut()
+            .spawn(Attack {
+                base_attack_speed: 1.0, // 1秒攻击间隔，0.3秒前摇，0.7秒后摇
+                windup_config: WindupConfig::Legacy { attack_offset: 0.0 },
+                ..Default::default()
+            })
+            .id();
+
+        // 完成一次攻击到后摇阶段
+        app.world_mut().trigger_targets(
+            CommandCommandAttack {
+                target: target_entity,
+            },
+            attacker,
+        );
+        app.update();
+        advance_time(&mut app, 0.3); // 完成前摇
+
+        let attack_state = app.world().get::<AttackState>(attacker).unwrap();
+        assert!(attack_state.is_cooldown());
+
+        // 在后摇期间重置攻击 - 应该跳过后摇，立即开始下一次攻击
+        app.world_mut()
+            .trigger_targets(CommandAttackReset, attacker);
+        app.update();
+
+        // 验证立即进入新的前摇状态
+        let attack_state = app.world().get::<AttackState>(attacker).unwrap();
+        assert!(attack_state.is_windup());
+        assert_eq!(attack_state.current_target(), Some(target_entity));
+    }
+
+    #[test]
+    fn test_attack_reset_during_windup() {
+        let mut app = create_test_app();
+
+        let target_entity = app.world_mut().spawn_empty().id();
+        let attacker = app
+            .world_mut()
+            .spawn(Attack {
+                base_attack_speed: 1.0,
+                windup_config: WindupConfig::Legacy { attack_offset: 0.0 },
+                ..Default::default()
+            })
+            .id();
+
+        // 开始攻击
+        app.world_mut().trigger_targets(
+            CommandCommandAttack {
+                target: target_entity,
+            },
+            attacker,
+        );
+        app.update();
+
+        let attack_state = app.world().get::<AttackState>(attacker).unwrap();
+        assert!(attack_state.is_windup());
+
+        // 在前摇期间重置攻击 - 应该取消当前攻击
+        app.world_mut()
+            .trigger_targets(CommandAttackReset, attacker);
+        app.update();
+
+        // 验证回到空闲状态
+        let attack_state = app.world().get::<AttackState>(attacker).unwrap();
+        assert!(attack_state.is_idle());
+    }
+
+    #[test]
+    fn test_modern_windup_with_attack_speed_scaling() {
+        let mut app = create_test_app();
+
+        let target_entity = app.world_mut().spawn_empty().id();
+        let attacker = app
+            .world_mut()
+            .spawn(Attack {
+                base_attack_speed: 1.0,  // 1秒基础攻击间隔
+                bonus_attack_speed: 1.0, // 100%额外攻击速度，总共2.0攻击速度，0.5秒攻击间隔
+                windup_config: WindupConfig::Modern {
+                    attack_cast_time: 0.25,
+                    attack_total_time: 1.0,
+                }, // 25%前摇比例
+                ..Default::default()
+            })
+            .id();
+
+        let attack = app.world().get::<Attack>(attacker).unwrap();
+        // 前摇时间应该是: (0.25/1.0) * 0.5 = 0.125秒
+        assert_eq!(attack.windup_time(), 0.125);
+        // 后摇时间应该是: 0.5 - 0.125 = 0.375秒
+        assert_eq!(attack.cooldown_time(), 0.375);
+
+        // 测试完整攻击周期
+        app.world_mut().trigger_targets(
+            CommandCommandAttack {
+                target: target_entity,
+            },
+            attacker,
+        );
+        app.update();
+
+        // 前摇阶段
+        let attack_state = app.world().get::<AttackState>(attacker).unwrap();
+        assert!(attack_state.is_windup());
+
+        // 推进到前摇结束
+        advance_time(&mut app, 0.125);
+        let attack_state = app.world().get::<AttackState>(attacker).unwrap();
+        assert!(attack_state.is_cooldown());
+
+        // 推进到后摇结束
+        advance_time(&mut app, 0.375);
+        let attack_state = app.world().get::<AttackState>(attacker).unwrap();
+        assert!(attack_state.is_idle());
     }
 
     #[test]
