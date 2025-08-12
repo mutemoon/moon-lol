@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::core::{CommandAttackLock, CommandTargetSet};
+use crate::core::{CommandAttackCast, CommandTargetSet};
 
 #[derive(Event)]
 pub struct CommandCommandAttack {
@@ -23,5 +23,5 @@ pub fn command_attack(trigger: Trigger<CommandCommandAttack>, mut commands: Comm
         },
         trigger.target(),
     );
-    commands.trigger_targets(CommandAttackLock, trigger.target());
+    commands.trigger_targets(CommandAttackCast, trigger.target());
 }
