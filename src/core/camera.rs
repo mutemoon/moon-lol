@@ -1,8 +1,10 @@
 use crate::{
-    core::{map::MAP_HEIGHT, MAP_WIDTH},
+    core::{map::MAP_HEIGHT, Configs, MAP_WIDTH},
     system_debug, system_info,
 };
-use bevy::{input::mouse::MouseWheel, prelude::*, window::CursorGrabMode};
+use bevy::{
+    input::keyboard::KeyCode, input::mouse::MouseWheel, prelude::*, window::CursorGrabMode,
+};
 
 pub const CAMERA_OFFSET_X: f32 = 0.0;
 pub const CAMERA_OFFSET_Y: f32 = 1911.85;
@@ -21,10 +23,11 @@ pub struct PluginCamera;
 impl Plugin for PluginCamera {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, setup);
-        // app.add_systems(Startup, confine_cursor);
+        app.add_systems(Startup, confine_cursor);
         app.add_systems(Update, camera_focus);
         app.add_systems(Update, camera_zoom);
         app.add_systems(Update, edge_scroll_camera);
+        app.add_systems(Update, camera_navigation_center);
     }
 }
 
@@ -67,29 +70,23 @@ fn camera_zoom(
     for event in mouse_wheel_events.read() {
         system_debug!("camera_zoom", "Mouse wheel event: y={:.2}", event.y);
 
-        for mut transform in query.iter_mut() {
-            let before_z = transform.translation.z;
-            let before_y = transform.translation.y;
-            let pred_z = before_z - (event.y * CAMERA_OFFSET_Z / 100.0);
-
-            transform.translation.z = pred_z;
-            // transform.translation.z = pred_z.clamp(CAMERA_OFFSET_Z / 5.0, CAMERA_OFFSET_Z);
-
-            let delta_z = transform.translation.z - before_z;
-            let delta_y = delta_z * CAMERA_OFFSET_Y / CAMERA_OFFSET_Z;
-
-            transform.translation.y = transform.translation.y + delta_y;
-
-            system_debug!(
-                "camera_zoom",
-                "Camera zoom: Z {:.1} -> {:.1}, Y {:.1} -> {:.1}",
-                before_z,
-                transform.translation.z,
-                before_y,
-                transform.translation.y
-            );
+        if let Ok(mut transform) = query.single_mut() {
+            camera_zoom_by_mouse_wheel(&mut transform, event.y);
         }
     }
+}
+
+fn camera_zoom_by_mouse_wheel(transform: &mut Transform, y: f32) {
+    let before_z = transform.translation.z;
+    let pred_z = before_z - (y * CAMERA_OFFSET_Z / 100.0);
+
+    transform.translation.z = pred_z;
+    // transform.translation.z = pred_z.clamp(CAMERA_OFFSET_Z / 5.0, CAMERA_OFFSET_Z);
+
+    let delta_z = transform.translation.z - before_z;
+    let delta_y = delta_z * CAMERA_OFFSET_Y / CAMERA_OFFSET_Z;
+
+    transform.translation.y = transform.translation.y + delta_y;
 }
 
 fn edge_scroll_camera(window: Query<&Window>, mut camera: Query<&mut Transform, With<Camera3d>>) {
@@ -128,6 +125,27 @@ fn edge_scroll_camera(window: Query<&Window>, mut camera: Query<&mut Transform, 
 
                 transform.translation.z = transform.translation.z.clamp(min_z, max_z);
             }
+        }
+    }
+}
+
+fn camera_navigation_center(
+    keyboard_input: Res<ButtonInput<KeyCode>>,
+    configs: Res<Configs>,
+    mut camera: Query<&mut Transform, With<Camera3d>>,
+) {
+    if keyboard_input.just_pressed(KeyCode::KeyM) {
+        let center_pos = configs.navigation_grid.get_center_pos();
+
+        if let Ok(mut transform) = camera.single_mut() {
+            // 将相机对准导航网格中心
+            let new_position = center_pos + Vec3::new(0.0, CAMERA_OFFSET_Y, CAMERA_OFFSET_Z);
+            transform.translation = new_position;
+
+            // 调整相机朝向，看向中心点
+            transform.look_at(center_pos, Vec3::Y);
+
+            camera_zoom_by_mouse_wheel(&mut transform, -500.0);
         }
     }
 }

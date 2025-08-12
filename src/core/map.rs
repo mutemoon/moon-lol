@@ -87,7 +87,9 @@ pub fn spawn_environment_object(
         asset_server.load(config_env_object.material_path.clone());
 
     // 创建父实体
-    let parent_entity = commands.spawn(transform).id();
+    let parent_entity = commands
+        .spawn(transform.with_scale(transform.scale * config_env_object.skin_scale.unwrap_or(1.0)))
+        .id();
 
     // 构建骨骼实体映射
     let mut index_to_entity = vec![Entity::PLACEHOLDER; config_env_object.joints.len()];

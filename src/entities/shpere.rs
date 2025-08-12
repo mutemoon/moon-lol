@@ -1,9 +1,10 @@
-use bevy::{
-    color::palettes::tailwind, prelude::*,
-};
+use bevy::{color::palettes::tailwind, prelude::*};
 
 #[derive(Component)]
-pub struct DebugSphere;
+pub struct DebugSphere {
+    pub radius: f32,
+    pub color: Color,
+}
 
 pub struct PluginDebugSphere;
 

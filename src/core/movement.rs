@@ -1,18 +1,13 @@
-use crate::{
-    core::{navigation::Obstacle, Bounding},
-    system_debug,
-};
+use crate::{core::Bounding, system_debug};
 use bevy::prelude::*;
 use rvo2::RVOSimulatorWrapper;
 use serde::{Deserialize, Serialize};
-use std::{collections::HashMap, time::Instant};
-use vleue_navigator::prelude::*;
+use std::collections::HashMap;
 
 pub struct PluginMovement;
 
 impl Plugin for PluginMovement {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, setup);
         app.add_systems(FixedUpdate, (update, update_path_movement));
 
         app.add_event::<CommandMovementMoveTo>();
@@ -55,53 +50,9 @@ pub struct CommandMovementMoveTo(pub Vec2);
 #[derive(Event, Debug)]
 pub struct CommandMovementFollowPath(pub Vec<Vec2>);
 
-#[derive(Resource)]
-pub struct ObstacleVerticesArray(pub Vec<Vec<[f32; 2]>>);
-
-fn setup(
-    mut commands: Commands,
-    cachable_obstacles: Query<
-        (&GlobalTransform, &PrimitiveObstacle),
-        (With<Obstacle>, Without<Movement>),
-    >,
-) {
-    let start = Instant::now();
-
-    let mut obstacle_vertices_array = ObstacleVerticesArray(Vec::new());
-    for (global_transform, &primitive_obstacle) in cachable_obstacles.iter() {
-        let vertices = primitive_obstacle.get_polygons(
-            global_transform,
-            &Transform::default(),
-            (global_transform.forward(), 0.0),
-        );
-
-        let mut vertices_array: Vec<[f32; 2]> = vertices
-            .iter()
-            .flat_map(|v| v.iter().map(|v| [v.x, v.y]))
-            .collect();
-
-        vertices_array.reverse();
-        vertices_array.pop();
-
-        obstacle_vertices_array.0.push(vertices_array);
-    }
-    commands.insert_resource(obstacle_vertices_array);
-
-    debug!("init_obstacle: {:?}", start.elapsed());
-}
-
-fn create_simulator(
-    timer: &Res<Time<Fixed>>,
-    obstacle_vertices_array: &Res<ObstacleVerticesArray>,
-) -> RVOSimulatorWrapper {
+fn create_simulator(timer: &Res<Time<Fixed>>) -> RVOSimulatorWrapper {
     let mut simulator = RVOSimulatorWrapper::new();
     simulator.set_time_step(timer.timestep().as_secs_f32());
-
-    for vertices_array in obstacle_vertices_array.0.iter() {
-        simulator.add_obstacle(&vertices_array);
-    }
-
-    simulator.process_obstacles();
     simulator
 }
 
@@ -168,9 +119,8 @@ fn update(
     )>,
     mut q_transform: Query<&mut Transform>,
     timer: Res<Time<Fixed>>,
-    obstacle_vertices_array: Res<ObstacleVerticesArray>,
 ) {
-    let mut simulator = create_simulator(&timer, &obstacle_vertices_array);
+    let mut simulator = create_simulator(&timer);
     let mut entity_to_index = HashMap::new();
 
     // 添加代理到模拟器
@@ -224,9 +174,8 @@ fn update_path_movement(
     )>,
     mut q_transform: Query<&mut Transform>,
     timer: Res<Time<Fixed>>,
-    obstacle_vertices_array: Res<ObstacleVerticesArray>,
 ) {
-    let mut simulator = create_simulator(&timer, &obstacle_vertices_array);
+    let mut simulator = create_simulator(&timer);
     let mut entity_to_index = HashMap::new();
     let mut path_info = HashMap::new();
 
@@ -351,13 +300,6 @@ fn find_next_target_point(
 fn command_movement_move_to(trigger: Trigger<CommandMovementMoveTo>, mut commands: Commands) {
     let entity = trigger.target();
     let destination = trigger.event().0;
-
-    system_debug!(
-        "action_set_move_target",
-        "Entity {:?} received move command to {:?}",
-        entity,
-        destination,
-    );
 
     // 清除路径移动状态，切换到目标点移动
     commands.entity(entity).remove::<MovementPath>();

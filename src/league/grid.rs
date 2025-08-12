@@ -104,19 +104,27 @@ impl NavigationGridCell {
         }
     }
 
-    pub fn get_x(&self) -> i16 {
+    pub fn get_x(&self) -> usize {
         match self {
-            NavigationGridCell::Version3(cell) => cell.x,
-            NavigationGridCell::Version5(cell) => cell.x,
-            NavigationGridCell::Version7(cell) => cell.x,
+            NavigationGridCell::Version3(cell) => cell.x as usize,
+            NavigationGridCell::Version5(cell) => cell.x as usize,
+            NavigationGridCell::Version7(cell) => cell.x as usize,
         }
     }
 
-    pub fn get_z(&self) -> i16 {
+    pub fn get_z(&self) -> usize {
         match self {
-            NavigationGridCell::Version3(cell) => cell.z,
-            NavigationGridCell::Version5(cell) => cell.z,
-            NavigationGridCell::Version7(cell) => cell.z,
+            NavigationGridCell::Version3(cell) => cell.z as usize,
+            NavigationGridCell::Version5(cell) => cell.z as usize,
+            NavigationGridCell::Version7(cell) => cell.z as usize,
+        }
+    }
+
+    pub fn get_heuristic(&self) -> f32 {
+        match self {
+            NavigationGridCell::Version3(cell) => cell.heuristic,
+            NavigationGridCell::Version5(cell) => cell.heuristic,
+            NavigationGridCell::Version7(cell) => cell.heuristic,
         }
     }
 }

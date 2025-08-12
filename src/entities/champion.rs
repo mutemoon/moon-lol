@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
-use crate::core::{Navigator, Obstacle, Team};
+use crate::core::Team;
 
 #[derive(Component, Default)]
-#[require(Transform, Navigator, Team, Obstacle)]
+#[require(Transform, Team)]
 pub struct Champion {}

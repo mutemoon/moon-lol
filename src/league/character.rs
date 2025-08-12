@@ -227,6 +227,7 @@ pub struct SkinMeshDataProperties {
     pub skeleton: String,
     pub simple_skin: String,
     pub texture: String,
+    pub skin_scale: Option<f32>,
 }
 
 impl From<&BinEmbed> for SkinMeshDataProperties {
@@ -244,10 +245,15 @@ impl From<&BinEmbed> for SkinMeshDataProperties {
             .getv::<BinString>(LeagueLoader::hash_bin("texture").into())
             .unwrap();
 
+        let skin_scale = value
+            .getv::<BinFloat>(LeagueLoader::hash_bin("skinScale").into())
+            .map(|v| v.0);
+
         Self {
             skeleton,
             simple_skin: simple_skin.0.clone(),
             texture: texture.0.clone(),
+            skin_scale,
         }
     }
 }

@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
-use crate::core::{Obstacle, Team};
+use crate::core::Team;
 
 #[derive(Component)]
-#[require(Transform, Team, Obstacle)]
+#[require(Transform, Team)]
 pub struct Inhibitor;

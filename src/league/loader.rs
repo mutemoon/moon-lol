@@ -1,24 +1,3 @@
-use crate::core::{
-    ConfigAnimationGraph, ConfigEnvironmentObject, ConfigGeometryObject, ConfigJoint,
-    ConfigSkinnedMeshInverseBindposes, Configs, Health,
-};
-use crate::league::{
-    neg_mat_z, skinned_mesh_to_intermediate, submesh_to_intermediate, AnimationClipData,
-    AnimationGraphData, LeagueBinCharacterRecord, LeagueBinMaybeCharacterMapRecord, LeagueMaterial,
-    LeagueMinionPath, LeagueSkeleton, LeagueSkinnedMesh, LeagueSkinnedMeshInternal,
-    SkinCharacterDataProperties,
-};
-use crate::league::{
-    static_conversion::parse_vertex_data, LayerTransitionBehavior, LeagueMapGeo, LeagueTexture,
-};
-use bevy::transform::components::Transform;
-use bevy::{image::TextureError, scene::ron, scene::ron::de::SpannedError};
-use binrw::BinWrite;
-use binrw::{args, binread, io::NoSeek, BinRead, Endian};
-use cdragon_prop::{
-    BinEmbed, BinEntry, BinHash, BinList, BinMap, BinString, BinStruct, PropError, PropFile,
-};
-use serde::Serialize;
 use std::io::BufReader;
 #[cfg(unix)]
 use std::os::unix::fs::FileExt;
@@ -32,6 +11,30 @@ use std::{
     path::{Path, PathBuf},
     sync::Arc,
 };
+
+use crate::core::{
+    ConfigAnimationGraph, ConfigEnvironmentObject, ConfigGeometryObject, ConfigJoint,
+    ConfigNavigationGrid, ConfigNavigationGridCell, ConfigSkinnedMeshInverseBindposes, Configs,
+    Health,
+};
+use crate::league::{
+    neg_mat_z, skinned_mesh_to_intermediate, submesh_to_intermediate, AiMeshNGrid,
+    AnimationClipData, AnimationGraphData, LeagueBinCharacterRecord,
+    LeagueBinMaybeCharacterMapRecord, LeagueMaterial, LeagueMinionPath, LeagueSkeleton,
+    LeagueSkinnedMesh, LeagueSkinnedMeshInternal, SkinCharacterDataProperties,
+};
+use crate::league::{
+    static_conversion::parse_vertex_data, LayerTransitionBehavior, LeagueMapGeo, LeagueTexture,
+};
+
+use bevy::transform::components::Transform;
+use bevy::{image::TextureError, scene::ron, scene::ron::de::SpannedError};
+use binrw::BinWrite;
+use binrw::{args, binread, io::NoSeek, BinRead, Endian};
+use cdragon_prop::{
+    BinEmbed, BinEntry, BinHash, BinList, BinMap, BinString, BinStruct, PropError, PropFile,
+};
+use serde::Serialize;
 use tokio::{fs::File as AsyncFile, io::AsyncWriteExt};
 use twox_hash::XxHash64;
 use zstd::Decoder;
@@ -344,10 +347,62 @@ impl LeagueLoader {
             configs.minion_paths.insert(path.lane, path.path);
         }
 
+        configs.navigation_grid = self.load_navigation_grid().await?;
+
         // 保存最终配置文件
         save_struct_to_file("configs.ron", &configs).await?;
 
         Ok(configs)
+    }
+
+    pub async fn load_navigation_grid(&self) -> Result<ConfigNavigationGrid, LeagueLoaderError> {
+        let map_container = self
+            .materials_bin
+            .entries
+            .iter()
+            .find(|v| v.ctype.hash == Self::hash_bin("MapContainer"))
+            .unwrap();
+
+        let components = map_container
+            .getv::<BinList>(Self::hash_bin("components").into())
+            .unwrap();
+
+        let map_nav_grid = components
+            .downcast::<BinStruct>()
+            .unwrap()
+            .iter()
+            .find(|v| v.ctype.hash == Self::hash_bin("MapNavGrid"))
+            .unwrap();
+
+        let nav_grid_path = map_nav_grid
+            .getv::<BinString>(Self::hash_bin("NavGridPath").into())
+            .unwrap()
+            .0
+            .clone();
+
+        let mut reader = self.get_wad_entry_reader_by_path(&nav_grid_path).unwrap();
+
+        let nav_grid = AiMeshNGrid::read(&mut reader).unwrap();
+
+        let min_grid_pos = nav_grid.header.min_grid_pos.unwrap().0;
+        let cell_size = nav_grid.header.cell_size.unwrap();
+        let x_len = nav_grid.header.x_cell_count.unwrap() as usize;
+        let y_len = nav_grid.header.y_cell_count.unwrap() as usize;
+        let mut cells: Vec<Vec<ConfigNavigationGridCell>> =
+            vec![vec![ConfigNavigationGridCell::default(); y_len]; x_len];
+
+        nav_grid.navigation_grid.iter().for_each(|v| {
+            cells[v.get_x()][v.get_z()].y = v.get_height();
+            cells[v.get_x()][v.get_z()].heuristic = v.get_heuristic();
+        });
+
+        Ok(ConfigNavigationGrid {
+            min_grid_pos,
+            cell_size,
+            x_len,
+            y_len,
+            cells,
+        })
     }
 
     pub fn find_and_load_image_for_submesh(&self, material_name: &str) -> Option<LeagueMaterial> {
@@ -511,6 +566,9 @@ impl LeagueLoader {
         .await?;
 
         Ok(ConfigEnvironmentObject {
+            skin_scale: skin_character_data_properties
+                .skin_mesh_properties
+                .skin_scale,
             material_path,
             submesh_paths,
             joint_influences_indices: league_skeleton.modern_data.influences,

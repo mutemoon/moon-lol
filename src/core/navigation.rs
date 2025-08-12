@@ -1,152 +1,66 @@
-use super::{Movement, MovementDestination};
-use crate::core::{MAP_HEIGHT, MAP_WIDTH};
-use crate::{system_debug, system_info, system_warn};
-use bevy::{app::App, math::vec2, prelude::*};
-use vleue_navigator::{
-    prelude::{ObstacleSource, PrimitiveObstacle},
-    NavMesh,
-};
+use bevy::prelude::*;
 
-#[derive(Component, Default)]
-pub struct Navigator;
-
-#[derive(Component, Default)]
-pub struct Obstacle;
-
-#[derive(Resource)]
-pub struct GlobalNavMesh(NavMesh);
+use crate::core::{Configs, Movement};
 
 pub struct PluginNavigaton;
 
 impl Plugin for PluginNavigaton {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, setup);
+        // 可视化导航网格
+        // app.add_systems(Startup, setup);
         app.add_systems(FixedPreUpdate, update);
     }
 }
 
-fn setup(
-    mut commands: Commands,
-    cachable_obstacles: Query<
-        (&GlobalTransform, &PrimitiveObstacle),
-        (With<Obstacle>, Without<Movement>),
-    >,
-) {
-    let obstacle_count = cachable_obstacles.iter().count();
-    system_info!(
-        "navigation_setup",
-        "Setting up navigation mesh with {} obstacles",
-        obstacle_count
-    );
+// fn setup(
+//     mut commands: Commands,
+//     configs: Res<Configs>,
+//     mut meshes: ResMut<Assets<Mesh>>,
+//     mut materials: ResMut<Assets<StandardMaterial>>,
+// ) {
+//     let navigation_grid = &configs.navigation_grid;
 
-    let polygons: Vec<_> = cachable_obstacles
-        .iter()
-        .flat_map(|(global_transform, obstacle)| {
-            obstacle.get_polygons(
-                global_transform,
-                &Transform::default(),
-                (global_transform.forward(), 0.0),
-            )
-        })
-        .collect();
+//     let mut max_heuristic = 0.0;
 
-    system_debug!(
-        "navigation_setup",
-        "Generated {} polygons from obstacles",
-        polygons.len()
-    );
+//     for row in navigation_grid.cells.iter() {
+//         for cell in row.iter() {
+//             if let Some(cell) = cell {
+//                 if cell.heuristic > max_heuristic {
+//                     max_heuristic = cell.heuristic;
+//                 }
+//             }
+//         }
+//     }
 
-    let navmesh = NavMesh::from_edge_and_obstacles(
-        vec![
-            vec2(0.0, 0.0),
-            vec2(MAP_WIDTH, 0.0),
-            vec2(MAP_WIDTH, MAP_HEIGHT),
-            vec2(0.0, MAP_HEIGHT),
-        ],
-        polygons,
-    );
+//     let mesh = meshes.add(Sphere::new(navigation_grid.cell_size / 2.0));
 
-    system_info!(
-        "navigation_setup",
-        "Navigation mesh created successfully with bounds {}x{}",
-        MAP_WIDTH,
-        MAP_HEIGHT
-    );
-    commands.insert_resource(GlobalNavMesh(navmesh));
-}
+//     for (x, row) in navigation_grid.cells.iter().enumerate() {
+//         for (y, cell) in row.iter().enumerate() {
+//             if let Some(cell) = cell {
+//                 let material = materials.add(Color::srgb(
+//                     f32::min(cell.heuristic / (max_heuristic / 5.0), 1.0),
+//                     0.0,
+//                     0.0,
+//                 ));
+//                 commands.spawn((
+//                     Mesh3d(mesh.clone()),
+//                     MeshMaterial3d(material.clone()),
+//                     Transform::from_translation(navigation_grid.get_cell_pos(x, y)),
+//                 ));
+//             }
+//         }
+//     }
+// }
 
-fn update(
-    mut commands: Commands,
-    mut query_navigator: Query<(Entity, &MovementDestination, &mut Transform), With<Navigator>>,
-    navmeshes: Res<GlobalNavMesh>,
-) {
-    let navmesh = &navmeshes.0;
-    let navigator_count = query_navigator.iter().count();
+fn update(configs: Res<Configs>, mut q_movement: Query<&mut Transform, With<Movement>>) {
+    for mut transform in q_movement.iter_mut() {
+        let cell = configs
+            .navigation_grid
+            .get_cell_by_pos(transform.translation);
+        transform.translation.y = cell.y;
 
-    if navigator_count > 0 {
-        system_debug!(
-            "update_navigator",
-            "Updating navigation for {} entities",
-            navigator_count
-        );
-    }
-
-    let mut path_found_count = 0;
-    let mut path_failed_count = 0;
-
-    for (entity, movement_destination, transform) in query_navigator.iter_mut() {
-        let target = movement_destination.0;
-        let start = transform.translation.xz();
-
-        if start == target {
-            continue;
+        if transform.translation.y < 0.0 {
+            transform.translation.y = 0.0;
         }
-
-        system_debug!(
-            "update_navigator",
-            "Finding path from ({:.1}, {:.1}) to ({:.1}, {:.1})",
-            start.x,
-            start.y,
-            target.x,
-            target.y
-        );
-
-        let Some(path) = navmesh.path(start, target) else {
-            system_warn!(
-                "update_navigator",
-                "Failed to find path from ({:.1}, {:.1}) to ({:.1}, {:.1})",
-                start.x,
-                start.y,
-                target.x,
-                target.y
-            );
-            path_failed_count += 1;
-            continue;
-        };
-
-        let path = path.path;
-        if !path.is_empty() {
-            let next_waypoint = path[0];
-            system_debug!(
-                "update_navigator",
-                "Path found with {} waypoints, next waypoint: ({:.1}, {:.1})",
-                path.len(),
-                next_waypoint.x,
-                next_waypoint.y
-            );
-            commands
-                .entity(entity)
-                .insert(MovementDestination(next_waypoint));
-            path_found_count += 1;
-        }
-    }
-
-    if path_found_count > 0 || path_failed_count > 0 {
-        system_info!(
-            "update_navigator",
-            "Navigation update complete: {} paths found, {} paths failed",
-            path_found_count,
-            path_failed_count
-        );
     }
 }

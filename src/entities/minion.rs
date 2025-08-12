@@ -1,13 +1,12 @@
 use crate::core::{
     Attack, Bounding, CommandMovementFollowPath, CommandMovementMoveTo, CommandTargetRemove,
-    CommandTargetSet, EventAttackDone, EventDead, EventMovementMoveEnd, Navigator, Obstacle,
-    Target, Team,
+    CommandTargetSet, EventAttackDone, EventDead, EventMovementMoveEnd, EventSpawn, Target, Team,
 };
 use bevy::{app::Plugin, prelude::*};
 use serde::{Deserialize, Serialize};
 
 #[derive(Component, Debug, Clone, Copy, Serialize, Deserialize)]
-#[require(MinionState, Navigator, Team, Obstacle, AggroInfo)]
+#[require(MinionState, Team, AggroInfo)]
 pub enum Minion {
     Siege,
     Melee,
@@ -54,7 +53,7 @@ impl Plugin for PluginMinion {
         app.add_event::<EventMinionChasingTimeout>();
         app.add_event::<ChasingTooMuch>();
         app.add_systems(FixedPostUpdate, minion_aggro);
-        app.add_systems(FixedUpdate, on_spawn);
+        app.add_observer(on_spawn);
         app.add_observer(action_continue_minion_path);
         app.add_observer(on_found_aggro_target);
         app.add_observer(on_target_dead);
@@ -248,13 +247,17 @@ fn on_target_dead(
     }
 }
 
-fn on_spawn(mut commands: Commands, mut q_minion_state: Query<(Entity, &mut MinionState)>) {
-    for (entity, mut minion_state) in q_minion_state.iter_mut() {
+fn on_spawn(
+    trigger: Trigger<EventSpawn>,
+    mut commands: Commands,
+    mut q_minion_state: Query<&mut MinionState>,
+) {
+    let entity = trigger.target();
+    if let Ok(mut minion_state) = q_minion_state.get_mut(entity) {
         match *minion_state {
             MinionState::MovingOnPath => {
                 *minion_state = MinionState::MovingOnPath;
-                let action = CommandMinionContinuePath;
-                commands.trigger_targets(action, entity);
+                commands.trigger_targets(CommandMinionContinuePath, entity);
             }
             _ => (),
         }

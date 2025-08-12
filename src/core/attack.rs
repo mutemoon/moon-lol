@@ -89,16 +89,6 @@ impl Attack {
     pub fn cooldown_time(&self) -> f32 {
         self.attack_interval() - self.windup_time()
     }
-
-    fn windup_percent(&self) -> f32 {
-        match self.windup_config {
-            WindupConfig::Legacy { .. } => 0.3,
-            WindupConfig::Modern {
-                attack_cast_time,
-                attack_total_time,
-            } => attack_cast_time / attack_total_time,
-        }
-    }
 }
 
 /// 前摇时间配置方式
