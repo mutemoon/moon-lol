@@ -1,9 +1,8 @@
 use crate::{
     core::Configs,
     league::{
-        get_struct_from_file, LeagueLoaderAnimationClip, LeagueLoaderAnimationGraph,
-        LeagueLoaderImage, LeagueLoaderMaterial, LeagueLoaderMesh,
-        LeagueLoaderSkinnedMeshInverseBindposes,
+        get_struct_from_file, LeagueLoaderAnimationClip, LeagueLoaderImage, LeagueLoaderMaterial,
+        LeagueLoaderMesh, LeagueLoaderSkinnedMeshInverseBindposes,
     },
 };
 
@@ -17,7 +16,6 @@ impl Plugin for PluginResource {
         app.init_asset_loader::<LeagueLoaderImage>();
         app.init_asset_loader::<LeagueLoaderMesh>();
         app.init_asset_loader::<LeagueLoaderAnimationClip>();
-        app.init_asset_loader::<LeagueLoaderAnimationGraph>();
         app.init_asset_loader::<LeagueLoaderSkinnedMeshInverseBindposes>();
 
         let configs: Configs = get_struct_from_file("configs").unwrap();

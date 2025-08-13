@@ -174,6 +174,7 @@ fn barracks_spawning_system(
     inhibitor_state: Res<InhibitorState>,
     mut commands: Commands,
     mut query: Query<(&GlobalTransform, &Barrack, &mut BarrackState, &Team, &Lane)>,
+    mut res_animation_graph: ResMut<Assets<AnimationGraph>>,
     res_game_config: Res<Configs>,
     time: Res<Time>,
 ) {
@@ -280,6 +281,7 @@ fn barracks_spawning_system(
 
                     let entity = spawn_environment_object(
                         &mut commands,
+                        &mut res_animation_graph,
                         &asset_server,
                         transform.compute_transform(),
                         &config_environment_object,
@@ -324,10 +326,16 @@ fn calculate_spawn_count(
         WaveBehavior::ConstantWaveBehavior { spawn_count } => *spawn_count,
         WaveBehavior::InhibitorWaveBehavior {
             spawn_count_per_inhibitor_down,
-        } => spawn_count_per_inhibitor_down
-            .get(inhibitor_state.inhibitors_down)
-            .copied()
-            .unwrap_or(0),
+        } => {
+            if inhibitor_state.inhibitors_down == 0 {
+                return 0;
+            }
+
+            spawn_count_per_inhibitor_down
+                .get(inhibitor_state.inhibitors_down - 1)
+                .copied()
+                .unwrap_or(0)
+        }
         WaveBehavior::RotatingWaveBehavior {
             spawn_counts_by_wave,
         } => {

@@ -31,16 +31,16 @@ pub struct PluginCore;
 impl bevy::app::Plugin for PluginCore {
     fn build(&self, app: &mut bevy::prelude::App) {
         app.add_plugins((
+            PluginAnimation,
             PluginAttack,
+            PluginCamera,
             PluginDamage,
             PluginLife,
-            PluginTarget,
+            PluginMap,
             PluginMovement,
             PluginNavigaton,
-            PluginAnimation,
-            PluginCamera,
-            PluginMap,
             PluginResource,
+            PluginTarget,
             PluginUI,
         ));
     }

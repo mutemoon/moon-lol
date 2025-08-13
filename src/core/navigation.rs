@@ -3,6 +3,7 @@ use std::cmp::Ordering;
 use std::collections::{BinaryHeap, HashMap};
 
 use crate::core::{Configs, Movement};
+use crate::league::VisionPathingFlags;
 
 pub struct PluginNavigaton;
 
@@ -62,7 +63,7 @@ pub fn find_path(configs: &Configs, start: Vec3, end: Vec3) -> Option<Vec<Vec2>>
     let start_pos = world_to_grid(grid, start);
     let end_pos = world_to_grid(grid, end);
 
-    info!(
+    debug!(
         "A* pathfinding: start=({}, {}) end=({}, {})",
         start_pos.x, start_pos.y, end_pos.x, end_pos.y
     );
@@ -109,7 +110,7 @@ pub fn find_path(configs: &Configs, start: Vec3, end: Vec3) -> Option<Vec<Vec2>>
         }
 
         if current.pos == end_pos {
-            info!("A* pathfinding: Found path in {} iterations", iterations);
+            debug!("A* pathfinding: Found path in {} iterations", iterations);
             // 重建路径
             let mut path = Vec::new();
             let mut current_pos = end_pos;
@@ -125,7 +126,7 @@ pub fn find_path(configs: &Configs, start: Vec3, end: Vec3) -> Option<Vec<Vec2>>
             path.push(Vec2::new(start_world.x, start_world.z));
 
             path.reverse();
-            info!("A* pathfinding: Generated path with {} points", path.len());
+            debug!("A* pathfinding: Generated path with {} points", path.len());
             return Some(path);
         }
 
@@ -217,16 +218,27 @@ fn get_neighbors(grid: &crate::core::ConfigNavigationGrid, pos: GridPos) -> Vec<
         let new_x = pos.x as i32 + dx;
         let new_y = pos.y as i32 + dy;
 
-        if new_x >= 0 && new_y >= 0 {
-            let neighbor_pos = GridPos {
-                x: new_x as usize,
-                y: new_y as usize,
-            };
-
-            if is_valid_pos(grid, neighbor_pos) {
-                neighbors.push(neighbor_pos);
-            }
+        if new_x < 0 || new_y < 0 {
+            continue;
         }
+
+        let pos = GridPos {
+            x: new_x as usize,
+            y: new_y as usize,
+        };
+
+        if !is_valid_pos(grid, pos) {
+            continue;
+        }
+
+        if grid.cells[pos.x][pos.y]
+            .vision_pathing_flags
+            .contains(VisionPathingFlags::Wall)
+        {
+            continue;
+        }
+
+        neighbors.push(pos);
     }
 
     neighbors
@@ -238,7 +250,7 @@ fn distance_cost(grid: &crate::core::ConfigNavigationGrid, from: GridPos, to: Gr
 
     // 对角线移动成本更高
     if dx == 1.0 && dy == 1.0 {
-        1.414 * grid.cell_size // sqrt(2)
+        1.414 * grid.cell_size
     } else {
         grid.cell_size
     }
@@ -246,8 +258,8 @@ fn distance_cost(grid: &crate::core::ConfigNavigationGrid, from: GridPos, to: Gr
 
 fn heuristic_cost(grid: &crate::core::ConfigNavigationGrid, from: GridPos, to: GridPos) -> f32 {
     // 使用预制的启发式值加上欧几里得距离
-    let cell_heuristic = -grid.cells[from.x][from.y].heuristic;
-    // let cell_heuristic = 0.0;
+    // let cell_heuristic = -grid.cells[from.x][from.y].heuristic;
+    let cell_heuristic = 0.0;
 
     let dx = (to.x as i32 - from.x as i32).abs() as f32;
     let dy = (to.y as i32 - from.y as i32).abs() as f32;

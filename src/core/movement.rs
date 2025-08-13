@@ -49,7 +49,14 @@ impl MovementState {
         self.velocity = Vec2::ZERO;
         self.direction = Vec2::ZERO;
     }
+
+    pub fn is_moving(&self) -> bool {
+        self.current_target_index < self.path.len() - 1
+    }
 }
+
+#[derive(Event, Debug)]
+pub struct EventMovementStart;
 
 #[derive(Event, Debug)]
 pub struct EventMovementMoveEnd;
@@ -98,7 +105,7 @@ fn update_path_movement(
                 // 更新旋转朝向移动方向
                 if movement_state.velocity.length() > 0.1 {
                     transform.rotation = Quat::from_rotation_y(
-                        movement_state.velocity.y.atan2(movement_state.velocity.x),
+                        movement_state.velocity.x.atan2(movement_state.velocity.y),
                     );
                 }
             } else {
@@ -178,6 +185,7 @@ fn find_next_target_point(
 
 fn command_movement_move_to(
     trigger: Trigger<CommandMovementMoveTo>,
+    mut commands: Commands,
     configs: Res<Configs>,
     mut q_transform: Query<(&Transform, &mut MovementState)>,
 ) {
@@ -193,12 +201,14 @@ fn command_movement_move_to(
         if let Some(path) = navigation::find_path(&configs, start_pos, end_pos) {
             // 设置新的路径
             movement_state.set_path(path);
+            commands.trigger_targets(EventMovementStart, entity);
         }
     }
 }
 
 fn command_movement_follow_path(
     trigger: Trigger<CommandMovementFollowPath>,
+    mut commands: Commands,
     mut q_transform: Query<(&Transform, &mut MovementState)>,
 ) {
     let entity = trigger.target();
@@ -208,6 +218,7 @@ fn command_movement_follow_path(
         // 设置新路径
         if let Ok((_, mut movement_state)) = q_transform.get_mut(entity) {
             movement_state.set_path(path);
+            commands.trigger_targets(EventMovementStart, entity);
         }
     }
 }

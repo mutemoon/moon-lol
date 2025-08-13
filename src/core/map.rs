@@ -1,4 +1,6 @@
-use crate::core::Configs;
+use std::collections::HashMap;
+
+use crate::core::{Animation, Configs};
 use crate::core::{ConfigEnvironmentObject, ConfigGeometryObject};
 use bevy::animation::{AnimationTarget, AnimationTargetId};
 use bevy::asset::uuid::Uuid;
@@ -23,15 +25,26 @@ impl Plugin for PluginMap {
     }
 }
 
-fn setup(mut commands: Commands, configs: Res<Configs>, asset_server: Res<AssetServer>) {
+fn setup(
+    mut commands: Commands,
+    mut res_animation_graph: ResMut<Assets<AnimationGraph>>,
+    asset_server: Res<AssetServer>,
+    configs: Res<Configs>,
+) {
     spawn_geometry_objects_from_configs(&mut commands, &asset_server, &configs);
 
-    spawn_environment_objects_from_configs(&mut commands, &asset_server, &configs);
+    spawn_environment_objects_from_configs(
+        &mut commands,
+        &mut res_animation_graph,
+        &asset_server,
+        &configs,
+    );
 }
 
 /// 从Config中的ConfigEnvironmentObject生成环境对象实体
 pub fn spawn_environment_object(
     commands: &mut Commands,
+    res_animation_graph: &mut ResMut<Assets<AnimationGraph>>,
     asset_server: &Res<AssetServer>,
     transform: Transform,
     config_env_object: &ConfigEnvironmentObject,
@@ -74,14 +87,21 @@ pub fn spawn_environment_object(
         }
     }
 
-    let animation_player = AnimationPlayer::default();
+    let mut animation_graph = AnimationGraph::new();
+    let mut hash_to_node_index = HashMap::new();
 
-    let animation_graph_handle: Handle<AnimationGraph> =
-        asset_server.load(config_env_object.animation_graph_path.clone());
+    for (hash, clip_path) in &config_env_object.clip_map {
+        let clip = asset_server.load(clip_path.clone());
+        let node_index = animation_graph.add_clip(clip, 1.0, animation_graph.root);
+        hash_to_node_index.insert(*hash, node_index);
+    }
+
+    let graph_handle = res_animation_graph.add(animation_graph);
 
     commands.entity(parent_entity).insert((
-        animation_player,
-        AnimationGraphHandle(animation_graph_handle),
+        AnimationPlayer::default(),
+        Animation { hash_to_node_index },
+        AnimationGraphHandle(graph_handle),
     ));
 
     // 加载和创建mesh实体
@@ -112,14 +132,20 @@ pub fn spawn_environment_object(
 /// 从Configs批量生成所有环境对象
 pub fn spawn_environment_objects_from_configs(
     commands: &mut Commands,
+    res_animation_graph: &mut ResMut<Assets<AnimationGraph>>,
     asset_server: &Res<AssetServer>,
     configs: &Configs,
 ) -> Vec<Entity> {
     let mut entities = Vec::new();
 
     for (transform, config_env_object, _) in &configs.environment_objects {
-        let entity =
-            spawn_environment_object(commands, asset_server, *transform, config_env_object);
+        let entity = spawn_environment_object(
+            commands,
+            res_animation_graph,
+            asset_server,
+            *transform,
+            config_env_object,
+        );
         entities.push(entity);
     }
 

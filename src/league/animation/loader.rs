@@ -1,9 +1,9 @@
 use crate::{
-    core::{ConfigAnimationGraph, ConfigSkinnedMeshInverseBindposes},
+    core::ConfigSkinnedMeshInverseBindposes,
     league::{AnimationData, AnimationFile, LeagueLoaderError},
 };
 use bevy::{
-    animation::{graph::AnimationGraph, AnimationClip},
+    animation::AnimationClip,
     asset::{AssetLoader, LoadContext},
     render::mesh::skinning::SkinnedMeshInverseBindposes,
 };
@@ -32,35 +32,6 @@ impl AssetLoader for LeagueLoaderAnimationClip {
         let animation = AnimationFile::read(&mut reader)?;
 
         Ok(AnimationData::from(animation).into())
-    }
-}
-
-#[derive(Default)]
-pub struct LeagueLoaderAnimationGraph;
-
-impl AssetLoader for LeagueLoaderAnimationGraph {
-    type Asset = AnimationGraph;
-
-    type Settings = ();
-
-    type Error = LeagueLoaderError;
-
-    async fn load(
-        &self,
-        reader: &mut dyn bevy::asset::io::Reader,
-        _settings: &Self::Settings,
-        load_context: &mut LoadContext<'_>,
-    ) -> Result<Self::Asset, Self::Error> {
-        let mut buf = Vec::new();
-        reader.read_to_end(&mut buf).await?;
-        let animation: ConfigAnimationGraph = bincode::deserialize(&buf)?;
-        let animation_clips = animation
-            .clip_paths
-            .iter()
-            .map(|v| load_context.load(v))
-            .collect::<Vec<_>>();
-        let (graph, _) = AnimationGraph::from_clips(animation_clips);
-        Ok(graph)
     }
 }
 

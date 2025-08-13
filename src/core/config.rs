@@ -33,18 +33,13 @@ pub struct ConfigGeometryObject {
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct ConfigEnvironmentObject {
-    pub animation_graph_path: String,
+    pub clip_map: HashMap<u32, String>,
     pub inverse_bind_pose_path: String,
     pub joint_influences_indices: Vec<i16>,
     pub joints: Vec<ConfigJoint>,
     pub material_path: String,
     pub skin_scale: Option<f32>,
     pub submesh_paths: Vec<String>,
-}
-
-#[derive(Clone, Serialize, Deserialize)]
-pub struct ConfigAnimationGraph {
-    pub clip_paths: Vec<String>,
 }
 
 #[derive(Clone, Serialize, Deserialize)]

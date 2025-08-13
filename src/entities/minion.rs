@@ -6,7 +6,7 @@ use crate::core::{
 use bevy::{app::Plugin, color::palettes, prelude::*};
 use serde::{Deserialize, Serialize};
 
-#[derive(Component, Debug, Clone, Copy, Serialize, Deserialize)]
+#[derive(Component, Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 #[require(MinionState, Team, AggroInfo)]
 pub enum Minion {
     Siege,

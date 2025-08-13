@@ -275,47 +275,41 @@ impl From<&BinEmbed> for SkinAnimationProperties {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct AnimationGraphData {
-    pub clip_data_map: HashMap<u32, AnimationClipData>,
+    pub clip_data_map: HashMap<u32, AnimationAtomicClipData>,
 }
 
 impl From<&BinEntry> for AnimationGraphData {
     fn from(value: &BinEntry) -> Self {
+        let hash = LeagueLoader::hash_bin("AtomicClipData");
+
         let clip_data_map = value
             .getv::<BinMap>(LeagueLoader::hash_bin("mClipDataMap").into())
             .unwrap()
             .downcast::<BinHash, BinStruct>()
             .unwrap()
             .iter()
+            .filter(|(_, v)| v.ctype.hash == hash)
             .map(|(k, v)| (k.0.hash, v.into()))
             .collect();
 
-        Self { clip_data_map }
+        AnimationGraphData { clip_data_map }
     }
 }
 
 #[derive(Debug)]
-pub enum AnimationClipData {
-    AtomicClipData {
-        animation_resource_data: AnimationResourceData,
-    },
-    Unknown,
+pub struct AnimationAtomicClipData {
+    pub animation_resource_data: AnimationResourceData,
 }
 
-impl From<&BinStruct> for AnimationClipData {
+impl From<&BinStruct> for AnimationAtomicClipData {
     fn from(value: &BinStruct) -> Self {
-        let hash = LeagueLoader::hash_bin("AtomicClipData");
-
-        if value.ctype.hash == hash {
-            AnimationClipData::AtomicClipData {
-                animation_resource_data: value
-                    .getv::<BinEmbed>(LeagueLoader::hash_bin("mAnimationResourceData").into())
-                    .unwrap()
-                    .into(),
-            }
-        } else {
-            AnimationClipData::Unknown
+        AnimationAtomicClipData {
+            animation_resource_data: value
+                .getv::<BinEmbed>(LeagueLoader::hash_bin("mAnimationResourceData").into())
+                .unwrap()
+                .into(),
         }
     }
 }
