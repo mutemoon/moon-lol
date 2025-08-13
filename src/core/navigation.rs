@@ -62,13 +62,20 @@ pub fn find_path(configs: &Configs, start: Vec3, end: Vec3) -> Option<Vec<Vec2>>
     let start_pos = world_to_grid(grid, start);
     let end_pos = world_to_grid(grid, end);
 
+    info!(
+        "A* pathfinding: start=({}, {}) end=({}, {})",
+        start_pos.x, start_pos.y, end_pos.x, end_pos.y
+    );
+
     if !is_valid_pos(grid, start_pos) || !is_valid_pos(grid, end_pos) {
+        warn!("A* pathfinding: Invalid start or end position");
         return None;
     }
 
     let mut open_set = BinaryHeap::new();
     let mut closed_set = HashMap::new();
     let mut came_from = HashMap::new();
+    let mut g_scores = HashMap::new(); // 跟踪每个位置的最佳g_cost
 
     let start_node = AStarNode {
         pos: start_pos,
@@ -78,9 +85,31 @@ pub fn find_path(configs: &Configs, start: Vec3, end: Vec3) -> Option<Vec<Vec2>>
     };
 
     open_set.push(start_node);
+    g_scores.insert(start_pos, 0.0);
+
+    let mut iterations = 0;
+    const MAX_ITERATIONS: usize = 10000; // 防止无限循环
 
     while let Some(current) = open_set.pop() {
+        iterations += 1;
+
+        if iterations > MAX_ITERATIONS {
+            error!("A* pathfinding: Exceeded maximum iterations ({}), breaking to prevent infinite loop", MAX_ITERATIONS);
+            return None;
+        }
+
+        if iterations % 1000 == 0 {
+            debug!(
+                "A* pathfinding: Iteration {}, current=({}, {}), f_cost={:.2}",
+                iterations,
+                current.pos.x,
+                current.pos.y,
+                current.f_cost()
+            );
+        }
+
         if current.pos == end_pos {
+            info!("A* pathfinding: Found path in {} iterations", iterations);
             // 重建路径
             let mut path = Vec::new();
             let mut current_pos = end_pos;
@@ -96,41 +125,59 @@ pub fn find_path(configs: &Configs, start: Vec3, end: Vec3) -> Option<Vec<Vec2>>
             path.push(Vec2::new(start_world.x, start_world.z));
 
             path.reverse();
+            info!("A* pathfinding: Generated path with {} points", path.len());
             return Some(path);
+        }
+
+        // 如果这个节点已经在closed_set中且有更好的g_cost，跳过
+        if let Some(&existing_g_cost) = closed_set.get(&current.pos) {
+            if current.g_cost > existing_g_cost {
+                continue;
+            }
         }
 
         closed_set.insert(current.pos, current.g_cost);
 
         // 检查邻居
         for neighbor_pos in get_neighbors(grid, current.pos) {
-            if closed_set.contains_key(&neighbor_pos) {
-                continue;
+            // 如果邻居已经在closed_set中且有更好的g_cost，跳过
+            if let Some(&existing_g_cost) = closed_set.get(&neighbor_pos) {
+                let tentative_g_cost =
+                    current.g_cost + distance_cost(grid, current.pos, neighbor_pos);
+                if tentative_g_cost >= existing_g_cost {
+                    continue;
+                }
             }
 
             let tentative_g_cost = current.g_cost + distance_cost(grid, current.pos, neighbor_pos);
 
-            let neighbor_node = AStarNode {
-                pos: neighbor_pos,
-                g_cost: tentative_g_cost,
-                h_cost: heuristic_cost(grid, neighbor_pos, end_pos),
-                parent: Some(current.pos),
-            };
-
-            // 检查是否已经在open_set中有更好的路径
+            // 检查是否找到了更好的路径
             let mut should_add = true;
-            if let Some(existing_g_cost) = closed_set.get(&neighbor_pos) {
-                if tentative_g_cost >= *existing_g_cost {
+            if let Some(&existing_g_cost) = g_scores.get(&neighbor_pos) {
+                if tentative_g_cost >= existing_g_cost {
                     should_add = false;
                 }
             }
 
             if should_add {
+                let neighbor_node = AStarNode {
+                    pos: neighbor_pos,
+                    g_cost: tentative_g_cost,
+                    h_cost: heuristic_cost(grid, neighbor_pos, end_pos),
+                    parent: Some(current.pos),
+                };
+
                 came_from.insert(neighbor_pos, current.pos);
+                g_scores.insert(neighbor_pos, tentative_g_cost);
                 open_set.push(neighbor_node);
             }
         }
     }
 
+    warn!(
+        "A* pathfinding: No path found after {} iterations",
+        iterations
+    );
     None
 }
 
@@ -149,10 +196,7 @@ fn grid_to_world(grid: &crate::core::ConfigNavigationGrid, grid_pos: GridPos) ->
 }
 
 fn is_valid_pos(grid: &crate::core::ConfigNavigationGrid, pos: GridPos) -> bool {
-    pos.x < grid.x_len
-        && pos.y < grid.y_len
-        && !grid.cells[pos.x].is_empty()
-        && pos.y < grid.cells[pos.x].len()
+    pos.x < grid.x_len && pos.y < grid.y_len
 }
 
 fn get_neighbors(grid: &crate::core::ConfigNavigationGrid, pos: GridPos) -> Vec<GridPos> {
