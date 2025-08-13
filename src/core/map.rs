@@ -1,6 +1,6 @@
 use crate::core::Configs;
 use crate::core::{ConfigEnvironmentObject, ConfigGeometryObject};
-use crate::core::{MovementDestination, Target};
+use crate::core::{MovementPath, Target};
 use bevy::animation::{AnimationTarget, AnimationTargetId};
 use bevy::asset::uuid::Uuid;
 use bevy::color::palettes;
@@ -34,7 +34,7 @@ fn setup(mut commands: Commands, configs: Res<Configs>, asset_server: Res<AssetS
 pub fn draw_attack(
     mut gizmos: Gizmos,
     q_attack: Query<(&Transform, &Target)>,
-    q_movement_destination: Query<(&Transform, &MovementDestination)>,
+    q_movement_path: Query<(&Transform, &MovementPath)>,
     q_target: Query<(&Transform, &Target)>,
     q_transform: Query<&Transform>,
 ) {
@@ -49,18 +49,19 @@ pub fn draw_attack(
         );
     }
 
-    for (transform, movement_destination) in q_movement_destination.iter() {
-        let destination = movement_destination.0;
+    for (transform, movement_path) in q_movement_path.iter() {
+        let mut prev_pos = transform.translation;
 
-        gizmos.line(
-            transform.translation,
-            transform
-                .translation
-                .clone()
-                .with_x(destination.x)
-                .with_z(destination.y),
-            Color::Srgba(palettes::tailwind::GREEN_500),
-        );
+        // 绘制路径线段
+        for &path_point in &movement_path.0 {
+            let world_pos = Vec3::new(path_point.x, prev_pos.y, path_point.y);
+            gizmos.line(
+                prev_pos,
+                world_pos,
+                Color::Srgba(palettes::tailwind::GREEN_500),
+            );
+            prev_pos = world_pos;
+        }
     }
 
     for (transform, target) in q_target.iter() {

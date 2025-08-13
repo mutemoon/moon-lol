@@ -9,3 +9,5 @@
 不要使用直接修改状态的 trick 通过测试
 
 你理解错了，不是发起攻击后的两帧不可取消，而是攻击生效前的两帧是不可取消的，而且 AttackTimer 可以直接去掉了，需要保存的信息直接放在 AttackState 中，不要在 Windup 中存放 can_cancel
+
+我已经决定不使用 rvo 进行寻路和避障了，而是采用 A* 算法直接规划路径，将这部分代码放在 navigation.rs，movement.rs 只负责按路径移动，而且 movement 去掉 MovementDestination，只保留 MovementPath，CommandMovementMoveTo 时只需要传一个 length 为 1 的 path，游戏的导航网格的定义在 config.rs 中，网格有预制的启发式值可以给 A* 算法用
