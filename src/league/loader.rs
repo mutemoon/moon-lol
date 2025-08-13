@@ -394,6 +394,7 @@ impl LeagueLoader {
         nav_grid.navigation_grid.iter().for_each(|v| {
             cells[v.get_x()][v.get_z()].y = v.get_height();
             cells[v.get_x()][v.get_z()].heuristic = v.get_heuristic();
+            cells[v.get_x()][v.get_z()].flags = v.get_flags();
         });
 
         Ok(ConfigNavigationGrid {

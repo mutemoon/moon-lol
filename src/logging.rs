@@ -30,7 +30,7 @@ impl Plugin for PluginLogging {
 }
 
 /// Set up file-based logging
-fn setup_file_logging(log_path: &PathBuf) {
+pub fn setup_file_logging(log_path: &PathBuf) {
     // Create the log file
     let log_file = File::create(log_path).expect("Failed to create log file");
 

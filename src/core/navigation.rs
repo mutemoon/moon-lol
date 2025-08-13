@@ -246,7 +246,8 @@ fn distance_cost(grid: &crate::core::ConfigNavigationGrid, from: GridPos, to: Gr
 
 fn heuristic_cost(grid: &crate::core::ConfigNavigationGrid, from: GridPos, to: GridPos) -> f32 {
     // 使用预制的启发式值加上欧几里得距离
-    let cell_heuristic = grid.cells[from.x][from.y].heuristic;
+    let cell_heuristic = -grid.cells[from.x][from.y].heuristic;
+    // let cell_heuristic = 0.0;
 
     let dx = (to.x as i32 - from.x as i32).abs() as f32;
     let dy = (to.y as i32 - from.y as i32).abs() as f32;

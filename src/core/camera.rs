@@ -145,7 +145,7 @@ fn camera_navigation_center(
             // 调整相机朝向，看向中心点
             transform.look_at(center_pos, Vec3::Y);
 
-            camera_zoom_by_mouse_wheel(&mut transform, -500.0);
+            camera_zoom_by_mouse_wheel(&mut transform, -700.0);
         }
     }
 }

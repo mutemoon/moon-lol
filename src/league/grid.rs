@@ -127,6 +127,14 @@ impl NavigationGridCell {
             NavigationGridCell::Version7(cell) => cell.heuristic,
         }
     }
+
+    pub fn get_flags(&self) -> u16 {
+        match self {
+            NavigationGridCell::Version3(cell) => cell.flags as u16,
+            NavigationGridCell::Version5(cell) => cell.flags as u16,
+            NavigationGridCell::Version7(cell) => cell.flags as u16,
+        }
+    }
 }
 
 #[binread]

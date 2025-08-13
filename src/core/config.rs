@@ -68,6 +68,7 @@ pub struct ConfigNavigationGrid {
 pub struct ConfigNavigationGridCell {
     pub y: f32,
     pub heuristic: f32,
+    pub flags: u16,
 }
 
 impl ConfigNavigationGrid {
