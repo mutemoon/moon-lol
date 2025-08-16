@@ -13,6 +13,8 @@ pub struct PluginMovement;
 
 impl Plugin for PluginMovement {
     fn build(&self, app: &mut App) {
+        app.register_type::<Movement>();
+
         app.add_systems(FixedUpdate, update_path_movement);
 
         app.add_event::<CommandMovementMoveTo>();
@@ -21,11 +23,12 @@ impl Plugin for PluginMovement {
         app.add_event::<CommandMovementFollowPath>();
         app.add_observer(command_movement_follow_path);
 
-        app.add_event::<EventMovementMoveEnd>();
+        app.add_event::<EventMovementEnd>();
     }
 }
 
-#[derive(Component, Clone, Serialize, Deserialize)]
+#[derive(Component, Clone, Serialize, Deserialize, Reflect)]
+#[reflect(Component)]
 #[require(MovementState)]
 pub struct Movement {
     pub speed: f32,
@@ -66,7 +69,7 @@ impl MovementState {
 pub struct EventMovementStart;
 
 #[derive(Event, Debug)]
-pub struct EventMovementMoveEnd;
+pub struct EventMovementEnd;
 
 #[derive(Event, Debug)]
 pub struct CommandMovementMoveTo(pub Vec2);
@@ -129,7 +132,7 @@ fn update_path_movement(
                     // 完成路径移动
                     movement_state.completed = true;
                     movement_state.clear_path();
-                    commands.trigger_targets(EventMovementMoveEnd, entity);
+                    commands.trigger_targets(EventMovementEnd, entity);
                 } else {
                     // 更新路径状态到下一个点
                     movement_state.current_target_index = new_index;
@@ -141,7 +144,7 @@ fn update_path_movement(
             movement_state.velocity = Vec2::ZERO;
             movement_state.direction = Vec2::ZERO;
             movement_state.clear_path();
-            commands.trigger_targets(EventMovementMoveEnd, entity);
+            commands.trigger_targets(EventMovementEnd, entity);
         }
     }
 }

@@ -9,7 +9,66 @@ pub struct PluginNavigaton;
 
 impl Plugin for PluginNavigaton {
     fn build(&self, app: &mut App) {
+        app.add_systems(Startup, setup);
         app.add_systems(FixedPreUpdate, update);
+    }
+}
+
+fn setup(
+    mut commands: Commands,
+    configs: Res<ConfigMap>,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+) {
+    let navigation_grid = &configs.navigation_grid;
+
+    let mesh = meshes.add(Plane3d::new(
+        vec3(0.0, 1.0, 0.0),
+        Vec2::splat(navigation_grid.cell_size / 2.0 - 5.0),
+    ));
+    let red_material = materials.add(StandardMaterial {
+        base_color: Color::srgb(1.0, 0.0, 0.0),
+        unlit: true,
+        depth_bias: 100.0,
+        ..default()
+    });
+
+    let green_material = materials.add(StandardMaterial {
+        base_color: Color::srgb(0.0, 1.0, 0.0),
+        unlit: true,
+        depth_bias: 100.0,
+        ..default()
+    });
+
+    for (x, row) in navigation_grid.cells.iter().enumerate() {
+        for (y, cell) in row.iter().enumerate() {
+            commands.spawn((
+                Mesh3d(mesh.clone()),
+                MeshMaterial3d(
+                    if cell.vision_pathing_flags.contains(VisionPathingFlags::Wall) {
+                        red_material.clone()
+                    } else {
+                        green_material.clone()
+                    },
+                ),
+                Transform::from_translation(navigation_grid.get_cell_pos(x, y)),
+                Visibility::Visible,
+                Pickable::IGNORE,
+            ));
+        }
+    }
+}
+
+fn update(configs: Res<ConfigMap>, mut q_movement: Query<&mut Transform, With<Movement>>) {
+    for mut transform in q_movement.iter_mut() {
+        let cell = configs
+            .navigation_grid
+            .get_cell_by_pos(transform.translation);
+        transform.translation.y = cell.y;
+
+        if transform.translation.y < 0.0 {
+            transform.translation.y = 0.0;
+        }
     }
 }
 
@@ -174,13 +233,9 @@ pub fn find_path(configs: &ConfigMap, start: Vec3, end: Vec3) -> Option<Vec<Vec2
 }
 
 fn world_to_grid(grid: &crate::core::ConfigNavigationGrid, world_pos: Vec3) -> GridPos {
-    let x = ((world_pos.x - grid.min_grid_pos.x) / grid.cell_size).round() as usize;
-    let y = ((-world_pos.z - grid.min_grid_pos.z) / grid.cell_size).round() as usize;
+    let (x, y) = grid.get_cell_xy_by_pos(world_pos);
 
-    GridPos {
-        x: x.clamp(0, grid.x_len - 1),
-        y: y.clamp(0, grid.y_len - 1),
-    }
+    GridPos { x, y }
 }
 
 fn grid_to_world(grid: &crate::core::ConfigNavigationGrid, grid_pos: GridPos) -> Vec3 {
@@ -256,17 +311,4 @@ fn heuristic_cost(grid: &crate::core::ConfigNavigationGrid, from: GridPos, to: G
     // 例如 1.0 / (地图最大距离)
     const P: f32 = 1.0 / (300.0 * 300.0);
     return euclidean_distance * (1.0 + P);
-}
-
-fn update(configs: Res<ConfigMap>, mut q_movement: Query<&mut Transform, With<Movement>>) {
-    for mut transform in q_movement.iter_mut() {
-        let cell = configs
-            .navigation_grid
-            .get_cell_by_pos(transform.translation);
-        transform.translation.y = cell.y;
-
-        if transform.translation.y < 0.0 {
-            transform.translation.y = 0.0;
-        }
-    }
 }

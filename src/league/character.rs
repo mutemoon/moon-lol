@@ -1,8 +1,12 @@
-use crate::league::LeagueLoader;
+use crate::{
+    core::ConfigCharacterSkinAnimation,
+    league::{LeagueLoader, LeagueLoaderError},
+};
 use bevy::math::Mat4;
 use bevy::prelude::*;
 use cdragon_prop::{
-    BinEmbed, BinEntry, BinFloat, BinHash, BinLink, BinMap, BinMatrix, BinString, BinStruct, BinU32,
+    BinEmbed, BinEntry, BinFloat, BinHash, BinLink, BinList, BinMap, BinMatrix, BinString,
+    BinStruct, BinU32,
 };
 use std::collections::HashMap;
 
@@ -275,59 +279,88 @@ impl From<&BinEmbed> for SkinAnimationProperties {
     }
 }
 
-#[derive(Debug, Default)]
-pub struct AnimationGraphData {
-    pub clip_data_map: HashMap<u32, AnimationAtomicClipData>,
-}
+pub fn load_animation_map(
+    value: &BinEntry,
+) -> Result<HashMap<u32, ConfigCharacterSkinAnimation>, LeagueLoaderError> {
+    let nodes = value
+        .getv::<BinMap>(LeagueLoader::hash_bin("mClipDataMap").into())
+        .unwrap()
+        .downcast::<BinHash, BinStruct>()
+        .unwrap();
 
-impl From<&BinEntry> for AnimationGraphData {
-    fn from(value: &BinEntry) -> Self {
-        let hash = LeagueLoader::hash_bin("AtomicClipData");
+    let animation_graph_data = nodes
+        .iter()
+        .filter_map(|(k, v)| {
+            let hash_atomic_clip_data = LeagueLoader::hash_bin("AtomicClipData");
+            let hash_condition_float_clip_data = LeagueLoader::hash_bin("ConditionFloatClipData");
+            match v.ctype.hash {
+                _ if v.ctype.hash == hash_atomic_clip_data => Some((
+                    k.0.hash,
+                    ConfigCharacterSkinAnimation::AtomicClipData {
+                        clip_path: v
+                            .getv::<BinEmbed>(
+                                LeagueLoader::hash_bin("mAnimationResourceData").into(),
+                            )
+                            .unwrap()
+                            .getv::<BinString>(LeagueLoader::hash_bin("mAnimationFilePath").into())
+                            .map(|v| v.0.clone())
+                            .unwrap(),
+                    },
+                )),
+                _ if v.ctype.hash == hash_condition_float_clip_data => {
+                    let updater = v
+                        .getv::<BinStruct>(LeagueLoader::hash_bin("Updater").into())
+                        .unwrap();
 
-        let clip_data_map = value
-            .getv::<BinMap>(LeagueLoader::hash_bin("mClipDataMap").into())
-            .unwrap()
-            .downcast::<BinHash, BinStruct>()
-            .unwrap()
-            .iter()
-            .filter(|(_, v)| v.ctype.hash == hash)
-            .map(|(k, v)| (k.0.hash, v.into()))
-            .collect();
+                    let mut component_name = None;
+                    let mut field_name = None;
 
-        AnimationGraphData { clip_data_map }
-    }
-}
+                    if updater.ctype.hash == LeagueLoader::hash_bin("MoveSpeedParametricUpdater") {
+                        component_name = Some("Movement".to_string());
+                        field_name = Some("speed".to_string());
+                    }
 
-#[derive(Debug)]
-pub struct AnimationAtomicClipData {
-    pub animation_resource_data: AnimationResourceData,
-}
+                    let Some(component_name) = component_name else {
+                        return None;
+                    };
+                    let Some(field_name) = field_name else {
+                        return None;
+                    };
 
-impl From<&BinStruct> for AnimationAtomicClipData {
-    fn from(value: &BinStruct) -> Self {
-        AnimationAtomicClipData {
-            animation_resource_data: value
-                .getv::<BinEmbed>(LeagueLoader::hash_bin("mAnimationResourceData").into())
-                .unwrap()
-                .into(),
-        }
-    }
-}
+                    Some((
+                        k.0.hash,
+                        ConfigCharacterSkinAnimation::ConditionFloatClipData {
+                            conditions: v
+                                .getv::<BinList>(
+                                    LeagueLoader::hash_bin("mConditionFloatPairDataList").into(),
+                                )
+                                .unwrap()
+                                .downcast::<BinEmbed>()
+                                .unwrap()
+                                .iter()
+                                .map(|v| {
+                                    (
+                                        v.getv::<BinHash>(
+                                            LeagueLoader::hash_bin("mClipName").into(),
+                                        )
+                                        .unwrap()
+                                        .0
+                                        .hash,
+                                        v.getv::<BinFloat>(LeagueLoader::hash_bin("mValue").into())
+                                            .unwrap_or(&BinFloat(0.0))
+                                            .0,
+                                    )
+                                })
+                                .collect(),
+                            component_name,
+                            field_name,
+                        },
+                    ))
+                }
+                _ => None,
+            }
+        })
+        .collect();
 
-#[derive(Debug)]
-pub struct AnimationResourceData {
-    pub animation_file_path: String,
-}
-
-impl From<&BinEmbed> for AnimationResourceData {
-    fn from(value: &BinEmbed) -> Self {
-        let animation_file_path = value
-            .getv::<BinString>(LeagueLoader::hash_bin("mAnimationFilePath").into())
-            .map(|v| v.0.clone())
-            .unwrap();
-
-        AnimationResourceData {
-            animation_file_path,
-        }
-    }
+    Ok(animation_graph_data)
 }

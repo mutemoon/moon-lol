@@ -282,7 +282,9 @@ impl LeagueWadMapLoader {
         let nav_grid = AiMeshNGrid::read(&mut reader).unwrap();
 
         let min_grid_pos = nav_grid.header.min_bounds.0;
+
         let cell_size = nav_grid.header.cell_size;
+
         let x_len = nav_grid.header.x_cell_count as usize;
         let y_len = nav_grid.header.z_cell_count as usize;
 

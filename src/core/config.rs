@@ -40,13 +40,25 @@ pub struct ConfigGeometryObject {
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct ConfigCharacterSkin {
-    pub clip_map: HashMap<u32, String>,
+    pub animation_map: HashMap<u32, ConfigCharacterSkinAnimation>,
     pub inverse_bind_pose_path: String,
     pub joint_influences_indices: Vec<i16>,
     pub joints: Vec<ConfigJoint>,
     pub material_path: String,
     pub skin_scale: Option<f32>,
     pub submesh_paths: Vec<String>,
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+pub enum ConfigCharacterSkinAnimation {
+    AtomicClipData {
+        clip_path: String,
+    },
+    ConditionFloatClipData {
+        conditions: Vec<(u32, f32)>,
+        component_name: String,
+        field_name: String,
+    },
 }
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -85,26 +97,42 @@ pub struct ConfigNavigationGridCell {
 }
 
 impl ConfigNavigationGrid {
-    pub fn get_cell_pos(&self, x: usize, y: usize) -> Vec3 {
-        Vec3::new(
-            self.min_grid_pos.x + x as f32 * self.cell_size,
-            self.cells[x][y].y,
-            -(self.min_grid_pos.z + y as f32 * self.cell_size),
+    pub fn get_offset(&self) -> Vec2 {
+        Vec2::new(
+            self.min_grid_pos.x + self.cell_size / 2.0,
+            self.min_grid_pos.z + self.cell_size / 2.0,
         )
     }
 
+    pub fn get_cell_pos(&self, x: usize, y: usize) -> Vec3 {
+        let offset = self.get_offset();
+        Vec3::new(
+            offset.x + y as f32 * self.cell_size,
+            self.cells[x][y].y + 5.0,
+            -(offset.y + x as f32 * self.cell_size),
+        )
+    }
+
+    pub fn get_cell_xy_by_pos(&self, pos: Vec3) -> (usize, usize) {
+        let offset = self.get_offset();
+        let x = ((-pos.z - offset.y) / self.cell_size).round() as usize;
+        let y = ((pos.x - offset.x) / self.cell_size).round() as usize;
+
+        (x, y)
+    }
+
     pub fn get_cell_by_pos(&self, pos: Vec3) -> &ConfigNavigationGridCell {
-        let x = ((pos.x - self.min_grid_pos.x) / self.cell_size).round() as usize;
-        let y = ((-pos.z - self.min_grid_pos.z) / self.cell_size).round() as usize;
+        let (x, y) = self.get_cell_xy_by_pos(pos);
 
         &self.cells[x.clamp(0, self.x_len - 1)][y.clamp(0, self.y_len - 1)]
     }
 
     pub fn get_center_pos(&self) -> Vec3 {
+        let offset = self.get_offset();
         Vec3::new(
-            self.min_grid_pos.x + self.cell_size * self.x_len as f32 / 2.0,
+            offset.x + self.cell_size * self.x_len as f32 / 2.0,
             0.0,
-            -(self.min_grid_pos.z + self.cell_size * self.y_len as f32 / 2.0),
+            -(offset.y + self.cell_size * self.y_len as f32 / 2.0),
         )
     }
 }

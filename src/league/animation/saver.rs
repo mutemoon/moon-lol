@@ -1,17 +1,20 @@
-use std::{
-    collections::HashMap,
-    io::{self, Cursor},
-};
+use std::io::{self, Cursor};
 
 use bevy::transform::components::Transform;
 use binrw::{BinRead, BinWrite};
 use tokio::io::AsyncWriteExt;
 
-use crate::core::{ConfigCharacterSkin, ConfigJoint, ConfigSkinnedMeshInverseBindposes};
 use crate::league::{
     get_asset_writer, get_bin_path, neg_mat_z, save_struct_to_file, skinned_mesh_to_intermediate,
-    AnimationGraphData, LeagueLoader, LeagueLoaderError, LeagueMaterial, LeagueSkeleton,
-    LeagueSkinnedMesh, LeagueSkinnedMeshInternal, LeagueWadLoader,
+    LeagueLoader, LeagueLoaderError, LeagueMaterial, LeagueSkeleton, LeagueSkinnedMesh,
+    LeagueSkinnedMeshInternal, LeagueWadLoader,
+};
+use crate::{
+    core::{
+        ConfigCharacterSkin, ConfigCharacterSkinAnimation, ConfigJoint,
+        ConfigSkinnedMeshInverseBindposes,
+    },
+    league::load_animation_map,
 };
 
 impl LeagueWadLoader {
@@ -53,24 +56,24 @@ impl LeagueWadLoader {
             .map(|mut v| LeagueSkeleton::read(&mut v).unwrap())
             .unwrap();
 
-        let animation_graph_data: AnimationGraphData = flat_map
-            .get(
-                &skin_character_data_properties
-                    .skin_animation_properties
-                    .animation_graph_data,
-            )
-            .unwrap()
-            .into();
-
-        let clip_map = animation_graph_data
-            .clip_data_map
-            .into_iter()
-            .map(|(k, v)| (k, v.animation_resource_data.animation_file_path))
-            .collect::<HashMap<_, _>>();
+        let animation_map = load_animation_map(
+            flat_map
+                .get(
+                    &skin_character_data_properties
+                        .skin_animation_properties
+                        .animation_graph_data,
+                )
+                .unwrap(),
+        )?;
 
         // 保存动画文件
-        for (_, clip_path) in &clip_map {
-            self.save_wad_entry_to_file(clip_path).await?;
+        for (_, animation) in &animation_map {
+            match animation {
+                ConfigCharacterSkinAnimation::AtomicClipData { clip_path } => {
+                    self.save_wad_entry_to_file(clip_path).await?;
+                }
+                _ => {}
+            }
         }
 
         let material_path = get_bin_path(&format!("ASSETS/{}/material", skin));
@@ -127,7 +130,7 @@ impl LeagueWadLoader {
                     parent_index: joint.parent_index,
                 })
                 .collect(),
-            clip_map,
+            animation_map,
         })
     }
 }

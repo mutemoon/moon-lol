@@ -1,6 +1,6 @@
 use crate::core::{
     Attack, Bounding, CommandMovementFollowPath, CommandMovementMoveTo, CommandTargetRemove,
-    CommandTargetSet, EventAttackDone, EventDead, EventMovementMoveEnd, EventSpawn, MovementState,
+    CommandTargetSet, EventAttackDone, EventDead, EventMovementEnd, EventSpawn, MovementState,
     Target, Team,
 };
 use bevy::{app::Plugin, color::palettes, prelude::*};
@@ -169,7 +169,7 @@ fn on_found_aggro_target(
     );
 
     if is_in_attack_range {
-        commands.trigger_targets(EventMovementMoveEnd, trigger.target());
+        commands.trigger_targets(EventMovementEnd, trigger.target());
     } else {
         // 获取目标位置并设置为移动目标
         if let Ok(target_transform) = q_transform.get(event.target) {
