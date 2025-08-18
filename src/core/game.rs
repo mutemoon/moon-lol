@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::core::{spawn_skin_entity, ConfigGame, Controller, Health, Movement};
+use crate::core::{spawn_skin_entity, ConfigGame, Controller, Focus, Health, Movement};
 
 #[derive(Default)]
 pub struct PluginGame;
@@ -33,6 +33,7 @@ pub fn setup(
             .insert((
                 team,
                 Controller,
+                Focus,
                 Movement { speed: 325.0 },
                 Health {
                     value: 600.0,

@@ -130,9 +130,8 @@ impl ConfigNavigationGrid {
     }
 
     pub fn get_cell_xy_by_position(&self, position: &Vec2) -> (usize, usize) {
-        let first_cell_center_position = self.get_first_cell_center_position();
-        let x = ((position.x - first_cell_center_position.x) / self.cell_size).round() as usize;
-        let y = ((position.y - first_cell_center_position.y) / self.cell_size).round() as usize;
+        let x = ((position.x - self.min_position.x) / self.cell_size).floor() as usize;
+        let y = ((position.y - self.min_position.y) / self.cell_size).floor() as usize;
         (x, y)
     }
 

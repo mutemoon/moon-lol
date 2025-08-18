@@ -1,10 +1,7 @@
 use std::time::Instant;
 
-use bevy::asset::RenderAssetUsages;
 use bevy::color::palettes;
-use bevy::image::ImageSampler;
 use bevy::prelude::*;
-use bevy::render::render_resource::{Extent3d, TextureDimension, TextureFormat};
 use bevy::render::{
     settings::{Backends, RenderCreation, WgpuSettings},
     RenderPlugin,
@@ -13,7 +10,7 @@ use bevy_egui::{egui, EguiContexts, EguiPlugin, EguiPrimaryContextPass};
 use moon_lol::core::{
     find_grid_path_with_result, on_click_map, post_process_path, simplify_path, AStarResult,
     CameraState, CommandMovementFollowPath, CommandNavigationTo, ConfigNavigationGrid, Map,
-    Movement, MovementState, PluginCore, PluginNavigaton,
+    Movement, PluginCore, PluginNavigaton,
 };
 use moon_lol::entities::PluginEntities;
 use moon_lol::league::VisionPathingFlags;
@@ -160,118 +157,6 @@ fn setup(
                 .observe(on_click_map);
         }
     }
-}
-
-fn setup_sample_height_textured(
-    mut commands: Commands,
-    grid: Res<ConfigNavigationGrid>,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
-    mut images: ResMut<Assets<Image>>, // 新增：用于创建贴图的资源
-) {
-    // 1. 计算高度图的尺寸和颜色范围
-    let width = grid.height_x_len;
-    let height = grid.height_samples.len() / width as usize;
-
-    if width == 0 || height == 0 {
-        return; // 避免除零错误
-    }
-
-    let max_sample_height = grid
-        .height_samples
-        .iter()
-        .flatten()
-        .max_by(|a, b| a.partial_cmp(b).unwrap())
-        .unwrap_or(&1.0);
-    let min_sample_height = grid
-        .height_samples
-        .iter()
-        .flatten()
-        .min_by(|a, b| a.partial_cmp(b).unwrap())
-        .unwrap_or(&0.0);
-
-    let height_range = max_sample_height - min_sample_height;
-    // 如果所有高度都一样，防止除零
-    let height_range = if height_range == 0.0 {
-        1.0
-    } else {
-        height_range
-    };
-
-    // 2. 创建图像数据 (像素字节)
-    // 我们将为每个高度样本创建一个像素。格式为 RGBA8。
-    let mut image_data = Vec::with_capacity(width * height * 4);
-    for row in grid.height_samples.iter() {
-        for h_val in row.iter() {
-            let normalized_height = (h_val - min_sample_height) / height_range;
-
-            // 将 0.0-1.0 的浮点数颜色转换为 0-255 的 u8 字节
-            let r = (normalized_height * 255.0) as u8;
-            let g = 0;
-            let b = 0;
-            let a = 255; // Alpha通道，255表示完全不透明
-
-            image_data.extend_from_slice(&[r, g, b, a]);
-        }
-    }
-
-    // 3. 从原始数据创建 Bevy Image 资源
-    let mut image = Image::new(
-        Extent3d {
-            width: width as u32,
-            height: height as u32,
-            depth_or_array_layers: 1,
-        },
-        TextureDimension::D2,
-        image_data,
-        // 使用 sRGB 格式以获得正确的颜色显示
-        TextureFormat::Rgba8UnormSrgb,
-        RenderAssetUsages::default(),
-    );
-
-    // 使用最近邻采样，避免像素模糊，让网格看起来更清晰
-    image.sampler = ImageSampler::nearest();
-
-    let image_handle = images.add(image);
-
-    // 4. 创建一个大的平面网格来承载贴图
-    let cell_size = 2.0;
-    let plane_width = width as f32 * cell_size;
-    let plane_z_height = height as f32 * cell_size;
-
-    let plane_mesh = meshes.add(Plane3d::new(
-        Vec3::Y, // 法线朝上
-        Vec2::new(plane_width, plane_z_height) / 2.0,
-    ));
-
-    // 5. 创建使用该贴图的材质
-    let plane_material = materials.add(StandardMaterial {
-        base_color_texture: Some(image_handle),
-        unlit: true, // 不受光照影响，以显示原始颜色
-        ..default()
-    });
-
-    // 6. 生成单个实体
-    // 将平面的中心点对齐到网格的中心，以匹配原来的坐标系
-    let transform = Transform::from_xyz(
-        (plane_width - cell_size) / 2.0,
-        0.0,
-        -((plane_z_height - cell_size) / 2.0),
-    );
-
-    commands.spawn((
-        Mesh3d(plane_mesh),
-        MeshMaterial3d(plane_material),
-        transform,
-    ));
-    // commands.spawn(PbrBundle {
-    //     mesh: plane_mesh,
-    //     material: plane_material,
-    //     transform,
-    //     ..default()
-    // });
-
-    // 注意：原来的 .observe(on_click_map) 逻辑需要改变，见下方说明
 }
 
 fn on_key_space(
@@ -555,18 +440,6 @@ fn update_astar_visualization(
             AStarPathCell,
             Visibility::Visible,
         ));
-    }
-}
-
-fn lock_camera_full_map(
-    grid: Res<ConfigNavigationGrid>,
-    mut camera: Query<&mut CameraState, With<Camera3d>>,
-) {
-    let center_pos = grid.get_map_center_position();
-
-    if let Ok(mut camera_state) = camera.single_mut() {
-        camera_state.position = center_pos;
-        camera_state.scale = 8.0;
     }
 }
 
