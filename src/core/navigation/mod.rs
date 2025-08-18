@@ -99,16 +99,22 @@ pub fn has_line_of_sight(
     cell_size: f32,
     is_walkable: impl Fn(usize, usize) -> bool,
 ) -> bool {
+    const CORNER_EPSILON: f32 = 1e-6;
+
     // --- 定义和初始化部分不变 ---
     let start_grid_x = (start.x / cell_size).floor() as isize;
     let start_grid_y = (start.y / cell_size).floor() as isize;
+
     let end_grid_x = (end.x / cell_size).floor() as isize;
     let end_grid_y = (end.y / cell_size).floor() as isize;
 
     let mut current_grid_x = start_grid_x;
     let mut current_grid_y = start_grid_y;
 
-    if !is_walkable(current_grid_x as usize, current_grid_y as usize) {
+    if start.x % cell_size > CORNER_EPSILON
+        && start.y % cell_size > CORNER_EPSILON
+        && !is_walkable(current_grid_x as usize, current_grid_y as usize)
+    {
         return false;
     }
 
@@ -149,30 +155,9 @@ pub fn has_line_of_sight(
     };
 
     let steps_to_take = (end_grid_x - start_grid_x).abs() + (end_grid_y - start_grid_y).abs();
-    const CORNER_EPSILON: f32 = 1e-6;
 
     for _ in 0..steps_to_take {
         if (t_max_x - t_max_y).abs() < CORNER_EPSILON {
-            // --- 核心修正：豁免对终点交叉点的严格检查 ---
-            // let is_final_diagonal_step =
-            //     (current_grid_x + step_x == end_grid_x) && (current_grid_y + step_y == end_grid_y);
-
-            // if !is_final_diagonal_step {
-            //     // 只有在“中途切角”时，才进行严格的两侧检查
-            //     let corner_x_walkable =
-            //         is_walkable((current_grid_x + step_x) as usize, current_grid_y as usize);
-            //     let corner_y_walkable =
-            //         is_walkable(current_grid_x as usize, (current_grid_y + step_y) as usize);
-
-            //     if !corner_x_walkable && !corner_y_walkable {
-            //         // 只有当两侧都不可走时，才认为完全阻塞。
-            //         // 这是一条更宽松的规则，允许“擦”过单个障碍物的角。
-            //         // 如果需要严格规则，请使用 ||
-            //         return false;
-            //     }
-            // }
-
-            // 对角线移动
             current_grid_x += step_x;
             current_grid_y += step_y;
             t_max_x += t_delta_x;

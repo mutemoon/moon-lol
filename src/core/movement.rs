@@ -80,107 +80,81 @@ fn update_path_movement(
         }
 
         let mut transform = q_transform.get_mut(entity).unwrap();
-        let current_pos = transform.translation.xz();
 
-        // 找到当前应该前往的目标点
-        let target = find_next_target_point(&mut movement_state, current_pos);
+        // 本帧可移动的总距离
+        let mut remaining_distance_this_frame = movement.speed * dt;
+        // 记录本帧最后的移动方向，用于更新旋转
+        let mut last_direction = Vec2::ZERO;
 
-        if let Some(target) = target {
-            // 计算移动方向和速度
-            let direction = target - current_pos;
-            let distance = direction.length();
+        // 只要本帧还有可移动的距离，就继续处理
+        while remaining_distance_this_frame > 0.0 {
+            // 首先，检查当前的目标点是否有效
+            let target = match movement_state.path.get(movement_state.current_target_index) {
+                Some(p) => *p,
+                None => {
+                    if !movement_state.completed {
+                        movement_state.completed = true;
+                    }
+                    break;
+                }
+            };
 
-            if distance > movement.speed * dt {
-                // 还没到达目标点，继续移动
-                let normalized_direction = direction / distance;
-                movement_state.direction = normalized_direction;
-                movement_state.velocity = normalized_direction * movement.speed;
+            let current_pos = transform.translation.xz();
+            let vector_to_target = target - current_pos;
+            let distance_to_target = vector_to_target.length();
 
-                // 更新位置
-                let new_pos = current_pos + movement_state.velocity * dt;
+            if distance_to_target.abs() < f32::EPSILON {
+                let new_index = movement_state.current_target_index + 1;
+                if new_index >= movement_state.path.len() {
+                    movement_state.completed = true;
+                    break;
+                } else {
+                    movement_state.current_target_index = new_index;
+                    continue;
+                }
+            }
+
+            last_direction = vector_to_target.normalize();
+
+            if distance_to_target > remaining_distance_this_frame {
+                let new_pos = current_pos + last_direction * remaining_distance_this_frame;
                 transform.translation.x = new_pos.x;
                 transform.translation.z = new_pos.y;
-
-                // 更新旋转朝向移动方向
-                if movement_state.velocity.length() > 0.1 {
-                    transform.rotation = Quat::from_rotation_y(
-                        -(movement_state.velocity.y.atan2(movement_state.velocity.x)
-                            + f32::consts::PI / 2.0),
-                    );
-                }
+                remaining_distance_this_frame = 0.0;
             } else {
-                // 到达当前目标点
                 transform.translation.x = target.x;
                 transform.translation.z = target.y;
-                movement_state.velocity = Vec2::ZERO;
-                movement_state.direction = Vec2::ZERO;
+                remaining_distance_this_frame -= distance_to_target;
 
                 let new_index = movement_state.current_target_index + 1;
-
                 if new_index >= movement_state.path.len() {
-                    // 完成路径移动
                     movement_state.completed = true;
-                    movement_state.clear_path();
-                    commands.trigger_targets(EventMovementEnd, entity);
+                    break;
                 } else {
-                    // 更新路径状态到下一个点
                     movement_state.current_target_index = new_index;
                 }
             }
-        } else {
-            // 没有有效的目标点，结束移动
-            movement_state.completed = true;
+        }
+
+        // 在循环结束后，根据最终状态统一更新
+        if movement_state.completed {
             movement_state.velocity = Vec2::ZERO;
             movement_state.direction = Vec2::ZERO;
             movement_state.clear_path();
+            // 恢复您原来的事件触发命令
             commands.trigger_targets(EventMovementEnd, entity);
-        }
-    }
-}
-
-fn find_next_target_point(
-    movement_state: &mut MovementState,
-    current_position: Vec2,
-) -> Option<Vec2> {
-    let path = &movement_state.path;
-
-    if path.is_empty() || movement_state.current_target_index >= path.len() {
-        return None;
-    }
-
-    // 如果还没有开始移动，找到最近的前进方向的点
-    if movement_state.current_target_index == 0 {
-        let mut closest_index = 0;
-        let mut min_distance = f32::INFINITY;
-
-        for (i, &point) in path.iter().enumerate() {
-            let distance = current_position.distance(point);
-            if distance < min_distance {
-                min_distance = distance;
-                closest_index = i;
-            }
+        } else {
+            movement_state.direction = last_direction;
+            movement_state.velocity = last_direction * movement.speed;
         }
 
-        // 确保不往回走，如果找到的最近点不是第一个点，检查是否应该选择下一个点
-        if closest_index > 0 {
-            let prev_point = path[closest_index - 1];
-            let curr_point = path[closest_index];
-
-            // 计算从前一个点到当前点的方向向量
-            let path_direction = (curr_point - prev_point).normalize();
-            // 计算从前一个点到当前位置的向量
-            let position_direction = (current_position - prev_point).normalize();
-
-            // 如果当前位置在路径方向的前方，选择当前点；否则选择下一个点（如果存在）
-            if path_direction.dot(position_direction) > 0.0 && closest_index + 1 < path.len() {
-                closest_index += 1;
-            }
+        // 更新旋转
+        if last_direction.length_squared() > 0.0 {
+            transform.rotation = Quat::from_rotation_y(
+                -(last_direction.y.atan2(last_direction.x) + f32::consts::PI / 2.0),
+            );
         }
-
-        movement_state.current_target_index = closest_index;
     }
-
-    Some(path[movement_state.current_target_index])
 }
 
 fn command_movement_follow_path(
