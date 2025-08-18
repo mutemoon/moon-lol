@@ -12,12 +12,14 @@ async fn main() {
 
     let start = Instant::now();
 
-    map_loader.save_config_map().await.unwrap();
+    // map_loader.save_config_map().await.unwrap();
 
-    match loader.save_legends("Fiora", "Skin44").await {
-        Ok(_) => println!("Legends saved"),
-        Err(e) => println!("Error saving legends: {:?}", e),
-    }
+    map_loader.save_navigation_grid().await.unwrap();
+
+    // match loader.save_legends("Fiora", "Skin44").await {
+    //     Ok(_) => println!("Legends saved"),
+    //     Err(e) => println!("Error saving legends: {:?}", e),
+    // }
 
     let end = Instant::now();
     println!("Time taken: {:?}", end.duration_since(start));

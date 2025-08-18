@@ -3,7 +3,6 @@ use std::cmp::Ordering;
 use std::collections::{BinaryHeap, HashMap};
 
 use crate::core::ConfigNavigationGrid;
-use crate::league::VisionPathingFlags;
 
 #[derive(Debug, Clone)]
 struct AStarNode {

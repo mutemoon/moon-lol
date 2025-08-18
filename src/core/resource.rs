@@ -1,5 +1,5 @@
 use crate::{
-    core::{ConfigGame, ConfigMap},
+    core::{ConfigGame, ConfigMap, ConfigNavigationGrid},
     league::{
         get_struct_from_file, LeagueLoaderAnimationClip, LeagueLoaderImage, LeagueLoaderMaterial,
         LeagueLoaderMesh, LeagueLoaderSkinnedMeshInverseBindposes,
@@ -7,7 +7,7 @@ use crate::{
 };
 
 pub const CONFIG_PATH_MAP: &str = "config_map";
-
+pub const CONFIG_PATH_MAP_NAV_GRID: &str = "config_map_nav_grid";
 pub const CONFIG_PATH_GAME: &str = "config_game";
 
 use bevy::prelude::*;
@@ -28,5 +28,9 @@ impl Plugin for PluginResource {
 
         let game_configs: ConfigGame = get_struct_from_file(CONFIG_PATH_GAME).unwrap();
         app.insert_resource(game_configs);
+
+        let nav_grid: ConfigNavigationGrid =
+            get_struct_from_file(CONFIG_PATH_MAP_NAV_GRID).unwrap();
+        app.insert_resource(nav_grid);
     }
 }

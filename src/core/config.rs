@@ -29,7 +29,6 @@ pub struct ConfigMap {
     pub environment_objects: Vec<(Transform, ConfigCharacterSkin, Option<Health>)>,
     pub minion_paths: HashMap<Lane, Vec<Vec2>>,
     pub barracks: Vec<(Transform, Team, Lane, Barrack)>,
-    pub navigation_grid: ConfigNavigationGrid,
 }
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -76,7 +75,7 @@ pub struct ConfigSkinnedMeshInverseBindposes {
     pub inverse_bindposes: Vec<Mat4>,
 }
 
-#[derive(Clone, Default, Serialize, Deserialize)]
+#[derive(Resource, Clone, Default, Serialize, Deserialize)]
 pub struct ConfigNavigationGrid {
     pub min_position: Vec2,
     pub max_position: Vec2,
@@ -86,7 +85,7 @@ pub struct ConfigNavigationGrid {
     pub cells: Vec<Vec<ConfigNavigationGridCell>>,
     pub height_x_len: usize,
     pub height_y_len: usize,
-    pub height_samples: Vec<f32>,
+    pub height_samples: Vec<Vec<f32>>,
 }
 
 impl ConfigNavigationGrid {
@@ -107,7 +106,7 @@ impl ConfigNavigationGrid {
             * (self.height_y_len - 1) as f32)
             .round() as usize;
 
-        self.height_samples[y * self.height_x_len + x]
+        self.height_samples[y][x]
     }
 
     pub fn get_first_cell_center_position(&self) -> Vec2 {
@@ -131,13 +130,14 @@ impl ConfigNavigationGrid {
     }
 
     pub fn get_cell_xy_by_position(&self, position: &Vec2) -> (usize, usize) {
-        let x = ((position.x - self.min_position.x) / self.cell_size).round() as usize;
-        let y = ((position.y - self.min_position.y) / self.cell_size).round() as usize;
+        let first_cell_center_position = self.get_first_cell_center_position();
+        let x = ((position.x - first_cell_center_position.x) / self.cell_size).round() as usize;
+        let y = ((position.y - first_cell_center_position.y) / self.cell_size).round() as usize;
         (x, y)
     }
 
     pub fn get_cell_by_xy(&self, (x, y): (usize, usize)) -> &ConfigNavigationGridCell {
-        &self.cells[x.clamp(0, self.x_len - 1)][y.clamp(0, self.y_len - 1)]
+        &self.cells[y.clamp(0, self.y_len - 1)][x.clamp(0, self.x_len - 1)]
     }
 
     pub fn get_cell_by_position(&self, pos: &Vec2) -> &ConfigNavigationGridCell {
@@ -161,7 +161,7 @@ impl ConfigNavigationGrid {
     }
 
     pub fn get_map_center_position(&self) -> Vec3 {
-        self.get_world_position_by_position(&vec2(self.get_width() / 2.0, self.get_height() / 2.0))
+        self.get_world_position_by_position(&vec2(self.get_width() / 2.0, -self.get_height() / 2.0))
     }
 }
 

@@ -44,7 +44,7 @@ fn setup(
 
     commands
         .entity(geo_entity)
-        .insert((Visibility::Visible, Map))
+        .insert((Visibility::Hidden, Map))
         .observe(on_click_map);
 
     let environment_entities = spawn_environment_objects_from_configs(
@@ -57,7 +57,7 @@ fn setup(
     for entity in environment_entities {
         commands
             .entity(entity)
-            .insert((Visibility::Visible, Map, Pickable::IGNORE));
+            .insert((Visibility::Hidden, Map, Pickable::IGNORE));
     }
 }
 

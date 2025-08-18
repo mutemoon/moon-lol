@@ -1,7 +1,4 @@
-use crate::core::ConfigMap;
-use bevy::{
-    input::keyboard::KeyCode, input::mouse::MouseWheel, prelude::*, window::CursorGrabMode,
-};
+use bevy::{input::mouse::MouseWheel, prelude::*, window::CursorGrabMode};
 
 // 相机基础偏移量
 pub const CAMERA_OFFSET_X: f32 = 0.0;
@@ -59,7 +56,6 @@ impl Plugin for PluginCamera {
         app.add_systems(Update, update_focus);
         app.add_systems(Update, on_wheel);
         app.add_systems(Update, on_mouse_scroll);
-        app.add_systems(Update, on_key_m);
     }
 }
 
@@ -159,19 +155,4 @@ fn on_mouse_scroll(window: Query<&Window>, mut camera: Query<&mut CameraState, W
             );
 
     camera_state.set_position(new_position);
-}
-
-fn on_key_m(
-    keyboard_input: Res<ButtonInput<KeyCode>>,
-    configs: Res<ConfigMap>,
-    mut camera: Query<&mut CameraState, With<Camera3d>>,
-) {
-    if keyboard_input.just_pressed(KeyCode::KeyM) {
-        let center_pos = configs.navigation_grid.get_map_center_position();
-
-        if let Ok(mut camera_state) = camera.single_mut() {
-            camera_state.position = center_pos;
-            camera_state.scale = 10.0;
-        }
-    }
 }

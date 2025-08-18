@@ -11,14 +11,17 @@ use binrw::{io::NoSeek, BinRead, BinWrite};
 use cdragon_prop::{BinEmbed, BinHash, BinList, BinMap, BinString, BinStruct, PropFile};
 use tokio::io::AsyncWriteExt;
 
-use crate::league::{
-    get_asset_writer, get_bin_path, neg_mat_z, save_struct_to_file, submesh_to_intermediate,
-    AiMeshNGrid, LeagueBinMaybeCharacterMapRecord, LeagueLoader, LeagueLoaderError, LeagueMaterial,
-    LeagueMinionPath, LeagueWadLoader,
-};
 use crate::{
     core::CONFIG_PATH_MAP,
     league::{static_conversion::parse_vertex_data, LayerTransitionBehavior, LeagueMapGeo},
+};
+use crate::{
+    core::CONFIG_PATH_MAP_NAV_GRID,
+    league::{
+        get_asset_writer, get_bin_path, neg_mat_z, save_struct_to_file, submesh_to_intermediate,
+        AiMeshNGrid, LeagueBinMaybeCharacterMapRecord, LeagueLoader, LeagueLoaderError,
+        LeagueMaterial, LeagueMinionPath, LeagueWadLoader,
+    },
 };
 use crate::{
     core::{
@@ -242,7 +245,6 @@ impl LeagueWadMapLoader {
             environment_objects,
             minion_paths,
             barracks,
-            navigation_grid: self.load_navigation_grid().await?,
         };
 
         // 保存最终配置文件
@@ -250,6 +252,13 @@ impl LeagueWadMapLoader {
         save_struct_to_file(&path, &configs).await?;
 
         Ok(configs)
+    }
+
+    pub async fn save_navigation_grid(&self) -> Result<ConfigNavigationGrid, LeagueLoaderError> {
+        let nav_grid = self.load_navigation_grid().await?;
+        let path = get_bin_path(CONFIG_PATH_MAP_NAV_GRID);
+        save_struct_to_file(&path, &nav_grid).await?;
+        Ok(nav_grid)
     }
 
     pub async fn load_navigation_grid(&self) -> Result<ConfigNavigationGrid, LeagueLoaderError> {
@@ -285,10 +294,16 @@ impl LeagueWadMapLoader {
         let nav_grid = AiMeshNGrid::read(&mut reader).unwrap();
 
         let min_bounds = nav_grid.header.min_bounds.0.xz();
-        let max_bounds = nav_grid.header.max_bounds.0.xz();
 
-        let min_position = vec2(min_bounds.x, -max_bounds.y);
-        let max_position = vec2(max_bounds.x, -min_bounds.y);
+        let min_position = vec2(
+            min_bounds.x,
+            -(min_bounds.y + nav_grid.header.z_cell_count as f32 * nav_grid.header.cell_size),
+        );
+
+        let max_position = vec2(
+            min_bounds.x + nav_grid.header.x_cell_count as f32 * nav_grid.header.cell_size,
+            -min_bounds.y,
+        );
 
         println!("min_position: {:?}", min_position);
         println!("max_position: {:?}", max_position);
@@ -319,7 +334,7 @@ impl LeagueWadMapLoader {
         let mut cells: Vec<ConfigNavigationGridCell> = Vec::new();
 
         for (i, cell) in nav_grid.navigation_grid.iter().enumerate() {
-            cells.push(ConfigNavigationGridCell {
+            let cell = ConfigNavigationGridCell {
                 heuristic: cell.heuristic,
                 vision_pathing_flags: nav_grid.vision_pathing_flags[i],
                 river_region_flags: nav_grid.other_flags[i].river_region_flags,
@@ -329,10 +344,10 @@ impl LeagueWadMapLoader {
                 poi_flags: nav_grid.other_flags[i].poi_flags,
                 ring_flags: nav_grid.other_flags[i].ring_flags,
                 srx_flags: nav_grid.other_flags[i].srx_flags,
-            });
-        }
+            };
 
-        let cells = cells.chunks(x_len).map(|v| v.to_vec()).collect();
+            cells.push(cell);
+        }
 
         Ok(ConfigNavigationGrid {
             min_position,
@@ -340,10 +355,22 @@ impl LeagueWadMapLoader {
             cell_size,
             x_len,
             y_len,
-            cells,
+            cells: cells
+                .chunks(x_len)
+                // .map(|v| v.to_vec().into_iter().rev().collect())
+                .map(|v| v.to_vec())
+                .rev()
+                .collect(),
             height_x_len: nav_grid.height_samples.x_count as usize,
             height_y_len: nav_grid.height_samples.z_count as usize,
-            height_samples: nav_grid.height_samples.samples,
+            height_samples: nav_grid
+                .height_samples
+                .samples
+                .chunks(nav_grid.height_samples.x_count as usize)
+                .map(|v| v.to_vec())
+                .rev()
+                // .map(|v| v.to_vec().into_iter().rev().collect())
+                .collect(),
         })
     }
 }

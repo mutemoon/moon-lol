@@ -7,7 +7,7 @@ pub use smoother::*;
 use bevy::prelude::*;
 use std::time::Instant;
 
-use crate::core::{CommandMovementFollowPath, ConfigMap, ConfigNavigationGrid, Movement};
+use crate::core::{CommandMovementFollowPath, ConfigNavigationGrid, Movement};
 use crate::system_debug;
 
 #[derive(Event, Debug)]
@@ -23,18 +23,16 @@ impl Plugin for PluginNavigaton {
     }
 }
 
-fn update(configs: Res<ConfigMap>, mut q_movement: Query<&mut Transform, With<Movement>>) {
+fn update(grid: Res<ConfigNavigationGrid>, mut q_movement: Query<&mut Transform, With<Movement>>) {
     for mut transform in q_movement.iter_mut() {
-        transform.translation = configs
-            .navigation_grid
-            .get_world_position_by_position(&transform.translation.xz());
+        transform.translation = grid.get_world_position_by_position(&transform.translation.xz());
     }
 }
 
 fn command_movement_move_to(
     trigger: Trigger<CommandNavigationTo>,
     mut commands: Commands,
-    configs: Res<ConfigMap>,
+    grid: Res<ConfigNavigationGrid>,
     mut q_transform: Query<&Transform>,
 ) {
     let entity = trigger.target();
@@ -47,7 +45,7 @@ fn command_movement_move_to(
 
         let start = Instant::now();
         // 使用A*算法规划路径，对于单点移动，创建长度为1的路径
-        if let Some(result) = find_path(&configs, start_pos, end_pos) {
+        if let Some(result) = find_path(&grid, start_pos, end_pos) {
             system_debug!(
                 "command_movement_move_to",
                 "Path found in {:.6}ms",
@@ -60,9 +58,7 @@ fn command_movement_move_to(
 }
 
 /// 主要的寻路函数，结合A*和漏斗算法
-pub fn find_path(configs: &ConfigMap, start: Vec3, end: Vec3) -> Option<Vec<Vec2>> {
-    let grid = &configs.navigation_grid;
-
+pub fn find_path(grid: &ConfigNavigationGrid, start: Vec3, end: Vec3) -> Option<Vec<Vec2>> {
     // 首先使用A*找到网格路径
     let grid_path = find_grid_path(grid, start, end)?;
 
@@ -92,7 +88,7 @@ pub fn post_process_path(
     simplified_path.push(end.xz());
 
     // 路径优化：从后往前，检测两点之间的格子，根据 grid.get_cell_by_position().is_walkable() 判断该格子是否可走，来优化路径
-    optimize_path_line_of_sight(grid, &mut simplified_path);
+    // optimize_path_line_of_sight(grid, &mut simplified_path);
 
     return simplified_path;
 }
