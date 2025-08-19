@@ -351,7 +351,6 @@ impl LeagueWadMapLoader {
 
         Ok(ConfigNavigationGrid {
             min_position,
-            max_position,
             cell_size,
             x_len,
             y_len,

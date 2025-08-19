@@ -78,7 +78,6 @@ pub struct ConfigSkinnedMeshInverseBindposes {
 #[derive(Resource, Clone, Default, Serialize, Deserialize)]
 pub struct ConfigNavigationGrid {
     pub min_position: Vec2,
-    pub max_position: Vec2,
     pub cell_size: f32,
     pub x_len: usize,
     pub y_len: usize,
@@ -90,11 +89,11 @@ pub struct ConfigNavigationGrid {
 
 impl ConfigNavigationGrid {
     pub fn get_width(&self) -> f32 {
-        self.max_position.x - self.min_position.x
+        self.x_len as f32 * self.cell_size
     }
 
     pub fn get_height(&self) -> f32 {
-        self.max_position.y - self.min_position.y
+        self.y_len as f32 * self.cell_size
     }
 
     pub fn get_height_by_position(&self, position: &Vec2) -> f32 {
@@ -152,9 +151,10 @@ impl ConfigNavigationGrid {
     }
 
     pub fn get_position_by_float_xy(&self, pos: &Vec2) -> Vec2 {
-        Vec2::new(
-            self.min_position.x + pos.x * self.cell_size,
-            self.min_position.y + pos.y * self.cell_size,
+        let first_cell_center_position = self.get_first_cell_center_position();
+        vec2(
+            first_cell_center_position.x + pos.x * self.cell_size,
+            first_cell_center_position.y + pos.y * self.cell_size,
         )
     }
 

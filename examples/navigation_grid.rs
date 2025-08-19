@@ -8,9 +8,9 @@ use bevy::render::{
 };
 use bevy_egui::{egui, EguiContexts, EguiPlugin, EguiPrimaryContextPass};
 use moon_lol::core::{
-    find_grid_path_with_result, on_click_map, post_process_path, simplify_path, AStarResult,
-    CameraState, CommandMovementFollowPath, CommandNavigationTo, ConfigNavigationGrid, Map,
-    Movement, PluginCore, PluginNavigaton,
+    find_grid_path_with_result, on_click_map, post_process_path, AStarResult, CameraState,
+    CommandMovementFollowPath, CommandNavigationTo, ConfigNavigationGrid, Map, Movement,
+    PluginCore, PluginNavigaton,
 };
 use moon_lol::entities::PluginEntities;
 use moon_lol::league::VisionPathingFlags;
@@ -338,31 +338,6 @@ fn command_navigation_to(
             if result.path.is_empty() {
                 return;
             }
-
-            let mut path = result
-                .path
-                .clone()
-                .into_iter()
-                .map(|(x, y)| vec2(x as f32 + 0.5, y as f32 + 0.5))
-                .collect::<Vec<_>>();
-
-            println!("path: {:?}", path);
-
-            path.remove(0);
-            path.insert(0, (start_pos.xz() - grid.min_position) / grid.cell_size);
-
-            path.pop();
-            path.push((end_pos.xz() - grid.min_position) / grid.cell_size);
-
-            println!("path: {:?}", path);
-
-            let simplified_path = simplify_path(&path);
-
-            astar_vis.unoptimized_path = simplified_path
-                .clone()
-                .into_iter()
-                .map(|v| grid.get_position_by_float_xy(&v))
-                .collect();
 
             let world_path = post_process_path(&grid, &result.path, &start_pos, &end_pos);
 
