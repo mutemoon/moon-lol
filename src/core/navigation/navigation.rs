@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use std::collections::HashSet;
 use std::time::Instant;
 
 use crate::core::{find_grid_path, CommandMovementFollowPath, ConfigNavigationGrid, Movement};
@@ -67,17 +68,14 @@ pub fn post_process_path(
 ) -> Vec<Vec2> {
     let mut path = path
         .iter()
-        .map(|&(x, y)| vec2(x as f32, y as f32))
+        .map(|&(x, y)| vec2(x as f32 + 0.5, y as f32 + 0.5))
         .collect::<Vec<_>>();
 
     path.remove(0);
-    path.insert(
-        0,
-        (start.xz() - grid.min_position - (grid.cell_size / 2.0)) / grid.cell_size,
-    );
+    path.insert(0, (start.xz() - grid.min_position) / grid.cell_size);
 
     path.pop();
-    path.push((end.xz() - grid.min_position - (grid.cell_size / 2.0)) / grid.cell_size);
+    path.push((end.xz() - grid.min_position) / grid.cell_size);
 
     let path = optimize_path(&path, &|x, y| grid.get_cell_by_xy((x, y)).is_walkable());
 
@@ -128,18 +126,11 @@ pub fn has_line_of_sight(
 
     let start_grid_x = start.x.floor() as isize;
     let start_grid_y = start.y.floor() as isize;
-
     let end_grid_x = end.x.floor() as isize;
     let end_grid_y = end.y.floor() as isize;
 
     let mut current_grid_x = start_grid_x;
     let mut current_grid_y = start_grid_y;
-
-    if (start.x != start.x.trunc() || start.y != start.y.trunc())
-        && !is_walkable(current_grid_x as usize, current_grid_y as usize)
-    {
-        return false;
-    }
 
     if current_grid_x == end_grid_x && current_grid_y == end_grid_y {
         return true;
@@ -149,13 +140,12 @@ pub fn has_line_of_sight(
     let step_x = direction.x.signum() as isize;
     let step_y = direction.y.signum() as isize;
 
-    let t_delta_x = if direction.x.abs() < 1e-6 {
+    let t_delta_x = if direction.x.abs() < CORNER_EPSILON {
         f32::MAX
     } else {
         (1.0 / direction.x).abs()
     };
-
-    let t_delta_y = if direction.y.abs() < 1e-6 {
+    let t_delta_y = if direction.y.abs() < CORNER_EPSILON {
         f32::MAX
     } else {
         (1.0 / direction.y).abs()
@@ -168,7 +158,6 @@ pub fn has_line_of_sight(
     } else {
         f32::MAX
     };
-
     let mut t_max_y = if direction.y > 0.0 {
         ((start_grid_y + 1) as f32 - start.y) / direction.y
     } else if direction.y < 0.0 {
@@ -180,6 +169,7 @@ pub fn has_line_of_sight(
     let steps_to_take = (end_grid_x - start_grid_x).abs() + (end_grid_y - start_grid_y).abs();
 
     for _ in 0..steps_to_take {
+        // --- 核心算法逻辑 ---
         if (t_max_x - t_max_y).abs() < CORNER_EPSILON {
             current_grid_x += step_x;
             current_grid_y += step_y;
@@ -193,10 +183,12 @@ pub fn has_line_of_sight(
             t_max_y += t_delta_y;
         }
 
+        // 检查新位置是否可行走
         if !is_walkable(current_grid_x as usize, current_grid_y as usize) {
             return false;
         }
 
+        // 检查是否到达终点
         if current_grid_x == end_grid_x && current_grid_y == end_grid_y {
             return true;
         }

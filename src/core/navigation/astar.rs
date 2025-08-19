@@ -92,18 +92,9 @@ pub fn find_grid_path_with_result(
     g_scores.insert(start_pos, 0.0);
 
     let mut iterations = 0;
-    const MAX_ITERATIONS: usize = 10000;
 
     while let Some(current) = open_set.pop() {
         iterations += 1;
-
-        if iterations > MAX_ITERATIONS {
-            error!(
-                "A* pathfinding: Exceeded maximum iterations ({})",
-                MAX_ITERATIONS
-            );
-            return None;
-        }
 
         // 记录访问过的单元格
         visited_cells.push(current.pos);

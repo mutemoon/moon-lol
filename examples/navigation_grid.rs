@@ -323,14 +323,6 @@ fn command_navigation_to(
         let start = Instant::now();
         // 使用A*算法规划路径，对于单点移动，创建长度为1的路径
         if let Some(result) = find_path_with_visualization(&grid, start_pos, end_pos) {
-            let duration = start.elapsed();
-
-            system_debug!(
-                "command_movement_move_to",
-                "Path found in {:.6}ms",
-                duration.as_millis()
-            );
-
             // 更新 A* 可视化数据
             astar_vis.visited_cells = result.visited_cells;
             astar_vis.path_cells = result.path.clone();
@@ -340,6 +332,12 @@ fn command_navigation_to(
             }
 
             let world_path = post_process_path(&grid, &result.path, &start_pos, &end_pos);
+
+            system_debug!(
+                "command_navigation_to",
+                "Path found in {:.6}ms",
+                start.elapsed().as_millis()
+            );
 
             astar_vis.optimized_path = world_path.clone();
 
