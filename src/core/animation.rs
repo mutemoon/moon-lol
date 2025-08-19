@@ -7,7 +7,7 @@ use rand::{
 };
 
 use crate::{
-    core::{EventMovementEnd, EventMovementStart},
+    core::{EventAttackCast, EventMovementEnd, EventMovementStart},
     league::LeagueLoader,
 };
 
@@ -75,6 +75,7 @@ impl Plugin for PluginAnimation {
     fn build(&self, app: &mut App) {
         app.add_observer(on_movement_start);
         app.add_observer(on_movement_end);
+        app.add_observer(on_command_attack_cast);
         app.add_systems(Update, on_animation_state_change);
         app.add_systems(Update, update_condition_animation);
     }
@@ -98,6 +99,19 @@ fn on_movement_end(trigger: Trigger<EventMovementEnd>, mut query: Query<&mut Ani
     };
 
     state.current_hash = LeagueLoader::hash_bin("Idle1");
+}
+
+fn on_command_attack_cast(
+    trigger: Trigger<EventAttackCast>,
+    mut query: Query<&mut AnimationState>,
+) {
+    let entity = trigger.target();
+
+    let Ok(mut state) = query.get_mut(entity) else {
+        return;
+    };
+
+    state.current_hash = LeagueLoader::hash_bin("Attack1");
 }
 
 fn on_animation_state_change(

@@ -1,5 +1,4 @@
 use bevy::prelude::*;
-use std::collections::HashSet;
 use std::time::Instant;
 
 use crate::core::{find_grid_path, CommandMovementFollowPath, ConfigNavigationGrid, Movement};
