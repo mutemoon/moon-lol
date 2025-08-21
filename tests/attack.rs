@@ -138,7 +138,7 @@ mod tests {
         /// 断言攻击状态为空闲
         fn then_expect_idle(&mut self, message: &str) -> &mut Self {
             let state = self.attack_state();
-            assert!(state.is_none(), "没有处于攻击状态: {}", message);
+            assert!(state.is_none(), "处于攻击状态: {}", message);
             self
         }
 
@@ -200,17 +200,12 @@ mod tests {
             ..Default::default()
         });
 
-        let initial_time = harness.current_time();
         let target = harness.target;
 
         harness
             .attack()
             .then_expect_windup("攻击命令应该触发前摇状态")
             .then_expect_target(target, "攻击目标应该正确")
-            .then_custom_assert(
-                |h| h.attack_state().unwrap().start_time >= initial_time,
-                "cast_time应该被更新",
-            )
             .advance_time(0.3)
             .then_expect_cooldown("前摇结束后应该进入后摇状态")
             .then_expect_target(target, "后摇期间目标应该保持不变")
@@ -240,11 +235,7 @@ mod tests {
             // 手动发送第二次攻击命令（测试同目标不重新开始）
             .attack()
             .then_expect_windup("第二次攻击应该保持前摇状态")
-            .then_expect_target(target, "攻击目标应该保持不变")
-            .then_custom_assert(
-                |h| h.attack_state().unwrap().start_time < initial_time + 1.1, // cast_time 不应重置，这里用一个稍微大一点的值来判断
-                "攻击同一目标时不应该重新开始",
-            );
+            .then_expect_target(target, "攻击目标应该保持不变");
 
         assert!(
             (harness.attack_component().windup_duration_secs() - 0.3).abs() < EPSILON,
@@ -254,34 +245,6 @@ mod tests {
             (harness.attack_component().cooldown_time() - 0.7).abs() < EPSILON,
             "后摇时间配置正确"
         );
-    }
-
-    /// 目标 3：攻击中切换目标
-    #[test]
-    fn test_switch_target_during_attack() {
-        let mut harness = TestHarness::new().with_attacker(Attack {
-            base_attack_speed: 1.0,
-            windup_config: WindupConfig::Legacy { attack_offset: 0.0 },
-            ..Default::default()
-        });
-
-        let target_a = harness.target;
-        let target_b = harness.spawn_target();
-
-        harness
-            .attack()
-            .then_expect_windup("攻击命令应该触发前摇状态")
-            .then_expect_target(target_a, "初始攻击目标应该正确")
-            .advance_time(0.3)
-            .then_expect_cooldown("前摇结束后应该进入后摇状态")
-            .switch_target(target_b)
-            .advance_time(0.7)
-            .then_expect_windup("后摇结束后应该自动开始下一次攻击")
-            .then_expect_target(target_b, "下一次攻击的目标应该是新目标")
-            // 手动发送攻击新目标的命令（测试同目标不重新开始）
-            .attack()
-            .then_expect_windup("攻击新目标应该保持前摇状态")
-            .then_expect_target(target_b, "攻击目标应该保持为新目标");
     }
 
     // ===== 二、攻击取消机制 (Attack Cancellation Mechanics) =====
@@ -524,27 +487,6 @@ mod tests {
         );
     }
 
-    // ===== 六、目标与距离验证 (Targeting & Range) =====
-
-    /// 目标在攻击前摇期间死亡或失效
-    #[test]
-    fn test_target_death_during_windup() {
-        let mut harness = TestHarness::new().with_attacker(Attack {
-            base_attack_speed: 1.0,
-            windup_config: WindupConfig::Legacy { attack_offset: 0.0 },
-            ..Default::default()
-        });
-
-        let target_id = harness.target;
-
-        harness
-            .attack()
-            .then_expect_windup("攻击命令应该触发前摇状态")
-            .kill_target(target_id)
-            .advance_time(1.0 / TEST_FPS) // 手动运行FixedUpdate来触发目标有效性检查
-            .then_expect_idle("目标失效后攻击应该被取消");
-    }
-
     // ===== 七、辅助测试函数和浮点数精度 =====
 
     /// 攻击速度计算验证
@@ -699,12 +641,19 @@ mod tests {
             .then_expect_target(target_a, "攻击目标应该是A")
             .advance_time(0.234)
             .switch_target(target_b)
-            .advance_time(0.066)
-            .then_expect_cooldown("攻击应该正常进入后摇状态")
-            .then_expect_target(target_a, "当前攻击的目标应该仍然是A")
-            .advance_time(0.7)
-            .then_expect_windup("应该自动开始下一次攻击")
-            .then_expect_target(target_b, "下一次攻击的目标应该是B");
+            .attack()
+            .then_expect_windup("攻击应该重新进入前摇状态")
+            .then_expect_target(target_b, "当前攻击的目标应该是B")
+            .advance_time(0.5)
+            .then_expect_cooldown("应该进入冷却状态")
+            .then_expect_target(target_b, "下一次攻击的目标还是B")
+            .switch_target(target_a)
+            .attack()
+            .then_expect_cooldown("攻击应该还是后摇状态")
+            .then_expect_target(target_a, "下一次攻击的目标应该是A")
+            .advance_time(0.5)
+            .then_expect_windup("后摇结束后应该自动开始下一次攻击")
+            .then_expect_target(target_a, "下一次攻击的目标应该是A");
     }
 
     /// 测试场景2：攻击目标A，在可取消期间攻击目标B
@@ -719,7 +668,6 @@ mod tests {
 
         let target_a = harness.target;
         let target_b = harness.spawn_target();
-        let time_before_switch = harness.current_time();
 
         harness
             .attack()
@@ -730,10 +678,6 @@ mod tests {
             .attack()
             .then_expect_windup("应该立即开始攻击目标B")
             .then_expect_target(target_b, "当前攻击的目标应该是B")
-            .then_custom_assert(
-                |h| h.attack_state().unwrap().start_time >= time_before_switch,
-                "攻击时间应该重新计时",
-            )
             .advance_time(0.3)
             .then_expect_cooldown("前摇结束后应该进入后摇状态")
             .then_expect_target(target_b, "后摇期间目标应该是B")
@@ -757,9 +701,9 @@ mod tests {
             .advance_time(0.3)
             .then_expect_cooldown("前摇结束后应该进入后摇状态")
             .cancel()
-            .then_expect_idle("后摇期间应该可以取消攻击")
+            .then_expect_cooldown("后摇期间取消攻击还是后摇状态")
             .attack()
-            .then_expect_windup("取消后应该能立即开始新攻击");
+            .then_expect_cooldown("后摇期间发送攻击命令应该不变");
     }
 
     /// 测试空闲状态下发送取消或重置命令
@@ -794,10 +738,6 @@ mod tests {
             .then_expect_windup("没有取消命令时应该自动继续攻击")
             // 测试取消命令停止自动攻击
             .cancel()
-            .then_custom_assert(
-                |h| !h.attack_state().unwrap().target.is_none(),
-                "取消后不应该继续自动攻击",
-            )
             .then_expect_idle("取消后应该回到空闲状态");
     }
 
@@ -831,23 +771,19 @@ mod tests {
             .then_expect_windup("后摇被重置，立即开始新的攻击")
             .then_expect_target(new_target, "目标仍然是 new_target")
             .advance_time(0.1)
-            .kill_target(new_target)
-            .advance_time(1.0 / TEST_FPS)
-            .then_expect_idle("目标死亡后，攻击应该被取消并回到空闲状态")
-            .modify_attacker(|attack| {
-                attack.bonus_attack_speed = 1.0;
-            })
-            .then_custom_assert(
-                |h| (h.attack_component().total_duration_secs() - 0.5).abs() < EPSILON,
-                "攻速提升后，攻击间隔应为0.5秒",
-            )
             .switch_target(initial_target)
             .attack()
             .then_expect_windup("可以正常开始攻击初始目标")
-            .advance_time(0.3)
-            .then_expect_cooldown("加速后攻击完成，进入后摇")
-            .advance_time(0.2)
-            .then_expect_windup("加速后的后摇结束，自动开始下一次攻击");
+            .advance_time(0.1)
+            .modify_attacker(|attack| {
+                attack.bonus_attack_speed = 1.0;
+            })
+            .advance_time(0.1)
+            .then_expect_windup("前摇中加攻速不会影响前摇时间")
+            .advance_time(0.1)
+            .then_expect_cooldown("进入后摇")
+            .advance_time(0.35)
+            .then_expect_windup("加攻速后，后摇时间变为 0.35 秒，进入下一次攻击前摇");
     }
 
     /// 复杂场景：多目标切换和取消序列

@@ -58,17 +58,15 @@ pub struct AttackState {
     pub status: AttackStatus,
     /// 攻击目标
     pub target: Option<Entity>,
-    /// 当前阶段开始的时间
-    pub start_time: f32,
 }
 
 /// 攻击状态 - 更详细的状态表示
 #[derive(Debug, Clone, PartialEq)]
 pub enum AttackStatus {
     /// 前摇阶段 - 举起武器准备攻击
-    Windup { target: Entity },
+    Windup { target: Entity, end_time: f32 },
     /// 后摇阶段 - 武器收回，等待下一次攻击
-    Cooldown,
+    Cooldown { end_time: f32 },
 }
 
 #[derive(Event, Debug)]
@@ -163,6 +161,7 @@ impl AttackState {
 fn on_command_attack_start(
     trigger: Trigger<CommandAttackStart>,
     mut commands: Commands,
+    q_attack: Query<&Attack>,
     mut q_attack_state: Query<&mut AttackState>,
     time: Res<Time<Fixed>>,
 ) {
@@ -171,13 +170,19 @@ fn on_command_attack_start(
 
     let now = time.elapsed_secs();
 
+    let Ok(attack) = q_attack.get(entity) else {
+        return;
+    };
+
     let Ok(mut attack_state) = q_attack_state.get_mut(entity) else {
         commands
             .entity(entity)
             .insert(AttackState {
-                status: AttackStatus::Windup { target },
+                status: AttackStatus::Windup {
+                    target,
+                    end_time: now + attack.windup_duration_secs(),
+                },
                 target: Some(target),
-                start_time: now,
             })
             .trigger(EventAttackStart { target });
         return;
@@ -186,6 +191,7 @@ fn on_command_attack_start(
     match &attack_state.status {
         AttackStatus::Windup {
             target: windup_target,
+            ..
         } => {
             if *windup_target == target {
                 return;
@@ -196,7 +202,7 @@ fn on_command_attack_start(
                 .remove::<AttackState>()
                 .trigger(CommandAttackStart { target });
         }
-        AttackStatus::Cooldown => {
+        AttackStatus::Cooldown { .. } => {
             // 冷却阶段也需要设置目标，因为下一次攻击要攻击这个目标
             attack_state.target = Some(target);
         }
@@ -240,7 +246,7 @@ fn on_command_attack_stop(
         AttackStatus::Windup { .. } => {
             commands.entity(entity).remove::<AttackState>();
         }
-        AttackStatus::Cooldown => {
+        AttackStatus::Cooldown { .. } => {
             attack_state.target = None;
         }
     };
@@ -256,11 +262,12 @@ fn update(
 
     for (entity, mut attack_state, attack) in query.iter_mut() {
         match &attack_state.status.clone() {
-            AttackStatus::Windup { target } => {
+            AttackStatus::Windup { target, end_time } => {
                 // 检查前摇是否完成
-                if attack_state.start_time + attack.windup_duration_secs() <= now {
-                    attack_state.status = AttackStatus::Cooldown;
-                    attack_state.start_time = now;
+                if *end_time <= now {
+                    attack_state.status = AttackStatus::Cooldown {
+                        end_time: now + attack.cooldown_time(),
+                    };
 
                     commands.entity(*target).trigger(CommandDamageCreate {
                         source: entity,
@@ -273,9 +280,9 @@ fn update(
                         .trigger(EventAttackEnd { target: *target });
                 }
             }
-            AttackStatus::Cooldown => {
+            AttackStatus::Cooldown { end_time } => {
                 // 检查后摇是否完成
-                if attack_state.start_time + attack.total_duration_secs() <= now {
+                if *end_time <= now {
                     commands
                         .entity(entity)
                         .remove::<AttackState>()
