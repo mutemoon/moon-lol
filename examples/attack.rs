@@ -91,17 +91,7 @@ pub fn setup(
                     value: 600.0,
                     max: 600.0,
                 },
-                Attack {
-                    range: 100.0,
-                    base_attack_speed: 0.69,
-                    bonus_attack_speed: 0.0,
-                    attack_speed_cap: 2.5,
-                    windup_config: WindupConfig::Modern {
-                        attack_cast_time: 0.2,
-                        attack_total_time: 1.45,
-                    },
-                    windup_modifier: 1.0,
-                },
+                Attack::new(150.0, 0.2, 1.45),
                 Fiora,
             ))
             .log_components();
