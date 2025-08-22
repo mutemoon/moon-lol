@@ -1,5 +1,6 @@
 mod animation;
 mod barrack;
+mod bin;
 mod character;
 mod grid;
 mod lane;
@@ -13,6 +14,7 @@ mod texture;
 mod utils;
 
 pub use animation::*;
+pub use bin::*;
 pub use character::*;
 pub use grid::*;
 pub use lane::*;

@@ -5,7 +5,7 @@ use bevy::render::{
 };
 use moon_lol::core::{
     spawn_skin_entity, Attack, ConfigGame, ConfigNavigationGrid, Controller, Focus, Health,
-    Movement, PluginGame, Team, WindupConfig,
+    Movement, PluginGame, Team,
 };
 use moon_lol::entities::Fiora;
 use moon_lol::{core::PluginCore, entities::PluginEntities, logging::PluginLogging};
