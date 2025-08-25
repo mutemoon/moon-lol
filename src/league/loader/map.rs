@@ -3,43 +3,112 @@ use std::{
     io::{Cursor, Read},
 };
 
-use bevy::{
-    math::{vec2, Vec3Swizzles},
-    transform::components::Transform,
-};
+use bevy::math::{vec2, Vec3Swizzles};
 use binrw::{io::NoSeek, BinRead, BinWrite};
-use cdragon_prop::{BinEmbed, BinHash, BinList, BinMap, BinString, BinStruct, PropFile};
 use tokio::io::AsyncWriteExt;
 
 use crate::{
-    core::CONFIG_PATH_MAP,
-    league::{parse_vertex_data, LayerTransitionBehavior, LeagueMapGeo},
-};
-use crate::{
-    core::CONFIG_PATH_MAP_NAV_GRID,
-    league::{
-        get_asset_writer, get_bin_path, neg_mat_z, save_struct_to_file, submesh_to_intermediate,
-        AiMeshNGrid, LeagueBinMaybeCharacterMapRecord, LeagueLoader, LeagueLoaderError,
-        LeagueMaterial, LeagueMinionPath, LeagueWadLoader,
-    },
-};
-use crate::{
     core::{
-        ConfigCharacterSkin, ConfigGeometryObject, ConfigMap, ConfigNavigationGrid,
-        ConfigNavigationGridCell, Health, Lane, Team,
+        ConfigGeometryObject, ConfigMap, ConfigNavigationGrid, ConfigNavigationGridCell, Lane,
+        CONFIG_PATH_MAP, CONFIG_PATH_MAP_NAV_GRID,
     },
-    entities::Barrack,
+    league::{
+        from_entry, get_asset_writer, get_bin_path, merge_class_maps, parse_vertex_data,
+        save_struct_to_file, submesh_to_intermediate, AiMeshNGrid, BarracksConfig,
+        LayerTransitionBehavior, LeagueLoader, LeagueLoaderError, LeagueMapGeo, LeagueMaterial,
+        LeagueWadLoader, MapContainer, MapContainerComponents, MapPlaceableContainer,
+        MapPlaceableContainerItems, PropFile, StaticMaterialDef, Unk0x9d9f60d2,
+    },
 };
 
 pub struct LeagueWadMapLoader {
     pub wad_loader: LeagueWadLoader,
-
     pub map_geo: LeagueMapGeo,
-
     pub materials_bin: PropFile,
 }
 
 impl LeagueWadMapLoader {
+    pub async fn extract_all_map_classes(
+        &self,
+        hash_paths: &[&str],
+    ) -> Result<String, LeagueLoaderError> {
+        let mut class_map = self.extract_all_class(&self.materials_bin).await?;
+
+        let hashes = self.get_hashes(hash_paths);
+
+        let rust_code = self.class_map_to_rust_code(&mut class_map, &hashes).await?;
+
+        Ok(rust_code)
+    }
+
+    pub async fn extract_all_classes(
+        &self,
+        hash_paths: &[&str],
+    ) -> Result<String, LeagueLoaderError> {
+        let mut characters = HashMap::new();
+        let mut environment_objects = HashMap::new();
+
+        for entry in self.materials_bin.iter_entry_by_class(0x9d9f60d2) {
+            let record = from_entry::<Unk0x9d9f60d2>(entry);
+            characters.entry(entry.hash).or_insert(record);
+        }
+
+        for entry in self
+            .materials_bin
+            .iter_entry_by_class(LeagueLoader::hash_bin("MapPlaceableContainer"))
+        {
+            let map_placeable_container = from_entry::<MapPlaceableContainer>(entry);
+
+            for (hash, value) in map_placeable_container.items {
+                match value {
+                    MapPlaceableContainerItems::Unk0x3c2bf0c0(unk0x3c2bf0c0) => {
+                        environment_objects.entry(hash).or_insert(unk0x3c2bf0c0);
+                    }
+                    _ => {}
+                }
+            }
+        }
+
+        let mut skins = Vec::new();
+        let mut character_records = Vec::new();
+
+        for environment_object in environment_objects.values() {
+            let skin_key = environment_object.definition.skin.clone();
+            skins.push(skin_key);
+            let character_record_key = environment_object.definition.character_record.clone();
+            character_records.push(character_record_key);
+        }
+
+        for character in characters.values() {
+            let skin_key = character.skin.clone();
+            skins.push(skin_key);
+            let character_record_key = character.character_record.clone();
+            character_records.push(character_record_key);
+        }
+
+        let mut class_map = HashMap::new();
+        for skin in skins {
+            let skin_bin = self.wad_loader.get_skin_bin_by_path(&skin).unwrap();
+            let bin_class_map = self.extract_all_class(&skin_bin).await?;
+            merge_class_maps(&mut class_map, bin_class_map);
+        }
+
+        for character_record in character_records {
+            let character_bin = self
+                .wad_loader
+                .get_character_bin_by_path(&character_record)
+                .unwrap();
+            let bin_class_map = self.extract_all_class(&character_bin).await?;
+            merge_class_maps(&mut class_map, bin_class_map);
+        }
+
+        let hashes = self.get_hashes(hash_paths);
+
+        let rust_code = self.class_map_to_rust_code(&mut class_map, &hashes).await?;
+
+        Ok(rust_code)
+    }
+
     pub fn from_loader(
         wad_loader: LeagueWadLoader,
         map: &str,
@@ -66,7 +135,7 @@ impl LeagueWadMapLoader {
 
         reader.read_to_end(&mut data)?;
 
-        let materials_bin = PropFile::from_slice(&data)?;
+        let materials_bin = PropFile::read(&mut Cursor::new(data))?;
 
         Ok(LeagueWadMapLoader {
             wad_loader,
@@ -123,92 +192,34 @@ impl LeagueWadMapLoader {
         Ok(geometry_objects)
     }
 
-    pub async fn save_environment_objects(
-        &self,
-    ) -> Result<
-        (
-            Vec<(Transform, ConfigCharacterSkin, Option<Health>)>,
-            Vec<(Transform, Team, Lane, Barrack)>,
-        ),
-        LeagueLoaderError,
-    > {
-        let mut environment_objects = Vec::new();
-        let mut barracks = Vec::new();
+    pub fn load_image_for_submesh(&self, material_name: &str) -> Option<LeagueMaterial> {
+        // 1. 根据材质名查找 texturePath
 
-        // 处理环境对象和兵营
-        for entry in self
+        let entry = self
             .materials_bin
             .entries
             .iter()
-            .filter(|v| v.ctype.hash == LeagueLoader::hash_bin("MapPlaceableContainer"))
-            .filter_map(|v| v.getv::<BinMap>(LeagueLoader::hash_bin("items").into()))
-            .filter_map(|v| v.downcast::<BinHash, BinStruct>())
-            .flatten()
-        {
-            match entry.1.ctype.hash {
-                0x1e1cce2 => {
-                    let character_map_record = LeagueBinMaybeCharacterMapRecord::from(&entry.1);
+            .find(|v| v.hash == LeagueLoader::hash_bin(material_name))?;
 
-                    let character_record = self
-                        .wad_loader
-                        .load_character_record(&character_map_record.definition.character_record);
-                    let transform =
-                        Transform::from_matrix(neg_mat_z(&character_map_record.transform));
-                    let skin = character_map_record.definition.skin;
+        let material = from_entry::<StaticMaterialDef>(entry);
 
-                    let environment_object = self.wad_loader.save_environment_object(&skin).await?;
+        // 2. 将列表转换为可迭代的 BinEmbed
+        let embedded_samplers = material.sampler_values;
 
-                    environment_objects.push((
-                        transform,
-                        environment_object,
-                        character_record
-                            .base_hp
-                            .map(|v| Health { value: v, max: v }),
-                    ));
-                }
-                0x71d0eabd => {
-                    let barrack = self.save_barrack(&entry.1).await?;
-                    barracks.push(barrack);
-                }
-                _ => {}
+        // 3. 遍历所有 sampler，查找第一个包含 "texturePath" 的
+        // `find_map` 会在找到第一个 Some(T) 后立即停止，比 filter_map + collect + first 更高效
+        let texture_path = embedded_samplers.into_iter().find_map(|sampler_item| {
+            let texture_name = &sampler_item.texture_name;
+            if !(texture_name == "DiffuseTexture" || texture_name == "Diffuse_Texture") {
+                return None;
             }
-        }
+            Some(sampler_item.texture_path)
+        });
 
-        Ok((environment_objects, barracks))
-    }
-
-    pub fn load_image_for_submesh(&self, material_name: &str) -> Option<LeagueMaterial> {
-        // 1. 根据材质名查找 texturePath
-        let binhash = LeagueLoader::hash_bin(material_name);
-
-        for entry in &self.materials_bin.entries {
-            if entry.path.hash == binhash {
-                let sampler_values =
-                    entry.getv::<BinList>(LeagueLoader::hash_bin("samplerValues").into())?;
-
-                // 2. 将列表转换为可迭代的 BinEmbed
-                let embedded_samplers = sampler_values.downcast::<BinEmbed>()?;
-
-                // 3. 遍历所有 sampler，查找第一个包含 "texturePath" 的
-                // `find_map` 会在找到第一个 Some(T) 后立即停止，比 filter_map + collect + first 更高效
-                let texture_path = embedded_samplers.into_iter().find_map(|sampler_item| {
-                    let texture_name = &sampler_item
-                        .getv::<BinString>(LeagueLoader::hash_bin("textureName").into())?
-                        .0;
-                    if !(texture_name == "DiffuseTexture" || texture_name == "Diffuse_Texture") {
-                        return None;
-                    }
-                    sampler_item
-                        .getv::<BinString>(LeagueLoader::hash_bin("texturePath").into())
-                        .map(|v| v.0.clone())
-                });
-
-                if let Some(texture_path) = texture_path {
-                    return Some(LeagueMaterial {
-                        texture_path: texture_path,
-                    });
-                }
-            }
+        if let Some(texture_path) = texture_path {
+            return Some(LeagueMaterial {
+                texture_path: texture_path,
+            });
         }
 
         None
@@ -216,35 +227,95 @@ impl LeagueWadMapLoader {
 
     pub async fn save_config_map(&self) -> Result<ConfigMap, LeagueLoaderError> {
         // 并行处理地图网格
-        let geometry_objects = self.save_mapgeo().await?;
+        let geometry_objects = Vec::new();
+        // self.save_mapgeo().await?;
 
-        let (environment_objects, barracks) = self.save_environment_objects().await?;
+        let mut minion_paths = HashMap::new();
+        let mut barracks = HashMap::new();
+        let mut characters = HashMap::new();
+        let mut barrack_configs = HashMap::new();
+        let mut environment_objects = HashMap::new();
+        let mut skins = HashMap::new();
+        let mut character_records = HashMap::new();
 
-        // 处理小兵路径（这部分不涉及文件 I/O，保持同步）
-        let minion_paths: Vec<LeagueMinionPath> = self
+        for entry in self
             .materials_bin
-            .entries
-            .iter()
-            .filter(|v| v.ctype.hash == LeagueLoader::hash_bin("MapPlaceableContainer"))
-            .map(|v| {
-                v.getv::<BinMap>(LeagueLoader::hash_bin("items").into())
-                    .unwrap()
-            })
-            .flat_map(|v| v.downcast::<BinHash, BinStruct>().unwrap())
-            .filter(|v| v.1.ctype.hash == 0x3c995caf)
-            .map(|v| LeagueMinionPath::from(&v.1))
-            .collect();
+            .iter_entry_by_class(LeagueLoader::hash_bin("BarracksConfig"))
+        {
+            barrack_configs
+                .entry(entry.hash)
+                .or_insert(from_entry::<BarracksConfig>(entry));
+        }
 
-        let minion_paths = minion_paths
-            .into_iter()
-            .map(|v| (v.lane, v.path))
-            .collect::<HashMap<_, _>>();
+        for entry in self.materials_bin.iter_entry_by_class(0x9d9f60d2) {
+            let record = from_entry::<Unk0x9d9f60d2>(entry);
+            characters.entry(entry.hash).or_insert(record);
+        }
+
+        for entry in self
+            .materials_bin
+            .iter_entry_by_class(LeagueLoader::hash_bin("MapPlaceableContainer"))
+        {
+            let map_placeable_container = from_entry::<MapPlaceableContainer>(entry);
+
+            for (hash, value) in map_placeable_container.items {
+                match value {
+                    MapPlaceableContainerItems::Unk0x3c2bf0c0(unk0x3c2bf0c0) => {
+                        environment_objects.entry(hash).or_insert(unk0x3c2bf0c0);
+                    }
+                    MapPlaceableContainerItems::Unk0x3c995caf(unk0x3c995caf) => {
+                        let lane = match unk0x3c995caf.name.as_str() {
+                            "MinionPath_Top" => Lane::Top,
+                            "MinionPath_Mid" => Lane::Mid,
+                            "MinionPath_Bot" => Lane::Bot,
+                            _ => panic!("未知的小兵路径: {}", unk0x3c995caf.name),
+                        };
+
+                        let path = unk0x3c995caf.segments.iter().map(|v| v.xz()).collect();
+
+                        minion_paths.entry(lane).or_insert(path);
+                    }
+                    MapPlaceableContainerItems::Unk0xc71ee7fb(unk0xc71ee7fb) => {
+                        barracks.entry(hash).or_insert(unk0xc71ee7fb);
+                    }
+                    _ => {}
+                }
+            }
+        }
+
+        for environment_object in environment_objects.values() {
+            let skin_key = environment_object.definition.skin.clone();
+            let skin = self.wad_loader.save_environment_object(&skin_key).await?;
+            skins.entry(skin_key).or_insert(skin);
+
+            let character_record_key = environment_object.definition.character_record.clone();
+            let character_record = self.wad_loader.load_character_record(&character_record_key);
+            character_records
+                .entry(character_record_key)
+                .or_insert(character_record);
+        }
+
+        for character in characters.values() {
+            let skin_key = character.skin.clone();
+            let skin = self.wad_loader.save_environment_object(&skin_key).await?;
+            skins.entry(skin_key).or_insert(skin);
+
+            let character_record_key = character.character_record.clone();
+            let character_record = self.wad_loader.load_character_record(&character_record_key);
+            character_records
+                .entry(character_record_key)
+                .or_insert(character_record);
+        }
 
         let configs = ConfigMap {
             geometry_objects,
-            environment_objects,
             minion_paths,
             barracks,
+            characters,
+            barrack_configs,
+            environment_objects,
+            skins,
+            character_records,
         };
 
         // 保存最终配置文件
@@ -262,33 +333,30 @@ impl LeagueWadMapLoader {
     }
 
     pub async fn load_navigation_grid(&self) -> Result<ConfigNavigationGrid, LeagueLoaderError> {
-        let map_container = self
+        let entry = self
             .materials_bin
-            .entries
-            .iter()
-            .find(|v| v.ctype.hash == LeagueLoader::hash_bin("MapContainer"))
+            .iter_entry_by_class(LeagueLoader::hash_bin("MapContainer"))
+            .next()
             .unwrap();
 
-        let components = map_container
-            .getv::<BinList>(LeagueLoader::hash_bin("components").into())
-            .unwrap();
+        let map_container = from_entry::<MapContainer>(entry);
+
+        let components = map_container.components;
+
+        println!("components: {:?}", components);
 
         let map_nav_grid = components
-            .downcast::<BinStruct>()
-            .unwrap()
             .iter()
-            .find(|v| v.ctype.hash == LeagueLoader::hash_bin("MapNavGrid"))
+            .filter_map(|v| match v {
+                MapContainerComponents::MapNavGrid(v) => Some(v),
+                _ => None,
+            })
+            .next()
             .unwrap();
-
-        let nav_grid_path = map_nav_grid
-            .getv::<BinString>(LeagueLoader::hash_bin("NavGridPath").into())
-            .unwrap()
-            .0
-            .clone();
 
         let mut reader = self
             .wad_loader
-            .get_wad_entry_reader_by_path(&nav_grid_path)
+            .get_wad_entry_reader_by_path(&map_nav_grid.nav_grid_path)
             .unwrap();
 
         let nav_grid = AiMeshNGrid::read(&mut reader).unwrap();

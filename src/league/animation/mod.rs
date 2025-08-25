@@ -1,3 +1,4 @@
+mod bin;
 mod compressed;
 mod loader;
 mod saver;
@@ -6,6 +7,7 @@ mod uncompressed;
 
 use std::collections::HashMap;
 
+pub use bin::*;
 pub use compressed::*;
 pub use loader::*;
 pub use skeleton::*;

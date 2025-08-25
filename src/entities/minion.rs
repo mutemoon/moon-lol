@@ -1,6 +1,6 @@
 use crate::core::{
-    Attack, AttackState, Bounding, CommandBehaviorAttack, CommandMovementStart, DamageType,
-    EventDamageCreate, EventDead, EventMovementEnd, EventSpawn, State, Team,
+    Attack, AttackState, Bounding, CommandBehaviorAttack, CommandMovementStart, ConfigMap,
+    DamageType, EventDamageCreate, EventDead, EventMovementEnd, EventSpawn, Lane, State, Team,
 };
 use bevy::{app::Plugin, prelude::*};
 use serde::{Deserialize, Serialize};
@@ -30,6 +30,18 @@ pub enum Minion {
     Super,
 }
 
+impl From<u8> for Minion {
+    fn from(value: u8) -> Self {
+        match value {
+            4 => Minion::Melee,
+            6 => Minion::Siege,
+            5 => Minion::Ranged,
+            7 => Minion::Super,
+            _ => panic!("unknown minion type"),
+        }
+    }
+}
+
 #[derive(Component, Default)]
 pub struct AggroInfo {
     pub aggros: std::collections::HashMap<Entity, f32>,
@@ -41,9 +53,6 @@ pub enum MinionState {
     MovingOnPath,
     AttackingTarget,
 }
-
-#[derive(Component)]
-pub struct MinionPath(pub Vec<Vec2>);
 
 #[derive(Event, Debug)]
 pub struct CommandMinionContinuePath;
@@ -115,21 +124,23 @@ pub fn minion_aggro(
 
 pub fn action_continue_minion_path(
     trigger: Trigger<CommandMinionContinuePath>,
-    query: Query<(&Transform, &MinionPath)>,
+    query: Query<(&Transform, &Lane)>,
+    res_config: Res<ConfigMap>,
     mut commands: Commands,
 ) {
-    let Ok((transform, minion_path)) = query.get(trigger.target()) else {
+    let Ok((transform, lane)) = query.get(trigger.target()) else {
         return;
     };
 
-    let Some(closest_index) =
-        find_closest_point_index(&minion_path.0.clone(), transform.translation.xz())
+    let minion_path = res_config.minion_paths.get(lane).unwrap();
+
+    let Some(closest_index) = find_closest_point_index(&minion_path, transform.translation.xz())
     else {
         return;
     };
 
     commands.trigger_targets(
-        CommandMovementStart(minion_path.0[closest_index..].to_vec()),
+        CommandMovementStart(minion_path[closest_index..].to_vec()),
         trigger.target(),
     );
 }

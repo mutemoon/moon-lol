@@ -6,16 +6,15 @@ use std::{
     sync::Arc,
 };
 
-use crate::league::{
-    get_asset_writer, ArcFileReader, LeagueBinCharacterRecord, LeagueLoader, LeagueLoaderError,
-    LeagueTexture, LeagueWad, LeagueWadEntry, LeagueWadSubchunk, SkinCharacterDataProperties,
-    WadDataFormat,
-};
-
 use binrw::{args, io::NoSeek, BinRead, Endian};
-use cdragon_prop::{BinEntry, PropFile};
 use tokio::io::AsyncWriteExt;
 use zstd::Decoder;
+
+use crate::league::{
+    from_entry, get_asset_writer, ArcFileReader, CharacterRecord, EntryData, LeagueLoader,
+    LeagueLoaderError, LeagueTexture, LeagueWad, LeagueWadEntry, LeagueWadSubchunk, PropFile,
+    SkinCharacterDataProperties, WadDataFormat,
+};
 
 pub struct LeagueWadLoader {
     pub wad: LeagueWad,
@@ -121,52 +120,61 @@ impl LeagueWadLoader {
 
     pub fn get_prop_bin_by_path(&self, path: &str) -> Result<PropFile, LeagueLoaderError> {
         let mut reader = self.get_wad_entry_no_seek_reader_by_path(path)?;
-        let mut data = Vec::new();
-        reader.read_to_end(&mut data)?;
-        Ok(PropFile::from_slice(&data)?)
+        Ok(PropFile::read(&mut reader)?)
     }
 
-    pub fn load_character_record(&self, character_record: &str) -> LeagueBinCharacterRecord {
+    pub fn get_character_bin_by_path(
+        &self,
+        character_record: &str,
+    ) -> Result<PropFile, LeagueLoaderError> {
         let name = character_record.split("/").nth(1).unwrap();
 
         let path = format!("data/characters/{0}/{0}.bin", name);
 
         let character_bin = self.get_prop_bin_by_path(&path).unwrap();
 
-        let character_record = character_bin
+        Ok(character_bin)
+    }
+
+    pub fn load_character_record(&self, character_record: &str) -> CharacterRecord {
+        let character_bin = self.get_character_bin_by_path(character_record).unwrap();
+
+        let entry = character_bin
             .entries
             .iter()
-            .find(|v| v.path.hash == LeagueLoader::hash_bin(&character_record))
+            .find(|v| v.hash == LeagueLoader::hash_bin(&character_record))
             .unwrap();
 
-        let character_record = character_record.into();
+        from_entry(entry)
+    }
 
-        character_record
+    pub fn get_skin_bin_by_path(&self, skin: &str) -> Result<PropFile, LeagueLoaderError> {
+        let path = format!("data/{}.bin", skin);
+        let skin_bin = self.get_prop_bin_by_path(&path).unwrap();
+        Ok(skin_bin)
     }
 
     pub fn load_character_skin(
         &self,
         skin: &str,
-    ) -> (SkinCharacterDataProperties, HashMap<u32, BinEntry>) {
-        let skin_path = format!("data/{}.bin", skin);
+    ) -> (SkinCharacterDataProperties, HashMap<u32, EntryData>) {
+        let skin_bin = self.get_skin_bin_by_path(skin).unwrap();
 
-        let skin_bin = self.get_prop_bin_by_path(&skin_path).unwrap();
+        let awi = skin_bin
+            .iter_entry_by_class(LeagueLoader::hash_bin("SkinCharacterDataProperties"))
+            .collect::<Vec<_>>();
 
-        let skin_mesh_properties = skin_bin
-            .entries
-            .iter()
-            .find(|v| v.ctype.hash == LeagueLoader::hash_bin("SkinCharacterDataProperties"))
-            .unwrap();
+        let skin_character_data_properties = awi.iter().next().unwrap();
 
         let flat_map: HashMap<_, _> = skin_bin
-            .linked_files
+            .links
             .iter()
-            .map(|v| self.get_prop_bin_by_path(v).unwrap())
+            .map(|v| self.get_prop_bin_by_path(&v.text).unwrap())
             .flat_map(|v| v.entries)
-            .map(|v| (v.path.hash, v))
+            .map(|v| (v.hash, v))
             .collect();
 
-        (skin_mesh_properties.into(), flat_map)
+        (from_entry(skin_character_data_properties), flat_map)
     }
 
     pub fn get_wad_entry_reader(

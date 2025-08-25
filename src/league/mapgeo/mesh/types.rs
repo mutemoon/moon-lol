@@ -1,4 +1,4 @@
-use crate::league::{SizedString, Vector2};
+use crate::league::{SizedStringU32, Vector2};
 use binrw::binread;
 
 #[binread]
@@ -7,7 +7,7 @@ use binrw::binread;
 pub struct Submesh {
     pub hash: u32,
 
-    pub material_name: SizedString,
+    pub material_name: SizedStringU32,
 
     pub start_index: u32,
     pub submesh_index_count: u32,
@@ -19,7 +19,7 @@ pub struct Submesh {
 #[derive(Debug, Clone)]
 #[br(little)]
 pub struct Channel {
-    pub texture: SizedString,
+    pub texture: SizedStringU32,
     pub uv_scale: Vector2,
     pub uv_offset: Vector2,
 }
@@ -29,5 +29,5 @@ pub struct Channel {
 #[br(little)]
 pub struct TextureOverride {
     pub sampler_id: u32,
-    pub texture_path: SizedString,
+    pub texture_path: SizedStringU32,
 }

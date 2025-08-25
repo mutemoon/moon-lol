@@ -2,6 +2,18 @@ use crate::{system_debug, system_info, system_warn};
 use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
 
+#[derive(Default)]
+pub struct PluginLife;
+
+impl Plugin for PluginLife {
+    fn build(&self, app: &mut App) {
+        app.add_event::<EventDead>();
+        app.add_event::<EventSpawn>();
+        app.add_systems(FixedUpdate, (detect_death, spawn_event));
+        app.add_observer(on_dead);
+    }
+}
+
 #[derive(Component, Serialize, Deserialize, Clone)]
 pub struct Health {
     pub value: f32,
@@ -14,15 +26,9 @@ pub struct EventDead;
 #[derive(Event, Debug)]
 pub struct EventSpawn;
 
-#[derive(Default)]
-pub struct PluginLife;
-
-impl Plugin for PluginLife {
-    fn build(&self, app: &mut App) {
-        app.add_event::<EventDead>();
-        app.add_event::<EventSpawn>();
-        app.add_systems(FixedUpdate, (detect_death, spawn_event));
-        app.add_observer(on_dead);
+impl Health {
+    pub fn new(max: f32) -> Health {
+        Health { value: max, max }
     }
 }
 

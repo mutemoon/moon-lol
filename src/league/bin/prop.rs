@@ -1,33 +1,28 @@
-use binrw::binrw;
+use binrw::binread;
 
-#[binrw]
+use crate::league::SizedStringU16;
+
+#[binread]
 #[br(little)]
 #[br(magic = b"PROP")]
 pub struct PropFile {
     pub version: u32,
 
-    #[br(if(version >= 2))]
-    pub type_info_v2: Option<TypeInfoV2>,
+    pub link_count: u32,
 
-    pub types_count: u32,
+    #[br(count = link_count)]
+    pub links: Vec<SizedStringU16>,
 
-    #[br(count = types_count * 4)]
-    pub types_data: Vec<u8>,
+    pub entry_length: u32,
 
-    #[br(count = types_count)]
+    #[br(count = entry_length)]
+    pub entry_classes: Vec<u32>,
+
+    #[br(count = entry_length)]
     pub entries: Vec<EntryData>,
 }
 
-#[binrw]
-#[br(little)]
-pub struct TypeInfoV2 {
-    pub count: u32,
-
-    #[br(count = count)]
-    pub entries: Vec<EntryData>,
-}
-
-#[binrw]
+#[binread]
 #[br(little)]
 pub struct EntryData {
     pub len: u32,
@@ -36,4 +31,25 @@ pub struct EntryData {
 
     #[br(count = len - 4)]
     pub data: Vec<u8>,
+}
+
+impl PropFile {
+    pub fn get_entry(&self, hash: u32) -> &EntryData {
+        self.entries.iter().find(|v| v.hash == hash).unwrap()
+    }
+
+    pub fn iter_entry_by_class(&self, hash: u32) -> impl Iterator<Item = &EntryData> {
+        self.entries
+            .iter()
+            .enumerate()
+            .filter(move |(i, _v)| self.entry_classes[*i] == hash)
+            .map(|v| v.1)
+    }
+
+    pub fn iter_class_hash_and_entry(&self) -> impl Iterator<Item = (u32, &EntryData)> {
+        self.entries
+            .iter()
+            .enumerate()
+            .map(|(i, v)| (self.entry_classes[i], v))
+    }
 }

@@ -8,11 +8,11 @@ use bevy::{
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    core::{Health, Lane, Team},
-    entities::Barrack,
+    core::{Lane, Team},
     league::{
-        JungleQuadrantFlags, MainRegionFlags, NearestLaneFlags, POIFlags, RingFlags,
-        RiverRegionFlags, UnknownSRXFlags, VisionPathingFlags,
+        BarracksConfig, BinHash, CharacterRecord, JungleQuadrantFlags, MainRegionFlags,
+        NearestLaneFlags, POIFlags, RingFlags, RiverRegionFlags, Unk0x3c2bf0c0, Unk0x9d9f60d2,
+        Unk0xc71ee7fb, UnknownSRXFlags, VisionPathingFlags,
     },
 };
 
@@ -29,9 +29,14 @@ type ConfigLegend = (Transform, Team, ConfigCharacterSkin);
 #[derive(Resource, Default, Serialize, Deserialize)]
 pub struct ConfigMap {
     pub geometry_objects: Vec<ConfigGeometryObject>,
-    pub environment_objects: Vec<(Transform, ConfigCharacterSkin, Option<Health>)>,
+
     pub minion_paths: HashMap<Lane, Vec<Vec2>>,
-    pub barracks: Vec<(Transform, Team, Lane, Barrack)>,
+    pub barracks: HashMap<BinHash, Unk0xc71ee7fb>,
+    pub characters: HashMap<BinHash, Unk0x9d9f60d2>,
+    pub barrack_configs: HashMap<BinHash, BarracksConfig>,
+    pub environment_objects: HashMap<BinHash, Unk0x3c2bf0c0>,
+    pub skins: HashMap<String, ConfigCharacterSkin>,
+    pub character_records: HashMap<String, CharacterRecord>,
 }
 
 #[derive(Clone, Serialize, Deserialize)]

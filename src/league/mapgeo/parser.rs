@@ -1,6 +1,6 @@
 use crate::league::{
     BinMat4, BinVec3, BoundingBox, ElementFormat, ElementName, EnvironmentVisibility,
-    LeagueMapGeoMesh, SizedString,
+    LeagueMapGeoMesh, SizedStringU32,
 };
 use binrw::binread;
 
@@ -106,7 +106,7 @@ pub struct PlanarReflector {
 #[br(little)]
 pub struct ShaderTextureOverride {
     pub id: u32,
-    pub path: SizedString,
+    pub path: SizedStringU32,
 }
 
 #[binread]

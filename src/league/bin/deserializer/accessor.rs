@@ -4,7 +4,7 @@ use serde::de::{self, EnumAccess, IntoDeserializer, MapAccess, SeqAccess, Varian
 use serde::Deserializer;
 
 use crate::league::{
-    BinDeserializer, BinDeserializerError, BinDeserializerResult, BinParser, BinType, LeagueLoader,
+    BinDeserializer, BinDeserializerError, BinDeserializerResult, BinType, LeagueLoader,
 };
 
 pub struct SeqReader<'a, 'de: 'a> {
@@ -24,7 +24,6 @@ impl<'de, 'a> SeqAccess<'de> for SeqReader<'a, 'de> {
         }
 
         self.count -= 1;
-
         seed.deserialize(&mut *self.de).map(Some)
     }
 }
@@ -44,18 +43,16 @@ impl<'de> MapAccess<'de> for MapReader<'de> {
     ) -> BinDeserializerResult<Option<K::Value>> {
         while let Some(field_name) = self.struct_fields.next() {
             let hash = if field_name.starts_with("unk") {
-                u32::from_str_radix(&field_name[3..], 16).unwrap()
+                u32::from_str_radix(&field_name[5..], 16).unwrap()
             } else {
                 LeagueLoader::hash_bin(field_name)
             };
 
             if let Some((vtype, value_slice)) = self.data_map.remove(&hash) {
                 self.next_value = Some((vtype, value_slice));
-                println!("🐕 获取映射键: {:?}", field_name);
 
                 return seed.deserialize(field_name.into_deserializer()).map(Some);
-            }
-            println!("🐎 没找着 {}", field_name);
+            };
         }
 
         Ok(None)
@@ -66,8 +63,6 @@ impl<'de> MapAccess<'de> for MapReader<'de> {
         seed: V,
     ) -> BinDeserializerResult<V::Value> {
         let (vtype, value_slice) = self.next_value.unwrap();
-
-        println!("🐕 获取映射值: 长度: {}", value_slice.len());
 
         let mut value_de = BinDeserializer::from_bytes(value_slice, vtype);
 
@@ -105,10 +100,6 @@ impl<'de, 'a> MapAccess<'de> for HashMapReader<'a, 'de> {
     ) -> BinDeserializerResult<V::Value> {
         // 临时设置 deserializer 要解析的类型为 value 的类型
         self.de.value_type = self.vtype;
-        println!(
-            "🐕 获取第 {} 个 HashMap 的值，类型为: {:?}",
-            self.count, self.vtype
-        );
 
         let value = seed.deserialize(&mut *self.de)?;
 
@@ -141,24 +132,14 @@ impl<'de, 'a> EnumAccess<'de> for EnumReader<'a, 'de> {
 pub struct VariantReader<'a, 'de: 'a> {
     de: &'a mut BinDeserializer<'de>,
 }
+
 impl<'de, 'a> VariantAccess<'de> for VariantReader<'a, 'de> {
     type Error = BinDeserializerError;
 
     fn unit_variant(self) -> BinDeserializerResult<()> {
-        println!("📦 正在解析 Unit 变体 (例如 VfxPrimitiveArbitraryQuad)");
+        self.de.parser.skip_value(BinType::Struct)?;
 
-        let _class_hash = self.de.parser.read_bytes(4)?;
-        let _fields_len = self.de.parser.read_bytes(4)?;
-        let field_count = u16::from_le_bytes(self.de.parser.read_bytes(2)?.try_into().unwrap());
-
-        if field_count == 0 {
-            Ok(())
-        } else {
-            Err(BinDeserializerError::Message(format!(
-                "期望 Unit 变体 (0 个字段)，但文件中记录了 {} 个字段",
-                field_count
-            )))
-        }
+        return Ok(());
     }
 
     fn struct_variant<V>(
@@ -169,16 +150,14 @@ impl<'de, 'a> VariantAccess<'de> for VariantReader<'a, 'de> {
     where
         V: Visitor<'de>,
     {
-        println!("🏗️ 正在解析 Struct 变体");
-
         self.de.deserialize_struct("", fields, visitor)
     }
 
-    fn newtype_variant_seed<T>(self, _seed: T) -> BinDeserializerResult<T::Value>
+    fn newtype_variant_seed<T>(self, seed: T) -> BinDeserializerResult<T::Value>
     where
         T: de::DeserializeSeed<'de>,
     {
-        Err(BinDeserializerError::Message("不支持 Newtype 变体".into()))
+        seed.deserialize(self.de)
     }
 
     fn tuple_variant<V>(self, _len: usize, _visitor: V) -> BinDeserializerResult<V::Value>

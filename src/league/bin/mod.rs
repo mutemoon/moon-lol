@@ -1,9 +1,19 @@
-mod barrack;
+mod character;
 mod deserializer;
-mod placable;
+mod materials;
 mod prop;
 
-pub use barrack::*;
+pub use character::*;
 pub use deserializer::*;
-pub use placable::*;
+pub use materials::*;
 pub use prop::*;
+
+use serde::Deserialize;
+
+pub fn from_entry<'de, T>(slice: &'de EntryData) -> T
+where
+    T: Deserialize<'de>,
+{
+    let mut deserializer = BinDeserializer::from_bytes(&slice.data, BinType::Entry);
+    T::deserialize(&mut deserializer).unwrap()
+}

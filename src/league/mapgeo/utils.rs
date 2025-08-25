@@ -4,8 +4,17 @@ use binrw::binread;
 #[binread]
 #[derive(Debug, Clone)]
 #[br(little)]
-pub struct SizedString {
+pub struct SizedStringU32 {
     pub len: u32,
+    #[br(count = len, try_map = |bytes: Vec<u8>| String::from_utf8(bytes))]
+    pub text: String,
+}
+
+#[binread]
+#[derive(Debug, Clone)]
+#[br(little)]
+pub struct SizedStringU16 {
+    pub len: u16,
     #[br(count = len, try_map = |bytes: Vec<u8>| String::from_utf8(bytes))]
     pub text: String,
 }

@@ -3,19 +3,28 @@ use std::fmt::Display;
 use serde::de;
 use thiserror::Error;
 
+pub type BinLink = u32;
+
+pub type BinHash = u32;
+
+pub struct BinStructHeader {
+    pub class_hash: u32,
+    pub bytes_count: usize,
+}
+
 #[derive(Error, Clone, Debug, PartialEq)]
 pub enum BinDeserializerError {
     #[error("{0}")]
     Message(String),
-
-    #[error("Unexpected end of input")]
-    Eof,
 
     #[error("Missing field: {0}")]
     MissingField(String),
 
     #[error("Invalid BIN type byte: {0}")]
     InvalidBinType(u8),
+
+    #[error("Unknown variant: {0}")]
+    UnknownVariant(String),
 }
 
 impl de::Error for BinDeserializerError {

@@ -1,90 +1,21 @@
-use crate::{
-    core::{
-        spawn_skin_entity, Armor, Bounding, ConfigCharacterSkin, ConfigMap, Damage, Health, Lane,
-        Movement, Team,
-    },
-    entities::{Minion, MinionPath},
-};
-use bevy::prelude::*;
-use serde::{Deserialize, Serialize};
 use std::{collections::VecDeque, time::Duration};
 
-#[derive(Component, Clone, Serialize, Deserialize)]
-pub struct Barrack {
-    pub initial_spawn_time_secs: f32,
-    pub wave_spawn_interval_secs: f32,
-    pub minion_spawn_interval_secs: f32,
-    pub upgrade_interval_secs: f32,
-    pub upgrades_before_late_game_scaling: i32,
-    pub move_speed_increase_initial_delay_secs: f32,
-    pub move_speed_increase_interval_secs: f32,
-    pub move_speed_increase_increment: i32,
-    pub move_speed_increase_max_times: i32,
-    pub exp_radius: f32,
-    pub gold_radius: f32,
-    pub units: Vec<BarracksMinionConfig>,
-}
+use bevy::prelude::*;
+use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Serialize, Deserialize)]
-pub struct MinionRecord {
-    pub team: Team,
-    pub character_record: String,
-    pub skin: String,
-}
-
-#[derive(Clone, Serialize, Deserialize)]
-pub struct BarracksMinionConfig {
-    pub minion_type: Minion,
-    pub minion_object: (
-        Health,
-        Movement,
-        Bounding,
-        Damage,
-        Armor,
-        ConfigCharacterSkin,
-    ),
-    pub wave_behavior: WaveBehavior,
-    pub minion_upgrade_stats: MinionUpgradeConfig,
-}
-
-#[derive(Clone, Serialize, Deserialize)]
-pub enum WaveBehavior {
-    InhibitorWaveBehavior {
-        spawn_count_per_inhibitor_down: Vec<i32>,
+use crate::{
+    core::{spawn_skin_entity, Armor, Bounding, ConfigMap, Damage, Health, Lane, Movement, Team},
+    entities::Minion,
+    league::{
+        BarracksMinionConfigWaveBehavior, BinHash, ConstantWaveBehavior, InhibitorWaveBehavior,
+        RotatingWaveBehavior, TimedVariableWaveBehavior, TimedWaveBehaviorInfoBehavior,
     },
-    ConstantWaveBehavior {
-        spawn_count: i32,
-    },
-    TimedVariableWaveBehavior {
-        behaviors: Vec<TimedWaveBehaviorInfo>,
-    },
-    RotatingWaveBehavior {
-        spawn_counts_by_wave: Vec<i32>,
-    },
-    Unknown,
-}
-
-#[derive(Clone, Serialize, Deserialize)]
-pub struct TimedWaveBehaviorInfo {
-    pub start_time_secs: i32,
-    pub behavior: WaveBehavior,
-}
-
-#[derive(Clone, Serialize, Deserialize)]
-pub struct MinionUpgradeConfig {
-    pub armor_max: f32,
-    pub armor_upgrade_growth: f32,
-    pub hp_max_bonus: f32,
-    pub hp_upgrade: f32,
-    pub hp_upgrade_late: f32,
-    pub damage_max: f32,
-    pub damage_upgrade: f32,
-    pub damage_upgrade_late: f32,
-}
+};
 
 /// 兵营的动态状态，用于跟踪计时器和生成队列
-#[derive(Component)]
-pub struct BarrackState {
+#[derive(Component, Serialize, Deserialize)]
+pub struct Barrack {
+    pub id: BinHash,
     /// 下一波兵的生成计时器
     pub wave_timer: Timer,
     /// 属性升级计时器
@@ -94,7 +25,7 @@ pub struct BarrackState {
     /// 同一波兵中，每个小兵之间的生成间隔计时器
     pub intra_spawn_timer: Timer,
     /// 当前的生成队列
-    pub spawn_queue: VecDeque<MinionSpawnInfo>,
+    pub spawn_queue: VecDeque<(usize, i32)>,
     /// 已应用的属性升级次数
     pub upgrade_count: i32,
     /// 已应用的移速升级次数
@@ -103,17 +34,6 @@ pub struct BarrackState {
     pub wave_count: u32,
 }
 
-/// 用于在生成队列中存储信息
-#[derive(Clone, Serialize, Deserialize)]
-pub struct MinionSpawnInfo {
-    /// 对应兵营 `units` Vec 中的索引
-    pub config_index: usize,
-    /// 剩余要生成的数量
-    pub count: i32,
-}
-
-/// 一个全局资源，用于跟踪被摧毁的水晶数量
-/// `InhibitorWaveBehavior` 需要这个状态
 #[derive(Resource, Default)]
 pub struct InhibitorState {
     pub inhibitors_down: usize,
@@ -131,29 +51,32 @@ impl Plugin for PluginBarrack {
 }
 
 fn setup(mut commands: Commands, res_game_config: Res<ConfigMap>) {
-    for (transform, team, lane, barrack) in res_game_config.barracks.clone().into_iter() {
-        let initial_delay = barrack.initial_spawn_time_secs;
+    for (hash, barrack) in res_game_config.barracks.iter() {
+        let barrack_config = res_game_config.barrack_configs.get(hash).unwrap();
+
+        let initial_delay = barrack_config.initial_spawn_time_secs;
 
         commands.spawn((
-            transform,
-            team,
-            lane,
-            BarrackState {
+            Transform::from_matrix(barrack.transform),
+            Team::from(barrack.definition.team),
+            Lane::from(barrack.definition.unk_0xdbde2288[0].lane),
+            Barrack {
+                id: *hash,
                 // 第一波兵有初始延迟
                 wave_timer: Timer::from_seconds(initial_delay, TimerMode::Repeating),
                 // 属性升级从第一波兵生成后开始计算
                 upgrade_timer: Timer::new(
-                    Duration::from_secs_f32(barrack.upgrade_interval_secs),
+                    Duration::from_secs_f32(barrack_config.upgrade_interval_secs),
                     TimerMode::Repeating,
                 ),
                 // 移速升级有自己的独立延迟
                 move_speed_upgrade_timer: Timer::new(
-                    Duration::from_secs_f32(barrack.move_speed_increase_initial_delay_secs),
+                    Duration::from_secs_f32(barrack_config.move_speed_increase_initial_delay_secs),
                     TimerMode::Repeating,
                 ),
                 // 小兵间的生成间隔计时器
                 intra_spawn_timer: Timer::from_seconds(
-                    barrack.minion_spawn_interval_secs,
+                    barrack_config.minion_spawn_interval_secs,
                     TimerMode::Repeating,
                 ),
                 spawn_queue: VecDeque::new(),
@@ -161,7 +84,6 @@ fn setup(mut commands: Commands, res_game_config: Res<ConfigMap>) {
                 move_speed_upgrade_count: 0,
                 wave_count: 0,
             },
-            barrack,
         ));
     }
 }
@@ -172,160 +94,190 @@ fn barracks_spawning_system(
     game_time: Res<Time<Virtual>>,
     inhibitor_state: Res<InhibitorState>,
     mut commands: Commands,
-    mut query: Query<(&GlobalTransform, &Barrack, &mut BarrackState, &Team, &Lane)>,
+    mut query: Query<(&GlobalTransform, &mut Barrack, &Team, &Lane)>,
     mut res_animation_graph: ResMut<Assets<AnimationGraph>>,
     res_game_config: Res<ConfigMap>,
     time: Res<Time>,
 ) {
-    for (transform, barrack, mut state, team, lane) in query.iter_mut() {
+    for (transform, mut barrack_state, team, lane) in query.iter_mut() {
+        let barrack_place = res_game_config.barracks.get(&barrack_state.id).unwrap();
+
+        let barrack_config = res_game_config
+            .barrack_configs
+            .get(&barrack_place.definition.barracks_config)
+            .unwrap();
+
         // --- 1. 更新所有计时器 ---
-        state.wave_timer.tick(time.delta());
+        barrack_state.wave_timer.tick(time.delta());
 
         // 只有在第一波之后才开始计时升级
-        if state.wave_count > 0 {
-            state.upgrade_timer.tick(time.delta());
-            state.move_speed_upgrade_timer.tick(time.delta());
+        if barrack_state.wave_count > 0 {
+            barrack_state.upgrade_timer.tick(time.delta());
+            barrack_state.move_speed_upgrade_timer.tick(time.delta());
         }
 
         // --- 2. 处理属性和移速升级 ---
-        if state.upgrade_timer.just_finished() {
-            state.upgrade_count += 1;
-            println!("Barrack upgraded! New count: {}", state.upgrade_count);
+        if barrack_state.upgrade_timer.just_finished() {
+            barrack_state.upgrade_count += 1;
+            println!(
+                "Barrack upgraded! New count: {}",
+                barrack_state.upgrade_count
+            );
         }
 
-        if state.move_speed_upgrade_timer.just_finished() {
-            if state.move_speed_upgrade_count < barrack.move_speed_increase_max_times {
-                state.move_speed_upgrade_count += 1;
+        if barrack_state.move_speed_upgrade_timer.just_finished() {
+            if barrack_state.move_speed_upgrade_count < barrack_config.move_speed_increase_max_times
+            {
+                barrack_state.move_speed_upgrade_count += 1;
                 println!(
                     "Minion move speed upgraded! New count: {}",
-                    state.move_speed_upgrade_count
+                    barrack_state.move_speed_upgrade_count
                 );
             }
         }
 
         // --- 3. 检查是否需要生成新一波小兵 ---
         // 只有当上一波完全生成完后（队列为空），才开始准备新一波
-        if state.wave_timer.just_finished() && state.spawn_queue.is_empty() {
-            state.wave_count += 1;
-            state
+        if barrack_state.wave_timer.just_finished() && barrack_state.spawn_queue.is_empty() {
+            barrack_state.wave_count += 1;
+            barrack_state
                 .wave_timer
-                .set_duration(Duration::from_secs_f32(barrack.wave_spawn_interval_secs));
+                .set_duration(Duration::from_secs_f32(
+                    barrack_config.wave_spawn_interval_secs,
+                ));
 
             // 遍历兵营配置中的所有小兵类型
-            for (index, minion_config) in barrack.units.iter().enumerate() {
+            for (index, minion_config) in barrack_config.units.iter().enumerate() {
                 let spawn_count = calculate_spawn_count(
                     &minion_config.wave_behavior,
                     game_time.elapsed_secs(),
-                    state.wave_count,
+                    barrack_state.wave_count,
                     &inhibitor_state,
                 );
 
                 if spawn_count > 0 {
-                    state.spawn_queue.push_back(MinionSpawnInfo {
-                        config_index: index,
-                        count: spawn_count,
-                    });
+                    barrack_state.spawn_queue.push_back((index, spawn_count));
                 }
             }
         }
 
         // --- 4. 处理生成队列，逐个生成小兵 ---
-        if !state.spawn_queue.is_empty() {
-            state.intra_spawn_timer.tick(time.delta());
+        if barrack_state.spawn_queue.is_empty() {
+            return;
+        }
 
-            if state.intra_spawn_timer.just_finished() {
-                let upgrade_count = state.upgrade_count;
-                let move_speed_upgrade_count = state.move_speed_upgrade_count;
+        barrack_state.intra_spawn_timer.tick(time.delta());
 
-                // 获取队列头部的待生成小兵信息
-                if let Some(current_spawn) = state.spawn_queue.front_mut() {
-                    let config_index = current_spawn.config_index;
-                    let minion_config = &barrack.units[config_index];
-                    let upgrade_config = &minion_config.minion_upgrade_stats;
+        if !barrack_state.intra_spawn_timer.just_finished() {
+            return;
+        }
 
-                    // --- 计算小兵最终属性 ---
-                    let is_late_game = upgrade_count >= barrack.upgrades_before_late_game_scaling;
+        let upgrade_count = barrack_state.upgrade_count;
+        let move_speed_upgrade_count = barrack_state.move_speed_upgrade_count;
 
-                    let (
-                        mut health,
-                        mut movement,
-                        bounding,
-                        mut damage,
-                        mut armor,
-                        config_environment_object,
-                    ) = minion_config.minion_object.clone();
+        // 获取队列头部的待生成小兵信息
+        let Some(current_spawn) = barrack_state.spawn_queue.front_mut() else {
+            return;
+        };
 
-                    let hp_upgrade = if is_late_game {
-                        upgrade_config.hp_upgrade_late
-                    } else {
-                        upgrade_config.hp_upgrade
-                    };
+        let config_index = current_spawn.0;
+        let minion_config = &barrack_config.units[config_index];
+        let upgrade_config = &minion_config.minion_upgrade_stats;
 
-                    health.max += upgrade_config.hp_max_bonus + hp_upgrade * upgrade_count as f32;
-                    health.value = health.max;
+        // --- 计算小兵最终属性 ---
+        let is_late_game = upgrade_count >= barrack_config.upgrades_before_late_game_scaling;
 
-                    let damage_upgrade = if is_late_game {
-                        upgrade_config.damage_upgrade_late
-                    } else {
-                        upgrade_config.damage_upgrade
-                    };
+        let link = minion_config.unk_0x8a3fc6eb;
 
-                    damage.0 += upgrade_config.damage_max + damage_upgrade * upgrade_count as f32;
+        let character = res_game_config.characters.get(&link).unwrap();
 
-                    armor.0 += upgrade_config.armor_max
-                        + upgrade_config.armor_upgrade_growth * upgrade_count as f32;
+        let config_character_skin = res_game_config.skins.get(&character.skin).unwrap();
 
-                    movement.speed +=
-                        (barrack.move_speed_increase_increment * move_speed_upgrade_count) as f32;
+        let character_record = res_game_config
+            .character_records
+            .get(&character.character_record)
+            .unwrap();
 
-                    let entity = spawn_skin_entity(
-                        &mut commands,
-                        &mut res_animation_graph,
-                        &asset_server,
-                        transform.compute_transform(),
-                        &config_environment_object,
-                    );
+        let mut health = Health::new(character_record.base_hp);
+        let hp_upgrade = if is_late_game {
+            upgrade_config.hp_upgrade_late.unwrap_or(0.0)
+        } else {
+            upgrade_config.hp_upgrade
+        };
+        health.max += upgrade_config.hp_max_bonus + hp_upgrade * upgrade_count as f32;
+        health.value = health.max;
 
-                    let mut path = res_game_config.minion_paths.get(lane).unwrap().clone();
+        let mut damage = Damage(character_record.base_damage);
+        let damage_upgrade = if is_late_game {
+            upgrade_config.damage_upgrade_late
+        } else {
+            upgrade_config.damage_upgrade
+        };
+        damage.0 +=
+            upgrade_config.damage_max + damage_upgrade.unwrap_or(0.0) * upgrade_count as f32;
 
-                    if *team == Team::Chaos {
-                        path.reverse();
-                    }
+        let mut armor = Armor(character_record.base_armor.unwrap_or(0.0));
+        armor.0 += upgrade_config.armor_max.unwrap_or(0.0)
+            + upgrade_config.armor_upgrade_growth.unwrap_or(0.0) * upgrade_count as f32;
 
-                    commands.entity(entity).insert((
-                        minion_config.minion_type,
-                        MinionPath(path),
-                        health,
-                        movement,
-                        damage,
-                        armor,
-                        bounding,
-                        team.clone(),
-                    ));
+        let mut movement = Movement {
+            speed: character_record.base_move_speed,
+        };
+        movement.speed +=
+            (barrack_config.move_speed_increase_increment * move_speed_upgrade_count) as f32;
 
-                    // 更新队列
-                    current_spawn.count -= 1;
-                    if current_spawn.count <= 0 {
-                        state.spawn_queue.pop_front();
-                    }
-                }
-            }
+        let bounding = Bounding {
+            radius: character_record.pathfinding_collision_radius,
+            height: character_record.health_bar_height,
+        };
+
+        let entity = spawn_skin_entity(
+            &mut commands,
+            &mut res_animation_graph,
+            &asset_server,
+            transform.compute_transform(),
+            &config_character_skin,
+        );
+
+        let mut path = res_game_config.minion_paths.get(lane).unwrap().clone();
+
+        if *team == Team::Chaos {
+            path.reverse();
+        }
+
+        commands.entity(entity).insert((
+            Minion::from(minion_config.minion_type),
+            lane.clone(),
+            team.clone(),
+            health,
+            movement,
+            damage,
+            armor,
+            bounding,
+        ));
+
+        // 更新队列
+        current_spawn.1 -= 1;
+        if current_spawn.1 <= 0 {
+            barrack_state.spawn_queue.pop_front();
         }
     }
 }
 
 /// 辅助函数：根据不同的 WaveBehavior 计算应生成的数量
 fn calculate_spawn_count(
-    behavior: &WaveBehavior,
+    behavior: &BarracksMinionConfigWaveBehavior,
     game_time_secs: f32,
     wave_count: u32,
     inhibitor_state: &InhibitorState,
 ) -> i32 {
     match behavior {
-        WaveBehavior::ConstantWaveBehavior { spawn_count } => *spawn_count,
-        WaveBehavior::InhibitorWaveBehavior {
+        BarracksMinionConfigWaveBehavior::ConstantWaveBehavior(ConstantWaveBehavior {
+            spawn_count,
+        }) => *spawn_count,
+        BarracksMinionConfigWaveBehavior::InhibitorWaveBehavior(InhibitorWaveBehavior {
             spawn_count_per_inhibitor_down,
-        } => {
+        }) => {
             if inhibitor_state.inhibitors_down == 0 {
                 return 0;
             }
@@ -335,28 +287,46 @@ fn calculate_spawn_count(
                 .copied()
                 .unwrap_or(0)
         }
-        WaveBehavior::RotatingWaveBehavior {
-            spawn_counts_by_wave,
-        } => {
-            if spawn_counts_by_wave.is_empty() {
-                0
-            } else {
-                spawn_counts_by_wave
-                    [((wave_count - 1) % spawn_counts_by_wave.len() as u32) as usize]
-            }
-        }
-        WaveBehavior::TimedVariableWaveBehavior { behaviors } => {
+        BarracksMinionConfigWaveBehavior::TimedVariableWaveBehavior(
+            TimedVariableWaveBehavior { behaviors },
+        ) => {
             // 寻找当前时间点最合适的行为
-            let mut active_behavior = &WaveBehavior::Unknown;
+            let mut active_behavior = None;
             for timed_behavior in behaviors.iter().rev() {
                 if game_time_secs >= timed_behavior.start_time_secs as f32 {
-                    active_behavior = &timed_behavior.behavior;
+                    active_behavior = Some(&timed_behavior.behavior);
                     break;
                 }
             }
+
             // 递归调用
-            calculate_spawn_count(active_behavior, game_time_secs, wave_count, inhibitor_state)
+            match active_behavior {
+                Some(behavior) => match behavior {
+                    TimedWaveBehaviorInfoBehavior::ConstantWaveBehavior(ConstantWaveBehavior {
+                        spawn_count,
+                    }) => calculate_spawn_count(
+                        &BarracksMinionConfigWaveBehavior::ConstantWaveBehavior(
+                            ConstantWaveBehavior {
+                                spawn_count: *spawn_count,
+                            },
+                        ),
+                        game_time_secs,
+                        wave_count,
+                        inhibitor_state,
+                    ),
+                    TimedWaveBehaviorInfoBehavior::RotatingWaveBehavior(RotatingWaveBehavior {
+                        spawn_counts_by_wave,
+                    }) => {
+                        if spawn_counts_by_wave.is_empty() {
+                            0
+                        } else {
+                            spawn_counts_by_wave
+                                [((wave_count - 1) % spawn_counts_by_wave.len() as u32) as usize]
+                        }
+                    }
+                },
+                None => 0,
+            }
         }
-        WaveBehavior::Unknown => 0,
     }
 }

@@ -1,28 +1,19 @@
 mod animation;
-mod barrack;
 mod bin;
-mod character;
 mod grid;
-mod lane;
 mod loader;
 mod mapgeo;
 mod material;
 mod mesh;
-mod minion;
-mod team;
 mod texture;
 mod utils;
 
 pub use animation::*;
 pub use bin::*;
-pub use character::*;
 pub use grid::*;
-pub use lane::*;
 pub use loader::*;
 pub use mapgeo::*;
 pub use material::*;
 pub use mesh::*;
-pub use minion::*;
-pub use team::*;
 pub use texture::*;
 pub use utils::*;

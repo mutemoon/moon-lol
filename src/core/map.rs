@@ -116,7 +116,6 @@ pub fn spawn_skin_entity(
                 let node_index = animation_graph.add_clip(clip, 1.0, animation_graph.root);
                 hash_to_node.insert(*hash, AnimationNode::Clip { node_index });
             }
-
             ConfigCharacterSkinAnimation::ConditionFloatClipData {
                 conditions,
                 component_name,
@@ -137,7 +136,6 @@ pub fn spawn_skin_entity(
                     },
                 );
             }
-
             ConfigCharacterSkinAnimation::SelectorClipData { probably_nodes } => {
                 hash_to_node.insert(
                     *hash,
@@ -194,7 +192,6 @@ pub fn spawn_skin_entity(
     parent_entity
 }
 
-/// 从Configs批量生成所有环境对象
 pub fn spawn_environment_objects_from_configs(
     commands: &mut Commands,
     res_animation_graph: &mut ResMut<Assets<AnimationGraph>>,
@@ -203,13 +200,16 @@ pub fn spawn_environment_objects_from_configs(
 ) -> Vec<Entity> {
     let mut entities = Vec::new();
 
-    for (transform, config_env_object, _) in &configs.environment_objects {
+    for (_, environment_object) in &configs.environment_objects {
         let entity = spawn_skin_entity(
             commands,
             res_animation_graph,
             asset_server,
-            *transform,
-            config_env_object,
+            Transform::from_matrix(environment_object.transform),
+            configs
+                .skins
+                .get(&environment_object.definition.skin)
+                .unwrap(),
         );
         entities.push(entity);
     }
