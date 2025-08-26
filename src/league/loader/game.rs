@@ -212,6 +212,21 @@ impl LeagueLoader {
 
         Ok(LeagueLoader {
             root_dir: root_dir.to_string(),
+            wads: vec![],
+            map_loader,
+        })
+    }
+
+    pub fn full(root_dir: &str, map: &str) -> Result<LeagueLoader, LeagueLoaderError> {
+        let loader = LeagueWadLoader::from_relative_path(
+            root_dir,
+            "DATA/FINAL/Maps/Shipping/Map11.wad.client",
+        )?;
+
+        let map_loader = LeagueWadMapLoader::from_loader(loader, map)?;
+
+        Ok(LeagueLoader {
+            root_dir: root_dir.to_string(),
             wads: CHARACTER_WAD_PATHS
                 .iter()
                 .map(|path| LeagueWadLoader::from_relative_path(root_dir, path).unwrap())
