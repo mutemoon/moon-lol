@@ -1,11 +1,9 @@
-mod character;
+mod classes;
 mod deserializer;
-mod materials;
 mod prop;
 
-pub use character::*;
+pub use classes::*;
 pub use deserializer::*;
-pub use materials::*;
 pub use prop::*;
 
 use serde::Deserialize;

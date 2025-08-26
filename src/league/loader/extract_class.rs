@@ -2,11 +2,9 @@ use std::collections::{HashMap, HashSet};
 
 use heck::{ToPascalCase, ToSnakeCase};
 
-use crate::league::{
-    BinParser, BinType, EntryData, LeagueLoaderError, LeagueWadMapLoader, PropFile,
-};
+use crate::league::{BinParser, BinType, EntryData, LeagueLoaderError, PropFile};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum ClassData {
     Base(String),
     Struct(u32),
@@ -18,11 +16,12 @@ pub enum ClassData {
 
 type ClassMap = HashMap<u32, HashMap<u32, ClassData>>;
 
-// 辅助函数，增加了 parent_class_name 参数
+// 辅助函数，增加了 parent_class_name 和 class_map 参数
 fn generate_enums_recursively(
-    parent_class_name: &str, // 新增参数
+    parent_class_name: &str,
     field_hash: &u32,
     field_data: &ClassData,
+    class_map: &mut ClassMap, // <--- 新增参数: 传入完整的 class_map
     hashes: &HashMap<u32, String>,
     generated_enums: &mut HashSet<String>,
     all_definitions: &mut String,
@@ -34,13 +33,10 @@ fn generate_enums_recursively(
                 .map(|s| s.as_str())
                 .unwrap_or("UnknownEnumField");
 
-            // -- 这是关键修改 --
-            // 使用父结构体名和字段名共同创建 Enum 类型名
-            // 例如: "MyCharacterData" + "items" -> "MyCharacterDataItems"
             let enum_name = format!("{}{}", parent_class_name, field_name.to_pascal_case());
 
             if generated_enums.contains(&enum_name) {
-                return; // 如果已经生成过，则跳过
+                return;
             }
 
             let mut enum_def = String::new();
@@ -48,23 +44,44 @@ fn generate_enums_recursively(
             enum_def.push_str(&format!("pub enum {} {{\n", enum_name));
 
             for variant_hash in enum_hashes {
-                let variant_name = hashes
+                let mut variant_name = hashes
                     .get(variant_hash)
                     .map(|s| s.to_pascal_case())
                     .unwrap_or(format!("Unk0x{:x}", variant_hash));
-                enum_def.push_str(&format!("    {}({}),\n", variant_name, variant_name));
+
+                if variant_name == "Self" {
+                    variant_name = "MySelf".to_string();
+                }
+
+                // --- 这是核心修改 ---
+                // 检查这个变体对应的 Struct 是否为空。
+                // map_or(false, ...) 的意思是：如果 get 返回 None (struct 不存在)，则视为空；
+                // 如果返回 Some(fields)，则检查 fields.is_empty()。
+                let is_empty_struct = class_map
+                    .get(variant_hash)
+                    .map_or(true, |fields| fields.is_empty());
+
+                if is_empty_struct {
+                    // 如果 struct 为空，则生成简单变体，例如: MyVariant,
+                    enum_def.push_str(&format!("    {},\n", variant_name));
+                    class_map.remove(variant_hash);
+                } else {
+                    // 否则，保持原样，生成 newtype 变体，例如: MyVariant(MyVariant),
+                    enum_def.push_str(&format!("    {}({}),\n", variant_name, variant_name));
+                }
             }
 
             enum_def.push_str("}\n\n");
             all_definitions.push_str(&enum_def);
             generated_enums.insert(enum_name);
         }
-        // --- 递归处理 (将 parent_class_name 传递下去) ---
+        // --- 递归处理 (将 class_map 参数传递下去) ---
         ClassData::List(element_data) => {
             generate_enums_recursively(
                 parent_class_name,
                 field_hash,
                 element_data,
+                class_map, // <--- 传递
                 hashes,
                 generated_enums,
                 all_definitions,
@@ -75,6 +92,7 @@ fn generate_enums_recursively(
                 parent_class_name,
                 field_hash,
                 key_data,
+                class_map, // <--- 传递
                 hashes,
                 generated_enums,
                 all_definitions,
@@ -83,6 +101,7 @@ fn generate_enums_recursively(
                 parent_class_name,
                 field_hash,
                 value_data,
+                class_map, // <--- 传递
                 hashes,
                 generated_enums,
                 all_definitions,
@@ -93,6 +112,7 @@ fn generate_enums_recursively(
                 parent_class_name,
                 field_hash,
                 value_data,
+                class_map, // <--- 传递
                 hashes,
                 generated_enums,
                 all_definitions,
@@ -167,7 +187,7 @@ fn map_base_type(bin_type: &BinType) -> String {
         BinType::Vec3 => "Vec3".to_string(),
         BinType::Vec4 => "Vec4".to_string(),
         BinType::Matrix => "Mat4".to_string(),
-        BinType::Color => "Color".to_string(),
+        BinType::Color => "[u8; 4]".to_string(),
         BinType::String => "String".to_string(),
         BinType::Path => "u64".to_string(),
         BinType::Hash => "u32".to_string(),
@@ -285,8 +305,16 @@ pub fn merge_class_maps(base: &mut ClassMap, new: ClassMap) {
 
     // 遍历所有在 base 中已经存在的 class_hash
     for (class_hash, base_fields) in base.iter_mut() {
+        if *class_hash == 0xf36e13f7 {
+            // println!("base_fields: {:?}", base_fields);
+        }
+
         // 如果这个 class 在 new map 中也存在
         if let Some(new_fields) = new.remove(class_hash) {
+            if *class_hash == 0xf36e13f7 {
+                // println!("new_fields: {:?}", new_fields);
+            }
+
             // 获取新旧字段的 key 的并集，这样我们就能处理所有字段
             let all_field_hashes: HashSet<u32> = base_fields
                 .keys()
@@ -324,276 +352,288 @@ pub fn merge_class_maps(base: &mut ClassMap, new: ClassMap) {
     }
 }
 
-impl LeagueWadMapLoader {
-    pub fn get_hashes(&self, paths: &[&str]) -> HashMap<u32, String> {
-        let mut hashes = HashMap::new();
+pub fn get_hashes(paths: &[&str]) -> HashMap<u32, String> {
+    let mut hashes = HashMap::new();
 
-        for path in paths {
-            let content = std::fs::read_to_string(path).unwrap();
-            let lines = content.lines().collect::<Vec<_>>();
+    for path in paths {
+        let content = std::fs::read_to_string(path).unwrap();
+        let lines = content.lines().collect::<Vec<_>>();
 
-            for line in lines {
-                let parts = line.split_whitespace().collect::<Vec<_>>();
-                if parts.len() != 2 {
-                    continue;
-                }
-
-                let hash = u32::from_str_radix(parts[0], 16).unwrap();
-                let path = parts[1].to_string();
-                hashes.insert(hash, path);
+        for line in lines {
+            let parts = line.split_whitespace().collect::<Vec<_>>();
+            if parts.len() != 2 {
+                continue;
             }
-        }
 
-        hashes
+            let hash = u32::from_str_radix(parts[0], 16).unwrap();
+            let path = parts[1].to_string();
+            hashes.insert(hash, path);
+        }
     }
 
-    pub async fn class_map_to_rust_code(
-        &self,
-        class_map: &mut ClassMap,
-        hashes: &HashMap<u32, String>,
-    ) -> Result<String, LeagueLoaderError> {
-        let mut all_definitions = String::new();
-        let mut generated_enums = HashSet::new();
+    hashes
+}
 
-        // --- 第一阶段: 生成所有需要的 Enum 定义 ---
-        // 这种方法基于一个假设：当一个字段的类型是枚举时，
-        // 我们可以根据该字段的名称来命名这个枚举类型。
-        for (class_hash, class_fields) in class_map.iter() {
-            // 在这里获取父结构体的名称
-            let parent_class_name = hashes
-                .get(class_hash)
-                .map(|s| s.to_pascal_case())
-                .unwrap_or(format!("Unk0x{:x}", class_hash));
+pub fn get_hashes_u64(paths: &[&str]) -> HashMap<u64, String> {
+    let mut hashes = HashMap::new();
 
-            for (field_hash, field_data) in class_fields.iter() {
-                generate_enums_recursively(
-                    &parent_class_name, // 修改点
-                    field_hash,
-                    field_data,
-                    hashes,
-                    &mut generated_enums,
-                    &mut all_definitions,
-                );
+    for path in paths {
+        let content = std::fs::read_to_string(path).unwrap();
+        let lines = content.lines().collect::<Vec<_>>();
+
+        for line in lines {
+            let parts = line.split_whitespace().collect::<Vec<_>>();
+            if parts.len() != 2 {
+                continue;
             }
+
+            let hash = u64::from_str_radix(parts[0], 16).unwrap();
+            let path = parts[1].to_string();
+            hashes.insert(hash, path);
+        }
+    }
+
+    hashes
+}
+
+pub async fn class_map_to_rust_code(
+    class_map: &mut ClassMap,
+    hashes: &HashMap<u32, String>,
+) -> Result<String, LeagueLoaderError> {
+    let mut all_definitions = String::new();
+    let mut generated_enums = HashSet::new();
+
+    // --- 第一阶段: 生成所有需要的 Enum 定义 ---
+    let mut enums_info = Vec::new();
+    for (class_hash, class_fields) in class_map.iter() {
+        let parent_class_name = hashes
+            .get(class_hash)
+            .map(|s| s.to_pascal_case())
+            .unwrap_or(format!("Unk0x{:x}", class_hash));
+
+        for (field_hash, field_data) in class_fields.iter() {
+            enums_info.push((parent_class_name.clone(), *field_hash, field_data.clone()));
+        }
+    }
+
+    for (parent_class_name, field_hash, field_data) in enums_info {
+        generate_enums_recursively(
+            &parent_class_name,
+            &field_hash,
+            &field_data,
+            class_map, // <--- 修改点: 将 class_map 自身传入
+            hashes,
+            &mut generated_enums,
+            &mut all_definitions,
+        );
+    }
+
+    // --- 第二阶段: 生成 Struct 定义 ---
+    for (class_hash, class_data) in class_map.iter() {
+        let mut class_name = hashes
+            .get(class_hash)
+            .map(|s| s.to_pascal_case())
+            .unwrap_or(format!("Unk0x{:x}", class_hash));
+
+        if class_name == "Self" {
+            class_name = "r#Self".to_string();
         }
 
-        // --- 第二阶段: 生成 Struct 定义 ---
-        for (class_hash, class_data) in class_map.iter() {
-            let class_name = hashes
-                .get(class_hash)
-                .map(|s| s.to_pascal_case())
-                .unwrap_or(format!("Unk0x{:x}", class_hash));
+        let mut struct_def = String::new();
+        struct_def.push_str("#[derive(Serialize, Deserialize, Debug)]\n");
+        struct_def.push_str("#[serde(rename_all = \"camelCase\")]\n");
+        struct_def.push_str(&format!("pub struct {} {{\n", class_name));
 
-            let mut struct_def = String::new();
-            struct_def.push_str("#[derive(Serialize, Deserialize, Debug)]\n");
-            struct_def.push_str("#[serde(rename_all = \"camelCase\")]\n");
-            struct_def.push_str(&format!("pub struct {} {{\n", class_name));
+        for (field_hash, field_data) in class_data.iter() {
+            let field_name_original = hashes
+                .get(field_hash)
+                .cloned()
+                .unwrap_or(format!("unk_0x{:x}", field_hash));
 
-            for (field_hash, field_data) in class_data.iter() {
-                let field_name_original = hashes
-                    .get(field_hash)
-                    .cloned()
-                    .unwrap_or(format!("unk_0x{:x}", field_hash));
+            let mut field_name_snake = field_name_original.to_snake_case();
 
-                let mut field_name_snake = field_name_original.to_snake_case();
-
-                if field_name_snake == "type" {
-                    field_name_snake = "r#type".to_string();
-                }
-
-                // 调用时传入 class_name (它就是这里的父结构体名)
-                let type_name =
-                    map_class_data_to_rust_type(&class_name, field_data, field_hash, hashes); // 修改点
-
-                struct_def.push_str(&format!("    pub {}: {},\n", field_name_snake, type_name));
+            if field_name_snake == "type" {
+                field_name_snake = "r#type".to_string();
             }
-            struct_def.push_str("}\n\n");
-            all_definitions.push_str(&struct_def);
-        }
 
-        Ok(all_definitions)
+            let type_name =
+                map_class_data_to_rust_type(&class_name, field_data, field_hash, hashes);
+
+            struct_def.push_str(&format!("    pub {}: {},\n", field_name_snake, type_name));
+        }
+        struct_def.push_str("}\n\n");
+        all_definitions.push_str(&struct_def);
     }
 
-    pub async fn extract_all_class(
-        &self,
-        prop_file: &PropFile,
-    ) -> Result<ClassMap, LeagueLoaderError> {
-        let mut class_map = HashMap::new();
-        for (class_hash, entry) in prop_file.iter_class_hash_and_entry() {
-            let class_map_entry = self.extract_entry_class(class_hash, entry).await.unwrap();
-            merge_class_maps(&mut class_map, class_map_entry);
-        }
-        Ok(class_map)
+    Ok(all_definitions)
+}
+
+pub async fn extract_all_class(prop_file: &PropFile) -> Result<ClassMap, LeagueLoaderError> {
+    let mut class_map = HashMap::new();
+    for (class_hash, entry) in prop_file.iter_class_hash_and_entry() {
+        let class_map_entry = extract_entry_class(class_hash, entry).await.unwrap();
+        merge_class_maps(&mut class_map, class_map_entry);
+    }
+    Ok(class_map)
+}
+
+pub async fn extract_entry_class(
+    class_hash: u32,
+    entry: &EntryData,
+) -> Result<ClassMap, LeagueLoaderError> {
+    let mut parser = BinParser::from_bytes(&entry.data);
+
+    let data_map = parser.read_fields().unwrap();
+
+    let class_map = extract_struct_class(class_hash, &data_map).unwrap();
+
+    Ok(class_map)
+}
+
+// 3. extract_struct_class 被大大简化
+pub fn extract_struct_class(
+    class_hash: u32,
+    data_map: &HashMap<u32, (BinType, &[u8])>,
+) -> Result<ClassMap, LeagueLoaderError> {
+    let mut class_map = HashMap::new();
+    let mut struct_map = HashMap::new();
+
+    for (hash, (vtype, value_slice)) in data_map.iter() {
+        // 对每个字段，调用新的核心函数来提取其完整的类型信息
+        let class_data = extract_type_data(*vtype, value_slice, &mut class_map).unwrap();
+        struct_map.insert(*hash, class_data);
     }
 
-    pub async fn extract_entry_class(
-        &self,
-        class_hash: u32,
-        entry: &EntryData,
-    ) -> Result<ClassMap, LeagueLoaderError> {
-        let mut parser = BinParser::from_bytes(&entry.data);
+    class_map.insert(class_hash, struct_map);
 
-        let data_map = parser.read_fields().unwrap();
+    Ok(class_map)
+}
 
-        let class_map = self.extract_struct_class(class_hash, &data_map).unwrap();
-
-        Ok(class_map)
+// 4. 新的核心递归函数
+/// 根据 vtype 和数据切片，递归地提取完整的 ClassData 信息
+/// 同时会用新发现的子结构定义来填充 class_map
+fn extract_type_data(
+    vtype: BinType,
+    value_slice: &[u8],
+    class_map: &mut ClassMap, // 传入可变引用以收集嵌套的 struct 定义
+) -> Result<ClassData, LeagueLoaderError> {
+    // 对于基础类型，直接返回
+    if !matches!(
+        vtype,
+        BinType::Struct
+            | BinType::Embed
+            | BinType::List
+            | BinType::List2
+            | BinType::Map
+            | BinType::Option
+    ) {
+        return Ok(ClassData::Base(map_base_type(&vtype)));
     }
 
-    // 3. extract_struct_class 被大大简化
-    pub fn extract_struct_class(
-        &self,
-        class_hash: u32,
-        data_map: &HashMap<u32, (BinType, &[u8])>,
-    ) -> Result<ClassMap, LeagueLoaderError> {
-        let mut class_map = HashMap::new();
-        let mut struct_map = HashMap::new();
+    let mut parser = BinParser::from_bytes(value_slice);
+    match vtype {
+        BinType::Struct | BinType::Embed => {
+            let Some(header) = parser.read_struct_header()? else {
+                // 对于空的 struct，可以返回一个特殊的基础类型或进行其他处理
+                return Ok(ClassData::Struct(0));
+            };
+            let fields = parser.read_fields().unwrap();
 
-        for (hash, (vtype, value_slice)) in data_map.iter() {
-            // 对每个字段，调用新的核心函数来提取其完整的类型信息
-            let class_data = self
-                .extract_type_data(*vtype, value_slice, &mut class_map)
-                .unwrap();
-            struct_map.insert(*hash, class_data);
+            let sub_class_map = extract_struct_class(header.class_hash, &fields).unwrap();
+            merge_class_maps(class_map, sub_class_map);
+            Ok(ClassData::Struct(header.class_hash))
         }
+        BinType::List | BinType::List2 => {
+            let element_type = parser.read_type().unwrap();
+            let _bytes_count = parser.read_u32().unwrap();
+            let list = parser.read_list(element_type).unwrap();
 
-        class_map.insert(class_hash, struct_map);
-        Ok(class_map)
-    }
-
-    // 4. 新的核心递归函数
-    /// 根据 vtype 和数据切片，递归地提取完整的 ClassData 信息
-    /// 同时会用新发现的子结构定义来填充 class_map
-    fn extract_type_data(
-        &self,
-        vtype: BinType,
-        value_slice: &[u8],
-        class_map: &mut ClassMap, // 传入可变引用以收集嵌套的 struct 定义
-    ) -> Result<ClassData, LeagueLoaderError> {
-        // 对于基础类型，直接返回
-        if !matches!(
-            vtype,
-            BinType::Struct
-                | BinType::Embed
-                | BinType::List
-                | BinType::List2
-                | BinType::Map
-                | BinType::Option
-        ) {
-            return Ok(ClassData::Base(map_base_type(&vtype)));
-        }
-
-        let mut parser = BinParser::from_bytes(value_slice);
-        match vtype {
-            BinType::Struct | BinType::Embed => {
-                let Some(header) = parser.read_struct_header()? else {
-                    // 对于空的 struct，可以返回一个特殊的基础类型或进行其他处理
-                    return Ok(ClassData::Struct(0));
-                };
-                let fields = parser.read_fields().unwrap();
-                let sub_class_map = self
-                    .extract_struct_class(header.class_hash, &fields)
-                    .unwrap();
-                merge_class_maps(class_map, sub_class_map);
-                Ok(ClassData::Struct(header.class_hash))
-            }
-            BinType::List | BinType::List2 => {
-                let element_type = parser.read_type().unwrap();
-                let _bytes_count = parser.read_u32().unwrap();
-                let list = parser.read_list(element_type).unwrap();
-
-                // 特殊情况：List<Struct> 被视为一个多态枚举 (Enum)
-                if element_type == BinType::Struct || element_type == BinType::Embed {
-                    let mut class_hashes = HashSet::new();
-                    for struct_data in list {
-                        let mut item_parser = BinParser::from_bytes(struct_data);
-                        let Some(header) = item_parser.read_struct_header()? else {
-                            continue;
-                        };
-                        class_hashes.insert(header.class_hash);
-
-                        let item_fields = item_parser.read_fields().unwrap();
-                        let item_class_map = self
-                            .extract_struct_class(header.class_hash, &item_fields)
-                            .unwrap();
-                        merge_class_maps(class_map, item_class_map);
-                    }
-                    if class_hashes.len() == 1 {
-                        return Ok(ClassData::List(Box::new(ClassData::Struct(
-                            *class_hashes.iter().next().unwrap(),
-                        ))));
-                    }
-                    Ok(ClassData::List(Box::new(ClassData::Enum(class_hashes))))
-                } else {
-                    // 通用情况：递归解析列表的第一个元素来确定列表的类型
-                    let element_class_data = if let Some(first_element) = list.get(0) {
-                        self.extract_type_data(element_type, first_element, class_map)?
-                    } else {
-                        // 如果列表为空，我们无法确定其内部结构，返回一个占位符
-                        ClassData::Base("()".to_string())
+            // 特殊情况：List<Struct> 被视为一个多态枚举 (Enum)
+            if element_type == BinType::Struct || element_type == BinType::Embed {
+                let mut class_hashes = HashSet::new();
+                for struct_data in list {
+                    let mut item_parser = BinParser::from_bytes(struct_data);
+                    let Some(header) = item_parser.read_struct_header()? else {
+                        class_hashes.insert(0);
+                        continue;
                     };
-                    Ok(ClassData::List(Box::new(element_class_data)))
+                    class_hashes.insert(header.class_hash);
+
+                    let item_fields = item_parser.read_fields().unwrap();
+                    let item_class_map =
+                        extract_struct_class(header.class_hash, &item_fields).unwrap();
+                    merge_class_maps(class_map, item_class_map);
                 }
-            }
-            BinType::Map => {
-                let ktype = parser.read_type().unwrap();
-                let vtype = parser.read_type().unwrap();
-
-                let _bytes_count = parser.read_u32().unwrap();
-                let count = parser.read_u32().unwrap();
-
-                if vtype == BinType::Struct || vtype == BinType::Embed {
-                    let mut class_hashes = HashSet::new();
-
-                    for _ in 0..count {
-                        parser.skip_value(ktype).unwrap();
-
-                        let value_slice = parser.skip_value(vtype).unwrap();
-                        let value_class_data = self
-                            .extract_type_data(vtype, value_slice, class_map)
-                            .unwrap();
-
-                        if let ClassData::Struct(class_hash) = value_class_data {
-                            class_hashes.insert(class_hash);
-                        }
-                    }
-                    Ok(ClassData::Map(
-                        Box::new(ClassData::Base(map_base_type(&ktype))),
-                        Box::new(ClassData::Enum(class_hashes)),
-                    ))
-                } else {
-                    let key_slice = parser.skip_value(ktype).unwrap();
-                    let value_slice = parser.skip_value(vtype).unwrap();
-
-                    let key_class_data =
-                        self.extract_type_data(ktype, key_slice, class_map).unwrap();
-                    let value_class_data = self
-                        .extract_type_data(vtype, value_slice, class_map)
-                        .unwrap();
-
-                    Ok(ClassData::Map(
-                        Box::new(key_class_data),
-                        Box::new(value_class_data),
-                    ))
-                }
-            }
-            BinType::Option => {
-                let vtype = parser.read_type().unwrap();
-                let some = parser.read_bool().unwrap();
-                if some {
-                    let value_slice = parser.skip_value(vtype).unwrap();
-                    let value_data = self
-                        .extract_type_data(vtype, value_slice, class_map)
-                        .unwrap();
-                    Ok(ClassData::Option(Box::new(value_data)))
-                } else {
-                    Ok(ClassData::Option(Box::new(ClassData::Base(
-                        "()".to_string(),
+                if class_hashes.len() == 1 {
+                    Ok(ClassData::List(Box::new(ClassData::Struct(
+                        *class_hashes.iter().next().unwrap(),
                     ))))
+                } else {
+                    Ok(ClassData::List(Box::new(ClassData::Enum(class_hashes))))
                 }
+            } else {
+                // 通用情况：递归解析列表的第一个元素来确定列表的类型
+                let element_class_data = if let Some(first_element) = list.get(0) {
+                    extract_type_data(element_type, first_element, class_map)?
+                } else {
+                    // 如果列表为空，我们无法确定其内部结构，返回一个占位符
+                    ClassData::Base("()".to_string())
+                };
+                Ok(ClassData::List(Box::new(element_class_data)))
             }
-            // 其他所有类型都已经在函数开头的 if 判断中作为基础类型处理
-            _ => unreachable!(),
         }
+        BinType::Map => {
+            let ktype = parser.read_type().unwrap();
+            let vtype = parser.read_type().unwrap();
+
+            let _bytes_count = parser.read_u32().unwrap();
+            let count = parser.read_u32().unwrap();
+
+            if vtype == BinType::Struct || vtype == BinType::Embed {
+                let mut class_hashes = HashSet::new();
+
+                for _ in 0..count {
+                    parser.skip_value(ktype).unwrap();
+
+                    let value_slice = parser.skip_value(vtype).unwrap();
+                    let value_class_data =
+                        extract_type_data(vtype, value_slice, class_map).unwrap();
+
+                    if let ClassData::Struct(class_hash) = value_class_data {
+                        class_hashes.insert(class_hash);
+                    }
+                }
+                Ok(ClassData::Map(
+                    Box::new(ClassData::Base(map_base_type(&ktype))),
+                    Box::new(ClassData::Enum(class_hashes)),
+                ))
+            } else {
+                let key_slice = parser.skip_value(ktype).unwrap();
+                let value_slice = parser.skip_value(vtype).unwrap();
+
+                let key_class_data = extract_type_data(ktype, key_slice, class_map).unwrap();
+                let value_class_data = extract_type_data(vtype, value_slice, class_map).unwrap();
+
+                Ok(ClassData::Map(
+                    Box::new(key_class_data),
+                    Box::new(value_class_data),
+                ))
+            }
+        }
+        BinType::Option => {
+            let vtype = parser.read_type().unwrap();
+            let some = parser.read_bool().unwrap();
+            if some {
+                let value_slice = parser.skip_value(vtype).unwrap();
+                let value_data = extract_type_data(vtype, value_slice, class_map).unwrap();
+                Ok(ClassData::Option(Box::new(value_data)))
+            } else {
+                Ok(ClassData::Option(Box::new(ClassData::Base(
+                    "()".to_string(),
+                ))))
+            }
+        }
+        // 其他所有类型都已经在函数开头的 if 判断中作为基础类型处理
+        _ => unreachable!(),
     }
 }

@@ -13,11 +13,11 @@ use crate::{
         CONFIG_PATH_MAP, CONFIG_PATH_MAP_NAV_GRID,
     },
     league::{
-        from_entry, get_asset_writer, get_bin_path, merge_class_maps, parse_vertex_data,
-        save_struct_to_file, submesh_to_intermediate, AiMeshNGrid, BarracksConfig,
-        LayerTransitionBehavior, LeagueLoader, LeagueLoaderError, LeagueMapGeo, LeagueMaterial,
-        LeagueWadLoader, MapContainer, MapContainerComponents, MapPlaceableContainer,
-        MapPlaceableContainerItems, PropFile, StaticMaterialDef, Unk0x9d9f60d2,
+        from_entry, get_asset_writer, get_bin_path, parse_vertex_data, save_struct_to_file,
+        submesh_to_intermediate, AiMeshNGrid, BarracksConfig, LayerTransitionBehavior,
+        LeagueLoader, LeagueLoaderError, LeagueMapGeo, LeagueMaterial, LeagueWadLoader,
+        MapContainer, MapContainerComponents, MapPlaceableContainer, MapPlaceableContainerItems,
+        PropFile, StaticMaterialDef, Unk0x9d9f60d2,
     },
 };
 
@@ -28,87 +28,6 @@ pub struct LeagueWadMapLoader {
 }
 
 impl LeagueWadMapLoader {
-    pub async fn extract_all_map_classes(
-        &self,
-        hash_paths: &[&str],
-    ) -> Result<String, LeagueLoaderError> {
-        let mut class_map = self.extract_all_class(&self.materials_bin).await?;
-
-        let hashes = self.get_hashes(hash_paths);
-
-        let rust_code = self.class_map_to_rust_code(&mut class_map, &hashes).await?;
-
-        Ok(rust_code)
-    }
-
-    pub async fn extract_all_classes(
-        &self,
-        hash_paths: &[&str],
-    ) -> Result<String, LeagueLoaderError> {
-        let mut characters = HashMap::new();
-        let mut environment_objects = HashMap::new();
-
-        for entry in self.materials_bin.iter_entry_by_class(0x9d9f60d2) {
-            let record = from_entry::<Unk0x9d9f60d2>(entry);
-            characters.entry(entry.hash).or_insert(record);
-        }
-
-        for entry in self
-            .materials_bin
-            .iter_entry_by_class(LeagueLoader::hash_bin("MapPlaceableContainer"))
-        {
-            let map_placeable_container = from_entry::<MapPlaceableContainer>(entry);
-
-            for (hash, value) in map_placeable_container.items {
-                match value {
-                    MapPlaceableContainerItems::Unk0x3c2bf0c0(unk0x3c2bf0c0) => {
-                        environment_objects.entry(hash).or_insert(unk0x3c2bf0c0);
-                    }
-                    _ => {}
-                }
-            }
-        }
-
-        let mut skins = Vec::new();
-        let mut character_records = Vec::new();
-
-        for environment_object in environment_objects.values() {
-            let skin_key = environment_object.definition.skin.clone();
-            skins.push(skin_key);
-            let character_record_key = environment_object.definition.character_record.clone();
-            character_records.push(character_record_key);
-        }
-
-        for character in characters.values() {
-            let skin_key = character.skin.clone();
-            skins.push(skin_key);
-            let character_record_key = character.character_record.clone();
-            character_records.push(character_record_key);
-        }
-
-        let mut class_map = HashMap::new();
-        for skin in skins {
-            let skin_bin = self.wad_loader.get_skin_bin_by_path(&skin).unwrap();
-            let bin_class_map = self.extract_all_class(&skin_bin).await?;
-            merge_class_maps(&mut class_map, bin_class_map);
-        }
-
-        for character_record in character_records {
-            let character_bin = self
-                .wad_loader
-                .get_character_bin_by_path(&character_record)
-                .unwrap();
-            let bin_class_map = self.extract_all_class(&character_bin).await?;
-            merge_class_maps(&mut class_map, bin_class_map);
-        }
-
-        let hashes = self.get_hashes(hash_paths);
-
-        let rust_code = self.class_map_to_rust_code(&mut class_map, &hashes).await?;
-
-        Ok(rust_code)
-    }
-
     pub fn from_loader(
         wad_loader: LeagueWadLoader,
         map: &str,

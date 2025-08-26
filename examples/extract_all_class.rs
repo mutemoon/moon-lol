@@ -1,14 +1,17 @@
-use moon_lol::league::LeagueLoader;
+use moon_lol::league::{get_hashes_u64, LeagueLoader};
 use tokio::time::Instant;
 
 #[tokio::main]
 async fn main() {
     #[cfg(unix)]
-    let loader = LeagueLoader::new(r"/mnt/c/Program Files (x86)/WeGameApps/英雄联盟/game").unwrap();
+    let loader = LeagueLoader::new(
+        r"/mnt/c/Program Files (x86)/WeGameApps/英雄联盟/game",
+        "bloom",
+    )
+    .unwrap();
     #[cfg(windows)]
-    let loader = LeagueLoader::new(r"C:\Program Files (x86)\WeGameApps\英雄联盟\game").unwrap();
-
-    let map_loader = loader.get_map_loader("bloom").unwrap();
+    let loader =
+        LeagueLoader::new(r"C:\Program Files (x86)\WeGameApps\英雄联盟\game", "bloom").unwrap();
 
     let start = Instant::now();
 
@@ -19,16 +22,25 @@ async fn main() {
         "assets/hashes.bintypes.txt",
     ];
 
-    let rust_code = map_loader
-        .extract_all_map_classes(&hash_paths)
+    let file_paths = vec!["assets/hashes.game.txt.0", "assets/hashes.game.txt.1"];
+
+    let hashes = get_hashes_u64(&file_paths);
+
+    let paths = hashes
+        .iter()
+        .filter(|(_hash, path)| {
+            path.ends_with(".bin")
+                && (path.contains("data/characters/") || path.contains("map11/bloom.materials.bin"))
+        })
+        .map(|v| v.1.as_str())
+        .collect::<Vec<_>>();
+
+    let rust_code = loader
+        .extract_all_classes(&paths, &hash_paths)
         .await
         .unwrap();
 
-    std::fs::write("map.rs", rust_code).unwrap();
-
-    let rust_code = map_loader.extract_all_classes(&hash_paths).await.unwrap();
-
-    std::fs::write("character.rs", rust_code).unwrap();
+    std::fs::write("league.rs", rust_code).unwrap();
 
     let end = Instant::now();
     println!("Time taken: {:?}", end.duration_since(start));

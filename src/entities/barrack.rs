@@ -207,7 +207,7 @@ fn barracks_spawning_system(
         health.max += upgrade_config.hp_max_bonus + hp_upgrade * upgrade_count as f32;
         health.value = health.max;
 
-        let mut damage = Damage(character_record.base_damage);
+        let mut damage = Damage(character_record.base_damage.unwrap_or(0.0));
         let damage_upgrade = if is_late_game {
             upgrade_config.damage_upgrade_late
         } else {
@@ -221,14 +221,14 @@ fn barracks_spawning_system(
             + upgrade_config.armor_upgrade_growth.unwrap_or(0.0) * upgrade_count as f32;
 
         let mut movement = Movement {
-            speed: character_record.base_move_speed,
+            speed: character_record.base_move_speed.unwrap_or(0.0),
         };
         movement.speed +=
             (barrack_config.move_speed_increase_increment * move_speed_upgrade_count) as f32;
 
         let bounding = Bounding {
             radius: character_record.pathfinding_collision_radius,
-            height: character_record.health_bar_height,
+            height: character_record.health_bar_height.unwrap_or(0.0),
         };
 
         let entity = spawn_skin_entity(

@@ -1,4 +1,4 @@
-use std::io::BufReader;
+use std::io::{self, BufReader};
 use std::{
     collections::HashMap,
     fs::File,
@@ -19,7 +19,7 @@ use crate::league::{
 pub struct LeagueWadLoader {
     pub wad: LeagueWad,
     pub file: Arc<File>,
-    pub sub_chunk: LeagueWadSubchunk,
+    pub sub_chunk: Option<LeagueWadSubchunk>,
 }
 
 impl LeagueWadLoader {
@@ -33,23 +33,31 @@ impl LeagueWadLoader {
 
         let wad = LeagueWad::read(&mut ArcFileReader::new(file.clone(), 0))?;
 
-        let subchunk_path = wad_relative_path.replace(".client", ".subchunktoc");
+        let subchunk_path: String = wad_relative_path.replace(".client", ".subchunktoc");
 
-        let entry = wad.get_entry(LeagueLoader::hash_wad(&subchunk_path))?;
-
-        let reader = Self::get_wad_zstd_entry_reader_inner(file.clone(), &entry)?;
-
-        let sub_chunk = LeagueWadSubchunk::read_options(
-            &mut NoSeek::new(reader),
-            Endian::Little,
-            args! { count: entry.target_size / 16 },
-        )?;
+        let sub_chunk = Self::get_sub_chunk(&wad, &file, &subchunk_path).ok();
 
         Ok(LeagueWadLoader {
             wad,
             file,
             sub_chunk,
         })
+    }
+
+    pub fn get_sub_chunk(
+        wad: &LeagueWad,
+        file: &Arc<File>,
+        subchunk_path: &str,
+    ) -> Result<LeagueWadSubchunk, LeagueLoaderError> {
+        let entry = wad.get_entry(LeagueLoader::hash_wad(&subchunk_path))?;
+
+        let reader = Self::get_wad_zstd_entry_reader_inner(file.clone(), &entry)?;
+
+        Ok(LeagueWadSubchunk::read_options(
+            &mut NoSeek::new(reader),
+            Endian::Little,
+            args! { count: entry.target_size / 16 },
+        )?)
     }
 
     pub fn get_wad_zstd_entry_reader(
@@ -200,20 +208,23 @@ impl LeagueWadLoader {
         entry: &LeagueWadEntry,
         subchunk_count: u8,
     ) -> Result<Box<dyn Read + '_>, LeagueLoaderError> {
-        if self.sub_chunk.chunks.is_empty() {
-            panic!("No subchunk data available");
-        }
+        let Some(sub_chunk) = &self.sub_chunk else {
+            return Err(LeagueLoaderError::Io(io::Error::new(
+                io::ErrorKind::NotFound,
+                "Subchunk not found",
+            )));
+        };
 
         let mut offset = 0u64;
         let mut result = Vec::with_capacity(entry.target_size as usize);
 
         for i in 0..subchunk_count {
             let chunk_index = (entry.first_subchunk_index as usize) + (i as usize);
-            if chunk_index >= self.sub_chunk.chunks.len() {
+            if chunk_index >= sub_chunk.chunks.len() {
                 panic!("Subchunk index out of bounds");
             }
 
-            let subchunk_entry = &self.sub_chunk.chunks[chunk_index];
+            let subchunk_entry = &sub_chunk.chunks[chunk_index];
             let mut subchunk_reader =
                 ArcFileReader::new(self.file.clone(), entry.offset as u64 + offset)
                     .take(subchunk_entry.size as u64);

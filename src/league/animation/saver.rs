@@ -11,9 +11,9 @@ use crate::core::{
 };
 use crate::league::{
     from_entry, get_asset_writer, get_bin_path, neg_mat_z, save_struct_to_file,
-    skinned_mesh_to_intermediate, AnimationConditionUpdater, AnimationGraphData, ClipData,
-    EntryData, LeagueLoader, LeagueLoaderError, LeagueMaterial, LeagueSkeleton, LeagueSkinnedMesh,
-    LeagueSkinnedMeshInternal, LeagueWadLoader,
+    skinned_mesh_to_intermediate, AnimationGraphData, AnimationGraphDataMClipDataMap,
+    ConditionFloatClipDataUpdater, EntryData, LeagueLoader, LeagueLoaderError, LeagueMaterial,
+    LeagueSkeleton, LeagueSkinnedMesh, LeagueSkinnedMeshInternal, LeagueWadLoader,
 };
 
 impl LeagueWadLoader {
@@ -23,37 +23,31 @@ impl LeagueWadLoader {
     ) -> Result<ConfigCharacterSkin, LeagueLoaderError> {
         let (skin_character_data_properties, flat_map) = self.load_character_skin(&skin);
 
-        let texture_path = skin_character_data_properties
-            .skin_mesh_properties
-            .texture
-            .clone();
-        self.save_wad_entry_to_file(&texture_path).await?;
+        let skin_mesh_properties = &skin_character_data_properties.skin_mesh_properties.unwrap();
+
+        let texture = skin_mesh_properties.texture.clone().unwrap();
+        self.save_wad_entry_to_file(&texture).await?;
 
         let material = LeagueMaterial {
-            texture_path: texture_path.clone(),
+            texture_path: texture.clone(),
         };
+        let material_path = get_bin_path(&format!("ASSETS/{}/material", skin));
+        save_struct_to_file(&material_path, &material).await?;
 
-        let skeleton_path = skin_character_data_properties
-            .skin_mesh_properties
-            .skeleton
-            .clone();
-        self.save_wad_entry_to_file(&skeleton_path).await?;
-
-        let mut reader = self
-            .get_wad_entry_no_seek_reader_by_path(
-                &skin_character_data_properties
-                    .skin_mesh_properties
-                    .simple_skin,
-            )
-            .unwrap();
-
-        let league_skinned_mesh =
-            LeagueSkinnedMesh::from(LeagueSkinnedMeshInternal::read(&mut reader).unwrap());
+        let skeleton = skin_mesh_properties.skeleton.clone().unwrap();
+        self.save_wad_entry_to_file(&skeleton).await?;
 
         let league_skeleton = self
-            .get_wad_entry_reader_by_path(&skeleton_path)
+            .get_wad_entry_reader_by_path(&skeleton)
             .map(|mut v| LeagueSkeleton::read(&mut v).unwrap())
             .unwrap();
+
+        let simple_skin = skin_mesh_properties.simple_skin.clone().unwrap();
+        let mut reader = self
+            .get_wad_entry_no_seek_reader_by_path(&simple_skin)
+            .unwrap();
+        let league_skinned_mesh =
+            LeagueSkinnedMesh::from(LeagueSkinnedMeshInternal::read(&mut reader).unwrap());
 
         let animation_map = self.load_animation_map(
             flat_map
@@ -74,9 +68,6 @@ impl LeagueWadLoader {
                 _ => {}
             }
         }
-
-        let material_path = get_bin_path(&format!("ASSETS/{}/material", skin));
-        save_struct_to_file(&material_path, &material).await?;
 
         let mut submesh_paths = Vec::new();
 
@@ -112,9 +103,7 @@ impl LeagueWadLoader {
         .await?;
 
         Ok(ConfigCharacterSkin {
-            skin_scale: skin_character_data_properties
-                .skin_mesh_properties
-                .skin_scale,
+            skin_scale: skin_mesh_properties.skin_scale,
             material_path,
             submesh_paths,
             joint_influences_indices: league_skeleton.modern_data.influences,
@@ -139,16 +128,13 @@ impl LeagueWadLoader {
     ) -> Result<HashMap<u32, ConfigCharacterSkinAnimation>, LeagueLoaderError> {
         let animation_graph_data = from_entry::<AnimationGraphData>(value);
 
-        let nodes = animation_graph_data
-            .m_clip_data_map
-            .iter()
-            .collect::<HashMap<_, _>>();
+        let nodes = animation_graph_data.m_clip_data_map;
 
         let animation_graph_data = nodes
             .iter()
-            .filter_map(|(&k, &v)| -> Option<(u32, ConfigCharacterSkinAnimation)> {
+            .filter_map(|(k, v)| -> Option<(u32, ConfigCharacterSkinAnimation)> {
                 match v {
-                    ClipData::AtomicClipData(atomic_clip_data) => Some((
+                    AnimationGraphDataMClipDataMap::AtomicClipData(atomic_clip_data) => Some((
                         *k,
                         ConfigCharacterSkinAnimation::AtomicClipData {
                             clip_path: atomic_clip_data
@@ -157,7 +143,7 @@ impl LeagueWadLoader {
                                 .clone(),
                         },
                     )),
-                    ClipData::SelectorClipData(selector_clip_data) => Some((
+                    AnimationGraphDataMClipDataMap::SelectorClipData(selector_clip_data) => Some((
                         *k,
                         ConfigCharacterSkinAnimation::SelectorClipData {
                             probably_nodes: selector_clip_data
@@ -167,7 +153,9 @@ impl LeagueWadLoader {
                                 .collect(),
                         },
                     )),
-                    ClipData::ConditionFloatClipData(condition_float_clip_data) => Some((
+                    AnimationGraphDataMClipDataMap::ConditionFloatClipData(
+                        condition_float_clip_data,
+                    ) => Some((
                         *k,
                         ConfigCharacterSkinAnimation::ConditionFloatClipData {
                             conditions: condition_float_clip_data
@@ -176,13 +164,13 @@ impl LeagueWadLoader {
                                 .map(|v| (v.m_clip_name, v.m_value.unwrap_or(0.0)))
                                 .collect(),
                             component_name: match condition_float_clip_data.updater {
-                                AnimationConditionUpdater::MoveSpeedParametricUpdater => {
+                                ConditionFloatClipDataUpdater::MoveSpeedParametricUpdater => {
                                     "Movement".to_string()
                                 }
                                 _ => "".to_string(),
                             },
                             field_name: match condition_float_clip_data.updater {
-                                AnimationConditionUpdater::MoveSpeedParametricUpdater => {
+                                ConditionFloatClipDataUpdater::MoveSpeedParametricUpdater => {
                                     "speed".to_string()
                                 }
                                 _ => "".to_string(),

@@ -1,4 +1,3 @@
-mod bin;
 mod compressed;
 mod loader;
 mod saver;
@@ -7,7 +6,6 @@ mod uncompressed;
 
 use std::collections::HashMap;
 
-pub use bin::*;
 pub use compressed::*;
 pub use loader::*;
 pub use skeleton::*;
@@ -322,13 +320,17 @@ mod tests {
     #[test]
     fn test_read() {
         let start = Instant::now();
-        let loader = LeagueLoader::new(r"C:\Program Files (x86)\WeGameApps\英雄联盟\game").unwrap();
-        let map_loader = loader.get_map_loader("bloom").unwrap();
+        let loader =
+            LeagueLoader::new(r"C:\Program Files (x86)\WeGameApps\英雄联盟\game", "bloom").unwrap();
 
         println!("{:?}", start.elapsed());
 
-        for (_, entry) in map_loader.wad_loader.wad.entries.clone() {
-            let mut reader = map_loader.wad_loader.get_wad_entry_reader(&entry).unwrap();
+        for (_, entry) in loader.map_loader.wad_loader.wad.entries.clone() {
+            let mut reader = loader
+                .map_loader
+                .wad_loader
+                .get_wad_entry_reader(&entry)
+                .unwrap();
             let mut buf = [0; 8];
             if reader.read_exact(&mut buf).is_err() {
                 continue;
@@ -340,7 +342,11 @@ mod tests {
                 continue;
             }
 
-            let mut reader = map_loader.wad_loader.get_wad_entry_reader(&entry).unwrap();
+            let mut reader = loader
+                .map_loader
+                .wad_loader
+                .get_wad_entry_reader(&entry)
+                .unwrap();
             let mut buf: Vec<u8> = Vec::new();
             reader.read_to_end(&mut buf).unwrap();
             let res = AnimationFile::read(&mut Cursor::new(buf));

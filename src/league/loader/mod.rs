@@ -18,6 +18,9 @@ use crate::league::BinDeserializerError;
 
 #[derive(thiserror::Error, Debug)]
 pub enum LeagueLoaderError {
+    #[error("Custom error: {0}")]
+    Custom(String),
+
     #[error("Could not load mesh: {0}")]
     Io(#[from] std::io::Error),
 

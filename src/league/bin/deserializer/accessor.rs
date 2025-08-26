@@ -66,7 +66,14 @@ impl<'de> MapAccess<'de> for MapReader<'de> {
 
         let mut value_de = BinDeserializer::from_bytes(value_slice, vtype);
 
-        seed.deserialize(&mut value_de)
+        seed.deserialize(&mut value_de).map_err(|e| {
+            BinDeserializerError::Message(format!(
+                "🐕 反序列化失败: {:?}, {:?}，原始错误: {:?}",
+                vtype,
+                value_slice.len(),
+                e
+            ))
+        })
     }
 }
 

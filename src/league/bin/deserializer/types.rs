@@ -7,6 +7,7 @@ pub type BinLink = u32;
 
 pub type BinHash = u32;
 
+#[derive(Debug)]
 pub struct BinStructHeader {
     pub class_hash: u32,
     pub bytes_count: usize,

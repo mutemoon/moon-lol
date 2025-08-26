@@ -28,12 +28,10 @@ impl<'de, 'a> de::Deserializer<'de> for &'a mut BinDeserializer<'de> {
 
     fn deserialize_struct<V: Visitor<'de>>(
         self,
-        name: &'static str,
+        _name: &'static str,
         struct_fields: &'static [&'static str],
         visitor: V,
     ) -> BinDeserializerResult<V::Value> {
-        println!("🚀 正在处理 rust 结构体: {:?}", name);
-
         if self.value_type != BinType::Entry {
             self.parser.read_struct_header()?;
         }
@@ -87,7 +85,10 @@ impl<'de, 'a> de::Deserializer<'de> for &'a mut BinDeserializer<'de> {
                 de: &mut BinDeserializer::from_bytes(self.parser.input, BinType::Float),
                 count: 16,
             }),
-            BinType::Color => todo!(),
+            BinType::Color => visitor.visit_seq(SeqReader {
+                de: &mut BinDeserializer::from_bytes(self.parser.input, BinType::U8),
+                count: 4,
+            }),
             BinType::String => self.deserialize_string(visitor),
             BinType::Hash => visitor.visit_u32(self.parser.read_hash()?),
             BinType::Path => {
@@ -98,7 +99,6 @@ impl<'de, 'a> de::Deserializer<'de> for &'a mut BinDeserializer<'de> {
                 let value_bin_type = self.parser.read_type()?;
                 let _padding = self.parser.read_u32()?;
                 let count = self.parser.read_u32()? as usize;
-                println!("📕 获取线性信息: {:?} 共 {} 个", value_bin_type, count);
 
                 visitor.visit_seq(SeqReader {
                     de: &mut BinDeserializer::from_bytes(self.parser.input, value_bin_type),
@@ -119,7 +119,6 @@ impl<'de, 'a> de::Deserializer<'de> for &'a mut BinDeserializer<'de> {
 
                 let _bytes_count = self.parser.read_u32()?;
                 let count = self.parser.read_u32()?;
-                println!("🐕 获取 Map 信息: {:?} 共 {} 个", (ktype, vtype), count);
 
                 visitor.visit_map(HashMapReader {
                     de: &mut BinDeserializer::from_bytes(self.parser.input, ktype),
@@ -137,8 +136,17 @@ impl<'de, 'a> de::Deserializer<'de> for &'a mut BinDeserializer<'de> {
     where
         V: Visitor<'de>,
     {
-        println!("🎁 正在反序列化 Option，判定为 Some(...)");
-        visitor.visit_some(self)
+        if self.value_type == BinType::Option {
+            self.value_type = self.parser.read_type().unwrap();
+            let some = self.parser.read_bool().unwrap();
+            if some {
+                visitor.visit_some(self)
+            } else {
+                visitor.visit_none()
+            }
+        } else {
+            visitor.visit_some(self)
+        }
     }
 
     fn deserialize_newtype_struct<V: Visitor<'de>>(
@@ -158,29 +166,20 @@ impl<'de, 'a> de::Deserializer<'de> for &'a mut BinDeserializer<'de> {
     where
         V: Visitor<'de>,
     {
-        println!("👻 开始反序列化 Enum 长度: {}", self.parser.input.len());
         let variant_hash = u32::from_le_bytes(self.parser.input[0..4].try_into().unwrap());
-        println!(
-            "👻 准备反序列化 Enum，偷看到的类型哈希为: {:x}",
-            variant_hash
-        );
 
         let (variant_index, _variant_name) = variants
             .iter()
             .enumerate()
-            .find(|(_i, name)| {
+            .find(|(_i, &name)| {
                 if name.starts_with("Unk") {
-                    println!("👻 跳过 Unk 类型: {}", name);
                     return u32::from_str_radix(&name[5..], 16).unwrap() == variant_hash;
                 }
-                println!(
-                    "👻 class hash: {:x}  variant name : {} hash: {:x}",
-                    variant_hash,
-                    name,
-                    LeagueLoader::hash_bin(name)
-                );
-
-                LeagueLoader::hash_bin(name) == variant_hash
+                if name == "MySelf" {
+                    LeagueLoader::hash_bin("Self") == variant_hash
+                } else {
+                    LeagueLoader::hash_bin(name) == variant_hash
+                }
             })
             .ok_or_else(|| {
                 BinDeserializerError::UnknownVariant(format!(
@@ -188,11 +187,6 @@ impl<'de, 'a> de::Deserializer<'de> for &'a mut BinDeserializer<'de> {
                     variant_hash, variants
                 ))
             })?;
-
-        println!(
-            "🐕 获取变体索引: {}，变体名称: {}",
-            variant_index, variants[variant_index]
-        );
 
         visitor.visit_enum(EnumReader {
             de: self,
