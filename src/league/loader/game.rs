@@ -1,10 +1,11 @@
 use std::{collections::HashMap, hash::Hasher, io};
 
 use bevy::transform::components::Transform;
+use lol_core::Team;
 use twox_hash::XxHash64;
 
 use crate::{
-    core::{ConfigGame, Team, CONFIG_PATH_GAME},
+    core::{ConfigGame, CONFIG_PATH_GAME},
     league::{
         class_map_to_rust_code, extract_all_class, get_bin_path, get_hashes, merge_class_maps,
         save_struct_to_file, LeagueLoaderError, LeagueWadLoader, LeagueWadMapLoader, PropFile,

@@ -3,9 +3,10 @@ use bevy::render::{
     settings::{Backends, RenderCreation, WgpuSettings},
     RenderPlugin,
 };
+use lol_core::Team;
 use moon_lol::core::{
     spawn_skin_entity, Attack, ConfigGame, ConfigNavigationGrid, Controller, Focus, Health,
-    Movement, PluginGame, Team,
+    Movement, PluginGame,
 };
 use moon_lol::entities::Fiora;
 use moon_lol::{core::PluginCore, entities::PluginEntities, logging::PluginLogging};

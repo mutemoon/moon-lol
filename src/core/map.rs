@@ -1,16 +1,18 @@
 use std::collections::HashMap;
 use std::f32;
 
-use crate::core::{
-    Animation, AnimationNode, AnimationNodeF32, AnimationState, CommandBehaviorAttack,
-    CommandBehaviorMoveTo, ConfigCharacterSkinAnimation, ConfigMap, Controller, Team,
-};
-use crate::core::{ConfigCharacterSkin, ConfigGeometryObject};
-use crate::league::{neg_mat_z, LeagueLoader};
 use bevy::animation::{AnimationTarget, AnimationTargetId};
 use bevy::asset::uuid::Uuid;
 use bevy::prelude::*;
 use bevy::render::mesh::skinning::SkinnedMesh;
+use lol_core::Team;
+
+use crate::core::{
+    Animation, AnimationNode, AnimationNodeF32, AnimationState, CommandBehaviorAttack,
+    CommandBehaviorMoveTo, ConfigCharacterSkin, ConfigCharacterSkinAnimation, ConfigGeometryObject,
+    ConfigMap, Controller,
+};
+use crate::league::{neg_mat_z, LeagueLoader};
 
 // 基于相机配置的地图边界
 pub const MAP_WIDTH: f32 = 14400.0; // cam_MaxX

@@ -1,10 +1,10 @@
 use bevy::{app::Plugin, prelude::*};
-use lol_core::Lane;
+use lol_core::{Lane, Team};
 use serde::{Deserialize, Serialize};
 
 use crate::core::{
     Attack, AttackState, Bounding, CommandBehaviorAttack, CommandMovementStart, ConfigMap,
-    DamageType, EventDamageCreate, EventDead, EventMovementEnd, EventSpawn, State, Team,
+    DamageType, EventDamageCreate, EventDead, EventMovementEnd, EventSpawn, State,
 };
 
 #[derive(Default)]

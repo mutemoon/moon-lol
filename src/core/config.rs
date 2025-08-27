@@ -5,16 +5,13 @@ use bevy::{
     math::{vec2, vec3, Mat4, Vec2, Vec3},
     transform::components::Transform,
 };
-use lol_core::Lane;
+use lol_core::{Lane, Team};
 use serde::{Deserialize, Serialize};
 
-use crate::{
-    core::Team,
-    league::{
-        BarracksConfig, BinHash, CharacterRecord, JungleQuadrantFlags, MainRegionFlags,
-        NearestLaneFlags, POIFlags, RingFlags, RiverRegionFlags, Unk0x3c2bf0c0, Unk0x9d9f60d2,
-        Unk0xc71ee7fb, UnknownSRXFlags, VisionPathingFlags,
-    },
+use crate::league::{
+    BarracksConfig, BinHash, CharacterRecord, JungleQuadrantFlags, MainRegionFlags,
+    NearestLaneFlags, POIFlags, RingFlags, RiverRegionFlags, Unk0x3c2bf0c0, Unk0x9d9f60d2,
+    Unk0xc71ee7fb, UnknownSRXFlags, VisionPathingFlags,
 };
 
 pub const GAME_TICK_DURATION: f32 = 0.033; // 30 FPS

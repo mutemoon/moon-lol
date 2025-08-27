@@ -1,9 +1,10 @@
 use std::collections::HashMap;
 
 use bevy::prelude::*;
+use lol_core::Team;
 use rand::random;
 
-use crate::{core::Team, entities::champion::Champion};
+use crate::entities::champion::Champion;
 
 #[derive(Component)]
 #[require(Champion)]

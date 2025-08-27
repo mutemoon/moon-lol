@@ -1,11 +1,11 @@
 use std::{collections::VecDeque, time::Duration};
 
 use bevy::prelude::*;
-use lol_core::Lane;
+use lol_core::{Lane, Team};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    core::{spawn_skin_entity, Armor, Bounding, ConfigMap, Damage, Health, Movement, Team},
+    core::{spawn_skin_entity, Armor, Bounding, ConfigMap, Damage, Health, Movement},
     entities::Minion,
     league::{
         neg_mat_z, BarracksMinionConfigWaveBehavior, BinHash, ConstantWaveBehavior,
