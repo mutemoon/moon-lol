@@ -7,6 +7,7 @@ use binrw::io::{Read, Seek, SeekFrom};
 use binrw::{binread, BinRead};
 use binrw::{prelude::*, Endian};
 
+use league_utils::animation::decompress_quat;
 use league_utils::{hash_joint, parse_quat, parse_quat_array, parse_vec3, parse_vec3_array};
 
 #[binread]
@@ -247,8 +248,8 @@ pub struct UncompressedDataV5 {
 
     #[br(
         seek_before = SeekFrom::Start(quat_palette_offset as u64 + 12),
-        count = (joint_name_hashes_offset - quat_palette_offset) / 16,
-        map = parse_quat_array
+        count = (joint_name_hashes_offset - quat_palette_offset) / 6,
+        map = |vals: Vec<[u16; 3]>| vals.iter().map(decompress_quat).collect()
     )]
     pub quat_palette: Vec<Quat>,
 

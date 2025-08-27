@@ -125,7 +125,7 @@ impl Animation {
     pub fn play(&mut self, player: &mut AnimationPlayer, key: u32, weight: f32) {
         let node_indices = self.get_node_indices(key);
         for node_index in node_indices {
-            player.play(node_index).set_weight(weight);
+            player.play(node_index).set_weight(weight).repeat();
         }
     }
 
