@@ -7,26 +7,26 @@ use league_utils::hash_wad;
 
 fn main() {
     let paths = vec![
-        "assets/ASSETS/shaders/hlsl/particlesystem/distortion_mesh_ps.ps.glsl",
-        "assets/ASSETS/shaders/hlsl/particlesystem/distortion_mesh_vs.vs.glsl",
-        "assets/ASSETS/shaders/hlsl/particlesystem/distortion_ps.ps.glsl",
-        "assets/ASSETS/shaders/hlsl/particlesystem/distortion_vs.vs.glsl",
-        "assets/ASSETS/shaders/hlsl/particlesystem/mesh_ps_slice.ps.glsl",
-        "assets/ASSETS/shaders/hlsl/particlesystem/mesh_ps.ps.glsl",
-        "assets/ASSETS/shaders/hlsl/particlesystem/mesh_vs.vs.glsl",
-        "assets/ASSETS/shaders/hlsl/particlesystem/quad_ps_fixedalphauv.ps.glsl",
-        "assets/ASSETS/shaders/hlsl/particlesystem/quad_ps_slice.ps.glsl",
-        "assets/ASSETS/shaders/hlsl/particlesystem/quad_ps.ps.glsl",
-        "assets/ASSETS/shaders/hlsl/particlesystem/quad_screenspaceuv.ps.glsl",
-        "assets/ASSETS/shaders/hlsl/particlesystem/quad_screenspaceuv.vs.glsl",
-        "assets/ASSETS/shaders/hlsl/particlesystem/quad_vs_fixedalphauv.vs.glsl",
-        "assets/ASSETS/shaders/hlsl/particlesystem/quad_vs.vs.glsl",
-        "assets/ASSETS/shaders/hlsl/particlesystem/shadow_mesh_ps.ps.glsl",
-        "assets/ASSETS/shaders/hlsl/particlesystem/shadow_mesh_vs.vs.glsl",
-        "assets/ASSETS/shaders/hlsl/particlesystem/shadow_quad_ps.ps.glsl",
-        "assets/ASSETS/shaders/hlsl/particlesystem/shadow_quad_vs.vs.glsl",
-        "assets/ASSETS/shaders/hlsl/particlesystem/simple_projected_ps.ps.glsl",
-        "assets/ASSETS/shaders/hlsl/particlesystem/simple_projected_vs.vs.glsl",
+        "assets/ASSETS/shaders/hlsl/particlesystem/distortion_mesh_ps.ps.dx11",
+        "assets/ASSETS/shaders/hlsl/particlesystem/distortion_mesh_vs.vs.dx11",
+        "assets/ASSETS/shaders/hlsl/particlesystem/distortion_ps.ps.dx11",
+        "assets/ASSETS/shaders/hlsl/particlesystem/distortion_vs.vs.dx11",
+        "assets/ASSETS/shaders/hlsl/particlesystem/mesh_ps_slice.ps.dx11",
+        "assets/ASSETS/shaders/hlsl/particlesystem/mesh_ps.ps.dx11",
+        "assets/ASSETS/shaders/hlsl/particlesystem/mesh_vs.vs.dx11",
+        "assets/ASSETS/shaders/hlsl/particlesystem/quad_ps_fixedalphauv.ps.dx11",
+        "assets/ASSETS/shaders/hlsl/particlesystem/quad_ps_slice.ps.dx11",
+        "assets/ASSETS/shaders/hlsl/particlesystem/quad_ps.ps.dx11",
+        "assets/ASSETS/shaders/hlsl/particlesystem/quad_screenspaceuv.ps.dx11",
+        "assets/ASSETS/shaders/hlsl/particlesystem/quad_screenspaceuv.vs.dx11",
+        "assets/ASSETS/shaders/hlsl/particlesystem/quad_vs_fixedalphauv.vs.dx11",
+        "assets/ASSETS/shaders/hlsl/particlesystem/quad_vs.vs.dx11",
+        "assets/ASSETS/shaders/hlsl/particlesystem/shadow_mesh_ps.ps.dx11",
+        "assets/ASSETS/shaders/hlsl/particlesystem/shadow_mesh_vs.vs.dx11",
+        "assets/ASSETS/shaders/hlsl/particlesystem/shadow_quad_ps.ps.dx11",
+        "assets/ASSETS/shaders/hlsl/particlesystem/shadow_quad_vs.vs.dx11",
+        "assets/ASSETS/shaders/hlsl/particlesystem/simple_projected_ps.ps.dx11",
+        "assets/ASSETS/shaders/hlsl/particlesystem/simple_projected_vs.vs.dx11",
     ];
 
     for path in paths {
@@ -53,11 +53,6 @@ fn main() {
             continue;
         };
 
-        // var shaderId = shaderObject.ShaderIds[shaderIndex];
-        // var shaderBundleId = 100 * (shaderId / 100);
-        // var shaderIndexInBundle = shaderId % 100;
-        // var shaderBundlePath = $"{shaderObjectPath}_{shaderBundleId}";
-
         let shader_id = shader_toc.shader_ids[shader_index];
         let shader_bundle_id = 100 * (shader_id / 100);
         let shader_index_in_bundle = shader_id % 100;
@@ -67,9 +62,9 @@ fn main() {
 
         let mut reader = BufReader::new(file);
 
-        for i in 0..shader_index_in_bundle {
+        for _ in 0..shader_index_in_bundle - 1 {
             let mut buf = [0; 4];
-            let size = reader.read(&mut buf).unwrap();
+            reader.read(&mut buf).unwrap();
             let shader_size = u32::from_le_bytes(buf);
 
             println!("shader_size: {}", shader_size);
@@ -78,7 +73,7 @@ fn main() {
         }
 
         let mut buf = [0; 4];
-        let size = reader.read(&mut buf).unwrap();
+        reader.read(&mut buf).unwrap();
         let shader_size = u32::from_le_bytes(buf);
 
         println!("final shader_size: {}", shader_size);
@@ -86,19 +81,19 @@ fn main() {
         let mut bytes = vec![0; shader_size as usize];
         reader.read(&mut bytes).unwrap();
 
-        let shader_bytecode_file = File::create(format!("{}.glbc", &shader_bundle_path)).unwrap();
+        let shader_bytecode_file = File::create(format!("{}.dxbc", &shader_bundle_path)).unwrap();
         let mut writer = BufWriter::new(shader_bytecode_file);
         writer.write_all(&bytes).unwrap();
 
-        // println!(
-        //     "{:?}",
-        //     shader_toc
-        //         .base_defines
-        //         .iter()
-        //         .map(|v| v.name.text.clone())
-        //         .collect::<Vec<String>>()
-        // );
+        println!(
+            "{:?}",
+            shader_toc
+                .base_defines
+                .iter()
+                .map(|v| v.name.text.clone())
+                .collect::<Vec<String>>()
+        );
 
-        // println!("{:?}", shader_bundle_path);
+        println!("{:?}", shader_bundle_path);
     }
 }
