@@ -1,12 +1,12 @@
 use std::collections::HashMap;
 use std::fs::{self, File};
-use std::io::{BufReader, Cursor, Write};
+use std::io::{BufReader, Write};
 use std::path::Path;
 use std::sync::Arc;
 
 use binrw::{binrw, BinRead, BinResult, Endian};
 use league_file::LeagueShader;
-use league_utils::{hash_shader, hash_wad};
+use league_utils::hash_shader;
 
 // --- 1. 定义 binrw 结构体来解析 Shader Bundle ---
 

@@ -100,11 +100,11 @@ pub struct CustomMaterial {
 
 impl Material for CustomMaterial {
     fn fragment_shader() -> ShaderRef {
-        "shaders/ps_quad_ps_slice/BASE.450.frag".into()
+        "shaders/ps_quad_ps_slice/BASE.frag".into()
     }
 
     fn vertex_shader() -> ShaderRef {
-        "shaders/vs_quad_vs/BASE.450.vert".into()
+        "shaders/vs_quad_vs/BASE.vert".into()
     }
 
     fn alpha_mode(&self) -> AlphaMode {

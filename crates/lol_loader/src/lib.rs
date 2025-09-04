@@ -216,6 +216,10 @@ impl AssetLoader for LeagueLoaderImage {
 
         Ok(image)
     }
+
+    fn extensions(&self) -> &[&str] {
+        &["tex"]
+    }
 }
 
 #[derive(Default)]

@@ -6,7 +6,7 @@ async fn main() {
     #[cfg(unix)]
     let root_dir = r"/mnt/c/Program Files (x86)/WeGameApps/英雄联盟/game";
     #[cfg(windows)]
-    let root_dir = r"C:\Program Files (x86)\WeGameApps\英雄联盟\game";
+    let root_dir = r"C:\Riot Games\League of Legends\Game";
 
     let start = Instant::now();
 
