@@ -23,7 +23,7 @@ fn main() {
                     primary_window: Some(Window {
                         title: "classic 1v1 fiora".to_string(),
                         resolution: (300.0, 300.0).into(),
-                        position: WindowPosition::At((0, 1920).into()),
+                        position: WindowPosition::At((0, 0).into()),
                         ..default()
                     }),
                     ..default()

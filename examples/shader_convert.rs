@@ -1,163 +1,230 @@
-use clap::Parser;
 use regex::Regex;
-use std::collections::HashMap;
 use std::fs;
-use std::path::PathBuf;
-
-/// 使用 Rust 将 GLSL 150 着色器转换为 GLSL 450 核心规范
-#[derive(Parser, Debug)]
-#[command(author, version, about, long_about = None)]
-struct Args {
-    /// 输入的 GLSL 150 文件路径
-    #[arg(value_name = "INPUT_FILE")]
-    input_file: PathBuf,
-
-    /// 输出的 GLSL 450 文件路径
-    #[arg(value_name = "OUTPUT_FILE")]
-    output_file: PathBuf,
-}
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let args = Args::parse();
+    let path = "assets/shaders_extract/vs_quad_vs/BASE.vert";
 
-    let source_code = fs::read_to_string(&args.input_file)
-        .map_err(|e| format!("无法读取输入文件 '{}': {}", args.input_file.display(), e))?;
+    let source_code = fs::read_to_string(path).unwrap();
 
-    let converted_code = convert_glsl(&source_code);
+    let converted_code = convert(&source_code);
 
-    fs::write(&args.output_file, converted_code)
-        .map_err(|e| format!("无法写入输出文件 '{}': {}", args.output_file.display(), e))?;
+    fs::write(path.replace("shaders_extract", "shaders"), &converted_code).unwrap();
 
-    println!(
-        "✅ 成功将 '{}' 转换为 '{}'",
-        args.input_file.display(),
-        args.output_file.display()
-    );
-    println!("🔔 请检查输出文件，并根据你的引擎需求手动调整 set/binding。");
+    println!("{}", converted_code);
+
+    let path = "assets/shaders_extract/ps_quad_ps/BASE.frag";
+
+    let source_code = fs::read_to_string(path).unwrap();
+
+    let converted_code = convert_frag(&source_code);
+
+    fs::write(path.replace("shaders_extract", "shaders"), &converted_code).unwrap();
+
+    println!("{}", converted_code);
 
     Ok(())
 }
 
-fn convert_glsl(source_code: &str) -> String {
-    let re_in = Regex::new(r"in\s+(\w+)\s+(\w+);").unwrap();
-    let re_out = Regex::new(r"out\s+(\w+)\s+(\w+);").unwrap();
-    let re_sampler = Regex::new(r"uniform\s+sampler2D\s+(\w+);").unwrap();
+fn convert(code: &str) -> String {
+    // 1. 执行初始的、非上下文相关的替换。这里的顺序很重要。
+    //    首先替换最具体的限定用法，然后才替换通用的变量名。
+    let mut result = code.replace("_UniformsVertex.mProj", "camera_view.clip_from_world");
+    result = result.replace("_UniformsVertex.vCamera", "camera_view.world_position");
 
-    // --- 主要变更点 ---
-    // 1. 使用 (?s) 标志来允许多行匹配 (dot matches newline)
-    let re_uniform_struct_def = Regex::new(r"(?s)struct\s+(\w+)\s*\{([^}]+)\};").unwrap();
-    let re_uniform_struct_var = Regex::new(r"uniform\s+(\w+)\s+(\w+);").unwrap();
+    // 2. 对代码进行逐行处理以实现更复杂的结构性更改。
+    let mut processed_lines = Vec::new();
+    let mut in_uniforms_vertex_struct = false;
+    let mut out_location_counter = 0;
 
-    let mut output_header = Vec::new();
-    let mut body_lines = Vec::new();
-    let mut uniforms_to_ubo = Vec::new();
-    let mut samplers = HashMap::new();
+    // 用于查找名为 ATTR<number> 的 `in` 变量并捕获其数字的正则表达式。
+    let in_re = Regex::new(r"^\s*in\s+[\w\d]+\s+ATTR(\d+);").unwrap();
 
-    // 创建一个可变副本用于预处理
-    let mut processed_source = source_code.to_string();
+    for line in result.lines() {
+        let trimmed_line = line.trim();
 
-    let mut location_in_counter = 0;
-    let mut location_out_counter = 0;
-    let mut sampler_binding_counter = 0;
-    let ubo_set = 0;
-    let sampler_set = 1;
-
-    output_header.push("#version 450 core".to_string());
-
-    // --- 2. 预处理阶段：在逐行扫描前处理多行 struct ---
-    let mut uniform_struct_instance_name = String::new();
-    if let Some(struct_caps) = re_uniform_struct_def.captures(source_code) {
-        let struct_name = &struct_caps[1];
-        let struct_body = &struct_caps[2].trim();
-
-        // 找到使用该 struct 的 uniform 实例
-        if let Some(var_caps) = re_uniform_struct_var.captures(source_code) {
-            if &var_caps[1] == struct_name {
-                uniform_struct_instance_name = var_caps[2].to_string(); // e.g., _UniformsVertex
-
-                // 填充 UBO 成员
-                for member in struct_body.split(';').filter(|s| !s.trim().is_empty()) {
-                    uniforms_to_ubo.push(format!("    {};", member.trim()));
-                }
-
-                // 3. 从源码中移除已处理的定义，避免在后续循环中重复处理
-                processed_source = re_uniform_struct_def
-                    .replace(&processed_source, "")
-                    .to_string();
-                processed_source = re_uniform_struct_var
-                    .replace(&processed_source, "")
-                    .to_string();
-            }
-        }
-    }
-
-    // --- 第一遍：在预处理过的源码上进行逐行识别和分类 ---
-    for line in processed_source.lines() {
-        let trimmed = line.trim();
-        if trimmed.is_empty() || trimmed.starts_with("#version") {
+        // 特殊处理 uniform UniformsVertex _UniformsVertex; 这一行
+        if trimmed_line == "uniform UniformsVertex _UniformsVertex;" {
+            processed_lines.push(
+                "layout(set = 2, binding = 0) uniform UniformsVertex uniforms_vertext;".to_string(),
+            );
             continue;
         }
 
-        if let Some(caps) = re_in.captures(trimmed) {
-            output_header.push(format!(
-                "layout(location = {}) in {} {};",
-                location_in_counter, &caps[1], &caps[2]
-            ));
-            location_in_counter += 1;
-        } else if let Some(caps) = re_out.captures(trimmed) {
-            output_header.push(format!(
-                "layout(location = {}) out {} {};",
-                location_out_counter, &caps[1], &caps[2]
-            ));
-            location_out_counter += 1;
-        } else if let Some(caps) = re_sampler.captures(trimmed) {
-            let sampler_name = &caps[1];
-            output_header.push(format!(
-                "layout(set = {}, binding = {}) uniform texture2D {};",
-                sampler_set, sampler_binding_counter, sampler_name
-            ));
-            sampler_binding_counter += 1;
-            output_header.push(format!(
-                "layout(set = {}, binding = {}) uniform sampler {}_sampler;",
-                sampler_set, sampler_binding_counter, sampler_name
-            ));
-            sampler_binding_counter += 1;
+        // 处理我们想要修改的结构体定义的开始
+        if trimmed_line.starts_with("struct UniformsVertex") {
+            in_uniforms_vertex_struct = true;
+            processed_lines.push(line.to_string());
+            continue;
+        }
 
-            samplers.insert(
-                sampler_name.to_string(),
-                format!("{}_sampler", sampler_name),
-            );
+        // 在结构体内部，过滤掉要删除的行
+        if in_uniforms_vertex_struct {
+            if trimmed_line.contains("mProj") || trimmed_line.contains("vCamera") {
+                // 跳过这些行
+                continue;
+            }
+            // 结构体定义的结束
+            if trimmed_line.starts_with("};") {
+                in_uniforms_vertex_struct = false;
+            }
+            processed_lines.push(line.to_string());
+            continue;
+        }
+
+        // 为 `in` 变量添加 layout
+        if let Some(caps) = in_re.captures(line) {
+            if let Some(location_num) = caps.get(1) {
+                let new_line = format!("layout(location = {}) {}", location_num.as_str(), line);
+                processed_lines.push(new_line);
+                continue;
+            }
+        }
+
+        // 为 `out` 变量添加 layout
+        if trimmed_line.starts_with("out ") {
+            let new_line = format!("layout(location = {}) {}", out_location_counter, line);
+            processed_lines.push(new_line);
+            out_location_counter += 1;
+            continue;
+        }
+
+        // 如果没有特殊处理，则直接添加该行
+        processed_lines.push(line.to_string());
+    }
+
+    // 3. 注入 CameraView 结构体及其 uniform 声明
+    let camera_view_definitions = r#"
+struct CameraView {
+    mat4 clip_from_world;
+    mat4 unjittered_clip_from_world;
+    mat4 world_from_clip;
+    mat4 world_from_view;
+    mat4 view_from_world;
+    mat4 clip_from_view;
+    mat4 view_from_clip;
+    vec3 world_position;
+};
+
+layout(set = 0, binding = 0) uniform CameraView camera_view;"#;
+
+    let mut final_lines = Vec::new();
+    let mut injected = false;
+    for line in processed_lines {
+        let is_version_line = line.contains("#version 150"); // 检查原始版本号
+        if is_version_line {
+            final_lines.push("#version 450".to_string());
+            final_lines.push(camera_view_definitions.to_string());
+            injected = true;
         } else {
-            // 其他所有行先视为 body
-            body_lines.push(line.to_string());
+            final_lines.push(line);
         }
     }
 
-    // --- 第二遍：构建 UBO 和替换代码 ---
-    if !uniforms_to_ubo.is_empty() {
-        let mut ubo_block = vec!["".to_string()];
-        ubo_block.push(format!(
-            "layout(set = {}, binding = 0, std140) uniform Uniforms {{",
-            ubo_set
-        ));
-        ubo_block.extend(uniforms_to_ubo);
-        ubo_block.push("};".to_string());
-        output_header.append(&mut ubo_block);
+    // 4. 全局替换变量名并将所有行合并成单个字符串返回
+    let final_code = final_lines.join("\n");
+    final_code.replace("_UniformsVertex", "uniforms_vertext")
+}
+
+/// Converts a GLSL 150 fragment shader string to GLSL 450.
+fn convert_frag(code: &str) -> String {
+    // 正则表达式，用于查找 "uniform sampler2D <name>;" 声明。
+    let sampler_re = Regex::new(r"^\s*uniform\s+sampler2D\s+([a-zA-Z0-9_]+);").unwrap();
+
+    // 存储采样器的原始名称，以便后续修改 texture() 调用。
+    let mut sampler_names = Vec::new();
+
+    // --- 第 1 部分：逐行处理着色器以转换声明部分 ---
+
+    let mut processed_lines = Vec::new();
+    let mut binding_counter = 1; // set=2 的绑定索引从 1 开始
+    let mut in_location_counter = 0;
+    let mut out_location_counter = 0;
+    let mut main_declaration_found = false;
+
+    for line in code.lines() {
+        let trimmed_line = line.trim();
+
+        // 跳过文件开头的空行
+        if processed_lines.is_empty() && trimmed_line.is_empty() {
+            continue;
+        }
+
+        // 规则: #version 150 -> #version 450
+        if trimmed_line.starts_with("#version") {
+            processed_lines.push("#version 450".to_string());
+            continue;
+        }
+
+        // 规则: 转换 UniformsPixel uniform 块
+        if trimmed_line.starts_with("uniform UniformsPixel") {
+            let new_line = format!(
+                "layout(set = 2, binding = {}) uniform UniformsPixel uniforms_pixel;",
+                binding_counter
+            );
+            processed_lines.push(new_line);
+            binding_counter += 1;
+            continue;
+        }
+
+        // 规则: 将 sampler2D 分离为 texture2D 和 sampler
+        if let Some(caps) = sampler_re.captures(trimmed_line) {
+            // 可以安全地 unwrap，因为正则表达式中定义了一个捕获组。
+            let name = caps.get(1).unwrap().as_str();
+            sampler_names.push(name.to_string());
+
+            let texture_line = format!(
+                "layout(set = 2, binding = {}) uniform texture2D {}_texture;",
+                binding_counter, name
+            );
+            processed_lines.push(texture_line);
+            binding_counter += 1;
+
+            let sampler_line = format!(
+                "layout(set = 2, binding = {}) uniform sampler {}_sampler;",
+                binding_counter, name
+            );
+            processed_lines.push(sampler_line);
+            binding_counter += 1;
+            continue;
+        }
+
+        // 规则: 为 'in' 变量添加 layout(location=...)
+        if trimmed_line.starts_with("in ") {
+            let new_line = format!("layout(location = {}) {}", in_location_counter, line);
+            processed_lines.push(new_line);
+            in_location_counter += 1;
+            continue;
+        }
+
+        // 规则: 为 'out' 变量添加 layout(location=...)
+        if trimmed_line.starts_with("out ") {
+            let new_line = format!("layout(location = {}) {}", out_location_counter, line);
+            processed_lines.push(new_line);
+            out_location_counter += 1;
+            continue;
+        }
+
+        // 如果没有匹配任何规则，则直接添加原始行。
+        processed_lines.push(line.to_string());
     }
 
-    let mut final_body = body_lines.join("\n");
+    // --- 第 2 部分：对已处理的代码执行全局替换 ---
 
-    if !uniform_struct_instance_name.is_empty() {
-        let access_pattern =
-            Regex::new(&format!(r"{}\.(\w+)", uniform_struct_instance_name)).unwrap();
-        final_body = access_pattern.replace_all(&final_body, "$1").to_string();
+    let mut final_code = processed_lines.join("\n");
+
+    // 规则: 在函数体中将 _UniformsPixel 重命名为 uniforms_pixel
+    final_code = final_code.replace("_UniformsPixel", "uniforms_pixel");
+
+    // 规则: 更新 texture() 调用以使用合并的采样器构造函数
+    for name in &sampler_names {
+        // 使用正则表达式来稳健地处理 texture() 调用中可能存在的不同空格情况
+        let texture_call_re = Regex::new(&format!(r"texture\s*\(\s*{}\s*,", name)).unwrap();
+        let new_call = format!("texture(sampler2D({}_texture, {}_sampler),", name, name);
+
+        final_code = texture_call_re
+            .replace_all(&final_code, &new_call)
+            .to_string();
     }
 
-    for (tex_name, sampler_name) in &samplers {
-        let pattern = Regex::new(&format!(r"texture\(\s*{}\s*,\s*(.*?)\)", tex_name)).unwrap();
-        let replacement = format!("texture(sampler2D({}, {}), $1)", tex_name, sampler_name);
-        final_body = pattern.replace_all(&final_body, replacement).to_string();
-    }
-
-    format!("{}\n\n{}", output_header.join("\n"), final_body)
+    final_code
 }
