@@ -112,7 +112,11 @@ fn main() -> std::io::Result<()> {
             continue;
         };
 
-        let output_dir_str = format!("assets/shaders/{}_{}", shader_type, original_filename_base);
+        let output_dir_str = format!(
+            "assets/shaders/{}/{}",
+            shader_type,
+            original_filename_base.replace("_ps", "").replace("_vs", "")
+        );
         fs::create_dir_all(&output_dir_str)?;
         println!("  - 输出目录: {}", output_dir_str);
 
@@ -202,6 +206,15 @@ fn main() -> std::io::Result<()> {
                     // --- 提取并保存字节码 ---
                     let bytecode = &chunk_file_arc.files[shader_index_in_bundle].bytes;
 
+                    let content = String::from_utf8_lossy(bytecode);
+
+                    // let converted = if shader_type == "vs" {
+                    //     convert(&content)
+                    // } else {
+                    //     convert_frag(&content)
+                    // };
+                    let converted = content;
+
                     let name = if combo.is_empty() {
                         "BASE"
                     } else {
@@ -215,8 +228,10 @@ fn main() -> std::io::Result<()> {
                     );
 
                     let output_path = Path::new(&output_dir_str).join(&output_filename);
+
                     let mut output_file = File::create(&output_path)?;
-                    output_file.write_all(bytecode)?;
+
+                    output_file.write_all(converted.as_bytes())?;
                 } else {
                     println!(
                         "! 索引越界: ID {} 在 {} 中索引为 {}, 但文件只有 {} 个着色器",

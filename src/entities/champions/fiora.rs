@@ -28,7 +28,7 @@ impl Plugin for PluginFiora {
 }
 
 const VITAL_DISTANCE: f32 = 1000.0;
-const VITAL_ADD_DURATION: f32 = 1.0;
+const VITAL_ADD_DURATION: f32 = 1.5;
 const VITAL_DURATION: f32 = 2.0;
 
 #[derive(Clone)]
@@ -150,6 +150,14 @@ fn update_remove_vital(
 
             if !vital.is_active() {
                 vital.active_timer.tick(time.delta());
+
+                if vital.is_active() {
+                    commands
+                        .entity(target_entity)
+                        .trigger(CommandParticleSpawn {
+                            particle: hash_bin("Fiora_Passive_NW"),
+                        });
+                }
                 continue;
             }
 

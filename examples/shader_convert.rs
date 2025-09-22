@@ -1,28 +1,43 @@
+use std::fs::{read, write};
+
 use regex::Regex;
-use std::fs;
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let path = "assets/shaders_extract/vs_quad_vs/BASE.vert";
+fn main() {
+    let convert_list = [
+        (
+            "assets/shaders_reversed/quad.vert",
+            "assets/shaders/quad.vert",
+        ),
+        (
+            "assets/shaders_reversed/quad.frag",
+            "assets/shaders/quad.frag",
+        ),
+        (
+            "assets/shaders_reversed/quad_slice.frag",
+            "assets/shaders/quad_slice.frag",
+        ),
+    ];
 
-    let source_code = fs::read_to_string(path).unwrap();
+    // 使用 for 循环遍历 convert_list
+    for (source_path, dest_path) in convert_list {
+        println!("Converting {} -> {}", source_path, dest_path);
 
-    let converted_code = convert(&source_code);
+        // 读取源文件
+        let binding = read(source_path).unwrap();
+        let code = String::from_utf8_lossy(binding.as_slice());
 
-    fs::write(path.replace("shaders_extract", "shaders"), &converted_code).unwrap();
+        // 执行转换
+        let converted_code = if source_path.ends_with("vert") {
+            convert(&code)
+        } else {
+            convert_frag(&code)
+        };
 
-    println!("{}", converted_code);
+        // 写入目标文件
+        write(dest_path, converted_code.as_bytes()).unwrap();
+    }
 
-    let path = "assets/shaders_extract/ps_quad_ps/BASE.frag";
-
-    let source_code = fs::read_to_string(path).unwrap();
-
-    let converted_code = convert_frag(&source_code);
-
-    fs::write(path.replace("shaders_extract", "shaders"), &converted_code).unwrap();
-
-    println!("{}", converted_code);
-
-    Ok(())
+    println!("Conversion complete!");
 }
 
 fn convert(code: &str) -> String {
@@ -108,13 +123,11 @@ struct CameraView {
 layout(set = 0, binding = 0) uniform CameraView camera_view;"#;
 
     let mut final_lines = Vec::new();
-    let mut injected = false;
     for line in processed_lines {
         let is_version_line = line.contains("#version 150"); // 检查原始版本号
         if is_version_line {
             final_lines.push("#version 450".to_string());
             final_lines.push(camera_view_definitions.to_string());
-            injected = true;
         } else {
             final_lines.push(line);
         }
@@ -136,10 +149,9 @@ fn convert_frag(code: &str) -> String {
     // --- 第 1 部分：逐行处理着色器以转换声明部分 ---
 
     let mut processed_lines = Vec::new();
-    let mut binding_counter = 1; // set=2 的绑定索引从 1 开始
+    let mut binding_counter = 2; // set=2 的绑定索引从 1 开始
     let mut in_location_counter = 0;
     let mut out_location_counter = 0;
-    let mut main_declaration_found = false;
 
     for line in code.lines() {
         let trimmed_line = line.trim();
@@ -157,12 +169,9 @@ fn convert_frag(code: &str) -> String {
 
         // 规则: 转换 UniformsPixel uniform 块
         if trimmed_line.starts_with("uniform UniformsPixel") {
-            let new_line = format!(
-                "layout(set = 2, binding = {}) uniform UniformsPixel uniforms_pixel;",
-                binding_counter
-            );
+            let new_line =
+                "layout(set = 2, binding = 1) uniform UniformsPixel uniforms_pixel;".to_string();
             processed_lines.push(new_line);
-            binding_counter += 1;
             continue;
         }
 

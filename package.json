@@ -2,16 +2,12 @@
   "name": "fsm-demo-rust",
   "scripts": {
     "extract": "cargo run --example extract",
-    "example:classic_fiora": "cargo run --package moon_lol --example classic_fiora",
+    "example:attack:watch": "cargo-watch -x \"run --example attack\" -w src -w assets -w crates",
     "example:attack": "cargo run --package moon_lol --example attack",
-    "example:shader_convert:ps": "cargo run --example shader_convert -- assets/shaders/ps_quad_ps_slice/BASE.frag assets/shaders/ps_quad_ps_slice/BASE.450.frag",
-    "example:shader_convert:vs": "cargo run --example shader_convert -- assets/shaders/vs_quad_vs/BASE.vert assets/shaders/vs_quad_vs/BASE.450.vert",
-    "wsl:example:classic_fiora": "WGPU_ALLOW_UNDERLYING_NONCOMPLIANT_ADAPTER=1 cargo run --package moon_lol --example classic_fiora",
-    "wsl:example:navigation_grid": "WGPU_ALLOW_UNDERLYING_NONCOMPLIANT_ADAPTER=1 cargo run --package moon_lol --example navigation_grid",
-    "wsl:example:attack": "WGPU_ALLOW_UNDERLYING_NONCOMPLIANT_ADAPTER=1 cargo run --package moon_lol --example attack",
-    "wsl:example:attack:watch": "WGPU_ALLOW_UNDERLYING_NONCOMPLIANT_ADAPTER=1 cargo-watch -x \"run --example attack\" -w src -w assets -w crates",
-    "wsl:example:particle:watch": "WGPU_ALLOW_UNDERLYING_NONCOMPLIANT_ADAPTER=1 cargo-watch -w src -w crates -w examples -w assets/shaders -x \"run --example particle\"",
-    "wsl:example:texture:watch": "WGPU_ALLOW_UNDERLYING_NONCOMPLIANT_ADAPTER=1 cargo-watch -w src -w crates -w examples -w assets/shaders -x \"run --example texture\""
+    "example:classic_fiora": "cargo run --package moon_lol --example classic_fiora",
+    "example:navigation_grid": "cargo run --package moon_lol --example navigation_grid",
+    "example:particle:watch": "cargo-watch -w src -w crates -w examples -w assets/shaders -x \"run --example particle\"",
+    "example:texture:watch": "cargo-watch -w src -w crates -w examples -w assets/shaders -x \"run --example texture\""
   },
   "dependencies": {
     "@gltf-transform/core": "^4.2.0",
