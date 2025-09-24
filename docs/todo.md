@@ -18,7 +18,7 @@
 
 - [ ] 根据剑姬破绽方向触发不同方位的粒子特效
 
-- [ ] 弄清楚剑姬破绽的生命周期：warning active timeout timeout_red red
+- [x] 弄清楚剑姬破绽的生命周期：warning active timeout_red
 
 - [ ] 粒子系统支持 blend mode
 
@@ -34,4 +34,4 @@
 
 mat -> key -> def
 
-- [ ] 如何为不同的 def 传入不同的数据组合呢
+- [x] 如何为不同的 def 传入不同的数据组合呢

@@ -60,11 +60,3 @@ impl From<ValueFloat> for Sampler {
         }
     }
 }
-
-pub fn blend_mode_to_alpha_mode(blend_mode: u8) -> AlphaMode {
-    match blend_mode {
-        1 => AlphaMode::Opaque,
-        4 => AlphaMode::Blend,
-        _ => AlphaMode::Opaque,
-    }
-}

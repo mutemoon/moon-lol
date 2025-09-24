@@ -1,3 +1,5 @@
+use std::fmt::Debug;
+
 use bevy::{
     pbr::{MaterialPipeline, MaterialPipelineKey},
     prelude::*,
@@ -10,9 +12,9 @@ use bevy::{
     },
 };
 
-use crate::particles::{ATTRIBUTE_LIFETIME, ATTRIBUTE_UV_FRAME, ATTRIBUTE_WORLD_POSITION};
+use crate::core::particle::{ATTRIBUTE_LIFETIME, ATTRIBUTE_UV_FRAME, ATTRIBUTE_WORLD_POSITION};
 
-#[derive(Clone, ShaderType)]
+#[derive(Clone, ShaderType, Debug)]
 pub struct UniformsVertexQuad {
     pub fog_of_war_params: Vec4,
     pub fog_of_war_always_below_y: Vec4,
@@ -37,7 +39,7 @@ impl Default for UniformsVertexQuad {
     }
 }
 
-#[derive(Asset, TypePath, AsBindGroup, Clone)]
+#[derive(Asset, TypePath, AsBindGroup, Clone, Debug)]
 #[bind_group_data(ConditionalMaterialKey)]
 pub struct QuadMaterial {
     #[uniform(0)]
@@ -58,7 +60,7 @@ pub struct QuadMaterial {
     pub blend_mode: u8,
 }
 
-#[derive(Copy, Clone, Hash, Eq, PartialEq)]
+#[derive(Copy, Clone, Hash, Eq, PartialEq, Debug)]
 pub struct ConditionalMaterialKey {
     blend_mode: u8,
 }
@@ -84,7 +86,7 @@ impl Material for QuadMaterial {
     fn alpha_mode(&self) -> AlphaMode {
         match self.blend_mode {
             1 => AlphaMode::Blend,
-            4 => AlphaMode::Add,
+            4 => AlphaMode::Blend,
             _ => AlphaMode::Opaque,
         }
     }
@@ -98,20 +100,16 @@ impl Material for QuadMaterial {
         descriptor.vertex.entry_point = "main".into();
         descriptor.fragment.as_mut().unwrap().entry_point = "main".into();
 
+        let fragment = descriptor.fragment.as_mut().unwrap();
+        let target = fragment.targets.get_mut(0).unwrap().as_mut().unwrap();
         if key.bind_group_data.blend_mode == 4 {
-            let fragment = descriptor.fragment.as_mut().unwrap();
-            let target = fragment.targets.get_mut(0).unwrap().as_mut().unwrap();
             target.blend = Some(BlendState {
                 color: BlendComponent {
-                    src_factor: BlendFactor::One,
+                    src_factor: BlendFactor::SrcAlpha,
                     dst_factor: BlendFactor::One,
                     operation: BlendOperation::Add,
                 },
-                alpha: BlendComponent {
-                    src_factor: BlendFactor::One,
-                    dst_factor: BlendFactor::One,
-                    operation: BlendOperation::Add,
-                },
+                alpha: BlendComponent::OVER,
             });
         }
 
@@ -125,11 +123,4 @@ impl Material for QuadMaterial {
 
         Ok(())
     }
-}
-
-#[derive(Clone, ShaderType)]
-pub struct UniformsPixel {
-    pub alpha_test_reference_value: f32,
-    pub slice_range: Vec2,
-    pub apply_team_color_correction: Vec4,
 }

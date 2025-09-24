@@ -4,22 +4,29 @@ use bevy::{
     render::{
         mesh::MeshVertexBufferLayoutRef,
         render_resource::{
-            AsBindGroup, RenderPipelineDescriptor, ShaderRef, SpecializedMeshPipelineError,
+            AsBindGroup, RenderPipelineDescriptor, ShaderRef, ShaderType,
+            SpecializedMeshPipelineError,
         },
     },
 };
 
-use crate::particles::{
-    blend_mode_to_alpha_mode, UniformsPixel, UniformsVertexQuad, ATTRIBUTE_LIFETIME,
-    ATTRIBUTE_UV_FRAME, ATTRIBUTE_WORLD_POSITION,
+use crate::core::particle::{
+    UniformsVertexQuad, ATTRIBUTE_LIFETIME, ATTRIBUTE_UV_FRAME, ATTRIBUTE_WORLD_POSITION,
 };
+
+#[derive(Clone, ShaderType)]
+pub struct UniformsPixelQuadSlice {
+    pub alpha_test_reference_value: f32,
+    pub slice_range: Vec2,
+    pub apply_team_color_correction: Vec4,
+}
 
 #[derive(Asset, TypePath, AsBindGroup, Clone)]
 pub struct QuadSliceMaterial {
     #[uniform(0)]
     pub uniforms_vertex: UniformsVertexQuad,
     #[uniform(1)]
-    pub uniforms_pixel: UniformsPixel,
+    pub uniforms_pixel: UniformsPixelQuadSlice,
     #[texture(2)]
     #[sampler(3)]
     pub particle_color_texture: Option<Handle<Image>>,
@@ -46,7 +53,11 @@ impl Material for QuadSliceMaterial {
     }
 
     fn alpha_mode(&self) -> AlphaMode {
-        blend_mode_to_alpha_mode(self.blend_mode)
+        match self.blend_mode {
+            1 => AlphaMode::Blend,
+            4 => AlphaMode::Blend,
+            _ => todo!(),
+        }
     }
 
     fn specialize(

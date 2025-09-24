@@ -5,7 +5,10 @@ use league_utils::hash_bin;
 use lol_core::Team;
 use rand::random;
 
-use crate::{core::CommandParticleSpawn, entities::champion::Champion};
+use crate::{
+    core::{CommandParticleDespawn, CommandParticleSpawn},
+    entities::champion::Champion,
+};
 
 #[derive(Component)]
 #[require(Champion)]
@@ -29,7 +32,8 @@ impl Plugin for PluginFiora {
 
 const VITAL_DISTANCE: f32 = 1000.0;
 const VITAL_ADD_DURATION: f32 = 1.5;
-const VITAL_DURATION: f32 = 2.0;
+const VITAL_DURATION: f32 = 4.0;
+const VITAL_TIMEOUT: f32 = 1.5;
 
 #[derive(Clone)]
 pub enum Direction {
@@ -44,6 +48,8 @@ pub struct FioraVital {
     pub direction: Direction,
     pub active_timer: Timer,
     pub remove_timer: Timer,
+    /// 用于标记 "TimeOut_Red" 特效是否已触发
+    pub timeout_red_triggered: bool,
 }
 
 impl FioraVital {
@@ -110,6 +116,7 @@ fn update_add_vital(
                 direction,
                 active_timer: Timer::from_seconds(VITAL_ADD_DURATION, TimerMode::Once),
                 remove_timer: Timer::from_seconds(VITAL_DURATION, TimerMode::Once),
+                timeout_red_triggered: false, // 初始化为 false
             });
 
             commands
@@ -160,6 +167,25 @@ fn update_remove_vital(
                 }
                 continue;
             }
+
+            // --- 新增逻辑 ---
+            // 如果破绽即将消失（剩余时间 <= 1.5s）且尚未触发红色警告特效
+            if !vital.timeout_red_triggered && vital.remove_timer.remaining_secs() <= VITAL_TIMEOUT
+            {
+                commands
+                    .entity(target_entity)
+                    .trigger(CommandParticleDespawn {
+                        particle: hash_bin("Fiora_Passive_NW"),
+                    });
+                commands
+                    .entity(target_entity)
+                    .trigger(CommandParticleSpawn {
+                        particle: hash_bin("Fiora_Passive_NW_TimeOut_Red"),
+                    });
+                // 标记为已触发，防止重复生成
+                vital.timeout_red_triggered = true;
+            }
+            // --- 结束新增逻辑 ---
 
             vital.remove_timer.tick(time.delta());
 

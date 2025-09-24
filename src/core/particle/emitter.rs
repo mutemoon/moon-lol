@@ -5,9 +5,12 @@ use league_core::{
     VfxEmitterDefinitionDataSpawnShape,
 };
 
-use crate::particles::{
-    create_black_pixel_texture, ParticleLifeState, ParticleQuad, QuadMaterial, QuadSliceMaterial,
-    Sampler, UniformsPixel, UniformsVertexQuad,
+use crate::{
+    core::particle::{
+        create_black_pixel_texture, ParticleLifeState, ParticleQuad, QuadMaterial,
+        QuadSliceMaterial, Sampler, UniformsPixelQuadSlice, UniformsVertexQuad,
+    },
+    core::Particle,
 };
 
 #[derive(Component)]
@@ -30,14 +33,17 @@ pub fn update_emitter(
         &ChildOf,
         &mut ParticleEmitterState,
         &VfxEmitterDefinitionData,
+        &Particle,
     )>,
     time: Res<Time>,
 ) {
-    for (entity, parent, mut emitter, vfx_emitter_definition_data) in query.iter_mut() {
+    for (emitter_entity, parent, mut emitter, vfx_emitter_definition_data, particle) in
+        query.iter_mut()
+    {
         emitter.timer.tick(time.delta());
 
         if emitter.timer.finished() {
-            commands.entity(entity).despawn();
+            commands.entity(emitter_entity).despawn();
             continue;
         }
         let normalized_time = emitter.timer.elapsed_secs() / emitter.timer.duration().as_secs_f32();
@@ -90,6 +96,7 @@ pub fn update_emitter(
             };
 
             let mut target = commands.spawn((
+                particle.clone(),
                 Mesh3d(mesh),
                 Transform::from_translation(offset),
                 ParticleLifeState {
@@ -106,7 +113,7 @@ pub fn update_emitter(
                 target.insert(MeshMaterial3d(
                     res_quad_slice_material.add(QuadSliceMaterial {
                         uniforms_vertex: UniformsVertexQuad::default(),
-                        uniforms_pixel: UniformsPixel {
+                        uniforms_pixel: UniformsPixelQuadSlice {
                             alpha_test_reference_value: f32::default(),
                             slice_range: vec2(range, 1.0 / (range * range)),
                             apply_team_color_correction: Vec4::default(),

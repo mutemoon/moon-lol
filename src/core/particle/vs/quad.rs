@@ -1,6 +1,6 @@
 use bevy::{prelude::*, render::mesh::VertexAttributeValues};
 
-use crate::particles::{ATTRIBUTE_LIFETIME, ATTRIBUTE_UV_FRAME, ATTRIBUTE_WORLD_POSITION};
+use crate::core::particle::{ATTRIBUTE_LIFETIME, ATTRIBUTE_UV_FRAME, ATTRIBUTE_WORLD_POSITION};
 
 #[derive(Default)]
 pub struct ParticleQuad {}

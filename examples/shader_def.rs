@@ -30,16 +30,16 @@ struct ConditionalUniforms {
 
 #[derive(Asset, TypePath, AsBindGroup, Debug, Clone)]
 #[bind_group_data(ConditionalMaterialKey)]
-pub struct ConditionalMaterial {
+struct ConditionalMaterial {
     #[uniform(0)]
-    pub uniforms: ConditionalUniforms,
+    uniforms: ConditionalUniforms,
 
-    pub use_highlight: bool,
-    pub use_special_effect: bool,
+    use_highlight: bool,
+    use_special_effect: bool,
 }
 
 #[derive(Copy, Clone, Hash, Eq, PartialEq)]
-pub struct ConditionalMaterialKey {
+struct ConditionalMaterialKey {
     use_highlight: bool,
     use_special_effect: bool,
 }
