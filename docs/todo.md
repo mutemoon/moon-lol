@@ -14,24 +14,34 @@
 
 # 粒子系统
 
-- [ ] 粒子系统支持 birthRotation0
-
-- [ ] 根据剑姬破绽方向触发不同方位的粒子特效
-
-- [x] 弄清楚剑姬破绽的生命周期：warning active timeout_red
-
-- [ ] 粒子系统支持 blend mode
-
-- [ ] 人物移动时粒子会抖的问题
-
-- [ ] 弄清楚粒子系统 pass 属性的作用
-
-- [ ] 粒子系统支持设置 color 顶点属性
-
-- [ ] 弄清楚粒子系统 texture mult 的作用
-
 - [x] 在 bevy 中, shader 有不同的变体, 怎么把 cpu 数据传给 gpu, 难道为每个变体创建一个 AsBindGroup 的结构体吗
 
 mat -> key -> def
 
 - [x] 如何为不同的 def 传入不同的数据组合呢
+
+- [x] 粒子系统支持 birthRotation0
+
+- [x] 粒子系统支持 blend mode
+
+- [x] 人物移动时粒子会抖的问题
+
+- [ ] 支持 single particle 属性
+
+- [ ] 支持 birth scale
+
+- [ ] 支持 velocity
+
+- [ ] 弄清楚粒子系统 pass 属性的作用
+
+- [ ] 粒子系统支持设置 color 顶点属性
+
+- [ ] 弄清楚粒子系统 texture mult 子属性的作用
+
+# 剑姬
+
+- [x] 根据剑姬破绽方向触发不同方位的粒子特效
+
+- [x] 弄清楚剑姬破绽的生命周期
+
+warning active timeout_red

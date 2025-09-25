@@ -1,8 +1,8 @@
-// UI-related functionality
-use crate::core::damage::EventDamageCreate;
-use crate::core::Health;
-use crate::{system_debug, system_info};
 use bevy::{color::palettes, prelude::*};
+
+use crate::core::damage::EventDamageCreate;
+use crate::core::{Bounding, Health};
+use crate::{system_debug, system_info};
 
 #[derive(Default)]
 pub struct PluginUI;
@@ -45,7 +45,11 @@ pub struct DamageNumber {
     pub final_font_size: f32,
 }
 
-pub fn init_health_bar(mut commands: Commands, q_health: Query<Entity, Added<Health>>) {
+pub fn init_health_bar(
+    mut commands: Commands,
+    q_health: Query<Entity, Added<Health>>,
+    q_bounding: Query<&Bounding>,
+) {
     let health_bar_count = q_health.iter().count();
     if health_bar_count > 0 {
         system_info!(
@@ -72,8 +76,9 @@ pub fn init_health_bar(mut commands: Commands, q_health: Query<Entity, Added<Hea
                 },
                 UIBind {
                     entity,
-                    position: Vec3::ZERO,
-                    offset: Vec2::new(0.0, -50.0),
+                    position: Vec3::ZERO
+                        .with_y(q_bounding.get(entity).map(|v| v.height).unwrap_or(0.0)),
+                    offset: Vec2::ZERO,
                 },
             ))
             .with_children(|parent| {

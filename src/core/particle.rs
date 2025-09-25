@@ -40,7 +40,7 @@ impl Plugin for PluginParticle {
         app.init_asset::<QuadSliceMaterial>();
 
         app.add_systems(Update, update_emitter);
-        app.add_systems(First, update_particle);
+        app.add_systems(Last, update_particle);
     }
 }
 
@@ -82,6 +82,8 @@ fn on_command_particle_spawn(
     }
 
     for vfx_emitter_definition_data in vfx_emitter_definition_datas.into_iter() {
+        let birth_rotation = vfx_emitter_definition_data.birth_rotation0.clone().unwrap();
+
         commands.entity(trigger.target()).with_child((
             vfx_emitter_definition_data.clone(),
             Particle(trigger.particle),
@@ -99,6 +101,7 @@ fn on_command_particle_spawn(
                         constant_value: Some(1.0),
                     })
                     .into(),
+                rotation_sampler: birth_rotation.into(),
                 emission_debt: 1.0,
             },
             Transform::default(),

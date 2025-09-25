@@ -92,6 +92,7 @@ impl AssetLoader for LeagueLoaderMaterial {
         Ok(StandardMaterial {
             base_color_texture: Some(image),
             unlit: true,
+
             alpha_mode: AlphaMode::Mask(0.3),
             ..default()
         })

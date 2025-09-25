@@ -7,7 +7,8 @@ use bevy::render::{
 use lol_config::{ConfigGame, ConfigNavigationGrid};
 use lol_core::Team;
 use moon_lol::core::{
-    spawn_skin_entity, Attack, CameraState, Controller, Focus, Health, Movement, PluginGame,
+    spawn_skin_entity, Attack, Bounding, CameraState, Controller, Focus, Health, Movement,
+    PluginGame,
 };
 use moon_lol::entities::{Fiora, PluginBarrack};
 use moon_lol::{core::PluginCore, entities::PluginEntities, logging::PluginLogging};
@@ -79,6 +80,10 @@ pub fn setup(
                     max: 6000.0,
                 },
                 Fiora,
+                Bounding {
+                    radius: 35.0,
+                    height: 300.0,
+                },
             ))
             .log_components();
 
@@ -103,6 +108,10 @@ pub fn setup(
                 },
                 Attack::new(150.0, 0.2, 1.45),
                 Fiora,
+                Bounding {
+                    radius: 35.0,
+                    height: 300.0,
+                },
             ))
             .log_components();
     }

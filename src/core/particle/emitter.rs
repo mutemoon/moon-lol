@@ -4,11 +4,12 @@ use league_core::{
     Unk0xee39916f, VfxEmitterDefinitionData, VfxEmitterDefinitionDataPrimitive,
     VfxEmitterDefinitionDataSpawnShape,
 };
+use league_utils::neg_vec_z;
 
 use crate::{
     core::particle::{
-        create_black_pixel_texture, ParticleLifeState, ParticleQuad, QuadMaterial,
-        QuadSliceMaterial, Sampler, UniformsPixelQuadSlice, UniformsVertexQuad,
+        create_black_pixel_texture, ParticleQuad, ParticleState, QuadMaterial, QuadSliceMaterial,
+        Sampler, UniformsPixelQuadSlice, UniformsVertexQuad,
     },
     core::Particle,
 };
@@ -16,8 +17,9 @@ use crate::{
 #[derive(Component)]
 pub struct ParticleEmitterState {
     pub timer: Timer,
-    pub rate_sampler: Sampler,
-    pub life_sampler: Sampler,
+    pub rate_sampler: Sampler<f32>,
+    pub life_sampler: Sampler<f32>,
+    pub rotation_sampler: Sampler<Vec3>,
     pub emission_debt: f32,
 }
 
@@ -49,6 +51,8 @@ pub fn update_emitter(
         let normalized_time = emitter.timer.elapsed_secs() / emitter.timer.duration().as_secs_f32();
 
         let current_rate = emitter.rate_sampler.sample_clamped(normalized_time);
+        let lifetime = emitter.life_sampler.sample_clamped(normalized_time);
+        let current_rotation = emitter.rotation_sampler.sample_clamped(normalized_time);
 
         // 计算本帧应该发射的粒子数量
         // 加上一帧的 "欠账"，这使得在低速率下也能平滑发射
@@ -59,8 +63,6 @@ pub fn update_emitter(
 
         // 更新 "欠账"，为下一帧做准备
         emitter.emission_debt = particles_to_spawn_f32.fract();
-
-        let lifetime = emitter.life_sampler.sample_clamped(normalized_time);
 
         for _ in 0..particles_to_spawn {
             let mesh = vfx_emitter_definition_data
@@ -91,16 +93,24 @@ pub fn update_emitter(
             let offset = match vfx_emitter_definition_data.spawn_shape.clone().unwrap() {
                 VfxEmitterDefinitionDataSpawnShape::Unk0xee39916f(Unk0xee39916f {
                     emit_offset,
-                }) => emit_offset.unwrap(),
+                }) => neg_vec_z(&emit_offset.unwrap()),
                 _ => todo!(),
             };
+
+            let mut transform = Transform::from_translation(offset);
+
+            transform.rotate_x((current_rotation.x).to_radians());
+            transform.rotate_y((90.0 - current_rotation.y).to_radians());
 
             let mut target = commands.spawn((
                 particle.clone(),
                 Mesh3d(mesh),
-                Transform::from_translation(offset),
-                ParticleLifeState {
-                    timer: Timer::from_seconds(lifetime, TimerMode::Repeating),
+                transform,
+                ParticleState {
+                    timer_life: Timer::from_seconds(lifetime, TimerMode::Repeating),
+                    is_local_orientation: vfx_emitter_definition_data
+                        .is_local_orientation
+                        .unwrap_or(true),
                 },
                 Pickable::IGNORE,
             ));

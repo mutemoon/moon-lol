@@ -43,6 +43,17 @@ pub enum Direction {
     Down,
 }
 
+fn get_particle_hash(direction: &Direction, suffix: &str) -> u32 {
+    let base_name = match direction {
+        Direction::Up => "Fiora_Passive_NE",
+        Direction::Right => "Fiora_Passive_NW",
+        Direction::Down => "Fiora_Passive_SW",
+        Direction::Left => "Fiora_Passive_SE",
+    };
+    let full_name = format!("{}{}", base_name, suffix);
+    hash_bin(&full_name)
+}
+
 #[derive(Component)]
 pub struct FioraVital {
     pub direction: Direction,
@@ -86,16 +97,16 @@ fn update_add_vital(
                 Some(direction) => match direction {
                     Direction::Up | Direction::Right => {
                         if random::<bool>() {
-                            Direction::Up
+                            Direction::Left
                         } else {
-                            Direction::Right
+                            Direction::Down
                         }
                     }
                     Direction::Left | Direction::Down => {
                         if random::<bool>() {
-                            Direction::Left
+                            Direction::Up
                         } else {
-                            Direction::Down
+                            Direction::Right
                         }
                     }
                 },
@@ -113,7 +124,7 @@ fn update_add_vital(
                 .insert(target_entity, direction.clone());
 
             commands.entity(target_entity).insert(FioraVital {
-                direction,
+                direction: direction.clone(),
                 active_timer: Timer::from_seconds(VITAL_ADD_DURATION, TimerMode::Once),
                 remove_timer: Timer::from_seconds(VITAL_DURATION, TimerMode::Once),
                 timeout_red_triggered: false, // 初始化为 false
@@ -122,7 +133,7 @@ fn update_add_vital(
             commands
                 .entity(target_entity)
                 .trigger(CommandParticleSpawn {
-                    particle: hash_bin("Fiora_Passive_NW_Warning"),
+                    particle: get_particle_hash(&direction, "_Warning"),
                 });
         }
     }
@@ -162,7 +173,12 @@ fn update_remove_vital(
                     commands
                         .entity(target_entity)
                         .trigger(CommandParticleSpawn {
-                            particle: hash_bin("Fiora_Passive_NW"),
+                            particle: get_particle_hash(&vital.direction, ""),
+                        });
+                    commands
+                        .entity(target_entity)
+                        .trigger(CommandParticleSpawn {
+                            particle: hash_bin("Fiora_Q_Slash_Cas"),
                         });
                 }
                 continue;
@@ -175,12 +191,12 @@ fn update_remove_vital(
                 commands
                     .entity(target_entity)
                     .trigger(CommandParticleDespawn {
-                        particle: hash_bin("Fiora_Passive_NW"),
+                        particle: get_particle_hash(&vital.direction, ""),
                     });
                 commands
                     .entity(target_entity)
                     .trigger(CommandParticleSpawn {
-                        particle: hash_bin("Fiora_Passive_NW_TimeOut_Red"),
+                        particle: get_particle_hash(&vital.direction, "_TimeOut_Red"),
                     });
                 // 标记为已触发，防止重复生成
                 vital.timeout_red_triggered = true;
