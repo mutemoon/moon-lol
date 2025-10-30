@@ -1,12 +1,15 @@
+use std::sync::Arc;
+
 use bevy::prelude::*;
 use bevy_behave::{behave, Behave};
 use league_utils::hash_bin;
 
 use crate::{
-    abilities::AbilityDuelistsDance,
+    abilities::{AbilityFioraPassive, BuffFioraE},
     core::{
-        AAction, Attack, Bounding, Health, Movement, Skill, SkillEffectAnimation, SkillEffectDash,
-        SkillEffectParticle, SkillOf,
+        ActionAnimationPlay, ActionAttackReset, ActionBuffSpawn, ActionDamage, ActionDash,
+        ActionParticleDespawn, ActionParticleSpawn, Attack, AttackBuff, Bounding, BuffOf, Health,
+        Movement, Skill, SkillOf,
     },
     entities::champion::Champion,
 };
@@ -38,81 +41,81 @@ pub fn spawn_fiora(commands: &mut Commands, entity: Entity) {
                 height: 300.0,
             },
         ))
-        .with_related::<SkillOf>((Skill { effect: None }, AbilityDuelistsDance))
-        .with_related::<SkillOf>((
-            Skill {
-                effect: Some(behave! {
-                    Behave::Sequence => {
+        .with_related::<SkillOf>((Skill { effect: None }, AbilityFioraPassive))
+        .with_related::<SkillOf>((Skill {
+            effect: Some(behave! {
+                Behave::Sequence => {
+                    Behave::trigger(
+                        ActionAnimationPlay { hash: hash_bin("Spell1") }
+                    ),
+                    Behave::trigger(
+                        ActionParticleSpawn { hash: hash_bin("Fiora_Q_Dash_Trail_ground") },
+                    ),
+                    Behave::trigger(
+                        ActionDash::Pointer { speed: 1000., max: 300. },
+                    ),
+                    Behave::IfThen => {
+                        Behave::trigger(ActionDamage),
                         Behave::trigger(
-                            AAction::Animation(SkillEffectAnimation { hash: hash_bin("Spell1") })
+                            ActionParticleSpawn { hash: hash_bin("Fiora_Q_Slash_Cas") },
                         ),
-                        Behave::trigger(
-                            AAction::Particle(SkillEffectParticle { hash: hash_bin("Fiora_Q_Dash_Trail_ground") }),
-                        ),
-                        Behave::trigger(
-                            AAction::Dash(SkillEffectDash::Pointer { speed: 1000., max: 300. }),
-                        ),
-                        Behave::IfThen => {
-                            Behave::trigger(AAction::Damage),
-                            Behave::trigger(
-                                AAction::Particle(SkillEffectParticle { hash: hash_bin("Fiora_Q_Slash_Cas") }),
-                            ),
-                        },
-                    }
-                }),
-            },
-        ))
-        .with_related::<SkillOf>((
-            Skill {
-                effect: Some(behave! {
-                    Behave::Sequence => {
-                        Behave::trigger(
-                            AAction::Particle(SkillEffectParticle { hash: hash_bin("Fiora_W_Telegraph_Blue") }),
-                        ),
-                        Behave::trigger(
-                            AAction::Animation(SkillEffectAnimation { hash: hash_bin("Spell2_In") })
-                        ),
-                        Behave::trigger(
-                            AAction::Particle(SkillEffectParticle { hash: hash_bin("Fiora_W_Cas") }),
-                        ),
-                        Behave::Wait(0.5),
-                        Behave::trigger(
-                            AAction::Animation(SkillEffectAnimation { hash: hash_bin("Spell2") })
-                        ),
-                        Behave::trigger(AAction::Damage),
-                        Behave::Wait(0.1),
-                        Behave::trigger(
-                            AAction::DespawnParticle(hash_bin("Fiora_W_Telegraph_Blue")),
-                        ),
-                    }
-                }),
-            },
-        ))
-        .with_related::<SkillOf>((
-            Skill {
-                effect: Some(behave! {
-                    Behave::Sequence => {
-                        Behave::trigger(
-                            AAction::Particle(SkillEffectParticle { hash: hash_bin("Fiora_Passive_Hit_Tar") }),
-                        ),
-                        Behave::Wait(1.),
-                        Behave::trigger(AAction::Damage),
-                    }
-                }),
-            },
-        ))
-        .with_related::<SkillOf>((
-            Skill {
-                effect: Some(behave! {
-                    Behave::Sequence => {
-                        Behave::trigger(
-                            AAction::Animation(SkillEffectAnimation { hash: hash_bin("Spell2") })
-                        ),
-                        Behave::Wait(1.),
-                        Behave::trigger(AAction::Damage),
-                    }
-                }),
-            },
-        ))
+                    },
+                }
+            }),
+        },))
+        .with_related::<SkillOf>((Skill {
+            effect: Some(behave! {
+                Behave::Sequence => {
+                    Behave::trigger(
+                        ActionParticleSpawn { hash: hash_bin("Fiora_W_Telegraph_Blue") },
+                    ),
+                    Behave::trigger(
+                        ActionAnimationPlay { hash: hash_bin("Spell2_In") }
+                    ),
+                    Behave::trigger(
+                        ActionParticleSpawn { hash: hash_bin("Fiora_W_Cas") },
+                    ),
+                    Behave::Wait(0.5),
+                    Behave::trigger(
+                        ActionAnimationPlay { hash: hash_bin("Spell2") }
+                    ),
+                    Behave::trigger(ActionDamage),
+                    Behave::Wait(0.1),
+                    Behave::trigger(
+                        ActionParticleDespawn{ hash: hash_bin("Fiora_W_Telegraph_Blue") },
+                    ),
+                }
+            }),
+        },))
+        .with_related::<SkillOf>((Skill {
+            effect: Some(behave! {
+                Behave::Sequence => {
+                    Behave::trigger(ActionBuffSpawn{
+                        bundle: Arc::new(|commands: &mut EntityCommands| {
+                            commands.with_related::<BuffOf>((
+                                AttackBuff {
+                                    bonus_attack_speed: 10.,
+                                },
+                                BuffFioraE {
+                                    left: 2
+                                },
+                            ));
+                        }),
+                    }),
+                    Behave::trigger(ActionAttackReset),
+                }
+            }),
+        },))
+        .with_related::<SkillOf>((Skill {
+            effect: Some(behave! {
+                Behave::Sequence => {
+                    Behave::trigger(
+                        ActionAnimationPlay { hash: hash_bin("Spell2") }
+                    ),
+                    Behave::Wait(1.),
+                    Behave::trigger(ActionDamage),
+                }
+            }),
+        },))
         .log_components();
 }

@@ -1,9 +1,13 @@
 use core::f32;
 
 use bevy::prelude::*;
+use lol_config::ConfigNavigationGrid;
 use serde::{Deserialize, Serialize};
 
-use crate::core::rotate_to_direction;
+use crate::core::{
+    get_nav_path, rotate_to_direction, ArbitrationPipelinePlugin, FinalDecision, LastDecision,
+    PipelineStages, RequestBuffer,
+};
 
 #[derive(Default)]
 pub struct PluginMovement;
@@ -13,18 +17,28 @@ impl Plugin for PluginMovement {
         app.register_type::<Movement>();
 
         app.add_event::<CommandMovementStart>();
-        app.add_event::<EventMovementStart>();
-        app.add_observer(command_movement_start);
-
         app.add_event::<CommandMovementStop>();
-        app.add_observer(command_movement_stop);
 
+        app.add_event::<EventMovementStart>();
         app.add_event::<EventMovementEnd>();
-        app.add_observer(on_movement_stop);
+
+        app.add_observer(on_command_movement_stop);
+        app.add_observer(on_event_movement_end);
+
+        app.add_plugins(ArbitrationPipelinePlugin::<
+            CommandMovementStart,
+            MovementPipeline,
+        >::default());
 
         app.add_systems(
             FixedPostUpdate,
-            (finalize_decision_system, update_path_movement).chain(),
+            (
+                // 插入“仲裁”逻辑
+                reduce_movement_by_priority.in_set(MovementPipeline::Reduce),
+                // 插入“应用”逻辑
+                (apply_final_movement_decision, update_path_movement)
+                    .in_set(MovementPipeline::Apply),
+            ),
         );
     }
 }
@@ -49,18 +63,49 @@ pub struct MovementState {
 #[derive(Event, Debug, Clone)]
 pub struct CommandMovementStart {
     pub priority: i32,
-    pub path: Vec<Vec2>,
+    pub way: MovementWay,
     pub speed: Option<f32>,
 }
 
+#[derive(Debug, Clone)]
+pub enum MovementWay {
+    Pathfind(Vec2),
+    Path(Vec<Vec2>),
+}
+
 #[derive(Event, Debug)]
-pub struct CommandMovementStop;
+pub struct CommandMovementStop {
+    pub priority: i32,
+}
 
 #[derive(Event, Debug)]
 pub struct EventMovementStart;
 
 #[derive(Event, Debug)]
 pub struct EventMovementEnd;
+
+#[derive(SystemSet, Debug, Hash, PartialEq, Eq, Clone)]
+pub enum MovementPipeline {
+    Modify,
+    Reduce,
+    Apply,
+    Cleanup,
+}
+
+impl PipelineStages for MovementPipeline {
+    fn modify() -> Self {
+        Self::Modify
+    }
+    fn reduce() -> Self {
+        Self::Reduce
+    }
+    fn apply() -> Self {
+        Self::Apply
+    }
+    fn cleanup() -> Self {
+        Self::Cleanup
+    }
+}
 
 impl MovementState {
     pub fn reset_path(&mut self, path: &Vec<Vec2>) {
@@ -181,72 +226,12 @@ fn update_path_movement(
     }
 }
 
-#[derive(Component, Clone)]
-struct MovementCurrentMovement(CommandMovementStart);
-
-fn command_movement_start(
-    trigger: Trigger<CommandMovementStart>,
-    mut commands: Commands,
-    query: Query<&MovementCurrentMovement>,
-) {
-    let target_entity = trigger.target();
-
-    let event = trigger.event();
-
-    if event.path.is_empty() {
-        return;
-    }
-
-    if let Ok(current_best) = query.get(target_entity) {
-        // 如果新请求的优先级更高，则替换
-        if event.priority >= current_best.0.priority {
-            commands
-                .entity(target_entity)
-                .insert(MovementCurrentMovement(event.clone()));
-        }
-    } else {
-        // 这是本帧第一个请求，直接插入
-        commands
-            .entity(target_entity)
-            .insert(MovementCurrentMovement(event.clone()));
-    }
-}
-
-fn finalize_decision_system(
-    mut commands: Commands,
-    // 查询所有在本帧被修改过“最佳请求”的实体
-    query: Query<(Entity, &MovementCurrentMovement), Changed<MovementCurrentMovement>>,
-    mut q_transform: Query<&mut MovementState>,
-) {
-    for (entity, best_request) in query.iter() {
-        // 1. 添加“最终决策”
-
-        let Ok(mut movement_state) = q_transform.get_mut(entity) else {
-            return;
-        };
-
-        movement_state.reset_path(&best_request.0.path);
-
-        if let Some(speed) = best_request.0.speed {
-            movement_state.with_speed(speed);
-        }
-
-        commands.trigger_targets(EventMovementStart, entity);
-
-        // 2. 移除临时组件，为下一帧做准备
-    }
-}
-
-fn on_movement_stop(trigger: Trigger<EventMovementEnd>, mut commands: Commands) {
-    commands
-        .entity(trigger.target())
-        .remove::<MovementCurrentMovement>();
-}
-
-fn command_movement_stop(
+fn on_command_movement_stop(
     trigger: Trigger<CommandMovementStop>,
     mut commands: Commands,
     mut q_movement: Query<&mut MovementState>,
+    mut q_buffer: Query<&mut RequestBuffer<CommandMovementStart>>,
+    q_last_decision: Query<&LastDecision<CommandMovementStart>>,
 ) {
     let entity = trigger.target();
 
@@ -254,7 +239,77 @@ fn command_movement_stop(
         return;
     };
 
+    if let Ok(last_decision) = q_last_decision.get(entity) {
+        if last_decision.0.priority > trigger.priority {
+            return;
+        }
+    }
+
+    if let Ok(mut buffer) = q_buffer.get_mut(entity) {
+        buffer.0 = buffer
+            .0
+            .iter()
+            .filter(|req| req.priority > trigger.priority)
+            .cloned()
+            .collect::<Vec<_>>();
+    }
+
     movement_state.clear_path();
 
-    commands.trigger_targets(EventMovementEnd, entity);
+    // commands.trigger_targets(EventMovementEnd, entity);
+}
+
+fn reduce_movement_by_priority(
+    mut commands: Commands,
+    query: Query<(
+        Entity,
+        &RequestBuffer<CommandMovementStart>,
+        Option<&LastDecision<CommandMovementStart>>,
+    )>,
+) {
+    for (entity, buffer, last_decision) in query.iter() {
+        if let Some(best_request) = buffer.0.iter().max_by_key(|req| req.priority) {
+            if best_request.priority >= last_decision.map(|v| v.0.priority).unwrap_or(0) {
+                commands
+                    .entity(entity)
+                    .insert(FinalDecision(best_request.clone()));
+            }
+        }
+    }
+}
+
+fn apply_final_movement_decision(
+    mut commands: Commands,
+    mut query: Query<(
+        Entity,
+        &Transform,
+        &FinalDecision<CommandMovementStart>,
+        &mut MovementState,
+    )>,
+    grid: Res<ConfigNavigationGrid>,
+) {
+    for (entity, transform, decision, mut movement_state) in query.iter_mut() {
+        match &decision.0.way {
+            MovementWay::Pathfind(target) => {
+                if let Some(path) = get_nav_path(&transform.translation.xz(), target, &grid) {
+                    movement_state.reset_path(&path);
+                }
+            }
+            MovementWay::Path(path) => {
+                movement_state.reset_path(path);
+            }
+        }
+
+        if let Some(speed) = decision.0.speed {
+            movement_state.with_speed(speed);
+        }
+
+        commands.trigger_targets(EventMovementStart, entity);
+    }
+}
+
+fn on_event_movement_end(trigger: Trigger<EventMovementEnd>, mut commands: Commands) {
+    commands
+        .entity(trigger.target())
+        .remove::<LastDecision<CommandMovementStart>>();
 }

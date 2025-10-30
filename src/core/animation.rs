@@ -172,6 +172,17 @@ impl Animation {
             }
         }
     }
+
+    pub fn get_weight(&self, player: &AnimationPlayer, key: u32) -> f32 {
+        let node_indices = self.get_current_node_indices(key);
+        let mut weight = 0.0;
+        for node_index in node_indices {
+            if let Some(animation) = player.animation(node_index) {
+                weight = animation.weight().max(weight);
+            }
+        }
+        weight
+    }
 }
 
 impl AnimationState {
@@ -203,7 +214,7 @@ fn on_state_change(
             State::Idle => {
                 animation_state.update(hash_bin("Idle1"));
             }
-            State::Moving => {
+            State::Running => {
                 animation_state.update(hash_bin("Run"));
             }
             State::Attacking => {
@@ -248,27 +259,25 @@ fn on_animation_state_change(
     time: Res<Time>,
 ) {
     for (entity, mut player, mut animation, state) in query.iter_mut() {
-        match state.last_hash {
-            Some(last_hash) => {
-                if state.current_hash == last_hash {
-                    continue;
-                }
-            }
-            None => {}
-        }
-
         if let Ok(transition_out) = q_transition_out.get(entity) {
             animation.stop(&mut player, transition_out.hash);
         }
 
         if let Some(last_hash) = state.last_hash {
-            commands.entity(entity).insert(AnimationTransitionOut {
-                hash: last_hash,
-                weight: 1.0,
-                duration: Duration::from_millis(0),
-                start_time: time.elapsed_secs(),
-            });
-            animation.stop(&mut player, last_hash);
+            if state.current_hash == last_hash {
+                if state.repeat {
+                    continue;
+                } else {
+                    animation.stop(&mut player, last_hash);
+                }
+            } else {
+                commands.entity(entity).insert(AnimationTransitionOut {
+                    hash: last_hash,
+                    weight: 1.0,
+                    duration: Duration::from_millis(200),
+                    start_time: time.elapsed_secs(),
+                });
+            }
         }
 
         animation.play(&mut player, state.current_hash, 1.0);

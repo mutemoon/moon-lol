@@ -20,9 +20,9 @@ const VITAL_DURATION: f32 = 4.0;
 const VITAL_TIMEOUT: f32 = 1.5;
 
 #[derive(Default)]
-pub struct PluginDuelistsDance;
+pub struct PluginFioraPassive;
 
-impl Plugin for PluginDuelistsDance {
+impl Plugin for PluginFioraPassive {
     fn build(&self, app: &mut App) {
         app.init_resource::<FioraVitalLastDirection>();
         app.add_systems(FixedUpdate, update_add_vital);
@@ -37,7 +37,7 @@ struct FioraVitalLastDirection {
 }
 
 #[derive(Component, Default)]
-pub struct AbilityDuelistsDance;
+pub struct AbilityFioraPassive;
 
 #[derive(Component)]
 pub struct Vital {
@@ -67,7 +67,7 @@ fn get_particle_hash(direction: &Direction, suffix: &str) -> u32 {
 fn update_add_vital(
     mut commands: Commands,
     q_target_without_vital: Query<(Entity, &Transform, &Team), (With<Champion>, Without<Vital>)>,
-    q_skill_of_with_ability: Query<&SkillOf, With<AbilityDuelistsDance>>,
+    q_skill_of_with_ability: Query<&SkillOf, With<AbilityFioraPassive>>,
     q_transform_team: Query<(&Transform, &Team)>,
     mut last_direction: ResMut<FioraVitalLastDirection>,
 ) {
@@ -142,7 +142,7 @@ fn update_remove_vital(
         (Entity, &Transform, &Team, &mut Vital),
         (With<Champion>, With<Vital>),
     >,
-    q_skill_of_with_ability: Query<&SkillOf, With<AbilityDuelistsDance>>,
+    q_skill_of_with_ability: Query<&SkillOf, With<AbilityFioraPassive>>,
     q_transform_team: Query<(&Transform, &Team)>,
     time: Res<Time<Fixed>>,
 ) {

@@ -1,6 +1,6 @@
-use bevy::prelude::*;
+use bevy::{prelude::*, transform};
 
-use crate::core::{CommandDamageCreate, DamageType};
+use crate::core::{rotate_to_direction, Buffs, CommandDamageCreate, DamageType};
 
 #[derive(Default)]
 pub struct PluginAttack;
@@ -10,8 +10,9 @@ impl Plugin for PluginAttack {
         app.add_event::<EventAttackEnd>();
         app.add_event::<EventAttackReady>();
 
-        app.add_event::<CommandAttackStart>();
         app.add_event::<EventAttackStart>();
+
+        app.add_event::<CommandAttackStart>();
         app.add_observer(on_command_attack_start);
 
         app.add_event::<CommandAttackReset>();
@@ -20,7 +21,7 @@ impl Plugin for PluginAttack {
         app.add_event::<CommandAttackStop>();
         app.add_observer(on_command_attack_stop);
 
-        app.add_systems(FixedUpdate, update);
+        app.add_systems(FixedUpdate, fixed_update);
     }
 }
 
@@ -60,6 +61,11 @@ pub struct AttackState {
     pub target: Option<Entity>,
 }
 
+#[derive(Component)]
+pub struct AttackBuff {
+    pub bonus_attack_speed: f32,
+}
+
 /// 攻击状态 - 更详细的状态表示
 #[derive(Debug, Clone, PartialEq)]
 pub enum AttackStatus {
@@ -83,6 +89,7 @@ pub struct CommandAttackStop;
 #[derive(Event, Debug)]
 pub struct EventAttackStart {
     pub target: Entity,
+    pub duration: f32,
 }
 
 #[derive(Event, Debug)]
@@ -176,12 +183,23 @@ impl AttackState {
     }
 }
 
+fn update_attack_state(attack_state: &mut Attack, buffs: Vec<&AttackBuff>) {
+    attack_state.bonus_attack_speed = buffs
+        .iter()
+        .map(|v| v.bonus_attack_speed)
+        .reduce(|a, b| a + b)
+        .unwrap_or(0.0);
+}
+
 // 观察者函数
 fn on_command_attack_start(
     trigger: Trigger<CommandAttackStart>,
     mut commands: Commands,
-    q_attack: Query<&Attack>,
     mut q_attack_state: Query<&mut AttackState>,
+    mut q_attack: Query<&mut Attack>,
+    mut q_transform: Query<&mut Transform>,
+    q_attack_buff: Query<&AttackBuff>,
+    q_buffs: Query<&Buffs>,
     time: Res<Time<Fixed>>,
 ) {
     let entity = trigger.target();
@@ -189,11 +207,29 @@ fn on_command_attack_start(
 
     let now = time.elapsed_secs();
 
-    let Ok(attack) = q_attack.get(entity) else {
+    let Ok(mut attack) = q_attack.get_mut(entity) else {
         return;
     };
 
     let Ok(mut attack_state) = q_attack_state.get_mut(entity) else {
+        if let Ok(buffs) = q_buffs.get(entity) {
+            let buffs = buffs
+                .iter()
+                .filter_map(|v| q_attack_buff.get(v).ok())
+                .collect::<Vec<_>>();
+            update_attack_state(&mut attack, buffs);
+        } else {
+            update_attack_state(&mut attack, vec![]);
+        }
+
+        let target_position = q_transform.get(target).unwrap().translation.xz();
+
+        let mut transform = q_transform.get_mut(entity).unwrap();
+
+        let direction = (target_position - transform.translation.xz()).normalize();
+
+        rotate_to_direction(&mut transform, direction);
+
         commands
             .entity(entity)
             .insert(AttackState {
@@ -203,7 +239,10 @@ fn on_command_attack_start(
                 },
                 target: Some(target),
             })
-            .trigger(EventAttackStart { target });
+            .trigger(EventAttackStart {
+                target,
+                duration: attack.total_duration_secs(),
+            });
         return;
     };
 
@@ -272,10 +311,11 @@ fn on_command_attack_stop(
 }
 
 // 系统函数
-fn update(
+fn fixed_update(
     mut query: Query<(Entity, &mut AttackState, &Attack)>,
     mut commands: Commands,
     time: Res<Time<Fixed>>,
+    q_entity: Query<Entity>,
 ) {
     let now = time.elapsed_secs();
 
@@ -288,15 +328,19 @@ fn update(
                         end_time: now + attack.cooldown_time(),
                     };
 
-                    commands.entity(*target).trigger(CommandDamageCreate {
-                        source: entity,
-                        damage_type: DamageType::Physical,
-                        amount: 100.0,
-                    });
+                    if q_entity.contains(*target) {
+                        commands.entity(*target).trigger(CommandDamageCreate {
+                            source: entity,
+                            damage_type: DamageType::Physical,
+                            amount: 100.0,
+                        });
 
-                    commands
-                        .entity(entity)
-                        .trigger(EventAttackEnd { target: *target });
+                        commands
+                            .entity(entity)
+                            .trigger(EventAttackEnd { target: *target });
+                    } else {
+                        commands.entity(entity).remove::<AttackState>();
+                    }
                 }
             }
             AttackStatus::Cooldown { end_time } => {

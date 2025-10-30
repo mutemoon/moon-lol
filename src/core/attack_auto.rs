@@ -3,7 +3,8 @@ use std::time::Duration;
 use bevy::prelude::*;
 
 use crate::core::{
-    Attack, AttackState, AttackStatus, CommandAttackStart, CommandAttackStop, CommandNavigationTo,
+    Attack, AttackState, AttackStatus, CommandAttackStart, CommandAttackStop, CommandRunStart,
+    CommandRunStop, RunTarget,
 };
 
 #[derive(Default)]
@@ -17,7 +18,7 @@ impl Plugin for PluginAttackAuto {
         app.add_event::<CommandAttackAutoStop>();
         app.add_observer(on_command_attack_auto_stop);
 
-        app.add_systems(FixedUpdate, update_attack_auto);
+        app.add_systems(FixedPreUpdate, update_attack_auto);
     }
 }
 
@@ -65,6 +66,7 @@ fn on_command_attack_auto_start(
     check_and_action(
         &mut commands,
         trigger.target(),
+        attack_auto.target,
         &mut attack_auto,
         transform.translation.xz(),
         target_transform.translation.xz(),
@@ -91,6 +93,12 @@ fn update_attack_auto(
     for (entity, mut attack_auto, attack) in query.iter_mut() {
         attack_auto.timer.tick(time.delta());
 
+        if let Ok(attack_state) = q_attack_state.get(entity) {
+            if matches!(attack_state.status, AttackStatus::Windup { .. }) {
+                continue;
+            }
+        };
+
         let Ok(transform) = q_transform.get(entity) else {
             continue;
         };
@@ -99,15 +107,10 @@ fn update_attack_auto(
             continue;
         };
 
-        if let Ok(attack_state) = q_attack_state.get(entity) {
-            if matches!(attack_state.status, AttackStatus::Windup { .. }) {
-                continue;
-            }
-        };
-
         check_and_action(
             &mut commands,
             entity,
+            attack_auto.target,
             &mut attack_auto,
             transform.translation.xz(),
             target_transform.translation.xz(),
@@ -119,6 +122,7 @@ fn update_attack_auto(
 fn check_and_action(
     commands: &mut Commands,
     entity: Entity,
+    target: Entity,
     attack_auto: &mut AttackAuto,
     position: Vec2,
     target_position: Vec2,
@@ -126,15 +130,18 @@ fn check_and_action(
 ) {
     if position.distance(target_position) > range {
         if attack_auto.timer.just_finished() {
-            commands.entity(entity).trigger(CommandNavigationTo {
-                priority: 0,
-                target: target_position,
+            commands.entity(entity).trigger(CommandRunStart {
+                target: RunTarget::Target(target),
             });
+
             attack_auto.timer.reset();
         }
     } else {
-        commands.entity(entity).trigger(CommandAttackStart {
-            target: attack_auto.target,
-        });
+        commands
+            .entity(entity)
+            .trigger(CommandRunStop)
+            .trigger(CommandAttackStart {
+                target: attack_auto.target,
+            });
     }
 }

@@ -11,7 +11,7 @@ use league_core::VisionPathingFlags;
 use lol_config::ConfigNavigationGrid;
 use moon_lol::core::{
     find_grid_path_with_result, on_click_map, post_process_path, AStarResult, CameraState,
-    CommandMovementStart, CommandNavigationTo, Map, Movement, PluginCore, PluginNavigaton,
+    CommandMovementStart, Map, Movement, MovementWay, PluginCore, PluginNavigaton,
 };
 use moon_lol::entities::PluginEntities;
 use moon_lol::logging::PluginLogging;
@@ -52,7 +52,7 @@ fn main() {
         .add_systems(Update, update_height)
         .add_systems(Update, draw_move_path)
         .add_systems(Update, update_astar_visualization)
-        .add_observer(command_navigation_to)
+        // .add_observer(command_navigation_to)
         // sample height
         // .add_systems(Startup, setup_sample_height_textured)
         // .add_systems(Update, lock_camera_full_map)
@@ -305,59 +305,59 @@ pub struct AStarVisualization {
     pub optimized_path: Vec<Vec2>,
 }
 
-fn command_navigation_to(
-    trigger: Trigger<CommandNavigationTo>,
-    mut commands: Commands,
-    grid: Res<ConfigNavigationGrid>,
-    mut q_transform: Query<&Transform>,
-    mut astar_vis: ResMut<AStarVisualization>,
-) {
-    let entity = trigger.target();
-    let destination = trigger.event().target;
+// fn command_navigation_to(
+//     trigger: Trigger<CommandNavigationTo>,
+//     mut commands: Commands,
+//     grid: Res<ConfigNavigationGrid>,
+//     mut q_transform: Query<&Transform>,
+//     mut astar_vis: ResMut<AStarVisualization>,
+// ) {
+//     let entity = trigger.target();
+//     let destination = trigger.event().target;
 
-    // 获取当前位置
-    if let Ok(transform) = q_transform.get_mut(entity) {
-        let start_pos = transform.translation.xz();
-        let end_pos = destination;
+//     // 获取当前位置
+//     if let Ok(transform) = q_transform.get_mut(entity) {
+//         let start_pos = transform.translation.xz();
+//         let end_pos = destination;
 
-        let start = Instant::now();
-        // 使用A*算法规划路径，对于单点移动，创建长度为1的路径
-        if let Some(result) = find_path_with_visualization(&grid, start_pos, end_pos) {
-            // 更新 A* 可视化数据
-            astar_vis.visited_cells = result.visited_cells;
-            astar_vis.path_cells = result.path.clone();
+//         let start = Instant::now();
+//         // 使用A*算法规划路径，对于单点移动，创建长度为1的路径
+//         if let Some(result) = find_path_with_visualization(&grid, &start_pos, &end_pos) {
+//             // 更新 A* 可视化数据
+//             astar_vis.visited_cells = result.visited_cells;
+//             astar_vis.path_cells = result.path.clone();
 
-            if result.path.is_empty() {
-                return;
-            }
+//             if result.path.is_empty() {
+//                 return;
+//             }
 
-            let world_path = post_process_path(&grid, &result.path, &start_pos, &end_pos);
+//             let world_path = post_process_path(&grid, &result.path, &start_pos, &end_pos);
 
-            system_debug!(
-                "command_navigation_to",
-                "Path found in {:.6}ms",
-                start.elapsed().as_millis()
-            );
+//             system_debug!(
+//                 "command_navigation_to",
+//                 "Path found in {:.6}ms",
+//                 start.elapsed().as_millis()
+//             );
 
-            astar_vis.optimized_path = world_path.clone();
+//             astar_vis.optimized_path = world_path.clone();
 
-            commands.trigger_targets(
-                CommandMovementStart {
-                    priority: 0,
-                    path: world_path,
-                    speed: None,
-                },
-                entity,
-            );
-        }
-    }
-}
+//             commands.trigger_targets(
+//                 CommandMovementStart {
+//                     priority: 0,
+//                     way: MovementWay::Path(world_path),
+//                     speed: None,
+//                 },
+//                 entity,
+//             );
+//         }
+//     }
+// }
 
 /// 带可视化的寻路函数
 fn find_path_with_visualization(
     grid: &ConfigNavigationGrid,
-    start: Vec2,
-    end: Vec2,
+    start: &Vec2,
+    end: &Vec2,
 ) -> Option<AStarResult> {
     // 使用带结果的A*算法
     if let Some(astar_result) = find_grid_path_with_result(grid, start, end) {

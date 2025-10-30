@@ -3,7 +3,7 @@ use std::collections::{hash_map::Iter, HashMap};
 use bevy::prelude::*;
 use lol_core::Team;
 
-use crate::core::{Action, CommandBehavior, Map};
+use crate::core::{Action, CommandAction, Map};
 
 #[derive(Default)]
 pub struct PluginController;
@@ -124,6 +124,6 @@ pub fn on_key_pressed(
             continue;
         };
 
-        commands.entity(entity).trigger(CommandBehavior { action });
+        commands.entity(entity).trigger(CommandAction { action });
     }
 }

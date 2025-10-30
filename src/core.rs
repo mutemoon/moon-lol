@@ -1,8 +1,8 @@
+mod action;
 mod animation;
 mod attack;
 mod attack_auto;
 mod base;
-mod behavior;
 mod camera;
 mod config;
 mod controller;
@@ -16,16 +16,17 @@ mod movement;
 mod navigation;
 mod particle;
 mod resource;
+mod run;
 mod skill;
 mod spawn;
 mod ui;
 mod utils;
 
+pub use action::*;
 pub use animation::*;
 pub use attack::*;
 pub use attack_auto::*;
 pub use base::*;
-pub use behavior::*;
 pub use camera::*;
 pub use config::*;
 pub use controller::*;
@@ -39,6 +40,7 @@ pub use movement::*;
 pub use navigation::*;
 pub use particle::*;
 pub use resource::*;
+pub use run::*;
 pub use skill::*;
 pub use spawn::*;
 pub use ui::*;
@@ -48,10 +50,10 @@ use bevy::app::plugin_group;
 
 plugin_group! {
     pub struct PluginCore {
+        :PluginAction,
         :PluginAnimation,
         :PluginAttack,
         :PluginAttackAuto,
-        :PluginBehavior,
         :PluginCamera,
         :PluginController,
         :PluginDamage,
@@ -63,6 +65,7 @@ plugin_group! {
         :PluginNavigaton,
         :PluginParticle,
         :PluginResource,
+        :PluginRun,
         :PluginSkill,
         :PluginState,
         :PluginUI,

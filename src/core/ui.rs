@@ -43,7 +43,7 @@ pub struct DamageNumber {
     pub final_scale: f32,
 }
 
-pub fn init_health_bar(
+fn init_health_bar(
     mut commands: Commands,
     q_health: Query<Entity, Added<Health>>,
     q_bounding: Query<&Bounding>,
@@ -115,7 +115,7 @@ pub fn init_health_bar(
     }
 }
 
-pub fn ui(
+fn ui(
     mut commands: Commands,
     camera_info: Single<(&Camera, &GlobalTransform), With<Camera3d>>,
     global_transform: Query<&GlobalTransform>,
@@ -156,7 +156,7 @@ pub fn ui(
 }
 
 /// 监听伤害事件并创建伤害数字
-pub fn on_damage_create(
+fn on_damage_create(
     trigger: Trigger<EventDamageCreate>,
     mut commands: Commands,
     global_transform: Query<&GlobalTransform>,
@@ -217,7 +217,7 @@ pub fn on_damage_create(
 }
 
 /// 更新伤害数字的动画效果
-pub fn update_damage_numbers(
+fn update_damage_numbers(
     mut commands: Commands,
     time: Res<Time>,
     camera_info: Single<(&Camera, &GlobalTransform), With<Camera3d>>,

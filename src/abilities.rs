@@ -1,14 +1,14 @@
-mod duelists_dance;
-mod lunge;
+mod fiora_e;
+mod fiora_passive;
 
-pub use duelists_dance::*;
-pub use lunge::*;
+pub use fiora_e::*;
+pub use fiora_passive::*;
 
 use bevy::app::plugin_group;
 
 plugin_group! {
     pub struct PluginAbilities {
-        :PluginDuelistsDance,
-        :PluginLunge,
+        :PluginFioraPassive,
+        :PluginFioraE,
     }
 }

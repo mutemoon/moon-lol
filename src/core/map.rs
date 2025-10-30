@@ -6,7 +6,7 @@ use league_file::LeagueMapGeoMesh;
 use league_utils::neg_mat_z;
 use lol_config::ConfigMap;
 
-use crate::core::{spawn_geometry_object, spawn_skin_entity, Action, CommandBehavior, Controller};
+use crate::core::{spawn_geometry_object, spawn_skin_entity, Action, CommandAction, Controller};
 
 pub const MAP_WIDTH: f32 = 14400.0;
 pub const MAP_HEIGHT: f32 = 14765.0;
@@ -118,7 +118,7 @@ pub fn on_click_map(
     // }
 
     commands.trigger_targets(
-        CommandBehavior {
+        CommandAction {
             action: Action::Move(position.xz()),
         },
         targets,

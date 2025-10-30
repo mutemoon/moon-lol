@@ -3,14 +3,8 @@ use std::time::Instant;
 
 use lol_config::ConfigNavigationGrid;
 
-use crate::core::{find_grid_path, CommandMovementStart, Movement};
+use crate::core::{find_grid_path, Movement};
 use crate::system_debug;
-
-#[derive(Event, Debug)]
-pub struct CommandNavigationTo {
-    pub priority: i32,
-    pub target: Vec2,
-}
 
 #[derive(Default)]
 pub struct PluginNavigaton;
@@ -18,7 +12,6 @@ pub struct PluginNavigaton;
 impl Plugin for PluginNavigaton {
     fn build(&self, app: &mut App) {
         app.add_systems(Update, update);
-        app.add_observer(on_command_navigation_to);
     }
 }
 
@@ -28,34 +21,9 @@ fn update(grid: Res<ConfigNavigationGrid>, mut q_movement: Query<&mut Transform,
     }
 }
 
-fn on_command_navigation_to(
-    trigger: Trigger<CommandNavigationTo>,
-    mut commands: Commands,
-    grid: Res<ConfigNavigationGrid>,
-    mut q_transform: Query<&Transform>,
-) {
-    let entity = trigger.target();
-    let event = trigger.event();
-
-    // 获取当前位置
-    let Ok(transform) = q_transform.get_mut(entity) else {
-        return;
-    };
-
-    let start_pos = transform.translation.xz();
-
-    if let Some(path) = get_nav_path(start_pos, event.target, &grid) {
-        commands.entity(entity).trigger(CommandMovementStart {
-            priority: event.priority,
-            path,
-            speed: None,
-        });
-    }
-}
-
 pub fn get_nav_path(
-    start_pos: Vec2,
-    end_pos: Vec2,
+    start_pos: &Vec2,
+    end_pos: &Vec2,
     grid: &ConfigNavigationGrid,
 ) -> Option<Vec<Vec2>> {
     let start = Instant::now();
@@ -72,7 +40,7 @@ pub fn get_nav_path(
             "Direct path found in {:.6}ms",
             start.elapsed().as_millis()
         );
-        return Some(vec![start_pos, end_pos]);
+        return Some(vec![start_pos.clone(), end_pos.clone()]);
     }
 
     // 如果不可直达，则使用A*算法规划路径
@@ -88,7 +56,7 @@ pub fn get_nav_path(
 }
 
 /// 主要的寻路函数，结合A*和漏斗算法
-pub fn find_path(grid: &ConfigNavigationGrid, start: Vec2, end: Vec2) -> Option<Vec<Vec2>> {
+pub fn find_path(grid: &ConfigNavigationGrid, start: &Vec2, end: &Vec2) -> Option<Vec<Vec2>> {
     // 首先使用A*找到网格路径
     let grid_path = find_grid_path(grid, start, end)?;
 

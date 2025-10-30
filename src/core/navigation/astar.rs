@@ -51,8 +51,8 @@ pub struct AStarResult {
 /// 使用A*算法找到网格路径
 pub fn find_grid_path(
     grid: &ConfigNavigationGrid,
-    start: Vec2,
-    end: Vec2,
+    start: &Vec2,
+    end: &Vec2,
 ) -> Option<Vec<(usize, usize)>> {
     find_grid_path_with_result(grid, start, end).map(|result| result.path)
 }
@@ -60,8 +60,8 @@ pub fn find_grid_path(
 /// 使用A*算法找到网格路径，返回详细结果
 pub fn find_grid_path_with_result(
     grid: &ConfigNavigationGrid,
-    start: Vec2,
-    end: Vec2,
+    start: &Vec2,
+    end: &Vec2,
 ) -> Option<AStarResult> {
     let start_pos = world_to_grid(grid, start);
     let end_pos = world_to_grid(grid, end);
@@ -162,8 +162,8 @@ pub fn find_grid_path_with_result(
     })
 }
 
-fn world_to_grid(grid: &ConfigNavigationGrid, world_pos: Vec2) -> (usize, usize) {
-    let (x, y) = grid.get_cell_xy_by_position(&world_pos);
+fn world_to_grid(grid: &ConfigNavigationGrid, world_pos: &Vec2) -> (usize, usize) {
+    let (x, y) = grid.get_cell_xy_by_position(world_pos);
 
     (x, y)
 }
