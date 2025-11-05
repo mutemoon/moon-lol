@@ -1,16 +1,13 @@
 use std::{
-    collections::HashMap,
-    net::TcpListener,
+    io::Cursor,
     sync::{
         atomic::{AtomicBool, Ordering},
         Arc, Mutex,
     },
     thread,
-    time::Duration,
 };
 
 use bevy::{
-    app::AppExit,
     image::TextureFormatPixelInfo,
     prelude::*,
     render::{
@@ -30,16 +27,12 @@ use bevy::{
 };
 use crossbeam_channel::{Receiver, Sender};
 use image::codecs::jpeg::JpegEncoder;
-use rand::Rng as _;
-use tungstenite::protocol::Message;
-
-use lol_config::{ConfigGame, ConfigNavigationGrid};
-use lol_core::Team;
 
 use moon_lol::{
     abilities::PluginAbilities,
-    core::{spawn_skin_entity, Action, CameraInit, Controller, Focus, Health, PluginCore},
-    entities::{spawn_fiora, PluginBarrack, PluginEntities},
+    core::{Action, CameraInit, CommandAction, Controller, PluginCore},
+    entities::{PluginBarrack, PluginEntities},
+    server::PluginGymEnv,
 };
 
 #[derive(Resource, Deref)]
@@ -48,25 +41,13 @@ struct MainWorldReceiver(Receiver<Vec<u8>>);
 #[derive(Resource, Deref)]
 struct RenderWorldSender(Sender<Vec<u8>>);
 
-#[derive(Resource, Deref)]
-struct WsImageSender(Sender<Vec<u8>>);
-
 #[derive(Resource, Deref, DerefMut, Default, Clone)]
 struct ImageCopiers(pub Vec<ImageCopier>);
 
 #[derive(Resource, Default, Debug)]
 struct SceneController {
-    state: SceneState,
-    name: String,
     width: u32,
     height: u32,
-}
-
-#[derive(Default, Debug)]
-enum SceneState {
-    #[default]
-    BuildScene,
-    Render(u32),
 }
 
 #[derive(Component, Deref, DerefMut)]
@@ -79,211 +60,19 @@ struct ImageCopier {
     src_image: Handle<Image>,
 }
 
-struct AppConfig {
-    width: u32,
-    height: u32,
-}
-
-fn main() {
-    let config = AppConfig {
-        width: 1920,
-        height: 1080,
-    };
-
-    let (ws_tx, ws_rx) = crossbeam_channel::unbounded::<Vec<u8>>();
-
-    thread::spawn(move || {
-        ws_server_thread(ws_rx);
-    });
-
-    let mut app = App::new();
-    app.insert_resource(SceneController::new(config.width, config.height))
-        .insert_resource(ClearColor(Color::srgb_u8(0, 0, 0)))
-        .insert_resource(WsImageSender(ws_tx))
-        .add_plugins(
-            DefaultPlugins
-                .set(ImagePlugin::default_nearest())
-                .set(WindowPlugin {
-                    primary_window: None,
-                    exit_condition: ExitCondition::DontExit,
-                    ..default()
-                })
-                .disable::<WinitPlugin>(),
-        )
-        .add_plugins(PluginCore)
-        .add_plugins(PluginEntities.build().disable::<PluginBarrack>())
-        .add_plugins(PluginAbilities)
-        .add_plugins(PluginGymEnv)
-        .add_plugins(ImageCopyPlugin)
-        .add_plugins(CaptureFramePlugin)
-        .init_resource::<SceneController>()
-        .add_systems(Startup, setup.after(CameraInit));
-
-    app.finish();
-    app.cleanup();
-
-    loop {
-        let start_time = std::time::Instant::now();
-
-        app.update();
-
-        info!("(Runner) 帧更新完成。");
-
-        let mut app_exit_events = app.world_mut().resource_mut::<Events<AppExit>>();
-        if app_exit_events.drain().next().is_some() {
-            info!("(Runner) 收到退出信号，关闭。");
-            break;
-        }
-
-        let elapsed = start_time.elapsed();
-        let sleep_duration = Duration::from_millis(50).saturating_sub(elapsed);
-        if !sleep_duration.is_zero() {
-            info!("(Runner) 睡眠 {} 毫秒...", sleep_duration.as_millis());
-            thread::sleep(sleep_duration);
-        }
-    }
-}
-
-fn ws_server_thread(image_receiver: Receiver<Vec<u8>>) {
-    let server = TcpListener::bind("127.0.0.1:9001").expect("无法启动 WebSocket 服务器");
-    info!("[WS Server] WebSocket 服务器已启动，监听: ws://127.0.0.1:9001");
-
-    let clients: Arc<Mutex<HashMap<i32, tungstenite::WebSocket<std::net::TcpStream>>>> =
-        Arc::new(Mutex::new(HashMap::new()));
-    let mut next_client_id = 0;
-
-    let clients_for_broadcast = clients.clone();
-
-    thread::spawn(move || {
-        for image_data in image_receiver {
-            let mut clients_guard = clients_for_broadcast.lock().unwrap();
-            let mut disconnected_clients = Vec::new();
-
-            if clients_guard.is_empty() {
-                info!("[WS Broadcaster] 收到图像，但没有客户端连接。");
-                continue;
-            }
-
-            info!(
-                "[WS Broadcaster] 收到 {} 字节的图像。广播给 {} 个客户端。",
-                image_data.len(),
-                clients_guard.len()
-            );
-
-            for (id, client) in clients_guard.iter_mut() {
-                let msg = Message::Binary(image_data.clone());
-                if let Err(e) = client.send(msg) {
-                    warn!(
-                        "[WS Broadcaster] 发送失败 (客户端 {}): {}。标记为断开连接。",
-                        id, e
-                    );
-                    disconnected_clients.push(*id);
-                }
-            }
-
-            for id in disconnected_clients {
-                clients_guard.remove(&id);
-                info!("[WS Broadcaster] 客户端 {} 已移除。", id);
-            }
-        }
-        info!("[WS Broadcaster] Bevy 通道已关闭。广播线程退出。");
-    });
-
-    for stream in server.incoming() {
-        let stream = match stream {
-            Ok(s) => s,
-            Err(e) => {
-                warn!("[WS Server] 接受连接失败: {}", e);
-                continue;
-            }
-        };
-
-        let peer_addr = stream.peer_addr().unwrap();
-        info!("[WS Server] 收到新客户端连接: {}", peer_addr);
-
-        let clients_clone = clients.clone();
-        let client_id = next_client_id;
-        next_client_id += 1;
-
-        thread::spawn(move || match tungstenite::accept(stream) {
-            Ok(websocket) => {
-                info!("[WS Client {}] WebSocket 握手成功。", client_id);
-                {
-                    let mut clients_guard = clients_clone.lock().unwrap();
-                    clients_guard.insert(client_id, websocket);
-                    info!("[WS Client {}] 已添加到客户端列表。", client_id);
-                }
-
-                info!("[WS Client {}] 客户端处理线程完成。", client_id);
-            }
-            Err(e) => {
-                warn!("[WS Client {}] WebSocket 握手失败: {}", client_id, e);
-            }
-        });
-    }
-}
-
 impl SceneController {
     pub fn new(width: u32, height: u32) -> SceneController {
-        SceneController {
-            state: SceneState::BuildScene,
-            name: String::from(""),
-            width,
-            height,
-        }
+        SceneController { width, height }
     }
 }
 
 fn setup(
     mut commands: Commands,
     mut images: ResMut<Assets<Image>>,
-    mut scene_controller: ResMut<SceneController>,
+    scene_controller: Res<SceneController>,
     render_device: Res<RenderDevice>,
     mut q_camera: Query<&mut Camera>,
 ) {
-    let render_target = setup_render_target(
-        &mut commands,
-        &mut images,
-        &render_device,
-        &mut scene_controller,
-        1,
-        "main_scene".into(),
-    );
-
-    let mut camera = q_camera.single_mut().unwrap();
-
-    camera.target = render_target;
-}
-
-pub struct ImageCopyPlugin;
-
-impl Plugin for ImageCopyPlugin {
-    fn build(&self, app: &mut App) {
-        let (s, r) = crossbeam_channel::unbounded();
-
-        let render_app = app
-            .insert_resource(MainWorldReceiver(r))
-            .sub_app_mut(RenderApp);
-
-        let mut graph = render_app.world_mut().resource_mut::<RenderGraph>();
-        graph.add_node(ImageCopy, ImageCopyDriver);
-        graph.add_node_edge(bevy::render::graph::CameraDriverLabel, ImageCopy);
-
-        render_app
-            .insert_resource(RenderWorldSender(s))
-            .add_systems(ExtractSchedule, image_copy_extract)
-            .add_systems(Render, receive_image_from_buffer.after(RenderSet::Render));
-    }
-}
-
-fn setup_render_target(
-    commands: &mut Commands,
-    images: &mut ResMut<Assets<Image>>,
-    render_device: &Res<RenderDevice>,
-    scene_controller: &mut ResMut<SceneController>,
-    pre_roll_frames: u32,
-    scene_name: String,
-) -> RenderTarget {
     let size = Extent3d {
         width: scene_controller.width,
         height: scene_controller.height,
@@ -313,21 +102,35 @@ fn setup_render_target(
     commands.spawn(ImageCopier::new(
         render_target_image_handle.clone(),
         size,
-        render_device,
+        &render_device,
     ));
     commands.spawn(ImageToSave(cpu_image_handle));
 
-    scene_controller.state = SceneState::Render(pre_roll_frames);
-    scene_controller.name = scene_name;
-    RenderTarget::Image(render_target_image_handle.into())
+    let render_target = RenderTarget::Image(render_target_image_handle.into());
+
+    let mut camera = q_camera.single_mut().unwrap();
+
+    camera.target = render_target;
 }
 
-pub struct CaptureFramePlugin;
+pub struct PluginImageCopy;
 
-impl Plugin for CaptureFramePlugin {
+impl Plugin for PluginImageCopy {
     fn build(&self, app: &mut App) {
-        info!("Adding CaptureFramePlugin");
-        app.add_systems(PostUpdate, update_and_stream_image);
+        let (s, r) = crossbeam_channel::unbounded();
+
+        let render_app = app
+            .insert_resource(MainWorldReceiver(r))
+            .sub_app_mut(RenderApp);
+
+        let mut graph = render_app.world_mut().resource_mut::<RenderGraph>();
+        graph.add_node(ImageCopy, ImageCopyDriver);
+        graph.add_node_edge(bevy::render::graph::CameraDriverLabel, ImageCopy);
+
+        render_app
+            .insert_resource(RenderWorldSender(s))
+            .add_systems(ExtractSchedule, image_copy_extract)
+            .add_systems(Render, receive_image_from_buffer.after(RenderSet::Render));
     }
 }
 
@@ -416,6 +219,7 @@ impl render_graph::Node for ImageCopyDriver {
                 },
                 src_image.size,
             );
+            println!("[bevy app] copy 结束");
 
             let render_queue = world.get_resource::<RenderQueue>().unwrap();
             render_queue.submit(std::iter::once(encoder.finish()));
@@ -451,203 +255,233 @@ fn receive_image_from_buffer(
     }
 }
 
-fn update_and_stream_image(
-    images_to_save: Query<&ImageToSave>,
-    receiver: Res<MainWorldReceiver>,
-    mut images: ResMut<Assets<Image>>,
-    mut scene_controller: ResMut<SceneController>,
-    ws_sender: Res<WsImageSender>,
-) {
-    if let SceneState::Render(n) = scene_controller.state {
-        if n < 1 {
-            info!("[Bevy Update] 预热结束。尝试从 RenderWorld 接收图像...");
+use rocket::{
+    get,
+    http::{ContentType, Status},
+    launch, post, routes,
+    serde::json::Json,
+    State,
+};
 
-            let mut image_data = Vec::new();
-            while let Ok(data) = receiver.try_recv() {
-                image_data = data;
-            }
-            if image_data.is_empty() {
-                info!("[Bevy Update] 未收到图像数据。");
-            } else {
-                info!(
-                    "[Bevy Update] 收到 {} 字节的原始图像数据。正在处理...",
-                    image_data.len()
-                );
-                for image in images_to_save.iter() {
-                    let img_bytes = images.get_mut(image.id()).unwrap();
-                    let row_bytes = img_bytes.width() as usize
-                        * img_bytes.texture_descriptor.format.pixel_size();
-                    let aligned_row_bytes = RenderDevice::align_copy_bytes_per_row(row_bytes);
+struct BevyAppState {
+    sender: Sender<AppMsg>,
+    image: Arc<Mutex<Option<Vec<u8>>>>,
+}
 
-                    if row_bytes == aligned_row_bytes {
-                        img_bytes.data = Some(image_data.clone());
-                    } else {
-                        img_bytes.data = Some(
-                            image_data
-                                .chunks(aligned_row_bytes)
-                                .take(img_bytes.height() as usize)
-                                .flat_map(|row| &row[..row_bytes.min(row.len())])
-                                .cloned()
-                                .collect(),
-                        );
-                    }
+enum AppMsg {
+    Step(Action),
+}
 
-                    let img = match img_bytes.clone().try_into_dynamic() {
-                        Ok(img) => img.to_rgba8(),
-                        Err(e) => {
-                            warn!("[Bevy Update] 转换图像失败: {e:?}");
-                            continue;
+#[post("/step", data = "<action_json>")]
+fn step(state: &State<BevyAppState>, action_json: Json<Action>) -> Status {
+    println!("[STEP] 请求 POST /step");
+
+    let action: Action = action_json.into_inner();
+
+    match state.sender.send(AppMsg::Step(action)) {
+        Ok(_) => {
+            println!("[STEP] Action 已成功发送到 Bevy App。");
+            Status::Accepted
+        }
+        Err(e) => {
+            eprintln!("[STEP] 发送 Action 到 Bevy App 失败: {}", e);
+            Status::InternalServerError
+        }
+    }
+}
+
+#[get("/render")]
+fn render(state: &State<BevyAppState>) -> (ContentType, Vec<u8>) {
+    println!("[STEP] /render 请求已收到");
+
+    // 锁定、解包并克隆 Option<Vec<u8>>
+    let image_option = state.image.lock().unwrap().clone();
+
+    // 使用 match 来处理 Option
+    match image_option {
+        Some(image_data) => {
+            // 如果有图像数据...
+            println!(
+                "[STEP] 找到图像 ({} 字节)，正在作为 JPEG 返回。",
+                image_data.len()
+            );
+
+            // ...将其包装在 content::Raw 中并指定 JPEG 类型，
+            // 然后将这一切包装在 Some() 中返回。
+            (ContentType::JPEG, image_data)
+        }
+        None => {
+            // 如果没有图像数据...
+            println!("[STEP] 图像尚未准备好 (返回 404)。");
+
+            // ...返回 None，Rocket 会自动发送 404 Not Found。
+            panic!()
+        }
+    }
+    // 你原来的 "update 完成" 打印语句不再需要，因为函数已经返回了
+}
+
+#[launch]
+fn rocket() -> _ {
+    let (tx, rx) = crossbeam_channel::bounded::<AppMsg>(1);
+
+    // 2. 创建共享的 image 数据
+    let shared_image = Arc::new(Mutex::new(None));
+
+    let bevy_state = BevyAppState {
+        sender: tx,
+        image: shared_image.clone(),
+    };
+
+    thread::spawn(move || {
+        let mut app = App::new();
+
+        app.add_plugins(
+            DefaultPlugins
+                .set(ImagePlugin::default_nearest())
+                .set(WindowPlugin {
+                    primary_window: None,
+                    exit_condition: ExitCondition::DontExit,
+                    ..default()
+                })
+                .disable::<WinitPlugin>(),
+        )
+        .add_plugins(PluginCore)
+        .add_plugins(PluginEntities.build().disable::<PluginBarrack>())
+        .add_plugins(PluginAbilities)
+        .add_plugins(PluginGymEnv)
+        .add_plugins(PluginImageCopy)
+        .insert_resource(SceneController::new(1920, 1080))
+        .add_systems(Startup, setup.after(CameraInit));
+
+        app.finish();
+        app.cleanup();
+
+        loop {
+            match rx.recv() {
+                Ok(msg) => match msg {
+                    AppMsg::Step(action) => {
+                        let world = app.world_mut();
+                        if let Ok((entity, _)) =
+                            world.query::<(Entity, &Controller)>().single(world)
+                        {
+                            world
+                                .commands()
+                                .entity(entity)
+                                .trigger(CommandAction { action });
                         }
-                    };
 
-                    let mut jpeg_bytes = Vec::new();
+                        app.update();
+                        println!("[bevy app] update 结束");
+                        // 假设这是在你的循环或函数内部
+                        let world = app.world_mut();
 
-                    let mut encoder = JpegEncoder::new_with_quality(&mut jpeg_bytes, 80);
+                        // --- 移植自 update_and_stream_image 的逻辑 ---
 
-                    info!("[Bevy Update] 正在将图像编码为 JPEG...");
-                    match encoder.encode_image(&img) {
-                        Ok(_) => {
+                        // ----- 块 1: 检查通道 (不可变借用) -----
+                        // 我们将结果放入一个 Option 中。
+                        // `receiver` 的不可变借用在此块结束时被释放。
+                        let image_data: Option<Vec<u8>> = {
+                            let receiver = world.resource::<MainWorldReceiver>();
+                            info!("[Rocket Loop] 尝试从 RenderWorld 接收图像...");
+                            // 使用 .ok() 将 Result 转换为 Option，非阻塞
+                            receiver.recv().ok()
+                        };
+
+                        // 仅在成功接收到数据时才继续
+                        if let Some(image_data) = image_data {
+                            if image_data.is_empty() {
+                                info!("[Rocket Loop] 收到空的图像数据。");
+                                // 如果在循环中，你可能想用 continue;
+                                return;
+                            }
+
                             info!(
-                                "[Bevy Update] JPEG 编码成功 ({} 字节)。发送到 WebSocket...",
-                                jpeg_bytes.len()
+                                "[Rocket Loop] 收到 {} 字节的原始图像数据。正在处理...",
+                                image_data.len()
                             );
 
-                            if let Err(e) = ws_sender.send(jpeg_bytes) {
-                                warn!("[Bevy Update] 发送图像到 WS 线程失败: {e}");
+                            // ----- 块 2: 获取要保存的图像 ID (第一个可变借用) -----
+                            // 假设你只关心第一个实体 (根据你原来的 `break;`)
+                            // `images_to_save_query` 的可变借用在此块结束时被释放。
+                            let image_to_save_id = {
+                                let mut images_to_save_query = world.query::<&ImageToSave>();
+                                // 获取第一个匹配实体的 ID
+                                images_to_save_query.iter(world).next().map(|img| img.id())
+                            };
+
+                            // 仅在找到要保存的实体时才继续
+                            if let Some(image_id) = image_to_save_id {
+                                // ----- 块 3: 修改图像资源 (第二个可变借用) -----
+                                // 现在以前的借用都已释放，我们可以安全地获取 `Assets<Image>`。
+                                let mut images = world.resource_mut::<Assets<Image>>();
+
+                                // 你的原始逻辑中，这里可能会 panic 如果 ID 无效。
+                                // 最好使用 get_mut 并处理 Option。
+                                let Some(img_bytes) = images.get_mut(image_id) else {
+                                    warn!("[Rocket Loop] 找不到 ImageToSave ID 对应的 Asset。");
+                                    return; // 或 continue
+                                };
+
+                                // ... 你的图像处理逻辑 ...
+                                let row_bytes = img_bytes.width() as usize
+                                    * img_bytes.texture_descriptor.format.pixel_size();
+                                let aligned_row_bytes =
+                                    RenderDevice::align_copy_bytes_per_row(row_bytes);
+
+                                if row_bytes == aligned_row_bytes {
+                                    // 注意：image_data 在这里被移动 (move)
+                                    img_bytes.data = Some(image_data);
+                                } else {
+                                    img_bytes.data = Some(
+                image_data // `image_data` 在这里也被移动
+                    .chunks(aligned_row_bytes)
+                    .take(img_bytes.height() as usize)
+                    .flat_map(|row| &row[..row_bytes.min(row.len())])
+                    .cloned()
+                    .collect(),
+            );
+                                }
+
+                                let img = match img_bytes.clone().try_into_dynamic() {
+                                    Ok(img) => img.to_rgba8(),
+                                    Err(e) => {
+                                        warn!("[Rocket Loop] 转换图像失败: {e:?}");
+                                        return; // 或 continue
+                                    }
+                                };
+
+                                let mut jpeg_bytes = Vec::new();
+                                let mut encoder =
+                                    JpegEncoder::new_with_quality(&mut jpeg_bytes, 80);
+
+                                info!("[Rocket Loop] 正在将图像编码为 JPEG...");
+
+                                match encoder.encode_image(&img) {
+                                    Ok(_) => {
+                                        info!("[Rocket Loop] JPEG 编码成功 ({} 字节)。存入 shared_image...",jpeg_bytes.len());
+                                        *shared_image.lock().unwrap() = Some(jpeg_bytes);
+                                    }
+                                    Err(e) => {
+                                        warn!("[Rocket Loop] JPEG 编码失败: {e}");
+                                    }
+                                }
+                                // `break;`不再需要，因为我们只处理了 `image_to_save_id`
+                            } else {
+                                info!("[Rocket Loop] 收到图像数据，但未找到 ImageToSave 实体。");
                             }
+                        } else {
+                            info!("[Rocket Loop] 未收到图像数据。");
                         }
-                        Err(e) => {
-                            warn!("[Bevy Update] JPEG 编码失败: {e}");
-                        }
+                        // --- 移植逻辑结束 ---
                     }
-                }
+                },
+                Err(_) => {}
             }
-        } else {
-            scene_controller.state = SceneState::Render(n - 1);
         }
-    }
-}
+    });
 
-#[derive(Default)]
-struct PluginGymEnv;
-
-impl Plugin for PluginGymEnv {
-    fn build(&self, app: &mut App) {
-        app.add_systems(Startup, setup_fiora_player);
-        app.add_systems(FixedUpdate, spawn_target);
-        app.add_systems(FixedUpdate, drive_random_agent);
-    }
-}
-
-#[derive(Component)]
-struct AttackTarget;
-
-#[derive(Component)]
-struct RandomAgent {
-    timer: Timer,
-}
-
-fn setup_fiora_player(
-    mut commands: Commands,
-    mut virtual_time: ResMut<Time<Virtual>>,
-    mut res_animation_graph: ResMut<Assets<AnimationGraph>>,
-    config_game: Res<ConfigGame>,
-    asset_server: Res<AssetServer>,
-    grid: Res<ConfigNavigationGrid>,
-) {
-    virtual_time.set_relative_speed(1.0);
-
-    let center = grid.get_map_center_position();
-
-    for (_, team, skin) in config_game.legends.iter() {
-        let agent = spawn_skin_entity(
-            &mut commands,
-            &mut res_animation_graph,
-            &asset_server,
-            Transform::from_translation(center + vec3(-100.0, 0.0, 100.0)),
-            &skin,
-        );
-
-        spawn_fiora(&mut commands, agent);
-
-        commands.entity(agent).insert((
-            team.clone(),
-            Controller::default(),
-            Focus,
-            Pickable::IGNORE,
-        ));
-
-        commands.entity(agent).insert(RandomAgent {
-            timer: Timer::from_seconds(0.5, TimerMode::Repeating),
-        });
-    }
-}
-
-fn spawn_target(
-    mut commands: Commands,
-    q_t: Query<&AttackTarget>,
-    mut res_animation_graph: ResMut<Assets<AnimationGraph>>,
-    asset_server: Res<AssetServer>,
-    res_navigation_grid: Res<ConfigNavigationGrid>,
-    config_game: Res<ConfigGame>,
-) {
-    if q_t.single().is_ok() {
-        return;
-    }
-
-    for (_, _, skin) in config_game.legends.iter() {
-        let map_center_position = res_navigation_grid.get_map_center_position();
-
-        let target = spawn_skin_entity(
-            &mut commands,
-            &mut res_animation_graph,
-            &asset_server,
-            Transform::from_translation(map_center_position + vec3(100.0, 0.0, -100.0)),
-            &skin,
-        );
-
-        spawn_fiora(&mut commands, target);
-
-        commands.entity(target).insert((
-            Team::Chaos,
-            Health {
-                value: 6000.0,
-                max: 6000.0,
-            },
-            AttackTarget,
-        ));
-    }
-}
-
-fn drive_random_agent(
-    mut commands: Commands,
-    mut agents: Query<(Entity, &mut RandomAgent, &Transform)>,
-    q_target: Query<Entity, With<AttackTarget>>,
-    time: Res<Time<Fixed>>,
-) {
-    for (entity, mut agent, transform) in agents.iter_mut() {
-        agent.timer.tick(time.delta());
-        if !agent.timer.just_finished() {
-            continue;
-        }
-
-        let mut rng = rand::rng();
-        let choice = rng.random_range(0..3);
-
-        let action = match choice {
-            0 => Action::Attack(q_target.single().unwrap()),
-            1 => {
-                let angle = rng.random_range(0.0f32..std::f32::consts::TAU);
-                let radius = rng.random_range(50.0f32..200.0f32);
-                let offset = Vec2::new(angle.cos(), angle.sin()) * radius;
-                Action::Move(transform.translation.xz() + offset)
-            }
-            2 => Action::Stop,
-            _ => Action::Stop,
-        };
-
-        commands
-            .entity(entity)
-            .trigger(moon_lol::core::CommandAction { action });
-    }
+    rocket::build()
+        .manage(bevy_state)
+        .mount("/", routes![step, render])
 }

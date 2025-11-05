@@ -15,6 +15,7 @@ pub use dash::*;
 pub use particle::*;
 
 use bevy::prelude::*;
+use serde::{Deserialize, Serialize};
 
 use crate::core::{
     Attack, CommandAttackAutoStart, CommandAttackAutoStop, CommandMovement, CommandRunStart,
@@ -47,7 +48,7 @@ pub struct CommandAction {
     pub action: Action,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub enum Action {
     Attack(Entity),
     Move(Vec2),

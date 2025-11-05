@@ -57,3 +57,4 @@ bevy_behave = "0.3.0"
 crossbeam-channel = "0.5"
 image = { version = "0.25", features = ["jpeg", "png"] }
 tungstenite = "0.23"
+rocket = { version = "*", features = ["json"] }
