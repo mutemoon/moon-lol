@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Bevy 实时渲染流</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background-color: #1a1a1a;
+            color: #e0e0e0;
+            margin: 0;
+        }
+
+        h1 {
+            font-weight: 300;
+        }
+
+        #stream-container {
+            border: 2px solid #555;
+            background-color: #000;
+            padding: 8px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            /* 保持 16:9 的宽高比 */
+            width: 80vw;
+            max-width: 1280px;
+            aspect-ratio: 16 / 9;
+        }
+
+        img#stream {
+            width: 100%;
+            height: 100%;
+            display: block;
+            object-fit: contain;
+            /* 保持图像比例，在容器内缩放 */
+        }
+
+        #status {
+            margin-top: 16px;
+            font-size: 1.1em;
+            padding: 8px 16px;
+            border-radius: 4px;
+        }
+
+        .connecting {
+            background-color: #4a4a4a;
+        }
+
+        .open {
+            background-color: #2a882a;
+        }
+
+        .closed {
+            background-color: #b03030;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Bevy 实时渲染流 (每 3 秒更新)</h1>
+    <div id="stream-container">
+        <img id="stream" alt="等待 Bevy 渲染流...">
+    </div>
+    <div id="status" class="connecting">状态: 正在连接...</div>
+
+    <script>
+        const img = document.getElementById('stream');
+        const statusEl = document.getElementById('status');
+        const wsUrl = 'ws://localhost:9001'; // 对应 Rust 服务器地址
+
+        let currentObjectUrl = null; // 用于释放旧的 URL
+
+        function connect() {
+            console.log(`正在连接到 ${wsUrl}...`);
+            statusEl.textContent = '状态: 正在连接...';
+            statusEl.className = 'connecting';
+
+            const socket = new WebSocket(wsUrl);
+
+            // 关键：告诉 WebSocket 我们期望接收的是二进制数据 (Blob)
+            socket.binaryType = 'blob';
+
+            socket.onopen = () => {
+                console.log('WebSocket 连接已打开。');
+                statusEl.textContent = '状态: 已连接';
+                statusEl.className = 'open';
+            };
+
+            socket.onmessage = (event) => {
+                // event.data 是一个 Blob 对象 (因为我们设置了 binaryType)
+                // 这个 Blob 就是我们的 JPEG 图像
+                const imageBlob = event.data;
+
+                // 1. 释放上一个图像的 Object URL (防止内存泄漏)
+                if (currentObjectUrl) {
+                    URL.revokeObjectURL(currentObjectUrl);
+                }
+
+                // 2. 为新的 Blob 创建一个新的 Object URL
+                currentObjectUrl = URL.createObjectURL(imageBlob);
+
+                // 3. 将 <img> 的 src 设置为这个新 URL
+                img.src = currentObjectUrl;
+                console.log(`图像已更新。 (大小: ${imageBlob.size} 字节)`);
+            };
+
+            socket.onclose = (event) => {
+                console.warn('WebSocket 连接已关闭。', event);
+                statusEl.textContent = '状态: 已断开。 3 秒后尝试重连...';
+                statusEl.className = 'closed';
+
+                // 释放 URL
+                if (currentObjectUrl) {
+                    URL.revokeObjectURL(currentObjectUrl);
+                    currentObjectUrl = null;
+                }
+                img.src = ''; // 清空图像
+
+                // 尝试重连
+                setTimeout(connect, 3000);
+            };
+
+            socket.onerror = (error) => {
+                console.error('WebSocket 错误:', error);
+                statusEl.textContent = '状态: 连接错误。';
+                statusEl.className = 'closed';
+                socket.close(); // 触发 onclose 中的重连逻辑
+            };
+        }
+
+        // 启动连接
+        connect();
+    </script>
+</body>
+
+</html>

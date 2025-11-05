@@ -1,9 +1,12 @@
+use std::time::Duration;
+
 use bevy::prelude::*;
 use bevy::render::{
     settings::{Backends, RenderCreation, WgpuSettings},
     RenderPlugin,
 };
 
+use bevy::winit::{UpdateMode, WinitSettings};
 use lol_config::{ConfigGame, ConfigNavigationGrid};
 use lol_core::Team;
 
@@ -37,6 +40,20 @@ fn main() {
             PluginEntities.build().disable::<PluginBarrack>(),
             PluginAbilities,
         ))
+        .insert_resource(WinitSettings {
+            focused_mode: UpdateMode::Reactive {
+                wait: Duration::MAX,           // 不超时，只靠你触发
+                react_to_device_events: false, // 不理会输入设备事件
+                react_to_user_events: false,
+                react_to_window_events: false,
+            },
+            unfocused_mode: UpdateMode::Reactive {
+                wait: Duration::MAX,
+                react_to_device_events: false, // 不理会输入设备事件
+                react_to_user_events: false,
+                react_to_window_events: false,
+            },
+        })
         .add_systems(Startup, setup)
         .add_systems(
             Update,

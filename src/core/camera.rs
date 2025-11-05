@@ -25,12 +25,15 @@ pub const CAMERA_MAP_CONSTRAIN_OFFSET_BOTTOM: f32 = -2000.0;
 
 pub const CAMERA_OFFSET: Vec3 = Vec3::new(CAMERA_OFFSET_X, CAMERA_OFFSET_Y, CAMERA_OFFSET_Z);
 
+#[derive(SystemSet, Debug, Hash, PartialEq, Eq, Clone)]
+pub struct CameraInit;
+
 #[derive(Default)]
 pub struct PluginCamera;
 
 impl Plugin for PluginCamera {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, setup);
+        app.add_systems(Startup, setup.in_set(CameraInit));
         app.add_systems(Update, update);
         app.add_systems(Update, update_focus);
         app.add_systems(Update, on_wheel);
