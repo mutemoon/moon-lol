@@ -28,20 +28,20 @@ pub fn neg_mat_z(mat: &Mat4) -> Mat4 {
 }
 
 pub fn neg_vec_z(vec: &Vec3) -> Vec3 {
-    Vec3::new(vec.x, vec.y, -vec.z)
+    Vec3::new(vec.x, vec.y, vec.z)
 }
 
 pub fn neg_array_z(array: &[f32; 3]) -> [f32; 3] {
-    [array[0], array[1], -array[2]]
+    [array[0], array[1], array[2]]
 }
 
 pub fn neg_rotation_z(rotation: &Quat) -> Quat {
-    Quat::from_xyzw(-rotation.x, -rotation.y, rotation.z, rotation.w)
+    Quat::from_xyzw(rotation.x, rotation.y, rotation.z, rotation.w)
 }
 
 pub fn reverse_indices(indices: &Vec<u16>) -> Vec<u16> {
     let mut reversed = indices.clone();
-    reversed.reverse();
+    // reversed.reverse();
     reversed
 }
 

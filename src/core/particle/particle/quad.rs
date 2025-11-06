@@ -54,10 +54,9 @@ pub struct ParticleMeshQuad {
 
 impl From<ParticleMeshQuad> for Mesh {
     fn from(value: ParticleMeshQuad) -> Self {
-        // let mut mesh = Mesh::from(Cuboid::new(1.0, 1.0, 1.0));
         let mut mesh: Mesh = Plane3d::new(Vec3::NEG_Z, Vec2::splat(1.0)).into();
 
-        let transform = Transform::from_rotation(Quat::from_rotation_z(PI / 2.));
+        let transform = Transform::from_rotation(Quat::from_rotation_z(-PI / 2.));
 
         let VertexAttributeValues::Float32x3(values) =
             mesh.attribute(Mesh::ATTRIBUTE_POSITION).unwrap()
@@ -85,12 +84,12 @@ impl From<ParticleMeshQuad> for Mesh {
 
         mesh.insert_attribute(ATTRIBUTE_WORLD_POSITION, values.clone());
 
-        let indices = mesh.indices_mut().unwrap();
+        // let indices = mesh.indices_mut().unwrap();
 
-        match indices {
-            Indices::U16(items) => items.reverse(),
-            Indices::U32(items) => items.reverse(),
-        }
+        // match indices {
+        //     Indices::U16(items) => items.reverse(),
+        //     Indices::U32(items) => items.reverse(),
+        // }
 
         let VertexAttributeValues::Float32x3(values) =
             mesh.attribute(Mesh::ATTRIBUTE_NORMAL).unwrap()
@@ -115,7 +114,7 @@ impl From<ParticleMeshQuad> for Mesh {
 
         let values = uv_values
             .into_iter()
-            .map(|v| [v[0], v[1], value.frame as f32, 0.0])
+            .map(|v| [1. - v[0], 1. - v[1], value.frame as f32, 0.0])
             .collect::<Vec<_>>();
 
         mesh.insert_attribute(ATTRIBUTE_UV_FRAME, values);
@@ -237,7 +236,7 @@ impl Material for ParticleMaterialQuad {
             // ATTRIBUTE_UV_MULT.at_shader_location(9),
         ])?;
         descriptor.vertex.buffers = vec![vertex_layout];
-        descriptor.primitive.cull_mode = None;
+        // descriptor.primitive.cull_mode = None;
 
         Ok(())
     }

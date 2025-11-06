@@ -41,10 +41,7 @@ pub async fn load_navigation_grid(
 
     let min_bounds = nav_grid.header.min_bounds.xz();
 
-    let min_position = vec2(
-        min_bounds.x,
-        -(min_bounds.y + nav_grid.header.z_cell_count as f32 * nav_grid.header.cell_size),
-    );
+    let min_position = vec2(min_bounds.x, min_bounds.y);
 
     let cell_size = nav_grid.header.cell_size;
 
@@ -74,7 +71,7 @@ pub async fn load_navigation_grid(
         cell_size,
         x_len,
         y_len,
-        cells: cells.chunks(x_len).map(|v| v.to_vec()).rev().collect(),
+        cells: cells.chunks(x_len).map(|v| v.to_vec()).collect(),
         height_x_len: nav_grid.height_samples.x_count as usize,
         height_y_len: nav_grid.height_samples.z_count as usize,
         height_samples: nav_grid
@@ -82,7 +79,6 @@ pub async fn load_navigation_grid(
             .samples
             .chunks(nav_grid.height_samples.x_count as usize)
             .map(|v| v.to_vec())
-            .rev()
             .collect(),
     })
 }

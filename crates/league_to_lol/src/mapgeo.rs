@@ -52,16 +52,8 @@ pub async fn save_mapgeo(loader: &LeagueWadMapLoader) -> Result<Vec<ConfigGeomet
                 mesh_path,
                 material_path,
                 bounding_box: Aabb3d {
-                    min: map_mesh
-                        .bounding_box
-                        .min
-                        .with_z(-map_mesh.bounding_box.max.z)
-                        .into(),
-                    max: map_mesh
-                        .bounding_box
-                        .max
-                        .with_z(-map_mesh.bounding_box.min.z)
-                        .into(),
+                    min: map_mesh.bounding_box.min.into(),
+                    max: map_mesh.bounding_box.max.into(),
                 },
                 geo_mesh: map_mesh.clone(),
             });

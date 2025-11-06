@@ -91,7 +91,7 @@ impl ConfigNavigationGrid {
     }
 
     pub fn get_map_center_position(&self) -> Vec3 {
-        self.get_world_position_by_position(&vec2(self.get_width() / 2.0, -self.get_height() / 2.0))
+        self.get_world_position_by_position(&vec2(self.get_width() / 2.0, self.get_height() / 2.0))
     }
 }
 

@@ -1,10 +1,6 @@
 // use bevy::window::CursorGrabMode;
 use bevy::{input::mouse::MouseWheel, prelude::*};
-
-// 相机基础偏移量
-pub const CAMERA_OFFSET_X: f32 = 0.0;
-pub const CAMERA_OFFSET_Y: f32 = 1911.85;
-pub const CAMERA_OFFSET_Z: f32 = 1289.56;
+use league_utils::neg_vec_z;
 
 // 相机距离和位置配置
 pub const CAMERA_FAR_Z: f32 = 22000.0;
@@ -23,7 +19,7 @@ pub const CAMERA_MAP_CONSTRAIN_OFFSET_RIGHT: f32 = 10000.0;
 pub const CAMERA_MAP_CONSTRAIN_OFFSET_TOP: f32 = 6000.0;
 pub const CAMERA_MAP_CONSTRAIN_OFFSET_BOTTOM: f32 = -2000.0;
 
-pub const CAMERA_OFFSET: Vec3 = Vec3::new(CAMERA_OFFSET_X, CAMERA_OFFSET_Y, CAMERA_OFFSET_Z);
+pub const CAMERA_OFFSET: Vec3 = Vec3::new(0.0, 1911.85, -1289.56);
 
 #[derive(SystemSet, Debug, Hash, PartialEq, Eq, Clone)]
 pub struct CameraInit;
@@ -85,7 +81,8 @@ fn update(mut q_camera: Query<(&mut Transform, &CameraState), Changed<CameraStat
         return;
     };
 
-    transform.translation = camera_state.position + (CAMERA_OFFSET * camera_state.scale);
+    transform.translation =
+        camera_state.position + (neg_vec_z(&CAMERA_OFFSET) * camera_state.scale);
     transform.look_at(camera_state.position, Vec3::Y);
 }
 
@@ -139,9 +136,9 @@ fn on_mouse_scroll(window: Query<&Window>, mut camera: Query<&mut CameraState, W
 
     // 检测上下边缘
     if cursor_position.y < edge_margin {
-        movement.z -= 1.0;
-    } else if cursor_position.y > window_size.y - edge_margin {
         movement.z += 1.0;
+    } else if cursor_position.y > window_size.y - edge_margin {
+        movement.z -= 1.0;
     }
 
     // 如果有移动，应用到相机
@@ -154,7 +151,7 @@ fn on_mouse_scroll(window: Query<&Window>, mut camera: Query<&mut CameraState, W
     };
 
     let new_position = camera_state.position
-        + movement
+        + neg_vec_z(&movement)
             * Vec3::new(
                 CAMERA_KEYBOARD_ORBIT_SPEED_X,
                 0.0,

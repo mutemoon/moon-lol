@@ -245,7 +245,7 @@ pub fn update_emitter(
             {
                 birth_scale0.x = birth_scale0.x * 2.;
                 birth_scale0.y = m_projection.as_ref().unwrap().m_y_range.unwrap();
-                birth_scale0.z = -birth_scale0.z * 2.;
+                birth_scale0.z = birth_scale0.z * 2.;
             }
 
             let transform = Transform::from_rotation(rotation_quat)
@@ -524,7 +524,7 @@ pub fn update_emitter_attached(
             {
                 birth_scale0.x = birth_scale0.x * 2.;
                 birth_scale0.y = m_projection.as_ref().unwrap().m_y_range.unwrap();
-                birth_scale0.z = -birth_scale0.z * 2.;
+                birth_scale0.z = birth_scale0.z * 2.;
             }
 
             let transform = Transform::from_rotation(rotation_quat)
@@ -637,7 +637,7 @@ pub fn update_decal_intersections(
 
         let current_bounding_box = Aabb3d::new(
             particle_decal_global_transform.translation(),
-            particle_decal_global_transform.scale().abs(),
+            particle_decal_global_transform.scale(),
         );
 
         for (geometry_entity, mesh3d, map_geometry) in q_map_geo.iter() {

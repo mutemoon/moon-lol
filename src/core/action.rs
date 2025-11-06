@@ -56,16 +56,11 @@ pub enum Action {
     Skill { index: usize, point: Vec2 },
 }
 
-fn on_command_action(
-    trigger: Trigger<CommandAction>,
-    mut commands: Commands,
-    q_attack: Query<&Attack>,
-) {
+fn on_command_action(trigger: Trigger<CommandAction>, mut commands: Commands) {
     let entity = trigger.target();
 
     match trigger.event().action {
         Action::Attack(target) => {
-            let attack = q_attack.get(entity).unwrap();
             commands
                 .entity(entity)
                 .trigger(CommandAttackAutoStart { target });
