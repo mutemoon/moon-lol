@@ -53,7 +53,7 @@ pub enum Action {
     Attack(Entity),
     Move(Vec2),
     Stop,
-    Skill { index: usize, point: Vec3 },
+    Skill { index: usize, point: Vec2 },
 }
 
 fn on_command_action(

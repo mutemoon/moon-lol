@@ -43,7 +43,7 @@ pub fn on_action_command(
             continue;
         };
 
-        let distance = target_transform.translation.distance(translation);
+        let distance = target_transform.translation.xz().distance(translation);
         if distance < min_distance {
             min_distance = distance;
             target_bundle = Some(target);

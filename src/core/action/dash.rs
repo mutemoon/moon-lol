@@ -2,7 +2,8 @@ use bevy::prelude::*;
 use bevy_behave::prelude::BehaveTrigger;
 
 use crate::core::{
-    CommandMovement, MovementAction, EventMovementEnd, MovementWay, SkillEffectBehaveCtx, SkillEffectContext,
+    CommandMovement, EventMovementEnd, MovementAction, MovementWay, SkillEffectBehaveCtx,
+    SkillEffectContext,
 };
 
 #[derive(Debug, Clone)]
@@ -27,14 +28,14 @@ pub fn on_action_dash(
             let skill_effect_ctx = q_skill_effect_ctx.get(behave_entity).ok();
             let skill_effect_ctx = skill_effect_ctx.unwrap();
             let transform = q_transform.get(entity).unwrap();
-            let vector = skill_effect_ctx.point - transform.translation;
+            let vector = skill_effect_ctx.point - transform.translation.xz();
             let distance = vector.length();
 
             let destination = if distance < *max {
                 skill_effect_ctx.point
             } else {
                 let direction = vector.normalize();
-                let dash_point = transform.translation + direction * *max;
+                let dash_point = transform.translation.xz() + direction * *max;
                 dash_point
             };
 
@@ -44,7 +45,7 @@ pub fn on_action_dash(
                 .trigger(CommandMovement {
                     priority: 100,
                     action: MovementAction::Start {
-                        way: MovementWay::Path(vec![destination.xz()]),
+                        way: MovementWay::Path(vec![destination]),
                         speed: Some(*speed),
                     },
                 });

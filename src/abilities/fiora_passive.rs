@@ -5,6 +5,7 @@ use rand::random;
 
 use league_utils::hash_bin;
 use lol_core::Team;
+use serde::{Deserialize, Serialize};
 
 use crate::{
     abilities::BuffFioraR,
@@ -40,7 +41,7 @@ struct FioraVitalLastDirection {
 #[derive(Component, Default)]
 pub struct AbilityFioraPassive;
 
-#[derive(Component)]
+#[derive(Component, Clone, Serialize, Deserialize)]
 pub struct Vital {
     pub direction: Direction,
     pub active_timer: Timer,

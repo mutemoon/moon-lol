@@ -112,7 +112,7 @@ pub fn on_key_pressed(
                 if res_input.just_pressed(*key) {
                     action = Some(Action::Skill {
                         index: *skill_id,
-                        point: position,
+                        point: position.xz(),
                     });
                     break;
                 }

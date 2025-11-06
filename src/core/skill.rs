@@ -38,13 +38,13 @@ pub struct Skill {
 
 #[derive(Component)]
 pub struct SkillEffectContext {
-    pub point: Vec3,
+    pub point: Vec2,
 }
 
 #[derive(Event)]
 pub struct CommandSkillStart {
     pub index: usize,
-    pub point: Vec3,
+    pub point: Vec2,
 }
 
 fn on_skill_cast(

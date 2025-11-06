@@ -19,18 +19,15 @@ impl Plugin for PluginGymEnv {
 }
 
 #[derive(Component)]
-struct AttackTarget;
+pub struct AttackTarget;
 
 fn setup_fiora_player(
     mut commands: Commands,
-    mut virtual_time: ResMut<Time<Virtual>>,
     mut res_animation_graph: ResMut<Assets<AnimationGraph>>,
     config_game: Res<ConfigGame>,
     asset_server: Res<AssetServer>,
     grid: Res<ConfigNavigationGrid>,
 ) {
-    virtual_time.set_relative_speed(1.0);
-
     let center = grid.get_map_center_position();
 
     for (_, team, skin) in config_game.legends.iter() {

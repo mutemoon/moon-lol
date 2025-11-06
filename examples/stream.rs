@@ -22,18 +22,28 @@ use bevy::{
         renderer::{RenderContext, RenderDevice, RenderQueue},
         Extract, Render, RenderApp, RenderSet,
     },
+    time::TimeUpdateStrategy,
     window::ExitCondition,
     winit::WinitPlugin,
 };
 use crossbeam_channel::{Receiver, Sender};
 use image::codecs::jpeg::JpegEncoder;
+use rocket::{
+    get,
+    http::{ContentType, Method, Status},
+    launch, post, routes,
+    serde::json::Json,
+    State,
+};
+use rocket_cors::{AllowedOrigins, CorsOptions};
 
 use moon_lol::{
-    abilities::PluginAbilities,
-    core::{Action, CameraInit, CommandAction, Controller, PluginCore},
+    abilities::{PluginAbilities, Vital},
+    core::{Action, CameraInit, CommandAction, Controller, Health, PluginCore},
     entities::{PluginBarrack, PluginEntities},
-    server::PluginGymEnv,
+    server::{AttackTarget, PluginGymEnv},
 };
+use serde::{Deserialize, Serialize};
 
 #[derive(Resource, Deref)]
 struct MainWorldReceiver(Receiver<Vec<u8>>);
@@ -255,17 +265,25 @@ fn receive_image_from_buffer(
     }
 }
 
-use rocket::{
-    get,
-    http::{ContentType, Status},
-    launch, post, routes,
-    serde::json::Json,
-    State,
-};
-
 struct BevyAppState {
     sender: Sender<AppMsg>,
     image: Arc<Mutex<Option<Vec<u8>>>>,
+    observe: Arc<Mutex<Option<Observe>>>,
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+struct Observe {
+    time: f32,
+    position: Vec2,
+    minions: ObserveMinion,
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+struct ObserveMinion {
+    entity: Entity,
+    position: Vec2,
+    health: f32,
+    vital: Vital,
 }
 
 enum AppMsg {
@@ -275,6 +293,9 @@ enum AppMsg {
 #[post("/step", data = "<action_json>")]
 fn step(state: &State<BevyAppState>, action_json: Json<Action>) -> Status {
     println!("[STEP] 请求 POST /step");
+
+    // 清除上一张图像
+    *state.image.lock().unwrap() = None;
 
     let action: Action = action_json.into_inner();
 
@@ -291,34 +312,39 @@ fn step(state: &State<BevyAppState>, action_json: Json<Action>) -> Status {
 }
 
 #[get("/render")]
-fn render(state: &State<BevyAppState>) -> (ContentType, Vec<u8>) {
+fn render(state: &State<BevyAppState>) -> Result<(ContentType, Vec<u8>), Status> {
     println!("[STEP] /render 请求已收到");
 
-    // 锁定、解包并克隆 Option<Vec<u8>>
     let image_option = state.image.lock().unwrap().clone();
 
-    // 使用 match 来处理 Option
-    match image_option {
-        Some(image_data) => {
-            // 如果有图像数据...
-            println!(
-                "[STEP] 找到图像 ({} 字节)，正在作为 JPEG 返回。",
-                image_data.len()
-            );
-
-            // ...将其包装在 content::Raw 中并指定 JPEG 类型，
-            // 然后将这一切包装在 Some() 中返回。
-            (ContentType::JPEG, image_data)
-        }
-        None => {
-            // 如果没有图像数据...
-            println!("[STEP] 图像尚未准备好 (返回 404)。");
-
-            // ...返回 None，Rocket 会自动发送 404 Not Found。
-            panic!()
-        }
+    // 使用 if let 优雅地处理 Option
+    if let Some(image_data) = image_option {
+        println!(
+            "[STEP] 找到图像 ({} 字节)，正在作为 JPEG 返回。",
+            image_data.len()
+        );
+        // Ok(T) 会返回 200 OK
+        Ok((ContentType::JPEG, image_data))
+    } else {
+        println!("[STEP] 图像尚未准备好 (返回 404)。");
+        // Err(Status) 会返回对应的 HTTP 错误状态
+        Err(Status::NotFound)
     }
-    // 你原来的 "update 完成" 打印语句不再需要，因为函数已经返回了
+}
+
+#[get("/observe")]
+fn observe(state: &State<BevyAppState>) -> Result<Json<Observe>, Status> {
+    println!("[OBSERVE] 请求 POST /observe");
+
+    let observe_option = state.observe.lock().unwrap().clone();
+
+    if let Some(observe_data) = observe_option {
+        // Ok(Json(T)) 会序列化 T 并返回 200 OK
+        Ok(Json(observe_data))
+    } else {
+        println!("[OBSERVE] Observe 数据尚未准备好 (返回 404)。");
+        Err(Status::NotFound)
+    }
 }
 
 #[launch]
@@ -327,14 +353,18 @@ fn rocket() -> _ {
 
     // 2. 创建共享的 image 数据
     let shared_image = Arc::new(Mutex::new(None));
+    let shared_observe = Arc::new(Mutex::new(None));
 
     let bevy_state = BevyAppState {
         sender: tx,
         image: shared_image.clone(),
+        observe: shared_observe.clone(),
     };
 
     thread::spawn(move || {
         let mut app = App::new();
+
+        let fixed_update_timestep = Time::<Fixed>::default().timestep();
 
         app.add_plugins(
             DefaultPlugins
@@ -351,11 +381,19 @@ fn rocket() -> _ {
         .add_plugins(PluginAbilities)
         .add_plugins(PluginGymEnv)
         .add_plugins(PluginImageCopy)
+        .insert_resource(TimeUpdateStrategy::ManualDuration(fixed_update_timestep))
         .insert_resource(SceneController::new(1920, 1080))
         .add_systems(Startup, setup.after(CameraInit));
 
         app.finish();
         app.cleanup();
+
+        app.update();
+        receive_img(app.world_mut());
+        app.update();
+        receive_img(app.world_mut());
+        app.update();
+        receive_img(app.world_mut());
 
         loop {
             match rx.recv() {
@@ -376,104 +414,13 @@ fn rocket() -> _ {
                         // 假设这是在你的循环或函数内部
                         let world = app.world_mut();
 
-                        // --- 移植自 update_and_stream_image 的逻辑 ---
-
-                        // ----- 块 1: 检查通道 (不可变借用) -----
-                        // 我们将结果放入一个 Option 中。
-                        // `receiver` 的不可变借用在此块结束时被释放。
-                        let image_data: Option<Vec<u8>> = {
-                            let receiver = world.resource::<MainWorldReceiver>();
-                            info!("[Rocket Loop] 尝试从 RenderWorld 接收图像...");
-                            // 使用 .ok() 将 Result 转换为 Option，非阻塞
-                            receiver.recv().ok()
+                        if let Some(image) = receive_img(world) {
+                            *shared_image.lock().unwrap() = Some(image);
                         };
 
-                        // 仅在成功接收到数据时才继续
-                        if let Some(image_data) = image_data {
-                            if image_data.is_empty() {
-                                info!("[Rocket Loop] 收到空的图像数据。");
-                                // 如果在循环中，你可能想用 continue;
-                                return;
-                            }
-
-                            info!(
-                                "[Rocket Loop] 收到 {} 字节的原始图像数据。正在处理...",
-                                image_data.len()
-                            );
-
-                            // ----- 块 2: 获取要保存的图像 ID (第一个可变借用) -----
-                            // 假设你只关心第一个实体 (根据你原来的 `break;`)
-                            // `images_to_save_query` 的可变借用在此块结束时被释放。
-                            let image_to_save_id = {
-                                let mut images_to_save_query = world.query::<&ImageToSave>();
-                                // 获取第一个匹配实体的 ID
-                                images_to_save_query.iter(world).next().map(|img| img.id())
-                            };
-
-                            // 仅在找到要保存的实体时才继续
-                            if let Some(image_id) = image_to_save_id {
-                                // ----- 块 3: 修改图像资源 (第二个可变借用) -----
-                                // 现在以前的借用都已释放，我们可以安全地获取 `Assets<Image>`。
-                                let mut images = world.resource_mut::<Assets<Image>>();
-
-                                // 你的原始逻辑中，这里可能会 panic 如果 ID 无效。
-                                // 最好使用 get_mut 并处理 Option。
-                                let Some(img_bytes) = images.get_mut(image_id) else {
-                                    warn!("[Rocket Loop] 找不到 ImageToSave ID 对应的 Asset。");
-                                    return; // 或 continue
-                                };
-
-                                // ... 你的图像处理逻辑 ...
-                                let row_bytes = img_bytes.width() as usize
-                                    * img_bytes.texture_descriptor.format.pixel_size();
-                                let aligned_row_bytes =
-                                    RenderDevice::align_copy_bytes_per_row(row_bytes);
-
-                                if row_bytes == aligned_row_bytes {
-                                    // 注意：image_data 在这里被移动 (move)
-                                    img_bytes.data = Some(image_data);
-                                } else {
-                                    img_bytes.data = Some(
-                image_data // `image_data` 在这里也被移动
-                    .chunks(aligned_row_bytes)
-                    .take(img_bytes.height() as usize)
-                    .flat_map(|row| &row[..row_bytes.min(row.len())])
-                    .cloned()
-                    .collect(),
-            );
-                                }
-
-                                let img = match img_bytes.clone().try_into_dynamic() {
-                                    Ok(img) => img.to_rgba8(),
-                                    Err(e) => {
-                                        warn!("[Rocket Loop] 转换图像失败: {e:?}");
-                                        return; // 或 continue
-                                    }
-                                };
-
-                                let mut jpeg_bytes = Vec::new();
-                                let mut encoder =
-                                    JpegEncoder::new_with_quality(&mut jpeg_bytes, 80);
-
-                                info!("[Rocket Loop] 正在将图像编码为 JPEG...");
-
-                                match encoder.encode_image(&img) {
-                                    Ok(_) => {
-                                        info!("[Rocket Loop] JPEG 编码成功 ({} 字节)。存入 shared_image...",jpeg_bytes.len());
-                                        *shared_image.lock().unwrap() = Some(jpeg_bytes);
-                                    }
-                                    Err(e) => {
-                                        warn!("[Rocket Loop] JPEG 编码失败: {e}");
-                                    }
-                                }
-                                // `break;`不再需要，因为我们只处理了 `image_to_save_id`
-                            } else {
-                                info!("[Rocket Loop] 收到图像数据，但未找到 ImageToSave 实体。");
-                            }
-                        } else {
-                            info!("[Rocket Loop] 未收到图像数据。");
-                        }
-                        // --- 移植逻辑结束 ---
+                        if let Some(observe) = get_observe(world) {
+                            *shared_observe.lock().unwrap() = Some(observe);
+                        };
                     }
                 },
                 Err(_) => {}
@@ -481,7 +428,119 @@ fn rocket() -> _ {
         }
     });
 
+    let cors = CorsOptions::default()
+        .allowed_origins(AllowedOrigins::all()) // 允许所有来源
+        .allowed_methods(
+            // 允许 GET, POST, 和 OPTIONS (OPTIONS 是预检请求必需的)
+            vec![Method::Get, Method::Post, Method::Options]
+                .into_iter()
+                .map(From::from)
+                .collect(),
+        )
+        .allowed_headers(rocket_cors::AllowedHeaders::all()) // 允许所有请求头
+        .allow_credentials(true); // 允许凭证 (cookies, auth headers)
+
     rocket::build()
+        .attach(cors.to_cors().expect("CORS fairing 创建失败"))
         .manage(bevy_state)
-        .mount("/", routes![step, render])
+        .mount("/", routes![step, render, observe])
+}
+
+fn receive_img(world: &mut World) -> Option<Vec<u8>> {
+    let receiver = world.resource::<MainWorldReceiver>();
+    info!("[Rocket Loop] 尝试从 RenderWorld 接收图像...");
+
+    let Some(image_data) = receiver.recv().ok() else {
+        info!("[Rocket Loop] 未收到图像数据。");
+        return None;
+    };
+
+    if image_data.is_empty() {
+        info!("[Rocket Loop] 收到空的图像数据。");
+        return None;
+    }
+
+    info!(
+        "[Rocket Loop] 收到 {} 字节的原始图像数据。正在处理...",
+        image_data.len()
+    );
+
+    let mut images_to_save_query = world.query::<&ImageToSave>();
+    let Some(image_id) = images_to_save_query.iter(world).next().map(|img| img.id()) else {
+        info!("[Rocket Loop] 收到图像数据，但未找到 ImageToSave 实体。");
+        return None;
+    };
+
+    let mut images = world.resource_mut::<Assets<Image>>();
+
+    let Some(img_bytes) = images.get_mut(image_id) else {
+        warn!("[Rocket Loop] 找不到 ImageToSave ID 对应的 Asset。");
+        return None;
+    };
+
+    let row_bytes = img_bytes.width() as usize * img_bytes.texture_descriptor.format.pixel_size();
+    let aligned_row_bytes = RenderDevice::align_copy_bytes_per_row(row_bytes);
+
+    if row_bytes == aligned_row_bytes {
+        img_bytes.data = Some(image_data);
+    } else {
+        img_bytes.data = Some(
+            image_data
+                .chunks(aligned_row_bytes)
+                .take(img_bytes.height() as usize)
+                .flat_map(|row| &row[..row_bytes.min(row.len())])
+                .cloned()
+                .collect(),
+        );
+    }
+
+    let Ok(dyn_img) = img_bytes.clone().try_into_dynamic() else {
+        warn!("[Rocket Loop] 转换图像失败");
+        return None;
+    };
+    let img = dyn_img.to_rgba8();
+
+    let mut jpeg_bytes = Vec::new();
+    let mut encoder = JpegEncoder::new_with_quality(&mut jpeg_bytes, 80);
+
+    info!("[Rocket Loop] 正在将图像编码为 JPEG...");
+
+    if encoder.encode_image(&img).is_err() {
+        warn!("[Rocket Loop] JPEG 编码失败");
+    }
+
+    Some(jpeg_bytes)
+}
+
+fn get_observe(world: &mut World) -> Option<Observe> {
+    let Ok((entity, transform, _)) = world
+        .query::<(Entity, &Transform, &Controller)>()
+        .single(world)
+    else {
+        return None;
+    };
+
+    let position = transform.translation.xz();
+
+    let Ok((target_entity, target_transform, health, vital, _)) = world
+        .query::<(Entity, &Transform, &Health, &Vital, &AttackTarget)>()
+        .single(world)
+    else {
+        return None;
+    };
+
+    let minions = ObserveMinion {
+        entity: target_entity,
+        position: target_transform.translation.xz(),
+        health: health.value,
+        vital: vital.clone(),
+    };
+
+    let time = world.resource::<Time>().elapsed_secs();
+
+    Some(Observe {
+        time,
+        position,
+        minions,
+    })
 }
