@@ -11,7 +11,7 @@ use lol_core::{Lane, Team};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    core::{spawn_skin_entity, Armor, Attack, Bounding, Damage, Health, Movement, ResourceCache},
+    core::{Armor, Attack, Bounding, CommandSkinSpawn, Damage, Health, Movement, ResourceCache},
     entities::Minion,
 };
 
@@ -242,12 +242,11 @@ fn barracks_spawning_system(
 
         let entity = commands.spawn(transform.compute_transform()).id();
 
-        spawn_skin_entity(
-            &mut commands,
-            &mut res_animation_graph,
-            &asset_server,
+        commands.trigger_targets(
+            CommandSkinSpawn {
+                skin_path: character.skin.clone(),
+            },
             entity,
-            &config_character_skin,
         );
 
         let mut path = res_game_config.minion_paths.get(lane).unwrap().clone();

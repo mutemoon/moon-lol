@@ -71,6 +71,7 @@ plugin_group! {
         :PluginRotate,
         :PluginRun,
         :PluginSkill,
+        :PluginSkin,
         :PluginState,
         :PluginUI,
     }

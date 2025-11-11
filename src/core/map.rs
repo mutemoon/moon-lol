@@ -6,9 +6,7 @@ use league_file::LeagueMapGeoMesh;
 use league_utils::neg_mat_z;
 use lol_config::ConfigMap;
 
-use crate::core::{
-    spawn_geometry_object, spawn_skin_entity, Action, CommandAction, Controller, ResourceCache,
-};
+use crate::core::{spawn_geometry_object, Action, CommandAction, CommandSkinSpawn, Controller};
 
 pub const MAP_WIDTH: f32 = 14400.0;
 pub const MAP_HEIGHT: f32 = 14765.0;
@@ -35,13 +33,7 @@ impl Plugin for PluginMap {
     }
 }
 
-fn setup(
-    mut commands: Commands,
-    mut res_animation_graph: ResMut<Assets<AnimationGraph>>,
-    asset_server: Res<AssetServer>,
-    configs: Res<ConfigMap>,
-    res_resource_cache: Res<ResourceCache>,
-) {
+fn setup(mut commands: Commands, asset_server: Res<AssetServer>, configs: Res<ConfigMap>) {
     let geo_entity = spawn_geometry_objects_from_configs(&mut commands, &asset_server, &configs);
 
     commands
@@ -49,13 +41,7 @@ fn setup(
         .insert(Map)
         .observe(on_click_map);
 
-    let environment_entities = spawn_environment_objects_from_configs(
-        &mut commands,
-        &mut res_animation_graph,
-        &asset_server,
-        &configs,
-        &res_resource_cache,
-    );
+    let environment_entities = spawn_environment_objects_from_configs(&mut commands, &configs);
 
     for entity in environment_entities {
         commands.entity(entity).insert(Pickable::IGNORE);
@@ -64,10 +50,7 @@ fn setup(
 
 pub fn spawn_environment_objects_from_configs(
     commands: &mut Commands,
-    res_animation_graph: &mut ResMut<Assets<AnimationGraph>>,
-    asset_server: &Res<AssetServer>,
     configs: &ConfigMap,
-    resource_cache: &ResourceCache,
 ) -> Vec<Entity> {
     let mut entities = Vec::new();
 
@@ -77,11 +60,12 @@ pub fn spawn_environment_objects_from_configs(
                 &environment_object.transform,
             )))
             .id();
-        let skin = resource_cache
-            .skins
-            .get(&environment_object.definition.skin)
-            .unwrap();
-        spawn_skin_entity(commands, res_animation_graph, asset_server, entity, skin);
+        commands.trigger_targets(
+            CommandSkinSpawn {
+                skin_path: environment_object.definition.skin.clone(),
+            },
+            entity,
+        );
         entities.push(entity);
     }
 

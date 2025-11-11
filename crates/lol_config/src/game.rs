@@ -8,11 +8,9 @@ use serde::{
     Deserializer,
 };
 
-use crate::ConfigCharacterSkin;
-
 #[derive(Resource, Default)]
 pub struct ConfigGame {
-    pub legends: Vec<(Entity, ConfigCharacterSkin)>,
+    pub legends: Vec<(Entity, String)>,
 }
 
 type ConfigLegend = (ConfigCharacter, Vec<Box<dyn PartialReflect>>);

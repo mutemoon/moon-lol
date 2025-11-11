@@ -12,15 +12,70 @@ use league_core::{
 use league_utils::hash_bin;
 use lol_config::ConfigCharacterSkin;
 
-use crate::core::{Animation, AnimationNode, AnimationNodeF32, AnimationState};
+use crate::core::{Animation, AnimationNode, AnimationNodeF32, AnimationState, ResourceCache};
 
-pub fn spawn_skin_entity(
+// 皮肤系统事件定义
+#[derive(Event)]
+pub struct EventSkinSpawn;
+
+#[derive(Event)]
+pub struct EventSkinSpawnComplete;
+
+#[derive(Event)]
+pub struct CommandSkinSpawn {
+    pub skin_path: String,
+}
+
+// 皮肤系统插件
+#[derive(Default)]
+pub struct PluginSkin;
+
+impl Plugin for PluginSkin {
+    fn build(&self, app: &mut App) {
+        app.add_event::<CommandSkinSpawn>();
+        app.add_event::<EventSkinSpawn>();
+        app.add_event::<EventSkinSpawnComplete>();
+
+        app.add_observer(on_command_skin_spawn);
+    }
+}
+
+// 皮肤生成命令处理器
+fn on_command_skin_spawn(
+    trigger: Trigger<CommandSkinSpawn>,
+    mut commands: Commands,
+    mut res_animation_graph: ResMut<Assets<AnimationGraph>>,
+    asset_server: Res<AssetServer>,
+    res_resource_cache: Res<ResourceCache>,
+) {
+    let entity = trigger.target();
+
+    commands.trigger_targets(EventSkinSpawn, entity);
+
+    // 从 skin_path 获取 ConfigCharacterSkin
+    let skin = res_resource_cache
+        .skins
+        .get(&trigger.skin_path)
+        .unwrap_or_else(|| panic!("Skin not found: {}", trigger.skin_path));
+
+    spawn_skin_entity(
+        &mut commands,
+        &mut res_animation_graph,
+        &asset_server,
+        entity,
+        skin,
+    );
+
+    commands.trigger_targets(EventSkinSpawnComplete, entity);
+}
+
+fn spawn_skin_entity(
     commands: &mut Commands,
     res_animation_graph: &mut ResMut<Assets<AnimationGraph>>,
     asset_server: &Res<AssetServer>,
     entity: Entity,
     skin: &ConfigCharacterSkin,
-) -> Entity {
+) {
     let material_handle: Handle<StandardMaterial> = asset_server.load(skin.material_path.clone());
 
     commands.entity(entity).insert(Visibility::default());
@@ -192,8 +247,6 @@ pub fn spawn_skin_entity(
     }
 
     commands.entity(entity).insert(skinned_mesh.clone());
-
-    entity
 }
 
 pub fn spawn_shadow_skin_entity<M: Material>(

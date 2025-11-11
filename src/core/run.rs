@@ -7,10 +7,6 @@ pub struct PluginRun;
 
 impl Plugin for PluginRun {
     fn build(&self, app: &mut App) {
-        app.add_event::<EventRunStart>();
-        app.add_event::<CommandRunStart>();
-        app.add_event::<CommandRunStop>();
-
         app.add_systems(FixedUpdate, fixed_update);
 
         app.add_observer(on_event_movement_end);

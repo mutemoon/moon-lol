@@ -64,7 +64,6 @@ impl Plugin for PluginResource {
             get_struct_from_file(CONFIG_PATH_MAP_NAV_GRID).unwrap();
 
         app.insert_resource(config_map);
-        app.insert_resource(resource_cache);
         app.insert_resource(nav_grid);
 
         let world = app.world_mut();
@@ -89,8 +88,11 @@ impl Plugin for PluginResource {
                 &character_config.skin_path
             ))
             .unwrap();
+            resource_cache
+                .skins
+                .insert(character_config.skin_path.clone(), skin);
 
-            legends.push((entity, skin));
+            legends.push((entity, character_config.skin_path.clone()));
 
             for component in &components {
                 let type_info = component.get_represented_type_info().unwrap();
@@ -122,6 +124,7 @@ impl Plugin for PluginResource {
         }
 
         app.insert_resource(ConfigGame { legends });
+        app.insert_resource(resource_cache);
     }
 }
 
