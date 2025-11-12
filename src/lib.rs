@@ -20,6 +20,7 @@ plugin_group! {
 
         :PluginBarrack,
         :PluginChampion,
+        :PluginCharacter,
         :PluginDebugSphere,
         :PluginFiora,
         :PluginMinion,

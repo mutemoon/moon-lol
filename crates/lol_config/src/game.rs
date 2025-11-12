@@ -10,7 +10,7 @@ use serde::{
 
 #[derive(Resource, Default)]
 pub struct ConfigGame {
-    pub legends: Vec<(Entity, String)>,
+    pub legends: Vec<(Entity, String, String)>,
 }
 
 type ConfigLegend = (ConfigCharacter, Vec<Box<dyn PartialReflect>>);
@@ -18,6 +18,7 @@ type ConfigLegend = (ConfigCharacter, Vec<Box<dyn PartialReflect>>);
 #[derive(Deserialize, Debug)]
 pub struct ConfigCharacter {
     pub skin_path: String,
+    pub character_record: String,
 }
 
 pub struct CharacterConfigsDeserializer<'a> {

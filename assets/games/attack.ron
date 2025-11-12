@@ -1,6 +1,7 @@
 [
     (
         skin_path: "Characters/Fiora/Skins/Skin22",
+        character_record: "Characters/Fiora/CharacterRecords/Root",
     ),
     {
         "bevy_transform::components::transform::Transform": (
@@ -8,14 +9,16 @@
             rotation: (0.0, 0.0, 0.0, 1.0),
             scale: (1.0, 1.0, 1.0),
         ),
-        "moon_lol::movement::Movement": ( speed: 425.0 ),
+        "moon_lol::core::movement::Movement": ( speed: 425.0 ),
         "lol_core::team::Team": Order,
-        "moon_lol::damage::Damage": (100.0),
+        "moon_lol::core::damage::Damage": (100.0),
         "moon_lol::entities::champions::fiora::Fiora": (),
-        "moon_lol::controller::Controller": (),
+        "moon_lol::core::controller::Controller": (),
+        "moon_lol::core::camera::Focus": (),
     },
     (
         skin_path: "Characters/Fiora/Skins/Skin22",
+        character_record: "Characters/Fiora/CharacterRecords/Root",
     ),
     {
         "bevy_transform::components::transform::Transform": (
@@ -23,10 +26,10 @@
             rotation: (0.0, 0.0, 0.0, 1.0),
             scale: (1.0, 1.0, 1.0),
         ),
-        "moon_lol::movement::Movement": ( speed: 425.0 ),
+        "moon_lol::core::movement::Movement": ( speed: 425.0 ),
         "lol_core::team::Team": Chaos,
         "moon_lol::entities::champion::Champion": (),
-        "moon_lol::life::Health": (
+        "moon_lol::core::life::Health": (
             value: 6000.0,
             max: 6000.0,
         ),

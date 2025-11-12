@@ -14,11 +14,6 @@ use crate::{
     entities::champion::Champion,
 };
 
-#[derive(Component, Reflect)]
-#[require(Champion, Name = Name::new("Fiora"))]
-#[reflect(Component)]
-pub struct Fiora;
-
 #[derive(Default)]
 pub struct PluginFiora;
 
@@ -29,6 +24,11 @@ impl Plugin for PluginFiora {
         app.add_systems(FixedUpdate, add_skills);
     }
 }
+
+#[derive(Component, Reflect)]
+#[require(Champion, Name = Name::new("Fiora"))]
+#[reflect(Component)]
+pub struct Fiora;
 
 pub fn add_skills(mut commands: Commands, q_fiora: Query<Entity, (With<Fiora>, Without<Skills>)>) {
     for entity in q_fiora.iter() {

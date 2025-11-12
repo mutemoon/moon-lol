@@ -20,9 +20,9 @@ pub async fn save_legends(
 
     let skin_path: String = format!("Characters/{}/Skins/{}", champion, skin);
 
-    // let character_record = wad_loader.load_character_record(&character_record_path);
+    let character_record_path = format!("Characters/{}/CharacterRecords/Root", champion);
 
-    let vfx_system_definition_datas = save_character(&loader, &skin_path).await?;
+    let vfx_system_definition_datas = save_character(&loader, &skin_path, &character_record_path).await?;
 
     for (_, vfx_system_definition_data) in vfx_system_definition_datas.iter() {
         let Some(ref complex_emitter_definition_data) =

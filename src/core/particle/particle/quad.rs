@@ -196,7 +196,7 @@ impl Material for ParticleMaterialQuad {
             // ATTRIBUTE_UV_MULT.at_shader_location(9),
         ])?;
         descriptor.vertex.buffers = vec![vertex_layout];
-        // descriptor.primitive.cull_mode = None;
+        descriptor.primitive.cull_mode = None;
 
         Ok(())
     }

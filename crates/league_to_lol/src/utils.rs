@@ -52,6 +52,11 @@ pub fn get_bin_path(path: &str) -> String {
     format!("{}.bin", path)
 }
 
+pub fn get_character_record_path(path: &str) -> String {
+    let name = path.split("/").nth(1).unwrap();
+    format!("Assets/Characters/{}/character_record", name)
+}
+
 pub fn get_struct_from_file<T: DeserializeOwned>(path: &str) -> Result<T, Error> {
     let mut file = File::open(format!("assets/{}", &get_bin_path(path)))?;
     let mut data = Vec::new();

@@ -19,12 +19,14 @@ use lol_config::{
 };
 
 use crate::{
-    get_bin_path, save_struct_to_file, save_wad_entry_to_file, skinned_mesh_to_intermediate, Error,
+    get_bin_path, get_character_record_path, save_struct_to_file, save_wad_entry_to_file,
+    skinned_mesh_to_intermediate, Error,
 };
 
 pub async fn save_character(
     loader: &LeagueWadLoader,
     skin: &str,
+    character_record_path: &str,
 ) -> Result<HashMap<u32, VfxSystemDefinitionData>, Error> {
     let (skin_character_data_properties, resource_resolver, flat_map) =
         loader.load_character_skin(&skin);
@@ -166,6 +168,11 @@ pub async fn save_character(
         blend_data,
     };
     save_struct_to_file(&path, &config_character_skin).await?;
+
+    // 保存 character_record
+    let character_record = loader.load_character_record(character_record_path);
+    let character_record_path = get_character_record_path(&character_record_path);
+    save_struct_to_file(&character_record_path, &character_record).await?;
 
     Ok(vfx_system_definition_datas)
 }

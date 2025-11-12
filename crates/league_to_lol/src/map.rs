@@ -31,7 +31,6 @@ pub async fn save_config_map(
     let mut characters = HashMap::new();
     let mut barrack_configs = HashMap::new();
     let mut environment_objects = HashMap::new();
-    let mut character_records = HashMap::new();
     let mut vfx_system_definition_datas = HashMap::new();
 
     for entry in map_loader
@@ -85,31 +84,27 @@ pub async fn save_config_map(
         }
     }
 
-    let mut skin_paths = Vec::new();
-    let mut record_paths = Vec::new();
+    let mut skin_and_record_pairs = Vec::new();
 
     for environment_object in environment_objects.values() {
-        skin_paths.push(environment_object.definition.skin.clone());
-        record_paths.push(environment_object.definition.character_record.clone());
+        skin_and_record_pairs.push((
+            environment_object.definition.skin.clone(),
+            environment_object.definition.character_record.clone(),
+        ));
     }
 
     for character in characters.values() {
-        skin_paths.push(character.skin.clone());
-        record_paths.push(character.character_record.clone());
+        skin_and_record_pairs.push((
+            character.skin.clone(),
+            character.character_record.clone(),
+        ));
     }
 
-    for skin_path in skin_paths {
+    for (skin_path, record_path) in skin_and_record_pairs {
         let skin_vfx_system_definition_datas =
-            save_character(&map_loader.wad_loader, &skin_path).await?;
+            save_character(&map_loader.wad_loader, &skin_path, &record_path).await?;
 
         vfx_system_definition_datas.extend(skin_vfx_system_definition_datas);
-    }
-
-    for record_path in record_paths {
-        let character_record = map_loader.wad_loader.load_character_record(&record_path);
-        character_records
-            .entry(record_path)
-            .or_insert(character_record);
     }
 
     for (champion, skin) in champions {
@@ -126,7 +121,6 @@ pub async fn save_config_map(
         characters,
         barrack_configs,
         environment_objects,
-        character_records,
         vfx_system_definition_datas,
     };
 

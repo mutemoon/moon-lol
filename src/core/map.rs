@@ -5,7 +5,7 @@ use bevy::{math::bounding::Aabb3d, prelude::*};
 use league_file::LeagueMapGeoMesh;
 use lol_config::ConfigMap;
 
-use crate::{spawn_geometry_object, Action, CommandAction, CommandSkinSpawn, Controller};
+use crate::{spawn_geometry_object, Action, CommandAction, CommandSpawnCharacter, Controller};
 
 pub const MAP_WIDTH: f32 = 14400.0;
 pub const MAP_HEIGHT: f32 = 14765.0;
@@ -58,7 +58,11 @@ pub fn spawn_environment_objects_from_configs(
             .spawn(Transform::from_matrix(environment_object.transform))
             .id();
         commands.trigger_targets(
-            CommandSkinSpawn {
+            CommandSpawnCharacter {
+                character_record_key: environment_object
+                    .definition
+                    .character_record
+                    .clone(),
                 skin_path: environment_object.definition.skin.clone(),
             },
             entity,

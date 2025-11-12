@@ -1,6 +1,8 @@
 use std::{fs::File, io::Read};
 
-use league_to_lol::{get_struct_from_file, CONFIG_PATH_MAP, CONFIG_PATH_MAP_NAV_GRID};
+use league_to_lol::{
+    get_character_record_path, get_struct_from_file, CONFIG_PATH_MAP, CONFIG_PATH_MAP_NAV_GRID,
+};
 use lol_config::{
     CharacterConfigsDeserializer, ConfigCharacterSkin, ConfigGame, ConfigMap, ConfigNavigationGrid,
 };
@@ -19,6 +21,7 @@ use bevy::{
     prelude::*,
     scene::ron::{self},
 };
+use league_core::CharacterRecord;
 use serde::de::DeserializeSeed;
 
 #[derive(Default)]
@@ -47,12 +50,26 @@ impl Plugin for PluginResource {
                 ))
                 .unwrap(),
             );
+            resource_cache.character_records.insert(
+                v.definition.character_record.clone(),
+                get_struct_from_file::<CharacterRecord>(&get_character_record_path(
+                    &v.definition.character_record,
+                ))
+                .unwrap(),
+            );
         }
 
         for (_, v) in config_map.characters.iter() {
             resource_cache.skins.insert(
                 v.skin.clone(),
                 get_struct_from_file(&format!("ASSETS/{}/config_character_skin", &v.skin)).unwrap(),
+            );
+            resource_cache.character_records.insert(
+                v.character_record.clone(),
+                get_struct_from_file::<CharacterRecord>(&get_character_record_path(
+                    &v.character_record,
+                ))
+                .unwrap(),
             );
         }
 
@@ -92,7 +109,20 @@ impl Plugin for PluginResource {
                 .skins
                 .insert(character_config.skin_path.clone(), skin);
 
-            legends.push((entity, character_config.skin_path.clone()));
+            // 加载 character_record 到 resource_cache
+            let character_record = get_struct_from_file::<CharacterRecord>(
+                &get_character_record_path(&character_config.character_record),
+            )
+            .unwrap();
+            resource_cache
+                .character_records
+                .insert(character_config.character_record.clone(), character_record);
+
+            legends.push((
+                entity,
+                character_config.skin_path.clone(),
+                character_config.character_record.clone(),
+            ));
 
             for component in &components {
                 let type_info = component.get_represented_type_info().unwrap();
@@ -133,6 +163,7 @@ pub struct ResourceCache {
     image: HashMap<String, Handle<Image>>,
     mesh: HashMap<String, Handle<Mesh>>,
     pub skins: HashMap<String, ConfigCharacterSkin>,
+    pub character_records: HashMap<String, CharacterRecord>,
 }
 
 impl ResourceCache {

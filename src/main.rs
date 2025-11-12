@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use moon_lol::{PluginBarrack, PluginCore, PluginLogging};
+use moon_lol::{PluginCore, PluginLogging};
 
 fn main() {
     App::new()
@@ -16,7 +16,7 @@ fn main() {
                     }),
                     ..default()
                 }),
-            PluginCore.build().disable::<PluginBarrack>(),
+            PluginCore.build(),
         ))
         .run();
 }

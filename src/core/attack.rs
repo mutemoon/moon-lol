@@ -130,24 +130,6 @@ impl Attack {
         }
     }
 
-    pub fn from_character_record(character_record: &CharacterRecord) -> Self {
-        Self::new(
-            character_record.attack_range.unwrap(),
-            character_record
-                .basic_attack
-                .clone()
-                .unwrap()
-                .m_attack_cast_time
-                .unwrap(),
-            character_record
-                .basic_attack
-                .clone()
-                .unwrap()
-                .m_attack_total_time
-                .unwrap(),
-        )
-    }
-
     pub fn with_bonus_attack_speed(mut self, bonus_attack_speed: f32) -> Self {
         self.bonus_attack_speed = bonus_attack_speed;
         self
@@ -165,10 +147,9 @@ impl Attack {
 
     pub fn animation_duration(&self) -> f32 {
         match self.windup_config {
-            WindupConfig::Legacy { attack_offset } => todo!(),
+            WindupConfig::Legacy { attack_offset } => (0.3 + attack_offset) * 4.,
             WindupConfig::Modern {
-                attack_cast_time,
-                attack_total_time,
+                attack_cast_time, ..
             } => attack_cast_time * 4.,
         }
     }

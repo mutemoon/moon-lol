@@ -10,7 +10,7 @@ use lol_core::{Lane, Team};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    core::{Armor, Attack, Bounding, CommandSkinSpawn, Damage, Health, Movement},
+    core::{Armor, Attack, Bounding, CommandSpawnCharacter, Damage, Health, Movement, ResourceCache},
     entities::Minion,
 };
 
@@ -102,6 +102,7 @@ fn barracks_spawning_system(
     mut commands: Commands,
     mut query: Query<(&GlobalTransform, &mut Barrack, &Team, &Lane)>,
     res_game_config: Res<ConfigMap>,
+    resource_cache: Res<ResourceCache>,
     time: Res<Time>,
 ) {
     for (transform, mut barrack_state, team, lane) in query.iter_mut() {
@@ -196,7 +197,7 @@ fn barracks_spawning_system(
 
         let character = res_game_config.characters.get(&link).unwrap();
 
-        let character_record = res_game_config
+        let character_record = resource_cache
             .character_records
             .get(&character.character_record)
             .unwrap();
@@ -234,10 +235,19 @@ fn barracks_spawning_system(
             height: character_record.health_bar_height.unwrap_or(0.0),
         };
 
-        let entity = commands.spawn(transform.compute_transform()).id();
+        let entity = commands
+            .spawn((
+                Transform::from_matrix(transform.compute_matrix()),
+                Minion::from(minion_config.minion_type),
+                lane.clone(),
+                team.clone(),
+            ))
+            .id();
 
+        // 触发角色生成命令（创建基础组件并加载皮肤）
         commands.trigger_targets(
-            CommandSkinSpawn {
+            CommandSpawnCharacter {
+                character_record_key: character.character_record.clone(),
                 skin_path: character.skin.clone(),
             },
             entity,
@@ -248,18 +258,6 @@ fn barracks_spawning_system(
         if *team == Team::Chaos {
             path.reverse();
         }
-
-        commands.entity(entity).insert((
-            Minion::from(minion_config.minion_type),
-            lane.clone(),
-            team.clone(),
-            health,
-            movement,
-            damage,
-            armor,
-            bounding,
-            Attack::from_character_record(character_record),
-        ));
 
         // 更新队列
         current_spawn.1 -= 1;
