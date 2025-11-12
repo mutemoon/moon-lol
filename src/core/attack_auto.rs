@@ -2,7 +2,7 @@ use std::time::Duration;
 
 use bevy::prelude::*;
 
-use crate::core::{
+use crate::{
     Attack, AttackState, AttackStatus, CommandAttackStart, CommandAttackStop, CommandRunStart,
     CommandRunStop, RunTarget,
 };

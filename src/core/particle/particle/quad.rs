@@ -6,7 +6,7 @@ use bevy::{
     prelude::*,
     render::{
         mesh::MeshVertexBufferLayoutRef,
-        mesh::{Indices, VertexAttributeValues},
+        mesh::VertexAttributeValues,
         render_resource::{
             AsBindGroup, BlendComponent, BlendFactor, BlendOperation, BlendState,
             RenderPipelineDescriptor, ShaderDefVal, ShaderRef, ShaderType,
@@ -15,12 +15,7 @@ use bevy::{
     },
 };
 
-use league_utils::neg_array_z;
-
-use crate::core::{
-    particle::{ATTRIBUTE_LIFETIME, ATTRIBUTE_UV_FRAME, ATTRIBUTE_WORLD_POSITION},
-    ATTRIBUTE_UV_MULT,
-};
+use crate::{ATTRIBUTE_LIFETIME, ATTRIBUTE_UV_FRAME, ATTRIBUTE_UV_MULT, ATTRIBUTE_WORLD_POSITION};
 
 #[derive(Clone, ShaderType, Debug)]
 pub struct UniformsVertexQuad {
@@ -58,66 +53,31 @@ impl From<ParticleMeshQuad> for Mesh {
 
         let transform = Transform::from_rotation(Quat::from_rotation_z(-PI / 2.));
 
-        let VertexAttributeValues::Float32x3(values) =
+        if let VertexAttributeValues::Float32x3(values) =
             mesh.attribute(Mesh::ATTRIBUTE_POSITION).unwrap()
-        else {
-            panic!();
-        };
+        {
+            let values = values
+                .into_iter()
+                .map(|v| transform.transform_point(Vec3::from_array(*v)))
+                .collect::<Vec<_>>();
 
-        let values = values
-            .into_iter()
-            .map(|v| transform.transform_point(Vec3::from_array(*v)))
-            .collect::<Vec<_>>();
+            mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, values.clone());
 
-        mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, values.clone());
+            mesh.insert_attribute(ATTRIBUTE_WORLD_POSITION, values.clone());
+        }
 
-        let VertexAttributeValues::Float32x3(values) =
-            mesh.attribute(Mesh::ATTRIBUTE_POSITION).unwrap()
-        else {
-            panic!();
-        };
-
-        let values = values
-            .into_iter()
-            .map(|v| neg_array_z(v))
-            .collect::<Vec<_>>();
-
-        mesh.insert_attribute(ATTRIBUTE_WORLD_POSITION, values.clone());
-
-        // let indices = mesh.indices_mut().unwrap();
-
-        // match indices {
-        //     Indices::U16(items) => items.reverse(),
-        //     Indices::U32(items) => items.reverse(),
-        // }
-
-        let VertexAttributeValues::Float32x3(values) =
-            mesh.attribute(Mesh::ATTRIBUTE_NORMAL).unwrap()
-        else {
-            panic!();
-        };
-
-        let values = values
-            .into_iter()
-            .map(|v| neg_array_z(v))
-            .collect::<Vec<_>>();
-
-        mesh.insert_attribute(Mesh::ATTRIBUTE_NORMAL, values.clone());
-
-        let VertexAttributeValues::Float32x2(uv_values) =
+        if let VertexAttributeValues::Float32x2(values) =
             mesh.attribute(Mesh::ATTRIBUTE_UV_0).unwrap().clone()
-        else {
-            panic!();
-        };
+        {
+            mesh.insert_attribute(ATTRIBUTE_UV_MULT, values.clone());
 
-        mesh.insert_attribute(ATTRIBUTE_UV_MULT, uv_values.clone());
+            let values = values
+                .into_iter()
+                .map(|v| [1. - v[0], 1. - v[1], value.frame as f32, 0.0])
+                .collect::<Vec<_>>();
 
-        let values = uv_values
-            .into_iter()
-            .map(|v| [1. - v[0], 1. - v[1], value.frame as f32, 0.0])
-            .collect::<Vec<_>>();
-
-        mesh.insert_attribute(ATTRIBUTE_UV_FRAME, values);
+            mesh.insert_attribute(ATTRIBUTE_UV_FRAME, values);
+        }
 
         let values = Vec::from([[0.0; 2]; 4]);
         mesh.insert_attribute(ATTRIBUTE_LIFETIME, values);

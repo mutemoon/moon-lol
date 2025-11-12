@@ -17,10 +17,9 @@ use bevy::{
 use league_core::VfxEmitterDefinitionDataPrimitive;
 use lol_config::ConfigMap;
 
-use crate::core::{
-    particle::{ATTRIBUTE_LIFETIME, ATTRIBUTE_WORLD_POSITION},
+use crate::{
     Lifetime, ParticleEmitterState, ParticleId, ParticleMaterialSkinnedMeshParticle,
-    ParticleMaterialUnlitDecal,
+    ParticleMaterialUnlitDecal, ATTRIBUTE_LIFETIME, ATTRIBUTE_WORLD_POSITION,
 };
 
 #[derive(Component)]

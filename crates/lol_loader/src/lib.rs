@@ -22,7 +22,6 @@ use bincode::deserialize;
 use binrw::BinRead;
 use league_file::{LeagueMeshStatic, LeagueTexture, LeagueTextureFormat};
 use league_to_lol::mesh_static_to_bevy_mesh;
-use league_utils::{neg_rotation_z, neg_vec_z};
 use thiserror::Error;
 
 use lol_config::{
@@ -267,10 +266,7 @@ impl AssetLoader for LeagueLoaderAnimationClip {
                     AnimationTargetId(Uuid::from_u128(*join_hash as u128)),
                     AnimatableCurve::new(
                         animated_field!(Transform::translation),
-                        AnimatableKeyframeCurve::new(
-                            translates.iter().map(|(time, vec)| (*time, neg_vec_z(vec))),
-                        )
-                        .unwrap(),
+                        AnimatableKeyframeCurve::new(translates.clone()).unwrap(),
                     ),
                 );
             }
@@ -280,12 +276,7 @@ impl AssetLoader for LeagueLoaderAnimationClip {
                     AnimationTargetId(Uuid::from_u128(*join_hash as u128)),
                     AnimatableCurve::new(
                         animated_field!(Transform::rotation),
-                        AnimatableKeyframeCurve::new(
-                            rotations
-                                .iter()
-                                .map(|(time, quat)| (*time, neg_rotation_z(quat))),
-                        )
-                        .unwrap(),
+                        AnimatableKeyframeCurve::new(rotations.clone()).unwrap(),
                     ),
                 );
             }

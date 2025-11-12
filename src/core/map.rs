@@ -3,10 +3,9 @@ use std::f32;
 use bevy::{math::bounding::Aabb3d, prelude::*};
 
 use league_file::LeagueMapGeoMesh;
-use league_utils::neg_mat_z;
 use lol_config::ConfigMap;
 
-use crate::core::{spawn_geometry_object, Action, CommandAction, CommandSkinSpawn, Controller};
+use crate::{spawn_geometry_object, Action, CommandAction, CommandSkinSpawn, Controller};
 
 pub const MAP_WIDTH: f32 = 14400.0;
 pub const MAP_HEIGHT: f32 = 14765.0;
@@ -56,9 +55,7 @@ pub fn spawn_environment_objects_from_configs(
 
     for (_, environment_object) in &configs.environment_objects {
         let entity = commands
-            .spawn(Transform::from_matrix(neg_mat_z(
-                &environment_object.transform,
-            )))
+            .spawn(Transform::from_matrix(environment_object.transform))
             .id();
         commands.trigger_targets(
             CommandSkinSpawn {

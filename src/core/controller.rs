@@ -3,7 +3,7 @@ use std::collections::{hash_map::Iter, HashMap};
 use bevy::prelude::*;
 use lol_core::Team;
 
-use crate::core::{Action, CommandAction, Map};
+use crate::{Action, CommandAction, Map};
 
 #[derive(Default)]
 pub struct PluginController;

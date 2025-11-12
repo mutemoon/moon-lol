@@ -22,7 +22,7 @@ use bevy::render::mesh::{MeshVertexAttribute, VertexFormat};
 
 use lol_config::ConfigMap;
 
-use crate::core::{Lifetime, LifetimeMode};
+use crate::{Lifetime, LifetimeMode};
 
 pub const ATTRIBUTE_WORLD_POSITION: MeshVertexAttribute =
     MeshVertexAttribute::new("Vertext_World_Position", 7, VertexFormat::Float32x3);

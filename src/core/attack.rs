@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use league_core::CharacterRecord;
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Buffs, CommandDamageCreate, CommandRotate, Damage, DamageType};
+use crate::{Buffs, CommandDamageCreate, CommandRotate, Damage, DamageType};
 
 #[derive(Default)]
 pub struct PluginAttack;

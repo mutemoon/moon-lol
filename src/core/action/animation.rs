@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_behave::prelude::BehaveTrigger;
 
-use crate::core::CommandAnimationPlay;
+use crate::CommandAnimationPlay;
 
 #[derive(Debug, Clone)]
 pub struct ActionAnimationPlay {

@@ -14,19 +14,15 @@ use league_core::{
     VfxPrimitiveAttachedMesh, VfxPrimitiveMesh, VfxPrimitivePlanarProjection, VfxShapeBox,
     VfxShapeCylinder, VfxShapeLegacy,
 };
-use league_utils::{neg_rotation_z, neg_vec_z};
 use lol_config::ConfigMap;
 
-use crate::core::{
-    particle::{
-        create_black_pixel_texture, ParticleMaterialQuad, ParticleMaterialQuadSlice,
-        ParticleMeshQuad, ParticleState, UniformsPixelQuadSlice, UniformsVertexQuad,
-    },
-    spawn_shadow_skin_entity, Lifetime, MapGeometry, ParticleId, ParticleMaterialMesh,
-    ParticleMaterialSkinnedMeshParticle, ParticleMaterialUnlitDecal, ResourceCache,
-    StochasticSampler, UniformsPixelMesh, UniformsPixelSkinnedMeshParticle,
-    UniformsPixelUnlitDecal, UniformsVertexMesh, UniformsVertexSkinnedMeshParticle,
-    UniformsVertexUnlitDecal,
+use crate::{
+    create_black_pixel_texture, spawn_shadow_skin_entity, Lifetime, MapGeometry, ParticleId,
+    ParticleMaterialMesh, ParticleMaterialQuad, ParticleMaterialQuadSlice,
+    ParticleMaterialSkinnedMeshParticle, ParticleMaterialUnlitDecal, ParticleMeshQuad,
+    ParticleState, ResourceCache, StochasticSampler, UniformsPixelMesh, UniformsPixelQuadSlice,
+    UniformsPixelSkinnedMeshParticle, UniformsPixelUnlitDecal, UniformsVertexMesh,
+    UniformsVertexQuad, UniformsVertexSkinnedMeshParticle, UniformsVertexUnlitDecal,
 };
 
 #[derive(Component)]
@@ -91,13 +87,13 @@ pub fn update_emitter_position(
             .compute_transform();
 
         if is_local_orientation {
-            character_global_transform.translation += neg_vec_z(&emitter_position);
+            character_global_transform.translation += emitter_position;
             *transform = character_global_transform;
         } else {
             *transform = Transform::from_matrix(Mat4::from_scale_rotation_translation(
                 character_global_transform.scale,
                 Quat::default(),
-                character_global_transform.translation + neg_vec_z(&emitter_position),
+                character_global_transform.translation + emitter_position,
             ));
         }
     }
@@ -205,30 +201,28 @@ pub fn update_emitter(
                 birth_scale0
             };
 
-            let translation = neg_vec_z(
-                &vfx_emitter_definition_data
-                    .spawn_shape
-                    .clone()
-                    .and_then(|v| match v {
-                        VfxEmitterDefinitionDataSpawnShape::Unk0xee39916f(Unk0xee39916f {
-                            emit_offset,
-                        }) => emit_offset,
-                        VfxEmitterDefinitionDataSpawnShape::VfxShapeLegacy(VfxShapeLegacy {
-                            emit_offset,
-                            ..
-                        }) => emit_offset.and_then(|v| {
-                            Some(StochasticSampler::<Vec3>::from(v).sample_clamped(progress))
-                        }),
-                        VfxEmitterDefinitionDataSpawnShape::VfxShapeBox(VfxShapeBox { .. }) => {
-                            Some(Vec3::ZERO)
-                        }
-                        VfxEmitterDefinitionDataSpawnShape::VfxShapeCylinder(
-                            VfxShapeCylinder { .. },
-                        ) => Some(Vec3::ZERO),
-                        _ => todo!(),
-                    })
-                    .unwrap_or(Vec3::ZERO),
-            );
+            let translation = vfx_emitter_definition_data
+                .spawn_shape
+                .clone()
+                .and_then(|v| match v {
+                    VfxEmitterDefinitionDataSpawnShape::Unk0xee39916f(Unk0xee39916f {
+                        emit_offset,
+                    }) => emit_offset,
+                    VfxEmitterDefinitionDataSpawnShape::VfxShapeLegacy(VfxShapeLegacy {
+                        emit_offset,
+                        ..
+                    }) => emit_offset.and_then(|v| {
+                        Some(StochasticSampler::<Vec3>::from(v).sample_clamped(progress))
+                    }),
+                    VfxEmitterDefinitionDataSpawnShape::VfxShapeBox(VfxShapeBox { .. }) => {
+                        Some(Vec3::ZERO)
+                    }
+                    VfxEmitterDefinitionDataSpawnShape::VfxShapeCylinder(VfxShapeCylinder {
+                        ..
+                    }) => Some(Vec3::ZERO),
+                    _ => todo!(),
+                })
+                .unwrap_or(Vec3::ZERO);
 
             let rotation_quat = Quat::from_euler(
                 EulerRot::XYZEx,
@@ -236,8 +230,6 @@ pub fn update_emitter(
                 (birth_rotation0.y - birth_rotation0.z).to_radians(),
                 0.,
             );
-
-            let rotation_quat = neg_rotation_z(&rotation_quat);
 
             if let VfxEmitterDefinitionDataPrimitive::VfxPrimitivePlanarProjection(
                 VfxPrimitivePlanarProjection { ref m_projection },
@@ -270,7 +262,7 @@ pub fn update_emitter(
                         birth_uv_scroll_rate,
                         birth_color,
                         birth_scale0,
-                        velocity: neg_vec_z(&birth_velocity),
+                        velocity: birth_velocity,
                         acceleration: birth_acceleration,
                         frame,
                     },
@@ -490,24 +482,22 @@ pub fn update_emitter_attached(
                 birth_scale0
             };
 
-            let translation = neg_vec_z(
-                &vfx_emitter_definition_data
-                    .spawn_shape
-                    .clone()
-                    .and_then(|v| match v {
-                        VfxEmitterDefinitionDataSpawnShape::Unk0xee39916f(Unk0xee39916f {
-                            emit_offset,
-                        }) => emit_offset,
-                        VfxEmitterDefinitionDataSpawnShape::VfxShapeLegacy(VfxShapeLegacy {
-                            emit_offset,
-                            ..
-                        }) => emit_offset.and_then(|v| {
-                            Some(StochasticSampler::<Vec3>::from(v).sample_clamped(progress))
-                        }),
-                        _ => todo!(),
-                    })
-                    .unwrap_or(Vec3::ZERO),
-            );
+            let translation = vfx_emitter_definition_data
+                .spawn_shape
+                .clone()
+                .and_then(|v| match v {
+                    VfxEmitterDefinitionDataSpawnShape::Unk0xee39916f(Unk0xee39916f {
+                        emit_offset,
+                    }) => emit_offset,
+                    VfxEmitterDefinitionDataSpawnShape::VfxShapeLegacy(VfxShapeLegacy {
+                        emit_offset,
+                        ..
+                    }) => emit_offset.and_then(|v| {
+                        Some(StochasticSampler::<Vec3>::from(v).sample_clamped(progress))
+                    }),
+                    _ => todo!(),
+                })
+                .unwrap_or(Vec3::ZERO);
 
             let rotation_quat = Quat::from_euler(
                 EulerRot::XYZEx,
@@ -515,8 +505,6 @@ pub fn update_emitter_attached(
                 (birth_rotation0.y - birth_rotation0.z).to_radians(),
                 0.,
             );
-
-            let rotation_quat = neg_rotation_z(&rotation_quat);
 
             if let VfxEmitterDefinitionDataPrimitive::VfxPrimitivePlanarProjection(
                 VfxPrimitivePlanarProjection { ref m_projection },
@@ -549,7 +537,7 @@ pub fn update_emitter_attached(
                         birth_uv_scroll_rate,
                         birth_color,
                         birth_scale0,
-                        velocity: neg_vec_z(&birth_velocity),
+                        velocity: birth_velocity,
                         acceleration: birth_acceleration,
                         frame,
                     },

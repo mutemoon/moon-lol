@@ -8,12 +8,10 @@ use bevy_egui::{egui, EguiContexts, EguiPlugin, EguiPrimaryContextPass};
 use league_core::VisionPathingFlags;
 use lol_config::ConfigNavigationGrid;
 
-use moon_lol::core::{
+use moon_lol::{
     find_grid_path_with_result, on_click_map, AStarResult, CameraState, Map, Movement, PluginCore,
-    PluginNavigaton,
+    PluginLogging, PluginNavigaton,
 };
-use moon_lol::entities::PluginEntities;
-use moon_lol::logging::PluginLogging;
 
 fn main() {
     App::new()
@@ -38,7 +36,6 @@ fn main() {
                 }),
             EguiPlugin::default(),
             PluginCore.build().disable::<PluginNavigaton>(),
-            PluginEntities,
         ))
         .init_resource::<FlagFilters>()
         .add_systems(Startup, setup)

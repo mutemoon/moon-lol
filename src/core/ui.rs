@@ -1,7 +1,7 @@
 use bevy::color::palettes::css::{BLUE, RED, WHITE};
 use bevy::{color::palettes, prelude::*};
 
-use crate::core::{Bounding, DamageType, EventDamageCreate, Health};
+use crate::{Bounding, DamageType, EventDamageCreate, Health};
 
 #[derive(Default)]
 pub struct PluginUI;
@@ -47,8 +47,6 @@ fn init_health_bar(
     q_health: Query<Entity, Added<Health>>,
     q_bounding: Query<&Bounding>,
 ) {
-    let health_bar_count = q_health.iter().count();
-
     for entity in q_health.iter() {
         commands
             .spawn((

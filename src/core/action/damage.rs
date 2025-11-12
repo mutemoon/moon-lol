@@ -3,7 +3,7 @@ use bevy_behave::prelude::BehaveTrigger;
 use league_utils::hash_bin;
 use lol_core::Team;
 
-use crate::core::{
+use crate::{
     rotate_to_direction, CommandDamageCreate, CommandParticleSpawn, DamageType, MovementBlock,
 };
 

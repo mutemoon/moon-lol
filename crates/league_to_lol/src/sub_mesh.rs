@@ -1,7 +1,6 @@
 use std::collections::HashMap;
 
 use league_file::{ElementName, LeagueMapGeo, LeagueMapGeoMesh, Submesh};
-use league_utils::{neg_array_z, reverse_indices};
 use lol_config::IntermediateMesh;
 
 /// 从静态mesh（submesh）创建中间结构
@@ -40,12 +39,12 @@ pub fn submesh_to_intermediate(
 
             // 添加位置数据
             if let Some(pos) = all_positions.get(global_index as usize) {
-                local_positions.push(neg_array_z(pos));
+                local_positions.push(*pos);
             }
 
             // 添加法线数据
             if let Some(normal) = all_normals.get(global_index as usize) {
-                local_normals.push(neg_array_z(normal));
+                local_normals.push(*normal);
             }
 
             // 添加UV数据
@@ -72,7 +71,7 @@ pub fn submesh_to_intermediate(
         intermediate_mesh.set_uvs(Some(local_uvs));
     }
 
-    intermediate_mesh.set_indices(reverse_indices(&local_indices));
+    intermediate_mesh.set_indices(local_indices);
     intermediate_mesh.set_material_info(Some(submesh.material_name.text.clone()));
 
     intermediate_mesh

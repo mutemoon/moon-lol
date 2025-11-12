@@ -1,5 +1,4 @@
 use std::{
-    io::Cursor,
     sync::{
         atomic::{AtomicBool, Ordering},
         Arc, Mutex,
@@ -36,14 +35,12 @@ use rocket::{
     State,
 };
 use rocket_cors::{AllowedOrigins, CorsOptions};
+use serde::{Deserialize, Serialize};
 
 use moon_lol::{
-    abilities::{PluginAbilities, Vital},
-    core::{Action, AttackState, CameraInit, CommandAction, Controller, Health, PluginCore},
-    entities::{PluginBarrack, PluginEntities},
-    server::{AttackTarget, PluginGymEnv},
+    Action, AttackState, AttackTarget, CameraInit, CommandAction, Controller, Health,
+    PluginBarrack, PluginCore, PluginGymEnv, Vital,
 };
-use serde::{Deserialize, Serialize};
 
 #[derive(Resource, Deref)]
 struct MainWorldReceiver(Receiver<Vec<u8>>);
@@ -365,9 +362,7 @@ fn rocket() -> _ {
                 })
                 .disable::<WinitPlugin>(),
         )
-        .add_plugins(PluginCore)
-        .add_plugins(PluginEntities.build().disable::<PluginBarrack>())
-        .add_plugins(PluginAbilities)
+        .add_plugins(PluginCore.build().disable::<PluginBarrack>())
         .add_plugins(PluginGymEnv)
         .add_plugins(PluginImageCopy)
         .insert_resource(TimeUpdateStrategy::ManualDuration(fixed_update_timestep))

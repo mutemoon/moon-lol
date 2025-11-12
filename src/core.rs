@@ -47,32 +47,3 @@ pub use skill::*;
 pub use spawn::*;
 pub use ui::*;
 pub use utils::*;
-
-use bevy::app::plugin_group;
-
-plugin_group! {
-    pub struct PluginCore {
-        :PluginAction,
-        :PluginAnimation,
-        :PluginAttack,
-        :PluginAttackAuto,
-        :PluginBase,
-        :PluginCamera,
-        :PluginController,
-        :PluginDamage,
-        :PluginGame,
-        :PluginLife,
-        :PluginLifetime,
-        :PluginMap,
-        :PluginMovement,
-        :PluginNavigaton,
-        :PluginParticle,
-        :PluginResource,
-        :PluginRotate,
-        :PluginRun,
-        :PluginSkill,
-        :PluginSkin,
-        :PluginState,
-        :PluginUI,
-    }
-}

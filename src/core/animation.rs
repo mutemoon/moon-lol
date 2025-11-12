@@ -8,7 +8,7 @@ use rand::{
     rng,
 };
 
-use crate::core::{Attack, Movement, State};
+use crate::{Attack, Movement, State};
 
 #[derive(Default)]
 pub struct PluginAnimation;

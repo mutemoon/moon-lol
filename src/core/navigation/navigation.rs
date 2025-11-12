@@ -3,7 +3,7 @@ use std::time::Instant;
 
 use lol_config::ConfigNavigationGrid;
 
-use crate::core::{find_grid_path, Movement};
+use crate::{find_grid_path, Movement};
 use crate::system_debug;
 
 #[derive(Default)]

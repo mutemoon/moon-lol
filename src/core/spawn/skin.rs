@@ -12,7 +12,7 @@ use league_core::{
 use league_utils::hash_bin;
 use lol_config::ConfigCharacterSkin;
 
-use crate::core::{Animation, AnimationNode, AnimationNodeF32, AnimationState, ResourceCache};
+use crate::{Animation, AnimationNode, AnimationNodeF32, AnimationState, ResourceCache};
 
 // 皮肤系统插件
 #[derive(Default)]

@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_behave::prelude::BehaveTrigger;
 
-use crate::core::{CommandParticleDespawn, CommandParticleSpawn};
+use crate::{CommandParticleDespawn, CommandParticleSpawn};
 
 #[derive(Debug, Clone)]
 pub struct ActionParticleSpawn {

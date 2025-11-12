@@ -2,9 +2,10 @@ use bevy::asset::AssetPlugin;
 use bevy::prelude::*;
 use rand::Rng;
 
-use moon_lol::abilities::PluginAbilities;
-use moon_lol::core::{Action, PluginCore};
-use moon_lol::entities::{PluginBarrack, PluginEntities};
+use moon_lol::{
+    Action, PluginAnimation, PluginBarrack, PluginCamera, PluginController, PluginCore, PluginMap,
+    PluginParticle, PluginSkill, PluginUI,
+};
 
 #[derive(Default)]
 struct PluginGymEnv;
@@ -55,7 +56,7 @@ fn drive_random_agent(
 
         commands
             .entity(entity)
-            .trigger(moon_lol::core::CommandAction { action });
+            .trigger(moon_lol::CommandAction { action });
     }
 }
 
@@ -81,22 +82,20 @@ fn main() {
             }),
             ..default()
         }));
-        app.add_plugins(PluginCore);
-        app.add_plugins(PluginEntities.build().disable::<PluginBarrack>());
-        app.add_plugins(PluginAbilities);
+        app.add_plugins(PluginCore.build().disable::<PluginBarrack>());
     } else {
         app.add_plugins(MinimalPlugins);
         app.add_plugins(AssetPlugin::default());
         app.add_plugins(
             PluginCore
                 .build()
-                .disable::<moon_lol::core::PluginMap>()
-                .disable::<moon_lol::core::PluginCamera>()
-                .disable::<moon_lol::core::PluginUI>()
-                .disable::<moon_lol::core::PluginParticle>()
-                .disable::<moon_lol::core::PluginAnimation>()
-                .disable::<moon_lol::core::PluginController>()
-                .disable::<moon_lol::core::PluginSkill>(),
+                .disable::<PluginMap>()
+                .disable::<PluginCamera>()
+                .disable::<PluginUI>()
+                .disable::<PluginParticle>()
+                .disable::<PluginAnimation>()
+                .disable::<PluginController>()
+                .disable::<PluginSkill>(),
         );
     }
 

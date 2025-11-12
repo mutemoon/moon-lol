@@ -1,4 +1,4 @@
-use crate::core::{
+use crate::{
     direction_to_angle, lerp_angle_with_velocity, ArbitrationPipelinePlugin, FinalDecision,
     LastDecision, MovementPipeline, PipelineStages, RequestBuffer,
 };

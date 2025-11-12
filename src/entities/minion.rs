@@ -3,9 +3,9 @@ use lol_config::ConfigMap;
 use lol_core::{Lane, Team};
 use serde::{Deserialize, Serialize};
 
-use crate::core::{
-    Action, AttackAuto, AttackState, CommandAction, CommandMovement, DamageType, EventDamageCreate,
-    EventDead, EventSpawn, MovementAction, MovementWay, State,
+use crate::{
+    Action, AttackAuto, CommandAction, CommandMovement, DamageType, EventDamageCreate, EventDead,
+    EventSpawn, MovementAction, MovementWay, State,
 };
 
 #[derive(Default)]

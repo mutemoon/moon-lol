@@ -4,11 +4,8 @@ mod tests {
 
     use bevy::{prelude::*, time::TimeUpdateStrategy};
     use moon_lol::{
-        core::{
-            PluginAction, PluginAttack, PluginAttackAuto, PluginDamage, PluginLife, PluginMovement,
-            PluginResource,
-        },
-        entities::{PluginBarrack, PluginMinion},
+        PluginAction, PluginAttack, PluginAttackAuto, PluginBarrack, PluginDamage, PluginLife,
+        PluginMinion, PluginMovement, PluginResource,
     };
 
     #[test]

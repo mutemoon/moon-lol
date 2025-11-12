@@ -10,9 +10,7 @@ use bevy::{
     },
 };
 
-use crate::core::particle::{
-    UniformsVertexQuad, ATTRIBUTE_LIFETIME, ATTRIBUTE_UV_FRAME, ATTRIBUTE_WORLD_POSITION,
-};
+use crate::{UniformsVertexQuad, ATTRIBUTE_LIFETIME, ATTRIBUTE_UV_FRAME, ATTRIBUTE_WORLD_POSITION};
 
 #[derive(Clone, ShaderType, Default)]
 pub struct UniformsPixelQuadSlice {

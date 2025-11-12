@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_behave::prelude::BehaveTrigger;
 
-use crate::core::CommandAttackReset;
+use crate::CommandAttackReset;
 
 #[derive(Debug, Clone)]
 pub struct ActionAttackReset;

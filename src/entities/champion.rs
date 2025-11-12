@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::core::State;
+use crate::State;
 
 #[derive(Component, Reflect, Default)]
 #[reflect(Component)]

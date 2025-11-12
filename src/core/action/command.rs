@@ -4,7 +4,7 @@ use bevy::prelude::*;
 use bevy_behave::prelude::BehaveTrigger;
 use lol_core::Team;
 
-use crate::core::SkillEffectContext;
+use crate::SkillEffectContext;
 
 type BundleSpawner = Arc<dyn Fn(&mut EntityCommands) + Send + Sync + 'static>;
 

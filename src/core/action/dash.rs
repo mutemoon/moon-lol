@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_behave::prelude::BehaveTrigger;
 
-use crate::core::{
+use crate::{
     CommandMovement, EventMovementEnd, MovementAction, MovementWay, SkillEffectBehaveCtx,
     SkillEffectContext,
 };

@@ -7,12 +7,7 @@ use bevy::render::{
 };
 use bevy::winit::{UpdateMode, WinitSettings};
 
-use moon_lol::abilities::PluginAbilities;
-use moon_lol::core::PluginResource;
-use moon_lol::entities::PluginBarrack;
-use moon_lol::{core::PluginCore, entities::PluginEntities};
-
-// use moon_lol::core::CameraState;
+use moon_lol::{PluginBarrack, PluginCore, PluginResource};
 
 fn main() {
     App::new()
@@ -35,11 +30,12 @@ fn main() {
                     }),
                     ..default()
                 }),
-            PluginEntities.build().disable::<PluginBarrack>(),
-            PluginAbilities,
-            PluginCore.build().set(PluginResource {
-                game_config_path: "games/attack.ron".to_owned(),
-            }),
+            PluginCore
+                .build()
+                .set(PluginResource {
+                    game_config_path: "games/attack.ron".to_owned(),
+                })
+                .disable::<PluginBarrack>(),
         ))
         .insert_resource(WinitSettings {
             focused_mode: UpdateMode::Reactive {

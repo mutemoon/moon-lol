@@ -17,7 +17,7 @@ pub use particle::*;
 use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
 
-use crate::core::{
+use crate::{
     CommandAttackAutoStart, CommandAttackAutoStop, CommandMovement, CommandRunStart,
     CommandSkillStart, MovementAction, RunTarget,
 };

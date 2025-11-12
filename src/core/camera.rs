@@ -2,7 +2,6 @@
 use bevy::math::{Mat4, Vec3A, Vec4};
 use bevy::render::camera::{CameraProjection, Projection, SubCameraView};
 use bevy::{input::mouse::MouseWheel, prelude::*};
-use league_utils::neg_vec_z;
 
 // 相机距离和位置配置
 pub const CAMERA_FAR_Z: f32 = 22000.0;
@@ -87,8 +86,7 @@ fn update(mut q_camera: Query<(&mut Transform, &CameraState), Changed<CameraStat
         return;
     };
 
-    transform.translation =
-        camera_state.position + (neg_vec_z(&CAMERA_OFFSET) * camera_state.scale);
+    transform.translation = camera_state.position + (CAMERA_OFFSET * camera_state.scale);
     transform.look_at(camera_state.position, Vec3::Y);
 }
 
@@ -157,7 +155,7 @@ fn on_mouse_scroll(window: Query<&Window>, mut camera: Query<&mut CameraState, W
     };
 
     let new_position = camera_state.position
-        + neg_vec_z(&movement)
+        + movement
             * Vec3::new(
                 CAMERA_KEYBOARD_ORBIT_SPEED_X,
                 0.0,

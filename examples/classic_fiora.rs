@@ -1,8 +1,6 @@
 use bevy::prelude::*;
 
-use moon_lol::abilities::PluginAbilities;
-use moon_lol::core::PluginResource;
-use moon_lol::{core::PluginCore, entities::PluginEntities};
+use moon_lol::{PluginCore, PluginResource};
 
 fn main() {
     App::new()
@@ -16,8 +14,6 @@ fn main() {
                 }),
                 ..default()
             }),
-            PluginEntities,
-            PluginAbilities,
             PluginCore.build().set(PluginResource {
                 game_config_path: "games/classic_fiora.ron".to_owned(),
             }),

@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod tests {
     use bevy::prelude::*;
-    use moon_lol::core::*;
+    use moon_lol::*;
 
     // ===== 测试常量定义 =====
     const TEST_FPS: f32 = 30.0;

@@ -4,7 +4,7 @@ use bevy::prelude::*;
 use lol_config::ConfigNavigationGrid;
 use serde::{Deserialize, Serialize};
 
-use crate::core::{
+use crate::{
     get_nav_path, ArbitrationPipelinePlugin, CommandRotate, FinalDecision, LastDecision,
     PipelineStages, RequestBuffer,
 };

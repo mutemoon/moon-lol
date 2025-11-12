@@ -12,7 +12,7 @@ use league_file::{
 };
 use league_loader::LeagueWadLoader;
 use league_property::{from_entry, EntryData};
-use league_utils::{hash_joint, neg_mat_z};
+use league_utils::hash_joint;
 use lol_config::{
     ConfigAnimationClip, ConfigCharacterSkin, ConfigJoint, ConfigSkinnedMeshInverseBindposes,
     LeagueMaterial,
@@ -134,7 +134,6 @@ pub async fn save_character(
         .influences
         .iter()
         .map(|&v| league_skeleton.modern_data.joints[v as usize].inverse_bind_transform)
-        .map(|v| neg_mat_z(&v))
         .collect::<Vec<_>>();
 
     let inverse_bind_pose_path = get_bin_path(&format!("ASSETS/{}/inverse_bind_pose", skin));
@@ -159,7 +158,7 @@ pub async fn save_character(
             .iter()
             .map(|joint| ConfigJoint {
                 hash: hash_joint(&joint.name),
-                transform: Transform::from_matrix(neg_mat_z(&joint.local_transform)),
+                transform: Transform::from_matrix(joint.local_transform),
                 parent_index: joint.parent_index,
             })
             .collect(),

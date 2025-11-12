@@ -7,7 +7,7 @@ use league_core::{
 };
 use league_loader::{LeagueLoader, LeagueWadMapLoader};
 use league_property::from_entry;
-use league_utils::{hash_bin, neg_vec_z};
+use league_utils::hash_bin;
 use lol_config::{ConfigMap, ConfigNavigationGrid};
 use lol_core::Lane;
 
@@ -72,7 +72,7 @@ pub async fn save_config_map(
                     let path = unk0x3c995caf
                         .segments
                         .iter()
-                        .map(|v| neg_vec_z(&(v + translation)).xz())
+                        .map(|v| (v + translation).xz())
                         .collect();
 
                     minion_paths.entry(lane).or_insert(path);

@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use lol_config::ConfigGeometryObject;
 
-use crate::core::MapGeometry;
+use crate::MapGeometry;
 
 pub fn spawn_geometry_object(
     commands: &mut Commands,

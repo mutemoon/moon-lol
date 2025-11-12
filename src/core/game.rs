@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use lol_config::ConfigGame;
 
-use crate::core::CommandSkinSpawn;
+use crate::CommandSkinSpawn;
 
 #[derive(Default)]
 pub struct PluginGame;

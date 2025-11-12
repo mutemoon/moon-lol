@@ -1,5 +1,4 @@
 use league_file::{LeagueSkinnedMesh, SkinnedMeshVertex};
-use league_utils::{neg_array_z, reverse_indices};
 use lol_config::IntermediateMesh;
 
 pub fn skinned_mesh_to_intermediate(
@@ -44,7 +43,7 @@ pub fn skinned_mesh_to_intermediate(
         let x_pos = f32::from_le_bytes(v_chunk[offset..offset + 4].try_into().unwrap());
         let y_pos = f32::from_le_bytes(v_chunk[offset + 4..offset + 8].try_into().unwrap());
         let z_pos = f32::from_le_bytes(v_chunk[offset + 8..offset + 12].try_into().unwrap());
-        positions.push(neg_array_z(&[x_pos, y_pos, z_pos]));
+        positions.push([x_pos, y_pos, z_pos]);
         offset += 12;
 
         // 读取骨骼索引
@@ -71,7 +70,7 @@ pub fn skinned_mesh_to_intermediate(
         let x_norm = f32::from_le_bytes(v_chunk[offset..offset + 4].try_into().unwrap());
         let y_norm = f32::from_le_bytes(v_chunk[offset + 4..offset + 8].try_into().unwrap());
         let z_norm = f32::from_le_bytes(v_chunk[offset + 8..offset + 12].try_into().unwrap());
-        normals.push(neg_array_z(&[x_norm, y_norm, z_norm]));
+        normals.push([x_norm, y_norm, z_norm]);
         offset += 12;
 
         // 读取UV
@@ -125,7 +124,7 @@ pub fn skinned_mesh_to_intermediate(
     intermediate_mesh.set_uvs(Some(uvs));
     intermediate_mesh.set_joint_indices(Some(joint_indices));
     intermediate_mesh.set_joint_weights(Some(joint_weights));
-    intermediate_mesh.set_indices(reverse_indices(&local_indices));
+    intermediate_mesh.set_indices(local_indices);
 
     // 设置可选属性
     if let Some(colors_data) = colors {

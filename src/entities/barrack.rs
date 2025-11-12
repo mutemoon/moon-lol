@@ -5,13 +5,12 @@ use league_core::{
     BarracksMinionConfigWaveBehavior, ConstantWaveBehavior, InhibitorWaveBehavior,
     RotatingWaveBehavior, TimedVariableWaveBehavior,
 };
-use league_utils::neg_mat_z;
 use lol_config::ConfigMap;
 use lol_core::{Lane, Team};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    core::{Armor, Attack, Bounding, CommandSkinSpawn, Damage, Health, Movement, ResourceCache},
+    core::{Armor, Attack, Bounding, CommandSkinSpawn, Damage, Health, Movement},
     entities::Minion,
 };
 
@@ -65,7 +64,7 @@ fn setup(mut commands: Commands, res_game_config: Res<ConfigMap>) {
         println!("生成兵营 {:?}", hash);
 
         commands.spawn((
-            Transform::from_matrix(neg_mat_z(&barrack.transform)),
+            Transform::from_matrix(barrack.transform),
             Team::from(barrack.definition.team),
             Lane::from(barrack.definition.unk_0xdbde2288[0].lane),
             Barrack {
@@ -98,14 +97,11 @@ fn setup(mut commands: Commands, res_game_config: Res<ConfigMap>) {
 
 /// 核心系统：处理兵营的计时、升级和生成逻辑
 fn barracks_spawning_system(
-    asset_server: Res<AssetServer>,
     game_time: Res<Time<Virtual>>,
     inhibitor_state: Res<InhibitorState>,
     mut commands: Commands,
     mut query: Query<(&GlobalTransform, &mut Barrack, &Team, &Lane)>,
-    mut res_animation_graph: ResMut<Assets<AnimationGraph>>,
     res_game_config: Res<ConfigMap>,
-    res_resource_cache: Res<ResourceCache>,
     time: Res<Time>,
 ) {
     for (transform, mut barrack_state, team, lane) in query.iter_mut() {
@@ -199,8 +195,6 @@ fn barracks_spawning_system(
         let link = minion_config.unk_0x8a3fc6eb;
 
         let character = res_game_config.characters.get(&link).unwrap();
-
-        let config_character_skin = res_resource_cache.skins.get(&character.skin).unwrap();
 
         let character_record = res_game_config
             .character_records

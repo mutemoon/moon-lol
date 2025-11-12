@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::core::{Buff, Buffs, EventAttackEnd};
+use crate::{Buff, Buffs, EventAttackEnd};
 
 #[derive(Default)]
 pub struct PluginFioraE;

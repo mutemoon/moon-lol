@@ -2,7 +2,6 @@ use bevy::asset::RenderAssetUsages;
 use bevy::render::mesh::{Indices, Mesh};
 use bevy::render::render_resource::PrimitiveTopology;
 use league_file::LeagueMeshStatic;
-use league_utils::{neg_array_z, reverse_indices};
 
 pub fn mesh_static_to_bevy_mesh(mesh: LeagueMeshStatic) -> Mesh {
     let num_vertices = mesh.faces.len() * 3;
@@ -27,7 +26,7 @@ pub fn mesh_static_to_bevy_mesh(mesh: LeagueMeshStatic) -> Mesh {
             // a. 获取位置数据
             // 从全局 "vertices" 列表查找位置
             let pos = mesh.vertices[global_pos_index];
-            bevy_positions.push(neg_array_z(&pos)); // 转换坐标系
+            bevy_positions.push(pos);
 
             // c. 获取UV数据
             // UV 数据也直接存储在 face 中
@@ -53,9 +52,7 @@ pub fn mesh_static_to_bevy_mesh(mesh: LeagueMeshStatic) -> Mesh {
 
     // 3. 创建索引
     // 因为我们展开了所有顶点，索引现在只是一个简单的 0, 1, 2, 3, 4, 5, ... 序列
-    let base_indices: Vec<u16> = (0..num_vertices as u16).collect();
-    // 反转 winding order 以匹配 Bevy (和 glTF) 的标准 (CCW)
-    let reversed_indices = reverse_indices(&base_indices);
+    let indices: Vec<u16> = (0..num_vertices as u16).collect();
 
     // 4. 创建 Bevy Mesh 并插入所有属性
     let mut bevy_mesh = Mesh::new(
@@ -70,7 +67,7 @@ pub fn mesh_static_to_bevy_mesh(mesh: LeagueMeshStatic) -> Mesh {
         bevy_mesh.insert_attribute(Mesh::ATTRIBUTE_COLOR, colors_data);
     }
 
-    bevy_mesh.insert_indices(Indices::U16(reversed_indices));
+    bevy_mesh.insert_indices(Indices::U16(indices));
 
     bevy_mesh.compute_normals();
 

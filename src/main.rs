@@ -1,12 +1,6 @@
 use bevy::prelude::*;
-use bevy::render::{
-    settings::{Backends, RenderCreation, WgpuSettings},
-    RenderPlugin,
-};
 
-use moon_lol::abilities::PluginAbilities;
-use moon_lol::entities::PluginBarrack;
-use moon_lol::{core::PluginCore, entities::PluginEntities, logging::PluginLogging};
+use moon_lol::{PluginBarrack, PluginCore, PluginLogging};
 
 fn main() {
     App::new()
@@ -21,17 +15,8 @@ fn main() {
                         ..default()
                     }),
                     ..default()
-                })
-                .set(RenderPlugin {
-                    render_creation: RenderCreation::Automatic(WgpuSettings {
-                        backends: Some(Backends::VULKAN),
-                        ..default()
-                    }),
-                    ..default()
                 }),
-            PluginCore,
-            PluginEntities.build().disable::<PluginBarrack>(),
-            PluginAbilities,
+            PluginCore.build().disable::<PluginBarrack>(),
         ))
         .run();
 }
