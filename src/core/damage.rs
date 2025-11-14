@@ -282,13 +282,13 @@ pub fn on_command_damage_create(
         Option<&DamageReductions>,
     )>,
 ) {
-    // println!(
-    //     "Processing damage event: source={:?}, target={:?}, type={:?}, amount={:.1}",
-    //     trigger.source,
-    //     trigger.target(),
-    //     trigger.damage_type,
-    //     trigger.amount
-    // );
+    debug!(
+        "{:?} 对 {:?} 造成 {:.1} 点 {:?} 伤害",
+        trigger.source,
+        trigger.target(),
+        trigger.amount,
+        trigger.damage_type,
+    );
 
     if let Ok((mut health, white_shield, magic_shield, damage_reductions)) =
         query.get_mut(trigger.target())

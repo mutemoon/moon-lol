@@ -148,6 +148,7 @@ pub fn on_command_continue_minion_path(
             action: MovementAction::Start {
                 way: MovementWay::Path(path[closest_index..].to_vec()),
                 speed: None,
+                source: "Minion".to_string(),
             },
         },
         trigger.target(),

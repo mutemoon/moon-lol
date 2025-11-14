@@ -1,6 +1,8 @@
 use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
 
+use crate::EventDamageCreate;
+
 #[derive(Default)]
 pub struct PluginLife;
 
@@ -10,8 +12,8 @@ impl Plugin for PluginLife {
 
         app.add_event::<EventDead>();
         app.add_event::<EventSpawn>();
-        app.add_systems(FixedUpdate, (detect_death, spawn_event));
-        app.add_observer(on_dead);
+        app.add_systems(FixedUpdate, spawn_event);
+        app.add_observer(on_event_damage_create);
     }
 }
 
@@ -42,28 +44,24 @@ pub fn spawn_event(mut commands: Commands, q_alive: Query<Entity, Added<Health>>
 
     for entity in q_alive.iter() {
         // println!("Triggering spawn event for entity {:?}", entity);
-        commands.trigger_targets(EventSpawn, entity);
+        commands.entity(entity).trigger(EventSpawn);
     }
 }
 
-pub fn detect_death(mut commands: Commands, q_health: Query<(Entity, &Health)>) {
-    let mut death_count = 0;
-
-    for (entity, health) in q_health.iter() {
-        if health.value <= 0.0 {
-            // println!("Entity {:?} has died (health={:.1})", entity, health.value);
-            commands.trigger_targets(EventDead, entity);
-            death_count += 1;
-        }
-    }
-
-    if death_count > 0 {
-        // println!("Detected {} deaths this frame", death_count);
-    }
-}
-
-fn on_dead(trigger: Trigger<EventDead>, mut commands: Commands) {
+fn on_event_damage_create(
+    trigger: Trigger<EventDamageCreate>,
+    mut commands: Commands,
+    q_health: Query<&Health>,
+) {
     let entity = trigger.target();
-    // println!("Despawning dead entity {:?}", entity);
-    commands.entity(entity).despawn();
+
+    let Ok(health) = q_health.get(entity) else {
+        return;
+    };
+
+    if health.value <= 0.0 {
+        debug!("{:?} 死了", entity);
+        commands.entity(entity).despawn();
+        commands.trigger_targets(EventDead, entity);
+    }
 }

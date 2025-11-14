@@ -17,8 +17,14 @@ impl Plugin for PluginNavigaton {
             *res_stats = Default::default();
         });
         app.add_systems(Last, |res_stats: Res<NavigationStats>| {
-            print!("\x1B[2J\x1B[1;1H"); // 清屏
-            println!("NavigationStats: {:#?}", res_stats);
+            // print!("\x1B[2J\x1B[1;1H"); // 清屏
+            // println!("NavigationStats: {:#?}", res_stats);
+            if res_stats.get_nav_path_time > Duration::from_millis(1) {
+                info!("{:#?}", res_stats);
+            }
+            // if res_stats.occupied_grid_cells_num > 0 {
+            //     info!("{:#?}", res_stats.occupied_grid_cells_num);
+            // }
         });
         app.add_systems(Update, update);
     }
@@ -31,6 +37,8 @@ pub struct NavigationStats {
 
     pub get_nav_path_count: u32,
     pub get_nav_path_time: Duration,
+
+    pub occupied_grid_cells_num: u32,
 
     pub calculate_occupied_grid_cells_count: u32,
     pub calculate_occupied_grid_cells_time: Duration,
@@ -46,18 +54,44 @@ pub fn get_nav_path(
     start_pos: &Vec2,
     end_pos: &Vec2,
     grid: &ConfigNavigationGrid,
-    stats: Option<&mut NavigationStats>,
+    stats: &mut NavigationStats,
 ) -> Option<Vec<Vec2>> {
     let start = Instant::now();
+
+    let start_grid_pos = grid.get_cell_xy_by_position(start_pos);
+    let adjusted_start_pos = if !grid.is_walkable_by_xy(start_grid_pos) {
+        let start_time = Instant::now();
+        if let Some(new_start_grid_pos) = find_nearest_walkable_cell(grid, start_grid_pos) {
+            debug!(
+                "get_nav_path: Start position ({}, {}) is not walkable, using nearest walkable cell ({}, {})",
+                start_grid_pos.0, start_grid_pos.1, new_start_grid_pos.0, new_start_grid_pos.1
+            );
+            {
+                stats.find_nearest_walkable_cell_count += 1;
+                stats.find_nearest_walkable_cell_time += start_time.elapsed();
+            }
+            grid.get_cell_center_position_by_xy(new_start_grid_pos).xz()
+        } else {
+            warn!("get_nav_path: No walkable cell found near start position");
+            return None;
+        }
+    } else {
+        *start_pos
+    };
 
     // 检查终点是否可行走，如果不可行，找到最近的可达格子
     let end_grid_pos = grid.get_cell_xy_by_position(end_pos);
     let adjusted_end_pos = if !grid.is_walkable_by_xy(end_grid_pos) {
+        let start_time = Instant::now();
         if let Some(new_end_grid_pos) = find_nearest_walkable_cell(grid, end_grid_pos) {
             debug!(
                 "get_nav_path: End position ({}, {}) is not walkable, using nearest walkable cell ({}, {})",
                 end_grid_pos.0, end_grid_pos.1, new_end_grid_pos.0, new_end_grid_pos.1
             );
+            {
+                stats.find_nearest_walkable_cell_count += 1;
+                stats.find_nearest_walkable_cell_time += start_time.elapsed();
+            }
             grid.get_cell_center_position_by_xy(new_end_grid_pos).xz()
         } else {
             warn!("get_nav_path: No walkable cell found near end position");
@@ -68,24 +102,24 @@ pub fn get_nav_path(
     };
 
     // 检查起点和终点是否可直达
-    let start_grid_pos = (start_pos - grid.min_position) / grid.cell_size;
+    let adjusted_start_grid_pos = (adjusted_start_pos - grid.min_position) / grid.cell_size;
     let adjusted_end_grid_pos = (adjusted_end_pos - grid.min_position) / grid.cell_size;
 
-    if has_line_of_sight(&grid, start_grid_pos, adjusted_end_grid_pos) {
+    if has_line_of_sight(&grid, adjusted_start_grid_pos, adjusted_end_grid_pos) {
         system_debug!(
             "command_movement_move_to",
             "Direct path found in {:.6}ms",
             start.elapsed().as_millis()
         );
-        if let Some(s) = stats {
-            s.get_nav_path_count += 1;
-            s.get_nav_path_time += start.elapsed();
+        {
+            stats.get_nav_path_count += 1;
+            stats.get_nav_path_time += start.elapsed();
         }
-        return Some(vec![start_pos.clone(), adjusted_end_pos]);
+        return Some(vec![adjusted_start_pos, adjusted_end_pos]);
     }
 
     // 如果不可直达，则使用A*算法规划路径
-    let result = find_path(&grid, start_pos, &adjusted_end_pos);
+    let result = find_path(&grid, &adjusted_start_pos, &adjusted_end_pos);
 
     system_debug!(
         "command_movement_move_to",
@@ -93,9 +127,9 @@ pub fn get_nav_path(
         start.elapsed().as_millis()
     );
 
-    if let Some(s) = stats {
-        s.get_nav_path_count += 1;
-        s.get_nav_path_time += start.elapsed();
+    {
+        stats.get_nav_path_count += 1;
+        stats.get_nav_path_time += start.elapsed();
     }
 
     return result;

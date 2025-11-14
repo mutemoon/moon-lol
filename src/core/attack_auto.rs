@@ -52,17 +52,14 @@ fn on_command_attack_auto_start(
     let mut attack_auto = AttackAuto { target, timer };
 
     let Ok(transform) = q_transform.get(entity) else {
-        println!("return 1");
         return;
     };
 
     let Ok(target_transform) = q_transform.get(attack_auto.target) else {
-        println!("return 2");
         return;
     };
 
     let Ok(attack) = q_attack.get(entity) else {
-        println!("return 3");
         return;
     };
 

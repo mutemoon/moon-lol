@@ -1,5 +1,6 @@
 use std::time::Duration;
 
+use bevy::log::LogPlugin;
 use bevy::prelude::*;
 use bevy::render::{
     settings::{Backends, RenderCreation, WgpuSettings},
@@ -12,24 +13,18 @@ use moon_lol::{PluginBarrack, PluginCore, PluginResource};
 fn main() {
     App::new()
         .add_plugins((
-            DefaultPlugins
-                .build()
-                .set(WindowPlugin {
-                    primary_window: Some(Window {
-                        title: "classic 1v1 fiora".to_string(),
-                        resolution: (300.0, 300.0).into(),
-                        position: WindowPosition::At((0, 1000).into()),
-                        ..default()
-                    }),
-                    ..default()
-                })
-                .set(RenderPlugin {
-                    render_creation: RenderCreation::Automatic(WgpuSettings {
-                        backends: Some(Backends::VULKAN),
-                        ..default()
-                    }),
+            DefaultPlugins.build().set(WindowPlugin {
+                primary_window: Some(Window {
+                    title: "classic 1v1 fiora".to_string(),
+                    resolution: (300.0, 300.0).into(),
+                    position: WindowPosition::At((0, 1000).into()),
                     ..default()
                 }),
+                ..default()
+            }), // .set(LogPlugin {
+                //     filter: "moon_lol=debug".to_string(),
+                //     ..default()
+                // })
             PluginCore
                 .build()
                 .set(PluginResource {

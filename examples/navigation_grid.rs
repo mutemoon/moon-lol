@@ -357,10 +357,7 @@ fn find_path_with_visualization(
     start: &Vec2,
     end: &Vec2,
 ) -> Option<AStarResult> {
-    // 使用带结果的A*算法
-    // 示例中不需要考虑动态实体，所以传递空的HashSet
-    let occupied_cells = HashSet::new();
-    if let Some(astar_result) = find_grid_path_with_result(grid, start, end, &occupied_cells) {
+    if let Some(astar_result) = find_grid_path_with_result(grid, start, end) {
         // 注意：这里不对路径进行简化，保持原始的A*网格路径
         // 简化路径只在最终转换为世界坐标时使用
         Some(astar_result)

@@ -2,6 +2,7 @@
   "name": "fsm-demo-rust",
   "scripts": {
     "extract": "cargo run --example extract",
+    "test:minion:watch": "cargo-watch -x \"test -p moon_lol --test minion -- tests::test_complete_attack_cycle --exact --nocapture\"",
     "example:stream:watch": "cargo-watch -x \"run --example stream\"",
     "example:attack:watch": "cargo-watch -x \"run --example attack\" -w src -w assets -w crates",
     "example:attack": "cargo run --package moon_lol --example attack",

@@ -70,6 +70,7 @@ fn fixed_update(mut commands: Commands, q: Query<(Entity, &Run)>, q_transform: Q
                     action: MovementAction::Start {
                         way: MovementWay::Pathfind(position),
                         speed: None,
+                        source: "Run".to_string(),
                     },
                 });
             }
@@ -82,6 +83,7 @@ fn fixed_update(mut commands: Commands, q: Query<(Entity, &Run)>, q_transform: Q
                     action: MovementAction::Start {
                         way: MovementWay::Pathfind(transform.translation.xz()),
                         speed: None,
+                        source: "Run".to_string(),
                     },
                 });
             }
@@ -89,26 +91,10 @@ fn fixed_update(mut commands: Commands, q: Query<(Entity, &Run)>, q_transform: Q
     }
 }
 
-fn on_event_movement_end(
-    trigger: Trigger<EventMovementEnd>,
-    mut commands: Commands,
-    q: Query<(Entity, &Transform, &Run)>,
-    q_transform: Query<&Transform>,
-) {
+fn on_event_movement_end(trigger: Trigger<EventMovementEnd>, mut commands: Commands) {
     let entity = trigger.target();
-    if let Ok((entity, transform, run)) = q.get(entity) {
-        let target_position = match run.target {
-            RunTarget::Position(target) => target,
-            RunTarget::Target(target) => {
-                let Ok(transform) = q_transform.get(target) else {
-                    return;
-                };
-                transform.translation.xz()
-            }
-        };
-
-        commands.entity(entity).remove::<Run>().trigger(EventRunEnd);
-        // if target_position.distance(transform.translation.xz()) < 10. {
-        // }
+    if trigger.event().source != "Run" {
+        return;
     }
+    commands.entity(entity).remove::<Run>().trigger(EventRunEnd);
 }

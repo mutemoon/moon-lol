@@ -1,4 +1,5 @@
 use core::f32;
+use std::collections::HashSet;
 use std::time::Instant;
 
 use bevy::prelude::*;
@@ -6,8 +7,9 @@ use lol_config::ConfigNavigationGrid;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    calculate_occupied_grid_cells, get_nav_path, ArbitrationPipelinePlugin, Bounding,
-    CommandRotate, FinalDecision, LastDecision, NavigationStats, PipelineStages, RequestBuffer,
+    calculate_occupied_grid_cells, get_nav_path, world_pos_to_grid_xy, ArbitrationPipelinePlugin,
+    Bounding, CommandRotate, FinalDecision, LastDecision, NavigationStats, PipelineStages,
+    RequestBuffer,
 };
 
 #[derive(Default)]
@@ -20,6 +22,11 @@ impl Plugin for PluginMovement {
         app.add_observer(on_event_movement_end);
 
         app.add_plugins(ArbitrationPipelinePlugin::<CommandMovement, MovementPipeline>::default());
+
+        app.add_systems(
+            PreUpdate,
+            calculate_global_occupied_cells.in_set(MovementPipeline::Calculate),
+        );
 
         app.add_systems(
             FixedPostUpdate,
@@ -47,6 +54,8 @@ pub struct MovementState {
     pub velocity: Vec2,
     pub current_target_index: usize,
     pub completed: bool,
+    pub pathfind: Option<(Vec2, f32)>,
+    pub source: String,
 }
 
 #[derive(Component, Default)]
@@ -63,6 +72,7 @@ pub enum MovementAction {
     Start {
         way: MovementWay,
         speed: Option<f32>,
+        source: String,
     },
     Stop,
 }
@@ -77,10 +87,13 @@ pub enum MovementWay {
 pub struct EventMovementStart;
 
 #[derive(Event, Debug)]
-pub struct EventMovementEnd;
+pub struct EventMovementEnd {
+    pub source: String,
+}
 
 #[derive(SystemSet, Debug, Hash, PartialEq, Eq, Clone)]
 pub enum MovementPipeline {
+    Calculate,
     Modify,
     Reduce,
     Apply,
@@ -103,13 +116,14 @@ impl PipelineStages for MovementPipeline {
 }
 
 impl MovementState {
-    pub fn reset_path(&mut self, path: &Vec<Vec2>) {
+    pub fn reset_path(&mut self, path: &Vec<Vec2>, source: &str) {
         self.path = path.clone();
         self.speed = None;
         self.current_target_index = 0;
         self.completed = false;
         self.velocity = Vec2::ZERO;
         self.direction = Vec2::ZERO;
+        self.source = source.to_string();
     }
 
     pub fn clear_path(&mut self) {
@@ -204,7 +218,12 @@ fn update_path_movement(
             movement_state.direction = Vec2::ZERO;
             movement_state.clear_path();
 
-            commands.trigger_targets(EventMovementEnd, entity);
+            commands.trigger_targets(
+                EventMovementEnd {
+                    source: movement_state.source.clone(),
+                },
+                entity,
+            );
         } else {
             movement_state.direction = last_direction;
             movement_state.velocity = last_direction * speed;
@@ -275,6 +294,20 @@ fn reduce_movement_by_priority(
     }
 }
 
+fn calculate_global_occupied_cells(
+    mut grid: ResMut<ConfigNavigationGrid>,
+    entities_with_bounding: Query<(Entity, &GlobalTransform, &Bounding)>,
+    mut stats: ResMut<NavigationStats>,
+) {
+    let start = Instant::now();
+    // 计算所有实体的 occupied_cells（不排除任何实体）
+    let occupied_cells = calculate_occupied_grid_cells(&grid, &entities_with_bounding, &[]);
+    grid.occupied_cells = occupied_cells;
+    stats.calculate_occupied_grid_cells_time += start.elapsed();
+    stats.calculate_occupied_grid_cells_count += 1;
+    stats.occupied_grid_cells_num = grid.occupied_cells.len() as u32;
+}
+
 fn apply_final_movement_decision(
     mut commands: Commands,
     mut query: Query<(
@@ -282,41 +315,69 @@ fn apply_final_movement_decision(
         &Transform,
         &FinalDecision<CommandMovement>,
         &mut MovementState,
+        &Bounding,
     )>,
     mut grid: ResMut<ConfigNavigationGrid>,
     mut stats: ResMut<NavigationStats>,
-    entities_with_bounding: Query<(Entity, &GlobalTransform, &Bounding)>,
+    time: Res<Time>,
 ) {
-    for (entity, transform, decision, mut movement_state) in query.iter_mut() {
+    for (entity, transform, decision, mut movement_state, bounding) in query.iter_mut() {
         match &decision.0.action {
-            MovementAction::Start { way, speed } => {
+            MovementAction::Start { way, speed, source } => {
                 match way {
                     MovementWay::Pathfind(target) => {
-                        // 清空并重新计算被Bounding实体占据的网格格子，并在寻路时避开它们
-                        // 排除当前移动的实体自身（避免把自己当作障碍物）
-                        let start = Instant::now();
-                        let exclude_entities = &[entity];
-                        let occupied_cells = calculate_occupied_grid_cells(
-                            &grid,
-                            &entities_with_bounding,
-                            exclude_entities,
-                        );
-                        stats.calculate_occupied_grid_cells_time += start.elapsed();
-                        stats.calculate_occupied_grid_cells_count += 1;
-
-                        grid.occupied_cells.clear();
-                        grid.occupied_cells.extend(occupied_cells);
-                        if let Some(path) = get_nav_path(
-                            &transform.translation.xz(),
-                            target,
-                            &grid,
-                            Some(&mut stats),
-                        ) {
-                            movement_state.reset_path(&path);
+                        if let Some((last_target, last_time)) = movement_state.pathfind {
+                            if (target - last_target).length() < f32::EPSILON
+                                && time.elapsed_secs() - last_time < 1.0
+                            {
+                                continue;
+                            }
                         }
+
+                        movement_state.pathfind = Some((*target, time.elapsed_secs()));
+
+                        // 从全局 occupied_cells 中临时移除当前实体占据的格子
+                        let entity_pos = transform.translation.xz();
+                        let entity_grid_pos = world_pos_to_grid_xy(&grid, entity_pos);
+                        let mut exclude_cells = HashSet::new();
+
+                        // 计算当前实体占据的格子（根据 Bounding 组件的半径）
+                        let radius_in_cells = (bounding.radius / grid.cell_size).ceil() as i32;
+                        for dx in -radius_in_cells..=radius_in_cells {
+                            for dy in -radius_in_cells..=radius_in_cells {
+                                let new_x = entity_grid_pos.0 as i32 + dx;
+                                let new_y = entity_grid_pos.1 as i32 + dy;
+
+                                if new_x >= 0 && new_y >= 0 {
+                                    let new_pos = (new_x as usize, new_y as usize);
+                                    if new_pos.0 < grid.x_len && new_pos.1 < grid.y_len {
+                                        exclude_cells.insert(new_pos);
+                                    }
+                                }
+                            }
+                        }
+
+                        // 临时从全局 occupied_cells 中移除当前实体占据的格子
+                        let removed_cells: HashSet<_> = grid
+                            .occupied_cells
+                            .iter()
+                            .filter(|cell| exclude_cells.contains(cell))
+                            .copied()
+                            .collect();
+                        grid.occupied_cells
+                            .retain(|cell| !exclude_cells.contains(cell));
+
+                        if let Some(path) =
+                            get_nav_path(&transform.translation.xz(), target, &grid, &mut stats)
+                        {
+                            movement_state.reset_path(&path, source);
+                        }
+
+                        // 恢复全局 occupied_cells
+                        grid.occupied_cells.extend(removed_cells);
                     }
                     MovementWay::Path(path) => {
-                        movement_state.reset_path(path);
+                        movement_state.reset_path(path, source);
                     }
                 }
 

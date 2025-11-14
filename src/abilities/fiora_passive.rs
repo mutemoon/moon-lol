@@ -14,6 +14,7 @@ use crate::{
         DamageType, Direction, EventDamageCreate, Health, SkillOf,
     },
     entities::Champion,
+    EntityCommandsTrigger,
 };
 
 const VITAL_DISTANCE: f32 = 1000.0;
@@ -270,7 +271,7 @@ fn on_damage_create(
 
     commands
         .entity(target_entity)
-        .trigger(CommandParticleSpawn {
+        .try_trigger(CommandParticleSpawn {
             particle: hash_bin("Fiora_Passive_Hit_Tar"),
         });
     commands
@@ -329,7 +330,7 @@ fn on_damage_create(
 
     commands
         .entity(target_entity)
-        .trigger(CommandParticleSpawn {
+        .try_trigger(CommandParticleSpawn {
             particle: get_particle_hash(&direction, "Fiora_Passive_", "_Warning"),
         });
 }

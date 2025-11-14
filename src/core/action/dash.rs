@@ -47,6 +47,7 @@ pub fn on_action_dash(
                     action: MovementAction::Start {
                         way: MovementWay::Path(vec![destination]),
                         speed: Some(*speed),
+                        source: "Dash".to_string(),
                     },
                 });
         }

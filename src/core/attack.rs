@@ -1,27 +1,24 @@
-use bevy::prelude::*;
+use bevy::{
+    ecs::{
+        error::ignore,
+        system::entity_command::{self, trigger},
+    },
+    prelude::*,
+};
 use league_core::CharacterRecord;
 use serde::{Deserialize, Serialize};
 
-use crate::{Buffs, CommandDamageCreate, CommandRotate, Damage, DamageType};
+use crate::{Buffs, CommandDamageCreate, CommandRotate, Damage, DamageType, EventDead};
 
 #[derive(Default)]
 pub struct PluginAttack;
 
 impl Plugin for PluginAttack {
     fn build(&self, app: &mut App) {
-        app.add_event::<EventAttackEnd>();
-        app.add_event::<EventAttackReady>();
-
-        app.add_event::<EventAttackStart>();
-
-        app.add_event::<CommandAttackStart>();
         app.add_observer(on_command_attack_start);
-
-        app.add_event::<CommandAttackReset>();
         app.add_observer(on_command_attack_reset);
-
-        app.add_event::<CommandAttackStop>();
         app.add_observer(on_command_attack_stop);
+        app.add_observer(on_event_dead);
 
         app.add_systems(FixedUpdate, fixed_update);
     }
@@ -327,12 +324,27 @@ fn on_command_attack_stop(
     };
 }
 
+fn on_event_dead(
+    trigger: Trigger<EventDead>,
+    mut commands: Commands,
+    q_attack_state: Query<(Entity, &AttackState)>,
+) {
+    let dead_entity = trigger.target();
+
+    for (entity, attack_state) in q_attack_state.iter() {
+        if let AttackStatus::Windup { target, .. } = &attack_state.status {
+            if *target == dead_entity {
+                commands.entity(entity).remove::<AttackState>();
+            }
+        }
+    }
+}
+
 // 系统函数
 fn fixed_update(
     mut query: Query<(Entity, &mut AttackState, &Attack, &Damage)>,
     mut commands: Commands,
     time: Res<Time<Fixed>>,
-    q_entity: Query<Entity>,
 ) {
     let now = time.elapsed_secs();
 
@@ -345,20 +357,14 @@ fn fixed_update(
                         end_time: now + attack.cooldown_time(),
                     };
 
-                    if q_entity.contains(*target) {
-                        commands.get_entity(*target).iter_mut().for_each(|v| {
-                            v.trigger(CommandDamageCreate {
-                                source: entity,
-                                damage_type: DamageType::Physical,
-                                amount: damage.0,
-                            });
-                        });
-                        commands.get_entity(entity).iter_mut().for_each(|v| {
-                            v.trigger(EventAttackEnd { target: *target });
-                        });
-                    } else {
-                        commands.entity(entity).remove::<AttackState>();
-                    }
+                    commands.entity(*target).try_trigger(CommandDamageCreate {
+                        source: entity,
+                        damage_type: DamageType::Physical,
+                        amount: damage.0,
+                    });
+                    commands
+                        .entity(entity)
+                        .try_trigger(EventAttackEnd { target: *target });
                 }
             }
             AttackStatus::Cooldown { end_time } => {
@@ -367,15 +373,25 @@ fn fixed_update(
                     commands
                         .entity(entity)
                         .remove::<AttackState>()
-                        .trigger(EventAttackReady);
+                        .try_trigger(EventAttackReady);
 
                     if let Some(target) = attack_state.target {
                         commands
                             .entity(entity)
-                            .trigger(CommandAttackStart { target });
+                            .try_trigger(CommandAttackStart { target });
                     };
                 }
             }
         }
+    }
+}
+
+pub trait EntityCommandsTrigger {
+    fn try_trigger<T: Event>(&mut self, event: T) -> &mut Self;
+}
+
+impl<'a> EntityCommandsTrigger for EntityCommands<'a> {
+    fn try_trigger<T: Event>(&mut self, event: T) -> &mut Self {
+        self.queue_handled(trigger(event), ignore)
     }
 }
