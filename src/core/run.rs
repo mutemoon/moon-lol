@@ -20,19 +20,26 @@ pub struct Run {
     pub target: RunTarget,
 }
 
-#[derive(Event)]
-pub struct EventRunStart;
+#[derive(EntityEvent)]
+pub struct EventRunStart {
+    entity: Entity,
+}
 
-#[derive(Event)]
-pub struct EventRunEnd;
+#[derive(EntityEvent)]
+pub struct EventRunEnd {
+    entity: Entity,
+}
 
-#[derive(Event)]
+#[derive(EntityEvent)]
 pub struct CommandRunStart {
+    pub entity: Entity,
     pub target: RunTarget,
 }
 
-#[derive(Event)]
-pub struct CommandRunStop;
+#[derive(EntityEvent)]
+pub struct CommandRunStop {
+    pub entity: Entity,
+}
 
 #[derive(Clone)]
 pub enum RunTarget {
@@ -40,32 +47,30 @@ pub enum RunTarget {
     Target(Entity),
 }
 
-fn on_command_run_start(trigger: Trigger<CommandRunStart>, mut commands: Commands) {
-    let entity = trigger.target();
-    commands
-        .entity(entity)
-        .insert(Run {
-            target: trigger.target.clone(),
-        })
-        .trigger(EventRunStart);
+fn on_command_run_start(trigger: On<CommandRunStart>, mut commands: Commands) {
+    let entity = trigger.event_target();
+    commands.entity(entity).insert(Run {
+        target: trigger.target.clone(),
+    });
+    commands.trigger(EventRunStart { entity });
 }
 
-fn on_command_run_stop(trigger: Trigger<CommandRunStop>, mut commands: Commands) {
-    let entity = trigger.target();
-    commands
-        .entity(entity)
-        .remove::<Run>()
-        .trigger(CommandMovement {
-            priority: 0,
-            action: MovementAction::Stop,
-        });
+fn on_command_run_stop(trigger: On<CommandRunStop>, mut commands: Commands) {
+    let entity = trigger.event_target();
+    commands.entity(entity).remove::<Run>();
+    commands.trigger(CommandMovement {
+        entity,
+        priority: 0,
+        action: MovementAction::Stop,
+    });
 }
 
 fn fixed_update(mut commands: Commands, q: Query<(Entity, &Run)>, q_transform: Query<&Transform>) {
     for (entity, run) in q.iter() {
         match run.target {
             RunTarget::Position(position) => {
-                commands.entity(entity).trigger(CommandMovement {
+                commands.trigger(CommandMovement {
+                    entity,
                     priority: 0,
                     action: MovementAction::Start {
                         way: MovementWay::Pathfind(position),
@@ -78,7 +83,8 @@ fn fixed_update(mut commands: Commands, q: Query<(Entity, &Run)>, q_transform: Q
                 let Ok(transform) = q_transform.get(target) else {
                     return;
                 };
-                commands.entity(entity).trigger(CommandMovement {
+                commands.trigger(CommandMovement {
+                    entity,
                     priority: 0,
                     action: MovementAction::Start {
                         way: MovementWay::Pathfind(transform.translation.xz()),
@@ -91,10 +97,11 @@ fn fixed_update(mut commands: Commands, q: Query<(Entity, &Run)>, q_transform: Q
     }
 }
 
-fn on_event_movement_end(trigger: Trigger<EventMovementEnd>, mut commands: Commands) {
-    let entity = trigger.target();
-    if trigger.event().source != "Run" {
+fn on_event_movement_end(trigger: On<EventMovementEnd>, mut commands: Commands) {
+    let entity = trigger.event_target();
+    if trigger.source != "Run" {
         return;
     }
-    commands.entity(entity).remove::<Run>().trigger(EventRunEnd);
+    commands.entity(entity).remove::<Run>();
+    commands.trigger(EventRunEnd { entity });
 }

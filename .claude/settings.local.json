@@ -1,11 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(cargo check:*)",
-      "Bash(findstr:*)",
-      "Bash(cargo build:*)",
-      "Bash(find:*)",
-      "Bash(timeout 60 cargo:*)"
+      "WebSearch",
+      "WebFetch(domain:docs.rs)"
     ],
     "deny": [],
     "ask": []

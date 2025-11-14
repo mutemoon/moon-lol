@@ -1,11 +1,7 @@
 use bevy::{
-    ecs::{
-        error::ignore,
-        system::entity_command::{self, trigger},
-    },
+    ecs::{error::ignore, system::command::trigger},
     prelude::*,
 };
-use league_core::CharacterRecord;
 use serde::{Deserialize, Serialize};
 
 use crate::{Buffs, CommandDamageCreate, CommandRotate, Damage, DamageType, EventDead};
@@ -74,30 +70,39 @@ pub enum AttackStatus {
     Cooldown { end_time: f32 },
 }
 
-#[derive(Event, Debug)]
+#[derive(EntityEvent, Debug)]
 pub struct CommandAttackStart {
+    pub entity: Entity,
     pub target: Entity,
 }
 
-#[derive(Event, Debug)]
-pub struct CommandAttackReset;
+#[derive(EntityEvent, Debug)]
+pub struct CommandAttackReset {
+    pub entity: Entity,
+}
 
-#[derive(Event, Debug)]
-pub struct CommandAttackStop;
+#[derive(EntityEvent, Debug)]
+pub struct CommandAttackStop {
+    pub entity: Entity,
+}
 
-#[derive(Event, Debug)]
+#[derive(EntityEvent, Debug)]
 pub struct EventAttackStart {
+    pub entity: Entity,
     pub target: Entity,
     pub duration: f32,
 }
 
-#[derive(Event, Debug)]
+#[derive(EntityEvent, Debug)]
 pub struct EventAttackEnd {
+    pub entity: Entity,
     pub target: Entity,
 }
 
-#[derive(Event, Debug)]
-pub struct EventAttackReady;
+#[derive(EntityEvent, Debug)]
+pub struct EventAttackReady {
+    pub entity: Entity,
+}
 
 impl Attack {
     pub fn new(range: f32, windup_duration_secs: f32, total_duration_secs: f32) -> Self {
@@ -201,7 +206,7 @@ fn update_attack_state(attack_state: &mut Attack, buffs: Vec<&AttackBuff>) {
 
 // 观察者函数
 fn on_command_attack_start(
-    trigger: Trigger<CommandAttackStart>,
+    trigger: On<CommandAttackStart>,
     mut commands: Commands,
     mut q_attack_state: Query<&mut AttackState>,
     mut q_attack: Query<&mut Attack>,
@@ -210,7 +215,7 @@ fn on_command_attack_start(
     q_buffs: Query<&Buffs>,
     time: Res<Time<Fixed>>,
 ) {
-    let entity = trigger.target();
+    let entity = trigger.event_target();
     let target = trigger.target;
 
     let now = time.elapsed_secs();
@@ -238,25 +243,25 @@ fn on_command_attack_start(
 
         let direction = (target_position - transform.translation.xz()).normalize();
 
-        commands.entity(entity).trigger(CommandRotate {
+        commands.trigger(CommandRotate {
+            entity,
             priority: 1,
             direction,
             angular_velocity: None,
         });
 
-        commands
-            .entity(entity)
-            .insert(AttackState {
-                status: AttackStatus::Windup {
-                    target,
-                    end_time: now + attack.windup_duration_secs(),
-                },
-                target: Some(target),
-            })
-            .trigger(EventAttackStart {
+        commands.entity(entity).insert(AttackState {
+            status: AttackStatus::Windup {
                 target,
-                duration: attack.total_duration_secs(),
-            });
+                end_time: now + attack.windup_duration_secs(),
+            },
+            target: Some(target),
+        });
+        commands.trigger(EventAttackStart {
+            entity,
+            target,
+            duration: attack.total_duration_secs(),
+        });
         return;
     };
 
@@ -269,10 +274,8 @@ fn on_command_attack_start(
                 return;
             }
 
-            commands
-                .entity(entity)
-                .remove::<AttackState>()
-                .trigger(CommandAttackStart { target });
+            commands.entity(entity).remove::<AttackState>();
+            commands.trigger(CommandAttackStart { entity, target });
         }
         AttackStatus::Cooldown { .. } => {
             // 冷却阶段也需要设置目标，因为下一次攻击要攻击这个目标
@@ -282,11 +285,11 @@ fn on_command_attack_start(
 }
 
 fn on_command_attack_reset(
-    trigger: Trigger<CommandAttackReset>,
+    trigger: On<CommandAttackReset>,
     mut commands: Commands,
     mut query: Query<&mut AttackState>,
 ) {
-    let entity = trigger.target();
+    let entity = trigger.event_target();
 
     let Ok(attack_state) = query.get_mut(entity) else {
         return;
@@ -298,17 +301,15 @@ fn on_command_attack_reset(
         return;
     };
 
-    commands
-        .entity(entity)
-        .trigger(CommandAttackStart { target });
+    commands.trigger(CommandAttackStart { entity, target });
 }
 
 fn on_command_attack_stop(
-    trigger: Trigger<CommandAttackStop>,
+    trigger: On<CommandAttackStop>,
     mut commands: Commands,
     mut q_attack_state: Query<&mut AttackState>,
 ) {
-    let entity = trigger.target();
+    let entity = trigger.event_target();
 
     let Ok(mut attack_state) = q_attack_state.get_mut(entity) else {
         return;
@@ -325,11 +326,11 @@ fn on_command_attack_stop(
 }
 
 fn on_event_dead(
-    trigger: Trigger<EventDead>,
+    trigger: On<EventDead>,
     mut commands: Commands,
     q_attack_state: Query<(Entity, &AttackState)>,
 ) {
-    let dead_entity = trigger.target();
+    let dead_entity = trigger.event_target();
 
     for (entity, attack_state) in q_attack_state.iter() {
         if let AttackStatus::Windup { target, .. } = &attack_state.status {
@@ -357,28 +358,26 @@ fn fixed_update(
                         end_time: now + attack.cooldown_time(),
                     };
 
-                    commands.entity(*target).try_trigger(CommandDamageCreate {
+                    commands.try_trigger(CommandDamageCreate {
+                        entity: *target,
                         source: entity,
                         damage_type: DamageType::Physical,
                         amount: damage.0,
                     });
-                    commands
-                        .entity(entity)
-                        .try_trigger(EventAttackEnd { target: *target });
+                    commands.try_trigger(EventAttackEnd {
+                        entity,
+                        target: *target,
+                    });
                 }
             }
             AttackStatus::Cooldown { end_time } => {
                 // 检查后摇是否完成
                 if *end_time <= now {
-                    commands
-                        .entity(entity)
-                        .remove::<AttackState>()
-                        .try_trigger(EventAttackReady);
+                    commands.entity(entity).remove::<AttackState>();
+                    commands.try_trigger(EventAttackReady { entity });
 
                     if let Some(target) = attack_state.target {
-                        commands
-                            .entity(entity)
-                            .try_trigger(CommandAttackStart { target });
+                        commands.try_trigger(CommandAttackStart { entity, target });
                     };
                 }
             }
@@ -387,11 +386,12 @@ fn fixed_update(
 }
 
 pub trait EntityCommandsTrigger {
-    fn try_trigger<T: Event>(&mut self, event: T) -> &mut Self;
+    fn try_trigger<'a, T: Event<Trigger<'a>: Default>>(&mut self, event: T) -> &mut Self;
 }
 
-impl<'a> EntityCommandsTrigger for EntityCommands<'a> {
-    fn try_trigger<T: Event>(&mut self, event: T) -> &mut Self {
-        self.queue_handled(trigger(event), ignore)
+impl<'w, 'a> EntityCommandsTrigger for Commands<'w, 'a> {
+    fn try_trigger<'b, T: Event<Trigger<'b>: Default>>(&mut self, event: T) -> &mut Self {
+        self.queue_handled(trigger(event), ignore);
+        self
     }
 }

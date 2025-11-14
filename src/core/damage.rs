@@ -37,8 +37,9 @@ pub enum DamageType {
 }
 
 /// 伤害事件，包含伤害来源、目标、伤害类型和数值
-#[derive(Event, Debug)]
+#[derive(EntityEvent, Debug)]
 pub struct CommandDamageCreate {
+    pub entity: Entity,
     /// 伤害来源实体
     pub source: Entity,
     /// 伤害类型
@@ -47,8 +48,9 @@ pub struct CommandDamageCreate {
     pub amount: f32,
 }
 
-#[derive(Event, Debug)]
+#[derive(EntityEvent, Debug)]
 pub struct EventDamageCreate {
+    pub entity: Entity,
     pub source: Entity,
     pub damage_type: DamageType,
     pub damage_result: DamageResult,
@@ -273,7 +275,7 @@ pub fn calculate_damage(
 
 /// 伤害系统 - 处理伤害事件
 pub fn on_command_damage_create(
-    trigger: Trigger<CommandDamageCreate>,
+    trigger: On<CommandDamageCreate>,
     mut commands: Commands,
     mut query: Query<(
         &mut Health,
@@ -285,15 +287,15 @@ pub fn on_command_damage_create(
     debug!(
         "{:?} 对 {:?} 造成 {:.1} 点 {:?} 伤害",
         trigger.source,
-        trigger.target(),
+        trigger.event_target(),
         trigger.amount,
         trigger.damage_type,
     );
 
     if let Ok((mut health, white_shield, magic_shield, damage_reductions)) =
-        query.get_mut(trigger.target())
+        query.get_mut(trigger.event_target())
     {
-        let health_before = health.value;
+        // let health_before = health.value;
         let result = calculate_damage(
             trigger.damage_type,
             trigger.amount,
@@ -320,14 +322,12 @@ pub fn on_command_damage_create(
         // );
 
         // 触发伤害生效事件
-        commands.trigger_targets(
-            EventDamageCreate {
-                source: trigger.source,
-                damage_type: trigger.damage_type,
-                damage_result: result,
-            },
-            trigger.target(),
-        );
+        commands.trigger(EventDamageCreate {
+            entity: trigger.event_target(),
+            source: trigger.source,
+            damage_type: trigger.damage_type,
+            damage_result: result,
+        });
 
         if health.value <= 0.0 {
             // println!(

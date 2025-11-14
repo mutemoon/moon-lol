@@ -1,15 +1,14 @@
 use std::fmt::Debug;
 
 use bevy::{
+    mesh::MeshVertexBufferLayoutRef,
     pbr::{MaterialPipeline, MaterialPipelineKey},
     prelude::*,
-    render::{
-        mesh::MeshVertexBufferLayoutRef,
-        render_resource::{
-            AsBindGroup, BlendComponent, BlendFactor, BlendOperation, BlendState,
-            RenderPipelineDescriptor, ShaderRef, ShaderType, SpecializedMeshPipelineError,
-        },
+    render::render_resource::{
+        AsBindGroup, BlendComponent, BlendFactor, BlendOperation, BlendState,
+        RenderPipelineDescriptor, ShaderType, SpecializedMeshPipelineError,
     },
+    shader::ShaderRef,
 };
 
 #[derive(Clone, ShaderType, Debug)]
@@ -110,13 +109,13 @@ impl Material for ParticleMaterialMesh {
     }
 
     fn specialize(
-        _pipeline: &MaterialPipeline<Self>,
+        _pipeline: &MaterialPipeline,
         descriptor: &mut RenderPipelineDescriptor,
         layout: &MeshVertexBufferLayoutRef,
         key: MaterialPipelineKey<Self>,
     ) -> Result<(), SpecializedMeshPipelineError> {
-        descriptor.vertex.entry_point = "main".into();
-        descriptor.fragment.as_mut().unwrap().entry_point = "main".into();
+        descriptor.vertex.entry_point = Some("main".into());
+        descriptor.fragment.as_mut().unwrap().entry_point = Some("main".into());
 
         let fragment = descriptor.fragment.as_mut().unwrap();
         let target = fragment.targets.get_mut(0).unwrap().as_mut().unwrap();

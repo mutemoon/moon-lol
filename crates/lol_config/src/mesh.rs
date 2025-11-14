@@ -1,7 +1,7 @@
 use bevy::{
     asset::RenderAssetUsages,
+    mesh::{Indices, PrimitiveTopology, VertexAttributeValues},
     prelude::*,
-    render::mesh::{Indices, PrimitiveTopology, VertexAttributeValues},
 };
 use binrw::{BinRead, BinWrite};
 use serde::{Deserialize, Serialize};

@@ -9,17 +9,18 @@ pub struct ActionAnimationPlay {
 }
 
 pub fn on_action_animation_play(
-    trigger: Trigger<BehaveTrigger<ActionAnimationPlay>>,
+    trigger: On<BehaveTrigger<ActionAnimationPlay>>,
     mut commands: Commands,
 ) {
     let ctx = trigger.ctx();
     let entity = ctx.target_entity();
     let event = trigger.inner();
 
-    commands.entity(entity).trigger(CommandAnimationPlay {
+    commands.trigger(CommandAnimationPlay {
+        entity,
         hash: event.hash,
         repeat: false,
-        ..default()
+        duration: None,
     });
     commands.trigger(ctx.success());
 }

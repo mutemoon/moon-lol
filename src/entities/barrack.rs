@@ -10,7 +10,7 @@ use lol_core::{Lane, Team};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    core::{Armor, Attack, Bounding, CommandSpawnCharacter, Damage, Health, Movement, ResourceCache},
+    core::{Armor, CommandSpawnCharacter, Damage, Health, Movement, ResourceCache},
     entities::Minion,
 };
 
@@ -230,14 +230,9 @@ fn barracks_spawning_system(
         movement.speed +=
             (barrack_config.move_speed_increase_increment * move_speed_upgrade_count) as f32;
 
-        let bounding = Bounding {
-            radius: character_record.pathfinding_collision_radius.unwrap_or(0.0),
-            height: character_record.health_bar_height.unwrap_or(0.0),
-        };
-
         let entity = commands
             .spawn((
-                Transform::from_matrix(transform.compute_matrix()),
+                Transform::from_matrix(transform.to_matrix()),
                 Minion::from(minion_config.minion_type),
                 lane.clone(),
                 team.clone(),
@@ -245,13 +240,11 @@ fn barracks_spawning_system(
             .id();
 
         // 触发角色生成命令（创建基础组件并加载皮肤）
-        commands.trigger_targets(
-            CommandSpawnCharacter {
-                character_record_key: character.character_record.clone(),
-                skin_path: character.skin.clone(),
-            },
+        commands.trigger(CommandSpawnCharacter {
             entity,
-        );
+            character_record_key: character.character_record.clone(),
+            skin_path: character.skin.clone(),
+        });
 
         let mut path = res_game_config.minion_paths.get(lane).unwrap().clone();
 

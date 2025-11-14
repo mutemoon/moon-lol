@@ -55,16 +55,21 @@ pub enum MinionState {
     AttackingTarget,
 }
 
-#[derive(Event, Debug)]
-pub struct CommandMinionContinuePath;
+#[derive(EntityEvent, Debug)]
+pub struct CommandMinionContinuePath {
+    pub entity: Entity,
+}
 
-#[derive(Event, Debug)]
+#[derive(EntityEvent, Debug)]
 pub struct EventMinionFoundTarget {
+    pub entity: Entity,
     pub target: Entity,
 }
 
-#[derive(Event, Debug)]
-pub struct EventMinionChasingTimeout;
+#[derive(EntityEvent, Debug)]
+pub struct EventMinionChasingTimeout {
+    pub entity: Entity,
+}
 
 #[derive(Event, Debug)]
 pub struct ChasingTooMuch;
@@ -113,7 +118,8 @@ pub fn minion_aggro(
 
         // 如果找到有效目标则触发
         if target_entity != Entity::PLACEHOLDER {
-            commands.entity(entity).trigger(EventMinionFoundTarget {
+            commands.trigger(EventMinionFoundTarget {
+                entity,
                 target: target_entity,
             });
         }
@@ -121,12 +127,12 @@ pub fn minion_aggro(
 }
 
 pub fn on_command_continue_minion_path(
-    trigger: Trigger<CommandMinionContinuePath>,
+    trigger: On<CommandMinionContinuePath>,
     query: Query<(&Transform, &Lane, &Team)>,
     res_config: Res<ConfigMap>,
     mut commands: Commands,
 ) {
-    let Ok((transform, lane, team)) = query.get(trigger.target()) else {
+    let Ok((transform, lane, team)) = query.get(trigger.event_target()) else {
         return;
     };
 
@@ -142,31 +148,31 @@ pub fn on_command_continue_minion_path(
         return;
     };
 
-    commands.trigger_targets(
-        CommandMovement {
-            priority: 0,
-            action: MovementAction::Start {
-                way: MovementWay::Path(path[closest_index..].to_vec()),
-                speed: None,
-                source: "Minion".to_string(),
-            },
+    let entity = trigger.event_target();
+    commands.trigger(CommandMovement {
+        entity,
+        priority: 0,
+        action: MovementAction::Start {
+            way: MovementWay::Path(path[closest_index..].to_vec()),
+            speed: None,
+            source: "Minion".to_string(),
         },
-        trigger.target(),
-    );
+    });
 }
 
 fn on_event_minion_found_target(
-    trigger: Trigger<EventMinionFoundTarget>,
+    trigger: On<EventMinionFoundTarget>,
     mut commands: Commands,
     mut q_minion_state: Query<&mut MinionState>,
 ) {
-    let entity = trigger.target();
+    let entity = trigger.event_target();
 
     if let Ok(mut minion_state) = q_minion_state.get_mut(entity) {
         match *minion_state {
             MinionState::MovingOnPath => {
                 *minion_state = MinionState::AttackingTarget;
-                commands.entity(entity).trigger(CommandAction {
+                commands.trigger(CommandAction {
+                    entity,
                     action: Action::Attack(trigger.target),
                 });
             }
@@ -176,13 +182,13 @@ fn on_event_minion_found_target(
 }
 
 pub fn on_team_get_damage(
-    trigger: Trigger<EventDamageCreate>,
+    trigger: On<EventDamageCreate>,
     mut q_minion: Query<(&Team, &Transform, &mut AggroInfo), With<Minion>>,
     q_transform: Query<&Transform>,
     q_team: Query<&Team>,
 ) {
     let source = trigger.source;
-    let target = trigger.target();
+    let target = trigger.event_target();
 
     if trigger.damage_type != DamageType::Physical {
         return;
@@ -216,11 +222,11 @@ pub fn on_team_get_damage(
 }
 
 fn on_target_dead(
-    trigger: Trigger<EventDead>,
+    trigger: On<EventDead>,
     mut commands: Commands,
     mut q_minion_state: Query<(Entity, &mut MinionState, &AttackAuto)>,
 ) {
-    let dead_entity = trigger.target();
+    let dead_entity = trigger.event_target();
 
     for (entity, mut minion_state, attack_state) in q_minion_state.iter_mut() {
         let target = attack_state.target;
@@ -232,7 +238,7 @@ fn on_target_dead(
         match *minion_state {
             MinionState::AttackingTarget => {
                 *minion_state = MinionState::MovingOnPath;
-                commands.entity(entity).trigger(CommandMinionContinuePath);
+                commands.trigger(CommandMinionContinuePath { entity });
             }
             _ => (),
         }
@@ -240,16 +246,16 @@ fn on_target_dead(
 }
 
 fn on_spawn(
-    trigger: Trigger<EventSpawn>,
+    trigger: On<EventSpawn>,
     mut commands: Commands,
     mut q_minion_state: Query<&mut MinionState>,
 ) {
-    let entity = trigger.target();
+    let entity = trigger.event_target();
     if let Ok(mut minion_state) = q_minion_state.get_mut(entity) {
         match *minion_state {
             MinionState::MovingOnPath => {
                 *minion_state = MinionState::MovingOnPath;
-                commands.trigger_targets(CommandMinionContinuePath, entity);
+                commands.trigger(CommandMinionContinuePath { entity });
             }
             _ => (),
         }

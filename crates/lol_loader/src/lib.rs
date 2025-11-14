@@ -6,13 +6,13 @@ use bevy::{
         animation_curves::{AnimatableCurve, AnimatableKeyframeCurve},
         AnimationClip, AnimationTargetId,
     },
-    asset::{io::Reader, uuid::Uuid, AssetLoader, LoadContext, RenderAssetUsages},
+    asset::{io::Reader, uuid::Uuid, AssetLoader, LoadContext},
     image::ImageSampler,
+    mesh::skinning::SkinnedMeshInverseBindposes,
     pbr::StandardMaterial,
     prelude::*,
     render::{
         alpha::AlphaMode,
-        mesh::skinning::SkinnedMeshInverseBindposes,
         render_resource::{
             Extent3d, Face, TextureDescriptor, TextureDimension, TextureFormat, TextureUsages,
         },
@@ -196,8 +196,7 @@ impl AssetLoader for LeagueLoaderImage {
             data: Some(texture.mipmaps[0].clone()),
             texture_descriptor,
             sampler: ImageSampler::linear(),
-            texture_view_descriptor: None,
-            asset_usage: RenderAssetUsages::default(),
+            ..default()
         };
 
         let srgb_image = Image {
@@ -221,8 +220,7 @@ impl AssetLoader for LeagueLoaderImage {
                 view_formats: &[],
             },
             sampler: ImageSampler::linear(),
-            texture_view_descriptor: None,
-            asset_usage: RenderAssetUsages::default(),
+            ..default()
         };
 
         load_context.add_labeled_asset("srgb".to_string(), srgb_image);

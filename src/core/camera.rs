@@ -1,6 +1,5 @@
-// use bevy::window::CursorGrabMode;
+use bevy::camera::{CameraProjection, SubCameraView};
 use bevy::math::{Mat4, Vec3A, Vec4};
-use bevy::render::camera::{CameraProjection, Projection, SubCameraView};
 use bevy::{input::mouse::MouseWheel, prelude::*};
 
 // 相机距离和位置配置
@@ -103,7 +102,7 @@ fn update_focus(mut q_camera: Query<&mut CameraState>, q_focus: Query<&Transform
 }
 
 fn on_wheel(
-    mut mouse_wheel_events: EventReader<MouseWheel>,
+    mut mouse_wheel_events: MessageReader<MouseWheel>,
     mut query: Query<&mut CameraState, With<Camera3d>>,
 ) {
     let Ok(mut camera_state) = query.single_mut() else {

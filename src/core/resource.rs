@@ -133,7 +133,10 @@ impl Plugin for PluginResource {
 
                 #[expect(unsafe_code, reason = "this is faster")]
                 let component_info = unsafe { world.components().get_info_unchecked(component_id) };
-                if *component_info.clone_behavior() == ComponentCloneBehavior::Ignore {
+                if matches!(
+                    *component_info.clone_behavior(),
+                    ComponentCloneBehavior::Ignore
+                ) {
                     continue;
                 }
 
@@ -171,7 +174,7 @@ impl ResourceCache {
         match self.image.get(path) {
             Some(handle) => handle.clone(),
             None => {
-                let handle = asset_server.load(path);
+                let handle = asset_server.load(path.to_string());
                 self.image.insert(path.to_string(), handle.clone());
                 handle
             }
@@ -182,7 +185,7 @@ impl ResourceCache {
         match self.mesh.get(path) {
             Some(handle) => handle.clone(),
             None => {
-                let handle = asset_server.load(path);
+                let handle = asset_server.load(path.to_string());
                 self.mesh.insert(path.to_string(), handle.clone());
                 handle
             }

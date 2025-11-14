@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use lol_config::ConfigGame;
 
-use crate::{CommandSpawnCharacter, ResourceCache};
+use crate::CommandSpawnCharacter;
 
 #[derive(Default)]
 pub struct PluginGame;
@@ -22,18 +22,13 @@ fn fixed_update_frame(mut frame: ResMut<FixedFrameCount>) {
     frame.0 += 1;
 }
 
-fn startup(
-    mut commands: Commands,
-    config_game: Res<ConfigGame>,
-) {
+fn startup(mut commands: Commands, config_game: Res<ConfigGame>) {
     // 使用 ConfigGame 中保存的 character_record 和 skin_path
     for (entity, skin, character_record) in config_game.legends.iter() {
-        commands.trigger_targets(
-            CommandSpawnCharacter {
-                character_record_key: character_record.clone(),
-                skin_path: skin.clone(),
-            },
-            *entity,
-        );
+        commands.trigger(CommandSpawnCharacter {
+            entity: *entity,
+            character_record_key: character_record.clone(),
+            skin_path: skin.clone(),
+        });
     }
 }

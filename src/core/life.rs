@@ -9,9 +9,6 @@ pub struct PluginLife;
 impl Plugin for PluginLife {
     fn build(&self, app: &mut App) {
         app.register_type::<Health>();
-
-        app.add_event::<EventDead>();
-        app.add_event::<EventSpawn>();
         app.add_systems(FixedUpdate, spawn_event);
         app.add_observer(on_event_damage_create);
     }
@@ -24,11 +21,15 @@ pub struct Health {
     pub max: f32,
 }
 
-#[derive(Event, Debug)]
-pub struct EventDead;
+#[derive(EntityEvent, Debug)]
+pub struct EventDead {
+    entity: Entity,
+}
 
-#[derive(Event, Debug)]
-pub struct EventSpawn;
+#[derive(EntityEvent, Debug)]
+pub struct EventSpawn {
+    entity: Entity,
+}
 
 impl Health {
     pub fn new(max: f32) -> Health {
@@ -43,17 +44,16 @@ pub fn spawn_event(mut commands: Commands, q_alive: Query<Entity, Added<Health>>
     }
 
     for entity in q_alive.iter() {
-        // println!("Triggering spawn event for entity {:?}", entity);
-        commands.entity(entity).trigger(EventSpawn);
+        commands.trigger(EventSpawn { entity });
     }
 }
 
 fn on_event_damage_create(
-    trigger: Trigger<EventDamageCreate>,
+    trigger: On<EventDamageCreate>,
     mut commands: Commands,
     q_health: Query<&Health>,
 ) {
-    let entity = trigger.target();
+    let entity = trigger.event_target();
 
     let Ok(health) = q_health.get(entity) else {
         return;
@@ -62,6 +62,6 @@ fn on_event_damage_create(
     if health.value <= 0.0 {
         debug!("{:?} 死了", entity);
         commands.entity(entity).despawn();
-        commands.trigger_targets(EventDead, entity);
+        commands.trigger(EventDead { entity });
     }
 }

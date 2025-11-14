@@ -127,6 +127,6 @@ pub fn on_key_pressed(
             continue;
         };
 
-        commands.entity(entity).trigger(CommandAction { action });
+        commands.trigger(CommandAction { entity, action });
     }
 }

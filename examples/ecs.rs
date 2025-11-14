@@ -15,8 +15,6 @@ fn main() {
 
     app.add_plugins(MinimalPlugins)
         .init_resource::<FixedFrameCount>()
-        .add_event::<CommandAddNeedUpdateImmediately>()
-        .add_event::<CommandAddNeedUpdateImmediately2>()
         .add_systems(FixedUpdate, fixed_update_2)
         .add_systems(FixedUpdate, fixed_update)
         .add_systems(FixedPostUpdate, fixed_post_update)
@@ -101,7 +99,7 @@ fn update(
 }
 
 fn observer(
-    _trigger: Trigger<CommandAddNeedUpdateImmediately>,
+    _trigger: On<CommandAddNeedUpdateImmediately>,
     mut commands: Commands,
     frame: Res<FrameCount>,
     fixed_frame: Res<FixedFrameCount>,
@@ -115,7 +113,7 @@ fn observer(
 }
 
 fn observer2(
-    _trigger: Trigger<CommandAddNeedUpdateImmediately2>,
+    _trigger: On<CommandAddNeedUpdateImmediately2>,
     mut commands: Commands,
     frame: Res<FrameCount>,
     fixed_frame: Res<FixedFrameCount>,

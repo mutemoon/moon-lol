@@ -2,17 +2,14 @@ use std::f32::consts::PI;
 use std::fmt::Debug;
 
 use bevy::{
+    mesh::{MeshVertexBufferLayoutRef, VertexAttributeValues},
     pbr::{MaterialPipeline, MaterialPipelineKey},
     prelude::*,
-    render::{
-        mesh::MeshVertexBufferLayoutRef,
-        mesh::VertexAttributeValues,
-        render_resource::{
-            AsBindGroup, BlendComponent, BlendFactor, BlendOperation, BlendState,
-            RenderPipelineDescriptor, ShaderDefVal, ShaderRef, ShaderType,
-            SpecializedMeshPipelineError,
-        },
+    render::render_resource::{
+        AsBindGroup, BlendComponent, BlendFactor, BlendOperation, BlendState,
+        RenderPipelineDescriptor, ShaderType, SpecializedMeshPipelineError,
     },
+    shader::{ShaderDefVal, ShaderRef},
 };
 
 use crate::{ATTRIBUTE_LIFETIME, ATTRIBUTE_UV_FRAME, ATTRIBUTE_UV_MULT, ATTRIBUTE_WORLD_POSITION};
@@ -146,13 +143,13 @@ impl Material for ParticleMaterialQuad {
     }
 
     fn specialize(
-        _pipeline: &MaterialPipeline<Self>,
+        _pipeline: &MaterialPipeline,
         descriptor: &mut RenderPipelineDescriptor,
         layout: &MeshVertexBufferLayoutRef,
         key: MaterialPipelineKey<Self>,
     ) -> Result<(), SpecializedMeshPipelineError> {
-        descriptor.vertex.entry_point = "main".into();
-        descriptor.fragment.as_mut().unwrap().entry_point = "main".into();
+        descriptor.vertex.entry_point = Some("main".into());
+        descriptor.fragment.as_mut().unwrap().entry_point = Some("main".into());
 
         let fragment = descriptor.fragment.as_mut().unwrap();
         let target = fragment.targets.get_mut(0).unwrap().as_mut().unwrap();

@@ -27,8 +27,6 @@ pub struct PluginAction;
 
 impl Plugin for PluginAction {
     fn build(&self, app: &mut App) {
-        app.add_event::<CommandAction>();
-
         app.add_observer(on_action_animation_play);
         app.add_observer(on_action_attack_reset);
         app.add_observer(on_action_buff_spawn);
@@ -43,8 +41,9 @@ impl Plugin for PluginAction {
     }
 }
 
-#[derive(Event)]
+#[derive(EntityEvent)]
 pub struct CommandAction {
+    pub entity: Entity,
     pub action: Action,
 }
 
@@ -56,18 +55,17 @@ pub enum Action {
     Skill { index: usize, point: Vec2 },
 }
 
-fn on_command_action(trigger: Trigger<CommandAction>, mut commands: Commands) {
-    let entity = trigger.target();
+fn on_command_action(trigger: On<CommandAction>, mut commands: Commands) {
+    let entity = trigger.event_target();
 
-    match trigger.event().action {
+    match trigger.action {
         Action::Attack(target) => {
-            commands
-                .entity(entity)
-                .trigger(CommandAttackAutoStart { target });
+            commands.trigger(CommandAttackAutoStart { entity, target });
         }
         Action::Move(target) => {
-            commands.entity(entity).trigger(CommandAttackAutoStop);
-            commands.entity(entity).trigger(CommandRunStart {
+            commands.trigger(CommandAttackAutoStop { entity });
+            commands.trigger(CommandRunStart {
+                entity,
                 target: RunTarget::Position(target),
             });
             // commands.entity(entity).trigger(CommandAnimationPlay {
@@ -77,17 +75,19 @@ fn on_command_action(trigger: Trigger<CommandAction>, mut commands: Commands) {
             // });
         }
         Action::Skill { index, point } => {
-            commands.trigger_targets(CommandSkillStart { index, point }, trigger.target());
+            commands.trigger(CommandSkillStart {
+                entity,
+                index,
+                point,
+            });
         }
         Action::Stop => {
-            commands.trigger_targets(CommandAttackAutoStop, trigger.target());
-            commands.trigger_targets(
-                CommandMovement {
-                    priority: 0,
-                    action: MovementAction::Stop,
-                },
-                trigger.target(),
-            );
+            commands.trigger(CommandAttackAutoStop { entity });
+            commands.trigger(CommandMovement {
+                entity,
+                priority: 0,
+                action: MovementAction::Stop,
+            });
         }
     }
 }

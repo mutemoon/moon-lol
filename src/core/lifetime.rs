@@ -48,7 +48,7 @@ impl Lifetime {
     /// 检查生命周期是否结束。
     /// 如果 timer 是 None (无限生命周期), 永远返回 false。
     pub fn is_dead(self: &Self) -> bool {
-        self.timer.as_ref().map_or(false, |t| t.finished())
+        self.timer.as_ref().map_or(false, |t| t.is_finished())
     }
 
     /// 检查生命周期是否仍在进行中。

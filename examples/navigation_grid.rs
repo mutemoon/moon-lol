@@ -7,11 +7,9 @@ use bevy::render::{
 use bevy_egui::{egui, EguiContexts, EguiPlugin, EguiPrimaryContextPass};
 use league_core::VisionPathingFlags;
 use lol_config::ConfigNavigationGrid;
-use std::collections::HashSet;
 
 use moon_lol::{
-    find_grid_path_with_result, on_click_map, AStarResult, CameraState, Map, Movement, PluginCore,
-    PluginLogging, PluginNavigaton,
+    on_click_map, CameraState, Map, Movement, PluginCore, PluginLogging, PluginNavigaton,
 };
 
 fn main() {
@@ -309,7 +307,7 @@ pub struct AStarVisualization {
 //     mut astar_vis: ResMut<AStarVisualization>,
 // ) {
 //     let entity = trigger.target();
-//     let destination = trigger.event().target;
+//     let destination = trigger.target;
 
 //     // 获取当前位置
 //     if let Ok(transform) = q_transform.get_mut(entity) {
@@ -351,20 +349,19 @@ pub struct AStarVisualization {
 //     }
 // }
 
-/// 带可视化的寻路函数
-fn find_path_with_visualization(
-    grid: &ConfigNavigationGrid,
-    start: &Vec2,
-    end: &Vec2,
-) -> Option<AStarResult> {
-    if let Some(astar_result) = find_grid_path_with_result(grid, start, end) {
-        // 注意：这里不对路径进行简化，保持原始的A*网格路径
-        // 简化路径只在最终转换为世界坐标时使用
-        Some(astar_result)
-    } else {
-        None
-    }
-}
+// fn find_path_with_visualization(
+//     grid: &ConfigNavigationGrid,
+//     start: &Vec2,
+//     end: &Vec2,
+// ) -> Option<AStarResult> {
+//     if let Some(astar_result) = find_grid_path_with_result(grid, start, end) {
+//         // 注意：这里不对路径进行简化，保持原始的A*网格路径
+//         // 简化路径只在最终转换为世界坐标时使用
+//         Some(astar_result)
+//     } else {
+//         None
+//     }
+// }
 
 /// 更新 A* 可视化系统
 fn update_astar_visualization(

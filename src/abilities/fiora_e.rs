@@ -18,12 +18,12 @@ pub struct BuffFioraE {
 }
 
 fn on_event_attack_end(
-    trigger: Trigger<EventAttackEnd>,
+    trigger: On<EventAttackEnd>,
     mut commands: Commands,
     q_buffs: Query<&Buffs>,
     mut q_buff_fiora_e: Query<&mut BuffFioraE>,
 ) {
-    let entity = trigger.target();
+    let entity = trigger.event_target();
     let Ok(buffs) = q_buffs.get(entity) else {
         return;
     };

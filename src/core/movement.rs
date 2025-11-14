@@ -61,8 +61,9 @@ pub struct MovementState {
 #[derive(Component, Default)]
 pub struct MovementBlock;
 
-#[derive(Event, Debug, Clone, PartialEq)]
+#[derive(EntityEvent, Debug, Clone, PartialEq)]
 pub struct CommandMovement {
+    pub entity: Entity,
     pub priority: i32,
     pub action: MovementAction,
 }
@@ -83,11 +84,14 @@ pub enum MovementWay {
     Path(Vec<Vec2>),
 }
 
-#[derive(Event, Debug)]
-pub struct EventMovementStart;
+#[derive(EntityEvent, Debug)]
+pub struct EventMovementStart {
+    entity: Entity,
+}
 
-#[derive(Event, Debug)]
+#[derive(EntityEvent, Debug)]
 pub struct EventMovementEnd {
+    pub entity: Entity,
     pub source: String,
 }
 
@@ -218,19 +222,18 @@ fn update_path_movement(
             movement_state.direction = Vec2::ZERO;
             movement_state.clear_path();
 
-            commands.trigger_targets(
-                EventMovementEnd {
-                    source: movement_state.source.clone(),
-                },
+            commands.trigger(EventMovementEnd {
                 entity,
-            );
+                source: movement_state.source.clone(),
+            });
         } else {
             movement_state.direction = last_direction;
             movement_state.velocity = last_direction * speed;
         }
 
         if last_direction.length_squared() > 0.0 {
-            commands.entity(entity).trigger(CommandRotate {
+            commands.trigger(CommandRotate {
+                entity,
                 priority: 0,
                 direction: last_direction,
                 angular_velocity: None,
@@ -385,7 +388,7 @@ fn apply_final_movement_decision(
                     movement_state.with_speed(*speed);
                 }
 
-                commands.trigger_targets(EventMovementStart, entity);
+                commands.trigger(EventMovementStart { entity });
             }
             MovementAction::Stop => {
                 movement_state.clear_path();
@@ -394,8 +397,8 @@ fn apply_final_movement_decision(
     }
 }
 
-fn on_event_movement_end(trigger: Trigger<EventMovementEnd>, mut commands: Commands) {
+fn on_event_movement_end(trigger: On<EventMovementEnd>, mut commands: Commands) {
     commands
-        .entity(trigger.target())
+        .entity(trigger.event_target())
         .remove::<LastDecision<CommandMovement>>();
 }

@@ -7,14 +7,14 @@ use crate::CommandAttackReset;
 pub struct ActionAttackReset;
 
 pub fn on_action_attack_reset(
-    trigger: Trigger<BehaveTrigger<ActionAttackReset>>,
+    trigger: On<BehaveTrigger<ActionAttackReset>>,
     mut commands: Commands,
 ) {
     let ctx = trigger.ctx();
     let entity = ctx.target_entity();
     let _event = trigger.inner();
 
-    commands.entity(entity).trigger(CommandAttackReset);
+    commands.trigger(CommandAttackReset { entity });
 
     commands.trigger(ctx.success());
 }

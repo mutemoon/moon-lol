@@ -47,8 +47,9 @@ pub struct AnimationTransitionOut {
     pub start_time: f32,
 }
 
-#[derive(Event, Default)]
+#[derive(EntityEvent)]
 pub struct CommandAnimationPlay {
+    pub entity: Entity,
     pub hash: u32,
     pub repeat: bool,
     pub duration: Option<f32>,
@@ -120,11 +121,7 @@ impl Animation {
 
                 vec![hashes[0]]
             }
-            AnimationNode::ConditionBool {
-                true_node,
-                false_node,
-                updater,
-            } => {
+            AnimationNode::ConditionBool { false_node, .. } => {
                 vec![*false_node]
             }
         };
@@ -161,11 +158,9 @@ impl Animation {
                 Some(index) => self.get_current_node_indices(hashes[*index]),
                 None => vec![],
             },
-            AnimationNode::ConditionBool {
-                true_node,
-                false_node,
-                updater,
-            } => self.get_current_node_indices(*false_node),
+            AnimationNode::ConditionBool { false_node, .. } => {
+                self.get_current_node_indices(*false_node)
+            }
         }
     }
 
@@ -197,11 +192,7 @@ impl Animation {
             AnimationNode::Sequence { hashes, .. } => {
                 result.extend(hashes.iter().flat_map(|v| self.get_current_nodes(*v)));
             }
-            AnimationNode::ConditionBool {
-                true_node,
-                false_node,
-                updater,
-            } => {
+            AnimationNode::ConditionBool { false_node, .. } => {
                 result.extend(self.get_current_nodes(*false_node));
             }
         }
@@ -311,17 +302,16 @@ fn on_state_change(
                     .with_repeat(false)
                     .with_duration(attack.animation_duration());
             }
-            _ => {}
         }
     }
 }
 
 fn on_command_animation_play(
-    trigger: Trigger<CommandAnimationPlay>,
+    trigger: On<CommandAnimationPlay>,
     mut query: Query<&mut AnimationState>,
 ) {
     let event = trigger.event();
-    let entity = trigger.target();
+    let entity = trigger.event_target();
 
     let mut animation_state = query.get_mut(entity).unwrap();
 

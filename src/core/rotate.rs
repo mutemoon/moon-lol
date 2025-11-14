@@ -14,8 +14,6 @@ impl Plugin for PluginRotate {
     fn build(&self, app: &mut App) {
         app.register_type::<Rotate>();
 
-        app.add_event::<CommandRotate>();
-
         app.add_plugins(ArbitrationPipelinePlugin::<CommandRotate, RotatePipeline>::default());
 
         app.add_systems(
@@ -40,8 +38,9 @@ pub struct Rotate {
     pub target_angle: f32,     // 目标角度
 }
 
-#[derive(Event, Debug, Clone)]
+#[derive(EntityEvent, Debug, Clone)]
 pub struct CommandRotate {
+    pub entity: Entity,
     pub priority: i32,
     pub direction: Vec2,
     pub angular_velocity: Option<f32>,

@@ -1,12 +1,9 @@
 use bevy::{
     animation::AnimationTarget,
-    math::{
-        bounding::{Aabb3d, IntersectsVolume},
-        VectorSpace,
-    },
+    math::bounding::{Aabb3d, IntersectsVolume},
+    mesh::skinning::SkinnedMesh,
     platform::collections::HashSet,
     prelude::*,
-    render::mesh::skinning::SkinnedMesh,
 };
 
 use league_core::{
@@ -112,14 +109,13 @@ pub fn update_emitter(
     mut res_particle_material_mesh: ResMut<Assets<ParticleMaterialMesh>>,
     mut query: Query<(
         Entity,
-        &EmitterOf,
         &mut Lifetime,
         &mut ParticleEmitterState,
         &ParticleId,
     )>,
     time: Res<Time>,
 ) {
-    for (emitter_entity, emitter_of, mut lifetime, mut emitter, particle_id) in query.iter_mut() {
+    for (emitter_entity, mut lifetime, mut emitter, particle_id) in query.iter_mut() {
         let vfx_emitter_definition_data = particle_id.get_def(&res_config_map);
 
         let primitive = vfx_emitter_definition_data
@@ -161,7 +157,7 @@ pub fn update_emitter(
             .is_uniform_scale
             .unwrap_or(false);
 
-        let mut texture = vfx_emitter_definition_data
+        let texture = vfx_emitter_definition_data
             .texture
             .as_ref()
             .map(|v| res_resource_cache.get_image(&res_asset_server, v));

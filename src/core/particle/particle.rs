@@ -7,11 +7,11 @@ pub use quad::*;
 pub use quad_slice::*;
 
 use bevy::{
-    prelude::*,
-    render::mesh::{
+    mesh::{
         skinning::{SkinnedMesh, SkinnedMeshInverseBindposes},
         VertexAttributeValues,
     },
+    prelude::*,
 };
 
 use league_core::VfxEmitterDefinitionDataPrimitive;
@@ -72,7 +72,7 @@ pub fn update_particle(
 
         let mut world_transform = emitter_global_transform.mul_transform(*transform);
 
-        let world_matrix = world_transform.compute_matrix();
+        let world_matrix = world_transform.to_matrix();
 
         let vfx_emitter_definition_data = particle_id.get_def(&res_config_map);
 
@@ -245,7 +245,7 @@ pub fn update_particle_skinned_mesh_particle(
 
         for (i, entity) in skinned_mesh.joints.iter().enumerate() {
             let g = q_global_transform.get(*entity).unwrap();
-            bones.push(g.compute_matrix() * inverse_bindposes[i]);
+            bones.push(g.to_matrix() * inverse_bindposes[i]);
         }
 
         let current_uv_offset: Vec2 =

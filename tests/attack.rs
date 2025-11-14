@@ -64,12 +64,10 @@ mod tests {
 
         /// 发送攻击命令
         fn attack(&mut self) -> &mut Self {
-            self.app.world_mut().trigger_targets(
-                CommandAttackStart {
-                    target: self.target,
-                },
-                self.attacker,
-            );
+            self.app.world_mut().trigger(CommandAttackStart {
+                entity: self.attacker,
+                target: self.target,
+            });
             self.app.update();
             self
         }
@@ -78,7 +76,7 @@ mod tests {
         fn cancel(&mut self) -> &mut Self {
             self.app
                 .world_mut()
-                .trigger_targets(CommandAttackStop, self.attacker);
+                .trigger(CommandAttackStop { entity: self.attacker });
             self.app.update();
             self
         }
@@ -87,7 +85,7 @@ mod tests {
         fn reset(&mut self) -> &mut Self {
             self.app
                 .world_mut()
-                .trigger_targets(CommandAttackReset, self.attacker);
+                .trigger(CommandAttackReset { entity: self.attacker });
             self.app.update();
             self
         }

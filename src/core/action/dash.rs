@@ -13,7 +13,7 @@ pub enum ActionDash {
 }
 
 pub fn on_action_dash(
-    trigger: Trigger<BehaveTrigger<ActionDash>>,
+    trigger: On<BehaveTrigger<ActionDash>>,
     mut commands: Commands,
     q_transform: Query<&Transform>,
     q_skill_effect_ctx: Query<&SkillEffectContext>,
@@ -41,25 +41,26 @@ pub fn on_action_dash(
 
             commands
                 .entity(entity)
-                .insert(SkillEffectBehaveCtx(ctx.clone()))
-                .trigger(CommandMovement {
-                    priority: 100,
-                    action: MovementAction::Start {
-                        way: MovementWay::Path(vec![destination]),
-                        speed: Some(*speed),
-                        source: "Dash".to_string(),
-                    },
-                });
+                .insert(SkillEffectBehaveCtx(ctx.clone()));
+            commands.trigger(CommandMovement {
+                entity,
+                priority: 100,
+                action: MovementAction::Start {
+                    way: MovementWay::Path(vec![destination]),
+                    speed: Some(*speed),
+                    source: "Dash".to_string(),
+                },
+            });
         }
     }
 }
 
 pub fn on_action_dash_end(
-    trigger: Trigger<EventMovementEnd>,
+    trigger: On<EventMovementEnd>,
     mut commands: Commands,
     q: Query<&SkillEffectBehaveCtx>,
 ) {
-    let entity = trigger.target();
+    let entity = trigger.event_target();
     let Ok(SkillEffectBehaveCtx(ctx)) = q.get(entity) else {
         return;
     };

@@ -1,5 +1,5 @@
 use bevy::asset::RenderAssetUsages;
-use bevy::render::mesh::{Indices, Mesh};
+use bevy::mesh::{Indices, Mesh};
 use bevy::render::render_resource::PrimitiveTopology;
 use league_file::LeagueMeshStatic;
 

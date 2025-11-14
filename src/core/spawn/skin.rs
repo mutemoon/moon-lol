@@ -2,8 +2,8 @@ use std::collections::HashMap;
 
 use bevy::animation::{AnimationTarget, AnimationTargetId};
 use bevy::asset::uuid::Uuid;
+use bevy::mesh::skinning::SkinnedMesh;
 use bevy::prelude::*;
-use bevy::render::mesh::skinning::SkinnedMesh;
 
 use league_core::{
     AnimationGraphDataMClipDataMap, AtomicClipData, ConditionBoolClipData, ConditionFloatClipData,
@@ -30,28 +30,33 @@ impl Plugin for PluginSkin {
 }
 
 // 皮肤系统事件定义
-#[derive(Event)]
-pub struct EventSkinSpawn;
+#[derive(EntityEvent)]
+pub struct EventSkinSpawn {
+    entity: Entity,
+}
 
-#[derive(Event)]
-pub struct EventSkinSpawnComplete;
+#[derive(EntityEvent)]
+pub struct EventSkinSpawnComplete {
+    entity: Entity,
+}
 
-#[derive(Event)]
+#[derive(EntityEvent)]
 pub struct CommandSkinSpawn {
+    pub entity: Entity,
     pub skin_path: String,
 }
 
 // 皮肤生成命令处理器
 fn on_command_skin_spawn(
-    trigger: Trigger<CommandSkinSpawn>,
+    trigger: On<CommandSkinSpawn>,
     mut commands: Commands,
     mut res_animation_graph: ResMut<Assets<AnimationGraph>>,
     asset_server: Res<AssetServer>,
     res_resource_cache: Res<ResourceCache>,
 ) {
-    let entity = trigger.target();
+    let entity = trigger.event_target();
 
-    commands.trigger_targets(EventSkinSpawn, entity);
+    commands.trigger(EventSkinSpawn { entity });
 
     // 从 skin_path 获取 ConfigCharacterSkin
     let skin = res_resource_cache
@@ -71,7 +76,7 @@ fn on_command_skin_spawn(
         skin,
     );
 
-    commands.entity(entity).trigger(EventSkinSpawnComplete);
+    commands.trigger(EventSkinSpawnComplete { entity });
 }
 
 /// 更新皮肤缩放系统

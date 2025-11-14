@@ -45,7 +45,7 @@ where
 
 impl<T, P> Plugin for ArbitrationPipelinePlugin<T, P>
 where
-    T: Event + Clone + Send + Sync + 'static,
+    T: EntityEvent + Clone + Send + Sync + 'static,
     P: PipelineStages + Send + Sync + 'static,
 {
     fn build(&self, app: &mut App) {
@@ -64,14 +64,14 @@ where
 }
 
 fn accumulate_requests<T, P>(
-    trigger: Trigger<T>,
+    trigger: On<T>,
     mut commands: Commands,
     mut query: Query<(Entity, Option<&mut RequestBuffer<T>>)>,
 ) where
-    T: Event + Clone + Send + Sync + 'static,
+    T: EntityEvent + Clone + Send + Sync + 'static,
     P: PipelineStages,
 {
-    let entity = trigger.target();
+    let entity = trigger.event_target();
     let event = trigger.event();
 
     if let Ok((_e, buffer_opt)) = query.get_mut(entity) {

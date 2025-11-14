@@ -57,16 +57,11 @@ pub fn spawn_environment_objects_from_configs(
         let entity = commands
             .spawn(Transform::from_matrix(environment_object.transform))
             .id();
-        commands.trigger_targets(
-            CommandSpawnCharacter {
-                character_record_key: environment_object
-                    .definition
-                    .character_record
-                    .clone(),
-                skin_path: environment_object.definition.skin.clone(),
-            },
+        commands.trigger(CommandSpawnCharacter {
             entity,
-        );
+            character_record_key: environment_object.definition.character_record.clone(),
+            skin_path: environment_object.definition.skin.clone(),
+        });
         entities.push(entity);
     }
 
@@ -92,7 +87,7 @@ pub fn spawn_geometry_objects_from_configs(
 }
 
 pub fn on_click_map(
-    click: Trigger<Pointer<Pressed>>,
+    click: On<Pointer<Press>>,
     mut commands: Commands,
     q_move: Query<Entity, With<Controller>>,
     // q_map_geo: Query<&MapGeometry>,
@@ -107,10 +102,10 @@ pub fn on_click_map(
     //     println!("map_geo: {:?}", map_geo.config);
     // }
 
-    commands.trigger_targets(
-        CommandAction {
+    for entity in targets {
+        commands.trigger(CommandAction {
+            entity,
             action: Action::Move(position.xz()),
-        },
-        targets,
-    );
+        });
+    }
 }

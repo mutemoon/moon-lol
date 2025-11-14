@@ -9,7 +9,7 @@ use crate::{rotate_to_direction, CommandDamageCreate, CommandParticleSpawn, Dama
 pub struct ActionDamage;
 
 pub fn on_attack_damage(
-    trigger: Trigger<BehaveTrigger<ActionDamage>>,
+    trigger: On<BehaveTrigger<ActionDamage>>,
     mut commands: Commands,
     mut q_transform: Query<&mut Transform>,
     q_target: Query<(Entity, &Team)>,
@@ -50,12 +50,14 @@ pub fn on_attack_damage(
     let mut transform = q_transform.get_mut(entity).unwrap();
     rotate_to_direction(&mut transform, direction);
 
-    commands.entity(target).trigger(CommandDamageCreate {
+    commands.trigger(CommandDamageCreate {
+        entity: target,
         source: entity,
         damage_type: DamageType::Physical,
         amount: 100.0,
     });
-    commands.entity(entity).trigger(CommandParticleSpawn {
+    commands.trigger(CommandParticleSpawn {
+        entity: target,
         particle: hash_bin("Fiora_Q_Slash_Cas"),
     });
     commands.trigger(ctx.success());

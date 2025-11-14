@@ -14,7 +14,7 @@ pub struct ActionCommand {
 }
 
 pub fn on_action_command(
-    trigger: Trigger<BehaveTrigger<ActionCommand>>,
+    trigger: On<BehaveTrigger<ActionCommand>>,
     mut commands: Commands,
     q_skill_effect_ctx: Query<&SkillEffectContext>,
     q_transform: Query<&Transform>,

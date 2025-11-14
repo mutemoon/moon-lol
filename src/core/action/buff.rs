@@ -11,7 +11,7 @@ pub struct ActionBuffSpawn {
 }
 
 pub fn on_action_buff_spawn(
-    trigger: Trigger<BehaveTrigger<ActionBuffSpawn>>,
+    trigger: On<BehaveTrigger<ActionBuffSpawn>>,
     mut commands: Commands,
 ) {
     let ctx = trigger.ctx();

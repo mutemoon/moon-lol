@@ -1,6 +1,7 @@
-use bevy::prelude::*;
 use std::cmp::Ordering;
-use std::collections::{BinaryHeap, HashMap, HashSet};
+use std::collections::{BinaryHeap, HashMap};
+
+use bevy::prelude::*;
 
 use lol_config::ConfigNavigationGrid;
 
@@ -163,10 +164,7 @@ pub fn find_grid_path_with_result(
     })
 }
 
-fn get_neighbors(
-    grid: &ConfigNavigationGrid,
-    pos: (usize, usize),
-) -> Vec<(usize, usize)> {
+fn get_neighbors(grid: &ConfigNavigationGrid, pos: (usize, usize)) -> Vec<(usize, usize)> {
     let mut neighbors = Vec::new();
 
     let directions = [

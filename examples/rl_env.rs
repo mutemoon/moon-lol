@@ -54,9 +54,7 @@ fn drive_random_agent(
             _ => Action::Stop,
         };
 
-        commands
-            .entity(entity)
-            .trigger(moon_lol::CommandAction { action });
+        commands.trigger(moon_lol::CommandAction { entity, action });
     }
 }
 
@@ -76,7 +74,7 @@ fn main() {
         app.add_plugins(DefaultPlugins.build().set(WindowPlugin {
             primary_window: Some(Window {
                 title: "classic 1v1 fiora".to_string(),
-                resolution: (300.0, 300.0).into(),
+                resolution: (300, 300).into(),
                 position: WindowPosition::At((0, 1000).into()),
                 ..default()
             }),

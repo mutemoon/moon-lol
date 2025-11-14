@@ -35,7 +35,7 @@ pub struct BuffFioraR {
 
 impl BuffFioraR {
     pub fn is_active(&self) -> bool {
-        self.active_timer.finished()
+        self.active_timer.is_finished()
     }
 }
 
@@ -68,14 +68,14 @@ fn fixed_update(
 
             if buff.is_active() {
                 for direction in buff.vitals.iter() {
-                    commands
-                        .entity(target_entity)
-                        .trigger(CommandParticleSpawn {
-                            particle: get_particle_hash(direction, "Fiora_R_Mark_", ""),
-                        })
-                        .trigger(CommandParticleSpawn {
-                            particle: get_particle_hash(direction, "Fiora_R_Mark_", "_FioraOnly"),
-                        });
+                    commands.trigger(CommandParticleSpawn {
+                        entity: target_entity,
+                        particle: get_particle_hash(direction, "Fiora_R_Mark_", ""),
+                    });
+                    commands.trigger(CommandParticleSpawn {
+                        entity: target_entity,
+                        particle: get_particle_hash(direction, "Fiora_R_Mark_", "_FioraOnly"),
+                    });
                 }
             }
             continue;
@@ -83,36 +83,37 @@ fn fixed_update(
 
         if !buff.timeout_red_triggered && buff.remove_timer.remaining_secs() <= VITAL_R_TIMEOUT {
             for direction in buff.vitals.iter() {
-                commands
-                    .entity(target_entity)
-                    .trigger(CommandParticleDespawn {
-                        hash: get_particle_hash(direction, "Fiora_R_Mark_", ""),
-                    });
-                commands
-                    .entity(target_entity)
-                    .trigger(CommandParticleSpawn {
-                        particle: get_particle_hash(direction, "Fiora_R_", "_Timeout"),
-                    });
+                commands.entity(target_entity);
+                commands.trigger(CommandParticleDespawn {
+                    entity: target_entity,
+                    hash: get_particle_hash(direction, "Fiora_R_Mark_", ""),
+                });
+                commands.trigger(CommandParticleSpawn {
+                    entity: target_entity,
+                    particle: get_particle_hash(direction, "Fiora_R_", "_Timeout"),
+                });
             }
             buff.timeout_red_triggered = true;
         }
 
         buff.remove_timer.tick(time.delta());
 
-        if buff.remove_timer.finished() {
+        if buff.remove_timer.is_finished() {
             // 清理所有剩余的粒子
             for direction in buff.vitals.iter() {
-                commands
-                    .entity(target_entity)
-                    .trigger(CommandParticleDespawn {
-                        hash: get_particle_hash(direction, "Fiora_R_Mark_", ""),
-                    })
-                    .trigger(CommandParticleDespawn {
-                        hash: get_particle_hash(direction, "Fiora_R_Mark_", "_FioraOnly"),
-                    })
-                    .trigger(CommandParticleDespawn {
-                        hash: get_particle_hash(direction, "Fiora_R_", "_Timeout"),
-                    });
+                commands.entity(target_entity);
+                commands.trigger(CommandParticleDespawn {
+                    entity: target_entity,
+                    hash: get_particle_hash(direction, "Fiora_R_Mark_", ""),
+                });
+                commands.trigger(CommandParticleDespawn {
+                    entity: target_entity,
+                    hash: get_particle_hash(direction, "Fiora_R_Mark_", "_FioraOnly"),
+                });
+                commands.trigger(CommandParticleDespawn {
+                    entity: target_entity,
+                    hash: get_particle_hash(direction, "Fiora_R_", "_Timeout"),
+                });
             }
             commands.entity(entity).despawn();
         }
@@ -121,13 +122,13 @@ fn fixed_update(
 
 /// 监听伤害事件并创建伤害数字
 fn on_damage_create(
-    trigger: Trigger<EventDamageCreate>,
+    trigger: On<EventDamageCreate>,
     mut commands: Commands,
     q_target_with_vital: Query<(&GlobalTransform, &Team, &Health)>,
     q_transform: Query<(&GlobalTransform, &Team)>,
     mut q_buff_fiora_r: Query<(Entity, &BuffOf, &mut BuffFioraR)>,
 ) {
-    let target_entity = trigger.target();
+    let target_entity = trigger.event_target();
     let (transform, team) = q_transform.get(trigger.source).unwrap();
 
     let Some((buff_entity, mut buff_fiora_r)) =
@@ -173,22 +174,22 @@ fn on_damage_create(
         return;
     };
 
-    commands
-        .entity(target_entity)
-        .trigger(CommandParticleSpawn {
-            particle: hash_bin("Fiora_Passive_Hit_Tar"),
-        });
-    commands
-        .entity(target_entity)
-        .trigger(CommandParticleDespawn {
-            hash: get_particle_hash(&direction, "Fiora_R_Mark_", ""),
-        })
-        .trigger(CommandParticleDespawn {
-            hash: get_particle_hash(&direction, "Fiora_R_Mark_", "_FioraOnly"),
-        })
-        .trigger(CommandParticleDespawn {
-            hash: get_particle_hash(&direction, "Fiora_R_", "_Timeout"),
-        });
+    commands.trigger(CommandParticleSpawn {
+        entity: target_entity,
+        particle: hash_bin("Fiora_Passive_Hit_Tar"),
+    });
+    commands.trigger(CommandParticleDespawn {
+        entity: target_entity,
+        hash: get_particle_hash(&direction, "Fiora_R_Mark_", ""),
+    });
+    commands.trigger(CommandParticleDespawn {
+        entity: target_entity,
+        hash: get_particle_hash(&direction, "Fiora_R_Mark_", "_FioraOnly"),
+    });
+    commands.trigger(CommandParticleDespawn {
+        entity: target_entity,
+        hash: get_particle_hash(&direction, "Fiora_R_", "_Timeout"),
+    });
 
     if buff_fiora_r.vitals.is_empty() {
         // TODO: 在这里触发治疗光环

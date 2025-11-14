@@ -14,29 +14,28 @@ pub struct ActionParticleDespawn {
 }
 
 pub fn on_action_particle_spawn(
-    trigger: Trigger<BehaveTrigger<ActionParticleSpawn>>,
+    trigger: On<BehaveTrigger<ActionParticleSpawn>>,
     mut commands: Commands,
 ) {
     let ctx = trigger.ctx();
     let entity = ctx.target_entity();
     let event = trigger.inner();
 
-    commands.entity(entity).trigger(CommandParticleSpawn {
+    commands.trigger(CommandParticleSpawn {
+        entity,
         particle: event.hash,
     });
     commands.trigger(ctx.success());
 }
 
 pub fn on_action_particle_despawn(
-    trigger: Trigger<BehaveTrigger<ActionParticleDespawn>>,
+    trigger: On<BehaveTrigger<ActionParticleDespawn>>,
     mut commands: Commands,
 ) {
     let ctx = trigger.ctx();
     let entity = ctx.target_entity();
     let event = trigger.inner();
 
-    commands
-        .entity(entity)
-        .trigger(CommandParticleDespawn { hash: event.hash });
+    commands.trigger(CommandParticleDespawn { entity, hash: event.hash });
     commands.trigger(ctx.success());
 }

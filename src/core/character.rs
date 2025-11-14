@@ -3,8 +3,9 @@ use bevy::prelude::*;
 use crate::{Armor, Attack, Bounding, CommandSkinSpawn, Damage, Health, Movement, ResourceCache};
 
 /// 生成角色的命令
-#[derive(Event, Debug, Clone)]
+#[derive(EntityEvent, Debug, Clone)]
 pub struct CommandSpawnCharacter {
+    pub entity: Entity,
     pub character_record_key: String,
     pub skin_path: String,
 }
@@ -24,28 +25,30 @@ impl Plugin for PluginCharacter {
 
 /// 处理角色生成命令的观察者
 fn on_command_spawn_character(
-    trigger: Trigger<CommandSpawnCharacter>,
+    trigger: On<CommandSpawnCharacter>,
     mut commands: Commands,
     resource_cache: Res<ResourceCache>,
 ) {
-    let event = trigger.event();
-    let entity = trigger.target();
+    let entity = trigger.event_target();
 
     // 查找 character 配置
     let character_record = match resource_cache
         .character_records
-        .get(&event.character_record_key)
+        .get(&trigger.character_record_key)
     {
         Some(record) => record,
         None => {
-            error!("Character record not found: {}", event.character_record_key);
+            error!(
+                "Character record not found: {}",
+                trigger.character_record_key
+            );
             return;
         }
     };
 
-    // 触发皮肤生成命令
-    commands.entity(entity).trigger(CommandSkinSpawn {
-        skin_path: event.skin_path.clone(),
+    commands.trigger(CommandSkinSpawn {
+        entity,
+        skin_path: trigger.skin_path.clone(),
     });
 
     // 根据 character_record 创建组件

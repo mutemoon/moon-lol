@@ -63,7 +63,7 @@ impl Vital {
 
 impl Vital {
     pub fn is_active(&self) -> bool {
-        self.active_timer.finished()
+        self.active_timer.is_finished()
     }
 }
 
@@ -155,11 +155,10 @@ fn update_add_vital(
                 FIORA_PASSIVE_DURATION,
             ));
 
-            commands
-                .entity(target_entity)
-                .trigger(CommandParticleSpawn {
-                    particle: get_particle_hash(&direction, "Fiora_Passive_", "_Warning"),
-                });
+            commands.trigger(CommandParticleSpawn {
+                entity: target_entity,
+                particle: get_particle_hash(&direction, "Fiora_Passive_", "_Warning"),
+            });
         }
     }
 }
@@ -200,38 +199,31 @@ fn update_remove_vital(
                 vital.active_timer.tick(time.delta());
 
                 if vital.is_active() {
-                    commands
-                        .entity(target_entity)
-                        .trigger(CommandParticleSpawn {
-                            particle: get_particle_hash(&vital.direction, "Fiora_Passive_", ""),
-                        });
+                    commands.trigger(CommandParticleSpawn {
+                        entity: target_entity,
+                        particle: get_particle_hash(&vital.direction, "Fiora_Passive_", ""),
+                    });
                 }
                 continue;
             }
 
             if !vital.timeout_red_triggered && vital.remove_timer.remaining_secs() <= VITAL_TIMEOUT
             {
-                commands
-                    .entity(target_entity)
-                    .trigger(CommandParticleDespawn {
-                        hash: get_particle_hash(&vital.direction, "Fiora_Passive_", ""),
-                    });
-                commands
-                    .entity(target_entity)
-                    .trigger(CommandParticleSpawn {
-                        particle: get_particle_hash(
-                            &vital.direction,
-                            "Fiora_Passive_",
-                            "_TimeOut_Red",
-                        ),
-                    });
+                commands.trigger(CommandParticleDespawn {
+                    entity: target_entity,
+                    hash: get_particle_hash(&vital.direction, "Fiora_Passive_", ""),
+                });
+                commands.trigger(CommandParticleSpawn {
+                    entity: target_entity,
+                    particle: get_particle_hash(&vital.direction, "Fiora_Passive_", "_TimeOut_Red"),
+                });
 
                 vital.timeout_red_triggered = true;
             }
 
             vital.remove_timer.tick(time.delta());
 
-            if vital.remove_timer.finished() {
+            if vital.remove_timer.is_finished() {
                 commands.entity(target_entity).remove::<Vital>();
             }
         }
@@ -240,13 +232,13 @@ fn update_remove_vital(
 
 /// 监听伤害事件并创建伤害数字
 fn on_damage_create(
-    trigger: Trigger<EventDamageCreate>,
+    trigger: On<EventDamageCreate>,
     mut commands: Commands,
     q_target_with_vital: Query<(&GlobalTransform, &Team, &Health, &Vital)>,
     q_transform: Query<(&GlobalTransform, &Team)>,
     mut last_direction: ResMut<FioraVitalLastDirection>,
 ) {
-    let target_entity = trigger.target();
+    let target_entity = trigger.event_target();
     let (transform, team) = q_transform.get(trigger.source).unwrap();
 
     let Ok((target_transform, target_team, hp, vital)) = q_target_with_vital.get(target_entity)
@@ -269,16 +261,14 @@ fn on_damage_create(
         return;
     }
 
-    commands
-        .entity(target_entity)
-        .try_trigger(CommandParticleSpawn {
-            particle: hash_bin("Fiora_Passive_Hit_Tar"),
-        });
-    commands
-        .entity(target_entity)
-        .trigger(CommandParticleDespawn {
-            hash: get_particle_hash(&vital.direction, "Fiora_Passive_", ""),
-        });
+    commands.try_trigger(CommandParticleSpawn {
+        entity: target_entity,
+        particle: hash_bin("Fiora_Passive_Hit_Tar"),
+    });
+    commands.trigger(CommandParticleDespawn {
+        entity: target_entity,
+        hash: get_particle_hash(&vital.direction, "Fiora_Passive_", ""),
+    });
 
     let distance = source_position.distance(target_position);
 
@@ -322,15 +312,15 @@ fn on_damage_create(
         FIORA_PASSIVE_DURATION,
     ));
 
-    commands.entity(target_entity).trigger(CommandDamageCreate {
+    commands.trigger(CommandDamageCreate {
+        entity: target_entity,
         source: trigger.source,
         damage_type: DamageType::True,
         amount: hp.max * 0.05,
     });
 
-    commands
-        .entity(target_entity)
-        .try_trigger(CommandParticleSpawn {
-            particle: get_particle_hash(&direction, "Fiora_Passive_", "_Warning"),
-        });
+    commands.try_trigger(CommandParticleSpawn {
+        entity: target_entity,
+        particle: get_particle_hash(&direction, "Fiora_Passive_", "_Warning"),
+    });
 }

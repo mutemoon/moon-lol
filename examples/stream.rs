@@ -7,19 +7,20 @@ use std::{
 };
 
 use bevy::{
+    asset::RenderAssetUsages,
+    camera::RenderTarget,
     image::TextureFormatPixelInfo,
     prelude::*,
     render::{
-        camera::RenderTarget,
-        render_asset::{RenderAssetUsages, RenderAssets},
+        render_asset::RenderAssets,
         render_graph::{self, NodeRunError, RenderGraph, RenderGraphContext, RenderLabel},
         render_resource::{
-            Buffer, BufferDescriptor, BufferUsages, CommandEncoderDescriptor, Extent3d, Maintain,
-            MapMode, TexelCopyBufferInfo, TexelCopyBufferLayout, TextureDimension, TextureFormat,
+            Buffer, BufferDescriptor, BufferUsages, CommandEncoderDescriptor, Extent3d, MapMode,
+            PollType, TexelCopyBufferInfo, TexelCopyBufferLayout, TextureDimension, TextureFormat,
             TextureUsages,
         },
         renderer::{RenderContext, RenderDevice, RenderQueue},
-        Extract, Render, RenderApp, RenderSet,
+        Extract, Render, RenderApp, RenderSystems,
     },
     time::TimeUpdateStrategy,
     window::ExitCondition,
@@ -135,7 +136,10 @@ impl Plugin for PluginImageCopy {
         render_app
             .insert_resource(RenderWorldSender(s))
             .add_systems(ExtractSchedule, image_copy_extract)
-            .add_systems(Render, receive_image_from_buffer.after(RenderSet::Render));
+            .add_systems(
+                Render,
+                receive_image_from_buffer.after(RenderSystems::Render),
+            );
     }
 }
 
@@ -252,7 +256,7 @@ fn receive_image_from_buffer(
             Err(err) => panic!("Failed to map buffer {err}"),
         });
 
-        render_device.poll(Maintain::wait()).panic_on_timeout();
+        render_device.poll(PollType::wait()).unwrap();
         r.recv().expect("Failed to receive the map_async message");
 
         let _ = sender.send(buffer_slice.get_mapped_range().to_vec());
@@ -393,10 +397,7 @@ fn rocket() -> _ {
             if let Some(action) = action {
                 let world = app.world_mut();
                 if let Ok((entity, _)) = world.query::<(Entity, &Controller)>().single(world) {
-                    world
-                        .commands()
-                        .entity(entity)
-                        .trigger(CommandAction { action });
+                    world.commands().trigger(CommandAction { entity, action });
                 }
             }
 
@@ -457,7 +458,7 @@ fn receive_and_encode_image_async(world: &mut World, shared_image: Arc<Mutex<Opt
     thread::spawn(move || {
         info!("[后台线程] 开始处理图像...");
 
-        let row_bytes = width as usize * format.pixel_size();
+        let row_bytes = width as usize * format.pixel_size().unwrap();
         let aligned_row_bytes = RenderDevice::align_copy_bytes_per_row(row_bytes);
 
         let final_image_data = if row_bytes == aligned_row_bytes {
@@ -493,7 +494,7 @@ fn receive_and_encode_image_async(world: &mut World, shared_image: Arc<Mutex<Opt
 }
 
 fn get_observe(world: &mut World) -> Option<Observe> {
-    let Ok((entity, transform, attack_state, controller)) = world
+    let Ok((_entity, transform, attack_state, _controller)) = world
         .query::<(Entity, &Transform, Option<&AttackState>, &Controller)>()
         .single(world)
     else {

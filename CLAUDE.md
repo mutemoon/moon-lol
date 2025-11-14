@@ -19,3 +19,64 @@
 
 1. 不要增加新的文档
 2. 使用 cargo check 检查代码能否通过编译
+
+# bevy 0.16 迁移到 0.17
+
+```rs
+// OLd
+Trigger<EventCustom>
+// New
+On<EventCustom>
+
+// OLd
+trigger.target()
+// New
+trigger.event_target()
+
+// Old
+let entity = trigger.target();
+let target = trigger.target;
+// New
+let entity = trigger.event_target();
+let target = trigger.target;
+
+// OLd
+#[drive(Event)]
+struct EventCustom;
+// New
+#[drive(EntityEvent)]
+struct EventCustom {
+    pub entity: Entity
+}
+
+// OLd
+commands.entity(entity).trigger(EventCustom);
+// New
+commands.trigger(EventCustom { entity });
+
+// Old
+commands
+    .entity(entity)
+    .trigger(EventAttackEnd { target: *target });
+// New
+commands.trigger(EventAttackEnd {
+    entity,
+    target: *target
+});
+
+// Old
+commands
+    .entity(entity)
+    .try_trigger(EventAttackEnd { target: *target });
+// New
+commands.try_trigger(EventAttackEnd {
+    entity,
+    target: *target
+});
+
+// Old
+commands.trigger_targets(CommandSkillStart { index, point }, trigger.event_target());
+// New
+let entity = trigger.event_target();
+commands.trigger(CommandSkillStart { entity, index, point });
+```

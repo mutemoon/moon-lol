@@ -1,11 +1,6 @@
 use std::time::Duration;
 
-use bevy::log::LogPlugin;
 use bevy::prelude::*;
-use bevy::render::{
-    settings::{Backends, RenderCreation, WgpuSettings},
-    RenderPlugin,
-};
 use bevy::winit::{UpdateMode, WinitSettings};
 
 use moon_lol::{PluginBarrack, PluginCore, PluginResource};
@@ -16,15 +11,15 @@ fn main() {
             DefaultPlugins.build().set(WindowPlugin {
                 primary_window: Some(Window {
                     title: "classic 1v1 fiora".to_string(),
-                    resolution: (300.0, 300.0).into(),
+                    resolution: (300, 300).into(),
                     position: WindowPosition::At((0, 1000).into()),
                     ..default()
                 }),
                 ..default()
             }), // .set(LogPlugin {
-                //     filter: "moon_lol=debug".to_string(),
-                //     ..default()
-                // })
+            //     filter: "moon_lol=debug".to_string(),
+            //     ..default()
+            // })
             PluginCore
                 .build()
                 .set(PluginResource {

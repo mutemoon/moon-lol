@@ -12,10 +12,7 @@ pub struct PluginAttackAuto;
 
 impl Plugin for PluginAttackAuto {
     fn build(&self, app: &mut App) {
-        app.add_event::<CommandAttackAutoStart>();
         app.add_observer(on_command_attack_auto_start);
-
-        app.add_event::<CommandAttackAutoStop>();
         app.add_observer(on_command_attack_auto_stop);
 
         app.add_systems(FixedPreUpdate, update_attack_auto);
@@ -28,16 +25,19 @@ pub struct AttackAuto {
     pub timer: Timer,
 }
 
-#[derive(Event)]
+#[derive(EntityEvent)]
 pub struct CommandAttackAutoStart {
+    pub entity: Entity,
     pub target: Entity,
 }
 
-#[derive(Event)]
-pub struct CommandAttackAutoStop;
+#[derive(EntityEvent)]
+pub struct CommandAttackAutoStop {
+    pub entity: Entity,
+}
 
 fn on_command_attack_auto_start(
-    trigger: Trigger<CommandAttackAutoStart>,
+    trigger: On<CommandAttackAutoStart>,
     mut commands: Commands,
     q_transform: Query<&Transform>,
     q_attack: Query<&Attack>,
@@ -46,7 +46,7 @@ fn on_command_attack_auto_start(
 
     timer.tick(Duration::from_secs_f32(1.0));
 
-    let entity = trigger.target();
+    let entity = trigger.event_target();
     let target = trigger.target;
 
     let mut attack_auto = AttackAuto { target, timer };
@@ -65,7 +65,7 @@ fn on_command_attack_auto_start(
 
     check_and_action(
         &mut commands,
-        trigger.target(),
+        trigger.event_target(),
         attack_auto.target,
         &mut attack_auto,
         transform.translation.xz(),
@@ -73,14 +73,13 @@ fn on_command_attack_auto_start(
         attack.range,
     );
 
-    commands.entity(trigger.target()).insert(attack_auto);
+    commands.entity(entity).insert(attack_auto);
 }
 
-fn on_command_attack_auto_stop(trigger: Trigger<CommandAttackAutoStop>, mut commands: Commands) {
-    commands
-        .entity(trigger.target())
-        .remove::<AttackAuto>()
-        .trigger(CommandAttackStop);
+fn on_command_attack_auto_stop(trigger: On<CommandAttackAutoStop>, mut commands: Commands) {
+    let entity = trigger.event_target();
+    commands.entity(entity).remove::<AttackAuto>();
+    commands.trigger(CommandAttackStop { entity });
 }
 
 fn update_attack_auto(
@@ -130,18 +129,18 @@ fn check_and_action(
 ) {
     if position.distance(target_position) > range {
         if attack_auto.timer.just_finished() {
-            commands.entity(entity).trigger(CommandRunStart {
+            commands.trigger(CommandRunStart {
+                entity,
                 target: RunTarget::Target(target),
             });
 
             attack_auto.timer.reset();
         }
     } else {
-        commands
-            .entity(entity)
-            .trigger(CommandRunStop)
-            .trigger(CommandAttackStart {
-                target: attack_auto.target,
-            });
+        commands.trigger(CommandRunStop { entity });
+        commands.trigger(CommandAttackStart {
+            entity,
+            target: attack_auto.target,
+        });
     }
 }

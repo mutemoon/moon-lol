@@ -141,12 +141,12 @@ fn ui(
 
 /// 监听伤害事件并创建伤害数字
 fn on_damage_create(
-    trigger: Trigger<EventDamageCreate>,
+    trigger: On<EventDamageCreate>,
     mut commands: Commands,
     global_transform: Query<&GlobalTransform>,
 ) {
-    let target_entity = trigger.target();
-    let damage_result = &trigger.event().damage_result;
+    let target_entity = trigger.event_target();
+    let damage_result = &trigger.damage_result;
 
     // 只显示实际造成的伤害
     if damage_result.final_damage <= 0.0 {

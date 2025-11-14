@@ -4,22 +4,21 @@ mod particle;
 mod skinned_mesh;
 mod utils;
 
-use bevy::transform::systems::{
-    mark_dirty_trees, propagate_parent_transforms, sync_simple_transforms,
-};
 pub use emitter::*;
 pub use environment::*;
 pub use particle::*;
 pub use skinned_mesh::*;
 pub use utils::*;
 
-use bevy::platform::collections::HashMap;
+use bevy::{
+    mesh::{MeshVertexAttribute, VertexFormat},
+    platform::collections::HashMap,
+    prelude::*,
+    transform::systems::{mark_dirty_trees, propagate_parent_transforms, sync_simple_transforms},
+};
+
 use league_core::{ValueColor, ValueFloat, ValueVector2, ValueVector3, VfxEmitterDefinitionData};
 use league_utils::hash_wad;
-
-use bevy::prelude::*;
-use bevy::render::mesh::{MeshVertexAttribute, VertexFormat};
-
 use lol_config::ConfigMap;
 
 use crate::{Lifetime, LifetimeMode};
@@ -81,7 +80,7 @@ impl Plugin for PluginParticle {
                 update_particle_skinned_mesh_particle,
             )
                 .chain()
-                .after(TransformSystem::TransformPropagate),
+                .after(TransformSystems::Propagate),
         );
     }
 }
@@ -109,13 +108,15 @@ impl ParticleId {
     }
 }
 
-#[derive(Event)]
+#[derive(EntityEvent)]
 pub struct CommandParticleSpawn {
+    pub entity: Entity,
     pub particle: u32,
 }
 
-#[derive(Event)]
+#[derive(EntityEvent)]
 pub struct CommandParticleDespawn {
+    pub entity: Entity,
     pub hash: u32,
 }
 
@@ -126,7 +127,7 @@ impl ParticleMesh {
 }
 
 fn on_command_particle_spawn(
-    trigger: Trigger<CommandParticleSpawn>,
+    trigger: On<CommandParticleSpawn>,
     mut commands: Commands,
     res_config_map: Res<ConfigMap>,
     q_global_transform: Query<&GlobalTransform>,
@@ -136,7 +137,7 @@ fn on_command_particle_spawn(
         .get(&trigger.particle)
         .unwrap();
 
-    let entity = trigger.target();
+    let entity = trigger.event_target();
 
     // if !vfx_system_definition_data
     //     .particle_name
@@ -285,12 +286,12 @@ fn on_command_particle_spawn(
 }
 
 fn on_command_particle_despawn(
-    trigger: Trigger<CommandParticleDespawn>,
+    trigger: On<CommandParticleDespawn>,
     mut commands: Commands,
     q_emitters: Query<&Emitters>,
     q_emitter: Query<&ParticleId>,
 ) {
-    let Ok(emitters) = q_emitters.get(trigger.target()) else {
+    let Ok(emitters) = q_emitters.get(trigger.event_target()) else {
         return;
     };
 
