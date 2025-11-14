@@ -6,14 +6,14 @@ struct UniformsPixel
     vec4 MODULATE_COLOR;
 };
 
-layout(set = 2, binding = 1) uniform UniformsPixel uniforms_pixel;
+layout(set = 3, binding = 1) uniform UniformsPixel uniforms_pixel;
 
-layout(set = 2, binding = 2) uniform texture2D DIFFUSE_MAP_texture;
-layout(set = 2, binding = 3) uniform sampler DIFFUSE_MAP_sampler;
-layout(set = 2, binding = 4) uniform texture2D PARTICLE_COLOR_TEXTURE_texture;
-layout(set = 2, binding = 5) uniform sampler PARTICLE_COLOR_TEXTURE_sampler;
-layout(set = 2, binding = 6) uniform texture2D CMB_TEX_FOW_MAP_SMP_Clamp_No_Mip_texture;
-layout(set = 2, binding = 7) uniform sampler CMB_TEX_FOW_MAP_SMP_Clamp_No_Mip_sampler;
+layout(set = 3, binding = 2) uniform texture2D DIFFUSE_MAP_texture;
+layout(set = 3, binding = 3) uniform sampler DIFFUSE_MAP_sampler;
+layout(set = 3, binding = 4) uniform texture2D PARTICLE_COLOR_TEXTURE_texture;
+layout(set = 3, binding = 5) uniform sampler PARTICLE_COLOR_TEXTURE_sampler;
+layout(set = 3, binding = 6) uniform texture2D CMB_TEX_FOW_MAP_SMP_Clamp_No_Mip_texture;
+layout(set = 3, binding = 7) uniform sampler CMB_TEX_FOW_MAP_SMP_Clamp_No_Mip_sampler;
 
 layout(location = 0) in vec3 TEXCOORD0;
 layout(location = 1) in vec2 TEXCOORD2;

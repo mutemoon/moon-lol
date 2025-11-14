@@ -26,7 +26,7 @@ struct UniformsVertex
     vec4 DECAL_PROJECTION_Y_RANGE;
 };
 
-layout(set = 2, binding = 0) uniform UniformsVertex uniforms_vertext;
+layout(set = 3, binding = 0) uniform UniformsVertex uniforms_vertext;
 
 layout(location = 0) in vec3 ATTR0;
 layout(location = 0) out vec3 TEXCOORD0;

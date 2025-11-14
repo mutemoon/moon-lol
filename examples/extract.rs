@@ -7,9 +7,13 @@ async fn main() {
 
     let start = Instant::now();
 
-    save_config_map(root_dir, "bloom", vec![("Fiora", "Skin22")])
-        .await
-        .unwrap();
+    save_config_map(
+        root_dir,
+        "bloom",
+        vec![("Fiora", "Skin22"), ("Hwei", "Skin0")],
+    )
+    .await
+    .unwrap();
 
     let end = Instant::now();
 

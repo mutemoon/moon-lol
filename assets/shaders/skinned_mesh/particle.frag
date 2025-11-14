@@ -5,16 +5,16 @@ struct UniformsPixel
     vec2 COLOR_LOOKUP_UV;
 };
 
-layout(set = 2, binding = 1) uniform UniformsPixel uniforms_pixel;
+layout(set = 3, binding = 1) uniform UniformsPixel uniforms_pixel;
 
-layout(set = 2, binding = 2) uniform texture2D TEXTURE_texture;
-layout(set = 2, binding = 3) uniform sampler TEXTURE_sampler;
-layout(set = 2, binding = 4) uniform texture2D PARTICLE_COLOR_TEXTURE_texture;
-layout(set = 2, binding = 5) uniform sampler PARTICLE_COLOR_TEXTURE_sampler;
-layout(set = 2, binding = 6) uniform texture2D CMB_TEX_PIXEL_COLOR_REMAP_RAMP_SMP_Clamp_No_Mip_texture;
-layout(set = 2, binding = 7) uniform sampler CMB_TEX_PIXEL_COLOR_REMAP_RAMP_SMP_Clamp_No_Mip_sampler;
-layout(set = 2, binding = 8) uniform texture2D CMB_TEX_FOW_MAP_SMP_Clamp_No_Mip_texture;
-layout(set = 2, binding = 9) uniform sampler CMB_TEX_FOW_MAP_SMP_Clamp_No_Mip_sampler;
+layout(set = 3, binding = 2) uniform texture2D TEXTURE_texture;
+layout(set = 3, binding = 3) uniform sampler TEXTURE_sampler;
+layout(set = 3, binding = 4) uniform texture2D PARTICLE_COLOR_TEXTURE_texture;
+layout(set = 3, binding = 5) uniform sampler PARTICLE_COLOR_TEXTURE_sampler;
+layout(set = 3, binding = 6) uniform texture2D CMB_TEX_PIXEL_COLOR_REMAP_RAMP_SMP_Clamp_No_Mip_texture;
+layout(set = 3, binding = 7) uniform sampler CMB_TEX_PIXEL_COLOR_REMAP_RAMP_SMP_Clamp_No_Mip_sampler;
+layout(set = 3, binding = 8) uniform texture2D CMB_TEX_FOW_MAP_SMP_Clamp_No_Mip_texture;
+layout(set = 3, binding = 9) uniform sampler CMB_TEX_FOW_MAP_SMP_Clamp_No_Mip_sampler;
 
 layout(location = 0) in vec4 TEXCOORD0;
 layout(location = 1) in vec3 TEXCOORD1;

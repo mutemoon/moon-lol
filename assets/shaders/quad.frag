@@ -11,32 +11,32 @@ struct UniformsPixel
     vec4 APPLY_TEAM_COLOR_CORRECTION;
 };
 
-layout(set = 2, binding = 1) uniform UniformsPixel uniforms_pixel;
+layout(set = 3, binding = 1) uniform UniformsPixel uniforms_pixel;
 
-layout(set = 2, binding = 2) uniform texture2D TEXTURE_texture;
-layout(set = 2, binding = 3) uniform sampler TEXTURE_sampler;
-layout(set = 2, binding = 4) uniform texture2D PARTICLE_COLOR_TEXTURE_texture;
-layout(set = 2, binding = 5) uniform sampler PARTICLE_COLOR_TEXTURE_sampler;
-layout(set = 2, binding = 6) uniform texture2D CMB_TEX_PIXEL_COLOR_REMAP_RAMP_SMP_Clamp_No_Mip_texture;
-layout(set = 2, binding = 7) uniform sampler CMB_TEX_PIXEL_COLOR_REMAP_RAMP_SMP_Clamp_No_Mip_sampler;
-layout(set = 2, binding = 8) uniform texture2D CMB_TEX_FOW_MAP_SMP_Clamp_No_Mip_texture;
-layout(set = 2, binding = 9) uniform sampler CMB_TEX_FOW_MAP_SMP_Clamp_No_Mip_sampler;
+layout(set = 3, binding = 2) uniform texture2D TEXTURE_texture;
+layout(set = 3, binding = 3) uniform sampler TEXTURE_sampler;
+layout(set = 3, binding = 4) uniform texture2D PARTICLE_COLOR_TEXTURE_texture;
+layout(set = 3, binding = 5) uniform sampler PARTICLE_COLOR_TEXTURE_sampler;
+layout(set = 3, binding = 6) uniform texture2D CMB_TEX_PIXEL_COLOR_REMAP_RAMP_SMP_Clamp_No_Mip_texture;
+layout(set = 3, binding = 7) uniform sampler CMB_TEX_PIXEL_COLOR_REMAP_RAMP_SMP_Clamp_No_Mip_sampler;
+layout(set = 3, binding = 8) uniform texture2D CMB_TEX_FOW_MAP_SMP_Clamp_No_Mip_texture;
+layout(set = 3, binding = 9) uniform sampler CMB_TEX_FOW_MAP_SMP_Clamp_No_Mip_sampler;
 
 #ifdef MASKED
-layout(set = 2, binding = 10) uniform texture2D NAVMESH_MASK_TEXTURE_texture;
-layout(set = 2, binding = 11) uniform sampler NAVMESH_MASK_TEXTURE_sampler;
+layout(set = 3, binding = 10) uniform texture2D NAVMESH_MASK_TEXTURE_texture;
+layout(set = 3, binding = 11) uniform sampler NAVMESH_MASK_TEXTURE_sampler;
 #endif
 #ifdef MULT_PASS
-layout(set = 2, binding = 12) uniform texture2D TEXTUREMULT_texture;
-layout(set = 2, binding = 13) uniform sampler TEXTUREMULT_sampler;
+layout(set = 3, binding = 12) uniform texture2D TEXTUREMULT_texture;
+layout(set = 3, binding = 13) uniform sampler TEXTUREMULT_sampler;
 #endif
 #ifdef PALETTIZE_TEXTURES
-layout(set = 2, binding = 14) uniform texture2D sPalettesTexture_texture;
-layout(set = 2, binding = 15) uniform sampler sPalettesTexture_sampler;
+layout(set = 3, binding = 14) uniform texture2D sPalettesTexture_texture;
+layout(set = 3, binding = 15) uniform sampler sPalettesTexture_sampler;
 #endif
 #ifdef SOFT_PARTICLES
-layout(set = 2, binding = 16) uniform texture2D sDepthTexture_texture;
-layout(set = 2, binding = 17) uniform sampler sDepthTexture_sampler;
+layout(set = 3, binding = 16) uniform texture2D sDepthTexture_texture;
+layout(set = 3, binding = 17) uniform sampler sDepthTexture_sampler;
 #endif
 
 layout(location = 0) in vec4 TEXCOORD0;

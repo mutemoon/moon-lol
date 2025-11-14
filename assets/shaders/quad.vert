@@ -22,7 +22,7 @@ struct UniformsVertex
     vec4 TEXTURE_INFO;
     vec4 TEXTURE_INFO_2;
 };
-layout(set = 2, binding = 0) uniform UniformsVertex uniforms_vertext;
+layout(set = 3, binding = 0) uniform UniformsVertex uniforms_vertext;
 
 layout(location = 0) in vec3 ATTR0;
 layout(location = 3) in vec4 ATTR3;

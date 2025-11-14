@@ -9,19 +9,19 @@ struct UniformsPixel
     vec4 APPLY_TEAM_COLOR_CORRECTION; // 用于色盲模式的参数
 };
 
-layout(set = 2, binding = 1) uniform UniformsPixel uniforms_pixel;
+layout(set = 3, binding = 1) uniform UniformsPixel uniforms_pixel;
 
 // 统一的纹理采样器
-layout(set = 2, binding = 2) uniform texture2D PARTICLE_COLOR_TEXTURE_texture;
-layout(set = 2, binding = 3) uniform sampler PARTICLE_COLOR_TEXTURE_sampler;
-layout(set = 2, binding = 4) uniform texture2D TEXTURE_texture;
-layout(set = 2, binding = 5) uniform sampler TEXTURE_sampler;
-layout(set = 2, binding = 6) uniform texture2D CMB_TEX_PIXEL_COLOR_REMAP_RAMP_SMP_Clamp_No_Mip_texture;
-layout(set = 2, binding = 7) uniform sampler CMB_TEX_PIXEL_COLOR_REMAP_RAMP_SMP_Clamp_No_Mip_sampler;
+layout(set = 3, binding = 2) uniform texture2D PARTICLE_COLOR_TEXTURE_texture;
+layout(set = 3, binding = 3) uniform sampler PARTICLE_COLOR_TEXTURE_sampler;
+layout(set = 3, binding = 4) uniform texture2D TEXTURE_texture;
+layout(set = 3, binding = 5) uniform sampler TEXTURE_sampler;
+layout(set = 3, binding = 6) uniform texture2D CMB_TEX_PIXEL_COLOR_REMAP_RAMP_SMP_Clamp_No_Mip_texture;
+layout(set = 3, binding = 7) uniform sampler CMB_TEX_PIXEL_COLOR_REMAP_RAMP_SMP_Clamp_No_Mip_sampler;
 
 #ifndef DISABLE_FOW
-layout(set = 2, binding = 8) uniform texture2D SAMPLER_FOW_texture;
-layout(set = 2, binding = 9) uniform sampler SAMPLER_FOW_sampler;
+layout(set = 3, binding = 8) uniform texture2D SAMPLER_FOW_texture;
+layout(set = 3, binding = 9) uniform sampler SAMPLER_FOW_sampler;
 #endif
 
 // 输入的顶点属性 (Varyings)

@@ -1,7 +1,7 @@
 [
     (
-        skin_path: "Characters/Fiora/Skins/Skin22",
-        character_record: "Characters/Fiora/CharacterRecords/Root",
+        skin_path: "Characters/Hwei/Skins/Skin0",
+        character_record: "Characters/Hwei/CharacterRecords/Root",
     ),
     {
         "bevy_transform::components::transform::Transform": (

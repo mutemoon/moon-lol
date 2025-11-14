@@ -92,7 +92,7 @@ fn convert(code: &str) -> String {
         // 特殊处理 uniform UniformsVertex _UniformsVertex; 这一行
         if trimmed_line == "uniform UniformsVertex _UniformsVertex;" {
             processed_lines.push(
-                "layout(set = 2, binding = 0) uniform UniformsVertex uniforms_vertext;".to_string(),
+                "layout(set = 3, binding = 0) uniform UniformsVertex uniforms_vertext;".to_string(),
             );
             continue;
         }
@@ -210,7 +210,7 @@ fn convert_frag(code: &str) -> String {
         // 规则: 转换 UniformsPixel uniform 块
         if trimmed_line.starts_with("uniform UniformsPixel") {
             let new_line =
-                "layout(set = 2, binding = 1) uniform UniformsPixel uniforms_pixel;".to_string();
+                "layout(set = 3, binding = 1) uniform UniformsPixel uniforms_pixel;".to_string();
             processed_lines.push(new_line);
             continue;
         }
@@ -222,14 +222,14 @@ fn convert_frag(code: &str) -> String {
             sampler_names.push(name.to_string());
 
             let texture_line = format!(
-                "layout(set = 2, binding = {}) uniform texture2D {}_texture;",
+                "layout(set = 3, binding = {}) uniform texture2D {}_texture;",
                 binding_counter, name
             );
             processed_lines.push(texture_line);
             binding_counter += 1;
 
             let sampler_line = format!(
-                "layout(set = 2, binding = {}) uniform sampler {}_sampler;",
+                "layout(set = 3, binding = {}) uniform sampler {}_sampler;",
                 binding_counter, name
             );
             processed_lines.push(sampler_line);
