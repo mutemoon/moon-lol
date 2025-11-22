@@ -9,7 +9,7 @@ use std::{
 use binrw::{args, io::NoSeek, BinRead, Endian};
 use zstd::Decoder;
 
-use league_core::{CharacterRecord, ResourceResolver, SkinCharacterDataProperties};
+use league_core::{ResourceResolver, SkinCharacterDataProperties};
 use league_file::LeagueTexture;
 use league_property::{from_entry, EntryData, PropFile};
 use league_utils::{hash_bin, hash_wad};
@@ -134,28 +134,6 @@ impl LeagueWadLoader {
     pub fn get_prop_bin_by_path(&self, path: &str) -> Result<PropFile, Error> {
         let mut reader = self.get_wad_entry_no_seek_reader_by_path(path)?;
         Ok(PropFile::read(&mut reader)?)
-    }
-
-    pub fn get_character_bin_by_path(&self, character_record: &str) -> Result<PropFile, Error> {
-        let name = character_record.split("/").nth(1).unwrap();
-
-        let path = format!("data/characters/{0}/{0}.bin", name);
-
-        let character_bin = self.get_prop_bin_by_path(&path).unwrap();
-
-        Ok(character_bin)
-    }
-
-    pub fn load_character_record(&self, character_record: &str) -> CharacterRecord {
-        let character_bin = self.get_character_bin_by_path(character_record).unwrap();
-
-        let entry = character_bin
-            .entries
-            .iter()
-            .find(|v| v.hash == hash_bin(&character_record))
-            .unwrap();
-
-        from_entry(entry)
     }
 
     pub fn get_skin_bin_by_path(&self, skin: &str) -> Result<PropFile, Error> {

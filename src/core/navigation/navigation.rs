@@ -4,7 +4,7 @@ use std::time::{Duration, Instant};
 
 use lol_config::ConfigNavigationGrid;
 
-use crate::{find_grid_path, system_debug, Bounding, Movement};
+use crate::{find_grid_path, system_debug, Bounding, Character, Movement};
 
 #[derive(Default)]
 pub struct PluginNavigaton;
@@ -19,9 +19,11 @@ impl Plugin for PluginNavigaton {
         app.add_systems(Last, |res_stats: Res<NavigationStats>| {
             // print!("\x1B[2J\x1B[1;1H"); // 清屏
             // println!("NavigationStats: {:#?}", res_stats);
+
             if res_stats.get_nav_path_time > Duration::from_millis(10) {
-                info!("1{:#?}", res_stats);
+                info!("{:#?}", res_stats);
             }
+
             // if res_stats.occupied_grid_cells_num > 0 {
             //     info!("{:#?}", res_stats.occupied_grid_cells_num);
             // }
@@ -44,7 +46,7 @@ pub struct NavigationStats {
     pub calculate_occupied_grid_cells_time: Duration,
 }
 
-fn update(grid: Res<ConfigNavigationGrid>, mut q_movement: Query<&mut Transform, With<Movement>>) {
+fn update(grid: Res<ConfigNavigationGrid>, mut q_movement: Query<&mut Transform, With<Character>>) {
     for mut transform in q_movement.iter_mut() {
         transform.translation = grid.get_world_position_by_position(&transform.translation.xz());
     }

@@ -5,22 +5,23 @@ use binrw::BinRead;
 
 use league_core::{
     AnimationGraphData, AnimationGraphDataMBlendDataTable, AnimationGraphDataMClipDataMap,
-    AtomicClipData, VfxEmitterDefinitionDataPrimitive, VfxSystemDefinitionData,
+    AtomicClipData, CharacterRecord, SpellObject, VfxEmitterDefinitionDataPrimitive,
+    VfxSystemDefinitionData,
 };
 use league_file::{
     AnimationFile, CompressedTransformType, LeagueSkeleton, LeagueSkinnedMesh, UncompressedData,
 };
 use league_loader::LeagueWadLoader;
 use league_property::{from_entry, EntryData};
-use league_utils::hash_joint;
+use league_utils::{hash_bin, hash_joint};
 use lol_config::{
     ConfigAnimationClip, ConfigCharacterSkin, ConfigJoint, ConfigSkinnedMeshInverseBindposes,
     LeagueMaterial,
 };
 
 use crate::{
-    get_bin_path, get_character_record_path, save_struct_to_file, save_wad_entry_to_file,
-    skinned_mesh_to_intermediate, Error,
+    get_bin_path, get_character_record_save_path, get_character_spell_objects_save_path,
+    save_struct_to_file, save_wad_entry_to_file, skinned_mesh_to_intermediate, Error,
 };
 
 pub async fn save_character(
@@ -66,6 +67,34 @@ pub async fn save_character(
             };
 
             vfx_system_definition_datas.insert(hash, vfx_system_definition_data);
+        }
+    }
+
+    for (_, vfx_system_definition_data) in vfx_system_definition_datas.iter() {
+        let Some(ref complex_emitter_definition_data) =
+            vfx_system_definition_data.complex_emitter_definition_data
+        else {
+            continue;
+        };
+
+        for vfx_emitter_definition_data in complex_emitter_definition_data {
+            if let Some(ref texture) = vfx_emitter_definition_data.texture {
+                if !texture.is_empty() {
+                    save_wad_entry_to_file(&loader, &texture).await?;
+                }
+            }
+            if let Some(ref texture) = vfx_emitter_definition_data.particle_color_texture {
+                if !texture.is_empty() {
+                    save_wad_entry_to_file(&loader, &texture).await?;
+                }
+            }
+            if let Some(ref texture) = vfx_emitter_definition_data.texture_mult {
+                if let Some(ref texture) = texture.texture_mult {
+                    if !texture.is_empty() {
+                        save_wad_entry_to_file(&loader, &texture).await?;
+                    }
+                }
+            }
         }
     }
 
@@ -169,10 +198,31 @@ pub async fn save_character(
     };
     save_struct_to_file(&path, &config_character_skin).await?;
 
+    let name = character_record_path.split("/").nth(1).unwrap();
+
+    let character_bin_path = format!("data/characters/{0}/{0}.bin", name);
+
+    let character_bin = loader.get_prop_bin_by_path(&character_bin_path).unwrap();
+
+    let character_record: CharacterRecord = from_entry(
+        character_bin
+            .entries
+            .iter()
+            .find(|v| v.hash == hash_bin(&character_record_path))
+            .unwrap(),
+    );
+
     // 保存 character_record
-    let character_record = loader.load_character_record(character_record_path);
-    let character_record_path = get_bin_path(&get_character_record_path(&character_record_path));
-    save_struct_to_file(&character_record_path, &character_record).await?;
+    let character_record_save_path =
+        get_bin_path(&get_character_record_save_path(&character_record_path));
+    save_struct_to_file(&character_record_save_path, &character_record).await?;
+
+    let spell_objects = character_bin
+        .iter_entry_by_class(hash_bin(&"SpellObject"))
+        .map(|v| (v.hash, from_entry::<SpellObject>(v)))
+        .collect::<HashMap<_, _>>();
+    let spell_objects_save_path = get_bin_path(&get_character_spell_objects_save_path(&name));
+    save_struct_to_file(&spell_objects_save_path, &spell_objects).await?;
 
     Ok(vfx_system_definition_datas)
 }

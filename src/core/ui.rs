@@ -78,101 +78,138 @@ fn init_health_bar(
                     offset: Vec2::ZERO,
                 },
             ))
-            .with_children(|parent| {
-                match health_bar.bar_type {
-                    HealthBarType::Minion => {
-                        parent
-                            .spawn((
-                                Node {
-                                    width: Val::Px(74.0),
-                                    height: Val::Px(7.0),
-                                    left: Val::Px(-15.0),
-                                    top: Val::Px(-10.0),
-                                    position_type: PositionType::Absolute,
+            .with_children(|parent| match health_bar.bar_type {
+                HealthBarType::Minion => {
+                    parent
+                        .spawn((
+                            Node {
+                                width: Val::Px(74.0),
+                                height: Val::Px(7.0),
+                                left: Val::Px(-15.0),
+                                top: Val::Px(-10.0),
+                                position_type: PositionType::Absolute,
+                                ..default()
+                            },
+                            ImageNode {
+                                image: res_asset_server.load("spotlighthealthbaratlas.tex#srgb"),
+                                rect: Some(Rect::new(2.0, 503.0, 68.0, 510.0)),
+                                color: Color::srgb(0.9, 0.9, 0.9),
+                                ..default()
+                            },
+                        ))
+                        .with_children(|parent| {
+                            parent
+                                .spawn((Node {
+                                    width: Val::Px(72.0),
+                                    height: Val::Px(5.0),
+                                    left: Val::Px(1.0),
+                                    top: Val::Px(1.0),
                                     ..default()
-                                },
-                                ImageNode {
-                                    image: res_asset_server
-                                        .load("spotlighthealthbaratlas.tex#srgb"),
-                                    rect: Some(Rect::new(2.0, 503.0, 68.0, 510.0)),
-                                    color: Color::srgb(0.9, 0.9, 0.9),
-                                    ..default()
-                                },
-                            ))
-                            .with_children(|parent| {
-                                parent
-                                    .spawn((Node {
-                                        width: Val::Px(72.0),
-                                        height: Val::Px(5.0),
-                                        left: Val::Px(1.0),
-                                        top: Val::Px(1.0),
+                                },))
+                                .with_child((
+                                    Node {
+                                        width: Val::Percent(100.0),
                                         ..default()
-                                    },))
-                                    .with_child((
-                                        Node {
-                                            width: Val::Percent(100.0),
-                                            ..default()
-                                        },
-                                        ImageNode {
-                                            image: res_asset_server
-                                                .load("spotlighthealthbaratlas.tex#srgb"),
-                                            rect: Some(Rect::new(147.0, 4.0, 258.0, 15.0)),
-                                            color: Color::srgb(0.9, 0.9, 0.9),
-                                            image_mode: NodeImageMode::Stretch,
-                                            ..default()
-                                        },
-                                        HealthBind(entity),
-                                    ));
-                            });
-                    }
-                    HealthBarType::Champion => {
-                        parent
-                            .spawn((
-                                Node {
-                                    width: Val::Px(136.0),
-                                    height: Val::Px(29.0),
-                                    left: Val::Px(-70.0),
-                                    top: Val::Px(-60.0),
-                                    position_type: PositionType::Absolute,
-                                    ..default()
-                                },
-                                ImageNode {
-                                    image: res_asset_server
-                                        .load("spotlighthealthbaratlas.tex#srgb"),
-                                    rect: Some(Rect::new(3.0, 2.0, 139.0, 31.0)),
-                                    color: Color::srgb(0.9, 0.9, 0.9),
-                                    ..default()
-                                },
-                            ))
-                            .with_children(|parent| {
-                                parent
-                                    .spawn((Node {
-                                        width: Val::Px(104.0),
-                                        height: Val::Px(11.0),
-                                        left: Val::Px(28.0),
-                                        top: Val::Px(7.0),
+                                    },
+                                    ImageNode {
+                                        image: res_asset_server
+                                            .load("spotlighthealthbaratlas.tex#srgb"),
+                                        rect: Some(Rect::new(147.0, 4.0, 258.0, 15.0)),
+                                        color: Color::srgb(0.9, 0.9, 0.9),
+                                        image_mode: NodeImageMode::Stretch,
                                         ..default()
-                                    },))
-                                    .with_child((
-                                        Node {
-                                            width: Val::Percent(100.0),
-                                            ..default()
-                                        },
-                                        ImageNode {
-                                            image: res_asset_server
-                                                .load("spotlighthealthbaratlas.tex#srgb"),
-                                            rect: Some(Rect::new(147.0, 4.0, 258.0, 15.0)),
-                                            color: Color::srgb(0.9, 0.9, 0.9),
-                                            image_mode: NodeImageMode::Stretch,
-                                            ..default()
-                                        },
-                                        HealthBind(entity),
-                                    ));
-                            });
-                    }
-                    HealthBarType::Turret => {
-                        // 预留：塔类血条样式
-                    }
+                                    },
+                                    HealthBind(entity),
+                                ));
+                        });
+                }
+                HealthBarType::Champion => {
+                    parent
+                        .spawn((
+                            Node {
+                                width: Val::Px(136.0),
+                                height: Val::Px(29.0),
+                                left: Val::Px(-70.0),
+                                top: Val::Px(-60.0),
+                                position_type: PositionType::Absolute,
+                                ..default()
+                            },
+                            ImageNode {
+                                image: res_asset_server.load("spotlighthealthbaratlas.tex#srgb"),
+                                rect: Some(Rect::new(3.0, 2.0, 139.0, 31.0)),
+                                color: Color::srgb(0.9, 0.9, 0.9),
+                                ..default()
+                            },
+                        ))
+                        .with_children(|parent| {
+                            parent
+                                .spawn((Node {
+                                    width: Val::Px(104.0),
+                                    height: Val::Px(11.0),
+                                    left: Val::Px(28.0),
+                                    top: Val::Px(7.0),
+                                    ..default()
+                                },))
+                                .with_child((
+                                    Node {
+                                        width: Val::Percent(100.0),
+                                        ..default()
+                                    },
+                                    ImageNode {
+                                        image: res_asset_server
+                                            .load("spotlighthealthbaratlas.tex#srgb"),
+                                        rect: Some(Rect::new(147.0, 4.0, 258.0, 15.0)),
+                                        color: Color::srgb(0.9, 0.9, 0.9),
+                                        image_mode: NodeImageMode::Stretch,
+                                        ..default()
+                                    },
+                                    HealthBind(entity),
+                                ));
+                        });
+                }
+                HealthBarType::Turret => {
+                    parent
+                        .spawn((
+                            Node {
+                                width: Val::Px(192.0),
+                                height: Val::Px(44.0),
+                                left: Val::Px(-96.0),
+                                top: Val::Px(-22.0),
+                                position_type: PositionType::Absolute,
+                                ..default()
+                            },
+                            ImageNode {
+                                image: res_asset_server.load("spotlighthealthbaratlas.tex#srgb"),
+                                rect: Some(Rect::new(6.0, 256.0, 198.0, 290.0)),
+                                color: Color::srgb(0.9, 0.9, 0.9),
+                                ..default()
+                            },
+                        ))
+                        .with_children(|parent| {
+                            parent
+                                .spawn((Node {
+                                    width: Val::Px(168.0),
+                                    height: Val::Px(13.0),
+                                    left: Val::Px(12.0),
+                                    top: Val::Px(7.0),
+                                    ..default()
+                                },))
+                                .with_child((
+                                    Node {
+                                        width: Val::Percent(100.0),
+                                        ..default()
+                                    },
+                                    ImageNode {
+                                        image: res_asset_server
+                                            .load("spotlighthealthbaratlas.tex#srgb"),
+                                        rect: Some(Rect::new(147.0, 4.0, 258.0, 15.0)),
+                                        color: Color::srgb(0.9, 0.9, 0.9),
+                                        image_mode: NodeImageMode::Stretch,
+                                        ..default()
+                                    },
+                                    HealthBind(entity),
+                                ));
+                        });
                 }
             });
     }

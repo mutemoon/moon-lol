@@ -7,6 +7,7 @@
     "example:stream:watch": "cargo-watch -x \"run --example stream\"",
     "example:attack:watch": "cargo-watch -x \"run --example attack\" -w src -w assets -w crates",
     "example:attack": "cargo run --package moon_lol --example attack",
+    "example:attack:release": "cargo run --package moon_lol --example attack --release",
     "example:classic_fiora": "cargo run --package moon_lol --example classic_fiora",
     "example:classic_fiora:watch": "cargo-watch -w src -w crates -w examples -w assets -x \"run --example classic_fiora\"",
     "example:classic_fiora:release": "cargo run --package moon_lol --example classic_fiora --release",

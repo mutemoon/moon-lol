@@ -318,7 +318,7 @@ fn apply_final_movement_decision(
         &Transform,
         &FinalDecision<CommandMovement>,
         &mut MovementState,
-        &Bounding,
+        Option<&Bounding>,
     )>,
     mut grid: ResMut<ConfigNavigationGrid>,
     mut stats: ResMut<NavigationStats>,
@@ -339,36 +339,42 @@ fn apply_final_movement_decision(
 
                         movement_state.pathfind = Some((*target, time.elapsed_secs()));
 
-                        // 从全局 occupied_cells 中临时移除当前实体占据的格子
-                        let entity_pos = transform.translation.xz();
-                        let entity_grid_pos = world_pos_to_grid_xy(&grid, entity_pos);
-                        let mut exclude_cells = HashSet::new();
+                        // 从全局 occupied_cells 中临时移除当前实体占据的格子（仅当实体有 Bounding 时）
+                        let removed_cells = if let Some(bounding) = bounding {
+                            let entity_pos = transform.translation.xz();
+                            let entity_grid_pos = world_pos_to_grid_xy(&grid, entity_pos);
+                            let mut exclude_cells = HashSet::new();
 
-                        // 计算当前实体占据的格子（根据 Bounding 组件的半径）
-                        let radius_in_cells = (bounding.radius / grid.cell_size).ceil() as i32;
-                        for dx in -radius_in_cells..=radius_in_cells {
-                            for dy in -radius_in_cells..=radius_in_cells {
-                                let new_x = entity_grid_pos.0 as i32 + dx;
-                                let new_y = entity_grid_pos.1 as i32 + dy;
+                            // 计算当前实体占据的格子（根据 Bounding 组件的半径）
+                            let radius_in_cells = (bounding.radius / grid.cell_size).ceil() as i32;
+                            for dx in -radius_in_cells..=radius_in_cells {
+                                for dy in -radius_in_cells..=radius_in_cells {
+                                    let new_x = entity_grid_pos.0 as i32 + dx;
+                                    let new_y = entity_grid_pos.1 as i32 + dy;
 
-                                if new_x >= 0 && new_y >= 0 {
-                                    let new_pos = (new_x as usize, new_y as usize);
-                                    if new_pos.0 < grid.x_len && new_pos.1 < grid.y_len {
-                                        exclude_cells.insert(new_pos);
+                                    if new_x >= 0 && new_y >= 0 {
+                                        let new_pos = (new_x as usize, new_y as usize);
+                                        if new_pos.0 < grid.x_len && new_pos.1 < grid.y_len {
+                                            exclude_cells.insert(new_pos);
+                                        }
                                     }
                                 }
                             }
-                        }
 
-                        // 临时从全局 occupied_cells 中移除当前实体占据的格子
-                        let removed_cells: HashSet<_> = grid
-                            .occupied_cells
-                            .iter()
-                            .filter(|cell| exclude_cells.contains(cell))
-                            .copied()
-                            .collect();
-                        grid.occupied_cells
-                            .retain(|cell| !exclude_cells.contains(cell));
+                            // 临时从全局 occupied_cells 中移除当前实体占据的格子
+                            let removed: HashSet<_> = grid
+                                .occupied_cells
+                                .iter()
+                                .filter(|cell| exclude_cells.contains(cell))
+                                .copied()
+                                .collect();
+                            grid.occupied_cells
+                                .retain(|cell| !exclude_cells.contains(cell));
+
+                            removed
+                        } else {
+                            HashSet::new()
+                        };
 
                         if let Some(path) =
                             get_nav_path(&transform.translation.xz(), target, &grid, &mut stats)

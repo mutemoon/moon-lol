@@ -6,7 +6,9 @@ use league_file::LeagueMapGeoMesh;
 use lol_config::ConfigMap;
 use lol_core::Team;
 
-use crate::{spawn_geometry_object, Action, CommandAction, CommandSpawnCharacter, Controller};
+use crate::{
+    spawn_geometry_object, Action, CommandAction, CommandSpawnCharacter, Controller, Turret,
+};
 
 pub const MAP_WIDTH: f32 = 14400.0;
 pub const MAP_HEIGHT: f32 = 14765.0;
@@ -56,6 +58,11 @@ pub fn spawn_environment_objects_from_configs(
         let entity = commands
             .spawn((transform, Team::from(environment_object.definition.team)))
             .id();
+
+        if matches!(environment_object.definition.r#type, Some(0)) {
+            commands.entity(entity).insert(Turret);
+        }
+
         commands.trigger(CommandSpawnCharacter {
             entity,
             character_record_key: environment_object.definition.character_record.clone(),

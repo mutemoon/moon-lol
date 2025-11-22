@@ -94,10 +94,7 @@ pub async fn save_config_map(
     }
 
     for character in characters.values() {
-        skin_and_record_pairs.push((
-            character.skin.clone(),
-            character.character_record.clone(),
-        ));
+        skin_and_record_pairs.push((character.skin.clone(), character.character_record.clone()));
     }
 
     for (skin_path, record_path) in skin_and_record_pairs {

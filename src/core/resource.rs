@@ -1,16 +1,5 @@
 use std::{fs::File, io::Read};
 
-use league_to_lol::{
-    get_character_record_path, get_struct_from_file, CONFIG_PATH_MAP, CONFIG_PATH_MAP_NAV_GRID,
-};
-use lol_config::{
-    CharacterConfigsDeserializer, ConfigCharacterSkin, ConfigGame, ConfigMap, ConfigNavigationGrid,
-};
-use lol_loader::{
-    LeagueLoaderAnimationClip, LeagueLoaderImage, LeagueLoaderMaterial, LeagueLoaderMesh,
-    LeagueLoaderMeshStatic, LeagueLoaderSkinnedMeshInverseBindposes,
-};
-
 use bevy::{
     ecs::{
         component::ComponentCloneBehavior,
@@ -21,8 +10,20 @@ use bevy::{
     prelude::*,
     scene::ron::{self},
 };
-use league_core::CharacterRecord;
 use serde::de::DeserializeSeed;
+
+use league_core::{CharacterRecord, SpellObject};
+use league_to_lol::{
+    get_character_record_save_path, get_character_spell_objects_save_path, get_struct_from_file,
+    CONFIG_PATH_MAP, CONFIG_PATH_MAP_NAV_GRID,
+};
+use lol_config::{
+    CharacterConfigsDeserializer, ConfigCharacterSkin, ConfigGame, ConfigMap, ConfigNavigationGrid,
+};
+use lol_loader::{
+    LeagueLoaderAnimationClip, LeagueLoaderImage, LeagueLoaderMaterial, LeagueLoaderMesh,
+    LeagueLoaderMeshStatic, LeagueLoaderSkinnedMeshInverseBindposes,
+};
 
 #[derive(Default)]
 pub struct PluginResource {
@@ -50,13 +51,21 @@ impl Plugin for PluginResource {
                 ))
                 .unwrap(),
             );
-            resource_cache.character_records.insert(
-                v.definition.character_record.clone(),
-                get_struct_from_file::<CharacterRecord>(&get_character_record_path(
-                    &v.definition.character_record,
-                ))
-                .unwrap(),
-            );
+
+            let character_record = get_struct_from_file::<CharacterRecord>(
+                &get_character_record_save_path(&v.definition.character_record),
+            )
+            .unwrap();
+            let spell_map = get_struct_from_file::<HashMap<u32, SpellObject>>(
+                &get_character_spell_objects_save_path(&character_record.m_character_name),
+            )
+            .unwrap();
+
+            resource_cache
+                .character_records
+                .insert(v.definition.character_record.clone(), character_record);
+
+            resource_cache.spells.extend(spell_map);
         }
 
         for (_, v) in config_map.characters.iter() {
@@ -64,13 +73,20 @@ impl Plugin for PluginResource {
                 v.skin.clone(),
                 get_struct_from_file(&format!("ASSETS/{}/config_character_skin", &v.skin)).unwrap(),
             );
-            resource_cache.character_records.insert(
-                v.character_record.clone(),
-                get_struct_from_file::<CharacterRecord>(&get_character_record_path(
-                    &v.character_record,
-                ))
-                .unwrap(),
-            );
+            let character_record = get_struct_from_file::<CharacterRecord>(
+                &get_character_record_save_path(&v.character_record),
+            )
+            .unwrap();
+            let spell_map = get_struct_from_file::<HashMap<u32, SpellObject>>(
+                &get_character_spell_objects_save_path(&character_record.m_character_name),
+            )
+            .unwrap();
+
+            resource_cache
+                .character_records
+                .insert(v.character_record.clone(), character_record);
+
+            resource_cache.spells.extend(spell_map);
         }
 
         let mut file = File::open(format!("assets/{}", &self.game_config_path)).unwrap();
@@ -111,12 +127,19 @@ impl Plugin for PluginResource {
 
             // 加载 character_record 到 resource_cache
             let character_record = get_struct_from_file::<CharacterRecord>(
-                &get_character_record_path(&character_config.character_record),
+                &get_character_record_save_path(&character_config.character_record),
             )
             .unwrap();
+            let spell_map = get_struct_from_file::<HashMap<u32, SpellObject>>(
+                &get_character_spell_objects_save_path(&character_record.m_character_name),
+            )
+            .unwrap();
+
             resource_cache
                 .character_records
                 .insert(character_config.character_record.clone(), character_record);
+
+            resource_cache.spells.extend(spell_map);
 
             legends.push((
                 entity,
@@ -167,6 +190,7 @@ pub struct ResourceCache {
     mesh: HashMap<String, Handle<Mesh>>,
     pub skins: HashMap<String, ConfigCharacterSkin>,
     pub character_records: HashMap<String, CharacterRecord>,
+    pub spells: HashMap<u32, SpellObject>,
 }
 
 impl ResourceCache {

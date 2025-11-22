@@ -1,5 +1,3 @@
-// use bevy::prelude::*;
-
 mod abilities;
 mod core;
 mod entities;
@@ -7,22 +5,13 @@ mod logging;
 mod server;
 
 pub use abilities::*;
-use bevy::animation::AnimationPlugin;
-use bevy::asset::AssetPlugin;
-use bevy::log::LogPlugin;
-use bevy::time::TimeUpdateStrategy;
-use bevy::MinimalPlugins;
 pub use core::*;
 pub use entities::*;
 pub use logging::*;
 pub use server::*;
-use std::time::Duration;
 
-use bevy::prelude::PluginGroup;
 use bevy::{
     app::{plugin_group, App},
-    utils::default,
-    window::{Window, WindowPlugin},
     DefaultPlugins,
 };
 

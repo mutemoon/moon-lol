@@ -4,7 +4,9 @@ use bevy::{
 };
 use serde::{Deserialize, Serialize};
 
-use crate::{Buffs, CommandDamageCreate, CommandRotate, Damage, DamageType, EventDead};
+use crate::{
+    Buffs, CommandDamageCreate, CommandMissileCreate, CommandRotate, Damage, DamageType, EventDead,
+};
 
 #[derive(Default)]
 pub struct PluginAttack;
@@ -34,6 +36,8 @@ pub struct Attack {
     pub windup_config: WindupConfig,
     /// 前摇修正系数 (默认 1.0，可以被技能修改)
     pub windup_modifier: f32,
+    /// 攻击导弹
+    pub spell_key: Option<u32>,
 }
 
 /// 前摇时间配置方式
@@ -116,6 +120,7 @@ impl Attack {
                 attack_total_time: total_duration_secs,
             },
             windup_modifier: 1.0,
+            spell_key: None,
         }
     }
 
@@ -129,7 +134,13 @@ impl Attack {
                 attack_offset: windup_offset,
             },
             windup_modifier: 1.0,
+            spell_key: None,
         }
+    }
+
+    pub fn with_missile(mut self, missile: Option<u32>) -> Self {
+        self.spell_key = missile;
+        self
     }
 
     pub fn with_bonus_attack_speed(mut self, bonus_attack_speed: f32) -> Self {
@@ -358,12 +369,23 @@ fn fixed_update(
                         end_time: now + attack.cooldown_time(),
                     };
 
-                    commands.try_trigger(CommandDamageCreate {
-                        entity: *target,
-                        source: entity,
-                        damage_type: DamageType::Physical,
-                        amount: damage.0,
-                    });
+                    match attack.spell_key {
+                        Some(spell_key) => {
+                            commands.trigger(CommandMissileCreate {
+                                entity,
+                                target: *target,
+                                spell_key,
+                            });
+                        }
+                        None => {
+                            commands.try_trigger(CommandDamageCreate {
+                                entity: *target,
+                                source: entity,
+                                damage_type: DamageType::Physical,
+                                amount: damage.0,
+                            });
+                        }
+                    }
                     commands.try_trigger(EventAttackEnd {
                         entity,
                         target: *target,

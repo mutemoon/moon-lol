@@ -41,7 +41,7 @@ pub async fn save_struct_to_file<T: Serialize>(path: &str, data: &T) -> Result<(
 }
 
 pub async fn get_asset_writer(path: &str) -> Result<AsyncFile, Error> {
-    let path = format!("assets/{}", path);
+    let path = format!("assets/{path}");
     // println!("√ {}", path);
     ensure_dir_exists(&path)?;
     let file = AsyncFile::create(path).await?;
@@ -49,12 +49,15 @@ pub async fn get_asset_writer(path: &str) -> Result<AsyncFile, Error> {
 }
 
 pub fn get_bin_path(path: &str) -> String {
-    format!("{}.bin", path)
+    format!("{path}.bin")
 }
 
-pub fn get_character_record_path(path: &str) -> String {
-    let name = path.split("/").nth(1).unwrap();
-    format!("Assets/Characters/{}/character_record", name)
+pub fn get_character_record_save_path(path: &str) -> String {
+    format!("Assets/{path}")
+}
+
+pub fn get_character_spell_objects_save_path(name: &str) -> String {
+    format!("Assets/Characters/{name}/spell_objects")
 }
 
 pub fn get_struct_from_file<T: DeserializeOwned>(path: &str) -> Result<T, Error> {

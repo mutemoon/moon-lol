@@ -1,11 +1,12 @@
 use bevy::{app::Plugin, prelude::*};
-use lol_config::ConfigMap;
-use lol_core::{Lane, Team};
 use serde::{Deserialize, Serialize};
 
+use lol_config::ConfigMap;
+use lol_core::{Lane, Team};
+
 use crate::{
-    Action, AttackAuto, CommandAction, CommandMovement, DamageType, EventDamageCreate, EventDead,
-    EventSpawn, HealthBar, HealthBarType, MovementAction, MovementWay, State,
+    Aggro, AttackAuto, CommandAttackAutoStart, CommandAttackAutoStop, CommandMovement,
+    EventAggroTargetFound, EventDead, HealthBar, HealthBarType, MovementAction, MovementWay, State,
 };
 
 #[derive(Default)]
@@ -14,21 +15,31 @@ pub struct PluginMinion;
 impl Plugin for PluginMinion {
     fn build(&self, app: &mut bevy::prelude::App) {
         app.add_systems(FixedUpdate, fixed_update);
-        app.add_systems(FixedPostUpdate, minion_aggro);
 
-        app.add_observer(on_spawn);
-        app.add_observer(on_event_minion_found_target);
+        app.add_observer(on_event_aggro_target_found);
         app.add_observer(on_target_dead);
     }
 }
 
 #[derive(Component, Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
-#[require(MinionState, AggroInfo, State, HealthBar = HealthBar { bar_type: HealthBarType::Minion })]
+#[require(
+    MinionState,
+    Aggro = Aggro { range: 500.0 },
+    State,
+    HealthBar = HealthBar { bar_type: HealthBarType::Minion }
+)]
 pub enum Minion {
     Siege,
     Melee,
     Ranged,
     Super,
+}
+
+#[derive(Component, PartialEq, Debug, Default)]
+pub enum MinionState {
+    #[default]
+    MovingOnPath,
+    AttackingTarget,
 }
 
 impl From<u8> for Minion {
@@ -42,39 +53,6 @@ impl From<u8> for Minion {
         }
     }
 }
-
-#[derive(Component, Default)]
-pub struct AggroInfo {
-    pub aggros: std::collections::HashMap<Entity, f32>,
-}
-
-#[derive(Component, PartialEq, Debug, Default)]
-pub enum MinionState {
-    #[default]
-    MovingOnPath,
-    AttackingTarget,
-}
-
-#[derive(EntityEvent, Debug)]
-pub struct CommandMinionContinuePath {
-    pub entity: Entity,
-}
-
-#[derive(EntityEvent, Debug)]
-pub struct EventMinionFoundTarget {
-    pub entity: Entity,
-    pub target: Entity,
-}
-
-#[derive(EntityEvent, Debug)]
-pub struct EventMinionChasingTimeout {
-    pub entity: Entity,
-}
-
-#[derive(Event, Debug)]
-pub struct ChasingTooMuch;
-
-pub const AGGRO_RANGE: f32 = 500.0;
 
 pub fn fixed_update(
     mut commands: Commands,
@@ -113,58 +91,8 @@ pub fn fixed_update(
     }
 }
 
-pub fn minion_aggro(
-    mut commands: Commands,
-    q_minion: Query<(Entity, &Team, &Transform, &AggroInfo), With<Minion>>,
-    q_attackable: Query<(Entity, &Team, &Transform)>,
-) {
-    for (entity, minion_team, minion_transform, aggro_info) in q_minion.iter() {
-        let mut best_aggro = 0.0;
-        let mut closest_distance = f32::MAX;
-        let mut target_entity = Entity::PLACEHOLDER;
-
-        // 遍历所有可攻击单位筛选目标
-        for (attackable_entity, attackable_team, attackable_transform) in q_attackable.iter() {
-            // 忽略友方单位
-            if attackable_team == minion_team {
-                continue;
-            }
-
-            // 计算距离并检查是否在仇恨范围内
-            let distance = minion_transform
-                .translation
-                .distance(attackable_transform.translation);
-            if distance >= AGGRO_RANGE {
-                continue;
-            }
-
-            // 获取仇恨值（默认为0）
-            let aggro = aggro_info
-                .aggros
-                .get(&attackable_entity)
-                .copied()
-                .unwrap_or(0.0);
-
-            // 优先选择仇恨值更高的目标，仇恨相同时选择更近的
-            if aggro > best_aggro || (aggro == best_aggro && distance < closest_distance) {
-                best_aggro = aggro;
-                closest_distance = distance;
-                target_entity = attackable_entity;
-            }
-        }
-
-        // 如果找到有效目标则触发
-        if target_entity != Entity::PLACEHOLDER {
-            commands.trigger(EventMinionFoundTarget {
-                entity,
-                target: target_entity,
-            });
-        }
-    }
-}
-
-fn on_event_minion_found_target(
-    trigger: On<EventMinionFoundTarget>,
+fn on_event_aggro_target_found(
+    trigger: On<EventAggroTargetFound>,
     mut commands: Commands,
     mut q_minion_state: Query<&mut MinionState>,
 ) {
@@ -174,53 +102,13 @@ fn on_event_minion_found_target(
         match *minion_state {
             MinionState::MovingOnPath => {
                 *minion_state = MinionState::AttackingTarget;
-                commands.trigger(CommandAction {
+                commands.trigger(CommandAttackAutoStart {
                     entity,
-                    action: Action::Attack(trigger.target),
+                    target: trigger.target,
                 });
             }
             _ => (),
         }
-    }
-}
-
-pub fn on_team_get_damage(
-    trigger: On<EventDamageCreate>,
-    mut q_minion: Query<(&Team, &Transform, &mut AggroInfo), With<Minion>>,
-    q_transform: Query<&Transform>,
-    q_team: Query<&Team>,
-) {
-    let source = trigger.source;
-    let target = trigger.event_target();
-
-    if trigger.damage_type != DamageType::Physical {
-        return;
-    }
-
-    let Ok(source_transform) = q_transform.get(source) else {
-        return;
-    };
-
-    let Ok(target_team) = q_team.get(target) else {
-        return;
-    };
-
-    for (minion_team, minion_transform, mut aggro_info) in q_minion.iter_mut() {
-        if target_team != minion_team {
-            continue;
-        }
-
-        let distance = minion_transform
-            .translation
-            .distance(source_transform.translation);
-
-        if distance >= AGGRO_RANGE {
-            continue;
-        }
-
-        let aggro = aggro_info.aggros.get(&source).copied().unwrap_or(0.0);
-
-        aggro_info.aggros.insert(source, aggro + 10.0);
     }
 }
 
@@ -241,24 +129,7 @@ fn on_target_dead(
         match *minion_state {
             MinionState::AttackingTarget => {
                 *minion_state = MinionState::MovingOnPath;
-                commands.trigger(CommandMinionContinuePath { entity });
-            }
-            _ => (),
-        }
-    }
-}
-
-fn on_spawn(
-    trigger: On<EventSpawn>,
-    mut commands: Commands,
-    mut q_minion_state: Query<&mut MinionState>,
-) {
-    let entity = trigger.event_target();
-    if let Ok(mut minion_state) = q_minion_state.get_mut(entity) {
-        match *minion_state {
-            MinionState::MovingOnPath => {
-                *minion_state = MinionState::MovingOnPath;
-                commands.trigger(CommandMinionContinuePath { entity });
+                commands.trigger(CommandAttackAutoStop { entity });
             }
             _ => (),
         }

@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use league_utils::hash_bin;
 
 use crate::{Armor, Attack, Bounding, CommandSkinSpawn, Damage, Health, Movement, ResourceCache};
 
@@ -71,21 +72,31 @@ fn on_command_spawn_character(
         if let Some(basic_attack) = &character_record.basic_attack {
             if let Some(cast_time) = basic_attack.m_attack_cast_time {
                 if let Some(total_time) = basic_attack.m_attack_total_time {
-                    commands.entity(entity).insert(Attack::new(
-                        *attack_range,
-                        cast_time,
-                        total_time,
-                    ));
+                    commands.entity(entity).insert(
+                        Attack::new(*attack_range, cast_time, total_time).with_missile(Some(
+                            hash_bin(&format!(
+                                "Characters/{}/Spells/{}BasicAttack",
+                                character_record.m_character_name,
+                                character_record.m_character_name
+                            )),
+                        )),
+                    );
                 }
             } else if let Some(m_attack_delay_cast_offset_percent) =
                 basic_attack.m_attack_delay_cast_offset_percent
             {
                 if let Some(attack_speed) = character_record.attack_speed {
-                    commands.entity(entity).insert(Attack::from_legacy(
-                        *attack_range,
-                        attack_speed,
-                        m_attack_delay_cast_offset_percent,
-                    ));
+                    commands.entity(entity).insert(
+                        Attack::from_legacy(
+                            *attack_range,
+                            attack_speed,
+                            m_attack_delay_cast_offset_percent,
+                        )
+                        .with_missile(Some(hash_bin(&format!(
+                            "Characters/{}/Spells/{}BasicAttack",
+                            character_record.m_character_name, character_record.m_character_name
+                        )))),
+                    );
                 }
             }
         }

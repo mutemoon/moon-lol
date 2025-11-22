@@ -8,8 +8,8 @@ use bevy::{
 
 use league_core::{
     Unk0xee39916f, VfxEmitterDefinitionData, VfxEmitterDefinitionDataPrimitive,
-    VfxEmitterDefinitionDataSpawnShape, VfxPrimitiveAttachedMesh, VfxPrimitiveMesh,
-    VfxPrimitivePlanarProjection, VfxShapeBox, VfxShapeCylinder, VfxShapeLegacy,
+    VfxEmitterDefinitionDataSpawnShape, VfxPrimitiveMesh, VfxPrimitivePlanarProjection,
+    VfxShapeBox, VfxShapeCylinder, VfxShapeLegacy,
 };
 use lol_config::ConfigMap;
 
