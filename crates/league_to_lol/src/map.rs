@@ -98,14 +98,20 @@ pub async fn save_config_map(
     }
 
     for (skin_path, record_path) in skin_and_record_pairs {
-        let skin_vfx_system_definition_datas =
-            save_character(&map_loader.wad_loader, &skin_path, &record_path).await?;
+        let skin_vfx_system_definition_datas = save_character(
+            &loader.data_loader,
+            &map_loader.wad_loader,
+            &skin_path,
+            &record_path,
+        )
+        .await?;
 
         vfx_system_definition_datas.extend(skin_vfx_system_definition_datas);
     }
 
     for (champion, skin) in champions {
-        let champion_vfx_system_definition_datas = save_legends(root_dir, champion, skin).await?;
+        let champion_vfx_system_definition_datas =
+            save_legends(root_dir, champion, skin, &loader.data_loader).await?;
         vfx_system_definition_datas.extend(champion_vfx_system_definition_datas);
     }
 

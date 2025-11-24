@@ -9,7 +9,8 @@ use league_core::{
     VfxSystemDefinitionData,
 };
 use league_file::{
-    AnimationFile, CompressedTransformType, LeagueSkeleton, LeagueSkinnedMesh, UncompressedData,
+    AnimationFile, CompressedTransformType, InibinFile, LeagueSkeleton, LeagueSkinnedMesh,
+    UncompressedData,
 };
 use league_loader::LeagueWadLoader;
 use league_property::{from_entry, EntryData};
@@ -25,6 +26,7 @@ use crate::{
 };
 
 pub async fn save_character(
+    data_loader: &LeagueWadLoader,
     loader: &LeagueWadLoader,
     skin: &str,
     character_record_path: &str,
@@ -221,6 +223,22 @@ pub async fn save_character(
         .iter_entry_by_class(hash_bin(&"SpellObject"))
         .map(|v| (v.hash, from_entry::<SpellObject>(v)))
         .collect::<HashMap<_, _>>();
+
+    for spell_object in spell_objects.values() {
+        let Some(missile_effect_name) = spell_object
+            .m_spell
+            .as_ref()
+            .and_then(|v| v.m_missile_effect_name.as_ref())
+        else {
+            continue;
+        };
+
+        // let path = format!("data/particles/{}bin", missile_effect_name);
+
+        // let mut reader = data_loader.get_wad_entry_reader_by_path(&path).unwrap();
+        // let inibin = InibinFile::read(&mut reader).unwrap();
+    }
+
     let spell_objects_save_path = get_bin_path(&get_character_spell_objects_save_path(&name));
     save_struct_to_file(&spell_objects_save_path, &spell_objects).await?;
 

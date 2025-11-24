@@ -11,6 +11,7 @@ pub async fn save_legends(
     root_dir: &str,
     champion: &str,
     skin: &str,
+    data_loader: &LeagueWadLoader,
 ) -> Result<HashMap<u32, VfxSystemDefinitionData>, Error> {
     let wad_relative_path = format!("DATA/FINAL/Champions/{}.wad.client", champion);
 
@@ -21,7 +22,7 @@ pub async fn save_legends(
     let character_record_path = format!("Characters/{}/CharacterRecords/Root", champion);
 
     let vfx_system_definition_datas =
-        save_character(&loader, &skin_path, &character_record_path).await?;
+        save_character(&data_loader, &loader, &skin_path, &character_record_path).await?;
 
     Ok(vfx_system_definition_datas)
 }

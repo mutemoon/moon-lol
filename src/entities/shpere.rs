@@ -1,4 +1,4 @@
-use bevy::{color::palettes::tailwind, prelude::*};
+use bevy::prelude::*;
 
 #[derive(Component)]
 pub struct DebugSphere {
@@ -17,15 +17,16 @@ impl Plugin for PluginDebugSphere {
 
 fn debug_sphere_system(
     mut commands: Commands,
-    query: Query<Entity, Added<DebugSphere>>,
+    query: Query<(Entity, &DebugSphere), Added<DebugSphere>>,
     mut res_materials: ResMut<Assets<StandardMaterial>>,
     mut res_meshes: ResMut<Assets<Mesh>>,
 ) {
-    for entity in query.iter() {
+    for (entity, debug_sphere) in query.iter() {
         commands.entity(entity).insert((
-            Mesh3d(res_meshes.add(Sphere::new(20.0))),
+            Mesh3d(res_meshes.add(Sphere::new(debug_sphere.radius))),
             MeshMaterial3d(res_materials.add(StandardMaterial {
-                base_color: Color::from(tailwind::RED_500),
+                base_color: debug_sphere.color,
+                unlit: true,
                 ..Default::default()
             })),
         ));

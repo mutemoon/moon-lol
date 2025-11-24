@@ -18,12 +18,9 @@ fn main() {
                 }),
                 ..default()
             }),
-            PluginCore
-                .build()
-                .set(PluginResource {
-                    game_config_path: "games/attack.ron".to_owned(),
-                })
-                .disable::<PluginBarrack>(),
+            PluginCore.build().set(PluginResource {
+                game_config_path: "games/attack.ron".to_owned(),
+            }), // .disable::<PluginBarrack>(),
         ))
         .insert_resource(WinitSettings {
             focused_mode: UpdateMode::Reactive {

@@ -1,10 +1,10 @@
-use bevy::{animation::AnimationTarget, prelude::*};
+use bevy::{animation::AnimationTarget, color::palettes::tailwind::RED_500, prelude::*};
 use league_core::MissileSpecificationMovementComponent;
 use league_utils::hash_joint;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    CommandDamageCreate, CommandMovement, CommandParticleSpawn, Damage, DamageType,
+    CommandDamageCreate, CommandMovement, CommandParticleSpawn, Damage, DamageType, DebugSphere,
     EntityCommandsTrigger, EventMovementEnd, Movement, MovementAction, MovementWay, ResourceCache,
 };
 
@@ -82,10 +82,12 @@ fn on_command_missile_create(
 
     let speed = spell_data_resource.missile_speed.unwrap();
 
-    let target_translation = q_global_transform
+    let Ok(target_translation) = q_global_transform
         .get(trigger.target)
-        .unwrap()
-        .translation();
+        .map(|v| v.translation())
+    else {
+        return;
+    };
 
     let mut start_translation = None;
 
@@ -168,6 +170,11 @@ fn on_command_missile_create(
         commands.trigger(CommandParticleSpawn {
             entity: missile_entity,
             particle,
+        });
+    } else {
+        commands.entity(missile_entity).insert(DebugSphere {
+            color: RED_500.into(),
+            radius: 10.0,
         });
     }
 }

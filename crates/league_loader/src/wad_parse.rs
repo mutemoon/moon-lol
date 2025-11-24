@@ -35,7 +35,7 @@ impl LeagueWad {
             .ok_or_else(|| {
                 Error::Io(io::Error::new(
                     io::ErrorKind::NotFound,
-                    "WAD entry not found",
+                    format!("WAD entry not found: {:x}", hash),
                 ))
             })
             .cloned()

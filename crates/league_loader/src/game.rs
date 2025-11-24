@@ -191,6 +191,7 @@ const CHARACTER_WAD_PATHS: &[&str] = &[
 pub struct LeagueLoader {
     pub root_dir: String,
     pub wads: Vec<LeagueWadLoader>,
+    pub data_loader: LeagueWadLoader,
     pub map_loader: LeagueWadMapLoader,
 }
 
@@ -206,6 +207,10 @@ impl LeagueLoader {
         Ok(LeagueLoader {
             root_dir: root_dir.to_string(),
             wads: vec![],
+            data_loader: LeagueWadLoader::from_relative_path(
+                root_dir,
+                "DATA/FINAL/Data.wad.client",
+            )?,
             map_loader,
         })
     }
@@ -224,6 +229,10 @@ impl LeagueLoader {
                 .iter()
                 .map(|path| LeagueWadLoader::from_relative_path(root_dir, path).unwrap())
                 .collect::<Vec<LeagueWadLoader>>(),
+            data_loader: LeagueWadLoader::from_relative_path(
+                root_dir,
+                "DATA/FINAL/Data.wad.client",
+            )?,
             map_loader,
         })
     }
