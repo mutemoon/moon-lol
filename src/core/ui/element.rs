@@ -85,7 +85,7 @@ pub fn spawn_ui_atom(
     position: &UiElementIconDataPosition,
     layer: &Option<u32>,
     texture_data: &Option<UiElementEffectAnimationDataTextureData>,
-) -> Option<(Entity)> {
+) -> Option<Entity> {
     let entity = commands
         .spawn((
             Node {

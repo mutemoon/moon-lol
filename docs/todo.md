@@ -61,7 +61,7 @@ ui 动画实体是谁
 UiElementGroupButtonData 中定义了默认、悬停、点击、不可用这几种状态的 ui 元素
 
 怎么根据切换 ui 元素
-增加 button 系统，通过 bevy 内置的按钮组件实现状态切换时更新图片
+增加 button 系统，通过 bevy 的 Interaction 组件实现按钮状态切换时切换 ui 元素
 
 - [ ] 加点机制
 

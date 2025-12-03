@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use bevy::prelude::*;
 
 use lol_config::ConfigUi;
@@ -17,6 +15,11 @@ pub fn startup_spawn_buttons(mut commands: Commands, res_config_ui: Res<ConfigUi
         v.1.name
             .contains("ClientStates/Gameplay/UX/LoL/PlayerFrame/")
     }) {
+        let is_enabled = ui_button_group.is_enabled.unwrap_or(false);
+        if !is_enabled {
+            continue;
+        }
+
         let hit_region = res_config_ui
             .ui_region
             .get(&ui_button_group.hit_region_element)
@@ -35,18 +38,16 @@ pub fn startup_spawn_buttons(mut commands: Commands, res_config_ui: Res<ConfigUi
 
 pub fn update_button(
     mut commands: Commands,
-    mut interaction_query: Query<(Entity, &Interaction, &UIButton), Changed<Interaction>>,
+    mut interaction_query: Query<(&Interaction, &UIButton), Changed<Interaction>>,
     res_config_ui: Res<ConfigUi>,
     res_ui_element_entity: Res<UIElementEntity>,
 ) {
-    for (entity, interaction, button) in &mut interaction_query {
+    for (interaction, button) in &mut interaction_query {
         let ui_button_group = res_config_ui.ui_button_group.get(&button.key).unwrap();
 
         let interaction_entity = match *interaction {
             Interaction::Pressed => {
                 info!("按下 {}", ui_button_group.name);
-                // The accessibility system's only update the button's state when the `Button` component is marked as changed.
-
                 let Some(&clicked_entity) = ui_button_group
                     .clicked_state_elements
                     .as_ref()
