@@ -1,12 +1,17 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::HashSet;
 
-use league_core::{UiElementEffectAnimationDataTextureData, UiElementIconData};
+use tokio::time::Instant;
+
+use league_core::{
+    UiElementEffectAnimationData, UiElementEffectAnimationDataTextureData,
+    UiElementGroupButtonData, UiElementIconData, UiElementRegionData,
+};
 use league_loader::{LeagueWadGroupLoader, PropBinLoader};
 use league_property::from_entry;
 use league_to_lol::{
     get_bin_path, save_config_map, save_struct_to_file, save_wad_entry_to_file, CONFIG_UI,
 };
-use tokio::time::Instant;
+use lol_config::ConfigUi;
 
 #[tokio::main]
 async fn main() {
@@ -14,7 +19,7 @@ async fn main() {
 
     let start = Instant::now();
 
-    let mut ui_elements = HashMap::new();
+    let mut config_ui = ConfigUi::default();
 
     let mut textures = HashSet::new();
 
@@ -29,12 +34,26 @@ async fn main() {
         };
 
         for entry in prop_bin.entries.iter() {
-            let Ok(ui_element_icon_data) = from_entry::<UiElementIconData>(entry) else {
-                continue;
-            };
+            if let Ok(ui_element_icon_data) = from_entry::<UiElementIconData>(entry) {
+                if let Some(texture_data) = ui_element_icon_data.texture_data.as_ref() {
+                    match texture_data {
+                        UiElementEffectAnimationDataTextureData::AtlasData(atlas_data) => {
+                            if !textures.contains(&atlas_data.m_texture_name) {
+                                textures.insert(atlas_data.m_texture_name.clone());
+                            }
+                        }
+                        _ => {}
+                    }
+                }
+                config_ui
+                    .ui_elements
+                    .insert(entry.hash, ui_element_icon_data);
+            }
 
-            if let Some(texture_data) = ui_element_icon_data.texture_data.as_ref() {
-                match texture_data {
+            if let Ok(ui_element_effect_animation_data) =
+                from_entry::<UiElementEffectAnimationData>(entry)
+            {
+                match &ui_element_effect_animation_data.texture_data {
                     UiElementEffectAnimationDataTextureData::AtlasData(atlas_data) => {
                         if !textures.contains(&atlas_data.m_texture_name) {
                             textures.insert(atlas_data.m_texture_name.clone());
@@ -42,9 +61,24 @@ async fn main() {
                     }
                     _ => {}
                 }
+
+                config_ui
+                    .ui_animations
+                    .insert(entry.hash, ui_element_effect_animation_data);
             }
 
-            ui_elements.insert(ui_element_icon_data.name.clone(), ui_element_icon_data);
+            if let Ok(ui_element_group_button_data) = from_entry::<UiElementGroupButtonData>(entry)
+            {
+                config_ui
+                    .ui_button_group
+                    .insert(entry.hash, ui_element_group_button_data);
+            }
+
+            if let Ok(ui_element_region_data) = from_entry::<UiElementRegionData>(entry) {
+                config_ui
+                    .ui_region
+                    .insert(entry.hash, ui_element_region_data);
+            }
         }
     }
 
@@ -55,7 +89,7 @@ async fn main() {
         };
     }
 
-    save_struct_to_file(&get_bin_path(CONFIG_UI), &ui_elements)
+    save_struct_to_file(&get_bin_path(CONFIG_UI), &config_ui)
         .await
         .unwrap();
 

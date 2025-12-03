@@ -34,6 +34,7 @@ fn add_skills(mut commands: Commands, q_fiora: Query<Entity, (With<Fiora>, Witho
             .entity(entity)
             .with_related::<SkillOf>((
                 Skill {
+                    key: hash_bin("Characters/Fiora/Spells/FioraPassiveAbility/FioraPassive"),
                     level: 0,
                     effect: None,
                 },
@@ -41,6 +42,7 @@ fn add_skills(mut commands: Commands, q_fiora: Query<Entity, (With<Fiora>, Witho
             ))
             .with_related::<SkillOf>((Skill {
                 level: 0,
+                key: hash_bin("Characters/Fiora/Spells/FioraQAbility/FioraQ"),
                 effect: Some(behave! {
                     Behave::Sequence => {
                         Behave::trigger(
@@ -62,6 +64,7 @@ fn add_skills(mut commands: Commands, q_fiora: Query<Entity, (With<Fiora>, Witho
             },))
             .with_related::<SkillOf>((Skill {
                 level: 0,
+                key: hash_bin("Characters/Fiora/Spells/FioraWAbility/FioraW"),
                 effect: Some(behave! {
                     Behave::Sequence => {
                         Behave::trigger(
@@ -87,6 +90,7 @@ fn add_skills(mut commands: Commands, q_fiora: Query<Entity, (With<Fiora>, Witho
             },))
             .with_related::<SkillOf>((Skill {
                 level: 0,
+                key: hash_bin("Characters/Fiora/Spells/FioraEAbility/FioraE"),
                 effect: Some(behave! {
                     Behave::Sequence => {
                         Behave::trigger(ActionBuffSpawn{
@@ -107,6 +111,7 @@ fn add_skills(mut commands: Commands, q_fiora: Query<Entity, (With<Fiora>, Witho
             },))
             .with_related::<SkillOf>((Skill {
                 level: 0,
+                key: hash_bin("Characters/Fiora/Spells/FioraRAbility/FioraR"),
                 effect: Some(behave! {
                     Behave::Sequence => {
                         Behave::trigger(

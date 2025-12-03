@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use bevy::math::{Vec2, Vec4};
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum UiElementEffectAnimationDataTextureData {
     LooseUiTextureData9Slice(LooseUiTextureData9Slice),
     LooseUiTextureData(LooseUiTextureData),
@@ -15,13 +15,13 @@ pub enum UiElementEffectAnimationDataTextureData {
     AtlasData3SliceH(AtlasData3SliceH),
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum UiElementGroupMeterDataTipStyle {
     DoubleSidedTipStyle(DoubleSidedTipStyle),
     GlowCenteredOverlayTipStyle(GlowCenteredOverlayTipStyle),
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum OptionItemGroupFilter {
     OptionItemFilterWindows,
     OptionItemFilterFeatureToggle(OptionItemFilterFeatureToggle),
@@ -42,7 +42,7 @@ pub enum OptionItemGroupFilter {
     OptionItemFilterReplayApi,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum OptionItemGroupItems {
     OptionItemVoiceInputDeviceDropdown(OptionItemVoiceInputDeviceDropdown),
     Unk0x165c0117(Unk0x165c0117),
@@ -64,7 +64,7 @@ pub enum OptionItemGroupItems {
     OptionItemColumns(OptionItemColumns),
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum UiElementIconDataDragType {
     UiDraggableElementGroupDrag(UiDraggableElementGroupDrag),
     UiDraggableProxyElementDrag(UiDraggableProxyElementDrag),
@@ -72,59 +72,59 @@ pub enum UiElementIconDataDragType {
     UiDraggableSceneDrag(UiDraggableSceneDrag),
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum UiElementIconDataPosition {
     UiPositionRect(UiPositionRect),
     UiPositionFullScreen,
     UiPositionPolygon(UiPositionPolygon),
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum UiElementIconDataExtension {
     IconElementGradientExtension,
     IconElementCircleMaskeExtension,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum UiElementGroupManagedLayoutDataLayoutStyle {
     LayoutStyleGrid(LayoutStyleGrid),
     LayoutStyleVerticalList(LayoutStyleVerticalList),
     LayoutStyleHorizontalList(LayoutStyleHorizontalList),
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum UiSceneDataSceneTransitionOut {
     SceneScreenEdgeTransitionData(SceneScreenEdgeTransitionData),
     SceneAlphaTransitionData(SceneAlphaTransitionData),
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum Unk0x104afcdaUnknownEnumField {
     Unk0xd2fb821b(Unk0xd2fb821b),
     Unk0x7acf50f9,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum OptionItemButtonFilter {
     OptionItemFilterIos,
     OptionItemFilterPromoteAccount,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum UiPositionRectAnchors {
     AnchorSingle(AnchorSingle),
     AnchorDouble(AnchorDouble),
     Unk0x0,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct AnchorDouble {
     pub anchor_right: Option<Vec2>,
     pub anchor_left: Option<Vec2>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct UiElementGroupSliderState {
     pub slider_icon: u32,
@@ -132,7 +132,7 @@ pub struct UiElementGroupSliderState {
     pub bar_fill: Option<u32>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct UiElementGroupFramedData {
     pub scene: u32,
@@ -141,7 +141,7 @@ pub struct UiElementGroupFramedData {
     pub frame_element: u32,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct UiElementEffectAnimationData {
     pub layer: Option<u32>,
@@ -157,7 +157,7 @@ pub struct UiElementEffectAnimationData {
     pub position: UiPositionRect,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct UiElementGroupMeterData {
     pub tip_style: Option<UiElementGroupMeterDataTipStyle>,
@@ -170,7 +170,7 @@ pub struct UiElementGroupMeterData {
     pub scene: u32,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct OptionItemGroup {
     pub label_tra_key: String,
@@ -180,7 +180,7 @@ pub struct OptionItemGroup {
     pub template: u32,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Unk0xa9d60c77 {
     pub unk_0x3e58e16: u32,
@@ -189,7 +189,7 @@ pub struct Unk0xa9d60c77 {
     pub unk_0xd7150c53: u32,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct LayoutStyleGrid {
     pub vertical_justification: Option<u8>,
@@ -200,7 +200,7 @@ pub struct LayoutStyleGrid {
     pub vertical_fill_direction: Option<u8>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Unk0xd31bbf89 {
     pub unk_0x69ae9918: Option<u32>,
@@ -209,20 +209,20 @@ pub struct Unk0xd31bbf89 {
     pub r#loop: Option<bool>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct LooseUiTextureData {
     pub texture_name: String,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct OptionItemResolutionDropdown {
     pub label_tra_key: String,
     pub template: u32,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Unk0x65955db8 {
     pub unk_0xb02e568a: u32,
@@ -236,7 +236,7 @@ pub struct Unk0x65955db8 {
     pub unk_0x25b31bc: u32,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct UiElementIconData {
     pub flip_x: Option<bool>,
@@ -257,7 +257,7 @@ pub struct UiElementIconData {
     pub enabled: Option<bool>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Unk0xd75bce6a {
     pub name: String,
@@ -267,7 +267,7 @@ pub struct Unk0xd75bce6a {
     pub position: UiPositionRect,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct HudItemShopItemIconDefinition {
     pub ornn_frame: u32,
@@ -296,7 +296,7 @@ pub struct HudItemShopItemIconDefinition {
     pub cooldown_effect_data: Option<CooldownEffectUiData>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct OptionItemSliderVolume {
     pub label_tra_key: String,
@@ -307,7 +307,7 @@ pub struct OptionItemSliderVolume {
     pub option: u16,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct UiElementEffectCooldownData {
     pub m_effect_color0: [u8; 4],
@@ -318,7 +318,7 @@ pub struct UiElementEffectCooldownData {
     pub name: String,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Unk0x9984b4a {
     pub unk_0xf60f3af2: u32,
@@ -328,13 +328,13 @@ pub struct Unk0x9984b4a {
     pub bounds_element: u32,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Unk0xd2fb821b {
     pub anchor: Vec2,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct UiElementGroupManagedLayoutData {
     pub scene: u32,
@@ -346,7 +346,7 @@ pub struct UiElementGroupManagedLayoutData {
     pub ignore_disabled_elements: Option<bool>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct UiPositionPolygon {
     pub ui_rect: UiElementRect,
@@ -354,7 +354,7 @@ pub struct UiPositionPolygon {
     pub polygon_vertices: Vec<Vec2>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct UiComboBoxDefinition {
     pub object_path: u32,
@@ -369,7 +369,7 @@ pub struct UiComboBoxDefinition {
     pub list_option_hit_area_element_data: u32,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct UiElementEffectInstancedData {
     pub enabled: Option<bool>,
@@ -382,21 +382,21 @@ pub struct UiElementEffectInstancedData {
     pub scene: u32,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct OptionItemHotkeys {
     pub filter: Option<OptionItemGroupFilter>,
     pub template: u32,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct CooldownEffectUiData {
     pub radial_effect: u32,
     pub cooldown_text: u32,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct UiSceneViewPaneData {
     pub scroll_direction: Option<u8>,
@@ -413,7 +413,7 @@ pub struct UiSceneViewPaneData {
     pub inherit_scissoring: Option<bool>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct UiElementParticleSystemData {
     pub name: String,
@@ -428,13 +428,13 @@ pub struct UiElementParticleSystemData {
     pub vfx_system: u32,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct OptionItemFilterAnd {
     pub filters: Box<Vec<OptionItemGroupFilter>>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct UiSceneData {
     pub unk_0x49d8f2c4: Option<bool>,
@@ -448,7 +448,7 @@ pub struct UiSceneData {
     pub scene_transition_in: Option<UiSceneDataSceneTransitionOut>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct HudItemShopRecItemCardDefinition {
     pub advice_empty_icon_non_mythic_hover: u32,
@@ -506,7 +506,7 @@ pub struct HudItemShopRecItemCardDefinition {
     pub mythic_frame_icon: u32,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct UiElementEffectAnimatedRotatingIconData {
     pub number_of_frames_per_row_in_atlas: f32,
@@ -518,7 +518,7 @@ pub struct UiElementEffectAnimatedRotatingIconData {
     pub texture_data: AtlasData,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct UiElementGroupData {
     pub scene: u32,
@@ -526,7 +526,7 @@ pub struct UiElementGroupData {
     pub elements: Option<Vec<u32>>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct VoiceChatViewSelfSlot {
     pub connection_button: u32,
@@ -538,7 +538,7 @@ pub struct VoiceChatViewSelfSlot {
     pub halo: u32,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct UiElementEffectArcFillData {
     pub name: String,
@@ -550,7 +550,7 @@ pub struct UiElementEffectArcFillData {
     pub texture_data: UiElementEffectAnimationDataTextureData,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct OptionTemplateLabel {
     pub label1: u32,
@@ -558,7 +558,7 @@ pub struct OptionTemplateLabel {
     pub label2: u32,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct OptionItemSecondaryHotkeys2Column {
     pub unk_0x98f86e0: Vec<OptionItemSecondaryHotkeys2ColumnRow>,
@@ -566,7 +566,7 @@ pub struct OptionItemSecondaryHotkeys2Column {
     pub header: Option<OptionItemSecondaryHotkeys2ColumnHeader>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Unk0x30ed049a {
     pub position: u32,
@@ -576,7 +576,7 @@ pub struct Unk0x30ed049a {
     pub unk_0x1cb3d492: String,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct TooltipViewController {
     pub unk_0x56716e4a: String,
@@ -588,7 +588,7 @@ pub struct TooltipViewController {
     pub path_hash_to_self: u64,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct DoubleSidedTipStyle {
     pub directional_tip_elements: Vec<u32>,
@@ -596,7 +596,7 @@ pub struct DoubleSidedTipStyle {
     pub reverse_directional_tip_elements: Vec<u32>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct LayoutStyleVerticalList {
     pub column_horizontal_alignment: Option<u8>,
@@ -605,20 +605,20 @@ pub struct LayoutStyleVerticalList {
     pub horizontal_justification: Option<u8>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct UiDraggableBasic {
     pub use_sticky_drag: Option<bool>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Unk0x165c0117 {
     pub filter: OptionItemGroupFilter,
     pub template: u32,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct UiElementEffectCircleMaskDesaturateData {
     pub position: UiPositionRect,
@@ -630,7 +630,7 @@ pub struct UiElementEffectCircleMaskDesaturateData {
     pub layer: u32,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct VoiceChatViewController {
     pub self_slot: VoiceChatViewSelfSlot,
@@ -647,26 +647,26 @@ pub struct VoiceChatViewController {
     pub path_hash_to_self: u64,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct UiDraggableElementGroupDrag {
     pub use_sticky_drag: bool,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct AnchorSingle {
     pub anchor: Vec2,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct StatFilterDefinition {
     pub matching_categories: Option<Vec<u32>>,
     pub button_definition: u32,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct AtlasData3SliceV {
     pub m_texture_source_resolution_width: u32,
@@ -677,21 +677,21 @@ pub struct AtlasData3SliceV {
     pub texture_vs: Vec4,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct LooseUiTextureData3SliceH {
     pub texture_name: String,
     pub edge_sizes_left_right: Option<Vec2>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct OptionItemSecondaryHotkeys1ColumnHeader {
     pub column1_label_tra_key: String,
     pub column0_label_tra_key: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct OptionsTab {
     pub show_on: Option<u8>,
@@ -701,7 +701,7 @@ pub struct OptionsTab {
     pub tab_name_tra_key: String,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Unk0x104afcda {
     pub scene: u32,
@@ -720,7 +720,7 @@ pub struct Unk0x104afcda {
     pub unk_0x9edb827d: String,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Unk0x3a8e6763 {
     pub hotkey_button_text_small: u32,
@@ -737,14 +737,14 @@ pub struct Unk0x3a8e6763 {
     pub unk_0xb712cd3d: bool,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct UiElementGroupSliderSoundEvents {
     pub on_bar_clicked_event: String,
     pub on_drag_end_event: String,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct UiElementEffectAmmoData {
     pub layer: u32,
@@ -755,7 +755,7 @@ pub struct UiElementEffectAmmoData {
     pub m_effect_color0: [u8; 4],
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct AtlasData3SliceH {
     pub m_texture_source_resolution_height: u32,
@@ -766,7 +766,7 @@ pub struct AtlasData3SliceH {
     pub texture_vs: Vec2,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct PerLocaleTooltipAdjustments {
     pub bottom_hr_y_pre_adjustment: Option<i32>,
@@ -777,7 +777,7 @@ pub struct PerLocaleTooltipAdjustments {
     pub top_hr_y_pre_adjustment: Option<i32>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct VoiceChatViewPlayerSlotData {
     pub group: u32,
@@ -789,13 +789,13 @@ pub struct VoiceChatViewPlayerSlotData {
     pub volume_slider_bar: u32,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct GlowCenteredOverlayTipStyle {
     pub directional_tip_elements: Vec<u32>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct LooseUiTextureData9Slice {
     pub texture_name: String,
@@ -803,14 +803,14 @@ pub struct LooseUiTextureData9Slice {
     pub edge_sizes_top_bottom: Option<Vec2>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct UiElementMeterSkin {
     pub tip_elements: Vec<u32>,
     pub bar_elements: Vec<u32>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct UiElementEffectRotatingIconData {
     pub layer: u32,
@@ -821,7 +821,7 @@ pub struct UiElementEffectRotatingIconData {
     pub name: String,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct UiElementGroupButtonState {
     pub display_element_list: Option<Vec<u32>>,
@@ -829,13 +829,13 @@ pub struct UiElementGroupButtonState {
     pub text_frame_element: Option<u32>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct OptionTemplateHotkeysLabel {
     pub label: u32,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct AtlasData {
     pub m_texture_uv: Option<Vec4>,
@@ -844,13 +844,13 @@ pub struct AtlasData {
     pub m_texture_source_resolution_height: Option<u32>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct UiDraggableSceneDrag {
     pub use_sticky_drag: Option<bool>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct UiElementEffectDesaturateData {
     pub name: String,
@@ -862,14 +862,14 @@ pub struct UiElementEffectDesaturateData {
     pub texture_data: Option<UiElementEffectAnimationDataTextureData>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct OptionTemplateSecondaryHotkeysLabel {
     pub background_element: u32,
     pub text_element: u32,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct SceneScreenEdgeTransitionData {
     pub transition_start_delay_secs: Option<f32>,
@@ -880,7 +880,7 @@ pub struct SceneScreenEdgeTransitionData {
     pub end_alpha: Option<u8>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct OptionItemSecondaryHotkeys1Column {
     pub filter: Option<OptionItemGroupFilter>,
@@ -890,7 +890,7 @@ pub struct OptionItemSecondaryHotkeys1Column {
     pub header: OptionItemSecondaryHotkeys1ColumnHeader,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Unk0xf0ae6ff1 {
     pub scene: u32,
@@ -912,13 +912,13 @@ pub struct Unk0xf0ae6ff1 {
     pub post_script_left_element: u32,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct OptionItemFilterFeatureToggle {
     pub toggle_name: String,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct OptionItemSecondaryHotkeys2ColumnRow {
     pub event_name: String,
@@ -926,14 +926,14 @@ pub struct OptionItemSecondaryHotkeys2ColumnRow {
     pub label_tra_key: String,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Unk0x81580a34 {
     pub template: u32,
     pub filter: OptionItemGroupFilter,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct OptionTemplateGroup {
     pub bounds_element: u32,
@@ -942,7 +942,7 @@ pub struct OptionTemplateGroup {
     pub label_element: u32,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct ReconnectDialogViewController {
     pub base_loadable: u32,
@@ -952,7 +952,7 @@ pub struct ReconnectDialogViewController {
     pub path_hash_to_self: u64,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct LayoutStyleHorizontalList {
     pub vertical_justification: Option<u8>,
@@ -961,7 +961,7 @@ pub struct LayoutStyleHorizontalList {
     pub horizontal_fill_direction: Option<u8>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct OptionTemplateSlider {
     pub bounds_element: u32,
@@ -970,7 +970,7 @@ pub struct OptionTemplateSlider {
     pub value_element: u32,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct UiElementEffectCircleMaskCooldownData {
     pub layer: u32,
@@ -981,7 +981,7 @@ pub struct UiElementEffectCircleMaskCooldownData {
     pub name: String,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct TooltipFormat {
     pub m_uses_list_values: Option<bool>,
@@ -997,13 +997,13 @@ pub struct TooltipFormat {
     pub m_object_name: String,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct UiDraggableProxyElementDrag {
     pub proxy_element: u32,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct StatFilterButtonDefinitions {
     pub mana: StatFilterDefinition,
@@ -1023,7 +1023,7 @@ pub struct StatFilterButtonDefinitions {
     pub critical_strike: StatFilterDefinition,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct OptionTemplateHotkeys {
     pub hotkey_button_text_small: u32,
@@ -1038,7 +1038,7 @@ pub struct OptionTemplateHotkeys {
     pub bounds_element: u32,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct UiElementEffectLineData {
     pub m_thickness: f32,
@@ -1050,7 +1050,7 @@ pub struct UiElementEffectLineData {
     pub enabled: bool,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct AtlasData9Slice {
     pub m_texture_source_resolution_width: u32,
@@ -1062,7 +1062,7 @@ pub struct AtlasData9Slice {
     pub texture_vs: Vec4,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct OptionTemplateDropdown {
     pub bounds_element: u32,
@@ -1070,14 +1070,14 @@ pub struct OptionTemplateDropdown {
     pub label_element: u32,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct OptionItemFilterHwRequirement {
     pub requires_alienware: Option<bool>,
     pub requires_shader_model3: Option<bool>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct UiElementRegionData {
     pub scene: u32,
@@ -1089,7 +1089,7 @@ pub struct UiElementRegionData {
     pub block_input_events: Option<bool>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct UiElementRect {
     pub source_resolution_height: Option<u16>,
@@ -1098,20 +1098,20 @@ pub struct UiElementRect {
     pub source_resolution_width: Option<u16>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct UiPropertyLoadable {
     pub filepath_hash: u64,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct OptionItemDropdownItem {
     pub tra_key: String,
     pub value: Option<i32>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct OptionTemplateSecondaryHotkeys1Column {
     pub heading_row_label1: OptionTemplateSecondaryHotkeysLabel,
@@ -1121,7 +1121,7 @@ pub struct OptionTemplateSecondaryHotkeys1Column {
     pub row_label_column0: OptionTemplateSecondaryHotkeysLabel,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct OptionTemplateCheckbox {
     pub button_definition: u32,
@@ -1130,7 +1130,7 @@ pub struct OptionTemplateCheckbox {
     pub unk_0x60e0943: u32,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct OptionsViewController {
     pub tabs: Vec<u32>,
@@ -1153,7 +1153,7 @@ pub struct OptionsViewController {
     pub close_button_definition: u32,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct OptionTemplateSecondaryHotkeys2Column {
     pub row_label_column0: OptionTemplateSecondaryHotkeysLabel,
@@ -1165,7 +1165,7 @@ pub struct OptionTemplateSecondaryHotkeys2Column {
     pub row_button_column2: OptionTemplateSecondaryHotkeysButton,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct OptionItemButton {
     pub show_on_platform: u8,
@@ -1176,7 +1176,7 @@ pub struct OptionItemButton {
     pub description_tra_key: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct UiPositionRect {
     pub ui_rect: Option<UiElementRect>,
@@ -1188,14 +1188,14 @@ pub struct UiPositionRect {
     pub ignore_global_scale: Option<bool>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct LooseUiTextureData3SliceV {
     pub texture_name: String,
     pub edge_sizes_top_bottom: Vec2,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct OptionItemLabel {
     pub template: u32,
@@ -1204,7 +1204,7 @@ pub struct OptionItemLabel {
     pub label2_tra_key: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct SceneAlphaTransitionData {
     pub start_alpha: Option<u8>,
@@ -1214,7 +1214,7 @@ pub struct SceneAlphaTransitionData {
     pub transition_start_delay_secs: Option<f32>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct UiElementScissorRegionData {
     pub enabled: Option<bool>,
@@ -1225,7 +1225,7 @@ pub struct UiElementScissorRegionData {
     pub scene: u32,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct OptionItemSliderFloat {
     pub live_update: Option<bool>,
@@ -1238,19 +1238,19 @@ pub struct OptionItemSliderFloat {
     pub label_tra_key: String,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Unk0x6a04facb {
     pub label: u32,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct OptionTemplateBorder {
     pub border: u32,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Unk0x31bf21b0 {
     pub unk_0x25b31bc: u32,
@@ -1262,7 +1262,7 @@ pub struct Unk0x31bf21b0 {
     pub unk_0xf6b809cd: u32,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct UiElementTextData {
     pub wrapping_mode: Option<u8>,
@@ -1282,7 +1282,7 @@ pub struct UiElementTextData {
     pub scene: u32,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct UiElementGroupSliderData {
     pub name: String,
@@ -1299,7 +1299,7 @@ pub struct UiElementGroupSliderData {
     pub elements: Vec<u32>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct UiElementEffectCooldownRadialData {
     pub texture_data: UiElementEffectAnimationDataTextureData,
@@ -1313,14 +1313,14 @@ pub struct UiElementEffectCooldownRadialData {
     pub m_flip_y: Option<bool>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct OptionItemSecondaryHotkeys1ColumnRow {
     pub event_name: String,
     pub label_tra_key: String,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Unk0x35317d3f {
     pub enabled: Option<bool>,
@@ -1333,7 +1333,7 @@ pub struct Unk0x35317d3f {
     pub scissor_region_element: u32,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct UiElementEffectFillPercentageData {
     pub scene: u32,
@@ -1345,7 +1345,7 @@ pub struct UiElementEffectFillPercentageData {
     pub texture_data: AtlasData,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct UiElementEffectGlowingRotatingIconData {
     pub name: String,
@@ -1356,14 +1356,14 @@ pub struct UiElementEffectGlowingRotatingIconData {
     pub cycle_time: f32,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct OptionItemFilterNot {
     pub filter: Box<OptionItemGroupFilter>,
     pub unk_0x93bef4c5: Option<bool>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct OptionTemplateHotkeysKey {
     pub event_name: String,
@@ -1371,26 +1371,26 @@ pub struct OptionTemplateHotkeysKey {
     pub event_name_tra_key: String,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct OptionItemBorder {
     pub unk_0xa4b002d7: Box<Vec<OptionItemGroupItems>>,
     pub template: u32,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct OptionItemFilterMutator {
     pub mutator: String,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct OptionTemplateMuteButton {
     pub button_definition: u32,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct OptionItemColumns {
     pub items_right: Box<Option<Vec<OptionItemGroupItems>>>,
@@ -1399,7 +1399,7 @@ pub struct OptionItemColumns {
     pub items_either: Box<Option<Vec<OptionItemGroupItems>>>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct UiElementGroupButtonSoundEvents {
     pub mouse_down_event: Option<String>,
@@ -1409,14 +1409,14 @@ pub struct UiElementGroupButtonSoundEvents {
     pub roll_over_event: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct OptionItemVoiceInputDeviceDropdown {
     pub label_tra_key: String,
     pub template: u32,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct OptionTemplateButton {
     pub button_definition: u32,
@@ -1425,7 +1425,7 @@ pub struct OptionTemplateButton {
     pub description_definition: u32,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct OptionItemFilterGameStyle {
     pub unk_0x64bc3430: Option<bool>,
@@ -1437,19 +1437,19 @@ pub struct OptionItemFilterGameStyle {
     pub show_in_lol_replay: Option<bool>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct UiComboBoxSoundEvents {
     pub on_selection_event: String,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct OptionItemSliderGraphicsQuality {
     pub template: u32,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct UiElementEffectGlowData {
     pub scene: u32,
@@ -1462,13 +1462,13 @@ pub struct UiElementEffectGlowData {
     pub cycle_time: f32,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct OptionTemplateSecondaryHotkeysButton {
     pub button_definition: u32,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct OptionItemDropdown {
     pub option: u16,
@@ -1480,14 +1480,14 @@ pub struct OptionItemDropdown {
     pub tooltip_tra_key: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Unk0x9ef1e737 {
     pub template: u32,
     pub filter: OptionItemFilterGameStyle,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct OptionItemSecondaryHotkeys2ColumnHeader {
     pub column2_label_tra_key: String,
@@ -1495,7 +1495,7 @@ pub struct OptionItemSecondaryHotkeys2ColumnHeader {
     pub column0_label_tra_key: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct UiElementGroupButtonData {
     pub elements: Vec<u32>,
@@ -1523,14 +1523,14 @@ pub struct UiElementGroupButtonData {
     pub selected_tooltip_tra_key: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct UiPropertyOverrideLoadable {
     pub filepath_hash: u64,
     pub override_src_folder: u64,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct OptionItemCheckbox {
     pub live_update: Option<bool>,
@@ -1542,7 +1542,7 @@ pub struct OptionItemCheckbox {
     pub template: u32,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct OptionItemSliderInt {
     pub label_tra_key: String,

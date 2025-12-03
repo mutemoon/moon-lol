@@ -15,6 +15,8 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-vue-next": "^0.552.0",
+    "markstream-vue": "0.0.2-beta.4",
+    "mermaid": "^11.12.1",
     "ollama": "^0.6.2",
     "openai": "^6.8.1",
     "pinia": "^3.0.4",

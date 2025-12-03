@@ -12,13 +12,14 @@ use bevy::{
 };
 use serde::de::DeserializeSeed;
 
-use league_core::{CharacterRecord, SpellObject, UiElementIconData};
+use league_core::{CharacterRecord, SpellObject, UiElementEffectAnimationData, UiElementIconData};
 use league_to_lol::{
     get_character_record_save_path, get_character_spell_objects_save_path, get_struct_from_file,
     CONFIG_PATH_MAP, CONFIG_PATH_MAP_NAV_GRID, CONFIG_UI,
 };
 use lol_config::{
     CharacterConfigsDeserializer, ConfigCharacterSkin, ConfigGame, ConfigMap, ConfigNavigationGrid,
+    ConfigUi,
 };
 use lol_loader::{
     LeagueLoaderAnimationClip, LeagueLoaderImage, LeagueLoaderMaterial, LeagueLoaderMesh,
@@ -41,10 +42,8 @@ impl Plugin for PluginResource {
 
         let mut resource_cache = ResourceCache::default();
 
-        let ui_elements: HashMap<String, UiElementIconData> =
-            get_struct_from_file(CONFIG_UI).unwrap();
-
-        resource_cache.ui_elements = ui_elements;
+        let config_ui: ConfigUi = get_struct_from_file(CONFIG_UI).unwrap();
+        app.insert_resource(config_ui);
 
         let config_map: ConfigMap = get_struct_from_file(CONFIG_PATH_MAP).unwrap();
 
@@ -210,7 +209,6 @@ pub struct ResourceCache {
     pub skins: HashMap<String, ConfigCharacterSkin>,
     pub character_records: HashMap<String, CharacterRecord>,
     pub spells: HashMap<u32, SpellObject>,
-    pub ui_elements: HashMap<String, UiElementIconData>,
 }
 
 impl ResourceCache {

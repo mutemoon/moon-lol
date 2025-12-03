@@ -1,3 +1,9 @@
+@font-face {
+  font-family: "AlimamaShuHeiTi";
+  src: url("https://at.alicdn.com/wf/webfont/kfq1sgJFWQ6g/cPCrTL8ewntCCMPMNgo40.woff2") format("woff2");
+  font-display: swap;
+}
+
 @import "tailwindcss";
 @import "tw-animate-css";
 
@@ -40,6 +46,69 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Acid Theme Colors */
+  --color-acid-blue: #00ffff;
+  --color-acid-green: #39ff14;
+  --color-acid-yellow: #ffff00;
+  --color-acid-pink: #ff0088;
+  --color-acid-dark: #050505;
+  --color-acid-grid: rgba(57, 255, 20, 0.15);
+
+  /* Custom Fonts */
+  --font-glitch: "Rubik Glitch", "AlimamaShuHeiTi";
+  --font-mono: "Space Mono", monospace;
+  --font-retro: "VT323", monospace;
+
+  /* Custom Animations */
+  --animate-spin-slow: spin 10s linear infinite;
+  --animate-marquee: marquee 20s linear infinite;
+  --animate-marquee-reverse: marquee 20s linear infinite reverse;
+  --animate-float: float 6s ease-in-out infinite;
+
+  @keyframes marquee {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-100%);
+    }
+  }
+
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-20px);
+    }
+  }
+}
+
+@utility glass-y2k {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow:
+    0 4px 30px rgba(0, 0, 0, 0.1),
+    inset 0 0 20px rgba(255, 255, 255, 0.05);
+}
+
+@utility text-outline {
+  text-shadow:
+    -1px -1px 0 #000,
+    1px -1px 0 #000,
+    -1px 1px 0 #000,
+    1px 1px 0 #000;
+}
+
+@utility text-glow-blue {
+  text-shadow: 0 0 10px var(--color-acid-blue);
+}
+
+@utility text-glow-pink {
+  text-shadow: 0 0 10px var(--color-acid-pink);
 }
 
 :root {
@@ -79,6 +148,10 @@
 }
 
 .dark {
+  --acid-lime: #ccff00;
+  --acid-pink: #ff00cc;
+  --acid-black: #0a0a0a;
+
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.145 0 0);
@@ -116,8 +189,76 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
+    box-sizing: border-box;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-acid-dark text-acid-green overflow-x-hidden font-mono;
+    background-image:
+      linear-gradient(rgba(57, 255, 20, 0.15) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(57, 255, 20, 0.15) 1px, transparent 1px);
+    background-size: 40px 40px;
   }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #000;
+}
+::-webkit-scrollbar-thumb {
+  background: #39ff14;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #ff00ff;
+}
+
+/* Noise Overlay */
+.noise-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9000;
+  opacity: 0.06;
+  background: url('data:image/svg+xml;utf8,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)"/%3E%3C/svg%3E');
+}
+
+/* Chrome Text */
+.chrome-text {
+  background-image: linear-gradient(135deg, #e0e0e0 0%, #ffffff 50%, #a0a0a0 51%, #e0e0e0 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.3));
+}
+
+/* Reveal on Scroll */
+.reveal-on-scroll {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.reveal-on-scroll.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Glitch Button */
+.btn-glitch {
+  position: relative;
+  overflow: hidden;
+}
+.btn-glitch::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.8), transparent);
+  transition: 0.5s;
+}
+.btn-glitch:hover::before {
+  left: 100%;
 }

@@ -31,6 +31,7 @@ pub struct CoolDown {
 #[derive(Component)]
 #[require(CoolDown)]
 pub struct Skill {
+    pub key: u32,
     pub effect: Option<Tree<Behave>>,
     pub level: usize,
 }

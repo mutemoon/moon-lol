@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
 use crate::{
-    spawn_ui_element, AbilityResource, CommandUpdateUIElement, Controller, Health, Level, NodeType,
+    AbilityResource, Character, CommandUpdateUIElement, Controller, Health, Level, NodeType,
     ResourceCache, SizeType, UIElementEntity,
 };
 
@@ -17,7 +17,7 @@ pub fn update_level(
     res_ui_element_entity: Res<UIElementEntity>,
     q_level: Query<&Level, With<Controller>>,
 ) {
-    let Some(entity) = res_ui_element_entity.map.get("ClientStates/Gameplay/UX/LoL/PlayerFrame/UIBase/Player_Frame_Root/Player_Frame/PlayerExp_BarTexture") else {
+    let Some(&entity) = res_ui_element_entity.get_by_string("ClientStates/Gameplay/UX/LoL/PlayerFrame/UIBase/Player_Frame_Root/Player_Frame/PlayerExp_BarTexture") else {
         return;
     };
 
@@ -26,7 +26,7 @@ pub fn update_level(
     };
 
     commands.trigger(CommandUpdateUIElement {
-        entity: *entity,
+        entity,
         size_type: SizeType::Height,
         value: level.experience as f32 / level.experience_to_next_level as f32,
         node_type: NodeType::Parent,
@@ -45,12 +45,13 @@ pub fn update_player_health(
     };
 
     // Update Green Bar (Immediate)
-    let Some(entity) = res_ui_element_entity.map.get("ClientStates/Gameplay/UX/LoL/PlayerFrame/UIBase/Player_Frame_Root/PlayerResourceBars/PlayerHPMeter/PlayerHP_BarTextureGreen") else {
+    let key = "ClientStates/Gameplay/UX/LoL/PlayerFrame/UIBase/Player_Frame_Root/PlayerResourceBars/PlayerHPMeter/PlayerHP_BarTextureGreen";
+    let Some(&entity) = res_ui_element_entity.get_by_string(key) else {
         return;
     };
 
     commands.trigger(CommandUpdateUIElement {
-        entity: *entity,
+        entity,
         size_type: SizeType::Width,
         value,
         node_type: NodeType::Parent,
@@ -67,14 +68,15 @@ pub fn update_player_health_fade(
     let health_data = q_health.single().ok();
 
     // Update Fade Bar (Animated)
-    let Some(entity) = res_ui_element_entity.map.get("ClientStates/Gameplay/UX/LoL/PlayerFrame/UIBase/Player_Frame_Root/PlayerResourceBars/PlayerHPMeter/PlayerHP_BarFade") else {
+    let key = "ClientStates/Gameplay/UX/LoL/PlayerFrame/UIBase/Player_Frame_Root/PlayerResourceBars/PlayerHPMeter/PlayerHP_BarFade";
+    let Some(&entity) = res_ui_element_entity.get_by_string(key) else {
         return;
     };
 
     let mut final_value;
     let final_max;
 
-    if let Ok(mut health_fade) = q_health_fade.get_mut(*entity) {
+    if let Ok(mut health_fade) = q_health_fade.get_mut(entity) {
         let (target_val, current_max) = if let Some(health) = health_data {
             health_fade.max = health.max;
             (health.value, health.max)
@@ -94,14 +96,14 @@ pub fn update_player_health_fade(
         final_max = current_max;
     } else {
         if let Some(health) = health_data {
-            commands.entity(*entity).insert(HealthFade {
+            commands.entity(entity).insert(HealthFade {
                 value: health.value,
                 max: health.max,
             });
             final_value = health.value;
             final_max = health.max;
         } else {
-            commands.entity(*entity).insert(HealthFade {
+            commands.entity(entity).insert(HealthFade {
                 value: 0.0,
                 max: 1.0,
             });
@@ -117,7 +119,7 @@ pub fn update_player_health_fade(
     }
 
     commands.trigger(CommandUpdateUIElement {
-        entity: *entity,
+        entity,
         size_type: SizeType::Width,
         value: final_value,
         node_type: NodeType::Parent,
@@ -126,24 +128,19 @@ pub fn update_player_health_fade(
 
 pub fn update_player_ability_resource(
     mut commands: Commands,
-    mut res_ui_element_entity: ResMut<UIElementEntity>,
-    res_asset_server: Res<AssetServer>,
-    res_resource_cache: Res<ResourceCache>,
+    res_ui_element_entity: Res<UIElementEntity>,
     q_ability_resource: Query<&AbilityResource, With<Controller>>,
 ) {
     let key = "ClientStates/Gameplay/UX/LoL/PlayerFrame/UIBase/Player_Frame_Root/PlayerResourceBars/PlayerPARMeter/PlayerPar_BarTextureBlue";
-    let entity = if let Some(entity) = res_ui_element_entity.map.get(key) {
-        *entity
-    } else {
-        let ui = res_resource_cache.ui_elements.get(key).unwrap();
-        let entity = spawn_ui_element(&mut commands, &res_asset_server, ui).unwrap();
-        res_ui_element_entity.map.insert(key.to_owned(), entity);
-        entity
+    let Some(&entity) = res_ui_element_entity.get_by_string(key) else {
+        return;
     };
 
     let Ok(ability_resource) = q_ability_resource.single() else {
         return;
     };
+
+    commands.entity(entity).insert(Visibility::Visible);
 
     commands.trigger(CommandUpdateUIElement {
         entity,
@@ -151,4 +148,38 @@ pub fn update_player_ability_resource(
         value: ability_resource.value as f32 / ability_resource.max as f32,
         node_type: NodeType::Parent,
     });
+}
+
+pub fn update_player_icon(
+    mut commands: Commands,
+    mut res_resource_cache: ResMut<ResourceCache>,
+    asset_server: Res<AssetServer>,
+    q_character: Query<&Character, With<Controller>>,
+    res_ui_element_entity: Res<UIElementEntity>,
+    q_children: Query<&Children>,
+    mut q_image_node: Query<&mut ImageNode>,
+) {
+    let key = "ClientStates/Gameplay/UX/LoL/PlayerFrame/UIBase/Player_Frame_Root/Player_Frame/PlayerIcon_Base";
+    let Some(&entity) = res_ui_element_entity.get_by_string(key) else {
+        return;
+    };
+
+    let Ok(character) = q_character.single() else {
+        return;
+    };
+    let skin = res_resource_cache.skins.get(&character.skin_key).unwrap();
+    let icon_name = skin.icon_avatar_path.clone().unwrap();
+
+    let &child = q_children.get(entity).unwrap().get(0).unwrap();
+    if q_image_node.get_mut(child).is_ok() {
+        return;
+    }
+
+    commands.entity(entity).insert((
+        ImageNode {
+            image: res_resource_cache.get_image(&asset_server, &format!("{}#srgb", icon_name)),
+            ..default()
+        },
+        Visibility::Visible,
+    ));
 }

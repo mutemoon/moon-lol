@@ -27,10 +27,12 @@ fn add_skills(mut commands: Commands, q_hwei: Query<Entity, (With<Hwei>, Without
             .entity(entity)
             .with_related::<SkillOf>(Skill {
                 level: 0,
+                key: hash_bin("Characters/Hwei/Spells/HweiPassiveAbility/HweiPassive"),
                 effect: None,
             })
             .with_related::<SkillOf>((Skill {
                 level: 0,
+                key: hash_bin("Characters/Hwei/Spells/HweiQAbility/HweiQ"),
                 effect: Some(behave! {
                     Behave::Sequence => {
                         Behave::trigger(
@@ -44,6 +46,7 @@ fn add_skills(mut commands: Commands, q_hwei: Query<Entity, (With<Hwei>, Without
             },))
             .with_related::<SkillOf>((Skill {
                 level: 0,
+                key: hash_bin("Characters/Hwei/Spells/HweiWAbility/HweiW"),
                 effect: Some(behave! {
                     Behave::Sequence => {
                         Behave::trigger(
@@ -57,6 +60,7 @@ fn add_skills(mut commands: Commands, q_hwei: Query<Entity, (With<Hwei>, Without
             },))
             .with_related::<SkillOf>((Skill {
                 level: 0,
+                key: hash_bin("Characters/Hwei/Spells/HweiEAbility/HweiE"),
                 effect: Some(behave! {
                     Behave::Sequence => {
                         Behave::trigger(
@@ -70,6 +74,7 @@ fn add_skills(mut commands: Commands, q_hwei: Query<Entity, (With<Hwei>, Without
             },))
             .with_related::<SkillOf>((Skill {
                 level: 0,
+                key: hash_bin("Characters/Hwei/Spells/HweiRAbility/HweiR"),
                 effect: Some(behave! {
                     Behave::Sequence => {
                         Behave::trigger(

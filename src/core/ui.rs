@@ -1,18 +1,24 @@
+mod animation;
+mod button;
+mod element;
 mod player;
+mod skill;
 
-use player::*;
-
-use std::collections::HashMap;
+pub use animation::*;
+pub use button::*;
+pub use element::*;
+pub use player::*;
+pub use skill::*;
 
 use bevy::color::palettes::css::{BLUE, RED, WHITE};
 use bevy::prelude::*;
-use bevy::window::WindowResized;
 
-use league_core::{
-    UiElementEffectAnimationDataTextureData, UiElementIconData, UiElementIconDataPosition,
-};
+use crate::{Bounding, DamageType, EventDamageCreate, Health};
 
-use crate::{Bounding, DamageType, EventDamageCreate, Health, ResourceCache};
+#[derive(SystemSet, Debug, Clone, PartialEq, Eq, Hash)]
+pub enum UIStartupSystems {
+    SpawnUIElement,
+}
 
 #[derive(Default)]
 pub struct PluginUI;
@@ -21,7 +27,10 @@ impl Plugin for PluginUI {
     fn build(&self, app: &mut App) {
         app.init_resource::<UIElementEntity>();
 
-        app.add_systems(Startup, startup);
+        app.add_systems(
+            Startup,
+            (startup_spawn_ui_element, startup_spawn_buttons).chain(),
+        );
         app.add_systems(
             Update,
             (
@@ -33,11 +42,17 @@ impl Plugin for PluginUI {
                 update_player_health_fade,
                 update_damage_numbers,
                 update_player_ability_resource,
+                update_skill_icon,
+                update_player_icon,
+                update_ui_animation,
+                update_resize_system,
+                update_button,
             ),
         );
-        app.add_systems(Update, on_resize_system);
-        app.add_observer(on_damage_create);
+
+        app.add_observer(on_event_damage_create);
         app.add_observer(on_command_update_ui_element);
+        app.add_observer(on_command_ui_animation_start);
     }
 }
 
@@ -59,16 +74,6 @@ pub enum SizeType {
 pub enum NodeType {
     Parent,
     Child,
-}
-
-#[derive(Resource, Default)]
-pub struct UIElementEntity {
-    pub map: HashMap<String, Entity>,
-}
-
-#[derive(Component)]
-pub struct UIElement {
-    pub key: String,
 }
 
 #[derive(Component)]
@@ -112,146 +117,6 @@ pub struct DamageNumber {
     pub gravity: f32,
     /// 最终字体大小
     pub final_scale: f32,
-}
-
-fn startup(
-    mut commands: Commands,
-    res_resource_cache: Res<ResourceCache>,
-    res_asset_server: Res<AssetServer>,
-    mut res_ui_element_entity: ResMut<UIElementEntity>,
-) {
-    for (key, ui) in res_resource_cache.ui_elements.iter().filter(|v| {
-        v.0.contains(
-            // "ClientStates/Gameplay/UX/LoL/PlayerFrame/UIBase/Player_Frame_Root/HUDCenterFrame",
-            "ClientStates/Gameplay/UX/LoL/PlayerFrame/",
-        )
-    }) {
-        // println!("{}", ui.name);
-
-        let Some(enabled) = ui.enabled.as_ref() else {
-            continue;
-        };
-
-        if !enabled {
-            continue;
-        }
-
-        let Some(entity) = spawn_ui_element(&mut commands, &res_asset_server, ui) else {
-            continue;
-        };
-
-        res_ui_element_entity.map.insert(key.clone(), entity);
-    }
-}
-
-pub fn spawn_ui_element(
-    commands: &mut Commands,
-    res_asset_server: &Res<AssetServer>,
-    ui: &UiElementIconData,
-) -> Option<Entity> {
-    let Some(texture_data) = ui.texture_data.as_ref() else {
-        return None;
-    };
-
-    let UiElementEffectAnimationDataTextureData::AtlasData(atlas_data) = texture_data else {
-        return None;
-    };
-
-    let Some(m_texture_uv) = atlas_data.m_texture_uv else {
-        return None;
-    };
-
-    let entity = commands
-        .spawn((
-            Node {
-                position_type: PositionType::Absolute,
-                overflow: Overflow::hidden(),
-                ..default()
-            },
-            ZIndex(ui.layer.unwrap_or(0) as i32),
-            UIElement {
-                key: ui.name.clone(),
-            },
-        ))
-        .with_child((
-            Node::default(),
-            ImageNode {
-                image: res_asset_server.load(format!("{}#srgb", atlas_data.m_texture_name)),
-                rect: Some(Rect::new(
-                    m_texture_uv.x,
-                    m_texture_uv.y,
-                    m_texture_uv.z,
-                    m_texture_uv.w,
-                )),
-                ..default()
-            },
-        ))
-        .observe(
-            |event: On<Pointer<Click>>, q_uielement: Query<&UIElement>| {
-                let ui_element = q_uielement.get(event.entity).unwrap();
-                println!("点击了 {}", ui_element.key);
-            },
-        )
-        .id();
-
-    Some(entity)
-}
-
-fn on_resize_system(
-    mut text: Query<(Entity, &Children, &UIElement)>,
-    mut q_node: Query<&mut Node>,
-    mut resize_reader: MessageReader<WindowResized>,
-    res_resource_cache: Res<ResourceCache>,
-) {
-    for e in resize_reader.read() {
-        for (entity, children, ui_element) in text.iter_mut() {
-            let ui = res_resource_cache.ui_elements.get(&ui_element.key).unwrap();
-
-            let mut node = q_node.get_mut(entity).unwrap();
-
-            let UiElementIconDataPosition::UiPositionRect(ref position) = ui.position else {
-                continue;
-            };
-
-            let Some(ui_rect) = position.ui_rect.as_ref() else {
-                continue;
-            };
-
-            let Some(position) = ui_rect.position else {
-                continue;
-            };
-
-            let Some(size) = ui_rect.size else {
-                continue;
-            };
-
-            let Some(source_resolution_width) = ui_rect.source_resolution_width else {
-                continue;
-            };
-
-            let Some(source_resolution_height) = ui_rect.source_resolution_height else {
-                continue;
-            };
-
-            let scale_x = e.width / source_resolution_width as f32;
-            let scale_y = e.height / source_resolution_height as f32;
-            let scale = vec2(scale_x, scale_y);
-
-            let position_scaled = position * scale;
-            let size_scaled = size * scale;
-
-            node.left = Val::Px(position_scaled.x);
-            node.top = Val::Px(position_scaled.y);
-
-            node.width = Val::Px(size_scaled.x);
-            node.height = Val::Px(size_scaled.y);
-
-            let mut child_node = q_node.get_mut(children[0]).unwrap();
-
-            child_node.width = Val::Px(size_scaled.x);
-            child_node.height = Val::Px(size_scaled.y);
-        }
-    }
 }
 
 fn init_health_bar(
@@ -481,7 +346,7 @@ fn update_health(
 }
 
 /// 监听伤害事件并创建伤害数字
-fn on_damage_create(
+fn on_event_damage_create(
     trigger: On<EventDamageCreate>,
     mut commands: Commands,
     global_transform: Query<&GlobalTransform>,

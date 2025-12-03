@@ -245,6 +245,10 @@ fn barracks_spawning_system(
             skin_path: character.skin.clone(),
         });
 
+        commands
+            .entity(entity)
+            .insert((health, damage, armor, movement));
+
         let mut path = res_game_config.minion_paths.get(lane).unwrap().clone();
 
         if *team == Team::Chaos {

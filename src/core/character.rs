@@ -18,6 +18,7 @@ pub struct CommandSpawnCharacter {
 #[derive(Component, Debug)]
 pub struct Character {
     pub character_record_key: String,
+    pub skin_key: String,
 }
 
 #[derive(Default)]
@@ -92,6 +93,7 @@ fn on_command_spawn_character(
     commands.entity(entity).insert((
         Character {
             character_record_key: trigger.character_record_key.clone(),
+            skin_key: trigger.skin_path.clone(),
         },
         health,
         movement,

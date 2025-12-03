@@ -14,6 +14,7 @@ pub struct ConfigCharacterSkin {
     pub material_path: String,
     pub skin_scale: Option<f32>,
     pub submesh_paths: Vec<String>,
+    pub icon_avatar_path: Option<String>,
 }
 
 #[derive(Clone, Serialize, Deserialize)]

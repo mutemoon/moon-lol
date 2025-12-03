@@ -1,4 +1,5 @@
 mod animation;
+mod character;
 mod gird;
 mod legend;
 mod map;
@@ -9,6 +10,7 @@ mod sub_mesh;
 mod utils;
 
 pub use animation::*;
+pub use character::*;
 pub use gird::*;
 pub use legend::*;
 pub use map::*;
