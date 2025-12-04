@@ -17,14 +17,14 @@ impl Plugin for PluginMinion {
         app.add_systems(FixedUpdate, fixed_update);
 
         app.add_observer(on_event_aggro_target_found);
-        app.add_observer(on_target_dead);
+        app.add_observer(on_event_dead);
     }
 }
 
 #[derive(Component, Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 #[require(
     MinionState,
-    Aggro = Aggro { range: 500.0 },
+    Aggro = Aggro { range: 1000.0 },
     State,
     HealthBar = HealthBar { bar_type: HealthBarType::Minion }
 )]
@@ -77,6 +77,7 @@ pub fn fixed_update(
             return;
         };
 
+        debug!("{} 寻路到 {}", entity, path[closest_index]);
         commands.trigger(CommandMovement {
             entity,
             priority: 0,
@@ -113,7 +114,7 @@ fn on_event_aggro_target_found(
     }
 }
 
-fn on_target_dead(
+fn on_event_dead(
     trigger: On<EventDead>,
     mut commands: Commands,
     mut q_minion_state: Query<(Entity, &mut MinionState, &AttackAuto)>,

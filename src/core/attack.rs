@@ -358,7 +358,6 @@ fn on_event_dead(
     }
 }
 
-// 系统函数
 fn fixed_update(
     mut query: Query<(Entity, &mut AttackState, &Attack, &Damage)>,
     mut commands: Commands,

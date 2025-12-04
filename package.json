@@ -12,6 +12,7 @@
     "example:classic_fiora:watch": "cargo-watch -w src -w crates -w examples -w assets -x \"run --example classic_fiora\"",
     "example:classic_fiora:release": "cargo run --example classic_fiora --release",
     "example:navigation_grid": "cargo run --example navigation_grid",
+    "example:navigation_grid:watch": "cargo-watch -w src -w crates -w examples -w assets -x \"run --example navigation_grid\"",
     "example:particle:watch": "cargo-watch -w src -w crates -w examples -w assets/shaders -x \"run --example particle\"",
     "example:texture:watch": "cargo-watch -w src -w crates -w examples -w assets/shaders -x \"run --example texture\""
   },

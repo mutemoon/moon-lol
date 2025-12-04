@@ -47,7 +47,7 @@ pub fn aggro_scan(
         // 遍历所有可攻击单位筛选目标
         for (attackable_entity, attackable_team, attackable_transform) in q_attackable.iter() {
             // 忽略友方单位
-            if attackable_team == team {
+            if attackable_team == team || *attackable_team == Team::Neutral {
                 continue;
             }
 

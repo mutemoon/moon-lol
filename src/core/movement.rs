@@ -1,15 +1,17 @@
 use core::f32;
-use std::collections::HashSet;
-use std::time::Instant;
+use std::{
+    collections::{HashMap, HashSet},
+    time::Instant,
+};
 
 use bevy::prelude::*;
 use lol_config::ConfigNavigationGrid;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    calculate_occupied_grid_cells, get_nav_path, world_pos_to_grid_xy, ArbitrationPipelinePlugin,
-    Bounding, CommandRotate, FinalDecision, LastDecision, NavigationStats, PipelineStages,
-    RequestBuffer,
+    get_nav_path_with_debug, is_path_blocked, world_pos_to_grid_xy, ArbitrationPipelinePlugin,
+    Bounding, CommandRotate, FinalDecision, LastDecision, NavigationDebug, NavigationStats,
+    PipelineStages, RequestBuffer,
 };
 
 #[derive(Default)]
@@ -20,11 +22,6 @@ impl Plugin for PluginMovement {
         app.add_observer(on_event_movement_end);
 
         app.add_plugins(ArbitrationPipelinePlugin::<CommandMovement, MovementPipeline>::default());
-
-        app.add_systems(
-            PreUpdate,
-            calculate_global_occupied_cells.in_set(MovementPipeline::Calculate),
-        );
 
         app.add_systems(
             FixedPostUpdate,
@@ -44,7 +41,7 @@ pub struct Movement {
     pub speed: f32,
 }
 
-#[derive(Component, Default)]
+#[derive(Component, Default, Debug)]
 pub struct MovementState {
     pub path: Vec<Vec3>,
     pub speed: Option<f32>,
@@ -119,21 +116,18 @@ impl PipelineStages for MovementPipeline {
 
 impl MovementState {
     pub fn reset_path(&mut self, path: &Vec<Vec3>, source: &str) {
-        self.path = path.clone();
-        self.speed = None;
-        self.current_target_index = 0;
         self.completed = false;
-        self.velocity = Vec2::ZERO;
+        self.current_target_index = 0;
         self.direction = Vec2::ZERO;
+        self.path = path.clone();
+        // self.pathfind = None;
         self.source = source.to_string();
+        self.speed = None;
+        self.velocity = Vec2::ZERO;
     }
 
     pub fn clear_path(&mut self) {
-        self.path.clear();
-        self.current_target_index = 0;
-        self.completed = false;
-        self.velocity = Vec2::ZERO;
-        self.direction = Vec2::ZERO;
+        *self = MovementState::default();
     }
 
     pub fn is_moving(&self) -> bool {
@@ -305,20 +299,6 @@ fn reduce_movement_by_priority(
     }
 }
 
-fn calculate_global_occupied_cells(
-    mut grid: ResMut<ConfigNavigationGrid>,
-    entities_with_bounding: Query<(Entity, &GlobalTransform, &Bounding)>,
-    mut stats: ResMut<NavigationStats>,
-) {
-    let start = Instant::now();
-    // 计算所有实体的 occupied_cells（不排除任何实体）
-    let occupied_cells = calculate_occupied_grid_cells(&grid, &entities_with_bounding, &[]);
-    grid.occupied_cells = occupied_cells;
-    stats.calculate_occupied_grid_cells_time += start.elapsed();
-    stats.calculate_occupied_grid_cells_count += 1;
-    stats.occupied_grid_cells_num = grid.occupied_cells.len() as u32;
-}
-
 fn apply_final_movement_decision(
     mut commands: Commands,
     mut query: Query<(
@@ -330,6 +310,7 @@ fn apply_final_movement_decision(
     )>,
     mut grid: ResMut<ConfigNavigationGrid>,
     mut stats: ResMut<NavigationStats>,
+    mut nav_debug: ResMut<NavigationDebug>,
     time: Res<Time>,
 ) {
     for (entity, transform, decision, mut movement_state, bounding) in query.iter_mut() {
@@ -337,24 +318,15 @@ fn apply_final_movement_decision(
             MovementAction::Start { way, speed, source } => {
                 match way {
                     MovementWay::Pathfind(target) => {
-                        if let Some((last_target, last_time)) = movement_state.pathfind {
-                            if (target - last_target).length() < f32::EPSILON
-                                && time.elapsed_secs() - last_time < 1.0
-                            {
-                                continue;
-                            }
-                        }
+                        let start = Instant::now();
 
-                        movement_state.pathfind = Some((*target, time.elapsed_secs()));
-
-                        // 从全局 occupied_cells 中临时移除当前实体占据的格子（仅当实体有 Bounding 时）
-                        let removed_cells = if let Some(bounding) = bounding {
+                        if let Some(bounding) = bounding {
                             let entity_pos = transform.translation.xz();
                             let entity_grid_pos = world_pos_to_grid_xy(&grid, entity_pos);
                             let mut exclude_cells = HashSet::new();
 
                             // 计算当前实体占据的格子（根据 Bounding 组件的半径）
-                            let radius_in_cells = (bounding.radius / grid.cell_size).ceil() as i32;
+                            let radius_in_cells = (bounding.radius / grid.cell_size).floor() as i32;
                             for dx in -radius_in_cells..=radius_in_cells {
                                 for dy in -radius_in_cells..=radius_in_cells {
                                     let new_x = entity_grid_pos.0 as i32 + dx;
@@ -369,26 +341,57 @@ fn apply_final_movement_decision(
                                 }
                             }
 
-                            // 临时从全局 occupied_cells 中移除当前实体占据的格子
-                            let removed: HashSet<_> = grid
-                                .occupied_cells
-                                .iter()
-                                .filter(|cell| exclude_cells.contains(cell))
-                                .copied()
-                                .collect();
-                            grid.occupied_cells
-                                .retain(|cell| !exclude_cells.contains(cell));
-
-                            removed
-                        } else {
-                            HashSet::new()
+                            grid.exclude_cells = exclude_cells;
                         };
 
-                        if let Some(path) = get_nav_path(
+                        stats.exclude_time += start.elapsed();
+                        stats.exclude_count += 1;
+
+                        // 检查是否需要重新规划路径
+                        let need_replan = if let Some((last_target, _)) = movement_state.pathfind {
+                            // 目标位置发生变化
+                            let target_changed =
+                                (target - last_target).xz().length() > f32::EPSILON;
+                            // 路径上有障碍物阻挡
+                            let path_blocked = is_path_blocked(
+                                &grid,
+                                &movement_state.path,
+                                movement_state.current_target_index,
+                            );
+                            if target_changed {
+                                debug!("{} 的目标位置发生变化: {}", entity, target_changed);
+                            }
+                            if path_blocked {
+                                debug!("{} 的路径上有障碍物阻挡: {}", entity, path_blocked);
+                            }
+                            target_changed || path_blocked
+                        } else {
+                            // 第一次规划
+                            debug!("{} 第一次规划", entity);
+                            true
+                        };
+
+                        if !need_replan {
+                            debug!("{} 不需要重新规划，{:#?}", entity, movement_state);
+                            continue;
+                        }
+
+                        movement_state.pathfind = Some((*target, time.elapsed_secs()));
+
+                        debug!("{} 寻路到 {:?}", entity, target);
+
+                        let debug_ref = if nav_debug.enabled {
+                            Some(&mut *nav_debug)
+                        } else {
+                            None
+                        };
+
+                        if let Some(path) = get_nav_path_with_debug(
                             &transform.translation.xz(),
                             &target.xz(),
                             &grid,
                             &mut stats,
+                            debug_ref,
                         ) {
                             let start_y = transform.translation.y;
                             let total = path.len() as f32;
@@ -402,10 +405,9 @@ fn apply_final_movement_decision(
                                 })
                                 .collect();
                             movement_state.reset_path(&path_3d, source);
+                        } else {
+                            debug!("{} 寻路失败", entity);
                         }
-
-                        // 恢复全局 occupied_cells
-                        grid.occupied_cells.extend(removed_cells);
                     }
                     MovementWay::Path(path) => {
                         debug!("{} 设置路径 {:?}", entity, path);

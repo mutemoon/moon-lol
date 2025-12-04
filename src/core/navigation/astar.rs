@@ -169,7 +169,7 @@ pub fn find_grid_path_with_result(
         // 处理邻居的逻辑提取为闭包以减少缩进
         let mut process_neighbor = |neighbor_pos: (usize, usize)| {
             let tentative_g =
-                current_node.g_cost + distance_cost(grid.cell_size, current_node.pos, neighbor_pos);
+                current_node.g_cost + movement_cost(grid, current_node.pos, neighbor_pos);
 
             if let Some(&existing_g) = current_g_map.get(&neighbor_pos) {
                 if tentative_g >= existing_g {
@@ -280,6 +280,13 @@ fn distance_cost(cell_size: f32, from: (usize, usize), to: (usize, usize)) -> f3
     } else {
         cell_size
     }
+}
+
+/// 计算从 from 移动到 to 的实际成本（包含动态障碍物成本）
+fn movement_cost(grid: &ConfigNavigationGrid, from: (usize, usize), to: (usize, usize)) -> f32 {
+    let base_cost = distance_cost(grid.cell_size, from, to);
+    let cell_cost = grid.get_cell_cost(to);
+    base_cost + cell_cost
 }
 
 fn heuristic_cost(cell_size: f32, from: (usize, usize), to: (usize, usize)) -> f32 {

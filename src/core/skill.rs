@@ -121,24 +121,24 @@ fn on_skill_level_up(
         return;
     };
 
-    info!("{} 尝试升级技能: 索引 {}", entity, trigger.index);
+    debug!("{} 尝试升级技能: 索引 {}", entity, trigger.index);
 
     if skill_points.0 == 0 {
-        info!("{} 升级失败: 技能点不足", entity);
+        debug!("{} 升级失败: 技能点不足", entity);
         return;
     }
 
     // 1 级只能加点 q w e，6 级才能加点 r，6 级前一个技能最多加 3 点
     if level.value < 6 {
         if trigger.index == 3 {
-            info!(
+            debug!(
                 "{} 升级失败: 等级 {} 小于 6 级不能升级大招",
                 entity, level.value
             );
             return;
         }
         if skill.level >= 3 {
-            info!(
+            debug!(
                 "{} 升级失败: 等级 {} 小于 6 级，技能 {} 已达上限 (3)",
                 entity, level.value, trigger.index
             );
@@ -148,7 +148,7 @@ fn on_skill_level_up(
 
     skill.level += 1;
     skill_points.0 -= 1;
-    info!(
+    debug!(
         "{} 技能升级成功: 索引 {}, 新等级 {}, 剩余技能点 {}",
         entity, trigger.index, skill.level, skill_points.0
     );
@@ -158,7 +158,7 @@ fn on_level_up(event: On<EventLevelUp>, mut q_skill_points: Query<&mut SkillPoin
     let entity = event.event_target();
     if let Ok(mut skill_points) = q_skill_points.get_mut(entity) {
         skill_points.0 += event.delta;
-        info!(
+        debug!(
             "{} 升级: 获得 {} 技能点，当前技能点 {}",
             entity, event.delta, skill_points.0
         );

@@ -80,6 +80,6 @@ pub async fn load_navigation_grid(
             .chunks(nav_grid.height_samples.x_count as usize)
             .map(|v| v.to_vec())
             .collect(),
-        occupied_cells: Default::default(),
+        ..default()
     })
 }
