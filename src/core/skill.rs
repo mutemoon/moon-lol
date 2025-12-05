@@ -4,7 +4,7 @@ use bevy_behave::{
     Behave,
 };
 
-use crate::{EventLevelUp, Level};
+use crate::{AbilityResource, EventLevelUp, Level};
 
 #[derive(Default)]
 pub struct PluginSkill;
@@ -49,6 +49,7 @@ pub struct Skill {
     pub key: u32,
     pub effect: Option<Tree<Behave>>,
     pub level: u32,
+    pub mana_cost: f32,
 }
 
 #[derive(Component)]
@@ -80,6 +81,7 @@ fn on_skill_cast(
     mut commands: Commands,
     skills: Query<&Skills>,
     mut q_skill: Query<(&Skill, &mut CoolDown)>,
+    mut q_ability_resource: Query<&mut AbilityResource>,
 ) {
     let entity = trigger.event_target();
     let Ok(skills) = skills.get(entity) else {
@@ -101,6 +103,24 @@ fn on_skill_cast(
         );
         return;
     }
+
+    let Ok(mut ability_resource) = q_ability_resource.get_mut(entity) else {
+        return;
+    };
+
+    if ability_resource.value < skill.mana_cost {
+        debug!(
+            "{} 技能 {} 蓝量不足，需要 {:.0}，当前 {:.0}",
+            entity, trigger.index, skill.mana_cost, ability_resource.value
+        );
+        return;
+    }
+
+    ability_resource.value -= skill.mana_cost;
+    debug!(
+        "{} 技能 {} 消耗 {:.0} 蓝量，剩余 {:.0}",
+        entity, trigger.index, skill.mana_cost, ability_resource.value
+    );
 
     if let Some(effect) = &skill.effect {
         commands.entity(entity).with_child((

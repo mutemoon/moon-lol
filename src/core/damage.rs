@@ -102,6 +102,8 @@ pub struct DamageResult {
     pub magic_shield_absorbed: f32,
     /// 被减免的伤害
     pub reduced_damage: f32,
+    /// 被护甲减免的伤害
+    pub armor_reduced_damage: f32,
     /// 原始伤害
     pub original_damage: f32,
 }
@@ -214,6 +216,7 @@ impl DamageReductions {
 pub fn calculate_damage(
     damage_type: DamageType,
     amount: f32,
+    armor: Option<f32>,
     white_shield: Option<Mut<WhiteShield>>,
     magic_shield: Option<Mut<MagicShield>>,
     damage_reductions: Option<&DamageReductions>,
@@ -223,6 +226,7 @@ pub fn calculate_damage(
     let mut white_shield_absorbed = 0.0;
     let mut magic_shield_absorbed = 0.0;
     let mut reduced_damage = 0.0;
+    let mut armor_reduced_damage = 0.0;
 
     // 真实伤害无视所有防御机制
     if damage_type == DamageType::True {
@@ -231,18 +235,30 @@ pub fn calculate_damage(
             white_shield_absorbed: 0.0,
             magic_shield_absorbed: 0.0,
             reduced_damage: 0.0,
+            armor_reduced_damage: 0.0,
             original_damage,
         };
     }
 
-    // 1. 首先应用伤害减免buff
+    // 1. 对物理伤害应用护甲减伤
+    if damage_type == DamageType::Physical {
+        if let Some(armor_value) = armor {
+            if armor_value > 0.0 {
+                let damage_after_armor = remaining_damage * 100.0 / (100.0 + armor_value);
+                armor_reduced_damage = remaining_damage - damage_after_armor;
+                remaining_damage = damage_after_armor;
+            }
+        }
+    }
+
+    // 2. 应用伤害减免buff
     if let Some(reductions) = damage_reductions {
         let reduction_percentage = reductions.calculate_reduction(damage_type);
         reduced_damage = remaining_damage * reduction_percentage;
         remaining_damage -= reduced_damage;
     }
 
-    // 2. 然后应用护盾（白色护盾优先）
+    // 3. 应用护盾（白色护盾优先）
     if let Some(mut white_shield) = white_shield {
         if !white_shield.is_depleted() {
             let absorbed = white_shield.absorb_damage(remaining_damage);
@@ -251,7 +267,7 @@ pub fn calculate_damage(
         }
     }
 
-    // 3. 如果是魔法伤害且还有剩余伤害，应用魔法护盾
+    // 4. 如果是魔法伤害且还有剩余伤害，应用魔法护盾
     if damage_type == DamageType::Magic {
         if let Some(mut magic_shield) = magic_shield {
             if !magic_shield.is_depleted() && remaining_damage > 0.0 {
@@ -267,6 +283,7 @@ pub fn calculate_damage(
         white_shield_absorbed,
         magic_shield_absorbed,
         reduced_damage,
+        armor_reduced_damage,
         original_damage,
     }
 }
@@ -277,67 +294,67 @@ pub fn on_command_damage_create(
     mut commands: Commands,
     mut query: Query<(
         &mut Health,
+        Option<&Armor>,
         Option<&mut WhiteShield>,
         Option<&mut MagicShield>,
         Option<&DamageReductions>,
     )>,
 ) {
     debug!(
-        "{:?} 对 {:?} 造成 {:.1} 点 {:?} 伤害",
+        "实体 {:?} 对 {:?} 造成 {:.1} 点 {:?} 伤害",
         trigger.source,
         trigger.event_target(),
         trigger.amount,
         trigger.damage_type,
     );
 
-    if let Ok((mut health, white_shield, magic_shield, damage_reductions)) =
+    let Ok((mut health, armor, white_shield, magic_shield, damage_reductions)) =
         query.get_mut(trigger.event_target())
-    {
-        let health_before = health.value;
-        let result = calculate_damage(
-            trigger.damage_type,
-            trigger.amount,
-            white_shield,
-            magic_shield,
-            damage_reductions,
-        );
+    else {
+        debug!("未找到伤害目标实体 {:?}", trigger.event_target());
+        return;
+    };
 
-        // 应用最终伤害到生命值
-        health.value -= result.final_damage;
+    let health_before = health.value;
+    let armor_value = armor.map(|a| a.0);
+    let result = calculate_damage(
+        trigger.damage_type,
+        trigger.amount,
+        armor_value,
+        white_shield,
+        magic_shield,
+        damage_reductions,
+    );
 
+    health.value -= result.final_damage;
+
+    debug!(
+        "伤害已应用 {:?} -> {:?} 类型 {:?} 原始伤害 {:.1} 最终伤害 {:.1} 生命值 {:.1} -> {:.1} 护甲减免 {:.1} 白盾吸收 {:.1} 魔盾吸收 {:.1} 减伤 {:.1}",
+        trigger.source,
+        trigger.event_target(),
+        trigger.damage_type,
+        result.original_damage,
+        result.final_damage,
+        health_before,
+        health.value,
+        result.armor_reduced_damage,
+        result.white_shield_absorbed,
+        result.magic_shield_absorbed,
+        result.reduced_damage
+    );
+
+    commands.trigger(EventDamageCreate {
+        entity: trigger.event_target(),
+        source: trigger.source,
+        damage_type: trigger.damage_type,
+        damage_result: result,
+    });
+
+    if health.value <= 0.0 {
         debug!(
-            "Damage applied: {:?} -> {:?}, Type: {:?}, Original: {:.1}, Final: {:.1}, Health: {:.1} -> {:.1}, Shields: W{:.1}/M{:.1}, Reduced: {:.1}",
-            trigger.source,
+            "实体 {:?} 生命值降至 {:.1} 已达到死亡阈值",
             trigger.event_target(),
-            trigger.damage_type,
-            result.original_damage,
-            result.final_damage,
-            health_before,
-            health.value,
-            result.white_shield_absorbed,
-            result.magic_shield_absorbed,
-            result.reduced_damage
-        );
-
-        // 触发伤害生效事件
-        commands.trigger(EventDamageCreate {
-            entity: trigger.event_target(),
-            source: trigger.source,
-            damage_type: trigger.damage_type,
-            damage_result: result,
-        });
-
-        if health.value <= 0.0 {
-            debug!(
-                "Entity {:?} health dropped to {:.1} (death threshold)",
-                trigger.event_target(),
-                health.value
-            );
-        }
-    } else {
-        debug!(
-            "Failed to find target entity {:?} for damage event",
-            trigger.event_target()
+            health.value
         );
     }
 }
@@ -346,7 +363,7 @@ pub fn on_command_damage_create(
 pub fn update_damage_reductions_system(mut query: Query<&mut DamageReductions>, time: Res<Time>) {
     let entity_count = query.iter().count();
     if entity_count > 0 {
-        debug!("Updating {} entities with damage reductions", entity_count);
+        debug!("正在更新 {} 个拥有伤害减免的实体", entity_count);
     }
 
     for mut reductions in query.iter_mut() {
@@ -357,7 +374,7 @@ pub fn update_damage_reductions_system(mut query: Query<&mut DamageReductions>, 
 
         if expired_before != expired_after {
             debug!(
-                "Removed {} expired damage reductions",
+                "已移除 {} 个过期的伤害减免效果",
                 expired_before - expired_after
             );
         }
@@ -375,7 +392,7 @@ pub fn cleanup_depleted_shields_system(
 
     if white_shield_count > 0 || magic_shield_count > 0 {
         debug!(
-            "Checking {} white shields and {} magic shields for depletion",
+            "正在检查 {} 个白色护盾和 {} 个魔法护盾是否耗尽",
             white_shield_count, magic_shield_count
         );
     }
@@ -386,7 +403,7 @@ pub fn cleanup_depleted_shields_system(
     // 移除耗尽的白色护盾
     for (entity, shield) in white_shields.iter() {
         if shield.is_depleted() {
-            debug!("Removing depleted white shield from entity {:?}", entity);
+            debug!("正在移除实体 {:?} 的耗尽白色护盾", entity);
             commands.entity(entity).remove::<WhiteShield>();
             removed_white += 1;
         }
@@ -395,7 +412,7 @@ pub fn cleanup_depleted_shields_system(
     // 移除耗尽的魔法护盾
     for (entity, shield) in magic_shields.iter() {
         if shield.is_depleted() {
-            debug!("Removing depleted magic shield from entity {:?}", entity);
+            debug!("正在移除实体 {:?} 的耗尽魔法护盾", entity);
             commands.entity(entity).remove::<MagicShield>();
             removed_magic += 1;
         }
@@ -403,7 +420,7 @@ pub fn cleanup_depleted_shields_system(
 
     if removed_white > 0 || removed_magic > 0 {
         debug!(
-            "Removed {} white shields and {} magic shields",
+            "已移除 {} 个白色护盾和 {} 个魔法护盾",
             removed_white, removed_magic
         );
     }
@@ -513,21 +530,6 @@ mod tests {
         // 再更新时间，使其过期
         buff.update_time(3.0);
         assert!(buff.is_expired());
-    }
-
-    #[test]
-    fn test_true_damage_ignores_all_defenses() {
-        let mut reductions = DamageReductions::default();
-        reductions.add_buff(DamageReduction::new(0.9, None, None)); // 90%减免
-
-        // 验证真实伤害的逻辑
-        let damage_type = DamageType::True;
-        let amount = 50.0;
-
-        if damage_type == DamageType::True {
-            // 真实伤害应该无视所有防御
-            assert_eq!(amount, 50.0); // 伤害不变
-        }
     }
 
     #[test]

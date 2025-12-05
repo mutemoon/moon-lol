@@ -30,6 +30,7 @@ fn add_skills(mut commands: Commands, q_hwei: Query<Entity, (With<Hwei>, Without
                     level: 0,
                     key: hash_bin("Characters/Hwei/Spells/HweiPassiveAbility/HweiPassive"),
                     effect: None,
+                    mana_cost: 0.0,
                 },
                 CoolDown {
                     duration: 0.0,
@@ -40,6 +41,7 @@ fn add_skills(mut commands: Commands, q_hwei: Query<Entity, (With<Hwei>, Without
                 Skill {
                     level: 0,
                     key: hash_bin("Characters/Hwei/Spells/HweiQAbility/HweiQ"),
+                    mana_cost: 60.0,
                     effect: Some(behave! {
                         Behave::Sequence => {
                             Behave::trigger(
@@ -60,6 +62,7 @@ fn add_skills(mut commands: Commands, q_hwei: Query<Entity, (With<Hwei>, Without
                 Skill {
                     level: 0,
                     key: hash_bin("Characters/Hwei/Spells/HweiWAbility/HweiW"),
+                    mana_cost: 70.0,
                     effect: Some(behave! {
                         Behave::Sequence => {
                             Behave::trigger(
@@ -80,6 +83,7 @@ fn add_skills(mut commands: Commands, q_hwei: Query<Entity, (With<Hwei>, Without
                 Skill {
                     level: 0,
                     key: hash_bin("Characters/Hwei/Spells/HweiEAbility/HweiE"),
+                    mana_cost: 50.0,
                     effect: Some(behave! {
                         Behave::Sequence => {
                             Behave::trigger(
@@ -100,6 +104,7 @@ fn add_skills(mut commands: Commands, q_hwei: Query<Entity, (With<Hwei>, Without
                 Skill {
                     level: 0,
                     key: hash_bin("Characters/Hwei/Spells/HweiRAbility/HweiR"),
+                    mana_cost: 100.0,
                     effect: Some(behave! {
                         Behave::Sequence => {
                             Behave::trigger(

@@ -37,6 +37,7 @@ fn add_skills(mut commands: Commands, q_fiora: Query<Entity, (With<Fiora>, Witho
                     key: hash_bin("Characters/Fiora/Spells/FioraPassiveAbility/FioraPassive"),
                     level: 0,
                     effect: None,
+                    mana_cost: 0.0,
                 },
                 CoolDown {
                     duration: 0.0,
@@ -48,6 +49,7 @@ fn add_skills(mut commands: Commands, q_fiora: Query<Entity, (With<Fiora>, Witho
                 Skill {
                     level: 0,
                     key: hash_bin("Characters/Fiora/Spells/FioraQAbility/FioraQ"),
+                    mana_cost: 25.0,
                     effect: Some(behave! {
                         Behave::Sequence => {
                             Behave::trigger(
@@ -76,6 +78,7 @@ fn add_skills(mut commands: Commands, q_fiora: Query<Entity, (With<Fiora>, Witho
                 Skill {
                     level: 0,
                     key: hash_bin("Characters/Fiora/Spells/FioraWAbility/FioraW"),
+                    mana_cost: 50.0,
                     effect: Some(behave! {
                         Behave::Sequence => {
                             Behave::trigger(
@@ -108,6 +111,7 @@ fn add_skills(mut commands: Commands, q_fiora: Query<Entity, (With<Fiora>, Witho
                 Skill {
                     level: 0,
                     key: hash_bin("Characters/Fiora/Spells/FioraEAbility/FioraE"),
+                    mana_cost: 40.0,
                     effect: Some(behave! {
                         Behave::Sequence => {
                             Behave::trigger(ActionBuffSpawn{
@@ -135,6 +139,7 @@ fn add_skills(mut commands: Commands, q_fiora: Query<Entity, (With<Fiora>, Witho
                 Skill {
                     level: 0,
                     key: hash_bin("Characters/Fiora/Spells/FioraRAbility/FioraR"),
+                    mana_cost: 100.0,
                     effect: Some(behave! {
                         Behave::Sequence => {
                             Behave::trigger(
