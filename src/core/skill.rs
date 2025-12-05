@@ -1,3 +1,5 @@
+use std::ops::Deref;
+
 use bevy::prelude::*;
 use bevy_behave::{
     prelude::{BehaveCtx, BehavePlugin, BehaveTree, Tree},
@@ -23,11 +25,17 @@ impl Plugin for PluginSkill {
 #[relationship(relationship_target = Skills)]
 pub struct SkillOf(pub Entity);
 
-use std::ops::Deref;
-
 #[derive(Component, Debug)]
 #[relationship_target(relationship = SkillOf, linked_spawn)]
 pub struct Skills(Vec<Entity>);
+
+#[derive(Component, Debug)]
+#[relationship(relationship_target = PassiveSkill)]
+pub struct PassiveSkillOf(pub Entity);
+
+#[derive(Component, Debug)]
+#[relationship_target(relationship = PassiveSkillOf, linked_spawn)]
+pub struct PassiveSkill(Entity);
 
 impl Deref for Skills {
     type Target = Vec<Entity>;
@@ -101,6 +109,11 @@ fn on_skill_cast(
             trigger.index,
             cooldown.timer.remaining_secs()
         );
+        return;
+    }
+
+    if skill.level == 0 {
+        debug!("{} 技能 {} 未学习，无法释放", entity, trigger.index);
         return;
     }
 

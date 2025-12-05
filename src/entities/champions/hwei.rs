@@ -5,6 +5,7 @@ use league_utils::hash_bin;
 use crate::{
     core::{ActionAnimationPlay, ActionParticleSpawn, CoolDown, Skill, SkillOf, Skills},
     entities::champion::Champion,
+    PassiveSkillOf,
 };
 
 #[derive(Default)]
@@ -25,7 +26,7 @@ fn add_skills(mut commands: Commands, q_hwei: Query<Entity, (With<Hwei>, Without
     for entity in q_hwei.iter() {
         commands
             .entity(entity)
-            .with_related::<SkillOf>((
+            .with_related::<PassiveSkillOf>((
                 Skill {
                     level: 0,
                     key: hash_bin("Characters/Hwei/Spells/HweiPassiveAbility/HweiPassive"),

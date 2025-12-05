@@ -28,10 +28,10 @@ impl Default for Controller {
             attack_key: KeyCode::KeyA,
             stop_key: KeyCode::KeyS,
             skill_key_map: HashMap::from([
-                (1, KeyCode::KeyQ),
-                (2, KeyCode::KeyW),
-                (3, KeyCode::KeyE),
-                (4, KeyCode::KeyR),
+                (0, KeyCode::KeyQ),
+                (1, KeyCode::KeyW),
+                (2, KeyCode::KeyE),
+                (3, KeyCode::KeyR),
             ]),
         }
     }

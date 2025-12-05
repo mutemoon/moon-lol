@@ -11,7 +11,7 @@ use crate::{
     abilities::BuffFioraR,
     core::{
         is_in_direction, BuffOf, CommandDamageCreate, CommandParticleDespawn, CommandParticleSpawn,
-        DamageType, Direction, EventDamageCreate, Health, SkillOf,
+        DamageType, Direction, EventDamageCreate, Health, PassiveSkillOf,
     },
     entities::Champion,
     EntityCommandsTrigger,
@@ -81,7 +81,7 @@ pub fn get_particle_hash(direction: &Direction, postfix: &str, suffix: &str) -> 
 fn update_add_vital(
     mut commands: Commands,
     q_target_without_vital: Query<(Entity, &Transform, &Team), (With<Champion>, Without<Vital>)>,
-    q_skill_of_with_ability: Query<&SkillOf, With<AbilityFioraPassive>>,
+    q_skill_of_with_ability: Query<&PassiveSkillOf, With<AbilityFioraPassive>>,
     q_transform_team: Query<(&Transform, &Team)>,
     q_buff_fiora_r: Query<&BuffOf, With<BuffFioraR>>,
     mut last_direction: ResMut<FioraVitalLastDirection>,
@@ -169,7 +169,7 @@ fn update_remove_vital(
         (Entity, &Transform, &Team, &mut Vital),
         (With<Champion>, With<Vital>),
     >,
-    q_skill_of_with_ability: Query<&SkillOf, With<AbilityFioraPassive>>,
+    q_skill_of_with_ability: Query<&PassiveSkillOf, With<AbilityFioraPassive>>,
     q_transform_team: Query<(&Transform, &Team)>,
     time: Res<Time<Fixed>>,
 ) {

@@ -12,6 +12,7 @@ use crate::{
         Skill, SkillOf, Skills,
     },
     entities::champion::Champion,
+    PassiveSkillOf,
 };
 
 #[derive(Default)]
@@ -32,7 +33,7 @@ fn add_skills(mut commands: Commands, q_fiora: Query<Entity, (With<Fiora>, Witho
     for entity in q_fiora.iter() {
         commands
             .entity(entity)
-            .with_related::<SkillOf>((
+            .with_related::<PassiveSkillOf>((
                 Skill {
                     key: hash_bin("Characters/Fiora/Spells/FioraPassiveAbility/FioraPassive"),
                     level: 0,
