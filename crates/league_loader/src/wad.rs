@@ -1,6 +1,5 @@
 use std::io::{self, BufReader};
 use std::{
-    collections::HashMap,
     fs::File,
     io::{Cursor, Read},
     sync::Arc,
@@ -9,12 +8,12 @@ use std::{
 use binrw::{args, io::NoSeek, BinRead, Endian};
 use zstd::Decoder;
 
-use league_core::{ResourceResolver, SkinCharacterDataProperties};
-use league_file::LeagueTexture;
-use league_property::{from_entry_unwrap, EntryData, PropFile};
-use league_utils::{hash_bin, hash_wad};
+use league_utils::hash_wad;
 
-use crate::{ArcFileReader, Error, LeagueWad, LeagueWadEntry, LeagueWadSubchunk, WadDataFormat};
+use crate::{
+    ArcFileReader, Error, LeagueWad, LeagueWadEntry, LeagueWadSubchunk, PropBinLoader,
+    WadDataFormat,
+};
 
 pub struct LeagueWadLoader {
     pub wad: LeagueWad,
@@ -84,63 +83,12 @@ impl LeagueWadLoader {
             .map(|v| BufReader::new(Cursor::new(v)))
     }
 
+    pub fn get_wad_entry_by_hash(&self, hash: u64) -> Result<LeagueWadEntry, Error> {
+        self.wad.get_entry(hash)
+    }
+
     pub fn get_wad_entry_by_path(&self, path: &str) -> Result<LeagueWadEntry, Error> {
         self.get_wad_entry_by_hash(hash_wad(&path.to_lowercase()))
-    }
-
-    pub fn get_texture_by_hash(&self, hash: u64) -> Result<LeagueTexture, Error> {
-        let mut reader = self.get_wad_entry_no_seek_reader_by_hash(hash)?;
-        Ok(LeagueTexture::read(&mut reader)?)
-    }
-
-    pub fn get_texture_by_path(&self, path: &str) -> Result<LeagueTexture, Error> {
-        let mut reader = self.get_wad_entry_no_seek_reader_by_path(path)?;
-        Ok(LeagueTexture::read(&mut reader)?)
-    }
-
-    pub fn get_prop_bin_by_path(&self, path: &str) -> Result<PropFile, Error> {
-        let mut reader = self.get_wad_entry_no_seek_reader_by_path(path)?;
-        Ok(PropFile::read(&mut reader)?)
-    }
-
-    pub fn get_skin_bin_by_path(&self, skin: &str) -> Result<PropFile, Error> {
-        let path = format!("data/{}.bin", skin);
-        let skin_bin = self.get_prop_bin_by_path(&path).unwrap();
-        Ok(skin_bin)
-    }
-
-    pub fn load_character_skin(
-        &self,
-        skin: &str,
-    ) -> (
-        SkinCharacterDataProperties,
-        Option<ResourceResolver>,
-        HashMap<u32, EntryData>,
-    ) {
-        let skin_bin = self.get_skin_bin_by_path(skin).unwrap();
-
-        let skin_character_data_properties = from_entry_unwrap(
-            skin_bin
-                .iter_entry_by_class(hash_bin("SkinCharacterDataProperties"))
-                .next()
-                .unwrap(),
-        );
-
-        let resource_resolver = skin_bin
-            .iter_entry_by_class(hash_bin("ResourceResolver"))
-            .next()
-            .map(|v| from_entry_unwrap(v));
-
-        let flat_map: HashMap<_, _> = skin_bin
-            .links
-            .iter()
-            .map(|v| self.get_prop_bin_by_path(&v.text).unwrap())
-            .flat_map(|v| v.entries)
-            .chain(skin_bin.entries.into_iter())
-            .map(|v| (v.hash, v))
-            .collect();
-
-        (skin_character_data_properties, resource_resolver, flat_map)
     }
 
     fn read_chunked_entry(
@@ -182,63 +130,9 @@ impl LeagueWadLoader {
     }
 }
 
-pub struct LeagueWadGroupLoader {
-    pub wads: Vec<LeagueWadLoader>,
-}
-
-impl LeagueWadGroupLoader {
-    pub fn from_relative_path(root_dir: &str, wads: Vec<&str>) -> Self {
-        let mut wad_loaders = Vec::new();
-        for wad in wads {
-            wad_loaders.push(LeagueWadLoader::from_relative_path(root_dir, wad).unwrap());
-        }
-        Self { wads: wad_loaders }
-    }
-
-    pub fn iter_wad_entries(&self) -> impl Iterator<Item = (&u64, &LeagueWadEntry)> {
-        self.wads.iter().flat_map(|wad| wad.wad.entries.iter())
-    }
-}
-
-pub trait PropBinLoader {
-    fn get_wad_entry_by_hash(&self, hash: u64) -> Result<LeagueWadEntry, Error>;
-
-    fn get_wad_entry_reader(&self, entry: &LeagueWadEntry) -> Result<Box<dyn Read + '_>, Error>;
-
-    fn get_wad_entry_no_seek_reader_by_hash(
-        &self,
-        hash: u64,
-    ) -> Result<NoSeek<Box<dyn Read + '_>>, Error> {
-        let entry = self.get_wad_entry_by_hash(hash)?;
-        self.get_wad_entry_reader(&entry).map(|v| NoSeek::new(v))
-    }
-
-    fn get_wad_entry_no_seek_reader_by_path(
-        &self,
-        path: &str,
-    ) -> Result<NoSeek<Box<dyn Read + '_>>, Error> {
-        self.get_wad_entry_no_seek_reader_by_hash(hash_wad(path))
-    }
-
-    fn get_prop_bin_by_hash(&self, hash: u64) -> Result<PropFile, Error> {
-        let mut reader = self.get_wad_entry_no_seek_reader_by_hash(hash)?;
-        Ok(PropFile::read(&mut reader)?)
-    }
-
-    fn get_wad_entry_buffer_by_path(&self, path: &str) -> Result<Vec<u8>, Error> {
-        let mut reader = self.get_wad_entry_no_seek_reader_by_path(path)?;
-        let mut buffer = Vec::new();
-        reader.read_to_end(&mut buffer)?;
-        Ok(buffer)
-    }
-}
-
 impl PropBinLoader for LeagueWadLoader {
-    fn get_wad_entry_by_hash(&self, hash: u64) -> Result<LeagueWadEntry, Error> {
-        self.wad.get_entry(hash)
-    }
-
-    fn get_wad_entry_reader(&self, entry: &LeagueWadEntry) -> Result<Box<dyn Read + '_>, Error> {
+    fn get_wad_entry_reader_by_hash(&self, hash: u64) -> Result<Box<dyn Read + '_>, Error> {
+        let entry = self.get_wad_entry_by_hash(hash)?;
         match entry.format {
             WadDataFormat::Uncompressed => Ok(Box::new(
                 ArcFileReader::new(self.file.clone(), entry.offset as u64).take(entry.size as u64),
@@ -246,30 +140,10 @@ impl PropBinLoader for LeagueWadLoader {
             WadDataFormat::Redirection | WadDataFormat::Gzip => {
                 panic!("wad entry format not supported")
             }
-            WadDataFormat::Zstd => self.get_wad_zstd_entry_reader(entry),
+            WadDataFormat::Zstd => self.get_wad_zstd_entry_reader(&entry),
             WadDataFormat::Chunked(subchunk_count) => {
-                self.read_chunked_entry(entry, subchunk_count)
+                self.read_chunked_entry(&entry, subchunk_count)
             }
         }
-    }
-}
-
-impl PropBinLoader for LeagueWadGroupLoader {
-    fn get_wad_entry_by_hash(&self, hash: u64) -> Result<LeagueWadEntry, Error> {
-        for wad in &self.wads {
-            if let Ok(entry) = wad.get_wad_entry_by_hash(hash) {
-                return Ok(entry);
-            }
-        }
-        Err(Error::Custom("Wad entry not found"))
-    }
-
-    fn get_wad_entry_reader(&self, entry: &LeagueWadEntry) -> Result<Box<dyn Read + '_>, Error> {
-        for wad in &self.wads {
-            if let Ok(reader) = wad.get_wad_entry_reader(entry) {
-                return Ok(reader);
-            }
-        }
-        Err(Error::Custom("Wad entry not found"))
     }
 }

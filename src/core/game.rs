@@ -1,4 +1,6 @@
 use bevy::prelude::*;
+
+use league_utils::get_asset_id_by_path;
 use lol_config::ConfigGame;
 
 use crate::CommandSpawnCharacter;
@@ -32,8 +34,8 @@ fn startup(mut commands: Commands, config_game: Res<ConfigGame>) {
     for (entity, skin, character_record) in config_game.legends.iter() {
         commands.trigger(CommandSpawnCharacter {
             entity: *entity,
-            character_record_key: character_record.clone(),
-            skin_path: skin.clone(),
+            character_record_key: get_asset_id_by_path(character_record),
+            skin_key: get_asset_id_by_path(skin),
         });
     }
 }

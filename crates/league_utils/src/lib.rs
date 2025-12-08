@@ -1,6 +1,8 @@
-use std::hash::Hasher;
+use std::{collections::HashMap, hash::Hasher};
 
-use bevy::prelude::*;
+use heck::ToPascalCase;
+
+use bevy::{asset::uuid::Uuid, prelude::*};
 use binrw::binread;
 use serde::{Deserialize, Serialize};
 use twox_hash::XxHash64;
@@ -72,4 +74,23 @@ pub fn get_padded_string_128(bytes: [u8; 128]) -> String {
     String::from_utf8_lossy(&bytes)
         .trim_end_matches('\0')
         .to_string()
+}
+
+pub fn get_asset_id_by_path<A: Asset>(path: &str) -> AssetId<A> {
+    AssetId::Uuid {
+        uuid: Uuid::from_u128(hash_bin(path) as u128),
+    }
+}
+
+pub fn get_asset_id_by_hash<A: Asset>(hash: u32) -> AssetId<A> {
+    AssetId::Uuid {
+        uuid: Uuid::from_u128(hash as u128),
+    }
+}
+
+pub fn hash_to_type_name(hash: &u32, hash_to_string: &HashMap<u32, String>) -> String {
+    hash_to_string
+        .get(hash)
+        .map(|s| s.to_pascal_case())
+        .unwrap_or_else(|| format!("Unk0x{:x}", hash))
 }

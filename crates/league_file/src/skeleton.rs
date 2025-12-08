@@ -1,4 +1,6 @@
+use bevy::asset::Asset;
 use bevy::math::{Mat4, Quat, Vec3, Vec4};
+use bevy::reflect::TypePath;
 use binrw::io::{Read, Seek, SeekFrom};
 use binrw::{binread, BinRead};
 use binrw::{prelude::*, Endian};
@@ -7,7 +9,7 @@ use league_utils::{parse_quat, parse_vec3};
 const FORMAT_TOKEN: u32 = 0x22FD4FC3;
 
 #[binread]
-#[derive(Debug)]
+#[derive(Debug, Asset, TypePath)]
 #[br(little)]
 pub struct LeagueSkeleton {
     #[br(temp)]

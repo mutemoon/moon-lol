@@ -1,7 +1,7 @@
 [
     (
-        skin_path: "Characters/Fiora/Skins/Skin22",
-        character_record: "Characters/Fiora/CharacterRecords/Root",
+        skin_path: "Characters/Riven/Skins/Skin0",
+        character_record: "Characters/Riven/CharacterRecords/Root",
     ),
     {
         "bevy_transform::components::transform::Transform": (
@@ -11,7 +11,7 @@
         ),
         "lol_core::team::Team": Order,
         "moon_lol::core::damage::Damage": (100.0),
-        "moon_lol::entities::champions::fiora::Fiora": (),
+        "moon_lol::entities::champions::riven::Riven": (),
         "moon_lol::core::controller::Controller": (),
         "moon_lol::core::camera::Focus": (),
     },

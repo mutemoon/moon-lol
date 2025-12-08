@@ -1,6 +1,10 @@
 use std::collections::HashMap;
 
-use bevy::math::{Mat4, Vec2, Vec3, Vec4};
+use bevy::{
+    asset::Asset,
+    math::{Mat4, Vec2, Vec3, Vec4},
+    reflect::TypePath,
+};
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -562,7 +566,7 @@ pub struct ObjectTags {
     pub m_object_tag_list: Vec<u32>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, TypePath, Asset)]
 #[serde(rename_all = "camelCase")]
 pub struct SpellObject {
     pub m_buff: Option<BuffData>,
@@ -811,7 +815,7 @@ pub struct ToolAlternateForm {
     pub the_switch: String,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Asset, TypePath)]
 #[serde(rename_all = "camelCase")]
 pub struct VfxSystemDefinitionData {
     pub override_scale_cap: Option<f32>,
@@ -1290,7 +1294,7 @@ pub struct LinearTransformProcessorData {
     pub m_increment: Option<f32>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Asset, TypePath)]
 #[serde(rename_all = "camelCase")]
 pub struct AnimationGraphData {
     pub m_sync_group_data_map: Option<HashMap<u32, SyncGroupData>>,
@@ -1310,7 +1314,7 @@ pub struct Unk0x7fb92f53 {
     pub unk_0xc865acd9: f32,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Asset, TypePath)]
 #[serde(rename_all = "camelCase")]
 pub struct StaticMaterialDef {
     pub child_techniques: Option<Vec<StaticMaterialChildTechniqueDef>>,
@@ -2580,7 +2584,7 @@ pub struct ContextualConditionBuffCounterChanged {
 #[serde(rename_all = "camelCase")]
 pub struct ParametricMovementTypeAngleFromTarget {}
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, TypePath, Asset)]
 #[serde(rename_all = "camelCase")]
 pub struct CharacterRecord {
     pub local_gold_split_with_last_hitter: Option<bool>,
@@ -3759,7 +3763,7 @@ pub struct Unk0x635d04b7 {
     pub champion_name: String,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Asset, TypePath)]
 #[serde(rename_all = "camelCase")]
 pub struct SkinCharacterDataProperties {
     pub alternate_icons_square: Option<Vec<String>>,
@@ -3960,7 +3964,7 @@ pub struct Unk0x9bc366ca {
     pub skin_id: u32,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Asset, TypePath)]
 #[serde(rename_all = "camelCase")]
 pub struct BarracksConfig {
     pub move_speed_increase_interval_secs: f32,
@@ -4386,7 +4390,7 @@ pub struct IsSpecifiedUnitCastRequirement {
     pub m_invert_result: Option<bool>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Asset, TypePath)]
 #[serde(rename_all = "camelCase")]
 pub struct MapContainer {
     pub convert_streams_to_half_float: bool,
@@ -4753,7 +4757,7 @@ pub struct AnimationResourceData {
     pub m_animation_file_path: String,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Asset, TypePath)]
 #[serde(rename_all = "camelCase")]
 pub struct Unk0xad65d8c4 {
     pub definition: Unk0x9d9f60d2,
@@ -4834,7 +4838,7 @@ pub struct FixedSpeedMovement {
     pub m_tracks_target: Option<bool>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Asset, TypePath)]
 #[serde(rename_all = "camelCase")]
 pub struct MapPlaceableContainer {
     pub items: HashMap<u32, MissileSpecificationBehaviors>,
@@ -5147,7 +5151,7 @@ pub struct Unk0x7084628f {
     pub bottom_hr_momentum_post: Vec<u32>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Asset, TypePath)]
 #[serde(rename_all = "camelCase")]
 pub struct ResourceResolver {
     pub resource_map: Option<HashMap<u32, u32>>,

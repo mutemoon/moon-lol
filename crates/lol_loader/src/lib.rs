@@ -11,22 +11,16 @@ use bevy::{
     mesh::skinning::SkinnedMeshInverseBindposes,
     pbr::StandardMaterial,
     prelude::*,
-    render::{
-        alpha::AlphaMode,
-        render_resource::{
-            Extent3d, Face, TextureDescriptor, TextureDimension, TextureFormat, TextureUsages,
-        },
+    render::render_resource::{
+        Extent3d, TextureDescriptor, TextureDimension, TextureFormat, TextureUsages,
     },
 };
-use bincode::deserialize;
 use binrw::BinRead;
-use league_file::{LeagueMeshStatic, LeagueTexture, LeagueTextureFormat};
-use league_to_lol::mesh_static_to_bevy_mesh;
 use thiserror::Error;
 
-use lol_config::{
-    ConfigAnimationClip, ConfigSkinnedMeshInverseBindposes, IntermediateMesh, LeagueMaterial,
-};
+use league_file::{LeagueMeshStatic, LeagueTexture, LeagueTextureFormat};
+use league_to_lol::mesh_static_to_bevy_mesh;
+use lol_config::{ConfigAnimationClip, IntermediateMesh};
 
 #[derive(Error, Debug)]
 pub enum Error {
@@ -41,60 +35,6 @@ pub enum Error {
 
     #[error("{0}")]
     BinRead(#[from] binrw::Error),
-}
-
-#[derive(Default)]
-pub struct LeagueLoaderSkinnedMeshInverseBindposes;
-
-impl AssetLoader for LeagueLoaderSkinnedMeshInverseBindposes {
-    type Asset = SkinnedMeshInverseBindposes;
-
-    type Settings = ();
-
-    type Error = Error;
-
-    async fn load(
-        &self,
-        reader: &mut dyn Reader,
-        _settings: &Self::Settings,
-        _load_context: &mut LoadContext<'_>,
-    ) -> Result<Self::Asset, Self::Error> {
-        let mut buf = Vec::new();
-        reader.read_to_end(&mut buf).await?;
-        let config: ConfigSkinnedMeshInverseBindposes = deserialize(&buf)?;
-        Ok(SkinnedMeshInverseBindposes::from(config.inverse_bindposes))
-    }
-}
-
-#[derive(Default)]
-pub struct LeagueLoaderMaterial;
-
-impl AssetLoader for LeagueLoaderMaterial {
-    type Asset = StandardMaterial;
-
-    type Settings = ();
-
-    type Error = Error;
-
-    async fn load(
-        &self,
-        reader: &mut dyn bevy::asset::io::Reader,
-        _settings: &Self::Settings,
-        load_context: &mut LoadContext<'_>,
-    ) -> Result<Self::Asset, Self::Error> {
-        let mut buf = Vec::new();
-        reader.read_to_end(&mut buf).await?;
-        let material: LeagueMaterial = bincode::deserialize(&buf)?;
-        let path = material.texture_path + "#srgb";
-        let image = load_context.load(path);
-        Ok(StandardMaterial {
-            base_color_texture: Some(image),
-            unlit: true,
-            cull_mode: Some(Face::Front),
-            alpha_mode: AlphaMode::Mask(0.3),
-            ..default()
-        })
-    }
 }
 
 #[derive(Default)]

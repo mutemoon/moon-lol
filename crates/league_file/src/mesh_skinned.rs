@@ -44,7 +44,7 @@ pub struct BoundingSphere {
 }
 
 #[binread]
-#[derive(Debug)]
+#[derive(Debug, Asset, TypePath)]
 #[br(little)]
 pub struct LeagueSkinnedMesh {
     #[br(magic = b"\x33\x22\x11\x00")]

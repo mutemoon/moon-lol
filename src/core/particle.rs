@@ -17,9 +17,11 @@ use bevy::{
     transform::systems::{mark_dirty_trees, propagate_parent_transforms, sync_simple_transforms},
 };
 
-use league_core::{ValueColor, ValueFloat, ValueVector2, ValueVector3, VfxEmitterDefinitionData};
-use league_utils::hash_wad;
-use lol_config::ConfigMap;
+use league_core::{
+    ValueColor, ValueFloat, ValueVector2, ValueVector3, VfxEmitterDefinitionData,
+    VfxSystemDefinitionData,
+};
+use league_utils::{get_asset_id_by_hash, hash_wad};
 
 use crate::{Lifetime, LifetimeMode};
 
@@ -91,15 +93,17 @@ pub struct ParticleMesh(HashMap<u64, Handle<Mesh>>);
 
 #[derive(Component, Clone, Debug)]
 pub struct ParticleId {
-    hash: u32,
+    hash: AssetId<VfxSystemDefinitionData>,
     index: usize,
 }
 
 impl ParticleId {
-    pub fn get_def<'a>(self: &Self, config_map: &'a ConfigMap) -> &'a VfxEmitterDefinitionData {
-        config_map
-            .vfx_system_definition_datas
-            .get(&self.hash)
+    pub fn get_def<'a>(
+        self: &Self,
+        res_assets_vfx_system_definition_data: &'a Res<Assets<VfxSystemDefinitionData>>,
+    ) -> &'a VfxEmitterDefinitionData {
+        res_assets_vfx_system_definition_data
+            .get(self.hash)
             .unwrap()
             .complex_emitter_definition_data
             .as_ref()
@@ -112,13 +116,13 @@ impl ParticleId {
 #[derive(EntityEvent)]
 pub struct CommandParticleSpawn {
     pub entity: Entity,
-    pub particle: u32,
+    pub hash: AssetId<VfxSystemDefinitionData>,
 }
 
 #[derive(EntityEvent)]
 pub struct CommandParticleDespawn {
     pub entity: Entity,
-    pub hash: u32,
+    pub hash: AssetId<VfxSystemDefinitionData>,
 }
 
 impl ParticleMesh {
@@ -130,7 +134,7 @@ impl ParticleMesh {
 fn on_command_particle_spawn(
     trigger: On<CommandParticleSpawn>,
     mut commands: Commands,
-    res_config_map: Res<ConfigMap>,
+    res_assets_vfx_system_definition_data: Res<Assets<VfxSystemDefinitionData>>,
     q_global_transform: Query<&GlobalTransform>,
 ) {
     let entity = trigger.event_target();
@@ -142,9 +146,8 @@ fn on_command_particle_spawn(
         return;
     };
 
-    let vfx_system_definition_data = res_config_map
-        .vfx_system_definition_datas
-        .get(&trigger.particle)
+    let vfx_system_definition_data = res_assets_vfx_system_definition_data
+        .get(trigger.hash)
         .unwrap();
 
     // if !vfx_system_definition_data
@@ -262,7 +265,7 @@ fn on_command_particle_spawn(
 
         commands.entity(entity).with_related::<EmitterOf>((
             ParticleId {
-                hash: trigger.particle,
+                hash: trigger.hash,
                 index: i,
             },
             ParticleEmitterState {

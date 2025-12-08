@@ -1,12 +1,12 @@
 use bevy::{app::Plugin, prelude::*};
 use serde::{Deserialize, Serialize};
 
-use lol_config::ConfigMap;
 use lol_core::{Lane, Team};
 
 use crate::{
     Aggro, AttackAuto, CommandAttackAutoStart, CommandAttackAutoStop, CommandMovement,
-    EventAggroTargetFound, EventDead, HealthBar, HealthBarType, MovementAction, MovementWay, State,
+    EventAggroTargetFound, EventDead, HealthBar, HealthBarType, MinionPath, MovementAction,
+    MovementWay, State,
 };
 
 #[derive(Default)]
@@ -56,15 +56,15 @@ impl From<u8> for Minion {
 
 pub fn fixed_update(
     mut commands: Commands,
-    res_config: Res<ConfigMap>,
     q_minion: Query<(Entity, &Transform, &Team, &Lane, &MinionState), With<Minion>>,
+    res_minion_path: Res<MinionPath>,
 ) {
     for (entity, transform, team, lane, minion_state) in q_minion.iter() {
         if *minion_state == MinionState::AttackingTarget {
             continue;
         }
 
-        let minion_path = res_config.minion_paths.get(lane).unwrap();
+        let minion_path = res_minion_path.0.get(lane).unwrap();
 
         let mut path = minion_path.clone();
 

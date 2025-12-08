@@ -6,11 +6,9 @@ use league_core::{
     UiElementEffectAnimationData, UiElementEffectAnimationDataTextureData,
     UiElementGroupButtonData, UiElementIconData, UiElementRegionData,
 };
-use league_loader::{LeagueWadGroupLoader, PropBinLoader};
+use league_loader::{LeagueLoader, PropBinLoader};
 use league_property::from_entry;
-use league_to_lol::{
-    get_bin_path, save_config_map, save_struct_to_file, save_wad_entry_to_file, CONFIG_UI,
-};
+use league_to_lol::{get_bin_path, save_struct_to_file, save_wad_entry_to_file, CONFIG_UI};
 use lol_config::ConfigUi;
 
 #[tokio::main]
@@ -23,7 +21,7 @@ async fn main() {
 
     let mut textures = HashSet::new();
 
-    let ui_loader = LeagueWadGroupLoader::from_relative_path(
+    let ui_loader = LeagueLoader::from_relative_path(
         root_dir,
         vec!["DATA/FINAL/UI.wad.client", "DATA/FINAL/UI.zh_MY.wad.client"],
     );
@@ -92,18 +90,6 @@ async fn main() {
     save_struct_to_file(&get_bin_path(CONFIG_UI), &config_ui)
         .await
         .unwrap();
-
-    save_config_map(
-        root_dir,
-        "base_srx",
-        vec![
-            ("Fiora", "Skin22"),
-            ("Hwei", "Skin0"),
-            ("Cassiopeia", "Skin0"),
-        ],
-    )
-    .await
-    .unwrap();
 
     let end = Instant::now();
 

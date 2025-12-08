@@ -1,4 +1,4 @@
-use league_loader::LeagueLoader;
+use league_loader::LeagueWadMapLoader;
 use league_to_lol::load_navigation_grid;
 use tokio::time::Instant;
 
@@ -9,11 +9,11 @@ async fn main() {
     #[cfg(windows)]
     let root_dir = r"C:\Program Files (x86)\WeGameApps\英雄联盟\game";
 
-    let loader = LeagueLoader::new(root_dir, "bloom").unwrap();
+    let loader = LeagueWadMapLoader::from_loader(root_dir, "bloom").unwrap();
 
     let start = Instant::now();
 
-    load_navigation_grid(&loader.map_loader).await.unwrap();
+    load_navigation_grid(&loader).await.unwrap();
 
     let end = Instant::now();
     println!("Time taken: {:?}", end.duration_since(start));

@@ -5,8 +5,8 @@ use lol_core::Team;
 use crate::{
     abilities::get_particle_hash,
     core::{
-        is_in_direction, Buff, BuffOf, CommandParticleDespawn, CommandParticleSpawn, Direction,
-        EventDamageCreate, Health,
+        is_in_direction, Buff, BuffOf, CommandCharacterParticleDespawn,
+        CommandCharacterParticleSpawn, Direction, EventDamageCreate, Health,
     },
 };
 
@@ -68,13 +68,13 @@ fn fixed_update(
 
             if buff.is_active() {
                 for direction in buff.vitals.iter() {
-                    commands.trigger(CommandParticleSpawn {
+                    commands.trigger(CommandCharacterParticleSpawn {
                         entity: target_entity,
-                        particle: get_particle_hash(direction, "Fiora_R_Mark_", ""),
+                        hash: get_particle_hash(direction, "Fiora_R_Mark_", ""),
                     });
-                    commands.trigger(CommandParticleSpawn {
+                    commands.trigger(CommandCharacterParticleSpawn {
                         entity: target_entity,
-                        particle: get_particle_hash(direction, "Fiora_R_Mark_", "_FioraOnly"),
+                        hash: get_particle_hash(direction, "Fiora_R_Mark_", "_FioraOnly"),
                     });
                 }
             }
@@ -84,13 +84,13 @@ fn fixed_update(
         if !buff.timeout_red_triggered && buff.remove_timer.remaining_secs() <= VITAL_R_TIMEOUT {
             for direction in buff.vitals.iter() {
                 commands.entity(target_entity);
-                commands.trigger(CommandParticleDespawn {
+                commands.trigger(CommandCharacterParticleDespawn {
                     entity: target_entity,
                     hash: get_particle_hash(direction, "Fiora_R_Mark_", ""),
                 });
-                commands.trigger(CommandParticleSpawn {
+                commands.trigger(CommandCharacterParticleSpawn {
                     entity: target_entity,
-                    particle: get_particle_hash(direction, "Fiora_R_", "_Timeout"),
+                    hash: get_particle_hash(direction, "Fiora_R_", "_Timeout"),
                 });
             }
             buff.timeout_red_triggered = true;
@@ -102,15 +102,15 @@ fn fixed_update(
             // 清理所有剩余的粒子
             for direction in buff.vitals.iter() {
                 commands.entity(target_entity);
-                commands.trigger(CommandParticleDespawn {
+                commands.trigger(CommandCharacterParticleDespawn {
                     entity: target_entity,
                     hash: get_particle_hash(direction, "Fiora_R_Mark_", ""),
                 });
-                commands.trigger(CommandParticleDespawn {
+                commands.trigger(CommandCharacterParticleDespawn {
                     entity: target_entity,
                     hash: get_particle_hash(direction, "Fiora_R_Mark_", "_FioraOnly"),
                 });
-                commands.trigger(CommandParticleDespawn {
+                commands.trigger(CommandCharacterParticleDespawn {
                     entity: target_entity,
                     hash: get_particle_hash(direction, "Fiora_R_", "_Timeout"),
                 });
@@ -176,19 +176,19 @@ fn on_damage_create(
         return;
     };
 
-    commands.trigger(CommandParticleSpawn {
+    commands.trigger(CommandCharacterParticleSpawn {
         entity: target_entity,
-        particle: hash_bin("Fiora_Passive_Hit_Tar"),
+        hash: hash_bin("Fiora_Passive_Hit_Tar"),
     });
-    commands.trigger(CommandParticleDespawn {
+    commands.trigger(CommandCharacterParticleDespawn {
         entity: target_entity,
         hash: get_particle_hash(&direction, "Fiora_R_Mark_", ""),
     });
-    commands.trigger(CommandParticleDespawn {
+    commands.trigger(CommandCharacterParticleDespawn {
         entity: target_entity,
         hash: get_particle_hash(&direction, "Fiora_R_Mark_", "_FioraOnly"),
     });
-    commands.trigger(CommandParticleDespawn {
+    commands.trigger(CommandCharacterParticleDespawn {
         entity: target_entity,
         hash: get_particle_hash(&direction, "Fiora_R_", "_Timeout"),
     });

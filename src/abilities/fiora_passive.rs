@@ -8,13 +8,9 @@ use league_utils::hash_bin;
 use lol_core::Team;
 
 use crate::{
-    abilities::BuffFioraR,
-    core::{
-        is_in_direction, BuffOf, CommandDamageCreate, CommandParticleDespawn, CommandParticleSpawn,
-        DamageType, Direction, EventDamageCreate, Health, PassiveSkillOf,
-    },
-    entities::Champion,
-    EntityCommandsTrigger,
+    is_in_direction, BuffFioraR, BuffOf, Champion, CommandCharacterParticleDespawn,
+    CommandCharacterParticleSpawn, CommandDamageCreate, DamageType, Direction,
+    EntityCommandsTrigger, EventDamageCreate, Health, PassiveSkillOf,
 };
 
 const VITAL_DISTANCE: f32 = 1000.0;
@@ -74,8 +70,8 @@ pub fn get_particle_hash(direction: &Direction, postfix: &str, suffix: &str) -> 
         Direction::Down => "SW",
         Direction::Left => "SE",
     };
-    let full_name = format!("{}{}{}", postfix, base_name, suffix);
-    hash_bin(&full_name)
+
+    hash_bin(&format!("{}{}{}", postfix, base_name, suffix))
 }
 
 fn update_add_vital(
@@ -155,9 +151,9 @@ fn update_add_vital(
                 FIORA_PASSIVE_DURATION,
             ));
 
-            commands.trigger(CommandParticleSpawn {
+            commands.trigger(CommandCharacterParticleDespawn {
                 entity: target_entity,
-                particle: get_particle_hash(&direction, "Fiora_Passive_", "_Warning"),
+                hash: get_particle_hash(&direction, "Fiora_Passive_", "_Warning"),
             });
         }
     }
@@ -199,13 +195,13 @@ fn update_remove_vital(
                 vital.active_timer.tick(time.delta());
 
                 if vital.is_active() {
-                    commands.trigger(CommandParticleDespawn {
+                    commands.trigger(CommandCharacterParticleSpawn {
                         entity: target_entity,
                         hash: get_particle_hash(&vital.direction, "Fiora_Passive_", "_Warning"),
                     });
-                    commands.trigger(CommandParticleSpawn {
+                    commands.trigger(CommandCharacterParticleDespawn {
                         entity: target_entity,
-                        particle: get_particle_hash(&vital.direction, "Fiora_Passive_", ""),
+                        hash: get_particle_hash(&vital.direction, "Fiora_Passive_", ""),
                     });
                 }
                 continue;
@@ -213,13 +209,13 @@ fn update_remove_vital(
 
             if !vital.timeout_red_triggered && vital.remove_timer.remaining_secs() <= VITAL_TIMEOUT
             {
-                commands.trigger(CommandParticleDespawn {
+                commands.trigger(CommandCharacterParticleSpawn {
                     entity: target_entity,
                     hash: get_particle_hash(&vital.direction, "Fiora_Passive_", ""),
                 });
-                commands.trigger(CommandParticleSpawn {
+                commands.trigger(CommandCharacterParticleDespawn {
                     entity: target_entity,
-                    particle: get_particle_hash(&vital.direction, "Fiora_Passive_", "_TimeOut_Red"),
+                    hash: get_particle_hash(&vital.direction, "Fiora_Passive_", "_TimeOut_Red"),
                 });
 
                 vital.timeout_red_triggered = true;
@@ -267,16 +263,16 @@ fn on_damage_create(
         return;
     }
 
-    commands.try_trigger(CommandParticleSpawn {
+    commands.try_trigger(CommandCharacterParticleDespawn {
         entity: target_entity,
-        particle: hash_bin("Fiora_Passive_Hit_Tar"),
+        hash: hash_bin("Fiora_Passive_Hit_Tar"),
     });
 
-    commands.trigger(CommandParticleDespawn {
+    commands.trigger(CommandCharacterParticleSpawn {
         entity: target_entity,
         hash: get_particle_hash(&vital.direction, "Fiora_Passive_", "_Warning"),
     });
-    commands.trigger(CommandParticleDespawn {
+    commands.trigger(CommandCharacterParticleSpawn {
         entity: target_entity,
         hash: get_particle_hash(&vital.direction, "Fiora_Passive_", ""),
     });
@@ -330,8 +326,8 @@ fn on_damage_create(
         amount: hp.max * 0.05,
     });
 
-    commands.try_trigger(CommandParticleSpawn {
+    commands.try_trigger(CommandCharacterParticleDespawn {
         entity: target_entity,
-        particle: get_particle_hash(&direction, "Fiora_Passive_", "_Warning"),
+        hash: get_particle_hash(&direction, "Fiora_Passive_", "_Warning"),
     });
 }

@@ -9,9 +9,8 @@ use bevy::{
 use league_core::{
     Unk0xee39916f, VfxEmitterDefinitionData, VfxEmitterDefinitionDataPrimitive,
     VfxEmitterDefinitionDataSpawnShape, VfxPrimitiveMesh, VfxPrimitivePlanarProjection,
-    VfxShapeBox, VfxShapeCylinder, VfxShapeLegacy,
+    VfxShapeBox, VfxShapeCylinder, VfxShapeLegacy, VfxSystemDefinitionData,
 };
-use lol_config::ConfigMap;
 
 use crate::{
     create_black_pixel_texture, spawn_shadow_skin_entity, Lifetime, MapGeometry, ParticleId,
@@ -58,11 +57,12 @@ pub fn update_emitter_position(
         &ParticleEmitterState,
         &ParticleId,
     )>,
-    res_config_map: Res<ConfigMap>,
+    res_assets_vfx_system_definition_data: Res<Assets<VfxSystemDefinitionData>>,
     q_global_transform: Query<&GlobalTransform>,
 ) {
     for (mut transform, emitter_of, lifetime, emitter, particle_id) in query.iter_mut() {
-        let vfx_emitter_definition_data = particle_id.get_def(&res_config_map);
+        let vfx_emitter_definition_data =
+            particle_id.get_def(&res_assets_vfx_system_definition_data);
 
         let is_local_orientation = vfx_emitter_definition_data
             .is_local_orientation
@@ -342,7 +342,7 @@ fn attach_particle_visuals(
 pub fn update_emitter(
     mut commands: Commands,
     mut res_mesh: ResMut<Assets<Mesh>>,
-    res_config_map: Res<ConfigMap>,
+    res_assets_vfx_system_definition_data: Res<Assets<VfxSystemDefinitionData>>,
     res_asset_server: Res<AssetServer>,
     mut res_resource_cache: ResMut<ResourceCache>,
     mut res_image: ResMut<Assets<Image>>,
@@ -359,7 +359,8 @@ pub fn update_emitter(
     time: Res<Time>,
 ) {
     for (emitter_entity, mut lifetime, mut emitter, particle_id) in query.iter_mut() {
-        let vfx_emitter_definition_data = particle_id.get_def(&res_config_map);
+        let vfx_emitter_definition_data =
+            particle_id.get_def(&res_assets_vfx_system_definition_data);
 
         let primitive = vfx_emitter_definition_data
             .primitive
@@ -475,7 +476,7 @@ pub fn update_emitter(
 
 pub fn update_emitter_attached(
     mut commands: Commands,
-    res_config_map: Res<ConfigMap>,
+    res_assets_vfx_system_definition_data: Res<Assets<VfxSystemDefinitionData>>,
     res_asset_server: Res<AssetServer>,
     mut res_resource_cache: ResMut<ResourceCache>,
     mut res_image: ResMut<Assets<Image>>,
@@ -496,7 +497,8 @@ pub fn update_emitter_attached(
     time: Res<Time>,
 ) {
     for (emitter_entity, emitter_of, mut lifetime, mut emitter, particle_id) in query.iter_mut() {
-        let vfx_emitter_definition_data = particle_id.get_def(&res_config_map);
+        let vfx_emitter_definition_data =
+            particle_id.get_def(&res_assets_vfx_system_definition_data);
 
         let primitive = vfx_emitter_definition_data
             .primitive

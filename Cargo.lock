@@ -3934,7 +3934,9 @@ dependencies = [
  "bevy",
  "binrw",
  "heck",
+ "league_core",
  "league_utils",
+ "rayon",
  "serde",
  "thiserror 2.0.12",
 ]
@@ -3964,6 +3966,7 @@ version = "0.1.0"
 dependencies = [
  "bevy",
  "binrw",
+ "heck",
  "serde",
  "twox-hash",
 ]
@@ -4085,6 +4088,7 @@ dependencies = [
  "binrw",
  "league_core",
  "league_file",
+ "league_property",
  "league_utils",
  "lol_core",
  "serde",
@@ -4271,6 +4275,7 @@ dependencies = [
  "lol_core",
  "lol_loader",
  "rand 0.9.2",
+ "rayon",
  "regex",
  "rocket",
  "rocket_cors",

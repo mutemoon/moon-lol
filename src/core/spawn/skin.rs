@@ -2,17 +2,19 @@ use std::collections::HashMap;
 
 use bevy::animation::{AnimationTarget, AnimationTargetId};
 use bevy::asset::uuid::Uuid;
-use bevy::mesh::skinning::SkinnedMesh;
+use bevy::mesh::skinning::{SkinnedMesh, SkinnedMeshInverseBindposes};
 use bevy::prelude::*;
 
+use bevy::render::render_resource::Face;
 use league_core::{
-    AnimationGraphDataMClipDataMap, AtomicClipData, ConditionBoolClipData, ConditionFloatClipData,
-    SelectorClipData, SequencerClipData,
+    AnimationGraphData, AnimationGraphDataMClipDataMap, AtomicClipData, ConditionBoolClipData,
+    ConditionFloatClipData, SelectorClipData, SequencerClipData, SkinCharacterDataProperties,
 };
-use league_utils::hash_bin;
-use lol_config::ConfigCharacterSkin;
+use league_file::{LeagueSkeleton, LeagueSkinnedMesh};
+use league_to_lol::{load_animation_map, skinned_mesh_to_intermediate};
+use league_utils::{get_asset_id_by_hash, get_asset_id_by_path, hash_bin, hash_joint};
 
-use crate::{Animation, AnimationNode, AnimationNodeF32, AnimationState, ResourceCache};
+use crate::{Animation, AnimationNode, AnimationNodeF32, AnimationState};
 
 // 皮肤系统插件
 #[derive(Default)]
@@ -34,19 +36,19 @@ impl Plugin for PluginSkin {
 #[derive(EntityEvent)]
 pub struct CommandSkinSpawn {
     pub entity: Entity,
-    pub skin_path: String,
+    pub skin_key: AssetId<SkinCharacterDataProperties>,
 }
 
 #[derive(EntityEvent)]
 pub struct CommandSpawnMesh {
     pub entity: Entity,
-    pub skin_path: String,
+    pub skin_key: AssetId<SkinCharacterDataProperties>,
 }
 
 #[derive(EntityEvent)]
 pub struct CommandSpawnAnimation {
     pub entity: Entity,
-    pub skin_path: String,
+    pub skin_key: AssetId<SkinCharacterDataProperties>,
 }
 
 /// 更新皮肤缩放系统
@@ -60,42 +62,99 @@ fn update_skin_scale(mut query: Query<(&SkinScale, &mut Transform)>) {
 fn on_command_skin_spawn(
     trigger: On<CommandSkinSpawn>,
     mut commands: Commands,
-    res_resource_cache: Res<ResourceCache>,
+    res_assets_skin_character_data_properties: Res<Assets<SkinCharacterDataProperties>>,
 ) {
     let entity = trigger.event_target();
 
     // 从 skin_path 获取 ConfigCharacterSkin
-    let skin = res_resource_cache
-        .skins
-        .get(&trigger.skin_path)
-        .unwrap_or_else(|| panic!("Skin not found: {}", trigger.skin_path));
+    let skin = res_assets_skin_character_data_properties
+        .get(trigger.skin_key)
+        .unwrap_or_else(|| panic!("Skin not found: {}", trigger.skin_key));
 
     commands.entity(entity).insert((
         Visibility::default(),
-        SkinScale(skin.skin_scale.unwrap_or(1.0)),
+        SkinScale(
+            skin.skin_mesh_properties
+                .as_ref()
+                .unwrap()
+                .skin_scale
+                .unwrap_or(1.0),
+        ),
     ));
 
     commands.trigger(CommandSpawnMesh {
         entity,
-        skin_path: trigger.skin_path.clone(),
+        skin_key: trigger.skin_key.clone(),
     });
+}
+
+struct ConfigJoint {
+    hash: u32,
+    transform: Transform,
+    parent_index: i16,
 }
 
 fn on_command_spawn_mesh(
     trigger: On<CommandSpawnMesh>,
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    res_resource_cache: Res<ResourceCache>,
+    mut res_assets_mesh: ResMut<Assets<Mesh>>,
+    res_assets_skin_character_data_properties: Res<Assets<SkinCharacterDataProperties>>,
+    mut res_assets_standard_material: ResMut<Assets<StandardMaterial>>,
+    mut res_assets_league_skeleton: ResMut<Assets<LeagueSkeleton>>,
+    mut res_assets_league_skinned_mesh: ResMut<Assets<LeagueSkinnedMesh>>,
+    mut res_assets_skinned_mesh_inverse_bindposes: ResMut<Assets<SkinnedMeshInverseBindposes>>,
 ) {
     let entity = trigger.event_target();
-    let skin_path = &trigger.skin_path;
-    let skin = res_resource_cache.skins.get(skin_path).unwrap();
+    let skin_path = &trigger.skin_key;
+    let skin_character_data_properties = res_assets_skin_character_data_properties
+        .get(trigger.skin_key)
+        .unwrap();
 
-    let material_handle: Handle<StandardMaterial> = asset_server.load(skin.material_path.clone());
+    let skin_mesh_properties = skin_character_data_properties
+        .skin_mesh_properties
+        .as_ref()
+        .unwrap();
 
-    let mut index_to_entity = vec![Entity::PLACEHOLDER; skin.joints.len()];
+    let texture = skin_mesh_properties.texture.clone().unwrap();
 
-    for (i, joint) in skin.joints.iter().enumerate() {
+    let material_handle = get_standard(
+        &mut res_assets_standard_material,
+        &asset_server,
+        Some(texture),
+    );
+
+    let league_skeleton = res_assets_league_skeleton
+        .get(get_asset_id_by_path(
+            skin_mesh_properties.skeleton.as_ref().unwrap(),
+        ))
+        .unwrap();
+
+    let inverse_bindposes = res_assets_skinned_mesh_inverse_bindposes.add(
+        league_skeleton
+            .modern_data
+            .influences
+            .iter()
+            .map(|&v| league_skeleton.modern_data.joints[v as usize].inverse_bind_transform)
+            .collect::<Vec<_>>(),
+    );
+
+    let joints = league_skeleton
+        .modern_data
+        .joints
+        .iter()
+        .map(|joint| ConfigJoint {
+            hash: hash_joint(&joint.name),
+            transform: Transform::from_matrix(joint.local_transform),
+            parent_index: joint.parent_index,
+        })
+        .collect::<Vec<_>>();
+
+    let joint_influences_indices = &league_skeleton.modern_data.influences;
+
+    let mut index_to_entity = vec![Entity::PLACEHOLDER; joints.len()];
+
+    for (i, joint) in joints.iter().enumerate() {
         let ent = commands
             .spawn((
                 joint.transform,
@@ -108,7 +167,7 @@ fn on_command_spawn_mesh(
         index_to_entity[i] = ent;
     }
 
-    for (i, joint) in skin.joints.iter().enumerate() {
+    for (i, joint) in joints.iter().enumerate() {
         if joint.parent_index >= 0 {
             let parent_entity_joint = index_to_entity[joint.parent_index as usize];
             commands
@@ -119,19 +178,25 @@ fn on_command_spawn_mesh(
         }
     }
 
-    let inverse_bindposes = asset_server.load(&skin.inverse_bind_pose_path);
-    let joints = skin
-        .joint_influences_indices
+    let joints = joint_influences_indices
         .iter()
         .map(|&v| index_to_entity[v as usize])
         .collect::<Vec<_>>();
+
     let skinned_mesh = SkinnedMesh {
         inverse_bindposes,
         joints,
     };
 
-    for submesh_path in &skin.submesh_paths {
-        let mesh_handle: Handle<Mesh> = asset_server.load(submesh_path.clone());
+    let league_skinned_mesh = res_assets_league_skinned_mesh
+        .get(get_asset_id_by_path(
+            skin_mesh_properties.simple_skin.as_ref().unwrap(),
+        ))
+        .unwrap();
+
+    for (i, _) in league_skinned_mesh.ranges.iter().enumerate() {
+        let mesh = skinned_mesh_to_intermediate(&league_skinned_mesh, i);
+        let mesh_handle = res_assets_mesh.add(mesh);
         commands.entity(entity).with_child((
             Transform::default(),
             Mesh3d(mesh_handle),
@@ -144,8 +209,24 @@ fn on_command_spawn_mesh(
 
     commands.trigger(CommandSpawnAnimation {
         entity,
-        skin_path: skin_path.clone(),
+        skin_key: skin_path.clone(),
     });
+}
+
+pub fn get_standard(
+    res_assets_standard_material: &mut ResMut<Assets<StandardMaterial>>,
+    asset_server: &Res<AssetServer>,
+    texture: Option<String>,
+) -> Handle<StandardMaterial> {
+    let material_handle = res_assets_standard_material.add(StandardMaterial {
+        base_color_texture: texture.map(|v| asset_server.load(v)),
+        unlit: true,
+        cull_mode: Some(Face::Front),
+        alpha_mode: AlphaMode::Mask(0.3),
+        ..default()
+    });
+
+    material_handle
 }
 
 fn on_command_spawn_animation(
@@ -153,15 +234,27 @@ fn on_command_spawn_animation(
     mut commands: Commands,
     mut res_animation_graph: ResMut<Assets<AnimationGraph>>,
     asset_server: Res<AssetServer>,
-    res_resource_cache: Res<ResourceCache>,
+    res_assets_skin_character_data_properties: Res<Assets<SkinCharacterDataProperties>>,
+    res_assets_animation_graph_data: Res<Assets<AnimationGraphData>>,
 ) {
     let entity = trigger.event_target();
-    let skin_path = &trigger.skin_path;
-    let skin = res_resource_cache.skins.get(skin_path).unwrap();
+    let skin_character_data_properties = res_assets_skin_character_data_properties
+        .get(trigger.skin_key)
+        .unwrap();
+
+    let animation_graph_data = res_assets_animation_graph_data
+        .get(get_asset_id_by_hash(
+            skin_character_data_properties
+                .skin_animation_properties
+                .animation_graph_data,
+        ))
+        .unwrap();
+
+    let (animation_map, blend_data) = load_animation_map(animation_graph_data.clone()).unwrap();
 
     let mut animation_graph = AnimationGraph::new();
 
-    let hash_to_node = build_animation_nodes(skin, &asset_server, &mut animation_graph);
+    let hash_to_node = build_animation_nodes(animation_map, &asset_server, &mut animation_graph);
 
     let graph_handle = res_animation_graph.add(animation_graph);
 
@@ -170,7 +263,7 @@ fn on_command_spawn_animation(
         AnimationGraphHandle(graph_handle),
         Animation {
             hash_to_node,
-            blend_data: skin.blend_data.clone(),
+            blend_data,
         },
         AnimationState {
             last_hash: None,
@@ -182,13 +275,13 @@ fn on_command_spawn_animation(
 }
 
 fn build_animation_nodes(
-    skin: &ConfigCharacterSkin,
+    animation_map: HashMap<u32, AnimationGraphDataMClipDataMap>,
     asset_server: &Res<AssetServer>,
     animation_graph: &mut AnimationGraph,
 ) -> HashMap<u32, AnimationNode> {
     let mut hash_to_node = HashMap::new();
 
-    for (hash, clip) in &skin.animation_map {
+    for (hash, clip) in &animation_map {
         match clip {
             AnimationGraphDataMClipDataMap::AtomicClipData(AtomicClipData {
                 m_animation_resource_data,

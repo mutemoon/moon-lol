@@ -1,6 +1,7 @@
 use std::collections::{HashMap, HashSet};
 
 use heck::{ToPascalCase, ToSnakeCase};
+use league_utils::hash_to_type_name;
 
 use crate::{BinParser, BinType, EntryData, Error, PropFile};
 
@@ -166,14 +167,11 @@ fn generate_enum_definitions(
         }
 
         let mut enum_def = String::new();
-        enum_def.push_str("#[derive(Serialize, Deserialize, Debug)]\n");
+        enum_def.push_str("#[derive(Serialize, Deserialize, Debug, Clone, Reflect)]\n");
         enum_def.push_str(&format!("pub enum {} {{\n", enum_info.name));
 
         for variant_hash in &enum_info.hashes {
-            let mut variant_name = hashes
-                .get(variant_hash)
-                .map(|s| s.to_pascal_case())
-                .unwrap_or(format!("Unk0x{:x}", variant_hash));
+            let mut variant_name = hash_to_type_name(variant_hash, hashes);
 
             if variant_name == "Self" {
                 variant_name = "MySelf".to_string();
@@ -209,10 +207,7 @@ fn map_class_data_to_rust_type(
 ) -> String {
     match field_data {
         ClassData::Base(type_string) => type_string.clone(),
-        ClassData::Struct(struct_hash) => hashes
-            .get(struct_hash)
-            .map(|s| s.to_pascal_case())
-            .unwrap_or(format!("Unk0x{:x}", struct_hash)),
+        ClassData::Struct(struct_hash) => hash_to_type_name(struct_hash, hashes),
         ClassData::Enum(enum_hashes) => {
             // 从枚举的哈希集合中取第一个哈希，查找合并后的枚举名称
             if let Some(&first_hash) = enum_hashes.iter().next() {
@@ -455,21 +450,18 @@ pub fn get_hashes_u64(paths: &[&str]) -> HashMap<u64, String> {
 
     hashes
 }
-// ... end of unchanged functions
 
-pub async fn class_map_to_rust_code(
+pub fn class_map_to_rust_code(
     class_map: &mut ClassMap,
     hashes: &HashMap<u32, String>,
+    entry_hashes: &HashSet<u32>,
 ) -> Result<String, Error> {
     let mut all_definitions = String::new();
 
     // 1. 收集所有枚举信息
     let mut enum_infos = Vec::new();
     for (class_hash, class_fields) in class_map.iter() {
-        let parent_class_name = hashes
-            .get(class_hash)
-            .map(|s| s.to_pascal_case())
-            .unwrap_or(format!("Unk0x{:x}", class_hash));
+        let parent_class_name = hash_to_type_name(class_hash, hashes);
 
         for (field_hash, field_data) in class_fields.iter() {
             collect_enum_info_recursively(
@@ -522,17 +514,18 @@ pub async fn class_map_to_rust_code(
 
     // 6. 生成结构体定义
     for (class_hash, class_data) in class_map.iter() {
-        let mut class_name = hashes
-            .get(class_hash)
-            .map(|s| s.to_pascal_case())
-            .unwrap_or(format!("Unk0x{:x}", class_hash));
+        let mut class_name = hash_to_type_name(class_hash, hashes);
 
         if class_name == "Self" {
             class_name = "r#Self".to_string();
         }
 
         let mut struct_def = String::new();
-        struct_def.push_str("#[derive(Serialize, Deserialize, Debug)]\n");
+        if entry_hashes.contains(class_hash) {
+            struct_def.push_str("#[derive(Serialize, Deserialize, Debug, Clone, Reflect)]\n");
+        } else {
+            struct_def.push_str("#[derive(Serialize, Deserialize, Debug, Clone, Reflect)]\n");
+        }
         struct_def.push_str("#[serde(rename_all = \"camelCase\")]\n");
         struct_def.push_str(&format!("pub struct {} {{\n", class_name));
 
@@ -546,6 +539,15 @@ pub async fn class_map_to_rust_code(
 
             if field_name_snake == "type" {
                 field_name_snake = "r#type".to_string();
+            }
+            if field_name_snake == "move" {
+                field_name_snake = "r#move".to_string();
+            }
+            if field_name_snake == "loop" {
+                field_name_snake = "r#loop".to_string();
+            }
+            if field_name_snake == "trait" {
+                field_name_snake = "r#trait".to_string();
             }
 
             let mut type_name = map_class_data_to_rust_type(
@@ -570,17 +572,16 @@ pub async fn class_map_to_rust_code(
     Ok(all_definitions)
 }
 
-// ... unchanged functions ...
-pub async fn extract_all_class(prop_file: &PropFile) -> Result<ClassMap, Error> {
+pub fn extract_all_class(prop_file: &PropFile) -> Result<ClassMap, Error> {
     let mut class_map = HashMap::new();
     for (class_hash, entry) in prop_file.iter_class_hash_and_entry() {
-        let class_map_entry = extract_entry_class(class_hash, entry).await.unwrap();
+        let class_map_entry = extract_entry_class(class_hash, entry).unwrap();
         merge_class_maps(&mut class_map, class_map_entry);
     }
     Ok(class_map)
 }
 
-pub async fn extract_entry_class(class_hash: u32, entry: &EntryData) -> Result<ClassMap, Error> {
+pub fn extract_entry_class(class_hash: u32, entry: &EntryData) -> Result<ClassMap, Error> {
     let mut parser = BinParser::from_bytes(&entry.data);
 
     let data_map = parser.read_fields().unwrap();

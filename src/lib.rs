@@ -22,10 +22,12 @@ plugin_group! {
         :PluginChampion,
         :PluginCharacter,
         :PluginDebugSphere,
-        :PluginFiora,
-        :PluginHwei,
         :PluginMinion,
         :PluginTurret,
+
+        :PluginFiora,
+        :PluginHwei,
+        :PluginRiven,
 
         :PluginAction,
         :PluginAnimation,

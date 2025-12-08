@@ -5,7 +5,7 @@ use league_utils::{parse_vec3_array, BoundingBox};
 use serde::{Deserialize, Serialize};
 
 #[binread]
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Asset, TypePath)]
 #[br(magic = b"OEGM")]
 #[br(little)]
 pub struct LeagueMapGeo {

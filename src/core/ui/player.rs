@@ -1,8 +1,9 @@
 use bevy::prelude::*;
+use league_core::SkinCharacterDataProperties;
 
 use crate::{
     AbilityResource, Character, CommandUpdateUIElement, Controller, Health, Level, NodeType,
-    ResourceCache, SizeType, UIElementEntity,
+    SizeType, UIElementEntity,
 };
 
 #[derive(Component, Reflect, Default)]
@@ -152,7 +153,7 @@ pub fn update_player_ability_resource(
 
 pub fn update_player_icon(
     mut commands: Commands,
-    mut res_resource_cache: ResMut<ResourceCache>,
+    res_assets_skin_character_data_properties: Res<Assets<SkinCharacterDataProperties>>,
     asset_server: Res<AssetServer>,
     q_character: Query<&Character, With<Controller>>,
     res_ui_element_entity: Res<UIElementEntity>,
@@ -167,8 +168,10 @@ pub fn update_player_icon(
     let Ok(character) = q_character.single() else {
         return;
     };
-    let skin = res_resource_cache.skins.get(&character.skin_key).unwrap();
-    let icon_name = skin.icon_avatar_path.clone().unwrap();
+    let skin = res_assets_skin_character_data_properties
+        .get(character.skin_key)
+        .unwrap();
+    let icon_name = skin.icon_avatar.clone().unwrap();
 
     let &child = q_children.get(entity).unwrap().get(0).unwrap();
     if q_image_node.get_mut(child).is_ok() {
@@ -177,7 +180,7 @@ pub fn update_player_icon(
 
     commands.entity(entity).insert((
         ImageNode {
-            image: res_resource_cache.get_image(&asset_server, &format!("{}#srgb", icon_name)),
+            image: asset_server.load(&format!("{}#srgb", icon_name)),
             ..default()
         },
         Visibility::Visible,

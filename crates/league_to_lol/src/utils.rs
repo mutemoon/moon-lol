@@ -52,14 +52,6 @@ pub fn get_bin_path(path: &str) -> String {
     format!("{path}.bin")
 }
 
-pub fn get_character_record_save_path(path: &str) -> String {
-    format!("Assets/{path}")
-}
-
-pub fn get_character_spell_objects_save_path(name: &str) -> String {
-    format!("Assets/Characters/{name}/spell_objects")
-}
-
 pub fn get_struct_from_file<T: DeserializeOwned>(path: &str) -> Result<T, Error> {
     let mut file = File::open(format!("assets/{}", &get_bin_path(path)))?;
     let mut data = Vec::new();

@@ -6,13 +6,12 @@ use league_core::{
     AnimationGraphData, AnimationGraphDataMBlendDataTable, AnimationGraphDataMClipDataMap,
 };
 use league_file::{AnimationFile, CompressedTransformType, UncompressedData};
-use league_property::{from_entry_unwrap, EntryData};
 use lol_config::ConfigAnimationClip;
 
 use crate::Error;
 
 pub fn load_animation_map(
-    value: &EntryData,
+    animation_graph_data: AnimationGraphData,
 ) -> Result<
     (
         HashMap<u32, AnimationGraphDataMClipDataMap>,
@@ -20,8 +19,6 @@ pub fn load_animation_map(
     ),
     Error,
 > {
-    let animation_graph_data = from_entry_unwrap::<AnimationGraphData>(value);
-
     let (Some(nodes), Some(blend_data)) = (
         animation_graph_data.m_clip_data_map,
         animation_graph_data.m_blend_data_table,

@@ -1,11 +1,11 @@
 use bevy::{animation::AnimationTarget, color::palettes::tailwind::RED_500, prelude::*};
-use league_core::MissileSpecificationMovementComponent;
-use league_utils::hash_joint;
+use league_core::{MissileSpecificationMovementComponent, SpellObject};
+use league_utils::{get_asset_id_by_hash, hash_joint};
 use serde::{Deserialize, Serialize};
 
 use crate::{
     CommandDamageCreate, CommandMovement, CommandParticleSpawn, Damage, DamageType, DebugSphere,
-    EntityCommandsTrigger, EventMovementEnd, Movement, MovementAction, MovementWay, ResourceCache,
+    EntityCommandsTrigger, EventMovementEnd, Movement, MovementAction, MovementWay,
 };
 
 #[derive(Default)]
@@ -23,7 +23,7 @@ impl Plugin for PluginMissile {
 /// 攻击组件 - 包含攻击的基础属性
 #[derive(Debug, Component, Clone)]
 pub struct Missile {
-    pub key: u32,
+    pub key: AssetId<SpellObject>,
     pub speed: f32,
 }
 
@@ -40,7 +40,7 @@ pub struct MissileState {
 pub struct CommandMissileCreate {
     pub entity: Entity,
     pub target: Entity,
-    pub spell_key: u32,
+    pub spell_key: AssetId<SpellObject>,
 }
 
 fn fixed_update(
@@ -69,14 +69,14 @@ fn fixed_update(
 fn on_command_missile_create(
     trigger: On<CommandMissileCreate>,
     mut commands: Commands,
-    resource_cache: Res<ResourceCache>,
+    res_assets_spell_object: Res<Assets<SpellObject>>,
     q_global_transform: Query<&GlobalTransform>,
     q_children: Query<&Children>,
     q_joint_target: Query<&AnimationTarget>,
 ) {
     let entity = trigger.event_target();
 
-    let spell_object = resource_cache.spells.get(&trigger.spell_key).unwrap();
+    let spell_object = res_assets_spell_object.get(trigger.spell_key).unwrap();
 
     let spell_data_resource = spell_object.m_spell.clone().unwrap();
 
@@ -169,7 +169,7 @@ fn on_command_missile_create(
     if let Some(particle) = spell_data_resource.m_missile_effect_key {
         commands.trigger(CommandParticleSpawn {
             entity: missile_entity,
-            particle,
+            hash: get_asset_id_by_hash(particle),
         });
     } else {
         commands.entity(missile_entity).insert(DebugSphere {

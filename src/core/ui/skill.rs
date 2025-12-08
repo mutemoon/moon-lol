@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use league_core::SpellObject;
 
 use crate::{
     CommandDespawnButton, CommandSkillLevelUp, CommandSpawnButton, Controller, Level,
@@ -14,8 +15,10 @@ pub fn update_skill_icon(
     res_ui_element_entity: Res<UIElementEntity>,
     q_children: Query<&Children>,
     mut q_image_node: Query<&mut ImageNode>,
+    res_assets_spell_object: Res<Assets<SpellObject>>,
 ) {
     let Some(skills) = q_skills.iter().next() else {
+        debug!("未找到控制器的技能列表");
         return;
     };
 
@@ -27,19 +30,22 @@ pub fn update_skill_icon(
         };
 
         let Some(&entity) = res_ui_element_entity.get_by_string(&key) else {
+            debug!("未找到技能图标 UI 元素 {}", key);
             continue;
         };
         let &child = q_children.get(entity).unwrap().get(0).unwrap();
         let mut image_node = q_image_node.get_mut(child).unwrap();
         if image_node.rect.is_none() {
+            debug!("技能图标 {} 的 rect 为空", index);
             continue;
         }
 
         let Ok(skill) = q_skill.get(skill) else {
+            debug!("未找到技能实体 {} 的技能组件", index);
             continue;
         };
 
-        let spell = res_resource_cache.spells.get(&skill.key).unwrap();
+        let spell = res_assets_spell_object.get(skill.key_spell_object).unwrap();
 
         let icon_name = spell
             .m_spell
@@ -71,6 +77,7 @@ pub fn update_skill_level_up_button(
     q_skill: Query<&Skill>,
 ) {
     let Ok((entity, level, skill_points, skills)) = q_skill_points.single() else {
+        debug!("未找到控制器的技能点信息");
         return;
     };
 
@@ -102,7 +109,7 @@ pub fn update_skill_level_up_button(
                 continue;
             }
 
-            debug!("{} 生成技能升级按钮: 索引 {}", entity, index);
+            debug!("生成技能升级按钮 实体 {} 索引 {}", entity, index);
             let entity_button = commands
                 .spawn_empty()
                 .observe(move |_event: On<Pointer<Click>>, mut commands: Commands| {
@@ -116,7 +123,7 @@ pub fn update_skill_level_up_button(
             });
         } else {
             if let Some(entity_button) = res_skill_level_up_button.entities[index] {
-                debug!("{} 销毁技能升级按钮: 索引 {}", entity, index);
+                debug!("销毁技能升级按钮 实体 {} 索引 {}", entity, index);
                 res_skill_level_up_button.entities[index] = None;
                 commands.trigger(CommandDespawnButton {
                     entity: entity_button,
@@ -124,4 +131,5 @@ pub fn update_skill_level_up_button(
             }
         }
     }
+    debug!("技能升级按钮更新完成");
 }

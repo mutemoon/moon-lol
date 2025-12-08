@@ -12,3 +12,4 @@ trigger: always_on
 
 1. let else return 或 if return 减少缩进
 2. 要在文件顶部导入，不要用 qualify 导入，要用 use
+3. debug! 时要写中文可读性强的日志，而不是使用冒号

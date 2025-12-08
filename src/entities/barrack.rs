@@ -2,22 +2,23 @@ use std::{collections::VecDeque, time::Duration};
 
 use bevy::prelude::*;
 use league_core::{
-    BarracksMinionConfigWaveBehavior, ConstantWaveBehavior, InhibitorWaveBehavior,
-    RotatingWaveBehavior, TimedVariableWaveBehavior,
+    BarracksConfig, BarracksMinionConfigWaveBehavior, CharacterRecord, ConstantWaveBehavior,
+    InhibitorWaveBehavior, MapContainer, MapPlaceableContainer, MissileSpecificationBehaviors,
+    RotatingWaveBehavior, TimedVariableWaveBehavior, Unk0xad65d8c4,
 };
-use lol_config::ConfigMap;
+use league_utils::{get_asset_id_by_hash, get_asset_id_by_path};
 use lol_core::{Lane, Team};
-use serde::{Deserialize, Serialize};
 
 use crate::{
-    core::{Armor, CommandSpawnCharacter, Damage, Health, Movement, ResourceCache},
+    core::{Armor, CommandSpawnCharacter, Damage, Health, Movement},
     entities::Minion,
+    MapName, MinionPath,
 };
 
 /// 兵营的动态状态，用于跟踪计时器和生成队列
-#[derive(Component, Serialize, Deserialize)]
+#[derive(Component)]
 pub struct Barrack {
-    pub id: u32,
+    pub key_barracks_config: AssetId<BarracksConfig>,
     /// 下一波兵的生成计时器
     pub wave_timer: Timer,
     /// 属性升级计时器
@@ -47,50 +48,95 @@ pub struct PluginBarrack;
 impl Plugin for PluginBarrack {
     fn build(&self, app: &mut App) {
         app.init_resource::<InhibitorState>();
-        app.add_systems(Startup, setup);
+        app.add_systems(Startup, startup_spawn_barrack);
         app.add_systems(FixedUpdate, barracks_spawning_system);
     }
 }
 
-fn setup(mut commands: Commands, res_game_config: Res<ConfigMap>) {
-    for (hash, barrack) in res_game_config.barracks.iter() {
-        let barrack_config = res_game_config
-            .barrack_configs
-            .get(&barrack.definition.barracks_config)
-            .unwrap();
+fn startup_spawn_barrack(
+    mut commands: Commands,
+    mut res_minion_path: ResMut<MinionPath>,
+    map_name: Res<MapName>,
+    res_assets_map_container: Res<Assets<MapContainer>>,
+    res_assets_map_placeable_container: Res<Assets<MapPlaceableContainer>>,
+    res_assets_barracks_config: Res<Assets<BarracksConfig>>,
+) {
+    let map_container = res_assets_map_container
+        .get(get_asset_id_by_path(&map_name.0))
+        .unwrap();
 
-        // let initial_delay = barrack_config.initial_spawn_time_secs;
-        let initial_delay = 0.0;
+    for (_, &link) in &map_container.chunks {
+        let Some(map_placeable_container) =
+            res_assets_map_placeable_container.get(get_asset_id_by_hash(link))
+        else {
+            continue;
+        };
 
-        commands.spawn((
-            Transform::from_matrix(barrack.transform),
-            Team::from(barrack.definition.team),
-            Lane::from(barrack.definition.unk_0xdbde2288[0].lane),
-            Barrack {
-                id: *hash,
-                // 第一波兵有初始延迟
-                wave_timer: Timer::from_seconds(initial_delay, TimerMode::Repeating),
-                // 属性升级从第一波兵生成后开始计算
-                upgrade_timer: Timer::new(
-                    Duration::from_secs_f32(barrack_config.upgrade_interval_secs),
-                    TimerMode::Repeating,
-                ),
-                // 移速升级有自己的独立延迟
-                move_speed_upgrade_timer: Timer::new(
-                    Duration::from_secs_f32(barrack_config.move_speed_increase_initial_delay_secs),
-                    TimerMode::Repeating,
-                ),
-                // 小兵间的生成间隔计时器
-                intra_spawn_timer: Timer::from_seconds(
-                    barrack_config.minion_spawn_interval_secs,
-                    TimerMode::Repeating,
-                ),
-                spawn_queue: VecDeque::new(),
-                upgrade_count: 0,
-                move_speed_upgrade_count: 0,
-                wave_count: 0,
-            },
-        ));
+        for (_, value) in &map_placeable_container.items {
+            match value {
+                MissileSpecificationBehaviors::Unk0x3c995caf(unk0x3c995caf) => {
+                    let lane = match unk0x3c995caf.name.as_str() {
+                        "MinionPath_Top" => Lane::Top,
+                        "MinionPath_Mid" => Lane::Mid,
+                        "MinionPath_Bot" => Lane::Bot,
+                        _ => panic!("未知的小兵路径: {}", unk0x3c995caf.name),
+                    };
+
+                    let translation = unk0x3c995caf.transform.to_scale_rotation_translation().2;
+
+                    let path = unk0x3c995caf
+                        .segments
+                        .iter()
+                        .map(|v| (v + translation).xz())
+                        .collect();
+
+                    res_minion_path.0.entry(lane).or_insert(path);
+                }
+                MissileSpecificationBehaviors::Unk0xba138ae3(unk0xba138ae3) => {
+                    let key_barracks_config =
+                        get_asset_id_by_hash(unk0xba138ae3.definition.barracks_config);
+
+                    let barracks_config =
+                        res_assets_barracks_config.get(key_barracks_config).unwrap();
+
+                    // let initial_delay = barracks_config.initial_spawn_time_secs;
+                    let initial_delay = 0.0;
+
+                    commands.spawn((
+                        Transform::from_matrix(unk0xba138ae3.transform),
+                        Team::from(unk0xba138ae3.definition.team),
+                        Lane::from(unk0xba138ae3.definition.unk_0xdbde2288[0].lane),
+                        Barrack {
+                            key_barracks_config,
+                            // 第一波兵有初始延迟
+                            wave_timer: Timer::from_seconds(initial_delay, TimerMode::Repeating),
+                            // 属性升级从第一波兵生成后开始计算
+                            upgrade_timer: Timer::new(
+                                Duration::from_secs_f32(barracks_config.upgrade_interval_secs),
+                                TimerMode::Repeating,
+                            ),
+                            // 移速升级有自己的独立延迟
+                            move_speed_upgrade_timer: Timer::new(
+                                Duration::from_secs_f32(
+                                    barracks_config.move_speed_increase_initial_delay_secs,
+                                ),
+                                TimerMode::Repeating,
+                            ),
+                            // 小兵间的生成间隔计时器
+                            intra_spawn_timer: Timer::from_seconds(
+                                barracks_config.minion_spawn_interval_secs,
+                                TimerMode::Repeating,
+                            ),
+                            spawn_queue: VecDeque::new(),
+                            upgrade_count: 0,
+                            move_speed_upgrade_count: 0,
+                            wave_count: 0,
+                        },
+                    ));
+                }
+                _ => {}
+            }
+        }
     }
 }
 
@@ -100,16 +146,14 @@ fn barracks_spawning_system(
     inhibitor_state: Res<InhibitorState>,
     mut commands: Commands,
     mut query: Query<(&GlobalTransform, &mut Barrack, &Team, &Lane)>,
-    res_game_config: Res<ConfigMap>,
-    resource_cache: Res<ResourceCache>,
+    res_assets_character_record: Res<Assets<CharacterRecord>>,
     time: Res<Time>,
+    res_assets_barracks_config: Res<Assets<BarracksConfig>>,
+    res_assets_unk_ad65d8c4: Res<Assets<Unk0xad65d8c4>>,
 ) {
     for (transform, mut barrack_state, team, lane) in query.iter_mut() {
-        let barrack_place = res_game_config.barracks.get(&barrack_state.id).unwrap();
-
-        let barrack_config = res_game_config
-            .barrack_configs
-            .get(&barrack_place.definition.barracks_config)
+        let barracks_config = res_assets_barracks_config
+            .get(barrack_state.key_barracks_config)
             .unwrap();
 
         // --- 1. 更新所有计时器 ---
@@ -131,7 +175,8 @@ fn barracks_spawning_system(
         }
 
         if barrack_state.move_speed_upgrade_timer.just_finished() {
-            if barrack_state.move_speed_upgrade_count < barrack_config.move_speed_increase_max_times
+            if barrack_state.move_speed_upgrade_count
+                < barracks_config.move_speed_increase_max_times
             {
                 barrack_state.move_speed_upgrade_count += 1;
                 debug!(
@@ -148,11 +193,11 @@ fn barracks_spawning_system(
             barrack_state
                 .wave_timer
                 .set_duration(Duration::from_secs_f32(
-                    barrack_config.wave_spawn_interval_secs,
+                    barracks_config.wave_spawn_interval_secs,
                 ));
 
             // 遍历兵营配置中的所有小兵类型
-            for (index, minion_config) in barrack_config.units.iter().enumerate() {
+            for (index, minion_config) in barracks_config.units.iter().enumerate() {
                 let spawn_count = calculate_spawn_count(
                     &minion_config.wave_behavior,
                     game_time.elapsed_secs(),
@@ -186,19 +231,18 @@ fn barracks_spawning_system(
         };
 
         let config_index = current_spawn.0;
-        let minion_config = &barrack_config.units[config_index];
+        let minion_config = &barracks_config.units[config_index];
         let upgrade_config = &minion_config.minion_upgrade_stats;
 
         // --- 计算小兵最终属性 ---
-        let is_late_game = upgrade_count >= barrack_config.upgrades_before_late_game_scaling;
+        let is_late_game = upgrade_count >= barracks_config.upgrades_before_late_game_scaling;
 
-        let link = minion_config.unk_0x8a3fc6eb;
+        let character = res_assets_unk_ad65d8c4
+            .get(get_asset_id_by_hash(minion_config.unk_0x8a3fc6eb))
+            .unwrap();
 
-        let character = res_game_config.characters.get(&link).unwrap();
-
-        let character_record = resource_cache
-            .character_records
-            .get(&character.character_record)
+        let character_record = res_assets_character_record
+            .get(get_asset_id_by_path(&character.definition.character_record))
             .unwrap();
 
         let mut health = Health::new(character_record.base_hp.unwrap_or(0.0));
@@ -228,7 +272,7 @@ fn barracks_spawning_system(
             speed: character_record.base_move_speed.unwrap_or(0.0),
         };
         movement.speed +=
-            (barrack_config.move_speed_increase_increment * move_speed_upgrade_count) as f32;
+            (barracks_config.move_speed_increase_increment * move_speed_upgrade_count) as f32;
 
         let entity = commands
             .spawn((
@@ -242,19 +286,13 @@ fn barracks_spawning_system(
         // 触发角色生成命令（创建基础组件并加载皮肤）
         commands.trigger(CommandSpawnCharacter {
             entity,
-            character_record_key: character.character_record.clone(),
-            skin_path: character.skin.clone(),
+            character_record_key: get_asset_id_by_path(&character.definition.character_record),
+            skin_key: get_asset_id_by_path(&character.definition.skin),
         });
 
         commands
             .entity(entity)
             .insert((health, damage, armor, movement));
-
-        let mut path = res_game_config.minion_paths.get(lane).unwrap().clone();
-
-        if *team == Team::Chaos {
-            path.reverse();
-        }
 
         // 更新队列
         current_spawn.1 -= 1;

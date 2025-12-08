@@ -1,11 +1,13 @@
 mod game;
 mod map;
+mod prop_bin;
 mod reader;
 mod wad;
 mod wad_parse;
 
 pub use game::*;
 pub use map::*;
+pub use prop_bin::*;
 pub use reader::*;
 pub use wad::*;
 pub use wad_parse::*;

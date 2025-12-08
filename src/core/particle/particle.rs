@@ -14,8 +14,7 @@ use bevy::{
     prelude::*,
 };
 
-use league_core::VfxEmitterDefinitionDataPrimitive;
-use lol_config::ConfigMap;
+use league_core::{VfxEmitterDefinitionDataPrimitive, VfxSystemDefinitionData};
 
 use crate::{
     Lifetime, ParticleEmitterState, ParticleId, ParticleMaterialSkinnedMeshParticle,
@@ -38,7 +37,7 @@ pub fn update_particle(
     mut res_mesh: ResMut<Assets<Mesh>>,
     mut res_particle_material_unlit_decal: ResMut<Assets<ParticleMaterialUnlitDecal>>,
     mut res_particle_material_mesh: ResMut<Assets<ParticleMaterialMesh>>,
-    res_config_map: Res<ConfigMap>,
+    res_assets_vfx_system_definition_data: Res<Assets<VfxSystemDefinitionData>>,
     q_particle_state: Query<(
         Entity,
         &Transform,
@@ -74,7 +73,8 @@ pub fn update_particle(
 
         let world_matrix = world_transform.to_matrix();
 
-        let vfx_emitter_definition_data = particle_id.get_def(&res_config_map);
+        let vfx_emitter_definition_data =
+            particle_id.get_def(&res_assets_vfx_system_definition_data);
 
         if let Ok(material) = q_particle_material_unlit_decal.get(particle_entity) {
             if let Some(material) = res_particle_material_unlit_decal.get_mut(material.0.id()) {

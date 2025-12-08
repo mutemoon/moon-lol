@@ -1,10 +1,13 @@
 use bevy::prelude::*;
-use league_utils::hash_bin;
+
+use league_core::{CharacterRecord, ResourceResolver, SkinCharacterDataProperties};
+use league_utils::{get_asset_id_by_hash, get_asset_id_by_path};
 use lol_core::Team;
 
 use crate::{
-    AbilityResource, AbilityResourceType, Armor, Attack, Bounding, CommandSkinSpawn, Damage,
-    EventDead, EventLevelUp, Health, Level, Movement, ResourceCache,
+    AbilityResource, AbilityResourceType, Armor, Attack, Bounding, CommandParticleDespawn,
+    CommandParticleSpawn, CommandSkinSpawn, Damage, EventDead, EventLevelUp, Health, Level,
+    Movement,
 };
 
 #[derive(Default)]
@@ -20,31 +23,40 @@ impl Plugin for PluginCharacter {
 /// 角色组件标记
 #[derive(Component, Debug)]
 pub struct Character {
-    pub character_record_key: String,
-    pub skin_key: String,
+    pub character_record_key: AssetId<CharacterRecord>,
+    pub skin_key: AssetId<SkinCharacterDataProperties>,
 }
 
 /// 生成角色的命令
 #[derive(EntityEvent, Debug, Clone)]
 pub struct CommandSpawnCharacter {
     pub entity: Entity,
-    pub character_record_key: String,
-    pub skin_path: String,
+    pub character_record_key: AssetId<CharacterRecord>,
+    pub skin_key: AssetId<SkinCharacterDataProperties>,
+}
+
+#[derive(EntityEvent)]
+pub struct CommandCharacterParticleSpawn {
+    pub entity: Entity,
+    pub hash: u32,
+}
+
+#[derive(EntityEvent)]
+pub struct CommandCharacterParticleDespawn {
+    pub entity: Entity,
+    pub hash: u32,
 }
 
 /// 处理角色生成命令的观察者
 fn on_command_spawn_character(
     trigger: On<CommandSpawnCharacter>,
     mut commands: Commands,
-    resource_cache: Res<ResourceCache>,
+    res_assets_character_record: Res<Assets<CharacterRecord>>,
 ) {
     let entity = trigger.event_target();
 
     // 查找 character 配置
-    let character_record = match resource_cache
-        .character_records
-        .get(&trigger.character_record_key)
-    {
+    let character_record = match res_assets_character_record.get(trigger.character_record_key) {
         Some(record) => record,
         None => {
             error!(
@@ -57,7 +69,7 @@ fn on_command_spawn_character(
 
     commands.trigger(CommandSkinSpawn {
         entity,
-        skin_path: trigger.skin_path.clone(),
+        skin_key: trigger.skin_key.clone(),
     });
 
     if let Some(primary_ability_resource) = &character_record.primary_ability_resource {
@@ -94,7 +106,7 @@ fn on_command_spawn_character(
     commands.entity(entity).insert((
         Character {
             character_record_key: trigger.character_record_key.clone(),
-            skin_key: trigger.skin_path.clone(),
+            skin_key: trigger.skin_key,
         },
         health,
         movement,
@@ -109,7 +121,7 @@ fn on_command_spawn_character(
                 if let Some(total_time) = basic_attack.m_attack_total_time {
                     commands.entity(entity).insert(
                         Attack::new(*attack_range, cast_time, total_time).with_missile(Some(
-                            hash_bin(&format!(
+                            get_asset_id_by_path(&format!(
                                 "Characters/{}/Spells/{}BasicAttack",
                                 character_record.m_character_name,
                                 character_record.m_character_name
@@ -127,10 +139,13 @@ fn on_command_spawn_character(
                             attack_speed,
                             m_attack_delay_cast_offset_percent,
                         )
-                        .with_missile(Some(hash_bin(&format!(
-                            "Characters/{}/Spells/{}BasicAttack",
-                            character_record.m_character_name, character_record.m_character_name
-                        )))),
+                        .with_missile(Some(get_asset_id_by_path(
+                            &format!(
+                                "Characters/{}/Spells/{}BasicAttack",
+                                character_record.m_character_name,
+                                character_record.m_character_name
+                            ),
+                        ))),
                     );
                 }
             }
@@ -138,11 +153,87 @@ fn on_command_spawn_character(
     }
 }
 
+fn on_command_character_spawn_effect(
+    trigger: On<CommandCharacterParticleSpawn>,
+    res_assets_resource_resolver: Res<Assets<ResourceResolver>>,
+    res_assets_skin_character_data_properties: Res<Assets<SkinCharacterDataProperties>>,
+    mut commands: Commands,
+    query: Query<&Character>,
+) {
+    let entity = trigger.event_target();
+
+    let Ok(character) = query.get(entity) else {
+        return;
+    };
+
+    let skin_character_data_properties = res_assets_skin_character_data_properties
+        .get(character.skin_key)
+        .unwrap();
+
+    let m_resource_resolver = skin_character_data_properties.m_resource_resolver.unwrap();
+
+    let resource_resolver = res_assets_resource_resolver
+        .get(get_asset_id_by_hash(m_resource_resolver))
+        .unwrap();
+
+    let Some(record) = resource_resolver
+        .resource_map
+        .as_ref()
+        .unwrap()
+        .get(&trigger.hash)
+    else {
+        return;
+    };
+
+    commands.trigger(CommandParticleSpawn {
+        entity,
+        hash: get_asset_id_by_hash(*record),
+    });
+}
+
+fn on_command_character_despawn_effect(
+    trigger: On<CommandCharacterParticleDespawn>,
+    res_assets_resource_resolver: Res<Assets<ResourceResolver>>,
+    res_assets_skin_character_data_properties: Res<Assets<SkinCharacterDataProperties>>,
+    mut commands: Commands,
+    query: Query<&Character>,
+) {
+    let entity = trigger.event_target();
+
+    let Ok(character) = query.get(entity) else {
+        return;
+    };
+
+    let skin_character_data_properties = res_assets_skin_character_data_properties
+        .get(character.skin_key)
+        .unwrap();
+
+    let m_resource_resolver = skin_character_data_properties.m_resource_resolver.unwrap();
+
+    let resource_resolver = res_assets_resource_resolver
+        .get(get_asset_id_by_hash(m_resource_resolver))
+        .unwrap();
+
+    let Some(record) = resource_resolver
+        .resource_map
+        .as_ref()
+        .unwrap()
+        .get(&trigger.hash)
+    else {
+        return;
+    };
+
+    commands.trigger(CommandParticleDespawn {
+        entity,
+        hash: get_asset_id_by_hash(*record),
+    });
+}
+
 fn on_event_dead(
     event: On<EventDead>,
     query: Query<(&GlobalTransform, &Character, &Team)>,
     mut level_query: Query<(Entity, &GlobalTransform, &Team, &mut Level)>,
-    resource_cache: Res<ResourceCache>,
+    res_assets_character_record: Res<Assets<CharacterRecord>>,
     mut commands: Commands,
 ) {
     let entity = event.event_target();
@@ -151,10 +242,7 @@ fn on_event_dead(
         return;
     };
 
-    let Some(record) = resource_cache
-        .character_records
-        .get(&character.character_record_key)
-    else {
+    let Some(record) = res_assets_character_record.get(character.character_record_key) else {
         return;
     };
 
