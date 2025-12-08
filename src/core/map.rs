@@ -1,6 +1,6 @@
 use std::{collections::HashMap, f32};
 
-use bevy::{math::bounding::Aabb3d, prelude::*, render::render_resource::Face};
+use bevy::{math::bounding::Aabb3d, prelude::*};
 
 use league_core::{
     EnvironmentVisibility, MapContainer, MapPlaceableContainer, MissileSpecificationBehaviors,
@@ -11,7 +11,7 @@ use league_to_lol::{parse_vertex_data, submesh_to_intermediate};
 use league_utils::{get_asset_id_by_hash, get_asset_id_by_path};
 use lol_core::{Lane, Team};
 
-use crate::{get_standard, Action, CommandAction, CommandSpawnCharacter, Controller, Turret};
+use crate::{get_standard, Action, CommandAction, CommandCharacterSpawn, Controller, Turret};
 
 pub const MAP_WIDTH: f32 = 14400.0;
 pub const MAP_HEIGHT: f32 = 14765.0;
@@ -84,7 +84,7 @@ fn startup_spawn_map_character(
                         commands.entity(entity).insert(Turret);
                     }
 
-                    commands.trigger(CommandSpawnCharacter {
+                    commands.trigger(CommandCharacterSpawn {
                         entity,
                         character_record_key: get_asset_id_by_path(
                             &unk0xad65d8c4.definition.character_record,

@@ -6,10 +6,8 @@ use bevy::{
         animation_curves::{AnimatableCurve, AnimatableKeyframeCurve},
         AnimationClip, AnimationTargetId,
     },
-    asset::{io::Reader, uuid::Uuid, AssetLoader, LoadContext},
+    asset::{uuid::Uuid, AssetLoader, LoadContext},
     image::ImageSampler,
-    mesh::skinning::SkinnedMeshInverseBindposes,
-    pbr::StandardMaterial,
     prelude::*,
     render::render_resource::{
         Extent3d, TextureDescriptor, TextureDimension, TextureFormat, TextureUsages,

@@ -2,7 +2,8 @@ use std::collections::HashMap;
 
 use bevy::prelude::*;
 
-use lol_config::ConfigUi;
+use league_core::{UiElementGroupButtonData, UiElementRegionData};
+use league_utils::get_asset_id_by_hash;
 
 use crate::{core::ui::element::UIElementEntity, UIElement};
 
@@ -14,13 +15,13 @@ pub struct UIButtonEntity {
 #[derive(Component)]
 #[require(Interaction)]
 pub struct UIButton {
-    pub key: u32,
+    pub key: AssetId<UiElementGroupButtonData>,
 }
 
 #[derive(Event)]
 pub struct CommandSpawnButton {
     pub entity: Option<Entity>,
-    pub key: u32,
+    pub key: AssetId<UiElementGroupButtonData>,
 }
 
 #[derive(EntityEvent)]
@@ -28,12 +29,17 @@ pub struct CommandDespawnButton {
     pub entity: Entity,
 }
 
-pub fn startup_spawn_buttons(mut commands: Commands, res_config_ui: Res<ConfigUi>) {
-    for (&key, ui_button_group) in res_config_ui.ui_button_group.iter().filter(|v| {
-        v.1.name
-            .contains("ClientStates/Gameplay/UX/LoL/PlayerFrame/")
-    }) {
-        let is_enabled = ui_button_group.is_enabled.unwrap_or(false);
+pub fn startup_spawn_buttons(
+    mut commands: Commands,
+    res_assets_ui_element_group_button_data: Res<Assets<UiElementGroupButtonData>>,
+) {
+    for (key, ui_element_group_button_data) in
+        res_assets_ui_element_group_button_data.iter().filter(|v| {
+            v.1.name
+                .contains("ClientStates/Gameplay/UX/LoL/PlayerFrame/")
+        })
+    {
+        let is_enabled = ui_element_group_button_data.is_enabled.unwrap_or(false);
         if !is_enabled {
             continue;
         }
@@ -45,19 +51,21 @@ pub fn startup_spawn_buttons(mut commands: Commands, res_config_ui: Res<ConfigUi
 pub fn on_command_spawn_button(
     trigger: On<CommandSpawnButton>,
     mut commands: Commands,
-    res_config_ui: Res<ConfigUi>,
+    res_assets_ui_element_group_button_data: Res<Assets<UiElementGroupButtonData>>,
+    res_ui_region: Res<Assets<UiElementRegionData>>,
 ) {
     let key = trigger.key;
-    let ui_button_group = res_config_ui.ui_button_group.get(&key).unwrap();
+    let ui_element_group_button_data = res_assets_ui_element_group_button_data.get(key).unwrap();
 
-    let hit_region = res_config_ui
-        .ui_region
-        .get(&ui_button_group.hit_region_element)
+    let hit_region = res_ui_region
+        .get(get_asset_id_by_hash(
+            ui_element_group_button_data.hit_region_element,
+        ))
         .unwrap();
     let bundle = (
         Node::default(),
         UIElement {
-            key: ui_button_group.hit_region_element.to_string(),
+            key: ui_element_group_button_data.hit_region_element.to_string(),
             position: hit_region.position.clone().unwrap(),
             update_child: false,
         },
@@ -75,7 +83,7 @@ pub fn on_command_despawn_button(
     trigger: On<CommandDespawnButton>,
     mut commands: Commands,
     q_ui_button: Query<&UIButton>,
-    res_config_ui: Res<ConfigUi>,
+    res_assets_ui_element_group_button_data: Res<Assets<UiElementGroupButtonData>>,
     res_ui_element_entity: Res<UIElementEntity>,
 ) {
     commands.entity(trigger.entity).despawn();
@@ -84,9 +92,11 @@ pub fn on_command_despawn_button(
         return;
     };
 
-    let ui_button_group = res_config_ui.ui_button_group.get(&button.key).unwrap();
+    let ui_element_group_button_data = res_assets_ui_element_group_button_data
+        .get(button.key)
+        .unwrap();
 
-    for element in ui_button_group.elements.iter() {
+    for element in ui_element_group_button_data.elements.iter() {
         let &element_entity = res_ui_element_entity.map.get(element).unwrap();
         commands.entity(element_entity).insert(Visibility::Hidden);
     }
@@ -95,16 +105,18 @@ pub fn on_command_despawn_button(
 pub fn update_button(
     mut commands: Commands,
     mut interaction_query: Query<(&Interaction, &UIButton), Changed<Interaction>>,
-    res_config_ui: Res<ConfigUi>,
+    res_assets_ui_element_group_button_data: Res<Assets<UiElementGroupButtonData>>,
     res_ui_element_entity: Res<UIElementEntity>,
 ) {
     for (interaction, button) in &mut interaction_query {
-        let ui_button_group = res_config_ui.ui_button_group.get(&button.key).unwrap();
+        let ui_element_group_button_data = res_assets_ui_element_group_button_data
+            .get(button.key)
+            .unwrap();
 
         let interaction_entity = match *interaction {
             Interaction::Pressed => {
-                debug!("按下 {}", ui_button_group.name);
-                let Some(&clicked_entity) = ui_button_group
+                debug!("按下 {}", ui_element_group_button_data.name);
+                let Some(&clicked_entity) = ui_element_group_button_data
                     .clicked_state_elements
                     .as_ref()
                     .and_then(|v| v.display_element_list.as_ref())
@@ -116,8 +128,8 @@ pub fn update_button(
                 clicked_entity
             }
             Interaction::Hovered => {
-                debug!("悬停 {}", ui_button_group.name);
-                let &hover_entity = ui_button_group
+                debug!("悬停 {}", ui_element_group_button_data.name);
+                let &hover_entity = ui_element_group_button_data
                     .hover_state_elements
                     .as_ref()
                     .and_then(|v| v.display_element_list.as_ref())
@@ -127,8 +139,8 @@ pub fn update_button(
                 hover_entity
             }
             Interaction::None => {
-                debug!("恢复 {}", ui_button_group.name);
-                let &default_entity = ui_button_group
+                debug!("恢复 {}", ui_element_group_button_data.name);
+                let &default_entity = ui_element_group_button_data
                     .default_state_elements
                     .as_ref()
                     .and_then(|v| v.display_element_list.as_ref())
@@ -139,7 +151,7 @@ pub fn update_button(
             }
         };
 
-        for element in ui_button_group.elements.iter() {
+        for element in ui_element_group_button_data.elements.iter() {
             let &element_entity = res_ui_element_entity.map.get(element).unwrap();
             commands.entity(element_entity).insert(Visibility::Hidden);
         }

@@ -1,6 +1,9 @@
 use bevy::prelude::*;
-use league_core::{UiElementEffectAnimationDataTextureData, UiElementIconDataPosition};
-use lol_config::ConfigUi;
+use league_core::{
+    UiElementEffectAnimationData, UiElementEffectAnimationDataTextureData,
+    UiElementIconDataPosition,
+};
+use league_utils::{get_asset_id_by_hash, hash_bin};
 
 use crate::spawn_ui_atom;
 
@@ -20,9 +23,11 @@ pub fn on_command_ui_animation_start(
     event: On<CommandUiAnimationStart>,
     mut commands: Commands,
     res_asset_server: Res<AssetServer>,
-    res_config_ui: Res<ConfigUi>,
+    res_ui_animation: Res<Assets<UiElementEffectAnimationData>>,
 ) {
-    let ui_animation = res_config_ui.get_ui_animation_by_path(&event.key).unwrap();
+    let ui_animation = res_ui_animation
+        .get(get_asset_id_by_hash(hash_bin(&event.key)))
+        .unwrap();
     let Some(entity) = spawn_ui_atom(
         &mut commands,
         &res_asset_server,
@@ -47,14 +52,14 @@ pub fn on_command_ui_animation_start(
 pub fn update_ui_animation(
     mut commands: Commands,
     mut q_ui_animation_state: Query<(Entity, &mut UiAnimationState)>,
-    res_config_ui: Res<ConfigUi>,
+    res_ui_animation: Res<Assets<UiElementEffectAnimationData>>,
     q_children: Query<&Children>,
     mut q_image_node: Query<&mut ImageNode>,
     time: Res<Time>,
 ) {
     for (entity, mut ui_animation_state) in q_ui_animation_state.iter_mut() {
-        let ui_animation = res_config_ui
-            .get_ui_animation_by_path(&ui_animation_state.key)
+        let ui_animation = res_ui_animation
+            .get(get_asset_id_by_hash(hash_bin(&ui_animation_state.key)))
             .unwrap();
 
         let frames_per_second = ui_animation.frames_per_second.unwrap_or(30.0);

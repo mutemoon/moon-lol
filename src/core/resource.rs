@@ -13,9 +13,12 @@ use bevy::{
 use league_property::{init_league_asset, AssetLoaderRegistry};
 use serde::de::DeserializeSeed;
 
-use league_core::{CharacterRecord, SpellObject};
-use league_to_lol::{get_struct_from_file, CONFIG_PATH_MAP_NAV_GRID, CONFIG_UI};
-use lol_config::{CharacterConfigsDeserializer, ConfigGame, ConfigNavigationGrid, ConfigUi};
+use league_core::{
+    CharacterRecord, SpellObject, UiElementEffectAnimationData, UiElementGroupButtonData,
+    UiElementIconData, UiElementRegionData,
+};
+use league_to_lol::{get_struct_from_file, CONFIG_PATH_MAP_NAV_GRID};
+use lol_config::{CharacterConfigsDeserializer, ConfigGame, ConfigNavigationGrid};
 use lol_loader::{
     LeagueLoaderAnimationClip, LeagueLoaderImage, LeagueLoaderMesh, LeagueLoaderMeshStatic,
 };
@@ -32,6 +35,10 @@ impl Plugin for PluginResource {
         app.init_asset::<SpellObject>();
         app.init_asset::<SkillEffect>();
         app.init_asset::<CharacterRecord>();
+        app.init_asset::<UiElementIconData>();
+        app.init_asset::<UiElementEffectAnimationData>();
+        app.init_asset::<UiElementGroupButtonData>();
+        app.init_asset::<UiElementRegionData>();
 
         let mut asset_loader_registry = AssetLoaderRegistry::default();
         init_league_asset(&mut asset_loader_registry);
@@ -58,9 +65,6 @@ impl Plugin for PluginResource {
         app.init_asset_loader::<LeagueLoaderAnimationClip>();
 
         let mut resource_cache = ResourceCache::default();
-
-        let config_ui: ConfigUi = get_struct_from_file(CONFIG_UI).unwrap();
-        app.insert_resource(config_ui);
 
         let mut file = File::open(format!("assets/{}", &self.game_config_path)).unwrap();
         let mut data = Vec::new();

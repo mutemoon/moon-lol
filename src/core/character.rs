@@ -15,8 +15,10 @@ pub struct PluginCharacter;
 
 impl Plugin for PluginCharacter {
     fn build(&self, app: &mut App) {
-        app.add_observer(on_command_spawn_character);
+        app.add_observer(on_command_character_spawn);
         app.add_observer(on_event_dead);
+        app.add_observer(on_command_character_particle_spawn);
+        app.add_observer(on_command_character_particle_despawn);
     }
 }
 
@@ -29,7 +31,7 @@ pub struct Character {
 
 /// 生成角色的命令
 #[derive(EntityEvent, Debug, Clone)]
-pub struct CommandSpawnCharacter {
+pub struct CommandCharacterSpawn {
     pub entity: Entity,
     pub character_record_key: AssetId<CharacterRecord>,
     pub skin_key: AssetId<SkinCharacterDataProperties>,
@@ -48,8 +50,8 @@ pub struct CommandCharacterParticleDespawn {
 }
 
 /// 处理角色生成命令的观察者
-fn on_command_spawn_character(
-    trigger: On<CommandSpawnCharacter>,
+fn on_command_character_spawn(
+    trigger: On<CommandCharacterSpawn>,
     mut commands: Commands,
     res_assets_character_record: Res<Assets<CharacterRecord>>,
 ) {
@@ -153,7 +155,7 @@ fn on_command_spawn_character(
     }
 }
 
-fn on_command_character_spawn_effect(
+fn on_command_character_particle_spawn(
     trigger: On<CommandCharacterParticleSpawn>,
     res_assets_resource_resolver: Res<Assets<ResourceResolver>>,
     res_assets_skin_character_data_properties: Res<Assets<SkinCharacterDataProperties>>,
@@ -191,7 +193,7 @@ fn on_command_character_spawn_effect(
     });
 }
 
-fn on_command_character_despawn_effect(
+fn on_command_character_particle_despawn(
     trigger: On<CommandCharacterParticleDespawn>,
     res_assets_resource_resolver: Res<Assets<ResourceResolver>>,
     res_assets_skin_character_data_properties: Res<Assets<SkinCharacterDataProperties>>,

@@ -10,7 +10,6 @@ use league_core::{
     UiPositionRectAnchors,
 };
 use league_utils::hash_bin;
-use lol_config::ConfigUi;
 
 use crate::CommandUiAnimationStart;
 
@@ -34,11 +33,11 @@ pub struct UIElement {
 
 pub fn startup_spawn_ui_element(
     mut commands: Commands,
-    res_config_ui: Res<ConfigUi>,
-    res_asset_server: Res<AssetServer>,
     mut res_ui_element_entity: ResMut<UIElementEntity>,
+    res_asset_server: Res<AssetServer>,
+    res_assets_ui_element_icon_data: Res<Assets<UiElementIconData>>,
 ) {
-    for (key, ui) in res_config_ui.ui_elements.iter().filter(|v| {
+    for (_, ui) in res_assets_ui_element_icon_data.iter().filter(|v| {
         v.1.name
             .contains("ClientStates/Gameplay/UX/LoL/PlayerFrame/")
     }) {
@@ -58,7 +57,7 @@ pub fn startup_spawn_ui_element(
             commands.entity(entity).insert(Visibility::Visible);
         }
 
-        res_ui_element_entity.map.insert(key.clone(), entity);
+        res_ui_element_entity.map.insert(hash_bin(&ui.name), entity);
     }
 
     commands.trigger(CommandUiAnimationStart {

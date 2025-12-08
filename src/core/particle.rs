@@ -21,7 +21,7 @@ use league_core::{
     ValueColor, ValueFloat, ValueVector2, ValueVector3, VfxEmitterDefinitionData,
     VfxSystemDefinitionData,
 };
-use league_utils::{get_asset_id_by_hash, hash_wad};
+use league_utils::hash_wad;
 
 use crate::{Lifetime, LifetimeMode};
 

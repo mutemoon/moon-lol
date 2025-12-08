@@ -5,17 +5,18 @@ use crate::{
     CommandDespawnButton, CommandSkillLevelUp, CommandSpawnButton, Controller, Level,
     ResourceCache, Skill, SkillPoints, Skills, UIElementEntity,
 };
+use league_utils::get_asset_id_by_hash;
 
 pub fn update_skill_icon(
-    mut commands: Commands,
-    mut res_resource_cache: ResMut<ResourceCache>,
     asset_server: Res<AssetServer>,
-    q_skills: Query<&Skills, With<Controller>>,
-    q_skill: Query<&Skill>,
-    res_ui_element_entity: Res<UIElementEntity>,
-    q_children: Query<&Children>,
+    mut commands: Commands,
     mut q_image_node: Query<&mut ImageNode>,
+    mut res_resource_cache: ResMut<ResourceCache>,
+    q_children: Query<&Children>,
+    q_skill: Query<&Skill>,
+    q_skills: Query<&Skills, With<Controller>>,
     res_assets_spell_object: Res<Assets<SpellObject>>,
+    res_ui_element_entity: Res<UIElementEntity>,
 ) {
     let Some(skills) = q_skills.iter().next() else {
         debug!("未找到控制器的技能列表");
@@ -118,7 +119,7 @@ pub fn update_skill_level_up_button(
                 .id();
             res_skill_level_up_button.entities[index] = Some(entity_button);
             commands.trigger(CommandSpawnButton {
-                key,
+                key: get_asset_id_by_hash(key),
                 entity: Some(entity_button),
             });
         } else {

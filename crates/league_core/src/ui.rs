@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use bevy::math::{Vec2, Vec4};
+use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -141,7 +141,7 @@ pub struct UiElementGroupFramedData {
     pub frame_element: u32,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Asset, TypePath)]
 #[serde(rename_all = "camelCase")]
 pub struct UiElementEffectAnimationData {
     pub layer: Option<u32>,
@@ -236,7 +236,7 @@ pub struct Unk0x65955db8 {
     pub unk_0x25b31bc: u32,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Asset, TypePath)]
 #[serde(rename_all = "camelCase")]
 pub struct UiElementIconData {
     pub flip_x: Option<bool>,
@@ -1077,7 +1077,7 @@ pub struct OptionItemFilterHwRequirement {
     pub requires_shader_model3: Option<bool>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Asset, TypePath)]
 #[serde(rename_all = "camelCase")]
 pub struct UiElementRegionData {
     pub scene: u32,
@@ -1495,7 +1495,7 @@ pub struct OptionItemSecondaryHotkeys2ColumnHeader {
     pub column0_label_tra_key: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Asset, TypePath)]
 #[serde(rename_all = "camelCase")]
 pub struct UiElementGroupButtonData {
     pub elements: Vec<u32>,

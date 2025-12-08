@@ -10,7 +10,7 @@ use league_utils::{get_asset_id_by_hash, get_asset_id_by_path};
 use lol_core::{Lane, Team};
 
 use crate::{
-    core::{Armor, CommandSpawnCharacter, Damage, Health, Movement},
+    core::{Armor, CommandCharacterSpawn, Damage, Health, Movement},
     entities::Minion,
     MapName, MinionPath,
 };
@@ -284,7 +284,7 @@ fn barracks_spawning_system(
             .id();
 
         // 触发角色生成命令（创建基础组件并加载皮肤）
-        commands.trigger(CommandSpawnCharacter {
+        commands.trigger(CommandCharacterSpawn {
             entity,
             character_record_key: get_asset_id_by_path(&character.definition.character_record),
             skin_key: get_asset_id_by_path(&character.definition.skin),
