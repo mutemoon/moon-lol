@@ -4,6 +4,9 @@ use bevy::prelude::*;
 use bevy::window::{PrimaryWindow, WindowResized};
 use league_core::{EnumAnchor, EnumData, EnumUiPosition, UiElementIconData};
 use league_utils::hash_bin;
+use lol_config::LeagueProperties;
+
+use crate::CommandLoadPropBin;
 
 #[derive(Resource, Default)]
 pub struct UIElementEntity {
@@ -23,16 +26,41 @@ pub struct UIElement {
     pub update_child: bool,
 }
 
-pub fn startup_spawn_ui_element(
+#[derive(States, Default, Debug, Hash, Eq, Clone, PartialEq)]
+pub enum UIState {
+    #[default]
+    Loading,
+    Loaded,
+}
+
+pub fn startup_load_ui(mut commands: Commands) {
+    let paths = vec!["clientstates/gameplay/ux/lol/playerframe/uibase".to_string()];
+
+    commands.trigger(CommandLoadPropBin { paths });
+}
+
+pub fn update_spawn_ui_element(
     mut commands: Commands,
     mut res_ui_element_entity: ResMut<UIElementEntity>,
     res_asset_server: Res<AssetServer>,
     res_assets_ui_element_icon_data: Res<Assets<UiElementIconData>>,
+    res_league_properties: Res<LeagueProperties>,
 ) {
-    for (_, ui) in res_assets_ui_element_icon_data.iter().filter(|v| {
-        v.1.name
-            .contains("ClientStates/Gameplay/UX/LoL/PlayerFrame/")
-    }) {
+    if res_league_properties
+        .iter(&res_assets_ui_element_icon_data)
+        .count()
+        == 0
+    {
+        return;
+    }
+
+    for (_, ui) in res_league_properties
+        .iter(&res_assets_ui_element_icon_data)
+        .filter(|v| {
+            v.1.name
+                .contains("ClientStates/Gameplay/UX/LoL/PlayerFrame/")
+        })
+    {
         let Some(entity) = spawn_ui_element(&mut commands, &res_asset_server, ui) else {
             continue;
         };
@@ -55,6 +83,7 @@ pub fn startup_spawn_ui_element(
     // commands.trigger(CommandUiAnimationStart {
     //     key: "ClientStates/Gameplay/UX/LoL/PlayerFrame/UIBase/Player_Frame_Root/LevelUpFxIn/LevelUp0_ButtonIn".to_string(),
     // });
+    commands.set_state(UIState::Loaded);
 }
 
 pub fn spawn_ui_element(

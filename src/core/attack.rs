@@ -2,6 +2,7 @@ use bevy::ecs::error::ignore;
 use bevy::ecs::system::command::trigger;
 use bevy::prelude::*;
 use league_core::SpellObject;
+use lol_config::{HashKey, LeagueProperties};
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -37,7 +38,7 @@ pub struct Attack {
     /// 前摇修正系数 (默认 1.0，可以被技能修改)
     pub windup_modifier: f32,
     /// 攻击导弹
-    pub spell_key: Option<AssetId<SpellObject>>,
+    pub spell_key: Option<HashKey<SpellObject>>,
 }
 
 /// 前摇时间配置方式
@@ -138,7 +139,7 @@ impl Attack {
         }
     }
 
-    pub fn with_missile(mut self, missile: Option<AssetId<SpellObject>>) -> Self {
+    pub fn with_missile(mut self, missile: Option<HashKey<SpellObject>>) -> Self {
         self.spell_key = missile;
         self
     }
@@ -361,6 +362,7 @@ fn fixed_update(
     mut query: Query<(Entity, &mut AttackState, &Attack, &Damage)>,
     mut commands: Commands,
     res_assets_spell_object: Res<Assets<SpellObject>>,
+    res_league_properties: Res<LeagueProperties>,
     time: Res<Time<Fixed>>,
 ) {
     let now = time.elapsed_secs();
@@ -374,15 +376,17 @@ fn fixed_update(
                         end_time: now + attack.cooldown_time(),
                     };
 
-                    match attack.spell_key {
+                    match &attack.spell_key {
                         Some(spell_key) => {
-                            let spell = res_assets_spell_object.get(spell_key).unwrap();
+                            let spell = res_league_properties
+                                .get(&res_assets_spell_object, spell_key)
+                                .unwrap();
 
                             if spell.m_spell.as_ref().unwrap().m_cast_type.unwrap_or(0) == 1 {
                                 commands.trigger(CommandMissileCreate {
                                     entity,
                                     target: *target,
-                                    spell_key,
+                                    spell_key: spell_key.clone(),
                                 });
                             } else {
                                 commands.try_trigger(CommandDamageCreate {

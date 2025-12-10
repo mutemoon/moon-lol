@@ -7,7 +7,7 @@ use league_core::{
     InhibitorWaveBehavior, MapContainer, MapPlaceableContainer, RotatingWaveBehavior,
     TimedVariableWaveBehavior, Unk0xad65d8c4,
 };
-use league_utils::{get_asset_id_by_hash, get_asset_id_by_path};
+use lol_config::{HashKey, LeagueProperties};
 use lol_core::{Lane, Team};
 
 use crate::core::{Armor, CommandCharacterSpawn, Damage, Health, Movement};
@@ -17,7 +17,7 @@ use crate::{MapName, MinionPath};
 /// 兵营的动态状态，用于跟踪计时器和生成队列
 #[derive(Component)]
 pub struct Barrack {
-    pub key_barracks_config: AssetId<BarracksConfig>,
+    pub key_barracks_config: HashKey<BarracksConfig>,
     /// 下一波兵的生成计时器
     pub wave_timer: Timer,
     /// 属性升级计时器
@@ -59,14 +59,15 @@ fn startup_spawn_barrack(
     res_assets_map_container: Res<Assets<MapContainer>>,
     res_assets_map_placeable_container: Res<Assets<MapPlaceableContainer>>,
     res_assets_barracks_config: Res<Assets<BarracksConfig>>,
+    res_league_properties: Res<LeagueProperties>,
 ) {
-    let map_container = res_assets_map_container
-        .get(get_asset_id_by_path(&map_name.0))
+    let map_container = res_league_properties
+        .get(&res_assets_map_container, &map_name.0)
         .unwrap();
 
     for (_, &link) in &map_container.chunks {
         let Some(map_placeable_container) =
-            res_assets_map_placeable_container.get(get_asset_id_by_hash(link))
+            res_league_properties.get(&res_assets_map_placeable_container, link)
         else {
             continue;
         };
@@ -92,11 +93,11 @@ fn startup_spawn_barrack(
                     res_minion_path.0.entry(lane).or_insert(path);
                 }
                 EnumMap::Unk0xba138ae3(unk0xba138ae3) => {
-                    let key_barracks_config =
-                        get_asset_id_by_hash(unk0xba138ae3.definition.barracks_config);
+                    let key_barracks_config = unk0xba138ae3.definition.barracks_config.into();
 
-                    let barracks_config =
-                        res_assets_barracks_config.get(key_barracks_config).unwrap();
+                    let barracks_config = res_league_properties
+                        .get(&res_assets_barracks_config, key_barracks_config)
+                        .unwrap();
 
                     // let initial_delay = barracks_config.initial_spawn_time_secs;
                     let initial_delay = 0.0;
@@ -149,10 +150,14 @@ fn barracks_spawning_system(
     time: Res<Time>,
     res_assets_barracks_config: Res<Assets<BarracksConfig>>,
     res_assets_unk_ad65d8c4: Res<Assets<Unk0xad65d8c4>>,
+    res_league_properties: Res<LeagueProperties>,
 ) {
     for (transform, mut barrack_state, team, lane) in query.iter_mut() {
-        let barracks_config = res_assets_barracks_config
-            .get(barrack_state.key_barracks_config)
+        let barracks_config = res_league_properties
+            .get(
+                &res_assets_barracks_config,
+                barrack_state.key_barracks_config,
+            )
             .unwrap();
 
         // --- 1. 更新所有计时器 ---
@@ -236,12 +241,15 @@ fn barracks_spawning_system(
         // --- 计算小兵最终属性 ---
         let is_late_game = upgrade_count >= barracks_config.upgrades_before_late_game_scaling;
 
-        let character = res_assets_unk_ad65d8c4
-            .get(get_asset_id_by_hash(minion_config.unk_0xfee040bc))
+        let character = res_league_properties
+            .get(&res_assets_unk_ad65d8c4, minion_config.unk_0xfee040bc)
             .unwrap();
 
-        let character_record = res_assets_character_record
-            .get(get_asset_id_by_path(&character.definition.character_record))
+        let character_record = res_league_properties
+            .get(
+                &res_assets_character_record,
+                &character.definition.character_record,
+            )
             .unwrap();
 
         let mut health = Health::new(character_record.base_hp.unwrap_or(0.0));
@@ -285,8 +293,8 @@ fn barracks_spawning_system(
         // 触发角色生成命令（创建基础组件并加载皮肤）
         commands.trigger(CommandCharacterSpawn {
             entity,
-            character_record_key: get_asset_id_by_path(&character.definition.character_record),
-            skin_key: get_asset_id_by_path(&character.definition.skin),
+            character_record: (&character.definition.character_record).into(),
+            skin: (&character.definition.skin).into(),
         });
 
         commands

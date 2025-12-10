@@ -5,7 +5,7 @@ use bevy::asset::LoadContext;
 use bevy::platform::collections::HashMap;
 use bevy::prelude::*;
 use league_property::{from_entry, EntryData};
-use league_utils::hash_bin;
+use league_utils::type_name_to_hash;
 use serde::de::DeserializeOwned;
 
 #[derive(Resource, Default)]
@@ -18,14 +18,8 @@ impl AssetLoaderRegistry {
     pub fn register<T: Asset + DeserializeOwned + TypePath + Send + Sync + 'static>(&mut self) {
         let type_name = T::short_type_path();
 
-        let hash = if type_name.starts_with("Unk0x") {
-            u32::from_str_radix(&type_name[5..], 16).unwrap()
-        } else {
-            hash_bin(&type_name)
-        };
-
         self.loaders.insert(
-            hash,
+            type_name_to_hash(type_name),
             (
                 type_name.to_string(),
                 Box::new(GenericLoader::<T>(PhantomData)),

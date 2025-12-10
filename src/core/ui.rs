@@ -6,6 +6,7 @@ mod skill;
 
 pub use animation::*;
 use bevy::color::palettes::css::{BLUE, RED, WHITE};
+use bevy::ecs::schedule::And;
 use bevy::prelude::*;
 pub use button::*;
 pub use element::*;
@@ -24,17 +25,18 @@ pub struct PluginUI;
 
 impl Plugin for PluginUI {
     fn build(&self, app: &mut App) {
+        app.init_state::<UIState>();
+
         app.init_resource::<UIElementEntity>();
         app.init_resource::<UIButtonEntity>();
         app.init_resource::<SkillLevelUpButton>();
 
-        app.add_systems(
-            Startup,
-            (startup_spawn_ui_element, startup_spawn_buttons).chain(),
-        );
+        app.add_systems(Startup, startup_load_ui);
+        app.add_systems(Startup, startup_spawn_buttons);
         app.add_systems(
             Update,
             (
+                update_spawn_ui_element.run_if(in_state(UIState::Loading)),
                 init_health_bar,
                 update_ui_bind,
                 update_health,
@@ -45,7 +47,7 @@ impl Plugin for PluginUI {
                 update_player_ability_resource,
                 update_skill_icon,
                 update_skill_level_up_button,
-                update_player_icon,
+                update_player_icon.run_if(in_state(UIState::Loaded).and(run_once)),
                 update_ui_animation,
                 update_ui_element,
                 update_on_add_ui_element,

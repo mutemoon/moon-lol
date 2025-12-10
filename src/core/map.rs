@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use std::f32;
+use std::ops::Deref;
 
 use bevy::math::bounding::Aabb3d;
 use bevy::prelude::*;
@@ -8,10 +9,13 @@ use league_core::{
 };
 use league_file::{LeagueMapGeo, LeagueMapGeoMesh};
 use league_to_lol::{parse_vertex_data, submesh_to_intermediate};
-use league_utils::{get_asset_id_by_hash, get_asset_id_by_path};
-use lol_core::{Lane, Team};
+use lol_config::LeagueProperties;
+use lol_core::{ConfigMapGeo, Lane, Team};
 
-use crate::{get_standard, Action, CommandAction, CommandCharacterSpawn, Controller, Turret};
+use crate::{
+    get_standard, Action, CommandAction, CommandCharacterSpawn, CommandLoadPropBin, Controller,
+    Loading, Turret,
+};
 
 pub const MAP_WIDTH: f32 = 14400.0;
 pub const MAP_HEIGHT: f32 = 14765.0;
@@ -29,12 +33,25 @@ impl Plugin for PluginMap {
         app.init_resource::<MapName>();
         app.init_resource::<MinionPath>();
 
+        app.init_state::<MapState>();
+
+        app.add_systems(Startup, startup_load_map_geometry);
         app.add_systems(
             Update,
-            startup_spawn_map_character.run_if(resource_changed::<Assets<MapContainer>>),
+            (
+                update_spawn_map_character.run_if(in_state(MapState::Loading)),
+                update_spawn_map_geometry.run_if(resource_exists::<Loading<Handle<ConfigMapGeo>>>),
+            ),
         );
         // app.add_systems(Startup, startup_spawn_map_geometry);
     }
+}
+
+#[derive(States, Default, Debug, Hash, Eq, Clone, PartialEq)]
+pub enum MapState {
+    #[default]
+    Loading,
+    Loaded,
 }
 
 #[derive(Component)]
@@ -43,7 +60,6 @@ pub struct Map;
 #[derive(Component)]
 pub struct MapGeometry {
     pub bounding_box: Aabb3d,
-    pub config: LeagueMapGeoMesh,
 }
 
 #[derive(Resource)]
@@ -58,26 +74,38 @@ impl Default for MapName {
 #[derive(Resource, Default)]
 pub struct MinionPath(pub HashMap<Lane, Vec<Vec2>>);
 
-fn startup_spawn_map_character(
+fn startup_load_map_geometry(
+    mut commands: Commands,
+    res_asset_server: Res<AssetServer>,
+    res_map_name: Res<MapName>,
+) {
+    let paths = vec![
+        "data/maps/mapgeometry/map11/base_srx.materials.bin".to_string(),
+        "data/maps/shipping/map11/map11.bin".to_string(),
+    ];
+
+    commands.trigger(CommandLoadPropBin { paths });
+
+    commands.insert_resource(Loading::new(
+        res_asset_server.load::<ConfigMapGeo>(format!("data/{}.mapgeo", &res_map_name.0)),
+    ));
+}
+
+fn update_spawn_map_character(
     mut commands: Commands,
     map_name: Res<MapName>,
     res_assets_map_container: Res<Assets<MapContainer>>,
     res_assets_map_placeable_container: Res<Assets<MapPlaceableContainer>>,
+    res_league_properties: Res<LeagueProperties>,
 ) {
-    let Some(map_container) = res_assets_map_container.get(get_asset_id_by_path(&map_name.0))
+    let Some(map_container) = res_league_properties.get(&res_assets_map_container, &map_name.0)
     else {
-        println!(
-            "无法找到地图容器: {} MapContainer: {}",
-            map_name.0,
-            res_assets_map_container.len()
-        );
         return;
     };
-    println!("地图容器: {}", map_container.chunks.len());
 
     for (_, &link) in &map_container.chunks {
         let Some(map_placeable_container) =
-            res_assets_map_placeable_container.get(get_asset_id_by_hash(link))
+            res_league_properties.get(&res_assets_map_placeable_container, link)
         else {
             continue;
         };
@@ -100,100 +128,74 @@ fn startup_spawn_map_character(
 
                     commands.trigger(CommandCharacterSpawn {
                         entity,
-                        character_record_key: get_asset_id_by_path(
-                            &unk0xad65d8c4.definition.character_record,
-                        ),
-                        skin_key: get_asset_id_by_path(&unk0xad65d8c4.definition.skin),
+                        character_record: (&unk0xad65d8c4.definition.character_record).into(),
+                        skin: (&unk0xad65d8c4.definition.skin).into(),
                     });
                 }
                 _ => {}
             }
         }
     }
+
+    commands.set_state(MapState::Loaded);
 }
 
-fn startup_spawn_map_geometry(
+fn update_spawn_map_geometry(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    map_name: Res<MapName>,
-    res_assets_map_geo: Res<Assets<LeagueMapGeo>>,
-    res_assets_static_material_def: Res<Assets<StaticMaterialDef>>,
-    mut res_assets_mesh: ResMut<Assets<Mesh>>,
     mut res_assets_standard_material: ResMut<Assets<StandardMaterial>>,
+    res_assets_map_geo: Res<Assets<ConfigMapGeo>>,
+    res_assets_static_material_def: Res<Assets<StaticMaterialDef>>,
+    res_league_properties: Res<LeagueProperties>,
+    res_loading_map_geo: Res<Loading<Handle<ConfigMapGeo>>>,
 ) {
+    let Some(config_map_geo) = res_assets_map_geo.get(res_loading_map_geo.deref().deref()) else {
+        println!("未加载地图");
+        return;
+    };
+
+    println!("加载地图完成");
+
+    commands.remove_resource::<Loading<Handle<ConfigMapGeo>>>();
+
     let geo_entity = commands
         .spawn((Transform::default(), Visibility::default(), Map))
         .id();
 
-    let map_geo = res_assets_map_geo
-        .get(get_asset_id_by_path(&map_name.0))
-        .unwrap();
+    println!("地图数量: {:?}", config_map_geo.submeshes.len());
 
-    for map_mesh in map_geo.meshes.iter() {
-        // if map_mesh.layer_transition_behavior != LayerTransitionBehavior::Unaffected {
-        //     continue;
-        // }
+    for (mesh_handle, mat_name, bounding_box) in &config_map_geo.submeshes {
+        let static_material_def = res_league_properties
+            .get(&res_assets_static_material_def, mat_name)
+            .unwrap();
 
-        if !map_mesh
-            .environment_visibility
-            .contains(EnvironmentVisibility::Layer1)
-        {
-            continue;
-        }
+        let base_color_texture = static_material_def.sampler_values.as_ref().and_then(|v| {
+            v.into_iter().find_map(|sampler_item| {
+                let texture_name = &sampler_item.texture_name;
+                if texture_name == "DiffuseTexture" || texture_name == "Diffuse_Texture" {
+                    sampler_item.texture_path.as_ref()
+                } else {
+                    None
+                }
+            })
+        });
 
-        let (all_positions, all_normals, all_uvs) = parse_vertex_data(&map_geo, map_mesh);
+        let material_handle = get_standard(
+            &mut res_assets_standard_material,
+            &asset_server,
+            base_color_texture.cloned(),
+        );
 
-        for submesh in map_mesh.submeshes.iter() {
-            let intermediate_meshes = submesh_to_intermediate(
-                &submesh,
-                &map_geo,
-                map_mesh,
-                &all_positions,
-                &all_normals,
-                &all_uvs,
-            );
-
-            let static_material_def = res_assets_static_material_def
-                .get(get_asset_id_by_path(&submesh.material_name.text))
-                .unwrap();
-
-            let base_color_texture = static_material_def.sampler_values.as_ref().and_then(|v| {
-                v.into_iter().find_map(|sampler_item| {
-                    let texture_name = &sampler_item.texture_name;
-                    if texture_name == "DiffuseTexture" || texture_name == "Diffuse_Texture" {
-                        sampler_item
-                            .texture_path
-                            .as_ref()
-                            .map(|path| format!("{}#srgb", path))
-                    } else {
-                        None
-                    }
-                })
-            });
-
-            let mesh_handle = res_assets_mesh.add(intermediate_meshes);
-
-            let material_handle = get_standard(
-                &mut res_assets_standard_material,
-                &asset_server,
-                base_color_texture,
-            );
-
-            commands
-                .spawn((
-                    Mesh3d(mesh_handle),
-                    MeshMaterial3d(material_handle),
-                    MapGeometry {
-                        bounding_box: Aabb3d {
-                            min: map_mesh.bounding_box.min.into(),
-                            max: map_mesh.bounding_box.max.into(),
-                        },
-                        config: map_mesh.clone(),
-                    },
-                    ChildOf(geo_entity),
-                ))
-                .observe(on_click_map);
-        }
+        commands
+            .spawn((
+                Mesh3d(mesh_handle.clone()),
+                MeshMaterial3d(material_handle),
+                MapGeometry {
+                    bounding_box: bounding_box.clone(),
+                },
+                ChildOf(geo_entity),
+            ))
+            .observe(on_click_map);
     }
 }
 

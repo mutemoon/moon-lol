@@ -4116,6 +4116,7 @@ dependencies = [
  "league_to_lol",
  "league_utils",
  "lol_config",
+ "lol_core",
  "rayon",
  "thiserror 2.0.12",
 ]

@@ -3,7 +3,8 @@ use std::sync::Arc;
 use bevy::prelude::*;
 use bevy_behave::{behave, Behave};
 use league_core::CharacterRecord;
-use league_utils::{get_asset_id_by_hash, get_asset_id_by_path, hash_bin};
+use league_utils::{get_asset_id_by_path, hash_bin};
+use lol_config::LeagueProperties;
 
 use crate::abilities::{AbilityFioraPassive, BuffFioraE, BuffFioraR};
 use crate::core::{
@@ -130,29 +131,29 @@ fn add_skills(
     mut commands: Commands,
     q_fiora: Query<Entity, (With<Fiora>, Without<Skills>)>,
     res_assets_character_record: Res<Assets<CharacterRecord>>,
+    res_league_properties: Res<LeagueProperties>,
 ) {
     for entity in q_fiora.iter() {
         commands.entity(entity).with_related::<PassiveSkillOf>((
             Skill {
-                key_spell_object: get_asset_id_by_path(
-                    "Characters/Fiora/Spells/FioraPassiveAbility/FioraPassive",
-                ),
+                key_spell_object: "Characters/Fiora/Spells/FioraPassiveAbility/FioraPassive".into(),
                 ..default()
             },
             CoolDown::default(),
             AbilityFioraPassive,
         ));
 
-        let character_record = res_assets_character_record
-            .get(get_asset_id_by_path(
+        let character_record = res_league_properties
+            .get(
+                &res_assets_character_record,
                 "Characters/Fiora/CharacterRecords/Root",
-            ))
+            )
             .unwrap();
 
         for &skill in character_record.spells.as_ref().unwrap().iter() {
             commands.entity(entity).with_related::<SkillOf>((
                 Skill {
-                    key_spell_object: get_asset_id_by_hash(skill),
+                    key_spell_object: skill.into(),
                     ..default()
                 },
                 CoolDown::default(),

@@ -1,9 +1,10 @@
 use bevy::prelude::*;
 use league_core::SkinCharacterDataProperties;
+use lol_config::LeagueProperties;
 
 use crate::{
-    AbilityResource, Character, CommandUpdateUIElement, Controller, Health, Level, NodeType,
-    SizeType, UIElementEntity,
+    AbilityResource, CommandUpdateUIElement, Controller, Health, Level, NodeType, SizeType, Skin,
+    UIElementEntity,
 };
 
 #[derive(Component, Reflect, Default)]
@@ -152,26 +153,32 @@ pub fn update_player_ability_resource(
 }
 
 pub fn update_player_icon(
-    mut commands: Commands,
-    res_assets_skin_character_data_properties: Res<Assets<SkinCharacterDataProperties>>,
     asset_server: Res<AssetServer>,
-    q_character: Query<&Character, With<Controller>>,
-    res_ui_element_entity: Res<UIElementEntity>,
-    q_children: Query<&Children>,
+    mut commands: Commands,
     mut q_image_node: Query<&mut ImageNode>,
+    q_skin: Query<&Skin, With<Controller>>,
+    q_children: Query<&Children>,
+    res_assets_skin_character_data_properties: Res<Assets<SkinCharacterDataProperties>>,
+    res_league_properties: Res<LeagueProperties>,
+    res_ui_element_entity: Res<UIElementEntity>,
 ) {
     let key = "ClientStates/Gameplay/UX/LoL/PlayerFrame/UIBase/Player_Frame_Root/Player_Frame/PlayerIcon_Base";
     let Some(&entity) = res_ui_element_entity.get_by_string(key) else {
         return;
     };
 
-    let Ok(character) = q_character.single() else {
+    let Ok(skin) = q_skin.single() else {
         return;
     };
-    let skin = res_assets_skin_character_data_properties
-        .get(character.skin_key)
+
+    let skin = res_league_properties
+        .get(&res_assets_skin_character_data_properties, skin.key)
         .unwrap();
-    let icon_name = skin.icon_avatar.clone().unwrap();
+
+    let icon_name = skin
+        .icon_avatar
+        .clone()
+        .unwrap_or(skin.icon_circle.clone().unwrap());
 
     let &child = q_children.get(entity).unwrap().get(0).unwrap();
     if q_image_node.get_mut(child).is_ok() {

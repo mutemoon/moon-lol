@@ -8,6 +8,7 @@ use league_core::{
     VfxPrimitivePlanarProjection, VfxShapeBox, VfxShapeCylinder, VfxShapeLegacy,
     VfxSystemDefinitionData,
 };
+use lol_config::LeagueProperties;
 
 use crate::{
     create_black_pixel_texture, spawn_shadow_skin_entity, Lifetime, MapGeometry, ParticleId,
@@ -54,12 +55,15 @@ pub fn update_emitter_position(
         &ParticleEmitterState,
         &ParticleId,
     )>,
+    res_league_properties: Res<LeagueProperties>,
     res_assets_vfx_system_definition_data: Res<Assets<VfxSystemDefinitionData>>,
     q_global_transform: Query<&GlobalTransform>,
 ) {
     for (mut transform, emitter_of, lifetime, emitter, particle_id) in query.iter_mut() {
-        let vfx_emitter_definition_data =
-            particle_id.get_def(&res_assets_vfx_system_definition_data);
+        let vfx_emitter_definition_data = particle_id.get_def(
+            &res_league_properties,
+            &res_assets_vfx_system_definition_data,
+        );
 
         let is_local_orientation = vfx_emitter_definition_data
             .is_local_orientation
@@ -337,6 +341,7 @@ pub fn update_emitter(
     mut res_quad_slice_material: ResMut<Assets<ParticleMaterialQuadSlice>>,
     mut res_unlit_decal_material: ResMut<Assets<ParticleMaterialUnlitDecal>>,
     mut res_particle_material_mesh: ResMut<Assets<ParticleMaterialMesh>>,
+    res_league_properties: Res<LeagueProperties>,
     mut query: Query<(
         Entity,
         &mut Lifetime,
@@ -346,8 +351,10 @@ pub fn update_emitter(
     time: Res<Time>,
 ) {
     for (emitter_entity, mut lifetime, mut emitter, particle_id) in query.iter_mut() {
-        let vfx_emitter_definition_data =
-            particle_id.get_def(&res_assets_vfx_system_definition_data);
+        let vfx_emitter_definition_data = particle_id.get_def(
+            &res_league_properties,
+            &res_assets_vfx_system_definition_data,
+        );
 
         let primitive = vfx_emitter_definition_data
             .primitive
@@ -467,6 +474,7 @@ pub fn update_emitter_attached(
     mut res_particle_material_skinned_mesh_particle: ResMut<
         Assets<ParticleMaterialSkinnedMeshParticle>,
     >,
+    res_league_properties: Res<LeagueProperties>,
     mut query: Query<(
         Entity,
         &EmitterOf,
@@ -481,8 +489,10 @@ pub fn update_emitter_attached(
     time: Res<Time>,
 ) {
     for (emitter_entity, emitter_of, mut lifetime, mut emitter, particle_id) in query.iter_mut() {
-        let vfx_emitter_definition_data =
-            particle_id.get_def(&res_assets_vfx_system_definition_data);
+        let vfx_emitter_definition_data = particle_id.get_def(
+            &res_league_properties,
+            &res_assets_vfx_system_definition_data,
+        );
 
         let primitive = vfx_emitter_definition_data
             .primitive

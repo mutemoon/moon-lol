@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_behave::prelude::BehaveTrigger;
 
-use crate::{CommandCharacterParticleDespawn, CommandCharacterParticleSpawn};
+use crate::{CommandSkinParticleDespawn, CommandSkinParticleSpawn};
 
 #[derive(Debug, Clone)]
 pub struct ActionParticleSpawn {
@@ -21,7 +21,7 @@ pub fn on_action_particle_spawn(
     let entity = ctx.target_entity();
     let event = trigger.inner();
 
-    commands.trigger(CommandCharacterParticleSpawn {
+    commands.trigger(CommandSkinParticleSpawn {
         entity,
         hash: event.hash,
     });
@@ -36,7 +36,7 @@ pub fn on_action_particle_despawn(
     let entity = ctx.target_entity();
     let event = trigger.inner();
 
-    commands.trigger(CommandCharacterParticleDespawn {
+    commands.trigger(CommandSkinParticleDespawn {
         entity,
         hash: event.hash,
     });

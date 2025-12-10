@@ -4,6 +4,7 @@ use bevy::prelude::*;
 use bevy_behave::prelude::{BehaveCtx, BehavePlugin, BehaveTree, Tree};
 use bevy_behave::Behave;
 use league_core::SpellObject;
+use lol_config::{HashKey, LeagueProperties};
 
 use crate::{AbilityResource, EventLevelUp, Level};
 
@@ -52,12 +53,22 @@ pub struct CoolDown {
     pub duration: f32,
 }
 
-#[derive(Component, Default)]
+#[derive(Component)]
 #[require(CoolDown)]
 pub struct Skill {
-    pub key_spell_object: AssetId<SpellObject>,
-    pub key_skill_effect: AssetId<SkillEffect>,
+    pub key_spell_object: HashKey<SpellObject>,
+    pub key_skill_effect: HashKey<SkillEffect>,
     pub level: usize,
+}
+
+impl Default for Skill {
+    fn default() -> Self {
+        Self {
+            key_spell_object: 0.into(),
+            key_skill_effect: 0.into(),
+            level: 0,
+        }
+    }
 }
 
 #[derive(Asset, TypePath)]
@@ -93,6 +104,7 @@ fn on_skill_cast(
     skills: Query<&Skills>,
     res_assets_spell_object: Res<Assets<SpellObject>>,
     res_assets_skill_effect: Res<Assets<SkillEffect>>,
+    res_league_properties: Res<LeagueProperties>,
     mut q_skill: Query<(&Skill, &mut CoolDown)>,
     mut q_ability_resource: Query<&mut AbilityResource>,
 ) {
@@ -117,7 +129,9 @@ fn on_skill_cast(
         return;
     }
 
-    let spell_object = res_assets_spell_object.get(skill.key_spell_object).unwrap();
+    let spell_object = res_league_properties
+        .get(&res_assets_spell_object, skill.key_spell_object)
+        .unwrap();
 
     if skill.level == 0 {
         info!("{} 技能 {} 未学习，无法释放", entity, trigger.index);
@@ -146,7 +160,9 @@ fn on_skill_cast(
         );
     }
 
-    if let Some(effect) = res_assets_skill_effect.get(skill.key_skill_effect) {
+    if let Some(effect) =
+        res_league_properties.get(&res_assets_skill_effect, skill.key_skill_effect)
+    {
         info!("{} 技能 {} 开始执行行为树", entity, trigger.index);
         commands.entity(entity).with_child((
             BehaveTree::new(effect.0.clone()),

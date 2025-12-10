@@ -1,7 +1,8 @@
 use bevy::prelude::*;
 use bevy_behave::{behave, Behave};
 use league_core::CharacterRecord;
-use league_utils::{get_asset_id_by_hash, get_asset_id_by_path, hash_bin};
+use league_utils::{get_asset_id_by_path, hash_bin};
+use lol_config::LeagueProperties;
 
 use crate::core::{ActionAnimationPlay, ActionParticleSpawn, CoolDown, Skill, SkillOf, Skills};
 use crate::entities::champion::Champion;
@@ -89,29 +90,30 @@ fn add_skills(
     mut commands: Commands,
     q_hwei: Query<Entity, (With<Hwei>, Without<Skills>)>,
     res_assets_character_record: Res<Assets<CharacterRecord>>,
+    res_league_properties: Res<LeagueProperties>,
 ) {
     for entity in q_hwei.iter() {
         commands.entity(entity).with_related::<PassiveSkillOf>((
             Skill {
-                key_spell_object: get_asset_id_by_path(
-                    "Characters/Hwei/Spells/HweiPassiveAbility/HweiPassive",
-                ),
+                key_spell_object: "Characters/Hwei/Spells/HweiPassiveAbility/HweiPassive".into(),
+                key_skill_effect: "Characters/Hwei/Spells/HweiPassiveAbility/HweiPassive".into(),
                 ..default()
             },
             CoolDown::default(),
         ));
 
-        let character_record = res_assets_character_record
-            .get(get_asset_id_by_path(
+        let character_record = res_league_properties
+            .get(
+                &res_assets_character_record,
                 "Characters/Hwei/CharacterRecords/Root",
-            ))
+            )
             .unwrap();
 
         for &skill in character_record.spells.as_ref().unwrap().iter() {
             commands.entity(entity).with_related::<SkillOf>((
                 Skill {
-                    key_spell_object: get_asset_id_by_hash(skill),
-                    key_skill_effect: get_asset_id_by_hash(skill),
+                    key_spell_object: skill.into(),
+                    key_skill_effect: skill.into(),
                     ..default()
                 },
                 CoolDown::default(),

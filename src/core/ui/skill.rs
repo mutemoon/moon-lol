@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use league_core::SpellObject;
-use league_utils::get_asset_id_by_hash;
+use lol_config::LeagueProperties;
 
 use crate::{
     CommandDespawnButton, CommandSkillLevelUp, CommandSpawnButton, Controller, Level,
@@ -16,6 +16,7 @@ pub fn update_skill_icon(
     q_skill: Query<&Skill>,
     q_skills: Query<&Skills, With<Controller>>,
     res_assets_spell_object: Res<Assets<SpellObject>>,
+    res_league_properties: Res<LeagueProperties>,
     res_ui_element_entity: Res<UIElementEntity>,
 ) {
     let Some(skills) = q_skills.iter().next() else {
@@ -34,7 +35,11 @@ pub fn update_skill_icon(
             debug!("未找到技能图标 UI 元素 {}", key);
             continue;
         };
-        let &child = q_children.get(entity).unwrap().get(0).unwrap();
+
+        let Ok(children) = q_children.get(entity) else {
+            continue;
+        };
+        let &child = children.get(0).unwrap();
         let mut image_node = q_image_node.get_mut(child).unwrap();
         if image_node.rect.is_none() {
             debug!("技能图标 {} 的 rect 为空", index);
@@ -46,7 +51,9 @@ pub fn update_skill_icon(
             continue;
         };
 
-        let spell = res_assets_spell_object.get(skill.key_spell_object).unwrap();
+        let spell = res_league_properties
+            .get(&res_assets_spell_object, skill.key_spell_object)
+            .unwrap();
 
         let icon_name = spell
             .m_spell
@@ -119,7 +126,7 @@ pub fn update_skill_level_up_button(
                 .id();
             res_skill_level_up_button.entities[index] = Some(entity_button);
             commands.trigger(CommandSpawnButton {
-                key: get_asset_id_by_hash(key),
+                key: key.into(),
                 entity: Some(entity_button),
             });
         } else {

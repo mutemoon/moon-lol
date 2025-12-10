@@ -1,5 +1,6 @@
 use std::fs::File;
 use std::io::Read;
+use std::ops::Deref;
 
 use bevy::ecs::component::ComponentCloneBehavior;
 use bevy::ecs::entity::{EntityHashMap, SceneEntityMapper};
@@ -8,14 +9,19 @@ use bevy::platform::collections::HashMap;
 use bevy::prelude::*;
 use bevy::scene::ron::{self};
 use league_core::init_league_asset;
-use league_file::{LeagueMapGeo, LeagueSkeleton};
+use league_file::LeagueSkeleton;
 use league_to_lol::{get_struct_from_file, CONFIG_PATH_MAP_NAV_GRID};
-use lol_config::{CharacterConfigsDeserializer, ConfigGame, ConfigNavigationGrid, LeagueProperty};
+use lol_config::{
+    CharacterConfigsDeserializer, ConfigGame, ConfigNavigationGrid, LeagueProperties,
+};
+use lol_core::{ConfigMapGeo, LeagueSkinMesh};
 use lol_loader::{
-    LeagueLoaderAnimationClip, LeagueLoaderAny, LeagueLoaderImage, LeagueLoaderMesh,
-    LeagueLoaderMeshStatic, LeagueLoaderProperty,
+    LeagueLoaderAnimationClip, LeagueLoaderAny, LeagueLoaderImage, LeagueLoaderMapgeo,
+    LeagueLoaderMesh, LeagueLoaderMeshStatic, LeagueLoaderProperty, LeagueLoaderSkeleton,
 };
 use serde::de::DeserializeSeed;
+
+use crate::{CharacterSpawn, SkinAnimationSpawn, SkinMeshSpawn, SkinSkeletonSpawn, SkinSpawn};
 
 #[derive(Default)]
 pub struct PluginResource {
@@ -24,9 +30,10 @@ pub struct PluginResource {
 
 impl Plugin for PluginResource {
     fn build(&self, app: &mut App) {
-        app.init_asset::<LeagueMapGeo>();
+        app.init_asset::<ConfigMapGeo>();
         app.init_asset::<LeagueSkeleton>();
-        app.init_asset::<LeagueProperty>();
+        app.init_asset::<LeagueProperties>();
+        app.init_asset::<LeagueSkinMesh>();
 
         init_league_asset(app);
 
@@ -34,12 +41,25 @@ impl Plugin for PluginResource {
         app.init_asset_loader::<LeagueLoaderProperty>();
         app.init_asset_loader::<LeagueLoaderImage>();
         app.init_asset_loader::<LeagueLoaderMesh>();
+        app.init_asset_loader::<LeagueLoaderSkeleton>();
+        app.init_asset_loader::<LeagueLoaderMapgeo>();
         app.init_asset_loader::<LeagueLoaderMeshStatic>();
         app.init_asset_loader::<LeagueLoaderAnimationClip>();
 
-        app.add_systems(Startup, startup_load_prop_bin);
+        app.init_resource::<LeagueProperties>();
+        app.init_resource::<LeaguePropertyFiles>();
 
-        let mut resource_cache = ResourceCache::default();
+        app.add_systems(Update, update_collect_properties);
+
+        register_loading::<CharacterSpawn>(app);
+        register_loading::<SkinAnimationSpawn>(app);
+        register_loading::<SkinMeshSpawn>(app);
+        register_loading::<SkinSkeletonSpawn>(app);
+        register_loading::<SkinSpawn>(app);
+
+        app.add_observer(on_command_load_prop_bin);
+
+        let resource_cache = ResourceCache::default();
 
         let mut file = File::open(format!("assets/{}", &self.game_config_path)).unwrap();
         let mut data = Vec::new();
@@ -125,9 +145,52 @@ impl Plugin for PluginResource {
 }
 
 #[derive(Resource, Default)]
+pub struct LeaguePropertyFiles(pub Vec<Handle<LeagueProperties>>);
+
+#[derive(Resource, Default)]
 pub struct ResourceCache {
     image: HashMap<String, Handle<Image>>,
     mesh: HashMap<String, Handle<Mesh>>,
+}
+
+#[derive(Event)]
+pub struct CommandLoadPropBin {
+    pub paths: Vec<String>,
+}
+
+#[derive(Component, Resource)]
+pub struct Loading<F> {
+    pub timer: Timer,
+    pub value: F,
+}
+
+impl<F> Loading<F> {
+    pub fn new(value: F) -> Self {
+        Self {
+            timer: Timer::from_seconds(10.0, TimerMode::Once),
+            value,
+        }
+    }
+
+    pub fn is_timeout(&self) -> bool {
+        self.timer.is_finished()
+    }
+
+    pub fn update(&mut self, time: &Time) {
+        self.timer.tick(time.delta());
+    }
+
+    pub fn set(&mut self, value: F) {
+        self.value = value;
+    }
+}
+
+impl<T> Deref for Loading<T> {
+    type Target = T;
+
+    fn deref(&self) -> &Self::Target {
+        &self.value
+    }
 }
 
 impl ResourceCache {
@@ -154,13 +217,66 @@ impl ResourceCache {
     }
 }
 
-fn startup_load_prop_bin(res_asset_server: Res<AssetServer>) {
-    let prop_bin_paths = vec![
-        "data/maps/mapgeometry/map11/base_srx.materials.bin",
-        "data/maps/shipping/map11/map11.bin",
-    ];
+fn on_command_load_prop_bin(
+    event: On<CommandLoadPropBin>,
+    res_asset_server: Res<AssetServer>,
+    mut res_league_property_files: ResMut<LeaguePropertyFiles>,
+) {
+    for path in &event.paths {
+        res_league_property_files
+            .0
+            .push(res_asset_server.load(path.to_lowercase()));
+        // info!("开始加载 {:?}", path);
+    }
+}
 
-    for path in prop_bin_paths {
-        res_asset_server.load_untyped(path);
+fn update_collect_properties(
+    mut res_assets_league_properties: ResMut<Assets<LeagueProperties>>,
+    mut res_league_property_files: ResMut<LeaguePropertyFiles>,
+    mut res_league_properties: ResMut<LeagueProperties>,
+) {
+    if res_league_property_files.0.is_empty() {
+        return;
+    }
+
+    let mut left_league_property_files = Vec::new();
+
+    for handle_league_properties in &res_league_property_files.0 {
+        let Some(league_properties) =
+            res_assets_league_properties.get_mut(handle_league_properties)
+        else {
+            left_league_property_files.push(handle_league_properties.clone());
+            continue;
+        };
+
+        res_league_properties.merge(league_properties);
+    }
+
+    if left_league_property_files.is_empty() {
+        return;
+    }
+
+    res_league_property_files.0 = left_league_property_files;
+}
+
+pub trait LoadingTrait {
+    fn is_timeout(&self) -> bool;
+}
+
+fn register_loading<T: TypePath + Send + Sync + 'static>(app: &mut App) {
+    app.add_systems(Update, update_loading::<T>);
+}
+
+fn update_loading<T: TypePath + Send + Sync + 'static>(
+    mut commands: Commands,
+    mut q_loading: Query<(Entity, &mut Loading<T>)>,
+    time: Res<Time>,
+) {
+    for (entity, mut loading) in q_loading.iter_mut() {
+        loading.update(&time);
+
+        if loading.is_timeout() {
+            commands.entity(entity).remove::<Loading<T>>();
+        }
     }
 }

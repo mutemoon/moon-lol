@@ -1,5 +1,4 @@
 use bevy::prelude::*;
-use league_utils::get_asset_id_by_path;
 use lol_config::ConfigGame;
 
 use crate::CommandCharacterSpawn;
@@ -30,11 +29,11 @@ fn fixed_update_frame(mut frame: ResMut<FixedFrameCount>) {
 
 fn startup(mut commands: Commands, config_game: Res<ConfigGame>) {
     // 使用 ConfigGame 中保存的 character_record 和 skin_path
-    for (entity, skin, character_record) in config_game.legends.iter() {
+    for (entity, skin, character_record) in config_game.legends.clone() {
         commands.trigger(CommandCharacterSpawn {
-            entity: *entity,
-            character_record_key: get_asset_id_by_path(character_record),
-            skin_key: get_asset_id_by_path(skin),
+            entity,
+            character_record,
+            skin,
         });
     }
 }

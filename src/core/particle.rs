@@ -17,6 +17,7 @@ use league_core::{
     VfxSystemDefinitionData,
 };
 use league_utils::hash_wad;
+use lol_config::{HashKey, LeagueProperties};
 pub use particle::*;
 pub use skinned_mesh::*;
 pub use utils::*;
@@ -91,17 +92,18 @@ pub struct ParticleMesh(HashMap<u64, Handle<Mesh>>);
 
 #[derive(Component, Clone, Debug)]
 pub struct ParticleId {
-    hash: AssetId<VfxSystemDefinitionData>,
+    hash: HashKey<VfxSystemDefinitionData>,
     index: usize,
 }
 
 impl ParticleId {
     pub fn get_def<'a>(
         self: &Self,
+        res_assets_league_properties: &'a Res<LeagueProperties>,
         res_assets_vfx_system_definition_data: &'a Res<Assets<VfxSystemDefinitionData>>,
     ) -> &'a VfxEmitterDefinitionData {
-        res_assets_vfx_system_definition_data
-            .get(self.hash)
+        res_assets_league_properties
+            .get(res_assets_vfx_system_definition_data, self.hash)
             .unwrap()
             .complex_emitter_definition_data
             .as_ref()
@@ -114,13 +116,13 @@ impl ParticleId {
 #[derive(EntityEvent)]
 pub struct CommandParticleSpawn {
     pub entity: Entity,
-    pub hash: AssetId<VfxSystemDefinitionData>,
+    pub hash: HashKey<VfxSystemDefinitionData>,
 }
 
 #[derive(EntityEvent)]
 pub struct CommandParticleDespawn {
     pub entity: Entity,
-    pub hash: AssetId<VfxSystemDefinitionData>,
+    pub hash: HashKey<VfxSystemDefinitionData>,
 }
 
 impl ParticleMesh {
@@ -133,6 +135,7 @@ fn on_command_particle_spawn(
     trigger: On<CommandParticleSpawn>,
     mut commands: Commands,
     res_assets_vfx_system_definition_data: Res<Assets<VfxSystemDefinitionData>>,
+    res_league_properties: Res<LeagueProperties>,
     q_global_transform: Query<&GlobalTransform>,
 ) {
     let entity = trigger.event_target();
@@ -144,8 +147,10 @@ fn on_command_particle_spawn(
         return;
     };
 
-    let vfx_system_definition_data = res_assets_vfx_system_definition_data
-        .get(trigger.hash)
+    println!("{:x?}", trigger.hash);
+
+    let vfx_system_definition_data = res_league_properties
+        .get(&res_assets_vfx_system_definition_data, trigger.hash)
         .unwrap();
 
     // if !vfx_system_definition_data

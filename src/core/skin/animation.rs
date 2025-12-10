@@ -6,54 +6,79 @@ use league_core::{
     EnumClipData, SelectorClipData, SequencerClipData, SkinCharacterDataProperties,
 };
 use league_to_lol::load_animation_map;
-use league_utils::{get_asset_id_by_hash, hash_bin};
+use league_utils::hash_bin;
+use lol_config::{HashKey, LeagueProperties};
 
-use super::CommandSpawnAnimation;
-use crate::{Animation, AnimationNode, AnimationNodeF32, AnimationState};
+use crate::{Animation, AnimationNode, AnimationNodeF32, AnimationState, Loading};
 
-pub fn on_command_spawn_animation(
-    trigger: On<CommandSpawnAnimation>,
+#[derive(EntityEvent)]
+pub struct CommandSkinAnimationSpawn {
+    pub entity: Entity,
+    pub key: HashKey<SkinCharacterDataProperties>,
+}
+
+#[derive(TypePath)]
+pub struct SkinAnimationSpawn(pub HashKey<SkinCharacterDataProperties>);
+
+pub fn on_command_skin_animation_spawn(
+    trigger: On<CommandSkinAnimationSpawn>,
     mut commands: Commands,
-    mut res_animation_graph: ResMut<Assets<AnimationGraph>>,
-    asset_server: Res<AssetServer>,
-    res_assets_skin_character_data_properties: Res<Assets<SkinCharacterDataProperties>>,
-    res_assets_animation_graph_data: Res<Assets<AnimationGraphData>>,
 ) {
     let entity = trigger.event_target();
-    let skin_character_data_properties = res_assets_skin_character_data_properties
-        .get(trigger.skin_key)
-        .unwrap();
+    commands
+        .entity(entity)
+        .insert(Loading::new(SkinAnimationSpawn(trigger.key)));
+}
 
-    let animation_graph_data = res_assets_animation_graph_data
-        .get(get_asset_id_by_hash(
-            skin_character_data_properties
-                .skin_animation_properties
-                .animation_graph_data,
-        ))
-        .unwrap();
+pub fn update_skin_animation_spawn(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    mut res_animation_graph: ResMut<Assets<AnimationGraph>>,
+    res_assets_animation_graph_data: Res<Assets<AnimationGraphData>>,
+    res_assets_skin_character_data_properties: Res<Assets<SkinCharacterDataProperties>>,
+    res_league_properties: Res<LeagueProperties>,
+    q_loading_animation: Query<(Entity, &Loading<SkinAnimationSpawn>)>,
+) {
+    for (entity, loading) in q_loading_animation.iter() {
+        let Some(skin_character_data_properties) =
+            res_league_properties.get(&res_assets_skin_character_data_properties, loading.0)
+        else {
+            continue;
+        };
 
-    let (animation_map, blend_data) = load_animation_map(animation_graph_data.clone()).unwrap();
+        let animation_graph_data = res_league_properties
+            .get(
+                &res_assets_animation_graph_data,
+                skin_character_data_properties
+                    .skin_animation_properties
+                    .animation_graph_data,
+            )
+            .unwrap();
 
-    let mut animation_graph = AnimationGraph::new();
+        let (animation_map, blend_data) = load_animation_map(animation_graph_data.clone()).unwrap();
 
-    let hash_to_node = build_animation_nodes(animation_map, &asset_server, &mut animation_graph);
+        let mut animation_graph = AnimationGraph::new();
 
-    let graph_handle = res_animation_graph.add(animation_graph);
+        let hash_to_node =
+            build_animation_nodes(animation_map, &asset_server, &mut animation_graph);
 
-    commands.entity(entity).insert((
-        AnimationPlayer::default(),
-        AnimationGraphHandle(graph_handle),
-        Animation {
-            hash_to_node,
-            blend_data,
-        },
-        AnimationState {
-            last_hash: None,
-            current_hash: hash_bin("Idle1"),
-            current_duration: None,
-            repeat: true,
-        },
-    ));
+        let graph_handle = res_animation_graph.add(animation_graph);
+
+        commands.entity(entity).insert((
+            AnimationPlayer::default(),
+            AnimationGraphHandle(graph_handle),
+            Animation {
+                hash_to_node,
+                blend_data,
+            },
+            AnimationState {
+                last_hash: None,
+                current_hash: hash_bin("Idle1"),
+                current_duration: None,
+                repeat: true,
+            },
+        ));
+    }
 }
 
 fn build_animation_nodes(

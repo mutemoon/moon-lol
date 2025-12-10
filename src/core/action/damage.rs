@@ -3,7 +3,7 @@ use bevy_behave::prelude::BehaveTrigger;
 use league_utils::hash_bin;
 use lol_core::Team;
 
-use crate::{rotate_to_direction, CommandCharacterParticleSpawn, CommandDamageCreate, DamageType};
+use crate::{rotate_to_direction, CommandDamageCreate, CommandSkinParticleSpawn, DamageType};
 
 #[derive(Debug, Clone)]
 pub struct ActionDamage;
@@ -56,7 +56,7 @@ pub fn on_attack_damage(
         damage_type: DamageType::Physical,
         amount: 100.0,
     });
-    commands.trigger(CommandCharacterParticleSpawn {
+    commands.trigger(CommandSkinParticleSpawn {
         entity,
         hash: hash_bin("Fiora_Q_Slash_Cas"),
     });

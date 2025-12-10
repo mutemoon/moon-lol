@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::io::Cursor;
 
 use bevy::animation::animation_curves::{AnimatableCurve, AnimatableKeyframeCurve};
@@ -5,16 +6,24 @@ use bevy::animation::{animated_field, AnimationClip, AnimationTargetId};
 use bevy::asset::uuid::Uuid;
 use bevy::asset::{AssetLoader, LoadContext};
 use bevy::image::ImageSampler;
+use bevy::math::bounding::Aabb3d;
 use bevy::prelude::*;
 use bevy::render::render_resource::{
     Extent3d, TextureDescriptor, TextureDimension, TextureFormat, TextureUsages,
 };
 use binrw::BinRead;
-use league_core::ASSET_LOADER_REGISTRY;
-use league_file::{LeagueMeshStatic, LeagueTexture, LeagueTextureFormat};
+use league_core::{EnvironmentVisibility, ASSET_LOADER_REGISTRY};
+use league_file::{
+    LeagueMapGeo, LeagueMeshStatic, LeagueSkeleton, LeagueSkinnedMesh, LeagueTexture,
+    LeagueTextureFormat,
+};
 use league_property::PropFile;
-use league_to_lol::mesh_static_to_bevy_mesh;
-use lol_config::{ConfigAnimationClip, IntermediateMesh, LeagueProperty};
+use league_to_lol::{
+    mesh_static_to_bevy_mesh, parse_vertex_data, skinned_mesh_to_intermediate,
+    submesh_to_intermediate,
+};
+use lol_config::{ConfigAnimationClip, IntermediateMesh, LeagueProperties};
+use lol_core::{ConfigMapGeo, LeagueSkinMesh};
 use thiserror::Error;
 
 #[derive(Error, Debug)]
@@ -36,7 +45,7 @@ pub enum Error {
 pub struct LeagueLoaderProperty;
 
 impl AssetLoader for LeagueLoaderProperty {
-    type Asset = LeagueProperty;
+    type Asset = LeagueProperties;
 
     type Settings = ();
 
@@ -50,18 +59,27 @@ impl AssetLoader for LeagueLoaderProperty {
     ) -> Result<Self::Asset, Self::Error> {
         let mut buf = Vec::new();
         reader.read_to_end(&mut buf).await?;
-        let prop_bin = PropFile::read(&mut Cursor::new(buf))?;
+        let mut cursor = Cursor::new(buf);
+        let prop_bin = PropFile::read(&mut cursor)?;
 
-        let mut handles = Vec::new();
-        for (hash, entry) in prop_bin.iter_class_hash_and_entry() {
-            let Some((_, loader)) = ASSET_LOADER_REGISTRY.loaders.get(&hash) else {
+        let mut handles = HashMap::new();
+        for (entry_hash, entry) in prop_bin.iter_class_hash_and_entry() {
+            let Some((_, loader)) = ASSET_LOADER_REGISTRY.loaders.get(&entry_hash) else {
                 continue;
             };
 
-            handles.push(loader.load_and_add(load_context, entry));
+            let handle = loader.load_and_add(load_context, entry);
+
+            if !handles.contains_key(&entry_hash) {
+                handles.insert(entry_hash, HashMap::new());
+            };
+
+            let store = handles.get_mut(&entry_hash).unwrap();
+
+            store.insert(entry.hash, handle);
         }
 
-        Ok(LeagueProperty(handles))
+        Ok(LeagueProperties(handles))
     }
 
     fn extensions(&self) -> &[&str] {
@@ -93,7 +111,7 @@ impl AssetLoader for LeagueLoaderAny {
 pub struct LeagueLoaderMesh;
 
 impl AssetLoader for LeagueLoaderMesh {
-    type Asset = Mesh;
+    type Asset = LeagueSkinMesh;
 
     type Settings = ();
 
@@ -107,12 +125,115 @@ impl AssetLoader for LeagueLoaderMesh {
     ) -> Result<Self::Asset, Self::Error> {
         let mut buf = Vec::new();
         reader.read_to_end(&mut buf).await?;
-        let mesh: IntermediateMesh = bincode::deserialize(&buf)?;
-        Ok(mesh.into())
+        let mut cursor = Cursor::new(buf);
+        let league_skinned_mesh = LeagueSkinnedMesh::read(&mut cursor)?;
+
+        let mut submeshes = Vec::new();
+        for (i, _) in league_skinned_mesh.ranges.iter().enumerate() {
+            let mesh = skinned_mesh_to_intermediate(&league_skinned_mesh, i);
+            submeshes.push(_load_context.add_labeled_asset(i.to_string(), mesh.into()));
+        }
+
+        Ok(LeagueSkinMesh { submeshes })
     }
 
     fn extensions(&self) -> &[&str] {
-        &["mesh"]
+        &["skn"]
+    }
+}
+
+#[derive(Default)]
+pub struct LeagueLoaderMapgeo;
+
+impl AssetLoader for LeagueLoaderMapgeo {
+    type Asset = ConfigMapGeo;
+
+    type Settings = ();
+
+    type Error = Error;
+
+    async fn load(
+        &self,
+        reader: &mut dyn bevy::asset::io::Reader,
+        _settings: &Self::Settings,
+        load_context: &mut LoadContext<'_>,
+    ) -> Result<Self::Asset, Self::Error> {
+        let mut buf = Vec::new();
+        reader.read_to_end(&mut buf).await?;
+        let mut cursor = Cursor::new(buf);
+        let league_mapgeo = LeagueMapGeo::read(&mut cursor)?;
+
+        let mut submeshes = Vec::new();
+
+        for (i, map_mesh) in league_mapgeo.meshes.iter().enumerate() {
+            // if map_mesh.layer_transition_behavior != LayerTransitionBehavior::Unaffected {
+            //     continue;
+            // }
+
+            if !map_mesh
+                .environment_visibility
+                .contains(EnvironmentVisibility::Layer1)
+            {
+                continue;
+            }
+
+            let (all_positions, all_normals, all_uvs) = parse_vertex_data(&league_mapgeo, map_mesh);
+
+            for (j, submesh) in map_mesh.submeshes.iter().enumerate() {
+                let intermediate_meshes = submesh_to_intermediate(
+                    &submesh,
+                    &league_mapgeo,
+                    map_mesh,
+                    &all_positions,
+                    &all_normals,
+                    &all_uvs,
+                );
+
+                submeshes.push((
+                    load_context.add_labeled_asset(format!("{i}-{j}"), intermediate_meshes.into()),
+                    submesh.material_name.text.clone(),
+                    Aabb3d {
+                        min: map_mesh.bounding_box.min.into(),
+                        max: map_mesh.bounding_box.max.into(),
+                    },
+                ));
+            }
+        }
+
+        Ok(ConfigMapGeo { submeshes })
+    }
+
+    fn extensions(&self) -> &[&str] {
+        &["mapgeo"]
+    }
+}
+
+#[derive(Default)]
+pub struct LeagueLoaderSkeleton;
+
+impl AssetLoader for LeagueLoaderSkeleton {
+    type Asset = LeagueSkeleton;
+
+    type Settings = ();
+
+    type Error = Error;
+
+    async fn load(
+        &self,
+        reader: &mut dyn bevy::asset::io::Reader,
+        _settings: &Self::Settings,
+        _load_context: &mut LoadContext<'_>,
+    ) -> Result<Self::Asset, Self::Error> {
+        let mut buf = Vec::new();
+        reader.read_to_end(&mut buf).await?;
+        let mut cursor = Cursor::new(buf);
+        let league_skeleton = LeagueSkeleton::read(&mut cursor)?;
+
+        Ok(league_skeleton)
+    }
+
+    fn extensions(&self) -> &[&str] {
+        &["skl"]
     }
 }
 

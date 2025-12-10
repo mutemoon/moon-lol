@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use bevy::prelude::*;
 use league_core::{UiElementGroupButtonData, UiElementRegionData};
-use league_utils::get_asset_id_by_hash;
+use lol_config::{HashKey, LeagueProperties};
 
 use crate::core::ui::element::UIElementEntity;
 use crate::UIElement;
@@ -15,13 +15,13 @@ pub struct UIButtonEntity {
 #[derive(Component)]
 #[require(Interaction)]
 pub struct UIButton {
-    pub key: AssetId<UiElementGroupButtonData>,
+    pub key: HashKey<UiElementGroupButtonData>,
 }
 
 #[derive(Event)]
 pub struct CommandSpawnButton {
     pub entity: Option<Entity>,
-    pub key: AssetId<UiElementGroupButtonData>,
+    pub key: HashKey<UiElementGroupButtonData>,
 }
 
 #[derive(EntityEvent)]
@@ -32,9 +32,11 @@ pub struct CommandDespawnButton {
 pub fn startup_spawn_buttons(
     mut commands: Commands,
     res_assets_ui_element_group_button_data: Res<Assets<UiElementGroupButtonData>>,
+    res_league_properties: Res<LeagueProperties>,
 ) {
-    for (key, ui_element_group_button_data) in
-        res_assets_ui_element_group_button_data.iter().filter(|v| {
+    for (key, ui_element_group_button_data) in res_league_properties
+        .iter(&res_assets_ui_element_group_button_data)
+        .filter(|v| {
             v.1.name
                 .contains("ClientStates/Gameplay/UX/LoL/PlayerFrame/")
         })
@@ -53,14 +55,18 @@ pub fn on_command_spawn_button(
     mut commands: Commands,
     res_assets_ui_element_group_button_data: Res<Assets<UiElementGroupButtonData>>,
     res_ui_region: Res<Assets<UiElementRegionData>>,
+    res_league_properties: Res<LeagueProperties>,
 ) {
     let key = trigger.key;
-    let ui_element_group_button_data = res_assets_ui_element_group_button_data.get(key).unwrap();
+    let ui_element_group_button_data = res_league_properties
+        .get(&res_assets_ui_element_group_button_data, key)
+        .unwrap();
 
-    let hit_region = res_ui_region
-        .get(get_asset_id_by_hash(
+    let hit_region = res_league_properties
+        .get(
+            &res_ui_region,
             ui_element_group_button_data.hit_region_element,
-        ))
+        )
         .unwrap();
     let bundle = (
         Node::default(),
@@ -84,6 +90,7 @@ pub fn on_command_despawn_button(
     mut commands: Commands,
     q_ui_button: Query<&UIButton>,
     res_assets_ui_element_group_button_data: Res<Assets<UiElementGroupButtonData>>,
+    res_league_properties: Res<LeagueProperties>,
     res_ui_element_entity: Res<UIElementEntity>,
 ) {
     commands.entity(trigger.entity).despawn();
@@ -92,12 +99,14 @@ pub fn on_command_despawn_button(
         return;
     };
 
-    let ui_element_group_button_data = res_assets_ui_element_group_button_data
-        .get(button.key)
+    let ui_element_group_button_data = res_league_properties
+        .get(&res_assets_ui_element_group_button_data, button.key)
         .unwrap();
 
     for element in ui_element_group_button_data.elements.iter() {
-        let &element_entity = res_ui_element_entity.map.get(element).unwrap();
+        let Some(&element_entity) = res_ui_element_entity.map.get(element) else {
+            continue;
+        };
         commands.entity(element_entity).insert(Visibility::Hidden);
     }
 }
@@ -106,11 +115,12 @@ pub fn update_button(
     mut commands: Commands,
     mut interaction_query: Query<(&Interaction, &UIButton), Changed<Interaction>>,
     res_assets_ui_element_group_button_data: Res<Assets<UiElementGroupButtonData>>,
+    res_league_properties: Res<LeagueProperties>,
     res_ui_element_entity: Res<UIElementEntity>,
 ) {
     for (interaction, button) in &mut interaction_query {
-        let ui_element_group_button_data = res_assets_ui_element_group_button_data
-            .get(button.key)
+        let ui_element_group_button_data = res_league_properties
+            .get(&res_assets_ui_element_group_button_data, button.key)
             .unwrap();
 
         let interaction_entity = match *interaction {
@@ -152,7 +162,9 @@ pub fn update_button(
         };
 
         for element in ui_element_group_button_data.elements.iter() {
-            let &element_entity = res_ui_element_entity.map.get(element).unwrap();
+            let Some(&element_entity) = res_ui_element_entity.map.get(element) else {
+                continue;
+            };
             commands.entity(element_entity).insert(Visibility::Hidden);
         }
 

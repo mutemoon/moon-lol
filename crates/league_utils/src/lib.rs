@@ -118,3 +118,11 @@ pub fn hash_to_field_name(hash: &u32, hash_to_string: &HashMap<u32, String>) -> 
         })
         .unwrap_or_else(|| format!("unk_0x{:x}", hash))
 }
+
+pub fn type_name_to_hash(type_name: &str) -> u32 {
+    if type_name.starts_with("Unk0x") {
+        u32::from_str_radix(&type_name[5..], 16).unwrap()
+    } else {
+        hash_bin(&type_name)
+    }
+}
