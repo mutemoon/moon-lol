@@ -4,7 +4,7 @@ use std::path::{Path, PathBuf};
 
 use league_property::PropFile;
 
-use crate::{Error, LeagueWadEntry, LeagueWadLoader, PropBinLoader};
+use crate::{Error, LeagueWadEntry, LeagueWadLoader, LeagueWadLoaderTrait};
 
 pub struct LeagueLoader {
     pub root_dir: String,
@@ -84,7 +84,7 @@ impl LeagueLoader {
     }
 }
 
-impl PropBinLoader for LeagueLoader {
+impl LeagueWadLoaderTrait for LeagueLoader {
     fn get_wad_entry_reader_by_hash(&self, hash: u64) -> Result<Box<dyn Read + '_>, Error> {
         for wad in &self.wads {
             if let Ok(reader) = wad.get_wad_entry_reader_by_hash(hash) {

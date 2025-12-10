@@ -22,6 +22,58 @@ pub enum Error {
 
     #[error("Unknown variant: {0}")]
     UnknownVariant(String),
+
+    #[error("{message}\n  -> {context}")]
+    WithContext {
+        context: String,
+        #[source]
+        source: Box<Error>,
+        message: String,
+    },
+}
+
+impl Error {
+    /// 为错误添加上下文，形成类似堆栈的错误链
+    pub fn with_context(self, context: impl Into<String>) -> Self {
+        let context = context.into();
+        let message = self.format_full_chain();
+        Error::WithContext {
+            context,
+            source: Box::new(self),
+            message,
+        }
+    }
+
+    /// 格式化完整的错误链，生成类似堆栈的输出
+    fn format_full_chain(&self) -> String {
+        let mut parts = Vec::new();
+        self.collect_chain(&mut parts);
+        parts.join("\n")
+    }
+
+    fn collect_chain(&self, parts: &mut Vec<String>) {
+        match self {
+            Error::WithContext {
+                context, source, ..
+            } => {
+                parts.push(format!("  -> {}", context));
+                source.collect_chain(parts);
+            }
+            other => {
+                parts.push(format!("  !! {}", other.root_message()));
+            }
+        }
+    }
+
+    fn root_message(&self) -> String {
+        match self {
+            Error::Message(msg) => msg.clone(),
+            Error::MissingField(field) => format!("缺少字段: {}", field),
+            Error::InvalidBinType(byte) => format!("无效的类型字节: {}", byte),
+            Error::UnknownVariant(msg) => msg.clone(),
+            Error::WithContext { source, .. } => source.root_message(),
+        }
+    }
 }
 
 impl de::Error for Error {

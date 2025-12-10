@@ -25,58 +25,66 @@ impl Plugin for PluginHwei {
 pub struct Hwei;
 
 fn startup_load_assets(mut res_assets_skill_effect: ResMut<Assets<SkillEffect>>) {
-    res_assets_skill_effect.insert(
-        get_asset_id_by_path("Characters/Hwei/Spells/HweiQAbility/HweiQ"),
-        SkillEffect(behave! {
-            Behave::Sequence => {
-                Behave::trigger(
-                    ActionAnimationPlay { hash: hash_bin("Spell1") }
-                ),
-                Behave::trigger(
-                    ActionParticleSpawn { hash: hash_bin("Hwei_Q_Q_Tar") },
-                ),
-            }
-        }),
-    );
-    res_assets_skill_effect.insert(
-        get_asset_id_by_path("Characters/Hwei/Spells/HweiWAbility/HweiW"),
-        SkillEffect(behave! {
-            Behave::Sequence => {
-                Behave::trigger(
-                    ActionAnimationPlay { hash: hash_bin("Spell1") }
-                ),
-                Behave::trigger(
-                    ActionParticleSpawn { hash: hash_bin("Hwei_Q_W_AoE") },
-                ),
-            }
-        }),
-    );
-    res_assets_skill_effect.insert(
-        get_asset_id_by_path("Characters/Hwei/Spells/HweiEAbility/HweiE"),
-        SkillEffect(behave! {
-            Behave::Sequence => {
-                Behave::trigger(
-                    ActionAnimationPlay { hash: hash_bin("Spell1") }
-                ),
-                Behave::trigger(
-                    ActionParticleSpawn { hash: hash_bin("Hwei_Q_Q_Tar") },
-                ),
-            }
-        }),
-    );
-    res_assets_skill_effect.insert(
-        get_asset_id_by_path("Characters/Hwei/Spells/HweiRAbility/HweiR"),
-        SkillEffect(behave! {
-            Behave::Sequence => {
-                Behave::trigger(
-                    ActionAnimationPlay { hash: hash_bin("Spell1") }
-                ),
-                Behave::trigger(
-                    ActionParticleSpawn { hash: hash_bin("Hwei_Q_Q_Tar") },
-                ),
-            }
-        }),
-    );
+    res_assets_skill_effect
+        .insert(
+            get_asset_id_by_path("Characters/Hwei/Spells/HweiQAbility/HweiQ"),
+            SkillEffect(behave! {
+                Behave::Sequence => {
+                    Behave::trigger(
+                        ActionAnimationPlay { hash: hash_bin("Spell1") }
+                    ),
+                    Behave::trigger(
+                        ActionParticleSpawn { hash: hash_bin("Hwei_Q_Q_Tar") },
+                    ),
+                }
+            }),
+        )
+        .unwrap();
+    res_assets_skill_effect
+        .insert(
+            get_asset_id_by_path("Characters/Hwei/Spells/HweiWAbility/HweiW"),
+            SkillEffect(behave! {
+                Behave::Sequence => {
+                    Behave::trigger(
+                        ActionAnimationPlay { hash: hash_bin("Spell1") }
+                    ),
+                    Behave::trigger(
+                        ActionParticleSpawn { hash: hash_bin("Hwei_Q_W_AoE") },
+                    ),
+                }
+            }),
+        )
+        .unwrap();
+    res_assets_skill_effect
+        .insert(
+            get_asset_id_by_path("Characters/Hwei/Spells/HweiEAbility/HweiE"),
+            SkillEffect(behave! {
+                Behave::Sequence => {
+                    Behave::trigger(
+                        ActionAnimationPlay { hash: hash_bin("Spell1") }
+                    ),
+                    Behave::trigger(
+                        ActionParticleSpawn { hash: hash_bin("Hwei_Q_Q_Tar") },
+                    ),
+                }
+            }),
+        )
+        .unwrap();
+    res_assets_skill_effect
+        .insert(
+            get_asset_id_by_path("Characters/Hwei/Spells/HweiRAbility/HweiR"),
+            SkillEffect(behave! {
+                Behave::Sequence => {
+                    Behave::trigger(
+                        ActionAnimationPlay { hash: hash_bin("Spell1") }
+                    ),
+                    Behave::trigger(
+                        ActionParticleSpawn { hash: hash_bin("Hwei_Q_Q_Tar") },
+                    ),
+                }
+            }),
+        )
+        .unwrap();
 }
 
 fn add_skills(

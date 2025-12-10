@@ -1,8 +1,9 @@
 use std::collections::{HashMap, VecDeque};
 
-use league_utils::hash_bin;
 use serde::de::{self, EnumAccess, IntoDeserializer, MapAccess, SeqAccess, VariantAccess, Visitor};
 use serde::Deserializer;
+
+use league_utils::hash_bin;
 
 use crate::{BinDeserializer, BinDeserializerResult, BinType, Error};
 
@@ -36,6 +37,7 @@ impl<'de, E: IntoDeserializer<'de, Error> + Copy> SeqAccess<'de> for SeqIntoRead
 pub struct SeqDerReader<'de> {
     pub values: VecDeque<&'de [u8]>,
     pub vtype: BinType,
+    pub current_index: usize,
 }
 
 impl<'de> SeqDerReader<'de> {
@@ -43,6 +45,7 @@ impl<'de> SeqDerReader<'de> {
         Self {
             values: VecDeque::from(values),
             vtype,
+            current_index: 0,
         }
     }
 }
@@ -58,8 +61,12 @@ impl<'de> SeqAccess<'de> for SeqDerReader<'de> {
             return Ok(None);
         };
 
+        let index = self.current_index;
+        self.current_index += 1;
+
         seed.deserialize(&mut BinDeserializer::from_bytes(value, self.vtype))
             .map(Some)
+            .map_err(|e| e.with_context(format!("列表[{}]", index)))
     }
 }
 
@@ -67,6 +74,7 @@ pub struct MapReader<'de> {
     pub data_map: HashMap<u32, (BinType, &'de [u8])>,
     pub struct_fields: std::slice::Iter<'static, &'static str>,
     pub next_value: Option<(BinType, &'de [u8])>,
+    pub current_field: Option<&'static str>,
 }
 
 impl<'de> MapAccess<'de> for MapReader<'de> {
@@ -85,6 +93,7 @@ impl<'de> MapAccess<'de> for MapReader<'de> {
 
             if let Some((vtype, value_slice)) = self.data_map.remove(&hash) {
                 self.next_value = Some((vtype, value_slice));
+                self.current_field = Some(field_name);
 
                 return seed.deserialize(field_name.into_deserializer()).map(Some);
             };
@@ -98,57 +107,45 @@ impl<'de> MapAccess<'de> for MapReader<'de> {
         seed: V,
     ) -> BinDeserializerResult<V::Value> {
         let (vtype, value_slice) = self.next_value.unwrap();
+        let field_name = self.current_field.unwrap_or("<unknown>");
 
         let mut value_de = BinDeserializer::from_bytes(value_slice, vtype);
 
-        seed.deserialize(&mut value_de).map_err(|e| {
-            Error::Message(format!(
-                "🐕 反序列化失败: {:?}, {:?}，原始错误: {:?}",
-                vtype,
-                value_slice.len(),
-                e
-            ))
-        })
+        seed.deserialize(&mut value_de)
+            .map_err(|e| e.with_context(format!("字段 \"{}\" (类型: {:?})", field_name, vtype)))
     }
 }
 
-pub struct HashMapReader<'a, 'de: 'a> {
-    pub de: &'a mut BinDeserializer<'de>,
+pub struct HashMapReader<'de> {
+    pub map: VecDeque<(&'de [u8], &'de [u8])>,
     pub ktype: BinType,
     pub vtype: BinType,
-    pub count: u32,
 }
 
-impl<'de, 'a> MapAccess<'de> for HashMapReader<'a, 'de> {
+impl<'de> MapAccess<'de> for HashMapReader<'de> {
     type Error = Error;
 
     fn next_key_seed<K: de::DeserializeSeed<'de>>(
         &mut self,
         seed: K,
     ) -> BinDeserializerResult<Option<K::Value>> {
-        // 如果 count 为 0，说明 map 的所有条目都已读取完毕
-        if self.count == 0 {
+        let Some((key, _)) = self.map.get(0) else {
             return Ok(None);
-        }
+        };
 
-        // 使用 seed 来反序列化 key
-        self.de.value_type = self.ktype;
-        seed.deserialize(&mut *self.de).map(Some)
+        seed.deserialize(&mut BinDeserializer::from_bytes(key, self.ktype))
+            .map(Some)
+            .map_err(|e| e.with_context("Map 键"))
     }
 
     fn next_value_seed<V: de::DeserializeSeed<'de>>(
         &mut self,
         seed: V,
     ) -> BinDeserializerResult<V::Value> {
-        // 临时设置 deserializer 要解析的类型为 value 的类型
-        self.de.value_type = self.vtype;
+        let (_, value) = self.map.pop_front().unwrap();
 
-        let value = seed.deserialize(&mut *self.de)?;
-
-        // 一个完整的键值对已经读取完毕，将计数器减 1
-        self.count -= 1;
-
-        Ok(value)
+        seed.deserialize(&mut BinDeserializer::from_bytes(value, self.vtype))
+            .map_err(|e| e.with_context("Map 值"))
     }
 }
 

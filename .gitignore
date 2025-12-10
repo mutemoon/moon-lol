@@ -13,3 +13,5 @@ assets/*
 *.db
 .docs-cache
 hashes
+
+./league.rs

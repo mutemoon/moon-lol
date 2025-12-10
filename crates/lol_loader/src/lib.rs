@@ -1,24 +1,21 @@
 use std::io::Cursor;
 
-use bevy::{
-    animation::{
-        animated_field,
-        animation_curves::{AnimatableCurve, AnimatableKeyframeCurve},
-        AnimationClip, AnimationTargetId,
-    },
-    asset::{uuid::Uuid, AssetLoader, LoadContext},
-    image::ImageSampler,
-    prelude::*,
-    render::render_resource::{
-        Extent3d, TextureDescriptor, TextureDimension, TextureFormat, TextureUsages,
-    },
+use bevy::animation::animation_curves::{AnimatableCurve, AnimatableKeyframeCurve};
+use bevy::animation::{animated_field, AnimationClip, AnimationTargetId};
+use bevy::asset::uuid::Uuid;
+use bevy::asset::{AssetLoader, LoadContext};
+use bevy::image::ImageSampler;
+use bevy::prelude::*;
+use bevy::render::render_resource::{
+    Extent3d, TextureDescriptor, TextureDimension, TextureFormat, TextureUsages,
 };
 use binrw::BinRead;
-use thiserror::Error;
-
+use league_core::ASSET_LOADER_REGISTRY;
 use league_file::{LeagueMeshStatic, LeagueTexture, LeagueTextureFormat};
+use league_property::PropFile;
 use league_to_lol::mesh_static_to_bevy_mesh;
-use lol_config::{ConfigAnimationClip, IntermediateMesh};
+use lol_config::{ConfigAnimationClip, IntermediateMesh, LeagueProperty};
+use thiserror::Error;
 
 #[derive(Error, Debug)]
 pub enum Error {
@@ -33,6 +30,63 @@ pub enum Error {
 
     #[error("{0}")]
     BinRead(#[from] binrw::Error),
+}
+
+#[derive(Default)]
+pub struct LeagueLoaderProperty;
+
+impl AssetLoader for LeagueLoaderProperty {
+    type Asset = LeagueProperty;
+
+    type Settings = ();
+
+    type Error = Error;
+
+    async fn load(
+        &self,
+        reader: &mut dyn bevy::asset::io::Reader,
+        _settings: &Self::Settings,
+        load_context: &mut LoadContext<'_>,
+    ) -> Result<Self::Asset, Self::Error> {
+        let mut buf = Vec::new();
+        reader.read_to_end(&mut buf).await?;
+        let prop_bin = PropFile::read(&mut Cursor::new(buf))?;
+
+        let mut handles = Vec::new();
+        for (hash, entry) in prop_bin.iter_class_hash_and_entry() {
+            let Some((_, loader)) = ASSET_LOADER_REGISTRY.loaders.get(&hash) else {
+                continue;
+            };
+
+            handles.push(loader.load_and_add(load_context, entry));
+        }
+
+        Ok(LeagueProperty(handles))
+    }
+
+    fn extensions(&self) -> &[&str] {
+        &["bin"]
+    }
+}
+
+#[derive(Default)]
+pub struct LeagueLoaderAny;
+
+impl AssetLoader for LeagueLoaderAny {
+    type Asset = ();
+
+    type Settings = ();
+
+    type Error = Error;
+
+    async fn load(
+        &self,
+        _reader: &mut dyn bevy::asset::io::Reader,
+        _settings: &Self::Settings,
+        _load_context: &mut LoadContext<'_>,
+    ) -> Result<Self::Asset, Self::Error> {
+        Ok(())
+    }
 }
 
 #[derive(Default)]

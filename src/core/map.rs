@@ -3,8 +3,7 @@ use std::{collections::HashMap, f32};
 use bevy::{math::bounding::Aabb3d, prelude::*};
 
 use league_core::{
-    EnumAddLevelTimer, EnvironmentVisibility, MapContainer, MapPlaceableContainer,
-    StaticMaterialDef,
+    EnumMap, EnvironmentVisibility, MapContainer, MapPlaceableContainer, StaticMaterialDef,
 };
 use league_file::{LeagueMapGeo, LeagueMapGeoMesh};
 use league_to_lol::{parse_vertex_data, submesh_to_intermediate};
@@ -25,9 +24,15 @@ pub struct PluginMap;
 impl Plugin for PluginMap {
     fn build(&self, app: &mut App) {
         app.add_plugins(MeshPickingPlugin);
+
         app.init_resource::<MapName>();
-        app.add_systems(Startup, startup_spawn_map_character);
-        app.add_systems(Startup, startup_spawn_map_geometry);
+        app.init_resource::<MinionPath>();
+
+        app.add_systems(
+            Update,
+            startup_spawn_map_character.run_if(resource_changed::<Assets<MapContainer>>),
+        );
+        // app.add_systems(Startup, startup_spawn_map_geometry);
     }
 }
 
@@ -49,7 +54,7 @@ impl Default for MapName {
     }
 }
 
-#[derive(Resource)]
+#[derive(Resource, Default)]
 pub struct MinionPath(pub HashMap<Lane, Vec<Vec2>>);
 
 fn startup_spawn_map_character(
@@ -58,9 +63,16 @@ fn startup_spawn_map_character(
     res_assets_map_container: Res<Assets<MapContainer>>,
     res_assets_map_placeable_container: Res<Assets<MapPlaceableContainer>>,
 ) {
-    let map_container = res_assets_map_container
-        .get(get_asset_id_by_path(&map_name.0))
-        .unwrap();
+    let Some(map_container) = res_assets_map_container.get(get_asset_id_by_path(&map_name.0))
+    else {
+        println!(
+            "无法找到地图容器: {} MapContainer: {}",
+            map_name.0,
+            res_assets_map_container.len()
+        );
+        return;
+    };
+    println!("地图容器: {}", map_container.chunks.len());
 
     for (_, &link) in &map_container.chunks {
         let Some(map_placeable_container) =
@@ -71,7 +83,7 @@ fn startup_spawn_map_character(
 
         for (_, value) in map_placeable_container.items.as_ref().unwrap() {
             match value {
-                EnumAddLevelTimer::Unk0xad65d8c4(unk0xad65d8c4) => {
+                EnumMap::Unk0xad65d8c4(unk0xad65d8c4) => {
                     let transform = Transform::from_matrix(unk0xad65d8c4.transform.unwrap());
                     let entity = commands
                         .spawn((

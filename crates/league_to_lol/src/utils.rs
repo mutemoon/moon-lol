@@ -1,6 +1,6 @@
 use std::{fs::File, io::Read, path::Path};
 
-use league_loader::PropBinLoader;
+use league_loader::LeagueWadLoaderTrait;
 use serde::{de::DeserializeOwned, Serialize};
 use tokio::{fs::File as AsyncFile, io::AsyncWriteExt};
 
@@ -60,7 +60,10 @@ pub fn get_struct_from_file<T: DeserializeOwned>(path: &str) -> Result<T, Error>
     Ok(data)
 }
 
-pub async fn save_wad_entry_to_file(loader: &impl PropBinLoader, path: &str) -> Result<(), Error> {
+pub async fn save_wad_entry_to_file(
+    loader: &impl LeagueWadLoaderTrait,
+    path: &str,
+) -> Result<(), Error> {
     let buffer = loader.get_wad_entry_buffer_by_path(path)?;
     let mut file = get_asset_writer(&path).await?;
     file.write_all(&buffer).await?;

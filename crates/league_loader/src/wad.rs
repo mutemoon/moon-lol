@@ -11,7 +11,7 @@ use zstd::Decoder;
 use league_utils::hash_wad;
 
 use crate::{
-    ArcFileReader, Error, LeagueWad, LeagueWadEntry, LeagueWadSubchunk, PropBinLoader,
+    ArcFileReader, Error, LeagueWad, LeagueWadEntry, LeagueWadLoaderTrait, LeagueWadSubchunk,
     WadDataFormat,
 };
 
@@ -130,7 +130,7 @@ impl LeagueWadLoader {
     }
 }
 
-impl PropBinLoader for LeagueWadLoader {
+impl LeagueWadLoaderTrait for LeagueWadLoader {
     fn get_wad_entry_reader_by_hash(&self, hash: u64) -> Result<Box<dyn Read + '_>, Error> {
         let entry = self.get_wad_entry_by_hash(hash)?;
         match entry.format {

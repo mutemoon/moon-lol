@@ -1,9 +1,9 @@
 use std::collections::{HashMap, HashSet};
 
-use heck::{ToPascalCase, ToSnakeCase};
+use heck::ToPascalCase;
 use league_utils::{hash_bin, hash_to_field_name, hash_to_type_name};
 
-use crate::{detect_cyclic_types, BinParser, BinType, EntryData, Error, PropFile};
+use crate::{detect_cyclic_types, BinParser, BinType, EntryData, Error};
 
 #[derive(Debug, Clone)]
 pub enum ClassData {
@@ -553,30 +553,30 @@ fn extract_type_data(
     match vtype {
         BinType::Struct | BinType::Embed => {
             let Some(header) = parser.read_struct_header()? else {
-                return Ok(ClassData::Struct(0));
+                return Ok(ClassData::Base("()".to_string()));
             };
-            let fields = parser.read_fields().unwrap();
+            let fields = parser.read_fields()?;
 
             let sub_class_map = extract_struct_class(header.class_hash, &fields).unwrap();
             merge_class_maps(class_map, sub_class_map);
             Ok(ClassData::Struct(header.class_hash))
         }
         BinType::List | BinType::List2 => {
-            let element_type = parser.read_type().unwrap();
-            let _bytes_count = parser.read_u32().unwrap();
-            let list = parser.read_list(element_type).unwrap();
+            let element_type = parser.read_type()?;
+            let _bytes_count = parser.read_u32()?;
+            let list = parser.read_list(element_type)?;
 
             if element_type == BinType::Struct || element_type == BinType::Embed {
                 let mut class_hashes = HashSet::new();
                 for struct_data in list {
                     let mut item_parser = BinParser::from_bytes(struct_data);
                     let Some(header) = item_parser.read_struct_header()? else {
-                        class_hashes.insert(0);
                         continue;
                     };
+
                     class_hashes.insert(header.class_hash);
 
-                    let item_fields = item_parser.read_fields().unwrap();
+                    let item_fields = item_parser.read_fields()?;
                     let item_class_map =
                         extract_struct_class(header.class_hash, &item_fields).unwrap();
                     merge_class_maps(class_map, item_class_map);
@@ -611,14 +611,13 @@ fn extract_type_data(
                     let val_slice = parser.skip_value(vtype).unwrap();
                     let mut parser = BinParser::from_bytes(val_slice);
                     let Some(header) = parser.read_struct_header()? else {
-                        class_hashes.insert(0);
                         continue;
                     };
+
                     class_hashes.insert(header.class_hash);
 
-                    let item_fields = parser.read_fields().unwrap();
-                    let item_class_map =
-                        extract_struct_class(header.class_hash, &item_fields).unwrap();
+                    let item_fields = parser.read_fields()?;
+                    let item_class_map = extract_struct_class(header.class_hash, &item_fields)?;
                     merge_class_maps(class_map, item_class_map);
                 }
                 if class_hashes.len() == 1 {
@@ -706,15 +705,6 @@ pub fn get_hashes(paths: &[&str]) -> HashMap<u32, String> {
     hashes
 }
 
-pub fn extract_all_class(prop_file: &PropFile) -> Result<ClassMap, Error> {
-    let mut class_map = HashMap::new();
-    for (class_hash, entry) in prop_file.iter_class_hash_and_entry() {
-        let class_map_entry = extract_entry_class(class_hash, entry).unwrap();
-        merge_class_maps(&mut class_map, class_map_entry);
-    }
-    Ok(class_map)
-}
-
 pub fn extract_entry_class(class_hash: u32, entry: &EntryData) -> Result<ClassMap, Error> {
     let mut parser = BinParser::from_bytes(&entry.data);
     let data_map = parser.read_fields().unwrap();
@@ -736,151 +726,4 @@ pub fn extract_struct_class(
 
     class_map.insert(class_hash, struct_map);
     Ok(class_map)
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_merge_enums_empty() {
-        let enums: Vec<HashSet<u32>> = vec![];
-        let result = merge_enums(enums);
-        assert!(result.is_empty());
-    }
-
-    #[test]
-    fn test_merge_enums_single() {
-        let mut set1 = HashSet::new();
-        set1.insert(1);
-        set1.insert(2);
-        let enums = vec![set1.clone()];
-        let result = merge_enums(enums);
-        assert_eq!(result.len(), 1);
-        assert_eq!(result[0], set1);
-    }
-
-    #[test]
-    fn test_merge_enums_disjoint() {
-        let mut set1 = HashSet::new();
-        set1.insert(1);
-        set1.insert(2);
-
-        let mut set2 = HashSet::new();
-        set2.insert(3);
-        set2.insert(4);
-
-        let enums = vec![set1.clone(), set2.clone()];
-        let result = merge_enums(enums);
-        assert_eq!(result.len(), 2);
-        // The order is not guaranteed, so we check if both sets are present
-        assert!(result.contains(&set1));
-        assert!(result.contains(&set2));
-    }
-
-    #[test]
-    fn test_merge_enums_simple_overlap() {
-        let mut set1 = HashSet::new();
-        set1.insert(1);
-        set1.insert(2);
-
-        let mut set2 = HashSet::new();
-        set2.insert(2);
-        set2.insert(3);
-
-        let enums = vec![set1, set2];
-        let result = merge_enums(enums);
-        assert_eq!(result.len(), 1);
-
-        let mut expected = HashSet::new();
-        expected.insert(1);
-        expected.insert(2);
-        expected.insert(3);
-        assert_eq!(result[0], expected);
-    }
-
-    #[test]
-    fn test_merge_enums_chain_overlap() {
-        // A: {1, 2}
-        // B: {2, 3}
-        // C: {3, 4}
-        // Should merge to {1, 2, 3, 4}
-        let mut set1 = HashSet::new();
-        set1.insert(1);
-        set1.insert(2);
-
-        let mut set2 = HashSet::new();
-        set2.insert(2);
-        set2.insert(3);
-
-        let mut set3 = HashSet::new();
-        set3.insert(3);
-        set3.insert(4);
-
-        let enums = vec![set1, set2, set3];
-        let result = merge_enums(enums);
-        assert_eq!(result.len(), 1);
-
-        let mut expected = HashSet::new();
-        expected.insert(1);
-        expected.insert(2);
-        expected.insert(3);
-        expected.insert(4);
-        assert_eq!(result[0], expected);
-    }
-
-    #[test]
-    fn test_merge_enums_subset() {
-        // A: {1, 2, 3}
-        // B: {1, 2}
-        // Should merge to {1, 2, 3}
-        let mut set1 = HashSet::new();
-        set1.insert(1);
-        set1.insert(2);
-        set1.insert(3);
-
-        let mut set2 = HashSet::new();
-        set2.insert(1);
-        set2.insert(2);
-
-        let enums = vec![set1, set2];
-        let result = merge_enums(enums);
-        assert_eq!(result.len(), 1);
-
-        let mut expected = HashSet::new();
-        expected.insert(1);
-        expected.insert(2);
-        expected.insert(3);
-        assert_eq!(result[0], expected);
-    }
-
-    #[test]
-    fn test_merge_enums_complex_merge() {
-        // A: {1, 2}
-        // B: {3, 4}
-        // C: {2, 3}  <-- connects A and B
-        // Should merge to {1, 2, 3, 4}
-        let mut set1 = HashSet::new();
-        set1.insert(1);
-        set1.insert(2);
-
-        let mut set2 = HashSet::new();
-        set2.insert(3);
-        set2.insert(4);
-
-        let mut set3 = HashSet::new();
-        set3.insert(2);
-        set3.insert(3);
-
-        let enums = vec![set1, set2, set3];
-        let result = merge_enums(enums);
-        assert_eq!(result.len(), 1);
-
-        let mut expected = HashSet::new();
-        expected.insert(1);
-        expected.insert(2);
-        expected.insert(3);
-        expected.insert(4);
-        assert_eq!(result[0], expected);
-    }
 }

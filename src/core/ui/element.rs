@@ -5,10 +5,8 @@ use bevy::{
     window::{PrimaryWindow, WindowResized},
 };
 
-use league_core::{EnumAddLevelTimer, EnumData, EnumUiPosition, UiElementIconData};
+use league_core::{EnumAnchor, EnumData, EnumUiPosition, UiElementIconData};
 use league_utils::hash_bin;
-
-use crate::CommandUiAnimationStart;
 
 #[derive(Resource, Default)]
 pub struct UIElementEntity {
@@ -57,9 +55,9 @@ pub fn startup_spawn_ui_element(
         res_ui_element_entity.map.insert(hash_bin(&ui.name), entity);
     }
 
-    commands.trigger(CommandUiAnimationStart {
-        key: "ClientStates/Gameplay/UX/LoL/PlayerFrame/UIBase/Player_Frame_Root/LevelUpFxIn/LevelUp0_ButtonIn".to_string(),
-    });
+    // commands.trigger(CommandUiAnimationStart {
+    //     key: "ClientStates/Gameplay/UX/LoL/PlayerFrame/UIBase/Player_Frame_Root/LevelUpFxIn/LevelUp0_ButtonIn".to_string(),
+    // });
 }
 
 pub fn spawn_ui_element(
@@ -145,7 +143,7 @@ fn apply_rect_position(node: &mut Node, ui_element: &UIElement, window_size: Vec
         return None;
     };
 
-    let EnumAddLevelTimer::AnchorSingle(anchor) = anchors else {
+    let EnumAnchor::AnchorSingle(anchor) = anchors else {
         return None;
     };
     let anchor = anchor.anchor;

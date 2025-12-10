@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use binrw::BinRead;
 
-use league_core::{EnumAddLevelTimer, MapContainer};
+use league_core::{EnumMap, MapContainer};
 use league_file::AiMeshNGrid;
 use league_loader::LeagueWadMapLoader;
 use league_property::from_entry_unwrap;
@@ -26,7 +26,7 @@ pub async fn load_navigation_grid(
     let map_nav_grid = components
         .iter()
         .filter_map(|v| match v {
-            EnumAddLevelTimer::MapNavGrid(v) => Some(v),
+            EnumMap::MapNavGrid(v) => Some(v),
             _ => None,
         })
         .next()

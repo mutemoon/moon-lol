@@ -1,5 +1,8 @@
-use league_utils::hash_bin;
+use std::collections::VecDeque;
+
 use serde::de::{self, Visitor};
+
+use league_utils::hash_bin;
 
 use crate::{
     BinDeserializerResult, BinParser, BinType, EnumReader, Error, HashMapReader, MapReader,
@@ -39,11 +42,20 @@ impl<'de, 'a> de::Deserializer<'de> for &'a mut BinDeserializer<'de> {
 
         let data_map = self.parser.read_fields()?;
 
-        visitor.visit_map(MapReader {
-            data_map,
-            struct_fields: struct_fields.iter(),
-            next_value: None,
-        })
+        visitor
+            .visit_map(MapReader {
+                data_map,
+                struct_fields: struct_fields.iter(),
+                next_value: None,
+                current_field: None,
+            })
+            .map_err(|e| {
+                if _name.is_empty() {
+                    e
+                } else {
+                    e.with_context(format!("结构体 \"{}\"", _name))
+                }
+            })
     }
 
     fn deserialize_string<V>(self, visitor: V) -> Result<V::Value, Self::Error>
@@ -93,7 +105,11 @@ impl<'de, 'a> de::Deserializer<'de> for &'a mut BinDeserializer<'de> {
 
                 let mut values = Vec::new();
                 for _ in 0..count {
-                    values.push(self.parser.skip_value(vtype)?);
+                    if vtype == BinType::Struct && self.parser.test_null_struct()? {
+                        self.parser.skip_value(vtype)?;
+                    } else {
+                        values.push(self.parser.skip_value(vtype)?);
+                    }
                 }
 
                 visitor.visit_seq(SeqDerReader::from_values(values, vtype))
@@ -106,12 +122,17 @@ impl<'de, 'a> de::Deserializer<'de> for &'a mut BinDeserializer<'de> {
                 let _bytes_count = self.parser.read_u32()?;
                 let count = self.parser.read_u32()?;
 
-                visitor.visit_map(HashMapReader {
-                    de: &mut BinDeserializer::from_bytes(self.parser.input, ktype),
-                    ktype,
-                    vtype,
-                    count,
-                })
+                let mut map = VecDeque::new();
+                for _ in 0..count {
+                    let key = self.parser.skip_value(ktype)?;
+                    if vtype == BinType::Struct && self.parser.test_null_struct()? {
+                        self.parser.skip_value(vtype)?;
+                    } else {
+                        map.push_back((key, self.parser.skip_value(vtype)?));
+                    }
+                }
+
+                visitor.visit_map(HashMapReader { map, ktype, vtype })
             }
             BinType::Flag => visitor.visit_bool(self.parser.read_flag()?),
             _ => {
@@ -176,10 +197,12 @@ impl<'de, 'a> de::Deserializer<'de> for &'a mut BinDeserializer<'de> {
                 ))
             })?;
 
-        visitor.visit_enum(EnumReader {
-            de: self,
-            variant_index: variant_index as u32,
-        })
+        visitor
+            .visit_enum(EnumReader {
+                de: self,
+                variant_index: variant_index as u32,
+            })
+            .map_err(|e| e.with_context(format!("枚举 \"{}\" (变体: {})", _name, _variant_name)))
     }
 
     serde::forward_to_deserialize_any! {

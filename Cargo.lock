@@ -3898,6 +3898,8 @@ version = "0.1.0"
 dependencies = [
  "bevy",
  "bitflags 2.10.0",
+ "league_property",
+ "league_utils",
  "serde",
 ]
 
@@ -3934,7 +3936,6 @@ dependencies = [
  "bevy",
  "binrw",
  "heck",
- "league_core",
  "league_utils",
  "rayon",
  "serde",
@@ -4109,8 +4110,8 @@ dependencies = [
  "bevy",
  "bincode",
  "binrw",
+ "league_core",
  "league_file",
- "league_loader",
  "league_property",
  "league_to_lol",
  "league_utils",

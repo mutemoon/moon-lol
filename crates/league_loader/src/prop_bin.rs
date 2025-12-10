@@ -8,7 +8,7 @@ use league_utils::hash_wad;
 
 use crate::Error;
 
-pub trait PropBinLoader {
+pub trait LeagueWadLoaderTrait {
     fn get_wad_entry_reader_by_hash(&self, hash: u64) -> Result<Box<dyn Read + '_>, Error>;
 
     fn get_wad_entry_no_seek_reader_by_hash(

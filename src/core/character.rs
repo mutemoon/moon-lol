@@ -58,15 +58,9 @@ fn on_command_character_spawn(
     let entity = trigger.event_target();
 
     // 查找 character 配置
-    let character_record = match res_assets_character_record.get(trigger.character_record_key) {
-        Some(record) => record,
-        None => {
-            error!(
-                "Character record not found: {}",
-                trigger.character_record_key
-            );
-            return;
-        }
+    let Some(character_record) = res_assets_character_record.get(trigger.character_record_key)
+    else {
+        return;
     };
 
     commands.trigger(CommandSkinSpawn {

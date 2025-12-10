@@ -6,4 +6,6 @@ edition = "2021"
 [dependencies]
 bevy.workspace = true
 bitflags.workspace = true
+league_utils.workspace = true
+league_property.workspace = true
 serde.workspace = true

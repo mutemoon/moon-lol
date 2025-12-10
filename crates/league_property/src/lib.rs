@@ -4,7 +4,6 @@ mod deserializer;
 mod extract;
 mod parser;
 mod prop;
-mod register;
 mod types;
 
 pub use accessor::*;
@@ -13,7 +12,6 @@ pub use deserializer::*;
 pub use extract::*;
 pub use parser::*;
 pub use prop::*;
-pub use register::*;
 pub use types::*;
 
 use serde::Deserialize;

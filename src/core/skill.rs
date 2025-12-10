@@ -14,6 +14,8 @@ pub struct PluginSkill;
 
 impl Plugin for PluginSkill {
     fn build(&self, app: &mut App) {
+        app.init_asset::<SkillEffect>();
+
         app.add_plugins(BehavePlugin::default());
 
         app.add_observer(on_skill_cast);

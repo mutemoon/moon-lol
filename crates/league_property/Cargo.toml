@@ -8,7 +8,6 @@ bevy.workspace = true
 binrw.workspace = true
 heck.workspace = true
 league_utils.workspace = true
-league_core.workspace = true
 serde.workspace = true
 thiserror.workspace = true
 rayon = "1.10"

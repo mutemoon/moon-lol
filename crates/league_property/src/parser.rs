@@ -160,6 +160,12 @@ impl<'de> BinParser<'de> {
         }
     }
 
+    pub fn test_null_struct(&mut self) -> BinDeserializerResult<bool> {
+        let class_hash = u32::from_le_bytes(self.input[..4].try_into().unwrap());
+
+        Ok(class_hash == 0)
+    }
+
     pub fn read_fields(&mut self) -> BinDeserializerResult<HashMap<u32, (BinType, &'de [u8])>> {
         let field_count = self.read_u16().unwrap() as usize;
 

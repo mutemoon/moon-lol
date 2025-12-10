@@ -2,7 +2,7 @@ use std::{collections::VecDeque, time::Duration};
 
 use bevy::prelude::*;
 use league_core::{
-    BarracksConfig, CharacterRecord, ConstantWaveBehavior, EnumAddLevelTimer, EnumWaveBehavior,
+    BarracksConfig, CharacterRecord, ConstantWaveBehavior, EnumMap, EnumWaveBehavior,
     InhibitorWaveBehavior, MapContainer, MapPlaceableContainer, RotatingWaveBehavior,
     TimedVariableWaveBehavior, Unk0xad65d8c4,
 };
@@ -48,7 +48,7 @@ pub struct PluginBarrack;
 impl Plugin for PluginBarrack {
     fn build(&self, app: &mut App) {
         app.init_resource::<InhibitorState>();
-        app.add_systems(Startup, startup_spawn_barrack);
+        // app.add_systems(Startup, startup_spawn_barrack);
         app.add_systems(FixedUpdate, barracks_spawning_system);
     }
 }
@@ -74,7 +74,7 @@ fn startup_spawn_barrack(
 
         for (_, value) in map_placeable_container.items.as_ref().unwrap() {
             match value {
-                EnumAddLevelTimer::Unk0x3c995caf(unk0x3c995caf) => {
+                EnumMap::Unk0x3c995caf(unk0x3c995caf) => {
                     let lane = match unk0x3c995caf.name.as_str() {
                         "MinionPath_Top" => Lane::Top,
                         "MinionPath_Mid" => Lane::Mid,
@@ -92,7 +92,7 @@ fn startup_spawn_barrack(
 
                     res_minion_path.0.entry(lane).or_insert(path);
                 }
-                EnumAddLevelTimer::Unk0xba138ae3(unk0xba138ae3) => {
+                EnumMap::Unk0xba138ae3(unk0xba138ae3) => {
                     let key_barracks_config =
                         get_asset_id_by_hash(unk0xba138ae3.definition.barracks_config);
 
@@ -311,7 +311,7 @@ fn calculate_spawn_count(
 ) -> i32 {
     match behavior {
         EnumWaveBehavior::ConstantWaveBehavior(ConstantWaveBehavior { spawn_count }) => {
-            spawn_count.unwrap()
+            *spawn_count
         }
         EnumWaveBehavior::InhibitorWaveBehavior(InhibitorWaveBehavior {
             spawn_count_per_inhibitor_down,

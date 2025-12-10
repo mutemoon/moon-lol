@@ -131,6 +131,12 @@ fn add_skills(
     res_assets_character_record: Res<Assets<CharacterRecord>>,
 ) {
     for entity in q_riven.iter() {
+        let Some(character_record) = res_assets_character_record.get(get_asset_id_by_path(
+            "Characters/Riven/CharacterRecords/Root",
+        )) else {
+            continue;
+        };
+
         commands.entity(entity).with_related::<PassiveSkillOf>((
             Skill {
                 key_spell_object: get_asset_id_by_path(
@@ -140,12 +146,6 @@ fn add_skills(
             },
             CoolDown::default(),
         ));
-
-        let character_record = res_assets_character_record
-            .get(get_asset_id_by_path(
-                "Characters/Riven/CharacterRecords/Root",
-            ))
-            .unwrap();
 
         for &skill in character_record.spells.as_ref().unwrap().iter() {
             commands.entity(entity).with_related::<SkillOf>((

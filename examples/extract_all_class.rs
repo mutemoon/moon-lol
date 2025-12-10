@@ -5,10 +5,11 @@ use std::sync::Mutex;
 use std::time::Instant;
 
 use bevy::prelude::*;
+use league_utils::hash_bin;
 use rayon::prelude::*;
 
-use league_loader::{LeagueLoader, PropBinLoader};
-use league_property::{class_map_to_rust_code, extract_all_class, get_hashes, merge_class_maps};
+use league_loader::{LeagueLoader, LeagueWadLoaderTrait};
+use league_property::{class_map_to_rust_code, extract_entry_class, get_hashes, merge_class_maps};
 
 fn main() {
     let root_dir = r"D:\Program Files\Riot Games\League of Legends\Game";
@@ -201,11 +202,29 @@ fn main() {
     let start = Instant::now();
 
     let hash_paths = vec![
-        "../../assets/hashes/hashes.binentries.txt",
-        "../../assets/hashes/hashes.binfields.txt",
-        "../../assets/hashes/hashes.binhashes.txt",
-        "../../assets/hashes/hashes.bintypes.txt",
+        "assets/hashes/hashes.binentries.txt",
+        "assets/hashes/hashes.binfields.txt",
+        "assets/hashes/hashes.binhashes.txt",
+        "assets/hashes/hashes.bintypes.txt",
     ];
+
+    let need_extract = HashSet::from([
+        hash_bin("AnimationGraphData"),
+        hash_bin("BarracksConfig"),
+        hash_bin("CharacterRecord"),
+        hash_bin("MapContainer"),
+        hash_bin("MapPlaceableContainer"),
+        hash_bin("ResourceResolver"),
+        hash_bin("SkinCharacterDataProperties"),
+        hash_bin("SpellObject"),
+        hash_bin("StaticMaterialDef"),
+        hash_bin("UiElementEffectAnimationData"),
+        hash_bin("UiElementGroupButtonData"),
+        hash_bin("UiElementIconData"),
+        hash_bin("UiElementRegionData"),
+        hash_bin("VfxSystemDefinitionData"),
+        0xad65d8c4,
+    ]);
 
     // 收集所有 (wad_index, entry_hash) 任务
     let tasks: Vec<_> = loader
@@ -226,7 +245,6 @@ fn main() {
 
     // 使用线程安全容器收集结果
     let class_map = Mutex::new(HashMap::new());
-    let entry_hashes = Mutex::new(HashSet::new());
 
     tasks.par_iter().for_each(|(wad_index, hash)| {
         let wad = &loader.wads[*wad_index];
@@ -241,14 +259,15 @@ fn main() {
             return;
         };
 
-        // 收集 entry_hashes
-        let mut entry_hashes_guard = entry_hashes.lock().unwrap();
-        for class_hash in &bin.entry_classes {
-            entry_hashes_guard.insert(*class_hash);
-        }
+        let mut bin_class_map = HashMap::new();
+        for (class_hash, entry) in bin.iter_class_hash_and_entry() {
+            if !need_extract.contains(&class_hash) {
+                continue;
+            }
 
-        // 提取 class_map
-        let bin_class_map = extract_all_class(&bin).unwrap();
+            let class_map_entry = extract_entry_class(class_hash, entry).unwrap();
+            merge_class_maps(&mut bin_class_map, class_map_entry);
+        }
 
         // 合并到全局 class_map
         let mut class_map_guard = class_map.lock().unwrap();
@@ -256,11 +275,11 @@ fn main() {
     });
 
     let mut class_map = class_map.into_inner().unwrap();
-    let entry_hashes = entry_hashes.into_inner().unwrap();
+
     let hashes = get_hashes(&hash_paths);
 
     let (rust_code, init_code) =
-        class_map_to_rust_code(&mut class_map, &hashes, &entry_hashes).unwrap();
+        class_map_to_rust_code(&mut class_map, &hashes, &need_extract).unwrap();
 
     write("league.rs", rust_code).unwrap();
     write("init_league_asset.rs", init_code).unwrap();

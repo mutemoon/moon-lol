@@ -1,29 +1,21 @@
-use std::{fs::File, io::Read};
+use std::fs::File;
+use std::io::Read;
 
-use bevy::{
-    ecs::{
-        component::ComponentCloneBehavior,
-        entity::{EntityHashMap, SceneEntityMapper},
-        relationship::RelationshipHookMode,
-    },
-    platform::collections::HashMap,
-    prelude::*,
-    scene::ron::{self},
-};
-use league_property::{init_league_asset, AssetLoaderRegistry};
-use serde::de::DeserializeSeed;
-
-use league_core::{
-    CharacterRecord, SpellObject, UiElementEffectAnimationData, UiElementGroupButtonData,
-    UiElementIconData, UiElementRegionData,
-};
+use bevy::ecs::component::ComponentCloneBehavior;
+use bevy::ecs::entity::{EntityHashMap, SceneEntityMapper};
+use bevy::ecs::relationship::RelationshipHookMode;
+use bevy::platform::collections::HashMap;
+use bevy::prelude::*;
+use bevy::scene::ron::{self};
+use league_core::init_league_asset;
+use league_file::{LeagueMapGeo, LeagueSkeleton};
 use league_to_lol::{get_struct_from_file, CONFIG_PATH_MAP_NAV_GRID};
-use lol_config::{CharacterConfigsDeserializer, ConfigGame, ConfigNavigationGrid};
+use lol_config::{CharacterConfigsDeserializer, ConfigGame, ConfigNavigationGrid, LeagueProperty};
 use lol_loader::{
-    LeagueLoaderAnimationClip, LeagueLoaderImage, LeagueLoaderMesh, LeagueLoaderMeshStatic,
+    LeagueLoaderAnimationClip, LeagueLoaderAny, LeagueLoaderImage, LeagueLoaderMesh,
+    LeagueLoaderMeshStatic, LeagueLoaderProperty,
 };
-
-use crate::SkillEffect;
+use serde::de::DeserializeSeed;
 
 #[derive(Default)]
 pub struct PluginResource {
@@ -32,36 +24,20 @@ pub struct PluginResource {
 
 impl Plugin for PluginResource {
     fn build(&self, app: &mut App) {
-        app.init_asset::<SpellObject>();
-        app.init_asset::<SkillEffect>();
-        app.init_asset::<CharacterRecord>();
-        app.init_asset::<UiElementIconData>();
-        app.init_asset::<UiElementEffectAnimationData>();
-        app.init_asset::<UiElementGroupButtonData>();
-        app.init_asset::<UiElementRegionData>();
+        app.init_asset::<LeagueMapGeo>();
+        app.init_asset::<LeagueSkeleton>();
+        app.init_asset::<LeagueProperty>();
 
+        init_league_asset(app);
+
+        app.init_asset_loader::<LeagueLoaderAny>();
+        app.init_asset_loader::<LeagueLoaderProperty>();
         app.init_asset_loader::<LeagueLoaderImage>();
         app.init_asset_loader::<LeagueLoaderMesh>();
         app.init_asset_loader::<LeagueLoaderMeshStatic>();
         app.init_asset_loader::<LeagueLoaderAnimationClip>();
 
-        let mut asset_loader_registry = AssetLoaderRegistry::default();
-
-        let prop_bin_paths = vec![
-            "data/maps/mapgeometry/map11/base_srx.materials.bin",
-            "data/maps/shipping/map11/map11.bin",
-        ];
-
-        //     world.resource_scope(|world, registry: Mut<AssetLoaderRegistry>| {
-        //         for (type_name, json_content) in raw_data {
-        //             if let Some(loader) = registry.loaders.get(&type_name) {
-        //                 // 调用动态分发的函数
-        //                 loader.load_and_add(world, &json_content);
-        //             } else {
-        //                 warn!("未知的资产类型: {}", type_name);
-        //             }
-        //         }
-        //     });
+        app.add_systems(Startup, startup_load_prop_bin);
 
         let mut resource_cache = ResourceCache::default();
 
@@ -74,8 +50,6 @@ impl Plugin for PluginResource {
 
         app.insert_resource(nav_grid);
 
-        init_league_asset(app, &mut asset_loader_registry);
-
         let world = app.world_mut();
 
         let type_registry = world.resource::<AppTypeRegistry>();
@@ -83,10 +57,6 @@ impl Plugin for PluginResource {
 
         let binding = type_registry.internal.clone();
         let type_registry = binding.read().unwrap();
-        // println!("{:?}", type_registry.iter().collect::<Vec<_>>());
-        for item in type_registry.iter() {
-            println!("{:?}", item.type_info().type_path_table().short_path());
-        }
 
         let mut deserializer = ron::de::Deserializer::from_bytes(&data).unwrap();
         let scene_deserializer = CharacterConfigsDeserializer {
@@ -181,5 +151,16 @@ impl ResourceCache {
                 handle
             }
         }
+    }
+}
+
+fn startup_load_prop_bin(res_asset_server: Res<AssetServer>) {
+    let prop_bin_paths = vec![
+        "data/maps/mapgeometry/map11/base_srx.materials.bin",
+        "data/maps/shipping/map11/map11.bin",
+    ];
+
+    for path in prop_bin_paths {
+        res_asset_server.load_untyped(path);
     }
 }

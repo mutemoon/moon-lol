@@ -32,92 +32,100 @@ impl Plugin for PluginFiora {
 pub struct Fiora;
 
 fn startup_load_assets(mut res_assets_skill_effect: ResMut<Assets<SkillEffect>>) {
-    res_assets_skill_effect.insert(
-        get_asset_id_by_path("Characters/Fiora/Spells/FioraQAbility/FioraQ"),
-        SkillEffect(behave! {
-            Behave::Sequence => {
-                Behave::trigger(
-                    ActionAnimationPlay { hash: hash_bin("Spell1") }
-                ),
-                Behave::trigger(
-                    ActionParticleSpawn { hash: hash_bin("Fiora_Q_Dash_Trail_ground") },
-                ),
-                Behave::trigger(
-                    ActionDash::Pointer { speed: 1000., max: 300. },
-                ),
-                Behave::IfThen => {
-                    Behave::trigger(ActionDamage),
-                    Behave::Sequence => {
+    res_assets_skill_effect
+        .insert(
+            get_asset_id_by_path("Characters/Fiora/Spells/FioraQAbility/FioraQ"),
+            SkillEffect(behave! {
+                Behave::Sequence => {
+                    Behave::trigger(
+                        ActionAnimationPlay { hash: hash_bin("Spell1") }
+                    ),
+                    Behave::trigger(
+                        ActionParticleSpawn { hash: hash_bin("Fiora_Q_Dash_Trail_ground") },
+                    ),
+                    Behave::trigger(
+                        ActionDash::Pointer { speed: 1000., max: 300. },
+                    ),
+                    Behave::IfThen => {
+                        Behave::trigger(ActionDamage),
+                        Behave::Sequence => {
+                        },
                     },
-                },
-            }
-        }),
-    );
-    res_assets_skill_effect.insert(
-        get_asset_id_by_path("Characters/Fiora/Spells/FioraEAbility/FioraW"),
-        SkillEffect(behave! {
-            Behave::Sequence => {
-                Behave::trigger(
-                    ActionParticleSpawn { hash: hash_bin("Fiora_W_Telegraph_Blue") },
-                ),
-                Behave::trigger(
-                    ActionAnimationPlay { hash: hash_bin("Spell2_In") }
-                ),
-                Behave::trigger(
-                    ActionParticleSpawn { hash: hash_bin("Fiora_W_Cas") },
-                ),
-                Behave::Wait(0.5),
-                Behave::trigger(
-                    ActionAnimationPlay { hash: hash_bin("Spell2") }
-                ),
-                Behave::trigger(ActionDamage),
-                Behave::Wait(0.1),
-                Behave::trigger(
-                    ActionParticleDespawn{ hash: hash_bin("Fiora_W_Telegraph_Blue") },
-                ),
-            }
-        }),
-    );
-    res_assets_skill_effect.insert(
-        get_asset_id_by_path("Characters/Fiora/Spells/FioraEAbility/FioraE"),
-        SkillEffect(behave! {
-            Behave::Sequence => {
-                Behave::trigger(ActionBuffSpawn{
-                    bundle: Arc::new(|commands: &mut EntityCommands| {
-                        commands.with_related::<BuffOf>((
-                            AttackBuff {
-                                bonus_attack_speed: 0.5,
-                            },
-                            BuffFioraE {
-                                left: 2
-                            },
-                        ));
+                }
+            }),
+        )
+        .unwrap();
+    res_assets_skill_effect
+        .insert(
+            get_asset_id_by_path("Characters/Fiora/Spells/FioraEAbility/FioraW"),
+            SkillEffect(behave! {
+                Behave::Sequence => {
+                    Behave::trigger(
+                        ActionParticleSpawn { hash: hash_bin("Fiora_W_Telegraph_Blue") },
+                    ),
+                    Behave::trigger(
+                        ActionAnimationPlay { hash: hash_bin("Spell2_In") }
+                    ),
+                    Behave::trigger(
+                        ActionParticleSpawn { hash: hash_bin("Fiora_W_Cas") },
+                    ),
+                    Behave::Wait(0.5),
+                    Behave::trigger(
+                        ActionAnimationPlay { hash: hash_bin("Spell2") }
+                    ),
+                    Behave::trigger(ActionDamage),
+                    Behave::Wait(0.1),
+                    Behave::trigger(
+                        ActionParticleDespawn{ hash: hash_bin("Fiora_W_Telegraph_Blue") },
+                    ),
+                }
+            }),
+        )
+        .unwrap();
+    res_assets_skill_effect
+        .insert(
+            get_asset_id_by_path("Characters/Fiora/Spells/FioraEAbility/FioraE"),
+            SkillEffect(behave! {
+                Behave::Sequence => {
+                    Behave::trigger(ActionBuffSpawn{
+                        bundle: Arc::new(|commands: &mut EntityCommands| {
+                            commands.with_related::<BuffOf>((
+                                AttackBuff {
+                                    bonus_attack_speed: 0.5,
+                                },
+                                BuffFioraE {
+                                    left: 2
+                                },
+                            ));
+                        }),
                     }),
-                }),
-                Behave::trigger(ActionAttackReset),
-            }
-        }),
-    );
-    res_assets_skill_effect.insert(
-        get_asset_id_by_path("Characters/Fiora/Spells/FioraRAbility/FioraR"),
-        SkillEffect(behave! {
-            Behave::Sequence => {
-                Behave::trigger(
-                    ActionParticleSpawn { hash: hash_bin("Fiora_R_Indicator_Ring") },
-                ),
-                Behave::trigger(
-                    ActionParticleSpawn { hash: hash_bin("Fiora_R_ALL_Warning") },
-                ),
-                Behave::trigger(ActionCommand {
-                    bundle: Arc::new(|commands: &mut EntityCommands| {
-                        commands.with_related::<BuffOf>((
-                            BuffFioraR::default(),
-                        ));
+                    Behave::trigger(ActionAttackReset),
+                }
+            }),
+        )
+        .unwrap();
+    res_assets_skill_effect
+        .insert(
+            get_asset_id_by_path("Characters/Fiora/Spells/FioraRAbility/FioraR"),
+            SkillEffect(behave! {
+                Behave::Sequence => {
+                    Behave::trigger(
+                        ActionParticleSpawn { hash: hash_bin("Fiora_R_Indicator_Ring") },
+                    ),
+                    Behave::trigger(
+                        ActionParticleSpawn { hash: hash_bin("Fiora_R_ALL_Warning") },
+                    ),
+                    Behave::trigger(ActionCommand {
+                        bundle: Arc::new(|commands: &mut EntityCommands| {
+                            commands.with_related::<BuffOf>((
+                                BuffFioraR::default(),
+                            ));
+                        }),
                     }),
-                }),
-            }
-        }),
-    );
+                }
+            }),
+        )
+        .unwrap();
 }
 
 fn add_skills(
