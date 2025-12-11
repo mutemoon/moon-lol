@@ -8,6 +8,7 @@ use bevy::ecs::relationship::RelationshipHookMode;
 use bevy::platform::collections::HashMap;
 use bevy::prelude::*;
 use bevy::scene::ron::{self};
+use bevy::state::commands;
 use league_core::init_league_asset;
 use league_file::LeagueSkeleton;
 use league_to_lol::{get_struct_from_file, CONFIG_PATH_MAP_NAV_GRID};
@@ -145,7 +146,10 @@ impl Plugin for PluginResource {
 }
 
 #[derive(Resource, Default)]
-pub struct LeaguePropertyFiles(pub Vec<Handle<LeagueProperties>>);
+pub struct LeaguePropertyFiles {
+    pub unload: Vec<Handle<LeagueProperties>>,
+    pub loaded: Vec<String>,
+}
 
 #[derive(Resource, Default)]
 pub struct ResourceCache {
@@ -223,40 +227,42 @@ fn on_command_load_prop_bin(
     mut res_league_property_files: ResMut<LeaguePropertyFiles>,
 ) {
     for path in &event.paths {
+        if res_league_property_files.loaded.contains(path) {
+            continue;
+        }
+
         res_league_property_files
-            .0
+            .unload
             .push(res_asset_server.load(path.to_lowercase()));
+
+        res_league_property_files.loaded.push(path.clone());
         // info!("开始加载 {:?}", path);
     }
 }
 
 fn update_collect_properties(
+    mut commands: Commands,
     mut res_assets_league_properties: ResMut<Assets<LeagueProperties>>,
     mut res_league_property_files: ResMut<LeaguePropertyFiles>,
     mut res_league_properties: ResMut<LeagueProperties>,
 ) {
-    if res_league_property_files.0.is_empty() {
-        return;
-    }
+    res_league_property_files
+        .unload
+        .retain(|handle_league_properties| {
+            let Some(league_properties) =
+                res_assets_league_properties.get_mut(handle_league_properties)
+            else {
+                return true;
+            };
 
-    let mut left_league_property_files = Vec::new();
+            res_league_properties.merge(league_properties);
 
-    for handle_league_properties in &res_league_property_files.0 {
-        let Some(league_properties) =
-            res_assets_league_properties.get_mut(handle_league_properties)
-        else {
-            left_league_property_files.push(handle_league_properties.clone());
-            continue;
-        };
+            commands.trigger(CommandLoadPropBin {
+                paths: league_properties.1.clone(),
+            });
 
-        res_league_properties.merge(league_properties);
-    }
-
-    if left_league_property_files.is_empty() {
-        return;
-    }
-
-    res_league_property_files.0 = left_league_property_files;
+            false
+        });
 }
 
 pub trait LoadingTrait {
@@ -276,6 +282,7 @@ fn update_loading<T: TypePath + Send + Sync + 'static>(
         loading.update(&time);
 
         if loading.is_timeout() {
+            // println!("加载超时 {}", T::type_path());
             commands.entity(entity).remove::<Loading<T>>();
         }
     }

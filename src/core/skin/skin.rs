@@ -34,8 +34,6 @@ pub fn on_command_skin_spawn(trigger: On<CommandSkinSpawn>, mut commands: Comman
 
     commands.trigger(CommandLoadPropBin { paths });
 
-    commands.trigger(CommandSkinAnimationSpawn { entity, key });
-
     commands.entity(entity).insert(Loading::new(SkinSpawn(key)));
 }
 
@@ -68,6 +66,8 @@ pub fn update_skin_spawn(
         ));
 
         commands.trigger(CommandSkinMeshSpawn { entity });
+
+        commands.trigger(CommandSkinAnimationSpawn { entity });
 
         commands.entity(entity).remove::<Loading<SkinSpawn>>();
     }

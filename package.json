@@ -1,29 +1,24 @@
 {
   "name": "fsm-demo-rust",
   "scripts": {
-    "extract": "cargo run --example extract",
-    "hot:patch": "dx serve --hot-patch --features \"bevy/hotpatching\"",
-    "test:minion:watch": "cargo-watch -x \"test -p moon_lol --test minion -- tests::test_complete_attack_cycle --exact --nocapture\"",
-    "example:stream:watch": "cargo-watch -x \"run --example stream\"",
     "example:attack": "cargo run --example attack",
     "example:attack:release": "cargo run --example attack --release",
-    "example:attack:watch": "cargo-watch -x \"run --example attack\" -w src -w assets -w crates -w examples",
+    "example:attack:watch": "cargo-watch -x \"run --example attack\"",
     "example:classic_fiora": "cargo run --example classic_fiora",
-    "example:classic_fiora:watch": "cargo-watch -w src -w crates -w examples -w assets -x \"run --example classic_fiora\"",
     "example:classic_fiora:release": "cargo run --example classic_fiora --release",
+    "example:classic_fiora:watch": "cargo-watch -x \"run --example classic_fiora\"",
     "example:navigation_grid": "cargo run --example navigation_grid",
-    "example:navigation_grid:watch": "cargo-watch -w src -w crates -w examples -w assets -x \"run --example navigation_grid\"",
-    "example:particle:watch": "cargo-watch -w src -w crates -w examples -w assets/shaders -x \"run --example particle\"",
-    "example:texture:watch": "cargo-watch -w src -w crates -w examples -w assets/shaders -x \"run --example texture\""
-  },
-  "dependencies": {
-    "@gltf-transform/core": "^4.2.0",
-    "@gltf-transform/extensions": "^4.2.0",
-    "@types/node": "^24.0.14",
-    "three": "^0.178.0",
-    "vite": "^6.0.6"
+    "example:navigation_grid:watch": "cargo-watch -x \"run --example navigation_grid\"",
+    "example:particle:watch": "cargo-watch -x \"run --example particle\"",
+    "example:stream:watch": "cargo-watch -x \"run --example stream\"",
+    "example:texture:watch": "cargo-watch -x \"run --example texture\"",
+    "extract": "cargo run --example extract",
+    "hot:patch": "dx serve --hot-patch --features \"bevy/hotpatching\"",
+    "test:minion:watch": "cargo-watch -x \"test -p moon_lol --test minion -- tests::test_complete_attack_cycle --exact --nocapture\""
   },
   "devDependencies": {
-    "@types/three": "^0.178.1"
+    "prettier": "^3.7.4",
+    "prettier-plugin-package": "^2.0.0",
+    "prettier-plugin-tailwindcss": "^0.7.2"
   }
 }

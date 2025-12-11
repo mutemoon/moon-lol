@@ -60,7 +60,10 @@ impl<T> PartialEq for HashKey<T> {
 }
 
 #[derive(Resource, Asset, TypePath, Default)]
-pub struct LeagueProperties(pub HashMap<u32, HashMap<u32, UntypedHandle>>);
+pub struct LeagueProperties(
+    pub HashMap<u32, HashMap<u32, UntypedHandle>>,
+    pub Vec<String>,
+);
 
 impl LeagueProperties {
     pub fn get<'a, T: Asset>(

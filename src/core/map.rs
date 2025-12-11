@@ -40,7 +40,10 @@ impl Plugin for PluginMap {
             Update,
             (
                 update_spawn_map_character.run_if(in_state(MapState::Loading)),
-                update_spawn_map_geometry.run_if(resource_exists::<Loading<Handle<ConfigMapGeo>>>),
+                update_spawn_map_geometry.run_if(
+                    resource_exists::<Loading<Handle<ConfigMapGeo>>>
+                        .and(in_state(MapState::Loaded)),
+                ),
             ),
         );
         // app.add_systems(Startup, startup_spawn_map_geometry);
@@ -150,11 +153,8 @@ fn update_spawn_map_geometry(
     res_loading_map_geo: Res<Loading<Handle<ConfigMapGeo>>>,
 ) {
     let Some(config_map_geo) = res_assets_map_geo.get(res_loading_map_geo.deref().deref()) else {
-        println!("未加载地图");
         return;
     };
-
-    println!("加载地图完成");
 
     commands.remove_resource::<Loading<Handle<ConfigMapGeo>>>();
 
@@ -162,7 +162,7 @@ fn update_spawn_map_geometry(
         .spawn((Transform::default(), Visibility::default(), Map))
         .id();
 
-    println!("地图数量: {:?}", config_map_geo.submeshes.len());
+    println!("地图网格数量: {:?}", config_map_geo.submeshes.len());
 
     for (mesh_handle, mat_name, bounding_box) in &config_map_geo.submeshes {
         let static_material_def = res_league_properties

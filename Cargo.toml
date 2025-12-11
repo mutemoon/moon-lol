@@ -31,8 +31,6 @@ tracing = "0.1"
 tracing-subscriber = "0.3"
 regex = "1"
 
-
-
 [workspace.dependencies]
 league_core = { path = "crates/league_core" }
 league_file = { path = "crates/league_file" }
@@ -56,9 +54,22 @@ tokio = { version = "1.0", features = ["full"] }
 rayon = "1.10"
 
 [dev-dependencies]
+anyhow = "1.0.100"
+autoagents = { version = "0.3.0", features = ["openrouter", "ollama", "openai"] }
+autoagents-derive = "0.3.0"
 crossbeam-channel = "0.5"
+glsl-lang = "0.8.0"
+glsl-lang-pp = { version = "0.8.0", features = ["full"] }
 image = { version = "0.25", features = ["jpeg", "png"] }
-tungstenite = "0.23"
+preproc = "0.2.0"
+rayon.workspace = true
 rocket = { version = "*", features = ["json"] }
 rocket_cors = "0.6"
-rayon.workspace = true
+serde_json = "1.0.145"
+similar = "2"
+tungstenite = "0.23"
+walkdir = "2.5.0"
+chrono = "0.4"
+
+[build-dependencies]
+embed-resource = "2.4"

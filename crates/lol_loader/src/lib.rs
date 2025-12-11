@@ -14,12 +14,12 @@ use bevy::render::render_resource::{
 use binrw::BinRead;
 use league_core::{EnvironmentVisibility, ASSET_LOADER_REGISTRY};
 use league_file::{
-    LeagueMapGeo, LeagueMeshStatic, LeagueSkeleton, LeagueSkinnedMesh, LeagueTexture,
-    LeagueTextureFormat,
+    AnimationFile, LeagueMapGeo, LeagueMeshStatic, LeagueSkeleton, LeagueSkinnedMesh,
+    LeagueTexture, LeagueTextureFormat,
 };
 use league_property::PropFile;
 use league_to_lol::{
-    mesh_static_to_bevy_mesh, parse_vertex_data, skinned_mesh_to_intermediate,
+    load_animation_file, mesh_static_to_bevy_mesh, parse_vertex_data, skinned_mesh_to_intermediate,
     submesh_to_intermediate,
 };
 use lol_config::{ConfigAnimationClip, IntermediateMesh, LeagueProperties};
@@ -79,7 +79,9 @@ impl AssetLoader for LeagueLoaderProperty {
             store.insert(entry.hash, handle);
         }
 
-        Ok(LeagueProperties(handles))
+        let paths = prop_bin.links.into_iter().map(|v| v.text).collect();
+
+        Ok(LeagueProperties(handles, paths))
     }
 
     fn extensions(&self) -> &[&str] {
@@ -364,7 +366,10 @@ impl AssetLoader for LeagueLoaderAnimationClip {
     ) -> Result<Self::Asset, Self::Error> {
         let mut buf = Vec::new();
         reader.read_to_end(&mut buf).await?;
-        let animation: ConfigAnimationClip = bincode::deserialize(&buf)?;
+        let mut reader = Cursor::new(buf);
+        let animation_file = AnimationFile::read(&mut reader)?;
+
+        let animation = load_animation_file(animation_file);
 
         let mut clip = AnimationClip::default();
         for (i, join_hash) in animation.joint_hashes.iter().enumerate() {
@@ -403,5 +408,9 @@ impl AssetLoader for LeagueLoaderAnimationClip {
             }
         }
         Ok(clip)
+    }
+
+    fn extensions(&self) -> &[&str] {
+        &["anm"]
     }
 }

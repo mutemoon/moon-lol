@@ -28,6 +28,7 @@ impl Plugin for PluginSkin {
         app.add_systems(Update, update_skin_scale);
         app.add_systems(Update, update_skin_spawn);
         app.add_systems(Update, update_skin_skeleton_spawn);
+        app.add_systems(Update, update_skin_animation_spawn);
         app.add_systems(Update, update_skin_mesh_spawn);
     }
 }

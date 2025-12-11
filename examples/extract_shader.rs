@@ -73,38 +73,49 @@ fn main() -> std::io::Result<()> {
     let paths = vec![
         "assets/ASSETS/shaders/hlsl/skinnedmesh/particle_vs.vs.glsl",
         "assets/ASSETS/shaders/hlsl/skinnedmesh/particle_ps.ps.glsl",
-        // "assets/ASSETS/shaders/hlsl/particlesystem/distortion_mesh_ps.ps.glsl",
-        // "assets/ASSETS/shaders/hlsl/particlesystem/distortion_mesh_vs.vs.glsl",
-        // "assets/ASSETS/shaders/hlsl/particlesystem/distortion_ps.ps.glsl",
-        // "assets/ASSETS/shaders/hlsl/particlesystem/distortion_vs.vs.glsl",
-        // "assets/ASSETS/shaders/hlsl/particlesystem/mesh_ps_slice.ps.glsl",
-        // "assets/ASSETS/shaders/hlsl/particlesystem/mesh_ps.ps.glsl",
-        // "assets/ASSETS/shaders/hlsl/particlesystem/mesh_vs.vs.glsl",
-        // "assets/ASSETS/shaders/hlsl/particlesystem/quad_ps_fixedalphauv.ps.glsl",
-        // "assets/ASSETS/shaders/hlsl/particlesystem/quad_ps_slice.ps.glsl",
-        // "assets/ASSETS/shaders/hlsl/particlesystem/quad_ps.ps.glsl",
-        // "assets/ASSETS/shaders/hlsl/particlesystem/quad_screenspaceuv.ps.glsl",
-        // "assets/ASSETS/shaders/hlsl/particlesystem/quad_screenspaceuv.vs.glsl",
-        // "assets/ASSETS/shaders/hlsl/particlesystem/quad_vs_fixedalphauv.vs.glsl",
-        // "assets/ASSETS/shaders/hlsl/particlesystem/quad_vs.vs.glsl",
-        // "assets/ASSETS/shaders/hlsl/particlesystem/shadow_mesh_ps.ps.glsl",
-        // "assets/ASSETS/shaders/hlsl/particlesystem/shadow_mesh_vs.vs.glsl",
-        // "assets/ASSETS/shaders/hlsl/particlesystem/shadow_quad_ps.ps.glsl",
-        // "assets/ASSETS/shaders/hlsl/particlesystem/shadow_quad_vs.vs.glsl",
-        // "assets/ASSETS/shaders/hlsl/particlesystem/simple_projected_ps.ps.glsl",
-        // "assets/ASSETS/shaders/hlsl/particlesystem/simple_projected_vs.vs.glsl",
-        // "assets/ASSETS/shaders/hlsl/environment/unlit_decal_vs.vs.glsl",
-        // "assets/ASSETS/shaders/hlsl/environment/unlit_decal_ps.ps.glsl",
+        "assets/ASSETS/shaders/hlsl/particlesystem/distortion_mesh_ps.ps.glsl",
+        "assets/ASSETS/shaders/hlsl/particlesystem/distortion_mesh_vs.vs.glsl",
+        "assets/ASSETS/shaders/hlsl/particlesystem/distortion_ps.ps.glsl",
+        "assets/ASSETS/shaders/hlsl/particlesystem/distortion_vs.vs.glsl",
+        "assets/ASSETS/shaders/hlsl/particlesystem/mesh_ps_slice.ps.glsl",
+        "assets/ASSETS/shaders/hlsl/particlesystem/mesh_ps.ps.glsl",
+        "assets/ASSETS/shaders/hlsl/particlesystem/mesh_vs.vs.glsl",
+        "assets/ASSETS/shaders/hlsl/particlesystem/quad_ps_fixedalphauv.ps.glsl",
+        "assets/ASSETS/shaders/hlsl/particlesystem/quad_ps_slice.ps.glsl",
+        "assets/ASSETS/shaders/hlsl/particlesystem/quad_ps.ps.glsl",
+        "assets/ASSETS/shaders/hlsl/particlesystem/quad_screenspaceuv.ps.glsl",
+        "assets/ASSETS/shaders/hlsl/particlesystem/quad_screenspaceuv.vs.glsl",
+        "assets/ASSETS/shaders/hlsl/particlesystem/quad_vs_fixedalphauv.vs.glsl",
+        "assets/ASSETS/shaders/hlsl/particlesystem/quad_vs.vs.glsl",
+        "assets/ASSETS/shaders/hlsl/particlesystem/shadow_mesh_ps.ps.glsl",
+        "assets/ASSETS/shaders/hlsl/particlesystem/shadow_mesh_vs.vs.glsl",
+        "assets/ASSETS/shaders/hlsl/particlesystem/shadow_quad_ps.ps.glsl",
+        "assets/ASSETS/shaders/hlsl/particlesystem/shadow_quad_vs.vs.glsl",
+        "assets/ASSETS/shaders/hlsl/particlesystem/simple_projected_ps.ps.glsl",
+        "assets/ASSETS/shaders/hlsl/particlesystem/simple_projected_vs.vs.glsl",
+        "assets/ASSETS/shaders/hlsl/environment/unlit_decal_vs.vs.glsl",
+        "assets/ASSETS/shaders/hlsl/environment/unlit_decal_ps.ps.glsl",
     ];
 
+    let out_put_dir = "assets/shaders_extract";
+
     // 确保 shaders 输出目录存在
-    fs::create_dir_all("assets/shaders")?;
+    fs::create_dir_all(out_put_dir)?;
 
     for path_str in paths {
         println!("> 处理文件: {}", path_str);
 
         // --- 准备路径和输出目录 ---
-        let file_name = Path::new(path_str).file_name().unwrap().to_str().unwrap();
+        let path = Path::new(path_str);
+        let file_name = path.file_name().unwrap().to_str().unwrap();
+        let shader_category = path
+            .parent()
+            .unwrap()
+            .file_name()
+            .unwrap()
+            .to_str()
+            .unwrap();
+
         let stem = file_name.strip_suffix(".glsl").unwrap_or(file_name);
 
         let (shader_type, original_filename_base) = if stem.ends_with(".ps") {
@@ -116,17 +127,24 @@ fn main() -> std::io::Result<()> {
             continue;
         };
 
-        let output_dir_str = format!(
-            "assets/shaders/{}/{}",
-            shader_type,
-            original_filename_base.replace("_ps", "").replace("_vs", "")
-        );
+        let shader_name = original_filename_base.replace("_ps", "").replace("_vs", "");
+
+        let output_dir_str = format!("{out_put_dir}/{shader_category}/{shader_name}/{shader_type}");
         fs::create_dir_all(&output_dir_str)?;
         println!("  - 输出目录: {}", output_dir_str);
 
         // --- 读取着色器目录文件 (TOC) ---
         let toc_file = File::open(path_str)?;
         let shader_toc = LeagueShader::read(&mut BufReader::new(toc_file)).unwrap();
+
+        // println!(
+        //     "shader_toc: {:#?}",
+        //     shader_toc
+        //         .base_defines
+        //         .iter()
+        //         .map(|v| (v.name.text.clone(), v.value.text.clone()))
+        //         .collect::<Vec<(String, String)>>()
+        // );
 
         let base_defines: Vec<String> = shader_toc
             .base_defines

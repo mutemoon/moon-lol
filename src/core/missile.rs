@@ -7,8 +7,8 @@ use lol_config::{HashKey, LeagueProperties};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    CommandDamageCreate, CommandMovement, CommandParticleSpawn, Damage, DamageType, DebugSphere,
-    EntityCommandsTrigger, EventMovementEnd, Movement, MovementAction, MovementWay,
+    CommandDamageCreate, CommandMovement, CommandSkinParticleSpawn, Damage, DamageType,
+    DebugSphere, EntityCommandsTrigger, EventMovementEnd, Movement, MovementAction, MovementWay,
 };
 
 #[derive(Default)]
@@ -173,9 +173,9 @@ fn on_command_missile_create(
         },
     });
     if let Some(particle) = spell_data_resource.m_missile_effect_key {
-        commands.trigger(CommandParticleSpawn {
+        commands.trigger(CommandSkinParticleSpawn {
             entity: missile_entity,
-            hash: particle.into(),
+            hash: particle,
         });
     } else {
         commands.entity(missile_entity).insert(DebugSphere {

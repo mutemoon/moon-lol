@@ -129,10 +129,9 @@ pub struct DamageNumber {
 fn init_health_bar(
     mut commands: Commands,
     res_asset_server: Res<AssetServer>,
-    q_added_health_bar: Query<(Entity, &HealthBar), Added<HealthBar>>,
-    q_bounding: Query<&Bounding>,
+    q_added_health_bar: Query<(Entity, &HealthBar, &Bounding), Added<Bounding>>,
 ) {
-    for (entity, health_bar) in q_added_health_bar.iter() {
+    for (entity, health_bar, bounding) in q_added_health_bar.iter() {
         commands
             .spawn((
                 Node {
@@ -141,8 +140,7 @@ fn init_health_bar(
                 },
                 UIBind {
                     entity,
-                    position: Vec3::ZERO
-                        .with_y(q_bounding.get(entity).map(|v| v.height).unwrap_or(0.0)),
+                    position: Vec3::ZERO.with_y(bounding.height),
                     offset: Vec2::ZERO,
                 },
             ))
