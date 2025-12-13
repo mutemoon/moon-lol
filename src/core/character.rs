@@ -1,6 +1,6 @@
 use bevy::prelude::*;
-use league_core::{CharacterRecord, SkinCharacterDataProperties};
-use lol_config::{HashKey, LeagueProperties};
+use league_core::CharacterRecord;
+use lol_config::{HashKey, LoadHashKeyTrait};
 use lol_core::Team;
 
 use crate::{
@@ -14,6 +14,7 @@ pub struct PluginCharacter;
 impl Plugin for PluginCharacter {
     fn build(&self, app: &mut App) {
         app.add_observer(on_command_character_spawn);
+        app.add_observer(on_command_character_load);
         app.add_observer(on_event_dead);
 
         app.add_systems(Update, update_character_spawn);
@@ -34,6 +35,11 @@ pub struct CommandCharacterSpawn {
     pub skin: String,
 }
 
+#[derive(Event, Debug, Clone)]
+pub struct CommandCharacterLoad {
+    pub character_record: String,
+}
+
 #[derive(TypePath)]
 pub struct CharacterSpawn(pub HashKey<CharacterRecord>);
 
@@ -46,27 +52,30 @@ fn on_command_character_spawn(trigger: On<CommandCharacterSpawn>, mut commands: 
         key: trigger.skin.clone(),
     });
 
-    let name = trigger.character_record.split('/').skip(1).next().unwrap();
-
-    let paths = vec![format!("data/characters/{name}/{name}.bin")];
-
-    commands.trigger(CommandLoadPropBin { paths });
+    commands.trigger(CommandCharacterLoad {
+        character_record: trigger.character_record.clone(),
+    });
 
     commands.entity(entity).insert(Loading::new(CharacterSpawn(
         trigger.character_record.clone().into(),
     )));
 }
 
+fn on_command_character_load(trigger: On<CommandCharacterLoad>, mut commands: Commands) {
+    let name = trigger.character_record.split('/').skip(1).next().unwrap();
+
+    let paths = vec![format!("data/characters/{name}/{name}.bin")];
+
+    commands.trigger(CommandLoadPropBin { paths });
+}
+
 fn update_character_spawn(
     mut commands: Commands,
     res_assets_character_record: Res<Assets<CharacterRecord>>,
-    res_league_properties: Res<LeagueProperties>,
     q_loading: Query<(Entity, &Loading<CharacterSpawn>)>,
 ) {
     for (entity, loading) in q_loading.iter() {
-        let Some(character_record) =
-            res_league_properties.get(&res_assets_character_record, loading.0)
-        else {
+        let Some(character_record) = res_assets_character_record.load_hash(loading.0) else {
             return;
         };
 
@@ -158,7 +167,6 @@ fn on_event_dead(
     query: Query<(&GlobalTransform, &Character, &Team)>,
     mut level_query: Query<(Entity, &GlobalTransform, &Team, &mut Level)>,
     res_assets_character_record: Res<Assets<CharacterRecord>>,
-    res_league_properties: Res<LeagueProperties>,
     mut commands: Commands,
 ) {
     let entity = event.event_target();
@@ -167,8 +175,7 @@ fn on_event_dead(
         return;
     };
 
-    let Some(record) = res_league_properties.get(&res_assets_character_record, character.key)
-    else {
+    let Some(record) = res_assets_character_record.load_hash(character.key) else {
         return;
     };
 

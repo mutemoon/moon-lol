@@ -4,7 +4,6 @@ use bevy::prelude::*;
 use bevy::window::{PrimaryWindow, WindowResized};
 use league_core::{EnumAnchor, EnumData, EnumUiPosition, UiElementIconData};
 use league_utils::hash_bin;
-use lol_config::LeagueProperties;
 
 use crate::CommandLoadPropBin;
 
@@ -44,23 +43,15 @@ pub fn update_spawn_ui_element(
     mut res_ui_element_entity: ResMut<UIElementEntity>,
     res_asset_server: Res<AssetServer>,
     res_assets_ui_element_icon_data: Res<Assets<UiElementIconData>>,
-    res_league_properties: Res<LeagueProperties>,
-) {
-    if res_league_properties
-        .iter(&res_assets_ui_element_icon_data)
-        .count()
-        == 0
-    {
+    ) {
+    if res_assets_ui_element_icon_data.iter().count() == 0 {
         return;
     }
 
-    for (_, ui) in res_league_properties
-        .iter(&res_assets_ui_element_icon_data)
-        .filter(|v| {
-            v.1.name
-                .contains("ClientStates/Gameplay/UX/LoL/PlayerFrame/")
-        })
-    {
+    for (_, ui) in res_assets_ui_element_icon_data.iter().filter(|v| {
+        v.1.name
+            .contains("ClientStates/Gameplay/UX/LoL/PlayerFrame/")
+    }) {
         let Some(entity) = spawn_ui_element(&mut commands, &res_asset_server, ui) else {
             continue;
         };

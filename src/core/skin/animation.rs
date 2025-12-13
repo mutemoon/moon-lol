@@ -1,13 +1,13 @@
 use std::collections::HashMap;
 
-use bevy::prelude::*;
+use bevy::prelude::*;use lol_config::LoadHashKeyTrait;
 use league_core::{
     AnimationGraphData, AtomicClipData, ConditionBoolClipData, ConditionFloatClipData,
     EnumClipData, SelectorClipData, SequencerClipData, SkinCharacterDataProperties,
 };
 use league_to_lol::load_animation_map;
 use league_utils::hash_bin;
-use lol_config::{HashKey, LeagueProperties};
+use lol_config::HashKey;
 
 use crate::{Animation, AnimationNode, AnimationNodeF32, AnimationState, Loading, Skin};
 
@@ -23,15 +23,13 @@ pub fn on_command_skin_animation_spawn(
     trigger: On<CommandSkinAnimationSpawn>,
     mut commands: Commands,
     res_assets_skin_character_data_properties: Res<Assets<SkinCharacterDataProperties>>,
-    res_league_properties: Res<LeagueProperties>,
-    q_skin: Query<&Skin>,
+        q_skin: Query<&Skin>,
 ) {
     let entity = trigger.event_target();
 
     let skin = q_skin.get(entity).unwrap();
 
-    let skin_character_data_properties = res_league_properties
-        .get(&res_assets_skin_character_data_properties, skin.key)
+    let skin_character_data_properties = res_assets_skin_character_data_properties.load_hash( skin.key)
         .unwrap();
 
     commands
@@ -49,12 +47,11 @@ pub fn update_skin_animation_spawn(
     asset_server: Res<AssetServer>,
     mut res_animation_graph: ResMut<Assets<AnimationGraph>>,
     res_assets_animation_graph_data: Res<Assets<AnimationGraphData>>,
-    res_league_properties: Res<LeagueProperties>,
-    q_loading_animation: Query<(Entity, &Loading<SkinAnimationSpawn>)>,
+        q_loading_animation: Query<(Entity, &Loading<SkinAnimationSpawn>)>,
 ) {
     for (entity, loading) in q_loading_animation.iter() {
         let Some(animation_graph_data) =
-            res_league_properties.get(&res_assets_animation_graph_data, loading.0)
+            res_assets_animation_graph_data.load_hash( loading.0)
         else {
             continue;
         };

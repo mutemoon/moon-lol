@@ -4,7 +4,7 @@ use bevy::prelude::*;
 use bevy_behave::{behave, Behave};
 use league_core::CharacterRecord;
 use league_utils::hash_bin;
-use lol_config::LeagueProperties;
+use lol_config::{LeagueProperties, LoadHashKeyTrait};
 
 use crate::abilities::{AbilityFioraPassive, BuffFioraE, BuffFioraR};
 use crate::core::{
@@ -20,7 +20,7 @@ pub struct PluginFiora;
 
 impl Plugin for PluginFiora {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, startup_load_assets);
+        // app.add_systems(Startup, startup_load_assets);
         app.add_systems(FixedUpdate, add_skills);
     }
 }
@@ -133,13 +133,11 @@ fn add_skills(
     mut commands: Commands,
     q_fiora: Query<Entity, (With<Fiora>, Without<Skills>)>,
     res_assets_character_record: Res<Assets<CharacterRecord>>,
-    res_league_properties: Res<LeagueProperties>,
-) {
+    ) {
     for entity in q_fiora.iter() {
-        let Some(character_record) = res_league_properties.get(
-            &res_assets_character_record,
-            "Characters/Fiora/CharacterRecords/Root",
-        ) else {
+        let Some(character_record) =
+            res_assets_character_record.load_hash("Characters/Fiora/CharacterRecords/Root")
+        else {
             continue;
         };
 

@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use league_core::{ResourceResolver, SkinCharacterDataProperties};
-use lol_config::LeagueProperties;
+use lol_config::{LeagueProperties, LoadHashKeyTrait};
 
 use crate::{CommandParticleDespawn, CommandParticleSpawn, Skin};
 
@@ -20,7 +20,7 @@ fn resolve_skin_resource_record<'a>(
     entity: Entity,
     input_hash: u32, // 假设 trigger.hash 是 u32，请根据实际类型调整
     query_skin: &Query<&Skin>,
-    league_props: &LeagueProperties,
+    _league_props: &LeagueProperties,
     assets_skin: &Assets<SkinCharacterDataProperties>,
     assets_resolver: &'a Assets<ResourceResolver>,
 ) -> Option<&'a u32> {
@@ -29,13 +29,13 @@ fn resolve_skin_resource_record<'a>(
     let skin = query_skin.get(entity).ok()?;
 
     // 2. 获取角色皮肤数据
-    let skin_data = league_props.get(assets_skin, skin.key)?;
+    let skin_data = assets_skin.load_hash(skin.key)?;
 
     // 3. 获取资源解析器句柄
     let resolver_handle = skin_data.m_resource_resolver?;
 
     // 4. 获取资源解析器资产
-    let resolver = league_props.get(assets_resolver, resolver_handle)?;
+    let resolver = assets_resolver.load_hash(resolver_handle)?;
 
     // 5. 查找具体的资源记录
     resolver.resource_map.as_ref()?.get(&input_hash)

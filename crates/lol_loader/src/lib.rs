@@ -12,7 +12,7 @@ use bevy::render::render_resource::{
     Extent3d, TextureDescriptor, TextureDimension, TextureFormat, TextureUsages,
 };
 use binrw::BinRead;
-use league_core::{EnvironmentVisibility, ASSET_LOADER_REGISTRY};
+use league_core::EnvironmentVisibility;
 use league_file::{
     AnimationFile, LeagueMapGeo, LeagueMeshStatic, LeagueSkeleton, LeagueSkinnedMesh,
     LeagueTexture, LeagueTextureFormat,
@@ -22,8 +22,8 @@ use league_to_lol::{
     load_animation_file, mesh_static_to_bevy_mesh, parse_vertex_data, skinned_mesh_to_intermediate,
     submesh_to_intermediate,
 };
-use lol_config::{ConfigAnimationClip, IntermediateMesh, LeagueProperties};
-use lol_core::{ConfigMapGeo, LeagueSkinMesh};
+use lol_config::{ConfigMapGeo, LeagueProperties, ASSET_LOADER_REGISTRY};
+use lol_core::LeagueSkinMesh;
 use thiserror::Error;
 
 #[derive(Error, Debug)]

@@ -6,7 +6,7 @@ mod utils;
 
 use bevy::mesh::{MeshVertexAttribute, VertexFormat};
 use bevy::platform::collections::HashMap;
-use bevy::prelude::*;
+use bevy::prelude::*;use lol_config::LoadHashKeyTrait;
 use bevy::transform::systems::{
     mark_dirty_trees, propagate_parent_transforms, sync_simple_transforms,
 };
@@ -135,8 +135,7 @@ fn on_command_particle_spawn(
     trigger: On<CommandParticleSpawn>,
     mut commands: Commands,
     res_assets_vfx_system_definition_data: Res<Assets<VfxSystemDefinitionData>>,
-    res_league_properties: Res<LeagueProperties>,
-    q_global_transform: Query<&GlobalTransform>,
+        q_global_transform: Query<&GlobalTransform>,
 ) {
     let entity = trigger.event_target();
 
@@ -149,8 +148,7 @@ fn on_command_particle_spawn(
 
     println!("{:x?}", trigger.hash);
 
-    let vfx_system_definition_data = res_league_properties
-        .get(&res_assets_vfx_system_definition_data, trigger.hash)
+    let vfx_system_definition_data = res_assets_vfx_system_definition_data.load_hash( trigger.hash)
         .unwrap();
 
     // if !vfx_system_definition_data

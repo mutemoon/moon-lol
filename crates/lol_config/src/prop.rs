@@ -1,7 +1,8 @@
 use std::collections::HashMap;
 use std::marker::PhantomData;
 
-use bevy::asset::{Asset, Assets, UntypedHandle};
+use bevy::asset::uuid::Uuid;
+use bevy::asset::{Asset, AssetId, Assets, Handle, UntypedHandle};
 use bevy::ecs::resource::Resource;
 use bevy::reflect::TypePath;
 use league_utils::{hash_bin, type_name_to_hash};
@@ -59,6 +60,45 @@ impl<T> PartialEq for HashKey<T> {
     }
 }
 
+impl<T: Asset> From<HashKey<T>> for AssetId<T> {
+    fn from(value: HashKey<T>) -> Self {
+        AssetId::Uuid {
+            uuid: Uuid::from_u128(value.0 .0 as u128),
+        }
+    }
+}
+
+impl<T: Asset> From<AssetId<T>> for HashKey<T> {
+    fn from(value: AssetId<T>) -> Self {
+        match value {
+            AssetId::Uuid { uuid } => HashKey((uuid.as_u128() as u32, PhantomData)),
+            _ => panic!("AssetId is not Uuid"),
+        }
+    }
+}
+
+impl<T: Asset> From<HashKey<T>> for Handle<T> {
+    fn from(value: HashKey<T>) -> Self {
+        Handle::Uuid(Uuid::from_u128(value.0 .0 as u128), PhantomData)
+    }
+}
+
+impl<T: Asset> From<HashKey<T>> for UntypedHandle {
+    fn from(value: HashKey<T>) -> Self {
+        Handle::from(value).untyped()
+    }
+}
+
+pub trait LoadHashKeyTrait<T: Asset> {
+    fn load_hash(&self, hash: impl Into<HashKey<T>>) -> Option<&T>;
+}
+
+impl<T: Asset> LoadHashKeyTrait<T> for Assets<T> {
+    fn load_hash(&self, hash: impl Into<HashKey<T>>) -> Option<&T> {
+        self.get(AssetId::from(hash.into()))
+    }
+}
+
 #[derive(Resource, Asset, TypePath, Default)]
 pub struct LeagueProperties(
     pub HashMap<u32, HashMap<u32, UntypedHandle>>,
@@ -71,12 +111,14 @@ impl LeagueProperties {
         res_assets: &'a Assets<T>,
         hash: impl Into<HashKey<T>>,
     ) -> Option<&'a T> {
-        let type_name = T::short_type_path();
-        let type_hash = type_name_to_hash(type_name);
-        let store = self.0.get(&type_hash)?;
-        let untyped_handle = store.get(&hash.into().0 .0)?;
-        let handle = untyped_handle.clone().typed::<T>();
-        res_assets.get(&handle)
+        // let type_name = T::short_type_path();
+        // let type_hash = type_name_to_hash(type_name);
+        // let store = self.0.get(&type_hash)?;
+        // let untyped_handle = store.get(&hash.into().0 .0)?;
+        // let handle = untyped_handle.clone().typed::<T>();
+        // res_assets.get(&handle)
+
+        res_assets.get(AssetId::from(hash.into()))
     }
 
     pub fn merge(&mut self, other: &LeagueProperties) {
@@ -86,23 +128,6 @@ impl LeagueProperties {
                 .and_modify(|store| store.extend(other_store.clone()))
                 .or_insert(other_store.clone());
         }
-    }
-
-    pub fn iter<'a, T: Asset>(
-        &'a self,
-        res_assets: &'a Assets<T>,
-    ) -> impl Iterator<Item = (HashKey<T>, &'a T)> {
-        let type_name = T::short_type_path();
-        let type_hash = type_name_to_hash(type_name);
-        let store = self.0.get(&type_hash);
-
-        store.into_iter().flat_map(|store| {
-            store.iter().map(|(hash, handle)| {
-                let handle = handle.clone().typed::<T>();
-                let asset = res_assets.get(&handle).unwrap();
-                (HashKey::from(hash), asset)
-            })
-        })
     }
 
     pub fn add<'a, T: Asset>(

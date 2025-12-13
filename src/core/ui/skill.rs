@@ -1,6 +1,5 @@
-use bevy::prelude::*;
+use bevy::prelude::*;use lol_config::LoadHashKeyTrait;
 use league_core::SpellObject;
-use lol_config::LeagueProperties;
 
 use crate::{
     CommandDespawnButton, CommandSkillLevelUp, CommandSpawnButton, Controller, Level,
@@ -16,8 +15,7 @@ pub fn update_skill_icon(
     q_skill: Query<&Skill>,
     q_skills: Query<&Skills, With<Controller>>,
     res_assets_spell_object: Res<Assets<SpellObject>>,
-    res_league_properties: Res<LeagueProperties>,
-    res_ui_element_entity: Res<UIElementEntity>,
+        res_ui_element_entity: Res<UIElementEntity>,
 ) {
     let Some(skills) = q_skills.iter().next() else {
         debug!("未找到控制器的技能列表");
@@ -51,8 +49,7 @@ pub fn update_skill_icon(
             continue;
         };
 
-        let spell = res_league_properties
-            .get(&res_assets_spell_object, skill.key_spell_object)
+        let spell = res_assets_spell_object.load_hash( skill.key_spell_object)
             .unwrap();
 
         let icon_name = spell

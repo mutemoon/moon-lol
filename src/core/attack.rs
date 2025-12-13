@@ -2,7 +2,7 @@ use bevy::ecs::error::ignore;
 use bevy::ecs::system::command::trigger;
 use bevy::prelude::*;
 use league_core::SpellObject;
-use lol_config::{HashKey, LeagueProperties};
+use lol_config::{HashKey, LoadHashKeyTrait};
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -362,7 +362,6 @@ fn fixed_update(
     mut query: Query<(Entity, &mut AttackState, &Attack, &Damage)>,
     mut commands: Commands,
     res_assets_spell_object: Res<Assets<SpellObject>>,
-    res_league_properties: Res<LeagueProperties>,
     time: Res<Time<Fixed>>,
 ) {
     let now = time.elapsed_secs();
@@ -378,9 +377,7 @@ fn fixed_update(
 
                     match &attack.spell_key {
                         Some(spell_key) => {
-                            let spell = res_league_properties
-                                .get(&res_assets_spell_object, spell_key)
-                                .unwrap();
+                            let spell = res_assets_spell_object.load_hash(spell_key).unwrap();
 
                             if spell.m_spell.as_ref().unwrap().m_cast_type.unwrap_or(0) == 1 {
                                 commands.trigger(CommandMissileCreate {

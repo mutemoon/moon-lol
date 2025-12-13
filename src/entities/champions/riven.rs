@@ -3,8 +3,8 @@ use std::sync::Arc;
 use bevy::prelude::*;
 use bevy_behave::{behave, Behave};
 use league_core::CharacterRecord;
-use league_utils::{get_asset_id_by_path, hash_bin};
-use lol_config::LeagueProperties;
+use league_utils::hash_bin;
+use lol_config::{LeagueProperties, LoadHashKeyTrait};
 
 use crate::core::{
     ActionAnimationPlay, ActionAttackReset, ActionBuffSpawn, ActionCommand, ActionDamage,
@@ -19,7 +19,7 @@ pub struct PluginRiven;
 
 impl Plugin for PluginRiven {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, startup_load_assets);
+        // app.add_systems(Startup, startup_load_assets);
         app.add_systems(FixedUpdate, add_skills);
     }
 }
@@ -128,13 +128,11 @@ fn add_skills(
     mut commands: Commands,
     q_riven: Query<Entity, (With<Riven>, Without<Skills>)>,
     res_assets_character_record: Res<Assets<CharacterRecord>>,
-    res_league_properties: Res<LeagueProperties>,
-) {
+    ) {
     for entity in q_riven.iter() {
-        let Some(character_record) = res_league_properties.get(
-            &res_assets_character_record,
-            "Characters/Riven/CharacterRecords/Root",
-        ) else {
+        let Some(character_record) =
+            res_assets_character_record.load_hash("Characters/Riven/CharacterRecords/Root")
+        else {
             continue;
         };
 

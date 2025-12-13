@@ -15,4 +15,3 @@ league_property.workspace = true
 league_to_lol.workspace = true
 lol_core.workspace = true
 thiserror.workspace = true
-rayon.workspace = true

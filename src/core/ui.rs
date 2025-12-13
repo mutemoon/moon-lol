@@ -6,7 +6,6 @@ mod skill;
 
 pub use animation::*;
 use bevy::color::palettes::css::{BLUE, RED, WHITE};
-use bevy::ecs::schedule::And;
 use bevy::prelude::*;
 pub use button::*;
 pub use element::*;

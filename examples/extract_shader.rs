@@ -6,7 +6,7 @@ use std::sync::Arc;
 
 use binrw::{binrw, BinRead, BinResult, Endian};
 use league_file::LeagueShader;
-use league_utils::hash_shader;
+use league_utils::hash_shader_spec;
 
 // --- 1. 定义 binrw 结构体来解析 Shader Bundle ---
 
@@ -164,23 +164,9 @@ fn main() -> std::io::Result<()> {
         // 用于缓存已读取的捆绑包文件，避免重复IO
         let mut bundle_cache: HashMap<String, Arc<ShaderChunkFile>> = HashMap::new();
 
-        for mut combo in combinations {
+        for combo in combinations {
             // --- 计算当前组合的哈希 ---
-            // 必须排序以确保哈希值稳定
-            combo.sort();
-            let defines_string: String = combo
-                .iter()
-                .map(|v| {
-                    shader_toc
-                        .base_defines
-                        .iter()
-                        .find(|v2| v2.name.text == *v)
-                        .unwrap()
-                })
-                .map(|v| format!("{}={}", v.name.text, v.value.text))
-                .collect::<Vec<String>>()
-                .join("");
-            let defines_hash = hash_shader(&defines_string);
+            let defines_hash = hash_shader_spec(&combo);
 
             // --- 查找哈希对应的索引和ID ---
             let Some(shader_index) = shader_toc

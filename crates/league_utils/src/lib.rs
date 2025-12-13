@@ -55,6 +55,20 @@ pub fn hash_joint(s: &str) -> u32 {
     hash
 }
 
+pub fn hash_shader_spec(defs: &Vec<String>) -> u64 {
+    let mut defs = defs.clone();
+
+    defs.sort();
+
+    let define_string = defs
+        .iter()
+        .map(|v| format!("{v}=1"))
+        .collect::<Vec<_>>()
+        .join("");
+
+    hash_shader(&define_string)
+}
+
 #[binread]
 #[derive(Debug, Clone, Deserialize, Serialize)]
 #[br(little)]

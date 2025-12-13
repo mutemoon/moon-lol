@@ -1,6 +1,5 @@
-use bevy::prelude::*;
+use bevy::prelude::*;use lol_config::LoadHashKeyTrait;
 use league_core::SkinCharacterDataProperties;
-use lol_config::LeagueProperties;
 
 use crate::{
     AbilityResource, CommandUpdateUIElement, Controller, Health, Level, NodeType, SizeType, Skin,
@@ -159,8 +158,7 @@ pub fn update_player_icon(
     q_skin: Query<&Skin, With<Controller>>,
     q_children: Query<&Children>,
     res_assets_skin_character_data_properties: Res<Assets<SkinCharacterDataProperties>>,
-    res_league_properties: Res<LeagueProperties>,
-    res_ui_element_entity: Res<UIElementEntity>,
+        res_ui_element_entity: Res<UIElementEntity>,
 ) {
     let key = "ClientStates/Gameplay/UX/LoL/PlayerFrame/UIBase/Player_Frame_Root/Player_Frame/PlayerIcon_Base";
     let Some(&entity) = res_ui_element_entity.get_by_string(key) else {
@@ -171,8 +169,7 @@ pub fn update_player_icon(
         return;
     };
 
-    let skin = res_league_properties
-        .get(&res_assets_skin_character_data_properties, skin.key)
+    let skin = res_assets_skin_character_data_properties.load_hash( skin.key)
         .unwrap();
 
     let icon_name = skin

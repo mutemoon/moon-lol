@@ -4,13 +4,9 @@ use std::ops::Deref;
 
 use bevy::math::bounding::Aabb3d;
 use bevy::prelude::*;
-use league_core::{
-    EnumMap, EnvironmentVisibility, MapContainer, MapPlaceableContainer, StaticMaterialDef,
-};
-use league_file::{LeagueMapGeo, LeagueMapGeoMesh};
-use league_to_lol::{parse_vertex_data, submesh_to_intermediate};
-use lol_config::LeagueProperties;
-use lol_core::{ConfigMapGeo, Lane, Team};
+use league_core::{EnumMap, MapContainer, MapPlaceableContainer, StaticMaterialDef};
+use lol_config::{ConfigMapGeo, HashKey, LoadHashKeyTrait};
+use lol_core::{Lane, Team};
 
 use crate::{
     get_standard, Action, CommandAction, CommandCharacterSpawn, CommandLoadPropBin, Controller,
@@ -99,16 +95,13 @@ fn update_spawn_map_character(
     map_name: Res<MapName>,
     res_assets_map_container: Res<Assets<MapContainer>>,
     res_assets_map_placeable_container: Res<Assets<MapPlaceableContainer>>,
-    res_league_properties: Res<LeagueProperties>,
 ) {
-    let Some(map_container) = res_league_properties.get(&res_assets_map_container, &map_name.0)
-    else {
+    let Some(map_container) = res_assets_map_container.get(HashKey::from(&map_name.0)) else {
         return;
     };
 
     for (_, &link) in &map_container.chunks {
-        let Some(map_placeable_container) =
-            res_league_properties.get(&res_assets_map_placeable_container, link)
+        let Some(map_placeable_container) = res_assets_map_placeable_container.load_hash(link)
         else {
             continue;
         };
@@ -149,7 +142,6 @@ fn update_spawn_map_geometry(
     mut res_assets_standard_material: ResMut<Assets<StandardMaterial>>,
     res_assets_map_geo: Res<Assets<ConfigMapGeo>>,
     res_assets_static_material_def: Res<Assets<StaticMaterialDef>>,
-    res_league_properties: Res<LeagueProperties>,
     res_loading_map_geo: Res<Loading<Handle<ConfigMapGeo>>>,
 ) {
     let Some(config_map_geo) = res_assets_map_geo.get(res_loading_map_geo.deref().deref()) else {
@@ -165,9 +157,7 @@ fn update_spawn_map_geometry(
     println!("地图网格数量: {:?}", config_map_geo.submeshes.len());
 
     for (mesh_handle, mat_name, bounding_box) in &config_map_geo.submeshes {
-        let static_material_def = res_league_properties
-            .get(&res_assets_static_material_def, mat_name)
-            .unwrap();
+        let static_material_def = res_assets_static_material_def.load_hash(mat_name).unwrap();
 
         let base_color_texture = static_material_def.sampler_values.as_ref().and_then(|v| {
             v.into_iter().find_map(|sampler_item| {

@@ -1,6 +1,8 @@
 use std::f32::consts::PI;
 use std::fmt::Debug;
+use std::marker::PhantomData;
 
+use bevy::asset::uuid::Uuid;
 use bevy::mesh::{MeshVertexBufferLayoutRef, VertexAttributeValues};
 use bevy::pbr::{MaterialPipeline, MaterialPipelineKey};
 use bevy::prelude::*;
@@ -8,7 +10,8 @@ use bevy::render::render_resource::{
     AsBindGroup, BlendComponent, BlendFactor, BlendOperation, BlendState, RenderPipelineDescriptor,
     ShaderType, SpecializedMeshPipelineError,
 };
-use bevy::shader::{ShaderDefVal, ShaderRef};
+use bevy::shader::ShaderRef;
+use league_utils::hash_shader_spec;
 
 use crate::{ATTRIBUTE_LIFETIME, ATTRIBUTE_UV_FRAME, ATTRIBUTE_UV_MULT, ATTRIBUTE_WORLD_POSITION};
 
@@ -107,18 +110,23 @@ pub struct ParticleMaterialQuad {
     pub blend_mode: u8,
 }
 
-#[derive(Copy, Clone, Hash, Eq, PartialEq, Debug)]
+#[derive(Clone, Hash, Eq, PartialEq, Debug)]
 pub struct ConditionalMaterialKey {
     blend_mode: u8,
-    mult_pass: bool,
+    shader_frag: Handle<Shader>,
 }
 
 // 2. 为 Key 实现 From Trait
 impl From<&ParticleMaterialQuad> for ConditionalMaterialKey {
     fn from(material: &ParticleMaterialQuad) -> Self {
+        let mut shader_frag_defs = vec![];
+        if material.texturemult.is_some() {
+            shader_frag_defs.push("MULT_PASS".to_string());
+        }
+
         Self {
             blend_mode: material.blend_mode,
-            mult_pass: material.texturemult.is_some(),
+            shader_frag: get_shader_handle(&shader_frag_defs),
         }
     }
 }
@@ -173,15 +181,7 @@ impl Material for ParticleMaterialQuad {
             });
         }
 
-        if key.bind_group_data.mult_pass {
-            fragment
-                .shader_defs
-                .push(ShaderDefVal::Bool("MULT_PASS".to_string(), true));
-            descriptor
-                .vertex
-                .shader_defs
-                .push(ShaderDefVal::Bool("MULT_PASS".to_string(), true));
-        }
+        fragment.shader = key.bind_group_data.shader_frag;
 
         let vertex_layout = layout.0.get_layout(&[
             ATTRIBUTE_WORLD_POSITION.at_shader_location(0),
@@ -195,4 +195,8 @@ impl Material for ParticleMaterialQuad {
 
         Ok(())
     }
+}
+
+pub fn get_shader_handle(defs: &Vec<String>) -> Handle<Shader> {
+    Handle::Uuid(Uuid::from_u128(hash_shader_spec(defs) as u128), PhantomData)
 }

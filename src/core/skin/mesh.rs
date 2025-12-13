@@ -1,8 +1,7 @@
 use bevy::mesh::skinning::SkinnedMesh;
-use bevy::prelude::*;
+use bevy::prelude::*;use lol_config::LoadHashKeyTrait;
 use bevy::render::render_resource::Face;
 use league_core::SkinCharacterDataProperties;
-use lol_config::LeagueProperties;
 use lol_core::LeagueSkinMesh;
 
 use crate::{CommandSkinSkeletonSpawn, Loading, Skin};
@@ -22,14 +21,12 @@ pub fn on_command_skin_mesh_spawn(
     mut res_assets_standard_material: ResMut<Assets<StandardMaterial>>,
     q_skin: Query<&Skin>,
     res_assets_skin_character_data_properties: Res<Assets<SkinCharacterDataProperties>>,
-    res_league_properties: Res<LeagueProperties>,
-) {
+    ) {
     let entity = trigger.event_target();
 
     let skin = q_skin.get(entity).unwrap();
 
-    let skin_character_data_properties = res_league_properties
-        .get(&res_assets_skin_character_data_properties, skin.key)
+    let skin_character_data_properties = res_assets_skin_character_data_properties.load_hash( skin.key)
         .unwrap();
 
     let skin_mesh_properties = skin_character_data_properties

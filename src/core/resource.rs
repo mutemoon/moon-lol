@@ -1,3 +1,6 @@
+mod shader;
+
+use std::collections::HashMap;
 use std::fs::File;
 use std::io::Read;
 use std::ops::Deref;
@@ -5,22 +8,21 @@ use std::ops::Deref;
 use bevy::ecs::component::ComponentCloneBehavior;
 use bevy::ecs::entity::{EntityHashMap, SceneEntityMapper};
 use bevy::ecs::relationship::RelationshipHookMode;
-use bevy::platform::collections::HashMap;
 use bevy::prelude::*;
 use bevy::scene::ron::{self};
-use bevy::state::commands;
-use league_core::init_league_asset;
 use league_file::LeagueSkeleton;
 use league_to_lol::{get_struct_from_file, CONFIG_PATH_MAP_NAV_GRID};
 use lol_config::{
-    CharacterConfigsDeserializer, ConfigGame, ConfigNavigationGrid, LeagueProperties,
+    init_league_asset, CharacterConfigsDeserializer, ConfigGame, ConfigMapGeo,
+    ConfigNavigationGrid, LeagueProperties, ASSET_LOADER_REGISTRY,
 };
-use lol_core::{ConfigMapGeo, LeagueSkinMesh};
+use lol_core::LeagueSkinMesh;
 use lol_loader::{
     LeagueLoaderAnimationClip, LeagueLoaderAny, LeagueLoaderImage, LeagueLoaderMapgeo,
     LeagueLoaderMesh, LeagueLoaderMeshStatic, LeagueLoaderProperty, LeagueLoaderSkeleton,
 };
 use serde::de::DeserializeSeed;
+pub use shader::*;
 
 use crate::{CharacterSpawn, SkinAnimationSpawn, SkinMeshSpawn, SkinSkeletonSpawn, SkinSpawn};
 
@@ -50,6 +52,7 @@ impl Plugin for PluginResource {
         app.init_resource::<LeagueProperties>();
         app.init_resource::<LeaguePropertyFiles>();
 
+        app.add_systems(Startup, startup_load_shaders);
         app.add_systems(Update, update_collect_properties);
 
         register_loading::<CharacterSpawn>(app);
@@ -147,7 +150,7 @@ impl Plugin for PluginResource {
 
 #[derive(Resource, Default)]
 pub struct LeaguePropertyFiles {
-    pub unload: Vec<Handle<LeagueProperties>>,
+    pub unload: Vec<(String, Handle<LeagueProperties>)>,
     pub loaded: Vec<String>,
 }
 
@@ -227,16 +230,16 @@ fn on_command_load_prop_bin(
     mut res_league_property_files: ResMut<LeaguePropertyFiles>,
 ) {
     for path in &event.paths {
-        if res_league_property_files.loaded.contains(path) {
+        let lower = path.to_lowercase();
+        if res_league_property_files.loaded.contains(&lower) {
             continue;
         }
 
         res_league_property_files
             .unload
-            .push(res_asset_server.load(path.to_lowercase()));
+            .push((lower.clone(), res_asset_server.load(&lower)));
 
-        res_league_property_files.loaded.push(path.clone());
-        // info!("开始加载 {:?}", path);
+        res_league_property_files.loaded.push(lower);
     }
 }
 
@@ -246,9 +249,13 @@ fn update_collect_properties(
     mut res_league_property_files: ResMut<LeaguePropertyFiles>,
     mut res_league_properties: ResMut<LeagueProperties>,
 ) {
+    if res_league_property_files.unload.is_empty() {
+        return;
+    }
+
     res_league_property_files
         .unload
-        .retain(|handle_league_properties| {
+        .retain(|(_path, handle_league_properties)| {
             let Some(league_properties) =
                 res_assets_league_properties.get_mut(handle_league_properties)
             else {
@@ -263,6 +270,35 @@ fn update_collect_properties(
 
             false
         });
+
+    commands.queue(insert_props);
+}
+
+fn insert_props(world: &mut World) {
+    let start = std::time::Instant::now();
+    let res_league_properties = world.resource::<LeagueProperties>();
+
+    let collect = res_league_properties
+        .0
+        .iter()
+        .flat_map(|(type_hash, v)| {
+            v.iter()
+                .map(|(prop_hash, v)| (type_hash.clone(), prop_hash.clone(), v.clone()))
+        })
+        .collect::<Vec<_>>();
+
+    for (type_hash, prop_hash, mut handle) in collect {
+        let (_, loader) = ASSET_LOADER_REGISTRY.loaders.get(&type_hash).unwrap();
+        let _new_handle = loader.load(world, prop_hash, &mut handle);
+        let mut res_league_properties = world.resource_mut::<LeagueProperties>();
+        res_league_properties
+            .0
+            .get_mut(&type_hash)
+            .unwrap()
+            .remove(&prop_hash);
+    }
+
+    println!("insert props time: {:?}", start.elapsed());
 }
 
 pub trait LoadingTrait {

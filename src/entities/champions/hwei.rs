@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use bevy_behave::{behave, Behave};
 use league_core::CharacterRecord;
 use league_utils::{get_asset_id_by_path, hash_bin};
-use lol_config::LeagueProperties;
+use lol_config::LoadHashKeyTrait;
 
 use crate::core::{ActionAnimationPlay, ActionParticleSpawn, CoolDown, Skill, SkillOf, Skills};
 use crate::entities::champion::Champion;
@@ -13,7 +13,7 @@ pub struct PluginHwei;
 
 impl Plugin for PluginHwei {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, startup_load_assets);
+        // app.add_systems(Startup, startup_load_assets);
         app.add_systems(FixedUpdate, add_skills);
     }
 }
@@ -90,8 +90,7 @@ fn add_skills(
     mut commands: Commands,
     q_hwei: Query<Entity, (With<Hwei>, Without<Skills>)>,
     res_assets_character_record: Res<Assets<CharacterRecord>>,
-    res_league_properties: Res<LeagueProperties>,
-) {
+    ) {
     for entity in q_hwei.iter() {
         commands.entity(entity).with_related::<PassiveSkillOf>((
             Skill {
@@ -102,11 +101,8 @@ fn add_skills(
             CoolDown::default(),
         ));
 
-        let character_record = res_league_properties
-            .get(
-                &res_assets_character_record,
-                "Characters/Hwei/CharacterRecords/Root",
-            )
+        let character_record = res_assets_character_record
+            .load_hash("Characters/Hwei/CharacterRecords/Root")
             .unwrap();
 
         for &skill in character_record.spells.as_ref().unwrap().iter() {

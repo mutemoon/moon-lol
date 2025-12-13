@@ -1,13 +1,9 @@
 use std::collections::HashMap;
-use std::sync::LazyLock;
 
 use bevy::asset::Asset;
 use bevy::math::{Mat4, Vec2, Vec3, Vec4};
-use bevy::prelude::{App, AssetApp};
 use bevy::reflect::TypePath;
 use serde::{Deserialize, Serialize};
-
-use crate::AssetLoaderRegistry;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -4800,45 +4796,3 @@ pub struct WallFollowMovement {
 pub struct WidthPerSecond {
     pub m_width_per_second: f32,
 }
-
-pub fn init_league_asset(app: &mut App) {
-    app.init_asset::<SpellDataResource>();
-    app.init_asset::<MapContainer>();
-    app.init_asset::<StaticMaterialDef>();
-    app.init_asset::<SkinCharacterDataProperties>();
-    app.init_asset::<SpellObject>();
-    app.init_asset::<MapPlaceableContainer>();
-    app.init_asset::<Unk0xad65d8c4>();
-    app.init_asset::<VfxSystemDefinitionData>();
-    app.init_asset::<CharacterRecord>();
-    app.init_asset::<ResourceResolver>();
-    app.init_asset::<UiElementIconData>();
-    app.init_asset::<UiElementRegionData>();
-    app.init_asset::<BuffData>();
-    app.init_asset::<BarracksConfig>();
-    app.init_asset::<AnimationGraphData>();
-    app.init_asset::<UiElementEffectAnimationData>();
-    app.init_asset::<UiElementGroupButtonData>();
-}
-
-pub static ASSET_LOADER_REGISTRY: LazyLock<AssetLoaderRegistry> = LazyLock::new(|| {
-    let mut registry = AssetLoaderRegistry::default();
-    registry.register::<SpellDataResource>();
-    registry.register::<MapContainer>();
-    registry.register::<StaticMaterialDef>();
-    registry.register::<SkinCharacterDataProperties>();
-    registry.register::<SpellObject>();
-    registry.register::<MapPlaceableContainer>();
-    registry.register::<Unk0xad65d8c4>();
-    registry.register::<VfxSystemDefinitionData>();
-    registry.register::<CharacterRecord>();
-    registry.register::<ResourceResolver>();
-    registry.register::<UiElementIconData>();
-    registry.register::<UiElementRegionData>();
-    registry.register::<BuffData>();
-    registry.register::<BarracksConfig>();
-    registry.register::<AnimationGraphData>();
-    registry.register::<UiElementEffectAnimationData>();
-    registry.register::<UiElementGroupButtonData>();
-    registry
-});

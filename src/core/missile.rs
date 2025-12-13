@@ -1,9 +1,9 @@
 use bevy::animation::AnimationTarget;
 use bevy::color::palettes::tailwind::RED_500;
-use bevy::prelude::*;
+use bevy::prelude::*;use lol_config::LoadHashKeyTrait;
 use league_core::{EnumMovement, SpellObject};
 use league_utils::hash_joint;
-use lol_config::{HashKey, LeagueProperties};
+use lol_config::HashKey;
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -73,15 +73,13 @@ fn on_command_missile_create(
     trigger: On<CommandMissileCreate>,
     mut commands: Commands,
     res_assets_spell_object: Res<Assets<SpellObject>>,
-    res_league_properties: Res<LeagueProperties>,
-    q_global_transform: Query<&GlobalTransform>,
+        q_global_transform: Query<&GlobalTransform>,
     q_children: Query<&Children>,
     q_joint_target: Query<&AnimationTarget>,
 ) {
     let entity = trigger.event_target();
 
-    let spell_object = res_league_properties
-        .get(&res_assets_spell_object, trigger.spell_key)
+    let spell_object = res_assets_spell_object.load_hash( trigger.spell_key)
         .unwrap();
 
     let spell_data_resource = spell_object.m_spell.clone().unwrap();
