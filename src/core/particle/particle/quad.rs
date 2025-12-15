@@ -20,10 +20,10 @@ pub struct UniformsVertexQuad {
     pub fog_of_war_params: Vec4,
     pub fog_of_war_always_below_y: Vec4,
     pub fow_height_fade: Vec4,
-    // pub nav_grid_xform: Vec4,
+    pub nav_grid_xform: Vec4,
     pub particle_depth_push_pull: f32,
     pub texture_info: Vec4,
-    // pub texture_info_2: Vec4,
+    pub texture_info_2: Vec4,
 }
 
 impl Default for UniformsVertexQuad {
@@ -32,10 +32,10 @@ impl Default for UniformsVertexQuad {
             fog_of_war_params: Vec4::ZERO,
             fog_of_war_always_below_y: Vec4::ZERO,
             fow_height_fade: Vec4::ZERO,
-            // nav_grid_xform: Vec4::ZERO,
+            nav_grid_xform: Vec4::ZERO,
             particle_depth_push_pull: 0.0,
             texture_info: Vec4::ONE,
-            // texture_info_2: Vec4::ONE,
+            texture_info_2: Vec4::ONE,
         }
     }
 }
@@ -191,8 +191,8 @@ impl Material for ParticleMaterialQuad {
             });
         }
 
+        fragment.shader = key.bind_group_data.shader_frag;
         println!("{:?}", fragment.shader);
-        // fragment.shader = key.bind_group_data.shader_frag;
 
         let vertex_layout = layout.0.get_layout(&[
             ATTRIBUTE_WORLD_POSITION.at_shader_location(0),

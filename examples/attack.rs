@@ -4,7 +4,7 @@ use bevy::prelude::*;
 use bevy::winit::{UpdateMode, WinitSettings};
 // use moon_lol::CameraState;
 // use moon_lol::PluginBarrack;
-use moon_lol::{PluginCore, PluginParticle, PluginResource};
+use moon_lol::{PluginCore, PluginResource};
 
 fn main() {
     App::new()

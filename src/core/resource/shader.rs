@@ -14,7 +14,6 @@ pub struct ResourceShaderHandles(pub Vec<(String, Handle<ResourceShaderPackage>)
 
 pub fn startup_load_shaders(
     asset_server: Res<AssetServer>,
-    res_assets_shader: ResMut<Assets<Shader>>,
     mut res_resource_shader_handles: ResMut<ResourceShaderHandles>,
 ) {
     let paths = HashSet::from([
@@ -39,7 +38,6 @@ pub fn update_shaders(
     res_assets_shader_package: ResMut<Assets<ResourceShaderPackage>>,
     mut res_assets_shader: ResMut<Assets<Shader>>,
 ) {
-    let hash = hash_shader_spec(&vec![]);
     res_resource_shader_handles.0.retain(|(path, handle)| {
         let Some(shader_package) = res_assets_shader_package.get(handle) else {
             return true;
@@ -47,10 +45,6 @@ pub fn update_shaders(
 
         for (&u64_hash, handle) in shader_package.handles.iter() {
             let shader = res_assets_shader.get(handle).unwrap().clone();
-            if hash == u64_hash {
-                info!("path: {}", path);
-                info!("{:?}", shader.source);
-            }
 
             res_assets_shader
                 .insert(get_shader_handle_by_hash(&path, u64_hash).id(), shader)

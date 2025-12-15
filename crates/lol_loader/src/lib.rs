@@ -25,6 +25,7 @@ use league_to_lol::{
 };
 use lol_config::{ConfigMapGeo, LeagueProperties, ResourceShaderPackage, ASSET_LOADER_REGISTRY};
 use lol_core::LeagueSkinMesh;
+use regex::Regex;
 use thiserror::Error;
 
 #[derive(Error, Debug)]
@@ -419,15 +420,13 @@ impl AssetLoader for LeagueLoaderShaderToc {
 
         let path = load_context.asset_path().to_string();
 
-        let path_no_extension = path.replace(".glsl", "");
-        let shader_type = path_no_extension.split(".").last().unwrap();
-
         let mut handles = HashMap::new();
 
-        let &max_id = shader_toc.shader_ids.iter().max().unwrap();
         let mut chunks = Vec::new();
 
-        for i in 0..((max_id as f32 / 100.0).ceil() as usize) {
+        let mut max_struct = "".to_string();
+
+        for i in 0..((shader_toc.bundled_shader_count as f32 / 100.0).ceil() as usize) {
             let chunk_path = format!("{}_{}", path, i * 100);
 
             let chunk = load_context
@@ -437,32 +436,60 @@ impl AssetLoader for LeagueLoaderShaderToc {
 
             let shader_chunk = LeagueShaderChunk::read_le(&mut Cursor::new(chunk))?;
 
-            for (shader_index, shader_file) in shader_chunk.files.iter().enumerate() {
+            for shader_file in shader_chunk.files.iter() {
                 let content = shader_file.text.clone();
-                let source = if shader_type == "vs" {
-                    Source::Glsl(convert_vert(&content).into(), ShaderStage::Vertex)
-                } else {
-                    Source::Glsl(convert_frag(&content).into(), ShaderStage::Fragment)
-                };
-                let shader = Shader {
-                    path: path.clone(),
-                    imports: Default::default(),
-                    import_path: ShaderImport::Custom(path.clone()),
-                    source,
-                    additional_imports: Default::default(),
-                    shader_defs: Default::default(),
-                    file_dependencies: Default::default(),
-                    validate_shader: ValidateShader::Disabled,
-                };
-                chunks.push(
-                    load_context.add_labeled_asset((i * 100 + shader_index).to_string(), shader),
-                );
+
+                // content.matches("struct")
+
+                let re = Regex::new(r"struct[\w\W]*?\}").unwrap(); // 匹配 YYYY-MM-DD 日期格式
+                let matches = re.find_iter(&content);
+
+                for mat in matches {
+                    if mat.as_str().len() > max_struct.len() {
+                        max_struct = mat.as_str().to_string();
+                    }
+                }
+
+                chunks.push(content);
             }
+        }
+
+        let mut shader_handles = Vec::new();
+        for i in 0..shader_toc.bundled_shader_count {
+            let mut content = chunks[i as usize].clone();
+
+            let re = Regex::new(r"struct[\w\W]*?\}").unwrap(); // 匹配 YYYY-MM-DD 日期格式
+            let matches = re.find_iter(&content);
+
+            let ranges = matches.map(|mat| mat.range()).collect::<Vec<_>>();
+
+            for range in ranges {
+                content.replace_range(range, &max_struct);
+            }
+
+            let source = if shader_toc.shader_type == 0 {
+                Source::Glsl(convert_vert(&content).into(), ShaderStage::Vertex)
+            } else {
+                Source::Glsl(convert_frag(&content).into(), ShaderStage::Fragment)
+            };
+
+            let shader = Shader {
+                path: path.clone(),
+                imports: Default::default(),
+                import_path: ShaderImport::Custom(path.clone()),
+                source,
+                additional_imports: Default::default(),
+                shader_defs: Default::default(),
+                file_dependencies: Default::default(),
+                validate_shader: ValidateShader::Disabled,
+            };
+
+            shader_handles.push(load_context.add_labeled_asset(i.to_string(), shader));
         }
 
         for (shader_index, shader_hash) in shader_toc.shader_hashes.into_iter().enumerate() {
             let shader_id = shader_toc.shader_ids[shader_index];
-            handles.insert(shader_hash, chunks[shader_id as usize].clone());
+            handles.insert(shader_hash, shader_handles[shader_id as usize].clone());
         }
 
         Ok(ResourceShaderPackage { handles })

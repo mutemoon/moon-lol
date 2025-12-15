@@ -4118,6 +4118,7 @@ dependencies = [
  "league_utils",
  "lol_config",
  "lol_core",
+ "regex",
  "thiserror 2.0.12",
 ]
 

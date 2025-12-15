@@ -77,7 +77,7 @@ fn startup_spawn_barrack(
     res_assets_map_placeable_container: Res<Assets<MapPlaceableContainer>>,
     res_assets_barracks_config: Res<Assets<BarracksConfig>>,
     res_assets_unk_ad65d8c4: Res<Assets<Unk0xad65d8c4>>,
-    ) {
+) {
     let map_container = res_assets_map_container.load_hash(&map_name.0).unwrap();
 
     for (_, &link) in &map_container.chunks {
@@ -170,7 +170,7 @@ fn is_character_loaded(
     res_assets_barracks_config: Res<Assets<BarracksConfig>>,
     res_assets_character_record: Res<Assets<CharacterRecord>>,
     res_assets_unk_ad65d8c4: Res<Assets<Unk0xad65d8c4>>,
-    ) {
+) {
     if q_barrack.is_empty() {
         return;
     }
@@ -207,7 +207,7 @@ fn barracks_spawning_system(
     time: Res<Time>,
     res_assets_barracks_config: Res<Assets<BarracksConfig>>,
     res_assets_unk_ad65d8c4: Res<Assets<Unk0xad65d8c4>>,
-    ) {
+) {
     for (transform, mut barrack_state, team, lane) in query.iter_mut() {
         let barracks_config = res_assets_barracks_config
             .load_hash(barrack_state.key_barracks_config)
