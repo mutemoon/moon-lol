@@ -22,7 +22,7 @@ pub struct Health {
 
 #[derive(EntityEvent, Debug)]
 pub struct EventDead {
-    entity: Entity,
+    pub entity: Entity,
 }
 
 #[derive(EntityEvent, Debug)]
