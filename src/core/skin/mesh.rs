@@ -84,8 +84,7 @@ pub fn get_standard(
     texture: Option<String>,
 ) -> Handle<StandardMaterial> {
     let material_handle = res_assets_standard_material.add(StandardMaterial {
-        base_color_texture: texture
-            .map(|v| asset_server.load_image_labeled(v.to_lowercase(), "srgb")),
+        base_color_texture: texture.map(|v| asset_server.load_league_labeled(&v, "srgb")),
         unlit: true,
         cull_mode: Some(Face::Front),
         alpha_mode: AlphaMode::Mask(0.3),

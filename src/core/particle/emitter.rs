@@ -570,7 +570,7 @@ pub fn update_emitter_attached(
             {
                 for material_override_definition in material_override_definitions {
                     if let Some(base_texture) = &material_override_definition.base_texture {
-                        texture = Some(res_asset_server.load_image(base_texture));
+                        texture = Some(res_asset_server.load_league(base_texture));
                     }
                 }
             }

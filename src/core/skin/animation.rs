@@ -1,4 +1,4 @@
-use crate::AssetServerLoadLeague;use std::collections::HashMap;
+use std::collections::HashMap;
 
 use bevy::prelude::*;
 use league_core::{
@@ -9,7 +9,10 @@ use league_to_lol::load_animation_map;
 use league_utils::hash_bin;
 use lol_config::{HashKey, LoadHashKeyTrait};
 
-use crate::{Animation, AnimationNode, AnimationNodeF32, AnimationState, Loading, Skin};
+use crate::{
+    Animation, AnimationNode, AnimationNodeF32, AnimationState, AssetServerLoadLeague, Loading,
+    Skin,
+};
 
 #[derive(EntityEvent)]
 pub struct CommandSkinAnimationSpawn {
@@ -98,8 +101,8 @@ fn build_animation_nodes(
                 m_animation_resource_data,
                 ..
             }) => {
-                let clip = asset_server
-                    .load_league(m_animation_resource_data.m_animation_file_path.clone());
+                let clip =
+                    asset_server.load_league(&m_animation_resource_data.m_animation_file_path);
                 let node_index = animation_graph.add_clip(clip, 1.0, animation_graph.root);
                 hash_to_node.insert(*hash, AnimationNode::Clip { node_index });
             }

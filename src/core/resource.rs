@@ -213,7 +213,7 @@ impl ResourceCache {
         match self.image.get(path) {
             Some(handle) => handle.clone(),
             None => {
-                let handle = asset_server.load_image(path.to_string());
+                let handle = asset_server.load_league(path);
                 self.image.insert(path.to_string(), handle.clone());
                 handle
             }
@@ -224,7 +224,7 @@ impl ResourceCache {
         match self.mesh.get(path) {
             Some(handle) => handle.clone(),
             None => {
-                let handle = asset_server.load_league(path.to_string());
+                let handle = asset_server.load_league(path);
                 self.mesh.insert(path.to_string(), handle.clone());
                 handle
             }
@@ -302,6 +302,7 @@ fn insert_props(world: &mut World) {
         let (_, loader) = ASSET_LOADER_REGISTRY.loaders.get(&type_hash).unwrap();
         loader.load(world, prop_hash, &mut handle);
     }
+
     let mut res_league_properties = world.resource_mut::<LeagueProperties>();
     res_league_properties.0.clear();
 }

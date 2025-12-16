@@ -86,7 +86,7 @@ fn startup_load_map_geometry(
     commands.trigger(CommandLoadPropBin { paths });
 
     commands.insert_resource(Loading::new(
-        res_asset_server.load_league::<ConfigMapGeo>(format!("data/{}.mapgeo", &res_map_name.0)),
+        res_asset_server.load_league::<ConfigMapGeo>(&format!("data/{}.mapgeo", &res_map_name.0)),
     ));
 }
 

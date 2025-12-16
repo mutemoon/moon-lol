@@ -176,8 +176,8 @@ pub fn update_player_icon(
 
     let icon_name = skin
         .icon_avatar
-        .clone()
-        .unwrap_or(skin.icon_circle.clone().unwrap());
+        .as_ref()
+        .unwrap_or(skin.icon_circle.as_ref().unwrap());
 
     let &child = q_children.get(entity).unwrap().get(0).unwrap();
     if q_image_node.get_mut(child).is_ok() {
@@ -186,7 +186,7 @@ pub fn update_player_icon(
 
     commands.entity(entity).insert((
         ImageNode {
-            image: asset_server.load_image_labeled(icon_name, "srgb"),
+            image: asset_server.load_league_labeled(icon_name, "srgb"),
             ..default()
         },
         Visibility::Visible,

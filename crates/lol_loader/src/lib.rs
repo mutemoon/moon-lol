@@ -89,7 +89,7 @@ impl AssetLoader for LeagueLoaderProperty {
     }
 
     fn extensions(&self) -> &[&str] {
-        &["bin"]
+        &["lol"]
     }
 }
 
@@ -124,7 +124,7 @@ impl AssetLoader for LeagueLoaderMesh {
     }
 
     fn extensions(&self) -> &[&str] {
-        &["skn"]
+        &["lol"]
     }
 }
 
@@ -190,7 +190,7 @@ impl AssetLoader for LeagueLoaderMapgeo {
     }
 
     fn extensions(&self) -> &[&str] {
-        &["mapgeo"]
+        &["lol"]
     }
 }
 
@@ -219,7 +219,7 @@ impl AssetLoader for LeagueLoaderSkeleton {
     }
 
     fn extensions(&self) -> &[&str] {
-        &["skl"]
+        &["lol"]
     }
 }
 
@@ -247,7 +247,7 @@ impl AssetLoader for LeagueLoaderMeshStatic {
     }
 
     fn extensions(&self) -> &[&str] {
-        &["scb"]
+        &["lol"]
     }
 }
 
@@ -331,7 +331,7 @@ impl AssetLoader for LeagueLoaderImage {
     }
 
     fn extensions(&self) -> &[&str] {
-        &["tex"]
+        &["lol", "tex"]
     }
 }
 
@@ -398,7 +398,7 @@ impl AssetLoader for LeagueLoaderAnimationClip {
     }
 
     fn extensions(&self) -> &[&str] {
-        &["anm"]
+        &["lol"]
     }
 }
 
@@ -421,123 +421,121 @@ impl AssetLoader for LeagueLoaderShaderToc {
         let mut buf = Vec::new();
         reader.read_to_end(&mut buf).await?;
         let mut reader = Cursor::new(buf);
-        let shader_toc = LeagueShaderToc::read(&mut reader)?;
 
         let path = load_context.asset_path().to_string();
+        info!("loading shader toc {}", path);
+
+        let shader_toc = LeagueShaderToc::read(&mut reader)?;
 
         let mut handles = HashMap::new();
 
-        let mut chunks = Vec::new();
+        // let mut chunks = Vec::new();
 
-        let mut max_struct = "".to_string();
+        // let mut max_struct = "".to_string();
 
-        let mut max_uniform_sampler = "".to_string();
+        // let mut max_uniform_sampler = "".to_string();
 
-        for i in 0..((shader_toc.bundled_shader_count as f32 / 100.0).ceil() as usize) {
-            let chunk_hash = hash_wad(&format!("{}_{}", path, i * 100));
+        // for i in 0..((shader_toc.bundled_shader_count as f32 / 100.0).ceil() as usize) {
+        //     let chunk_hash = hash_wad(&format!("{}_{}", path, i * 100));
 
-            let chunk = load_context
-                .read_asset_bytes(&format!("data/{:x}", chunk_hash))
-                .await
-                .unwrap();
+        //     let chunk = load_context
+        //         .read_asset_bytes(&format!("data/{:x}", chunk_hash))
+        //         .await
+        //         .unwrap();
 
-            let shader_chunk = LeagueShaderChunk::read_le(&mut Cursor::new(chunk))?;
+        //     let shader_chunk = LeagueShaderChunk::read_le(&mut Cursor::new(chunk))?;
 
-            for shader_file in shader_chunk.files.iter() {
-                let content = shader_file.text.clone();
+        //     for shader_file in shader_chunk.files.iter() {
+        //         let content = shader_file.text.clone();
 
-                // content.matches("struct")
+        //         // content.matches("struct")
 
-                let re = Regex::new(r"struct[\w\W]*?\}").unwrap(); // 匹配 YYYY-MM-DD 日期格式
-                let matches = re.find_iter(&content);
+        //         let re = Regex::new(r"struct[\w\W]*?\}").unwrap(); // 匹配 YYYY-MM-DD 日期格式
+        //         let matches = re.find_iter(&content);
 
-                for mat in matches {
-                    if mat.as_str().len() > max_struct.len() {
-                        max_struct = mat.as_str().to_string();
-                    }
-                }
+        //         for mat in matches {
+        //             if mat.as_str().len() > max_struct.len() {
+        //                 max_struct = mat.as_str().to_string();
+        //             }
+        //         }
 
-                let re = Regex::new(r"uniform sampler2D[\w\W]*?\n\n").unwrap();
-                let matches = re.find_iter(&content);
+        //         let re = Regex::new(r"uniform sampler2D[\w\W]*?\n\n").unwrap();
+        //         let matches = re.find_iter(&content);
 
-                for mat in matches {
-                    if mat.as_str().len() > max_uniform_sampler.len() {
-                        max_uniform_sampler = mat.as_str().to_string();
-                    }
-                }
+        //         for mat in matches {
+        //             if mat.as_str().len() > max_uniform_sampler.len() {
+        //                 max_uniform_sampler = mat.as_str().to_string();
+        //             }
+        //         }
 
-                chunks.push(content);
-            }
-        }
+        //         chunks.push(content);
+        //     }
+        // }
 
-        let mut shader_handles = Vec::new();
-        for i in 0..shader_toc.bundled_shader_count {
-            let mut content = chunks[i as usize].clone();
+        // let mut shader_handles = Vec::new();
+        // for i in 0..shader_toc.bundled_shader_count {
+        //     let mut content = chunks[i as usize].clone();
 
-            let re = Regex::new(r"struct[\w\W]*?\}").unwrap(); // 匹配 YYYY-MM-DD 日期格式
-            let matches = re.find_iter(&content);
+        //     let re = Regex::new(r"struct[\w\W]*?\}").unwrap(); // 匹配 YYYY-MM-DD 日期格式
+        //     let matches = re.find_iter(&content);
 
-            let ranges = matches.map(|mat| mat.range()).collect::<Vec<_>>();
+        //     let ranges = matches.map(|mat| mat.range()).collect::<Vec<_>>();
 
-            for range in ranges {
-                content.replace_range(range, &max_struct);
-            }
+        //     for range in ranges {
+        //         content.replace_range(range, &max_struct);
+        //     }
 
-            let re = Regex::new(r"uniform sampler2D[\w\W]*?\n\n").unwrap();
-            let matches = re.find_iter(&content);
+        //     let re = Regex::new(r"uniform sampler2D[\w\W]*?\n\n").unwrap();
+        //     let matches = re.find_iter(&content);
 
-            let ranges = matches.map(|mat| mat.range()).collect::<Vec<_>>();
+        //     let ranges = matches.map(|mat| mat.range()).collect::<Vec<_>>();
 
-            for range in ranges {
-                content.replace_range(range, &max_uniform_sampler);
-            }
+        //     for range in ranges {
+        //         content.replace_range(range, &max_uniform_sampler);
+        //     }
 
-            let converted = if shader_toc.shader_type == 0 {
-                convert_vert(&content)
-            } else {
-                convert_frag(&content)
-            };
+        //     let converted = if shader_toc.shader_type == 0 {
+        //         convert_vert(&content)
+        //     } else {
+        //         convert_frag(&content)
+        //     };
 
-            let source = if shader_toc.shader_type == 0 {
-                Source::Glsl(converted.clone().into(), ShaderStage::Vertex)
-            } else {
-                Source::Glsl(converted.clone().into(), ShaderStage::Fragment)
-            };
+        //     let source = if shader_toc.shader_type == 0 {
+        //         Source::Glsl(converted.clone().into(), ShaderStage::Vertex)
+        //     } else {
+        //         Source::Glsl(converted.clone().into(), ShaderStage::Fragment)
+        //     };
 
-            let shader = Shader {
-                path: path.clone(),
-                imports: Default::default(),
-                import_path: ShaderImport::Custom(path.clone()),
-                source,
-                additional_imports: Default::default(),
-                shader_defs: Default::default(),
-                file_dependencies: Default::default(),
-                validate_shader: ValidateShader::Disabled,
-            };
+        //     let shader = Shader {
+        //         path: path.clone(),
+        //         imports: Default::default(),
+        //         import_path: ShaderImport::Custom(path.clone()),
+        //         source,
+        //         additional_imports: Default::default(),
+        //         shader_defs: Default::default(),
+        //         file_dependencies: Default::default(),
+        //         validate_shader: ValidateShader::Disabled,
+        //     };
 
-            shader_handles.push((
-                converted.clone(),
-                load_context.add_labeled_asset(i.to_string(), shader),
-            ));
-        }
+        //     shader_handles.push((
+        //         converted.clone(),
+        //         load_context.add_labeled_asset(i.to_string(), shader),
+        //     ));
+        // }
 
-        for (shader_index, shader_hash) in shader_toc.shader_hashes.into_iter().enumerate() {
-            let shader_id = shader_toc.shader_ids[shader_index];
+        // for (shader_index, shader_hash) in shader_toc.shader_hashes.into_iter().enumerate() {
+        //     let shader_id = shader_toc.shader_ids[shader_index];
 
-            let (converted, handle) = &shader_handles[shader_id as usize];
+        //     let (converted, handle) = &shader_handles[shader_id as usize];
 
-            if get_shader_uuid_by_hash(&path, shader_hash) == Uuid::from_u128(0xdee3e40ffaa02909) {
-                debug!("shader_id: {}", shader_id);
-                debug!("converted: {}", converted);
-            }
+        //     if get_shader_uuid_by_hash(&path, shader_hash) == Uuid::from_u128(0xdee3e40ffaa02909) {
+        //         debug!("shader_id: {}", shader_id);
+        //         debug!("converted: {}", converted);
+        //     }
 
-            handles.insert(shader_hash, handle.clone());
-        }
+        //     handles.insert(shader_hash, handle.clone());
+        // }
 
         Ok(ResourceShaderPackage { handles })
-    }
-
-    fn extensions(&self) -> &[&str] {
-        &["glsl"]
     }
 }

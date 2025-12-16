@@ -5,7 +5,6 @@ use std::time::Instant;
 
 use bevy::prelude::*;
 use league_loader::{LeagueLoader, LeagueWadLoaderTrait};
-use league_utils::get_extension_by_bytes;
 use rayon::prelude::*;
 
 fn main() {
@@ -64,9 +63,7 @@ fn main() {
             return;
         };
 
-        let extension = get_extension_by_bytes(&buffer);
-
-        write(format!("assets/data/{:x}.{}", hash, extension), buffer).unwrap();
+        write(format!("assets/data/{:x}.lol", hash), buffer).unwrap();
     });
 
     println!("耗时: {:?}", start.elapsed());

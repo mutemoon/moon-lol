@@ -84,64 +84,17 @@ impl PartialEq for HashPath {
 }
 
 pub trait AssetServerLoadLeague {
-    fn load_league<'a, A: Asset>(&self, path: impl Into<HashPath>) -> Handle<A>;
+    fn load_league<A: Asset>(&self, path: &str) -> Handle<A>;
 
-    fn load_league_labeled<'a, A: Asset>(
-        &self,
-        path: impl Into<HashPath>,
-        label: &str,
-    ) -> Handle<A>;
-
-    fn load_league_with_settings<'a, A: Asset, S: Settings>(
-        &self,
-        path: impl Into<HashPath>,
-        settings: impl Fn(&mut S) + Send + Sync + 'static,
-    ) -> Handle<A>;
-
-    fn load_image<'a, A: Asset>(&self, path: impl Into<HashPath>) -> Handle<A>;
-
-    fn load_image_labeled<'a, A: Asset>(&self, path: impl Into<HashPath>, label: &str)
-        -> Handle<A>;
+    fn load_league_labeled<'a, A: Asset>(&self, path: &str, label: &str) -> Handle<A>;
 }
 
 impl AssetServerLoadLeague for AssetServer {
-    fn load_league<'a, A: Asset>(&self, path: impl Into<HashPath>) -> Handle<A> {
-        self.load(format!("data/{:x}", path.into().0,))
+    fn load_league<A: Asset>(&self, path: &str) -> Handle<A> {
+        self.load(format!("data/{:x}.lol", HashPath::from(path).0))
     }
 
-    fn load_league_labeled<'a, A: Asset>(
-        &self,
-        path: impl Into<HashPath>,
-        label: &str,
-    ) -> Handle<A> {
-        self.load(format!("data/{:x}", path.into().0))
-    }
-
-    fn load_league_with_settings<'a, A: Asset, S: Settings>(
-        &self,
-        path: impl Into<HashPath>,
-        settings: impl Fn(&mut S) + Send + Sync + 'static,
-    ) -> Handle<A> {
-        self.load_with_settings(format!("data/{:x}", path.into().0), settings)
-    }
-
-    fn load_image<'a, A: Asset>(&self, path: impl Into<HashPath>) -> Handle<A> {
-        let path = path.into();
-        self.load_with_settings(
-            format!("data/{:x}", path.clone().0),
-            |_: &mut ImageSettings| {},
-        )
-    }
-
-    fn load_image_labeled<'a, A: Asset>(
-        &self,
-        path: impl Into<HashPath>,
-        label: &str,
-    ) -> Handle<A> {
-        let path = path.into();
-        self.load_with_settings(
-            format!("data/{:x}#{label}", path.clone().0),
-            |_: &mut ImageSettings| {},
-        )
+    fn load_league_labeled<'a, A: Asset>(&self, path: &str, label: &str) -> Handle<A> {
+        self.load(format!("data/{:x}.lol#{label}", HashPath::from(path).0))
     }
 }

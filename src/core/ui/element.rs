@@ -129,7 +129,7 @@ pub fn spawn_ui_atom(
         if let EnumData::AtlasData(atlas_data) = texture_data {
             if let Some(m_texture_uv) = atlas_data.m_texture_uv {
                 commands.entity(child_entity).insert(ImageNode {
-                    image: res_asset_server.load_image_labeled(&atlas_data.m_texture_name, "srgb"),
+                    image: res_asset_server.load_league_labeled(&atlas_data.m_texture_name, "srgb"),
                     rect: Some(Rect::new(
                         m_texture_uv.x,
                         m_texture_uv.y,
