@@ -23,9 +23,11 @@ use league_to_lol::{
     convert_frag, convert_vert, load_animation_file, mesh_static_to_bevy_mesh, parse_vertex_data,
     skinned_mesh_to_intermediate, submesh_to_intermediate,
 };
+use league_utils::{get_shader_uuid_by_hash, hash_wad};
 use lol_config::{ConfigMapGeo, LeagueProperties, ResourceShaderPackage, ASSET_LOADER_REGISTRY};
 use lol_core::LeagueSkinMesh;
 use regex::Regex;
+use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
 #[derive(Error, Debug)]
@@ -249,13 +251,16 @@ impl AssetLoader for LeagueLoaderMeshStatic {
     }
 }
 
+#[derive(Default, Serialize, Deserialize)]
+pub struct ImageSettings;
+
 #[derive(Default)]
 pub struct LeagueLoaderImage;
 
 impl AssetLoader for LeagueLoaderImage {
     type Asset = Image;
 
-    type Settings = ();
+    type Settings = ImageSettings;
 
     type Error = Error;
 
@@ -426,13 +431,15 @@ impl AssetLoader for LeagueLoaderShaderToc {
 
         let mut max_struct = "".to_string();
 
+        let mut max_uniform_sampler = "".to_string();
+
         for i in 0..((shader_toc.bundled_shader_count as f32 / 100.0).ceil() as usize) {
-            let chunk_path = format!("{}_{}", path, i * 100);
+            let chunk_hash = hash_wad(&format!("{}_{}", path, i * 100));
 
             let chunk = load_context
-                .read_asset_bytes(&chunk_path)
+                .read_asset_bytes(&format!("data/{:x}", chunk_hash))
                 .await
-                .unwrap_or(Vec::new());
+                .unwrap();
 
             let shader_chunk = LeagueShaderChunk::read_le(&mut Cursor::new(chunk))?;
 
@@ -447,6 +454,15 @@ impl AssetLoader for LeagueLoaderShaderToc {
                 for mat in matches {
                     if mat.as_str().len() > max_struct.len() {
                         max_struct = mat.as_str().to_string();
+                    }
+                }
+
+                let re = Regex::new(r"uniform sampler2D[\w\W]*?\n\n").unwrap();
+                let matches = re.find_iter(&content);
+
+                for mat in matches {
+                    if mat.as_str().len() > max_uniform_sampler.len() {
+                        max_uniform_sampler = mat.as_str().to_string();
                     }
                 }
 
@@ -467,10 +483,25 @@ impl AssetLoader for LeagueLoaderShaderToc {
                 content.replace_range(range, &max_struct);
             }
 
-            let source = if shader_toc.shader_type == 0 {
-                Source::Glsl(convert_vert(&content).into(), ShaderStage::Vertex)
+            let re = Regex::new(r"uniform sampler2D[\w\W]*?\n\n").unwrap();
+            let matches = re.find_iter(&content);
+
+            let ranges = matches.map(|mat| mat.range()).collect::<Vec<_>>();
+
+            for range in ranges {
+                content.replace_range(range, &max_uniform_sampler);
+            }
+
+            let converted = if shader_toc.shader_type == 0 {
+                convert_vert(&content)
             } else {
-                Source::Glsl(convert_frag(&content).into(), ShaderStage::Fragment)
+                convert_frag(&content)
+            };
+
+            let source = if shader_toc.shader_type == 0 {
+                Source::Glsl(converted.clone().into(), ShaderStage::Vertex)
+            } else {
+                Source::Glsl(converted.clone().into(), ShaderStage::Fragment)
             };
 
             let shader = Shader {
@@ -484,12 +515,23 @@ impl AssetLoader for LeagueLoaderShaderToc {
                 validate_shader: ValidateShader::Disabled,
             };
 
-            shader_handles.push(load_context.add_labeled_asset(i.to_string(), shader));
+            shader_handles.push((
+                converted.clone(),
+                load_context.add_labeled_asset(i.to_string(), shader),
+            ));
         }
 
         for (shader_index, shader_hash) in shader_toc.shader_hashes.into_iter().enumerate() {
             let shader_id = shader_toc.shader_ids[shader_index];
-            handles.insert(shader_hash, shader_handles[shader_id as usize].clone());
+
+            let (converted, handle) = &shader_handles[shader_id as usize];
+
+            if get_shader_uuid_by_hash(&path, shader_hash) == Uuid::from_u128(0xdee3e40ffaa02909) {
+                debug!("shader_id: {}", shader_id);
+                debug!("converted: {}", converted);
+            }
+
+            handles.insert(shader_hash, handle.clone());
         }
 
         Ok(ResourceShaderPackage { handles })

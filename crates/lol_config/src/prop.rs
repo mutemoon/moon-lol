@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::fmt::Debug;
 use std::marker::PhantomData;
 
 use bevy::asset::uuid::Uuid;
@@ -7,8 +8,13 @@ use bevy::ecs::resource::Resource;
 use bevy::reflect::TypePath;
 use league_utils::{hash_bin, type_name_to_hash};
 
-#[derive(Debug)]
 pub struct HashKey<T>((u32, PhantomData<T>));
+
+impl<T> Debug for HashKey<T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(&format!("{:x}", self.0 .0))
+    }
+}
 
 impl<T> From<&u32> for HashKey<T> {
     fn from(value: &u32) -> Self {
@@ -112,21 +118,6 @@ pub struct LeagueProperties(
 );
 
 impl LeagueProperties {
-    pub fn get<'a, T: Asset>(
-        &self,
-        res_assets: &'a Assets<T>,
-        hash: impl Into<HashKey<T>>,
-    ) -> Option<&'a T> {
-        // let type_name = T::short_type_path();
-        // let type_hash = type_name_to_hash(type_name);
-        // let store = self.0.get(&type_hash)?;
-        // let untyped_handle = store.get(&hash.into().0 .0)?;
-        // let handle = untyped_handle.clone().typed::<T>();
-        // res_assets.get(&handle)
-
-        res_assets.get(AssetId::from(hash.into()))
-    }
-
     pub fn merge(&mut self, other: &LeagueProperties) {
         for (type_hash, other_store) in &other.0 {
             self.0

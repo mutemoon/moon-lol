@@ -1,6 +1,9 @@
 use std::f32::consts::PI;
 
+use bevy::asset::meta::Settings;
 use bevy::prelude::*;
+use league_utils::hash_wad;
+use lol_loader::ImageSettings;
 
 pub fn rotate_to_direction(transform: &mut Transform, direction: Vec2) {
     transform.rotation = Quat::from_rotation_y(direction_to_angle(direction));
@@ -37,5 +40,108 @@ pub fn lerp_angle_with_velocity(
         target
     } else {
         current + diff.signum() * max_rotation
+    }
+}
+
+pub struct HashPath(pub u64);
+
+impl From<&str> for HashPath {
+    fn from(value: &str) -> Self {
+        Self(hash_wad(value))
+    }
+}
+
+impl From<&String> for HashPath {
+    fn from(value: &String) -> Self {
+        Self(hash_wad(value))
+    }
+}
+
+impl From<String> for HashPath {
+    fn from(value: String) -> Self {
+        Self(hash_wad(&value))
+    }
+}
+
+impl From<&HashPath> for HashPath {
+    fn from(value: &HashPath) -> Self {
+        Self(value.0)
+    }
+}
+
+impl Clone for HashPath {
+    fn clone(&self) -> Self {
+        *self
+    }
+}
+
+impl Copy for HashPath {}
+
+impl PartialEq for HashPath {
+    fn eq(&self, other: &Self) -> bool {
+        self.0 == other.0
+    }
+}
+
+pub trait AssetServerLoadLeague {
+    fn load_league<'a, A: Asset>(&self, path: impl Into<HashPath>) -> Handle<A>;
+
+    fn load_league_labeled<'a, A: Asset>(
+        &self,
+        path: impl Into<HashPath>,
+        label: &str,
+    ) -> Handle<A>;
+
+    fn load_league_with_settings<'a, A: Asset, S: Settings>(
+        &self,
+        path: impl Into<HashPath>,
+        settings: impl Fn(&mut S) + Send + Sync + 'static,
+    ) -> Handle<A>;
+
+    fn load_image<'a, A: Asset>(&self, path: impl Into<HashPath>) -> Handle<A>;
+
+    fn load_image_labeled<'a, A: Asset>(&self, path: impl Into<HashPath>, label: &str)
+        -> Handle<A>;
+}
+
+impl AssetServerLoadLeague for AssetServer {
+    fn load_league<'a, A: Asset>(&self, path: impl Into<HashPath>) -> Handle<A> {
+        self.load(format!("data/{:x}", path.into().0,))
+    }
+
+    fn load_league_labeled<'a, A: Asset>(
+        &self,
+        path: impl Into<HashPath>,
+        label: &str,
+    ) -> Handle<A> {
+        self.load(format!("data/{:x}", path.into().0))
+    }
+
+    fn load_league_with_settings<'a, A: Asset, S: Settings>(
+        &self,
+        path: impl Into<HashPath>,
+        settings: impl Fn(&mut S) + Send + Sync + 'static,
+    ) -> Handle<A> {
+        self.load_with_settings(format!("data/{:x}", path.into().0), settings)
+    }
+
+    fn load_image<'a, A: Asset>(&self, path: impl Into<HashPath>) -> Handle<A> {
+        let path = path.into();
+        self.load_with_settings(
+            format!("data/{:x}", path.clone().0),
+            |_: &mut ImageSettings| {},
+        )
+    }
+
+    fn load_image_labeled<'a, A: Asset>(
+        &self,
+        path: impl Into<HashPath>,
+        label: &str,
+    ) -> Handle<A> {
+        let path = path.into();
+        self.load_with_settings(
+            format!("data/{:x}#{label}", path.clone().0),
+            |_: &mut ImageSettings| {},
+        )
     }
 }

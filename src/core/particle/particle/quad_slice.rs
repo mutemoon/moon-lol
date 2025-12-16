@@ -5,9 +5,10 @@ use bevy::render::render_resource::{
     AsBindGroup, RenderPipelineDescriptor, ShaderType, SpecializedMeshPipelineError,
 };
 use bevy::shader::ShaderRef;
+use league_utils::get_shader_handle;
 
 use crate::{
-    get_shader_handle, MaterialPath, UniformsVertexQuad, ATTRIBUTE_LIFETIME, ATTRIBUTE_UV_FRAME,
+    MaterialPath, UniformsVertexQuad, ATTRIBUTE_LIFETIME, ATTRIBUTE_UV_FRAME,
     ATTRIBUTE_WORLD_POSITION,
 };
 

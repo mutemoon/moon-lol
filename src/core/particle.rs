@@ -17,7 +17,7 @@ use league_core::{
     VfxSystemDefinitionData,
 };
 use league_utils::hash_wad;
-use lol_config::{HashKey, LeagueProperties, LoadHashKeyTrait};
+use lol_config::{HashKey, LoadHashKeyTrait};
 pub use particle::*;
 pub use skinned_mesh::*;
 pub use utils::*;
@@ -99,11 +99,10 @@ pub struct ParticleId {
 impl ParticleId {
     pub fn get_def<'a>(
         self: &Self,
-        res_assets_league_properties: &'a Res<LeagueProperties>,
         res_assets_vfx_system_definition_data: &'a Res<Assets<VfxSystemDefinitionData>>,
     ) -> &'a VfxEmitterDefinitionData {
-        res_assets_league_properties
-            .get(res_assets_vfx_system_definition_data, self.hash)
+        res_assets_vfx_system_definition_data
+            .load_hash(self.hash)
             .unwrap()
             .complex_emitter_definition_data
             .as_ref()

@@ -5,7 +5,7 @@ use bevy::window::{PrimaryWindow, WindowResized};
 use league_core::{EnumAnchor, EnumData, EnumUiPosition, UiElementIconData};
 use league_utils::hash_bin;
 
-use crate::CommandLoadPropBin;
+use crate::{AssetServerLoadLeague, CommandLoadPropBin};
 
 #[derive(Resource, Default)]
 pub struct UIElementEntity {
@@ -43,7 +43,7 @@ pub fn update_spawn_ui_element(
     mut res_ui_element_entity: ResMut<UIElementEntity>,
     res_asset_server: Res<AssetServer>,
     res_assets_ui_element_icon_data: Res<Assets<UiElementIconData>>,
-    ) {
+) {
     if res_assets_ui_element_icon_data.iter().count() == 0 {
         return;
     }
@@ -129,7 +129,7 @@ pub fn spawn_ui_atom(
         if let EnumData::AtlasData(atlas_data) = texture_data {
             if let Some(m_texture_uv) = atlas_data.m_texture_uv {
                 commands.entity(child_entity).insert(ImageNode {
-                    image: res_asset_server.load(format!("{}#srgb", atlas_data.m_texture_name)),
+                    image: res_asset_server.load_image_labeled(&atlas_data.m_texture_name, "srgb"),
                     rect: Some(Rect::new(
                         m_texture_uv.x,
                         m_texture_uv.y,

@@ -1,10 +1,11 @@
 use bevy::mesh::skinning::SkinnedMesh;
-use bevy::prelude::*;use lol_config::LoadHashKeyTrait;
+use bevy::prelude::*;
 use bevy::render::render_resource::Face;
 use league_core::SkinCharacterDataProperties;
+use lol_config::LoadHashKeyTrait;
 use lol_core::LeagueSkinMesh;
 
-use crate::{CommandSkinSkeletonSpawn, Loading, Skin};
+use crate::{AssetServerLoadLeague, CommandSkinSkeletonSpawn, Loading, Skin};
 
 #[derive(EntityEvent)]
 pub struct CommandSkinMeshSpawn {
@@ -21,12 +22,13 @@ pub fn on_command_skin_mesh_spawn(
     mut res_assets_standard_material: ResMut<Assets<StandardMaterial>>,
     q_skin: Query<&Skin>,
     res_assets_skin_character_data_properties: Res<Assets<SkinCharacterDataProperties>>,
-    ) {
+) {
     let entity = trigger.event_target();
 
     let skin = q_skin.get(entity).unwrap();
 
-    let skin_character_data_properties = res_assets_skin_character_data_properties.load_hash( skin.key)
+    let skin_character_data_properties = res_assets_skin_character_data_properties
+        .load_hash(skin.key)
         .unwrap();
 
     let skin_mesh_properties = skin_character_data_properties
@@ -40,7 +42,7 @@ pub fn on_command_skin_mesh_spawn(
     });
 
     commands.entity(entity).insert(Loading::new(SkinMeshSpawn(
-        asset_server.load(&skin_mesh_properties.simple_skin.clone().unwrap()),
+        asset_server.load_league(&skin_mesh_properties.simple_skin.clone().unwrap()),
         get_standard(
             &mut res_assets_standard_material,
             &asset_server,
@@ -82,7 +84,8 @@ pub fn get_standard(
     texture: Option<String>,
 ) -> Handle<StandardMaterial> {
     let material_handle = res_assets_standard_material.add(StandardMaterial {
-        base_color_texture: texture.map(|v| asset_server.load(v.to_lowercase() + "#srgb")),
+        base_color_texture: texture
+            .map(|v| asset_server.load_image_labeled(v.to_lowercase(), "srgb")),
         unlit: true,
         cull_mode: Some(Face::Front),
         alpha_mode: AlphaMode::Mask(0.3),

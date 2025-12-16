@@ -26,6 +26,12 @@ pub trait LeagueWadLoaderTrait {
         self.get_wad_entry_no_seek_reader_by_hash(hash_wad(path))
     }
 
+    fn get_wad_entry_buffer_by_hash(&self, hash: u64) -> Result<Vec<u8>, Error> {
+        let mut reader = self.get_wad_entry_no_seek_reader_by_hash(hash)?;
+        let mut buffer = Vec::new();
+        reader.read_to_end(&mut buffer)?;
+        Ok(buffer)
+    }
     fn get_wad_entry_buffer_by_path(&self, path: &str) -> Result<Vec<u8>, Error> {
         let mut reader = self.get_wad_entry_no_seek_reader_by_path(path)?;
         let mut buffer = Vec::new();

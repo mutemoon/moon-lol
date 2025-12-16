@@ -1,4 +1,4 @@
-use bevy::animation::{AnimationTarget, AnimationTargetId};
+use crate::AssetServerLoadLeague;use bevy::animation::{AnimationTarget, AnimationTargetId};
 use bevy::asset::uuid::Uuid;
 use bevy::mesh::skinning::{SkinnedMesh, SkinnedMeshInverseBindposes};
 use bevy::prelude::*;
@@ -32,7 +32,7 @@ pub fn on_command_skin_skeleton_spawn(
     commands
         .entity(entity)
         .insert(Loading::new(SkinSkeletonSpawn(
-            asset_server.load(&trigger.path),
+            asset_server.load_league(&trigger.path),
         )));
 }
 

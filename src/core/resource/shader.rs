@@ -1,11 +1,11 @@
 use std::collections::HashSet;
 
 use bevy::prelude::*;
-use league_utils::hash_shader_spec;
+use league_utils::get_shader_handle_by_hash;
 use lol_config::ResourceShaderPackage;
 
 use crate::{
-    get_shader_handle_by_hash, MaterialPath, ParticleMaterialQuad, ParticleMaterialQuadSlice,
+    AssetServerLoadLeague, MaterialPath, ParticleMaterialQuad, ParticleMaterialQuadSlice,
     ParticleMaterialUnlitDecal,
 };
 
@@ -26,7 +26,7 @@ pub fn startup_load_shaders(
     ]);
 
     for path in paths {
-        let handle = asset_server.load::<ResourceShaderPackage>(path);
+        let handle = asset_server.load_league::<ResourceShaderPackage>(path);
         res_resource_shader_handles
             .0
             .push((path.to_string(), handle));
@@ -50,7 +50,7 @@ pub fn update_shaders(
                 .insert(get_shader_handle_by_hash(&path, u64_hash).id(), shader)
                 .unwrap();
         }
-        // true
+
         false
     });
 }

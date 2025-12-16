@@ -4119,6 +4119,7 @@ dependencies = [
  "lol_config",
  "lol_core",
  "regex",
+ "serde",
  "thiserror 2.0.12",
 ]
 

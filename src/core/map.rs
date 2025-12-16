@@ -9,8 +9,8 @@ use lol_config::{ConfigMapGeo, HashKey, LoadHashKeyTrait};
 use lol_core::{Lane, Team};
 
 use crate::{
-    get_standard, Action, CommandAction, CommandCharacterSpawn, CommandLoadPropBin, Controller,
-    Loading, Turret,
+    get_standard, Action, AssetServerLoadLeague, CommandAction, CommandCharacterSpawn,
+    CommandLoadPropBin, Controller, Loading, Turret,
 };
 
 pub const MAP_WIDTH: f32 = 14400.0;
@@ -86,7 +86,7 @@ fn startup_load_map_geometry(
     commands.trigger(CommandLoadPropBin { paths });
 
     commands.insert_resource(Loading::new(
-        res_asset_server.load::<ConfigMapGeo>(format!("data/{}.mapgeo", &res_map_name.0)),
+        res_asset_server.load_league::<ConfigMapGeo>(format!("data/{}.mapgeo", &res_map_name.0)),
     ));
 }
 

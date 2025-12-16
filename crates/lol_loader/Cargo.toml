@@ -16,3 +16,4 @@ league_to_lol.workspace = true
 lol_core.workspace = true
 regex.workspace = true
 thiserror.workspace = true
+serde.workspace = true

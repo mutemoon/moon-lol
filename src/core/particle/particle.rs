@@ -6,7 +6,6 @@ use bevy::mesh::skinning::{SkinnedMesh, SkinnedMeshInverseBindposes};
 use bevy::mesh::VertexAttributeValues;
 use bevy::prelude::*;
 use league_core::{EnumVfxPrimitive, VfxSystemDefinitionData};
-use lol_config::LeagueProperties;
 pub use mesh::*;
 pub use quad::*;
 pub use quad_slice::*;
@@ -33,7 +32,6 @@ pub fn update_particle(
     mut res_particle_material_unlit_decal: ResMut<Assets<ParticleMaterialUnlitDecal>>,
     mut res_particle_material_mesh: ResMut<Assets<ParticleMaterialMesh>>,
     res_assets_vfx_system_definition_data: Res<Assets<VfxSystemDefinitionData>>,
-    res_league_properties: Res<LeagueProperties>,
     q_particle_state: Query<(
         Entity,
         &Transform,
@@ -69,10 +67,8 @@ pub fn update_particle(
 
         let world_matrix = world_transform.to_matrix();
 
-        let vfx_emitter_definition_data = particle_id.get_def(
-            &res_league_properties,
-            &res_assets_vfx_system_definition_data,
-        );
+        let vfx_emitter_definition_data =
+            particle_id.get_def(&res_assets_vfx_system_definition_data);
 
         if let Ok(material) = q_particle_material_unlit_decal.get(particle_entity) {
             if let Some(material) = res_particle_material_unlit_decal.get_mut(material.0.id()) {

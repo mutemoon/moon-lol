@@ -1,5 +1,4 @@
 mod shader;
-
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::Read;
@@ -19,13 +18,17 @@ use lol_config::{
 };
 use lol_core::LeagueSkinMesh;
 use lol_loader::{
-    LeagueLoaderAnimationClip, LeagueLoaderImage, LeagueLoaderMapgeo, LeagueLoaderMesh,
-    LeagueLoaderMeshStatic, LeagueLoaderProperty, LeagueLoaderShaderToc, LeagueLoaderSkeleton,
+    ImageSettings, LeagueLoaderAnimationClip, LeagueLoaderImage, LeagueLoaderMapgeo,
+    LeagueLoaderMesh, LeagueLoaderMeshStatic, LeagueLoaderProperty, LeagueLoaderShaderToc,
+    LeagueLoaderSkeleton,
 };
 use serde::de::DeserializeSeed;
 pub use shader::*;
 
-use crate::{CharacterSpawn, SkinAnimationSpawn, SkinMeshSpawn, SkinSkeletonSpawn, SkinSpawn};
+use crate::{
+    AssetServerLoadLeague, CharacterSpawn, SkinAnimationSpawn, SkinMeshSpawn, SkinSkeletonSpawn,
+    SkinSpawn,
+};
 
 #[derive(Default)]
 pub struct PluginResource {
@@ -210,7 +213,7 @@ impl ResourceCache {
         match self.image.get(path) {
             Some(handle) => handle.clone(),
             None => {
-                let handle = asset_server.load(path.to_string());
+                let handle = asset_server.load_image(path.to_string());
                 self.image.insert(path.to_string(), handle.clone());
                 handle
             }
@@ -221,7 +224,7 @@ impl ResourceCache {
         match self.mesh.get(path) {
             Some(handle) => handle.clone(),
             None => {
-                let handle = asset_server.load(path.to_string());
+                let handle = asset_server.load_league(path.to_string());
                 self.mesh.insert(path.to_string(), handle.clone());
                 handle
             }
@@ -242,7 +245,7 @@ fn on_command_load_prop_bin(
 
         res_league_property_files
             .unload
-            .push((lower.clone(), res_asset_server.load(&lower)));
+            .push((lower.clone(), res_asset_server.load_league(&lower)));
 
         res_league_property_files.loaded.push(lower);
     }

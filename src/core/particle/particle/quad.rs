@@ -1,8 +1,6 @@
 use std::f32::consts::PI;
 use std::fmt::Debug;
-use std::marker::PhantomData;
 
-use bevy::asset::uuid::Uuid;
 use bevy::mesh::{MeshVertexBufferLayoutRef, VertexAttributeValues};
 use bevy::pbr::{MaterialPipeline, MaterialPipelineKey};
 use bevy::prelude::*;
@@ -11,7 +9,7 @@ use bevy::render::render_resource::{
     ShaderType, SpecializedMeshPipelineError,
 };
 use bevy::shader::ShaderRef;
-use league_utils::{hash_shader, hash_shader_spec};
+use league_utils::get_shader_handle;
 
 use crate::{ATTRIBUTE_LIFETIME, ATTRIBUTE_UV_FRAME, ATTRIBUTE_UV_MULT, ATTRIBUTE_WORLD_POSITION};
 
@@ -87,26 +85,44 @@ impl From<ParticleMeshQuad> for Mesh {
     }
 }
 
-#[derive(Asset, TypePath, AsBindGroup, Clone, Debug)]
+#[derive(Asset, AsBindGroup, TypePath, Clone, Debug, Default)]
 #[bind_group_data(ConditionalMaterialKey)]
 pub struct ParticleMaterialQuad {
     #[uniform(0)]
     pub uniforms_vertex: UniformsVertexQuad,
+
     #[texture(2)]
     #[sampler(3)]
     pub texture: Option<Handle<Image>>,
+
     #[texture(4)]
     #[sampler(5)]
-    pub particle_color_texture: Option<Handle<Image>>,
+    pub s_palettes_texture: Option<Handle<Image>>,
+
     #[texture(6)]
     #[sampler(7)]
-    pub cmb_tex_pixel_color_remap_ramp_smp_clamp_no_mip: Option<Handle<Image>>,
+    pub texturemult: Option<Handle<Image>>,
+
     #[texture(8)]
     #[sampler(9)]
-    pub sampler_fow: Option<Handle<Image>>,
+    pub particle_color_texture: Option<Handle<Image>>,
+
+    #[texture(10)]
+    #[sampler(11)]
+    pub cmb_tex_pixel_color_remap_ramp_smp_clamp_no_mip: Option<Handle<Image>>,
+
     #[texture(12)]
     #[sampler(13)]
-    pub texturemult: Option<Handle<Image>>,
+    pub cmb_tex_fow_map_smp_clamp_no_mip: Option<Handle<Image>>,
+
+    #[texture(14)]
+    #[sampler(15)]
+    pub s_depth_texture: Option<Handle<Image>>,
+
+    #[texture(16)]
+    #[sampler(17)]
+    pub navmesh_mask_texture: Option<Handle<Image>>,
+
     pub blend_mode: u8,
 }
 
@@ -192,7 +208,13 @@ impl Material for ParticleMaterialQuad {
         }
 
         fragment.shader = key.bind_group_data.shader_frag;
-        println!("{:?}", fragment.shader);
+        match fragment.shader {
+            Handle::Uuid(uuid, ..) => {
+                info!("shader {:x}", uuid.as_u128() as u64);
+                if uuid.as_u128() as u64 == 0xdee3e40ffaa02909 {}
+            }
+            _ => {}
+        }
 
         let vertex_layout = layout.0.get_layout(&[
             ATTRIBUTE_WORLD_POSITION.at_shader_location(0),
@@ -206,15 +228,4 @@ impl Material for ParticleMaterialQuad {
 
         Ok(())
     }
-}
-
-pub fn get_shader_handle_by_hash(path: &str, hash: u64) -> Handle<Shader> {
-    Handle::Uuid(
-        Uuid::from_u128(hash_shader(&format!("{path}#{hash}")) as u128),
-        PhantomData,
-    )
-}
-
-pub fn get_shader_handle(path: &str, defs: &Vec<String>) -> Handle<Shader> {
-    get_shader_handle_by_hash(path, hash_shader_spec(defs))
 }
