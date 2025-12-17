@@ -5,7 +5,7 @@ use bevy::prelude::*;
 use bevy::render::render_resource::Face;
 use lol_config::{ConfigNavigationGrid, CELL_COST_IMPASSABLE};
 
-use crate::{find_grid_path_with_result, system_debug, Bounding, Character};
+use crate::{find_grid_path_with_result, Bounding, Character};
 
 #[derive(Default)]
 pub struct PluginNavigaton;
@@ -150,11 +150,7 @@ pub fn get_nav_path_with_debug(
     let adjusted_end_grid_pos = (adjusted_end_pos - grid.min_position) / grid.cell_size;
 
     if has_line_of_sight(&grid, adjusted_start_grid_pos, adjusted_end_grid_pos) {
-        system_debug!(
-            "command_movement_move_to",
-            "Direct path found in {:.6}ms",
-            start.elapsed().as_millis()
-        );
+        debug!("Direct path found in {:.6}ms", start.elapsed().as_millis());
         {
             stats.get_nav_path_count += 1;
             stats.get_nav_path_time += start.elapsed();
@@ -174,11 +170,7 @@ pub fn get_nav_path_with_debug(
     // 如果不可直达，则使用A*算法规划路径（包含 debug 信息）
     let result = find_path_with_result(&grid, &adjusted_start_pos, &adjusted_end_pos);
 
-    system_debug!(
-        "command_movement_move_to",
-        "A* path found in {:.6}ms",
-        start.elapsed().as_millis()
-    );
+    debug!("A* path found in {:.6}ms", start.elapsed().as_millis());
 
     {
         stats.get_nav_path_count += 1;

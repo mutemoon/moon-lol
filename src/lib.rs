@@ -1,7 +1,6 @@
 mod abilities;
 mod core;
 mod entities;
-mod logging;
 mod server;
 
 pub use core::*;
@@ -9,7 +8,6 @@ pub use core::*;
 pub use abilities::*;
 use bevy::app::plugin_group;
 pub use entities::*;
-pub use logging::*;
 pub use server::*;
 
 plugin_group! {

@@ -39,7 +39,7 @@ impl Health {
 pub fn spawn_event(mut commands: Commands, q_alive: Query<Entity, Added<Health>>) {
     let spawn_count = q_alive.iter().count();
     if spawn_count > 0 {
-        debug!("Spawning {} new entities with health", spawn_count);
+        debug!("生成 {} 个新实体", spawn_count);
     }
 
     for entity in q_alive.iter() {
