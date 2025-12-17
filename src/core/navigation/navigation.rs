@@ -108,7 +108,7 @@ pub fn get_nav_path_with_debug(
         let start_time = Instant::now();
         if let Some(new_start_grid_pos) = find_nearest_walkable_cell(grid, start_grid_pos) {
             debug!(
-                "get_nav_path: Start position ({}, {}) is not walkable, using nearest walkable cell ({}, {})",
+                "寻路: 起点 ({}, {}) 不可行走，使用最近的可行走格子 ({}, {})",
                 start_grid_pos.0, start_grid_pos.1, new_start_grid_pos.0, new_start_grid_pos.1
             );
             {
@@ -117,7 +117,7 @@ pub fn get_nav_path_with_debug(
             }
             grid.get_cell_center_position_by_xy(new_start_grid_pos).xz()
         } else {
-            warn!("get_nav_path: No walkable cell found near start position");
+            warn!("寻路: 起点附近未找到可行走格子");
             return None;
         }
     } else {
@@ -130,7 +130,7 @@ pub fn get_nav_path_with_debug(
         let start_time = Instant::now();
         if let Some(new_end_grid_pos) = find_nearest_walkable_cell(grid, end_grid_pos) {
             debug!(
-                "get_nav_path: End position ({}, {}) is not walkable, using nearest walkable cell ({}, {})",
+                "寻路: 终点 ({}, {}) 不可行走，使用最近的可行走格子 ({}, {})",
                 end_grid_pos.0, end_grid_pos.1, new_end_grid_pos.0, new_end_grid_pos.1
             );
             {
@@ -139,7 +139,7 @@ pub fn get_nav_path_with_debug(
             }
             grid.get_cell_center_position_by_xy(new_end_grid_pos).xz()
         } else {
-            warn!("get_nav_path: No walkable cell found near end position");
+            warn!("寻路: 终点附近未找到可行走格子");
             return None;
         }
     } else {
@@ -151,7 +151,7 @@ pub fn get_nav_path_with_debug(
     let adjusted_end_grid_pos = (adjusted_end_pos - grid.min_position) / grid.cell_size;
 
     if has_line_of_sight(&grid, adjusted_start_grid_pos, adjusted_end_grid_pos) {
-        debug!("Direct path found in {:.6}ms", start.elapsed().as_millis());
+        debug!("直接路径找到，耗时 {:.6}ms", start.elapsed().as_millis());
         {
             stats.get_nav_path_count += 1;
             stats.get_nav_path_time += start.elapsed();
@@ -171,7 +171,7 @@ pub fn get_nav_path_with_debug(
     // 如果不可直达，则使用A*算法规划路径（包含 debug 信息）
     let result = find_path_with_result(&grid, &adjusted_start_pos, &adjusted_end_pos);
 
-    debug!("A* path found in {:.6}ms", start.elapsed().as_millis());
+    debug!("A* 路径找到，耗时 {:.6}ms", start.elapsed().as_millis());
 
     {
         stats.get_nav_path_count += 1;

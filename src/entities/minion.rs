@@ -77,15 +77,17 @@ pub fn fixed_update(
             return;
         };
 
+        let target_pos = {
+            let p = *path.get(closest_index + 1).unwrap_or(&path[closest_index]);
+            Vec3::new(p.x, transform.translation.y, p.y)
+        };
+
         debug!("{} 寻路到 {}", entity, path[closest_index]);
         commands.trigger(CommandMovement {
             entity,
             priority: 0,
             action: MovementAction::Start {
-                way: MovementWay::Pathfind({
-                    let p = *path.get(closest_index + 1).unwrap_or(&path[closest_index]);
-                    Vec3::new(p.x, transform.translation.y, p.y)
-                }),
+                way: MovementWay::Pathfind(target_pos),
                 speed: None,
                 source: "Minion".to_string(),
             },
@@ -100,17 +102,16 @@ fn on_event_aggro_target_found(
 ) {
     let entity = trigger.event_target();
 
-    if let Ok(mut minion_state) = q_minion_state.get_mut(entity) {
-        match *minion_state {
-            MinionState::MovingOnPath => {
-                *minion_state = MinionState::AttackingTarget;
-                commands.trigger(CommandAttackAutoStart {
-                    entity,
-                    target: trigger.target,
-                });
-            }
-            _ => (),
-        }
+    let Ok(mut minion_state) = q_minion_state.get_mut(entity) else {
+        return;
+    };
+
+    if *minion_state == MinionState::MovingOnPath {
+        *minion_state = MinionState::AttackingTarget;
+        commands.trigger(CommandAttackAutoStart {
+            entity,
+            target: trigger.target,
+        });
     }
 }
 
@@ -128,12 +129,9 @@ fn on_event_dead(
             continue;
         }
 
-        match *minion_state {
-            MinionState::AttackingTarget => {
-                *minion_state = MinionState::MovingOnPath;
-                commands.trigger(CommandAttackAutoStop { entity });
-            }
-            _ => (),
+        if *minion_state == MinionState::AttackingTarget {
+            *minion_state = MinionState::MovingOnPath;
+            commands.trigger(CommandAttackAutoStop { entity });
         }
     }
 }
