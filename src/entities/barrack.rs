@@ -24,7 +24,8 @@ impl Plugin for PluginBarrack {
         app.add_systems(
             Update,
             (
-                update_spawn_barrack.run_if(in_state(MapState::Loaded).and(run_once)),
+                update_spawn_barrack
+                    .run_if(in_state(MapState::Loaded).and(in_state(BarrackState::Loading))),
                 is_character_loaded.run_if(in_state(BarrackState::Loading)),
             ),
         );
@@ -85,6 +86,20 @@ fn update_spawn_barrack(
         else {
             continue;
         };
+
+        for (_, value) in map_placeable_container.items.as_ref().unwrap() {
+            match value {
+                EnumMap::Unk0xba138ae3(unk0xba138ae3) => {
+                    if res_assets_barracks_config
+                        .load_hash(unk0xba138ae3.definition.barracks_config)
+                        .is_none()
+                    {
+                        return;
+                    }
+                }
+                _ => {}
+            }
+        }
 
         for (_, value) in map_placeable_container.items.as_ref().unwrap() {
             match value {
