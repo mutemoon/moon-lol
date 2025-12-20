@@ -78,7 +78,9 @@ fn update_spawn_barrack(
     res_assets_barracks_config: Res<Assets<BarracksConfig>>,
     res_assets_unk_ad65d8c4: Res<Assets<Unk0xad65d8c4>>,
 ) {
-    let map_container = res_assets_map_container.load_hash(&map_name.0).unwrap();
+    let map_container = res_assets_map_container
+        .load_hash(&map_name.get_materials_path())
+        .unwrap();
 
     for (_, &link) in &map_container.chunks {
         let Some(map_placeable_container) = res_assets_map_placeable_container.load_hash(link)

@@ -1,6 +1,5 @@
 use std::f32::consts::PI;
 
-use bevy::asset::meta::Settings;
 use bevy::prelude::*;
 use league_utils::hash_wad;
 use lol_loader::ShaderTocSettings;

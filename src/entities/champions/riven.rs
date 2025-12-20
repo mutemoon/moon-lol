@@ -58,10 +58,10 @@ fn create_riven_tri_cleave() -> SkillEffect {
                 ActionAnimationPlay { hash: hash_bin("Spell1A") }
             ),
             Behave::trigger(
-                ActionParticleSpawn { hash: hash_bin("Riven_Q_01_Detonate") },
+                ActionDash::Pointer { speed: 1000., max: 300. },
             ),
             Behave::trigger(
-                ActionDash::Pointer { speed: 1000., max: 300. },
+                ActionParticleSpawn { hash: hash_bin("Riven_Q_01_Detonate") },
             ),
             Behave::IfThen => {
                 Behave::trigger(ActionDamage),

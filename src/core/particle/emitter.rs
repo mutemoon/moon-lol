@@ -391,7 +391,7 @@ pub fn update_emitter(
         let texture = vfx_emitter_definition_data
             .texture
             .as_ref()
-            .map(|v| res_resource_cache.get_image(&res_asset_server, v));
+            .map(|v| res_resource_cache.get_image_srgb(&res_asset_server, v));
 
         let particle_color_texture = vfx_emitter_definition_data
             .particle_color_texture

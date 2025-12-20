@@ -62,11 +62,17 @@ pub struct MapGeometry {
 }
 
 #[derive(Resource)]
-pub struct MapName(pub String);
+pub struct MapName(String);
 
 impl Default for MapName {
     fn default() -> Self {
-        Self("Maps/MapGeometry/Map11/Base_SRX".to_string())
+        Self("sr_seasonal_map".to_string())
+    }
+}
+
+impl MapName {
+    pub fn get_materials_path(&self) -> String {
+        format!("Maps/MapGeometry/Map11/{}", &self.0)
     }
 }
 
@@ -79,15 +85,15 @@ fn startup_load_map_geometry(
     res_map_name: Res<MapName>,
 ) {
     let paths = vec![
-        "data/maps/mapgeometry/map11/base_srx.materials.bin".to_string(),
+        format!("data/{}.materials.bin", &res_map_name.get_materials_path()),
         "data/maps/shipping/map11/map11.bin".to_string(),
     ];
 
     commands.trigger(CommandLoadPropBin { paths });
 
-    commands.insert_resource(Loading::new(
-        res_asset_server.load_league::<ConfigMapGeo>(&format!("data/{}.mapgeo", &res_map_name.0)),
-    ));
+    commands.insert_resource(Loading::new(res_asset_server.load_league::<ConfigMapGeo>(
+        &format!("data/{}.mapgeo", &res_map_name.get_materials_path()),
+    )));
 }
 
 fn update_spawn_map_character(
@@ -96,7 +102,9 @@ fn update_spawn_map_character(
     res_assets_map_container: Res<Assets<MapContainer>>,
     res_assets_map_placeable_container: Res<Assets<MapPlaceableContainer>>,
 ) {
-    let Some(map_container) = res_assets_map_container.get(HashKey::from(&map_name.0)) else {
+    let Some(map_container) =
+        res_assets_map_container.get(HashKey::from(&map_name.get_materials_path()))
+    else {
         return;
     };
 
@@ -106,7 +114,11 @@ fn update_spawn_map_character(
             continue;
         };
 
-        for (_, value) in map_placeable_container.items.as_ref().unwrap() {
+        let Some(items) = map_placeable_container.items.as_ref() else {
+            continue;
+        };
+
+        for (_, value) in items {
             match value {
                 EnumMap::Unk0xad65d8c4(unk0xad65d8c4) => {
                     let transform = Transform::from_matrix(unk0xad65d8c4.transform.unwrap());

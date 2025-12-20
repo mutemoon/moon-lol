@@ -98,20 +98,25 @@ pub fn fixed_update(
 fn on_event_aggro_target_found(
     trigger: On<EventAggroTargetFound>,
     mut commands: Commands,
-    mut q_minion_state: Query<&mut MinionState>,
+    mut q_minion: Query<(&mut MinionState, Option<&AttackAuto>)>,
 ) {
     let entity = trigger.event_target();
 
-    let Ok(mut minion_state) = q_minion_state.get_mut(entity) else {
+    let Ok((mut minion_state, attack_auto)) = q_minion.get_mut(entity) else {
         return;
     };
 
+    let target = trigger.target;
+
     if *minion_state == MinionState::MovingOnPath {
         *minion_state = MinionState::AttackingTarget;
-        commands.trigger(CommandAttackAutoStart {
-            entity,
-            target: trigger.target,
-        });
+        commands.trigger(CommandAttackAutoStart { entity, target });
+    } else if *minion_state == MinionState::AttackingTarget {
+        if let Some(attack_auto) = attack_auto {
+            if attack_auto.target != target {
+                commands.trigger(CommandAttackAutoStart { entity, target });
+            }
+        }
     }
 }
 

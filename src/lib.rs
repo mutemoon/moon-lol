@@ -51,6 +51,6 @@ plugin_group! {
         :PluginSkill,
         :PluginSkin,
         :PluginState,
-        :PluginUI,
+        // :PluginUI,
     }
 }

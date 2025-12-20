@@ -283,7 +283,7 @@ impl AssetLoader for LeagueLoaderImage {
             sample_count: 1,
             dimension: TextureDimension::D2,
             format: match texture.format {
-                LeagueTextureFormat::Bc1 => TextureFormat::Bc1RgbaUnormSrgb,
+                LeagueTextureFormat::Bc1 => TextureFormat::Bc1RgbaUnorm,
                 LeagueTextureFormat::Bc3 => TextureFormat::Bc3RgbaUnorm,
                 _ => panic!("not bc1 or bc3 is {:?}", texture.format),
             },

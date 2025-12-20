@@ -38,6 +38,35 @@ impl Default for UniformsVertexQuad {
     }
 }
 
+#[derive(Clone, ShaderType, Debug)]
+pub struct UniformsPixel {
+    pub c_depth_conversion_params: Vec4,
+    pub c_soft_particle_params: Vec4,
+    pub c_soft_particle_control: Vec4,
+    pub c_palette_select_main: Vec4,
+    pub c_palette_src_mixer_main: Vec4,
+    pub c_alpha_erosion_params: Vec4,
+    pub c_alpha_erosion_texture_mixer: Vec4,
+    pub alpha_test_reference_value: f32,
+    pub apply_team_color_correction: Vec4,
+}
+
+impl Default for UniformsPixel {
+    fn default() -> Self {
+        Self {
+            c_depth_conversion_params: Vec4::new(10.0, -9.999, 0.0, 0.0),
+            c_soft_particle_params: Vec4::new(0.0, 0.0, 1.0 / 100.0, 1.0 / 100.0),
+            c_soft_particle_control: Vec4::new(2.0, 1.0, 0.5, 0.5),
+            c_palette_select_main: Vec4::ZERO,
+            c_palette_src_mixer_main: Vec4::ZERO,
+            c_alpha_erosion_params: Vec4::ZERO,
+            c_alpha_erosion_texture_mixer: Vec4::ZERO,
+            alpha_test_reference_value: 0.0,
+            apply_team_color_correction: Vec4::ZERO,
+        }
+    }
+}
+
 #[derive(Default)]
 pub struct ParticleMeshQuad {
     pub frame: f32,
@@ -91,6 +120,9 @@ pub struct ParticleMaterialQuad {
     #[uniform(0)]
     pub uniforms_vertex: UniformsVertexQuad,
 
+    #[uniform(1)]
+    pub uniforms_pixel: UniformsPixel,
+
     #[texture(2)]
     #[sampler(3)]
     pub texture: Option<Handle<Image>>,
@@ -136,13 +168,28 @@ pub struct ConditionalMaterialKey {
 impl From<&ParticleMaterialQuad> for ConditionalMaterialKey {
     fn from(material: &ParticleMaterialQuad) -> Self {
         let mut shader_frag_defs = vec![];
+
+        if material.blend_mode == 4 {
+            shader_frag_defs.push("SOFT_PARTICLES".to_string());
+        }
+
         if material.texturemult.is_some() {
             shader_frag_defs.push("MULT_PASS".to_string());
         }
 
+        let shader_frag = get_shader_handle(ParticleMaterialQuad::FRAG_PATH, &shader_frag_defs);
+
+        debug!("shader_frag_defs: {:?}", shader_frag_defs);
+        match shader_frag {
+            Handle::Uuid(uuid, ..) => {
+                debug!("shader {:x}", uuid.as_u128() as u64);
+            }
+            _ => {}
+        }
+
         Self {
             blend_mode: material.blend_mode,
-            shader_frag: get_shader_handle(ParticleMaterialQuad::FRAG_PATH, &shader_frag_defs),
+            shader_frag,
         }
     }
 }
@@ -188,33 +235,15 @@ impl Material for ParticleMaterialQuad {
         if key.bind_group_data.blend_mode == 4 {
             target.blend = Some(BlendState {
                 color: BlendComponent {
-                    // 源颜色乘以它自己的 alpha 值
                     src_factor: BlendFactor::SrcAlpha,
-                    // 目标颜色乘以 1
                     dst_factor: BlendFactor::One,
-                    // 操作：源 + 目标
                     operation: BlendOperation::Add,
                 },
-                alpha: BlendComponent {
-                    // 通常在加法混合中，我们不想修改目标 Alpha
-                    // 源 Alpha * 0
-                    src_factor: BlendFactor::Zero,
-                    // 目标 Alpha * 1
-                    dst_factor: BlendFactor::One,
-                    // 操作：(S.alpha * 0) + (D.alpha * 1) = D.alpha
-                    operation: BlendOperation::Add,
-                },
+                alpha: BlendComponent::OVER,
             });
         }
 
         fragment.shader = key.bind_group_data.shader_frag;
-        match fragment.shader {
-            Handle::Uuid(uuid, ..) => {
-                info!("shader {:x}", uuid.as_u128() as u64);
-                if uuid.as_u128() as u64 == 0xdee3e40ffaa02909 {}
-            }
-            _ => {}
-        }
 
         let vertex_layout = layout.0.get_layout(&[
             ATTRIBUTE_WORLD_POSITION.at_shader_location(0),

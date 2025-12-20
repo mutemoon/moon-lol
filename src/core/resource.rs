@@ -20,7 +20,6 @@ use lol_core::LeagueSkinMesh;
 use lol_loader::{
     LeagueLoaderAnimationClip, LeagueLoaderImage, LeagueLoaderMapgeo, LeagueLoaderMesh,
     LeagueLoaderMeshStatic, LeagueLoaderProperty, LeagueLoaderShaderToc, LeagueLoaderSkeleton,
-    ShaderTocSettings,
 };
 use serde::de::DeserializeSeed;
 pub use shader::*;
@@ -214,6 +213,17 @@ impl ResourceCache {
             Some(handle) => handle.clone(),
             None => {
                 let handle = asset_server.load_league(path);
+                self.image.insert(path.to_string(), handle.clone());
+                handle
+            }
+        }
+    }
+
+    pub fn get_image_srgb(&mut self, asset_server: &AssetServer, path: &str) -> Handle<Image> {
+        match self.image.get(path) {
+            Some(handle) => handle.clone(),
+            None => {
+                let handle = asset_server.load_league_labeled(path, "srgb");
                 self.image.insert(path.to_string(), handle.clone());
                 handle
             }
