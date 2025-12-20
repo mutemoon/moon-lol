@@ -89,7 +89,11 @@ fn update_spawn_barrack(
             continue;
         };
 
-        for (_, value) in map_placeable_container.items.as_ref().unwrap() {
+        let Some(items) = map_placeable_container.items.as_ref() else {
+            continue;
+        };
+
+        for (_, value) in items {
             match value {
                 EnumMap::Unk0xba138ae3(unk0xba138ae3) => {
                     if res_assets_barracks_config
@@ -103,7 +107,7 @@ fn update_spawn_barrack(
             }
         }
 
-        for (_, value) in map_placeable_container.items.as_ref().unwrap() {
+        for (_, value) in items {
             match value {
                 EnumMap::Unk0x3c995caf(unk0x3c995caf) => {
                     let lane = match unk0x3c995caf.name.as_str() {
