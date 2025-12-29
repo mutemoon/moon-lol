@@ -61,7 +61,7 @@ pub struct AttackState {
     pub target: Option<Entity>,
 }
 
-#[derive(Component)]
+#[derive(Component, Clone)]
 pub struct AttackBuff {
     pub bonus_attack_speed: f32,
 }

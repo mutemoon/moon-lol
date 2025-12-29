@@ -10,7 +10,6 @@ use bevy::ecs::relationship::RelationshipHookMode;
 use bevy::prelude::*;
 use bevy::scene::ron::{self};
 use league_file::LeagueSkeleton;
-use league_to_lol::{get_struct_from_file, CONFIG_PATH_MAP_NAV_GRID};
 use lol_config::{
     init_league_asset, CharacterConfigsDeserializer, ConfigGame, ConfigMapGeo,
     ConfigNavigationGrid, LeagueProperties, ResourceShaderChunk, ResourceShaderPackage,
@@ -19,7 +18,8 @@ use lol_config::{
 use lol_core::LeagueSkinMesh;
 use lol_loader::{
     LeagueLoaderAnimationClip, LeagueLoaderImage, LeagueLoaderMapgeo, LeagueLoaderMesh,
-    LeagueLoaderMeshStatic, LeagueLoaderProperty, LeagueLoaderShaderToc, LeagueLoaderSkeleton,
+    LeagueLoaderMeshStatic, LeagueLoaderNavGrid, LeagueLoaderProperty, LeagueLoaderShaderToc,
+    LeagueLoaderSkeleton,
 };
 use serde::de::DeserializeSeed;
 pub use shader::*;
@@ -42,6 +42,7 @@ impl Plugin for PluginResource {
         app.init_asset::<LeagueSkinMesh>();
         app.init_asset::<ResourceShaderPackage>();
         app.init_asset::<ResourceShaderChunk>();
+        app.init_asset::<ConfigNavigationGrid>();
 
         init_league_asset(app);
 
@@ -53,6 +54,7 @@ impl Plugin for PluginResource {
         app.init_asset_loader::<LeagueLoaderMeshStatic>();
         app.init_asset_loader::<LeagueLoaderAnimationClip>();
         app.init_asset_loader::<LeagueLoaderShaderToc>();
+        app.init_asset_loader::<LeagueLoaderNavGrid>();
 
         app.init_resource::<ResourceShaderHandles>();
         app.init_resource::<LeagueProperties>();
@@ -75,11 +77,6 @@ impl Plugin for PluginResource {
         let mut file = File::open(format!("assets/{}", &self.game_config_path)).unwrap();
         let mut data = Vec::new();
         file.read_to_end(&mut data).unwrap();
-
-        let nav_grid: ConfigNavigationGrid =
-            get_struct_from_file(CONFIG_PATH_MAP_NAV_GRID).unwrap();
-
-        app.insert_resource(nav_grid);
 
         let world = app.world_mut();
 

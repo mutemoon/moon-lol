@@ -10,6 +10,7 @@
     "example:navigation_grid": "cargo run --example navigation_grid",
     "example:navigation_grid:watch": "cargo-watch -x \"run --example navigation_grid\"",
     "example:particle:watch": "cargo-watch -x \"run --example particle\"",
+    "example:riven:watch": "cargo-watch -x \"run --example riven\"",
     "example:stream:watch": "cargo-watch -x \"run --example stream\"",
     "example:texture:watch": "cargo-watch -x \"run --example texture\"",
     "extract": "cargo run --example extract",

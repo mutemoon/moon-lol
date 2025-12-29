@@ -13,7 +13,7 @@ use crate::core::{
     SkillOf, Skills,
 };
 use crate::entities::champion::Champion;
-use crate::{PassiveSkillOf, SkillEffect};
+use crate::{DashMoveType, PassiveSkillOf, SkillEffect};
 
 #[derive(Default)]
 pub struct PluginFiora;
@@ -42,7 +42,11 @@ fn startup_load_assets(mut res_assets_skill_effect: ResMut<Assets<SkillEffect>>)
                     ActionParticleSpawn { hash: hash_bin("Fiora_Q_Dash_Trail_ground") },
                 ),
                 Behave::trigger(
-                    ActionDash::Pointer { speed: 1000., max: 300. },
+                    ActionDash {
+                        move_type: DashMoveType::Pointer { max: 300. },
+                        damage: None,
+                        speed: 1000.0,
+                    },
                 ),
                 Behave::IfThen => {
                     Behave::trigger(ActionDamage),

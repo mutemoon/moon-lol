@@ -6,7 +6,9 @@ use bevy::prelude::*;
 use bevy::render::render_resource::Face;
 use lol_config::{ConfigNavigationGrid, CELL_COST_IMPASSABLE};
 
-use crate::{find_grid_path_with_result, Bounding, Character};
+use crate::{
+    find_grid_path_with_result, update_load_grid, Bounding, Character, MapState, ResourceGrid,
+};
 
 #[derive(Default)]
 pub struct PluginNavigaton;
@@ -30,10 +32,23 @@ impl Plugin for PluginNavigaton {
                 }
             },
         );
-        app.add_systems(PreUpdate, pre_update_global_occupied_cells);
-        app.add_systems(Update, update_y);
-        app.add_systems(Update, update_visualization_astar);
-        app.add_systems(Update, update_visualization_move_path);
+        app.add_systems(
+            PreUpdate,
+            pre_update_global_occupied_cells.run_if(resource_exists::<ResourceGrid>),
+        );
+        app.add_systems(
+            Update,
+            (
+                update_y,
+                update_visualization_astar,
+                update_visualization_move_path,
+            )
+                .run_if(resource_exists::<ResourceGrid>),
+        );
+        app.add_systems(
+            Update,
+            update_load_grid.run_if(in_state(MapState::Loaded).and(run_once)),
+        );
     }
 }
 
@@ -77,9 +92,13 @@ struct AStarPathCell;
 struct ObstacleCell;
 
 fn update_y(
-    grid: Res<ConfigNavigationGrid>,
+    res_grid: Res<ResourceGrid>,
+    assets_grid: Res<Assets<ConfigNavigationGrid>>,
     mut q_movement: Query<&mut Transform, With<Character>>,
 ) {
+    let Some(grid) = assets_grid.get(&res_grid.0) else {
+        return;
+    };
     for mut transform in q_movement.iter_mut() {
         transform.translation = grid.get_world_position_by_position(&transform.translation.xz());
     }
@@ -455,14 +474,18 @@ pub fn find_nearest_walkable_cell(
 }
 
 fn pre_update_global_occupied_cells(
-    mut grid: ResMut<ConfigNavigationGrid>,
+    res_grid: Res<ResourceGrid>,
+    mut assets_grid: ResMut<Assets<ConfigNavigationGrid>>,
     entities_with_bounding: Query<(Entity, &GlobalTransform, &Bounding)>,
     mut stats: ResMut<NavigationStats>,
 ) {
+    let Some(grid) = assets_grid.get_mut(&res_grid.0) else {
+        return;
+    };
     let start = Instant::now();
 
     // 计算所有实体的 occupied_cells（不排除任何实体）
-    let occupied_cells = calculate_occupied_grid_cells(&grid, &entities_with_bounding, &[]);
+    let occupied_cells = calculate_occupied_grid_cells(grid, &entities_with_bounding, &[]);
     grid.occupied_cells = occupied_cells;
 
     stats.calculate_occupied_grid_cells_time += start.elapsed();
@@ -545,7 +568,8 @@ fn calculate_cell_cost(distance: f32, radius_in_cells: i32) -> f32 {
 
 fn update_visualization_astar(
     mut commands: Commands,
-    grid: Res<ConfigNavigationGrid>,
+    res_grid: Res<ResourceGrid>,
+    assets_grid: Res<Assets<ConfigNavigationGrid>>,
     nav_debug: Res<NavigationDebug>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
@@ -553,11 +577,15 @@ fn update_visualization_astar(
     path_query: Query<Entity, With<AStarPathCell>>,
     obstacle_query: Query<Entity, With<ObstacleCell>>,
 ) {
+    let Some(grid) = assets_grid.get(&res_grid.0) else {
+        return;
+    };
+
     if !nav_debug.enabled {
         return;
     }
 
-    if !nav_debug.is_changed() && !grid.is_changed() {
+    if !nav_debug.is_changed() && !assets_grid.is_changed() {
         return;
     }
 
@@ -660,10 +688,15 @@ fn update_visualization_astar(
 
 /// 绘制移动路径（粉色为未优化路径，蓝色为优化后路径）
 fn update_visualization_move_path(
-    grid: Res<ConfigNavigationGrid>,
+    res_grid: Res<ResourceGrid>,
+    assets_grid: Res<Assets<ConfigNavigationGrid>>,
     mut gizmos: Gizmos,
     nav_debug: Res<NavigationDebug>,
 ) {
+    let Some(grid) = assets_grid.get(&res_grid.0) else {
+        return;
+    };
+
     if !nav_debug.enabled {
         return;
     }

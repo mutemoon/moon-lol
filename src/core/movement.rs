@@ -9,7 +9,7 @@ use serde::{Deserialize, Serialize};
 use crate::{
     get_nav_path_with_debug, is_path_blocked, world_pos_to_grid_xy, ArbitrationPipelinePlugin,
     Bounding, CommandRotate, FinalDecision, LastDecision, NavigationDebug, NavigationStats,
-    PipelineStages, RequestBuffer,
+    PipelineStages, RequestBuffer, ResourceGrid,
 };
 
 #[derive(Default)]
@@ -25,7 +25,10 @@ impl Plugin for PluginMovement {
             FixedPostUpdate,
             (
                 reduce_movement_by_priority.in_set(MovementPipeline::Reduce),
-                (apply_final_movement_decision, update_path_movement)
+                (
+                    apply_final_movement_decision.run_if(resource_exists::<ResourceGrid>),
+                    update_path_movement,
+                )
                     .in_set(MovementPipeline::Apply),
             ),
         );
@@ -335,11 +338,15 @@ fn apply_final_movement_decision(
         &mut MovementState,
         Option<&Bounding>,
     )>,
-    mut grid: ResMut<ConfigNavigationGrid>,
+    res_grid: Res<ResourceGrid>,
+    mut assets_grid: ResMut<Assets<ConfigNavigationGrid>>,
     mut stats: ResMut<NavigationStats>,
     mut nav_debug: ResMut<NavigationDebug>,
     time: Res<Time>,
 ) {
+    let Some(grid) = assets_grid.get_mut(&res_grid.0) else {
+        return;
+    };
     for (entity, transform, decision, mut movement_state, bounding) in query.iter_mut() {
         match &decision.0.action {
             MovementAction::Start { way, speed, source } => {
@@ -349,7 +356,7 @@ fn apply_final_movement_decision(
 
                         if let Some(bounding) = bounding {
                             calculate_and_set_exclude_cells(
-                                &mut grid,
+                                grid,
                                 transform.translation.xz(),
                                 bounding.radius,
                             );
@@ -405,7 +412,7 @@ fn apply_final_movement_decision(
                         if let Some(path) = get_nav_path_with_debug(
                             &transform.translation.xz(),
                             &target.xz(),
-                            &grid,
+                            grid,
                             &mut stats,
                             debug_ref,
                         ) {

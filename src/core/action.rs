@@ -37,6 +37,8 @@ impl Plugin for PluginAction {
         app.add_observer(on_attack_damage);
 
         app.add_observer(on_command_action);
+
+        app.add_systems(FixedUpdate, update_dash_damage);
     }
 }
 

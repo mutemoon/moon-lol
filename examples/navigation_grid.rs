@@ -5,6 +5,7 @@ use league_core::VisionPathingFlags;
 use lol_config::ConfigNavigationGrid;
 use moon_lol::{
     on_click_map, CameraState, Map, NavigationDebug, PluginBarrack, PluginCore, PluginResource,
+    ResourceGrid,
 };
 
 fn main() {
@@ -28,7 +29,7 @@ fn main() {
                 }),
         ))
         .init_resource::<FlagFilters>()
-        .add_systems(Startup, setup)
+        .add_systems(Update, setup)
         .add_systems(EguiPrimaryContextPass, ui_system)
         .add_systems(Update, update_grid_visibility)
         .add_systems(Update, on_key_space)
@@ -72,12 +73,23 @@ struct GridCell {
 
 fn setup(
     mut commands: Commands,
-    grid: Res<ConfigNavigationGrid>,
+    res_grid: Option<Res<ResourceGrid>>,
+    assets_grid: Res<Assets<ConfigNavigationGrid>>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
     mut flag_filters: ResMut<FlagFilters>,
     mut nav_debug: ResMut<NavigationDebug>,
+    q_cells: Query<Entity, With<GridCell>>,
 ) {
+    if !q_cells.is_empty() {
+        return;
+    }
+    let Some(res_grid) = res_grid else {
+        return;
+    };
+    let Some(grid) = assets_grid.get(&res_grid.0) else {
+        return;
+    };
     // 启用 A* 可视化
     nav_debug.enabled = true;
 
@@ -252,10 +264,17 @@ fn update_grid_visibility(
 
 fn on_key_m(
     keyboard_input: Res<ButtonInput<KeyCode>>,
-    grid: Res<ConfigNavigationGrid>,
+    res_grid: Option<Res<ResourceGrid>>,
+    assets_grid: Res<Assets<ConfigNavigationGrid>>,
     mut camera: Query<&mut CameraState, With<Camera3d>>,
 ) {
     if keyboard_input.just_pressed(KeyCode::KeyM) {
+        let Some(res_grid) = res_grid else {
+            return;
+        };
+        let Some(grid) = assets_grid.get(&res_grid.0) else {
+            return;
+        };
         let center_pos = grid.get_map_center_position();
 
         if let Ok(mut camera_state) = camera.single_mut() {

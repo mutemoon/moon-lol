@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use bevy::prelude::*;
 use bevy_behave::{behave, Behave};
 use league_core::CharacterRecord;
@@ -7,12 +5,11 @@ use league_utils::hash_bin;
 use lol_config::LoadHashKeyTrait;
 
 use crate::core::{
-    ActionAnimationPlay, ActionAttackReset, ActionBuffSpawn, ActionCommand, ActionDamage,
-    ActionDash, ActionParticleDespawn, ActionParticleSpawn, AttackBuff, BuffOf, CoolDown, Skill,
-    SkillOf, Skills,
+    ActionAnimationPlay, ActionAttackReset, ActionBuffSpawn, ActionDamage, ActionDash,
+    ActionParticleDespawn, ActionParticleSpawn, AttackBuff, CoolDown, Skill, SkillOf, Skills,
 };
 use crate::entities::champion::Champion;
-use crate::{PassiveSkillOf, SkillEffect};
+use crate::{DamageType, DashDamage, DashMoveType, PassiveSkillOf, SkillEffect};
 
 #[derive(Default)]
 pub struct PluginRiven;
@@ -58,16 +55,19 @@ fn create_riven_tri_cleave() -> SkillEffect {
                 ActionAnimationPlay { hash: hash_bin("Spell1A") }
             ),
             Behave::trigger(
-                ActionDash::Pointer { speed: 1000., max: 300. },
+                ActionDash {
+                    move_type: DashMoveType::Fixed(250.0),
+                    damage: Some(DashDamage {
+                        amount: 100.0,
+                        radius_end: 250.0,
+                        damage_type: DamageType::Physical,
+                    }),
+                    speed: 1000.0,
+                },
             ),
             Behave::trigger(
                 ActionParticleSpawn { hash: hash_bin("Riven_Q_01_Detonate") },
             ),
-            Behave::IfThen => {
-                Behave::trigger(ActionDamage),
-                Behave::Sequence => {
-                },
-            },
         }
     })
 }
@@ -100,15 +100,9 @@ fn create_riven_martyr() -> SkillEffect {
 fn create_riven_feint() -> SkillEffect {
     SkillEffect(behave! {
         Behave::Sequence => {
-            Behave::trigger(ActionBuffSpawn{
-                bundle: Arc::new(|commands: &mut EntityCommands| {
-                    commands.with_related::<BuffOf>((
-                        AttackBuff {
-                            bonus_attack_speed: 0.5,
-                        },
-                    ));
-                }),
-            }),
+            Behave::trigger(
+                ActionBuffSpawn::new(AttackBuff { bonus_attack_speed: 0.5 })
+            ),
             Behave::trigger(ActionAttackReset),
         }
     })
@@ -123,12 +117,6 @@ fn create_riven_feng_shui_engine() -> SkillEffect {
             Behave::trigger(
                 ActionParticleSpawn { hash: hash_bin("Riven_R_ALL_Warning") },
             ),
-            Behave::trigger(ActionCommand {
-                bundle: Arc::new(|commands: &mut EntityCommands| {
-                    commands.with_related::<BuffOf>((
-                    ));
-                }),
-            }),
         }
     })
 }
