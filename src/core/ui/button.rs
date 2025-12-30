@@ -32,7 +32,7 @@ pub struct CommandDespawnButton {
 pub fn startup_spawn_buttons(
     mut commands: Commands,
     res_assets_ui_element_group_button_data: Res<Assets<UiElementGroupButtonData>>,
-    ) {
+) {
     for (key, ui_element_group_button_data) in
         res_assets_ui_element_group_button_data.iter().filter(|v| {
             v.1.name
@@ -56,7 +56,7 @@ pub fn on_command_spawn_button(
     mut commands: Commands,
     res_assets_ui_element_group_button_data: Res<Assets<UiElementGroupButtonData>>,
     res_ui_region: Res<Assets<UiElementRegionData>>,
-    ) {
+) {
     let key = trigger.key;
     let ui_element_group_button_data = res_assets_ui_element_group_button_data
         .load_hash(key)
@@ -87,7 +87,7 @@ pub fn on_command_despawn_button(
     mut commands: Commands,
     q_ui_button: Query<&UIButton>,
     res_assets_ui_element_group_button_data: Res<Assets<UiElementGroupButtonData>>,
-        res_ui_element_entity: Res<UIElementEntity>,
+    res_ui_element_entity: Res<UIElementEntity>,
 ) {
     commands.entity(trigger.entity).despawn();
 
@@ -111,7 +111,7 @@ pub fn update_button(
     mut commands: Commands,
     mut interaction_query: Query<(&Interaction, &UIButton), Changed<Interaction>>,
     res_assets_ui_element_group_button_data: Res<Assets<UiElementGroupButtonData>>,
-        res_ui_element_entity: Res<UIElementEntity>,
+    res_ui_element_entity: Res<UIElementEntity>,
 ) {
     for (interaction, button) in &mut interaction_query {
         let ui_element_group_button_data = res_assets_ui_element_group_button_data

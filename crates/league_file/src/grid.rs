@@ -1,80 +1,98 @@
-use bevy::prelude::*;
-use binrw::binread;
+use bevy::math::Vec3;
+use bevy::prelude::Resource;
 use league_core::{
     JungleQuadrantFlags, MainRegionFlags, NearestLaneFlags, POIFlags, RingFlags, RiverRegionFlags,
     UnknownSRXFlags, VisionPathingFlags,
 };
-use league_utils::parse_vec3;
+use nom::bytes::complete::take;
+use nom::multi::count;
+use nom::number::complete::{le_f32, le_i16, le_i32, le_u16, le_u32, le_u8};
+use nom::{IResult, Parser};
 
-#[binread]
-#[br(little)]
 #[derive(Debug, Resource, Clone)]
 pub struct AiMeshNGrid {
     pub header: Header,
-
-    #[br(count = header.get_x_cell_count() * header.get_y_cell_count())]
     pub navigation_grid: Vec<NavigationGridCell>,
-
-    // Vision pathing flags - read after all cells
-    #[br(count = header.get_x_cell_count() * header.get_y_cell_count())]
-    #[br(map = |v: Vec<u16>| v.into_iter().map(|v| VisionPathingFlags::from_bits(v).unwrap()).collect())]
     pub vision_pathing_flags: Vec<VisionPathingFlags>,
-
-    // River region and other flags - read after vision pathing flags
-    #[br(count = header.get_x_cell_count() * header.get_y_cell_count())]
     pub other_flags: Vec<OtherFlags>,
-
-    // Unknown block - 8 blocks of 132 bytes each
-    #[br(count = 8 * 132)]
     pub unknown_block: Vec<u8>,
-
     pub height_samples: HeightSamples,
     pub hint_nodes: HintNodes,
 }
 
-#[binread]
-#[br(little)]
+impl AiMeshNGrid {
+    pub fn parse(input: &[u8]) -> IResult<&[u8], Self> {
+        let (i, header) = Header::parse(input)?;
+        let cell_count = (header.x_cell_count * header.z_cell_count) as usize;
+
+        let (i, navigation_grid) = count(NavigationGridCell::parse, cell_count).parse(i)?;
+        let (i, vision_pathing_flags_raw) = count(le_u16, cell_count).parse(i)?;
+        let vision_pathing_flags = vision_pathing_flags_raw
+            .into_iter()
+            .map(|v| VisionPathingFlags::from_bits(v).unwrap())
+            .collect();
+
+        let (i, other_flags) = count(OtherFlags::parse, cell_count).parse(i)?;
+        let (i, unknown_block_raw) = take(8usize * 132usize)(i)?;
+        let unknown_block = unknown_block_raw.to_vec();
+
+        let (i, height_samples) = HeightSamples::parse(i)?;
+        let (i, hint_nodes) = HintNodes::parse(i)?;
+
+        Ok((
+            i,
+            AiMeshNGrid {
+                header,
+                navigation_grid,
+                vision_pathing_flags,
+                other_flags,
+                unknown_block,
+                height_samples,
+                hint_nodes,
+            },
+        ))
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct OtherFlags {
-    #[br(map = |v: u8| RiverRegionFlags::from_bits(v).unwrap())]
     pub river_region_flags: RiverRegionFlags,
-
-    #[br(temp)]
-    jungle_quadrant_and_main_region_flags: u8,
-
-    #[br(calc = JungleQuadrantFlags::from_bits(jungle_quadrant_and_main_region_flags & 0x0f).unwrap())]
     pub jungle_quadrant_flags: JungleQuadrantFlags,
-    #[br(calc = MainRegionFlags::from((jungle_quadrant_and_main_region_flags & 0xf0) >> 4))]
     pub main_region_flags: MainRegionFlags,
-
-    #[br(temp)]
-    nearest_lane_and_poi_flags: u8,
-
-    #[br(calc = NearestLaneFlags::from(nearest_lane_and_poi_flags & 0x0f))]
     pub nearest_lane_flags: NearestLaneFlags,
-
-    #[br(calc = POIFlags::from((nearest_lane_and_poi_flags & 0xf0) >> 4))]
     pub poi_flags: POIFlags,
-
-    #[br(temp)]
-    ring_and_srx_flags: u8,
-
-    #[br(calc = RingFlags::from(ring_and_srx_flags & 0x0f))]
     pub ring_flags: RingFlags,
-
-    #[br(calc = UnknownSRXFlags::from((ring_and_srx_flags & 0xf0) >> 4))]
     pub srx_flags: UnknownSRXFlags,
 }
 
-#[binread]
-#[br(little)]
+impl OtherFlags {
+    pub fn parse(input: &[u8]) -> IResult<&[u8], Self> {
+        let (i, river_region_raw) = le_u8(input)?;
+        let (i, jungle_and_main) = le_u8(i)?;
+        let (i, lane_and_poi) = le_u8(i)?;
+        let (i, ring_and_srx) = le_u8(i)?;
+
+        Ok((
+            i,
+            OtherFlags {
+                river_region_flags: RiverRegionFlags::from_bits(river_region_raw).unwrap(),
+                jungle_quadrant_flags: JungleQuadrantFlags::from_bits(jungle_and_main & 0x0f)
+                    .unwrap(),
+                main_region_flags: MainRegionFlags::from((jungle_and_main & 0xf0) >> 4),
+                nearest_lane_flags: NearestLaneFlags::from(lane_and_poi & 0x0f),
+                poi_flags: POIFlags::from((lane_and_poi & 0xf0) >> 4),
+                ring_flags: RingFlags::from(ring_and_srx & 0x0f),
+                srx_flags: UnknownSRXFlags::from((ring_and_srx & 0xf0) >> 4),
+            },
+        ))
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct Header {
     pub major_version: u8,
     pub minor_version: i16,
-    #[br(map = parse_vec3)]
     pub min_bounds: Vec3,
-    #[br(map = parse_vec3)]
     pub max_bounds: Vec3,
     pub cell_size: f32,
     pub x_cell_count: u32,
@@ -82,81 +100,158 @@ pub struct Header {
 }
 
 impl Header {
-    fn get_x_cell_count(&self) -> u32 {
-        self.x_cell_count
-    }
+    pub fn parse(input: &[u8]) -> IResult<&[u8], Self> {
+        let (i, major_version) = le_u8(input)?;
+        let (i, minor_version) = le_i16(i)?;
+        let (i, min_bounds) = parse_vec3(i)?;
+        let (i, max_bounds) = parse_vec3(i)?;
+        let (i, cell_size) = le_f32(i)?;
+        let (i, x_cell_count) = le_u32(i)?;
+        let (i, z_cell_count) = le_u32(i)?;
 
-    fn get_y_cell_count(&self) -> u32 {
-        self.z_cell_count
+        Ok((
+            i,
+            Header {
+                major_version,
+                minor_version,
+                min_bounds,
+                max_bounds,
+                cell_size,
+                x_cell_count,
+                z_cell_count,
+            },
+        ))
     }
 }
 
-#[binread]
-#[br(little)]
 #[derive(Debug, Clone)]
 pub struct NavigationGridCell {
-    // center height (overridden by height samples)
     pub center_height: f32,
-    // session ID
     pub session_id: i32,
-    // arrival cost
     pub arrival_cost: f32,
-    // is open
     pub is_open: i32,
-    // heuristic
     pub heuristic: f32,
-    // x coordinate
-    #[br(map = |v: i16| v as usize)]
     pub x: usize,
-    // z coordinate
-    #[br(map = |v: i16| v as usize)]
     pub z: usize,
-    // actor list
     pub actor_list: i32,
-    // unknown 1
     pub unknown1: i32,
-    // good cell session ID
     pub good_cell_session_id: i32,
-    // hint weight
     pub hint_weight: f32,
-    // unknown 2
     pub unknown2: i16,
-    // arrival direction
     pub arrival_direction: i16,
-    // hint node 1
     pub hint_node1: i16,
-    // hint node 2
     pub hint_node2: i16,
 }
 
-#[binread]
-#[br(little)]
+impl NavigationGridCell {
+    pub fn parse(input: &[u8]) -> IResult<&[u8], Self> {
+        let (i, center_height) = le_f32(input)?;
+        let (i, session_id) = le_i32(i)?;
+        let (i, arrival_cost) = le_f32(i)?;
+        let (i, is_open) = le_i32(i)?;
+        let (i, heuristic) = le_f32(i)?;
+        let (i, x_raw) = le_i16(i)?;
+        let (i, z_raw) = le_i16(i)?;
+        let (i, actor_list) = le_i32(i)?;
+        let (i, unknown1) = le_i32(i)?;
+        let (i, good_cell_session_id) = le_i32(i)?;
+        let (i, hint_weight) = le_f32(i)?;
+        let (i, unknown2) = le_i16(i)?;
+        let (i, arrival_direction) = le_i16(i)?;
+        let (i, hint_node1) = le_i16(i)?;
+        let (i, hint_node2) = le_i16(i)?;
+
+        Ok((
+            i,
+            NavigationGridCell {
+                center_height,
+                session_id,
+                arrival_cost,
+                is_open,
+                heuristic,
+                x: x_raw as usize,
+                z: z_raw as usize,
+                actor_list,
+                unknown1,
+                good_cell_session_id,
+                hint_weight,
+                unknown2,
+                arrival_direction,
+                hint_node1,
+                hint_node2,
+            },
+        ))
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct HeightSamples {
     pub x_count: u32,
     pub z_count: u32,
     pub offset_x: f32,
     pub offset_z: f32,
-    #[br(count = x_count * z_count)]
     pub samples: Vec<f32>,
 }
 
-#[binread]
-#[br(little)]
+impl HeightSamples {
+    pub fn parse(input: &[u8]) -> IResult<&[u8], Self> {
+        let (i, x_count) = le_u32(input)?;
+        let (i, z_count) = le_u32(i)?;
+        let (i, offset_x) = le_f32(i)?;
+        let (i, offset_z) = le_f32(i)?;
+        let (i, samples) = count(le_f32, (x_count * z_count) as usize).parse(i)?;
+
+        Ok((
+            i,
+            HeightSamples {
+                x_count,
+                z_count,
+                offset_x,
+                offset_z,
+                samples,
+            },
+        ))
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct HintNodes {
-    // 900x900 matrix of distances
-    #[br(count = 900 * 900)]
     pub distances: Vec<f32>,
-    // 900 hint coordinates
-    #[br(count = 900)]
     pub hint_coordinates: Vec<HintCoordinate>,
 }
 
-#[binread]
-#[br(little)]
+impl HintNodes {
+    pub fn parse(input: &[u8]) -> IResult<&[u8], Self> {
+        let (i, distances) = count(le_f32, 900usize * 900usize).parse(input)?;
+        let (i, hint_coordinates) = count(HintCoordinate::parse, 900usize).parse(i)?;
+
+        Ok((
+            i,
+            HintNodes {
+                distances,
+                hint_coordinates,
+            },
+        ))
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct HintCoordinate {
     pub x: i16,
     pub y: i16,
+}
+
+impl HintCoordinate {
+    pub fn parse(input: &[u8]) -> IResult<&[u8], Self> {
+        let (i, x) = le_i16(input)?;
+        let (i, y) = le_i16(i)?;
+        Ok((i, HintCoordinate { x, y }))
+    }
+}
+
+fn parse_vec3(input: &[u8]) -> IResult<&[u8], Vec3> {
+    let (i, x) = le_f32(input)?;
+    let (i, y) = le_f32(i)?;
+    let (i, z) = le_f32(i)?;
+    Ok((i, Vec3::new(x, y, z)))
 }

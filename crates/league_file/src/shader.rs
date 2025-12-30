@@ -1,38 +1,68 @@
-use binrw::binread;
-use binrw::prelude::*;
+use nom::multi::count;
+use nom::number::complete::{le_u32, le_u64};
+use nom::{IResult, Parser};
 
-use crate::SizedStringU32;
+use crate::common::SizedStringU32;
 
-#[binread]
 #[derive(Debug)]
-#[br(little)]
 pub struct LeagueShaderToc {
     pub magic: SizedStringU32,
-
     pub shader_count: u32,
     pub base_define_count: u32,
     pub bundled_shader_count: u32,
-    // 0 = vs 1 = ps
     pub shader_type: u32,
     pub base_defines_section_magic: SizedStringU32,
-
-    #[br(count = base_define_count)]
     pub base_defines: Vec<ShaderMacroDefinition>,
     pub shaders_section_magic: SizedStringU32,
-
-    #[br(count = shader_count)]
     pub shader_hashes: Vec<u64>,
-
-    #[br(count = shader_count)]
     pub shader_ids: Vec<u32>,
 }
 
-#[binread]
+impl LeagueShaderToc {
+    pub fn parse(input: &[u8]) -> IResult<&[u8], Self> {
+        let (i, magic) = SizedStringU32::parse(input)?;
+        let (i, shader_count) = le_u32(i)?;
+        let (i, base_define_count) = le_u32(i)?;
+        let (i, bundled_shader_count) = le_u32(i)?;
+        let (i, shader_type) = le_u32(i)?;
+        let (i, base_defines_section_magic) = SizedStringU32::parse(i)?;
+
+        let (i, base_defines) =
+            count(ShaderMacroDefinition::parse, base_define_count as usize).parse(i)?;
+        let (i, shaders_section_magic) = SizedStringU32::parse(i)?;
+        let (i, shader_hashes) = count(le_u64, shader_count as usize).parse(i)?;
+        let (i, shader_ids) = count(le_u32, shader_count as usize).parse(i)?;
+
+        Ok((
+            i,
+            LeagueShaderToc {
+                magic,
+                shader_count,
+                base_define_count,
+                bundled_shader_count,
+                shader_type,
+                base_defines_section_magic,
+                base_defines,
+                shaders_section_magic,
+                shader_hashes,
+                shader_ids,
+            },
+        ))
+    }
+}
+
 #[derive(Debug)]
-#[br(little)]
 pub struct ShaderMacroDefinition {
     pub name: SizedStringU32,
     pub value: SizedStringU32,
+}
+
+impl ShaderMacroDefinition {
+    pub fn parse(input: &[u8]) -> IResult<&[u8], Self> {
+        let (i, name) = SizedStringU32::parse(input)?;
+        let (i, value) = SizedStringU32::parse(i)?;
+        Ok((i, ShaderMacroDefinition { name, value }))
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -40,18 +70,19 @@ pub struct LeagueShaderChunk {
     pub files: Vec<SizedStringU32>,
 }
 
-impl BinRead for LeagueShaderChunk {
-    type Args<'a> = ();
-
-    fn read_options<R: std::io::Read + std::io::Seek>(
-        reader: &mut R,
-        endian: binrw::Endian,
-        _args: Self::Args<'_>,
-    ) -> BinResult<Self> {
+impl LeagueShaderChunk {
+    pub fn parse(input: &[u8]) -> IResult<&[u8], Self> {
         let mut files = Vec::new();
-        while let Ok(shader_file) = SizedStringU32::read_options(reader, endian, ()) {
-            files.push(shader_file);
+        let mut current_input = input;
+        while !current_input.is_empty() {
+            match SizedStringU32::parse(current_input) {
+                Ok((i, s)) => {
+                    files.push(s);
+                    current_input = i;
+                }
+                Err(_) => break,
+            }
         }
-        Ok(LeagueShaderChunk { files })
+        Ok((current_input, LeagueShaderChunk { files }))
     }
 }

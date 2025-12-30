@@ -1,5 +1,4 @@
 use std::collections::HashMap;
-use std::io::Cursor;
 
 use bevy::animation::animation_curves::{AnimatableCurve, AnimatableKeyframeCurve};
 use bevy::animation::{animated_field, AnimationClip, AnimationTargetId};
@@ -12,7 +11,6 @@ use bevy::render::render_resource::{
     Extent3d, ShaderStage, TextureDescriptor, TextureDimension, TextureFormat, TextureUsages,
 };
 use bevy::shader::{ShaderImport, Source, ValidateShader};
-use binrw::BinRead;
 use league_core::EnvironmentVisibility;
 use league_file::{
     AiMeshNGrid, AnimationFile, LeagueMapGeo, LeagueMeshStatic, LeagueShaderChunk, LeagueShaderToc,
@@ -44,8 +42,8 @@ pub enum Error {
     #[error("{0}")]
     Bincode(#[from] bincode::Error),
 
-    #[error("{0}")]
-    BinRead(#[from] binrw::Error),
+    #[error("Parse error: {0}")]
+    Parse(String),
 }
 
 #[derive(Default)]
@@ -66,8 +64,7 @@ impl AssetLoader for LeagueLoaderProperty {
     ) -> Result<Self::Asset, Self::Error> {
         let mut buf = Vec::new();
         reader.read_to_end(&mut buf).await?;
-        let mut cursor = Cursor::new(buf);
-        let prop_bin = PropFile::read(&mut cursor)?;
+        let (_, prop_bin) = PropFile::parse(&buf).map_err(|e| Error::Parse(e.to_string()))?;
 
         let mut handles = HashMap::new();
         for (entry_hash, entry) in prop_bin.iter_class_hash_and_entry() {
@@ -114,8 +111,8 @@ impl AssetLoader for LeagueLoaderMesh {
     ) -> Result<Self::Asset, Self::Error> {
         let mut buf = Vec::new();
         reader.read_to_end(&mut buf).await?;
-        let mut cursor = Cursor::new(buf);
-        let league_skinned_mesh = LeagueSkinnedMesh::read(&mut cursor)?;
+        let (_, league_skinned_mesh) =
+            LeagueSkinnedMesh::parse(&buf).map_err(|e| Error::Parse(e.to_string()))?;
 
         let mut submeshes = Vec::new();
         for (i, _) in league_skinned_mesh.ranges.iter().enumerate() {
@@ -149,8 +146,8 @@ impl AssetLoader for LeagueLoaderMapgeo {
     ) -> Result<Self::Asset, Self::Error> {
         let mut buf = Vec::new();
         reader.read_to_end(&mut buf).await?;
-        let mut cursor = Cursor::new(buf);
-        let league_mapgeo = LeagueMapGeo::read(&mut cursor)?;
+        let (_, league_mapgeo) =
+            LeagueMapGeo::parse(&buf).map_err(|e| Error::Parse(e.to_string()))?;
 
         let mut submeshes = Vec::new();
 
@@ -215,8 +212,8 @@ impl AssetLoader for LeagueLoaderSkeleton {
     ) -> Result<Self::Asset, Self::Error> {
         let mut buf = Vec::new();
         reader.read_to_end(&mut buf).await?;
-        let mut cursor = Cursor::new(buf);
-        let league_skeleton = LeagueSkeleton::read(&mut cursor)?;
+        let (_, league_skeleton) =
+            LeagueSkeleton::parse(&buf).map_err(|e| Error::Parse(e.to_string()))?;
 
         Ok(league_skeleton)
     }
@@ -244,8 +241,7 @@ impl AssetLoader for LeagueLoaderMeshStatic {
     ) -> Result<Self::Asset, Self::Error> {
         let mut buf = Vec::new();
         reader.read_to_end(&mut buf).await?;
-        let mut reader = Cursor::new(buf);
-        let mesh = LeagueMeshStatic::read(&mut reader)?;
+        let (_, mesh) = LeagueMeshStatic::parse(&buf).map_err(|e| Error::Parse(e.to_string()))?;
         Ok(mesh_static_to_bevy_mesh(mesh))
     }
 
@@ -272,8 +268,7 @@ impl AssetLoader for LeagueLoaderImage {
     ) -> Result<Self::Asset, Self::Error> {
         let mut buf = Vec::new();
         reader.read_to_end(&mut buf).await?;
-        let mut reader = Cursor::new(buf);
-        let texture = LeagueTexture::read(&mut reader)?;
+        let (_, texture) = LeagueTexture::parse(&buf).map_err(|e| Error::Parse(e.to_string()))?;
 
         let texture_descriptor = TextureDescriptor {
             label: None,
@@ -353,8 +348,8 @@ impl AssetLoader for LeagueLoaderAnimationClip {
     ) -> Result<Self::Asset, Self::Error> {
         let mut buf = Vec::new();
         reader.read_to_end(&mut buf).await?;
-        let mut reader = Cursor::new(buf);
-        let animation_file = AnimationFile::read(&mut reader)?;
+        let (_, animation_file) =
+            AnimationFile::parse(&buf).map_err(|e| Error::Parse(e.to_string()))?;
 
         let animation = load_animation_file(animation_file);
 
@@ -423,9 +418,9 @@ impl AssetLoader for LeagueLoaderShaderToc {
     ) -> Result<Self::Asset, Self::Error> {
         let mut buf = Vec::new();
         reader.read_to_end(&mut buf).await?;
-        let mut reader = Cursor::new(buf);
 
-        let shader_toc = LeagueShaderToc::read(&mut reader)?;
+        let (_, shader_toc) =
+            LeagueShaderToc::parse(&buf).map_err(|e| Error::Parse(e.to_string()))?;
 
         let path = &settings.0;
 
@@ -445,7 +440,8 @@ impl AssetLoader for LeagueLoaderShaderToc {
                 .await
                 .unwrap();
 
-            let shader_chunk = LeagueShaderChunk::read_le(&mut Cursor::new(chunk))?;
+            let (_, shader_chunk) =
+                LeagueShaderChunk::parse(&chunk).map_err(|e| Error::Parse(e.to_string()))?;
 
             for shader_file in shader_chunk.files.iter() {
                 let content = shader_file.text.clone();
@@ -564,9 +560,8 @@ impl AssetLoader for LeagueLoaderNavGrid {
     ) -> Result<Self::Asset, Self::Error> {
         let mut buf = Vec::new();
         reader.read_to_end(&mut buf).await?;
-        let mut reader = Cursor::new(buf);
 
-        let nav_grid = AiMeshNGrid::read(&mut reader)?;
+        let (_, nav_grid) = AiMeshNGrid::parse(&buf).map_err(|e| Error::Parse(e.to_string()))?;
 
         let min_bounds = nav_grid.header.min_bounds.xz();
 

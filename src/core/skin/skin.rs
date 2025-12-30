@@ -1,6 +1,6 @@
-use bevy::prelude::*;use lol_config::LoadHashKeyTrait;
+use bevy::prelude::*;
 use league_core::SkinCharacterDataProperties;
-use lol_config::HashKey;
+use lol_config::{HashKey, LoadHashKeyTrait};
 
 use crate::{CommandLoadPropBin, CommandSkinAnimationSpawn, CommandSkinMeshSpawn, Loading};
 
@@ -40,11 +40,11 @@ pub fn on_command_skin_spawn(trigger: On<CommandSkinSpawn>, mut commands: Comman
 pub fn update_skin_spawn(
     mut commands: Commands,
     res_assets_skin_character_data_properties: Res<Assets<SkinCharacterDataProperties>>,
-        q_loading: Query<(Entity, &Loading<SkinSpawn>)>,
+    q_loading: Query<(Entity, &Loading<SkinSpawn>)>,
 ) {
     for (entity, loading) in q_loading.iter() {
         let Some(skin_character_data_properties) =
-            res_assets_skin_character_data_properties.load_hash( loading.0)
+            res_assets_skin_character_data_properties.load_hash(loading.0)
         else {
             continue;
         };

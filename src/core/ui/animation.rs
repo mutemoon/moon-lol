@@ -1,6 +1,7 @@
-use bevy::prelude::*;use lol_config::LoadHashKeyTrait;
+use bevy::prelude::*;
 use league_core::{EnumData, EnumUiPosition, UiElementEffectAnimationData};
 use league_utils::hash_bin;
+use lol_config::LoadHashKeyTrait;
 
 use crate::spawn_ui_atom;
 
@@ -21,9 +22,8 @@ pub fn on_command_ui_animation_start(
     mut commands: Commands,
     res_asset_server: Res<AssetServer>,
     res_ui_animation: Res<Assets<UiElementEffectAnimationData>>,
-    ) {
-    let ui_animation = res_ui_animation.load_hash( &hash_bin(&event.key))
-        .unwrap();
+) {
+    let ui_animation = res_ui_animation.load_hash(&hash_bin(&event.key)).unwrap();
     let Some(entity) = spawn_ui_atom(
         &mut commands,
         &res_asset_server,
@@ -49,12 +49,13 @@ pub fn update_ui_animation(
     mut commands: Commands,
     mut q_ui_animation_state: Query<(Entity, &mut UiAnimationState)>,
     res_ui_animation: Res<Assets<UiElementEffectAnimationData>>,
-        q_children: Query<&Children>,
+    q_children: Query<&Children>,
     mut q_image_node: Query<&mut ImageNode>,
     time: Res<Time>,
 ) {
     for (entity, mut ui_animation_state) in q_ui_animation_state.iter_mut() {
-        let ui_animation = res_ui_animation.load_hash( &hash_bin(&ui_animation_state.key))
+        let ui_animation = res_ui_animation
+            .load_hash(&hash_bin(&ui_animation_state.key))
             .unwrap();
 
         let frames_per_second = ui_animation.frames_per_second.unwrap_or(30.0);

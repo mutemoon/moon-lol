@@ -1,7 +1,5 @@
-use std::io::{Cursor, Read};
+use std::io::Read;
 
-use binrw::io::NoSeek;
-use binrw::BinRead;
 use league_file::LeagueMapGeo;
 use league_property::PropFile;
 use league_utils::hash_wad;
@@ -25,9 +23,16 @@ impl LeagueWadMapLoader {
 
         let entry = wad_loader.wad.get_entry(hash_wad(&map_geo_path))?;
 
-        let reader = wad_loader.get_wad_zstd_entry_reader(&entry)?;
+        let mut reader = wad_loader.get_wad_zstd_entry_reader(&entry)?;
+        let mut data = Vec::with_capacity(entry.target_size as usize);
+        reader.read_to_end(&mut data)?;
 
-        let map_geo = LeagueMapGeo::read(&mut NoSeek::new(reader))?;
+        let (_, map_geo) = LeagueMapGeo::parse(&data).map_err(|_| {
+            Error::Io(std::io::Error::new(
+                std::io::ErrorKind::InvalidData,
+                "Failed to parse mapgeo",
+            ))
+        })?;
 
         let map_materials_bin_path = format!("data/maps/mapgeometry/map11/{}.materials.bin", map);
 
@@ -36,12 +41,15 @@ impl LeagueWadMapLoader {
             .get_entry(hash_wad(&map_materials_bin_path))?;
 
         let mut reader = wad_loader.get_wad_zstd_entry_reader(&entry)?;
-
         let mut data = Vec::with_capacity(entry.target_size as usize);
-
         reader.read_to_end(&mut data)?;
 
-        let materials_bin = PropFile::read(&mut Cursor::new(data))?;
+        let (_, materials_bin) = PropFile::parse(&data).map_err(|_| {
+            Error::Io(std::io::Error::new(
+                std::io::ErrorKind::InvalidData,
+                "Failed to parse materials bin",
+            ))
+        })?;
 
         Ok(LeagueWadMapLoader {
             wad_loader,

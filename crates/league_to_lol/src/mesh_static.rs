@@ -77,9 +77,8 @@ pub fn mesh_static_to_bevy_mesh(mesh: LeagueMeshStatic) -> Mesh {
 #[cfg(test)]
 mod tests {
     use std::fs::File;
-    use std::io::BufReader;
+    use std::io::{BufReader, Read};
 
-    use binrw::BinRead;
     use league_file::LeagueMeshStatic;
 
     use super::*;
@@ -88,7 +87,9 @@ mod tests {
     fn test_mesh_static_to_bevy_mesh() {
         let path = "ASSETS/Characters/Fiora/Skins/Base/Particles/Fiora_Base_W_sphere.scb";
         let mut reader = BufReader::new(File::open(format!("../../assets/{}", path)).unwrap());
-        let mesh = LeagueMeshStatic::read(&mut reader).unwrap();
+        let mut buf = Vec::new();
+        reader.read_to_end(&mut buf).unwrap();
+        let (_, mesh) = LeagueMeshStatic::parse(&buf).unwrap();
         let bevy_mesh = mesh_static_to_bevy_mesh(mesh);
         assert_eq!(
             bevy_mesh.primitive_topology(),

@@ -1,32 +1,44 @@
 use std::collections::HashMap;
 use std::io::{self};
 
-use binrw::binread;
+use nom::bytes::complete::take;
+use nom::multi::count;
+use nom::number::complete::{le_u16, le_u32, le_u64, le_u8};
+use nom::{IResult, Parser};
 
 use crate::Error;
 
-#[binread]
 #[derive(Debug)]
-#[br(magic = b"RW")]
-#[br(little)]
 pub struct LeagueWad {
     pub major: u8,
     pub minor: u8,
-
-    #[br(pad_before = 0x108)]
-    pub entry_count: u32,
-
-    #[br(count = entry_count)]
-    #[br(map = |entries: Vec<LeagueWadEntry>| {
-        entries
-            .into_iter()
-            .map(|entry| (entry.path_hash, entry))
-            .collect()
-    })]
     pub entries: HashMap<u64, LeagueWadEntry>,
 }
 
 impl LeagueWad {
+    pub fn parse(input: &[u8]) -> IResult<&[u8], Self> {
+        let (i, _) = take(2usize)(input)?; // magic: RW
+        let (i, major) = le_u8(i)?;
+        let (i, minor) = le_u8(i)?;
+        let (i, _) = take(0x108usize)(i)?;
+        let (i, entry_count) = le_u32(i)?;
+
+        let (i, entries_vec) = count(LeagueWadEntry::parse, entry_count as usize).parse(i)?;
+        let entries = entries_vec
+            .into_iter()
+            .map(|entry| (entry.path_hash, entry))
+            .collect();
+
+        Ok((
+            i,
+            LeagueWad {
+                major,
+                minor,
+                entries,
+            },
+        ))
+    }
+
     pub fn get_entry(&self, hash: u64) -> Result<LeagueWadEntry, Error> {
         self.entries
             .get(&hash)
@@ -40,28 +52,48 @@ impl LeagueWad {
     }
 }
 
-#[binread]
 #[derive(Debug, Clone, Copy)]
-#[br(little)]
 pub struct LeagueWadEntry {
     pub path_hash: u64,
     pub offset: u32,
     pub size: u32,
     pub target_size: u32,
-
-    #[br(map = |v: u8| parse_wad_data_format(v))]
     pub format: WadDataFormat,
-
-    #[br(map = |v: u8| v != 0)]
     pub duplicate: bool,
-
     pub first_subchunk_index: u16,
     pub data_hash: u64,
 }
 
-#[binread]
+impl LeagueWadEntry {
+    pub fn parse(input: &[u8]) -> IResult<&[u8], Self> {
+        let (i, path_hash) = le_u64(input)?;
+        let (i, offset) = le_u32(i)?;
+        let (i, size) = le_u32(i)?;
+        let (i, target_size) = le_u32(i)?;
+        let (i, format_raw) = le_u8(i)?;
+        let format = parse_wad_data_format(format_raw);
+        let (i, duplicate_raw) = le_u8(i)?;
+        let duplicate = duplicate_raw != 0;
+        let (i, first_subchunk_index) = le_u16(i)?;
+        let (i, data_hash) = le_u64(i)?;
+
+        Ok((
+            i,
+            LeagueWadEntry {
+                path_hash,
+                offset,
+                size,
+                target_size,
+                format,
+                duplicate,
+                first_subchunk_index,
+                data_hash,
+            },
+        ))
+    }
+}
+
 #[derive(Debug, Clone, Copy)]
-#[br(little)]
 pub enum WadDataFormat {
     Uncompressed,
     Gzip,
@@ -81,20 +113,37 @@ fn parse_wad_data_format(format: u8) -> WadDataFormat {
     }
 }
 
-#[binread]
 #[derive(Debug)]
-#[br(little)]
-#[br(import(count: u32))]
 pub struct LeagueWadSubchunk {
-    #[br(count = count)]
     pub chunks: Vec<LeagueWadSubchunkItem>,
 }
 
-#[binread]
+impl LeagueWadSubchunk {
+    pub fn parse(input: &[u8], count_val: u32) -> IResult<&[u8], Self> {
+        let (i, chunks) = count(LeagueWadSubchunkItem::parse, count_val as usize).parse(input)?;
+        Ok((i, LeagueWadSubchunk { chunks }))
+    }
+}
+
 #[derive(Debug)]
-#[br(little)]
 pub struct LeagueWadSubchunkItem {
     pub size: u32,
     pub target_size: u32,
     pub data_hash: u64,
+}
+
+impl LeagueWadSubchunkItem {
+    pub fn parse(input: &[u8]) -> IResult<&[u8], Self> {
+        let (i, size) = le_u32(input)?;
+        let (i, target_size) = le_u32(i)?;
+        let (i, data_hash) = le_u64(i)?;
+        Ok((
+            i,
+            LeagueWadSubchunkItem {
+                size,
+                target_size,
+                data_hash,
+            },
+        ))
+    }
 }
