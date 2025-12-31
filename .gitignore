@@ -6,7 +6,6 @@ node_modules
 assets/*
 !assets/games
 !assets/spotlighthealthbaratlas.tex
-!assets/config_map_nav_grid.bin
 
 .vs
 

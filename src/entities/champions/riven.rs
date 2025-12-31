@@ -5,8 +5,8 @@ use league_utils::hash_bin;
 use lol_config::LoadHashKeyTrait;
 
 use crate::core::{
-    ActionAnimationPlay, ActionAttackReset, ActionBuffSpawn, ActionDamage, ActionDash,
-    ActionParticleDespawn, ActionParticleSpawn, BuffAttack, CoolDown, Skill, SkillOf, Skills,
+    ActionAnimationPlay, ActionBuffSpawn, ActionDash, ActionParticleSpawn, CoolDown, Skill,
+    SkillOf, Skills,
 };
 use crate::entities::champion::Champion;
 use crate::{
@@ -151,22 +151,10 @@ fn create_riven_martyr() -> SkillEffect {
     SkillEffect(behave! {
         Behave::Sequence => {
             Behave::trigger(
-                ActionParticleSpawn { hash: hash_bin("Riven_W_Telegraph_Blue") },
+                ActionParticleSpawn { hash: hash_bin("Riven_W_Cast") },
             ),
-            Behave::trigger(
-                ActionAnimationPlay { hash: hash_bin("Spell2_In") }
-            ),
-            Behave::trigger(
-                ActionParticleSpawn { hash: hash_bin("Riven_W_Cas") },
-            ),
-            Behave::Wait(0.5),
             Behave::trigger(
                 ActionAnimationPlay { hash: hash_bin("Spell2") }
-            ),
-            Behave::trigger(ActionDamage),
-            Behave::Wait(0.1),
-            Behave::trigger(
-                ActionParticleDespawn{ hash: hash_bin("Riven_W_Telegraph_Blue") },
             ),
         }
     })
@@ -176,9 +164,11 @@ fn create_riven_feint() -> SkillEffect {
     SkillEffect(behave! {
         Behave::Sequence => {
             Behave::trigger(
-                ActionBuffSpawn::new(BuffAttack { bonus_attack_speed: 0.5 })
+                ActionParticleSpawn { hash: hash_bin("Riven_E_Mis") },
             ),
-            Behave::trigger(ActionAttackReset),
+            Behave::trigger(
+                ActionAnimationPlay { hash: hash_bin("Spell3") }
+            ),
         }
     })
 }

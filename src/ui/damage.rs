@@ -1,7 +1,7 @@
 use bevy::color::palettes::css::{BLUE, RED, WHITE};
 use bevy::prelude::*;
 
-use crate::core::damage::{DamageType, EventDamageCreate};
+use crate::{DamageType, EventDamageCreate};
 
 /// 伤害数字组件 - 用于显示飘动的伤害数字
 #[derive(Component)]

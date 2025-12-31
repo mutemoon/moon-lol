@@ -4,8 +4,7 @@ use bevy::prelude::*;
 use league_core::{UiElementGroupButtonData, UiElementRegionData};
 use lol_config::{HashKey, LoadHashKeyTrait};
 
-use crate::core::ui::element::UIElementEntity;
-use crate::UIElement;
+use crate::{UIElement, UIElementEntity};
 
 #[derive(Resource, Default)]
 pub struct UIButtonEntity {

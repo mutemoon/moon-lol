@@ -2,6 +2,7 @@ mod buffs;
 mod core;
 mod entities;
 mod server;
+mod ui;
 
 pub use core::*;
 
@@ -9,6 +10,7 @@ use bevy::app::plugin_group;
 pub use buffs::*;
 pub use entities::*;
 pub use server::*;
+pub use ui::*;
 
 plugin_group! {
     pub struct PluginCore {
