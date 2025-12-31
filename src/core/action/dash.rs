@@ -1,12 +1,12 @@
 use std::collections::HashSet;
 
 use bevy::prelude::*;
-use bevy_behave::prelude::BehaveTrigger;
+use bevy_behave::prelude::{BehaveCtx, BehaveTrigger};
 use lol_core::Team;
 
 use crate::{
     CommandDamageCreate, CommandMovement, DamageType, EventMovementEnd, MovementAction,
-    MovementWay, SkillEffectBehaveCtx, SkillEffectContext,
+    MovementWay, SkillEffectContext,
 };
 
 #[derive(Debug, Clone)]
@@ -36,6 +36,9 @@ pub struct DashDamageComponent {
     pub damage: DashDamage,
     pub hit_entities: HashSet<Entity>,
 }
+
+#[derive(Component)]
+pub struct DashBehaveCtx(pub BehaveCtx);
 
 pub fn on_action_dash(
     trigger: On<BehaveTrigger<ActionDash>>,
@@ -81,9 +84,7 @@ pub fn on_action_dash(
         });
     }
 
-    commands
-        .entity(entity)
-        .insert(SkillEffectBehaveCtx(ctx.clone()));
+    commands.entity(entity).insert(DashBehaveCtx(ctx.clone()));
     commands.trigger(CommandMovement {
         entity,
         priority: 100,
@@ -102,14 +103,13 @@ pub fn on_action_dash(
 pub fn on_action_dash_end(
     trigger: On<EventMovementEnd>,
     mut commands: Commands,
-    q: Query<&SkillEffectBehaveCtx>,
+    q: Query<&DashBehaveCtx>,
 ) {
     let entity = trigger.event_target();
-    commands.entity(entity).remove::<DashDamageComponent>();
-    let Ok(SkillEffectBehaveCtx(ctx)) = q.get(entity) else {
+    let Ok(DashBehaveCtx(ctx)) = q.get(entity) else {
         return;
     };
-
+    commands.entity(entity).remove::<DashDamageComponent>();
     commands.trigger(ctx.success());
 }
 

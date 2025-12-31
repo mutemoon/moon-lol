@@ -88,9 +88,6 @@ pub struct SkillEffectContext {
     pub point: Vec2,
 }
 
-#[derive(Component)]
-pub struct SkillEffectBehaveCtx(pub BehaveCtx);
-
 #[derive(EntityEvent)]
 pub struct CommandSkillStart {
     pub entity: Entity,

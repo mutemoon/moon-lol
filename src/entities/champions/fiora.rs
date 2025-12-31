@@ -5,8 +5,9 @@ use league_utils::hash_bin;
 use lol_config::LoadHashKeyTrait;
 
 use crate::core::{
-    ActionAnimationPlay, ActionAttackReset, ActionBuffSpawn, ActionDamage, ActionDash,
-    ActionParticleDespawn, ActionParticleSpawn, BuffAttack, CoolDown, Skill, SkillOf, Skills,
+    ActionAnimationPlay, ActionAttackReset, ActionBuffSpawn, ActionDamage, ActionDamageEffect,
+    ActionDash, ActionParticleDespawn, ActionParticleSpawn, BuffAttack, CoolDown, DamageShape,
+    DamageType, Skill, SkillOf, Skills, TargetDamage, TargetFilter,
 };
 use crate::entities::champion::Champion;
 use crate::{
@@ -47,7 +48,17 @@ fn startup_load_assets(mut res_assets_skill_effect: ResMut<Assets<SkillEffect>>)
                     },
                 ),
                 Behave::IfThen => {
-                    Behave::trigger(ActionDamage),
+                    Behave::trigger(ActionDamage {
+                        effects: vec![ActionDamageEffect {
+                            shape: DamageShape::Nearest { max_distance: 300.0 },
+                            damage_list: vec![TargetDamage {
+                                filter: TargetFilter::All,
+                                amount: 100.0,
+                                damage_type: DamageType::Physical,
+                            }],
+                            particle: Some(hash_bin("Fiora_Q_Slash_Cas")),
+                        }],
+                    }),
                     Behave::Sequence => {
                     },
                 },
@@ -72,7 +83,6 @@ fn startup_load_assets(mut res_assets_skill_effect: ResMut<Assets<SkillEffect>>)
                 Behave::trigger(
                     ActionAnimationPlay { hash: hash_bin("Spell2") }
                 ),
-                Behave::trigger(ActionDamage),
                 Behave::Wait(0.1),
                 Behave::trigger(
                     ActionParticleDespawn{ hash: hash_bin("Fiora_W_Telegraph_Blue") },

@@ -5,13 +5,13 @@ use league_utils::hash_bin;
 use lol_config::LoadHashKeyTrait;
 
 use crate::core::{
-    ActionAnimationPlay, ActionBuffSpawn, ActionDash, ActionParticleSpawn, CoolDown, Skill,
-    SkillOf, Skills,
+    ActionAnimationPlay, ActionBuffSpawn, ActionDamage, ActionDamageEffect, ActionDash,
+    ActionParticleSpawn, CoolDown, DamageShape, Skill, SkillOf, Skills, TargetDamage, TargetFilter,
 };
 use crate::entities::champion::Champion;
 use crate::{
-    BuffRivenPassive, BuffRivenQ2, BuffRivenQ3, DamageType, DashDamage, DashMoveType,
-    PassiveSkillOf, SkillEffect,
+    BuffRivenPassive, BuffRivenQ2, BuffRivenQ3, BuffShieldWhite, DamageType, DashDamage,
+    DashMoveType, PassiveSkillOf, SkillEffect,
 };
 
 #[derive(Default)]
@@ -156,6 +156,19 @@ fn create_riven_martyr() -> SkillEffect {
             Behave::trigger(
                 ActionAnimationPlay { hash: hash_bin("Spell2") }
             ),
+            Behave::trigger(
+                ActionDamage {
+                    effects: vec![ActionDamageEffect {
+                        shape: DamageShape::Circle { radius: 300.0 },
+                        damage_list: vec![TargetDamage {
+                            filter: TargetFilter::All,
+                            amount: 100.0,
+                            damage_type: DamageType::Physical,
+                        }],
+                        particle: None,
+                    }],
+                },
+            ),
         }
     })
 }
@@ -168,6 +181,16 @@ fn create_riven_feint() -> SkillEffect {
             ),
             Behave::trigger(
                 ActionAnimationPlay { hash: hash_bin("Spell3") }
+            ),
+            Behave::trigger(
+                ActionBuffSpawn::new(BuffShieldWhite::new(100.0)),
+            ),
+            Behave::trigger(
+                ActionDash {
+                    move_type: DashMoveType::Fixed(250.0),
+                    damage: None,
+                    speed: 1000.0,
+                },
             ),
         }
     })
