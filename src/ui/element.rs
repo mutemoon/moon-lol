@@ -1,4 +1,5 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
+use std::sync::LazyLock;
 
 use bevy::prelude::*;
 use bevy::window::{PrimaryWindow, WindowResized};
@@ -54,9 +55,15 @@ impl UIElementEntity {
 
 pub fn startup_load_ui(mut commands: Commands) {
     let paths = vec!["clientstates/gameplay/ux/lol/playerframe/uibase".to_string()];
+    let paths = vec!["gameplay.playerframe.bin".to_string()];
 
     commands.trigger(CommandLoadPropBin { paths });
 }
+
+static STRS: LazyLock<std::sync::Mutex<HashSet<String>>> = LazyLock::new(|| {
+    println!("初始化");
+    std::sync::Mutex::new(HashSet::new())
+});
 
 pub fn update_spawn_ui_element(
     mut commands: Commands,
@@ -66,6 +73,17 @@ pub fn update_spawn_ui_element(
 ) {
     if res_assets_ui_element_icon_data.iter().count() == 0 {
         return;
+    }
+
+    for (_, ui) in res_assets_ui_element_icon_data.iter() {
+        if let Some(EnumData::AtlasData(atlas_data)) = &ui.texture_data {
+            let mut strs = STRS.lock().unwrap();
+            if strs.contains(&atlas_data.m_texture_name) {
+                continue;
+            }
+            strs.insert(atlas_data.m_texture_name.clone());
+            println!("{:?}", atlas_data.m_texture_name);
+        }
     }
 
     for (_, ui) in res_assets_ui_element_icon_data.iter().filter(|v| {

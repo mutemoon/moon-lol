@@ -1,7 +1,11 @@
 {
   "permissions": {
-    "allow": [
-      "Bash(cargo:*)"
-    ]
+    "allow": ["Bash(cargo:*)"]
+  },
+  "env": {
+    "ANTHROPIC_AUTH_TOKEN": "sk-18942be8b09b4f30b80e2c2b08bf4b82",
+    "ANTHROPIC_BASE_URL": "http://127.0.0.1:8045",
+    "API_TIMEOUT_MS": "3000000",
+    "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": 1
   }
 }

@@ -537,6 +537,7 @@ fn extract_type_data(
     value_slice: &[u8],
     class_map: &mut ClassMap,
 ) -> Result<ClassData, Error> {
+    let mut parser = BinParser::from_bytes(value_slice);
     if !matches!(
         vtype,
         BinType::Struct
@@ -549,7 +550,6 @@ fn extract_type_data(
         return Ok(ClassData::Base(map_base_type(&vtype)));
     }
 
-    let mut parser = BinParser::from_bytes(value_slice);
     match vtype {
         BinType::Struct | BinType::Embed => {
             let Some(header) = parser.read_struct_header()? else {

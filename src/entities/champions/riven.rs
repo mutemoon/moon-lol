@@ -70,9 +70,12 @@ fn create_riven_tri_cleave_q1() -> SkillEffect {
                 ActionDash {
                     move_type: DashMoveType::Fixed(250.0),
                     damage: Some(DashDamage {
-                        amount: 100.0,
                         radius_end: 250.0,
-                        damage_type: DamageType::Physical,
+                        damage: TargetDamage {
+                            filter: TargetFilter::All,
+                            amount: 100.0,
+                            damage_type: DamageType::Physical,
+                        },
                     }),
                     speed: 1000.0,
                 },
@@ -100,9 +103,12 @@ fn create_riven_tri_cleave_q2() -> SkillEffect {
                 ActionDash {
                     move_type: DashMoveType::Fixed(250.0),
                     damage: Some(DashDamage {
-                        amount: 100.0,
                         radius_end: 250.0,
-                        damage_type: DamageType::Physical,
+                        damage: TargetDamage {
+                            filter: TargetFilter::All,
+                            amount: 100.0,
+                            damage_type: DamageType::Physical,
+                        },
                     }),
                     speed: 1000.0,
                 },
@@ -130,9 +136,12 @@ fn create_riven_tri_cleave_q3() -> SkillEffect {
                 ActionDash {
                     move_type: DashMoveType::Fixed(250.0),
                     damage: Some(DashDamage {
-                        amount: 100.0,
                         radius_end: 250.0,
-                        damage_type: DamageType::Physical,
+                        damage: TargetDamage {
+                            filter: TargetFilter::All,
+                            amount: 100.0,
+                            damage_type: DamageType::Physical,
+                        },
                     }),
                     speed: 1000.0,
                 },

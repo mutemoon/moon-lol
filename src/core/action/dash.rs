@@ -4,8 +4,9 @@ use bevy::prelude::*;
 use bevy_behave::prelude::{BehaveCtx, BehaveTrigger};
 use lol_core::Team;
 
+use super::{TargetDamage, TargetFilter};
 use crate::{
-    CommandDamageCreate, CommandMovement, DamageType, EventMovementEnd, MovementAction,
+    Champion, CommandDamageCreate, CommandMovement, EventMovementEnd, Minion, MovementAction,
     MovementWay, SkillEffectContext,
 };
 
@@ -24,9 +25,8 @@ pub enum DashMoveType {
 
 #[derive(Debug, Clone)]
 pub struct DashDamage {
-    pub amount: f32,
     pub radius_end: f32,
-    pub damage_type: DamageType,
+    pub damage: TargetDamage,
 }
 
 #[derive(Component)]
@@ -116,7 +116,13 @@ pub fn on_action_dash_end(
 pub fn update_dash_damage(
     mut commands: Commands,
     mut q_dasher: Query<(Entity, &Transform, &mut DashDamageComponent, &Team)>,
-    q_target: Query<(Entity, &Transform, &Team)>,
+    q_target: Query<(
+        Entity,
+        &Transform,
+        &Team,
+        Option<&Champion>,
+        Option<&Minion>,
+    )>,
     // TODO: Get entity radius
 ) {
     for (dasher, dasher_transform, mut dash_damage, team) in q_dasher.iter_mut() {
@@ -136,12 +142,22 @@ pub fn update_dash_damage(
         let current_radius =
             radius_start + (dash_damage.damage.radius_end - radius_start) * progress;
 
-        for (target, target_transform, target_team) in q_target.iter() {
+        for (target, target_transform, target_team, champion, minion) in q_target.iter() {
             if team == target_team {
                 continue;
             }
 
             if dash_damage.hit_entities.contains(&target) {
+                continue;
+            }
+
+            let apply = match dash_damage.damage.damage.filter {
+                TargetFilter::All => true,
+                TargetFilter::Champion => champion.is_some(),
+                TargetFilter::Minion => minion.is_some(),
+            };
+
+            if !apply {
                 continue;
             }
 
@@ -153,8 +169,8 @@ pub fn update_dash_damage(
                 commands.trigger(CommandDamageCreate {
                     entity: target,
                     source: dasher,
-                    damage_type: dash_damage.damage.damage_type,
-                    amount: dash_damage.damage.amount,
+                    damage_type: dash_damage.damage.damage.damage_type,
+                    amount: dash_damage.damage.damage.amount,
                 });
                 // Optional: Spawn hit effect
                 // commands.trigger(CommandSkinParticleSpawn {
