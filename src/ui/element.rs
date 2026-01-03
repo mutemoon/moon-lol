@@ -1,5 +1,4 @@
-use std::collections::{HashMap, HashSet};
-use std::sync::LazyLock;
+use std::collections::HashMap;
 
 use bevy::prelude::*;
 use bevy::window::{PrimaryWindow, WindowResized};
@@ -10,6 +9,25 @@ use league_utils::hash_bin;
 use lol_config::LoadHashKeyTrait;
 
 use crate::{AssetServerLoadLeague, CommandLoadPropBin, EventLoadPropEnd, PropPath};
+
+pub struct PluginUIElement;
+
+impl Plugin for PluginUIElement {
+    fn build(&self, app: &mut App) {
+        app.init_state::<UIState>();
+        app.init_resource::<UIElementEntity>();
+
+        app.add_systems(Startup, startup_load_ui);
+        app.add_systems(
+            Update,
+            (update_on_window_resized, update_on_add_ui_element).run_if(in_state(UIState::Loaded)),
+        );
+
+        app.add_observer(on_event_load_prop_end_ui_gameplay);
+        app.add_observer(on_event_load_prop_end_ui);
+        app.add_observer(on_command_update_ui_element);
+    }
+}
 
 #[derive(States, Default, Debug, Hash, Eq, Clone, PartialEq)]
 pub enum UIState {
@@ -56,7 +74,7 @@ impl UIElementEntity {
     }
 }
 
-pub fn startup_load_ui(mut commands: Commands) {
+fn startup_load_ui(mut commands: Commands) {
     let paths = vec![
         // "gameplay.playeraugments.bin".to_string(),
         "gameplay.playerframe.bin".to_string(),
@@ -75,10 +93,7 @@ pub fn startup_load_ui(mut commands: Commands) {
     });
 }
 
-static STRS: LazyLock<std::sync::Mutex<HashSet<String>>> =
-    LazyLock::new(|| std::sync::Mutex::new(HashSet::new()));
-
-pub fn on_event_load_prop_end_ui_gameplay(
+fn on_event_load_prop_end_ui_gameplay(
     event: On<EventLoadPropEnd>,
     mut commands: Commands,
     res_assets_ui_property_loadable: Res<Assets<UiPropertyLoadable>>,
@@ -98,7 +113,7 @@ pub fn on_event_load_prop_end_ui_gameplay(
     });
 }
 
-pub fn on_event_load_prop_end_ui(
+fn on_event_load_prop_end_ui(
     event: On<EventLoadPropEnd>,
     mut commands: Commands,
     mut res_ui_element_entity: ResMut<UIElementEntity>,
@@ -111,16 +126,6 @@ pub fn on_event_load_prop_end_ui(
     }
 
     info!("开始初始化 ui 元素");
-
-    for (_, ui) in res_assets_ui_element_icon_data.iter() {
-        if let Some(EnumData::AtlasData(atlas_data)) = &ui.texture_data {
-            let mut strs = STRS.lock().unwrap();
-            if strs.contains(&atlas_data.m_texture_name) {
-                continue;
-            }
-            strs.insert(atlas_data.m_texture_name.clone());
-        }
-    }
 
     for (_, ui) in res_assets_ui_element_icon_data.iter() {
         let Some(entity) = spawn_ui_element(&mut commands, &res_asset_server, ui) else {
@@ -236,13 +241,23 @@ pub fn spawn_ui_atom(
     Some(entity)
 }
 
-fn apply_rect_position(node: &mut Node, ui_element: &UIElement, window_size: Vec2) -> Option<Vec2> {
+fn update_element_layout(
+    entity: Entity,
+    ui_element: &UIElement,
+    window_size: Vec2,
+    q_node: &mut Query<&mut Node>,
+    q_children: &Query<&Children>,
+) {
+    let Ok(mut node) = q_node.get_mut(entity) else {
+        return;
+    };
+
     let EnumUiPosition::UiPositionRect(ref position) = ui_element.position else {
-        return None;
+        return;
     };
 
     let Some(ui_rect) = &position.ui_rect else {
-        return None;
+        return;
     };
 
     let anchor = match &position.anchors {
@@ -251,19 +266,19 @@ fn apply_rect_position(node: &mut Node, ui_element: &UIElement, window_size: Vec
     };
 
     let Some(position) = ui_rect.position else {
-        return None;
+        return;
     };
 
     let Some(size) = ui_rect.size else {
-        return None;
+        return;
     };
 
     let Some(source_resolution_width) = ui_rect.source_resolution_width else {
-        return None;
+        return;
     };
 
     let Some(source_resolution_height) = ui_rect.source_resolution_height else {
-        return None;
+        return;
     };
 
     let scale_y = window_size.y / source_resolution_height as f32;
@@ -286,25 +301,6 @@ fn apply_rect_position(node: &mut Node, ui_element: &UIElement, window_size: Vec
     node.width = Val::Px(size_new.x);
     node.height = Val::Px(size_new.y);
 
-    Some(size_new)
-}
-
-fn update_element_layout(
-    entity: Entity,
-    ui_element: &UIElement,
-    window_size: Vec2,
-    q_node: &mut Query<&mut Node>,
-    q_children: &Query<&Children>,
-) {
-    let Some(size_new) = ({
-        let Ok(mut node) = q_node.get_mut(entity) else {
-            return;
-        };
-        apply_rect_position(&mut node, ui_element, window_size)
-    }) else {
-        return;
-    };
-
     if !ui_element.update_child {
         return;
     }
@@ -325,10 +321,10 @@ fn update_element_layout(
     child_node.height = Val::Px(size_new.y);
 }
 
-pub fn update_on_add_ui_element(
+fn update_on_add_ui_element(
     mut q_element: Query<(Entity, &UIElement), Added<UIElement>>,
-    q_children: Query<&Children>,
     mut q_node: Query<&mut Node>,
+    q_children: Query<&Children>,
     q_window: Query<&Window, With<PrimaryWindow>>,
 ) {
     let Ok(window) = q_window.single() else {
@@ -341,11 +337,11 @@ pub fn update_on_add_ui_element(
     }
 }
 
-pub fn update_ui_element(
-    mut q_element: Query<(Entity, &UIElement)>,
-    q_children: Query<&Children>,
-    mut q_node: Query<&mut Node>,
+fn update_on_window_resized(
     mut resize_reader: MessageReader<WindowResized>,
+    mut q_element: Query<(Entity, &UIElement)>,
+    mut q_node: Query<&mut Node>,
+    q_children: Query<&Children>,
 ) {
     for e in resize_reader.read() {
         let window_size = vec2(e.width, e.height);
@@ -355,7 +351,7 @@ pub fn update_ui_element(
     }
 }
 
-pub fn on_command_update_ui_element(
+fn on_command_update_ui_element(
     trigger: On<CommandUpdateUIElement>,
     q_children: Query<&Children>,
     mut q_node: Query<&mut Node>,

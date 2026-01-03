@@ -7,10 +7,15 @@ mod skill;
 
 pub use animation::*;
 use bevy::prelude::*;
+use bevy::window::PrimaryWindow;
 pub use button::*;
 pub use damage::*;
 pub use element::*;
-use league_core::{FloatingInfoBarViewController, HeroFloatingInfoBarData, UiElementIconData};
+use league_core::{
+    EnumUiPosition, FloatingInfoBarViewController, HeroFloatingInfoBarData,
+    StructureFloatingInfoBarData, UiElementIconData, UiElementRegionData, UnitFloatingInfoBarData,
+};
+use league_utils::hash_bin;
 use lol_config::LoadHashKeyTrait;
 pub use player::*;
 pub use skill::*;
@@ -27,13 +32,11 @@ pub struct PluginUI;
 
 impl Plugin for PluginUI {
     fn build(&self, app: &mut App) {
-        app.init_state::<UIState>();
+        app.add_plugins(PluginUIElement);
 
-        app.init_resource::<UIElementEntity>();
         app.init_resource::<UIButtonEntity>();
         app.init_resource::<SkillLevelUpButton>();
 
-        app.add_systems(Startup, startup_load_ui);
         app.add_systems(Startup, startup_spawn_buttons);
         app.add_systems(
             Update,
@@ -50,18 +53,11 @@ impl Plugin for PluginUI {
                 (update_player_skill_icon, update_player_icon)
                     .run_if(in_state(UIState::Loaded).and(run_once)),
                 update_ui_animation,
-                update_ui_element,
-                update_on_add_ui_element,
                 update_button.run_if(in_state(UIState::Loaded)),
             ),
         );
 
-        // element
-        app.add_observer(on_event_load_prop_end_ui_gameplay);
-        app.add_observer(on_event_load_prop_end_ui);
-
         app.add_observer(on_event_damage_create);
-        app.add_observer(on_command_update_ui_element);
         app.add_observer(on_command_ui_animation_start);
         app.add_observer(on_command_spawn_button);
         app.add_observer(on_command_despawn_button);
@@ -73,6 +69,7 @@ pub struct UIBind {
     pub entity: Entity,
     pub position: Vec3,
     pub offset: Vec2,
+    pub anchor: Vec2,
 }
 
 #[derive(Component)]
@@ -88,7 +85,10 @@ fn init_health_bar(
     mut commands: Commands,
     q_added_health_bar: Query<(Entity, &HealthBar, &Bounding), Added<Bounding>>,
     res_assets_floating_info_bar_view_controller: Res<Assets<FloatingInfoBarViewController>>,
+    res_assets_unit_floating_info_bar_data: Res<Assets<UnitFloatingInfoBarData>>,
     res_assets_hero_floating_info_bar_data: Res<Assets<HeroFloatingInfoBarData>>,
+    res_assets_structure_floating_info_bar_data: Res<Assets<StructureFloatingInfoBarData>>,
+    res_assets_ui_element_region_data: Res<Assets<UiElementRegionData>>,
     res_assets_ui_element_icon_data: Res<Assets<UiElementIconData>>,
     res_asset_server: Res<AssetServer>,
 ) {
@@ -105,11 +105,7 @@ fn init_health_bar(
                     position_type: PositionType::Absolute,
                     ..default()
                 },
-                UIBind {
-                    entity,
-                    position: Vec3::ZERO.with_y(bounding.height),
-                    offset: Vec2::ZERO,
-                },
+                BackgroundColor(Color::WHITE),
             ))
             .id();
 
@@ -118,26 +114,69 @@ fn init_health_bar(
             .get(&health_bar.bar_type)
             .unwrap();
 
+        let spawn_and_attach = |commands: &mut Commands, hash: &u32| {
+            let ui_element_data = res_assets_ui_element_icon_data.load_hash(hash).unwrap();
+            if let Some(ui_element_entity) =
+                spawn_ui_element(commands, &res_asset_server, ui_element_data)
+            {
+                commands
+                    .entity(ui_element_entity)
+                    .insert(Visibility::Visible);
+                commands
+                    .entity(health_bar_entity)
+                    .add_child(ui_element_entity);
+            }
+        };
+
+        let apply_anchor = |commands: &mut Commands, anchor_hash: &u32| {
+            let anchor_region = res_assets_ui_element_region_data
+                .load_hash(anchor_hash)
+                .unwrap();
+
+            if let Some(EnumUiPosition::UiPositionRect(anchor_position)) = &anchor_region.position {
+                let anchor_ui_rect = anchor_position.ui_rect.as_ref().unwrap();
+                commands.entity(health_bar_entity).insert(UIBind {
+                    entity,
+                    position: Vec3::ZERO.with_y(bounding.height),
+                    offset: Vec2::ZERO,
+                    anchor: anchor_ui_rect.position.clone().unwrap() + Vec2::new(50.0, 50.0),
+                });
+            }
+        };
+
         match health_bar.bar_type {
-            12 => {
+            0 | 1 | 2 | 5 | 6 | 7 | 9 => {
+                let bar_data = res_assets_unit_floating_info_bar_data
+                    .load_hash(bar_controller)
+                    .unwrap();
+                apply_anchor(&mut commands, &bar_data.anchor);
+                spawn_and_attach(&mut commands, &bar_data.border);
+            }
+            3 | 4 | 8 => {
+                let bar_data = res_assets_structure_floating_info_bar_data
+                    .load_hash(bar_controller)
+                    .unwrap();
+                apply_anchor(&mut commands, &bar_data.anchor);
+                spawn_and_attach(&mut commands, &bar_data.border);
+            }
+            10 | 12 => {
                 let bar_data = res_assets_hero_floating_info_bar_data
                     .load_hash(bar_controller)
                     .unwrap();
 
-                let ui_element_data = res_assets_ui_element_icon_data
-                    .load_hash(&bar_data.borders.default_border.border)
+                let green_bar = bar_data
+                    .health_bar
+                    .health_bar
+                    .additional_bar_types
+                    .as_ref()
+                    .unwrap()
+                    .get(&hash_bin("green"))
                     .unwrap();
 
-                if let Some(ui_element_entity) =
-                    spawn_ui_element(&mut commands, &res_asset_server, ui_element_data)
-                {
-                    commands
-                        .entity(ui_element_entity)
-                        .insert(Visibility::Visible);
-                    commands
-                        .entity(health_bar_entity)
-                        .add_child(ui_element_entity);
-                }
+                apply_anchor(&mut commands, &bar_data.anchor);
+
+                spawn_and_attach(&mut commands, &bar_data.borders.default_border.border);
+                spawn_and_attach(&mut commands, green_bar);
             }
             _ => {}
         }
@@ -148,11 +187,16 @@ fn update_ui_bind(
     mut commands: Commands,
     camera_info: Single<(&Camera, &GlobalTransform), With<Camera3d>>,
     q_global_transform: Query<&GlobalTransform>,
-    mut q_ui_bind: Query<(Entity, &mut Node, &UIBind)>,
+    mut q_ui_bind: Query<(Entity, &mut Node, &UIBind, &Children)>,
+    q_window: Query<&Window, With<PrimaryWindow>>,
 ) {
     let (camera, camera_global_transform) = camera_info.into_inner();
 
-    for (entity, mut node, ui_bind) in q_ui_bind.iter_mut() {
+    let Ok(window) = q_window.single() else {
+        return;
+    };
+
+    for (entity, mut node, ui_bind, children) in q_ui_bind.iter_mut() {
         let Ok(bind_target) = q_global_transform.get(ui_bind.entity) else {
             commands.entity(entity).despawn();
             continue;
@@ -167,14 +211,26 @@ fn update_ui_bind(
 
         let viewport_position = viewport_position + ui_bind.offset;
 
-        if viewport_position.x < 0.0 || viewport_position.y < 0.0 {
+        if viewport_position.x < 0.0
+            || viewport_position.y < 0.0
+            || viewport_position.x > window.width()
+            || viewport_position.y > window.height()
+        {
             commands.entity(entity).insert(Visibility::Hidden);
+            for child in children {
+                commands.entity(*child).insert(Visibility::Hidden);
+            }
             continue;
-        } else {
-            commands.entity(entity).insert(Visibility::Visible);
-            node.left = Val::Px(viewport_position.x);
-            node.top = Val::Px(viewport_position.y);
         }
+
+        for child in children {
+            commands.entity(*child).insert(Visibility::Visible);
+        }
+        commands.entity(entity).insert(Visibility::Visible);
+
+        let viewport_position = viewport_position - ui_bind.anchor;
+        node.left = Val::Px(viewport_position.x);
+        node.top = Val::Px(viewport_position.y);
     }
 }
 
