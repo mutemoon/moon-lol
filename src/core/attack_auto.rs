@@ -36,29 +36,16 @@ pub struct CommandAttackAutoStop {
 fn on_command_attack_auto_start(
     trigger: On<CommandAttackAutoStart>,
     mut commands: Commands,
-    q_transform: Query<&Transform>,
-    q_attack: Query<&Attack>,
-    q_bounding: Query<&Bounding>,
+    q: Query<(&Transform, &Bounding, Option<&Attack>)>,
 ) {
     let entity = trigger.event_target();
     let target = trigger.target;
 
-    // 获取自身组件
-    let Ok(transform) = q_transform.get(entity) else {
-        return;
-    };
-    let Ok(attack) = q_attack.get(entity) else {
-        return;
-    };
-    let Ok(bounding) = q_bounding.get(entity) else {
+    let Ok((transform, bounding, Some(attack))) = q.get(entity) else {
         return;
     };
 
-    // 获取目标组件
-    let Ok(target_transform) = q_transform.get(target) else {
-        return;
-    };
-    let Ok(target_bounding) = q_bounding.get(target) else {
+    let Ok((target_transform, target_bounding, _)) = q.get(target) else {
         return;
     };
 
@@ -84,27 +71,28 @@ fn on_command_attack_auto_stop(trigger: On<CommandAttackAutoStop>, mut commands:
 
 fn update_attack_auto(
     mut commands: Commands,
-    // 优化：直接在主查询中获取自身的 Transform 和 Bounding，减少 get 调用
-    q_attacker: Query<(Entity, &AttackAuto, &Attack, &Transform, &Bounding)>,
-    q_attack_state: Query<&AttackState>,
-    q_transform: Query<&Transform>,
-    q_bounding: Query<&Bounding>,
+    q_attacker: Query<(
+        Entity,
+        &AttackAuto,
+        &Attack,
+        Option<&AttackState>,
+        &Transform,
+        &Bounding,
+    )>,
+    q_target: Query<(&Transform, &Bounding)>,
 ) {
-    for (entity, attack_auto, attack, transform, bounding) in q_attacker.iter() {
-        // 检查攻击状态（如果在前摇中则跳过）
-        if let Ok(state) = q_attack_state.get(entity) {
-            if matches!(state.status, AttackStatus::Windup { .. }) {
-                continue;
-            }
+    for (entity, attack_auto, attack, attack_state, transform, bounding) in q_attacker.iter() {
+        if let Some(AttackState {
+            status: AttackStatus::Windup { .. },
+            ..
+        }) = attack_state
+        {
+            continue;
         }
 
         let target = attack_auto.target;
 
-        // 获取目标组件
-        let Ok(target_transform) = q_transform.get(target) else {
-            continue;
-        };
-        let Ok(target_bounding) = q_bounding.get(target) else {
+        let Ok((target_transform, target_bounding)) = q_target.get(target) else {
             continue;
         };
 

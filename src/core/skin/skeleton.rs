@@ -5,21 +5,18 @@ use bevy::prelude::*;
 use league_file::LeagueSkeleton;
 use league_utils::hash_joint;
 
-use crate::Loading;
-
-#[derive(EntityEvent)]
-pub struct CommandSkinSkeletonSpawn {
-    pub entity: Entity,
-    pub path: String,
-}
-
-#[derive(TypePath)]
-pub struct SkinSkeletonSpawn(pub Handle<LeagueSkeleton>);
+use crate::{AssetServerLoadLeague, Loading};
 
 struct ConfigJoint {
     hash: u32,
     transform: Transform,
     parent_index: i16,
+}
+
+#[derive(EntityEvent)]
+pub struct CommandSkinSkeletonSpawn {
+    pub entity: Entity,
+    pub path: String,
 }
 
 pub fn on_command_skin_skeleton_spawn(
@@ -29,21 +26,19 @@ pub fn on_command_skin_skeleton_spawn(
 ) {
     let entity = trigger.event_target();
 
-    commands
-        .entity(entity)
-        .insert(Loading::new(SkinSkeletonSpawn(
-            asset_server.load(&trigger.path),
-        )));
+    commands.entity(entity).insert(Loading::new(
+        asset_server.load_league::<LeagueSkeleton>(&trigger.path),
+    ));
 }
 
 pub fn update_skin_skeleton_spawn(
     mut commands: Commands,
     mut res_assets_skinned_mesh_inverse_bindposes: ResMut<Assets<SkinnedMeshInverseBindposes>>,
     res_assets_league_skeleton: ResMut<Assets<LeagueSkeleton>>,
-    q_loading_skeleton: Query<(Entity, &Loading<SkinSkeletonSpawn>)>,
+    q_loading_skeleton: Query<(Entity, &Loading<Handle<LeagueSkeleton>>)>,
 ) {
     for (entity, loading) in q_loading_skeleton.iter() {
-        let Some(league_skeleton) = res_assets_league_skeleton.get(&loading.0) else {
+        let Some(league_skeleton) = res_assets_league_skeleton.get(&loading.value) else {
             continue;
         };
 
@@ -108,6 +103,6 @@ pub fn update_skin_skeleton_spawn(
         commands
             .entity(entity)
             .insert(skinned_mesh.clone())
-            .remove::<Loading<SkinSkeletonSpawn>>();
+            .remove::<Loading<Handle<LeagueSkeleton>>>();
     }
 }

@@ -5,27 +5,14 @@
     ),
     {
         "bevy_transform::components::transform::Transform": (
-            translation: (8800.0, 0.0, 6300.0),
+            translation: (7300.0, 0.0, 7300.0),
             rotation: (0.0, 0.0, 0.0, 1.0),
             scale: (1.0, 1.0, 1.0),
         ),
         "moon_lol::entities::champions::riven::Riven": (),
-        "moon_lol::core::controller::Controller": (),
         "lol_core::team::Team": Order,
-    },
-    (
-        skin_path: "Characters/Fiora/Skins/Skin0",
-        character_record: "Characters/Fiora/CharacterRecords/Root",
-    ),
-    {
-        "bevy_transform::components::transform::Transform": (
-            translation: (9200.0, 0.0, 6300.0),
-            rotation: (0.0, 0.0, 0.0, 1.0),
-            scale: (1.0, 1.0, 1.0),
-        ),
-        "lol_core::team::Team": Order,
-        "moon_lol::entities::champions::fiora::Fiora": (),
         "moon_lol::core::camera::Focus": (),
+        "moon_lol::core::controller::Controller": (),
     },
     (
         skin_path: "Characters/Fiora/Skins/Skin22",
@@ -33,7 +20,7 @@
     ),
     {
         "bevy_transform::components::transform::Transform": (
-            translation: (9000.0, 0.0, 6300.0),
+            translation: (7400.0, 0.0, 7400.0),
             rotation: (0.0, 0.0, 0.0, 1.0),
             scale: (1.0, 1.0, 1.0),
         ),

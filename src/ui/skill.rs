@@ -4,10 +4,31 @@ use lol_config::LoadHashKeyTrait;
 
 use crate::{
     CommandDespawnButton, CommandSkillLevelUp, CommandSpawnButton, Controller, Level, PassiveSkill,
-    ResourceCache, Skill, SkillPoints, Skills, UIElementEntity,
+    ResourceCache, Skill, SkillPoints, Skills, UIElementEntity, UIState,
 };
 
-pub fn update_player_skill_icon(
+#[derive(Default)]
+pub struct PluginUISkill;
+
+impl Plugin for PluginUISkill {
+    fn build(&self, app: &mut App) {
+        app.init_resource::<SkillLevelUpButton>();
+        app.add_systems(
+            Update,
+            (
+                update_skill_level_up_button.run_if(in_state(UIState::Loaded)),
+                update_player_skill_icon.run_if(in_state(UIState::Loaded).and(run_once)),
+            ),
+        );
+    }
+}
+
+#[derive(Resource, Default)]
+struct SkillLevelUpButton {
+    pub entities: [Option<Entity>; 4],
+}
+
+fn update_player_skill_icon(
     asset_server: Res<AssetServer>,
     mut commands: Commands,
     mut q_image_node: Query<&mut ImageNode>,
@@ -79,12 +100,7 @@ pub fn update_player_skill_icon(
     }
 }
 
-#[derive(Resource, Default)]
-pub struct SkillLevelUpButton {
-    pub entities: [Option<Entity>; 4],
-}
-
-pub fn update_skill_level_up_button(
+fn update_skill_level_up_button(
     mut commands: Commands,
     q_skill_points: Query<(Entity, &Level, &SkillPoints, &Skills), With<Controller>>,
     mut res_skill_level_up_button: ResMut<SkillLevelUpButton>,

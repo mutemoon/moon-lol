@@ -12,12 +12,9 @@ use bevy::transform::systems::{
 };
 pub use emitter::*;
 pub use environment::*;
-use league_core::{
-    ValueColor, ValueFloat, ValueVector2, ValueVector3, VfxEmitterDefinitionData,
-    VfxSystemDefinitionData,
-};
+use league_core::{VfxEmitterDefinitionData, VfxSystemDefinitionData};
 use league_utils::hash_wad;
-use lol_config::{HashKey, LeagueProperties, LoadHashKeyTrait};
+use lol_config::{HashKey, LoadHashKeyTrait};
 pub use particle::*;
 pub use skinned_mesh::*;
 pub use utils::*;
@@ -99,11 +96,10 @@ pub struct ParticleId {
 impl ParticleId {
     pub fn get_def<'a>(
         self: &Self,
-        res_assets_league_properties: &'a Res<LeagueProperties>,
         res_assets_vfx_system_definition_data: &'a Res<Assets<VfxSystemDefinitionData>>,
     ) -> &'a VfxEmitterDefinitionData {
-        res_assets_league_properties
-            .get(res_assets_vfx_system_definition_data, self.hash)
+        res_assets_vfx_system_definition_data
+            .load_hash(self.hash)
             .unwrap()
             .complex_emitter_definition_data
             .as_ref()
@@ -150,141 +146,24 @@ fn on_command_particle_spawn(
         .load_hash(trigger.hash)
         .unwrap();
 
-    // if !vfx_system_definition_data
-    //     .particle_name
-    //     .ends_with("Dash_Trail_ground")
-    // {
-    //     return;
-    // }
+    let vfx_emitter_definition_datas = vfx_system_definition_data
+        .complex_emitter_definition_data
+        .iter()
+        .flatten()
+        .chain(
+            vfx_system_definition_data
+                .simple_emitter_definition_data
+                .iter()
+                .flatten(),
+        );
 
-    let mut vfx_emitter_definition_datas = Vec::new();
-
-    if let Some(complex_emitter_definition_data) =
-        &vfx_system_definition_data.complex_emitter_definition_data
-    {
-        vfx_emitter_definition_datas.extend(complex_emitter_definition_data);
-    }
-
-    if let Some(simple_emitter_definition_data) =
-        &vfx_system_definition_data.simple_emitter_definition_data
-    {
-        vfx_emitter_definition_datas.extend(simple_emitter_definition_data);
-    }
-
-    for (i, vfx_emitter_definition_data) in vfx_emitter_definition_datas.into_iter().enumerate() {
-        // if vfx_emitter_definition_data.emitter_name.clone().unwrap() != "Fiora_Flash" {
-        //     continue;
-        // }
-
-        let rate = vfx_emitter_definition_data.rate.clone().unwrap();
-        let particle_lifetime = vfx_emitter_definition_data
-            .particle_lifetime
-            .clone()
-            .unwrap_or(ValueFloat {
-                dynamics: None,
-                constant_value: Some(1.0),
-            });
-        let color = vfx_emitter_definition_data
-            .color
-            .clone()
-            .unwrap_or(ValueColor {
-                dynamics: None,
-                constant_value: Some(Vec4::ONE),
-            });
-        let scale0 = vfx_emitter_definition_data
-            .scale0
-            .clone()
-            .unwrap_or(ValueVector3 {
-                dynamics: None,
-                constant_value: Some(Vec3::ONE),
-            });
-        let birth_velocity = vfx_emitter_definition_data
-            .birth_velocity
-            .clone()
-            .unwrap_or(ValueVector3 {
-                dynamics: None,
-                constant_value: Some(Vec3::ZERO),
-            });
-        let birth_acceleration = vfx_emitter_definition_data
-            .birth_acceleration
-            .clone()
-            .unwrap_or(ValueVector3 {
-                dynamics: None,
-                constant_value: Some(Vec3::ZERO),
-            });
-        let birth_color = vfx_emitter_definition_data
-            .birth_color
-            .clone()
-            .unwrap_or(ValueColor {
-                dynamics: None,
-                constant_value: Some(Vec4::ONE),
-            });
-        let birth_rotation0 = vfx_emitter_definition_data
-            .birth_rotation0
-            .clone()
-            .unwrap_or(ValueVector3 {
-                dynamics: None,
-                constant_value: Some(Vec3::ZERO),
-            });
-        let birth_scale0 =
-            vfx_emitter_definition_data
-                .birth_scale0
-                .clone()
-                .unwrap_or(ValueVector3 {
-                    dynamics: None,
-                    constant_value: Some(Vec3::ONE),
-                });
-        let birth_uv_offset = vfx_emitter_definition_data
-            .birth_uv_offset
-            .clone()
-            .unwrap_or(ValueVector2 {
-                dynamics: None,
-                constant_value: Some(Vec2::ONE),
-            });
-        let birth_uv_scroll_rate = vfx_emitter_definition_data
-            .birth_uv_scroll_rate
-            .clone()
-            .unwrap_or(ValueVector2 {
-                dynamics: None,
-                constant_value: Some(Vec2::ZERO),
-            });
-        let emitter_position = vfx_emitter_definition_data
-            .emitter_position
-            .clone()
-            .unwrap_or(ValueVector3 {
-                dynamics: None,
-                constant_value: Some(Vec3::ZERO),
-            });
-        let bind_weight = vfx_emitter_definition_data
-            .bind_weight
-            .clone()
-            .unwrap_or(ValueFloat {
-                dynamics: None,
-                constant_value: Some(0.0),
-            });
-
+    for (i, vfx_emitter_definition_data) in vfx_emitter_definition_datas.enumerate() {
         commands.entity(entity).with_related::<EmitterOf>((
             ParticleId {
                 hash: trigger.hash,
                 index: i,
             },
-            ParticleEmitterState {
-                birth_acceleration: birth_acceleration.into(),
-                birth_color: birth_color.into(),
-                birth_rotation0: birth_rotation0.into(),
-                birth_scale0: birth_scale0.into(),
-                birth_uv_offset: birth_uv_offset.into(),
-                birth_uv_scroll_rate: birth_uv_scroll_rate.into(),
-                birth_velocity: birth_velocity.into(),
-                bind_weight: bind_weight.into(),
-                color: color.into(),
-                scale0: scale0.into(),
-                emission_debt: 0.,
-                particle_lifetime: particle_lifetime.into(),
-                rate: rate.into(),
-                emitter_position: emitter_position.into(),
-                global_transform,
-            },
+            ParticleEmitterState::new(vfx_emitter_definition_data, global_transform),
             Lifetime::new(
                 vfx_emitter_definition_data.lifetime.unwrap_or(1.0),
                 LifetimeMode::TimerAndNoChildren,

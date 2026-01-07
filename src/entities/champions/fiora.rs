@@ -1,19 +1,18 @@
-use std::sync::Arc;
-
 use bevy::prelude::*;
 use bevy_behave::{behave, Behave};
 use league_core::CharacterRecord;
 use league_utils::hash_bin;
 use lol_config::LoadHashKeyTrait;
 
-use crate::abilities::{AbilityFioraPassive, BuffFioraE, BuffFioraR};
 use crate::core::{
-    ActionAnimationPlay, ActionAttackReset, ActionBuffSpawn, ActionCommand, ActionDamage,
-    ActionDash, ActionParticleDespawn, ActionParticleSpawn, AttackBuff, BuffOf, CoolDown, Skill,
-    SkillOf, Skills,
+    ActionAnimationPlay, ActionAttackReset, ActionBuffSpawn, ActionDamage, ActionDamageEffect,
+    ActionDash, ActionParticleDespawn, ActionParticleSpawn, BuffAttack, CoolDown, DamageShape,
+    DamageType, Skill, SkillOf, Skills, TargetDamage, TargetFilter,
 };
 use crate::entities::champion::Champion;
-use crate::{PassiveSkillOf, SkillEffect};
+use crate::{
+    AbilityFioraPassive, BuffFioraE, BuffFioraR, DashMoveType, PassiveSkillOf, SkillEffect,
+};
 
 #[derive(Default)]
 pub struct PluginFiora;
@@ -42,10 +41,27 @@ fn startup_load_assets(mut res_assets_skill_effect: ResMut<Assets<SkillEffect>>)
                     ActionParticleSpawn { hash: hash_bin("Fiora_Q_Dash_Trail_ground") },
                 ),
                 Behave::trigger(
-                    ActionDash::Pointer { speed: 1000., max: 300. },
+                    ActionDash {
+                        skill: "Characters/Fiora/Spells/FioraQAbility/FioraQ".into(),
+                        move_type: DashMoveType::Pointer { max: 300. },
+                        damage: None,
+                        speed: 1000.0,
+                    },
                 ),
                 Behave::IfThen => {
-                    Behave::trigger(ActionDamage),
+                    Behave::trigger(ActionDamage {
+                        entity: Entity::PLACEHOLDER,
+                        skill: "Characters/Fiora/Spells/FioraQAbility/FioraQ".into(),
+                        effects: vec![ActionDamageEffect {
+                            shape: DamageShape::Nearest { max_distance: 300.0 },
+                            damage_list: vec![TargetDamage {
+                                filter: TargetFilter::All,
+                                amount: hash_bin("TotalDamage"),
+                                damage_type: DamageType::Physical,
+                            }],
+                            particle: Some(hash_bin("Fiora_Q_Slash_Cas")),
+                        }],
+                    }),
                     Behave::Sequence => {
                     },
                 },
@@ -70,7 +86,6 @@ fn startup_load_assets(mut res_assets_skill_effect: ResMut<Assets<SkillEffect>>)
                 Behave::trigger(
                     ActionAnimationPlay { hash: hash_bin("Spell2") }
                 ),
-                Behave::trigger(ActionDamage),
                 Behave::Wait(0.1),
                 Behave::trigger(
                     ActionParticleDespawn{ hash: hash_bin("Fiora_W_Telegraph_Blue") },
@@ -83,18 +98,12 @@ fn startup_load_assets(mut res_assets_skill_effect: ResMut<Assets<SkillEffect>>)
         "Characters/Fiora/Spells/FioraEAbility/FioraE",
         SkillEffect(behave! {
             Behave::Sequence => {
-                Behave::trigger(ActionBuffSpawn{
-                    bundle: Arc::new(|commands: &mut EntityCommands| {
-                        commands.with_related::<BuffOf>((
-                            AttackBuff {
-                                bonus_attack_speed: 0.5,
-                            },
-                            BuffFioraE {
-                                left: 2
-                            },
-                        ));
-                    }),
-                }),
+                Behave::trigger(ActionBuffSpawn::new((
+                    BuffAttack {
+                        bonus_attack_speed: 0.5,
+                    },
+                    BuffFioraE::default()
+                ))),
                 Behave::trigger(ActionAttackReset),
             }
         }),
@@ -110,13 +119,9 @@ fn startup_load_assets(mut res_assets_skill_effect: ResMut<Assets<SkillEffect>>)
                 Behave::trigger(
                     ActionParticleSpawn { hash: hash_bin("Fiora_R_ALL_Warning") },
                 ),
-                Behave::trigger(ActionCommand {
-                    bundle: Arc::new(|commands: &mut EntityCommands| {
-                        commands.with_related::<BuffOf>((
-                            BuffFioraR::default(),
-                        ));
-                    }),
-                }),
+                Behave::trigger(ActionBuffSpawn::new(
+                    BuffFioraR::default(),
+                )),
             }
         }),
     );

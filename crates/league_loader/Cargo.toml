@@ -4,7 +4,6 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-binrw.workspace = true
 league_core.workspace = true
 league_file.workspace = true
 league_property.workspace = true
@@ -12,3 +11,4 @@ league_utils.workspace = true
 lol_config.workspace = true
 thiserror.workspace = true
 zstd = "0.13.3"
+nom.workspace = true

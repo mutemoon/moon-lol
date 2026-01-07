@@ -24,7 +24,8 @@ impl Plugin for PluginBarrack {
         app.add_systems(
             Update,
             (
-                update_spawn_barrack.run_if(in_state(MapState::Loaded).and(run_once)),
+                update_spawn_barrack
+                    .run_if(in_state(MapState::Loaded).and(in_state(BarrackState::Loading))),
                 is_character_loaded.run_if(in_state(BarrackState::Loading)),
             ),
         );
@@ -72,13 +73,15 @@ pub enum BarrackState {
 fn update_spawn_barrack(
     mut commands: Commands,
     mut res_minion_path: ResMut<MinionPath>,
-    map_name: Res<MapName>,
+    res_map_name: Res<MapName>,
     res_assets_map_container: Res<Assets<MapContainer>>,
     res_assets_map_placeable_container: Res<Assets<MapPlaceableContainer>>,
     res_assets_barracks_config: Res<Assets<BarracksConfig>>,
     res_assets_unk_ad65d8c4: Res<Assets<Unk0xad65d8c4>>,
 ) {
-    let map_container = res_assets_map_container.load_hash(&map_name.0).unwrap();
+    let map_container = res_assets_map_container
+        .load_hash(&res_map_name.get_materials_path())
+        .unwrap();
 
     for (_, &link) in &map_container.chunks {
         let Some(map_placeable_container) = res_assets_map_placeable_container.load_hash(link)
@@ -86,7 +89,25 @@ fn update_spawn_barrack(
             continue;
         };
 
-        for (_, value) in map_placeable_container.items.as_ref().unwrap() {
+        let Some(items) = map_placeable_container.items.as_ref() else {
+            continue;
+        };
+
+        for (_, value) in items {
+            match value {
+                EnumMap::Unk0xba138ae3(unk0xba138ae3) => {
+                    if res_assets_barracks_config
+                        .load_hash(unk0xba138ae3.definition.barracks_config)
+                        .is_none()
+                    {
+                        return;
+                    }
+                }
+                _ => {}
+            }
+        }
+
+        for (_, value) in items {
             match value {
                 EnumMap::Unk0x3c995caf(unk0x3c995caf) => {
                     let lane = match unk0x3c995caf.name.as_str() {

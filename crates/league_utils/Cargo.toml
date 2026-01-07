@@ -7,5 +7,5 @@ edition = "2021"
 bevy.workspace = true
 twox-hash = "2.1.1"
 heck.workspace = true
-binrw.workspace = true
+nom.workspace = true
 serde.workspace = true

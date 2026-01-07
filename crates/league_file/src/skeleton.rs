@@ -1,26 +1,41 @@
 use bevy::asset::Asset;
 use bevy::math::{Mat4, Quat, Vec3, Vec4};
 use bevy::reflect::TypePath;
-use binrw::io::{Read, Seek, SeekFrom};
-use binrw::prelude::*;
-use binrw::{binread, BinRead, Endian};
-use league_utils::{parse_quat, parse_vec3};
+use nom::bytes::complete::take;
+use nom::multi::count;
+use nom::number::complete::{le_f32, le_i16, le_i32, le_u16, le_u32, le_u8};
+use nom::{IResult, Parser};
 
-const FORMAT_TOKEN: u32 = 0x22FD4FC3;
+pub const FORMAT_TOKEN: u32 = 0x22FD4FC3;
 
-#[binread]
 #[derive(Debug, Asset, TypePath)]
-#[br(little)]
 pub struct LeagueSkeleton {
-    #[br(temp)]
-    _file_size: u32,
-
-    #[br(temp)]
-    format_token: u32,
-
-    #[br(args(format_token))]
-    #[br(map = |kind: SkeletonDataKind| kind.into())]
     pub modern_data: SkeletonData,
+}
+
+impl LeagueSkeleton {
+    pub fn parse(input: &[u8]) -> IResult<&[u8], Self> {
+        let (i, _file_size) = le_u32(input)?;
+        let (i, format_token) = le_u32(i)?;
+
+        if format_token == FORMAT_TOKEN {
+            let (_, modern) = ModernSkeletonData::parse(input)?;
+            Ok((
+                i,
+                LeagueSkeleton {
+                    modern_data: modern.into(),
+                },
+            ))
+        } else {
+            let (_, legacy) = LegacySkeletonData::parse(input)?;
+            Ok((
+                i,
+                LeagueSkeleton {
+                    modern_data: legacy.into(),
+                },
+            ))
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -43,176 +58,197 @@ pub struct Joint {
     pub inverse_bind_transform: Mat4,
 }
 
-#[binread]
-#[br(import(format_token: u32))]
-enum SkeletonDataKind {
-    #[br(pre_assert(format_token == FORMAT_TOKEN))]
-    Modern(ModernSkeletonData),
-
-    Legacy(LegacySkeletonData),
+struct ModernSkeletonData {
+    pub flags: u16,
+    pub name: String,
+    pub asset_name: String,
+    pub joints: Vec<RigResourceJoint>,
+    pub influences: Vec<i16>,
 }
 
-impl From<SkeletonDataKind> for SkeletonData {
-    fn from(kind: SkeletonDataKind) -> Self {
-        match kind {
-            SkeletonDataKind::Modern(modern) => {
-                let joints = modern
-                    .joints
-                    .into_iter()
-                    .map(|j| Joint {
-                        name: j.name,
-                        flags: j.flags,
-                        index: j.id,
-                        parent_index: j.parent_id,
-                        radius: j.radius,
-                        local_transform: j.local_transform,
-                        inverse_bind_transform: j.inverse_bind_transform,
-                    })
-                    .collect();
+impl ModernSkeletonData {
+    pub fn parse(full_input: &[u8]) -> IResult<&[u8], Self> {
+        let i = &full_input[8..];
+        let (i, version) = le_u32(i)?;
+        if version != 0 {
+            panic!("Invalid skeleton version: {}", version);
+        }
+        let (i, flags) = le_u16(i)?;
+        let (i, joint_count) = le_u16(i)?;
+        let (i, influences_count) = le_u32(i)?;
 
-                SkeletonData {
-                    flags: modern.flags,
-                    name: modern.name,
-                    asset_name: modern.asset_name,
-                    joints,
-                    influences: modern.influences,
-                }
-            }
-            SkeletonDataKind::Legacy(legacy) => SkeletonData {
-                flags: 0,
-                name: String::new(),
-                asset_name: String::new(),
-                joints: legacy.joints,
-                influences: legacy.influences,
+        let (i, joints_offset) = le_i32(i)?;
+        let (i, _joint_indices_offset) = le_i32(i)?;
+        let (i, influences_offset) = le_i32(i)?;
+        let (i, name_offset) = le_i32(i)?;
+        let (i, asset_name_offset) = le_i32(i)?;
+        let (i, _bone_names_offset) = le_i32(i)?;
+
+        let (i, _reserved) = count(le_i32, 5).parse(i)?;
+
+        let name = if name_offset > 0 {
+            read_null_terminated_string(&full_input[name_offset as usize..])?.1
+        } else {
+            String::new()
+        };
+
+        let asset_name = if asset_name_offset > 0 {
+            read_null_terminated_string(&full_input[asset_name_offset as usize..])?.1
+        } else {
+            String::new()
+        };
+
+        let joints = if joints_offset > 0 {
+            count(
+                |input| RigResourceJoint::parse(input, full_input),
+                joint_count as usize,
+            )
+            .parse(&full_input[joints_offset as usize..])?
+            .1
+        } else {
+            Vec::new()
+        };
+
+        let influences = if influences_offset > 0 {
+            count(le_i16, influences_count as usize)
+                .parse(&full_input[influences_offset as usize..])?
+                .1
+        } else {
+            Vec::new()
+        };
+
+        Ok((
+            i,
+            ModernSkeletonData {
+                flags,
+                name,
+                asset_name,
+                joints,
+                influences,
             },
+        ))
+    }
+}
+
+impl From<ModernSkeletonData> for SkeletonData {
+    fn from(modern: ModernSkeletonData) -> Self {
+        let joints = modern
+            .joints
+            .into_iter()
+            .map(|j| Joint {
+                name: j.name,
+                flags: j.flags,
+                index: j.id,
+                parent_index: j.parent_id,
+                radius: j.radius,
+                local_transform: j.local_transform,
+                inverse_bind_transform: j.inverse_bind_transform,
+            })
+            .collect();
+
+        SkeletonData {
+            flags: modern.flags,
+            name: modern.name,
+            asset_name: modern.asset_name,
+            joints,
+            influences: modern.influences,
         }
     }
 }
 
-#[binread]
-#[br(little)]
-struct ModernSkeletonData {
-    #[br(temp)]
-    version: u32,
-    #[br(assert(version == 0, "Invalid skeleton version: {}", version))]
-    pub flags: u16,
-    #[br(temp)]
-    joint_count: u16,
-    #[br(temp)]
-    influences_count: u32,
-
-    #[br(temp)]
-    joints_offset: i32,
-    _joint_indices_offset: i32,
-    #[br(temp)]
-    influences_offset: i32,
-    #[br(temp)]
-    name_offset: i32,
-    #[br(temp)]
-    asset_name_offset: i32,
-    _bone_names_offset: i32,
-
-    #[br(count = 5)]
-    _reserved: Vec<i32>,
-
-    #[br(
-        seek_before = SeekFrom::Start(name_offset as u64),
-        if(name_offset > 0),
-        parse_with = read_null_terminated_string,
-        restore_position
-    )]
-    pub name: String,
-
-    #[br(
-        seek_before = SeekFrom::Start(asset_name_offset as u64),
-        if(asset_name_offset > 0),
-        parse_with = read_null_terminated_string,
-        restore_position
-    )]
-    pub asset_name: String,
-
-    #[br(
-        seek_before = SeekFrom::Start(joints_offset as u64),
-        count = joint_count,
-        if(joints_offset > 0)
-    )]
-    pub joints: Vec<RigResourceJoint>,
-
-    #[br(
-        seek_before = SeekFrom::Start(influences_offset as u64),
-        count = influences_count,
-        if(influences_offset > 0)
-    )]
-    pub influences: Vec<i16>,
-}
-
-#[binread]
-#[derive(Debug)]
-#[br(little)]
 struct RigResourceJoint {
     pub flags: u16,
     pub id: i16,
     pub parent_id: i16,
-    #[br(temp)]
-    _padding: u16,
-    #[br(temp)]
-    _name_hash: u32,
     pub radius: f32,
-
-    #[br(temp, map = parse_vec3)]
-    local_translation: Vec3,
-    #[br(temp, map = parse_vec3)]
-    local_scale: Vec3,
-    #[br(temp, map = parse_quat)]
-    local_rotation: Quat,
-    #[br(temp, map = parse_vec3)]
-    inverse_bind_translation: Vec3,
-    #[br(temp, map = parse_vec3)]
-    inverse_bind_scale: Vec3,
-    #[br(temp, map = parse_quat)]
-    inverse_bind_rotation: Quat,
-
-    #[br(map = |rs: RelativeString| rs.0)]
     pub name: String,
-
-    #[br(calc = Mat4::from_scale_rotation_translation(local_scale, local_rotation, local_translation))]
     pub local_transform: Mat4,
-
-    #[br(calc = Mat4::from_scale_rotation_translation(inverse_bind_scale, inverse_bind_rotation, inverse_bind_translation))]
     pub inverse_bind_transform: Mat4,
 }
 
-#[binread]
-#[derive(Debug)]
-#[br(little)]
+impl RigResourceJoint {
+    pub fn parse<'a>(input: &'a [u8], full_input: &'a [u8]) -> IResult<&'a [u8], Self> {
+        let (i, flags) = le_u16(input)?;
+        let (i, id) = le_i16(i)?;
+        let (i, parent_id) = le_i16(i)?;
+        let (i, _padding) = le_u16(i)?;
+        let (i, _name_hash) = le_u32(i)?;
+        let (i, radius) = le_f32(i)?;
+
+        let (i, local_translation) = parse_vec3(i)?;
+        let (i, local_scale) = parse_vec3(i)?;
+        let (i, local_rotation) = parse_quat(i)?;
+        let (i, inverse_bind_translation) = parse_vec3(i)?;
+        let (i, inverse_bind_scale) = parse_vec3(i)?;
+        let (i, inverse_bind_rotation) = parse_quat(i)?;
+
+        let (i, name_offset) = le_i32(i)?;
+        // Relative string: base_pos + offset
+        // base_pos is the position of the offset itself.
+        // In our case, the offset was at input - 4.
+        let base_pos = (input.as_ptr() as usize - full_input.as_ptr() as usize)
+            + (i.as_ptr() as usize - input.as_ptr() as usize)
+            - 4;
+        let string_pos = (base_pos as i64 + name_offset as i64) as usize;
+        let name = read_null_terminated_string(&full_input[string_pos..])?.1;
+
+        Ok((
+            i,
+            RigResourceJoint {
+                flags,
+                id,
+                parent_id,
+                radius,
+                name,
+                local_transform: Mat4::from_scale_rotation_translation(
+                    local_scale,
+                    local_rotation,
+                    local_translation,
+                ),
+                inverse_bind_transform: Mat4::from_scale_rotation_translation(
+                    inverse_bind_scale,
+                    inverse_bind_rotation,
+                    inverse_bind_translation,
+                ),
+            },
+        ))
+    }
+}
+
 struct LegacySkeletonData {
-    #[br(seek_before = SeekFrom::Start(0), magic = b"r3d2sklt")]
-    _magic: (),
-
-    #[br(temp)]
-    version: u32,
-    #[br(assert(version == 1 || version == 2, "Invalid legacy skeleton version: {}", version))]
-    _skeleton_id: u32,
-    #[br(temp)]
-    joint_count: u32,
-
-    #[br(temp)]
-    #[br(count = joint_count)]
-    legacy_joints: Vec<RigResourceLegacyJoint>,
-
-    #[br(temp)]
-    #[br(if(version == 2))]
-    #[br(parse_with = parse_legacy_influences)]
-    influences_v2: Vec<i16>,
-
-    #[br(calc = Self::calculate_joints(&legacy_joints))]
     pub joints: Vec<Joint>,
-
-    #[br(calc = Self::calculate_influences(version, joint_count, &influences_v2))]
     pub influences: Vec<i16>,
 }
 
 impl LegacySkeletonData {
+    pub fn parse(full_input: &[u8]) -> IResult<&[u8], Self> {
+        let (i, magic) = take(8usize)(full_input)?;
+        if magic != b"r3d2sklt" {
+            panic!("Invalid legacy skeleton magic");
+        }
+        let (i, version) = le_u32(i)?;
+        if version != 1 && version != 2 {
+            panic!("Invalid legacy skeleton version: {}", version);
+        }
+        let (i, _skeleton_id) = le_u32(i)?;
+        let (i, joint_count) = le_u32(i)?;
+
+        let (i, legacy_joints) =
+            count(RigResourceLegacyJoint::parse, joint_count as usize).parse(i)?;
+
+        let (i, influences) = if version == 2 {
+            let (i, count_val) = le_u32(i)?;
+            let (i, influences_raw) = count(le_u32, count_val as usize).parse(i)?;
+            (i, influences_raw.into_iter().map(|v| v as i16).collect())
+        } else {
+            (i, (0..joint_count as i16).collect())
+        };
+
+        let joints = Self::calculate_joints(&legacy_joints);
+
+        Ok((i, LegacySkeletonData { joints, influences }))
+    }
+
     fn calculate_joints(legacy_joints: &[RigResourceLegacyJoint]) -> Vec<Joint> {
         for (i, joint) in legacy_joints.iter().enumerate() {
             if i as i32 <= joint.parent_id {
@@ -227,7 +263,6 @@ impl LegacySkeletonData {
                     joint.global_transform
                 } else {
                     let parent_global = legacy_joints[joint.parent_id as usize].global_transform;
-
                     joint.global_transform * parent_global.inverse()
                 }
             })
@@ -247,94 +282,84 @@ impl LegacySkeletonData {
             })
             .collect()
     }
+}
 
-    fn calculate_influences(version: u32, joint_count: u32, influences_v2: &[i16]) -> Vec<i16> {
-        if version == 2 {
-            influences_v2.to_vec()
-        } else {
-            (0..joint_count as i16).collect()
+impl From<LegacySkeletonData> for SkeletonData {
+    fn from(legacy: LegacySkeletonData) -> Self {
+        SkeletonData {
+            flags: 0,
+            name: String::new(),
+            asset_name: String::new(),
+            joints: legacy.joints,
+            influences: legacy.influences,
         }
     }
 }
 
-#[binread]
-#[derive(Debug)]
-#[br(little)]
 struct RigResourceLegacyJoint {
-    #[br(count = 32, map = |bytes: Vec<u8>| String::from_utf8_lossy(&bytes).trim_end_matches('\0').to_string())]
     pub name: String,
     pub parent_id: i32,
     pub radius: f32,
-    #[br(map = |data: LegacyTransformData| data.into())]
     pub global_transform: Mat4,
 }
 
-#[binread]
-#[derive(Debug)]
-#[br(little)]
-struct LegacyTransformData {
-    col0: [f32; 4],
-    col1: [f32; 4],
-    col2: [f32; 4],
-}
+impl RigResourceLegacyJoint {
+    pub fn parse(input: &[u8]) -> IResult<&[u8], Self> {
+        let (i, name_bytes) = take(32usize)(input)?;
+        let name = String::from_utf8_lossy(name_bytes)
+            .trim_end_matches('\0')
+            .to_string();
+        let (i, parent_id) = le_i32(i)?;
+        let (i, radius) = le_f32(i)?;
+        let (i, col0) = count(le_f32, 4).parse(i)?;
+        let (i, col1) = count(le_f32, 4).parse(i)?;
+        let (i, col2) = count(le_f32, 4).parse(i)?;
 
-impl From<LegacyTransformData> for Mat4 {
-    fn from(data: LegacyTransformData) -> Self {
-        Mat4::from_cols(
-            data.col0.into(),
-            data.col1.into(),
-            data.col2.into(),
+        let global_transform = Mat4::from_cols(
+            Vec4::from_slice(&col0),
+            Vec4::from_slice(&col1),
+            Vec4::from_slice(&col2),
             Vec4::new(0.0, 0.0, 0.0, 1.0),
-        )
+        );
+
+        Ok((
+            i,
+            RigResourceLegacyJoint {
+                name,
+                parent_id,
+                radius,
+                global_transform,
+            },
+        ))
     }
 }
 
-fn parse_legacy_influences<R: Read + Seek>(
-    reader: &mut R,
-    endian: Endian,
-    _: (),
-) -> BinResult<Vec<i16>> {
-    let count = u32::read_options(reader, endian, ())?;
-    let mut influences = Vec::with_capacity(count as usize);
-    for _ in 0..count {
-        influences.push(u32::read_options(reader, endian, ())? as i16);
-    }
-    Ok(influences)
-}
-
-struct RelativeString(pub String);
-
-impl BinRead for RelativeString {
-    type Args<'a> = ();
-
-    fn read_options<R: Read + Seek>(
-        reader: &mut R,
-        endian: Endian,
-        _args: Self::Args<'_>,
-    ) -> BinResult<Self> {
-        let base_pos = reader.stream_position()?;
-        let offset = i32::read_options(reader, endian, ())?;
-        let after_offset_pos = reader.stream_position()?;
-
-        let string_pos = (base_pos as i64 + offset as i64) as u64;
-
-        reader.seek(SeekFrom::Start(string_pos))?;
-        let value = read_null_terminated_string(reader, endian, ())?;
-        reader.seek(SeekFrom::Start(after_offset_pos))?;
-
-        Ok(RelativeString(value))
-    }
-}
-
-fn read_null_terminated_string<R: Read>(reader: &mut R, _: Endian, _: ()) -> BinResult<String> {
+fn read_null_terminated_string(input: &[u8]) -> IResult<&[u8], String> {
     let mut bytes = Vec::new();
+    let mut current_input = input;
     loop {
-        let mut byte = [0u8; 1];
-        reader.read_exact(&mut byte)?;
-        if byte[0] == 0 {
+        let (i, byte) = le_u8(current_input)?;
+        if byte == 0 {
+            current_input = i;
             break;
         }
-        bytes.push(byte[0]);
+        bytes.push(byte);
+        current_input = i;
     }
-    Ok(String::from_utf8_lossy(&bytes).to_string())
+    Ok((current_input, String::from_utf8_lossy(&bytes).to_string()))
+}
+
+fn parse_vec3(input: &[u8]) -> IResult<&[u8], Vec3> {
+    let (i, x) = le_f32(input)?;
+    let (i, y) = le_f32(i)?;
+    let (i, z) = le_f32(i)?;
+    Ok((i, Vec3::new(x, y, z)))
+}
+
+fn parse_quat(input: &[u8]) -> IResult<&[u8], Quat> {
+    let (i, x) = le_f32(input)?;
+    let (i, y) = le_f32(i)?;
+    let (i, z) = le_f32(i)?;
+    let (i, w) = le_f32(i)?;
+    Ok((i, Quat::from_xyzw(x, y, z, w)))
 }

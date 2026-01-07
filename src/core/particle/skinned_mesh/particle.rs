@@ -8,8 +8,9 @@ use bevy::render::render_resource::{
     ShaderType, SpecializedMeshPipelineError,
 };
 use bevy::shader::ShaderRef;
+use league_utils::get_shader_handle;
 
-use crate::{get_shader_handle, MaterialPath};
+use crate::MaterialPath;
 
 #[derive(Clone, ShaderType, Debug)]
 pub struct UniformsVertexSkinnedMeshParticle {

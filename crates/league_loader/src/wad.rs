@@ -2,8 +2,6 @@ use std::fs::File;
 use std::io::{self, BufReader, Cursor, Read};
 use std::sync::Arc;
 
-use binrw::io::NoSeek;
-use binrw::{args, BinRead, Endian};
 use league_utils::hash_wad;
 use zstd::Decoder;
 
@@ -27,7 +25,27 @@ impl LeagueWadLoader {
 
         let file = Arc::new(File::open(&wad_absolute_path)?);
 
-        let wad = LeagueWad::read(&mut ArcFileReader::new(file.clone(), 0))?;
+        // Read first 272 bytes for header (magic + major + minor + padding + entry_count)
+        // Actually, LeagueWad::parse reads magic (2) + major (1) + minor (1) + padding (0x108) + entry_count (4) = 272 bytes.
+        // But then it reads entries. So we need to read more.
+        // Let's read the whole header first to get entry_count.
+        let mut header_bytes = [0u8; 272];
+        let mut f = File::open(&wad_absolute_path)?;
+        f.read_exact(&mut header_bytes)?;
+        let entry_count = u32::from_le_bytes(header_bytes[268..272].try_into().unwrap());
+
+        // Now read the whole thing (header + entries)
+        let total_header_size = 272 + (entry_count as usize * 32); // Each entry is 32 bytes
+        let mut wad_bytes = vec![0u8; total_header_size];
+        let mut f = File::open(&wad_absolute_path)?;
+        f.read_exact(&mut wad_bytes)?;
+
+        let (_, wad) = LeagueWad::parse(&wad_bytes).map_err(|_| {
+            Error::Io(io::Error::new(
+                io::ErrorKind::InvalidData,
+                "Failed to parse WAD",
+            ))
+        })?;
 
         let subchunk_path: String = wad_relative_path.replace(".client", ".subchunktoc");
 
@@ -47,13 +65,19 @@ impl LeagueWadLoader {
     ) -> Result<LeagueWadSubchunk, Error> {
         let entry = wad.get_entry(hash_wad(&subchunk_path))?;
 
-        let reader = Self::get_wad_zstd_entry_reader_inner(file.clone(), &entry)?;
+        let mut reader = Self::get_wad_zstd_entry_reader_inner(file.clone(), &entry)?;
+        let mut data = Vec::new();
+        reader.read_to_end(&mut data)?;
 
-        Ok(LeagueWadSubchunk::read_options(
-            &mut NoSeek::new(reader),
-            Endian::Little,
-            args! { count: entry.target_size / 16 },
-        )?)
+        let (_, sub_chunk) =
+            LeagueWadSubchunk::parse(&data, entry.target_size / 16).map_err(|_| {
+                Error::Io(io::Error::new(
+                    io::ErrorKind::InvalidData,
+                    "Failed to parse subchunk",
+                ))
+            })?;
+
+        Ok(sub_chunk)
     }
 
     pub fn get_wad_zstd_entry_reader(

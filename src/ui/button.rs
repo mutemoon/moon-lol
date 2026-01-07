@@ -1,15 +1,19 @@
-use std::collections::HashMap;
-
 use bevy::prelude::*;
 use league_core::{UiElementGroupButtonData, UiElementRegionData};
 use lol_config::{HashKey, LoadHashKeyTrait};
 
-use crate::core::ui::element::UIElementEntity;
-use crate::UIElement;
+use crate::{UIElement, UIElementEntity, UIState};
 
-#[derive(Resource, Default)]
-pub struct UIButtonEntity {
-    pub map: HashMap<u32, Entity>,
+#[derive(Default)]
+pub struct PluginUIButton;
+
+impl Plugin for PluginUIButton {
+    fn build(&self, app: &mut App) {
+        app.add_systems(Startup, startup_spawn_buttons);
+        app.add_systems(Update, update_button.run_if(in_state(UIState::Loaded)));
+        app.add_observer(on_command_spawn_button);
+        app.add_observer(on_command_despawn_button);
+    }
 }
 
 #[derive(Component)]
@@ -29,10 +33,10 @@ pub struct CommandDespawnButton {
     pub entity: Entity,
 }
 
-pub fn startup_spawn_buttons(
+fn startup_spawn_buttons(
     mut commands: Commands,
     res_assets_ui_element_group_button_data: Res<Assets<UiElementGroupButtonData>>,
-    ) {
+) {
     for (key, ui_element_group_button_data) in
         res_assets_ui_element_group_button_data.iter().filter(|v| {
             v.1.name
@@ -51,16 +55,17 @@ pub fn startup_spawn_buttons(
     }
 }
 
-pub fn on_command_spawn_button(
+fn on_command_spawn_button(
     trigger: On<CommandSpawnButton>,
     mut commands: Commands,
     res_assets_ui_element_group_button_data: Res<Assets<UiElementGroupButtonData>>,
     res_ui_region: Res<Assets<UiElementRegionData>>,
-    ) {
+) {
     let key = trigger.key;
-    let ui_element_group_button_data = res_assets_ui_element_group_button_data
-        .load_hash(key)
-        .unwrap();
+    let Some(ui_element_group_button_data) = res_assets_ui_element_group_button_data.load_hash(key)
+    else {
+        return;
+    };
 
     let hit_region = res_ui_region
         .load_hash(ui_element_group_button_data.hit_region_element)
@@ -82,12 +87,12 @@ pub fn on_command_spawn_button(
     }
 }
 
-pub fn on_command_despawn_button(
+fn on_command_despawn_button(
     trigger: On<CommandDespawnButton>,
     mut commands: Commands,
     q_ui_button: Query<&UIButton>,
     res_assets_ui_element_group_button_data: Res<Assets<UiElementGroupButtonData>>,
-        res_ui_element_entity: Res<UIElementEntity>,
+    res_ui_element_entity: Res<UIElementEntity>,
 ) {
     commands.entity(trigger.entity).despawn();
 
@@ -107,11 +112,11 @@ pub fn on_command_despawn_button(
     }
 }
 
-pub fn update_button(
+fn update_button(
     mut commands: Commands,
     mut interaction_query: Query<(&Interaction, &UIButton), Changed<Interaction>>,
     res_assets_ui_element_group_button_data: Res<Assets<UiElementGroupButtonData>>,
-        res_ui_element_entity: Res<UIElementEntity>,
+    res_ui_element_entity: Res<UIElementEntity>,
 ) {
     for (interaction, button) in &mut interaction_query {
         let ui_element_group_button_data = res_assets_ui_element_group_button_data

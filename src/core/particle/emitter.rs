@@ -8,15 +8,15 @@ use league_core::{
     VfxPrimitivePlanarProjection, VfxShapeBox, VfxShapeCylinder, VfxShapeLegacy,
     VfxSystemDefinitionData,
 };
-use lol_config::LeagueProperties;
 
 use crate::{
-    create_black_pixel_texture, spawn_shadow_skin_entity, Lifetime, MapGeometry, ParticleId,
-    ParticleMaterialMesh, ParticleMaterialQuad, ParticleMaterialQuadSlice,
-    ParticleMaterialSkinnedMeshParticle, ParticleMaterialUnlitDecal, ParticleMeshQuad,
-    ParticleState, ResourceCache, StochasticSampler, UniformsPixelMesh, UniformsPixelQuadSlice,
-    UniformsPixelSkinnedMeshParticle, UniformsPixelUnlitDecal, UniformsVertexMesh,
-    UniformsVertexQuad, UniformsVertexSkinnedMeshParticle, UniformsVertexUnlitDecal,
+    create_black_pixel_texture, spawn_shadow_skin_entity, AssetServerLoadLeague, FromVfxOption,
+    Lifetime, MapGeometry, ParticleId, ParticleMaterialMesh, ParticleMaterialQuad,
+    ParticleMaterialQuadSlice, ParticleMaterialSkinnedMeshParticle, ParticleMaterialUnlitDecal,
+    ParticleMeshQuad, ParticleState, ResourceCache, StochasticSampler, UniformsPixelMesh,
+    UniformsPixelQuadSlice, UniformsPixelSkinnedMeshParticle, UniformsPixelUnlitDecal,
+    UniformsVertexMesh, UniformsVertexQuad, UniformsVertexSkinnedMeshParticle,
+    UniformsVertexUnlitDecal,
 };
 
 #[derive(Component)]
@@ -39,6 +39,34 @@ pub struct ParticleEmitterState {
     pub global_transform: Transform,
 }
 
+impl ParticleEmitterState {
+    pub fn new(def: &VfxEmitterDefinitionData, global_transform: Transform) -> Self {
+        Self {
+            birth_acceleration: FromVfxOption::from_option(
+                def.birth_acceleration.clone(),
+                Vec3::ZERO,
+            ),
+            birth_color: FromVfxOption::from_option(def.birth_color.clone(), Vec4::ONE),
+            birth_rotation0: FromVfxOption::from_option(def.birth_rotation0.clone(), Vec3::ZERO),
+            birth_scale0: FromVfxOption::from_option(def.birth_scale0.clone(), Vec3::ONE),
+            birth_uv_offset: FromVfxOption::from_option(def.birth_uv_offset.clone(), Vec2::ONE),
+            birth_uv_scroll_rate: FromVfxOption::from_option(
+                def.birth_uv_scroll_rate.clone(),
+                Vec2::ZERO,
+            ),
+            birth_velocity: FromVfxOption::from_option(def.birth_velocity.clone(), Vec3::ZERO),
+            bind_weight: FromVfxOption::from_option(def.bind_weight.clone(), 0.0),
+            color: FromVfxOption::from_option(def.color.clone(), Vec4::ONE),
+            scale0: FromVfxOption::from_option(def.scale0.clone(), Vec3::ONE),
+            emission_debt: 0.,
+            particle_lifetime: FromVfxOption::from_option(def.particle_lifetime.clone(), 1.0),
+            rate: FromVfxOption::from_option(def.rate.clone(), 0.0),
+            emitter_position: FromVfxOption::from_option(def.emitter_position.clone(), Vec3::ZERO),
+            global_transform,
+        }
+    }
+}
+
 #[derive(Component, Debug)]
 #[relationship(relationship_target = Emitters)]
 pub struct EmitterOf(pub Entity);
@@ -55,15 +83,12 @@ pub fn update_emitter_position(
         &ParticleEmitterState,
         &ParticleId,
     )>,
-    res_league_properties: Res<LeagueProperties>,
     res_assets_vfx_system_definition_data: Res<Assets<VfxSystemDefinitionData>>,
     q_global_transform: Query<&GlobalTransform>,
 ) {
     for (mut transform, emitter_of, lifetime, emitter, particle_id) in query.iter_mut() {
-        let vfx_emitter_definition_data = particle_id.get_def(
-            &res_league_properties,
-            &res_assets_vfx_system_definition_data,
-        );
+        let vfx_emitter_definition_data =
+            particle_id.get_def(&res_assets_vfx_system_definition_data);
 
         let is_local_orientation = vfx_emitter_definition_data
             .is_local_orientation
@@ -272,9 +297,9 @@ fn attach_particle_visuals(
                             cmb_tex_pixel_color_remap_ramp_smp_clamp_no_mip: Some(
                                 black_pixel_texture,
                             ),
-                            sampler_fow: None,
                             texturemult: texture_mult.clone(),
                             blend_mode,
+                            ..default()
                         },
                     )));
             };
@@ -341,7 +366,6 @@ pub fn update_emitter(
     mut res_quad_slice_material: ResMut<Assets<ParticleMaterialQuadSlice>>,
     mut res_unlit_decal_material: ResMut<Assets<ParticleMaterialUnlitDecal>>,
     mut res_particle_material_mesh: ResMut<Assets<ParticleMaterialMesh>>,
-    res_league_properties: Res<LeagueProperties>,
     mut query: Query<(
         Entity,
         &mut Lifetime,
@@ -351,10 +375,8 @@ pub fn update_emitter(
     time: Res<Time>,
 ) {
     for (emitter_entity, mut lifetime, mut emitter, particle_id) in query.iter_mut() {
-        let vfx_emitter_definition_data = particle_id.get_def(
-            &res_league_properties,
-            &res_assets_vfx_system_definition_data,
-        );
+        let vfx_emitter_definition_data =
+            particle_id.get_def(&res_assets_vfx_system_definition_data);
 
         let primitive = vfx_emitter_definition_data
             .primitive
@@ -398,7 +420,7 @@ pub fn update_emitter(
         let texture = vfx_emitter_definition_data
             .texture
             .as_ref()
-            .map(|v| res_resource_cache.get_image(&res_asset_server, v));
+            .map(|v| res_resource_cache.get_image_srgb(&res_asset_server, v));
 
         let particle_color_texture = vfx_emitter_definition_data
             .particle_color_texture
@@ -474,7 +496,6 @@ pub fn update_emitter_attached(
     mut res_particle_material_skinned_mesh_particle: ResMut<
         Assets<ParticleMaterialSkinnedMeshParticle>,
     >,
-    res_league_properties: Res<LeagueProperties>,
     mut query: Query<(
         Entity,
         &EmitterOf,
@@ -489,10 +510,8 @@ pub fn update_emitter_attached(
     time: Res<Time>,
 ) {
     for (emitter_entity, emitter_of, mut lifetime, mut emitter, particle_id) in query.iter_mut() {
-        let vfx_emitter_definition_data = particle_id.get_def(
-            &res_league_properties,
-            &res_assets_vfx_system_definition_data,
-        );
+        let vfx_emitter_definition_data =
+            particle_id.get_def(&res_assets_vfx_system_definition_data);
 
         let primitive = vfx_emitter_definition_data
             .primitive
@@ -580,7 +599,7 @@ pub fn update_emitter_attached(
             {
                 for material_override_definition in material_override_definitions {
                     if let Some(base_texture) = &material_override_definition.base_texture {
-                        texture = Some(res_asset_server.load(base_texture));
+                        texture = Some(res_asset_server.load_league(base_texture));
                     }
                 }
             }

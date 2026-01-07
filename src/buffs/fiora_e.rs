@@ -11,10 +11,16 @@ impl Plugin for PluginFioraE {
     }
 }
 
-#[derive(Component, Debug, Default)]
+#[derive(Component, Clone, Debug)]
 #[require(Buff = Buff { name: "FioraE" })]
 pub struct BuffFioraE {
     pub left: i32,
+}
+
+impl Default for BuffFioraE {
+    fn default() -> Self {
+        Self { left: 2 }
+    }
 }
 
 fn on_event_attack_end(

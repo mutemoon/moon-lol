@@ -1,10 +1,12 @@
 use std::collections::HashMap;
 use std::hash::Hasher;
+use std::marker::PhantomData;
 
 use bevy::asset::uuid::Uuid;
 use bevy::prelude::*;
-use binrw::binread;
 use heck::{ToPascalCase, ToSnakeCase};
+use nom::number::complete::le_f32;
+use nom::IResult;
 use serde::{Deserialize, Serialize};
 use twox_hash::XxHash64;
 
@@ -22,6 +24,21 @@ pub fn parse_quat(v: [f32; 4]) -> Quat {
 
 pub fn parse_quat_array(v: Vec<[f32; 4]>) -> Vec<Quat> {
     v.into_iter().map(parse_quat).collect()
+}
+
+pub fn nom_parse_vec3(input: &[u8]) -> IResult<&[u8], Vec3> {
+    let (i, x) = le_f32(input)?;
+    let (i, y) = le_f32(i)?;
+    let (i, z) = le_f32(i)?;
+    Ok((i, Vec3::new(x, y, z)))
+}
+
+pub fn nom_parse_quat(input: &[u8]) -> IResult<&[u8], Quat> {
+    let (i, x) = le_f32(input)?;
+    let (i, y) = le_f32(i)?;
+    let (i, z) = le_f32(i)?;
+    let (i, w) = le_f32(i)?;
+    Ok((i, Quat::from_xyzw(x, y, z, w)))
 }
 
 pub fn hash_wad(s: &str) -> u64 {
@@ -69,14 +86,18 @@ pub fn hash_shader_spec(defs: &Vec<String>) -> u64 {
     hash_shader(&define_string)
 }
 
-#[binread]
 #[derive(Debug, Clone, Deserialize, Serialize)]
-#[br(little)]
 pub struct BoundingBox {
-    #[br(map = Vec3::from_array)]
     pub min: Vec3,
-    #[br(map = Vec3::from_array)]
     pub max: Vec3,
+}
+
+impl BoundingBox {
+    pub fn parse(input: &[u8]) -> IResult<&[u8], Self> {
+        let (i, min) = nom_parse_vec3(input)?;
+        let (i, max) = nom_parse_vec3(i)?;
+        Ok((i, BoundingBox { min, max }))
+    }
 }
 
 pub fn get_padded_string_64(bytes: [u8; 64]) -> String {
@@ -139,4 +160,86 @@ pub fn type_name_to_hash(type_name: &str) -> u32 {
     } else {
         hash_bin(&type_name)
     }
+}
+
+pub fn get_shader_uuid_by_hash(path: &str, hash: u64) -> Uuid {
+    Uuid::from_u128(hash_shader(&format!("{path}#{hash}")) as u128)
+}
+
+pub fn get_shader_handle_by_hash(path: &str, hash: u64) -> Handle<Shader> {
+    Handle::Uuid(get_shader_uuid_by_hash(path, hash), PhantomData)
+}
+
+pub fn get_shader_handle(path: &str, defs: &Vec<String>) -> Handle<Shader> {
+    get_shader_handle_by_hash(path, hash_shader_spec(defs))
+}
+
+pub fn get_extension_by_bytes(bytes: &[u8]) -> &str {
+    if bytes.len() >= 8 {
+        match &bytes[..8] {
+            b"r3d2Mesh" => return "scb",
+            b"r3d2sklt" => return "skl",
+            b"r3d2anmd" => return "anm",
+            b"r3d2canm" => return "anm",
+            _ => {}
+        };
+
+        if &bytes[..4] == b"r3d2" {
+            if u32::from_le_bytes(bytes[4..8].try_into().unwrap()) == 1 {
+                return "wpk";
+            }
+        }
+
+        if u32::from_le_bytes(bytes[4..8].try_into().unwrap()) == 0x22FD4FC3 {
+            return "skl";
+        }
+    }
+
+    if bytes.len() >= 7 {
+        if &bytes[..7] == b"PreLoad" {
+            return "preload";
+        }
+    }
+
+    if bytes.len() >= 5 {
+        if &bytes[1..5] == b"LuaQ" {
+            return "luaobj";
+        }
+    }
+
+    if bytes.len() >= 4 {
+        match &bytes[..4] {
+            b"DDS " => return "dds",
+            b"PROP" => return "bin",
+            b"BKHD" => return "bnk",
+            b"WGEO" => return "wgeo",
+            b"OEGM" => return "mapgeo",
+            b"[Obj" => return "sco",
+            b"PTCH" => return "bin",
+            b"TEX\0" => return "tex",
+            _ => {}
+        }
+
+        if &bytes[1..4] == b"PNG" {
+            return "png";
+        }
+
+        let magic = u32::from_le_bytes(bytes[..4].try_into().unwrap());
+        match magic {
+            0x00112233 => return "skn",
+            0x3 => return "dat",
+            _ => {}
+        }
+    }
+
+    if bytes.len() >= 3 {
+        if &bytes[..3] == b"RST" {
+            return "stringtable";
+        }
+        if bytes[0] == 0xFF && bytes[1] == 0xD8 && bytes[2] == 0xFF {
+            return "jpg";
+        }
+    }
+
+    "unk"
 }

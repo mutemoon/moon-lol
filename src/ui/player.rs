@@ -1,9 +1,10 @@
-use bevy::prelude::*;use lol_config::LoadHashKeyTrait;
+use bevy::prelude::*;
 use league_core::SkinCharacterDataProperties;
+use lol_config::LoadHashKeyTrait;
 
 use crate::{
-    AbilityResource, CommandUpdateUIElement, Controller, Health, Level, NodeType, SizeType, Skin,
-    UIElementEntity,
+    AbilityResource, AssetServerLoadLeague, CommandUpdateUIElement, Controller, Health, Level,
+    NodeType, SizeType, Skin, UIElementEntity, UIState,
 };
 
 #[derive(Component, Reflect, Default)]
@@ -13,7 +14,25 @@ pub struct HealthFade {
     pub max: f32,
 }
 
-pub fn update_level(
+#[derive(Default)]
+pub struct PluginUIPlayer;
+
+impl Plugin for PluginUIPlayer {
+    fn build(&self, app: &mut App) {
+        app.add_systems(
+            Update,
+            (
+                update_level,
+                update_player_health,
+                update_player_health_fade,
+                update_player_ability_resource,
+                update_player_icon.run_if(in_state(UIState::Loaded).and(run_once)),
+            ),
+        );
+    }
+}
+
+fn update_level(
     mut commands: Commands,
     res_ui_element_entity: Res<UIElementEntity>,
     q_level: Query<&Level, With<Controller>>,
@@ -34,7 +53,7 @@ pub fn update_level(
     });
 }
 
-pub fn update_player_health(
+fn update_player_health(
     mut commands: Commands,
     res_ui_element_entity: Res<UIElementEntity>,
     q_health: Query<&Health, With<Controller>>,
@@ -59,7 +78,7 @@ pub fn update_player_health(
     });
 }
 
-pub fn update_player_health_fade(
+fn update_player_health_fade(
     mut commands: Commands,
     time: Res<Time>,
     res_ui_element_entity: Res<UIElementEntity>,
@@ -127,7 +146,7 @@ pub fn update_player_health_fade(
     });
 }
 
-pub fn update_player_ability_resource(
+fn update_player_ability_resource(
     mut commands: Commands,
     res_ui_element_entity: Res<UIElementEntity>,
     q_ability_resource: Query<&AbilityResource, With<Controller>>,
@@ -151,14 +170,14 @@ pub fn update_player_ability_resource(
     });
 }
 
-pub fn update_player_icon(
+fn update_player_icon(
     asset_server: Res<AssetServer>,
     mut commands: Commands,
     mut q_image_node: Query<&mut ImageNode>,
     q_skin: Query<&Skin, With<Controller>>,
     q_children: Query<&Children>,
     res_assets_skin_character_data_properties: Res<Assets<SkinCharacterDataProperties>>,
-        res_ui_element_entity: Res<UIElementEntity>,
+    res_ui_element_entity: Res<UIElementEntity>,
 ) {
     let key = "ClientStates/Gameplay/UX/LoL/PlayerFrame/UIBase/Player_Frame_Root/Player_Frame/PlayerIcon_Base";
     let Some(&entity) = res_ui_element_entity.get_by_string(key) else {
@@ -169,13 +188,14 @@ pub fn update_player_icon(
         return;
     };
 
-    let skin = res_assets_skin_character_data_properties.load_hash( skin.key)
+    let skin = res_assets_skin_character_data_properties
+        .load_hash(skin.key)
         .unwrap();
 
     let icon_name = skin
         .icon_avatar
-        .clone()
-        .unwrap_or(skin.icon_circle.clone().unwrap());
+        .as_ref()
+        .unwrap_or(skin.icon_circle.as_ref().unwrap());
 
     let &child = q_children.get(entity).unwrap().get(0).unwrap();
     if q_image_node.get_mut(child).is_ok() {
@@ -184,7 +204,7 @@ pub fn update_player_icon(
 
     commands.entity(entity).insert((
         ImageNode {
-            image: asset_server.load(&format!("{}#srgb", icon_name)),
+            image: asset_server.load_league_labeled(icon_name, "srgb"),
             ..default()
         },
         Visibility::Visible,

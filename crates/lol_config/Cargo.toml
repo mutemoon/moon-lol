@@ -5,10 +5,10 @@ edition = "2021"
 
 [dependencies]
 bevy.workspace = true
-binrw.workspace = true
 league_core.workspace = true
 league_utils.workspace = true
 league_file.workspace = true
 league_property.workspace = true
 lol_core.workspace = true
 serde.workspace = true
+ron.workspace = true

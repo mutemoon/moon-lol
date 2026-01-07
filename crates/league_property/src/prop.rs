@@ -1,37 +1,36 @@
-use binrw::binread;
+use nom::bytes::complete::{tag, take};
+use nom::multi::count;
+use nom::number::complete::{le_u16, le_u32};
+use nom::{IResult, Parser};
 
-#[binread]
-#[br(little)]
-#[br(magic = b"PROP")]
 pub struct PropFile {
     pub version: u32,
-
-    pub link_count: u32,
-
-    #[br(count = link_count)]
     pub links: Vec<SizedStringU16>,
-
-    pub entry_length: u32,
-
-    #[br(count = entry_length)]
     pub entry_classes: Vec<u32>,
-
-    #[br(count = entry_length)]
     pub entries: Vec<EntryData>,
 }
 
-#[binread]
-#[br(little)]
-pub struct EntryData {
-    pub len: u32,
-
-    pub hash: u32,
-
-    #[br(count = len - 4)]
-    pub data: Vec<u8>,
-}
-
 impl PropFile {
+    pub fn parse(input: &[u8]) -> IResult<&[u8], Self> {
+        let (i, _) = tag(&b"PROP"[..])(input)?;
+        let (i, version) = le_u32(i)?;
+        let (i, link_count) = le_u32(i)?;
+        let (i, links) = count(SizedStringU16::parse, link_count as usize).parse(i)?;
+        let (i, entry_length) = le_u32(i)?;
+        let (i, entry_classes) = count(le_u32, entry_length as usize).parse(i)?;
+        let (i, entries) = count(EntryData::parse, entry_length as usize).parse(i)?;
+
+        Ok((
+            i,
+            PropFile {
+                version,
+                links,
+                entry_classes,
+                entries,
+            },
+        ))
+    }
+
     pub fn get_entry(&self, hash: u32) -> &EntryData {
         self.entries.iter().find(|v| v.hash == hash).unwrap()
     }
@@ -52,11 +51,39 @@ impl PropFile {
     }
 }
 
-#[binread]
+pub struct EntryData {
+    pub len: u32,
+    pub hash: u32,
+    pub data: Vec<u8>,
+}
+
+impl EntryData {
+    pub fn parse(input: &[u8]) -> IResult<&[u8], Self> {
+        let (i, len) = le_u32(input)?;
+        let (i, hash) = le_u32(i)?;
+        let (i, data) = take((len - 4) as usize)(i)?;
+        Ok((
+            i,
+            EntryData {
+                len,
+                hash,
+                data: data.to_vec(),
+            },
+        ))
+    }
+}
+
 #[derive(Debug, Clone)]
-#[br(little)]
 pub struct SizedStringU16 {
     pub len: u16,
-    #[br(count = len, try_map = |bytes: Vec<u8>| String::from_utf8(bytes))]
     pub text: String,
+}
+
+impl SizedStringU16 {
+    pub fn parse(input: &[u8]) -> IResult<&[u8], Self> {
+        let (i, len) = le_u16(input)?;
+        let (i, bytes) = take(len as usize)(i)?;
+        let text = String::from_utf8_lossy(bytes).to_string();
+        Ok((i, SizedStringU16 { len, text }))
+    }
 }

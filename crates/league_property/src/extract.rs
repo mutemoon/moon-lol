@@ -31,7 +31,8 @@ struct GeneratedItem {
 pub fn class_map_to_rust_code(
     class_map: &mut ClassMap,
     hashes: &HashMap<u32, String>,
-    entry_hashes: &HashSet<u32>,
+    need_extract: &HashSet<u32>,
+    need_defaults: &HashSet<u32>,
 ) -> Result<(String, String), Error> {
     // 1. 收集所有枚举信息
     let mut enums = Vec::new();
@@ -86,23 +87,24 @@ pub fn class_map_to_rust_code(
     let generated_enum_items = generate_enum_definitions(&merged_enums, class_map, hashes);
     all_generated_items.extend(generated_enum_items);
 
-    let mut init_code = "pub fn init_league_asset(app: &mut App, asset_loader_registry: &mut AssetLoaderRegistry) {".to_string();
-
     // 6. 生成结构体定义
     for (class_hash, class_data) in class_map.iter() {
         let class_name = hash_to_type_name(class_hash, hashes);
 
         let mut struct_def = String::new();
-        if entry_hashes.contains(class_hash) {
-            struct_def
-                .push_str("#[derive(Serialize, Deserialize, Debug, Clone, Asset, TypePath)]\n");
-            init_code.push_str(&format!(
-                "app.init_asset::<{}>();\nasset_loader_registry.register::<{}>();\n",
-                class_name, class_name
-            ));
-        } else {
-            struct_def.push_str("#[derive(Serialize, Deserialize, Debug, Clone)]\n");
+        struct_def.push_str("#[derive(");
+
+        struct_def.push_str("Serialize, Deserialize, Debug, Clone");
+
+        if need_defaults.contains(class_hash) {
+            struct_def.push_str(", Default");
         }
+
+        if need_extract.contains(class_hash) {
+            struct_def.push_str(", Asset, TypePath");
+        }
+
+        struct_def.push_str(")]\n");
         struct_def.push_str("#[serde(rename_all = \"camelCase\")]\n");
         struct_def.push_str(&format!("pub struct {} {{\n", class_name));
 
@@ -151,9 +153,41 @@ pub fn class_map_to_rust_code(
         all_definitions.push_str(&item.code);
     }
 
-    init_code.push_str("}\n");
+    let mut entry_hashes = need_extract
+        .iter()
+        .map(|h| hash_to_type_name(h, hashes))
+        .collect::<Vec<_>>();
 
-    Ok((all_definitions, init_code))
+    entry_hashes.sort();
+
+    let init_code = entry_hashes
+        .iter()
+        .map(|v| format!("app.init_asset::<{}>();", v))
+        .collect::<Vec<_>>();
+    let reg_code = entry_hashes
+        .iter()
+        .map(|v| format!("registry.register::<{}>();", v))
+        .collect::<Vec<_>>();
+
+    let res = format!(
+        "use league_core::{{
+    {}
+}};
+
+pub fn init_league_asset(app: &mut App) {{
+{}
+}}
+pub static ASSET_LOADER_REGISTRY: LazyLock<AssetLoaderRegistry> = LazyLock::new(|| {{
+    let mut registry = AssetLoaderRegistry::default();
+    {}
+    registry
+}});",
+        entry_hashes.join(","),
+        init_code.join("\n"),
+        reg_code.join("\n")
+    );
+
+    Ok((all_definitions, res))
 }
 
 fn collect_enums(field_data: &ClassData, enums: &mut Vec<HashSet<u32>>) {
@@ -537,6 +571,7 @@ fn extract_type_data(
     value_slice: &[u8],
     class_map: &mut ClassMap,
 ) -> Result<ClassData, Error> {
+    let mut parser = BinParser::from_bytes(value_slice);
     if !matches!(
         vtype,
         BinType::Struct
@@ -549,7 +584,6 @@ fn extract_type_data(
         return Ok(ClassData::Base(map_base_type(&vtype)));
     }
 
-    let mut parser = BinParser::from_bytes(value_slice);
     match vtype {
         BinType::Struct | BinType::Embed => {
             let Some(header) = parser.read_struct_header()? else {

@@ -5,8 +5,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     Aggro, AttackAuto, CommandAttackAutoStart, CommandAttackAutoStop, CommandMovement,
-    EventAggroTargetFound, EventDead, HealthBar, HealthBarType, MinionPath, MovementAction,
-    MovementWay, State,
+    EventAggroTargetFound, EventDead, MinionPath, MovementAction, MovementWay, State,
 };
 
 #[derive(Default)]
@@ -22,12 +21,7 @@ impl Plugin for PluginMinion {
 }
 
 #[derive(Component, Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
-#[require(
-    MinionState,
-    Aggro = Aggro { range: 1000.0 },
-    State,
-    HealthBar = HealthBar { bar_type: HealthBarType::Minion }
-)]
+#[require(MinionState, Aggro = Aggro { range: 1000.0 }, State)]
 pub enum Minion {
     Siege,
     Melee,
@@ -77,15 +71,17 @@ pub fn fixed_update(
             return;
         };
 
+        let target_pos = {
+            let p = *path.get(closest_index + 1).unwrap_or(&path[closest_index]);
+            Vec3::new(p.x, transform.translation.y, p.y)
+        };
+
         debug!("{} 寻路到 {}", entity, path[closest_index]);
         commands.trigger(CommandMovement {
             entity,
             priority: 0,
             action: MovementAction::Start {
-                way: MovementWay::Pathfind({
-                    let p = *path.get(closest_index + 1).unwrap_or(&path[closest_index]);
-                    Vec3::new(p.x, transform.translation.y, p.y)
-                }),
+                way: MovementWay::Pathfind(target_pos),
                 speed: None,
                 source: "Minion".to_string(),
             },
@@ -96,20 +92,24 @@ pub fn fixed_update(
 fn on_event_aggro_target_found(
     trigger: On<EventAggroTargetFound>,
     mut commands: Commands,
-    mut q_minion_state: Query<&mut MinionState>,
+    mut q_minion: Query<(&mut MinionState, Option<&AttackAuto>)>,
 ) {
     let entity = trigger.event_target();
 
-    if let Ok(mut minion_state) = q_minion_state.get_mut(entity) {
-        match *minion_state {
-            MinionState::MovingOnPath => {
-                *minion_state = MinionState::AttackingTarget;
-                commands.trigger(CommandAttackAutoStart {
-                    entity,
-                    target: trigger.target,
-                });
+    let Ok((mut minion_state, attack_auto)) = q_minion.get_mut(entity) else {
+        return;
+    };
+
+    let target = trigger.target;
+
+    if *minion_state == MinionState::MovingOnPath {
+        *minion_state = MinionState::AttackingTarget;
+        commands.trigger(CommandAttackAutoStart { entity, target });
+    } else if *minion_state == MinionState::AttackingTarget {
+        if let Some(attack_auto) = attack_auto {
+            if attack_auto.target != target {
+                commands.trigger(CommandAttackAutoStart { entity, target });
             }
-            _ => (),
         }
     }
 }
@@ -128,12 +128,9 @@ fn on_event_dead(
             continue;
         }
 
-        match *minion_state {
-            MinionState::AttackingTarget => {
-                *minion_state = MinionState::MovingOnPath;
-                commands.trigger(CommandAttackAutoStop { entity });
-            }
-            _ => (),
+        if *minion_state == MinionState::AttackingTarget {
+            *minion_state = MinionState::MovingOnPath;
+            commands.trigger(CommandAttackAutoStop { entity });
         }
     }
 }

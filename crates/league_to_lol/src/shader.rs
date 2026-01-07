@@ -195,9 +195,17 @@ pub fn convert_frag(code: &str) -> String {
     final_code = final_code.replace("_UniformsPixel", "uniforms_pixel");
 
     // 替换 texture 调用
-    for name in sampler_names {
+    for name in sampler_names.clone() {
         let pattern = format!(r"texture\s*\(\s*{}\s*,", name);
         let replacement = format!("texture(sampler2D({}_texture, {}_sampler),", name, name);
+        let re = Regex::new(&pattern).unwrap();
+        final_code = re.replace_all(&final_code, &replacement).to_string();
+    }
+
+    // 替换 texelFetch 调用
+    for name in sampler_names {
+        let pattern = format!(r"texelFetch\s*\(\s*{}\s*,", name);
+        let replacement = format!("texelFetch(sampler2D({}_texture, {}_sampler),", name, name);
         let re = Regex::new(&pattern).unwrap();
         final_code = re.replace_all(&final_code, &replacement).to_string();
     }

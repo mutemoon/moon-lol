@@ -1,7 +1,8 @@
 use std::collections::{HashMap, HashSet};
 
-use bevy::ecs::resource::Resource;
+use bevy::asset::Asset;
 use bevy::math::{vec2, vec3, Vec2, Vec3};
+use bevy::reflect::TypePath;
 use league_core::{
     JungleQuadrantFlags, MainRegionFlags, NearestLaneFlags, POIFlags, RingFlags, RiverRegionFlags,
     UnknownSRXFlags, VisionPathingFlags,
@@ -11,7 +12,7 @@ use serde::{Deserialize, Serialize};
 /// 表示格子不可通行的成本值
 pub const CELL_COST_IMPASSABLE: f32 = f32::MAX;
 
-#[derive(Resource, Clone, Default, Serialize, Deserialize)]
+#[derive(Asset, TypePath, Clone, Default, Serialize, Deserialize)]
 pub struct ConfigNavigationGrid {
     pub min_position: Vec2,
     pub cell_size: f32,

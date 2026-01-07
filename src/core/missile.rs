@@ -1,9 +1,9 @@
 use bevy::animation::AnimationTarget;
 use bevy::color::palettes::tailwind::RED_500;
-use bevy::prelude::*;use lol_config::LoadHashKeyTrait;
+use bevy::prelude::*;
 use league_core::{EnumMovement, SpellObject};
 use league_utils::hash_joint;
-use lol_config::HashKey;
+use lol_config::{HashKey, LoadHashKeyTrait};
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -52,20 +52,24 @@ fn fixed_update(
     q_transform: Query<&GlobalTransform>,
 ) {
     for (entity, missile, state) in q_missile.iter() {
-        if let Some(target_bone) = state.target_bone {
-            if let Ok(target_transform) = q_transform.get(target_bone) {
-                let target_translation = target_transform.translation();
-                commands.trigger(CommandMovement {
-                    entity,
-                    priority: 0,
-                    action: MovementAction::Start {
-                        way: MovementWay::Path(vec![target_translation]),
-                        speed: Some(missile.speed),
-                        source: "Missile".to_string(),
-                    },
-                });
-            }
-        }
+        let Some(target_bone) = state.target_bone else {
+            continue;
+        };
+
+        let Ok(target_transform) = q_transform.get(target_bone) else {
+            continue;
+        };
+
+        let target_translation = target_transform.translation();
+        commands.trigger(CommandMovement {
+            entity,
+            priority: 0,
+            action: MovementAction::Start {
+                way: MovementWay::Path(vec![target_translation]),
+                speed: Some(missile.speed),
+                source: "Missile".to_string(),
+            },
+        });
     }
 }
 
@@ -73,13 +77,14 @@ fn on_command_missile_create(
     trigger: On<CommandMissileCreate>,
     mut commands: Commands,
     res_assets_spell_object: Res<Assets<SpellObject>>,
-        q_global_transform: Query<&GlobalTransform>,
+    q_global_transform: Query<&GlobalTransform>,
     q_children: Query<&Children>,
     q_joint_target: Query<&AnimationTarget>,
 ) {
     let entity = trigger.event_target();
 
-    let spell_object = res_assets_spell_object.load_hash( trigger.spell_key)
+    let spell_object = res_assets_spell_object
+        .load_hash(trigger.spell_key)
         .unwrap();
 
     let spell_data_resource = spell_object.m_spell.clone().unwrap();
@@ -96,23 +101,17 @@ fn on_command_missile_create(
     let mut start_translation = None;
 
     if let Some(m_missile_spec) = spell_data_resource.m_missile_spec {
-        match m_missile_spec.movement_component {
-            EnumMovement::FixedSpeedMovement(fixed_speed_movement) => {
-                if let Some(m_start_bone_name) = fixed_speed_movement.m_start_bone_name {
-                    for child in q_children.iter_descendants(entity) {
-                        let Ok(joint_target) = q_joint_target.get(child) else {
-                            continue;
-                        };
-                        let id = joint_target.id.0.as_u128();
-                        if hash_joint(&m_start_bone_name) as u128 == id {
-                            start_translation =
-                                Some(q_global_transform.get(child).unwrap().translation());
-                        }
-                    }
-                }
-            }
-            _ => {
-                // TODO: Implement other movement types
+        if let EnumMovement::FixedSpeedMovement(fixed_speed_movement) =
+            m_missile_spec.movement_component
+        {
+            if let Some(m_start_bone_name) = fixed_speed_movement.m_start_bone_name {
+                start_translation = find_bone_translation(
+                    entity,
+                    &m_start_bone_name,
+                    &q_children,
+                    &q_joint_target,
+                    &q_global_transform,
+                );
             }
         }
     }
@@ -208,4 +207,23 @@ fn on_event_movement_end(
             amount: damage.0,
         });
     }
+}
+
+fn find_bone_translation(
+    entity: Entity,
+    bone_name: &str,
+    q_children: &Query<&Children>,
+    q_joint_target: &Query<&AnimationTarget>,
+    q_global_transform: &Query<&GlobalTransform>,
+) -> Option<Vec3> {
+    for child in q_children.iter_descendants(entity) {
+        let Ok(joint_target) = q_joint_target.get(child) else {
+            continue;
+        };
+        let id = joint_target.id.0.as_u128();
+        if hash_joint(bone_name) as u128 == id {
+            return Some(q_global_transform.get(child).unwrap().translation());
+        }
+    }
+    None
 }

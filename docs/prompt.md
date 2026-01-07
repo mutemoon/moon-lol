@@ -1,0 +1,1 @@
+@dash.rs 把 dash 中的伤害逻辑移除，只保留位移逻辑，我将改为在 dash 时释放一个 missle，将其作为释放者的 child，那么 missle 就会跟随释放者，这个 missle 隔 n 帧就会碰撞检测，对范围内的敌人造成伤害， missle 对每个敌方单位最多造成 n 次伤害，其他伤害范围、过滤等具体结构，则参考 @damage.rs ，到时就可以移除 ActionDamage ，完全使用该 missle 造成技能伤害，因为 ActionDamage 可以视为只存在 1 帧速度为 0 的伤害 missle 。

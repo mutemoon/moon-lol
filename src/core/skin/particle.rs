@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use league_core::{ResourceResolver, SkinCharacterDataProperties};
-use lol_config::{LeagueProperties, LoadHashKeyTrait};
+use lol_config::LoadHashKeyTrait;
 
 use crate::{CommandParticleDespawn, CommandParticleSpawn, Skin};
 
@@ -20,7 +20,6 @@ fn resolve_skin_resource_record<'a>(
     entity: Entity,
     input_hash: u32, // 假设 trigger.hash 是 u32，请根据实际类型调整
     query_skin: &Query<&Skin>,
-    _league_props: &LeagueProperties,
     assets_skin: &Assets<SkinCharacterDataProperties>,
     assets_resolver: &'a Assets<ResourceResolver>,
 ) -> Option<&'a u32> {
@@ -45,18 +44,17 @@ pub fn on_command_character_particle_spawn(
     trigger: On<CommandSkinParticleSpawn>,
     res_assets_resource_resolver: Res<Assets<ResourceResolver>>,
     res_assets_skin_character_data_properties: Res<Assets<SkinCharacterDataProperties>>,
-    res_league_properties: Res<LeagueProperties>,
     mut commands: Commands,
     query: Query<&Skin>,
 ) {
     let entity = trigger.event_target();
+    debug!("{entity} 创建人物特效 {:x}", trigger.hash);
 
     // 使用辅助函数获取记录，如果任何一步失败（返回 None），直接 return
     let Some(record) = resolve_skin_resource_record(
         entity,
         trigger.hash,
         &query,
-        &res_league_properties,
         &res_assets_skin_character_data_properties,
         &res_assets_resource_resolver,
     ) else {
@@ -73,18 +71,17 @@ pub fn on_command_character_particle_despawn(
     trigger: On<CommandSkinParticleDespawn>,
     res_assets_resource_resolver: Res<Assets<ResourceResolver>>,
     res_assets_skin_character_data_properties: Res<Assets<SkinCharacterDataProperties>>,
-    res_league_properties: Res<LeagueProperties>,
     mut commands: Commands,
     query: Query<&Skin>,
 ) {
     let entity = trigger.event_target();
+    debug!("{entity} 销毁人物特效 {:x}", trigger.hash);
 
     // 复用相同的逻辑
     let Some(record) = resolve_skin_resource_record(
         entity,
         trigger.hash,
         &query,
-        &res_league_properties,
         &res_assets_skin_character_data_properties,
         &res_assets_resource_resolver,
     ) else {

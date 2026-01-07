@@ -63,7 +63,7 @@ pub fn find_grid_path_with_result(
     let end_pos = grid.get_cell_xy_by_position(end);
 
     if !grid.is_walkable_by_xy(start_pos) || !grid.is_walkable_by_xy(end_pos) {
-        warn!("Bidirectional A*: Invalid start or end position");
+        warn!("双向 A* 起点或终点位置无效");
         return None;
     }
 
@@ -108,7 +108,7 @@ pub fn find_grid_path_with_result(
     while !open_fwd.is_empty() && !open_bwd.is_empty() {
         iterations += 1;
         if iterations > 10000 {
-            warn!("Bidirectional A*: Exceeded iterations limit");
+            warn!("双向 A* 超过迭代次数限制");
             return None;
         }
 
@@ -201,7 +201,7 @@ pub fn find_grid_path_with_result(
     }
 
     if let Some(meet_node) = best_connection {
-        debug!("Bidirectional A*: Found path iterations={}", iterations);
+        debug!("双向 A* 找到路径 迭代次数 {}", iterations);
         let path = reconstruct_bidirectional_path(meet_node, &came_from_fwd, &came_from_bwd);
         return Some(AStarResult {
             path,

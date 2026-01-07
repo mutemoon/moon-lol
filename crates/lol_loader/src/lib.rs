@@ -1,5 +1,4 @@
 use std::collections::HashMap;
-use std::io::Cursor;
 
 use bevy::animation::animation_curves::{AnimatableCurve, AnimatableKeyframeCurve};
 use bevy::animation::{animated_field, AnimationClip, AnimationTargetId};
@@ -12,10 +11,9 @@ use bevy::render::render_resource::{
     Extent3d, ShaderStage, TextureDescriptor, TextureDimension, TextureFormat, TextureUsages,
 };
 use bevy::shader::{ShaderImport, Source, ValidateShader};
-use binrw::BinRead;
 use league_core::EnvironmentVisibility;
 use league_file::{
-    AnimationFile, LeagueMapGeo, LeagueMeshStatic, LeagueShaderChunk, LeagueShaderToc,
+    AiMeshNGrid, AnimationFile, LeagueMapGeo, LeagueMeshStatic, LeagueShaderChunk, LeagueShaderToc,
     LeagueSkeleton, LeagueSkinnedMesh, LeagueTexture, LeagueTextureFormat,
 };
 use league_property::PropFile;
@@ -23,9 +21,14 @@ use league_to_lol::{
     convert_frag, convert_vert, load_animation_file, mesh_static_to_bevy_mesh, parse_vertex_data,
     skinned_mesh_to_intermediate, submesh_to_intermediate,
 };
-use lol_config::{ConfigMapGeo, LeagueProperties, ResourceShaderPackage, ASSET_LOADER_REGISTRY};
+use league_utils::{get_shader_uuid_by_hash, hash_wad};
+use lol_config::{
+    ConfigMapGeo, ConfigNavigationGrid, ConfigNavigationGridCell, LeagueProperties,
+    ResourceShaderPackage, ASSET_LOADER_REGISTRY,
+};
 use lol_core::LeagueSkinMesh;
 use regex::Regex;
+use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
 #[derive(Error, Debug)]
@@ -39,8 +42,8 @@ pub enum Error {
     #[error("{0}")]
     Bincode(#[from] bincode::Error),
 
-    #[error("{0}")]
-    BinRead(#[from] binrw::Error),
+    #[error("Parse error: {0}")]
+    Parse(String),
 }
 
 #[derive(Default)]
@@ -61,8 +64,7 @@ impl AssetLoader for LeagueLoaderProperty {
     ) -> Result<Self::Asset, Self::Error> {
         let mut buf = Vec::new();
         reader.read_to_end(&mut buf).await?;
-        let mut cursor = Cursor::new(buf);
-        let prop_bin = PropFile::read(&mut cursor)?;
+        let (_, prop_bin) = PropFile::parse(&buf).map_err(|e| Error::Parse(e.to_string()))?;
 
         let mut handles = HashMap::new();
         for (entry_hash, entry) in prop_bin.iter_class_hash_and_entry() {
@@ -109,8 +111,8 @@ impl AssetLoader for LeagueLoaderMesh {
     ) -> Result<Self::Asset, Self::Error> {
         let mut buf = Vec::new();
         reader.read_to_end(&mut buf).await?;
-        let mut cursor = Cursor::new(buf);
-        let league_skinned_mesh = LeagueSkinnedMesh::read(&mut cursor)?;
+        let (_, league_skinned_mesh) =
+            LeagueSkinnedMesh::parse(&buf).map_err(|e| Error::Parse(e.to_string()))?;
 
         let mut submeshes = Vec::new();
         for (i, _) in league_skinned_mesh.ranges.iter().enumerate() {
@@ -144,8 +146,8 @@ impl AssetLoader for LeagueLoaderMapgeo {
     ) -> Result<Self::Asset, Self::Error> {
         let mut buf = Vec::new();
         reader.read_to_end(&mut buf).await?;
-        let mut cursor = Cursor::new(buf);
-        let league_mapgeo = LeagueMapGeo::read(&mut cursor)?;
+        let (_, league_mapgeo) =
+            LeagueMapGeo::parse(&buf).map_err(|e| Error::Parse(e.to_string()))?;
 
         let mut submeshes = Vec::new();
 
@@ -210,8 +212,8 @@ impl AssetLoader for LeagueLoaderSkeleton {
     ) -> Result<Self::Asset, Self::Error> {
         let mut buf = Vec::new();
         reader.read_to_end(&mut buf).await?;
-        let mut cursor = Cursor::new(buf);
-        let league_skeleton = LeagueSkeleton::read(&mut cursor)?;
+        let (_, league_skeleton) =
+            LeagueSkeleton::parse(&buf).map_err(|e| Error::Parse(e.to_string()))?;
 
         Ok(league_skeleton)
     }
@@ -239,8 +241,7 @@ impl AssetLoader for LeagueLoaderMeshStatic {
     ) -> Result<Self::Asset, Self::Error> {
         let mut buf = Vec::new();
         reader.read_to_end(&mut buf).await?;
-        let mut reader = Cursor::new(buf);
-        let mesh = LeagueMeshStatic::read(&mut reader)?;
+        let (_, mesh) = LeagueMeshStatic::parse(&buf).map_err(|e| Error::Parse(e.to_string()))?;
         Ok(mesh_static_to_bevy_mesh(mesh))
     }
 
@@ -267,8 +268,7 @@ impl AssetLoader for LeagueLoaderImage {
     ) -> Result<Self::Asset, Self::Error> {
         let mut buf = Vec::new();
         reader.read_to_end(&mut buf).await?;
-        let mut reader = Cursor::new(buf);
-        let texture = LeagueTexture::read(&mut reader)?;
+        let (_, texture) = LeagueTexture::parse(&buf).map_err(|e| Error::Parse(e.to_string()))?;
 
         let texture_descriptor = TextureDescriptor {
             label: None,
@@ -281,7 +281,7 @@ impl AssetLoader for LeagueLoaderImage {
             sample_count: 1,
             dimension: TextureDimension::D2,
             format: match texture.format {
-                LeagueTextureFormat::Bc1 => TextureFormat::Bc1RgbaUnormSrgb,
+                LeagueTextureFormat::Bc1 => TextureFormat::Bc1RgbaUnorm,
                 LeagueTextureFormat::Bc3 => TextureFormat::Bc3RgbaUnorm,
                 _ => panic!("not bc1 or bc3 is {:?}", texture.format),
             },
@@ -348,8 +348,8 @@ impl AssetLoader for LeagueLoaderAnimationClip {
     ) -> Result<Self::Asset, Self::Error> {
         let mut buf = Vec::new();
         reader.read_to_end(&mut buf).await?;
-        let mut reader = Cursor::new(buf);
-        let animation_file = AnimationFile::read(&mut reader)?;
+        let (_, animation_file) =
+            AnimationFile::parse(&buf).map_err(|e| Error::Parse(e.to_string()))?;
 
         let animation = load_animation_file(animation_file);
 
@@ -397,28 +397,32 @@ impl AssetLoader for LeagueLoaderAnimationClip {
     }
 }
 
+#[derive(Default, Serialize, Deserialize)]
+pub struct ShaderTocSettings(pub String);
+
 #[derive(Default)]
 pub struct LeagueLoaderShaderToc;
 
 impl AssetLoader for LeagueLoaderShaderToc {
     type Asset = ResourceShaderPackage;
 
-    type Settings = ();
+    type Settings = ShaderTocSettings;
 
     type Error = Error;
 
     async fn load(
         &self,
         reader: &mut dyn bevy::asset::io::Reader,
-        _settings: &Self::Settings,
+        settings: &Self::Settings,
         load_context: &mut LoadContext<'_>,
     ) -> Result<Self::Asset, Self::Error> {
         let mut buf = Vec::new();
         reader.read_to_end(&mut buf).await?;
-        let mut reader = Cursor::new(buf);
-        let shader_toc = LeagueShaderToc::read(&mut reader)?;
 
-        let path = load_context.asset_path().to_string();
+        let (_, shader_toc) =
+            LeagueShaderToc::parse(&buf).map_err(|e| Error::Parse(e.to_string()))?;
+
+        let path = &settings.0;
 
         let mut handles = HashMap::new();
 
@@ -426,15 +430,18 @@ impl AssetLoader for LeagueLoaderShaderToc {
 
         let mut max_struct = "".to_string();
 
+        let mut max_uniform_sampler = "".to_string();
+
         for i in 0..((shader_toc.bundled_shader_count as f32 / 100.0).ceil() as usize) {
-            let chunk_path = format!("{}_{}", path, i * 100);
+            let chunk_hash = hash_wad(&format!("{}_{}", path, i * 100));
 
             let chunk = load_context
-                .read_asset_bytes(&chunk_path)
+                .read_asset_bytes(&format!("data/{:x}.lol", chunk_hash))
                 .await
-                .unwrap_or(Vec::new());
+                .unwrap();
 
-            let shader_chunk = LeagueShaderChunk::read_le(&mut Cursor::new(chunk))?;
+            let (_, shader_chunk) =
+                LeagueShaderChunk::parse(&chunk).map_err(|e| Error::Parse(e.to_string()))?;
 
             for shader_file in shader_chunk.files.iter() {
                 let content = shader_file.text.clone();
@@ -447,6 +454,15 @@ impl AssetLoader for LeagueLoaderShaderToc {
                 for mat in matches {
                     if mat.as_str().len() > max_struct.len() {
                         max_struct = mat.as_str().to_string();
+                    }
+                }
+
+                let re = Regex::new(r"uniform sampler2D[\w\W]*?\n\n").unwrap();
+                let matches = re.find_iter(&content);
+
+                for mat in matches {
+                    if mat.as_str().len() > max_uniform_sampler.len() {
+                        max_uniform_sampler = mat.as_str().to_string();
                     }
                 }
 
@@ -467,10 +483,25 @@ impl AssetLoader for LeagueLoaderShaderToc {
                 content.replace_range(range, &max_struct);
             }
 
-            let source = if shader_toc.shader_type == 0 {
-                Source::Glsl(convert_vert(&content).into(), ShaderStage::Vertex)
+            let re = Regex::new(r"uniform sampler2D[\w\W]*?\n\n").unwrap();
+            let matches = re.find_iter(&content);
+
+            let ranges = matches.map(|mat| mat.range()).collect::<Vec<_>>();
+
+            for range in ranges {
+                content.replace_range(range, &max_uniform_sampler);
+            }
+
+            let converted = if shader_toc.shader_type == 0 {
+                convert_vert(&content)
             } else {
-                Source::Glsl(convert_frag(&content).into(), ShaderStage::Fragment)
+                convert_frag(&content)
+            };
+
+            let source = if shader_toc.shader_type == 0 {
+                Source::Glsl(converted.clone().into(), ShaderStage::Vertex)
+            } else {
+                Source::Glsl(converted.clone().into(), ShaderStage::Fragment)
             };
 
             let shader = Shader {
@@ -484,12 +515,23 @@ impl AssetLoader for LeagueLoaderShaderToc {
                 validate_shader: ValidateShader::Disabled,
             };
 
-            shader_handles.push(load_context.add_labeled_asset(i.to_string(), shader));
+            shader_handles.push((
+                converted.clone(),
+                load_context.add_labeled_asset(i.to_string(), shader),
+            ));
         }
 
         for (shader_index, shader_hash) in shader_toc.shader_hashes.into_iter().enumerate() {
             let shader_id = shader_toc.shader_ids[shader_index];
-            handles.insert(shader_hash, shader_handles[shader_id as usize].clone());
+
+            let (converted, handle) = &shader_handles[shader_id as usize];
+
+            if get_shader_uuid_by_hash(&path, shader_hash) == Uuid::from_u128(0xdee3e40ffaa02909) {
+                debug!("shader_id: {}", shader_id);
+                debug!("converted: {}", converted);
+            }
+
+            handles.insert(shader_hash, handle.clone());
         }
 
         Ok(ResourceShaderPackage { handles })
@@ -497,5 +539,76 @@ impl AssetLoader for LeagueLoaderShaderToc {
 
     fn extensions(&self) -> &[&str] {
         &["glsl"]
+    }
+}
+
+#[derive(Default)]
+pub struct LeagueLoaderNavGrid;
+
+impl AssetLoader for LeagueLoaderNavGrid {
+    type Asset = ConfigNavigationGrid;
+
+    type Settings = ();
+
+    type Error = Error;
+
+    async fn load(
+        &self,
+        reader: &mut dyn bevy::asset::io::Reader,
+        _settings: &Self::Settings,
+        _load_context: &mut LoadContext<'_>,
+    ) -> Result<Self::Asset, Self::Error> {
+        let mut buf = Vec::new();
+        reader.read_to_end(&mut buf).await?;
+
+        let (_, nav_grid) = AiMeshNGrid::parse(&buf).map_err(|e| Error::Parse(e.to_string()))?;
+
+        let min_bounds = nav_grid.header.min_bounds.xz();
+
+        let min_position = vec2(min_bounds.x, min_bounds.y);
+
+        let cell_size = nav_grid.header.cell_size;
+
+        let x_len = nav_grid.header.x_cell_count as usize;
+        let y_len = nav_grid.header.z_cell_count as usize;
+
+        let mut cells: Vec<ConfigNavigationGridCell> = Vec::new();
+
+        for (i, cell) in nav_grid.navigation_grid.iter().enumerate() {
+            let cell = ConfigNavigationGridCell {
+                heuristic: cell.heuristic,
+                vision_pathing_flags: nav_grid.vision_pathing_flags[i],
+                river_region_flags: nav_grid.other_flags[i].river_region_flags,
+                jungle_quadrant_flags: nav_grid.other_flags[i].jungle_quadrant_flags,
+                main_region_flags: nav_grid.other_flags[i].main_region_flags,
+                nearest_lane_flags: nav_grid.other_flags[i].nearest_lane_flags,
+                poi_flags: nav_grid.other_flags[i].poi_flags,
+                ring_flags: nav_grid.other_flags[i].ring_flags,
+                srx_flags: nav_grid.other_flags[i].srx_flags,
+            };
+
+            cells.push(cell);
+        }
+
+        Ok(ConfigNavigationGrid {
+            min_position,
+            cell_size,
+            x_len,
+            y_len,
+            cells: cells.chunks(x_len).map(|v| v.to_vec()).collect(),
+            height_x_len: nav_grid.height_samples.x_count as usize,
+            height_y_len: nav_grid.height_samples.z_count as usize,
+            height_samples: nav_grid
+                .height_samples
+                .samples
+                .chunks(nav_grid.height_samples.x_count as usize)
+                .map(|v| v.to_vec())
+                .collect(),
+            ..default()
+        })
+    }
+
+    fn extensions(&self) -> &[&str] {
+        &["nav_grid"]
     }
 }

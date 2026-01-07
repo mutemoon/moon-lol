@@ -7,6 +7,14 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
+pub struct AbilityResourceBarData {
+    pub ability_resource_bars: ResourceMeterIconData,
+    pub backdrop: Option<u32>,
+    pub standard_tick: u32,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct AbilityResourceByCoefficientCalculationPart {
     pub m_ability_resource: Option<u8>,
     pub m_coefficient: f32,
@@ -17,6 +25,31 @@ pub struct AbilityResourceByCoefficientCalculationPart {
 #[serde(rename_all = "camelCase")]
 pub struct AbilityResourceDynamicMaterialFloatDriver {
     pub slot: Option<u8>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct AbilityResourcePipSpacerTypeMap {
+    pub additional_pip_spacer_types: HashMap<u32, u32>,
+    pub default_pip_spacer: u32,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct AbilityResourcePipTypeMap {
+    pub additional_pip_types: HashMap<u32, u32>,
+    pub default_empty_pip: u32,
+    pub default_large_pip: u32,
+    pub default_medium_pip: u32,
+    pub default_small_pip: u32,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct AbilityResourcePipsData {
+    pub backdrop: u32,
+    pub pip_spacer: AbilityResourcePipSpacerTypeMap,
+    pub pips: AbilityResourcePipTypeMap,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -206,6 +239,14 @@ pub struct BankUnit {
     pub voice_over: Option<bool>,
 }
 
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct BarTypeMap {
+    pub additional_bar_types: Option<HashMap<u32, u32>>,
+    pub default_bar: u32,
+    pub min_display_percent_override: Option<f32>,
+}
+
 #[derive(Serialize, Deserialize, Debug, Clone, Asset, TypePath)]
 #[serde(rename_all = "camelCase")]
 pub struct BarracksConfig {
@@ -283,7 +324,7 @@ pub struct BuffCounterDynamicMaterialFloatDriver {
     pub spell: Option<u32>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Asset, TypePath)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct BuffData {
     pub can_timeout_while_casting: Option<bool>,
@@ -1062,6 +1103,13 @@ pub enum EnumHasAllSubRequirementsCastRequirement {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+pub enum EnumHealthBarTickStyle {
+    HealthBarTickStyleHero(HealthBarTickStyleHero),
+    HealthBarTickStyleTftCompanion(HealthBarTickStyleTftCompanion),
+    HealthBarTickStyleUnit(HealthBarTickStyleUnit),
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum EnumHeightSolver {
     BlendedLinearHeightSolver,
     CurveTheDifferenceHeightSolver(CurveTheDifferenceHeightSolver),
@@ -1203,6 +1251,12 @@ pub enum EnumTargetingRangeValue {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+pub enum EnumTransitionData {
+    SceneAlphaTransitionData(SceneAlphaTransitionData),
+    SceneScreenEdgeTransitionData(SceneScreenEdgeTransitionData),
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum EnumUiDraggable {
     UiDraggableBasic(UiDraggableBasic),
     UiDraggableElementGroupDrag(UiDraggableElementGroupDrag),
@@ -1234,6 +1288,12 @@ pub enum EnumUnk0x51445de9 {
 pub enum EnumUnk0x6bbc3db6 {
     Unk0x6bbc3db6(Unk0x6bbc3db6),
     Unk0xf00f3333,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub enum EnumUnk0x797fe1c2 {
+    Unk0x797fe1c2,
+    Unk0xcdf661db(Unk0xcdf661db),
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -1476,6 +1536,23 @@ pub struct FloatPerSpellLevel {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
+pub struct FloatingHealthBarBurstData {
+    pub burst_trigger_percent: f32,
+    pub flash_trigger_percent: f32,
+    pub shake_trigger_percent: f32,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, Asset, TypePath)]
+#[serde(rename_all = "camelCase")]
+pub struct FloatingInfoBarViewController {
+    pub base_loadable: u32,
+    pub info_bar_style_source_map: HashMap<u8, u32>,
+    pub path_hash_to_self: u64,
+    pub unit_status_priority_list: u32,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct FollowTerrainHeightSolver {
     pub m_height_offset: Option<f32>,
     pub m_max_slope: Option<f32>,
@@ -1628,11 +1705,166 @@ pub struct HasUnitTagsCastRequirement {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
+pub struct HealthBarData {
+    pub extra_bars: Option<HealthBarExtraBarsData>,
+    pub fade_data: Option<HealthBarFadeData>,
+    pub health_bar: BarTypeMap,
+    pub incoming_damage_bar: Option<u32>,
+    pub max_hp_penalty_bar: Option<u32>,
+    pub max_hp_penalty_divider: Option<u32>,
+    pub text_data: Option<HealthBarTextData>,
+    pub tick_style: EnumHealthBarTickStyle,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct HealthBarExtraBarsData {
+    pub all_shield_bar: u32,
+    pub champ_specific_bar: Option<BarTypeMap>,
+    pub disguise_health_bar: Option<u32>,
+    pub incoming_heal_bar: Option<BarTypeMap>,
+    pub magic_shield_bar: Option<u32>,
+    pub physical_shield_bar: Option<u32>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct HealthBarFadeData {
+    pub fade_bar: BarTypeMap,
+    pub fade_speed: Option<f32>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct HealthBarTextData {
+    pub health_value_text: u32,
+    pub include_max_health: bool,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct HealthBarTickStyleHero {
+    pub micro_tick: u32,
+    pub micro_tick_per_standard_tick_data: Vec<MicroTicksPerStandardTickData>,
+    pub standard_tick: u32,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct HealthBarTickStyleTftCompanion {
+    pub standard_tick: u32,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct HealthBarTickStyleUnit {
+    pub standard_tick: u32,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct HermiteSplineInfo {
     pub m_control_point1: Option<Vec3>,
     pub m_control_point2: Option<Vec3>,
     pub m_start_position_offset: Option<Vec3>,
     pub m_use_missile_position_as_origin: Option<bool>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, Asset, TypePath)]
+#[serde(rename_all = "camelCase")]
+pub struct HeroFloatingInfoBarData {
+    pub anchor: u32,
+    pub borders: HeroFloatingInfoBorderData,
+    pub burst_fade_meter_other: u32,
+    pub burst_fade_meter_self: u32,
+    pub burst_heal_meter_ally: u32,
+    pub burst_heal_meter_enemy: u32,
+    pub burst_heal_meter_self: u32,
+    pub burst_heal_meter_self_colorblind: u32,
+    pub character_state_indicators: Option<HeroFloatingInfoCharacterStateIndicatorData>,
+    pub damage_flash_meter: u32,
+    pub death_anim_ally: u32,
+    pub death_anim_enemy: u32,
+    pub divider: u32,
+    pub health_bar: HealthBarData,
+    pub icons: HeroFloatingInfoIconsData,
+    pub par_bar: Option<AbilityResourceBarData>,
+    pub sar_bar: Option<AbilityResourceBarData>,
+    pub sar_pips: Option<AbilityResourcePipsData>,
+    pub scene: u32,
+    pub scripted_threshold_types: HashMap<u32, u32>,
+    pub unit_status: UiUnitStatusData,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct HeroFloatingInfoBorderData {
+    pub additional_status_icons: Option<HashMap<u32, u32>>,
+    pub default_border: HeroFloatingInfoBorderTypeData,
+    pub defense_modifier_icons: Option<HeroFloatingInfoBorderDefenseIconData>,
+    pub executable_border: HeroFloatingInfoBorderTypeData,
+    pub has_attached_ally_border: Option<HeroFloatingInfoBorderTypeData>,
+    pub invulnerable_border: Option<HeroFloatingInfoBorderTypeData>,
+    pub level_text: u32,
+    pub level_text_color_ally: Option<[u8; 4]>,
+    pub level_text_color_enemy: Option<[u8; 4]>,
+    pub level_text_color_self_colorblind: Option<[u8; 4]>,
+    pub spell_shield_border: Option<HeroFloatingInfoBorderTypeData>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct HeroFloatingInfoBorderDefenseIconData {
+    pub defense_down_icons: Vec<HeroFloatingInfoBorderDefenseIconThresholdData>,
+    pub defense_up_icon: HeroFloatingInfoBorderDefenseIconThresholdData,
+    pub left_icon_region: u32,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct HeroFloatingInfoBorderDefenseIconThresholdData {
+    pub armor_icon: u32,
+    pub combo_icon: u32,
+    pub defense_modifier_threshold: f32,
+    pub magic_resist_icon: u32,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct HeroFloatingInfoBorderTypeData {
+    pub anim_in: Option<u32>,
+    pub border: u32,
+    pub highlight: u32,
+    pub level_box_overlay_ally: Option<u32>,
+    pub level_box_overlay_enemy: Option<u32>,
+    pub level_box_overlay_self: Option<u32>,
+    pub level_box_overlay_self_colorblind: Option<u32>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct HeroFloatingInfoCharacterStateIndicatorData {
+    pub character_states_map: HashMap<u32, HeroFloatingInfoCharacterStateIndicatorList>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct HeroFloatingInfoCharacterStateIndicatorList {
+    pub state_indicator_list: Vec<Unk0x85a6a05c>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct HeroFloatingInfoIconData {
+    pub border: u32,
+    pub highlight_anim: Option<u32>,
+    pub icon: u32,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct HeroFloatingInfoIconsData {
+    pub icons: Vec<HeroFloatingInfoIconData>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -1958,6 +2190,13 @@ pub struct MaxMaterialDriver {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
+pub struct MicroTicksPerStandardTickData {
+    pub micro_ticks_between: u32,
+    pub min_health: f32,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct MinMaterialDriver {
     pub m_drivers: Vec<Box<EnumDriver>>,
 }
@@ -2232,7 +2471,7 @@ pub struct RecSpellRankUpInfo {
     pub m_default_priority: Vec<u32>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Asset, TypePath)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct RecSpellRankUpInfoList {
     pub rec_spell_rank_up_infos: Vec<RecSpellRankUpInfo>,
@@ -2263,6 +2502,13 @@ pub struct ResimulateTrailVfxOnEnterVisibility {
     pub time_to_resimulate: f32,
 }
 
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct ResourceMeterIconData {
+    pub additional_bar_types: Option<HashMap<u32, u32>>,
+    pub default_bar: u32,
+}
+
 #[derive(Serialize, Deserialize, Debug, Clone, Asset, TypePath)]
 #[serde(rename_all = "camelCase")]
 pub struct ResourceResolver {
@@ -2286,6 +2532,27 @@ pub struct RotatingWaveBehavior {
 #[serde(rename_all = "camelCase")]
 pub struct SameTeamCastRequirement {
     pub m_invert_result: Option<bool>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct SceneAlphaTransitionData {
+    pub easing_type: Option<u8>,
+    pub end_alpha: Option<u8>,
+    pub start_alpha: Option<u8>,
+    pub transition_start_delay_secs: Option<f32>,
+    pub transition_time: Option<f32>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct SceneScreenEdgeTransitionData {
+    pub easing_type: Option<u8>,
+    pub edge: Option<u8>,
+    pub end_alpha: Option<u8>,
+    pub start_alpha: Option<u8>,
+    pub transition_start_delay_secs: Option<f32>,
+    pub transition_time: Option<f32>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -2513,7 +2780,7 @@ pub struct SpecificColorMaterialDriver {
     pub m_color: Option<Vec4>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Asset, TypePath)]
+#[derive(Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct SpellDataResource {
     pub always_snap_facing: Option<bool>,
@@ -2888,6 +3155,25 @@ pub struct StopAnimationEventData {
     pub m_name: Option<u32>,
     pub m_start_frame: Option<f32>,
     pub m_stop_animation_name: Option<u32>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, Asset, TypePath)]
+#[serde(rename_all = "camelCase")]
+pub struct StructureFloatingInfoBarData {
+    pub aggro: u32,
+    pub anchor: u32,
+    pub border: u32,
+    pub burst_data: FloatingHealthBarBurstData,
+    pub burst_fade_meter: u32,
+    pub damage_flash_meter: u32,
+    pub death_anim_ally: u32,
+    pub death_anim_enemy: u32,
+    pub health_bar: HealthBarData,
+    pub highlight: u32,
+    pub objective_bounty_ally: u32,
+    pub objective_bounty_enemy: u32,
+    pub par_bar: Option<AbilityResourceBarData>,
+    pub scene: u32,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -3505,6 +3791,78 @@ pub struct UiPositionRect {
     pub ui_rect: Option<UiElementRect>,
 }
 
+#[derive(Serialize, Deserialize, Debug, Clone, Asset, TypePath)]
+#[serde(rename_all = "camelCase")]
+pub struct UiPropertyLoadable {
+    pub filepath_hash: u64,
+    pub unk_0xe50d4da6: Option<EnumUnk0x797fe1c2>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, Asset, TypePath)]
+#[serde(rename_all = "camelCase")]
+pub struct UiSceneData {
+    pub enabled: Option<bool>,
+    pub handle_input_during_pause: Option<bool>,
+    pub inherit_scissoring: Option<bool>,
+    pub layer: Option<u32>,
+    pub name: String,
+    pub parent_scene: Option<u32>,
+    pub scene_transition_in: Option<EnumTransitionData>,
+    pub scene_transition_out: Option<EnumTransitionData>,
+    pub unk_0x49d8f2c4: Option<bool>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct UiUnitStatusData {
+    pub center_justify_status_icon_and_text: bool,
+    pub name_text: u32,
+    pub status_duration_bar_data: Option<UiUnitStatusDurationBarData>,
+    pub status_icon: u32,
+    pub status_text: u32,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct UiUnitStatusDurationBarData {
+    pub status_duration_bar: u32,
+    pub tenacity_bar: u32,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, Asset, TypePath)]
+#[serde(rename_all = "camelCase")]
+pub struct UnitFloatingInfoBarData {
+    pub aggro: u32,
+    pub anchor: u32,
+    pub border: u32,
+    pub death_anim_ally: Option<u32>,
+    pub death_anim_enemy: Option<u32>,
+    pub health_bar: HealthBarData,
+    pub highlight: u32,
+    pub icons: Option<HeroFloatingInfoIconsData>,
+    pub objective_bounty_ally: Option<u32>,
+    pub objective_bounty_enemy: Option<u32>,
+    pub par_bar: Option<AbilityResourceBarData>,
+    pub scene: u32,
+    pub scripted_threshold_types: Option<HashMap<u32, u32>>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct UnitStatusData {
+    pub attackable_unit_status_type: Option<u32>,
+    pub loc_type: Option<u32>,
+    pub status_name: String,
+    pub texture_uvs: Vec4,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, Asset, TypePath)]
+#[serde(rename_all = "camelCase")]
+pub struct UnitStatusPriorityList {
+    pub m_prioritized_unit_status_data: Vec<UnitStatusData>,
+    pub texture_name: String,
+}
+
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Unk0x125a3586 {
@@ -3760,6 +4118,12 @@ pub struct Unk0x82cab1b3 {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
+pub struct Unk0x85a6a05c {
+    pub unk_0xffeb3531: u32,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct Unk0x8958fee2 {
     pub unk_0x79a2e7aa: Option<f32>,
     pub unk_0xffcbd9e2: Option<f32>,
@@ -3926,6 +4290,13 @@ pub struct Unk0xcd5a34f5 {
 #[serde(rename_all = "camelCase")]
 pub struct Unk0xcdb1c8f6 {
     pub unk_0x6355dd6f: Vec<Unk0x6355dd6f>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct Unk0xcdf661db {
+    pub category: String,
+    pub unk_0x2de18da: String,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

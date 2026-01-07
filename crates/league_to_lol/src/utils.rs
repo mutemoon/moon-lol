@@ -17,8 +17,8 @@ pub enum Error {
     #[error("{0}")]
     Io(#[from] std::io::Error),
 
-    #[error("{0}")]
-    Binrw(#[from] binrw::Error),
+    #[error("Parse error: {0}")]
+    Parse(String),
 
     #[error("{0}")]
     Bincode(#[from] bincode::Error),

@@ -5,7 +5,7 @@ use lol_core::Team;
 
 use crate::{
     AbilityResource, AbilityResourceType, Armor, Attack, Bounding, CommandLoadPropBin,
-    CommandSkinSpawn, Damage, EventDead, EventLevelUp, Health, Level, Loading, Movement,
+    CommandSkinSpawn, Damage, EventDead, EventLevelUp, Health, Level, Loading, Movement, PropPath,
 };
 
 #[derive(Default)]
@@ -21,13 +21,11 @@ impl Plugin for PluginCharacter {
     }
 }
 
-/// 角色组件标记
 #[derive(Component, Debug)]
 pub struct Character {
     pub key: HashKey<CharacterRecord>,
 }
 
-/// 生成角色的命令
 #[derive(EntityEvent, Debug, Clone)]
 pub struct CommandCharacterSpawn {
     pub entity: Entity,
@@ -40,10 +38,6 @@ pub struct CommandCharacterLoad {
     pub character_record: String,
 }
 
-#[derive(TypePath)]
-pub struct CharacterSpawn(pub HashKey<CharacterRecord>);
-
-/// 处理角色生成命令的观察者
 fn on_command_character_spawn(trigger: On<CommandCharacterSpawn>, mut commands: Commands) {
     let entity = trigger.event_target();
 
@@ -56,9 +50,11 @@ fn on_command_character_spawn(trigger: On<CommandCharacterSpawn>, mut commands: 
         character_record: trigger.character_record.clone(),
     });
 
-    commands.entity(entity).insert(Loading::new(CharacterSpawn(
-        trigger.character_record.clone().into(),
-    )));
+    commands
+        .entity(entity)
+        .insert(Loading::new(HashKey::<CharacterRecord>::from(
+            &trigger.character_record,
+        )));
 }
 
 fn on_command_character_load(trigger: On<CommandCharacterLoad>, mut commands: Commands) {
@@ -66,20 +62,25 @@ fn on_command_character_load(trigger: On<CommandCharacterLoad>, mut commands: Co
 
     let paths = vec![format!("data/characters/{name}/{name}.bin")];
 
-    commands.trigger(CommandLoadPropBin { paths });
+    commands.trigger(CommandLoadPropBin {
+        path: PropPath::Path(paths),
+        label: None,
+    });
 }
 
 fn update_character_spawn(
     mut commands: Commands,
     res_assets_character_record: Res<Assets<CharacterRecord>>,
-    q_loading: Query<(Entity, &Loading<CharacterSpawn>)>,
+    q_loading: Query<(Entity, &Loading<HashKey<CharacterRecord>>)>,
 ) {
     for (entity, loading) in q_loading.iter() {
-        let Some(character_record) = res_assets_character_record.load_hash(loading.0) else {
+        let Some(character_record) = res_assets_character_record.load_hash(loading.value) else {
             return;
         };
 
-        commands.entity(entity).remove::<Loading<CharacterSpawn>>();
+        commands
+            .entity(entity)
+            .remove::<Loading<HashKey<CharacterRecord>>>();
 
         if let Some(primary_ability_resource) = &character_record.primary_ability_resource {
             // info!(
@@ -113,7 +114,7 @@ fn update_character_spawn(
         };
 
         commands.entity(entity).insert((
-            Character { key: loading.0 },
+            Character { key: loading.value },
             health,
             movement,
             damage,

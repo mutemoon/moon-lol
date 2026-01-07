@@ -3,11 +3,11 @@ use bevy::prelude::*;
 use league_utils::hash_bin;
 use lol_core::Team;
 
-use crate::abilities::get_particle_hash;
 use crate::core::{
-    is_in_direction, Buff, BuffOf, CommandSkinParticleDespawn, CommandSkinParticleSpawn,
-    Direction, EventDamageCreate, Health,
+    is_in_direction, Buff, BuffOf, CommandSkinParticleDespawn, CommandSkinParticleSpawn, Direction,
+    EventDamageCreate, Health,
 };
+use crate::get_particle_hash;
 
 const VITAL_R_TIMEOUT: f32 = 1.5;
 const FIORA_R_ACTIVE_DURATION: f32 = 0.5;
@@ -23,7 +23,7 @@ impl Plugin for PluginFioraR {
     }
 }
 
-#[derive(Component)]
+#[derive(Component, Debug, Clone)]
 #[require(Buff = Buff { name: "FioraR" })]
 pub struct BuffFioraR {
     pub vitals: Vec<Direction>,

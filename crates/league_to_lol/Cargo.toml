@@ -6,7 +6,7 @@ edition = "2021"
 [dependencies]
 bevy.workspace = true
 bincode.workspace = true
-binrw.workspace = true
+nom.workspace = true
 league_core.workspace = true
 league_file.workspace = true
 league_loader.workspace = true

@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use bevy::prelude::*;
 use bevy_behave::{behave, Behave};
 use league_core::CharacterRecord;
@@ -7,12 +5,14 @@ use league_utils::hash_bin;
 use lol_config::LoadHashKeyTrait;
 
 use crate::core::{
-    ActionAnimationPlay, ActionAttackReset, ActionBuffSpawn, ActionCommand, ActionDamage,
-    ActionDash, ActionParticleDespawn, ActionParticleSpawn, AttackBuff, BuffOf, CoolDown, Skill,
-    SkillOf, Skills,
+    ActionAnimationPlay, ActionBuffSpawn, ActionDamage, ActionDamageEffect, ActionDash,
+    ActionParticleSpawn, CoolDown, DamageShape, Skill, SkillOf, Skills, TargetDamage, TargetFilter,
 };
 use crate::entities::champion::Champion;
-use crate::{PassiveSkillOf, SkillEffect};
+use crate::{
+    BuffRivenPassive, BuffRivenQ2, BuffRivenQ3, BuffShieldWhite, DamageType, DashDamage,
+    DashMoveType, PassiveSkillOf, SkillEffect,
+};
 
 #[derive(Default)]
 pub struct PluginRiven;
@@ -30,91 +30,198 @@ impl Plugin for PluginRiven {
 pub struct Riven;
 
 fn startup_load_assets(mut res_assets_skill_effect: ResMut<Assets<SkillEffect>>) {
+    // Q 技能三段
     res_assets_skill_effect.add_hash(
         "Characters/Riven/Spells/RivenTriCleaveAbility/RivenTriCleave",
-        SkillEffect(behave! {
-            Behave::Sequence => {
-                Behave::trigger(
-                    ActionAnimationPlay { hash: hash_bin("Spell1A") }
-                ),
-                Behave::trigger(
-                    ActionParticleSpawn { hash: hash_bin("Riven_Q_01_Detonate") },
-                ),
-                Behave::trigger(
-                    ActionDash::Pointer { speed: 1000., max: 300. },
-                ),
-                Behave::IfThen => {
-                    Behave::trigger(ActionDamage),
-                    Behave::Sequence => {
-                    },
-                },
-            }
-        }),
+        create_riven_tri_cleave_q1(),
+    );
+    res_assets_skill_effect.add_hash(
+        "Characters/Riven/Spells/RivenTriCleaveAbility/RivenTriCleaveQ2",
+        create_riven_tri_cleave_q2(),
+    );
+    res_assets_skill_effect.add_hash(
+        "Characters/Riven/Spells/RivenTriCleaveAbility/RivenTriCleaveQ3",
+        create_riven_tri_cleave_q3(),
     );
 
     res_assets_skill_effect.add_hash(
         "Characters/Riven/Spells/RivenMartyrAbility/RivenMartyr",
-        SkillEffect(behave! {
-            Behave::Sequence => {
-                Behave::trigger(
-                    ActionParticleSpawn { hash: hash_bin("Riven_W_Telegraph_Blue") },
-                ),
-                Behave::trigger(
-                    ActionAnimationPlay { hash: hash_bin("Spell2_In") }
-                ),
-                Behave::trigger(
-                    ActionParticleSpawn { hash: hash_bin("Riven_W_Cas") },
-                ),
-                Behave::Wait(0.5),
-                Behave::trigger(
-                    ActionAnimationPlay { hash: hash_bin("Spell2") }
-                ),
-                Behave::trigger(ActionDamage),
-                Behave::Wait(0.1),
-                Behave::trigger(
-                    ActionParticleDespawn{ hash: hash_bin("Riven_W_Telegraph_Blue") },
-                ),
-            }
-        }),
+        create_riven_martyr(),
     );
 
     res_assets_skill_effect.add_hash(
         "Characters/Riven/Spells/RivenFeintAbility/RivenFeint",
-        SkillEffect(behave! {
-            Behave::Sequence => {
-                Behave::trigger(ActionBuffSpawn{
-                    bundle: Arc::new(|commands: &mut EntityCommands| {
-                        commands.with_related::<BuffOf>((
-                            AttackBuff {
-                                bonus_attack_speed: 0.5,
-                            },
-                        ));
-                    }),
-                }),
-                Behave::trigger(ActionAttackReset),
-            }
-        }),
+        create_riven_feint(),
     );
 
     res_assets_skill_effect.add_hash(
         "Characters/Riven/Spells/RivenFengShuiEngineAbility/RivenFengShuiEngine",
-        SkillEffect(behave! {
-            Behave::Sequence => {
-                Behave::trigger(
-                    ActionParticleSpawn { hash: hash_bin("Riven_R_Indicator_Ring") },
-                ),
-                Behave::trigger(
-                    ActionParticleSpawn { hash: hash_bin("Riven_R_ALL_Warning") },
-                ),
-                Behave::trigger(ActionCommand {
-                    bundle: Arc::new(|commands: &mut EntityCommands| {
-                        commands.with_related::<BuffOf>((
-                        ));
-                    }),
-                }),
-            }
-        }),
+        create_riven_feng_shui_engine(),
     );
+}
+
+fn create_riven_tri_cleave_q1() -> SkillEffect {
+    SkillEffect(behave! {
+        Behave::Sequence => {
+            Behave::trigger(
+                ActionAnimationPlay { hash: hash_bin("Spell1A") }
+            ),
+            Behave::trigger(
+                ActionDash {
+                    skill: "Characters/Riven/Spells/RivenTriCleaveAbility/RivenTriCleave".into(),
+                    move_type: DashMoveType::Fixed(250.0),
+                    damage: Some(DashDamage {
+                        radius_end: 250.0,
+                        damage: TargetDamage {
+                            filter: TargetFilter::All,
+                            amount: hash_bin("FirstSlashDamage"),
+                            damage_type: DamageType::Physical,
+                        },
+                    }),
+                    speed: 1000.0,
+                },
+            ),
+            Behave::trigger(
+                ActionBuffSpawn::new(BuffRivenQ2),
+            ),
+            Behave::trigger(
+                ActionBuffSpawn::new(BuffRivenPassive),
+            ),
+            Behave::trigger(
+                ActionParticleSpawn { hash: hash_bin("Riven_Q_01_Detonate") },
+            ),
+        }
+    })
+}
+
+fn create_riven_tri_cleave_q2() -> SkillEffect {
+    SkillEffect(behave! {
+        Behave::Sequence => {
+            Behave::trigger(
+                ActionAnimationPlay { hash: hash_bin("Spell1B") }
+            ),
+            Behave::trigger(
+                ActionDash {
+                    skill: "Characters/Riven/Spells/RivenTriCleaveAbility/RivenTriCleave".into(),
+                    move_type: DashMoveType::Fixed(250.0),
+                    damage: Some(DashDamage {
+                        radius_end: 250.0,
+                        damage: TargetDamage {
+                            filter: TargetFilter::All,
+                            amount: hash_bin("FirstSlashDamage"),
+                            damage_type: DamageType::Physical,
+                        },
+                    }),
+                    speed: 1000.0,
+                },
+            ),
+            Behave::trigger(
+                ActionBuffSpawn::new(BuffRivenQ3),
+            ),
+            Behave::trigger(
+                ActionBuffSpawn::new(BuffRivenPassive),
+            ),
+            Behave::trigger(
+                ActionParticleSpawn { hash: hash_bin("Riven_Q_02_Detonate") },
+            ),
+        }
+    })
+}
+
+fn create_riven_tri_cleave_q3() -> SkillEffect {
+    SkillEffect(behave! {
+        Behave::Sequence => {
+            Behave::trigger(
+                ActionAnimationPlay { hash: hash_bin("Spell1C") }
+            ),
+            Behave::trigger(
+                ActionDash {
+                    skill: "Characters/Riven/Spells/RivenTriCleaveAbility/RivenTriCleave".into(),
+                    move_type: DashMoveType::Fixed(250.0),
+                    damage: Some(DashDamage {
+                        radius_end: 250.0,
+                        damage: TargetDamage {
+                            filter: TargetFilter::All,
+                            amount: hash_bin("FirstSlashDamage"),
+                            damage_type: DamageType::Physical,
+                        },
+                    }),
+                    speed: 1000.0,
+                },
+            ),
+            Behave::trigger(
+                ActionBuffSpawn::new(BuffRivenPassive),
+            ),
+            Behave::trigger(
+                ActionParticleSpawn { hash: hash_bin("Riven_Q_03_Detonate") },
+            ),
+        }
+    })
+}
+
+fn create_riven_martyr() -> SkillEffect {
+    SkillEffect(behave! {
+        Behave::Sequence => {
+            Behave::trigger(
+                ActionParticleSpawn { hash: hash_bin("Riven_W_Cast") },
+            ),
+            Behave::trigger(
+                ActionAnimationPlay { hash: hash_bin("Spell2") }
+            ),
+            Behave::trigger(
+                ActionDamage {
+                    entity: Entity::PLACEHOLDER,
+                    skill: "Characters/Riven/Spells/RivenMartyrAbility/RivenMartyr".into(),
+                    effects: vec![ActionDamageEffect {
+                        shape: DamageShape::Circle { radius: 300.0 },
+                        damage_list: vec![TargetDamage {
+                            filter: TargetFilter::All,
+                            amount: hash_bin("TotalDamage"),
+                            damage_type: DamageType::Physical,
+                        }],
+                        particle: None,
+                    }],
+                },
+            ),
+        }
+    })
+}
+
+fn create_riven_feint() -> SkillEffect {
+    SkillEffect(behave! {
+        Behave::Sequence => {
+            Behave::trigger(
+                ActionParticleSpawn { hash: hash_bin("Riven_E_Mis") },
+            ),
+            Behave::trigger(
+                ActionAnimationPlay { hash: hash_bin("Spell3") }
+            ),
+            Behave::trigger(
+                ActionBuffSpawn::new(BuffShieldWhite::new(100.0)),
+            ),
+            Behave::trigger(
+                ActionDash {
+                    skill: "Characters/Riven/Spells/RivenFeintAbility/RivenFeint".into(),
+                    move_type: DashMoveType::Fixed(250.0),
+                    damage: None,
+                    speed: 1000.0,
+                },
+            ),
+        }
+    })
+}
+
+fn create_riven_feng_shui_engine() -> SkillEffect {
+    SkillEffect(behave! {
+        Behave::Sequence => {
+            Behave::trigger(
+                ActionParticleSpawn { hash: hash_bin("Riven_R_Indicator_Ring") },
+            ),
+            Behave::trigger(
+                ActionParticleSpawn { hash: hash_bin("Riven_R_ALL_Warning") },
+            ),
+        }
+    })
 }
 
 fn add_skills(

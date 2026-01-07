@@ -61,8 +61,8 @@ pub struct AttackState {
     pub target: Option<Entity>,
 }
 
-#[derive(Component)]
-pub struct AttackBuff {
+#[derive(Component, Clone)]
+pub struct BuffAttack {
     pub bonus_attack_speed: f32,
 }
 
@@ -208,7 +208,7 @@ impl AttackState {
     }
 }
 
-fn update_attack_state(attack_state: &mut Attack, buffs: Vec<&AttackBuff>) {
+fn update_attack_state(attack_state: &mut Attack, buffs: Vec<&BuffAttack>) {
     attack_state.bonus_attack_speed = buffs
         .iter()
         .map(|v| v.bonus_attack_speed)
@@ -223,7 +223,7 @@ fn on_command_attack_start(
     mut q_attack_state: Query<&mut AttackState>,
     mut q_attack: Query<&mut Attack>,
     q_transform: Query<&Transform>,
-    q_attack_buff: Query<&AttackBuff>,
+    q_buff_attack: Query<&BuffAttack>,
     q_buffs: Query<&Buffs>,
     time: Res<Time<Fixed>>,
 ) {
@@ -240,7 +240,7 @@ fn on_command_attack_start(
         if let Ok(buffs) = q_buffs.get(entity) {
             let buffs = buffs
                 .iter()
-                .filter_map(|v| q_attack_buff.get(v).ok())
+                .filter_map(|v| q_buff_attack.get(v).ok())
                 .collect::<Vec<_>>();
             update_attack_state(&mut attack, buffs);
         } else {

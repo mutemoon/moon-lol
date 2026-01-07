@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::{Aggro, CommandAttackAutoStart, EventAggroTargetFound, HealthBar, HealthBarType};
+use crate::{Aggro, CommandAttackAutoStart, EventAggroTargetFound};
 
 #[derive(Default)]
 pub struct PluginTurret;
@@ -12,7 +12,7 @@ impl Plugin for PluginTurret {
 }
 
 #[derive(Component)]
-#[require(Aggro = Aggro { range: 1000.0 }, HealthBar = HealthBar { bar_type: HealthBarType::Turret })]
+#[require(Aggro = Aggro { range: 1000.0 })]
 pub struct Turret;
 
 fn on_event_aggro_target_found(

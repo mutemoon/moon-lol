@@ -255,6 +255,54 @@ impl From<ValueColor> for StochasticSampler<Vec4> {
     }
 }
 
+pub trait FromVfxOption<V, T> {
+    fn from_option(option: Option<V>, default_constant: T) -> Self;
+}
+
+impl FromVfxOption<ValueFloat, f32> for StochasticSampler<f32> {
+    fn from_option(option: Option<ValueFloat>, default_constant: f32) -> Self {
+        option
+            .unwrap_or(ValueFloat {
+                dynamics: None,
+                constant_value: Some(default_constant),
+            })
+            .into()
+    }
+}
+
+impl FromVfxOption<ValueVector3, Vec3> for StochasticSampler<Vec3> {
+    fn from_option(option: Option<ValueVector3>, default_constant: Vec3) -> Self {
+        option
+            .unwrap_or(ValueVector3 {
+                dynamics: None,
+                constant_value: Some(default_constant),
+            })
+            .into()
+    }
+}
+
+impl FromVfxOption<ValueVector2, Vec2> for StochasticSampler<Vec2> {
+    fn from_option(option: Option<ValueVector2>, default_constant: Vec2) -> Self {
+        option
+            .unwrap_or(ValueVector2 {
+                dynamics: None,
+                constant_value: Some(default_constant),
+            })
+            .into()
+    }
+}
+
+impl FromVfxOption<ValueColor, Vec4> for StochasticSampler<Vec4> {
+    fn from_option(option: Option<ValueColor>, default_constant: Vec4) -> Self {
+        option
+            .unwrap_or(ValueColor {
+                dynamics: None,
+                constant_value: Some(default_constant),
+            })
+            .into()
+    }
+}
+
 impl<T> StochasticSampler<T> {
     pub fn sample_clamped(&self, t: f32) -> T
     where

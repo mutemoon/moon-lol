@@ -11,7 +11,7 @@ use league_utils::hash_bin;
 use rayon::prelude::*;
 
 fn main() {
-    let root_dir = r"D:\Program Files\Riot Games\League of Legends\Game";
+    let root_dir = r"D:\WeGameApps\英雄联盟\Game";
 
     let start = Instant::now();
 
@@ -207,23 +207,34 @@ fn main() {
         "assets/hashes/hashes.bintypes.txt",
     ];
 
+    let hashes = get_hashes(&hash_paths);
+
     let need_extract = HashSet::from([
         hash_bin("AnimationGraphData"),
         hash_bin("BarracksConfig"),
         hash_bin("CharacterRecord"),
+        hash_bin("FloatingInfoBarViewController"),
+        hash_bin("HeroFloatingInfoBarData"),
         hash_bin("MapContainer"),
         hash_bin("MapPlaceableContainer"),
         hash_bin("ResourceResolver"),
         hash_bin("SkinCharacterDataProperties"),
         hash_bin("SpellObject"),
         hash_bin("StaticMaterialDef"),
+        hash_bin("StructureFloatingInfoBarData"),
         hash_bin("UiElementEffectAnimationData"),
         hash_bin("UiElementGroupButtonData"),
         hash_bin("UiElementIconData"),
         hash_bin("UiElementRegionData"),
+        hash_bin("UiPropertyLoadable"),
+        hash_bin("UISceneData"),
+        hash_bin("UnitFloatingInfoBarData"),
+        hash_bin("UnitStatusPriorityList"),
         hash_bin("VfxSystemDefinitionData"),
         0xad65d8c4,
     ]);
+
+    let need_defaults = HashSet::from([hash_bin("SpellDataResource"), hash_bin("SpellObject")]);
 
     // 收集所有 (wad_index, entry_hash) 任务
     let tasks: Vec<_> = loader
@@ -275,10 +286,8 @@ fn main() {
 
     let mut class_map = class_map.into_inner().unwrap();
 
-    let hashes = get_hashes(&hash_paths);
-
     let (rust_code, init_code) =
-        class_map_to_rust_code(&mut class_map, &hashes, &need_extract).unwrap();
+        class_map_to_rust_code(&mut class_map, &hashes, &need_extract, &need_defaults).unwrap();
 
     write("league.rs", rust_code).unwrap();
     write("init_league_asset.rs", init_code).unwrap();

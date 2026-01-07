@@ -1,43 +1,7 @@
 use bevy::asset::RenderAssetUsages;
 use bevy::mesh::{Indices, PrimitiveTopology, VertexAttributeValues};
 use bevy::prelude::*;
-use binrw::{BinRead, BinWrite};
 use serde::{Deserialize, Serialize};
-
-#[derive(Debug, Clone, BinRead, BinWrite)]
-#[br(little)]
-#[bw(little)]
-pub struct SerializableString {
-    length: u32,
-    #[br(count = length)]
-    data: Vec<u8>,
-}
-
-impl From<String> for SerializableString {
-    fn from(s: String) -> Self {
-        let data = s.into_bytes();
-        Self {
-            length: data.len() as u32,
-            data,
-        }
-    }
-}
-
-impl From<SerializableString> for String {
-    fn from(s: SerializableString) -> Self {
-        String::from_utf8_lossy(&s.data).to_string()
-    }
-}
-
-impl From<&str> for SerializableString {
-    fn from(s: &str) -> Self {
-        let data = s.as_bytes().to_vec();
-        Self {
-            length: data.len() as u32,
-            data,
-        }
-    }
-}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct IntermediateMesh {
