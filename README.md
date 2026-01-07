@@ -33,7 +33,7 @@ cargo run --example extract
 Once the resource extraction is complete, you can run the Riven skill test example to start the game:
 
 ```bash
-cargo run --example riven
+cargo run --example riven --release
 ```
 
 该示例将加载锐雯的模型、动画及技能逻辑，你可以在窗口中进行操作测试。

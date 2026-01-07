@@ -101,6 +101,13 @@ pub struct CommandSkillStart {
     pub point: Vec2,
 }
 
+#[derive(EntityEvent)]
+pub struct CommandSkillBeforeStart {
+    pub entity: Entity,
+    pub index: usize,
+    pub point: Vec2,
+}
+
 fn on_skill_cast(
     trigger: On<CommandSkillStart>,
     mut commands: Commands,

@@ -18,7 +18,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     CommandAttackAutoStart, CommandAttackAutoStop, CommandMovement, CommandRunStart,
-    CommandSkillLevelUp, CommandSkillStart, MovementAction, RunTarget,
+    CommandSkillBeforeStart, CommandSkillLevelUp, CommandSkillStart, MovementAction, RunTarget,
 };
 
 #[derive(Default)]
@@ -78,6 +78,11 @@ fn on_command_action(trigger: On<CommandAction>, mut commands: Commands) {
             // });
         }
         Action::Skill { index, point } => {
+            commands.trigger(CommandSkillBeforeStart {
+                entity,
+                index,
+                point,
+            });
             commands.trigger(CommandSkillStart {
                 entity,
                 index,

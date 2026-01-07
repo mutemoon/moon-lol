@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use lol_config::HashKey;
 
-use crate::{Buff, Buffs, CommandSkillStart, Riven, Skill, SkillEffect, Skills};
+use crate::{Buff, Buffs, CommandSkillBeforeStart, Riven, Skill, SkillEffect, Skills};
 
 #[derive(Default)]
 pub struct PluginRivenQ;
@@ -25,7 +25,7 @@ const RIVEN_Q2_KEY: &str = "Characters/Riven/Spells/RivenTriCleaveAbility/RivenT
 const RIVEN_Q3_KEY: &str = "Characters/Riven/Spells/RivenTriCleaveAbility/RivenTriCleaveQ3";
 
 fn on_command_skill_start(
-    event: On<CommandSkillStart>,
+    event: On<CommandSkillBeforeStart>,
     mut commands: Commands,
     q_buffs: Query<&Buffs>,
     q_buff_q2: Query<&BuffRivenQ2>,
