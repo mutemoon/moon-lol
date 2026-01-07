@@ -31,7 +31,8 @@ struct GeneratedItem {
 pub fn class_map_to_rust_code(
     class_map: &mut ClassMap,
     hashes: &HashMap<u32, String>,
-    entry_hashes: &HashSet<u32>,
+    need_extract: &HashSet<u32>,
+    need_defaults: &HashSet<u32>,
 ) -> Result<(String, String), Error> {
     // 1. 收集所有枚举信息
     let mut enums = Vec::new();
@@ -91,12 +92,19 @@ pub fn class_map_to_rust_code(
         let class_name = hash_to_type_name(class_hash, hashes);
 
         let mut struct_def = String::new();
-        if entry_hashes.contains(class_hash) {
-            struct_def
-                .push_str("#[derive(Serialize, Deserialize, Debug, Clone, Asset, TypePath)]\n");
-        } else {
-            struct_def.push_str("#[derive(Serialize, Deserialize, Debug, Clone)]\n");
+        struct_def.push_str("#[derive(");
+
+        struct_def.push_str("Serialize, Deserialize, Debug, Clone");
+
+        if need_defaults.contains(class_hash) {
+            struct_def.push_str(", Default");
         }
+
+        if need_extract.contains(class_hash) {
+            struct_def.push_str(", Asset, TypePath");
+        }
+
+        struct_def.push_str(")]\n");
         struct_def.push_str("#[serde(rename_all = \"camelCase\")]\n");
         struct_def.push_str(&format!("pub struct {} {{\n", class_name));
 
@@ -145,7 +153,7 @@ pub fn class_map_to_rust_code(
         all_definitions.push_str(&item.code);
     }
 
-    let mut entry_hashes = entry_hashes
+    let mut entry_hashes = need_extract
         .iter()
         .map(|h| hash_to_type_name(h, hashes))
         .collect::<Vec<_>>();

@@ -42,6 +42,7 @@ fn startup_load_assets(mut res_assets_skill_effect: ResMut<Assets<SkillEffect>>)
                 ),
                 Behave::trigger(
                     ActionDash {
+                        skill: "Characters/Fiora/Spells/FioraQAbility/FioraQ".into(),
                         move_type: DashMoveType::Pointer { max: 300. },
                         damage: None,
                         speed: 1000.0,
@@ -49,11 +50,13 @@ fn startup_load_assets(mut res_assets_skill_effect: ResMut<Assets<SkillEffect>>)
                 ),
                 Behave::IfThen => {
                     Behave::trigger(ActionDamage {
+                        entity: Entity::PLACEHOLDER,
+                        skill: "Characters/Fiora/Spells/FioraQAbility/FioraQ".into(),
                         effects: vec![ActionDamageEffect {
                             shape: DamageShape::Nearest { max_distance: 300.0 },
                             damage_list: vec![TargetDamage {
                                 filter: TargetFilter::All,
-                                amount: 100.0,
+                                amount: hash_bin("TotalDamage"),
                                 damage_type: DamageType::Physical,
                             }],
                             particle: Some(hash_bin("Fiora_Q_Slash_Cas")),

@@ -2,13 +2,14 @@ use std::collections::HashSet;
 
 use bevy::prelude::*;
 use bevy_behave::prelude::{BehaveCtx, BehaveTrigger};
-use lol_config::ConfigNavigationGrid;
+use league_core::SpellObject;
+use lol_config::{ConfigNavigationGrid, HashKey, LoadHashKeyTrait};
 use lol_core::Team;
 
-use super::{TargetDamage, TargetFilter};
 use crate::{
-    Champion, CommandDamageCreate, CommandMovement, EventMovementEnd, Minion, MovementAction,
-    MovementWay, ResourceGrid, SkillEffectContext,
+    get_skill_value, Champion, CommandDamageCreate, CommandMovement, Damage, EventMovementEnd,
+    Minion, MovementAction, MovementWay, ResourceGrid, Skill, SkillEffectContext, Skills,
+    TargetDamage, TargetFilter,
 };
 
 #[derive(Debug, Clone)]
@@ -16,6 +17,7 @@ pub struct ActionDash {
     pub move_type: DashMoveType,
     pub damage: Option<DashDamage>,
     pub speed: f32,
+    pub skill: HashKey<SpellObject>,
 }
 
 #[derive(Debug, Clone)]
@@ -35,6 +37,7 @@ pub struct DashDamageComponent {
     pub start_pos: Vec3,
     pub target_pos: Vec3,
     pub damage: DashDamage,
+    pub skill: HashKey<SpellObject>,
     pub hit_entities: HashSet<Entity>,
 }
 
@@ -96,6 +99,7 @@ pub fn on_action_dash(
             start_pos: transform.translation,
             target_pos: Vec3::new(destination.x, transform.translation.y, destination.y),
             damage: damage.clone(),
+            skill: event.skill,
             hit_entities: HashSet::default(),
         });
     }
@@ -139,9 +143,25 @@ pub fn update_dash_damage(
         Option<&Champion>,
         Option<&Minion>,
     )>,
+    q_skills: Query<&Skills>,
+    q_skill: Query<&Skill>,
+    q_damage: Query<&Damage>,
+    res_assets_spell_object: Res<Assets<SpellObject>>,
     // TODO: Get entity radius
 ) {
-    for (dasher, dasher_transform, mut dash_damage, team) in q_dasher.iter_mut() {
+    for (entity, dasher_transform, mut dash_damage, team) in q_dasher.iter_mut() {
+        let Some(skill_object) = res_assets_spell_object.load_hash(dash_damage.skill) else {
+            return;
+        };
+        let Ok(skills) = q_skills.get(entity) else {
+            return;
+        };
+        let skill = skills
+            .iter()
+            .map(|v| q_skill.get(v))
+            .find_map(|v| v.ok())
+            .unwrap();
+
         let start_pos = dash_damage.start_pos;
         let target_pos = dash_damage.target_pos;
         let current_pos = dasher_transform.translation;
@@ -177,6 +197,21 @@ pub fn update_dash_damage(
                 continue;
             }
 
+            let damage_amount = get_skill_value(
+                &skill_object,
+                dash_damage.damage.damage.amount,
+                skill.level,
+                |stat| {
+                    if stat == 2 {
+                        if let Ok(damage) = q_damage.get(entity) {
+                            return damage.0;
+                        }
+                    }
+                    0.0
+                },
+            )
+            .unwrap();
+
             if dasher_transform
                 .translation
                 .distance(target_transform.translation)
@@ -184,9 +219,9 @@ pub fn update_dash_damage(
             {
                 commands.trigger(CommandDamageCreate {
                     entity: target,
-                    source: dasher,
+                    source: entity,
                     damage_type: dash_damage.damage.damage.damage_type,
-                    amount: dash_damage.damage.damage.amount,
+                    amount: damage_amount,
                 });
                 // Optional: Spawn hit effect
                 // commands.trigger(CommandSkinParticleSpawn {

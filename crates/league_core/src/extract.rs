@@ -2780,7 +2780,7 @@ pub struct SpecificColorMaterialDriver {
     pub m_color: Option<Vec4>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct SpellDataResource {
     pub always_snap_facing: Option<bool>,

@@ -68,12 +68,13 @@ fn create_riven_tri_cleave_q1() -> SkillEffect {
             ),
             Behave::trigger(
                 ActionDash {
+                    skill: "Characters/Riven/Spells/RivenTriCleaveAbility/RivenTriCleave".into(),
                     move_type: DashMoveType::Fixed(250.0),
                     damage: Some(DashDamage {
                         radius_end: 250.0,
                         damage: TargetDamage {
                             filter: TargetFilter::All,
-                            amount: 100.0,
+                            amount: hash_bin("FirstSlashDamage"),
                             damage_type: DamageType::Physical,
                         },
                     }),
@@ -101,12 +102,13 @@ fn create_riven_tri_cleave_q2() -> SkillEffect {
             ),
             Behave::trigger(
                 ActionDash {
+                    skill: "Characters/Riven/Spells/RivenTriCleaveAbility/RivenTriCleave".into(),
                     move_type: DashMoveType::Fixed(250.0),
                     damage: Some(DashDamage {
                         radius_end: 250.0,
                         damage: TargetDamage {
                             filter: TargetFilter::All,
-                            amount: 100.0,
+                            amount: hash_bin("FirstSlashDamage"),
                             damage_type: DamageType::Physical,
                         },
                     }),
@@ -134,12 +136,13 @@ fn create_riven_tri_cleave_q3() -> SkillEffect {
             ),
             Behave::trigger(
                 ActionDash {
+                    skill: "Characters/Riven/Spells/RivenTriCleaveAbility/RivenTriCleave".into(),
                     move_type: DashMoveType::Fixed(250.0),
                     damage: Some(DashDamage {
                         radius_end: 250.0,
                         damage: TargetDamage {
                             filter: TargetFilter::All,
-                            amount: 100.0,
+                            amount: hash_bin("FirstSlashDamage"),
                             damage_type: DamageType::Physical,
                         },
                     }),
@@ -167,11 +170,13 @@ fn create_riven_martyr() -> SkillEffect {
             ),
             Behave::trigger(
                 ActionDamage {
+                    entity: Entity::PLACEHOLDER,
+                    skill: "Characters/Riven/Spells/RivenMartyrAbility/RivenMartyr".into(),
                     effects: vec![ActionDamageEffect {
                         shape: DamageShape::Circle { radius: 300.0 },
                         damage_list: vec![TargetDamage {
                             filter: TargetFilter::All,
-                            amount: 100.0,
+                            amount: hash_bin("TotalDamage"),
                             damage_type: DamageType::Physical,
                         }],
                         particle: None,
@@ -196,6 +201,7 @@ fn create_riven_feint() -> SkillEffect {
             ),
             Behave::trigger(
                 ActionDash {
+                    skill: "Characters/Riven/Spells/RivenFeintAbility/RivenFeint".into(),
                     move_type: DashMoveType::Fixed(250.0),
                     damage: None,
                     speed: 1000.0,

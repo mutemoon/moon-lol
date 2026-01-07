@@ -234,6 +234,8 @@ fn main() {
         0xad65d8c4,
     ]);
 
+    let need_defaults = HashSet::from([hash_bin("SpellDataResource"), hash_bin("SpellObject")]);
+
     // 收集所有 (wad_index, entry_hash) 任务
     let tasks: Vec<_> = loader
         .wads
@@ -285,7 +287,7 @@ fn main() {
     let mut class_map = class_map.into_inner().unwrap();
 
     let (rust_code, init_code) =
-        class_map_to_rust_code(&mut class_map, &hashes, &need_extract).unwrap();
+        class_map_to_rust_code(&mut class_map, &hashes, &need_extract, &need_defaults).unwrap();
 
     write("league.rs", rust_code).unwrap();
     write("init_league_asset.rs", init_code).unwrap();

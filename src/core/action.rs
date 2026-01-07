@@ -34,7 +34,8 @@ impl Plugin for PluginAction {
         app.add_observer(on_action_particle_despawn);
         app.add_observer(on_action_particle_spawn);
         app.add_observer(on_action_command);
-        app.add_observer(on_attack_damage);
+        app.add_observer(on_behave_attack_damage);
+        app.add_observer(on_action_damage);
 
         app.add_observer(on_command_action);
 

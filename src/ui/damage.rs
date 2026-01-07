@@ -88,7 +88,7 @@ fn update_damage_numbers(
     camera_info: Single<(&Camera, &GlobalTransform), With<Camera3d>>,
     mut damage_numbers: Query<(
         Entity,
-        &mut Transform,
+        &mut UiTransform,
         &mut DamageNumber,
         &mut Node,
         &mut TextColor,
@@ -133,7 +133,7 @@ fn update_damage_numbers(
         // // 字体大小动画：从大到小
         let current_font_size = 1. - (1. - damage_number.final_scale) * progress;
 
-        transform.scale = Vec3::splat(current_font_size);
+        transform.scale = Vec2::splat(current_font_size);
 
         // 透明度动画：逐渐消失
         let alpha = 1.0 - progress;
