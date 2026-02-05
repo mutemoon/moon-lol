@@ -6,6 +6,11 @@ use league_core::{
 };
 use rand::Rng;
 
+pub trait MaterialPath {
+    const FRAG_PATH: &str;
+    const VERT_PATH: &str;
+}
+
 pub fn create_black_pixel_texture() -> Image {
     let image = Image::new_fill(
         Extent3d {

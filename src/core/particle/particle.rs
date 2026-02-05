@@ -1,3 +1,4 @@
+mod distortion;
 mod mesh;
 mod quad;
 mod quad_slice;
@@ -5,6 +6,7 @@ mod quad_slice;
 use bevy::mesh::skinning::{SkinnedMesh, SkinnedMeshInverseBindposes};
 use bevy::mesh::VertexAttributeValues;
 use bevy::prelude::*;
+pub use distortion::*;
 use league_core::{EnumVfxPrimitive, VfxSystemDefinitionData};
 pub use mesh::*;
 pub use quad::*;

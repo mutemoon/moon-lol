@@ -1,4 +1,4 @@
-mod emitter;
+mod emitters;
 mod environment;
 mod particle;
 mod skinned_mesh;
@@ -10,7 +10,7 @@ use bevy::prelude::*;
 use bevy::transform::systems::{
     mark_dirty_trees, propagate_parent_transforms, sync_simple_transforms,
 };
-pub use emitter::*;
+pub use emitters::*;
 pub use environment::*;
 use league_core::{VfxEmitterDefinitionData, VfxSystemDefinitionData};
 use league_utils::hash_wad;
@@ -41,12 +41,14 @@ impl Plugin for PluginParticle {
         app.add_observer(on_command_particle_spawn);
         app.add_observer(on_command_particle_despawn);
 
+        app.add_plugins(MaterialPlugin::<ParticleMaterialDistortion>::default());
         app.add_plugins(MaterialPlugin::<ParticleMaterialQuad>::default());
         app.add_plugins(MaterialPlugin::<ParticleMaterialQuadSlice>::default());
         app.add_plugins(MaterialPlugin::<ParticleMaterialUnlitDecal>::default());
         app.add_plugins(MaterialPlugin::<ParticleMaterialMesh>::default());
         app.add_plugins(MaterialPlugin::<ParticleMaterialSkinnedMeshParticle>::default());
 
+        app.init_asset::<ParticleMaterialDistortion>();
         app.init_asset::<ParticleMaterialQuad>();
         app.init_asset::<ParticleMaterialQuadSlice>();
         app.init_asset::<ParticleMaterialUnlitDecal>();
@@ -65,8 +67,10 @@ impl Plugin for PluginParticle {
                     sync_simple_transforms,
                 )
                     .chain(),
-                update_emitter,
-                update_emitter_attached,
+                update_emitter_quad,
+                update_emitter_decal,
+                update_emitter_mesh,
+                update_emitter_skinned_mesh,
                 update_decal_intersections,
                 update_particle_transform,
                 (
@@ -157,7 +161,10 @@ fn on_command_particle_spawn(
                 .flatten(),
         );
 
-    for (i, vfx_emitter_definition_data) in vfx_emitter_definition_datas.enumerate() {
+    for (i, vfx_emitter_definition_data) in vfx_emitter_definition_datas.enumerate()
+    // .skip(2).take(1)
+    {
+        println!("{:?}", vfx_emitter_definition_data.emitter_name);
         commands.entity(entity).with_related::<EmitterOf>((
             ParticleId {
                 hash: trigger.hash,

@@ -2,9 +2,10 @@ use std::collections::hash_map::Iter;
 use std::collections::HashMap;
 
 use bevy::prelude::*;
+use league_utils::hash_bin;
 use lol_core::Team;
 
-use crate::{Action, CommandAction, Map};
+use crate::{Action, CommandAction, CommandSkinParticleSpawn, Map};
 
 #[derive(Default)]
 pub struct PluginController;
@@ -61,6 +62,16 @@ pub fn on_key_pressed(
     res_input: Res<ButtonInput<KeyCode>>,
     window: Single<&Window>,
 ) {
+    for (entity, team, controller) in q_controller.iter() {
+        if res_input.just_pressed(KeyCode::KeyV) {
+            commands.trigger(CommandSkinParticleSpawn {
+                entity,
+                hash: hash_bin("Riven_Q_03_Detonate"),
+            });
+            return;
+        };
+    }
+
     let Some(viewport_position) = window.cursor_position() else {
         return;
     };

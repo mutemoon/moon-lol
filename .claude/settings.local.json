@@ -1,5 +1,5 @@
 {
   "permissions": {
-    "allow": ["Bash(cargo:*)"]
+    "allow": ["Bash", "Write", "Edit"]
   }
 }
