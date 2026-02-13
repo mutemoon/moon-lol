@@ -13,8 +13,9 @@ pub use quad::*;
 pub use quad_slice::*;
 
 use crate::{
-    Lifetime, ParticleEmitterState, ParticleId, ParticleMaterialSkinnedMeshParticle,
+    CameraState, Lifetime, ParticleEmitterState, ParticleId, ParticleMaterialSkinnedMeshParticle,
     ParticleMaterialUnlitDecal, ATTRIBUTE_LIFETIME, ATTRIBUTE_WORLD_POSITION,
+    ATTRIBUTE_WORLD_POSITION_VEC4,
 };
 
 #[derive(Component)]
@@ -42,6 +43,10 @@ pub fn update_particle(
         &ParticleState,
         &ParticleId,
     )>,
+    q_particle_material_distortion: Query<
+        &MeshMaterial3d<ParticleMaterialDistortion>,
+        With<ParticleState>,
+    >,
     q_particle_material_unlit_decal: Query<
         &MeshMaterial3d<ParticleMaterialUnlitDecal>,
         With<ParticleState>,
@@ -50,7 +55,7 @@ pub fn update_particle(
     q_particle_emitter_state: Query<&ParticleEmitterState>,
     q_global_transform: Query<&GlobalTransform>,
     q_mesh3d: Query<&Mesh3d>,
-    q_camera_transform: Query<&Transform, With<Camera3d>>,
+    q_camera_transform: Query<&Transform, With<CameraState>>,
 ) {
     for (particle_entity, transform, child_of, lifetime, particle, particle_id) in
         q_particle_state.iter()
@@ -156,15 +161,35 @@ pub fn update_particle(
             world_transform = world_transform.looking_at(camera_transform.translation, Vec3::ZERO);
         }
 
-        let postion_values = postion_values
-            .iter()
-            .map(|v| {
-                let vertext_position = Vec3::from_array(*v);
-                world_transform.transform_point(vertext_position).to_array()
-            })
-            .collect::<Vec<_>>();
+        // Check if this is a distortion particle (uses Vec4) or regular particle (uses Vec3)
+        let is_distortion = q_particle_material_distortion.get(particle_entity).is_ok();
 
-        mesh.insert_attribute(ATTRIBUTE_WORLD_POSITION, postion_values);
+        if is_distortion {
+            // Distortion particles use ATTRIBUTE_WORLD_POSITION_VEC4
+            let postion_values = postion_values
+                .iter()
+                .map(|v| {
+                    let vertext_position = Vec3::from_array(*v);
+                    world_transform
+                        .transform_point(vertext_position)
+                        .extend(0.0)
+                        .to_array()
+                })
+                .collect::<Vec<_>>();
+
+            mesh.insert_attribute(ATTRIBUTE_WORLD_POSITION_VEC4, postion_values);
+        } else {
+            // Other particles use ATTRIBUTE_WORLD_POSITION
+            let postion_values = postion_values
+                .iter()
+                .map(|v| {
+                    let vertext_position = Vec3::from_array(*v);
+                    world_transform.transform_point(vertext_position).to_array()
+                })
+                .collect::<Vec<_>>();
+
+            mesh.insert_attribute(ATTRIBUTE_WORLD_POSITION, postion_values);
+        }
 
         let VertexAttributeValues::Float32x4(values) =
             mesh.attribute_mut(Mesh::ATTRIBUTE_COLOR).unwrap()

@@ -2,20 +2,23 @@ use std::time::Duration;
 
 use bevy::prelude::*;
 use bevy::winit::{UpdateMode, WinitSettings};
-use moon_lol::{PluginBarrack, PluginCore, PluginResource};
+use moon_lol::{create_log_plugin, PluginBarrack, PluginCore, PluginResource};
 
 fn main() {
     App::new()
         .add_plugins((
-            DefaultPlugins.build().set(WindowPlugin {
-                primary_window: Some(Window {
-                    title: "锐雯技能测试".to_string(),
-                    // resolution: (300, 300).into(),
-                    // position: WindowPosition::At((0, 1000).into()),
+            DefaultPlugins
+                .build()
+                .set(create_log_plugin())
+                .set(WindowPlugin {
+                    primary_window: Some(Window {
+                        title: "锐雯技能测试".to_string(),
+                        // resolution: (300, 300).into(),
+                        // position: WindowPosition::At((0, 1000).into()),
+                        ..default()
+                    }),
                     ..default()
                 }),
-                ..default()
-            }),
             PluginCore
                 .build()
                 .set(PluginResource {

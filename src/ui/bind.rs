@@ -1,6 +1,8 @@
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 
+use crate::CameraState;
+
 #[derive(Default)]
 pub struct PluginUIBind;
 
@@ -20,7 +22,7 @@ pub struct UIBind {
 
 fn update_ui_bind(
     mut commands: Commands,
-    camera_info: Single<(&Camera, &GlobalTransform), With<Camera3d>>,
+    camera_info: Single<(&Camera, &GlobalTransform), With<CameraState>>,
     q_global_transform: Query<&GlobalTransform>,
     mut q_ui_bind: Query<(Entity, &mut Node, &UIBind, &Children)>,
     q_window: Query<&Window, With<PrimaryWindow>>,

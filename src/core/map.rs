@@ -42,7 +42,6 @@ impl Plugin for PluginMap {
                 ),
             ),
         );
-        // app.add_systems(Startup, startup_spawn_map_geometry);
     }
 }
 

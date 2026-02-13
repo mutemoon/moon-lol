@@ -1,3 +1,4 @@
+use bevy::camera::visibility::RenderLayers;
 use bevy::mesh::skinning::SkinnedMesh;
 use bevy::prelude::*;
 use bevy::render::render_resource::Face;
@@ -72,6 +73,7 @@ pub fn update_skin_mesh_spawn(
                 Transform::default(),
                 Mesh3d(mesh.clone()),
                 MeshMaterial3d(loading.value.1.clone()),
+                RenderLayers::layer(1),
                 skinned_mesh.clone(),
             ));
         }

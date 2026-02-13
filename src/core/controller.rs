@@ -5,7 +5,7 @@ use bevy::prelude::*;
 use league_utils::hash_bin;
 use lol_core::Team;
 
-use crate::{Action, CommandAction, CommandSkinParticleSpawn, Map};
+use crate::{Action, CameraState, CommandAction, CommandSkinParticleSpawn, Map};
 
 #[derive(Default)]
 pub struct PluginController;
@@ -53,7 +53,7 @@ impl Controller {
 
 pub fn on_key_pressed(
     mut commands: Commands,
-    camera: Single<(&Camera, &GlobalTransform)>,
+    camera: Single<(&Camera, &GlobalTransform), With<CameraState>>,
     mut ray_cast: MeshRayCast,
     q_children: Query<&ChildOf>,
     q_controller: Query<(Entity, &Team, &Controller)>,

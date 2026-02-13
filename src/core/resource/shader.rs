@@ -5,8 +5,8 @@ use league_utils::get_shader_handle_by_hash;
 use lol_config::ResourceShaderPackage;
 
 use crate::{
-    AssetServerLoadLeague, MaterialPath, ParticleMaterialQuad, ParticleMaterialQuadSlice,
-    ParticleMaterialUnlitDecal,
+    AssetServerLoadLeague, MaterialPath, ParticleMaterialDistortion, ParticleMaterialQuad,
+    ParticleMaterialQuadSlice, ParticleMaterialUnlitDecal,
 };
 
 #[derive(Resource, Default)]
@@ -23,6 +23,8 @@ pub fn startup_load_shaders(
         ParticleMaterialQuad::VERT_PATH,
         ParticleMaterialUnlitDecal::FRAG_PATH,
         ParticleMaterialUnlitDecal::VERT_PATH,
+        ParticleMaterialDistortion::FRAG_PATH,
+        ParticleMaterialDistortion::VERT_PATH,
     ]);
 
     for path in paths {

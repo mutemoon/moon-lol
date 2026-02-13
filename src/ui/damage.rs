@@ -1,7 +1,7 @@
 use bevy::color::palettes::css::{BLUE, RED, WHITE};
 use bevy::prelude::*;
 
-use crate::{DamageType, EventDamageCreate};
+use crate::{CameraState, DamageType, EventDamageCreate};
 
 #[derive(Default)]
 pub struct PluginUIDamage;
@@ -85,7 +85,7 @@ fn on_event_damage_create(
 fn update_damage_numbers(
     mut commands: Commands,
     time: Res<Time>,
-    camera_info: Single<(&Camera, &GlobalTransform), With<Camera3d>>,
+    camera_info: Single<(&Camera, &GlobalTransform), With<CameraState>>,
     mut damage_numbers: Query<(
         Entity,
         &mut UiTransform,

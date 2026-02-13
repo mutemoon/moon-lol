@@ -8,6 +8,44 @@ use crate::{Lifetime, ParticleId, ParticleState, StochasticSampler};
 
 use super::ParticleEmitterState;
 
+/// Emitter type classification for particle systems
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum EmitterType {
+    Quad,
+    Mesh,
+    SkinnedMesh,
+    Decal,
+    Distortion,
+    Unknown,
+}
+
+/// Extract the emitter type from VFX emitter definition data
+pub fn get_emitter_type(vfx_emitter_definition_data: &VfxEmitterDefinitionData) -> EmitterType {
+    let primitive = vfx_emitter_definition_data
+        .primitive
+        .clone()
+        .unwrap_or(EnumVfxPrimitive::VfxPrimitiveCameraUnitQuad);
+
+    match primitive {
+        // Quad primitives - check if it's a distortion effect
+        EnumVfxPrimitive::VfxPrimitiveArbitraryQuad
+        | EnumVfxPrimitive::VfxPrimitiveCameraUnitQuad => {
+            if vfx_emitter_definition_data.distortion_definition.is_some() {
+                EmitterType::Distortion
+            } else {
+                EmitterType::Quad
+            }
+        }
+        // Mesh primitives
+        EnumVfxPrimitive::VfxPrimitiveMesh(_) => EmitterType::Mesh,
+        EnumVfxPrimitive::VfxPrimitiveAttachedMesh(_) => EmitterType::SkinnedMesh,
+        // Decal primitives
+        EnumVfxPrimitive::VfxPrimitivePlanarProjection { .. } => EmitterType::Decal,
+        // Unknown/unsupported types
+        _ => EmitterType::Unknown,
+    }
+}
+
 pub struct ParticleBirthParams {
     pub birth_color: Vec4,
     pub birth_velocity: Vec3,

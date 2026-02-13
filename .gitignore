@@ -5,7 +5,7 @@ node_modules
 
 assets/*
 !assets/games
-!assets/spotlighthealthbaratlas.tex
+!assets/shaders
 
 .vs
 

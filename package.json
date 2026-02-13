@@ -3,19 +3,17 @@
   "scripts": {
     "example:attack": "cargo run --example attack",
     "example:attack:release": "cargo run --example attack --release",
-    "example:attack:watch": "cargo-watch -x \"run --example attack\"",
+    "example:attack:watch": "cargo-watch -w src -x \"run --example attack\"",
     "example:classic_fiora": "cargo run --example classic_fiora",
     "example:classic_fiora:release": "cargo run --example classic_fiora --release",
-    "example:classic_fiora:watch": "cargo-watch -x \"run --example classic_fiora\"",
+    "example:classic_fiora:watch": "cargo-watch -w src -x \"run --example classic_fiora\"",
     "example:navigation_grid": "cargo run --example navigation_grid",
-    "example:navigation_grid:watch": "cargo-watch -x \"run --example navigation_grid\"",
-    "example:particle:watch": "cargo-watch -x \"run --example particle\"",
-    "example:riven:watch": "cargo-watch -x \"run --example riven\"",
-    "example:stream:watch": "cargo-watch -x \"run --example stream\"",
-    "example:texture:watch": "cargo-watch -x \"run --example texture\"",
+    "example:navigation_grid:watch": "cargo-watch -w src -x \"run --example navigation_grid\"",
+    "example:riven:watch": "cargo-watch -w src -w assets -x \"run --example riven\"",
+    "example:stream:watch": "cargo-watch -w src -x \"run --example stream\"",
     "extract": "cargo run --example extract",
     "hot:patch": "dx serve --hot-patch --features \"bevy/hotpatching\"",
-    "test:minion:watch": "cargo-watch -x \"test -p moon_lol --test minion -- tests::test_complete_attack_cycle --exact --nocapture\""
+    "test:minion:watch": "cargo-watch -w src -x \"test -p moon_lol --test minion -- tests::test_complete_attack_cycle --exact --nocapture\""
   },
   "devDependencies": {
     "prettier": "^3.7.4",

@@ -7,7 +7,7 @@ use crate::{
 };
 
 use super::ParticleEmitterState;
-use super::utils::{ParticleBirthParams, EmissionParams, calculate_emission_params, calculate_particle_transform_frame, spawn_particle_entity};
+use super::utils::{ParticleBirthParams, EmissionParams, calculate_emission_params, calculate_particle_transform_frame, spawn_particle_entity, get_emitter_type, EmitterType};
 
 pub fn attach_mesh_visuals(
     commands: &mut Commands,
@@ -71,12 +71,18 @@ pub fn update_emitter_mesh(
         let vfx_emitter_definition_data =
             particle_id.get_def(&res_assets_vfx_system_definition_data);
 
+        // Check if this emitter should be processed by this update function
+        let emitter_type = get_emitter_type(vfx_emitter_definition_data);
+        if emitter_type != EmitterType::Mesh {
+            continue;
+        }
+
         let primitive = vfx_emitter_definition_data
             .primitive
             .clone()
             .unwrap_or(EnumVfxPrimitive::VfxPrimitiveCameraUnitQuad);
 
-        // Skip non-mesh primitives
+        // Extract m_mesh from Mesh primitive
         let m_mesh = match primitive {
             EnumVfxPrimitive::VfxPrimitiveMesh(ref m) => m,
             _ => continue,

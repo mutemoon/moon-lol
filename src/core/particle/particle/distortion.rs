@@ -13,37 +13,37 @@ use league_utils::get_shader_handle;
 
 use crate::{
     MaterialPath, ATTRIBUTE_LIFETIME, ATTRIBUTE_UV_FRAME, ATTRIBUTE_UV_MULT,
-    ATTRIBUTE_WORLD_POSITION,
+    ATTRIBUTE_WORLD_POSITION_VEC4,
 };
 
 #[derive(Clone, ShaderType, Debug)]
 pub struct UniformsVertexDistortion {
-    pub alpha_test_reference_value: f32,
-    pub distortion_power: f32,
-    pub apply_team_color_correction: Vec4,
+    pub particle_depth_push_pull: f32,
+    pub texture_info: Vec4,
 }
 
 impl Default for UniformsVertexDistortion {
     fn default() -> Self {
         Self {
-            alpha_test_reference_value: 0.0,
-            distortion_power: 0.0,
-            apply_team_color_correction: Vec4::ZERO,
+            particle_depth_push_pull: 0.0,
+            texture_info: Vec4::ZERO,
         }
     }
 }
 
 #[derive(Clone, ShaderType, Debug)]
 pub struct UniformsPixelDistortion {
-    pub particle_depth_push_pull: f32,
-    pub texture_info: Vec4,
+    pub alpha_test_reference_value: f32,
+    pub distortion_power: f32,
+    pub apply_team_color_correction: Vec4,
 }
 
 impl Default for UniformsPixelDistortion {
     fn default() -> Self {
         Self {
-            particle_depth_push_pull: 0.0,
-            texture_info: Vec4::ZERO,
+            alpha_test_reference_value: 0.0,
+            distortion_power: 0.0,
+            apply_team_color_correction: Vec4::ZERO,
         }
     }
 }
@@ -64,12 +64,10 @@ impl From<ParticleMeshDistortion> for Mesh {
         {
             let values = values
                 .into_iter()
-                .map(|v| transform.transform_point(Vec3::from_array(*v)))
+                .map(|v| transform.transform_point(Vec3::from_array(*v)).extend(0.0))
                 .collect::<Vec<_>>();
 
-            mesh.insert_attribute(Mesh::ATTRIBUTE_POSITION, values.clone());
-
-            mesh.insert_attribute(ATTRIBUTE_WORLD_POSITION, values.clone());
+            mesh.insert_attribute(ATTRIBUTE_WORLD_POSITION_VEC4, values.clone());
         }
 
         if let VertexAttributeValues::Float32x2(values) =
@@ -108,16 +106,16 @@ pub struct ParticleMaterialDistortion {
     #[sampler(3)]
     pub texture: Option<Handle<Image>>,
 
-    #[texture(8)]
-    #[sampler(9)]
-    pub particle_color_texture: Option<Handle<Image>>,
-
     #[texture(4)]
     #[sampler(5)]
-    pub normal_map: Option<Handle<Image>>,
+    pub particle_color_texture: Option<Handle<Image>>,
 
     #[texture(6)]
     #[sampler(7)]
+    pub normal_map: Option<Handle<Image>>,
+
+    #[texture(8)]
+    #[sampler(9)]
     pub cmb_tex_sampler_back_buffer_copy_smp_clamp_no_mip: Option<Handle<Image>>,
 
     pub blend_mode: u8,
@@ -159,11 +157,13 @@ impl MaterialPath for ParticleMaterialDistortion {
 
 impl Material for ParticleMaterialDistortion {
     fn fragment_shader() -> ShaderRef {
-        get_shader_handle(Self::FRAG_PATH, &vec![]).into()
+        // get_shader_handle(Self::FRAG_PATH, &vec![]).into()
+        "shaders/distortion.frag".into()
     }
 
     fn vertex_shader() -> ShaderRef {
-        get_shader_handle(Self::VERT_PATH, &vec![]).into()
+        // get_shader_handle(Self::VERT_PATH, &vec![]).into()
+        "shaders/distortion.vert".into()
     }
 
     fn alpha_mode(&self) -> AlphaMode {
@@ -196,13 +196,14 @@ impl Material for ParticleMaterialDistortion {
             });
         }
 
-        fragment.shader = key.bind_group_data.shader_frag;
+        // fragment.shader = key.bind_group_data.shader_frag;
 
         let vertex_layout = layout.0.get_layout(&[
-            ATTRIBUTE_WORLD_POSITION.at_shader_location(0),
+            ATTRIBUTE_WORLD_POSITION_VEC4.at_shader_location(0),
             Mesh::ATTRIBUTE_COLOR.at_shader_location(3),
-            ATTRIBUTE_UV_FRAME.at_shader_location(8),
-            ATTRIBUTE_LIFETIME.at_shader_location(9),
+            ATTRIBUTE_LIFETIME.at_shader_location(8),
+            Mesh::ATTRIBUTE_UV_0.at_shader_location(9),
+            // ATTRIBUTE_UV_FRAME.at_shader_location(9),
             // ATTRIBUTE_UV_MULT.at_shader_location(9),
         ])?;
         descriptor.vertex.buffers = vec![vertex_layout];

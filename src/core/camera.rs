@@ -1,7 +1,11 @@
+use bevy::camera::visibility::RenderLayers;
 use bevy::camera::{CameraProjection, SubCameraView};
 use bevy::input::mouse::MouseWheel;
 use bevy::math::{Mat4, Vec3A, Vec4};
 use bevy::prelude::*;
+use bevy::render::render_resource::{
+    Extent3d, TextureDescriptor, TextureDimension, TextureFormat, TextureUsages,
+};
 
 // 相机距离和位置配置
 pub const CAMERA_FAR_Z: f32 = 22000.0;
@@ -38,6 +42,9 @@ impl Plugin for PluginCamera {
     }
 }
 
+#[derive(Resource)]
+pub struct TargetImage(pub Handle<Image>);
+
 #[derive(Component, Reflect)]
 #[reflect(Component)]
 pub struct Focus;
@@ -64,15 +71,55 @@ impl CameraState {
 fn setup(
     mut commands: Commands,
     // mut window: Query<&mut Window>
+    mut images: ResMut<Assets<Image>>,
 ) {
-    commands.spawn((
-        Camera3d::default(),
-        CameraState {
-            scale: 1.0,
-            position: vec3(CAMERA_MIN_X, 0.0, CAMERA_MAX_Y),
+    let size = Extent3d {
+        width: 512,
+        height: 512,
+        ..default()
+    };
+
+    let mut image = Image {
+        texture_descriptor: TextureDescriptor {
+            label: Some("Target Image"),
+            size,
+            dimension: TextureDimension::D2,
+            format: TextureFormat::Rgba8UnormSrgb,
+            mip_level_count: 1,
+            sample_count: 1,
+            usage: TextureUsages::TEXTURE_BINDING
+                | TextureUsages::COPY_DST
+                | TextureUsages::RENDER_ATTACHMENT,
+            view_formats: &[],
         },
-        Projection::custom(CustomFlipXProjection::default()),
-    ));
+        ..default()
+    };
+
+    image.resize(size);
+
+    let image_handle = images.add(image);
+
+    commands.insert_resource(TargetImage(image_handle.clone()));
+
+    commands
+        .spawn((
+            Camera3d::default(),
+            CameraState {
+                scale: 1.0,
+                position: vec3(CAMERA_MIN_X, 0.0, CAMERA_MAX_Y),
+            },
+            RenderLayers::from_layers(&[0, 1]),
+            Projection::custom(CustomFlipXProjection::default()),
+        ))
+        .with_child((
+            Camera3d::default(),
+            Camera {
+                target: image_handle.into(),
+                ..default()
+            },
+            RenderLayers::layer(0),
+            Projection::custom(CustomFlipXProjection::default()),
+        ));
 
     // if let Ok(mut window) = window.single_mut() {
     //     window.cursor_options.grab_mode = CursorGrabMode::Confined;

@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use league_core::{EnumVfxPrimitive, VfxEmitterDefinitionData, VfxPrimitivePlanarProjection, VfxProjectionDefinitionData, VfxSystemDefinitionData};
+use league_core::{EnumVfxPrimitive, VfxPrimitivePlanarProjection, VfxProjectionDefinitionData, VfxSystemDefinitionData};
 
 use crate::{
     Lifetime, ParticleDecal, ParticleId, ParticleMaterialUnlitDecal, ResourceCache,
@@ -7,7 +7,7 @@ use crate::{
 };
 
 use super::ParticleEmitterState;
-use super::utils::{ParticleBirthParams, EmissionParams, calculate_emission_params, calculate_particle_transform_frame, spawn_particle_entity};
+use super::utils::{ParticleBirthParams, EmissionParams, calculate_emission_params, calculate_particle_transform_frame, spawn_particle_entity, get_emitter_type, EmitterType};
 
 pub fn attach_unlit_decal_visuals(
     commands: &mut Commands,
@@ -54,16 +54,16 @@ pub fn update_emitter_decal(
         let vfx_emitter_definition_data =
             particle_id.get_def(&res_assets_vfx_system_definition_data);
 
+        // Check if this emitter should be processed by this update function
+        let emitter_type = get_emitter_type(vfx_emitter_definition_data);
+        if emitter_type != EmitterType::Decal {
+            continue;
+        }
+
         let primitive = vfx_emitter_definition_data
             .primitive
             .clone()
             .unwrap_or(EnumVfxPrimitive::VfxPrimitiveCameraUnitQuad);
-
-        // Skip non-decal primitives
-        let is_decal = matches!(primitive, EnumVfxPrimitive::VfxPrimitivePlanarProjection { .. });
-        if !is_decal {
-            continue;
-        }
 
         let Some(EmissionParams {
             particles_to_spawn,

@@ -22,16 +22,22 @@ pub use utils::*;
 use crate::{Lifetime, LifetimeMode};
 
 pub const ATTRIBUTE_WORLD_POSITION: MeshVertexAttribute =
-    MeshVertexAttribute::new("Vertext_World_Position", 7, VertexFormat::Float32x3);
+    MeshVertexAttribute::new("ATTRIBUTE_WORLD_POSITION", 2020, VertexFormat::Float32x3);
+
+pub const ATTRIBUTE_WORLD_POSITION_VEC4: MeshVertexAttribute = MeshVertexAttribute::new(
+    "ATTRIBUTE_WORLD_POSITION_VEC4",
+    2021,
+    VertexFormat::Float32x4,
+);
 
 pub const ATTRIBUTE_UV_FRAME: MeshVertexAttribute =
-    MeshVertexAttribute::new("Vertext_UV_FRAME", 8, VertexFormat::Float32x4);
+    MeshVertexAttribute::new("ATTRIBUTE_UV_FRAME", 2022, VertexFormat::Float32x4);
 
 pub const ATTRIBUTE_LIFETIME: MeshVertexAttribute =
-    MeshVertexAttribute::new("Vertext_LIFETIME", 9, VertexFormat::Float32x2);
+    MeshVertexAttribute::new("ATTRIBUTE_LIFETIME", 2023, VertexFormat::Float32x2);
 
 pub const ATTRIBUTE_UV_MULT: MeshVertexAttribute =
-    MeshVertexAttribute::new("Vertext_UV_MULT", 99, VertexFormat::Float32x2);
+    MeshVertexAttribute::new("ATTRIBUTE_UV_MULT", 2024, VertexFormat::Float32x2);
 
 #[derive(Default)]
 pub struct PluginParticle;
@@ -71,6 +77,7 @@ impl Plugin for PluginParticle {
                 update_emitter_decal,
                 update_emitter_mesh,
                 update_emitter_skinned_mesh,
+                update_emitter_distortion,
                 update_decal_intersections,
                 update_particle_transform,
                 (
