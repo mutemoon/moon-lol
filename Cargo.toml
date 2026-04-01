@@ -24,9 +24,10 @@ serde.workspace = true
 tokio.workspace = true
 
 bevy_egui = "0.38"
+crossbeam-channel = "0.5"
+image = { version = "0.25", features = ["png"] }
 rand = "0.9.2"
 tracing = "0.1"
-tracing-subscriber = "0.3"
 
 [workspace.dependencies]
 league_core = { path = "crates/league_core" }
@@ -51,8 +52,6 @@ tokio = { version = "1.0", features = ["full"] }
 ron = "0.8"
 
 [dev-dependencies]
-crossbeam-channel = "0.5"
-image = { version = "0.25", features = ["jpeg", "png"] }
 rayon = "1.10"
 rocket = { version = "*", features = ["json"] }
 rocket_cors = "0.6"

@@ -130,7 +130,7 @@ pub struct ConditionalMaterialKeyDistortion {
 // 2. 为 Key 实现 From Trait
 impl From<&ParticleMaterialDistortion> for ConditionalMaterialKeyDistortion {
     fn from(material: &ParticleMaterialDistortion) -> Self {
-        let mut shader_frag_defs = vec![];
+        let shader_frag_defs = vec![];
 
         let shader_frag =
             get_shader_handle(ParticleMaterialDistortion::FRAG_PATH, &shader_frag_defs);

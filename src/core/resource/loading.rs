@@ -7,6 +7,7 @@ use league_file::LeagueSkeleton;
 use lol_config::HashKey;
 use lol_core::LeagueSkinMesh;
 
+#[derive(Default)]
 pub struct PluginResourceLoading;
 
 impl Plugin for PluginResourceLoading {

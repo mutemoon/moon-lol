@@ -11,7 +11,7 @@ use super::utils::{
 };
 use super::ParticleEmitterState;
 use crate::{
-    create_black_pixel_texture, Lifetime, ParticleId, ParticleMaterialDistortion,
+    Lifetime, ParticleId, ParticleMaterialDistortion,
     ParticleMeshDistortion, ResourceCache, TargetImage, UniformsPixelDistortion,
     UniformsVertexDistortion,
 };
@@ -26,7 +26,7 @@ pub fn attach_distortion_visuals(
     blend_mode: u8,
     frame: f32,
     res_mesh: &mut ResMut<Assets<Mesh>>,
-    res_image: &mut ResMut<Assets<Image>>,
+    _res_image: &mut ResMut<Assets<Image>>,
     res_distortion_material: &mut ResMut<Assets<ParticleMaterialDistortion>>,
     res_asset_server: &Res<AssetServer>,
     res_resource_cache: &mut ResMut<ResourceCache>,

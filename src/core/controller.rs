@@ -62,7 +62,7 @@ pub fn on_key_pressed(
     res_input: Res<ButtonInput<KeyCode>>,
     window: Single<&Window>,
 ) {
-    for (entity, team, controller) in q_controller.iter() {
+    for (entity, _team, _controller) in q_controller.iter() {
         if res_input.just_pressed(KeyCode::KeyV) {
             commands.trigger(CommandSkinParticleSpawn {
                 entity,

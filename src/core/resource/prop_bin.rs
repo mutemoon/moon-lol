@@ -5,6 +5,7 @@ use lol_config::{LeagueProperties, ASSET_LOADER_REGISTRY};
 
 use crate::{AssetServerLoadLeague, HashPath};
 
+#[derive(Default)]
 pub struct PluginResourcePropBin;
 
 impl Plugin for PluginResourcePropBin {

@@ -25,6 +25,7 @@ mod rotate;
 mod run;
 mod skill;
 mod skin;
+mod test_render;
 mod utils;
 
 pub use action::*;
@@ -54,4 +55,5 @@ pub use rotate::*;
 pub use run::*;
 pub use skill::*;
 pub use skin::*;
+pub use test_render::*;
 pub use utils::*;

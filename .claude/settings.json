@@ -1,6 +1,6 @@
 {
   "permissions": {
-    "allow": ["Bash", "Edit", "Glob", "Grep", "Write", "LSP", "Read", "TodoWrite"],
+    "allow": ["Bash", "Edit", "Glob", "Grep", "Write", "LSP", "Read", "TodoWrite", "WebSearch"],
     "deny": [
       "AskUserQuestion",
       "CronCreate",
@@ -22,13 +22,11 @@
       "TaskOutput",
       "TaskUpdate",
       "WebFetch",
-      "WebSearch",
-
       "mcp__ide__executeCode",
       "mcp__ide__getDiagnostics"
     ]
   },
   "enabledPlugins": {
-    "ralph-wiggum@claude-plugins-official": true
+    "ralph-wiggum@claude-code-plugins": true
   }
 }

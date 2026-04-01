@@ -61,6 +61,11 @@ impl Default for Skills {
 }
 
 impl Skills {
+    /// Create a new Skills list with a single skill entity
+    pub fn new(entity: Entity) -> Self {
+        Skills(vec![entity])
+    }
+
     /// Add a skill entity to this Skills list
     pub fn push(&mut self, entity: Entity) {
         self.0.push(entity);

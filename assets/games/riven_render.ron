@@ -1,0 +1,33 @@
+[
+    (
+        skin_path: "Characters/Riven/Skins/Skin0",
+        character_record: "Characters/Riven/CharacterRecords/Root",
+    ),
+    {
+        "bevy_transform::components::transform::Transform": (
+            translation: (0.0, 0.0, 0.0),
+            rotation: (0.0, 0.0, 0.0, 1.0),
+            scale: (1.0, 1.0, 1.0),
+        ),
+        "moon_lol::entities::champions::riven::Riven": (),
+        "lol_core::team::Team": Order,
+        "moon_lol::core::camera::Focus": (),
+    },
+    (
+        skin_path: "Characters/Fiora/Skins/Skin22",
+        character_record: "Characters/Fiora/CharacterRecords/Root",
+    ),
+    {
+        "bevy_transform::components::transform::Transform": (
+            translation: (140.0, 0.0, 0.0),
+            rotation: (0.0, 1.0, 0.0, 0.0),
+            scale: (1.0, 1.0, 1.0),
+        ),
+        "lol_core::team::Team": Chaos,
+        "moon_lol::entities::champion::Champion": (),
+        "moon_lol::core::life::Health": (
+            value: 6000.0,
+            max: 6000.0,
+        ),
+    },
+]
