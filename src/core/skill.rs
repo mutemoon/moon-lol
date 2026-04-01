@@ -54,6 +54,19 @@ impl Deref for Skills {
     }
 }
 
+impl Default for Skills {
+    fn default() -> Self {
+        Skills(Vec::new())
+    }
+}
+
+impl Skills {
+    /// Add a skill entity to this Skills list
+    pub fn push(&mut self, entity: Entity) {
+        self.0.push(entity);
+    }
+}
+
 #[derive(Component, Default)]
 pub struct CoolDown {
     pub timer: Timer,
