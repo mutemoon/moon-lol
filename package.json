@@ -13,7 +13,10 @@
     "example:stream:watch": "cargo-watch -w src -x \"run --example stream\"",
     "extract": "cargo run --example extract",
     "hot:patch": "dx serve --hot-patch --features \"bevy/hotpatching\"",
-    "test:minion:watch": "cargo-watch -w src -x \"test -p moon_lol --test minion -- tests::test_complete_attack_cycle --exact --nocapture\""
+    "test:minion:watch": "cargo-watch -w src -x \"test -p moon_lol --test minion -- tests::test_complete_attack_cycle --exact --nocapture\"",
+    "test:render": "node scripts/run-render-tests.mjs",
+    "test:render:riven": "cargo test --test riven_render_test -- --test-threads=1",
+    "test:render:fiora": "cargo test --test fiora_render_test -- --test-threads=1"
   },
   "devDependencies": {
     "prettier": "^3.7.4",

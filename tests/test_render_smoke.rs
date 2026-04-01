@@ -20,6 +20,8 @@ fn skill_test_render_writes_frames() {
         capture_every_nth_frame: 1,
         max_frames: Some(3),
         spawn_default_scene: true,
+        video_output: None,
+        keep_frame_images: false,
     });
     app.add_plugins(DefaultPlugins.build().disable::<WinitPlugin>());
     app.add_plugins(PluginSkillTestRenderSuite);
@@ -32,8 +34,9 @@ fn skill_test_render_writes_frames() {
         app.update();
     }
 
-    let entries = fs::read_dir(&output_dir)
-        .unwrap_or_else(|e| panic!("failed to read output dir {output_dir:?}: {e}"))
+    let frames_dir = output_dir.join("frames");
+    let entries = fs::read_dir(&frames_dir)
+        .unwrap_or_else(|e| panic!("failed to read output dir {frames_dir:?}: {e}"))
         .filter_map(|entry| entry.ok())
         .map(|entry| entry.path())
         .filter(|path| path.extension().is_some_and(|ext| ext == "png"))
@@ -41,6 +44,6 @@ fn skill_test_render_writes_frames() {
 
     assert!(
         !entries.is_empty(),
-        "expected rendered frames in {output_dir:?}, found none"
+        "expected rendered frames in {frames_dir:?}, found none"
     );
 }

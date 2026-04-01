@@ -4,14 +4,14 @@ use std::time::Duration;
 use bevy::prelude::*;
 use bevy::time::TimeUpdateStrategy;
 use moon_lol::{
-    Action, PluginBarrack, PluginCore, PluginMap, PluginMinion, PluginSkillTestRender,
-    PluginTurret, PluginUI, PluginResource, Riven, SkillTestRenderConfig, SkillTestScript,
+    Action, Fiora, PluginBarrack, PluginCore, PluginMap, PluginMinion, PluginResource,
+    PluginSkillTestRender, PluginTurret, PluginUI, SkillTestRenderConfig, SkillTestScript,
     SkillTestScriptCursor, SkillTestScriptStep, SkillTestVideoFormat, SkillTestVideoOutput,
     attach_skill_test_actor,
 };
 
 fn main() {
-    let output_dir = PathBuf::from("artifacts/riven_render_test");
+    let output_dir = PathBuf::from("artifacts/fiora_render_test");
     let _ = std::fs::remove_dir_all(&output_dir);
 
     let mut app = App::new();
@@ -25,12 +25,12 @@ fn main() {
         video_output: Some(SkillTestVideoOutput {
             format: SkillTestVideoFormat::Mp4,
             fps: 60,
-            file_name: "riven_render_test.mp4".to_owned(),
+            file_name: "fiora_render_test.mp4".to_owned(),
         }),
         keep_frame_images: false,
     });
     app.insert_resource(TimeUpdateStrategy::ManualDuration(Duration::from_millis(16)));
-    app.insert_resource(make_riven_script());
+    app.insert_resource(make_fiora_script());
     app.init_resource::<SkillTestScriptCursor>();
     app.add_plugins(DefaultPlugins.set(WindowPlugin {
         primary_window: Some(Window {
@@ -44,7 +44,7 @@ fn main() {
         PluginCore
             .build()
             .set(PluginResource {
-                game_config_path: "games/riven_render.ron".to_owned(),
+                game_config_path: "games/fiora_render.ron".to_owned(),
             })
             .disable::<PluginBarrack>()
             .disable::<PluginMap>()
@@ -53,7 +53,7 @@ fn main() {
             .disable::<PluginUI>(),
     );
     app.add_systems(Startup, setup_stage);
-    app.add_systems(Update, attach_skill_test_actor::<Riven>);
+    app.add_systems(Update, attach_skill_test_actor::<Fiora>);
     app.finish();
     app.cleanup();
 
@@ -87,7 +87,7 @@ fn setup_stage(
     ));
 }
 
-fn make_riven_script() -> SkillTestScript {
+fn make_fiora_script() -> SkillTestScript {
     SkillTestScript::new(vec![
         SkillTestScriptStep::set_skill_points(0, 4),
         SkillTestScriptStep::action(0, Action::SkillLevelUp(0)),
@@ -98,42 +98,35 @@ fn make_riven_script() -> SkillTestScript {
             15,
             Action::Skill {
                 index: 0,
-                point: Vec2::new(140.0, 0.0),
+                point: Vec2::new(170.0, 0.0),
             },
         ),
         SkillTestScriptStep::action(
-            40,
-            Action::Skill {
-                index: 0,
-                point: Vec2::new(140.0, 0.0),
-            },
-        ),
-        SkillTestScriptStep::action(
-            65,
-            Action::Skill {
-                index: 0,
-                point: Vec2::new(140.0, 0.0),
-            },
-        ),
-        SkillTestScriptStep::action(
-            95,
+            45,
             Action::Skill {
                 index: 1,
-                point: Vec2::new(140.0, 0.0),
+                point: Vec2::new(170.0, 0.0),
             },
         ),
         SkillTestScriptStep::action(
-            125,
+            80,
             Action::Skill {
                 index: 2,
-                point: Vec2::new(140.0, 0.0),
+                point: Vec2::new(170.0, 0.0),
             },
         ),
         SkillTestScriptStep::action(
-            155,
+            115,
+            Action::Skill {
+                index: 0,
+                point: Vec2::new(170.0, 0.0),
+            },
+        ),
+        SkillTestScriptStep::action(
+            145,
             Action::Skill {
                 index: 3,
-                point: Vec2::new(140.0, 0.0),
+                point: Vec2::new(170.0, 0.0),
             },
         ),
     ])

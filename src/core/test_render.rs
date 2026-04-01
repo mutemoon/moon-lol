@@ -22,13 +22,21 @@ use bevy::render::{Extract, ExtractSchedule, Render, RenderApp, RenderSystems};
 use crossbeam_channel::{Receiver, Sender};
 use image::{ImageBuffer, Rgba};
 use league_file::LeagueSkeleton;
-use lol_config::{init_league_asset, ConfigMapGeo, ConfigNavigationGrid, ResourceShaderChunk, ResourceShaderPackage};
+use league_core::{
+    JungleQuadrantFlags, MainRegionFlags, NearestLaneFlags, POIFlags, RingFlags,
+    RiverRegionFlags, UnknownSRXFlags, VisionPathingFlags,
+};
+use lol_config::{
+    init_league_asset, ConfigMapGeo, ConfigNavigationGrid, ConfigNavigationGridCell,
+    ResourceShaderChunk, ResourceShaderPackage,
+};
 use lol_core::LeagueSkinMesh;
 
 use crate::{
     Action, CommandAction, FixedFrameCount,
     PluginAnimation, PluginCamera, PluginParticle, PluginResourceLoading, PluginResourcePropBin,
-    PluginRotate, PluginSkin, ResourceCache, ResourceShaderHandles, SkillPoints, Skills,
+    PluginRotate, PluginSkin, ResourceCache, ResourceGrid, ResourceShaderHandles, SkillPoints,
+    Skills,
 };
 
 #[derive(Resource, Clone)]
@@ -40,6 +48,7 @@ pub struct SkillTestRenderConfig {
     pub max_frames: Option<u32>,
     pub spawn_default_scene: bool,
     pub video_output: Option<SkillTestVideoOutput>,
+    pub keep_frame_images: bool,
 }
 
 impl Default for SkillTestRenderConfig {
@@ -52,6 +61,7 @@ impl Default for SkillTestRenderConfig {
             max_frames: None,
             spawn_default_scene: true,
             video_output: None,
+            keep_frame_images: false,
         }
     }
 }
@@ -67,6 +77,10 @@ impl SkillTestVideoOutput {
     fn output_path(&self, output_dir: &std::path::Path) -> PathBuf {
         output_dir.join(&self.file_name)
     }
+}
+
+fn frames_dir(output_dir: &std::path::Path) -> PathBuf {
+    output_dir.join("frames")
 }
 
 #[derive(Clone)]
@@ -197,6 +211,7 @@ impl Plugin for PluginSkillTestRender {
         app.init_resource::<CapturedFrameCount>();
         app.init_resource::<CapturedFrameWriteIndex>();
         app.init_resource::<CapturePostProcessState>();
+        app.init_resource::<SkillTestScriptCursor>();
         app.add_systems(
             Update,
             setup_skill_test_render
@@ -251,17 +266,25 @@ impl ImageCopier {
 fn setup_skill_test_render(
     mut commands: Commands,
     config: Res<SkillTestRenderConfig>,
+    mut navigation_grids: ResMut<Assets<ConfigNavigationGrid>>,
     mut images: ResMut<Assets<Image>>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
     render_device: Res<RenderDevice>,
+    res_grid: Option<Res<ResourceGrid>>,
     q_camera: Query<Entity, With<Camera>>,
 ) {
     let _ = fs::create_dir_all(&config.output_dir);
+    let _ = fs::create_dir_all(frames_dir(&config.output_dir));
     commands.insert_resource(CaptureImageSize {
         width: config.width,
         height: config.height,
     });
+
+    if res_grid.is_none() {
+        let grid = navigation_grids.add(make_test_grid());
+        commands.insert_resource(ResourceGrid(grid));
+    }
 
     let size = Extent3d {
         width: config.width,
@@ -452,9 +475,7 @@ fn write_captured_frames(
         }
 
         let image = rgba_from_padded_buffer(&raw, image_size.width, image_size.height);
-        let frame_path = config
-            .output_dir
-            .join(format!("frame_{:06}.png", write_index.0));
+        let frame_path = frames_dir(&config.output_dir).join(format!("frame_{:06}.png", write_index.0));
 
         let _ = image.save(frame_path);
         write_index.0 += 1;
@@ -493,6 +514,13 @@ fn run_post_process_after_capture(
     }
 
     let output_path = video_output.output_path(&config.output_dir);
+    let frame_input = format!(
+        "{}/frame_%06d.png",
+        frames_dir(&config.output_dir)
+            .strip_prefix(&config.output_dir)
+            .unwrap_or(frames_dir(&config.output_dir).as_path())
+            .display()
+    );
     let status = match video_output.format {
         SkillTestVideoFormat::Gif => Command::new("ffmpeg")
             .args([
@@ -500,7 +528,7 @@ fn run_post_process_after_capture(
                 "-framerate",
                 &video_output.fps.to_string(),
                 "-i",
-                "frame_%06d.png",
+                &frame_input,
                 &video_output.file_name,
             ])
             .current_dir(&config.output_dir)
@@ -511,7 +539,7 @@ fn run_post_process_after_capture(
                 "-framerate",
                 &video_output.fps.to_string(),
                 "-i",
-                "frame_%06d.png",
+                &frame_input,
                 "-pix_fmt",
                 "yuv420p",
                 "-vf",
@@ -524,6 +552,9 @@ fn run_post_process_after_capture(
 
     match status {
         Ok(status) if status.success() => {
+            if !config.keep_frame_images {
+                let _ = fs::remove_dir_all(frames_dir(&config.output_dir));
+            }
             info!("exported capture video to {}", output_path.display());
         }
         Ok(status) => {
@@ -549,6 +580,33 @@ fn ffmpeg_exists() -> bool {
         .unwrap_or(false)
 }
 
+fn make_test_grid() -> ConfigNavigationGrid {
+    let cell = ConfigNavigationGridCell {
+        heuristic: 1.0,
+        vision_pathing_flags: VisionPathingFlags::Walkable,
+        river_region_flags: RiverRegionFlags::NonJungle,
+        jungle_quadrant_flags: JungleQuadrantFlags::None,
+        main_region_flags: MainRegionFlags::Spawn,
+        nearest_lane_flags: NearestLaneFlags::BlueSideTopLane,
+        poi_flags: POIFlags::None,
+        ring_flags: RingFlags::BlueSpawnToNexus,
+        srx_flags: UnknownSRXFlags::Walkable,
+    };
+
+    ConfigNavigationGrid {
+        min_position: Vec2::new(-2000.0, -2000.0),
+        cell_size: 50.0,
+        x_len: 100,
+        y_len: 100,
+        cells: vec![vec![cell; 100]; 100],
+        height_x_len: 2,
+        height_y_len: 2,
+        height_samples: vec![vec![0.0; 2]; 2],
+        occupied_cells: Default::default(),
+        exclude_cells: Default::default(),
+    }
+}
+
 pub fn attach_skill_test_actor<T: Component>(
     mut commands: Commands,
     q_tagged: Query<(), With<SkillTestActor>>,
@@ -567,11 +625,14 @@ pub fn attach_skill_test_actor<T: Component>(
 
 pub fn run_skill_test_script(
     mut commands: Commands,
-    frame: Res<FixedFrameCount>,
+    frame: Option<Res<FixedFrameCount>>,
     script: Option<Res<SkillTestScript>>,
     mut cursor: ResMut<SkillTestScriptCursor>,
     mut q_actor: Query<(Entity, Option<&mut SkillPoints>), (With<SkillTestActor>, With<Skills>)>,
 ) {
+    let Some(frame) = frame else {
+        return;
+    };
     let Some(script) = script else {
         return;
     };
@@ -581,7 +642,7 @@ pub fn run_skill_test_script(
     };
 
     while let Some(step) = script.steps.get(cursor.0) {
-        if step.frame != frame.0 {
+        if step.frame > frame.0 {
             break;
         }
 
