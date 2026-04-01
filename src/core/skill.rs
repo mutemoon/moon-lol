@@ -1,8 +1,6 @@
 use std::ops::Deref;
 
 use bevy::prelude::*;
-use bevy_behave::prelude::{BehavePlugin, BehaveTree, Tree};
-use bevy_behave::Behave;
 use league_core::{
     EffectValueCalculationPart, EnumAbilityResourceByCoefficientCalculationPart,
     EnumGameCalculation, NamedDataValueCalculationPart, SpellObject,
@@ -12,7 +10,12 @@ use league_core::{
 use league_utils::hash_bin;
 use lol_config::{HashKey, LoadHashKeyTrait};
 
-use crate::{AbilityResource, EventLevelUp, Level};
+use crate::{
+    AbilityResource, ActionAnimationPlay, ActionBuffSpawn, ActionDamage, ActionDash,
+    ActionParticleDespawn, ActionParticleSpawn, CommandAnimationPlay, CommandAttackReset,
+    CommandMovement, CommandSkinParticleDespawn, CommandSkinParticleSpawn, EventLevelUp, Level,
+    MovementAction, MovementWay,
+};
 
 #[derive(Default)]
 pub struct PluginSkill;
@@ -20,8 +23,6 @@ pub struct PluginSkill;
 impl Plugin for PluginSkill {
     fn build(&self, app: &mut App) {
         app.init_asset::<SkillEffect>();
-
-        app.add_plugins(BehavePlugin::default());
 
         app.add_observer(on_skill_cast);
         app.add_observer(on_skill_level_up);
@@ -78,7 +79,19 @@ impl Default for Skill {
 }
 
 #[derive(Asset, TypePath)]
-pub struct SkillEffect(pub Tree<Behave>);
+pub struct SkillEffect(pub Vec<SkillAction>);
+
+/// 技能动作枚举，替代行为树节点
+#[derive(Clone)]
+pub enum SkillAction {
+    Animation(ActionAnimationPlay),
+    Particle(ActionParticleSpawn),
+    ParticleDespawn(ActionParticleDespawn),
+    Dash(ActionDash),
+    Damage(ActionDamage),
+    Buff(ActionBuffSpawn),
+    AttackReset,
+}
 
 #[derive(Component)]
 pub struct SkillPoints(pub u32);
@@ -116,6 +129,7 @@ fn on_skill_cast(
     res_assets_skill_effect: Res<Assets<SkillEffect>>,
     mut q_skill: Query<(&Skill, &mut CoolDown)>,
     mut q_ability_resource: Query<&mut AbilityResource>,
+    q_transform: Query<&Transform>,
 ) {
     let entity = trigger.event_target();
     let Ok(skills) = skills.get(entity) else {
@@ -171,14 +185,100 @@ fn on_skill_cast(
 
     let effect_key = skill.key_skill_effect;
 
-    if let Some(effect) = res_assets_skill_effect.load_hash(effect_key) {
-        debug!("{} 技能 {} 开始执行行为树", entity, trigger.index);
-        commands.entity(entity).with_child((
-            BehaveTree::new(effect.0.clone()),
-            SkillEffectContext {
-                point: trigger.point,
-            },
-        ));
+    let Some(effect) = res_assets_skill_effect.load_hash(effect_key) else {
+        return;
+    };
+
+    debug!("{} 技能 {} 开始执行动作列表", entity, trigger.index);
+
+    for action in &effect.0 {
+        match action {
+            SkillAction::Animation(a) => {
+                commands.trigger(CommandAnimationPlay {
+                    entity,
+                    hash: a.hash,
+                    repeat: false,
+                    duration: None,
+                });
+            }
+            SkillAction::Particle(p) => {
+                commands.trigger(CommandSkinParticleSpawn {
+                    entity,
+                    hash: p.hash,
+                });
+            }
+            SkillAction::ParticleDespawn(p) => {
+                commands.trigger(CommandSkinParticleDespawn {
+                    entity,
+                    hash: p.hash,
+                });
+            }
+            SkillAction::Dash(d) => {
+                let transform = q_transform.get(entity).unwrap();
+                let vector = trigger.point - transform.translation.xz();
+                let distance = vector.length();
+
+                let destination = match d.move_type {
+                    crate::DashMoveType::Fixed(fixed_distance) => {
+                        let direction = if distance < 0.001 {
+                            transform.forward().xz().normalize()
+                        } else {
+                            vector.normalize()
+                        };
+                        transform.translation.xz() + direction * fixed_distance
+                    }
+                    crate::DashMoveType::Pointer { max } => {
+                        if distance < max {
+                            trigger.point
+                        } else {
+                            let direction = vector.normalize();
+                            transform.translation.xz() + direction * max
+                        }
+                    }
+                };
+
+                if let Some(damage) = &d.damage {
+                    commands.entity(entity).insert(crate::DashDamageComponent {
+                        start_pos: transform.translation,
+                        target_pos: Vec3::new(
+                            destination.x,
+                            transform.translation.y,
+                            destination.y,
+                        ),
+                        damage: damage.clone(),
+                        skill: d.skill,
+                        hit_entities: std::collections::HashSet::default(),
+                    });
+                }
+
+                commands.trigger(CommandMovement {
+                    entity,
+                    priority: 100,
+                    action: MovementAction::Start {
+                        way: MovementWay::Path(vec![Vec3::new(
+                            destination.x,
+                            transform.translation.y,
+                            destination.y,
+                        )]),
+                        speed: Some(d.speed),
+                        source: "Dash".to_string(),
+                    },
+                });
+            }
+            SkillAction::Damage(d) => {
+                commands.trigger(ActionDamage {
+                    entity,
+                    skill: d.skill,
+                    effects: d.effects.clone(),
+                });
+            }
+            SkillAction::Buff(b) => {
+                (b.bundle)(&mut commands.entity(entity));
+            }
+            SkillAction::AttackReset => {
+                commands.trigger(CommandAttackReset { entity });
+            }
+        }
     }
 
     cooldown.timer = Timer::from_seconds(cooldown.duration, TimerMode::Once);

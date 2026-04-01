@@ -1,12 +1,11 @@
 use bevy::prelude::*;
-use bevy_behave::{behave, Behave};
 use league_core::CharacterRecord;
 use league_utils::{get_asset_id_by_path, hash_bin};
 use lol_config::LoadHashKeyTrait;
 
 use crate::core::{ActionAnimationPlay, ActionParticleSpawn, CoolDown, Skill, SkillOf, Skills};
 use crate::entities::champion::Champion;
-use crate::{PassiveSkillOf, SkillEffect};
+use crate::{PassiveSkillOf, SkillAction, SkillEffect};
 
 #[derive(Default)]
 pub struct PluginHwei;
@@ -27,61 +26,53 @@ fn startup_load_assets(mut res_assets_skill_effect: ResMut<Assets<SkillEffect>>)
     res_assets_skill_effect
         .insert(
             get_asset_id_by_path("Characters/Hwei/Spells/HweiQAbility/HweiQ"),
-            SkillEffect(behave! {
-                Behave::Sequence => {
-                    Behave::trigger(
-                        ActionAnimationPlay { hash: hash_bin("Spell1") }
-                    ),
-                    Behave::trigger(
-                        ActionParticleSpawn { hash: hash_bin("Hwei_Q_Q_Tar") },
-                    ),
-                }
-            }),
+            SkillEffect(vec![
+                SkillAction::Animation(ActionAnimationPlay {
+                    hash: hash_bin("Spell1"),
+                }),
+                SkillAction::Particle(ActionParticleSpawn {
+                    hash: hash_bin("Hwei_Q_Q_Tar"),
+                }),
+            ]),
         )
         .unwrap();
     res_assets_skill_effect
         .insert(
             get_asset_id_by_path("Characters/Hwei/Spells/HweiWAbility/HweiW"),
-            SkillEffect(behave! {
-                Behave::Sequence => {
-                    Behave::trigger(
-                        ActionAnimationPlay { hash: hash_bin("Spell1") }
-                    ),
-                    Behave::trigger(
-                        ActionParticleSpawn { hash: hash_bin("Hwei_Q_W_AoE") },
-                    ),
-                }
-            }),
+            SkillEffect(vec![
+                SkillAction::Animation(ActionAnimationPlay {
+                    hash: hash_bin("Spell1"),
+                }),
+                SkillAction::Particle(ActionParticleSpawn {
+                    hash: hash_bin("Hwei_Q_W_AoE"),
+                }),
+            ]),
         )
         .unwrap();
     res_assets_skill_effect
         .insert(
             get_asset_id_by_path("Characters/Hwei/Spells/HweiEAbility/HweiE"),
-            SkillEffect(behave! {
-                Behave::Sequence => {
-                    Behave::trigger(
-                        ActionAnimationPlay { hash: hash_bin("Spell1") }
-                    ),
-                    Behave::trigger(
-                        ActionParticleSpawn { hash: hash_bin("Hwei_Q_Q_Tar") },
-                    ),
-                }
-            }),
+            SkillEffect(vec![
+                SkillAction::Animation(ActionAnimationPlay {
+                    hash: hash_bin("Spell1"),
+                }),
+                SkillAction::Particle(ActionParticleSpawn {
+                    hash: hash_bin("Hwei_Q_Q_Tar"),
+                }),
+            ]),
         )
         .unwrap();
     res_assets_skill_effect
         .insert(
             get_asset_id_by_path("Characters/Hwei/Spells/HweiRAbility/HweiR"),
-            SkillEffect(behave! {
-                Behave::Sequence => {
-                    Behave::trigger(
-                        ActionAnimationPlay { hash: hash_bin("Spell1") }
-                    ),
-                    Behave::trigger(
-                        ActionParticleSpawn { hash: hash_bin("Hwei_Q_Q_Tar") },
-                    ),
-                }
-            }),
+            SkillEffect(vec![
+                SkillAction::Animation(ActionAnimationPlay {
+                    hash: hash_bin("Spell1"),
+                }),
+                SkillAction::Particle(ActionParticleSpawn {
+                    hash: hash_bin("Hwei_Q_Q_Tar"),
+                }),
+            ]),
         )
         .unwrap();
 }

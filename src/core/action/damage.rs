@@ -1,5 +1,4 @@
 use bevy::prelude::*;
-use bevy_behave::prelude::BehaveTrigger;
 use league_core::SpellObject;
 use lol_config::{HashKey, LoadHashKeyTrait};
 use lol_core::Team;
@@ -59,19 +58,6 @@ pub struct ActionDamage {
     pub entity: Entity,
     pub skill: HashKey<SpellObject>,
     pub effects: Vec<ActionDamageEffect>,
-}
-
-pub fn on_behave_attack_damage(event: On<BehaveTrigger<ActionDamage>>, mut commands: Commands) {
-    let ctx = event.ctx();
-    let entity = ctx.target_entity();
-    let action = event.inner();
-
-    commands.trigger(ActionDamage {
-        entity,
-        skill: action.skill,
-        effects: action.effects.clone(),
-    });
-    commands.trigger(ctx.success());
 }
 
 pub fn on_action_damage(

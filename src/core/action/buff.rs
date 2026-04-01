@@ -1,7 +1,6 @@
 use std::sync::Arc;
 
 use bevy::prelude::*;
-use bevy_behave::prelude::BehaveTrigger;
 
 use crate::BuffOf;
 
@@ -20,14 +19,4 @@ impl ActionBuffSpawn {
             }),
         }
     }
-}
-
-pub fn on_action_buff_spawn(trigger: On<BehaveTrigger<ActionBuffSpawn>>, mut commands: Commands) {
-    let ctx = trigger.ctx();
-    let entity = ctx.target_entity();
-    let event = trigger.inner();
-
-    (event.bundle)(&mut commands.entity(entity));
-
-    commands.trigger(ctx.success());
 }

@@ -26,15 +26,7 @@ pub struct PluginAction;
 
 impl Plugin for PluginAction {
     fn build(&self, app: &mut App) {
-        app.add_observer(on_action_animation_play);
-        app.add_observer(on_action_attack_reset);
-        app.add_observer(on_action_buff_spawn);
-        app.add_observer(on_action_dash_end);
-        app.add_observer(on_action_dash);
-        app.add_observer(on_action_particle_despawn);
-        app.add_observer(on_action_particle_spawn);
-        app.add_observer(on_action_command);
-        app.add_observer(on_behave_attack_damage);
+        app.add_observer(on_dash_end);
         app.add_observer(on_action_damage);
 
         app.add_observer(on_command_action);
