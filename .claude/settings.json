@@ -1,6 +1,6 @@
 {
   "permissions": {
-    "allow": ["Bash", "Edit", "Glob", "Grep", "Write", "LSP", "Read", "TodoWrite", "WebSearch"],
+    "allow": ["Bash", "Edit", "Glob", "Grep", "Write", "LSP", "Read", "TodoWrite", "Skill"],
     "deny": [
       "AskUserQuestion",
       "CronCreate",
@@ -14,7 +14,6 @@
       "ListMcpResourcesTool",
       "NotebookEdit",
       "ReadMcpResourceTool",
-      "Skill",
       "Task",
       "TaskCreate",
       "TaskGet",
@@ -22,6 +21,7 @@
       "TaskOutput",
       "TaskUpdate",
       "WebFetch",
+      "WebSearch",
       "mcp__ide__executeCode",
       "mcp__ide__getDiagnostics"
     ]
