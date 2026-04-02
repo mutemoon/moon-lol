@@ -5,11 +5,11 @@ use lol_config::LoadHashKeyTrait;
 
 use crate::core::{
     play_skill_animation, skill_damage, skill_dash, skill_slot_from_index, spawn_skill_particle,
-    CoolDown, DamageShape, EventSkillCast, Skill, SkillCooldownMode, SkillOf, SkillRecastWindow,
-    SkillSlot, Skills, TargetDamage, TargetFilter,
+    BuffOf, CoolDown, DamageShape, EventDamageCreate, EventSkillCast, Skill, SkillCooldownMode,
+    SkillOf, SkillRecastWindow, SkillSlot, Skills, TargetDamage, TargetFilter,
 };
 use crate::entities::champion::Champion;
-use crate::{BuffOf, BuffSelfHeal, PassiveSkillOf};
+use crate::{BuffSelfHeal, DebuffSlow, PassiveSkillOf};
 use crate::DamageType;
 
 const SYLAS_Q_KEY: &str = "Characters/Sylas/Spells/SylasQ/SylasQ";
@@ -24,6 +24,7 @@ impl Plugin for PluginSylas {
     fn build(&self, app: &mut App) {
         app.add_systems(FixedUpdate, add_skills);
         app.add_observer(on_sylas_skill_cast);
+        app.add_observer(on_sylas_damage_hit);
     }
 }
 
@@ -81,8 +82,6 @@ fn cast_sylas_q(commands: &mut Commands, entity: Entity) {
         }],
         Some(hash_bin("Sylas_Q_Hit")),
     );
-    debug!("{:?} 的技能 {} 应对目标施加 {}",
-        entity, "Sylas Q", "减速 DebuffSlow");
 }
 
 fn cast_sylas_w(commands: &mut Commands, q_transform: &Query<&Transform>, entity: Entity, point: Vec2) {
@@ -173,15 +172,27 @@ fn cast_sylas_e(
             timer: Timer::from_seconds(cooldown.duration, TimerMode::Once),
             duration: cooldown.duration,
         });
-        debug!("{:?} 释放了 {} 技能，当前阶段 {}，开始冷却", entity, "Sylas E", stage);
     }
 }
 
 fn cast_sylas_r(commands: &mut Commands, entity: Entity, _point: Vec2) {
     play_skill_animation(commands, entity, hash_bin("Spell4"));
     spawn_skill_particle(commands, entity, hash_bin("Sylas_R_Cast"));
-    // R is stolen from enemy - deals damage based on enemy's ultimate
-    debug!("{:?} R 偷取目标大招", entity);
+    // R 对最近敌方英雄造成魔法伤害
+    skill_damage(
+        commands,
+        entity,
+        "Characters/Sylas/Spells/SylasR/SylasR",
+        DamageShape::Nearest {
+            max_distance: 400.0,
+        },
+        vec![TargetDamage {
+            filter: TargetFilter::Champion,
+            amount: hash_bin("TotalDamage"),
+            damage_type: DamageType::Magic,
+        }],
+        Some(hash_bin("Sylas_R_Hit")),
+    );
 }
 
 fn add_skills(
@@ -216,4 +227,19 @@ fn add_skills(
             ));
         }
     }
+}
+
+/// 监听 Sylas 造成的伤害，Q 命中减速
+fn on_sylas_damage_hit(
+    trigger: On<EventDamageCreate>,
+    mut commands: Commands,
+    q_sylas: Query<(), With<Sylas>>,
+) {
+    let source = trigger.source;
+    if q_sylas.get(source).is_err() {
+        return;
+    }
+    let target = trigger.event_target();
+    // Q 命中减速
+    commands.entity(target).with_related::<BuffOf>(DebuffSlow::new(0.5, 1.5));
 }

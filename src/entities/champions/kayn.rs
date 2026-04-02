@@ -5,11 +5,11 @@ use lol_config::LoadHashKeyTrait;
 
 use crate::core::{
     play_skill_animation, skill_damage, skill_dash, skill_slot_from_index, spawn_skill_particle,
-    CoolDown, DamageShape, EventSkillCast, Skill, SkillOf, SkillSlot, Skills, TargetDamage,
-    TargetFilter,
+    BuffOf, CoolDown, DamageShape, EventDamageCreate, EventSkillCast, Skill, SkillOf, SkillSlot,
+    Skills, TargetDamage, TargetFilter,
 };
 use crate::entities::champion::Champion;
-use crate::{BuffMoveSpeed, BuffOf, PassiveSkillOf};
+use crate::{BuffKaynRActive, BuffMoveSpeed, DebuffSlow, PassiveSkillOf};
 use crate::DamageType;
 
 const KAYN_Q_KEY: &str = "Characters/Kayn/Spells/KaynQ/KaynQ";
@@ -22,6 +22,7 @@ impl Plugin for PluginKayn {
     fn build(&self, app: &mut App) {
         app.add_systems(FixedUpdate, add_skills);
         app.add_observer(on_kayn_skill_cast);
+        app.add_observer(on_kayn_damage_hit);
     }
 }
 
@@ -107,8 +108,6 @@ fn cast_kayn_w(commands: &mut Commands, entity: Entity, _point: Vec2) {
         }],
         Some(hash_bin("Kayn_W_Hit")),
     );
-    debug!("{:?} 的技能 {} 应对目标施加 {}",
-        entity, "Kayn W", "减速 DebuffSlow");
 }
 
 fn cast_kayn_e(commands: &mut Commands, _q_transform: &Query<&Transform>, entity: Entity, _point: Vec2) {
@@ -122,10 +121,8 @@ fn cast_kayn_e(commands: &mut Commands, _q_transform: &Query<&Transform>, entity
 fn cast_kayn_r(commands: &mut Commands, entity: Entity) {
     play_skill_animation(commands, entity, hash_bin("Spell4"));
     spawn_skill_particle(commands, entity, hash_bin("Kayn_R_Cast"));
-    // R is an extended dash that reappears after a delay
-    // Blue form: Assassin - single target damage
-    // Red form: Bruiser - AoE damage around reappearance
-    debug!("{:?} R 寄生目标，不可选中", entity);
+    // R 寄生：给自身挂 BuffKaynRActive（不可选中状态）
+    commands.entity(entity).with_related::<BuffOf>(BuffKaynRActive::new(Entity::PLACEHOLDER, 2.5));
 }
 
 fn add_skills(
@@ -155,4 +152,19 @@ fn add_skills(
             ));
         }
     }
+}
+
+/// 监听 Kayn 造成的伤害，W 命中时减速
+fn on_kayn_damage_hit(
+    trigger: On<EventDamageCreate>,
+    mut commands: Commands,
+    q_kayn: Query<(), With<Kayn>>,
+) {
+    let source = trigger.source;
+    if q_kayn.get(source).is_err() {
+        return;
+    }
+    let target = trigger.event_target();
+    // W 命中时减速
+    commands.entity(target).with_related::<BuffOf>(DebuffSlow::new(0.6, 1.5));
 }

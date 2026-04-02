@@ -5,11 +5,12 @@ use lol_config::LoadHashKeyTrait;
 
 use crate::core::{
     play_skill_animation, reset_skill_attack, skill_damage, skill_dash, skill_slot_from_index,
-    spawn_skill_particle, CoolDown, DamageShape, EventSkillCast, Skill, SkillCooldownMode,
-    SkillOf, SkillRecastWindow, SkillSlot, Skills, TargetDamage, TargetFilter,
+    spawn_skill_particle, BuffOf, CoolDown, DamageShape, EventDamageCreate, EventSkillCast,
+    Skill, SkillCooldownMode, SkillOf, SkillRecastWindow, SkillSlot, Skills, TargetDamage,
+    TargetFilter,
 };
 use crate::entities::champion::Champion;
-use crate::PassiveSkillOf;
+use crate::{DebuffSlow, PassiveSkillOf};
 use crate::DamageType;
 
 const CAMILLE_Q_KEY: &str = "Characters/Camille/Spells/CamilleQ/CamilleQ";
@@ -26,6 +27,7 @@ impl Plugin for PluginCamille {
     fn build(&self, app: &mut App) {
         app.add_systems(FixedUpdate, add_skills);
         app.add_observer(on_camille_skill_cast);
+        app.add_observer(on_camille_damage_hit);
     }
 }
 
@@ -106,7 +108,6 @@ fn cast_camille_q(
             timer: Timer::from_seconds(cooldown.duration, TimerMode::Once),
             duration: cooldown.duration,
         });
-        debug!("{:?} 释放了 {} 技能，当前阶段 {}，开始冷却", entity, "Camille Q", stage);
     }
 }
 
@@ -126,7 +127,6 @@ fn cast_camille_w(commands: &mut Commands, entity: Entity) {
         }],
         Some(hash_bin("Camille_W_Hit")),
     );
-    debug!("{:?} W 扫击命中，施加减速", entity);
 }
 
 fn cast_camille_e(
@@ -148,7 +148,6 @@ fn cast_camille_e(
         commands
             .entity(skill_entity)
             .insert(SkillRecastWindow::new(2, 2, CAMILLE_E_RECAST_WINDOW));
-        debug!("{:?} E1 钩索射出，搜索地形附着点", entity);
     } else {
         // Second cast: Dash toward hooked terrain
         spawn_skill_particle(commands, entity, hash_bin("Camille_E2_Cast"));
@@ -176,7 +175,6 @@ fn cast_camille_e(
             timer: Timer::from_seconds(cooldown.duration, TimerMode::Once),
             duration: cooldown.duration,
         });
-        debug!("{:?} 释放了 {} 技能，当前阶段 {}，开始冷却", entity, "Camille E", stage);
     }
 }
 
@@ -203,7 +201,6 @@ fn cast_camille_r(commands: &mut Commands, q_transform: &Query<&Transform>, enti
             speed: 800.0,
         },
     );
-    debug!("{:?} R 创建海克斯壁垒，困住目标", entity);
 }
 
 fn add_skills(
@@ -238,4 +235,18 @@ fn add_skills(
             ));
         }
     }
+}
+
+/// 监听 Camille 造成的伤害，给目标施加减速
+fn on_camille_damage_hit(
+    trigger: On<EventDamageCreate>,
+    mut commands: Commands,
+    q_camille: Query<(), With<Camille>>,
+) {
+    let source = trigger.source;
+    if q_camille.get(source).is_err() {
+        return;
+    }
+    let target = trigger.event_target();
+    commands.entity(target).with_related::<BuffOf>(DebuffSlow::new(0.6, 2.0));
 }

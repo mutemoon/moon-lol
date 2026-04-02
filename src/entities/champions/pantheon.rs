@@ -5,11 +5,11 @@ use lol_config::LoadHashKeyTrait;
 
 use crate::core::{
     play_skill_animation, skill_damage, skill_dash, skill_slot_from_index, spawn_skill_particle,
-    BuffOf, CoolDown, DamageShape, EventSkillCast, Skill, SkillOf, SkillSlot, Skills,
-    TargetDamage, TargetFilter,
+    BuffOf, CoolDown, DamageShape, EventDamageCreate, EventSkillCast, Skill, SkillOf, SkillSlot,
+    Skills, TargetDamage, TargetFilter,
 };
 use crate::entities::champion::Champion;
-use crate::{BuffPantheonE, PassiveSkillOf};
+use crate::{BuffPantheonE, DebuffStun, PassiveSkillOf};
 use crate::DamageType;
 
 const PANTHEON_Q_KEY: &str = "Characters/Pantheon/Spells/PantheonQ/PantheonQ";
@@ -24,6 +24,7 @@ impl Plugin for PluginPantheon {
     fn build(&self, app: &mut App) {
         app.add_systems(FixedUpdate, add_skills);
         app.add_observer(on_pantheon_skill_cast);
+        app.add_observer(on_pantheon_damage_hit);
     }
 }
 
@@ -98,8 +99,6 @@ fn cast_pantheon_w(commands: &mut Commands, q_transform: &Query<&Transform>, ent
             speed: 1000.0,
         },
     );
-    debug!("{:?} 的技能 {} 应对目标施加 {}",
-        entity, "Pantheon W", "眩晕 DebuffStun");
 }
 
 fn cast_pantheon_e(commands: &mut Commands, entity: Entity) {
@@ -149,7 +148,6 @@ fn cast_pantheon_r(
             speed: 1500.0,
         },
     );
-    debug!("{:?} R 全局跳跃，选择降落点", entity);
 }
 
 fn add_skills(
@@ -179,4 +177,19 @@ fn add_skills(
             ));
         }
     }
+}
+
+/// 监听 Pantheon 造成的伤害，W 命中时眩晕
+fn on_pantheon_damage_hit(
+    trigger: On<EventDamageCreate>,
+    mut commands: Commands,
+    q_pantheon: Query<(), With<Pantheon>>,
+) {
+    let source = trigger.source;
+    if q_pantheon.get(source).is_err() {
+        return;
+    }
+    let target = trigger.event_target();
+    // W 命中时眩晕
+    commands.entity(target).with_related::<BuffOf>(DebuffStun::new(1.0));
 }

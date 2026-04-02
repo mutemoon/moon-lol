@@ -5,11 +5,11 @@ use lol_config::LoadHashKeyTrait;
 
 use crate::core::{
     play_skill_animation, reset_skill_attack, skill_damage, skill_slot_from_index,
-    spawn_skill_particle, CoolDown, DamageShape, EventSkillCast, Skill, SkillOf, SkillSlot,
-    Skills, TargetDamage, TargetFilter,
+    spawn_skill_particle, BuffOf, CoolDown, DamageShape, EventDamageCreate, EventSkillCast,
+    Skill, SkillOf, SkillSlot, Skills, TargetDamage, TargetFilter,
 };
 use crate::entities::champion::Champion;
-use crate::PassiveSkillOf;
+use crate::{BuffDariusBleed, DebuffSlow, PassiveSkillOf};
 use crate::DamageType;
 
 const DARIUS_Q_KEY: &str = "Characters/Darius/Spells/DariusAxeGrabCone/DariusAxeGrabCone";
@@ -23,6 +23,7 @@ impl Plugin for PluginDarius {
     fn build(&self, app: &mut App) {
         app.add_systems(FixedUpdate, add_skills);
         app.add_observer(on_darius_skill_cast);
+        app.add_observer(on_darius_damage_hit);
     }
 }
 
@@ -71,7 +72,6 @@ fn cast_darius_q(commands: &mut Commands, entity: Entity) {
         }],
         Some(hash_bin("Darius_Q_Hit")),
     );
-    debug!("{:?} Q 内外圈判定：外圈命中回血，内圈只造成伤害", entity);
 }
 
 fn cast_darius_w(commands: &mut Commands, entity: Entity) {
@@ -79,8 +79,6 @@ fn cast_darius_w(commands: &mut Commands, entity: Entity) {
     spawn_skill_particle(commands, entity, hash_bin("Darius_W_Cast"));
     // W is an empowered auto attack that applies slow
     reset_skill_attack(commands, entity);
-    debug!("{:?} 的技能 {} 应对目标施加 {}",
-        entity, "Darius W", "出血叠层 + DebuffSlow");
 }
 
 fn cast_darius_e(commands: &mut Commands, entity: Entity) {
@@ -99,7 +97,6 @@ fn cast_darius_e(commands: &mut Commands, entity: Entity) {
         }],
         Some(hash_bin("Darius_E_Hit")),
     );
-    debug!("{:?} E 拉回范围内敌人", entity);
 }
 
 fn cast_darius_r(commands: &mut Commands, entity: Entity) {
@@ -118,7 +115,6 @@ fn cast_darius_r(commands: &mut Commands, entity: Entity) {
         }],
         Some(hash_bin("Darius_R_Hit")),
     );
-    debug!("{:?} R 斩杀判定：击杀后刷新冷却", entity);
 }
 
 fn add_skills(
@@ -148,4 +144,21 @@ fn add_skills(
             ));
         }
     }
+}
+
+/// 监听 Darius 造成的伤害，给目标叠加出血和减速
+fn on_darius_damage_hit(
+    trigger: On<EventDamageCreate>,
+    mut commands: Commands,
+    q_darius: Query<(), With<Darius>>,
+) {
+    let source = trigger.source;
+    if q_darius.get(source).is_err() {
+        return;
+    }
+    let target = trigger.event_target();
+    // 所有 Darius 造成的伤害都给目标叠出血
+    commands.entity(target).with_related::<BuffOf>(BuffDariusBleed::new(1, 5.0));
+    // W 命中施加减速
+    commands.entity(target).with_related::<BuffOf>(DebuffSlow::new(0.5, 1.0));
 }

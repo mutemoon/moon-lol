@@ -5,11 +5,11 @@ use lol_config::LoadHashKeyTrait;
 
 use crate::core::{
     play_skill_animation, reset_skill_attack, skill_damage, skill_dash, skill_slot_from_index,
-    spawn_skill_particle, BuffOf, CoolDown, DamageShape, EventSkillCast, Skill, SkillOf,
-    SkillSlot, Skills, TargetDamage, TargetFilter,
+    spawn_skill_particle, BuffOf, CoolDown, DamageShape, EventDamageCreate, EventSkillCast, Skill,
+    SkillOf, SkillSlot, Skills, TargetDamage, TargetFilter,
 };
 use crate::entities::champion::Champion;
-use crate::{BuffSettQ, BuffShieldWhite, PassiveSkillOf};
+use crate::{BuffSettQ, BuffShieldWhite, DebuffStun, PassiveSkillOf};
 use crate::DamageType;
 
 const SETT_W_KEY: &str = "Characters/Sett/Spells/SettW/SettW";
@@ -23,6 +23,7 @@ impl Plugin for PluginSett {
     fn build(&self, app: &mut App) {
         app.add_systems(FixedUpdate, add_skills);
         app.add_observer(on_sett_skill_cast);
+        app.add_observer(on_sett_damage_hit);
     }
 }
 
@@ -100,8 +101,6 @@ fn cast_sett_e(commands: &mut Commands, entity: Entity) {
         }],
         Some(hash_bin("Sett_E_Hit")),
     );
-    debug!("{:?} 的技能 {} 应对目标施加 {}",
-        entity, "Sett E", "拉扯 + 眩晕 DebuffStun");
 }
 
 fn cast_sett_r(commands: &mut Commands, q_transform: &Query<&Transform>, entity: Entity, point: Vec2) {
@@ -127,7 +126,6 @@ fn cast_sett_r(commands: &mut Commands, q_transform: &Query<&Transform>, entity:
             speed: 700.0,
         },
     );
-    debug!("{:?} R 抱起目标并砸向地面", entity);
 }
 
 fn add_skills(
@@ -157,4 +155,19 @@ fn add_skills(
             ));
         }
     }
+}
+
+/// 监听 Sett 造成的伤害，E/R 命中时眩晕
+fn on_sett_damage_hit(
+    trigger: On<EventDamageCreate>,
+    mut commands: Commands,
+    q_sett: Query<(), With<Sett>>,
+) {
+    let source = trigger.source;
+    if q_sett.get(source).is_err() {
+        return;
+    }
+    let target = trigger.event_target();
+    // E/R 命中时眩晕
+    commands.entity(target).with_related::<BuffOf>(DebuffStun::new(1.0));
 }

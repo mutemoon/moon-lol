@@ -5,13 +5,15 @@ use lol_config::LoadHashKeyTrait;
 
 use crate::core::{
     play_skill_animation, skill_damage, skill_dash, skill_slot_from_index, spawn_skill_particle,
-    CoolDown, DamageShape, EventSkillCast, Skill, SkillOf, SkillSlot, Skills, TargetDamage,
-    TargetFilter,
+    BuffOf, CoolDown, DamageShape, EventDamageCreate, EventSkillCast, Skill, SkillOf, SkillSlot,
+    Skills, TargetDamage, TargetFilter,
 };
 use crate::entities::champion::Champion;
-use crate::PassiveSkillOf;
+use crate::{DebuffSlow, PassiveSkillOf};
 use crate::DamageType;
 
+const GNAR_Q_KEY: &str = "Characters/Gnar/Spells/GnarQ/GnarQ";
+const GNAR_W_KEY: &str = "Characters/Gnar/Spells/GnarW/GnarW";
 const GNAR_E_KEY: &str = "Characters/Gnar/Spells/GnarE/GnarE";
 const GNAR_R_KEY: &str = "Characters/Gnar/Spells/GnarR/GnarR";
 
@@ -22,6 +24,7 @@ impl Plugin for PluginGnar {
     fn build(&self, app: &mut App) {
         app.add_systems(FixedUpdate, add_skills);
         app.add_observer(on_gnar_skill_cast);
+        app.add_observer(on_gnar_damage_hit);
     }
 }
 
@@ -67,21 +70,49 @@ fn on_gnar_skill_cast(
 fn cast_gnar_q(commands: &mut Commands, entity: Entity, _point: Vec2) {
     play_skill_animation(commands, entity, hash_bin("Spell1"));
     spawn_skill_particle(commands, entity, hash_bin("Gnar_Q_Cast"));
-    // Q is a boomerang that can be caught to reduce cooldown
-    debug!("{:?} Q 投掷回旋镖", entity);
+    // Q 回旋镖：Sector 模拟直线飞行
+    skill_damage(
+        commands,
+        entity,
+        GNAR_Q_KEY,
+        DamageShape::Sector {
+            radius: 500.0,
+            angle: 30.0,
+        },
+        vec![TargetDamage {
+            filter: TargetFilter::All,
+            amount: hash_bin("TotalDamage"),
+            damage_type: DamageType::Physical,
+        }],
+        Some(hash_bin("Gnar_Q_Hit")),
+    );
 }
 
 fn cast_gnar_w(commands: &mut Commands, entity: Entity) {
     play_skill_animation(commands, entity, hash_bin("Spell2"));
     spawn_skill_particle(commands, entity, hash_bin("Gnar_W_Cast"));
-    // W is a passive that on 3rd attack deals bonus damage and slows
-    debug!("{:?} W 第三次攻击触发额外伤害", entity);
+    // Mega 形态 W：AOE 伤害 + 眩晕
+    skill_damage(
+        commands,
+        entity,
+        GNAR_W_KEY,
+        DamageShape::Sector {
+            radius: 250.0,
+            angle: 60.0,
+        },
+        vec![TargetDamage {
+            filter: TargetFilter::All,
+            amount: hash_bin("TotalDamage"),
+            damage_type: DamageType::Physical,
+        }],
+        Some(hash_bin("Gnar_W_Hit")),
+    );
 }
 
 fn cast_gnar_e(commands: &mut Commands, q_transform: &Query<&Transform>, entity: Entity, point: Vec2) {
     play_skill_animation(commands, entity, hash_bin("Spell3"));
     spawn_skill_particle(commands, entity, hash_bin("Gnar_E_Cast"));
-    // E is a hop that can bounce off towers/minions
+    // E 是跳跃，可以二段跳
     skill_dash(
         commands,
         q_transform,
@@ -90,11 +121,17 @@ fn cast_gnar_e(commands: &mut Commands, q_transform: &Query<&Transform>, entity:
         &crate::ActionDash {
             skill: GNAR_E_KEY.into(),
             move_type: crate::DashMoveType::Pointer { max: 300.0 },
-            damage: None,
+            damage: Some(crate::DashDamage {
+                radius_end: 100.0,
+                damage: TargetDamage {
+                    filter: TargetFilter::All,
+                    amount: hash_bin("TotalDamage"),
+                    damage_type: DamageType::Physical,
+                },
+            }),
             speed: 600.0,
         },
     );
-    debug!("{:?} E 弹跳，命中单位可二段跳", entity);
 }
 
 fn cast_gnar_r(commands: &mut Commands, entity: Entity) {
@@ -113,7 +150,6 @@ fn cast_gnar_r(commands: &mut Commands, entity: Entity) {
         }],
         Some(hash_bin("Gnar_R_Hit")),
     );
-    debug!("{:?} R 投掷，击退并眩晕撞墙目标", entity);
 }
 
 fn add_skills(
@@ -143,4 +179,19 @@ fn add_skills(
             ));
         }
     }
+}
+
+/// 监听 Gnar 造成的伤害，所有伤害命中施加减速
+fn on_gnar_damage_hit(
+    trigger: On<EventDamageCreate>,
+    mut commands: Commands,
+    q_gnar: Query<(), With<Gnar>>,
+) {
+    let source = trigger.source;
+    if q_gnar.get(source).is_err() {
+        return;
+    }
+    let target = trigger.event_target();
+    // 所有伤害命中施加减速
+    commands.entity(target).with_related::<BuffOf>(DebuffSlow::new(0.5, 1.5));
 }

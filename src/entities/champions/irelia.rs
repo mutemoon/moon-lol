@@ -5,11 +5,11 @@ use lol_config::LoadHashKeyTrait;
 
 use crate::core::{
     play_skill_animation, skill_damage, skill_dash, skill_slot_from_index, spawn_skill_particle,
-    CoolDown, DamageShape, EventSkillCast, Skill, SkillCooldownMode, SkillOf, SkillRecastWindow,
-    SkillSlot, Skills, TargetDamage, TargetFilter,
+    BuffOf, CoolDown, DamageShape, EventDamageCreate, EventSkillCast, Skill, SkillCooldownMode,
+    SkillOf, SkillRecastWindow, SkillSlot, Skills, TargetDamage, TargetFilter,
 };
 use crate::entities::champion::Champion;
-use crate::{BuffDamageReduction, BuffOf, PassiveSkillOf};
+use crate::{BuffDamageReduction, DebuffIreliaUnsteady, DebuffStun, PassiveSkillOf};
 use crate::DamageType;
 
 const IRELIA_Q_KEY: &str = "Characters/Irelia/Spells/IreliaQ/IreliaQ";
@@ -24,6 +24,7 @@ impl Plugin for PluginIrelia {
     fn build(&self, app: &mut App) {
         app.add_systems(FixedUpdate, add_skills);
         app.add_observer(on_irelia_skill_cast);
+        app.add_observer(on_irelia_damage_hit);
     }
 }
 
@@ -86,7 +87,6 @@ fn cast_irelia_q(commands: &mut Commands, q_transform: &Query<&Transform>, entit
             speed: 800.0,
         },
     );
-    debug!("{:?} Q 命中，检查不稳标记", entity);
 }
 
 fn cast_irelia_w(commands: &mut Commands, entity: Entity) {
@@ -96,7 +96,6 @@ fn cast_irelia_w(commands: &mut Commands, entity: Entity) {
     let (buff_irelia_w, buff_damage_reduction) = BuffDamageReduction::irelia_w(0.5, 1.5);
     commands.entity(entity).with_related::<BuffOf>(buff_irelia_w);
     commands.entity(entity).with_related::<BuffOf>(buff_damage_reduction);
-    debug!("{:?} W 蓄力中，获得 {}% 伤害减免", entity, 50);
 }
 
 fn cast_irelia_e(
@@ -116,7 +115,6 @@ fn cast_irelia_e(
         commands
             .entity(skill_entity)
             .insert(SkillRecastWindow::new(2, 2, IRELIA_E_RECAST_WINDOW));
-        debug!("{:?} E1 射出刀刃，标记敌人为不稳", entity);
     } else {
         // Second cast: Throws second blade and stuns marked enemies
         spawn_skill_particle(commands, entity, hash_bin("Irelia_E2_Cast"));
@@ -137,8 +135,6 @@ fn cast_irelia_e(
             timer: Timer::from_seconds(cooldown.duration, TimerMode::Once),
             duration: cooldown.duration,
         });
-        debug!("{:?} 释放了 {} 技能，当前阶段 {}，开始冷却", entity, "Irelia E", stage);
-        debug!("{:?} E2 标记范围内敌人为不稳", entity);
     }
 }
 
@@ -158,7 +154,6 @@ fn cast_irelia_r(commands: &mut Commands, entity: Entity, _point: Vec2) {
         }],
         Some(hash_bin("Irelia_R_Hit")),
     );
-    debug!("{:?} R 标记范围内敌人为不稳", entity);
 }
 
 fn add_skills(
@@ -193,4 +188,20 @@ fn add_skills(
             ));
         }
     }
+}
+
+/// 监听 Irelia 造成的伤害，E/R 命中给目标标记不稳 + 眩晕
+fn on_irelia_damage_hit(
+    trigger: On<EventDamageCreate>,
+    mut commands: Commands,
+    q_irelia: Query<(), With<Irelia>>,
+) {
+    let source = trigger.source;
+    if q_irelia.get(source).is_err() {
+        return;
+    }
+    let target = trigger.event_target();
+    // E/R 命中给目标标记不稳 + 眩晕
+    commands.entity(target).with_related::<BuffOf>(DebuffIreliaUnsteady::new(5.0));
+    commands.entity(target).with_related::<BuffOf>(DebuffStun::new(0.75));
 }

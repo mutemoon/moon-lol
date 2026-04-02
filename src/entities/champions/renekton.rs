@@ -39,7 +39,7 @@ fn on_renekton_skill_cast(
     q_renekton: Query<(), With<Renekton>>,
     q_transform: Query<&Transform>,
     q_skill: Query<(&Skill, &CoolDown, Option<&SkillRecastWindow>)>,
-    q_ability_resource: Query<&AbilityResource>,
+    mut q_ability_resource: Query<&mut AbilityResource>,
 ) {
     let entity = trigger.event_target();
     if q_renekton.get(entity).is_err() {
@@ -51,7 +51,7 @@ fn on_renekton_skill_cast(
     };
 
     match skill.slot {
-        SkillSlot::Q => cast_renekton_q(&mut commands, entity, &q_ability_resource),
+        SkillSlot::Q => cast_renekton_q(&mut commands, entity, &mut q_ability_resource),
         SkillSlot::W => cast_renekton_w(&mut commands, entity),
         SkillSlot::E => cast_renekton_e(
             &mut commands,
@@ -70,31 +70,45 @@ fn on_renekton_skill_cast(
 fn cast_renekton_q(
     commands: &mut Commands,
     entity: Entity,
-    q_ability_resource: &Query<&AbilityResource>,
+    q_ability_resource: &mut Query<&mut AbilityResource>,
 ) {
     play_skill_animation(commands, entity, hash_bin("Spell1"));
     spawn_skill_particle(commands, entity, hash_bin("Renekton_Q_Cast"));
     // Q is a cleave that deals damage in a circle
     let rage = q_ability_resource.get(entity).map(|r| r.value).unwrap_or(0.0);
     if rage >= 50.0 {
-        debug!("{:?} Q 怒气强化：消耗50怒气，提升伤害和治疗", entity);
+        // 消耗 50 怒气，强化版伤害和治疗
+        if let Ok(mut resource) = q_ability_resource.get_mut(entity) {
+            resource.value -= 50.0;
+        }
+        skill_damage(
+            commands,
+            entity,
+            RENECKTON_Q_KEY,
+            DamageShape::Circle { radius: 300.0 },
+            vec![TargetDamage {
+                filter: TargetFilter::All,
+                amount: hash_bin("TotalDamage"),
+                damage_type: DamageType::Physical,
+            }],
+            Some(hash_bin("Renekton_Q_Hit")),
+        );
+        commands.entity(entity).with_related::<BuffOf>(BuffSelfHeal::new(80.0)); // 翻倍治疗
     } else {
-        debug!("{:?} Q 普通释放", entity);
+        skill_damage(
+            commands,
+            entity,
+            RENECKTON_Q_KEY,
+            DamageShape::Circle { radius: 250.0 },
+            vec![TargetDamage {
+                filter: TargetFilter::All,
+                amount: hash_bin("TotalDamage"),
+                damage_type: DamageType::Physical,
+            }],
+            Some(hash_bin("Renekton_Q_Hit")),
+        );
+        commands.entity(entity).with_related::<BuffOf>(BuffSelfHeal::new(40.0));
     }
-    skill_damage(
-        commands,
-        entity,
-        RENECKTON_Q_KEY,
-        DamageShape::Circle { radius: 250.0 },
-        vec![TargetDamage {
-            filter: TargetFilter::All,
-            amount: hash_bin("TotalDamage"),
-            damage_type: DamageType::Physical,
-        }],
-        Some(hash_bin("Renekton_Q_Hit")),
-    );
-    // Self-heal based on damage dealt
-    commands.entity(entity).with_related::<BuffOf>(BuffSelfHeal::new(40.0));
 }
 
 fn cast_renekton_w(commands: &mut Commands, entity: Entity) {
@@ -181,7 +195,6 @@ fn cast_renekton_e(
             timer: Timer::from_seconds(cooldown.duration, TimerMode::Once),
             duration: cooldown.duration,
         });
-        debug!("{:?} 释放了 {} 技能，当前阶段 {}，开始冷却", entity, "Renekton E", stage);
     }
 }
 

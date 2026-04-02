@@ -5,11 +5,12 @@ use lol_config::LoadHashKeyTrait;
 
 use crate::core::{
     play_skill_animation, reset_skill_attack, skill_damage, skill_dash, skill_slot_from_index,
-    spawn_skill_particle, BuffOf, CoolDown, DamageShape, EventSkillCast, Skill,
+    spawn_skill_particle, BuffOf, CoolDown, DamageShape, EventDamageCreate, EventSkillCast, Skill,
     SkillCooldownMode, SkillOf, SkillRecastWindow, SkillSlot, Skills, TargetDamage, TargetFilter,
 };
 use crate::entities::champion::Champion;
-use crate::{BuffShieldWhite, BuffVolibearQ, DamageType, PassiveSkillOf};
+use crate::{BuffSelfHeal, BuffShieldWhite, BuffVolibearQ, DamageType, DebuffSlow,
+    DebuffVolibearWMark, PassiveSkillOf};
 
 const VOLIBEAR_W_KEY: &str = "Characters/Volibear/Spells/VolibearW/VolibearW";
 const VOLIBEAR_E_KEY: &str = "Characters/Volibear/Spells/VolibearE/VolibearE";
@@ -23,6 +24,7 @@ impl Plugin for PluginVolibear {
     fn build(&self, app: &mut App) {
         app.add_systems(FixedUpdate, add_skills);
         app.add_observer(on_volibear_skill_cast);
+        app.add_observer(on_volibear_damage_hit);
     }
 }
 
@@ -87,8 +89,6 @@ fn cast_volibear_w(
         // First cast: W marks target
         spawn_skill_particle(commands, entity, hash_bin("Volibear_W_Cast"));
         commands.entity(skill_entity).insert(SkillRecastWindow::new(2, 2, VOLIBEAR_W_RECAST_WINDOW));
-        debug!("{:?} W1 撕咬并标记目标", entity);
-        debug!("{:?} 释放了 {} 技能，当前阶段 {}", entity, "Volibear W", stage);
     } else {
         // Second cast: W detonates mark for bonus damage + heal
         spawn_skill_particle(commands, entity, hash_bin("Volibear_W2_Cast"));
@@ -104,13 +104,13 @@ fn cast_volibear_w(
             }],
             Some(hash_bin("Volibear_W_Hit")),
         );
+        // W2 命中已标记目标时自我治疗
+        commands.entity(entity).with_related::<BuffOf>(BuffSelfHeal::new(50.0));
         commands.entity(skill_entity).remove::<SkillRecastWindow>();
         commands.entity(skill_entity).insert(CoolDown {
             timer: Timer::from_seconds(cooldown.duration, TimerMode::Once),
             duration: cooldown.duration,
         });
-        debug!("{:?} W2 撕咬已标记目标，触发治疗", entity);
-        debug!("{:?} 释放了 {} 技能，当前阶段 {}，开始冷却", entity, "Volibear W", stage);
     }
 }
 
@@ -131,8 +131,6 @@ fn cast_volibear_e(commands: &mut Commands, entity: Entity) {
         Some(hash_bin("Volibear_E_Hit")),
     );
     commands.entity(entity).with_related::<BuffOf>(BuffShieldWhite::new(100.0));
-    debug!("{:?} 的技能 {} 应对目标施加 {}",
-        entity, "Volibear E", "减速 DebuffSlow");
 }
 
 fn cast_volibear_r(
@@ -163,7 +161,6 @@ fn cast_volibear_r(
             speed: 800.0,
         },
     );
-    debug!("{:?} R 禁用范围内防御塔", entity);
 }
 
 fn add_skills(
@@ -198,4 +195,21 @@ fn add_skills(
             ));
         }
     }
+}
+
+/// 监听 Volibear 造成的伤害，W1 标记目标，E 命中减速
+fn on_volibear_damage_hit(
+    trigger: On<EventDamageCreate>,
+    mut commands: Commands,
+    q_volibear: Query<(), With<Volibear>>,
+) {
+    let source = trigger.source;
+    if q_volibear.get(source).is_err() {
+        return;
+    }
+    let target = trigger.event_target();
+    // W1 标记目标
+    commands.entity(target).with_related::<BuffOf>(DebuffVolibearWMark::new(source, 4.0));
+    // E 命中减速
+    commands.entity(target).with_related::<BuffOf>(DebuffSlow::new(0.4, 2.0));
 }
