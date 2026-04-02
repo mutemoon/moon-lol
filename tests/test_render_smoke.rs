@@ -1,4 +1,5 @@
 use std::fs;
+use std::panic::{catch_unwind, AssertUnwindSafe};
 use std::path::PathBuf;
 use std::time::Duration;
 
@@ -9,6 +10,16 @@ use moon_lol::{PluginSkillTestRenderSuite, SkillTestRenderConfig};
 
 #[test]
 fn skill_test_render_writes_frames() {
+    if std::env::var("MOON_LOL_RUN_RENDER_TESTS").as_deref() != Ok("1") {
+        eprintln!("skipping render smoke test: set MOON_LOL_RUN_RENDER_TESTS=1 to enable");
+        return;
+    }
+    if skip_due_to_missing_gpu(skill_test_render_writes_frames_inner) {
+        return;
+    }
+}
+
+fn skill_test_render_writes_frames_inner() {
     let output_dir = PathBuf::from("artifacts/test_render_smoke");
     let _ = fs::remove_dir_all(&output_dir);
 
@@ -46,4 +57,26 @@ fn skill_test_render_writes_frames() {
         !entries.is_empty(),
         "expected rendered frames in {frames_dir:?}, found none"
     );
+}
+
+fn skip_due_to_missing_gpu(run: impl FnOnce()) -> bool {
+    match catch_unwind(AssertUnwindSafe(run)) {
+        Ok(()) => false,
+        Err(payload) => {
+            let message = if let Some(message) = payload.downcast_ref::<String>() {
+                message.as_str()
+            } else if let Some(message) = payload.downcast_ref::<&str>() {
+                message
+            } else {
+                ""
+            };
+
+            if message.contains("Unable to find a GPU") {
+                eprintln!("skipping render smoke test: no GPU available");
+                true
+            } else {
+                std::panic::resume_unwind(payload);
+            }
+        }
+    }
 }

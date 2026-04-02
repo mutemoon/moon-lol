@@ -7,16 +7,18 @@ mod tests {
     use bevy::time::TimeUpdateStrategy;
     use moon_lol::{
         PluginAction, PluginAttack, PluginAttackAuto, PluginBarrack, PluginCharacter, PluginDamage,
-        PluginLife, PluginMinion, PluginMovement, PluginNavigaton, PluginResource,
+        PluginLife, PluginMinion, PluginMovement, PluginNavigaton, PluginResource, MinionPath,
     };
 
     #[test]
     fn test_complete_attack_cycle() {
         let mut app = App::new();
         app.add_plugins(MinimalPlugins);
+        app.add_plugins(bevy::state::app::StatesPlugin);
         app.add_plugins(AssetPlugin::default());
         app.add_plugins(LogPlugin::default());
         app.add_plugins(AnimationPlugin::default());
+        app.init_asset::<Shader>();
 
         app.add_plugins(PluginMinion);
 
@@ -37,7 +39,13 @@ mod tests {
         app.insert_resource(TimeUpdateStrategy::ManualDuration(Duration::from_millis(
             16,
         )));
+        app.insert_resource(MinionPath::default());
 
-        app.run();
+        app.finish();
+        app.cleanup();
+
+        for _ in 0..5 {
+            app.update();
+        }
     }
 }

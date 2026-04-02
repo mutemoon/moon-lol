@@ -1,19 +1,22 @@
 use bevy::prelude::*;
 use league_core::CharacterRecord;
-use league_utils::{get_asset_id_by_path, hash_bin};
+use league_utils::hash_bin;
 use lol_config::LoadHashKeyTrait;
 
-use crate::core::{ActionAnimationPlay, ActionParticleSpawn, CoolDown, Skill, SkillOf, Skills};
+use crate::core::{
+    play_skill_animation, skill_slot_from_index, spawn_skill_particle, CoolDown, EventSkillCast,
+    Skill, SkillOf, SkillSlot, Skills,
+};
 use crate::entities::champion::Champion;
-use crate::{PassiveSkillOf, SkillAction, SkillEffect};
+use crate::PassiveSkillOf;
 
 #[derive(Default)]
 pub struct PluginHwei;
 
 impl Plugin for PluginHwei {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, startup_load_assets);
         app.add_systems(FixedUpdate, add_skills);
+        app.add_observer(on_hwei_skill_cast);
     }
 }
 
@@ -22,59 +25,30 @@ impl Plugin for PluginHwei {
 #[reflect(Component)]
 pub struct Hwei;
 
-fn startup_load_assets(mut res_assets_skill_effect: ResMut<Assets<SkillEffect>>) {
-    res_assets_skill_effect
-        .insert(
-            get_asset_id_by_path("Characters/Hwei/Spells/HweiQAbility/HweiQ"),
-            SkillEffect(vec![
-                SkillAction::Animation(ActionAnimationPlay {
-                    hash: hash_bin("Spell1"),
-                }),
-                SkillAction::Particle(ActionParticleSpawn {
-                    hash: hash_bin("Hwei_Q_Q_Tar"),
-                }),
-            ]),
-        )
-        .unwrap();
-    res_assets_skill_effect
-        .insert(
-            get_asset_id_by_path("Characters/Hwei/Spells/HweiWAbility/HweiW"),
-            SkillEffect(vec![
-                SkillAction::Animation(ActionAnimationPlay {
-                    hash: hash_bin("Spell1"),
-                }),
-                SkillAction::Particle(ActionParticleSpawn {
-                    hash: hash_bin("Hwei_Q_W_AoE"),
-                }),
-            ]),
-        )
-        .unwrap();
-    res_assets_skill_effect
-        .insert(
-            get_asset_id_by_path("Characters/Hwei/Spells/HweiEAbility/HweiE"),
-            SkillEffect(vec![
-                SkillAction::Animation(ActionAnimationPlay {
-                    hash: hash_bin("Spell1"),
-                }),
-                SkillAction::Particle(ActionParticleSpawn {
-                    hash: hash_bin("Hwei_Q_Q_Tar"),
-                }),
-            ]),
-        )
-        .unwrap();
-    res_assets_skill_effect
-        .insert(
-            get_asset_id_by_path("Characters/Hwei/Spells/HweiRAbility/HweiR"),
-            SkillEffect(vec![
-                SkillAction::Animation(ActionAnimationPlay {
-                    hash: hash_bin("Spell1"),
-                }),
-                SkillAction::Particle(ActionParticleSpawn {
-                    hash: hash_bin("Hwei_Q_Q_Tar"),
-                }),
-            ]),
-        )
-        .unwrap();
+fn on_hwei_skill_cast(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_hwei: Query<(), With<Hwei>>,
+    q_skill: Query<&Skill>,
+) {
+    let entity = trigger.event_target();
+    if q_hwei.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+
+    play_skill_animation(&mut commands, entity, hash_bin("Spell1"));
+
+    match skill.slot {
+        SkillSlot::Q => spawn_skill_particle(&mut commands, entity, hash_bin("Hwei_Q_Q_Tar")),
+        SkillSlot::W => spawn_skill_particle(&mut commands, entity, hash_bin("Hwei_Q_W_AoE")),
+        SkillSlot::E => spawn_skill_particle(&mut commands, entity, hash_bin("Hwei_Q_Q_Tar")),
+        SkillSlot::R => spawn_skill_particle(&mut commands, entity, hash_bin("Hwei_Q_Q_Tar")),
+        _ => {}
+    }
 }
 
 fn add_skills(
@@ -84,25 +58,22 @@ fn add_skills(
 ) {
     for entity in q_hwei.iter() {
         commands.entity(entity).with_related::<PassiveSkillOf>((
-            Skill {
-                key_spell_object: "Characters/Hwei/Spells/HweiPassiveAbility/HweiPassive".into(),
-                key_skill_effect: "Characters/Hwei/Spells/HweiPassiveAbility/HweiPassive".into(),
-                ..default()
-            },
+            Skill::new(
+                SkillSlot::Passive,
+                "Characters/Hwei/Spells/HweiPassiveAbility/HweiPassive",
+            ),
             CoolDown::default(),
         ));
 
-        let character_record = res_assets_character_record
-            .load_hash("Characters/Hwei/CharacterRecords/Root")
-            .unwrap();
+        let Some(character_record) =
+            res_assets_character_record.load_hash("Characters/Hwei/CharacterRecords/Root")
+        else {
+            continue;
+        };
 
-        for &skill in character_record.spells.as_ref().unwrap().iter() {
+        for (index, &skill) in character_record.spells.as_ref().unwrap().iter().enumerate() {
             commands.entity(entity).with_related::<SkillOf>((
-                Skill {
-                    key_spell_object: skill.into(),
-                    key_skill_effect: skill.into(),
-                    ..default()
-                },
+                Skill::new(skill_slot_from_index(index), skill),
                 CoolDown::default(),
             ));
         }

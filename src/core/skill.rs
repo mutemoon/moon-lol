@@ -11,10 +11,9 @@ use league_utils::hash_bin;
 use lol_config::{HashKey, LoadHashKeyTrait};
 
 use crate::{
-    AbilityResource, ActionAnimationPlay, ActionBuffSpawn, ActionDamage, ActionDash,
-    ActionParticleDespawn, ActionParticleSpawn, CommandAnimationPlay, CommandAttackReset,
-    CommandMovement, CommandSkinParticleDespawn, CommandSkinParticleSpawn, EventLevelUp, Level,
-    MovementAction, MovementWay,
+    AbilityResource, ActionDamageEffect, ActionDash, CommandAnimationPlay, CommandAttackReset,
+    CommandMovement, CommandSkinParticleDespawn, CommandSkinParticleSpawn, DamageShape,
+    EventLevelUp, Level, MovementAction, MovementWay, TargetDamage,
 };
 
 #[derive(Default)]
@@ -22,11 +21,12 @@ pub struct PluginSkill;
 
 impl Plugin for PluginSkill {
     fn build(&self, app: &mut App) {
-        app.init_asset::<SkillEffect>();
+        app.init_resource::<SkillCastLog>();
 
         app.add_observer(on_skill_cast);
         app.add_observer(on_skill_level_up);
         app.add_observer(on_level_up);
+        app.add_systems(FixedUpdate, update_skill_recast_windows);
     }
 }
 
@@ -78,37 +78,73 @@ pub struct CoolDown {
     pub duration: f32,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Reflect, Default)]
+pub enum SkillSlot {
+    Passive,
+    #[default]
+    Q,
+    W,
+    E,
+    R,
+    Custom(u8),
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Reflect, Default)]
+pub enum SkillCooldownMode {
+    #[default]
+    AfterCast,
+    Manual,
+}
+
 #[derive(Component)]
 #[require(CoolDown)]
 pub struct Skill {
     pub key_spell_object: HashKey<SpellObject>,
-    pub key_skill_effect: HashKey<SkillEffect>,
     pub level: usize,
+    pub slot: SkillSlot,
+    pub cooldown_mode: SkillCooldownMode,
 }
 
 impl Default for Skill {
     fn default() -> Self {
         Self {
             key_spell_object: 0.into(),
-            key_skill_effect: 0.into(),
             level: 0,
+            slot: SkillSlot::Q,
+            cooldown_mode: SkillCooldownMode::AfterCast,
         }
     }
 }
 
-#[derive(Asset, TypePath)]
-pub struct SkillEffect(pub Vec<SkillAction>);
+impl Skill {
+    pub fn new(slot: SkillSlot, key_spell_object: impl Into<HashKey<SpellObject>>) -> Self {
+        Self {
+            key_spell_object: key_spell_object.into(),
+            level: 0,
+            slot,
+            cooldown_mode: SkillCooldownMode::AfterCast,
+        }
+    }
 
-/// 技能动作枚举，替代行为树节点
-#[derive(Clone)]
-pub enum SkillAction {
-    Animation(ActionAnimationPlay),
-    Particle(ActionParticleSpawn),
-    ParticleDespawn(ActionParticleDespawn),
-    Dash(ActionDash),
-    Damage(ActionDamage),
-    Buff(ActionBuffSpawn),
-    AttackReset,
+    pub fn with_level(mut self, level: usize) -> Self {
+        self.level = level;
+        self
+    }
+
+    pub fn with_cooldown_mode(mut self, cooldown_mode: SkillCooldownMode) -> Self {
+        self.cooldown_mode = cooldown_mode;
+        self
+    }
+}
+
+pub fn skill_slot_from_index(index: usize) -> SkillSlot {
+    match index {
+        0 => SkillSlot::Q,
+        1 => SkillSlot::W,
+        2 => SkillSlot::E,
+        3 => SkillSlot::R,
+        other => SkillSlot::Custom(other as u8),
+    }
 }
 
 #[derive(Component)]
@@ -120,10 +156,53 @@ impl Default for SkillPoints {
     }
 }
 
-#[derive(Component)]
-pub struct SkillEffectContext {
-    pub point: Vec2,
+#[derive(Component, Debug, Clone)]
+pub struct SkillRecastWindow {
+    pub stage: u8,
+    pub max_stage: u8,
+    pub timer: Timer,
 }
+
+impl SkillRecastWindow {
+    pub fn new(stage: u8, max_stage: u8, duration: f32) -> Self {
+        Self {
+            stage,
+            max_stage,
+            timer: Timer::from_seconds(duration, TimerMode::Once),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum SkillCastFailureReason {
+    MissingSkills,
+    InvalidSkillIndex,
+    MissingSkillEntity,
+    MissingSpellObject,
+    NotLearned,
+    MissingAbilityResource,
+    InsufficientAbilityResource,
+    CoolingDown,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum SkillCastResult {
+    Started,
+    Failed(SkillCastFailureReason),
+}
+
+#[derive(Debug, Clone)]
+pub struct SkillCastRecord {
+    pub caster: Entity,
+    pub skill_entity: Option<Entity>,
+    pub index: usize,
+    pub slot: Option<SkillSlot>,
+    pub point: Vec2,
+    pub result: SkillCastResult,
+}
+
+#[derive(Resource, Default, Debug)]
+pub struct SkillCastLog(pub Vec<SkillCastRecord>);
 
 #[derive(EntityEvent)]
 pub struct CommandSkillStart {
@@ -139,24 +218,77 @@ pub struct CommandSkillBeforeStart {
     pub point: Vec2,
 }
 
+#[derive(EntityEvent, Debug, Clone, Copy)]
+pub struct EventSkillCast {
+    pub entity: Entity,
+    pub skill_entity: Entity,
+    pub index: usize,
+    pub point: Vec2,
+}
+
+fn push_skill_log(
+    log: &mut ResMut<SkillCastLog>,
+    caster: Entity,
+    skill_entity: Option<Entity>,
+    index: usize,
+    slot: Option<SkillSlot>,
+    point: Vec2,
+    result: SkillCastResult,
+) {
+    log.0.push(SkillCastRecord {
+        caster,
+        skill_entity,
+        index,
+        slot,
+        point,
+        result,
+    });
+}
+
 fn on_skill_cast(
     trigger: On<CommandSkillStart>,
     mut commands: Commands,
     skills: Query<&Skills>,
     res_assets_spell_object: Res<Assets<SpellObject>>,
-    res_assets_skill_effect: Res<Assets<SkillEffect>>,
     mut q_skill: Query<(&Skill, &mut CoolDown)>,
     mut q_ability_resource: Query<&mut AbilityResource>,
-    q_transform: Query<&Transform>,
+    mut log: ResMut<SkillCastLog>,
 ) {
     let entity = trigger.event_target();
     let Ok(skills) = skills.get(entity) else {
+        push_skill_log(
+            &mut log,
+            entity,
+            None,
+            trigger.index,
+            None,
+            trigger.point,
+            SkillCastResult::Failed(SkillCastFailureReason::MissingSkills),
+        );
         return;
     };
     let Some(&skill_entity) = skills.0.get(trigger.index) else {
+        push_skill_log(
+            &mut log,
+            entity,
+            None,
+            trigger.index,
+            None,
+            trigger.point,
+            SkillCastResult::Failed(SkillCastFailureReason::InvalidSkillIndex),
+        );
         return;
     };
     let Ok((skill, mut cooldown)) = q_skill.get_mut(skill_entity) else {
+        push_skill_log(
+            &mut log,
+            entity,
+            Some(skill_entity),
+            trigger.index,
+            None,
+            trigger.point,
+            SkillCastResult::Failed(SkillCastFailureReason::MissingSkillEntity),
+        );
         return;
     };
 
@@ -167,19 +299,55 @@ fn on_skill_cast(
             trigger.index,
             cooldown.timer.remaining_secs()
         );
+        push_skill_log(
+            &mut log,
+            entity,
+            Some(skill_entity),
+            trigger.index,
+            Some(skill.slot),
+            trigger.point,
+            SkillCastResult::Failed(SkillCastFailureReason::CoolingDown),
+        );
         return;
     }
 
-    let spell_object = res_assets_spell_object
-        .load_hash(skill.key_spell_object)
-        .unwrap();
+    let Some(spell_object) = res_assets_spell_object.load_hash(skill.key_spell_object) else {
+        push_skill_log(
+            &mut log,
+            entity,
+            Some(skill_entity),
+            trigger.index,
+            Some(skill.slot),
+            trigger.point,
+            SkillCastResult::Failed(SkillCastFailureReason::MissingSpellObject),
+        );
+        return;
+    };
 
     if skill.level == 0 {
         debug!("{} 技能 {} 未学习，无法释放", entity, trigger.index);
+        push_skill_log(
+            &mut log,
+            entity,
+            Some(skill_entity),
+            trigger.index,
+            Some(skill.slot),
+            trigger.point,
+            SkillCastResult::Failed(SkillCastFailureReason::NotLearned),
+        );
         return;
     }
 
     let Ok(mut ability_resource) = q_ability_resource.get_mut(entity) else {
+        push_skill_log(
+            &mut log,
+            entity,
+            Some(skill_entity),
+            trigger.index,
+            Some(skill.slot),
+            trigger.point,
+            SkillCastResult::Failed(SkillCastFailureReason::MissingAbilityResource),
+        );
         return;
     };
 
@@ -191,6 +359,15 @@ fn on_skill_cast(
                 "{} 技能 {} 蓝量不足，需要 {:.0}，当前 {:.0}",
                 entity, trigger.index, current_mana, ability_resource.value
             );
+            push_skill_log(
+                &mut log,
+                entity,
+                Some(skill_entity),
+                trigger.index,
+                Some(skill.slot),
+                trigger.point,
+                SkillCastResult::Failed(SkillCastFailureReason::InsufficientAbilityResource),
+            );
             return;
         }
 
@@ -201,109 +378,33 @@ fn on_skill_cast(
         );
     }
 
-    let effect_key = skill.key_skill_effect;
+    push_skill_log(
+        &mut log,
+        entity,
+        Some(skill_entity),
+        trigger.index,
+        Some(skill.slot),
+        trigger.point,
+        SkillCastResult::Started,
+    );
 
-    let Some(effect) = res_assets_skill_effect.load_hash(effect_key) else {
-        return;
+    let cast_event = EventSkillCast {
+        entity,
+        skill_entity,
+        index: trigger.index,
+        point: trigger.point,
     };
 
-    debug!("{} 技能 {} 开始执行动作列表", entity, trigger.index);
+    debug!("{} 技能 {} 进入代码驱动观察者流程", entity, trigger.index);
+    commands.trigger(cast_event);
 
-    for action in &effect.0 {
-        match action {
-            SkillAction::Animation(a) => {
-                commands.trigger(CommandAnimationPlay {
-                    entity,
-                    hash: a.hash,
-                    repeat: false,
-                    duration: None,
-                });
-            }
-            SkillAction::Particle(p) => {
-                commands.trigger(CommandSkinParticleSpawn {
-                    entity,
-                    hash: p.hash,
-                });
-            }
-            SkillAction::ParticleDespawn(p) => {
-                commands.trigger(CommandSkinParticleDespawn {
-                    entity,
-                    hash: p.hash,
-                });
-            }
-            SkillAction::Dash(d) => {
-                let transform = q_transform.get(entity).unwrap();
-                let vector = trigger.point - transform.translation.xz();
-                let distance = vector.length();
-
-                let destination = match d.move_type {
-                    crate::DashMoveType::Fixed(fixed_distance) => {
-                        let direction = if distance < 0.001 {
-                            transform.forward().xz().normalize()
-                        } else {
-                            vector.normalize()
-                        };
-                        transform.translation.xz() + direction * fixed_distance
-                    }
-                    crate::DashMoveType::Pointer { max } => {
-                        if distance < max {
-                            trigger.point
-                        } else {
-                            let direction = vector.normalize();
-                            transform.translation.xz() + direction * max
-                        }
-                    }
-                };
-
-                if let Some(damage) = &d.damage {
-                    commands.entity(entity).insert(crate::DashDamageComponent {
-                        start_pos: transform.translation,
-                        target_pos: Vec3::new(
-                            destination.x,
-                            transform.translation.y,
-                            destination.y,
-                        ),
-                        damage: damage.clone(),
-                        skill: d.skill,
-                        hit_entities: std::collections::HashSet::default(),
-                    });
-                }
-
-                commands.trigger(CommandMovement {
-                    entity,
-                    priority: 100,
-                    action: MovementAction::Start {
-                        way: MovementWay::Path(vec![Vec3::new(
-                            destination.x,
-                            transform.translation.y,
-                            destination.y,
-                        )]),
-                        speed: Some(d.speed),
-                        source: "Dash".to_string(),
-                    },
-                });
-            }
-            SkillAction::Damage(d) => {
-                commands.trigger(ActionDamage {
-                    entity,
-                    skill: d.skill,
-                    effects: d.effects.clone(),
-                });
-            }
-            SkillAction::Buff(b) => {
-                (b.bundle)(&mut commands.entity(entity));
-            }
-            SkillAction::AttackReset => {
-                commands.trigger(CommandAttackReset { entity });
-            }
-        }
+    if skill.cooldown_mode == SkillCooldownMode::AfterCast {
+        cooldown.timer = Timer::from_seconds(cooldown.duration, TimerMode::Once);
+        debug!(
+            "{} 技能 {} 开始冷却 {}s",
+            entity, trigger.index, cooldown.duration
+        );
     }
-
-    cooldown.timer = Timer::from_seconds(cooldown.duration, TimerMode::Once);
-    debug!(
-        "{} 技能 {} 开始冷却 {}s",
-        entity, trigger.index, cooldown.duration
-    );
 }
 
 #[derive(EntityEvent)]
@@ -374,6 +475,116 @@ fn on_level_up(event: On<EventLevelUp>, mut q_skill_points: Query<&mut SkillPoin
             entity, event.delta, skill_points.0
         );
     }
+}
+
+fn update_skill_recast_windows(
+    time: Res<Time<Fixed>>,
+    mut commands: Commands,
+    mut q_skill_window: Query<(Entity, &mut SkillRecastWindow)>,
+) {
+    for (entity, mut window) in q_skill_window.iter_mut() {
+        window.timer.tick(time.delta());
+        if window.timer.is_finished() {
+            commands.entity(entity).remove::<SkillRecastWindow>();
+        }
+    }
+}
+
+pub fn play_skill_animation(commands: &mut Commands, entity: Entity, hash: u32) {
+    commands.trigger(CommandAnimationPlay {
+        entity,
+        hash,
+        repeat: false,
+        duration: None,
+    });
+}
+
+pub fn spawn_skill_particle(commands: &mut Commands, entity: Entity, hash: u32) {
+    commands.trigger(CommandSkinParticleSpawn { entity, hash });
+}
+
+pub fn despawn_skill_particle(commands: &mut Commands, entity: Entity, hash: u32) {
+    commands.trigger(CommandSkinParticleDespawn { entity, hash });
+}
+
+pub fn reset_skill_attack(commands: &mut Commands, entity: Entity) {
+    commands.trigger(CommandAttackReset { entity });
+}
+
+pub fn skill_damage(
+    commands: &mut Commands,
+    entity: Entity,
+    skill: impl Into<HashKey<SpellObject>>,
+    shape: DamageShape,
+    damage_list: Vec<TargetDamage>,
+    particle: Option<u32>,
+) {
+    commands.trigger(crate::ActionDamage {
+        entity,
+        skill: skill.into(),
+        effects: vec![ActionDamageEffect {
+            shape,
+            damage_list,
+            particle,
+        }],
+    });
+}
+
+pub fn skill_dash(
+    commands: &mut Commands,
+    q_transform: &Query<&Transform>,
+    entity: Entity,
+    point: Vec2,
+    dash: &ActionDash,
+) {
+    let Ok(transform) = q_transform.get(entity) else {
+        return;
+    };
+    let vector = point - transform.translation.xz();
+    let distance = vector.length();
+
+    let destination = match dash.move_type {
+        crate::DashMoveType::Fixed(fixed_distance) => {
+            let direction = if distance < 0.001 {
+                transform.forward().xz().normalize()
+            } else {
+                vector.normalize()
+            };
+            transform.translation.xz() + direction * fixed_distance
+        }
+        crate::DashMoveType::Pointer { max } => {
+            if distance < max {
+                point
+            } else {
+                let direction = vector.normalize();
+                transform.translation.xz() + direction * max
+            }
+        }
+    };
+
+    if let Some(damage) = &dash.damage {
+        commands.entity(entity).insert(crate::DashDamageComponent {
+            start_pos: transform.translation,
+            target_pos: Vec3::new(destination.x, transform.translation.y, destination.y),
+            damage: damage.clone(),
+            skill: dash.skill,
+            hit_entities: std::collections::HashSet::default(),
+        });
+    }
+
+    commands.trigger(CommandMovement {
+        entity,
+        priority: 100,
+        action: MovementAction::Start {
+            way: MovementWay::Path(vec![Vec3::new(
+                destination.x,
+                transform.translation.y,
+                destination.y,
+            )]),
+            speed: Some(dash.speed),
+            source: "Dash".to_string(),
+        },
+    });
 }
 
 pub fn get_skill_value(

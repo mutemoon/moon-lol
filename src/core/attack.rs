@@ -29,8 +29,10 @@ pub struct Attack {
     pub range: f32,
     /// 基础攻击速度 (1级时的每秒攻击次数)
     pub base_attack_speed: f32,
-    /// 额外攻击速度加成 (来自装备/符文的攻击速度)
+    /// 持久的额外攻击速度加成 (来自装备/符文/直接修改)
     pub bonus_attack_speed: f32,
+    /// 来自临时 buff 的攻击速度加成
+    pub buff_bonus_attack_speed: f32,
     /// 攻击速度上限 (默认 2.5)
     pub attack_speed_cap: f32,
     /// 前摇时间配置
@@ -115,6 +117,7 @@ impl Attack {
             range,
             base_attack_speed: 1.0 / total_duration_secs,
             bonus_attack_speed: 0.0,
+            buff_bonus_attack_speed: 0.0,
             attack_speed_cap: 2.5,
             windup_config: WindupConfig::Modern {
                 attack_cast_time: windup_duration_secs,
@@ -130,6 +133,7 @@ impl Attack {
             range,
             base_attack_speed,
             bonus_attack_speed: 0.0,
+            buff_bonus_attack_speed: 0.0,
             attack_speed_cap: 2.5,
             windup_config: WindupConfig::Legacy {
                 attack_offset: windup_offset,
@@ -151,7 +155,10 @@ impl Attack {
 
     /// 计算当前总攻击速度
     pub fn current_attack_speed(&self) -> f32 {
-        (self.base_attack_speed * (1.0 + self.bonus_attack_speed)).min(self.attack_speed_cap)
+        (
+            self.base_attack_speed * (1.0 + self.bonus_attack_speed + self.buff_bonus_attack_speed)
+        )
+        .min(self.attack_speed_cap)
     }
 
     /// 计算攻击间隔时间 (1 / attack_speed)
@@ -209,7 +216,7 @@ impl AttackState {
 }
 
 fn update_attack_state(attack_state: &mut Attack, buffs: Vec<&BuffAttack>) {
-    attack_state.bonus_attack_speed = buffs
+    attack_state.buff_bonus_attack_speed = buffs
         .iter()
         .map(|v| v.bonus_attack_speed)
         .reduce(|a, b| a + b)
@@ -247,20 +254,17 @@ fn on_command_attack_start(
             update_attack_state(&mut attack, vec![]);
         }
 
-        let Ok(target_position) = q_transform.get(target).map(|v| v.translation.xz()) else {
-            return;
-        };
-
-        let transform = q_transform.get(entity).unwrap();
-
-        let direction = (target_position - transform.translation.xz()).normalize();
-
-        commands.trigger(CommandRotate {
-            entity,
-            priority: 1,
-            direction,
-            angular_velocity: None,
-        });
+        if let (Ok(target_transform), Ok(transform)) = (q_transform.get(target), q_transform.get(entity)) {
+            let delta = target_transform.translation.xz() - transform.translation.xz();
+            if delta.length_squared() > 0.0001 {
+                commands.trigger(CommandRotate {
+                    entity,
+                    priority: 1,
+                    direction: delta.normalize(),
+                    angular_velocity: None,
+                });
+            }
+        }
 
         commands.entity(entity).insert(AttackState {
             status: AttackStatus::Windup {
@@ -359,9 +363,9 @@ fn on_event_dead(
 }
 
 fn fixed_update(
-    mut query: Query<(Entity, &mut AttackState, &Attack, &Damage)>,
+    mut query: Query<(Entity, &mut AttackState, &Attack, Option<&Damage>)>,
     mut commands: Commands,
-    res_assets_spell_object: Res<Assets<SpellObject>>,
+    res_assets_spell_object: Option<Res<Assets<SpellObject>>>,
     time: Res<Time<Fixed>>,
 ) {
     let now = time.elapsed_secs();
@@ -377,15 +381,28 @@ fn fixed_update(
 
                     match &attack.spell_key {
                         Some(spell_key) => {
-                            let spell = res_assets_spell_object.load_hash(spell_key).unwrap();
-
-                            if spell.m_spell.as_ref().unwrap().m_cast_type.unwrap_or(0) == 1 {
-                                commands.trigger(CommandMissileCreate {
-                                    entity,
-                                    target: *target,
-                                    spell_key: spell_key.clone(),
-                                });
-                            } else {
+                            if let Some(spell) = res_assets_spell_object
+                                .as_ref()
+                                .and_then(|assets| assets.load_hash(spell_key))
+                            {
+                                if spell.m_spell.as_ref().unwrap().m_cast_type.unwrap_or(0) == 1 {
+                                    commands.trigger(CommandMissileCreate {
+                                        entity,
+                                        target: *target,
+                                        spell_key: *spell_key,
+                                    });
+                                } else if let Some(damage) = damage {
+                                    commands.try_trigger(CommandDamageCreate {
+                                        entity: *target,
+                                        source: entity,
+                                        damage_type: DamageType::Physical,
+                                        amount: damage.0,
+                                    });
+                                }
+                            }
+                        }
+                        None => {
+                            if let Some(damage) = damage {
                                 commands.try_trigger(CommandDamageCreate {
                                     entity: *target,
                                     source: entity,
@@ -393,14 +410,6 @@ fn fixed_update(
                                     amount: damage.0,
                                 });
                             }
-                        }
-                        None => {
-                            commands.try_trigger(CommandDamageCreate {
-                                entity: *target,
-                                source: entity,
-                                damage_type: DamageType::Physical,
-                                amount: damage.0,
-                            });
                         }
                     }
                     commands.try_trigger(EventAttackEnd {

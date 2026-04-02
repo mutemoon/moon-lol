@@ -1,4 +1,5 @@
 use std::fs;
+use std::panic::{catch_unwind, AssertUnwindSafe};
 use std::path::PathBuf;
 use std::time::Duration;
 
@@ -88,7 +89,17 @@ fn riven_r_writes_video() {
     );
 }
 
-fn run_riven_case(test_name: &str, max_frames: u32, mut steps: Vec<SkillTestScriptStep>) {
+fn run_riven_case(test_name: &str, max_frames: u32, steps: Vec<SkillTestScriptStep>) {
+    if std::env::var("MOON_LOL_RUN_RENDER_TESTS").as_deref() != Ok("1") {
+        eprintln!("skipping render test: set MOON_LOL_RUN_RENDER_TESTS=1 to enable");
+        return;
+    }
+    if skip_due_to_missing_gpu(|| run_riven_case_inner(test_name, max_frames, steps)) {
+        return;
+    }
+}
+
+fn run_riven_case_inner(test_name: &str, max_frames: u32, mut steps: Vec<SkillTestScriptStep>) {
     let output_dir = PathBuf::from(format!("artifacts/tests/{test_name}"));
     let _ = fs::remove_dir_all(&output_dir);
 
@@ -137,6 +148,28 @@ fn run_riven_case(test_name: &str, max_frames: u32, mut steps: Vec<SkillTestScri
         "expected capture video in {}",
         output_dir.display()
     );
+}
+
+fn skip_due_to_missing_gpu(run: impl FnOnce()) -> bool {
+    match catch_unwind(AssertUnwindSafe(run)) {
+        Ok(()) => false,
+        Err(payload) => {
+            let message = if let Some(message) = payload.downcast_ref::<String>() {
+                message.as_str()
+            } else if let Some(message) = payload.downcast_ref::<&str>() {
+                message
+            } else {
+                ""
+            };
+
+            if message.contains("Unable to find a GPU") {
+                eprintln!("skipping render test: no GPU available");
+                true
+            } else {
+                std::panic::resume_unwind(payload);
+            }
+        }
+    }
 }
 
 fn make_script(skill_steps: &mut [SkillTestScriptStep]) -> SkillTestScript {

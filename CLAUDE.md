@@ -15,7 +15,7 @@
 
 - `skill` 测试默认运行在无头 Bevy 实例里。
 - 必须显式构造最小完整场景：施法者、敌方目标、友方目标，以及必要的 `Transform`、`Team`、`Health`、`Skills`、`SkillPoints`、`AbilityResource`。
-- 必须显式注册技能依赖资产，如 `SpellObject`、`SkillEffect`，不要依赖隐式全局状态。
+- 必须显式注册技能依赖资产，如 `SpellObject`，不要依赖隐式全局状态。
 - 输入必须走真实语义，优先使用 `CommandAction -> Action::Skill`、`Action::SkillLevelUp`，不要直接改内部组件假装测试通过。
 - 对依赖 `FixedUpdate` 或 `Time` 的逻辑，必须使用固定帧率和手动时间推进，例如 `TimeUpdateStrategy::ManualDuration`。
 - 一个合格的技能测试至少覆盖：初始场景、玩家输入、帧推进、最终世界状态。

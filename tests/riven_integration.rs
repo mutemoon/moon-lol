@@ -5,20 +5,20 @@ use std::time::Duration;
 use bevy::prelude::*;
 use bevy::time::TimeUpdateStrategy;
 use league_core::{
-    CharacterRecord, JungleQuadrantFlags, MainRegionFlags, NearestLaneFlags, POIFlags,
-    RiverRegionFlags, RingFlags, SpellObject, UnknownSRXFlags, VisionPathingFlags,
+    CharacterRecord, JungleQuadrantFlags, MainRegionFlags, NearestLaneFlags, POIFlags, RingFlags,
+    RiverRegionFlags, SpellObject, UnknownSRXFlags, VisionPathingFlags,
 };
 use league_property::{from_entry, PropFile};
 use league_utils::{hash_bin, hash_wad, type_name_to_hash};
 use lol_config::{ConfigNavigationGrid, ConfigNavigationGridCell, LoadHashKeyTrait};
 use lol_core::Team;
 use moon_lol::{
-    AbilityResource, AbilityResourceType, Action, BuffRivenQ2, BuffRivenQ3, BuffShieldWhite,
-    Buffs, CommandAction, CommandDamageCreate, CoolDown, Damage, DamageType, Health, Level,
-    get_skill_value,
-    Movement, PluginAction, PluginCooldown, PluginDamage, PluginLife, PluginMovement,
-    PluginRiven, PluginRivenQ, PluginRotate, PluginShieldWhite, PluginSkill, ResourceGrid, Riven,
-    Skill, SkillPoints, Skills, NavigationDebug, NavigationStats,
+    get_skill_value, skill_slot_from_index, AbilityResource, AbilityResourceType, Action,
+    BuffShieldWhite, Buffs, CommandAction, CommandDamageCreate, CoolDown, Damage, DamageType,
+    Health, Level, Movement, NavigationDebug, NavigationStats, PluginAction, PluginCooldown,
+    PluginDamage, PluginLife, PluginMovement, PluginRiven, PluginRivenQ, PluginRotate,
+    PluginShieldWhite, PluginSkill, ResourceGrid, Riven, Skill, SkillCooldownMode, SkillPoints,
+    SkillRecastWindow, SkillSlot, Skills,
 };
 
 const TEST_FPS: f32 = 30.0;
@@ -27,8 +27,7 @@ const EPSILON: f32 = 1e-3;
 const RIVEN_Q_KEY: &str = "Characters/Riven/Spells/RivenTriCleaveAbility/RivenTriCleave";
 const RIVEN_W_KEY: &str = "Characters/Riven/Spells/RivenMartyrAbility/RivenMartyr";
 const RIVEN_E_KEY: &str = "Characters/Riven/Spells/RivenFeintAbility/RivenFeint";
-const RIVEN_R_KEY: &str =
-    "Characters/Riven/Spells/RivenFengShuiEngineAbility/RivenFengShuiEngine";
+const RIVEN_R_KEY: &str = "Characters/Riven/Spells/RivenFengShuiEngineAbility/RivenFengShuiEngine";
 const RIVEN_BIN_PATH: &str = "DATA/Characters/Riven/Riven.bin";
 
 struct RivenHarness {
@@ -126,7 +125,10 @@ impl RivenHarness {
     }
 
     fn load_real_spell(&mut self, spell_key: &str) -> &mut Self {
-        let path = format!("assets/data/{:x}.lol", hash_wad(&RIVEN_BIN_PATH.to_lowercase()));
+        let path = format!(
+            "assets/data/{:x}.lol",
+            hash_wad(&RIVEN_BIN_PATH.to_lowercase())
+        );
         let bytes = fs::read(&path).unwrap_or_else(|e| panic!("failed to read {path}: {e}"));
         let (_, prop) = PropFile::parse(&bytes)
             .unwrap_or_else(|e| panic!("failed to parse prop file {path}: {e:?}"));
@@ -176,19 +178,32 @@ impl RivenHarness {
         self
     }
 
-    fn add_skill(&mut self, spell_key: &str, effect_key: &str, level: usize, cooldown: f32) -> &mut Self {
+    fn add_skill(&mut self, spell_key: &str, level: usize, cooldown: f32) -> &mut Self {
         let mut timer = Timer::from_seconds(cooldown, TimerMode::Once);
         timer.tick(Duration::from_secs_f32(cooldown));
+        let slot = match spell_key {
+            RIVEN_Q_KEY => SkillSlot::Q,
+            RIVEN_W_KEY => SkillSlot::W,
+            RIVEN_E_KEY => SkillSlot::E,
+            RIVEN_R_KEY => SkillSlot::R,
+            _ => skill_slot_from_index(
+                self.app
+                    .world()
+                    .get::<Skills>(self.riven)
+                    .expect("riven should always have a skill list")
+                    .len(),
+            ),
+        };
+        let mut skill = Skill::new(slot, spell_key).with_level(level);
+        if slot == SkillSlot::Q {
+            skill = skill.with_cooldown_mode(SkillCooldownMode::Manual);
+        }
 
         let skill_entity = self
             .app
             .world_mut()
             .spawn((
-                Skill {
-                    key_spell_object: spell_key.into(),
-                    key_skill_effect: effect_key.into(),
-                    level,
-                },
+                skill,
                 CoolDown {
                     timer,
                     duration: cooldown,
@@ -231,16 +246,6 @@ impl RivenHarness {
             self.app.update();
         }
         self
-    }
-
-    fn has_buff<T: Component>(&self) -> bool {
-        let Some(buffs) = self.app.world().get::<Buffs>(self.riven) else {
-            return false;
-        };
-
-        buffs
-            .iter()
-            .any(|buff| self.app.world().get::<T>(buff).is_some())
     }
 
     fn shield_value(&self) -> Option<f32> {
@@ -345,25 +350,39 @@ fn riven_q_cycles_through_three_real_stages() {
     let mut harness = RivenHarness::new();
     harness
         .load_real_spell(RIVEN_Q_KEY)
-        .add_skill(RIVEN_Q_KEY, RIVEN_Q_KEY, 1, 0.2);
+        .add_skill(RIVEN_Q_KEY, 1, 0.2);
 
-    harness
-        .cast_skill(0, Vec2::new(1000.0, 0.0))
-        .advance(0.4);
-    assert!(harness.has_buff::<BuffRivenQ2>());
-    assert!(!harness.has_buff::<BuffRivenQ3>());
+    harness.cast_skill(0, Vec2::new(1000.0, 0.0)).advance(0.4);
+    let q_entity = harness.app.world().get::<Skills>(harness.riven).unwrap()[0];
+    assert_eq!(
+        harness
+            .app
+            .world()
+            .get::<SkillRecastWindow>(q_entity)
+            .map(|window| window.stage),
+        Some(2)
+    );
+    assert!(harness.cooldown_finished(0));
 
-    harness
-        .cast_skill(0, Vec2::new(1000.0, 0.0))
-        .advance(0.4);
-    assert!(!harness.has_buff::<BuffRivenQ2>());
-    assert!(harness.has_buff::<BuffRivenQ3>());
+    harness.cast_skill(0, Vec2::new(1000.0, 0.0)).advance(0.4);
+    assert_eq!(
+        harness
+            .app
+            .world()
+            .get::<SkillRecastWindow>(q_entity)
+            .map(|window| window.stage),
+        Some(3)
+    );
+    assert!(harness.cooldown_finished(0));
 
-    harness
-        .cast_skill(0, Vec2::new(1000.0, 0.0))
-        .advance(0.4);
-    assert!(!harness.has_buff::<BuffRivenQ2>());
-    assert!(!harness.has_buff::<BuffRivenQ3>());
+    harness.cast_skill(0, Vec2::new(1000.0, 0.0)).advance(0.1);
+    assert!(harness
+        .app
+        .world()
+        .get::<SkillRecastWindow>(q_entity)
+        .is_none());
+    assert!(!harness.cooldown_finished(0));
+    harness.advance(0.3);
     let q_pos = harness.position(harness.riven).x;
     assert!(
         (q_pos - 750.0).abs() < 5.0,
@@ -377,8 +396,8 @@ fn riven_w_hits_only_enemies_in_range() {
     harness
         .load_real_spell(RIVEN_W_KEY)
         .load_real_spell(RIVEN_Q_KEY)
-        .add_skill(RIVEN_Q_KEY, RIVEN_Q_KEY, 1, 0.2)
-        .add_skill(RIVEN_W_KEY, RIVEN_W_KEY, 1, 1.0);
+        .add_skill(RIVEN_Q_KEY, 1, 0.2)
+        .add_skill(RIVEN_W_KEY, 1, 1.0);
 
     let expected_damage = get_skill_value(
         harness.spell(RIVEN_W_KEY),
@@ -414,12 +433,10 @@ fn riven_e_spawns_shield_and_dash_absorbs_damage() {
     harness
         .load_real_spell(RIVEN_E_KEY)
         .load_real_spell(RIVEN_Q_KEY)
-        .add_skill(RIVEN_Q_KEY, RIVEN_Q_KEY, 1, 0.2)
-        .add_skill(RIVEN_E_KEY, RIVEN_E_KEY, 1, 1.0);
+        .add_skill(RIVEN_Q_KEY, 1, 0.2)
+        .add_skill(RIVEN_E_KEY, 1, 1.0);
 
-    harness
-        .cast_skill(1, Vec2::new(1000.0, 0.0))
-        .advance(0.4);
+    harness.cast_skill(1, Vec2::new(1000.0, 0.0)).advance(0.4);
 
     let e_pos = harness.position(harness.riven).x;
     assert!(
@@ -442,8 +459,8 @@ fn riven_r_starts_cooldown_without_moving_or_damaging() {
     harness
         .load_real_spell(RIVEN_R_KEY)
         .load_real_spell(RIVEN_Q_KEY)
-        .add_skill(RIVEN_Q_KEY, RIVEN_Q_KEY, 1, 0.2)
-        .add_skill(RIVEN_R_KEY, RIVEN_R_KEY, 1, 4.0);
+        .add_skill(RIVEN_Q_KEY, 1, 0.2)
+        .add_skill(RIVEN_R_KEY, 1, 4.0);
 
     let expected_mana_cost = harness
         .spell(RIVEN_R_KEY)
