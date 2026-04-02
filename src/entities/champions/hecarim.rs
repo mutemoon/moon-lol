@@ -10,7 +10,7 @@ use crate::core::{
     Skills, TargetDamage, TargetFilter,
 };
 use crate::entities::champion::Champion;
-use crate::{BuffHecarimQ, BuffHecarimW, BuffMoveSpeed, BuffSelfHeal, DamageType, PassiveSkillOf};
+use crate::{BuffHecarimQ, BuffHecarimW, BuffMoveSpeed, BuffSelfHeal, DamageType, DebuffFear, PassiveSkillOf};
 use bevy::prelude::GlobalTransform;
 use lol_core::Team;
 
@@ -115,7 +115,6 @@ fn cast_hecarim_e(commands: &mut Commands, _q_transform: &Query<&Transform>, ent
     // E is movement speed boost + knockback on contact
     // Movement speed buff with knockback on collision
     commands.entity(entity).with_related::<BuffOf>(BuffMoveSpeed::new(0.75, 4.0));
-    debug!("{:?} E 冲锋碰撞，击退目标", entity);
 }
 
 fn cast_hecarim_r(commands: &mut Commands, q_transform: &Query<&Transform>, entity: Entity, point: Vec2) {
@@ -141,11 +140,9 @@ fn cast_hecarim_r(commands: &mut Commands, q_transform: &Query<&Transform>, enti
             speed: 1500.0,
         },
     );
-    debug!("{:?} 的技能 {} 应对目标施加 {}",
-        entity, "Hecarim R", "恐惧 DebuffFear");
 }
 
-/// Hecarim W 持续期间造成伤害时给自身治疗
+/// Hecarim W 持续期间造成伤害时给自身治疗，R 命中施加恐惧
 fn on_hecarim_damage_hit(
     trigger: On<EventDamageCreate>,
     mut commands: Commands,
@@ -156,10 +153,13 @@ fn on_hecarim_damage_hit(
     if q_hecarim.get(source).is_err() {
         return;
     }
-    // If Hecarim has BuffHecarimW active, heal on damage dealt
+    let target = trigger.event_target();
+    // W buff 期间造成伤害时自我治疗
     if q_has_w_buff.get(source).is_ok() {
         commands.entity(source).with_related::<BuffOf>(BuffSelfHeal::new(30.0));
     }
+    // R 命中施加恐惧
+    commands.entity(target).with_related::<BuffOf>(DebuffFear::new(1.5));
 }
 
 /// Hecarim E 冲刺结束时推开最近目标

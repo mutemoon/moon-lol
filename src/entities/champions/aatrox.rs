@@ -5,13 +5,12 @@ use lol_config::LoadHashKeyTrait;
 
 use crate::core::{
     play_skill_animation, skill_damage, skill_dash, skill_slot_from_index, spawn_skill_particle,
-    CoolDown, DamageShape, EventSkillCast, Skill, SkillCooldownMode, SkillOf, SkillRecastWindow,
-    SkillSlot, Skills, TargetDamage, TargetFilter,
+    BuffOf, CoolDown, DamageShape, EventDamageCreate, EventSkillCast, Skill, SkillCooldownMode,
+    SkillOf, SkillRecastWindow, SkillSlot, Skills, TargetDamage, TargetFilter,
 };
 use crate::entities::champion::Champion;
 use crate::PassiveSkillOf;
-use crate::{BuffMoveSpeed, BuffOf, BuffSelfHeal};
-use crate::DamageType;
+use crate::{BuffMoveSpeed, BuffSelfHeal, DebuffSlow, DamageType};
 
 const AATROX_Q_KEY: &str = "Characters/Aatrox/Spells/AatroxQ/AatroxQ";
 const AATROX_W_KEY: &str = "Characters/Aatrox/Spells/AatroxW/AatroxW";
@@ -26,6 +25,7 @@ impl Plugin for PluginAatrox {
     fn build(&self, app: &mut App) {
         app.add_systems(FixedUpdate, add_skills);
         app.add_observer(on_aatrox_skill_cast);
+        app.add_observer(on_aatrox_damage_hit);
     }
 }
 
@@ -144,7 +144,6 @@ fn cast_aatrox_w(commands: &mut Commands, entity: Entity) {
         }],
         Some(hash_bin("Aatrox_W_Hit")),
     );
-    debug!("{:?} W 锁链命中，1s 后拉回目标", entity);
 }
 
 fn cast_aatrox_e(
@@ -190,6 +189,19 @@ fn cast_aatrox_r(commands: &mut Commands, entity: Entity) {
     );
     // Movement speed buff
     commands.entity(entity).with_related::<BuffOf>(BuffMoveSpeed::new(0.5, 8.0));
+}
+
+/// 监听 Aatrox 造成的伤害，W 命中施加减速
+fn on_aatrox_damage_hit(
+    trigger: On<EventDamageCreate>,
+    mut commands: Commands,
+    q_aatrox: Query<(), With<Aatrox>>,
+) {
+    if q_aatrox.get(trigger.source).is_err() {
+        return;
+    }
+    let target = trigger.event_target();
+    commands.entity(target).with_related::<BuffOf>(DebuffSlow::new(0.25, 1.5));
 }
 
 fn add_skills(

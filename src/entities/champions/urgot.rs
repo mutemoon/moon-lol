@@ -119,7 +119,6 @@ fn cast_urgot_e(
         },
     );
     commands.entity(entity).with_related::<BuffOf>(BuffShieldWhite::new(100.0));
-    debug!("{:?} E 冲刺投掷，击退目标", entity);
 }
 
 fn cast_urgot_r(commands: &mut Commands, entity: Entity, _point: Vec2) {
