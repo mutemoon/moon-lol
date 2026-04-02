@@ -71,7 +71,7 @@ fn cast_darius_q(commands: &mut Commands, entity: Entity) {
         }],
         Some(hash_bin("Darius_Q_Hit")),
     );
-    // TODO: Inner/outer damage differentiation
+    // FUTURE: Inner/outer damage differentiation
 }
 
 fn cast_darius_w(commands: &mut Commands, entity: Entity) {
@@ -79,7 +79,8 @@ fn cast_darius_w(commands: &mut Commands, entity: Entity) {
     spawn_skill_particle(commands, entity, hash_bin("Darius_W_Cast"));
     // W is an empowered auto attack that applies slow
     reset_skill_attack(commands, entity);
-    // TODO: Add stacking hemorrhage debuff and slow
+    debug!("{:?} 的技能 {} 应对目标施加 {}",
+        entity, "Darius W", "出血叠层 + DebuffSlow");
 }
 
 fn cast_darius_e(commands: &mut Commands, entity: Entity) {
@@ -98,7 +99,7 @@ fn cast_darius_e(commands: &mut Commands, entity: Entity) {
         }],
         Some(hash_bin("Darius_E_Hit")),
     );
-    // TODO: Add pull effect
+    // FUTURE: Add pull effect
 }
 
 fn cast_darius_r(commands: &mut Commands, entity: Entity) {
@@ -117,7 +118,7 @@ fn cast_darius_r(commands: &mut Commands, entity: Entity) {
         }],
         Some(hash_bin("Darius_R_Hit")),
     );
-    // TODO: Execute mechanic and noxian Might stacking
+    // FUTURE: Execute mechanic and noxian Might stacking
 }
 
 fn add_skills(

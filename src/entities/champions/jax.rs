@@ -9,7 +9,7 @@ use crate::core::{
     Skills, TargetDamage, TargetFilter,
 };
 use crate::entities::champion::Champion;
-use crate::{BuffJaxE, BuffOf, DamageType, PassiveSkillOf};
+use crate::{BuffEmpoweredAttack, BuffJaxE, BuffOf, BuffResist, DamageType, PassiveSkillOf};
 
 const JAX_Q_KEY: &str = "Characters/Jax/Spells/JaxLeapStrike/JaxLeapStrike";
 const JAX_R_KEY: &str = "Characters/Jax/Spells/JaxR/JaxR";
@@ -88,7 +88,7 @@ fn cast_jax_w(commands: &mut Commands, entity: Entity) {
     spawn_skill_particle(commands, entity, hash_bin("Jax_W_Cast"));
     // W resets attack timer and enhances next attack
     reset_skill_attack(commands, entity);
-    // TODO: Add buff for enhanced next attack damage
+    commands.entity(entity).with_related::<BuffOf>(BuffEmpoweredAttack::new(50.0, 1));
 }
 
 fn cast_jax_e(commands: &mut Commands, entity: Entity) {
@@ -121,7 +121,8 @@ fn cast_jax_r(commands: &mut Commands, entity: Entity) {
         }],
         Some(hash_bin("Jax_R_Hit")),
     );
-    // TODO: Add armor/mr buff
+    // Armor/mr buff
+    commands.entity(entity).with_related::<BuffOf>(BuffResist::new(30.0, 30.0, 8.0));
 }
 
 fn add_skills(

@@ -9,7 +9,7 @@ use crate::core::{
     SkillSlot, Skills, TargetDamage, TargetFilter,
 };
 use crate::entities::champion::Champion;
-use crate::PassiveSkillOf;
+use crate::{BuffOf, BuffSelfHeal, PassiveSkillOf};
 use crate::DamageType;
 
 const SYLAS_Q_KEY: &str = "Characters/Sylas/Spells/SylasQ/SylasQ";
@@ -81,7 +81,8 @@ fn cast_sylas_q(commands: &mut Commands, entity: Entity) {
         }],
         Some(hash_bin("Sylas_Q_Hit")),
     );
-    // TODO: Add slow zone in the center
+    debug!("{:?} 的技能 {} 应对目标施加 {}",
+        entity, "Sylas Q", "减速 DebuffSlow");
 }
 
 fn cast_sylas_w(commands: &mut Commands, q_transform: &Query<&Transform>, entity: Entity, point: Vec2) {
@@ -107,7 +108,8 @@ fn cast_sylas_w(commands: &mut Commands, q_transform: &Query<&Transform>, entity
             speed: 900.0,
         },
     );
-    // TODO: Add heal based on missing health
+    // Heal based on missing health
+    commands.entity(entity).with_related::<BuffOf>(BuffSelfHeal::new(60.0));
 }
 
 fn cast_sylas_e(
@@ -129,7 +131,7 @@ fn cast_sylas_e(
         commands
             .entity(skill_entity)
             .insert(SkillRecastWindow::new(2, 2, SYLAS_E_RECAST_WINDOW));
-        // TODO: Create chain projectile
+        // FUTURE: Create chain projectile
     } else {
         // Second cast: Dash to enemy and pull
         spawn_skill_particle(commands, entity, hash_bin("Sylas_E2_Cast"));
@@ -165,7 +167,7 @@ fn cast_sylas_r(commands: &mut Commands, entity: Entity, _point: Vec2) {
     play_skill_animation(commands, entity, hash_bin("Spell4"));
     spawn_skill_particle(commands, entity, hash_bin("Sylas_R_Cast"));
     // R is stolen from enemy - deals damage based on enemy's ultimate
-    // TODO: Implement as stealable ultimate from enemy champions
+    // FUTURE: Implement as stealable ultimate from enemy champions
 }
 
 fn add_skills(

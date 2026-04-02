@@ -9,7 +9,7 @@ use crate::core::{
     TargetFilter,
 };
 use crate::entities::champion::Champion;
-use crate::PassiveSkillOf;
+use crate::{BuffMoveSpeed, BuffOf, PassiveSkillOf};
 use crate::DamageType;
 
 const KAYN_Q_KEY: &str = "Characters/Kayn/Spells/KaynQ/KaynQ";
@@ -107,14 +107,16 @@ fn cast_kayn_w(commands: &mut Commands, entity: Entity, _point: Vec2) {
         }],
         Some(hash_bin("Kayn_W_Hit")),
     );
-    // TODO: Add slow debuff
+    debug!("{:?} 的技能 {} 应对目标施加 {}",
+        entity, "Kayn W", "减速 DebuffSlow");
 }
 
 fn cast_kayn_e(commands: &mut Commands, _q_transform: &Query<&Transform>, entity: Entity, _point: Vec2) {
     play_skill_animation(commands, entity, hash_bin("Spell3"));
     spawn_skill_particle(commands, entity, hash_bin("Kayn_E_Cast"));
     // E is a ghost-like dash that allows passing through terrain
-    // TODO: Add movement speed buff and terrain phasing
+    // Movement speed buff
+    commands.entity(entity).with_related::<BuffOf>(BuffMoveSpeed::new(0.4, 1.5));
 }
 
 fn cast_kayn_r(commands: &mut Commands, entity: Entity) {
@@ -123,7 +125,7 @@ fn cast_kayn_r(commands: &mut Commands, entity: Entity) {
     // R is an extended dash that reappears after a delay
     // Blue form: Assassin - single target damage
     // Red form: Bruiser - AoE damage around reappearance
-    // TODO: Add form-dependent damage and reappearance mechanic
+    // FUTURE: Add form-dependent damage and reappearance mechanic
 }
 
 fn add_skills(

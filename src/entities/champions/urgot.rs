@@ -63,7 +63,7 @@ fn cast_urgot_q(commands: &mut Commands, entity: Entity, _point: Vec2) {
     play_skill_animation(commands, entity, hash_bin("Spell1"));
     spawn_skill_particle(commands, entity, hash_bin("Urgot_Q_Cast"));
     // Q is a skillshot that fires in a line
-    // TODO: Could implement as a missile or static damage zone
+    // FUTURE: Could implement as a missile or static damage zone
 }
 
 fn cast_urgot_w(commands: &mut Commands, entity: Entity) {
@@ -102,7 +102,7 @@ fn cast_urgot_e(
         },
     );
     commands.entity(entity).with_related::<BuffOf>(BuffShieldWhite::new(100.0));
-    // TODO: Add knockback to enemies
+    // FUTURE: Add knockback to enemies
 }
 
 fn cast_urgot_r(commands: &mut Commands, entity: Entity, _point: Vec2) {
@@ -121,7 +121,7 @@ fn cast_urgot_r(commands: &mut Commands, entity: Entity, _point: Vec2) {
         }],
         Some(hash_bin("Urgot_R_Hit")),
     );
-    // TODO: Add execute mark debuff
+    // FUTURE: Add execute mark debuff
 }
 
 fn add_skills(

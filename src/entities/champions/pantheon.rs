@@ -5,11 +5,11 @@ use lol_config::LoadHashKeyTrait;
 
 use crate::core::{
     play_skill_animation, skill_damage, skill_dash, skill_slot_from_index, spawn_skill_particle,
-    CoolDown, DamageShape, EventSkillCast, Skill, SkillOf, SkillSlot, Skills, TargetDamage,
-    TargetFilter,
+    BuffOf, CoolDown, DamageShape, EventSkillCast, Skill, SkillOf, SkillSlot, Skills,
+    TargetDamage, TargetFilter,
 };
 use crate::entities::champion::Champion;
-use crate::PassiveSkillOf;
+use crate::{BuffPantheonE, PassiveSkillOf};
 use crate::DamageType;
 
 const PANTHEON_Q_KEY: &str = "Characters/Pantheon/Spells/PantheonQ/PantheonQ";
@@ -98,7 +98,8 @@ fn cast_pantheon_w(commands: &mut Commands, q_transform: &Query<&Transform>, ent
             speed: 1000.0,
         },
     );
-    // TODO: Add stun debuff
+    debug!("{:?} 的技能 {} 应对目标施加 {}",
+        entity, "Pantheon W", "眩晕 DebuffStun");
 }
 
 fn cast_pantheon_e(commands: &mut Commands, entity: Entity) {
@@ -117,7 +118,7 @@ fn cast_pantheon_e(commands: &mut Commands, entity: Entity) {
         }],
         Some(hash_bin("Pantheon_E_Hit")),
     );
-    // TODO: Shield block mechanic
+    commands.entity(entity).with_related::<BuffOf>(BuffPantheonE::new(Vec2::ZERO, 1.5));
 }
 
 fn cast_pantheon_r(commands: &mut Commands, entity: Entity, _point: Vec2) {
@@ -136,7 +137,7 @@ fn cast_pantheon_r(commands: &mut Commands, entity: Entity, _point: Vec2) {
         }],
         Some(hash_bin("Pantheon_R_Hit")),
     );
-    // TODO: Long range targeting
+    // FUTURE: Long range targeting
 }
 
 fn add_skills(

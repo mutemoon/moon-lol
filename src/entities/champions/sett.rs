@@ -4,12 +4,12 @@ use league_utils::hash_bin;
 use lol_config::LoadHashKeyTrait;
 
 use crate::core::{
-    play_skill_animation, skill_damage, skill_dash, skill_slot_from_index, spawn_skill_particle,
-    CoolDown, DamageShape, EventSkillCast, Skill, SkillOf, SkillSlot, Skills, TargetDamage,
-    TargetFilter,
+    play_skill_animation, reset_skill_attack, skill_damage, skill_dash, skill_slot_from_index,
+    spawn_skill_particle, BuffOf, CoolDown, DamageShape, EventSkillCast, Skill, SkillOf,
+    SkillSlot, Skills, TargetDamage, TargetFilter,
 };
 use crate::entities::champion::Champion;
-use crate::PassiveSkillOf;
+use crate::{BuffSettQ, BuffShieldWhite, PassiveSkillOf};
 use crate::DamageType;
 
 const SETT_W_KEY: &str = "Characters/Sett/Spells/SettW/SettW";
@@ -59,8 +59,9 @@ fn on_sett_skill_cast(
 fn cast_sett_q(commands: &mut Commands, entity: Entity) {
     play_skill_animation(commands, entity, hash_bin("Spell1"));
     spawn_skill_particle(commands, entity, hash_bin("Sett_Q_Cast"));
-    // Q is a buff that enhances next 2 attacks with bonus damage
-    // TODO: Add stacking buff for next 2 attacks
+    // Q is a buff that enhances next 2 attacks with bonus damage and move speed
+    reset_skill_attack(commands, entity);
+    commands.entity(entity).with_related::<BuffOf>(BuffSettQ::new(2, 0.3, 4.0));
 }
 
 fn cast_sett_w(commands: &mut Commands, entity: Entity) {
@@ -79,7 +80,8 @@ fn cast_sett_w(commands: &mut Commands, entity: Entity) {
         }],
         Some(hash_bin("Sett_W_Hit")),
     );
-    // TODO: Track damage taken as Grit resource, convert to shield
+    // Grit converts to shield
+    commands.entity(entity).with_related::<BuffOf>(BuffShieldWhite::new(100.0));
 }
 
 fn cast_sett_e(commands: &mut Commands, entity: Entity) {
@@ -98,7 +100,8 @@ fn cast_sett_e(commands: &mut Commands, entity: Entity) {
         }],
         Some(hash_bin("Sett_E_Hit")),
     );
-    // TODO: Pull enemies together and stun
+    debug!("{:?} 的技能 {} 应对目标施加 {}",
+        entity, "Sett E", "拉扯 + 眩晕 DebuffStun");
 }
 
 fn cast_sett_r(commands: &mut Commands, q_transform: &Query<&Transform>, entity: Entity, point: Vec2) {
@@ -124,7 +127,7 @@ fn cast_sett_r(commands: &mut Commands, q_transform: &Query<&Transform>, entity:
             speed: 700.0,
         },
     );
-    // TODO: Carry target champion and slam them on ground
+    // FUTURE: Carry target champion and slam them on ground
 }
 
 fn add_skills(

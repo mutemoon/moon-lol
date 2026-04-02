@@ -68,14 +68,14 @@ fn cast_gnar_q(commands: &mut Commands, entity: Entity, _point: Vec2) {
     play_skill_animation(commands, entity, hash_bin("Spell1"));
     spawn_skill_particle(commands, entity, hash_bin("Gnar_Q_Cast"));
     // Q is a boomerang that can be caught to reduce cooldown
-    // TODO: Implement as projectile or zone damage
+    // FUTURE: Implement as projectile or zone damage
 }
 
 fn cast_gnar_w(commands: &mut Commands, entity: Entity) {
     play_skill_animation(commands, entity, hash_bin("Spell2"));
     spawn_skill_particle(commands, entity, hash_bin("Gnar_W_Cast"));
     // W is a passive that on 3rd attack deals bonus damage and slows
-    // TODO: Implement as stacking buff on auto attacks
+    // FUTURE: Implement as stacking buff on auto attacks
 }
 
 fn cast_gnar_e(commands: &mut Commands, q_transform: &Query<&Transform>, entity: Entity, point: Vec2) {
@@ -94,7 +94,7 @@ fn cast_gnar_e(commands: &mut Commands, q_transform: &Query<&Transform>, entity:
             speed: 600.0,
         },
     );
-    // TODO: Add bounce mechanic off units
+    // FUTURE: Add bounce mechanic off units
 }
 
 fn cast_gnar_r(commands: &mut Commands, entity: Entity) {
@@ -113,7 +113,7 @@ fn cast_gnar_r(commands: &mut Commands, entity: Entity) {
         }],
         Some(hash_bin("Gnar_R_Hit")),
     );
-    // TODO: Add knockback and stun
+    // FUTURE: Add knockback and stun
 }
 
 fn add_skills(

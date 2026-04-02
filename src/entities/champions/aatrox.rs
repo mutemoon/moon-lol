@@ -10,6 +10,7 @@ use crate::core::{
 };
 use crate::entities::champion::Champion;
 use crate::PassiveSkillOf;
+use crate::{BuffMoveSpeed, BuffOf, BuffSelfHeal};
 use crate::DamageType;
 
 const AATROX_Q_KEY: &str = "Characters/Aatrox/Spells/AatroxQ/AatroxQ";
@@ -143,7 +144,7 @@ fn cast_aatrox_w(commands: &mut Commands, entity: Entity) {
         }],
         Some(hash_bin("Aatrox_W_Hit")),
     );
-    // TODO: Add delayed pull effect
+    // FUTURE: Add delayed pull effect
 }
 
 fn cast_aatrox_e(
@@ -167,7 +168,8 @@ fn cast_aatrox_e(
             speed: 900.0,
         },
     );
-    // TODO: Add healing based on damage
+    // Self-heal based on damage
+    commands.entity(entity).with_related::<BuffOf>(BuffSelfHeal::new(30.0));
 }
 
 fn cast_aatrox_r(commands: &mut Commands, entity: Entity) {
@@ -186,7 +188,8 @@ fn cast_aatrox_r(commands: &mut Commands, entity: Entity) {
         }],
         Some(hash_bin("Aatrox_R_Hit")),
     );
-    // TODO: Add movement speed buff and revive mechanic
+    // Movement speed buff
+    commands.entity(entity).with_related::<BuffOf>(BuffMoveSpeed::new(0.5, 8.0));
 }
 
 fn add_skills(

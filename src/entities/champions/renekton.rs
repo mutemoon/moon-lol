@@ -4,12 +4,12 @@ use league_utils::hash_bin;
 use lol_config::LoadHashKeyTrait;
 
 use crate::core::{
-    play_skill_animation, skill_damage, skill_dash, skill_slot_from_index, spawn_skill_particle,
-    CoolDown, DamageShape, EventSkillCast, Skill, SkillCooldownMode, SkillOf, SkillRecastWindow,
-    SkillSlot, Skills, TargetDamage, TargetFilter,
+    play_skill_animation, reset_skill_attack, skill_damage, skill_dash, skill_slot_from_index,
+    spawn_skill_particle, BuffOf, CoolDown, DamageShape, EventSkillCast, Skill,
+    SkillCooldownMode, SkillOf, SkillRecastWindow, SkillSlot, Skills, TargetDamage, TargetFilter,
 };
 use crate::entities::champion::Champion;
-use crate::PassiveSkillOf;
+use crate::{BuffRenektonR, BuffSelfHeal, PassiveSkillOf};
 use crate::DamageType;
 
 const RENECKTON_Q_KEY: &str = "Characters/Renekton/Spells/RenektonQ/RenektonQ";
@@ -70,7 +70,7 @@ fn cast_renekton_q(commands: &mut Commands, entity: Entity) {
     play_skill_animation(commands, entity, hash_bin("Spell1"));
     spawn_skill_particle(commands, entity, hash_bin("Renekton_Q_Cast"));
     // Q is a cleave that deals damage in a circle
-    // TODO: Check rage amount - enhanced at 50+ rage
+    // FUTURE: Check rage amount - enhanced at 50+ rage
     skill_damage(
         commands,
         entity,
@@ -83,14 +83,15 @@ fn cast_renekton_q(commands: &mut Commands, entity: Entity) {
         }],
         Some(hash_bin("Renekton_Q_Hit")),
     );
-    // TODO: Self-heal based on damage dealt
+    // Self-heal based on damage dealt
+    commands.entity(entity).with_related::<BuffOf>(BuffSelfHeal::new(40.0));
 }
 
 fn cast_renekton_w(commands: &mut Commands, entity: Entity) {
     play_skill_animation(commands, entity, hash_bin("Spell2"));
     spawn_skill_particle(commands, entity, hash_bin("Renekton_W_Cast"));
     // W is an empowered auto attack that stuns
-    // TODO: Check rage amount - enhanced at 50+ rage (3 hits instead of 2)
+    reset_skill_attack(commands, entity);
     skill_damage(
         commands,
         entity,
@@ -103,7 +104,6 @@ fn cast_renekton_w(commands: &mut Commands, entity: Entity) {
         }],
         Some(hash_bin("Renekton_W_Hit")),
     );
-    // TODO: Add stun debuff
 }
 
 fn cast_renekton_e(
@@ -191,7 +191,7 @@ fn cast_renekton_r(commands: &mut Commands, entity: Entity) {
         }],
         Some(hash_bin("Renekton_R_Hit")),
     );
-    // TODO: Add transformation buff and rage generation aura
+    commands.entity(entity).with_related::<BuffOf>(BuffRenektonR::new(0.0, 5.0, 15.0));
 }
 
 fn add_skills(

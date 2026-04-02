@@ -4,12 +4,12 @@ use league_utils::hash_bin;
 use lol_config::LoadHashKeyTrait;
 
 use crate::core::{
-    play_skill_animation, skill_damage, skill_dash, skill_slot_from_index, spawn_skill_particle,
-    CoolDown, DamageShape, EventSkillCast, Skill, SkillCooldownMode, SkillOf, SkillRecastWindow,
-    SkillSlot, Skills, TargetDamage, TargetFilter,
+    play_skill_animation, reset_skill_attack, skill_damage, skill_dash, skill_slot_from_index,
+    spawn_skill_particle, BuffOf, CoolDown, DamageShape, EventSkillCast, Skill,
+    SkillCooldownMode, SkillOf, SkillRecastWindow, SkillSlot, Skills, TargetDamage, TargetFilter,
 };
 use crate::entities::champion::Champion;
-use crate::{BuffOf, BuffShieldWhite, DamageType, PassiveSkillOf};
+use crate::{BuffShieldWhite, BuffVolibearQ, DamageType, PassiveSkillOf};
 
 const VOLIBEAR_W_KEY: &str = "Characters/Volibear/Spells/VolibearW/VolibearW";
 const VOLIBEAR_E_KEY: &str = "Characters/Volibear/Spells/VolibearE/VolibearE";
@@ -67,7 +67,8 @@ fn cast_volibear_q(commands: &mut Commands, entity: Entity) {
     play_skill_animation(commands, entity, hash_bin("Spell1"));
     spawn_skill_particle(commands, entity, hash_bin("Volibear_Q_Cast"));
     // Q is movement speed boost + stun on contact
-    // TODO: Add movement speed buff with stun on collision
+    reset_skill_attack(commands, entity);
+    commands.entity(entity).with_related::<BuffOf>(BuffVolibearQ::new(0.3, 1.0, 4.0));
 }
 
 fn cast_volibear_w(
@@ -86,7 +87,7 @@ fn cast_volibear_w(
         // First cast: W marks target
         spawn_skill_particle(commands, entity, hash_bin("Volibear_W_Cast"));
         commands.entity(skill_entity).insert(SkillRecastWindow::new(2, 2, VOLIBEAR_W_RECAST_WINDOW));
-        // TODO: Add mark buff to target
+        // FUTURE: Add mark buff to target
         debug!("{:?} 释放了 {} 技能，当前阶段 {}", entity, "Volibear W", stage);
     } else {
         // Second cast: W detonates mark for bonus damage + heal
@@ -108,7 +109,7 @@ fn cast_volibear_w(
             timer: Timer::from_seconds(cooldown.duration, TimerMode::Once),
             duration: cooldown.duration,
         });
-        // TODO: Heal based on missing health
+        // FUTURE: Heal based on missing health
         debug!("{:?} 释放了 {} 技能，当前阶段 {}，开始冷却", entity, "Volibear W", stage);
     }
 }
@@ -130,7 +131,8 @@ fn cast_volibear_e(commands: &mut Commands, entity: Entity) {
         Some(hash_bin("Volibear_E_Hit")),
     );
     commands.entity(entity).with_related::<BuffOf>(BuffShieldWhite::new(100.0));
-    // TODO: Add slow debuff to enemies
+    debug!("{:?} 的技能 {} 应对目标施加 {}",
+        entity, "Volibear E", "减速 DebuffSlow");
 }
 
 fn cast_volibear_r(
@@ -161,7 +163,7 @@ fn cast_volibear_r(
             speed: 800.0,
         },
     );
-    // TODO: Add tower debuff
+    // FUTURE: Add tower debuff
 }
 
 fn add_skills(

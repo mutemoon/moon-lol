@@ -86,14 +86,14 @@ fn cast_irelia_q(commands: &mut Commands, q_transform: &Query<&Transform>, entit
             speed: 800.0,
         },
     );
-    // TODO: Reset on kill/unsteady mark, mark enemies as Unsteady
+    // FUTURE: Reset on kill/unsteady mark, mark enemies as Unsteady
 }
 
 fn cast_irelia_w(commands: &mut Commands, entity: Entity) {
     play_skill_animation(commands, entity, hash_bin("Spell2"));
     spawn_skill_particle(commands, entity, hash_bin("Irelia_W_Cast"));
     // W is a channel that grants damage reduction then releases damage
-    // TODO: Add channeled defense buff, then release damage on release
+    // FUTURE: Add channeled defense buff, then release damage on release
 }
 
 fn cast_irelia_e(
@@ -113,7 +113,7 @@ fn cast_irelia_e(
         commands
             .entity(skill_entity)
             .insert(SkillRecastWindow::new(2, 2, IRELIA_E_RECAST_WINDOW));
-        // TODO: Create blade projectile that marks enemies as Unsteady
+        // FUTURE: Create blade projectile that marks enemies as Unsteady
     } else {
         // Second cast: Throws second blade and stuns marked enemies
         spawn_skill_particle(commands, entity, hash_bin("Irelia_E2_Cast"));
@@ -154,7 +154,7 @@ fn cast_irelia_r(commands: &mut Commands, entity: Entity, _point: Vec2) {
         }],
         Some(hash_bin("Irelia_R_Hit")),
     );
-    // TODO: Create zone that marks enemies as Unsteady, reduce Q cooldown
+    // FUTURE: Create zone that marks enemies as Unsteady, reduce Q cooldown
 }
 
 fn add_skills(

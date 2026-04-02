@@ -5,11 +5,11 @@ use lol_config::LoadHashKeyTrait;
 
 use crate::core::{
     play_skill_animation, skill_damage, skill_dash, skill_slot_from_index, spawn_skill_particle,
-    CoolDown, DamageShape, EventSkillCast, Skill, SkillCooldownMode, SkillOf, SkillRecastWindow,
-    SkillSlot, Skills, TargetDamage, TargetFilter,
+    BuffOf, CoolDown, DamageShape, EventSkillCast, Skill, SkillCooldownMode, SkillOf,
+    SkillRecastWindow, SkillSlot, Skills, TargetDamage, TargetFilter,
 };
 use crate::entities::champion::Champion;
-use crate::PassiveSkillOf;
+use crate::{BuffLeeSinIronWill, PassiveSkillOf};
 use crate::DamageType;
 
 const LEESIN_Q_KEY: &str = "Characters/LeeSin/Spells/LeeSinQ/LeeSinQ";
@@ -175,7 +175,7 @@ fn cast_leesin_w(
     } else {
         // Second cast: Iron Will - lifesteal and attack speed buff
         spawn_skill_particle(commands, entity, hash_bin("LeeSin_W2_Cast"));
-        // Iron Will doesn't deal damage, just grants lifesteal and attack speed
+        commands.entity(entity).with_related::<BuffOf>(BuffLeeSinIronWill::new(0.1, 0.1, 4.0));
         commands.entity(skill_entity).remove::<SkillRecastWindow>();
         commands.entity(skill_entity).insert(CoolDown {
             timer: Timer::from_seconds(cooldown.duration, TimerMode::Once),
@@ -218,7 +218,8 @@ fn cast_leesin_e(
     } else {
         // Second cast: Cripple - slow enemies already affected by Tempest
         spawn_skill_particle(commands, entity, hash_bin("LeeSin_E2_Cast"));
-        // TODO: Add cripple debuff (movement speed reduction)
+        debug!("{:?} 的技能 {} 应对目标施加 {}",
+            entity, "Lee Sin E2", "减速 DebuffSlow");
         commands.entity(skill_entity).remove::<SkillRecastWindow>();
         commands.entity(skill_entity).insert(CoolDown {
             timer: Timer::from_seconds(cooldown.duration, TimerMode::Once),
@@ -246,7 +247,8 @@ fn cast_leesin_r(commands: &mut Commands, entity: Entity) {
         }],
         Some(hash_bin("LeeSin_R_Hit")),
     );
-    // TODO: Knockback enemy into terrain and stun
+    debug!("{:?} 的技能 {} 应对目标施加 {}",
+        entity, "Lee Sin R", "击退 + 眩晕 DebuffStun");
 }
 
 fn add_skills(

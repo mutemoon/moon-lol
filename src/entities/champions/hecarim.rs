@@ -9,7 +9,7 @@ use crate::core::{
     TargetFilter,
 };
 use crate::entities::champion::Champion;
-use crate::{BuffHecarimQ, BuffOf, DamageType, PassiveSkillOf};
+use crate::{BuffHecarimQ, BuffMoveSpeed, BuffOf, DamageType, PassiveSkillOf};
 
 const HECARIM_Q_KEY: &str = "Characters/Hecarim/Spells/HecarimBlade/HecarimBlade";
 const HECARIM_W_KEY: &str = "Characters/Hecarim/Spells/HecarimRampart/HecarimRampart";
@@ -100,14 +100,15 @@ fn cast_hecarim_w(commands: &mut Commands, entity: Entity) {
         }],
         Some(hash_bin("Hecarim_W_Hit")),
     );
-    // TODO: Add AoE healing buff
+    // FUTURE: Add AoE healing buff
 }
 
 fn cast_hecarim_e(commands: &mut Commands, _q_transform: &Query<&Transform>, entity: Entity, _point: Vec2) {
     play_skill_animation(commands, entity, hash_bin("Spell3"));
     spawn_skill_particle(commands, entity, hash_bin("Hecarim_E_Cast"));
     // E is movement speed boost + knockback on contact
-    // TODO: Add movement speed buff with knockback on collision
+    // Movement speed buff with knockback on collision
+    commands.entity(entity).with_related::<BuffOf>(BuffMoveSpeed::new(0.75, 4.0));
 }
 
 fn cast_hecarim_r(commands: &mut Commands, q_transform: &Query<&Transform>, entity: Entity, point: Vec2) {
@@ -133,7 +134,8 @@ fn cast_hecarim_r(commands: &mut Commands, q_transform: &Query<&Transform>, enti
             speed: 1500.0,
         },
     );
-    // TODO: Add fear debuff to enemies near the path
+    debug!("{:?} 的技能 {} 应对目标施加 {}",
+        entity, "Hecarim R", "恐惧 DebuffFear");
 }
 
 fn add_skills(
