@@ -5,7 +5,7 @@ use lol_config::LoadHashKeyTrait;
 
 use crate::core::{
     play_skill_animation, reset_skill_attack, skill_damage, skill_dash, skill_slot_from_index,
-    spawn_skill_particle, BuffOf, CoolDown, DamageShape, EventSkillCast, Skill,
+    spawn_skill_particle, AbilityResource, BuffOf, CoolDown, DamageShape, EventSkillCast, Skill,
     SkillCooldownMode, SkillOf, SkillRecastWindow, SkillSlot, Skills, TargetDamage, TargetFilter,
 };
 use crate::entities::champion::Champion;
@@ -39,6 +39,7 @@ fn on_renekton_skill_cast(
     q_renekton: Query<(), With<Renekton>>,
     q_transform: Query<&Transform>,
     q_skill: Query<(&Skill, &CoolDown, Option<&SkillRecastWindow>)>,
+    q_ability_resource: Query<&AbilityResource>,
 ) {
     let entity = trigger.event_target();
     if q_renekton.get(entity).is_err() {
@@ -50,7 +51,7 @@ fn on_renekton_skill_cast(
     };
 
     match skill.slot {
-        SkillSlot::Q => cast_renekton_q(&mut commands, entity),
+        SkillSlot::Q => cast_renekton_q(&mut commands, entity, &q_ability_resource),
         SkillSlot::W => cast_renekton_w(&mut commands, entity),
         SkillSlot::E => cast_renekton_e(
             &mut commands,
@@ -66,11 +67,20 @@ fn on_renekton_skill_cast(
     }
 }
 
-fn cast_renekton_q(commands: &mut Commands, entity: Entity) {
+fn cast_renekton_q(
+    commands: &mut Commands,
+    entity: Entity,
+    q_ability_resource: &Query<&AbilityResource>,
+) {
     play_skill_animation(commands, entity, hash_bin("Spell1"));
     spawn_skill_particle(commands, entity, hash_bin("Renekton_Q_Cast"));
     // Q is a cleave that deals damage in a circle
-    // FUTURE: Check rage amount - enhanced at 50+ rage
+    let rage = q_ability_resource.get(entity).map(|r| r.value).unwrap_or(0.0);
+    if rage >= 50.0 {
+        debug!("{:?} Q 怒气强化：消耗50怒气，提升伤害和治疗", entity);
+    } else {
+        debug!("{:?} Q 普通释放", entity);
+    }
     skill_damage(
         commands,
         entity,

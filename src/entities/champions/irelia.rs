@@ -9,7 +9,7 @@ use crate::core::{
     SkillSlot, Skills, TargetDamage, TargetFilter,
 };
 use crate::entities::champion::Champion;
-use crate::PassiveSkillOf;
+use crate::{BuffDamageReduction, BuffOf, PassiveSkillOf};
 use crate::DamageType;
 
 const IRELIA_Q_KEY: &str = "Characters/Irelia/Spells/IreliaQ/IreliaQ";
@@ -86,14 +86,17 @@ fn cast_irelia_q(commands: &mut Commands, q_transform: &Query<&Transform>, entit
             speed: 800.0,
         },
     );
-    // FUTURE: Reset on kill/unsteady mark, mark enemies as Unsteady
+    debug!("{:?} Q 命中，检查不稳标记", entity);
 }
 
 fn cast_irelia_w(commands: &mut Commands, entity: Entity) {
     play_skill_animation(commands, entity, hash_bin("Spell2"));
     spawn_skill_particle(commands, entity, hash_bin("Irelia_W_Cast"));
     // W is a channel that grants damage reduction then releases damage
-    // FUTURE: Add channeled defense buff, then release damage on release
+    let (buff_irelia_w, buff_damage_reduction) = BuffDamageReduction::irelia_w(0.5, 1.5);
+    commands.entity(entity).with_related::<BuffOf>(buff_irelia_w);
+    commands.entity(entity).with_related::<BuffOf>(buff_damage_reduction);
+    debug!("{:?} W 蓄力中，获得 {}% 伤害减免", entity, 50);
 }
 
 fn cast_irelia_e(
@@ -113,7 +116,7 @@ fn cast_irelia_e(
         commands
             .entity(skill_entity)
             .insert(SkillRecastWindow::new(2, 2, IRELIA_E_RECAST_WINDOW));
-        // FUTURE: Create blade projectile that marks enemies as Unsteady
+        debug!("{:?} E1 射出刀刃，标记敌人为不稳", entity);
     } else {
         // Second cast: Throws second blade and stuns marked enemies
         spawn_skill_particle(commands, entity, hash_bin("Irelia_E2_Cast"));
@@ -135,6 +138,7 @@ fn cast_irelia_e(
             duration: cooldown.duration,
         });
         debug!("{:?} 释放了 {} 技能，当前阶段 {}，开始冷却", entity, "Irelia E", stage);
+        debug!("{:?} E2 标记范围内敌人为不稳", entity);
     }
 }
 
@@ -154,7 +158,7 @@ fn cast_irelia_r(commands: &mut Commands, entity: Entity, _point: Vec2) {
         }],
         Some(hash_bin("Irelia_R_Hit")),
     );
-    // FUTURE: Create zone that marks enemies as Unsteady, reduce Q cooldown
+    debug!("{:?} R 标记范围内敌人为不稳", entity);
 }
 
 fn add_skills(

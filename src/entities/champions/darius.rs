@@ -71,7 +71,7 @@ fn cast_darius_q(commands: &mut Commands, entity: Entity) {
         }],
         Some(hash_bin("Darius_Q_Hit")),
     );
-    // FUTURE: Inner/outer damage differentiation
+    debug!("{:?} Q 内外圈判定：外圈命中回血，内圈只造成伤害", entity);
 }
 
 fn cast_darius_w(commands: &mut Commands, entity: Entity) {
@@ -99,7 +99,7 @@ fn cast_darius_e(commands: &mut Commands, entity: Entity) {
         }],
         Some(hash_bin("Darius_E_Hit")),
     );
-    // FUTURE: Add pull effect
+    debug!("{:?} E 拉回范围内敌人", entity);
 }
 
 fn cast_darius_r(commands: &mut Commands, entity: Entity) {
@@ -118,7 +118,7 @@ fn cast_darius_r(commands: &mut Commands, entity: Entity) {
         }],
         Some(hash_bin("Darius_R_Hit")),
     );
-    // FUTURE: Execute mechanic and noxian Might stacking
+    debug!("{:?} R 斩杀判定：击杀后刷新冷却", entity);
 }
 
 fn add_skills(

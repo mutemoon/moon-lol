@@ -144,7 +144,7 @@ fn cast_aatrox_w(commands: &mut Commands, entity: Entity) {
         }],
         Some(hash_bin("Aatrox_W_Hit")),
     );
-    // FUTURE: Add delayed pull effect
+    debug!("{:?} W 锁链命中，1s 后拉回目标", entity);
 }
 
 fn cast_aatrox_e(

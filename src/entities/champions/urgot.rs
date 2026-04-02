@@ -5,14 +5,19 @@ use lol_config::LoadHashKeyTrait;
 
 use crate::core::{
     play_skill_animation, skill_damage, skill_dash, skill_slot_from_index, spawn_skill_particle,
-    CoolDown, DamageShape, EventSkillCast, Skill, SkillOf, SkillSlot, Skills, TargetDamage,
-    TargetFilter,
+    BuffOf, CoolDown, DamageShape, EventDamageCreate, EventSkillCast, Skill, SkillOf, SkillSlot,
+    Skills, TargetDamage, TargetFilter,
 };
 use crate::entities::champion::Champion;
-use crate::{BuffOf, BuffShieldWhite, BuffUrgotW, DamageType, PassiveSkillOf};
+use crate::{BuffShieldWhite, BuffUrgotW, DebuffSlow, DamageType, PassiveSkillOf};
 
+const URGOT_Q_KEY: &str = "Characters/Urgot/Spells/UrgotQ/UrgotQ";
 const URGOT_E_KEY: &str = "Characters/Urgot/Spells/UrgotE/UrgotE";
 const URGOT_R_KEY: &str = "Characters/Urgot/Spells/UrgotR/UrgotR";
+
+// Urgot Q parameters
+const URGOT_Q_SLOW_PERCENT: f32 = 0.45;
+const URGOT_Q_SLOW_DURATION: f32 = 1.25;
 
 // Urgot W parameters
 const URGOT_W_ATTACK_INTERVAL: f32 = 0.5; // Attack every 0.5 seconds
@@ -26,6 +31,7 @@ impl Plugin for PluginUrgot {
     fn build(&self, app: &mut App) {
         app.add_systems(FixedUpdate, add_skills);
         app.add_observer(on_urgot_skill_cast);
+        app.add_observer(on_urgot_damage_hit);
     }
 }
 
@@ -62,8 +68,19 @@ fn on_urgot_skill_cast(
 fn cast_urgot_q(commands: &mut Commands, entity: Entity, _point: Vec2) {
     play_skill_animation(commands, entity, hash_bin("Spell1"));
     spawn_skill_particle(commands, entity, hash_bin("Urgot_Q_Cast"));
-    // Q is a skillshot that fires in a line
-    // FUTURE: Could implement as a missile or static damage zone
+    // Q is a mortar shot that damages and slows enemies in area
+    skill_damage(
+        commands,
+        entity,
+        URGOT_Q_KEY,
+        DamageShape::Circle { radius: 200.0 },
+        vec![TargetDamage {
+            filter: TargetFilter::All,
+            amount: hash_bin("TotalDamage"),
+            damage_type: DamageType::Physical,
+        }],
+        Some(hash_bin("Urgot_Q_Hit")),
+    );
 }
 
 fn cast_urgot_w(commands: &mut Commands, entity: Entity) {
@@ -102,7 +119,7 @@ fn cast_urgot_e(
         },
     );
     commands.entity(entity).with_related::<BuffOf>(BuffShieldWhite::new(100.0));
-    // FUTURE: Add knockback to enemies
+    debug!("{:?} E 冲刺投掷，击退目标", entity);
 }
 
 fn cast_urgot_r(commands: &mut Commands, entity: Entity, _point: Vec2) {
@@ -121,7 +138,22 @@ fn cast_urgot_r(commands: &mut Commands, entity: Entity, _point: Vec2) {
         }],
         Some(hash_bin("Urgot_R_Hit")),
     );
-    // FUTURE: Add execute mark debuff
+    debug!("{:?} R 发射钻头，低血量可处决", entity);
+}
+
+/// 厄加特Q命中时减速，R命中时挂斩杀标记
+fn on_urgot_damage_hit(
+    trigger: On<EventDamageCreate>,
+    mut commands: Commands,
+    q_urgot: Query<(), With<Urgot>>,
+) {
+    let source = trigger.source;
+    if q_urgot.get(source).is_err() {
+        return;
+    }
+    let target = trigger.event_target();
+    // Q applies slow
+    commands.entity(target).with_related::<BuffOf>(DebuffSlow::new(URGOT_Q_SLOW_PERCENT, URGOT_Q_SLOW_DURATION));
 }
 
 fn add_skills(

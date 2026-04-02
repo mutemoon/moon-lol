@@ -5,12 +5,12 @@ use lol_config::LoadHashKeyTrait;
 
 use crate::core::{
     play_skill_animation, skill_damage, skill_dash, skill_slot_from_index, spawn_skill_particle,
-    BuffOf, CoolDown, DamageShape, EventSkillCast, Skill, SkillCooldownMode, SkillOf,
+    BuffOf, CommandMovement, CoolDown, DamageShape, EventDamageCreate, EventSkillCast,
+    MovementAction, MovementWay, Skill, SkillCooldownMode, SkillOf,
     SkillRecastWindow, SkillSlot, Skills, TargetDamage, TargetFilter,
 };
 use crate::entities::champion::Champion;
-use crate::{BuffLeeSinIronWill, PassiveSkillOf};
-use crate::DamageType;
+use crate::{BuffLeeSinIronWill, DebuffSlow, DebuffStun, PassiveSkillOf, DamageType};
 
 const LEESIN_Q_KEY: &str = "Characters/LeeSin/Spells/LeeSinQ/LeeSinQ";
 const LEESIN_W_KEY: &str = "Characters/LeeSin/Spells/LeeSinW/LeeSinW";
@@ -25,6 +25,7 @@ impl Plugin for PluginLeeSin {
     fn build(&self, app: &mut App) {
         app.add_systems(FixedUpdate, add_skills);
         app.add_observer(on_leesin_skill_cast);
+        app.add_observer(on_leesin_damage_hit);
     }
 }
 
@@ -32,6 +33,13 @@ impl Plugin for PluginLeeSin {
 #[require(Champion, Name = Name::new("LeeSin"))]
 #[reflect(Component)]
 pub struct LeeSin;
+
+/// 标记李青当前释放的技能，用于伤害命中 observer 判断是哪个技能命中
+/// stage: 1=E1, 2=E2, 3=R
+#[derive(Component, Debug, Clone)]
+pub struct LeeSinActiveAbility {
+    pub stage: u8,
+}
 
 fn on_leesin_skill_cast(
     trigger: On<EventSkillCast>,
@@ -197,7 +205,7 @@ fn cast_leesin_e(
     play_skill_animation(commands, entity, hash_bin("Spell3"));
 
     if stage == 1 {
-        // First cast: Tempest - AoE damage and slow
+        // First cast: Tempest - AoE damage (no slow)
         spawn_skill_particle(commands, entity, hash_bin("LeeSin_E_Cast"));
         skill_damage(
             commands,
@@ -218,8 +226,20 @@ fn cast_leesin_e(
     } else {
         // Second cast: Cripple - slow enemies already affected by Tempest
         spawn_skill_particle(commands, entity, hash_bin("LeeSin_E2_Cast"));
-        debug!("{:?} 的技能 {} 应对目标施加 {}",
-            entity, "Lee Sin E2", "减速 DebuffSlow");
+        // Mark E2 so observer applies slow on damage hit
+        commands.entity(entity).insert(LeeSinActiveAbility { stage: 2 });
+        skill_damage(
+            commands,
+            entity,
+            LEESIN_E_KEY,
+            DamageShape::Circle { radius: 250.0 },
+            vec![TargetDamage {
+                filter: TargetFilter::All,
+                amount: hash_bin("TotalDamage"),
+                damage_type: DamageType::Physical,
+            }],
+            Some(hash_bin("LeeSin_E2_Hit")),
+        );
         commands.entity(skill_entity).remove::<SkillRecastWindow>();
         commands.entity(skill_entity).insert(CoolDown {
             timer: Timer::from_seconds(cooldown.duration, TimerMode::Once),
@@ -232,7 +252,9 @@ fn cast_leesin_e(
 fn cast_leesin_r(commands: &mut Commands, entity: Entity) {
     play_skill_animation(commands, entity, hash_bin("Spell4"));
     spawn_skill_particle(commands, entity, hash_bin("LeeSin_R_Cast"));
-    // R is a knockback that hits enemy into terrain
+    // Mark R so observer applies knockback + stun on damage hit
+    commands.entity(entity).insert(LeeSinActiveAbility { stage: 3 });
+
     skill_damage(
         commands,
         entity,
@@ -247,8 +269,56 @@ fn cast_leesin_r(commands: &mut Commands, entity: Entity) {
         }],
         Some(hash_bin("LeeSin_R_Hit")),
     );
-    debug!("{:?} 的技能 {} 应对目标施加 {}",
-        entity, "Lee Sin R", "击退 + 眩晕 DebuffStun");
+}
+
+/// 监听李青造成的伤害，应用E2减速和R击退眩晕
+fn on_leesin_damage_hit(
+    trigger: On<EventDamageCreate>,
+    mut commands: Commands,
+    q_leesin: Query<(Entity, &LeeSinActiveAbility, &GlobalTransform)>,
+    q_target: Query<&GlobalTransform>,
+) {
+    let target_entity = trigger.event_target();
+    let Ok((leesin_entity, active_ability, leesin_transform)) = q_leesin.get(trigger.source) else {
+        return;
+    };
+
+    match active_ability.stage {
+        2 => {
+            // E2命中给目标减速
+            commands.entity(target_entity).with_related::<BuffOf>(DebuffSlow::new(0.6, 2.0));
+        }
+        3 => {
+            // R命中：眩晕 + 击退
+            commands.entity(target_entity).with_related::<BuffOf>(DebuffStun::new(1.0));
+
+            // 计算击退方向（推向远离李青的方向）
+            if let Ok(target_transform) = q_target.get(target_entity) {
+                let knockback_dir = target_transform.translation() - leesin_transform.translation();
+                if knockback_dir.length() > 0.1 {
+                    let knockback_pos = target_transform.translation()
+                        + knockback_dir.normalize() * 200.0;
+                    commands.trigger(CommandMovement {
+                        entity: target_entity,
+                        priority: 100,
+                        action: MovementAction::Start {
+                            way: MovementWay::Pathfind(Vec3::new(
+                                knockback_pos.x,
+                                target_transform.translation().y,
+                                knockback_pos.z,
+                            )),
+                            speed: Some(1200.0),
+                            source: "LeeSinR".to_string(),
+                        },
+                    });
+                }
+            }
+
+            // R用完后移除标记
+            commands.entity(leesin_entity).remove::<LeeSinActiveAbility>();
+        }
+        _ => {}
+    }
 }
 
 fn add_skills(

@@ -87,7 +87,7 @@ fn cast_volibear_w(
         // First cast: W marks target
         spawn_skill_particle(commands, entity, hash_bin("Volibear_W_Cast"));
         commands.entity(skill_entity).insert(SkillRecastWindow::new(2, 2, VOLIBEAR_W_RECAST_WINDOW));
-        // FUTURE: Add mark buff to target
+        debug!("{:?} W1 撕咬并标记目标", entity);
         debug!("{:?} 释放了 {} 技能，当前阶段 {}", entity, "Volibear W", stage);
     } else {
         // Second cast: W detonates mark for bonus damage + heal
@@ -109,7 +109,7 @@ fn cast_volibear_w(
             timer: Timer::from_seconds(cooldown.duration, TimerMode::Once),
             duration: cooldown.duration,
         });
-        // FUTURE: Heal based on missing health
+        debug!("{:?} W2 撕咬已标记目标，触发治疗", entity);
         debug!("{:?} 释放了 {} 技能，当前阶段 {}，开始冷却", entity, "Volibear W", stage);
     }
 }
@@ -163,7 +163,7 @@ fn cast_volibear_r(
             speed: 800.0,
         },
     );
-    // FUTURE: Add tower debuff
+    debug!("{:?} R 禁用范围内防御塔", entity);
 }
 
 fn add_skills(

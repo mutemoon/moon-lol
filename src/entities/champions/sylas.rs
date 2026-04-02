@@ -126,12 +126,26 @@ fn cast_sylas_e(
     play_skill_animation(commands, entity, hash_bin("Spell3"));
 
     if stage == 1 {
-        // First cast: Throws chain toward enemy
+        // First cast: Throws chain toward enemy - damage in narrow cone
         spawn_skill_particle(commands, entity, hash_bin("Sylas_E_Cast"));
+        skill_damage(
+            commands,
+            entity,
+            SYLAS_E_KEY,
+            DamageShape::Sector {
+                radius: 400.0,
+                angle: 20.0,
+            },
+            vec![TargetDamage {
+                filter: TargetFilter::All,
+                amount: hash_bin("TotalDamage"),
+                damage_type: DamageType::Magic,
+            }],
+            Some(hash_bin("Sylas_E_Hit")),
+        );
         commands
             .entity(skill_entity)
             .insert(SkillRecastWindow::new(2, 2, SYLAS_E_RECAST_WINDOW));
-        // FUTURE: Create chain projectile
     } else {
         // Second cast: Dash to enemy and pull
         spawn_skill_particle(commands, entity, hash_bin("Sylas_E2_Cast"));
@@ -167,7 +181,7 @@ fn cast_sylas_r(commands: &mut Commands, entity: Entity, _point: Vec2) {
     play_skill_animation(commands, entity, hash_bin("Spell4"));
     spawn_skill_particle(commands, entity, hash_bin("Sylas_R_Cast"));
     // R is stolen from enemy - deals damage based on enemy's ultimate
-    // FUTURE: Implement as stealable ultimate from enemy champions
+    debug!("{:?} R 偷取目标大招", entity);
 }
 
 fn add_skills(

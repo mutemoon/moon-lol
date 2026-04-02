@@ -5,11 +5,14 @@ use lol_config::LoadHashKeyTrait;
 
 use crate::core::{
     play_skill_animation, skill_damage, skill_dash, skill_slot_from_index, spawn_skill_particle,
-    CoolDown, DamageShape, EventSkillCast, Skill, SkillOf, SkillSlot, Skills, TargetDamage,
-    TargetFilter,
+    BuffOf, CommandMovement, CoolDown, DamageShape, EventDamageCreate, EventMovementEnd,
+    EventSkillCast, MovementAction, MovementWay, Skill, SkillOf, SkillSlot,
+    Skills, TargetDamage, TargetFilter,
 };
 use crate::entities::champion::Champion;
-use crate::{BuffHecarimQ, BuffMoveSpeed, BuffOf, DamageType, PassiveSkillOf};
+use crate::{BuffHecarimQ, BuffHecarimW, BuffMoveSpeed, BuffSelfHeal, DamageType, PassiveSkillOf};
+use bevy::prelude::GlobalTransform;
+use lol_core::Team;
 
 const HECARIM_Q_KEY: &str = "Characters/Hecarim/Spells/HecarimBlade/HecarimBlade";
 const HECARIM_W_KEY: &str = "Characters/Hecarim/Spells/HecarimRampart/HecarimRampart";
@@ -27,6 +30,8 @@ impl Plugin for PluginHecarim {
     fn build(&self, app: &mut App) {
         app.add_systems(FixedUpdate, add_skills);
         app.add_observer(on_hecarim_skill_cast);
+        app.add_observer(on_hecarim_damage_hit);
+        app.add_observer(on_hecarim_e_dash_end);
     }
 }
 
@@ -88,6 +93,8 @@ fn cast_hecarim_w(commands: &mut Commands, entity: Entity) {
     play_skill_animation(commands, entity, hash_bin("Spell2"));
     spawn_skill_particle(commands, entity, hash_bin("Hecarim_W_Cast"));
     // W is AoE damage in area + healing based on damage dealt
+    // Apply BuffHecarimW that will trigger heal on damage dealt
+    commands.entity(entity).with_related::<BuffOf>(BuffHecarimW::new(4.0));
     skill_damage(
         commands,
         entity,
@@ -100,7 +107,6 @@ fn cast_hecarim_w(commands: &mut Commands, entity: Entity) {
         }],
         Some(hash_bin("Hecarim_W_Hit")),
     );
-    // FUTURE: Add AoE healing buff
 }
 
 fn cast_hecarim_e(commands: &mut Commands, _q_transform: &Query<&Transform>, entity: Entity, _point: Vec2) {
@@ -109,6 +115,7 @@ fn cast_hecarim_e(commands: &mut Commands, _q_transform: &Query<&Transform>, ent
     // E is movement speed boost + knockback on contact
     // Movement speed buff with knockback on collision
     commands.entity(entity).with_related::<BuffOf>(BuffMoveSpeed::new(0.75, 4.0));
+    debug!("{:?} E 冲锋碰撞，击退目标", entity);
 }
 
 fn cast_hecarim_r(commands: &mut Commands, q_transform: &Query<&Transform>, entity: Entity, point: Vec2) {
@@ -136,6 +143,84 @@ fn cast_hecarim_r(commands: &mut Commands, q_transform: &Query<&Transform>, enti
     );
     debug!("{:?} 的技能 {} 应对目标施加 {}",
         entity, "Hecarim R", "恐惧 DebuffFear");
+}
+
+/// Hecarim W 持续期间造成伤害时给自身治疗
+fn on_hecarim_damage_hit(
+    trigger: On<EventDamageCreate>,
+    mut commands: Commands,
+    q_hecarim: Query<(), With<Hecarim>>,
+    q_has_w_buff: Query<(), With<BuffHecarimW>>,
+) {
+    let source = trigger.source;
+    if q_hecarim.get(source).is_err() {
+        return;
+    }
+    // If Hecarim has BuffHecarimW active, heal on damage dealt
+    if q_has_w_buff.get(source).is_ok() {
+        commands.entity(source).with_related::<BuffOf>(BuffSelfHeal::new(30.0));
+    }
+}
+
+/// Hecarim E 冲刺结束时推开最近目标
+fn on_hecarim_e_dash_end(
+    trigger: On<EventMovementEnd>,
+    mut commands: Commands,
+    q_hecarim: Query<(), With<Hecarim>>,
+    q_hecarim_transform: Query<&GlobalTransform>,
+    q_target: Query<(Entity, &Team, &GlobalTransform)>,
+) {
+    let entity = trigger.event_target();
+    // Only process if this is Hecarim's dash ending
+    if q_hecarim.get(entity).is_err() {
+        return;
+    }
+    if trigger.source != "HecarimE" {
+        return;
+    }
+
+    let Ok(hecarim_transform) = q_hecarim_transform.get(entity) else {
+        return;
+    };
+
+    // Find nearest enemy to knock back
+    let mut nearest: Option<(Entity, f32)> = None;
+    let targets: Vec<(Entity, &Team, &GlobalTransform)> = q_target.iter().collect();
+    for (target, team, target_transform) in targets.iter() {
+        if *team == &Team::Order {
+            continue;
+        }
+        let dist = target_transform.translation().distance(hecarim_transform.translation());
+        if nearest.map_or(true, |(_, d)| dist < d) {
+            nearest = Some((*target, dist));
+        }
+    }
+
+    if let Some((target_entity, _)) = nearest {
+        let knockback_dir = {
+            let target_transform = q_target.get(target_entity).unwrap().2;
+            target_transform.translation() - hecarim_transform.translation()
+        };
+        if knockback_dir.length() > 0.1 {
+            let knockback_pos = {
+                let target_transform = q_target.get(target_entity).unwrap().2;
+                target_transform.translation() + knockback_dir.normalize() * 150.0
+            };
+            commands.trigger(CommandMovement {
+                entity: target_entity,
+                priority: 100,
+                action: MovementAction::Start {
+                    way: MovementWay::Pathfind(Vec3::new(
+                        knockback_pos.x,
+                        knockback_pos.y,
+                        knockback_pos.z,
+                    )),
+                    speed: Some(800.0),
+                    source: "HecarimE".to_string(),
+                },
+            });
+        }
+    }
 }
 
 fn add_skills(

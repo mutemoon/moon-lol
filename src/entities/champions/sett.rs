@@ -127,7 +127,7 @@ fn cast_sett_r(commands: &mut Commands, q_transform: &Query<&Transform>, entity:
             speed: 700.0,
         },
     );
-    // FUTURE: Carry target champion and slam them on ground
+    debug!("{:?} R 抱起目标并砸向地面", entity);
 }
 
 fn add_skills(

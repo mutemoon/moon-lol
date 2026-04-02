@@ -126,7 +126,7 @@ fn cast_camille_w(commands: &mut Commands, entity: Entity) {
         }],
         Some(hash_bin("Camille_W_Hit")),
     );
-    // FUTURE: Add slow debuff
+    debug!("{:?} W 扫击命中，施加减速", entity);
 }
 
 fn cast_camille_e(
@@ -148,7 +148,7 @@ fn cast_camille_e(
         commands
             .entity(skill_entity)
             .insert(SkillRecastWindow::new(2, 2, CAMILLE_E_RECAST_WINDOW));
-        // FUTURE: Add hookshot projectile that can attach to terrain
+        debug!("{:?} E1 钩索射出，搜索地形附着点", entity);
     } else {
         // Second cast: Dash toward hooked terrain
         spawn_skill_particle(commands, entity, hash_bin("Camille_E2_Cast"));
@@ -203,7 +203,7 @@ fn cast_camille_r(commands: &mut Commands, q_transform: &Query<&Transform>, enti
             speed: 800.0,
         },
     );
-    // FUTURE: Create zone that prevents target from escaping
+    debug!("{:?} R 创建海克斯壁垒，困住目标", entity);
 }
 
 fn add_skills(

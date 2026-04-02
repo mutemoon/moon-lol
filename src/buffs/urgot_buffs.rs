@@ -38,3 +38,20 @@ impl BuffUrgotW {
         self.elapsed = 0.0;
     }
 }
+
+/// 厄加特R 斩杀标记 —— 挂在被R命中的目标上
+#[derive(Component, Debug, Clone)]
+#[require(Buff = Buff { name: "UrgotR" })]
+pub struct DebuffUrgotR {
+    pub source: Entity, // 厄加特自身
+    pub timer: Timer,
+}
+
+impl DebuffUrgotR {
+    pub fn new(source: Entity, duration: f32) -> Self {
+        Self {
+            source,
+            timer: Timer::from_seconds(duration, TimerMode::Once),
+        }
+    }
+}

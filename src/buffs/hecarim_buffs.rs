@@ -45,3 +45,25 @@ impl BuffHecarimQ {
         (self.stacks as f32 - 1.0) * self.cooldown_reduction_per_stack
     }
 }
+
+/// 赫卡里姆W - 灵魂收割，持续时间内造成伤害并治疗
+#[derive(Component, Debug, Clone)]
+#[require(Buff = Buff { name: "HecarimW" })]
+pub struct BuffHecarimW {
+    pub duration: f32,
+    pub timer: Timer,
+}
+
+impl BuffHecarimW {
+    pub fn new(duration: f32) -> Self {
+        Self {
+            duration,
+            timer: Timer::from_seconds(duration, TimerMode::Once),
+        }
+    }
+
+    pub fn tick(&mut self, delta: f32) -> bool {
+        self.timer.tick(std::time::Duration::from_secs_f32(delta));
+        self.timer.is_finished()
+    }
+}

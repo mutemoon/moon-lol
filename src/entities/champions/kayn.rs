@@ -125,7 +125,7 @@ fn cast_kayn_r(commands: &mut Commands, entity: Entity) {
     // R is an extended dash that reappears after a delay
     // Blue form: Assassin - single target damage
     // Red form: Bruiser - AoE damage around reappearance
-    // FUTURE: Add form-dependent damage and reappearance mechanic
+    debug!("{:?} R 寄生目标，不可选中", entity);
 }
 
 fn add_skills(

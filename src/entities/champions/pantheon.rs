@@ -52,7 +52,7 @@ fn on_pantheon_skill_cast(
         SkillSlot::Q => cast_pantheon_q(&mut commands, entity, trigger.point),
         SkillSlot::W => cast_pantheon_w(&mut commands, &q_transform, entity, trigger.point),
         SkillSlot::E => cast_pantheon_e(&mut commands, entity),
-        SkillSlot::R => cast_pantheon_r(&mut commands, entity, trigger.point),
+        SkillSlot::R => cast_pantheon_r(&mut commands, &q_transform, entity, trigger.point),
         _ => {}
     }
 }
@@ -121,23 +121,35 @@ fn cast_pantheon_e(commands: &mut Commands, entity: Entity) {
     commands.entity(entity).with_related::<BuffOf>(BuffPantheonE::new(Vec2::ZERO, 1.5));
 }
 
-fn cast_pantheon_r(commands: &mut Commands, entity: Entity, _point: Vec2) {
+fn cast_pantheon_r(
+    commands: &mut Commands,
+    q_transform: &Query<&Transform>,
+    entity: Entity,
+    point: Vec2,
+) {
     play_skill_animation(commands, entity, hash_bin("Spell4"));
     spawn_skill_particle(commands, entity, hash_bin("Pantheon_R_Cast"));
     // R is a long-range leap that damages enemies in area
-    skill_damage(
+    skill_dash(
         commands,
+        q_transform,
         entity,
-        PANTHEON_R_KEY,
-        DamageShape::Circle { radius: 400.0 },
-        vec![TargetDamage {
-            filter: TargetFilter::All,
-            amount: hash_bin("TotalDamage"),
-            damage_type: DamageType::Physical,
-        }],
-        Some(hash_bin("Pantheon_R_Hit")),
+        point,
+        &crate::ActionDash {
+            skill: PANTHEON_R_KEY.into(),
+            move_type: crate::DashMoveType::Pointer { max: 2000.0 },
+            damage: Some(crate::DashDamage {
+                radius_end: 200.0,
+                damage: TargetDamage {
+                    filter: TargetFilter::All,
+                    amount: hash_bin("TotalDamage"),
+                    damage_type: DamageType::Physical,
+                },
+            }),
+            speed: 1500.0,
+        },
     );
-    // FUTURE: Long range targeting
+    debug!("{:?} R 全局跳跃，选择降落点", entity);
 }
 
 fn add_skills(
