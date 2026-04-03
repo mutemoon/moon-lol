@@ -2,9 +2,11 @@ use std::fs;
 use std::io::Read;
 use std::path::{Path, PathBuf};
 
-use league_property::PropFile;
+use league_property::prop::PropFile;
 
-use crate::{Error, LeagueWadEntry, LeagueWadLoader, LeagueWadLoaderTrait};
+use crate::prop_bin::LeagueWadLoaderTrait;
+use crate::wad::{LeagueWadEntry, LeagueWadLoader};
+use crate::Error;
 
 pub struct LeagueLoader {
     pub root_dir: String,

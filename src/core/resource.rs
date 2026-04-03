@@ -12,7 +12,6 @@ use bevy::ecs::relationship::RelationshipHookMode;
 use bevy::prelude::*;
 use bevy::scene::ron::{self};
 use league_file::LeagueSkeleton;
-pub use loading::*;
 use lol_config::{
     init_league_asset, CharacterConfigsDeserializer, ConfigGame, ConfigMapGeo,
     ConfigNavigationGrid, ResourceShaderChunk, ResourceShaderPackage,
@@ -23,9 +22,7 @@ use lol_loader::{
     LeagueLoaderMeshStatic, LeagueLoaderNavGrid, LeagueLoaderProperty, LeagueLoaderShaderToc,
     LeagueLoaderSkeleton,
 };
-pub use prop_bin::*;
 use serde::de::DeserializeSeed;
-pub use shader::*;
 
 use crate::AssetServerLoadLeague;
 

@@ -4,7 +4,8 @@ use league_utils::hash_bin;
 use serde::de::{self, EnumAccess, IntoDeserializer, MapAccess, SeqAccess, VariantAccess, Visitor};
 use serde::Deserializer;
 
-use crate::{BinDeserializer, BinDeserializerResult, BinType, Error};
+use crate::deserializer::BinDeserializer;
+use crate::types::{BinDeserializerResult, BinType, Error};
 
 pub struct SeqIntoReader<E> {
     pub values: VecDeque<E>,

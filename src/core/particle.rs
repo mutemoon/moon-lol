@@ -10,14 +10,9 @@ use bevy::prelude::*;
 use bevy::transform::systems::{
     mark_dirty_trees, propagate_parent_transforms, sync_simple_transforms,
 };
-pub use emitters::*;
-pub use environment::*;
 use league_core::{VfxEmitterDefinitionData, VfxSystemDefinitionData};
 use league_utils::hash_wad;
 use lol_config::{HashKey, LoadHashKeyTrait};
-pub use particle::*;
-pub use skinned_mesh::*;
-pub use utils::*;
 
 use crate::{Lifetime, LifetimeMode};
 

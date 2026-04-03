@@ -1,10 +1,10 @@
 use std::io::Read;
 
-use league_file::LeagueMapGeo;
-use league_property::PropFile;
+use league_file::mapgeo::LeagueMapGeo;
+use league_property::prop::PropFile;
 use league_utils::hash_wad;
 
-use crate::{Error, LeagueWadLoader};
+use crate::{Error, wad::LeagueWadLoader};
 
 pub struct LeagueWadMapLoader {
     pub wad_loader: LeagueWadLoader,

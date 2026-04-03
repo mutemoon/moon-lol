@@ -2,7 +2,7 @@ use std::fs::File;
 use std::io::Read;
 use std::path::Path;
 
-use league_loader::LeagueWadLoaderTrait;
+use league_loader::prop_bin::LeagueWadLoaderTrait;
 use serde::de::DeserializeOwned;
 use serde::Serialize;
 use thiserror::Error;

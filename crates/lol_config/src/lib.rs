@@ -1,17 +1,8 @@
-mod animation;
 mod game;
-mod grid;
+pub mod animation;
+pub mod grid;
 mod mapgeo;
-mod mesh;
+pub mod mesh;
 mod prop;
 mod register;
 mod shader;
-
-pub use animation::*;
-pub use game::*;
-pub use grid::*;
-pub use mapgeo::*;
-pub use mesh::*;
-pub use prop::*;
-pub use register::*;
-pub use shader::*;
