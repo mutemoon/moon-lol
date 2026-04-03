@@ -30,7 +30,7 @@ use lol_config::grid::{ConfigNavigationGrid, ConfigNavigationGridCell};
 use lol_config::mapgeo::ConfigMapGeo;
 use lol_config::register::init_league_asset;
 use lol_config::shader::{ResourceShaderChunk, ResourceShaderPackage};
-use lol_core::skin::LeagueSkinMesh;
+use lol_core_render::skin::LeagueSkinMesh;
 use lol_core_render::camera::PluginCamera;
 use lol_core_render::resource_cache::ResourceCache;
 use lol_particle::PluginParticle;

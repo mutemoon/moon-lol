@@ -5,7 +5,7 @@ use bevy::prelude::*;
 use league_core::extract::{AnimationGraphData, CharacterRecord, SkinCharacterDataProperties};
 use league_file::skeleton::LeagueSkeleton;
 use lol_config::prop::HashKey;
-use lol_core::skin::LeagueSkinMesh;
+use lol_core_render::skin::LeagueSkinMesh;
 
 #[derive(Default)]
 pub struct PluginResourceLoading;

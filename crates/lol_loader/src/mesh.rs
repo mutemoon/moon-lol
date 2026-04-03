@@ -1,7 +1,7 @@
 use bevy::asset::{AssetLoader, LoadContext};
 use league_file::mesh_skinned::LeagueSkinnedMesh;
 use league_to_lol::skin_mesh::skinned_mesh_to_intermediate;
-use lol_core::skin::LeagueSkinMesh;
+use lol_core_render::skin::LeagueSkinMesh;
 
 use super::error::Error;
 

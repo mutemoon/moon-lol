@@ -17,7 +17,7 @@ use lol_config::grid::ConfigNavigationGrid;
 use lol_config::mapgeo::ConfigMapGeo;
 use lol_config::register::init_league_asset;
 use lol_config::shader::{ResourceShaderChunk, ResourceShaderPackage};
-use lol_core::skin::LeagueSkinMesh;
+use lol_core_render::skin::LeagueSkinMesh;
 use lol_core_render::utils::AssetServerLoadLeague;
 use lol_loader::animation::LeagueLoaderAnimationClip;
 use lol_loader::image::LeagueLoaderImage;

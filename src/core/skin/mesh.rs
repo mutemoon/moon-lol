@@ -4,7 +4,7 @@ use bevy::prelude::*;
 use bevy::render::render_resource::Face;
 use league_core::extract::SkinCharacterDataProperties;
 use lol_config::prop::LoadHashKeyTrait;
-use lol_core::skin::LeagueSkinMesh;
+use lol_core_render::skin::LeagueSkinMesh;
 use lol_core_render::utils::AssetServerLoadLeague;
 
 use crate::core::resource::loading::Loading;
