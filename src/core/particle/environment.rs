@@ -1,3 +1,1 @@
-mod unlit_decal;
-
-pub use unlit_decal::*;
+pub mod unlit_decal;

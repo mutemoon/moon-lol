@@ -1,16 +1,12 @@
-mod distortion;
-mod mesh;
-mod quad;
-mod quad_slice;
+pub mod distortion;
+pub mod mesh;
+pub mod quad;
+pub mod quad_slice;
 
 use bevy::mesh::skinning::{SkinnedMesh, SkinnedMeshInverseBindposes};
 use bevy::mesh::VertexAttributeValues;
 use bevy::prelude::*;
-pub use distortion::*;
 use league_core::{EnumVfxPrimitive, VfxSystemDefinitionData};
-pub use mesh::*;
-pub use quad::*;
-pub use quad_slice::*;
 
 use crate::{
     CameraState, Lifetime, ParticleEmitterState, ParticleId, ParticleMaterialSkinnedMeshParticle,

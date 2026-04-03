@@ -5,13 +5,12 @@ use lol_config::LoadHashKeyTrait;
 
 use crate::core::{
     play_skill_animation, reset_skill_attack, skill_damage, skill_dash, skill_slot_from_index,
-    spawn_skill_particle, BuffOf, CoolDown, DamageShape, EventDamageCreate, EventSkillCast,
-    Skill, SkillCooldownMode, SkillOf, SkillRecastWindow, SkillSlot, Skills, TargetDamage,
-    TargetFilter,
+    spawn_skill_particle, BuffOf, CoolDown, DamageShape, EventDamageCreate, EventSkillCast, Skill,
+    SkillCooldownMode, SkillOf, SkillRecastWindow, SkillSlot, Skills, TargetDamage, TargetFilter,
 };
-use crate::entities::champion::Champion;
+
+use crate::{Champion, DamageType};
 use crate::{DebuffSlow, PassiveSkillOf};
-use crate::DamageType;
 
 const CAMILLE_Q_KEY: &str = "Characters/Camille/Spells/CamilleQ/CamilleQ";
 const CAMILLE_W_KEY: &str = "Characters/Camille/Spells/CamilleW/CamilleW";
@@ -53,7 +52,13 @@ fn on_camille_skill_cast(
     };
 
     match skill.slot {
-        SkillSlot::Q => cast_camille_q(&mut commands, entity, trigger.skill_entity, cooldown, recast),
+        SkillSlot::Q => cast_camille_q(
+            &mut commands,
+            entity,
+            trigger.skill_entity,
+            cooldown,
+            recast,
+        ),
         SkillSlot::W => cast_camille_w(&mut commands, entity),
         SkillSlot::E => cast_camille_e(
             &mut commands,
@@ -95,7 +100,9 @@ fn cast_camille_q(
             commands,
             entity,
             CAMILLE_Q_KEY,
-            DamageShape::Nearest { max_distance: 150.0 },
+            DamageShape::Nearest {
+                max_distance: 150.0,
+            },
             vec![TargetDamage {
                 filter: TargetFilter::All,
                 amount: hash_bin("TotalDamage"),
@@ -119,7 +126,10 @@ fn cast_camille_w(commands: &mut Commands, entity: Entity) {
         commands,
         entity,
         CAMILLE_W_KEY,
-        DamageShape::Sector { radius: 300.0, angle: 90.0 },
+        DamageShape::Sector {
+            radius: 300.0,
+            angle: 90.0,
+        },
         vec![TargetDamage {
             filter: TargetFilter::All,
             amount: hash_bin("TotalDamage"),
@@ -178,7 +188,12 @@ fn cast_camille_e(
     }
 }
 
-fn cast_camille_r(commands: &mut Commands, q_transform: &Query<&Transform>, entity: Entity, point: Vec2) {
+fn cast_camille_r(
+    commands: &mut Commands,
+    q_transform: &Query<&Transform>,
+    entity: Entity,
+    point: Vec2,
+) {
     play_skill_animation(commands, entity, hash_bin("Spell4"));
     spawn_skill_particle(commands, entity, hash_bin("Camille_R_Cast"));
     // R is a hookshot-like leap that marks and traps target champion
@@ -229,10 +244,9 @@ fn add_skills(
             if index == 0 || index == 2 {
                 skill_component = skill_component.with_cooldown_mode(SkillCooldownMode::Manual);
             }
-            commands.entity(entity).with_related::<SkillOf>((
-                skill_component,
-                CoolDown::default(),
-            ));
+            commands
+                .entity(entity)
+                .with_related::<SkillOf>((skill_component, CoolDown::default()));
         }
     }
 }
@@ -248,5 +262,7 @@ fn on_camille_damage_hit(
         return;
     }
     let target = trigger.event_target();
-    commands.entity(target).with_related::<BuffOf>(DebuffSlow::new(0.6, 2.0));
+    commands
+        .entity(target)
+        .with_related::<BuffOf>(DebuffSlow::new(0.6, 2.0));
 }

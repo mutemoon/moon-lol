@@ -1,17 +1,8 @@
-mod barrack;
-mod champion;
-mod champions;
-mod inhibitor;
-mod minion;
-mod nexus;
-mod shpere;
-mod turret;
-
-pub use barrack::*;
-pub use champion::*;
-pub use champions::*;
-pub use inhibitor::*;
-pub use minion::*;
-pub use nexus::*;
-pub use shpere::*;
-pub use turret::*;
+pub mod barrack;
+pub mod champion;
+pub mod champions;
+pub mod inhibitor;
+pub mod minion;
+pub mod nexus;
+pub mod shpere;
+pub mod turret;

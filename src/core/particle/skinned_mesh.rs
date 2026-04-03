@@ -1,3 +1,1 @@
-mod particle;
-
-pub use particle::*;
+pub mod particle;

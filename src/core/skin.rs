@@ -1,17 +1,10 @@
-mod animation;
-mod mesh;
-mod mesh_shadow;
-mod particle;
-mod skeleton;
-mod skin;
-
-pub use animation::*;
+pub mod animation;
+pub mod mesh;
+pub mod mesh_shadow;
+pub mod particle;
+pub mod skeleton;
+pub mod skin;
 use bevy::prelude::*;
-pub use mesh::*;
-pub use mesh_shadow::*;
-pub use particle::*;
-pub use skeleton::*;
-pub use skin::*;
 
 #[derive(Default)]
 pub struct PluginSkin;

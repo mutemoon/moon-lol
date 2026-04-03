@@ -1,3 +1,1 @@
-mod gym;
-
-pub use gym::*;
+pub mod gym;
