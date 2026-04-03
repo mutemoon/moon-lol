@@ -1,6 +1,6 @@
 use bevy::math::Vec3;
 use bevy::prelude::Resource;
-use league_core::grid::{
+use league_core::{
     JungleQuadrantFlags, MainRegionFlags, NearestLaneFlags, POIFlags, RingFlags, RiverRegionFlags,
     UnknownSRXFlags, VisionPathingFlags,
 };

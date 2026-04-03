@@ -1,11 +1,17 @@
 mod game;
 mod map;
-pub mod prop_bin;
+mod prop_bin;
 mod reader;
 mod wad;
 mod wad_parse;
 
+pub use game::*;
+pub use map::*;
+pub use prop_bin::*;
+pub use reader::*;
 use thiserror::Error;
+pub use wad::*;
+pub use wad_parse::*;
 
 #[derive(Error, Debug)]
 pub enum Error {

@@ -3,9 +3,10 @@ use std::collections::VecDeque;
 use league_utils::hash_bin;
 use serde::de::{self, Visitor};
 
-use crate::accessor::{EnumReader, HashMapReader, MapReader, SeqDerReader, SeqIntoReader};
-use crate::parser::BinParser;
-use crate::types::{BinDeserializerResult, BinType, Error};
+use crate::{
+    BinDeserializerResult, BinParser, BinType, EnumReader, Error, HashMapReader, MapReader,
+    SeqDerReader, SeqIntoReader,
+};
 
 pub struct BinDeserializer<'de> {
     pub parser: BinParser<'de>,

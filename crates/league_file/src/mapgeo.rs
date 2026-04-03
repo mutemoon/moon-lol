@@ -1,6 +1,6 @@
 use bevy::math::{Mat4, Vec2, Vec3};
 use bevy::prelude::*;
-use league_core::mapgeo::{EnvironmentVisibility, LayerTransitionBehavior};
+use league_core::{EnvironmentVisibility, LayerTransitionBehavior};
 use league_utils::BoundingBox;
 use nom::bytes::complete::{tag, take};
 use nom::multi::count;

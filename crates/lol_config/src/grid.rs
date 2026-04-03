@@ -3,7 +3,7 @@ use std::collections::{HashMap, HashSet};
 use bevy::asset::Asset;
 use bevy::math::{vec2, vec3, Vec2, Vec3};
 use bevy::reflect::TypePath;
-use league_core::grid::{
+use league_core::{
     JungleQuadrantFlags, MainRegionFlags, NearestLaneFlags, POIFlags, RingFlags, RiverRegionFlags,
     UnknownSRXFlags, VisionPathingFlags,
 };

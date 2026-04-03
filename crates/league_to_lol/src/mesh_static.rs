@@ -1,7 +1,7 @@
 use bevy::asset::RenderAssetUsages;
 use bevy::mesh::{Indices, Mesh};
 use bevy::render::render_resource::PrimitiveTopology;
-use league_file::mesh_static::LeagueMeshStatic;
+use league_file::LeagueMeshStatic;
 
 pub fn mesh_static_to_bevy_mesh(mesh: LeagueMeshStatic) -> Mesh {
     let num_vertices = mesh.faces.len() * 3;

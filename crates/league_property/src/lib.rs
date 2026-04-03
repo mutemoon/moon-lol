@@ -3,15 +3,19 @@ mod cycle;
 mod deserializer;
 mod extract;
 mod parser;
-pub mod prop;
+mod prop;
 mod types;
 
+pub use accessor::*;
+pub use cycle::*;
+pub use deserializer::*;
+pub use extract::*;
+pub use parser::*;
+pub use prop::*;
 use serde::Deserialize;
+pub use types::*;
 
-use crate::deserializer::BinDeserializer;
-use crate::types::{BinType, Error};
-
-pub fn from_entry_unwrap<'de, T>(slice: &'de prop::EntryData) -> T
+pub fn from_entry_unwrap<'de, T>(slice: &'de EntryData) -> T
 where
     T: Deserialize<'de>,
 {
@@ -19,7 +23,7 @@ where
     T::deserialize(&mut deserializer).unwrap()
 }
 
-pub fn from_entry<'de, T>(slice: &'de prop::EntryData) -> Result<T, Error>
+pub fn from_entry<'de, T>(slice: &'de EntryData) -> Result<T, Error>
 where
     T: Deserialize<'de>,
 {
