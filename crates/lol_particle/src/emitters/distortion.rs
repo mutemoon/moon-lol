@@ -4,20 +4,20 @@ use league_core::extract::{
     EnumVfxPrimitive, VfxDistortionDefinitionData, VfxEmitterDefinitionData,
     VfxSystemDefinitionData,
 };
+use lol_core::lifetime::Lifetime;
+use lol_core_render::camera::TargetImage;
+use lol_core_render::resource_cache::ResourceCache;
 
 use super::state::ParticleEmitterState;
 use super::utils::{
     calculate_emission_params, calculate_particle_transform_frame, get_emitter_type,
     spawn_particle_entity, EmissionParams, EmitterType, ParticleBirthParams,
 };
-use crate::core::camera::TargetImage;
-use crate::core::lifetime::Lifetime;
-use crate::core::particle::particle::distortion::{
+use crate::particle::distortion::{
     ParticleMaterialDistortion, ParticleMeshDistortion, UniformsPixelDistortion,
     UniformsVertexDistortion,
 };
-use crate::core::particle::ParticleId;
-use crate::core::resource::ResourceCache;
+use crate::ParticleId;
 
 pub fn attach_distortion_visuals(
     commands: &mut Commands,

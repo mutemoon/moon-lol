@@ -1,9 +1,10 @@
 [package]
-name = "lol_core"
+name = "lol_core_render"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
 bevy.workspace = true
-serde.workspace = true
 league_utils.workspace = true
+lol_core.workspace = true
+serde.workspace = true

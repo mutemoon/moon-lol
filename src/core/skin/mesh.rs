@@ -5,11 +5,11 @@ use bevy::render::render_resource::Face;
 use league_core::extract::SkinCharacterDataProperties;
 use lol_config::prop::LoadHashKeyTrait;
 use lol_core::skin::LeagueSkinMesh;
+use lol_core_render::utils::AssetServerLoadLeague;
 
 use crate::core::resource::loading::Loading;
 use crate::core::skin::skeleton::CommandSkinSkeletonSpawn;
 use crate::core::skin::skin::Skin;
-use crate::core::utils::AssetServerLoadLeague;
 
 #[derive(EntityEvent)]
 pub struct CommandSkinMeshSpawn {

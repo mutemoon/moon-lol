@@ -18,6 +18,7 @@ use lol_config::mapgeo::ConfigMapGeo;
 use lol_config::register::init_league_asset;
 use lol_config::shader::{ResourceShaderChunk, ResourceShaderPackage};
 use lol_core::skin::LeagueSkinMesh;
+use lol_core_render::utils::AssetServerLoadLeague;
 use lol_loader::animation::LeagueLoaderAnimationClip;
 use lol_loader::image::LeagueLoaderImage;
 use lol_loader::mapgeo::LeagueLoaderMapgeo;
@@ -32,7 +33,6 @@ use serde::de::DeserializeSeed;
 use self::loading::PluginResourceLoading;
 use self::prop_bin::PluginResourcePropBin;
 use self::shader::{startup_load_shaders, update_shaders, ResourceShaderHandles};
-use crate::core::utils::AssetServerLoadLeague;
 
 #[derive(Default)]
 pub struct PluginResource {

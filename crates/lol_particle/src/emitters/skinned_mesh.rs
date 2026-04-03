@@ -1,107 +1,113 @@
+use bevy::animation::AnimationTarget;
+use bevy::mesh::skinning::SkinnedMesh;
 use bevy::prelude::*;
 use league_core::extract::{EnumVfxPrimitive, VfxEmitterDefinitionData, VfxSystemDefinitionData};
+use lol_core::lifetime::Lifetime;
+use lol_core_render::resource_cache::ResourceCache;
+use lol_core_render::skin::mesh_shadow::spawn_shadow_skin_entity;
+use lol_core_render::utils::AssetServerLoadLeague;
 
-use super::state::ParticleEmitterState;
+use super::state::{EmitterOf, ParticleEmitterState};
 use super::utils::{
     calculate_emission_params, calculate_particle_transform_frame, get_emitter_type,
     spawn_particle_entity, EmissionParams, EmitterType, ParticleBirthParams,
 };
-use crate::core::lifetime::Lifetime;
-use crate::core::particle::particle::quad::{
-    ParticleMaterialQuad, ParticleMeshQuad, UniformsVertexQuad,
+use crate::skinned_mesh::particle::{
+    ParticleMaterialSkinnedMeshParticle, UniformsPixelSkinnedMeshParticle,
+    UniformsVertexSkinnedMeshParticle,
 };
-use crate::core::particle::particle::quad_slice::{
-    ParticleMaterialQuadSlice, UniformsPixelQuadSlice,
-};
-use crate::core::particle::utils::create_black_pixel_texture;
-use crate::core::particle::ParticleId;
-use crate::core::resource::ResourceCache;
+use crate::utils::create_black_pixel_texture;
+use crate::ParticleId;
 
-pub fn attach_quad_visuals(
+pub fn attach_skinned_mesh_visuals(
     commands: &mut Commands,
     particle_entity: Entity,
+    emitter_of: &EmitterOf,
     vfx_emitter_definition_data: &VfxEmitterDefinitionData,
     texture: Option<Handle<Image>>,
     particle_color_texture: Option<Handle<Image>>,
-    texture_mult: Option<Handle<Image>>,
     blend_mode: u8,
-    frame: f32,
-    res_mesh: &mut ResMut<Assets<Mesh>>,
     res_image: &mut ResMut<Assets<Image>>,
-    res_quad_material: &mut ResMut<Assets<ParticleMaterialQuad>>,
-    res_quad_slice_material: &mut ResMut<Assets<ParticleMaterialQuadSlice>>,
+    res_particle_material_skinned_mesh_particle: &mut ResMut<
+        Assets<ParticleMaterialSkinnedMeshParticle>,
+    >,
+    res_asset_server: &Res<AssetServer>,
+    q_mesh3d: Query<&Mesh3d>,
+    q_skinned_mesh: Query<&SkinnedMesh>,
+    q_children: Query<&Children>,
+    q_animation_target: Query<(Entity, &Transform, &AnimationTarget)>,
 ) {
-    let mesh = res_mesh.add(ParticleMeshQuad { frame });
-    commands.entity(particle_entity).insert(Mesh3d(mesh));
-
     let black_pixel_texture = res_image.add(create_black_pixel_texture());
-    let uniforms_vertex = UniformsVertexQuad {
-        texture_info: match vfx_emitter_definition_data.tex_div {
-            Some(tex_div) => vec4(tex_div.x, 1.0 / tex_div.x, 1.0 / tex_div.y, 0.),
-            None => Vec4::ONE,
-        },
-        ..default()
+
+    // Handle material overrides
+    let final_texture = if let Some(material_override_definitions) =
+        &vfx_emitter_definition_data.material_override_definitions
+    {
+        let mut tex = texture;
+        for material_override_definition in material_override_definitions {
+            if let Some(base_texture) = &material_override_definition.base_texture {
+                tex = Some(res_asset_server.load_league(base_texture));
+            }
+        }
+        tex
+    } else {
+        texture
     };
 
-    if let Some(range) = vfx_emitter_definition_data.slice_technique_range {
-        commands
-            .entity(particle_entity)
-            .insert(MeshMaterial3d(res_quad_slice_material.add(
-                ParticleMaterialQuadSlice {
-                    uniforms_vertex,
-                    uniforms_pixel: UniformsPixelQuadSlice {
-                        slice_range: vec2(range, 1.0 / (range * range)),
-                        ..default()
-                    },
-                    particle_color_texture: particle_color_texture.clone(),
-                    texture: texture.clone(),
-                    cmb_tex_pixel_color_remap_ramp_smp_clamp_no_mip: Some(black_pixel_texture),
-                    sampler_fow: None,
-                    blend_mode,
-                },
-            )));
-    } else {
-        commands
-            .entity(particle_entity)
-            .insert(MeshMaterial3d(res_quad_material.add(
-                ParticleMaterialQuad {
-                    uniforms_vertex,
-                    particle_color_texture: particle_color_texture.clone(),
-                    texture: texture.clone(),
-                    cmb_tex_pixel_color_remap_ramp_smp_clamp_no_mip: Some(black_pixel_texture),
-                    texturemult: texture_mult.clone(),
-                    blend_mode,
-                    ..default()
-                },
-            )));
-    };
+    let material = MeshMaterial3d(res_particle_material_skinned_mesh_particle.add(
+        ParticleMaterialSkinnedMeshParticle {
+            uniforms_vertex: UniformsVertexSkinnedMeshParticle::default(),
+            uniforms_pixel: UniformsPixelSkinnedMeshParticle::default(),
+            texture: final_texture,
+            particle_color_texture: particle_color_texture.clone(),
+            cmb_tex_pixel_color_remap_ramp_smp_clamp_no_mip: Some(black_pixel_texture),
+            cmb_tex_fow_map_smp_clamp_no_mip: None,
+            blend_mode,
+        },
+    ));
+
+    spawn_shadow_skin_entity(
+        commands,
+        particle_entity,
+        emitter_of.0,
+        material,
+        q_mesh3d,
+        q_skinned_mesh,
+        q_children,
+        q_animation_target,
+    );
 }
 
-/// Update emitters for Quad primitive types (ArbitraryQuad, CameraUnitQuad)
-pub fn update_emitter_quad(
+/// Update emitters for AttachedMesh (SkinnedMesh) primitive type
+pub fn update_emitter_skinned_mesh(
     mut commands: Commands,
-    mut res_mesh: ResMut<Assets<Mesh>>,
     res_assets_vfx_system_definition_data: Res<Assets<VfxSystemDefinitionData>>,
     res_asset_server: Res<AssetServer>,
     mut res_resource_cache: ResMut<ResourceCache>,
     mut res_image: ResMut<Assets<Image>>,
-    mut res_quad_material: ResMut<Assets<ParticleMaterialQuad>>,
-    mut res_quad_slice_material: ResMut<Assets<ParticleMaterialQuadSlice>>,
+    mut res_particle_material_skinned_mesh_particle: ResMut<
+        Assets<ParticleMaterialSkinnedMeshParticle>,
+    >,
     mut query: Query<(
         Entity,
+        &EmitterOf,
         &mut Lifetime,
         &mut ParticleEmitterState,
         &ParticleId,
     )>,
+    q_mesh3d: Query<&Mesh3d>,
+    q_skinned_mesh: Query<&SkinnedMesh>,
+    q_children: Query<&Children>,
+    q_animation_target: Query<(Entity, &Transform, &AnimationTarget)>,
     time: Res<Time>,
 ) {
-    for (emitter_entity, mut lifetime, mut emitter, particle_id) in query.iter_mut() {
+    for (emitter_entity, emitter_of, mut lifetime, mut emitter, particle_id) in query.iter_mut() {
         let vfx_emitter_definition_data =
             particle_id.get_def(&res_assets_vfx_system_definition_data);
 
         // Check if this emitter should be processed by this update function
         let emitter_type = get_emitter_type(vfx_emitter_definition_data);
-        if emitter_type != EmitterType::Quad {
+        if emitter_type != EmitterType::SkinnedMesh {
             continue;
         }
 
@@ -137,17 +143,11 @@ pub fn update_emitter_quad(
         let texture = vfx_emitter_definition_data
             .texture
             .as_ref()
-            .map(|v| res_resource_cache.get_image_srgb(&res_asset_server, v));
+            .map(|v| res_resource_cache.get_image(&res_asset_server, v));
 
         let particle_color_texture = vfx_emitter_definition_data
             .particle_color_texture
             .as_ref()
-            .map(|v| res_resource_cache.get_image(&res_asset_server, v));
-
-        let texture_mult = vfx_emitter_definition_data
-            .texture_mult
-            .as_ref()
-            .and_then(|v| v.texture_mult.as_ref())
             .map(|v| res_resource_cache.get_image(&res_asset_server, v));
 
         let blend_mode = vfx_emitter_definition_data.blend_mode.unwrap_or(4);
@@ -181,19 +181,21 @@ pub fn update_emitter_quad(
                 adjusted_birth_scale0,
             );
 
-            attach_quad_visuals(
+            attach_skinned_mesh_visuals(
                 &mut commands,
                 particle_entity,
+                emitter_of,
                 vfx_emitter_definition_data,
                 texture.clone(),
                 particle_color_texture.clone(),
-                texture_mult.clone(),
                 blend_mode,
-                frame,
-                &mut res_mesh,
                 &mut res_image,
-                &mut res_quad_material,
-                &mut res_quad_slice_material,
+                &mut res_particle_material_skinned_mesh_particle,
+                &res_asset_server,
+                q_mesh3d,
+                q_skinned_mesh,
+                q_children,
+                q_animation_target,
             );
         }
     }

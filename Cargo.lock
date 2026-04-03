@@ -4166,6 +4166,17 @@ name = "lol_core"
 version = "0.1.0"
 dependencies = [
  "bevy",
+ "league_utils",
+ "serde",
+]
+
+[[package]]
+name = "lol_core_render"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+ "league_utils",
+ "lol_core",
  "serde",
 ]
 
@@ -4182,10 +4193,25 @@ dependencies = [
  "league_utils",
  "lol_config",
  "lol_core",
+ "lol_core_render",
  "nom 8.0.0",
  "regex",
  "serde",
  "thiserror 2.0.18",
+]
+
+[[package]]
+name = "lol_particle"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+ "league_core",
+ "league_utils",
+ "lol_config",
+ "lol_core",
+ "lol_core_render",
+ "rand 0.9.2",
+ "serde",
 ]
 
 [[package]]
@@ -4343,7 +4369,9 @@ dependencies = [
  "league_utils",
  "lol_config",
  "lol_core",
+ "lol_core_render",
  "lol_loader",
+ "lol_particle",
  "rand 0.9.2",
  "rayon",
  "rocket",

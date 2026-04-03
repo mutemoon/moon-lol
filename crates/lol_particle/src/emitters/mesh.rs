@@ -2,19 +2,17 @@ use bevy::prelude::*;
 use league_core::extract::{
     EnumVfxPrimitive, VfxEmitterDefinitionData, VfxPrimitiveMesh, VfxSystemDefinitionData,
 };
+use lol_core::lifetime::Lifetime;
+use lol_core_render::resource_cache::ResourceCache;
 
 use super::state::ParticleEmitterState;
 use super::utils::{
     calculate_emission_params, calculate_particle_transform_frame, get_emitter_type,
     spawn_particle_entity, EmissionParams, EmitterType, ParticleBirthParams,
 };
-use crate::core::lifetime::Lifetime;
-use crate::core::particle::particle::mesh::{
-    ParticleMaterialMesh, UniformsPixelMesh, UniformsVertexMesh,
-};
-use crate::core::particle::utils::create_black_pixel_texture;
-use crate::core::particle::ParticleId;
-use crate::core::resource::ResourceCache;
+use crate::particle::mesh::{ParticleMaterialMesh, UniformsPixelMesh, UniformsVertexMesh};
+use crate::utils::create_black_pixel_texture;
+use crate::ParticleId;
 
 pub fn attach_mesh_visuals(
     commands: &mut Commands,

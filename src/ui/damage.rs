@@ -1,7 +1,7 @@
 use bevy::color::palettes::css::{BLUE, RED, WHITE};
 use bevy::prelude::*;
+use lol_core_render::camera::CameraState;
 
-use crate::core::camera::CameraState;
 use crate::core::damage::{DamageType, EventDamageCreate};
 
 #[derive(Default)]

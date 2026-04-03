@@ -1,7 +1,6 @@
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
-
-use crate::core::camera::CameraState;
+use lol_core_render::camera::CameraState;
 
 #[derive(Default)]
 pub struct PluginUIBind;

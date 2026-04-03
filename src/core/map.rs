@@ -9,6 +9,7 @@ use lol_config::mapgeo::ConfigMapGeo;
 use lol_config::prop::{HashKey, LoadHashKeyTrait};
 use lol_core::lane::Lane;
 use lol_core::team::Team;
+use lol_core_render::utils::AssetServerLoadLeague;
 
 use crate::core::action::{Action, CommandAction};
 use crate::core::character::CommandCharacterSpawn;
@@ -16,7 +17,6 @@ use crate::core::controller::Controller;
 use crate::core::resource::loading::Loading;
 use crate::core::resource::prop_bin::{CommandLoadPropBin, PropPath};
 use crate::core::skin::mesh::get_standard;
-use crate::core::utils::AssetServerLoadLeague;
 use crate::entities::turret::Turret;
 
 pub const MAP_WIDTH: f32 = 14400.0;

@@ -3,19 +3,19 @@ use league_core::extract::{
     EnumVfxPrimitive, VfxPrimitivePlanarProjection, VfxProjectionDefinitionData,
     VfxSystemDefinitionData,
 };
+use lol_core::lifetime::Lifetime;
+use lol_core_render::resource_cache::ResourceCache;
 
 use super::state::ParticleEmitterState;
 use super::utils::{
     calculate_emission_params, calculate_particle_transform_frame, get_emitter_type,
     spawn_particle_entity, EmissionParams, EmitterType, ParticleBirthParams,
 };
-use crate::core::lifetime::Lifetime;
-use crate::core::particle::emitters::decal::ParticleDecal;
-use crate::core::particle::environment::unlit_decal::{
+use crate::emitters::decal::ParticleDecal;
+use crate::environment::unlit_decal::{
     ParticleMaterialUnlitDecal, UniformsPixelUnlitDecal, UniformsVertexUnlitDecal,
 };
-use crate::core::particle::ParticleId;
-use crate::core::resource::ResourceCache;
+use crate::ParticleId;
 
 pub fn attach_unlit_decal_visuals(
     commands: &mut Commands,

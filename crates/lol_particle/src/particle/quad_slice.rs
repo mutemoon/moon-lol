@@ -7,9 +7,9 @@ use bevy::render::render_resource::{
 use bevy::shader::ShaderRef;
 use league_utils::get_shader_handle;
 
-use crate::core::particle::particle::quad::UniformsVertexQuad;
-use crate::core::particle::utils::MaterialPath;
-use crate::core::particle::{ATTRIBUTE_LIFETIME, ATTRIBUTE_UV_FRAME, ATTRIBUTE_WORLD_POSITION};
+use crate::particle::quad::UniformsVertexQuad;
+use crate::utils::MaterialPath;
+use crate::{ATTRIBUTE_LIFETIME, ATTRIBUTE_UV_FRAME, ATTRIBUTE_WORLD_POSITION};
 
 #[derive(Clone, ShaderType, Default)]
 pub struct UniformsPixelQuadSlice {

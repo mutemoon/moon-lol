@@ -10,14 +10,14 @@ use bevy::render::render_resource::{
 use bevy::shader::ShaderRef;
 use league_utils::get_shader_handle;
 
-use crate::core::particle::utils::MaterialPath;
+use crate::utils::MaterialPath;
 
 #[derive(Clone, ShaderType, Debug)]
-pub struct UniformsVertexSkinnedMeshParticle {
+pub struct UniformsVertexMesh {
     pub fog_of_war_params: Vec4,
     pub fog_of_war_always_below_y: Vec4,
     pub fow_height_fade: Vec4,
-    pub bones: [[Vec3; 4]; 68],
+    pub m_world: Mat4,
     pub particle_depth_push_pull: f32,
     pub v_fresnel: Vec4,
     pub v_particle_uvtransform: [Vec3; 4],
@@ -25,13 +25,13 @@ pub struct UniformsVertexSkinnedMeshParticle {
     pub k_color_factor: Vec4,
 }
 
-impl Default for UniformsVertexSkinnedMeshParticle {
+impl Default for UniformsVertexMesh {
     fn default() -> Self {
         Self {
             fog_of_war_params: Vec4::ZERO,
             fog_of_war_always_below_y: Vec4::ZERO,
             fow_height_fade: Vec4::ZERO,
-            bones: [[Vec3::ZERO; 4]; 68],
+            m_world: Default::default(),
             particle_depth_push_pull: Default::default(),
             v_fresnel: Vec4::W,
             v_particle_uvtransform: [Vec3::X, Vec3::Y, Vec3::ZERO, Vec3::ZERO],
@@ -42,25 +42,27 @@ impl Default for UniformsVertexSkinnedMeshParticle {
 }
 
 #[derive(Clone, ShaderType, Debug)]
-pub struct UniformsPixelSkinnedMeshParticle {
+pub struct UniformsPixelMesh {
+    pub fow_edge_control: Vec4,
     pub color_lookup_uv: Vec2,
 }
 
-impl Default for UniformsPixelSkinnedMeshParticle {
+impl Default for UniformsPixelMesh {
     fn default() -> Self {
         Self {
+            fow_edge_control: Vec4::ONE,
             color_lookup_uv: Vec2::ONE,
         }
     }
 }
 
 #[derive(Asset, TypePath, AsBindGroup, Clone, Debug)]
-#[bind_group_data(ParticleMaterialKeySkinnedMeshParticle)]
-pub struct ParticleMaterialSkinnedMeshParticle {
+#[bind_group_data(ParticleMaterialKeyMesh)]
+pub struct ParticleMaterialMesh {
     #[uniform(0)]
-    pub uniforms_vertex: UniformsVertexSkinnedMeshParticle,
+    pub uniforms_vertex: UniformsVertexMesh,
     #[uniform(1)]
-    pub uniforms_pixel: UniformsPixelSkinnedMeshParticle,
+    pub uniforms_pixel: UniformsPixelMesh,
     #[texture(2)]
     #[sampler(3)]
     pub texture: Option<Handle<Image>>,
@@ -77,25 +79,25 @@ pub struct ParticleMaterialSkinnedMeshParticle {
 }
 
 #[derive(Copy, Clone, Hash, Eq, PartialEq, Debug)]
-pub struct ParticleMaterialKeySkinnedMeshParticle {
+pub struct ParticleMaterialKeyMesh {
     blend_mode: u8,
 }
 
 // 2. 为 Key 实现 From Trait
-impl From<&ParticleMaterialSkinnedMeshParticle> for ParticleMaterialKeySkinnedMeshParticle {
-    fn from(material: &ParticleMaterialSkinnedMeshParticle) -> Self {
+impl From<&ParticleMaterialMesh> for ParticleMaterialKeyMesh {
+    fn from(material: &ParticleMaterialMesh) -> Self {
         Self {
             blend_mode: material.blend_mode,
         }
     }
 }
 
-impl MaterialPath for ParticleMaterialSkinnedMeshParticle {
-    const FRAG_PATH: &str = "assets/shaders/hlsl/skinnedmesh/particle_ps.ps.glsl";
-    const VERT_PATH: &str = "assets/shaders/hlsl/skinnedmesh/particle_vs.vs.glsl";
+impl MaterialPath for ParticleMaterialMesh {
+    const FRAG_PATH: &str = "assets/shaders/hlsl/particlesystem/mesh_ps.ps.glsl";
+    const VERT_PATH: &str = "assets/shaders/hlsl/particlesystem/mesh_vs.vs.glsl";
 }
 
-impl Material for ParticleMaterialSkinnedMeshParticle {
+impl Material for ParticleMaterialMesh {
     fn fragment_shader() -> ShaderRef {
         get_shader_handle(Self::FRAG_PATH, &vec![]).into()
     }
@@ -136,12 +138,9 @@ impl Material for ParticleMaterialSkinnedMeshParticle {
 
         let vertex_layout = layout.0.get_layout(&[
             Mesh::ATTRIBUTE_POSITION.at_shader_location(0),
-            Mesh::ATTRIBUTE_JOINT_WEIGHT.at_shader_location(1),
             Mesh::ATTRIBUTE_NORMAL.at_shader_location(2),
-            Mesh::ATTRIBUTE_JOINT_INDEX.at_shader_location(7),
             Mesh::ATTRIBUTE_UV_0.at_shader_location(8),
         ])?;
-
         descriptor.vertex.buffers = vec![vertex_layout];
         descriptor.primitive.cull_mode = None;
 

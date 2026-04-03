@@ -2,7 +2,6 @@ use std::f32::consts::PI;
 
 use bevy::prelude::*;
 use league_utils::hash_wad;
-use lol_loader::shader::ShaderTocSettings;
 
 pub fn rotate_to_direction(transform: &mut Transform, direction: Vec2) {
     transform.rotation = Quat::from_rotation_y(direction_to_angle(direction));
@@ -101,41 +100,5 @@ impl Clone for HashPath {
 impl PartialEq for HashPath {
     fn eq(&self, other: &Self) -> bool {
         self.hash == other.hash && self.ext == other.ext
-    }
-}
-
-pub trait AssetServerLoadLeague {
-    fn load_league<A: Asset>(&self, path: impl Into<HashPath>) -> Handle<A>;
-
-    fn load_league_labeled<'a, A: Asset>(
-        &self,
-        path: impl Into<HashPath>,
-        label: &str,
-    ) -> Handle<A>;
-
-    fn load_league_with_settings<'a, A: Asset>(&self, path: &str) -> Handle<A>;
-}
-
-impl AssetServerLoadLeague for AssetServer {
-    fn load_league<A: Asset>(&self, path: impl Into<HashPath>) -> Handle<A> {
-        let path = path.into();
-        self.load(format!("data/{:x}.{}", path.hash, path.ext))
-    }
-
-    fn load_league_labeled<'a, A: Asset>(
-        &self,
-        path: impl Into<HashPath>,
-        label: &str,
-    ) -> Handle<A> {
-        let path = path.into();
-        self.load(format!("data/{:x}.{}#{label}", path.hash, path.ext))
-    }
-
-    fn load_league_with_settings<'a, A: Asset>(&self, path: &str) -> Handle<A> {
-        let original_path = path.to_string();
-        self.load_with_settings(
-            format!("data/{:x}.lol", hash_wad(path)),
-            move |settings: &mut ShaderTocSettings| settings.0 = original_path.clone(),
-        )
     }
 }

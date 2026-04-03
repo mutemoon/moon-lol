@@ -1,8 +1,8 @@
 use bevy::prelude::*;
 use league_core::extract::{ResourceResolver, SkinCharacterDataProperties};
 use lol_config::prop::LoadHashKeyTrait;
+use lol_particle::{CommandParticleDespawn, CommandParticleSpawn};
 
-use crate::core::particle::{CommandParticleDespawn, CommandParticleSpawn};
 use crate::core::skin::skin::Skin;
 
 #[derive(EntityEvent)]

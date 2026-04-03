@@ -3,7 +3,7 @@ use bevy::render::render_resource::Face;
 use bevy_egui::{egui, EguiContexts, EguiPlugin, EguiPrimaryContextPass};
 use league_core::grid::VisionPathingFlags;
 use lol_config::grid::ConfigNavigationGrid;
-use moon_lol::core::camera::CameraState;
+use lol_core_render::camera::CameraState;
 use moon_lol::core::map::{on_click_map, Map};
 use moon_lol::core::navigation::grid::ResourceGrid;
 use moon_lol::core::navigation::navigation::NavigationDebug;

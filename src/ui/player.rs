@@ -1,13 +1,13 @@
 use bevy::prelude::*;
 use league_core::extract::SkinCharacterDataProperties;
 use lol_config::prop::LoadHashKeyTrait;
+use lol_core_render::utils::AssetServerLoadLeague;
 
 use crate::core::base::ability_resource::AbilityResource;
 use crate::core::base::level::Level;
 use crate::core::controller::Controller;
 use crate::core::life::Health;
 use crate::core::skin::skin::Skin;
-use crate::core::utils::AssetServerLoadLeague;
 use crate::ui::element::{CommandUpdateUIElement, NodeType, SizeType, UIElementEntity, UIState};
 
 #[derive(Component, Reflect, Default)]

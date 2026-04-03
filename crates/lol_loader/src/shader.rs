@@ -8,13 +8,10 @@ use league_file::shader::{LeagueShaderChunk, LeagueShaderToc};
 use league_to_lol::shader::{convert_frag, convert_vert};
 use league_utils::{get_shader_uuid_by_hash, hash_wad};
 use lol_config::shader::ResourceShaderPackage;
+use lol_core_render::utils::ShaderTocSettings;
 use regex::Regex;
-use serde::{Deserialize, Serialize};
 
 use super::error::Error;
-
-#[derive(Default, Serialize, Deserialize)]
-pub struct ShaderTocSettings(pub String);
 
 #[derive(Default)]
 pub struct LeagueLoaderShaderToc;

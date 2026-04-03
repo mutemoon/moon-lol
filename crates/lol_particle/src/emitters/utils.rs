@@ -3,12 +3,12 @@ use league_core::extract::{
     EnumVfxPrimitive, EnumVfxShape, Unk0xee39916f, VfxEmitterDefinitionData,
     VfxPrimitivePlanarProjection, VfxShapeBox, VfxShapeCylinder, VfxShapeLegacy,
 };
+use lol_core::lifetime::Lifetime;
 
 use super::state::ParticleEmitterState;
-use crate::core::lifetime::Lifetime;
-use crate::core::particle::particle::ParticleState;
-use crate::core::particle::utils::StochasticSampler;
-use crate::core::particle::ParticleId;
+use crate::particle::ParticleState;
+use crate::utils::StochasticSampler;
+use crate::ParticleId;
 
 /// Emitter type classification for particle systems
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

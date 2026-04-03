@@ -8,11 +8,11 @@ use league_core::extract::{
 use league_to_lol::animation::load_animation_map;
 use league_utils::hash_bin;
 use lol_config::prop::{HashKey, LoadHashKeyTrait};
+use lol_core_render::utils::AssetServerLoadLeague;
 
 use crate::core::animation::{Animation, AnimationNode, AnimationNodeF32, AnimationState};
 use crate::core::resource::loading::Loading;
 use crate::core::skin::skin::Skin;
-use crate::core::utils::AssetServerLoadLeague;
 
 #[derive(EntityEvent)]
 pub struct CommandSkinAnimationSpawn {
