@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 牛头被动 - 胜利怒吼
 #[derive(Component, Debug, Clone)]

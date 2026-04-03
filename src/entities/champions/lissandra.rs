@@ -1,15 +1,17 @@
 use bevy::prelude::*;
-use league_core::CharacterRecord;
+use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_config::LoadHashKeyTrait;
+use lol_config::prop::LoadHashKeyTrait;
 
-use crate::core::{
-    play_skill_animation, skill_damage, skill_slot_from_index, spawn_skill_particle,
-    BuffOf, CoolDown, DamageShape, EventDamageCreate, EventSkillCast, Skill, SkillOf, SkillSlot,
-    Skills, TargetDamage, TargetFilter,
+use crate::buffs::lissandra_buffs::{BuffLissandraQ, BuffLissandraR, BuffLissandraW};
+use crate::core::action::damage::{DamageShape, TargetDamage, TargetFilter};
+use crate::core::base::buff::BuffOf;
+use crate::core::damage::{DamageType, EventDamageCreate};
+use crate::core::skill::{
+    play_skill_animation, skill_damage, skill_slot_from_index, spawn_skill_particle, CoolDown,
+    EventSkillCast, PassiveSkillOf, Skill, SkillOf, SkillSlot, Skills,
 };
 use crate::entities::champion::Champion;
-use crate::{BuffLissandraQ, BuffLissandraR, BuffLissandraW, DamageType, PassiveSkillOf};
 
 const LISSANDRA_Q_KEY: &str = "Characters/Lissandra/Spells/LissandraQ/LissandraQ";
 const LISSANDRA_W_KEY: &str = "Characters/Lissandra/Spells/LissandraW/LissandraW";
@@ -66,7 +68,10 @@ fn cast_lissandra_q(commands: &mut Commands, entity: Entity) {
         commands,
         entity,
         LISSANDRA_Q_KEY,
-        DamageShape::Sector { radius: 825.0, angle: 15.0 },
+        DamageShape::Sector {
+            radius: 825.0,
+            angle: 15.0,
+        },
         vec![TargetDamage {
             filter: TargetFilter::All,
             amount: hash_bin("TotalDamage"),
@@ -95,7 +100,12 @@ fn cast_lissandra_w(commands: &mut Commands, entity: Entity) {
     );
 }
 
-fn cast_lissandra_e(commands: &mut Commands, _q_transform: &Query<&Transform>, entity: Entity, _point: Vec2) {
+fn cast_lissandra_e(
+    commands: &mut Commands,
+    _q_transform: &Query<&Transform>,
+    entity: Entity,
+    _point: Vec2,
+) {
     play_skill_animation(commands, entity, hash_bin("Spell3"));
     spawn_skill_particle(commands, entity, hash_bin("Lissandra_E_Cast"));
 
@@ -104,7 +114,10 @@ fn cast_lissandra_e(commands: &mut Commands, _q_transform: &Query<&Transform>, e
         commands,
         entity,
         LISSANDRA_E_KEY,
-        DamageShape::Sector { radius: 1025.0, angle: 10.0 },
+        DamageShape::Sector {
+            radius: 1025.0,
+            angle: 10.0,
+        },
         vec![TargetDamage {
             filter: TargetFilter::All,
             amount: hash_bin("TotalDamage"),
@@ -119,7 +132,9 @@ fn cast_lissandra_r(commands: &mut Commands, entity: Entity) {
     spawn_skill_particle(commands, entity, hash_bin("Lissandra_R_Cast"));
 
     // R can self-cast for shield or enemy cast for damage+root
-    commands.entity(entity).with_related::<BuffOf>(BuffLissandraR::new(true, 100.0, 2.5));
+    commands
+        .entity(entity)
+        .with_related::<BuffOf>(BuffLissandraR::new(true, 100.0, 2.5));
 
     skill_damage(
         commands,
@@ -148,10 +163,14 @@ fn on_lissandra_damage_hit(
     let target = trigger.event_target();
 
     // Q applies slow
-    commands.entity(target).with_related::<BuffOf>(BuffLissandraQ::new(0.3, 3.0));
+    commands
+        .entity(target)
+        .with_related::<BuffOf>(BuffLissandraQ::new(0.3, 3.0));
 
     // W roots
-    commands.entity(target).with_related::<BuffOf>(BuffLissandraW::new(1.5, 3.0));
+    commands
+        .entity(target)
+        .with_related::<BuffOf>(BuffLissandraW::new(1.5, 3.0));
 }
 
 fn add_skills(
@@ -176,10 +195,9 @@ fn add_skills(
 
         for (index, &skill) in character_record.spells.as_ref().unwrap().iter().enumerate() {
             let skill_component = Skill::new(skill_slot_from_index(index), skill);
-            commands.entity(entity).with_related::<SkillOf>((
-                skill_component,
-                CoolDown::default(),
-            ));
+            commands
+                .entity(entity)
+                .with_related::<SkillOf>((skill_component, CoolDown::default()));
         }
     }
 }

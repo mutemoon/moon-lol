@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 崔斯特W - 选牌-金牌（眩晕）
 #[derive(Component, Debug, Clone)]

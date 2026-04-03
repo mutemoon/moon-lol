@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 赛娜W - 墨影缚（禁锢）
 #[derive(Component, Debug, Clone)]

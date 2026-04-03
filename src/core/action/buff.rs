@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use bevy::prelude::*;
 
-use crate::BuffOf;
+use crate::core::base::buff::BuffOf;
 
 type BundleSpawner = Arc<dyn Fn(&mut EntityCommands) + Send + Sync + 'static>;
 

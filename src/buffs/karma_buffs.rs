@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 卡尔莎被动 - 聚集之火（减少R冷却）
 #[derive(Component, Debug, Clone)]

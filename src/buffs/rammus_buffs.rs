@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 拉莫斯Q - 动力球（减速）
 #[derive(Component, Debug, Clone)]

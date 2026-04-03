@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 塔里克E - 正义荣耀（眩晕）
 #[derive(Component, Debug, Clone)]

@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 俄洛伊被动 - 夺命者的预言
 #[derive(Component, Debug, Clone)]

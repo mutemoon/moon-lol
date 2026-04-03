@@ -1,7 +1,7 @@
 use bevy::asset::{AssetLoader, LoadContext};
 use bevy::prelude::Mesh;
-use league_file::LeagueMeshStatic;
-use league_to_lol::mesh_static_to_bevy_mesh;
+use league_file::mesh_static::LeagueMeshStatic;
+use league_to_lol::mesh_static::mesh_static_to_bevy_mesh;
 
 use super::error::Error;
 

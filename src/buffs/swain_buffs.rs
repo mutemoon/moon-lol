@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 斯维因W - 帝国钩索（眩晕）
 #[derive(Component, Debug, Clone)]

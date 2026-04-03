@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 诺提勒斯被动 - 猛冲重击（击飞）
 #[derive(Component, Debug, Clone)]

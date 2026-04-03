@@ -1,20 +1,23 @@
 use bevy::camera::visibility::RenderLayers;
 use bevy::prelude::*;
-use league_core::{
+use league_core::extract::{
     EnumVfxPrimitive, VfxDistortionDefinitionData, VfxEmitterDefinitionData,
     VfxSystemDefinitionData,
 };
 
+use super::state::ParticleEmitterState;
 use super::utils::{
     calculate_emission_params, calculate_particle_transform_frame, get_emitter_type,
     spawn_particle_entity, EmissionParams, EmitterType, ParticleBirthParams,
 };
-use super::ParticleEmitterState;
-use crate::{
-    Lifetime, ParticleId, ParticleMaterialDistortion,
-    ParticleMeshDistortion, ResourceCache, TargetImage, UniformsPixelDistortion,
+use crate::core::camera::TargetImage;
+use crate::core::lifetime::Lifetime;
+use crate::core::particle::particle::distortion::{
+    ParticleMaterialDistortion, ParticleMeshDistortion, UniformsPixelDistortion,
     UniformsVertexDistortion,
 };
+use crate::core::particle::ParticleId;
+use crate::core::resource::ResourceCache;
 
 pub fn attach_distortion_visuals(
     commands: &mut Commands,

@@ -3,7 +3,10 @@ use std::collections::{HashMap, HashSet};
 use heck::ToPascalCase;
 use league_utils::{hash_bin, hash_to_field_name, hash_to_type_name};
 
-use crate::{detect_cyclic_types, BinParser, BinType, EntryData, Error};
+use crate::cycle::detect_cyclic_types;
+use crate::parser::BinParser;
+use crate::prop::EntryData;
+use crate::types::{BinType, Error};
 
 #[derive(Debug, Clone)]
 pub enum ClassData {

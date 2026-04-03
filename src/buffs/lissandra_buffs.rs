@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 冰晶凤凰被动 - 冰霜奴役
 #[derive(Component, Debug, Clone)]

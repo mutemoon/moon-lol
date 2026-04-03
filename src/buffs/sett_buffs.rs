@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::Buff;
+use crate::core::base::buff::Buff;
 
 /// 瑟提Q - 强化下两次攻击 + 移速
 #[derive(Component, Debug, Clone)]

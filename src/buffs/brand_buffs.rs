@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 布兰德被动 - 炽燃之焰
 #[derive(Component, Debug, Clone)]

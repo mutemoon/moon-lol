@@ -1,15 +1,19 @@
 use bevy::prelude::*;
-use league_core::CharacterRecord;
+use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_config::LoadHashKeyTrait;
+use lol_config::prop::LoadHashKeyTrait;
 
-use crate::core::{
+use crate::buffs::cc_debuffs::DebuffSlow;
+use crate::buffs::leona_buffs::{BuffLeonaSunlight, BuffLeonaW};
+use crate::core::action::damage::{DamageShape, TargetDamage, TargetFilter};
+use crate::core::base::buff::BuffOf;
+use crate::core::damage::{DamageType, EventDamageCreate};
+use crate::core::skill::{
     play_skill_animation, reset_skill_attack, skill_damage, skill_slot_from_index,
-    spawn_skill_particle, BuffOf, CoolDown, DamageShape, EventDamageCreate, EventSkillCast, Skill,
-    SkillOf, SkillSlot, Skills, TargetDamage, TargetFilter,
+    spawn_skill_particle, CoolDown, EventSkillCast, PassiveSkillOf, Skill, SkillOf, SkillSlot,
+    Skills,
 };
 use crate::entities::champion::Champion;
-use crate::{BuffLeonaSunlight, BuffLeonaW, DebuffSlow, DamageType, PassiveSkillOf};
 
 #[allow(dead_code)]
 const LEONA_Q_KEY: &str = "Characters/Leona/Spells/LeonaQ/LeonaQ";
@@ -71,7 +75,9 @@ fn cast_leona_w(commands: &mut Commands, entity: Entity) {
     spawn_skill_particle(commands, entity, hash_bin("Leona_W_Cast"));
 
     // W grants damage reduction and armor/mr
-    commands.entity(entity).with_related::<BuffOf>(BuffLeonaW::new(0.5, 40.0, 40.0, 3.0));
+    commands
+        .entity(entity)
+        .with_related::<BuffOf>(BuffLeonaW::new(0.5, 40.0, 40.0, 3.0));
 
     skill_damage(
         commands,
@@ -87,7 +93,12 @@ fn cast_leona_w(commands: &mut Commands, entity: Entity) {
     );
 }
 
-fn cast_leona_e(commands: &mut Commands, _q_transform: &Query<&Transform>, entity: Entity, _point: Vec2) {
+fn cast_leona_e(
+    commands: &mut Commands,
+    _q_transform: &Query<&Transform>,
+    entity: Entity,
+    _point: Vec2,
+) {
     play_skill_animation(commands, entity, hash_bin("Spell3"));
     spawn_skill_particle(commands, entity, hash_bin("Leona_E_Cast"));
 
@@ -96,7 +107,10 @@ fn cast_leona_e(commands: &mut Commands, _q_transform: &Query<&Transform>, entit
         commands,
         entity,
         LEONA_E_KEY,
-        DamageShape::Sector { radius: 900.0, angle: 10.0 },
+        DamageShape::Sector {
+            radius: 900.0,
+            angle: 10.0,
+        },
         vec![TargetDamage {
             filter: TargetFilter::All,
             amount: hash_bin("TotalDamage"),
@@ -138,10 +152,14 @@ fn on_leona_damage_hit(
     let target = trigger.event_target();
 
     // Passive applies sunlight
-    commands.entity(target).with_related::<BuffOf>(BuffLeonaSunlight::new(50.0, 2.5));
+    commands
+        .entity(target)
+        .with_related::<BuffOf>(BuffLeonaSunlight::new(50.0, 2.5));
 
     // R applies slow
-    commands.entity(target).with_related::<BuffOf>(DebuffSlow::new(0.8, 1.75));
+    commands
+        .entity(target)
+        .with_related::<BuffOf>(DebuffSlow::new(0.8, 1.75));
 }
 
 fn add_skills(
@@ -166,10 +184,9 @@ fn add_skills(
 
         for (index, &skill) in character_record.spells.as_ref().unwrap().iter().enumerate() {
             let skill_component = Skill::new(skill_slot_from_index(index), skill);
-            commands.entity(entity).with_related::<SkillOf>((
-                skill_component,
-                CoolDown::default(),
-            ));
+            commands
+                .entity(entity)
+                .with_related::<SkillOf>((skill_component, CoolDown::default()));
         }
     }
 }

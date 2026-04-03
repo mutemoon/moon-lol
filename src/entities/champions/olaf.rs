@@ -1,14 +1,17 @@
 use bevy::prelude::*;
-use league_core::CharacterRecord;
+use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_config::LoadHashKeyTrait;
+use lol_config::prop::LoadHashKeyTrait;
 
-use crate::core::{
+use crate::buffs::olaf_buffs::{BuffOlafR, BuffOlafW};
+use crate::core::action::damage::{DamageShape, TargetDamage, TargetFilter};
+use crate::core::base::buff::BuffOf;
+use crate::core::damage::DamageType;
+use crate::core::skill::{
     play_skill_animation, skill_damage, skill_slot_from_index, spawn_skill_particle, CoolDown,
-    DamageShape, EventSkillCast, Skill, SkillOf, SkillSlot, Skills, TargetDamage, TargetFilter,
+    EventSkillCast, PassiveSkillOf, Skill, SkillOf, SkillSlot, Skills,
 };
 use crate::entities::champion::Champion;
-use crate::{BuffOlafR, BuffOlafW, BuffOf, DamageType, PassiveSkillOf};
 
 const OLAF_E_KEY: &str = "Characters/Olaf/Spells/OlafRecklessStrike/OlafRecklessStrike";
 
@@ -70,14 +73,21 @@ fn cast_olaf_w(commands: &mut Commands, entity: Entity) {
     spawn_skill_particle(commands, entity, hash_bin("Olaf_W_Cast"));
 
     // W provides attack speed buff and shield
-    commands.entity(entity).with_related::<BuffOf>(BuffOlafW::new(
-        OLAF_W_ATTACK_SPEED_BONUS,
-        OLAF_W_SHIELD,
-        OLAF_W_DURATION,
-    ));
+    commands
+        .entity(entity)
+        .with_related::<BuffOf>(BuffOlafW::new(
+            OLAF_W_ATTACK_SPEED_BONUS,
+            OLAF_W_SHIELD,
+            OLAF_W_DURATION,
+        ));
 
-    debug!("{:?} 释放了 {} 技能，获得 {}% 攻速加成和 {} 护盾", entity, "Olaf W",
-        (OLAF_W_ATTACK_SPEED_BONUS * 100.0) as i32, OLAF_W_SHIELD as i32);
+    debug!(
+        "{:?} 释放了 {} 技能，获得 {}% 攻速加成和 {} 护盾",
+        entity,
+        "Olaf W",
+        (OLAF_W_ATTACK_SPEED_BONUS * 100.0) as i32,
+        OLAF_W_SHIELD as i32
+    );
 }
 
 fn cast_olaf_e(commands: &mut Commands, entity: Entity, _point: Vec2) {
@@ -87,7 +97,9 @@ fn cast_olaf_e(commands: &mut Commands, entity: Entity, _point: Vec2) {
         commands,
         entity,
         OLAF_E_KEY,
-        DamageShape::Nearest { max_distance: 200.0 },
+        DamageShape::Nearest {
+            max_distance: 200.0,
+        },
         vec![TargetDamage {
             filter: TargetFilter::All,
             amount: hash_bin("TotalDamage"),
@@ -103,9 +115,14 @@ fn cast_olaf_r(commands: &mut Commands, entity: Entity) {
     spawn_skill_particle(commands, entity, hash_bin("Olaf_R_Cast"));
 
     // R provides CC immunity
-    commands.entity(entity).with_related::<BuffOf>(BuffOlafR::new(OLAF_R_DURATION));
+    commands
+        .entity(entity)
+        .with_related::<BuffOf>(BuffOlafR::new(OLAF_R_DURATION));
 
-    debug!("{:?} 释放了 {} 技能，免疫控制效果持续 {} 秒", entity, "Olaf R", OLAF_R_DURATION);
+    debug!(
+        "{:?} 释放了 {} 技能，免疫控制效果持续 {} 秒",
+        entity, "Olaf R", OLAF_R_DURATION
+    );
 }
 
 fn add_skills(

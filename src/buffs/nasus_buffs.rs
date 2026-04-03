@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 沙漠死神被动 - 噬魂者（吸血）
 #[derive(Component, Debug, Clone)]
@@ -65,7 +66,12 @@ pub struct BuffNasusR {
 }
 
 impl BuffNasusR {
-    pub fn new(bonus_health: f32, armor_bonus: f32, magic_resist_bonus: f32, duration: f32) -> Self {
+    pub fn new(
+        bonus_health: f32,
+        armor_bonus: f32,
+        magic_resist_bonus: f32,
+        duration: f32,
+    ) -> Self {
         Self {
             bonus_health,
             armor_bonus,

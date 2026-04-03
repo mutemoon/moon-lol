@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 嘉文四世被动 - 战争律动
 #[derive(Component, Debug, Clone)]

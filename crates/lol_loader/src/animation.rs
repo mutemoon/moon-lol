@@ -2,12 +2,11 @@ use bevy::animation::animation_curves::{AnimatableCurve, AnimatableKeyframeCurve
 use bevy::animation::{animated_field, AnimationClip, AnimationTargetId};
 use bevy::asset::uuid::Uuid;
 use bevy::asset::{AssetLoader, LoadContext};
-use league_file::AnimationFile;
-use league_to_lol::load_animation_file;
+use bevy::prelude::*;
+use league_file::animation::AnimationFile;
+use league_to_lol::animation::load_animation_file;
 
 use super::error::Error;
-
-use bevy::prelude::*;
 
 #[derive(Default)]
 pub struct LeagueLoaderAnimationClip;

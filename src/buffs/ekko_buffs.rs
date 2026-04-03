@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 艾克被动 - Z型驱动共振
 #[derive(Component, Debug, Clone)]

@@ -1,18 +1,18 @@
 use std::collections::HashMap;
 
 use bevy::prelude::*;
-use league_core::{
+use league_core::extract::{
     AnimationGraphData, AtomicClipData, ConditionBoolClipData, ConditionFloatClipData,
     EnumClipData, SelectorClipData, SequencerClipData, SkinCharacterDataProperties,
 };
-use league_to_lol::load_animation_map;
+use league_to_lol::animation::load_animation_map;
 use league_utils::hash_bin;
-use lol_config::{HashKey, LoadHashKeyTrait};
+use lol_config::prop::{HashKey, LoadHashKeyTrait};
 
-use crate::{
-    Animation, AnimationNode, AnimationNodeF32, AnimationState, AssetServerLoadLeague, Loading,
-    Skin,
-};
+use crate::core::animation::{Animation, AnimationNode, AnimationNodeF32, AnimationState};
+use crate::core::resource::loading::Loading;
+use crate::core::skin::skin::Skin;
+use crate::core::utils::AssetServerLoadLeague;
 
 #[derive(EntityEvent)]
 pub struct CommandSkinAnimationSpawn {

@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 德莱文被动 - 德莱文联盟
 #[derive(Component, Debug, Clone)]

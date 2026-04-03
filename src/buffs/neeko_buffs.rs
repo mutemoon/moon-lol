@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 妮蔻被动 - 先天魅力（伪装）
 #[derive(Component, Debug, Clone)]

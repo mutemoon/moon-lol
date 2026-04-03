@@ -1,13 +1,14 @@
 use bevy::ecs::relationship::Relationship;
 use bevy::prelude::*;
 use league_utils::hash_bin;
-use lol_core::Team;
+use lol_core::team::Team;
 
-use crate::core::{
-    is_in_direction, Buff, BuffOf, CommandSkinParticleDespawn, CommandSkinParticleSpawn, Direction,
-    EventDamageCreate, Health,
-};
-use crate::get_particle_hash;
+use crate::buffs::fiora_passive::get_particle_hash;
+use crate::core::base::buff::{Buff, BuffOf};
+use crate::core::base::direction::{is_in_direction, Direction};
+use crate::core::damage::EventDamageCreate;
+use crate::core::life::Health;
+use crate::core::skin::particle::{CommandSkinParticleDespawn, CommandSkinParticleSpawn};
 
 const VITAL_R_TIMEOUT: f32 = 1.5;
 const FIORA_R_ACTIVE_DURATION: f32 = 0.5;

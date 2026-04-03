@@ -1,15 +1,20 @@
 use bevy::prelude::*;
-use league_core::CharacterRecord;
+use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_config::LoadHashKeyTrait;
+use lol_config::prop::LoadHashKeyTrait;
 
-use crate::core::{
+use crate::buffs::common_buffs::{BuffEmpoweredAttack, BuffResist};
+use crate::buffs::jax_buffs::BuffJaxE;
+use crate::core::action::damage::{DamageShape, TargetDamage, TargetFilter};
+use crate::core::action::dash::{ActionDash, DashDamage, DashMoveType};
+use crate::core::base::buff::BuffOf;
+use crate::core::damage::DamageType;
+use crate::core::skill::{
     play_skill_animation, reset_skill_attack, skill_damage, skill_dash, skill_slot_from_index,
-    spawn_skill_particle, CoolDown, DamageShape, EventSkillCast, Skill, SkillOf, SkillSlot,
-    Skills, TargetDamage, TargetFilter,
+    spawn_skill_particle, CoolDown, EventSkillCast, PassiveSkillOf, Skill, SkillOf, SkillSlot,
+    Skills,
 };
 use crate::entities::champion::Champion;
-use crate::{BuffEmpoweredAttack, BuffJaxE, BuffOf, BuffResist, DamageType, PassiveSkillOf};
 
 const JAX_Q_KEY: &str = "Characters/Jax/Spells/JaxLeapStrike/JaxLeapStrike";
 const JAX_R_KEY: &str = "Characters/Jax/Spells/JaxR/JaxR";
@@ -59,7 +64,12 @@ fn on_jax_skill_cast(
     }
 }
 
-fn cast_jax_q(commands: &mut Commands, q_transform: &Query<&Transform>, entity: Entity, point: Vec2) {
+fn cast_jax_q(
+    commands: &mut Commands,
+    q_transform: &Query<&Transform>,
+    entity: Entity,
+    point: Vec2,
+) {
     play_skill_animation(commands, entity, hash_bin("Spell1"));
     spawn_skill_particle(commands, entity, hash_bin("Jax_Q_Cast"));
     skill_dash(
@@ -67,10 +77,10 @@ fn cast_jax_q(commands: &mut Commands, q_transform: &Query<&Transform>, entity: 
         q_transform,
         entity,
         point,
-        &crate::ActionDash {
+        &ActionDash {
             skill: JAX_Q_KEY.into(),
-            move_type: crate::DashMoveType::Pointer { max: 300.0 },
-            damage: Some(crate::DashDamage {
+            move_type: DashMoveType::Pointer { max: 300.0 },
+            damage: Some(DashDamage {
                 radius_end: 100.0,
                 damage: TargetDamage {
                     filter: TargetFilter::All,
@@ -88,7 +98,9 @@ fn cast_jax_w(commands: &mut Commands, entity: Entity) {
     spawn_skill_particle(commands, entity, hash_bin("Jax_W_Cast"));
     // W resets attack timer and enhances next attack
     reset_skill_attack(commands, entity);
-    commands.entity(entity).with_related::<BuffOf>(BuffEmpoweredAttack::new(50.0, 1));
+    commands
+        .entity(entity)
+        .with_related::<BuffOf>(BuffEmpoweredAttack::new(50.0, 1));
 }
 
 fn cast_jax_e(commands: &mut Commands, entity: Entity) {
@@ -96,13 +108,20 @@ fn cast_jax_e(commands: &mut Commands, entity: Entity) {
     spawn_skill_particle(commands, entity, hash_bin("Jax_E_Cast"));
 
     // E provides dodge buff
-    commands.entity(entity).with_related::<BuffOf>(BuffJaxE::new(
-        JAX_E_DURATION,
-        JAX_E_DODGE_CHANCE,
-        JAX_E_AOE_DODGE_CHANCE,
-    ));
+    commands
+        .entity(entity)
+        .with_related::<BuffOf>(BuffJaxE::new(
+            JAX_E_DURATION,
+            JAX_E_DODGE_CHANCE,
+            JAX_E_AOE_DODGE_CHANCE,
+        ));
 
-    debug!("{:?} 释放了 {} 技能，获得 {}% 闪避几率", entity, "Jax E", (JAX_E_DODGE_CHANCE * 100.0) as i32);
+    debug!(
+        "{:?} 释放了 {} 技能，获得 {}% 闪避几率",
+        entity,
+        "Jax E",
+        (JAX_E_DODGE_CHANCE * 100.0) as i32
+    );
 }
 
 fn cast_jax_r(commands: &mut Commands, entity: Entity) {
@@ -122,7 +141,9 @@ fn cast_jax_r(commands: &mut Commands, entity: Entity) {
         Some(hash_bin("Jax_R_Hit")),
     );
     // Armor/mr buff
-    commands.entity(entity).with_related::<BuffOf>(BuffResist::new(30.0, 30.0, 8.0));
+    commands
+        .entity(entity)
+        .with_related::<BuffOf>(BuffResist::new(30.0, 30.0, 8.0));
 }
 
 fn add_skills(

@@ -1,14 +1,21 @@
 use bevy::prelude::*;
-use league_core::{EnumVfxPrimitive, VfxEmitterDefinitionData, VfxSystemDefinitionData};
+use league_core::extract::{EnumVfxPrimitive, VfxEmitterDefinitionData, VfxSystemDefinitionData};
 
-use crate::{
-    create_black_pixel_texture, Lifetime, ParticleId, ParticleMaterialQuad,
-    ParticleMaterialQuadSlice, ParticleMeshQuad, ResourceCache, UniformsPixelQuadSlice,
-    UniformsVertexQuad,
+use super::state::ParticleEmitterState;
+use super::utils::{
+    calculate_emission_params, calculate_particle_transform_frame, get_emitter_type,
+    spawn_particle_entity, EmissionParams, EmitterType, ParticleBirthParams,
 };
-
-use super::ParticleEmitterState;
-use super::utils::{ParticleBirthParams, EmissionParams, calculate_emission_params, calculate_particle_transform_frame, spawn_particle_entity, get_emitter_type, EmitterType};
+use crate::core::lifetime::Lifetime;
+use crate::core::particle::particle::quad::{
+    ParticleMaterialQuad, ParticleMeshQuad, UniformsVertexQuad,
+};
+use crate::core::particle::particle::quad_slice::{
+    ParticleMaterialQuadSlice, UniformsPixelQuadSlice,
+};
+use crate::core::particle::utils::create_black_pixel_texture;
+use crate::core::particle::ParticleId;
+use crate::core::resource::ResourceCache;
 
 pub fn attach_quad_visuals(
     commands: &mut Commands,
@@ -37,32 +44,36 @@ pub fn attach_quad_visuals(
     };
 
     if let Some(range) = vfx_emitter_definition_data.slice_technique_range {
-        commands.entity(particle_entity).insert(MeshMaterial3d(
-            res_quad_slice_material.add(ParticleMaterialQuadSlice {
-                uniforms_vertex,
-                uniforms_pixel: UniformsPixelQuadSlice {
-                    slice_range: vec2(range, 1.0 / (range * range)),
-                    ..default()
+        commands
+            .entity(particle_entity)
+            .insert(MeshMaterial3d(res_quad_slice_material.add(
+                ParticleMaterialQuadSlice {
+                    uniforms_vertex,
+                    uniforms_pixel: UniformsPixelQuadSlice {
+                        slice_range: vec2(range, 1.0 / (range * range)),
+                        ..default()
+                    },
+                    particle_color_texture: particle_color_texture.clone(),
+                    texture: texture.clone(),
+                    cmb_tex_pixel_color_remap_ramp_smp_clamp_no_mip: Some(black_pixel_texture),
+                    sampler_fow: None,
+                    blend_mode,
                 },
-                particle_color_texture: particle_color_texture.clone(),
-                texture: texture.clone(),
-                cmb_tex_pixel_color_remap_ramp_smp_clamp_no_mip: Some(black_pixel_texture),
-                sampler_fow: None,
-                blend_mode,
-            }),
-        ));
+            )));
     } else {
         commands
             .entity(particle_entity)
-            .insert(MeshMaterial3d(res_quad_material.add(ParticleMaterialQuad {
-                uniforms_vertex,
-                particle_color_texture: particle_color_texture.clone(),
-                texture: texture.clone(),
-                cmb_tex_pixel_color_remap_ramp_smp_clamp_no_mip: Some(black_pixel_texture),
-                texturemult: texture_mult.clone(),
-                blend_mode,
-                ..default()
-            })));
+            .insert(MeshMaterial3d(res_quad_material.add(
+                ParticleMaterialQuad {
+                    uniforms_vertex,
+                    particle_color_texture: particle_color_texture.clone(),
+                    texture: texture.clone(),
+                    cmb_tex_pixel_color_remap_ramp_smp_clamp_no_mip: Some(black_pixel_texture),
+                    texturemult: texture_mult.clone(),
+                    blend_mode,
+                    ..default()
+                },
+            )));
     };
 }
 
@@ -107,7 +118,8 @@ pub fn update_emitter_quad(
             &mut emitter,
             vfx_emitter_definition_data,
             time.delta_secs(),
-        ) else {
+        )
+        else {
             continue;
         };
 

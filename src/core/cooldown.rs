@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::CoolDown;
+use crate::core::skill::CoolDown;
 
 #[derive(Default)]
 pub struct PluginCooldown;

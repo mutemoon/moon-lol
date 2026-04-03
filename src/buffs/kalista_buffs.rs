@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 卡莉丝塔被动 - 武术姿态（位移）
 #[derive(Component, Debug, Clone)]

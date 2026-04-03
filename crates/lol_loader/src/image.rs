@@ -4,7 +4,7 @@ use bevy::prelude::Image;
 use bevy::render::render_resource::{
     Extent3d, TextureDescriptor, TextureDimension, TextureFormat, TextureUsages,
 };
-use league_file::{LeagueTexture, LeagueTextureFormat};
+use league_file::texture::{LeagueTexture, LeagueTextureFormat};
 
 use super::error::Error;
 

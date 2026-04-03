@@ -1,15 +1,18 @@
 use bevy::prelude::*;
-use league_core::CharacterRecord;
+use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_config::LoadHashKeyTrait;
+use lol_config::prop::LoadHashKeyTrait;
 
-use crate::core::{
-    play_skill_animation, skill_damage, skill_slot_from_index, spawn_skill_particle,
-    CoolDown, DamageShape, EventDamageCreate, EventSkillCast, Skill,
-    SkillOf, SkillSlot, Skills, TargetDamage, TargetFilter,
+use crate::buffs::braum_buffs::{BuffBraumPassive, BuffBraumW};
+use crate::buffs::cc_debuffs::DebuffSlow;
+use crate::core::action::damage::{DamageShape, TargetDamage, TargetFilter};
+use crate::core::base::buff::BuffOf;
+use crate::core::damage::{DamageType, EventDamageCreate};
+use crate::core::skill::{
+    play_skill_animation, skill_damage, skill_slot_from_index, spawn_skill_particle, CoolDown,
+    EventSkillCast, PassiveSkillOf, Skill, SkillOf, SkillSlot, Skills,
 };
 use crate::entities::champion::Champion;
-use crate::{BuffBraumPassive, BuffBraumW, BuffOf, DamageType, DebuffSlow, PassiveSkillOf};
 
 const BRAUM_Q_KEY: &str = "Characters/Braum/Spells/BraumQ/BraumQ";
 #[allow(dead_code)]
@@ -67,7 +70,10 @@ fn cast_braum_q(commands: &mut Commands, entity: Entity) {
         commands,
         entity,
         BRAUM_Q_KEY,
-        DamageShape::Sector { radius: 1050.0, angle: 30.0 },
+        DamageShape::Sector {
+            radius: 1050.0,
+            angle: 30.0,
+        },
         vec![TargetDamage {
             filter: TargetFilter::All,
             amount: hash_bin("TotalDamage"),
@@ -82,7 +88,9 @@ fn cast_braum_w(commands: &mut Commands, entity: Entity) {
     spawn_skill_particle(commands, entity, hash_bin("Braum_W_Cast"));
 
     // W jumps to ally and grants armor/mr buff
-    commands.entity(entity).with_related::<BuffOf>(BuffBraumW::new());
+    commands
+        .entity(entity)
+        .with_related::<BuffOf>(BuffBraumW::new());
 }
 
 fn cast_braum_e(commands: &mut Commands, entity: Entity) {
@@ -100,7 +108,10 @@ fn cast_braum_r(commands: &mut Commands, entity: Entity) {
         commands,
         entity,
         BRAUM_R_KEY,
-        DamageShape::Sector { radius: 1200.0, angle: 45.0 },
+        DamageShape::Sector {
+            radius: 1200.0,
+            angle: 45.0,
+        },
         vec![TargetDamage {
             filter: TargetFilter::All,
             amount: hash_bin("TotalDamage"),
@@ -123,9 +134,13 @@ fn on_braum_damage_hit(
     let target = trigger.event_target();
 
     // Q slows
-    commands.entity(target).with_related::<BuffOf>(DebuffSlow::new(0.7, 2.0));
+    commands
+        .entity(target)
+        .with_related::<BuffOf>(DebuffSlow::new(0.7, 2.0));
     // Apply passive stacks
-    commands.entity(target).with_related::<BuffOf>(BuffBraumPassive::new());
+    commands
+        .entity(target)
+        .with_related::<BuffOf>(BuffBraumPassive::new());
 }
 
 fn add_skills(
@@ -150,10 +165,9 @@ fn add_skills(
 
         for (index, &skill) in character_record.spells.as_ref().unwrap().iter().enumerate() {
             let skill_component = Skill::new(skill_slot_from_index(index), skill);
-            commands.entity(entity).with_related::<SkillOf>((
-                skill_component,
-                CoolDown::default(),
-            ));
+            commands
+                .entity(entity)
+                .with_related::<SkillOf>((skill_component, CoolDown::default()));
         }
     }
 }

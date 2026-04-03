@@ -1,15 +1,17 @@
 use bevy::prelude::*;
-use league_core::CharacterRecord;
+use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_config::LoadHashKeyTrait;
+use lol_config::prop::LoadHashKeyTrait;
 
-use crate::core::{
-    play_skill_animation, skill_damage, skill_slot_from_index, spawn_skill_particle,
-    BuffOf, CoolDown, DamageShape, EventDamageCreate, EventSkillCast, Skill, SkillOf, SkillSlot,
-    Skills, TargetDamage, TargetFilter,
+use crate::buffs::katarina_buffs::{BuffKatarinaVoracity, BuffKatarinaW};
+use crate::core::action::damage::{DamageShape, TargetDamage, TargetFilter};
+use crate::core::base::buff::BuffOf;
+use crate::core::damage::{DamageType, EventDamageCreate};
+use crate::core::skill::{
+    play_skill_animation, skill_damage, skill_slot_from_index, spawn_skill_particle, CoolDown,
+    EventSkillCast, PassiveSkillOf, Skill, SkillOf, SkillSlot, Skills,
 };
 use crate::entities::champion::Champion;
-use crate::{BuffKatarinaVoracity, BuffKatarinaW, DamageType, PassiveSkillOf};
 
 const KATARINA_Q_KEY: &str = "Characters/Katarina/Spells/KatarinaQ/KatarinaQ";
 #[allow(dead_code)]
@@ -82,10 +84,17 @@ fn cast_katarina_w(commands: &mut Commands, entity: Entity) {
     spawn_skill_particle(commands, entity, hash_bin("Katarina_W_Cast"));
 
     // W throws dagger up and grants movespeed
-    commands.entity(entity).with_related::<BuffOf>(BuffKatarinaW::new(0.8, 2.0));
+    commands
+        .entity(entity)
+        .with_related::<BuffOf>(BuffKatarinaW::new(0.8, 2.0));
 }
 
-fn cast_katarina_e(commands: &mut Commands, _q_transform: &Query<&Transform>, entity: Entity, _point: Vec2) {
+fn cast_katarina_e(
+    commands: &mut Commands,
+    _q_transform: &Query<&Transform>,
+    entity: Entity,
+    _point: Vec2,
+) {
     play_skill_animation(commands, entity, hash_bin("Spell3"));
     spawn_skill_particle(commands, entity, hash_bin("Katarina_E_Cast"));
 
@@ -136,7 +145,9 @@ fn on_katarina_damage_hit(
     let _target = trigger.event_target();
 
     // Passive: kill reduces cooldowns
-    commands.entity(source).with_related::<BuffOf>(BuffKatarinaVoracity::new(15.0, 3.0));
+    commands
+        .entity(source)
+        .with_related::<BuffOf>(BuffKatarinaVoracity::new(15.0, 3.0));
 }
 
 fn add_skills(
@@ -161,10 +172,9 @@ fn add_skills(
 
         for (index, &skill) in character_record.spells.as_ref().unwrap().iter().enumerate() {
             let skill_component = Skill::new(skill_slot_from_index(index), skill);
-            commands.entity(entity).with_related::<SkillOf>((
-                skill_component,
-                CoolDown::default(),
-            ));
+            commands
+                .entity(entity)
+                .with_related::<SkillOf>((skill_component, CoolDown::default()));
         }
     }
 }

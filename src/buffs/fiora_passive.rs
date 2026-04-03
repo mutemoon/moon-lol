@@ -3,15 +3,19 @@ use std::collections::HashMap;
 use bevy::ecs::relationship::Relationship;
 use bevy::prelude::*;
 use league_utils::hash_bin;
-use lol_core::Team;
+use lol_core::team::Team;
 use rand::random;
 use serde::{Deserialize, Serialize};
 
-use crate::{
-    is_in_direction, BuffFioraR, BuffOf, Champion, CommandDamageCreate, CommandSkinParticleDespawn,
-    CommandSkinParticleSpawn, DamageType, Direction, EntityCommandsTrigger, EventDamageCreate,
-    Health, PassiveSkillOf,
-};
+use crate::buffs::fiora_r::BuffFioraR;
+use crate::core::attack::EntityCommandsTrigger;
+use crate::core::base::buff::BuffOf;
+use crate::core::base::direction::{is_in_direction, Direction};
+use crate::core::damage::{CommandDamageCreate, DamageType, EventDamageCreate};
+use crate::core::life::Health;
+use crate::core::skill::PassiveSkillOf;
+use crate::core::skin::particle::{CommandSkinParticleDespawn, CommandSkinParticleSpawn};
+use crate::entities::champion::Champion;
 
 const VITAL_DISTANCE: f32 = 1000.0;
 const FIORA_PASSIVE_ACTIVE_DURATION: f32 = 1.7;

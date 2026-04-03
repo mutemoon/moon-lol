@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 阿木木被动 - 诅咒之触
 #[derive(Component, Debug, Clone)]

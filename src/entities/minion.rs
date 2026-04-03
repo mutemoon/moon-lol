@@ -1,12 +1,15 @@
 use bevy::app::Plugin;
 use bevy::prelude::*;
-use lol_core::{Lane, Team};
+use lol_core::lane::Lane;
+use lol_core::team::Team;
 use serde::{Deserialize, Serialize};
 
-use crate::{
-    Aggro, AttackAuto, CommandAttackAutoStart, CommandAttackAutoStop, CommandMovement,
-    EventAggroTargetFound, EventDead, MinionPath, MovementAction, MovementWay, State,
-};
+use crate::core::aggro::{Aggro, EventAggroTargetFound};
+use crate::core::attack_auto::{AttackAuto, CommandAttackAutoStart, CommandAttackAutoStop};
+use crate::core::base::state::State;
+use crate::core::life::EventDead;
+use crate::core::map::MinionPath;
+use crate::core::movement::{CommandMovement, MovementAction, MovementWay};
 
 #[derive(Default)]
 pub struct PluginMinion;

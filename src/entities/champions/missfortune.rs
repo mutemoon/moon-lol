@@ -1,15 +1,18 @@
 use bevy::prelude::*;
-use league_core::CharacterRecord;
+use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_config::LoadHashKeyTrait;
+use lol_config::prop::LoadHashKeyTrait;
 
-use crate::core::{
-    play_skill_animation, skill_damage, skill_slot_from_index,
-    spawn_skill_particle, BuffOf, CoolDown, DamageShape, EventDamageCreate, EventSkillCast, Skill,
-    SkillOf, SkillSlot, Skills, TargetDamage, TargetFilter,
+use crate::buffs::cc_debuffs::DebuffSlow;
+use crate::buffs::missfortune_buffs::BuffMissFortuneW;
+use crate::core::action::damage::{DamageShape, TargetDamage, TargetFilter};
+use crate::core::base::buff::BuffOf;
+use crate::core::damage::{DamageType, EventDamageCreate};
+use crate::core::skill::{
+    play_skill_animation, skill_damage, skill_slot_from_index, spawn_skill_particle, CoolDown,
+    EventSkillCast, PassiveSkillOf, Skill, SkillOf, SkillSlot, Skills,
 };
 use crate::entities::champion::Champion;
-use crate::{BuffMissFortuneW, DebuffSlow, DamageType, PassiveSkillOf};
 
 const MISSFORTUNE_Q_KEY: &str = "Characters/MissFortune/Spells/MissFortuneQ/MissFortuneQ";
 #[allow(dead_code)]
@@ -66,7 +69,10 @@ fn cast_missfortune_q(commands: &mut Commands, entity: Entity) {
         commands,
         entity,
         MISSFORTUNE_Q_KEY,
-        DamageShape::Sector { radius: 550.0, angle: 10.0 },
+        DamageShape::Sector {
+            radius: 550.0,
+            angle: 10.0,
+        },
         vec![TargetDamage {
             filter: TargetFilter::All,
             amount: hash_bin("TotalDamage"),
@@ -81,7 +87,9 @@ fn cast_missfortune_w(commands: &mut Commands, entity: Entity) {
     spawn_skill_particle(commands, entity, hash_bin("MissFortune_W_Cast"));
 
     // W grants movespeed and attackspeed
-    commands.entity(entity).with_related::<BuffOf>(BuffMissFortuneW::new(0.6, 1.0, 4.0));
+    commands
+        .entity(entity)
+        .with_related::<BuffOf>(BuffMissFortuneW::new(0.6, 1.0, 4.0));
 }
 
 fn cast_missfortune_e(commands: &mut Commands, entity: Entity) {
@@ -112,7 +120,10 @@ fn cast_missfortune_r(commands: &mut Commands, entity: Entity) {
         commands,
         entity,
         MISSFORTUNE_R_KEY,
-        DamageShape::Sector { radius: 1450.0, angle: 45.0 },
+        DamageShape::Sector {
+            radius: 1450.0,
+            angle: 45.0,
+        },
         vec![TargetDamage {
             filter: TargetFilter::All,
             amount: hash_bin("TotalDamage"),
@@ -135,7 +146,9 @@ fn on_missfortune_damage_hit(
     let target = trigger.event_target();
 
     // E slows
-    commands.entity(target).with_related::<BuffOf>(DebuffSlow::new(0.4, 2.0));
+    commands
+        .entity(target)
+        .with_related::<BuffOf>(DebuffSlow::new(0.4, 2.0));
 }
 
 fn add_skills(
@@ -160,10 +173,9 @@ fn add_skills(
 
         for (index, &skill) in character_record.spells.as_ref().unwrap().iter().enumerate() {
             let skill_component = Skill::new(skill_slot_from_index(index), skill);
-            commands.entity(entity).with_related::<SkillOf>((
-                skill_component,
-                CoolDown::default(),
-            ));
+            commands
+                .entity(entity)
+                .with_related::<SkillOf>((skill_component, CoolDown::default()));
         }
     }
 }

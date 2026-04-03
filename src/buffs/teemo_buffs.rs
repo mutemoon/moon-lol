@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 提莫Q - 致盲（致盲）
 #[derive(Component, Debug, Clone)]

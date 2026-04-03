@@ -199,7 +199,11 @@ impl ActionSkillHarness {
     }
 
     fn mana(&self) -> f32 {
-        self.app.world().get::<AbilityResource>(self.caster).unwrap().value
+        self.app
+            .world()
+            .get::<AbilityResource>(self.caster)
+            .unwrap()
+            .value
     }
 
     fn health(&self) -> f32 {
@@ -222,9 +226,10 @@ fn make_mana(value: f32) -> AbilityResource {
 #[test]
 fn action_input_can_drive_code_driven_damage_skill_end_to_end() {
     let mut harness = ActionSkillHarness::new();
-    harness
-        .register_spell(25.0, 35.0)
-        .add_skill(Skill::new(SkillSlot::Q, SPELL_KEY).with_level(1), ActionDamageSkill);
+    harness.register_spell(25.0, 35.0).add_skill(
+        Skill::new(SkillSlot::Q, SPELL_KEY).with_level(1),
+        ActionDamageSkill,
+    );
 
     harness.send_action(Action::Skill {
         index: 0,
@@ -234,7 +239,14 @@ fn action_input_can_drive_code_driven_damage_skill_end_to_end() {
     assert!((harness.mana() - 75.0).abs() < EPSILON);
     assert!((harness.health() - 965.0).abs() < EPSILON);
     assert!(matches!(
-        harness.app.world().resource::<SkillCastLog>().0.last().unwrap().result,
+        harness
+            .app
+            .world()
+            .resource::<SkillCastLog>()
+            .0
+            .last()
+            .unwrap()
+            .result,
         SkillCastResult::Started
     ));
 }
@@ -242,9 +254,10 @@ fn action_input_can_drive_code_driven_damage_skill_end_to_end() {
 #[test]
 fn action_input_can_reach_code_driven_skill_observer() {
     let mut harness = ActionSkillHarness::new();
-    harness
-        .register_spell(10.0, 0.0)
-        .add_skill(Skill::new(SkillSlot::W, SPELL_KEY).with_level(1), ActionObserverSkill);
+    harness.register_spell(10.0, 0.0).add_skill(
+        Skill::new(SkillSlot::W, SPELL_KEY).with_level(1),
+        ActionObserverSkill,
+    );
 
     harness.send_action(Action::Skill {
         index: 0,
@@ -263,7 +276,15 @@ fn action_input_can_level_up_skill_through_same_pipeline() {
 
     harness.send_action(Action::SkillLevelUp(0));
 
-    assert_eq!(harness.app.world().get::<Skill>(skill_entity).unwrap().level, 1);
+    assert_eq!(
+        harness
+            .app
+            .world()
+            .get::<Skill>(skill_entity)
+            .unwrap()
+            .level,
+        1
+    );
     assert_eq!(
         harness
             .app

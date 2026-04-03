@@ -1,15 +1,17 @@
 use bevy::prelude::*;
-use league_core::CharacterRecord;
+use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_config::LoadHashKeyTrait;
+use lol_config::prop::LoadHashKeyTrait;
 
-use crate::core::{
-    play_skill_animation, skill_damage, skill_slot_from_index, spawn_skill_particle,
-    BuffOf, CoolDown, DamageShape, EventDamageCreate, EventSkillCast, Skill, SkillOf, SkillSlot,
-    Skills, TargetDamage, TargetFilter,
+use crate::buffs::leblanc_buffs::{BuffLeBlancE, BuffLeBlancQ};
+use crate::core::action::damage::{DamageShape, TargetDamage, TargetFilter};
+use crate::core::base::buff::BuffOf;
+use crate::core::damage::{DamageType, EventDamageCreate};
+use crate::core::skill::{
+    play_skill_animation, skill_damage, skill_slot_from_index, spawn_skill_particle, CoolDown,
+    EventSkillCast, PassiveSkillOf, Skill, SkillOf, SkillSlot, Skills,
 };
 use crate::entities::champion::Champion;
-use crate::{BuffLeBlancE, BuffLeBlancQ, DamageType, PassiveSkillOf};
 
 const LEBLANC_Q_KEY: &str = "Characters/LeBlanc/Spells/LeBlancQ/LeBlancQ";
 const LEBLANC_W_KEY: &str = "Characters/LeBlanc/Spells/LeBlancW/LeBlancW";
@@ -66,7 +68,10 @@ fn cast_leblanc_q(commands: &mut Commands, entity: Entity) {
         commands,
         entity,
         LEBLANC_Q_KEY,
-        DamageShape::Sector { radius: 700.0, angle: 10.0 },
+        DamageShape::Sector {
+            radius: 700.0,
+            angle: 10.0,
+        },
         vec![TargetDamage {
             filter: TargetFilter::All,
             amount: hash_bin("TotalDamage"),
@@ -76,7 +81,12 @@ fn cast_leblanc_q(commands: &mut Commands, entity: Entity) {
     );
 }
 
-fn cast_leblanc_w(commands: &mut Commands, _q_transform: &Query<&Transform>, entity: Entity, _point: Vec2) {
+fn cast_leblanc_w(
+    commands: &mut Commands,
+    _q_transform: &Query<&Transform>,
+    entity: Entity,
+    _point: Vec2,
+) {
     play_skill_animation(commands, entity, hash_bin("Spell2"));
     spawn_skill_particle(commands, entity, hash_bin("LeBlanc_W_Cast"));
 
@@ -104,7 +114,10 @@ fn cast_leblanc_e(commands: &mut Commands, entity: Entity) {
         commands,
         entity,
         LEBLANC_E_KEY,
-        DamageShape::Sector { radius: 950.0, angle: 10.0 },
+        DamageShape::Sector {
+            radius: 950.0,
+            angle: 10.0,
+        },
         vec![TargetDamage {
             filter: TargetFilter::All,
             amount: hash_bin("TotalDamage"),
@@ -114,7 +127,12 @@ fn cast_leblanc_e(commands: &mut Commands, entity: Entity) {
     );
 }
 
-fn cast_leblanc_r(commands: &mut Commands, _q_transform: &Query<&Transform>, entity: Entity, _point: Vec2) {
+fn cast_leblanc_r(
+    commands: &mut Commands,
+    _q_transform: &Query<&Transform>,
+    entity: Entity,
+    _point: Vec2,
+) {
     play_skill_animation(commands, entity, hash_bin("Spell4"));
     spawn_skill_particle(commands, entity, hash_bin("LeBlanc_R_Cast"));
 
@@ -123,7 +141,10 @@ fn cast_leblanc_r(commands: &mut Commands, _q_transform: &Query<&Transform>, ent
         commands,
         entity,
         LEBLANC_R_KEY,
-        DamageShape::Sector { radius: 700.0, angle: 10.0 },
+        DamageShape::Sector {
+            radius: 700.0,
+            angle: 10.0,
+        },
         vec![TargetDamage {
             filter: TargetFilter::All,
             amount: hash_bin("TotalDamage"),
@@ -146,10 +167,14 @@ fn on_leblanc_damage_hit(
     let target = trigger.event_target();
 
     // Q applies mark
-    commands.entity(target).with_related::<BuffOf>(BuffLeBlancQ::new(100.0, 3.5));
+    commands
+        .entity(target)
+        .with_related::<BuffOf>(BuffLeBlancQ::new(100.0, 3.5));
 
     // E roots
-    commands.entity(target).with_related::<BuffOf>(BuffLeBlancE::new(80.0, 1.5, 3.0));
+    commands
+        .entity(target)
+        .with_related::<BuffOf>(BuffLeBlancE::new(80.0, 1.5, 3.0));
 }
 
 fn add_skills(
@@ -174,10 +199,9 @@ fn add_skills(
 
         for (index, &skill) in character_record.spells.as_ref().unwrap().iter().enumerate() {
             let skill_component = Skill::new(skill_slot_from_index(index), skill);
-            commands.entity(entity).with_related::<SkillOf>((
-                skill_component,
-                CoolDown::default(),
-            ));
+            commands
+                .entity(entity)
+                .with_related::<SkillOf>((skill_component, CoolDown::default()));
         }
     }
 }

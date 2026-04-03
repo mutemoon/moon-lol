@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::Buff;
+use crate::core::base::buff::Buff;
 
 /// 沃利贝尔Q - 加速 + 下次攻击眩晕
 #[derive(Component, Debug, Clone)]

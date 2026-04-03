@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 卡莎被动 - 等离子标记
 #[derive(Component, Debug, Clone)]

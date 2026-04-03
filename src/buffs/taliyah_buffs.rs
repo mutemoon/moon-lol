@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 塔莉垭W - 伍图突岩（击飞）
 #[derive(Component, Debug, Clone)]

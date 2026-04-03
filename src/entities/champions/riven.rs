@@ -1,17 +1,20 @@
 use bevy::prelude::*;
-use league_core::CharacterRecord;
+use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_config::LoadHashKeyTrait;
+use lol_config::prop::LoadHashKeyTrait;
 
-use crate::core::{
+use crate::buffs::riven_passive::BuffRivenPassive;
+use crate::buffs::shield_white::BuffShieldWhite;
+use crate::core::action::damage::{DamageShape, TargetDamage, TargetFilter};
+use crate::core::action::dash::{ActionDash, DashDamage, DashMoveType};
+use crate::core::base::buff::BuffOf;
+use crate::core::damage::DamageType;
+use crate::core::skill::{
     play_skill_animation, skill_damage, skill_dash, skill_slot_from_index, spawn_skill_particle,
-    CoolDown, DamageShape, EventSkillCast, Skill, SkillOf, SkillCooldownMode, SkillRecastWindow,
-    SkillSlot, Skills, TargetDamage, TargetFilter,
+    CoolDown, EventSkillCast, PassiveSkillOf, Skill, SkillCooldownMode, SkillOf, SkillRecastWindow,
+    SkillSlot, Skills,
 };
 use crate::entities::champion::Champion;
-use crate::{
-    BuffOf, BuffRivenPassive, BuffShieldWhite, DamageType, DashDamage, DashMoveType, PassiveSkillOf,
-};
 
 const RIVEN_Q_KEY: &str = "Characters/Riven/Spells/RivenTriCleaveAbility/RivenTriCleave";
 const RIVEN_W_KEY: &str = "Characters/Riven/Spells/RivenMartyrAbility/RivenMartyr";
@@ -89,7 +92,7 @@ fn cast_riven_q(
         q_transform,
         entity,
         point,
-        &crate::ActionDash {
+        &ActionDash {
             skill: RIVEN_Q_KEY.into(),
             move_type: DashMoveType::Fixed(250.0),
             damage: Some(DashDamage {
@@ -115,9 +118,11 @@ fn cast_riven_q(
             duration: cooldown.duration,
         });
     } else {
-        commands
-            .entity(skill_entity)
-            .insert(SkillRecastWindow::new(stage + 1, 3, RIVEN_Q_RECAST_WINDOW));
+        commands.entity(skill_entity).insert(SkillRecastWindow::new(
+            stage + 1,
+            3,
+            RIVEN_Q_RECAST_WINDOW,
+        ));
     }
 }
 
@@ -154,7 +159,7 @@ fn cast_riven_e(
         q_transform,
         entity,
         point,
-        &crate::ActionDash {
+        &ActionDash {
             skill: RIVEN_E_KEY.into(),
             move_type: DashMoveType::Fixed(250.0),
             damage: None,
@@ -193,10 +198,9 @@ fn add_skills(
             if index == 0 {
                 skill_component = skill_component.with_cooldown_mode(SkillCooldownMode::Manual);
             }
-            commands.entity(entity).with_related::<SkillOf>((
-                skill_component,
-                CoolDown::default(),
-            ));
+            commands
+                .entity(entity)
+                .with_related::<SkillOf>((skill_component, CoolDown::default()));
         }
     }
 }

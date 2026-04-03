@@ -1,7 +1,7 @@
 use bevy::prelude::*;
-use league_core::VfxEmitterDefinitionData;
+use league_core::extract::VfxEmitterDefinitionData;
 
-use crate::{FromVfxOption, StochasticSampler};
+use crate::core::particle::utils::{FromVfxOption, StochasticSampler};
 
 #[derive(Component)]
 #[require(Visibility)]

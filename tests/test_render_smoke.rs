@@ -36,7 +36,9 @@ fn skill_test_render_writes_frames_inner() {
     });
     app.add_plugins(DefaultPlugins.build().disable::<WinitPlugin>());
     app.add_plugins(PluginSkillTestRenderSuite);
-    app.insert_resource(TimeUpdateStrategy::ManualDuration(Duration::from_millis(16)));
+    app.insert_resource(TimeUpdateStrategy::ManualDuration(Duration::from_millis(
+        16,
+    )));
 
     app.finish();
     app.cleanup();

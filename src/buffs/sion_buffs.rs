@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 赛恩Q - 残虐猛击（击飞）
 #[derive(Component, Debug, Clone)]

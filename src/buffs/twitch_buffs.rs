@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 图奇被动 - 致命毒液（持续伤害）
 #[derive(Component, Debug, Clone)]

@@ -1,16 +1,21 @@
 use bevy::prelude::*;
-use league_core::CharacterRecord;
+use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_config::LoadHashKeyTrait;
+use lol_config::prop::LoadHashKeyTrait;
 
-use crate::core::{
+use crate::buffs::common_buffs::BuffSelfHeal;
+use crate::buffs::renekton_buffs::BuffRenektonR;
+use crate::core::action::damage::{DamageShape, TargetDamage, TargetFilter};
+use crate::core::action::dash::{ActionDash, DashDamage, DashMoveType};
+use crate::core::base::ability_resource::AbilityResource;
+use crate::core::base::buff::BuffOf;
+use crate::core::damage::DamageType;
+use crate::core::skill::{
     play_skill_animation, reset_skill_attack, skill_damage, skill_dash, skill_slot_from_index,
-    spawn_skill_particle, AbilityResource, BuffOf, CoolDown, DamageShape, EventSkillCast, Skill,
-    SkillCooldownMode, SkillOf, SkillRecastWindow, SkillSlot, Skills, TargetDamage, TargetFilter,
+    spawn_skill_particle, CoolDown, EventSkillCast, PassiveSkillOf, Skill, SkillCooldownMode,
+    SkillOf, SkillRecastWindow, SkillSlot, Skills,
 };
 use crate::entities::champion::Champion;
-use crate::{BuffRenektonR, BuffSelfHeal, PassiveSkillOf};
-use crate::DamageType;
 
 const RENECKTON_Q_KEY: &str = "Characters/Renekton/Spells/RenektonQ/RenektonQ";
 const RENECKTON_W_KEY: &str = "Characters/Renekton/Spells/RenektonW/RenektonW";
@@ -75,7 +80,10 @@ fn cast_renekton_q(
     play_skill_animation(commands, entity, hash_bin("Spell1"));
     spawn_skill_particle(commands, entity, hash_bin("Renekton_Q_Cast"));
     // Q is a cleave that deals damage in a circle
-    let rage = q_ability_resource.get(entity).map(|r| r.value).unwrap_or(0.0);
+    let rage = q_ability_resource
+        .get(entity)
+        .map(|r| r.value)
+        .unwrap_or(0.0);
     if rage >= 50.0 {
         // 消耗 50 怒气，强化版伤害和治疗
         if let Ok(mut resource) = q_ability_resource.get_mut(entity) {
@@ -93,7 +101,9 @@ fn cast_renekton_q(
             }],
             Some(hash_bin("Renekton_Q_Hit")),
         );
-        commands.entity(entity).with_related::<BuffOf>(BuffSelfHeal::new(80.0)); // 翻倍治疗
+        commands
+            .entity(entity)
+            .with_related::<BuffOf>(BuffSelfHeal::new(80.0)); // 翻倍治疗
     } else {
         skill_damage(
             commands,
@@ -107,7 +117,9 @@ fn cast_renekton_q(
             }],
             Some(hash_bin("Renekton_Q_Hit")),
         );
-        commands.entity(entity).with_related::<BuffOf>(BuffSelfHeal::new(40.0));
+        commands
+            .entity(entity)
+            .with_related::<BuffOf>(BuffSelfHeal::new(40.0));
     }
 }
 
@@ -120,7 +132,9 @@ fn cast_renekton_w(commands: &mut Commands, entity: Entity) {
         commands,
         entity,
         RENECKTON_W_KEY,
-        DamageShape::Nearest { max_distance: 150.0 },
+        DamageShape::Nearest {
+            max_distance: 150.0,
+        },
         vec![TargetDamage {
             filter: TargetFilter::All,
             amount: hash_bin("TotalDamage"),
@@ -151,10 +165,10 @@ fn cast_renekton_e(
             q_transform,
             entity,
             point,
-            &crate::ActionDash {
+            &ActionDash {
                 skill: RENECKTON_E_KEY.into(),
-                move_type: crate::DashMoveType::Pointer { max: 200.0 },
-                damage: Some(crate::DashDamage {
+                move_type: DashMoveType::Pointer { max: 200.0 },
+                damage: Some(DashDamage {
                     radius_end: 100.0,
                     damage: TargetDamage {
                         filter: TargetFilter::All,
@@ -165,9 +179,11 @@ fn cast_renekton_e(
                 speed: 700.0,
             },
         );
-        commands
-            .entity(skill_entity)
-            .insert(SkillRecastWindow::new(2, 2, RENECKTON_E_RECAST_WINDOW));
+        commands.entity(skill_entity).insert(SkillRecastWindow::new(
+            2,
+            2,
+            RENECKTON_E_RECAST_WINDOW,
+        ));
     } else {
         // Second cast: Dash again
         spawn_skill_particle(commands, entity, hash_bin("Renekton_E2_Cast"));
@@ -176,10 +192,10 @@ fn cast_renekton_e(
             q_transform,
             entity,
             point,
-            &crate::ActionDash {
+            &ActionDash {
                 skill: RENECKTON_E_KEY.into(),
-                move_type: crate::DashMoveType::Pointer { max: 200.0 },
-                damage: Some(crate::DashDamage {
+                move_type: DashMoveType::Pointer { max: 200.0 },
+                damage: Some(DashDamage {
                     radius_end: 100.0,
                     damage: TargetDamage {
                         filter: TargetFilter::All,
@@ -214,7 +230,9 @@ fn cast_renekton_r(commands: &mut Commands, entity: Entity) {
         }],
         Some(hash_bin("Renekton_R_Hit")),
     );
-    commands.entity(entity).with_related::<BuffOf>(BuffRenektonR::new(0.0, 5.0, 15.0));
+    commands
+        .entity(entity)
+        .with_related::<BuffOf>(BuffRenektonR::new(0.0, 5.0, 15.0));
 }
 
 fn add_skills(
@@ -243,10 +261,9 @@ fn add_skills(
             if index == 2 {
                 skill_component = skill_component.with_cooldown_mode(SkillCooldownMode::Manual);
             }
-            commands.entity(entity).with_related::<SkillOf>((
-                skill_component,
-                CoolDown::default(),
-            ));
+            commands
+                .entity(entity)
+                .with_related::<SkillOf>((skill_component, CoolDown::default()));
         }
     }
 }

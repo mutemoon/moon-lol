@@ -1,12 +1,15 @@
 use bevy::prelude::*;
-use league_core::{
+use league_core::extract::{
     EnumUiPosition, FloatingInfoBarViewController, HeroFloatingInfoBarData,
     StructureFloatingInfoBarData, UiElementIconData, UiElementRegionData, UnitFloatingInfoBarData,
 };
 use league_utils::hash_bin;
-use lol_config::LoadHashKeyTrait;
+use lol_config::prop::LoadHashKeyTrait;
 
-use crate::{spawn_ui_element, Bounding, Health, UIBind, UIState};
+use crate::core::base::bounding::Bounding;
+use crate::core::life::Health;
+use crate::ui::bind::UIBind;
+use crate::ui::element::{spawn_ui_element, UIState};
 
 pub struct PluginUIHealthBar;
 

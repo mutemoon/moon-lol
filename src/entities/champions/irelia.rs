@@ -1,16 +1,21 @@
 use bevy::prelude::*;
-use league_core::CharacterRecord;
+use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_config::LoadHashKeyTrait;
+use lol_config::prop::LoadHashKeyTrait;
 
-use crate::core::{
+use crate::buffs::cc_debuffs::DebuffStun;
+use crate::buffs::damage_reduction::BuffDamageReduction;
+use crate::buffs::irelia_buffs::DebuffIreliaUnsteady;
+use crate::core::action::damage::{DamageShape, TargetDamage, TargetFilter};
+use crate::core::action::dash::{ActionDash, DashDamage, DashMoveType};
+use crate::core::base::buff::BuffOf;
+use crate::core::damage::{DamageType, EventDamageCreate};
+use crate::core::skill::{
     play_skill_animation, skill_damage, skill_dash, skill_slot_from_index, spawn_skill_particle,
-    BuffOf, CoolDown, DamageShape, EventDamageCreate, EventSkillCast, Skill, SkillCooldownMode,
-    SkillOf, SkillRecastWindow, SkillSlot, Skills, TargetDamage, TargetFilter,
+    CoolDown, EventSkillCast, PassiveSkillOf, Skill, SkillCooldownMode, SkillOf, SkillRecastWindow,
+    SkillSlot, Skills,
 };
 use crate::entities::champion::Champion;
-use crate::{BuffDamageReduction, DebuffIreliaUnsteady, DebuffStun, PassiveSkillOf};
-use crate::DamageType;
 
 const IRELIA_Q_KEY: &str = "Characters/Irelia/Spells/IreliaQ/IreliaQ";
 const IRELIA_E_KEY: &str = "Characters/Irelia/Spells/IreliaE/IreliaE";
@@ -64,7 +69,12 @@ fn on_irelia_skill_cast(
     }
 }
 
-fn cast_irelia_q(commands: &mut Commands, q_transform: &Query<&Transform>, entity: Entity, point: Vec2) {
+fn cast_irelia_q(
+    commands: &mut Commands,
+    q_transform: &Query<&Transform>,
+    entity: Entity,
+    point: Vec2,
+) {
     play_skill_animation(commands, entity, hash_bin("Spell1"));
     spawn_skill_particle(commands, entity, hash_bin("Irelia_Q_Cast"));
     // Q is a dash that resets on kill and marks enemies as Unsteady
@@ -73,10 +83,10 @@ fn cast_irelia_q(commands: &mut Commands, q_transform: &Query<&Transform>, entit
         q_transform,
         entity,
         point,
-        &crate::ActionDash {
+        &ActionDash {
             skill: IRELIA_Q_KEY.into(),
-            move_type: crate::DashMoveType::Pointer { max: 250.0 },
-            damage: Some(crate::DashDamage {
+            move_type: DashMoveType::Pointer { max: 250.0 },
+            damage: Some(DashDamage {
                 radius_end: 80.0,
                 damage: TargetDamage {
                     filter: TargetFilter::All,
@@ -94,8 +104,12 @@ fn cast_irelia_w(commands: &mut Commands, entity: Entity) {
     spawn_skill_particle(commands, entity, hash_bin("Irelia_W_Cast"));
     // W is a channel that grants damage reduction then releases damage
     let (buff_irelia_w, buff_damage_reduction) = BuffDamageReduction::irelia_w(0.5, 1.5);
-    commands.entity(entity).with_related::<BuffOf>(buff_irelia_w);
-    commands.entity(entity).with_related::<BuffOf>(buff_damage_reduction);
+    commands
+        .entity(entity)
+        .with_related::<BuffOf>(buff_irelia_w);
+    commands
+        .entity(entity)
+        .with_related::<BuffOf>(buff_damage_reduction);
 }
 
 fn cast_irelia_e(
@@ -182,10 +196,9 @@ fn add_skills(
             if index == 2 {
                 skill_component = skill_component.with_cooldown_mode(SkillCooldownMode::Manual);
             }
-            commands.entity(entity).with_related::<SkillOf>((
-                skill_component,
-                CoolDown::default(),
-            ));
+            commands
+                .entity(entity)
+                .with_related::<SkillOf>((skill_component, CoolDown::default()));
         }
     }
 }
@@ -202,6 +215,10 @@ fn on_irelia_damage_hit(
     }
     let target = trigger.event_target();
     // E/R 命中给目标标记不稳 + 眩晕
-    commands.entity(target).with_related::<BuffOf>(DebuffIreliaUnsteady::new(5.0));
-    commands.entity(target).with_related::<BuffOf>(DebuffStun::new(0.75));
+    commands
+        .entity(target)
+        .with_related::<BuffOf>(DebuffIreliaUnsteady::new(5.0));
+    commands
+        .entity(target)
+        .with_related::<BuffOf>(DebuffStun::new(0.75));
 }

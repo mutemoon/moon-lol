@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::Buff;
+use crate::core::base::buff::Buff;
 
 /// 赫卡里姆Q技能层数buff - 叠层后减少Q冷却并增加伤害
 #[derive(Component, Debug, Clone)]
@@ -17,7 +17,11 @@ pub struct BuffHecarimQ {
 }
 
 impl BuffHecarimQ {
-    pub fn new(max_stacks: u8, cooldown_reduction_per_stack: f32, damage_bonus_per_stack: f32) -> Self {
+    pub fn new(
+        max_stacks: u8,
+        cooldown_reduction_per_stack: f32,
+        damage_bonus_per_stack: f32,
+    ) -> Self {
         Self {
             stacks: 1,
             max_stacks,

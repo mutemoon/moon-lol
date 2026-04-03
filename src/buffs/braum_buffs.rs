@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 布隆被动 - 震荡猛击
 #[derive(Component, Debug, Clone)]

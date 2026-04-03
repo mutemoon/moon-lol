@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 洛W - 华丽登场（击飞）
 #[derive(Component, Debug, Clone)]

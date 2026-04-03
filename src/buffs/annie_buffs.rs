@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 安妮被动 - 嗜火
 #[derive(Component, Debug, Clone)]

@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 希瓦娜E - 龙牙突袭（眩晕）
 #[derive(Component, Debug, Clone)]

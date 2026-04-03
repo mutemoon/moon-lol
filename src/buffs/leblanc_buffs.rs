@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 乐芙兰被动 - 镜像（低血量分身）
 #[derive(Component, Debug, Clone)]

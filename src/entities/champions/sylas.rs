@@ -1,16 +1,20 @@
 use bevy::prelude::*;
-use league_core::CharacterRecord;
+use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_config::LoadHashKeyTrait;
+use lol_config::prop::LoadHashKeyTrait;
 
-use crate::core::{
+use crate::buffs::cc_debuffs::DebuffSlow;
+use crate::buffs::common_buffs::BuffSelfHeal;
+use crate::core::action::damage::{DamageShape, TargetDamage, TargetFilter};
+use crate::core::action::dash::{ActionDash, DashDamage, DashMoveType};
+use crate::core::base::buff::BuffOf;
+use crate::core::damage::{DamageType, EventDamageCreate};
+use crate::core::skill::{
     play_skill_animation, skill_damage, skill_dash, skill_slot_from_index, spawn_skill_particle,
-    BuffOf, CoolDown, DamageShape, EventDamageCreate, EventSkillCast, Skill, SkillCooldownMode,
-    SkillOf, SkillRecastWindow, SkillSlot, Skills, TargetDamage, TargetFilter,
+    CoolDown, EventSkillCast, PassiveSkillOf, Skill, SkillCooldownMode, SkillOf, SkillRecastWindow,
+    SkillSlot, Skills,
 };
 use crate::entities::champion::Champion;
-use crate::{BuffSelfHeal, DebuffSlow, PassiveSkillOf};
-use crate::DamageType;
 
 const SYLAS_Q_KEY: &str = "Characters/Sylas/Spells/SylasQ/SylasQ";
 const SYLAS_W_KEY: &str = "Characters/Sylas/Spells/SylasW/SylasW";
@@ -74,7 +78,10 @@ fn cast_sylas_q(commands: &mut Commands, entity: Entity) {
         commands,
         entity,
         SYLAS_Q_KEY,
-        DamageShape::Sector { radius: 350.0, angle: 60.0 },
+        DamageShape::Sector {
+            radius: 350.0,
+            angle: 60.0,
+        },
         vec![TargetDamage {
             filter: TargetFilter::All,
             amount: hash_bin("TotalDamage"),
@@ -84,7 +91,12 @@ fn cast_sylas_q(commands: &mut Commands, entity: Entity) {
     );
 }
 
-fn cast_sylas_w(commands: &mut Commands, q_transform: &Query<&Transform>, entity: Entity, point: Vec2) {
+fn cast_sylas_w(
+    commands: &mut Commands,
+    q_transform: &Query<&Transform>,
+    entity: Entity,
+    point: Vec2,
+) {
     play_skill_animation(commands, entity, hash_bin("Spell2"));
     spawn_skill_particle(commands, entity, hash_bin("Sylas_W_Cast"));
     // W is a dash to target that deals damage and heals based on missing health
@@ -93,10 +105,10 @@ fn cast_sylas_w(commands: &mut Commands, q_transform: &Query<&Transform>, entity
         q_transform,
         entity,
         point,
-        &crate::ActionDash {
+        &ActionDash {
             skill: SYLAS_W_KEY.into(),
-            move_type: crate::DashMoveType::Pointer { max: 200.0 },
-            damage: Some(crate::DashDamage {
+            move_type: DashMoveType::Pointer { max: 200.0 },
+            damage: Some(DashDamage {
                 radius_end: 100.0,
                 damage: TargetDamage {
                     filter: TargetFilter::All,
@@ -108,7 +120,9 @@ fn cast_sylas_w(commands: &mut Commands, q_transform: &Query<&Transform>, entity
         },
     );
     // Heal based on missing health
-    commands.entity(entity).with_related::<BuffOf>(BuffSelfHeal::new(60.0));
+    commands
+        .entity(entity)
+        .with_related::<BuffOf>(BuffSelfHeal::new(60.0));
 }
 
 fn cast_sylas_e(
@@ -153,10 +167,10 @@ fn cast_sylas_e(
             q_transform,
             entity,
             point,
-            &crate::ActionDash {
+            &ActionDash {
                 skill: SYLAS_E_KEY.into(),
-                move_type: crate::DashMoveType::Pointer { max: 300.0 },
-                damage: Some(crate::DashDamage {
+                move_type: DashMoveType::Pointer { max: 300.0 },
+                damage: Some(DashDamage {
                     radius_end: 100.0,
                     damage: TargetDamage {
                         filter: TargetFilter::All,
@@ -221,10 +235,9 @@ fn add_skills(
             if index == 2 {
                 skill_component = skill_component.with_cooldown_mode(SkillCooldownMode::Manual);
             }
-            commands.entity(entity).with_related::<SkillOf>((
-                skill_component,
-                CoolDown::default(),
-            ));
+            commands
+                .entity(entity)
+                .with_related::<SkillOf>((skill_component, CoolDown::default()));
         }
     }
 }
@@ -241,5 +254,7 @@ fn on_sylas_damage_hit(
     }
     let target = trigger.event_target();
     // Q 命中减速
-    commands.entity(target).with_related::<BuffOf>(DebuffSlow::new(0.5, 1.5));
+    commands
+        .entity(target)
+        .with_related::<BuffOf>(DebuffSlow::new(0.5, 1.5));
 }

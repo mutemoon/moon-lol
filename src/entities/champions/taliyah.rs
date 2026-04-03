@@ -1,15 +1,17 @@
 use bevy::prelude::*;
-use league_core::CharacterRecord;
+use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_config::LoadHashKeyTrait;
+use lol_config::prop::LoadHashKeyTrait;
 
-use crate::core::{
-    play_skill_animation, skill_damage, skill_slot_from_index, spawn_skill_particle, BuffOf,
-    CoolDown, DamageShape, EventDamageCreate, EventSkillCast, Skill, SkillOf, SkillSlot, Skills,
-    TargetDamage, TargetFilter,
+use crate::buffs::taliyah_buffs::BuffTaliyahW;
+use crate::core::action::damage::{DamageShape, TargetDamage, TargetFilter};
+use crate::core::base::buff::BuffOf;
+use crate::core::damage::{DamageType, EventDamageCreate};
+use crate::core::skill::{
+    play_skill_animation, skill_damage, skill_slot_from_index, spawn_skill_particle, CoolDown,
+    EventSkillCast, PassiveSkillOf, Skill, SkillOf, SkillSlot, Skills,
 };
 use crate::entities::champion::Champion;
-use crate::{BuffTaliyahW, DamageType, PassiveSkillOf};
 
 const TALIYAH_Q_KEY: &str = "Characters/Taliyah/Spells/TaliyahQ/TaliyahQ";
 const TALIYAH_W_KEY: &str = "Characters/Taliyah/Spells/TaliyahW/TaliyahW";
@@ -65,7 +67,10 @@ fn cast_taliyah_q(commands: &mut Commands, entity: Entity) {
         commands,
         entity,
         TALIYAH_Q_KEY,
-        DamageShape::Sector { radius: 1000.0, angle: 30.0 },
+        DamageShape::Sector {
+            radius: 1000.0,
+            angle: 30.0,
+        },
         vec![TargetDamage {
             filter: TargetFilter::All,
             amount: hash_bin("TotalDamage"),
@@ -128,7 +133,9 @@ fn on_taliyah_damage_hit(
 
     let target = trigger.event_target();
 
-    commands.entity(target).with_related::<BuffOf>(BuffTaliyahW::new(0.75, 1.0));
+    commands
+        .entity(target)
+        .with_related::<BuffOf>(BuffTaliyahW::new(0.75, 1.0));
 }
 
 fn add_skills(
@@ -153,10 +160,9 @@ fn add_skills(
 
         for (index, &skill) in character_record.spells.as_ref().unwrap().iter().enumerate() {
             let skill_component = Skill::new(skill_slot_from_index(index), skill);
-            commands.entity(entity).with_related::<SkillOf>((
-                skill_component,
-                CoolDown::default(),
-            ));
+            commands
+                .entity(entity)
+                .with_related::<SkillOf>((skill_component, CoolDown::default()));
         }
     }
 }

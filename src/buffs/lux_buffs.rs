@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 拉克丝被动 - 照明标记
 #[derive(Component, Debug, Clone)]

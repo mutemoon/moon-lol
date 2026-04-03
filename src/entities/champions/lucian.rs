@@ -1,15 +1,19 @@
 use bevy::prelude::*;
-use league_core::CharacterRecord;
+use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_config::LoadHashKeyTrait;
+use lol_config::prop::LoadHashKeyTrait;
 
-use crate::core::{
+use crate::buffs::lucian_buffs::{BuffLucianPassive, BuffLucianW};
+use crate::core::action::damage::{DamageShape, TargetDamage, TargetFilter};
+use crate::core::action::dash::{ActionDash, DashMoveType};
+use crate::core::base::buff::BuffOf;
+use crate::core::damage::{DamageType, EventDamageCreate};
+use crate::core::skill::{
     play_skill_animation, reset_skill_attack, skill_damage, skill_dash, skill_slot_from_index,
-    spawn_skill_particle, BuffOf, CoolDown, DamageShape, EventDamageCreate, EventSkillCast, Skill,
-    SkillOf, SkillSlot, Skills, TargetDamage, TargetFilter,
+    spawn_skill_particle, CoolDown, EventSkillCast, PassiveSkillOf, Skill, SkillOf, SkillSlot,
+    Skills,
 };
 use crate::entities::champion::Champion;
-use crate::{BuffLucianPassive, BuffLucianW, DamageType, PassiveSkillOf};
 
 const LUCIAN_Q_KEY: &str = "Characters/Lucian/Spells/LucianQ/LucianQ";
 const LUCIAN_W_KEY: &str = "Characters/Lucian/Spells/LucianW/LucianW";
@@ -66,7 +70,10 @@ fn cast_lucian_q(commands: &mut Commands, entity: Entity) {
         commands,
         entity,
         LUCIAN_Q_KEY,
-        DamageShape::Sector { radius: 1000.0, angle: 10.0 },
+        DamageShape::Sector {
+            radius: 1000.0,
+            angle: 10.0,
+        },
         vec![TargetDamage {
             filter: TargetFilter::All,
             amount: hash_bin("TotalDamage"),
@@ -81,13 +88,18 @@ fn cast_lucian_w(commands: &mut Commands, entity: Entity) {
     spawn_skill_particle(commands, entity, hash_bin("Lucian_W_Cast"));
 
     // W marks enemies and grants movespeed to Lucian
-    commands.entity(entity).with_related::<BuffOf>(BuffLucianW::new(60.0, 6.0));
+    commands
+        .entity(entity)
+        .with_related::<BuffOf>(BuffLucianW::new(60.0, 6.0));
 
     skill_damage(
         commands,
         entity,
         LUCIAN_W_KEY,
-        DamageShape::Sector { radius: 900.0, angle: 15.0 },
+        DamageShape::Sector {
+            radius: 900.0,
+            angle: 15.0,
+        },
         vec![TargetDamage {
             filter: TargetFilter::All,
             amount: hash_bin("TotalDamage"),
@@ -97,7 +109,12 @@ fn cast_lucian_w(commands: &mut Commands, entity: Entity) {
     );
 }
 
-fn cast_lucian_e(commands: &mut Commands, q_transform: &Query<&Transform>, entity: Entity, point: Vec2) {
+fn cast_lucian_e(
+    commands: &mut Commands,
+    q_transform: &Query<&Transform>,
+    entity: Entity,
+    point: Vec2,
+) {
     play_skill_animation(commands, entity, hash_bin("Spell3"));
     spawn_skill_particle(commands, entity, hash_bin("Lucian_E_Cast"));
 
@@ -109,9 +126,9 @@ fn cast_lucian_e(commands: &mut Commands, q_transform: &Query<&Transform>, entit
         q_transform,
         entity,
         point,
-        &crate::ActionDash {
+        &ActionDash {
             skill: LUCIAN_E_KEY.into(),
-            move_type: crate::DashMoveType::Pointer { max: 425.0 },
+            move_type: DashMoveType::Pointer { max: 425.0 },
             damage: None,
             speed: 1000.0,
         },
@@ -127,7 +144,10 @@ fn cast_lucian_r(commands: &mut Commands, entity: Entity) {
         commands,
         entity,
         LUCIAN_R_KEY,
-        DamageShape::Sector { radius: 1200.0, angle: 30.0 },
+        DamageShape::Sector {
+            radius: 1200.0,
+            angle: 30.0,
+        },
         vec![TargetDamage {
             filter: TargetFilter::All,
             amount: hash_bin("TotalDamage"),
@@ -150,7 +170,9 @@ fn on_lucian_damage_hit(
     let _target = trigger.event_target();
 
     // Passive procs after abilities
-    commands.entity(source).with_related::<BuffOf>(BuffLucianPassive::new(50.0, 1.0));
+    commands
+        .entity(source)
+        .with_related::<BuffOf>(BuffLucianPassive::new(50.0, 1.0));
 }
 
 fn add_skills(
@@ -175,10 +197,9 @@ fn add_skills(
 
         for (index, &skill) in character_record.spells.as_ref().unwrap().iter().enumerate() {
             let skill_component = Skill::new(skill_slot_from_index(index), skill);
-            commands.entity(entity).with_related::<SkillOf>((
-                skill_component,
-                CoolDown::default(),
-            ));
+            commands
+                .entity(entity)
+                .with_related::<SkillOf>((skill_component, CoolDown::default()));
         }
     }
 }

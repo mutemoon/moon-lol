@@ -1,25 +1,19 @@
-mod animation;
-mod attack_reset;
-mod buff;
-mod command;
-mod damage;
-mod dash;
-mod particle;
-
-pub use animation::*;
-pub use attack_reset::*;
+pub mod animation;
+pub mod attack_reset;
+pub mod buff;
+pub mod command;
+pub mod damage;
+pub mod dash;
+pub mod particle;
 use bevy::prelude::*;
-pub use buff::*;
-pub use command::*;
-pub use damage::*;
-pub use dash::*;
-pub use particle::*;
 use serde::{Deserialize, Serialize};
 
-use crate::{
-    CommandAttackAutoStart, CommandAttackAutoStop, CommandMovement, CommandRunStart,
-    CommandSkillBeforeStart, CommandSkillLevelUp, CommandSkillStart, MovementAction, RunTarget,
-};
+use crate::core::action::damage::on_action_damage;
+use crate::core::action::dash::{on_dash_end, update_dash_damage};
+use crate::core::attack_auto::{CommandAttackAutoStart, CommandAttackAutoStop};
+use crate::core::movement::{CommandMovement, MovementAction};
+use crate::core::run::{CommandRunStart, RunTarget};
+use crate::core::skill::{CommandSkillBeforeStart, CommandSkillLevelUp, CommandSkillStart};
 
 #[derive(Default)]
 pub struct PluginAction;

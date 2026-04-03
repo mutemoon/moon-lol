@@ -2,13 +2,14 @@ use std::collections::HashMap;
 
 use bevy::prelude::*;
 use bevy::window::{PrimaryWindow, WindowResized};
-use league_core::{
+use league_core::extract::{
     EnumAnchor, EnumData, EnumUiPosition, UiElementIconData, UiPropertyLoadable, UiSceneData,
 };
 use league_utils::hash_bin;
-use lol_config::LoadHashKeyTrait;
+use lol_config::prop::LoadHashKeyTrait;
 
-use crate::{AssetServerLoadLeague, CommandLoadPropBin, EventLoadPropEnd, PropPath};
+use crate::core::resource::prop_bin::{CommandLoadPropBin, EventLoadPropEnd, PropPath};
+use crate::core::utils::AssetServerLoadLeague;
 
 pub struct PluginUIElement;
 

@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 卡特琳娜被动 - 贪婪（参与击杀减少冷却）
 #[derive(Component, Debug, Clone)]

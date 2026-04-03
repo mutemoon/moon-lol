@@ -1,15 +1,19 @@
 use bevy::prelude::*;
-use league_core::CharacterRecord;
+use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_config::LoadHashKeyTrait;
+use lol_config::prop::LoadHashKeyTrait;
 
-use crate::core::{
+use crate::buffs::ahri_buffs::{BuffAhriFoxFire, BuffCharm};
+use crate::core::action::damage::{DamageShape, TargetDamage, TargetFilter};
+use crate::core::action::dash::{ActionDash, DashDamage, DashMoveType};
+use crate::core::base::buff::BuffOf;
+use crate::core::damage::{DamageType, EventDamageCreate};
+use crate::core::skill::{
     play_skill_animation, skill_damage, skill_dash, skill_slot_from_index, spawn_skill_particle,
-    CoolDown, DamageShape, EventDamageCreate, EventSkillCast, Skill, SkillCooldownMode,
-    SkillOf, SkillRecastWindow, SkillSlot, Skills, TargetDamage, TargetFilter,
+    CoolDown, EventSkillCast, PassiveSkillOf, Skill, SkillCooldownMode, SkillOf, SkillRecastWindow,
+    SkillSlot, Skills,
 };
 use crate::entities::champion::Champion;
-use crate::{BuffAhriFoxFire, BuffCharm, BuffOf, DamageType, PassiveSkillOf};
 
 const AHRI_Q_KEY: &str = "Characters/Ahri/Spells/AhriOrbofDeception/AhriOrbofDeception";
 const AHRI_W_KEY: &str = "Characters/Ahri/Spells/AhriFoxFire/AhriFoxFire";
@@ -49,7 +53,13 @@ fn on_ahri_skill_cast(
     };
 
     match skill.slot {
-        SkillSlot::Q => cast_ahri_q(&mut commands, &q_transform, entity, trigger.skill_entity, trigger.point),
+        SkillSlot::Q => cast_ahri_q(
+            &mut commands,
+            &q_transform,
+            entity,
+            trigger.skill_entity,
+            trigger.point,
+        ),
         SkillSlot::W => cast_ahri_w(&mut commands, entity, trigger.skill_entity),
         SkillSlot::E => cast_ahri_e(&mut commands, entity),
         SkillSlot::R => cast_ahri_r(
@@ -81,7 +91,10 @@ fn cast_ahri_q(
         commands,
         entity,
         AHRI_Q_KEY,
-        DamageShape::Sector { radius: 900.0, angle: 90.0 },
+        DamageShape::Sector {
+            radius: 900.0,
+            angle: 90.0,
+        },
         vec![TargetDamage {
             filter: TargetFilter::All,
             amount: hash_bin("TotalDamage"),
@@ -91,7 +104,9 @@ fn cast_ahri_q(
     );
 
     // Apply fox fire buff for W tracking (will be consumed by W)
-    commands.entity(entity).with_related::<BuffOf>(BuffAhriFoxFire::new(3));
+    commands
+        .entity(entity)
+        .with_related::<BuffOf>(BuffAhriFoxFire::new(3));
 }
 
 fn cast_ahri_w(commands: &mut Commands, entity: Entity, _skill_entity: Entity) {
@@ -99,7 +114,9 @@ fn cast_ahri_w(commands: &mut Commands, entity: Entity, _skill_entity: Entity) {
     spawn_skill_particle(commands, entity, hash_bin("Ahri_W_Cast"));
 
     // Fox-fire: Three flames orbit Ahri and can attack enemies
-    commands.entity(entity).with_related::<BuffOf>(BuffAhriFoxFire::new(3));
+    commands
+        .entity(entity)
+        .with_related::<BuffOf>(BuffAhriFoxFire::new(3));
 
     // W damage
     skill_damage(
@@ -125,7 +142,10 @@ fn cast_ahri_e(commands: &mut Commands, entity: Entity) {
         commands,
         entity,
         AHRI_E_KEY,
-        DamageShape::Sector { radius: 1000.0, angle: 60.0 },
+        DamageShape::Sector {
+            radius: 1000.0,
+            angle: 60.0,
+        },
         vec![TargetDamage {
             filter: TargetFilter::Champion,
             amount: hash_bin("TotalDamage"),
@@ -161,10 +181,10 @@ fn cast_ahri_r(
         q_transform,
         entity,
         point,
-        &crate::ActionDash {
+        &ActionDash {
             skill: AHRI_R_KEY.into(),
-            move_type: crate::DashMoveType::Pointer { max: 500.0 },
-            damage: Some(crate::DashDamage {
+            move_type: DashMoveType::Pointer { max: 500.0 },
+            damage: Some(DashDamage {
                 radius_end: 300.0,
                 damage: TargetDamage {
                     filter: TargetFilter::Champion,
@@ -205,7 +225,9 @@ fn on_ahri_damage_hit(
 
     // Check if this was from E (charm) to apply charm debuff
     // The charm effect is applied based on the skill hash
-    commands.entity(target).with_related::<BuffOf>(BuffCharm::new(1.5));
+    commands
+        .entity(target)
+        .with_related::<BuffOf>(BuffCharm::new(1.5));
 }
 
 fn add_skills(
@@ -234,10 +256,9 @@ fn add_skills(
             if index == 3 {
                 skill_component = skill_component.with_cooldown_mode(SkillCooldownMode::Manual);
             }
-            commands.entity(entity).with_related::<SkillOf>((
-                skill_component,
-                CoolDown::default(),
-            ));
+            commands
+                .entity(entity)
+                .with_related::<SkillOf>((skill_component, CoolDown::default()));
         }
     }
 }

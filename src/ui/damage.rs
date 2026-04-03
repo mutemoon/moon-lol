@@ -1,7 +1,8 @@
 use bevy::color::palettes::css::{BLUE, RED, WHITE};
 use bevy::prelude::*;
 
-use crate::{CameraState, DamageType, EventDamageCreate};
+use crate::core::camera::CameraState;
+use crate::core::damage::{DamageType, EventDamageCreate};
 
 #[derive(Default)]
 pub struct PluginUIDamage;

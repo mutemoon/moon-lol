@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 阿卡丽被动 - 刺客印记
 #[derive(Component, Debug, Clone)]
@@ -10,7 +11,9 @@ pub struct BuffAkaliPassive {
 
 impl BuffAkaliPassive {
     pub fn new() -> Self {
-        Self { ring_created: false }
+        Self {
+            ring_created: false,
+        }
     }
 }
 

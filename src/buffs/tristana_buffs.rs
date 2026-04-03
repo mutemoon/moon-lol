@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 崔丝塔娜W - 火箭跳跃（减速）
 #[derive(Component, Debug, Clone)]

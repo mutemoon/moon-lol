@@ -1,13 +1,15 @@
 use bevy::ecs::error::ignore;
 use bevy::ecs::system::command::trigger;
 use bevy::prelude::*;
-use league_core::SpellObject;
-use lol_config::{HashKey, LoadHashKeyTrait};
+use league_core::extract::SpellObject;
+use lol_config::prop::{HashKey, LoadHashKeyTrait};
 use serde::{Deserialize, Serialize};
 
-use crate::{
-    Buffs, CommandDamageCreate, CommandMissileCreate, CommandRotate, Damage, DamageType, EventDead,
-};
+use crate::core::base::buff::Buffs;
+use crate::core::damage::{CommandDamageCreate, Damage, DamageType};
+use crate::core::life::EventDead;
+use crate::core::missile::CommandMissileCreate;
+use crate::core::rotate::CommandRotate;
 
 #[derive(Default)]
 pub struct PluginAttack;
@@ -155,10 +157,8 @@ impl Attack {
 
     /// 计算当前总攻击速度
     pub fn current_attack_speed(&self) -> f32 {
-        (
-            self.base_attack_speed * (1.0 + self.bonus_attack_speed + self.buff_bonus_attack_speed)
-        )
-        .min(self.attack_speed_cap)
+        (self.base_attack_speed * (1.0 + self.bonus_attack_speed + self.buff_bonus_attack_speed))
+            .min(self.attack_speed_cap)
     }
 
     /// 计算攻击间隔时间 (1 / attack_speed)
@@ -254,7 +254,9 @@ fn on_command_attack_start(
             update_attack_state(&mut attack, vec![]);
         }
 
-        if let (Ok(target_transform), Ok(transform)) = (q_transform.get(target), q_transform.get(entity)) {
+        if let (Ok(target_transform), Ok(transform)) =
+            (q_transform.get(target), q_transform.get(entity))
+        {
             let delta = target_transform.translation.xz() - transform.translation.xz();
             if delta.length_squared() > 0.0001 {
                 commands.trigger(CommandRotate {

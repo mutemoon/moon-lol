@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 千珏被动 - 印记
 #[derive(Component, Debug, Clone)]

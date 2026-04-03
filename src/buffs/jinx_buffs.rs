@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 金克丝被动 - 超活跃状态
 #[derive(Component, Debug, Clone)]

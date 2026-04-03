@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 ///  Bel'Veth 被动 - 死亡之紫
 #[derive(Component, Debug, Clone)]

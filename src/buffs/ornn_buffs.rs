@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 奥恩Q - 火山裂缝（减速）
 #[derive(Component, Debug, Clone)]

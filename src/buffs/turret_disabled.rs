@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::Buff;
+use crate::core::base::buff::Buff;
 
 /// 防御塔禁用 —— 挂在被禁用的防御塔上
 #[derive(Component, Debug, Clone)]

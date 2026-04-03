@@ -2,17 +2,21 @@ use std::collections::VecDeque;
 use std::time::Duration;
 
 use bevy::prelude::*;
-use league_core::{
+use league_core::extract::{
     BarracksConfig, CharacterRecord, ConstantWaveBehavior, EnumMap, EnumWaveBehavior,
     InhibitorWaveBehavior, MapContainer, MapPlaceableContainer, RotatingWaveBehavior,
     TimedVariableWaveBehavior, Unk0xad65d8c4,
 };
-use lol_config::{HashKey, LoadHashKeyTrait};
-use lol_core::{Lane, Team};
+use lol_config::prop::{HashKey, LoadHashKeyTrait};
+use lol_core::lane::Lane;
+use lol_core::team::Team;
 
-use crate::core::{Armor, CommandCharacterSpawn, Damage, Health, Movement};
-use crate::entities::Minion;
-use crate::{CommandCharacterLoad, MapName, MapState, MinionPath};
+use crate::core::character::{CommandCharacterLoad, CommandCharacterSpawn};
+use crate::core::damage::{Armor, Damage};
+use crate::core::life::Health;
+use crate::core::map::{MapName, MapState, MinionPath};
+use crate::core::movement::Movement;
+use crate::entities::minion::Minion;
 
 #[derive(Default)]
 pub struct PluginBarrack;

@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::Buff;
+use crate::core::base::buff::Buff;
 
 /// 潘森被动计数器 - 每3次强化下一个技能
 #[derive(Component, Debug, Clone)]

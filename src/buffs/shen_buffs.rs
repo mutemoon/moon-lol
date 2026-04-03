@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 慎W - 魂佑（闪避）
 #[derive(Component, Debug, Clone)]

@@ -1,16 +1,23 @@
-use bevy::prelude::*;
 use bevy::animation::AnimationTarget;
 use bevy::mesh::skinning::SkinnedMesh;
-use league_core::{EnumVfxPrimitive, VfxEmitterDefinitionData, VfxSystemDefinitionData};
+use bevy::prelude::*;
+use league_core::extract::{EnumVfxPrimitive, VfxEmitterDefinitionData, VfxSystemDefinitionData};
 
-use crate::{
-    create_black_pixel_texture, spawn_shadow_skin_entity, AssetServerLoadLeague, Lifetime,
-    ParticleId, ParticleMaterialSkinnedMeshParticle, ResourceCache,
-    UniformsPixelSkinnedMeshParticle, UniformsVertexSkinnedMeshParticle,
+use super::state::{EmitterOf, ParticleEmitterState};
+use super::utils::{
+    calculate_emission_params, calculate_particle_transform_frame, get_emitter_type,
+    spawn_particle_entity, EmissionParams, EmitterType, ParticleBirthParams,
 };
-
-use super::{EmitterOf, ParticleEmitterState};
-use super::utils::{ParticleBirthParams, EmissionParams, calculate_emission_params, calculate_particle_transform_frame, spawn_particle_entity, get_emitter_type, EmitterType};
+use crate::core::lifetime::Lifetime;
+use crate::core::particle::skinned_mesh::particle::{
+    ParticleMaterialSkinnedMeshParticle, UniformsPixelSkinnedMeshParticle,
+    UniformsVertexSkinnedMeshParticle,
+};
+use crate::core::particle::utils::create_black_pixel_texture;
+use crate::core::particle::ParticleId;
+use crate::core::resource::ResourceCache;
+use crate::core::skin::mesh_shadow::spawn_shadow_skin_entity;
+use crate::core::utils::AssetServerLoadLeague;
 
 pub fn attach_skinned_mesh_visuals(
     commands: &mut Commands,
@@ -21,7 +28,9 @@ pub fn attach_skinned_mesh_visuals(
     particle_color_texture: Option<Handle<Image>>,
     blend_mode: u8,
     res_image: &mut ResMut<Assets<Image>>,
-    res_particle_material_skinned_mesh_particle: &mut ResMut<Assets<ParticleMaterialSkinnedMeshParticle>>,
+    res_particle_material_skinned_mesh_particle: &mut ResMut<
+        Assets<ParticleMaterialSkinnedMeshParticle>,
+    >,
     res_asset_server: &Res<AssetServer>,
     q_mesh3d: Query<&Mesh3d>,
     q_skinned_mesh: Query<&SkinnedMesh>,
@@ -115,7 +124,8 @@ pub fn update_emitter_skinned_mesh(
             &mut emitter,
             vfx_emitter_definition_data,
             time.delta_secs(),
-        ) else {
+        )
+        else {
             continue;
         };
 

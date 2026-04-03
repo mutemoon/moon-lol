@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 璐璐被动 - Pix（小精灵）
 #[derive(Component, Debug, Clone)]
@@ -29,7 +30,12 @@ pub struct BuffLuluW {
 }
 
 impl BuffLuluW {
-    pub fn new(polymorph: bool, attackspeed_bonus: f32, movespeed_bonus: f32, duration: f32) -> Self {
+    pub fn new(
+        polymorph: bool,
+        attackspeed_bonus: f32,
+        movespeed_bonus: f32,
+        duration: f32,
+    ) -> Self {
         Self {
             polymorph,
             attackspeed_bonus,

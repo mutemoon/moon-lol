@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::Buff;
+use crate::core::base::buff::Buff;
 
 /// 诺手被动 - 出血标记，最多5层
 #[derive(Component, Debug, Clone)]

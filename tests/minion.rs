@@ -6,8 +6,8 @@ mod tests {
     use bevy::prelude::*;
     use bevy::time::TimeUpdateStrategy;
     use moon_lol::{
-        PluginAction, PluginAttack, PluginAttackAuto, PluginBarrack, PluginCharacter, PluginDamage,
-        PluginLife, PluginMinion, PluginMovement, PluginNavigaton, PluginResource, MinionPath,
+        MinionPath, PluginAction, PluginAttack, PluginAttackAuto, PluginBarrack, PluginCharacter,
+        PluginDamage, PluginLife, PluginMinion, PluginMovement, PluginNavigaton, PluginResource,
     };
 
     #[test]

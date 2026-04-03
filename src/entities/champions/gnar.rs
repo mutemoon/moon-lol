@@ -1,16 +1,18 @@
 use bevy::prelude::*;
-use league_core::CharacterRecord;
+use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_config::LoadHashKeyTrait;
+use lol_config::prop::LoadHashKeyTrait;
 
-use crate::core::{
+use crate::buffs::cc_debuffs::DebuffSlow;
+use crate::core::action::damage::{DamageShape, TargetDamage, TargetFilter};
+use crate::core::action::dash::{ActionDash, DashDamage, DashMoveType};
+use crate::core::base::buff::BuffOf;
+use crate::core::damage::{DamageType, EventDamageCreate};
+use crate::core::skill::{
     play_skill_animation, skill_damage, skill_dash, skill_slot_from_index, spawn_skill_particle,
-    BuffOf, CoolDown, DamageShape, EventDamageCreate, EventSkillCast, Skill, SkillOf, SkillSlot,
-    Skills, TargetDamage, TargetFilter,
+    CoolDown, EventSkillCast, PassiveSkillOf, Skill, SkillOf, SkillSlot, Skills,
 };
 use crate::entities::champion::Champion;
-use crate::{DebuffSlow, PassiveSkillOf};
-use crate::DamageType;
 
 const GNAR_Q_KEY: &str = "Characters/Gnar/Spells/GnarQ/GnarQ";
 const GNAR_W_KEY: &str = "Characters/Gnar/Spells/GnarW/GnarW";
@@ -109,7 +111,12 @@ fn cast_gnar_w(commands: &mut Commands, entity: Entity) {
     );
 }
 
-fn cast_gnar_e(commands: &mut Commands, q_transform: &Query<&Transform>, entity: Entity, point: Vec2) {
+fn cast_gnar_e(
+    commands: &mut Commands,
+    q_transform: &Query<&Transform>,
+    entity: Entity,
+    point: Vec2,
+) {
     play_skill_animation(commands, entity, hash_bin("Spell3"));
     spawn_skill_particle(commands, entity, hash_bin("Gnar_E_Cast"));
     // E 是跳跃，可以二段跳
@@ -118,10 +125,10 @@ fn cast_gnar_e(commands: &mut Commands, q_transform: &Query<&Transform>, entity:
         q_transform,
         entity,
         point,
-        &crate::ActionDash {
+        &ActionDash {
             skill: GNAR_E_KEY.into(),
-            move_type: crate::DashMoveType::Pointer { max: 300.0 },
-            damage: Some(crate::DashDamage {
+            move_type: DashMoveType::Pointer { max: 300.0 },
+            damage: Some(DashDamage {
                 radius_end: 100.0,
                 damage: TargetDamage {
                     filter: TargetFilter::All,
@@ -193,5 +200,7 @@ fn on_gnar_damage_hit(
     }
     let target = trigger.event_target();
     // 所有伤害命中施加减速
-    commands.entity(target).with_related::<BuffOf>(DebuffSlow::new(0.5, 1.5));
+    commands
+        .entity(target)
+        .with_related::<BuffOf>(DebuffSlow::new(0.5, 1.5));
 }

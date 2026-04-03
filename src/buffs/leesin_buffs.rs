@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::Buff;
+use crate::core::base::buff::Buff;
 
 /// 盲僧W2 - 铁意/生命偷取
 #[derive(Component, Debug, Clone)]

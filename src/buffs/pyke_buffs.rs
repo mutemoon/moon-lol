@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 派克Q - 骨齿穿刺（减速）
 #[derive(Component, Debug, Clone)]

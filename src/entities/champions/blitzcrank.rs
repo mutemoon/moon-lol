@@ -1,21 +1,29 @@
 use bevy::prelude::*;
-use league_core::CharacterRecord;
+use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_config::LoadHashKeyTrait;
+use lol_config::prop::LoadHashKeyTrait;
 
-use crate::core::{
+use crate::buffs::blitzcrank_buffs::BuffBlitzcrankW;
+use crate::buffs::cc_debuffs::DebuffStun;
+use crate::core::action::damage::{DamageShape, TargetDamage, TargetFilter};
+use crate::core::action::dash::{ActionDash, DashDamage, DashMoveType};
+use crate::core::base::buff::BuffOf;
+use crate::core::damage::{DamageType, EventDamageCreate};
+use crate::core::skill::{
     play_skill_animation, skill_damage, skill_dash, skill_slot_from_index, spawn_skill_particle,
-    CoolDown, DamageShape, EventDamageCreate, EventSkillCast, Skill,
-    SkillOf, SkillSlot, Skills, TargetDamage, TargetFilter,
+    CoolDown, EventSkillCast, PassiveSkillOf, Skill, SkillOf, SkillSlot, Skills,
 };
 use crate::entities::champion::Champion;
-use crate::{BuffBlitzcrankW, BuffOf, DamageType, DebuffStun, PassiveSkillOf};
 
-const BLITZCRANK_Q_KEY: &str = "Characters/Blitzcrank/Spells/BlitzcrankRocketGrab/BlitzcrankRocketGrab";
+const BLITZCRANK_Q_KEY: &str =
+    "Characters/Blitzcrank/Spells/BlitzcrankRocketGrab/BlitzcrankRocketGrab";
 #[allow(dead_code)]
-const BLITZCRANK_W_KEY: &str = "Characters/Blitzcrank/Spells/BlitzcrankOverdrive/BlitzcrankOverdrive";
-const BLITZCRANK_E_KEY: &str = "Characters/Blitzcrank/Spells/BlitzcrankPowerFist/BlitzcrankPowerFist";
-const BLITZCRANK_R_KEY: &str = "Characters/Blitzcrank/Spells/BlitzcrankStaticField/BlitzcrankStaticField";
+const BLITZCRANK_W_KEY: &str =
+    "Characters/Blitzcrank/Spells/BlitzcrankOverdrive/BlitzcrankOverdrive";
+const BLITZCRANK_E_KEY: &str =
+    "Characters/Blitzcrank/Spells/BlitzcrankPowerFist/BlitzcrankPowerFist";
+const BLITZCRANK_R_KEY: &str =
+    "Characters/Blitzcrank/Spells/BlitzcrankStaticField/BlitzcrankStaticField";
 
 #[derive(Default)]
 pub struct PluginBlitzcrank;
@@ -58,7 +66,12 @@ fn on_blitzcrank_skill_cast(
     }
 }
 
-fn cast_blitzcrank_q(commands: &mut Commands, q_transform: &Query<&Transform>, entity: Entity, point: Vec2) {
+fn cast_blitzcrank_q(
+    commands: &mut Commands,
+    q_transform: &Query<&Transform>,
+    entity: Entity,
+    point: Vec2,
+) {
     play_skill_animation(commands, entity, hash_bin("Spell1"));
     spawn_skill_particle(commands, entity, hash_bin("Blitzcrank_Q_Cast"));
 
@@ -68,10 +81,10 @@ fn cast_blitzcrank_q(commands: &mut Commands, q_transform: &Query<&Transform>, e
         q_transform,
         entity,
         point,
-        &crate::ActionDash {
+        &ActionDash {
             skill: BLITZCRANK_Q_KEY.into(),
-            move_type: crate::DashMoveType::Pointer { max: 1115.0 },
-            damage: Some(crate::DashDamage {
+            move_type: DashMoveType::Pointer { max: 1115.0 },
+            damage: Some(DashDamage {
                 radius_end: 100.0,
                 damage: TargetDamage {
                     filter: TargetFilter::Champion,
@@ -89,7 +102,9 @@ fn cast_blitzcrank_w(commands: &mut Commands, entity: Entity) {
     spawn_skill_particle(commands, entity, hash_bin("Blitzcrank_W_Cast"));
 
     // W grants movement and attack speed
-    commands.entity(entity).with_related::<BuffOf>(BuffBlitzcrankW::new());
+    commands
+        .entity(entity)
+        .with_related::<BuffOf>(BuffBlitzcrankW::new());
 }
 
 fn cast_blitzcrank_e(commands: &mut Commands, entity: Entity) {
@@ -101,7 +116,9 @@ fn cast_blitzcrank_e(commands: &mut Commands, entity: Entity) {
         commands,
         entity,
         BLITZCRANK_E_KEY,
-        DamageShape::Nearest { max_distance: 100.0 },
+        DamageShape::Nearest {
+            max_distance: 100.0,
+        },
         vec![TargetDamage {
             filter: TargetFilter::All,
             amount: hash_bin("TotalDamage"),
@@ -143,7 +160,9 @@ fn on_blitzcrank_damage_hit(
     let target = trigger.event_target();
 
     // Q stuns on hit
-    commands.entity(target).with_related::<BuffOf>(DebuffStun::new(0.65));
+    commands
+        .entity(target)
+        .with_related::<BuffOf>(DebuffStun::new(0.65));
 }
 
 fn add_skills(
@@ -168,10 +187,9 @@ fn add_skills(
 
         for (index, &skill) in character_record.spells.as_ref().unwrap().iter().enumerate() {
             let skill_component = Skill::new(skill_slot_from_index(index), skill);
-            commands.entity(entity).with_related::<SkillOf>((
-                skill_component,
-                CoolDown::default(),
-            ));
+            commands
+                .entity(entity)
+                .with_related::<SkillOf>((skill_component, CoolDown::default()));
         }
     }
 }

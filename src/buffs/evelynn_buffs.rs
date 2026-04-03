@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 伊芙琳被动 - 恶魔之影
 #[derive(Component, Debug, Clone)]

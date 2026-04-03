@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 女枪被动 - 轻挑
 #[derive(Component, Debug, Clone)]

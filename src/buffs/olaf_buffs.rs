@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::Buff;
+use crate::core::base::buff::Buff;
 
 /// 奥拉夫W技能buff - 攻速加成和护盾
 #[derive(Component, Debug, Clone)]

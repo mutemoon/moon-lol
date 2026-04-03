@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 移动速度加成 buff（通用）
 #[derive(Component, Debug, Clone)]
@@ -60,6 +61,9 @@ pub struct BuffEmpoweredAttack {
 
 impl BuffEmpoweredAttack {
     pub fn new(bonus_damage: f32, hits: u8) -> Self {
-        Self { bonus_damage, remaining_hits: hits }
+        Self {
+            bonus_damage,
+            remaining_hits: hits,
+        }
     }
 }

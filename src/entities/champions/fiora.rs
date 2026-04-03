@@ -1,18 +1,22 @@
 use bevy::prelude::*;
-use league_core::CharacterRecord;
+use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_config::LoadHashKeyTrait;
+use lol_config::prop::LoadHashKeyTrait;
 
-use crate::core::{
+use crate::buffs::fiora_e::BuffFioraE;
+use crate::buffs::fiora_passive::AbilityFioraPassive;
+use crate::buffs::fiora_r::BuffFioraR;
+use crate::core::action::damage::{DamageShape, TargetDamage, TargetFilter};
+use crate::core::action::dash::{ActionDash, DashMoveType};
+use crate::core::attack::BuffAttack;
+use crate::core::base::buff::BuffOf;
+use crate::core::damage::DamageType;
+use crate::core::skill::{
     despawn_skill_particle, play_skill_animation, reset_skill_attack, skill_damage, skill_dash,
-    skill_slot_from_index, spawn_skill_particle, CoolDown, DamageShape, EventSkillCast, Skill,
-    SkillOf, SkillSlot, Skills, TargetDamage, TargetFilter,
+    skill_slot_from_index, spawn_skill_particle, CoolDown, EventSkillCast, PassiveSkillOf, Skill,
+    SkillOf, SkillSlot, Skills,
 };
 use crate::entities::champion::Champion;
-use crate::{
-    AbilityFioraPassive, BuffAttack, BuffFioraE, BuffFioraR, BuffOf, DamageType, DashMoveType,
-    PassiveSkillOf,
-};
 
 const FIORA_Q_KEY: &str = "Characters/Fiora/Spells/FioraQAbility/FioraQ";
 #[derive(Default)]
@@ -55,7 +59,12 @@ fn on_fiora_skill_cast(
     }
 }
 
-fn cast_fiora_q(commands: &mut Commands, q_transform: &Query<&Transform>, entity: Entity, point: Vec2) {
+fn cast_fiora_q(
+    commands: &mut Commands,
+    q_transform: &Query<&Transform>,
+    entity: Entity,
+    point: Vec2,
+) {
     play_skill_animation(commands, entity, hash_bin("Spell1"));
     spawn_skill_particle(commands, entity, hash_bin("Fiora_Q_Dash_Trail_ground"));
     skill_dash(
@@ -63,7 +72,7 @@ fn cast_fiora_q(commands: &mut Commands, q_transform: &Query<&Transform>, entity
         q_transform,
         entity,
         point,
-        &crate::ActionDash {
+        &ActionDash {
             skill: FIORA_Q_KEY.into(),
             move_type: DashMoveType::Pointer { max: 300.0 },
             damage: None,
@@ -74,7 +83,9 @@ fn cast_fiora_q(commands: &mut Commands, q_transform: &Query<&Transform>, entity
         commands,
         entity,
         FIORA_Q_KEY,
-        DamageShape::Nearest { max_distance: 300.0 },
+        DamageShape::Nearest {
+            max_distance: 300.0,
+        },
         vec![TargetDamage {
             filter: TargetFilter::All,
             amount: hash_bin("TotalDamage"),
@@ -93,11 +104,9 @@ fn cast_fiora_w(commands: &mut Commands, entity: Entity) {
 }
 
 fn cast_fiora_e(commands: &mut Commands, entity: Entity) {
-    commands.entity(entity).insert((
-        BuffAttack {
-            bonus_attack_speed: 0.5,
-        },
-    ));
+    commands.entity(entity).insert((BuffAttack {
+        bonus_attack_speed: 0.5,
+    },));
     commands
         .entity(entity)
         .with_related::<BuffOf>(BuffFioraE::default());

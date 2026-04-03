@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 索拉卡E - 星界隔绝（沉默）
 #[derive(Component, Debug, Clone)]

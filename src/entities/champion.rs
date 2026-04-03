@@ -1,6 +1,8 @@
 use bevy::prelude::*;
 
-use crate::{Level, SkillPoints, State};
+use crate::core::base::level::Level;
+use crate::core::base::state::State;
+use crate::core::skill::SkillPoints;
 
 #[derive(Component, Reflect, Default)]
 #[reflect(Component)]

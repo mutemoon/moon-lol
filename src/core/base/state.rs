@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 
-use crate::{EventAttackStart, EventRunEnd, EventRunStart};
+use crate::core::attack::EventAttackStart;
+use crate::core::run::{EventRunEnd, EventRunStart};
 
 #[derive(Default)]
 pub struct PluginState;

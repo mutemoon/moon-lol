@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 奈德丽被动 - 草丛掠食（移速）
 #[derive(Component, Debug, Clone)]

@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 菲兹被动 - 灵活战士
 #[derive(Component, Debug, Clone)]

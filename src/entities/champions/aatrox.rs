@@ -1,16 +1,20 @@
 use bevy::prelude::*;
-use league_core::CharacterRecord;
+use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_config::LoadHashKeyTrait;
+use lol_config::prop::LoadHashKeyTrait;
 
-use crate::core::{
+use crate::buffs::cc_debuffs::DebuffSlow;
+use crate::buffs::common_buffs::{BuffMoveSpeed, BuffSelfHeal};
+use crate::core::action::damage::{DamageShape, TargetDamage, TargetFilter};
+use crate::core::action::dash::{ActionDash, DashDamage, DashMoveType};
+use crate::core::base::buff::BuffOf;
+use crate::core::damage::{DamageType, EventDamageCreate};
+use crate::core::skill::{
     play_skill_animation, skill_damage, skill_dash, skill_slot_from_index, spawn_skill_particle,
-    BuffOf, CoolDown, DamageShape, EventDamageCreate, EventSkillCast, Skill, SkillCooldownMode,
-    SkillOf, SkillRecastWindow, SkillSlot, Skills, TargetDamage, TargetFilter,
+    CoolDown, EventSkillCast, PassiveSkillOf, Skill, SkillCooldownMode, SkillOf, SkillRecastWindow,
+    SkillSlot, Skills,
 };
 use crate::entities::champion::Champion;
-use crate::PassiveSkillOf;
-use crate::{BuffMoveSpeed, BuffSelfHeal, DebuffSlow, DamageType};
 
 const AATROX_Q_KEY: &str = "Characters/Aatrox/Spells/AatroxQ/AatroxQ";
 const AATROX_W_KEY: &str = "Characters/Aatrox/Spells/AatroxW/AatroxW";
@@ -95,10 +99,10 @@ fn cast_aatrox_q(
         q_transform,
         entity,
         point,
-        &crate::ActionDash {
+        &ActionDash {
             skill: AATROX_Q_KEY.into(),
-            move_type: crate::DashMoveType::Fixed(200.0),
-            damage: Some(crate::DashDamage {
+            move_type: DashMoveType::Fixed(200.0),
+            damage: Some(DashDamage {
                 radius_end: 200.0,
                 damage: TargetDamage {
                     filter: TargetFilter::All,
@@ -117,14 +121,20 @@ fn cast_aatrox_q(
             timer: Timer::from_seconds(cooldown.duration, TimerMode::Once),
             duration: cooldown.duration,
         });
-        debug!("{:?} 释放了 {} 技能，当前阶段 {}，开始冷却", entity, "Aatrox Q", stage);
+        debug!(
+            "{:?} 释放了 {} 技能，当前阶段 {}，开始冷却",
+            entity, "Aatrox Q", stage
+        );
     } else {
         commands.entity(skill_entity).insert(SkillRecastWindow::new(
             stage + 1,
             3,
             AATROX_Q_RECAST_WINDOW,
         ));
-        debug!("{:?} 释放了 {} 技能，当前阶段 {}", entity, "Aatrox Q", stage);
+        debug!(
+            "{:?} 释放了 {} 技能，当前阶段 {}",
+            entity, "Aatrox Q", stage
+        );
     }
 }
 
@@ -160,15 +170,17 @@ fn cast_aatrox_e(
         q_transform,
         entity,
         point,
-        &crate::ActionDash {
+        &ActionDash {
             skill: AATROX_E_KEY.into(),
-            move_type: crate::DashMoveType::Pointer { max: 250.0 },
+            move_type: DashMoveType::Pointer { max: 250.0 },
             damage: None,
             speed: 900.0,
         },
     );
     // Self-heal based on damage
-    commands.entity(entity).with_related::<BuffOf>(BuffSelfHeal::new(30.0));
+    commands
+        .entity(entity)
+        .with_related::<BuffOf>(BuffSelfHeal::new(30.0));
 }
 
 fn cast_aatrox_r(commands: &mut Commands, entity: Entity) {
@@ -188,7 +200,9 @@ fn cast_aatrox_r(commands: &mut Commands, entity: Entity) {
         Some(hash_bin("Aatrox_R_Hit")),
     );
     // Movement speed buff
-    commands.entity(entity).with_related::<BuffOf>(BuffMoveSpeed::new(0.5, 8.0));
+    commands
+        .entity(entity)
+        .with_related::<BuffOf>(BuffMoveSpeed::new(0.5, 8.0));
 }
 
 /// 监听 Aatrox 造成的伤害，W 命中施加减速
@@ -201,7 +215,9 @@ fn on_aatrox_damage_hit(
         return;
     }
     let target = trigger.event_target();
-    commands.entity(target).with_related::<BuffOf>(DebuffSlow::new(0.25, 1.5));
+    commands
+        .entity(target)
+        .with_related::<BuffOf>(DebuffSlow::new(0.25, 1.5));
 }
 
 fn add_skills(

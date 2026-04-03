@@ -1,21 +1,20 @@
-mod animation;
-mod bind;
-mod button;
-mod damage;
-mod element;
-mod health_bar;
-mod player;
-mod skill;
-
-pub use animation::*;
+pub mod animation;
+pub mod bind;
+pub mod button;
+pub mod damage;
+pub mod element;
+pub mod health_bar;
+pub mod player;
+pub mod skill;
+use animation::PluginUIAnimation;
 use bevy::prelude::*;
-pub use bind::*;
-pub use button::*;
-pub use damage::*;
-pub use element::*;
-pub use health_bar::*;
-pub use player::*;
-pub use skill::*;
+use bind::PluginUIBind;
+use button::PluginUIButton;
+use damage::PluginUIDamage;
+use element::PluginUIElement;
+use health_bar::PluginUIHealthBar;
+use player::PluginUIPlayer;
+use skill::PluginUISkill;
 
 #[derive(Default)]
 pub struct PluginUI;

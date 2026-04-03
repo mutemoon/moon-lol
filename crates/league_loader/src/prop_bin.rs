@@ -1,7 +1,7 @@
 use std::io::Read;
 
-use league_file::LeagueTexture;
-use league_property::PropFile;
+use league_file::texture::LeagueTexture;
+use league_property::prop::PropFile;
 use league_utils::hash_wad;
 
 use crate::Error;

@@ -1,15 +1,20 @@
 use bevy::prelude::*;
-use league_core::CharacterRecord;
+use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_config::LoadHashKeyTrait;
+use lol_config::prop::LoadHashKeyTrait;
 
-use crate::core::{
+use crate::buffs::cc_debuffs::DebuffSlow;
+use crate::buffs::shield_white::BuffShieldWhite;
+use crate::buffs::urgot_buffs::BuffUrgotW;
+use crate::core::action::damage::{DamageShape, TargetDamage, TargetFilter};
+use crate::core::action::dash::{ActionDash, DashMoveType};
+use crate::core::base::buff::BuffOf;
+use crate::core::damage::{DamageType, EventDamageCreate};
+use crate::core::skill::{
     play_skill_animation, skill_damage, skill_dash, skill_slot_from_index, spawn_skill_particle,
-    BuffOf, CoolDown, DamageShape, EventDamageCreate, EventSkillCast, Skill, SkillOf, SkillSlot,
-    Skills, TargetDamage, TargetFilter,
+    CoolDown, EventSkillCast, PassiveSkillOf, Skill, SkillOf, SkillSlot, Skills,
 };
 use crate::entities::champion::Champion;
-use crate::{BuffShieldWhite, BuffUrgotW, DebuffSlow, DamageType, PassiveSkillOf};
 
 const URGOT_Q_KEY: &str = "Characters/Urgot/Spells/UrgotQ/UrgotQ";
 const URGOT_E_KEY: &str = "Characters/Urgot/Spells/UrgotE/UrgotE";
@@ -88,13 +93,20 @@ fn cast_urgot_w(commands: &mut Commands, entity: Entity) {
     spawn_skill_particle(commands, entity, hash_bin("Urgot_W_Cast"));
 
     // W is a toggle that makes Urgot fire at nearby enemies with reduced move speed
-    commands.entity(entity).with_related::<BuffOf>(BuffUrgotW::new(
-        URGOT_W_ATTACK_INTERVAL,
-        URGOT_W_MOVE_SPEED_REDUCTION,
-        URGOT_W_MAX_RANGE,
-    ));
+    commands
+        .entity(entity)
+        .with_related::<BuffOf>(BuffUrgotW::new(
+            URGOT_W_ATTACK_INTERVAL,
+            URGOT_W_MOVE_SPEED_REDUCTION,
+            URGOT_W_MAX_RANGE,
+        ));
 
-    debug!("{:?} 释放了 {} 技能，自动攻击周围敌人，移速降低 {}%", entity, "Urgot W", (URGOT_W_MOVE_SPEED_REDUCTION * 100.0) as i32);
+    debug!(
+        "{:?} 释放了 {} 技能，自动攻击周围敌人，移速降低 {}%",
+        entity,
+        "Urgot W",
+        (URGOT_W_MOVE_SPEED_REDUCTION * 100.0) as i32
+    );
 }
 
 fn cast_urgot_e(
@@ -111,14 +123,16 @@ fn cast_urgot_e(
         q_transform,
         entity,
         point,
-        &crate::ActionDash {
+        &ActionDash {
             skill: URGOT_E_KEY.into(),
-            move_type: crate::DashMoveType::Pointer { max: 300.0 },
+            move_type: DashMoveType::Pointer { max: 300.0 },
             damage: None, // E doesn't deal damage directly but knockback
             speed: 700.0,
         },
     );
-    commands.entity(entity).with_related::<BuffOf>(BuffShieldWhite::new(100.0));
+    commands
+        .entity(entity)
+        .with_related::<BuffOf>(BuffShieldWhite::new(100.0));
 }
 
 fn cast_urgot_r(commands: &mut Commands, entity: Entity, _point: Vec2) {
@@ -129,7 +143,9 @@ fn cast_urgot_r(commands: &mut Commands, entity: Entity, _point: Vec2) {
         commands,
         entity,
         URGOT_R_KEY,
-        DamageShape::Nearest { max_distance: 500.0 },
+        DamageShape::Nearest {
+            max_distance: 500.0,
+        },
         vec![TargetDamage {
             filter: TargetFilter::Champion,
             amount: hash_bin("TotalDamage"),
@@ -152,7 +168,9 @@ fn on_urgot_damage_hit(
     }
     let target = trigger.event_target();
     // Q applies slow
-    commands.entity(target).with_related::<BuffOf>(DebuffSlow::new(URGOT_Q_SLOW_PERCENT, URGOT_Q_SLOW_DURATION));
+    commands
+        .entity(target)
+        .with_related::<BuffOf>(DebuffSlow::new(URGOT_Q_SLOW_PERCENT, URGOT_Q_SLOW_DURATION));
 }
 
 fn add_skills(

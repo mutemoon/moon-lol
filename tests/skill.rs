@@ -52,7 +52,9 @@ fn on_test_observer_skill_cast(
     stages.0.push(stage);
 
     if stage >= 3 {
-        commands.entity(trigger.skill_entity).remove::<SkillRecastWindow>();
+        commands
+            .entity(trigger.skill_entity)
+            .remove::<SkillRecastWindow>();
         commands.entity(trigger.skill_entity).insert(CoolDown {
             timer: Timer::from_seconds(cooldown.duration, TimerMode::Once),
             duration: cooldown.duration,
@@ -288,15 +290,30 @@ fn skill_level_up_still_respects_basic_rules() {
     harness.level_up_skill(3);
 
     let skill_entity = harness.skill_entity(3);
-    assert_eq!(harness.app.world().get::<Skill>(skill_entity).unwrap().level, 0);
-    assert_eq!(harness.app.world().get::<SkillPoints>(harness.caster).unwrap().0, 1);
+    assert_eq!(
+        harness
+            .app
+            .world()
+            .get::<Skill>(skill_entity)
+            .unwrap()
+            .level,
+        0
+    );
+    assert_eq!(
+        harness
+            .app
+            .world()
+            .get::<SkillPoints>(harness.caster)
+            .unwrap()
+            .0,
+        1
+    );
 }
 
 #[test]
 fn observer_skill_cast_spends_mana_starts_cooldown_and_applies_damage() {
     let mut harness = SkillHarness::new();
-    harness
-        .register_spell(30.0, vec![40.0; 6]);
+    harness.register_spell(30.0, vec![40.0; 6]);
 
     harness.add_skill(
         Skill::new(SkillSlot::Q, SPELL_KEY).with_level(1),
@@ -317,7 +334,10 @@ fn observer_skill_cast_spends_mana_starts_cooldown_and_applies_damage() {
     assert!(!cooldown.timer.is_finished());
 
     let log = harness.app.world().resource::<SkillCastLog>();
-    assert!(matches!(log.0.last().unwrap().result, SkillCastResult::Started));
+    assert!(matches!(
+        log.0.last().unwrap().result,
+        SkillCastResult::Started
+    ));
 }
 
 #[test]
@@ -341,22 +361,18 @@ fn observer_skill_can_drive_recast_state_and_manual_cooldown() {
     assert_eq!(stages.as_slice(), &[1, 2, 3]);
 
     let skill_entity = harness.skill_entity(0);
-    assert!(
-        harness
-            .app
-            .world()
-            .get::<SkillRecastWindow>(skill_entity)
-            .is_none()
-    );
-    assert!(
-        !harness
-            .app
-            .world()
-            .get::<CoolDown>(skill_entity)
-            .unwrap()
-            .timer
-            .is_finished()
-    );
+    assert!(harness
+        .app
+        .world()
+        .get::<SkillRecastWindow>(skill_entity)
+        .is_none());
+    assert!(!harness
+        .app
+        .world()
+        .get::<CoolDown>(skill_entity)
+        .unwrap()
+        .timer
+        .is_finished());
 }
 
 #[test]
@@ -371,16 +387,16 @@ fn skill_recast_window_expires_in_fixed_update() {
         TestObserverSkill,
     );
 
-    harness.cast_skill(0, Vec2::new(50.0, 0.0)).advance_time(4.1);
+    harness
+        .cast_skill(0, Vec2::new(50.0, 0.0))
+        .advance_time(4.1);
 
     let skill_entity = harness.skill_entity(0);
-    assert!(
-        harness
-            .app
-            .world()
-            .get::<SkillRecastWindow>(skill_entity)
-            .is_none()
-    );
+    assert!(harness
+        .app
+        .world()
+        .get::<SkillRecastWindow>(skill_entity)
+        .is_none());
 
     harness.cast_skill(0, Vec2::new(50.0, 0.0));
     let stages = &harness.app.world().resource::<ObserverStages>().0;
@@ -395,8 +411,7 @@ fn insufficient_mana_is_recorded_without_starting_cooldown() {
         .world_mut()
         .entity_mut(harness.caster)
         .insert(make_mana(10.0));
-    harness
-        .register_spell(30.0, vec![40.0; 6]);
+    harness.register_spell(30.0, vec![40.0; 6]);
     harness.add_skill(
         Skill::new(SkillSlot::Q, SPELL_KEY).with_level(1),
         3.0,
@@ -406,17 +421,22 @@ fn insufficient_mana_is_recorded_without_starting_cooldown() {
     harness.cast_skill(0, Vec2::new(50.0, 0.0));
 
     assert!((harness.mana() - 10.0).abs() < EPSILON);
-    assert!(
+    assert!(harness
+        .app
+        .world()
+        .get::<CoolDown>(harness.skill_entity(0))
+        .unwrap()
+        .timer
+        .is_finished());
+    assert!(matches!(
         harness
             .app
             .world()
-            .get::<CoolDown>(harness.skill_entity(0))
+            .resource::<SkillCastLog>()
+            .0
+            .last()
             .unwrap()
-            .timer
-            .is_finished()
-    );
-    assert!(matches!(
-        harness.app.world().resource::<SkillCastLog>().0.last().unwrap().result,
+            .result,
         SkillCastResult::Failed(SkillCastFailureReason::InsufficientAbilityResource)
     ));
 }

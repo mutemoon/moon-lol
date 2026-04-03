@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 莫甘娜被动 - 灵魂虹吸（法术吸血）
 #[derive(Component, Debug, Clone)]

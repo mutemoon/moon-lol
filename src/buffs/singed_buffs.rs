@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 辛吉德E - 致命搅拌（减速）
 #[derive(Component, Debug, Clone)]

@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 马尔扎哈被动 - 虚空穿越
 #[derive(Component, Debug, Clone)]
