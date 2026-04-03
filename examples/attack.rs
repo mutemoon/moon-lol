@@ -1,7 +1,4 @@
-use std::time::Duration;
-
 use bevy::prelude::*;
-use bevy::winit::{UpdateMode, WinitSettings};
 use moon_lol::{PluginBarrack, PluginCore, PluginResource};
 
 fn main() {

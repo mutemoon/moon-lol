@@ -153,9 +153,10 @@ fn on_command_particle_spawn(
         return;
     };
 
-    let vfx_system_definition_data = res_assets_vfx_system_definition_data
-        .load_hash(trigger.hash)
-        .unwrap();
+    let Some(vfx_system_definition_data) = res_assets_vfx_system_definition_data
+        .load_hash(trigger.hash) else {
+            return;
+        };
 
     let vfx_emitter_definition_datas = vfx_system_definition_data
         .complex_emitter_definition_data
