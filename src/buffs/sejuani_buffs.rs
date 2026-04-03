@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 瑟庄妮Q - 极冰冲击（减速）
 #[derive(Component, Debug, Clone)]

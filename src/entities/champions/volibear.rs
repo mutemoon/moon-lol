@@ -1,16 +1,22 @@
 use bevy::prelude::*;
-use league_core::CharacterRecord;
+use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_config::LoadHashKeyTrait;
+use lol_config::prop::LoadHashKeyTrait;
 
-use crate::core::{
+use crate::buffs::cc_debuffs::DebuffSlow;
+use crate::buffs::common_buffs::BuffSelfHeal;
+use crate::buffs::shield_white::BuffShieldWhite;
+use crate::buffs::volibear_buffs::{BuffVolibearQ, DebuffVolibearWMark};
+use crate::core::action::damage::{DamageShape, TargetDamage, TargetFilter};
+use crate::core::action::dash::{ActionDash, DashDamage, DashMoveType};
+use crate::core::base::buff::BuffOf;
+use crate::core::damage::{DamageType, EventDamageCreate};
+use crate::core::skill::{
     play_skill_animation, reset_skill_attack, skill_damage, skill_dash, skill_slot_from_index,
-    spawn_skill_particle, BuffOf, CoolDown, DamageShape, EventDamageCreate, EventSkillCast, Skill,
-    SkillCooldownMode, SkillOf, SkillRecastWindow, SkillSlot, Skills, TargetDamage, TargetFilter,
+    spawn_skill_particle, CoolDown, EventSkillCast, PassiveSkillOf, Skill, SkillCooldownMode,
+    SkillOf, SkillRecastWindow, SkillSlot, Skills,
 };
 use crate::entities::champion::Champion;
-use crate::{BuffSelfHeal, BuffShieldWhite, BuffVolibearQ, DamageType, DebuffSlow,
-    DebuffVolibearWMark, PassiveSkillOf};
 
 const VOLIBEAR_W_KEY: &str = "Characters/Volibear/Spells/VolibearW/VolibearW";
 const VOLIBEAR_E_KEY: &str = "Characters/Volibear/Spells/VolibearE/VolibearE";
@@ -70,7 +76,9 @@ fn cast_volibear_q(commands: &mut Commands, entity: Entity) {
     spawn_skill_particle(commands, entity, hash_bin("Volibear_Q_Cast"));
     // Q is movement speed boost + stun on contact
     reset_skill_attack(commands, entity);
-    commands.entity(entity).with_related::<BuffOf>(BuffVolibearQ::new(0.3, 1.0, 4.0));
+    commands
+        .entity(entity)
+        .with_related::<BuffOf>(BuffVolibearQ::new(0.3, 1.0, 4.0));
 }
 
 fn cast_volibear_w(
@@ -88,7 +96,11 @@ fn cast_volibear_w(
     if stage == 1 {
         // First cast: W marks target
         spawn_skill_particle(commands, entity, hash_bin("Volibear_W_Cast"));
-        commands.entity(skill_entity).insert(SkillRecastWindow::new(2, 2, VOLIBEAR_W_RECAST_WINDOW));
+        commands.entity(skill_entity).insert(SkillRecastWindow::new(
+            2,
+            2,
+            VOLIBEAR_W_RECAST_WINDOW,
+        ));
     } else {
         // Second cast: W detonates mark for bonus damage + heal
         spawn_skill_particle(commands, entity, hash_bin("Volibear_W2_Cast"));
@@ -96,7 +108,9 @@ fn cast_volibear_w(
             commands,
             entity,
             VOLIBEAR_W_KEY,
-            DamageShape::Nearest { max_distance: 200.0 },
+            DamageShape::Nearest {
+                max_distance: 200.0,
+            },
             vec![TargetDamage {
                 filter: TargetFilter::All,
                 amount: hash_bin("TotalDamage"),
@@ -105,7 +119,9 @@ fn cast_volibear_w(
             Some(hash_bin("Volibear_W_Hit")),
         );
         // W2 命中已标记目标时自我治疗
-        commands.entity(entity).with_related::<BuffOf>(BuffSelfHeal::new(50.0));
+        commands
+            .entity(entity)
+            .with_related::<BuffOf>(BuffSelfHeal::new(50.0));
         commands.entity(skill_entity).remove::<SkillRecastWindow>();
         commands.entity(skill_entity).insert(CoolDown {
             timer: Timer::from_seconds(cooldown.duration, TimerMode::Once),
@@ -130,7 +146,9 @@ fn cast_volibear_e(commands: &mut Commands, entity: Entity) {
         }],
         Some(hash_bin("Volibear_E_Hit")),
     );
-    commands.entity(entity).with_related::<BuffOf>(BuffShieldWhite::new(100.0));
+    commands
+        .entity(entity)
+        .with_related::<BuffOf>(BuffShieldWhite::new(100.0));
 }
 
 fn cast_volibear_r(
@@ -147,10 +165,10 @@ fn cast_volibear_r(
         q_transform,
         entity,
         point,
-        &crate::ActionDash {
+        &ActionDash {
             skill: VOLIBEAR_R_KEY.into(),
-            move_type: crate::DashMoveType::Pointer { max: 400.0 },
-            damage: Some(crate::DashDamage {
+            move_type: DashMoveType::Pointer { max: 400.0 },
+            damage: Some(DashDamage {
                 radius_end: 150.0,
                 damage: TargetDamage {
                     filter: TargetFilter::All,
@@ -189,10 +207,9 @@ fn add_skills(
             if index == 1 {
                 skill_component = skill_component.with_cooldown_mode(SkillCooldownMode::Manual);
             }
-            commands.entity(entity).with_related::<SkillOf>((
-                skill_component,
-                CoolDown::default(),
-            ));
+            commands
+                .entity(entity)
+                .with_related::<SkillOf>((skill_component, CoolDown::default()));
         }
     }
 }
@@ -209,7 +226,11 @@ fn on_volibear_damage_hit(
     }
     let target = trigger.event_target();
     // W1 标记目标
-    commands.entity(target).with_related::<BuffOf>(DebuffVolibearWMark::new(source, 4.0));
+    commands
+        .entity(target)
+        .with_related::<BuffOf>(DebuffVolibearWMark::new(source, 4.0));
     // E 命中减速
-    commands.entity(target).with_related::<BuffOf>(DebuffSlow::new(0.4, 2.0));
+    commands
+        .entity(target)
+        .with_related::<BuffOf>(DebuffSlow::new(0.4, 2.0));
 }

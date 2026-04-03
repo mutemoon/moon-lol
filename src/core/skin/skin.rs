@@ -1,11 +1,12 @@
 use bevy::prelude::*;
-use league_core::SkinCharacterDataProperties;
-use lol_config::{HashKey, LoadHashKeyTrait};
+use league_core::extract::SkinCharacterDataProperties;
+use lol_config::prop::{HashKey, LoadHashKeyTrait};
 
-use crate::{
-    CommandLoadPropBin, CommandSkinAnimationSpawn, CommandSkinMeshSpawn, HealthBar, Loading,
-    PropPath,
-};
+use crate::core::resource::loading::Loading;
+use crate::core::resource::prop_bin::{CommandLoadPropBin, PropPath};
+use crate::core::skin::animation::CommandSkinAnimationSpawn;
+use crate::core::skin::mesh::CommandSkinMeshSpawn;
+use crate::ui::health_bar::HealthBar;
 
 #[derive(Component, Debug, Clone, Copy)]
 pub struct Skin {

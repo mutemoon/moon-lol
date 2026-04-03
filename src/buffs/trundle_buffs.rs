@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 茂凯Q - 荆棘缠绕（减速）
 #[derive(Component, Debug, Clone)]

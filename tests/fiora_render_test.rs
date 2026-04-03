@@ -7,9 +7,9 @@ use bevy::prelude::*;
 use bevy::time::TimeUpdateStrategy;
 use bevy::winit::WinitPlugin;
 use moon_lol::{
-    Action, Fiora, PluginBarrack, PluginCore, PluginMap, PluginMinion, PluginResource,
-    PluginSkillTestRender, PluginTurret, PluginUI, SkillTestRenderConfig, SkillTestScript,
-    SkillTestScriptStep, SkillTestVideoFormat, SkillTestVideoOutput, attach_skill_test_actor,
+    attach_skill_test_actor, Action, Fiora, PluginBarrack, PluginCore, PluginMap, PluginMinion,
+    PluginResource, PluginSkillTestRender, PluginTurret, PluginUI, SkillTestRenderConfig,
+    SkillTestScript, SkillTestScriptStep, SkillTestVideoFormat, SkillTestVideoOutput,
 };
 
 #[test]
@@ -101,7 +101,9 @@ fn run_fiora_case_inner(test_name: &str, max_frames: u32, mut steps: Vec<SkillTe
         }),
         keep_frame_images: false,
     });
-    app.insert_resource(TimeUpdateStrategy::ManualDuration(Duration::from_millis(16)));
+    app.insert_resource(TimeUpdateStrategy::ManualDuration(Duration::from_millis(
+        16,
+    )));
     app.insert_resource(make_script(steps.as_mut_slice()));
     app.add_plugins(DefaultPlugins.build().disable::<WinitPlugin>());
     app.add_plugins(PluginSkillTestRender);

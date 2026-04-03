@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 加里奥被动 - 巨石碾击
 #[derive(Component, Debug, Clone)]

@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// Briar被动 - 赤红诅咒（流血）
 #[derive(Component, Debug, Clone)]

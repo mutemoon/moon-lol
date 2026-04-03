@@ -20,7 +20,9 @@ fn main() {
         video_output: None,
         keep_frame_images: false,
     });
-    app.insert_resource(TimeUpdateStrategy::ManualDuration(Duration::from_millis(16)));
+    app.insert_resource(TimeUpdateStrategy::ManualDuration(Duration::from_millis(
+        16,
+    )));
     app.add_plugins(DefaultPlugins.set(WindowPlugin {
         primary_window: Some(Window {
             visible: false,

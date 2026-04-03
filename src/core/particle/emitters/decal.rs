@@ -2,7 +2,8 @@ use bevy::math::bounding::{Aabb3d, IntersectsVolume};
 use bevy::platform::collections::HashSet;
 use bevy::prelude::*;
 
-use crate::{MapGeometry, ParticleMaterialUnlitDecal};
+use crate::core::map::MapGeometry;
+use crate::core::particle::environment::unlit_decal::ParticleMaterialUnlitDecal;
 
 #[derive(Component, Default)]
 pub struct ParticleDecal {

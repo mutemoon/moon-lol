@@ -1,8 +1,8 @@
 use bevy::prelude::*;
-use league_core::{UiElementGroupButtonData, UiElementRegionData};
-use lol_config::{HashKey, LoadHashKeyTrait};
+use league_core::extract::{UiElementGroupButtonData, UiElementRegionData};
+use lol_config::prop::{HashKey, LoadHashKeyTrait};
 
-use crate::{UIElement, UIElementEntity, UIState};
+use crate::ui::element::{UIElement, UIElementEntity, UIState};
 
 #[derive(Default)]
 pub struct PluginUIButton;

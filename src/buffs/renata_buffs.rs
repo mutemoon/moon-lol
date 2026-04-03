@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 瑞纳斯Q - 铁绑鞭（减速）
 #[derive(Component, Debug, Clone)]

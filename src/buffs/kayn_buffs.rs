@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::Buff;
+use crate::core::base::buff::Buff;
 
 /// Kayn R 寄生 —— 挂在被标记的目标身上
 #[derive(Component, Debug, Clone)]

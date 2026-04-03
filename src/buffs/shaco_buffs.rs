@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 萨科W - 幻痛（恐惧）
 #[derive(Component, Debug, Clone)]

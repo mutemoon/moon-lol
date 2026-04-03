@@ -1,15 +1,19 @@
 use bevy::prelude::*;
-use league_core::CharacterRecord;
+use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_config::LoadHashKeyTrait;
+use lol_config::prop::LoadHashKeyTrait;
 
-use crate::core::{
+use crate::buffs::alistar_buffs::BuffAlistarR;
+use crate::buffs::cc_debuffs::DebuffStun;
+use crate::core::action::damage::{DamageShape, TargetDamage, TargetFilter};
+use crate::core::action::dash::{ActionDash, DashDamage, DashMoveType};
+use crate::core::base::buff::BuffOf;
+use crate::core::damage::{DamageType, EventDamageCreate};
+use crate::core::skill::{
     play_skill_animation, skill_damage, skill_dash, skill_slot_from_index, spawn_skill_particle,
-    CoolDown, DamageShape, EventDamageCreate, EventSkillCast, Skill,
-    SkillOf, SkillSlot, Skills, TargetDamage, TargetFilter,
+    CoolDown, EventSkillCast, PassiveSkillOf, Skill, SkillOf, SkillSlot, Skills,
 };
 use crate::entities::champion::Champion;
-use crate::{BuffAlistarR, BuffOf, DamageType, DebuffStun, PassiveSkillOf};
 
 const ALISTAR_Q_KEY: &str = "Characters/Alistar/Spells/AlistarQ/AlistarQ";
 const ALISTAR_W_KEY: &str = "Characters/Alistar/Spells/AlistarW/AlistarW";
@@ -77,10 +81,17 @@ fn cast_alistar_q(commands: &mut Commands, entity: Entity) {
     );
 
     // Stun all enemies in range
-    commands.entity(entity).with_related::<BuffOf>(DebuffStun::new(1.0));
+    commands
+        .entity(entity)
+        .with_related::<BuffOf>(DebuffStun::new(1.0));
 }
 
-fn cast_alistar_w(commands: &mut Commands, q_transform: &Query<&Transform>, entity: Entity, point: Vec2) {
+fn cast_alistar_w(
+    commands: &mut Commands,
+    q_transform: &Query<&Transform>,
+    entity: Entity,
+    point: Vec2,
+) {
     play_skill_animation(commands, entity, hash_bin("Spell2"));
     spawn_skill_particle(commands, entity, hash_bin("Alistar_W_Cast"));
 
@@ -90,10 +101,10 @@ fn cast_alistar_w(commands: &mut Commands, q_transform: &Query<&Transform>, enti
         q_transform,
         entity,
         point,
-        &crate::ActionDash {
+        &ActionDash {
             skill: ALISTAR_W_KEY.into(),
-            move_type: crate::DashMoveType::Pointer { max: 650.0 },
-            damage: Some(crate::DashDamage {
+            move_type: DashMoveType::Pointer { max: 650.0 },
+            damage: Some(DashDamage {
                 radius_end: 100.0,
                 damage: TargetDamage {
                     filter: TargetFilter::All,
@@ -130,7 +141,9 @@ fn cast_alistar_r(commands: &mut Commands, entity: Entity) {
     spawn_skill_particle(commands, entity, hash_bin("Alistar_R_Cast"));
 
     // R grants damage reduction
-    commands.entity(entity).with_related::<BuffOf>(BuffAlistarR::new());
+    commands
+        .entity(entity)
+        .with_related::<BuffOf>(BuffAlistarR::new());
 }
 
 fn on_alistar_damage_hit(
@@ -146,7 +159,9 @@ fn on_alistar_damage_hit(
     let target = trigger.event_target();
 
     // W stuns and knocks back
-    commands.entity(target).with_related::<BuffOf>(DebuffStun::new(0.75));
+    commands
+        .entity(target)
+        .with_related::<BuffOf>(DebuffStun::new(0.75));
 }
 
 fn add_skills(
@@ -171,10 +186,9 @@ fn add_skills(
 
         for (index, &skill) in character_record.spells.as_ref().unwrap().iter().enumerate() {
             let skill_component = Skill::new(skill_slot_from_index(index), skill);
-            commands.entity(entity).with_related::<SkillOf>((
-                skill_component,
-                CoolDown::default(),
-            ));
+            commands
+                .entity(entity)
+                .with_related::<SkillOf>((skill_component, CoolDown::default()));
         }
     }
 }

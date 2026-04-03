@@ -3,9 +3,12 @@ use std::collections::HashMap;
 
 use bevy::prelude::*;
 use league_utils::hash_bin;
-use lol_core::Team;
+use lol_core::team::Team;
 
-use crate::{Action, CameraState, CommandAction, CommandSkinParticleSpawn, Map};
+use crate::core::action::{Action, CommandAction};
+use crate::core::camera::CameraState;
+use crate::core::map::Map;
+use crate::core::skin::particle::CommandSkinParticleSpawn;
 
 #[derive(Default)]
 pub struct PluginController;

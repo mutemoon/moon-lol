@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 ///  Aphelios Q - 狙击枪标记
 #[derive(Component, Debug, Clone)]

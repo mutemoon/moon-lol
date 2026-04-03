@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 斯莫德W - 深火烙印（减速）
 #[derive(Component, Debug, Clone)]

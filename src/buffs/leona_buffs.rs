@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 蕾欧娜被动 - 阳光标记
 #[derive(Component, Debug, Clone)]
@@ -46,7 +47,12 @@ pub struct BuffLeonaW {
 }
 
 impl BuffLeonaW {
-    pub fn new(damage_reduction: f32, armor_bonus: f32, magic_resist_bonus: f32, duration: f32) -> Self {
+    pub fn new(
+        damage_reduction: f32,
+        armor_bonus: f32,
+        magic_resist_bonus: f32,
+        duration: f32,
+    ) -> Self {
         Self {
             damage_reduction,
             armor_bonus,

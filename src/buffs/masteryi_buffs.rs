@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 易大师被动 - 双重打击
 #[derive(Component, Debug, Clone)]

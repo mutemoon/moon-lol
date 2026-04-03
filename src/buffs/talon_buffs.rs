@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 泰隆W - 尝血利刃（减速）
 #[derive(Component, Debug, Clone)]

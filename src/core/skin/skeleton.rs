@@ -2,10 +2,11 @@ use bevy::animation::{AnimationTarget, AnimationTargetId};
 use bevy::asset::uuid::Uuid;
 use bevy::mesh::skinning::{SkinnedMesh, SkinnedMeshInverseBindposes};
 use bevy::prelude::*;
-use league_file::LeagueSkeleton;
+use league_file::skeleton::LeagueSkeleton;
 use league_utils::hash_joint;
 
-use crate::{AssetServerLoadLeague, Loading};
+use crate::core::resource::loading::Loading;
+use crate::core::utils::AssetServerLoadLeague;
 
 struct ConfigJoint {
     hash: u32,

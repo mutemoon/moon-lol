@@ -1,15 +1,19 @@
 use bevy::prelude::*;
-use league_core::CharacterRecord;
+use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_config::LoadHashKeyTrait;
+use lol_config::prop::LoadHashKeyTrait;
 
-use crate::core::{
+use crate::buffs::cc_debuffs::DebuffSlow;
+use crate::buffs::ekko_buffs::BuffEkkoPassive;
+use crate::core::action::damage::{DamageShape, TargetDamage, TargetFilter};
+use crate::core::action::dash::{ActionDash, DashDamage, DashMoveType};
+use crate::core::base::buff::BuffOf;
+use crate::core::damage::{DamageType, EventDamageCreate};
+use crate::core::skill::{
     play_skill_animation, skill_damage, skill_dash, skill_slot_from_index, spawn_skill_particle,
-    CoolDown, DamageShape, EventDamageCreate, EventSkillCast, Skill,
-    SkillOf, SkillSlot, Skills, TargetDamage, TargetFilter,
+    CoolDown, EventSkillCast, PassiveSkillOf, Skill, SkillOf, SkillSlot, Skills,
 };
 use crate::entities::champion::Champion;
-use crate::{BuffEkkoPassive, BuffOf, DamageType, DebuffSlow, PassiveSkillOf};
 
 const EKKO_Q_KEY: &str = "Characters/Ekko/Spells/EkkoQ/EkkoQ";
 const EKKO_W_KEY: &str = "Characters/Ekko/Spells/EkkoW/EkkoW";
@@ -66,7 +70,10 @@ fn cast_ekko_q(commands: &mut Commands, entity: Entity) {
         commands,
         entity,
         EKKO_Q_KEY,
-        DamageShape::Sector { radius: 1100.0, angle: 30.0 },
+        DamageShape::Sector {
+            radius: 1100.0,
+            angle: 30.0,
+        },
         vec![TargetDamage {
             filter: TargetFilter::All,
             amount: hash_bin("TotalDamage"),
@@ -95,7 +102,12 @@ fn cast_ekko_w(commands: &mut Commands, entity: Entity) {
     );
 }
 
-fn cast_ekko_e(commands: &mut Commands, q_transform: &Query<&Transform>, entity: Entity, point: Vec2) {
+fn cast_ekko_e(
+    commands: &mut Commands,
+    q_transform: &Query<&Transform>,
+    entity: Entity,
+    point: Vec2,
+) {
     play_skill_animation(commands, entity, hash_bin("Spell3"));
     spawn_skill_particle(commands, entity, hash_bin("Ekko_E_Cast"));
 
@@ -105,10 +117,10 @@ fn cast_ekko_e(commands: &mut Commands, q_transform: &Query<&Transform>, entity:
         q_transform,
         entity,
         point,
-        &crate::ActionDash {
+        &ActionDash {
             skill: EKKO_E_KEY.into(),
-            move_type: crate::DashMoveType::Pointer { max: 325.0 },
-            damage: Some(crate::DashDamage {
+            move_type: DashMoveType::Pointer { max: 325.0 },
+            damage: Some(DashDamage {
                 radius_end: 100.0,
                 damage: TargetDamage {
                     filter: TargetFilter::All,
@@ -153,9 +165,13 @@ fn on_ekko_damage_hit(
     let target = trigger.event_target();
 
     // Apply passive stacks
-    commands.entity(target).with_related::<BuffOf>(BuffEkkoPassive::new());
+    commands
+        .entity(target)
+        .with_related::<BuffOf>(BuffEkkoPassive::new());
     // Q and W slow
-    commands.entity(target).with_related::<BuffOf>(DebuffSlow::new(0.5, 2.0));
+    commands
+        .entity(target)
+        .with_related::<BuffOf>(DebuffSlow::new(0.5, 2.0));
 }
 
 fn add_skills(
@@ -180,10 +196,9 @@ fn add_skills(
 
         for (index, &skill) in character_record.spells.as_ref().unwrap().iter().enumerate() {
             let skill_component = Skill::new(skill_slot_from_index(index), skill);
-            commands.entity(entity).with_related::<SkillOf>((
-                skill_component,
-                CoolDown::default(),
-            ));
+            commands
+                .entity(entity)
+                .with_related::<SkillOf>((skill_component, CoolDown::default()));
         }
     }
 }

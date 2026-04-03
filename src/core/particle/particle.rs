@@ -6,12 +6,17 @@ pub mod quad_slice;
 use bevy::mesh::skinning::{SkinnedMesh, SkinnedMeshInverseBindposes};
 use bevy::mesh::VertexAttributeValues;
 use bevy::prelude::*;
-use league_core::{EnumVfxPrimitive, VfxSystemDefinitionData};
+use league_core::extract::{EnumVfxPrimitive, VfxSystemDefinitionData};
 
-use crate::{
-    CameraState, Lifetime, ParticleEmitterState, ParticleId, ParticleMaterialSkinnedMeshParticle,
-    ParticleMaterialUnlitDecal, ATTRIBUTE_LIFETIME, ATTRIBUTE_WORLD_POSITION,
-    ATTRIBUTE_WORLD_POSITION_VEC4,
+use crate::core::camera::CameraState;
+use crate::core::lifetime::Lifetime;
+use crate::core::particle::emitters::state::ParticleEmitterState;
+use crate::core::particle::environment::unlit_decal::ParticleMaterialUnlitDecal;
+use crate::core::particle::particle::distortion::ParticleMaterialDistortion;
+use crate::core::particle::particle::mesh::ParticleMaterialMesh;
+use crate::core::particle::skinned_mesh::particle::ParticleMaterialSkinnedMeshParticle;
+use crate::core::particle::{
+    ParticleId, ATTRIBUTE_LIFETIME, ATTRIBUTE_WORLD_POSITION, ATTRIBUTE_WORLD_POSITION_VEC4,
 };
 
 #[derive(Component)]

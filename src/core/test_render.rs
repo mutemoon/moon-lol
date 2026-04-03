@@ -21,23 +21,30 @@ use bevy::render::renderer::{RenderContext, RenderDevice, RenderQueue};
 use bevy::render::{Extract, ExtractSchedule, Render, RenderApp, RenderSystems};
 use crossbeam_channel::{Receiver, Sender};
 use image::{ImageBuffer, Rgba};
-use league_file::LeagueSkeleton;
-use league_core::{
-    JungleQuadrantFlags, MainRegionFlags, NearestLaneFlags, POIFlags, RingFlags,
-    RiverRegionFlags, UnknownSRXFlags, VisionPathingFlags,
+use league_core::grid::{
+    JungleQuadrantFlags, MainRegionFlags, NearestLaneFlags, POIFlags, RingFlags, RiverRegionFlags,
+    UnknownSRXFlags, VisionPathingFlags,
 };
-use lol_config::{
-    init_league_asset, ConfigMapGeo, ConfigNavigationGrid, ConfigNavigationGridCell,
-    ResourceShaderChunk, ResourceShaderPackage,
-};
-use lol_core::LeagueSkinMesh;
+use league_file::skeleton::LeagueSkeleton;
+use lol_config::grid::{ConfigNavigationGrid, ConfigNavigationGridCell};
+use lol_config::mapgeo::ConfigMapGeo;
+use lol_config::register::init_league_asset;
+use lol_config::shader::{ResourceShaderChunk, ResourceShaderPackage};
+use lol_core::skin::LeagueSkinMesh;
 
-use crate::{
-    Action, CommandAction, FixedFrameCount,
-    PluginAnimation, PluginCamera, PluginParticle, PluginResourceLoading, PluginResourcePropBin,
-    PluginRotate, PluginSkin, ResourceCache, ResourceGrid, ResourceShaderHandles, SkillPoints,
-    Skills,
-};
+use crate::core::action::{Action, CommandAction};
+use crate::core::animation::PluginAnimation;
+use crate::core::camera::PluginCamera;
+use crate::core::game::FixedFrameCount;
+use crate::core::navigation::grid::ResourceGrid;
+use crate::core::particle::PluginParticle;
+use crate::core::resource::loading::PluginResourceLoading;
+use crate::core::resource::prop_bin::PluginResourcePropBin;
+use crate::core::resource::shader::ResourceShaderHandles;
+use crate::core::resource::ResourceCache;
+use crate::core::rotate::PluginRotate;
+use crate::core::skill::{SkillPoints, Skills};
+use crate::core::skin::PluginSkin;
 
 #[derive(Resource, Clone)]
 pub struct SkillTestRenderConfig {
@@ -219,7 +226,10 @@ impl Plugin for PluginSkillTestRender {
                 .run_if(run_once),
         );
         app.add_systems(FixedUpdate, run_skill_test_script);
-        app.add_systems(Last, (write_captured_frames, run_post_process_after_capture));
+        app.add_systems(
+            Last,
+            (write_captured_frames, run_post_process_after_capture),
+        );
 
         let render_app = app.sub_app_mut(RenderApp);
         let mut graph = render_app.world_mut().resource_mut::<RenderGraph>();
@@ -377,7 +387,8 @@ impl render_graph::Node for ImageCopyDriver {
         let Some(image_copiers) = world.get_resource::<ImageCopiers>() else {
             return Ok(());
         };
-        let Some(gpu_images) = world.get_resource::<RenderAssets<bevy::render::texture::GpuImage>>()
+        let Some(gpu_images) =
+            world.get_resource::<RenderAssets<bevy::render::texture::GpuImage>>()
         else {
             return Ok(());
         };
@@ -475,7 +486,8 @@ fn write_captured_frames(
         }
 
         let image = rgba_from_padded_buffer(&raw, image_size.width, image_size.height);
-        let frame_path = frames_dir(&config.output_dir).join(format!("frame_{:06}.png", write_index.0));
+        let frame_path =
+            frames_dir(&config.output_dir).join(format!("frame_{:06}.png", write_index.0));
 
         let _ = image.save(frame_path);
         write_index.0 += 1;

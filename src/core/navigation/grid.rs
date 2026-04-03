@@ -1,8 +1,10 @@
 use bevy::prelude::*;
-use league_core::{EnumMap, MapContainer};
-use lol_config::{ConfigNavigationGrid, LoadHashKeyTrait};
+use league_core::extract::{EnumMap, MapContainer};
+use lol_config::grid::ConfigNavigationGrid;
+use lol_config::prop::LoadHashKeyTrait;
 
-use crate::{AssetServerLoadLeague, MapName};
+use crate::core::map::MapName;
+use crate::core::utils::AssetServerLoadLeague;
 
 #[derive(Resource, Default)]
 pub struct ResourceGrid(pub Handle<ConfigNavigationGrid>);

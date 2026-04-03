@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 琴女W - 迅奏鸣曲（护盾）
 #[derive(Component, Debug, Clone)]

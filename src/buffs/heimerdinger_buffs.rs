@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 黑默丁格被动 - 科技亲和
 #[derive(Component, Debug, Clone)]

@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 凯南被动 - 风暴印记（眩晕）
 #[derive(Component, Debug, Clone)]

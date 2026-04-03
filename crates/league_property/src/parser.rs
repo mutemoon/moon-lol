@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use bevy::math::Vec2;
 
-use crate::{BinDeserializerResult, BinStructHeader, BinType, Error};
+use crate::types::{BinDeserializerResult, BinStructHeader, BinType, Error};
 
 #[derive(Clone)]
 pub struct BinParser<'de> {

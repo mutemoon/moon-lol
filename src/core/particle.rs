@@ -10,11 +10,28 @@ use bevy::prelude::*;
 use bevy::transform::systems::{
     mark_dirty_trees, propagate_parent_transforms, sync_simple_transforms,
 };
-use league_core::{VfxEmitterDefinitionData, VfxSystemDefinitionData};
+use league_core::extract::{VfxEmitterDefinitionData, VfxSystemDefinitionData};
 use league_utils::hash_wad;
-use lol_config::{HashKey, LoadHashKeyTrait};
+use lol_config::prop::{HashKey, LoadHashKeyTrait};
 
-use crate::{Lifetime, LifetimeMode};
+use crate::core::lifetime::{Lifetime, LifetimeMode};
+use crate::core::particle::emitters::decal::update_decal_intersections;
+use crate::core::particle::emitters::distortion::update_emitter_distortion;
+use crate::core::particle::emitters::mesh::update_emitter_mesh;
+use crate::core::particle::emitters::position::update_emitter_position;
+use crate::core::particle::emitters::quad::update_emitter_quad;
+use crate::core::particle::emitters::skinned_mesh::update_emitter_skinned_mesh;
+use crate::core::particle::emitters::state::{EmitterOf, Emitters, ParticleEmitterState};
+use crate::core::particle::emitters::unlit_decal::update_emitter_decal;
+use crate::core::particle::environment::unlit_decal::ParticleMaterialUnlitDecal;
+use crate::core::particle::particle::distortion::ParticleMaterialDistortion;
+use crate::core::particle::particle::mesh::ParticleMaterialMesh;
+use crate::core::particle::particle::quad::ParticleMaterialQuad;
+use crate::core::particle::particle::quad_slice::ParticleMaterialQuadSlice;
+use crate::core::particle::particle::{
+    update_particle, update_particle_skinned_mesh_particle, update_particle_transform,
+};
+use crate::core::particle::skinned_mesh::particle::ParticleMaterialSkinnedMeshParticle;
 
 pub const ATTRIBUTE_WORLD_POSITION: MeshVertexAttribute =
     MeshVertexAttribute::new("ATTRIBUTE_WORLD_POSITION", 2020, VertexFormat::Float32x3);
@@ -148,10 +165,11 @@ fn on_command_particle_spawn(
         return;
     };
 
-    let Some(vfx_system_definition_data) = res_assets_vfx_system_definition_data
-        .load_hash(trigger.hash) else {
-            return;
-        };
+    let Some(vfx_system_definition_data) =
+        res_assets_vfx_system_definition_data.load_hash(trigger.hash)
+    else {
+        return;
+    };
 
     let vfx_emitter_definition_datas = vfx_system_definition_data
         .complex_emitter_definition_data

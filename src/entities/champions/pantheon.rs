@@ -1,16 +1,19 @@
 use bevy::prelude::*;
-use league_core::CharacterRecord;
+use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_config::LoadHashKeyTrait;
+use lol_config::prop::LoadHashKeyTrait;
 
-use crate::core::{
+use crate::buffs::cc_debuffs::DebuffStun;
+use crate::buffs::pantheon_buffs::BuffPantheonE;
+use crate::core::action::damage::{DamageShape, TargetDamage, TargetFilter};
+use crate::core::action::dash::{ActionDash, DashDamage, DashMoveType};
+use crate::core::base::buff::BuffOf;
+use crate::core::damage::{DamageType, EventDamageCreate};
+use crate::core::skill::{
     play_skill_animation, skill_damage, skill_dash, skill_slot_from_index, spawn_skill_particle,
-    BuffOf, CoolDown, DamageShape, EventDamageCreate, EventSkillCast, Skill, SkillOf, SkillSlot,
-    Skills, TargetDamage, TargetFilter,
+    CoolDown, EventSkillCast, PassiveSkillOf, Skill, SkillOf, SkillSlot, Skills,
 };
 use crate::entities::champion::Champion;
-use crate::{BuffPantheonE, DebuffStun, PassiveSkillOf};
-use crate::DamageType;
 
 const PANTHEON_Q_KEY: &str = "Characters/Pantheon/Spells/PantheonQ/PantheonQ";
 const PANTHEON_W_KEY: &str = "Characters/Pantheon/Spells/PantheonW/PantheonW";
@@ -66,7 +69,10 @@ fn cast_pantheon_q(commands: &mut Commands, entity: Entity, _point: Vec2) {
         commands,
         entity,
         PANTHEON_Q_KEY,
-        DamageShape::Sector { radius: 400.0, angle: 45.0 },
+        DamageShape::Sector {
+            radius: 400.0,
+            angle: 45.0,
+        },
         vec![TargetDamage {
             filter: TargetFilter::All,
             amount: hash_bin("TotalDamage"),
@@ -76,7 +82,12 @@ fn cast_pantheon_q(commands: &mut Commands, entity: Entity, _point: Vec2) {
     );
 }
 
-fn cast_pantheon_w(commands: &mut Commands, q_transform: &Query<&Transform>, entity: Entity, point: Vec2) {
+fn cast_pantheon_w(
+    commands: &mut Commands,
+    q_transform: &Query<&Transform>,
+    entity: Entity,
+    point: Vec2,
+) {
     play_skill_animation(commands, entity, hash_bin("Spell2"));
     spawn_skill_particle(commands, entity, hash_bin("Pantheon_W_Cast"));
     // W is a dash to target that stuns
@@ -85,10 +96,10 @@ fn cast_pantheon_w(commands: &mut Commands, q_transform: &Query<&Transform>, ent
         q_transform,
         entity,
         point,
-        &crate::ActionDash {
+        &ActionDash {
             skill: PANTHEON_W_KEY.into(),
-            move_type: crate::DashMoveType::Pointer { max: 200.0 },
-            damage: Some(crate::DashDamage {
+            move_type: DashMoveType::Pointer { max: 200.0 },
+            damage: Some(DashDamage {
                 radius_end: 100.0,
                 damage: TargetDamage {
                     filter: TargetFilter::All,
@@ -109,7 +120,10 @@ fn cast_pantheon_e(commands: &mut Commands, entity: Entity) {
         commands,
         entity,
         PANTHEON_E_KEY,
-        DamageShape::Sector { radius: 300.0, angle: 90.0 },
+        DamageShape::Sector {
+            radius: 300.0,
+            angle: 90.0,
+        },
         vec![TargetDamage {
             filter: TargetFilter::All,
             amount: hash_bin("TotalDamage"),
@@ -117,7 +131,9 @@ fn cast_pantheon_e(commands: &mut Commands, entity: Entity) {
         }],
         Some(hash_bin("Pantheon_E_Hit")),
     );
-    commands.entity(entity).with_related::<BuffOf>(BuffPantheonE::new(Vec2::ZERO, 1.5));
+    commands
+        .entity(entity)
+        .with_related::<BuffOf>(BuffPantheonE::new(Vec2::ZERO, 1.5));
 }
 
 fn cast_pantheon_r(
@@ -134,10 +150,10 @@ fn cast_pantheon_r(
         q_transform,
         entity,
         point,
-        &crate::ActionDash {
+        &ActionDash {
             skill: PANTHEON_R_KEY.into(),
-            move_type: crate::DashMoveType::Pointer { max: 2000.0 },
-            damage: Some(crate::DashDamage {
+            move_type: DashMoveType::Pointer { max: 2000.0 },
+            damage: Some(DashDamage {
                 radius_end: 200.0,
                 damage: TargetDamage {
                     filter: TargetFilter::All,
@@ -191,5 +207,7 @@ fn on_pantheon_damage_hit(
     }
     let target = trigger.event_target();
     // W 命中时眩晕
-    commands.entity(target).with_related::<BuffOf>(DebuffStun::new(1.0));
+    commands
+        .entity(target)
+        .with_related::<BuffOf>(DebuffStun::new(1.0));
 }

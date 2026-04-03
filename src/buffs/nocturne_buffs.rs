@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 梦魇被动 - 夜魔翅膀（额外伤害和治疗）
 #[derive(Component, Debug, Clone)]

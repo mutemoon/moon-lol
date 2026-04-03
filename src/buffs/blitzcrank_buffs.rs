@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 蒸汽机器人被动 - 法力护盾
 #[derive(Component, Debug, Clone)]

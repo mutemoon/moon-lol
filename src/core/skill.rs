@@ -1,20 +1,23 @@
 use std::ops::Deref;
 
 use bevy::prelude::*;
-use league_core::{
+use league_core::extract::{
     EffectValueCalculationPart, EnumAbilityResourceByCoefficientCalculationPart,
     EnumGameCalculation, NamedDataValueCalculationPart, SpellObject,
     StatByCoefficientCalculationPart, StatByNamedDataValueCalculationPart,
     StatBySubPartCalculationPart,
 };
 use league_utils::hash_bin;
-use lol_config::{HashKey, LoadHashKeyTrait};
+use lol_config::prop::{HashKey, LoadHashKeyTrait};
 
-use crate::{
-    AbilityResource, ActionDamageEffect, ActionDash, CommandAnimationPlay, CommandAttackReset,
-    CommandMovement, CommandSkinParticleDespawn, CommandSkinParticleSpawn, DamageShape,
-    EventLevelUp, Level, MovementAction, MovementWay, TargetDamage,
-};
+use crate::core::action::damage::{ActionDamage, ActionDamageEffect, DamageShape, TargetDamage};
+use crate::core::action::dash::{ActionDash, DashDamageComponent, DashMoveType};
+use crate::core::animation::CommandAnimationPlay;
+use crate::core::attack::CommandAttackReset;
+use crate::core::base::ability_resource::AbilityResource;
+use crate::core::base::level::{EventLevelUp, Level};
+use crate::core::movement::{CommandMovement, MovementAction, MovementWay};
+use crate::core::skin::particle::{CommandSkinParticleDespawn, CommandSkinParticleSpawn};
 
 #[derive(Default)]
 pub struct PluginSkill;
@@ -519,7 +522,7 @@ pub fn skill_damage(
     damage_list: Vec<TargetDamage>,
     particle: Option<u32>,
 ) {
-    commands.trigger(crate::ActionDamage {
+    commands.trigger(ActionDamage {
         entity,
         skill: skill.into(),
         effects: vec![ActionDamageEffect {
@@ -544,7 +547,7 @@ pub fn skill_dash(
     let distance = vector.length();
 
     let destination = match dash.move_type {
-        crate::DashMoveType::Fixed(fixed_distance) => {
+        DashMoveType::Fixed(fixed_distance) => {
             let direction = if distance < 0.001 {
                 transform.forward().xz().normalize()
             } else {
@@ -552,7 +555,7 @@ pub fn skill_dash(
             };
             transform.translation.xz() + direction * fixed_distance
         }
-        crate::DashMoveType::Pointer { max } => {
+        DashMoveType::Pointer { max } => {
             if distance < max {
                 point
             } else {
@@ -563,7 +566,7 @@ pub fn skill_dash(
     };
 
     if let Some(damage) = &dash.damage {
-        commands.entity(entity).insert(crate::DashDamageComponent {
+        commands.entity(entity).insert(DashDamageComponent {
             start_pos: transform.translation,
             target_pos: Vec3::new(destination.x, transform.translation.y, destination.y),
             damage: damage.clone(),
@@ -725,7 +728,7 @@ fn calculate_part(
 mod tests {
     use std::collections::HashMap;
 
-    use league_core::{
+    use league_core::extract::{
         EffectValueCalculationPart, EnumAbilityResourceByCoefficientCalculationPart,
         EnumGameCalculation, GameCalculation, NamedDataValueCalculationPart, SpellDataResource,
         SpellDataValue, SpellEffectAmount, SpellObject, StatByCoefficientCalculationPart,

@@ -1,15 +1,17 @@
 use bevy::prelude::*;
-use league_core::CharacterRecord;
+use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_config::LoadHashKeyTrait;
+use lol_config::prop::LoadHashKeyTrait;
 
-use crate::core::{
-    play_skill_animation, skill_damage, skill_slot_from_index, spawn_skill_particle, BuffOf,
-    CoolDown, DamageShape, EventDamageCreate, EventSkillCast, Skill, SkillOf, SkillSlot, Skills,
-    TargetDamage, TargetFilter,
+use crate::buffs::smolder_buffs::BuffSmolderW;
+use crate::core::action::damage::{DamageShape, TargetDamage, TargetFilter};
+use crate::core::base::buff::BuffOf;
+use crate::core::damage::{DamageType, EventDamageCreate};
+use crate::core::skill::{
+    play_skill_animation, skill_damage, skill_slot_from_index, spawn_skill_particle, CoolDown,
+    EventSkillCast, PassiveSkillOf, Skill, SkillOf, SkillSlot, Skills,
 };
 use crate::entities::champion::Champion;
-use crate::{BuffSmolderW, DamageType, PassiveSkillOf};
 
 const SMOLDER_Q_KEY: &str = "Characters/Smolder/Spells/SmolderQ/SmolderQ";
 const SMOLDER_W_KEY: &str = "Characters/Smolder/Spells/SmolderW/SmolderW";
@@ -66,7 +68,9 @@ fn cast_smolder_q(commands: &mut Commands, entity: Entity) {
         commands,
         entity,
         SMOLDER_Q_KEY,
-        DamageShape::Nearest { max_distance: 550.0 },
+        DamageShape::Nearest {
+            max_distance: 550.0,
+        },
         vec![TargetDamage {
             filter: TargetFilter::All,
             amount: hash_bin("TotalDamage"),
@@ -134,7 +138,9 @@ fn on_smolder_damage_hit(
     let target = trigger.event_target();
 
     // W slows
-    commands.entity(target).with_related::<BuffOf>(BuffSmolderW::new(0.3, 1.5));
+    commands
+        .entity(target)
+        .with_related::<BuffOf>(BuffSmolderW::new(0.3, 1.5));
 }
 
 fn add_skills(
@@ -159,10 +165,9 @@ fn add_skills(
 
         for (index, &skill) in character_record.spells.as_ref().unwrap().iter().enumerate() {
             let skill_component = Skill::new(skill_slot_from_index(index), skill);
-            commands.entity(entity).with_related::<SkillOf>((
-                skill_component,
-                CoolDown::default(),
-            ));
+            commands
+                .entity(entity)
+                .with_related::<SkillOf>((skill_component, CoolDown::default()));
         }
     }
 }

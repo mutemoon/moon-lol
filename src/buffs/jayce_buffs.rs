@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 杰斯被动 - 雷霆一击
 #[derive(Component, Debug, Clone)]

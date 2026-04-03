@@ -2,13 +2,15 @@ use std::collections::HashMap;
 use std::time::Duration;
 
 use bevy::prelude::*;
-use league_core::{EnumBlendData, EnumParametricUpdater};
+use league_core::extract::{EnumBlendData, EnumParametricUpdater};
 use league_utils::hash_bin;
 use rand::distr::weighted::WeightedIndex;
 use rand::distr::Distribution;
 use rand::rng;
 
-use crate::{Attack, Movement, State};
+use crate::core::attack::Attack;
+use crate::core::base::state::State;
+use crate::core::movement::Movement;
 
 #[derive(Default)]
 pub struct PluginAnimation;

@@ -11,20 +11,28 @@ use bevy::ecs::entity::{EntityHashMap, SceneEntityMapper};
 use bevy::ecs::relationship::RelationshipHookMode;
 use bevy::prelude::*;
 use bevy::scene::ron::{self};
-use league_file::LeagueSkeleton;
-use lol_config::{
-    init_league_asset, CharacterConfigsDeserializer, ConfigGame, ConfigMapGeo,
-    ConfigNavigationGrid, ResourceShaderChunk, ResourceShaderPackage,
-};
-use lol_core::LeagueSkinMesh;
-use lol_loader::{
-    LeagueLoaderAnimationClip, LeagueLoaderImage, LeagueLoaderMapgeo, LeagueLoaderMesh,
-    LeagueLoaderMeshStatic, LeagueLoaderNavGrid, LeagueLoaderProperty, LeagueLoaderShaderToc,
-    LeagueLoaderSkeleton,
-};
+use league_file::skeleton::LeagueSkeleton;
+use lol_config::game::{CharacterConfigsDeserializer, ConfigGame};
+use lol_config::grid::ConfigNavigationGrid;
+use lol_config::mapgeo::ConfigMapGeo;
+use lol_config::register::init_league_asset;
+use lol_config::shader::{ResourceShaderChunk, ResourceShaderPackage};
+use lol_core::skin::LeagueSkinMesh;
+use lol_loader::animation::LeagueLoaderAnimationClip;
+use lol_loader::image::LeagueLoaderImage;
+use lol_loader::mapgeo::LeagueLoaderMapgeo;
+use lol_loader::mesh::LeagueLoaderMesh;
+use lol_loader::mesh_static::LeagueLoaderMeshStatic;
+use lol_loader::navgrid::LeagueLoaderNavGrid;
+use lol_loader::property::LeagueLoaderProperty;
+use lol_loader::shader::LeagueLoaderShaderToc;
+use lol_loader::skeleton::LeagueLoaderSkeleton;
 use serde::de::DeserializeSeed;
 
-use crate::AssetServerLoadLeague;
+use self::loading::PluginResourceLoading;
+use self::prop_bin::PluginResourcePropBin;
+use self::shader::{startup_load_shaders, update_shaders, ResourceShaderHandles};
+use crate::core::utils::AssetServerLoadLeague;
 
 #[derive(Default)]
 pub struct PluginResource {

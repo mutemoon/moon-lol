@@ -1,19 +1,26 @@
 use bevy::prelude::*;
-use league_core::{EnumVfxPrimitive, VfxEmitterDefinitionData, VfxSystemDefinitionData};
-
-use crate::{
-    create_black_pixel_texture, Lifetime, ParticleId, ParticleMaterialMesh, ResourceCache,
-    UniformsPixelMesh, UniformsVertexMesh,
+use league_core::extract::{
+    EnumVfxPrimitive, VfxEmitterDefinitionData, VfxPrimitiveMesh, VfxSystemDefinitionData,
 };
 
-use super::ParticleEmitterState;
-use super::utils::{ParticleBirthParams, EmissionParams, calculate_emission_params, calculate_particle_transform_frame, spawn_particle_entity, get_emitter_type, EmitterType};
+use super::state::ParticleEmitterState;
+use super::utils::{
+    calculate_emission_params, calculate_particle_transform_frame, get_emitter_type,
+    spawn_particle_entity, EmissionParams, EmitterType, ParticleBirthParams,
+};
+use crate::core::lifetime::Lifetime;
+use crate::core::particle::particle::mesh::{
+    ParticleMaterialMesh, UniformsPixelMesh, UniformsVertexMesh,
+};
+use crate::core::particle::utils::create_black_pixel_texture;
+use crate::core::particle::ParticleId;
+use crate::core::resource::ResourceCache;
 
 pub fn attach_mesh_visuals(
     commands: &mut Commands,
     particle_entity: Entity,
     _vfx_emitter_definition_data: &VfxEmitterDefinitionData,
-    m_mesh: &league_core::VfxPrimitiveMesh,
+    m_mesh: &VfxPrimitiveMesh,
     texture: Option<Handle<Image>>,
     particle_color_texture: Option<Handle<Image>>,
     blend_mode: u8,
@@ -96,7 +103,8 @@ pub fn update_emitter_mesh(
             &mut emitter,
             vfx_emitter_definition_data,
             time.delta_secs(),
-        ) else {
+        )
+        else {
             continue;
         };
 

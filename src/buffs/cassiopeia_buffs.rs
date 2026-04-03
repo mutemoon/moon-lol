@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 卡西奥佩娅被动 - 蛇眼优雅
 #[derive(Component, Debug, Clone)]

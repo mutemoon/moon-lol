@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 兰博W - 破碎护盾（护盾）
 #[derive(Component, Debug, Clone)]

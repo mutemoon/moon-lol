@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 奥莉安娜被动 - 发条上弦（额外伤害）
 #[derive(Component, Debug, Clone)]

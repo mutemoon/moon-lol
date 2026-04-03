@@ -2,10 +2,10 @@ use std::fmt::Debug;
 use std::ops::Deref;
 
 use bevy::prelude::*;
-use league_core::{AnimationGraphData, CharacterRecord, SkinCharacterDataProperties};
-use league_file::LeagueSkeleton;
-use lol_config::HashKey;
-use lol_core::LeagueSkinMesh;
+use league_core::extract::{AnimationGraphData, CharacterRecord, SkinCharacterDataProperties};
+use league_file::skeleton::LeagueSkeleton;
+use lol_config::prop::HashKey;
+use lol_core::skin::LeagueSkinMesh;
 
 #[derive(Default)]
 pub struct PluginResourceLoading;

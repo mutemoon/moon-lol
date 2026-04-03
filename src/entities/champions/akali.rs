@@ -1,15 +1,20 @@
 use bevy::prelude::*;
-use league_core::CharacterRecord;
+use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_config::LoadHashKeyTrait;
+use lol_config::prop::LoadHashKeyTrait;
 
-use crate::core::{
+use crate::buffs::akali_buffs::{BuffAkaliPassive, BuffAkaliStealth, BuffAkaliW};
+use crate::buffs::cc_debuffs::DebuffSlow;
+use crate::core::action::damage::{DamageShape, TargetDamage, TargetFilter};
+use crate::core::action::dash::{ActionDash, DashDamage, DashMoveType};
+use crate::core::base::buff::BuffOf;
+use crate::core::damage::{DamageType, EventDamageCreate};
+use crate::core::skill::{
     play_skill_animation, skill_damage, skill_dash, skill_slot_from_index, spawn_skill_particle,
-    CoolDown, DamageShape, EventDamageCreate, EventSkillCast, Skill, SkillCooldownMode,
-    SkillOf, SkillRecastWindow, SkillSlot, Skills, TargetDamage, TargetFilter,
+    CoolDown, EventSkillCast, PassiveSkillOf, Skill, SkillCooldownMode, SkillOf, SkillRecastWindow,
+    SkillSlot, Skills,
 };
 use crate::entities::champion::Champion;
-use crate::{BuffAkaliPassive, BuffAkaliStealth, BuffAkaliW, BuffOf, DamageType, DebuffSlow, PassiveSkillOf};
 
 const AKALI_Q_KEY: &str = "Characters/Akali/Spells/AkaliFivePointStrike/AkaliFivePointStrike";
 #[allow(dead_code)]
@@ -83,7 +88,10 @@ fn cast_akali_q(commands: &mut Commands, entity: Entity) {
         commands,
         entity,
         AKALI_Q_KEY,
-        DamageShape::Sector { radius: 500.0, angle: 45.0 },
+        DamageShape::Sector {
+            radius: 500.0,
+            angle: 45.0,
+        },
         vec![TargetDamage {
             filter: TargetFilter::All,
             amount: hash_bin("TotalDamage"),
@@ -93,7 +101,9 @@ fn cast_akali_q(commands: &mut Commands, entity: Entity) {
     );
 
     // Mark for passive ring
-    commands.entity(entity).with_related::<BuffOf>(BuffAkaliPassive::new());
+    commands
+        .entity(entity)
+        .with_related::<BuffOf>(BuffAkaliPassive::new());
 }
 
 fn cast_akali_w(commands: &mut Commands, entity: Entity) {
@@ -101,8 +111,12 @@ fn cast_akali_w(commands: &mut Commands, entity: Entity) {
     spawn_skill_particle(commands, entity, hash_bin("Akali_W_Cast"));
 
     // W drops a smoke bomb and grants stealth and move speed
-    commands.entity(entity).with_related::<BuffOf>(BuffAkaliW::new());
-    commands.entity(entity).with_related::<BuffOf>(BuffAkaliStealth::new());
+    commands
+        .entity(entity)
+        .with_related::<BuffOf>(BuffAkaliW::new());
+    commands
+        .entity(entity)
+        .with_related::<BuffOf>(BuffAkaliStealth::new());
 }
 
 fn cast_akali_e(
@@ -125,7 +139,10 @@ fn cast_akali_e(
             commands,
             entity,
             AKALI_E_KEY,
-            DamageShape::Sector { radius: 825.0, angle: 45.0 },
+            DamageShape::Sector {
+                radius: 825.0,
+                angle: 45.0,
+            },
             vec![TargetDamage {
                 filter: TargetFilter::All,
                 amount: hash_bin("TotalDamage"),
@@ -145,10 +162,10 @@ fn cast_akali_e(
             q_transform,
             entity,
             point,
-            &crate::ActionDash {
+            &ActionDash {
                 skill: AKALI_E_KEY.into(),
-                move_type: crate::DashMoveType::Pointer { max: 825.0 },
-                damage: Some(crate::DashDamage {
+                move_type: DashMoveType::Pointer { max: 825.0 },
+                damage: Some(DashDamage {
                     radius_end: 100.0,
                     damage: TargetDamage {
                         filter: TargetFilter::All,
@@ -206,11 +223,11 @@ fn cast_akali_r(
         q_transform,
         entity,
         point,
-        &crate::ActionDash {
+        &ActionDash {
             skill: AKALI_R_KEY.into(),
-            move_type: crate::DashMoveType::Pointer { max: 675.0 },
+            move_type: DashMoveType::Pointer { max: 675.0 },
             damage: if stage == 1 {
-                Some(crate::DashDamage {
+                Some(DashDamage {
                     radius_end: 150.0,
                     damage: TargetDamage {
                         filter: TargetFilter::Champion,
@@ -252,7 +269,9 @@ fn on_akali_damage_hit(
     let target = trigger.event_target();
 
     // Q slows distant enemies by 50%
-    commands.entity(target).with_related::<BuffOf>(DebuffSlow::new(0.5, 1.0));
+    commands
+        .entity(target)
+        .with_related::<BuffOf>(DebuffSlow::new(0.5, 1.0));
 }
 
 fn add_skills(
@@ -281,10 +300,9 @@ fn add_skills(
             if index == 2 || index == 3 {
                 skill_component = skill_component.with_cooldown_mode(SkillCooldownMode::Manual);
             }
-            commands.entity(entity).with_related::<SkillOf>((
-                skill_component,
-                CoolDown::default(),
-            ));
+            commands
+                .entity(entity)
+                .with_related::<SkillOf>((skill_component, CoolDown::default()));
         }
     }
 }

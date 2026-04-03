@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 泰达米尔W - 嘲弄（减速+攻击力削减）
 #[derive(Component, Debug, Clone)]

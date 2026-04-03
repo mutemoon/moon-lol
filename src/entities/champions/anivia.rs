@@ -1,15 +1,19 @@
 use bevy::prelude::*;
-use league_core::CharacterRecord;
+use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_config::LoadHashKeyTrait;
+use lol_config::prop::LoadHashKeyTrait;
 
-use crate::core::{
-    play_skill_animation, skill_damage, skill_slot_from_index, spawn_skill_particle,
-    CoolDown, DamageShape, EventDamageCreate, EventSkillCast, Skill, SkillCooldownMode,
-    SkillOf, SkillRecastWindow, SkillSlot, Skills, TargetDamage, TargetFilter,
+use crate::buffs::anivia_buffs::BuffAniviaR;
+use crate::buffs::cc_debuffs::DebuffSlow;
+use crate::core::action::damage::{DamageShape, TargetDamage, TargetFilter};
+use crate::core::base::buff::BuffOf;
+use crate::core::damage::{DamageType, EventDamageCreate};
+use crate::core::skill::{
+    play_skill_animation, skill_damage, skill_slot_from_index, spawn_skill_particle, CoolDown,
+    EventSkillCast, PassiveSkillOf, Skill, SkillCooldownMode, SkillOf, SkillRecastWindow,
+    SkillSlot, Skills,
 };
 use crate::entities::champion::Champion;
-use crate::{BuffAniviaR, BuffOf, DamageType, DebuffSlow, PassiveSkillOf};
 
 const ANIVIA_Q_KEY: &str = "Characters/Anivia/Spells/AniviaFlashFrost/AniviaFlashFrost";
 #[allow(dead_code)]
@@ -148,7 +152,9 @@ fn cast_anivia_r(commands: &mut Commands, entity: Entity) {
         Some(hash_bin("Anivia_R_Hit")),
     );
 
-    commands.entity(entity).with_related::<BuffOf>(BuffAniviaR::new());
+    commands
+        .entity(entity)
+        .with_related::<BuffOf>(BuffAniviaR::new());
 }
 
 fn on_anivia_damage_hit(
@@ -164,7 +170,9 @@ fn on_anivia_damage_hit(
     let target = trigger.event_target();
 
     // Q and R slow
-    commands.entity(target).with_related::<BuffOf>(DebuffSlow::new(0.2, 2.0));
+    commands
+        .entity(target)
+        .with_related::<BuffOf>(DebuffSlow::new(0.2, 2.0));
 }
 
 fn add_skills(
@@ -193,10 +201,9 @@ fn add_skills(
             if index == 0 {
                 skill_component = skill_component.with_cooldown_mode(SkillCooldownMode::Manual);
             }
-            commands.entity(entity).with_related::<SkillOf>((
-                skill_component,
-                CoolDown::default(),
-            ));
+            commands
+                .entity(entity)
+                .with_related::<SkillOf>((skill_component, CoolDown::default()));
         }
     }
 }

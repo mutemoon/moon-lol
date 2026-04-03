@@ -1,15 +1,17 @@
 use bevy::prelude::*;
-use league_core::CharacterRecord;
+use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_config::LoadHashKeyTrait;
+use lol_config::prop::LoadHashKeyTrait;
 
-use crate::core::{
-    play_skill_animation, skill_damage, skill_slot_from_index, spawn_skill_particle, BuffOf,
-    CoolDown, DamageShape, EventDamageCreate, EventSkillCast, Skill, SkillOf, SkillSlot, Skills,
-    TargetDamage, TargetFilter,
+use crate::buffs::kayle_buffs::{BuffKaylePassive, BuffKayleR, BuffKayleW};
+use crate::core::action::damage::{DamageShape, TargetDamage, TargetFilter};
+use crate::core::base::buff::BuffOf;
+use crate::core::damage::{DamageType, EventDamageCreate};
+use crate::core::skill::{
+    play_skill_animation, skill_damage, skill_slot_from_index, spawn_skill_particle, CoolDown,
+    EventSkillCast, PassiveSkillOf, Skill, SkillOf, SkillSlot, Skills,
 };
 use crate::entities::champion::Champion;
-use crate::{BuffKaylePassive, BuffKayleR, BuffKayleW, DamageType, PassiveSkillOf};
 
 const KAYLE_Q_KEY: &str = "Characters/Kayle/Spells/KayleQ/KayleQ";
 #[allow(dead_code)]
@@ -67,7 +69,10 @@ fn cast_kayle_q(commands: &mut Commands, entity: Entity) {
         commands,
         entity,
         KAYLE_Q_KEY,
-        DamageShape::Sector { radius: 900.0, angle: 15.0 },
+        DamageShape::Sector {
+            radius: 900.0,
+            angle: 15.0,
+        },
         vec![TargetDamage {
             filter: TargetFilter::All,
             amount: hash_bin("TotalDamage"),
@@ -82,7 +87,9 @@ fn cast_kayle_w(commands: &mut Commands, entity: Entity) {
     spawn_skill_particle(commands, entity, hash_bin("Kayle_W_Cast"));
 
     // W heals and grants movespeed
-    commands.entity(entity).with_related::<BuffOf>(BuffKayleW::new(80.0, 0.35, 2.5));
+    commands
+        .entity(entity)
+        .with_related::<BuffOf>(BuffKayleW::new(80.0, 0.35, 2.5));
 }
 
 fn cast_kayle_e(commands: &mut Commands, entity: Entity) {
@@ -97,7 +104,9 @@ fn cast_kayle_r(commands: &mut Commands, entity: Entity) {
     spawn_skill_particle(commands, entity, hash_bin("Kayle_R_Cast"));
 
     // R makes Kayle invulnerable and deals damage after delay
-    commands.entity(entity).with_related::<BuffOf>(BuffKayleR::new(2.5));
+    commands
+        .entity(entity)
+        .with_related::<BuffOf>(BuffKayleR::new(2.5));
 
     skill_damage(
         commands,
@@ -126,7 +135,9 @@ fn on_kayle_damage_hit(
     let _target = trigger.event_target();
 
     // Passive grants attackspeed
-    commands.entity(source).with_related::<BuffOf>(BuffKaylePassive::new(0.15, 3.0));
+    commands
+        .entity(source)
+        .with_related::<BuffOf>(BuffKaylePassive::new(0.15, 3.0));
 }
 
 fn add_skills(
@@ -151,10 +162,9 @@ fn add_skills(
 
         for (index, &skill) in character_record.spells.as_ref().unwrap().iter().enumerate() {
             let skill_component = Skill::new(skill_slot_from_index(index), skill);
-            commands.entity(entity).with_related::<SkillOf>((
-                skill_component,
-                CoolDown::default(),
-            ));
+            commands
+                .entity(entity)
+                .with_related::<SkillOf>((skill_component, CoolDown::default()));
         }
     }
 }

@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 奥瑞利安被动 - 冬境之灵
 #[derive(Component, Debug, Clone)]

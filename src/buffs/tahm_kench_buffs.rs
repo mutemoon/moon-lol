@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 塔姆E - 厚实表皮（护盾）
 #[derive(Component, Debug, Clone)]

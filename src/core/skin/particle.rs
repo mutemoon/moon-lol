@@ -1,8 +1,9 @@
 use bevy::prelude::*;
-use league_core::{ResourceResolver, SkinCharacterDataProperties};
-use lol_config::LoadHashKeyTrait;
+use league_core::extract::{ResourceResolver, SkinCharacterDataProperties};
+use lol_config::prop::LoadHashKeyTrait;
 
-use crate::{CommandParticleDespawn, CommandParticleSpawn, Skin};
+use crate::core::particle::{CommandParticleDespawn, CommandParticleSpawn};
+use crate::core::skin::skin::Skin;
 
 #[derive(EntityEvent)]
 pub struct CommandSkinParticleSpawn {

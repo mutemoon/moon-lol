@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 奎因W - 高度感知（攻速+移速）
 #[derive(Component, Debug, Clone)]

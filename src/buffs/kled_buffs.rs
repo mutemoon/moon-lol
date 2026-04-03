@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 克烈被动 - 战备（骑乘状态）
 #[derive(Component, Debug, Clone)]

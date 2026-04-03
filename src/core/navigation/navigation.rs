@@ -4,11 +4,13 @@ use std::time::{Duration, Instant};
 use bevy::color::palettes;
 use bevy::prelude::*;
 use bevy::render::render_resource::Face;
-use lol_config::{ConfigNavigationGrid, CELL_COST_IMPASSABLE};
+use lol_config::grid::{ConfigNavigationGrid, CELL_COST_IMPASSABLE};
 
-use crate::{
-    find_grid_path_with_result, update_load_grid, Bounding, Character, MapState, ResourceGrid,
-};
+use crate::core::base::bounding::Bounding;
+use crate::core::character::Character;
+use crate::core::map::MapState;
+use crate::core::navigation::astar::find_grid_path_with_result;
+use crate::core::navigation::grid::{update_load_grid, ResourceGrid};
 
 #[derive(Default)]
 pub struct PluginNavigaton;

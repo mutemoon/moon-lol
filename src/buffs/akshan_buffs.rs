@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 阿卡丽Q - 虎牙（持续伤害）
 #[derive(Component, Debug, Clone)]

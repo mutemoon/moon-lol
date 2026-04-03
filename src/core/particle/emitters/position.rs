@@ -1,9 +1,9 @@
 use bevy::prelude::*;
-use league_core::VfxSystemDefinitionData;
+use league_core::extract::VfxSystemDefinitionData;
 
-use crate::{Lifetime, ParticleId};
-
-use super::{EmitterOf, ParticleEmitterState};
+use super::state::{EmitterOf, ParticleEmitterState};
+use crate::core::lifetime::Lifetime;
+use crate::core::particle::ParticleId;
 
 pub fn update_emitter_position(
     mut query: Query<(

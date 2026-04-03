@@ -1,6 +1,9 @@
 use bevy::prelude::*;
 
-use crate::{Buff, Buffs, CommandDamageCreate, Damage, DamageType, EventAttackEnd, Riven};
+use crate::core::attack::EventAttackEnd;
+use crate::core::base::buff::{Buff, Buffs};
+use crate::core::damage::{CommandDamageCreate, Damage, DamageType};
+use crate::entities::champions::riven::Riven;
 
 /// 锐雯被动额外伤害倍率
 const RIVEN_PASSIVE_BONUS_RATIO: f32 = 0.2;

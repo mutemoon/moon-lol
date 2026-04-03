@@ -10,7 +10,7 @@ use bevy::render::render_resource::{
 use bevy::shader::ShaderRef;
 use league_utils::get_shader_handle;
 
-use crate::MaterialPath;
+use crate::core::particle::utils::MaterialPath;
 
 #[derive(Clone, ShaderType, Debug)]
 pub struct UniformsVertexMesh {

@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::Buff;
+use crate::core::base::buff::Buff;
 
 /// 盖伦Q技能buff - 移动速度加成和下次攻击增强
 #[derive(Component, Debug, Clone)]

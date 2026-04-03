@@ -5,12 +5,13 @@ use std::sync::LazyLock;
 use bevy::asset::LoadContext;
 use bevy::platform::collections::HashMap;
 use bevy::prelude::*;
-use league_property::{from_entry, EntryData};
+use league_property::from_entry;
+use league_property::prop::EntryData;
 use league_utils::type_name_to_hash;
 use serde::de::DeserializeOwned;
 use serde::Serialize;
 
-use crate::HashKey;
+use crate::prop::HashKey;
 
 #[derive(Resource, Default)]
 pub struct AssetLoaderRegistry {
@@ -70,7 +71,7 @@ where
         HashKey::<T>::from(hash).into()
     }
 }
-use league_core::{
+use league_core::extract::{
     AnimationGraphData, BarracksConfig, CharacterRecord, FloatingInfoBarViewController,
     HeroFloatingInfoBarData, MapContainer, MapPlaceableContainer, ResourceResolver,
     SkinCharacterDataProperties, SpellObject, StaticMaterialDef, StructureFloatingInfoBarData,

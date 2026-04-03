@@ -1,11 +1,11 @@
 use std::collections::HashMap;
 
 use bevy::prelude::*;
-use league_core::{AnimationGraphData, EnumBlendData, EnumClipData};
-use league_file::{AnimationFile, CompressedTransformType, UncompressedData};
-use lol_config::ConfigAnimationClip;
+use league_core::extract::{AnimationGraphData, EnumBlendData, EnumClipData};
+use league_file::animation::{AnimationFile, CompressedTransformType, UncompressedData};
+use lol_config::animation::ConfigAnimationClip;
 
-use crate::Error;
+use crate::utils::Error;
 
 pub fn load_animation_map(
     animation_graph_data: AnimationGraphData,

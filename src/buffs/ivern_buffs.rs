@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 艾翁被动 - 森林之友
 #[derive(Component, Debug, Clone)]

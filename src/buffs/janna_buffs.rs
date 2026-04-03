@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 风暴之怒被动 - 顺风而行
 #[derive(Component, Debug, Clone)]

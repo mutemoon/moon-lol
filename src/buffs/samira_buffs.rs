@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 莎弥拉E - 螺旋利刃（眩晕）
 #[derive(Component, Debug, Clone)]

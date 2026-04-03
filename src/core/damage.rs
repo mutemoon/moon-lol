@@ -1,7 +1,11 @@
 use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
 
-use crate::{BuffDamageReduction, BuffShieldMagic, BuffShieldWhite, Buffs, Health};
+use crate::buffs::damage_reduction::BuffDamageReduction;
+use crate::buffs::shield_magic::BuffShieldMagic;
+use crate::buffs::shield_white::BuffShieldWhite;
+use crate::core::base::buff::Buffs;
+use crate::core::life::Health;
 
 /// 伤害系统插件
 #[derive(Default)]

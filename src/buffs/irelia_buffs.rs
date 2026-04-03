@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 
-use crate::{Buff, BuffDamageReduction};
+use crate::buffs::damage_reduction::BuffDamageReduction;
+use crate::core::base::buff::Buff;
 
 /// 不稳标记 —— 挂在被标记的敌方实体上
 #[derive(Component, Debug, Clone)]

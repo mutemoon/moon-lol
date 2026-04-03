@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 琴女被动 - 时光乐章
 #[derive(Component, Debug, Clone)]

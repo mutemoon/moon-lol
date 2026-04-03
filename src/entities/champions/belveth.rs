@@ -1,15 +1,17 @@
 use bevy::prelude::*;
-use league_core::CharacterRecord;
+use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_config::LoadHashKeyTrait;
+use lol_config::prop::LoadHashKeyTrait;
 
-use crate::core::{
-    play_skill_animation, skill_damage, skill_slot_from_index, spawn_skill_particle, BuffOf,
-    CoolDown, DamageShape, EventDamageCreate, EventSkillCast, Skill, SkillOf, SkillSlot, Skills,
-    TargetDamage, TargetFilter,
+use crate::buffs::belveth_buffs::{BuffBelvethPassive, BuffBelvethW};
+use crate::core::action::damage::{DamageShape, TargetDamage, TargetFilter};
+use crate::core::base::buff::BuffOf;
+use crate::core::damage::{DamageType, EventDamageCreate};
+use crate::core::skill::{
+    play_skill_animation, skill_damage, skill_slot_from_index, spawn_skill_particle, CoolDown,
+    EventSkillCast, PassiveSkillOf, Skill, SkillOf, SkillSlot, Skills,
 };
 use crate::entities::champion::Champion;
-use crate::{BuffBelvethPassive, BuffBelvethW, DamageType, PassiveSkillOf};
 
 const BELVETH_Q_KEY: &str = "Characters/Belveth/Spells/BelvethQ/BelvethQ";
 const BELVETH_W_KEY: &str = "Characters/Belveth/Spells/BelvethW/BelvethW";
@@ -82,7 +84,10 @@ fn cast_belveth_w(commands: &mut Commands, entity: Entity) {
         commands,
         entity,
         BELVETH_W_KEY,
-        DamageShape::Sector { radius: 660.0, angle: 45.0 },
+        DamageShape::Sector {
+            radius: 660.0,
+            angle: 45.0,
+        },
         vec![TargetDamage {
             filter: TargetFilter::All,
             amount: hash_bin("TotalDamage"),
@@ -127,8 +132,12 @@ fn on_belveth_damage_hit(
 
     let target = trigger.event_target();
 
-    commands.entity(target).with_related::<BuffOf>(BuffBelvethPassive::new(2, 0.1, 5.0));
-    commands.entity(target).with_related::<BuffOf>(BuffBelvethW::new(0.5, 2.0));
+    commands
+        .entity(target)
+        .with_related::<BuffOf>(BuffBelvethPassive::new(2, 0.1, 5.0));
+    commands
+        .entity(target)
+        .with_related::<BuffOf>(BuffBelvethW::new(0.5, 2.0));
 }
 
 fn add_skills(
@@ -153,10 +162,9 @@ fn add_skills(
 
         for (index, &skill) in character_record.spells.as_ref().unwrap().iter().enumerate() {
             let skill_component = Skill::new(skill_slot_from_index(index), skill);
-            commands.entity(entity).with_related::<SkillOf>((
-                skill_component,
-                CoolDown::default(),
-            ));
+            commands
+                .entity(entity)
+                .with_related::<SkillOf>((skill_component, CoolDown::default()));
         }
     }
 }

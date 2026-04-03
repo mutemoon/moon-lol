@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 芮尔W - 挥击（减速）
 #[derive(Component, Debug, Clone)]

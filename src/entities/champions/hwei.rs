@@ -1,14 +1,13 @@
 use bevy::prelude::*;
-use league_core::CharacterRecord;
+use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_config::LoadHashKeyTrait;
+use lol_config::prop::LoadHashKeyTrait;
 
-use crate::core::{
+use crate::core::skill::{
     play_skill_animation, skill_slot_from_index, spawn_skill_particle, CoolDown, EventSkillCast,
-    Skill, SkillOf, SkillSlot, Skills,
+    PassiveSkillOf, Skill, SkillOf, SkillSlot, Skills,
 };
 use crate::entities::champion::Champion;
-use crate::PassiveSkillOf;
 
 #[derive(Default)]
 pub struct PluginHwei;

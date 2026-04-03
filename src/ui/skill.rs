@@ -1,11 +1,13 @@
 use bevy::prelude::*;
-use league_core::SpellObject;
-use lol_config::LoadHashKeyTrait;
+use league_core::extract::SpellObject;
+use lol_config::prop::LoadHashKeyTrait;
 
-use crate::{
-    CommandDespawnButton, CommandSkillLevelUp, CommandSpawnButton, Controller, Level, PassiveSkill,
-    ResourceCache, Skill, SkillPoints, Skills, UIElementEntity, UIState,
-};
+use crate::core::base::level::Level;
+use crate::core::controller::Controller;
+use crate::core::resource::ResourceCache;
+use crate::core::skill::{CommandSkillLevelUp, PassiveSkill, Skill, SkillPoints, Skills};
+use crate::ui::button::{CommandDespawnButton, CommandSpawnButton};
+use crate::ui::element::{UIElementEntity, UIState};
 
 #[derive(Default)]
 pub struct PluginUISkill;

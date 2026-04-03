@@ -1,18 +1,22 @@
-use bevy::prelude::*;
-use league_core::CharacterRecord;
+use bevy::prelude::{GlobalTransform, *};
+use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_config::LoadHashKeyTrait;
+use lol_config::prop::LoadHashKeyTrait;
+use lol_core::team::Team;
 
-use crate::core::{
+use crate::buffs::cc_debuffs::DebuffFear;
+use crate::buffs::common_buffs::{BuffMoveSpeed, BuffSelfHeal};
+use crate::buffs::hecarim_buffs::{BuffHecarimQ, BuffHecarimW};
+use crate::core::action::damage::{DamageShape, TargetDamage, TargetFilter};
+use crate::core::action::dash::{ActionDash, DashDamage, DashMoveType};
+use crate::core::base::buff::BuffOf;
+use crate::core::damage::{DamageType, EventDamageCreate};
+use crate::core::movement::{CommandMovement, EventMovementEnd, MovementAction, MovementWay};
+use crate::core::skill::{
     play_skill_animation, skill_damage, skill_dash, skill_slot_from_index, spawn_skill_particle,
-    BuffOf, CommandMovement, CoolDown, DamageShape, EventDamageCreate, EventMovementEnd,
-    EventSkillCast, MovementAction, MovementWay, Skill, SkillOf, SkillSlot,
-    Skills, TargetDamage, TargetFilter,
+    CoolDown, EventSkillCast, PassiveSkillOf, Skill, SkillOf, SkillSlot, Skills,
 };
 use crate::entities::champion::Champion;
-use crate::{BuffHecarimQ, BuffHecarimW, BuffMoveSpeed, BuffSelfHeal, DamageType, DebuffFear, PassiveSkillOf};
-use bevy::prelude::GlobalTransform;
-use lol_core::Team;
 
 const HECARIM_Q_KEY: &str = "Characters/Hecarim/Spells/HecarimBlade/HecarimBlade";
 const HECARIM_W_KEY: &str = "Characters/Hecarim/Spells/HecarimRampart/HecarimRampart";
@@ -81,11 +85,13 @@ fn cast_hecarim_q(commands: &mut Commands, entity: Entity) {
         Some(hash_bin("Hecarim_Q_Hit")),
     );
     // Q stacks - adds stacking buff for cooldown reduction and bonus damage
-    commands.entity(entity).with_related::<BuffOf>(BuffHecarimQ::new(
-        HECARIM_Q_MAX_STACKS,
-        HECARIM_Q_COOLDOWN_REDUCTION,
-        HECARIM_Q_DAMAGE_BONUS,
-    ));
+    commands
+        .entity(entity)
+        .with_related::<BuffOf>(BuffHecarimQ::new(
+            HECARIM_Q_MAX_STACKS,
+            HECARIM_Q_COOLDOWN_REDUCTION,
+            HECARIM_Q_DAMAGE_BONUS,
+        ));
     debug!("{:?} 释放了 {} 技能，获得层数", entity, "Hecarim Q");
 }
 
@@ -94,7 +100,9 @@ fn cast_hecarim_w(commands: &mut Commands, entity: Entity) {
     spawn_skill_particle(commands, entity, hash_bin("Hecarim_W_Cast"));
     // W is AoE damage in area + healing based on damage dealt
     // Apply BuffHecarimW that will trigger heal on damage dealt
-    commands.entity(entity).with_related::<BuffOf>(BuffHecarimW::new(4.0));
+    commands
+        .entity(entity)
+        .with_related::<BuffOf>(BuffHecarimW::new(4.0));
     skill_damage(
         commands,
         entity,
@@ -109,15 +117,27 @@ fn cast_hecarim_w(commands: &mut Commands, entity: Entity) {
     );
 }
 
-fn cast_hecarim_e(commands: &mut Commands, _q_transform: &Query<&Transform>, entity: Entity, _point: Vec2) {
+fn cast_hecarim_e(
+    commands: &mut Commands,
+    _q_transform: &Query<&Transform>,
+    entity: Entity,
+    _point: Vec2,
+) {
     play_skill_animation(commands, entity, hash_bin("Spell3"));
     spawn_skill_particle(commands, entity, hash_bin("Hecarim_E_Cast"));
     // E is movement speed boost + knockback on contact
     // Movement speed buff with knockback on collision
-    commands.entity(entity).with_related::<BuffOf>(BuffMoveSpeed::new(0.75, 4.0));
+    commands
+        .entity(entity)
+        .with_related::<BuffOf>(BuffMoveSpeed::new(0.75, 4.0));
 }
 
-fn cast_hecarim_r(commands: &mut Commands, q_transform: &Query<&Transform>, entity: Entity, point: Vec2) {
+fn cast_hecarim_r(
+    commands: &mut Commands,
+    q_transform: &Query<&Transform>,
+    entity: Entity,
+    point: Vec2,
+) {
     play_skill_animation(commands, entity, hash_bin("Spell4"));
     spawn_skill_particle(commands, entity, hash_bin("Hecarim_R_Cast"));
     // R is a long dash with fear
@@ -126,10 +146,10 @@ fn cast_hecarim_r(commands: &mut Commands, q_transform: &Query<&Transform>, enti
         q_transform,
         entity,
         point,
-        &crate::ActionDash {
+        &ActionDash {
             skill: HECARIM_R_KEY.into(),
-            move_type: crate::DashMoveType::Pointer { max: 800.0 },
-            damage: Some(crate::DashDamage {
+            move_type: DashMoveType::Pointer { max: 800.0 },
+            damage: Some(DashDamage {
                 radius_end: 200.0,
                 damage: TargetDamage {
                     filter: TargetFilter::All,
@@ -156,10 +176,14 @@ fn on_hecarim_damage_hit(
     let target = trigger.event_target();
     // W buff 期间造成伤害时自我治疗
     if q_has_w_buff.get(source).is_ok() {
-        commands.entity(source).with_related::<BuffOf>(BuffSelfHeal::new(30.0));
+        commands
+            .entity(source)
+            .with_related::<BuffOf>(BuffSelfHeal::new(30.0));
     }
     // R 命中施加恐惧
-    commands.entity(target).with_related::<BuffOf>(DebuffFear::new(1.5));
+    commands
+        .entity(target)
+        .with_related::<BuffOf>(DebuffFear::new(1.5));
 }
 
 /// Hecarim E 冲刺结束时推开最近目标
@@ -190,7 +214,9 @@ fn on_hecarim_e_dash_end(
         if *team == &Team::Order {
             continue;
         }
-        let dist = target_transform.translation().distance(hecarim_transform.translation());
+        let dist = target_transform
+            .translation()
+            .distance(hecarim_transform.translation());
         if nearest.map_or(true, |(_, d)| dist < d) {
             nearest = Some((*target, dist));
         }

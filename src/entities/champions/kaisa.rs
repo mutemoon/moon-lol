@@ -1,15 +1,18 @@
 use bevy::prelude::*;
-use league_core::CharacterRecord;
+use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_config::LoadHashKeyTrait;
+use lol_config::prop::LoadHashKeyTrait;
 
-use crate::core::{
+use crate::buffs::kaisa_buffs::{BuffKaisaE, BuffKaisaPlasma, BuffKaisaR};
+use crate::core::action::damage::{DamageShape, TargetDamage, TargetFilter};
+use crate::core::action::dash::{ActionDash, DashDamage, DashMoveType};
+use crate::core::base::buff::BuffOf;
+use crate::core::damage::{DamageType, EventDamageCreate};
+use crate::core::skill::{
     play_skill_animation, skill_damage, skill_dash, skill_slot_from_index, spawn_skill_particle,
-    BuffOf, CoolDown, DamageShape, EventDamageCreate, EventSkillCast, Skill, SkillOf, SkillSlot,
-    Skills, TargetDamage, TargetFilter,
+    CoolDown, EventSkillCast, PassiveSkillOf, Skill, SkillOf, SkillSlot, Skills,
 };
 use crate::entities::champion::Champion;
-use crate::{BuffKaisaE, BuffKaisaPlasma, BuffKaisaR, DamageType, PassiveSkillOf};
 
 const KAISA_Q_KEY: &str = "Characters/Kaisa/Spells/KaisaQ/KaisaQ";
 const KAISA_W_KEY: &str = "Characters/Kaisa/Spells/KaisaW/KaisaW";
@@ -86,7 +89,10 @@ fn cast_kaisa_w(commands: &mut Commands, entity: Entity) {
         commands,
         entity,
         KAISA_W_KEY,
-        DamageShape::Sector { radius: 3000.0, angle: 10.0 },
+        DamageShape::Sector {
+            radius: 3000.0,
+            angle: 10.0,
+        },
         vec![TargetDamage {
             filter: TargetFilter::All,
             amount: hash_bin("TotalDamage"),
@@ -101,25 +107,34 @@ fn cast_kaisa_e(commands: &mut Commands, entity: Entity) {
     spawn_skill_particle(commands, entity, hash_bin("Kaisa_E_Cast"));
 
     // E charges movement speed then grants attackspeed
-    commands.entity(entity).with_related::<BuffOf>(BuffKaisaE::new(0.8, 4.0));
+    commands
+        .entity(entity)
+        .with_related::<BuffOf>(BuffKaisaE::new(0.8, 4.0));
 }
 
-fn cast_kaisa_r(commands: &mut Commands, q_transform: &Query<&Transform>, entity: Entity, point: Vec2) {
+fn cast_kaisa_r(
+    commands: &mut Commands,
+    q_transform: &Query<&Transform>,
+    entity: Entity,
+    point: Vec2,
+) {
     play_skill_animation(commands, entity, hash_bin("Spell4"));
     spawn_skill_particle(commands, entity, hash_bin("Kaisa_R_Cast"));
 
     // R is a dash to a plasma-marked enemy with shield
-    commands.entity(entity).with_related::<BuffOf>(BuffKaisaR::new(100.0, 4.0));
+    commands
+        .entity(entity)
+        .with_related::<BuffOf>(BuffKaisaR::new(100.0, 4.0));
 
     skill_dash(
         commands,
         q_transform,
         entity,
         point,
-        &crate::ActionDash {
+        &ActionDash {
             skill: KAISA_R_KEY.into(),
-            move_type: crate::DashMoveType::Pointer { max: 2000.0 },
-            damage: Some(crate::DashDamage {
+            move_type: DashMoveType::Pointer { max: 2000.0 },
+            damage: Some(DashDamage {
                 radius_end: 150.0,
                 damage: TargetDamage {
                     filter: TargetFilter::All,
@@ -145,7 +160,9 @@ fn on_kaisa_damage_hit(
     let target = trigger.event_target();
 
     // Apply plasma stacks (Q applies 1, W applies 2)
-    commands.entity(target).with_related::<BuffOf>(BuffKaisaPlasma::new(1, 5.0));
+    commands
+        .entity(target)
+        .with_related::<BuffOf>(BuffKaisaPlasma::new(1, 5.0));
 }
 
 fn add_skills(
@@ -170,10 +187,9 @@ fn add_skills(
 
         for (index, &skill) in character_record.spells.as_ref().unwrap().iter().enumerate() {
             let skill_component = Skill::new(skill_slot_from_index(index), skill);
-            commands.entity(entity).with_related::<SkillOf>((
-                skill_component,
-                CoolDown::default(),
-            ));
+            commands
+                .entity(entity)
+                .with_related::<SkillOf>((skill_component, CoolDown::default()));
         }
     }
 }

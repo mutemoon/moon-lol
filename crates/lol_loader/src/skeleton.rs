@@ -1,5 +1,5 @@
 use bevy::asset::{AssetLoader, LoadContext};
-use league_file::LeagueSkeleton;
+use league_file::skeleton::LeagueSkeleton;
 
 use super::error::Error;
 

@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::Buff;
+use crate::core::base::buff::Buff;
 
 /// 鳄鱼R - 统治/变身
 #[derive(Component, Debug, Clone)]

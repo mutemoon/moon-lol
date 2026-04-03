@@ -1,16 +1,19 @@
 use bevy::prelude::*;
-use league_core::CharacterRecord;
+use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_config::LoadHashKeyTrait;
+use lol_config::prop::LoadHashKeyTrait;
 
-use crate::core::{
+use crate::buffs::cc_debuffs::DebuffSlow;
+use crate::core::action::damage::{DamageShape, TargetDamage, TargetFilter};
+use crate::core::action::dash::{ActionDash, DashDamage, DashMoveType};
+use crate::core::base::buff::BuffOf;
+use crate::core::damage::{DamageType, EventDamageCreate};
+use crate::core::skill::{
     play_skill_animation, reset_skill_attack, skill_damage, skill_dash, skill_slot_from_index,
-    spawn_skill_particle, BuffOf, CoolDown, DamageShape, EventDamageCreate, EventSkillCast, Skill,
-    SkillCooldownMode, SkillOf, SkillRecastWindow, SkillSlot, Skills, TargetDamage, TargetFilter,
+    spawn_skill_particle, CoolDown, EventSkillCast, PassiveSkillOf, Skill, SkillCooldownMode,
+    SkillOf, SkillRecastWindow, SkillSlot, Skills,
 };
-
-use crate::{Champion, DamageType};
-use crate::{DebuffSlow, PassiveSkillOf};
+use crate::entities::champion::Champion;
 
 const CAMILLE_Q_KEY: &str = "Characters/Camille/Spells/CamilleQ/CamilleQ";
 const CAMILLE_W_KEY: &str = "Characters/Camille/Spells/CamilleW/CamilleW";
@@ -166,10 +169,10 @@ fn cast_camille_e(
             q_transform,
             entity,
             point,
-            &crate::ActionDash {
+            &ActionDash {
                 skill: CAMILLE_E_KEY.into(),
-                move_type: crate::DashMoveType::Pointer { max: 400.0 },
-                damage: Some(crate::DashDamage {
+                move_type: DashMoveType::Pointer { max: 400.0 },
+                damage: Some(DashDamage {
                     radius_end: 150.0,
                     damage: TargetDamage {
                         filter: TargetFilter::All,
@@ -202,10 +205,10 @@ fn cast_camille_r(
         q_transform,
         entity,
         point,
-        &crate::ActionDash {
+        &ActionDash {
             skill: CAMILLE_R_KEY.into(),
-            move_type: crate::DashMoveType::Pointer { max: 350.0 },
-            damage: Some(crate::DashDamage {
+            move_type: DashMoveType::Pointer { max: 350.0 },
+            damage: Some(DashDamage {
                 radius_end: 150.0,
                 damage: TargetDamage {
                     filter: TargetFilter::Champion,

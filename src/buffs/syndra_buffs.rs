@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 辛德拉E - 驱使法球（眩晕）
 #[derive(Component, Debug, Clone)]

@@ -1,13 +1,21 @@
 use bevy::prelude::*;
-use league_core::{EnumVfxPrimitive, VfxPrimitivePlanarProjection, VfxProjectionDefinitionData, VfxSystemDefinitionData};
-
-use crate::{
-    Lifetime, ParticleDecal, ParticleId, ParticleMaterialUnlitDecal, ResourceCache,
-    UniformsPixelUnlitDecal, UniformsVertexUnlitDecal,
+use league_core::extract::{
+    EnumVfxPrimitive, VfxPrimitivePlanarProjection, VfxProjectionDefinitionData,
+    VfxSystemDefinitionData,
 };
 
-use super::ParticleEmitterState;
-use super::utils::{ParticleBirthParams, EmissionParams, calculate_emission_params, calculate_particle_transform_frame, spawn_particle_entity, get_emitter_type, EmitterType};
+use super::state::ParticleEmitterState;
+use super::utils::{
+    calculate_emission_params, calculate_particle_transform_frame, get_emitter_type,
+    spawn_particle_entity, EmissionParams, EmitterType, ParticleBirthParams,
+};
+use crate::core::lifetime::Lifetime;
+use crate::core::particle::emitters::decal::ParticleDecal;
+use crate::core::particle::environment::unlit_decal::{
+    ParticleMaterialUnlitDecal, UniformsPixelUnlitDecal, UniformsVertexUnlitDecal,
+};
+use crate::core::particle::ParticleId;
+use crate::core::resource::ResourceCache;
 
 pub fn attach_unlit_decal_visuals(
     commands: &mut Commands,
@@ -73,7 +81,8 @@ pub fn update_emitter_decal(
             &mut emitter,
             vfx_emitter_definition_data,
             time.delta_secs(),
-        ) else {
+        )
+        else {
             continue;
         };
 

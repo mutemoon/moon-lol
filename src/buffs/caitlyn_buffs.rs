@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 女警被动 - 爆头
 #[derive(Component, Debug, Clone)]

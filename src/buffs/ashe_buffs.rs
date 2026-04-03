@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 艾希Q - 集中火力
 #[derive(Component, Debug, Clone)]

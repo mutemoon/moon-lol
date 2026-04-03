@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 
-use crate::{Buff, DamageType};
+use crate::core::base::buff::Buff;
+use crate::core::damage::DamageType;
 
 /// 盖伦W技能buff - 韧性和伤害减免
 #[derive(Component, Debug, Clone)]

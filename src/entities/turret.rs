@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 
-use crate::{Aggro, CommandAttackAutoStart, EventAggroTargetFound};
+use crate::core::aggro::{Aggro, EventAggroTargetFound};
+use crate::core::attack_auto::CommandAttackAutoStart;
 
 #[derive(Default)]
 pub struct PluginTurret;

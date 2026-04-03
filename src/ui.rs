@@ -6,7 +6,15 @@ pub mod element;
 pub mod health_bar;
 pub mod player;
 pub mod skill;
+use animation::PluginUIAnimation;
 use bevy::prelude::*;
+use bind::PluginUIBind;
+use button::PluginUIButton;
+use damage::PluginUIDamage;
+use element::PluginUIElement;
+use health_bar::PluginUIHealthBar;
+use player::PluginUIPlayer;
+use skill::PluginUISkill;
 
 #[derive(Default)]
 pub struct PluginUI;

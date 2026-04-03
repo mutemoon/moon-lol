@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 锤石Q - 死亡判决（眩晕）
 #[derive(Component, Debug, Clone)]

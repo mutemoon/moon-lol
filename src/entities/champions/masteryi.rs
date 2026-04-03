@@ -1,15 +1,18 @@
 use bevy::prelude::*;
-use league_core::CharacterRecord;
+use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_config::LoadHashKeyTrait;
+use lol_config::prop::LoadHashKeyTrait;
 
-use crate::core::{
-    play_skill_animation, skill_damage, skill_slot_from_index,
-    spawn_skill_particle, BuffOf, CoolDown, DamageShape, EventDamageCreate, EventSkillCast, Skill,
-    SkillOf, SkillSlot, Skills, TargetDamage, TargetFilter,
+use crate::buffs::common_buffs::BuffMoveSpeed;
+use crate::buffs::masteryi_buffs::{BuffMasterYiE, BuffMasterYiR};
+use crate::core::action::damage::{DamageShape, TargetDamage, TargetFilter};
+use crate::core::base::buff::BuffOf;
+use crate::core::damage::{DamageType, EventDamageCreate};
+use crate::core::skill::{
+    play_skill_animation, skill_damage, skill_slot_from_index, spawn_skill_particle, CoolDown,
+    EventSkillCast, PassiveSkillOf, Skill, SkillOf, SkillSlot, Skills,
 };
 use crate::entities::champion::Champion;
-use crate::{BuffMasterYiE, BuffMasterYiR, BuffMoveSpeed, DamageType, PassiveSkillOf};
 
 const MASTERYI_Q_KEY: &str = "Characters/MasterYi/Spells/MasterYiQ/MasterYiQ";
 #[allow(dead_code)]
@@ -90,7 +93,9 @@ fn cast_masteryi_e(commands: &mut Commands, entity: Entity) {
     spawn_skill_particle(commands, entity, hash_bin("MasterYi_E_Cast"));
 
     // E grants bonus true damage on attacks
-    commands.entity(entity).with_related::<BuffOf>(BuffMasterYiE::new(0.3, 5.0));
+    commands
+        .entity(entity)
+        .with_related::<BuffOf>(BuffMasterYiE::new(0.3, 5.0));
 }
 
 fn cast_masteryi_r(commands: &mut Commands, entity: Entity) {
@@ -98,8 +103,12 @@ fn cast_masteryi_r(commands: &mut Commands, entity: Entity) {
     spawn_skill_particle(commands, entity, hash_bin("MasterYi_R_Cast"));
 
     // R grants attackspeed and movespeed
-    commands.entity(entity).with_related::<BuffOf>(BuffMasterYiR::new(0.8, 0.45, 10.0));
-    commands.entity(entity).with_related::<BuffOf>(BuffMoveSpeed::new(0.45, 10.0));
+    commands
+        .entity(entity)
+        .with_related::<BuffOf>(BuffMasterYiR::new(0.8, 0.45, 10.0));
+    commands
+        .entity(entity)
+        .with_related::<BuffOf>(BuffMoveSpeed::new(0.45, 10.0));
 }
 
 fn on_masteryi_damage_hit(
@@ -137,10 +146,9 @@ fn add_skills(
 
         for (index, &skill) in character_record.spells.as_ref().unwrap().iter().enumerate() {
             let skill_component = Skill::new(skill_slot_from_index(index), skill);
-            commands.entity(entity).with_related::<SkillOf>((
-                skill_component,
-                CoolDown::default(),
-            ));
+            commands
+                .entity(entity)
+                .with_related::<SkillOf>((skill_component, CoolDown::default()));
         }
     }
 }

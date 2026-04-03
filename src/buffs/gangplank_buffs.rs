@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 普朗克被动 - 火药试炼
 #[derive(Component, Debug, Clone)]

@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 黛安娜被动 - 银光刃
 #[derive(Component, Debug, Clone)]

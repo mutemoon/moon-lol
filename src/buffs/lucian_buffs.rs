@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 卢锡安被动 - 圣光枪弹
 #[derive(Component, Debug, Clone)]

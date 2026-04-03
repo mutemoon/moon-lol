@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::{CommandMovement, EventMovementEnd, MovementAction, MovementWay};
+use crate::core::movement::{CommandMovement, EventMovementEnd, MovementAction, MovementWay};
 
 #[derive(Default)]
 pub struct PluginRun;

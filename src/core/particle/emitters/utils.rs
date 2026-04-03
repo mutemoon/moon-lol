@@ -1,12 +1,14 @@
 use bevy::prelude::*;
-use league_core::{
+use league_core::extract::{
     EnumVfxPrimitive, EnumVfxShape, Unk0xee39916f, VfxEmitterDefinitionData,
     VfxPrimitivePlanarProjection, VfxShapeBox, VfxShapeCylinder, VfxShapeLegacy,
 };
 
-use crate::{Lifetime, ParticleId, ParticleState, StochasticSampler};
-
-use super::ParticleEmitterState;
+use super::state::ParticleEmitterState;
+use crate::core::lifetime::Lifetime;
+use crate::core::particle::particle::ParticleState;
+use crate::core::particle::utils::StochasticSampler;
+use crate::core::particle::ParticleId;
 
 /// Emitter type classification for particle systems
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

@@ -1,9 +1,9 @@
 use bevy::prelude::*;
-use league_core::{EnumData, EnumUiPosition, UiElementEffectAnimationData};
+use league_core::extract::{EnumData, EnumUiPosition, UiElementEffectAnimationData};
 use league_utils::hash_bin;
-use lol_config::LoadHashKeyTrait;
+use lol_config::prop::LoadHashKeyTrait;
 
-use crate::spawn_ui_atom;
+use crate::ui::element::spawn_ui_atom;
 
 #[derive(Component)]
 pub struct UiAnimationState {

@@ -1,15 +1,17 @@
 use bevy::prelude::*;
-use league_core::CharacterRecord;
+use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_config::LoadHashKeyTrait;
+use lol_config::prop::LoadHashKeyTrait;
 
-use crate::core::{
-    play_skill_animation, skill_damage, skill_slot_from_index, spawn_skill_particle, BuffOf,
-    CoolDown, DamageShape, EventDamageCreate, EventSkillCast, Skill, SkillOf, SkillSlot, Skills,
-    TargetDamage, TargetFilter,
+use crate::buffs::sona_buffs::{BuffSonaE, BuffSonaW};
+use crate::core::action::damage::{DamageShape, TargetDamage, TargetFilter};
+use crate::core::base::buff::BuffOf;
+use crate::core::damage::{DamageType, EventDamageCreate};
+use crate::core::skill::{
+    play_skill_animation, skill_damage, skill_slot_from_index, spawn_skill_particle, CoolDown,
+    EventSkillCast, PassiveSkillOf, Skill, SkillOf, SkillSlot, Skills,
 };
 use crate::entities::champion::Champion;
-use crate::{BuffSonaE, BuffSonaW, DamageType, PassiveSkillOf};
 
 const SONA_Q_KEY: &str = "Characters/Sona/Spells/SonaQ/SonaQ";
 #[allow(dead_code)]
@@ -82,7 +84,9 @@ fn cast_sona_w(commands: &mut Commands, entity: Entity) {
     spawn_skill_particle(commands, entity, hash_bin("Sona_W_Cast"));
 
     // W is aria of perseverance - shield
-    commands.entity(entity).with_related::<BuffOf>(BuffSonaW::new(40.0, 1.5));
+    commands
+        .entity(entity)
+        .with_related::<BuffOf>(BuffSonaW::new(40.0, 1.5));
 }
 
 fn cast_sona_e(commands: &mut Commands, entity: Entity) {
@@ -90,7 +94,9 @@ fn cast_sona_e(commands: &mut Commands, entity: Entity) {
     spawn_skill_particle(commands, entity, hash_bin("Sona_E_Cast"));
 
     // E is song of celerity - movespeed buff
-    commands.entity(entity).with_related::<BuffOf>(BuffSonaE::new(0.2, 2.5));
+    commands
+        .entity(entity)
+        .with_related::<BuffOf>(BuffSonaE::new(0.2, 2.5));
 }
 
 fn cast_sona_r(commands: &mut Commands, entity: Entity) {
@@ -102,7 +108,10 @@ fn cast_sona_r(commands: &mut Commands, entity: Entity) {
         commands,
         entity,
         SONA_R_KEY,
-        DamageShape::Sector { radius: 900.0, angle: 40.0 },
+        DamageShape::Sector {
+            radius: 900.0,
+            angle: 40.0,
+        },
         vec![TargetDamage {
             filter: TargetFilter::All,
             amount: hash_bin("TotalDamage"),
@@ -125,7 +134,9 @@ fn on_sona_damage_hit(
     let target = trigger.event_target();
 
     // R stuns
-    commands.entity(target).with_related::<BuffOf>(BuffSonaE::new(0.2, 2.5));
+    commands
+        .entity(target)
+        .with_related::<BuffOf>(BuffSonaE::new(0.2, 2.5));
 }
 
 fn add_skills(
@@ -150,10 +161,9 @@ fn add_skills(
 
         for (index, &skill) in character_record.spells.as_ref().unwrap().iter().enumerate() {
             let skill_component = Skill::new(skill_slot_from_index(index), skill);
-            commands.entity(entity).with_related::<SkillOf>((
-                skill_component,
-                CoolDown::default(),
-            ));
+            commands
+                .entity(entity)
+                .with_related::<SkillOf>((skill_component, CoolDown::default()));
         }
     }
 }

@@ -1,15 +1,18 @@
 use bevy::prelude::*;
-use league_core::CharacterRecord;
+use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_config::LoadHashKeyTrait;
+use lol_config::prop::LoadHashKeyTrait;
 
-use crate::core::{
+use crate::buffs::ezreal_buffs::BuffEzrealPassive;
+use crate::core::action::damage::{DamageShape, TargetDamage, TargetFilter};
+use crate::core::action::dash::{ActionDash, DashDamage, DashMoveType};
+use crate::core::base::buff::BuffOf;
+use crate::core::damage::{DamageType, EventDamageCreate};
+use crate::core::skill::{
     play_skill_animation, skill_damage, skill_dash, skill_slot_from_index, spawn_skill_particle,
-    CoolDown, DamageShape, EventDamageCreate, EventSkillCast, Skill,
-    SkillOf, SkillSlot, Skills, TargetDamage, TargetFilter,
+    CoolDown, EventSkillCast, PassiveSkillOf, Skill, SkillOf, SkillSlot, Skills,
 };
 use crate::entities::champion::Champion;
-use crate::{BuffEzrealPassive, BuffOf, DamageType, PassiveSkillOf};
 
 const EZREAL_Q_KEY: &str = "Characters/Ezreal/Spells/EzrealQ/EzrealQ";
 const EZREAL_W_KEY: &str = "Characters/Ezreal/Spells/EzrealW/EzrealW";
@@ -66,7 +69,10 @@ fn cast_ezreal_q(commands: &mut Commands, entity: Entity) {
         commands,
         entity,
         EZREAL_Q_KEY,
-        DamageShape::Sector { radius: 1200.0, angle: 15.0 },
+        DamageShape::Sector {
+            radius: 1200.0,
+            angle: 15.0,
+        },
         vec![TargetDamage {
             filter: TargetFilter::All,
             amount: hash_bin("TotalDamage"),
@@ -85,7 +91,10 @@ fn cast_ezreal_w(commands: &mut Commands, entity: Entity) {
         commands,
         entity,
         EZREAL_W_KEY,
-        DamageShape::Sector { radius: 1200.0, angle: 20.0 },
+        DamageShape::Sector {
+            radius: 1200.0,
+            angle: 20.0,
+        },
         vec![TargetDamage {
             filter: TargetFilter::All,
             amount: hash_bin("TotalDamage"),
@@ -95,7 +104,12 @@ fn cast_ezreal_w(commands: &mut Commands, entity: Entity) {
     );
 }
 
-fn cast_ezreal_e(commands: &mut Commands, q_transform: &Query<&Transform>, entity: Entity, point: Vec2) {
+fn cast_ezreal_e(
+    commands: &mut Commands,
+    q_transform: &Query<&Transform>,
+    entity: Entity,
+    point: Vec2,
+) {
     play_skill_animation(commands, entity, hash_bin("Spell3"));
     spawn_skill_particle(commands, entity, hash_bin("Ezreal_E_Cast"));
 
@@ -105,10 +119,10 @@ fn cast_ezreal_e(commands: &mut Commands, q_transform: &Query<&Transform>, entit
         q_transform,
         entity,
         point,
-        &crate::ActionDash {
+        &ActionDash {
             skill: EZREAL_E_KEY.into(),
-            move_type: crate::DashMoveType::Pointer { max: 475.0 },
-            damage: Some(crate::DashDamage {
+            move_type: DashMoveType::Pointer { max: 475.0 },
+            damage: Some(DashDamage {
                 radius_end: 100.0,
                 damage: TargetDamage {
                     filter: TargetFilter::All,
@@ -130,7 +144,10 @@ fn cast_ezreal_r(commands: &mut Commands, entity: Entity) {
         commands,
         entity,
         EZREAL_R_KEY,
-        DamageShape::Sector { radius: 20000.0, angle: 30.0 },
+        DamageShape::Sector {
+            radius: 20000.0,
+            angle: 30.0,
+        },
         vec![TargetDamage {
             filter: TargetFilter::All,
             amount: hash_bin("TotalDamage"),
@@ -153,7 +170,9 @@ fn on_ezreal_damage_hit(
     let target = trigger.event_target();
 
     // Apply passive stacks
-    commands.entity(target).with_related::<BuffOf>(BuffEzrealPassive::new());
+    commands
+        .entity(target)
+        .with_related::<BuffOf>(BuffEzrealPassive::new());
 }
 
 fn add_skills(
@@ -178,10 +197,9 @@ fn add_skills(
 
         for (index, &skill) in character_record.spells.as_ref().unwrap().iter().enumerate() {
             let skill_component = Skill::new(skill_slot_from_index(index), skill);
-            commands.entity(entity).with_related::<SkillOf>((
-                skill_component,
-                CoolDown::default(),
-            ));
+            commands
+                .entity(entity)
+                .with_related::<SkillOf>((skill_component, CoolDown::default()));
         }
     }
 }

@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::Buff;
+use crate::core::base::buff::Buff;
 
 /// 厄加特W技能buff - 开启期间自动攻击周围敌人
 #[derive(Component, Debug, Clone)]

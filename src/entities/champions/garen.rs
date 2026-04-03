@@ -1,14 +1,18 @@
 use bevy::prelude::*;
-use league_core::CharacterRecord;
+use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_config::LoadHashKeyTrait;
+use lol_config::prop::LoadHashKeyTrait;
 
-use crate::core::{
+use crate::buffs::garen_q::{BuffGarenQ, BuffGarenQAttack};
+use crate::buffs::garen_w::BuffGarenW;
+use crate::core::action::damage::{DamageShape, TargetDamage, TargetFilter};
+use crate::core::base::buff::BuffOf;
+use crate::core::damage::DamageType;
+use crate::core::skill::{
     play_skill_animation, skill_damage, skill_slot_from_index, spawn_skill_particle, CoolDown,
-    DamageShape, EventSkillCast, Skill, SkillOf, SkillSlot, Skills, TargetDamage, TargetFilter,
+    EventSkillCast, PassiveSkillOf, Skill, SkillOf, SkillSlot, Skills,
 };
 use crate::entities::champion::Champion;
-use crate::{BuffGarenQ, BuffGarenQAttack, BuffGarenW, BuffOf, PassiveSkillOf};
 
 const GAREN_E_KEY: &str = "Characters/Garen/Spells/GarenSpin/GarenSpin";
 const GAREN_R_KEY: &str = "Characters/Garen/Spells/GarenExecute/GarenExecute";
@@ -68,17 +72,21 @@ fn cast_garen_q(commands: &mut Commands, entity: Entity) {
     spawn_skill_particle(commands, entity, hash_bin("Garen_Q_Cast"));
 
     // Q provides movement speed buff and enhanced next attack
-    commands.entity(entity).with_related::<BuffOf>(BuffGarenQ::new(
-        GAREN_Q_MOVE_SPEED_BONUS,
-        GAREN_Q_DURATION,
-    ));
+    commands
+        .entity(entity)
+        .with_related::<BuffOf>(BuffGarenQ::new(GAREN_Q_MOVE_SPEED_BONUS, GAREN_Q_DURATION));
 
     // Add the enhanced attack buff (silence on hit)
-    commands.entity(entity).with_related::<BuffOf>(BuffGarenQAttack::new(
-        GAREN_Q_SILENCE_DURATION,
-    ));
+    commands
+        .entity(entity)
+        .with_related::<BuffOf>(BuffGarenQAttack::new(GAREN_Q_SILENCE_DURATION));
 
-    debug!("{:?} 释放了 {} 技能，获得 {}% 移速加成和沉默效果", entity, "Garen Q", (GAREN_Q_MOVE_SPEED_BONUS * 100.0) as i32);
+    debug!(
+        "{:?} 释放了 {} 技能，获得 {}% 移速加成和沉默效果",
+        entity,
+        "Garen Q",
+        (GAREN_Q_MOVE_SPEED_BONUS * 100.0) as i32
+    );
 }
 
 fn cast_garen_w(commands: &mut Commands, entity: Entity) {
@@ -86,15 +94,23 @@ fn cast_garen_w(commands: &mut Commands, entity: Entity) {
     spawn_skill_particle(commands, entity, hash_bin("Garen_W_Cast"));
 
     // W provides tenacity, damage reduction, and a shield
-    commands.entity(entity).with_related::<BuffOf>(BuffGarenW::new(
-        GAREN_W_TENACITY,
-        GAREN_W_DAMAGE_REDUCTION,
-        GAREN_W_SHIELD,
-        GAREN_W_DURATION,
-    ));
+    commands
+        .entity(entity)
+        .with_related::<BuffOf>(BuffGarenW::new(
+            GAREN_W_TENACITY,
+            GAREN_W_DAMAGE_REDUCTION,
+            GAREN_W_SHIELD,
+            GAREN_W_DURATION,
+        ));
 
-    debug!("{:?} 释放了 {} 技能，获得 {}% 韧性、{}% 伤害减免和 {} 护盾", entity, "Garen W",
-        (GAREN_W_TENACITY * 100.0) as i32, (GAREN_W_DAMAGE_REDUCTION * 100.0) as i32, GAREN_W_SHIELD as i32);
+    debug!(
+        "{:?} 释放了 {} 技能，获得 {}% 韧性、{}% 伤害减免和 {} 护盾",
+        entity,
+        "Garen W",
+        (GAREN_W_TENACITY * 100.0) as i32,
+        (GAREN_W_DAMAGE_REDUCTION * 100.0) as i32,
+        GAREN_W_SHIELD as i32
+    );
 }
 
 fn cast_garen_e(commands: &mut Commands, entity: Entity) {
@@ -108,7 +124,7 @@ fn cast_garen_e(commands: &mut Commands, entity: Entity) {
         vec![TargetDamage {
             filter: TargetFilter::All,
             amount: hash_bin("TotalDamage"),
-            damage_type: crate::DamageType::Physical,
+            damage_type: DamageType::Physical,
         }],
         Some(hash_bin("Garen_E_Hit")),
     );
@@ -122,11 +138,13 @@ fn cast_garen_r(commands: &mut Commands, entity: Entity, _point: Vec2) {
         commands,
         entity,
         GAREN_R_KEY,
-        DamageShape::Nearest { max_distance: 400.0 },
+        DamageShape::Nearest {
+            max_distance: 400.0,
+        },
         vec![TargetDamage {
             filter: TargetFilter::Champion,
             amount: hash_bin("TotalDamage"),
-            damage_type: crate::DamageType::Physical,
+            damage_type: DamageType::Physical,
         }],
         Some(hash_bin("Garen_R_Hit")),
     );

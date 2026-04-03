@@ -4,10 +4,10 @@ use std::time::Duration;
 use bevy::prelude::*;
 use bevy::time::TimeUpdateStrategy;
 use moon_lol::{
-    Action, PluginBarrack, PluginCore, PluginMap, PluginMinion, PluginSkillTestRender,
-    PluginTurret, PluginUI, PluginResource, Riven, SkillTestRenderConfig, SkillTestScript,
-    SkillTestScriptCursor, SkillTestScriptStep, SkillTestVideoFormat, SkillTestVideoOutput,
-    attach_skill_test_actor,
+    attach_skill_test_actor, Action, PluginBarrack, PluginCore, PluginMap, PluginMinion,
+    PluginResource, PluginSkillTestRender, PluginTurret, PluginUI, Riven, SkillTestRenderConfig,
+    SkillTestScript, SkillTestScriptCursor, SkillTestScriptStep, SkillTestVideoFormat,
+    SkillTestVideoOutput,
 };
 
 fn main() {
@@ -29,7 +29,9 @@ fn main() {
         }),
         keep_frame_images: false,
     });
-    app.insert_resource(TimeUpdateStrategy::ManualDuration(Duration::from_millis(16)));
+    app.insert_resource(TimeUpdateStrategy::ManualDuration(Duration::from_millis(
+        16,
+    )));
     app.insert_resource(make_riven_script());
     app.init_resource::<SkillTestScriptCursor>();
     app.add_plugins(DefaultPlugins.set(WindowPlugin {

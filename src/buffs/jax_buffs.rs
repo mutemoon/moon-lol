@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::Buff;
+use crate::core::base::buff::Buff;
 
 /// 贾克斯E技能buff - 闪避
 #[derive(Component, Debug, Clone)]

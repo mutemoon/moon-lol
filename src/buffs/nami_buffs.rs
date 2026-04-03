@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 娜美被动 - 潮涌（移速加成）
 #[derive(Component, Debug, Clone)]

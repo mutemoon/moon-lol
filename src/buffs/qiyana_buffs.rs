@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::Buff;
+
+use crate::core::base::buff::Buff;
 
 /// 奇亚娜W - 元素之怒（草丛：隐身+移速）
 #[derive(Component, Debug, Clone)]

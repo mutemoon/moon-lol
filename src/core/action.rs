@@ -8,10 +8,12 @@ pub mod particle;
 use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
 
-use crate::{
-    CommandAttackAutoStart, CommandAttackAutoStop, CommandMovement, CommandRunStart,
-    CommandSkillBeforeStart, CommandSkillLevelUp, CommandSkillStart, MovementAction, RunTarget,
-};
+use crate::core::action::damage::on_action_damage;
+use crate::core::action::dash::{on_dash_end, update_dash_damage};
+use crate::core::attack_auto::{CommandAttackAutoStart, CommandAttackAutoStop};
+use crate::core::movement::{CommandMovement, MovementAction};
+use crate::core::run::{CommandRunStart, RunTarget};
+use crate::core::skill::{CommandSkillBeforeStart, CommandSkillLevelUp, CommandSkillStart};
 
 #[derive(Default)]
 pub struct PluginAction;

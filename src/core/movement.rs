@@ -3,14 +3,19 @@ use std::collections::HashSet;
 use std::time::Instant;
 
 use bevy::prelude::*;
-use lol_config::ConfigNavigationGrid;
+use lol_config::grid::ConfigNavigationGrid;
 use serde::{Deserialize, Serialize};
 
-use crate::{
-    get_nav_path_with_debug, is_path_blocked, world_pos_to_grid_xy, ArbitrationPipelinePlugin,
-    Bounding, CommandRotate, FinalDecision, LastDecision, NavigationDebug, NavigationStats,
-    PipelineStages, RequestBuffer, ResourceGrid,
+use crate::core::base::bounding::Bounding;
+use crate::core::base::pipeline::{
+    ArbitrationPipelinePlugin, FinalDecision, LastDecision, PipelineStages, RequestBuffer,
 };
+use crate::core::navigation::grid::ResourceGrid;
+use crate::core::navigation::navigation::{
+    get_nav_path_with_debug, is_path_blocked, world_pos_to_grid_xy, NavigationDebug,
+    NavigationStats,
+};
+use crate::core::rotate::CommandRotate;
 
 #[derive(Default)]
 pub struct PluginMovement;

@@ -1,16 +1,21 @@
 use bevy::prelude::*;
-use league_core::CharacterRecord;
+use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_config::LoadHashKeyTrait;
+use lol_config::prop::LoadHashKeyTrait;
 
-use crate::core::{
+use crate::buffs::cc_debuffs::DebuffStun;
+use crate::buffs::sett_buffs::BuffSettQ;
+use crate::buffs::shield_white::BuffShieldWhite;
+use crate::core::action::damage::{DamageShape, TargetDamage, TargetFilter};
+use crate::core::action::dash::{ActionDash, DashDamage, DashMoveType};
+use crate::core::base::buff::BuffOf;
+use crate::core::damage::{DamageType, EventDamageCreate};
+use crate::core::skill::{
     play_skill_animation, reset_skill_attack, skill_damage, skill_dash, skill_slot_from_index,
-    spawn_skill_particle, BuffOf, CoolDown, DamageShape, EventDamageCreate, EventSkillCast, Skill,
-    SkillOf, SkillSlot, Skills, TargetDamage, TargetFilter,
+    spawn_skill_particle, CoolDown, EventSkillCast, PassiveSkillOf, Skill, SkillOf, SkillSlot,
+    Skills,
 };
 use crate::entities::champion::Champion;
-use crate::{BuffSettQ, BuffShieldWhite, DebuffStun, PassiveSkillOf};
-use crate::DamageType;
 
 const SETT_W_KEY: &str = "Characters/Sett/Spells/SettW/SettW";
 const SETT_E_KEY: &str = "Characters/Sett/Spells/SettE/SettE";
@@ -62,7 +67,9 @@ fn cast_sett_q(commands: &mut Commands, entity: Entity) {
     spawn_skill_particle(commands, entity, hash_bin("Sett_Q_Cast"));
     // Q is a buff that enhances next 2 attacks with bonus damage and move speed
     reset_skill_attack(commands, entity);
-    commands.entity(entity).with_related::<BuffOf>(BuffSettQ::new(2, 0.3, 4.0));
+    commands
+        .entity(entity)
+        .with_related::<BuffOf>(BuffSettQ::new(2, 0.3, 4.0));
 }
 
 fn cast_sett_w(commands: &mut Commands, entity: Entity) {
@@ -73,7 +80,10 @@ fn cast_sett_w(commands: &mut Commands, entity: Entity) {
         commands,
         entity,
         SETT_W_KEY,
-        DamageShape::Sector { radius: 350.0, angle: 75.0 },
+        DamageShape::Sector {
+            radius: 350.0,
+            angle: 75.0,
+        },
         vec![TargetDamage {
             filter: TargetFilter::All,
             amount: hash_bin("TotalDamage"),
@@ -82,7 +92,9 @@ fn cast_sett_w(commands: &mut Commands, entity: Entity) {
         Some(hash_bin("Sett_W_Hit")),
     );
     // Grit converts to shield
-    commands.entity(entity).with_related::<BuffOf>(BuffShieldWhite::new(100.0));
+    commands
+        .entity(entity)
+        .with_related::<BuffOf>(BuffShieldWhite::new(100.0));
 }
 
 fn cast_sett_e(commands: &mut Commands, entity: Entity) {
@@ -93,7 +105,10 @@ fn cast_sett_e(commands: &mut Commands, entity: Entity) {
         commands,
         entity,
         SETT_E_KEY,
-        DamageShape::Sector { radius: 300.0, angle: 90.0 },
+        DamageShape::Sector {
+            radius: 300.0,
+            angle: 90.0,
+        },
         vec![TargetDamage {
             filter: TargetFilter::All,
             amount: hash_bin("TotalDamage"),
@@ -103,7 +118,12 @@ fn cast_sett_e(commands: &mut Commands, entity: Entity) {
     );
 }
 
-fn cast_sett_r(commands: &mut Commands, q_transform: &Query<&Transform>, entity: Entity, point: Vec2) {
+fn cast_sett_r(
+    commands: &mut Commands,
+    q_transform: &Query<&Transform>,
+    entity: Entity,
+    point: Vec2,
+) {
     play_skill_animation(commands, entity, hash_bin("Spell4"));
     spawn_skill_particle(commands, entity, hash_bin("Sett_R_Cast"));
     // R is a dash that carries enemy to target location and deals damage
@@ -112,10 +132,10 @@ fn cast_sett_r(commands: &mut Commands, q_transform: &Query<&Transform>, entity:
         q_transform,
         entity,
         point,
-        &crate::ActionDash {
+        &ActionDash {
             skill: SETT_R_KEY.into(),
-            move_type: crate::DashMoveType::Pointer { max: 400.0 },
-            damage: Some(crate::DashDamage {
+            move_type: DashMoveType::Pointer { max: 400.0 },
+            damage: Some(DashDamage {
                 radius_end: 200.0,
                 damage: TargetDamage {
                     filter: TargetFilter::All,
@@ -169,5 +189,7 @@ fn on_sett_damage_hit(
     }
     let target = trigger.event_target();
     // E/R 命中时眩晕
-    commands.entity(target).with_related::<BuffOf>(DebuffStun::new(1.0));
+    commands
+        .entity(target)
+        .with_related::<BuffOf>(DebuffStun::new(1.0));
 }
