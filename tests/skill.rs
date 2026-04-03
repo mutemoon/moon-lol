@@ -2,13 +2,25 @@ use std::collections::HashMap;
 use std::time::Duration;
 
 use bevy::prelude::*;
-use league_core::{
+use league_core::extract::{
     EffectValueCalculationPart, EnumAbilityResourceByCoefficientCalculationPart,
     EnumGameCalculation, GameCalculation, SpellDataResource, SpellEffectAmount, SpellObject,
 };
-use lol_config::LoadHashKeyTrait;
-use lol_core::Team;
-use moon_lol::*;
+use lol_config::prop::LoadHashKeyTrait;
+use lol_core::team::Team;
+use moon_lol::core::action::damage::{DamageShape, TargetDamage, TargetFilter};
+use moon_lol::core::action::PluginAction;
+use moon_lol::core::base::ability_resource::{AbilityResource, AbilityResourceType};
+use moon_lol::core::base::level::Level;
+use moon_lol::core::cooldown::PluginCooldown;
+use moon_lol::core::damage::{DamageType, PluginDamage};
+use moon_lol::core::life::{Health, PluginLife};
+use moon_lol::core::movement::PluginMovement;
+use moon_lol::core::skill::{
+    skill_damage, CommandSkillLevelUp, CommandSkillStart, CoolDown, EventSkillCast, PluginSkill,
+    Skill, SkillCastFailureReason, SkillCastLog, SkillCastResult, SkillCooldownMode, SkillOf,
+    SkillPoints, SkillRecastWindow, SkillSlot, Skills,
+};
 
 const TEST_FPS: f32 = 30.0;
 const SPELL_KEY: u32 = 0x1001;

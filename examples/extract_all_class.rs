@@ -5,8 +5,11 @@ use std::sync::Mutex;
 use std::time::Instant;
 
 use bevy::prelude::*;
-use league_loader::{LeagueLoader, LeagueWadLoaderTrait};
-use league_property::{class_map_to_rust_code, extract_entry_class, get_hashes, merge_class_maps};
+use league_loader::game::LeagueLoader;
+use league_loader::prop_bin::LeagueWadLoaderTrait;
+use league_property::extract::{
+    class_map_to_rust_code, extract_entry_class, get_hashes, merge_class_maps,
+};
 use league_utils::hash_bin;
 use rayon::prelude::*;
 

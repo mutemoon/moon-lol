@@ -6,11 +6,19 @@ use std::time::Duration;
 use bevy::prelude::*;
 use bevy::time::TimeUpdateStrategy;
 use bevy::winit::WinitPlugin;
-use moon_lol::{
-    attach_skill_test_actor, Action, Fiora, PluginBarrack, PluginCore, PluginMap, PluginMinion,
-    PluginResource, PluginSkillTestRender, PluginTurret, PluginUI, SkillTestRenderConfig,
-    SkillTestScript, SkillTestScriptStep, SkillTestVideoFormat, SkillTestVideoOutput,
+use moon_lol::core::action::Action;
+use moon_lol::core::map::PluginMap;
+use moon_lol::core::resource::PluginResource;
+use moon_lol::core::test_render::{
+    attach_skill_test_actor, PluginSkillTestRender, SkillTestRenderConfig, SkillTestScript,
+    SkillTestScriptStep, SkillTestVideoFormat, SkillTestVideoOutput,
 };
+use moon_lol::entities::barrack::PluginBarrack;
+use moon_lol::entities::champions::fiora::Fiora;
+use moon_lol::entities::minion::PluginMinion;
+use moon_lol::entities::turret::PluginTurret;
+use moon_lol::ui::PluginUI;
+use moon_lol::PluginCore;
 
 #[test]
 fn fiora_q_writes_video() {

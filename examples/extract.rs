@@ -4,7 +4,8 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 use std::time::Instant;
 
 use bevy::prelude::*;
-use league_loader::{LeagueLoader, LeagueWadLoaderTrait};
+use league_loader::game::LeagueLoader;
+use league_loader::prop_bin::LeagueWadLoaderTrait;
 use league_utils::get_extension_by_bytes;
 use rayon::prelude::*;
 

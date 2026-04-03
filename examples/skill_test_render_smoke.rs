@@ -3,7 +3,7 @@ use std::time::Duration;
 
 use bevy::prelude::*;
 use bevy::time::TimeUpdateStrategy;
-use moon_lol::{PluginSkillTestRenderSuite, SkillTestRenderConfig};
+use moon_lol::core::test_render::{PluginSkillTestRenderSuite, SkillTestRenderConfig};
 
 fn main() {
     let output_dir = PathBuf::from("artifacts/skill_test_render_smoke");

@@ -21,10 +21,15 @@ use bevy::window::ExitCondition;
 use bevy::winit::WinitPlugin;
 use crossbeam_channel::{Receiver, Sender};
 use image::codecs::jpeg::JpegEncoder;
-use moon_lol::{
-    Action, AttackState, AttackTarget, CameraInit, CommandAction, Controller, Health,
-    PluginBarrack, PluginCore, PluginGymEnv, Vital,
-};
+use moon_lol::buffs::fiora_passive::Vital;
+use moon_lol::core::action::{Action, CommandAction};
+use moon_lol::core::attack::AttackState;
+use moon_lol::core::camera::CameraInit;
+use moon_lol::core::controller::Controller;
+use moon_lol::core::life::Health;
+use moon_lol::entities::barrack::PluginBarrack;
+use moon_lol::server::gym::{AttackTarget, PluginGymEnv};
+use moon_lol::PluginCore;
 use rocket::http::{ContentType, Method, Status};
 use rocket::serde::json::Json;
 use rocket::{get, launch, post, routes, State};

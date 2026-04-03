@@ -2,7 +2,10 @@ use std::time::Duration;
 
 use bevy::prelude::*;
 use bevy::winit::{UpdateMode, WinitSettings};
-use moon_lol::{create_log_plugin, PluginBarrack, PluginCore, PluginResource};
+use moon_lol::core::log::create_log_plugin;
+use moon_lol::core::resource::PluginResource;
+use moon_lol::entities::barrack::PluginBarrack;
+use moon_lol::PluginCore;
 
 fn main() {
     App::new()

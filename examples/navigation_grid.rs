@@ -1,12 +1,15 @@
 use bevy::prelude::*;
 use bevy::render::render_resource::Face;
 use bevy_egui::{egui, EguiContexts, EguiPlugin, EguiPrimaryContextPass};
-use league_core::VisionPathingFlags;
-use lol_config::ConfigNavigationGrid;
-use moon_lol::{
-    on_click_map, CameraState, Map, NavigationDebug, PluginBarrack, PluginCore, PluginResource,
-    ResourceGrid,
-};
+use league_core::grid::VisionPathingFlags;
+use lol_config::grid::ConfigNavigationGrid;
+use moon_lol::core::camera::CameraState;
+use moon_lol::core::map::{on_click_map, Map};
+use moon_lol::core::navigation::grid::ResourceGrid;
+use moon_lol::core::navigation::navigation::NavigationDebug;
+use moon_lol::core::resource::PluginResource;
+use moon_lol::entities::barrack::PluginBarrack;
+use moon_lol::PluginCore;
 
 fn main() {
     App::new()

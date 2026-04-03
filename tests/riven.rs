@@ -5,20 +5,46 @@ use std::time::Duration;
 use bevy::prelude::*;
 use bevy::time::TimeUpdateStrategy;
 use bevy::winit::WinitPlugin;
-use league_core::{
+use league_core::extract::{SpellDataResource, SpellDataValue, SpellObject};
+use league_core::grid::{
     JungleQuadrantFlags, MainRegionFlags, NearestLaneFlags, POIFlags, RingFlags, RiverRegionFlags,
-    SpellDataResource, SpellDataValue, SpellObject, UnknownSRXFlags, VisionPathingFlags,
+    UnknownSRXFlags, VisionPathingFlags,
 };
 use league_utils::hash_bin;
-use lol_config::{ConfigNavigationGrid, ConfigNavigationGridCell, LoadHashKeyTrait};
-use lol_core::Team;
-use moon_lol::{
-    attach_skill_test_actor, get_skill_value, AbilityResource, AbilityResourceType, Action, Armor,
-    BuffShieldWhite, Buffs, CommandAction, CommandDamageCreate, CoolDown, Damage, DamageType,
-    Health, Level, NavigationDebug, NavigationStats, PluginBarrack, PluginCore, PluginMinion,
-    PluginResource, PluginSkillTestRender, PluginTurret, PluginUI, ResourceGrid, Riven, Skill,
-    SkillCooldownMode, SkillOf, SkillPoints, SkillRecastWindow, SkillSlot, SkillTestActor, Skills,
+use lol_config::grid::{ConfigNavigationGrid, ConfigNavigationGridCell};
+use lol_config::prop::LoadHashKeyTrait;
+use lol_core::team::Team;
+use moon_lol::buffs::shield_white::BuffShieldWhite;
+use moon_lol::core::action::{Action, CommandAction};
+use moon_lol::core::animation::PluginAnimation;
+use moon_lol::core::base::ability_resource::{AbilityResource, AbilityResourceType};
+use moon_lol::core::base::buff::Buffs;
+use moon_lol::core::base::level::Level;
+use moon_lol::core::camera::PluginCamera;
+use moon_lol::core::damage::{Armor, CommandDamageCreate, Damage, DamageType};
+use moon_lol::core::life::Health;
+use moon_lol::core::movement::{Movement, MovementState};
+use moon_lol::core::navigation::grid::ResourceGrid;
+use moon_lol::core::navigation::navigation::{NavigationDebug, NavigationStats, PluginNavigaton};
+use moon_lol::core::particle::PluginParticle;
+use moon_lol::core::resource::PluginResource;
+use moon_lol::core::skill::{
+    get_skill_value, CoolDown, Skill, SkillCooldownMode, SkillOf, SkillPoints, SkillRecastWindow,
+    SkillSlot, Skills,
 };
+use moon_lol::core::skin::PluginSkin;
+use moon_lol::core::test_render::{
+    attach_skill_test_actor, PluginSkillTestRender, SkillTestActor, SkillTestRenderConfig,
+    SkillTestVideoFormat, SkillTestVideoOutput,
+};
+use moon_lol::entities::barrack::PluginBarrack;
+use moon_lol::entities::champion::Champion;
+use moon_lol::entities::champions::riven::Riven;
+use moon_lol::entities::minion::PluginMinion;
+use moon_lol::entities::shpere::PluginDebugSphere;
+use moon_lol::entities::turret::PluginTurret;
+use moon_lol::ui::PluginUI;
+use moon_lol::PluginCore;
 
 const RIVEN_Q_KEY: &str = "Characters/Riven/Spells/RivenTriCleaveAbility/RivenTriCleave";
 const RIVEN_W_KEY: &str = "Characters/Riven/Spells/RivenMartyrAbility/RivenMartyr";
@@ -85,15 +111,15 @@ impl RivenHarness {
         if is_render {
             let output_dir = std::path::PathBuf::from(format!("artifacts/tests/{}", _test_name));
             let _ = std::fs::remove_dir_all(&output_dir);
-            app.insert_resource(moon_lol::SkillTestRenderConfig {
+            app.insert_resource(SkillTestRenderConfig {
                 output_dir,
                 width: 1280,
                 height: 720,
                 capture_every_nth_frame: 1,
                 max_frames: None,
                 spawn_default_scene: false,
-                video_output: Some(moon_lol::SkillTestVideoOutput {
-                    format: moon_lol::SkillTestVideoFormat::Mp4,
+                video_output: Some(SkillTestVideoOutput {
+                    format: SkillTestVideoFormat::Mp4,
                     fps: 60,
                     file_name: format!("{}.mp4", _test_name),
                 }),
@@ -116,12 +142,12 @@ impl RivenHarness {
 
             // Disable graphics/audio plugins in logic test to avoid parallel GPU panics
             plugin_group = plugin_group
-                .disable::<moon_lol::PluginAnimation>()
-                .disable::<moon_lol::PluginSkin>()
-                .disable::<moon_lol::PluginParticle>()
-                .disable::<moon_lol::PluginNavigaton>()
-                .disable::<moon_lol::PluginDebugSphere>()
-                .disable::<moon_lol::PluginCamera>();
+                .disable::<PluginAnimation>()
+                .disable::<PluginSkin>()
+                .disable::<PluginParticle>()
+                .disable::<PluginNavigaton>()
+                .disable::<PluginDebugSphere>()
+                .disable::<PluginCamera>();
 
             app.add_plugins(plugin_group);
         }
@@ -145,14 +171,14 @@ impl RivenHarness {
         // Mock SpellObject assets
         {
             let mut spell_objects = app.world_mut().resource_mut::<Assets<SpellObject>>();
-            let mut make_spell_object = || {
-                use league_core::{
+            let make_spell_object = || {
+                use league_core::extract::{
                     EnumAbilityResourceByCoefficientCalculationPart, EnumGameCalculation,
                     GameCalculation, NamedDataValueCalculationPart,
                 };
                 let mut calculations = HashMap::new();
 
-                let mut make_calc = |name: &str| {
+                let make_calc = |name: &str| {
                     EnumGameCalculation::GameCalculation(GameCalculation {
                         m_formula_parts: Some(vec![
                             EnumAbilityResourceByCoefficientCalculationPart::NamedDataValueCalculationPart(
@@ -241,8 +267,8 @@ impl RivenHarness {
                     SkillPoints(4),
                     Damage(100.0),
                     Armor(0.0),
-                    moon_lol::Movement { speed: 340.0 },
-                    moon_lol::MovementState::default(),
+                    Movement { speed: 340.0 },
+                    MovementState::default(),
                     SkillTestActor,
                 ))
                 .id();
@@ -272,7 +298,7 @@ impl RivenHarness {
 
             let enemy_near = commands
                 .spawn((
-                    moon_lol::Champion,
+                    Champion,
                     Team::Chaos,
                     Transform::from_xyz(100.0, 0.0, 0.0),
                     Health::new(6000.0),
@@ -282,7 +308,7 @@ impl RivenHarness {
 
             let enemy_far = commands
                 .spawn((
-                    moon_lol::Champion,
+                    Champion,
                     Team::Chaos,
                     Transform::from_xyz(420.0, 0.0, 0.0),
                     Health::new(6000.0),
@@ -445,7 +471,7 @@ impl RivenHarness {
     }
 
     fn print_skill_logs(&self) {
-        use moon_lol::SkillCastLog;
+        use moon_lol::core::skill::SkillCastLog;
         if let Some(log) = self.app.world().get_resource::<SkillCastLog>() {
             for record in &log.0 {
                 println!("Skill Cast Record: {:?}", record);
