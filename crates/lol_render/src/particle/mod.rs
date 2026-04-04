@@ -12,7 +12,7 @@ use bevy::transform::systems::{
 };
 use league_core::extract::{VfxEmitterDefinitionData, VfxSystemDefinitionData};
 use league_utils::hash_wad;
-use lol_config::prop::{HashKey, LoadHashKeyTrait};
+use lol_base::prop::{HashKey, LoadHashKeyTrait};
 use lol_core::lifetime::{Lifetime, LifetimeMode};
 
 use crate::particle::emitters::decal::update_decal_intersections;

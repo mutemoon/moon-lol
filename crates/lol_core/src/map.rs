@@ -4,7 +4,7 @@ use std::f32;
 use bevy::math::bounding::Aabb3d;
 use bevy::prelude::*;
 use league_core::extract::{EnumMap, MapContainer, MapPlaceableContainer};
-use lol_config::prop::{HashKey, LoadHashKeyTrait};
+use lol_base::prop::{HashKey, LoadHashKeyTrait};
 
 use crate::character::CommandCharacterSpawn;
 use crate::entities::turret::Turret;

@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use league_core::extract::SkinCharacterDataProperties;
-use lol_config::prop::LoadHashKeyTrait;
+use lol_base::prop::LoadHashKeyTrait;
 use lol_core::base::ability_resource::AbilityResource;
 use lol_core::base::level::Level;
 use lol_core::life::Health;

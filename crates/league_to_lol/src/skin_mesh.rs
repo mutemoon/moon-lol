@@ -1,5 +1,5 @@
 use league_file::mesh_skinned::{LeagueSkinnedMesh, SkinnedMeshVertex};
-use lol_config::mesh::IntermediateMesh;
+use lol_base::mesh::IntermediateMesh;
 
 pub fn skinned_mesh_to_intermediate(
     skinned_mesh: &LeagueSkinnedMesh,

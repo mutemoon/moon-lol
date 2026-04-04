@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use league_core::extract::{EnumData, EnumUiPosition, UiElementEffectAnimationData};
 use league_utils::hash_bin;
-use lol_config::prop::LoadHashKeyTrait;
+use lol_base::prop::LoadHashKeyTrait;
 
 use crate::ui::element::spawn_ui_atom;
 

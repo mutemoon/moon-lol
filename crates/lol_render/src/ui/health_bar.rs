@@ -4,7 +4,7 @@ use league_core::extract::{
     StructureFloatingInfoBarData, UiElementIconData, UiElementRegionData, UnitFloatingInfoBarData,
 };
 use league_utils::hash_bin;
-use lol_config::prop::LoadHashKeyTrait;
+use lol_base::prop::LoadHashKeyTrait;
 use lol_core::base::bounding::Bounding;
 use lol_core::life::Health;
 

@@ -2,7 +2,7 @@ use bevy::ecs::error::ignore;
 use bevy::ecs::system::command::trigger;
 use bevy::prelude::*;
 use league_core::extract::SpellObject;
-use lol_config::prop::{HashKey, LoadHashKeyTrait};
+use lol_base::prop::{HashKey, LoadHashKeyTrait};
 use serde::{Deserialize, Serialize};
 
 use crate::base::buff::Buffs;

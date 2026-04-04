@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use league_core::extract::{EnumMap, MapContainer};
-use lol_config::grid::ConfigNavigationGrid;
-use lol_config::prop::LoadHashKeyTrait;
+use lol_base::grid::ConfigNavigationGrid;
+use lol_base::prop::LoadHashKeyTrait;
 
 use crate::map::MapName;
 use crate::utils::AssetServerLoadLeague;

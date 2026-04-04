@@ -1,7 +1,7 @@
 use bevy::asset::{AssetLoader, LoadContext};
 use bevy::math::Vec3Swizzles;
 use league_file::grid::AiMeshNGrid;
-use lol_config::grid::{ConfigNavigationGrid, ConfigNavigationGridCell};
+use lol_base::grid::{ConfigNavigationGrid, ConfigNavigationGridCell};
 
 use super::error::Error;
 

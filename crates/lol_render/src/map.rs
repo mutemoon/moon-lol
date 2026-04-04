@@ -2,8 +2,8 @@ use std::ops::Deref;
 
 use bevy::prelude::*;
 use league_core::extract::StaticMaterialDef;
-use lol_config::mapgeo::ConfigMapGeo;
-use lol_config::prop::LoadHashKeyTrait;
+use lol_base::mapgeo::ConfigMapGeo;
+use lol_base::prop::LoadHashKeyTrait;
 use lol_core::action::{Action, CommandAction};
 use lol_core::map::{MapGeometry, MapName, MapState};
 use lol_core::resource::loading::Loading;

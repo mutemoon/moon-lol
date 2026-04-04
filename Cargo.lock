@@ -3940,7 +3940,7 @@ dependencies = [
  "league_file",
  "league_property",
  "league_utils",
- "lol_config",
+ "lol_base",
  "nom 8.0.0",
  "thiserror 2.0.18",
  "zstd",
@@ -3970,7 +3970,7 @@ dependencies = [
  "league_loader",
  "league_property",
  "league_utils",
- "lol_config",
+ "lol_base",
  "nom 8.0.0",
  "regex",
  "serde",
@@ -4113,7 +4113,7 @@ dependencies = [
  "league_core",
  "league_file",
  "league_utils",
- "lol_config",
+ "lol_base",
  "lol_core",
  "lol_loader",
  "rand 0.9.2",
@@ -4121,7 +4121,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "lol_config"
+name = "lol_base"
 version = "0.1.0"
 dependencies = [
  "bevy",
@@ -4141,7 +4141,7 @@ dependencies = [
  "league_core",
  "league_file",
  "league_utils",
- "lol_config",
+ "lol_base",
  "lol_loader",
  "rand 0.9.2",
  "serde",
@@ -4158,7 +4158,7 @@ dependencies = [
  "league_property",
  "league_to_lol",
  "league_utils",
- "lol_config",
+ "lol_base",
  "nom 8.0.0",
  "regex",
  "serde",
@@ -4178,7 +4178,7 @@ dependencies = [
  "league_loader",
  "league_to_lol",
  "league_utils",
- "lol_config",
+ "lol_base",
  "lol_core",
  "rand 0.9.2",
  "regex",
@@ -4340,7 +4340,7 @@ dependencies = [
  "league_to_lol",
  "league_utils",
  "lol_champions",
- "lol_config",
+ "lol_base",
  "lol_core",
  "lol_loader",
  "lol_render",

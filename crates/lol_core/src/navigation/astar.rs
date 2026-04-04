@@ -2,7 +2,7 @@ use std::cmp::Ordering;
 use std::collections::{BinaryHeap, HashMap};
 
 use bevy::prelude::*;
-use lol_config::grid::ConfigNavigationGrid;
+use lol_base::grid::ConfigNavigationGrid;
 
 #[derive(Debug, Clone)]
 struct AStarNode {

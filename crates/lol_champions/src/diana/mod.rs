@@ -3,7 +3,7 @@ pub mod buffs;
 use bevy::prelude::*;
 use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_config::prop::LoadHashKeyTrait;
+use lol_base::prop::LoadHashKeyTrait;
 use lol_core::action::damage::{DamageShape, TargetDamage, TargetFilter};
 use lol_core::action::dash::{ActionDash, DashDamage, DashMoveType};
 use lol_core::base::buff::BuffOf;

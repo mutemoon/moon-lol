@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use league_core::extract::{UiElementGroupButtonData, UiElementRegionData};
-use lol_config::prop::{HashKey, LoadHashKeyTrait};
+use lol_base::prop::{HashKey, LoadHashKeyTrait};
 
 use crate::ui::element::{UIElement, UIElementEntity, UIState};
 

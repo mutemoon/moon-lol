@@ -3,7 +3,7 @@ use std::ops::Deref;
 
 use bevy::prelude::*;
 use league_core::extract::CharacterRecord;
-use lol_config::prop::HashKey;
+use lol_base::prop::HashKey;
 
 #[derive(Default)]
 pub struct PluginResourceLoading;

@@ -4,7 +4,7 @@ use std::time::{Duration, Instant};
 use bevy::color::palettes;
 use bevy::prelude::*;
 use bevy::render::render_resource::Face;
-use lol_config::grid::{ConfigNavigationGrid, CELL_COST_IMPASSABLE};
+use lol_base::grid::{ConfigNavigationGrid, CELL_COST_IMPASSABLE};
 
 use crate::base::bounding::Bounding;
 use crate::character::Character;

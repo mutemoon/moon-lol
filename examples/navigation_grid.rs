@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use bevy::render::render_resource::Face;
 use bevy_egui::{egui, EguiContexts, EguiPlugin, EguiPrimaryContextPass};
 use league_core::grid::VisionPathingFlags;
-use lol_config::grid::ConfigNavigationGrid;
+use lol_base::grid::ConfigNavigationGrid;
 use lol_core::entities::barrack::PluginBarrack;
 use lol_core::navigation::grid::ResourceGrid;
 use lol_core::navigation::navigation::NavigationDebug;

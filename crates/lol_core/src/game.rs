@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use lol_config::game::ConfigGame;
+use lol_base::game::ConfigGame;
 
 use crate::character::CommandCharacterSpawn;
 

@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use league_core::extract::SkinCharacterDataProperties;
-use lol_config::prop::{HashKey, LoadHashKeyTrait};
+use lol_base::prop::{HashKey, LoadHashKeyTrait};
 use lol_core::render_cmd::CommandSkinSpawn;
 use lol_core::resource::loading::Loading;
 use lol_core::resource::prop_bin::{CommandLoadPropBin, PropPath};

@@ -26,10 +26,10 @@ use league_core::grid::{
     UnknownSRXFlags, VisionPathingFlags,
 };
 use league_file::skeleton::LeagueSkeleton;
-use lol_config::grid::{ConfigNavigationGrid, ConfigNavigationGridCell};
-use lol_config::mapgeo::ConfigMapGeo;
-use lol_config::register::init_league_asset;
-use lol_config::shader::{ResourceShaderChunk, ResourceShaderPackage};
+use lol_base::grid::{ConfigNavigationGrid, ConfigNavigationGridCell};
+use lol_base::mapgeo::ConfigMapGeo;
+use lol_base::register::init_league_asset;
+use lol_base::shader::{ResourceShaderChunk, ResourceShaderPackage};
 use lol_core::action::{Action, CommandAction};
 use lol_core::game::FixedFrameCount;
 use lol_core::navigation::grid::ResourceGrid;

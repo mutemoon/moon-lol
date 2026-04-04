@@ -7,7 +7,7 @@ use std::time::Instant;
 use league_loader::game::LeagueLoader;
 use league_loader::prop_bin::LeagueWadLoaderTrait;
 use league_property::prop::PropFile;
-use lol_config::register::ASSET_LOADER_REGISTRY;
+use lol_base::register::ASSET_LOADER_REGISTRY;
 use rayon::prelude::*;
 
 fn get_hashes_u64(path: &str) -> HashMap<u64, String> {

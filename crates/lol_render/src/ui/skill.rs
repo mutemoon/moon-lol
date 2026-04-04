@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use league_core::extract::SpellObject;
-use lol_config::prop::LoadHashKeyTrait;
+use lol_base::prop::LoadHashKeyTrait;
 use lol_core::base::level::Level;
 use lol_core::skill::{CommandSkillLevelUp, PassiveSkill, Skill, SkillPoints, Skills};
 

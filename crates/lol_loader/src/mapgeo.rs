@@ -3,7 +3,7 @@ use bevy::math::bounding::Aabb3d;
 use league_core::mapgeo::EnvironmentVisibility;
 use league_file::mapgeo::LeagueMapGeo;
 use league_to_lol::sub_mesh::{parse_vertex_data, submesh_to_intermediate};
-use lol_config::mapgeo::ConfigMapGeo;
+use lol_base::mapgeo::ConfigMapGeo;
 
 use super::error::Error;
 

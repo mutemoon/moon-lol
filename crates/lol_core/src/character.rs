@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use league_core::extract::CharacterRecord;
-use lol_config::prop::{HashKey, LoadHashKeyTrait};
+use lol_base::prop::{HashKey, LoadHashKeyTrait};
 
 use crate::attack::Attack;
 use crate::base::ability_resource::{AbilityResource, AbilityResourceType};

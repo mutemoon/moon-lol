@@ -8,7 +8,7 @@ use league_core::extract::{
     StatBySubPartCalculationPart,
 };
 use league_utils::hash_bin;
-use lol_config::prop::{HashKey, LoadHashKeyTrait};
+use lol_base::prop::{HashKey, LoadHashKeyTrait};
 
 use crate::action::damage::{ActionDamage, ActionDamageEffect, DamageShape, TargetDamage};
 use crate::action::dash::{ActionDash, DashDamageComponent, DashMoveType};

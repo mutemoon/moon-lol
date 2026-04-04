@@ -7,7 +7,7 @@ use league_core::extract::{
     EffectValueCalculationPart, EnumAbilityResourceByCoefficientCalculationPart,
     EnumGameCalculation, GameCalculation, SpellDataResource, SpellEffectAmount, SpellObject,
 };
-use lol_config::prop::LoadHashKeyTrait;
+use lol_base::prop::LoadHashKeyTrait;
 use lol_core::action::damage::{DamageShape, TargetDamage, TargetFilter};
 use lol_core::action::{Action, CommandAction, PluginAction};
 use lol_core::base::ability_resource::{AbilityResource, AbilityResourceType};

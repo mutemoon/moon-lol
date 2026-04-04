@@ -2,7 +2,7 @@ use std::collections::HashSet;
 
 use bevy::prelude::*;
 use league_utils::get_shader_handle_by_hash;
-use lol_config::shader::ResourceShaderPackage;
+use lol_base::shader::ResourceShaderPackage;
 
 use crate::loaders::shader::AssetServerLoadShaderToc;
 use crate::particle::environment::unlit_decal::ParticleMaterialUnlitDecal;

@@ -3,7 +3,7 @@ use bevy::color::palettes::tailwind::RED_500;
 use bevy::prelude::*;
 use league_core::extract::{EnumMovement, SpellObject};
 use league_utils::hash_joint;
-use lol_config::prop::{HashKey, LoadHashKeyTrait};
+use lol_base::prop::{HashKey, LoadHashKeyTrait};
 use serde::{Deserialize, Serialize};
 
 use crate::attack::EntityCommandsTrigger;

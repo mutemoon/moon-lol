@@ -8,7 +8,7 @@ use bevy::shader::{ShaderImport, Source, ValidateShader};
 use league_file::shader::{LeagueShaderChunk, LeagueShaderToc};
 use league_to_lol::shader::{convert_frag, convert_vert};
 use league_utils::{get_shader_uuid_by_hash, hash_wad};
-use lol_config::shader::ResourceShaderPackage;
+use lol_base::shader::ResourceShaderPackage;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 

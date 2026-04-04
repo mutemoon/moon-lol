@@ -17,7 +17,7 @@ league_property.workspace = true
 league_to_lol.workspace = true
 league_file.workspace = true
 league_utils.workspace = true
-lol_config.workspace = true
+lol_base.workspace = true
 lol_core.workspace = true
 lol_render.workspace = true
 lol_loader.workspace = true
@@ -36,7 +36,7 @@ league_loader = { path = "crates/league_loader" }
 league_property = { path = "crates/league_property" }
 league_to_lol = { path = "crates/league_to_lol" }
 league_utils = { path = "crates/league_utils" }
-lol_config = { path = "crates/lol_config" }
+lol_base = { path = "crates/lol_base" }
 lol_core = { path = "crates/lol_core" }
 lol_render = { path = "crates/lol_render" }
 lol_loader = { path = "crates/lol_loader" }

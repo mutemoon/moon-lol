@@ -1,8 +1,8 @@
 use std::collections::{HashMap, HashSet};
 
 use bevy::prelude::*;
-use lol_config::prop::LeagueProperties;
-use lol_config::register::ASSET_LOADER_REGISTRY;
+use lol_base::prop::LeagueProperties;
+use lol_base::register::ASSET_LOADER_REGISTRY;
 
 use crate::utils::{AssetServerLoadLeague, HashPath};
 

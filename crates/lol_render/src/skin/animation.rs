@@ -7,7 +7,7 @@ use league_core::extract::{
 };
 use league_to_lol::animation::load_animation_map;
 use league_utils::hash_bin;
-use lol_config::prop::{HashKey, LoadHashKeyTrait};
+use lol_base::prop::{HashKey, LoadHashKeyTrait};
 use lol_core::resource::loading::Loading;
 use lol_core::utils::AssetServerLoadLeague;
 

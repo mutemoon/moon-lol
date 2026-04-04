@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use bevy::prelude::*;
 use league_core::extract::{AnimationGraphData, EnumBlendData, EnumClipData};
 use league_file::animation::{AnimationFile, CompressedTransformType, UncompressedData};
-use lol_config::animation::ConfigAnimationClip;
+use lol_base::animation::ConfigAnimationClip;
 
 use crate::utils::Error;
 

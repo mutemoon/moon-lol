@@ -3,7 +3,7 @@ use std::collections::HashSet;
 use std::time::Instant;
 
 use bevy::prelude::*;
-use lol_config::grid::ConfigNavigationGrid;
+use lol_base::grid::ConfigNavigationGrid;
 use serde::{Deserialize, Serialize};
 
 use crate::base::bounding::Bounding;

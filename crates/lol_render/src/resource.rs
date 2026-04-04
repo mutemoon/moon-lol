@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use bevy::prelude::*;
 use league_core::extract::{AnimationGraphData, SkinCharacterDataProperties};
 use league_file::skeleton::LeagueSkeleton;
-use lol_config::prop::HashKey;
+use lol_base::prop::HashKey;
 use lol_core::resource::loading::RegisterLoadingExt;
 use lol_core::utils::AssetServerLoadLeague;
 

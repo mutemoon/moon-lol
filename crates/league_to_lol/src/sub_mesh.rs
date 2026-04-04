@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use league_file::mapgeo::{ElementName, LeagueMapGeo, LeagueMapGeoMesh, Submesh};
-use lol_config::mesh::IntermediateMesh;
+use lol_base::mesh::IntermediateMesh;
 
 /// 从静态mesh（submesh）创建中间结构
 pub fn submesh_to_intermediate(

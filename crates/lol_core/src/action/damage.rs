@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use league_core::extract::SpellObject;
-use lol_config::prop::{HashKey, LoadHashKeyTrait};
+use lol_base::prop::{HashKey, LoadHashKeyTrait};
 
 use crate::damage::{CommandDamageCreate, Damage, DamageType};
 use crate::entities::champion::Champion;
