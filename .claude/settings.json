@@ -1,4 +1,7 @@
 {
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  },
   "permissions": {
     "allow": [
       "Bash",
@@ -9,7 +12,6 @@
       "Read",
       "Skill",
       "Write",
-
       "Agent",
       "KillShell",
       "SendMessage",
@@ -37,15 +39,24 @@
       "ReadMcpResourceTool",
       "WebFetch",
       "WebSearch",
-
       "mcp__ide__executeCode",
       "mcp__ide__getDiagnostics"
     ]
   },
-  "enabledPlugins": {
-    "ralph-wiggum@claude-code-plugins": true
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cargo +nightly fmt"
+          }
+        ]
+      }
+    ]
   },
-  "env": {
-    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  "enabledPlugins": {
+    "rust-analyzer-lsp@claude-plugins-official": true
   }
 }
