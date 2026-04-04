@@ -1,6 +1,6 @@
 ## 模块迁移计划
 
-src/core 拆分到 crates 中 lol_core lol_core_render
+src/core 拆分到 crates 中 lol_core lol_render
 
 # 指令
 

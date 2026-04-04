@@ -148,12 +148,12 @@ use lol_core::resource::PluginResource;
 use lol_core::rotate::PluginRotate;
 use lol_core::run::PluginRun;
 use lol_core::skill::PluginSkill;
-use lol_core_render::animation::PluginAnimation;
-use lol_core_render::camera::PluginCamera;
-use lol_core_render::controller::PluginController;
-use lol_core_render::particle::PluginParticle;
-use lol_core_render::skin::PluginSkin;
-use lol_core_render::ui::PluginUI;
+use lol_render::animation::PluginAnimation;
+use lol_render::camera::PluginCamera;
+use lol_render::controller::PluginController;
+use lol_render::particle::PluginParticle;
+use lol_render::skin::PluginSkin;
+use lol_render::ui::PluginUI;
 
 plugin_group! {
     pub struct PluginCore {

@@ -17,11 +17,11 @@ use crate::shader::{startup_load_shaders, update_shaders, ResourceShaderHandles}
 use crate::skin::LeagueSkinMesh;
 
 #[derive(Default)]
-pub struct PluginResource {
+pub struct PluginRenderResource {
     pub game_config_path: String,
 }
 
-impl Plugin for PluginResource {
+impl Plugin for PluginRenderResource {
     fn build(&self, app: &mut App) {
         app.init_asset::<LeagueSkinMesh>();
         app.init_asset::<LeagueSkeleton>();

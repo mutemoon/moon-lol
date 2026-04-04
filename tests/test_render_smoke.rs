@@ -6,7 +6,7 @@ use std::time::Duration;
 use bevy::prelude::*;
 use bevy::time::TimeUpdateStrategy;
 use bevy::winit::WinitPlugin;
-use lol_core_render::test_render::{PluginSkillTestRenderSuite, SkillTestRenderConfig};
+use lol_render::test_render::{PluginSkillTestRenderSuite, SkillTestRenderConfig};
 
 #[test]
 fn skill_test_render_writes_frames() {

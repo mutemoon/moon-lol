@@ -35,15 +35,15 @@ use lol_core::skill::{
     SkillSlot, Skills,
 };
 use lol_core::team::Team;
-use lol_core_render::animation::PluginAnimation;
-use lol_core_render::camera::PluginCamera;
-use lol_core_render::particle::PluginParticle;
-use lol_core_render::skin::PluginSkin;
-use lol_core_render::test_render::{
+use lol_render::animation::PluginAnimation;
+use lol_render::camera::PluginCamera;
+use lol_render::particle::PluginParticle;
+use lol_render::skin::PluginSkin;
+use lol_render::test_render::{
     attach_skill_test_actor, PluginSkillTestRender, SkillTestActor, SkillTestRenderConfig,
     SkillTestVideoFormat, SkillTestVideoOutput,
 };
-use lol_core_render::ui::PluginUI;
+use lol_render::ui::PluginUI;
 use moon_lol::PluginCore;
 
 const RIVEN_Q_KEY: &str = "Characters/Riven/Spells/RivenTriCleaveAbility/RivenTriCleave";

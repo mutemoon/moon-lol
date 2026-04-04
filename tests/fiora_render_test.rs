@@ -13,11 +13,11 @@ use lol_core::entities::minion::PluginMinion;
 use lol_core::entities::turret::PluginTurret;
 use lol_core::map::PluginMap;
 use lol_core::resource::PluginResource;
-use lol_core_render::test_render::{
+use lol_render::test_render::{
     attach_skill_test_actor, PluginSkillTestRender, SkillTestRenderConfig, SkillTestScript,
     SkillTestScriptStep, SkillTestVideoFormat, SkillTestVideoOutput,
 };
-use lol_core_render::ui::PluginUI;
+use lol_render::ui::PluginUI;
 use moon_lol::PluginCore;
 
 #[test]
