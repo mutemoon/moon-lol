@@ -3,9 +3,9 @@ use std::time::Duration;
 
 use bevy::prelude::*;
 use bevy::time::TimeUpdateStrategy;
+use lol_champions::champions::riven::Riven;
 use lol_core::action::Action;
 use lol_core::entities::barrack::PluginBarrack;
-use lol_core::entities::champions::riven::Riven;
 use lol_core::entities::minion::PluginMinion;
 use lol_core::entities::turret::PluginTurret;
 use lol_core::map::PluginMap;

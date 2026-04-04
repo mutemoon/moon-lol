@@ -11,6 +11,7 @@ use league_core::grid::{
     UnknownSRXFlags, VisionPathingFlags,
 };
 use league_utils::hash_bin;
+use lol_champions::champions::riven::Riven;
 use lol_config::grid::{ConfigNavigationGrid, ConfigNavigationGridCell};
 use lol_config::prop::LoadHashKeyTrait;
 use lol_core::action::{Action, CommandAction};
@@ -21,7 +22,6 @@ use lol_core::buffs::shield_white::BuffShieldWhite;
 use lol_core::damage::{Armor, CommandDamageCreate, Damage, DamageType};
 use lol_core::entities::barrack::PluginBarrack;
 use lol_core::entities::champion::Champion;
-use lol_core::entities::champions::riven::Riven;
 use lol_core::entities::minion::PluginMinion;
 use lol_core::entities::shpere::PluginDebugSphere;
 use lol_core::entities::turret::PluginTurret;
