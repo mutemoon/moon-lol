@@ -4,9 +4,8 @@ use bevy::mesh::skinning::{SkinnedMesh, SkinnedMeshInverseBindposes};
 use bevy::prelude::*;
 use league_file::skeleton::LeagueSkeleton;
 use league_utils::hash_joint;
-use lol_core::utils::AssetServerLoadLeague;
-
 use lol_core::resource::loading::Loading;
+use lol_core::utils::AssetServerLoadLeague;
 
 struct ConfigJoint {
     hash: u32,

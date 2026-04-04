@@ -1,9 +1,9 @@
-use crate::particle::{CommandParticleDespawn, CommandParticleSpawn};
 use bevy::prelude::*;
 use league_core::extract::{ResourceResolver, SkinCharacterDataProperties};
 use lol_config::prop::LoadHashKeyTrait;
 use lol_core::render_cmd::{CommandSkinParticleDespawn, CommandSkinParticleSpawn};
 
+use crate::particle::{CommandParticleDespawn, CommandParticleSpawn};
 use crate::skin::skin::Skin;
 
 fn resolve_skin_resource_record<'a>(

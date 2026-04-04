@@ -2,13 +2,6 @@ use std::collections::HashMap;
 use std::fs::File;
 use std::io::Read;
 
-use crate::loaders::animation::LeagueLoaderAnimationClip;
-use crate::loaders::image::LeagueLoaderImage;
-use crate::loaders::mesh::LeagueLoaderMesh;
-use crate::loaders::mesh_static::LeagueLoaderMeshStatic;
-use crate::loaders::shader::LeagueLoaderShaderToc;
-use crate::loaders::skeleton::LeagueLoaderSkeleton;
-use crate::skin::LeagueSkinMesh;
 use bevy::ecs::component::ComponentCloneBehavior;
 use bevy::ecs::entity::{EntityHashMap, SceneEntityMapper};
 use bevy::ecs::relationship::RelationshipHookMode;
@@ -26,7 +19,14 @@ use lol_core::resource::loading::RegisterLoadingExt;
 use lol_core::utils::AssetServerLoadLeague;
 use serde::de::DeserializeSeed;
 
+use crate::loaders::animation::LeagueLoaderAnimationClip;
+use crate::loaders::image::LeagueLoaderImage;
+use crate::loaders::mesh::LeagueLoaderMesh;
+use crate::loaders::mesh_static::LeagueLoaderMeshStatic;
+use crate::loaders::shader::LeagueLoaderShaderToc;
+use crate::loaders::skeleton::LeagueLoaderSkeleton;
 use crate::shader::{startup_load_shaders, update_shaders, ResourceShaderHandles};
+use crate::skin::LeagueSkinMesh;
 
 #[derive(Default)]
 pub struct PluginResource {

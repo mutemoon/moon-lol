@@ -1,7 +1,6 @@
 use std::collections::HashMap;
 
 use bevy::prelude::*;
-
 use lol_core::utils::AssetServerLoadLeague;
 
 #[derive(Resource, Default)]

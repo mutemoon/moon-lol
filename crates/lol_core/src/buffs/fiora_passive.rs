@@ -1,6 +1,5 @@
 use std::collections::HashMap;
 
-use crate::team::Team;
 use bevy::ecs::relationship::Relationship;
 use bevy::prelude::*;
 use league_utils::hash_bin;
@@ -16,6 +15,7 @@ use crate::entities::champion::Champion;
 use crate::life::Health;
 use crate::render_cmd::{CommandSkinParticleDespawn, CommandSkinParticleSpawn};
 use crate::skill::PassiveSkillOf;
+use crate::team::Team;
 
 const VITAL_DISTANCE: f32 = 1000.0;
 const FIORA_PASSIVE_ACTIVE_DURATION: f32 = 1.7;

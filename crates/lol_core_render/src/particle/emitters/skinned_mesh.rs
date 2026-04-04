@@ -1,5 +1,3 @@
-use crate::resource_cache::ResourceCache;
-use crate::skin::mesh_shadow::spawn_shadow_skin_entity;
 use bevy::animation::AnimationTarget;
 use bevy::mesh::skinning::SkinnedMesh;
 use bevy::prelude::*;
@@ -18,6 +16,8 @@ use crate::particle::skinned_mesh::particle::{
 };
 use crate::particle::utils::create_black_pixel_texture;
 use crate::particle::ParticleId;
+use crate::resource_cache::ResourceCache;
+use crate::skin::mesh_shadow::spawn_shadow_skin_entity;
 
 pub fn attach_skinned_mesh_visuals(
     commands: &mut Commands,

@@ -1,9 +1,9 @@
-use crate::skin::LeagueSkinMesh;
 use bevy::asset::{AssetLoader, LoadContext};
 use league_file::mesh_skinned::LeagueSkinnedMesh;
 use league_to_lol::skin_mesh::skinned_mesh_to_intermediate;
 
 use crate::error::Error;
+use crate::skin::LeagueSkinMesh;
 
 #[derive(Default)]
 pub struct LeagueLoaderMesh;

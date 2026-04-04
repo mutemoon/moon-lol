@@ -3,18 +3,18 @@ use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
 use lol_config::prop::LoadHashKeyTrait;
 
-use crate::buffs::common_buffs::{BuffEmpoweredAttack, BuffResist};
-use crate::buffs::jax_buffs::BuffJaxE;
 use crate::action::damage::{DamageShape, TargetDamage, TargetFilter};
 use crate::action::dash::{ActionDash, DashDamage, DashMoveType};
 use crate::base::buff::BuffOf;
+use crate::buffs::common_buffs::{BuffEmpoweredAttack, BuffResist};
+use crate::buffs::jax_buffs::BuffJaxE;
 use crate::damage::DamageType;
+use crate::entities::champion::Champion;
 use crate::skill::{
     play_skill_animation, reset_skill_attack, skill_damage, skill_dash, skill_slot_from_index,
     spawn_skill_particle, CoolDown, EventSkillCast, PassiveSkillOf, Skill, SkillOf, SkillSlot,
     Skills,
 };
-use crate::entities::champion::Champion;
 
 const JAX_Q_KEY: &str = "Characters/Jax/Spells/JaxLeapStrike/JaxLeapStrike";
 const JAX_R_KEY: &str = "Characters/Jax/Spells/JaxR/JaxR";

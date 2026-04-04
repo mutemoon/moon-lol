@@ -3,15 +3,15 @@ use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
 use lol_config::prop::LoadHashKeyTrait;
 
-use crate::buffs::teemo_buffs::BuffTeemoQ;
 use crate::action::damage::{DamageShape, TargetDamage, TargetFilter};
 use crate::base::buff::BuffOf;
+use crate::buffs::teemo_buffs::BuffTeemoQ;
 use crate::damage::{DamageType, EventDamageCreate};
+use crate::entities::champion::Champion;
 use crate::skill::{
     play_skill_animation, skill_damage, skill_slot_from_index, spawn_skill_particle, CoolDown,
     EventSkillCast, PassiveSkillOf, Skill, SkillOf, SkillSlot, Skills,
 };
-use crate::entities::champion::Champion;
 
 const TEEMO_Q_KEY: &str = "Characters/Teemo/Spells/TeemoQ/TeemoQ";
 #[allow(dead_code)]

@@ -1,5 +1,3 @@
-use crate::camera::TargetImage;
-use crate::resource_cache::ResourceCache;
 use bevy::camera::visibility::RenderLayers;
 use bevy::prelude::*;
 use league_core::extract::{
@@ -13,11 +11,13 @@ use super::utils::{
     calculate_emission_params, calculate_particle_transform_frame, get_emitter_type,
     spawn_particle_entity, EmissionParams, EmitterType, ParticleBirthParams,
 };
+use crate::camera::TargetImage;
 use crate::particle::particle::distortion::{
     ParticleMaterialDistortion, ParticleMeshDistortion, UniformsPixelDistortion,
     UniformsVertexDistortion,
 };
 use crate::particle::ParticleId;
+use crate::resource_cache::ResourceCache;
 
 pub fn attach_distortion_visuals(
     commands: &mut Commands,

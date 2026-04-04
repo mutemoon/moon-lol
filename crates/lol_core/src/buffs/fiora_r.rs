@@ -1,4 +1,3 @@
-use crate::team::Team;
 use bevy::ecs::relationship::Relationship;
 use bevy::prelude::*;
 use league_utils::hash_bin;
@@ -9,6 +8,7 @@ use crate::buffs::fiora_passive::get_particle_hash;
 use crate::damage::EventDamageCreate;
 use crate::life::Health;
 use crate::render_cmd::{CommandSkinParticleDespawn, CommandSkinParticleSpawn};
+use crate::team::Team;
 
 const VITAL_R_TIMEOUT: f32 = 1.5;
 const FIORA_R_ACTIVE_DURATION: f32 = 0.5;

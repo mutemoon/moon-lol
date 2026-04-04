@@ -7,9 +7,8 @@ use league_core::extract::{
 };
 use league_utils::hash_bin;
 use lol_config::prop::LoadHashKeyTrait;
-use lol_core::utils::AssetServerLoadLeague;
-
 use lol_core::resource::prop_bin::{CommandLoadPropBin, EventLoadPropEnd, PropPath};
+use lol_core::utils::AssetServerLoadLeague;
 
 pub struct PluginUIElement;
 

@@ -1,15 +1,15 @@
-use crate::skin::LeagueSkinMesh;
 use bevy::camera::visibility::RenderLayers;
 use bevy::mesh::skinning::SkinnedMesh;
 use bevy::prelude::*;
 use bevy::render::render_resource::Face;
 use league_core::extract::SkinCharacterDataProperties;
 use lol_config::prop::LoadHashKeyTrait;
+use lol_core::resource::loading::Loading;
 use lol_core::utils::AssetServerLoadLeague;
 
 use crate::skin::skeleton::CommandSkinSkeletonSpawn;
 use crate::skin::skin::Skin;
-use lol_core::resource::loading::Loading;
+use crate::skin::LeagueSkinMesh;
 
 #[derive(EntityEvent)]
 pub struct CommandSkinMeshSpawn {

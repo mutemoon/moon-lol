@@ -1,14 +1,15 @@
 use std::ops::Deref;
 
-use crate::{controller::Controller, skin::mesh::get_standard};
 use bevy::prelude::*;
 use league_core::extract::StaticMaterialDef;
-use lol_config::{mapgeo::ConfigMapGeo, prop::LoadHashKeyTrait};
-use lol_core::{
-    action::{Action, CommandAction},
-    map::{MapGeometry, MapState},
-    resource::loading::Loading,
-};
+use lol_config::mapgeo::ConfigMapGeo;
+use lol_config::prop::LoadHashKeyTrait;
+use lol_core::action::{Action, CommandAction};
+use lol_core::map::{MapGeometry, MapState};
+use lol_core::resource::loading::Loading;
+
+use crate::controller::Controller;
+use crate::skin::mesh::get_standard;
 
 #[derive(Default)]
 pub struct PluginMapRender;

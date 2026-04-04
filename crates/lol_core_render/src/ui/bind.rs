@@ -1,6 +1,7 @@
-use crate::camera::CameraState;
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
+
+use crate::camera::CameraState;
 
 #[derive(Default)]
 pub struct PluginUIBind;

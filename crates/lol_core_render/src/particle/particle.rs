@@ -3,13 +3,13 @@ pub mod mesh;
 pub mod quad;
 pub mod quad_slice;
 
-use crate::camera::CameraState;
 use bevy::mesh::skinning::{SkinnedMesh, SkinnedMeshInverseBindposes};
 use bevy::mesh::VertexAttributeValues;
 use bevy::prelude::*;
 use league_core::extract::{EnumVfxPrimitive, VfxSystemDefinitionData};
 use lol_core::lifetime::Lifetime;
 
+use crate::camera::CameraState;
 use crate::particle::emitters::state::ParticleEmitterState;
 use crate::particle::environment::unlit_decal::ParticleMaterialUnlitDecal;
 use crate::particle::particle::distortion::ParticleMaterialDistortion;

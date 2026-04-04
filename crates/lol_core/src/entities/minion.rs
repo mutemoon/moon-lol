@@ -1,15 +1,15 @@
 use bevy::app::Plugin;
 use bevy::prelude::*;
-use crate::lane::Lane;
-use crate::team::Team;
 use serde::{Deserialize, Serialize};
 
 use crate::aggro::{Aggro, EventAggroTargetFound};
 use crate::attack_auto::{AttackAuto, CommandAttackAutoStart, CommandAttackAutoStop};
 use crate::base::state::State;
+use crate::lane::Lane;
 use crate::life::EventDead;
 use crate::map::MinionPath;
 use crate::movement::{CommandMovement, MovementAction, MovementWay};
+use crate::team::Team;
 
 #[derive(Component, Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 #[require(MinionState, Aggro = Aggro { range: 1000.0 }, State)]

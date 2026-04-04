@@ -2,9 +2,6 @@ use std::collections::HashMap;
 use std::f32;
 use std::ops::Deref;
 
-use crate::lane::Lane;
-use crate::team::Team;
-use crate::utils::AssetServerLoadLeague;
 use bevy::math::bounding::Aabb3d;
 use bevy::prelude::*;
 use league_core::extract::{EnumMap, MapContainer, MapPlaceableContainer, StaticMaterialDef};
@@ -14,8 +11,11 @@ use lol_config::prop::{HashKey, LoadHashKeyTrait};
 use crate::action::{Action, CommandAction};
 use crate::character::CommandCharacterSpawn;
 use crate::entities::turret::Turret;
+use crate::lane::Lane;
 use crate::resource::loading::Loading;
 use crate::resource::prop_bin::{CommandLoadPropBin, PropPath};
+use crate::team::Team;
+use crate::utils::AssetServerLoadLeague;
 
 pub const MAP_WIDTH: f32 = 14400.0;
 pub const MAP_HEIGHT: f32 = 14765.0;

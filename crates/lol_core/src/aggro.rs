@@ -1,10 +1,10 @@
 use std::collections::HashMap;
 
 use bevy::prelude::*;
-use crate::team::Team;
 
 use crate::damage::{DamageType, EventDamageCreate};
 use crate::life::EventDead;
+use crate::team::Team;
 
 #[derive(Default)]
 pub struct PluginAggro;

@@ -12,7 +12,9 @@ use bevy::shader::ShaderRef;
 use league_utils::get_shader_handle;
 
 use crate::particle::utils::MaterialPath;
-use crate::particle::{ATTRIBUTE_LIFETIME, ATTRIBUTE_UV_FRAME, ATTRIBUTE_UV_MULT, ATTRIBUTE_WORLD_POSITION};
+use crate::particle::{
+    ATTRIBUTE_LIFETIME, ATTRIBUTE_UV_FRAME, ATTRIBUTE_UV_MULT, ATTRIBUTE_WORLD_POSITION,
+};
 
 #[derive(Clone, ShaderType, Debug)]
 pub struct UniformsVertexQuad {

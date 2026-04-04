@@ -1,8 +1,8 @@
-use crate::camera::CameraState;
 use bevy::color::palettes::css::{BLUE, RED, WHITE};
 use bevy::prelude::*;
-
 use lol_core::damage::{DamageType, EventDamageCreate};
+
+use crate::camera::CameraState;
 
 #[derive(Default)]
 pub struct PluginUIDamage;

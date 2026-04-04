@@ -4,14 +4,13 @@ use std::time::Duration;
 use bevy::prelude::*;
 use league_core::extract::{EnumBlendData, EnumParametricUpdater};
 use league_utils::hash_bin;
+use lol_core::attack::Attack;
+use lol_core::base::state::State;
+use lol_core::movement::Movement;
 use lol_core::render_cmd::CommandAnimationPlay;
 use rand::distr::weighted::WeightedIndex;
 use rand::distr::Distribution;
 use rand::rng;
-
-use lol_core::attack::Attack;
-use lol_core::base::state::State;
-use lol_core::movement::Movement;
 
 #[derive(Default)]
 pub struct PluginAnimation;

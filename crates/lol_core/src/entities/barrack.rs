@@ -8,15 +8,15 @@ use league_core::extract::{
     TimedVariableWaveBehavior, Unk0xad65d8c4,
 };
 use lol_config::prop::{HashKey, LoadHashKeyTrait};
-use crate::lane::Lane;
-use crate::team::Team;
 
 use crate::character::{CommandCharacterLoad, CommandCharacterSpawn};
 use crate::damage::{Armor, Damage};
 use crate::entities::minion::Minion;
+use crate::lane::Lane;
 use crate::life::Health;
 use crate::map::{MapName, MapState, MinionPath};
 use crate::movement::Movement;
+use crate::team::Team;
 
 #[derive(Default)]
 pub struct PluginBarrack;

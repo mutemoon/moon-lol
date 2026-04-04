@@ -1,15 +1,16 @@
 use std::collections::HashSet;
 
+use bevy::prelude::*;
+use league_utils::get_shader_handle_by_hash;
+use lol_config::shader::ResourceShaderPackage;
+use lol_core::utils::AssetServerLoadLeague;
+
 use crate::loaders::shader::AssetServerLoadShaderToc;
 use crate::particle::environment::unlit_decal::ParticleMaterialUnlitDecal;
 use crate::particle::particle::distortion::ParticleMaterialDistortion;
 use crate::particle::particle::quad::ParticleMaterialQuad;
 use crate::particle::particle::quad_slice::ParticleMaterialQuadSlice;
 use crate::particle::utils::MaterialPath;
-use bevy::prelude::*;
-use league_utils::get_shader_handle_by_hash;
-use lol_config::shader::ResourceShaderPackage;
-use lol_core::utils::AssetServerLoadLeague;
 
 #[derive(Resource, Default)]
 pub struct ResourceShaderHandles(pub Vec<(String, Handle<ResourceShaderPackage>)>);

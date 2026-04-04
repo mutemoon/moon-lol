@@ -4,7 +4,6 @@ use std::process::Command;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 
-use crate::particle::PluginParticle;
 use bevy::app::plugin_group;
 use bevy::asset::RenderAssetUsages;
 use bevy::camera::RenderTarget;
@@ -31,13 +30,6 @@ use lol_config::grid::{ConfigNavigationGrid, ConfigNavigationGridCell};
 use lol_config::mapgeo::ConfigMapGeo;
 use lol_config::register::init_league_asset;
 use lol_config::shader::{ResourceShaderChunk, ResourceShaderPackage};
-
-use crate::camera::PluginCamera;
-use crate::resource_cache::ResourceCache;
-use crate::skin::{LeagueSkinMesh, PluginSkin};
-
-use crate::animation::PluginAnimation;
-use crate::shader::ResourceShaderHandles;
 use lol_core::action::{Action, CommandAction};
 use lol_core::game::FixedFrameCount;
 use lol_core::navigation::grid::ResourceGrid;
@@ -45,6 +37,13 @@ use lol_core::resource::loading::PluginResourceLoading;
 use lol_core::resource::prop_bin::PluginResourcePropBin;
 use lol_core::rotate::PluginRotate;
 use lol_core::skill::{SkillPoints, Skills};
+
+use crate::animation::PluginAnimation;
+use crate::camera::PluginCamera;
+use crate::particle::PluginParticle;
+use crate::resource_cache::ResourceCache;
+use crate::shader::ResourceShaderHandles;
+use crate::skin::{LeagueSkinMesh, PluginSkin};
 
 #[derive(Resource, Clone)]
 pub struct SkillTestRenderConfig {

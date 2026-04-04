@@ -1,4 +1,3 @@
-use crate::resource_cache::ResourceCache;
 use bevy::prelude::*;
 use league_core::extract::{EnumVfxPrimitive, VfxEmitterDefinitionData, VfxSystemDefinitionData};
 use lol_core::lifetime::Lifetime;
@@ -12,6 +11,7 @@ use crate::particle::particle::quad::{ParticleMaterialQuad, ParticleMeshQuad, Un
 use crate::particle::particle::quad_slice::{ParticleMaterialQuadSlice, UniformsPixelQuadSlice};
 use crate::particle::utils::create_black_pixel_texture;
 use crate::particle::ParticleId;
+use crate::resource_cache::ResourceCache;
 
 pub fn attach_quad_visuals(
     commands: &mut Commands,

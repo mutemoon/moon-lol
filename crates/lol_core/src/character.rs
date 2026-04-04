@@ -1,4 +1,3 @@
-use crate::team::Team;
 use bevy::prelude::*;
 use league_core::extract::CharacterRecord;
 use lol_config::prop::{HashKey, LoadHashKeyTrait};
@@ -13,6 +12,7 @@ use crate::movement::Movement;
 use crate::render_cmd::CommandSkinSpawn;
 use crate::resource::loading::Loading;
 use crate::resource::prop_bin::{CommandLoadPropBin, PropPath};
+use crate::team::Team;
 
 #[derive(Default)]
 pub struct PluginCharacter;

@@ -1,8 +1,6 @@
 use bevy::prelude::*;
 
-use crate::attack::{
-    Attack, AttackState, AttackStatus, CommandAttackStart, CommandAttackStop,
-};
+use crate::attack::{Attack, AttackState, AttackStatus, CommandAttackStart, CommandAttackStop};
 use crate::base::bounding::Bounding;
 use crate::run::{CommandRunStart, CommandRunStop, RunTarget};
 

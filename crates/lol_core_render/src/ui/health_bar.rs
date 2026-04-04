@@ -5,11 +5,11 @@ use league_core::extract::{
 };
 use league_utils::hash_bin;
 use lol_config::prop::LoadHashKeyTrait;
+use lol_core::base::bounding::Bounding;
+use lol_core::life::Health;
 
 use crate::ui::bind::UIBind;
 use crate::ui::element::{spawn_ui_element, UIState};
-use lol_core::base::bounding::Bounding;
-use lol_core::life::Health;
 
 pub struct PluginUIHealthBar;
 
