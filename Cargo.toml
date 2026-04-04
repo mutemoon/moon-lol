@@ -21,14 +21,11 @@ lol_config.workspace = true
 lol_core.workspace = true
 lol_core_render.workspace = true
 lol_loader.workspace = true
-lol_particle.workspace = true
 serde.workspace = true
 tokio.workspace = true
 rand.workspace = true
 
 bevy_egui = "0.38"
-crossbeam-channel = "0.5"
-image = { version = "0.25", features = ["png"] }
 tracing = "0.1"
 
 [workspace.dependencies]
@@ -42,12 +39,13 @@ lol_config = { path = "crates/lol_config" }
 lol_core = { path = "crates/lol_core" }
 lol_core_render = { path = "crates/lol_core_render" }
 lol_loader = { path = "crates/lol_loader" }
-lol_particle = { path = "crates/lol_particle" }
 
 bevy = { version = "0.17.2", features = ["dds", "bevy_picking", "serialize", "shader_format_glsl", "bevy_debug_stepping", "hotpatching"] }
 bincode = "1.3"
 bitflags = "2.9.1"
+crossbeam-channel = "0.5"
 heck = "0.5.0"
+image = { version = "0.25", features = ["png"] }
 nom = "8.0.0"
 rand = "0.9.2"
 regex = "1"
@@ -63,3 +61,4 @@ rocket_cors = "0.6"
 serde_json = "1.0.145"
 walkdir = "2.5.0"
 ron = "0.8"
+

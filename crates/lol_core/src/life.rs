@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
 
-use crate::core::damage::EventDamageCreate;
+use crate::damage::EventDamageCreate;
 
 #[derive(Default)]
 pub struct PluginLife;

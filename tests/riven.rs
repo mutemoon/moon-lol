@@ -15,7 +15,7 @@ use lol_config::grid::{ConfigNavigationGrid, ConfigNavigationGridCell};
 use lol_config::prop::LoadHashKeyTrait;
 use lol_core::team::Team;
 use lol_core_render::camera::PluginCamera;
-use lol_particle::PluginParticle;
+use lol_core_render::particle::PluginParticle;
 use moon_lol::buffs::shield_white::BuffShieldWhite;
 use moon_lol::core::action::{Action, CommandAction};
 use moon_lol::core::animation::PluginAnimation;

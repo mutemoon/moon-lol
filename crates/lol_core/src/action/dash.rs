@@ -3,11 +3,11 @@ use std::collections::HashSet;
 use bevy::prelude::*;
 use league_core::extract::SpellObject;
 use lol_config::prop::{HashKey, LoadHashKeyTrait};
-use lol_core::team::Team;
+use crate::team::Team;
 
-use crate::core::action::damage::{TargetDamage, TargetFilter};
-use crate::core::damage::{CommandDamageCreate, Damage};
-use crate::core::skill::{get_skill_value, Skill, Skills};
+use crate::action::damage::{TargetDamage, TargetFilter};
+use crate::damage::{CommandDamageCreate, Damage};
+use crate::skill::{get_skill_value, Skill, Skills};
 use crate::entities::champion::Champion;
 use crate::entities::minion::Minion;
 
@@ -41,7 +41,7 @@ pub struct DashDamageComponent {
 }
 
 pub fn on_dash_end(
-    trigger: On<crate::core::movement::EventMovementEnd>,
+    trigger: On<crate::movement::EventMovementEnd>,
     mut commands: Commands,
     q: Query<&DashDamageComponent>,
 ) {

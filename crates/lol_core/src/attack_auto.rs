@@ -1,10 +1,10 @@
 use bevy::prelude::*;
 
-use crate::core::attack::{
+use crate::attack::{
     Attack, AttackState, AttackStatus, CommandAttackStart, CommandAttackStop,
 };
-use crate::core::base::bounding::Bounding;
-use crate::core::run::{CommandRunStart, CommandRunStop, RunTarget};
+use crate::base::bounding::Bounding;
+use crate::run::{CommandRunStart, CommandRunStop, RunTarget};
 
 #[derive(Default)]
 pub struct PluginAttackAuto;

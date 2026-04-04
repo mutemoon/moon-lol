@@ -4012,7 +4012,6 @@ dependencies = [
  "league_property",
  "league_utils",
  "lol_config",
- "lol_core",
  "nom 8.0.0",
  "regex",
  "serde",
@@ -4156,7 +4155,6 @@ dependencies = [
  "league_file",
  "league_property",
  "league_utils",
- "lol_core",
  "ron 0.8.1",
  "serde",
 ]
@@ -4166,7 +4164,12 @@ name = "lol_core"
 version = "0.1.0"
 dependencies = [
  "bevy",
+ "league_core",
+ "league_file",
  "league_utils",
+ "lol_config",
+ "lol_loader",
+ "rand 0.9.2",
  "serde",
 ]
 
@@ -4175,9 +4178,20 @@ name = "lol_core_render"
 version = "0.1.0"
 dependencies = [
  "bevy",
+ "bincode",
+ "crossbeam-channel",
+ "image",
+ "league_core",
+ "league_file",
+ "league_loader",
+ "league_to_lol",
  "league_utils",
+ "lol_config",
  "lol_core",
+ "rand 0.9.2",
+ "regex",
  "serde",
+ "thiserror 2.0.18",
 ]
 
 [[package]]
@@ -4192,26 +4206,10 @@ dependencies = [
  "league_to_lol",
  "league_utils",
  "lol_config",
- "lol_core",
- "lol_core_render",
  "nom 8.0.0",
  "regex",
  "serde",
  "thiserror 2.0.18",
-]
-
-[[package]]
-name = "lol_particle"
-version = "0.1.0"
-dependencies = [
- "bevy",
- "league_core",
- "league_utils",
- "lol_config",
- "lol_core",
- "lol_core_render",
- "rand 0.9.2",
- "serde",
 ]
 
 [[package]]
@@ -4359,8 +4357,6 @@ version = "0.1.0"
 dependencies = [
  "bevy",
  "bevy_egui",
- "crossbeam-channel",
- "image",
  "league_core",
  "league_file",
  "league_loader",
@@ -4371,7 +4367,6 @@ dependencies = [
  "lol_core",
  "lol_core_render",
  "lol_loader",
- "lol_particle",
  "rand 0.9.2",
  "rayon",
  "rocket",

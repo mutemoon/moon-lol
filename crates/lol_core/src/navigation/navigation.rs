@@ -6,11 +6,11 @@ use bevy::prelude::*;
 use bevy::render::render_resource::Face;
 use lol_config::grid::{ConfigNavigationGrid, CELL_COST_IMPASSABLE};
 
-use crate::core::base::bounding::Bounding;
-use crate::core::character::Character;
-use crate::core::map::MapState;
-use crate::core::navigation::astar::find_grid_path_with_result;
-use crate::core::navigation::grid::{update_load_grid, ResourceGrid};
+use crate::base::bounding::Bounding;
+use crate::character::Character;
+use crate::map::MapState;
+use crate::navigation::astar::find_grid_path_with_result;
+use crate::navigation::grid::{update_load_grid, ResourceGrid};
 
 #[derive(Default)]
 pub struct PluginNavigaton;

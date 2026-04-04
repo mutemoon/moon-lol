@@ -1,10 +1,10 @@
 use std::collections::HashMap;
 
 use bevy::prelude::*;
-use lol_core::team::Team;
+use crate::team::Team;
 
-use crate::core::damage::{DamageType, EventDamageCreate};
-use crate::core::life::EventDead;
+use crate::damage::{DamageType, EventDamageCreate};
+use crate::life::EventDead;
 
 #[derive(Default)]
 pub struct PluginAggro;
@@ -140,8 +140,8 @@ mod tests {
     use bevy::time::TimeUpdateStrategy;
 
     use super::*;
-    use crate::core::damage::{DamageResult, DamageType, EventDamageCreate};
-    use crate::core::life::EventDead;
+    use crate::damage::{DamageResult, DamageType, EventDamageCreate};
+    use crate::life::EventDead;
 
     // 用于测试中捕获系统选中的目标
     #[derive(Resource, Default)]

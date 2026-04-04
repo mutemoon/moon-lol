@@ -5,11 +5,11 @@ use league_core::extract::SpellObject;
 use lol_config::prop::{HashKey, LoadHashKeyTrait};
 use serde::{Deserialize, Serialize};
 
-use crate::core::base::buff::Buffs;
-use crate::core::damage::{CommandDamageCreate, Damage, DamageType};
-use crate::core::life::EventDead;
-use crate::core::missile::CommandMissileCreate;
-use crate::core::rotate::CommandRotate;
+use crate::base::buff::Buffs;
+use crate::damage::{CommandDamageCreate, Damage, DamageType};
+use crate::life::EventDead;
+use crate::missile::CommandMissileCreate;
+use crate::rotate::CommandRotate;
 
 #[derive(Default)]
 pub struct PluginAttack;

@@ -1,10 +1,10 @@
 use bevy::prelude::*;
-use lol_core::utils::{direction_to_angle, lerp_angle_with_velocity};
+use crate::utils::{direction_to_angle, lerp_angle_with_velocity};
 
-use crate::core::base::pipeline::{
+use crate::base::pipeline::{
     ArbitrationPipelinePlugin, FinalDecision, LastDecision, PipelineStages, RequestBuffer,
 };
-use crate::core::movement::MovementPipeline;
+use crate::movement::MovementPipeline;
 
 // 默认角速度：每秒3弧度（约172度/秒）
 const DEFAULT_ANGULAR_VELOCITY: f32 = 20.0;

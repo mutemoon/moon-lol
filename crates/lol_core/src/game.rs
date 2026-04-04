@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use lol_config::game::ConfigGame;
 
-use crate::core::character::CommandCharacterSpawn;
+use crate::character::CommandCharacterSpawn;
 
 #[derive(SystemSet, Debug, Clone, PartialEq, Eq, Hash)]
 pub enum GameStartupSystems {

@@ -2,21 +2,15 @@ use std::fmt::Debug;
 use std::ops::Deref;
 
 use bevy::prelude::*;
-use league_core::extract::{AnimationGraphData, CharacterRecord, SkinCharacterDataProperties};
-use league_file::skeleton::LeagueSkeleton;
+use league_core::extract::CharacterRecord;
 use lol_config::prop::HashKey;
-use lol_core_render::skin::LeagueSkinMesh;
 
 #[derive(Default)]
 pub struct PluginResourceLoading;
 
 impl Plugin for PluginResourceLoading {
     fn build(&self, app: &mut App) {
-        app.register_loading::<HashKey<CharacterRecord>>()
-            .register_loading::<HashKey<AnimationGraphData>>()
-            .register_loading::<HashKey<SkinCharacterDataProperties>>()
-            .register_loading::<Handle<LeagueSkeleton>>()
-            .register_loading::<(Handle<LeagueSkinMesh>, Handle<StandardMaterial>)>();
+        app.register_loading::<HashKey<CharacterRecord>>();
     }
 }
 

@@ -1,18 +1,18 @@
+use crate::team::Team;
 use bevy::prelude::*;
 use league_core::extract::CharacterRecord;
 use lol_config::prop::{HashKey, LoadHashKeyTrait};
-use lol_core::team::Team;
 
-use crate::core::attack::Attack;
-use crate::core::base::ability_resource::{AbilityResource, AbilityResourceType};
-use crate::core::base::bounding::Bounding;
-use crate::core::base::level::{EventLevelUp, Level};
-use crate::core::damage::{Armor, Damage};
-use crate::core::life::{EventDead, Health};
-use crate::core::movement::Movement;
-use crate::core::resource::loading::Loading;
-use crate::core::resource::prop_bin::{CommandLoadPropBin, PropPath};
-use crate::core::skin::skin::CommandSkinSpawn;
+use crate::attack::Attack;
+use crate::base::ability_resource::{AbilityResource, AbilityResourceType};
+use crate::base::bounding::Bounding;
+use crate::base::level::{EventLevelUp, Level};
+use crate::damage::{Armor, Damage};
+use crate::life::{EventDead, Health};
+use crate::movement::Movement;
+use crate::render_cmd::CommandSkinSpawn;
+use crate::resource::loading::Loading;
+use crate::resource::prop_bin::{CommandLoadPropBin, PropPath};
 
 #[derive(Default)]
 pub struct PluginCharacter;

@@ -1,4 +1,13 @@
+pub mod animation;
 pub mod camera;
+pub mod controller;
+pub mod error;
+pub mod loaders;
+pub mod map;
+pub mod particle;
+pub mod resource;
 pub mod resource_cache;
+pub mod shader;
 pub mod skin;
-pub mod utils;
+pub mod test_render;
+pub mod ui;

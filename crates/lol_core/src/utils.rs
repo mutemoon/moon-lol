@@ -1,7 +1,9 @@
 use std::f32::consts::PI;
 
+use bevy::asset::{Asset, Handle};
 use bevy::prelude::*;
 use league_utils::hash_wad;
+use serde::{Deserialize, Serialize};
 
 pub fn rotate_to_direction(transform: &mut Transform, direction: Vec2) {
     transform.rotation = Quat::from_rotation_y(direction_to_angle(direction));
@@ -100,5 +102,31 @@ impl Clone for HashPath {
 impl PartialEq for HashPath {
     fn eq(&self, other: &Self) -> bool {
         self.hash == other.hash && self.ext == other.ext
+    }
+}
+
+pub trait AssetServerLoadLeague {
+    fn load_league<A: Asset>(&self, path: impl Into<HashPath>) -> Handle<A>;
+
+    fn load_league_labeled<'a, A: Asset>(
+        &self,
+        path: impl Into<HashPath>,
+        label: &str,
+    ) -> Handle<A>;
+}
+
+impl AssetServerLoadLeague for AssetServer {
+    fn load_league<A: Asset>(&self, path: impl Into<HashPath>) -> Handle<A> {
+        let path = path.into();
+        self.load(format!("data/{:x}.{}", path.hash, path.ext))
+    }
+
+    fn load_league_labeled<'a, A: Asset>(
+        &self,
+        path: impl Into<HashPath>,
+        label: &str,
+    ) -> Handle<A> {
+        let path = path.into();
+        self.load(format!("data/{:x}.{}#{label}", path.hash, path.ext))
     }
 }

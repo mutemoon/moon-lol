@@ -3,8 +3,8 @@ use std::collections::{HashMap, HashSet};
 use bevy::prelude::*;
 use lol_config::prop::LeagueProperties;
 use lol_config::register::ASSET_LOADER_REGISTRY;
-use lol_core::utils::HashPath;
-use lol_core_render::utils::AssetServerLoadLeague;
+use crate::utils::HashPath;
+use crate::utils::AssetServerLoadLeague;
 
 #[derive(Default)]
 pub struct PluginResourcePropBin;

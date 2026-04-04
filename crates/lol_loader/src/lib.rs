@@ -1,10 +1,4 @@
-pub mod animation;
 pub mod error;
-pub mod image;
 pub mod mapgeo;
-pub mod mesh;
-pub mod mesh_static;
 pub mod navgrid;
 pub mod property;
-pub mod shader;
-pub mod skeleton;
