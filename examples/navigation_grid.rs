@@ -3,12 +3,12 @@ use bevy::render::render_resource::Face;
 use bevy_egui::{egui, EguiContexts, EguiPlugin, EguiPrimaryContextPass};
 use league_core::grid::VisionPathingFlags;
 use lol_config::grid::ConfigNavigationGrid;
+use lol_core::entities::barrack::PluginBarrack;
+use lol_core::navigation::grid::ResourceGrid;
+use lol_core::navigation::navigation::NavigationDebug;
+use lol_core::resource::PluginResource;
 use lol_core_render::camera::CameraState;
-use moon_lol::core::map::{on_click_map, Map};
-use moon_lol::core::navigation::grid::ResourceGrid;
-use moon_lol::core::navigation::navigation::NavigationDebug;
-use moon_lol::core::resource::PluginResource;
-use moon_lol::entities::barrack::PluginBarrack;
+use lol_core_render::map::{on_click_map, Map};
 use moon_lol::PluginCore;
 
 fn main() {

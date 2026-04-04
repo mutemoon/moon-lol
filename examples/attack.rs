@@ -1,6 +1,6 @@
 use bevy::prelude::*;
-use moon_lol::core::resource::PluginResource;
-use moon_lol::entities::barrack::PluginBarrack;
+use lol_core::entities::barrack::PluginBarrack;
+use lol_core::resource::PluginResource;
 use moon_lol::PluginCore;
 
 fn main() {

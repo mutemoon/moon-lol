@@ -1,23 +1,11 @@
 use std::collections::HashMap;
-use std::fs::File;
-use std::io::Read;
 
-use bevy::ecs::component::ComponentCloneBehavior;
-use bevy::ecs::entity::{EntityHashMap, SceneEntityMapper};
-use bevy::ecs::relationship::RelationshipHookMode;
 use bevy::prelude::*;
-use bevy::scene::ron::{self};
 use league_core::extract::{AnimationGraphData, SkinCharacterDataProperties};
 use league_file::skeleton::LeagueSkeleton;
-use lol_config::game::{CharacterConfigsDeserializer, ConfigGame};
-use lol_config::grid::ConfigNavigationGrid;
-use lol_config::mapgeo::ConfigMapGeo;
 use lol_config::prop::HashKey;
-use lol_config::register::init_league_asset;
-use lol_config::shader::{ResourceShaderChunk, ResourceShaderPackage};
 use lol_core::resource::loading::RegisterLoadingExt;
 use lol_core::utils::AssetServerLoadLeague;
-use serde::de::DeserializeSeed;
 
 use crate::loaders::animation::LeagueLoaderAnimationClip;
 use crate::loaders::image::LeagueLoaderImage;

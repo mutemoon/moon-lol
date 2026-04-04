@@ -5,18 +5,18 @@ mod tests {
     use bevy::log::LogPlugin;
     use bevy::prelude::*;
     use bevy::time::TimeUpdateStrategy;
-    use moon_lol::core::action::PluginAction;
-    use moon_lol::core::attack::PluginAttack;
-    use moon_lol::core::attack_auto::PluginAttackAuto;
-    use moon_lol::core::character::PluginCharacter;
-    use moon_lol::core::damage::PluginDamage;
-    use moon_lol::core::life::PluginLife;
-    use moon_lol::core::map::MinionPath;
-    use moon_lol::core::movement::PluginMovement;
-    use moon_lol::core::navigation::navigation::PluginNavigaton;
-    use moon_lol::core::resource::PluginResource;
-    use moon_lol::entities::barrack::PluginBarrack;
-    use moon_lol::entities::minion::PluginMinion;
+    use lol_core::action::PluginAction;
+    use lol_core::attack::PluginAttack;
+    use lol_core::attack_auto::PluginAttackAuto;
+    use lol_core::character::PluginCharacter;
+    use lol_core::damage::PluginDamage;
+    use lol_core::entities::barrack::PluginBarrack;
+    use lol_core::entities::minion::PluginMinion;
+    use lol_core::life::PluginLife;
+    use lol_core::map::MinionPath;
+    use lol_core::movement::PluginMovement;
+    use lol_core::navigation::navigation::PluginNavigaton;
+    use lol_core::resource::PluginResource;
 
     #[test]
     fn test_complete_attack_cycle() {

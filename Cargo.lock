@@ -4357,6 +4357,8 @@ version = "0.1.0"
 dependencies = [
  "bevy",
  "bevy_egui",
+ "crossbeam-channel",
+ "image",
  "league_core",
  "league_file",
  "league_loader",

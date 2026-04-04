@@ -8,18 +8,18 @@ use league_core::extract::{
     EnumGameCalculation, GameCalculation, SpellDataResource, SpellEffectAmount, SpellObject,
 };
 use lol_config::prop::LoadHashKeyTrait;
-use lol_core::team::Team;
-use moon_lol::core::action::damage::{DamageShape, TargetDamage, TargetFilter};
-use moon_lol::core::action::{Action, CommandAction, PluginAction};
-use moon_lol::core::base::ability_resource::{AbilityResource, AbilityResourceType};
-use moon_lol::core::base::level::Level;
-use moon_lol::core::cooldown::PluginCooldown;
-use moon_lol::core::damage::{DamageType, PluginDamage};
-use moon_lol::core::life::{Health, PluginLife};
-use moon_lol::core::skill::{
+use lol_core::action::damage::{DamageShape, TargetDamage, TargetFilter};
+use lol_core::action::{Action, CommandAction, PluginAction};
+use lol_core::base::ability_resource::{AbilityResource, AbilityResourceType};
+use lol_core::base::level::Level;
+use lol_core::cooldown::PluginCooldown;
+use lol_core::damage::{DamageType, PluginDamage};
+use lol_core::life::{Health, PluginLife};
+use lol_core::skill::{
     skill_damage, CoolDown, EventSkillCast, PluginSkill, Skill, SkillCastLog, SkillCastResult,
     SkillOf, SkillPoints, SkillSlot, Skills,
 };
+use lol_core::team::Team;
 
 const TEST_FPS: f32 = 30.0;
 const SPELL_KEY: u32 = 0x5001;

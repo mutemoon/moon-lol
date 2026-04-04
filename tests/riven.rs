@@ -13,37 +13,37 @@ use league_core::grid::{
 use league_utils::hash_bin;
 use lol_config::grid::{ConfigNavigationGrid, ConfigNavigationGridCell};
 use lol_config::prop::LoadHashKeyTrait;
-use lol_core::team::Team;
-use lol_core_render::camera::PluginCamera;
-use lol_core_render::particle::PluginParticle;
-use moon_lol::buffs::shield_white::BuffShieldWhite;
-use moon_lol::core::action::{Action, CommandAction};
-use moon_lol::core::animation::PluginAnimation;
-use moon_lol::core::base::ability_resource::{AbilityResource, AbilityResourceType};
-use moon_lol::core::base::buff::Buffs;
-use moon_lol::core::base::level::Level;
-use moon_lol::core::damage::{Armor, CommandDamageCreate, Damage, DamageType};
-use moon_lol::core::life::Health;
-use moon_lol::core::movement::{Movement, MovementState};
-use moon_lol::core::navigation::grid::ResourceGrid;
-use moon_lol::core::navigation::navigation::{NavigationDebug, NavigationStats, PluginNavigaton};
-use moon_lol::core::resource::PluginResource;
-use moon_lol::core::skill::{
+use lol_core::action::{Action, CommandAction};
+use lol_core::base::ability_resource::{AbilityResource, AbilityResourceType};
+use lol_core::base::buff::Buffs;
+use lol_core::base::level::Level;
+use lol_core::buffs::shield_white::BuffShieldWhite;
+use lol_core::damage::{Armor, CommandDamageCreate, Damage, DamageType};
+use lol_core::entities::barrack::PluginBarrack;
+use lol_core::entities::champion::Champion;
+use lol_core::entities::champions::riven::Riven;
+use lol_core::entities::minion::PluginMinion;
+use lol_core::entities::shpere::PluginDebugSphere;
+use lol_core::entities::turret::PluginTurret;
+use lol_core::life::Health;
+use lol_core::movement::{Movement, MovementState};
+use lol_core::navigation::grid::ResourceGrid;
+use lol_core::navigation::navigation::{NavigationDebug, NavigationStats, PluginNavigaton};
+use lol_core::resource::PluginResource;
+use lol_core::skill::{
     get_skill_value, CoolDown, Skill, SkillCooldownMode, SkillOf, SkillPoints, SkillRecastWindow,
     SkillSlot, Skills,
 };
-use moon_lol::core::skin::PluginSkin;
-use moon_lol::core::test_render::{
+use lol_core::team::Team;
+use lol_core_render::animation::PluginAnimation;
+use lol_core_render::camera::PluginCamera;
+use lol_core_render::particle::PluginParticle;
+use lol_core_render::skin::PluginSkin;
+use lol_core_render::test_render::{
     attach_skill_test_actor, PluginSkillTestRender, SkillTestActor, SkillTestRenderConfig,
     SkillTestVideoFormat, SkillTestVideoOutput,
 };
-use moon_lol::entities::barrack::PluginBarrack;
-use moon_lol::entities::champion::Champion;
-use moon_lol::entities::champions::riven::Riven;
-use moon_lol::entities::minion::PluginMinion;
-use moon_lol::entities::shpere::PluginDebugSphere;
-use moon_lol::entities::turret::PluginTurret;
-use moon_lol::ui::PluginUI;
+use lol_core_render::ui::PluginUI;
 use moon_lol::PluginCore;
 
 const RIVEN_Q_KEY: &str = "Characters/Riven/Spells/RivenTriCleaveAbility/RivenTriCleave";
@@ -471,7 +471,7 @@ impl RivenHarness {
     }
 
     fn print_skill_logs(&self) {
-        use moon_lol::core::skill::SkillCastLog;
+        use lol_core::skill::SkillCastLog;
         if let Some(log) = self.app.world().get_resource::<SkillCastLog>() {
             for record in &log.0 {
                 println!("Skill Cast Record: {:?}", record);

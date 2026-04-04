@@ -1,11 +1,11 @@
 #[cfg(test)]
 mod tests {
     use bevy::prelude::*;
-    use moon_lol::core::attack::{
+    use lol_core::attack::{
         Attack, AttackState, CommandAttackReset, CommandAttackStart, CommandAttackStop,
         PluginAttack,
     };
-    use moon_lol::core::config::UNCANCELLABLE_GRACE_PERIOD;
+    use lol_core::config::UNCANCELLABLE_GRACE_PERIOD;
 
     // ===== 测试常量定义 =====
     const TEST_FPS: f32 = 30.0;
