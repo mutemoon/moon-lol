@@ -29,8 +29,9 @@ pub struct PluginRiven;
 
 impl Plugin for PluginRiven {
     fn build(&self, app: &mut App) {
-        app.add_systems(FixedUpdate, add_skills);
+        app.add_systems(FixedUpdate, (add_skills,));
         app.add_observer(on_riven_skill_cast);
+        app.add_observer(passive::on_damage_create_trigger_bonus);
     }
 }
 

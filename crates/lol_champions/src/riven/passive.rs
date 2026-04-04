@@ -8,21 +8,12 @@ use crate::riven::Riven;
 /// 锐雯被动额外伤害倍率
 const RIVEN_PASSIVE_BONUS_RATIO: f32 = 0.2;
 
-#[derive(Default)]
-pub struct PluginRivenPassive;
-
-impl Plugin for PluginRivenPassive {
-    fn build(&self, app: &mut App) {
-        app.add_observer(on_damage_create_trigger_bonus);
-    }
-}
-
 #[derive(Component, Clone, Debug, Default)]
 #[require(Buff = Buff { name: "RivenPassive" })]
 pub struct BuffRivenPassive;
 
 /// 当锐雯造成伤害时，如果有被动层数，触发额外伤害并消耗一层
-fn on_damage_create_trigger_bonus(
+pub fn on_damage_create_trigger_bonus(
     trigger: On<EventAttackEnd>,
     mut commands: Commands,
     q_riven: Query<&Damage, With<Riven>>,

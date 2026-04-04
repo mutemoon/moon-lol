@@ -30,13 +30,12 @@ impl Plugin for PluginFioraPassive {
         app.init_resource::<FioraVitalLastDirection>();
         app.add_systems(FixedUpdate, update_add_vital);
         app.add_systems(FixedUpdate, update_remove_vital);
-        app.add_observer(on_damage_create);
     }
 }
 
 #[derive(Resource, Default)]
-struct FioraVitalLastDirection {
-    entity_to_last_direction: HashMap<Entity, Direction>,
+pub struct FioraVitalLastDirection {
+    pub entity_to_last_direction: HashMap<Entity, Direction>,
 }
 
 #[derive(Component, Default)]
@@ -78,7 +77,7 @@ pub fn get_particle_hash(direction: &Direction, postfix: &str, suffix: &str) -> 
     hash_bin(&format!("{}{}{}", postfix, base_name, suffix))
 }
 
-fn update_add_vital(
+pub fn update_add_vital(
     mut commands: Commands,
     q_target_without_vital: Query<(Entity, &Transform, &Team), (With<Champion>, Without<Vital>)>,
     q_skill_of_with_ability: Query<&PassiveSkillOf, With<AbilityFioraPassive>>,
@@ -163,7 +162,7 @@ fn update_add_vital(
     }
 }
 
-fn update_remove_vital(
+pub fn update_remove_vital(
     mut commands: Commands,
     mut q_target_with_vital: Query<
         (Entity, &Transform, &Team, &mut Vital),
@@ -235,7 +234,7 @@ fn update_remove_vital(
 }
 
 /// 监听伤害事件并创建伤害数字
-fn on_damage_create(
+pub fn on_passive_damage_create(
     trigger: On<EventDamageCreate>,
     mut commands: Commands,
     q_target_with_vital: Query<(&GlobalTransform, &Team, &Health, &Vital)>,

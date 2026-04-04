@@ -28,8 +28,20 @@ pub struct PluginFiora;
 
 impl Plugin for PluginFiora {
     fn build(&self, app: &mut App) {
-        app.add_systems(FixedUpdate, add_skills);
+        app.init_resource::<passive::FioraVitalLastDirection>();
+        app.add_systems(
+            FixedUpdate,
+            (
+                add_skills,
+                passive::update_add_vital,
+                passive::update_remove_vital,
+                r::fixed_update,
+            ),
+        );
         app.add_observer(on_fiora_skill_cast);
+        app.add_observer(passive::on_passive_damage_create);
+        app.add_observer(e::on_event_attack_end);
+        app.add_observer(r::on_r_damage_create);
     }
 }
 

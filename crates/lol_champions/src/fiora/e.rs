@@ -2,15 +2,6 @@ use bevy::prelude::*;
 use lol_core::attack::EventAttackEnd;
 use lol_core::base::buff::{Buff, Buffs};
 
-#[derive(Default)]
-pub struct PluginFioraE;
-
-impl Plugin for PluginFioraE {
-    fn build(&self, app: &mut App) {
-        app.add_observer(on_event_attack_end);
-    }
-}
-
 #[derive(Component, Clone, Debug)]
 #[require(Buff = Buff { name: "FioraE" })]
 pub struct BuffFioraE {
@@ -23,7 +14,7 @@ impl Default for BuffFioraE {
     }
 }
 
-fn on_event_attack_end(
+pub fn on_event_attack_end(
     trigger: On<EventAttackEnd>,
     mut commands: Commands,
     q_buffs: Query<&Buffs>,

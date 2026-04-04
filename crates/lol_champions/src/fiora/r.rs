@@ -14,16 +14,6 @@ const VITAL_R_TIMEOUT: f32 = 1.5;
 const FIORA_R_ACTIVE_DURATION: f32 = 0.5;
 const FIORA_R_DURATION: f32 = 7.;
 
-#[derive(Default)]
-pub struct PluginFioraR;
-
-impl Plugin for PluginFioraR {
-    fn build(&self, app: &mut App) {
-        app.add_systems(FixedUpdate, fixed_update);
-        app.add_observer(on_damage_create);
-    }
-}
-
 #[derive(Component, Debug, Clone)]
 #[require(Buff = Buff { name: "FioraR" })]
 pub struct BuffFioraR {
@@ -55,7 +45,7 @@ impl Default for BuffFioraR {
     }
 }
 
-fn fixed_update(
+pub fn fixed_update(
     mut commands: Commands,
     mut q_buff_fiora_r: Query<(Entity, &BuffOf, &mut BuffFioraR)>,
     time: Res<Time<Fixed>>,
@@ -121,7 +111,7 @@ fn fixed_update(
 }
 
 /// 监听伤害事件并创建伤害数字
-fn on_damage_create(
+pub fn on_r_damage_create(
     trigger: On<EventDamageCreate>,
     mut commands: Commands,
     q_target_with_vital: Query<(&GlobalTransform, &Team, &Health)>,
