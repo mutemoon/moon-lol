@@ -9,10 +9,10 @@
             rotation: (0.0, 0.0, 0.0, 1.0),
             scale: (1.0, 1.0, 1.0),
         ),
-        "moon_lol::entities::champions::riven::Riven": (),
+        "lol_champions::champions::riven::Riven": (),
         "lol_core::team::Team": Order,
-        "moon_lol::core::camera::Focus": (),
-        "moon_lol::core::controller::Controller": (),
+        "lol_render::camera::Focus": (),
+        "lol_render::controller::Controller": (),
     },
     (
         skin_path: "Characters/Fiora/Skins/Skin22",
@@ -25,8 +25,8 @@
             scale: (1.0, 1.0, 1.0),
         ),
         "lol_core::team::Team": Chaos,
-        "moon_lol::entities::champion::Champion": (),
-        "moon_lol::core::life::Health": (
+        "lol_core::entities::champion::Champion": (),
+        "lol_core::life::Health": (
             value: 6000.0,
             max: 6000.0,
         ),
@@ -42,8 +42,8 @@
             scale: (1.0, 1.0, 1.0),
         ),
         "lol_core::team::Team": Chaos,
-        "moon_lol::entities::champion::Champion": (),
-        "moon_lol::core::life::Health": (
+        "lol_core::entities::champion::Champion": (),
+        "lol_core::life::Health": (
             value: 6000.0,
             max: 6000.0,
         ),
