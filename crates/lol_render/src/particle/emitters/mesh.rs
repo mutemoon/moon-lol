@@ -14,7 +14,7 @@ use crate::particle::particle::mesh::{
 };
 use crate::particle::utils::create_black_pixel_texture;
 use crate::particle::ParticleId;
-use crate::resource_cache::ResourceCache;
+use crate::resource::ResourceCache;
 
 pub fn attach_mesh_visuals(
     commands: &mut Commands,

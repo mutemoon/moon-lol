@@ -17,7 +17,7 @@ use crate::particle::particle::distortion::{
     UniformsVertexDistortion,
 };
 use crate::particle::ParticleId;
-use crate::resource_cache::ResourceCache;
+use crate::resource::ResourceCache;
 
 pub fn attach_distortion_visuals(
     commands: &mut Commands,

@@ -15,7 +15,7 @@ use crate::particle::environment::unlit_decal::{
     ParticleMaterialUnlitDecal, UniformsPixelUnlitDecal, UniformsVertexUnlitDecal,
 };
 use crate::particle::ParticleId;
-use crate::resource_cache::ResourceCache;
+use crate::resource::ResourceCache;
 
 pub fn attach_unlit_decal_visuals(
     commands: &mut Commands,

@@ -12,9 +12,9 @@ use crate::controller::Controller;
 use crate::skin::mesh::get_standard;
 
 #[derive(Default)]
-pub struct PluginMapRender;
+pub struct PluginRenderMap;
 
-impl Plugin for PluginMapRender {
+impl Plugin for PluginRenderMap {
     fn build(&self, app: &mut App) {
         app.add_plugins(MeshPickingPlugin);
 

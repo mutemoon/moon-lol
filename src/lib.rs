@@ -151,7 +151,9 @@ use lol_core::skill::PluginSkill;
 use lol_render::animation::PluginAnimation;
 use lol_render::camera::PluginCamera;
 use lol_render::controller::PluginController;
+use lol_render::map::PluginRenderMap;
 use lol_render::particle::PluginParticle;
+use lol_render::resource::PluginRenderResource;
 use lol_render::skin::PluginSkin;
 use lol_render::ui::PluginUI;
 
@@ -313,5 +315,8 @@ plugin_group! {
         :PluginSkin,
         :PluginState,
         :PluginUI,
+
+        :PluginRenderMap,
+        :PluginRenderResource,
     }
 }

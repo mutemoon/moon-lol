@@ -41,7 +41,7 @@ use lol_core::skill::{SkillPoints, Skills};
 use crate::animation::PluginAnimation;
 use crate::camera::PluginCamera;
 use crate::particle::PluginParticle;
-use crate::resource_cache::ResourceCache;
+use crate::resource::ResourceCache;
 use crate::shader::ResourceShaderHandles;
 use crate::skin::{LeagueSkinMesh, PluginSkin};
 
