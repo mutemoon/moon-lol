@@ -5,8 +5,9 @@ use league_core::extract::StaticMaterialDef;
 use lol_config::mapgeo::ConfigMapGeo;
 use lol_config::prop::LoadHashKeyTrait;
 use lol_core::action::{Action, CommandAction};
-use lol_core::map::{MapGeometry, MapState};
+use lol_core::map::{MapGeometry, MapName, MapState};
 use lol_core::resource::loading::Loading;
+use lol_core::utils::AssetServerLoadLeague;
 
 use crate::controller::Controller;
 use crate::skin::mesh::get_standard;
@@ -18,17 +19,28 @@ impl Plugin for PluginRenderMap {
     fn build(&self, app: &mut App) {
         app.add_plugins(MeshPickingPlugin);
 
+        app.add_systems(Startup, startup_load_map_geo);
         app.add_systems(
             Update,
-            (update_spawn_map_geometry.run_if(
+            update_spawn_map_geometry.run_if(
                 resource_exists::<Loading<Handle<ConfigMapGeo>>>.and(in_state(MapState::Loaded)),
-            ),),
+            ),
         );
     }
 }
 
 #[derive(Component)]
 pub struct Map;
+
+fn startup_load_map_geo(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    res_map_name: Res<MapName>,
+) {
+    commands.insert_resource(Loading::new(asset_server.load_league::<ConfigMapGeo>(
+        &format!("data/{}.mapgeo", &res_map_name.get_materials_path()),
+    )));
+}
 
 fn update_spawn_map_geometry(
     mut commands: Commands,

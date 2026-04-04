@@ -4,16 +4,13 @@ use std::f32;
 use bevy::math::bounding::Aabb3d;
 use bevy::prelude::*;
 use league_core::extract::{EnumMap, MapContainer, MapPlaceableContainer};
-use lol_config::mapgeo::ConfigMapGeo;
 use lol_config::prop::{HashKey, LoadHashKeyTrait};
 
 use crate::character::CommandCharacterSpawn;
 use crate::entities::turret::Turret;
 use crate::lane::Lane;
-use crate::resource::loading::Loading;
 use crate::resource::prop_bin::{CommandLoadPropBin, PropPath};
 use crate::team::Team;
-use crate::utils::AssetServerLoadLeague;
 
 pub const MAP_WIDTH: f32 = 14400.0;
 pub const MAP_HEIGHT: f32 = 14765.0;
@@ -71,7 +68,6 @@ pub struct MinionPath(pub HashMap<Lane, Vec<Vec2>>);
 
 fn startup_load_map_geometry(
     mut commands: Commands,
-    res_asset_server: Res<AssetServer>,
     res_map_name: Res<MapName>,
 ) {
     let paths = vec![
@@ -83,10 +79,6 @@ fn startup_load_map_geometry(
         path: PropPath::Path(paths),
         label: None,
     });
-
-    commands.insert_resource(Loading::new(res_asset_server.load_league::<ConfigMapGeo>(
-        &format!("data/{}.mapgeo", &res_map_name.get_materials_path()),
-    )));
 }
 
 fn update_spawn_map_character(
