@@ -66,10 +66,7 @@ impl MapName {
 #[derive(Resource, Default)]
 pub struct MinionPath(pub HashMap<Lane, Vec<Vec2>>);
 
-fn startup_load_map_geometry(
-    mut commands: Commands,
-    res_map_name: Res<MapName>,
-) {
+fn startup_load_map_geometry(mut commands: Commands, res_map_name: Res<MapName>) {
     let paths = vec![
         format!("data/{}.materials.bin", &res_map_name.get_materials_path()),
         "data/maps/shipping/map11/map11.bin".to_string(),

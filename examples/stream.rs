@@ -21,7 +21,7 @@ use bevy::window::ExitCondition;
 use bevy::winit::WinitPlugin;
 use crossbeam_channel::{Receiver, Sender};
 use image::codecs::jpeg::JpegEncoder;
-use lol_champions::buffs::fiora_passive::Vital;
+use lol_champions::fiora::passive::Vital;
 use lol_core::action::{Action, CommandAction};
 use lol_core::attack::AttackState;
 use lol_core::entities::barrack::PluginBarrack;

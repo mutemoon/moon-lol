@@ -3,7 +3,7 @@ use std::time::Duration;
 
 use bevy::prelude::*;
 use bevy::time::TimeUpdateStrategy;
-use lol_champions::champions::fiora::Fiora;
+use lol_champions::fiora::Fiora;
 use lol_core::action::Action;
 use lol_core::entities::barrack::PluginBarrack;
 use lol_core::entities::minion::PluginMinion;

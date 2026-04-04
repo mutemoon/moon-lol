@@ -11,7 +11,7 @@ use league_core::grid::{
     UnknownSRXFlags, VisionPathingFlags,
 };
 use league_utils::hash_bin;
-use lol_champions::champions::riven::Riven;
+use lol_champions::riven::Riven;
 use lol_config::grid::{ConfigNavigationGrid, ConfigNavigationGridCell};
 use lol_config::prop::LoadHashKeyTrait;
 use lol_core::action::{Action, CommandAction};

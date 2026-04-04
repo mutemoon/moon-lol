@@ -11,7 +11,7 @@
         ),
         "lol_core::team::Team": Order,
         "lol_core::damage::Damage": (100.0),
-        "lol_champions::champions::hwei::Hwei": (),
+        "lol_champions::hwei::Hwei": (),
         "lol_render::controller::Controller": (),
         "lol_render::camera::Focus": (),
     },
