@@ -22,7 +22,7 @@ fn main() {
         root_dir,
         vec![
             "DATA/FINAL/UI.wad.client",
-            "DATA/FINAL/UI.zh_MY.wad.client",
+            "DATA/FINAL/UI.zh_CN.wad.client",
             "DATA/FINAL/Maps/Shipping/Map11.wad.client",
             "DATA/FINAL/Champions/Ziggs.wad.client",
             "DATA/FINAL/Champions/Zac.wad.client",
