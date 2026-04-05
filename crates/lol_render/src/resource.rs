@@ -21,9 +21,6 @@ pub struct PluginRenderResource;
 
 impl Plugin for PluginRenderResource {
     fn build(&self, app: &mut App) {
-        app.init_asset::<LeagueSkinMesh>();
-        app.init_asset::<LeagueSkeleton>();
-
         app.init_asset_loader::<LeagueLoaderImage>();
         app.init_asset_loader::<LeagueLoaderMesh>();
         app.init_asset_loader::<LeagueLoaderSkeleton>();

@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use league_file::skeleton::LeagueSkeleton;
 
 #[derive(Asset, TypePath)]
 pub struct LeagueSkinMesh {
@@ -23,6 +24,9 @@ pub struct PluginSkin;
 
 impl Plugin for PluginSkin {
     fn build(&self, app: &mut App) {
+        app.init_asset::<LeagueSkinMesh>();
+        app.init_asset::<LeagueSkeleton>();
+
         app.add_observer(on_command_character_particle_despawn);
         app.add_observer(on_command_character_particle_spawn);
         app.add_observer(on_command_skin_animation_spawn);

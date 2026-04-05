@@ -43,7 +43,7 @@ lol_loader = { path = "crates/lol_loader" }
 lol_champions = { path = "crates/lol_champions" }
 
 
-bevy = { version = "0.18.1", features = ["dds", "bevy_picking", "serialize", "shader_format_glsl", "bevy_debug_stepping", "hotpatching"] }
+bevy = { version = "0.18.1", features = ["dds", "bevy_picking", "serialize", "bevy_debug_stepping", "hotpatching"] }
 bincode = "1.3"
 bitflags = "2.9.1"
 crossbeam-channel = "0.5"

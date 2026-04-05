@@ -30,7 +30,7 @@ impl Plugin for PluginRender {
         app.add_plugins(PluginCamera);
         app.add_plugins(PluginController);
         app.add_plugins(PluginRenderMap);
-        app.add_plugins(PluginParticle);
+        // app.add_plugins(PluginParticle);
         app.add_plugins(PluginRenderResource);
         app.add_plugins(PluginSkin);
         app.add_plugins(PluginUI);
