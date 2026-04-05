@@ -1,11 +1,12 @@
 use bevy::asset::{AssetLoader, LoadContext};
 use bevy::prelude::Mesh;
+use bevy::reflect::TypePath;
 use league_file::mesh_static::LeagueMeshStatic;
 use league_to_lol::mesh_static::mesh_static_to_bevy_mesh;
 
 use crate::error::Error;
 
-#[derive(Default)]
+#[derive(Default, TypePath)]
 pub struct LeagueLoaderMeshStatic;
 
 impl AssetLoader for LeagueLoaderMeshStatic {

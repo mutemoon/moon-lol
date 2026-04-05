@@ -1,13 +1,14 @@
 use std::collections::HashMap;
 
 use bevy::asset::{AssetLoader, LoadContext};
+use bevy::reflect::TypePath;
 use league_property::prop::PropFile;
 use lol_base::prop::LeagueProperties;
 use lol_base::register::ASSET_LOADER_REGISTRY;
 
 use super::error::Error;
 
-#[derive(Default)]
+#[derive(Default, TypePath)]
 pub struct LeagueLoaderProperty;
 
 impl AssetLoader for LeagueLoaderProperty {

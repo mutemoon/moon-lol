@@ -1,3 +1,4 @@
+use bevy::camera::RenderTarget;
 use bevy::prelude::*;
 use bevy::render::render_resource::{
     Extent3d, TextureDescriptor, TextureDimension, TextureFormat, TextureUsages,
@@ -44,10 +45,7 @@ fn setup(
         ))
         .with_child((
             Camera3d::default(),
-            Camera {
-                target: image_handle.clone().into(),
-                ..default()
-            },
+            RenderTarget::Image(image_handle.clone().into()),
         ));
 
     commands.spawn((

@@ -1,4 +1,4 @@
-use bevy::animation::{AnimationTarget, AnimationTargetId};
+use bevy::animation::{AnimatedBy, AnimationTargetId};
 use bevy::asset::uuid::Uuid;
 use bevy::mesh::skinning::{SkinnedMesh, SkinnedMeshInverseBindposes};
 use bevy::prelude::*;
@@ -70,10 +70,8 @@ pub fn update_skin_skeleton_spawn(
             let ent = commands
                 .spawn((
                     joint.transform,
-                    AnimationTarget {
-                        id: AnimationTargetId(Uuid::from_u128(joint.hash as u128)),
-                        player: entity,
-                    },
+                    AnimationTargetId(Uuid::from_u128(joint.hash as u128)),
+                    AnimatedBy(entity),
                 ))
                 .id();
             index_to_entity[i] = ent;

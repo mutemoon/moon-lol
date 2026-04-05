@@ -1,4 +1,4 @@
-use bevy::animation::AnimationTarget;
+use bevy::animation::AnimationTargetId;
 use bevy::color::palettes::tailwind::RED_500;
 use bevy::prelude::*;
 use league_core::extract::{EnumMovement, SpellObject};
@@ -80,7 +80,7 @@ fn on_command_missile_create(
     res_assets_spell_object: Res<Assets<SpellObject>>,
     q_global_transform: Query<&GlobalTransform>,
     q_children: Query<&Children>,
-    q_joint_target: Query<&AnimationTarget>,
+    q_joint_target: Query<&AnimationTargetId>,
 ) {
     let entity = trigger.event_target();
 
@@ -123,7 +123,7 @@ fn on_command_missile_create(
             let Ok(joint_target) = q_joint_target.get(child) else {
                 continue;
             };
-            let id = joint_target.id.0.as_u128();
+            let id = joint_target.0.as_u128();
             if hash_joint(&m_hit_bone_name) as u128 == id {
                 end_entity = child;
                 break;
@@ -214,14 +214,14 @@ fn find_bone_translation(
     entity: Entity,
     bone_name: &str,
     q_children: &Query<&Children>,
-    q_joint_target: &Query<&AnimationTarget>,
+    q_joint_target: &Query<&AnimationTargetId>,
     q_global_transform: &Query<&GlobalTransform>,
 ) -> Option<Vec3> {
     for child in q_children.iter_descendants(entity) {
         let Ok(joint_target) = q_joint_target.get(child) else {
             continue;
         };
-        let id = joint_target.id.0.as_u128();
+        let id = joint_target.0.as_u128();
         if hash_joint(bone_name) as u128 == id {
             return Some(q_global_transform.get(child).unwrap().translation());
         }

@@ -1,6 +1,6 @@
 use bevy::asset::{AssetLoader, LoadContext};
-use bevy::image::ImageSampler;
-use bevy::prelude::Image;
+use bevy::image::{Image, ImageSampler};
+use bevy::reflect::TypePath;
 use bevy::render::render_resource::{
     Extent3d, TextureDescriptor, TextureDimension, TextureFormat, TextureUsages,
 };
@@ -8,7 +8,7 @@ use league_file::texture::{LeagueTexture, LeagueTextureFormat};
 
 use crate::error::Error;
 
-#[derive(Default)]
+#[derive(Default, TypePath)]
 pub struct LeagueLoaderImage;
 
 impl AssetLoader for LeagueLoaderImage {

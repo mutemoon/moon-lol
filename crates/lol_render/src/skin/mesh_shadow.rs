@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use bevy::animation::AnimationTarget;
+use bevy::animation::AnimationTargetId;
 use bevy::mesh::skinning::SkinnedMesh;
 use bevy::prelude::*;
 
@@ -12,7 +12,7 @@ pub fn spawn_shadow_skin_entity<M: Material>(
     q_mesh3d: Query<&Mesh3d>,
     q_skinned_mesh: Query<&SkinnedMesh>,
     q_children: Query<&Children>,
-    q_animation_target: Query<(Entity, &Transform, &AnimationTarget)>,
+    q_animation_target: Query<(Entity, &Transform, &AnimationTargetId)>,
 ) {
     let children = q_children.get(skin_entity).unwrap();
 
@@ -66,9 +66,9 @@ pub fn spawn_shadow_skin_entity<M: Material>(
 pub fn duplicate_joints_to_target(
     commands: &mut Commands,
     parent: Entity,
-    joints: Vec<(Entity, &Transform, &AnimationTarget)>,
+    joints: Vec<(Entity, &Transform, &AnimationTargetId)>,
     q_children: &Query<&Children>,
-    q_animation_target: &Query<(Entity, &Transform, &AnimationTarget)>,
+    q_animation_target: &Query<(Entity, &Transform, &AnimationTargetId)>,
     joint_map: &mut HashMap<Entity, Entity>,
 ) {
     for (joint_entity, transform, anim_target) in joints {

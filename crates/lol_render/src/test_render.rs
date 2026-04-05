@@ -319,17 +319,14 @@ fn setup_skill_test_render(
     ));
 
     if let Some(camera) = q_camera.iter().next() {
-        commands.entity(camera).insert(Camera {
-            target: RenderTarget::Image(render_target_image_handle.into()),
-            ..default()
-        });
+        commands.entity(camera).insert((
+            Camera::default(),
+            RenderTarget::Image(render_target_image_handle.into()),
+        ));
     } else {
         commands.spawn((
             Camera3d::default(),
-            Camera {
-                target: RenderTarget::Image(render_target_image_handle.into()),
-                ..default()
-            },
+            RenderTarget::Image(render_target_image_handle.into()),
             Transform::from_xyz(-6.0, 6.5, 8.0).looking_at(Vec3::ZERO, Vec3::Y),
         ));
     }
@@ -453,7 +450,7 @@ fn receive_image_from_buffer(
             let _ = map_sender.send(result);
         });
 
-        render_device.poll(PollType::wait()).unwrap();
+        render_device.poll(PollType::wait_indefinitely()).unwrap();
         let Ok(Ok(())) = map_receiver.recv() else {
             continue;
         };

@@ -1,11 +1,12 @@
 use bevy::asset::{AssetLoader, LoadContext};
+use bevy::reflect::TypePath;
 use league_file::mesh_skinned::LeagueSkinnedMesh;
 use league_to_lol::skin_mesh::skinned_mesh_to_intermediate;
 
 use crate::error::Error;
 use crate::skin::LeagueSkinMesh;
 
-#[derive(Default)]
+#[derive(Default, TypePath)]
 pub struct LeagueLoaderMesh;
 
 impl AssetLoader for LeagueLoaderMesh {

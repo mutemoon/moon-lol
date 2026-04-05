@@ -1,5 +1,4 @@
-use bevy::animation::animation_curves::{AnimatableCurve, AnimatableKeyframeCurve};
-use bevy::animation::{animated_field, AnimationClip, AnimationTargetId};
+use bevy::animation::{animated_field, AnimationTargetId};
 use bevy::asset::uuid::Uuid;
 use bevy::asset::{AssetLoader, LoadContext};
 use bevy::prelude::*;
@@ -8,7 +7,7 @@ use league_to_lol::animation::load_animation_file;
 
 use crate::error::Error;
 
-#[derive(Default)]
+#[derive(Default, TypePath)]
 pub struct LeagueLoaderAnimationClip;
 
 impl AssetLoader for LeagueLoaderAnimationClip {

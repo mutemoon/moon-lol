@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 
-use bevy::asset::{AssetLoader, AssetServer, LoadContext};
+use bevy::asset::{AssetLoader, AssetServer, Handle, LoadContext};
 use bevy::log::debug;
-use bevy::prelude::*;
+use bevy::reflect::TypePath;
 use bevy::render::render_resource::ShaderStage;
 use bevy::shader::{ShaderImport, Source, ValidateShader};
 use league_file::shader::{LeagueShaderChunk, LeagueShaderToc};
@@ -17,7 +17,7 @@ use crate::error::Error;
 #[derive(Default, Serialize, Deserialize, Clone)]
 pub struct ShaderTocSettings(pub String);
 
-#[derive(Default)]
+#[derive(Default, TypePath)]
 pub struct LeagueLoaderShaderToc;
 
 impl AssetLoader for LeagueLoaderShaderToc {

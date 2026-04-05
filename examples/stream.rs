@@ -72,7 +72,7 @@ fn setup(
     mut images: ResMut<Assets<Image>>,
     scene_controller: Res<SceneController>,
     render_device: Res<RenderDevice>,
-    mut q_camera: Query<&mut Camera>,
+    mut q_render_target: Query<&mut RenderTarget>,
 ) {
     let size = Extent3d {
         width: scene_controller.width,
@@ -107,9 +107,8 @@ fn setup(
     ));
     commands.spawn(ImageToSave(cpu_image_handle));
 
-    let mut camera = q_camera.single_mut().unwrap();
-
-    camera.target = RenderTarget::Image(render_target_image_handle.into());
+    let mut render_target = q_render_target.single_mut().unwrap();
+    *render_target = RenderTarget::Image(render_target_image_handle.into());
 }
 
 pub struct PluginImageCopy;
@@ -249,7 +248,7 @@ fn receive_image_from_buffer(
             Err(err) => panic!("Failed to map buffer {err}"),
         });
 
-        render_device.poll(PollType::wait()).unwrap();
+        render_device.poll(PollType::wait_indefinitely()).unwrap();
         r.recv().expect("Failed to receive the map_async message");
 
         let _ = sender.send(buffer_slice.get_mapped_range().to_vec());

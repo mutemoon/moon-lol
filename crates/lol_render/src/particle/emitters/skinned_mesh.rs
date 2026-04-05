@@ -1,4 +1,4 @@
-use bevy::animation::AnimationTarget;
+use bevy::animation::AnimationTargetId;
 use bevy::mesh::skinning::SkinnedMesh;
 use bevy::prelude::*;
 use league_core::extract::{EnumVfxPrimitive, VfxEmitterDefinitionData, VfxSystemDefinitionData};
@@ -35,7 +35,7 @@ pub fn attach_skinned_mesh_visuals(
     q_mesh3d: Query<&Mesh3d>,
     q_skinned_mesh: Query<&SkinnedMesh>,
     q_children: Query<&Children>,
-    q_animation_target: Query<(Entity, &Transform, &AnimationTarget)>,
+    q_animation_target: Query<(Entity, &Transform, &AnimationTargetId)>,
 ) {
     let black_pixel_texture = res_image.add(create_black_pixel_texture());
 
@@ -98,7 +98,7 @@ pub fn update_emitter_skinned_mesh(
     q_mesh3d: Query<&Mesh3d>,
     q_skinned_mesh: Query<&SkinnedMesh>,
     q_children: Query<&Children>,
-    q_animation_target: Query<(Entity, &Transform, &AnimationTarget)>,
+    q_animation_target: Query<(Entity, &Transform, &AnimationTargetId)>,
     time: Res<Time>,
 ) {
     for (emitter_entity, emitter_of, mut lifetime, mut emitter, particle_id) in query.iter_mut() {

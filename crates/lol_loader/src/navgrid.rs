@@ -1,11 +1,12 @@
 use bevy::asset::{AssetLoader, LoadContext};
 use bevy::math::Vec3Swizzles;
+use bevy::reflect::TypePath;
 use league_file::grid::AiMeshNGrid;
 use lol_base::grid::{ConfigNavigationGrid, ConfigNavigationGridCell};
 
 use super::error::Error;
 
-#[derive(Default)]
+#[derive(Default, TypePath)]
 pub struct LeagueLoaderNavGrid;
 
 impl AssetLoader for LeagueLoaderNavGrid {

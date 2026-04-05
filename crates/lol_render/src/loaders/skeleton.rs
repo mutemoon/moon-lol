@@ -1,9 +1,10 @@
 use bevy::asset::{AssetLoader, LoadContext};
+use bevy::reflect::TypePath;
 use league_file::skeleton::LeagueSkeleton;
 
 use crate::error::Error;
 
-#[derive(Default)]
+#[derive(Default, TypePath)]
 pub struct LeagueLoaderSkeleton;
 
 impl AssetLoader for LeagueLoaderSkeleton {

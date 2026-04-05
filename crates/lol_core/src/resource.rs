@@ -8,7 +8,6 @@ use bevy::ecs::component::ComponentCloneBehavior;
 use bevy::ecs::entity::{EntityHashMap, SceneEntityMapper};
 use bevy::ecs::relationship::RelationshipHookMode;
 use bevy::prelude::*;
-use bevy::scene::ron::{self};
 use lol_base::game::{CharacterConfigsDeserializer, ConfigGame};
 use lol_base::grid::ConfigNavigationGrid;
 use lol_base::mapgeo::ConfigMapGeo;

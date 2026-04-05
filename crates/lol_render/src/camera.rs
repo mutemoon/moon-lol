@@ -1,5 +1,5 @@
 use bevy::camera::visibility::RenderLayers;
-use bevy::camera::{CameraProjection, SubCameraView};
+use bevy::camera::{CameraProjection, RenderTarget, SubCameraView};
 use bevy::input::mouse::MouseWheel;
 use bevy::math::{Mat4, Vec3A, Vec4};
 use bevy::prelude::*;
@@ -113,10 +113,7 @@ fn setup(
         ))
         .with_child((
             Camera3d::default(),
-            Camera {
-                target: image_handle.into(),
-                ..default()
-            },
+            RenderTarget::Image(image_handle.into()),
             RenderLayers::layer(0),
             Projection::custom(CustomFlipXProjection::default()),
         ));
