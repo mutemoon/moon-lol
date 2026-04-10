@@ -194,6 +194,8 @@ impl RivenHarness {
                         m_simple_tooltip_calculation_display: None,
                         result_modifier: None,
                         tooltip_only: None,
+                        unk_0x72c5c2a8: None,
+                        
                     })
                 };
 
@@ -207,20 +209,20 @@ impl RivenHarness {
                         m_spell_calculations: Some(calculations),
                         data_values: Some(vec![
                             SpellDataValue {
-                                m_name: "mDamage".to_string(),
-                                m_values: Some(vec![130.0f32; 6]),
+                                name: "mDamage".to_string(),
+                                values: Some(vec![130.0f32; 6]),
                             },
                             SpellDataValue {
-                                m_name: "TotalDamage".to_string(),
-                                m_values: Some(vec![130.0f32; 6]),
+                                name: "TotalDamage".to_string(),
+                                values: Some(vec![130.0f32; 6]),
                             },
                             SpellDataValue {
-                                m_name: "FirstSlashDamage".to_string(),
-                                m_values: Some(vec![130.0f32; 6]),
+                                name: "FirstSlashDamage".to_string(),
+                                values: Some(vec![130.0f32; 6]),
                             },
                             SpellDataValue {
-                                m_name: "ShieldStrength".to_string(),
-                                m_values: Some(vec![100.0f32; 6]),
+                                name: "ShieldStrength".to_string(),
+                                values: Some(vec![100.0f32; 6]),
                             },
                         ]),
                         ..default()

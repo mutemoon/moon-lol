@@ -95,25 +95,25 @@ fn update_character_spawn(
             // );
             let ar_type = AbilityResourceType::from(primary_ability_resource.ar_type);
 
-            let ar = AbilityResource {
-                ar_type,
-                value: primary_ability_resource.ar_base.unwrap_or(0.0),
-                max: primary_ability_resource.ar_base.unwrap_or(0.0),
-                base: primary_ability_resource.ar_base.unwrap_or(0.0),
-                per_level: primary_ability_resource.ar_per_level.unwrap_or(0.0),
-                base_static_regen: primary_ability_resource.ar_base_static_regen.unwrap_or(0.0),
-                regen_per_level: primary_ability_resource.ar_regen_per_level.unwrap_or(0.0),
-            };
+            // let ar = AbilityResource {
+            //     ar_type,
+            //     value: primary_ability_resource.ar_base.unwrap_or(0.0),
+            //     max: primary_ability_resource.ar_base.unwrap_or(0.0),
+            //     base: primary_ability_resource.ar_base.unwrap_or(0.0),
+            //     per_level: primary_ability_resource.ar_per_level.unwrap_or(0.0),
+            //     base_static_regen: primary_ability_resource.ar_base_static_regen.unwrap_or(0.0),
+            //     regen_per_level: primary_ability_resource.ar_regen_per_level.unwrap_or(0.0),
+            // };
 
-            commands.entity(entity).insert(ar);
+            // commands.entity(entity).insert(ar);
         }
         // 根据 character_record 创建组件
-        let health = Health::new(character_record.base_hp.unwrap_or(0.0));
-        let damage = Damage(character_record.base_damage.unwrap_or(0.0));
-        let armor = Armor(character_record.base_armor.unwrap_or(0.0));
-        let movement = Movement {
-            speed: character_record.base_move_speed.unwrap_or(0.0),
-        };
+        // let health = Health::new(character_record.base_hp.unwrap_or(0.0));
+        // let damage = Damage(character_record.base_damage.unwrap_or(0.0));
+        // let armor = Armor(character_record.base_armor.unwrap_or(0.0));
+        // let movement = Movement {
+        //     speed: character_record.base_move_speed.unwrap_or(0.0),
+        // };
         let bounding = Bounding {
             radius: character_record.pathfinding_collision_radius.unwrap_or(0.0),
             height: character_record.health_bar_height.unwrap_or(200.0),
@@ -121,51 +121,51 @@ fn update_character_spawn(
 
         commands.entity(entity).insert((
             Character { key: loading.value },
-            health,
-            movement,
-            damage,
-            armor,
+            // health,
+            // movement,
+            // damage,
+            // armor,
             bounding,
         ));
 
-        if let Some(attack_range) = &character_record.attack_range {
-            if let Some(basic_attack) = &character_record.basic_attack {
-                if let Some(cast_time) = basic_attack.m_attack_cast_time {
-                    if let Some(total_time) = basic_attack.m_attack_total_time {
-                        commands.entity(entity).insert(
-                            Attack::new(*attack_range, cast_time, total_time).with_missile(Some(
-                                (&format!(
-                                    "Characters/{}/Spells/{}BasicAttack",
-                                    character_record.m_character_name,
-                                    character_record.m_character_name
-                                ))
-                                    .into(),
-                            )),
-                        );
-                    }
-                } else if let Some(m_attack_delay_cast_offset_percent) =
-                    basic_attack.m_attack_delay_cast_offset_percent
-                {
-                    if let Some(attack_speed) = character_record.attack_speed {
-                        commands.entity(entity).insert(
-                            Attack::from_legacy(
-                                *attack_range,
-                                attack_speed,
-                                m_attack_delay_cast_offset_percent,
-                            )
-                            .with_missile(Some(
-                                (&format!(
-                                    "Characters/{}/Spells/{}BasicAttack",
-                                    character_record.m_character_name,
-                                    character_record.m_character_name
-                                ))
-                                    .into(),
-                            )),
-                        );
-                    }
-                }
-            }
-        }
+        // if let Some(attack_range) = &character_record.attack_range {
+        //     if let Some(basic_attack) = &character_record.basic_attack {
+        //         if let Some(cast_time) = basic_attack.m_attack_cast_time {
+        //             if let Some(total_time) = basic_attack.m_attack_total_time {
+        //                 commands.entity(entity).insert(
+        //                     Attack::new(*attack_range, cast_time, total_time).with_missile(Some(
+        //                         (&format!(
+        //                             "Characters/{}/Spells/{}BasicAttack",
+        //                             character_record.m_character_name,
+        //                             character_record.m_character_name
+        //                         ))
+        //                             .into(),
+        //                     )),
+        //                 );
+        //             }
+        //         } else if let Some(m_attack_delay_cast_offset_percent) =
+        //             basic_attack.m_attack_delay_cast_offset_percent
+        //         {
+        //             if let Some(attack_speed) = character_record.attack_speed {
+        //                 commands.entity(entity).insert(
+        //                     Attack::from_legacy(
+        //                         *attack_range,
+        //                         attack_speed,
+        //                         m_attack_delay_cast_offset_percent,
+        //                     )
+        //                     .with_missile(Some(
+        //                         (&format!(
+        //                             "Characters/{}/Spells/{}BasicAttack",
+        //                             character_record.m_character_name,
+        //                             character_record.m_character_name
+        //                         ))
+        //                             .into(),
+        //                     )),
+        //                 );
+        //             }
+        //         }
+        //     }
+        // }
     }
 }
 

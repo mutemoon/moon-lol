@@ -12,3 +12,5 @@ lol_base.workspace = true
 thiserror.workspace = true
 zstd = "0.13.3"
 nom.workspace = true
+bevy.workspace = true
+serde.workspace = true

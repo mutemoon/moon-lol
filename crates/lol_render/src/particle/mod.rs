@@ -15,6 +15,7 @@ use league_utils::hash_wad;
 use lol_base::prop::{HashKey, LoadHashKeyTrait};
 use lol_core::lifetime::{Lifetime, LifetimeMode};
 
+use crate::loaders::shader::LeagueLoaderShaderToc;
 use crate::particle::emitters::decal::update_decal_intersections;
 use crate::particle::emitters::distortion::update_emitter_distortion;
 use crate::particle::emitters::mesh::update_emitter_mesh;
@@ -32,6 +33,7 @@ use crate::particle::particle::{
     update_particle, update_particle_skinned_mesh_particle, update_particle_transform,
 };
 use crate::particle::skinned_mesh::particle::ParticleMaterialSkinnedMeshParticle;
+use crate::shader::{startup_load_shaders, update_shaders, ResourceShaderHandles};
 
 pub const ATTRIBUTE_WORLD_POSITION: MeshVertexAttribute =
     MeshVertexAttribute::new("ATTRIBUTE_WORLD_POSITION", 2020, VertexFormat::Float32x3);
@@ -59,6 +61,8 @@ impl Plugin for PluginParticle {
         app.add_observer(on_command_particle_spawn);
         app.add_observer(on_command_particle_despawn);
 
+        app.init_asset_loader::<LeagueLoaderShaderToc>();
+
         app.add_plugins(MaterialPlugin::<ParticleMaterialDistortion>::default());
         app.add_plugins(MaterialPlugin::<ParticleMaterialQuad>::default());
         app.add_plugins(MaterialPlugin::<ParticleMaterialQuadSlice>::default());
@@ -74,6 +78,10 @@ impl Plugin for PluginParticle {
         app.init_asset::<ParticleMaterialSkinnedMeshParticle>();
 
         app.init_resource::<ParticleMesh>();
+        app.init_resource::<ResourceShaderHandles>();
+
+        app.add_systems(Startup, startup_load_shaders);
+        app.add_systems(Update, update_shaders);
 
         app.add_systems(
             PostUpdate,

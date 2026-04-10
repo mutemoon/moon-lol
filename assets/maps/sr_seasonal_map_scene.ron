@@ -1,0 +1,2342 @@
+(
+  resources: {
+    "lol_core::map::MinionPath": ({
+      Top: [
+        (1508.0, 3597.0),
+        (1382.0, 4910.0),
+        (1170.0, 6715.0),
+        (1207.0, 7787.0),
+        (1229.0, 9072.0),
+        (1285.0, 10423.0),
+        (1508.0, 11601.0),
+        (1968.0, 12459.0),
+        (2720.0, 13100.0),
+        (3486.0, 13473.0),
+        (4359.0, 13597.0),
+        (5504.0, 13608.0),
+        (6668.0, 13647.0),
+        (8113.0, 13665.0),
+        (9889.0, 13447.0),
+        (11348.0, 13344.0),
+      ],
+      Mid: [
+        (2952.0, 3474.0),
+        (3856.0, 4170.0),
+        (4874.0, 5141.0),
+        (5375.0, 5589.0),
+        (5823.0, 5928.0),
+        (6270.0, 6366.0),
+        (6764.0, 6864.0),
+        (7408.0, 7405.0),
+        (8079.0, 8022.0),
+        (8618.0, 8647.0),
+        (9149.0, 9105.0),
+        (9625.0, 9543.0),
+        (10193.0, 10035.0),
+        (10822.0, 10646.0),
+        (11808.0, 11479.0),
+      ],
+      Bot: [
+        (3471.0, 1589.0),
+        (4844.0, 1440.0),
+        (6925.0, 1163.0),
+        (7975.0, 1230.0),
+        (8870.0, 1212.0),
+        (10506.0, 1301.0),
+        (11432.0, 1472.0),
+        (12294.0, 1913.0),
+        (13001.0, 2628.0),
+        (13529.0, 3694.0),
+        (13751.0, 4790.0),
+        (13741.0, 5811.0),
+        (13710.0, 7177.0),
+        (13696.0, 8608.0),
+        (13364.0, 10040.0),
+        (13253.0, 11334.0),
+      ],
+    }),
+    "lol_core::navigation::grid::ResourceGridPath": ("ASSETS/Maps/NavGrid/Map11/AIPath_SRX_3.aimesh_ngrid"),
+  },
+  entities: {
+    4294967215: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (11375.606, -82.27555, -1327.2509),
+          rotation: (0.0, 0.031018145, 0.0, 0.99951875),
+          scale: (1.0, 1.0, 1.0),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::character::ConfigCharacter": (
+          skin_path: "Characters/sru_dragon_earth/Skins/Skin0",
+          character_record: "Characters/sru_dragon_earth/CharacterRecords/Root",
+        ),
+        "lol_core::team::Team": Neutral,
+      },
+    ),
+    4294967216: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (9622.405, -82.275894, -1887.6136),
+          rotation: (0.0, 0.031018145, 0.0, 0.99951875),
+          scale: (1.0, 1.0, 1.0),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::character::ConfigCharacter": (
+          skin_path: "Characters/sru_dragon_hextech/Skins/Skin0",
+          character_record: "Characters/sru_dragon_hextech/CharacterRecords/Root",
+        ),
+        "lol_core::team::Team": Neutral,
+      },
+    ),
+    4294967217: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (10532.806, -82.27574, -1334.8898),
+          rotation: (0.0, 0.031018145, 0.0, 0.99951875),
+          scale: (1.0, 1.0, 1.0),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::character::ConfigCharacter": (
+          skin_path: "Characters/sru_dragon_chemtech/Skins/Skin0",
+          character_record: "Characters/sru_dragon_chemtech/CharacterRecords/Root",
+        ),
+        "lol_core::team::Team": Neutral,
+      },
+    ),
+    4294967218: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (10505.355, -82.27497, -1893.663),
+          rotation: (0.0, 0.031018145, 0.0, 0.99951875),
+          scale: (1.0, 1.0, 1.0),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::character::ConfigCharacter": (
+          skin_path: "Characters/sru_dragon_elder/Skins/Skin0",
+          character_record: "Characters/sru_dragon_elder/CharacterRecords/Root",
+        ),
+        "lol_core::team::Team": Neutral,
+      },
+    ),
+    4294967219: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (8858.361, -82.275215, -1298.417),
+          rotation: (0.0, 0.031018145, 0.0, 0.99951875),
+          scale: (1.0, 1.0, 1.0),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::character::ConfigCharacter": (
+          skin_path: "Characters/SRU_Dragon/Skins/Skin0",
+          character_record: "Characters/SRU_Dragon/CharacterRecords/Root",
+        ),
+        "lol_core::team::Team": Neutral,
+      },
+    ),
+    4294967220: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (11357.94, -82.27519, -1852.194),
+          rotation: (0.0, 0.031018145, 0.0, 0.99951875),
+          scale: (1.0, 1.0, 1.0),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::character::ConfigCharacter": (
+          skin_path: "Characters/sru_dragon_air/Skins/Skin0",
+          character_record: "Characters/sru_dragon_air/CharacterRecords/Root",
+        ),
+        "lol_core::team::Team": Neutral,
+      },
+    ),
+    4294967221: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (8825.791, -82.275764, -1827.8857),
+          rotation: (0.0, 0.031018145, 0.0, 0.99951875),
+          scale: (1.0, 1.0, 1.0),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::character::ConfigCharacter": (
+          skin_path: "Characters/sru_dragon_water/Skins/Skin0",
+          character_record: "Characters/sru_dragon_water/CharacterRecords/Root",
+        ),
+        "lol_core::team::Team": Neutral,
+      },
+    ),
+    4294967222: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (9648.6, -82.27571, -1321.3429),
+          rotation: (0.0, 0.031018145, 0.0, 0.99951875),
+          scale: (1.0, 1.0, 1.0),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::character::ConfigCharacter": (
+          skin_path: "Characters/sru_dragon_fire/Skins/Skin0",
+          character_record: "Characters/sru_dragon_fire/CharacterRecords/Root",
+        ),
+        "lol_core::team::Team": Neutral,
+      },
+    ),
+    4294967223: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (2008.0, 119.0, 2079.0),
+          rotation: (0.0, 0.0, 0.0, 1.0),
+          scale: (0.99999994, 0.99999994, 0.9999999),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::barrack::ConfigBarracks": (
+          exp_radius: 1500.0,
+          gold_radius: 1250.0,
+          initial_spawn_time_secs: 30.0,
+          minion_spawn_interval_secs: 0.8,
+          move_speed_increase_increment: 25,
+          move_speed_increase_initial_delay_secs: 600.0,
+          move_speed_increase_interval_secs: 300.0,
+          move_speed_increase_max_times: 4,
+          units: [
+            (
+              minion_type: 7,
+              minion_upgrade_stats: (
+                armor_max: None,
+                armor_upgrade: None,
+                armor_upgrade_growth: None,
+                damage_max: 300.0,
+                damage_upgrade: Some(5.0),
+                damage_upgrade_late: None,
+                gold_max: Some(90.0),
+                hp_max_bonus: 6000.0,
+                hp_upgrade: 100.0,
+                hp_upgrade_late: None,
+                magic_resistance_upgrade: None,
+                unk_0x726ae049: Some(1.0),
+              ),
+              unk_0xfee040bc: 104794764,
+              wave_behavior: InhibitorWaveBehavior((
+                spawn_count_per_inhibitor_down: [
+                  1,
+                  1,
+                  2,
+                ],
+              )),
+            ),
+            (
+              minion_type: 4,
+              minion_upgrade_stats: (
+                armor_max: Some(20.0),
+                armor_upgrade: None,
+                armor_upgrade_growth: Some(0.085),
+                damage_max: 69.0,
+                damage_upgrade: None,
+                damage_upgrade_late: Some(3.0),
+                gold_max: None,
+                hp_max_bonus: 1060.0,
+                hp_upgrade: 25.0,
+                hp_upgrade_late: Some(10.0),
+                magic_resistance_upgrade: None,
+                unk_0x726ae049: None,
+              ),
+              unk_0xfee040bc: 1289410707,
+              wave_behavior: TimedVariableWaveBehavior((
+                behaviors: [
+                  (
+                    behavior: ConstantWaveBehavior((
+                      spawn_count: 3,
+                    )),
+                    start_time_secs: None,
+                  ),
+                  (
+                    behavior: RotatingWaveBehavior((
+                      spawn_counts_by_wave: [
+                        2,
+                        3,
+                      ],
+                    )),
+                    start_time_secs: Some(840),
+                  ),
+                  (
+                    behavior: ConstantWaveBehavior((
+                      spawn_count: 2,
+                    )),
+                    start_time_secs: Some(1500),
+                  ),
+                ],
+                default_spawn_count: None,
+              )),
+            ),
+            (
+              minion_type: 6,
+              minion_upgrade_stats: (
+                armor_max: None,
+                armor_upgrade: None,
+                armor_upgrade_growth: None,
+                damage_max: 90.0,
+                damage_upgrade: Some(1.5),
+                damage_upgrade_late: Some(2.5),
+                gold_max: Some(90.0),
+                hp_max_bonus: 5100.0,
+                hp_upgrade: 85.0,
+                hp_upgrade_late: None,
+                magic_resistance_upgrade: None,
+                unk_0x726ae049: Some(1.0),
+              ),
+              unk_0xfee040bc: 1499726740,
+              wave_behavior: TimedVariableWaveBehavior((
+                behaviors: [
+                  (
+                    behavior: RotatingWaveBehavior((
+                      spawn_counts_by_wave: [
+                        0,
+                        0,
+                        1,
+                      ],
+                    )),
+                    start_time_secs: None,
+                  ),
+                  (
+                    behavior: RotatingWaveBehavior((
+                      spawn_counts_by_wave: [
+                        1,
+                        0,
+                      ],
+                    )),
+                    start_time_secs: Some(840),
+                  ),
+                  (
+                    behavior: ConstantWaveBehavior((
+                      spawn_count: 1,
+                    )),
+                    start_time_secs: Some(1500),
+                  ),
+                ],
+                default_spawn_count: None,
+              )),
+            ),
+            (
+              minion_type: 5,
+              minion_upgrade_stats: (
+                armor_max: None,
+                armor_upgrade: None,
+                armor_upgrade_growth: None,
+                damage_max: 105.5,
+                damage_upgrade: Some(1.5),
+                damage_upgrade_late: Some(2.5),
+                gold_max: None,
+                hp_max_bonus: 325.0,
+                hp_upgrade: 9.0,
+                hp_upgrade_late: None,
+                magic_resistance_upgrade: None,
+                unk_0x726ae049: None,
+              ),
+              unk_0xfee040bc: 241733370,
+              wave_behavior: TimedVariableWaveBehavior((
+                behaviors: [
+                  (
+                    behavior: ConstantWaveBehavior((
+                      spawn_count: 3,
+                    )),
+                    start_time_secs: None,
+                  ),
+                  (
+                    behavior: ConstantWaveBehavior((
+                      spawn_count: 2,
+                    )),
+                    start_time_secs: Some(1800),
+                  ),
+                ],
+                default_spawn_count: None,
+              )),
+            ),
+          ],
+          upgrade_interval_secs: 90.0,
+          upgrades_before_late_game_scaling: 5,
+          wave_spawn_interval_secs: 30.0,
+        ),
+        "lol_core::lane::Lane": Mid,
+        "lol_core::team::Team": Order,
+      },
+    ),
+    4294967224: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (10481.0, 88.0, 13650.0),
+          rotation: (0.0, 0.7260828, 0.0, -0.6876073),
+          scale: (1.0, 0.99999994, 0.99999994),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::character::ConfigCharacter": (
+          skin_path: "Characters/Turret/Skins/Skin49",
+          character_record: "Characters/Turret/CharacterRecords/SR_Inhibitor",
+        ),
+        "lol_core::team::Team": Chaos,
+      },
+    ),
+    4294967225: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (1512.0, 42.0, 6699.0),
+          rotation: (0.0, 0.008726535, 0.0, 0.999962),
+          scale: (1.0, 0.99999994, 0.99999994),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::character::ConfigCharacter": (
+          skin_path: "Characters/Turret/Skins/Skin48",
+          character_record: "Characters/Turret/CharacterRecords/SR_Inner",
+        ),
+        "lol_core::team::Team": Order,
+      },
+    ),
+    4294967226: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (1169.0, 90.734985, 4287.0),
+          rotation: (0.0, -0.02617695, 0.0, 0.9996573),
+          scale: (1.0, 0.99999994, 0.99999994),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::character::ConfigCharacter": (
+          skin_path: "Characters/Turret/Skins/Skin48",
+          character_record: "Characters/Turret/CharacterRecords/SR_Inhibitor",
+        ),
+        "lol_core::team::Team": Order,
+      },
+    ),
+    4294967227: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (1550.669, 91.0, 1660.319),
+          rotation: (0.0, 0.92387956, 0.0, -0.3826834),
+          scale: (1.0, 0.99999994, 0.99999994),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::character::ConfigCharacter": (
+          skin_path: "Characters/Nexus/Skins/Skin44",
+          character_record: "Characters/Nexus/CharacterRecords/Root",
+        ),
+        "lol_core::team::Team": Order,
+      },
+    ),
+    4294967228: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (5846.0, 44.0, 6396.0),
+          rotation: (0.0, 0.39874914, 0.0, 0.91706014),
+          scale: (0.99999994, 0.99999994, 0.9999999),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::character::ConfigCharacter": (
+          skin_path: "Characters/Turret/Skins/Skin48",
+          character_record: "Characters/Turret/CharacterRecords/SR_Outer",
+        ),
+        "lol_core::team::Team": Order,
+      },
+    ),
+    4294967229: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (10504.0, 41.0, 1029.0),
+          rotation: (0.0, 0.7084692, 0.0, 0.7057417),
+          scale: (0.99999994, 0.99999994, 0.9999999),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::character::ConfigCharacter": (
+          skin_path: "Characters/Turret/Skins/Skin48",
+          character_record: "Characters/Turret/CharacterRecords/SR_Outer",
+        ),
+        "lol_core::team::Team": Order,
+      },
+    ),
+    4294967230: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (3468.068, 88.003006, 1230.9547),
+          rotation: (0.0, 0.72040117, 0.0, 0.69355756),
+          scale: (1.0000011, 0.99999994, 1.0000011),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::character::ConfigCharacter": (
+          skin_path: "Characters/Inhibitor/Skins/Skin40",
+          character_record: "Characters/Inhibitor/CharacterRecords/SR_Order",
+        ),
+        "lol_core::team::Team": Order,
+      },
+    ),
+    4294967231: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (12800.0, 128.0, 13745.0),
+          rotation: (0.0, 0.0, 0.0, 1.0),
+          scale: (0.99999994, 0.99999994, 0.9999999),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::barrack::ConfigBarracks": (
+          exp_radius: 1500.0,
+          gold_radius: 1250.0,
+          initial_spawn_time_secs: 30.0,
+          minion_spawn_interval_secs: 0.8,
+          move_speed_increase_increment: 25,
+          move_speed_increase_initial_delay_secs: 600.0,
+          move_speed_increase_interval_secs: 300.0,
+          move_speed_increase_max_times: 4,
+          units: [
+            (
+              minion_type: 7,
+              minion_upgrade_stats: (
+                armor_max: None,
+                armor_upgrade: None,
+                armor_upgrade_growth: None,
+                damage_max: 300.0,
+                damage_upgrade: Some(5.0),
+                damage_upgrade_late: None,
+                gold_max: Some(90.0),
+                hp_max_bonus: 6000.0,
+                hp_upgrade: 100.0,
+                hp_upgrade_late: None,
+                magic_resistance_upgrade: None,
+                unk_0x726ae049: None,
+              ),
+              unk_0xfee040bc: 2200199732,
+              wave_behavior: InhibitorWaveBehavior((
+                spawn_count_per_inhibitor_down: [
+                  1,
+                  1,
+                  2,
+                ],
+              )),
+            ),
+            (
+              minion_type: 4,
+              minion_upgrade_stats: (
+                armor_max: Some(20.0),
+                armor_upgrade: None,
+                armor_upgrade_growth: Some(0.085),
+                damage_max: 69.0,
+                damage_upgrade: None,
+                damage_upgrade_late: Some(3.0),
+                gold_max: None,
+                hp_max_bonus: 1060.0,
+                hp_upgrade: 25.0,
+                hp_upgrade_late: Some(10.0),
+                magic_resistance_upgrade: None,
+                unk_0x726ae049: None,
+              ),
+              unk_0xfee040bc: 791927003,
+              wave_behavior: TimedVariableWaveBehavior((
+                behaviors: [
+                  (
+                    behavior: ConstantWaveBehavior((
+                      spawn_count: 3,
+                    )),
+                    start_time_secs: None,
+                  ),
+                  (
+                    behavior: RotatingWaveBehavior((
+                      spawn_counts_by_wave: [
+                        2,
+                        3,
+                      ],
+                    )),
+                    start_time_secs: Some(840),
+                  ),
+                  (
+                    behavior: ConstantWaveBehavior((
+                      spawn_count: 2,
+                    )),
+                    start_time_secs: Some(1500),
+                  ),
+                ],
+                default_spawn_count: None,
+              )),
+            ),
+            (
+              minion_type: 6,
+              minion_upgrade_stats: (
+                armor_max: None,
+                armor_upgrade: None,
+                armor_upgrade_growth: None,
+                damage_max: 90.0,
+                damage_upgrade: Some(1.5),
+                damage_upgrade_late: Some(2.5),
+                gold_max: Some(90.0),
+                hp_max_bonus: 5100.0,
+                hp_upgrade: 85.0,
+                hp_upgrade_late: None,
+                magic_resistance_upgrade: None,
+                unk_0x726ae049: Some(1.0),
+              ),
+              unk_0xfee040bc: 2119130828,
+              wave_behavior: TimedVariableWaveBehavior((
+                behaviors: [
+                  (
+                    behavior: RotatingWaveBehavior((
+                      spawn_counts_by_wave: [
+                        0,
+                        0,
+                        1,
+                      ],
+                    )),
+                    start_time_secs: None,
+                  ),
+                  (
+                    behavior: RotatingWaveBehavior((
+                      spawn_counts_by_wave: [
+                        1,
+                        0,
+                      ],
+                    )),
+                    start_time_secs: Some(840),
+                  ),
+                  (
+                    behavior: ConstantWaveBehavior((
+                      spawn_count: 1,
+                    )),
+                    start_time_secs: Some(1500),
+                  ),
+                ],
+                default_spawn_count: None,
+              )),
+            ),
+            (
+              minion_type: 5,
+              minion_upgrade_stats: (
+                armor_max: None,
+                armor_upgrade: None,
+                armor_upgrade_growth: None,
+                damage_max: 105.5,
+                damage_upgrade: Some(1.5),
+                damage_upgrade_late: Some(2.5),
+                gold_max: None,
+                hp_max_bonus: 325.0,
+                hp_upgrade: 9.0,
+                hp_upgrade_late: None,
+                magic_resistance_upgrade: None,
+                unk_0x726ae049: None,
+              ),
+              unk_0xfee040bc: 3910339938,
+              wave_behavior: TimedVariableWaveBehavior((
+                behaviors: [
+                  (
+                    behavior: ConstantWaveBehavior((
+                      spawn_count: 3,
+                    )),
+                    start_time_secs: None,
+                  ),
+                  (
+                    behavior: ConstantWaveBehavior((
+                      spawn_count: 2,
+                    )),
+                    start_time_secs: Some(1800),
+                  ),
+                ],
+                default_spawn_count: None,
+              )),
+            ),
+          ],
+          upgrade_interval_secs: 90.0,
+          upgrades_before_late_game_scaling: 5,
+          wave_spawn_interval_secs: 30.0,
+        ),
+        "lol_core::lane::Lane": Top,
+        "lol_core::team::Team": Chaos,
+      },
+    ),
+    4294967232: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (1748.0, 88.0, 2270.0),
+          rotation: (0.0, 0.25881904, 0.0, 0.9659259),
+          scale: (0.99999994, 0.99999994, 0.9999999),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::character::ConfigCharacter": (
+          skin_path: "Characters/Turret/Skins/Skin48",
+          character_record: "Characters/Turret/CharacterRecords/SR_Nexus",
+        ),
+        "lol_core::team::Team": Order,
+      },
+    ),
+    4294967233: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (4318.0, 38.0, 13875.0),
+          rotation: (0.000000060351915, 0.8433915, 0.00000006035192, -0.5372996),
+          scale: (1.0, 0.9999999, 0.99999994),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::character::ConfigCharacter": (
+          skin_path: "Characters/Turret/Skins/Skin49",
+          character_record: "Characters/Turret/CharacterRecords/SR_Outer",
+        ),
+        "lol_core::team::Team": Chaos,
+      },
+    ),
+    4294967234: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (7943.0, 38.0, 13411.0),
+          rotation: (0.0, 0.7378667, 0.0, -0.6749465),
+          scale: (0.99999994, 0.99999994, 0.9999999),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::character::ConfigCharacter": (
+          skin_path: "Characters/Turret/Skins/Skin49",
+          character_record: "Characters/Turret/CharacterRecords/SR_Inner",
+        ),
+        "lol_core::team::Team": Chaos,
+      },
+    ),
+    4294967235: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (13243.0, 91.0, 13235.0),
+          rotation: (0.0, 0.4192371, 0.0, 0.9078768),
+          scale: (1.0, 0.99999994, 0.9999999),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::character::ConfigCharacter": (
+          skin_path: "Characters/Nexus/Skins/Skin45",
+          character_record: "Characters/Nexus/CharacterRecords/Root",
+        ),
+        "lol_core::team::Team": Chaos,
+      },
+    ),
+    4294967236: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (11134.0, 88.0, 11207.0),
+          rotation: (0.0, 0.92387956, 0.0, -0.3826834),
+          scale: (1.0, 0.99999994, 0.99999994),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::character::ConfigCharacter": (
+          skin_path: "Characters/Turret/Skins/Skin49",
+          character_record: "Characters/Turret/CharacterRecords/SR_Inhibitor",
+        ),
+        "lol_core::team::Team": Chaos,
+      },
+    ),
+    4294967237: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (1109.0, 124.0, 2091.0),
+          rotation: (0.0, 0.0, 0.0, 1.0),
+          scale: (0.99999994, 0.99999994, 0.9999999),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::barrack::ConfigBarracks": (
+          exp_radius: 1500.0,
+          gold_radius: 1250.0,
+          initial_spawn_time_secs: 30.0,
+          minion_spawn_interval_secs: 0.8,
+          move_speed_increase_increment: 25,
+          move_speed_increase_initial_delay_secs: 600.0,
+          move_speed_increase_interval_secs: 300.0,
+          move_speed_increase_max_times: 4,
+          units: [
+            (
+              minion_type: 7,
+              minion_upgrade_stats: (
+                armor_max: None,
+                armor_upgrade: None,
+                armor_upgrade_growth: None,
+                damage_max: 300.0,
+                damage_upgrade: Some(5.0),
+                damage_upgrade_late: None,
+                gold_max: Some(90.0),
+                hp_max_bonus: 6000.0,
+                hp_upgrade: 100.0,
+                hp_upgrade_late: None,
+                magic_resistance_upgrade: None,
+                unk_0x726ae049: Some(1.0),
+              ),
+              unk_0xfee040bc: 104794764,
+              wave_behavior: InhibitorWaveBehavior((
+                spawn_count_per_inhibitor_down: [
+                  1,
+                  1,
+                  2,
+                ],
+              )),
+            ),
+            (
+              minion_type: 4,
+              minion_upgrade_stats: (
+                armor_max: Some(20.0),
+                armor_upgrade: None,
+                armor_upgrade_growth: Some(0.085),
+                damage_max: 69.0,
+                damage_upgrade: None,
+                damage_upgrade_late: Some(3.0),
+                gold_max: None,
+                hp_max_bonus: 1060.0,
+                hp_upgrade: 25.0,
+                hp_upgrade_late: Some(10.0),
+                magic_resistance_upgrade: None,
+                unk_0x726ae049: None,
+              ),
+              unk_0xfee040bc: 1289410707,
+              wave_behavior: TimedVariableWaveBehavior((
+                behaviors: [
+                  (
+                    behavior: ConstantWaveBehavior((
+                      spawn_count: 3,
+                    )),
+                    start_time_secs: None,
+                  ),
+                  (
+                    behavior: RotatingWaveBehavior((
+                      spawn_counts_by_wave: [
+                        2,
+                        3,
+                      ],
+                    )),
+                    start_time_secs: Some(840),
+                  ),
+                  (
+                    behavior: ConstantWaveBehavior((
+                      spawn_count: 2,
+                    )),
+                    start_time_secs: Some(1500),
+                  ),
+                ],
+                default_spawn_count: None,
+              )),
+            ),
+            (
+              minion_type: 6,
+              minion_upgrade_stats: (
+                armor_max: None,
+                armor_upgrade: None,
+                armor_upgrade_growth: None,
+                damage_max: 90.0,
+                damage_upgrade: Some(1.5),
+                damage_upgrade_late: Some(2.5),
+                gold_max: Some(90.0),
+                hp_max_bonus: 5100.0,
+                hp_upgrade: 85.0,
+                hp_upgrade_late: None,
+                magic_resistance_upgrade: None,
+                unk_0x726ae049: Some(1.0),
+              ),
+              unk_0xfee040bc: 1499726740,
+              wave_behavior: TimedVariableWaveBehavior((
+                behaviors: [
+                  (
+                    behavior: RotatingWaveBehavior((
+                      spawn_counts_by_wave: [
+                        0,
+                        0,
+                        1,
+                      ],
+                    )),
+                    start_time_secs: None,
+                  ),
+                  (
+                    behavior: RotatingWaveBehavior((
+                      spawn_counts_by_wave: [
+                        1,
+                        0,
+                      ],
+                    )),
+                    start_time_secs: Some(840),
+                  ),
+                  (
+                    behavior: ConstantWaveBehavior((
+                      spawn_count: 1,
+                    )),
+                    start_time_secs: Some(1500),
+                  ),
+                ],
+                default_spawn_count: None,
+              )),
+            ),
+            (
+              minion_type: 5,
+              minion_upgrade_stats: (
+                armor_max: None,
+                armor_upgrade: None,
+                armor_upgrade_growth: None,
+                damage_max: 105.5,
+                damage_upgrade: Some(1.5),
+                damage_upgrade_late: Some(2.5),
+                gold_max: None,
+                hp_max_bonus: 325.0,
+                hp_upgrade: 9.0,
+                hp_upgrade_late: None,
+                magic_resistance_upgrade: None,
+                unk_0x726ae049: None,
+              ),
+              unk_0xfee040bc: 241733370,
+              wave_behavior: TimedVariableWaveBehavior((
+                behaviors: [
+                  (
+                    behavior: ConstantWaveBehavior((
+                      spawn_count: 3,
+                    )),
+                    start_time_secs: None,
+                  ),
+                  (
+                    behavior: ConstantWaveBehavior((
+                      spawn_count: 2,
+                    )),
+                    start_time_secs: Some(1800),
+                  ),
+                ],
+                default_spawn_count: None,
+              )),
+            ),
+          ],
+          upgrade_interval_secs: 90.0,
+          upgrades_before_late_game_scaling: 5,
+          wave_spawn_interval_secs: 30.0,
+        ),
+        "lol_core::lane::Lane": Top,
+        "lol_core::team::Team": Order,
+      },
+    ),
+    4294967238: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (13052.0, 88.0, 12612.0),
+          rotation: (0.0, 0.9636305, 0.0, -0.2672383),
+          scale: (1.0, 0.99999994, 0.99999994),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::character::ConfigCharacter": (
+          skin_path: "Characters/Turret/Skins/Skin49",
+          character_record: "Characters/Turret/CharacterRecords/SR_Nexus",
+        ),
+        "lol_core::team::Team": Chaos,
+      },
+    ),
+    4294967239: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (13719.0, 119.0, 12845.0),
+          rotation: (0.0, 0.0, 0.0, 1.0),
+          scale: (1.0, 1.0, 1.0),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::barrack::ConfigBarracks": (
+          exp_radius: 1500.0,
+          gold_radius: 1250.0,
+          initial_spawn_time_secs: 30.0,
+          minion_spawn_interval_secs: 0.8,
+          move_speed_increase_increment: 25,
+          move_speed_increase_initial_delay_secs: 600.0,
+          move_speed_increase_interval_secs: 300.0,
+          move_speed_increase_max_times: 4,
+          units: [
+            (
+              minion_type: 7,
+              minion_upgrade_stats: (
+                armor_max: None,
+                armor_upgrade: None,
+                armor_upgrade_growth: None,
+                damage_max: 300.0,
+                damage_upgrade: Some(5.0),
+                damage_upgrade_late: None,
+                gold_max: Some(90.0),
+                hp_max_bonus: 6000.0,
+                hp_upgrade: 100.0,
+                hp_upgrade_late: None,
+                magic_resistance_upgrade: None,
+                unk_0x726ae049: None,
+              ),
+              unk_0xfee040bc: 2200199732,
+              wave_behavior: InhibitorWaveBehavior((
+                spawn_count_per_inhibitor_down: [
+                  1,
+                  1,
+                  2,
+                ],
+              )),
+            ),
+            (
+              minion_type: 4,
+              minion_upgrade_stats: (
+                armor_max: Some(20.0),
+                armor_upgrade: None,
+                armor_upgrade_growth: Some(0.085),
+                damage_max: 69.0,
+                damage_upgrade: None,
+                damage_upgrade_late: Some(3.0),
+                gold_max: None,
+                hp_max_bonus: 1060.0,
+                hp_upgrade: 25.0,
+                hp_upgrade_late: Some(10.0),
+                magic_resistance_upgrade: None,
+                unk_0x726ae049: None,
+              ),
+              unk_0xfee040bc: 791927003,
+              wave_behavior: TimedVariableWaveBehavior((
+                behaviors: [
+                  (
+                    behavior: ConstantWaveBehavior((
+                      spawn_count: 3,
+                    )),
+                    start_time_secs: None,
+                  ),
+                  (
+                    behavior: RotatingWaveBehavior((
+                      spawn_counts_by_wave: [
+                        2,
+                        3,
+                      ],
+                    )),
+                    start_time_secs: Some(840),
+                  ),
+                  (
+                    behavior: ConstantWaveBehavior((
+                      spawn_count: 2,
+                    )),
+                    start_time_secs: Some(1500),
+                  ),
+                ],
+                default_spawn_count: None,
+              )),
+            ),
+            (
+              minion_type: 6,
+              minion_upgrade_stats: (
+                armor_max: None,
+                armor_upgrade: None,
+                armor_upgrade_growth: None,
+                damage_max: 90.0,
+                damage_upgrade: Some(1.5),
+                damage_upgrade_late: Some(2.5),
+                gold_max: Some(90.0),
+                hp_max_bonus: 5100.0,
+                hp_upgrade: 85.0,
+                hp_upgrade_late: None,
+                magic_resistance_upgrade: None,
+                unk_0x726ae049: Some(1.0),
+              ),
+              unk_0xfee040bc: 2119130828,
+              wave_behavior: TimedVariableWaveBehavior((
+                behaviors: [
+                  (
+                    behavior: RotatingWaveBehavior((
+                      spawn_counts_by_wave: [
+                        0,
+                        0,
+                        1,
+                      ],
+                    )),
+                    start_time_secs: None,
+                  ),
+                  (
+                    behavior: RotatingWaveBehavior((
+                      spawn_counts_by_wave: [
+                        1,
+                        0,
+                      ],
+                    )),
+                    start_time_secs: Some(840),
+                  ),
+                  (
+                    behavior: ConstantWaveBehavior((
+                      spawn_count: 1,
+                    )),
+                    start_time_secs: Some(1500),
+                  ),
+                ],
+                default_spawn_count: None,
+              )),
+            ),
+            (
+              minion_type: 5,
+              minion_upgrade_stats: (
+                armor_max: None,
+                armor_upgrade: None,
+                armor_upgrade_growth: None,
+                damage_max: 105.5,
+                damage_upgrade: Some(1.5),
+                damage_upgrade_late: Some(2.5),
+                gold_max: None,
+                hp_max_bonus: 325.0,
+                hp_upgrade: 9.0,
+                hp_upgrade_late: None,
+                magic_resistance_upgrade: None,
+                unk_0x726ae049: None,
+              ),
+              unk_0xfee040bc: 3910339938,
+              wave_behavior: TimedVariableWaveBehavior((
+                behaviors: [
+                  (
+                    behavior: ConstantWaveBehavior((
+                      spawn_count: 3,
+                    )),
+                    start_time_secs: None,
+                  ),
+                  (
+                    behavior: ConstantWaveBehavior((
+                      spawn_count: 2,
+                    )),
+                    start_time_secs: Some(1800),
+                  ),
+                ],
+                default_spawn_count: None,
+              )),
+            ),
+          ],
+          upgrade_interval_secs: 90.0,
+          upgrades_before_late_game_scaling: 5,
+          wave_spawn_interval_secs: 30.0,
+        ),
+        "lol_core::lane::Lane": Bot,
+        "lol_core::team::Team": Chaos,
+      },
+    ),
+    4294967240: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (13327.0, 38.0, 8226.0),
+          rotation: (0.0, 1.0, 0.0, -0.00000004371139),
+          scale: (0.99999994, 0.99999994, 0.9999999),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::character::ConfigCharacter": (
+          skin_path: "Characters/Turret/Skins/Skin49",
+          character_record: "Characters/Turret/CharacterRecords/SR_Inner",
+        ),
+        "lol_core::team::Team": Chaos,
+      },
+    ),
+    4294967241: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (2034.0, 128.0, 1171.0),
+          rotation: (0.0, 0.0, 0.0, 1.0),
+          scale: (0.99999994, 0.99999994, 0.9999999),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::barrack::ConfigBarracks": (
+          exp_radius: 1500.0,
+          gold_radius: 1250.0,
+          initial_spawn_time_secs: 30.0,
+          minion_spawn_interval_secs: 0.8,
+          move_speed_increase_increment: 25,
+          move_speed_increase_initial_delay_secs: 600.0,
+          move_speed_increase_interval_secs: 300.0,
+          move_speed_increase_max_times: 4,
+          units: [
+            (
+              minion_type: 7,
+              minion_upgrade_stats: (
+                armor_max: None,
+                armor_upgrade: None,
+                armor_upgrade_growth: None,
+                damage_max: 300.0,
+                damage_upgrade: Some(5.0),
+                damage_upgrade_late: None,
+                gold_max: Some(90.0),
+                hp_max_bonus: 6000.0,
+                hp_upgrade: 100.0,
+                hp_upgrade_late: None,
+                magic_resistance_upgrade: None,
+                unk_0x726ae049: Some(1.0),
+              ),
+              unk_0xfee040bc: 104794764,
+              wave_behavior: InhibitorWaveBehavior((
+                spawn_count_per_inhibitor_down: [
+                  1,
+                  1,
+                  2,
+                ],
+              )),
+            ),
+            (
+              minion_type: 4,
+              minion_upgrade_stats: (
+                armor_max: Some(20.0),
+                armor_upgrade: None,
+                armor_upgrade_growth: Some(0.085),
+                damage_max: 69.0,
+                damage_upgrade: None,
+                damage_upgrade_late: Some(3.0),
+                gold_max: None,
+                hp_max_bonus: 1060.0,
+                hp_upgrade: 25.0,
+                hp_upgrade_late: Some(10.0),
+                magic_resistance_upgrade: None,
+                unk_0x726ae049: None,
+              ),
+              unk_0xfee040bc: 1289410707,
+              wave_behavior: TimedVariableWaveBehavior((
+                behaviors: [
+                  (
+                    behavior: ConstantWaveBehavior((
+                      spawn_count: 3,
+                    )),
+                    start_time_secs: None,
+                  ),
+                  (
+                    behavior: RotatingWaveBehavior((
+                      spawn_counts_by_wave: [
+                        2,
+                        3,
+                      ],
+                    )),
+                    start_time_secs: Some(840),
+                  ),
+                  (
+                    behavior: ConstantWaveBehavior((
+                      spawn_count: 2,
+                    )),
+                    start_time_secs: Some(1500),
+                  ),
+                ],
+                default_spawn_count: None,
+              )),
+            ),
+            (
+              minion_type: 6,
+              minion_upgrade_stats: (
+                armor_max: None,
+                armor_upgrade: None,
+                armor_upgrade_growth: None,
+                damage_max: 90.0,
+                damage_upgrade: Some(1.5),
+                damage_upgrade_late: Some(2.5),
+                gold_max: Some(90.0),
+                hp_max_bonus: 5100.0,
+                hp_upgrade: 85.0,
+                hp_upgrade_late: None,
+                magic_resistance_upgrade: None,
+                unk_0x726ae049: Some(1.0),
+              ),
+              unk_0xfee040bc: 1499726740,
+              wave_behavior: TimedVariableWaveBehavior((
+                behaviors: [
+                  (
+                    behavior: RotatingWaveBehavior((
+                      spawn_counts_by_wave: [
+                        0,
+                        0,
+                        1,
+                      ],
+                    )),
+                    start_time_secs: None,
+                  ),
+                  (
+                    behavior: RotatingWaveBehavior((
+                      spawn_counts_by_wave: [
+                        1,
+                        0,
+                      ],
+                    )),
+                    start_time_secs: Some(840),
+                  ),
+                  (
+                    behavior: ConstantWaveBehavior((
+                      spawn_count: 1,
+                    )),
+                    start_time_secs: Some(1500),
+                  ),
+                ],
+                default_spawn_count: None,
+              )),
+            ),
+            (
+              minion_type: 5,
+              minion_upgrade_stats: (
+                armor_max: None,
+                armor_upgrade: None,
+                armor_upgrade_growth: None,
+                damage_max: 105.5,
+                damage_upgrade: Some(1.5),
+                damage_upgrade_late: Some(2.5),
+                gold_max: None,
+                hp_max_bonus: 325.0,
+                hp_upgrade: 9.0,
+                hp_upgrade_late: None,
+                magic_resistance_upgrade: None,
+                unk_0x726ae049: None,
+              ),
+              unk_0xfee040bc: 241733370,
+              wave_behavior: TimedVariableWaveBehavior((
+                behaviors: [
+                  (
+                    behavior: ConstantWaveBehavior((
+                      spawn_count: 3,
+                    )),
+                    start_time_secs: None,
+                  ),
+                  (
+                    behavior: ConstantWaveBehavior((
+                      spawn_count: 2,
+                    )),
+                    start_time_secs: Some(1800),
+                  ),
+                ],
+                default_spawn_count: None,
+              )),
+            ),
+          ],
+          upgrade_interval_secs: 90.0,
+          upgrades_before_late_game_scaling: 5,
+          wave_spawn_interval_secs: 30.0,
+        ),
+        "lol_core::lane::Lane": Bot,
+        "lol_core::team::Team": Order,
+      },
+    ),
+    4294967242: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (8955.0, 38.0, 8510.0),
+          rotation: (0.0, 0.91205204, 0.0, -0.41007438),
+          scale: (0.9999999, 0.99999994, 0.9999998),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::character::ConfigCharacter": (
+          skin_path: "Characters/Turret/Skins/Skin49",
+          character_record: "Characters/Turret/CharacterRecords/SR_Outer",
+        ),
+        "lol_core::team::Team": Chaos,
+      },
+    ),
+    4294967243: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (3210.616, 88.00265, 3217.5273),
+          rotation: (0.0, 0.37079665, 0.0, 0.9287141),
+          scale: (1.000001, 0.99999994, 1.0000008),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::character::ConfigCharacter": (
+          skin_path: "Characters/Inhibitor/Skins/Skin40",
+          character_record: "Characters/Inhibitor/CharacterRecords/SR_Order",
+        ),
+        "lol_core::team::Team": Order,
+      },
+    ),
+    4294967244: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (12611.0, 88.0, 13084.0),
+          rotation: (0.0, 0.8616292, 0.0, -0.5075385),
+          scale: (0.99999994, 0.99999994, 0.9999999),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::character::ConfigCharacter": (
+          skin_path: "Characters/Turret/Skins/Skin49",
+          character_record: "Characters/Turret/CharacterRecords/SR_Nexus",
+        ),
+        "lol_core::team::Team": Chaos,
+      },
+    ),
+    4294967245: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (4281.0, 86.0, 1253.0),
+          rotation: (0.0, 0.7372773, 0.0, 0.67559016),
+          scale: (1.0, 0.99999994, 0.99999994),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::character::ConfigCharacter": (
+          skin_path: "Characters/Turret/Skins/Skin48",
+          character_record: "Characters/Turret/CharacterRecords/SR_Inhibitor",
+        ),
+        "lol_core::team::Team": Order,
+      },
+    ),
+    4294967246: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (2177.0, 89.0, 1807.0),
+          rotation: (0.0, 0.5, 0.0, 0.8660254),
+          scale: (1.0, 0.99999994, 1.0),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::character::ConfigCharacter": (
+          skin_path: "Characters/Turret/Skins/Skin48",
+          character_record: "Characters/Turret/CharacterRecords/SR_Nexus",
+        ),
+        "lol_core::team::Team": Order,
+      },
+    ),
+    4294967247: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (13611.213, 88.001, 11319.917),
+          rotation: (0.0, 0.0, 0.0, 1.0),
+          scale: (0.99999994, 0.99999994, 0.9999999),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::character::ConfigCharacter": (
+          skin_path: "Characters/Inhibitor/Skins/Skin41",
+          character_record: "Characters/Inhibitor/CharacterRecords/SR_Chaos",
+        ),
+        "lol_core::team::Team": Chaos,
+      },
+    ),
+    4294967248: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (11593.575, 88.001, 11669.565),
+          rotation: (0.0, 0.38268346, 0.0, 0.92387956),
+          scale: (0.99999994, 0.99999994, 0.9999999),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::character::ConfigCharacter": (
+          skin_path: "Characters/Inhibitor/Skins/Skin41",
+          character_record: "Characters/Inhibitor/CharacterRecords/SR_Chaos",
+        ),
+        "lol_core::team::Team": Chaos,
+      },
+    ),
+    4294967249: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (9767.0, 38.0, 10113.0),
+          rotation: (0.0, 0.92387956, 0.0, -0.3826834),
+          scale: (1.0, 0.99999994, 0.99999994),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::character::ConfigCharacter": (
+          skin_path: "Characters/Turret/Skins/Skin49",
+          character_record: "Characters/Turret/CharacterRecords/SR_Inner",
+        ),
+        "lol_core::team::Team": Chaos,
+      },
+    ),
+    4294967250: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (13866.0, 38.0, 4505.0),
+          rotation: (0.0, 0.9999269, 0.0, -0.012094844),
+          scale: (0.99999994, 0.99999994, 0.9999999),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::character::ConfigCharacter": (
+          skin_path: "Characters/Turret/Skins/Skin49",
+          character_record: "Characters/Turret/CharacterRecords/SR_Outer",
+        ),
+        "lol_core::team::Team": Chaos,
+      },
+    ),
+    4294967251: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (13624.0, 88.0, 10572.0),
+          rotation: (0.0, 1.0, 0.0, -0.00000004371139),
+          scale: (0.99999994, 0.99999994, 0.9999999),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::character::ConfigCharacter": (
+          skin_path: "Characters/Turret/Skins/Skin49",
+          character_record: "Characters/Turret/CharacterRecords/SR_Inhibitor",
+        ),
+        "lol_core::team::Team": Chaos,
+      },
+    ),
+    4294967252: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (6919.0, 43.0, 1483.0),
+          rotation: (0.0, 0.7132504, 0.0, 0.7009093),
+          scale: (0.99999994, 0.99999994, 0.9999999),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::character::ConfigCharacter": (
+          skin_path: "Characters/Turret/Skins/Skin48",
+          character_record: "Characters/Turret/CharacterRecords/SR_Inner",
+        ),
+        "lol_core::team::Team": Order,
+      },
+    ),
+    4294967253: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (12776.0, 110.0, 12784.0),
+          rotation: (0.0, 0.0, 0.0, 1.0),
+          scale: (1.0, 1.0, 1.0),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::barrack::ConfigBarracks": (
+          exp_radius: 1500.0,
+          gold_radius: 1250.0,
+          initial_spawn_time_secs: 30.0,
+          minion_spawn_interval_secs: 0.8,
+          move_speed_increase_increment: 25,
+          move_speed_increase_initial_delay_secs: 600.0,
+          move_speed_increase_interval_secs: 300.0,
+          move_speed_increase_max_times: 4,
+          units: [
+            (
+              minion_type: 7,
+              minion_upgrade_stats: (
+                armor_max: None,
+                armor_upgrade: None,
+                armor_upgrade_growth: None,
+                damage_max: 300.0,
+                damage_upgrade: Some(5.0),
+                damage_upgrade_late: None,
+                gold_max: Some(90.0),
+                hp_max_bonus: 6000.0,
+                hp_upgrade: 100.0,
+                hp_upgrade_late: None,
+                magic_resistance_upgrade: None,
+                unk_0x726ae049: None,
+              ),
+              unk_0xfee040bc: 2200199732,
+              wave_behavior: InhibitorWaveBehavior((
+                spawn_count_per_inhibitor_down: [
+                  1,
+                  1,
+                  2,
+                ],
+              )),
+            ),
+            (
+              minion_type: 4,
+              minion_upgrade_stats: (
+                armor_max: Some(20.0),
+                armor_upgrade: None,
+                armor_upgrade_growth: Some(0.085),
+                damage_max: 69.0,
+                damage_upgrade: None,
+                damage_upgrade_late: Some(3.0),
+                gold_max: None,
+                hp_max_bonus: 1060.0,
+                hp_upgrade: 25.0,
+                hp_upgrade_late: Some(10.0),
+                magic_resistance_upgrade: None,
+                unk_0x726ae049: None,
+              ),
+              unk_0xfee040bc: 791927003,
+              wave_behavior: TimedVariableWaveBehavior((
+                behaviors: [
+                  (
+                    behavior: ConstantWaveBehavior((
+                      spawn_count: 3,
+                    )),
+                    start_time_secs: None,
+                  ),
+                  (
+                    behavior: RotatingWaveBehavior((
+                      spawn_counts_by_wave: [
+                        2,
+                        3,
+                      ],
+                    )),
+                    start_time_secs: Some(840),
+                  ),
+                  (
+                    behavior: ConstantWaveBehavior((
+                      spawn_count: 2,
+                    )),
+                    start_time_secs: Some(1500),
+                  ),
+                ],
+                default_spawn_count: None,
+              )),
+            ),
+            (
+              minion_type: 6,
+              minion_upgrade_stats: (
+                armor_max: None,
+                armor_upgrade: None,
+                armor_upgrade_growth: None,
+                damage_max: 90.0,
+                damage_upgrade: Some(1.5),
+                damage_upgrade_late: Some(2.5),
+                gold_max: Some(90.0),
+                hp_max_bonus: 5100.0,
+                hp_upgrade: 85.0,
+                hp_upgrade_late: None,
+                magic_resistance_upgrade: None,
+                unk_0x726ae049: Some(1.0),
+              ),
+              unk_0xfee040bc: 2119130828,
+              wave_behavior: TimedVariableWaveBehavior((
+                behaviors: [
+                  (
+                    behavior: RotatingWaveBehavior((
+                      spawn_counts_by_wave: [
+                        0,
+                        0,
+                        1,
+                      ],
+                    )),
+                    start_time_secs: None,
+                  ),
+                  (
+                    behavior: RotatingWaveBehavior((
+                      spawn_counts_by_wave: [
+                        1,
+                        0,
+                      ],
+                    )),
+                    start_time_secs: Some(840),
+                  ),
+                  (
+                    behavior: ConstantWaveBehavior((
+                      spawn_count: 1,
+                    )),
+                    start_time_secs: Some(1500),
+                  ),
+                ],
+                default_spawn_count: None,
+              )),
+            ),
+            (
+              minion_type: 5,
+              minion_upgrade_stats: (
+                armor_max: None,
+                armor_upgrade: None,
+                armor_upgrade_growth: None,
+                damage_max: 105.5,
+                damage_upgrade: Some(1.5),
+                damage_upgrade_late: Some(2.5),
+                gold_max: None,
+                hp_max_bonus: 325.0,
+                hp_upgrade: 9.0,
+                hp_upgrade_late: None,
+                magic_resistance_upgrade: None,
+                unk_0x726ae049: None,
+              ),
+              unk_0xfee040bc: 3910339938,
+              wave_behavior: TimedVariableWaveBehavior((
+                behaviors: [
+                  (
+                    behavior: ConstantWaveBehavior((
+                      spawn_count: 3,
+                    )),
+                    start_time_secs: None,
+                  ),
+                  (
+                    behavior: ConstantWaveBehavior((
+                      spawn_count: 2,
+                    )),
+                    start_time_secs: Some(1800),
+                  ),
+                ],
+                default_spawn_count: None,
+              )),
+            ),
+          ],
+          upgrade_interval_secs: 90.0,
+          upgrades_before_late_game_scaling: 5,
+          wave_spawn_interval_secs: 30.0,
+        ),
+        "lol_core::lane::Lane": Mid,
+        "lol_core::team::Team": Chaos,
+      },
+    ),
+    4294967254: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (105.0, 36.0, 134.0),
+          rotation: (0.0, -0.04187564, 0.0, 0.99912274),
+          scale: (0.89, 0.8899999, 0.89),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::character::ConfigCharacter": (
+          skin_path: "Characters/SRUAP_Turret_Order5/Skins/Skin0",
+          character_record: "Characters/SRUAP_Turret_Order5/CharacterRecords/Root",
+        ),
+        "lol_core::team::Team": Order,
+      },
+    ),
+    4294967255: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (5048.0, 43.0, 4812.0),
+          rotation: (0.0, 0.35020736, 0.0, 0.9366722),
+          scale: (1.0, 0.99999994, 0.99999994),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::character::ConfigCharacter": (
+          skin_path: "Characters/Turret/Skins/Skin48",
+          character_record: "Characters/Turret/CharacterRecords/SR_Inner",
+        ),
+        "lol_core::team::Team": Order,
+      },
+    ),
+    4294967256: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (3651.0, 91.0, 3696.0),
+          rotation: (0.0, 0.38268346, 0.0, 0.92387956),
+          scale: (0.99999994, 0.99999994, 0.9999999),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::character::ConfigCharacter": (
+          skin_path: "Characters/Turret/Skins/Skin48",
+          character_record: "Characters/Turret/CharacterRecords/SR_Inhibitor",
+        ),
+        "lol_core::team::Team": Order,
+      },
+    ),
+    4294967257: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (981.0, 37.0, 10441.0),
+          rotation: (0.0, 0.043619387, 0.0, 0.99904835),
+          scale: (1.0, 0.99999994, 0.99999994),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::character::ConfigCharacter": (
+          skin_path: "Characters/Turret/Skins/Skin48",
+          character_record: "Characters/Turret/CharacterRecords/SR_Outer",
+        ),
+        "lol_core::team::Team": Order,
+      },
+    ),
+    4294967258: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (11275.23, 95.291, 13663.683),
+          rotation: (0.0, 0.70710677, 0.0, 0.7071067),
+          scale: (0.99999994, 0.99999994, 0.9999999),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::character::ConfigCharacter": (
+          skin_path: "Characters/Inhibitor/Skins/Skin41",
+          character_record: "Characters/Inhibitor/CharacterRecords/SR_Chaos",
+        ),
+        "lol_core::team::Team": Chaos,
+      },
+    ),
+    4294967259: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (1172.7019, 88.00346, 3583.286),
+          rotation: (0.0, -0.00016991835, 0.0, 1.0),
+          scale: (1.0000008, 0.99999994, 1.0000006),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::character::ConfigCharacter": (
+          skin_path: "Characters/Inhibitor/Skins/Skin40",
+          character_record: "Characters/Inhibitor/CharacterRecords/SR_Order",
+        ),
+        "lol_core::team::Team": Order,
+      },
+    ),
+    4294967260: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (14576.0, 466.0, 14693.0),
+          rotation: (0.0, 0.0, 0.0, 1.0),
+          scale: (0.5, 0.5, 0.5),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::character::ConfigCharacter": (
+          skin_path: "Characters/SRUAP_MageCrystal/Skins/Skin0",
+          character_record: "Characters/SRUAP_MageCrystal/CharacterRecords/Root",
+        ),
+        "lol_core::team::Team": Chaos,
+      },
+    ),
+    4294967261: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (7765.244, 50.383, 4020.187),
+          rotation: (-0.012556903, 0.9409928, 0.039213773, -0.33591273),
+          scale: (1.0, 1.0, 1.0),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::character::ConfigCharacter": (
+          skin_path: "Characters/SRU_Red/Skins/Skin3",
+          character_record: "Characters/SRU_Red/CharacterRecords/Root",
+        ),
+        "lol_core::team::Team": Neutral,
+      },
+    ),
+    4294967262: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (4400.0, -62.0, 9600.0),
+          rotation: (0.0, 0.92387956, 0.0, -0.38268346),
+          scale: (0.99999994, 1.0, 0.99999994),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::character::ConfigCharacter": (
+          skin_path: "Characters/Sru_Crab/Skins/Skin0",
+          character_record: "Characters/Sru_Crab/CharacterRecords/Root",
+        ),
+        "lol_core::team::Team": Neutral,
+      },
+    ),
+    4294967263: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (6962.718, 51.141, 5354.354),
+          rotation: (-0.06581233, 0.8843191, 0.047622345, 0.45976132),
+          scale: (0.9999999, 1.0, 1.0),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::character::ConfigCharacter": (
+          skin_path: "Characters/SRU_RazorbeakMini/Skins/Skin0",
+          character_record: "Characters/SRU_RazorbeakMini/CharacterRecords/Root",
+        ),
+        "lol_core::team::Team": Neutral,
+      },
+    ),
+    4294967264: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (3821.4885, 51.8755, 7901.054),
+          rotation: (0.0, -0.5807961, 0.0, 0.814049),
+          scale: (0.9999999, 1.0, 0.99999994),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::character::ConfigCharacter": (
+          skin_path: "Characters/SRU_Blue/Skins/Skin4",
+          character_record: "Characters/SRU_Blue/CharacterRecords/Root",
+        ),
+        "lol_core::team::Team": Neutral,
+      },
+    ),
+    4294967265: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (7986.997, 48.8, 9471.389),
+          rotation: (0.0, -0.39608514, 0.0, 0.9182138),
+          scale: (0.9999998, 1.0, 0.9999998),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::character::ConfigCharacter": (
+          skin_path: "Characters/SRU_Razorbeak/Skins/Skin0",
+          character_record: "Characters/SRU_Razorbeak/CharacterRecords/Root",
+        ),
+        "lol_core::team::Team": Neutral,
+      },
+    ),
+    4294967266: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (7101.869, 51.27, 10900.547),
+          rotation: (0.0, 0.36678073, 0.0, 0.93030745),
+          scale: (0.9999999, 0.99999994, 0.9999998),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::character::ConfigCharacter": (
+          skin_path: "Characters/SRU_Red/Skins/Skin3",
+          character_record: "Characters/SRU_Red/CharacterRecords/Root",
+        ),
+        "lol_core::team::Team": Neutral,
+      },
+    ),
+    4294967267: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (6547.0923, 47.607788, 12156.458),
+          rotation: (0.0, 0.0, 0.0, 1.0),
+          scale: (1.0, 1.0, 1.0),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::character::ConfigCharacter": (
+          skin_path: "Characters/SRU_KrugMini/Skins/Skin0",
+          character_record: "Characters/SRU_KrugMini/CharacterRecords/Root",
+        ),
+        "lol_core::team::Team": Neutral,
+      },
+    ),
+    4294967268: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (8482.471, 50.653, 2705.948),
+          rotation: (0.0, 1.0, 0.0, -0.00000004371139),
+          scale: (1.0, 1.0, 1.0),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::character::ConfigCharacter": (
+          skin_path: "Characters/SRU_Krug/Skins/Skin0",
+          character_record: "Characters/SRU_Krug/CharacterRecords/Root",
+        ),
+        "lol_core::team::Team": Neutral,
+      },
+    ),
+    4294967269: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (11031.729, 51.723, 6990.844),
+          rotation: (0.0, 0.8568172, 0.0, 0.51562035),
+          scale: (0.99999994, 1.0, 0.99999994),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::character::ConfigCharacter": (
+          skin_path: "Characters/SRU_Blue/Skins/Skin4",
+          character_record: "Characters/SRU_Blue/CharacterRecords/Root",
+        ),
+        "lol_core::team::Team": Neutral,
+      },
+    ),
+    4294967270: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (7724.229, 52.144, 9724.084),
+          rotation: (0.0, 0.4517114, 0.0, 0.8921642),
+          scale: (1.0, 1.0, 1.0),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::character::ConfigCharacter": (
+          skin_path: "Characters/SRU_RazorbeakMini/Skins/Skin0",
+          character_record: "Characters/SRU_RazorbeakMini/CharacterRecords/Root",
+        ),
+        "lol_core::team::Team": Neutral,
+      },
+    ),
+    4294967271: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (6949.8696, 50.27794, 5585.84),
+          rotation: (-0.00007044343, 0.9996684, -0.000053551477, -0.02574718),
+          scale: (0.99999994, 1.0, 0.99999994),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::character::ConfigCharacter": (
+          skin_path: "Characters/SRU_RazorbeakMini/Skins/Skin0",
+          character_record: "Characters/SRU_RazorbeakMini/CharacterRecords/Root",
+        ),
+        "lol_core::team::Team": Neutral,
+      },
+    ),
+    4294967272: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (11008.152, 51.24, 8387.408),
+          rotation: (0.0, 0.3781345, 0.0, 0.9257507),
+          scale: (1.0, 1.0, 1.0000001),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::character::ConfigCharacter": (
+          skin_path: "Characters/SRU_Murkwolf/Skins/Skin0",
+          character_record: "Characters/SRU_Murkwolf/CharacterRecords/Root",
+        ),
+        "lol_core::team::Team": Neutral,
+      },
+    ),
+    4294967273: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (10842.231, 51.240334, 8442.007),
+          rotation: (0.0, 0.44125715, 0.0, 0.89738077),
+          scale: (0.9999999, 1.0, 0.99999994),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::character::ConfigCharacter": (
+          skin_path: "Characters/SRU_MurkwolfMini/Skins/Skin0",
+          character_record: "Characters/SRU_MurkwolfMini/CharacterRecords/Root",
+        ),
+        "lol_core::team::Team": Neutral,
+      },
+    ),
+    4294967274: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (2110.628, 54.0, 8450.984),
+          rotation: (0.0, 0.78031075, 0.0, 0.6253921),
+          scale: (1.0, 1.0, 1.0),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::character::ConfigCharacter": (
+          skin_path: "Characters/SRU_Gromp/Skins/Skin0",
+          character_record: "Characters/SRU_Gromp/CharacterRecords/Root",
+        ),
+        "lol_core::team::Team": Neutral,
+      },
+    ),
+    4294967275: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (6785.813, 50.278053, 5483.475),
+          rotation: (0.0004636071, 0.7288727, 0.003403498, 0.6846405),
+          scale: (0.9999999, 1.0, 1.0),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::character::ConfigCharacter": (
+          skin_path: "Characters/SRU_Razorbeak/Skins/Skin0",
+          character_record: "Characters/SRU_Razorbeak/CharacterRecords/Root",
+        ),
+        "lol_core::team::Team": Neutral,
+      },
+    ),
+    4294967276: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (12679.631, 53.99931, 6428.4287),
+          rotation: (0.0, 0.8723646, 0.0, -0.4888559),
+          scale: (1.0, 1.0, 0.99999994),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::character::ConfigCharacter": (
+          skin_path: "Characters/SRU_Gromp/Skins/Skin0",
+          character_record: "Characters/SRU_Gromp/CharacterRecords/Root",
+        ),
+        "lol_core::team::Team": Neutral,
+      },
+    ),
+    4294967277: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (4938.7188, -122.93931, 10383.973),
+          rotation: (0.0, 0.94836086, 0.0, -0.31719318),
+          scale: (0.9999997, 1.0, 0.9999999),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::character::ConfigCharacter": (
+          skin_path: "Characters/SRU_RiftHerald/Skins/Skin0",
+          character_record: "Characters/SRU_RiftHerald/CharacterRecords/Root",
+        ),
+        "lol_core::team::Team": Neutral,
+      },
+    ),
+    4294967278: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (5210.0, -71.24, 10424.0),
+          rotation: (0.0020174875, 0.8088403, -0.012065035, -0.5879012),
+          scale: (1.0, 1.0, 0.99999994),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::character::ConfigCharacter": (
+          skin_path: "Characters/SRU_Horde/Skins/Skin0",
+          character_record: "Characters/SRU_Horde/CharacterRecords/Root",
+        ),
+        "lol_core::team::Team": Neutral,
+      },
+    ),
+    4294967279: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (7106.229, 48.144, 5266.084),
+          rotation: (0.0, 0.9935761, 0.0, 0.11316565),
+          scale: (0.99999994, 1.0, 0.99999994),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::character::ConfigCharacter": (
+          skin_path: "Characters/SRU_RazorbeakMini/Skins/Skin0",
+          character_record: "Characters/SRU_RazorbeakMini/CharacterRecords/Root",
+        ),
+        "lol_core::team::Team": Neutral,
+      },
+    ),
+    4294967280: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (3730.628, 45.0, 6593.984),
+          rotation: (0.0, 0.9103854, 0.0, -0.4137615),
+          scale: (1.0, 1.0, 0.99999994),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::character::ConfigCharacter": (
+          skin_path: "Characters/SRU_MurkwolfMini/Skins/Skin0",
+          character_record: "Characters/SRU_MurkwolfMini/CharacterRecords/Root",
+        ),
+        "lol_core::team::Team": Order,
+      },
+    ),
+    4294967281: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (8275.471, 50.653, 2688.948),
+          rotation: (0.0, 1.0, 0.0, -0.00000004371139),
+          scale: (1.0, 1.0, 1.0),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::character::ConfigCharacter": (
+          skin_path: "Characters/SRU_KrugMini/Skins/Skin0",
+          character_record: "Characters/SRU_KrugMini/CharacterRecords/Root",
+        ),
+        "lol_core::team::Team": Neutral,
+      },
+    ),
+    4294967282: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (3980.628, 45.0, 6443.984),
+          rotation: (0.0, 0.9497769, 0.0, -0.3129282),
+          scale: (0.99999994, 1.0, 0.9999999),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::character::ConfigCharacter": (
+          skin_path: "Characters/SRU_MurkwolfMini/Skins/Skin0",
+          character_record: "Characters/SRU_MurkwolfMini/CharacterRecords/Root",
+        ),
+        "lol_core::team::Team": Neutral,
+      },
+    ),
+    4294967283: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (6852.229, 48.144, 5227.084),
+          rotation: (0.07035019, 0.9746806, -0.05798486, 0.20417218),
+          scale: (0.99999994, 1.0, 0.99999994),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::character::ConfigCharacter": (
+          skin_path: "Characters/SRU_RazorbeakMini/Skins/Skin0",
+          character_record: "Characters/SRU_RazorbeakMini/CharacterRecords/Root",
+        ),
+        "lol_core::team::Team": Neutral,
+      },
+    ),
+    4294967284: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (11058.152, 51.24, 8217.408),
+          rotation: (0.0, 0.3951202, 0.0, 0.91862947),
+          scale: (1.0, 1.0, 1.0),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::character::ConfigCharacter": (
+          skin_path: "Characters/SRU_MurkwolfMini/Skins/Skin0",
+          character_record: "Characters/SRU_MurkwolfMini/CharacterRecords/Root",
+        ),
+        "lol_core::team::Team": Order,
+      },
+    ),
+    4294967285: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (7997.229, 52.144, 9772.084),
+          rotation: (0.0, -0.29481253, 0.0, 0.95555514),
+          scale: (1.0, 1.0, 1.0),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::character::ConfigCharacter": (
+          skin_path: "Characters/SRU_RazorbeakMini/Skins/Skin0",
+          character_record: "Characters/SRU_RazorbeakMini/CharacterRecords/Root",
+        ),
+        "lol_core::team::Team": Neutral,
+      },
+    ),
+    4294967286: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (7854.389, 52.226, 9610.474),
+          rotation: (0.0, -0.37021935, 0.0, 0.9289444),
+          scale: (0.9999999, 1.0, 0.9999999),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::character::ConfigCharacter": (
+          skin_path: "Characters/SRU_RazorbeakMini/Skins/Skin0",
+          character_record: "Characters/SRU_RazorbeakMini/CharacterRecords/Root",
+        ),
+        "lol_core::team::Team": Neutral,
+      },
+    ),
+    4294967287: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (7756.997, 48.8, 9451.389),
+          rotation: (0.0, 0.63655615, 0.0, 0.77123046),
+          scale: (1.0000001, 1.0, 1.0000001),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::character::ConfigCharacter": (
+          skin_path: "Characters/SRU_RazorbeakMini/Skins/Skin0",
+          character_record: "Characters/SRU_RazorbeakMini/CharacterRecords/Root",
+        ),
+        "lol_core::team::Team": Neutral,
+      },
+    ),
+    4294967288: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (3780.628, 45.0, 6443.984),
+          rotation: (0.0, 0.9276345, 0.0, -0.37348926),
+          scale: (0.9999999, 1.0, 0.99999994),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::character::ConfigCharacter": (
+          skin_path: "Characters/SRU_Murkwolf/Skins/Skin0",
+          character_record: "Characters/SRU_Murkwolf/CharacterRecords/Root",
+        ),
+        "lol_core::team::Team": Neutral,
+      },
+    ),
+    4294967289: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (4841.943, -71.239914, 10638.95),
+          rotation: (0.009779235, 0.99120444, -0.007348597, 0.13177323),
+          scale: (1.0, 1.0, 0.99999994),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::character::ConfigCharacter": (
+          skin_path: "Characters/SRU_Horde/Skins/Skin0",
+          character_record: "Characters/SRU_Horde/CharacterRecords/Root",
+        ),
+        "lol_core::team::Team": Neutral,
+      },
+    ),
+    4294967290: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (7060.458, 50.278, 5499.274),
+          rotation: (-0.21221311, -0.6585033, 0.40728897, 0.5962004),
+          scale: (1.0000002, 1.0, 1.0000002),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::character::ConfigCharacter": (
+          skin_path: "Characters/SRU_RazorbeakMini/Skins/Skin0",
+          character_record: "Characters/SRU_RazorbeakMini/CharacterRecords/Root",
+        ),
+        "lol_core::team::Team": Neutral,
+      },
+    ),
+    4294967291: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (5007.0, 24.0, 10471.0),
+          rotation: (0.006057862, 0.9620748, -0.010626169, -0.27251127),
+          scale: (1.0, 1.0, 0.99999994),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::character::ConfigCharacter": (
+          skin_path: "Characters/SRU_Baron/Skins/Skin0",
+          character_record: "Characters/SRU_Baron/CharacterRecords/Root",
+        ),
+        "lol_core::team::Team": Neutral,
+      },
+    ),
+    4294967292: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (4790.0, -71.24, 10182.446),
+          rotation: (0.011056808, 0.34490785, 0.0052328147, 0.93855685),
+          scale: (0.99999994, 1.0, 1.0),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::character::ConfigCharacter": (
+          skin_path: "Characters/SRU_Horde/Skins/Skin0",
+          character_record: "Characters/SRU_Horde/CharacterRecords/Root",
+        ),
+        "lol_core::team::Team": Neutral,
+      },
+    ),
+    4294967293: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (6317.0923, 47.607788, 12146.458),
+          rotation: (0.0, 0.0, 0.0, 1.0),
+          scale: (1.0, 1.0, 1.0),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::character::ConfigCharacter": (
+          skin_path: "Characters/SRU_Krug/Skins/Skin0",
+          character_record: "Characters/SRU_Krug/CharacterRecords/Root",
+        ),
+        "lol_core::team::Team": Neutral,
+      },
+    ),
+    4294967294: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (7886.9966, 48.80005, 9312.39),
+          rotation: (0.0, 0.0, 0.0, 1.0),
+          scale: (1.0, 1.0, 1.0),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::character::ConfigCharacter": (
+          skin_path: "Characters/SRU_RazorbeakMini/Skins/Skin0",
+          character_record: "Characters/SRU_RazorbeakMini/CharacterRecords/Root",
+        ),
+        "lol_core::team::Team": Neutral,
+      },
+    ),
+    4294967295: (
+      components: {
+        "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
+        "bevy_transform::components::transform::Transform": (
+          translation: (10500.0, -62.0, 5170.0),
+          rotation: (0.0, 0.38268346, 0.0, 0.92387956),
+          scale: (0.99999994, 1.0, 0.99999994),
+        ),
+        "bevy_transform::components::transform::TransformTreeChanged": (),
+        "lol_base::character::ConfigCharacter": (
+          skin_path: "Characters/Sru_Crab/Skins/Skin0",
+          character_record: "Characters/Sru_Crab/CharacterRecords/Root",
+        ),
+        "lol_core::team::Team": Neutral,
+      },
+    ),
+  },
+)

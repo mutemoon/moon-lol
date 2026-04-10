@@ -164,6 +164,7 @@ impl SkillHarness {
                 m_simple_tooltip_calculation_display: None,
                 result_modifier: None,
                 tooltip_only: None,
+                unk_0x72c5c2a8: None,
             }),
         );
 

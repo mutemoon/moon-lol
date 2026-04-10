@@ -2,7 +2,11 @@ use std::fs;
 use std::io::Read;
 use std::path::{Path, PathBuf};
 
+use bevy::reflect::TypePath;
+use league_property::from_entry;
 use league_property::prop::PropFile;
+use lol_base::prop::HashKey;
+use serde::de::DeserializeOwned;
 
 use crate::prop_bin::LeagueWadLoaderTrait;
 use crate::wad::LeagueWadLoader;
@@ -60,14 +64,15 @@ impl LeagueLoader {
         })
     }
 
-    pub fn get_prop_bin_by_path(&self, path: &str) -> Result<PropFile, Error> {
-        for wad_loader in &self.wads {
-            if let Ok(bin) = wad_loader.get_prop_bin_by_path(path) {
-                return Ok(bin);
+    pub fn get_prop_group_by_paths(&self, paths: Vec<&str>) -> Result<PropGroup, Error> {
+        let mut prop_files = Vec::new();
+        for path in paths {
+            if let Ok(bin) = self.get_prop_bin_by_path(path) {
+                prop_files.push(bin);
             }
         }
 
-        Err(Error::Custom("Prop file not found"))
+        Ok(PropGroup::new(prop_files))
     }
 
     pub fn from_relative_path(root_dir: &str, wads: Vec<&str>) -> Self {
@@ -94,6 +99,54 @@ impl LeagueWadLoaderTrait for LeagueLoader {
                 return Ok(reader);
             }
         }
+
         Err(Error::Custom("Wad reader not found"))
+    }
+}
+
+pub struct PropGroup {
+    prop_file: Vec<PropFile>,
+}
+
+impl PropGroup {
+    pub fn new(prop_file: Vec<PropFile>) -> Self {
+        Self { prop_file }
+    }
+}
+
+impl Data for PropGroup {
+    fn get_data<T: TypePath + DeserializeOwned>(&self, hash: impl Into<HashKey<T>>) -> T {
+        self.get_data_option(hash).unwrap()
+    }
+
+    fn get_data_option<T: TypePath + DeserializeOwned>(
+        &self,
+        hash: impl Into<HashKey<T>>,
+    ) -> Option<T> {
+        let hash = hash.into().0 .0;
+        self.prop_file
+            .iter()
+            .find_map(|v| v.get_data_option::<T>(hash))
+    }
+}
+
+pub trait Data {
+    fn get_data<T: TypePath + DeserializeOwned>(&self, hash: impl Into<HashKey<T>>) -> T {
+        self.get_data_option(hash).unwrap()
+    }
+
+    fn get_data_option<T: TypePath + DeserializeOwned>(
+        &self,
+        hash: impl Into<HashKey<T>>,
+    ) -> Option<T>;
+}
+
+impl Data for PropFile {
+    fn get_data_option<T: TypePath + DeserializeOwned>(
+        &self,
+        hash: impl Into<HashKey<T>>,
+    ) -> Option<T> {
+        self.get_entry(hash.into().0 .0)
+            .and_then(|v| from_entry::<T>(v).ok())
     }
 }

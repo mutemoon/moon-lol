@@ -492,6 +492,12 @@ dependencies = [
 
 [[package]]
 name = "base64"
+version = "0.13.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9e1b586273c5702936fe7b7d6896644d8be71e6314cfe09d3167c95f712589e8"
+
+[[package]]
+name = "base64"
 version = "0.21.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9d297deb1925b89f2ccc13d7635fa0714f12c87adce1c75356b39ca9b7178567"
@@ -3415,10 +3421,13 @@ version = "1.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e3ce1918195723ce6ac74e80542c5a96a40c2b26162c1957a5cd70799b8cacf7"
 dependencies = [
+ "base64 0.13.1",
  "byteorder",
  "gltf-json",
+ "image",
  "lazy_static",
  "serde_json",
+ "urlencoding",
 ]
 
 [[package]]
@@ -4105,12 +4114,14 @@ dependencies = [
 name = "league_loader"
 version = "0.1.0"
 dependencies = [
+ "bevy",
  "league_core",
  "league_file",
  "league_property",
  "league_utils",
  "lol_base",
  "nom 8.0.0",
+ "serde",
  "thiserror 2.0.18",
  "zstd",
 ]
@@ -4134,6 +4145,7 @@ version = "0.1.0"
 dependencies = [
  "bevy",
  "bincode",
+ "gltf",
  "league_core",
  "league_file",
  "league_loader",
@@ -4337,6 +4349,7 @@ dependencies = [
  "lol_base",
  "nom 8.0.0",
  "regex",
+ "ron 0.8.1",
  "serde",
  "thiserror 2.0.18",
 ]
@@ -4507,6 +4520,7 @@ version = "0.1.0"
 dependencies = [
  "bevy",
  "bevy_egui",
+ "bincode",
  "crossbeam-channel",
  "image",
  "league_core",
@@ -7002,6 +7016,12 @@ dependencies = [
  "percent-encoding",
  "serde",
 ]
+
+[[package]]
+name = "urlencoding"
+version = "2.1.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "daf8dba3b7eb870caf1ddeed7bc9d2a049f3cfdfae7cb521b087cc33ae4c49da"
 
 [[package]]
 name = "utf-8"

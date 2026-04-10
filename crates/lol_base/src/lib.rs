@@ -1,4 +1,6 @@
 pub mod animation;
+pub mod barrack;
+pub mod character;
 pub mod game;
 pub mod grid;
 pub mod mapgeo;

@@ -1,7 +1,8 @@
 use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
 
-#[derive(Component, Debug, PartialEq, Eq, Hash, Clone, Serialize, Deserialize)]
+#[derive(Component, Debug, PartialEq, Eq, Hash, Clone, Serialize, Deserialize, Reflect)]
+#[reflect(Component)]
 pub enum Lane {
     Top = 2,
     Mid = 1,

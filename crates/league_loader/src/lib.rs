@@ -1,9 +1,9 @@
 pub mod game;
-pub mod map;
 pub mod prop_bin;
 pub mod reader;
 pub mod wad;
 pub mod wad_parse;
+
 use thiserror::Error;
 
 #[derive(Error, Debug)]

@@ -16,8 +16,8 @@ pub struct LeagueMapGeo {
     pub vertex_buffers: Vec<VertexBuffer>,
     pub index_buffers: Vec<IndexBuffer>,
     pub meshes: Vec<LeagueMapGeoMesh>,
-    pub scene_graphs: Vec<SceneGraph>,
-    pub planar_reflectors: Vec<PlanarReflector>,
+    // pub scene_graphs: Vec<SceneGraph>,
+    // pub planar_reflectors: Vec<PlanarReflector>,
 }
 
 impl LeagueMapGeo {
@@ -42,12 +42,12 @@ impl LeagueMapGeo {
         let (i, mesh_count) = le_u32(i)?;
         let (i, meshes) = count(LeagueMapGeoMesh::parse, mesh_count as usize).parse(i)?;
 
-        let (i, scene_graph_count) = le_u32(i)?;
-        let (i, scene_graphs) = count(SceneGraph::parse, scene_graph_count as usize).parse(i)?;
+        // let (i, scene_graph_count) = le_u32(i)?;
+        // let (i, scene_graphs) = count(SceneGraph::parse, scene_graph_count as usize).parse(i)?;
 
-        let (i, planar_reflector_count) = le_u32(i)?;
-        let (i, planar_reflectors) =
-            count(PlanarReflector::parse, planar_reflector_count as usize).parse(i)?;
+        // let (i, planar_reflector_count) = le_u32(i)?;
+        // let (i, planar_reflectors) =
+        //     count(PlanarReflector::parse, planar_reflector_count as usize).parse(i)?;
 
         Ok((
             i,
@@ -58,8 +58,8 @@ impl LeagueMapGeo {
                 vertex_buffers,
                 index_buffers,
                 meshes,
-                scene_graphs,
-                planar_reflectors,
+                // scene_graphs,
+                // planar_reflectors,
             },
         ))
     }
@@ -449,6 +449,9 @@ impl LeagueMapGeoMesh {
         let (i, index_buffer_id) = le_u32(i)?;
         let (i, env_vis_raw) = le_u8(i)?;
         let environment_visibility = EnvironmentVisibility::from_bits_truncate(env_vis_raw);
+
+        let (i, val) = le_u32(i)?;
+
         let (i, visibility_controller_path_hash) = le_u32(i)?;
         let (i, submesh_count) = le_u32(i)?;
         let (i, submeshes) = count(Submesh::parse, submesh_count as usize).parse(i)?;

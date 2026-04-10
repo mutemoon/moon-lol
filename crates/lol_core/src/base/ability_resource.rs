@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-#[derive(Component)]
+#[derive(Component, Default)]
 pub struct AbilityResource {
     pub ar_type: AbilityResourceType,
     pub value: f32,
@@ -11,7 +11,9 @@ pub struct AbilityResource {
     pub regen_per_level: f32,
 }
 
+#[derive(Default)]
 pub enum AbilityResourceType {
+    #[default]
     Mana,
     Energy,
     Turret,

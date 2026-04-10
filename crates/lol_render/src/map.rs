@@ -37,9 +37,10 @@ fn startup_load_map_geo(
     asset_server: Res<AssetServer>,
     res_map_name: Res<MapName>,
 ) {
-    commands.insert_resource(Loading::new(asset_server.load_league::<ConfigMapGeo>(
-        &format!("data/{}.mapgeo", &res_map_name.get_materials_path()),
-    )));
+    commands.insert_resource(Loading::new(asset_server.load::<ConfigMapGeo>(&format!(
+        "data/{}.mapgeo",
+        &res_map_name.get_materials_path()
+    ))));
 }
 
 fn update_spawn_map_geometry(

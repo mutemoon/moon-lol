@@ -56,9 +56,6 @@ pub struct AbilityResourcePipsData {
 #[serde(rename_all = "camelCase")]
 pub struct AbilityResourceSlotInfo {
     pub ar_allow_max_value_to_be_overridden: Option<bool>,
-    pub ar_base: Option<f32>,
-    pub ar_base_factor_regen: Option<f32>,
-    pub ar_base_static_regen: Option<f32>,
     pub ar_display_as_pips: Option<bool>,
     pub ar_has_regen_text: Option<bool>,
     pub ar_increments: Option<f32>,
@@ -70,12 +67,23 @@ pub struct AbilityResourceSlotInfo {
     pub ar_override_medium_pip_name: Option<String>,
     pub ar_override_small_pip_name: Option<String>,
     pub ar_override_spacer_name: Option<String>,
-    pub ar_per_level: Option<f32>,
-    pub ar_regen_per_level: Option<f32>,
     pub ar_type: Option<u8>,
     pub hide_empty_pips: Option<bool>,
+    pub unk_0x3a509002: Option<Unk0xce9b917b>,
+    pub unk_0x452033bb: Option<Unk0xce9b917b>,
     pub unk_0x4eb6a404: Option<u8>,
+    pub unk_0x6216bf7b: Option<Unk0xce9b917b>,
+    pub unk_0x726ee5cd: Option<Unk0xce9b917b>,
+    pub unk_0xc4ab3550: Option<Unk0xce9b917b>,
+    pub unk_0xfa70e5c9: Option<bool>,
     pub visibility_flags: Option<u8>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct AboveHealthPercentCastRequirement {
+    pub m_invert_result: bool,
+    pub unk_0x137cf12a: u32,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -232,7 +240,6 @@ pub struct AttackSlotData {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct BankUnit {
-    pub asynchrone: Option<bool>,
     pub bank_path: Option<Vec<String>>,
     pub events: Option<Vec<String>>,
     pub name: String,
@@ -348,7 +355,7 @@ pub struct ByCharLevelBreakpointsCalculationPart {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct ByCharLevelFormulaCalculationPart {
-    pub m_values: Vec<f32>,
+    pub values: Vec<f32>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -441,20 +448,9 @@ pub struct CharacterRecord {
     pub area_indicator_radius: Option<f32>,
     pub area_indicator_target_distance: Option<f32>,
     pub area_indicator_texture_size: Option<f32>,
-    pub armor_per_level: Option<f32>,
     pub attack_auto_interrupt_percent: Option<f32>,
-    pub attack_range: Option<f32>,
-    pub attack_speed: Option<f32>,
-    pub attack_speed_per_level: Option<f32>,
-    pub attack_speed_ratio: Option<f32>,
-    pub base_armor: Option<f32>,
     pub base_crit_chance: Option<f32>,
-    pub base_damage: Option<f32>,
-    pub base_factor_hp_regen: Option<f32>,
-    pub base_hp: Option<f32>,
-    pub base_move_speed: Option<f32>,
-    pub base_spell_block: Option<f32>,
-    pub base_static_hp_regen: Option<f32>,
+    pub base_mr: Option<Unk0xce9b917b>,
     pub basic_attack: Option<AttackSlotData>,
     pub char_audio_name_override: Option<String>,
     pub character_tool_data: Option<CharacterToolData>,
@@ -462,7 +458,6 @@ pub struct CharacterRecord {
     pub crit_damage_multiplier: Option<f32>,
     pub crit_per_level: Option<f32>,
     pub critical_attack: Option<String>,
-    pub damage_per_level: Option<f32>,
     pub death_event_listening_radius: Option<f32>,
     pub death_time: Option<f32>,
     pub disabled_target_laser_effects: Option<TargetLaserComponentEffects>,
@@ -497,8 +492,6 @@ pub struct CharacterRecord {
     pub hover_line_indicator_target_texture_name: Option<String>,
     pub hover_line_indicator_width: Option<f32>,
     pub hover_line_indicator_width_minimap: Option<f32>,
-    pub hp_per_level: Option<f32>,
-    pub hp_regen_per_level: Option<f32>,
     pub joint_for_anim_adjusted_selection: Option<String>,
     pub launch_area_data: Option<LaunchAreaData>,
     pub local_exp_given_on_death: Option<f32>,
@@ -550,21 +543,37 @@ pub struct CharacterRecord {
     pub self_champ_specific_health_suffix: Option<String>,
     pub significance: Option<f32>,
     pub silhouette_attachment_anim: Option<String>,
-    pub spell_block_per_level: Option<f32>,
-    pub spell_level_up_info: Option<Vec<SpellLevelUpInfo>>,
     pub spell_names: Option<Vec<String>>,
     pub spells: Option<Vec<u32>>,
     pub target_laser_effects: Option<TargetLaserComponentEffects>,
     pub tower_targeting_priority_boost: Option<f32>,
     pub treat_auto_attacks_as_normal_spells: Option<TreatAutoAttacksAsNormalSpells>,
     pub unit_tags_string: Option<String>,
+    pub unk_0x1262a25: Option<Unk0xce9b917b>,
+    pub unk_0x18956a21: Option<Unk0xce9b917b>,
+    pub unk_0x1abb82c0: Option<Unk0xef35eacc>,
+    pub unk_0x2290fc9a: Option<Unk0xce9b917b>,
     pub unk_0x3f975e4a: Option<bool>,
     pub unk_0x43135375: Option<f32>,
+    pub unk_0x4af40dc3: Option<Unk0xce9b917b>,
+    pub unk_0x4d37af28: Option<Unk0xce9b917b>,
+    pub unk_0x4f89c991: Option<Unk0xce9b917b>,
     pub unk_0x6854087e: Option<Vec<Unk0x47f13ab0>>,
+    pub unk_0x7bd4b298: Option<Unk0xce9b917b>,
+    pub unk_0x81f10af9: Option<bool>,
+    pub unk_0x836cc82a: Option<Unk0xce9b917b>,
+    pub unk_0x8662cf12: Option<Unk0xce9b917b>,
+    pub unk_0x913157bb: Option<Unk0xce9b917b>,
     pub unk_0x9836cd87: Option<u8>,
+    pub unk_0x9eedebad: Option<Unk0xce9b917b>,
+    pub unk_0xb9f2b365: Option<Unk0xce9b917b>,
     pub unk_0xc1984296: Option<Vec<u32>>,
     pub unk_0xc5c48b41: Option<u8>,
     pub unk_0xdd661aab: Option<Unk0x280745b1>,
+    pub unk_0xe2b5d80d: Option<Unk0xce9b917b>,
+    pub unk_0xe62d9d92: Option<Unk0xce9b917b>,
+    pub unk_0xea6100d5: Option<Unk0xce9b917b>,
+    pub unk_0xeb74898c: Option<f32>,
     pub untargetable_spawn_time: Option<f32>,
     pub use_riot_relationships: Option<bool>,
     pub useable_data: Option<UseableData>,
@@ -892,12 +901,30 @@ pub enum EnumAbilityResourceByCoefficientCalculationPart {
     SumOfSubPartsCalculationPart(SumOfSubPartsCalculationPart),
     Unk0x1d452085(Unk0x1d452085),
     Unk0x382277da(Unk0x382277da),
+    Unk0x4ce08984(Unk0x4ce08984),
     Unk0x8a96ea3c(Unk0x8a96ea3c),
     Unk0x9e9e2e5c(Unk0x9e9e2e5c),
     Unk0xb22609db(Unk0xb22609db),
     Unk0xba007871(Unk0xba007871),
     Unk0xee18a47b(Unk0xee18a47b),
     Unk0xf3cbe7b2(Unk0xf3cbe7b2),
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub enum EnumAboveHealthPercentCastRequirement {
+    AboveHealthPercentCastRequirement(AboveHealthPercentCastRequirement),
+    HasAllSubRequirementsCastRequirement(HasAllSubRequirementsCastRequirement),
+    HasAtleastNSubRequirementsCastRequirement(HasAtleastNSubRequirementsCastRequirement),
+    HasBuffCastRequirement(HasBuffCastRequirement),
+    HasNNearbyUnitsRequirement(HasNNearbyUnitsRequirement),
+    HasNNearbyVisibleUnitsRequirement(HasNNearbyVisibleUnitsRequirement),
+    HasTypeAndStatusFlags(HasTypeAndStatusFlags),
+    HasUnitTagsCastRequirement(HasUnitTagsCastRequirement),
+    IsSpecifiedUnitCastRequirement(IsSpecifiedUnitCastRequirement),
+    SameTeamCastRequirement(SameTeamCastRequirement),
+    SpellSlotEqualOrGreaterThanLevelRequirement(SpellSlotEqualOrGreaterThanLevelRequirement),
+    Unk0x303c66f4(Unk0x303c66f4),
+    Unk0xe2ef74d0(Unk0xe2ef74d0),
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -1050,6 +1077,7 @@ pub enum EnumDriver {
     Unk0x83a9f4f8,
     Unk0x9bc366ca(Unk0x9bc366ca),
     Unk0xb7b43e1d(Unk0xb7b43e1d),
+    Unk0xef339ef9(Unk0xef339ef9),
     Unk0xf5821f8b,
     Unk0xfe70e9c4(Unk0xfe70e9c4),
     UvScaleBiasFromAnimationDynamicMaterialDriver(UvScaleBiasFromAnimationDynamicMaterialDriver),
@@ -1085,21 +1113,6 @@ pub enum EnumGameCalculation {
     GameCalculation(GameCalculation),
     GameCalculationConditional(GameCalculationConditional),
     GameCalculationModified(GameCalculationModified),
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub enum EnumHasAllSubRequirementsCastRequirement {
-    HasAllSubRequirementsCastRequirement(HasAllSubRequirementsCastRequirement),
-    HasAtleastNSubRequirementsCastRequirement(HasAtleastNSubRequirementsCastRequirement),
-    HasBuffCastRequirement(HasBuffCastRequirement),
-    HasNNearbyUnitsRequirement(HasNNearbyUnitsRequirement),
-    HasNNearbyVisibleUnitsRequirement(HasNNearbyVisibleUnitsRequirement),
-    HasTypeAndStatusFlags(HasTypeAndStatusFlags),
-    HasUnitTagsCastRequirement(HasUnitTagsCastRequirement),
-    IsSpecifiedUnitCastRequirement(IsSpecifiedUnitCastRequirement),
-    SameTeamCastRequirement(SameTeamCastRequirement),
-    Unk0x303c66f4(Unk0x303c66f4),
-    Unk0xe2ef74d0(Unk0xe2ef74d0),
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -1148,12 +1161,15 @@ pub enum EnumMap {
     Unk0x25e3f5d0(Unk0x25e3f5d0),
     Unk0x3c995caf(Unk0x3c995caf),
     Unk0x4cf74021(Unk0x4cf74021),
+    Unk0x8a533844(Unk0x8a533844),
     Unk0x9aa5b4bc(Unk0x9aa5b4bc),
     Unk0xad65d8c4(Unk0xad65d8c4),
     Unk0xba138ae3(Unk0xba138ae3),
     Unk0xcdb1c8f6(Unk0xcdb1c8f6),
     Unk0xcf4a55da(Unk0xcf4a55da),
     Unk0xd178749c(Unk0xd178749c),
+    Unk0xd8f395a4(Unk0xd8f395a4),
+    Unk0xe64ff723(Unk0xe64ff723),
     Unk0xeb997689(Unk0xeb997689),
 }
 
@@ -1276,6 +1292,13 @@ pub enum EnumUnk0x1aae122 {
     Unk0x1aae122(Unk0x1aae122),
     Unk0x1ddfbeeb,
     Unk0x93adc5b3(Unk0x93adc5b3),
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub enum EnumUnk0x3df230bf {
+    Unk0x3df230bf(Unk0x3df230bf),
+    Unk0x526478f0,
+    Unk0xcd5a34f5(Unk0xcd5a34f5),
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -1468,9 +1491,7 @@ pub struct FixedTimeSplineMovement {
     pub m_start_bone_name: String,
     pub m_target_bone_name: Option<String>,
     pub m_target_height_augment: Option<f32>,
-    pub m_tracks_target: Option<bool>,
     pub m_travel_time: f32,
-    pub m_use_missile_position_as_origin: Option<bool>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -1569,17 +1590,20 @@ pub struct GameCalculation {
     pub m_simple_tooltip_calculation_display: Option<u8>,
     pub result_modifier: Option<u8>,
     pub tooltip_only: Option<bool>,
+    pub unk_0x72c5c2a8: Option<u32>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct GameCalculationConditional {
-    pub m_conditional_calculation_requirements: HasBuffCastRequirement,
+    pub m_conditional_calculation_requirements: EnumAboveHealthPercentCastRequirement,
     pub m_conditional_game_calculation: u32,
-    pub m_default_game_calculation: u32,
+    pub m_default_game_calculation: Option<u32>,
     pub m_expanded_tooltip_calculation_display: Option<u8>,
     pub m_simple_tooltip_calculation_display: Option<u8>,
     pub tooltip_only: Option<bool>,
+    pub unk_0x353099b0: Option<bool>,
+    pub unk_0x72c5c2a8: Option<u32>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -1591,6 +1615,7 @@ pub struct GameCalculationModified {
     pub m_override_spell_level: Option<i32>,
     pub m_simple_tooltip_calculation_display: Option<u8>,
     pub tooltip_only: Option<bool>,
+    pub unk_0x72c5c2a8: Option<u32>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -1623,13 +1648,13 @@ pub struct GravityHeightSolver {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct HasAllSubRequirementsCastRequirement {
-    pub m_sub_requirements: Vec<Box<EnumHasAllSubRequirementsCastRequirement>>,
+    pub m_sub_requirements: Vec<Box<EnumAboveHealthPercentCastRequirement>>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct HasAtleastNSubRequirementsCastRequirement {
-    pub m_sub_requirements: Vec<Box<EnumHasAllSubRequirementsCastRequirement>>,
+    pub m_sub_requirements: Vec<Box<EnumAboveHealthPercentCastRequirement>>,
     pub m_successes_required: u32,
 }
 
@@ -1676,7 +1701,7 @@ pub struct HasNNearbyUnitsRequirement {
     pub m_distance_type: Option<u32>,
     pub m_range: f32,
     pub m_units_required: u32,
-    pub m_units_requirements: Vec<Box<EnumHasAllSubRequirementsCastRequirement>>,
+    pub m_units_requirements: Vec<Box<EnumAboveHealthPercentCastRequirement>>,
     pub unk_0x675c02b0: Option<u32>,
     pub unk_0xcec18a6a: Option<u32>,
 }
@@ -1687,7 +1712,7 @@ pub struct HasNNearbyVisibleUnitsRequirement {
     pub m_distance_type: Option<u32>,
     pub m_range: f32,
     pub m_units_required: u32,
-    pub m_units_requirements: Vec<Box<EnumHasAllSubRequirementsCastRequirement>>,
+    pub m_units_requirements: Vec<Box<EnumAboveHealthPercentCastRequirement>>,
     pub unk_0x990ecf03: Option<bool>,
 }
 
@@ -1899,7 +1924,7 @@ pub struct IntegratedValueFloat {
 #[serde(rename_all = "camelCase")]
 pub struct IntegratedValueVector2 {
     pub constant_value: Option<Vec2>,
-    pub dynamics: VfxAnimatedVector2fVariableData,
+    pub dynamics: Option<VfxAnimatedVector2fVariableData>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -2432,6 +2457,8 @@ pub struct PersistentVfxData {
     pub specific_team: Option<u32>,
     pub target_bone_name: Option<String>,
     pub target_pos_is_owner: Option<bool>,
+    pub unk_0x9dba9f88: Option<u32>,
+    pub unk_0xeaf5370d: Option<Unk0x34262325>,
     pub use_different_key_for_other_team: Option<bool>,
 }
 
@@ -2468,7 +2495,9 @@ pub struct ProductOfSubPartsCalculationPart {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct RecSpellRankUpInfo {
-    pub m_default_priority: Vec<u32>,
+    pub is_default_recommendation: Option<bool>,
+    pub m_default_priority: Option<Vec<u32>>,
+    pub m_early_level_overrides: Option<Vec<u32>>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -2646,6 +2675,7 @@ pub struct SkinCharacterDataProperties {
     pub idle_particles_effects: Option<Vec<SkinCharacterDataPropertiesCharacterIdleEffect>>,
     pub loadscreen: Option<CensoredImage>,
     pub loadscreen_vintage: Option<CensoredImage>,
+    pub m_additional_resource_resolvers: Option<Vec<u32>>,
     pub m_contextual_action_data: Option<u32>,
     pub m_emblems: Option<Vec<SkinEmblem>>,
     pub m_resource_resolver: Option<u32>,
@@ -2805,8 +2835,6 @@ pub struct SpellDataResource {
     pub cooldown_time: Option<Vec<f32>>,
     pub data_values: Option<Vec<SpellDataValue>>,
     pub data_values_mode_override: Option<HashMap<u32, SpellDataValueVector>>,
-    pub delay_cast_offset_percent: Option<f32>,
-    pub delay_total_time_percent: Option<f32>,
     pub flags: Option<u32>,
     pub img_icon_path: Option<String>,
     pub loadable: Option<u32>,
@@ -2837,8 +2865,8 @@ pub struct SpellDataResource {
     pub m_cast_range_growth_duration: Option<Vec<f32>>,
     pub m_cast_range_growth_max: Option<Vec<f32>>,
     pub m_cast_range_growth_start_time: Option<Vec<f32>>,
-    pub m_cast_requirements_caster: Option<Vec<EnumHasAllSubRequirementsCastRequirement>>,
-    pub m_cast_requirements_target: Option<Vec<EnumHasAllSubRequirementsCastRequirement>>,
+    pub m_cast_requirements_caster: Option<Vec<EnumAboveHealthPercentCastRequirement>>,
+    pub m_cast_requirements_target: Option<Vec<EnumAboveHealthPercentCastRequirement>>,
     pub m_cast_time: Option<f32>,
     pub m_cast_type: Option<u32>,
     pub m_caster_position_end_of_cast_update: Option<u8>,
@@ -2930,14 +2958,16 @@ pub struct SpellDataResource {
     pub show_channel_bar_per_spell_level_override: Option<Vec<bool>>,
     pub spell_event_to_audio_event_suffix: Option<HashMap<u32, String>>,
     pub targeting_forgiveness_definitions: Option<Vec<TargetingForgivenessDefinitions>>,
+    pub unk_0x11704a2b: Option<f32>,
     pub unk_0x288b8edc: Option<EnumUnk0x6bbc3db6>,
     pub unk_0x48201b0d: Option<f32>,
     pub unk_0x66769fb4: Option<bool>,
     pub unk_0x8958fee2: Option<Unk0x8958fee2>,
-    pub unk_0xabe507b9: Option<u32>,
     pub unk_0xb08bc498: Option<HashMap<u32, SpellEffectAmount>>,
+    pub unk_0xf26881a0: Option<f32>,
     pub unk_0xf4ca428f: Option<u8>,
     pub unk_0xf9c2333e: Option<HashMap<u32, SpellEffectAmount>>,
+    pub unk_0xfe87f21e: Option<Vec<Unk0xfe87f21e>>,
     pub use_animator_framerate: Option<bool>,
 }
 
@@ -2958,8 +2988,8 @@ pub struct SpellDataResourceClient {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct SpellDataValue {
-    pub m_name: String,
-    pub m_values: Option<Vec<f32>>,
+    pub name: String,
+    pub values: Option<Vec<f32>>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -2986,7 +3016,7 @@ pub struct SpellLockDeltaTimeData {
     pub m_spell_lock_delta_time_calculation: GameCalculation,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Asset, TypePath)]
+#[derive(Serialize, Deserialize, Debug, Clone, Default, Asset, TypePath)]
 #[serde(rename_all = "camelCase")]
 pub struct SpellObject {
     pub bot_data: Option<BotsSpellData>,
@@ -3008,6 +3038,12 @@ pub struct SpellRankIntDriver {
 #[serde(rename_all = "camelCase")]
 pub struct SpellRankUpRequirements {
     pub m_requirements: Option<Vec<EnumRequirement>>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct SpellSlotEqualOrGreaterThanLevelRequirement {
+    pub level: u32,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -3049,6 +3085,7 @@ pub struct StatByNamedDataValueCalculationPart {
     pub m_data_value: u32,
     pub m_stat: Option<u8>,
     pub m_stat_formula: Option<u8>,
+    pub unk_0xa8cb9c14: Option<bool>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -3381,9 +3418,9 @@ pub struct TargeterDefinitionRange {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct TargeterDefinitionSkipTerrain {
-    pub m_base_texture_name: String,
-    pub m_end_locator: DrawablePositionLocator,
-    pub m_terrain_texture_name: String,
+    pub m_base_texture_name: Option<String>,
+    pub m_end_locator: Option<DrawablePositionLocator>,
+    pub m_terrain_texture_name: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -3415,7 +3452,7 @@ pub struct TargetingForgivenessDefinitions {
     pub forgiveness_range: f32,
     pub m_affects_type_override: Option<u32>,
     pub override_affects_flags: Option<bool>,
-    pub target_forgiveness_definitions: Option<Vec<EnumHasAllSubRequirementsCastRequirement>>,
+    pub target_forgiveness_definitions: Option<Vec<EnumAboveHealthPercentCastRequirement>>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -3478,7 +3515,7 @@ pub struct TimedVariableWaveBehavior {
 #[serde(rename_all = "camelCase")]
 pub struct TimedWaveBehaviorInfo {
     pub behavior: Box<EnumWaveBehavior>,
-    pub start_time_secs: i32,
+    pub start_time_secs: Option<i32>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -3775,6 +3812,8 @@ pub struct UiElementRegionData {
 #[serde(rename_all = "camelCase")]
 pub struct UiPositionPolygon {
     pub anchors: AnchorSingle,
+    pub disable_pixel_snapping_x: Option<bool>,
+    pub disable_pixel_snapping_y: Option<bool>,
     pub polygon_vertices: Vec<Vec2>,
     pub ui_rect: UiElementRect,
 }
@@ -3801,6 +3840,7 @@ pub struct UiPropertyLoadable {
 #[derive(Serialize, Deserialize, Debug, Clone, Asset, TypePath)]
 #[serde(rename_all = "camelCase")]
 pub struct UiSceneData {
+    pub elements: Option<Vec<u32>>,
     pub enabled: Option<bool>,
     pub handle_input_during_pause: Option<bool>,
     pub inherit_scissoring: Option<bool>,
@@ -3845,6 +3885,8 @@ pub struct UnitFloatingInfoBarData {
     pub par_bar: Option<AbilityResourceBarData>,
     pub scene: u32,
     pub scripted_threshold_types: Option<HashMap<u32, u32>>,
+    pub unk_0xc1be745d: Option<u32>,
+    pub unk_0xea3d3f5: Option<u32>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -3893,19 +3935,38 @@ pub struct Unk0x1aae122 {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
+pub struct Unk0x1b1b0d1a {
+    pub team: u32,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct Unk0x1d12c4da {
+    pub height: f32,
+    pub margin: f32,
+    pub material: u32,
+    pub unk_0xa9e6b95: f32,
+    pub unk_0xc914b02b: f32,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct Unk0x1d452085 {
     pub m_stat: Option<u8>,
     pub unk_0x137cf12a: u32,
     pub unk_0xa519b194: u32,
+    pub unk_0xa8cb9c14: Option<bool>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Unk0x1f1f50f2 {
-    pub definition: Unk0x8ad25772,
     pub name: u32,
+    pub team: Option<Unk0x1b1b0d1a>,
     pub transform: Mat4,
+    pub unk_0x86f3c70: Option<bool>,
     pub unk_0xbbe68da1: Option<bool>,
+    pub vfx: Unk0x82b49579,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -3917,9 +3978,19 @@ pub struct Unk0x1f2e5fd0 {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
+pub struct Unk0x20e8567f {
+    pub unk_0x651de225: f32,
+    pub unk_0xd1318f26: f32,
+    pub unk_0xf908963: Vec3,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct Unk0x25e3f5d0 {
-    pub definition: Unk0xf775806c,
+    pub character: Unk0xaef1db01,
     pub name: u32,
+    pub shop: Unk0x20e8567f,
+    pub team: Option<Unk0x1b1b0d1a>,
     pub transform: Mat4,
 }
 
@@ -3946,6 +4017,20 @@ pub struct Unk0x313c0076 {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
+pub struct Unk0x333530c {
+    pub level: u32,
+    pub unk_0xae9b464d: u32,
+    pub unk_0xb0d8b2ac: u32,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct Unk0x34262325 {
+    pub animation_name: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct Unk0x382277da {
     pub m_subparts: Vec<Box<EnumAbilityResourceByCoefficientCalculationPart>>,
 }
@@ -3955,23 +4040,14 @@ pub struct Unk0x382277da {
 pub struct Unk0x3c995caf {
     pub name: String,
     pub segments: Vec<Vec3>,
-    pub transform: Mat4,
+    pub transform: Option<Mat4>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
-pub struct Unk0x429a2180 {
-    pub camp_level: Option<u16>,
-    pub minimap_icon: Option<String>,
-    pub minimap_icon_offset: Option<Vec3>,
-    pub reveal_event: Option<u16>,
-    pub scoreboard_timer: Option<u16>,
-    pub stop_spawn_time_secs: Option<f32>,
-    pub tags: Option<Vec<u32>>,
-    pub team: u32,
-    pub unk_0x1f2e5fd0: Option<Unk0x1f2e5fd0>,
-    pub unk_0x5a4ef4e7: u32,
-    pub unk_0x7d27af7f: Option<bool>,
+pub struct Unk0x3df230bf {
+    pub skeleton_name: String,
+    pub unk_0xb8314653: Vec<u32>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -3990,8 +4066,15 @@ pub struct Unk0x4a70b12c {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
+pub struct Unk0x4ce08984 {
+    pub unk_0x91d404a5: u32,
+    pub unk_0x9823b29a: Vec<Unk0x333530c>,
+    pub unk_0xbbd778a2: u32,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct Unk0x4cf74021 {
-    pub definition: Unk0xfbbe5989,
     pub name: u32,
     pub transform: Mat4,
 }
@@ -4022,9 +4105,24 @@ pub struct Unk0x56bb851 {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
+pub struct Unk0x5779866a {
+    pub config: Unk0x313c0076,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct Unk0x5b2fdd66 {
-    pub add: FloatLiteralMaterialDriver,
+    pub add: Box<EnumDriver>,
     pub value: Box<EnumDriver>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct Unk0x630a0360 {
+    pub unk_0x724108b0: f32,
+    pub unk_0xe8f75502: u32,
+    pub unk_0xffde771: u32,
+    pub vfx_system: u32,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -4062,6 +4160,13 @@ pub struct Unk0x72f86c81 {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
+pub struct Unk0x747991cb {
+    pub idle_animation_name: String,
+    pub play_idle_animation: Option<bool>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct Unk0x75e34c40 {
     pub unk_0x1dcc5270: Vec<Unk0xd5c9eb1>,
 }
@@ -4079,6 +4184,12 @@ pub struct Unk0x770f7888 {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
+pub struct Unk0x78e42784 {
+    pub vertices: Vec<Vec3>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct Unk0x7a1a2d27 {
     pub absorbed_damage_format: u32,
     pub combinable_damage_format: u32,
@@ -4092,21 +4203,17 @@ pub struct Unk0x7a1a2d27 {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
-pub struct Unk0x7faa90a0 {
-    pub character_record: String,
-    pub idle_animation_name: String,
-    pub play_idle_animation: Option<bool>,
-    pub skin: String,
-    pub team: Option<u32>,
-    pub unk_0x86f3c70: Option<bool>,
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-#[serde(rename_all = "camelCase")]
 pub struct Unk0x7fb92f53 {
     pub unk_0x28de30d6: f32,
     pub unk_0x3c475337: f32,
     pub unk_0xc865acd9: f32,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct Unk0x82b49579 {
+    pub system: u32,
+    pub unk_0x63176011: Option<bool>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -4131,23 +4238,16 @@ pub struct Unk0x8958fee2 {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
+pub struct Unk0x8a533844 {
+    pub name: u32,
+    pub tags: Option<Vec<u32>>,
+    pub transform: Mat4,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct Unk0x8a96ea3c {
     pub m_subparts: Vec<Box<EnumAbilityResourceByCoefficientCalculationPart>>,
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-#[serde(rename_all = "camelCase")]
-pub struct Unk0x8ad25772 {
-    pub system: u32,
-    pub unk_0x63176011: Option<bool>,
-    pub unk_0x86f3c70: Option<bool>,
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-#[serde(rename_all = "camelCase")]
-pub struct Unk0x92024c11 {
-    pub max: Vec3,
-    pub min: Vec3,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -4158,10 +4258,28 @@ pub struct Unk0x93adc5b3 {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
+pub struct Unk0x9597a7ab {
+    pub camp_level: Option<u16>,
+    pub minimap_icon: String,
+    pub minimap_icon_offset: Option<Vec3>,
+    pub reveal_event: Option<u16>,
+    pub scoreboard_timer: Option<u16>,
+    pub stop_spawn_time_secs: Option<f32>,
+    pub unk_0x1f2e5fd0: Unk0x1f2e5fd0,
+    pub unk_0x3011fe7: Option<f32>,
+    pub unk_0x5a4ef4e7: u32,
+    pub unk_0x7d27af7f: Option<bool>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct Unk0x9aa5b4bc {
-    pub definition: Unk0x7faa90a0,
+    pub character: Unk0xaef1db01,
     pub name: u32,
+    pub team: Option<Unk0x1b1b0d1a>,
     pub transform: Mat4,
+    pub unk_0x35431c5: Unk0x747991cb,
+    pub unk_0x86f3c70: Option<bool>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -4186,21 +4304,6 @@ pub struct Unk0x9d62f7e {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
-pub struct Unk0x9d9f60d2 {
-    pub character_record: String,
-    pub r#type: Option<u16>,
-    pub skin: String,
-    pub tags: Option<Vec<u32>>,
-    pub team: Option<u32>,
-    pub unk_0x33c6fd60: Option<Unk0x313c0076>,
-    pub unk_0x397fe037: Option<bool>,
-    pub unk_0xdbde2288: Option<Vec<Unk0x82cab1b3>>,
-    pub unk_0xde46f1d8: Option<String>,
-    pub unk_0xf1d3a034: Option<bool>,
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-#[serde(rename_all = "camelCase")]
 pub struct Unk0x9e9e2e5c {
     pub source_object: u32,
     pub unk_0x137cf12a: u32,
@@ -4209,10 +4312,21 @@ pub struct Unk0x9e9e2e5c {
 #[derive(Serialize, Deserialize, Debug, Clone, Asset, TypePath)]
 #[serde(rename_all = "camelCase")]
 pub struct Unk0xad65d8c4 {
-    pub definition: Unk0x9d9f60d2,
+    pub attackable_unit: Option<Unk0xcbe6ced9>,
+    pub character: Unk0xaef1db01,
+    pub icon: Option<Unk0x5779866a>,
     pub name: u32,
+    pub tags: Option<Vec<u32>>,
+    pub team: Option<Unk0x1b1b0d1a>,
     pub transform: Option<Mat4>,
     pub unk_0xbbe68da1: Option<bool>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct Unk0xaef1db01 {
+    pub character_record: String,
+    pub skin: String,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -4220,6 +4334,13 @@ pub struct Unk0xad65d8c4 {
 pub struct Unk0xb09016f6 {
     pub effect_calculation: GameCalculation,
     pub effect_tag: u32,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct Unk0xb1c52813 {
+    pub render_info: Unk0x1d12c4da,
+    pub unk_0xf43f2e26: Unk0x78e42784,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -4246,8 +4367,9 @@ pub struct Unk0xba007871 {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Unk0xba138ae3 {
-    pub definition: Unk0xfde6a2d7,
+    pub barracks: Unk0xf3121b20,
     pub name: u32,
+    pub team: Option<Unk0x1b1b0d1a>,
     pub transform: Mat4,
 }
 
@@ -4277,6 +4399,16 @@ pub struct Unk0xc96d9140 {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
+pub struct Unk0xcbe6ced9 {
+    pub r#type: Option<u16>,
+    pub unk_0x397fe037: Option<bool>,
+    pub unk_0xde46f1d8: Option<String>,
+    pub unk_0xe87dbba2: Option<Unk0x82cab1b3>,
+    pub unk_0xf1d3a034: Option<bool>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct Unk0xcd5a34f5 {
     pub animation_name: Option<String>,
     pub mesh_name: Option<String>,
@@ -4301,6 +4433,12 @@ pub struct Unk0xcdf661db {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
+pub struct Unk0xce9b917b {
+    pub unk_0xb35aa769: f32,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct Unk0xcf4a55da {
     pub overlays: u32,
 }
@@ -4308,9 +4446,12 @@ pub struct Unk0xcf4a55da {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Unk0xd178749c {
-    pub definition: Unk0x429a2180,
     pub name: u32,
+    pub tags: Option<Vec<u32>>,
+    pub team: Unk0x1b1b0d1a,
     pub transform: Mat4,
+    pub unk_0x7e5978a5: Unk0x9597a7ab,
+    pub unk_0xbbe68da1: Option<bool>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -4318,6 +4459,15 @@ pub struct Unk0xd178749c {
 pub struct Unk0xd5c9eb1 {
     pub event_name: u32,
     pub unk_0x1004c9c8: HashMap<u32, Unk0x56bb851>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct Unk0xd8f395a4 {
+    pub name: u32,
+    pub region: Unk0xb1c52813,
+    pub transform: Mat4,
+    pub unk_0xbbe68da1: bool,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -4351,6 +4501,7 @@ pub struct Unk0xe1555e0a {
 #[serde(rename_all = "camelCase")]
 pub struct Unk0xe2ef74d0 {
     pub slot: u8,
+    pub unk_0x7a2ca292: Option<bool>,
     pub unk_0xc073c624: f32,
 }
 
@@ -4366,6 +4517,19 @@ pub struct Unk0xe6147387 {
     pub unk_0xa57f0269: u8,
     pub unk_0xab2e032a: u8,
     pub unk_0xae1cbd5f: u8,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct Unk0xe64ff723 {
+    pub attackable_unit: Unk0xcbe6ced9,
+    pub character: Unk0xaef1db01,
+    pub name: u32,
+    pub tags: Vec<u32>,
+    pub team: Unk0x1b1b0d1a,
+    pub transform: Mat4,
+    pub unk_0x8a3d83e: Unk0x630a0360,
+    pub unk_0xbbe68da1: Option<bool>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -4394,8 +4558,9 @@ pub struct Unk0xe90af953 {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Unk0xeb997689 {
-    pub definition: Unk0xfcb92181,
     pub name: u32,
+    pub tags: Option<Vec<u32>>,
+    pub team: Option<Unk0x1b1b0d1a>,
     pub transform: Mat4,
 }
 
@@ -4414,11 +4579,32 @@ pub struct Unk0xee39916f {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
+pub struct Unk0xef339ef9 {
+    pub multiplier: Box<SineMaterialDriver>,
+    pub value: Box<LerpMaterialDriver>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct Unk0xef35eacc {
+    pub unk_0xcfb5881: Vec<SpellLevelUpInfo>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct Unk0xf090d2e7 {
     pub unk_0x9567c2a: Option<u8>,
     pub unk_0xa567dbd: Option<u8>,
     pub unk_0xbe0de52: Option<u8>,
     pub unk_0xce0dfe5: Option<u8>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct Unk0xf3121b20 {
+    pub barracks_config: u32,
+    pub lane: u16,
+    pub unk_0xdb6ea1a7: Option<u32>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -4429,44 +4615,8 @@ pub struct Unk0xf3cbe7b2 {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
-pub struct Unk0xf775806c {
-    pub character_record: String,
-    pub skin: String,
-    pub team: Option<u32>,
-    pub unk_0x651de225: f32,
-    pub unk_0xd1318f26: f32,
-    pub unk_0xf908963: Vec3,
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-#[serde(rename_all = "camelCase")]
 pub struct Unk0xfb16e4be {
     pub order_types: Vec<u8>,
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-#[serde(rename_all = "camelCase")]
-pub struct Unk0xfbbe5989 {
-    pub unit_tags: ObjectTags,
-    pub unk_0x998d15e9: bool,
-    pub unk_0x9a6a9339: u32,
-    pub unk_0xf43f2e26: Unk0x92024c11,
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-#[serde(rename_all = "camelCase")]
-pub struct Unk0xfcb92181 {
-    pub tags: Option<Vec<u32>>,
-    pub team: Option<u32>,
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-#[serde(rename_all = "camelCase")]
-pub struct Unk0xfde6a2d7 {
-    pub barracks_config: u32,
-    pub team: Option<u32>,
-    pub unk_0xdb6ea1a7: Option<u32>,
-    pub unk_0xdbde2288: Vec<Unk0x82cab1b3>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -4474,6 +4624,16 @@ pub struct Unk0xfde6a2d7 {
 pub struct Unk0xfe70e9c4 {
     pub unk_0x3ef62dce: u8,
     pub unk_0x4e748038: Option<u8>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct Unk0xfe87f21e {
+    pub unk_0x1987941: Option<Vec<EnumAboveHealthPercentCastRequirement>>,
+    pub unk_0x39ab689d: Option<u32>,
+    pub unk_0x6166b756: u32,
+    pub unk_0x644e252f: Option<u32>,
+    pub unk_0x7a9d64ea: Option<bool>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -4642,7 +4802,7 @@ pub struct VfxDistortionDefinitionData {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct VfxEmissionSurfaceData {
-    pub unk_0x2808fffd: Option<Unk0xcd5a34f5>,
+    pub unk_0x2808fffd: Option<EnumUnk0x3df230bf>,
     pub unk_0xf8b81c77: Option<Unk0x671b7351>,
 }
 

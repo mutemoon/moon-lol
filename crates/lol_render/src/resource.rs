@@ -11,9 +11,7 @@ use crate::loaders::animation::LeagueLoaderAnimationClip;
 use crate::loaders::image::LeagueLoaderImage;
 use crate::loaders::mesh::LeagueLoaderMesh;
 use crate::loaders::mesh_static::LeagueLoaderMeshStatic;
-use crate::loaders::shader::LeagueLoaderShaderToc;
 use crate::loaders::skeleton::LeagueLoaderSkeleton;
-use crate::shader::{startup_load_shaders, update_shaders, ResourceShaderHandles};
 use crate::skin::LeagueSkinMesh;
 
 #[derive(Default)]
@@ -26,7 +24,6 @@ impl Plugin for PluginRenderResource {
         app.init_asset_loader::<LeagueLoaderSkeleton>();
         app.init_asset_loader::<LeagueLoaderMeshStatic>();
         app.init_asset_loader::<LeagueLoaderAnimationClip>();
-        app.init_asset_loader::<LeagueLoaderShaderToc>();
 
         app.register_loading::<HashKey<AnimationGraphData>>()
             .register_loading::<HashKey<SkinCharacterDataProperties>>()
@@ -34,10 +31,6 @@ impl Plugin for PluginRenderResource {
             .register_loading::<(Handle<LeagueSkinMesh>, Handle<StandardMaterial>)>();
 
         app.init_resource::<ResourceCache>();
-        app.init_resource::<ResourceShaderHandles>();
-
-        app.add_systems(Startup, startup_load_shaders);
-        app.add_systems(Update, update_shaders);
     }
 }
 

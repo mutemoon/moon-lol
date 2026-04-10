@@ -1,31 +1,22 @@
 use bevy::prelude::*;
-use league_core::extract::{EnumMap, MapContainer};
+use league_utils::hash_wad;
 use lol_base::grid::ConfigNavigationGrid;
-use lol_base::prop::LoadHashKeyTrait;
 
-use crate::map::MapName;
-use crate::utils::AssetServerLoadLeague;
-
-#[derive(Resource, Default)]
+#[derive(Resource, Reflect, Default)]
+#[reflect(Resource)]
 pub struct ResourceGrid(pub Handle<ConfigNavigationGrid>);
+
+#[derive(Resource, Reflect)]
+#[reflect(Resource)]
+pub struct ResourceGridPath(pub String);
 
 pub fn update_load_grid(
     mut commands: Commands,
     res_asset_server: Res<AssetServer>,
-    res_assets_map_container: Res<Assets<MapContainer>>,
-    res_map_name: Res<MapName>,
+    res_assets_map_container: Res<ResourceGridPath>,
 ) {
-    let map_container = res_assets_map_container
-        .load_hash(&res_map_name.get_materials_path())
-        .unwrap();
-
-    for item in &map_container.components {
-        let EnumMap::MapNavGrid(map_nav_grid) = item else {
-            continue;
-        };
-
-        commands.insert_resource(ResourceGrid(
-            res_asset_server.load_league::<ConfigNavigationGrid>(&map_nav_grid.nav_grid_path),
-        ));
-    }
+    commands.insert_resource(ResourceGrid(res_asset_server.load(format!(
+        "maps/{:x}.nav_grid",
+        hash_wad(&res_assets_map_container.0)
+    ))));
 }

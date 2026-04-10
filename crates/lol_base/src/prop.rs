@@ -8,7 +8,7 @@ use bevy::ecs::resource::Resource;
 use bevy::reflect::TypePath;
 use league_utils::{hash_bin, type_name_to_hash};
 
-pub struct HashKey<T: TypePath>((u32, PhantomData<T>));
+pub struct HashKey<T: TypePath>(pub (u32, PhantomData<T>));
 
 impl<T: TypePath> Debug for HashKey<T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {

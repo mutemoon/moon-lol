@@ -674,9 +674,9 @@ fn calculate_part(
                 for dv in data_values {
                     // Check if hash of name matches m_data_value
                     // Assuming m_data_value is the hash of the name
-                    let hash = hash_bin(&dv.m_name);
+                    let hash = hash_bin(&dv.name);
                     if hash == *m_data_value {
-                        if let Some(values) = &dv.m_values {
+                        if let Some(values) = &dv.values {
                             let lvl_idx = if level > 0 { level - 1 } else { 0 };
                             return *values.get(lvl_idx).unwrap_or(&0.0);
                         }
@@ -709,9 +709,9 @@ fn calculate_part(
                 .and_then(|s| s.data_values.as_ref())
             {
                 for dv in data_values {
-                    let hash = hash_bin(&dv.m_name);
+                    let hash = hash_bin(&dv.name);
                     if hash == *m_data_value {
-                        if let Some(values) = &dv.m_values {
+                        if let Some(values) = &dv.values {
                             let lvl_idx = if level > 0 { level - 1 } else { 0 };
                             data_val = *values.get(lvl_idx).unwrap_or(&0.0);
                             break;
@@ -781,6 +781,7 @@ mod tests {
             m_simple_tooltip_calculation_display: None,
             result_modifier: None,
             tooltip_only: None,
+            unk_0x72c5c2a8: None,
         });
 
         let mut calculations = HashMap::new();
@@ -829,6 +830,7 @@ mod tests {
             m_simple_tooltip_calculation_display: None,
             result_modifier: None,
             tooltip_only: None,
+            unk_0x72c5c2a8: None,
         });
 
         let mut calculations = HashMap::new();
@@ -871,14 +873,15 @@ mod tests {
             m_simple_tooltip_calculation_display: None,
             result_modifier: None,
             tooltip_only: None,
+            unk_0x72c5c2a8: None,
         });
 
         let mut calculations = HashMap::new();
         calculations.insert(hash, game_calc);
 
         let data_values = vec![SpellDataValue {
-            m_name: data_name.to_string(),
-            m_values: Some(vec![expected_value, 60.0, 70.0]),
+            name: data_name.to_string(),
+            values: Some(vec![expected_value, 60.0, 70.0]),
         }];
 
         let spell_object = create_mock_spell_object(calculations, None, Some(data_values));

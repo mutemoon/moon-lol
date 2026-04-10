@@ -31,8 +31,8 @@ impl PropFile {
         ))
     }
 
-    pub fn get_entry(&self, hash: u32) -> &EntryData {
-        self.entries.iter().find(|v| v.hash == hash).unwrap()
+    pub fn get_entry(&self, hash: u32) -> Option<&EntryData> {
+        self.entries.iter().find(|v| v.hash == hash)
     }
 
     pub fn iter_entry_by_class(&self, hash: u32) -> impl Iterator<Item = &EntryData> {

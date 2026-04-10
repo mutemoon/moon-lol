@@ -6,6 +6,7 @@ node_modules
 assets/*
 !assets/games
 !assets/shaders
+!assets/maps
 
 .vs
 
