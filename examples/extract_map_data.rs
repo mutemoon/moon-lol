@@ -1,10 +1,12 @@
 use bevy::prelude::*;
 use league_core::extract::{
-    BarracksConfig, EnumMap, MapContainer, MapPlaceableContainer, Unk0xad65d8c4,
+    BarracksConfig, EnumMap, MapContainer, MapPlaceableContainer, StaticMaterialDef, Unk0xad65d8c4,
 };
 use league_file::grid::AiMeshNGrid;
+use league_file::mapgeo::LeagueMapGeo;
 use league_loader::game::{Data, LeagueLoader};
 use league_loader::prop_bin::LeagueWadLoaderTrait;
+use league_to_lol::gltf_export::export_mapgeo_to_gltf;
 use league_to_lol::navgrid::load_league_nav_grid;
 use lol_base::barrack::ConfigBarracks;
 use lol_base::character::ConfigCharacter;
@@ -158,7 +160,28 @@ fn main() {
         .get_wad_entry_buffer_by_path(&map_name.get_mapgeo_path())
         .unwrap();
 
-    let scene = DynamicScene::from_world(&world);
+    let (_, league_mapgeo) = LeagueMapGeo::parse(&buf).unwrap();
+
+    let mut material_defs = std::collections::HashMap::new();
+    for mesh in &league_mapgeo.meshes {
+        for submesh in &mesh.submeshes {
+            let mat_name = &submesh.material_name.text;
+            let mat_hash = league_utils::hash_bin(mat_name);
+            if let Some(mat_def) = prop_group.get_data_option::<StaticMaterialDef>(mat_hash) {
+                material_defs.insert(mat_hash, mat_def);
+            }
+        }
+    }
+
+    export_mapgeo_to_gltf(
+        &league_mapgeo,
+        &format!("assets/maps/{}_mapgeo", map_name),
+        &material_defs,
+        &loader,
+    )
+    .unwrap();
+
+    let scene = DynamicWorld::from_world(&world);
     let type_registry = world.resource::<AppTypeRegistry>();
     let type_registry = type_registry.read();
     let serialized_scene = scene.serialize(&type_registry).unwrap();

@@ -79,14 +79,14 @@ pub fn update_particle(
             particle_id.get_def(&res_assets_vfx_system_definition_data);
 
         if let Ok(material) = q_particle_material_unlit_decal.get(particle_entity) {
-            if let Some(material) = res_particle_material_unlit_decal.get_mut(material.0.id()) {
+            if let Some(mut material) = res_particle_material_unlit_decal.get_mut(material.0.id()) {
                 material.uniforms_vertex.decal_world_to_uv_matrix =
                     Mat4::from_translation(Vec3::splat(0.5)) * world_matrix.inverse();
             }
         }
 
         if let Ok(material) = q_particle_material_mesh.get(particle_entity) {
-            if let Some(material) = res_particle_material_mesh.get_mut(material.0.id()) {
+            if let Some(mut material) = res_particle_material_mesh.get_mut(material.0.id()) {
                 material.uniforms_vertex.m_world = world_matrix;
                 let frame = particle.frame;
 
@@ -128,7 +128,7 @@ pub fn update_particle(
             continue;
         };
 
-        let Some(mesh) = res_mesh.get_mut(mesh3d) else {
+        let Some(mut mesh) = res_mesh.get_mut(mesh3d) else {
             continue;
         };
 
@@ -253,7 +253,7 @@ pub fn update_particle_skinned_mesh_particle(
 
         let color = particle.birth_color * emitter.color.sample_clamped(life);
 
-        let material = res_particle_material_skinned_mesh_particle
+        let mut material = res_particle_material_skinned_mesh_particle
             .get_mut(material.0.id())
             .unwrap();
 

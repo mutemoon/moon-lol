@@ -9,16 +9,16 @@ use lol_core::base::buff::BuffOf;
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
 use lol_core::skill::{
-    play_skill_animation, skill_damage, skill_slot_from_index, spawn_skill_particle, CoolDown,
-    EventSkillCast, PassiveSkillOf, Skill, SkillOf, SkillSlot, Skills,
+    CoolDown, EventSkillCast, PassiveSkillOf, Skill, SkillOf, SkillSlot, Skills,
+    play_skill_animation, skill_damage, skill_slot_from_index, spawn_skill_particle,
 };
 
 use crate::twisted_fate::buffs::{BuffTwistedFateWSlow, BuffTwistedFateWStun};
 
 const TWISTED_FATE_Q_KEY: &str = "Characters/TwistedFate/Spells/TwistedFateQ/TwistedFateQ";
 const TWISTED_FATE_W_KEY: &str = "Characters/TwistedFate/Spells/TwistedFateW/TwistedFateW";
-const TWISTED_FATE_E_KEY: &str = "Characters/TwistedFate/Spells/TwistedFateE/TwistedFateE";
-const TWISTED_FATE_R_KEY: &str = "Characters/TwistedFate/Spells/TwistedFateR/TwistedFateR";
+// const TWISTED_FATE_E_KEY: &str = "Characters/TwistedFate/Spells/TwistedFateE/TwistedFateE";
+// const TWISTED_FATE_R_KEY: &str = "Characters/TwistedFate/Spells/TwistedFateR/TwistedFateR";
 
 #[derive(Default)]
 pub struct PluginTwistedFate;

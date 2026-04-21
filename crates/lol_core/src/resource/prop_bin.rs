@@ -130,7 +130,7 @@ fn update_collect_properties(
                 return true;
             };
 
-            res_league_properties.merge(league_properties);
+            res_league_properties.merge(&league_properties);
 
             if league_properties.1.is_empty() {
                 return false;

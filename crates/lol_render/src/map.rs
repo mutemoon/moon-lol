@@ -7,7 +7,6 @@ use lol_base::prop::LoadHashKeyTrait;
 use lol_core::action::{Action, CommandAction};
 use lol_core::map::{MapGeometry, MapName, MapState};
 use lol_core::resource::loading::Loading;
-use lol_core::utils::AssetServerLoadLeague;
 
 use crate::controller::Controller;
 use crate::skin::mesh::get_standard;
@@ -23,7 +22,8 @@ impl Plugin for PluginRenderMap {
         app.add_systems(
             Update,
             update_spawn_map_geometry.run_if(
-                resource_exists::<Loading<Handle<ConfigMapGeo>>>.and(in_state(MapState::Loaded)),
+                resource_exists::<Loading<Handle<ConfigMapGeo>>>
+                    .and_then(in_state(MapState::Loaded)),
             ),
         );
     }

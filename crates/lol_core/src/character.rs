@@ -1,14 +1,12 @@
 use bevy::prelude::*;
-use league_core::extract::CharacterRecord;
+use league_core::extract::{CharacterRecord, Unk0xad65d8c4};
 use lol_base::prop::{HashKey, LoadHashKeyTrait};
 
-use crate::attack::Attack;
-use crate::base::ability_resource::{AbilityResource, AbilityResourceType};
+use crate::base::ability_resource::AbilityResourceType;
 use crate::base::bounding::Bounding;
 use crate::base::level::{EventLevelUp, Level};
-use crate::damage::{Armor, Damage};
-use crate::life::{EventDead, Health};
-use crate::movement::Movement;
+use crate::life::EventDead;
+use crate::map::MapState;
 use crate::render_cmd::CommandSkinSpawn;
 use crate::resource::loading::Loading;
 use crate::resource::prop_bin::{CommandLoadPropBin, PropPath};
@@ -93,7 +91,7 @@ fn update_character_spawn(
             //     "{} 的 primary_ability_resource: {:#?}",
             //     character_record.m_character_name, primary_ability_resource.ar_type
             // );
-            let ar_type = AbilityResourceType::from(primary_ability_resource.ar_type);
+            let _ar_type = AbilityResourceType::from(primary_ability_resource.ar_type);
 
             // let ar = AbilityResource {
             //     ar_type,

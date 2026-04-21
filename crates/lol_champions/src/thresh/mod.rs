@@ -9,14 +9,14 @@ use lol_core::base::buff::BuffOf;
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
 use lol_core::skill::{
-    play_skill_animation, skill_damage, skill_slot_from_index, spawn_skill_particle, CoolDown,
-    EventSkillCast, PassiveSkillOf, Skill, SkillOf, SkillSlot, Skills,
+    CoolDown, EventSkillCast, PassiveSkillOf, Skill, SkillOf, SkillSlot, Skills,
+    play_skill_animation, skill_damage, skill_slot_from_index, spawn_skill_particle,
 };
 
 use crate::thresh::buffs::{BuffThreshE, BuffThreshQ};
 
 const THRESH_Q_KEY: &str = "Characters/Thresh/Spells/ThreshQ/ThreshQ";
-const THRESH_W_KEY: &str = "Characters/Thresh/Spells/ThreshW/ThreshW";
+// const THRESH_W_KEY: &str = "Characters/Thresh/Spells/ThreshW/ThreshW";
 const THRESH_E_KEY: &str = "Characters/Thresh/Spells/ThreshE/ThreshE";
 const THRESH_R_KEY: &str = "Characters/Thresh/Spells/ThreshR/ThreshR";
 

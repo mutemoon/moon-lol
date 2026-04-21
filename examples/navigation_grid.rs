@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use bevy::render::render_resource::Face;
-use bevy_egui::{egui, EguiContexts, EguiPlugin, EguiPrimaryContextPass};
+// use bevy_egui::{egui, EguiContexts, EguiPlugin, EguiPrimaryContextPass};
 use league_core::grid::VisionPathingFlags;
 use lol_base::grid::ConfigNavigationGrid;
 use lol_core::entities::barrack::PluginBarrack;
@@ -23,7 +23,7 @@ fn main() {
                 }),
                 ..default()
             }),
-            EguiPlugin::default(),
+            // EguiPlugin::default(),
             PluginCore
                 .build()
                 .disable::<PluginBarrack>()
@@ -33,7 +33,7 @@ fn main() {
         ))
         .init_resource::<FlagFilters>()
         .add_systems(Update, setup)
-        .add_systems(EguiPrimaryContextPass, ui_system)
+        // .add_systems(EguiPrimaryContextPass, ui_system)
         .add_systems(Update, update_grid_visibility)
         .add_systems(Update, on_key_space)
         .add_systems(Update, on_key_m)
@@ -168,77 +168,77 @@ fn on_key_space(
     }
 }
 
-fn ui_system(
-    mut contexts: EguiContexts,
-    mut flag_filters: ResMut<FlagFilters>,
-    mut nav_debug: ResMut<NavigationDebug>,
-) {
-    egui::Window::new("Grid Point Filter")
-        .default_width(300.0)
-        .show(contexts.ctx_mut().unwrap(), |ui| {
-            ui.heading("Display Control");
+// fn ui_system(
+//     mut contexts: EguiContexts,
+//     mut flag_filters: ResMut<FlagFilters>,
+//     mut nav_debug: ResMut<NavigationDebug>,
+// ) {
+//     egui::Window::new("Grid Point Filter")
+//         .default_width(300.0)
+//         .show(contexts.ctx_mut().unwrap(), |ui| {
+//             ui.heading("Display Control");
 
-            ui.checkbox(&mut flag_filters.show_all, "Show All Grid Points");
+//             ui.checkbox(&mut flag_filters.show_all, "Show All Grid Points");
 
-            // A* debug 开关
-            if ui
-                .checkbox(&mut nav_debug.enabled, "A* Visualization")
-                .changed()
-            {
-                // 当状态改变时触发更新
-            }
+//             // A* debug 开关
+//             if ui
+//                 .checkbox(&mut nav_debug.enabled, "A* Visualization")
+//                 .changed()
+//             {
+//                 // 当状态改变时触发更新
+//             }
 
-            if !flag_filters.show_all {
-                ui.separator();
-                ui.heading("Filter by Flag");
+//             if !flag_filters.show_all {
+//                 ui.separator();
+//                 ui.heading("Filter by Flag");
 
-                for &flag in COMMON_FLAGS {
-                    let mut enabled = flag_filters.enabled_flags.contains(&flag);
-                    if ui
-                        .checkbox(&mut enabled, format!("Flag {}", flag))
-                        .changed()
-                    {
-                        if enabled {
-                            flag_filters.enabled_flags.insert(flag);
-                        } else {
-                            flag_filters.enabled_flags.remove(&flag);
-                        }
-                    }
-                }
+//                 for &flag in COMMON_FLAGS {
+//                     let mut enabled = flag_filters.enabled_flags.contains(&flag);
+//                     if ui
+//                         .checkbox(&mut enabled, format!("Flag {}", flag))
+//                         .changed()
+//                     {
+//                         if enabled {
+//                             flag_filters.enabled_flags.insert(flag);
+//                         } else {
+//                             flag_filters.enabled_flags.remove(&flag);
+//                         }
+//                     }
+//                 }
 
-                ui.separator();
+//                 ui.separator();
 
-                ui.horizontal(|ui| {
-                    if ui.button("Select All").clicked() {
-                        for &flag in COMMON_FLAGS {
-                            flag_filters.enabled_flags.insert(flag);
-                        }
-                    }
+//                 ui.horizontal(|ui| {
+//                     if ui.button("Select All").clicked() {
+//                         for &flag in COMMON_FLAGS {
+//                             flag_filters.enabled_flags.insert(flag);
+//                         }
+//                     }
 
-                    if ui.button("Deselect All").clicked() {
-                        flag_filters.enabled_flags.clear();
-                    }
-                });
-            }
+//                     if ui.button("Deselect All").clicked() {
+//                         flag_filters.enabled_flags.clear();
+//                     }
+//                 });
+//             }
 
-            ui.separator();
-            ui.label(format!(
-                "Currently displayed flags: {:?}",
-                if flag_filters.show_all {
-                    "All".to_string()
-                } else {
-                    format!("{:?}", flag_filters.enabled_flags)
-                }
-            ));
+//             ui.separator();
+//             ui.label(format!(
+//                 "Currently displayed flags: {:?}",
+//                 if flag_filters.show_all {
+//                     "All".to_string()
+//                 } else {
+//                     format!("{:?}", flag_filters.enabled_flags)
+//                 }
+//             ));
 
-            ui.label(format!(
-                "Last search visited {} cells",
-                nav_debug.visited_cells.len()
-            ));
+//             ui.label(format!(
+//                 "Last search visited {} cells",
+//                 nav_debug.visited_cells.len()
+//             ));
 
-            ui.label(format!("Path length: {} cells", nav_debug.path_cells.len()));
-        });
-}
+//             ui.label(format!("Path length: {} cells", nav_debug.path_cells.len()));
+//         });
+// }
 
 fn update_grid_visibility(
     flag_filters: Res<FlagFilters>,

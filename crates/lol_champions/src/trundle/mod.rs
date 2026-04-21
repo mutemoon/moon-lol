@@ -9,14 +9,14 @@ use lol_core::base::buff::BuffOf;
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
 use lol_core::skill::{
-    play_skill_animation, skill_damage, skill_slot_from_index, spawn_skill_particle, CoolDown,
-    EventSkillCast, PassiveSkillOf, Skill, SkillOf, SkillSlot, Skills,
+    CoolDown, EventSkillCast, PassiveSkillOf, Skill, SkillOf, SkillSlot, Skills,
+    play_skill_animation, skill_damage, skill_slot_from_index, spawn_skill_particle,
 };
 
 use crate::trundle::buffs::BuffTrundleQ;
 
-const TRUNDLE_Q_KEY: &str = "Characters/Trundle/Spells/TrundleQ/TrundleQ";
-const TRUNDLE_W_KEY: &str = "Characters/Trundle/Spells/TrundleW/TrundleW";
+// const TRUNDLE_Q_KEY: &str = "Characters/Trundle/Spells/TrundleQ/TrundleQ";
+// const TRUNDLE_W_KEY: &str = "Characters/Trundle/Spells/TrundleW/TrundleW";
 const TRUNDLE_E_KEY: &str = "Characters/Trundle/Spells/TrundleE/TrundleE";
 const TRUNDLE_R_KEY: &str = "Characters/Trundle/Spells/TrundleR/TrundleR";
 

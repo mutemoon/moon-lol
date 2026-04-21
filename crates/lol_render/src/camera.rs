@@ -2,6 +2,7 @@ use bevy::camera::visibility::RenderLayers;
 use bevy::camera::{CameraProjection, RenderTarget, SubCameraView};
 use bevy::input::mouse::MouseWheel;
 use bevy::math::{Mat4, Vec3A, Vec4};
+use bevy::pbr::ScreenSpaceReflections;
 use bevy::prelude::*;
 use bevy::render::render_resource::{
     Extent3d, TextureDescriptor, TextureDimension, TextureFormat, TextureUsages,
@@ -104,18 +105,22 @@ fn setup(
     commands
         .spawn((
             Camera3d::default(),
+            Msaa::Off,
+            ScreenSpaceReflections::default(),
+            bevy::camera::Hdr,
             CameraState {
                 scale: 1.0,
                 position: vec3(CAMERA_MIN_X, 0.0, CAMERA_MAX_Y),
             },
             RenderLayers::from_layers(&[0, 1]),
-            Projection::custom(CustomFlipXProjection::default()),
+            // Projection::custom(CustomFlipXProjection::default()),
         ))
         .with_child((
             Camera3d::default(),
+            Msaa::Off,
             RenderTarget::Image(image_handle.into()),
             RenderLayers::layer(0),
-            Projection::custom(CustomFlipXProjection::default()),
+            // Projection::custom(CustomFlipXProjection::default()),
         ));
 
     // if let Ok(mut window) = window.single_mut() {
@@ -175,9 +180,11 @@ fn on_mouse_scroll(window: Query<&Window>, mut camera: Query<&mut CameraState, W
 
     // 检测左右边缘
     if cursor_position.x < edge_margin {
-        movement.x -= 1.0;
-    } else if cursor_position.x > window_size.x - edge_margin {
+        // movement.x -= 1.0;
         movement.x += 1.0;
+    } else if cursor_position.x > window_size.x - edge_margin {
+        // movement.x += 1.0;
+        movement.x -= 1.0;
     }
 
     // 检测上下边缘

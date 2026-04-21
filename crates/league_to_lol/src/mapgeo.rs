@@ -1,4 +1,3 @@
-use bevy::math::bounding::Aabb3d;
 use league_core::mapgeo::EnvironmentVisibility;
 use league_file::mapgeo::LeagueMapGeo;
 use lol_base::mapgeo::ConfigMapGeo;
@@ -12,7 +11,7 @@ pub fn parse_mapgeo(buf: &[u8]) -> Result<ConfigMapGeo, Error> {
 
     let mut submeshes = Vec::new();
 
-    for (i, map_mesh) in league_mapgeo.meshes.iter().enumerate() {
+    for (_i, map_mesh) in league_mapgeo.meshes.iter().enumerate() {
         // if map_mesh.layer_transition_behavior != LayerTransitionBehavior::Unaffected {
         //     continue;
         // }
@@ -26,8 +25,8 @@ pub fn parse_mapgeo(buf: &[u8]) -> Result<ConfigMapGeo, Error> {
 
         let (all_positions, all_normals, all_uvs) = parse_vertex_data(&league_mapgeo, map_mesh);
 
-        for (j, submesh) in map_mesh.submeshes.iter().enumerate() {
-            let intermediate_meshes = submesh_to_intermediate(
+        for (_j, submesh) in map_mesh.submeshes.iter().enumerate() {
+            let _intermediate_meshes = submesh_to_intermediate(
                 &submesh,
                 &league_mapgeo,
                 map_mesh,

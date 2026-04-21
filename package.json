@@ -7,20 +7,28 @@
     "example:classic_fiora": "cargo run --example classic_fiora",
     "example:classic_fiora:release": "cargo run --example classic_fiora --release",
     "example:classic_fiora:watch": "cargo-watch -w src -x \"run --example classic_fiora\"",
+    "example:lol": "cargo run --example lol",
     "example:navigation_grid": "cargo run --example navigation_grid",
     "example:navigation_grid:watch": "cargo-watch -w src -x \"run --example navigation_grid\"",
     "example:riven:watch": "cargo-watch -w src -w assets -x \"run --example riven\"",
     "example:stream:watch": "cargo-watch -w src -x \"run --example stream\"",
-    "extract": "cargo run --example extract",
+    "extract": "cargo run --example extract_map_data",
+    "extract:ts": "ts-node scripts/extract.ts",
     "hot:patch": "dx serve --hot-patch --features \"bevy/hotpatching\"",
     "test:minion:watch": "cargo-watch -w src -x \"test -p moon_lol --test minion -- tests::test_complete_attack_cycle --exact --nocapture\"",
     "test:render": "node scripts/run-render-tests.mjs",
     "test:render:fiora": "cargo test --test fiora_render_test -- --test-threads=1",
-    "test:render:riven": "cargo test --test riven_render_test -- --test-threads=1"
+    "test:render:riven": "cargo test --test riven_render_test -- --test-threads=1",
+    "wasm": "cargo build --release --example lol --target wasm32-unknown-unknown",
+    "wasm:bindgen": "wasm-bindgen --out-name lol --out-dir packages/lol --target web target/wasm32-unknown-unknown/release/examples/lol.wasm"
   },
   "devDependencies": {
+    "@gltf-transform/cli": "^4.3.0",
+    "@types/node": "^24.10.3",
+    "gltf-pipeline": "^4.3.1",
     "prettier": "^3.7.4",
     "prettier-plugin-package": "^2.0.0",
-    "prettier-plugin-tailwindcss": "^0.7.2"
+    "prettier-plugin-tailwindcss": "^0.7.2",
+    "ts-node": "^10.9.2"
   }
 }

@@ -178,7 +178,7 @@ impl<'de, 'a> de::Deserializer<'de> for &'a mut BinDeserializer<'de> {
         let (variant_index, _variant_name) = variants
             .iter()
             .enumerate()
-            .find(|(_i, &name)| {
+            .find(|&(_, &name)| {
                 if name.starts_with("Unk") {
                     return u32::from_str_radix(&name[5..], 16).unwrap() == variant_hash;
                 }

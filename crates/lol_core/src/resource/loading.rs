@@ -25,7 +25,7 @@ impl RegisterLoadingExt for App {
     }
 }
 
-#[derive(Component, Resource)]
+#[derive(Resource)]
 pub struct Loading<F> {
     pub timer: Timer,
     pub value: F,

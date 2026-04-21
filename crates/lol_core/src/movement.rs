@@ -349,7 +349,7 @@ fn apply_final_movement_decision(
     mut nav_debug: ResMut<NavigationDebug>,
     time: Res<Time>,
 ) {
-    let Some(grid) = assets_grid.get_mut(&res_grid.0) else {
+    let Some(mut grid) = assets_grid.get_mut(&res_grid.0) else {
         return;
     };
     for (entity, transform, decision, mut movement_state, bounding) in query.iter_mut() {
@@ -361,7 +361,7 @@ fn apply_final_movement_decision(
 
                         if let Some(bounding) = bounding {
                             calculate_and_set_exclude_cells(
-                                grid,
+                                &mut grid,
                                 transform.translation.xz(),
                                 bounding.radius,
                             );
@@ -417,7 +417,7 @@ fn apply_final_movement_decision(
                         if let Some(path) = get_nav_path_with_debug(
                             &transform.translation.xz(),
                             &target.xz(),
-                            grid,
+                            &grid,
                             &mut stats,
                             debug_ref,
                         ) {

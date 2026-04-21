@@ -19,7 +19,7 @@ impl Plugin for PluginUISkill {
             Update,
             (
                 update_skill_level_up_button.run_if(in_state(UIState::Loaded)),
-                update_player_skill_icon.run_if(in_state(UIState::Loaded).and(run_once)),
+                update_player_skill_icon.run_if(in_state(UIState::Loaded).and_then(run_once)),
             ),
         );
     }
@@ -56,7 +56,10 @@ fn update_player_skill_icon(
         let key = if index == 0 {
             "ClientStates/Gameplay/UX/LoL/PlayerFrame/UIBase/Player_Frame_Root/PlayerSpells/Passive/Passive_IconLoc".to_string()
         } else {
-            format!("ClientStates/Gameplay/UX/LoL/PlayerFrame/UIBase/Player_Frame_Root/PlayerSpells/Ability{0}/Ability{0}_IconLoc", index - 1)
+            format!(
+                "ClientStates/Gameplay/UX/LoL/PlayerFrame/UIBase/Player_Frame_Root/PlayerSpells/Ability{0}/Ability{0}_IconLoc",
+                index - 1
+            )
         };
 
         let Some(&entity) = res_ui_element_entity.get_by_string(&key) else {

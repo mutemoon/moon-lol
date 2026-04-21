@@ -26,7 +26,7 @@ impl Plugin for PluginBarrack {
             Update,
             (
                 update_spawn_barrack
-                    .run_if(in_state(MapState::Loaded).and(in_state(BarrackState::Loading))),
+                    .run_if(in_state(MapState::Loaded).and_then(in_state(BarrackState::Loading))),
                 is_character_loaded.run_if(in_state(BarrackState::Loading)),
             ),
         );
@@ -73,10 +73,6 @@ pub enum BarrackState {
 
 fn update_spawn_barrack(
     mut commands: Commands,
-    mut res_minion_path: ResMut<MinionPath>,
-    res_map_name: Res<MapName>,
-    res_assets_map_container: Res<Assets<MapContainer>>,
-    res_assets_map_placeable_container: Res<Assets<MapPlaceableContainer>>,
     res_assets_unk_ad65d8c4: Res<Assets<Unk0xad65d8c4>>,
     q_barrack: Query<(Entity, &ConfigBarracks), Without<Barrack>>,
 ) {
@@ -232,7 +228,6 @@ fn barracks_spawning_system(
         }
 
         let upgrade_count = barrack_state.upgrade_count;
-        let move_speed_upgrade_count = barrack_state.move_speed_upgrade_count;
 
         // 获取队列头部的待生成小兵信息
         let Some(current_spawn) = barrack_state.spawn_queue.front_mut() else {
@@ -250,12 +245,12 @@ fn barracks_spawning_system(
             .load_hash(minion_config.unk_0xfee040bc)
             .unwrap();
 
-        let character_record = res_assets_character_record
+        let _character_record = res_assets_character_record
             .load_hash(&character.character.character_record)
             .unwrap();
 
         // let mut health = Health::new(character_record.base_hp.unwrap_or(0.0));
-        let hp_upgrade = if is_late_game {
+        let _hp_upgrade = if is_late_game {
             upgrade_config.hp_upgrade_late.unwrap_or(0.0)
         } else {
             upgrade_config.hp_upgrade
@@ -263,7 +258,7 @@ fn barracks_spawning_system(
         // health.max += (hp_upgrade * upgrade_count as f32).min(upgrade_config.hp_max_bonus);
 
         // let mut damage = Damage(character_record.base_damage.unwrap_or(0.0));
-        let damage_upgrade = if is_late_game {
+        let _damage_upgrade = if is_late_game {
             upgrade_config.damage_upgrade_late
         } else {
             upgrade_config.damage_upgrade

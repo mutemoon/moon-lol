@@ -169,9 +169,10 @@ pub trait AssetServerLoadShaderToc {
 impl AssetServerLoadShaderToc for AssetServer {
     fn load_shader_toc<'a>(&self, path: &str) -> Handle<ResourceShaderPackage> {
         let original_path = path.to_string();
-        self.load_with_settings(
-            format!("data/{:x}.lol", hash_wad(path)),
-            move |settings: &mut ShaderTocSettings| settings.0 = original_path.clone(),
-        )
+        self.load_builder()
+            .with_settings(move |settings: &mut ShaderTocSettings| {
+                settings.0 = original_path.clone()
+            })
+            .load(format!("data/{:x}.lol", hash_wad(path)))
     }
 }

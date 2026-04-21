@@ -30,6 +30,13 @@ impl Read for ArcFileReader {
         let bytes_read = self.file.read_at(buf, absolute_offset)?;
         #[cfg(windows)]
         let bytes_read = self.file.seek_read(buf, absolute_offset)?;
+        #[cfg(not(any(unix, windows)))]
+        let bytes_read = {
+            return Err(io::Error::new(
+                io::ErrorKind::Unsupported,
+                "File reading is not supported on this platform",
+            ));
+        };
 
         self.current_pos += bytes_read as u64;
 

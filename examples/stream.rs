@@ -7,14 +7,11 @@ use bevy::camera::RenderTarget;
 use bevy::image::TextureFormatPixelInfo;
 use bevy::prelude::*;
 use bevy::render::render_asset::RenderAssets;
-use bevy::render::render_graph::{
-    self, NodeRunError, RenderGraph, RenderGraphContext, RenderLabel,
-};
 use bevy::render::render_resource::{
     Buffer, BufferDescriptor, BufferUsages, CommandEncoderDescriptor, Extent3d, MapMode, PollType,
     TexelCopyBufferInfo, TexelCopyBufferLayout, TextureDimension, TextureFormat, TextureUsages,
 };
-use bevy::render::renderer::{RenderContext, RenderDevice, RenderQueue};
+use bevy::render::renderer::{RenderDevice, RenderQueue};
 use bevy::render::{Extract, Render, RenderApp, RenderSystems};
 use bevy::time::TimeUpdateStrategy;
 use bevy::window::ExitCondition;
@@ -84,7 +81,7 @@ fn setup(
         size,
         TextureDimension::D2,
         &[0; 4],
-        TextureFormat::bevy_default(),
+        TextureFormat::Rgba8UnormSrgb,
         RenderAssetUsages::default(),
     );
     render_target_image.texture_descriptor.usage |=
@@ -95,7 +92,7 @@ fn setup(
         size,
         TextureDimension::D2,
         &[0; 4],
-        TextureFormat::bevy_default(),
+        TextureFormat::Rgba8UnormSrgb,
         RenderAssetUsages::default(),
     );
     let cpu_image_handle = images.add(cpu_image);
@@ -121,16 +118,15 @@ impl Plugin for PluginImageCopy {
             .insert_resource(MainWorldReceiver(r))
             .sub_app_mut(RenderApp);
 
-        let mut graph = render_app.world_mut().resource_mut::<RenderGraph>();
-        graph.add_node(ImageCopy, ImageCopyDriver);
-        graph.add_node_edge(bevy::render::graph::CameraDriverLabel, ImageCopy);
-
         render_app
             .insert_resource(RenderWorldSender(s))
             .add_systems(ExtractSchedule, image_copy_extract)
             .add_systems(
                 Render,
-                receive_image_from_buffer.after(RenderSystems::Render),
+                (
+                    image_copy_pass.after(RenderSystems::Render),
+                    receive_image_from_buffer.after(image_copy_pass),
+                ),
             );
     }
 }
@@ -169,64 +165,57 @@ fn image_copy_extract(mut commands: Commands, image_copiers: Extract<Query<&Imag
     ));
 }
 
-#[derive(Debug, PartialEq, Eq, Clone, Hash, RenderLabel)]
-struct ImageCopy;
+// Removed ImageCopy and ImageCopyDriver as RenderGraph is replaced by systems.
 
-#[derive(Default)]
-struct ImageCopyDriver;
-
-impl render_graph::Node for ImageCopyDriver {
-    fn run(
-        &self,
-        _graph: &mut RenderGraphContext,
-        render_context: &mut RenderContext,
-        world: &World,
-    ) -> Result<(), NodeRunError> {
-        let image_copiers = world.get_resource::<ImageCopiers>().unwrap();
-        let gpu_images = world
-            .get_resource::<RenderAssets<bevy::render::texture::GpuImage>>()
-            .unwrap();
-
-        for image_copier in image_copiers.iter() {
-            if !image_copier.enabled() {
-                continue;
-            }
-
-            let src_image = gpu_images.get(&image_copier.src_image).unwrap();
-            let mut encoder = render_context
-                .render_device()
-                .create_command_encoder(&CommandEncoderDescriptor::default());
-
-            let block_dimensions = src_image.texture_format.block_dimensions();
-            let block_size = src_image.texture_format.block_copy_size(None).unwrap();
-
-            let padded_bytes_per_row = RenderDevice::align_copy_bytes_per_row(
-                (src_image.size.width as usize / block_dimensions.0 as usize) * block_size as usize,
-            );
-
-            encoder.copy_texture_to_buffer(
-                src_image.texture.as_image_copy(),
-                TexelCopyBufferInfo {
-                    buffer: &image_copier.buffer,
-                    layout: TexelCopyBufferLayout {
-                        offset: 0,
-                        bytes_per_row: Some(
-                            std::num::NonZero::<u32>::new(padded_bytes_per_row as u32)
-                                .unwrap()
-                                .into(),
-                        ),
-                        rows_per_image: None,
-                    },
-                },
-                src_image.size,
-            );
-            info!("copy 结束");
-
-            let render_queue = world.get_resource::<RenderQueue>().unwrap();
-            render_queue.submit(std::iter::once(encoder.finish()));
+pub fn image_copy_pass(
+    image_copiers: Res<ImageCopiers>,
+    gpu_images: Res<RenderAssets<bevy::render::texture::GpuImage>>,
+    render_device: Res<RenderDevice>,
+    render_queue: Res<RenderQueue>,
+) {
+    for image_copier in image_copiers.iter() {
+        if !image_copier.enabled() {
+            continue;
         }
 
-        Ok(())
+        let Some(src_image) = gpu_images.get(&image_copier.src_image) else {
+            continue;
+        };
+
+        let block_dimensions = src_image.texture_descriptor.format.block_dimensions();
+        let block_size = src_image
+            .texture_descriptor
+            .format
+            .block_copy_size(None)
+            .unwrap();
+
+        let padded_bytes_per_row = RenderDevice::align_copy_bytes_per_row(
+            (src_image.texture_descriptor.size.width as usize / block_dimensions.0 as usize)
+                * block_size as usize,
+        );
+
+        let mut encoder =
+            render_device.create_command_encoder(&CommandEncoderDescriptor::default());
+
+        encoder.copy_texture_to_buffer(
+            src_image.texture.as_image_copy(),
+            TexelCopyBufferInfo {
+                buffer: &image_copier.buffer,
+                layout: TexelCopyBufferLayout {
+                    offset: 0,
+                    bytes_per_row: Some(
+                        std::num::NonZero::<u32>::new(padded_bytes_per_row as u32)
+                            .unwrap()
+                            .into(),
+                    ),
+                    rows_per_image: None,
+                },
+            },
+            src_image.texture_descriptor.size,
+        );
+        info!("copy 结束");
+
+        render_queue.submit(std::iter::once(encoder.finish()));
     }
 }
 
@@ -445,7 +434,7 @@ fn receive_and_encode_image_async(world: &mut World, shared_image: Arc<Mutex<Opt
     let scene_controller = world.resource::<SceneController>();
     let width = scene_controller.width;
     let height = scene_controller.height;
-    let format = TextureFormat::bevy_default();
+    let format = TextureFormat::Rgba8UnormSrgb;
 
     thread::spawn(move || {
         info!("[后台线程] 开始处理图像...");

@@ -58,7 +58,7 @@ fn on_event_damage_create(
     commands.spawn((
         Text::new(format!("{:.0}", damage_result.final_damage)),
         TextFont {
-            font_size: 24.0,
+            font_size: FontSize::Px(24.0),
             ..default()
         },
         TextColor(Color::Srgba(match trigger.damage_type {

@@ -29,7 +29,7 @@ impl Plugin for PluginUIPlayer {
                 update_player_health,
                 update_player_health_fade,
                 update_player_ability_resource,
-                update_player_icon.run_if(in_state(UIState::Loaded).and(run_once)),
+                update_player_icon.run_if(in_state(UIState::Loaded).and_then(run_once)),
             ),
         );
     }

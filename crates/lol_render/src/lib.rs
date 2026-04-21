@@ -16,7 +16,6 @@ use bevy::prelude::{App, Plugin};
 use camera::PluginCamera;
 use controller::PluginController;
 use map::PluginRenderMap;
-use particle::PluginParticle;
 use resource::PluginRenderResource;
 use skin::PluginSkin;
 use ui::PluginUI;

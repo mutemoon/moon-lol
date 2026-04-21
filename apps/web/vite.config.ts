@@ -1,4 +1,4 @@
-import path from "node:path";
+import path, { join, resolve } from "node:path";
 import tailwindcss from "@tailwindcss/vite";
 import vue from "@vitejs/plugin-vue";
 import { defineConfig } from "vite";
@@ -32,5 +32,24 @@ export default defineConfig({
   },
   optimizeDeps: {
     exclude: ["vue-element-plus-x"],
+  },
+  server: {
+    proxy: {
+      "/assets": {
+        target: "http://localhost:5173",
+        rewrite: (path) => {
+          const res = path.replace(/^\/assets/, `/@fs/${resolve("../../assets").replaceAll("\\", "/")}`);
+          // console.log(res);
+          return res;
+        },
+        bypass: (req, res) => {
+          if (req.url?.includes(".meta") && res) {
+            res.statusCode = 404;
+            res.end();
+            return false;
+          }
+        },
+      },
+    },
   },
 });

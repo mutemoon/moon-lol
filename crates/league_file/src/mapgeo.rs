@@ -4,7 +4,7 @@ use league_core::mapgeo::{EnvironmentVisibility, LayerTransitionBehavior};
 use league_utils::BoundingBox;
 use nom::bytes::complete::{tag, take};
 use nom::multi::count;
-use nom::number::complete::{le_f32, le_u16, le_u32, le_u8};
+use nom::number::complete::{le_f32, le_u8, le_u16, le_u32};
 use nom::{IResult, Parser};
 use serde::{Deserialize, Serialize};
 
@@ -450,7 +450,7 @@ impl LeagueMapGeoMesh {
         let (i, env_vis_raw) = le_u8(i)?;
         let environment_visibility = EnvironmentVisibility::from_bits_truncate(env_vis_raw);
 
-        let (i, val) = le_u32(i)?;
+        let (i, _val) = le_u32(i)?;
 
         let (i, visibility_controller_path_hash) = le_u32(i)?;
         let (i, submesh_count) = le_u32(i)?;

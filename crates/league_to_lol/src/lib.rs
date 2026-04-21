@@ -1,4 +1,5 @@
 pub mod animation;
+pub mod gltf_export;
 pub mod mapgeo;
 pub mod mesh_static;
 pub mod navgrid;

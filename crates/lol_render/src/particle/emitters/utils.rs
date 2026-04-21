@@ -6,9 +6,9 @@ use league_core::extract::{
 use lol_core::lifetime::Lifetime;
 
 use super::state::ParticleEmitterState;
+use crate::particle::ParticleId;
 use crate::particle::particle::ParticleState;
 use crate::particle::utils::StochasticSampler;
-use crate::particle::ParticleId;
 
 /// Emitter type classification for particle systems
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -183,7 +183,7 @@ pub fn calculate_particle_transform_frame(
     );
 
     if let EnumVfxPrimitive::VfxPrimitivePlanarProjection(VfxPrimitivePlanarProjection {
-        ref m_projection,
+        m_projection,
     }) = primitive
     {
         birth_scale0.x = birth_scale0.x * 2.;

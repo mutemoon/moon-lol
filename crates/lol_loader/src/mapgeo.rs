@@ -1,9 +1,5 @@
 use bevy::asset::{AssetLoader, LoadContext};
-use bevy::math::bounding::Aabb3d;
 use bevy::reflect::TypePath;
-use league_core::mapgeo::EnvironmentVisibility;
-use league_file::mapgeo::LeagueMapGeo;
-use league_to_lol::sub_mesh::{parse_vertex_data, submesh_to_intermediate};
 use lol_base::mapgeo::ConfigMapGeo;
 
 use super::error::Error;
@@ -22,7 +18,7 @@ impl AssetLoader for LeagueLoaderMapgeo {
         &self,
         reader: &mut dyn bevy::asset::io::Reader,
         _settings: &Self::Settings,
-        load_context: &mut LoadContext<'_>,
+        _load_context: &mut LoadContext<'_>,
     ) -> Result<Self::Asset, Self::Error> {
         let mut buf = Vec::new();
         reader.read_to_end(&mut buf).await?;

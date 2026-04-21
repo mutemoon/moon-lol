@@ -4,13 +4,13 @@ use std::time::{Duration, Instant};
 use bevy::color::palettes;
 use bevy::prelude::*;
 use bevy::render::render_resource::Face;
-use lol_base::grid::{ConfigNavigationGrid, CELL_COST_IMPASSABLE};
+use lol_base::grid::{CELL_COST_IMPASSABLE, ConfigNavigationGrid};
 
 use crate::base::bounding::Bounding;
 use crate::character::Character;
 use crate::map::MapState;
 use crate::navigation::astar::find_grid_path_with_result;
-use crate::navigation::grid::{update_load_grid, ResourceGrid};
+use crate::navigation::grid::{ResourceGrid, update_load_grid};
 
 #[derive(Default)]
 pub struct PluginNavigaton;
@@ -49,7 +49,7 @@ impl Plugin for PluginNavigaton {
         );
         app.add_systems(
             Update,
-            update_load_grid.run_if(in_state(MapState::Loaded).and(run_once)),
+            update_load_grid.run_if(in_state(MapState::Loaded).and_then(run_once)),
         );
     }
 }
@@ -481,13 +481,13 @@ fn pre_update_global_occupied_cells(
     entities_with_bounding: Query<(Entity, &GlobalTransform, &Bounding)>,
     mut stats: ResMut<NavigationStats>,
 ) {
-    let Some(grid) = assets_grid.get_mut(&res_grid.0) else {
+    let Some(mut grid) = assets_grid.get_mut(&res_grid.0) else {
         return;
     };
     let start = Instant::now();
 
     // 计算所有实体的 occupied_cells（不排除任何实体）
-    let occupied_cells = calculate_occupied_grid_cells(grid, &entities_with_bounding, &[]);
+    let occupied_cells = calculate_occupied_grid_cells(&grid, &entities_with_bounding, &[]);
     grid.occupied_cells = occupied_cells;
 
     stats.calculate_occupied_grid_cells_time += start.elapsed();

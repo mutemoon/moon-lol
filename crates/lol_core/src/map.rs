@@ -4,7 +4,7 @@ use std::fmt::Display;
 
 use bevy::math::bounding::Aabb3d;
 use bevy::prelude::*;
-use bevy::scene::SceneInstanceReady;
+use bevy::world_serialization::WorldInstanceReady;
 use lol_base::mapgeo::ConfigMapGeo;
 use lol_loader::navgrid::NavGridLoader;
 
@@ -85,18 +85,18 @@ impl Display for MapName {
 pub struct MinionPath(pub HashMap<Lane, Vec<Vec2>>);
 
 #[derive(Resource)]
-pub struct DynamicSceneHandle(pub Handle<DynamicScene>);
+pub struct DynamicWorldHandle(pub Handle<DynamicWorld>);
 
 fn startup_load_map_geometry(
     mut commands: Commands,
     res_map_name: Res<MapName>,
     res_asset_server: Res<AssetServer>,
 ) {
-    commands.spawn(DynamicSceneRoot(
+    commands.spawn(DynamicWorldRoot(
         res_asset_server.load(res_map_name.get_ron_path()),
     ));
 }
 
-fn update_load_map_geometry(trigger: On<SceneInstanceReady>, mut commands: Commands) {
+fn update_load_map_geometry(trigger: On<WorldInstanceReady>, mut commands: Commands) {
     commands.set_state(MapState::Loaded);
 }

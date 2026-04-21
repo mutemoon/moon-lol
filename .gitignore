@@ -6,7 +6,6 @@ node_modules
 assets/*
 !assets/games
 !assets/shaders
-!assets/maps
 
 .vs
 
@@ -16,3 +15,5 @@ hashes
 
 ./league.rs
 artifacts
+
+packages/lol/lol_bg.wasm

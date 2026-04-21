@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
+import init from "lol";
 
 const router = useRouter();
 
@@ -51,6 +52,8 @@ const posts = [
 ];
 
 onMounted(() => {
+  init();
+
   // Scroll Reveal Observer
   const observerOptions = {
     threshold: 0.1,
@@ -258,6 +261,8 @@ const startSize = { x: 100, y: 100 };
       <span class="text-acid-blue animate-pulse text-xs tracking-widest">SCROLL</span>
     </div>
   </section>
+
+  <div class="flex items-center justify-center"><canvas id="lol"></canvas></div>
 
   <!-- Scrolling Tech Stack -->
   <div class="relative z-20 flex overflow-hidden border-y border-white/10 bg-black/50 py-4 backdrop-blur-md">

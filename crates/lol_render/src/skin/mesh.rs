@@ -7,9 +7,9 @@ use lol_base::prop::LoadHashKeyTrait;
 use lol_core::resource::loading::Loading;
 use lol_core::utils::AssetServerLoadLeague;
 
+use crate::skin::LeagueSkinMesh;
 use crate::skin::skeleton::CommandSkinSkeletonSpawn;
 use crate::skin::skin::Skin;
-use crate::skin::LeagueSkinMesh;
 
 #[derive(EntityEvent)]
 pub struct CommandSkinMeshSpawn {
@@ -94,7 +94,7 @@ pub fn get_standard(
 ) -> Handle<StandardMaterial> {
     let material_handle = res_assets_standard_material.add(StandardMaterial {
         base_color_texture: texture.map(|v| asset_server.load_league_labeled(&v, "srgb")),
-        unlit: true,
+        unlit: false,
         cull_mode: Some(Face::Front),
         alpha_mode: AlphaMode::Mask(0.3),
         ..default()
