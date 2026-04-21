@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use league_core::extract::{
-    BarracksConfig, EnumMap, MapContainer, MapPlaceableContainer, StaticMaterialDef, Unk0xad65d8c4,
+    BarracksConfig, CharacterRecord, EnumMap, MapContainer, MapPlaceableContainer,
+    StaticMaterialDef,
 };
 use league_file::grid::AiMeshNGrid;
 use league_file::mapgeo::LeagueMapGeo;
@@ -11,6 +12,7 @@ use league_to_lol::navgrid::load_league_nav_grid;
 use lol_base::barrack::ConfigBarracks;
 use lol_base::character::ConfigCharacter;
 use lol_base::grid::ConfigNavigationGrid;
+use lol_core::base::bounding::Bounding;
 use lol_core::lane::Lane;
 use lol_core::map::{MapName, MinionPath};
 use lol_core::navigation::grid::ResourceGridPath;
@@ -32,17 +34,32 @@ fn main() {
 
     let world = app.world_mut();
 
-    let loader = LeagueLoader::from_relative_path(
-        r"D:\WeGameApps\英雄联盟\Game",
-        vec![
-            "DATA/FINAL/UI.wad.client",
-            "DATA/FINAL/UI.zh_CN.wad.client",
-            "DATA/FINAL/Maps/Shipping/Map11.wad.client",
-            "DATA/FINAL/Champions/Riven.wad.client",
-            "DATA/FINAL/Champions/Fiora.wad.client",
-            "DATA/FINAL/Bootstrap.windows.wad.client",
-        ],
-    );
+    let mut champion_wad_files = Vec::new();
+    let champions_path = std::path::Path::new(r"D:\WeGameApps\英雄联盟\Game\DATA\FINAL\Champions");
+    if let Ok(entries) = std::fs::read_dir(champions_path) {
+        for entry in entries.flatten() {
+            let path = entry.path();
+            // 检查文件名是否以 .wad.client 结尾且不包含下划线（排除语言版本）
+            if let Some(name) = path.file_name().and_then(|s| s.to_str()) {
+                if name.ends_with(".wad.client") && !name.contains('_') {
+                    champion_wad_files.push(format!("DATA/FINAL/Champions/{}", name));
+                }
+            }
+        }
+    }
+
+    let mut wad_files: Vec<&str> = vec![
+        "DATA/FINAL/UI.wad.client",
+        "DATA/FINAL/UI.zh_CN.wad.client",
+        "DATA/FINAL/Maps/Shipping/Map11.wad.client",
+        "DATA/FINAL/Bootstrap.windows.wad.client",
+    ];
+    wad_files.extend(champion_wad_files.iter().map(|s| s.as_str()));
+
+    let loader = LeagueLoader::from_relative_path(r"D:\WeGameApps\英雄联盟\Game", wad_files);
+
+    // 提取所有英雄角色数据
+    extract_all_champions(&loader);
 
     let map_name = MapName::default();
 
@@ -56,6 +73,8 @@ fn main() {
     let map_container = prop_group.get_data::<MapContainer>(map_name.get_materials_path());
 
     let mut minion_path = MinionPath::default();
+    let mut map_character_records: std::collections::HashMap<String, String> =
+        std::collections::HashMap::new();
 
     for (_, &link) in &map_container.chunks {
         let map_placeable_container = prop_group.get_data::<MapPlaceableContainer>(link);
@@ -95,17 +114,9 @@ fn main() {
                     let barracks_config = prop_group
                         .get_data::<BarracksConfig>(unk0xba138ae3.barracks.barracks_config);
 
-                    for unit in &barracks_config.units {
-                        let character = prop_group.get_data::<Unk0xad65d8c4>(unit.unk_0xfee040bc);
-
-                        // commands.trigger(CommandCharacterLoad {
-                        //     character_record: character.character.character_record.clone(),
-                        // });
-                    }
-
                     world.spawn((
                         Transform::from_matrix(unk0xba138ae3.transform),
-                        Team::from(&unk0xba138ae3.team),
+                        Team::from(unk0xba138ae3.team.as_ref().map(|x| x.team)),
                         Lane::from(unk0xba138ae3.barracks.lane),
                         ConfigBarracks::from(barracks_config),
                     ));
@@ -113,11 +124,22 @@ fn main() {
                 EnumMap::Unk0xad65d8c4(unk0xad65d8c4) => {
                     let transform = Transform::from_matrix(unk0xad65d8c4.transform.unwrap());
 
+                    // 收集 character_record 路径
+                    let char_record_path = unk0xad65d8c4.character.character_record.clone();
+                    // 从路径提取英雄名，如 "Characters/Aatrox/CharacterRecords/Root" -> "Aatrox"
+                    if let Some(champ_name) = char_record_path
+                        .strip_prefix("Characters/")
+                        .and_then(|s| s.split('/').next())
+                    {
+                        map_character_records
+                            .insert(champ_name.to_lowercase(), char_record_path.clone());
+                    }
+
                     world.spawn((
                         transform,
-                        Team::from(&unk0xad65d8c4.team),
+                        Team::from(unk0xad65d8c4.team.as_ref().map(|x| x.team)),
                         ConfigCharacter {
-                            character_record: unk0xad65d8c4.character.character_record.clone(),
+                            character_record: char_record_path,
                             skin_path: unk0xad65d8c4.character.skin.clone(),
                         },
                     ));
@@ -181,6 +203,9 @@ fn main() {
     )
     .unwrap();
 
+    // 从地图中提取 CharacterRecord（来自 Unk0xad65d8c4）
+    extract_character_records_from_map(&loader, &map_character_records);
+
     let scene = DynamicWorld::from_world(&world);
     let type_registry = world.resource::<AppTypeRegistry>();
     let type_registry = type_registry.read();
@@ -213,4 +238,144 @@ fn write_bin_to_file<T: Serialize>(path: &str, content: &T) {
         path,
         bincode::serialize(content).expect("无法序列化为二进制"),
     );
+}
+
+/// 从地图中收集的 CharacterRecord 路径提取数据
+fn extract_character_records_from_map(
+    loader: &LeagueLoader,
+    map_character_records: &std::collections::HashMap<String, String>,
+) {
+    if map_character_records.is_empty() {
+        return;
+    }
+
+    println!(
+        "[INFO] 从地图中提取 {} 个 CharacterRecord",
+        map_character_records.len()
+    );
+
+    let mut success_count = 0;
+
+    for (champ_name_lower, char_record_path) in map_character_records {
+        // 构造 bin 路径
+        let bin_path = format!(
+            "data/characters/{}/{}.bin",
+            champ_name_lower, champ_name_lower
+        );
+
+        let Ok(prop_group) = loader.get_prop_group_by_paths(vec![&bin_path]) else {
+            println!("[WARN] 无法加载 bin 文件: {}", bin_path);
+            continue;
+        };
+
+        let Some(record) = prop_group.get_by_class::<CharacterRecord>() else {
+            println!("[WARN] 无法获取 CharacterRecord: {}", char_record_path);
+            continue;
+        };
+
+        let config = ChampionConfig {
+            bounding: Bounding {
+                radius: record.pathfinding_collision_radius.unwrap_or(0.0),
+                height: record.health_bar_height.unwrap_or(200.0),
+            },
+            character_name: record.m_character_name.clone(),
+            spells: record.spells.clone(),
+            passive_spell: record.m_character_passive_spell,
+            acquisition_range: record.acquisition_range,
+            selection_radius: record.selection_radius,
+            selection_height: record.selection_height,
+        };
+
+        let output_path = format!("assets/champions/{}/config.ron", champ_name_lower);
+        write_ron_to_file(&output_path, &config);
+        println!("[OK] 提取成功: {} -> {}", champ_name_lower, output_path);
+        success_count += 1;
+    }
+
+    println!(
+        "[INFO] 地图 CharacterRecord 提取完成: 成功 {} 个",
+        success_count
+    );
+}
+
+fn extract_all_champions(loader: &LeagueLoader) {
+    let champions_path = std::path::Path::new(r"D:\WeGameApps\英雄联盟\Game\DATA\FINAL\Champions");
+    let Ok(entries) = std::fs::read_dir(champions_path) else {
+        eprintln!("[ERROR] 无法读取 Champions 目录: {:?}", champions_path);
+        return;
+    };
+
+    let wad_entries: Vec<_> = entries.flatten().collect();
+    println!("[INFO] 发现 {} 个 WAD 文件", wad_entries.len());
+
+    let mut success_count = 0;
+    let mut skip_count = 0;
+
+    for entry in wad_entries {
+        let path = entry.path();
+        let Some(file_name) = path.file_name().and_then(|s| s.to_str()) else {
+            continue;
+        };
+
+        // 跳过非英文版 wad.client 文件
+        if !file_name.ends_with(".wad.client") || file_name.contains('_') {
+            continue;
+        }
+
+        // 从 "Aatrox.wad.client" 提取 "Aatrox"
+        let champ_name = file_name.trim_end_matches(".wad.client");
+        let champ_name_lower = champ_name.to_lowercase();
+
+        let bin_path = format!(
+            "data/characters/{}/{}.bin",
+            champ_name_lower, champ_name_lower
+        );
+
+        let Ok(prop_group) = loader.get_prop_group_by_paths(vec![&bin_path]) else {
+            println!("[WARN] 无法加载 bin 文件: {}", bin_path);
+            skip_count += 1;
+            continue;
+        };
+
+        // 通过 class hash 获取 CharacterRecord
+        let Some(record) = prop_group.get_by_class::<CharacterRecord>() else {
+            println!("[WARN] 无法获取 CharacterRecord: {}", bin_path);
+            skip_count += 1;
+            continue;
+        };
+
+        let config = ChampionConfig {
+            bounding: Bounding {
+                radius: record.pathfinding_collision_radius.unwrap_or(0.0),
+                height: record.health_bar_height.unwrap_or(200.0),
+            },
+            character_name: record.m_character_name.clone(),
+            spells: record.spells.clone(),
+            passive_spell: record.m_character_passive_spell,
+            acquisition_range: record.acquisition_range,
+            selection_radius: record.selection_radius,
+            selection_height: record.selection_height,
+        };
+
+        let output_path = format!("assets/champions/{}/config.ron", champ_name_lower);
+        write_ron_to_file(&output_path, &config);
+        println!("[OK] 提取成功: {} -> {}", champ_name, output_path);
+        success_count += 1;
+    }
+
+    println!(
+        "[SUMMARY] 提取完成: 成功 {} 个, 跳过 {} 个",
+        success_count, skip_count
+    );
+}
+
+#[derive(Serialize)]
+struct ChampionConfig {
+    bounding: Bounding,
+    character_name: String,
+    spells: Option<Vec<u32>>,
+    passive_spell: Option<u32>,
+    acquisition_range: Option<f32>,
+    selection_radius: Option<f32>,
+    selection_height: Option<f32>,
 }

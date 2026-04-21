@@ -5,6 +5,7 @@ use std::path::{Path, PathBuf};
 use bevy::reflect::TypePath;
 use league_property::from_entry;
 use league_property::prop::PropFile;
+use league_utils::type_name_to_hash;
 use lol_base::prop::HashKey;
 use serde::de::DeserializeOwned;
 
@@ -112,21 +113,19 @@ impl PropGroup {
     pub fn new(prop_file: Vec<PropFile>) -> Self {
         Self { prop_file }
     }
-}
 
-impl Data for PropGroup {
-    fn get_data<T: TypePath + DeserializeOwned>(&self, hash: impl Into<HashKey<T>>) -> T {
-        self.get_data_option(hash).unwrap()
-    }
-
-    fn get_data_option<T: TypePath + DeserializeOwned>(
-        &self,
-        hash: impl Into<HashKey<T>>,
-    ) -> Option<T> {
-        let hash = hash.into().0.0;
-        self.prop_file
-            .iter()
-            .find_map(|v| v.get_data_option::<T>(hash))
+    /// 通过 class hash 获取数据
+    pub fn get_by_class<T: TypePath + DeserializeOwned>(&self) -> Option<T> {
+        let type_name = T::short_type_path();
+        let class_hash = type_name_to_hash(type_name);
+        for prop_file in &self.prop_file {
+            for (bin_class_hash, entry) in prop_file.iter_class_hash_and_entry() {
+                if bin_class_hash == class_hash {
+                    return from_entry::<T>(entry).ok();
+                }
+            }
+        }
+        None
     }
 }
 
@@ -139,6 +138,18 @@ pub trait Data {
         &self,
         hash: impl Into<HashKey<T>>,
     ) -> Option<T>;
+}
+
+impl Data for PropGroup {
+    fn get_data_option<T: TypePath + DeserializeOwned>(
+        &self,
+        hash: impl Into<HashKey<T>>,
+    ) -> Option<T> {
+        let hash = hash.into().0.0;
+        self.prop_file
+            .iter()
+            .find_map(|v| v.get_data_option::<T>(hash))
+    }
 }
 
 impl Data for PropFile {

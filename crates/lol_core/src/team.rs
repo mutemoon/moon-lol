@@ -1,5 +1,4 @@
 use bevy::prelude::*;
-use lol_base::team_data::TeamData;
 use serde::{Deserialize, Serialize};
 
 #[derive(Component, Reflect, Debug, Default, PartialEq, Clone, Serialize, Deserialize)]
@@ -26,15 +25,6 @@ impl From<Option<u32>> for Team {
     fn from(value: Option<u32>) -> Self {
         match value {
             Some(value) => From::from(value),
-            None => Team::default(),
-        }
-    }
-}
-
-impl From<&Option<TeamData>> for Team {
-    fn from(value: &Option<TeamData>) -> Self {
-        match value {
-            Some(value) => From::from(value.team),
             None => Team::default(),
         }
     }

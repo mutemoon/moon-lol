@@ -1,6 +1,6 @@
 use bevy::prelude::*;
-use league_core::extract::SpellObject;
 use lol_base::prop::LoadHashKeyTrait;
+use lol_base::spell::Spell;
 use lol_core::base::level::Level;
 use lol_core::skill::{CommandSkillLevelUp, PassiveSkill, Skill, SkillPoints, Skills};
 
@@ -39,7 +39,7 @@ fn update_player_skill_icon(
     q_skill: Query<&Skill>,
     q_skills: Query<&Skills, With<Controller>>,
     q_passive_skill: Query<&PassiveSkill, With<Controller>>,
-    res_assets_spell_object: Res<Assets<SpellObject>>,
+    res_assets_spell_object: Res<Assets<Spell>>,
     res_ui_element_entity: Res<UIElementEntity>,
 ) {
     let Ok(passive_skill) = q_passive_skill.single() else {
@@ -83,22 +83,22 @@ fn update_player_skill_icon(
             continue;
         };
 
-        let spell = res_assets_spell_object
-            .load_hash(skill.key_spell_object)
-            .unwrap();
+        // let spell = res_assets_spell_object
+        //     .load_hash(skill.key_spell_object)
+        //     .unwrap();
 
-        let icon_name = spell
-            .m_spell
-            .as_ref()
-            .unwrap()
-            .m_img_icon_name
-            .as_ref()
-            .unwrap()
-            .get(0)
-            .unwrap()
-            .clone();
+        // let icon_name = spell
+        //     .m_spell
+        //     .as_ref()
+        //     .unwrap()
+        //     .m_img_icon_name
+        //     .as_ref()
+        //     .unwrap()
+        //     .get(0)
+        //     .unwrap()
+        //     .clone();
 
-        image_node.image = res_resource_cache.get_image(&asset_server, &icon_name);
+        // image_node.image = res_resource_cache.get_image(&asset_server, &icon_name);
         image_node.rect = None;
 
         commands.entity(entity).insert(Visibility::Visible);
