@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use league_core::extract::Unk0x1b1b0d1a;
+use lol_base::team_data::TeamData;
 use serde::{Deserialize, Serialize};
 
 #[derive(Component, Reflect, Debug, Default, PartialEq, Clone, Serialize, Deserialize)]
@@ -31,8 +31,8 @@ impl From<Option<u32>> for Team {
     }
 }
 
-impl From<&Option<Unk0x1b1b0d1a>> for Team {
-    fn from(value: &Option<Unk0x1b1b0d1a>) -> Self {
+impl From<&Option<TeamData>> for Team {
+    fn from(value: &Option<TeamData>) -> Self {
         match value {
             Some(value) => From::from(value.team),
             None => Team::default(),

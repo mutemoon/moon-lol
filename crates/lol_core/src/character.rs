@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use league_core::extract::CharacterRecord;
+use lol_base::character_record::CharacterRecord;
 use lol_base::prop::{HashKey, LoadHashKeyTrait};
 
 use crate::base::ability_resource::AbilityResourceType;

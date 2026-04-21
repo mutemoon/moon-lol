@@ -1,12 +1,15 @@
 pub mod animation;
 pub mod barrack;
 pub mod character;
+pub mod character_record;
 pub mod game;
 pub mod grid;
 pub mod mapgeo;
 pub mod mesh;
+pub mod movement;
 pub mod prop;
 pub mod register;
 pub mod shader;
 pub mod spell;
 pub mod spell_calc;
+pub mod team_data;

@@ -4081,7 +4081,6 @@ name = "lol_core"
 version = "0.1.0"
 dependencies = [
  "bevy",
- "league_core",
  "league_file",
  "league_utils",
  "lol_base",

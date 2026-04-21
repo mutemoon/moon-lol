@@ -4,6 +4,7 @@ use bevy::asset::Asset;
 use bevy::reflect::TypePath;
 use serde::{Deserialize, Serialize};
 
+use super::movement::MissileSpecification;
 use super::spell_calc::CalculationType;
 
 /// 技能效果值
@@ -29,6 +30,11 @@ pub struct DataSpell {
     pub effect_amounts: Option<Vec<ValuesEffect>>,
     pub data_values: Option<Vec<ValuesData>>,
     pub mana: Option<Vec<f32>>,
+    pub missile_spec: Option<MissileSpecification>,
+    pub hit_bone_name: Option<String>,
+    pub missile_speed: Option<f32>,
+    pub missile_effect_key: Option<u32>,
+    pub cast_type: Option<u32>,
 }
 
 /// 技能对象 (Bevy Asset)

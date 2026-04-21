@@ -1,9 +1,10 @@
 use bevy::animation::AnimationTargetId;
 use bevy::color::palettes::tailwind::RED_500;
 use bevy::prelude::*;
-use league_core::extract::{EnumMovement, SpellObject};
 use league_utils::hash_joint;
+use lol_base::movement::MovementType;
 use lol_base::prop::{HashKey, LoadHashKeyTrait};
+use lol_base::spell::Spell;
 use serde::{Deserialize, Serialize};
 
 use crate::attack::EntityCommandsTrigger;
@@ -27,7 +28,7 @@ impl Plugin for PluginMissile {
 /// 攻击组件 - 包含攻击的基础属性
 #[derive(Debug, Component, Clone)]
 pub struct Missile {
-    pub key: HashKey<SpellObject>,
+    pub key: HashKey<Spell>,
     pub speed: f32,
 }
 
@@ -44,7 +45,7 @@ pub struct MissileState {
 pub struct CommandMissileCreate {
     pub entity: Entity,
     pub target: Entity,
-    pub spell_key: HashKey<SpellObject>,
+    pub spell_key: HashKey<Spell>,
 }
 
 fn fixed_update(
@@ -77,7 +78,7 @@ fn fixed_update(
 fn on_command_missile_create(
     trigger: On<CommandMissileCreate>,
     mut commands: Commands,
-    res_assets_spell_object: Res<Assets<SpellObject>>,
+    res_assets_spell_object: Res<Assets<Spell>>,
     q_global_transform: Query<&GlobalTransform>,
     q_children: Query<&Children>,
     q_joint_target: Query<&AnimationTargetId>,
@@ -88,7 +89,7 @@ fn on_command_missile_create(
         .load_hash(trigger.spell_key)
         .unwrap();
 
-    let spell_data_resource = spell_object.m_spell.clone().unwrap();
+    let spell_data_resource = spell_object.spell_data.clone().unwrap();
 
     let speed = spell_data_resource.missile_speed.unwrap();
 
@@ -101,14 +102,14 @@ fn on_command_missile_create(
 
     let mut start_translation = None;
 
-    if let Some(m_missile_spec) = spell_data_resource.m_missile_spec {
-        if let EnumMovement::FixedSpeedMovement(fixed_speed_movement) =
-            m_missile_spec.movement_component
+    if let Some(missile_spec) = spell_data_resource.missile_spec {
+        if let MovementType::MovementTypeFixedSpeed(fixed_speed_movement) =
+            missile_spec.movement_component
         {
-            if let Some(m_start_bone_name) = fixed_speed_movement.m_start_bone_name {
+            if let Some(start_bone_name) = &fixed_speed_movement.start_bone_name {
                 start_translation = find_bone_translation(
                     entity,
-                    &m_start_bone_name,
+                    start_bone_name,
                     &q_children,
                     &q_joint_target,
                     &q_global_transform,
@@ -118,13 +119,13 @@ fn on_command_missile_create(
     }
 
     let mut end_entity = trigger.target;
-    if let Some(m_hit_bone_name) = spell_data_resource.m_hit_bone_name {
+    if let Some(hit_bone_name) = spell_data_resource.hit_bone_name {
         for child in q_children.iter_descendants(trigger.target) {
             let Ok(joint_target) = q_joint_target.get(child) else {
                 continue;
             };
             let id = joint_target.0.as_u128();
-            if hash_joint(&m_hit_bone_name) as u128 == id {
+            if hash_joint(&hit_bone_name) as u128 == id {
                 end_entity = child;
                 break;
             }
@@ -170,7 +171,7 @@ fn on_command_missile_create(
             source: "Missile".to_string(),
         },
     });
-    if let Some(particle) = spell_data_resource.m_missile_effect_key {
+    if let Some(particle) = spell_data_resource.missile_effect_key {
         commands.trigger(CommandSkinParticleSpawn {
             entity: missile_entity,
             hash: particle,

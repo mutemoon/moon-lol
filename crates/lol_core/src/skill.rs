@@ -738,6 +738,11 @@ mod tests {
                 effect_amounts,
                 data_values,
                 mana: None,
+                missile_spec: None,
+                hit_bone_name: None,
+                missile_speed: None,
+                missile_effect_key: None,
+                cast_type: None,
             }),
         }
     }

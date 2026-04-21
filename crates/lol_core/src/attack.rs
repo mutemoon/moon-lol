@@ -1,8 +1,8 @@
 use bevy::ecs::error::ignore;
 use bevy::ecs::system::command::trigger;
 use bevy::prelude::*;
-use league_core::extract::SpellObject;
 use lol_base::prop::{HashKey, LoadHashKeyTrait};
+use lol_base::spell::Spell;
 use serde::{Deserialize, Serialize};
 
 use crate::base::buff::Buffs;
@@ -42,7 +42,7 @@ pub struct Attack {
     /// 前摇修正系数 (默认 1.0，可以被技能修改)
     pub windup_modifier: f32,
     /// 攻击导弹
-    pub spell_key: Option<HashKey<SpellObject>>,
+    pub spell_key: Option<HashKey<Spell>>,
 }
 
 /// 前摇时间配置方式
@@ -145,7 +145,7 @@ impl Attack {
         }
     }
 
-    pub fn with_missile(mut self, missile: Option<HashKey<SpellObject>>) -> Self {
+    pub fn with_missile(mut self, missile: Option<HashKey<Spell>>) -> Self {
         self.spell_key = missile;
         self
     }
@@ -367,7 +367,7 @@ fn on_event_dead(
 fn fixed_update(
     mut query: Query<(Entity, &mut AttackState, &Attack, Option<&Damage>)>,
     mut commands: Commands,
-    res_assets_spell_object: Option<Res<Assets<SpellObject>>>,
+    res_assets_spell_object: Option<Res<Assets<Spell>>>,
     time: Res<Time<Fixed>>,
 ) {
     let now = time.elapsed_secs();
@@ -387,7 +387,7 @@ fn fixed_update(
                                 .as_ref()
                                 .and_then(|assets| assets.load_hash(spell_key))
                             {
-                                if spell.m_spell.as_ref().unwrap().m_cast_type.unwrap_or(0) == 1 {
+                                if spell.spell_data.as_ref().unwrap().cast_type.unwrap_or(0) == 1 {
                                     commands.trigger(CommandMissileCreate {
                                         entity,
                                         target: *target,
