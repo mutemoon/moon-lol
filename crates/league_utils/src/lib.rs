@@ -5,8 +5,8 @@ use std::marker::PhantomData;
 use bevy::asset::uuid::Uuid;
 use bevy::prelude::*;
 use heck::{ToPascalCase, ToSnakeCase};
-use nom::number::complete::le_f32;
 use nom::IResult;
+use nom::number::complete::le_f32;
 use serde::{Deserialize, Serialize};
 use twox_hash::XxHash64;
 

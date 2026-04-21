@@ -1,12 +1,11 @@
 use bevy::prelude::*;
-use league_core::extract::{CharacterRecord, Unk0xad65d8c4};
+use league_core::extract::CharacterRecord;
 use lol_base::prop::{HashKey, LoadHashKeyTrait};
 
 use crate::base::ability_resource::AbilityResourceType;
 use crate::base::bounding::Bounding;
 use crate::base::level::{EventLevelUp, Level};
 use crate::life::EventDead;
-use crate::map::MapState;
 use crate::render_cmd::CommandSkinSpawn;
 use crate::resource::loading::Loading;
 use crate::resource::prop_bin::{CommandLoadPropBin, PropPath};

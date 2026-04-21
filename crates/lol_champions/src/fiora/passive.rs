@@ -5,7 +5,7 @@ use bevy::prelude::*;
 use league_utils::hash_bin;
 use lol_core::attack::EntityCommandsTrigger;
 use lol_core::base::buff::BuffOf;
-use lol_core::base::direction::{is_in_direction, Direction};
+use lol_core::base::direction::{Direction, is_in_direction};
 use lol_core::damage::{CommandDamageCreate, DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
 use lol_core::life::Health;

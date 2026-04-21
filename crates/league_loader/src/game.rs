@@ -8,10 +8,10 @@ use league_property::prop::PropFile;
 use lol_base::prop::HashKey;
 use serde::de::DeserializeOwned;
 
+use crate::Error;
 use crate::prop_bin::LeagueWadLoaderTrait;
 use crate::wad::LeagueWadLoader;
 use crate::wad_parse::LeagueWadEntry;
-use crate::Error;
 
 pub struct LeagueLoader {
     pub root_dir: String,
@@ -123,7 +123,7 @@ impl Data for PropGroup {
         &self,
         hash: impl Into<HashKey<T>>,
     ) -> Option<T> {
-        let hash = hash.into().0 .0;
+        let hash = hash.into().0.0;
         self.prop_file
             .iter()
             .find_map(|v| v.get_data_option::<T>(hash))
@@ -146,7 +146,7 @@ impl Data for PropFile {
         &self,
         hash: impl Into<HashKey<T>>,
     ) -> Option<T> {
-        self.get_entry(hash.into().0 .0)
+        self.get_entry(hash.into().0.0)
             .and_then(|v| from_entry::<T>(v).ok())
     }
 }

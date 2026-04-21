@@ -1,6 +1,6 @@
+use nom::IResult;
 use nom::bytes::complete::take;
 use nom::number::complete::le_u32;
-use nom::IResult;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

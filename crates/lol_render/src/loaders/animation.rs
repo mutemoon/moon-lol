@@ -1,4 +1,4 @@
-use bevy::animation::{animated_field, AnimationTargetId};
+use bevy::animation::{AnimationTargetId, animated_field};
 use bevy::asset::uuid::Uuid;
 use bevy::asset::{AssetLoader, LoadContext};
 use bevy::prelude::*;

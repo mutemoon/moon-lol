@@ -8,8 +8,8 @@ use bevy::prelude::*;
 use league_property::from_entry;
 use league_property::prop::EntryData;
 use league_utils::type_name_to_hash;
-use serde::de::DeserializeOwned;
 use serde::Serialize;
+use serde::de::DeserializeOwned;
 
 use crate::prop::HashKey;
 

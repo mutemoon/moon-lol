@@ -3,8 +3,8 @@ pub mod mesh;
 pub mod quad;
 pub mod quad_slice;
 
-use bevy::mesh::skinning::{SkinnedMesh, SkinnedMeshInverseBindposes};
 use bevy::mesh::VertexAttributeValues;
+use bevy::mesh::skinning::{SkinnedMesh, SkinnedMeshInverseBindposes};
 use bevy::prelude::*;
 use league_core::extract::{EnumVfxPrimitive, VfxSystemDefinitionData};
 use lol_core::lifetime::Lifetime;
@@ -16,7 +16,7 @@ use crate::particle::particle::distortion::ParticleMaterialDistortion;
 use crate::particle::particle::mesh::ParticleMaterialMesh;
 use crate::particle::skinned_mesh::particle::ParticleMaterialSkinnedMeshParticle;
 use crate::particle::{
-    ParticleId, ATTRIBUTE_LIFETIME, ATTRIBUTE_WORLD_POSITION, ATTRIBUTE_WORLD_POSITION_VEC4,
+    ATTRIBUTE_LIFETIME, ATTRIBUTE_WORLD_POSITION, ATTRIBUTE_WORLD_POSITION_VEC4, ParticleId,
 };
 
 #[derive(Component)]

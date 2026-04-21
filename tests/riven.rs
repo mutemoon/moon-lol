@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use std::panic::{catch_unwind, AssertUnwindSafe};
+use std::panic::{AssertUnwindSafe, catch_unwind};
 use std::time::Duration;
 
 use bevy::prelude::*;
@@ -31,8 +31,8 @@ use lol_core::navigation::grid::ResourceGrid;
 use lol_core::navigation::navigation::{NavigationDebug, NavigationStats, PluginNavigaton};
 use lol_core::resource::PluginResource;
 use lol_core::skill::{
-    get_skill_value, CoolDown, Skill, SkillCooldownMode, SkillOf, SkillPoints, SkillRecastWindow,
-    SkillSlot, Skills,
+    CoolDown, Skill, SkillCooldownMode, SkillOf, SkillPoints, SkillRecastWindow, SkillSlot, Skills,
+    get_skill_value,
 };
 use lol_core::team::Team;
 use lol_render::animation::PluginAnimation;
@@ -40,8 +40,8 @@ use lol_render::camera::PluginCamera;
 use lol_render::particle::PluginParticle;
 use lol_render::skin::PluginSkin;
 use lol_render::test_render::{
-    attach_skill_test_actor, PluginSkillTestRender, SkillTestActor, SkillTestRenderConfig,
-    SkillTestVideoFormat, SkillTestVideoOutput,
+    PluginSkillTestRender, SkillTestActor, SkillTestRenderConfig, SkillTestVideoFormat,
+    SkillTestVideoOutput, attach_skill_test_actor,
 };
 use lol_render::ui::PluginUI;
 use moon_lol::PluginCore;
@@ -195,7 +195,6 @@ impl RivenHarness {
                         result_modifier: None,
                         tooltip_only: None,
                         unk_0x72c5c2a8: None,
-                        
                     })
                 };
 
@@ -590,11 +589,13 @@ fn riven_q_cycles_through_three_real_stages() {
         assert!(harness.cooldown_finished(0));
 
         harness.cast_skill(0, Vec2::new(140.0, 0.0)).advance(0.1);
-        assert!(harness
-            .app
-            .world()
-            .get::<SkillRecastWindow>(q_entity)
-            .is_none());
+        assert!(
+            harness
+                .app
+                .world()
+                .get::<SkillRecastWindow>(q_entity)
+                .is_none()
+        );
         assert!(!harness.cooldown_finished(0));
         harness.advance(10.1);
         assert!(harness.cooldown_finished(0));

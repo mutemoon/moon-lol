@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use bitflags::bitflags;
 use nom::bytes::complete::take;
 use nom::multi::count;
-use nom::number::complete::{le_f32, le_i16, le_i32, le_u16, le_u32, le_u8};
+use nom::number::complete::{le_f32, le_i16, le_i32, le_u8, le_u16, le_u32};
 use nom::{IResult, Parser};
 
 bitflags! {

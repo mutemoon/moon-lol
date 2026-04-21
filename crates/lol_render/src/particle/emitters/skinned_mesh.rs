@@ -7,15 +7,15 @@ use lol_core::utils::AssetServerLoadLeague;
 
 use super::state::{EmitterOf, ParticleEmitterState};
 use super::utils::{
-    calculate_emission_params, calculate_particle_transform_frame, get_emitter_type,
-    spawn_particle_entity, EmissionParams, EmitterType, ParticleBirthParams,
+    EmissionParams, EmitterType, ParticleBirthParams, calculate_emission_params,
+    calculate_particle_transform_frame, get_emitter_type, spawn_particle_entity,
 };
+use crate::particle::ParticleId;
 use crate::particle::skinned_mesh::particle::{
     ParticleMaterialSkinnedMeshParticle, UniformsPixelSkinnedMeshParticle,
     UniformsVertexSkinnedMeshParticle,
 };
 use crate::particle::utils::create_black_pixel_texture;
-use crate::particle::ParticleId;
 use crate::resource::ResourceCache;
 use crate::skin::mesh_shadow::spawn_shadow_skin_entity;
 

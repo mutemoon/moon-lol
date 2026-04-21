@@ -2,16 +2,12 @@ use std::fmt::Debug;
 use std::ops::Deref;
 
 use bevy::prelude::*;
-use league_core::extract::CharacterRecord;
-use lol_base::prop::HashKey;
 
 #[derive(Default)]
 pub struct PluginResourceLoading;
 
 impl Plugin for PluginResourceLoading {
-    fn build(&self, app: &mut App) {
-        app.register_loading::<HashKey<CharacterRecord>>();
-    }
+    fn build(&self, app: &mut App) {}
 }
 
 pub trait RegisterLoadingExt {

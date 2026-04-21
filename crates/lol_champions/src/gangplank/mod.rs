@@ -9,8 +9,8 @@ use lol_core::base::buff::BuffOf;
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
 use lol_core::skill::{
-    play_skill_animation, skill_damage, skill_slot_from_index, spawn_skill_particle, CoolDown,
-    EventSkillCast, PassiveSkillOf, Skill, SkillOf, SkillSlot, Skills,
+    CoolDown, EventSkillCast, PassiveSkillOf, Skill, SkillOf, SkillSlot, Skills,
+    play_skill_animation, skill_damage, skill_slot_from_index, spawn_skill_particle,
 };
 
 use crate::gangplank::buffs::BuffGangplankPassive;

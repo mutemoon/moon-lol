@@ -25,11 +25,11 @@ use lol_core::entities::barrack::PluginBarrack;
 use lol_core::life::Health;
 use lol_render::camera::CameraInit;
 use lol_render::controller::Controller;
-use moon_lol::server::gym::{AttackTarget, PluginGymEnv};
 use moon_lol::PluginCore;
+use moon_lol::server::gym::{AttackTarget, PluginGymEnv};
 use rocket::http::{ContentType, Method, Status};
 use rocket::serde::json::Json;
-use rocket::{get, launch, post, routes, State};
+use rocket::{State, get, launch, post, routes};
 use rocket_cors::{AllowedOrigins, CorsOptions};
 use serde::{Deserialize, Serialize};
 

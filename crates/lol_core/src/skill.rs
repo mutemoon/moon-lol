@@ -1,14 +1,14 @@
 use std::ops::Deref;
 
 use bevy::prelude::*;
-use league_core::extract::{
-    EffectValueCalculationPart, EnumAbilityResourceByCoefficientCalculationPart,
-    EnumGameCalculation, NamedDataValueCalculationPart, SpellObject,
-    StatByCoefficientCalculationPart, StatByNamedDataValueCalculationPart,
-    StatBySubPartCalculationPart,
-};
 use league_utils::hash_bin;
 use lol_base::prop::{HashKey, LoadHashKeyTrait};
+use lol_base::spell::Spell;
+use lol_base::spell_calc::{
+    CalculationPart, CalculationPartEffectValue, CalculationPartNamedDataValue,
+    CalculationPartStatCoefficient, CalculationPartStatNamedDataValue, CalculationPartStatSub,
+    CalculationType,
+};
 
 use crate::action::damage::{ActionDamage, ActionDamageEffect, DamageShape, TargetDamage};
 use crate::action::dash::{ActionDash, DashDamageComponent, DashMoveType};
@@ -103,7 +103,7 @@ pub enum SkillCooldownMode {
 #[derive(Component)]
 #[require(CoolDown)]
 pub struct Skill {
-    pub key_spell_object: HashKey<SpellObject>,
+    pub key_spell_object: HashKey<Spell>,
     pub level: usize,
     pub slot: SkillSlot,
     pub cooldown_mode: SkillCooldownMode,
@@ -121,7 +121,7 @@ impl Default for Skill {
 }
 
 impl Skill {
-    pub fn new(slot: SkillSlot, key_spell_object: impl Into<HashKey<SpellObject>>) -> Self {
+    pub fn new(slot: SkillSlot, key_spell_object: impl Into<HashKey<Spell>>) -> Self {
         Self {
             key_spell_object: key_spell_object.into(),
             level: 0,
@@ -253,7 +253,7 @@ fn on_skill_cast(
     trigger: On<CommandSkillStart>,
     mut commands: Commands,
     skills: Query<&Skills>,
-    res_assets_spell_object: Res<Assets<SpellObject>>,
+    res_assets_spell_object: Res<Assets<Spell>>,
     mut q_skill: Query<(&Skill, &mut CoolDown)>,
     mut q_ability_resource: Query<&mut AbilityResource>,
     mut log: ResMut<SkillCastLog>,
@@ -355,7 +355,7 @@ fn on_skill_cast(
         return;
     };
 
-    if let Some(ref mana) = spell_object.m_spell.as_ref().unwrap().mana {
+    if let Some(ref mana) = spell_object.spell_data.as_ref().unwrap().mana {
         let &current_mana = mana.get(skill.level as usize).unwrap();
 
         if ability_resource.value < current_mana {
@@ -518,7 +518,7 @@ pub fn reset_skill_attack(commands: &mut Commands, entity: Entity) {
 pub fn skill_damage(
     commands: &mut Commands,
     entity: Entity,
-    skill: impl Into<HashKey<SpellObject>>,
+    skill: impl Into<HashKey<Spell>>,
     shape: DamageShape,
     damage_list: Vec<TargetDamage>,
     particle: Option<u32>,
@@ -592,58 +592,51 @@ pub fn skill_dash(
 }
 
 pub fn get_skill_value(
-    skill_object: &SpellObject,
+    skill_object: &Spell,
     hash: u32,
     level: usize,
     get_stat: impl Fn(u8) -> f32,
 ) -> Option<f32> {
-    let spell = skill_object.m_spell.as_ref()?;
-    let calculations = spell.m_spell_calculations.as_ref()?;
+    let spell = skill_object.spell_data.as_ref()?;
+    let calculations = spell.calculations.as_ref()?;
     let calculation = calculations.get(&hash)?;
 
     match calculation {
-        EnumGameCalculation::GameCalculation(calc) => {
+        CalculationType::CalculationSpell(calc) => {
             let mut value = 0.0;
-            if let Some(parts) = &calc.m_formula_parts {
+            if let Some(parts) = &calc.formula_parts {
                 for part in parts {
                     value += calculate_part(part, skill_object, level, &get_stat);
                 }
             }
 
-            if let Some(multiplier) = &calc.m_multiplier {
-                // m_multiplier is an EnumAbilityResourceByCoefficientCalculationPart
-                // Wait, the struct definition says:
-                // pub m_multiplier: Option<EnumAbilityResourceByCoefficientCalculationPart>,
-                // So we can directly use it.
+            if let Some(multiplier) = &calc.multiplier {
                 value *= calculate_part(multiplier, skill_object, level, &get_stat);
             }
             Some(value)
         }
-        _ => todo!(
-            "EnumGameCalculation variant not implemented: {:?}",
-            calculation
-        ),
+        _ => todo!("CalculationType variant not implemented: {:?}", calculation),
     }
 }
 
 fn calculate_part(
-    part: &EnumAbilityResourceByCoefficientCalculationPart,
-    skill_object: &SpellObject,
+    part: &CalculationPart,
+    skill_object: &Spell,
     level: usize,
     get_stat: &impl Fn(u8) -> f32,
 ) -> f32 {
     match part {
-        EnumAbilityResourceByCoefficientCalculationPart::EffectValueCalculationPart(
-            EffectValueCalculationPart { m_effect_index },
-        ) => {
-            let index = m_effect_index.unwrap_or(1) - 1;
+        CalculationPart::CalculationPartEffectValue(CalculationPartEffectValue {
+            effect_index,
+        }) => {
+            let index = effect_index.unwrap_or(1) - 1;
             if let Some(effect_amount) = skill_object
-                .m_spell
+                .spell_data
                 .as_ref()
-                .and_then(|s| s.m_effect_amount.as_ref())
+                .and_then(|s| s.effect_amounts.as_ref())
                 .and_then(|v| v.get(index as usize))
             {
-                if let Some(values) = &effect_amount.value {
+                if let Some(values) = &effect_amount.values {
                     // level is 1-based, so index is level - 1
                     // Ensure level is at least 1
                     let lvl_idx = if level > 0 { level - 1 } else { 0 };
@@ -652,30 +645,27 @@ fn calculate_part(
             }
             0.0
         }
-        EnumAbilityResourceByCoefficientCalculationPart::StatByCoefficientCalculationPart(
-            StatByCoefficientCalculationPart {
-                m_stat,
-                m_coefficient,
-                ..
-            },
-        ) => {
-            let stat = m_stat.unwrap_or(0);
-            let coefficient = m_coefficient.unwrap_or(0.0);
+        CalculationPart::CalculationPartStatCoefficient(CalculationPartStatCoefficient {
+            stat,
+            coefficient,
+            ..
+        }) => {
+            let stat = stat.unwrap_or(0);
+            let coefficient = coefficient.unwrap_or(0.0);
             get_stat(stat) * coefficient
         }
-        EnumAbilityResourceByCoefficientCalculationPart::NamedDataValueCalculationPart(
-            NamedDataValueCalculationPart { m_data_value },
-        ) => {
+        CalculationPart::CalculationPartNamedDataValue(CalculationPartNamedDataValue {
+            data_value,
+        }) => {
             if let Some(data_values) = skill_object
-                .m_spell
+                .spell_data
                 .as_ref()
                 .and_then(|s| s.data_values.as_ref())
             {
                 for dv in data_values {
-                    // Check if hash of name matches m_data_value
-                    // Assuming m_data_value is the hash of the name
+                    // Check if hash of name matches data_value
                     let hash = hash_bin(&dv.name);
-                    if hash == *m_data_value {
+                    if hash == *data_value {
                         if let Some(values) = &dv.values {
                             let lvl_idx = if level > 0 { level - 1 } else { 0 };
                             return *values.get(lvl_idx).unwrap_or(&0.0);
@@ -685,32 +675,32 @@ fn calculate_part(
             }
             0.0
         }
-        EnumAbilityResourceByCoefficientCalculationPart::StatBySubPartCalculationPart(
-            StatBySubPartCalculationPart {
-                m_stat, m_subpart, ..
-            },
-        ) => {
-            let stat = m_stat.unwrap_or(0);
-            let sub_val = calculate_part(m_subpart, skill_object, level, get_stat);
-            get_stat(stat) * sub_val
+        CalculationPart::CalculationPartStatSub(CalculationPartStatSub {
+            stat, subpart, ..
+        }) => {
+            let stat_val = stat.unwrap_or(0);
+            let sub_val = if let Some(sub) = subpart {
+                calculate_part(sub, skill_object, level, get_stat)
+            } else {
+                0.0
+            };
+            get_stat(stat_val) * sub_val
         }
-        EnumAbilityResourceByCoefficientCalculationPart::StatByNamedDataValueCalculationPart(
-            StatByNamedDataValueCalculationPart {
-                m_stat,
-                m_data_value,
-                ..
-            },
-        ) => {
-            let stat = m_stat.unwrap_or(0);
+        CalculationPart::CalculationPartStatNamedDataValue(CalculationPartStatNamedDataValue {
+            stat,
+            data_value,
+            ..
+        }) => {
+            let stat = stat.unwrap_or(0);
             let mut data_val = 0.0;
             if let Some(data_values) = skill_object
-                .m_spell
+                .spell_data
                 .as_ref()
                 .and_then(|s| s.data_values.as_ref())
             {
                 for dv in data_values {
                     let hash = hash_bin(&dv.name);
-                    if hash == *m_data_value {
+                    if hash == *data_value {
                         if let Some(values) = &dv.values {
                             let lvl_idx = if level > 0 { level - 1 } else { 0 };
                             data_val = *values.get(lvl_idx).unwrap_or(&0.0);
@@ -721,7 +711,7 @@ fn calculate_part(
             }
             get_stat(stat) * data_val
         }
-        _ => todo!("Calculation part not implemented: {:?}", part),
+        _ => todo!("CalculationPart not implemented: {:?}", part),
     }
 }
 
@@ -729,32 +719,26 @@ fn calculate_part(
 mod tests {
     use std::collections::HashMap;
 
-    use league_core::extract::{
-        EffectValueCalculationPart, EnumAbilityResourceByCoefficientCalculationPart,
-        EnumGameCalculation, GameCalculation, NamedDataValueCalculationPart, SpellDataResource,
-        SpellDataValue, SpellEffectAmount, SpellObject, StatByCoefficientCalculationPart,
+    use lol_base::spell::{DataSpell, Spell, ValuesData, ValuesEffect};
+    use lol_base::spell_calc::{
+        CalculationPart, CalculationPartEffectValue, CalculationPartNamedDataValue,
+        CalculationPartStatCoefficient, CalculationSpell, CalculationType,
     };
 
     use super::*;
 
-    fn create_mock_spell_object(
-        calculations: HashMap<u32, EnumGameCalculation>,
-        effect_amounts: Option<Vec<SpellEffectAmount>>,
-        data_values: Option<Vec<SpellDataValue>>,
-    ) -> SpellObject {
-        SpellObject {
-            m_spell: Some(SpellDataResource {
-                m_spell_calculations: Some(calculations),
-                m_effect_amount: effect_amounts,
+    fn create_mock_spell(
+        calculations: HashMap<u32, CalculationType>,
+        effect_amounts: Option<Vec<ValuesEffect>>,
+        data_values: Option<Vec<ValuesData>>,
+    ) -> Spell {
+        Spell {
+            spell_data: Some(DataSpell {
+                calculations: Some(calculations),
+                effect_amounts,
                 data_values,
-                ..default()
+                mana: None,
             }),
-            bot_data: None,
-            cc_behavior_data: None,
-            m_buff: None,
-            m_script_name: "".to_string(),
-            object_name: "".to_string(),
-            script: None,
         }
     }
 
@@ -766,39 +750,31 @@ mod tests {
         let expected_value_lvl1 = 10.0;
         let expected_value_lvl2 = 20.0;
 
-        let calc_part = EnumAbilityResourceByCoefficientCalculationPart::EffectValueCalculationPart(
-            EffectValueCalculationPart {
-                m_effect_index: Some(effect_index),
-            },
-        );
+        let calc_part = CalculationPart::CalculationPartEffectValue(CalculationPartEffectValue {
+            effect_index: Some(effect_index),
+        });
 
-        let game_calc = EnumGameCalculation::GameCalculation(GameCalculation {
-            m_formula_parts: Some(vec![calc_part]),
-            m_display_as_percent: None,
-            m_expanded_tooltip_calculation_display: None,
-            m_multiplier: None,
-            m_precision: None,
-            m_simple_tooltip_calculation_display: None,
-            result_modifier: None,
-            tooltip_only: None,
-            unk_0x72c5c2a8: None,
+        let calc = CalculationType::CalculationSpell(CalculationSpell {
+            formula_parts: Some(vec![calc_part]),
+            multiplier: None,
+            precision: None,
         });
 
         let mut calculations = HashMap::new();
-        calculations.insert(hash, game_calc);
+        calculations.insert(hash, calc);
 
-        let effect_amounts = vec![SpellEffectAmount {
-            value: Some(vec![expected_value_lvl1, expected_value_lvl2, 30.0]),
+        let effect_amounts = vec![ValuesEffect {
+            values: Some(vec![expected_value_lvl1, expected_value_lvl2, 30.0]),
         }];
 
-        let spell_object = create_mock_spell_object(calculations, Some(effect_amounts), None);
+        let spell = create_mock_spell(calculations, Some(effect_amounts), None);
 
         // Test Level 1
-        let result = get_skill_value(&spell_object, hash, 1, |_| 0.0);
+        let result = get_skill_value(&spell, hash, 1, |_| 0.0);
         assert_eq!(result, Some(expected_value_lvl1));
 
         // Test Level 2
-        let result = get_skill_value(&spell_object, hash, 2, |_| 0.0);
+        let result = get_skill_value(&spell, hash, 2, |_| 0.0);
         assert_eq!(result, Some(expected_value_lvl2));
     }
 
@@ -812,39 +788,26 @@ mod tests {
         let expected_value = stat_value * coefficient;
 
         let calc_part =
-            EnumAbilityResourceByCoefficientCalculationPart::StatByCoefficientCalculationPart(
-                StatByCoefficientCalculationPart {
-                    m_stat: Some(stat_id),
-                    m_coefficient: Some(coefficient),
-                    m_stat_formula: None,
-                    unk_0xa8cb9c14: None,
-                },
-            );
+            CalculationPart::CalculationPartStatCoefficient(CalculationPartStatCoefficient {
+                stat: Some(stat_id),
+                coefficient: Some(coefficient),
+                stat_formula: None,
+            });
 
-        let game_calc = EnumGameCalculation::GameCalculation(GameCalculation {
-            m_formula_parts: Some(vec![calc_part]),
-            m_display_as_percent: None,
-            m_expanded_tooltip_calculation_display: None,
-            m_multiplier: None,
-            m_precision: None,
-            m_simple_tooltip_calculation_display: None,
-            result_modifier: None,
-            tooltip_only: None,
-            unk_0x72c5c2a8: None,
+        let calc = CalculationType::CalculationSpell(CalculationSpell {
+            formula_parts: Some(vec![calc_part]),
+            multiplier: None,
+            precision: None,
         });
 
         let mut calculations = HashMap::new();
-        calculations.insert(hash, game_calc);
+        calculations.insert(hash, calc);
 
-        let spell_object = create_mock_spell_object(calculations, None, None);
+        let spell = create_mock_spell(calculations, None, None);
 
         // Test
-        let result = get_skill_value(&spell_object, hash, 1, |id| {
-            if id == stat_id {
-                stat_value
-            } else {
-                0.0
-            }
+        let result = get_skill_value(&spell, hash, 1, |id| {
+            if id == stat_id { stat_value } else { 0.0 }
         });
         assert_eq!(result, Some(expected_value));
     }
@@ -858,36 +821,28 @@ mod tests {
         let expected_value = 50.0;
 
         let calc_part =
-            EnumAbilityResourceByCoefficientCalculationPart::NamedDataValueCalculationPart(
-                NamedDataValueCalculationPart {
-                    m_data_value: data_name_hash,
-                },
-            );
+            CalculationPart::CalculationPartNamedDataValue(CalculationPartNamedDataValue {
+                data_value: data_name_hash,
+            });
 
-        let game_calc = EnumGameCalculation::GameCalculation(GameCalculation {
-            m_formula_parts: Some(vec![calc_part]),
-            m_display_as_percent: None,
-            m_expanded_tooltip_calculation_display: None,
-            m_multiplier: None,
-            m_precision: None,
-            m_simple_tooltip_calculation_display: None,
-            result_modifier: None,
-            tooltip_only: None,
-            unk_0x72c5c2a8: None,
+        let calc = CalculationType::CalculationSpell(CalculationSpell {
+            formula_parts: Some(vec![calc_part]),
+            multiplier: None,
+            precision: None,
         });
 
         let mut calculations = HashMap::new();
-        calculations.insert(hash, game_calc);
+        calculations.insert(hash, calc);
 
-        let data_values = vec![SpellDataValue {
+        let data_values = vec![ValuesData {
             name: data_name.to_string(),
             values: Some(vec![expected_value, 60.0, 70.0]),
         }];
 
-        let spell_object = create_mock_spell_object(calculations, None, Some(data_values));
+        let spell = create_mock_spell(calculations, None, Some(data_values));
 
         // Test
-        let result = get_skill_value(&spell_object, hash, 1, |_| 0.0);
+        let result = get_skill_value(&spell, hash, 1, |_| 0.0);
         assert_eq!(result, Some(expected_value));
     }
 }

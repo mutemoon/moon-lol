@@ -1,14 +1,14 @@
 use std::collections::HashSet;
 
 use bevy::prelude::*;
-use league_core::extract::SpellObject;
 use lol_base::prop::{HashKey, LoadHashKeyTrait};
+use lol_base::spell::Spell;
 
 use crate::action::damage::{TargetDamage, TargetFilter};
 use crate::damage::{CommandDamageCreate, Damage};
 use crate::entities::champion::Champion;
 use crate::entities::minion::Minion;
-use crate::skill::{get_skill_value, Skill, Skills};
+use crate::skill::{Skill, Skills, get_skill_value};
 use crate::team::Team;
 
 #[derive(Debug, Clone)]
@@ -16,7 +16,7 @@ pub struct ActionDash {
     pub move_type: DashMoveType,
     pub damage: Option<DashDamage>,
     pub speed: f32,
-    pub skill: HashKey<SpellObject>,
+    pub skill: HashKey<Spell>,
 }
 
 #[derive(Debug, Clone)]
@@ -36,7 +36,7 @@ pub struct DashDamageComponent {
     pub start_pos: Vec3,
     pub target_pos: Vec3,
     pub damage: DashDamage,
-    pub skill: HashKey<SpellObject>,
+    pub skill: HashKey<Spell>,
     pub hit_entities: HashSet<Entity>,
 }
 
@@ -64,7 +64,7 @@ pub fn update_dash_damage(
     q_skills: Query<&Skills>,
     q_skill: Query<&Skill>,
     q_damage: Query<&Damage>,
-    res_assets_spell_object: Res<Assets<SpellObject>>,
+    res_assets_spell_object: Res<Assets<Spell>>,
 ) {
     for (entity, dasher_transform, mut dash_damage, team) in q_dasher.iter_mut() {
         let Some(skill_object) = res_assets_spell_object.load_hash(dash_damage.skill) else {

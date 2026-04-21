@@ -1,8 +1,8 @@
 use std::collections::{HashMap, VecDeque};
 
 use league_utils::hash_bin;
-use serde::de::{self, EnumAccess, IntoDeserializer, MapAccess, SeqAccess, VariantAccess, Visitor};
 use serde::Deserializer;
+use serde::de::{self, EnumAccess, IntoDeserializer, MapAccess, SeqAccess, VariantAccess, Visitor};
 
 use crate::deserializer::BinDeserializer;
 use crate::types::{BinDeserializerResult, BinType, Error};

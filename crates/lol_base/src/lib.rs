@@ -8,3 +8,5 @@ pub mod mesh;
 pub mod prop;
 pub mod register;
 pub mod shader;
+pub mod spell;
+pub mod spell_calc;

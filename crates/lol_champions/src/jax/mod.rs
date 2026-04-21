@@ -11,9 +11,9 @@ use lol_core::buffs::common_buffs::{BuffEmpoweredAttack, BuffResist};
 use lol_core::damage::DamageType;
 use lol_core::entities::champion::Champion;
 use lol_core::skill::{
+    CoolDown, EventSkillCast, PassiveSkillOf, Skill, SkillOf, SkillSlot, Skills,
     play_skill_animation, reset_skill_attack, skill_damage, skill_dash, skill_slot_from_index,
-    spawn_skill_particle, CoolDown, EventSkillCast, PassiveSkillOf, Skill, SkillOf, SkillSlot,
-    Skills,
+    spawn_skill_particle,
 };
 
 use crate::jax::buffs::BuffJaxE;

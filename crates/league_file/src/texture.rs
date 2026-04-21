@@ -1,6 +1,6 @@
 use bitflags::bitflags;
 use nom::bytes::complete::{tag, take};
-use nom::number::complete::{le_u16, le_u8};
+use nom::number::complete::{le_u8, le_u16};
 use nom::{IResult, Parser};
 
 #[derive(Debug)]

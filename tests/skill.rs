@@ -7,8 +7,8 @@ use league_core::extract::{
     EnumGameCalculation, GameCalculation, SpellDataResource, SpellEffectAmount, SpellObject,
 };
 use lol_base::prop::LoadHashKeyTrait;
-use lol_core::action::damage::{DamageShape, TargetDamage, TargetFilter};
 use lol_core::action::PluginAction;
+use lol_core::action::damage::{DamageShape, TargetDamage, TargetFilter};
 use lol_core::base::ability_resource::{AbilityResource, AbilityResourceType};
 use lol_core::base::level::Level;
 use lol_core::cooldown::PluginCooldown;
@@ -16,9 +16,9 @@ use lol_core::damage::{DamageType, PluginDamage};
 use lol_core::life::{Health, PluginLife};
 use lol_core::movement::PluginMovement;
 use lol_core::skill::{
-    skill_damage, CommandSkillLevelUp, CommandSkillStart, CoolDown, EventSkillCast, PluginSkill,
-    Skill, SkillCastFailureReason, SkillCastLog, SkillCastResult, SkillCooldownMode, SkillOf,
-    SkillPoints, SkillRecastWindow, SkillSlot, Skills,
+    CommandSkillLevelUp, CommandSkillStart, CoolDown, EventSkillCast, PluginSkill, Skill,
+    SkillCastFailureReason, SkillCastLog, SkillCastResult, SkillCooldownMode, SkillOf, SkillPoints,
+    SkillRecastWindow, SkillSlot, Skills, skill_damage,
 };
 use lol_core::team::Team;
 
@@ -374,18 +374,22 @@ fn observer_skill_can_drive_recast_state_and_manual_cooldown() {
     assert_eq!(stages.as_slice(), &[1, 2, 3]);
 
     let skill_entity = harness.skill_entity(0);
-    assert!(harness
-        .app
-        .world()
-        .get::<SkillRecastWindow>(skill_entity)
-        .is_none());
-    assert!(!harness
-        .app
-        .world()
-        .get::<CoolDown>(skill_entity)
-        .unwrap()
-        .timer
-        .is_finished());
+    assert!(
+        harness
+            .app
+            .world()
+            .get::<SkillRecastWindow>(skill_entity)
+            .is_none()
+    );
+    assert!(
+        !harness
+            .app
+            .world()
+            .get::<CoolDown>(skill_entity)
+            .unwrap()
+            .timer
+            .is_finished()
+    );
 }
 
 #[test]
@@ -405,11 +409,13 @@ fn skill_recast_window_expires_in_fixed_update() {
         .advance_time(4.1);
 
     let skill_entity = harness.skill_entity(0);
-    assert!(harness
-        .app
-        .world()
-        .get::<SkillRecastWindow>(skill_entity)
-        .is_none());
+    assert!(
+        harness
+            .app
+            .world()
+            .get::<SkillRecastWindow>(skill_entity)
+            .is_none()
+    );
 
     harness.cast_skill(0, Vec2::new(50.0, 0.0));
     let stages = &harness.app.world().resource::<ObserverStages>().0;
@@ -434,13 +440,15 @@ fn insufficient_mana_is_recorded_without_starting_cooldown() {
     harness.cast_skill(0, Vec2::new(50.0, 0.0));
 
     assert!((harness.mana() - 10.0).abs() < EPSILON);
-    assert!(harness
-        .app
-        .world()
-        .get::<CoolDown>(harness.skill_entity(0))
-        .unwrap()
-        .timer
-        .is_finished());
+    assert!(
+        harness
+            .app
+            .world()
+            .get::<CoolDown>(harness.skill_entity(0))
+            .unwrap()
+            .timer
+            .is_finished()
+    );
     assert!(matches!(
         harness
             .app

@@ -9,7 +9,7 @@ use lol_core::base::bounding::Bounding;
 use lol_core::life::Health;
 
 use crate::ui::bind::UIBind;
-use crate::ui::element::{spawn_ui_element, UIState};
+use crate::ui::element::{UIState, spawn_ui_element};
 
 pub struct PluginUIHealthBar;
 

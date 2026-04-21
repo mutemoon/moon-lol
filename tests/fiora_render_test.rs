@@ -1,5 +1,5 @@
 use std::fs;
-use std::panic::{catch_unwind, AssertUnwindSafe};
+use std::panic::{AssertUnwindSafe, catch_unwind};
 use std::path::PathBuf;
 use std::time::Duration;
 
@@ -14,8 +14,8 @@ use lol_core::entities::turret::PluginTurret;
 use lol_core::map::PluginMap;
 use lol_core::resource::PluginResource;
 use lol_render::test_render::{
-    attach_skill_test_actor, PluginSkillTestRender, SkillTestRenderConfig, SkillTestScript,
-    SkillTestScriptStep, SkillTestVideoFormat, SkillTestVideoOutput,
+    PluginSkillTestRender, SkillTestRenderConfig, SkillTestScript, SkillTestScriptStep,
+    SkillTestVideoFormat, SkillTestVideoOutput, attach_skill_test_actor,
 };
 use lol_render::ui::PluginUI;
 use moon_lol::PluginCore;

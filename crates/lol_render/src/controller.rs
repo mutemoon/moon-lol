@@ -1,5 +1,5 @@
-use std::collections::hash_map::Iter;
 use std::collections::HashMap;
+use std::collections::hash_map::Iter;
 
 use bevy::prelude::*;
 use league_utils::hash_bin;

@@ -12,7 +12,7 @@ pub struct HashKey<T: TypePath>(pub (u32, PhantomData<T>));
 
 impl<T: TypePath> Debug for HashKey<T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_str(&format!("{:x}: {}", self.0 .0, T::short_type_path()))
+        f.write_str(&format!("{:x}: {}", self.0.0, T::short_type_path()))
     }
 }
 
@@ -48,7 +48,7 @@ impl<T: TypePath> From<String> for HashKey<T> {
 
 impl<T: TypePath> From<&HashKey<T>> for HashKey<T> {
     fn from(value: &HashKey<T>) -> Self {
-        Self((value.0 .0, PhantomData))
+        Self((value.0.0, PhantomData))
     }
 }
 
@@ -62,14 +62,14 @@ impl<T: TypePath> Copy for HashKey<T> {}
 
 impl<T: TypePath> PartialEq for HashKey<T> {
     fn eq(&self, other: &Self) -> bool {
-        self.0 .0 == other.0 .0
+        self.0.0 == other.0.0
     }
 }
 
 impl<T: Asset> From<HashKey<T>> for AssetId<T> {
     fn from(value: HashKey<T>) -> Self {
         AssetId::Uuid {
-            uuid: Uuid::from_u128(value.0 .0 as u128),
+            uuid: Uuid::from_u128(value.0.0 as u128),
         }
     }
 }
@@ -85,7 +85,7 @@ impl<T: Asset> From<AssetId<T>> for HashKey<T> {
 
 impl<T: Asset> From<HashKey<T>> for Handle<T> {
     fn from(value: HashKey<T>) -> Self {
-        Handle::Uuid(Uuid::from_u128(value.0 .0 as u128), PhantomData)
+        Handle::Uuid(Uuid::from_u128(value.0.0 as u128), PhantomData)
     }
 }
 
@@ -138,6 +138,6 @@ impl LeagueProperties {
         self.0
             .entry(type_hash)
             .or_default()
-            .insert(hash.into().0 .0, res_assets.add(asset).untyped());
+            .insert(hash.into().0.0, res_assets.add(asset).untyped());
     }
 }

@@ -4,13 +4,13 @@ use lol_core::lifetime::Lifetime;
 
 use super::state::ParticleEmitterState;
 use super::utils::{
-    calculate_emission_params, calculate_particle_transform_frame, get_emitter_type,
-    spawn_particle_entity, EmissionParams, EmitterType, ParticleBirthParams,
+    EmissionParams, EmitterType, ParticleBirthParams, calculate_emission_params,
+    calculate_particle_transform_frame, get_emitter_type, spawn_particle_entity,
 };
+use crate::particle::ParticleId;
 use crate::particle::particle::quad::{ParticleMaterialQuad, ParticleMeshQuad, UniformsVertexQuad};
 use crate::particle::particle::quad_slice::{ParticleMaterialQuadSlice, UniformsPixelQuadSlice};
 use crate::particle::utils::create_black_pixel_texture;
-use crate::particle::ParticleId;
 use crate::resource::ResourceCache;
 
 pub fn attach_quad_visuals(

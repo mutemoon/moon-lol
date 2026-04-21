@@ -8,7 +8,7 @@ use lol_core::navigation::grid::ResourceGrid;
 use lol_core::navigation::navigation::NavigationDebug;
 use lol_core::resource::PluginResource;
 use lol_render::camera::CameraState;
-use lol_render::map::{on_click_map, Map};
+use lol_render::map::{Map, on_click_map};
 use moon_lol::PluginCore;
 
 fn main() {

@@ -16,8 +16,8 @@ use lol_core::cooldown::PluginCooldown;
 use lol_core::damage::{DamageType, PluginDamage};
 use lol_core::life::{Health, PluginLife};
 use lol_core::skill::{
-    skill_damage, CoolDown, EventSkillCast, PluginSkill, Skill, SkillCastLog, SkillCastResult,
-    SkillOf, SkillPoints, SkillSlot, Skills,
+    CoolDown, EventSkillCast, PluginSkill, Skill, SkillCastLog, SkillCastResult, SkillOf,
+    SkillPoints, SkillSlot, Skills, skill_damage,
 };
 use lol_core::team::Team;
 

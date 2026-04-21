@@ -1,12 +1,12 @@
 use bevy::prelude::*;
-use league_core::extract::SpellObject;
 use lol_base::prop::{HashKey, LoadHashKeyTrait};
+use lol_base::spell::Spell;
 
 use crate::damage::{CommandDamageCreate, Damage, DamageType};
 use crate::entities::champion::Champion;
 use crate::entities::minion::Minion;
 use crate::render_cmd::CommandSkinParticleSpawn;
-use crate::skill::{get_skill_value, Skill, Skills};
+use crate::skill::{Skill, Skills, get_skill_value};
 use crate::team::Team;
 
 #[derive(Debug, Clone)]
@@ -57,14 +57,14 @@ pub struct ActionDamageEffect {
 #[derive(Debug, Clone, EntityEvent)]
 pub struct ActionDamage {
     pub entity: Entity,
-    pub skill: HashKey<SpellObject>,
+    pub skill: HashKey<Spell>,
     pub effects: Vec<ActionDamageEffect>,
 }
 
 pub fn on_action_damage(
     event: On<ActionDamage>,
     mut commands: Commands,
-    res_assets_spell_object: Res<Assets<SpellObject>>,
+    res_assets_spell_object: Res<Assets<Spell>>,
     q_transform: Query<&Transform>,
     q_target: Query<(
         Entity,

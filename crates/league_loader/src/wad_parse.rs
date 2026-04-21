@@ -3,7 +3,7 @@ use std::io::{self};
 
 use nom::bytes::complete::{tag, take};
 use nom::multi::count;
-use nom::number::complete::{le_u16, le_u32, le_u64, le_u8};
+use nom::number::complete::{le_u8, le_u16, le_u32, le_u64};
 use nom::{IResult, Parser};
 
 use crate::Error;

@@ -12,8 +12,8 @@ use crate::base::pipeline::{
 };
 use crate::navigation::grid::ResourceGrid;
 use crate::navigation::navigation::{
-    get_nav_path_with_debug, is_path_blocked, world_pos_to_grid_xy, NavigationDebug,
-    NavigationStats,
+    NavigationDebug, NavigationStats, get_nav_path_with_debug, is_path_blocked,
+    world_pos_to_grid_xy,
 };
 use crate::rotate::CommandRotate;
 

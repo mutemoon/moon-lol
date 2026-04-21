@@ -3,7 +3,7 @@ use bevy::math::{Mat4, Quat, Vec3, Vec4};
 use bevy::reflect::TypePath;
 use nom::bytes::complete::take;
 use nom::multi::count;
-use nom::number::complete::{le_f32, le_i16, le_i32, le_u16, le_u32, le_u8};
+use nom::number::complete::{le_f32, le_i16, le_i32, le_u8, le_u16, le_u32};
 use nom::{IResult, Parser};
 
 pub const FORMAT_TOKEN: u32 = 0x22FD4FC3;

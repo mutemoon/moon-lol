@@ -1,4 +1,4 @@
-use bevy::math::{vec2, Vec2};
+use bevy::math::{Vec2, vec2};
 
 fn rotate(v: Vec2) -> Vec2 {
     vec2(v.y, v.x)

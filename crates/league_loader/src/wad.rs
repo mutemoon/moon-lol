@@ -5,10 +5,10 @@ use std::sync::Arc;
 use league_utils::hash_wad;
 use zstd::Decoder;
 
+use crate::Error;
 use crate::prop_bin::LeagueWadLoaderTrait;
 use crate::reader::ArcFileReader;
 use crate::wad_parse::{LeagueWad, LeagueWadEntry, LeagueWadSubchunk, WadDataFormat};
-use crate::Error;
 
 pub struct LeagueWadLoader {
     pub wad: LeagueWad,

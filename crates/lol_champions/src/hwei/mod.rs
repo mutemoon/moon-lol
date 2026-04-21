@@ -4,8 +4,8 @@ use league_utils::hash_bin;
 use lol_base::prop::LoadHashKeyTrait;
 use lol_core::entities::champion::Champion;
 use lol_core::skill::{
-    play_skill_animation, skill_slot_from_index, spawn_skill_particle, CoolDown, EventSkillCast,
-    PassiveSkillOf, Skill, SkillOf, SkillSlot, Skills,
+    CoolDown, EventSkillCast, PassiveSkillOf, Skill, SkillOf, SkillSlot, Skills,
+    play_skill_animation, skill_slot_from_index, spawn_skill_particle,
 };
 
 #[derive(Default)]

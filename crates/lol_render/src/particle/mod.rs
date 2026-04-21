@@ -33,7 +33,7 @@ use crate::particle::particle::{
     update_particle, update_particle_skinned_mesh_particle, update_particle_transform,
 };
 use crate::particle::skinned_mesh::particle::ParticleMaterialSkinnedMeshParticle;
-use crate::shader::{startup_load_shaders, update_shaders, ResourceShaderHandles};
+use crate::shader::{ResourceShaderHandles, startup_load_shaders, update_shaders};
 
 pub const ATTRIBUTE_WORLD_POSITION: MeshVertexAttribute =
     MeshVertexAttribute::new("ATTRIBUTE_WORLD_POSITION", 2020, VertexFormat::Float32x3);

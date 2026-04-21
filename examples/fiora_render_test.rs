@@ -11,8 +11,8 @@ use lol_core::entities::turret::PluginTurret;
 use lol_core::map::PluginMap;
 use lol_core::resource::PluginResource;
 use lol_render::test_render::{
-    attach_skill_test_actor, PluginSkillTestRender, SkillTestRenderConfig, SkillTestScript,
-    SkillTestScriptCursor, SkillTestScriptStep, SkillTestVideoFormat, SkillTestVideoOutput,
+    PluginSkillTestRender, SkillTestRenderConfig, SkillTestScript, SkillTestScriptCursor,
+    SkillTestScriptStep, SkillTestVideoFormat, SkillTestVideoOutput, attach_skill_test_actor,
 };
 use lol_render::ui::PluginUI;
 use moon_lol::PluginCore;

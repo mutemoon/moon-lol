@@ -1,7 +1,7 @@
 use std::cmp;
 use std::collections::{HashMap, HashSet};
 
-use crate::extract::{collect_dependencies, ClassMap, EnumInfo};
+use crate::extract::{ClassMap, EnumInfo, collect_dependencies};
 
 pub fn detect_cyclic_types(
     class_map: &ClassMap,

@@ -2,7 +2,6 @@ use std::collections::VecDeque;
 use std::time::Duration;
 
 use bevy::prelude::*;
-use league_core::extract::{CharacterRecord, MapContainer, MapPlaceableContainer, Unk0xad65d8c4};
 use lol_base::barrack::{
     ConfigBarracks, ConstantWaveBehavior, EnumWaveBehavior, InhibitorWaveBehavior,
     RotatingWaveBehavior, TimedVariableWaveBehavior,
@@ -12,7 +11,7 @@ use lol_base::prop::LoadHashKeyTrait;
 use crate::character::{CommandCharacterLoad, CommandCharacterSpawn};
 use crate::entities::minion::Minion;
 use crate::lane::Lane;
-use crate::map::{MapName, MapState, MinionPath};
+use crate::map::MapState;
 use crate::team::Team;
 
 #[derive(Default)]
@@ -73,18 +72,18 @@ pub enum BarrackState {
 
 fn update_spawn_barrack(
     mut commands: Commands,
-    res_assets_unk_ad65d8c4: Res<Assets<Unk0xad65d8c4>>,
+    // res_assets_unk_ad65d8c4: Res<Assets<Unk0xad65d8c4>>,
     q_barrack: Query<(Entity, &ConfigBarracks), Without<Barrack>>,
 ) {
     for (entity, barracks_config) in q_barrack.iter() {
         for unit in &barracks_config.units {
-            let character = res_assets_unk_ad65d8c4
-                .load_hash(unit.unk_0xfee040bc)
-                .unwrap();
+            // let character = res_assets_unk_ad65d8c4
+            //     .load_hash(unit.unk_0xfee040bc)
+            //     .unwrap();
 
-            commands.trigger(CommandCharacterLoad {
-                character_record: character.character.character_record.clone(),
-            });
+            // commands.trigger(CommandCharacterLoad {
+            //     character_record: character.character.character_record.clone(),
+            // });
         }
 
         // let initial_delay = barracks_config.initial_spawn_time_secs;
@@ -119,8 +118,8 @@ fn update_spawn_barrack(
 fn is_character_loaded(
     mut commands: Commands,
     q_barrack: Query<&ConfigBarracks>,
-    res_assets_character_record: Res<Assets<CharacterRecord>>,
-    res_assets_unk_ad65d8c4: Res<Assets<Unk0xad65d8c4>>,
+    // res_assets_character_record: Res<Assets<CharacterRecord>>,
+    // res_assets_unk_ad65d8c4: Res<Assets<Unk0xad65d8c4>>,
 ) {
     if q_barrack.is_empty() {
         return;
@@ -128,16 +127,16 @@ fn is_character_loaded(
 
     for barracks_config in q_barrack.iter() {
         for unit in &barracks_config.units {
-            let character = res_assets_unk_ad65d8c4
-                .load_hash(unit.unk_0xfee040bc)
-                .unwrap();
+            // let character = res_assets_unk_ad65d8c4
+            //     .load_hash(unit.unk_0xfee040bc)
+            //     .unwrap();
 
-            if res_assets_character_record
-                .load_hash(&character.character.character_record)
-                .is_none()
-            {
-                return;
-            }
+            // if res_assets_character_record
+            //     .load_hash(&character.character.character_record)
+            //     .is_none()
+            // {
+            //     return;
+            // }
         }
     }
 
@@ -156,9 +155,9 @@ fn barracks_spawning_system(
         &Team,
         &Lane,
     )>,
-    res_assets_character_record: Res<Assets<CharacterRecord>>,
+    // res_assets_character_record: Res<Assets<CharacterRecord>>,
     time: Res<Time>,
-    res_assets_unk_ad65d8c4: Res<Assets<Unk0xad65d8c4>>,
+    // res_assets_unk_ad65d8c4: Res<Assets<Unk0xad65d8c4>>,
 ) {
     for (transform, mut barrack_state, barracks_config, team, lane) in query.iter_mut() {
         // --- 1. 更新所有计时器 ---
@@ -241,13 +240,13 @@ fn barracks_spawning_system(
         // --- 计算小兵最终属性 ---
         let is_late_game = upgrade_count >= barracks_config.upgrades_before_late_game_scaling;
 
-        let character = res_assets_unk_ad65d8c4
-            .load_hash(minion_config.unk_0xfee040bc)
-            .unwrap();
+        // let character = res_assets_unk_ad65d8c4
+        //     .load_hash(minion_config.unk_0xfee040bc)
+        //     .unwrap();
 
-        let _character_record = res_assets_character_record
-            .load_hash(&character.character.character_record)
-            .unwrap();
+        // let _character_record = res_assets_character_record
+        //     .load_hash(&character.character.character_record)
+        //     .unwrap();
 
         // let mut health = Health::new(character_record.base_hp.unwrap_or(0.0));
         let _hp_upgrade = if is_late_game {
@@ -290,11 +289,11 @@ fn barracks_spawning_system(
             .id();
 
         // 触发角色生成命令（创建基础组件并加载皮肤）
-        commands.trigger(CommandCharacterSpawn {
-            entity,
-            character_record: (&character.character.character_record).into(),
-            skin: (&character.character.skin).into(),
-        });
+        // commands.trigger(CommandCharacterSpawn {
+        //     entity,
+        //     character_record: (&character.character.character_record).into(),
+        //     skin: (&character.character.skin).into(),
+        // });
 
         // commands
         //     .entity(entity)
