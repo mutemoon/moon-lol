@@ -1,6 +1,25 @@
 use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
 
+/// 经验值组件，记录单位死亡时掉落经验
+#[derive(Component, Clone, Serialize, Deserialize, Reflect)]
+#[reflect(Component)]
+pub struct ExperienceDrop {
+    /// 死亡时掉落的经验值
+    pub exp_given_on_death: f32,
+    /// 经验掉落范围半径
+    pub experience_radius: f32,
+}
+
+impl Default for ExperienceDrop {
+    fn default() -> Self {
+        Self {
+            exp_given_on_death: 0.0,
+            experience_radius: 0.0,
+        }
+    }
+}
+
 #[derive(Component, Clone, Serialize, Deserialize, Reflect)]
 #[reflect(Component)]
 pub struct Level {

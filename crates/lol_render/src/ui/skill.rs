@@ -1,5 +1,4 @@
 use bevy::prelude::*;
-use lol_base::prop::LoadHashKeyTrait;
 use lol_base::spell::Spell;
 use lol_core::base::level::Level;
 use lol_core::skill::{CommandSkillLevelUp, PassiveSkill, Skill, SkillPoints, Skills};

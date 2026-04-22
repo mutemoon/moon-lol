@@ -111,7 +111,6 @@ fn barracks_spawning_system(
         &Lane,
     )>,
     res_barracks_config: Res<Assets<ConfigBarracks>>,
-    // res_assets_character_record: Res<Assets<CharacterRecord>>,
     time: Res<Time>,
     // res_assets_unk_ad65d8c4: Res<Assets<Unk0xad65d8c4>>,
 ) {

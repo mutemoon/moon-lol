@@ -14,6 +14,8 @@ use lol_base::barrack::ConfigBarracks;
 use lol_base::character::ConfigCharacter;
 use lol_core::attack::{Attack, WindupConfig};
 use lol_core::base::bounding::Bounding;
+use lol_core::base::level::ExperienceDrop;
+use lol_core::character::Character;
 use lol_core::damage::{Armor, Damage};
 use lol_core::entities::barrack::BarrackConfigHandler;
 use lol_core::entities::champion::Champion;
@@ -253,7 +255,14 @@ fn write_bin_to_file<T: Serialize>(path: &str, content: &T) {
 /// 从 CharacterRecord 创建所有组件（占位符，待摸清对应关系）
 fn create_champion_components_from_record(
     record: &CharacterRecord,
-) -> (Attack, Health, Damage, Armor, Movement) {
+) -> (
+    Attack,
+    Health,
+    Damage,
+    Armor,
+    Movement,
+    Option<ExperienceDrop>,
+) {
     // Attack
     let range = record.acquisition_range.unwrap_or(0.0);
     let windup_config = if let Some(basic_attack) = &record.basic_attack {
@@ -289,7 +298,18 @@ fn create_champion_components_from_record(
         speed: record.perception_bubble_radius.unwrap_or(5.0),
     };
 
-    (attack, health, damage, armor, movement)
+    // 经验掉落
+    let experience_drop =
+        if let (Some(exp), Some(radius)) = (record.exp_given_on_death, record.experience_radius) {
+            Some(ExperienceDrop {
+                exp_given_on_death: exp,
+                experience_radius: radius,
+            })
+        } else {
+            None
+        };
+
+    (attack, health, damage, armor, movement, experience_drop)
 }
 
 /// 导出 champion 实体为 Scene 文件
@@ -301,6 +321,7 @@ fn export_champion_scene(
     damage: Damage,
     armor: Armor,
     movement: Movement,
+    experience_drop: Option<ExperienceDrop>,
 ) {
     let mut world = World::new();
 
@@ -317,19 +338,27 @@ fn export_champion_scene(
     type_registry.write().register::<Damage>();
     type_registry.write().register::<Armor>();
     type_registry.write().register::<Movement>();
+    type_registry.write().register::<ExperienceDrop>();
     world.insert_resource(type_registry);
 
     let champ_name_string = champ_name.to_string();
-    world.spawn((
-        Name::new(champ_name_string),
-        Champion,
-        bounding,
-        attack,
-        health,
-        damage,
-        armor,
-        movement,
-    ));
+    let entity = world
+        .spawn((
+            Character,
+            Name::new(champ_name_string),
+            Champion,
+            bounding,
+            attack,
+            health,
+            damage,
+            armor,
+            movement,
+        ))
+        .id();
+
+    if let Some(exp_drop) = experience_drop {
+        world.entity_mut(entity).insert(exp_drop);
+    }
 
     let scene = DynamicWorld::from_world(&world);
     let type_registry = world.resource::<AppTypeRegistry>();
@@ -388,9 +417,17 @@ fn extract_champion_from_record(loader: &LeagueLoader, champ_name: &str) -> bool
         height: record.health_bar_height.unwrap_or(200.0),
     };
 
-    let (attack, health, damage, armor, movement) = create_champion_components_from_record(&record);
+    let (attack, health, damage, armor, movement, experience_drop) =
+        create_champion_components_from_record(&record);
     export_champion_scene(
-        champ_name, bounding, attack, health, damage, armor, movement,
+        champ_name,
+        bounding,
+        attack,
+        health,
+        damage,
+        armor,
+        movement,
+        experience_drop,
     );
     true
 }

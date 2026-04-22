@@ -18,10 +18,6 @@ use bevy::render::renderer::{RenderDevice, RenderQueue};
 use bevy::render::{Extract, ExtractSchedule, Render, RenderApp, RenderSystems};
 use crossbeam_channel::{Receiver, Sender};
 use image::{ImageBuffer, Rgba};
-use league_core::grid::{
-    JungleQuadrantFlags, MainRegionFlags, NearestLaneFlags, POIFlags, RingFlags, RiverRegionFlags,
-    UnknownSRXFlags, VisionPathingFlags,
-};
 use league_core::register::init_league_asset;
 use league_file::skeleton::LeagueSkeleton;
 use lol_base::grid::{

@@ -2,9 +2,8 @@ use std::collections::HashMap;
 
 use bevy::prelude::*;
 use bevy::window::{PrimaryWindow, WindowResized};
-use league_core::extract::{EnumAnchor, EnumData, EnumUiPosition, UiElementIconData, UiSceneData};
+use league_core::extract::{EnumAnchor, EnumData, EnumUiPosition, UiElementIconData};
 use league_utils::hash_bin;
-use lol_base::prop::LoadHashKeyTrait;
 use lol_core::utils::AssetServerLoadLeague;
 
 pub struct PluginUIElement;

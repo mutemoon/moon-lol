@@ -1,8 +1,4 @@
 use bevy::math::Vec3Swizzles;
-use league_core::grid::{
-    JungleQuadrantFlags, MainRegionFlags, NearestLaneFlags, POIFlags, RingFlags, RiverRegionFlags,
-    UnknownSRXFlags, VisionPathingFlags,
-};
 use league_file::grid::AiMeshNGrid;
 use lol_base::grid::{
     ConfigNavigationGrid, ConfigNavigationGridCell, GridFlagsJungleQuadrant, GridFlagsMainRegion,
