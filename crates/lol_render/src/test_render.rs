@@ -22,16 +22,19 @@ use league_core::grid::{
     JungleQuadrantFlags, MainRegionFlags, NearestLaneFlags, POIFlags, RingFlags, RiverRegionFlags,
     UnknownSRXFlags, VisionPathingFlags,
 };
+use league_core::register::init_league_asset;
 use league_file::skeleton::LeagueSkeleton;
-use lol_base::grid::{ConfigNavigationGrid, ConfigNavigationGridCell};
+use lol_base::grid::{
+    ConfigNavigationGrid, ConfigNavigationGridCell, GridFlagsJungleQuadrant, GridFlagsMainRegion,
+    GridFlagsNearestLane, GridFlagsPOI, GridFlagsRing, GridFlagsRiverRegion, GridFlagsSRX,
+    GridFlagsVisionPathing,
+};
 use lol_base::mapgeo::ConfigMapGeo;
-use lol_base::register::init_league_asset;
 use lol_base::shader::{ResourceShaderChunk, ResourceShaderPackage};
 use lol_core::action::{Action, CommandAction};
 use lol_core::game::FixedFrameCount;
 use lol_core::navigation::grid::ResourceGrid;
 use lol_core::resource::loading::PluginResourceLoading;
-use lol_core::resource::prop_bin::PluginResourcePropBin;
 use lol_core::rotate::PluginRotate;
 use lol_core::skill::{SkillPoints, Skills};
 
@@ -181,7 +184,6 @@ plugin_group! {
         :PluginCamera,
         :PluginParticle,
         :PluginResourceLoading,
-        :PluginResourcePropBin,
         :PluginRotate,
         :PluginSkin,
         :PluginSkillTestRender,
@@ -574,14 +576,14 @@ fn ffmpeg_exists() -> bool {
 fn make_test_grid() -> ConfigNavigationGrid {
     let cell = ConfigNavigationGridCell {
         heuristic: 1.0,
-        vision_pathing_flags: VisionPathingFlags::Walkable,
-        river_region_flags: RiverRegionFlags::NonJungle,
-        jungle_quadrant_flags: JungleQuadrantFlags::None,
-        main_region_flags: MainRegionFlags::Spawn,
-        nearest_lane_flags: NearestLaneFlags::BlueSideTopLane,
-        poi_flags: POIFlags::None,
-        ring_flags: RingFlags::BlueSpawnToNexus,
-        srx_flags: UnknownSRXFlags::Walkable,
+        vision_pathing_flags: GridFlagsVisionPathing::Walkable,
+        river_region_flags: GridFlagsRiverRegion::empty(),
+        jungle_quadrant_flags: GridFlagsJungleQuadrant::empty(),
+        main_region_flags: GridFlagsMainRegion::from(0),
+        nearest_lane_flags: GridFlagsNearestLane::from(0),
+        poi_flags: GridFlagsPOI::from(0),
+        ring_flags: GridFlagsRing::from(0),
+        srx_flags: GridFlagsSRX::from(0),
     };
 
     ConfigNavigationGrid {

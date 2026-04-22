@@ -3,8 +3,8 @@ use league_core::extract::SkinCharacterDataProperties;
 use lol_base::prop::{HashKey, LoadHashKeyTrait};
 use lol_core::render_cmd::CommandSkinSpawn;
 use lol_core::resource::loading::Loading;
-use lol_core::resource::prop_bin::{CommandLoadPropBin, PropPath};
 
+// use lol_core::resource::prop_bin::{CommandLoadPropBin, PropPath};
 use crate::skin::animation::CommandSkinAnimationSpawn;
 use crate::skin::mesh::CommandSkinMeshSpawn;
 use crate::ui::health_bar::HealthBar;
@@ -24,12 +24,12 @@ pub fn update_skin_scale(mut query: Query<(&Skin, &mut Transform)>) {
 pub fn on_command_skin_spawn(trigger: On<CommandSkinSpawn>, mut commands: Commands) {
     let entity = trigger.event_target();
 
-    let paths = vec![format!("data/{0}.bin", trigger.key)];
-
-    commands.trigger(CommandLoadPropBin {
-        path: PropPath::Path(paths),
-        label: None,
-    });
+    // let paths = vec![format!("data/{0}.bin", trigger.key)];
+    //
+    // commands.trigger(CommandLoadPropBin {
+    //     path: PropPath::Path(paths),
+    //     label: None,
+    // });
 
     commands
         .entity(entity)

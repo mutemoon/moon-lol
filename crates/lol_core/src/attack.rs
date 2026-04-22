@@ -26,7 +26,8 @@ impl Plugin for PluginAttack {
 }
 
 /// 攻击组件 - 包含攻击的基础属性
-#[derive(Debug, Component, Clone)]
+#[derive(Debug, Component, Clone, Serialize, Deserialize, Reflect)]
+#[reflect(Component)]
 pub struct Attack {
     pub range: f32,
     /// 基础攻击速度 (1级时的每秒攻击次数)
@@ -41,12 +42,13 @@ pub struct Attack {
     pub windup_config: WindupConfig,
     /// 前摇修正系数 (默认 1.0，可以被技能修改)
     pub windup_modifier: f32,
-    /// 攻击导弹
-    pub spell_key: Option<HashKey<Spell>>,
+    /// 攻击导弹路径 (用于序列化)
+    pub spell_key: Option<String>,
 }
 
 /// 前摇时间配置方式
-#[derive(Component, Clone, Debug)]
+#[derive(Component, Clone, Debug, Serialize, Deserialize, Reflect)]
+#[reflect(Component)]
 pub enum WindupConfig {
     /// 老英雄公式: 0.3 + attackOffset
     Legacy { attack_offset: f32 },
@@ -145,7 +147,7 @@ impl Attack {
         }
     }
 
-    pub fn with_missile(mut self, missile: Option<HashKey<Spell>>) -> Self {
+    pub fn with_missile(mut self, missile: Option<String>) -> Self {
         self.spell_key = missile;
         self
     }
@@ -382,7 +384,8 @@ fn fixed_update(
                     };
 
                     match &attack.spell_key {
-                        Some(spell_key) => {
+                        Some(spell_key_str) => {
+                            let spell_key = HashKey::<Spell>::from(spell_key_str.as_str());
                             if let Some(spell) = res_assets_spell_object
                                 .as_ref()
                                 .and_then(|assets| assets.load_hash(spell_key))
@@ -391,7 +394,7 @@ fn fixed_update(
                                     commands.trigger(CommandMissileCreate {
                                         entity,
                                         target: *target,
-                                        spell_key: *spell_key,
+                                        spell_key,
                                     });
                                 } else if let Some(damage) = damage {
                                     commands.try_trigger(CommandDamageCreate {

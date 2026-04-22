@@ -5,7 +5,7 @@ edition = "2024"
 
 [dependencies]
 bevy.workspace = true
-league_core.workspace = true
+bitflags.workspace = true
 league_utils.workspace = true
 league_file.workspace = true
 league_property.workspace = true

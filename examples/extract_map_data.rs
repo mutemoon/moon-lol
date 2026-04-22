@@ -7,17 +7,23 @@ use league_file::grid::AiMeshNGrid;
 use league_file::mapgeo::LeagueMapGeo;
 use league_loader::game::{Data, LeagueLoader};
 use league_loader::prop_bin::LeagueWadLoaderTrait;
+use league_to_lol::barrack::barracks_config_to_barracks;
 use league_to_lol::gltf_export::export_mapgeo_to_gltf;
 use league_to_lol::navgrid::load_league_nav_grid;
 use lol_base::barrack::ConfigBarracks;
 use lol_base::character::ConfigCharacter;
-use lol_base::grid::ConfigNavigationGrid;
+use lol_core::attack::{Attack, WindupConfig};
 use lol_core::base::bounding::Bounding;
+use lol_core::damage::{Armor, Damage};
+use lol_core::entities::barrack::BarrackConfigHandler;
+use lol_core::entities::champion::Champion;
 use lol_core::lane::Lane;
+use lol_core::life::Health;
 use lol_core::map::{MapName, MinionPath};
+use lol_core::movement::Movement;
 use lol_core::navigation::grid::ResourceGridPath;
 use lol_core::team::Team;
-use ron::ser::PrettyConfig;
+use lol_loader::barrack::BarracksLoader;
 use serde::Serialize;
 
 fn main() {
@@ -26,10 +32,10 @@ fn main() {
     app.add_plugins(AssetPlugin::default());
     app.add_plugins(TaskPoolPlugin::default());
 
-    app.init_asset::<ConfigNavigationGrid>();
+    app.init_asset::<ConfigBarracks>();
+    app.init_asset_loader::<BarracksLoader>();
 
     app.finish();
-
     app.cleanup();
 
     let world = app.world_mut();
@@ -111,14 +117,26 @@ fn main() {
                     minion_path.0.entry(lane).or_insert(path);
                 }
                 EnumMap::Unk0xba138ae3(unk0xba138ae3) => {
-                    let barracks_config = prop_group
-                        .get_data::<BarracksConfig>(unk0xba138ae3.barracks.barracks_config);
+                    let barracks_config_hash = unk0xba138ae3.barracks.barracks_config;
+                    let barracks_config =
+                        prop_group.get_data::<BarracksConfig>(barracks_config_hash);
+
+                    let config_barracks = barracks_config_to_barracks(barracks_config.clone());
+                    let ron_content = ron::to_string(&config_barracks).unwrap();
+                    write_to_file(
+                        &format!("assets/maps/{}.ron", barracks_config_hash),
+                        ron_content,
+                    );
 
                     world.spawn((
                         Transform::from_matrix(unk0xba138ae3.transform),
                         Team::from(unk0xba138ae3.team.as_ref().map(|x| x.team)),
                         Lane::from(unk0xba138ae3.barracks.lane),
-                        ConfigBarracks::from(barracks_config),
+                        BarrackConfigHandler::new(
+                            world
+                                .resource::<AssetServer>()
+                                .load(&format!("maps/{}.ron", barracks_config_hash)),
+                        ),
                     ));
                 }
                 EnumMap::Unk0xad65d8c4(unk0xad65d8c4) => {
@@ -206,7 +224,7 @@ fn main() {
     // 从地图中提取 CharacterRecord（来自 Unk0xad65d8c4）
     extract_character_records_from_map(&loader, &map_character_records);
 
-    let scene = DynamicWorld::from_world(&world);
+    let scene = DynamicWorld::from_world(world);
     let type_registry = world.resource::<AppTypeRegistry>();
     let type_registry = type_registry.read();
     let serialized_scene = scene.serialize(&type_registry).unwrap();
@@ -225,19 +243,101 @@ fn write_to_file(path: &str, content: impl AsRef<[u8]>) {
     std::fs::write(path, content).expect("无法写入文件");
 }
 
-fn write_ron_to_file<T: Serialize>(path: &str, content: &T) {
-    write_to_file(
-        path,
-        &ron::ser::to_string_pretty(content, PrettyConfig::new().compact_arrays(true))
-            .expect("无法序列化为ron"),
-    );
-}
-
 fn write_bin_to_file<T: Serialize>(path: &str, content: &T) {
     write_to_file(
         path,
         bincode::serialize(content).expect("无法序列化为二进制"),
     );
+}
+
+/// 从 CharacterRecord 创建所有组件（占位符，待摸清对应关系）
+fn create_champion_components_from_record(
+    record: &CharacterRecord,
+) -> (Attack, Health, Damage, Armor, Movement) {
+    // Attack
+    let range = record.acquisition_range.unwrap_or(0.0);
+    let windup_config = if let Some(basic_attack) = &record.basic_attack {
+        let cast_time = basic_attack.m_attack_cast_time.unwrap_or(0.3);
+        let total_time = basic_attack.m_attack_total_time.unwrap_or(0.7);
+        WindupConfig::Modern {
+            attack_cast_time: cast_time,
+            attack_total_time: total_time,
+        }
+    } else {
+        WindupConfig::Legacy { attack_offset: 0.3 }
+    };
+    let attack = match windup_config {
+        WindupConfig::Modern {
+            attack_cast_time,
+            attack_total_time,
+        } => Attack::new(range, attack_cast_time, attack_total_time),
+        WindupConfig::Legacy { attack_offset } => Attack::from_legacy(range, 1.0, attack_offset),
+    };
+
+    // TODO: 摸清字段对应关系后替换为正确的值
+    // 占位符：使用 exp_given_on_death 作为 health（待替换）
+    let health = Health::new(record.exp_given_on_death.unwrap_or(1000.0));
+
+    // 占位符：使用 unk_0x43135375 作为 damage（待替换）
+    let damage = Damage(record.unk_0x43135375.unwrap_or(50.0));
+
+    // 占位符：使用 unk_0x4af40dc3 中的某个值作为 armor（待替换）
+    let armor = Armor(record.area_indicator_radius.unwrap_or(30.0));
+
+    // 占位符：使用 perception_bubble_radius 作为 move speed（待替换）
+    let movement = Movement {
+        speed: record.perception_bubble_radius.unwrap_or(5.0),
+    };
+
+    (attack, health, damage, armor, movement)
+}
+
+/// 导出 champion 实体为 Scene 文件
+fn export_champion_scene(
+    champ_name: &str,
+    bounding: Bounding,
+    attack: Attack,
+    health: Health,
+    damage: Damage,
+    armor: Armor,
+    movement: Movement,
+) {
+    let mut world = World::new();
+
+    // 注册类型
+    let type_registry = AppTypeRegistry::default();
+    type_registry.write().register::<Champion>();
+    type_registry.write().register::<Bounding>();
+    type_registry.write().register::<Transform>();
+    type_registry.write().register::<GlobalTransform>();
+    type_registry.write().register::<Name>();
+    type_registry.write().register::<Attack>();
+    type_registry.write().register::<WindupConfig>();
+    type_registry.write().register::<Health>();
+    type_registry.write().register::<Damage>();
+    type_registry.write().register::<Armor>();
+    type_registry.write().register::<Movement>();
+    world.insert_resource(type_registry);
+
+    let champ_name_string = champ_name.to_string();
+    world.spawn((
+        Name::new(champ_name_string),
+        Champion,
+        bounding,
+        attack,
+        health,
+        damage,
+        armor,
+        movement,
+    ));
+
+    let scene = DynamicWorld::from_world(&world);
+    let type_registry = world.resource::<AppTypeRegistry>();
+    let type_registry = type_registry.read();
+    let serialized_scene = scene.serialize(&type_registry).unwrap();
+
+    let output_path = format!("assets/characters/{}/config.ron", champ_name.to_lowercase());
+    write_to_file(&output_path, serialized_scene);
 }
 
 /// 从地图中收集的 CharacterRecord 路径提取数据
@@ -256,46 +356,43 @@ fn extract_character_records_from_map(
 
     let mut success_count = 0;
 
-    for (champ_name_lower, char_record_path) in map_character_records {
-        // 构造 bin 路径
-        let bin_path = format!(
-            "data/characters/{}/{}.bin",
-            champ_name_lower, champ_name_lower
-        );
-
-        let Ok(prop_group) = loader.get_prop_group_by_paths(vec![&bin_path]) else {
-            println!("[WARN] 无法加载 bin 文件: {}", bin_path);
-            continue;
-        };
-
-        let Some(record) = prop_group.get_by_class::<CharacterRecord>() else {
-            println!("[WARN] 无法获取 CharacterRecord: {}", char_record_path);
-            continue;
-        };
-
-        let config = ChampionConfig {
-            bounding: Bounding {
-                radius: record.pathfinding_collision_radius.unwrap_or(0.0),
-                height: record.health_bar_height.unwrap_or(200.0),
-            },
-            character_name: record.m_character_name.clone(),
-            spells: record.spells.clone(),
-            passive_spell: record.m_character_passive_spell,
-            acquisition_range: record.acquisition_range,
-            selection_radius: record.selection_radius,
-            selection_height: record.selection_height,
-        };
-
-        let output_path = format!("assets/champions/{}/config.ron", champ_name_lower);
-        write_ron_to_file(&output_path, &config);
-        println!("[OK] 提取成功: {} -> {}", champ_name_lower, output_path);
-        success_count += 1;
+    for (champ_name, _) in map_character_records {
+        if extract_champion_from_record(loader, champ_name) {
+            println!("[OK] 提取成功: {}", champ_name);
+            success_count += 1;
+        }
     }
 
     println!(
         "[INFO] 地图 CharacterRecord 提取完成: 成功 {} 个",
         success_count
     );
+}
+
+/// 从 CharacterRecord 提取 champion 并导出场景
+fn extract_champion_from_record(loader: &LeagueLoader, champ_name: &str) -> bool {
+    let bin_path = format!("data/characters/{}/{}.bin", champ_name, champ_name);
+
+    let Ok(prop_group) = loader.get_prop_group_by_paths(vec![&bin_path]) else {
+        println!("[WARN] 无法加载 bin 文件: {}", bin_path);
+        return false;
+    };
+
+    let Some(record) = prop_group.get_by_class::<CharacterRecord>() else {
+        println!("[WARN] 无法获取 CharacterRecord: {}", bin_path);
+        return false;
+    };
+
+    let bounding = Bounding {
+        radius: record.pathfinding_collision_radius.unwrap_or(0.0),
+        height: record.health_bar_height.unwrap_or(200.0),
+    };
+
+    let (attack, health, damage, armor, movement) = create_champion_components_from_record(&record);
+    export_champion_scene(
+        champ_name, bounding, attack, health, damage, armor, movement,
+    );
+    true
 }
 
 fn extract_all_champions(loader: &LeagueLoader) {
@@ -323,59 +420,18 @@ fn extract_all_champions(loader: &LeagueLoader) {
         }
 
         // 从 "Aatrox.wad.client" 提取 "Aatrox"
-        let champ_name = file_name.trim_end_matches(".wad.client");
-        let champ_name_lower = champ_name.to_lowercase();
+        let champ_name = file_name.trim_end_matches(".wad.client").to_lowercase();
 
-        let bin_path = format!(
-            "data/characters/{}/{}.bin",
-            champ_name_lower, champ_name_lower
-        );
-
-        let Ok(prop_group) = loader.get_prop_group_by_paths(vec![&bin_path]) else {
-            println!("[WARN] 无法加载 bin 文件: {}", bin_path);
+        if extract_champion_from_record(loader, &champ_name) {
+            println!("[OK] 提取成功: {}", champ_name);
+            success_count += 1;
+        } else {
             skip_count += 1;
-            continue;
-        };
-
-        // 通过 class hash 获取 CharacterRecord
-        let Some(record) = prop_group.get_by_class::<CharacterRecord>() else {
-            println!("[WARN] 无法获取 CharacterRecord: {}", bin_path);
-            skip_count += 1;
-            continue;
-        };
-
-        let config = ChampionConfig {
-            bounding: Bounding {
-                radius: record.pathfinding_collision_radius.unwrap_or(0.0),
-                height: record.health_bar_height.unwrap_or(200.0),
-            },
-            character_name: record.m_character_name.clone(),
-            spells: record.spells.clone(),
-            passive_spell: record.m_character_passive_spell,
-            acquisition_range: record.acquisition_range,
-            selection_radius: record.selection_radius,
-            selection_height: record.selection_height,
-        };
-
-        let output_path = format!("assets/champions/{}/config.ron", champ_name_lower);
-        write_ron_to_file(&output_path, &config);
-        println!("[OK] 提取成功: {} -> {}", champ_name, output_path);
-        success_count += 1;
+        }
     }
 
     println!(
         "[SUMMARY] 提取完成: 成功 {} 个, 跳过 {} 个",
         success_count, skip_count
     );
-}
-
-#[derive(Serialize)]
-struct ChampionConfig {
-    bounding: Bounding,
-    character_name: String,
-    spells: Option<Vec<u32>>,
-    passive_spell: Option<u32>,
-    acquisition_range: Option<f32>,
-    selection_radius: Option<f32>,
-    selection_height: Option<f32>,
 }

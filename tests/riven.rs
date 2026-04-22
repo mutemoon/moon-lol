@@ -5,14 +5,17 @@ use std::time::Duration;
 use bevy::prelude::*;
 use bevy::time::TimeUpdateStrategy;
 use bevy::winit::WinitPlugin;
-use league_core::extract::{SpellDataResource, SpellDataValue, SpellObject};
-use league_core::grid::{
-    JungleQuadrantFlags, MainRegionFlags, NearestLaneFlags, POIFlags, RingFlags, RiverRegionFlags,
-    UnknownSRXFlags, VisionPathingFlags,
-};
 use league_utils::hash_bin;
-use lol_base::grid::{ConfigNavigationGrid, ConfigNavigationGridCell};
+use lol_base::grid::{
+    ConfigNavigationGrid, ConfigNavigationGridCell, GridFlagsJungleQuadrant, GridFlagsMainRegion,
+    GridFlagsNearestLane, GridFlagsPOI, GridFlagsRing, GridFlagsRiverRegion, GridFlagsSRX,
+    GridFlagsVisionPathing,
+};
 use lol_base::prop::LoadHashKeyTrait;
+use lol_base::spell::{DataSpell, Spell, ValuesData};
+use lol_base::spell_calc::{
+    CalculationPart, CalculationPartNamedDataValue, CalculationSpell, CalculationType,
+};
 use lol_champions::riven::Riven;
 use lol_core::action::{Action, CommandAction};
 use lol_core::base::ability_resource::{AbilityResource, AbilityResourceType};
@@ -155,7 +158,7 @@ impl RivenHarness {
         app.init_resource::<NavigationStats>();
         app.init_resource::<NavigationDebug>();
         app.init_asset::<ConfigNavigationGrid>();
-        app.init_asset::<SpellObject>();
+        app.init_asset::<Spell>();
         app.init_asset::<Image>();
         app.init_asset::<Mesh>();
         app.init_asset::<Shader>();
@@ -168,33 +171,21 @@ impl RivenHarness {
             .add(make_test_grid());
         app.insert_resource(ResourceGrid(grid_handle));
 
-        // Mock SpellObject assets
+        // Mock Spell assets
         {
-            let mut spell_objects = app.world_mut().resource_mut::<Assets<SpellObject>>();
-            let make_spell_object = || {
-                use league_core::extract::{
-                    EnumAbilityResourceByCoefficientCalculationPart, EnumGameCalculation,
-                    GameCalculation, NamedDataValueCalculationPart,
-                };
+            let mut spell_objects = app.world_mut().resource_mut::<Assets<Spell>>();
+            let make_spell = || {
                 let mut calculations = HashMap::new();
 
                 let make_calc = |name: &str| {
-                    EnumGameCalculation::GameCalculation(GameCalculation {
-                        m_formula_parts: Some(vec![
-                            EnumAbilityResourceByCoefficientCalculationPart::NamedDataValueCalculationPart(
-                                NamedDataValueCalculationPart {
-                                    m_data_value: hash_bin(name),
-                                }
-                            )
-                        ]),
-                        m_display_as_percent: None,
-                        m_expanded_tooltip_calculation_display: None,
-                        m_multiplier: None,
-                        m_precision: None,
-                        m_simple_tooltip_calculation_display: None,
-                        result_modifier: None,
-                        tooltip_only: None,
-                        unk_0x72c5c2a8: None,
+                    CalculationType::CalculationSpell(CalculationSpell {
+                        formula_parts: Some(vec![CalculationPart::CalculationPartNamedDataValue(
+                            CalculationPartNamedDataValue {
+                                data_value: hash_bin(name),
+                            },
+                        )]),
+                        multiplier: None,
+                        precision: None,
                     })
                 };
 
@@ -203,44 +194,44 @@ impl RivenHarness {
                 calculations.insert(hash_bin("FirstSlashDamage"), make_calc("FirstSlashDamage"));
                 calculations.insert(hash_bin("ShieldStrength"), make_calc("ShieldStrength"));
 
-                SpellObject {
-                    m_spell: Some(SpellDataResource {
-                        m_spell_calculations: Some(calculations),
+                Spell {
+                    spell_data: Some(DataSpell {
+                        calculations: Some(calculations),
                         data_values: Some(vec![
-                            SpellDataValue {
+                            ValuesData {
                                 name: "mDamage".to_string(),
                                 values: Some(vec![130.0f32; 6]),
                             },
-                            SpellDataValue {
+                            ValuesData {
                                 name: "TotalDamage".to_string(),
                                 values: Some(vec![130.0f32; 6]),
                             },
-                            SpellDataValue {
+                            ValuesData {
                                 name: "FirstSlashDamage".to_string(),
                                 values: Some(vec![130.0f32; 6]),
                             },
-                            SpellDataValue {
+                            ValuesData {
                                 name: "ShieldStrength".to_string(),
                                 values: Some(vec![100.0f32; 6]),
                             },
                         ]),
-                        ..default()
+                        effect_amounts: None,
+                        mana: None,
+                        missile_spec: None,
+                        hit_bone_name: None,
+                        missile_speed: None,
+                        missile_effect_key: None,
+                        cast_type: None,
                     }),
-                    bot_data: None,
-                    cc_behavior_data: None,
-                    m_buff: None,
-                    m_script_name: "".to_string(),
-                    object_name: "".to_string(),
-                    script: None,
                 }
             };
-            spell_objects.add_hash(RIVEN_Q_KEY, make_spell_object());
-            spell_objects.add_hash(RIVEN_W_KEY, make_spell_object());
-            spell_objects.add_hash(RIVEN_E_KEY, make_spell_object());
-            spell_objects.add_hash(RIVEN_R_KEY, make_spell_object());
+            spell_objects.add_hash(RIVEN_Q_KEY, make_spell());
+            spell_objects.add_hash(RIVEN_W_KEY, make_spell());
+            spell_objects.add_hash(RIVEN_E_KEY, make_spell());
+            spell_objects.add_hash(RIVEN_R_KEY, make_spell());
             spell_objects.add_hash(
                 "Characters/Riven/Spells/RivenPassiveAbility/RivenPassive",
-                make_spell_object(),
+                make_spell(),
             );
         }
 
@@ -456,7 +447,7 @@ impl RivenHarness {
             .is_finished()
     }
 
-    fn spell(&self, index: usize) -> Option<SpellObject> {
+    fn spell(&self, index: usize) -> Option<&Spell> {
         let skills = self.app.world().get::<Skills>(self.riven)?;
         let skill_entity = if index < skills.len() {
             Some(skills[index])
@@ -466,9 +457,8 @@ impl RivenHarness {
         let skill = self.app.world().get::<Skill>(skill_entity)?;
         self.app
             .world()
-            .resource::<Assets<SpellObject>>()
+            .resource::<Assets<Spell>>()
             .load_hash(&skill.key_spell_object)
-            .cloned()
     }
 
     fn print_skill_logs(&self) {
@@ -506,14 +496,14 @@ fn skip_due_to_missing_gpu(run: impl FnOnce()) -> bool {
 fn make_test_grid() -> ConfigNavigationGrid {
     let cell = ConfigNavigationGridCell {
         heuristic: 1.0,
-        vision_pathing_flags: VisionPathingFlags::Walkable,
-        river_region_flags: RiverRegionFlags::NonJungle,
-        jungle_quadrant_flags: JungleQuadrantFlags::None,
-        main_region_flags: MainRegionFlags::Spawn,
-        nearest_lane_flags: NearestLaneFlags::BlueSideTopLane,
-        poi_flags: POIFlags::None,
-        ring_flags: RingFlags::BlueSpawnToNexus,
-        srx_flags: UnknownSRXFlags::Walkable,
+        vision_pathing_flags: GridFlagsVisionPathing::Walkable,
+        river_region_flags: GridFlagsRiverRegion::NonJungle,
+        jungle_quadrant_flags: GridFlagsJungleQuadrant::None,
+        main_region_flags: GridFlagsMainRegion::Spawn,
+        nearest_lane_flags: GridFlagsNearestLane::BlueSideTopLane,
+        poi_flags: GridFlagsPOI::None,
+        ring_flags: GridFlagsRing::BlueSpawnToNexus,
+        srx_flags: GridFlagsSRX::Walkable,
     };
 
     ConfigNavigationGrid {
@@ -680,7 +670,7 @@ fn riven_r_starts_cooldown_without_moving_or_damaging() {
         let expected_mana_cost = harness
             .spell(3)
             .expect("R spell missing")
-            .m_spell
+            .spell_data
             .as_ref()
             .and_then(|spell| spell.mana.as_ref())
             .and_then(|mana| mana.first().copied())

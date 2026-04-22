@@ -3839,6 +3839,7 @@ dependencies = [
  "bitflags 2.11.1",
  "league_property",
  "league_utils",
+ "ron 0.8.1",
  "serde",
 ]
 
@@ -4053,7 +4054,7 @@ name = "lol_base"
 version = "0.1.0"
 dependencies = [
  "bevy",
- "league_core",
+ "bitflags 2.11.1",
  "league_file",
  "league_property",
  "league_utils",

@@ -1,3 +1,4 @@
+pub mod barrack;
 pub mod error;
 pub mod mapgeo;
 pub mod navgrid;

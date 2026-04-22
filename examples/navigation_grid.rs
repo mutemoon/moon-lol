@@ -1,8 +1,7 @@
 use bevy::prelude::*;
 use bevy::render::render_resource::Face;
 // use bevy_egui::{egui, EguiContexts, EguiPlugin, EguiPrimaryContextPass};
-use league_core::grid::VisionPathingFlags;
-use lol_base::grid::ConfigNavigationGrid;
+use lol_base::grid::{ConfigNavigationGrid, GridFlagsVisionPathing};
 use lol_core::entities::barrack::PluginBarrack;
 use lol_core::navigation::grid::ResourceGrid;
 use lol_core::navigation::navigation::NavigationDebug;
@@ -137,10 +136,13 @@ fn setup(
                     MeshMaterial3d(
                         if cell
                             .vision_pathing_flags
-                            .contains(VisionPathingFlags::BlueTeamOnly)
+                            .contains(GridFlagsVisionPathing::BlueTeamOnly)
                         {
                             blue_material.clone()
-                        } else if cell.vision_pathing_flags.contains(VisionPathingFlags::Wall) {
+                        } else if cell
+                            .vision_pathing_flags
+                            .contains(GridFlagsVisionPathing::Wall)
+                        {
                             red_material.clone()
                         } else {
                             green_material.clone()

@@ -21,7 +21,8 @@ impl Plugin for PluginDamage {
 #[reflect(Component)]
 pub struct Damage(pub f32);
 
-#[derive(Component, Clone, Serialize, Deserialize)]
+#[derive(Component, Clone, Serialize, Deserialize, Reflect)]
+#[reflect(Component)]
 pub struct Armor(pub f32);
 
 /// 伤害类型枚举

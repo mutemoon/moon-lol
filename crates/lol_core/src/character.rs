@@ -8,7 +8,6 @@ use crate::base::level::{EventLevelUp, Level};
 use crate::life::EventDead;
 use crate::render_cmd::CommandSkinSpawn;
 use crate::resource::loading::Loading;
-use crate::resource::prop_bin::{CommandLoadPropBin, PropPath};
 use crate::team::Team;
 
 #[derive(Default)]
@@ -65,10 +64,10 @@ fn on_command_character_load(trigger: On<CommandCharacterLoad>, mut commands: Co
 
     let paths = vec![format!("data/characters/{name}/{name}.bin")];
 
-    commands.trigger(CommandLoadPropBin {
-        path: PropPath::Path(paths),
-        label: None,
-    });
+    // commands.trigger(CommandLoadPropBin {
+    //     path: PropPath::Path(paths),
+    //     label: None,
+    // });
 }
 
 fn update_character_spawn(

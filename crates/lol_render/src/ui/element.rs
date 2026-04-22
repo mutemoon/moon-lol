@@ -2,12 +2,9 @@ use std::collections::HashMap;
 
 use bevy::prelude::*;
 use bevy::window::{PrimaryWindow, WindowResized};
-use league_core::extract::{
-    EnumAnchor, EnumData, EnumUiPosition, UiElementIconData, UiPropertyLoadable, UiSceneData,
-};
+use league_core::extract::{EnumAnchor, EnumData, EnumUiPosition, UiElementIconData, UiSceneData};
 use league_utils::hash_bin;
 use lol_base::prop::LoadHashKeyTrait;
-use lol_core::resource::prop_bin::{CommandLoadPropBin, EventLoadPropEnd, PropPath};
 use lol_core::utils::AssetServerLoadLeague;
 
 pub struct PluginUIElement;
@@ -17,14 +14,14 @@ impl Plugin for PluginUIElement {
         app.init_state::<UIState>();
         app.init_resource::<UIElementEntity>();
 
-        app.add_systems(Startup, startup_load_ui);
+        // app.add_systems(Startup, startup_load_ui);
         app.add_systems(
             Update,
             (update_on_window_resized, update_on_add_ui_element).run_if(in_state(UIState::Loaded)),
         );
 
-        app.add_observer(on_event_load_prop_end_ui_gameplay);
-        app.add_observer(on_event_load_prop_end_ui);
+        // app.add_observer(on_event_load_prop_end_ui_gameplay);
+        // app.add_observer(on_event_load_prop_end_ui);
         app.add_observer(on_command_update_ui_element);
     }
 }
@@ -74,102 +71,102 @@ impl UIElementEntity {
     }
 }
 
-fn startup_load_ui(mut commands: Commands) {
-    let paths = vec![
-        // "gameplay.playeraugments.bin".to_string(),
-        "gameplay.playerframe.bin".to_string(),
-        // "gameplay.playerinventory.bin".to_string(),
-        // "gameplay.playermute.bin".to_string(),
-        // "gameplay.playerperks.bin".to_string(),
-        // "gameplay.playerreport.bin".to_string(),
-        // "gameplay.playerstats.bin".to_string(),
-        // "gameplay.playerstatstones.bin".to_string(),
-        "gameplay.lolfloatinginfobars.bin".to_string(),
-    ];
+// fn startup_load_ui(mut commands: Commands) {
+//     let paths = vec![
+//         // "gameplay.playeraugments.bin".to_string(),
+//         "gameplay.playerframe.bin".to_string(),
+//         // "gameplay.playerinventory.bin".to_string(),
+//         // "gameplay.playermute.bin".to_string(),
+//         // "gameplay.playerperks.bin".to_string(),
+//         // "gameplay.playerreport.bin".to_string(),
+//         // "gameplay.playerstats.bin".to_string(),
+//         // "gameplay.playerstatstones.bin".to_string(),
+//         "gameplay.lolfloatinginfobars.bin".to_string(),
+//     ];
+//
+//     commands.trigger(CommandLoadPropBin {
+//         path: PropPath::Path(paths),
+//         label: Some("gameplay 系列".to_string()),
+//     });
+// }
 
-    commands.trigger(CommandLoadPropBin {
-        path: PropPath::Path(paths),
-        label: Some("gameplay 系列".to_string()),
-    });
-}
+// fn on_event_load_prop_end_ui_gameplay(
+//     event: On<EventLoadPropEnd>,
+//     mut commands: Commands,
+//     res_assets_ui_property_loadable: Res<Assets<UiPropertyLoadable>>,
+// ) {
+//     if event.label != "gameplay 系列" {
+//         return;
+//     }
+//
+//     commands.trigger(CommandLoadPropBin {
+//         path: PropPath::Hash(
+//             res_assets_ui_property_loadable
+//                 .iter()
+//                 .map(|v| v.1.filepath_hash)
+//                 .collect(),
+//         ),
+//         label: Some("ui 系列".to_string()),
+//     });
+// }
 
-fn on_event_load_prop_end_ui_gameplay(
-    event: On<EventLoadPropEnd>,
-    mut commands: Commands,
-    res_assets_ui_property_loadable: Res<Assets<UiPropertyLoadable>>,
-) {
-    if event.label != "gameplay 系列" {
-        return;
-    }
-
-    commands.trigger(CommandLoadPropBin {
-        path: PropPath::Hash(
-            res_assets_ui_property_loadable
-                .iter()
-                .map(|v| v.1.filepath_hash)
-                .collect(),
-        ),
-        label: Some("ui 系列".to_string()),
-    });
-}
-
-fn on_event_load_prop_end_ui(
-    event: On<EventLoadPropEnd>,
-    mut commands: Commands,
-    mut res_ui_element_entity: ResMut<UIElementEntity>,
-    res_asset_server: Res<AssetServer>,
-    res_assets_ui_element_icon_data: Res<Assets<UiElementIconData>>,
-    res_assets_ui_scene_data: Res<Assets<UiSceneData>>,
-) {
-    if event.label != "ui 系列" {
-        return;
-    }
-
-    info!("开始初始化 ui 元素");
-
-    for (_, ui) in res_assets_ui_element_icon_data.iter() {
-        let Some(entity) = spawn_ui_element(&mut commands, &res_asset_server, ui) else {
-            continue;
-        };
-
-        commands.entity(entity).insert(Visibility::Hidden);
-
-        if let Some(scene_data) = res_assets_ui_scene_data.load_hash(&ui.scene) {
-            if let Some(&enabled) = scene_data.enabled.as_ref() {
-                if enabled {
-                    commands.entity(entity).insert(Visibility::Visible);
-                } else {
-                    commands.entity(entity).insert(Visibility::Hidden);
-                }
-            }
-        }
-
-        if let Some(&enabled) = ui.enabled.as_ref() {
-            if enabled {
-                commands.entity(entity).insert(Visibility::Visible);
-            } else {
-                commands.entity(entity).insert(Visibility::Hidden);
-            }
-        }
-
-        // 应该根据技能是否可释放来显示，暂时全部显示为可用
-        if ui.name.contains("_BorderAvailable") {
-            commands.entity(entity).insert(Visibility::Visible);
-        }
-
-        res_ui_element_entity.map.insert(hash_bin(&ui.name), entity);
-    }
-
-    info!(
-        "ui 元素初始化完成，一共 {} 个元素",
-        res_ui_element_entity.map.len()
-    );
-
-    // commands.trigger(CommandUiAnimationStart {
-    //     key: "ClientStates/Gameplay/UX/LoL/PlayerFrame/UIBase/Player_Frame_Root/LevelUpFxIn/LevelUp0_ButtonIn".to_string(),
-    // });
-    commands.set_state(UIState::Loaded);
-}
+// fn on_event_load_prop_end_ui(
+//     event: On<EventLoadPropEnd>,
+//     mut commands: Commands,
+//     mut res_ui_element_entity: ResMut<UIElementEntity>,
+//     res_asset_server: Res<AssetServer>,
+//     res_assets_ui_element_icon_data: Res<Assets<UiElementIconData>>,
+//     res_assets_ui_scene_data: Res<Assets<UiSceneData>>,
+// ) {
+//     if event.label != "ui 系列" {
+//         return;
+//     }
+//
+//     info!("开始初始化 ui 元素");
+//
+//     for (_, ui) in res_assets_ui_element_icon_data.iter() {
+//         let Some(entity) = spawn_ui_element(&mut commands, &res_asset_server, ui) else {
+//             continue;
+//         };
+//
+//         commands.entity(entity).insert(Visibility::Hidden);
+//
+//         if let Some(scene_data) = res_assets_ui_scene_data.load_hash(&ui.scene) {
+//             if let Some(&enabled) = scene_data.enabled.as_ref() {
+//                 if enabled {
+//                     commands.entity(entity).insert(Visibility::Visible);
+//                 } else {
+//                     commands.entity(entity).insert(Visibility::Hidden);
+//                 }
+//             }
+//         }
+//
+//         if let Some(&enabled) = ui.enabled.as_ref() {
+//             if enabled {
+//                 commands.entity(entity).insert(Visibility::Visible);
+//             } else {
+//                 commands.entity(entity).insert(Visibility::Hidden);
+//             }
+//         }
+//
+//         // 应该根据技能是否可释放来显示，暂时全部显示为可用
+//         if ui.name.contains("_BorderAvailable") {
+//             commands.entity(entity).insert(Visibility::Visible);
+//         }
+//
+//         res_ui_element_entity.map.insert(hash_bin(&ui.name), entity);
+//     }
+//
+//     info!(
+//         "ui 元素初始化完成，一共 {} 个元素",
+//         res_ui_element_entity.map.len()
+//     );
+//
+//     // commands.trigger(CommandUiAnimationStart {
+//     //     key: "ClientStates/Gameplay/UX/LoL/PlayerFrame/UIBase/Player_Frame_Root/LevelUpFxIn/LevelUp0_ButtonIn".to_string(),
+//     // });
+//     commands.set_state(UIState::Loaded);
+// }
 
 pub fn spawn_ui_element(
     commands: &mut Commands,

@@ -2,9 +2,9 @@ use std::collections::HashMap;
 
 use bevy::asset::{AssetLoader, LoadContext};
 use bevy::reflect::TypePath;
+use league_core::register::ASSET_LOADER_REGISTRY;
 use league_property::prop::PropFile;
 use lol_base::prop::LeagueProperties;
-use lol_base::register::ASSET_LOADER_REGISTRY;
 
 use super::error::Error;
 

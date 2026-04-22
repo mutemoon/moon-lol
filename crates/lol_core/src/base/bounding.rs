@@ -1,7 +1,8 @@
 use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
 
-#[derive(Component, Clone, Serialize, Deserialize)]
+#[derive(Component, Clone, Serialize, Deserialize, Reflect)]
+#[reflect(Component)]
 pub struct Bounding {
     pub radius: f32,
     pub height: f32,

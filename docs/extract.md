@@ -57,7 +57,9 @@ CharacterRecord 是英雄的核心数据结构，包含以下信息：
 
 从地图的 `Unk0xad65d8c4` 组件中获取 `character_record` 路径，然后加载对应的 bin 文件。部分地图特有角色从此来源提取。
 
-两种来源使用相同的 bin 路径格式，最终都会输出到 `assets/champions/{name}/config.ron`。
+两种来源使用相同的 bin 路径格式，最终都会输出到 `assets/characters/{name}/config.ron`。
+
+> 注意：导出的 config.ron 只包含基本的组件配置。CharacterRecord 的完整数据（技能、属性等）在运行时通过 `character_record` 路径动态加载。
 
 ### 4. 提取地图可放置物
 
@@ -104,10 +106,25 @@ CharacterRecord 是英雄的核心数据结构，包含以下信息：
 
 | 文件 | 描述 |
 |------|------|
-| `assets/champions/{name}/config.ron` | 英雄角色配置 |
+| `assets/characters/{name}/config.ron` | 英雄角色场景（包含 Champion、Bounding、Attack、Health、Damage、Armor、Movement、Name 组件的序列化实体） |
 | `assets/maps/{map_name}_navgrid.bin` | 二进制导航网格数据 |
 | `assets/maps/{map_name}_mapgeo.gltf` | GLTF 格式的地图几何 |
 | `assets/maps/{map_name}_scene.ron` | 包含所有地图对象的序列化场景 |
+
+### Character 场景文件结构
+
+`assets/characters/{name}/config.ron` 是一个 Bevy DynamicScene RON 文件，包含以下组件：
+
+- **Champion** - 空组件，标记该实体为英雄
+- **Bounding** - 包含 `radius`（碰撞半径）和 `height`（生命条高度）
+- **Attack** - 包含 `range`（攻击距离）、`base_attack_speed`（基础攻击速度）、`windup_config`（前摇时间配置）
+- **Health** - 包含 `value` 和 `max`（生命值）
+- **Damage** - 包含 `0`（攻击力）
+- **Armor** - 包含 `0`（护甲值）
+- **Movement** - 包含 `speed`（移动速度）
+- **Name** - 实体名称
+
+可直接通过 Bevy 的场景系统反序列化加载为实体。
 
 ## 关键方法
 
@@ -129,7 +146,14 @@ let type_hash = type_name_to_hash(type_name);
 - `league_file::mapgeo::LeagueMapGeo` - 地图几何解析
 - `league_loader` - WAD 文件加载
 - `lol_base::barrack::ConfigBarracks` - 兵营配置
-- `lol_base::character::ConfigCharacter` - 角色配置
+- `lol_base::character::ConfigCharacter` - 角色配置（用于地图对象）
+- `lol_core::attack::Attack` - 攻击组件
 - `lol_core::base::bounding::Bounding` - 碰撞边界
+- `lol_core::damage::Damage` - 伤害组件
+- `lol_core::damage::Armor` - 护甲组件
+- `lol_core::entities::champion::Champion` - 英雄标记组件
 - `lol_core::lane::Lane` - 路线枚举
+- `lol_core::life::Health` - 生命值组件
 - `lol_core::map::MinionPath` - 小兵路径存储
+- `lol_core::movement::Movement` - 移动组件
+- `lol_core::team::Team` - 队伍组件（用于地图对象）

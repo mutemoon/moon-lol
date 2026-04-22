@@ -6,12 +6,9 @@ use lol_base::barrack::{
     ConfigBarracks, ConstantWaveBehavior, EnumWaveBehavior, InhibitorWaveBehavior,
     RotatingWaveBehavior, TimedVariableWaveBehavior,
 };
-use lol_base::prop::LoadHashKeyTrait;
 
-use crate::character::{CommandCharacterLoad, CommandCharacterSpawn};
 use crate::entities::minion::Minion;
 use crate::lane::Lane;
-use crate::map::MapState;
 use crate::team::Team;
 
 #[derive(Default)]
@@ -19,27 +16,30 @@ pub struct PluginBarrack;
 
 impl Plugin for PluginBarrack {
     fn build(&self, app: &mut App) {
-        app.init_state::<BarrackState>();
         app.init_resource::<InhibitorState>();
-        app.add_systems(
-            Update,
-            (
-                update_spawn_barrack
-                    .run_if(in_state(MapState::Loaded).and_then(in_state(BarrackState::Loading))),
-                is_character_loaded.run_if(in_state(BarrackState::Loading)),
-            ),
-        );
-        app.add_systems(
-            FixedUpdate,
-            barracks_spawning_system.run_if(in_state(BarrackState::Loaded)),
-        );
+        app.add_systems(FixedUpdate, init_barrack_state_system);
+        app.add_systems(FixedUpdate, barracks_spawning_system);
+    }
+}
+
+/// 兵营配置句柄，仅持有配置资源的引用
+#[derive(Component, Reflect)]
+#[reflect(Component)]
+pub struct BarrackConfigHandler {
+    /// 兵营配置的句柄
+    pub config_handle: Handle<ConfigBarracks>,
+}
+
+impl BarrackConfigHandler {
+    pub fn new(config_handle: Handle<ConfigBarracks>) -> Self {
+        Self { config_handle }
     }
 }
 
 /// 兵营的动态状态，用于跟踪计时器和生成队列
-#[derive(Component, Reflect)]
+#[derive(Component, Reflect, Default)]
 #[reflect(Component)]
-pub struct Barrack {
+pub struct BarrackState {
     /// 下一波兵的生成计时器
     pub wave_timer: Timer,
     /// 属性升级计时器
@@ -58,89 +58,44 @@ pub struct Barrack {
     pub wave_count: u32,
 }
 
-#[derive(Resource, Default)]
-pub struct InhibitorState {
-    pub inhibitors_down: usize,
-}
-
-#[derive(States, Default, Debug, Hash, Eq, Clone, PartialEq)]
-pub enum BarrackState {
-    #[default]
-    Loading,
-    Loaded,
-}
-
-fn update_spawn_barrack(
+/// 系统：为拥有 BarrackConfigHandler 但没有 BarrackState 的实体添加 BarrackState
+/// 根据 ConfigBarracks 初始化计时器
+fn init_barrack_state_system(
     mut commands: Commands,
-    // res_assets_unk_ad65d8c4: Res<Assets<Unk0xad65d8c4>>,
-    q_barrack: Query<(Entity, &ConfigBarracks), Without<Barrack>>,
+    query: Query<(Entity, &BarrackConfigHandler), Without<BarrackState>>,
+    res_barracks_config: Res<Assets<ConfigBarracks>>,
 ) {
-    for (entity, barracks_config) in q_barrack.iter() {
-        for unit in &barracks_config.units {
-            // let character = res_assets_unk_ad65d8c4
-            //     .load_hash(unit.unk_0xfee040bc)
-            //     .unwrap();
+    for (entity, config_handler) in query.iter() {
+        let Some(config) = res_barracks_config.get(&config_handler.config_handle) else {
+            continue;
+        };
 
-            // commands.trigger(CommandCharacterLoad {
-            //     character_record: character.character.character_record.clone(),
-            // });
-        }
-
-        // let initial_delay = barracks_config.initial_spawn_time_secs;
-        let initial_delay = 0.0;
-
-        commands.entity(entity).insert(Barrack {
+        commands.entity(entity).insert(BarrackState {
             // 第一波兵有初始延迟
-            wave_timer: Timer::from_seconds(initial_delay, TimerMode::Repeating),
+            wave_timer: Timer::from_seconds(0.0, TimerMode::Repeating),
             // 属性升级从第一波兵生成后开始计算
             upgrade_timer: Timer::new(
-                Duration::from_secs_f32(barracks_config.upgrade_interval_secs),
+                Duration::from_secs_f32(config.upgrade_interval_secs),
                 TimerMode::Repeating,
             ),
             // 移速升级有自己的独立延迟
             move_speed_upgrade_timer: Timer::new(
-                Duration::from_secs_f32(barracks_config.move_speed_increase_initial_delay_secs),
+                Duration::from_secs_f32(config.move_speed_increase_initial_delay_secs),
                 TimerMode::Repeating,
             ),
             // 小兵间的生成间隔计时器
             intra_spawn_timer: Timer::from_seconds(
-                barracks_config.minion_spawn_interval_secs,
+                config.minion_spawn_interval_secs,
                 TimerMode::Repeating,
             ),
-            spawn_queue: VecDeque::new(),
-            upgrade_count: 0,
-            move_speed_upgrade_count: 0,
-            wave_count: 0,
+            ..Default::default()
         });
     }
 }
 
-fn is_character_loaded(
-    mut commands: Commands,
-    q_barrack: Query<&ConfigBarracks>,
-    // res_assets_character_record: Res<Assets<CharacterRecord>>,
-    // res_assets_unk_ad65d8c4: Res<Assets<Unk0xad65d8c4>>,
-) {
-    if q_barrack.is_empty() {
-        return;
-    }
-
-    for barracks_config in q_barrack.iter() {
-        for unit in &barracks_config.units {
-            // let character = res_assets_unk_ad65d8c4
-            //     .load_hash(unit.unk_0xfee040bc)
-            //     .unwrap();
-
-            // if res_assets_character_record
-            //     .load_hash(&character.character.character_record)
-            //     .is_none()
-            // {
-            //     return;
-            // }
-        }
-    }
-
-    commands.set_state(BarrackState::Loaded);
+#[derive(Resource, Default)]
+pub struct InhibitorState {
+    pub inhibitors_down: usize,
 }
 
 /// 核心系统：处理兵营的计时、升级和生成逻辑
@@ -150,16 +105,21 @@ fn barracks_spawning_system(
     mut commands: Commands,
     mut query: Query<(
         &GlobalTransform,
-        &mut Barrack,
-        &ConfigBarracks,
+        &BarrackConfigHandler,
+        &mut BarrackState,
         &Team,
         &Lane,
     )>,
+    res_barracks_config: Res<Assets<ConfigBarracks>>,
     // res_assets_character_record: Res<Assets<CharacterRecord>>,
     time: Res<Time>,
     // res_assets_unk_ad65d8c4: Res<Assets<Unk0xad65d8c4>>,
 ) {
-    for (transform, mut barrack_state, barracks_config, team, lane) in query.iter_mut() {
+    for (transform, config_handler, mut barrack_state, team, lane) in query.iter_mut() {
+        let Some(barracks_config) = res_barracks_config.get(&config_handler.config_handle) else {
+            continue;
+        };
+
         // --- 1. 更新所有计时器 ---
         barrack_state.wave_timer.tick(time.delta());
 

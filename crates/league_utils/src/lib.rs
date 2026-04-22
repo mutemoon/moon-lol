@@ -243,3 +243,6 @@ pub fn get_extension_by_bytes(bytes: &[u8]) -> &str {
 
     "unk"
 }
+
+pub mod hash_key;
+pub use hash_key::{HashKey, LoadHashKeyTrait};
