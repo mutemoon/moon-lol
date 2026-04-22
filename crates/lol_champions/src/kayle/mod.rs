@@ -1,33 +1,24 @@
 pub mod buffs;
 
 use bevy::prelude::*;
-use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_base::prop::LoadHashKeyTrait;
+use lol_base::spell::Spell;
 use lol_core::action::damage::{DamageShape, TargetDamage, TargetFilter};
 use lol_core::base::buff::BuffOf;
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
 use lol_core::skill::{
-    CoolDown, EventSkillCast, PassiveSkillOf, Skill, SkillOf, SkillSlot, Skills,
-    play_skill_animation, skill_damage, skill_slot_from_index, spawn_skill_particle,
+    CoolDown, EventSkillCast, Skill, SkillSlot, play_skill_animation, skill_damage,
+    spawn_skill_particle,
 };
 
 use crate::kayle::buffs::{BuffKaylePassive, BuffKayleR, BuffKayleW};
-
-const KAYLE_Q_KEY: &str = "Characters/Kayle/Spells/KayleQ/KayleQ";
-#[allow(dead_code)]
-const KAYLE_W_KEY: &str = "Characters/Kayle/Spells/KayleW/KayleW";
-#[allow(dead_code)]
-const KAYLE_E_KEY: &str = "Characters/Kayle/Spells/KayleE/KayleE";
-const KAYLE_R_KEY: &str = "Characters/Kayle/Spells/KayleR/KayleR";
 
 #[derive(Default)]
 pub struct PluginKayle;
 
 impl Plugin for PluginKayle {
     fn build(&self, app: &mut App) {
-        app.add_systems(FixedUpdate, add_skills);
         app.add_observer(on_kayle_skill_cast);
         app.add_observer(on_kayle_damage_hit);
     }
@@ -53,16 +44,18 @@ fn on_kayle_skill_cast(
         return;
     };
 
+    let skill_spell = skill.key_spell_object.clone();
+
     match skill.slot {
-        SkillSlot::Q => cast_kayle_q(&mut commands, entity),
+        SkillSlot::Q => cast_kayle_q(&mut commands, entity, skill_spell),
         SkillSlot::W => cast_kayle_w(&mut commands, entity),
         SkillSlot::E => cast_kayle_e(&mut commands, entity),
-        SkillSlot::R => cast_kayle_r(&mut commands, entity),
+        SkillSlot::R => cast_kayle_r(&mut commands, entity, skill_spell),
         _ => {}
     }
 }
 
-fn cast_kayle_q(commands: &mut Commands, entity: Entity) {
+fn cast_kayle_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell1"));
     spawn_skill_particle(commands, entity, hash_bin("Kayle_Q_Cast"));
 
@@ -70,7 +63,7 @@ fn cast_kayle_q(commands: &mut Commands, entity: Entity) {
     skill_damage(
         commands,
         entity,
-        KAYLE_Q_KEY,
+        skill_spell,
         DamageShape::Sector {
             radius: 900.0,
             angle: 15.0,
@@ -101,7 +94,7 @@ fn cast_kayle_e(commands: &mut Commands, entity: Entity) {
     // E enhances next attack
 }
 
-fn cast_kayle_r(commands: &mut Commands, entity: Entity) {
+fn cast_kayle_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell4"));
     spawn_skill_particle(commands, entity, hash_bin("Kayle_R_Cast"));
 
@@ -113,7 +106,7 @@ fn cast_kayle_r(commands: &mut Commands, entity: Entity) {
     skill_damage(
         commands,
         entity,
-        KAYLE_R_KEY,
+        skill_spell,
         DamageShape::Circle { radius: 900.0 },
         vec![TargetDamage {
             filter: TargetFilter::All,
@@ -140,33 +133,4 @@ fn on_kayle_damage_hit(
     commands
         .entity(source)
         .with_related::<BuffOf>(BuffKaylePassive::new(0.15, 3.0));
-}
-
-fn add_skills(
-    mut commands: Commands,
-    q_kayle: Query<Entity, (With<Kayle>, Without<Skills>)>,
-    res_assets_character_record: Res<Assets<CharacterRecord>>,
-) {
-    for entity in q_kayle.iter() {
-        let Some(character_record) =
-            res_assets_character_record.load_hash("Characters/Kayle/CharacterRecords/Root")
-        else {
-            continue;
-        };
-
-        commands.entity(entity).with_related::<PassiveSkillOf>((
-            Skill::new(
-                SkillSlot::Passive,
-                "Characters/Kayle/Spells/KaylePassive/KaylePassive",
-            ),
-            CoolDown::default(),
-        ));
-
-        for (index, &skill) in character_record.spells.as_ref().unwrap().iter().enumerate() {
-            let skill_component = Skill::new(skill_slot_from_index(index), skill);
-            commands
-                .entity(entity)
-                .with_related::<SkillOf>((skill_component, CoolDown::default()));
-        }
-    }
 }

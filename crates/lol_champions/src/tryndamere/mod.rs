@@ -1,33 +1,24 @@
 pub mod buffs;
 
 use bevy::prelude::*;
-use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_base::prop::LoadHashKeyTrait;
+use lol_base::spell::Spell;
 use lol_core::action::damage::{DamageShape, TargetDamage, TargetFilter};
 use lol_core::base::buff::BuffOf;
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
 use lol_core::skill::{
-    CoolDown, EventSkillCast, PassiveSkillOf, Skill, SkillOf, SkillSlot, Skills,
-    play_skill_animation, skill_damage, skill_slot_from_index, spawn_skill_particle,
+    CoolDown, EventSkillCast, Skill, SkillSlot, play_skill_animation, skill_damage,
+    spawn_skill_particle,
 };
 
 use crate::tryndamere::buffs::BuffTryndamereW;
-
-#[allow(dead_code)]
-const TRYNDAMERE_Q_KEY: &str = "Characters/Tryndamere/Spells/TryndamereQ/TryndamereQ";
-const TRYNDAMERE_W_KEY: &str = "Characters/Tryndamere/Spells/TryndamereW/TryndamereW";
-const TRYNDAMERE_E_KEY: &str = "Characters/Tryndamere/Spells/TryndamereE/TryndamereE";
-#[allow(dead_code)]
-const TRYNDAMERE_R_KEY: &str = "Characters/Tryndamere/Spells/TryndamereR/TryndamereR";
 
 #[derive(Default)]
 pub struct PluginTryndamere;
 
 impl Plugin for PluginTryndamere {
     fn build(&self, app: &mut App) {
-        app.add_systems(FixedUpdate, add_skills);
         app.add_observer(on_tryndamere_skill_cast);
         app.add_observer(on_tryndamere_damage_hit);
     }
@@ -53,10 +44,12 @@ fn on_tryndamere_skill_cast(
         return;
     };
 
+    let skill_spell = skill.key_spell_object.clone();
+
     match skill.slot {
         SkillSlot::Q => cast_tryndamere_q(&mut commands, entity),
-        SkillSlot::W => cast_tryndamere_w(&mut commands, entity),
-        SkillSlot::E => cast_tryndamere_e(&mut commands, entity),
+        SkillSlot::W => cast_tryndamere_w(&mut commands, entity, skill_spell),
+        SkillSlot::E => cast_tryndamere_e(&mut commands, entity, skill_spell),
         SkillSlot::R => cast_tryndamere_r(&mut commands, entity),
         _ => {}
     }
@@ -67,14 +60,14 @@ fn cast_tryndamere_q(commands: &mut Commands, entity: Entity) {
     spawn_skill_particle(commands, entity, hash_bin("Tryndamere_Q_Cast"));
 }
 
-fn cast_tryndamere_w(commands: &mut Commands, entity: Entity) {
+fn cast_tryndamere_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell2"));
     spawn_skill_particle(commands, entity, hash_bin("Tryndamere_W_Cast"));
 
     skill_damage(
         commands,
         entity,
-        TRYNDAMERE_W_KEY,
+        skill_spell,
         DamageShape::Sector {
             radius: 850.0,
             angle: 30.0,
@@ -88,14 +81,14 @@ fn cast_tryndamere_w(commands: &mut Commands, entity: Entity) {
     );
 }
 
-fn cast_tryndamere_e(commands: &mut Commands, entity: Entity) {
+fn cast_tryndamere_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell3"));
     spawn_skill_particle(commands, entity, hash_bin("Tryndamere_E_Cast"));
 
     skill_damage(
         commands,
         entity,
-        TRYNDAMERE_E_KEY,
+        skill_spell,
         DamageShape::Circle { radius: 660.0 },
         vec![TargetDamage {
             filter: TargetFilter::All,
@@ -126,33 +119,4 @@ fn on_tryndamere_damage_hit(
     commands
         .entity(target)
         .with_related::<BuffOf>(BuffTryndamereW::new(0.35, 20.0, 2.0));
-}
-
-fn add_skills(
-    mut commands: Commands,
-    q_tryndamere: Query<Entity, (With<Tryndamere>, Without<Skills>)>,
-    res_assets_character_record: Res<Assets<CharacterRecord>>,
-) {
-    for entity in q_tryndamere.iter() {
-        let Some(character_record) =
-            res_assets_character_record.load_hash("Characters/Tryndamere/CharacterRecords/Root")
-        else {
-            continue;
-        };
-
-        commands.entity(entity).with_related::<PassiveSkillOf>((
-            Skill::new(
-                SkillSlot::Passive,
-                "Characters/Tryndamere/Spells/TryndamerePassive/TryndamerePassive",
-            ),
-            CoolDown::default(),
-        ));
-
-        for (index, &skill) in character_record.spells.as_ref().unwrap().iter().enumerate() {
-            let skill_component = Skill::new(skill_slot_from_index(index), skill);
-            commands
-                .entity(entity)
-                .with_related::<SkillOf>((skill_component, CoolDown::default()));
-        }
-    }
 }

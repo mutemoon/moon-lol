@@ -34,6 +34,7 @@ fn main() {
     app.add_plugins(AssetPlugin::default());
     app.add_plugins(TaskPoolPlugin::default());
 
+    app.init_asset::<DynamicWorld>();
     app.init_asset::<ConfigBarracks>();
     app.init_asset_loader::<BarracksLoader>();
 
@@ -147,22 +148,23 @@ fn main() {
                     // 收集 character_record 路径
                     let char_record_path = unk0xad65d8c4.character.character_record.clone();
                     // 从路径提取英雄名，如 "Characters/Aatrox/CharacterRecords/Root" -> "Aatrox"
-                    if let Some(champ_name) = char_record_path
-                        .strip_prefix("Characters/")
-                        .and_then(|s| s.split('/').next())
-                    {
+                    let champ_name = char_record_path.split('/').skip(1).next();
+
+                    if let Some(champ_name) = champ_name {
                         map_character_records
                             .insert(champ_name.to_lowercase(), char_record_path.clone());
-                    }
 
-                    world.spawn((
-                        transform,
-                        Team::from(unk0xad65d8c4.team.as_ref().map(|x| x.team)),
-                        ConfigCharacter {
-                            character_record: char_record_path,
-                            skin_path: unk0xad65d8c4.character.skin.clone(),
-                        },
-                    ));
+                        world.spawn((
+                            transform,
+                            Team::from(unk0xad65d8c4.team.as_ref().map(|x| x.team)),
+                            ConfigCharacter {
+                                character_record: world
+                                    .resource::<AssetServer>()
+                                    .load(&format!("characters/{}/config.ron", champ_name)),
+                                skin_path: unk0xad65d8c4.character.skin.clone(),
+                            },
+                        ));
+                    }
                 }
                 _ => {}
             }

@@ -1,33 +1,25 @@
 pub mod buffs;
 
 use bevy::prelude::*;
-use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_base::prop::LoadHashKeyTrait;
+use lol_base::spell::Spell;
 use lol_core::action::damage::{DamageShape, TargetDamage, TargetFilter};
 use lol_core::action::dash::{ActionDash, DashDamage, DashMoveType};
 use lol_core::base::buff::BuffOf;
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
 use lol_core::skill::{
-    CoolDown, EventSkillCast, PassiveSkillOf, Skill, SkillOf, SkillSlot, Skills,
-    play_skill_animation, skill_damage, skill_dash, skill_slot_from_index, spawn_skill_particle,
+    EventSkillCast, Skill, SkillSlot, play_skill_animation, skill_damage, skill_dash,
+    spawn_skill_particle,
 };
 
 use crate::galio::buffs::{BuffGalioPassive, BuffGalioW};
-
-const GALIO_Q_KEY: &str = "Characters/Galio/Spells/GalioQ/GalioQ";
-#[allow(dead_code)]
-const GALIO_W_KEY: &str = "Characters/Galio/Spells/GalioW/GalioW";
-const GALIO_E_KEY: &str = "Characters/Galio/Spells/GalioE/GalioE";
-const GALIO_R_KEY: &str = "Characters/Galio/Spells/GalioR/GalioR";
 
 #[derive(Default)]
 pub struct PluginGalio;
 
 impl Plugin for PluginGalio {
     fn build(&self, app: &mut App) {
-        app.add_systems(FixedUpdate, add_skills);
         app.add_observer(on_galio_skill_cast);
         app.add_observer(on_galio_damage_hit);
     }
@@ -43,27 +35,33 @@ fn on_galio_skill_cast(
     mut commands: Commands,
     q_galio: Query<(), With<Galio>>,
     q_transform: Query<&Transform>,
-    q_skill: Query<(&Skill, &CoolDown)>,
+    q_skill: Query<&Skill>,
 ) {
     let entity = trigger.event_target();
     if q_galio.get(entity).is_err() {
         return;
     }
 
-    let Ok((skill, _cooldown)) = q_skill.get(trigger.skill_entity) else {
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
         return;
     };
 
     match skill.slot {
-        SkillSlot::Q => cast_galio_q(&mut commands, entity),
+        SkillSlot::Q => cast_galio_q(&mut commands, entity, skill.key_spell_object.clone()),
         SkillSlot::W => cast_galio_w(&mut commands, entity),
-        SkillSlot::E => cast_galio_e(&mut commands, &q_transform, entity, trigger.point),
-        SkillSlot::R => cast_galio_r(&mut commands, entity),
+        SkillSlot::E => cast_galio_e(
+            &mut commands,
+            &q_transform,
+            entity,
+            trigger.point,
+            skill.key_spell_object.clone(),
+        ),
+        SkillSlot::R => cast_galio_r(&mut commands, entity, skill.key_spell_object.clone()),
         _ => {}
     }
 }
 
-fn cast_galio_q(commands: &mut Commands, entity: Entity) {
+fn cast_galio_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell1"));
     spawn_skill_particle(commands, entity, hash_bin("Galio_Q_Cast"));
 
@@ -71,7 +69,7 @@ fn cast_galio_q(commands: &mut Commands, entity: Entity) {
     skill_damage(
         commands,
         entity,
-        GALIO_Q_KEY,
+        skill_spell,
         DamageShape::Sector {
             radius: 825.0,
             angle: 60.0,
@@ -100,6 +98,7 @@ fn cast_galio_e(
     q_transform: &Query<&Transform>,
     entity: Entity,
     point: Vec2,
+    skill_spell: Handle<Spell>,
 ) {
     play_skill_animation(commands, entity, hash_bin("Spell3"));
     spawn_skill_particle(commands, entity, hash_bin("Galio_E_Cast"));
@@ -111,7 +110,7 @@ fn cast_galio_e(
         entity,
         point,
         &ActionDash {
-            skill: GALIO_E_KEY.into(),
+            skill: skill_spell.clone(),
             move_type: DashMoveType::Pointer { max: 650.0 },
             damage: Some(DashDamage {
                 radius_end: 150.0,
@@ -126,7 +125,7 @@ fn cast_galio_e(
     );
 }
 
-fn cast_galio_r(commands: &mut Commands, entity: Entity) {
+fn cast_galio_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell4"));
     spawn_skill_particle(commands, entity, hash_bin("Galio_R_Cast"));
 
@@ -134,7 +133,7 @@ fn cast_galio_r(commands: &mut Commands, entity: Entity) {
     skill_damage(
         commands,
         entity,
-        GALIO_R_KEY,
+        skill_spell,
         DamageShape::Circle { radius: 400.0 },
         vec![TargetDamage {
             filter: TargetFilter::All,
@@ -161,33 +160,4 @@ fn on_galio_damage_hit(
     commands
         .entity(target)
         .with_related::<BuffOf>(BuffGalioPassive::new());
-}
-
-fn add_skills(
-    mut commands: Commands,
-    q_galio: Query<Entity, (With<Galio>, Without<Skills>)>,
-    res_assets_character_record: Res<Assets<CharacterRecord>>,
-) {
-    for entity in q_galio.iter() {
-        let Some(character_record) =
-            res_assets_character_record.load_hash("Characters/Galio/CharacterRecords/Root")
-        else {
-            continue;
-        };
-
-        commands.entity(entity).with_related::<PassiveSkillOf>((
-            Skill::new(
-                SkillSlot::Passive,
-                "Characters/Galio/Spells/GalioPassive/GalioPassive",
-            ),
-            CoolDown::default(),
-        ));
-
-        for (index, &skill) in character_record.spells.as_ref().unwrap().iter().enumerate() {
-            let skill_component = Skill::new(skill_slot_from_index(index), skill);
-            commands
-                .entity(entity)
-                .with_related::<SkillOf>((skill_component, CoolDown::default()));
-        }
-    }
 }

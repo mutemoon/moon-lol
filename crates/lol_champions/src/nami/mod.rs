@@ -1,32 +1,24 @@
 pub mod buffs;
 
-use bevy::prelude::*;
-use league_core::extract::CharacterRecord;
+use bevy::prelude::{Handle, *};
 use league_utils::hash_bin;
-use lol_base::prop::LoadHashKeyTrait;
+use lol_base::spell::Spell;
 use lol_core::action::damage::{DamageShape, TargetDamage, TargetFilter};
 use lol_core::base::buff::BuffOf;
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
 use lol_core::skill::{
-    CoolDown, EventSkillCast, PassiveSkillOf, Skill, SkillOf, SkillSlot, Skills,
-    play_skill_animation, skill_damage, skill_slot_from_index, spawn_skill_particle,
+    CoolDown, EventSkillCast, Skill, SkillSlot, play_skill_animation, skill_damage,
+    spawn_skill_particle,
 };
 
 use crate::nami::buffs::{BuffNamiE, BuffNamiQ};
-
-const NAMI_Q_KEY: &str = "Characters/Nami/Spells/NamiQ/NamiQ";
-const NAMI_W_KEY: &str = "Characters/Nami/Spells/NamiW/NamiW";
-#[allow(dead_code)]
-const NAMI_E_KEY: &str = "Characters/Nami/Spells/NamiE/NamiE";
-const NAMI_R_KEY: &str = "Characters/Nami/Spells/NamiR/NamiR";
 
 #[derive(Default)]
 pub struct PluginNami;
 
 impl Plugin for PluginNami {
     fn build(&self, app: &mut App) {
-        app.add_systems(FixedUpdate, add_skills);
         app.add_observer(on_nami_skill_cast);
         app.add_observer(on_nami_damage_hit);
     }
@@ -52,16 +44,18 @@ fn on_nami_skill_cast(
         return;
     };
 
+    let skill_spell = skill.key_spell_object.clone();
+
     match skill.slot {
-        SkillSlot::Q => cast_nami_q(&mut commands, entity),
-        SkillSlot::W => cast_nami_w(&mut commands, entity),
+        SkillSlot::Q => cast_nami_q(&mut commands, entity, skill_spell),
+        SkillSlot::W => cast_nami_w(&mut commands, entity, skill_spell),
         SkillSlot::E => cast_nami_e(&mut commands, entity),
-        SkillSlot::R => cast_nami_r(&mut commands, entity),
+        SkillSlot::R => cast_nami_r(&mut commands, entity, skill_spell),
         _ => {}
     }
 }
 
-fn cast_nami_q(commands: &mut Commands, entity: Entity) {
+fn cast_nami_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell1"));
     spawn_skill_particle(commands, entity, hash_bin("Nami_Q_Cast"));
 
@@ -69,7 +63,7 @@ fn cast_nami_q(commands: &mut Commands, entity: Entity) {
     skill_damage(
         commands,
         entity,
-        NAMI_Q_KEY,
+        skill_spell,
         DamageShape::Circle { radius: 850.0 },
         vec![TargetDamage {
             filter: TargetFilter::All,
@@ -80,7 +74,7 @@ fn cast_nami_q(commands: &mut Commands, entity: Entity) {
     );
 }
 
-fn cast_nami_w(commands: &mut Commands, entity: Entity) {
+fn cast_nami_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell2"));
     spawn_skill_particle(commands, entity, hash_bin("Nami_W_Cast"));
 
@@ -88,7 +82,7 @@ fn cast_nami_w(commands: &mut Commands, entity: Entity) {
     skill_damage(
         commands,
         entity,
-        NAMI_W_KEY,
+        skill_spell,
         DamageShape::Circle { radius: 725.0 },
         vec![TargetDamage {
             filter: TargetFilter::All,
@@ -109,7 +103,7 @@ fn cast_nami_e(commands: &mut Commands, entity: Entity) {
         .with_related::<BuffOf>(BuffNamiE::new(30.0, 0.3, 6.0));
 }
 
-fn cast_nami_r(commands: &mut Commands, entity: Entity) {
+fn cast_nami_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell4"));
     spawn_skill_particle(commands, entity, hash_bin("Nami_R_Cast"));
 
@@ -117,7 +111,7 @@ fn cast_nami_r(commands: &mut Commands, entity: Entity) {
     skill_damage(
         commands,
         entity,
-        NAMI_R_KEY,
+        skill_spell,
         DamageShape::Sector {
             radius: 2750.0,
             angle: 45.0,
@@ -147,33 +141,4 @@ fn on_nami_damage_hit(
     commands
         .entity(target)
         .with_related::<BuffOf>(BuffNamiQ::new(1.5, 1.5));
-}
-
-fn add_skills(
-    mut commands: Commands,
-    q_nami: Query<Entity, (With<Nami>, Without<Skills>)>,
-    res_assets_character_record: Res<Assets<CharacterRecord>>,
-) {
-    for entity in q_nami.iter() {
-        let Some(character_record) =
-            res_assets_character_record.load_hash("Characters/Nami/CharacterRecords/Root")
-        else {
-            continue;
-        };
-
-        commands.entity(entity).with_related::<PassiveSkillOf>((
-            Skill::new(
-                SkillSlot::Passive,
-                "Characters/Nami/Spells/NamiPassive/NamiPassive",
-            ),
-            CoolDown::default(),
-        ));
-
-        for (index, &skill) in character_record.spells.as_ref().unwrap().iter().enumerate() {
-            let skill_component = Skill::new(skill_slot_from_index(index), skill);
-            commands
-                .entity(entity)
-                .with_related::<SkillOf>((skill_component, CoolDown::default()));
-        }
-    }
 }

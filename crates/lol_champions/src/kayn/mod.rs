@@ -1,9 +1,8 @@
 pub mod buffs;
 
 use bevy::prelude::*;
-use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_base::prop::LoadHashKeyTrait;
+use lol_base::spell::Spell;
 use lol_core::action::damage::{DamageShape, TargetDamage, TargetFilter};
 use lol_core::action::dash::{ActionDash, DashDamage, DashMoveType};
 use lol_core::base::buff::BuffOf;
@@ -12,21 +11,17 @@ use lol_core::buffs::common_buffs::BuffMoveSpeed;
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
 use lol_core::skill::{
-    CoolDown, EventSkillCast, PassiveSkillOf, Skill, SkillOf, SkillSlot, Skills,
-    play_skill_animation, skill_damage, skill_dash, skill_slot_from_index, spawn_skill_particle,
+    EventSkillCast, Skill, SkillSlot, play_skill_animation, skill_damage, skill_dash,
+    spawn_skill_particle,
 };
 
 use crate::kayn::buffs::BuffKaynRActive;
-
-const KAYN_Q_KEY: &str = "Characters/Kayn/Spells/KaynQ/KaynQ";
-const KAYN_W_KEY: &str = "Characters/Kayn/Spells/KaynW/KaynW";
 
 #[derive(Default)]
 pub struct PluginKayn;
 
 impl Plugin for PluginKayn {
     fn build(&self, app: &mut App) {
-        app.add_systems(FixedUpdate, add_skills);
         app.add_observer(on_kayn_skill_cast);
         app.add_observer(on_kayn_damage_hit);
     }
@@ -64,9 +59,17 @@ fn on_kayn_skill_cast(
         return;
     };
 
+    let skill_spell = skill.key_spell_object.clone();
+
     match skill.slot {
-        SkillSlot::Q => cast_kayn_q(&mut commands, &q_transform, entity, trigger.point),
-        SkillSlot::W => cast_kayn_w(&mut commands, entity, trigger.point),
+        SkillSlot::Q => cast_kayn_q(
+            &mut commands,
+            &q_transform,
+            entity,
+            trigger.point,
+            skill_spell,
+        ),
+        SkillSlot::W => cast_kayn_w(&mut commands, entity, skill_spell),
         SkillSlot::E => cast_kayn_e(&mut commands, &q_transform, entity, trigger.point),
         SkillSlot::R => cast_kayn_r(&mut commands, entity),
         _ => {}
@@ -78,6 +81,7 @@ fn cast_kayn_q(
     q_transform: &Query<&Transform>,
     entity: Entity,
     point: Vec2,
+    skill_spell: Handle<Spell>,
 ) {
     play_skill_animation(commands, entity, hash_bin("Spell1"));
     spawn_skill_particle(commands, entity, hash_bin("Kayn_Q_Cast"));
@@ -88,7 +92,7 @@ fn cast_kayn_q(
         entity,
         point,
         &ActionDash {
-            skill: KAYN_Q_KEY.into(),
+            skill: skill_spell,
             move_type: DashMoveType::Fixed(250.0),
             damage: Some(DashDamage {
                 radius_end: 150.0,
@@ -103,14 +107,14 @@ fn cast_kayn_q(
     );
 }
 
-fn cast_kayn_w(commands: &mut Commands, entity: Entity, _point: Vec2) {
+fn cast_kayn_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell2"));
     spawn_skill_particle(commands, entity, hash_bin("Kayn_W_Cast"));
     // W is an upward slash that slows
     skill_damage(
         commands,
         entity,
-        KAYN_W_KEY,
+        skill_spell,
         DamageShape::Sector {
             radius: 300.0,
             angle: 60.0,
@@ -146,35 +150,6 @@ fn cast_kayn_r(commands: &mut Commands, entity: Entity) {
     commands
         .entity(entity)
         .with_related::<BuffOf>(BuffKaynRActive::new(Entity::PLACEHOLDER, 2.5));
-}
-
-fn add_skills(
-    mut commands: Commands,
-    q_kayn: Query<Entity, (With<Kayn>, Without<Skills>)>,
-    res_assets_character_record: Res<Assets<CharacterRecord>>,
-) {
-    for entity in q_kayn.iter() {
-        let Some(character_record) =
-            res_assets_character_record.load_hash("Characters/Kayn/CharacterRecords/Root")
-        else {
-            continue;
-        };
-
-        commands.entity(entity).with_related::<PassiveSkillOf>((
-            Skill::new(
-                SkillSlot::Passive,
-                "Characters/Kayn/Spells/KaynPassiveAbility/KaynPassive",
-            ),
-            CoolDown::default(),
-        ));
-
-        for (index, &skill) in character_record.spells.as_ref().unwrap().iter().enumerate() {
-            commands.entity(entity).with_related::<SkillOf>((
-                Skill::new(skill_slot_from_index(index), skill),
-                CoolDown::default(),
-            ));
-        }
-    }
 }
 
 /// 监听 Kayn 造成的伤害，W 命中时减速

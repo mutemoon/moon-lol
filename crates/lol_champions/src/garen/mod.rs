@@ -2,23 +2,18 @@ pub mod q;
 pub mod w;
 
 use bevy::prelude::*;
-use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_base::prop::LoadHashKeyTrait;
+use lol_base::spell::Spell;
 use lol_core::action::damage::{DamageShape, TargetDamage, TargetFilter};
 use lol_core::base::buff::BuffOf;
 use lol_core::damage::DamageType;
 use lol_core::entities::champion::Champion;
 use lol_core::skill::{
-    CoolDown, EventSkillCast, PassiveSkillOf, Skill, SkillOf, SkillSlot, Skills,
-    play_skill_animation, skill_damage, skill_slot_from_index, spawn_skill_particle,
+    EventSkillCast, Skill, SkillSlot, play_skill_animation, skill_damage, spawn_skill_particle,
 };
 
 use crate::garen::q::{BuffGarenQ, BuffGarenQAttack};
 use crate::garen::w::BuffGarenW;
-
-const GAREN_E_KEY: &str = "Characters/Garen/Spells/GarenSpin/GarenSpin";
-const GAREN_R_KEY: &str = "Characters/Garen/Spells/GarenExecute/GarenExecute";
 
 // Garen Q parameters
 const GAREN_Q_MOVE_SPEED_BONUS: f32 = 0.3; // 30% move speed bonus
@@ -36,7 +31,6 @@ pub struct PluginGaren;
 
 impl Plugin for PluginGaren {
     fn build(&self, app: &mut App) {
-        app.add_systems(FixedUpdate, add_skills);
         app.add_observer(on_garen_skill_cast);
     }
 }
@@ -64,8 +58,13 @@ fn on_garen_skill_cast(
     match skill.slot {
         SkillSlot::Q => cast_garen_q(&mut commands, entity),
         SkillSlot::W => cast_garen_w(&mut commands, entity),
-        SkillSlot::E => cast_garen_e(&mut commands, entity),
-        SkillSlot::R => cast_garen_r(&mut commands, entity, trigger.point),
+        SkillSlot::E => cast_garen_e(&mut commands, entity, skill.key_spell_object.clone()),
+        SkillSlot::R => cast_garen_r(
+            &mut commands,
+            entity,
+            trigger.point,
+            skill.key_spell_object.clone(),
+        ),
         _ => {}
     }
 }
@@ -116,13 +115,13 @@ fn cast_garen_w(commands: &mut Commands, entity: Entity) {
     );
 }
 
-fn cast_garen_e(commands: &mut Commands, entity: Entity) {
+fn cast_garen_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell3"));
     spawn_skill_particle(commands, entity, hash_bin("Garen_E_Cast"));
     skill_damage(
         commands,
         entity,
-        GAREN_E_KEY,
+        skill_spell,
         DamageShape::Circle { radius: 200.0 },
         vec![TargetDamage {
             filter: TargetFilter::All,
@@ -133,14 +132,14 @@ fn cast_garen_e(commands: &mut Commands, entity: Entity) {
     );
 }
 
-fn cast_garen_r(commands: &mut Commands, entity: Entity, _point: Vec2) {
+fn cast_garen_r(commands: &mut Commands, entity: Entity, _point: Vec2, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell4"));
     spawn_skill_particle(commands, entity, hash_bin("Garen_R_Cast"));
     // R is a targeted execute ability - use Nearest shape for single target
     skill_damage(
         commands,
         entity,
-        GAREN_R_KEY,
+        skill_spell,
         DamageShape::Nearest {
             max_distance: 400.0,
         },
@@ -151,33 +150,4 @@ fn cast_garen_r(commands: &mut Commands, entity: Entity, _point: Vec2) {
         }],
         Some(hash_bin("Garen_R_Hit")),
     );
-}
-
-fn add_skills(
-    mut commands: Commands,
-    q_garen: Query<Entity, (With<Garen>, Without<Skills>)>,
-    res_assets_character_record: Res<Assets<CharacterRecord>>,
-) {
-    for entity in q_garen.iter() {
-        let Some(character_record) =
-            res_assets_character_record.load_hash("Characters/Garen/CharacterRecords/Root")
-        else {
-            continue;
-        };
-
-        commands.entity(entity).with_related::<PassiveSkillOf>((
-            Skill::new(
-                SkillSlot::Passive,
-                "Characters/Garen/Spells/GarenPassiveAbility/GarenPassive",
-            ),
-            CoolDown::default(),
-        ));
-
-        for (index, &skill) in character_record.spells.as_ref().unwrap().iter().enumerate() {
-            commands.entity(entity).with_related::<SkillOf>((
-                Skill::new(skill_slot_from_index(index), skill),
-                CoolDown::default(),
-            ));
-        }
-    }
 }

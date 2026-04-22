@@ -3,9 +3,8 @@ pub mod passive;
 pub mod r;
 
 use bevy::prelude::*;
-use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_base::prop::LoadHashKeyTrait;
+use lol_base::spell::Spell;
 use lol_core::action::damage::{DamageShape, TargetDamage, TargetFilter};
 use lol_core::action::dash::{ActionDash, DashMoveType};
 use lol_core::attack::BuffAttack;
@@ -13,16 +12,14 @@ use lol_core::base::buff::BuffOf;
 use lol_core::damage::DamageType;
 use lol_core::entities::champion::Champion;
 use lol_core::skill::{
-    CoolDown, EventSkillCast, PassiveSkillOf, Skill, SkillOf, SkillSlot, Skills,
-    despawn_skill_particle, play_skill_animation, reset_skill_attack, skill_damage, skill_dash,
-    skill_slot_from_index, spawn_skill_particle,
+    EventSkillCast, Skill, SkillSlot, despawn_skill_particle, play_skill_animation,
+    reset_skill_attack, skill_damage, skill_dash, spawn_skill_particle,
 };
 
 use crate::fiora::e::BuffFioraE;
 use crate::fiora::passive::AbilityFioraPassive;
 use crate::fiora::r::BuffFioraR;
 
-const FIORA_Q_KEY: &str = "Characters/Fiora/Spells/FioraQAbility/FioraQ";
 #[derive(Default)]
 pub struct PluginFiora;
 
@@ -32,7 +29,6 @@ impl Plugin for PluginFiora {
         app.add_systems(
             FixedUpdate,
             (
-                add_skills,
                 passive::update_add_vital,
                 passive::update_remove_vital,
                 r::fixed_update,
@@ -67,7 +63,13 @@ fn on_fiora_skill_cast(
     };
 
     match skill.slot {
-        SkillSlot::Q => cast_fiora_q(&mut commands, &q_transform, entity, trigger.point),
+        SkillSlot::Q => cast_fiora_q(
+            &mut commands,
+            &q_transform,
+            entity,
+            trigger.point,
+            skill.key_spell_object.clone(),
+        ),
         SkillSlot::W => cast_fiora_w(&mut commands, entity),
         SkillSlot::E => cast_fiora_e(&mut commands, entity),
         SkillSlot::R => cast_fiora_r(&mut commands, entity),
@@ -80,6 +82,7 @@ fn cast_fiora_q(
     q_transform: &Query<&Transform>,
     entity: Entity,
     point: Vec2,
+    skill_spell: Handle<Spell>,
 ) {
     play_skill_animation(commands, entity, hash_bin("Spell1"));
     spawn_skill_particle(commands, entity, hash_bin("Fiora_Q_Dash_Trail_ground"));
@@ -89,7 +92,7 @@ fn cast_fiora_q(
         entity,
         point,
         &ActionDash {
-            skill: FIORA_Q_KEY.into(),
+            skill: skill_spell.clone(),
             move_type: DashMoveType::Pointer { max: 300.0 },
             damage: None,
             speed: 1000.0,
@@ -98,7 +101,7 @@ fn cast_fiora_q(
     skill_damage(
         commands,
         entity,
-        FIORA_Q_KEY,
+        skill_spell,
         DamageShape::Nearest {
             max_distance: 300.0,
         },
@@ -135,34 +138,4 @@ fn cast_fiora_r(commands: &mut Commands, entity: Entity) {
     commands
         .entity(entity)
         .with_related::<BuffOf>(BuffFioraR::default());
-}
-
-fn add_skills(
-    mut commands: Commands,
-    q_fiora: Query<Entity, (With<Fiora>, Without<Skills>)>,
-    res_assets_character_record: Res<Assets<CharacterRecord>>,
-) {
-    for entity in q_fiora.iter() {
-        let Some(character_record) =
-            res_assets_character_record.load_hash("Characters/Fiora/CharacterRecords/Root")
-        else {
-            continue;
-        };
-
-        commands.entity(entity).with_related::<PassiveSkillOf>((
-            Skill::new(
-                SkillSlot::Passive,
-                "Characters/Fiora/Spells/FioraPassiveAbility/FioraPassive",
-            ),
-            CoolDown::default(),
-            AbilityFioraPassive,
-        ));
-
-        for (index, &skill) in character_record.spells.as_ref().unwrap().iter().enumerate() {
-            commands.entity(entity).with_related::<SkillOf>((
-                Skill::new(skill_slot_from_index(index), skill),
-                CoolDown::default(),
-            ));
-        }
-    }
 }

@@ -1,9 +1,8 @@
 pub mod buffs;
 
 use bevy::prelude::*;
-use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_base::prop::LoadHashKeyTrait;
+use lol_base::spell::Spell;
 use lol_core::action::damage::{DamageShape, TargetDamage, TargetFilter};
 use lol_core::action::dash::{ActionDash, DashDamage, DashMoveType};
 use lol_core::base::buff::BuffOf;
@@ -12,17 +11,12 @@ use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
 use lol_core::movement::{CommandMovement, MovementAction, MovementWay};
 use lol_core::skill::{
-    CoolDown, EventSkillCast, PassiveSkillOf, Skill, SkillCooldownMode, SkillOf, SkillRecastWindow,
-    SkillSlot, Skills, play_skill_animation, skill_damage, skill_dash, skill_slot_from_index,
-    spawn_skill_particle,
+    CoolDown, EventSkillCast, Skill, SkillCooldownMode, SkillRecastWindow, SkillSlot,
+    play_skill_animation, skill_damage, skill_dash, spawn_skill_particle,
 };
 
 use crate::leesin::buffs::BuffLeeSinIronWill;
 
-const LEESIN_Q_KEY: &str = "Characters/LeeSin/Spells/LeeSinQ/LeeSinQ";
-const LEESIN_W_KEY: &str = "Characters/LeeSin/Spells/LeeSinW/LeeSinW";
-const LEESIN_E_KEY: &str = "Characters/LeeSin/Spells/LeeSinE/LeeSinE";
-const LEESIN_R_KEY: &str = "Characters/LeeSin/Spells/LeeSinR/LeeSinR";
 const LEESIN_RECAST_WINDOW: f32 = 3.0;
 
 #[derive(Default)]
@@ -30,7 +24,6 @@ pub struct PluginLeeSin;
 
 impl Plugin for PluginLeeSin {
     fn build(&self, app: &mut App) {
-        app.add_systems(FixedUpdate, add_skills);
         app.add_observer(on_leesin_skill_cast);
         app.add_observer(on_leesin_damage_hit);
     }
@@ -64,6 +57,8 @@ fn on_leesin_skill_cast(
         return;
     };
 
+    let skill_spell = skill.key_spell_object.clone();
+
     match skill.slot {
         SkillSlot::Q => cast_leesin_q(
             &mut commands,
@@ -71,6 +66,7 @@ fn on_leesin_skill_cast(
             entity,
             trigger.skill_entity,
             trigger.point,
+            skill_spell,
             cooldown,
             recast,
         ),
@@ -80,6 +76,7 @@ fn on_leesin_skill_cast(
             entity,
             trigger.skill_entity,
             trigger.point,
+            skill_spell,
             cooldown,
             recast,
         ),
@@ -87,10 +84,11 @@ fn on_leesin_skill_cast(
             &mut commands,
             entity,
             trigger.skill_entity,
+            skill_spell,
             cooldown,
             recast,
         ),
-        SkillSlot::R => cast_leesin_r(&mut commands, entity),
+        SkillSlot::R => cast_leesin_r(&mut commands, entity, skill_spell),
         _ => {}
     }
 }
@@ -101,6 +99,7 @@ fn cast_leesin_q(
     entity: Entity,
     skill_entity: Entity,
     point: Vec2,
+    skill_spell: Handle<Spell>,
     cooldown: &CoolDown,
     recast: Option<&SkillRecastWindow>,
 ) {
@@ -114,7 +113,7 @@ fn cast_leesin_q(
         skill_damage(
             commands,
             entity,
-            LEESIN_Q_KEY,
+            skill_spell,
             DamageShape::Sector {
                 radius: 400.0,
                 angle: 30.0,
@@ -139,7 +138,7 @@ fn cast_leesin_q(
             entity,
             point,
             &ActionDash {
-                skill: LEESIN_Q_KEY.into(),
+                skill: skill_spell,
                 move_type: DashMoveType::Pointer { max: 500.0 },
                 damage: Some(DashDamage {
                     radius_end: 100.0,
@@ -170,6 +169,7 @@ fn cast_leesin_w(
     entity: Entity,
     skill_entity: Entity,
     point: Vec2,
+    skill_spell: Handle<Spell>,
     cooldown: &CoolDown,
     recast: Option<&SkillRecastWindow>,
 ) {
@@ -186,7 +186,7 @@ fn cast_leesin_w(
             entity,
             point,
             &ActionDash {
-                skill: LEESIN_W_KEY.into(),
+                skill: skill_spell,
                 move_type: DashMoveType::Pointer { max: 300.0 },
                 damage: None,
                 speed: 700.0,
@@ -218,6 +218,7 @@ fn cast_leesin_e(
     commands: &mut Commands,
     entity: Entity,
     skill_entity: Entity,
+    skill_spell: Handle<Spell>,
     cooldown: &CoolDown,
     recast: Option<&SkillRecastWindow>,
 ) {
@@ -231,7 +232,7 @@ fn cast_leesin_e(
         skill_damage(
             commands,
             entity,
-            LEESIN_E_KEY,
+            skill_spell,
             DamageShape::Circle { radius: 250.0 },
             vec![TargetDamage {
                 filter: TargetFilter::All,
@@ -254,7 +255,7 @@ fn cast_leesin_e(
         skill_damage(
             commands,
             entity,
-            LEESIN_E_KEY,
+            skill_spell,
             DamageShape::Circle { radius: 250.0 },
             vec![TargetDamage {
                 filter: TargetFilter::All,
@@ -275,7 +276,7 @@ fn cast_leesin_e(
     }
 }
 
-fn cast_leesin_r(commands: &mut Commands, entity: Entity) {
+fn cast_leesin_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell4"));
     spawn_skill_particle(commands, entity, hash_bin("LeeSin_R_Cast"));
     // Mark R so observer applies knockback + stun on damage hit
@@ -286,7 +287,7 @@ fn cast_leesin_r(commands: &mut Commands, entity: Entity) {
     skill_damage(
         commands,
         entity,
-        LEESIN_R_KEY,
+        skill_spell,
         DamageShape::Nearest {
             max_distance: 150.0,
         },
@@ -352,38 +353,5 @@ fn on_leesin_damage_hit(
                 .remove::<LeeSinActiveAbility>();
         }
         _ => {}
-    }
-}
-
-fn add_skills(
-    mut commands: Commands,
-    q_leesin: Query<Entity, (With<LeeSin>, Without<Skills>)>,
-    res_assets_character_record: Res<Assets<CharacterRecord>>,
-) {
-    for entity in q_leesin.iter() {
-        let Some(character_record) =
-            res_assets_character_record.load_hash("Characters/LeeSin/CharacterRecords/Root")
-        else {
-            continue;
-        };
-
-        commands.entity(entity).with_related::<PassiveSkillOf>((
-            Skill::new(
-                SkillSlot::Passive,
-                "Characters/LeeSin/Spells/LeeSinPassiveAbility/LeeSinPassive",
-            ),
-            CoolDown::default(),
-        ));
-
-        for (index, &skill) in character_record.spells.as_ref().unwrap().iter().enumerate() {
-            let mut skill_component = Skill::new(skill_slot_from_index(index), skill);
-            // Q, W, E all use manual cooldown mode for recast windows
-            if index < 3 {
-                skill_component = skill_component.with_cooldown_mode(SkillCooldownMode::Manual);
-            }
-            commands
-                .entity(entity)
-                .with_related::<SkillOf>((skill_component, CoolDown::default()));
-        }
     }
 }

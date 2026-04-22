@@ -1,32 +1,25 @@
 pub mod buffs;
 
 use bevy::prelude::*;
-use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_base::prop::LoadHashKeyTrait;
+use lol_base::spell::Spell;
 use lol_core::action::damage::{DamageShape, TargetDamage, TargetFilter};
 use lol_core::base::buff::BuffOf;
 use lol_core::buffs::cc_debuffs::DebuffSlow;
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
 use lol_core::skill::{
-    CoolDown, EventSkillCast, PassiveSkillOf, Skill, SkillOf, SkillSlot, Skills,
-    play_skill_animation, reset_skill_attack, skill_damage, skill_slot_from_index,
-    spawn_skill_particle,
+    CoolDown, EventSkillCast, Skill, SkillSlot, play_skill_animation, reset_skill_attack,
+    skill_damage, spawn_skill_particle,
 };
 
 use crate::darius::buffs::BuffDariusBleed;
-
-const DARIUS_Q_KEY: &str = "Characters/Darius/Spells/DariusAxeGrabCone/DariusAxeGrabCone";
-const DARIUS_E_KEY: &str = "Characters/Darius/Spells/DariusAoeGrab/DariusAoeGrab";
-const DARIUS_R_KEY: &str = "Characters/Darius/Spells/DariusExecute/DariusExecute";
 
 #[derive(Default)]
 pub struct PluginDarius;
 
 impl Plugin for PluginDarius {
     fn build(&self, app: &mut App) {
-        app.add_systems(FixedUpdate, add_skills);
         app.add_observer(on_darius_skill_cast);
         app.add_observer(on_darius_damage_hit);
     }
@@ -52,23 +45,25 @@ fn on_darius_skill_cast(
         return;
     };
 
+    let skill_spell = skill.key_spell_object.clone();
+
     match skill.slot {
-        SkillSlot::Q => cast_darius_q(&mut commands, entity),
+        SkillSlot::Q => cast_darius_q(&mut commands, entity, skill_spell),
         SkillSlot::W => cast_darius_w(&mut commands, entity),
-        SkillSlot::E => cast_darius_e(&mut commands, entity),
-        SkillSlot::R => cast_darius_r(&mut commands, entity),
+        SkillSlot::E => cast_darius_e(&mut commands, entity, skill_spell),
+        SkillSlot::R => cast_darius_r(&mut commands, entity, skill_spell),
         _ => {}
     }
 }
 
-fn cast_darius_q(commands: &mut Commands, entity: Entity) {
+fn cast_darius_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell1"));
     spawn_skill_particle(commands, entity, hash_bin("Darius_Q_Cast"));
     // Q is a cleave with inner and outer damage (using circle as approximation)
     skill_damage(
         commands,
         entity,
-        DARIUS_Q_KEY,
+        skill_spell,
         DamageShape::Circle { radius: 350.0 },
         vec![TargetDamage {
             filter: TargetFilter::All,
@@ -86,14 +81,14 @@ fn cast_darius_w(commands: &mut Commands, entity: Entity) {
     reset_skill_attack(commands, entity);
 }
 
-fn cast_darius_e(commands: &mut Commands, entity: Entity) {
+fn cast_darius_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell3"));
     spawn_skill_particle(commands, entity, hash_bin("Darius_E_Cast"));
     // E is a cone pull
     skill_damage(
         commands,
         entity,
-        DARIUS_E_KEY,
+        skill_spell,
         DamageShape::Sector {
             radius: 300.0,
             angle: 90.0,
@@ -107,14 +102,14 @@ fn cast_darius_e(commands: &mut Commands, entity: Entity) {
     );
 }
 
-fn cast_darius_r(commands: &mut Commands, entity: Entity) {
+fn cast_darius_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell4"));
     spawn_skill_particle(commands, entity, hash_bin("Darius_R_Cast"));
     // R is a targeted execute ability
     skill_damage(
         commands,
         entity,
-        DARIUS_R_KEY,
+        skill_spell,
         DamageShape::Nearest {
             max_distance: 400.0,
         },
@@ -125,35 +120,6 @@ fn cast_darius_r(commands: &mut Commands, entity: Entity) {
         }],
         Some(hash_bin("Darius_R_Hit")),
     );
-}
-
-fn add_skills(
-    mut commands: Commands,
-    q_darius: Query<Entity, (With<Darius>, Without<Skills>)>,
-    res_assets_character_record: Res<Assets<CharacterRecord>>,
-) {
-    for entity in q_darius.iter() {
-        let Some(character_record) =
-            res_assets_character_record.load_hash("Characters/Darius/CharacterRecords/Root")
-        else {
-            continue;
-        };
-
-        commands.entity(entity).with_related::<PassiveSkillOf>((
-            Skill::new(
-                SkillSlot::Passive,
-                "Characters/Darius/Spells/DariusPassiveAbility/DariusPassive",
-            ),
-            CoolDown::default(),
-        ));
-
-        for (index, &skill) in character_record.spells.as_ref().unwrap().iter().enumerate() {
-            commands.entity(entity).with_related::<SkillOf>((
-                Skill::new(skill_slot_from_index(index), skill),
-                CoolDown::default(),
-            ));
-        }
-    }
 }
 
 /// 监听 Darius 造成的伤害，给目标叠加出血和减速

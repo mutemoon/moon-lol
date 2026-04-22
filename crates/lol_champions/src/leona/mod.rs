@@ -1,34 +1,26 @@
 pub mod buffs;
 
+use bevy::asset::Handle;
 use bevy::prelude::*;
-use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_base::prop::LoadHashKeyTrait;
+use lol_base::spell::Spell;
 use lol_core::action::damage::{DamageShape, TargetDamage, TargetFilter};
 use lol_core::base::buff::BuffOf;
 use lol_core::buffs::cc_debuffs::DebuffSlow;
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
 use lol_core::skill::{
-    CoolDown, EventSkillCast, PassiveSkillOf, Skill, SkillOf, SkillSlot, Skills,
-    play_skill_animation, reset_skill_attack, skill_damage, skill_slot_from_index,
-    spawn_skill_particle,
+    CoolDown, EventSkillCast, Skill, SkillSlot, play_skill_animation, reset_skill_attack,
+    skill_damage, spawn_skill_particle,
 };
 
 use crate::leona::buffs::{BuffLeonaSunlight, BuffLeonaW};
-
-#[allow(dead_code)]
-const LEONA_Q_KEY: &str = "Characters/Leona/Spells/LeonaQ/LeonaQ";
-const LEONA_W_KEY: &str = "Characters/Leona/Spells/LeonaW/LeonaW";
-const LEONA_E_KEY: &str = "Characters/Leona/Spells/LeonaE/LeonaE";
-const LEONA_R_KEY: &str = "Characters/Leona/Spells/LeonaR/LeonaR";
 
 #[derive(Default)]
 pub struct PluginLeona;
 
 impl Plugin for PluginLeona {
     fn build(&self, app: &mut App) {
-        app.add_systems(FixedUpdate, add_skills);
         app.add_observer(on_leona_skill_cast);
         app.add_observer(on_leona_damage_hit);
     }
@@ -55,11 +47,19 @@ fn on_leona_skill_cast(
         return;
     };
 
+    let skill_spell = skill.key_spell_object.clone();
+
     match skill.slot {
         SkillSlot::Q => cast_leona_q(&mut commands, entity),
-        SkillSlot::W => cast_leona_w(&mut commands, entity),
-        SkillSlot::E => cast_leona_e(&mut commands, &q_transform, entity, trigger.point),
-        SkillSlot::R => cast_leona_r(&mut commands, entity),
+        SkillSlot::W => cast_leona_w(&mut commands, entity, skill_spell),
+        SkillSlot::E => cast_leona_e(
+            &mut commands,
+            &q_transform,
+            entity,
+            trigger.point,
+            skill_spell,
+        ),
+        SkillSlot::R => cast_leona_r(&mut commands, entity, skill_spell),
         _ => {}
     }
 }
@@ -72,7 +72,7 @@ fn cast_leona_q(commands: &mut Commands, entity: Entity) {
     reset_skill_attack(commands, entity);
 }
 
-fn cast_leona_w(commands: &mut Commands, entity: Entity) {
+fn cast_leona_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell2"));
     spawn_skill_particle(commands, entity, hash_bin("Leona_W_Cast"));
 
@@ -84,7 +84,7 @@ fn cast_leona_w(commands: &mut Commands, entity: Entity) {
     skill_damage(
         commands,
         entity,
-        LEONA_W_KEY,
+        skill_spell,
         DamageShape::Circle { radius: 450.0 },
         vec![TargetDamage {
             filter: TargetFilter::All,
@@ -100,6 +100,7 @@ fn cast_leona_e(
     _q_transform: &Query<&Transform>,
     entity: Entity,
     _point: Vec2,
+    skill_spell: Handle<Spell>,
 ) {
     play_skill_animation(commands, entity, hash_bin("Spell3"));
     spawn_skill_particle(commands, entity, hash_bin("Leona_E_Cast"));
@@ -108,7 +109,7 @@ fn cast_leona_e(
     skill_damage(
         commands,
         entity,
-        LEONA_E_KEY,
+        skill_spell,
         DamageShape::Sector {
             radius: 900.0,
             angle: 10.0,
@@ -122,7 +123,7 @@ fn cast_leona_e(
     );
 }
 
-fn cast_leona_r(commands: &mut Commands, entity: Entity) {
+fn cast_leona_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell4"));
     spawn_skill_particle(commands, entity, hash_bin("Leona_R_Cast"));
 
@@ -130,7 +131,7 @@ fn cast_leona_r(commands: &mut Commands, entity: Entity) {
     skill_damage(
         commands,
         entity,
-        LEONA_R_KEY,
+        skill_spell,
         DamageShape::Circle { radius: 1200.0 },
         vec![TargetDamage {
             filter: TargetFilter::All,
@@ -162,33 +163,4 @@ fn on_leona_damage_hit(
     commands
         .entity(target)
         .with_related::<BuffOf>(DebuffSlow::new(0.8, 1.75));
-}
-
-fn add_skills(
-    mut commands: Commands,
-    q_leona: Query<Entity, (With<Leona>, Without<Skills>)>,
-    res_assets_character_record: Res<Assets<CharacterRecord>>,
-) {
-    for entity in q_leona.iter() {
-        let Some(character_record) =
-            res_assets_character_record.load_hash("Characters/Leona/CharacterRecords/Root")
-        else {
-            continue;
-        };
-
-        commands.entity(entity).with_related::<PassiveSkillOf>((
-            Skill::new(
-                SkillSlot::Passive,
-                "Characters/Leona/Spells/LeonaPassive/LeonaPassive",
-            ),
-            CoolDown::default(),
-        ));
-
-        for (index, &skill) in character_record.spells.as_ref().unwrap().iter().enumerate() {
-            let skill_component = Skill::new(skill_slot_from_index(index), skill);
-            commands
-                .entity(entity)
-                .with_related::<SkillOf>((skill_component, CoolDown::default()));
-        }
-    }
 }

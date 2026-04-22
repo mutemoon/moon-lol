@@ -1,9 +1,8 @@
 pub mod buffs;
 
-use bevy::prelude::*;
-use league_core::extract::CharacterRecord;
+use bevy::prelude::{Handle, *};
 use league_utils::hash_bin;
-use lol_base::prop::LoadHashKeyTrait;
+use lol_base::spell::Spell;
 use lol_core::action::damage::{DamageShape, TargetDamage, TargetFilter};
 use lol_core::action::dash::{ActionDash, DashDamage, DashMoveType};
 use lol_core::base::buff::BuffOf;
@@ -11,23 +10,17 @@ use lol_core::buffs::cc_debuffs::DebuffStun;
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
 use lol_core::skill::{
-    CoolDown, EventSkillCast, PassiveSkillOf, Skill, SkillOf, SkillSlot, Skills,
-    play_skill_animation, skill_damage, skill_dash, skill_slot_from_index, spawn_skill_particle,
+    CoolDown, EventSkillCast, Skill, SkillSlot, play_skill_animation, skill_damage, skill_dash,
+    spawn_skill_particle,
 };
 
 use crate::pantheon::buffs::BuffPantheonE;
-
-const PANTHEON_Q_KEY: &str = "Characters/Pantheon/Spells/PantheonQ/PantheonQ";
-const PANTHEON_W_KEY: &str = "Characters/Pantheon/Spells/PantheonW/PantheonW";
-const PANTHEON_E_KEY: &str = "Characters/Pantheon/Spells/PantheonE/PantheonE";
-const PANTHEON_R_KEY: &str = "Characters/Pantheon/Spells/PantheonR/PantheonR";
 
 #[derive(Default)]
 pub struct PluginPantheon;
 
 impl Plugin for PluginPantheon {
     fn build(&self, app: &mut App) {
-        app.add_systems(FixedUpdate, add_skills);
         app.add_observer(on_pantheon_skill_cast);
         app.add_observer(on_pantheon_damage_hit);
     }
@@ -54,23 +47,42 @@ fn on_pantheon_skill_cast(
         return;
     };
 
+    let skill_spell = skill.key_spell_object.clone();
+
     match skill.slot {
-        SkillSlot::Q => cast_pantheon_q(&mut commands, entity, trigger.point),
-        SkillSlot::W => cast_pantheon_w(&mut commands, &q_transform, entity, trigger.point),
-        SkillSlot::E => cast_pantheon_e(&mut commands, entity),
-        SkillSlot::R => cast_pantheon_r(&mut commands, &q_transform, entity, trigger.point),
+        SkillSlot::Q => cast_pantheon_q(&mut commands, entity, trigger.point, skill_spell),
+        SkillSlot::W => cast_pantheon_w(
+            &mut commands,
+            &q_transform,
+            entity,
+            trigger.point,
+            skill_spell,
+        ),
+        SkillSlot::E => cast_pantheon_e(&mut commands, entity, skill_spell),
+        SkillSlot::R => cast_pantheon_r(
+            &mut commands,
+            &q_transform,
+            entity,
+            trigger.point,
+            skill_spell,
+        ),
         _ => {}
     }
 }
 
-fn cast_pantheon_q(commands: &mut Commands, entity: Entity, _point: Vec2) {
+fn cast_pantheon_q(
+    commands: &mut Commands,
+    entity: Entity,
+    _point: Vec2,
+    skill_spell: Handle<Spell>,
+) {
     play_skill_animation(commands, entity, hash_bin("Spell1"));
     spawn_skill_particle(commands, entity, hash_bin("Pantheon_Q_Cast"));
     // Q is a spear throw that can be held for more damage
     skill_damage(
         commands,
         entity,
-        PANTHEON_Q_KEY,
+        skill_spell,
         DamageShape::Sector {
             radius: 400.0,
             angle: 45.0,
@@ -89,6 +101,7 @@ fn cast_pantheon_w(
     q_transform: &Query<&Transform>,
     entity: Entity,
     point: Vec2,
+    skill_spell: Handle<Spell>,
 ) {
     play_skill_animation(commands, entity, hash_bin("Spell2"));
     spawn_skill_particle(commands, entity, hash_bin("Pantheon_W_Cast"));
@@ -99,7 +112,7 @@ fn cast_pantheon_w(
         entity,
         point,
         &ActionDash {
-            skill: PANTHEON_W_KEY.into(),
+            skill: skill_spell,
             move_type: DashMoveType::Pointer { max: 200.0 },
             damage: Some(DashDamage {
                 radius_end: 100.0,
@@ -114,14 +127,14 @@ fn cast_pantheon_w(
     );
 }
 
-fn cast_pantheon_e(commands: &mut Commands, entity: Entity) {
+fn cast_pantheon_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell3"));
     spawn_skill_particle(commands, entity, hash_bin("Pantheon_E_Cast"));
     // E is a shield block that deals damage in a cone when released
     skill_damage(
         commands,
         entity,
-        PANTHEON_E_KEY,
+        skill_spell,
         DamageShape::Sector {
             radius: 300.0,
             angle: 90.0,
@@ -143,6 +156,7 @@ fn cast_pantheon_r(
     q_transform: &Query<&Transform>,
     entity: Entity,
     point: Vec2,
+    skill_spell: Handle<Spell>,
 ) {
     play_skill_animation(commands, entity, hash_bin("Spell4"));
     spawn_skill_particle(commands, entity, hash_bin("Pantheon_R_Cast"));
@@ -153,7 +167,7 @@ fn cast_pantheon_r(
         entity,
         point,
         &ActionDash {
-            skill: PANTHEON_R_KEY.into(),
+            skill: skill_spell,
             move_type: DashMoveType::Pointer { max: 2000.0 },
             damage: Some(DashDamage {
                 radius_end: 200.0,
@@ -166,35 +180,6 @@ fn cast_pantheon_r(
             speed: 1500.0,
         },
     );
-}
-
-fn add_skills(
-    mut commands: Commands,
-    q_pantheon: Query<Entity, (With<Pantheon>, Without<Skills>)>,
-    res_assets_character_record: Res<Assets<CharacterRecord>>,
-) {
-    for entity in q_pantheon.iter() {
-        let Some(character_record) =
-            res_assets_character_record.load_hash("Characters/Pantheon/CharacterRecords/Root")
-        else {
-            continue;
-        };
-
-        commands.entity(entity).with_related::<PassiveSkillOf>((
-            Skill::new(
-                SkillSlot::Passive,
-                "Characters/Pantheon/Spells/PantheonPassiveAbility/PantheonPassive",
-            ),
-            CoolDown::default(),
-        ));
-
-        for (index, &skill) in character_record.spells.as_ref().unwrap().iter().enumerate() {
-            commands.entity(entity).with_related::<SkillOf>((
-                Skill::new(skill_slot_from_index(index), skill),
-                CoolDown::default(),
-            ));
-        }
-    }
 }
 
 /// 监听 Pantheon 造成的伤害，W 命中时眩晕

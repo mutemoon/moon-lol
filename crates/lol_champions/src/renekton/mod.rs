@@ -1,9 +1,8 @@
 pub mod buffs;
 
 use bevy::prelude::*;
-use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_base::prop::LoadHashKeyTrait;
+use lol_base::spell::Spell;
 use lol_core::action::damage::{DamageShape, TargetDamage, TargetFilter};
 use lol_core::action::dash::{ActionDash, DashDamage, DashMoveType};
 use lol_core::base::ability_resource::AbilityResource;
@@ -12,17 +11,12 @@ use lol_core::buffs::common_buffs::BuffSelfHeal;
 use lol_core::damage::DamageType;
 use lol_core::entities::champion::Champion;
 use lol_core::skill::{
-    CoolDown, EventSkillCast, PassiveSkillOf, Skill, SkillCooldownMode, SkillOf, SkillRecastWindow,
-    SkillSlot, Skills, play_skill_animation, reset_skill_attack, skill_damage, skill_dash,
-    skill_slot_from_index, spawn_skill_particle,
+    CoolDown, EventSkillCast, Skill, SkillRecastWindow, SkillSlot, play_skill_animation,
+    reset_skill_attack, skill_damage, skill_dash, spawn_skill_particle,
 };
 
 use crate::renekton::buffs::BuffRenektonR;
 
-const RENECKTON_Q_KEY: &str = "Characters/Renekton/Spells/RenektonQ/RenektonQ";
-const RENECKTON_W_KEY: &str = "Characters/Renekton/Spells/RenektonW/RenektonW";
-const RENECKTON_E_KEY: &str = "Characters/Renekton/Spells/RenektonE/RenektonE";
-const RENECKTON_R_KEY: &str = "Characters/Renekton/Spells/RenektonR/RenektonR";
 const RENECKTON_E_RECAST_WINDOW: f32 = 4.0;
 
 #[derive(Default)]
@@ -30,7 +24,6 @@ pub struct PluginRenekton;
 
 impl Plugin for PluginRenekton {
     fn build(&self, app: &mut App) {
-        app.add_systems(FixedUpdate, add_skills);
         app.add_observer(on_renekton_skill_cast);
     }
 }
@@ -58,8 +51,13 @@ fn on_renekton_skill_cast(
     };
 
     match skill.slot {
-        SkillSlot::Q => cast_renekton_q(&mut commands, entity, &mut q_ability_resource),
-        SkillSlot::W => cast_renekton_w(&mut commands, entity),
+        SkillSlot::Q => cast_renekton_q(
+            &mut commands,
+            entity,
+            &mut q_ability_resource,
+            skill.key_spell_object.clone(),
+        ),
+        SkillSlot::W => cast_renekton_w(&mut commands, entity, skill.key_spell_object.clone()),
         SkillSlot::E => cast_renekton_e(
             &mut commands,
             &q_transform,
@@ -68,8 +66,9 @@ fn on_renekton_skill_cast(
             trigger.point,
             cooldown,
             recast,
+            skill.key_spell_object.clone(),
         ),
-        SkillSlot::R => cast_renekton_r(&mut commands, entity),
+        SkillSlot::R => cast_renekton_r(&mut commands, entity, skill.key_spell_object.clone()),
         _ => {}
     }
 }
@@ -78,6 +77,7 @@ fn cast_renekton_q(
     commands: &mut Commands,
     entity: Entity,
     q_ability_resource: &mut Query<&mut AbilityResource>,
+    skill_spell: Handle<Spell>,
 ) {
     play_skill_animation(commands, entity, hash_bin("Spell1"));
     spawn_skill_particle(commands, entity, hash_bin("Renekton_Q_Cast"));
@@ -94,7 +94,7 @@ fn cast_renekton_q(
         skill_damage(
             commands,
             entity,
-            RENECKTON_Q_KEY,
+            skill_spell,
             DamageShape::Circle { radius: 300.0 },
             vec![TargetDamage {
                 filter: TargetFilter::All,
@@ -110,7 +110,7 @@ fn cast_renekton_q(
         skill_damage(
             commands,
             entity,
-            RENECKTON_Q_KEY,
+            skill_spell,
             DamageShape::Circle { radius: 250.0 },
             vec![TargetDamage {
                 filter: TargetFilter::All,
@@ -125,7 +125,7 @@ fn cast_renekton_q(
     }
 }
 
-fn cast_renekton_w(commands: &mut Commands, entity: Entity) {
+fn cast_renekton_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell2"));
     spawn_skill_particle(commands, entity, hash_bin("Renekton_W_Cast"));
     // W is an empowered auto attack that stuns
@@ -133,7 +133,7 @@ fn cast_renekton_w(commands: &mut Commands, entity: Entity) {
     skill_damage(
         commands,
         entity,
-        RENECKTON_W_KEY,
+        skill_spell,
         DamageShape::Nearest {
             max_distance: 150.0,
         },
@@ -154,6 +154,7 @@ fn cast_renekton_e(
     point: Vec2,
     cooldown: &CoolDown,
     recast: Option<&SkillRecastWindow>,
+    skill_spell: Handle<Spell>,
 ) {
     let stage = recast.map(|w| w.stage).unwrap_or(1);
 
@@ -168,7 +169,7 @@ fn cast_renekton_e(
             entity,
             point,
             &ActionDash {
-                skill: RENECKTON_E_KEY.into(),
+                skill: skill_spell,
                 move_type: DashMoveType::Pointer { max: 200.0 },
                 damage: Some(DashDamage {
                     radius_end: 100.0,
@@ -195,7 +196,7 @@ fn cast_renekton_e(
             entity,
             point,
             &ActionDash {
-                skill: RENECKTON_E_KEY.into(),
+                skill: skill_spell,
                 move_type: DashMoveType::Pointer { max: 200.0 },
                 damage: Some(DashDamage {
                     radius_end: 100.0,
@@ -216,14 +217,14 @@ fn cast_renekton_e(
     }
 }
 
-fn cast_renekton_r(commands: &mut Commands, entity: Entity) {
+fn cast_renekton_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell4"));
     spawn_skill_particle(commands, entity, hash_bin("Renekton_R_Cast"));
     // R is a transformation that deals damage around and generates rage
     skill_damage(
         commands,
         entity,
-        RENECKTON_R_KEY,
+        skill_spell,
         DamageShape::Circle { radius: 300.0 },
         vec![TargetDamage {
             filter: TargetFilter::All,
@@ -235,37 +236,4 @@ fn cast_renekton_r(commands: &mut Commands, entity: Entity) {
     commands
         .entity(entity)
         .with_related::<BuffOf>(BuffRenektonR::new(0.0, 5.0, 15.0));
-}
-
-fn add_skills(
-    mut commands: Commands,
-    q_renekton: Query<Entity, (With<Renekton>, Without<Skills>)>,
-    res_assets_character_record: Res<Assets<CharacterRecord>>,
-) {
-    for entity in q_renekton.iter() {
-        let Some(character_record) =
-            res_assets_character_record.load_hash("Characters/Renekton/CharacterRecords/Root")
-        else {
-            continue;
-        };
-
-        commands.entity(entity).with_related::<PassiveSkillOf>((
-            Skill::new(
-                SkillSlot::Passive,
-                "Characters/Renekton/Spells/RenektonPassiveAbility/RenektonPassive",
-            ),
-            CoolDown::default(),
-        ));
-
-        for (index, &skill) in character_record.spells.as_ref().unwrap().iter().enumerate() {
-            let mut skill_component = Skill::new(skill_slot_from_index(index), skill);
-            // E uses manual cooldown mode for recast window
-            if index == 2 {
-                skill_component = skill_component.with_cooldown_mode(SkillCooldownMode::Manual);
-            }
-            commands
-                .entity(entity)
-                .with_related::<SkillOf>((skill_component, CoolDown::default()));
-        }
-    }
 }

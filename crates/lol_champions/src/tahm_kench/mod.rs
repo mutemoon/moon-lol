@@ -1,33 +1,24 @@
 pub mod buffs;
 
 use bevy::prelude::*;
-use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_base::prop::LoadHashKeyTrait;
+use lol_base::spell::Spell;
 use lol_core::action::damage::{DamageShape, TargetDamage, TargetFilter};
 use lol_core::base::buff::BuffOf;
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
 use lol_core::skill::{
-    CoolDown, EventSkillCast, PassiveSkillOf, Skill, SkillOf, SkillSlot, Skills,
-    play_skill_animation, skill_damage, skill_slot_from_index, spawn_skill_particle,
+    CoolDown, EventSkillCast, Skill, SkillSlot, play_skill_animation, skill_damage,
+    spawn_skill_particle,
 };
 
 use crate::tahm_kench::buffs::BuffTahmKenchE;
-
-const TAHM_KENCH_Q_KEY: &str = "Characters/TahmKench/Spells/TahmKenchQ/TahmKenchQ";
-const TAHM_KENCH_W_KEY: &str = "Characters/TahmKench/Spells/TahmKenchW/TahmKenchW";
-#[allow(dead_code)]
-const TAHM_KENCH_E_KEY: &str = "Characters/TahmKench/Spells/TahmKenchE/TahmKenchE";
-#[allow(dead_code)]
-const TAHM_KENCH_R_KEY: &str = "Characters/TahmKench/Spells/TahmKenchR/TahmKenchR";
 
 #[derive(Default)]
 pub struct PluginTahmKench;
 
 impl Plugin for PluginTahmKench {
     fn build(&self, app: &mut App) {
-        app.add_systems(FixedUpdate, add_skills);
         app.add_observer(on_tahm_kench_skill_cast);
         app.add_observer(on_tahm_kench_damage_hit);
     }
@@ -53,23 +44,25 @@ fn on_tahm_kench_skill_cast(
         return;
     };
 
+    let skill_spell = skill.key_spell_object.clone();
+
     match skill.slot {
-        SkillSlot::Q => cast_tahm_kench_q(&mut commands, entity),
-        SkillSlot::W => cast_tahm_kench_w(&mut commands, entity),
+        SkillSlot::Q => cast_tahm_kench_q(&mut commands, entity, skill_spell),
+        SkillSlot::W => cast_tahm_kench_w(&mut commands, entity, skill_spell),
         SkillSlot::E => cast_tahm_kench_e(&mut commands, entity),
         SkillSlot::R => cast_tahm_kench_r(&mut commands, entity),
         _ => {}
     }
 }
 
-fn cast_tahm_kench_q(commands: &mut Commands, entity: Entity) {
+fn cast_tahm_kench_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell1"));
     spawn_skill_particle(commands, entity, hash_bin("TahmKench_Q_Cast"));
 
     skill_damage(
         commands,
         entity,
-        TAHM_KENCH_Q_KEY,
+        skill_spell,
         DamageShape::Nearest {
             max_distance: 900.0,
         },
@@ -82,14 +75,14 @@ fn cast_tahm_kench_q(commands: &mut Commands, entity: Entity) {
     );
 }
 
-fn cast_tahm_kench_w(commands: &mut Commands, entity: Entity) {
+fn cast_tahm_kench_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell2"));
     spawn_skill_particle(commands, entity, hash_bin("TahmKench_W_Cast"));
 
     skill_damage(
         commands,
         entity,
-        TAHM_KENCH_W_KEY,
+        skill_spell,
         DamageShape::Circle { radius: 400.0 },
         vec![TargetDamage {
             filter: TargetFilter::All,
@@ -129,33 +122,4 @@ fn on_tahm_kench_damage_hit(
     commands
         .entity(target)
         .with_related::<BuffOf>(BuffTahmKenchE::new(100.0, 2.0));
-}
-
-fn add_skills(
-    mut commands: Commands,
-    q_tahm_kench: Query<Entity, (With<TahmKench>, Without<Skills>)>,
-    res_assets_character_record: Res<Assets<CharacterRecord>>,
-) {
-    for entity in q_tahm_kench.iter() {
-        let Some(character_record) =
-            res_assets_character_record.load_hash("Characters/TahmKench/CharacterRecords/Root")
-        else {
-            continue;
-        };
-
-        commands.entity(entity).with_related::<PassiveSkillOf>((
-            Skill::new(
-                SkillSlot::Passive,
-                "Characters/TahmKench/Spells/TahmKenchPassive/TahmKenchPassive",
-            ),
-            CoolDown::default(),
-        ));
-
-        for (index, &skill) in character_record.spells.as_ref().unwrap().iter().enumerate() {
-            let skill_component = Skill::new(skill_slot_from_index(index), skill);
-            commands
-                .entity(entity)
-                .with_related::<SkillOf>((skill_component, CoolDown::default()));
-        }
-    }
 }

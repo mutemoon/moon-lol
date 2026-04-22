@@ -1,32 +1,24 @@
 pub mod buffs;
 
 use bevy::prelude::*;
-use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_base::prop::LoadHashKeyTrait;
+use lol_base::spell::Spell;
 use lol_core::action::damage::{DamageShape, TargetDamage, TargetFilter};
 use lol_core::base::buff::BuffOf;
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
 use lol_core::skill::{
-    CoolDown, EventSkillCast, PassiveSkillOf, Skill, SkillOf, SkillSlot, Skills,
-    play_skill_animation, skill_damage, skill_slot_from_index, spawn_skill_particle,
+    CoolDown, EventSkillCast, Skill, SkillSlot, play_skill_animation, skill_damage,
+    spawn_skill_particle,
 };
 
 use crate::sion::buffs::{BuffSionE, BuffSionQ};
-
-const SION_Q_KEY: &str = "Characters/Sion/Spells/SionQ/SionQ";
-const SION_W_KEY: &str = "Characters/Sion/Spells/SionW/SionW";
-const SION_E_KEY: &str = "Characters/Sion/Spells/SionE/SionE";
-#[allow(dead_code)]
-const SION_R_KEY: &str = "Characters/Sion/Spells/SionR/SionR";
 
 #[derive(Default)]
 pub struct PluginSion;
 
 impl Plugin for PluginSion {
     fn build(&self, app: &mut App) {
-        app.add_systems(FixedUpdate, add_skills);
         app.add_observer(on_sion_skill_cast);
         app.add_observer(on_sion_damage_hit);
     }
@@ -52,16 +44,18 @@ fn on_sion_skill_cast(
         return;
     };
 
+    let skill_spell = skill.key_spell_object.clone();
+
     match skill.slot {
-        SkillSlot::Q => cast_sion_q(&mut commands, entity),
-        SkillSlot::W => cast_sion_w(&mut commands, entity),
-        SkillSlot::E => cast_sion_e(&mut commands, entity),
-        SkillSlot::R => cast_sion_r(&mut commands, entity),
+        SkillSlot::Q => cast_sion_q(&mut commands, entity, skill_spell),
+        SkillSlot::W => cast_sion_w(&mut commands, entity, skill_spell),
+        SkillSlot::E => cast_sion_e(&mut commands, entity, skill_spell),
+        SkillSlot::R => cast_sion_r(&mut commands, entity, skill_spell),
         _ => {}
     }
 }
 
-fn cast_sion_q(commands: &mut Commands, entity: Entity) {
+fn cast_sion_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell1"));
     spawn_skill_particle(commands, entity, hash_bin("Sion_Q_Cast"));
 
@@ -69,7 +63,7 @@ fn cast_sion_q(commands: &mut Commands, entity: Entity) {
     skill_damage(
         commands,
         entity,
-        SION_Q_KEY,
+        skill_spell,
         DamageShape::Sector {
             radius: 600.0,
             angle: 30.0,
@@ -83,7 +77,7 @@ fn cast_sion_q(commands: &mut Commands, entity: Entity) {
     );
 }
 
-fn cast_sion_w(commands: &mut Commands, entity: Entity) {
+fn cast_sion_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell2"));
     spawn_skill_particle(commands, entity, hash_bin("Sion_W_Cast"));
 
@@ -91,7 +85,7 @@ fn cast_sion_w(commands: &mut Commands, entity: Entity) {
     skill_damage(
         commands,
         entity,
-        SION_W_KEY,
+        skill_spell,
         DamageShape::Circle { radius: 300.0 },
         vec![TargetDamage {
             filter: TargetFilter::All,
@@ -102,7 +96,7 @@ fn cast_sion_w(commands: &mut Commands, entity: Entity) {
     );
 }
 
-fn cast_sion_e(commands: &mut Commands, entity: Entity) {
+fn cast_sion_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell3"));
     spawn_skill_particle(commands, entity, hash_bin("Sion_E_Cast"));
 
@@ -110,7 +104,7 @@ fn cast_sion_e(commands: &mut Commands, entity: Entity) {
     skill_damage(
         commands,
         entity,
-        SION_E_KEY,
+        skill_spell,
         DamageShape::Sector {
             radius: 750.0,
             angle: 15.0,
@@ -124,7 +118,7 @@ fn cast_sion_e(commands: &mut Commands, entity: Entity) {
     );
 }
 
-fn cast_sion_r(commands: &mut Commands, entity: Entity) {
+fn cast_sion_r(commands: &mut Commands, entity: Entity, _skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell4"));
     spawn_skill_particle(commands, entity, hash_bin("Sion_R_Cast"));
 
@@ -151,33 +145,4 @@ fn on_sion_damage_hit(
     commands
         .entity(target)
         .with_related::<BuffOf>(BuffSionE::new(0.4, 2.0));
-}
-
-fn add_skills(
-    mut commands: Commands,
-    q_sion: Query<Entity, (With<Sion>, Without<Skills>)>,
-    res_assets_character_record: Res<Assets<CharacterRecord>>,
-) {
-    for entity in q_sion.iter() {
-        let Some(character_record) =
-            res_assets_character_record.load_hash("Characters/Sion/CharacterRecords/Root")
-        else {
-            continue;
-        };
-
-        commands.entity(entity).with_related::<PassiveSkillOf>((
-            Skill::new(
-                SkillSlot::Passive,
-                "Characters/Sion/Spells/SionPassive/SionPassive",
-            ),
-            CoolDown::default(),
-        ));
-
-        for (index, &skill) in character_record.spells.as_ref().unwrap().iter().enumerate() {
-            let skill_component = Skill::new(skill_slot_from_index(index), skill);
-            commands
-                .entity(entity)
-                .with_related::<SkillOf>((skill_component, CoolDown::default()));
-        }
-    }
 }

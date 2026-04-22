@@ -1,31 +1,24 @@
 pub mod buffs;
 
 use bevy::prelude::*;
-use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_base::prop::LoadHashKeyTrait;
+use lol_base::spell::Spell;
 use lol_core::action::damage::{DamageShape, TargetDamage, TargetFilter};
 use lol_core::base::buff::BuffOf;
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
 use lol_core::skill::{
-    CoolDown, EventSkillCast, PassiveSkillOf, Skill, SkillOf, SkillSlot, Skills,
-    play_skill_animation, skill_damage, skill_slot_from_index, spawn_skill_particle,
+    CoolDown, EventSkillCast, Skill, SkillSlot, play_skill_animation, skill_damage,
+    spawn_skill_particle,
 };
 
 use crate::akshan::buffs::BuffAkshanPassive;
-
-const AKSHAN_Q_KEY: &str = "Characters/Akshan/Spells/AkshanQ/AkshanQ";
-// const AKSHAN_W_KEY: &str = "Characters/Akshan/Spells/AkshanW/AkshanW";
-// const AKSHAN_E_KEY: &str = "Characters/Akshan/Spells/AkshanE/AkshanE";
-const AKSHAN_R_KEY: &str = "Characters/Akshan/Spells/AkshanR/AkshanR";
 
 #[derive(Default)]
 pub struct PluginAkshan;
 
 impl Plugin for PluginAkshan {
     fn build(&self, app: &mut App) {
-        app.add_systems(FixedUpdate, add_skills);
         app.add_observer(on_akshan_skill_cast);
         app.add_observer(on_akshan_damage_hit);
     }
@@ -51,23 +44,25 @@ fn on_akshan_skill_cast(
         return;
     };
 
+    let skill_spell = skill.key_spell_object.clone();
+
     match skill.slot {
-        SkillSlot::Q => cast_akshan_q(&mut commands, entity),
+        SkillSlot::Q => cast_akshan_q(&mut commands, entity, skill_spell),
         SkillSlot::W => cast_akshan_w(&mut commands, entity),
         SkillSlot::E => cast_akshan_e(&mut commands, entity),
-        SkillSlot::R => cast_akshan_r(&mut commands, entity),
+        SkillSlot::R => cast_akshan_r(&mut commands, entity, skill_spell),
         _ => {}
     }
 }
 
-fn cast_akshan_q(commands: &mut Commands, entity: Entity) {
+fn cast_akshan_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell1"));
     spawn_skill_particle(commands, entity, hash_bin("Akshan_Q_Cast"));
 
     skill_damage(
         commands,
         entity,
-        AKSHAN_Q_KEY,
+        skill_spell,
         DamageShape::Sector {
             radius: 850.0,
             angle: 20.0,
@@ -91,14 +86,14 @@ fn cast_akshan_e(commands: &mut Commands, entity: Entity) {
     spawn_skill_particle(commands, entity, hash_bin("Akshan_E_Cast"));
 }
 
-fn cast_akshan_r(commands: &mut Commands, entity: Entity) {
+fn cast_akshan_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell4"));
     spawn_skill_particle(commands, entity, hash_bin("Akshan_R_Cast"));
 
     skill_damage(
         commands,
         entity,
-        AKSHAN_R_KEY,
+        skill_spell,
         DamageShape::Nearest {
             max_distance: 2500.0,
         },
@@ -126,33 +121,4 @@ fn on_akshan_damage_hit(
     commands
         .entity(target)
         .with_related::<BuffOf>(BuffAkshanPassive::new(1, 15.0, 3.0));
-}
-
-fn add_skills(
-    mut commands: Commands,
-    q_akshan: Query<Entity, (With<Akshan>, Without<Skills>)>,
-    res_assets_character_record: Res<Assets<CharacterRecord>>,
-) {
-    for entity in q_akshan.iter() {
-        let Some(character_record) =
-            res_assets_character_record.load_hash("Characters/Akshan/CharacterRecords/Root")
-        else {
-            continue;
-        };
-
-        commands.entity(entity).with_related::<PassiveSkillOf>((
-            Skill::new(
-                SkillSlot::Passive,
-                "Characters/Akshan/Spells/AkshanPassive/AkshanPassive",
-            ),
-            CoolDown::default(),
-        ));
-
-        for (index, &skill) in character_record.spells.as_ref().unwrap().iter().enumerate() {
-            let skill_component = Skill::new(skill_slot_from_index(index), skill);
-            commands
-                .entity(entity)
-                .with_related::<SkillOf>((skill_component, CoolDown::default()));
-        }
-    }
 }

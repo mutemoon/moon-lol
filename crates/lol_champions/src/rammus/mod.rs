@@ -1,32 +1,24 @@
 pub mod buffs;
 
 use bevy::prelude::*;
-use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_base::prop::LoadHashKeyTrait;
+use lol_base::spell::Spell;
 use lol_core::action::damage::{DamageShape, TargetDamage, TargetFilter};
 use lol_core::base::buff::BuffOf;
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
 use lol_core::skill::{
-    CoolDown, EventSkillCast, PassiveSkillOf, Skill, SkillOf, SkillSlot, Skills,
-    play_skill_animation, skill_damage, skill_slot_from_index, spawn_skill_particle,
+    CoolDown, EventSkillCast, Skill, SkillSlot, play_skill_animation, skill_damage,
+    spawn_skill_particle,
 };
 
 use crate::rammus::buffs::{BuffRammusE, BuffRammusQ, BuffRammusR};
-
-const RAMMUS_Q_KEY: &str = "Characters/Rammus/Spells/RammusQ/RammusQ";
-#[allow(dead_code)]
-const RAMMUS_W_KEY: &str = "Characters/Rammus/Spells/RammusW/RammusW";
-const RAMMUS_E_KEY: &str = "Characters/Rammus/Spells/RammusE/RammusE";
-const RAMMUS_R_KEY: &str = "Characters/Rammus/Spells/RammusR/RammusR";
 
 #[derive(Default)]
 pub struct PluginRammus;
 
 impl Plugin for PluginRammus {
     fn build(&self, app: &mut App) {
-        app.add_systems(FixedUpdate, add_skills);
         app.add_observer(on_rammus_skill_cast);
         app.add_observer(on_rammus_damage_hit);
     }
@@ -53,15 +45,15 @@ fn on_rammus_skill_cast(
     };
 
     match skill.slot {
-        SkillSlot::Q => cast_rammus_q(&mut commands, entity),
+        SkillSlot::Q => cast_rammus_q(&mut commands, entity, skill.key_spell_object.clone()),
         SkillSlot::W => cast_rammus_w(&mut commands, entity),
-        SkillSlot::E => cast_rammus_e(&mut commands, entity),
-        SkillSlot::R => cast_rammus_r(&mut commands, entity),
+        SkillSlot::E => cast_rammus_e(&mut commands, entity, skill.key_spell_object.clone()),
+        SkillSlot::R => cast_rammus_r(&mut commands, entity, skill.key_spell_object.clone()),
         _ => {}
     }
 }
 
-fn cast_rammus_q(commands: &mut Commands, entity: Entity) {
+fn cast_rammus_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell1"));
     spawn_skill_particle(commands, entity, hash_bin("Rammus_Q_Cast"));
 
@@ -69,7 +61,7 @@ fn cast_rammus_q(commands: &mut Commands, entity: Entity) {
     skill_damage(
         commands,
         entity,
-        RAMMUS_Q_KEY,
+        skill_spell,
         DamageShape::Circle { radius: 250.0 },
         vec![TargetDamage {
             filter: TargetFilter::All,
@@ -87,7 +79,7 @@ fn cast_rammus_w(commands: &mut Commands, entity: Entity) {
     // W is defensive ball curl - damage reflection
 }
 
-fn cast_rammus_e(commands: &mut Commands, entity: Entity) {
+fn cast_rammus_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell3"));
     spawn_skill_particle(commands, entity, hash_bin("Rammus_E_Cast"));
 
@@ -95,7 +87,7 @@ fn cast_rammus_e(commands: &mut Commands, entity: Entity) {
     skill_damage(
         commands,
         entity,
-        RAMMUS_E_KEY,
+        skill_spell,
         DamageShape::Circle { radius: 325.0 },
         vec![TargetDamage {
             filter: TargetFilter::All,
@@ -106,7 +98,7 @@ fn cast_rammus_e(commands: &mut Commands, entity: Entity) {
     );
 }
 
-fn cast_rammus_r(commands: &mut Commands, entity: Entity) {
+fn cast_rammus_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell4"));
     spawn_skill_particle(commands, entity, hash_bin("Rammus_R_Cast"));
 
@@ -114,7 +106,7 @@ fn cast_rammus_r(commands: &mut Commands, entity: Entity) {
     skill_damage(
         commands,
         entity,
-        RAMMUS_R_KEY,
+        skill_spell,
         DamageShape::Circle { radius: 800.0 },
         vec![TargetDamage {
             filter: TargetFilter::All,
@@ -149,33 +141,4 @@ fn on_rammus_damage_hit(
     commands
         .entity(target)
         .with_related::<BuffOf>(BuffRammusR::new(0.5, 1.5));
-}
-
-fn add_skills(
-    mut commands: Commands,
-    q_rammus: Query<Entity, (With<Rammus>, Without<Skills>)>,
-    res_assets_character_record: Res<Assets<CharacterRecord>>,
-) {
-    for entity in q_rammus.iter() {
-        let Some(character_record) =
-            res_assets_character_record.load_hash("Characters/Rammus/CharacterRecords/Root")
-        else {
-            continue;
-        };
-
-        commands.entity(entity).with_related::<PassiveSkillOf>((
-            Skill::new(
-                SkillSlot::Passive,
-                "Characters/Rammus/Spells/RammusPassive/RammusPassive",
-            ),
-            CoolDown::default(),
-        ));
-
-        for (index, &skill) in character_record.spells.as_ref().unwrap().iter().enumerate() {
-            let skill_component = Skill::new(skill_slot_from_index(index), skill);
-            commands
-                .entity(entity)
-                .with_related::<SkillOf>((skill_component, CoolDown::default()));
-        }
-    }
 }

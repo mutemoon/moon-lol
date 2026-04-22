@@ -3,11 +3,10 @@ use std::time::Duration;
 
 use bevy::prelude::*;
 use bevy::time::TimeUpdateStrategy;
-use league_core::extract::{
-    EffectValueCalculationPart, EnumAbilityResourceByCoefficientCalculationPart,
-    EnumGameCalculation, GameCalculation, SpellDataResource, SpellEffectAmount, SpellObject,
-};
+use league_utils::hash_key::HashKey;
 use lol_base::prop::LoadHashKeyTrait;
+use lol_base::spell::{DataSpell, Spell, ValuesEffect};
+use lol_base::spell_calc::{CalculationPartEffectValue, CalculationSpell, CalculationType};
 use lol_core::action::damage::{DamageShape, TargetDamage, TargetFilter};
 use lol_core::action::{Action, CommandAction, PluginAction};
 use lol_core::base::ability_resource::{AbilityResource, AbilityResourceType};
@@ -25,6 +24,10 @@ const TEST_FPS: f32 = 30.0;
 const SPELL_KEY: u32 = 0x5001;
 const DAMAGE_AMOUNT_KEY: u32 = 0x5003;
 const EPSILON: f32 = 1e-4;
+
+fn spell_handle(key: u32) -> Handle<Spell> {
+    Handle::from(HashKey::<Spell>::from(key))
+}
 
 #[derive(Component)]
 struct ActionObserverSkill;
@@ -68,7 +71,7 @@ fn on_action_damage_skill_cast(
     skill_damage(
         &mut commands,
         trigger.entity,
-        SPELL_KEY,
+        spell_handle(SPELL_KEY),
         DamageShape::Circle { radius: 120.0 },
         vec![TargetDamage {
             filter: TargetFilter::All,
@@ -96,7 +99,7 @@ impl ActionSkillHarness {
         app.add_plugins(PluginLife);
         app.add_plugins(PluginSkill);
         app.add_plugins(PluginActionObserverSkill);
-        app.init_asset::<SpellObject>();
+        app.init_asset::<Spell>();
         app.insert_resource(Time::<Fixed>::from_hz(TEST_FPS as f64));
         app.insert_resource(TimeUpdateStrategy::ManualDuration(Duration::from_secs_f64(
             1.0 / TEST_FPS as f64,
@@ -126,48 +129,43 @@ impl ActionSkillHarness {
     }
 
     fn register_spell(&mut self, mana_cost: f32, base_damage: f32) -> &mut Self {
+        use lol_base::spell_calc::CalculationPart;
+
         let mut calculations = HashMap::new();
         calculations.insert(
             DAMAGE_AMOUNT_KEY,
-            EnumGameCalculation::GameCalculation(GameCalculation {
-                m_formula_parts: Some(vec![
-                    EnumAbilityResourceByCoefficientCalculationPart::EffectValueCalculationPart(
-                        EffectValueCalculationPart {
-                            m_effect_index: Some(1),
-                        },
-                    ),
-                ]),
-                m_display_as_percent: None,
-                m_expanded_tooltip_calculation_display: None,
-                m_multiplier: None,
-                m_precision: None,
-                m_simple_tooltip_calculation_display: None,
-                result_modifier: None,
-                tooltip_only: None,
-                unk_0x72c5c2a8: None,
+            CalculationType::CalculationSpell(CalculationSpell {
+                formula_parts: Some(vec![CalculationPart::CalculationPartEffectValue(
+                    CalculationPartEffectValue {
+                        effect_index: Some(1),
+                    },
+                )]),
+                multiplier: None,
+                precision: None,
             }),
         );
 
+        let effect_values = ValuesEffect {
+            values: Some(vec![base_damage; 6]),
+        };
+
         self.app
             .world_mut()
-            .resource_mut::<Assets<SpellObject>>()
+            .resource_mut::<Assets<Spell>>()
             .add_hash(
                 SPELL_KEY,
-                SpellObject {
-                    m_spell: Some(SpellDataResource {
+                Spell {
+                    spell_data: Some(DataSpell {
+                        calculations: Some(calculations),
+                        effect_amounts: Some(vec![effect_values]),
+                        data_values: None,
                         mana: Some(vec![mana_cost; 6]),
-                        m_spell_calculations: Some(calculations),
-                        m_effect_amount: Some(vec![SpellEffectAmount {
-                            value: Some(vec![base_damage; 6]),
-                        }]),
-                        ..Default::default()
+                        missile_spec: None,
+                        hit_bone_name: None,
+                        missile_speed: None,
+                        missile_effect_key: None,
+                        cast_type: None,
                     }),
-                    bot_data: None,
-                    cc_behavior_data: None,
-                    m_buff: None,
-                    m_script_name: String::new(),
-                    object_name: String::new(),
-                    script: None,
                 },
             );
         self
@@ -238,7 +236,7 @@ fn make_mana(value: f32) -> AbilityResource {
 fn action_input_can_drive_code_driven_damage_skill_end_to_end() {
     let mut harness = ActionSkillHarness::new();
     harness.register_spell(25.0, 35.0).add_skill(
-        Skill::new(SkillSlot::Q, SPELL_KEY).with_level(1),
+        Skill::new(SkillSlot::Q, spell_handle(SPELL_KEY)).with_level(1),
         ActionDamageSkill,
     );
 
@@ -266,7 +264,7 @@ fn action_input_can_drive_code_driven_damage_skill_end_to_end() {
 fn action_input_can_reach_code_driven_skill_observer() {
     let mut harness = ActionSkillHarness::new();
     harness.register_spell(10.0, 0.0).add_skill(
-        Skill::new(SkillSlot::W, SPELL_KEY).with_level(1),
+        Skill::new(SkillSlot::W, spell_handle(SPELL_KEY)).with_level(1),
         ActionObserverSkill,
     );
 
@@ -283,7 +281,7 @@ fn action_input_can_reach_code_driven_skill_observer() {
 #[test]
 fn action_input_can_level_up_skill_through_same_pipeline() {
     let mut harness = ActionSkillHarness::new();
-    let skill_entity = harness.add_skill(Skill::new(SkillSlot::Q, SPELL_KEY), ());
+    let skill_entity = harness.add_skill(Skill::new(SkillSlot::Q, spell_handle(SPELL_KEY)), ());
 
     harness.send_action(Action::SkillLevelUp(0));
 

@@ -1,32 +1,24 @@
 pub mod buffs;
 
 use bevy::prelude::*;
-use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_base::prop::LoadHashKeyTrait;
+use lol_base::spell::Spell;
 use lol_core::action::damage::{DamageShape, TargetDamage, TargetFilter};
 use lol_core::base::buff::BuffOf;
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
 use lol_core::skill::{
-    CoolDown, EventSkillCast, PassiveSkillOf, Skill, SkillOf, SkillSlot, Skills,
-    play_skill_animation, skill_damage, skill_slot_from_index, spawn_skill_particle,
+    CoolDown, EventSkillCast, Skill, SkillSlot, play_skill_animation, skill_damage,
+    spawn_skill_particle,
 };
 
 use crate::renata::buffs::{BuffRenataQ, BuffRenataR, BuffRenataW};
-
-const RENATA_Q_KEY: &str = "Characters/Renata/Spells/RenataQ/RenataQ";
-#[allow(dead_code)]
-const RENATA_W_KEY: &str = "Characters/Renata/Spells/RenataW/RenataW";
-const RENATA_E_KEY: &str = "Characters/Renata/Spells/RenataE/RenataE";
-const RENATA_R_KEY: &str = "Characters/Renata/Spells/RenataR/RenataR";
 
 #[derive(Default)]
 pub struct PluginRenata;
 
 impl Plugin for PluginRenata {
     fn build(&self, app: &mut App) {
-        app.add_systems(FixedUpdate, add_skills);
         app.add_observer(on_renata_skill_cast);
         app.add_observer(on_renata_damage_hit);
     }
@@ -53,15 +45,15 @@ fn on_renata_skill_cast(
     };
 
     match skill.slot {
-        SkillSlot::Q => cast_renata_q(&mut commands, entity),
+        SkillSlot::Q => cast_renata_q(&mut commands, entity, skill.key_spell_object.clone()),
         SkillSlot::W => cast_renata_w(&mut commands, entity),
-        SkillSlot::E => cast_renata_e(&mut commands, entity),
-        SkillSlot::R => cast_renata_r(&mut commands, entity),
+        SkillSlot::E => cast_renata_e(&mut commands, entity, skill.key_spell_object.clone()),
+        SkillSlot::R => cast_renata_r(&mut commands, entity, skill.key_spell_object.clone()),
         _ => {}
     }
 }
 
-fn cast_renata_q(commands: &mut Commands, entity: Entity) {
+fn cast_renata_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell1"));
     spawn_skill_particle(commands, entity, hash_bin("Renata_Q_Cast"));
 
@@ -69,7 +61,7 @@ fn cast_renata_q(commands: &mut Commands, entity: Entity) {
     skill_damage(
         commands,
         entity,
-        RENATA_Q_KEY,
+        skill_spell,
         DamageShape::Sector {
             radius: 900.0,
             angle: 15.0,
@@ -93,7 +85,7 @@ fn cast_renata_w(commands: &mut Commands, entity: Entity) {
         .with_related::<BuffOf>(BuffRenataW::new(0.5, 5.0));
 }
 
-fn cast_renata_e(commands: &mut Commands, entity: Entity) {
+fn cast_renata_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell3"));
     spawn_skill_particle(commands, entity, hash_bin("Renata_E_Cast"));
 
@@ -101,7 +93,7 @@ fn cast_renata_e(commands: &mut Commands, entity: Entity) {
     skill_damage(
         commands,
         entity,
-        RENATA_E_KEY,
+        skill_spell,
         DamageShape::Sector {
             radius: 800.0,
             angle: 20.0,
@@ -115,7 +107,7 @@ fn cast_renata_e(commands: &mut Commands, entity: Entity) {
     );
 }
 
-fn cast_renata_r(commands: &mut Commands, entity: Entity) {
+fn cast_renata_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell4"));
     spawn_skill_particle(commands, entity, hash_bin("Renata_R_Cast"));
 
@@ -123,7 +115,7 @@ fn cast_renata_r(commands: &mut Commands, entity: Entity) {
     skill_damage(
         commands,
         entity,
-        RENATA_R_KEY,
+        skill_spell,
         DamageShape::Sector {
             radius: 1500.0,
             angle: 60.0,
@@ -157,33 +149,4 @@ fn on_renata_damage_hit(
     commands
         .entity(target)
         .with_related::<BuffOf>(BuffRenataR::new(0.75, 1.0));
-}
-
-fn add_skills(
-    mut commands: Commands,
-    q_renata: Query<Entity, (With<Renata>, Without<Skills>)>,
-    res_assets_character_record: Res<Assets<CharacterRecord>>,
-) {
-    for entity in q_renata.iter() {
-        let Some(character_record) =
-            res_assets_character_record.load_hash("Characters/Renata/CharacterRecords/Root")
-        else {
-            continue;
-        };
-
-        commands.entity(entity).with_related::<PassiveSkillOf>((
-            Skill::new(
-                SkillSlot::Passive,
-                "Characters/Renata/Spells/RenataPassive/RenataPassive",
-            ),
-            CoolDown::default(),
-        ));
-
-        for (index, &skill) in character_record.spells.as_ref().unwrap().iter().enumerate() {
-            let skill_component = Skill::new(skill_slot_from_index(index), skill);
-            commands
-                .entity(entity)
-                .with_related::<SkillOf>((skill_component, CoolDown::default()));
-        }
-    }
 }

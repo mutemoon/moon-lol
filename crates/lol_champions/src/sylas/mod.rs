@@ -1,7 +1,6 @@
 use bevy::prelude::*;
-use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_base::prop::LoadHashKeyTrait;
+use lol_base::spell::Spell;
 use lol_core::action::damage::{DamageShape, TargetDamage, TargetFilter};
 use lol_core::action::dash::{ActionDash, DashDamage, DashMoveType};
 use lol_core::base::buff::BuffOf;
@@ -10,14 +9,10 @@ use lol_core::buffs::common_buffs::BuffSelfHeal;
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
 use lol_core::skill::{
-    CoolDown, EventSkillCast, PassiveSkillOf, Skill, SkillCooldownMode, SkillOf, SkillRecastWindow,
-    SkillSlot, Skills, play_skill_animation, skill_damage, skill_dash, skill_slot_from_index,
-    spawn_skill_particle,
+    CoolDown, EventSkillCast, Skill, SkillCooldownMode, SkillRecastWindow, SkillSlot,
+    play_skill_animation, skill_damage, skill_dash, spawn_skill_particle,
 };
 
-const SYLAS_Q_KEY: &str = "Characters/Sylas/Spells/SylasQ/SylasQ";
-const SYLAS_W_KEY: &str = "Characters/Sylas/Spells/SylasW/SylasW";
-const SYLAS_E_KEY: &str = "Characters/Sylas/Spells/SylasE/SylasE";
 const SYLAS_E_RECAST_WINDOW: f32 = 4.0;
 
 #[derive(Default)]
@@ -25,7 +20,6 @@ pub struct PluginSylas;
 
 impl Plugin for PluginSylas {
     fn build(&self, app: &mut App) {
-        app.add_systems(FixedUpdate, add_skills);
         app.add_observer(on_sylas_skill_cast);
         app.add_observer(on_sylas_damage_hit);
     }
@@ -52,31 +46,40 @@ fn on_sylas_skill_cast(
         return;
     };
 
+    let skill_spell = skill.key_spell_object.clone();
+
     match skill.slot {
-        SkillSlot::Q => cast_sylas_q(&mut commands, entity),
-        SkillSlot::W => cast_sylas_w(&mut commands, &q_transform, entity, trigger.point),
+        SkillSlot::Q => cast_sylas_q(&mut commands, entity, skill_spell),
+        SkillSlot::W => cast_sylas_w(
+            &mut commands,
+            &q_transform,
+            entity,
+            skill_spell,
+            trigger.point,
+        ),
         SkillSlot::E => cast_sylas_e(
             &mut commands,
             &q_transform,
             entity,
+            skill_spell,
             trigger.skill_entity,
             trigger.point,
             cooldown,
             recast,
         ),
-        SkillSlot::R => cast_sylas_r(&mut commands, entity, trigger.point),
+        SkillSlot::R => cast_sylas_r(&mut commands, entity, skill_spell, trigger.point),
         _ => {}
     }
 }
 
-fn cast_sylas_q(commands: &mut Commands, entity: Entity) {
+fn cast_sylas_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell1"));
     spawn_skill_particle(commands, entity, hash_bin("Sylas_Q_Cast"));
     // Q is a lash that slows enemies in the center
     skill_damage(
         commands,
         entity,
-        SYLAS_Q_KEY,
+        skill_spell,
         DamageShape::Sector {
             radius: 350.0,
             angle: 60.0,
@@ -94,6 +97,7 @@ fn cast_sylas_w(
     commands: &mut Commands,
     q_transform: &Query<&Transform>,
     entity: Entity,
+    skill_spell: Handle<Spell>,
     point: Vec2,
 ) {
     play_skill_animation(commands, entity, hash_bin("Spell2"));
@@ -105,7 +109,7 @@ fn cast_sylas_w(
         entity,
         point,
         &ActionDash {
-            skill: SYLAS_W_KEY.into(),
+            skill: skill_spell,
             move_type: DashMoveType::Pointer { max: 200.0 },
             damage: Some(DashDamage {
                 radius_end: 100.0,
@@ -128,6 +132,7 @@ fn cast_sylas_e(
     commands: &mut Commands,
     q_transform: &Query<&Transform>,
     entity: Entity,
+    skill_spell: Handle<Spell>,
     skill_entity: Entity,
     point: Vec2,
     cooldown: &CoolDown,
@@ -143,7 +148,7 @@ fn cast_sylas_e(
         skill_damage(
             commands,
             entity,
-            SYLAS_E_KEY,
+            skill_spell,
             DamageShape::Sector {
                 radius: 400.0,
                 angle: 20.0,
@@ -167,7 +172,7 @@ fn cast_sylas_e(
             entity,
             point,
             &ActionDash {
-                skill: SYLAS_E_KEY.into(),
+                skill: skill_spell,
                 move_type: DashMoveType::Pointer { max: 300.0 },
                 damage: Some(DashDamage {
                     radius_end: 100.0,
@@ -188,14 +193,14 @@ fn cast_sylas_e(
     }
 }
 
-fn cast_sylas_r(commands: &mut Commands, entity: Entity, _point: Vec2) {
+fn cast_sylas_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>, _point: Vec2) {
     play_skill_animation(commands, entity, hash_bin("Spell4"));
     spawn_skill_particle(commands, entity, hash_bin("Sylas_R_Cast"));
     // R 对最近敌方英雄造成魔法伤害
     skill_damage(
         commands,
         entity,
-        "Characters/Sylas/Spells/SylasR/SylasR",
+        skill_spell,
         DamageShape::Nearest {
             max_distance: 400.0,
         },
@@ -206,39 +211,6 @@ fn cast_sylas_r(commands: &mut Commands, entity: Entity, _point: Vec2) {
         }],
         Some(hash_bin("Sylas_R_Hit")),
     );
-}
-
-fn add_skills(
-    mut commands: Commands,
-    q_sylas: Query<Entity, (With<Sylas>, Without<Skills>)>,
-    res_assets_character_record: Res<Assets<CharacterRecord>>,
-) {
-    for entity in q_sylas.iter() {
-        let Some(character_record) =
-            res_assets_character_record.load_hash("Characters/Sylas/CharacterRecords/Root")
-        else {
-            continue;
-        };
-
-        commands.entity(entity).with_related::<PassiveSkillOf>((
-            Skill::new(
-                SkillSlot::Passive,
-                "Characters/Sylas/Spells/SylasPassiveAbility/SylasPassive",
-            ),
-            CoolDown::default(),
-        ));
-
-        for (index, &skill) in character_record.spells.as_ref().unwrap().iter().enumerate() {
-            let mut skill_component = Skill::new(skill_slot_from_index(index), skill);
-            // E uses manual cooldown mode for recast window
-            if index == 2 {
-                skill_component = skill_component.with_cooldown_mode(SkillCooldownMode::Manual);
-            }
-            commands
-                .entity(entity)
-                .with_related::<SkillOf>((skill_component, CoolDown::default()));
-        }
-    }
 }
 
 /// 监听 Sylas 造成的伤害，Q 命中减速

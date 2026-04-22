@@ -1,31 +1,24 @@
 pub mod buffs;
 
 use bevy::prelude::*;
-use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_base::prop::LoadHashKeyTrait;
+use lol_base::spell::Spell;
 use lol_core::action::damage::{DamageShape, TargetDamage, TargetFilter};
 use lol_core::base::buff::BuffOf;
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
 use lol_core::skill::{
-    CoolDown, EventSkillCast, PassiveSkillOf, Skill, SkillOf, SkillSlot, Skills,
-    play_skill_animation, skill_damage, skill_slot_from_index, spawn_skill_particle,
+    CoolDown, EventSkillCast, Skill, SkillSlot, play_skill_animation, skill_damage,
+    spawn_skill_particle,
 };
 
 use crate::belveth::buffs::{BuffBelvethPassive, BuffBelvethW};
-
-const BELVETH_Q_KEY: &str = "Characters/Belveth/Spells/BelvethQ/BelvethQ";
-const BELVETH_W_KEY: &str = "Characters/Belveth/Spells/BelvethW/BelvethW";
-const BELVETH_E_KEY: &str = "Characters/Belveth/Spells/BelvethE/BelvethE";
-// const BELVETH_R_KEY: &str = "Characters/Belveth/Spells/BelvethR/BelvethR";
 
 #[derive(Default)]
 pub struct PluginBelveth;
 
 impl Plugin for PluginBelveth {
     fn build(&self, app: &mut App) {
-        app.add_systems(FixedUpdate, add_skills);
         app.add_observer(on_belveth_skill_cast);
         app.add_observer(on_belveth_damage_hit);
     }
@@ -51,23 +44,25 @@ fn on_belveth_skill_cast(
         return;
     };
 
+    let skill_spell = skill.key_spell_object.clone();
+
     match skill.slot {
-        SkillSlot::Q => cast_belveth_q(&mut commands, entity),
-        SkillSlot::W => cast_belveth_w(&mut commands, entity),
-        SkillSlot::E => cast_belveth_e(&mut commands, entity),
+        SkillSlot::Q => cast_belveth_q(&mut commands, entity, skill_spell),
+        SkillSlot::W => cast_belveth_w(&mut commands, entity, skill_spell),
+        SkillSlot::E => cast_belveth_e(&mut commands, entity, skill_spell),
         SkillSlot::R => cast_belveth_r(&mut commands, entity),
         _ => {}
     }
 }
 
-fn cast_belveth_q(commands: &mut Commands, entity: Entity) {
+fn cast_belveth_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell1"));
     spawn_skill_particle(commands, entity, hash_bin("Belveth_Q_Cast"));
 
     skill_damage(
         commands,
         entity,
-        BELVETH_Q_KEY,
+        skill_spell,
         DamageShape::Circle { radius: 400.0 },
         vec![TargetDamage {
             filter: TargetFilter::All,
@@ -78,14 +73,14 @@ fn cast_belveth_q(commands: &mut Commands, entity: Entity) {
     );
 }
 
-fn cast_belveth_w(commands: &mut Commands, entity: Entity) {
+fn cast_belveth_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell2"));
     spawn_skill_particle(commands, entity, hash_bin("Belveth_W_Cast"));
 
     skill_damage(
         commands,
         entity,
-        BELVETH_W_KEY,
+        skill_spell,
         DamageShape::Sector {
             radius: 660.0,
             angle: 45.0,
@@ -99,14 +94,14 @@ fn cast_belveth_w(commands: &mut Commands, entity: Entity) {
     );
 }
 
-fn cast_belveth_e(commands: &mut Commands, entity: Entity) {
+fn cast_belveth_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell3"));
     spawn_skill_particle(commands, entity, hash_bin("Belveth_E_Cast"));
 
     skill_damage(
         commands,
         entity,
-        BELVETH_E_KEY,
+        skill_spell,
         DamageShape::Circle { radius: 500.0 },
         vec![TargetDamage {
             filter: TargetFilter::All,
@@ -140,33 +135,4 @@ fn on_belveth_damage_hit(
     commands
         .entity(target)
         .with_related::<BuffOf>(BuffBelvethW::new(0.5, 2.0));
-}
-
-fn add_skills(
-    mut commands: Commands,
-    q_belveth: Query<Entity, (With<Belveth>, Without<Skills>)>,
-    res_assets_character_record: Res<Assets<CharacterRecord>>,
-) {
-    for entity in q_belveth.iter() {
-        let Some(character_record) =
-            res_assets_character_record.load_hash("Characters/Belveth/CharacterRecords/Root")
-        else {
-            continue;
-        };
-
-        commands.entity(entity).with_related::<PassiveSkillOf>((
-            Skill::new(
-                SkillSlot::Passive,
-                "Characters/Belveth/Spells/BelvethPassive/BelvethPassive",
-            ),
-            CoolDown::default(),
-        ));
-
-        for (index, &skill) in character_record.spells.as_ref().unwrap().iter().enumerate() {
-            let skill_component = Skill::new(skill_slot_from_index(index), skill);
-            commands
-                .entity(entity)
-                .with_related::<SkillOf>((skill_component, CoolDown::default()));
-        }
-    }
 }

@@ -1,33 +1,24 @@
 pub mod buffs;
 
 use bevy::prelude::*;
-use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_base::prop::LoadHashKeyTrait;
+use lol_base::spell::Spell;
 use lol_core::action::damage::{DamageShape, TargetDamage, TargetFilter};
 use lol_core::base::buff::BuffOf;
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
 use lol_core::skill::{
-    CoolDown, EventSkillCast, PassiveSkillOf, Skill, SkillOf, SkillSlot, Skills,
-    play_skill_animation, skill_damage, skill_slot_from_index, spawn_skill_particle,
+    CoolDown, EventSkillCast, Skill, SkillSlot, play_skill_animation, skill_damage,
+    spawn_skill_particle,
 };
 
 use crate::karma::buffs::{BuffKarmaE, BuffKarmaGatheringFire, BuffKarmaQ};
-
-const KARMA_Q_KEY: &str = "Characters/Karma/Spells/KarmaQ/KarmaQ";
-const KARMA_W_KEY: &str = "Characters/Karma/Spells/KarmaW/KarmaW";
-#[allow(dead_code)]
-const KARMA_E_KEY: &str = "Characters/Karma/Spells/KarmaE/KarmaE";
-#[allow(dead_code)]
-const KARMA_R_KEY: &str = "Characters/Karma/Spells/KarmaR/KarmaR";
 
 #[derive(Default)]
 pub struct PluginKarma;
 
 impl Plugin for PluginKarma {
     fn build(&self, app: &mut App) {
-        app.add_systems(FixedUpdate, add_skills);
         app.add_observer(on_karma_skill_cast);
         app.add_observer(on_karma_damage_hit);
     }
@@ -53,16 +44,18 @@ fn on_karma_skill_cast(
         return;
     };
 
+    let skill_spell = skill.key_spell_object.clone();
+
     match skill.slot {
-        SkillSlot::Q => cast_karma_q(&mut commands, entity),
-        SkillSlot::W => cast_karma_w(&mut commands, entity),
+        SkillSlot::Q => cast_karma_q(&mut commands, entity, skill_spell),
+        SkillSlot::W => cast_karma_w(&mut commands, entity, skill_spell),
         SkillSlot::E => cast_karma_e(&mut commands, entity),
         SkillSlot::R => cast_karma_r(&mut commands, entity),
         _ => {}
     }
 }
 
-fn cast_karma_q(commands: &mut Commands, entity: Entity) {
+fn cast_karma_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell1"));
     spawn_skill_particle(commands, entity, hash_bin("Karma_Q_Cast"));
 
@@ -70,7 +63,7 @@ fn cast_karma_q(commands: &mut Commands, entity: Entity) {
     skill_damage(
         commands,
         entity,
-        KARMA_Q_KEY,
+        skill_spell,
         DamageShape::Sector {
             radius: 950.0,
             angle: 15.0,
@@ -84,7 +77,7 @@ fn cast_karma_q(commands: &mut Commands, entity: Entity) {
     );
 }
 
-fn cast_karma_w(commands: &mut Commands, entity: Entity) {
+fn cast_karma_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell2"));
     spawn_skill_particle(commands, entity, hash_bin("Karma_W_Cast"));
 
@@ -92,7 +85,7 @@ fn cast_karma_w(commands: &mut Commands, entity: Entity) {
     skill_damage(
         commands,
         entity,
-        KARMA_W_KEY,
+        skill_spell,
         DamageShape::Circle { radius: 675.0 },
         vec![TargetDamage {
             filter: TargetFilter::All,
@@ -141,33 +134,4 @@ fn on_karma_damage_hit(
     commands
         .entity(source)
         .with_related::<BuffOf>(BuffKarmaGatheringFire::new(2.0));
-}
-
-fn add_skills(
-    mut commands: Commands,
-    q_karma: Query<Entity, (With<Karma>, Without<Skills>)>,
-    res_assets_character_record: Res<Assets<CharacterRecord>>,
-) {
-    for entity in q_karma.iter() {
-        let Some(character_record) =
-            res_assets_character_record.load_hash("Characters/Karma/CharacterRecords/Root")
-        else {
-            continue;
-        };
-
-        commands.entity(entity).with_related::<PassiveSkillOf>((
-            Skill::new(
-                SkillSlot::Passive,
-                "Characters/Karma/Spells/KarmaPassive/KarmaPassive",
-            ),
-            CoolDown::default(),
-        ));
-
-        for (index, &skill) in character_record.spells.as_ref().unwrap().iter().enumerate() {
-            let skill_component = Skill::new(skill_slot_from_index(index), skill);
-            commands
-                .entity(entity)
-                .with_related::<SkillOf>((skill_component, CoolDown::default()));
-        }
-    }
 }

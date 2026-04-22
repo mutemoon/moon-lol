@@ -1,33 +1,25 @@
 pub mod buffs;
 
 use bevy::prelude::*;
-use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_base::prop::LoadHashKeyTrait;
+use lol_base::spell::Spell;
 use lol_core::action::damage::{DamageShape, TargetDamage, TargetFilter};
 use lol_core::action::dash::{ActionDash, DashDamage, DashMoveType};
 use lol_core::base::buff::BuffOf;
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
 use lol_core::skill::{
-    CoolDown, EventSkillCast, PassiveSkillOf, Skill, SkillOf, SkillSlot, Skills,
-    play_skill_animation, skill_damage, skill_dash, skill_slot_from_index, spawn_skill_particle,
+    CoolDown, EventSkillCast, Skill, SkillSlot, play_skill_animation, skill_damage, skill_dash,
+    spawn_skill_particle,
 };
 
 use crate::illaoi::buffs::BuffIllaoiPassive;
-
-#[allow(dead_code)]
-const ILLAAI_Q_KEY: &str = "Characters/Illaoi/Spells/IllaoiQ/IllaoiQ";
-const ILLAAI_W_KEY: &str = "Characters/Illaoi/Spells/IllaoiW/IllaoiW";
-const ILLAAI_E_KEY: &str = "Characters/Illaoi/Spells/IllaoiE/IllaoiE";
-const ILLAAI_R_KEY: &str = "Characters/Illaoi/Spells/IllaoiR/IllaoiR";
 
 #[derive(Default)]
 pub struct PluginIllaoi;
 
 impl Plugin for PluginIllaoi {
     fn build(&self, app: &mut App) {
-        app.add_systems(FixedUpdate, add_skills);
         app.add_observer(on_illaoi_skill_cast);
         app.add_observer(on_illaoi_damage_hit);
     }
@@ -54,11 +46,19 @@ fn on_illaoi_skill_cast(
         return;
     };
 
+    let skill_spell = skill.key_spell_object.clone();
+
     match skill.slot {
         SkillSlot::Q => cast_illaoi_q(&mut commands, entity),
-        SkillSlot::W => cast_illaoi_w(&mut commands, &q_transform, entity, trigger.point),
-        SkillSlot::E => cast_illaoi_e(&mut commands, entity),
-        SkillSlot::R => cast_illaoi_r(&mut commands, entity),
+        SkillSlot::W => cast_illaoi_w(
+            &mut commands,
+            &q_transform,
+            entity,
+            trigger.point,
+            skill_spell,
+        ),
+        SkillSlot::E => cast_illaoi_e(&mut commands, entity, skill_spell),
+        SkillSlot::R => cast_illaoi_r(&mut commands, entity, skill_spell),
         _ => {}
     }
 }
@@ -78,6 +78,7 @@ fn cast_illaoi_w(
     q_transform: &Query<&Transform>,
     entity: Entity,
     point: Vec2,
+    skill_spell: Handle<Spell>,
 ) {
     play_skill_animation(commands, entity, hash_bin("Spell2"));
     spawn_skill_particle(commands, entity, hash_bin("Illaoi_W_Cast"));
@@ -89,7 +90,7 @@ fn cast_illaoi_w(
         entity,
         point,
         &ActionDash {
-            skill: ILLAAI_W_KEY.into(),
+            skill: skill_spell,
             move_type: DashMoveType::Pointer { max: 225.0 },
             damage: Some(DashDamage {
                 radius_end: 100.0,
@@ -104,7 +105,7 @@ fn cast_illaoi_w(
     );
 }
 
-fn cast_illaoi_e(commands: &mut Commands, entity: Entity) {
+fn cast_illaoi_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell3"));
     spawn_skill_particle(commands, entity, hash_bin("Illaoi_E_Cast"));
 
@@ -112,7 +113,7 @@ fn cast_illaoi_e(commands: &mut Commands, entity: Entity) {
     skill_damage(
         commands,
         entity,
-        ILLAAI_E_KEY,
+        skill_spell,
         DamageShape::Sector {
             radius: 950.0,
             angle: 30.0,
@@ -126,7 +127,7 @@ fn cast_illaoi_e(commands: &mut Commands, entity: Entity) {
     );
 }
 
-fn cast_illaoi_r(commands: &mut Commands, entity: Entity) {
+fn cast_illaoi_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell4"));
     spawn_skill_particle(commands, entity, hash_bin("Illaoi_R_Cast"));
 
@@ -134,7 +135,7 @@ fn cast_illaoi_r(commands: &mut Commands, entity: Entity) {
     skill_damage(
         commands,
         entity,
-        ILLAAI_R_KEY,
+        skill_spell,
         DamageShape::Circle { radius: 500.0 },
         vec![TargetDamage {
             filter: TargetFilter::All,
@@ -161,33 +162,4 @@ fn on_illaoi_damage_hit(
     commands
         .entity(target)
         .with_related::<BuffOf>(BuffIllaoiPassive::new());
-}
-
-fn add_skills(
-    mut commands: Commands,
-    q_illaoi: Query<Entity, (With<Illaoi>, Without<Skills>)>,
-    res_assets_character_record: Res<Assets<CharacterRecord>>,
-) {
-    for entity in q_illaoi.iter() {
-        let Some(character_record) =
-            res_assets_character_record.load_hash("Characters/Illaoi/CharacterRecords/Root")
-        else {
-            continue;
-        };
-
-        commands.entity(entity).with_related::<PassiveSkillOf>((
-            Skill::new(
-                SkillSlot::Passive,
-                "Characters/Illaoi/Spells/IllaoiPassive/IllaoiPassive",
-            ),
-            CoolDown::default(),
-        ));
-
-        for (index, &skill) in character_record.spells.as_ref().unwrap().iter().enumerate() {
-            let skill_component = Skill::new(skill_slot_from_index(index), skill);
-            commands
-                .entity(entity)
-                .with_related::<SkillOf>((skill_component, CoolDown::default()));
-        }
-    }
 }

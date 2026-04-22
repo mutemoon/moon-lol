@@ -1,9 +1,8 @@
 pub mod buffs;
 
 use bevy::prelude::{GlobalTransform, *};
-use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_base::prop::LoadHashKeyTrait;
+use lol_base::spell::Spell;
 use lol_core::action::damage::{DamageShape, TargetDamage, TargetFilter};
 use lol_core::action::dash::{ActionDash, DashDamage, DashMoveType};
 use lol_core::base::buff::BuffOf;
@@ -13,16 +12,12 @@ use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
 use lol_core::movement::{CommandMovement, EventMovementEnd, MovementAction, MovementWay};
 use lol_core::skill::{
-    CoolDown, EventSkillCast, PassiveSkillOf, Skill, SkillOf, SkillSlot, Skills,
-    play_skill_animation, skill_damage, skill_dash, skill_slot_from_index, spawn_skill_particle,
+    EventSkillCast, Skill, SkillSlot, play_skill_animation, skill_damage, skill_dash,
+    spawn_skill_particle,
 };
 use lol_core::team::Team;
 
 use crate::hecarim::buffs::{BuffHecarimQ, BuffHecarimW};
-
-const HECARIM_Q_KEY: &str = "Characters/Hecarim/Spells/HecarimBlade/HecarimBlade";
-const HECARIM_W_KEY: &str = "Characters/Hecarim/Spells/HecarimRampart/HecarimRampart";
-const HECARIM_R_KEY: &str = "Characters/Hecarim/Spells/HecarimR/HecarimR";
 
 // Hecarim Q parameters
 const HECARIM_Q_MAX_STACKS: u8 = 4;
@@ -34,7 +29,6 @@ pub struct PluginHecarim;
 
 impl Plugin for PluginHecarim {
     fn build(&self, app: &mut App) {
-        app.add_systems(FixedUpdate, add_skills);
         app.add_observer(on_hecarim_skill_cast);
         app.add_observer(on_hecarim_damage_hit);
         app.add_observer(on_hecarim_e_dash_end);
@@ -63,21 +57,27 @@ fn on_hecarim_skill_cast(
     };
 
     match skill.slot {
-        SkillSlot::Q => cast_hecarim_q(&mut commands, entity),
-        SkillSlot::W => cast_hecarim_w(&mut commands, entity),
+        SkillSlot::Q => cast_hecarim_q(&mut commands, entity, skill.key_spell_object.clone()),
+        SkillSlot::W => cast_hecarim_w(&mut commands, entity, skill.key_spell_object.clone()),
         SkillSlot::E => cast_hecarim_e(&mut commands, &q_transform, entity, trigger.point),
-        SkillSlot::R => cast_hecarim_r(&mut commands, &q_transform, entity, trigger.point),
+        SkillSlot::R => cast_hecarim_r(
+            &mut commands,
+            &q_transform,
+            entity,
+            trigger.point,
+            skill.key_spell_object.clone(),
+        ),
         _ => {}
     }
 }
 
-fn cast_hecarim_q(commands: &mut Commands, entity: Entity) {
+fn cast_hecarim_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell1"));
     spawn_skill_particle(commands, entity, hash_bin("Hecarim_Q_Cast"));
     skill_damage(
         commands,
         entity,
-        HECARIM_Q_KEY,
+        skill_spell,
         DamageShape::Circle { radius: 200.0 },
         vec![TargetDamage {
             filter: TargetFilter::All,
@@ -97,7 +97,7 @@ fn cast_hecarim_q(commands: &mut Commands, entity: Entity) {
     debug!("{:?} 释放了 {} 技能，获得层数", entity, "Hecarim Q");
 }
 
-fn cast_hecarim_w(commands: &mut Commands, entity: Entity) {
+fn cast_hecarim_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell2"));
     spawn_skill_particle(commands, entity, hash_bin("Hecarim_W_Cast"));
     // W is AoE damage in area + healing based on damage dealt
@@ -108,7 +108,7 @@ fn cast_hecarim_w(commands: &mut Commands, entity: Entity) {
     skill_damage(
         commands,
         entity,
-        HECARIM_W_KEY,
+        skill_spell,
         DamageShape::Circle { radius: 300.0 },
         vec![TargetDamage {
             filter: TargetFilter::All,
@@ -139,6 +139,7 @@ fn cast_hecarim_r(
     q_transform: &Query<&Transform>,
     entity: Entity,
     point: Vec2,
+    skill_spell: Handle<Spell>,
 ) {
     play_skill_animation(commands, entity, hash_bin("Spell4"));
     spawn_skill_particle(commands, entity, hash_bin("Hecarim_R_Cast"));
@@ -149,7 +150,7 @@ fn cast_hecarim_r(
         entity,
         point,
         &ActionDash {
-            skill: HECARIM_R_KEY.into(),
+            skill: skill_spell.clone(),
             move_type: DashMoveType::Pointer { max: 800.0 },
             damage: Some(DashDamage {
                 radius_end: 200.0,
@@ -247,35 +248,6 @@ fn on_hecarim_e_dash_end(
                     source: "HecarimE".to_string(),
                 },
             });
-        }
-    }
-}
-
-fn add_skills(
-    mut commands: Commands,
-    q_hecarim: Query<Entity, (With<Hecarim>, Without<Skills>)>,
-    res_assets_character_record: Res<Assets<CharacterRecord>>,
-) {
-    for entity in q_hecarim.iter() {
-        let Some(character_record) =
-            res_assets_character_record.load_hash("Characters/Hecarim/CharacterRecords/Root")
-        else {
-            continue;
-        };
-
-        commands.entity(entity).with_related::<PassiveSkillOf>((
-            Skill::new(
-                SkillSlot::Passive,
-                "Characters/Hecarim/Spells/HecarimPassiveAbility/HecarimPassive",
-            ),
-            CoolDown::default(),
-        ));
-
-        for (index, &skill) in character_record.spells.as_ref().unwrap().iter().enumerate() {
-            commands.entity(entity).with_related::<SkillOf>((
-                Skill::new(skill_slot_from_index(index), skill),
-                CoolDown::default(),
-            ));
         }
     }
 }

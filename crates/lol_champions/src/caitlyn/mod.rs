@@ -1,33 +1,25 @@
 pub mod buffs;
 
 use bevy::prelude::*;
-use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_base::prop::LoadHashKeyTrait;
+use lol_base::spell::Spell;
 use lol_core::action::damage::{DamageShape, TargetDamage, TargetFilter};
 use lol_core::base::buff::BuffOf;
 use lol_core::buffs::cc_debuffs::DebuffSlow;
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
 use lol_core::skill::{
-    CoolDown, EventSkillCast, PassiveSkillOf, Skill, SkillOf, SkillSlot, Skills,
-    play_skill_animation, skill_damage, skill_slot_from_index, spawn_skill_particle,
+    CoolDown, EventSkillCast, Skill, SkillSlot, play_skill_animation, skill_damage,
+    spawn_skill_particle,
 };
 
 use crate::caitlyn::buffs::BuffCaitlynPassive;
-
-const CAITLYN_Q_KEY: &str = "Characters/Caitlyn/Spells/CaitlynQ/CaitlynQ";
-#[allow(dead_code)]
-const CAITLYN_W_KEY: &str = "Characters/Caitlyn/Spells/CaitlynW/CaitlynW";
-const CAITLYN_E_KEY: &str = "Characters/Caitlyn/Spells/CaitlynE/CaitlynE";
-const CAITLYN_R_KEY: &str = "Characters/Caitlyn/Spells/CaitlynR/CaitlynR";
 
 #[derive(Default)]
 pub struct PluginCaitlyn;
 
 impl Plugin for PluginCaitlyn {
     fn build(&self, app: &mut App) {
-        app.add_systems(FixedUpdate, add_skills);
         app.add_observer(on_caitlyn_skill_cast);
         app.add_observer(on_caitlyn_damage_hit);
     }
@@ -53,16 +45,18 @@ fn on_caitlyn_skill_cast(
         return;
     };
 
+    let skill_spell = skill.key_spell_object.clone();
+
     match skill.slot {
-        SkillSlot::Q => cast_caitlyn_q(&mut commands, entity),
+        SkillSlot::Q => cast_caitlyn_q(&mut commands, entity, skill_spell),
         SkillSlot::W => cast_caitlyn_w(&mut commands, entity),
-        SkillSlot::E => cast_caitlyn_e(&mut commands, entity),
-        SkillSlot::R => cast_caitlyn_r(&mut commands, entity),
+        SkillSlot::E => cast_caitlyn_e(&mut commands, entity, skill_spell),
+        SkillSlot::R => cast_caitlyn_r(&mut commands, entity, skill_spell),
         _ => {}
     }
 }
 
-fn cast_caitlyn_q(commands: &mut Commands, entity: Entity) {
+fn cast_caitlyn_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell1"));
     spawn_skill_particle(commands, entity, hash_bin("Caitlyn_Q_Cast"));
 
@@ -70,7 +64,7 @@ fn cast_caitlyn_q(commands: &mut Commands, entity: Entity) {
     skill_damage(
         commands,
         entity,
-        CAITLYN_Q_KEY,
+        skill_spell,
         DamageShape::Sector {
             radius: 1300.0,
             angle: 15.0,
@@ -90,7 +84,7 @@ fn cast_caitlyn_w(commands: &mut Commands, entity: Entity) {
     // W places traps - no direct damage
 }
 
-fn cast_caitlyn_e(commands: &mut Commands, entity: Entity) {
+fn cast_caitlyn_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell3"));
     spawn_skill_particle(commands, entity, hash_bin("Caitlyn_E_Cast"));
 
@@ -98,7 +92,7 @@ fn cast_caitlyn_e(commands: &mut Commands, entity: Entity) {
     skill_damage(
         commands,
         entity,
-        CAITLYN_E_KEY,
+        skill_spell,
         DamageShape::Sector {
             radius: 800.0,
             angle: 20.0,
@@ -112,7 +106,7 @@ fn cast_caitlyn_e(commands: &mut Commands, entity: Entity) {
     );
 }
 
-fn cast_caitlyn_r(commands: &mut Commands, entity: Entity) {
+fn cast_caitlyn_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell4"));
     spawn_skill_particle(commands, entity, hash_bin("Caitlyn_R_Cast"));
 
@@ -120,7 +114,7 @@ fn cast_caitlyn_r(commands: &mut Commands, entity: Entity) {
     skill_damage(
         commands,
         entity,
-        CAITLYN_R_KEY,
+        skill_spell,
         DamageShape::Circle { radius: 3500.0 },
         vec![TargetDamage {
             filter: TargetFilter::Champion,
@@ -151,33 +145,4 @@ fn on_caitlyn_damage_hit(
     commands
         .entity(target)
         .with_related::<BuffOf>(BuffCaitlynPassive::new());
-}
-
-fn add_skills(
-    mut commands: Commands,
-    q_caitlyn: Query<Entity, (With<Caitlyn>, Without<Skills>)>,
-    res_assets_character_record: Res<Assets<CharacterRecord>>,
-) {
-    for entity in q_caitlyn.iter() {
-        let Some(character_record) =
-            res_assets_character_record.load_hash("Characters/Caitlyn/CharacterRecords/Root")
-        else {
-            continue;
-        };
-
-        commands.entity(entity).with_related::<PassiveSkillOf>((
-            Skill::new(
-                SkillSlot::Passive,
-                "Characters/Caitlyn/Spells/CaitlynPassive/CaitlynPassive",
-            ),
-            CoolDown::default(),
-        ));
-
-        for (index, &skill) in character_record.spells.as_ref().unwrap().iter().enumerate() {
-            let skill_component = Skill::new(skill_slot_from_index(index), skill);
-            commands
-                .entity(entity)
-                .with_related::<SkillOf>((skill_component, CoolDown::default()));
-        }
-    }
 }

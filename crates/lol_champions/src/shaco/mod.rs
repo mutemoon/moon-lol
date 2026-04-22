@@ -1,33 +1,24 @@
 pub mod buffs;
 
 use bevy::prelude::*;
-use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_base::prop::LoadHashKeyTrait;
+use lol_base::spell::Spell;
 use lol_core::action::damage::{DamageShape, TargetDamage, TargetFilter};
 use lol_core::base::buff::BuffOf;
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
 use lol_core::skill::{
-    CoolDown, EventSkillCast, PassiveSkillOf, Skill, SkillOf, SkillSlot, Skills,
-    play_skill_animation, skill_damage, skill_slot_from_index, spawn_skill_particle,
+    CoolDown, EventSkillCast, Skill, SkillSlot, play_skill_animation, skill_damage,
+    spawn_skill_particle,
 };
 
 use crate::shaco::buffs::BuffShacoW;
-
-#[allow(dead_code)]
-const SHACO_Q_KEY: &str = "Characters/Shaco/Spells/ShacoQ/ShacoQ";
-const SHACO_W_KEY: &str = "Characters/Shaco/Spells/ShacoW/ShacoW";
-const SHACO_E_KEY: &str = "Characters/Shaco/Spells/ShacoE/ShacoE";
-#[allow(dead_code)]
-const SHACO_R_KEY: &str = "Characters/Shaco/Spells/ShacoR/ShacoR";
 
 #[derive(Default)]
 pub struct PluginShaco;
 
 impl Plugin for PluginShaco {
     fn build(&self, app: &mut App) {
-        app.add_systems(FixedUpdate, add_skills);
         app.add_observer(on_shaco_skill_cast);
         app.add_observer(on_shaco_damage_hit);
     }
@@ -53,10 +44,12 @@ fn on_shaco_skill_cast(
         return;
     };
 
+    let skill_spell = skill.key_spell_object.clone();
+
     match skill.slot {
         SkillSlot::Q => cast_shaco_q(&mut commands, entity),
-        SkillSlot::W => cast_shaco_w(&mut commands, entity),
-        SkillSlot::E => cast_shaco_e(&mut commands, entity),
+        SkillSlot::W => cast_shaco_w(&mut commands, entity, skill_spell),
+        SkillSlot::E => cast_shaco_e(&mut commands, entity, skill_spell),
         SkillSlot::R => cast_shaco_r(&mut commands, entity),
         _ => {}
     }
@@ -69,7 +62,7 @@ fn cast_shaco_q(commands: &mut Commands, entity: Entity) {
     // Q is vanish - invisibility
 }
 
-fn cast_shaco_w(commands: &mut Commands, entity: Entity) {
+fn cast_shaco_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell2"));
     spawn_skill_particle(commands, entity, hash_bin("Shaco_W_Cast"));
 
@@ -77,7 +70,7 @@ fn cast_shaco_w(commands: &mut Commands, entity: Entity) {
     skill_damage(
         commands,
         entity,
-        SHACO_W_KEY,
+        skill_spell,
         DamageShape::Circle { radius: 400.0 },
         vec![TargetDamage {
             filter: TargetFilter::All,
@@ -88,7 +81,7 @@ fn cast_shaco_w(commands: &mut Commands, entity: Entity) {
     );
 }
 
-fn cast_shaco_e(commands: &mut Commands, entity: Entity) {
+fn cast_shaco_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell3"));
     spawn_skill_particle(commands, entity, hash_bin("Shaco_E_Cast"));
 
@@ -96,7 +89,7 @@ fn cast_shaco_e(commands: &mut Commands, entity: Entity) {
     skill_damage(
         commands,
         entity,
-        SHACO_E_KEY,
+        skill_spell,
         DamageShape::Nearest {
             max_distance: 625.0,
         },
@@ -132,33 +125,4 @@ fn on_shaco_damage_hit(
     commands
         .entity(target)
         .with_related::<BuffOf>(BuffShacoW::new(0.5, 1.0));
-}
-
-fn add_skills(
-    mut commands: Commands,
-    q_shaco: Query<Entity, (With<Shaco>, Without<Skills>)>,
-    res_assets_character_record: Res<Assets<CharacterRecord>>,
-) {
-    for entity in q_shaco.iter() {
-        let Some(character_record) =
-            res_assets_character_record.load_hash("Characters/Shaco/CharacterRecords/Root")
-        else {
-            continue;
-        };
-
-        commands.entity(entity).with_related::<PassiveSkillOf>((
-            Skill::new(
-                SkillSlot::Passive,
-                "Characters/Shaco/Spells/ShacoPassive/ShacoPassive",
-            ),
-            CoolDown::default(),
-        ));
-
-        for (index, &skill) in character_record.spells.as_ref().unwrap().iter().enumerate() {
-            let skill_component = Skill::new(skill_slot_from_index(index), skill);
-            commands
-                .entity(entity)
-                .with_related::<SkillOf>((skill_component, CoolDown::default()));
-        }
-    }
 }

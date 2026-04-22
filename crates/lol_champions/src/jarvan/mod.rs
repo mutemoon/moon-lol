@@ -1,9 +1,8 @@
 pub mod buffs;
 
 use bevy::prelude::*;
-use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_base::prop::LoadHashKeyTrait;
+use lol_base::spell::Spell;
 use lol_core::action::damage::{DamageShape, TargetDamage, TargetFilter};
 use lol_core::action::dash::{ActionDash, DashDamage, DashMoveType};
 use lol_core::base::buff::BuffOf;
@@ -11,22 +10,15 @@ use lol_core::buffs::cc_debuffs::DebuffSlow;
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
 use lol_core::skill::{
-    CoolDown, EventSkillCast, PassiveSkillOf, Skill, SkillOf, SkillSlot, Skills,
-    play_skill_animation, skill_damage, skill_dash, skill_slot_from_index, spawn_skill_particle,
+    CoolDown, EventSkillCast, Skill, SkillSlot, play_skill_animation, skill_damage, skill_dash,
+    spawn_skill_particle,
 };
-
-const JARVAN_Q_KEY: &str = "Characters/JarvanIV/Spells/JarvanIVQ/JarvanIVQ";
-const JARVAN_W_KEY: &str = "Characters/JarvanIV/Spells/JarvanIVW/JarvanIVW";
-#[allow(dead_code)]
-const JARVAN_E_KEY: &str = "Characters/JarvanIV/Spells/JarvanIVE/JarvanIVE";
-const JARVAN_R_KEY: &str = "Characters/JarvanIV/Spells/JarvanIVR/JarvanIVR";
 
 #[derive(Default)]
 pub struct PluginJarvan;
 
 impl Plugin for PluginJarvan {
     fn build(&self, app: &mut App) {
-        app.add_systems(FixedUpdate, add_skills);
         app.add_observer(on_jarvan_skill_cast);
         app.add_observer(on_jarvan_damage_hit);
     }
@@ -53,16 +45,24 @@ fn on_jarvan_skill_cast(
         return;
     };
 
+    let skill_spell = skill.key_spell_object.clone();
+
     match skill.slot {
-        SkillSlot::Q => cast_jarvan_q(&mut commands, entity),
-        SkillSlot::W => cast_jarvan_w(&mut commands, entity),
+        SkillSlot::Q => cast_jarvan_q(&mut commands, entity, skill_spell),
+        SkillSlot::W => cast_jarvan_w(&mut commands, entity, skill_spell),
         SkillSlot::E => cast_jarvan_e(&mut commands, entity),
-        SkillSlot::R => cast_jarvan_r(&mut commands, &q_transform, entity, trigger.point),
+        SkillSlot::R => cast_jarvan_r(
+            &mut commands,
+            &q_transform,
+            entity,
+            trigger.point,
+            skill_spell,
+        ),
         _ => {}
     }
 }
 
-fn cast_jarvan_q(commands: &mut Commands, entity: Entity) {
+fn cast_jarvan_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell1"));
     spawn_skill_particle(commands, entity, hash_bin("Jarvan_Q_Cast"));
 
@@ -70,7 +70,7 @@ fn cast_jarvan_q(commands: &mut Commands, entity: Entity) {
     skill_damage(
         commands,
         entity,
-        JARVAN_Q_KEY,
+        skill_spell,
         DamageShape::Sector {
             radius: 785.0,
             angle: 20.0,
@@ -84,7 +84,7 @@ fn cast_jarvan_q(commands: &mut Commands, entity: Entity) {
     );
 }
 
-fn cast_jarvan_w(commands: &mut Commands, entity: Entity) {
+fn cast_jarvan_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell2"));
     spawn_skill_particle(commands, entity, hash_bin("Jarvan_W_Cast"));
 
@@ -92,7 +92,7 @@ fn cast_jarvan_w(commands: &mut Commands, entity: Entity) {
     skill_damage(
         commands,
         entity,
-        JARVAN_W_KEY,
+        skill_spell,
         DamageShape::Circle { radius: 600.0 },
         vec![TargetDamage {
             filter: TargetFilter::All,
@@ -115,6 +115,7 @@ fn cast_jarvan_r(
     q_transform: &Query<&Transform>,
     entity: Entity,
     point: Vec2,
+    skill_spell: Handle<Spell>,
 ) {
     play_skill_animation(commands, entity, hash_bin("Spell4"));
     spawn_skill_particle(commands, entity, hash_bin("Jarvan_R_Cast"));
@@ -126,7 +127,7 @@ fn cast_jarvan_r(
         entity,
         point,
         &ActionDash {
-            skill: JARVAN_R_KEY.into(),
+            skill: skill_spell,
             move_type: DashMoveType::Pointer { max: 650.0 },
             damage: Some(DashDamage {
                 radius_end: 150.0,
@@ -157,33 +158,4 @@ fn on_jarvan_damage_hit(
     commands
         .entity(target)
         .with_related::<BuffOf>(DebuffSlow::new(0.3, 2.0));
-}
-
-fn add_skills(
-    mut commands: Commands,
-    q_jarvan: Query<Entity, (With<JarvanIV>, Without<Skills>)>,
-    res_assets_character_record: Res<Assets<CharacterRecord>>,
-) {
-    for entity in q_jarvan.iter() {
-        let Some(character_record) =
-            res_assets_character_record.load_hash("Characters/JarvanIV/CharacterRecords/Root")
-        else {
-            continue;
-        };
-
-        commands.entity(entity).with_related::<PassiveSkillOf>((
-            Skill::new(
-                SkillSlot::Passive,
-                "Characters/JarvanIV/Spells/JarvanIVPassive/JarvanIVPassive",
-            ),
-            CoolDown::default(),
-        ));
-
-        for (index, &skill) in character_record.spells.as_ref().unwrap().iter().enumerate() {
-            let skill_component = Skill::new(skill_slot_from_index(index), skill);
-            commands
-                .entity(entity)
-                .with_related::<SkillOf>((skill_component, CoolDown::default()));
-        }
-    }
 }

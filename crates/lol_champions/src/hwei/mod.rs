@@ -1,11 +1,8 @@
 use bevy::prelude::*;
-use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_base::prop::LoadHashKeyTrait;
 use lol_core::entities::champion::Champion;
 use lol_core::skill::{
-    CoolDown, EventSkillCast, PassiveSkillOf, Skill, SkillOf, SkillSlot, Skills,
-    play_skill_animation, skill_slot_from_index, spawn_skill_particle,
+    EventSkillCast, Skill, SkillSlot, play_skill_animation, spawn_skill_particle,
 };
 
 #[derive(Default)]
@@ -13,7 +10,6 @@ pub struct PluginHwei;
 
 impl Plugin for PluginHwei {
     fn build(&self, app: &mut App) {
-        app.add_systems(FixedUpdate, add_skills);
         app.add_observer(on_hwei_skill_cast);
     }
 }
@@ -46,34 +42,5 @@ fn on_hwei_skill_cast(
         SkillSlot::E => spawn_skill_particle(&mut commands, entity, hash_bin("Hwei_Q_Q_Tar")),
         SkillSlot::R => spawn_skill_particle(&mut commands, entity, hash_bin("Hwei_Q_Q_Tar")),
         _ => {}
-    }
-}
-
-fn add_skills(
-    mut commands: Commands,
-    q_hwei: Query<Entity, (With<Hwei>, Without<Skills>)>,
-    res_assets_character_record: Res<Assets<CharacterRecord>>,
-) {
-    for entity in q_hwei.iter() {
-        commands.entity(entity).with_related::<PassiveSkillOf>((
-            Skill::new(
-                SkillSlot::Passive,
-                "Characters/Hwei/Spells/HweiPassiveAbility/HweiPassive",
-            ),
-            CoolDown::default(),
-        ));
-
-        let Some(character_record) =
-            res_assets_character_record.load_hash("Characters/Hwei/CharacterRecords/Root")
-        else {
-            continue;
-        };
-
-        for (index, &skill) in character_record.spells.as_ref().unwrap().iter().enumerate() {
-            commands.entity(entity).with_related::<SkillOf>((
-                Skill::new(skill_slot_from_index(index), skill),
-                CoolDown::default(),
-            ));
-        }
     }
 }

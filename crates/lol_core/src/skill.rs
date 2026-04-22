@@ -2,7 +2,6 @@ use std::ops::Deref;
 
 use bevy::prelude::*;
 use league_utils::hash_bin;
-use lol_base::prop::{HashKey, LoadHashKeyTrait};
 use lol_base::spell::Spell;
 use lol_base::spell_calc::{
     CalculationPart, CalculationPartEffectValue, CalculationPartNamedDataValue,
@@ -103,7 +102,7 @@ pub enum SkillCooldownMode {
 #[derive(Component)]
 #[require(CoolDown)]
 pub struct Skill {
-    pub key_spell_object: HashKey<Spell>,
+    pub key_spell_object: Handle<Spell>,
     pub level: usize,
     pub slot: SkillSlot,
     pub cooldown_mode: SkillCooldownMode,
@@ -112,7 +111,7 @@ pub struct Skill {
 impl Default for Skill {
     fn default() -> Self {
         Self {
-            key_spell_object: 0.into(),
+            key_spell_object: Handle::<Spell>::default(),
             level: 0,
             slot: SkillSlot::Q,
             cooldown_mode: SkillCooldownMode::AfterCast,
@@ -121,9 +120,9 @@ impl Default for Skill {
 }
 
 impl Skill {
-    pub fn new(slot: SkillSlot, key_spell_object: impl Into<HashKey<Spell>>) -> Self {
+    pub fn new(slot: SkillSlot, key_spell_object: Handle<Spell>) -> Self {
         Self {
-            key_spell_object: key_spell_object.into(),
+            key_spell_object,
             level: 0,
             slot,
             cooldown_mode: SkillCooldownMode::AfterCast,
@@ -315,7 +314,7 @@ fn on_skill_cast(
         return;
     }
 
-    let Some(spell_object) = res_assets_spell_object.load_hash(skill.key_spell_object) else {
+    let Some(spell_object) = res_assets_spell_object.get(&skill.key_spell_object) else {
         push_skill_log(
             &mut log,
             entity,
@@ -518,14 +517,14 @@ pub fn reset_skill_attack(commands: &mut Commands, entity: Entity) {
 pub fn skill_damage(
     commands: &mut Commands,
     entity: Entity,
-    skill: impl Into<HashKey<Spell>>,
+    skill: Handle<Spell>,
     shape: DamageShape,
     damage_list: Vec<TargetDamage>,
     particle: Option<u32>,
 ) {
     commands.trigger(ActionDamage {
         entity,
-        skill: skill.into(),
+        skill,
         effects: vec![ActionDamageEffect {
             shape,
             damage_list,
@@ -571,7 +570,7 @@ pub fn skill_dash(
             start_pos: transform.translation,
             target_pos: Vec3::new(destination.x, transform.translation.y, destination.y),
             damage: damage.clone(),
-            skill: dash.skill,
+            skill: dash.skill.clone(),
             hit_entities: std::collections::HashSet::default(),
         });
     }

@@ -1,31 +1,24 @@
 pub mod buffs;
 
 use bevy::prelude::*;
-use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_base::prop::LoadHashKeyTrait;
+use lol_base::spell::Spell;
 use lol_core::action::damage::{DamageShape, TargetDamage, TargetFilter};
 use lol_core::base::buff::BuffOf;
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
 use lol_core::skill::{
-    CoolDown, EventSkillCast, PassiveSkillOf, Skill, SkillOf, SkillSlot, Skills,
-    play_skill_animation, skill_damage, skill_slot_from_index, spawn_skill_particle,
+    CoolDown, EventSkillCast, Skill, SkillSlot, play_skill_animation, skill_damage,
+    spawn_skill_particle,
 };
 
 use crate::twitch::buffs::{BuffTwitchPassive, BuffTwitchW};
-
-// const TWITCH_Q_KEY: &str = "Characters/Twitch/Spells/TwitchQ/TwitchQ";
-const TWITCH_W_KEY: &str = "Characters/Twitch/Spells/TwitchW/TwitchW";
-const TWITCH_E_KEY: &str = "Characters/Twitch/Spells/TwitchE/TwitchE";
-// const TWITCH_R_KEY: &str = "Characters/Twitch/Spells/TwitchR/TwitchR";
 
 #[derive(Default)]
 pub struct PluginTwitch;
 
 impl Plugin for PluginTwitch {
     fn build(&self, app: &mut App) {
-        app.add_systems(FixedUpdate, add_skills);
         app.add_observer(on_twitch_skill_cast);
         app.add_observer(on_twitch_damage_hit);
     }
@@ -51,10 +44,12 @@ fn on_twitch_skill_cast(
         return;
     };
 
+    let skill_spell = skill.key_spell_object.clone();
+
     match skill.slot {
         SkillSlot::Q => cast_twitch_q(&mut commands, entity),
-        SkillSlot::W => cast_twitch_w(&mut commands, entity),
-        SkillSlot::E => cast_twitch_e(&mut commands, entity),
+        SkillSlot::W => cast_twitch_w(&mut commands, entity, skill_spell),
+        SkillSlot::E => cast_twitch_e(&mut commands, entity, skill_spell),
         SkillSlot::R => cast_twitch_r(&mut commands, entity),
         _ => {}
     }
@@ -65,14 +60,14 @@ fn cast_twitch_q(commands: &mut Commands, entity: Entity) {
     spawn_skill_particle(commands, entity, hash_bin("Twitch_Q_Cast"));
 }
 
-fn cast_twitch_w(commands: &mut Commands, entity: Entity) {
+fn cast_twitch_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell2"));
     spawn_skill_particle(commands, entity, hash_bin("Twitch_W_Cast"));
 
     skill_damage(
         commands,
         entity,
-        TWITCH_W_KEY,
+        skill_spell,
         DamageShape::Circle { radius: 955.0 },
         vec![TargetDamage {
             filter: TargetFilter::All,
@@ -83,14 +78,14 @@ fn cast_twitch_w(commands: &mut Commands, entity: Entity) {
     );
 }
 
-fn cast_twitch_e(commands: &mut Commands, entity: Entity) {
+fn cast_twitch_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell3"));
     spawn_skill_particle(commands, entity, hash_bin("Twitch_E_Cast"));
 
     skill_damage(
         commands,
         entity,
-        TWITCH_E_KEY,
+        skill_spell,
         DamageShape::Circle { radius: 1200.0 },
         vec![TargetDamage {
             filter: TargetFilter::All,
@@ -124,33 +119,4 @@ fn on_twitch_damage_hit(
     commands
         .entity(target)
         .with_related::<BuffOf>(BuffTwitchW::new(0.35, 3.0));
-}
-
-fn add_skills(
-    mut commands: Commands,
-    q_twitch: Query<Entity, (With<Twitch>, Without<Skills>)>,
-    res_assets_character_record: Res<Assets<CharacterRecord>>,
-) {
-    for entity in q_twitch.iter() {
-        let Some(character_record) =
-            res_assets_character_record.load_hash("Characters/Twitch/CharacterRecords/Root")
-        else {
-            continue;
-        };
-
-        commands.entity(entity).with_related::<PassiveSkillOf>((
-            Skill::new(
-                SkillSlot::Passive,
-                "Characters/Twitch/Spells/TwitchPassive/TwitchPassive",
-            ),
-            CoolDown::default(),
-        ));
-
-        for (index, &skill) in character_record.spells.as_ref().unwrap().iter().enumerate() {
-            let skill_component = Skill::new(skill_slot_from_index(index), skill);
-            commands
-                .entity(entity)
-                .with_related::<SkillOf>((skill_component, CoolDown::default()));
-        }
-    }
 }

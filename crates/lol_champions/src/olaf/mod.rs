@@ -1,21 +1,18 @@
 pub mod buffs;
 
-use bevy::prelude::*;
-use league_core::extract::CharacterRecord;
+use bevy::prelude::{Handle, *};
 use league_utils::hash_bin;
-use lol_base::prop::LoadHashKeyTrait;
+use lol_base::spell::Spell;
 use lol_core::action::damage::{DamageShape, TargetDamage, TargetFilter};
 use lol_core::base::buff::BuffOf;
 use lol_core::damage::DamageType;
 use lol_core::entities::champion::Champion;
 use lol_core::skill::{
-    CoolDown, EventSkillCast, PassiveSkillOf, Skill, SkillOf, SkillSlot, Skills,
-    play_skill_animation, skill_damage, skill_slot_from_index, spawn_skill_particle,
+    CoolDown, EventSkillCast, Skill, SkillSlot, play_skill_animation, skill_damage,
+    spawn_skill_particle,
 };
 
 use crate::olaf::buffs::{BuffOlafR, BuffOlafW};
-
-const OLAF_E_KEY: &str = "Characters/Olaf/Spells/OlafRecklessStrike/OlafRecklessStrike";
 
 // Olaf W parameters
 const OLAF_W_ATTACK_SPEED_BONUS: f32 = 0.4; // 40% attack speed
@@ -30,7 +27,6 @@ pub struct PluginOlaf;
 
 impl Plugin for PluginOlaf {
     fn build(&self, app: &mut App) {
-        app.add_systems(FixedUpdate, add_skills);
         app.add_observer(on_olaf_skill_cast);
     }
 }
@@ -55,10 +51,12 @@ fn on_olaf_skill_cast(
         return;
     };
 
+    let skill_spell = skill.key_spell_object.clone();
+
     match skill.slot {
         SkillSlot::Q => cast_olaf_q(&mut commands, entity, trigger.point),
         SkillSlot::W => cast_olaf_w(&mut commands, entity),
-        SkillSlot::E => cast_olaf_e(&mut commands, entity, trigger.point),
+        SkillSlot::E => cast_olaf_e(&mut commands, entity, trigger.point, skill_spell),
         SkillSlot::R => cast_olaf_r(&mut commands, entity),
         _ => {}
     }
@@ -92,13 +90,13 @@ fn cast_olaf_w(commands: &mut Commands, entity: Entity) {
     );
 }
 
-fn cast_olaf_e(commands: &mut Commands, entity: Entity, _point: Vec2) {
+fn cast_olaf_e(commands: &mut Commands, entity: Entity, _point: Vec2, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell3"));
     spawn_skill_particle(commands, entity, hash_bin("Olaf_E_Cast"));
     skill_damage(
         commands,
         entity,
-        OLAF_E_KEY,
+        skill_spell,
         DamageShape::Nearest {
             max_distance: 200.0,
         },
@@ -125,33 +123,4 @@ fn cast_olaf_r(commands: &mut Commands, entity: Entity) {
         "{:?} 释放了 {} 技能，免疫控制效果持续 {} 秒",
         entity, "Olaf R", OLAF_R_DURATION
     );
-}
-
-fn add_skills(
-    mut commands: Commands,
-    q_olaf: Query<Entity, (With<Olaf>, Without<Skills>)>,
-    res_assets_character_record: Res<Assets<CharacterRecord>>,
-) {
-    for entity in q_olaf.iter() {
-        let Some(character_record) =
-            res_assets_character_record.load_hash("Characters/Olaf/CharacterRecords/Root")
-        else {
-            continue;
-        };
-
-        commands.entity(entity).with_related::<PassiveSkillOf>((
-            Skill::new(
-                SkillSlot::Passive,
-                "Characters/Olaf/Spells/OlafPassiveAbility/OlafPassive",
-            ),
-            CoolDown::default(),
-        ));
-
-        for (index, &skill) in character_record.spells.as_ref().unwrap().iter().enumerate() {
-            commands.entity(entity).with_related::<SkillOf>((
-                Skill::new(skill_slot_from_index(index), skill),
-                CoolDown::default(),
-            ));
-        }
-    }
 }

@@ -1,33 +1,25 @@
 pub mod buffs;
 
 use bevy::prelude::*;
-use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_base::prop::LoadHashKeyTrait;
+use lol_base::spell::Spell;
 use lol_core::action::damage::{DamageShape, TargetDamage, TargetFilter};
 use lol_core::action::dash::{ActionDash, DashDamage, DashMoveType};
 use lol_core::base::buff::BuffOf;
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
 use lol_core::skill::{
-    CoolDown, EventSkillCast, PassiveSkillOf, Skill, SkillOf, SkillSlot, Skills,
-    play_skill_animation, skill_damage, skill_dash, skill_slot_from_index, spawn_skill_particle,
+    CoolDown, EventSkillCast, Skill, SkillSlot, play_skill_animation, skill_damage, skill_dash,
+    spawn_skill_particle,
 };
 
 use crate::kaisa::buffs::{BuffKaisaE, BuffKaisaPlasma, BuffKaisaR};
-
-const KAISA_Q_KEY: &str = "Characters/Kaisa/Spells/KaisaQ/KaisaQ";
-const KAISA_W_KEY: &str = "Characters/Kaisa/Spells/KaisaW/KaisaW";
-#[allow(dead_code)]
-const KAISA_E_KEY: &str = "Characters/Kaisa/Spells/KaisaE/KaisaE";
-const KAISA_R_KEY: &str = "Characters/Kaisa/Spells/KaisaR/KaisaR";
 
 #[derive(Default)]
 pub struct PluginKaisa;
 
 impl Plugin for PluginKaisa {
     fn build(&self, app: &mut App) {
-        app.add_systems(FixedUpdate, add_skills);
         app.add_observer(on_kaisa_skill_cast);
         app.add_observer(on_kaisa_damage_hit);
     }
@@ -54,16 +46,24 @@ fn on_kaisa_skill_cast(
         return;
     };
 
+    let skill_spell = skill.key_spell_object.clone();
+
     match skill.slot {
-        SkillSlot::Q => cast_kaisa_q(&mut commands, entity),
-        SkillSlot::W => cast_kaisa_w(&mut commands, entity),
+        SkillSlot::Q => cast_kaisa_q(&mut commands, entity, skill_spell),
+        SkillSlot::W => cast_kaisa_w(&mut commands, entity, skill_spell),
         SkillSlot::E => cast_kaisa_e(&mut commands, entity),
-        SkillSlot::R => cast_kaisa_r(&mut commands, &q_transform, entity, trigger.point),
+        SkillSlot::R => cast_kaisa_r(
+            &mut commands,
+            &q_transform,
+            entity,
+            trigger.point,
+            skill_spell,
+        ),
         _ => {}
     }
 }
 
-fn cast_kaisa_q(commands: &mut Commands, entity: Entity) {
+fn cast_kaisa_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell1"));
     spawn_skill_particle(commands, entity, hash_bin("Kaisa_Q_Cast"));
 
@@ -71,7 +71,7 @@ fn cast_kaisa_q(commands: &mut Commands, entity: Entity) {
     skill_damage(
         commands,
         entity,
-        KAISA_Q_KEY,
+        skill_spell,
         DamageShape::Circle { radius: 600.0 },
         vec![TargetDamage {
             filter: TargetFilter::All,
@@ -82,7 +82,7 @@ fn cast_kaisa_q(commands: &mut Commands, entity: Entity) {
     );
 }
 
-fn cast_kaisa_w(commands: &mut Commands, entity: Entity) {
+fn cast_kaisa_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell2"));
     spawn_skill_particle(commands, entity, hash_bin("Kaisa_W_Cast"));
 
@@ -90,7 +90,7 @@ fn cast_kaisa_w(commands: &mut Commands, entity: Entity) {
     skill_damage(
         commands,
         entity,
-        KAISA_W_KEY,
+        skill_spell,
         DamageShape::Sector {
             radius: 3000.0,
             angle: 10.0,
@@ -119,6 +119,7 @@ fn cast_kaisa_r(
     q_transform: &Query<&Transform>,
     entity: Entity,
     point: Vec2,
+    skill_spell: Handle<Spell>,
 ) {
     play_skill_animation(commands, entity, hash_bin("Spell4"));
     spawn_skill_particle(commands, entity, hash_bin("Kaisa_R_Cast"));
@@ -134,7 +135,7 @@ fn cast_kaisa_r(
         entity,
         point,
         &ActionDash {
-            skill: KAISA_R_KEY.into(),
+            skill: skill_spell,
             move_type: DashMoveType::Pointer { max: 2000.0 },
             damage: Some(DashDamage {
                 radius_end: 150.0,
@@ -165,33 +166,4 @@ fn on_kaisa_damage_hit(
     commands
         .entity(target)
         .with_related::<BuffOf>(BuffKaisaPlasma::new(1, 5.0));
-}
-
-fn add_skills(
-    mut commands: Commands,
-    q_kaisa: Query<Entity, (With<Kaisa>, Without<Skills>)>,
-    res_assets_character_record: Res<Assets<CharacterRecord>>,
-) {
-    for entity in q_kaisa.iter() {
-        let Some(character_record) =
-            res_assets_character_record.load_hash("Characters/Kaisa/CharacterRecords/Root")
-        else {
-            continue;
-        };
-
-        commands.entity(entity).with_related::<PassiveSkillOf>((
-            Skill::new(
-                SkillSlot::Passive,
-                "Characters/Kaisa/Spells/KaisaPassive/KaisaPassive",
-            ),
-            CoolDown::default(),
-        ));
-
-        for (index, &skill) in character_record.spells.as_ref().unwrap().iter().enumerate() {
-            let skill_component = Skill::new(skill_slot_from_index(index), skill);
-            commands
-                .entity(entity)
-                .with_related::<SkillOf>((skill_component, CoolDown::default()));
-        }
-    }
 }

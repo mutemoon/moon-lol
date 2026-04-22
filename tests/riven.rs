@@ -6,6 +6,7 @@ use bevy::prelude::*;
 use bevy::time::TimeUpdateStrategy;
 use bevy::winit::WinitPlugin;
 use league_utils::hash_bin;
+use league_utils::hash_key::HashKey;
 use lol_base::grid::{
     ConfigNavigationGrid, ConfigNavigationGridCell, GridFlagsJungleQuadrant, GridFlagsMainRegion,
     GridFlagsNearestLane, GridFlagsPOI, GridFlagsRing, GridFlagsRiverRegion, GridFlagsSRX,
@@ -267,7 +268,8 @@ impl RivenHarness {
 
             // Link skills
             let add_sk = |commands: &mut Commands, slot: SkillSlot, key: &str, manual: bool| {
-                let mut skill = Skill::new(slot, key).with_level(1);
+                let mut skill =
+                    Skill::new(slot, Handle::from(HashKey::<Spell>::from(key))).with_level(1);
                 if manual {
                     skill = skill.with_cooldown_mode(SkillCooldownMode::Manual);
                 }
@@ -458,7 +460,7 @@ impl RivenHarness {
         self.app
             .world()
             .resource::<Assets<Spell>>()
-            .load_hash(&skill.key_spell_object)
+            .load_hash(skill.key_spell_object.id())
     }
 
     fn print_skill_logs(&self) {

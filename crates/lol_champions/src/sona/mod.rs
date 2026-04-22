@@ -1,33 +1,24 @@
 pub mod buffs;
 
 use bevy::prelude::*;
-use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_base::prop::LoadHashKeyTrait;
+use lol_base::spell::Spell;
 use lol_core::action::damage::{DamageShape, TargetDamage, TargetFilter};
 use lol_core::base::buff::BuffOf;
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
 use lol_core::skill::{
-    CoolDown, EventSkillCast, PassiveSkillOf, Skill, SkillOf, SkillSlot, Skills,
-    play_skill_animation, skill_damage, skill_slot_from_index, spawn_skill_particle,
+    CoolDown, EventSkillCast, Skill, SkillSlot, play_skill_animation, skill_damage,
+    spawn_skill_particle,
 };
 
 use crate::sona::buffs::{BuffSonaE, BuffSonaW};
-
-const SONA_Q_KEY: &str = "Characters/Sona/Spells/SonaQ/SonaQ";
-#[allow(dead_code)]
-const SONA_W_KEY: &str = "Characters/Sona/Spells/SonaW/SonaW";
-#[allow(dead_code)]
-const SONA_E_KEY: &str = "Characters/Sona/Spells/SonaE/SonaE";
-const SONA_R_KEY: &str = "Characters/Sona/Spells/SonaR/SonaR";
 
 #[derive(Default)]
 pub struct PluginSona;
 
 impl Plugin for PluginSona {
     fn build(&self, app: &mut App) {
-        app.add_systems(FixedUpdate, add_skills);
         app.add_observer(on_sona_skill_cast);
         app.add_observer(on_sona_damage_hit);
     }
@@ -53,16 +44,18 @@ fn on_sona_skill_cast(
         return;
     };
 
+    let skill_spell = skill.key_spell_object.clone();
+
     match skill.slot {
-        SkillSlot::Q => cast_sona_q(&mut commands, entity),
+        SkillSlot::Q => cast_sona_q(&mut commands, entity, skill_spell),
         SkillSlot::W => cast_sona_w(&mut commands, entity),
         SkillSlot::E => cast_sona_e(&mut commands, entity),
-        SkillSlot::R => cast_sona_r(&mut commands, entity),
+        SkillSlot::R => cast_sona_r(&mut commands, entity, skill_spell),
         _ => {}
     }
 }
 
-fn cast_sona_q(commands: &mut Commands, entity: Entity) {
+fn cast_sona_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell1"));
     spawn_skill_particle(commands, entity, hash_bin("Sona_Q_Cast"));
 
@@ -70,7 +63,7 @@ fn cast_sona_q(commands: &mut Commands, entity: Entity) {
     skill_damage(
         commands,
         entity,
-        SONA_Q_KEY,
+        skill_spell,
         DamageShape::Circle { radius: 700.0 },
         vec![TargetDamage {
             filter: TargetFilter::All,
@@ -101,7 +94,7 @@ fn cast_sona_e(commands: &mut Commands, entity: Entity) {
         .with_related::<BuffOf>(BuffSonaE::new(0.2, 2.5));
 }
 
-fn cast_sona_r(commands: &mut Commands, entity: Entity) {
+fn cast_sona_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell4"));
     spawn_skill_particle(commands, entity, hash_bin("Sona_R_Cast"));
 
@@ -109,7 +102,7 @@ fn cast_sona_r(commands: &mut Commands, entity: Entity) {
     skill_damage(
         commands,
         entity,
-        SONA_R_KEY,
+        skill_spell,
         DamageShape::Sector {
             radius: 900.0,
             angle: 40.0,
@@ -139,33 +132,4 @@ fn on_sona_damage_hit(
     commands
         .entity(target)
         .with_related::<BuffOf>(BuffSonaE::new(0.2, 2.5));
-}
-
-fn add_skills(
-    mut commands: Commands,
-    q_sona: Query<Entity, (With<Sona>, Without<Skills>)>,
-    res_assets_character_record: Res<Assets<CharacterRecord>>,
-) {
-    for entity in q_sona.iter() {
-        let Some(character_record) =
-            res_assets_character_record.load_hash("Characters/Sona/CharacterRecords/Root")
-        else {
-            continue;
-        };
-
-        commands.entity(entity).with_related::<PassiveSkillOf>((
-            Skill::new(
-                SkillSlot::Passive,
-                "Characters/Sona/Spells/SonaPassive/SonaPassive",
-            ),
-            CoolDown::default(),
-        ));
-
-        for (index, &skill) in character_record.spells.as_ref().unwrap().iter().enumerate() {
-            let skill_component = Skill::new(skill_slot_from_index(index), skill);
-            commands
-                .entity(entity)
-                .with_related::<SkillOf>((skill_component, CoolDown::default()));
-        }
-    }
 }

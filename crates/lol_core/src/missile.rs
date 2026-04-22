@@ -3,7 +3,6 @@ use bevy::color::palettes::tailwind::RED_500;
 use bevy::prelude::*;
 use league_utils::hash_joint;
 use lol_base::movement::MovementType;
-use lol_base::prop::{HashKey, LoadHashKeyTrait};
 use lol_base::spell::Spell;
 use serde::{Deserialize, Serialize};
 
@@ -28,7 +27,7 @@ impl Plugin for PluginMissile {
 /// 攻击组件 - 包含攻击的基础属性
 #[derive(Debug, Component, Clone)]
 pub struct Missile {
-    pub key: HashKey<Spell>,
+    pub key: Handle<Spell>,
     pub speed: f32,
 }
 
@@ -45,7 +44,7 @@ pub struct MissileState {
 pub struct CommandMissileCreate {
     pub entity: Entity,
     pub target: Entity,
-    pub spell_key: HashKey<Spell>,
+    pub spell_key: Handle<Spell>,
 }
 
 fn fixed_update(
@@ -85,9 +84,7 @@ fn on_command_missile_create(
 ) {
     let entity = trigger.event_target();
 
-    let spell_object = res_assets_spell_object
-        .load_hash(trigger.spell_key)
-        .unwrap();
+    let spell_object = res_assets_spell_object.get(&trigger.spell_key).unwrap();
 
     let spell_data_resource = spell_object.spell_data.clone().unwrap();
 
@@ -147,7 +144,7 @@ fn on_command_missile_create(
     let missile_entity = commands
         .spawn((
             Missile {
-                key: trigger.spell_key,
+                key: trigger.spell_key.clone(),
                 speed,
             },
             MissileState {

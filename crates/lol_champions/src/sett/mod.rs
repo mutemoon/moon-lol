@@ -1,9 +1,8 @@
 pub mod buffs;
 
 use bevy::prelude::*;
-use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_base::prop::LoadHashKeyTrait;
+use lol_base::spell::Spell;
 use lol_core::action::damage::{DamageShape, TargetDamage, TargetFilter};
 use lol_core::action::dash::{ActionDash, DashDamage, DashMoveType};
 use lol_core::base::buff::BuffOf;
@@ -12,23 +11,17 @@ use lol_core::buffs::shield_white::BuffShieldWhite;
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
 use lol_core::skill::{
-    CoolDown, EventSkillCast, PassiveSkillOf, Skill, SkillOf, SkillSlot, Skills,
-    play_skill_animation, reset_skill_attack, skill_damage, skill_dash, skill_slot_from_index,
-    spawn_skill_particle,
+    CoolDown, EventSkillCast, Skill, SkillSlot, play_skill_animation, reset_skill_attack,
+    skill_damage, skill_dash, spawn_skill_particle,
 };
 
 use crate::sett::buffs::BuffSettQ;
-
-const SETT_W_KEY: &str = "Characters/Sett/Spells/SettW/SettW";
-const SETT_E_KEY: &str = "Characters/Sett/Spells/SettE/SettE";
-const SETT_R_KEY: &str = "Characters/Sett/Spells/SettR/SettR";
 
 #[derive(Default)]
 pub struct PluginSett;
 
 impl Plugin for PluginSett {
     fn build(&self, app: &mut App) {
-        app.add_systems(FixedUpdate, add_skills);
         app.add_observer(on_sett_skill_cast);
         app.add_observer(on_sett_damage_hit);
     }
@@ -57,9 +50,15 @@ fn on_sett_skill_cast(
 
     match skill.slot {
         SkillSlot::Q => cast_sett_q(&mut commands, entity),
-        SkillSlot::W => cast_sett_w(&mut commands, entity),
-        SkillSlot::E => cast_sett_e(&mut commands, entity),
-        SkillSlot::R => cast_sett_r(&mut commands, &q_transform, entity, trigger.point),
+        SkillSlot::W => cast_sett_w(&mut commands, entity, skill.key_spell_object.clone()),
+        SkillSlot::E => cast_sett_e(&mut commands, entity, skill.key_spell_object.clone()),
+        SkillSlot::R => cast_sett_r(
+            &mut commands,
+            &q_transform,
+            entity,
+            trigger.point,
+            skill.key_spell_object.clone(),
+        ),
         _ => {}
     }
 }
@@ -74,14 +73,14 @@ fn cast_sett_q(commands: &mut Commands, entity: Entity) {
         .with_related::<BuffOf>(BuffSettQ::new(2, 0.3, 4.0));
 }
 
-fn cast_sett_w(commands: &mut Commands, entity: Entity) {
+fn cast_sett_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell2"));
     spawn_skill_particle(commands, entity, hash_bin("Sett_W_Cast"));
     // W deals true damage in a cone and grants shield based on damage taken
     skill_damage(
         commands,
         entity,
-        SETT_W_KEY,
+        skill_spell,
         DamageShape::Sector {
             radius: 350.0,
             angle: 75.0,
@@ -99,14 +98,14 @@ fn cast_sett_w(commands: &mut Commands, entity: Entity) {
         .with_related::<BuffOf>(BuffShieldWhite::new(100.0));
 }
 
-fn cast_sett_e(commands: &mut Commands, entity: Entity) {
+fn cast_sett_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell3"));
     spawn_skill_particle(commands, entity, hash_bin("Sett_E_Cast"));
     // E is a两边拉扯 that damages and stuns enemies caught by both sides
     skill_damage(
         commands,
         entity,
-        SETT_E_KEY,
+        skill_spell,
         DamageShape::Sector {
             radius: 300.0,
             angle: 90.0,
@@ -125,6 +124,7 @@ fn cast_sett_r(
     q_transform: &Query<&Transform>,
     entity: Entity,
     point: Vec2,
+    skill_spell: Handle<Spell>,
 ) {
     play_skill_animation(commands, entity, hash_bin("Spell4"));
     spawn_skill_particle(commands, entity, hash_bin("Sett_R_Cast"));
@@ -135,7 +135,7 @@ fn cast_sett_r(
         entity,
         point,
         &ActionDash {
-            skill: SETT_R_KEY.into(),
+            skill: skill_spell,
             move_type: DashMoveType::Pointer { max: 400.0 },
             damage: Some(DashDamage {
                 radius_end: 200.0,
@@ -148,35 +148,6 @@ fn cast_sett_r(
             speed: 700.0,
         },
     );
-}
-
-fn add_skills(
-    mut commands: Commands,
-    q_sett: Query<Entity, (With<Sett>, Without<Skills>)>,
-    res_assets_character_record: Res<Assets<CharacterRecord>>,
-) {
-    for entity in q_sett.iter() {
-        let Some(character_record) =
-            res_assets_character_record.load_hash("Characters/Sett/CharacterRecords/Root")
-        else {
-            continue;
-        };
-
-        commands.entity(entity).with_related::<PassiveSkillOf>((
-            Skill::new(
-                SkillSlot::Passive,
-                "Characters/Sett/Spells/SettPassiveAbility/SettPassive",
-            ),
-            CoolDown::default(),
-        ));
-
-        for (index, &skill) in character_record.spells.as_ref().unwrap().iter().enumerate() {
-            commands.entity(entity).with_related::<SkillOf>((
-                Skill::new(skill_slot_from_index(index), skill),
-                CoolDown::default(),
-            ));
-        }
-    }
 }
 
 /// 监听 Sett 造成的伤害，E/R 命中时眩晕

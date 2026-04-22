@@ -1,33 +1,25 @@
 pub mod buffs;
 
 use bevy::prelude::*;
-use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_base::prop::LoadHashKeyTrait;
+use lol_base::spell::Spell;
 use lol_core::action::damage::{DamageShape, TargetDamage, TargetFilter};
 use lol_core::action::dash::{ActionDash, DashDamage, DashMoveType};
 use lol_core::base::buff::BuffOf;
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
 use lol_core::skill::{
-    CoolDown, EventSkillCast, PassiveSkillOf, Skill, SkillOf, SkillSlot, Skills,
-    play_skill_animation, skill_damage, skill_dash, skill_slot_from_index, spawn_skill_particle,
+    EventSkillCast, Skill, SkillSlot, play_skill_animation, skill_damage, skill_dash,
+    spawn_skill_particle,
 };
 
 use crate::kled::buffs::{BuffKledE, BuffKledR, BuffKledW};
-
-const KLED_Q_KEY: &str = "Characters/Kled/Spells/KledQ/KledQ";
-#[allow(dead_code)]
-const KLED_W_KEY: &str = "Characters/Kled/Spells/KledW/KledW";
-const KLED_E_KEY: &str = "Characters/Kled/Spells/KledE/KledE";
-const KLED_R_KEY: &str = "Characters/Kled/Spells/KledR/KledR";
 
 #[derive(Default)]
 pub struct PluginKled;
 
 impl Plugin for PluginKled {
     fn build(&self, app: &mut App) {
-        app.add_systems(FixedUpdate, add_skills);
         app.add_observer(on_kled_skill_cast);
         app.add_observer(on_kled_damage_hit);
     }
@@ -43,27 +35,41 @@ fn on_kled_skill_cast(
     mut commands: Commands,
     q_kled: Query<(), With<Kled>>,
     q_transform: Query<&Transform>,
-    q_skill: Query<(&Skill, &CoolDown)>,
+    q_skill: Query<&Skill>,
 ) {
     let entity = trigger.event_target();
     if q_kled.get(entity).is_err() {
         return;
     }
 
-    let Ok((skill, _cooldown)) = q_skill.get(trigger.skill_entity) else {
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
         return;
     };
 
+    let skill_spell = skill.key_spell_object.clone();
+
     match skill.slot {
-        SkillSlot::Q => cast_kled_q(&mut commands, entity),
+        SkillSlot::Q => cast_kled_q(&mut commands, entity, skill_spell),
         SkillSlot::W => cast_kled_w(&mut commands, entity),
-        SkillSlot::E => cast_kled_e(&mut commands, &q_transform, entity, trigger.point),
-        SkillSlot::R => cast_kled_r(&mut commands, &q_transform, entity, trigger.point),
+        SkillSlot::E => cast_kled_e(
+            &mut commands,
+            &q_transform,
+            entity,
+            trigger.point,
+            skill_spell,
+        ),
+        SkillSlot::R => cast_kled_r(
+            &mut commands,
+            &q_transform,
+            entity,
+            trigger.point,
+            skill_spell,
+        ),
         _ => {}
     }
 }
 
-fn cast_kled_q(commands: &mut Commands, entity: Entity) {
+fn cast_kled_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell1"));
     spawn_skill_particle(commands, entity, hash_bin("Kled_Q_Cast"));
 
@@ -71,7 +77,7 @@ fn cast_kled_q(commands: &mut Commands, entity: Entity) {
     skill_damage(
         commands,
         entity,
-        KLED_Q_KEY,
+        skill_spell,
         DamageShape::Sector {
             radius: 800.0,
             angle: 15.0,
@@ -100,6 +106,7 @@ fn cast_kled_e(
     q_transform: &Query<&Transform>,
     entity: Entity,
     point: Vec2,
+    skill_spell: Handle<Spell>,
 ) {
     play_skill_animation(commands, entity, hash_bin("Spell3"));
     spawn_skill_particle(commands, entity, hash_bin("Kled_E_Cast"));
@@ -111,7 +118,7 @@ fn cast_kled_e(
         entity,
         point,
         &ActionDash {
-            skill: KLED_E_KEY.into(),
+            skill: skill_spell,
             move_type: DashMoveType::Pointer { max: 550.0 },
             damage: Some(DashDamage {
                 radius_end: 100.0,
@@ -135,6 +142,7 @@ fn cast_kled_r(
     q_transform: &Query<&Transform>,
     entity: Entity,
     point: Vec2,
+    skill_spell: Handle<Spell>,
 ) {
     play_skill_animation(commands, entity, hash_bin("Spell4"));
     spawn_skill_particle(commands, entity, hash_bin("Kled_R_Cast"));
@@ -150,7 +158,7 @@ fn cast_kled_r(
         entity,
         point,
         &ActionDash {
-            skill: KLED_R_KEY.into(),
+            skill: skill_spell,
             move_type: DashMoveType::Pointer { max: 3500.0 },
             damage: None,
             speed: 1500.0,
@@ -171,33 +179,4 @@ fn on_kled_damage_hit(
     let _target = trigger.event_target();
 
     // Passive: Kled gains courage on hit
-}
-
-fn add_skills(
-    mut commands: Commands,
-    q_kled: Query<Entity, (With<Kled>, Without<Skills>)>,
-    res_assets_character_record: Res<Assets<CharacterRecord>>,
-) {
-    for entity in q_kled.iter() {
-        let Some(character_record) =
-            res_assets_character_record.load_hash("Characters/Kled/CharacterRecords/Root")
-        else {
-            continue;
-        };
-
-        commands.entity(entity).with_related::<PassiveSkillOf>((
-            Skill::new(
-                SkillSlot::Passive,
-                "Characters/Kled/Spells/KledPassive/KledPassive",
-            ),
-            CoolDown::default(),
-        ));
-
-        for (index, &skill) in character_record.spells.as_ref().unwrap().iter().enumerate() {
-            let skill_component = Skill::new(skill_slot_from_index(index), skill);
-            commands
-                .entity(entity)
-                .with_related::<SkillOf>((skill_component, CoolDown::default()));
-        }
-    }
 }

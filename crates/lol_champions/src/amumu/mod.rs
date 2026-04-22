@@ -1,9 +1,8 @@
 pub mod buffs;
 
 use bevy::prelude::*;
-use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_base::prop::LoadHashKeyTrait;
+use lol_base::spell::Spell;
 use lol_core::action::damage::{DamageShape, TargetDamage, TargetFilter};
 use lol_core::action::dash::{ActionDash, DashDamage, DashMoveType};
 use lol_core::base::buff::BuffOf;
@@ -11,23 +10,17 @@ use lol_core::buffs::cc_debuffs::DebuffStun;
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
 use lol_core::skill::{
-    CoolDown, EventSkillCast, PassiveSkillOf, Skill, SkillOf, SkillSlot, Skills,
-    play_skill_animation, skill_damage, skill_dash, skill_slot_from_index, spawn_skill_particle,
+    CoolDown, EventSkillCast, Skill, SkillSlot, play_skill_animation, skill_damage, skill_dash,
+    spawn_skill_particle,
 };
 
 use crate::amumu::buffs::{BuffAmumuPassive, BuffAmumuR};
-
-const AMUMU_Q_KEY: &str = "Characters/Amumu/Spells/AmumuQ/AmumuQ";
-const AMUMU_W_KEY: &str = "Characters/Amumu/Spells/AmumuW/AmumuW";
-const AMUMU_E_KEY: &str = "Characters/Amumu/Spells/AmumuE/AmumuE";
-const AMUMU_R_KEY: &str = "Characters/Amumu/Spells/AmumuR/AmumuR";
 
 #[derive(Default)]
 pub struct PluginAmumu;
 
 impl Plugin for PluginAmumu {
     fn build(&self, app: &mut App) {
-        app.add_systems(FixedUpdate, add_skills);
         app.add_observer(on_amumu_skill_cast);
         app.add_observer(on_amumu_damage_hit);
     }
@@ -54,11 +47,19 @@ fn on_amumu_skill_cast(
         return;
     };
 
+    let skill_spell = skill.key_spell_object.clone();
+
     match skill.slot {
-        SkillSlot::Q => cast_amumu_q(&mut commands, &q_transform, entity, trigger.point),
-        SkillSlot::W => cast_amumu_w(&mut commands, entity),
-        SkillSlot::E => cast_amumu_e(&mut commands, entity),
-        SkillSlot::R => cast_amumu_r(&mut commands, entity),
+        SkillSlot::Q => cast_amumu_q(
+            &mut commands,
+            &q_transform,
+            entity,
+            skill_spell,
+            trigger.point,
+        ),
+        SkillSlot::W => cast_amumu_w(&mut commands, entity, skill_spell),
+        SkillSlot::E => cast_amumu_e(&mut commands, entity, skill_spell),
+        SkillSlot::R => cast_amumu_r(&mut commands, entity, skill_spell),
         _ => {}
     }
 }
@@ -67,6 +68,7 @@ fn cast_amumu_q(
     commands: &mut Commands,
     q_transform: &Query<&Transform>,
     entity: Entity,
+    skill_spell: Handle<Spell>,
     point: Vec2,
 ) {
     play_skill_animation(commands, entity, hash_bin("Spell1"));
@@ -79,7 +81,7 @@ fn cast_amumu_q(
         entity,
         point,
         &ActionDash {
-            skill: AMUMU_Q_KEY.into(),
+            skill: skill_spell,
             move_type: DashMoveType::Pointer { max: 1100.0 },
             damage: Some(DashDamage {
                 radius_end: 100.0,
@@ -94,7 +96,7 @@ fn cast_amumu_q(
     );
 }
 
-fn cast_amumu_w(commands: &mut Commands, entity: Entity) {
+fn cast_amumu_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell2"));
     spawn_skill_particle(commands, entity, hash_bin("Amumu_W_Cast"));
 
@@ -102,7 +104,7 @@ fn cast_amumu_w(commands: &mut Commands, entity: Entity) {
     skill_damage(
         commands,
         entity,
-        AMUMU_W_KEY,
+        skill_spell,
         DamageShape::Circle { radius: 350.0 },
         vec![TargetDamage {
             filter: TargetFilter::All,
@@ -113,7 +115,7 @@ fn cast_amumu_w(commands: &mut Commands, entity: Entity) {
     );
 }
 
-fn cast_amumu_e(commands: &mut Commands, entity: Entity) {
+fn cast_amumu_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell3"));
     spawn_skill_particle(commands, entity, hash_bin("Amumu_E_Cast"));
 
@@ -121,7 +123,7 @@ fn cast_amumu_e(commands: &mut Commands, entity: Entity) {
     skill_damage(
         commands,
         entity,
-        AMUMU_E_KEY,
+        skill_spell,
         DamageShape::Circle { radius: 350.0 },
         vec![TargetDamage {
             filter: TargetFilter::All,
@@ -132,7 +134,7 @@ fn cast_amumu_e(commands: &mut Commands, entity: Entity) {
     );
 }
 
-fn cast_amumu_r(commands: &mut Commands, entity: Entity) {
+fn cast_amumu_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell4"));
     spawn_skill_particle(commands, entity, hash_bin("Amumu_R_Cast"));
 
@@ -140,7 +142,7 @@ fn cast_amumu_r(commands: &mut Commands, entity: Entity) {
     skill_damage(
         commands,
         entity,
-        AMUMU_R_KEY,
+        skill_spell,
         DamageShape::Circle { radius: 550.0 },
         vec![TargetDamage {
             filter: TargetFilter::All,
@@ -179,33 +181,4 @@ fn on_amumu_damage_hit(
     commands
         .entity(target)
         .with_related::<BuffOf>(BuffAmumuPassive::new());
-}
-
-fn add_skills(
-    mut commands: Commands,
-    q_amumu: Query<Entity, (With<Amumu>, Without<Skills>)>,
-    res_assets_character_record: Res<Assets<CharacterRecord>>,
-) {
-    for entity in q_amumu.iter() {
-        let Some(character_record) =
-            res_assets_character_record.load_hash("Characters/Amumu/CharacterRecords/Root")
-        else {
-            continue;
-        };
-
-        commands.entity(entity).with_related::<PassiveSkillOf>((
-            Skill::new(
-                SkillSlot::Passive,
-                "Characters/Amumu/Spells/AmumuPassive/AmumuPassive",
-            ),
-            CoolDown::default(),
-        ));
-
-        for (index, &skill) in character_record.spells.as_ref().unwrap().iter().enumerate() {
-            let skill_component = Skill::new(skill_slot_from_index(index), skill);
-            commands
-                .entity(entity)
-                .with_related::<SkillOf>((skill_component, CoolDown::default()));
-        }
-    }
 }

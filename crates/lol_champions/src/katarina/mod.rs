@@ -1,32 +1,24 @@
 pub mod buffs;
 
 use bevy::prelude::*;
-use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_base::prop::LoadHashKeyTrait;
+use lol_base::spell::Spell;
 use lol_core::action::damage::{DamageShape, TargetDamage, TargetFilter};
 use lol_core::base::buff::BuffOf;
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
 use lol_core::skill::{
-    CoolDown, EventSkillCast, PassiveSkillOf, Skill, SkillOf, SkillSlot, Skills,
-    play_skill_animation, skill_damage, skill_slot_from_index, spawn_skill_particle,
+    CoolDown, EventSkillCast, Skill, SkillSlot, play_skill_animation, skill_damage,
+    spawn_skill_particle,
 };
 
 use crate::katarina::buffs::{BuffKatarinaVoracity, BuffKatarinaW};
-
-const KATARINA_Q_KEY: &str = "Characters/Katarina/Spells/KatarinaQ/KatarinaQ";
-#[allow(dead_code)]
-const KATARINA_W_KEY: &str = "Characters/Katarina/Spells/KatarinaW/KatarinaW";
-const KATARINA_E_KEY: &str = "Characters/Katarina/Spells/KatarinaE/KatarinaE";
-const KATARINA_R_KEY: &str = "Characters/Katarina/Spells/KatarinaR/KatarinaR";
 
 #[derive(Default)]
 pub struct PluginKatarina;
 
 impl Plugin for PluginKatarina {
     fn build(&self, app: &mut App) {
-        app.add_systems(FixedUpdate, add_skills);
         app.add_observer(on_katarina_skill_cast);
         app.add_observer(on_katarina_damage_hit);
     }
@@ -41,7 +33,6 @@ fn on_katarina_skill_cast(
     trigger: On<EventSkillCast>,
     mut commands: Commands,
     q_katarina: Query<(), With<Katarina>>,
-    q_transform: Query<&Transform>,
     q_skill: Query<(&Skill, &CoolDown)>,
 ) {
     let entity = trigger.event_target();
@@ -53,16 +44,18 @@ fn on_katarina_skill_cast(
         return;
     };
 
+    let skill_spell = skill.key_spell_object.clone();
+
     match skill.slot {
-        SkillSlot::Q => cast_katarina_q(&mut commands, entity),
+        SkillSlot::Q => cast_katarina_q(&mut commands, entity, skill_spell),
         SkillSlot::W => cast_katarina_w(&mut commands, entity),
-        SkillSlot::E => cast_katarina_e(&mut commands, &q_transform, entity, trigger.point),
-        SkillSlot::R => cast_katarina_r(&mut commands, entity),
+        SkillSlot::E => cast_katarina_e(&mut commands, entity, skill_spell),
+        SkillSlot::R => cast_katarina_r(&mut commands, entity, skill_spell),
         _ => {}
     }
 }
 
-fn cast_katarina_q(commands: &mut Commands, entity: Entity) {
+fn cast_katarina_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell1"));
     spawn_skill_particle(commands, entity, hash_bin("Katarina_Q_Cast"));
 
@@ -70,7 +63,7 @@ fn cast_katarina_q(commands: &mut Commands, entity: Entity) {
     skill_damage(
         commands,
         entity,
-        KATARINA_Q_KEY,
+        skill_spell,
         DamageShape::Circle { radius: 625.0 },
         vec![TargetDamage {
             filter: TargetFilter::All,
@@ -91,12 +84,7 @@ fn cast_katarina_w(commands: &mut Commands, entity: Entity) {
         .with_related::<BuffOf>(BuffKatarinaW::new(0.8, 2.0));
 }
 
-fn cast_katarina_e(
-    commands: &mut Commands,
-    _q_transform: &Query<&Transform>,
-    entity: Entity,
-    _point: Vec2,
-) {
+fn cast_katarina_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell3"));
     spawn_skill_particle(commands, entity, hash_bin("Katarina_E_Cast"));
 
@@ -104,7 +92,7 @@ fn cast_katarina_e(
     skill_damage(
         commands,
         entity,
-        KATARINA_E_KEY,
+        skill_spell,
         DamageShape::Circle { radius: 100.0 },
         vec![TargetDamage {
             filter: TargetFilter::All,
@@ -115,7 +103,7 @@ fn cast_katarina_e(
     );
 }
 
-fn cast_katarina_r(commands: &mut Commands, entity: Entity) {
+fn cast_katarina_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell4"));
     spawn_skill_particle(commands, entity, hash_bin("Katarina_R_Cast"));
 
@@ -123,7 +111,7 @@ fn cast_katarina_r(commands: &mut Commands, entity: Entity) {
     skill_damage(
         commands,
         entity,
-        KATARINA_R_KEY,
+        skill_spell,
         DamageShape::Circle { radius: 550.0 },
         vec![TargetDamage {
             filter: TargetFilter::All,
@@ -150,33 +138,4 @@ fn on_katarina_damage_hit(
     commands
         .entity(source)
         .with_related::<BuffOf>(BuffKatarinaVoracity::new(15.0, 3.0));
-}
-
-fn add_skills(
-    mut commands: Commands,
-    q_katarina: Query<Entity, (With<Katarina>, Without<Skills>)>,
-    res_assets_character_record: Res<Assets<CharacterRecord>>,
-) {
-    for entity in q_katarina.iter() {
-        let Some(character_record) =
-            res_assets_character_record.load_hash("Characters/Katarina/CharacterRecords/Root")
-        else {
-            continue;
-        };
-
-        commands.entity(entity).with_related::<PassiveSkillOf>((
-            Skill::new(
-                SkillSlot::Passive,
-                "Characters/Katarina/Spells/KatarinaPassive/KatarinaPassive",
-            ),
-            CoolDown::default(),
-        ));
-
-        for (index, &skill) in character_record.spells.as_ref().unwrap().iter().enumerate() {
-            let skill_component = Skill::new(skill_slot_from_index(index), skill);
-            commands
-                .entity(entity)
-                .with_related::<SkillOf>((skill_component, CoolDown::default()));
-        }
-    }
 }

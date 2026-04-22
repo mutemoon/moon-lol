@@ -1,9 +1,8 @@
 pub mod buffs;
 
 use bevy::prelude::*;
-use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_base::prop::LoadHashKeyTrait;
+use lol_base::spell::Spell;
 use lol_core::action::damage::{DamageShape, TargetDamage, TargetFilter};
 use lol_core::action::dash::{ActionDash, DashDamage, DashMoveType};
 use lol_core::base::buff::BuffOf;
@@ -12,16 +11,12 @@ use lol_core::buffs::damage_reduction::BuffDamageReduction;
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
 use lol_core::skill::{
-    CoolDown, EventSkillCast, PassiveSkillOf, Skill, SkillCooldownMode, SkillOf, SkillRecastWindow,
-    SkillSlot, Skills, play_skill_animation, skill_damage, skill_dash, skill_slot_from_index,
-    spawn_skill_particle,
+    CoolDown, EventSkillCast, Skill, SkillCooldownMode, SkillRecastWindow, SkillSlot,
+    play_skill_animation, skill_damage, skill_dash, spawn_skill_particle,
 };
 
 use crate::irelia::buffs::{DebuffIreliaUnsteady, IreliaBuff};
 
-const IRELIA_Q_KEY: &str = "Characters/Irelia/Spells/IreliaQ/IreliaQ";
-const IRELIA_E_KEY: &str = "Characters/Irelia/Spells/IreliaE/IreliaE";
-const IRELIA_R_KEY: &str = "Characters/Irelia/Spells/IreliaR/IreliaR";
 const IRELIA_E_RECAST_WINDOW: f32 = 3.0;
 
 #[derive(Default)]
@@ -29,7 +24,6 @@ pub struct PluginIrelia;
 
 impl Plugin for PluginIrelia {
     fn build(&self, app: &mut App) {
-        app.add_systems(FixedUpdate, add_skills);
         app.add_observer(on_irelia_skill_cast);
         app.add_observer(on_irelia_damage_hit);
     }
@@ -56,8 +50,16 @@ fn on_irelia_skill_cast(
         return;
     };
 
+    let skill_spell = skill.key_spell_object.clone();
+
     match skill.slot {
-        SkillSlot::Q => cast_irelia_q(&mut commands, &q_transform, entity, trigger.point),
+        SkillSlot::Q => cast_irelia_q(
+            &mut commands,
+            &q_transform,
+            entity,
+            trigger.point,
+            skill_spell,
+        ),
         SkillSlot::W => cast_irelia_w(&mut commands, entity),
         SkillSlot::E => cast_irelia_e(
             &mut commands,
@@ -65,8 +67,9 @@ fn on_irelia_skill_cast(
             trigger.skill_entity,
             cooldown,
             recast,
+            skill_spell,
         ),
-        SkillSlot::R => cast_irelia_r(&mut commands, entity, trigger.point),
+        SkillSlot::R => cast_irelia_r(&mut commands, entity, trigger.point, skill_spell),
         _ => {}
     }
 }
@@ -76,6 +79,7 @@ fn cast_irelia_q(
     q_transform: &Query<&Transform>,
     entity: Entity,
     point: Vec2,
+    skill_spell: Handle<Spell>,
 ) {
     play_skill_animation(commands, entity, hash_bin("Spell1"));
     spawn_skill_particle(commands, entity, hash_bin("Irelia_Q_Cast"));
@@ -86,7 +90,7 @@ fn cast_irelia_q(
         entity,
         point,
         &ActionDash {
-            skill: IRELIA_Q_KEY.into(),
+            skill: skill_spell,
             move_type: DashMoveType::Pointer { max: 250.0 },
             damage: Some(DashDamage {
                 radius_end: 80.0,
@@ -120,6 +124,7 @@ fn cast_irelia_e(
     skill_entity: Entity,
     cooldown: &CoolDown,
     recast: Option<&SkillRecastWindow>,
+    skill_spell: Handle<Spell>,
 ) {
     let stage = recast.map(|w| w.stage).unwrap_or(1);
 
@@ -137,7 +142,7 @@ fn cast_irelia_e(
         skill_damage(
             commands,
             entity,
-            IRELIA_E_KEY,
+            skill_spell,
             DamageShape::Circle { radius: 200.0 },
             vec![TargetDamage {
                 filter: TargetFilter::All,
@@ -154,14 +159,19 @@ fn cast_irelia_e(
     }
 }
 
-fn cast_irelia_r(commands: &mut Commands, entity: Entity, _point: Vec2) {
+fn cast_irelia_r(
+    commands: &mut Commands,
+    entity: Entity,
+    _point: Vec2,
+    skill_spell: Handle<Spell>,
+) {
     play_skill_animation(commands, entity, hash_bin("Spell4"));
     spawn_skill_particle(commands, entity, hash_bin("Irelia_R_Cast"));
     // R is a long-range blade wave that creates a zone and marks enemies
     skill_damage(
         commands,
         entity,
-        IRELIA_R_KEY,
+        skill_spell,
         DamageShape::Circle { radius: 350.0 },
         vec![TargetDamage {
             filter: TargetFilter::All,
@@ -170,39 +180,6 @@ fn cast_irelia_r(commands: &mut Commands, entity: Entity, _point: Vec2) {
         }],
         Some(hash_bin("Irelia_R_Hit")),
     );
-}
-
-fn add_skills(
-    mut commands: Commands,
-    q_irelia: Query<Entity, (With<Irelia>, Without<Skills>)>,
-    res_assets_character_record: Res<Assets<CharacterRecord>>,
-) {
-    for entity in q_irelia.iter() {
-        let Some(character_record) =
-            res_assets_character_record.load_hash("Characters/Irelia/CharacterRecords/Root")
-        else {
-            continue;
-        };
-
-        commands.entity(entity).with_related::<PassiveSkillOf>((
-            Skill::new(
-                SkillSlot::Passive,
-                "Characters/Irelia/Spells/IreliaPassiveAbility/IreliaPassive",
-            ),
-            CoolDown::default(),
-        ));
-
-        for (index, &skill) in character_record.spells.as_ref().unwrap().iter().enumerate() {
-            let mut skill_component = Skill::new(skill_slot_from_index(index), skill);
-            // E uses manual cooldown mode for recast window
-            if index == 2 {
-                skill_component = skill_component.with_cooldown_mode(SkillCooldownMode::Manual);
-            }
-            commands
-                .entity(entity)
-                .with_related::<SkillOf>((skill_component, CoolDown::default()));
-        }
-    }
 }
 
 /// 监听 Irelia 造成的伤害，E/R 命中给目标标记不稳 + 眩晕

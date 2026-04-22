@@ -1,9 +1,8 @@
 use bevy::prelude::*;
-use serde::{Deserialize, Serialize};
 
-#[derive(Component, Reflect, Serialize, Deserialize, Debug, Clone)]
+#[derive(Component, Reflect, Debug, Clone)]
 #[reflect(Component)]
 pub struct ConfigCharacter {
     pub skin_path: String,
-    pub character_record: String,
+    pub character_record: Handle<DynamicWorld>,
 }

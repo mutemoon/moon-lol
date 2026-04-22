@@ -1,5 +1,4 @@
 use bevy::prelude::*;
-use lol_base::prop::{HashKey, LoadHashKeyTrait};
 use lol_base::spell::Spell;
 
 use crate::damage::{CommandDamageCreate, Damage, DamageType};
@@ -57,7 +56,7 @@ pub struct ActionDamageEffect {
 #[derive(Debug, Clone, EntityEvent)]
 pub struct ActionDamage {
     pub entity: Entity,
-    pub skill: HashKey<Spell>,
+    pub skill: Handle<Spell>,
     pub effects: Vec<ActionDamageEffect>,
 }
 
@@ -86,7 +85,7 @@ pub fn on_action_damage(
     let Ok(transform) = q_transform.get(entity) else {
         return;
     };
-    let Some(skill_object) = res_assets_spell_object.load_hash(&event.skill) else {
+    let Some(skill_object) = res_assets_spell_object.get(&event.skill) else {
         return;
     };
     let Ok(skills) = q_skills.get(entity) else {

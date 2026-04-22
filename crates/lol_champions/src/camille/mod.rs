@@ -1,7 +1,6 @@
 use bevy::prelude::*;
-use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_base::prop::LoadHashKeyTrait;
+use lol_base::spell::Spell;
 use lol_core::action::damage::{DamageShape, TargetDamage, TargetFilter};
 use lol_core::action::dash::{ActionDash, DashDamage, DashMoveType};
 use lol_core::base::buff::BuffOf;
@@ -9,15 +8,10 @@ use lol_core::buffs::cc_debuffs::DebuffSlow;
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
 use lol_core::skill::{
-    CoolDown, EventSkillCast, PassiveSkillOf, Skill, SkillCooldownMode, SkillOf, SkillRecastWindow,
-    SkillSlot, Skills, play_skill_animation, reset_skill_attack, skill_damage, skill_dash,
-    skill_slot_from_index, spawn_skill_particle,
+    CoolDown, EventSkillCast, Skill, SkillCooldownMode, SkillRecastWindow, SkillSlot,
+    play_skill_animation, reset_skill_attack, skill_damage, skill_dash, spawn_skill_particle,
 };
 
-const CAMILLE_Q_KEY: &str = "Characters/Camille/Spells/CamilleQ/CamilleQ";
-const CAMILLE_W_KEY: &str = "Characters/Camille/Spells/CamilleW/CamilleW";
-const CAMILLE_E_KEY: &str = "Characters/Camille/Spells/CamilleE/CamilleE";
-const CAMILLE_R_KEY: &str = "Characters/Camille/Spells/CamilleR/CamilleR";
 const CAMILLE_Q_RECAST_WINDOW: f32 = 3.0;
 const CAMILLE_E_RECAST_WINDOW: f32 = 4.0;
 
@@ -26,7 +20,6 @@ pub struct PluginCamille;
 
 impl Plugin for PluginCamille {
     fn build(&self, app: &mut App) {
-        app.add_systems(FixedUpdate, add_skills);
         app.add_observer(on_camille_skill_cast);
         app.add_observer(on_camille_damage_hit);
     }
@@ -53,6 +46,8 @@ fn on_camille_skill_cast(
         return;
     };
 
+    let skill_spell = skill.key_spell_object.clone();
+
     match skill.slot {
         SkillSlot::Q => cast_camille_q(
             &mut commands,
@@ -60,8 +55,9 @@ fn on_camille_skill_cast(
             trigger.skill_entity,
             cooldown,
             recast,
+            skill_spell,
         ),
-        SkillSlot::W => cast_camille_w(&mut commands, entity),
+        SkillSlot::W => cast_camille_w(&mut commands, entity, skill_spell),
         SkillSlot::E => cast_camille_e(
             &mut commands,
             &q_transform,
@@ -70,8 +66,15 @@ fn on_camille_skill_cast(
             trigger.point,
             cooldown,
             recast,
+            skill_spell,
         ),
-        SkillSlot::R => cast_camille_r(&mut commands, &q_transform, entity, trigger.point),
+        SkillSlot::R => cast_camille_r(
+            &mut commands,
+            &q_transform,
+            entity,
+            trigger.point,
+            skill_spell,
+        ),
         _ => {}
     }
 }
@@ -82,6 +85,7 @@ fn cast_camille_q(
     skill_entity: Entity,
     cooldown: &CoolDown,
     recast: Option<&SkillRecastWindow>,
+    skill_spell: Handle<Spell>,
 ) {
     let stage = recast.map(|w| w.stage).unwrap_or(1);
 
@@ -101,7 +105,7 @@ fn cast_camille_q(
         skill_damage(
             commands,
             entity,
-            CAMILLE_Q_KEY,
+            skill_spell,
             DamageShape::Nearest {
                 max_distance: 150.0,
             },
@@ -120,14 +124,14 @@ fn cast_camille_q(
     }
 }
 
-fn cast_camille_w(commands: &mut Commands, entity: Entity) {
+fn cast_camille_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell2"));
     spawn_skill_particle(commands, entity, hash_bin("Camille_W_Cast"));
     // W is a swept cone that slows
     skill_damage(
         commands,
         entity,
-        CAMILLE_W_KEY,
+        skill_spell,
         DamageShape::Sector {
             radius: 300.0,
             angle: 90.0,
@@ -149,6 +153,7 @@ fn cast_camille_e(
     point: Vec2,
     cooldown: &CoolDown,
     recast: Option<&SkillRecastWindow>,
+    skill_spell: Handle<Spell>,
 ) {
     let stage = recast.map(|w| w.stage).unwrap_or(1);
 
@@ -169,7 +174,7 @@ fn cast_camille_e(
             entity,
             point,
             &ActionDash {
-                skill: CAMILLE_E_KEY.into(),
+                skill: skill_spell,
                 move_type: DashMoveType::Pointer { max: 400.0 },
                 damage: Some(DashDamage {
                     radius_end: 150.0,
@@ -195,6 +200,7 @@ fn cast_camille_r(
     q_transform: &Query<&Transform>,
     entity: Entity,
     point: Vec2,
+    skill_spell: Handle<Spell>,
 ) {
     play_skill_animation(commands, entity, hash_bin("Spell4"));
     spawn_skill_particle(commands, entity, hash_bin("Camille_R_Cast"));
@@ -205,7 +211,7 @@ fn cast_camille_r(
         entity,
         point,
         &ActionDash {
-            skill: CAMILLE_R_KEY.into(),
+            skill: skill_spell,
             move_type: DashMoveType::Pointer { max: 350.0 },
             damage: Some(DashDamage {
                 radius_end: 150.0,
@@ -218,39 +224,6 @@ fn cast_camille_r(
             speed: 800.0,
         },
     );
-}
-
-fn add_skills(
-    mut commands: Commands,
-    q_camille: Query<Entity, (With<Camille>, Without<Skills>)>,
-    res_assets_character_record: Res<Assets<CharacterRecord>>,
-) {
-    for entity in q_camille.iter() {
-        let Some(character_record) =
-            res_assets_character_record.load_hash("Characters/Camille/CharacterRecords/Root")
-        else {
-            continue;
-        };
-
-        commands.entity(entity).with_related::<PassiveSkillOf>((
-            Skill::new(
-                SkillSlot::Passive,
-                "Characters/Camille/Spells/CamillePassiveAbility/CamillePassive",
-            ),
-            CoolDown::default(),
-        ));
-
-        for (index, &skill) in character_record.spells.as_ref().unwrap().iter().enumerate() {
-            let mut skill_component = Skill::new(skill_slot_from_index(index), skill);
-            // Q and E use manual cooldown mode for recast windows
-            if index == 0 || index == 2 {
-                skill_component = skill_component.with_cooldown_mode(SkillCooldownMode::Manual);
-            }
-            commands
-                .entity(entity)
-                .with_related::<SkillOf>((skill_component, CoolDown::default()));
-        }
-    }
 }
 
 /// 监听 Camille 造成的伤害，给目标施加减速

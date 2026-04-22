@@ -2,11 +2,10 @@ use std::collections::HashMap;
 use std::time::Duration;
 
 use bevy::prelude::*;
-use league_core::extract::{
-    EffectValueCalculationPart, EnumAbilityResourceByCoefficientCalculationPart,
-    EnumGameCalculation, GameCalculation, SpellDataResource, SpellEffectAmount, SpellObject,
-};
+use league_utils::hash_key::HashKey;
 use lol_base::prop::LoadHashKeyTrait;
+use lol_base::spell::{DataSpell, Spell, ValuesEffect};
+use lol_base::spell_calc::{CalculationPartEffectValue, CalculationSpell, CalculationType};
 use lol_core::action::PluginAction;
 use lol_core::action::damage::{DamageShape, TargetDamage, TargetFilter};
 use lol_core::base::ability_resource::{AbilityResource, AbilityResourceType};
@@ -26,6 +25,10 @@ const TEST_FPS: f32 = 30.0;
 const SPELL_KEY: u32 = 0x1001;
 const DAMAGE_AMOUNT_KEY: u32 = 0x3001;
 const EPSILON: f32 = 1e-4;
+
+fn spell_handle(key: u32) -> Handle<Spell> {
+    Handle::from(HashKey::<Spell>::from(key))
+}
 
 #[derive(Component)]
 struct TestObserverSkill;
@@ -90,7 +93,7 @@ fn on_test_damage_skill_cast(
     skill_damage(
         &mut commands,
         trigger.entity,
-        SPELL_KEY,
+        spell_handle(SPELL_KEY),
         DamageShape::Circle { radius: 100.0 },
         vec![TargetDamage {
             filter: TargetFilter::All,
@@ -119,7 +122,7 @@ impl SkillHarness {
         app.add_plugins(PluginMovement);
         app.add_plugins(PluginSkill);
         app.add_plugins(PluginTestObserverSkill);
-        app.init_asset::<SpellObject>();
+        app.init_asset::<Spell>();
         app.insert_resource(Time::<Fixed>::from_hz(TEST_FPS as f64));
 
         let caster = app
@@ -146,48 +149,43 @@ impl SkillHarness {
     }
 
     fn register_spell(&mut self, mana_cost: f32, effect_amounts: Vec<f32>) -> &mut Self {
+        use lol_base::spell_calc::CalculationPart;
+
         let mut calculations = HashMap::new();
         calculations.insert(
             DAMAGE_AMOUNT_KEY,
-            EnumGameCalculation::GameCalculation(GameCalculation {
-                m_formula_parts: Some(vec![
-                    EnumAbilityResourceByCoefficientCalculationPart::EffectValueCalculationPart(
-                        EffectValueCalculationPart {
-                            m_effect_index: Some(1),
-                        },
-                    ),
-                ]),
-                m_display_as_percent: None,
-                m_expanded_tooltip_calculation_display: None,
-                m_multiplier: None,
-                m_precision: None,
-                m_simple_tooltip_calculation_display: None,
-                result_modifier: None,
-                tooltip_only: None,
-                unk_0x72c5c2a8: None,
+            CalculationType::CalculationSpell(CalculationSpell {
+                formula_parts: Some(vec![CalculationPart::CalculationPartEffectValue(
+                    CalculationPartEffectValue {
+                        effect_index: Some(1),
+                    },
+                )]),
+                multiplier: None,
+                precision: None,
             }),
         );
 
+        let effect_values = ValuesEffect {
+            values: Some(effect_amounts),
+        };
+
         self.app
             .world_mut()
-            .resource_mut::<Assets<SpellObject>>()
+            .resource_mut::<Assets<Spell>>()
             .add_hash(
                 SPELL_KEY,
-                SpellObject {
-                    m_spell: Some(SpellDataResource {
+                Spell {
+                    spell_data: Some(DataSpell {
+                        calculations: Some(calculations),
+                        effect_amounts: Some(vec![effect_values]),
+                        data_values: None,
                         mana: Some(vec![mana_cost; 6]),
-                        m_spell_calculations: Some(calculations),
-                        m_effect_amount: Some(vec![SpellEffectAmount {
-                            value: Some(effect_amounts),
-                        }]),
-                        ..Default::default()
+                        missile_spec: None,
+                        hit_bone_name: None,
+                        missile_speed: None,
+                        missile_effect_key: None,
+                        cast_type: None,
                     }),
-                    bot_data: None,
-                    cc_behavior_data: None,
-                    m_buff: None,
-                    m_script_name: String::new(),
-                    object_name: String::new(),
-                    script: None,
                 },
             );
         self
@@ -295,10 +293,10 @@ fn skill_level_up_still_respects_basic_rules() {
             experience: 0,
             experience_to_next_level: 100,
         });
-    harness.add_skill(Skill::new(SkillSlot::Q, SPELL_KEY), 5.0, ());
-    harness.add_skill(Skill::new(SkillSlot::W, SPELL_KEY), 5.0, ());
-    harness.add_skill(Skill::new(SkillSlot::E, SPELL_KEY), 5.0, ());
-    harness.add_skill(Skill::new(SkillSlot::R, SPELL_KEY), 5.0, ());
+    harness.add_skill(Skill::new(SkillSlot::Q, spell_handle(SPELL_KEY)), 5.0, ());
+    harness.add_skill(Skill::new(SkillSlot::W, spell_handle(SPELL_KEY)), 5.0, ());
+    harness.add_skill(Skill::new(SkillSlot::E, spell_handle(SPELL_KEY)), 5.0, ());
+    harness.add_skill(Skill::new(SkillSlot::R, spell_handle(SPELL_KEY)), 5.0, ());
 
     harness.level_up_skill(3);
 
@@ -329,7 +327,7 @@ fn observer_skill_cast_spends_mana_starts_cooldown_and_applies_damage() {
     harness.register_spell(30.0, vec![40.0; 6]);
 
     harness.add_skill(
-        Skill::new(SkillSlot::Q, SPELL_KEY).with_level(1),
+        Skill::new(SkillSlot::Q, spell_handle(SPELL_KEY)).with_level(1),
         3.0,
         TestDamageSkill,
     );
@@ -358,7 +356,7 @@ fn observer_skill_can_drive_recast_state_and_manual_cooldown() {
     let mut harness = SkillHarness::new();
     harness.register_spell(20.0, vec![0.0; 6]);
     harness.add_skill(
-        Skill::new(SkillSlot::Q, SPELL_KEY)
+        Skill::new(SkillSlot::Q, spell_handle(SPELL_KEY))
             .with_level(1)
             .with_cooldown_mode(SkillCooldownMode::Manual),
         6.0,
@@ -397,7 +395,7 @@ fn skill_recast_window_expires_in_fixed_update() {
     let mut harness = SkillHarness::new();
     harness.register_spell(20.0, vec![0.0; 6]);
     harness.add_skill(
-        Skill::new(SkillSlot::Q, SPELL_KEY)
+        Skill::new(SkillSlot::Q, spell_handle(SPELL_KEY))
             .with_level(1)
             .with_cooldown_mode(SkillCooldownMode::Manual),
         6.0,
@@ -432,7 +430,7 @@ fn insufficient_mana_is_recorded_without_starting_cooldown() {
         .insert(make_mana(10.0));
     harness.register_spell(30.0, vec![40.0; 6]);
     harness.add_skill(
-        Skill::new(SkillSlot::Q, SPELL_KEY).with_level(1),
+        Skill::new(SkillSlot::Q, spell_handle(SPELL_KEY)).with_level(1),
         3.0,
         TestDamageSkill,
     );

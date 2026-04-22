@@ -1,32 +1,23 @@
 pub mod buffs;
 
 use bevy::prelude::*;
-use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_base::prop::LoadHashKeyTrait;
+use lol_base::spell::Spell;
 use lol_core::action::damage::{DamageShape, TargetDamage, TargetFilter};
 use lol_core::base::buff::BuffOf;
 use lol_core::buffs::cc_debuffs::DebuffSlow;
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
 use lol_core::skill::{
-    CoolDown, EventSkillCast, PassiveSkillOf, Skill, SkillOf, SkillSlot, Skills,
-    play_skill_animation, reset_skill_attack, skill_damage, skill_slot_from_index,
-    spawn_skill_particle,
+    CoolDown, EventSkillCast, Skill, SkillSlot, play_skill_animation, reset_skill_attack,
+    skill_damage, spawn_skill_particle,
 };
-
-#[allow(dead_code)]
-const JINX_Q_KEY: &str = "Characters/Jinx/Spells/JinxQ/JinxQ";
-const JINX_W_KEY: &str = "Characters/Jinx/Spells/JinxW/JinxW";
-const JINX_E_KEY: &str = "Characters/Jinx/Spells/JinxE/JinxE";
-const JINX_R_KEY: &str = "Characters/Jinx/Spells/JinxR/JinxR";
 
 #[derive(Default)]
 pub struct PluginJinx;
 
 impl Plugin for PluginJinx {
     fn build(&self, app: &mut App) {
-        app.add_systems(FixedUpdate, add_skills);
         app.add_observer(on_jinx_skill_cast);
         app.add_observer(on_jinx_damage_hit);
     }
@@ -53,11 +44,13 @@ fn on_jinx_skill_cast(
         return;
     };
 
+    let skill_spell = skill.key_spell_object.clone();
+
     match skill.slot {
         SkillSlot::Q => cast_jinx_q(&mut commands, entity),
-        SkillSlot::W => cast_jinx_w(&mut commands, entity),
-        SkillSlot::E => cast_jinx_e(&mut commands, &q_transform, entity, trigger.point),
-        SkillSlot::R => cast_jinx_r(&mut commands, &q_transform, entity, trigger.point),
+        SkillSlot::W => cast_jinx_w(&mut commands, entity, skill_spell),
+        SkillSlot::E => cast_jinx_e(&mut commands, entity, skill_spell),
+        SkillSlot::R => cast_jinx_r(&mut commands, entity, skill_spell),
         _ => {}
     }
 }
@@ -70,7 +63,7 @@ fn cast_jinx_q(commands: &mut Commands, entity: Entity) {
     reset_skill_attack(commands, entity);
 }
 
-fn cast_jinx_w(commands: &mut Commands, entity: Entity) {
+fn cast_jinx_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell2"));
     spawn_skill_particle(commands, entity, hash_bin("Jinx_W_Cast"));
 
@@ -78,7 +71,7 @@ fn cast_jinx_w(commands: &mut Commands, entity: Entity) {
     skill_damage(
         commands,
         entity,
-        JINX_W_KEY,
+        skill_spell,
         DamageShape::Sector {
             radius: 1500.0,
             angle: 10.0,
@@ -92,12 +85,7 @@ fn cast_jinx_w(commands: &mut Commands, entity: Entity) {
     );
 }
 
-fn cast_jinx_e(
-    commands: &mut Commands,
-    _q_transform: &Query<&Transform>,
-    entity: Entity,
-    _point: Vec2,
-) {
+fn cast_jinx_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell3"));
     spawn_skill_particle(commands, entity, hash_bin("Jinx_E_Cast"));
 
@@ -105,7 +93,7 @@ fn cast_jinx_e(
     skill_damage(
         commands,
         entity,
-        JINX_E_KEY,
+        skill_spell,
         DamageShape::Circle { radius: 250.0 },
         vec![TargetDamage {
             filter: TargetFilter::All,
@@ -116,12 +104,7 @@ fn cast_jinx_e(
     );
 }
 
-fn cast_jinx_r(
-    commands: &mut Commands,
-    _q_transform: &Query<&Transform>,
-    entity: Entity,
-    _point: Vec2,
-) {
+fn cast_jinx_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell4"));
     spawn_skill_particle(commands, entity, hash_bin("Jinx_R_Cast"));
 
@@ -129,7 +112,7 @@ fn cast_jinx_r(
     skill_damage(
         commands,
         entity,
-        JINX_R_KEY,
+        skill_spell,
         DamageShape::Sector {
             radius: 25000.0,
             angle: 30.0,
@@ -159,33 +142,4 @@ fn on_jinx_damage_hit(
     commands
         .entity(target)
         .with_related::<BuffOf>(DebuffSlow::new(0.4, 2.0));
-}
-
-fn add_skills(
-    mut commands: Commands,
-    q_jinx: Query<Entity, (With<Jinx>, Without<Skills>)>,
-    res_assets_character_record: Res<Assets<CharacterRecord>>,
-) {
-    for entity in q_jinx.iter() {
-        let Some(character_record) =
-            res_assets_character_record.load_hash("Characters/Jinx/CharacterRecords/Root")
-        else {
-            continue;
-        };
-
-        commands.entity(entity).with_related::<PassiveSkillOf>((
-            Skill::new(
-                SkillSlot::Passive,
-                "Characters/Jinx/Spells/JinxPassive/JinxPassive",
-            ),
-            CoolDown::default(),
-        ));
-
-        for (index, &skill) in character_record.spells.as_ref().unwrap().iter().enumerate() {
-            let skill_component = Skill::new(skill_slot_from_index(index), skill);
-            commands
-                .entity(entity)
-                .with_related::<SkillOf>((skill_component, CoolDown::default()));
-        }
-    }
 }

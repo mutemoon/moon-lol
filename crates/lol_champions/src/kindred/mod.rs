@@ -1,31 +1,23 @@
 pub mod buffs;
 
 use bevy::prelude::*;
-use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_base::prop::LoadHashKeyTrait;
+use lol_base::spell::Spell;
 use lol_core::action::damage::{DamageShape, TargetDamage, TargetFilter};
 use lol_core::base::buff::BuffOf;
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
 use lol_core::skill::{
-    CoolDown, EventSkillCast, PassiveSkillOf, Skill, SkillOf, SkillSlot, Skills,
-    play_skill_animation, skill_damage, skill_slot_from_index, spawn_skill_particle,
+    EventSkillCast, Skill, SkillSlot, play_skill_animation, skill_damage, spawn_skill_particle,
 };
 
 use crate::kindred::buffs::{BuffKindredE, BuffKindredW};
-
-const KINDRED_Q_KEY: &str = "Characters/Kindred/Spells/KindredQ/KindredQ";
-const KINDRED_W_KEY: &str = "Characters/Kindred/Spells/KindredW/KindredW";
-const KINDRED_E_KEY: &str = "Characters/Kindred/Spells/KindredE/KindredE";
-const KINDRED_R_KEY: &str = "Characters/Kindred/Spells/KindredR/KindredR";
 
 #[derive(Default)]
 pub struct PluginKindred;
 
 impl Plugin for PluginKindred {
     fn build(&self, app: &mut App) {
-        app.add_systems(FixedUpdate, add_skills);
         app.add_observer(on_kindred_skill_cast);
         app.add_observer(on_kindred_damage_hit);
     }
@@ -41,22 +33,30 @@ fn on_kindred_skill_cast(
     mut commands: Commands,
     q_kindred: Query<(), With<Kindred>>,
     q_transform: Query<&Transform>,
-    q_skill: Query<(&Skill, &CoolDown)>,
+    q_skill: Query<&Skill>,
 ) {
     let entity = trigger.event_target();
     if q_kindred.get(entity).is_err() {
         return;
     }
 
-    let Ok((skill, _cooldown)) = q_skill.get(trigger.skill_entity) else {
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
         return;
     };
 
+    let skill_spell = skill.key_spell_object.clone();
+
     match skill.slot {
-        SkillSlot::Q => cast_kindred_q(&mut commands, &q_transform, entity, trigger.point),
-        SkillSlot::W => cast_kindred_w(&mut commands, entity),
-        SkillSlot::E => cast_kindred_e(&mut commands, entity),
-        SkillSlot::R => cast_kindred_r(&mut commands, entity),
+        SkillSlot::Q => cast_kindred_q(
+            &mut commands,
+            &q_transform,
+            entity,
+            trigger.point,
+            skill_spell,
+        ),
+        SkillSlot::W => cast_kindred_w(&mut commands, entity, skill_spell),
+        SkillSlot::E => cast_kindred_e(&mut commands, entity, skill_spell),
+        SkillSlot::R => cast_kindred_r(&mut commands, entity, skill_spell),
         _ => {}
     }
 }
@@ -66,6 +66,7 @@ fn cast_kindred_q(
     _q_transform: &Query<&Transform>,
     entity: Entity,
     _point: Vec2,
+    skill_spell: Handle<Spell>,
 ) {
     play_skill_animation(commands, entity, hash_bin("Spell1"));
     spawn_skill_particle(commands, entity, hash_bin("Kindred_Q_Cast"));
@@ -74,7 +75,7 @@ fn cast_kindred_q(
     skill_damage(
         commands,
         entity,
-        KINDRED_Q_KEY,
+        skill_spell,
         DamageShape::Circle { radius: 300.0 },
         vec![TargetDamage {
             filter: TargetFilter::All,
@@ -85,7 +86,7 @@ fn cast_kindred_q(
     );
 }
 
-fn cast_kindred_w(commands: &mut Commands, entity: Entity) {
+fn cast_kindred_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell2"));
     spawn_skill_particle(commands, entity, hash_bin("Kindred_W_Cast"));
 
@@ -97,7 +98,7 @@ fn cast_kindred_w(commands: &mut Commands, entity: Entity) {
     skill_damage(
         commands,
         entity,
-        KINDRED_W_KEY,
+        skill_spell,
         DamageShape::Circle { radius: 500.0 },
         vec![TargetDamage {
             filter: TargetFilter::All,
@@ -108,7 +109,7 @@ fn cast_kindred_w(commands: &mut Commands, entity: Entity) {
     );
 }
 
-fn cast_kindred_e(commands: &mut Commands, entity: Entity) {
+fn cast_kindred_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell3"));
     spawn_skill_particle(commands, entity, hash_bin("Kindred_E_Cast"));
 
@@ -116,7 +117,7 @@ fn cast_kindred_e(commands: &mut Commands, entity: Entity) {
     skill_damage(
         commands,
         entity,
-        KINDRED_E_KEY,
+        skill_spell,
         DamageShape::Sector {
             radius: 500.0,
             angle: 30.0,
@@ -130,7 +131,7 @@ fn cast_kindred_e(commands: &mut Commands, entity: Entity) {
     );
 }
 
-fn cast_kindred_r(commands: &mut Commands, entity: Entity) {
+fn cast_kindred_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell4"));
     spawn_skill_particle(commands, entity, hash_bin("Kindred_R_Cast"));
 
@@ -138,7 +139,7 @@ fn cast_kindred_r(commands: &mut Commands, entity: Entity) {
     skill_damage(
         commands,
         entity,
-        KINDRED_R_KEY,
+        skill_spell,
         DamageShape::Circle { radius: 535.0 },
         vec![TargetDamage {
             filter: TargetFilter::All,
@@ -165,33 +166,4 @@ fn on_kindred_damage_hit(
     commands
         .entity(target)
         .with_related::<BuffOf>(BuffKindredE::new(1, 0.3, 2.0));
-}
-
-fn add_skills(
-    mut commands: Commands,
-    q_kindred: Query<Entity, (With<Kindred>, Without<Skills>)>,
-    res_assets_character_record: Res<Assets<CharacterRecord>>,
-) {
-    for entity in q_kindred.iter() {
-        let Some(character_record) =
-            res_assets_character_record.load_hash("Characters/Kindred/CharacterRecords/Root")
-        else {
-            continue;
-        };
-
-        commands.entity(entity).with_related::<PassiveSkillOf>((
-            Skill::new(
-                SkillSlot::Passive,
-                "Characters/Kindred/Spells/KindredPassive/KindredPassive",
-            ),
-            CoolDown::default(),
-        ));
-
-        for (index, &skill) in character_record.spells.as_ref().unwrap().iter().enumerate() {
-            let skill_component = Skill::new(skill_slot_from_index(index), skill);
-            commands
-                .entity(entity)
-                .with_related::<SkillOf>((skill_component, CoolDown::default()));
-        }
-    }
 }

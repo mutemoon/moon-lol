@@ -1,7 +1,6 @@
 use bevy::prelude::*;
-use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_base::prop::LoadHashKeyTrait;
+use lol_base::spell::Spell;
 use lol_core::action::damage::{DamageShape, TargetDamage, TargetFilter};
 use lol_core::action::dash::{ActionDash, DashDamage, DashMoveType};
 use lol_core::base::buff::BuffOf;
@@ -9,21 +8,15 @@ use lol_core::buffs::cc_debuffs::DebuffSlow;
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
 use lol_core::skill::{
-    CoolDown, EventSkillCast, PassiveSkillOf, Skill, SkillOf, SkillSlot, Skills,
-    play_skill_animation, skill_damage, skill_dash, skill_slot_from_index, spawn_skill_particle,
+    EventSkillCast, Skill, SkillSlot, play_skill_animation, skill_damage, skill_dash,
+    spawn_skill_particle,
 };
-
-const GNAR_Q_KEY: &str = "Characters/Gnar/Spells/GnarQ/GnarQ";
-const GNAR_W_KEY: &str = "Characters/Gnar/Spells/GnarW/GnarW";
-const GNAR_E_KEY: &str = "Characters/Gnar/Spells/GnarE/GnarE";
-const GNAR_R_KEY: &str = "Characters/Gnar/Spells/GnarR/GnarR";
 
 #[derive(Default)]
 pub struct PluginGnar;
 
 impl Plugin for PluginGnar {
     fn build(&self, app: &mut App) {
-        app.add_systems(FixedUpdate, add_skills);
         app.add_observer(on_gnar_skill_cast);
         app.add_observer(on_gnar_damage_hit);
     }
@@ -60,22 +53,28 @@ fn on_gnar_skill_cast(
     };
 
     match skill.slot {
-        SkillSlot::Q => cast_gnar_q(&mut commands, entity, trigger.point),
-        SkillSlot::W => cast_gnar_w(&mut commands, entity),
-        SkillSlot::E => cast_gnar_e(&mut commands, &q_transform, entity, trigger.point),
-        SkillSlot::R => cast_gnar_r(&mut commands, entity),
+        SkillSlot::Q => cast_gnar_q(&mut commands, entity, skill.key_spell_object.clone()),
+        SkillSlot::W => cast_gnar_w(&mut commands, entity, skill.key_spell_object.clone()),
+        SkillSlot::E => cast_gnar_e(
+            &mut commands,
+            &q_transform,
+            entity,
+            trigger.point,
+            skill.key_spell_object.clone(),
+        ),
+        SkillSlot::R => cast_gnar_r(&mut commands, entity, skill.key_spell_object.clone()),
         _ => {}
     }
 }
 
-fn cast_gnar_q(commands: &mut Commands, entity: Entity, _point: Vec2) {
+fn cast_gnar_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell1"));
     spawn_skill_particle(commands, entity, hash_bin("Gnar_Q_Cast"));
     // Q 回旋镖：Sector 模拟直线飞行
     skill_damage(
         commands,
         entity,
-        GNAR_Q_KEY,
+        skill_spell,
         DamageShape::Sector {
             radius: 500.0,
             angle: 30.0,
@@ -89,14 +88,14 @@ fn cast_gnar_q(commands: &mut Commands, entity: Entity, _point: Vec2) {
     );
 }
 
-fn cast_gnar_w(commands: &mut Commands, entity: Entity) {
+fn cast_gnar_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell2"));
     spawn_skill_particle(commands, entity, hash_bin("Gnar_W_Cast"));
     // Mega 形态 W：AOE 伤害 + 眩晕
     skill_damage(
         commands,
         entity,
-        GNAR_W_KEY,
+        skill_spell,
         DamageShape::Sector {
             radius: 250.0,
             angle: 60.0,
@@ -115,6 +114,7 @@ fn cast_gnar_e(
     q_transform: &Query<&Transform>,
     entity: Entity,
     point: Vec2,
+    skill_spell: Handle<Spell>,
 ) {
     play_skill_animation(commands, entity, hash_bin("Spell3"));
     spawn_skill_particle(commands, entity, hash_bin("Gnar_E_Cast"));
@@ -125,7 +125,7 @@ fn cast_gnar_e(
         entity,
         point,
         &ActionDash {
-            skill: GNAR_E_KEY.into(),
+            skill: skill_spell.clone(),
             move_type: DashMoveType::Pointer { max: 300.0 },
             damage: Some(DashDamage {
                 radius_end: 100.0,
@@ -140,14 +140,14 @@ fn cast_gnar_e(
     );
 }
 
-fn cast_gnar_r(commands: &mut Commands, entity: Entity) {
+fn cast_gnar_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell4"));
     spawn_skill_particle(commands, entity, hash_bin("Gnar_R_Cast"));
     // R is only available in Mega form - throws enemies and stuns
     skill_damage(
         commands,
         entity,
-        GNAR_R_KEY,
+        skill_spell,
         DamageShape::Circle { radius: 400.0 },
         vec![TargetDamage {
             filter: TargetFilter::All,
@@ -156,35 +156,6 @@ fn cast_gnar_r(commands: &mut Commands, entity: Entity) {
         }],
         Some(hash_bin("Gnar_R_Hit")),
     );
-}
-
-fn add_skills(
-    mut commands: Commands,
-    q_gnar: Query<Entity, (With<Gnar>, Without<Skills>)>,
-    res_assets_character_record: Res<Assets<CharacterRecord>>,
-) {
-    for entity in q_gnar.iter() {
-        let Some(character_record) =
-            res_assets_character_record.load_hash("Characters/Gnar/CharacterRecords/Root")
-        else {
-            continue;
-        };
-
-        commands.entity(entity).with_related::<PassiveSkillOf>((
-            Skill::new(
-                SkillSlot::Passive,
-                "Characters/Gnar/Spells/GnarPassiveAbility/GnarPassive",
-            ),
-            CoolDown::default(),
-        ));
-
-        for (index, &skill) in character_record.spells.as_ref().unwrap().iter().enumerate() {
-            commands.entity(entity).with_related::<SkillOf>((
-                Skill::new(skill_slot_from_index(index), skill),
-                CoolDown::default(),
-            ));
-        }
-    }
 }
 
 /// 监听 Gnar 造成的伤害，所有伤害命中施加减速

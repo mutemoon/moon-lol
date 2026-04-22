@@ -1,32 +1,24 @@
 pub mod buffs;
 
 use bevy::prelude::*;
-use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_base::prop::LoadHashKeyTrait;
+use lol_base::spell::Spell;
 use lol_core::action::damage::{DamageShape, TargetDamage, TargetFilter};
 use lol_core::base::buff::BuffOf;
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
 use lol_core::skill::{
-    CoolDown, EventSkillCast, PassiveSkillOf, Skill, SkillOf, SkillSlot, Skills,
-    play_skill_animation, skill_damage, skill_slot_from_index, spawn_skill_particle,
+    CoolDown, EventSkillCast, Skill, SkillSlot, play_skill_animation, skill_damage,
+    spawn_skill_particle,
 };
 
 use crate::seraphine::buffs::{BuffSeraphineE, BuffSeraphineW};
-
-const SERAPHINE_Q_KEY: &str = "Characters/Seraphine/Spells/SeraphineQ/SeraphineQ";
-#[allow(dead_code)]
-const SERAPHINE_W_KEY: &str = "Characters/Seraphine/Spells/SeraphineW/SeraphineW";
-const SERAPHINE_E_KEY: &str = "Characters/Seraphine/Spells/SeraphineE/SeraphineE";
-const SERAPHINE_R_KEY: &str = "Characters/Seraphine/Spells/SeraphineR/SeraphineR";
 
 #[derive(Default)]
 pub struct PluginSeraphine;
 
 impl Plugin for PluginSeraphine {
     fn build(&self, app: &mut App) {
-        app.add_systems(FixedUpdate, add_skills);
         app.add_observer(on_seraphine_skill_cast);
         app.add_observer(on_seraphine_damage_hit);
     }
@@ -53,15 +45,15 @@ fn on_seraphine_skill_cast(
     };
 
     match skill.slot {
-        SkillSlot::Q => cast_seraphine_q(&mut commands, entity),
+        SkillSlot::Q => cast_seraphine_q(&mut commands, entity, skill.key_spell_object.clone()),
         SkillSlot::W => cast_seraphine_w(&mut commands, entity),
-        SkillSlot::E => cast_seraphine_e(&mut commands, entity),
-        SkillSlot::R => cast_seraphine_r(&mut commands, entity),
+        SkillSlot::E => cast_seraphine_e(&mut commands, entity, skill.key_spell_object.clone()),
+        SkillSlot::R => cast_seraphine_r(&mut commands, entity, skill.key_spell_object.clone()),
         _ => {}
     }
 }
 
-fn cast_seraphine_q(commands: &mut Commands, entity: Entity) {
+fn cast_seraphine_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell1"));
     spawn_skill_particle(commands, entity, hash_bin("Seraphine_Q_Cast"));
 
@@ -69,7 +61,7 @@ fn cast_seraphine_q(commands: &mut Commands, entity: Entity) {
     skill_damage(
         commands,
         entity,
-        SERAPHINE_Q_KEY,
+        skill_spell,
         DamageShape::Circle { radius: 900.0 },
         vec![TargetDamage {
             filter: TargetFilter::All,
@@ -90,7 +82,7 @@ fn cast_seraphine_w(commands: &mut Commands, entity: Entity) {
         .with_related::<BuffOf>(BuffSeraphineW::new(50.0, 2.5));
 }
 
-fn cast_seraphine_e(commands: &mut Commands, entity: Entity) {
+fn cast_seraphine_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell3"));
     spawn_skill_particle(commands, entity, hash_bin("Seraphine_E_Cast"));
 
@@ -98,7 +90,7 @@ fn cast_seraphine_e(commands: &mut Commands, entity: Entity) {
     skill_damage(
         commands,
         entity,
-        SERAPHINE_E_KEY,
+        skill_spell,
         DamageShape::Sector {
             radius: 1300.0,
             angle: 30.0,
@@ -112,7 +104,7 @@ fn cast_seraphine_e(commands: &mut Commands, entity: Entity) {
     );
 }
 
-fn cast_seraphine_r(commands: &mut Commands, entity: Entity) {
+fn cast_seraphine_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell4"));
     spawn_skill_particle(commands, entity, hash_bin("Seraphine_R_Cast"));
 
@@ -120,7 +112,7 @@ fn cast_seraphine_r(commands: &mut Commands, entity: Entity) {
     skill_damage(
         commands,
         entity,
-        SERAPHINE_R_KEY,
+        skill_spell,
         DamageShape::Sector {
             radius: 1500.0,
             angle: 50.0,
@@ -150,33 +142,4 @@ fn on_seraphine_damage_hit(
     commands
         .entity(target)
         .with_related::<BuffOf>(BuffSeraphineE::new(0.75, 1.0));
-}
-
-fn add_skills(
-    mut commands: Commands,
-    q_seraphine: Query<Entity, (With<Seraphine>, Without<Skills>)>,
-    res_assets_character_record: Res<Assets<CharacterRecord>>,
-) {
-    for entity in q_seraphine.iter() {
-        let Some(character_record) =
-            res_assets_character_record.load_hash("Characters/Seraphine/CharacterRecords/Root")
-        else {
-            continue;
-        };
-
-        commands.entity(entity).with_related::<PassiveSkillOf>((
-            Skill::new(
-                SkillSlot::Passive,
-                "Characters/Seraphine/Spells/SeraphinePassive/SeraphinePassive",
-            ),
-            CoolDown::default(),
-        ));
-
-        for (index, &skill) in character_record.spells.as_ref().unwrap().iter().enumerate() {
-            let skill_component = Skill::new(skill_slot_from_index(index), skill);
-            commands
-                .entity(entity)
-                .with_related::<SkillOf>((skill_component, CoolDown::default()));
-        }
-    }
 }

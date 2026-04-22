@@ -1,7 +1,6 @@
 use std::collections::HashSet;
 
 use bevy::prelude::*;
-use lol_base::prop::{HashKey, LoadHashKeyTrait};
 use lol_base::spell::Spell;
 
 use crate::action::damage::{TargetDamage, TargetFilter};
@@ -16,7 +15,7 @@ pub struct ActionDash {
     pub move_type: DashMoveType,
     pub damage: Option<DashDamage>,
     pub speed: f32,
-    pub skill: HashKey<Spell>,
+    pub skill: Handle<Spell>,
 }
 
 #[derive(Debug, Clone)]
@@ -36,7 +35,7 @@ pub struct DashDamageComponent {
     pub start_pos: Vec3,
     pub target_pos: Vec3,
     pub damage: DashDamage,
-    pub skill: HashKey<Spell>,
+    pub skill: Handle<Spell>,
     pub hit_entities: HashSet<Entity>,
 }
 
@@ -67,7 +66,7 @@ pub fn update_dash_damage(
     res_assets_spell_object: Res<Assets<Spell>>,
 ) {
     for (entity, dasher_transform, mut dash_damage, team) in q_dasher.iter_mut() {
-        let Some(skill_object) = res_assets_spell_object.load_hash(dash_damage.skill) else {
+        let Some(skill_object) = res_assets_spell_object.get(&dash_damage.skill) else {
             return;
         };
         let Ok(skills) = q_skills.get(entity) else {

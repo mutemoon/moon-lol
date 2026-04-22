@@ -1,32 +1,25 @@
 pub mod buffs;
 
 use bevy::prelude::*;
-use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_base::prop::LoadHashKeyTrait;
+use lol_base::spell::Spell;
 use lol_core::action::damage::{DamageShape, TargetDamage, TargetFilter};
 use lol_core::action::dash::{ActionDash, DashDamage, DashMoveType};
 use lol_core::base::buff::BuffOf;
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
 use lol_core::skill::{
-    CoolDown, EventSkillCast, PassiveSkillOf, Skill, SkillOf, SkillSlot, Skills,
-    play_skill_animation, skill_damage, skill_dash, skill_slot_from_index, spawn_skill_particle,
+    CoolDown, EventSkillCast, Skill, SkillSlot, play_skill_animation, skill_damage, skill_dash,
+    spawn_skill_particle,
 };
 
 use crate::ezreal::buffs::BuffEzrealPassive;
-
-const EZREAL_Q_KEY: &str = "Characters/Ezreal/Spells/EzrealQ/EzrealQ";
-const EZREAL_W_KEY: &str = "Characters/Ezreal/Spells/EzrealW/EzrealW";
-const EZREAL_E_KEY: &str = "Characters/Ezreal/Spells/EzrealE/EzrealE";
-const EZREAL_R_KEY: &str = "Characters/Ezreal/Spells/EzrealR/EzrealR";
 
 #[derive(Default)]
 pub struct PluginEzreal;
 
 impl Plugin for PluginEzreal {
     fn build(&self, app: &mut App) {
-        app.add_systems(FixedUpdate, add_skills);
         app.add_observer(on_ezreal_skill_cast);
         app.add_observer(on_ezreal_damage_hit);
     }
@@ -53,16 +46,24 @@ fn on_ezreal_skill_cast(
         return;
     };
 
+    let skill_spell = skill.key_spell_object.clone();
+
     match skill.slot {
-        SkillSlot::Q => cast_ezreal_q(&mut commands, entity),
-        SkillSlot::W => cast_ezreal_w(&mut commands, entity),
-        SkillSlot::E => cast_ezreal_e(&mut commands, &q_transform, entity, trigger.point),
-        SkillSlot::R => cast_ezreal_r(&mut commands, entity),
+        SkillSlot::Q => cast_ezreal_q(&mut commands, entity, skill_spell),
+        SkillSlot::W => cast_ezreal_w(&mut commands, entity, skill_spell),
+        SkillSlot::E => cast_ezreal_e(
+            &mut commands,
+            &q_transform,
+            entity,
+            trigger.point,
+            skill_spell,
+        ),
+        SkillSlot::R => cast_ezreal_r(&mut commands, entity, skill_spell),
         _ => {}
     }
 }
 
-fn cast_ezreal_q(commands: &mut Commands, entity: Entity) {
+fn cast_ezreal_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell1"));
     spawn_skill_particle(commands, entity, hash_bin("Ezreal_Q_Cast"));
 
@@ -70,7 +71,7 @@ fn cast_ezreal_q(commands: &mut Commands, entity: Entity) {
     skill_damage(
         commands,
         entity,
-        EZREAL_Q_KEY,
+        skill_spell,
         DamageShape::Sector {
             radius: 1200.0,
             angle: 15.0,
@@ -84,7 +85,7 @@ fn cast_ezreal_q(commands: &mut Commands, entity: Entity) {
     );
 }
 
-fn cast_ezreal_w(commands: &mut Commands, entity: Entity) {
+fn cast_ezreal_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell2"));
     spawn_skill_particle(commands, entity, hash_bin("Ezreal_W_Cast"));
 
@@ -92,7 +93,7 @@ fn cast_ezreal_w(commands: &mut Commands, entity: Entity) {
     skill_damage(
         commands,
         entity,
-        EZREAL_W_KEY,
+        skill_spell,
         DamageShape::Sector {
             radius: 1200.0,
             angle: 20.0,
@@ -111,6 +112,7 @@ fn cast_ezreal_e(
     q_transform: &Query<&Transform>,
     entity: Entity,
     point: Vec2,
+    skill_spell: Handle<Spell>,
 ) {
     play_skill_animation(commands, entity, hash_bin("Spell3"));
     spawn_skill_particle(commands, entity, hash_bin("Ezreal_E_Cast"));
@@ -122,7 +124,7 @@ fn cast_ezreal_e(
         entity,
         point,
         &ActionDash {
-            skill: EZREAL_E_KEY.into(),
+            skill: skill_spell,
             move_type: DashMoveType::Pointer { max: 475.0 },
             damage: Some(DashDamage {
                 radius_end: 100.0,
@@ -137,7 +139,7 @@ fn cast_ezreal_e(
     );
 }
 
-fn cast_ezreal_r(commands: &mut Commands, entity: Entity) {
+fn cast_ezreal_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell4"));
     spawn_skill_particle(commands, entity, hash_bin("Ezreal_R_Cast"));
 
@@ -145,7 +147,7 @@ fn cast_ezreal_r(commands: &mut Commands, entity: Entity) {
     skill_damage(
         commands,
         entity,
-        EZREAL_R_KEY,
+        skill_spell,
         DamageShape::Sector {
             radius: 20000.0,
             angle: 30.0,
@@ -175,33 +177,4 @@ fn on_ezreal_damage_hit(
     commands
         .entity(target)
         .with_related::<BuffOf>(BuffEzrealPassive::new());
-}
-
-fn add_skills(
-    mut commands: Commands,
-    q_ezreal: Query<Entity, (With<Ezreal>, Without<Skills>)>,
-    res_assets_character_record: Res<Assets<CharacterRecord>>,
-) {
-    for entity in q_ezreal.iter() {
-        let Some(character_record) =
-            res_assets_character_record.load_hash("Characters/Ezreal/CharacterRecords/Root")
-        else {
-            continue;
-        };
-
-        commands.entity(entity).with_related::<PassiveSkillOf>((
-            Skill::new(
-                SkillSlot::Passive,
-                "Characters/Ezreal/Spells/EzrealPassive/EzrealPassive",
-            ),
-            CoolDown::default(),
-        ));
-
-        for (index, &skill) in character_record.spells.as_ref().unwrap().iter().enumerate() {
-            let skill_component = Skill::new(skill_slot_from_index(index), skill);
-            commands
-                .entity(entity)
-                .with_related::<SkillOf>((skill_component, CoolDown::default()));
-        }
-    }
 }

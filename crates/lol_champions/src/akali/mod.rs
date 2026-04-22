@@ -1,9 +1,8 @@
 pub mod buffs;
 
 use bevy::prelude::*;
-use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_base::prop::LoadHashKeyTrait;
+use lol_base::spell::Spell;
 use lol_core::action::damage::{DamageShape, TargetDamage, TargetFilter};
 use lol_core::action::dash::{ActionDash, DashDamage, DashMoveType};
 use lol_core::base::buff::BuffOf;
@@ -11,25 +10,17 @@ use lol_core::buffs::cc_debuffs::DebuffSlow;
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
 use lol_core::skill::{
-    CoolDown, EventSkillCast, PassiveSkillOf, Skill, SkillCooldownMode, SkillOf, SkillRecastWindow,
-    SkillSlot, Skills, play_skill_animation, skill_damage, skill_dash, skill_slot_from_index,
-    spawn_skill_particle,
+    CoolDown, EventSkillCast, Skill, SkillCooldownMode, SkillRecastWindow, SkillSlot,
+    play_skill_animation, skill_damage, skill_dash, spawn_skill_particle,
 };
 
 use crate::akali::buffs::{BuffAkaliPassive, BuffAkaliStealth, BuffAkaliW};
-
-const AKALI_Q_KEY: &str = "Characters/Akali/Spells/AkaliFivePointStrike/AkaliFivePointStrike";
-#[allow(dead_code)]
-const AKALI_W_KEY: &str = "Characters/Akali/Spells/AkaliSmokeBomb/AkaliSmokeBomb";
-const AKALI_E_KEY: &str = "Characters/Akali/Spells/AkaliShurikenFlip/AkaliShurikenFlip";
-const AKALI_R_KEY: &str = "Characters/Akali/Spells/AkaliShadowDance/AkaliShadowDance";
 
 #[derive(Default)]
 pub struct PluginAkali;
 
 impl Plugin for PluginAkali {
     fn build(&self, app: &mut App) {
-        app.add_systems(FixedUpdate, add_skills);
         app.add_observer(on_akali_skill_cast);
         app.add_observer(on_akali_damage_hit);
     }
@@ -56,13 +47,16 @@ fn on_akali_skill_cast(
         return;
     };
 
+    let skill_spell = skill.key_spell_object.clone();
+
     match skill.slot {
-        SkillSlot::Q => cast_akali_q(&mut commands, entity),
+        SkillSlot::Q => cast_akali_q(&mut commands, entity, skill_spell),
         SkillSlot::W => cast_akali_w(&mut commands, entity),
         SkillSlot::E => cast_akali_e(
             &mut commands,
             &q_transform,
             entity,
+            skill_spell,
             trigger.skill_entity,
             trigger.point,
             cooldown,
@@ -72,6 +66,7 @@ fn on_akali_skill_cast(
             &mut commands,
             &q_transform,
             entity,
+            skill_spell,
             trigger.skill_entity,
             trigger.point,
             cooldown,
@@ -81,7 +76,7 @@ fn on_akali_skill_cast(
     }
 }
 
-fn cast_akali_q(commands: &mut Commands, entity: Entity) {
+fn cast_akali_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell1"));
     spawn_skill_particle(commands, entity, hash_bin("Akali_Q_Cast"));
 
@@ -89,7 +84,7 @@ fn cast_akali_q(commands: &mut Commands, entity: Entity) {
     skill_damage(
         commands,
         entity,
-        AKALI_Q_KEY,
+        skill_spell,
         DamageShape::Sector {
             radius: 500.0,
             angle: 45.0,
@@ -125,6 +120,7 @@ fn cast_akali_e(
     commands: &mut Commands,
     q_transform: &Query<&Transform>,
     entity: Entity,
+    skill_spell: Handle<Spell>,
     skill_entity: Entity,
     point: Vec2,
     cooldown: &CoolDown,
@@ -140,7 +136,7 @@ fn cast_akali_e(
         skill_damage(
             commands,
             entity,
-            AKALI_E_KEY,
+            skill_spell,
             DamageShape::Sector {
                 radius: 825.0,
                 angle: 45.0,
@@ -165,7 +161,7 @@ fn cast_akali_e(
             entity,
             point,
             &ActionDash {
-                skill: AKALI_E_KEY.into(),
+                skill: skill_spell,
                 move_type: DashMoveType::Pointer { max: 825.0 },
                 damage: Some(DashDamage {
                     radius_end: 100.0,
@@ -190,6 +186,7 @@ fn cast_akali_r(
     commands: &mut Commands,
     q_transform: &Query<&Transform>,
     entity: Entity,
+    skill_spell: Handle<Spell>,
     skill_entity: Entity,
     point: Vec2,
     cooldown: &CoolDown,
@@ -208,7 +205,7 @@ fn cast_akali_r(
         skill_damage(
             commands,
             entity,
-            AKALI_R_KEY,
+            skill_spell.clone(),
             DamageShape::Circle { radius: 300.0 },
             vec![TargetDamage {
                 filter: TargetFilter::Champion,
@@ -226,7 +223,7 @@ fn cast_akali_r(
         entity,
         point,
         &ActionDash {
-            skill: AKALI_R_KEY.into(),
+            skill: skill_spell,
             move_type: DashMoveType::Pointer { max: 675.0 },
             damage: if stage == 1 {
                 Some(DashDamage {
@@ -274,37 +271,4 @@ fn on_akali_damage_hit(
     commands
         .entity(target)
         .with_related::<BuffOf>(DebuffSlow::new(0.5, 1.0));
-}
-
-fn add_skills(
-    mut commands: Commands,
-    q_akali: Query<Entity, (With<Akali>, Without<Skills>)>,
-    res_assets_character_record: Res<Assets<CharacterRecord>>,
-) {
-    for entity in q_akali.iter() {
-        let Some(character_record) =
-            res_assets_character_record.load_hash("Characters/Akali/CharacterRecords/Root")
-        else {
-            continue;
-        };
-
-        commands.entity(entity).with_related::<PassiveSkillOf>((
-            Skill::new(
-                SkillSlot::Passive,
-                "Characters/Akali/Spells/AkaliPassive/AkaliPassive",
-            ),
-            CoolDown::default(),
-        ));
-
-        for (index, &skill) in character_record.spells.as_ref().unwrap().iter().enumerate() {
-            let mut skill_component = Skill::new(skill_slot_from_index(index), skill);
-            // E and R use manual cooldown mode for recast windows
-            if index == 2 || index == 3 {
-                skill_component = skill_component.with_cooldown_mode(SkillCooldownMode::Manual);
-            }
-            commands
-                .entity(entity)
-                .with_related::<SkillOf>((skill_component, CoolDown::default()));
-        }
-    }
 }

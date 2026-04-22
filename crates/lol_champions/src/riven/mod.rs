@@ -2,9 +2,8 @@ pub mod passive;
 pub mod q;
 
 use bevy::prelude::*;
-use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_base::prop::LoadHashKeyTrait;
+use lol_base::spell::Spell;
 use lol_core::action::damage::{DamageShape, TargetDamage, TargetFilter};
 use lol_core::action::dash::{ActionDash, DashDamage, DashMoveType};
 use lol_core::base::buff::BuffOf;
@@ -12,16 +11,12 @@ use lol_core::buffs::shield_white::BuffShieldWhite;
 use lol_core::damage::DamageType;
 use lol_core::entities::champion::Champion;
 use lol_core::skill::{
-    CoolDown, EventSkillCast, PassiveSkillOf, Skill, SkillCooldownMode, SkillOf, SkillRecastWindow,
-    SkillSlot, Skills, play_skill_animation, skill_damage, skill_dash, skill_slot_from_index,
-    spawn_skill_particle,
+    CoolDown, EventSkillCast, Skill, SkillRecastWindow, SkillSlot, play_skill_animation,
+    skill_damage, skill_dash, spawn_skill_particle,
 };
 
 use crate::riven::passive::BuffRivenPassive;
 
-const RIVEN_Q_KEY: &str = "Characters/Riven/Spells/RivenTriCleaveAbility/RivenTriCleave";
-const RIVEN_W_KEY: &str = "Characters/Riven/Spells/RivenMartyrAbility/RivenMartyr";
-const RIVEN_E_KEY: &str = "Characters/Riven/Spells/RivenFeintAbility/RivenFeint";
 const RIVEN_Q_RECAST_WINDOW: f32 = 4.0;
 
 #[derive(Default)]
@@ -29,7 +24,6 @@ pub struct PluginRiven;
 
 impl Plugin for PluginRiven {
     fn build(&self, app: &mut App) {
-        app.add_systems(FixedUpdate, (add_skills,));
         app.add_observer(on_riven_skill_cast);
         app.add_observer(passive::on_damage_create_trigger_bonus);
     }
@@ -65,9 +59,16 @@ fn on_riven_skill_cast(
             trigger.point,
             cooldown,
             recast,
+            skill.key_spell_object.clone(),
         ),
-        SkillSlot::W => cast_riven_w(&mut commands, entity),
-        SkillSlot::E => cast_riven_e(&mut commands, &q_transform, entity, trigger.point),
+        SkillSlot::W => cast_riven_w(&mut commands, entity, skill.key_spell_object.clone()),
+        SkillSlot::E => cast_riven_e(
+            &mut commands,
+            &q_transform,
+            entity,
+            trigger.point,
+            skill.key_spell_object.clone(),
+        ),
         SkillSlot::R => cast_riven_r(&mut commands, entity),
         _ => {}
     }
@@ -81,6 +82,7 @@ fn cast_riven_q(
     point: Vec2,
     cooldown: &CoolDown,
     recast: Option<&SkillRecastWindow>,
+    skill_spell: Handle<Spell>,
 ) {
     let stage = recast.map(|window| window.stage).unwrap_or(1);
 
@@ -97,7 +99,7 @@ fn cast_riven_q(
         entity,
         point,
         &ActionDash {
-            skill: RIVEN_Q_KEY.into(),
+            skill: skill_spell,
             move_type: DashMoveType::Fixed(250.0),
             damage: Some(DashDamage {
                 radius_end: 250.0,
@@ -130,13 +132,13 @@ fn cast_riven_q(
     }
 }
 
-fn cast_riven_w(commands: &mut Commands, entity: Entity) {
+fn cast_riven_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     spawn_skill_particle(commands, entity, hash_bin("Riven_W_Cast"));
     play_skill_animation(commands, entity, hash_bin("Spell2"));
     skill_damage(
         commands,
         entity,
-        RIVEN_W_KEY,
+        skill_spell,
         DamageShape::Circle { radius: 300.0 },
         vec![TargetDamage {
             filter: TargetFilter::All,
@@ -152,6 +154,7 @@ fn cast_riven_e(
     q_transform: &Query<&Transform>,
     entity: Entity,
     point: Vec2,
+    skill_spell: Handle<Spell>,
 ) {
     spawn_skill_particle(commands, entity, hash_bin("Riven_E_Mis"));
     play_skill_animation(commands, entity, hash_bin("Spell3"));
@@ -164,7 +167,7 @@ fn cast_riven_e(
         entity,
         point,
         &ActionDash {
-            skill: RIVEN_E_KEY.into(),
+            skill: skill_spell,
             move_type: DashMoveType::Fixed(250.0),
             damage: None,
             speed: 1000.0,
@@ -175,36 +178,4 @@ fn cast_riven_e(
 fn cast_riven_r(commands: &mut Commands, entity: Entity) {
     spawn_skill_particle(commands, entity, hash_bin("Riven_R_Indicator_Ring"));
     spawn_skill_particle(commands, entity, hash_bin("Riven_R_ALL_Warning"));
-}
-
-fn add_skills(
-    mut commands: Commands,
-    q_riven: Query<Entity, (With<Riven>, Without<Skills>)>,
-    res_assets_character_record: Res<Assets<CharacterRecord>>,
-) {
-    for entity in q_riven.iter() {
-        let Some(character_record) =
-            res_assets_character_record.load_hash("Characters/Riven/CharacterRecords/Root")
-        else {
-            continue;
-        };
-
-        commands.entity(entity).with_related::<PassiveSkillOf>((
-            Skill::new(
-                SkillSlot::Passive,
-                "Characters/Riven/Spells/RivenPassiveAbility/RivenPassive",
-            ),
-            CoolDown::default(),
-        ));
-
-        for (index, &skill) in character_record.spells.as_ref().unwrap().iter().enumerate() {
-            let mut skill_component = Skill::new(skill_slot_from_index(index), skill);
-            if index == 0 {
-                skill_component = skill_component.with_cooldown_mode(SkillCooldownMode::Manual);
-            }
-            commands
-                .entity(entity)
-                .with_related::<SkillOf>((skill_component, CoolDown::default()));
-        }
-    }
 }

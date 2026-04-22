@@ -1,32 +1,24 @@
 pub mod buffs;
 
 use bevy::prelude::*;
-use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_base::prop::LoadHashKeyTrait;
+use lol_base::spell::Spell;
 use lol_core::action::damage::{DamageShape, TargetDamage, TargetFilter};
 use lol_core::base::buff::BuffOf;
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
 use lol_core::skill::{
-    CoolDown, EventSkillCast, PassiveSkillOf, Skill, SkillOf, SkillSlot, Skills,
-    play_skill_animation, skill_damage, skill_slot_from_index, spawn_skill_particle,
+    CoolDown, EventSkillCast, Skill, SkillSlot, play_skill_animation, skill_damage,
+    spawn_skill_particle,
 };
 
 use crate::ryze::buffs::BuffRyzeW;
-
-const RYZE_Q_KEY: &str = "Characters/Ryze/Spells/RyzeQ/RyzeQ";
-const RYZE_W_KEY: &str = "Characters/Ryze/Spells/RyzeW/RyzeW";
-const RYZE_E_KEY: &str = "Characters/Ryze/Spells/RyzeE/RyzeE";
-#[allow(dead_code)]
-const RYZE_R_KEY: &str = "Characters/Ryze/Spells/RyzeR/RyzeR";
 
 #[derive(Default)]
 pub struct PluginRyze;
 
 impl Plugin for PluginRyze {
     fn build(&self, app: &mut App) {
-        app.add_systems(FixedUpdate, add_skills);
         app.add_observer(on_ryze_skill_cast);
         app.add_observer(on_ryze_damage_hit);
     }
@@ -53,15 +45,15 @@ fn on_ryze_skill_cast(
     };
 
     match skill.slot {
-        SkillSlot::Q => cast_ryze_q(&mut commands, entity),
-        SkillSlot::W => cast_ryze_w(&mut commands, entity),
-        SkillSlot::E => cast_ryze_e(&mut commands, entity),
+        SkillSlot::Q => cast_ryze_q(&mut commands, entity, skill.key_spell_object.clone()),
+        SkillSlot::W => cast_ryze_w(&mut commands, entity, skill.key_spell_object.clone()),
+        SkillSlot::E => cast_ryze_e(&mut commands, entity, skill.key_spell_object.clone()),
         SkillSlot::R => cast_ryze_r(&mut commands, entity),
         _ => {}
     }
 }
 
-fn cast_ryze_q(commands: &mut Commands, entity: Entity) {
+fn cast_ryze_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell1"));
     spawn_skill_particle(commands, entity, hash_bin("Ryze_Q_Cast"));
 
@@ -69,7 +61,7 @@ fn cast_ryze_q(commands: &mut Commands, entity: Entity) {
     skill_damage(
         commands,
         entity,
-        RYZE_Q_KEY,
+        skill_spell,
         DamageShape::Sector {
             radius: 600.0,
             angle: 25.0,
@@ -83,7 +75,7 @@ fn cast_ryze_q(commands: &mut Commands, entity: Entity) {
     );
 }
 
-fn cast_ryze_w(commands: &mut Commands, entity: Entity) {
+fn cast_ryze_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell2"));
     spawn_skill_particle(commands, entity, hash_bin("Ryze_W_Cast"));
 
@@ -91,7 +83,7 @@ fn cast_ryze_w(commands: &mut Commands, entity: Entity) {
     skill_damage(
         commands,
         entity,
-        RYZE_W_KEY,
+        skill_spell,
         DamageShape::Circle { radius: 300.0 },
         vec![TargetDamage {
             filter: TargetFilter::All,
@@ -102,7 +94,7 @@ fn cast_ryze_w(commands: &mut Commands, entity: Entity) {
     );
 }
 
-fn cast_ryze_e(commands: &mut Commands, entity: Entity) {
+fn cast_ryze_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell3"));
     spawn_skill_particle(commands, entity, hash_bin("Ryze_E_Cast"));
 
@@ -110,7 +102,7 @@ fn cast_ryze_e(commands: &mut Commands, entity: Entity) {
     skill_damage(
         commands,
         entity,
-        RYZE_E_KEY,
+        skill_spell,
         DamageShape::Circle { radius: 300.0 },
         vec![TargetDamage {
             filter: TargetFilter::All,
@@ -144,33 +136,4 @@ fn on_ryze_damage_hit(
     commands
         .entity(target)
         .with_related::<BuffOf>(BuffRyzeW::new(0.7, 1.0));
-}
-
-fn add_skills(
-    mut commands: Commands,
-    q_ryze: Query<Entity, (With<Ryze>, Without<Skills>)>,
-    res_assets_character_record: Res<Assets<CharacterRecord>>,
-) {
-    for entity in q_ryze.iter() {
-        let Some(character_record) =
-            res_assets_character_record.load_hash("Characters/Ryze/CharacterRecords/Root")
-        else {
-            continue;
-        };
-
-        commands.entity(entity).with_related::<PassiveSkillOf>((
-            Skill::new(
-                SkillSlot::Passive,
-                "Characters/Ryze/Spells/RyzePassive/RyzePassive",
-            ),
-            CoolDown::default(),
-        ));
-
-        for (index, &skill) in character_record.spells.as_ref().unwrap().iter().enumerate() {
-            let skill_component = Skill::new(skill_slot_from_index(index), skill);
-            commands
-                .entity(entity)
-                .with_related::<SkillOf>((skill_component, CoolDown::default()));
-        }
-    }
 }

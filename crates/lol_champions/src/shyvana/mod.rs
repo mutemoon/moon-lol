@@ -1,32 +1,24 @@
 pub mod buffs;
 
 use bevy::prelude::*;
-use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_base::prop::LoadHashKeyTrait;
+use lol_base::spell::Spell;
 use lol_core::action::damage::{DamageShape, TargetDamage, TargetFilter};
 use lol_core::base::buff::BuffOf;
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
 use lol_core::skill::{
-    CoolDown, EventSkillCast, PassiveSkillOf, Skill, SkillOf, SkillSlot, Skills,
-    play_skill_animation, skill_damage, skill_slot_from_index, spawn_skill_particle,
+    CoolDown, EventSkillCast, Skill, SkillSlot, play_skill_animation, skill_damage,
+    spawn_skill_particle,
 };
 
 use crate::shyvana::buffs::BuffShyvanaE;
-
-const SHYVANA_Q_KEY: &str = "Characters/Shyvana/Spells/ShyvanaQ/ShyvanaQ";
-const SHYVANA_W_KEY: &str = "Characters/Shyvana/Spells/ShyvanaW/ShyvanaW";
-const SHYVANA_E_KEY: &str = "Characters/Shyvana/Spells/ShyvanaE/ShyvanaE";
-#[allow(dead_code)]
-const SHYVANA_R_KEY: &str = "Characters/Shyvana/Spells/ShyvanaR/ShyvanaR";
 
 #[derive(Default)]
 pub struct PluginShyvana;
 
 impl Plugin for PluginShyvana {
     fn build(&self, app: &mut App) {
-        app.add_systems(FixedUpdate, add_skills);
         app.add_observer(on_shyvana_skill_cast);
         app.add_observer(on_shyvana_damage_hit);
     }
@@ -52,16 +44,18 @@ fn on_shyvana_skill_cast(
         return;
     };
 
+    let skill_spell = skill.key_spell_object.clone();
+
     match skill.slot {
-        SkillSlot::Q => cast_shyvana_q(&mut commands, entity),
-        SkillSlot::W => cast_shyvana_w(&mut commands, entity),
-        SkillSlot::E => cast_shyvana_e(&mut commands, entity),
+        SkillSlot::Q => cast_shyvana_q(&mut commands, entity, skill_spell),
+        SkillSlot::W => cast_shyvana_w(&mut commands, entity, skill_spell),
+        SkillSlot::E => cast_shyvana_e(&mut commands, entity, skill_spell),
         SkillSlot::R => cast_shyvana_r(&mut commands, entity),
         _ => {}
     }
 }
 
-fn cast_shyvana_q(commands: &mut Commands, entity: Entity) {
+fn cast_shyvana_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell1"));
     spawn_skill_particle(commands, entity, hash_bin("Shyvana_Q_Cast"));
 
@@ -69,7 +63,7 @@ fn cast_shyvana_q(commands: &mut Commands, entity: Entity) {
     skill_damage(
         commands,
         entity,
-        SHYVANA_Q_KEY,
+        skill_spell,
         DamageShape::Circle { radius: 250.0 },
         vec![TargetDamage {
             filter: TargetFilter::All,
@@ -80,7 +74,7 @@ fn cast_shyvana_q(commands: &mut Commands, entity: Entity) {
     );
 }
 
-fn cast_shyvana_w(commands: &mut Commands, entity: Entity) {
+fn cast_shyvana_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell2"));
     spawn_skill_particle(commands, entity, hash_bin("Shyvana_W_Cast"));
 
@@ -88,7 +82,7 @@ fn cast_shyvana_w(commands: &mut Commands, entity: Entity) {
     skill_damage(
         commands,
         entity,
-        SHYVANA_W_KEY,
+        skill_spell,
         DamageShape::Sector {
             radius: 600.0,
             angle: 25.0,
@@ -102,7 +96,7 @@ fn cast_shyvana_w(commands: &mut Commands, entity: Entity) {
     );
 }
 
-fn cast_shyvana_e(commands: &mut Commands, entity: Entity) {
+fn cast_shyvana_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell3"));
     spawn_skill_particle(commands, entity, hash_bin("Shyvana_E_Cast"));
 
@@ -110,7 +104,7 @@ fn cast_shyvana_e(commands: &mut Commands, entity: Entity) {
     skill_damage(
         commands,
         entity,
-        SHYVANA_E_KEY,
+        skill_spell,
         DamageShape::Circle { radius: 450.0 },
         vec![TargetDamage {
             filter: TargetFilter::All,
@@ -144,33 +138,4 @@ fn on_shyvana_damage_hit(
     commands
         .entity(target)
         .with_related::<BuffOf>(BuffShyvanaE::new(0.5, 1.0));
-}
-
-fn add_skills(
-    mut commands: Commands,
-    q_shyvana: Query<Entity, (With<Shyvana>, Without<Skills>)>,
-    res_assets_character_record: Res<Assets<CharacterRecord>>,
-) {
-    for entity in q_shyvana.iter() {
-        let Some(character_record) =
-            res_assets_character_record.load_hash("Characters/Shyvana/CharacterRecords/Root")
-        else {
-            continue;
-        };
-
-        commands.entity(entity).with_related::<PassiveSkillOf>((
-            Skill::new(
-                SkillSlot::Passive,
-                "Characters/Shyvana/Spells/ShyvanaPassive/ShyvanaPassive",
-            ),
-            CoolDown::default(),
-        ));
-
-        for (index, &skill) in character_record.spells.as_ref().unwrap().iter().enumerate() {
-            let skill_component = Skill::new(skill_slot_from_index(index), skill);
-            commands
-                .entity(entity)
-                .with_related::<SkillOf>((skill_component, CoolDown::default()));
-        }
-    }
 }

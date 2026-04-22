@@ -1,7 +1,7 @@
 use bevy::prelude::*;
-use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
 use lol_base::prop::LoadHashKeyTrait;
+use lol_base::spell::Spell;
 use lol_core::action::damage::{DamageShape, TargetDamage, TargetFilter};
 use lol_core::action::dash::{ActionDash, DashDamage, DashMoveType};
 use lol_core::base::buff::BuffOf;
@@ -10,15 +10,10 @@ use lol_core::buffs::common_buffs::{BuffMoveSpeed, BuffSelfHeal};
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
 use lol_core::skill::{
-    CoolDown, EventSkillCast, PassiveSkillOf, Skill, SkillCooldownMode, SkillOf, SkillRecastWindow,
-    SkillSlot, Skills, play_skill_animation, skill_damage, skill_dash, skill_slot_from_index,
-    spawn_skill_particle,
+    CoolDown, EventSkillCast, Skill, SkillRecastWindow, SkillSlot, play_skill_animation,
+    skill_damage, skill_dash, spawn_skill_particle,
 };
 
-const AATROX_Q_KEY: &str = "Characters/Aatrox/Spells/AatroxQ/AatroxQ";
-const AATROX_W_KEY: &str = "Characters/Aatrox/Spells/AatroxW/AatroxW";
-const AATROX_E_KEY: &str = "Characters/Aatrox/Spells/AatroxE/AatroxE";
-const AATROX_R_KEY: &str = "Characters/Aatrox/Spells/AatroxR/AatroxR";
 const AATROX_Q_RECAST_WINDOW: f32 = 3.0;
 
 #[derive(Default)]
@@ -26,7 +21,6 @@ pub struct PluginAatrox;
 
 impl Plugin for PluginAatrox {
     fn build(&self, app: &mut App) {
-        app.add_systems(FixedUpdate, add_skills);
         app.add_observer(on_aatrox_skill_cast);
         app.add_observer(on_aatrox_damage_hit);
     }
@@ -62,10 +56,17 @@ fn on_aatrox_skill_cast(
             trigger.point,
             cooldown,
             recast,
+            skill.key_spell_object.clone(),
         ),
-        SkillSlot::W => cast_aatrox_w(&mut commands, entity),
-        SkillSlot::E => cast_aatrox_e(&mut commands, &q_transform, entity, trigger.point),
-        SkillSlot::R => cast_aatrox_r(&mut commands, entity),
+        SkillSlot::W => cast_aatrox_w(&mut commands, entity, skill.key_spell_object.clone()),
+        SkillSlot::E => cast_aatrox_e(
+            &mut commands,
+            &q_transform,
+            entity,
+            trigger.point,
+            skill.key_spell_object.clone(),
+        ),
+        SkillSlot::R => cast_aatrox_r(&mut commands, entity, skill.key_spell_object.clone()),
         _ => {}
     }
 }
@@ -78,6 +79,7 @@ fn cast_aatrox_q(
     point: Vec2,
     cooldown: &CoolDown,
     recast: Option<&SkillRecastWindow>,
+    skill_spell: Handle<Spell>,
 ) {
     // Q has 3 stages with different animations
     let stage = recast.map(|w| w.stage).unwrap_or(1);
@@ -99,7 +101,7 @@ fn cast_aatrox_q(
         entity,
         point,
         &ActionDash {
-            skill: AATROX_Q_KEY.into(),
+            skill: skill_spell,
             move_type: DashMoveType::Fixed(200.0),
             damage: Some(DashDamage {
                 radius_end: 200.0,
@@ -137,14 +139,14 @@ fn cast_aatrox_q(
     }
 }
 
-fn cast_aatrox_w(commands: &mut Commands, entity: Entity) {
+fn cast_aatrox_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell2"));
     spawn_skill_particle(commands, entity, hash_bin("Aatrox_W_Cast"));
     // W is a chain that pulls enemies back after delay
     skill_damage(
         commands,
         entity,
-        AATROX_W_KEY,
+        skill_spell,
         DamageShape::Circle { radius: 300.0 },
         vec![TargetDamage {
             filter: TargetFilter::All,
@@ -160,6 +162,7 @@ fn cast_aatrox_e(
     q_transform: &Query<&Transform>,
     entity: Entity,
     point: Vec2,
+    skill_spell: Handle<Spell>,
 ) {
     play_skill_animation(commands, entity, hash_bin("Spell3"));
     spawn_skill_particle(commands, entity, hash_bin("Aatrox_E_Cast"));
@@ -170,7 +173,7 @@ fn cast_aatrox_e(
         entity,
         point,
         &ActionDash {
-            skill: AATROX_E_KEY.into(),
+            skill: skill_spell,
             move_type: DashMoveType::Pointer { max: 250.0 },
             damage: None,
             speed: 900.0,
@@ -182,14 +185,14 @@ fn cast_aatrox_e(
         .with_related::<BuffOf>(BuffSelfHeal::new(30.0));
 }
 
-fn cast_aatrox_r(commands: &mut Commands, entity: Entity) {
+fn cast_aatrox_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell4"));
     spawn_skill_particle(commands, entity, hash_bin("Aatrox_R_Cast"));
     // R is a self-cast that makes Aatrox unstoppable and deals damage
     skill_damage(
         commands,
         entity,
-        AATROX_R_KEY,
+        skill_spell,
         DamageShape::Circle { radius: 300.0 },
         vec![TargetDamage {
             filter: TargetFilter::All,
@@ -217,37 +220,4 @@ fn on_aatrox_damage_hit(
     commands
         .entity(target)
         .with_related::<BuffOf>(DebuffSlow::new(0.25, 1.5));
-}
-
-fn add_skills(
-    mut commands: Commands,
-    q_aatrox: Query<Entity, (With<Aatrox>, Without<Skills>)>,
-    res_assets_character_record: Res<Assets<CharacterRecord>>,
-) {
-    for entity in q_aatrox.iter() {
-        let Some(character_record) =
-            res_assets_character_record.load_hash("Characters/Aatrox/CharacterRecords/Root")
-        else {
-            continue;
-        };
-
-        commands.entity(entity).with_related::<PassiveSkillOf>((
-            Skill::new(
-                SkillSlot::Passive,
-                "Characters/Aatrox/Spells/AatroxPassiveAbility/AatroxPassive",
-            ),
-            CoolDown::default(),
-        ));
-
-        for (index, &skill) in character_record.spells.as_ref().unwrap().iter().enumerate() {
-            let mut skill_component = Skill::new(skill_slot_from_index(index), skill);
-            // Q uses manual cooldown mode for recast window
-            if index == 0 {
-                skill_component = skill_component.with_cooldown_mode(SkillCooldownMode::Manual);
-            }
-            commands
-                .entity(entity)
-                .with_related::<SkillOf>((skill_component, CoolDown::default()));
-        }
-    }
 }

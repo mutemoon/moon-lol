@@ -1,9 +1,8 @@
 pub mod buffs;
 
 use bevy::prelude::*;
-use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_base::prop::LoadHashKeyTrait;
+use lol_base::spell::Spell;
 use lol_core::action::damage::{DamageShape, TargetDamage, TargetFilter};
 use lol_core::action::dash::{ActionDash, DashDamage, DashMoveType};
 use lol_core::base::buff::BuffOf;
@@ -13,16 +12,12 @@ use lol_core::buffs::shield_white::BuffShieldWhite;
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
 use lol_core::skill::{
-    CoolDown, EventSkillCast, PassiveSkillOf, Skill, SkillCooldownMode, SkillOf, SkillRecastWindow,
-    SkillSlot, Skills, play_skill_animation, reset_skill_attack, skill_damage, skill_dash,
-    skill_slot_from_index, spawn_skill_particle,
+    CoolDown, EventSkillCast, Skill, SkillRecastWindow, SkillSlot, play_skill_animation,
+    reset_skill_attack, skill_damage, skill_dash, spawn_skill_particle,
 };
 
 use crate::volibear::buffs::{BuffVolibearQ, DebuffVolibearWMark};
 
-const VOLIBEAR_W_KEY: &str = "Characters/Volibear/Spells/VolibearW/VolibearW";
-const VOLIBEAR_E_KEY: &str = "Characters/Volibear/Spells/VolibearE/VolibearE";
-const VOLIBEAR_R_KEY: &str = "Characters/Volibear/Spells/VolibearR/VolibearR";
 const VOLIBEAR_W_RECAST_WINDOW: f32 = 2.0;
 
 #[derive(Default)]
@@ -30,7 +25,6 @@ pub struct PluginVolibear;
 
 impl Plugin for PluginVolibear {
     fn build(&self, app: &mut App) {
-        app.add_systems(FixedUpdate, add_skills);
         app.add_observer(on_volibear_skill_cast);
         app.add_observer(on_volibear_damage_hit);
     }
@@ -57,18 +51,27 @@ fn on_volibear_skill_cast(
         return;
     };
 
+    let skill_spell = skill.key_spell_object.clone();
+
     match skill.slot {
         SkillSlot::Q => cast_volibear_q(&mut commands, entity),
         SkillSlot::W => cast_volibear_w(
             &mut commands,
             entity,
+            skill_spell,
             trigger.skill_entity,
             trigger.point,
             cooldown,
             recast,
         ),
-        SkillSlot::E => cast_volibear_e(&mut commands, entity),
-        SkillSlot::R => cast_volibear_r(&mut commands, &q_transform, entity, trigger.point),
+        SkillSlot::E => cast_volibear_e(&mut commands, entity, skill_spell),
+        SkillSlot::R => cast_volibear_r(
+            &mut commands,
+            &q_transform,
+            entity,
+            skill_spell,
+            trigger.point,
+        ),
         _ => {}
     }
 }
@@ -86,6 +89,7 @@ fn cast_volibear_q(commands: &mut Commands, entity: Entity) {
 fn cast_volibear_w(
     commands: &mut Commands,
     entity: Entity,
+    skill_spell: Handle<Spell>,
     skill_entity: Entity,
     _point: Vec2,
     cooldown: &CoolDown,
@@ -109,7 +113,7 @@ fn cast_volibear_w(
         skill_damage(
             commands,
             entity,
-            VOLIBEAR_W_KEY,
+            skill_spell,
             DamageShape::Nearest {
                 max_distance: 200.0,
             },
@@ -132,14 +136,14 @@ fn cast_volibear_w(
     }
 }
 
-fn cast_volibear_e(commands: &mut Commands, entity: Entity) {
+fn cast_volibear_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell3"));
     spawn_skill_particle(commands, entity, hash_bin("Volibear_E_Cast"));
     // E is AoE damage + slow + shield
     skill_damage(
         commands,
         entity,
-        VOLIBEAR_E_KEY,
+        skill_spell,
         DamageShape::Circle { radius: 300.0 },
         vec![TargetDamage {
             filter: TargetFilter::All,
@@ -157,6 +161,7 @@ fn cast_volibear_r(
     commands: &mut Commands,
     q_transform: &Query<&Transform>,
     entity: Entity,
+    skill_spell: Handle<Spell>,
     point: Vec2,
 ) {
     play_skill_animation(commands, entity, hash_bin("Spell4"));
@@ -168,7 +173,7 @@ fn cast_volibear_r(
         entity,
         point,
         &ActionDash {
-            skill: VOLIBEAR_R_KEY.into(),
+            skill: skill_spell,
             move_type: DashMoveType::Pointer { max: 400.0 },
             damage: Some(DashDamage {
                 radius_end: 150.0,
@@ -181,39 +186,6 @@ fn cast_volibear_r(
             speed: 800.0,
         },
     );
-}
-
-fn add_skills(
-    mut commands: Commands,
-    q_volibear: Query<Entity, (With<Volibear>, Without<Skills>)>,
-    res_assets_character_record: Res<Assets<CharacterRecord>>,
-) {
-    for entity in q_volibear.iter() {
-        let Some(character_record) =
-            res_assets_character_record.load_hash("Characters/Volibear/CharacterRecords/Root")
-        else {
-            continue;
-        };
-
-        commands.entity(entity).with_related::<PassiveSkillOf>((
-            Skill::new(
-                SkillSlot::Passive,
-                "Characters/Volibear/Spells/VolibearPassiveAbility/VolibearPassive",
-            ),
-            CoolDown::default(),
-        ));
-
-        for (index, &skill) in character_record.spells.as_ref().unwrap().iter().enumerate() {
-            let mut skill_component = Skill::new(skill_slot_from_index(index), skill);
-            // W uses manual cooldown mode for recast window
-            if index == 1 {
-                skill_component = skill_component.with_cooldown_mode(SkillCooldownMode::Manual);
-            }
-            commands
-                .entity(entity)
-                .with_related::<SkillOf>((skill_component, CoolDown::default()));
-        }
-    }
 }
 
 /// 监听 Volibear 造成的伤害，W1 标记目标，E 命中减速

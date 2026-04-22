@@ -1,33 +1,25 @@
 pub mod buffs;
 
 use bevy::prelude::*;
-use league_core::extract::CharacterRecord;
 use league_utils::hash_bin;
-use lol_base::prop::LoadHashKeyTrait;
+use lol_base::spell::Spell;
 use lol_core::action::damage::{DamageShape, TargetDamage, TargetFilter};
 use lol_core::base::buff::BuffOf;
 use lol_core::buffs::cc_debuffs::DebuffSlow;
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
 use lol_core::skill::{
-    CoolDown, EventSkillCast, PassiveSkillOf, Skill, SkillOf, SkillSlot, Skills,
-    play_skill_animation, skill_damage, skill_slot_from_index, spawn_skill_particle,
+    CoolDown, EventSkillCast, Skill, SkillSlot, play_skill_animation, skill_damage,
+    spawn_skill_particle,
 };
 
 use crate::janna::buffs::BuffJannaPassive;
-
-const JANNA_Q_KEY: &str = "Characters/Janna/Spells/JannaQ/JannaQ";
-const JANNA_W_KEY: &str = "Characters/Janna/Spells/JannaW/JannaW";
-#[allow(dead_code)]
-const JANNA_E_KEY: &str = "Characters/Janna/Spells/JannaE/JannaE";
-const JANNA_R_KEY: &str = "Characters/Janna/Spells/JannaR/JannaR";
 
 #[derive(Default)]
 pub struct PluginJanna;
 
 impl Plugin for PluginJanna {
     fn build(&self, app: &mut App) {
-        app.add_systems(FixedUpdate, add_skills);
         app.add_observer(on_janna_skill_cast);
         app.add_observer(on_janna_damage_hit);
     }
@@ -53,16 +45,18 @@ fn on_janna_skill_cast(
         return;
     };
 
+    let skill_spell = skill.key_spell_object.clone();
+
     match skill.slot {
-        SkillSlot::Q => cast_janna_q(&mut commands, entity),
-        SkillSlot::W => cast_janna_w(&mut commands, entity),
+        SkillSlot::Q => cast_janna_q(&mut commands, entity, skill_spell),
+        SkillSlot::W => cast_janna_w(&mut commands, entity, skill_spell),
         SkillSlot::E => cast_janna_e(&mut commands, entity),
-        SkillSlot::R => cast_janna_r(&mut commands, entity),
+        SkillSlot::R => cast_janna_r(&mut commands, entity, skill_spell),
         _ => {}
     }
 }
 
-fn cast_janna_q(commands: &mut Commands, entity: Entity) {
+fn cast_janna_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell1"));
     spawn_skill_particle(commands, entity, hash_bin("Janna_Q_Cast"));
 
@@ -70,7 +64,7 @@ fn cast_janna_q(commands: &mut Commands, entity: Entity) {
     skill_damage(
         commands,
         entity,
-        JANNA_Q_KEY,
+        skill_spell,
         DamageShape::Sector {
             radius: 1760.0,
             angle: 30.0,
@@ -84,7 +78,7 @@ fn cast_janna_q(commands: &mut Commands, entity: Entity) {
     );
 }
 
-fn cast_janna_w(commands: &mut Commands, entity: Entity) {
+fn cast_janna_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell2"));
     spawn_skill_particle(commands, entity, hash_bin("Janna_W_Cast"));
 
@@ -92,7 +86,7 @@ fn cast_janna_w(commands: &mut Commands, entity: Entity) {
     skill_damage(
         commands,
         entity,
-        JANNA_W_KEY,
+        skill_spell,
         DamageShape::Nearest {
             max_distance: 550.0,
         },
@@ -111,7 +105,7 @@ fn cast_janna_e(commands: &mut Commands, entity: Entity) {
     // E is a shield
 }
 
-fn cast_janna_r(commands: &mut Commands, entity: Entity) {
+fn cast_janna_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell4"));
     spawn_skill_particle(commands, entity, hash_bin("Janna_R_Cast"));
 
@@ -119,7 +113,7 @@ fn cast_janna_r(commands: &mut Commands, entity: Entity) {
     skill_damage(
         commands,
         entity,
-        JANNA_R_KEY,
+        skill_spell,
         DamageShape::Circle { radius: 700.0 },
         vec![TargetDamage {
             filter: TargetFilter::All,
@@ -150,33 +144,4 @@ fn on_janna_damage_hit(
     commands
         .entity(target)
         .with_related::<BuffOf>(DebuffSlow::new(0.3, 2.0));
-}
-
-fn add_skills(
-    mut commands: Commands,
-    q_janna: Query<Entity, (With<Janna>, Without<Skills>)>,
-    res_assets_character_record: Res<Assets<CharacterRecord>>,
-) {
-    for entity in q_janna.iter() {
-        let Some(character_record) =
-            res_assets_character_record.load_hash("Characters/Janna/CharacterRecords/Root")
-        else {
-            continue;
-        };
-
-        commands.entity(entity).with_related::<PassiveSkillOf>((
-            Skill::new(
-                SkillSlot::Passive,
-                "Characters/Janna/Spells/JannaPassive/JannaPassive",
-            ),
-            CoolDown::default(),
-        ));
-
-        for (index, &skill) in character_record.spells.as_ref().unwrap().iter().enumerate() {
-            let skill_component = Skill::new(skill_slot_from_index(index), skill);
-            commands
-                .entity(entity)
-                .with_related::<SkillOf>((skill_component, CoolDown::default()));
-        }
-    }
 }
