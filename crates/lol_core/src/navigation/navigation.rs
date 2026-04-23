@@ -10,7 +10,7 @@ use crate::base::bounding::Bounding;
 use crate::character::Character;
 use crate::map::MapState;
 use crate::navigation::astar::find_grid_path_with_result;
-use crate::navigation::grid::{ResourceGrid, update_load_grid};
+use crate::navigation::grid::ResourceGrid;
 
 #[derive(Default)]
 pub struct PluginNavigaton;
@@ -46,10 +46,6 @@ impl Plugin for PluginNavigaton {
                 update_visualization_move_path,
             )
                 .run_if(resource_exists::<ResourceGrid>),
-        );
-        app.add_systems(
-            Update,
-            update_load_grid.run_if(in_state(MapState::Loaded).and_then(run_once)),
         );
     }
 }

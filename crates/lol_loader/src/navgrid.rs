@@ -24,7 +24,7 @@ impl AssetLoader for NavGridLoader {
         reader.read_to_end(&mut buf).await?;
 
         let nav_grid: ConfigNavigationGrid =
-            ron::de::from_bytes(&buf).map_err(|e| Error::Parse(e.to_string()))?;
+            bincode::deserialize(&buf).map_err(|e| Error::Parse(e.to_string()))?;
 
         Ok(nav_grid)
     }

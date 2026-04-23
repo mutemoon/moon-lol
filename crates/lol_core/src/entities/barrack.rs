@@ -16,6 +16,7 @@ pub struct PluginBarrack;
 
 impl Plugin for PluginBarrack {
     fn build(&self, app: &mut App) {
+        app.init_asset::<ConfigBarracks>();
         app.init_resource::<InhibitorState>();
         app.add_systems(FixedUpdate, init_barrack_state_system);
         app.add_systems(FixedUpdate, barracks_spawning_system);
@@ -236,7 +237,7 @@ fn barracks_spawning_system(
         // movement.speed +=
         //     (barracks_config.move_speed_increase_increment * move_speed_upgrade_count) as f32;
 
-        info!("生成一个小兵");
+        debug!("生成一个小兵");
 
         let entity = commands
             .spawn((

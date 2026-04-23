@@ -11,7 +11,8 @@ use league_to_lol::barrack::barracks_config_to_barracks;
 use league_to_lol::gltf_export::export_mapgeo_to_gltf;
 use league_to_lol::navgrid::load_league_nav_grid;
 use lol_base::barrack::ConfigBarracks;
-use lol_base::character::ConfigCharacter;
+use lol_base::character::{ConfigCharacterRecord, ConfigSkin};
+use lol_base::grid::ConfigNavigationGrid;
 use lol_core::attack::{Attack, WindupConfig};
 use lol_core::base::bounding::Bounding;
 use lol_core::base::level::ExperienceDrop;
@@ -23,7 +24,7 @@ use lol_core::lane::Lane;
 use lol_core::life::Health;
 use lol_core::map::{MapName, MinionPath};
 use lol_core::movement::Movement;
-use lol_core::navigation::grid::ResourceGridPath;
+use lol_core::navigation::grid::ResourceGrid;
 use lol_core::team::Team;
 use lol_loader::barrack::BarracksLoader;
 use serde::Serialize;
@@ -36,6 +37,7 @@ fn main() {
 
     app.init_asset::<DynamicWorld>();
     app.init_asset::<ConfigBarracks>();
+    app.init_asset::<ConfigNavigationGrid>();
     app.init_asset_loader::<BarracksLoader>();
 
     app.finish();
@@ -157,11 +159,15 @@ fn main() {
                         world.spawn((
                             transform,
                             Team::from(unk0xad65d8c4.team.as_ref().map(|x| x.team)),
-                            ConfigCharacter {
+                            ConfigSkin {
+                                skin: world
+                                    .resource::<AssetServer>()
+                                    .load(&format!("characters/{}/skin.ron", champ_name)),
+                            },
+                            ConfigCharacterRecord {
                                 character_record: world
                                     .resource::<AssetServer>()
                                     .load(&format!("characters/{}/config.ron", champ_name)),
-                                skin_path: unk0xad65d8c4.character.skin.clone(),
                             },
                         ));
                     }
@@ -197,7 +203,11 @@ fn main() {
                 &config_navigation_grid,
             );
 
-            world.insert_resource(ResourceGridPath(nav_grid_path));
+            world.insert_resource(ResourceGrid(
+                world
+                    .resource::<AssetServer>()
+                    .load(&format!("maps/{}_navgrid.bin", map_name)),
+            ));
         });
 
     let buf = loader
@@ -234,7 +244,7 @@ fn main() {
     let serialized_scene = scene.serialize(&type_registry).unwrap();
 
     write_to_file(
-        format!("assets/maps/{}_scene.ron", map_name).as_str(),
+        &format!("assets/{}", map_name.get_ron_path()),
         &serialized_scene,
     );
 }

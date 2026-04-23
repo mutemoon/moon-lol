@@ -6,6 +6,7 @@ use bevy::math::bounding::Aabb3d;
 use bevy::prelude::*;
 use bevy::world_serialization::WorldInstanceReady;
 use lol_base::mapgeo::ConfigMapGeo;
+use lol_loader::barrack::BarracksLoader;
 use lol_loader::navgrid::NavGridLoader;
 
 use crate::lane::Lane;
@@ -23,6 +24,7 @@ impl Plugin for PluginMap {
     fn build(&self, app: &mut App) {
         app.init_asset::<ConfigMapGeo>();
 
+        app.init_asset_loader::<BarracksLoader>();
         app.init_asset_loader::<NavGridLoader>();
 
         app.init_resource::<MapName>();

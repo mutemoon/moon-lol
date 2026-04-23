@@ -30,6 +30,6 @@ impl AssetLoader for BarracksLoader {
     }
 
     fn extensions(&self) -> &[&str] {
-        &["barracks", "ron"]
+        &["ron"]
     }
 }

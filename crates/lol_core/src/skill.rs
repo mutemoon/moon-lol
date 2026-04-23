@@ -24,6 +24,8 @@ pub struct PluginSkill;
 
 impl Plugin for PluginSkill {
     fn build(&self, app: &mut App) {
+        app.init_asset::<Spell>();
+
         app.init_resource::<SkillCastLog>();
 
         app.add_observer(on_skill_cast);

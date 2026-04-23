@@ -1,4 +1,7 @@
+use bevy::ecs::entity::EntityHashMap;
 use bevy::prelude::*;
+use bevy::world_serialization::WorldInstanceSpawnError;
+use lol_base::character::ConfigCharacterRecord;
 
 use crate::base::level::{EventLevelUp, ExperienceDrop, Level};
 use crate::life::EventDead;
@@ -10,6 +13,7 @@ pub struct PluginCharacter;
 impl Plugin for PluginCharacter {
     fn build(&self, app: &mut App) {
         app.add_observer(on_event_dead);
+        app.add_systems(FixedUpdate, try_load_config_characters);
     }
 }
 
@@ -53,5 +57,46 @@ fn on_event_dead(
             level: level.value,
             delta: levels_gained,
         });
+    }
+}
+
+fn try_load_config_characters(
+    mut commands: Commands,
+    character_record_query: Query<(Entity, &ConfigCharacterRecord)>,
+    dynamic_worlds: Res<Assets<DynamicWorld>>,
+) {
+    let char_len = character_record_query.iter().len();
+    if char_len == 0 {
+        return;
+    }
+
+    info!("加载 {} 个角色", char_len);
+
+    // 处理 ConfigCharacterRecord - 写入角色数据到世界
+    for (entity, config) in &character_record_query {
+        if dynamic_worlds.get(&config.character_record).is_none() {
+            return;
+        }
+
+        let handle = config.character_record.clone();
+        commands.queue(move |world: &mut World| {
+            world.resource_scope(|world, dynamic_worlds: Mut<Assets<DynamicWorld>>| {
+                let dynamic_world = dynamic_worlds
+                    .get(&handle)
+                    .ok_or(WorldInstanceSpawnError::NonExistentDynamicWorld { id: handle.id() })?;
+
+                let mut map = EntityHashMap::new();
+                map.entry(dynamic_world.entities.get(0).unwrap().entity)
+                    .insert(entity);
+                info!(
+                    "{} -> {}",
+                    dynamic_world.entities.get(0).unwrap().entity,
+                    entity
+                );
+                dynamic_world.write_to_world(world, &mut map)
+            })
+        });
+
+        commands.entity(entity).remove::<ConfigCharacterRecord>();
     }
 }
