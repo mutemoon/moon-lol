@@ -1,17 +1,19 @@
 use bevy::prelude::*;
 use league_core::extract::{
     BarracksConfig, CharacterRecord, EnumMap, MapContainer, MapPlaceableContainer,
-    StaticMaterialDef,
+    SkinCharacterDataProperties, StaticMaterialDef,
 };
 use league_file::grid::AiMeshNGrid;
 use league_file::mapgeo::LeagueMapGeo;
+use league_file::mesh_skinned::LeagueSkinnedMesh;
 use league_loader::game::{Data, LeagueLoader};
 use league_loader::prop_bin::LeagueWadLoaderTrait;
 use league_to_lol::barrack::barracks_config_to_barracks;
 use league_to_lol::gltf_export::export_mapgeo_to_gltf;
 use league_to_lol::navgrid::load_league_nav_grid;
+use league_to_lol::skin_gltf_export::{decode_texture_to_png, export_skin_to_glb};
 use lol_base::barrack::ConfigBarracks;
-use lol_base::character::{ConfigCharacterRecord, ConfigSkin};
+use lol_base::character::{ConfigCharacterRecord, ConfigSkin, HealthBar, Skin};
 use lol_base::grid::ConfigNavigationGrid;
 use lol_core::attack::{Attack, WindupConfig};
 use lol_core::base::bounding::Bounding;
@@ -28,6 +30,36 @@ use lol_core::navigation::grid::ResourceGrid;
 use lol_core::team::Team;
 use lol_loader::barrack::BarracksLoader;
 use serde::Serialize;
+
+#[derive(Clone)]
+struct ChampionRecordData {
+    char_record_path: String,
+    skin_path: Option<String>,
+}
+
+/// 将 skin 路径转换为 skin bin 文件路径
+/// 例如: "Characters/Aatrox/Skins/Skin0" -> "data/characters/aatrox/skins/skin0.bin"
+fn skin_path_to_skin_bin_path(champ_name: &str, skin_path: &str) -> String {
+    // skin_path 格式: "Characters/{Name}/Skins/{SkinName}"
+    // 例如: "Characters/Aatrox/Skins/Skin0"
+    // 输出: "data/characters/{name}/skins/{skinname}.bin"
+    let parts: Vec<&str> = skin_path.split('/').collect();
+    if parts.len() >= 4 {
+        let skin_name = parts[parts.len() - 1].to_lowercase();
+        format!(
+            "data/characters/{}/skins/{}.bin",
+            champ_name.to_lowercase(),
+            skin_name
+        )
+    } else {
+        // Fallback: 假设格式是 "{SkinName}"，直接拼接
+        format!(
+            "data/characters/{}/skins/{}.bin",
+            champ_name.to_lowercase(),
+            skin_path.to_lowercase()
+        )
+    }
+}
 
 fn main() {
     let mut app = App::new();
@@ -84,7 +116,7 @@ fn main() {
     let map_container = prop_group.get_data::<MapContainer>(map_name.get_materials_path());
 
     let mut minion_path = MinionPath::default();
-    let mut map_character_records: std::collections::HashMap<String, String> =
+    let mut map_character_records: std::collections::HashMap<String, ChampionRecordData> =
         std::collections::HashMap::new();
 
     for (_, &link) in &map_container.chunks {
@@ -147,14 +179,22 @@ fn main() {
                 EnumMap::Unk0xad65d8c4(unk0xad65d8c4) => {
                     let transform = Transform::from_matrix(unk0xad65d8c4.transform.unwrap());
 
-                    // 收集 character_record 路径
-                    let char_record_path = unk0xad65d8c4.character.character_record.clone();
                     // 从路径提取英雄名，如 "Characters/Aatrox/CharacterRecords/Root" -> "Aatrox"
-                    let champ_name = char_record_path.split('/').skip(1).next();
+                    let champ_name = unk0xad65d8c4
+                        .character
+                        .character_record
+                        .split('/')
+                        .skip(1)
+                        .next();
 
                     if let Some(champ_name) = champ_name {
-                        map_character_records
-                            .insert(champ_name.to_lowercase(), char_record_path.clone());
+                        map_character_records.insert(
+                            champ_name.to_lowercase(),
+                            ChampionRecordData {
+                                char_record_path: unk0xad65d8c4.character.character_record.clone(),
+                                skin_path: Some(unk0xad65d8c4.character.skin.clone()),
+                            },
+                        );
 
                         world.spawn((
                             transform,
@@ -384,7 +424,7 @@ fn export_champion_scene(
 /// 从地图中收集的 CharacterRecord 路径提取数据
 fn extract_character_records_from_map(
     loader: &LeagueLoader,
-    map_character_records: &std::collections::HashMap<String, String>,
+    map_character_records: &std::collections::HashMap<String, ChampionRecordData>,
 ) {
     if map_character_records.is_empty() {
         return;
@@ -397,8 +437,12 @@ fn extract_character_records_from_map(
 
     let mut success_count = 0;
 
-    for (champ_name, _) in map_character_records {
-        if extract_champion_from_record(loader, champ_name) {
+    for (champ_name, record_data) in map_character_records {
+        let skin_bin_path = record_data
+            .skin_path
+            .as_ref()
+            .map(|skin_path| skin_path_to_skin_bin_path(champ_name, skin_path));
+        if extract_champion_from_record(loader, champ_name, skin_bin_path.as_deref()) {
             println!("[OK] 提取成功: {}", champ_name);
             success_count += 1;
         }
@@ -411,7 +455,11 @@ fn extract_character_records_from_map(
 }
 
 /// 从 CharacterRecord 提取 champion 并导出场景
-fn extract_champion_from_record(loader: &LeagueLoader, champ_name: &str) -> bool {
+fn extract_champion_from_record(
+    loader: &LeagueLoader,
+    champ_name: &str,
+    skin_bin_path: Option<&str>,
+) -> bool {
     let bin_path = format!("data/characters/{}/{}.bin", champ_name, champ_name);
 
     let Ok(prop_group) = loader.get_prop_group_by_paths(vec![&bin_path]) else {
@@ -441,7 +489,113 @@ fn extract_champion_from_record(loader: &LeagueLoader, champ_name: &str) -> bool
         movement,
         experience_drop,
     );
+
+    // 提取皮肤 GLB 和皮肤场景
+    extract_skin_for_champion(loader, champ_name, skin_bin_path);
+
     true
+}
+
+/// 导出角色的皮肤 GLB 和皮肤场景文件
+fn extract_skin_for_champion(loader: &LeagueLoader, champ_name: &str, skin_bin_path: Option<&str>) {
+    let Some(skin_bin_path) = skin_bin_path else {
+        return;
+    };
+
+    // 加载皮肤 bin 文件获取 SkinCharacterDataProperties
+    let Ok(skin_prop_group) = loader.get_prop_group_by_paths(vec![skin_bin_path]) else {
+        println!("[WARN] 无法加载皮肤 bin 文件: {}", skin_bin_path);
+        return;
+    };
+
+    let Some(skin_data) = skin_prop_group.get_by_class::<SkinCharacterDataProperties>() else {
+        println!(
+            "[WARN] 无法获取 SkinCharacterDataProperties: {}",
+            skin_bin_path
+        );
+        return;
+    };
+
+    let skin_mesh_properties = match &skin_data.skin_mesh_properties {
+        Some(props) => props,
+        None => return,
+    };
+
+    let simple_skin_path = match &skin_mesh_properties.simple_skin {
+        Some(path) => path,
+        None => return,
+    };
+
+    let texture_path = match &skin_mesh_properties.texture {
+        Some(path) => path.clone(),
+        None => return,
+    };
+
+    // 加载 .skn 文件
+    let skn_buf = match loader.get_wad_entry_buffer_by_path(simple_skin_path) {
+        Ok(buf) => buf,
+        Err(_) => {
+            println!("[WARN] 无法加载 SKN 文件: {}", simple_skin_path);
+            return;
+        }
+    };
+
+    let (_, skinned_mesh) = match LeagueSkinnedMesh::parse(&skn_buf) {
+        Ok(mesh) => mesh,
+        Err(_) => {
+            println!("[WARN] 无法解析 SKN 文件: {}", simple_skin_path);
+            return;
+        }
+    };
+
+    // 加载 .tex 文件并解码为 PNG
+    let texture_png = loader
+        .get_wad_entry_buffer_by_path(&texture_path)
+        .ok()
+        .and_then(|buf| {
+            let (_, texture) = league_file::texture::LeagueTexture::parse(&buf).ok()?;
+            decode_texture_to_png(&texture)
+        });
+
+    let output_glb_path = format!("assets/characters/{}/skin.glb", champ_name.to_lowercase());
+    if let Err(e) = export_skin_to_glb(&skinned_mesh, texture_png, &output_glb_path) {
+        println!("[WARN] 皮肤 GLB 导出失败: {}", e);
+        return;
+    }
+
+    // 获取 scale 和 bar_type
+    let scale = skin_mesh_properties.skin_scale.unwrap_or(1.0);
+    let bar_type = skin_data
+        .health_bar_data
+        .as_ref()
+        .and_then(|h| h.unit_health_bar_style)
+        .unwrap_or(0);
+
+    // 构建皮肤场景 skin.ron
+    let mut world = World::new();
+    let type_registry = AppTypeRegistry::default();
+    type_registry.write().register::<Skin>();
+    type_registry.write().register::<HealthBar>();
+    type_registry.write().register::<Visibility>();
+    world.insert_resource(type_registry);
+
+    let _entity = world
+        .spawn((
+            Skin { scale },
+            HealthBar { bar_type },
+            Visibility::default(),
+        ))
+        .id();
+
+    let scene = DynamicWorld::from_world(&world);
+    let type_registry = world.resource::<AppTypeRegistry>();
+    let type_registry = type_registry.read();
+    let serialized_scene = scene.serialize(&type_registry).unwrap();
+
+    let output_skin_path = format!("assets/characters/{}/skin.ron", champ_name.to_lowercase());
+    write_to_file(&output_skin_path, serialized_scene);
+
+    println!("[OK] 皮肤导出成功: {}", champ_name);
 }
 
 fn extract_all_champions(loader: &LeagueLoader) {
@@ -471,7 +625,9 @@ fn extract_all_champions(loader: &LeagueLoader) {
         // 从 "Aatrox.wad.client" 提取 "Aatrox"
         let champ_name = file_name.trim_end_matches(".wad.client").to_lowercase();
 
-        if extract_champion_from_record(loader, &champ_name) {
+        // champion 类型角色默认导出 Skin0
+        let skin_bin_path = Some(format!("data/characters/{}/skins/skin0.bin", champ_name));
+        if extract_champion_from_record(loader, &champ_name, skin_bin_path.as_deref()) {
             println!("[OK] 提取成功: {}", champ_name);
             success_count += 1;
         } else {

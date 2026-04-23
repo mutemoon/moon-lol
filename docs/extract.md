@@ -127,6 +127,8 @@
 | 文件 | 描述 |
 |------|------|
 | `assets/characters/{name}/config.ron` | 角色场景（包含 Bounding、Attack、Health、Damage、Armor、Movement、Skills、Name 等组件的序列化实体） |
+| `assets/characters/{name}/skin.glb` | 皮肤 GLB 文件（网格 + 材质 + 贴图） |
+| `assets/characters/{name}/skin.ron` | 皮肤场景（包含 Skin、HealthBar、Visibility 组件） |
 | `assets/maps/{map_name}_navgrid.bin` | 二进制导航网格数据 |
 | `assets/maps/{map_name}_mapgeo.gltf` | GLTF 格式的地图几何 |
 | `assets/maps/{map_name}_scene.ron` | 包含所有地图对象的序列化场景 |
@@ -146,6 +148,40 @@
 - **Name** - 实体名称
 
 可直接通过 Bevy 的场景系统反序列化加载为实体。
+
+### 皮肤数据提取
+
+皮肤数据从 `SkinCharacterDataProperties` 中提取，包含以下信息：
+
+| 信息 | 字段 |
+|------|------|
+| 皮肤缩放 | `skin_mesh_properties.skin_scale` |
+| 血条类型 | `health_bar_data.unit_health_bar_style` |
+| 网格路径 | `skin_mesh_properties.simple_skin` (`.skn`) |
+| 贴图路径 | `skin_mesh_properties.texture` (`.tex`) |
+
+#### 皮肤 bin 路径
+
+皮肤 bin 文件路径格式：`data/characters/{name}/skins/{skinname}.bin`
+
+- **Champion 类型**：默认使用 `skin0.bin`（如 `data/characters/aatrox/skins/skin0.bin`）
+- **Map 类型**：从 `Unk0xad65d8c4.character.skin` 路径转换
+  - 例如：`Characters/Aatrox/Skins/Skin0` → `data/characters/aatrox/skins/skin0.bin`
+
+#### 皮肤 GLB 文件结构
+
+`assets/characters/{name}/skin.glb` 包含：
+- **Mesh**: 从 `.skn` 解析的网格数据（Position、Normal、UV）
+- **Material**: PBR 材质（metallic=0, roughness=1, alpha_mask=0.3）
+- **Texture**: 从 `.tex` 解码的 PNG 贴图
+
+#### 皮肤场景文件结构
+
+`assets/characters/{name}/skin.ron` 是一个 Bevy DynamicScene RON 文件，包含以下组件：
+
+- **Skin** - 包含 `scale`（皮肤缩放）
+- **HealthBar** - 包含 `bar_type`（血条类型）
+- **Visibility** - 默认为 `Visible`
 
 ## 关键方法
 

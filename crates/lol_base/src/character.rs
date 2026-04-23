@@ -7,6 +7,13 @@ pub struct Skin {
     pub scale: f32,
 }
 
+/// 血条组件
+#[derive(Component, Reflect, Debug, Clone, Copy, Default)]
+#[reflect(Component)]
+pub struct HealthBar {
+    pub bar_type: u8,
+}
+
 /// 皮肤配置组件 - 指向预构建的皮肤场景
 #[derive(Component, Reflect, Debug, Clone)]
 #[reflect(Component)]
