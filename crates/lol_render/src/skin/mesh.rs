@@ -53,39 +53,39 @@ pub fn on_command_skin_mesh_spawn(
     )));
 }
 
-pub fn update_skin_mesh_spawn(
-    mut commands: Commands,
-    res_assets_league_skinned_mesh: Res<Assets<LeagueSkinMesh>>,
-    q_loading_mesh: Query<(
-        Entity,
-        &Loading<(Handle<LeagueSkinMesh>, Handle<StandardMaterial>)>,
-        Option<&SkinnedMesh>,
-    )>,
-) {
-    for (entity, loading, skinned_mesh) in q_loading_mesh.iter() {
-        let Some(league_skinned_mesh) = res_assets_league_skinned_mesh.get(&loading.value.0) else {
-            continue;
-        };
+// pub fn update_skin_mesh_spawn(
+//     mut commands: Commands,
+//     res_assets_league_skinned_mesh: Res<Assets<LeagueSkinMesh>>,
+//     q_loading_mesh: Query<(
+//         Entity,
+//         &Loading<(Handle<LeagueSkinMesh>, Handle<StandardMaterial>)>,
+//         Option<&SkinnedMesh>,
+//     )>,
+// ) {
+//     for (entity, loading, skinned_mesh) in q_loading_mesh.iter() {
+//         let Some(league_skinned_mesh) = res_assets_league_skinned_mesh.get(&loading.value.0) else {
+//             continue;
+//         };
 
-        let Some(skinned_mesh) = skinned_mesh else {
-            continue;
-        };
+//         let Some(skinned_mesh) = skinned_mesh else {
+//             continue;
+//         };
 
-        for mesh in league_skinned_mesh.submeshes.iter() {
-            commands.entity(entity).with_child((
-                Transform::default(),
-                Mesh3d(mesh.clone()),
-                MeshMaterial3d(loading.value.1.clone()),
-                RenderLayers::layer(1),
-                skinned_mesh.clone(),
-            ));
-        }
+//         for mesh in league_skinned_mesh.submeshes.iter() {
+//             commands.entity(entity).with_child((
+//                 Transform::default(),
+//                 Mesh3d(mesh.clone()),
+//                 MeshMaterial3d(loading.value.1.clone()),
+//                 RenderLayers::layer(1),
+//                 skinned_mesh.clone(),
+//             ));
+//         }
 
-        commands
-            .entity(entity)
-            .remove::<Loading<(Handle<LeagueSkinMesh>, Handle<StandardMaterial>)>>();
-    }
-}
+//         commands
+//             .entity(entity)
+//             .remove::<Loading<(Handle<LeagueSkinMesh>, Handle<StandardMaterial>)>>();
+//     }
+// }
 
 pub fn get_standard(
     res_assets_standard_material: &mut ResMut<Assets<StandardMaterial>>,

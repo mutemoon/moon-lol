@@ -97,7 +97,7 @@ impl UIElementEntity {
 //     if event.label != "gameplay 系列" {
 //         return;
 //     }
-//
+
 //     commands.trigger(CommandLoadPropBin {
 //         path: PropPath::Hash(
 //             res_assets_ui_property_loadable

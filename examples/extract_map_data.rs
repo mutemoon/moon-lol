@@ -1,3 +1,9 @@
+use std::any::{Any, TypeId};
+use std::intrinsics::type_id;
+use std::sync::Arc;
+
+use bevy::asset::{AssetIndex, AssetPath, StrongHandle};
+use bevy::ecs::archetype;
 use bevy::prelude::*;
 use league_core::extract::{
     BarracksConfig, CharacterRecord, EnumMap, MapContainer, MapPlaceableContainer,
@@ -572,24 +578,52 @@ fn extract_skin_for_champion(loader: &LeagueLoader, champ_name: &str, skin_bin_p
         .unwrap_or(0);
 
     // 构建皮肤场景 skin.ron
-    let mut world = World::new();
-    let type_registry = AppTypeRegistry::default();
-    type_registry.write().register::<Skin>();
-    type_registry.write().register::<HealthBar>();
-    type_registry.write().register::<Visibility>();
-    world.insert_resource(type_registry);
+    let mut app = App::new();
+
+    app.add_plugins(AssetPlugin::default());
+    app.add_plugins(TaskPoolPlugin::default());
+
+    app.init_asset::<WorldAsset>();
+
+    app.finish();
+    app.cleanup();
+
+    let world = app.world_mut();
+
+    let asset_server = world.resource::<AssetServer>();
+    let skin_handle: Handle<WorldAsset> = asset_server.load(
+        AssetPath::from(format!("characters/{}/skin.glb", champ_name.to_lowercase()))
+            .with_label(GltfAssetLabel::Scene(0).to_string()),
+    );
 
     let _entity = world
         .spawn((
             Skin { scale },
             HealthBar { bar_type },
             Visibility::default(),
+            WorldAssetRoot(skin_handle),
         ))
         .id();
 
-    let scene = DynamicWorld::from_world(&world);
     let type_registry = world.resource::<AppTypeRegistry>();
     let type_registry = type_registry.read();
+    let scene = DynamicWorldBuilder::from_world(&world, &type_registry)
+        .deny_component::<InheritedVisibility>()
+        .deny_component::<ViewVisibility>()
+        .deny_component::<GlobalTransform>()
+        .deny_component::<Transform>()
+        .deny_component::<TransformTreeChanged>()
+        .extract_entities(
+            // we do this instead of a query, in order to completely sidestep default query filters.
+            // while we could use `Allow<_>`, this wouldn't account for custom disabled components
+            world
+                .archetypes()
+                .iter()
+                .flat_map(archetype::Archetype::entities)
+                .map(archetype::ArchetypeEntity::id),
+        )
+        .extract_resources()
+        .build();
     let serialized_scene = scene.serialize(&type_registry).unwrap();
 
     let output_skin_path = format!("assets/characters/{}/skin.ron", champ_name.to_lowercase());

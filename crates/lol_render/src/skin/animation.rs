@@ -42,47 +42,47 @@ pub fn on_command_skin_animation_spawn(
         )));
 }
 
-pub fn update_skin_animation_spawn(
-    mut commands: Commands,
-    asset_server: Res<AssetServer>,
-    mut res_animation_graph: ResMut<Assets<AnimationGraph>>,
-    res_assets_animation_graph_data: Res<Assets<AnimationGraphData>>,
-    q_loading_animation: Query<(Entity, &Loading<HashKey<AnimationGraphData>>)>,
-) {
-    for (entity, loading) in q_loading_animation.iter() {
-        let Some(animation_graph_data) = res_assets_animation_graph_data.load_hash(loading.value)
-        else {
-            continue;
-        };
+// pub fn update_skin_animation_spawn(
+//     mut commands: Commands,
+//     asset_server: Res<AssetServer>,
+//     mut res_animation_graph: ResMut<Assets<AnimationGraph>>,
+//     res_assets_animation_graph_data: Res<Assets<AnimationGraphData>>,
+//     q_loading_animation: Query<(Entity, &Loading<HashKey<AnimationGraphData>>)>,
+// ) {
+//     for (entity, loading) in q_loading_animation.iter() {
+//         let Some(animation_graph_data) = res_assets_animation_graph_data.load_hash(loading.value)
+//         else {
+//             continue;
+//         };
 
-        let (animation_map, blend_data) = load_animation_map(animation_graph_data.clone()).unwrap();
+//         let (animation_map, blend_data) = load_animation_map(animation_graph_data.clone()).unwrap();
 
-        let mut animation_graph = AnimationGraph::new();
+//         let mut animation_graph = AnimationGraph::new();
 
-        let hash_to_node =
-            build_animation_nodes(animation_map, &asset_server, &mut animation_graph);
+//         let hash_to_node =
+//             build_animation_nodes(animation_map, &asset_server, &mut animation_graph);
 
-        let graph_handle = res_animation_graph.add(animation_graph);
+//         let graph_handle = res_animation_graph.add(animation_graph);
 
-        commands
-            .entity(entity)
-            .insert((
-                AnimationPlayer::default(),
-                AnimationGraphHandle(graph_handle),
-                Animation {
-                    hash_to_node,
-                    blend_data,
-                },
-                AnimationState {
-                    last_hash: None,
-                    current_hash: hash_bin("Idle1"),
-                    current_duration: None,
-                    repeat: true,
-                },
-            ))
-            .remove::<Loading<HashKey<AnimationGraphData>>>();
-    }
-}
+//         commands
+//             .entity(entity)
+//             .insert((
+//                 AnimationPlayer::default(),
+//                 AnimationGraphHandle(graph_handle),
+//                 Animation {
+//                     hash_to_node,
+//                     blend_data,
+//                 },
+//                 AnimationState {
+//                     last_hash: None,
+//                     current_hash: hash_bin("Idle1"),
+//                     current_duration: None,
+//                     repeat: true,
+//                 },
+//             ))
+//             .remove::<Loading<HashKey<AnimationGraphData>>>();
+//     }
+// }
 
 fn build_animation_nodes(
     animation_map: HashMap<u32, EnumClipData>,
