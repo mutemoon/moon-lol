@@ -25,7 +25,6 @@ use lol_base::grid::{
     GridFlagsNearestLane, GridFlagsPOI, GridFlagsRing, GridFlagsRiverRegion, GridFlagsSRX,
     GridFlagsVisionPathing,
 };
-use lol_base::mapgeo::ConfigMapGeo;
 use lol_base::shader::{ResourceShaderChunk, ResourceShaderPackage};
 use lol_core::action::{Action, CommandAction};
 use lol_core::game::FixedFrameCount;
@@ -192,7 +191,6 @@ impl Plugin for PluginSkillTestRender {
             app.insert_resource(SkillTestRenderConfig::default());
         }
 
-        app.init_asset::<ConfigMapGeo>();
         app.init_asset::<ConfigNavigationGrid>();
         app.init_asset::<LeagueSkeleton>();
         app.init_asset::<LeagueSkinMesh>();

@@ -4,7 +4,6 @@ use bevy::prelude::*;
 use lol_base::game::ConfigGame;
 use lol_base::grid::ConfigNavigationGrid;
 use lol_base::shader::{ResourceShaderChunk, ResourceShaderPackage};
-use lol_loader::mapgeo::LeagueLoaderMapgeo;
 use lol_loader::property::LeagueLoaderProperty;
 
 use self::loading::PluginResourceLoading;
@@ -21,7 +20,6 @@ impl Plugin for PluginResource {
         app.init_asset::<ConfigNavigationGrid>();
 
         app.init_asset_loader::<LeagueLoaderProperty>();
-        app.init_asset_loader::<LeagueLoaderMapgeo>();
 
         app.add_plugins(PluginResourceLoading);
 

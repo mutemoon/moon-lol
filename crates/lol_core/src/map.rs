@@ -5,7 +5,6 @@ use std::fmt::Display;
 use bevy::math::bounding::Aabb3d;
 use bevy::prelude::*;
 use bevy::world_serialization::WorldInstanceReady;
-use lol_base::mapgeo::ConfigMapGeo;
 use lol_loader::barrack::BarracksLoader;
 use lol_loader::navgrid::NavGridLoader;
 
@@ -22,8 +21,6 @@ pub struct PluginMap;
 
 impl Plugin for PluginMap {
     fn build(&self, app: &mut App) {
-        app.init_asset::<ConfigMapGeo>();
-
         app.init_asset_loader::<BarracksLoader>();
         app.init_asset_loader::<NavGridLoader>();
 
