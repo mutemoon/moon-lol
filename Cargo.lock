@@ -4128,6 +4128,7 @@ dependencies = [
  "lol_core",
  "rand 0.9.4",
  "regex",
+ "ron 0.8.1",
  "serde",
  "thiserror 2.0.18",
 ]

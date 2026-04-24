@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use league_core::extract::CharacterRecord;
-use league_loader::game::LeagueLoader;
+use league_loader::game::{Data, LeagueLoader};
 use lol_core::attack::{Attack, WindupConfig};
 use lol_core::base::bounding::Bounding;
 use lol_core::base::level::ExperienceDrop;

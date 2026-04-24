@@ -18,3 +18,4 @@ thiserror.workspace = true
 bincode.workspace = true
 regex.workspace = true
 rand.workspace = true
+ron.workspace = true

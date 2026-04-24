@@ -266,7 +266,14 @@ let type_hash = type_name_to_hash(type_name);
 | `Barrack`                         | `lol_core` (Component) | 兵营运行时状态，持有 `Handle<ConfigBarracks>` |
 | `ConfigNavigationGrid`            | `lol_base` (Asset)     | 导航网格配置                                  |
 | `Spell`                           | `lol_base` (Asset)     | 技能数据配置                                  |
+| `ConfigAnimation`                 | `lol_base` (Asset)     | 动画图配置                                    |
+| `AnimationHandler`                | `lol_core` (Component) | 动画处理器，持有 `Handle<ConfigAnimation>`    |
 | `Bounding`, `Attack`, `Health` 等 | `lol_core` (Component) | 角色初始配置，直接序列化到 config.ron         |
+
+### Asset Loader 注册
+
+新增 Asset 类型后，需在 `lol_render/loaders` 中注册对应的 AssetLoader：
+- `lol_base::animation::ConfigAnimation` → `lol_render::loaders::animation::AnimationLoader`
 
 ## 粒子特效提取
 

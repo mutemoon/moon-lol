@@ -1,17 +1,14 @@
-use bevy::animation::{AnimationTargetId, animated_field};
-use bevy::asset::uuid::Uuid;
 use bevy::asset::{AssetLoader, LoadContext};
-use bevy::prelude::*;
-use league_file::animation::AnimationFile;
-use league_to_lol::animation::load_animation_file;
+use bevy::reflect::TypePath;
+use lol_base::animation::ConfigAnimation;
 
 use crate::error::Error;
 
 #[derive(Default, TypePath)]
-pub struct LeagueLoaderAnimationClip;
+pub struct LeagueLoaderConfigAnimation;
 
-impl AssetLoader for LeagueLoaderAnimationClip {
-    type Asset = AnimationClip;
+impl AssetLoader for LeagueLoaderConfigAnimation {
+    type Asset = ConfigAnimation;
 
     type Settings = ();
 
@@ -25,51 +22,13 @@ impl AssetLoader for LeagueLoaderAnimationClip {
     ) -> Result<Self::Asset, Self::Error> {
         let mut buf = Vec::new();
         reader.read_to_end(&mut buf).await?;
-        let (_, animation_file) =
-            AnimationFile::parse(&buf).map_err(|e| Error::Parse(e.to_string()))?;
-
-        let animation = load_animation_file(animation_file);
-
-        let mut clip = AnimationClip::default();
-        for (i, join_hash) in animation.joint_hashes.iter().enumerate() {
-            let translates = animation.translates.get(i).unwrap();
-            let rotations = animation.rotations.get(i).unwrap();
-            let scales = animation.scales.get(i).unwrap();
-
-            if translates.len() >= 2 {
-                clip.add_curve_to_target(
-                    AnimationTargetId(Uuid::from_u128(*join_hash as u128)),
-                    AnimatableCurve::new(
-                        animated_field!(Transform::translation),
-                        AnimatableKeyframeCurve::new(translates.clone()).unwrap(),
-                    ),
-                );
-            }
-
-            if rotations.len() >= 2 {
-                clip.add_curve_to_target(
-                    AnimationTargetId(Uuid::from_u128(*join_hash as u128)),
-                    AnimatableCurve::new(
-                        animated_field!(Transform::rotation),
-                        AnimatableKeyframeCurve::new(rotations.clone()).unwrap(),
-                    ),
-                );
-            }
-
-            if scales.len() >= 2 {
-                clip.add_curve_to_target(
-                    AnimationTargetId(Uuid::from_u128(*join_hash as u128)),
-                    AnimatableCurve::new(
-                        animated_field!(Transform::scale),
-                        AnimatableKeyframeCurve::new(scales.clone().into_iter()).unwrap(),
-                    ),
-                );
-            }
-        }
-        Ok(clip)
+        let content = String::from_utf8(buf).map_err(|e| Error::Parse(e.to_string()))?;
+        let config_animation: ConfigAnimation =
+            ron::from_str(&content).map_err(|e| Error::Parse(e.to_string()))?;
+        Ok(config_animation)
     }
 
     fn extensions(&self) -> &[&str] {
-        &["anm"]
+        &["ron"]
     }
 }

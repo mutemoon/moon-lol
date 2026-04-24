@@ -3,6 +3,9 @@ use std::collections::BTreeMap;
 
 use gltf::accessor::DataType;
 use gltf::json::accessor::{Accessor, GenericComponentType, Type};
+use gltf::json::animation::{
+    Animation, Channel, Interpolation, Property, Sampler, Target as AnimationTarget,
+};
 use gltf::json::buffer::{Buffer, Target, View};
 use gltf::json::image::Image;
 use gltf::json::material::{Material, PbrBaseColorFactor, PbrMetallicRoughness, StrengthFactor};
@@ -15,6 +18,7 @@ use image::codecs::png::{CompressionType, FilterType};
 use image::{ExtendedColorType, ImageEncoder};
 use league_file::mesh_skinned::LeagueSkinnedMesh;
 use league_file::texture::{LeagueTexture, LeagueTextureFormat};
+use lol_base::animation::ConfigAnimationClip;
 use texpresso::Format;
 
 use crate::utils::Error;
@@ -64,10 +68,12 @@ pub fn decode_texture_to_png(texture: &LeagueTexture) -> Option<Vec<u8>> {
     Some(png_data)
 }
 
-/// 将角色皮肤（网格 + 材质 + 贴图）导出为 GLB 文件
+/// 将角色皮肤（网格 + 材质 + 贴图 + 动画）导出为 GLB 文件
+/// animations: map of (clip_name, ConfigAnimationClip)
 pub fn export_skin_to_glb(
     skinned_mesh: &LeagueSkinnedMesh,
     texture_png: Option<Vec<u8>>,
+    animations: &[(String, ConfigAnimationClip)],
     output_path: &str,
 ) -> Result<(), Error> {
     let mut builder = SkinGltfBuilder::new();
@@ -118,6 +124,11 @@ pub fn export_skin_to_glb(
     };
     builder.nodes.push(node);
 
+    // 添加动画
+    for (name, clip) in animations {
+        builder.add_animation(clip, name);
+    }
+
     builder.write_to_glb(output_path)
 }
 
@@ -130,6 +141,7 @@ struct SkinGltfBuilder {
     images: Vec<Image>,
     textures: Vec<Texture>,
     materials: Vec<Material>,
+    animations: Vec<Animation>,
 }
 
 impl SkinGltfBuilder {
@@ -143,7 +155,211 @@ impl SkinGltfBuilder {
             images: Vec::new(),
             textures: Vec::new(),
             materials: Vec::new(),
+            animations: Vec::new(),
         }
+    }
+
+    /// 添加动画片段到 GLB
+    fn add_animation(&mut self, clip: &ConfigAnimationClip, name: &str) {
+        let mut samplers = Vec::new();
+        let mut channels = Vec::new();
+
+        // 为每个 joint 创建 translation、rotation、scale 的 sampler 和 channel
+        for (joint_idx, &_joint_hash) in clip.joint_hashes.iter().enumerate() {
+            // Translation sampler
+            if let Some(translates) = clip.translates.get(joint_idx) {
+                if translates.len() >= 2 {
+                    let times: Vec<f32> = translates.iter().map(|(t, _)| *t).collect();
+                    let translations: Vec<[f32; 3]> =
+                        translates.iter().map(|(_, v)| [v.x, v.y, v.z]).collect();
+
+                    let input_idx = self.add_float_accessor(&times);
+                    let output_idx = self.add_vec3_accessor(&translations, false);
+
+                    let sampler_idx = samplers.len() as u32;
+                    samplers.push(Sampler {
+                        input: Index::new(input_idx),
+                        interpolation: Checked::Valid(Interpolation::Linear),
+                        output: Index::new(output_idx),
+                        extensions: None,
+                        extras: Default::default(),
+                    });
+
+                    channels.push(Channel {
+                        sampler: Index::new(sampler_idx),
+                        target: AnimationTarget {
+                            node: Index::new(joint_idx as u32),
+                            path: Checked::Valid(Property::Translation),
+                            extensions: None,
+                            extras: Default::default(),
+                        },
+                        extensions: None,
+                        extras: Default::default(),
+                    });
+                }
+            }
+
+            // Rotation sampler
+            if let Some(rotations) = clip.rotations.get(joint_idx) {
+                if rotations.len() >= 2 {
+                    let times: Vec<f32> = rotations.iter().map(|(t, _)| *t).collect();
+                    let quats: Vec<[f32; 4]> = rotations
+                        .iter()
+                        .map(|(_, q)| [q.x, q.y, q.z, q.w])
+                        .collect();
+
+                    let input_idx = self.add_float_accessor(&times);
+                    let output_idx = self.add_vec4_accessor(&quats);
+
+                    let sampler_idx = samplers.len() as u32;
+                    samplers.push(Sampler {
+                        input: Index::new(input_idx),
+                        interpolation: Checked::Valid(Interpolation::Linear),
+                        output: Index::new(output_idx),
+                        extensions: None,
+                        extras: Default::default(),
+                    });
+
+                    channels.push(Channel {
+                        sampler: Index::new(sampler_idx),
+                        target: AnimationTarget {
+                            node: Index::new(joint_idx as u32),
+                            path: Checked::Valid(Property::Rotation),
+                            extensions: None,
+                            extras: Default::default(),
+                        },
+                        extensions: None,
+                        extras: Default::default(),
+                    });
+                }
+            }
+
+            // Scale sampler
+            if let Some(scales) = clip.scales.get(joint_idx) {
+                if scales.len() >= 2 {
+                    let times: Vec<f32> = scales.iter().map(|(t, _)| *t).collect();
+                    let scale_data: Vec<[f32; 3]> =
+                        scales.iter().map(|(_, v)| [v.x, v.y, v.z]).collect();
+
+                    let input_idx = self.add_float_accessor(&times);
+                    let output_idx = self.add_vec3_accessor(&scale_data, false);
+
+                    let sampler_idx = samplers.len() as u32;
+                    samplers.push(Sampler {
+                        input: Index::new(input_idx),
+                        interpolation: Checked::Valid(Interpolation::Linear),
+                        output: Index::new(output_idx),
+                        extensions: None,
+                        extras: Default::default(),
+                    });
+
+                    channels.push(Channel {
+                        sampler: Index::new(sampler_idx),
+                        target: AnimationTarget {
+                            node: Index::new(joint_idx as u32),
+                            path: Checked::Valid(Property::Scale),
+                            extensions: None,
+                            extras: Default::default(),
+                        },
+                        extensions: None,
+                        extras: Default::default(),
+                    });
+                }
+            }
+        }
+
+        if !samplers.is_empty() {
+            self.animations.push(Animation {
+                name: Some(name.to_string()),
+                samplers,
+                channels,
+                extensions: None,
+                extras: Default::default(),
+            });
+        }
+    }
+
+    fn add_float_accessor(&mut self, data: &[f32]) -> u32 {
+        self.align_to_4();
+        let offset = self.buffer_data.len();
+
+        for &v in data {
+            self.buffer_data.extend_from_slice(&v.to_le_bytes());
+        }
+
+        let byte_length = data.len() * 4;
+        let view_idx = self.buffer_views.len() as u32;
+        self.buffer_views.push(View {
+            name: None,
+            buffer: Index::new(0),
+            byte_offset: Some(USize64(offset as u64)),
+            byte_length: USize64(byte_length as u64),
+            byte_stride: None,
+            target: Some(Checked::Valid(Target::ArrayBuffer)),
+            extensions: None,
+            extras: Default::default(),
+        });
+
+        let accessor_idx = self.accessors.len() as u32;
+        self.accessors.push(Accessor {
+            buffer_view: Some(Index::new(view_idx)),
+            byte_offset: Some(USize64(0)),
+            component_type: Checked::Valid(GenericComponentType(DataType::F32)),
+            count: USize64(data.len() as u64),
+            type_: Checked::Valid(Type::Scalar),
+            extensions: None,
+            extras: Default::default(),
+            min: None,
+            max: None,
+            name: None,
+            normalized: false,
+            sparse: None,
+        });
+
+        accessor_idx
+    }
+
+    fn add_vec4_accessor(&mut self, data: &[[f32; 4]]) -> u32 {
+        self.align_to_4();
+        let offset = self.buffer_data.len();
+
+        for v in data {
+            self.buffer_data.extend_from_slice(&v[0].to_le_bytes());
+            self.buffer_data.extend_from_slice(&v[1].to_le_bytes());
+            self.buffer_data.extend_from_slice(&v[2].to_le_bytes());
+            self.buffer_data.extend_from_slice(&v[3].to_le_bytes());
+        }
+
+        let byte_length = data.len() * 16;
+        let view_idx = self.buffer_views.len() as u32;
+        self.buffer_views.push(View {
+            name: None,
+            buffer: Index::new(0),
+            byte_offset: Some(USize64(offset as u64)),
+            byte_length: USize64(byte_length as u64),
+            byte_stride: None,
+            target: Some(Checked::Valid(Target::ArrayBuffer)),
+            extensions: None,
+            extras: Default::default(),
+        });
+
+        let accessor_idx = self.accessors.len() as u32;
+        self.accessors.push(Accessor {
+            buffer_view: Some(Index::new(view_idx)),
+            byte_offset: Some(USize64(0)),
+            component_type: Checked::Valid(GenericComponentType(DataType::F32)),
+            count: USize64(data.len() as u64),
+            type_: Checked::Valid(Type::Vec4),
+            extensions: None,
+            extras: Default::default(),
+            min: None,
+            max: None,
+            name: None,
+            normalized: false,
+            sparse: None,
+        });
+
+        accessor_idx
     }
 
     fn align_to_4(&mut self) {
@@ -559,6 +775,7 @@ impl SkinGltfBuilder {
             images: self.images,
             scene: Some(Index::new(0)),
             scenes: vec![scene],
+            animations: self.animations,
             ..Default::default()
         };
 

@@ -7,9 +7,8 @@ use lol_base::prop::HashKey;
 use lol_core::resource::loading::RegisterLoadingExt;
 use lol_core::utils::AssetServerLoadLeague;
 
-// use crate::loaders::animation::LeagueLoaderAnimationClip;
+use crate::loaders::animation::LeagueLoaderConfigAnimation;
 use crate::loaders::image::LeagueLoaderImage;
-// use crate::loaders::mesh::LeagueLoaderMesh;
 use crate::loaders::skeleton::LeagueLoaderSkeleton;
 use crate::skin::LeagueSkinMesh;
 
@@ -19,9 +18,8 @@ pub struct PluginRenderResource;
 impl Plugin for PluginRenderResource {
     fn build(&self, app: &mut App) {
         app.init_asset_loader::<LeagueLoaderImage>();
-        // app.init_asset_loader::<LeagueLoaderMesh>();
         app.init_asset_loader::<LeagueLoaderSkeleton>();
-        // app.init_asset_loader::<LeagueLoaderAnimationClip>();
+        app.init_asset_loader::<LeagueLoaderConfigAnimation>();
 
         app.register_loading::<HashKey<AnimationGraphData>>()
             .register_loading::<HashKey<SkinCharacterDataProperties>>()

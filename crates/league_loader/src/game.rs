@@ -112,20 +112,6 @@ impl PropGroup {
     pub fn new(prop_file: Vec<PropFile>) -> Self {
         Self { prop_file }
     }
-
-    /// 通过 class hash 获取数据
-    pub fn get_by_class<T: TypePath + DeserializeOwned>(&self) -> Option<T> {
-        let type_name = T::short_type_path();
-        let class_hash = type_name_to_hash(type_name);
-        for prop_file in &self.prop_file {
-            for (bin_class_hash, entry) in prop_file.iter_class_hash_and_entry() {
-                if bin_class_hash == class_hash {
-                    return from_entry::<T>(entry).ok();
-                }
-            }
-        }
-        None
-    }
 }
 
 pub trait Data {
@@ -137,6 +123,8 @@ pub trait Data {
         &self,
         hash: impl Into<HashKey<T>>,
     ) -> Option<T>;
+
+    fn get_by_class<T: TypePath + DeserializeOwned>(&self) -> Option<T>;
 }
 
 impl Data for PropGroup {
@@ -149,6 +137,11 @@ impl Data for PropGroup {
             .iter()
             .find_map(|v| v.get_data_option::<T>(hash))
     }
+
+    /// 通过 class hash 获取数据
+    fn get_by_class<T: TypePath + DeserializeOwned>(&self) -> Option<T> {
+        self.prop_file.iter().find_map(|v| v.get_by_class::<T>())
+    }
 }
 
 impl Data for PropFile {
@@ -158,5 +151,16 @@ impl Data for PropFile {
     ) -> Option<T> {
         self.get_entry(hash.into().0.0)
             .and_then(|v| from_entry::<T>(v).ok())
+    }
+
+    fn get_by_class<T: TypePath + DeserializeOwned>(&self) -> Option<T> {
+        let type_name = T::short_type_path();
+        let class_hash = type_name_to_hash(type_name);
+        for (bin_class_hash, entry) in self.iter_class_hash_and_entry() {
+            if bin_class_hash == class_hash {
+                return from_entry::<T>(entry).ok();
+            }
+        }
+        None
     }
 }
