@@ -12,7 +12,6 @@ league_utils.workspace = true
 league_file.workspace = true
 league_core.workspace = true
 league_property.workspace = true
-league_to_lol.workspace = true
 regex.workspace = true
 thiserror.workspace = true
 serde.workspace = true

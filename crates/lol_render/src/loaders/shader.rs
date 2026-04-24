@@ -14,9 +14,6 @@ use serde::{Deserialize, Serialize};
 
 use crate::error::Error;
 
-#[derive(Default, Serialize, Deserialize, Clone)]
-pub struct ShaderTocSettings(pub String);
-
 #[derive(Default, TypePath)]
 pub struct LeagueLoaderShaderToc;
 
@@ -159,20 +156,5 @@ impl AssetLoader for LeagueLoaderShaderToc {
 
     fn extensions(&self) -> &[&str] {
         &["glsl"]
-    }
-}
-
-pub trait AssetServerLoadShaderToc {
-    fn load_shader_toc<'a>(&self, path: &str) -> Handle<ResourceShaderPackage>;
-}
-
-impl AssetServerLoadShaderToc for AssetServer {
-    fn load_shader_toc<'a>(&self, path: &str) -> Handle<ResourceShaderPackage> {
-        let original_path = path.to_string();
-        self.load_builder()
-            .with_settings(move |settings: &mut ShaderTocSettings| {
-                settings.0 = original_path.clone()
-            })
-            .load(format!("data/{:x}.lol", hash_wad(path)))
     }
 }

@@ -146,9 +146,6 @@ pub fn export_mapgeo_to_gltf(
     let duration_collect = start_collect.elapsed();
 
     let texture_paths: Vec<_> = texture_paths.into_iter().collect();
-    if !texture_paths.is_empty() {
-        println!("📦 正在并行处理 {} 个贴图...", texture_paths.len());
-    }
 
     // 3. 并行处理纹理
     let start_textures = Instant::now();
@@ -757,8 +754,6 @@ impl<'a> GltfBuilder<'a> {
 
         std::fs::write(&glb_path, glb_data)
             .map_err(|e| Error::Parse(format!("Failed to write GLB file: {}", e)))?;
-
-        println!("✅ GLB 导出成功: {}", glb_path);
 
         Ok(())
     }

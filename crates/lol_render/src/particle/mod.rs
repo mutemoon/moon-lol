@@ -15,7 +15,7 @@ use league_utils::hash_wad;
 use lol_base::prop::{HashKey, LoadHashKeyTrait};
 use lol_core::lifetime::{Lifetime, LifetimeMode};
 
-use crate::loaders::shader::LeagueLoaderShaderToc;
+// use crate::loaders::shader::LeagueLoaderShaderToc;
 use crate::particle::emitters::decal::update_decal_intersections;
 use crate::particle::emitters::distortion::update_emitter_distortion;
 use crate::particle::emitters::mesh::update_emitter_mesh;
@@ -61,7 +61,7 @@ impl Plugin for PluginParticle {
         app.add_observer(on_command_particle_spawn);
         app.add_observer(on_command_particle_despawn);
 
-        app.init_asset_loader::<LeagueLoaderShaderToc>();
+        // app.init_asset_loader::<LeagueLoaderShaderToc>();
 
         app.add_plugins(MaterialPlugin::<ParticleMaterialDistortion>::default());
         app.add_plugins(MaterialPlugin::<ParticleMaterialQuad>::default());

@@ -1,5 +1,6 @@
 pub mod animation;
 pub mod barrack;
+pub mod extract;
 pub mod gltf_export;
 pub mod mesh_static;
 pub mod navgrid;

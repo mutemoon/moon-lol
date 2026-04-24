@@ -130,7 +130,6 @@ fn build_animation_nodes(
                             .map(|v| (v.m_clip_name, v.m_probability.unwrap_or(0.0)))
                             .map(|(key, value)| AnimationNodeF32 { key, value })
                             .collect::<Vec<_>>(),
-                        current_index: None,
                     },
                 );
             }
@@ -141,7 +140,6 @@ fn build_animation_nodes(
                     *hash,
                     AnimationNode::Sequence {
                         hashes: m_clip_name_list.clone(),
-                        current_index: None,
                     },
                 );
             }
@@ -177,7 +175,6 @@ fn build_animation_nodes(
                     value: 1.0,
                 },
             ],
-            current_index: None,
         },
     );
 

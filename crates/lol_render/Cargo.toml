@@ -14,7 +14,6 @@ league_loader.workspace = true
 league_file.workspace = true
 lol_base.workspace = true
 league_core.workspace = true
-league_to_lol.workspace = true
 thiserror.workspace = true
 bincode.workspace = true
 regex.workspace = true

@@ -595,7 +595,6 @@ impl SkinGltfBuilder {
         std::fs::write(output_path, glb_data)
             .map_err(|e| Error::Parse(format!("写入 GLB 失败: {}", e)))?;
 
-        println!("✅ 皮肤 GLB 导出成功: {}", output_path);
         Ok(())
     }
 }
