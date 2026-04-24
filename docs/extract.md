@@ -25,102 +25,116 @@
 - `ConfigXxx` 类型放在 `lol_base` 作为 Bevy Asset
 - 角色初始配置直接存储在组件中，通过场景序列化保存
 
-## 数据来源
+## 提取模块结构
 
-### WAD 文件
+```
+league_to_lol::extract
+├── mod.rs              # 模块入口，导出所有公共函数
+├── utils.rs            # 文件写入工具
+├── champion.rs         # Champion 提取逻辑
+├── skin.rs            # 皮肤提取逻辑
+└── map.rs             # 地图提取逻辑和阶段函数
+```
 
-从以下位置加载游戏资源：
+## 提取流程（7 阶段）
 
-- `DATA/FINAL/UI.wad.client` - UI 资源
-- `DATA/FINAL/UI.zh_CN.wad.client` - 中文 UI 资源
-- `DATA/FINAL/Maps/Shipping/Map11.wad.client` - 地图数据
-- `DATA/FINAL/Bootstrap.windows.wad.client` - 启动资源
-- `DATA/FINAL/Champions/*.wad.client` - 英雄资源（动态遍历，跳过语言版本）
+### Phase 1: 创建 Loader
 
-### Bin 文件路径
+`extract_phase_1_create_loader(game_path: &str) -> LeagueLoader`
 
-所有 bin 文件路径格式统一为：`data/characters/{name}/{name}.bin`
+扫描 Game 路径下的 Champions 文件夹，收集所有英文版 WAD 文件（不含下划线），创建 LeagueLoader。
 
-例如：`data/characters/fiora/fiora.bin`
+### Phase 2: 提取所有英雄
 
-## 提取流程
+`extract_phase_2_champions(loader: &LeagueLoader)`
 
-### 1. 初始化 Bevy 应用
+并行提取所有英雄角色数据：
+- 遍历 `Champions/*.wad.client` 文件
+- 使用 rayon 并行处理
+- 每个英雄导出 `config.ron`、`skin.glb`、`skin.ron`
 
-配置 AssetPlugin 和 TaskPoolPlugin，准备资源加载环境。
+### Phase 3: 提取地图块数据
 
-### 2. 加载 WAD 文件
+`extract_phase_3_map_chunks(world: &mut World, loader: &LeagueLoader, map_name: &MapName) -> HashMap<String, ChampionRecordData>`
 
-通过 LeagueLoader 加载多个 WAD 归档文件，同时动态遍历 Champions 文件夹下的英文版 `.wad.client` 文件（文件名不含下划线）。
+遍历地图可放置物，提取：
+- **小兵路径** (Unk0x3c995caf)：兵线路径点
+- **兵营** (Unk0xba138ae3)：生成兵营实体
+- **角色** (Unk0xad65d8c4)：收集角色记录数据
 
-### 3. 提取角色数据到组件
+返回 `map_character_records` 供 Phase 6 使用。
 
-从 bin 文件加载角色数据，将数据直接写入组件：
+### Phase 4: 提取导航网格
 
-| 组件             | 数据来源                                            |
-| ---------------- | --------------------------------------------------- |
-| `Bounding`       | `pathfinding_collision_radius`, `health_bar_height` |
-| `Attack`         | `acquisition_range`, `base_atted_attack_speed`      |
-| `Health`         | `health`                                            |
-| `Damage`         | `damage`                                            |
-| `Armor`          | `armor`                                             |
-| `Movement`       | `move_speed`                                        |
-| `Skills`         | `spells` 哈希列表                                   |
-| `ExperienceDrop` | `exp_given_on_death`, `experience_radius`           |
-| `Name`           | `m_character_name`                                  |
+`extract_phase_4_nav_grid(world: &mut World, loader: &LeagueLoader, map_name: &MapName)`
 
-#### 角色数据的两种来源
+从 MapNavGrid 路径加载导航网格数据，导出为二进制文件并插入 World 资源。
 
-**来源一：从英雄 WAD 文件提取**
+### Phase 5: 导出地图几何
 
-遍历 `Champions/*.wad.client` 文件，直接从对应的 bin 文件加载。适用于大多数英雄。
+`extract_phase_5_map_geo(loader: &LeagueLoader, map_name: &MapName)`
 
-**来源二：从地图 Unk0xad65d8c4 提取**
+解析地图几何数据，遍历所有网格和子网格，导出为 GLTF 格式。
 
-从地图的 `Unk0xad65d8c4` 组件中获取 `character_record` 路径，然后加载对应的 bin 文件。部分地图特有角色从此来源提取。
+### Phase 6: 从地图提取角色记录
 
-两种来源使用相同的 bin 路径格式，最终都输出到 `assets/characters/{name}/config.ron`。
+`extract_phase_6_map_character_records(loader: &LeagueLoader, map_character_records: &HashMap<String, ChampionRecordData>)`
 
-### 4. 提取地图可放置物
+并行提取地图中收集的角色记录数据（用于地图特有角色）。
 
-地图中的可放置物通过 `EnumMap` 枚举区分，包含以下类型：
+### Phase 7: 序列化 World
 
-- **Unk0x3c995caf**：小兵路径
-  - 根据名称识别线路：Top（上路）、Mid（中路）、Bot（下路）
-  - 包含路径线段和变换矩阵
+`extract_phase_7_serialize_world(world: &mut World, map_name: &MapName)`
 
-- **Unk0xba138ae3**：兵营
-  - 包含队伍归属（Team）和线路信息
-  - 生成带有 Transform、Team、Lane、ConfigBarracks(Asset) 组件的实体
+将所有生成的实体序列化为 RON 格式保存。
 
-- **Unk0xad65d8c4**：角色
-  - 包含 Transform、Team、skin 路径
-  - 生成的实体带有 Transform、Team 组件和角色组件
+## 一键提取
 
-- **MapNavGrid**：导航网格路径
-  - 指向导航网格数据文件
+```rust
+use league_to_lol::extract::extract_all;
 
-### 5. 提取小兵路径
+fn main() {
+    let game_path = r"D:\WeGameApps\英雄联盟\Game";
+    extract_all(game_path);
+}
+```
 
-遍历地图可放置物品项，识别 `Unk0x3c995caf` 条目：
+`extract_all` 函数自动完成所有 7 个阶段的提取工作。
 
-- **上路**：`MinionPath_Top`、`TopLaneHomeguardsPath`
-- **中路**：`MinionPath_Mid`、`MidLaneHomeguardsPath`
-- **下路**：`MinionPath_Bot`、`BotLaneHomeguardsPath`
+## 独立阶段调用
 
-将变换矩阵转换为平移向量，路径线段根据平移向量进行偏移。
+也可以单独调用某个阶段：
 
-### 6. 导出导航网格
+```rust
+use league_to_lol::extract::{
+    extract_phase_1_create_loader,
+    extract_phase_2_champions,
+    extract_phase_3_map_chunks,
+    extract_phase_4_nav_grid,
+    extract_phase_5_map_geo,
+    extract_phase_6_map_character_records,
+    extract_phase_7_serialize_world,
+};
 
-从 MapNavGrid 路径加载二进制导航数据，解析 AI 网格后导出为二进制格式。
+let loader = extract_phase_1_create_loader(game_path);
+extract_phase_2_champions(&loader);
+// ... 调用其他阶段
+```
 
-### 7. 导出地图几何
+## 日志输出
 
-解析地图几何数据，遍历所有网格和子网格，查找对应的材质定义，导出为 GLTF 格式。
-
-### 8. 序列化场景
-
-将所有生成的实体（兵营、角色、小兵路径）序列化为 RON 格式保存。
+```
+[1/7] Phase 1: 扫描 WAD 文件并创建 Loader...
+[2/7] Phase 2: 提取所有英雄...
+[SUMMARY] 英雄提取完成: 成功 173 个, 跳过 0 个
+[3/7] Phase 3: 提取地图块数据...
+[4/7] Phase 4: 提取导航网格...
+⏱️ 导出耗时统计: ...
+[5/7] Phase 5: 导出地图几何到 GLTF...
+[6/7] Phase 6: 从地图中提取 26 个角色记录...
+[SUMMARY] 地图角色记录提取完成: 成功 26 个
+[7/7] Phase 7: 序列化 World 到文件...
+```
 
 ## 输出文件
 
@@ -130,7 +144,7 @@
 | `assets/characters/{name}/skin.glb`   | 皮肤 GLB 文件（网格 + 材质 + 贴图）                                                                 |
 | `assets/characters/{name}/skin.ron`   | 皮肤场景（包含 Skin、HealthBar、Visibility 组件）                                                   |
 | `assets/maps/{map_name}_navgrid.bin`  | 二进制导航网格数据                                                                                  |
-| `assets/maps/{map_name}_mapgeo.gltf`  | GLTF 格式的地图几何                                                                                 |
+| `assets/maps/{map_name}_mapgeo.glb`   | GLTF 格式的地图几何                                                                                 |
 | `assets/maps/{map_name}_scene.ron`    | 包含所有地图对象的序列化场景                                                                        |
 
 ### Character 场景文件结构
