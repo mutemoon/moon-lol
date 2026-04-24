@@ -10,7 +10,6 @@ use lol_core::utils::AssetServerLoadLeague;
 use crate::loaders::animation::LeagueLoaderAnimationClip;
 use crate::loaders::image::LeagueLoaderImage;
 use crate::loaders::mesh::LeagueLoaderMesh;
-use crate::loaders::mesh_static::LeagueLoaderMeshStatic;
 use crate::loaders::skeleton::LeagueLoaderSkeleton;
 use crate::skin::LeagueSkinMesh;
 
@@ -22,7 +21,6 @@ impl Plugin for PluginRenderResource {
         app.init_asset_loader::<LeagueLoaderImage>();
         app.init_asset_loader::<LeagueLoaderMesh>();
         app.init_asset_loader::<LeagueLoaderSkeleton>();
-        app.init_asset_loader::<LeagueLoaderMeshStatic>();
         app.init_asset_loader::<LeagueLoaderAnimationClip>();
 
         app.register_loading::<HashKey<AnimationGraphData>>()

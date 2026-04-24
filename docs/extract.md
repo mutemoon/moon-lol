@@ -57,17 +57,17 @@
 
 从 bin 文件加载角色数据，将数据直接写入组件：
 
-| 组件 | 数据来源 |
-|------|----------|
-| `Bounding` | `pathfinding_collision_radius`, `health_bar_height` |
-| `Attack` | `acquisition_range`, `base_atted_attack_speed` |
-| `Health` | `health` |
-| `Damage` | `damage` |
-| `Armor` | `armor` |
-| `Movement` | `move_speed` |
-| `Skills` | `spells` 哈希列表 |
-| `ExperienceDrop` | `exp_given_on_death`, `experience_radius` |
-| `Name` | `m_character_name` |
+| 组件             | 数据来源                                            |
+| ---------------- | --------------------------------------------------- |
+| `Bounding`       | `pathfinding_collision_radius`, `health_bar_height` |
+| `Attack`         | `acquisition_range`, `base_atted_attack_speed`      |
+| `Health`         | `health`                                            |
+| `Damage`         | `damage`                                            |
+| `Armor`          | `armor`                                             |
+| `Movement`       | `move_speed`                                        |
+| `Skills`         | `spells` 哈希列表                                   |
+| `ExperienceDrop` | `exp_given_on_death`, `experience_radius`           |
+| `Name`           | `m_character_name`                                  |
 
 #### 角色数据的两种来源
 
@@ -124,14 +124,14 @@
 
 ## 输出文件
 
-| 文件 | 描述 |
-|------|------|
+| 文件                                  | 描述                                                                                                |
+| ------------------------------------- | --------------------------------------------------------------------------------------------------- |
 | `assets/characters/{name}/config.ron` | 角色场景（包含 Bounding、Attack、Health、Damage、Armor、Movement、Skills、Name 等组件的序列化实体） |
-| `assets/characters/{name}/skin.glb` | 皮肤 GLB 文件（网格 + 材质 + 贴图） |
-| `assets/characters/{name}/skin.ron` | 皮肤场景（包含 Skin、HealthBar、Visibility 组件） |
-| `assets/maps/{map_name}_navgrid.bin` | 二进制导航网格数据 |
-| `assets/maps/{map_name}_mapgeo.gltf` | GLTF 格式的地图几何 |
-| `assets/maps/{map_name}_scene.ron` | 包含所有地图对象的序列化场景 |
+| `assets/characters/{name}/skin.glb`   | 皮肤 GLB 文件（网格 + 材质 + 贴图）                                                                 |
+| `assets/characters/{name}/skin.ron`   | 皮肤场景（包含 Skin、HealthBar、Visibility 组件）                                                   |
+| `assets/maps/{map_name}_navgrid.bin`  | 二进制导航网格数据                                                                                  |
+| `assets/maps/{map_name}_mapgeo.gltf`  | GLTF 格式的地图几何                                                                                 |
+| `assets/maps/{map_name}_scene.ron`    | 包含所有地图对象的序列化场景                                                                        |
 
 ### Character 场景文件结构
 
@@ -153,12 +153,12 @@
 
 皮肤数据从 `SkinCharacterDataProperties` 中提取，包含以下信息：
 
-| 信息 | 字段 |
-|------|------|
-| 皮肤缩放 | `skin_mesh_properties.skin_scale` |
-| 血条类型 | `health_bar_data.unit_health_bar_style` |
+| 信息     | 字段                                        |
+| -------- | ------------------------------------------- |
+| 皮肤缩放 | `skin_mesh_properties.skin_scale`           |
+| 血条类型 | `health_bar_data.unit_health_bar_style`     |
 | 网格路径 | `skin_mesh_properties.simple_skin` (`.skn`) |
-| 贴图路径 | `skin_mesh_properties.texture` (`.tex`) |
+| 贴图路径 | `skin_mesh_properties.texture` (`.tex`)     |
 
 #### 皮肤 bin 路径
 
@@ -171,6 +171,7 @@
 #### 皮肤 GLB 文件结构
 
 `assets/characters/{name}/skin.glb` 包含：
+
 - **Mesh**: 从 `.skn` 解析的网格数据（Position、Normal、UV）
 - **Material**: PBR 材质（metallic=0, roughness=1, alpha_mask=0.3）
 - **Texture**: 从 `.tex` 解码的 PNG 贴图
@@ -245,10 +246,14 @@ let type_hash = type_name_to_hash(type_name);
 
 ### Asset vs Component 设计
 
-| 类型 | 存储位置 | 用途 |
-|------|----------|------|
-| `ConfigBarracks` | `lol_base` (Asset) | 兵营配置，可被多个兵营实例共享 |
-| `Barrack` | `lol_core` (Component) | 兵营运行时状态，持有 `Handle<ConfigBarracks>` |
-| `ConfigNavigationGrid` | `lol_base` (Asset) | 导航网格配置 |
-| `Spell` | `lol_base` (Asset) | 技能数据配置 |
-| `Bounding`, `Attack`, `Health` 等 | `lol_core` (Component) | 角色初始配置，直接序列化到 config.ron |
+| 类型                              | 存储位置               | 用途                                          |
+| --------------------------------- | ---------------------- | --------------------------------------------- |
+| `ConfigBarracks`                  | `lol_base` (Asset)     | 兵营配置，可被多个兵营实例共享                |
+| `Barrack`                         | `lol_core` (Component) | 兵营运行时状态，持有 `Handle<ConfigBarracks>` |
+| `ConfigNavigationGrid`            | `lol_base` (Asset)     | 导航网格配置                                  |
+| `Spell`                           | `lol_base` (Asset)     | 技能数据配置                                  |
+| `Bounding`, `Attack`, `Health` 等 | `lol_core` (Component) | 角色初始配置，直接序列化到 config.ron         |
+
+## 粒子特效提取
+
+VfxPrimitiveMesh.mMesh.mSimpleMeshName 是 scb 文件路径，可以转为 Mesh

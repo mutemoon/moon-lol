@@ -50,7 +50,11 @@
         "hooks": [
           {
             "type": "command",
-            "command": "cargo +nightly fmt"
+            "command": "pnpm fix"
+          },
+          {
+            "type": "command",
+            "command": "pnpm format"
           }
         ]
       }
