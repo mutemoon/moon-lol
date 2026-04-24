@@ -1,6 +1,5 @@
 use bevy::gltf::GltfLoaderSettings;
 use bevy::light::CascadeShadowConfigBuilder;
-use bevy::light::light_consts::lux;
 use bevy::pbr::DefaultOpaqueRendererMethod;
 use bevy::prelude::*;
 use bevy_gltf_draco::GltfDracoDecoderPlugin;
@@ -75,7 +74,7 @@ struct LoadingData {
 fn update_loading_data(
     mut loading_data: ResMut<LoadingData>,
     asset_server: Res<AssetServer>,
-    mut mesh_asset_events: MessageReader<AssetEvent<Mesh>>,
+    _mesh_asset_events: MessageReader<AssetEvent<Mesh>>,
 ) {
     // 移除已加载的资产
     loading_data.loading_assets.retain(|handle| {
@@ -86,7 +85,7 @@ fn update_loading_data(
     });
     //    12
     // 计算进度 (0.0 到 1.0)
-    let progress = if loading_data.total_assets == 0 {
+    let _progress = if loading_data.total_assets == 0 {
         1.0
     } else {
         (loading_data.total_assets - loading_data.loading_assets.len()) as f32

@@ -11,7 +11,7 @@ use lol_core::buffs::shield_white::BuffShieldWhite;
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
 use lol_core::skill::{
-    CoolDown, EventSkillCast, Skill, SkillSlot, play_skill_animation, skill_damage, skill_dash,
+    EventSkillCast, Skill, SkillSlot, play_skill_animation, skill_damage, skill_dash,
     spawn_skill_particle,
 };
 

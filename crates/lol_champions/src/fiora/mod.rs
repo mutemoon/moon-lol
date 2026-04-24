@@ -17,7 +17,6 @@ use lol_core::skill::{
 };
 
 use crate::fiora::e::BuffFioraE;
-use crate::fiora::passive::AbilityFioraPassive;
 use crate::fiora::r::BuffFioraR;
 
 #[derive(Default)]

@@ -94,7 +94,7 @@ fn cast_rakan_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
     );
 }
 
-fn cast_rakan_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
+fn cast_rakan_e(commands: &mut Commands, entity: Entity, _skill_spell: Handle<Spell>) {
     play_skill_animation(commands, entity, hash_bin("Spell3"));
     spawn_skill_particle(commands, entity, hash_bin("Rakan_E_Cast"));
 

@@ -167,7 +167,7 @@ fn image_copy_extract(mut commands: Commands, image_copiers: Extract<Query<&Imag
 
 // Removed ImageCopy and ImageCopyDriver as RenderGraph is replaced by systems.
 
-pub fn image_copy_pass(
+fn image_copy_pass(
     image_copiers: Res<ImageCopiers>,
     gpu_images: Res<RenderAssets<bevy::render::texture::GpuImage>>,
     render_device: Res<RenderDevice>,

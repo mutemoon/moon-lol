@@ -8,8 +8,7 @@ use lol_core::base::buff::BuffOf;
 use lol_core::damage::DamageType;
 use lol_core::entities::champion::Champion;
 use lol_core::skill::{
-    CoolDown, EventSkillCast, Skill, SkillSlot, play_skill_animation, skill_damage,
-    spawn_skill_particle,
+    EventSkillCast, Skill, SkillSlot, play_skill_animation, skill_damage, spawn_skill_particle,
 };
 
 use crate::olaf::buffs::{BuffOlafR, BuffOlafW};

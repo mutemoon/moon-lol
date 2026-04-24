@@ -1,5 +1,3 @@
-use bevy::camera::visibility::RenderLayers;
-use bevy::mesh::skinning::SkinnedMesh;
 use bevy::prelude::*;
 use bevy::render::render_resource::Face;
 use league_core::extract::SkinCharacterDataProperties;

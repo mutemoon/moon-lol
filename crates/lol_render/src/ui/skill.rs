@@ -30,15 +30,15 @@ struct SkillLevelUpButton {
 }
 
 fn update_player_skill_icon(
-    asset_server: Res<AssetServer>,
+    _asset_server: Res<AssetServer>,
     mut commands: Commands,
     mut q_image_node: Query<&mut ImageNode>,
-    mut res_resource_cache: ResMut<ResourceCache>,
+    _res_resource_cache: ResMut<ResourceCache>,
     q_children: Query<&Children>,
     q_skill: Query<&Skill>,
     q_skills: Query<&Skills, With<Controller>>,
     q_passive_skill: Query<&PassiveSkill, With<Controller>>,
-    res_assets_spell_object: Res<Assets<Spell>>,
+    _res_assets_spell_object: Res<Assets<Spell>>,
     res_ui_element_entity: Res<UIElementEntity>,
 ) {
     let Ok(passive_skill) = q_passive_skill.single() else {
@@ -77,7 +77,7 @@ fn update_player_skill_icon(
             continue;
         }
 
-        let Ok(skill) = q_skill.get(skill) else {
+        let Ok(_skill) = q_skill.get(skill) else {
             debug!("未找到技能实体 {} 的技能组件", index);
             continue;
         };

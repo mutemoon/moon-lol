@@ -1,5 +1,4 @@
 use bevy::prelude::*;
-use lol_core::entities::barrack::PluginBarrack;
 use lol_core::resource::PluginResource;
 use moon_lol::PluginCore;
 

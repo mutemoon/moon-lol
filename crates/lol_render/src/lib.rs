@@ -11,14 +11,12 @@ pub mod skin;
 pub mod test_render;
 pub mod ui;
 
-use animation::PluginAnimation;
 use bevy::prelude::{App, Plugin};
 use camera::PluginCamera;
 use controller::PluginController;
 use map::PluginRenderMap;
 use resource::PluginRenderResource;
 use skin::PluginSkin;
-use ui::PluginUI;
 
 #[derive(Default)]
 pub struct PluginRender;

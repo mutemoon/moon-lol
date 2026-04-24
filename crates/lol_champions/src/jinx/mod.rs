@@ -32,7 +32,7 @@ fn on_jinx_skill_cast(
     trigger: On<EventSkillCast>,
     mut commands: Commands,
     q_jinx: Query<(), With<Jinx>>,
-    q_transform: Query<&Transform>,
+    _q_transform: Query<&Transform>,
     q_skill: Query<(&Skill, &CoolDown)>,
 ) {
     let entity = trigger.event_target();

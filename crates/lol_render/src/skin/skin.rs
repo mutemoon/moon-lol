@@ -3,14 +3,11 @@ use bevy::prelude::*;
 use bevy::world_serialization::WorldInstanceSpawnError;
 use league_core::extract::SkinCharacterDataProperties;
 use lol_base::character::ConfigSkin;
-use lol_base::prop::{HashKey, LoadHashKeyTrait};
+use lol_base::prop::HashKey;
 use lol_core::render_cmd::CommandSkinSpawn;
 use lol_core::resource::loading::Loading;
 
 // use lol_core::resource::prop_bin::{CommandLoadPropBin, PropPath};
-use crate::skin::animation::CommandSkinAnimationSpawn;
-use crate::skin::mesh::CommandSkinMeshSpawn;
-use crate::ui::health_bar::HealthBar;
 
 #[derive(Component, Debug, Clone, Copy)]
 pub struct Skin {

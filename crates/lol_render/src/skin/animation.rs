@@ -5,13 +5,12 @@ use league_core::extract::{
     AnimationGraphData, AtomicClipData, ConditionBoolClipData, ConditionFloatClipData,
     EnumClipData, SelectorClipData, SequencerClipData, SkinCharacterDataProperties,
 };
-use league_to_lol::animation::load_animation_map;
 use league_utils::hash_bin;
 use lol_base::prop::{HashKey, LoadHashKeyTrait};
 use lol_core::resource::loading::Loading;
 use lol_core::utils::AssetServerLoadLeague;
 
-use crate::animation::{Animation, AnimationNode, AnimationNodeF32, AnimationState};
+use crate::animation::{AnimationNode, AnimationNodeF32};
 use crate::skin::skin::Skin;
 
 #[derive(EntityEvent)]

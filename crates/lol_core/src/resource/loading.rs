@@ -7,7 +7,7 @@ use bevy::prelude::*;
 pub struct PluginResourceLoading;
 
 impl Plugin for PluginResourceLoading {
-    fn build(&self, app: &mut App) {}
+    fn build(&self, _app: &mut App) {}
 }
 
 pub trait RegisterLoadingExt {

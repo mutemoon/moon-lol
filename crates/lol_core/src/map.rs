@@ -96,6 +96,6 @@ fn startup_load_map_geometry(
     ));
 }
 
-fn update_load_map_geometry(trigger: On<WorldInstanceReady>, mut commands: Commands) {
+fn update_load_map_geometry(_trigger: On<WorldInstanceReady>, mut commands: Commands) {
     commands.set_state(MapState::Loaded);
 }

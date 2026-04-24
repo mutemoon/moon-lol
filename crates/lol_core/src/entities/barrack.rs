@@ -239,7 +239,7 @@ fn barracks_spawning_system(
 
         debug!("生成一个小兵");
 
-        let entity = commands
+        let _entity = commands
             .spawn((
                 Transform::from_matrix(transform.to_matrix()),
                 Minion::from(minion_config.minion_type),

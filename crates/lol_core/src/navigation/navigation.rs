@@ -8,7 +8,6 @@ use lol_base::grid::{CELL_COST_IMPASSABLE, ConfigNavigationGrid};
 
 use crate::base::bounding::Bounding;
 use crate::character::Character;
-use crate::map::MapState;
 use crate::navigation::astar::find_grid_path_with_result;
 use crate::navigation::grid::ResourceGrid;
 

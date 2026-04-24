@@ -14,6 +14,8 @@
     "example:stream:watch": "cargo-watch -w src -x \"run --example stream\"",
     "extract": "cargo run --example extract_map_data",
     "extract:ts": "ts-node scripts/extract.ts",
+    "fix": "cargo fix --allow-dirty --workspace",
+    "format": "cargo +nightly fmt",
     "hot:patch": "dx serve --hot-patch --features \"bevy/hotpatching\"",
     "test:minion:watch": "cargo-watch -w src -x \"test -p moon_lol --test minion -- tests::test_complete_attack_cycle --exact --nocapture\"",
     "test:render": "node scripts/run-render-tests.mjs",

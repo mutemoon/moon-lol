@@ -77,7 +77,7 @@ pub fn export_skin_to_glb(
 
     // 为每个 submesh 创建一个 primitive
     let mut primitives = Vec::new();
-    for (i, range) in skinned_mesh.ranges.iter().enumerate() {
+    for (i, _range) in skinned_mesh.ranges.iter().enumerate() {
         let primitive = builder.create_primitive(skinned_mesh, i, material_index)?;
         primitives.push(primitive);
     }

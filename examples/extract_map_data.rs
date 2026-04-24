@@ -1,8 +1,4 @@
-use std::any::{Any, TypeId};
-use std::intrinsics::type_id;
-use std::sync::Arc;
-
-use bevy::asset::{AssetIndex, AssetPath, StrongHandle};
+use bevy::asset::AssetPath;
 use bevy::ecs::archetype;
 use bevy::prelude::*;
 use league_core::extract::{
