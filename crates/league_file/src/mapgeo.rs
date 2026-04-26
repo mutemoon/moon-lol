@@ -414,7 +414,8 @@ impl From<u32> for ElementName {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Component, Reflect, Debug, Clone, Serialize, Deserialize)]
+#[reflect(Component)]
 pub struct LeagueMapGeoMesh {
     pub vertex_count: u32,
     pub vertex_declaration_count: u32,
@@ -503,7 +504,7 @@ impl LeagueMapGeoMesh {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Reflect)]
 pub struct Submesh {
     pub hash: u32,
     pub material_name: SizedStringU32,
@@ -535,7 +536,7 @@ impl Submesh {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Reflect)]
 pub struct Channel {
     pub texture: SizedStringU32,
     pub uv_scale: Vec2,
@@ -560,7 +561,7 @@ impl Channel {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Reflect)]
 pub struct TextureOverride {
     pub sampler_id: u32,
     pub texture_path: SizedStringU32,
@@ -582,7 +583,7 @@ impl TextureOverride {
 
 use crate::common::SizedStringU32;
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Copy)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Copy, Reflect)]
 pub enum QualityFilter {
     All,
     VeryLow,

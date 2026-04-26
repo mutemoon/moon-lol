@@ -186,9 +186,12 @@ extract_phase_2_champions(&loader);
 
 `assets/characters/{name}/skin.glb` 包含：
 
-- **Mesh**: 从 `.skn` 解析的网格数据（Position、Normal、UV）
+- **Mesh**: 从 `.skn` 解析的网格数据（Position、Normal、UV、JOINTS_0、WEIGHTS_0）
 - **Material**: PBR 材质（metallic=0, roughness=1, alpha_mask=0.3）
 - **Texture**: 从 `.tex` 解码的 PNG 贴图
+- **Skeleton**: 从 `.skl` 解析的骨骼节点树，使用 `local_transform` 作为 rest pose
+- **Skin**: 蒙皮信息，`joints` 和 `inverseBindMatrices` 按 `influences` 顺序排列
+- **Animation**: 从 `.anm` 文件解析的动画数据，通道通过 `hash_joint` 匹配到正确的骨骼节点
 
 #### 皮肤场景文件结构
 

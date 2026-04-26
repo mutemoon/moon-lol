@@ -375,7 +375,7 @@ pub fn extract_all(game_path: &str) {
     app.init_asset::<DynamicWorld>();
     app.init_asset::<lol_base::barrack::ConfigBarracks>();
     app.init_asset::<lol_base::grid::ConfigNavigationGrid>();
-    app.init_asset_loader::<lol_loader::barrack::BarracksLoader>();
+    app.init_asset_loader::<lol_loader::barrack::ConfigBarracksLoader>();
     app.finish();
     app.cleanup();
 

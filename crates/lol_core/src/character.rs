@@ -88,7 +88,7 @@ fn try_load_config_characters(
                 let mut map = EntityHashMap::new();
                 map.entry(dynamic_world.entities.get(0).unwrap().entity)
                     .insert(entity);
-                info!(
+                debug!(
                     "{} -> {}",
                     dynamic_world.entities.get(0).unwrap().entity,
                     entity

@@ -1,64 +1,15 @@
 use std::collections::HashMap;
 
+use bevy::animation::graph::AnimationNodeIndex;
 use league_core::extract::{
     AnimationGraphData, AtomicClipData, ConditionBoolClipData, ConditionFloatClipData,
     EnumBlendData, EnumClipData, EnumParametricUpdater, SelectorClipData, SequencerClipData,
 };
 use league_utils::hash_bin;
 use lol_base::animation::{
-    AnimationNodeIndex, ConfigAnimation, ConfigAnimationNode, ConfigAnimationNodeF32,
-    ConfigBlendData, ConfigParametricUpdater,
+    ConfigAnimation, ConfigAnimationNode, ConfigAnimationNodeF32, ConfigBlendData,
+    ConfigParametricUpdater,
 };
-
-// Note: The following code requires `bevy_animation` dependency which is not currently
-// in league_to_lol's Cargo.toml. This is standby/备用 code.
-// If needed, uncomment and add `bevy_animation.workspace = true` to Cargo.toml.
-/*
-use bevy::animation::{AnimationTargetId, animated_field};
-use bevy::asset::uuid::Uuid;
-use bevy_animation::prelude::{AnimatableCurve, AnimatableKeyframeCurve};
-use bevy::prelude::AnimationClip;
-
-pub fn animation_clip_from_animation_file(animation: ConfigAnimationClip) -> AnimationClip {
-    let mut clip = AnimationClip::default();
-    for (i, joint_hash) in animation.joint_hashes.iter().enumerate() {
-        let translates = animation.translates.get(i).unwrap();
-        let rotations = animation.rotations.get(i).unwrap();
-        let scales = animation.scales.get(i).unwrap();
-
-        if translates.len() >= 2 {
-            clip.add_curve_to_target(
-                AnimationTargetId(Uuid::from_u128(*joint_hash as u128)),
-                AnimatableCurve::new(
-                    animated_field!(Transform::translation),
-                    AnimatableKeyframeCurve::new(translates.clone()).unwrap(),
-                ),
-            );
-        }
-
-        if rotations.len() >= 2 {
-            clip.add_curve_to_target(
-                AnimationTargetId(Uuid::from_u128(*joint_hash as u128)),
-                AnimatableCurve::new(
-                    animated_field!(Transform::rotation),
-                    AnimatableKeyframeCurve::new(rotations.clone()).unwrap(),
-                ),
-            );
-        }
-
-        if scales.len() >= 2 {
-            clip.add_curve_to_target(
-                AnimationTargetId(Uuid::from_u128(*joint_hash as u128)),
-                AnimatableCurve::new(
-                    animated_field!(Transform::scale),
-                    AnimatableKeyframeCurve::new(scales.clone().into_iter()).unwrap(),
-                ),
-            );
-        }
-    }
-    clip
-}
-*/
 
 /// Convert EnumParametricUpdater to ConfigParametricUpdater
 pub fn parametric_updater_to_config(updater: &EnumParametricUpdater) -> ConfigParametricUpdater {
@@ -153,7 +104,7 @@ pub fn clip_data_to_node(
             // For now, we return a placeholder that will be resolved later
             (
                 ConfigAnimationNode::Clip {
-                    node_index: 0, // Will be updated by build_animation_nodes
+                    node_index: AnimationNodeIndex::new(0), // Will be updated by build_animation_nodes
                 },
                 None,
             )
@@ -211,7 +162,12 @@ pub fn clip_data_to_node(
             },
             None,
         ),
-        _ => (ConfigAnimationNode::Clip { node_index: 0 }, None),
+        _ => (
+            ConfigAnimationNode::Clip {
+                node_index: AnimationNodeIndex::new(0),
+            },
+            None,
+        ),
     }
 }
 

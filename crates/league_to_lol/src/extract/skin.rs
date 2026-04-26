@@ -1,9 +1,12 @@
 use bevy::asset::{AssetPath, Handle};
 use bevy::ecs::archetype;
 use bevy::prelude::*;
-use league_core::extract::{AnimationGraphData, EnumClipData, SkinCharacterDataProperties};
+use league_core::extract::{
+    AnimationGraphData, EnumClipData, SkinCharacterDataProperties, StaticMaterialDef,
+};
 use league_file::animation::AnimationFile;
 use league_file::mesh_skinned::LeagueSkinnedMesh;
+use league_file::skeleton::LeagueSkeleton;
 use league_loader::game::{Data, LeagueLoader, PropGroup};
 use league_loader::prop_bin::LeagueWadLoaderTrait;
 use lol_base::animation::{AnimationHandler, ConfigAnimation, ConfigAnimationClip};
@@ -24,21 +27,9 @@ pub fn extract_skin_for_champion(
         return;
     };
 
-    // 加载皮肤 bin 文件获取 SkinCharacterDataProperties 和 links
-    let Ok(skin_prop_file) = loader.get_prop_bin_by_path(skin_bin_path) else {
-        println!("[WARN] 无法加载皮肤 bin 文件: {}", skin_bin_path);
-        return;
-    };
+    println!("[DEBUG] 正在加载 {}", champ_name);
 
-    // 从 links 创建 PropGroup 用于查找 SkinCharacterDataProperties 和 AnimationGraphData
-    let link_paths: Vec<&str> = skin_prop_file
-        .links
-        .iter()
-        .map(|link| link.text.as_str())
-        .filter(|s| !s.is_empty())
-        .collect();
-
-    let skin_prop_group = match loader.get_prop_group_by_paths(link_paths) {
+    let skin_prop_group = match loader.get_prop_group_by_paths(vec![skin_bin_path]) {
         Ok(group) => group,
         Err(_) => {
             println!("[WARN] 无法加载 linked bin 文件");
@@ -46,7 +37,7 @@ pub fn extract_skin_for_champion(
         }
     };
 
-    let skin_data = match skin_prop_file.get_by_class::<SkinCharacterDataProperties>() {
+    let skin_data = match skin_prop_group.get_by_class::<SkinCharacterDataProperties>() {
         Some(data) => data,
         None => {
             println!("[WARN] 无法获取 SkinCharacterDataProperties");
@@ -97,14 +88,85 @@ pub fn extract_skin_for_champion(
             decode_texture_to_png(&texture)
         });
 
+    // 加载 .skl 文件（骨架数据）
+    let skeleton = skin_mesh_properties.skeleton.as_ref().and_then(|skl_path| {
+        loader
+            .get_wad_entry_buffer_by_path(skl_path)
+            .ok()
+            .and_then(|buf| LeagueSkeleton::parse(&buf).ok().map(|(_, s)| s))
+    });
+
     let output_glb_path = format!("assets/characters/{}/skin.glb", champ_name.to_lowercase());
 
     // 加载动画数据并导出到 GLB
     let animations = load_animations_for_skin(loader, &skin_prop_group, anim_graph_hash);
 
-    if let Err(e) = export_skin_to_glb(&skinned_mesh, texture_png, &animations, &output_glb_path) {
+    // 加载 material override 的贴图
+    // materialOverride 的 material 字段是 link 哈希，需要加载对应的 bin 文件获取贴图
+    // 注意：材质可能存储在不同的 wad 文件中，需要使用 skin_prop_group 来获取
+    let material_override = skin_mesh_properties.material_override.as_ref().map(|overrides| {
+        let mut override_map = std::collections::HashMap::new();
+        for override_item in overrides {
+            let submesh_name = &override_item.submesh;
+            if let Some(material_hash) = override_item.material {
+                // 通过 skin_prop_group 获取 StaticMaterialDef
+                if let Some(static_material) = skin_prop_group.get_data_option::<StaticMaterialDef>(material_hash  ) {
+                    // 遍历 sampler_values 找到 Diffuse_Texture
+                    if let Some(samplers) = &static_material.sampler_values {
+                        for sampler in samplers {
+                            if &sampler.texture_name == "Diffuse_Texture" {
+                                if let Some(texture_path) = &sampler.texture_path {
+                                    println!("[DEBUG] Found Diffuse_Texture for submesh '{}': path={}", submesh_name, texture_path);
+                                    if let Ok(buf) = loader.get_wad_entry_buffer_by_path(texture_path) {
+                                        if let Ok((_, texture)) = league_file::texture::LeagueTexture::parse(&buf) {
+                                            if let Some(png_data) = decode_texture_to_png(&texture) {
+                                                override_map.insert(override_item.submesh.clone(), png_data);
+                                            }
+                                            else {
+                                                println!("[DEBUG] no png_data");
+                                            }
+                                        }
+                                        else {
+                                            println!("[DEBUG] no LeagueTexture::parse");
+                                        }
+                                    }
+                                    else {
+                                        println!("[DEBUG] no get_wad_entry_buffer_by_path(texture_path");
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        println!("[DEBUG] No sampler_values for submesh '{}'", submesh_name);
+                    }
+                } else {
+                    println!("[DEBUG] StaticMaterialDef not found in skin_prop_group for submesh '{}': hash={}", submesh_name, material_hash);
+                }
+            } else if let Some(texture_path) = &override_item.texture {
+                if let Ok(buf) = loader.get_wad_entry_buffer_by_path(texture_path) {
+                    if let Ok((_, texture)) = league_file::texture::LeagueTexture::parse(&buf) {
+                        if let Some(png_data) = decode_texture_to_png(&texture) {
+                            override_map.insert(override_item.submesh.clone(), png_data);
+                        }
+                    }
+                }
+            }
+        }
+        override_map
+    });
+
+    if let Err(e) = export_skin_to_glb(
+        &skinned_mesh,
+        texture_png,
+        skeleton.as_ref(),
+        &animations,
+        &output_glb_path,
+        material_override.as_ref(),
+    ) {
         println!("[WARN] 皮肤 GLB 导出失败: {}", e);
         return;
+    } else {
+        println!("{:?}", skin_mesh_properties.material_override);
     }
 
     // 导出动画 Asset（保留独立的 ron 文件用于运行时加载）
@@ -264,9 +326,9 @@ fn export_animation_for_skin(
     let mut node_index_map = std::collections::HashMap::new();
     if let Some(ref clip_data_map) = anim_graph_data.m_clip_data_map {
         for (hash, clip) in clip_data_map {
-            if matches!(clip, league_core::extract::EnumClipData::AtomicClipData(_)) {
+            if matches!(clip, EnumClipData::AtomicClipData(_)) {
                 let next_index = node_index_map.len();
-                node_index_map.insert(*hash, next_index);
+                node_index_map.insert(*hash, AnimationNodeIndex::new(next_index));
             }
         }
     }

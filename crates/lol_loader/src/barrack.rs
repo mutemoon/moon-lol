@@ -5,9 +5,9 @@ use lol_base::barrack::ConfigBarracks;
 use super::error::Error;
 
 #[derive(Default, TypePath)]
-pub struct BarracksLoader;
+pub struct ConfigBarracksLoader;
 
-impl AssetLoader for BarracksLoader {
+impl AssetLoader for ConfigBarracksLoader {
     type Asset = ConfigBarracks;
 
     type Settings = ();

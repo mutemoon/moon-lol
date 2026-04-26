@@ -86,7 +86,7 @@ pub fn hash_shader_spec(defs: &Vec<String>) -> u64 {
     hash_shader(&define_string)
 }
 
-#[derive(Debug, Clone, Deserialize, Serialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Reflect)]
 pub struct BoundingBox {
     pub min: Vec3,
     pub max: Vec3,
@@ -97,30 +97,6 @@ impl BoundingBox {
         let (i, min) = nom_parse_vec3(input)?;
         let (i, max) = nom_parse_vec3(i)?;
         Ok((i, BoundingBox { min, max }))
-    }
-}
-
-pub fn get_padded_string_64(bytes: [u8; 64]) -> String {
-    String::from_utf8_lossy(&bytes)
-        .trim_end_matches('\0')
-        .to_string()
-}
-
-pub fn get_padded_string_128(bytes: [u8; 128]) -> String {
-    String::from_utf8_lossy(&bytes)
-        .trim_end_matches('\0')
-        .to_string()
-}
-
-pub fn get_asset_id_by_path<A: Asset>(path: &str) -> AssetId<A> {
-    AssetId::Uuid {
-        uuid: Uuid::from_u128(hash_bin(path) as u128),
-    }
-}
-
-pub fn get_asset_id_by_hash<A: Asset>(hash: u32) -> AssetId<A> {
-    AssetId::Uuid {
-        uuid: Uuid::from_u128(hash as u128),
     }
 }
 

@@ -1,6 +1,5 @@
 use core::f32;
 use std::collections::HashSet;
-use std::time::Instant;
 
 use bevy::prelude::*;
 use lol_base::grid::ConfigNavigationGrid;
@@ -357,7 +356,7 @@ fn apply_final_movement_decision(
             MovementAction::Start { way, speed, source } => {
                 match way {
                     MovementWay::Pathfind(target) => {
-                        let start = Instant::now();
+                        // let start = Instant::now();
 
                         if let Some(bounding) = bounding {
                             calculate_and_set_exclude_cells(
@@ -367,12 +366,12 @@ fn apply_final_movement_decision(
                             );
                         };
 
-                        stats.exclude_time += start.elapsed();
+                        // stats.exclude_time += start.elapsed();
                         stats.exclude_count += 1;
 
                         // 检查是否需要重新规划路径
                         let need_replan = if let Some((last_target, _)) = movement_state.pathfind {
-                            let start = Instant::now();
+                            // let start = Instant::now();
 
                             // 目标位置发生变化
                             let target_changed =
@@ -392,7 +391,7 @@ fn apply_final_movement_decision(
                             }
 
                             stats.check_path_count += 1;
-                            stats.check_path_time += start.elapsed();
+                            // stats.check_path_time += start.elapsed();
 
                             target_changed || path_blocked
                         } else {

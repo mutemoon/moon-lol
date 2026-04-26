@@ -24,13 +24,15 @@ lol_champions = { path = "crates/lol_champions" }
 gltf = "1.4.1"
 bevy_gltf_draco = { path = "../bevy_gltf_draco" }
 serde_json = "1.0"
-bevy = { path = "../bevy", features = [
+bevy = { path = "../bevy-ktx2", features = [
     "webp",
+    "basis_universal",
     "free_camera",
     "serialize",
     "bevy_debug_stepping",
     "webgpu",
 ] }
+
 bincode = "1.3"
 bitflags = "2.9.1"
 crossbeam-channel = "0.5"
@@ -48,6 +50,7 @@ getrandom_02 = { package = "getrandom", version = "0.2", features = ["js"] }
 getrandom_03 = { package = "getrandom", version = "0.3", features = [
     "wasm_js",
 ] }
+wasm-bindgen = "0.2"
 
 [dependencies]
 getrandom_02.workspace = true
@@ -56,7 +59,6 @@ bevy.workspace = true
 league_core.workspace = true
 league_loader.workspace = true
 league_property.workspace = true
-league_to_lol.workspace = true
 league_file.workspace = true
 league_utils.workspace = true
 lol_base.workspace = true
@@ -72,6 +74,7 @@ bevy_gltf_draco.workspace = true
 tracing = "0.1"
 
 [dev-dependencies]
+league_to_lol.workspace = true
 crossbeam-channel.workspace = true
 image.workspace = true
 serde_json.workspace = true

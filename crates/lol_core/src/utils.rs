@@ -4,10 +4,6 @@ use bevy::asset::{Asset, Handle};
 use bevy::prelude::*;
 use league_utils::hash_wad;
 
-pub fn rotate_to_direction(transform: &mut Transform, direction: Vec2) {
-    transform.rotation = Quat::from_rotation_y(direction_to_angle(direction));
-}
-
 /// 计算从Vec2方向到角度的转换
 pub fn direction_to_angle(direction: Vec2) -> f32 {
     -(direction.y.atan2(direction.x) - PI / 2.0)

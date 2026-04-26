@@ -198,3 +198,15 @@ cargo check --example extract_map_data
 
 1. 运行导出工具，生成 `skin.glb`，用 glTF 查看器（如 https://gltf-viewer.donmccurdy.com/）验证模型、材质、骨骼、动画正确
 2. 运行游戏主程序，验证角色渲染正常
+
+## 地图加载速度
+
+### wasm
+
+- webp 15s
+- etc1s 9.8s
+
+### windows
+
+- webp ?
+- etc1s 3s

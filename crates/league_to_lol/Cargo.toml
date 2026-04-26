@@ -24,5 +24,4 @@ serde_json.workspace = true
 image.workspace = true
 texpresso.workspace = true
 
-[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 rayon.workspace = true

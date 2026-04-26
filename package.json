@@ -22,7 +22,8 @@
     "test:render:fiora": "cargo test --test fiora_render_test -- --test-threads=1",
     "test:render:riven": "cargo test --test riven_render_test -- --test-threads=1",
     "wasm": "cargo build --release --example lol --target wasm32-unknown-unknown",
-    "wasm:bindgen": "wasm-bindgen --out-name lol --out-dir packages/lol --target web target/wasm32-unknown-unknown/release/examples/lol.wasm"
+    "wasm:bindgen": "wasm-bindgen --out-name lol --out-dir packages/lol --target web target/wasm32-unknown-unknown/release/examples/lol.wasm",
+    "wasm:win": "pnpm wasm && pnpm wasm:bindgen"
   },
   "devDependencies": {
     "@gltf-transform/cli": "^4.3.0",

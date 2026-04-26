@@ -1,13 +1,10 @@
 use bevy::prelude::*;
-use league_core::extract::SkinCharacterDataProperties;
-use lol_base::prop::LoadHashKeyTrait;
+use lol_base::character::Skin;
 use lol_core::base::ability_resource::AbilityResource;
 use lol_core::base::level::Level;
 use lol_core::life::Health;
-use lol_core::utils::AssetServerLoadLeague;
 
 use crate::controller::Controller;
-use crate::skin::skin::Skin;
 use crate::ui::element::{CommandUpdateUIElement, NodeType, SizeType, UIElementEntity, UIState};
 
 #[derive(Component, Reflect, Default)]
@@ -174,42 +171,41 @@ fn update_player_ability_resource(
 }
 
 fn update_player_icon(
-    asset_server: Res<AssetServer>,
-    mut commands: Commands,
-    mut q_image_node: Query<&mut ImageNode>,
+    _asset_server: Res<AssetServer>,
+    _commands: Commands,
+    _q_image_node: Query<&mut ImageNode>,
     q_skin: Query<&Skin, With<Controller>>,
-    q_children: Query<&Children>,
-    res_assets_skin_character_data_properties: Res<Assets<SkinCharacterDataProperties>>,
+    _q_children: Query<&Children>,
     res_ui_element_entity: Res<UIElementEntity>,
 ) {
     let key = "ClientStates/Gameplay/UX/LoL/PlayerFrame/UIBase/Player_Frame_Root/Player_Frame/PlayerIcon_Base";
-    let Some(&entity) = res_ui_element_entity.get_by_string(key) else {
+    let Some(&_entity) = res_ui_element_entity.get_by_string(key) else {
         return;
     };
 
-    let Ok(skin) = q_skin.single() else {
+    let Ok(_skin) = q_skin.single() else {
         return;
     };
 
-    let skin = res_assets_skin_character_data_properties
-        .load_hash(skin.key)
-        .unwrap();
+    // let skin = res_assets_skin_character_data_properties
+    //     .load_hash(skin.key)
+    //     .unwrap();
 
-    let icon_name = skin
-        .icon_avatar
-        .as_ref()
-        .unwrap_or(skin.icon_circle.as_ref().unwrap());
+    // let icon_name = skin
+    //     .icon_avatar
+    //     .as_ref()
+    //     .unwrap_or(skin.icon_circle.as_ref().unwrap());
 
-    let &child = q_children.get(entity).unwrap().get(0).unwrap();
-    if q_image_node.get_mut(child).is_ok() {
-        return;
-    }
+    // let &child = q_children.get(entity).unwrap().get(0).unwrap();
+    // if q_image_node.get_mut(child).is_ok() {
+    //     return;
+    // }
 
-    commands.entity(entity).insert((
-        ImageNode {
-            image: asset_server.load_league_labeled(icon_name, "srgb"),
-            ..default()
-        },
-        Visibility::Visible,
-    ));
+    // commands.entity(entity).insert((
+    //     ImageNode {
+    //         image: asset_server.load_league_labeled(icon_name, "srgb"),
+    //         ..default()
+    //     },
+    //     Visibility::Visible,
+    // ));
 }

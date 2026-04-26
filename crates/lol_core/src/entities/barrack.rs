@@ -6,6 +6,7 @@ use lol_base::barrack::{
     ConfigBarracks, ConstantWaveBehavior, EnumWaveBehavior, InhibitorWaveBehavior,
     RotatingWaveBehavior, TimedVariableWaveBehavior,
 };
+use lol_loader::barrack::ConfigBarracksLoader;
 
 use crate::entities::minion::Minion;
 use crate::lane::Lane;
@@ -17,6 +18,7 @@ pub struct PluginBarrack;
 impl Plugin for PluginBarrack {
     fn build(&self, app: &mut App) {
         app.init_asset::<ConfigBarracks>();
+        app.init_asset_loader::<ConfigBarracksLoader>();
         app.init_resource::<InhibitorState>();
         app.add_systems(FixedUpdate, init_barrack_state_system);
         app.add_systems(FixedUpdate, barracks_spawning_system);

@@ -1,6 +1,7 @@
 use std::borrow::Cow;
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashMap};
 
+use bevy::prelude::*;
 use gltf::accessor::DataType;
 use gltf::json::accessor::{Accessor, GenericComponentType, Type};
 use gltf::json::animation::{
@@ -10,14 +11,17 @@ use gltf::json::buffer::{Buffer, Target, View};
 use gltf::json::image::Image;
 use gltf::json::material::{Material, PbrBaseColorFactor, PbrMetallicRoughness, StrengthFactor};
 use gltf::json::mesh::{Mesh, Mode, Primitive, Semantic};
-use gltf::json::scene::Scene;
+use gltf::json::scene::{Scene, UnitQuaternion};
+use gltf::json::skin::Skin as JsonSkin;
 use gltf::json::texture::{Info, Texture};
 use gltf::json::validation::{Checked, USize64};
 use gltf::json::{Index, Node, Root};
 use image::codecs::png::{CompressionType, FilterType};
 use image::{ExtendedColorType, ImageEncoder};
 use league_file::mesh_skinned::LeagueSkinnedMesh;
+use league_file::skeleton::LeagueSkeleton;
 use league_file::texture::{LeagueTexture, LeagueTextureFormat};
+use league_utils::hash_joint;
 use lol_base::animation::ConfigAnimationClip;
 use texpresso::Format;
 
@@ -70,27 +74,51 @@ pub fn decode_texture_to_png(texture: &LeagueTexture) -> Option<Vec<u8>> {
 
 /// 将角色皮肤（网格 + 材质 + 贴图 + 动画）导出为 GLB 文件
 /// animations: map of (clip_name, ConfigAnimationClip)
+/// material_override: map of submesh_name → texture_png，用于覆盖特定 submesh 的贴图
 pub fn export_skin_to_glb(
     skinned_mesh: &LeagueSkinnedMesh,
     texture_png: Option<Vec<u8>>,
+    skeleton: Option<&LeagueSkeleton>,
     animations: &[(String, ConfigAnimationClip)],
     output_path: &str,
+    material_override: Option<&std::collections::HashMap<String, Vec<u8>>>,
 ) -> Result<(), Error> {
     let mut builder = SkinGltfBuilder::new();
 
-    // 添加贴图和材质
-    let material_index = builder.add_material(texture_png);
+    // 添加默认贴图和材质
+    let default_material_index = builder.add_material(texture_png.clone(), "skin_material");
 
-    // 为每个 submesh 创建一个 primitive
+    // 为每个 submesh 创建 primitive，根据 submesh 名称使用对应的材质
     let mut primitives = Vec::new();
-    for (i, _range) in skinned_mesh.ranges.iter().enumerate() {
+    for (i, range) in skinned_mesh.ranges.iter().enumerate() {
+        // 获取 submesh 名称
+        let submesh_name = &range.name;
+
+        println!(
+            "{} - {:?}",
+            submesh_name,
+            material_override.map(|v| v.keys().map(|v| v.to_string()).collect::<Vec<_>>())
+        );
+
+        // 检查是否有材质覆盖
+        let material_index = if let Some(overrides) = material_override {
+            if let Some(override_texture) = overrides.get(submesh_name) {
+                // 使用覆盖的贴图创建新材质
+                builder.add_material(Some(override_texture.clone()), submesh_name)
+            } else {
+                default_material_index
+            }
+        } else {
+            default_material_index
+        };
+
         let primitive = builder.create_primitive(skinned_mesh, i, material_index)?;
         primitives.push(primitive);
     }
 
     // 如果没有 ranges（version 0），整个 mesh 作为一个 primitive
     if skinned_mesh.ranges.is_empty() {
-        let primitive = builder.create_full_mesh_primitive(skinned_mesh, material_index)?;
+        let primitive = builder.create_full_mesh_primitive(skinned_mesh, default_material_index)?;
         primitives.push(primitive);
     }
 
@@ -98,7 +126,7 @@ pub fn export_skin_to_glb(
         return Err(Error::Parse("没有可导出的网格数据".to_string()));
     }
 
-    // 创建 mesh 和 node
+    // 创建 mesh
     let mesh = Mesh {
         name: Some("skin_mesh".to_string()),
         primitives,
@@ -108,21 +136,30 @@ pub fn export_skin_to_glb(
     };
     builder.meshes.push(mesh);
 
-    let node = Node {
-        name: Some("skin_node".to_string()),
-        camera: None,
-        children: None,
-        extensions: None,
-        extras: Default::default(),
-        matrix: None,
-        mesh: Some(Index::new(0)),
-        rotation: None,
-        scale: None,
-        translation: None,
-        weights: None,
-        skin: None,
+    // 如果有 skeleton，创建关节节点和 Skin
+    let (_mesh_node_idx, _skin_idx): (u32, Option<u32>) = if let Some(skel) = skeleton {
+        let (mesh_idx, skin_idx) = builder.create_skeleton_nodes(skel)?;
+        (mesh_idx, Some(skin_idx))
+    } else {
+        // 没有 skeleton，只创建单个 mesh 节点
+        let node_idx = builder.nodes.len() as u32;
+        let node = Node {
+            name: Some("skin_node".to_string()),
+            camera: None,
+            children: None,
+            extensions: None,
+            extras: Default::default(),
+            matrix: None,
+            mesh: Some(Index::new(0)),
+            rotation: None,
+            scale: None,
+            translation: None,
+            weights: None,
+            skin: None,
+        };
+        builder.nodes.push(node);
+        (node_idx, None)
     };
-    builder.nodes.push(node);
 
     // 添加动画
     for (name, clip) in animations {
@@ -142,6 +179,9 @@ struct SkinGltfBuilder {
     textures: Vec<Texture>,
     materials: Vec<Material>,
     animations: Vec<Animation>,
+    skins: Vec<gltf::json::skin::Skin>,
+    root_node_indices: Vec<u32>,
+    joint_hash_to_node: HashMap<u32, u32>,
 }
 
 impl SkinGltfBuilder {
@@ -156,146 +196,148 @@ impl SkinGltfBuilder {
             textures: Vec::new(),
             materials: Vec::new(),
             animations: Vec::new(),
+            skins: Vec::new(),
+            root_node_indices: Vec::new(),
+            joint_hash_to_node: HashMap::new(),
         }
     }
 
-    /// 添加动画片段到 GLB
-    fn add_animation(&mut self, clip: &ConfigAnimationClip, name: &str) {
-        let mut samplers = Vec::new();
-        let mut channels = Vec::new();
+    /// 创建骨架节点和 Skin 对象，返回 (mesh_node_index, skin_index)
+    fn create_skeleton_nodes(&mut self, skeleton: &LeagueSkeleton) -> Result<(u32, u32), Error> {
+        let joints = &skeleton.modern_data.joints;
+        let joint_count = joints.len();
+        let influences = &skeleton.modern_data.influences;
 
-        // 为每个 joint 创建 translation、rotation、scale 的 sampler 和 channel
-        for (joint_idx, &_joint_hash) in clip.joint_hashes.iter().enumerate() {
-            // Translation sampler
-            if let Some(translates) = clip.translates.get(joint_idx) {
-                if translates.len() >= 2 {
-                    let times: Vec<f32> = translates.iter().map(|(t, _)| *t).collect();
-                    let translations: Vec<[f32; 3]> =
-                        translates.iter().map(|(_, v)| [v.x, v.y, v.z]).collect();
+        let mut joint_vec_index_to_node: Vec<u32> = Vec::with_capacity(joint_count);
 
-                    let input_idx = self.add_float_accessor(&times);
-                    let output_idx = self.add_vec3_accessor(&translations, false);
+        // 创建关节节点，使用 local_transform 作为节点的 TRS
+        for joint in joints {
+            let node_idx = self.nodes.len() as u32;
+            joint_vec_index_to_node.push(node_idx);
 
-                    let sampler_idx = samplers.len() as u32;
-                    samplers.push(Sampler {
-                        input: Index::new(input_idx),
-                        interpolation: Checked::Valid(Interpolation::Linear),
-                        output: Index::new(output_idx),
-                        extensions: None,
-                        extras: Default::default(),
-                    });
-
-                    channels.push(Channel {
-                        sampler: Index::new(sampler_idx),
-                        target: AnimationTarget {
-                            node: Index::new(joint_idx as u32),
-                            path: Checked::Valid(Property::Translation),
-                            extensions: None,
-                            extras: Default::default(),
-                        },
-                        extensions: None,
-                        extras: Default::default(),
-                    });
-                }
+            if joint.parent_index == -1 {
+                self.root_node_indices.push(node_idx);
             }
 
-            // Rotation sampler
-            if let Some(rotations) = clip.rotations.get(joint_idx) {
-                if rotations.len() >= 2 {
-                    let times: Vec<f32> = rotations.iter().map(|(t, _)| *t).collect();
-                    let quats: Vec<[f32; 4]> = rotations
-                        .iter()
-                        .map(|(_, q)| [q.x, q.y, q.z, q.w])
-                        .collect();
+            let (scale, rotation, translation) =
+                joint.local_transform.to_scale_rotation_translation();
 
-                    let input_idx = self.add_float_accessor(&times);
-                    let output_idx = self.add_vec4_accessor(&quats);
+            // 建立 hash → 节点索引映射，用于动画匹配
+            let joint_hash = hash_joint(&joint.name);
+            self.joint_hash_to_node.insert(joint_hash, node_idx);
 
-                    let sampler_idx = samplers.len() as u32;
-                    samplers.push(Sampler {
-                        input: Index::new(input_idx),
-                        interpolation: Checked::Valid(Interpolation::Linear),
-                        output: Index::new(output_idx),
-                        extensions: None,
-                        extras: Default::default(),
-                    });
-
-                    channels.push(Channel {
-                        sampler: Index::new(sampler_idx),
-                        target: AnimationTarget {
-                            node: Index::new(joint_idx as u32),
-                            path: Checked::Valid(Property::Rotation),
-                            extensions: None,
-                            extras: Default::default(),
-                        },
-                        extensions: None,
-                        extras: Default::default(),
-                    });
-                }
-            }
-
-            // Scale sampler
-            if let Some(scales) = clip.scales.get(joint_idx) {
-                if scales.len() >= 2 {
-                    let times: Vec<f32> = scales.iter().map(|(t, _)| *t).collect();
-                    let scale_data: Vec<[f32; 3]> =
-                        scales.iter().map(|(_, v)| [v.x, v.y, v.z]).collect();
-
-                    let input_idx = self.add_float_accessor(&times);
-                    let output_idx = self.add_vec3_accessor(&scale_data, false);
-
-                    let sampler_idx = samplers.len() as u32;
-                    samplers.push(Sampler {
-                        input: Index::new(input_idx),
-                        interpolation: Checked::Valid(Interpolation::Linear),
-                        output: Index::new(output_idx),
-                        extensions: None,
-                        extras: Default::default(),
-                    });
-
-                    channels.push(Channel {
-                        sampler: Index::new(sampler_idx),
-                        target: AnimationTarget {
-                            node: Index::new(joint_idx as u32),
-                            path: Checked::Valid(Property::Scale),
-                            extensions: None,
-                            extras: Default::default(),
-                        },
-                        extensions: None,
-                        extras: Default::default(),
-                    });
-                }
-            }
-        }
-
-        if !samplers.is_empty() {
-            self.animations.push(Animation {
-                name: Some(name.to_string()),
-                samplers,
-                channels,
+            let node = Node {
+                name: Some(joint.name.clone()),
+                camera: None,
+                children: None,
                 extensions: None,
                 extras: Default::default(),
-            });
+                matrix: None,
+                mesh: None,
+                rotation: Some(UnitQuaternion([
+                    rotation.x, rotation.y, rotation.z, rotation.w,
+                ])),
+                scale: Some([scale.x, scale.y, scale.z]),
+                translation: Some([translation.x, translation.y, translation.z]),
+                weights: None,
+                skin: None,
+            };
+            self.nodes.push(node);
         }
+
+        // 设置父子关系 - 使用 Vec 索引
+        for (i, joint) in joints.iter().enumerate() {
+            if joint.parent_index >= 0 {
+                let parent_idx = joint.parent_index as usize;
+                if parent_idx < joint_count {
+                    let child_node_idx = joint_vec_index_to_node[i];
+                    let parent_node_idx = joint_vec_index_to_node[parent_idx];
+
+                    // 给父节点添加子节点
+                    let parent_node = &mut self.nodes[parent_node_idx as usize];
+                    let mut children = parent_node.children.take().unwrap_or_default();
+                    children.push(Index::new(child_node_idx));
+                    parent_node.children = Some(children);
+                }
+            }
+        }
+
+        // 原始代码逻辑: skin.joints 和 IBM 都按 influences 顺序
+        // skin.joints[i] = index_to_entity[influences[i]]
+        // IBM[i] = joints[influences[i]].inverse_bind_transform
+        let ordered_joint_indices: Vec<u32> = influences
+            .iter()
+            .map(|&joint_vec_idx| joint_vec_index_to_node[joint_vec_idx as usize])
+            .collect();
+
+        let ibm_accessor_idx = self.add_inverse_bind_matrices_ordered_by_influences(skeleton)?;
+
+        // 创建 Skin
+        let skin_idx = self.skins.len() as u32;
+        let skin = JsonSkin {
+            extensions: None,
+            extras: Default::default(),
+            inverse_bind_matrices: Some(Index::new(ibm_accessor_idx)),
+            joints: ordered_joint_indices
+                .iter()
+                .map(|&i| Index::new(i))
+                .collect(),
+            name: Some("armature".to_string()),
+            skeleton: Some(Index::new(0)), // 根节点作为 skeleton root
+        };
+        self.skins.push(skin);
+
+        // 创建 mesh 节点，关联到 skin，mesh 节点也是 scene 根节点
+        let mesh_node_idx = self.nodes.len() as u32;
+        self.root_node_indices.push(mesh_node_idx);
+        let node = Node {
+            name: Some("skin_node".to_string()),
+            camera: None,
+            children: None,
+            extensions: None,
+            extras: Default::default(),
+            matrix: None,
+            mesh: Some(Index::new(0)),
+            rotation: None,
+            scale: None,
+            translation: None,
+            weights: None,
+            skin: Some(Index::new(skin_idx)),
+        };
+        self.nodes.push(node);
+
+        Ok((mesh_node_idx, skin_idx))
     }
 
-    fn add_float_accessor(&mut self, data: &[f32]) -> u32 {
+    /// 添加 inverse bind matrices accessor - 按 influences 顺序排列
+    fn add_inverse_bind_matrices_ordered_by_influences(
+        &mut self,
+        skeleton: &LeagueSkeleton,
+    ) -> Result<u32, Error> {
+        let joints = &skeleton.modern_data.joints;
+        let influences = &skeleton.modern_data.influences;
+
         self.align_to_4();
         let offset = self.buffer_data.len();
 
-        for &v in data {
-            self.buffer_data.extend_from_slice(&v.to_le_bytes());
+        for &joint_vec_idx in influences {
+            let ibm = joints[joint_vec_idx as usize].inverse_bind_transform;
+            for i in 0..16 {
+                let val = ibm.to_cols_array()[i];
+                self.buffer_data.extend_from_slice(&val.to_le_bytes());
+            }
         }
 
-        let byte_length = data.len() * 4;
+        let count = influences.len();
+        let byte_length = count * 16 * 4;
         let view_idx = self.buffer_views.len() as u32;
         self.buffer_views.push(View {
-            name: None,
+            name: Some("inverseBindMatrices".to_string()),
             buffer: Index::new(0),
             byte_offset: Some(USize64(offset as u64)),
             byte_length: USize64(byte_length as u64),
             byte_stride: None,
-            target: Some(Checked::Valid(Target::ArrayBuffer)),
+            target: None,
             extensions: None,
             extras: Default::default(),
         });
@@ -305,12 +347,217 @@ impl SkinGltfBuilder {
             buffer_view: Some(Index::new(view_idx)),
             byte_offset: Some(USize64(0)),
             component_type: Checked::Valid(GenericComponentType(DataType::F32)),
-            count: USize64(data.len() as u64),
-            type_: Checked::Valid(Type::Scalar),
+            count: USize64(count as u64),
+            type_: Checked::Valid(Type::Mat4),
             extensions: None,
             extras: Default::default(),
             min: None,
             max: None,
+            name: Some("inverseBindMatrices".to_string()),
+            normalized: false,
+            sparse: None,
+        });
+
+        Ok(accessor_idx)
+    }
+
+    fn add_animation(&mut self, clip: &ConfigAnimationClip, name: &str) {
+        let mut samplers = Vec::new();
+        let mut channels = Vec::new();
+
+        for joint_idx in 0..clip.joint_hashes.len() {
+            self.process_joint_channels(clip, joint_idx, &mut samplers, &mut channels);
+        }
+
+        if samplers.is_empty() {
+            return;
+        }
+
+        self.animations.push(Animation {
+            name: Some(name.to_string()),
+            samplers,
+            channels,
+            extensions: None,
+            extras: Default::default(),
+        });
+    }
+
+    fn process_joint_channels(
+        &mut self,
+        clip: &ConfigAnimationClip,
+        joint_idx: usize,
+        samplers: &mut Vec<Sampler>,
+        channels: &mut Vec<Channel>,
+    ) {
+        let joint_hash = clip.joint_hashes[joint_idx];
+        let Some(&node_idx) = self.joint_hash_to_node.get(&joint_hash) else {
+            return;
+        };
+
+        // 处理平移
+        if let Some(data) = clip.translates.get(joint_idx).filter(|v| v.len() >= 2) {
+            let times: Vec<f32> = data.iter().map(|(t, _)| *t).collect();
+            let values: Vec<[f32; 3]> = data.iter().map(|(_, v)| [v.x, v.y, v.z]).collect();
+            self.push_channel(
+                node_idx,
+                Property::Translation,
+                &times,
+                &values,
+                samplers,
+                channels,
+            );
+        }
+
+        // 处理旋转
+        if let Some(data) = clip.rotations.get(joint_idx).filter(|v| v.len() >= 2) {
+            let times: Vec<f32> = data.iter().map(|(t, _)| *t).collect();
+            let values: Vec<[f32; 4]> = data.iter().map(|(_, q)| [q.x, q.y, q.z, q.w]).collect();
+            self.push_channel_quat(
+                node_idx,
+                Property::Rotation,
+                &times,
+                &values,
+                samplers,
+                channels,
+            );
+        }
+
+        // 处理缩放
+        if let Some(data) = clip.scales.get(joint_idx).filter(|v| v.len() >= 2) {
+            let times: Vec<f32> = data.iter().map(|(t, _)| *t).collect();
+            let values: Vec<[f32; 3]> = data.iter().map(|(_, v)| [v.x, v.y, v.z]).collect();
+            self.push_channel(
+                node_idx,
+                Property::Scale,
+                &times,
+                &values,
+                samplers,
+                channels,
+            );
+        }
+    }
+
+    fn push_channel(
+        &mut self,
+        node_idx: u32,
+        path: Property,
+        times: &[f32],
+        values: &[[f32; 3]],
+        samplers: &mut Vec<Sampler>,
+        channels: &mut Vec<Channel>,
+    ) {
+        let input_idx = self.add_float_accessor(times);
+        let output_idx = self.add_vec3_accessor(values, false, None);
+        let sampler_idx = samplers.len() as u32;
+
+        samplers.push(Sampler {
+            input: Index::new(input_idx),
+            interpolation: Checked::Valid(Interpolation::Linear),
+            output: Index::new(output_idx),
+            extensions: None,
+            extras: Default::default(),
+        });
+
+        channels.push(Channel {
+            sampler: Index::new(sampler_idx),
+            target: AnimationTarget {
+                node: Index::new(node_idx),
+                path: Checked::Valid(path),
+                extensions: None,
+                extras: Default::default(),
+            },
+            extensions: None,
+            extras: Default::default(),
+        });
+    }
+
+    fn push_channel_quat(
+        &mut self,
+        node_idx: u32,
+        path: Property,
+        times: &[f32],
+        values: &[[f32; 4]],
+        samplers: &mut Vec<Sampler>,
+        channels: &mut Vec<Channel>,
+    ) {
+        let input_idx = self.add_float_accessor(times);
+        let output_idx = self.add_vec4_accessor(values, None);
+        let sampler_idx = samplers.len() as u32;
+
+        samplers.push(Sampler {
+            input: Index::new(input_idx),
+            interpolation: Checked::Valid(Interpolation::Linear),
+            output: Index::new(output_idx),
+            extensions: None,
+            extras: Default::default(),
+        });
+
+        channels.push(Channel {
+            sampler: Index::new(sampler_idx),
+            target: AnimationTarget {
+                node: Index::new(node_idx),
+                path: Checked::Valid(path),
+                extensions: None,
+                extras: Default::default(),
+            },
+            extensions: None,
+            extras: Default::default(),
+        });
+    }
+
+    fn add_float_accessor(&mut self, data: &[f32]) -> u32 {
+        // Ensure strictly increasing times for glTF animation validity
+        let mut times: Vec<f32> = Vec::with_capacity(data.len());
+        for (i, &t) in data.iter().enumerate() {
+            if i == 0 {
+                times.push(t);
+            } else {
+                // Add small epsilon to ensure strictly increasing
+                let prev = times[i - 1];
+                if t <= prev {
+                    times.push(prev + 0.0001);
+                } else {
+                    times.push(t);
+                }
+            }
+        }
+
+        self.align_to_4();
+        let offset = self.buffer_data.len();
+
+        for &v in &times {
+            self.buffer_data.extend_from_slice(&v.to_le_bytes());
+        }
+
+        let byte_length = times.len() * 4;
+        let view_idx = self.buffer_views.len() as u32;
+        self.buffer_views.push(View {
+            name: None,
+            buffer: Index::new(0),
+            byte_offset: Some(USize64(offset as u64)),
+            byte_length: USize64(byte_length as u64),
+            byte_stride: None,
+            target: None, // Animation sampler data uses no specific target
+            extensions: None,
+            extras: Default::default(),
+        });
+
+        // Compute min/max for animation input accessors (required by spec)
+        // For SCALAR type, min/max must be arrays with one element
+        let min_val = times.iter().cloned().fold(f32::MAX, f32::min);
+        let max_val = times.iter().cloned().fold(f32::MIN, f32::max);
+
+        let accessor_idx = self.accessors.len() as u32;
+        self.accessors.push(Accessor {
+            buffer_view: Some(Index::new(view_idx)),
+            byte_offset: Some(USize64(0)),
+            component_type: Checked::Valid(GenericComponentType(DataType::F32)),
+            count: USize64(times.len() as u64),
+            type_: Checked::Valid(Type::Scalar),
+            extensions: None,
+            extras: Default::default(),
+            min: Some(serde_json::to_value(vec![min_val]).unwrap()),
+            max: Some(serde_json::to_value(vec![max_val]).unwrap()),
             name: None,
             normalized: false,
             sparse: None,
@@ -319,7 +566,7 @@ impl SkinGltfBuilder {
         accessor_idx
     }
 
-    fn add_vec4_accessor(&mut self, data: &[[f32; 4]]) -> u32 {
+    fn add_vec4_accessor(&mut self, data: &[[f32; 4]], target: Option<Target>) -> u32 {
         self.align_to_4();
         let offset = self.buffer_data.len();
 
@@ -338,7 +585,7 @@ impl SkinGltfBuilder {
             byte_offset: Some(USize64(offset as u64)),
             byte_length: USize64(byte_length as u64),
             byte_stride: None,
-            target: Some(Checked::Valid(Target::ArrayBuffer)),
+            target: target.map(|t| Checked::Valid(t)),
             extensions: None,
             extras: Default::default(),
         });
@@ -370,7 +617,8 @@ impl SkinGltfBuilder {
     }
 
     /// 添加材质（可选贴图），返回材质索引
-    fn add_material(&mut self, texture_png: Option<Vec<u8>>) -> u32 {
+    /// name: 材质名称，用于区分不同 submesh 的材质
+    fn add_material(&mut self, texture_png: Option<Vec<u8>>, name: &str) -> u32 {
         let mut pbr = PbrMetallicRoughness {
             base_color_factor: PbrBaseColorFactor([1.0, 1.0, 1.0, 1.0]),
             base_color_texture: None,
@@ -401,7 +649,7 @@ impl SkinGltfBuilder {
 
                 let image_idx = self.images.len() as u32;
                 self.images.push(Image {
-                    name: Some("skin_texture".to_string()),
+                    name: Some(format!("{}_texture", name)),
                     uri: None,
                     buffer_view: Some(Index::new(view_idx)),
                     mime_type: Some(gltf::json::image::MimeType("image/png".to_string())),
@@ -411,7 +659,7 @@ impl SkinGltfBuilder {
 
                 let tex_idx = self.textures.len() as u32;
                 self.textures.push(Texture {
-                    name: Some("skin_tex".to_string()),
+                    name: Some(format!("{}_tex", name)),
                     sampler: None,
                     source: Index::new(image_idx),
                     extensions: None,
@@ -429,7 +677,7 @@ impl SkinGltfBuilder {
 
         let material_idx = self.materials.len() as u32;
         self.materials.push(Material {
-            name: Some("skin_material".to_string()),
+            name: Some(name.to_string()),
             pbr_metallic_roughness: pbr,
             normal_texture: None,
             occlusion_texture: None,
@@ -460,7 +708,8 @@ impl SkinGltfBuilder {
         let vertex_end = vertex_start + (range.vertex_count as usize * vertex_size);
         let vertex_slice = &skinned_mesh.vertex_buffer[vertex_start..vertex_end];
 
-        let (positions, normals, uvs) = Self::parse_vertices(vertex_slice, vertex_size);
+        let (positions, normals, uvs, bone_indices, bone_weights) =
+            Self::parse_vertices(vertex_slice, vertex_size);
 
         // 解析索引数据
         let index_start = range.start_index as usize * 2;
@@ -473,10 +722,15 @@ impl SkinGltfBuilder {
             .map(|idx| idx - range.start_vertex as u16)
             .collect();
 
-        // 反转三角形面序
-        let indices = Self::reverse_winding(&indices);
-
-        self.build_primitive(&positions, &normals, &uvs, &indices, material_index)
+        self.build_primitive(
+            &positions,
+            &normals,
+            &uvs,
+            &bone_indices,
+            &bone_weights,
+            &indices,
+            material_index,
+        )
     }
 
     /// 为整个 mesh 创建 primitive（version 0 没有 ranges）
@@ -486,7 +740,7 @@ impl SkinGltfBuilder {
         material_index: u32,
     ) -> Result<Primitive, Error> {
         let vertex_size = skinned_mesh.vertex_declaration.get_vertex_size() as usize;
-        let (positions, normals, uvs) =
+        let (positions, normals, uvs, bone_indices, bone_weights) =
             Self::parse_vertices(&skinned_mesh.vertex_buffer, vertex_size);
 
         let indices: Vec<u16> = skinned_mesh
@@ -495,20 +749,34 @@ impl SkinGltfBuilder {
             .map(|b| u16::from_le_bytes(b.try_into().unwrap()))
             .collect();
 
-        let indices = Self::reverse_winding(&indices);
-
-        self.build_primitive(&positions, &normals, &uvs, &indices, material_index)
+        self.build_primitive(
+            &positions,
+            &normals,
+            &uvs,
+            &bone_indices,
+            &bone_weights,
+            &indices,
+            material_index,
+        )
     }
 
-    /// 从顶点 buffer 解析 position/normal/uv
+    /// 从顶点 buffer 解析 position/normal/uv/bone_indices/bone_weights
     fn parse_vertices(
         vertex_data: &[u8],
         vertex_size: usize,
-    ) -> (Vec<[f32; 3]>, Vec<[f32; 3]>, Vec<[f32; 2]>) {
+    ) -> (
+        Vec<[f32; 3]>,
+        Vec<[f32; 3]>,
+        Vec<[f32; 2]>,
+        Vec<[u16; 4]>, // Changed from u8 to u16 to match original code
+        Vec<[f32; 4]>,
+    ) {
         let vertex_count = vertex_data.len() / vertex_size;
         let mut positions = Vec::with_capacity(vertex_count);
         let mut normals = Vec::with_capacity(vertex_count);
         let mut uvs = Vec::with_capacity(vertex_count);
+        let mut bone_indices = Vec::with_capacity(vertex_count);
+        let mut bone_weights = Vec::with_capacity(vertex_count);
 
         for chunk in vertex_data.chunks_exact(vertex_size) {
             // Position: offset 0, 12 bytes
@@ -517,7 +785,21 @@ impl SkinGltfBuilder {
             let pz = f32::from_le_bytes(chunk[8..12].try_into().unwrap());
             positions.push([px, py, pz]);
 
-            // 跳过 bone_indices(4) + bone_weights(16) = 20 bytes
+            // Bone indices: offset 12, 4 bytes (4 u8) - convert to u16 like original code
+            bone_indices.push([
+                chunk[12] as u16,
+                chunk[13] as u16,
+                chunk[14] as u16,
+                chunk[15] as u16,
+            ]);
+
+            // Bone weights: offset 16, 16 bytes (4 f32)
+            let bw0 = f32::from_le_bytes(chunk[16..20].try_into().unwrap());
+            let bw1 = f32::from_le_bytes(chunk[20..24].try_into().unwrap());
+            let bw2 = f32::from_le_bytes(chunk[24..28].try_into().unwrap());
+            let bw3 = f32::from_le_bytes(chunk[28..32].try_into().unwrap());
+            bone_weights.push([bw0, bw1, bw2, bw3]);
+
             let normal_offset = 32;
             let nx =
                 f32::from_le_bytes(chunk[normal_offset..normal_offset + 4].try_into().unwrap());
@@ -540,18 +822,7 @@ impl SkinGltfBuilder {
             uvs.push([u, v]);
         }
 
-        (positions, normals, uvs)
-    }
-
-    /// 反转三角形面序（顺时针 → 逆时针）
-    fn reverse_winding(indices: &[u16]) -> Vec<u16> {
-        let mut result = Vec::with_capacity(indices.len());
-        for tri in indices.chunks_exact(3) {
-            result.push(tri[0]);
-            result.push(tri[2]);
-            result.push(tri[1]);
-        }
-        result
+        (positions, normals, uvs, bone_indices, bone_weights)
     }
 
     /// 构建 GLTF Primitive
@@ -560,20 +831,22 @@ impl SkinGltfBuilder {
         positions: &[[f32; 3]],
         normals: &[[f32; 3]],
         uvs: &[[f32; 2]],
+        bone_indices: &[[u16; 4]], // Changed from u8 to u16
+        bone_weights: &[[f32; 4]],
         indices: &[u16],
         material_index: u32,
     ) -> Result<Primitive, Error> {
         let mut attributes = BTreeMap::new();
 
         // Position accessor
-        let pos_accessor_idx = self.add_vec3_accessor(positions, true);
+        let pos_accessor_idx = self.add_vec3_accessor(positions, true, Some(Target::ArrayBuffer));
         attributes.insert(
             Checked::Valid(Semantic::Positions),
             Index::new(pos_accessor_idx),
         );
 
         // Normal accessor
-        let norm_accessor_idx = self.add_vec3_accessor(normals, false);
+        let norm_accessor_idx = self.add_vec3_accessor(normals, false, Some(Target::ArrayBuffer));
         attributes.insert(
             Checked::Valid(Semantic::Normals),
             Index::new(norm_accessor_idx),
@@ -584,6 +857,20 @@ impl SkinGltfBuilder {
         attributes.insert(
             Checked::Valid(Semantic::TexCoords(0)),
             Index::new(uv_accessor_idx),
+        );
+
+        // Bone indices (JOINTS_0) - U16 x4
+        let joint_accessor_idx = self.add_vec4_u16_accessor(bone_indices);
+        attributes.insert(
+            Checked::Valid(Semantic::Joints(0)),
+            Index::new(joint_accessor_idx),
+        );
+
+        // Bone weights (WEIGHTS_0)
+        let weight_accessor_idx = self.add_vec4_accessor(bone_weights, Some(Target::ArrayBuffer));
+        attributes.insert(
+            Checked::Valid(Semantic::Weights(0)),
+            Index::new(weight_accessor_idx),
         );
 
         // Index accessor
@@ -600,7 +887,55 @@ impl SkinGltfBuilder {
         })
     }
 
-    fn add_vec3_accessor(&mut self, data: &[[f32; 3]], compute_bounds: bool) -> u32 {
+    fn add_vec4_u16_accessor(&mut self, data: &[[u16; 4]]) -> u32 {
+        self.align_to_4();
+        let offset = self.buffer_data.len();
+
+        for v in data {
+            self.buffer_data.extend_from_slice(&v[0].to_le_bytes());
+            self.buffer_data.extend_from_slice(&v[1].to_le_bytes());
+            self.buffer_data.extend_from_slice(&v[2].to_le_bytes());
+            self.buffer_data.extend_from_slice(&v[3].to_le_bytes());
+        }
+
+        let byte_length = data.len() * 8; // 4 * u16 = 8 bytes
+        let view_idx = self.buffer_views.len() as u32;
+        self.buffer_views.push(View {
+            name: None,
+            buffer: Index::new(0),
+            byte_offset: Some(USize64(offset as u64)),
+            byte_length: USize64(byte_length as u64),
+            byte_stride: None,
+            target: Some(Checked::Valid(Target::ArrayBuffer)),
+            extensions: None,
+            extras: Default::default(),
+        });
+
+        let accessor_idx = self.accessors.len() as u32;
+        self.accessors.push(Accessor {
+            buffer_view: Some(Index::new(view_idx)),
+            byte_offset: Some(USize64(0)),
+            component_type: Checked::Valid(GenericComponentType(DataType::U16)),
+            count: USize64(data.len() as u64),
+            type_: Checked::Valid(Type::Vec4),
+            extensions: None,
+            extras: Default::default(),
+            min: None,
+            max: None,
+            name: None,
+            normalized: false,
+            sparse: None,
+        });
+
+        accessor_idx
+    }
+
+    fn add_vec3_accessor(
+        &mut self,
+        data: &[[f32; 3]],
+        compute_bounds: bool,
+        target: Option<Target>,
+    ) -> u32 {
         self.align_to_4();
         let offset = self.buffer_data.len();
 
@@ -618,7 +953,7 @@ impl SkinGltfBuilder {
             byte_offset: Some(USize64(offset as u64)),
             byte_length: USize64(byte_length as u64),
             byte_stride: None,
-            target: Some(Checked::Valid(Target::ArrayBuffer)),
+            target: target.map(|t| Checked::Valid(t)),
             extensions: None,
             extras: Default::default(),
         });
@@ -749,8 +1084,10 @@ impl SkinGltfBuilder {
             extras: Default::default(),
         };
 
-        let node_indices: Vec<Index<Node>> = (0..self.nodes.len())
-            .map(|i| Index::new(i as u32))
+        let node_indices: Vec<Index<Node>> = self
+            .root_node_indices
+            .iter()
+            .map(|&i| Index::new(i))
             .collect();
 
         let scene = Scene {
@@ -776,27 +1113,29 @@ impl SkinGltfBuilder {
             scene: Some(Index::new(0)),
             scenes: vec![scene],
             animations: self.animations,
+            skins: self.skins,
             ..Default::default()
         };
 
         let json_string = serde_json::to_string(&gltf_json)
             .map_err(|e| Error::Parse(format!("序列化 GLTF JSON 失败: {}", e)))?;
-        let json_bytes = json_string.as_bytes();
 
-        let mut glb_buffer = self.buffer_data;
-        let padding = (4 - (glb_buffer.len() % 4)) % 4;
+        // Prepare binary data with padding
+        let mut binary_data = self.buffer_data;
+        let padding = (4 - (binary_data.len() % 4)) % 4;
         for _ in 0..padding {
-            glb_buffer.push(0);
+            binary_data.push(0);
         }
 
+        // Use gltf crate's binary serialization
         let glb = gltf::binary::Glb {
             header: gltf::binary::Header {
                 magic: *b"glTF",
                 version: 2,
-                length: 0,
+                length: 0, // Let to_vec() calculate
             },
-            json: Cow::Borrowed(json_bytes),
-            bin: Some(Cow::Borrowed(&glb_buffer)),
+            json: Cow::Owned(json_string.into_bytes()),
+            bin: Some(Cow::Owned(binary_data)),
         };
 
         let glb_data = glb

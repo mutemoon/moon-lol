@@ -21,7 +21,6 @@ use league_file::texture::{LeagueTexture, LeagueTextureFormat};
 use league_loader::game::LeagueLoader;
 use league_loader::prop_bin::LeagueWadLoaderTrait;
 use league_utils::hash_bin;
-#[cfg(not(target_arch = "wasm32"))]
 use rayon::prelude::*;
 use texpresso::Format;
 
@@ -149,10 +148,7 @@ pub fn export_mapgeo_to_gltf(
 
     // 3. 并行处理纹理
     let start_textures = Instant::now();
-    #[cfg(not(target_arch = "wasm32"))]
     let texture_iter = texture_paths.par_iter();
-    #[cfg(target_arch = "wasm32")]
-    let texture_iter = texture_paths.iter();
 
     let processed_textures: HashMap<String, Vec<u8>> = texture_iter
         .filter_map(|path| {

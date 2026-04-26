@@ -11,3 +11,4 @@ league_file.workspace = true
 league_property.workspace = true
 serde.workspace = true
 ron.workspace = true
+rand.workspace = true

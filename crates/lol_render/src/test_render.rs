@@ -18,7 +18,6 @@ use bevy::render::renderer::{RenderDevice, RenderQueue};
 use bevy::render::{Extract, ExtractSchedule, Render, RenderApp, RenderSystems};
 use crossbeam_channel::{Receiver, Sender};
 use image::{ImageBuffer, Rgba};
-use league_core::register::init_league_asset;
 use league_file::skeleton::LeagueSkeleton;
 use lol_base::grid::{
     ConfigNavigationGrid, ConfigNavigationGridCell, GridFlagsJungleQuadrant, GridFlagsMainRegion,
@@ -38,7 +37,7 @@ use crate::camera::PluginCamera;
 use crate::particle::PluginParticle;
 use crate::resource::ResourceCache;
 use crate::shader::ResourceShaderHandles;
-use crate::skin::{LeagueSkinMesh, PluginSkin};
+use crate::skin::PluginSkin;
 
 #[derive(Resource, Clone)]
 pub struct SkillTestRenderConfig {
@@ -193,10 +192,8 @@ impl Plugin for PluginSkillTestRender {
 
         app.init_asset::<ConfigNavigationGrid>();
         app.init_asset::<LeagueSkeleton>();
-        app.init_asset::<LeagueSkinMesh>();
         app.init_asset::<ResourceShaderPackage>();
         app.init_asset::<ResourceShaderChunk>();
-        init_league_asset(app);
         app.init_resource::<ResourceShaderHandles>();
         app.init_resource::<ResourceCache>();
 

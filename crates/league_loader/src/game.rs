@@ -68,11 +68,17 @@ impl LeagueLoader {
     pub fn get_prop_group_by_paths(&self, paths: Vec<&str>) -> Result<PropGroup, Error> {
         let mut prop_files = Vec::new();
         for path in paths {
-            if let Ok(bin) = self.get_prop_bin_by_path(path) {
-                prop_files.push(bin);
-            }
+            let bin = self.get_prop_bin_by_path(path)?; // 使用?，如果错误则传播
+            // 递归获取links的PropGroup，并将其文件合并
+            let linked_group = self.get_prop_group_by_paths(
+                bin.links
+                    .iter()
+                    .map(|v| v.text.as_str())
+                    .collect::<Vec<_>>(),
+            )?;
+            prop_files.push(bin);
+            prop_files.extend(linked_group.prop_file); // 假设PropGroup有方法into_files或类似
         }
-
         Ok(PropGroup::new(prop_files))
     }
 

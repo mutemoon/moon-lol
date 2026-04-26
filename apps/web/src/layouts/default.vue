@@ -2,7 +2,7 @@
 
 <template>
   <div class="bg-acid-dark selection:bg-acid-blue min-h-screen w-full overflow-hidden text-white selection:text-black">
-    <div class="noise-overlay"></div>
+    <!-- <div class="noise-overlay"></div> -->
 
     <!-- Y2K Background Gradient -->
     <div class="pointer-events-none fixed inset-0 z-0 opacity-30">

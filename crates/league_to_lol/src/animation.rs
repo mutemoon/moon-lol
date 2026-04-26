@@ -1,35 +1,8 @@
 use std::collections::HashMap;
 
 use bevy::prelude::*;
-use league_core::extract::{AnimationGraphData, EnumBlendData, EnumClipData};
 use league_file::animation::{AnimationFile, CompressedTransformType, UncompressedData};
 use lol_base::animation::ConfigAnimationClip;
-
-use crate::utils::Error;
-
-pub fn load_animation_map(
-    animation_graph_data: AnimationGraphData,
-) -> Result<
-    (
-        HashMap<u32, EnumClipData>,
-        HashMap<(u32, u32), EnumBlendData>,
-    ),
-    Error,
-> {
-    let (Some(nodes), Some(blend_data)) = (
-        animation_graph_data.m_clip_data_map,
-        animation_graph_data.m_blend_data_table,
-    ) else {
-        return Ok((HashMap::new(), HashMap::new()));
-    };
-
-    let blend_data = blend_data
-        .into_iter()
-        .map(|(k, v)| (((k >> 32) as u32, k as u32), v))
-        .collect();
-
-    Ok((nodes, blend_data))
-}
 
 pub fn load_animation_file(value: AnimationFile) -> ConfigAnimationClip {
     match value {

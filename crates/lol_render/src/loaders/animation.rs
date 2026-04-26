@@ -5,9 +5,9 @@ use lol_base::animation::ConfigAnimation;
 use crate::error::Error;
 
 #[derive(Default, TypePath)]
-pub struct LeagueLoaderConfigAnimation;
+pub struct LoaderConfigAnimation;
 
-impl AssetLoader for LeagueLoaderConfigAnimation {
+impl AssetLoader for LoaderConfigAnimation {
     type Asset = ConfigAnimation;
 
     type Settings = ();

@@ -1,9 +1,10 @@
+use bevy::reflect::Reflect;
 use nom::IResult;
 use nom::bytes::complete::take;
 use nom::number::complete::le_u32;
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Reflect)]
 pub struct SizedStringU32 {
     pub len: u32,
     pub text: String,

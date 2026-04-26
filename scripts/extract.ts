@@ -1,7 +1,7 @@
 import { execSync } from "child_process";
 import { readFile, writeFile } from "fs/promises";
 
-// execSync("pnpm extract");
+execSync("pnpm extract");
 
 execSync(
   "gltf-transform optimize assets/maps/sr_seasonal_map_mapgeo.glb assets/maps/output.gltf --compress draco --texture-compress ktx2",
@@ -24,6 +24,6 @@ json.textures.forEach((texture: any) => {
 });
 await writeFile("assets/maps/output.gltf", JSON.stringify(json));
 
-execSync("gltf-pipeline -i assets/maps/output.gltf -o assets/maps/output.glb", {
+execSync("gltf-pipeline -i assets/maps/output.gltf -o assets/maps/sr_seasonal_map_mapgeo.glb", {
   stdio: "inherit",
 });

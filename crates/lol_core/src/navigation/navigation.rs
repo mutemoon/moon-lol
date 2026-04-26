@@ -1,10 +1,11 @@
 use std::collections::{HashMap, HashSet, VecDeque};
-use std::time::{Duration, Instant};
+use std::time::Duration;
 
 use bevy::color::palettes;
 use bevy::prelude::*;
 use bevy::render::render_resource::Face;
 use lol_base::grid::{CELL_COST_IMPASSABLE, ConfigNavigationGrid};
+use lol_loader::navgrid::NavGridLoader;
 
 use crate::base::bounding::Bounding;
 use crate::character::Character;
@@ -16,6 +17,8 @@ pub struct PluginNavigaton;
 
 impl Plugin for PluginNavigaton {
     fn build(&self, app: &mut App) {
+        app.init_asset_loader::<NavGridLoader>();
+
         app.init_resource::<NavigationStats>();
         app.init_resource::<NavigationDebug>();
 
@@ -117,11 +120,11 @@ pub fn get_nav_path_with_debug(
     stats: &mut NavigationStats,
     mut debug: Option<&mut NavigationDebug>,
 ) -> Option<Vec<Vec2>> {
-    let start = Instant::now();
+    // let start = Instant::now();
 
     let start_grid_pos = grid.get_cell_xy_by_position(start_pos);
     let adjusted_start_pos = if !grid.is_walkable_by_xy(start_grid_pos) {
-        let start_time = Instant::now();
+        // let start_time = Instant::now();
         if let Some(new_start_grid_pos) = find_nearest_walkable_cell(grid, start_grid_pos) {
             debug!(
                 "寻路: 起点 ({}, {}) 不可行走，使用最近的可行走格子 ({}, {})",
@@ -129,7 +132,7 @@ pub fn get_nav_path_with_debug(
             );
             {
                 stats.find_nearest_walkable_cell_count += 1;
-                stats.find_nearest_walkable_cell_time += start_time.elapsed();
+                // stats.find_nearest_walkable_cell_time += start_time.elapsed();
             }
             grid.get_cell_center_position_by_xy(new_start_grid_pos).xz()
         } else {
@@ -143,7 +146,7 @@ pub fn get_nav_path_with_debug(
     // 检查终点是否可行走，如果不可行，找到最近的可达格子
     let end_grid_pos = grid.get_cell_xy_by_position(end_pos);
     let adjusted_end_pos = if !grid.is_walkable_by_xy(end_grid_pos) {
-        let start_time = Instant::now();
+        // let start_time = Instant::now();
         if let Some(new_end_grid_pos) = find_nearest_walkable_cell(grid, end_grid_pos) {
             debug!(
                 "寻路: 终点 ({}, {}) 不可行走，使用最近的可行走格子 ({}, {})",
@@ -151,7 +154,7 @@ pub fn get_nav_path_with_debug(
             );
             {
                 stats.find_nearest_walkable_cell_count += 1;
-                stats.find_nearest_walkable_cell_time += start_time.elapsed();
+                // stats.find_nearest_walkable_cell_time += start_time.elapsed();
             }
             grid.get_cell_center_position_by_xy(new_end_grid_pos).xz()
         } else {
@@ -167,10 +170,10 @@ pub fn get_nav_path_with_debug(
     let adjusted_end_grid_pos = (adjusted_end_pos - grid.min_position) / grid.cell_size;
 
     if has_line_of_sight(&grid, adjusted_start_grid_pos, adjusted_end_grid_pos) {
-        debug!("直接路径找到，耗时 {:.6}ms", start.elapsed().as_millis());
+        // debug!("直接路径找到，耗时 {:.6}ms", start.elapsed().as_millis());
         {
             stats.get_nav_path_count += 1;
-            stats.get_nav_path_time += start.elapsed();
+            // stats.get_nav_path_time += start.elapsed();
         }
 
         // 直线路径的 debug 信息
@@ -187,11 +190,11 @@ pub fn get_nav_path_with_debug(
     // 如果不可直达，则使用A*算法规划路径（包含 debug 信息）
     let result = find_path_with_result(&grid, &adjusted_start_pos, &adjusted_end_pos);
 
-    debug!("A* 路径找到，耗时 {:.6}ms", start.elapsed().as_millis());
+    // debug!("A* 路径找到，耗时 {:.6}ms", start.elapsed().as_millis());
 
     {
         stats.get_nav_path_count += 1;
-        stats.get_nav_path_time += start.elapsed();
+        // stats.get_nav_path_time += start.elapsed();
     }
 
     match result {
@@ -479,13 +482,13 @@ fn pre_update_global_occupied_cells(
     let Some(mut grid) = assets_grid.get_mut(&res_grid.0) else {
         return;
     };
-    let start = Instant::now();
+    // let start = Instant::now();
 
     // 计算所有实体的 occupied_cells（不排除任何实体）
     let occupied_cells = calculate_occupied_grid_cells(&grid, &entities_with_bounding, &[]);
     grid.occupied_cells = occupied_cells;
 
-    stats.calculate_occupied_grid_cells_time += start.elapsed();
+    // stats.calculate_occupied_grid_cells_time += start.elapsed();
     stats.calculate_occupied_grid_cells_count += 1;
     stats.occupied_grid_cells_num = grid.occupied_cells.len() as u32;
 }

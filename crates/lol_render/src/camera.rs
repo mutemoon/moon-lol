@@ -1,19 +1,20 @@
 use bevy::camera::visibility::RenderLayers;
 use bevy::camera::{CameraProjection, RenderTarget, SubCameraView};
-use bevy::input::mouse::MouseWheel;
+use bevy::input::mouse::{MouseScrollUnit, MouseWheel};
 use bevy::math::{Mat4, Vec3A, Vec4};
 use bevy::pbr::ScreenSpaceReflections;
 use bevy::prelude::*;
 use bevy::render::render_resource::{
     Extent3d, TextureDescriptor, TextureDimension, TextureFormat, TextureUsages,
 };
+use bevy::window::{CursorGrabMode, CursorOptions};
 
 // 相机距离和位置配置
 pub const CAMERA_FAR_Z: f32 = 22000.0;
 pub const CAMERA_MIN_X: f32 = 300.0;
 pub const CAMERA_MAX_X: f32 = 14400.0;
-pub const CAMERA_MIN_Y: f32 = -14765.0;
-pub const CAMERA_MAX_Y: f32 = -520.0;
+pub const CAMERA_MIN_Y: f32 = 520.0;
+pub const CAMERA_MAX_Y: f32 = 14765.0;
 
 // 键盘轨道控制速度
 pub const CAMERA_KEYBOARD_ORBIT_SPEED_X: f32 = 100.0;
@@ -58,20 +59,20 @@ pub struct CameraState {
 
 impl CameraState {
     pub fn set_position(&mut self, position: Vec3) {
-        // self.position.x = position.x.clamp(CAMERA_MIN_X, CAMERA_MAX_X);
-        // self.position.z = position.z.clamp(CAMERA_MIN_Y, CAMERA_MAX_Y);
-        self.position = position;
+        self.position.x = position.x.clamp(CAMERA_MIN_X, CAMERA_MAX_X);
+        self.position.z = position.z.clamp(CAMERA_MIN_Y, CAMERA_MAX_Y);
+        // self.position = position;
     }
 
     pub fn set_scale(&mut self, scale: f32) {
-        // self.scale = scale.clamp(0.1, 1.0);
-        self.scale = scale;
+        self.scale = scale.clamp(0.1, 1.0);
+        // self.scale = scale;
     }
 }
 
 fn setup(
     mut commands: Commands,
-    // mut window: Query<&mut Window>
+    mut window: Query<(&Window, &mut CursorOptions)>,
     mut images: ResMut<Assets<Image>>,
 ) {
     let size = Extent3d {
@@ -110,7 +111,7 @@ fn setup(
             bevy::camera::Hdr,
             CameraState {
                 scale: 1.0,
-                position: vec3(CAMERA_MIN_X, 0.0, CAMERA_MAX_Y),
+                position: vec3(CAMERA_MIN_X, 0.0, CAMERA_MIN_Y),
             },
             RenderLayers::from_layers(&[0, 1]),
             // Projection::custom(CustomFlipXProjection::default()),
@@ -123,9 +124,9 @@ fn setup(
             // Projection::custom(CustomFlipXProjection::default()),
         ));
 
-    // if let Ok(mut window) = window.single_mut() {
-    //     window.cursor_options.grab_mode = CursorGrabMode::Confined;
-    // }
+    if let Ok((_, mut cursor_options)) = window.single_mut() {
+        cursor_options.grab_mode = CursorGrabMode::Confined;
+    }
 }
 
 fn update(mut q_camera: Query<(&mut Transform, &CameraState), Changed<CameraState>>) {
@@ -158,7 +159,11 @@ fn on_wheel(
     };
 
     for event in mouse_wheel_events.read() {
-        let new_scale = camera_state.scale - event.y * 0.1;
+        let scroll = match event.unit {
+            MouseScrollUnit::Line => event.y,
+            MouseScrollUnit::Pixel => event.y / MouseScrollUnit::SCROLL_UNIT_CONVERSION_FACTOR,
+        };
+        let new_scale = camera_state.scale - (scroll * 0.1);
         camera_state.set_scale(new_scale);
     }
 }
