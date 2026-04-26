@@ -122,14 +122,7 @@
         <!-- 游戏画面 -->
         <div class="relative flex-1 border-r border-gray-800">
           <div class="absolute inset-0 bg-linear-to-br from-gray-900 to-black">
-            <img v-if="clientStore.img" :src="clientStore.img" alt="游戏画面" class="h-full w-full object-cover" />
-            <div v-else class="flex h-full items-center justify-center">
-              <div class="text-center text-gray-500">
-                <div class="mb-4 text-6xl opacity-50">🎮</div>
-                <p class="text-lg">等待游戏数据...</p>
-                <p class="mt-2 text-sm text-gray-600">点击更新图像开始</p>
-              </div>
-            </div>
+            <canvas id="lol" class="border-none outline-none" />
           </div>
         </div>
 
@@ -224,8 +217,13 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useClientStore } from "@/composables/useClient";
+import init from "lol";
 
 const clientStore = useClientStore();
+
+onMounted(() => {
+  init();
+});
 </script>
 
 <style scoped>

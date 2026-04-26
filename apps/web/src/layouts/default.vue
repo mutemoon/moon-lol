@@ -90,13 +90,13 @@
             <p class="font-mono text-sm leading-relaxed text-gray-300">
               基于 Rust Bevy 引擎的高性能 MOBA 游戏环境。
               <br />
-              <span class="text-acid-pink">Y2K RUSH EDITION</span>
+              <span class="text-acid-blue">Y2K RUSH EDITION</span>
             </p>
           </div>
 
           <!-- Navigation -->
           <div class="col-span-1">
-            <h3 class="font-glitch text-acid-pink text-glow-pink mb-6 text-xl">导航</h3>
+            <h3 class="font-glitch mb-6 text-xl text-white/90">导航</h3>
             <ul class="space-y-3 font-mono text-sm text-gray-400">
               <li>
                 <router-link to="/" class="hover:text-acid-blue inline-block transition-all hover:translate-x-2">
@@ -121,13 +121,13 @@
 
           <!-- Resources -->
           <div class="col-span-1">
-            <h3 class="font-glitch text-acid-yellow text-outline mb-6 text-xl">资源</h3>
+            <h3 class="font-glitch mb-6 text-xl text-white/90">资源</h3>
             <ul class="space-y-3 font-mono text-sm text-gray-400">
               <li>
                 <a
                   href="https://github.com/mutemoon/moon-lol"
                   target="_blank"
-                  class="hover:text-acid-yellow inline-block transition-all hover:translate-x-2"
+                  class="hover:text-acid-blue inline-block transition-all hover:translate-x-2"
                 >
                   GITHUB 仓库
                 </a>
@@ -143,17 +143,17 @@
 
           <!-- Status -->
           <div class="col-span-1">
-            <h3 class="font-glitch text-outline mb-6 text-xl text-white">系统状态</h3>
+            <h3 class="font-glitch mb-6 text-xl text-white/90">系统状态</h3>
             <div
-              class="glass-y2k hover:border-acid-green/50 space-y-4 rounded-xl p-4 font-mono text-xs transition-colors"
+              class="glass-y2k hover:border-acid-blue/50 space-y-4 rounded-xl p-4 font-mono text-xs transition-colors"
             >
               <div class="flex justify-between">
                 <span class="text-gray-400">版本</span>
-                <span class="text-acid-green font-bold">v0.1.0-alpha</span>
+                <span class="text-acid-blue font-bold">v0.1.0-alpha</span>
               </div>
               <div class="flex justify-between">
                 <span class="text-gray-400">核心</span>
-                <span class="text-acid-pink font-bold">Rust/Bevy</span>
+                <span class="text-acid-blue font-bold">Rust/Bevy</span>
               </div>
               <div class="flex justify-between">
                 <span class="text-gray-400">状态</span>

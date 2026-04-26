@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
-import init from "lol";
 
 const router = useRouter();
 
@@ -52,8 +51,6 @@ const posts = [
 ];
 
 onMounted(() => {
-  init();
-
   // Scroll Reveal Observer
   const observerOptions = {
     threshold: 0.1,
@@ -262,8 +259,6 @@ const startSize = { x: 100, y: 100 };
     </div>
   </section>
 
-  <div class="flex items-center justify-center"><canvas id="lol"></canvas></div>
-
   <!-- Scrolling Tech Stack -->
   <div class="relative z-20 flex overflow-hidden border-y border-white/10 bg-black/50 py-4 backdrop-blur-md">
     <div
@@ -308,82 +303,83 @@ const startSize = { x: 100, y: 100 };
     ></div>
 
     <div class="relative z-10 mx-auto max-w-7xl px-6">
-      <h2 class="font-glitch text-outline mb-12 inline-block text-6xl drop-shadow-[0_0_10px_var(--color-acid-pink)]">
-        <span class="text-acid-pink">技术</span>
-        栈
+      <h2 class="font-glitch text-outline mb-12 inline-block text-6xl drop-shadow-[0_0_10px_var(--color-acid-blue)]">
+        <span class="text-acid-blue">技术</span>
+        <span class="text-white">栈</span>
       </h2>
 
       <div class="grid grid-cols-1 gap-8 md:grid-cols-3">
+        <!-- 卡片 1 -->
         <div
-          class="glass-y2k hover-trigger group rounded-2xl p-8 transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_0_30px_rgba(0,240,255,0.3)]"
+          class="glass-y2k group rounded-2xl p-8 transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_0_30px_rgba(0,240,255,0.2)]"
         >
-          <h3
-            class="text-acid-blue mb-4 flex items-center gap-2 text-2xl font-bold transition-colors group-hover:text-white"
-          >
-            <span class="text-xl opacity-50">01.</span>
+          <h3 class="mb-4 flex items-center gap-2 text-2xl font-bold text-white">
+            <span class="text-acid-blue text-xl opacity-70">01.</span>
             Rust 语言
           </h3>
-          <p class="font-mono leading-relaxed text-gray-300 group-hover:text-white">追求极致的性能</p>
+          <p class="font-mono leading-relaxed text-gray-300">追求极致的性能与内存安全</p>
           <ul class="mt-6 space-y-2 font-mono text-sm text-gray-400">
             <li class="flex items-center gap-2">
-              <span class="bg-acid-green h-1.5 w-1.5 rounded-full"></span>
-              低内存占用
+              <span class="bg-acid-blue h-1.5 w-1.5 rounded-full"></span>
+              零成本抽象
             </li>
             <li class="flex items-center gap-2">
-              <span class="bg-acid-green h-1.5 w-1.5 rounded-full"></span>
-              高性能
+              <span class="bg-acid-blue h-1.5 w-1.5 rounded-full"></span>
+              无 GC 高并发
             </li>
             <li class="flex items-center gap-2">
-              <span class="bg-acid-green h-1.5 w-1.5 rounded-full"></span>
-              稳定性
+              <span class="bg-acid-blue h-1.5 w-1.5 rounded-full"></span>
+              稳定可靠的内存管理
             </li>
           </ul>
         </div>
 
+        <!-- 卡片 2 -->
         <div
-          class="glass-y2k hover-trigger group rounded-2xl p-8 transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_0_30px_rgba(255,0,255,0.3)]"
+          class="glass-y2k group rounded-2xl p-8 transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_0_30px_rgba(0,240,255,0.2)]"
         >
-          <h3
-            class="text-acid-pink mb-4 flex items-center gap-2 text-2xl font-bold transition-colors group-hover:text-white"
-          >
-            <span class="text-xl opacity-50">02.</span>
+          <h3 class="mb-4 flex items-center gap-2 text-2xl font-bold text-white">
+            <span class="text-acid-blue text-xl opacity-70">02.</span>
             Bevy 引擎
           </h3>
-          <p class="font-mono leading-relaxed text-gray-300 group-hover:text-white">Rust 编写的 ECS 游戏引擎</p>
+          <p class="font-mono leading-relaxed text-gray-300">Rust 编写的模块化 ECS 游戏引擎</p>
           <ul class="mt-6 space-y-2 font-mono text-sm text-gray-400">
             <li class="flex items-center gap-2">
-              <span class="bg-acid-pink h-1.5 w-1.5 rounded-full"></span>
+              <span class="bg-acid-blue h-1.5 w-1.5 rounded-full"></span>
               Bevy 0.17
             </li>
             <li class="flex items-center gap-2">
-              <span class="bg-acid-pink h-1.5 w-1.5 rounded-full"></span>
-              ECS 架构
+              <span class="bg-acid-blue h-1.5 w-1.5 rounded-full"></span>
+              并行 ECS 架构
             </li>
             <li class="flex items-center gap-2">
-              <span class="bg-acid-pink h-1.5 w-1.5 rounded-full"></span>
+              <span class="bg-acid-blue h-1.5 w-1.5 rounded-full"></span>
               WGPU 跨平台渲染
             </li>
           </ul>
         </div>
 
+        <!-- 卡片 3 -->
         <div
-          class="glass-y2k hover-trigger group rounded-2xl p-8 transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_0_30px_rgba(250,255,0,0.3)]"
+          class="glass-y2k group rounded-2xl p-8 transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_0_30px_rgba(0,240,255,0.2)]"
         >
-          <h3
-            class="text-acid-yellow mb-4 flex items-center gap-2 text-2xl font-bold transition-colors group-hover:text-white"
-          >
-            <span class="text-xl opacity-50">03.</span>
-            可视化
+          <h3 class="mb-4 flex items-center gap-2 text-2xl font-bold text-white">
+            <span class="text-acid-blue text-xl opacity-70">03.</span>
+            可视化前端
           </h3>
-          <p class="font-mono leading-relaxed text-gray-300 group-hover:text-white">AI 游戏过程实时可视化</p>
+          <p class="font-mono leading-relaxed text-gray-300">AI 对战过程的实时监控面板</p>
           <ul class="mt-6 space-y-2 font-mono text-sm text-gray-400">
             <li class="flex items-center gap-2">
-              <span class="bg-acid-yellow h-1.5 w-1.5 rounded-full"></span>
-              Vue 3 前端
+              <span class="bg-acid-blue h-1.5 w-1.5 rounded-full"></span>
+              Vue 3 + TypeScript
             </li>
             <li class="flex items-center gap-2">
-              <span class="bg-acid-yellow h-1.5 w-1.5 rounded-full"></span>
-              实时指标
+              <span class="bg-acid-blue h-1.5 w-1.5 rounded-full"></span>
+              实时指标图表
+            </li>
+            <li class="flex items-center gap-2">
+              <span class="bg-acid-blue h-1.5 w-1.5 rounded-full"></span>
+              WebSocket 通信
             </li>
           </ul>
         </div>
