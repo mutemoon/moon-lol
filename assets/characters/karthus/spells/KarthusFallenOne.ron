@@ -1,0 +1,62 @@
+(
+    spellData: Some((
+        calculations: Some({
+            501147496: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 64618745,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: 3809245599,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "BaseDamage",
+                values: Some([
+                    50.0,
+                    200.0,
+                    350.0,
+                    500.0,
+                    650.0,
+                    800.0,
+                    950.0,
+                ]),
+            ),
+            (
+                name: "APRatio",
+                values: Some([
+                    0.7,
+                    0.7,
+                    0.7,
+                    0.7,
+                    0.7,
+                    0.7,
+                    0.7,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            100.0,
+            100.0,
+            100.0,
+            100.0,
+            100.0,
+            100.0,
+        ]),
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: Some(0.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

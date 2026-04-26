@@ -1,0 +1,75 @@
+(
+    spellData: Some((
+        calculations: Some({
+            501147496: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 64618745,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: None,
+                        coefficient: Some(0.4),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "BaseDamage",
+                values: Some([
+                    45.0,
+                    70.0,
+                    95.0,
+                    120.0,
+                    145.0,
+                    170.0,
+                    195.0,
+                ]),
+            ),
+            (
+                name: "RootDuration",
+                values: Some([
+                    0.75,
+                    1.0,
+                    1.25,
+                    1.5,
+                    1.75,
+                    2.0,
+                    2.25,
+                ]),
+            ),
+            (
+                name: "RootDelay",
+                values: Some([
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            70.0,
+            75.0,
+            80.0,
+            85.0,
+            90.0,
+            90.0,
+        ]),
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: Some(0.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

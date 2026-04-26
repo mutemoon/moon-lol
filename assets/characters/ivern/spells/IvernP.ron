@@ -1,0 +1,135 @@
+(
+    spellData: Some((
+        calculations: Some({
+            1621780079: (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            1824105134: (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: Some((
+                    type: "CalculationPartNamedDataValue",
+                    dataValue: 83471741,
+                )),
+                precision: None,
+            ),
+            3326294280: (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: Some([
+            (
+                values: Some([
+                    120.0,
+                    120.0,
+                    120.0,
+                    120.0,
+                    120.0,
+                    120.0,
+                    120.0,
+                ]),
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+        ]),
+        dataValues: Some([
+            (
+                name: "LevelForBuffShare",
+                values: Some([
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                ]),
+            ),
+            (
+                name: "PickupDuration",
+                values: Some([
+                    60.0,
+                    60.0,
+                    60.0,
+                    60.0,
+                    60.0,
+                    60.0,
+                    60.0,
+                ]),
+            ),
+            (
+                name: "KrugExperience",
+                values: Some([
+                    58.0,
+                    58.0,
+                    58.0,
+                    58.0,
+                    58.0,
+                    58.0,
+                    58.0,
+                ]),
+            ),
+            (
+                name: "KrugGold",
+                values: Some([
+                    84.0,
+                    84.0,
+                    84.0,
+                    84.0,
+                    84.0,
+                    84.0,
+                    84.0,
+                ]),
+            ),
+            (
+                name: "ModeSpeedOverride",
+                values: Some([
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                ]),
+            ),
+        ]),
+        mana: None,
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: None,
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

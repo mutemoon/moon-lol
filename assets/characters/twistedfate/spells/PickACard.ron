@@ -1,0 +1,305 @@
+(
+    spellData: Some((
+        calculations: Some({
+            3074434168: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 917064896,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(2),
+                        coefficient: Some(1.0),
+                        statFormula: None,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: None,
+                        coefficient: Some(1.0),
+                        statFormula: None,
+                    ),
+                    (
+                        type: "CalculationPartStatSub",
+                        stat: Some(8),
+                        subpart: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            4156075069: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 1970749065,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(2),
+                        coefficient: Some(1.0),
+                        statFormula: None,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: None,
+                        coefficient: Some(0.7),
+                        statFormula: None,
+                    ),
+                    (
+                        type: "CalculationPartStatSub",
+                        stat: Some(8),
+                        subpart: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            1918996162: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 1869542814,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(2),
+                        coefficient: Some(1.0),
+                        statFormula: None,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: None,
+                        coefficient: Some(0.5),
+                        statFormula: None,
+                    ),
+                    (
+                        type: "CalculationPartStatSub",
+                        stat: Some(8),
+                        subpart: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: Some([
+            (
+                values: Some([
+                    20.0,
+                    40.0,
+                    60.0,
+                    80.0,
+                    100.0,
+                    120.0,
+                    140.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    25.0,
+                    30.0,
+                    35.0,
+                    40.0,
+                    45.0,
+                    50.0,
+                    55.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    0.75,
+                    1.0,
+                    1.25,
+                    1.5,
+                    1.75,
+                    2.0,
+                    2.25,
+                ]),
+            ),
+            (
+                values: Some([
+                    15.0,
+                    30.0,
+                    45.0,
+                    60.0,
+                    75.0,
+                    90.0,
+                    105.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    7.5,
+                    15.0,
+                    22.5,
+                    30.0,
+                    37.5,
+                    45.0,
+                    52.5,
+                ]),
+            ),
+            (
+                values: Some([
+                    70.0,
+                    70.0,
+                    90.0,
+                    110.0,
+                    130.0,
+                    150.0,
+                    165.0,
+                ]),
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+        ]),
+        dataValues: Some([
+            (
+                name: "BlueBase",
+                values: Some([
+                    20.0,
+                    40.0,
+                    60.0,
+                    80.0,
+                    100.0,
+                    120.0,
+                    140.0,
+                ]),
+            ),
+            (
+                name: "RedBase",
+                values: Some([
+                    15.0,
+                    30.0,
+                    45.0,
+                    60.0,
+                    75.0,
+                    90.0,
+                    105.0,
+                ]),
+            ),
+            (
+                name: "GoldBase",
+                values: Some([
+                    7.5,
+                    15.0,
+                    22.5,
+                    30.0,
+                    37.5,
+                    45.0,
+                    52.5,
+                ]),
+            ),
+            (
+                name: "BlueCritMultiplier",
+                values: Some([
+                    0.575,
+                    0.575,
+                    0.575,
+                    0.575,
+                    0.575,
+                    0.575,
+                    0.575,
+                ]),
+            ),
+            (
+                name: "RedCritMultiplier",
+                values: Some([
+                    0.35,
+                    0.35,
+                    0.35,
+                    0.35,
+                    0.35,
+                    0.35,
+                    0.35,
+                ]),
+            ),
+            (
+                name: "GoldCritMultiplier",
+                values: Some([
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                ]),
+            ),
+            (
+                name: "ttBlueAP",
+                values: Some([
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                ]),
+            ),
+            (
+                name: "ttRedAP",
+                values: Some([
+                    0.7,
+                    0.7,
+                    0.7,
+                    0.7,
+                    0.7,
+                    0.7,
+                    0.7,
+                ]),
+            ),
+            (
+                name: "ttGoldAP",
+                values: Some([
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                ]),
+            ),
+            (
+                name: "ttAD",
+                values: Some([
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            50.0,
+            55.0,
+            60.0,
+            65.0,
+            70.0,
+            75.0,
+        ]),
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: Some(20.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

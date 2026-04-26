@@ -1,0 +1,57 @@
+(
+    spellData: Some((
+        calculations: Some({
+            2272344318: (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            3202745679: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(12),
+                        dataValue: 2212226638,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "ArenaCooldownMod",
+                values: Some([
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                ]),
+            ),
+            (
+                name: "HealRatio",
+                values: Some([
+                    0.055,
+                    0.055,
+                    0.055,
+                    0.055,
+                    0.055,
+                    0.055,
+                    0.055,
+                ]),
+            ),
+        ]),
+        mana: None,
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: None,
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

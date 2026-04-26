@@ -1,0 +1,13 @@
+(
+    spellData: Some((
+        calculations: None,
+        effectAmounts: None,
+        dataValues: None,
+        mana: None,
+        missileSpec: None,
+        hitBoneName: Some("root"),
+        missileSpeed: Some(1750.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

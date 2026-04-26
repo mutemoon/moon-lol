@@ -1,0 +1,63 @@
+(
+    spellData: Some((
+        calculations: Some({
+            501147496: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 64618745,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: None,
+                        coefficient: Some(0.65),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "Upgrade1MaxAmmo",
+                values: Some([
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                ]),
+            ),
+            (
+                name: "BaseDamage",
+                values: Some([
+                    45.0,
+                    80.0,
+                    115.0,
+                    150.0,
+                    185.0,
+                    220.0,
+                    255.0,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            40.0,
+            45.0,
+            50.0,
+            55.0,
+            60.0,
+            60.0,
+        ]),
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: Some(1750.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

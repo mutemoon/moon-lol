@@ -1,0 +1,241 @@
+(
+    spellData: Some((
+        calculations: Some({
+            743758831: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 999281912,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: 2499458930,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            113261266: (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: Some((
+                    type: "CalculationPartNamedDataValue",
+                    dataValue: 1065024672,
+                )),
+                precision: None,
+            ),
+            75129323: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 754750083,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: 3424583977,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            646963981: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 64618745,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: 3809245599,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "BaseDamage",
+                values: Some([
+                    125.0,
+                    200.0,
+                    275.0,
+                    350.0,
+                    425.0,
+                    500.0,
+                    575.0,
+                ]),
+            ),
+            (
+                name: "APRatio",
+                values: Some([
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                ]),
+            ),
+            (
+                name: "BaseDamageCenter",
+                values: Some([
+                    100.0,
+                    300.0,
+                    500.0,
+                    700.0,
+                    900.0,
+                    1100.0,
+                    1300.0,
+                ]),
+            ),
+            (
+                name: "APRatioCenter",
+                values: Some([
+                    0.6,
+                    0.6,
+                    0.6,
+                    0.6,
+                    0.6,
+                    0.6,
+                    0.6,
+                ]),
+            ),
+            (
+                name: "MinDamageAtEdge",
+                values: Some([
+                    0.35,
+                    0.35,
+                    0.35,
+                    0.35,
+                    0.35,
+                    0.35,
+                    0.35,
+                ]),
+            ),
+            (
+                name: "MinStunAtEdge",
+                values: Some([
+                    0.33333,
+                    0.33333,
+                    0.33333,
+                    0.33333,
+                    0.33333,
+                    0.33333,
+                    0.33333,
+                ]),
+            ),
+            (
+                name: "CalamityBaseDamage",
+                values: Some([
+                    150.0,
+                    250.0,
+                    350.0,
+                    450.0,
+                    550.0,
+                    650.0,
+                    750.0,
+                ]),
+            ),
+            (
+                name: "CalamityAPRatio",
+                values: Some([
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                ]),
+            ),
+            (
+                name: "CalamityStacks",
+                values: Some([
+                    50.0,
+                    50.0,
+                    50.0,
+                    50.0,
+                    50.0,
+                    50.0,
+                    50.0,
+                ]),
+            ),
+            (
+                name: "StartingRadius",
+                values: Some([
+                    275.0,
+                    275.0,
+                    275.0,
+                    275.0,
+                    275.0,
+                    275.0,
+                    275.0,
+                ]),
+            ),
+            (
+                name: "AreaPerPassiveStacks",
+                values: Some([
+                    1500.0,
+                    1500.0,
+                    1500.0,
+                    1500.0,
+                    1500.0,
+                    1500.0,
+                    1500.0,
+                ]),
+            ),
+            (
+                name: "PI",
+                values: Some([
+                    3.14159,
+                    3.14159,
+                    3.14159,
+                    3.14159,
+                    3.14159,
+                    3.14159,
+                    3.14159,
+                ]),
+            ),
+            (
+                name: "InversePI",
+                values: Some([
+                    0.31831,
+                    0.31831,
+                    0.31831,
+                    0.31831,
+                    0.31831,
+                    0.31831,
+                    0.31831,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            100.0,
+            100.0,
+            100.0,
+            100.0,
+            100.0,
+            100.0,
+        ]),
+        missileSpec: Some((
+            movementComponent: (
+                type: "MovementTypeFixedSpeed",
+                speed: Some(1200.0),
+                startBoneName: Some(""),
+            ),
+        )),
+        hitBoneName: None,
+        missileSpeed: None,
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

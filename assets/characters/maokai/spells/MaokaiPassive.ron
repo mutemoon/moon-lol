@@ -1,0 +1,69 @@
+(
+    spellData: Some((
+        calculations: Some({
+            620905175: (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            3835899954: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatSub",
+                        stat: Some(12),
+                        subpart: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "PassiveCooldownReduction",
+                values: Some([
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                ]),
+            ),
+            (
+                name: "PassiveHealthThreshold",
+                values: Some([
+                    0.95,
+                    0.95,
+                    0.95,
+                    0.95,
+                    0.95,
+                    0.95,
+                    0.95,
+                ]),
+            ),
+            (
+                name: "JungPassCooldownReduction",
+                values: Some([
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                ]),
+            ),
+        ]),
+        mana: None,
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: None,
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

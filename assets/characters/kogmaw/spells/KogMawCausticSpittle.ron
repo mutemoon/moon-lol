@@ -1,0 +1,89 @@
+(
+    spellData: Some((
+        calculations: None,
+        effectAmounts: Some([
+            (
+                values: Some([
+                    10.0,
+                    60.0,
+                    110.0,
+                    160.0,
+                    210.0,
+                    260.0,
+                    310.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    5.0,
+                    10.0,
+                    15.0,
+                    20.0,
+                    25.0,
+                    30.0,
+                    35.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    0.0,
+                    5.0,
+                    10.0,
+                    15.0,
+                    20.0,
+                    25.0,
+                    30.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                ]),
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+        ]),
+        dataValues: None,
+        mana: Some([
+            60.0,
+            60.0,
+            60.0,
+            60.0,
+            60.0,
+            60.0,
+        ]),
+        missileSpec: Some((
+            movementComponent: (
+                type: "MovementTypeFixedSpeed",
+                speed: Some(1500.0),
+                startBoneName: Some("C_Mouth_d"),
+            ),
+        )),
+        hitBoneName: Some("C_BUFFBONE_GLB_CHEST_LOC"),
+        missileSpeed: Some(1500.0),
+        missileEffectKey: Some(716831127),
+        castType: Some(1),
+    )),
+)

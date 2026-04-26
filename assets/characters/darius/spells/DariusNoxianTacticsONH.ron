@@ -1,0 +1,99 @@
+(
+    spellData: Some((
+        calculations: Some({
+            1237280252: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatSub",
+                        stat: Some(2),
+                        subpart: Some((
+                            type: "CalculationPartEffectValue",
+                            effectIndex: Some(4),
+                        )),
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: Some([
+            (
+                values: None,
+            ),
+            (
+                values: Some([
+                    90.0,
+                    90.0,
+                    90.0,
+                    90.0,
+                    90.0,
+                    90.0,
+                    90.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    50.0,
+                    50.0,
+                    50.0,
+                    50.0,
+                    50.0,
+                    50.0,
+                    50.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    1.5,
+                    1.4,
+                    1.45,
+                    1.5,
+                    1.55,
+                    1.6,
+                    1.65,
+                ]),
+            ),
+            (
+                values: Some([
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                ]),
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+        ]),
+        dataValues: None,
+        mana: Some([
+            40.0,
+            40.0,
+            40.0,
+            40.0,
+            40.0,
+            40.0,
+        ]),
+        missileSpec: None,
+        hitBoneName: Some("root"),
+        missileSpeed: Some(0.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

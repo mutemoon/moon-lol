@@ -1,0 +1,122 @@
+(
+    spellData: Some((
+        calculations: Some({
+            501147496: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 64618745,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(2),
+                        dataValue: 942499611,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "BaseDamage",
+                values: Some([
+                    30.0,
+                    80.0,
+                    130.0,
+                    180.0,
+                    230.0,
+                    280.0,
+                    330.0,
+                ]),
+            ),
+            (
+                name: "ADRatio",
+                values: Some([
+                    2.4,
+                    2.4,
+                    2.4,
+                    2.4,
+                    2.4,
+                    2.4,
+                    2.4,
+                ]),
+            ),
+            (
+                name: "SprayDuration",
+                values: Some([
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                ]),
+            ),
+            (
+                name: "TicksPerSecond",
+                values: Some([
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                ]),
+            ),
+            (
+                name: "ShredMax",
+                values: Some([
+                    -10.0,
+                    -12.0,
+                    -14.0,
+                    -16.0,
+                    -18.0,
+                    -20.0,
+                    -22.0,
+                ]),
+            ),
+            (
+                name: "ShredCap",
+                values: Some([
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                ]),
+            ),
+            (
+                name: "ShredDuration",
+                values: Some([
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            50.0,
+            55.0,
+            60.0,
+            65.0,
+            70.0,
+            70.0,
+        ]),
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: Some(902.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

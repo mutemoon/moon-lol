@@ -1,0 +1,255 @@
+(
+    spellData: Some((
+        calculations: Some({
+            3811726588: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 865623685,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: 2550192411,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(12),
+                        coefficient: Some(0.1),
+                        statFormula: Some(2),
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            921247285: (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            501147496: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 64618745,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: 2970201272,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(12),
+                        coefficient: Some(0.05),
+                        statFormula: Some(2),
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            4242580152: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 704108499,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: None,
+                        coefficient: Some(0.0001),
+                        statFormula: None,
+                    ),
+                    (
+                        type: "CalculationPartStatSub",
+                        stat: Some(12),
+                        subpart: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            2231095099: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 3371916511,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(12),
+                        coefficient: Some(0.015),
+                        statFormula: Some(2),
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "SaplingDuration",
+                values: Some([
+                    30.0,
+                    30.0,
+                    30.0,
+                    30.0,
+                    30.0,
+                    30.0,
+                    30.0,
+                ]),
+            ),
+            (
+                name: "BaseDamage",
+                values: Some([
+                    25.0,
+                    50.0,
+                    75.0,
+                    100.0,
+                    125.0,
+                    150.0,
+                    175.0,
+                ]),
+            ),
+            (
+                name: "GrowthDuration",
+                values: Some([
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                ]),
+            ),
+            (
+                name: "SlowAmount",
+                values: Some([
+                    0.45,
+                    0.45,
+                    0.45,
+                    0.45,
+                    0.45,
+                    0.45,
+                    0.45,
+                ]),
+            ),
+            (
+                name: "SlowDuration",
+                values: Some([
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                ]),
+            ),
+            (
+                name: "EmpoweredDoTDuration",
+                values: Some([
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                ]),
+            ),
+            (
+                name: "EmpoweredBaseDamage",
+                values: Some([
+                    50.0,
+                    100.0,
+                    150.0,
+                    200.0,
+                    250.0,
+                    300.0,
+                    350.0,
+                ]),
+            ),
+            (
+                name: "SaplingDetectionRadius",
+                values: Some([
+                    550.0,
+                    550.0,
+                    550.0,
+                    550.0,
+                    550.0,
+                    550.0,
+                    550.0,
+                ]),
+            ),
+            (
+                name: "BaseEmpoweredSlowAmount",
+                values: Some([
+                    0.45,
+                    0.45,
+                    0.45,
+                    0.45,
+                    0.45,
+                    0.45,
+                    0.45,
+                ]),
+            ),
+            (
+                name: "MaxTraps",
+                values: Some([
+                    25000.0,
+                    25000.0,
+                    25000.0,
+                    25000.0,
+                    25000.0,
+                    25000.0,
+                    25000.0,
+                ]),
+            ),
+            (
+                name: "BaseAPRatio",
+                values: Some([
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                ]),
+            ),
+            (
+                name: "EmpoweredAPRatio",
+                values: Some([
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            60.0,
+            65.0,
+            70.0,
+            75.0,
+            80.0,
+            80.0,
+        ]),
+        missileSpec: None,
+        hitBoneName: Some("pelvis"),
+        missileSpeed: Some(1500.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

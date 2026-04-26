@@ -1,0 +1,245 @@
+(
+    spellData: Some((
+        calculations: Some({
+            2013612275: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(9),
+                        coefficient: Some(1.0),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            1878570480: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: None,
+                        coefficient: Some(0.18),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            4266938262: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: None,
+                        coefficient: Some(0.03),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            2365862897: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: None,
+                        coefficient: Some(1.1),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            2302023795: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 64618745,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(2),
+                        dataValue: 142106905,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            2798790303: (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "MinCooldown",
+                values: Some([
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                ]),
+            ),
+            (
+                name: "AttackSpeedCap",
+                values: Some([
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                ]),
+            ),
+            (
+                name: "ExcessAttackSpeedToADMult",
+                values: Some([
+                    0.7,
+                    0.7,
+                    0.7,
+                    0.7,
+                    0.7,
+                    0.7,
+                    0.7,
+                ]),
+            ),
+            (
+                name: "BaseDamage",
+                values: Some([
+                    13.0,
+                    15.0,
+                    17.0,
+                    19.0,
+                    21.0,
+                    23.0,
+                    25.0,
+                ]),
+            ),
+            (
+                name: "ActiveADRatio",
+                values: Some([
+                    1.0,
+                    1.04,
+                    1.08,
+                    1.12,
+                    1.16,
+                    1.2,
+                    1.24,
+                ]),
+            ),
+            (
+                name: "NumberOfMissiles",
+                values: Some([
+                    7.0,
+                    7.0,
+                    7.0,
+                    7.0,
+                    7.0,
+                    7.0,
+                    7.0,
+                ]),
+            ),
+            (
+                name: "EnergizedMissiles",
+                values: Some([
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                ]),
+            ),
+            (
+                name: "SlowDuration",
+                values: Some([
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                ]),
+            ),
+            (
+                name: "SlowPercent",
+                values: Some([
+                    0.99,
+                    0.99,
+                    0.99,
+                    0.99,
+                    0.99,
+                    0.99,
+                    0.99,
+                ]),
+            ),
+            (
+                name: "ActivePercentDamageToTowers",
+                values: Some([
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                ]),
+            ),
+            (
+                name: "MaxPercentHealthToMonsters",
+                values: Some([
+                    300.0,
+                    300.0,
+                    300.0,
+                    300.0,
+                    300.0,
+                    300.0,
+                    300.0,
+                ]),
+            ),
+            (
+                name: "ChargePerAttack",
+                values: Some([
+                    10.0,
+                    10.0,
+                    10.0,
+                    10.0,
+                    10.0,
+                    10.0,
+                    10.0,
+                ]),
+            ),
+            (
+                name: "ChargeDistanceMultiplier",
+                values: Some([
+                    0.025,
+                    0.025,
+                    0.025,
+                    0.025,
+                    0.025,
+                    0.025,
+                    0.025,
+                ]),
+            ),
+        ]),
+        mana: None,
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: None,
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

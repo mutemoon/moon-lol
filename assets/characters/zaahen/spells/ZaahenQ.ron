@@ -1,0 +1,174 @@
+(
+    spellData: Some((
+        calculations: Some({
+            1772179026: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 4225599511,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(2),
+                        dataValue: 4288120049,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            2995120959: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 2886805190,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(2),
+                        dataValue: 4288120049,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "Q1BaseDamage",
+                values: Some([
+                    0.0,
+                    15.0,
+                    30.0,
+                    45.0,
+                    60.0,
+                    75.0,
+                    90.0,
+                ]),
+            ),
+            (
+                name: "KnockUpDuration",
+                values: Some([
+                    0.75,
+                    0.75,
+                    0.75,
+                    0.75,
+                    0.75,
+                    0.75,
+                    0.75,
+                ]),
+            ),
+            (
+                name: "RecastWindow",
+                values: Some([
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                ]),
+            ),
+            (
+                name: "TimeBetweenAttacks",
+                values: Some([
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                ]),
+            ),
+            (
+                name: "HealPercent",
+                values: Some([
+                    0.04,
+                    0.05,
+                    0.06,
+                    0.07,
+                    0.08,
+                    0.09,
+                    0.1,
+                ]),
+            ),
+            (
+                name: "MinionHealPercent",
+                values: Some([
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                ]),
+            ),
+            (
+                name: "Q2BaseDamage",
+                values: Some([
+                    0.0,
+                    25.0,
+                    50.0,
+                    75.0,
+                    100.0,
+                    125.0,
+                    150.0,
+                ]),
+            ),
+            (
+                name: "QBonusRange",
+                values: Some([
+                    25.0,
+                    25.0,
+                    25.0,
+                    25.0,
+                    25.0,
+                    25.0,
+                    25.0,
+                ]),
+            ),
+            (
+                name: "QCoeff",
+                values: Some([
+                    0.15,
+                    0.2,
+                    0.25,
+                    0.3,
+                    0.35,
+                    0.4,
+                    0.45,
+                ]),
+            ),
+            (
+                name: "MonsterDamagePercent",
+                values: Some([
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            25.0,
+            25.0,
+            25.0,
+            25.0,
+            25.0,
+            25.0,
+        ]),
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: Some(8700.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

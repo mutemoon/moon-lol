@@ -1,0 +1,122 @@
+(
+    spellData: Some((
+        calculations: Some({
+            501147496: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 1508461632,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: None,
+                        coefficient: Some(0.75),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: Some([
+            (
+                values: None,
+            ),
+            (
+                values: Some([
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                ]),
+            ),
+            (
+                values: Some([
+                    -0.16,
+                    -0.2,
+                    -0.24,
+                    -0.28,
+                    -0.32,
+                    -0.36,
+                    -0.4,
+                ]),
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+        ]),
+        dataValues: Some([
+            (
+                name: "damage",
+                values: Some([
+                    45.0,
+                    80.0,
+                    115.0,
+                    150.0,
+                    185.0,
+                    220.0,
+                    255.0,
+                ]),
+            ),
+            (
+                name: "slowDuration",
+                values: Some([
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                ]),
+            ),
+            (
+                name: "slowPercentage",
+                values: Some([
+                    -0.16,
+                    -0.2,
+                    -0.24,
+                    -0.28,
+                    -0.32,
+                    -0.36,
+                    -0.4,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            55.0,
+            60.0,
+            65.0,
+            70.0,
+            75.0,
+            80.0,
+        ]),
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: Some(1200.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

@@ -1,0 +1,107 @@
+(
+    spellData: Some((
+        calculations: Some({
+            1508461632: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 64618745,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(2),
+                        coefficient: Some(1.2),
+                        statFormula: Some(2),
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: Some([
+            (
+                values: Some([
+                    250.0,
+                    250.0,
+                    250.0,
+                    250.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    1750.0,
+                    2500.0,
+                    3250.0,
+                    4000.0,
+                    0.0,
+                    0.0,
+                    750.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    150.0,
+                    150.0,
+                    275.0,
+                    400.0,
+                    0.0,
+                    0.0,
+                    100.0,
+                ]),
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: Some([
+                    6.0,
+                    6.0,
+                    6.0,
+                    6.0,
+                    6.0,
+                    6.0,
+                    6.0,
+                ]),
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+        ]),
+        dataValues: Some([
+            (
+                name: "BaseDamage",
+                values: Some([
+                    150.0,
+                    150.0,
+                    275.0,
+                    400.0,
+                    525.0,
+                    650.0,
+                    775.0,
+                ]),
+            ),
+        ]),
+        mana: None,
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: Some(20.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

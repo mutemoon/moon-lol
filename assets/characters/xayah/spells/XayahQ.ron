@@ -1,0 +1,178 @@
+(
+    spellData: Some((
+        calculations: Some({
+            501147496: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 64618745,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(2),
+                        coefficient: Some(0.5),
+                        statFormula: Some(2),
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: Some([
+            (
+                values: Some([
+                    30.0,
+                    45.0,
+                    60.0,
+                    75.0,
+                    90.0,
+                    105.0,
+                    120.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                ]),
+            ),
+            (
+                values: Some([
+                    0.334,
+                    0.334,
+                    0.334,
+                    0.334,
+                    0.334,
+                    0.334,
+                    0.334,
+                ]),
+            ),
+            (
+                values: Some([
+                    0.584,
+                    0.584,
+                    0.584,
+                    0.584,
+                    0.584,
+                    0.584,
+                    0.584,
+                ]),
+            ),
+            (
+                values: Some([
+                    3500.0,
+                    3500.0,
+                    3500.0,
+                    3500.0,
+                    3500.0,
+                    3500.0,
+                    3500.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    3500.0,
+                    3500.0,
+                    3500.0,
+                    3500.0,
+                    3500.0,
+                    3500.0,
+                    3500.0,
+                ]),
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+        ]),
+        dataValues: Some([
+            (
+                name: "BaseDamage",
+                values: Some([
+                    30.0,
+                    45.0,
+                    60.0,
+                    75.0,
+                    90.0,
+                    105.0,
+                    120.0,
+                ]),
+            ),
+            (
+                name: "MultiHitRatio",
+                values: Some([
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                ]),
+            ),
+            (
+                name: "StartingCastTime",
+                values: Some([
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                ]),
+            ),
+            (
+                name: "MinCastTime",
+                values: Some([
+                    0.0,
+                    0.1,
+                    0.1,
+                    0.1,
+                    0.1,
+                    0.1,
+                    0.1,
+                ]),
+            ),
+            (
+                name: "ASpeedCastTimeScalarPerHundrethSecond",
+                values: Some([
+                    0.0,
+                    0.07,
+                    0.07,
+                    0.07,
+                    0.07,
+                    0.07,
+                    0.07,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            35.0,
+            35.0,
+            35.0,
+            35.0,
+            35.0,
+            35.0,
+        ]),
+        missileSpec: None,
+        hitBoneName: Some("C_BUFFBONE_GLB_CHEST_LOC"),
+        missileSpeed: Some(700.0),
+        missileEffectKey: Some(3977908004),
+        castType: None,
+    )),
+)

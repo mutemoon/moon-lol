@@ -1,0 +1,174 @@
+(
+    spellData: Some((
+        calculations: Some({
+            210462332: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(12),
+                        dataValue: 3732678346,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            3223459321: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 1521540002,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            40884989: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 64618745,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(12),
+                        dataValue: 4292780561,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "AttackOverrideDuration",
+                values: Some([
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                ]),
+            ),
+            (
+                name: "FlatHealthCost",
+                values: Some([
+                    -5.0,
+                    10.0,
+                    25.0,
+                    40.0,
+                    55.0,
+                    70.0,
+                    85.0,
+                ]),
+            ),
+            (
+                name: "BaseDamage",
+                values: Some([
+                    -5.0,
+                    5.0,
+                    15.0,
+                    25.0,
+                    35.0,
+                    45.0,
+                    55.0,
+                ]),
+            ),
+            (
+                name: "BonusHealthRatio",
+                values: Some([
+                    0.05,
+                    0.05,
+                    0.05,
+                    0.05,
+                    0.05,
+                    0.05,
+                    0.05,
+                ]),
+            ),
+            (
+                name: "MaxMissingHealthThreshold",
+                values: Some([
+                    0.7,
+                    0.7,
+                    0.7,
+                    0.7,
+                    0.7,
+                    0.7,
+                    0.7,
+                ]),
+            ),
+            (
+                name: "MaxDamageAmp",
+                values: Some([
+                    1.4,
+                    1.4,
+                    1.4,
+                    1.4,
+                    1.4,
+                    1.4,
+                    1.4,
+                ]),
+            ),
+            (
+                name: "MinionMod",
+                values: Some([
+                    1.4,
+                    1.4,
+                    1.4,
+                    1.4,
+                    1.4,
+                    1.4,
+                    1.4,
+                ]),
+            ),
+            (
+                name: "MissileDistance",
+                values: Some([
+                    800.0,
+                    800.0,
+                    800.0,
+                    800.0,
+                    800.0,
+                    800.0,
+                    800.0,
+                ]),
+            ),
+            (
+                name: "MonsterMod",
+                values: Some([
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                ]),
+            ),
+            (
+                name: "HealthToADRatio",
+                values: Some([
+                    1.7,
+                    2.0,
+                    2.3,
+                    2.6,
+                    2.9,
+                    3.2,
+                    3.5,
+                ]),
+            ),
+        ]),
+        mana: None,
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: Some(20.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

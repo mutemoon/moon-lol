@@ -1,0 +1,147 @@
+(
+    spellData: Some((
+        calculations: Some({
+            650249832: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 1116170959,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            1455393055: (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            3723008375: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(2),
+                        dataValue: 2342114518,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "KnockupDuration",
+                values: Some([
+                    0.6,
+                    0.6,
+                    0.6,
+                    0.6,
+                    0.6,
+                    0.6,
+                    0.6,
+                ]),
+            ),
+            (
+                name: "SpinDuration",
+                values: Some([
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                ]),
+            ),
+            (
+                name: "MoveSpeed",
+                values: Some([
+                    0.2,
+                    0.2,
+                    0.2,
+                    0.2,
+                    0.2,
+                    0.2,
+                    0.2,
+                ]),
+            ),
+            (
+                name: "BasePercentMaxHPDmgPerSec",
+                values: Some([
+                    0.02,
+                    0.04,
+                    0.06,
+                    0.08,
+                    0.1,
+                    0.12,
+                    0.14,
+                ]),
+            ),
+            (
+                name: "SecondsPerTick",
+                values: Some([
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                ]),
+            ),
+            (
+                name: "RecastWindow",
+                values: Some([
+                    8.0,
+                    8.0,
+                    8.0,
+                    8.0,
+                    8.0,
+                    8.0,
+                    8.0,
+                ]),
+            ),
+            (
+                name: "LockoutTimeBetweenCasts",
+                values: Some([
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                ]),
+            ),
+            (
+                name: "ADRatioPerSecond",
+                values: Some([
+                    1.375,
+                    1.375,
+                    1.375,
+                    1.375,
+                    1.375,
+                    1.375,
+                    1.375,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            100.0,
+            100.0,
+            100.0,
+            100.0,
+            100.0,
+            0.0,
+        ]),
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: Some(700.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

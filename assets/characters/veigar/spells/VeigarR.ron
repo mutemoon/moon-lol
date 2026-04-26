@@ -1,0 +1,80 @@
+(
+    spellData: Some((
+        calculations: Some({
+            4266938262: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 64618745,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: 3809245599,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "APRatio",
+                values: Some([
+                    0.6,
+                    0.65,
+                    0.7,
+                    0.75,
+                    0.8,
+                    0.85,
+                    0.9,
+                ]),
+            ),
+            (
+                name: "BaseDamage",
+                values: Some([
+                    100.0,
+                    175.0,
+                    250.0,
+                    325.0,
+                    400.0,
+                    475.0,
+                    550.0,
+                ]),
+            ),
+            (
+                name: "MaxExecuteMult",
+                values: Some([
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            100.0,
+            100.0,
+            100.0,
+            100.0,
+            100.0,
+            100.0,
+        ]),
+        missileSpec: Some((
+            movementComponent: (
+                type: "MovementTypeFixedSpeed",
+                speed: None,
+                startBoneName: None,
+            ),
+        )),
+        hitBoneName: Some("C_BUFFBONE_GLB_LAYOUT_LOC"),
+        missileSpeed: None,
+        missileEffectKey: Some(664608619),
+        castType: Some(1),
+    )),
+)

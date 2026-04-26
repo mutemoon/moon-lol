@@ -1,0 +1,165 @@
+(
+    spellData: Some((
+        calculations: Some({
+            3979498608: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 64618745,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: 3809245599,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: Some([
+            (
+                values: Some([
+                    0.0,
+                    150.0,
+                    250.0,
+                    350.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    0.75,
+                    0.75,
+                    0.75,
+                    0.75,
+                    0.75,
+                    0.75,
+                    0.75,
+                ]),
+            ),
+            (
+                values: Some([
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                ]),
+            ),
+            (
+                values: Some([
+                    1100.0,
+                    1100.0,
+                    1100.0,
+                    1100.0,
+                    1100.0,
+                    1100.0,
+                    1100.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    1000.0,
+                    1000.0,
+                    1000.0,
+                    1000.0,
+                    1000.0,
+                    1000.0,
+                    1000.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    950.0,
+                    950.0,
+                    950.0,
+                    950.0,
+                    950.0,
+                    950.0,
+                    950.0,
+                ]),
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+        ]),
+        dataValues: Some([
+            (
+                name: "BaseDamage",
+                values: Some([
+                    50.0,
+                    150.0,
+                    250.0,
+                    350.0,
+                    450.0,
+                    550.0,
+                    650.0,
+                ]),
+            ),
+            (
+                name: "FearDurationMin",
+                values: Some([
+                    0.75,
+                    0.75,
+                    0.75,
+                    0.75,
+                    0.75,
+                    0.75,
+                    0.75,
+                ]),
+            ),
+            (
+                name: "FearDurationMax",
+                values: Some([
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                ]),
+            ),
+            (
+                name: "APRatio",
+                values: Some([
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            100.0,
+            100.0,
+            100.0,
+            100.0,
+            100.0,
+            0.0,
+        ]),
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: Some(1200.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

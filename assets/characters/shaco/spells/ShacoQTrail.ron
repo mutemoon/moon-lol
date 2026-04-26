@@ -1,0 +1,98 @@
+(
+    spellData: Some((
+        calculations: None,
+        effectAmounts: Some([
+            (
+                values: Some([
+                    0.0,
+                    10.0,
+                    40.0,
+                    70.0,
+                    100.0,
+                    130.0,
+                    160.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    17.5,
+                    20.0,
+                    22.5,
+                    25.0,
+                    27.5,
+                    30.0,
+                    32.5,
+                ]),
+            ),
+            (
+                values: Some([
+                    17.5,
+                    20.0,
+                    22.5,
+                    25.0,
+                    27.5,
+                    30.0,
+                    32.5,
+                ]),
+            ),
+            (
+                values: Some([
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    25.0,
+                    30.0,
+                    35.0,
+                    40.0,
+                    45.0,
+                    50.0,
+                    55.0,
+                ]),
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+        ]),
+        dataValues: None,
+        mana: None,
+        missileSpec: Some((
+            movementComponent: (
+                type: "MovementTypeFixedSpeed",
+                speed: Some(5000.0),
+                startBoneName: None,
+            ),
+        )),
+        hitBoneName: None,
+        missileSpeed: Some(5000.0),
+        missileEffectKey: None,
+        castType: Some(1),
+    )),
+)

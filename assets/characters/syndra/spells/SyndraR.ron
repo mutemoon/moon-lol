@@ -1,0 +1,122 @@
+(
+    spellData: Some((
+        calculations: Some({
+            3387110781: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 1243497186,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: 3809245599,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "DamagePerSphere",
+                values: Some([
+                    40.0,
+                    80.0,
+                    120.0,
+                    160.0,
+                    200.0,
+                    240.0,
+                    280.0,
+                ]),
+            ),
+            (
+                name: "MaxSpheresToUse",
+                values: Some([
+                    7.0,
+                    7.0,
+                    7.0,
+                    7.0,
+                    7.0,
+                    7.0,
+                    7.0,
+                ]),
+            ),
+            (
+                name: "UpgradeExecuteThreshold",
+                values: Some([
+                    0.15,
+                    0.15,
+                    0.15,
+                    0.15,
+                    0.15,
+                    0.15,
+                    0.15,
+                ]),
+            ),
+            (
+                name: "QHastePerRank",
+                values: Some([
+                    10.0,
+                    10.0,
+                    10.0,
+                    10.0,
+                    10.0,
+                    10.0,
+                    10.0,
+                ]),
+            ),
+            (
+                name: "TOOLTIPONLYTotalQHaste",
+                values: Some([
+                    0.0,
+                    10.0,
+                    20.0,
+                    30.0,
+                    40.0,
+                    50.0,
+                    60.0,
+                ]),
+            ),
+            (
+                name: "MinSpheresToUse",
+                values: Some([
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                ]),
+            ),
+            (
+                name: "APRatio",
+                values: Some([
+                    0.2,
+                    0.2,
+                    0.2,
+                    0.2,
+                    0.2,
+                    0.2,
+                    0.2,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            100.0,
+            100.0,
+            100.0,
+            100.0,
+            100.0,
+            100.0,
+        ]),
+        missileSpec: None,
+        hitBoneName: Some("head"),
+        missileSpeed: Some(1100.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

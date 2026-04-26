@@ -1,0 +1,162 @@
+(
+    spellData: Some((
+        calculations: Some({
+            2826286850: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 247463083,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: None,
+                        coefficient: Some(0.3),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            707375524: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 3357680165,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: None,
+                        coefficient: Some(0.25),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            822301470: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 1248407231,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: None,
+                        coefficient: Some(0.7),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            2142592777: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 3056683083,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: None,
+                        coefficient: Some(0.24),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "Tooltip_QQBaseDamage",
+                values: Some([
+                    20.0,
+                    50.0,
+                    80.0,
+                    110.0,
+                    140.0,
+                    170.0,
+                    200.0,
+                ]),
+            ),
+            (
+                name: "Tooltip_QQBonusDamage",
+                values: Some([
+                    2.0,
+                    3.0,
+                    4.0,
+                    5.0,
+                    6.0,
+                    7.0,
+                    8.0,
+                ]),
+            ),
+            (
+                name: "Tooltip_QWBaseDamage",
+                values: Some([
+                    35.0,
+                    60.0,
+                    85.0,
+                    110.0,
+                    135.0,
+                    160.0,
+                    185.0,
+                ]),
+            ),
+            (
+                name: "Tooltip_QWBonusDamageMult",
+                values: Some([
+                    1.625,
+                    2.0,
+                    2.375,
+                    2.75,
+                    3.125,
+                    3.5,
+                    3.875,
+                ]),
+            ),
+            (
+                name: "Tooltip_QEBaseDamage",
+                values: Some([
+                    5.0,
+                    20.0,
+                    35.0,
+                    50.0,
+                    65.0,
+                    80.0,
+                    95.0,
+                ]),
+            ),
+            (
+                name: "Tooltip_QEBaseDPS",
+                values: Some([
+                    5.0,
+                    20.0,
+                    35.0,
+                    50.0,
+                    65.0,
+                    80.0,
+                    95.0,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            80.0,
+            90.0,
+            100.0,
+            110.0,
+            120.0,
+            120.0,
+        ]),
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: None,
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

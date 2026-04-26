@@ -1,0 +1,116 @@
+(
+    spellData: Some((
+        calculations: Some({
+            4125537899: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 2665916724,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: 2734772740,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "RChannelDuration",
+                values: Some([
+                    1.0,
+                    1.25,
+                    1.5,
+                    1.75,
+                    2.0,
+                    2.25,
+                    2.5,
+                ]),
+            ),
+            (
+                name: "R1BaseDamage",
+                values: Some([
+                    100.0,
+                    150.0,
+                    200.0,
+                    250.0,
+                    300.0,
+                    350.0,
+                    400.0,
+                ]),
+            ),
+            (
+                name: "R1APRatio",
+                values: Some([
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                ]),
+            ),
+            (
+                name: "RRange",
+                values: Some([
+                    1200.0,
+                    1200.0,
+                    1200.0,
+                    1200.0,
+                    1200.0,
+                    1200.0,
+                    1200.0,
+                ]),
+            ),
+            (
+                name: "RMinSlow",
+                values: Some([
+                    -0.4,
+                    -0.4,
+                    -0.4,
+                    -0.4,
+                    -0.4,
+                    -0.4,
+                    -0.4,
+                ]),
+            ),
+            (
+                name: "RMaxSlow",
+                values: Some([
+                    -0.99,
+                    -0.99,
+                    -0.99,
+                    -0.99,
+                    -0.99,
+                    -0.99,
+                    -0.99,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            100.0,
+            100.0,
+            100.0,
+            100.0,
+            100.0,
+            100.0,
+        ]),
+        missileSpec: Some((
+            movementComponent: (
+                type: "MovementTypeFixedSpeed",
+                speed: Some(1600.0),
+                startBoneName: Some("C_Buffbone_Glb_Layout_Loc"),
+            ),
+        )),
+        hitBoneName: None,
+        missileSpeed: None,
+        missileEffectKey: None,
+        castType: Some(3),
+    )),
+)

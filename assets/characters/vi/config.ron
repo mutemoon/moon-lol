@@ -1,0 +1,114 @@
+(
+  resources: {},
+  entities: {
+    4294967288: (
+      components: {
+        "lol_core::skill::CoolDown": (
+          duration: 0.0,
+        ),
+        "lol_core::skill::Skill": (
+          spell: Path("characters/vi/spells/ViPassive.ron"),
+          level: 1,
+          slot: Passive,
+          cooldown_mode: AfterCast,
+        ),
+        "lol_core::skill::SkillOf": (4294967293),
+      },
+    ),
+    4294967289: (
+      components: {
+        "lol_core::skill::CoolDown": (
+          duration: 0.0,
+        ),
+        "lol_core::skill::Skill": (
+          spell: Path("characters/vi/spells/ViR.ron"),
+          level: 1,
+          slot: R,
+          cooldown_mode: AfterCast,
+        ),
+        "lol_core::skill::SkillOf": (4294967293),
+      },
+    ),
+    4294967290: (
+      components: {
+        "lol_core::skill::CoolDown": (
+          duration: 0.0,
+        ),
+        "lol_core::skill::Skill": (
+          spell: Path("characters/vi/spells/ViE.ron"),
+          level: 1,
+          slot: E,
+          cooldown_mode: AfterCast,
+        ),
+        "lol_core::skill::SkillOf": (4294967293),
+      },
+    ),
+    4294967291: (
+      components: {
+        "lol_core::skill::CoolDown": (
+          duration: 0.0,
+        ),
+        "lol_core::skill::Skill": (
+          spell: Path("characters/vi/spells/ViW.ron"),
+          level: 1,
+          slot: W,
+          cooldown_mode: AfterCast,
+        ),
+        "lol_core::skill::SkillOf": (4294967293),
+      },
+    ),
+    4294967292: (
+      components: {
+        "lol_core::skill::CoolDown": (
+          duration: 0.0,
+        ),
+        "lol_core::skill::Skill": (
+          spell: Path("characters/vi/spells/ViQ.ron"),
+          level: 1,
+          slot: Q,
+          cooldown_mode: AfterCast,
+        ),
+        "lol_core::skill::SkillOf": (4294967293),
+      },
+    ),
+    4294967293: (
+      components: {
+        "bevy_ecs::name::Name": "vi",
+        "lol_core::attack::Attack": (
+          range: 600.0,
+          base_attack_speed: 0.625,
+          bonus_attack_speed: 0.0,
+          buff_bonus_attack_speed: 0.0,
+          attack_speed_cap: 2.5,
+          windup_config: Modern(
+            attack_cast_time: 0.36,
+            attack_total_time: 1.6,
+          ),
+          windup_modifier: 1.0,
+          spell_key: None,
+        ),
+        "lol_core::base::bounding::Bounding": (
+          radius: 35.0,
+          height: 110.0,
+        ),
+        "lol_core::damage::Armor": (30.0),
+        "lol_core::damage::Damage": (50.0),
+        "lol_core::entities::champion::Champion": (),
+        "lol_core::life::Health": (
+          value: 1000.0,
+          max: 1000.0,
+        ),
+        "lol_core::movement::Movement": (
+          speed: 5.0,
+        ),
+        "lol_core::skill::Skills": ([
+          4294967292,
+          4294967291,
+          4294967290,
+          4294967289,
+          4294967288,
+        ]),
+      },
+    ),
+  },
+)

@@ -1,0 +1,192 @@
+(
+    spellData: Some((
+        calculations: Some({
+            3768369729: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(2),
+                        dataValue: 3254938624,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            4266938262: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 1649423674,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(2),
+                        coefficient: Some(0.6),
+                        statFormula: Some(2),
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            1204873108: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 2210378052,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(2),
+                        coefficient: Some(1.8),
+                        statFormula: Some(2),
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: Some([
+            (
+                values: Some([
+                    100.0,
+                    100.0,
+                    150.0,
+                    200.0,
+                    200.0,
+                    200.0,
+                    200.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    300.0,
+                    300.0,
+                    450.0,
+                    600.0,
+                    600.0,
+                    600.0,
+                    600.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    0.0,
+                    20.0,
+                    20.0,
+                    20.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    0.0,
+                    15.0,
+                    15.0,
+                    15.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    25.0,
+                    25.0,
+                    25.0,
+                    25.0,
+                    25.0,
+                    25.0,
+                    25.0,
+                ]),
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+        ]),
+        dataValues: Some([
+            (
+                name: "MinBase",
+                values: Some([
+                    50.0,
+                    100.0,
+                    150.0,
+                    200.0,
+                    250.0,
+                    300.0,
+                    350.0,
+                ]),
+            ),
+            (
+                name: "MaxBase",
+                values: Some([
+                    150.0,
+                    300.0,
+                    450.0,
+                    600.0,
+                    750.0,
+                    900.0,
+                    1050.0,
+                ]),
+            ),
+            (
+                name: "Duration",
+                values: Some([
+                    15.0,
+                    15.0,
+                    15.0,
+                    15.0,
+                    15.0,
+                    15.0,
+                    15.0,
+                ]),
+            ),
+            (
+                name: "PercentBonusAD",
+                values: Some([
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                ]),
+            ),
+            (
+                name: "TooltipAttackRange",
+                values: Some([
+                    75.0,
+                    75.0,
+                    75.0,
+                    75.0,
+                    75.0,
+                    75.0,
+                    75.0,
+                ]),
+            ),
+        ]),
+        mana: None,
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: Some(1200.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

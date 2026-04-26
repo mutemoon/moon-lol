@@ -1,0 +1,123 @@
+(
+    spellData: Some((
+        calculations: Some({
+            1089369324: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 3609980641,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: None,
+                        coefficient: Some(0.8),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "LifestealAndSpellVamp",
+                values: Some([
+                    6.0,
+                    10.0,
+                    14.0,
+                    18.0,
+                    22.0,
+                    26.0,
+                    30.0,
+                ]),
+            ),
+            (
+                name: "ShieldValue",
+                values: Some([
+                    25.0,
+                    70.0,
+                    115.0,
+                    160.0,
+                    205.0,
+                    250.0,
+                    295.0,
+                ]),
+            ),
+            (
+                name: "ShieldDuration",
+                values: Some([
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                ]),
+            ),
+            (
+                name: "DashSpeed",
+                values: Some([
+                    1350.0,
+                    1350.0,
+                    1350.0,
+                    1350.0,
+                    1350.0,
+                    1350.0,
+                    1350.0,
+                ]),
+            ),
+            (
+                name: "W1ReactivateTime",
+                values: Some([
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                ]),
+            ),
+            (
+                name: "W1CooldownRecovered",
+                values: Some([
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                ]),
+            ),
+            (
+                name: "LifestealAndSpellVampTime",
+                values: Some([
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            50.0,
+            50.0,
+            50.0,
+            50.0,
+            50.0,
+            50.0,
+        ]),
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: Some(1500.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

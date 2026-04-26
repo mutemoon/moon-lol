@@ -1,0 +1,37 @@
+(
+    spellData: Some((
+        calculations: Some({
+            501147496: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartEffectValue",
+                        effectIndex: Some(1),
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(2),
+                        coefficient: Some(1.0),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: None,
+        mana: None,
+        missileSpec: Some((
+            movementComponent: (
+                type: "MovementTypeFixedSpeed",
+                speed: Some(1600.0),
+                startBoneName: Some(""),
+            ),
+        )),
+        hitBoneName: None,
+        missileSpeed: Some(1800.0),
+        missileEffectKey: Some(2480774772),
+        castType: Some(3),
+    )),
+)

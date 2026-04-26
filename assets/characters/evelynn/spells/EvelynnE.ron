@@ -1,0 +1,239 @@
+(
+    spellData: Some((
+        calculations: Some({
+            722128141: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 3074522276,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: None,
+                        coefficient: Some(0.025),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            1001393024: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 3378955467,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: None,
+                        coefficient: Some(0.015),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: Some([
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: Some([
+                    0.3,
+                    0.3,
+                    0.35,
+                    0.4,
+                    0.45,
+                    0.5,
+                    0.5,
+                ]),
+            ),
+            (
+                values: Some([
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    450.0,
+                    450.0,
+                    450.0,
+                    450.0,
+                    450.0,
+                    450.0,
+                    450.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    0.75,
+                    0.8,
+                    0.85,
+                    0.9,
+                    0.95,
+                    1.0,
+                    1.05,
+                ]),
+            ),
+            (
+                values: Some([
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    1.25,
+                    1.3,
+                    1.35,
+                    1.4,
+                    1.45,
+                    1.5,
+                    1.55,
+                ]),
+            ),
+        ]),
+        dataValues: Some([
+            (
+                name: "TOOLTIP_ONLY",
+                values: None,
+            ),
+            (
+                name: "BaseDamage",
+                values: Some([
+                    30.0,
+                    60.0,
+                    90.0,
+                    120.0,
+                    150.0,
+                    180.0,
+                    210.0,
+                ]),
+            ),
+            (
+                name: "EmpoweredDamage",
+                values: Some([
+                    40.0,
+                    80.0,
+                    120.0,
+                    160.0,
+                    200.0,
+                    240.0,
+                    280.0,
+                ]),
+            ),
+            (
+                name: "BasePercentHealth",
+                values: Some([
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                ]),
+            ),
+            (
+                name: "EmpoweredPercentHealth",
+                values: Some([
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                ]),
+            ),
+            (
+                name: "MonsterCap",
+                values: Some([
+                    450.0,
+                    450.0,
+                    450.0,
+                    450.0,
+                    450.0,
+                    450.0,
+                    450.0,
+                ]),
+            ),
+            (
+                name: "SpeedAmount",
+                values: Some([
+                    0.25,
+                    0.3,
+                    0.35,
+                    0.4,
+                    0.45,
+                    0.5,
+                    0.55,
+                ]),
+            ),
+            (
+                name: "SpeedDuration",
+                values: Some([
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            40.0,
+            45.0,
+            50.0,
+            55.0,
+            60.0,
+            60.0,
+        ]),
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: Some(902.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

@@ -1,0 +1,182 @@
+(
+    spellData: Some((
+        calculations: Some({
+            501147496: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 1508461632,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(2),
+                        dataValue: 942499611,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: None,
+                        coefficient: Some(0.25),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "Damage",
+                values: Some([
+                    -10.0,
+                    30.0,
+                    70.0,
+                    110.0,
+                    150.0,
+                    190.0,
+                    230.0,
+                ]),
+            ),
+            (
+                name: "ADRatio",
+                values: Some([
+                    1.2,
+                    1.2,
+                    1.2,
+                    1.2,
+                    1.2,
+                    1.2,
+                    1.2,
+                ]),
+            ),
+            (
+                name: "CriticalEffectiveness",
+                values: Some([
+                    0.75,
+                    0.75,
+                    0.75,
+                    0.75,
+                    0.75,
+                    0.75,
+                    0.75,
+                ]),
+            ),
+            (
+                name: "SlowPercent",
+                values: Some([
+                    0.25,
+                    0.3,
+                    0.35,
+                    0.4,
+                    0.45,
+                    0.5,
+                    0.55,
+                ]),
+            ),
+            (
+                name: "SlowDuration",
+                values: Some([
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                ]),
+            ),
+            (
+                name: "WallBeamRange",
+                values: Some([
+                    1500.0,
+                    1500.0,
+                    1500.0,
+                    1500.0,
+                    1500.0,
+                    1500.0,
+                    1500.0,
+                ]),
+            ),
+            (
+                name: "BeamWidth",
+                values: Some([
+                    200.0,
+                    200.0,
+                    200.0,
+                    200.0,
+                    200.0,
+                    200.0,
+                    200.0,
+                ]),
+            ),
+            (
+                name: "BeamCastTime",
+                values: Some([
+                    0.85,
+                    0.85,
+                    0.85,
+                    0.85,
+                    0.85,
+                    0.85,
+                    0.85,
+                ]),
+            ),
+            (
+                name: "MinCastTime",
+                values: Some([
+                    0.3,
+                    0.3,
+                    0.3,
+                    0.3,
+                    0.3,
+                    0.3,
+                    0.3,
+                ]),
+            ),
+            (
+                name: "ASpeedCastTimeScalarPerHundrethSecond",
+                values: Some([
+                    0.09,
+                    0.09,
+                    0.09,
+                    0.09,
+                    0.09,
+                    0.09,
+                    0.09,
+                ]),
+            ),
+            (
+                name: "BaseCastTime",
+                values: Some([
+                    0.55,
+                    0.55,
+                    0.55,
+                    0.55,
+                    0.55,
+                    0.55,
+                    0.55,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            50.0,
+            60.0,
+            70.0,
+            80.0,
+            90.0,
+            100.0,
+        ]),
+        missileSpec: Some((
+            movementComponent: (
+                type: "MovementTypeFixedSpeed",
+                speed: Some(2500.0),
+                startBoneName: Some("Buffbone_Glb_Weapon_1"),
+            ),
+        )),
+        hitBoneName: Some("root"),
+        missileSpeed: Some(3300.0),
+        missileEffectKey: Some(2158127160),
+        castType: Some(3),
+    )),
+)

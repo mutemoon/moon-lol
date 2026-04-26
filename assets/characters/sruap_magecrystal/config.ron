@@ -1,0 +1,37 @@
+(
+  resources: {},
+  entities: {
+    4294967293: (
+      components: {
+        "bevy_ecs::name::Name": "sruap_magecrystal",
+        "lol_core::attack::Attack": (
+          range: 1250.0,
+          base_attack_speed: 1.4285715,
+          bonus_attack_speed: 0.0,
+          buff_bonus_attack_speed: 0.0,
+          attack_speed_cap: 2.5,
+          windup_config: Modern(
+            attack_cast_time: 0.3,
+            attack_total_time: 0.7,
+          ),
+          windup_modifier: 1.0,
+          spell_key: None,
+        ),
+        "lol_core::base::bounding::Bounding": (
+          radius: 88.4,
+          height: 200.0,
+        ),
+        "lol_core::damage::Armor": (30.0),
+        "lol_core::damage::Damage": (50.0),
+        "lol_core::entities::champion::Champion": (),
+        "lol_core::life::Health": (
+          value: 1000.0,
+          max: 1000.0,
+        ),
+        "lol_core::movement::Movement": (
+          speed: 5.0,
+        ),
+      },
+    ),
+  },
+)

@@ -1,0 +1,186 @@
+(
+    spellData: Some((
+        calculations: Some({
+            3202745679: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 2787609909,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: 3546411757,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            704689212: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 64618745,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: 3809245599,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "APRatio",
+                values: Some([
+                    0.75,
+                    0.75,
+                    0.75,
+                    0.75,
+                    0.75,
+                    0.75,
+                    0.75,
+                ]),
+            ),
+            (
+                name: "BaseDamage",
+                values: Some([
+                    50.0,
+                    150.0,
+                    250.0,
+                    350.0,
+                    450.0,
+                    550.0,
+                    650.0,
+                ]),
+            ),
+            (
+                name: "SlowAmount",
+                values: Some([
+                    -0.3,
+                    -0.45,
+                    -0.6,
+                    -0.75,
+                    -0.9,
+                    -1.05,
+                    -1.2,
+                ]),
+            ),
+            (
+                name: "SlowDuration",
+                values: Some([
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                ]),
+            ),
+            (
+                name: "EnemyCastDuration",
+                values: Some([
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                ]),
+            ),
+            (
+                name: "SelfCastDuration",
+                values: Some([
+                    2.5,
+                    2.5,
+                    2.5,
+                    2.5,
+                    2.5,
+                    2.5,
+                    2.5,
+                ]),
+            ),
+            (
+                name: "SelfCastFlatHeal",
+                values: Some([
+                    50.0,
+                    100.0,
+                    150.0,
+                    200.0,
+                    250.0,
+                    300.0,
+                    350.0,
+                ]),
+            ),
+            (
+                name: "SelfCastMissingHPRatio",
+                values: Some([
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                ]),
+            ),
+            (
+                name: "SelfCastMissingHPPerAbove",
+                values: Some([
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                ]),
+            ),
+            (
+                name: "StartingAoESize",
+                values: Some([
+                    292.0,
+                    292.0,
+                    292.0,
+                    292.0,
+                    292.0,
+                    292.0,
+                    292.0,
+                ]),
+            ),
+            (
+                name: "PercentMissingHPRatio",
+                values: Some([
+                    0.55,
+                    0.55,
+                    0.55,
+                    0.55,
+                    0.55,
+                    0.55,
+                    0.55,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            100.0,
+            100.0,
+            100.0,
+            0.0,
+            0.0,
+            0.0,
+        ]),
+        missileSpec: None,
+        hitBoneName: Some("C_BUFFBONE_GLB_CHEST_LOC"),
+        missileSpeed: Some(2000.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

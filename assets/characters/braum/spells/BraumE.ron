@@ -1,0 +1,88 @@
+(
+    spellData: Some((
+        calculations: None,
+        effectAmounts: Some([
+            (
+                values: None,
+            ),
+            (
+                values: Some([
+                    2.75,
+                    3.0,
+                    3.25,
+                    3.5,
+                    3.75,
+                    4.0,
+                    4.25,
+                ]),
+            ),
+            (
+                values: Some([
+                    30.0,
+                    35.0,
+                    40.0,
+                    45.0,
+                    50.0,
+                    55.0,
+                    60.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    10.0,
+                    10.0,
+                    10.0,
+                    10.0,
+                    10.0,
+                    10.0,
+                    10.0,
+                ]),
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+        ]),
+        dataValues: Some([
+            (
+                name: "RangedReflect",
+                values: Some([
+                    0.15,
+                    0.15,
+                    0.15,
+                    0.15,
+                    0.15,
+                    0.15,
+                    0.15,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            30.0,
+            35.0,
+            40.0,
+            45.0,
+            50.0,
+            55.0,
+        ]),
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: None,
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

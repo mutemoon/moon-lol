@@ -1,0 +1,76 @@
+(
+    spellData: Some((
+        calculations: Some({
+            501147496: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: None,
+                        coefficient: Some(0.5),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "MoveSpeedMod",
+                values: Some([
+                    -0.25,
+                    -0.25,
+                    -0.25,
+                    -0.25,
+                    -0.25,
+                    -0.25,
+                    -0.25,
+                ]),
+            ),
+            (
+                name: "ExplosionDelay",
+                values: Some([
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                ]),
+            ),
+            (
+                name: "Range",
+                values: Some([
+                    1350.0,
+                    1350.0,
+                    1350.0,
+                    1350.0,
+                    1350.0,
+                    1350.0,
+                    1350.0,
+                ]),
+            ),
+            (
+                name: "Radius",
+                values: Some([
+                    450.0,
+                    450.0,
+                    450.0,
+                    450.0,
+                    450.0,
+                    450.0,
+                    450.0,
+                ]),
+            ),
+        ]),
+        mana: None,
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: None,
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

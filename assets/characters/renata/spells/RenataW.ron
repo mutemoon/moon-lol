@@ -1,0 +1,205 @@
+(
+    spellData: Some((
+        calculations: Some({
+            2245515248: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 1905418908,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            2953195018: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 1166929275,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: 1269549457,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            1862149928: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 2368579180,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: 1269549457,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            1917711910: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 2368579180,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: 1269549457,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            1849838508: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 1166929275,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: 1269549457,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "Duration",
+                values: Some([
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                ]),
+            ),
+            (
+                name: "BonusAttackSpeed",
+                values: Some([
+                    5.0,
+                    10.0,
+                    15.0,
+                    20.0,
+                    25.0,
+                    30.0,
+                    35.0,
+                ]),
+            ),
+            (
+                name: "BonusMoveSpeed",
+                values: Some([
+                    7.5,
+                    10.0,
+                    12.5,
+                    15.0,
+                    17.5,
+                    20.0,
+                    22.5,
+                ]),
+            ),
+            (
+                name: "APToPercentRatio",
+                values: Some([
+                    0.01,
+                    0.01,
+                    0.01,
+                    0.01,
+                    0.01,
+                    0.01,
+                    0.01,
+                ]),
+            ),
+            (
+                name: "TriumphPercent",
+                values: Some([
+                    20.0,
+                    20.0,
+                    20.0,
+                    20.0,
+                    20.0,
+                    20.0,
+                    20.0,
+                ]),
+            ),
+            (
+                name: "TicksBeforeDeath",
+                values: Some([
+                    10.0,
+                    10.0,
+                    10.0,
+                    10.0,
+                    10.0,
+                    10.0,
+                    10.0,
+                ]),
+            ),
+            (
+                name: "MaxStatMultiplier",
+                values: Some([
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                ]),
+            ),
+            (
+                name: "TicksPerSecond",
+                values: Some([
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                ]),
+            ),
+            (
+                name: "TagDuration",
+                values: Some([
+                    6.0,
+                    6.0,
+                    6.0,
+                    6.0,
+                    6.0,
+                    6.0,
+                    6.0,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            80.0,
+            80.0,
+            80.0,
+            80.0,
+            80.0,
+            80.0,
+        ]),
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: Some(0.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

@@ -1,0 +1,104 @@
+(
+    spellData: Some((
+        calculations: Some({
+            3202745679: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(2),
+                        dataValue: 2627268465,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            1451939075: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 64618745,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(2),
+                        coefficient: Some(0.7),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            1798361858: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 64618745,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(2),
+                        coefficient: Some(0.7),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "BaseDamage",
+                values: Some([
+                    -15.0,
+                    5.0,
+                    25.0,
+                    45.0,
+                    65.0,
+                    85.0,
+                    105.0,
+                ]),
+            ),
+            (
+                name: "DashSpeedBonus",
+                values: Some([
+                    0.0,
+                    1400.0,
+                    1400.0,
+                    1400.0,
+                    1400.0,
+                    1400.0,
+                    1400.0,
+                ]),
+            ),
+            (
+                name: "HealTADCoefficient",
+                values: Some([
+                    0.08,
+                    0.09,
+                    0.1,
+                    0.11,
+                    0.12,
+                    0.13,
+                    0.14,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            15.0,
+            15.0,
+            15.0,
+            15.0,
+            15.0,
+            15.0,
+        ]),
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: Some(0.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

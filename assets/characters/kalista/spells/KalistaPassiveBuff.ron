@@ -1,0 +1,114 @@
+(
+    spellData: Some((
+        calculations: Some({
+            2233777796: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(7),
+                        coefficient: Some(2.0),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            1462302689: (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: Some((
+                    type: "CalculationPartNamedDataValue",
+                    dataValue: 2459213498,
+                )),
+                precision: Some(2),
+            ),
+            152212916: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(4),
+                        coefficient: Some(1.0),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            3273037337: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(4),
+                        coefficient: Some(1.0),
+                        statFormula: Some(2),
+                    ),
+                ]),
+                multiplier: Some((
+                    type: "CalculationPartNamedDataValue",
+                    dataValue: 420673158,
+                )),
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "DashSpeedDivisor",
+                values: Some([
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                ]),
+            ),
+            (
+                name: "GameModeInteger",
+                values: Some([
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                ]),
+            ),
+            (
+                name: "ModesASCap",
+                values: Some([
+                    6.0,
+                    6.0,
+                    6.0,
+                    6.0,
+                    6.0,
+                    6.0,
+                    6.0,
+                ]),
+            ),
+            (
+                name: "ModesAStoADRatio",
+                values: Some([
+                    0.7,
+                    0.7,
+                    0.7,
+                    0.7,
+                    0.7,
+                    0.7,
+                    0.7,
+                ]),
+            ),
+        ]),
+        mana: None,
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: None,
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

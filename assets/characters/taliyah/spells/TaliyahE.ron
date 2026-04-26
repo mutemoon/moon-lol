@@ -1,0 +1,207 @@
+(
+    spellData: Some((
+        calculations: Some({
+            2595293740: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 64618745,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: None,
+                        coefficient: Some(0.6),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            3129008161: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 1509660888,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: None,
+                        coefficient: Some(0.3),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: Some([
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: Some([
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    85.0,
+                    85.0,
+                    85.0,
+                    85.0,
+                    85.0,
+                    85.0,
+                    85.0,
+                ]),
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: Some([
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                ]),
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+        ]),
+        dataValues: Some([
+            (
+                name: "BaseDamage",
+                values: Some([
+                    15.0,
+                    60.0,
+                    105.0,
+                    150.0,
+                    195.0,
+                    240.0,
+                    285.0,
+                ]),
+            ),
+            (
+                name: "BaseDetonationDamage",
+                values: Some([
+                    10.0,
+                    25.0,
+                    40.0,
+                    55.0,
+                    70.0,
+                    85.0,
+                    100.0,
+                ]),
+            ),
+            (
+                name: "MonsterModPercent",
+                values: Some([
+                    2.25,
+                    2.25,
+                    2.25,
+                    2.25,
+                    2.25,
+                    2.25,
+                    2.25,
+                ]),
+            ),
+            (
+                name: "StunDuration",
+                values: Some([
+                    0.75,
+                    0.75,
+                    0.75,
+                    0.75,
+                    0.75,
+                    0.75,
+                    0.75,
+                ]),
+            ),
+            (
+                name: "MaxStunDuration",
+                values: Some([
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                ]),
+            ),
+            (
+                name: "MineDamageFalloff",
+                values: Some([
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                ]),
+            ),
+            (
+                name: "DelayBetweenRows",
+                values: Some([
+                    0.17,
+                    0.17,
+                    0.17,
+                    0.17,
+                    0.17,
+                    0.17,
+                    0.17,
+                ]),
+            ),
+            (
+                name: "SlowPercent",
+                values: Some([
+                    0.2,
+                    0.2,
+                    0.2,
+                    0.2,
+                    0.2,
+                    0.2,
+                    0.2,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            90.0,
+            90.0,
+            90.0,
+            90.0,
+            90.0,
+            90.0,
+        ]),
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: None,
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

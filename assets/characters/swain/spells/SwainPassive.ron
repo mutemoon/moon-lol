@@ -1,0 +1,51 @@
+(
+    spellData: Some((
+        calculations: Some({
+            1161527013: (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            2077653553: (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: Some(1),
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "SoulCollectionRange",
+                values: Some([
+                    1100.0,
+                    1100.0,
+                    1100.0,
+                    1100.0,
+                    1100.0,
+                    1100.0,
+                    1100.0,
+                ]),
+            ),
+            (
+                name: "HealthIncrement",
+                values: Some([
+                    15.0,
+                    15.0,
+                    15.0,
+                    15.0,
+                    15.0,
+                    15.0,
+                    15.0,
+                ]),
+            ),
+        ]),
+        mana: None,
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: None,
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

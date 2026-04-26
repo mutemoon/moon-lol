@@ -1,0 +1,162 @@
+(
+    spellData: Some((
+        calculations: Some({
+            501147496: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 3029543557,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(2),
+                        dataValue: 3971278895,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            4223235112: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 3752148091,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "NumTicks",
+                values: Some([
+                    7.0,
+                    7.0,
+                    7.0,
+                    7.0,
+                    7.0,
+                    7.0,
+                    7.0,
+                ]),
+            ),
+            (
+                name: "ASPerTick",
+                values: Some([
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                ]),
+            ),
+            (
+                name: "BaseDamagePerTick",
+                values: Some([
+                    1.0,
+                    4.0,
+                    7.0,
+                    10.0,
+                    13.0,
+                    16.0,
+                    19.0,
+                ]),
+            ),
+            (
+                name: "ADRatioPerTick",
+                values: Some([
+                    0.37,
+                    0.4,
+                    0.43,
+                    0.46,
+                    0.49,
+                    0.52,
+                    0.55,
+                ]),
+            ),
+            (
+                name: "ShredDuration",
+                values: Some([
+                    6.0,
+                    6.0,
+                    6.0,
+                    6.0,
+                    6.0,
+                    6.0,
+                    6.0,
+                ]),
+            ),
+            (
+                name: "StacksToShred",
+                values: Some([
+                    6.0,
+                    6.0,
+                    6.0,
+                    6.0,
+                    6.0,
+                    6.0,
+                    6.0,
+                ]),
+            ),
+            (
+                name: "Duration",
+                values: Some([
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                ]),
+            ),
+            (
+                name: "ShredAmount",
+                values: Some([
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                ]),
+            ),
+            (
+                name: "NearestEnemyBonus",
+                values: Some([
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                ]),
+            ),
+            (
+                name: "CritMod",
+                values: Some([
+                    0.3,
+                    0.3,
+                    0.3,
+                    0.3,
+                    0.3,
+                    0.3,
+                    0.3,
+                ]),
+            ),
+        ]),
+        mana: None,
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: Some(700.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

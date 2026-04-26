@@ -1,0 +1,19 @@
+(
+    spellData: Some((
+        calculations: None,
+        effectAmounts: None,
+        dataValues: None,
+        mana: None,
+        missileSpec: Some((
+            movementComponent: (
+                type: "MovementTypeFixedSpeed",
+                speed: Some(2000.0),
+                startBoneName: Some("root"),
+            ),
+        )),
+        hitBoneName: Some("root"),
+        missileSpeed: Some(2000.0),
+        missileEffectKey: None,
+        castType: Some(3),
+    )),
+)

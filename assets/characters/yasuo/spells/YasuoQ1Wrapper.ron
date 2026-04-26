@@ -1,0 +1,159 @@
+(
+    spellData: Some((
+        calculations: Some({
+            501147496: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 64618745,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(2),
+                        dataValue: 942499611,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            1844455852: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 64618745,
+                    ),
+                    (
+                        type: "CalculationPartStatSub",
+                        stat: Some(2),
+                        subpart: Some((
+                            type: "CalculationPartStatNamedDataValue",
+                            stat: Some(9),
+                            dataValue: 942499611,
+                        )),
+                    ),
+                ]),
+                multiplier: None,
+                precision: Some(1),
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "BaseDamage",
+                values: Some([
+                    -5.0,
+                    20.0,
+                    45.0,
+                    70.0,
+                    95.0,
+                    120.0,
+                    145.0,
+                ]),
+            ),
+            (
+                name: "StabRange",
+                values: Some([
+                    450.0,
+                    450.0,
+                    450.0,
+                    450.0,
+                    450.0,
+                    450.0,
+                    450.0,
+                ]),
+            ),
+            (
+                name: "TornadoRange",
+                values: Some([
+                    1100.0,
+                    1100.0,
+                    1100.0,
+                    1100.0,
+                    1100.0,
+                    1100.0,
+                    1100.0,
+                ]),
+            ),
+            (
+                name: "Cooldown",
+                values: Some([
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                ]),
+            ),
+            (
+                name: "StabWidth",
+                values: Some([
+                    80.0,
+                    80.0,
+                    80.0,
+                    80.0,
+                    80.0,
+                    80.0,
+                    80.0,
+                ]),
+            ),
+            (
+                name: "SpinWidth",
+                values: Some([
+                    260.0,
+                    260.0,
+                    260.0,
+                    260.0,
+                    260.0,
+                    260.0,
+                    260.0,
+                ]),
+            ),
+            (
+                name: "GatheringStormDuration",
+                values: Some([
+                    6.0,
+                    6.0,
+                    6.0,
+                    6.0,
+                    6.0,
+                    6.0,
+                    6.0,
+                ]),
+            ),
+            (
+                name: "KnockUpDurationTOOLTIPONLY",
+                values: Some([
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                ]),
+            ),
+            (
+                name: "ADRatio",
+                values: Some([
+                    1.05,
+                    1.05,
+                    1.05,
+                    1.05,
+                    1.05,
+                    1.05,
+                    1.05,
+                ]),
+            ),
+        ]),
+        mana: None,
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: Some(1500.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

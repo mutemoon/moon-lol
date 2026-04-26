@@ -1,0 +1,184 @@
+(
+    spellData: Some((
+        calculations: Some({
+            2462788001: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 1788080398,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(12),
+                        dataValue: 2217103903,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: 3973874403,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            975448091: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 1451939075,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(12),
+                        dataValue: 2840862647,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: 739308531,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "MonsterMinionDamage",
+                values: Some([
+                    200.0,
+                    400.0,
+                    600.0,
+                    800.0,
+                    1000.0,
+                    1200.0,
+                    1400.0,
+                ]),
+            ),
+            (
+                name: "BaseHealing",
+                values: Some([
+                    35.0,
+                    65.0,
+                    95.0,
+                    125.0,
+                    155.0,
+                    185.0,
+                    215.0,
+                ]),
+            ),
+            (
+                name: "ChampionDamage",
+                values: Some([
+                    20.0,
+                    60.0,
+                    100.0,
+                    140.0,
+                    180.0,
+                    220.0,
+                    260.0,
+                ]),
+            ),
+            (
+                name: "PercentageOfBonusHP",
+                values: Some([
+                    0.1,
+                    0.1,
+                    0.1,
+                    0.1,
+                    0.1,
+                    0.1,
+                    0.1,
+                ]),
+            ),
+            (
+                name: "ChampionHealingScalar",
+                values: Some([
+                    0.6,
+                    0.6,
+                    0.6,
+                    0.6,
+                    0.6,
+                    0.6,
+                    0.6,
+                ]),
+            ),
+            (
+                name: "LowHealthThreshhold",
+                values: Some([
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                ]),
+            ),
+            (
+                name: "LowHealthHealingScalar",
+                values: Some([
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                ]),
+            ),
+            (
+                name: "BonusMaxHPDamage",
+                values: Some([
+                    0.05,
+                    0.05,
+                    0.05,
+                    0.05,
+                    0.05,
+                    0.05,
+                    0.05,
+                ]),
+            ),
+            (
+                name: "ChampDamageAPRatio",
+                values: Some([
+                    0.65,
+                    0.65,
+                    0.65,
+                    0.65,
+                    0.65,
+                    0.65,
+                    0.65,
+                ]),
+            ),
+            (
+                name: "MonsterHealingAPRatio",
+                values: Some([
+                    0.9,
+                    0.9,
+                    0.9,
+                    0.9,
+                    0.9,
+                    0.9,
+                    0.9,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            60.0,
+            60.0,
+            60.0,
+            60.0,
+            60.0,
+            60.0,
+        ]),
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: None,
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

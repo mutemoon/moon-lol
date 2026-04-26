@@ -1,0 +1,92 @@
+(
+    spellData: Some((
+        calculations: Some({
+            1508461632: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 64618745,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(2),
+                        coefficient: Some(1.0),
+                        statFormula: None,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: None,
+                        coefficient: Some(0.15),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "BaseDamage",
+                values: Some([
+                    -5.0,
+                    5.0,
+                    15.0,
+                    25.0,
+                    35.0,
+                    45.0,
+                    55.0,
+                ]),
+            ),
+            (
+                name: "CDRefund",
+                values: Some([
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                ]),
+            ),
+            (
+                name: "CDRefundUrf",
+                values: Some([
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                ]),
+            ),
+            (
+                name: "AttackSpeed",
+                values: Some([
+                    0.3,
+                    0.45,
+                    0.6,
+                    0.75,
+                    0.9,
+                    1.05,
+                    1.2,
+                ]),
+            ),
+        ]),
+        mana: None,
+        missileSpec: Some((
+            movementComponent: (
+                type: "MovementTypeFixedSpeed",
+                speed: Some(2600.0),
+                startBoneName: Some("Revolver_Muzzle"),
+            ),
+        )),
+        hitBoneName: Some("C_buffbone_Glb_Center_Loc"),
+        missileSpeed: None,
+        missileEffectKey: Some(604916108),
+        castType: Some(3),
+    )),
+)

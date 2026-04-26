@@ -1,0 +1,155 @@
+(
+    spellData: Some((
+        calculations: Some({
+            315608060: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 1508461632,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(2),
+                        dataValue: 942499611,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            2329378572: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 2903963272,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(18),
+                        dataValue: 3023722483,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "Damage",
+                values: Some([
+                    50.0,
+                    150.0,
+                    250.0,
+                    350.0,
+                    450.0,
+                    550.0,
+                    650.0,
+                ]),
+            ),
+            (
+                name: "ADRatio",
+                values: Some([
+                    0.8,
+                    0.8,
+                    0.8,
+                    0.8,
+                    0.8,
+                    0.8,
+                    0.8,
+                ]),
+            ),
+            (
+                name: "Suppress_Duration",
+                values: Some([
+                    0.75,
+                    0.75,
+                    0.75,
+                    0.75,
+                    0.75,
+                    0.75,
+                    0.75,
+                ]),
+            ),
+            (
+                name: "Stun_Duration",
+                values: Some([
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                ]),
+            ),
+            (
+                name: "Armor_Penetration",
+                values: Some([
+                    0.0,
+                    0.1,
+                    0.2,
+                    0.3,
+                    0.4,
+                    0.5,
+                    0.6,
+                ]),
+            ),
+            (
+                name: "Omnivamp",
+                values: Some([
+                    0.075,
+                    0.1,
+                    0.125,
+                    0.15,
+                    0.175,
+                    0.2,
+                    0.225,
+                ]),
+            ),
+            (
+                name: "Omnivamp_LifeStealScaling",
+                values: Some([
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                ]),
+            ),
+            (
+                name: "Omnivamp_MinionMod",
+                values: Some([
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                ]),
+            ),
+            (
+                name: "Omnivamp_MonsterMod",
+                values: Some([
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                ]),
+            ),
+        ]),
+        mana: None,
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: Some(0.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

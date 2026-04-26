@@ -1,0 +1,100 @@
+(
+    spellData: Some((
+        calculations: Some({
+            1299648214: (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: Some(1),
+            ),
+            3484084320: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(1),
+                        coefficient: Some(0.05),
+                        statFormula: None,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(6),
+                        coefficient: Some(0.05),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "RefreshDuration",
+                values: Some([
+                    3.5,
+                    3.5,
+                    3.5,
+                    3.5,
+                    3.5,
+                    3.5,
+                    3.5,
+                ]),
+            ),
+            (
+                name: "StealPercent",
+                values: Some([
+                    0.03,
+                    0.03,
+                    0.03,
+                    0.03,
+                    0.03,
+                    0.03,
+                    0.03,
+                ]),
+            ),
+            (
+                name: "ShredDuration",
+                values: Some([
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                ]),
+            ),
+            (
+                name: "MaxStacks",
+                values: Some([
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                ]),
+            ),
+            (
+                name: "MaxPercentTooltipOnly",
+                values: Some([
+                    15.0,
+                    15.0,
+                    15.0,
+                    15.0,
+                    15.0,
+                    15.0,
+                    15.0,
+                ]),
+            ),
+        ]),
+        mana: None,
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: None,
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

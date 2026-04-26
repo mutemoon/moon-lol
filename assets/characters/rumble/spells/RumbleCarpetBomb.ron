@@ -1,0 +1,155 @@
+(
+    spellData: Some((
+        calculations: Some({
+            4209723727: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 670785668,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: None,
+                        coefficient: Some(0.35),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: Some([
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: Some([
+                    6.0,
+                    6.0,
+                    6.0,
+                    6.0,
+                    6.0,
+                    6.0,
+                    6.0,
+                ]),
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+        ]),
+        dataValues: Some([
+            (
+                name: "NumMissiles",
+                values: Some([
+                    6.0,
+                    6.0,
+                    6.0,
+                    6.0,
+                    6.0,
+                    6.0,
+                    6.0,
+                ]),
+            ),
+            (
+                name: "TrailDuration",
+                values: Some([
+                    4.5,
+                    4.5,
+                    4.5,
+                    4.5,
+                    4.5,
+                    4.5,
+                    4.5,
+                ]),
+            ),
+            (
+                name: "TickRate",
+                values: Some([
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                ]),
+            ),
+            (
+                name: "SlowAmount",
+                values: Some([
+                    35.0,
+                    35.0,
+                    35.0,
+                    35.0,
+                    35.0,
+                    35.0,
+                    35.0,
+                ]),
+            ),
+            (
+                name: "BaseDamagePerSecond",
+                values: Some([
+                    40.0,
+                    120.0,
+                    200.0,
+                    280.0,
+                    360.0,
+                    440.0,
+                    520.0,
+                ]),
+            ),
+            (
+                name: "MaxBurnSeconds",
+                values: Some([
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                ]),
+            ),
+            (
+                name: "BurnLingerTime",
+                values: Some([
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                ]),
+            ),
+        ]),
+        mana: None,
+        missileSpec: None,
+        hitBoneName: Some("head"),
+        missileSpeed: Some(1200.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

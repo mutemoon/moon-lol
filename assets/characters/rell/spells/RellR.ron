@@ -1,0 +1,111 @@
+(
+    spellData: Some((
+        calculations: Some({
+            4209723727: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 670785668,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: None,
+                        coefficient: Some(0.55),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "Duration",
+                values: Some([
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                ]),
+            ),
+            (
+                name: "BaseDamagePerSecond",
+                values: Some([
+                    25.0,
+                    75.0,
+                    125.0,
+                    175.0,
+                    225.0,
+                    275.0,
+                    325.0,
+                ]),
+            ),
+            (
+                name: "GravityHorizon",
+                values: Some([
+                    225.0,
+                    225.0,
+                    225.0,
+                    225.0,
+                    225.0,
+                    225.0,
+                    225.0,
+                ]),
+            ),
+            (
+                name: "GravityRadius",
+                values: Some([
+                    375.0,
+                    375.0,
+                    375.0,
+                    375.0,
+                    375.0,
+                    375.0,
+                    375.0,
+                ]),
+            ),
+            (
+                name: "GravityForce",
+                values: Some([
+                    300.0,
+                    300.0,
+                    300.0,
+                    300.0,
+                    300.0,
+                    300.0,
+                    300.0,
+                ]),
+            ),
+            (
+                name: "InitialRadius",
+                values: Some([
+                    425.0,
+                    425.0,
+                    425.0,
+                    425.0,
+                    425.0,
+                    425.0,
+                    425.0,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            100.0,
+            100.0,
+            100.0,
+            100.0,
+            100.0,
+            100.0,
+        ]),
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: None,
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

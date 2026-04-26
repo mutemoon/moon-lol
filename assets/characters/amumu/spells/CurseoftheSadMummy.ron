@@ -1,0 +1,74 @@
+(
+    spellData: Some((
+        calculations: Some({
+            1074619340: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 3854996560,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: 1017596770,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "RDamage",
+                values: Some([
+                    100.0,
+                    200.0,
+                    300.0,
+                    400.0,
+                    500.0,
+                    600.0,
+                    700.0,
+                ]),
+            ),
+            (
+                name: "RDuration",
+                values: Some([
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                ]),
+            ),
+            (
+                name: "RCoefficient",
+                values: Some([
+                    0.8,
+                    0.8,
+                    0.8,
+                    0.8,
+                    0.8,
+                    0.8,
+                    0.8,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            100.0,
+            150.0,
+            200.0,
+            80.0,
+            80.0,
+            0.0,
+        ]),
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: Some(20.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

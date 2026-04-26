@@ -1,0 +1,103 @@
+(
+    spellData: Some((
+        calculations: Some({
+            1379818893: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 154940601,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(2),
+                        dataValue: 103826291,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: 1374513391,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "RBaseValue",
+                values: Some([
+                    50.0,
+                    70.0,
+                    90.0,
+                    110.0,
+                    130.0,
+                    150.0,
+                    170.0,
+                ]),
+            ),
+            (
+                name: "RRange",
+                values: Some([
+                    1500.0,
+                    2000.0,
+                    2500.0,
+                    3000.0,
+                    3500.0,
+                    4000.0,
+                    4500.0,
+                ]),
+            ),
+            (
+                name: "RShieldDuration",
+                values: Some([
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                ]),
+            ),
+            (
+                name: "RTotalADRatio",
+                values: Some([
+                    0.45,
+                    0.9,
+                    1.35,
+                    1.8,
+                    2.25,
+                    2.7,
+                    3.15,
+                ]),
+            ),
+            (
+                name: "RAPRatio",
+                values: Some([
+                    1.2,
+                    1.2,
+                    1.2,
+                    1.2,
+                    1.2,
+                    1.2,
+                    1.2,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            100.0,
+            100.0,
+            100.0,
+            100.0,
+            100.0,
+            100.0,
+        ]),
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: Some(0.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

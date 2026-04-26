@@ -1,0 +1,90 @@
+(
+    spellData: Some((
+        calculations: None,
+        effectAmounts: Some([
+            (
+                values: Some([
+                    20.0,
+                    25.0,
+                    30.0,
+                    35.0,
+                    40.0,
+                    45.0,
+                    50.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    30.0,
+                    70.0,
+                    110.0,
+                    150.0,
+                    190.0,
+                    230.0,
+                    270.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    13.0,
+                    12.0,
+                    11.0,
+                    10.0,
+                    9.0,
+                    8.0,
+                    7.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                ]),
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: Some([
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                ]),
+            ),
+        ]),
+        dataValues: None,
+        mana: None,
+        missileSpec: Some((
+            movementComponent: (
+                type: "MovementTypeFixedSpeed",
+                speed: Some(20.0),
+                startBoneName: Some("R_hand"),
+            ),
+        )),
+        hitBoneName: None,
+        missileSpeed: Some(20.0),
+        missileEffectKey: Some(2576822736),
+        castType: Some(1),
+    )),
+)

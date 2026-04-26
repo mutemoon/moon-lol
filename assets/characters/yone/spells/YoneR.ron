@@ -1,0 +1,127 @@
+(
+    spellData: Some((
+        calculations: Some({
+            1508461632: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 64618745,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(2),
+                        dataValue: 942499611,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "BaseDamage",
+                values: Some([
+                    0.0,
+                    200.0,
+                    400.0,
+                    600.0,
+                    800.0,
+                    1000.0,
+                    1200.0,
+                ]),
+            ),
+            (
+                name: "ADRatio",
+                values: Some([
+                    0.8,
+                    0.8,
+                    0.8,
+                    0.8,
+                    0.8,
+                    0.8,
+                    0.8,
+                ]),
+            ),
+            (
+                name: "BlinkDistanceBehindTarget",
+                values: Some([
+                    200.0,
+                    200.0,
+                    200.0,
+                    200.0,
+                    200.0,
+                    200.0,
+                    200.0,
+                ]),
+            ),
+            (
+                name: "Width",
+                values: Some([
+                    225.0,
+                    225.0,
+                    225.0,
+                    225.0,
+                    225.0,
+                    225.0,
+                    225.0,
+                ]),
+            ),
+            (
+                name: "RKnockupHeight",
+                values: Some([
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                ]),
+            ),
+            (
+                name: "RKnockupDuration",
+                values: Some([
+                    0.75,
+                    0.75,
+                    0.75,
+                    0.75,
+                    0.75,
+                    0.75,
+                    0.75,
+                ]),
+            ),
+            (
+                name: "RKnockTowardsSpeed",
+                values: Some([
+                    3000.0,
+                    3000.0,
+                    3000.0,
+                    3000.0,
+                    3000.0,
+                    3000.0,
+                    3000.0,
+                ]),
+            ),
+            (
+                name: "RKnockTowardsDampener",
+                values: Some([
+                    0.8,
+                    0.8,
+                    0.8,
+                    0.8,
+                    0.8,
+                    0.8,
+                    0.8,
+                ]),
+            ),
+        ]),
+        mana: None,
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: Some(1500.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

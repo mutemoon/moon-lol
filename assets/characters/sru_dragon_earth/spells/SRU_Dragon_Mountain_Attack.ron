@@ -1,0 +1,59 @@
+(
+    spellData: Some((
+        calculations: Some({
+            64618745: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(2),
+                        coefficient: Some(1.0),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            1089369324: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(12),
+                        coefficient: Some(0.25),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "PercentCurrentHealthRatio",
+                values: Some([
+                    0.07,
+                    0.07,
+                    0.07,
+                    0.07,
+                    0.07,
+                    0.07,
+                    0.07,
+                ]),
+            ),
+        ]),
+        mana: None,
+        missileSpec: Some((
+            movementComponent: (
+                type: "MovementTypeFixedSpeed",
+                speed: None,
+                startBoneName: None,
+            ),
+        )),
+        hitBoneName: Some("Buffbone_Glb_Chest_Loc"),
+        missileSpeed: None,
+        missileEffectKey: None,
+        castType: Some(1),
+    )),
+)

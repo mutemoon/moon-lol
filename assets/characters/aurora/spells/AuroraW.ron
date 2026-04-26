@@ -1,0 +1,81 @@
+(
+    spellData: Some((
+        calculations: None,
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "InvisDuration",
+                values: Some([
+                    0.85,
+                    1.0,
+                    1.15,
+                    1.3,
+                    1.45,
+                    1.6,
+                    1.75,
+                ]),
+            ),
+            (
+                name: "DashBonusSpeed",
+                values: Some([
+                    350.0,
+                    350.0,
+                    350.0,
+                    350.0,
+                    350.0,
+                    350.0,
+                    350.0,
+                ]),
+            ),
+            (
+                name: "JumpDistance",
+                values: Some([
+                    300.0,
+                    300.0,
+                    300.0,
+                    300.0,
+                    300.0,
+                    300.0,
+                    300.0,
+                ]),
+            ),
+            (
+                name: "WallCheatDistance",
+                values: Some([
+                    450.0,
+                    450.0,
+                    450.0,
+                    450.0,
+                    450.0,
+                    450.0,
+                    450.0,
+                ]),
+            ),
+            (
+                name: "MoveSpeedBonus",
+                values: Some([
+                    15.0,
+                    20.0,
+                    25.0,
+                    30.0,
+                    35.0,
+                    40.0,
+                    45.0,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            80.0,
+            80.0,
+            80.0,
+            80.0,
+            80.0,
+            80.0,
+        ]),
+        missileSpec: None,
+        hitBoneName: Some("spine"),
+        missileSpeed: Some(1800.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

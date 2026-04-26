@@ -1,0 +1,86 @@
+(
+    spellData: Some((
+        calculations: Some({
+            415634883: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 1322757954,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: 3809245599,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "RBaseHeal",
+                values: Some([
+                    350.0,
+                    600.0,
+                    850.0,
+                    1100.0,
+                    1350.0,
+                    1600.0,
+                    1850.0,
+                ]),
+            ),
+            (
+                name: "RDuration",
+                values: Some([
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                ]),
+            ),
+            (
+                name: "APRatio",
+                values: Some([
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                ]),
+            ),
+            (
+                name: "ReviveStateDuration",
+                values: Some([
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            125.0,
+            150.0,
+            175.0,
+            0.0,
+            0.0,
+            0.0,
+        ]),
+        missileSpec: None,
+        hitBoneName: Some("head"),
+        missileSpeed: Some(20.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

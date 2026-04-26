@@ -1,0 +1,220 @@
+(
+    spellData: Some((
+        calculations: Some({
+            1322594364: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 1556013019,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(2),
+                        coefficient: Some(0.9),
+                        statFormula: Some(2),
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            391362326: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 2981364178,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            3127954165: (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            3047430457: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 3275800060,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(2),
+                        coefficient: Some(0.6),
+                        statFormula: Some(2),
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            707753674: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 1994395151,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(2),
+                        coefficient: Some(0.0004),
+                        statFormula: Some(2),
+                    ),
+                ]),
+                multiplier: None,
+                precision: Some(1),
+            ),
+            1741163824: (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            1975905851: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 3911128919,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            694363095: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 980153502,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(2),
+                        coefficient: Some(0.0003),
+                        statFormula: Some(2),
+                    ),
+                ]),
+                multiplier: None,
+                precision: Some(1),
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "Swap_Duration",
+                values: Some([
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                ]),
+            ),
+            (
+                name: "Swap_Static_Cooldown",
+                values: Some([
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                ]),
+            ),
+            (
+                name: "Damage_1_Base",
+                values: Some([
+                    20.0,
+                    40.0,
+                    60.0,
+                    80.0,
+                    100.0,
+                    120.0,
+                    140.0,
+                ]),
+            ),
+            (
+                name: "Damage_1_Percent",
+                values: Some([
+                    0.01,
+                    0.02,
+                    0.03,
+                    0.04,
+                    0.05,
+                    0.06,
+                    0.07,
+                ]),
+            ),
+            (
+                name: "Damage_2_Base",
+                values: Some([
+                    25.0,
+                    50.0,
+                    75.0,
+                    100.0,
+                    125.0,
+                    150.0,
+                    175.0,
+                ]),
+            ),
+            (
+                name: "Damage_2_Percent",
+                values: Some([
+                    0.01,
+                    0.02,
+                    0.03,
+                    0.04,
+                    0.05,
+                    0.06,
+                    0.07,
+                ]),
+            ),
+            (
+                name: "Damage_1_Min_Ratio",
+                values: Some([
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                ]),
+            ),
+            (
+                name: "Damage_2_Min_Ratio",
+                values: Some([
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            70.0,
+            70.0,
+            70.0,
+            70.0,
+            70.0,
+            70.0,
+        ]),
+        missileSpec: None,
+        hitBoneName: Some("root"),
+        missileSpeed: Some(8700.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

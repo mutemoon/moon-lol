@@ -1,0 +1,186 @@
+(
+    spellData: Some((
+        calculations: Some({
+            3362959451: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 2660837215,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: 343714030,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            955865097: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 366638630,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: Some([
+            (
+                values: Some([
+                    50.0,
+                    70.0,
+                    90.0,
+                    110.0,
+                    130.0,
+                    150.0,
+                    170.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    150.0,
+                    227.5,
+                    292.5,
+                    357.5,
+                    422.5,
+                    487.5,
+                    555.0,
+                ]),
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: Some([
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                ]),
+            ),
+            (
+                values: Some([
+                    1.2,
+                    1.2,
+                    1.2,
+                    1.2,
+                    1.2,
+                    1.2,
+                    1.2,
+                ]),
+            ),
+            (
+                values: Some([
+                    525.0,
+                    525.0,
+                    525.0,
+                    525.0,
+                    525.0,
+                    525.0,
+                    525.0,
+                ]),
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+        ]),
+        dataValues: Some([
+            (
+                name: "TooltipCougarMinimumDamage",
+                values: Some([
+                    -20.0,
+                    5.0,
+                    30.0,
+                    55.0,
+                    80.0,
+                    105.0,
+                    130.0,
+                ]),
+            ),
+            (
+                name: "SpearMinimumAPRatio",
+                values: Some([
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                ]),
+            ),
+            (
+                name: "SpearMinimumDamage",
+                values: Some([
+                    50.0,
+                    70.0,
+                    90.0,
+                    110.0,
+                    130.0,
+                    150.0,
+                    170.0,
+                ]),
+            ),
+            (
+                name: "SpearMaximumDamage",
+                values: Some([
+                    162.5,
+                    227.5,
+                    292.5,
+                    357.5,
+                    422.5,
+                    487.5,
+                    552.5,
+                ]),
+            ),
+            (
+                name: "DamageMulti",
+                values: Some([
+                    3.25,
+                    3.25,
+                    3.25,
+                    3.25,
+                    3.25,
+                    3.25,
+                    3.25,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            50.0,
+            55.0,
+            60.0,
+            65.0,
+            70.0,
+            75.0,
+        ]),
+        missileSpec: Some((
+            movementComponent: (
+                type: "MovementTypeFixedSpeed",
+                speed: Some(1300.0),
+                startBoneName: Some("R_Buffbone_GLB_Hand_Loc"),
+            ),
+        )),
+        hitBoneName: Some("C_BUFFBONE_GLB_CHEST_LOC"),
+        missileSpeed: Some(1300.0),
+        missileEffectKey: Some(835536123),
+        castType: Some(3),
+    )),
+)

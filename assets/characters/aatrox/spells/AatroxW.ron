@@ -1,0 +1,97 @@
+(
+    spellData: Some((
+        calculations: Some({
+            1265357971: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 3334443738,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(2),
+                        dataValue: 1767379836,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "WBaseDamage",
+                values: Some([
+                    20.0,
+                    30.0,
+                    40.0,
+                    50.0,
+                    60.0,
+                    70.0,
+                    80.0,
+                ]),
+            ),
+            (
+                name: "WBonusADRatio",
+                values: Some([
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                ]),
+            ),
+            (
+                name: "WSlowPercentage",
+                values: Some([
+                    -0.25,
+                    -0.25,
+                    -0.275,
+                    -0.3,
+                    -0.325,
+                    -0.35,
+                    -0.35,
+                ]),
+            ),
+            (
+                name: "WSlowDuration",
+                values: Some([
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                ]),
+            ),
+            (
+                name: "WTotalADRatio",
+                values: Some([
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                ]),
+            ),
+        ]),
+        mana: None,
+        missileSpec: Some((
+            movementComponent: (
+                type: "MovementTypeFixedSpeed",
+                speed: Some(1800.0),
+                startBoneName: Some("C_Buffbone_Glb_Layout_Loc"),
+            ),
+        )),
+        hitBoneName: None,
+        missileSpeed: None,
+        missileEffectKey: Some(6025708),
+        castType: Some(3),
+    )),
+)

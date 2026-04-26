@@ -1,0 +1,86 @@
+(
+    spellData: Some((
+        calculations: Some({
+            501147496: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 64618745,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: 3809245599,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "BaseDamage",
+                values: Some([
+                    20.0,
+                    60.0,
+                    100.0,
+                    140.0,
+                    180.0,
+                    220.0,
+                    260.0,
+                ]),
+            ),
+            (
+                name: "APRatio",
+                values: Some([
+                    0.8,
+                    0.8,
+                    0.8,
+                    0.8,
+                    0.8,
+                    0.8,
+                    0.8,
+                ]),
+            ),
+            (
+                name: "AoERadius",
+                values: Some([
+                    375.0,
+                    375.0,
+                    375.0,
+                    375.0,
+                    375.0,
+                    375.0,
+                    375.0,
+                ]),
+            ),
+            (
+                name: "KnockupDuration",
+                values: Some([
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            50.0,
+            55.0,
+            60.0,
+            65.0,
+            70.0,
+            75.0,
+        ]),
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: Some(20.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

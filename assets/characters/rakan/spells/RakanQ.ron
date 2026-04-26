@@ -1,0 +1,116 @@
+(
+    spellData: Some((
+        calculations: Some({
+            501147496: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 64618745,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: 2218269008,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            3096318468: (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            1027436371: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: 1886965801,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "BaseDamage",
+                values: Some([
+                    25.0,
+                    70.0,
+                    115.0,
+                    160.0,
+                    205.0,
+                    250.0,
+                    295.0,
+                ]),
+            ),
+            (
+                name: "HealDelay",
+                values: Some([
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                ]),
+            ),
+            (
+                name: "BaseCDActual",
+                values: Some([
+                    12.0,
+                    11.0,
+                    10.0,
+                    9.0,
+                    8.0,
+                    7.0,
+                    6.0,
+                ]),
+            ),
+            (
+                name: "DamageAPRatio",
+                values: Some([
+                    0.7,
+                    0.7,
+                    0.7,
+                    0.7,
+                    0.7,
+                    0.7,
+                    0.7,
+                ]),
+            ),
+            (
+                name: "HealAPRatio",
+                values: Some([
+                    0.55,
+                    0.55,
+                    0.55,
+                    0.55,
+                    0.55,
+                    0.55,
+                    0.55,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            45.0,
+            45.0,
+            45.0,
+            45.0,
+            45.0,
+            45.0,
+        ]),
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: Some(1850.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

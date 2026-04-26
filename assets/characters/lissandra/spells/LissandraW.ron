@@ -1,0 +1,101 @@
+(
+    spellData: Some((
+        calculations: Some({
+            501147496: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartEffectValue",
+                        effectIndex: Some(1),
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: None,
+                        coefficient: Some(0.7),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: Some([
+            (
+                values: Some([
+                    30.0,
+                    70.0,
+                    105.0,
+                    140.0,
+                    175.0,
+                    210.0,
+                    245.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    1.25,
+                    1.25,
+                    1.35,
+                    1.45,
+                    1.55,
+                    1.65,
+                    1.65,
+                ]),
+            ),
+            (
+                values: Some([
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    8.0,
+                    8.0,
+                    8.0,
+                    8.0,
+                    8.0,
+                    8.0,
+                    8.0,
+                ]),
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+        ]),
+        dataValues: None,
+        mana: Some([
+            40.0,
+            40.0,
+            40.0,
+            40.0,
+            40.0,
+            40.0,
+        ]),
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: Some(902.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

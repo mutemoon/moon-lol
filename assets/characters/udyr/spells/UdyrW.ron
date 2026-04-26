@@ -1,0 +1,234 @@
+(
+    spellData: Some((
+        calculations: Some({
+            2903963272: (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            3346360670: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 204386453,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: None,
+                        coefficient: Some(0.65),
+                        statFormula: None,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(12),
+                        coefficient: Some(0.08),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            2457073275: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(12),
+                        dataValue: 1112667854,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: 3073608905,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            1607285636: (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            3149494603: (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            1704249176: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 204386453,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(12),
+                        dataValue: 1940388851,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: 4106273920,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            241153302: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(12),
+                        coefficient: Some(0.05),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "ShieldDuration",
+                values: Some([
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                ]),
+            ),
+            (
+                name: "ShieldBase",
+                values: Some([
+                    25.0,
+                    45.0,
+                    65.0,
+                    85.0,
+                    105.0,
+                    125.0,
+                    145.0,
+                ]),
+            ),
+            (
+                name: "LifeOnHitHPRatio",
+                values: Some([
+                    0.012,
+                    0.012,
+                    0.012,
+                    0.012,
+                    0.012,
+                    0.012,
+                    0.012,
+                ]),
+            ),
+            (
+                name: "ShieldPercentHealth",
+                values: Some([
+                    0.017,
+                    0.02,
+                    0.023,
+                    0.026,
+                    0.029,
+                    0.032,
+                    0.035,
+                ]),
+            ),
+            (
+                name: "LifeSteal",
+                values: Some([
+                    0.14,
+                    0.15,
+                    0.16,
+                    0.17,
+                    0.18,
+                    0.19,
+                    0.2,
+                ]),
+            ),
+            (
+                name: "HealOnHitMinionPenalty",
+                values: Some([
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                ]),
+            ),
+            (
+                name: "HealAttackMult",
+                values: Some([
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                ]),
+            ),
+            (
+                name: "ShieldAPRatio",
+                values: Some([
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                ]),
+            ),
+            (
+                name: "OnHitHealAPRatio",
+                values: Some([
+                    0.08,
+                    0.08,
+                    0.08,
+                    0.08,
+                    0.08,
+                    0.08,
+                    0.08,
+                ]),
+            ),
+            (
+                name: "PercentOfShieldHealAmount",
+                values: Some([
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            40.0,
+            40.0,
+            40.0,
+            40.0,
+            40.0,
+            40.0,
+        ]),
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: None,
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

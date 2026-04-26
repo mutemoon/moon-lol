@@ -1,0 +1,117 @@
+(
+    spellData: Some((
+        calculations: Some({
+            2217972460: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 1301987201,
+                    ),
+                ]),
+                multiplier: None,
+                precision: Some(1),
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "PassiveBaseMS",
+                values: Some([
+                    25.0,
+                    30.0,
+                    35.0,
+                    40.0,
+                    45.0,
+                    50.0,
+                    55.0,
+                ]),
+            ),
+            (
+                name: "PassiveMaxMS",
+                values: Some([
+                    50.0,
+                    60.0,
+                    70.0,
+                    80.0,
+                    90.0,
+                    100.0,
+                    110.0,
+                ]),
+            ),
+            (
+                name: "LoveTapBaseRefund",
+                values: Some([
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                ]),
+            ),
+            (
+                name: "ActiveAS",
+                values: Some([
+                    0.25,
+                    0.4,
+                    0.55,
+                    0.7,
+                    0.85,
+                    1.0,
+                    1.15,
+                ]),
+            ),
+            (
+                name: "ActiveDuration",
+                values: Some([
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                ]),
+            ),
+            (
+                name: "PassiveBaseMSOOC",
+                values: Some([
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                ]),
+            ),
+            (
+                name: "PassiveMaxMSExtraOOC",
+                values: Some([
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            45.0,
+            45.0,
+            45.0,
+            45.0,
+            45.0,
+            45.0,
+        ]),
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: Some(1400.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

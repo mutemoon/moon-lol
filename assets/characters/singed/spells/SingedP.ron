@@ -1,0 +1,62 @@
+(
+    spellData: Some((
+        calculations: None,
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "MSPercent",
+                values: Some([
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                ]),
+            ),
+            (
+                name: "MSDuration",
+                values: Some([
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                ]),
+            ),
+            (
+                name: "PerTargetCD",
+                values: Some([
+                    8.0,
+                    8.0,
+                    8.0,
+                    8.0,
+                    8.0,
+                    8.0,
+                    8.0,
+                ]),
+            ),
+            (
+                name: "TriggerArea",
+                values: Some([
+                    225.0,
+                    225.0,
+                    225.0,
+                    225.0,
+                    225.0,
+                    225.0,
+                    225.0,
+                ]),
+            ),
+        ]),
+        mana: None,
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: Some(347.8),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

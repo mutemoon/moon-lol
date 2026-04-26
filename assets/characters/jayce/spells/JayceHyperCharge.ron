@@ -1,0 +1,145 @@
+(
+    spellData: Some((
+        calculations: Some({
+            2556780982: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(2),
+                        dataValue: 3170107084,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: Some([
+            (
+                values: Some([
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    0.0,
+                    0.0,
+                    25.0,
+                    50.0,
+                    75.0,
+                    100.0,
+                    125.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    15.0,
+                    20.0,
+                    25.0,
+                    30.0,
+                    35.0,
+                    40.0,
+                    45.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    0.62,
+                    0.7,
+                    0.78,
+                    0.86,
+                    0.94,
+                    1.02,
+                    1.1,
+                ]),
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+        ]),
+        dataValues: Some([
+            (
+                name: "DamagePerc",
+                values: Some([
+                    0.62,
+                    0.7,
+                    0.78,
+                    0.86,
+                    0.94,
+                    1.02,
+                    1.1,
+                ]),
+            ),
+            (
+                name: "NumAttacks",
+                values: Some([
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                ]),
+            ),
+            (
+                name: "Duration",
+                values: Some([
+                    3.6,
+                    3.6,
+                    3.6,
+                    3.6,
+                    3.6,
+                    3.6,
+                    3.6,
+                ]),
+            ),
+            (
+                name: "PercentIncreasedAS",
+                values: Some([
+                    3.6,
+                    3.6,
+                    3.6,
+                    3.6,
+                    3.6,
+                    3.6,
+                    3.6,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            40.0,
+            40.0,
+            40.0,
+            40.0,
+            40.0,
+            40.0,
+        ]),
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: Some(1500.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

@@ -1,0 +1,81 @@
+(
+    spellData: Some((
+        calculations: Some({
+            3175553840: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 64618745,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(2),
+                        coefficient: Some(0.2),
+                        statFormula: Some(2),
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "BaseDamage",
+                values: Some([
+                    50.0,
+                    60.0,
+                    70.0,
+                    80.0,
+                    90.0,
+                    100.0,
+                    110.0,
+                ]),
+            ),
+            (
+                name: "DashSpeed",
+                values: Some([
+                    2200.0,
+                    2200.0,
+                    2200.0,
+                    2200.0,
+                    2200.0,
+                    2200.0,
+                    2200.0,
+                ]),
+            ),
+            (
+                name: "DashTotalDistance",
+                values: Some([
+                    600.0,
+                    600.0,
+                    600.0,
+                    600.0,
+                    600.0,
+                    600.0,
+                    600.0,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            40.0,
+            40.0,
+            40.0,
+            40.0,
+            40.0,
+            40.0,
+        ]),
+        missileSpec: Some((
+            movementComponent: (
+                type: "MovementTypeFixedSpeed",
+                speed: None,
+                startBoneName: None,
+            ),
+        )),
+        hitBoneName: None,
+        missileSpeed: None,
+        missileEffectKey: Some(218563128),
+        castType: Some(1),
+    )),
+)

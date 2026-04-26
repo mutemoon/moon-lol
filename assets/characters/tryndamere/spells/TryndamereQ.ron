@@ -1,0 +1,135 @@
+(
+    spellData: Some((
+        calculations: Some({
+            3588743310: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 4176648857,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: 3902115858,
+                    ),
+                ]),
+                multiplier: None,
+                precision: Some(1),
+            ),
+            3605258375: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 1788080398,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: 3809245599,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            969836114: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 1788080398,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: 3809245599,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "BaseHealing",
+                values: Some([
+                    20.0,
+                    30.0,
+                    40.0,
+                    50.0,
+                    60.0,
+                    70.0,
+                    80.0,
+                ]),
+            ),
+            (
+                name: "BonusHealPerFury",
+                values: Some([
+                    0.05,
+                    0.5,
+                    0.95,
+                    1.4,
+                    1.85,
+                    2.3,
+                    2.75,
+                ]),
+            ),
+            (
+                name: "APRatio",
+                values: Some([
+                    0.3,
+                    0.3,
+                    0.3,
+                    0.3,
+                    0.3,
+                    0.3,
+                    0.3,
+                ]),
+            ),
+            (
+                name: "APRatioPerFury",
+                values: Some([
+                    0.012,
+                    0.012,
+                    0.012,
+                    0.012,
+                    0.012,
+                    0.012,
+                    0.012,
+                ]),
+            ),
+            (
+                name: "MaximumBonusAD",
+                values: Some([
+                    5.0,
+                    20.0,
+                    35.0,
+                    50.0,
+                    65.0,
+                    80.0,
+                    95.0,
+                ]),
+            ),
+            (
+                name: "RemainingHealthThreshold",
+                values: Some([
+                    0.1,
+                    0.1,
+                    0.1,
+                    0.1,
+                    0.1,
+                    0.1,
+                    0.1,
+                ]),
+            ),
+        ]),
+        mana: None,
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: None,
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

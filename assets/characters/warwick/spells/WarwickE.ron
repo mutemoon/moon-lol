@@ -1,0 +1,118 @@
+(
+    spellData: Some((
+        calculations: None,
+        effectAmounts: Some([
+            (
+                values: Some([
+                    30.0,
+                    35.0,
+                    40.0,
+                    45.0,
+                    50.0,
+                    55.0,
+                    60.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    2.75,
+                    2.75,
+                    2.75,
+                    2.75,
+                    2.75,
+                    2.75,
+                    2.75,
+                ]),
+            ),
+            (
+                values: Some([
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    800.0,
+                    800.0,
+                    800.0,
+                    800.0,
+                    800.0,
+                    800.0,
+                    800.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    400.0,
+                    400.0,
+                    400.0,
+                    400.0,
+                    400.0,
+                    400.0,
+                    400.0,
+                ]),
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+        ]),
+        dataValues: Some([
+            (
+                name: "CherryNegaHaste",
+                values: Some([
+                    -20.0,
+                    -20.0,
+                    -20.0,
+                    -20.0,
+                    -20.0,
+                    -20.0,
+                    -20.0,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            40.0,
+            40.0,
+            40.0,
+            40.0,
+            40.0,
+            40.0,
+        ]),
+        missileSpec: Some((
+            movementComponent: (
+                type: "MovementTypeFixedSpeed",
+                speed: Some(1600.0),
+                startBoneName: Some("Root"),
+            ),
+        )),
+        hitBoneName: Some("pelvis"),
+        missileSpeed: Some(1600.0),
+        missileEffectKey: None,
+        castType: Some(1),
+    )),
+)

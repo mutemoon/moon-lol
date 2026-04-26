@@ -1,0 +1,81 @@
+(
+    spellData: Some((
+        calculations: Some({
+            1508461632: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 64618745,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(2),
+                        coefficient: Some(0.9),
+                        statFormula: Some(2),
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "BaseDamage",
+                values: Some([
+                    30.0,
+                    70.0,
+                    110.0,
+                    150.0,
+                    190.0,
+                    230.0,
+                    270.0,
+                ]),
+            ),
+            (
+                name: "RootDuration",
+                values: Some([
+                    1.0,
+                    1.25,
+                    1.5,
+                    1.75,
+                    2.0,
+                    2.25,
+                    2.5,
+                ]),
+            ),
+            (
+                name: "DelayTime",
+                values: Some([
+                    0.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            50.0,
+            55.0,
+            60.0,
+            65.0,
+            70.0,
+            70.0,
+        ]),
+        missileSpec: Some((
+            movementComponent: (
+                type: "MovementTypeFixedSpeed",
+                speed: Some(1200.0),
+                startBoneName: None,
+            ),
+        )),
+        hitBoneName: Some("C_buffbone_Glb_Center_Loc"),
+        missileSpeed: Some(1000.0),
+        missileEffectKey: Some(2487011026),
+        castType: Some(3),
+    )),
+)

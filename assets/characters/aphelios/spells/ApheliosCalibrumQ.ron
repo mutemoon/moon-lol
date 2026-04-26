@@ -1,0 +1,150 @@
+(
+    spellData: Some((
+        calculations: Some({
+            2344518724: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatSub",
+                        stat: Some(2),
+                        subpart: None,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: None,
+                        coefficient: Some(1.0),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            4081769832: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(2),
+                        coefficient: Some(1.0),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            1450515464: (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: Some(2),
+            ),
+            1162334221: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(2),
+                        coefficient: Some(0.1),
+                        statFormula: Some(2),
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "MarkDuration",
+                values: Some([
+                    4.5,
+                    4.5,
+                    4.5,
+                    4.5,
+                    4.5,
+                    4.5,
+                    4.5,
+                ]),
+            ),
+            (
+                name: "BonusRange",
+                values: Some([
+                    100.0,
+                    100.0,
+                    100.0,
+                    100.0,
+                    100.0,
+                    100.0,
+                    100.0,
+                ]),
+            ),
+            (
+                name: "MoonlightCost",
+                values: Some([
+                    10.0,
+                    10.0,
+                    10.0,
+                    10.0,
+                    10.0,
+                    10.0,
+                    10.0,
+                ]),
+            ),
+            (
+                name: "BonusAS",
+                values: Some([
+                    0.05,
+                    0.09,
+                    0.13,
+                    0.17,
+                    0.21,
+                    0.25,
+                    0.29,
+                ]),
+            ),
+            (
+                name: "BonusASMax",
+                values: Some([
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                ]),
+            ),
+            (
+                name: "MaxMarkRange",
+                values: Some([
+                    1800.0,
+                    1800.0,
+                    1800.0,
+                    1800.0,
+                    1800.0,
+                    1800.0,
+                    1800.0,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            60.0,
+            60.0,
+            60.0,
+            60.0,
+            60.0,
+            60.0,
+        ]),
+        missileSpec: Some((
+            movementComponent: (
+                type: "MovementTypeFixedSpeed",
+                speed: Some(1800.0),
+                startBoneName: Some(""),
+            ),
+        )),
+        hitBoneName: Some("C_buffbone_glb_center_loc"),
+        missileSpeed: Some(1850.0),
+        missileEffectKey: Some(3407703414),
+        castType: Some(3),
+    )),
+)

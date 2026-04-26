@@ -1,0 +1,134 @@
+(
+    spellData: Some((
+        calculations: Some({
+            501147496: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 64618745,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: 3809245599,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "BaseDamage",
+                values: Some([
+                    35.0,
+                    70.0,
+                    105.0,
+                    140.0,
+                    175.0,
+                    210.0,
+                    245.0,
+                ]),
+            ),
+            (
+                name: "APRatio",
+                values: Some([
+                    0.6,
+                    0.6,
+                    0.6,
+                    0.6,
+                    0.6,
+                    0.6,
+                    0.6,
+                ]),
+            ),
+            (
+                name: "MinionMod",
+                values: Some([
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                ]),
+            ),
+            (
+                name: "Slow",
+                values: Some([
+                    -0.5,
+                    -0.5,
+                    -0.5,
+                    -0.5,
+                    -0.5,
+                    -0.5,
+                    -0.5,
+                ]),
+            ),
+            (
+                name: "SlowDuration",
+                values: Some([
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                ]),
+            ),
+            (
+                name: "RevealDuration",
+                values: Some([
+                    6.0,
+                    6.0,
+                    6.0,
+                    6.0,
+                    6.0,
+                    6.0,
+                    6.0,
+                ]),
+            ),
+            (
+                name: "EffectRadius",
+                values: Some([
+                    325.0,
+                    325.0,
+                    325.0,
+                    325.0,
+                    325.0,
+                    325.0,
+                    325.0,
+                ]),
+            ),
+            (
+                name: "VisionRadius",
+                values: Some([
+                    420.0,
+                    420.0,
+                    420.0,
+                    420.0,
+                    420.0,
+                    420.0,
+                    420.0,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            60.0,
+            65.0,
+            70.0,
+            75.0,
+            80.0,
+            80.0,
+        ]),
+        missileSpec: None,
+        hitBoneName: Some("head"),
+        missileSpeed: Some(0.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

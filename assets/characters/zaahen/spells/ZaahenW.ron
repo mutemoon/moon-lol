@@ -1,0 +1,110 @@
+(
+    spellData: Some((
+        calculations: Some({
+            1772179026: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 447221915,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(2),
+                        coefficient: Some(0.5),
+                        statFormula: Some(2),
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            3700674300: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 2529150525,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(2),
+                        coefficient: Some(0.3),
+                        statFormula: Some(2),
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "InitialBaseDamage",
+                values: Some([
+                    20.0,
+                    40.0,
+                    60.0,
+                    80.0,
+                    100.0,
+                    120.0,
+                    140.0,
+                ]),
+            ),
+            (
+                name: "SecondaryBaseDamage",
+                values: Some([
+                    10.0,
+                    30.0,
+                    50.0,
+                    70.0,
+                    90.0,
+                    110.0,
+                    130.0,
+                ]),
+            ),
+            (
+                name: "MaximumPullDistance",
+                values: Some([
+                    225.0,
+                    225.0,
+                    225.0,
+                    225.0,
+                    225.0,
+                    225.0,
+                    225.0,
+                ]),
+            ),
+            (
+                name: "PullSpeed",
+                values: Some([
+                    900.0,
+                    900.0,
+                    900.0,
+                    900.0,
+                    900.0,
+                    900.0,
+                    900.0,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            50.0,
+            50.0,
+            50.0,
+            50.0,
+            50.0,
+            50.0,
+        ]),
+        missileSpec: Some((
+            movementComponent: (
+                type: "MovementTypeFixedSpeed",
+                speed: Some(2900.0),
+                startBoneName: Some("C_Buffbone_Glb_Layout_Loc"),
+            ),
+        )),
+        hitBoneName: Some("C_BUFFBONE_GLB_CHEST_LOC"),
+        missileSpeed: Some(1600.0),
+        missileEffectKey: Some(1779257648),
+        castType: Some(1),
+    )),
+)

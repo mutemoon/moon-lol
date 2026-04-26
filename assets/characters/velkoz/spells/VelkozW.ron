@@ -1,0 +1,179 @@
+(
+    spellData: Some((
+        calculations: Some({
+            3700674300: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 3167387863,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: None,
+                        coefficient: Some(0.25),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            1772179026: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 3023431853,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: None,
+                        coefficient: Some(0.2),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: Some([
+            (
+                values: Some([
+                    10.0,
+                    30.0,
+                    50.0,
+                    70.0,
+                    90.0,
+                    110.0,
+                    130.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    15.0,
+                    45.0,
+                    75.0,
+                    105.0,
+                    135.0,
+                    165.0,
+                    195.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    100.0,
+                    100.0,
+                    100.0,
+                    100.0,
+                    100.0,
+                    100.0,
+                    100.0,
+                ]),
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: Some([
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                ]),
+            ),
+            (
+                values: Some([
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                ]),
+            ),
+            (
+                values: Some([
+                    88.0,
+                    88.0,
+                    88.0,
+                    88.0,
+                    88.0,
+                    88.0,
+                    88.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    500.0,
+                    500.0,
+                    500.0,
+                    500.0,
+                    500.0,
+                    500.0,
+                    500.0,
+                ]),
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+        ]),
+        dataValues: Some([
+            (
+                name: "PassiveStacksToAdd",
+                values: Some([
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                ]),
+            ),
+            (
+                name: "BaseInitialDamage",
+                values: Some([
+                    10.0,
+                    30.0,
+                    50.0,
+                    70.0,
+                    90.0,
+                    110.0,
+                    130.0,
+                ]),
+            ),
+            (
+                name: "BaseSecondaryDamage",
+                values: Some([
+                    15.0,
+                    45.0,
+                    75.0,
+                    105.0,
+                    135.0,
+                    165.0,
+                    195.0,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            50.0,
+            55.0,
+            60.0,
+            65.0,
+            70.0,
+            75.0,
+        ]),
+        missileSpec: None,
+        hitBoneName: Some("C_BUFFBONE_GLB_HEAD_LOC"),
+        missileSpeed: Some(1200.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

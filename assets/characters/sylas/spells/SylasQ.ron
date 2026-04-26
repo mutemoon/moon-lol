@@ -1,0 +1,191 @@
+(
+    spellData: Some((
+        calculations: Some({
+            1508461632: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 64618745,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: 446926058,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            1125352785: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 957428896,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: 430148439,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            1855703705: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 2361366308,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "BaseDamage",
+                values: Some([
+                    20.0,
+                    40.0,
+                    60.0,
+                    80.0,
+                    100.0,
+                    120.0,
+                    140.0,
+                ]),
+            ),
+            (
+                name: "APRatio1",
+                values: Some([
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                ]),
+            ),
+            (
+                name: "ExplosionBaseDamage",
+                values: Some([
+                    5.0,
+                    60.0,
+                    115.0,
+                    170.0,
+                    225.0,
+                    280.0,
+                    335.0,
+                ]),
+            ),
+            (
+                name: "APRatio2",
+                values: Some([
+                    0.8,
+                    0.8,
+                    0.8,
+                    0.8,
+                    0.8,
+                    0.8,
+                    0.8,
+                ]),
+            ),
+            (
+                name: "SlowAmount",
+                values: Some([
+                    0.1,
+                    0.15,
+                    0.2,
+                    0.25,
+                    0.3,
+                    0.35,
+                    0.4,
+                ]),
+            ),
+            (
+                name: "MinionMod",
+                values: Some([
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                ]),
+            ),
+            (
+                name: "Q2AoE",
+                values: Some([
+                    180.0,
+                    180.0,
+                    180.0,
+                    180.0,
+                    180.0,
+                    180.0,
+                    180.0,
+                ]),
+            ),
+            (
+                name: "DetonationDelay",
+                values: Some([
+                    0.6,
+                    0.6,
+                    0.6,
+                    0.6,
+                    0.6,
+                    0.6,
+                    0.6,
+                ]),
+            ),
+            (
+                name: "SlowDuration",
+                values: Some([
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                ]),
+            ),
+            (
+                name: "MonsterMod",
+                values: Some([
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            55.0,
+            55.0,
+            55.0,
+            55.0,
+            55.0,
+            55.0,
+        ]),
+        missileSpec: Some((
+            movementComponent: (
+                type: "MovementTypeFixedSpeed",
+                speed: Some(1800.0),
+                startBoneName: Some("R_Gauntlet"),
+            ),
+        )),
+        hitBoneName: None,
+        missileSpeed: Some(1800.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

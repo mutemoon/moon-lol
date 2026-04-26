@@ -1,0 +1,194 @@
+(
+    spellData: Some((
+        calculations: Some({
+            2238274326: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(4),
+                        dataValue: 2648470023,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            3563825907: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(4),
+                        dataValue: 1921561474,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            3660367429: (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            3899378287: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(4),
+                        dataValue: 564734838,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            3916155906: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 3191555322,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            2036942898: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(4),
+                        dataValue: 2071296771,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            2020165279: (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "PassiveAS",
+                values: Some([
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                ]),
+            ),
+            (
+                name: "PassiveASMinion",
+                values: Some([
+                    0.1,
+                    0.1,
+                    0.1,
+                    0.1,
+                    0.1,
+                    0.1,
+                    0.1,
+                ]),
+            ),
+            (
+                name: "PassiveASRatio",
+                values: Some([
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                ]),
+            ),
+            (
+                name: "PassiveASRatioMinion",
+                values: Some([
+                    0.2,
+                    0.2,
+                    0.2,
+                    0.2,
+                    0.2,
+                    0.2,
+                    0.2,
+                ]),
+            ),
+            (
+                name: "AStoADMinion",
+                values: Some([
+                    10.0,
+                    10.0,
+                    10.0,
+                    10.0,
+                    10.0,
+                    10.0,
+                    10.0,
+                ]),
+            ),
+            (
+                name: "AStoAPMinion",
+                values: Some([
+                    10.0,
+                    10.0,
+                    10.0,
+                    10.0,
+                    10.0,
+                    10.0,
+                    10.0,
+                ]),
+            ),
+            (
+                name: "AStoADChampion",
+                values: Some([
+                    25.0,
+                    25.0,
+                    25.0,
+                    25.0,
+                    25.0,
+                    25.0,
+                    25.0,
+                ]),
+            ),
+            (
+                name: "AStoAPChampion",
+                values: Some([
+                    25.0,
+                    25.0,
+                    25.0,
+                    25.0,
+                    25.0,
+                    25.0,
+                    25.0,
+                ]),
+            ),
+            (
+                name: "NewASCap",
+                values: Some([
+                    3.33,
+                    3.33,
+                    3.33,
+                    3.33,
+                    3.33,
+                    3.33,
+                    3.33,
+                ]),
+            ),
+        ]),
+        mana: None,
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: Some(1600.0),
+        missileEffectKey: Some(2373896057),
+        castType: None,
+    )),
+)

@@ -1,0 +1,134 @@
+(
+    spellData: Some((
+        calculations: Some({
+            1223475528: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 3700674300,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: None,
+                        coefficient: Some(0.25),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            1125352785: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 1897537670,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: None,
+                        coefficient: Some(0.6),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "SlowAmount",
+                values: Some([
+                    40.0,
+                    40.0,
+                    40.0,
+                    40.0,
+                    40.0,
+                    40.0,
+                    40.0,
+                ]),
+            ),
+            (
+                name: "SlowDuration",
+                values: Some([
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                ]),
+            ),
+            (
+                name: "ZoneDamage",
+                values: Some([
+                    10.0,
+                    60.0,
+                    110.0,
+                    160.0,
+                    210.0,
+                    260.0,
+                    310.0,
+                ]),
+            ),
+            (
+                name: "SecondaryDamage",
+                values: Some([
+                    10.0,
+                    35.0,
+                    60.0,
+                    85.0,
+                    110.0,
+                    135.0,
+                    160.0,
+                ]),
+            ),
+            (
+                name: "RepeatDelay",
+                values: Some([
+                    0.75,
+                    0.75,
+                    0.75,
+                    0.75,
+                    0.75,
+                    0.75,
+                    0.75,
+                ]),
+            ),
+            (
+                name: "MonsterBonus",
+                values: Some([
+                    20.0,
+                    35.0,
+                    50.0,
+                    65.0,
+                    80.0,
+                    95.0,
+                    110.0,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            50.0,
+            60.0,
+            70.0,
+            80.0,
+            90.0,
+            85.0,
+        ]),
+        missileSpec: Some((
+            movementComponent: (
+                type: "MovementTypeFixedSpeed",
+                speed: Some(2000.0),
+                startBoneName: Some("R_buffbone_Glb_Foot_Loc"),
+            ),
+        )),
+        hitBoneName: None,
+        missileSpeed: None,
+        missileEffectKey: Some(1104078073),
+        castType: Some(3),
+    )),
+)

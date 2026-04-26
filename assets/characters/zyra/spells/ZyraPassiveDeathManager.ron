@@ -1,0 +1,76 @@
+(
+    spellData: Some((
+        calculations: None,
+        effectAmounts: Some([
+            (
+                values: Some([
+                    0.0,
+                    20.0,
+                    60.0,
+                    100.0,
+                    140.0,
+                    180.0,
+                    220.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    15.0,
+                    15.0,
+                    15.0,
+                    15.0,
+                    15.0,
+                    15.0,
+                    15.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    40.0,
+                    40.0,
+                    40.0,
+                    40.0,
+                    40.0,
+                    40.0,
+                    40.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                ]),
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+        ]),
+        dataValues: None,
+        mana: None,
+        missileSpec: None,
+        hitBoneName: Some("C_BuffBone_Glb_Center_Loc"),
+        missileSpeed: Some(1900.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

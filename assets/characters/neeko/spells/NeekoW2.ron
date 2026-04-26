@@ -1,0 +1,128 @@
+(
+    spellData: Some((
+        calculations: Some({
+            372024801: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 767745579,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: None,
+                        coefficient: Some(0.6),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "CloneDuration",
+                values: Some([
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                ]),
+            ),
+            (
+                name: "StealthDuration",
+                values: Some([
+                    0.0,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                ]),
+            ),
+            (
+                name: "CloneDamageTimer",
+                values: Some([
+                    0.0,
+                    0.75,
+                    0.75,
+                    0.75,
+                    0.75,
+                    0.75,
+                    0.75,
+                ]),
+            ),
+            (
+                name: "Haste",
+                values: Some([
+                    15.0,
+                    20.0,
+                    25.0,
+                    30.0,
+                    35.0,
+                    40.0,
+                    45.0,
+                ]),
+            ),
+            (
+                name: "HasteDuration",
+                values: Some([
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                ]),
+            ),
+            (
+                name: "PassiveDamage",
+                values: Some([
+                    20.0,
+                    50.0,
+                    80.0,
+                    110.0,
+                    140.0,
+                    170.0,
+                    200.0,
+                ]),
+            ),
+            (
+                name: "PassiveHaste",
+                values: Some([
+                    2.5,
+                    10.0,
+                    17.5,
+                    25.0,
+                    32.5,
+                    40.0,
+                    47.5,
+                ]),
+            ),
+            (
+                name: "PassiveHasteDuration",
+                values: Some([
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                ]),
+            ),
+        ]),
+        mana: None,
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: Some(0.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

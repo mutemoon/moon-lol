@@ -1,0 +1,144 @@
+(
+    spellData: Some((
+        calculations: Some({
+            2228346219: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 3039609747,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(2),
+                        coefficient: Some(0.6),
+                        statFormula: Some(2),
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            1558548579: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 1458675421,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            501147496: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 3676851261,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(2),
+                        coefficient: Some(0.65),
+                        statFormula: Some(2),
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "CouragePerPellet",
+                values: Some([
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                ]),
+            ),
+            (
+                name: "MountedBaseDamage",
+                values: Some([
+                    5.0,
+                    30.0,
+                    55.0,
+                    80.0,
+                    105.0,
+                    130.0,
+                    155.0,
+                ]),
+            ),
+            (
+                name: "DismountedBaseDamage",
+                values: Some([
+                    20.0,
+                    35.0,
+                    50.0,
+                    65.0,
+                    80.0,
+                    95.0,
+                    110.0,
+                ]),
+            ),
+            (
+                name: "RechargeTime",
+                values: Some([
+                    20.0,
+                    18.0,
+                    16.0,
+                    14.0,
+                    12.0,
+                    10.0,
+                    8.0,
+                ]),
+            ),
+            (
+                name: "FalloffPerMissile",
+                values: Some([
+                    0.2,
+                    0.2,
+                    0.2,
+                    0.2,
+                    0.2,
+                    0.2,
+                    0.2,
+                ]),
+            ),
+            (
+                name: "KnockbackDistance",
+                values: Some([
+                    300.0,
+                    300.0,
+                    300.0,
+                    300.0,
+                    300.0,
+                    300.0,
+                    300.0,
+                ]),
+            ),
+            (
+                name: "MissileSpawnCheckRadius",
+                values: Some([
+                    55.0,
+                    55.0,
+                    55.0,
+                    55.0,
+                    55.0,
+                    55.0,
+                    55.0,
+                ]),
+            ),
+        ]),
+        mana: None,
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: Some(1200.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

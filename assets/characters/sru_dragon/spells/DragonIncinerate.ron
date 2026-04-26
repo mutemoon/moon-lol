@@ -1,0 +1,58 @@
+(
+    spellData: Some((
+        calculations: None,
+        effectAmounts: Some([
+            (
+                values: Some([
+                    30.0,
+                    80.0,
+                    130.0,
+                    180.0,
+                    230.0,
+                    280.0,
+                    330.0,
+                ]),
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+        ]),
+        dataValues: None,
+        mana: None,
+        missileSpec: Some((
+            movementComponent: (
+                type: "MovementTypeFixedSpeed",
+                speed: Some(700.0),
+                startBoneName: Some("buffbone_Cstm_fireStart"),
+            ),
+        )),
+        hitBoneName: None,
+        missileSpeed: Some(700.0),
+        missileEffectKey: None,
+        castType: Some(3),
+    )),
+)

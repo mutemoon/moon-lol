@@ -1,0 +1,182 @@
+(
+    spellData: Some((
+        calculations: Some({
+            704689212: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 64618745,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(2),
+                        coefficient: Some(1.0),
+                        statFormula: None,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(2),
+                        dataValue: 162078152,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            1028877529: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 2262762340,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            714284314: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(2),
+                        dataValue: 162078152,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            2479541367: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 4225952610,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            272648529: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(2),
+                        dataValue: 162078152,
+                    ),
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 64618745,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "BaseDamage",
+                values: Some([
+                    0.0,
+                    10.0,
+                    20.0,
+                    30.0,
+                    40.0,
+                    50.0,
+                    60.0,
+                ]),
+            ),
+            (
+                name: "MinSpeed",
+                values: Some([
+                    0.085,
+                    0.12,
+                    0.155,
+                    0.19,
+                    0.225,
+                    0.26,
+                    0.295,
+                ]),
+            ),
+            (
+                name: "MaxSpeed",
+                values: Some([
+                    0.17,
+                    0.24,
+                    0.31,
+                    0.38,
+                    0.45,
+                    0.52,
+                    0.59,
+                ]),
+            ),
+            (
+                name: "Duration",
+                values: Some([
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                ]),
+            ),
+            (
+                name: "StunDuration",
+                values: Some([
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                ]),
+            ),
+            (
+                name: "CDReset",
+                values: None,
+            ),
+            (
+                name: "BonusADRatio",
+                values: Some([
+                    1.6,
+                    1.6,
+                    1.6,
+                    1.6,
+                    1.6,
+                    1.6,
+                    1.6,
+                ]),
+            ),
+            (
+                name: "BonusRange",
+                values: Some([
+                    25.0,
+                    25.0,
+                    25.0,
+                    25.0,
+                    25.0,
+                    25.0,
+                    25.0,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            50.0,
+            50.0,
+            50.0,
+            50.0,
+            50.0,
+            50.0,
+        ]),
+        missileSpec: None,
+        hitBoneName: Some("C_BUFFBONE_GLB_LAYOUT_LOC"),
+        missileSpeed: Some(0.0),
+        missileEffectKey: Some(3390540789),
+        castType: None,
+    )),
+)

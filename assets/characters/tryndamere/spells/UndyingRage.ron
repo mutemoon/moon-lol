@@ -1,0 +1,105 @@
+(
+    spellData: Some((
+        calculations: None,
+        effectAmounts: Some([
+            (
+                values: Some([
+                    50.0,
+                    50.0,
+                    75.0,
+                    100.0,
+                    100.0,
+                    100.0,
+                    100.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    30.0,
+                    30.0,
+                    50.0,
+                    70.0,
+                    70.0,
+                    70.0,
+                    70.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                ]),
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+        ]),
+        dataValues: Some([
+            (
+                name: "TryndRFuryGain",
+                values: Some([
+                    50.0,
+                    50.0,
+                    75.0,
+                    100.0,
+                    125.0,
+                    150.0,
+                    175.0,
+                ]),
+            ),
+            (
+                name: "TryndRMinHealth",
+                values: Some([
+                    30.0,
+                    30.0,
+                    50.0,
+                    70.0,
+                    90.0,
+                    110.0,
+                    130.0,
+                ]),
+            ),
+            (
+                name: "TryndRDuration",
+                values: Some([
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                ]),
+            ),
+        ]),
+        mana: None,
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: None,
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

@@ -1,0 +1,20 @@
+(
+    spellData: Some((
+        calculations: None,
+        effectAmounts: None,
+        dataValues: None,
+        mana: Some([
+            60.0,
+            60.0,
+            60.0,
+            60.0,
+            60.0,
+            60.0,
+        ]),
+        missileSpec: None,
+        hitBoneName: Some("C_buffbone_glb_center_loc"),
+        missileSpeed: Some(1850.0),
+        missileEffectKey: None,
+        castType: Some(3),
+    )),
+)

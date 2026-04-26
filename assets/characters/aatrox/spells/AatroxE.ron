@@ -1,0 +1,151 @@
+(
+    spellData: Some((
+        calculations: Some({
+            4207551932: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 1772265762,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(12),
+                        dataValue: 82913047,
+                    ),
+                ]),
+                multiplier: None,
+                precision: Some(1),
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "ESpellVamp",
+                values: Some([
+                    16.0,
+                    16.0,
+                    16.0,
+                    16.0,
+                    16.0,
+                    16.0,
+                    16.0,
+                ]),
+            ),
+            (
+                name: "EBonusAD",
+                values: Some([
+                    5.0,
+                    15.0,
+                    25.0,
+                    35.0,
+                    45.0,
+                    55.0,
+                    65.0,
+                ]),
+            ),
+            (
+                name: "EResistancePerAD",
+                values: Some([
+                    5.0,
+                    10.0,
+                    15.0,
+                    20.0,
+                    25.0,
+                    30.0,
+                    35.0,
+                ]),
+            ),
+            (
+                name: "EDashSpeed",
+                values: Some([
+                    800.0,
+                    800.0,
+                    800.0,
+                    800.0,
+                    800.0,
+                    800.0,
+                    800.0,
+                ]),
+            ),
+            (
+                name: "EMaxRange",
+                values: Some([
+                    300.0,
+                    300.0,
+                    300.0,
+                    300.0,
+                    300.0,
+                    300.0,
+                    300.0,
+                ]),
+            ),
+            (
+                name: "EDuration",
+                values: Some([
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                ]),
+            ),
+            (
+                name: "EBaseRechargeTime",
+                values: Some([
+                    30.0,
+                    26.0,
+                    22.0,
+                    18.0,
+                    14.0,
+                    10.0,
+                    6.0,
+                ]),
+            ),
+            (
+                name: "EMinRange",
+                values: Some([
+                    75.0,
+                    75.0,
+                    75.0,
+                    75.0,
+                    75.0,
+                    75.0,
+                    75.0,
+                ]),
+            ),
+            (
+                name: "ESpellVampEmpowered",
+                values: Some([
+                    16.0,
+                    16.0,
+                    16.0,
+                    16.0,
+                    16.0,
+                    16.0,
+                    16.0,
+                ]),
+            ),
+            (
+                name: "EVampHPRatio",
+                values: Some([
+                    0.011,
+                    0.011,
+                    0.011,
+                    0.011,
+                    0.011,
+                    0.011,
+                    0.011,
+                ]),
+            ),
+        ]),
+        mana: None,
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: Some(20.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

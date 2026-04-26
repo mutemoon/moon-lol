@@ -1,0 +1,19 @@
+(
+    spellData: Some((
+        calculations: None,
+        effectAmounts: None,
+        dataValues: None,
+        mana: None,
+        missileSpec: Some((
+            movementComponent: (
+                type: "MovementTypeFixedSpeed",
+                speed: Some(1200.0),
+                startBoneName: Some("buffbone_glb_ground_loc"),
+            ),
+        )),
+        hitBoneName: None,
+        missileSpeed: Some(1200.0),
+        missileEffectKey: Some(2900728155),
+        castType: Some(3),
+    )),
+)

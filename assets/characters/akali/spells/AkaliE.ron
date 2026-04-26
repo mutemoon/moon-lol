@@ -1,0 +1,142 @@
+(
+    spellData: Some((
+        calculations: Some({
+            3457731194: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 64618745,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(2),
+                        dataValue: 1446754083,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: 3586158119,
+                    ),
+                ]),
+                multiplier: Some((
+                    type: "CalculationPartNamedDataValue",
+                    dataValue: 1356583295,
+                )),
+                precision: None,
+            ),
+            2384880754: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 64618745,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(2),
+                        dataValue: 1446754083,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: 3586158119,
+                    ),
+                ]),
+                multiplier: Some((
+                    type: "CalculationPartNamedDataValue",
+                    dataValue: 1594592816,
+                )),
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "BaseDamage",
+                values: Some([
+                    0.0,
+                    70.0,
+                    140.0,
+                    210.0,
+                    280.0,
+                    350.0,
+                    420.0,
+                ]),
+            ),
+            (
+                name: "SelfKnockbackRange",
+                values: Some([
+                    400.0,
+                    400.0,
+                    400.0,
+                    400.0,
+                    400.0,
+                    400.0,
+                    400.0,
+                ]),
+            ),
+            (
+                name: "E1PercentageOfTotal",
+                values: Some([
+                    0.3,
+                    0.3,
+                    0.3,
+                    0.3,
+                    0.3,
+                    0.3,
+                    0.3,
+                ]),
+            ),
+            (
+                name: "TotalADRatio",
+                values: Some([
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                ]),
+            ),
+            (
+                name: "TotalAPRatio",
+                values: Some([
+                    1.1,
+                    1.1,
+                    1.1,
+                    1.1,
+                    1.1,
+                    1.1,
+                    1.1,
+                ]),
+            ),
+            (
+                name: "E2PercentageOfTotal",
+                values: Some([
+                    0.7,
+                    0.7,
+                    0.7,
+                    0.7,
+                    0.7,
+                    0.7,
+                    0.7,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            30.0,
+            30.0,
+            30.0,
+            30.0,
+            30.0,
+            30.0,
+        ]),
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: Some(1200.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

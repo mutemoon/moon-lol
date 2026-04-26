@@ -1,0 +1,106 @@
+(
+    spellData: Some((
+        calculations: Some({
+            497973746: (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            2933830860: (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "ICD",
+                values: Some([
+                    6.4,
+                    6.0,
+                    5.6,
+                    5.2,
+                    4.8,
+                    4.4,
+                    4.0,
+                ]),
+            ),
+            (
+                name: "MoveSpeed",
+                values: Some([
+                    0.19,
+                    0.25,
+                    0.31,
+                    0.37,
+                    0.43,
+                    0.49,
+                    0.55,
+                ]),
+            ),
+            (
+                name: "MoveSpeedDuration",
+                values: Some([
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                ]),
+            ),
+            (
+                name: "StunDuration",
+                values: Some([
+                    0.75,
+                    0.75,
+                    0.75,
+                    0.75,
+                    0.75,
+                    0.75,
+                    0.75,
+                ]),
+            ),
+            (
+                name: "EmpoweredBonusRange",
+                values: Some([
+                    75.0,
+                    75.0,
+                    75.0,
+                    75.0,
+                    75.0,
+                    75.0,
+                    75.0,
+                ]),
+            ),
+            (
+                name: "UnstoppableDuration",
+                values: Some([
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            40.0,
+            40.0,
+            40.0,
+            40.0,
+            40.0,
+            40.0,
+        ]),
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: None,
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

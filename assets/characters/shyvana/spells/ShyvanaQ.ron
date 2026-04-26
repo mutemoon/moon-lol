@@ -1,0 +1,243 @@
+(
+    spellData: Some((
+        calculations: Some({
+            1474349906: (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            2836243956: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 3705937568,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(2),
+                        dataValue: 952261348,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: 4165699736,
+                    ),
+                ]),
+                multiplier: None,
+                precision: Some(1),
+            ),
+            315608060: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 180745984,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(2),
+                        dataValue: 2446420668,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: None,
+                        coefficient: Some(0.25),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            949230040: (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            1120533625: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 548834997,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            2934088168: (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "EnhanceDuration",
+                values: Some([
+                    6.0,
+                    6.0,
+                    6.0,
+                    6.0,
+                    6.0,
+                    6.0,
+                    6.0,
+                ]),
+            ),
+            (
+                name: "RecastDuration",
+                values: Some([
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                ]),
+            ),
+            (
+                name: "LockoutDuration",
+                values: Some([
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                ]),
+            ),
+            (
+                name: "Q1Length",
+                values: Some([
+                    450.0,
+                    450.0,
+                    450.0,
+                    450.0,
+                    450.0,
+                    450.0,
+                    450.0,
+                ]),
+            ),
+            (
+                name: "Q2Radius",
+                values: Some([
+                    275.0,
+                    275.0,
+                    275.0,
+                    275.0,
+                    275.0,
+                    275.0,
+                    275.0,
+                ]),
+            ),
+            (
+                name: "Cooldown_Reduction",
+                values: Some([
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                ]),
+            ),
+            (
+                name: "Max_Health_Damage",
+                values: Some([
+                    0.01,
+                    0.01,
+                    0.01,
+                    0.01,
+                    0.01,
+                    0.01,
+                    0.01,
+                ]),
+            ),
+            (
+                name: "Max_Health_AD_Ratio",
+                values: Some([
+                    0.00011,
+                    0.00011,
+                    0.00011,
+                    0.00011,
+                    0.00011,
+                    0.00011,
+                    0.00011,
+                ]),
+            ),
+            (
+                name: "Max_Health_AP_Ratio",
+                values: Some([
+                    0.00011,
+                    0.00011,
+                    0.00011,
+                    0.00011,
+                    0.00011,
+                    0.00011,
+                    0.00011,
+                ]),
+            ),
+            (
+                name: "Base_Damage",
+                values: Some([
+                    5.0,
+                    10.0,
+                    15.0,
+                    20.0,
+                    25.0,
+                    30.0,
+                    35.0,
+                ]),
+            ),
+            (
+                name: "Damage_AD_Ratio",
+                values: Some([
+                    1.1,
+                    1.1,
+                    1.1,
+                    1.1,
+                    1.1,
+                    1.1,
+                    1.1,
+                ]),
+            ),
+            (
+                name: "Bonus_Attack_Range",
+                values: Some([
+                    50.0,
+                    50.0,
+                    50.0,
+                    50.0,
+                    50.0,
+                    50.0,
+                    50.0,
+                ]),
+            ),
+            (
+                name: "Damage_Monster_Bonus",
+                values: Some([
+                    10.0,
+                    10.0,
+                    10.0,
+                    10.0,
+                    10.0,
+                    10.0,
+                    10.0,
+                ]),
+            ),
+        ]),
+        mana: None,
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: None,
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

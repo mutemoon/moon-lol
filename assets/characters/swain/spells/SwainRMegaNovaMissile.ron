@@ -1,0 +1,130 @@
+(
+    spellData: Some((
+        calculations: None,
+        effectAmounts: Some([
+            (
+                values: Some([
+                    40.0,
+                    40.0,
+                    55.0,
+                    70.0,
+                    85.0,
+                    100.0,
+                    115.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    50.0,
+                    50.0,
+                    75.0,
+                    100.0,
+                    125.0,
+                    150.0,
+                    175.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                ]),
+            ),
+            (
+                values: Some([
+                    1500.0,
+                    1500.0,
+                    1500.0,
+                    1500.0,
+                    1500.0,
+                    1500.0,
+                    1500.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    -0.5,
+                    -0.5,
+                    -0.5,
+                    -0.5,
+                    -0.5,
+                    -0.5,
+                    -0.5,
+                ]),
+            ),
+            (
+                values: Some([
+                    0.75,
+                    0.75,
+                    0.75,
+                    0.75,
+                    0.75,
+                    0.75,
+                    0.75,
+                ]),
+            ),
+            (
+                values: Some([
+                    60.0,
+                    60.0,
+                    85.0,
+                    105.0,
+                    125.0,
+                    150.0,
+                    175.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    60.0,
+                    60.0,
+                    85.0,
+                    105.0,
+                    125.0,
+                    150.0,
+                    175.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    15.0,
+                    15.0,
+                    15.0,
+                    15.0,
+                    15.0,
+                    15.0,
+                    15.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    400.0,
+                    400.0,
+                    400.0,
+                    400.0,
+                    400.0,
+                    400.0,
+                    400.0,
+                ]),
+            ),
+        ]),
+        dataValues: None,
+        mana: None,
+        missileSpec: Some((
+            movementComponent: (
+                type: "MovementTypeFixedSpeed",
+                speed: Some(3000.0),
+                startBoneName: None,
+            ),
+        )),
+        hitBoneName: Some("head"),
+        missileSpeed: Some(599.0),
+        missileEffectKey: Some(2901048313),
+        castType: Some(3),
+    )),
+)

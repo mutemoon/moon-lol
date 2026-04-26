@@ -1,0 +1,129 @@
+(
+    spellData: Some((
+        calculations: Some({
+            144632637: (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            1381849710: (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "SlowDuration",
+                values: Some([
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                ]),
+            ),
+            (
+                name: "SlowAmount",
+                values: Some([
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                ]),
+            ),
+            (
+                name: "CurrentHealthDamage",
+                values: Some([
+                    0.175,
+                    0.2,
+                    0.225,
+                    0.25,
+                    0.275,
+                    0.3,
+                    0.325,
+                ]),
+            ),
+            (
+                name: "MinimumDamage",
+                values: Some([
+                    30.0,
+                    80.0,
+                    130.0,
+                    180.0,
+                    230.0,
+                    280.0,
+                    330.0,
+                ]),
+            ),
+            (
+                name: "MaximumMonsterDamage",
+                values: Some([
+                    225.0,
+                    300.0,
+                    375.0,
+                    450.0,
+                    525.0,
+                    600.0,
+                    675.0,
+                ]),
+            ),
+            (
+                name: "HealthCost",
+                values: Some([
+                    40.0,
+                    50.0,
+                    60.0,
+                    70.0,
+                    80.0,
+                    90.0,
+                    100.0,
+                ]),
+            ),
+            (
+                name: "HealthRefundOnHitChampionMonsterPercent",
+                values: Some([
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                ]),
+            ),
+            (
+                name: "HealthRefundOnHitMinionPercent",
+                values: Some([
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                ]),
+            ),
+        ]),
+        mana: None,
+        missileSpec: Some((
+            movementComponent: (
+                type: "MovementTypeFixedSpeed",
+                speed: Some(2000.0),
+                startBoneName: Some("L_Buffbone_GLB_Loc"),
+            ),
+        )),
+        hitBoneName: None,
+        missileSpeed: Some(1500.0),
+        missileEffectKey: Some(3672767030),
+        castType: Some(3),
+    )),
+)

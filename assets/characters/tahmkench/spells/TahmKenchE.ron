@@ -1,0 +1,118 @@
+(
+    spellData: Some((
+        calculations: Some({
+            1463380026: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(12),
+                        coefficient: Some(3.0),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            2645958353: (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "ShieldDuration",
+                values: Some([
+                    2.5,
+                    2.5,
+                    2.5,
+                    2.5,
+                    2.5,
+                    2.5,
+                    2.5,
+                ]),
+            ),
+            (
+                name: "OOCTimer",
+                values: Some([
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                ]),
+            ),
+            (
+                name: "GreyHealthRatio",
+                values: Some([
+                    0.07,
+                    0.15,
+                    0.23,
+                    0.31,
+                    0.39,
+                    0.47,
+                    0.55,
+                ]),
+            ),
+            (
+                name: "MaxHPHealRatio",
+                values: Some([
+                    0.1,
+                    0.1,
+                    0.1,
+                    0.1,
+                    0.1,
+                    0.1,
+                    0.1,
+                ]),
+            ),
+            (
+                name: "GreyHealthRatioEnhanced",
+                values: Some([
+                    0.4,
+                    0.42,
+                    0.44,
+                    0.46,
+                    0.48,
+                    0.5,
+                    0.52,
+                ]),
+            ),
+            (
+                name: "EnhancedThreshold",
+                values: Some([
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                ]),
+            ),
+            (
+                name: "ThresholdRadius",
+                values: Some([
+                    2400.0,
+                    2400.0,
+                    2400.0,
+                    2400.0,
+                    2400.0,
+                    2400.0,
+                    2400.0,
+                ]),
+            ),
+        ]),
+        mana: None,
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: None,
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

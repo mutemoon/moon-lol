@@ -1,0 +1,61 @@
+(
+    spellData: Some((
+        calculations: None,
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "RPercentCurrentHPDamage",
+                values: Some([
+                    2.0,
+                    4.0,
+                    6.0,
+                    8.0,
+                    10.0,
+                    12.0,
+                    14.0,
+                ]),
+            ),
+            (
+                name: "ROnHitDamage",
+                values: None,
+            ),
+            (
+                name: "RDuration",
+                values: Some([
+                    1.75,
+                    2.5,
+                    3.25,
+                    4.0,
+                    4.75,
+                    5.5,
+                    6.25,
+                ]),
+            ),
+            (
+                name: "RCircleRadius",
+                values: Some([
+                    425.0,
+                    425.0,
+                    425.0,
+                    425.0,
+                    425.0,
+                    425.0,
+                    425.0,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            100.0,
+            100.0,
+            100.0,
+            100.0,
+            100.0,
+            100.0,
+        ]),
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: Some(1200.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

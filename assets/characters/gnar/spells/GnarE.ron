@@ -1,0 +1,193 @@
+(
+    spellData: Some((
+        calculations: Some({
+            2920605250: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 460883234,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(12),
+                        coefficient: Some(0.06),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            3817014469: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 429290295,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(12),
+                        coefficient: Some(0.06),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "MinibAS",
+                values: Some([
+                    0.35,
+                    0.4,
+                    0.45,
+                    0.5,
+                    0.55,
+                    0.6,
+                    0.65,
+                ]),
+            ),
+            (
+                name: "MiniASDuration",
+                values: Some([
+                    6.0,
+                    6.0,
+                    6.0,
+                    6.0,
+                    6.0,
+                    6.0,
+                    6.0,
+                ]),
+            ),
+            (
+                name: "MiniDamage",
+                values: Some([
+                    15.0,
+                    50.0,
+                    85.0,
+                    120.0,
+                    155.0,
+                    190.0,
+                    225.0,
+                ]),
+            ),
+            (
+                name: "MiniRange",
+                values: Some([
+                    475.0,
+                    475.0,
+                    475.0,
+                    475.0,
+                    475.0,
+                    475.0,
+                    475.0,
+                ]),
+            ),
+            (
+                name: "MiniBounceRange",
+                values: Some([
+                    525.0,
+                    525.0,
+                    525.0,
+                    525.0,
+                    525.0,
+                    525.0,
+                    525.0,
+                ]),
+            ),
+            (
+                name: "MoveSpeedMod",
+                values: Some([
+                    -0.8,
+                    -0.8,
+                    -0.8,
+                    -0.8,
+                    -0.8,
+                    -0.8,
+                    -0.8,
+                ]),
+            ),
+            (
+                name: "SlowDuration",
+                values: Some([
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                ]),
+            ),
+            (
+                name: "MegaDamage",
+                values: Some([
+                    45.0,
+                    80.0,
+                    115.0,
+                    150.0,
+                    185.0,
+                    220.0,
+                    255.0,
+                ]),
+            ),
+            (
+                name: "MegaRange",
+                values: Some([
+                    675.0,
+                    675.0,
+                    675.0,
+                    675.0,
+                    675.0,
+                    675.0,
+                    675.0,
+                ]),
+            ),
+            (
+                name: "MegaSlowAoE",
+                values: Some([
+                    200.0,
+                    200.0,
+                    200.0,
+                    200.0,
+                    200.0,
+                    200.0,
+                    200.0,
+                ]),
+            ),
+            (
+                name: "MegaDamageAoE",
+                values: Some([
+                    375.0,
+                    375.0,
+                    375.0,
+                    375.0,
+                    375.0,
+                    375.0,
+                    375.0,
+                ]),
+            ),
+            (
+                name: "TravelTime",
+                values: Some([
+                    0.6,
+                    0.6,
+                    0.6,
+                    0.6,
+                    0.6,
+                    0.6,
+                    0.6,
+                ]),
+            ),
+        ]),
+        mana: None,
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: Some(0.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

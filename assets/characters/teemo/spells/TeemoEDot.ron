@@ -1,0 +1,26 @@
+(
+    spellData: Some((
+        calculations: None,
+        effectAmounts: None,
+        dataValues: None,
+        mana: Some([
+            30.0,
+            35.0,
+            40.0,
+            45.0,
+            50.0,
+            55.0,
+        ]),
+        missileSpec: Some((
+            movementComponent: (
+                type: "MovementTypeFixedSpeed",
+                speed: Some(1500.0),
+                startBoneName: Some("R_hand"),
+            ),
+        )),
+        hitBoneName: None,
+        missileSpeed: Some(1500.0),
+        missileEffectKey: None,
+        castType: Some(1),
+    )),
+)

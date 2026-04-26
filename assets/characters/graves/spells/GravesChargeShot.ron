@@ -1,0 +1,92 @@
+(
+    spellData: Some((
+        calculations: Some({
+            383152960: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 2576103728,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(2),
+                        coefficient: Some(1.2),
+                        statFormula: Some(2),
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            1508461632: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 467962025,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(2),
+                        coefficient: Some(1.5),
+                        statFormula: Some(2),
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "RBaseDamage",
+                values: Some([
+                    125.0,
+                    275.0,
+                    425.0,
+                    575.0,
+                    725.0,
+                    875.0,
+                    1025.0,
+                ]),
+            ),
+            (
+                name: "RFalloffDamage",
+                values: Some([
+                    80.0,
+                    200.0,
+                    320.0,
+                    440.0,
+                    560.0,
+                    680.0,
+                    800.0,
+                ]),
+            ),
+            (
+                name: "RKnockbackDistance",
+                values: Some([
+                    400.0,
+                    400.0,
+                    400.0,
+                    400.0,
+                    400.0,
+                    400.0,
+                    400.0,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            100.0,
+            100.0,
+            100.0,
+            0.0,
+            0.0,
+            0.0,
+        ]),
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: Some(1400.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

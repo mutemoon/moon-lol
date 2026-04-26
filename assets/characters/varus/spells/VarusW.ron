@@ -1,0 +1,258 @@
+(
+    spellData: Some((
+        calculations: Some({
+            2189869368: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 2083783262,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            1976250603: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 396037120,
+                    ),
+                    (
+                        type: "CalculationPartStatSub",
+                        stat: None,
+                        subpart: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: Some(1),
+            ),
+            3484084320: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 4258916174,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: 260746276,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(2),
+                        dataValue: 3698461115,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: Some([
+            (
+                values: None,
+            ),
+            (
+                values: Some([
+                    0.025,
+                    0.03,
+                    0.035,
+                    0.04,
+                    0.045,
+                    0.05,
+                    0.055,
+                ]),
+            ),
+            (
+                values: Some([
+                    6.0,
+                    6.0,
+                    6.0,
+                    6.0,
+                    6.0,
+                    6.0,
+                    6.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    120.0,
+                    120.0,
+                    120.0,
+                    120.0,
+                    120.0,
+                    120.0,
+                    120.0,
+                ]),
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+        ]),
+        dataValues: Some([
+            (
+                name: "VarusWDebuffDuration",
+                values: Some([
+                    6.0,
+                    6.0,
+                    6.0,
+                    6.0,
+                    6.0,
+                    6.0,
+                    6.0,
+                ]),
+            ),
+            (
+                name: "VarusWMaxStacks",
+                values: Some([
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                ]),
+            ),
+            (
+                name: "MaxMonsterDamage",
+                values: Some([
+                    120.0,
+                    120.0,
+                    120.0,
+                    120.0,
+                    120.0,
+                    120.0,
+                    120.0,
+                ]),
+            ),
+            (
+                name: "BasePercentHPPerStack",
+                values: Some([
+                    0.025,
+                    0.03,
+                    0.035,
+                    0.04,
+                    0.045,
+                    0.05,
+                    0.055,
+                ]),
+            ),
+            (
+                name: "QEmpowerMonsterCap",
+                values: Some([
+                    360.0,
+                    360.0,
+                    360.0,
+                    360.0,
+                    360.0,
+                    360.0,
+                    360.0,
+                ]),
+            ),
+            (
+                name: "VarusWOnHitDamage",
+                values: Some([
+                    -1.0,
+                    8.0,
+                    17.0,
+                    26.0,
+                    35.0,
+                    44.0,
+                    53.0,
+                ]),
+            ),
+            (
+                name: "CDRPerBlightStack",
+                values: Some([
+                    0.13,
+                    0.13,
+                    0.13,
+                    0.13,
+                    0.13,
+                    0.13,
+                    0.13,
+                ]),
+            ),
+            (
+                name: "VarusWMaxChargeHPDamage",
+                values: Some([
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                ]),
+            ),
+            (
+                name: "OnHitRatio",
+                values: Some([
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                ]),
+            ),
+            (
+                name: "OnHitADRatio",
+                values: Some([
+                    0.15,
+                    0.15,
+                    0.15,
+                    0.15,
+                    0.15,
+                    0.15,
+                    0.15,
+                ]),
+            ),
+            (
+                name: "WQHealthDamage",
+                values: Some([
+                    0.04,
+                    0.06,
+                    0.08,
+                    0.1,
+                    0.12,
+                    0.14,
+                    0.16,
+                ]),
+            ),
+        ]),
+        mana: None,
+        missileSpec: None,
+        hitBoneName: Some("head"),
+        missileSpeed: Some(1200.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

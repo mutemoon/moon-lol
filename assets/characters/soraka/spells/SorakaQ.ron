@@ -1,0 +1,151 @@
+(
+    spellData: Some((
+        calculations: Some({
+            501147496: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 64618745,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: None,
+                        coefficient: Some(0.35),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            1111502268: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 3100192475,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: 1886965801,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "BaseDamage",
+                values: Some([
+                    50.0,
+                    85.0,
+                    120.0,
+                    155.0,
+                    190.0,
+                    225.0,
+                    260.0,
+                ]),
+            ),
+            (
+                name: "BaseHoT",
+                values: Some([
+                    45.0,
+                    60.0,
+                    75.0,
+                    90.0,
+                    105.0,
+                    120.0,
+                    135.0,
+                ]),
+            ),
+            (
+                name: "HotDuration",
+                values: Some([
+                    2.5,
+                    2.5,
+                    2.5,
+                    2.5,
+                    2.5,
+                    2.5,
+                    2.5,
+                ]),
+            ),
+            (
+                name: "MoveSpeedSlow",
+                values: Some([
+                    0.3,
+                    0.3,
+                    0.3,
+                    0.3,
+                    0.3,
+                    0.3,
+                    0.3,
+                ]),
+            ),
+            (
+                name: "SlowDuration",
+                values: Some([
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                ]),
+            ),
+            (
+                name: "MoveSpeedHaste",
+                values: Some([
+                    0.175,
+                    0.2,
+                    0.225,
+                    0.25,
+                    0.275,
+                    0.3,
+                    0.325,
+                ]),
+            ),
+            (
+                name: "MoveSpeedDuration",
+                values: Some([
+                    2.5,
+                    2.5,
+                    2.5,
+                    2.5,
+                    2.5,
+                    2.5,
+                    2.5,
+                ]),
+            ),
+            (
+                name: "HealAPRatio",
+                values: Some([
+                    0.3,
+                    0.3,
+                    0.3,
+                    0.3,
+                    0.3,
+                    0.3,
+                    0.3,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            45.0,
+            50.0,
+            55.0,
+            60.0,
+            65.0,
+            65.0,
+        ]),
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: Some(1750.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

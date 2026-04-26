@@ -1,0 +1,68 @@
+(
+    spellData: Some((
+        calculations: None,
+        effectAmounts: Some([
+            (
+                values: Some([
+                    25.0,
+                    75.0,
+                    125.0,
+                    175.0,
+                    225.0,
+                    275.0,
+                    325.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    5.0,
+                    8.0,
+                    11.0,
+                    14.0,
+                    17.0,
+                    20.0,
+                    23.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    80.0,
+                    80.0,
+                    80.0,
+                    80.0,
+                    80.0,
+                    80.0,
+                    80.0,
+                ]),
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+        ]),
+        dataValues: None,
+        mana: None,
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: Some(20.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

@@ -1,0 +1,262 @@
+(
+    spellData: Some((
+        calculations: Some({
+            129896502: (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            2998734127: (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            4161631095: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 64618745,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(2),
+                        dataValue: 162078152,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: 3809245599,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: Some([
+            (
+                values: Some([
+                    40.0,
+                    40.0,
+                    55.0,
+                    70.0,
+                    85.0,
+                    100.0,
+                    115.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    6.0,
+                    6.0,
+                    6.0,
+                    6.0,
+                    6.0,
+                    6.0,
+                    6.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                ]),
+            ),
+            (
+                values: Some([
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    0.35,
+                    0.35,
+                    0.35,
+                    0.35,
+                    0.35,
+                    0.35,
+                    0.35,
+                ]),
+            ),
+            (
+                values: Some([
+                    100.0,
+                    100.0,
+                    100.0,
+                    100.0,
+                    100.0,
+                    100.0,
+                    100.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    12.0,
+                    12.0,
+                    12.0,
+                    12.0,
+                    12.0,
+                    12.0,
+                    12.0,
+                ]),
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+        ]),
+        dataValues: Some([
+            (
+                name: "MaxDamage",
+                values: Some([
+                    56.25,
+                    90.0,
+                    123.75,
+                    157.5,
+                    191.25,
+                    225.0,
+                    258.75,
+                ]),
+            ),
+            (
+                name: "MaxDamageNL",
+                values: Some([
+                    90.0,
+                    123.75,
+                    157.5,
+                    191.25,
+                    225.0,
+                    258.75,
+                    292.5,
+                ]),
+            ),
+            (
+                name: "MaxDamageEvolved",
+                values: Some([
+                    93.75,
+                    150.0,
+                    206.25,
+                    262.5,
+                    318.75,
+                    375.0,
+                    431.25,
+                ]),
+            ),
+            (
+                name: "MaxDamageEvolvedNL",
+                values: Some([
+                    150.0,
+                    206.25,
+                    262.5,
+                    318.75,
+                    375.0,
+                    431.25,
+                    487.5,
+                ]),
+            ),
+            (
+                name: "BonusADRatio",
+                values: Some([
+                    0.55,
+                    0.55,
+                    0.55,
+                    0.55,
+                    0.55,
+                    0.55,
+                    0.55,
+                ]),
+            ),
+            (
+                name: "APRatio",
+                values: Some([
+                    0.2,
+                    0.2,
+                    0.2,
+                    0.2,
+                    0.2,
+                    0.2,
+                    0.2,
+                ]),
+            ),
+            (
+                name: "BaseDamage",
+                values: Some([
+                    25.0,
+                    40.0,
+                    55.0,
+                    70.0,
+                    85.0,
+                    100.0,
+                    115.0,
+                ]),
+            ),
+            (
+                name: "ExtraHitReduction",
+                values: Some([
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                ]),
+            ),
+            (
+                name: "MinionDamageMultiplier",
+                values: Some([
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                ]),
+            ),
+            (
+                name: "MinionHPThreshold",
+                values: Some([
+                    0.35,
+                    0.35,
+                    0.35,
+                    0.35,
+                    0.35,
+                    0.35,
+                    0.35,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            55.0,
+            55.0,
+            55.0,
+            55.0,
+            55.0,
+            55.0,
+        ]),
+        missileSpec: None,
+        hitBoneName: Some("pelvis"),
+        missileSpeed: Some(2500.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

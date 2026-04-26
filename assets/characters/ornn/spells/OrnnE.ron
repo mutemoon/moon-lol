@@ -1,0 +1,151 @@
+(
+    spellData: Some((
+        calculations: Some({
+            501147496: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 64618745,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(1),
+                        dataValue: 770143391,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(6),
+                        dataValue: 1929964645,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "BaseDamage",
+                values: Some([
+                    35.0,
+                    80.0,
+                    125.0,
+                    170.0,
+                    215.0,
+                    260.0,
+                    305.0,
+                ]),
+            ),
+            (
+                name: "KnockupDuration",
+                values: Some([
+                    1.25,
+                    1.25,
+                    1.25,
+                    1.25,
+                    1.25,
+                    1.25,
+                    1.25,
+                ]),
+            ),
+            (
+                name: "DashRange",
+                values: Some([
+                    650.0,
+                    650.0,
+                    650.0,
+                    650.0,
+                    650.0,
+                    650.0,
+                    650.0,
+                ]),
+            ),
+            (
+                name: "ShockwaveRadius",
+                values: Some([
+                    360.0,
+                    360.0,
+                    360.0,
+                    360.0,
+                    360.0,
+                    360.0,
+                    360.0,
+                ]),
+            ),
+            (
+                name: "DashWallCheating",
+                values: Some([
+                    150.0,
+                    150.0,
+                    150.0,
+                    150.0,
+                    150.0,
+                    150.0,
+                    150.0,
+                ]),
+            ),
+            (
+                name: "DashSpeed",
+                values: Some([
+                    1600.0,
+                    1600.0,
+                    1600.0,
+                    1600.0,
+                    1600.0,
+                    1600.0,
+                    1600.0,
+                ]),
+            ),
+            (
+                name: "DashRadius",
+                values: Some([
+                    175.0,
+                    175.0,
+                    175.0,
+                    175.0,
+                    175.0,
+                    175.0,
+                    175.0,
+                ]),
+            ),
+            (
+                name: "ArmorRatio",
+                values: Some([
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                ]),
+            ),
+            (
+                name: "MRRatio",
+                values: Some([
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            35.0,
+            40.0,
+            45.0,
+            50.0,
+            55.0,
+            60.0,
+        ]),
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: Some(1600.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

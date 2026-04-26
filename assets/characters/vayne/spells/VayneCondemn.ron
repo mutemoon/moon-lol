@@ -1,0 +1,87 @@
+(
+    spellData: Some((
+        calculations: Some({
+            501147496: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 1508461632,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(2),
+                        coefficient: Some(0.5),
+                        statFormula: Some(2),
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "Damage",
+                values: Some([
+                    15.0,
+                    50.0,
+                    85.0,
+                    120.0,
+                    155.0,
+                    190.0,
+                    225.0,
+                ]),
+            ),
+            (
+                name: "StunDamage",
+                values: Some([
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                ]),
+            ),
+            (
+                name: "StunDuration",
+                values: Some([
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                ]),
+            ),
+            (
+                name: "KnockbackDistance",
+                values: Some([
+                    475.0,
+                    475.0,
+                    475.0,
+                    475.0,
+                    475.0,
+                    475.0,
+                    475.0,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            90.0,
+            90.0,
+            90.0,
+            90.0,
+            90.0,
+            90.0,
+        ]),
+        missileSpec: None,
+        hitBoneName: Some("head"),
+        missileSpeed: Some(1200.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

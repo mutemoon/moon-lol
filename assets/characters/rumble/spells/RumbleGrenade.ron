@@ -1,0 +1,132 @@
+(
+    spellData: Some((
+        calculations: Some({
+            501147496: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 64618745,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: None,
+                        coefficient: Some(0.5),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "BaseDamage",
+                values: Some([
+                    30.0,
+                    55.0,
+                    80.0,
+                    105.0,
+                    130.0,
+                    155.0,
+                    180.0,
+                ]),
+            ),
+            (
+                name: "FirstCastHeatCost",
+                values: Some([
+                    20.0,
+                    20.0,
+                    20.0,
+                    20.0,
+                    20.0,
+                    20.0,
+                    20.0,
+                ]),
+            ),
+            (
+                name: "SecondCastHeatCost",
+                values: None,
+            ),
+            (
+                name: "PercMagicPen",
+                values: Some([
+                    0.08,
+                    0.1,
+                    0.12,
+                    0.14,
+                    0.16,
+                    0.18,
+                    0.2,
+                ]),
+            ),
+            (
+                name: "EnhancedMagicPen",
+                values: Some([
+                    0.16,
+                    0.2,
+                    0.24,
+                    0.28,
+                    0.32,
+                    0.36,
+                    0.4,
+                ]),
+            ),
+            (
+                name: "ShredDuration",
+                values: Some([
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                ]),
+            ),
+            (
+                name: "SlowDuration",
+                values: Some([
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                ]),
+            ),
+            (
+                name: "BaseSlowAmount",
+                values: Some([
+                    10.0,
+                    15.0,
+                    20.0,
+                    25.0,
+                    30.0,
+                    35.0,
+                    40.0,
+                ]),
+            ),
+            (
+                name: "EmpoweredSlowAmount",
+                values: Some([
+                    20.0,
+                    30.0,
+                    40.0,
+                    50.0,
+                    60.0,
+                    70.0,
+                    80.0,
+                ]),
+            ),
+        ]),
+        mana: None,
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: Some(1200.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

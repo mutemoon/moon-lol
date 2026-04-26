@@ -1,0 +1,160 @@
+(
+    spellData: Some((
+        calculations: Some({
+            673044596: (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: Some(-1),
+            ),
+            1509675819: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 2466211350,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(1),
+                        dataValue: 3153783731,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(6),
+                        dataValue: 3153783731,
+                    ),
+                ]),
+                multiplier: None,
+                precision: Some(2),
+            ),
+            749309793: (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: Some(-1),
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "MarkDuration",
+                values: Some([
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                ]),
+            ),
+            (
+                name: "BonusRange",
+                values: None,
+            ),
+            (
+                name: "RecoveryPercent",
+                values: Some([
+                    0.8,
+                    0.8,
+                    0.8,
+                    0.8,
+                    0.8,
+                    0.8,
+                    0.8,
+                ]),
+            ),
+            (
+                name: "ArmorMRMultiplier",
+                values: Some([
+                    0.002,
+                    0.002,
+                    0.002,
+                    0.002,
+                    0.002,
+                    0.002,
+                    0.002,
+                ]),
+            ),
+            (
+                name: "PassiveStartingDamage",
+                values: Some([
+                    0.0035,
+                    0.0035,
+                    0.0035,
+                    0.0035,
+                    0.0035,
+                    0.0035,
+                    0.0035,
+                ]),
+            ),
+            (
+                name: "MaxHealthDamagePercentBase",
+                values: Some([
+                    0.01,
+                    0.01,
+                    0.01,
+                    0.01,
+                    0.01,
+                    0.01,
+                    0.01,
+                ]),
+            ),
+            (
+                name: "MaxHealthDamageResistRatio",
+                values: Some([
+                    0.0001,
+                    0.0001,
+                    0.0001,
+                    0.0001,
+                    0.0001,
+                    0.0001,
+                    0.0001,
+                ]),
+            ),
+            (
+                name: "FlatDamage",
+                values: Some([
+                    12.0,
+                    12.0,
+                    12.0,
+                    12.0,
+                    12.0,
+                    12.0,
+                    12.0,
+                ]),
+            ),
+            (
+                name: "MarkDamagePercentMin",
+                values: Some([
+                    0.01,
+                    0.01,
+                    0.01,
+                    0.01,
+                    0.01,
+                    0.01,
+                    0.01,
+                ]),
+            ),
+            (
+                name: "MarkDamagePercentMax",
+                values: Some([
+                    0.02,
+                    0.02,
+                    0.02,
+                    0.02,
+                    0.02,
+                    0.02,
+                    0.02,
+                ]),
+            ),
+        ]),
+        mana: None,
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: None,
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

@@ -1,0 +1,159 @@
+(
+    spellData: Some((
+        calculations: Some({
+            501147496: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 64618745,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: 3809245599,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: Some([
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: Some([
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    100.0,
+                    100.0,
+                    100.0,
+                    100.0,
+                    100.0,
+                    100.0,
+                    100.0,
+                ]),
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+        ]),
+        dataValues: Some([
+            (
+                name: "AttackSpeed",
+                values: Some([
+                    0.0,
+                    0.05,
+                    0.1,
+                    0.15,
+                    0.2,
+                    0.25,
+                    0.3,
+                ]),
+            ),
+            (
+                name: "BaseDamage",
+                values: Some([
+                    35.0,
+                    80.0,
+                    125.0,
+                    170.0,
+                    215.0,
+                    260.0,
+                    305.0,
+                ]),
+            ),
+            (
+                name: "APRatio",
+                values: Some([
+                    0.9,
+                    0.9,
+                    0.9,
+                    0.9,
+                    0.9,
+                    0.9,
+                    0.9,
+                ]),
+            ),
+            (
+                name: "ShredAmount",
+                values: Some([
+                    12.0,
+                    16.0,
+                    20.0,
+                    24.0,
+                    28.0,
+                    32.0,
+                    36.0,
+                ]),
+            ),
+            (
+                name: "ShredDuration",
+                values: Some([
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            40.0,
+            40.0,
+            40.0,
+            40.0,
+            40.0,
+            40.0,
+        ]),
+        missileSpec: Some((
+            movementComponent: (
+                type: "MovementTypeFixedSpeed",
+                speed: Some(1650.0),
+                startBoneName: Some("C_Mouth_d"),
+            ),
+        )),
+        hitBoneName: Some("C_BUFFBONE_GLB_LAYOUT_LOC"),
+        missileSpeed: Some(1650.0),
+        missileEffectKey: Some(716831127),
+        castType: Some(3),
+    )),
+)

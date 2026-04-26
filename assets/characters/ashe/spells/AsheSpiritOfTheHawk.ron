@@ -1,0 +1,102 @@
+(
+    spellData: Some((
+        calculations: Some({
+            1198495164: (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: Some([
+            (
+                values: Some([
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    10.0,
+                    50.0,
+                    90.0,
+                    130.0,
+                    170.0,
+                    210.0,
+                    250.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    25000.0,
+                    25000.0,
+                    25000.0,
+                    25000.0,
+                    25000.0,
+                    25000.0,
+                    25000.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                ]),
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+        ]),
+        dataValues: Some([
+            (
+                name: "BaseCooldown",
+                values: Some([
+                    100.0,
+                    90.0,
+                    80.0,
+                    70.0,
+                    60.0,
+                    50.0,
+                    40.0,
+                ]),
+            ),
+        ]),
+        mana: None,
+        missileSpec: Some((
+            movementComponent: (
+                type: "MovementTypeFixedSpeed",
+                speed: Some(1400.0),
+                startBoneName: Some("head"),
+            ),
+        )),
+        hitBoneName: None,
+        missileSpeed: Some(1400.0),
+        missileEffectKey: Some(2847866210),
+        castType: Some(3),
+    )),
+)

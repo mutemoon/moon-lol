@@ -1,0 +1,116 @@
+(
+    spellData: Some((
+        calculations: None,
+        effectAmounts: Some([
+            (
+                values: Some([
+                    5.25,
+                    5.25,
+                    5.25,
+                    5.25,
+                    5.25,
+                    5.25,
+                    5.25,
+                ]),
+            ),
+            (
+                values: Some([
+                    0.2,
+                    0.2,
+                    0.2,
+                    0.2,
+                    0.2,
+                    0.2,
+                    0.2,
+                ]),
+            ),
+            (
+                values: Some([
+                    25.0,
+                    30.0,
+                    35.0,
+                    40.0,
+                    45.0,
+                    50.0,
+                    55.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    5.25,
+                    5.25,
+                    5.25,
+                    5.25,
+                    5.25,
+                    5.25,
+                    5.25,
+                ]),
+            ),
+            (
+                values: Some([
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                ]),
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+        ]),
+        dataValues: Some([
+            (
+                name: "RecastRange",
+                values: Some([
+                    2000.0,
+                    2000.0,
+                    2000.0,
+                    2000.0,
+                    2000.0,
+                    2000.0,
+                    2000.0,
+                ]),
+            ),
+            (
+                name: "MimickRange",
+                values: Some([
+                    25000.0,
+                    25000.0,
+                    25000.0,
+                    25000.0,
+                    25000.0,
+                    25000.0,
+                    25000.0,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            40.0,
+            35.0,
+            30.0,
+            25.0,
+            20.0,
+            15.0,
+        ]),
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: Some(1600.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

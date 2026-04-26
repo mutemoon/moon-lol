@@ -1,0 +1,145 @@
+(
+    spellData: Some((
+        calculations: Some({
+            863312304: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 797552461,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(12),
+                        coefficient: Some(0.15),
+                        statFormula: Some(2),
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: 4106273920,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "ArrivalPersonalSpace",
+                values: Some([
+                    175.0,
+                    175.0,
+                    175.0,
+                    175.0,
+                    175.0,
+                    175.0,
+                    175.0,
+                ]),
+            ),
+            (
+                name: "ArrivalCheckRadiusVisible",
+                values: Some([
+                    2000.0,
+                    2000.0,
+                    2000.0,
+                    2000.0,
+                    2000.0,
+                    2000.0,
+                    2000.0,
+                ]),
+            ),
+            (
+                name: "ArrivalCheckRadiusInvisible",
+                values: Some([
+                    600.0,
+                    600.0,
+                    600.0,
+                    600.0,
+                    600.0,
+                    600.0,
+                    600.0,
+                ]),
+            ),
+            (
+                name: "BaseShieldAmount",
+                values: Some([
+                    20.0,
+                    120.0,
+                    220.0,
+                    320.0,
+                    420.0,
+                    520.0,
+                    620.0,
+                ]),
+            ),
+            (
+                name: "ShieldAPRatio",
+                values: Some([
+                    1.35,
+                    1.35,
+                    1.35,
+                    1.35,
+                    1.35,
+                    1.35,
+                    1.35,
+                ]),
+            ),
+            (
+                name: "MaxShieldThreshold",
+                values: Some([
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                ]),
+            ),
+            (
+                name: "MaxShieldMult",
+                values: Some([
+                    1.6,
+                    1.6,
+                    1.6,
+                    1.6,
+                    1.6,
+                    1.6,
+                    1.6,
+                ]),
+            ),
+            (
+                name: "ShieldDuration",
+                values: Some([
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                ]),
+            ),
+            (
+                name: "ChannelDuration",
+                values: Some([
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                ]),
+            ),
+        ]),
+        mana: None,
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: None,
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

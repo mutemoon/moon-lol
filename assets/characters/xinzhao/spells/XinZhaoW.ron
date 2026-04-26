@@ -1,0 +1,227 @@
+(
+    spellData: Some((
+        calculations: Some({
+            1335700871: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 3287142022,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(2),
+                        coefficient: Some(0.3),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            1918579810: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 1425815051,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(2),
+                        coefficient: Some(0.9),
+                        statFormula: None,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: None,
+                        coefficient: Some(0.65),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            2219251473: (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: Some([
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: Some([
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                ]),
+            ),
+            (
+                values: Some([
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                ]),
+            ),
+            (
+                values: Some([
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                ]),
+            ),
+            (
+                values: Some([
+                    -0.5,
+                    -0.5,
+                    -0.5,
+                    -0.5,
+                    -0.5,
+                    -0.5,
+                    -0.5,
+                ]),
+            ),
+            (
+                values: Some([
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                ]),
+            ),
+            (
+                values: Some([
+                    140.0,
+                    140.0,
+                    140.0,
+                    140.0,
+                    140.0,
+                    140.0,
+                    140.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    200.0,
+                    200.0,
+                    200.0,
+                    200.0,
+                    200.0,
+                    200.0,
+                    200.0,
+                ]),
+            ),
+            (
+                values: None,
+            ),
+        ]),
+        dataValues: Some([
+            (
+                name: "SlashBaseDamage",
+                values: Some([
+                    20.0,
+                    30.0,
+                    40.0,
+                    50.0,
+                    60.0,
+                    70.0,
+                    80.0,
+                ]),
+            ),
+            (
+                name: "ThrustBaseDamage",
+                values: Some([
+                    15.0,
+                    50.0,
+                    85.0,
+                    120.0,
+                    155.0,
+                    190.0,
+                    225.0,
+                ]),
+            ),
+            (
+                name: "CritChanceAmp",
+                values: Some([
+                    0.333,
+                    0.333,
+                    0.333,
+                    0.333,
+                    0.333,
+                    0.333,
+                    0.333,
+                ]),
+            ),
+            (
+                name: "MarkDuration",
+                values: Some([
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                ]),
+            ),
+            (
+                name: "HitNum",
+                values: Some([
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                ]),
+            ),
+            (
+                name: "DelayTime",
+                values: Some([
+                    0.05,
+                    0.05,
+                    0.05,
+                    0.05,
+                    0.05,
+                    0.05,
+                    0.05,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            60.0,
+            55.0,
+            50.0,
+            45.0,
+            40.0,
+            40.0,
+        ]),
+        missileSpec: None,
+        hitBoneName: Some("C_BUFFBONE_GLB_HEAD_LOC"),
+        missileSpeed: None,
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

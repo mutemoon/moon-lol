@@ -1,0 +1,118 @@
+(
+    spellData: Some((
+        calculations: Some({
+            937010576: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(2),
+                        dataValue: 3407905334,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "RocketAoERadius",
+                values: Some([
+                    250.0,
+                    250.0,
+                    250.0,
+                    250.0,
+                    250.0,
+                    250.0,
+                    250.0,
+                ]),
+            ),
+            (
+                name: "RocketBonusRange",
+                values: Some([
+                    75.0,
+                    100.0,
+                    125.0,
+                    150.0,
+                    175.0,
+                    200.0,
+                    225.0,
+                ]),
+            ),
+            (
+                name: "MinigunAttackSpeedMax",
+                values: Some([
+                    5.0,
+                    30.0,
+                    55.0,
+                    80.0,
+                    105.0,
+                    130.0,
+                    155.0,
+                ]),
+            ),
+            (
+                name: "MinigunAttackSpeedDuration",
+                values: Some([
+                    2.5,
+                    2.5,
+                    2.5,
+                    2.5,
+                    2.5,
+                    2.5,
+                    2.5,
+                ]),
+            ),
+            (
+                name: "MinigunAttackSpeedStacks",
+                values: Some([
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                ]),
+            ),
+            (
+                name: "RocketTAD",
+                values: Some([
+                    1.1,
+                    1.1,
+                    1.1,
+                    1.1,
+                    1.1,
+                    1.1,
+                    1.1,
+                ]),
+            ),
+            (
+                name: "RocketASPDPenalty",
+                values: Some([
+                    0.1,
+                    0.1,
+                    0.1,
+                    0.1,
+                    0.1,
+                    0.1,
+                    0.1,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            20.0,
+            20.0,
+            20.0,
+            20.0,
+            20.0,
+            20.0,
+        ]),
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: Some(2000.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

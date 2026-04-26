@@ -1,0 +1,117 @@
+(
+    spellData: Some((
+        calculations: Some({
+            501147496: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 64618745,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: 3809245599,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: Some([
+            (
+                values: Some([
+                    40.0,
+                    90.0,
+                    140.0,
+                    190.0,
+                    240.0,
+                    290.0,
+                    340.0,
+                ]),
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+        ]),
+        dataValues: Some([
+            (
+                name: "BaseDamage",
+                values: Some([
+                    60.0,
+                    110.0,
+                    160.0,
+                    210.0,
+                    260.0,
+                    310.0,
+                    360.0,
+                ]),
+            ),
+            (
+                name: "LolipopLength",
+                values: Some([
+                    70.0,
+                    70.0,
+                    70.0,
+                    70.0,
+                    70.0,
+                    70.0,
+                    70.0,
+                ]),
+            ),
+            (
+                name: "APRatio",
+                values: Some([
+                    1.2,
+                    1.2,
+                    1.2,
+                    1.2,
+                    1.2,
+                    1.2,
+                    1.2,
+                ]),
+            ),
+            (
+                name: "CherryBonusHaste",
+                values: None,
+            ),
+        ]),
+        mana: Some([
+            100.0,
+            100.0,
+            100.0,
+            100.0,
+            100.0,
+            100.0,
+        ]),
+        missileSpec: None,
+        hitBoneName: Some("root"),
+        missileSpeed: Some(1800.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

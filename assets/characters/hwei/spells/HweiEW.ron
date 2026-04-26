@@ -1,0 +1,153 @@
+(
+    spellData: Some((
+        calculations: Some({
+            1508461632: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 64618745,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: None,
+                        coefficient: Some(0.65),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "StareRadius",
+                values: Some([
+                    350.0,
+                    350.0,
+                    350.0,
+                    350.0,
+                    350.0,
+                    350.0,
+                    350.0,
+                ]),
+            ),
+            (
+                name: "SetupDelay",
+                values: Some([
+                    0.65,
+                    0.65,
+                    0.65,
+                    0.65,
+                    0.65,
+                    0.65,
+                    0.65,
+                ]),
+            ),
+            (
+                name: "MinSetupDelay",
+                values: Some([
+                    0.65,
+                    0.65,
+                    0.65,
+                    0.65,
+                    0.65,
+                    0.65,
+                    0.65,
+                ]),
+            ),
+            (
+                name: "RootDuration",
+                values: Some([
+                    1.0,
+                    1.2,
+                    1.4,
+                    1.6,
+                    1.8,
+                    2.0,
+                    2.2,
+                ]),
+            ),
+            (
+                name: "BaseDamage",
+                values: Some([
+                    30.0,
+                    70.0,
+                    110.0,
+                    150.0,
+                    190.0,
+                    230.0,
+                    270.0,
+                ]),
+            ),
+            (
+                name: "FireDelay",
+                values: Some([
+                    0.3,
+                    0.3,
+                    0.3,
+                    0.3,
+                    0.3,
+                    0.3,
+                    0.3,
+                ]),
+            ),
+            (
+                name: "StareDuration",
+                values: Some([
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                ]),
+            ),
+            (
+                name: "MinStareDuration",
+                values: Some([
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                ]),
+            ),
+            (
+                name: "VisibilityRadius",
+                values: Some([
+                    450.0,
+                    450.0,
+                    450.0,
+                    450.0,
+                    450.0,
+                    450.0,
+                    450.0,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            50.0,
+            55.0,
+            60.0,
+            65.0,
+            70.0,
+            70.0,
+        ]),
+        missileSpec: Some((
+            movementComponent: (
+                type: "MovementTypeFixedSpeed",
+                speed: Some(1700.0),
+                startBoneName: Some("root"),
+            ),
+        )),
+        hitBoneName: None,
+        missileSpeed: None,
+        missileEffectKey: Some(3914195006),
+        castType: Some(3),
+    )),
+)

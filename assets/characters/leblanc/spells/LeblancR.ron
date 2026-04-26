@@ -1,0 +1,182 @@
+(
+    spellData: Some((
+        calculations: Some({
+            3416442790: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 4115664746,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: 3538761312,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            1619911138: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 2664135870,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: 3538761312,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            2733965475: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 3021083595,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: None,
+                        coefficient: Some(0.8),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            994187939: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 3570343371,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: None,
+                        coefficient: Some(0.85),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            1101335959: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 4027495543,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: None,
+                        coefficient: Some(0.8),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "RQ1Base",
+                values: Some([
+                    0.0,
+                    70.0,
+                    140.0,
+                    210.0,
+                    280.0,
+                    350.0,
+                    420.0,
+                ]),
+            ),
+            (
+                name: "RQ2Base",
+                values: Some([
+                    0.0,
+                    140.0,
+                    280.0,
+                    420.0,
+                    560.0,
+                    700.0,
+                    840.0,
+                ]),
+            ),
+            (
+                name: "RWBase",
+                values: Some([
+                    0.0,
+                    150.0,
+                    300.0,
+                    450.0,
+                    600.0,
+                    750.0,
+                    900.0,
+                ]),
+            ),
+            (
+                name: "RE1Base",
+                values: Some([
+                    0.0,
+                    70.0,
+                    140.0,
+                    210.0,
+                    280.0,
+                    350.0,
+                    420.0,
+                ]),
+            ),
+            (
+                name: "RE2Base",
+                values: Some([
+                    0.0,
+                    140.0,
+                    280.0,
+                    420.0,
+                    560.0,
+                    700.0,
+                    840.0,
+                ]),
+            ),
+            (
+                name: "RQMarkDuration",
+                values: Some([
+                    3.5,
+                    3.5,
+                    3.5,
+                    3.5,
+                    3.5,
+                    3.5,
+                    3.5,
+                ]),
+            ),
+            (
+                name: "RQ1RE1BaseAPRatio",
+                values: Some([
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                ]),
+            ),
+        ]),
+        mana: None,
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: Some(20.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

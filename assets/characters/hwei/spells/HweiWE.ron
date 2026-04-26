@@ -1,0 +1,93 @@
+(
+    spellData: Some((
+        calculations: Some({
+            3484084320: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 1381148019,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: None,
+                        coefficient: Some(0.15),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            2706256664: (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "BaseOnHitDamage",
+                values: Some([
+                    10.0,
+                    20.0,
+                    30.0,
+                    40.0,
+                    50.0,
+                    60.0,
+                    70.0,
+                ]),
+            ),
+            (
+                name: "Duration",
+                values: Some([
+                    9.0,
+                    9.0,
+                    9.0,
+                    9.0,
+                    9.0,
+                    9.0,
+                    9.0,
+                ]),
+            ),
+            (
+                name: "OnHitManaRestore",
+                values: Some([
+                    40.0,
+                    45.0,
+                    50.0,
+                    55.0,
+                    60.0,
+                    65.0,
+                    70.0,
+                ]),
+            ),
+            (
+                name: "ManaCostHelper",
+                values: Some([
+                    -85.0,
+                    -90.0,
+                    -95.0,
+                    -100.0,
+                    -105.0,
+                    -110.0,
+                    -115.0,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            90.0,
+            95.0,
+            100.0,
+            105.0,
+            110.0,
+            110.0,
+        ]),
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: None,
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

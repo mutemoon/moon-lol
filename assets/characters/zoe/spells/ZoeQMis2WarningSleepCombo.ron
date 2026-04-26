@@ -1,0 +1,66 @@
+(
+    spellData: Some((
+        calculations: None,
+        effectAmounts: Some([
+            (
+                values: Some([
+                    0.0,
+                    90.0,
+                    150.0,
+                    245.0,
+                    315.0,
+                    440.0,
+                    0.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    0.0,
+                    2.5,
+                    2.75,
+                    3.0,
+                    3.25,
+                    3.5,
+                    0.0,
+                ]),
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+        ]),
+        dataValues: None,
+        mana: None,
+        missileSpec: Some((
+            movementComponent: (
+                type: "MovementTypeFixedSpeed",
+                speed: None,
+                startBoneName: None,
+            ),
+        )),
+        hitBoneName: Some("root"),
+        missileSpeed: Some(2800.0),
+        missileEffectKey: None,
+        castType: Some(3),
+    )),
+)

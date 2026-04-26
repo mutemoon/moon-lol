@@ -1,0 +1,127 @@
+(
+    spellData: Some((
+        calculations: Some({
+            1134565867: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 3754703024,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            1074619340: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(2),
+                        coefficient: Some(1.0),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "RDamageAmp",
+                values: Some([
+                    0.1,
+                    0.25,
+                    0.4,
+                    0.55,
+                    0.7,
+                    0.85,
+                    1.0,
+                ]),
+            ),
+            (
+                name: "RReactivateCD",
+                values: Some([
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                ]),
+            ),
+            (
+                name: "RShadowDurationDisplayed",
+                values: Some([
+                    7.5,
+                    7.5,
+                    7.5,
+                    7.5,
+                    7.5,
+                    7.5,
+                    7.5,
+                ]),
+            ),
+            (
+                name: "RDeathMarkDuration",
+                values: Some([
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                ]),
+            ),
+            (
+                name: "RCanSwapBuffDuration",
+                values: Some([
+                    7.5,
+                    7.5,
+                    7.5,
+                    7.5,
+                    7.5,
+                    7.5,
+                    7.5,
+                ]),
+            ),
+            (
+                name: "RGhostedDuration",
+                values: Some([
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                ]),
+            ),
+            (
+                name: "RBaseDamage",
+                values: None,
+            ),
+            (
+                name: "RVisionDuration",
+                values: Some([
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                ]),
+            ),
+        ]),
+        mana: None,
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: Some(0.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

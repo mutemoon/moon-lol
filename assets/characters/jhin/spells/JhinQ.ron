@@ -1,0 +1,116 @@
+(
+    spellData: Some((
+        calculations: Some({
+            28445609: (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            501147496: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 64618745,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(2),
+                        dataValue: 942499611,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: None,
+                        coefficient: Some(0.6),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "BaseDamage",
+                values: Some([
+                    19.0,
+                    44.0,
+                    69.0,
+                    94.0,
+                    119.0,
+                    144.0,
+                    169.0,
+                ]),
+            ),
+            (
+                name: "ADRatio",
+                values: Some([
+                    0.365,
+                    0.44,
+                    0.515,
+                    0.59,
+                    0.665,
+                    0.74,
+                    0.815,
+                ]),
+            ),
+            (
+                name: "PercentAmpOnKill",
+                values: Some([
+                    0.35,
+                    0.35,
+                    0.35,
+                    0.35,
+                    0.35,
+                    0.35,
+                    0.35,
+                ]),
+            ),
+            (
+                name: "NumberOfBounces",
+                values: Some([
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                ]),
+            ),
+            (
+                name: "BounceRange",
+                values: Some([
+                    450.0,
+                    450.0,
+                    450.0,
+                    450.0,
+                    450.0,
+                    450.0,
+                    450.0,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            40.0,
+            45.0,
+            50.0,
+            55.0,
+            60.0,
+            65.0,
+        ]),
+        missileSpec: Some((
+            movementComponent: (
+                type: "MovementTypeFixedSpeed",
+                speed: Some(1800.0),
+                startBoneName: Some("R_Pauldron_scaler"),
+            ),
+        )),
+        hitBoneName: Some("head"),
+        missileSpeed: Some(1800.0),
+        missileEffectKey: Some(1975578696),
+        castType: Some(1),
+    )),
+)

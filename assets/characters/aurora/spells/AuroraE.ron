@@ -1,0 +1,123 @@
+(
+    spellData: Some((
+        calculations: Some({
+            3387110781: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 64618745,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: None,
+                        coefficient: Some(0.7),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "BaseDamage",
+                values: Some([
+                    30.0,
+                    70.0,
+                    110.0,
+                    150.0,
+                    190.0,
+                    230.0,
+                    270.0,
+                ]),
+            ),
+            (
+                name: "SlowPercent",
+                values: Some([
+                    -0.8,
+                    -0.8,
+                    -0.8,
+                    -0.8,
+                    -0.8,
+                    -0.8,
+                    -0.8,
+                ]),
+            ),
+            (
+                name: "SelfKnockBackDistance",
+                values: Some([
+                    250.0,
+                    250.0,
+                    250.0,
+                    250.0,
+                    250.0,
+                    250.0,
+                    250.0,
+                ]),
+            ),
+            (
+                name: "AoELength",
+                values: Some([
+                    825.0,
+                    825.0,
+                    825.0,
+                    825.0,
+                    825.0,
+                    825.0,
+                    825.0,
+                ]),
+            ),
+            (
+                name: "AoEWidth",
+                values: Some([
+                    175.0,
+                    175.0,
+                    175.0,
+                    175.0,
+                    175.0,
+                    175.0,
+                    175.0,
+                ]),
+            ),
+            (
+                name: "SlowDecay",
+                values: Some([
+                    0.85,
+                    0.85,
+                    0.85,
+                    0.85,
+                    0.85,
+                    0.85,
+                    0.85,
+                ]),
+            ),
+            (
+                name: "SlowDuration",
+                values: Some([
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            80.0,
+            80.0,
+            80.0,
+            80.0,
+            80.0,
+            80.0,
+        ]),
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: None,
+        missileEffectKey: Some(742009637),
+        castType: None,
+    )),
+)

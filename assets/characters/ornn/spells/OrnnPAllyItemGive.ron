@@ -1,0 +1,26 @@
+(
+    spellData: Some((
+        calculations: None,
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "MasterworkLevel",
+                values: Some([
+                    13.0,
+                    13.0,
+                    13.0,
+                    13.0,
+                    13.0,
+                    13.0,
+                    13.0,
+                ]),
+            ),
+        ]),
+        mana: None,
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: Some(1600.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

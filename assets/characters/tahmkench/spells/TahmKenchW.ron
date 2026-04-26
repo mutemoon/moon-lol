@@ -1,0 +1,123 @@
+(
+    spellData: Some((
+        calculations: Some({
+            501147496: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 64618745,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: None,
+                        coefficient: Some(1.5),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "BaseDamage",
+                values: Some([
+                    65.0,
+                    100.0,
+                    135.0,
+                    170.0,
+                    205.0,
+                    240.0,
+                    275.0,
+                ]),
+            ),
+            (
+                name: "KnockUpDuration",
+                values: Some([
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                ]),
+            ),
+            (
+                name: "AoEDelayFromChannelStart",
+                values: Some([
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                ]),
+            ),
+            (
+                name: "TotalTime",
+                values: Some([
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                ]),
+            ),
+            (
+                name: "ChannelTime",
+                values: Some([
+                    1.35,
+                    1.35,
+                    1.35,
+                    1.35,
+                    1.35,
+                    1.35,
+                    1.35,
+                ]),
+            ),
+            (
+                name: "EnemyWarningDelayFromChannelStart",
+                values: Some([
+                    0.75,
+                    0.75,
+                    0.75,
+                    0.75,
+                    0.75,
+                    0.75,
+                    0.75,
+                ]),
+            ),
+            (
+                name: "ChampRefund",
+                values: Some([
+                    0.375,
+                    0.4,
+                    0.425,
+                    0.45,
+                    0.475,
+                    0.5,
+                    0.525,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            60.0,
+            75.0,
+            90.0,
+            105.0,
+            120.0,
+            135.0,
+        ]),
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: None,
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

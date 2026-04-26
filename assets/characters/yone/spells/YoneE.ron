@@ -1,0 +1,152 @@
+(
+    spellData: Some((
+        calculations: Some({
+            3743621737: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 1958345293,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(2),
+                        coefficient: Some(0.25),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "ReturnTimer",
+                values: Some([
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                ]),
+            ),
+            (
+                name: "MovementSpeed",
+                values: Some([
+                    0.3,
+                    0.3,
+                    0.3,
+                    0.3,
+                    0.3,
+                    0.3,
+                    0.3,
+                ]),
+            ),
+            (
+                name: "DeathmarkBase",
+                values: Some([
+                    5.0,
+                    20.0,
+                    35.0,
+                    50.0,
+                    65.0,
+                    80.0,
+                    95.0,
+                ]),
+            ),
+            (
+                name: "DeathmarkPercent",
+                values: Some([
+                    0.225,
+                    0.25,
+                    0.275,
+                    0.3,
+                    0.325,
+                    0.35,
+                    0.375,
+                ]),
+            ),
+            (
+                name: "RecastLockout",
+                values: Some([
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                ]),
+            ),
+            (
+                name: "EDashRange",
+                values: Some([
+                    300.0,
+                    300.0,
+                    300.0,
+                    300.0,
+                    300.0,
+                    300.0,
+                    300.0,
+                ]),
+            ),
+            (
+                name: "EDashSpeed",
+                values: Some([
+                    1200.0,
+                    1200.0,
+                    1200.0,
+                    1200.0,
+                    1200.0,
+                    1200.0,
+                    1200.0,
+                ]),
+            ),
+            (
+                name: "OnHitIncrease",
+                values: Some([
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                ]),
+            ),
+            (
+                name: "StartingMS",
+                values: Some([
+                    0.1,
+                    0.1,
+                    0.1,
+                    0.1,
+                    0.1,
+                    0.1,
+                    0.1,
+                ]),
+            ),
+            (
+                name: "MissingHealthPercent",
+                values: Some([
+                    0.225,
+                    0.25,
+                    0.275,
+                    0.3,
+                    0.325,
+                    0.35,
+                    0.375,
+                ]),
+            ),
+        ]),
+        mana: None,
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: None,
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

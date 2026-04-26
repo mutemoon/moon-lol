@@ -1,0 +1,87 @@
+(
+    spellData: Some((
+        calculations: Some({
+            1508461632: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 64618745,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(2),
+                        coefficient: Some(1.2),
+                        statFormula: Some(2),
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "ParanoiaDuration",
+                values: Some([
+                    6.0,
+                    6.0,
+                    6.0,
+                    6.0,
+                    6.0,
+                    6.0,
+                    6.0,
+                ]),
+            ),
+            (
+                name: "TrackDistance",
+                values: Some([
+                    3500.0,
+                    3500.0,
+                    4250.0,
+                    5000.0,
+                    5750.0,
+                    6500.0,
+                    7250.0,
+                ]),
+            ),
+            (
+                name: "BaseDamage",
+                values: Some([
+                    150.0,
+                    150.0,
+                    275.0,
+                    400.0,
+                    525.0,
+                    650.0,
+                    775.0,
+                ]),
+            ),
+            (
+                name: "DashSpeed",
+                values: Some([
+                    1800.0,
+                    1800.0,
+                    1800.0,
+                    1800.0,
+                    1800.0,
+                    1800.0,
+                    1800.0,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            100.0,
+            100.0,
+            100.0,
+            0.0,
+            0.0,
+            0.0,
+        ]),
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: Some(20.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

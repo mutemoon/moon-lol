@@ -1,0 +1,81 @@
+(
+    spellData: Some((
+        calculations: Some({
+            3498653279: (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            1503179695: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: 3809245599,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "TowerDisintegrationTime",
+                values: Some([
+                    45.0,
+                    45.0,
+                    45.0,
+                    45.0,
+                    45.0,
+                    45.0,
+                    45.0,
+                ]),
+            ),
+            (
+                name: "SoldierStabRange",
+                values: Some([
+                    350.0,
+                    350.0,
+                    350.0,
+                    350.0,
+                    350.0,
+                    350.0,
+                    350.0,
+                ]),
+            ),
+            (
+                name: "SoldierDeactivationRange",
+                values: Some([
+                    660.0,
+                    660.0,
+                    660.0,
+                    660.0,
+                    660.0,
+                    660.0,
+                    660.0,
+                ]),
+            ),
+            (
+                name: "APRatio",
+                values: Some([
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                ]),
+            ),
+        ]),
+        mana: None,
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: None,
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

@@ -1,0 +1,109 @@
+(
+    spellData: Some((
+        calculations: Some({
+            501147496: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 2040088004,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: None,
+                        coefficient: Some(0.4),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "DrowsyDuration",
+                values: Some([
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                ]),
+            ),
+            (
+                name: "SleepDuration",
+                values: Some([
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                ]),
+            ),
+            (
+                name: "ImpactDamage",
+                values: Some([
+                    25.0,
+                    25.0,
+                    25.0,
+                    25.0,
+                    25.0,
+                    25.0,
+                    25.0,
+                ]),
+            ),
+            (
+                name: "BreakDamageBase",
+                values: Some([
+                    50.0,
+                    100.0,
+                    150.0,
+                    200.0,
+                    250.0,
+                    300.0,
+                    350.0,
+                ]),
+            ),
+            (
+                name: "InitialSlow",
+                values: Some([
+                    -0.1,
+                    -0.1,
+                    -0.1,
+                    -0.1,
+                    -0.1,
+                    -0.1,
+                    -0.1,
+                ]),
+            ),
+            (
+                name: "SlowIncrement",
+                values: None,
+            ),
+        ]),
+        mana: Some([
+            50.0,
+            50.0,
+            50.0,
+            50.0,
+            50.0,
+            50.0,
+        ]),
+        missileSpec: Some((
+            movementComponent: (
+                type: "MovementTypeFixedSpeed",
+                speed: None,
+                startBoneName: None,
+            ),
+        )),
+        hitBoneName: Some("C_buffbone_Glb_Center_Loc"),
+        missileSpeed: None,
+        missileEffectKey: Some(3926169533),
+        castType: None,
+    )),
+)

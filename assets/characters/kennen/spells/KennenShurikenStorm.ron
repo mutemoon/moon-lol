@@ -1,0 +1,103 @@
+(
+    spellData: Some((
+        calculations: Some({
+            2410905812: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 64618745,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: 3809245599,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "BaseDamage",
+                values: Some([
+                    5.0,
+                    40.0,
+                    75.0,
+                    110.0,
+                    145.0,
+                    180.0,
+                    215.0,
+                ]),
+            ),
+            (
+                name: "APRatio",
+                values: Some([
+                    0.225,
+                    0.225,
+                    0.225,
+                    0.225,
+                    0.225,
+                    0.225,
+                    0.225,
+                ]),
+            ),
+            (
+                name: "DamageAmp",
+                values: Some([
+                    0.1,
+                    0.1,
+                    0.1,
+                    0.1,
+                    0.1,
+                    0.1,
+                    0.1,
+                ]),
+            ),
+            (
+                name: "KennenRTickRate",
+                values: Some([
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                ]),
+            ),
+            (
+                name: "KennenRDefenses",
+                values: Some([
+                    0.0,
+                    20.0,
+                    40.0,
+                    60.0,
+                    80.0,
+                    100.0,
+                    120.0,
+                ]),
+            ),
+            (
+                name: "KennenRDuration",
+                values: Some([
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                ]),
+            ),
+        ]),
+        mana: None,
+        missileSpec: None,
+        hitBoneName: Some("C_BuffBone_Glb_Center_Loc"),
+        missileSpeed: Some(779.9),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

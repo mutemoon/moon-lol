@@ -1,0 +1,89 @@
+(
+    spellData: Some((
+        calculations: None,
+        effectAmounts: Some([
+            (
+                values: Some([
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    1500.0,
+                    3000.0,
+                    4500.0,
+                    6000.0,
+                    0.0,
+                    0.0,
+                    1500.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    0.1,
+                    0.1,
+                    0.1,
+                    0.1,
+                    0.1,
+                    0.1,
+                    0.1,
+                ]),
+            ),
+            (
+                values: Some([
+                    2500.0,
+                    2500.0,
+                    2500.0,
+                    2500.0,
+                    2500.0,
+                    2500.0,
+                    2500.0,
+                ]),
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+        ]),
+        dataValues: None,
+        mana: Some([
+            100.0,
+            100.0,
+            100.0,
+            0.0,
+            0.0,
+            0.0,
+        ]),
+        missileSpec: Some((
+            movementComponent: (
+                type: "MovementTypeFixedSpeed",
+                speed: Some(2000.0),
+                startBoneName: Some("root"),
+            ),
+        )),
+        hitBoneName: None,
+        missileSpeed: Some(2000.0),
+        missileEffectKey: None,
+        castType: Some(3),
+    )),
+)

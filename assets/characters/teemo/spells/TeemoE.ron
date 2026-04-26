@@ -1,0 +1,137 @@
+(
+    spellData: Some((
+        calculations: Some({
+            3171794293: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 1249581500,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: 685293356,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            3658781674: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 2537173271,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: 2535161837,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "TickBaseDamage",
+                values: Some([
+                    0.0,
+                    6.0,
+                    12.0,
+                    18.0,
+                    24.0,
+                    30.0,
+                    36.0,
+                ]),
+            ),
+            (
+                name: "TickAPRatio",
+                values: Some([
+                    0.1,
+                    0.1,
+                    0.1,
+                    0.1,
+                    0.1,
+                    0.1,
+                    0.1,
+                ]),
+            ),
+            (
+                name: "ImpactBaseDamage",
+                values: Some([
+                    -5.0,
+                    9.0,
+                    23.0,
+                    37.0,
+                    51.0,
+                    65.0,
+                    79.0,
+                ]),
+            ),
+            (
+                name: "ImpactAPRatio",
+                values: Some([
+                    0.3,
+                    0.3,
+                    0.3,
+                    0.3,
+                    0.3,
+                    0.3,
+                    0.3,
+                ]),
+            ),
+            (
+                name: "PoisonDuration",
+                values: Some([
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                ]),
+            ),
+            (
+                name: "TickFrequency",
+                values: Some([
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                ]),
+            ),
+            (
+                name: "MonsterMod",
+                values: Some([
+                    1.6,
+                    1.6,
+                    1.6,
+                    1.6,
+                    1.6,
+                    1.6,
+                    1.6,
+                ]),
+            ),
+        ]),
+        mana: None,
+        missileSpec: Some((
+            movementComponent: (
+                type: "MovementTypeFixedSpeed",
+                speed: Some(1500.0),
+                startBoneName: Some("R_hand"),
+            ),
+        )),
+        hitBoneName: None,
+        missileSpeed: Some(1500.0),
+        missileEffectKey: None,
+        castType: Some(1),
+    )),
+)

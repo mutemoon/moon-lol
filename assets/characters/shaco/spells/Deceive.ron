@@ -1,0 +1,128 @@
+(
+    spellData: Some((
+        calculations: Some({
+            501147496: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 64618745,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(2),
+                        dataValue: 162078152,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            2897813383: (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "BaseDamage",
+                values: Some([
+                    15.0,
+                    25.0,
+                    35.0,
+                    45.0,
+                    55.0,
+                    65.0,
+                    75.0,
+                ]),
+            ),
+            (
+                name: "StealthDuration",
+                values: Some([
+                    2.25,
+                    2.5,
+                    2.75,
+                    3.0,
+                    3.25,
+                    3.5,
+                    3.75,
+                ]),
+            ),
+            (
+                name: "CDRefund",
+                values: Some([
+                    2.5,
+                    2.5,
+                    2.5,
+                    2.5,
+                    2.5,
+                    2.5,
+                    2.5,
+                ]),
+            ),
+            (
+                name: "ExtraAATime",
+                values: Some([
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                ]),
+            ),
+            (
+                name: "PseudoCastTime",
+                values: Some([
+                    0.125,
+                    0.125,
+                    0.125,
+                    0.125,
+                    0.125,
+                    0.125,
+                    0.125,
+                ]),
+            ),
+            (
+                name: "BonusADRatio",
+                values: Some([
+                    0.6,
+                    0.6,
+                    0.6,
+                    0.6,
+                    0.6,
+                    0.6,
+                    0.6,
+                ]),
+            ),
+            (
+                name: "NonCritBackstabMod",
+                values: Some([
+                    0.6,
+                    0.6,
+                    0.6,
+                    0.6,
+                    0.6,
+                    0.6,
+                    0.6,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            40.0,
+            40.0,
+            40.0,
+            40.0,
+            40.0,
+            40.0,
+        ]),
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: Some(0.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

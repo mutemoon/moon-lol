@@ -1,0 +1,152 @@
+(
+    spellData: Some((
+        calculations: Some({
+            3390389310: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 1193184039,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: None,
+                        coefficient: Some(0.1),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            501147496: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 64618745,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: None,
+                        coefficient: Some(0.2),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "BuffDuration",
+                values: Some([
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                ]),
+            ),
+            (
+                name: "AllyBuffDuration",
+                values: Some([
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                ]),
+            ),
+            (
+                name: "BaseDamage",
+                values: Some([
+                    12.5,
+                    20.0,
+                    27.5,
+                    35.0,
+                    42.5,
+                    50.0,
+                    57.5,
+                ]),
+            ),
+            (
+                name: "AllyBaseDamage",
+                values: Some([
+                    5.0,
+                    10.0,
+                    15.0,
+                    20.0,
+                    25.0,
+                    30.0,
+                    35.0,
+                ]),
+            ),
+            (
+                name: "RevealDuration",
+                values: Some([
+                    8.0,
+                    8.0,
+                    8.0,
+                    8.0,
+                    8.0,
+                    8.0,
+                    8.0,
+                ]),
+            ),
+            (
+                name: "MaxBrushDuration",
+                values: Some([
+                    45.0,
+                    45.0,
+                    45.0,
+                    45.0,
+                    45.0,
+                    45.0,
+                    45.0,
+                ]),
+            ),
+            (
+                name: "BrushRadius",
+                values: Some([
+                    190.0,
+                    190.0,
+                    190.0,
+                    190.0,
+                    190.0,
+                    190.0,
+                    190.0,
+                ]),
+            ),
+            (
+                name: "BrushSpacing",
+                values: Some([
+                    90.0,
+                    90.0,
+                    90.0,
+                    90.0,
+                    90.0,
+                    90.0,
+                    90.0,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            30.0,
+            30.0,
+            30.0,
+            30.0,
+            30.0,
+            30.0,
+        ]),
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: Some(1600.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

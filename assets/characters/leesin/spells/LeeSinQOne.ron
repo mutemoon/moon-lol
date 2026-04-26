@@ -1,0 +1,145 @@
+(
+    spellData: Some((
+        calculations: Some({
+            1979514766: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 2886805190,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(2),
+                        dataValue: 3198134698,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            1772179026: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 4225599511,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(2),
+                        coefficient: Some(0.95),
+                        statFormula: Some(2),
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "Q1BaseDamage",
+                values: Some([
+                    35.0,
+                    65.0,
+                    95.0,
+                    125.0,
+                    155.0,
+                    185.0,
+                    215.0,
+                ]),
+            ),
+            (
+                name: "Q2BaseDamage",
+                values: Some([
+                    35.0,
+                    65.0,
+                    95.0,
+                    125.0,
+                    155.0,
+                    185.0,
+                    215.0,
+                ]),
+            ),
+            (
+                name: "Q2ADRatio",
+                values: Some([
+                    0.95,
+                    0.95,
+                    0.95,
+                    0.95,
+                    0.95,
+                    0.95,
+                    0.95,
+                ]),
+            ),
+            (
+                name: "Q2MaxMissingHealthMod",
+                values: Some([
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                ]),
+            ),
+            (
+                name: "ReactivateTime",
+                values: Some([
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                ]),
+            ),
+            (
+                name: "CherryBonusHaste",
+                values: Some([
+                    30.0,
+                    30.0,
+                    30.0,
+                    30.0,
+                    30.0,
+                    30.0,
+                    30.0,
+                ]),
+            ),
+            (
+                name: "DashSpeed",
+                values: Some([
+                    1350.0,
+                    1350.0,
+                    1350.0,
+                    1350.0,
+                    1350.0,
+                    1350.0,
+                    1350.0,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            50.0,
+            50.0,
+            50.0,
+            50.0,
+            50.0,
+            50.0,
+        ]),
+        missileSpec: Some((
+            movementComponent: (
+                type: "MovementTypeFixedSpeed",
+                speed: Some(1800.0),
+                startBoneName: Some("L_Hand"),
+            ),
+        )),
+        hitBoneName: Some("C_BuffBone_Glb_Center_Loc"),
+        missileSpeed: Some(1800.0),
+        missileEffectKey: Some(3217125181),
+        castType: Some(3),
+    )),
+)

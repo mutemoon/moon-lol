@@ -1,0 +1,41 @@
+(
+  resources: {},
+  entities: {
+    4294967293: (
+      components: {
+        "bevy_ecs::name::Name": "sru_razorbeak",
+        "lol_core::attack::Attack": (
+          range: 0.0,
+          base_attack_speed: 0.6666667,
+          bonus_attack_speed: 0.0,
+          buff_bonus_attack_speed: 0.0,
+          attack_speed_cap: 2.5,
+          windup_config: Modern(
+            attack_cast_time: 0.3,
+            attack_total_time: 1.5,
+          ),
+          windup_modifier: 1.0,
+          spell_key: None,
+        ),
+        "lol_core::base::bounding::Bounding": (
+          radius: 30.0,
+          height: 67.0,
+        ),
+        "lol_core::base::level::ExperienceDrop": (
+          exp_given_on_death: 120.0,
+          experience_radius: 1200.0,
+        ),
+        "lol_core::damage::Armor": (30.0),
+        "lol_core::damage::Damage": (50.0),
+        "lol_core::entities::champion::Champion": (),
+        "lol_core::life::Health": (
+          value: 120.0,
+          max: 120.0,
+        ),
+        "lol_core::movement::Movement": (
+          speed: 5.0,
+        ),
+      },
+    ),
+  },
+)

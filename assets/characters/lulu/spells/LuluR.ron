@@ -1,0 +1,111 @@
+(
+    spellData: Some((
+        calculations: Some({
+            2943173802: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 1382069074,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: None,
+                        coefficient: Some(0.55),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "BonusHealth",
+                values: Some([
+                    125.0,
+                    275.0,
+                    425.0,
+                    575.0,
+                    725.0,
+                    875.0,
+                    1025.0,
+                ]),
+            ),
+            (
+                name: "SlowPercent",
+                values: Some([
+                    15.0,
+                    30.0,
+                    45.0,
+                    60.0,
+                    75.0,
+                    90.0,
+                    105.0,
+                ]),
+            ),
+            (
+                name: "BuffDuration",
+                values: Some([
+                    7.0,
+                    7.0,
+                    7.0,
+                    7.0,
+                    7.0,
+                    7.0,
+                    7.0,
+                ]),
+            ),
+            (
+                name: "AoERadius",
+                values: Some([
+                    400.0,
+                    400.0,
+                    400.0,
+                    400.0,
+                    400.0,
+                    400.0,
+                    400.0,
+                ]),
+            ),
+            (
+                name: "KnockbackDuration",
+                values: Some([
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                ]),
+            ),
+            (
+                name: "KnockbackDistance",
+                values: Some([
+                    275.0,
+                    275.0,
+                    275.0,
+                    275.0,
+                    275.0,
+                    275.0,
+                    275.0,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            100.0,
+            100.0,
+            100.0,
+            100.0,
+            100.0,
+            0.0,
+        ]),
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: Some(0.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

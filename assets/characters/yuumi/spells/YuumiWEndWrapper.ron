@@ -1,0 +1,50 @@
+(
+    spellData: Some((
+        calculations: None,
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "CastForgivenessRange",
+                values: Some([
+                    125.0,
+                    125.0,
+                    125.0,
+                    125.0,
+                    125.0,
+                    125.0,
+                    125.0,
+                ]),
+            ),
+            (
+                name: "AdaptiveStatSharing",
+                values: Some([
+                    0.1,
+                    0.12,
+                    0.14,
+                    0.16,
+                    0.18,
+                    0.2,
+                    0.22,
+                ]),
+            ),
+            (
+                name: "FlatAdaptiveStats",
+                values: Some([
+                    10.0,
+                    12.0,
+                    14.0,
+                    16.0,
+                    18.0,
+                    20.0,
+                    22.0,
+                ]),
+            ),
+        ]),
+        mana: None,
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: None,
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

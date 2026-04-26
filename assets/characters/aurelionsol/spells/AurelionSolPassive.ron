@@ -1,0 +1,63 @@
+(
+    spellData: Some((
+        calculations: Some({
+            690701809: (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: Some(1),
+            ),
+            3724573734: (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: Some(1),
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "QMaxHealthTrueDamagePerStack",
+                values: Some([
+                    0.00031,
+                    0.00031,
+                    0.00031,
+                    0.00031,
+                    0.00031,
+                    0.00031,
+                    0.00031,
+                ]),
+            ),
+            (
+                name: "BaseExecutionThreshold",
+                values: Some([
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                ]),
+            ),
+            (
+                name: "ExecutionGrowthPerBreakpoint",
+                values: Some([
+                    0.026,
+                    0.026,
+                    0.026,
+                    0.026,
+                    0.026,
+                    0.026,
+                    0.026,
+                ]),
+            ),
+        ]),
+        mana: None,
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: None,
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

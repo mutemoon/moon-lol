@@ -1,0 +1,83 @@
+(
+    spellData: Some((
+        calculations: Some({
+            3067682359: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(2),
+                        coefficient: Some(1.0),
+                        statFormula: Some(2),
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "MonsterCap",
+                values: Some([
+                    100.0,
+                    200.0,
+                    300.0,
+                    400.0,
+                    500.0,
+                    600.0,
+                    700.0,
+                ]),
+            ),
+            (
+                name: "PercHPDamage",
+                values: Some([
+                    0.052,
+                    0.08,
+                    0.108,
+                    0.136,
+                    0.164,
+                    0.192,
+                    0.22,
+                ]),
+            ),
+            (
+                name: "KnockbackDistance",
+                values: Some([
+                    600.0,
+                    600.0,
+                    600.0,
+                    600.0,
+                    600.0,
+                    600.0,
+                    600.0,
+                ]),
+            ),
+            (
+                name: "KnockbackDuration",
+                values: Some([
+                    0.35,
+                    0.35,
+                    0.35,
+                    0.35,
+                    0.35,
+                    0.35,
+                    0.35,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            55.0,
+            55.0,
+            55.0,
+            55.0,
+            55.0,
+            55.0,
+        ]),
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: Some(20.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

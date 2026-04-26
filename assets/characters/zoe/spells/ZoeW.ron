@@ -1,0 +1,174 @@
+(
+    spellData: Some((
+        calculations: Some({
+            3786997193: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 320467457,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: 3586158119,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: Some([
+            (
+                values: None,
+            ),
+            (
+                values: Some([
+                    3000.0,
+                    3000.0,
+                    4500.0,
+                    6000.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    0.1,
+                    0.1,
+                    0.1,
+                    0.1,
+                    0.1,
+                    0.1,
+                    0.1,
+                ]),
+            ),
+            (
+                values: Some([
+                    2500.0,
+                    2500.0,
+                    2500.0,
+                    2500.0,
+                    2500.0,
+                    2500.0,
+                    2500.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    60.0,
+                    60.0,
+                    60.0,
+                    60.0,
+                    60.0,
+                    60.0,
+                    60.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    20.0,
+                    20.0,
+                    50.0,
+                    80.0,
+                    110.0,
+                    140.0,
+                    20.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    0.2,
+                    0.2,
+                    0.2,
+                    0.2,
+                    0.2,
+                    0.2,
+                    0.2,
+                ]),
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: Some([
+                    0.3,
+                    0.3,
+                    0.4,
+                    0.5,
+                    0.6,
+                    0.7,
+                    0.8,
+                ]),
+            ),
+            (
+                values: Some([
+                    2.0,
+                    2.0,
+                    2.25,
+                    2.5,
+                    2.75,
+                    3.0,
+                    3.25,
+                ]),
+            ),
+        ]),
+        dataValues: Some([
+            (
+                name: "TotalBaseDamage",
+                values: Some([
+                    10.0,
+                    20.0,
+                    30.0,
+                    40.0,
+                    50.0,
+                    60.0,
+                    70.0,
+                ]),
+            ),
+            (
+                name: "TotalAPRatio",
+                values: Some([
+                    0.15,
+                    0.15,
+                    0.15,
+                    0.15,
+                    0.15,
+                    0.15,
+                    0.15,
+                ]),
+            ),
+            (
+                name: "MoveSpeedMod",
+                values: Some([
+                    0.2,
+                    0.3,
+                    0.4,
+                    0.5,
+                    0.6,
+                    0.7,
+                    0.8,
+                ]),
+            ),
+            (
+                name: "MoveSpeedDuration",
+                values: Some([
+                    1.75,
+                    2.0,
+                    2.25,
+                    2.5,
+                    2.75,
+                    3.0,
+                    3.25,
+                ]),
+            ),
+        ]),
+        mana: None,
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: Some(2000.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

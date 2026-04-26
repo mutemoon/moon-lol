@@ -1,0 +1,149 @@
+(
+    spellData: Some((
+        calculations: Some({
+            947287420: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartEffectValue",
+                        effectIndex: Some(2),
+                    ),
+                    (
+                        type: "CalculationPartStatSub",
+                        stat: Some(2),
+                        subpart: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: Some([
+            (
+                values: Some([
+                    90.0,
+                    100.0,
+                    110.0,
+                    120.0,
+                    130.0,
+                    140.0,
+                    150.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    10.0,
+                    50.0,
+                    80.0,
+                    110.0,
+                    140.0,
+                    170.0,
+                    200.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    99.0,
+                    99.0,
+                    99.0,
+                    99.0,
+                    99.0,
+                    99.0,
+                    99.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    0.1,
+                    0.1,
+                    0.1,
+                    0.1,
+                    0.1,
+                    0.1,
+                    0.1,
+                ]),
+            ),
+            (
+                values: Some([
+                    17.0,
+                    17.0,
+                    17.0,
+                    17.0,
+                    17.0,
+                    17.0,
+                    17.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    35.0,
+                    35.0,
+                    35.0,
+                    35.0,
+                    35.0,
+                    35.0,
+                    35.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    51.0,
+                    51.0,
+                    51.0,
+                    51.0,
+                    51.0,
+                    51.0,
+                    51.0,
+                ]),
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+        ]),
+        dataValues: Some([
+            (
+                name: "MissingHealthHeal",
+                values: Some([
+                    17.0,
+                    17.0,
+                    17.0,
+                    17.0,
+                    17.0,
+                    17.0,
+                    17.0,
+                ]),
+            ),
+            (
+                name: "TotalADRatio",
+                values: Some([
+                    90.0,
+                    100.0,
+                    110.0,
+                    120.0,
+                    130.0,
+                    140.0,
+                    150.0,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            25.0,
+            30.0,
+            35.0,
+            40.0,
+            45.0,
+            50.0,
+        ]),
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: Some(0.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

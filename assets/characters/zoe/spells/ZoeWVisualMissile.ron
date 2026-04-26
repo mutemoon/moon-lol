@@ -1,0 +1,66 @@
+(
+    spellData: Some((
+        calculations: None,
+        effectAmounts: Some([
+            (
+                values: Some([
+                    0.0,
+                    80.0,
+                    115.0,
+                    150.0,
+                    185.0,
+                    220.0,
+                    0.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    0.0,
+                    1.8,
+                    1.9,
+                    2.0,
+                    2.1,
+                    2.2,
+                    0.0,
+                ]),
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+        ]),
+        dataValues: None,
+        mana: None,
+        missileSpec: Some((
+            movementComponent: (
+                type: "MovementTypeFixedSpeed",
+                speed: Some(1100.0),
+                startBoneName: Some("L_Buffbone_Glb_Hand_Loc"),
+            ),
+        )),
+        hitBoneName: None,
+        missileSpeed: Some(1100.0),
+        missileEffectKey: Some(416265532),
+        castType: Some(1),
+    )),
+)

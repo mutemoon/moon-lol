@@ -1,0 +1,58 @@
+(
+  resources: {},
+  entities: {
+    4294967292: (
+      components: {
+        "lol_core::skill::CoolDown": (
+          duration: 0.0,
+        ),
+        "lol_core::skill::Skill": (
+          spell: Path("characters/sru_dragon_hextech/spells/sru_dragon_hextech_Attack.ron"),
+          level: 1,
+          slot: W,
+          cooldown_mode: AfterCast,
+        ),
+        "lol_core::skill::SkillOf": (4294967293),
+      },
+    ),
+    4294967293: (
+      components: {
+        "bevy_ecs::name::Name": "sru_dragon_hextech",
+        "lol_core::attack::Attack": (
+          range: 1000.0,
+          base_attack_speed: 0.5,
+          bonus_attack_speed: 0.0,
+          buff_bonus_attack_speed: 0.0,
+          attack_speed_cap: 2.5,
+          windup_config: Modern(
+            attack_cast_time: 0.8,
+            attack_total_time: 2.0,
+          ),
+          windup_modifier: 1.0,
+          spell_key: None,
+        ),
+        "lol_core::base::bounding::Bounding": (
+          radius: 1.0,
+          height: 102.5,
+        ),
+        "lol_core::base::level::ExperienceDrop": (
+          exp_given_on_death: 160.0,
+          experience_radius: 2000.0,
+        ),
+        "lol_core::damage::Armor": (30.0),
+        "lol_core::damage::Damage": (50.0),
+        "lol_core::entities::champion::Champion": (),
+        "lol_core::life::Health": (
+          value: 160.0,
+          max: 160.0,
+        ),
+        "lol_core::movement::Movement": (
+          speed: 5.0,
+        ),
+        "lol_core::skill::Skills": ([
+          4294967292,
+        ]),
+      },
+    ),
+  },
+)

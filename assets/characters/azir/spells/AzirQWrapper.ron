@@ -1,0 +1,141 @@
+(
+    spellData: Some((
+        calculations: Some({
+            501147496: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 64618745,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: 3809245599,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: Some([
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: Some([
+                    70.0,
+                    70.0,
+                    70.0,
+                    70.0,
+                    70.0,
+                    70.0,
+                    70.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    1600.0,
+                    1600.0,
+                    1600.0,
+                    1600.0,
+                    1600.0,
+                    1600.0,
+                    1600.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    200.0,
+                    200.0,
+                    200.0,
+                    200.0,
+                    200.0,
+                    200.0,
+                    200.0,
+                ]),
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+        ]),
+        dataValues: Some([
+            (
+                name: "BaseDamage",
+                values: Some([
+                    40.0,
+                    60.0,
+                    80.0,
+                    100.0,
+                    120.0,
+                    140.0,
+                    160.0,
+                ]),
+            ),
+            (
+                name: "SlowAmount",
+                values: Some([
+                    -0.25,
+                    -0.25,
+                    -0.25,
+                    -0.25,
+                    -0.25,
+                    -0.25,
+                    -0.25,
+                ]),
+            ),
+            (
+                name: "SpearLength",
+                values: Some([
+                    325.0,
+                    325.0,
+                    325.0,
+                    325.0,
+                    325.0,
+                    325.0,
+                    325.0,
+                ]),
+            ),
+            (
+                name: "APRatio",
+                values: Some([
+                    0.3,
+                    0.35,
+                    0.4,
+                    0.45,
+                    0.5,
+                    0.55,
+                    0.6,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            70.0,
+            80.0,
+            90.0,
+            100.0,
+            110.0,
+            110.0,
+        ]),
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: None,
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

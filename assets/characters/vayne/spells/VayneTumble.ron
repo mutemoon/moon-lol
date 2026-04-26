@@ -1,0 +1,79 @@
+(
+    spellData: Some((
+        calculations: Some({
+            1768284126: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(2),
+                        dataValue: 1446754083,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: 3809245599,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "TotalADRatio",
+                values: Some([
+                    0.65,
+                    0.75,
+                    0.85,
+                    0.95,
+                    1.05,
+                    1.15,
+                    1.25,
+                ]),
+            ),
+            (
+                name: "Duration",
+                values: Some([
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                ]),
+            ),
+            (
+                name: "CanBonusDamageCrit",
+                values: None,
+            ),
+            (
+                name: "APRatio",
+                values: Some([
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            30.0,
+            30.0,
+            30.0,
+            30.0,
+            30.0,
+            30.0,
+        ]),
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: Some(20.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

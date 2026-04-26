@@ -1,0 +1,66 @@
+(
+    spellData: Some((
+        calculations: Some({
+            1476535861: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(7),
+                        dataValue: 36351330,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            237532172: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 36351330,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "MSPercentAlly",
+                values: Some([
+                    0.06,
+                    0.06,
+                    0.06,
+                    0.06,
+                    0.06,
+                    0.06,
+                    0.06,
+                ]),
+            ),
+            (
+                name: "MSPercentSelf",
+                values: None,
+            ),
+            (
+                name: "MSBonusMagicDamage",
+                values: Some([
+                    0.3,
+                    0.3,
+                    0.3,
+                    0.3,
+                    0.3,
+                    0.3,
+                    0.3,
+                ]),
+            ),
+        ]),
+        mana: None,
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: None,
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

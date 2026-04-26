@@ -1,0 +1,62 @@
+(
+    spellData: Some((
+        calculations: None,
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "HealthPerMinute",
+                values: Some([
+                    190.0,
+                    190.0,
+                    190.0,
+                    190.0,
+                    190.0,
+                    190.0,
+                    190.0,
+                ]),
+            ),
+            (
+                name: "ADPerMinute",
+                values: Some([
+                    10.0,
+                    10.0,
+                    10.0,
+                    10.0,
+                    10.0,
+                    10.0,
+                    10.0,
+                ]),
+            ),
+            (
+                name: "MaxBonusAD",
+                values: Some([
+                    370.0,
+                    370.0,
+                    370.0,
+                    370.0,
+                    370.0,
+                    370.0,
+                    370.0,
+                ]),
+            ),
+            (
+                name: "BaronBuffDuration",
+                values: Some([
+                    180.0,
+                    180.0,
+                    180.0,
+                    180.0,
+                    180.0,
+                    180.0,
+                    180.0,
+                ]),
+            ),
+        ]),
+        mana: None,
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: Some(1300.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

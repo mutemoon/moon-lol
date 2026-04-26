@@ -1,0 +1,149 @@
+(
+    spellData: Some((
+        calculations: Some({
+            501147496: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 64618745,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: 3809245599,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: Some([
+            (
+                values: Some([
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                ]),
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: Some([
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    55.0,
+                    65.0,
+                    75.0,
+                    85.0,
+                    95.0,
+                    105.0,
+                    115.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    275.0,
+                    275.0,
+                    275.0,
+                    275.0,
+                    275.0,
+                    275.0,
+                    275.0,
+                ]),
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+        ]),
+        dataValues: Some([
+            (
+                name: "BaseDamage",
+                values: Some([
+                    20.0,
+                    60.0,
+                    100.0,
+                    140.0,
+                    180.0,
+                    220.0,
+                    260.0,
+                ]),
+            ),
+            (
+                name: "APRatio",
+                values: Some([
+                    0.75,
+                    0.75,
+                    0.75,
+                    0.75,
+                    0.75,
+                    0.75,
+                    0.75,
+                ]),
+            ),
+            (
+                name: "TimeToExplode",
+                values: Some([
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                ]),
+            ),
+            (
+                name: "ExplosionSize",
+                values: Some([
+                    275.0,
+                    275.0,
+                    275.0,
+                    275.0,
+                    275.0,
+                    275.0,
+                    275.0,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            60.0,
+            70.0,
+            80.0,
+            90.0,
+            100.0,
+            110.0,
+        ]),
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: Some(10000.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

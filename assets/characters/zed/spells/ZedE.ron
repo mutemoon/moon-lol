@@ -1,0 +1,134 @@
+(
+    spellData: Some((
+        calculations: Some({
+            501147496: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 64618745,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(2),
+                        dataValue: 942499611,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "BaseDamage",
+                values: Some([
+                    45.0,
+                    70.0,
+                    95.0,
+                    120.0,
+                    145.0,
+                    170.0,
+                    195.0,
+                ]),
+            ),
+            (
+                name: "ADRatio",
+                values: Some([
+                    0.8,
+                    0.8,
+                    0.8,
+                    0.8,
+                    0.8,
+                    0.8,
+                    0.8,
+                ]),
+            ),
+            (
+                name: "MoveSpeedMod",
+                values: Some([
+                    -0.15,
+                    -0.2,
+                    -0.25,
+                    -0.3,
+                    -0.35,
+                    -0.4,
+                    -0.45,
+                ]),
+            ),
+            (
+                name: "MoveSpeedModBonus",
+                values: Some([
+                    -0.225,
+                    -0.3,
+                    -0.375,
+                    -0.45,
+                    -0.525,
+                    -0.6,
+                    -0.675,
+                ]),
+            ),
+            (
+                name: "SlowDuration",
+                values: Some([
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                ]),
+            ),
+            (
+                name: "ShadowHitCDR",
+                values: Some([
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                ]),
+            ),
+            (
+                name: "ZedRadius",
+                values: Some([
+                    315.0,
+                    315.0,
+                    315.0,
+                    315.0,
+                    315.0,
+                    315.0,
+                    315.0,
+                ]),
+            ),
+            (
+                name: "ShadowRadius",
+                values: Some([
+                    290.0,
+                    290.0,
+                    290.0,
+                    290.0,
+                    290.0,
+                    290.0,
+                    290.0,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            40.0,
+            40.0,
+            40.0,
+            40.0,
+            40.0,
+            40.0,
+        ]),
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: Some(0.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

@@ -1,0 +1,152 @@
+(
+    spellData: Some((
+        calculations: Some({
+            809136088: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 3965785558,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: 3809245599,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "SlowAmount",
+                values: Some([
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                ]),
+            ),
+            (
+                name: "SlowDuration",
+                values: Some([
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                ]),
+            ),
+            (
+                name: "BounceRange",
+                values: Some([
+                    25000.0,
+                    25000.0,
+                    25000.0,
+                    25000.0,
+                    25000.0,
+                    25000.0,
+                    25000.0,
+                ]),
+            ),
+            (
+                name: "ImpactDamage",
+                values: Some([
+                    35.0,
+                    60.0,
+                    85.0,
+                    110.0,
+                    135.0,
+                    160.0,
+                    185.0,
+                ]),
+            ),
+            (
+                name: "ImpactRangeCheck",
+                values: Some([
+                    115.0,
+                    115.0,
+                    115.0,
+                    115.0,
+                    115.0,
+                    115.0,
+                    115.0,
+                ]),
+            ),
+            (
+                name: "HitboxWidth",
+                values: Some([
+                    350.0,
+                    350.0,
+                    350.0,
+                    350.0,
+                    350.0,
+                    350.0,
+                    350.0,
+                ]),
+            ),
+            (
+                name: "HitboxLength",
+                values: Some([
+                    200.0,
+                    200.0,
+                    200.0,
+                    200.0,
+                    200.0,
+                    200.0,
+                    200.0,
+                ]),
+            ),
+            (
+                name: "AnimCutoffRange",
+                values: Some([
+                    350.0,
+                    350.0,
+                    350.0,
+                    350.0,
+                    350.0,
+                    350.0,
+                    350.0,
+                ]),
+            ),
+            (
+                name: "APRatio",
+                values: Some([
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            70.0,
+            70.0,
+            70.0,
+            70.0,
+            70.0,
+            70.0,
+        ]),
+        missileSpec: Some((
+            movementComponent: (
+                type: "MovementTypeFixedSpeed",
+                speed: Some(1400.0),
+                startBoneName: Some("Buffbone_Glb_Weapon_1"),
+            ),
+        )),
+        hitBoneName: None,
+        missileSpeed: Some(1750.0),
+        missileEffectKey: Some(3790137604),
+        castType: Some(3),
+    )),
+)

@@ -1,0 +1,116 @@
+(
+    spellData: Some((
+        calculations: Some({
+            3700674300: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 3307117811,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: 1214002253,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "E2Damage",
+                values: Some([
+                    50.0,
+                    90.0,
+                    130.0,
+                    170.0,
+                    210.0,
+                    250.0,
+                    290.0,
+                ]),
+            ),
+            (
+                name: "E2Ratio",
+                values: Some([
+                    0.7,
+                    0.7,
+                    0.7,
+                    0.7,
+                    0.7,
+                    0.7,
+                    0.7,
+                ]),
+            ),
+            (
+                name: "RootDuration",
+                values: Some([
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                ]),
+            ),
+            (
+                name: "PullDistance",
+                values: Some([
+                    290.0,
+                    290.0,
+                    290.0,
+                    290.0,
+                    290.0,
+                    290.0,
+                    290.0,
+                ]),
+            ),
+            (
+                name: "CooldownRefund",
+                values: Some([
+                    0.2,
+                    0.2,
+                    0.2,
+                    0.2,
+                    0.2,
+                    0.2,
+                    0.2,
+                ]),
+            ),
+            (
+                name: "ExplosionRadius",
+                values: Some([
+                    205.0,
+                    205.0,
+                    205.0,
+                    205.0,
+                    205.0,
+                    205.0,
+                    205.0,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            50.0,
+            55.0,
+            60.0,
+            65.0,
+            70.0,
+            70.0,
+        ]),
+        missileSpec: Some((
+            movementComponent: (
+                type: "MovementTypeFixedSpeed",
+                speed: None,
+                startBoneName: None,
+            ),
+        )),
+        hitBoneName: Some("head"),
+        missileSpeed: Some(935.0),
+        missileEffectKey: Some(1133161857),
+        castType: Some(3),
+    )),
+)

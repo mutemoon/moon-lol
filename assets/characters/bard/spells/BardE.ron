@@ -1,0 +1,88 @@
+(
+    spellData: Some((
+        calculations: None,
+        effectAmounts: Some([
+            (
+                values: Some([
+                    10.0,
+                    10.0,
+                    10.0,
+                    10.0,
+                    10.0,
+                    10.0,
+                    10.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    33.0,
+                    33.0,
+                    33.0,
+                    33.0,
+                    33.0,
+                    33.0,
+                    33.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    900.0,
+                    900.0,
+                    900.0,
+                    900.0,
+                    900.0,
+                    900.0,
+                    900.0,
+                ]),
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+        ]),
+        dataValues: Some([
+            (
+                name: "FriendlyMovementBonusPercentage",
+                values: Some([
+                    33.0,
+                    33.0,
+                    33.0,
+                    33.0,
+                    33.0,
+                    33.0,
+                    33.0,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            30.0,
+            30.0,
+            30.0,
+            30.0,
+            30.0,
+            30.0,
+        ]),
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: Some(0.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

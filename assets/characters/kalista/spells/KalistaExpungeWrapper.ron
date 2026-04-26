@@ -1,0 +1,275 @@
+(
+    spellData: Some((
+        calculations: Some({
+            3831181471: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 64618745,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(2),
+                        dataValue: 1068076572,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: 3809245599,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            40884989: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 1004757444,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(2),
+                        dataValue: 349567152,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: 3609200564,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            3941670476: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 2361366308,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: 3350336792,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: Some([
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: Some([
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                ]),
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+        ]),
+        dataValues: Some([
+            (
+                name: "EpicMonsterDamageMod",
+                values: Some([
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                ]),
+            ),
+            (
+                name: "BaseDamage",
+                values: Some([
+                    -5.0,
+                    5.0,
+                    15.0,
+                    25.0,
+                    35.0,
+                    45.0,
+                    55.0,
+                ]),
+            ),
+            (
+                name: "MaxSpears",
+                values: Some([
+                    254.0,
+                    254.0,
+                    254.0,
+                    254.0,
+                    254.0,
+                    254.0,
+                    254.0,
+                ]),
+            ),
+            (
+                name: "AdditionalBaseDamage",
+                values: Some([
+                    0.0,
+                    7.0,
+                    14.0,
+                    21.0,
+                    28.0,
+                    35.0,
+                    42.0,
+                ]),
+            ),
+            (
+                name: "ManaRefund",
+                values: Some([
+                    5.0,
+                    10.0,
+                    15.0,
+                    20.0,
+                    25.0,
+                    30.0,
+                    35.0,
+                ]),
+            ),
+            (
+                name: "SlowAmount",
+                values: Some([
+                    0.02,
+                    0.1,
+                    0.18,
+                    0.26,
+                    0.34,
+                    0.42,
+                    0.5,
+                ]),
+            ),
+            (
+                name: "SlowDuration",
+                values: Some([
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                ]),
+            ),
+            (
+                name: "AdditionalADRatio",
+                values: Some([
+                    0.125,
+                    0.2,
+                    0.275,
+                    0.35,
+                    0.425,
+                    0.5,
+                    0.575,
+                ]),
+            ),
+            (
+                name: "FakedCooldown",
+                values: Some([
+                    10.5,
+                    10.0,
+                    9.5,
+                    9.0,
+                    8.5,
+                    8.0,
+                    7.5,
+                ]),
+            ),
+            (
+                name: "APRatio",
+                values: Some([
+                    0.65,
+                    0.65,
+                    0.65,
+                    0.65,
+                    0.65,
+                    0.65,
+                    0.65,
+                ]),
+            ),
+            (
+                name: "SlowAPRatio",
+                values: Some([
+                    0.0005,
+                    0.0005,
+                    0.0005,
+                    0.0005,
+                    0.0005,
+                    0.0005,
+                    0.0005,
+                ]),
+            ),
+            (
+                name: "BaseADRatio",
+                values: Some([
+                    0.7,
+                    0.7,
+                    0.7,
+                    0.7,
+                    0.7,
+                    0.7,
+                    0.7,
+                ]),
+            ),
+            (
+                name: "AdditionalAPRatio",
+                values: Some([
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            30.0,
+            30.0,
+            30.0,
+            30.0,
+            30.0,
+            30.0,
+        ]),
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: Some(20.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

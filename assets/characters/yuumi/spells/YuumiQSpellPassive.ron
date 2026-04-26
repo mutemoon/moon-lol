@@ -1,0 +1,20 @@
+(
+    spellData: Some((
+        calculations: None,
+        effectAmounts: None,
+        dataValues: None,
+        mana: Some([
+            90.0,
+            90.0,
+            90.0,
+            90.0,
+            90.0,
+            90.0,
+        ]),
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: Some(100.0),
+        missileEffectKey: Some(3553023680),
+        castType: None,
+    )),
+)

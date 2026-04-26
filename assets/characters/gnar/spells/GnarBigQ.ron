@@ -1,0 +1,116 @@
+(
+    spellData: Some((
+        calculations: Some({
+            2920605250: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 2198913227,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(2),
+                        coefficient: Some(1.4),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "MegaBaseDamage",
+                values: Some([
+                    0.0,
+                    45.0,
+                    90.0,
+                    135.0,
+                    180.0,
+                    225.0,
+                    270.0,
+                ]),
+            ),
+            (
+                name: "MegaPickupAndLolipopRadius",
+                values: Some([
+                    200.0,
+                    200.0,
+                    200.0,
+                    200.0,
+                    200.0,
+                    200.0,
+                    200.0,
+                ]),
+            ),
+            (
+                name: "MegaBoulderLifetime",
+                values: Some([
+                    6.0,
+                    6.0,
+                    6.0,
+                    6.0,
+                    6.0,
+                    6.0,
+                    6.0,
+                ]),
+            ),
+            (
+                name: "MegaCDRefund",
+                values: Some([
+                    0.7,
+                    0.7,
+                    0.7,
+                    0.7,
+                    0.7,
+                    0.7,
+                    0.7,
+                ]),
+            ),
+            (
+                name: "MegaAoERadius",
+                values: Some([
+                    280.0,
+                    280.0,
+                    280.0,
+                    280.0,
+                    280.0,
+                    280.0,
+                    280.0,
+                ]),
+            ),
+            (
+                name: "MegaSlowAmount",
+                values: Some([
+                    0.25,
+                    0.3,
+                    0.35,
+                    0.4,
+                    0.45,
+                    0.5,
+                    0.55,
+                ]),
+            ),
+            (
+                name: "SlowDuration",
+                values: Some([
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                ]),
+            ),
+        ]),
+        mana: None,
+        missileSpec: None,
+        hitBoneName: Some("C_BUFFBONE_GLB_HEAD_LOC"),
+        missileSpeed: Some(1200.0),
+        missileEffectKey: Some(830389478),
+        castType: None,
+    )),
+)

@@ -1,0 +1,45 @@
+(
+    spellData: Some((
+        calculations: None,
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "BerserkDuration",
+                values: Some([
+                    0.75,
+                    1.25,
+                    1.75,
+                    2.25,
+                    2.75,
+                    3.25,
+                    3.75,
+                ]),
+            ),
+            (
+                name: "BonusAttackSpeed",
+                values: Some([
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            100.0,
+            100.0,
+            100.0,
+            100.0,
+            100.0,
+            100.0,
+        ]),
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: Some(1200.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

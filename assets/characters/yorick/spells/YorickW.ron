@@ -1,0 +1,81 @@
+(
+    spellData: Some((
+        calculations: None,
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "CircleDuration",
+                values: Some([
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                ]),
+            ),
+            (
+                name: "GhoulNumber",
+                values: Some([
+                    18.0,
+                    18.0,
+                    18.0,
+                    18.0,
+                    18.0,
+                    18.0,
+                    18.0,
+                ]),
+            ),
+            (
+                name: "Delay",
+                values: Some([
+                    0.75,
+                    0.75,
+                    0.75,
+                    0.75,
+                    0.75,
+                    0.75,
+                    0.75,
+                ]),
+            ),
+            (
+                name: "HPBonus",
+                values: Some([
+                    0.0,
+                    0.0,
+                    0.0,
+                    1.0,
+                    1.0,
+                    2.0,
+                    2.0,
+                ]),
+            ),
+            (
+                name: "WallHealthTooltip",
+                values: Some([
+                    2.0,
+                    2.0,
+                    2.0,
+                    3.0,
+                    3.0,
+                    4.0,
+                    4.0,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            70.0,
+            70.0,
+            70.0,
+            70.0,
+            70.0,
+            70.0,
+        ]),
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: Some(0.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

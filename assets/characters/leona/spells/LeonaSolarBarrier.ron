@@ -1,0 +1,171 @@
+(
+    spellData: Some((
+        calculations: Some({
+            466789754: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartEffectValue",
+                        effectIndex: Some(4),
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(6),
+                        coefficient: Some(0.2),
+                        statFormula: Some(2),
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            4138774530: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartEffectValue",
+                        effectIndex: Some(4),
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(1),
+                        coefficient: Some(0.2),
+                        statFormula: Some(2),
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            4073446979: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartEffectValue",
+                        effectIndex: Some(1),
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: 3809245599,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: Some([
+            (
+                values: Some([
+                    45.0,
+                    55.0,
+                    85.0,
+                    115.0,
+                    145.0,
+                    175.0,
+                    175.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    20.0,
+                    20.0,
+                    27.5,
+                    35.0,
+                    42.5,
+                    50.0,
+                    50.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    20.0,
+                    20.0,
+                    27.5,
+                    35.0,
+                    42.5,
+                    50.0,
+                    50.0,
+                ]),
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+        ]),
+        dataValues: Some([
+            (
+                name: "FlatDamageReduction",
+                values: Some([
+                    4.0,
+                    8.0,
+                    12.0,
+                    16.0,
+                    20.0,
+                    24.0,
+                    28.0,
+                ]),
+            ),
+            (
+                name: "FlatDamageReductionMax",
+                values: Some([
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                ]),
+            ),
+            (
+                name: "APRatio",
+                values: Some([
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            60.0,
+            60.0,
+            60.0,
+            60.0,
+            60.0,
+            60.0,
+        ]),
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: Some(828.5),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

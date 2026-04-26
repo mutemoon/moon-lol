@@ -1,0 +1,73 @@
+(
+    spellData: Some((
+        calculations: Some({
+            806412507: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 2196513046,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(2),
+                        dataValue: 2726746677,
+                    ),
+                ]),
+                multiplier: None,
+                precision: Some(1),
+            ),
+            97015132: (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "PassiveDamageADRatio",
+                values: Some([
+                    0.0004,
+                    0.0004,
+                    0.0004,
+                    0.0004,
+                    0.0004,
+                    0.0004,
+                    0.0004,
+                ]),
+            ),
+            (
+                name: "PassiveDamageBase",
+                values: Some([
+                    0.03,
+                    0.03,
+                    0.03,
+                    0.03,
+                    0.03,
+                    0.03,
+                    0.03,
+                ]),
+            ),
+            (
+                name: "MovementSpeedDuration",
+                values: Some([
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                ]),
+            ),
+        ]),
+        mana: None,
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: None,
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

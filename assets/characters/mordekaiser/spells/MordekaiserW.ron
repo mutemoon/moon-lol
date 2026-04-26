@@ -1,0 +1,161 @@
+(
+    spellData: Some((
+        calculations: Some({
+            1993683884: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(12),
+                        coefficient: Some(0.05),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            1130005786: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(12),
+                        coefficient: Some(0.3),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            4002580743: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(12),
+                        dataValue: 1792384216,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "Duration",
+                values: Some([
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                ]),
+            ),
+            (
+                name: "DamageConversion",
+                values: Some([
+                    0.45,
+                    0.45,
+                    0.45,
+                    0.45,
+                    0.45,
+                    0.45,
+                    0.45,
+                ]),
+            ),
+            (
+                name: "BaseShield",
+                values: Some([
+                    0.05,
+                    0.05,
+                    0.05,
+                    0.05,
+                    0.05,
+                    0.05,
+                    0.05,
+                ]),
+            ),
+            (
+                name: "HealingPercent",
+                values: Some([
+                    0.325,
+                    0.35,
+                    0.375,
+                    0.4,
+                    0.425,
+                    0.45,
+                    0.475,
+                ]),
+            ),
+            (
+                name: "MinionPenalty",
+                values: Some([
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                ]),
+            ),
+            (
+                name: "DamageTakenConversion",
+                values: Some([
+                    0.075,
+                    0.075,
+                    0.075,
+                    0.075,
+                    0.075,
+                    0.075,
+                    0.075,
+                ]),
+            ),
+            (
+                name: "MaxHealthCap",
+                values: Some([
+                    0.3,
+                    0.3,
+                    0.3,
+                    0.3,
+                    0.3,
+                    0.3,
+                    0.3,
+                ]),
+            ),
+            (
+                name: "TimeBeforeDecay",
+                values: Some([
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                ]),
+            ),
+            (
+                name: "DecayPerSecond",
+                values: Some([
+                    0.005,
+                    0.005,
+                    0.005,
+                    0.005,
+                    0.005,
+                    0.005,
+                    0.005,
+                ]),
+            ),
+        ]),
+        mana: None,
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: None,
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

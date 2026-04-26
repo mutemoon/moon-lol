@@ -1,0 +1,123 @@
+(
+    spellData: Some((
+        calculations: Some({
+            2407877160: (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: Some(2),
+            ),
+            620905175: (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "CannisterGroundDuration",
+                values: Some([
+                    7.0,
+                    7.0,
+                    7.0,
+                    7.0,
+                    7.0,
+                    7.0,
+                    7.0,
+                ]),
+            ),
+            (
+                name: "CannisterPickupRadius",
+                values: Some([
+                    115.0,
+                    115.0,
+                    115.0,
+                    115.0,
+                    115.0,
+                    115.0,
+                    115.0,
+                ]),
+            ),
+            (
+                name: "CannisterDistanceAway",
+                values: Some([
+                    525.0,
+                    525.0,
+                    525.0,
+                    525.0,
+                    525.0,
+                    525.0,
+                    525.0,
+                ]),
+            ),
+            (
+                name: "CannisterMaxAngle",
+                values: Some([
+                    70.0,
+                    70.0,
+                    70.0,
+                    70.0,
+                    70.0,
+                    70.0,
+                    70.0,
+                ]),
+            ),
+            (
+                name: "VFXLineIndicatorRange",
+                values: Some([
+                    1000.0,
+                    1000.0,
+                    1000.0,
+                    1000.0,
+                    1000.0,
+                    1000.0,
+                    1000.0,
+                ]),
+            ),
+            (
+                name: "PassiveCooldownRefund",
+                values: Some([
+                    15.0,
+                    15.0,
+                    15.0,
+                    15.0,
+                    15.0,
+                    15.0,
+                    15.0,
+                ]),
+            ),
+            (
+                name: "CurrentHealthLoss",
+                values: Some([
+                    0.04,
+                    0.04,
+                    0.04,
+                    0.04,
+                    0.04,
+                    0.04,
+                    0.04,
+                ]),
+            ),
+            (
+                name: "MaxHealthGain",
+                values: Some([
+                    0.04,
+                    0.04,
+                    0.04,
+                    0.04,
+                    0.04,
+                    0.04,
+                    0.04,
+                ]),
+            ),
+        ]),
+        mana: None,
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: None,
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

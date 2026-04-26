@@ -1,0 +1,18 @@
+(
+  resources: {},
+  entities: {
+    4294967268: (
+      components: {
+        "bevy_camera::visibility::Visibility": Inherited,
+        "bevy_world_serialization::components::WorldAssetRoot": (Path("characters/kalista/skin.glb#Scene0")),
+        "lol_base::animation::AnimationHandler": (Path("characters/kalista/animations/skin0.ron")),
+        "lol_base::character::HealthBar": (
+          bar_type: 12,
+        ),
+        "lol_base::character::Skin": (
+          scale: 0.77,
+        ),
+      },
+    ),
+  },
+)

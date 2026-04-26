@@ -1,0 +1,209 @@
+(
+    spellData: Some((
+        calculations: Some({
+            2908990872: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 346303084,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(2),
+                        dataValue: 2154830477,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            129896502: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 1061869160,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(2),
+                        dataValue: 1784442931,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: Some([
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: Some([
+                    2.5,
+                    2.5,
+                    2.5,
+                    2.5,
+                    2.5,
+                    2.5,
+                    2.5,
+                ]),
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: Some([
+                    7.5,
+                    7.5,
+                    7.5,
+                    7.5,
+                    7.5,
+                    7.5,
+                    7.5,
+                ]),
+            ),
+            (
+                values: Some([
+                    60.0,
+                    60.0,
+                    60.0,
+                    60.0,
+                    60.0,
+                    60.0,
+                    60.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    150.0,
+                    150.0,
+                    150.0,
+                    150.0,
+                    150.0,
+                    150.0,
+                    150.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    -0.8,
+                    -0.8,
+                    -0.8,
+                    -0.8,
+                    -0.8,
+                    -0.8,
+                    -0.8,
+                ]),
+            ),
+        ]),
+        dataValues: Some([
+            (
+                name: "ADRatioMin",
+                values: Some([
+                    0.3,
+                    0.4,
+                    0.5,
+                    0.6,
+                    0.7,
+                    0.8,
+                    0.9,
+                ]),
+            ),
+            (
+                name: "ADRatioMax",
+                values: Some([
+                    0.9,
+                    1.2,
+                    1.5,
+                    1.8,
+                    2.1,
+                    2.4,
+                    2.7,
+                ]),
+            ),
+            (
+                name: "LowDamage",
+                values: Some([
+                    20.0,
+                    40.0,
+                    60.0,
+                    80.0,
+                    100.0,
+                    120.0,
+                    140.0,
+                ]),
+            ),
+            (
+                name: "HighDamage",
+                values: Some([
+                    25.0,
+                    90.0,
+                    155.0,
+                    220.0,
+                    285.0,
+                    350.0,
+                    415.0,
+                ]),
+            ),
+            (
+                name: "MinionRatio",
+                values: Some([
+                    60.0,
+                    60.0,
+                    60.0,
+                    60.0,
+                    60.0,
+                    60.0,
+                    60.0,
+                ]),
+            ),
+            (
+                name: "MonsterRatio",
+                values: Some([
+                    165.0,
+                    165.0,
+                    165.0,
+                    165.0,
+                    165.0,
+                    165.0,
+                    165.0,
+                ]),
+            ),
+            (
+                name: "BaseStunTime",
+                values: Some([
+                    1.25,
+                    1.25,
+                    1.25,
+                    1.25,
+                    1.25,
+                    1.25,
+                    1.25,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            45.0,
+            45.0,
+            45.0,
+            45.0,
+            45.0,
+            45.0,
+        ]),
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: Some(1500.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

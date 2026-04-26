@@ -1,0 +1,132 @@
+(
+    spellData: Some((
+        calculations: Some({
+            118920704: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 1476535861,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: 2226571084,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            454723602: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: 2212226638,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            4190636200: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: 1916993383,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "BasicAPRatio",
+                values: Some([
+                    0.1,
+                    0.1,
+                    0.1,
+                    0.1,
+                    0.1,
+                    0.1,
+                    0.1,
+                ]),
+            ),
+            (
+                name: "BonusDamage",
+                values: Some([
+                    -5.0,
+                    20.0,
+                    45.0,
+                    70.0,
+                    95.0,
+                    120.0,
+                    145.0,
+                ]),
+            ),
+            (
+                name: "BonusAPRatio",
+                values: Some([
+                    0.55,
+                    0.55,
+                    0.55,
+                    0.55,
+                    0.55,
+                    0.55,
+                    0.55,
+                ]),
+            ),
+            (
+                name: "HealRatio",
+                values: Some([
+                    0.085,
+                    0.1,
+                    0.115,
+                    0.13,
+                    0.145,
+                    0.16,
+                    0.175,
+                ]),
+            ),
+            (
+                name: "MinionReductionModifier",
+                values: Some([
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                ]),
+            ),
+            (
+                name: "HealingRatio",
+                values: None,
+            ),
+        ]),
+        mana: Some([
+            40.0,
+            40.0,
+            40.0,
+            40.0,
+            40.0,
+            40.0,
+        ]),
+        missileSpec: Some((
+            movementComponent: (
+                type: "MovementTypeFixedSpeed",
+                speed: Some(2500.0),
+                startBoneName: Some("C_BUFFBONE_GLB_CHEST_LOC"),
+            ),
+        )),
+        hitBoneName: None,
+        missileSpeed: Some(2500.0),
+        missileEffectKey: Some(3681012426),
+        castType: Some(1),
+    )),
+)

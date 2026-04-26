@@ -1,0 +1,136 @@
+(
+    spellData: Some((
+        calculations: Some({
+            1476535861: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(2),
+                        coefficient: Some(1.0),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "StealthDuration",
+                values: Some([
+                    8.0,
+                    12.0,
+                    16.0,
+                    20.0,
+                    24.0,
+                    28.0,
+                    32.0,
+                ]),
+            ),
+            (
+                name: "EnemyDetectionRange",
+                values: Some([
+                    1600.0,
+                    1600.0,
+                    1600.0,
+                    1600.0,
+                    1600.0,
+                    1600.0,
+                    1600.0,
+                ]),
+            ),
+            (
+                name: "SelfVisionRange",
+                values: Some([
+                    2000.0,
+                    2500.0,
+                    3000.0,
+                    3500.0,
+                    4000.0,
+                    4500.0,
+                    5000.0,
+                ]),
+            ),
+            (
+                name: "SelfRevealRange",
+                values: Some([
+                    750.0,
+                    750.0,
+                    750.0,
+                    750.0,
+                    750.0,
+                    750.0,
+                    750.0,
+                ]),
+            ),
+            (
+                name: "StealthMS",
+                values: Some([
+                    30.0,
+                    40.0,
+                    50.0,
+                    60.0,
+                    70.0,
+                    80.0,
+                    90.0,
+                ]),
+            ),
+            (
+                name: "FadeTime",
+                values: Some([
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                ]),
+            ),
+            (
+                name: "ArmorShred",
+                values: Some([
+                    10.0,
+                    15.0,
+                    20.0,
+                    25.0,
+                    30.0,
+                    35.0,
+                    40.0,
+                ]),
+            ),
+            (
+                name: "ArmorShredDuration",
+                values: Some([
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                ]),
+            ),
+            (
+                name: "LeapRange",
+                values: Some([
+                    725.0,
+                    725.0,
+                    725.0,
+                    725.0,
+                    725.0,
+                    725.0,
+                    725.0,
+                ]),
+            ),
+        ]),
+        mana: None,
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: Some(0.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

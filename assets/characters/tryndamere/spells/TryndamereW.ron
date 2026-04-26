@@ -1,0 +1,62 @@
+(
+    spellData: Some((
+        calculations: None,
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "ADReduction",
+                values: Some([
+                    -5.0,
+                    -20.0,
+                    -35.0,
+                    -50.0,
+                    -65.0,
+                    -80.0,
+                    -95.0,
+                ]),
+            ),
+            (
+                name: "SlowPotency",
+                values: Some([
+                    -0.25,
+                    -0.3,
+                    -0.35,
+                    -0.4,
+                    -0.45,
+                    -0.5,
+                    -0.55,
+                ]),
+            ),
+            (
+                name: "ReductionDuration",
+                values: Some([
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                ]),
+            ),
+            (
+                name: "SlowDuration",
+                values: Some([
+                    3.25,
+                    3.25,
+                    3.25,
+                    3.25,
+                    3.25,
+                    3.25,
+                    3.25,
+                ]),
+            ),
+        ]),
+        mana: None,
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: None,
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

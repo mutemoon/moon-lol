@@ -1,0 +1,121 @@
+(
+    spellData: Some((
+        calculations: Some({
+            1426481597: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 4035213700,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(2),
+                        dataValue: 1508478382,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            2967766355: (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "QBaseDamage",
+                values: Some([
+                    -5.0,
+                    10.0,
+                    25.0,
+                    40.0,
+                    55.0,
+                    70.0,
+                    85.0,
+                ]),
+            ),
+            (
+                name: "QTotalADRatio",
+                values: Some([
+                    0.525,
+                    0.6,
+                    0.675,
+                    0.75,
+                    0.825,
+                    0.9,
+                    0.975,
+                ]),
+            ),
+            (
+                name: "QSweetSpotBonus",
+                values: Some([
+                    0.7,
+                    0.7,
+                    0.7,
+                    0.7,
+                    0.7,
+                    0.7,
+                    0.7,
+                ]),
+            ),
+            (
+                name: "QKnockupDuration",
+                values: Some([
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                ]),
+            ),
+            (
+                name: "QRampBonus",
+                values: Some([
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                ]),
+            ),
+            (
+                name: "QMonsterBonus",
+                values: Some([
+                    25.0,
+                    25.0,
+                    25.0,
+                    25.0,
+                    25.0,
+                    25.0,
+                    25.0,
+                ]),
+            ),
+            (
+                name: "QExtensionTime",
+                values: Some([
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                ]),
+            ),
+        ]),
+        mana: None,
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: None,
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

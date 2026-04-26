@@ -1,0 +1,196 @@
+(
+    spellData: Some((
+        calculations: None,
+        effectAmounts: Some([
+            (
+                values: Some([
+                    27.5,
+                    35.0,
+                    42.5,
+                    50.0,
+                    57.5,
+                    65.0,
+                    72.5,
+                ]),
+            ),
+            (
+                values: Some([
+                    35.0,
+                    70.0,
+                    80.0,
+                    90.0,
+                    100.0,
+                    110.0,
+                    125.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    5.0,
+                    10.0,
+                    15.0,
+                    20.0,
+                    25.0,
+                    30.0,
+                    35.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    70.0,
+                    80.0,
+                    90.0,
+                    100.0,
+                    110.0,
+                    120.0,
+                    130.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    30.0,
+                    30.0,
+                    30.0,
+                    30.0,
+                    30.0,
+                    30.0,
+                    30.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    8.0,
+                    8.0,
+                    8.0,
+                    8.0,
+                    8.0,
+                    8.0,
+                    8.0,
+                ]),
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+        ]),
+        dataValues: Some([
+            (
+                name: "PassiveASBonus",
+                values: Some([
+                    60.0,
+                    70.0,
+                    80.0,
+                    90.0,
+                    100.0,
+                    110.0,
+                    120.0,
+                ]),
+            ),
+            (
+                name: "Duration",
+                values: Some([
+                    8.0,
+                    8.0,
+                    8.0,
+                    8.0,
+                    8.0,
+                    8.0,
+                    8.0,
+                ]),
+            ),
+            (
+                name: "MoveSpeedBonus",
+                values: Some([
+                    10.0,
+                    15.0,
+                    20.0,
+                    25.0,
+                    30.0,
+                    35.0,
+                    40.0,
+                ]),
+            ),
+            (
+                name: "PassiveMSBonus",
+                values: Some([
+                    27.5,
+                    35.0,
+                    42.5,
+                    50.0,
+                    57.5,
+                    65.0,
+                    72.5,
+                ]),
+            ),
+            (
+                name: "NoTargetCDReduction",
+                values: Some([
+                    0.7,
+                    0.7,
+                    0.7,
+                    0.7,
+                    0.7,
+                    0.7,
+                    0.7,
+                ]),
+            ),
+            (
+                name: "PassiveASDuration",
+                values: Some([
+                    1.25,
+                    1.25,
+                    1.25,
+                    1.25,
+                    1.25,
+                    1.25,
+                    1.25,
+                ]),
+            ),
+            (
+                name: "FirstHPThreshold",
+                values: Some([
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                ]),
+            ),
+            (
+                name: "SecondHPThreshold",
+                values: Some([
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            55.0,
+            55.0,
+            55.0,
+            55.0,
+            55.0,
+            55.0,
+        ]),
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: Some(20.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

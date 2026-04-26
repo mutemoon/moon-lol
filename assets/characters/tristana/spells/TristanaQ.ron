@@ -1,0 +1,45 @@
+(
+    spellData: Some((
+        calculations: None,
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "AttackSpeedMod",
+                values: Some([
+                    0.45,
+                    0.6,
+                    0.75,
+                    0.9,
+                    1.05,
+                    1.2,
+                    1.35,
+                ]),
+            ),
+            (
+                name: "BuffDuration",
+                values: Some([
+                    7.0,
+                    7.0,
+                    7.0,
+                    7.0,
+                    7.0,
+                    7.0,
+                    7.0,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            30.0,
+            35.0,
+            40.0,
+            45.0,
+            50.0,
+            50.0,
+        ]),
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: Some(1450.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

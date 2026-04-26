@@ -1,0 +1,86 @@
+(
+    spellData: Some((
+        calculations: None,
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "Duration",
+                values: Some([
+                    10.0,
+                    10.0,
+                    10.0,
+                    10.0,
+                    10.0,
+                    10.0,
+                    10.0,
+                ]),
+            ),
+            (
+                name: "SpeedBoostAmount",
+                values: Some([
+                    0.05,
+                    0.15,
+                    0.25,
+                    0.35,
+                    0.45,
+                    0.55,
+                    0.65,
+                ]),
+            ),
+            (
+                name: "MissingHealthHeal",
+                values: Some([
+                    0.1,
+                    0.15,
+                    0.2,
+                    0.25,
+                    0.3,
+                    0.35,
+                    0.4,
+                ]),
+            ),
+            (
+                name: "MaxHealthHoT",
+                values: Some([
+                    0.0,
+                    0.2,
+                    0.4,
+                    0.6,
+                    0.8,
+                    1.0,
+                    1.2,
+                ]),
+            ),
+            (
+                name: "TakedownDurationExtension",
+                values: Some([
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                ]),
+            ),
+            (
+                name: "BonusPerNearbyChampion",
+                values: Some([
+                    0.05,
+                    0.05,
+                    0.05,
+                    0.05,
+                    0.05,
+                    0.05,
+                    0.05,
+                ]),
+            ),
+        ]),
+        mana: None,
+        missileSpec: None,
+        hitBoneName: Some("root"),
+        missileSpeed: Some(828.5),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

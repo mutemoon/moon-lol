@@ -1,0 +1,51 @@
+(
+    spellData: Some((
+        calculations: Some({
+            3524324636: (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            3062294574: (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "AttackSpeedPerMissingHPPerc",
+                values: Some([
+                    0.009,
+                    0.009,
+                    0.009,
+                    0.009,
+                    0.009,
+                    0.009,
+                    0.009,
+                ]),
+            ),
+            (
+                name: "MaxStatsThreshold",
+                values: Some([
+                    0.3,
+                    0.3,
+                    0.3,
+                    0.3,
+                    0.3,
+                    0.3,
+                    0.3,
+                ]),
+            ),
+        ]),
+        mana: None,
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: None,
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

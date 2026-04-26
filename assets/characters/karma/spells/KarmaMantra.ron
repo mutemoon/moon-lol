@@ -1,0 +1,241 @@
+(
+    spellData: Some((
+        calculations: Some({
+            2235193409: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 3443128444,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: 3655814163,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            236254731: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 492071202,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: 3418721809,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            2979803764: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 3314893593,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: 2493426667,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            1144732182: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 1952925990,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: 2815225149,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "QBonusDamage",
+                values: Some([
+                    -20.0,
+                    40.0,
+                    100.0,
+                    160.0,
+                    220.0,
+                    280.0,
+                    340.0,
+                ]),
+            ),
+            (
+                name: "QBonusAPRatio",
+                values: Some([
+                    0.3,
+                    0.3,
+                    0.3,
+                    0.3,
+                    0.3,
+                    0.3,
+                    0.3,
+                ]),
+            ),
+            (
+                name: "QDetonationDamage",
+                values: Some([
+                    -50.0,
+                    40.0,
+                    130.0,
+                    220.0,
+                    310.0,
+                    400.0,
+                    490.0,
+                ]),
+            ),
+            (
+                name: "QDetonationAPRatio",
+                values: Some([
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                ]),
+            ),
+            (
+                name: "RQSlow",
+                values: Some([
+                    -0.5,
+                    -0.5,
+                    -0.5,
+                    -0.5,
+                    -0.5,
+                    -0.5,
+                    -0.5,
+                ]),
+            ),
+            (
+                name: "RQSlowDuration",
+                values: Some([
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                ]),
+            ),
+            (
+                name: "RWBonusRoot",
+                values: Some([
+                    0.25,
+                    0.5,
+                    0.75,
+                    1.0,
+                    1.25,
+                    1.5,
+                    1.75,
+                ]),
+            ),
+            (
+                name: "RWBaseHeal",
+                values: Some([
+                    17.0,
+                    17.0,
+                    17.0,
+                    17.0,
+                    17.0,
+                    17.0,
+                    17.0,
+                ]),
+            ),
+            (
+                name: "RWHealRatio",
+                values: Some([
+                    0.01,
+                    0.01,
+                    0.01,
+                    0.01,
+                    0.01,
+                    0.01,
+                    0.01,
+                ]),
+            ),
+            (
+                name: "EBonusShield",
+                values: Some([
+                    5.0,
+                    45.0,
+                    85.0,
+                    125.0,
+                    165.0,
+                    205.0,
+                    245.0,
+                ]),
+            ),
+            (
+                name: "EBonusShieldRatio",
+                values: Some([
+                    0.45,
+                    0.45,
+                    0.45,
+                    0.45,
+                    0.45,
+                    0.45,
+                    0.45,
+                ]),
+            ),
+            (
+                name: "REMoveSpeed",
+                values: Some([
+                    0.15,
+                    0.15,
+                    0.15,
+                    0.15,
+                    0.15,
+                    0.15,
+                    0.15,
+                ]),
+            ),
+            (
+                name: "RESharedRatio",
+                values: Some([
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                ]),
+            ),
+        ]),
+        mana: None,
+        missileSpec: Some((
+            movementComponent: (
+                type: "MovementTypeFixedSpeed",
+                speed: Some(1300.0),
+                startBoneName: Some("root"),
+            ),
+        )),
+        hitBoneName: None,
+        missileSpeed: Some(1300.0),
+        missileEffectKey: Some(3704587880),
+        castType: Some(3),
+    )),
+)

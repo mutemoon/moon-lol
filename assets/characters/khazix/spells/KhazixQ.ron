@@ -1,0 +1,137 @@
+(
+    spellData: Some((
+        calculations: Some({
+            2339366755: (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            64618745: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartEffectValue",
+                        effectIndex: Some(1),
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(2),
+                        dataValue: 162078152,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            3123124719: (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: Some([
+            (
+                values: Some([
+                    80.0,
+                    80.0,
+                    105.0,
+                    130.0,
+                    155.0,
+                    180.0,
+                    180.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    110.0,
+                    110.0,
+                    110.0,
+                    110.0,
+                    110.0,
+                    110.0,
+                    110.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    50.0,
+                    50.0,
+                    50.0,
+                    50.0,
+                    50.0,
+                    50.0,
+                    50.0,
+                ]),
+            ),
+            (
+                values: Some([
+                    45.0,
+                    45.0,
+                    45.0,
+                    45.0,
+                    45.0,
+                    45.0,
+                    45.0,
+                ]),
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+            (
+                values: None,
+            ),
+        ]),
+        dataValues: Some([
+            (
+                name: "EvolutionIsolationCDRPercentage",
+                values: Some([
+                    45.0,
+                    45.0,
+                    45.0,
+                    45.0,
+                    45.0,
+                    45.0,
+                    45.0,
+                ]),
+            ),
+            (
+                name: "BonusADRatio",
+                values: Some([
+                    1.05,
+                    1.05,
+                    1.05,
+                    1.05,
+                    1.05,
+                    1.05,
+                    1.05,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            20.0,
+            20.0,
+            20.0,
+            20.0,
+            20.0,
+            20.0,
+        ]),
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: Some(20.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

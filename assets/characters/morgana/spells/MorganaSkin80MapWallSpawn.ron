@@ -1,0 +1,50 @@
+(
+    spellData: Some((
+        calculations: None,
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "TriggerRadius",
+                values: Some([
+                    2400.0,
+                    2400.0,
+                    2400.0,
+                    2400.0,
+                    2400.0,
+                    2400.0,
+                    2400.0,
+                ]),
+            ),
+            (
+                name: "MaxNumberButterflies",
+                values: Some([
+                    20.0,
+                    20.0,
+                    20.0,
+                    20.0,
+                    20.0,
+                    20.0,
+                    20.0,
+                ]),
+            ),
+            (
+                name: "DetectRadius",
+                values: Some([
+                    200.0,
+                    200.0,
+                    200.0,
+                    200.0,
+                    200.0,
+                    200.0,
+                    200.0,
+                ]),
+            ),
+        ]),
+        mana: None,
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: None,
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

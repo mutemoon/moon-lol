@@ -1,0 +1,172 @@
+(
+    spellData: Some((
+        calculations: Some({
+            3596606078: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 3746997602,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(2),
+                        dataValue: 2524999493,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: 2128282665,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            1117146549: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 2351022553,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            530819824: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 3424418274,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            211655295: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 3741939819,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "Buff_Duration",
+                values: Some([
+                    15.0,
+                    15.0,
+                    15.0,
+                    15.0,
+                    15.0,
+                    15.0,
+                    15.0,
+                ]),
+            ),
+            (
+                name: "RW_Damage_Base",
+                values: Some([
+                    160.0,
+                    160.0,
+                    320.0,
+                    480.0,
+                    640.0,
+                    800.0,
+                    960.0,
+                ]),
+            ),
+            (
+                name: "RW_ADRatio",
+                values: Some([
+                    1.2,
+                    1.2,
+                    1.2,
+                    1.2,
+                    1.2,
+                    1.2,
+                    1.2,
+                ]),
+            ),
+            (
+                name: "RW_APRatio",
+                values: Some([
+                    0.75,
+                    0.75,
+                    0.75,
+                    0.75,
+                    0.75,
+                    0.75,
+                    0.75,
+                ]),
+            ),
+            (
+                name: "RW_Slow_Duration",
+                values: Some([
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                ]),
+            ),
+            (
+                name: "RW_Slow_Amount",
+                values: Some([
+                    0.99,
+                    0.99,
+                    0.99,
+                    0.99,
+                    0.99,
+                    0.99,
+                    0.99,
+                ]),
+            ),
+            (
+                name: "RE_Dash_Speed",
+                values: Some([
+                    1200.0,
+                    1350.0,
+                    1500.0,
+                    1650.0,
+                    1800.0,
+                    1950.0,
+                    2100.0,
+                ]),
+            ),
+            (
+                name: "RW_CDR",
+                values: Some([
+                    0.8,
+                    0.8,
+                    0.8,
+                    0.8,
+                    0.8,
+                    0.8,
+                    0.8,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            100.0,
+            100.0,
+            100.0,
+            100.0,
+            100.0,
+            100.0,
+        ]),
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: Some(2000.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

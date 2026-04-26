@@ -1,0 +1,45 @@
+(
+    spellData: Some((
+        calculations: Some({
+            4175896801: (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "DRPercent",
+                values: Some([
+                    90.0,
+                    90.0,
+                    90.0,
+                    90.0,
+                    90.0,
+                    90.0,
+                    90.0,
+                ]),
+            ),
+            (
+                name: "LingerDuration",
+                values: Some([
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                ]),
+            ),
+        ]),
+        mana: None,
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: None,
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

@@ -1,0 +1,36 @@
+(
+  resources: {},
+  entities: {
+    4294967293: (
+      components: {
+        "bevy_ecs::name::Name": "nexus",
+        "lol_core::attack::Attack": (
+          range: 0.0,
+          base_attack_speed: 1.0,
+          bonus_attack_speed: 0.0,
+          buff_bonus_attack_speed: 0.0,
+          attack_speed_cap: 2.5,
+          windup_config: Legacy(
+            attack_offset: 0.3,
+          ),
+          windup_modifier: 1.0,
+          spell_key: None,
+        ),
+        "lol_core::base::bounding::Bounding": (
+          radius: 304.0,
+          height: 500.0,
+        ),
+        "lol_core::damage::Armor": (30.0),
+        "lol_core::damage::Damage": (50.0),
+        "lol_core::entities::champion::Champion": (),
+        "lol_core::life::Health": (
+          value: 1000.0,
+          max: 1000.0,
+        ),
+        "lol_core::movement::Movement": (
+          speed: 1350.0,
+        ),
+      },
+    ),
+  },
+)

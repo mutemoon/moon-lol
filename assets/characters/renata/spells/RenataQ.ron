@@ -1,0 +1,116 @@
+(
+    spellData: Some((
+        calculations: Some({
+            501147496: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 1508461632,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: 3809245599,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "Damage",
+                values: Some([
+                    35.0,
+                    80.0,
+                    125.0,
+                    170.0,
+                    215.0,
+                    260.0,
+                    305.0,
+                ]),
+            ),
+            (
+                name: "RootDuration",
+                values: Some([
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                ]),
+            ),
+            (
+                name: "SelfSlow",
+                values: Some([
+                    -0.3,
+                    -0.3,
+                    -0.3,
+                    -0.3,
+                    -0.3,
+                    -0.3,
+                    -0.3,
+                ]),
+            ),
+            (
+                name: "StunDuration",
+                values: Some([
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                ]),
+            ),
+            (
+                name: "PullDistance",
+                values: Some([
+                    275.0,
+                    275.0,
+                    275.0,
+                    275.0,
+                    275.0,
+                    275.0,
+                    275.0,
+                ]),
+            ),
+            (
+                name: "APRatio",
+                values: Some([
+                    0.8,
+                    0.8,
+                    0.8,
+                    0.8,
+                    0.8,
+                    0.8,
+                    0.8,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            80.0,
+            80.0,
+            80.0,
+            80.0,
+            80.0,
+            80.0,
+        ]),
+        missileSpec: Some((
+            movementComponent: (
+                type: "MovementTypeFixedSpeed",
+                speed: Some(1450.0),
+                startBoneName: Some("L_Elbow"),
+            ),
+        )),
+        hitBoneName: Some("root"),
+        missileSpeed: Some(1450.0),
+        missileEffectKey: Some(3397498874),
+        castType: Some(3),
+    )),
+)

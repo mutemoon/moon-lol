@@ -1,0 +1,98 @@
+(
+    spellData: Some((
+        calculations: Some({
+            4032647094: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 1768213658,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: 3809245599,
+                    ),
+                ]),
+                multiplier: None,
+                precision: Some(2),
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "MaxHealthDamage",
+                values: Some([
+                    2.25,
+                    3.0,
+                    3.75,
+                    4.5,
+                    5.25,
+                    6.0,
+                    6.75,
+                ]),
+            ),
+            (
+                name: "APRatio",
+                values: Some([
+                    0.015,
+                    0.015,
+                    0.015,
+                    0.015,
+                    0.015,
+                    0.015,
+                    0.015,
+                ]),
+            ),
+            (
+                name: "Range",
+                values: Some([
+                    110.0,
+                    130.0,
+                    150.0,
+                    170.0,
+                    190.0,
+                    210.0,
+                    230.0,
+                ]),
+            ),
+            (
+                name: "Duration",
+                values: Some([
+                    8.0,
+                    8.0,
+                    8.0,
+                    8.0,
+                    8.0,
+                    8.0,
+                    8.0,
+                ]),
+            ),
+            (
+                name: "MonsterDamageCap",
+                values: Some([
+                    100.0,
+                    100.0,
+                    100.0,
+                    100.0,
+                    100.0,
+                    100.0,
+                    100.0,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            40.0,
+            40.0,
+            40.0,
+            40.0,
+            40.0,
+            40.0,
+        ]),
+        missileSpec: None,
+        hitBoneName: Some("C_BuffBone_Glb_Center_Loc"),
+        missileSpeed: Some(7.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

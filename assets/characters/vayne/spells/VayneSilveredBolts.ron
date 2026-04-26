@@ -1,0 +1,78 @@
+(
+    spellData: Some((
+        calculations: Some({
+            501147496: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 2361073166,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "MaxHealthRatio",
+                values: Some([
+                    0.05,
+                    0.06,
+                    0.07,
+                    0.08,
+                    0.09,
+                    0.1,
+                    0.11,
+                ]),
+            ),
+            (
+                name: "DamageFloor",
+                values: Some([
+                    35.0,
+                    50.0,
+                    65.0,
+                    80.0,
+                    95.0,
+                    110.0,
+                    125.0,
+                ]),
+            ),
+            (
+                name: "DamageVsMonsters",
+                values: Some([
+                    125.0,
+                    140.0,
+                    155.0,
+                    170.0,
+                    185.0,
+                    200.0,
+                    215.0,
+                ]),
+            ),
+            (
+                name: "DebuffDuration",
+                values: Some([
+                    3.5,
+                    3.5,
+                    3.5,
+                    3.5,
+                    3.5,
+                    3.5,
+                    3.5,
+                ]),
+            ),
+            (
+                name: "APRatio",
+                values: None,
+            ),
+        ]),
+        mana: None,
+        missileSpec: None,
+        hitBoneName: Some("head"),
+        missileSpeed: Some(1200.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

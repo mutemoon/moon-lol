@@ -1,0 +1,151 @@
+(
+    spellData: Some((
+        calculations: Some({
+            501147496: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 64618745,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(2),
+                        coefficient: Some(1.1),
+                        statFormula: None,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(12),
+                        dataValue: 4292780561,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            3792260089: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 3767019112,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "BaseDamage",
+                values: Some([
+                    -20.0,
+                    5.0,
+                    30.0,
+                    55.0,
+                    80.0,
+                    105.0,
+                    130.0,
+                ]),
+            ),
+            (
+                name: "HealPercent",
+                values: Some([
+                    0.05,
+                    0.08,
+                    0.11,
+                    0.14,
+                    0.17,
+                    0.2,
+                    0.23,
+                ]),
+            ),
+            (
+                name: "BonusHealthRatio",
+                values: Some([
+                    0.06,
+                    0.06,
+                    0.06,
+                    0.06,
+                    0.06,
+                    0.06,
+                    0.06,
+                ]),
+            ),
+            (
+                name: "MarkDuration",
+                values: Some([
+                    8.0,
+                    8.0,
+                    8.0,
+                    8.0,
+                    8.0,
+                    8.0,
+                    8.0,
+                ]),
+            ),
+            (
+                name: "W2DamageMultiplier",
+                values: Some([
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                ]),
+            ),
+            (
+                name: "BaseHeal",
+                values: Some([
+                    5.0,
+                    20.0,
+                    35.0,
+                    50.0,
+                    65.0,
+                    80.0,
+                    95.0,
+                ]),
+            ),
+            (
+                name: "MinionAndMonsterMod",
+                values: Some([
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                ]),
+            ),
+            (
+                name: "W2BonusADDamageMultiplier",
+                values: Some([
+                    0.0025,
+                    0.0025,
+                    0.0025,
+                    0.0025,
+                    0.0025,
+                    0.0025,
+                    0.0025,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            20.0,
+            25.0,
+            30.0,
+            35.0,
+            40.0,
+            40.0,
+        ]),
+        missileSpec: None,
+        hitBoneName: Some("C_BUFFBONE_GLB_LAYOUT_LOC"),
+        missileSpeed: Some(1450.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

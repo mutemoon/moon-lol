@@ -1,0 +1,92 @@
+(
+    spellData: Some((
+        calculations: Some({
+            37839949: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 2362170196,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: None,
+                        coefficient: Some(0.8),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            949812597: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 3700674300,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: None,
+                        coefficient: Some(0.4),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "PrimaryDamage",
+                values: Some([
+                    25.0,
+                    150.0,
+                    275.0,
+                    400.0,
+                    525.0,
+                    650.0,
+                    775.0,
+                ]),
+            ),
+            (
+                name: "SecondaryDamage",
+                values: Some([
+                    75.0,
+                    125.0,
+                    175.0,
+                    225.0,
+                    275.0,
+                    325.0,
+                    375.0,
+                ]),
+            ),
+            (
+                name: "StunDuration",
+                values: Some([
+                    0.5,
+                    1.0,
+                    1.5,
+                    2.0,
+                    2.5,
+                    3.0,
+                    3.5,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            100.0,
+            100.0,
+            100.0,
+            100.0,
+            100.0,
+            0.0,
+        ]),
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: Some(1400.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

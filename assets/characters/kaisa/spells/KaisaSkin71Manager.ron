@@ -1,0 +1,50 @@
+(
+    spellData: Some((
+        calculations: None,
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "GoldToNextForm",
+                values: Some([
+                    2000.0,
+                    6000.0,
+                    6000.0,
+                    6000.0,
+                    6000.0,
+                    6000.0,
+                    6000.0,
+                ]),
+            ),
+            (
+                name: "SecondsOutOfCombatTillTransform",
+                values: Some([
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                ]),
+            ),
+            (
+                name: "SecondsOutOfCombatTillEmote",
+                values: Some([
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                ]),
+            ),
+        ]),
+        mana: None,
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: None,
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

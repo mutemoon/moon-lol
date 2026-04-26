@@ -1,0 +1,33 @@
+(
+    spellData: Some((
+        calculations: Some({
+            3498653279: (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "Cooldown",
+                values: Some([
+                    240.0,
+                    240.0,
+                    240.0,
+                    240.0,
+                    240.0,
+                    240.0,
+                    240.0,
+                ]),
+            ),
+        ]),
+        mana: None,
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: None,
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

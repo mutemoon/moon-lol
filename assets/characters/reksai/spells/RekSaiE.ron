@@ -1,0 +1,206 @@
+(
+    spellData: Some((
+        calculations: Some({
+            1406565072: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 1437691317,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(7),
+                        dataValue: 510047956,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            10334664: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 4029017048,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            3397572612: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 865623685,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(2),
+                        dataValue: 1121971103,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "EmpoweredBaseDamage",
+                values: Some([
+                    65.0,
+                    100.0,
+                    135.0,
+                    170.0,
+                    205.0,
+                    240.0,
+                    275.0,
+                ]),
+            ),
+            (
+                name: "EmpoweredADRatio",
+                values: Some([
+                    0.8,
+                    0.8,
+                    0.8,
+                    0.8,
+                    0.8,
+                    0.8,
+                    0.8,
+                ]),
+            ),
+            (
+                name: "UnempoweredModifier",
+                values: Some([
+                    0.8,
+                    0.8,
+                    0.8,
+                    0.8,
+                    0.8,
+                    0.8,
+                    0.8,
+                ]),
+            ),
+            (
+                name: "_____BURROWED_DATA_____",
+                values: None,
+            ),
+            (
+                name: "DashDistance",
+                values: Some([
+                    850.0,
+                    850.0,
+                    850.0,
+                    850.0,
+                    850.0,
+                    850.0,
+                    850.0,
+                ]),
+            ),
+            (
+                name: "MinimumRange",
+                values: Some([
+                    850.0,
+                    850.0,
+                    850.0,
+                    850.0,
+                    850.0,
+                    850.0,
+                    850.0,
+                ]),
+            ),
+            (
+                name: "DashSpeedBase",
+                values: Some([
+                    500.0,
+                    500.0,
+                    500.0,
+                    500.0,
+                    500.0,
+                    500.0,
+                    500.0,
+                ]),
+            ),
+            (
+                name: "DashSpeedMod",
+                values: Some([
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                ]),
+            ),
+            (
+                name: "MaximumTunnels",
+                values: Some([
+                    8.0,
+                    8.0,
+                    8.0,
+                    8.0,
+                    8.0,
+                    8.0,
+                    8.0,
+                ]),
+            ),
+            (
+                name: "TunnelDurationMinutes",
+                values: Some([
+                    10.0,
+                    10.0,
+                    10.0,
+                    10.0,
+                    10.0,
+                    10.0,
+                    10.0,
+                ]),
+            ),
+            (
+                name: "TunnelReuseCooldown",
+                values: Some([
+                    7.0,
+                    6.0,
+                    5.0,
+                    4.0,
+                    3.0,
+                    2.0,
+                    1.0,
+                ]),
+            ),
+            (
+                name: "DashCooldown",
+                values: Some([
+                    19.0,
+                    18.0,
+                    17.0,
+                    16.0,
+                    15.0,
+                    14.0,
+                    13.0,
+                ]),
+            ),
+            (
+                name: "TunnelTimeRatio",
+                values: Some([
+                    0.65,
+                    0.65,
+                    0.65,
+                    0.65,
+                    0.65,
+                    0.65,
+                    0.65,
+                ]),
+            ),
+        ]),
+        mana: None,
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: Some(4000.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

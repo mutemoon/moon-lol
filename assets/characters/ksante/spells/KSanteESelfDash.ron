@@ -1,0 +1,154 @@
+(
+    spellData: Some((
+        calculations: Some({
+            1704249176: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 1719398739,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "DashDistance",
+                values: Some([
+                    550.0,
+                    550.0,
+                    550.0,
+                    550.0,
+                    550.0,
+                    550.0,
+                    550.0,
+                ]),
+            ),
+            (
+                name: "AllyDashSpeed",
+                values: Some([
+                    1600.0,
+                    1600.0,
+                    1600.0,
+                    1600.0,
+                    1600.0,
+                    1600.0,
+                    1600.0,
+                ]),
+            ),
+            (
+                name: "TargetingForgiveness",
+                values: Some([
+                    150.0,
+                    150.0,
+                    150.0,
+                    150.0,
+                    150.0,
+                    150.0,
+                    150.0,
+                ]),
+            ),
+            (
+                name: "ShieldDuration",
+                values: Some([
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                ]),
+            ),
+            (
+                name: "ShieldBaseAmount",
+                values: Some([
+                    20.0,
+                    45.0,
+                    70.0,
+                    95.0,
+                    120.0,
+                    145.0,
+                    170.0,
+                ]),
+            ),
+            (
+                name: "BASE_FORM",
+                values: None,
+            ),
+            (
+                name: "FreeTargetRangeBase",
+                values: Some([
+                    250.0,
+                    250.0,
+                    250.0,
+                    250.0,
+                    250.0,
+                    250.0,
+                    250.0,
+                ]),
+            ),
+            (
+                name: "FreeTargetSpeedBase",
+                values: Some([
+                    1500.0,
+                    1500.0,
+                    1500.0,
+                    1500.0,
+                    1500.0,
+                    1500.0,
+                    1500.0,
+                ]),
+            ),
+            (
+                name: "ULT_FORM",
+                values: None,
+            ),
+            (
+                name: "FreeTargetRangeAO",
+                values: Some([
+                    400.0,
+                    400.0,
+                    400.0,
+                    400.0,
+                    400.0,
+                    400.0,
+                    400.0,
+                ]),
+            ),
+            (
+                name: "FreeTargetSpeedAO",
+                values: Some([
+                    2100.0,
+                    2100.0,
+                    2100.0,
+                    2100.0,
+                    2100.0,
+                    2100.0,
+                    2100.0,
+                ]),
+            ),
+            (
+                name: "ShieldBaseAmountFast",
+                values: Some([
+                    25.0,
+                    45.0,
+                    65.0,
+                    85.0,
+                    105.0,
+                    125.0,
+                    145.0,
+                ]),
+            ),
+        ]),
+        mana: None,
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: Some(0.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

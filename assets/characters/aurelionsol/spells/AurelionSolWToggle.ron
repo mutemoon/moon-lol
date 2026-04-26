@@ -1,0 +1,175 @@
+(
+    spellData: Some((
+        calculations: Some({
+            3822957258: (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            1406565072: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 851492244,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(7),
+                        coefficient: Some(1.0),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            4292313141: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 851492244,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(7),
+                        coefficient: Some(1.0),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "TrueDamageBonus",
+                values: Some([
+                    0.07,
+                    0.08,
+                    0.09,
+                    0.1,
+                    0.11,
+                    0.12,
+                    0.13,
+                ]),
+            ),
+            (
+                name: "BaseMS",
+                values: Some([
+                    340.0,
+                    340.0,
+                    340.0,
+                    340.0,
+                    340.0,
+                    340.0,
+                    340.0,
+                ]),
+            ),
+            (
+                name: "BaseCruiseMS",
+                values: Some([
+                    340.0,
+                    340.0,
+                    340.0,
+                    340.0,
+                    340.0,
+                    340.0,
+                    340.0,
+                ]),
+            ),
+            (
+                name: "DistancePerMass",
+                values: Some([
+                    7.5,
+                    7.5,
+                    7.5,
+                    7.5,
+                    7.5,
+                    7.5,
+                    7.5,
+                ]),
+            ),
+            (
+                name: "ResetWindow",
+                values: Some([
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                    3.0,
+                ]),
+            ),
+            (
+                name: "TakedownCooldownMultiplier",
+                values: Some([
+                    0.1,
+                    0.1,
+                    0.1,
+                    0.1,
+                    0.1,
+                    0.1,
+                    0.1,
+                ]),
+            ),
+            (
+                name: "TooltipTakedownCooldownMultiplier",
+                values: Some([
+                    90.0,
+                    90.0,
+                    90.0,
+                    90.0,
+                    90.0,
+                    90.0,
+                    90.0,
+                ]),
+            ),
+            (
+                name: "FakeCastTime",
+                values: Some([
+                    0.375,
+                    0.375,
+                    0.375,
+                    0.375,
+                    0.375,
+                    0.375,
+                    0.375,
+                ]),
+            ),
+            (
+                name: "OverrideECastRange",
+                values: Some([
+                    1100.0,
+                    1100.0,
+                    1100.0,
+                    1100.0,
+                    1100.0,
+                    1100.0,
+                    1100.0,
+                ]),
+            ),
+            (
+                name: "CD",
+                values: Some([
+                    22.0,
+                    22.0,
+                    20.5,
+                    19.0,
+                    17.5,
+                    16.0,
+                    16.0,
+                ]),
+            ),
+        ]),
+        mana: None,
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: Some(828.5),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

@@ -1,0 +1,184 @@
+(
+    spellData: Some((
+        calculations: Some({
+            4138774530: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(1),
+                        dataValue: 1093812064,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            2307255381: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 2435027013,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(1),
+                        dataValue: 373940146,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(6),
+                        dataValue: 2393835866,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            758099115: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 2435027013,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(1),
+                        dataValue: 373940146,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(6),
+                        dataValue: 2393835866,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            466789754: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(6),
+                        dataValue: 1152277384,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "BonusArmorPercent",
+                values: Some([
+                    0.225,
+                    0.3,
+                    0.375,
+                    0.45,
+                    0.525,
+                    0.6,
+                    0.675,
+                ]),
+            ),
+            (
+                name: "BonusMRPercent",
+                values: Some([
+                    0.225,
+                    0.3,
+                    0.375,
+                    0.45,
+                    0.525,
+                    0.6,
+                    0.675,
+                ]),
+            ),
+            (
+                name: "FlatBonusArmor",
+                values: Some([
+                    22.0,
+                    27.0,
+                    32.0,
+                    37.0,
+                    42.0,
+                    47.0,
+                    52.0,
+                ]),
+            ),
+            (
+                name: "FlatBonusMR",
+                values: Some([
+                    15.0,
+                    20.0,
+                    25.0,
+                    30.0,
+                    35.0,
+                    40.0,
+                    45.0,
+                ]),
+            ),
+            (
+                name: "BuffDuration",
+                values: Some([
+                    7.0,
+                    7.0,
+                    7.0,
+                    7.0,
+                    7.0,
+                    7.0,
+                    7.0,
+                ]),
+            ),
+            (
+                name: "DamageArmorRatio",
+                values: Some([
+                    0.1,
+                    0.1,
+                    0.1,
+                    0.1,
+                    0.1,
+                    0.1,
+                    0.1,
+                ]),
+            ),
+            (
+                name: "DamageMRRatio",
+                values: Some([
+                    0.1,
+                    0.1,
+                    0.1,
+                    0.1,
+                    0.1,
+                    0.1,
+                    0.1,
+                ]),
+            ),
+            (
+                name: "FlatDamageReturn",
+                values: Some([
+                    15.0,
+                    15.0,
+                    15.0,
+                    15.0,
+                    15.0,
+                    15.0,
+                    15.0,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            40.0,
+            40.0,
+            40.0,
+            40.0,
+            40.0,
+            40.0,
+        ]),
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: Some(0.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

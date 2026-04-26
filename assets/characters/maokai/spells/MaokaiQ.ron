@@ -1,0 +1,169 @@
+(
+    spellData: Some((
+        calculations: Some({
+            2453213240: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 3378955467,
+                    ),
+                ]),
+                multiplier: None,
+                precision: Some(1),
+            ),
+            501147496: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 64618745,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: 3809245599,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "BaseDamage",
+                values: Some([
+                    30.0,
+                    75.0,
+                    120.0,
+                    165.0,
+                    210.0,
+                    255.0,
+                    300.0,
+                ]),
+            ),
+            (
+                name: "SlowAmount",
+                values: Some([
+                    0.99,
+                    0.99,
+                    0.99,
+                    0.99,
+                    0.99,
+                    0.99,
+                    0.99,
+                ]),
+            ),
+            (
+                name: "SlowDuration",
+                values: Some([
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                ]),
+            ),
+            (
+                name: "LolipopRadius",
+                values: Some([
+                    325.0,
+                    325.0,
+                    325.0,
+                    325.0,
+                    325.0,
+                    325.0,
+                    325.0,
+                ]),
+            ),
+            (
+                name: "KnockbackSpeed",
+                values: Some([
+                    950.0,
+                    950.0,
+                    950.0,
+                    950.0,
+                    950.0,
+                    950.0,
+                    950.0,
+                ]),
+            ),
+            (
+                name: "KnockbackDistance",
+                values: Some([
+                    400.0,
+                    400.0,
+                    400.0,
+                    400.0,
+                    400.0,
+                    400.0,
+                    400.0,
+                ]),
+            ),
+            (
+                name: "BasePercentHealth",
+                values: Some([
+                    0.015,
+                    0.02,
+                    0.025,
+                    0.03,
+                    0.035,
+                    0.04,
+                    0.045,
+                ]),
+            ),
+            (
+                name: "NonChampMax",
+                values: Some([
+                    9999.0,
+                    9999.0,
+                    9999.0,
+                    9999.0,
+                    9999.0,
+                    9999.0,
+                    9999.0,
+                ]),
+            ),
+            (
+                name: "BonusMonsterDamage",
+                values: Some([
+                    130.0,
+                    140.0,
+                    150.0,
+                    160.0,
+                    170.0,
+                    180.0,
+                    190.0,
+                ]),
+            ),
+            (
+                name: "APRatio",
+                values: Some([
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            40.0,
+            40.0,
+            40.0,
+            40.0,
+            40.0,
+            40.0,
+        ]),
+        missileSpec: None,
+        hitBoneName: None,
+        missileSpeed: Some(1600.0),
+        missileEffectKey: None,
+        castType: None,
+    )),
+)

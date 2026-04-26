@@ -1,0 +1,82 @@
+(
+    spellData: Some((
+        calculations: Some({
+            3793779392: (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
+        effectAmounts: None,
+        dataValues: Some([
+            (
+                name: "EnemyCooldownPercent",
+                values: Some([
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                ]),
+            ),
+            (
+                name: "EnemyCooldownTooltip",
+                values: Some([
+                    200.0,
+                    200.0,
+                    200.0,
+                    200.0,
+                    200.0,
+                    200.0,
+                    200.0,
+                ]),
+            ),
+            (
+                name: "MinimumEnemyCooldown",
+                values: Some([
+                    40.0,
+                    40.0,
+                    40.0,
+                    40.0,
+                    40.0,
+                    40.0,
+                    40.0,
+                ]),
+            ),
+            (
+                name: "UltHoldDuration",
+                values: Some([
+                    90.0,
+                    90.0,
+                    90.0,
+                    90.0,
+                    90.0,
+                    90.0,
+                    90.0,
+                ]),
+            ),
+        ]),
+        mana: Some([
+            75.0,
+            75.0,
+            75.0,
+            75.0,
+            75.0,
+            75.0,
+        ]),
+        missileSpec: Some((
+            movementComponent: (
+                type: "MovementTypeFixedSpeed",
+                speed: Some(2200.0),
+                startBoneName: Some("L_Gauntlet"),
+            ),
+        )),
+        hitBoneName: None,
+        missileSpeed: Some(2200.0),
+        missileEffectKey: Some(2245261483),
+        castType: Some(1),
+    )),
+)
