@@ -50,7 +50,7 @@ fn on_olaf_skill_cast(
         return;
     };
 
-    let skill_spell = skill.key_spell_object.clone();
+    let skill_spell = skill.spell.clone();
 
     match skill.slot {
         SkillSlot::Q => cast_olaf_q(&mut commands, entity, trigger.point),

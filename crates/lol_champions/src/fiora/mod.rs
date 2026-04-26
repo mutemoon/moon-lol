@@ -67,7 +67,7 @@ fn on_fiora_skill_cast(
             &q_transform,
             entity,
             trigger.point,
-            skill.key_spell_object.clone(),
+            skill.spell.clone(),
         ),
         SkillSlot::W => cast_fiora_w(&mut commands, entity),
         SkillSlot::E => cast_fiora_e(&mut commands, entity),

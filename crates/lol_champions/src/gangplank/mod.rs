@@ -44,10 +44,10 @@ fn on_gangplank_skill_cast(
     };
 
     match skill.slot {
-        SkillSlot::Q => cast_gangplank_q(&mut commands, entity, skill.key_spell_object.clone()),
+        SkillSlot::Q => cast_gangplank_q(&mut commands, entity, skill.spell.clone()),
         SkillSlot::W => cast_gangplank_w(&mut commands, entity),
         SkillSlot::E => cast_gangplank_e(&mut commands, entity),
-        SkillSlot::R => cast_gangplank_r(&mut commands, entity, skill.key_spell_object.clone()),
+        SkillSlot::R => cast_gangplank_r(&mut commands, entity, skill.spell.clone()),
         _ => {}
     }
 }

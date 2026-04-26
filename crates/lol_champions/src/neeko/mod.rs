@@ -44,7 +44,7 @@ fn on_neeko_skill_cast(
         return;
     };
 
-    let skill_spell = skill.key_spell_object.clone();
+    let skill_spell = skill.spell.clone();
 
     match skill.slot {
         SkillSlot::Q => cast_neeko_q(&mut commands, entity, skill_spell),

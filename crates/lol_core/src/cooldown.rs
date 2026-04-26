@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::skill::CoolDown;
+use crate::skill::CoolDownState;
 
 #[derive(Default)]
 pub struct PluginCooldown;
@@ -11,8 +11,8 @@ impl Plugin for PluginCooldown {
     }
 }
 
-fn fixed_update_cooldown(time: Res<Time>, mut q_cooldown: Query<&mut CoolDown>) {
-    for mut cooldown in q_cooldown.iter_mut() {
-        cooldown.timer.tick(time.delta());
+fn fixed_update_cooldown(time: Res<Time>, mut q_cooldown: Query<&mut CoolDownState>) {
+    for mut cooldown_state in q_cooldown.iter_mut() {
+        cooldown_state.timer.tick(time.delta());
     }
 }

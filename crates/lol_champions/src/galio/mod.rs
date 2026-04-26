@@ -47,16 +47,16 @@ fn on_galio_skill_cast(
     };
 
     match skill.slot {
-        SkillSlot::Q => cast_galio_q(&mut commands, entity, skill.key_spell_object.clone()),
+        SkillSlot::Q => cast_galio_q(&mut commands, entity, skill.spell.clone()),
         SkillSlot::W => cast_galio_w(&mut commands, entity),
         SkillSlot::E => cast_galio_e(
             &mut commands,
             &q_transform,
             entity,
             trigger.point,
-            skill.key_spell_object.clone(),
+            skill.spell.clone(),
         ),
-        SkillSlot::R => cast_galio_r(&mut commands, entity, skill.key_spell_object.clone()),
+        SkillSlot::R => cast_galio_r(&mut commands, entity, skill.spell.clone()),
         _ => {}
     }
 }

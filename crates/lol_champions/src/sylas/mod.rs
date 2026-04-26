@@ -9,8 +9,8 @@ use lol_core::buffs::common_buffs::BuffSelfHeal;
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
 use lol_core::skill::{
-    CoolDown, EventSkillCast, Skill, SkillRecastWindow, SkillSlot, play_skill_animation,
-    skill_damage, skill_dash, spawn_skill_particle,
+    CoolDown, CoolDownState, EventSkillCast, Skill, SkillRecastWindow, SkillSlot,
+    play_skill_animation, skill_damage, skill_dash, spawn_skill_particle,
 };
 
 const SYLAS_E_RECAST_WINDOW: f32 = 4.0;
@@ -46,7 +46,7 @@ fn on_sylas_skill_cast(
         return;
     };
 
-    let skill_spell = skill.key_spell_object.clone();
+    let skill_spell = skill.spell.clone();
 
     match skill.slot {
         SkillSlot::Q => cast_sylas_q(&mut commands, entity, skill_spell),
@@ -186,10 +186,14 @@ fn cast_sylas_e(
             },
         );
         commands.entity(skill_entity).remove::<SkillRecastWindow>();
-        commands.entity(skill_entity).insert(CoolDown {
-            timer: Timer::from_seconds(cooldown.duration, TimerMode::Once),
-            duration: cooldown.duration,
-        });
+        commands.entity(skill_entity).insert((
+            CoolDown {
+                duration: cooldown.duration,
+            },
+            CoolDownState {
+                timer: Timer::from_seconds(cooldown.duration, TimerMode::Once),
+            },
+        ));
     }
 }
 

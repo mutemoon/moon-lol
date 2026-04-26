@@ -1,6 +1,7 @@
 use bevy::prelude::*;
-use league_core::extract::CharacterRecord;
-use league_loader::game::{Data, LeagueLoader};
+use league_core::extract::{CharacterRecord, SpellObject};
+use league_loader::game::{Data, LeagueLoader, PropGroup};
+use lol_base::spell::Spell;
 use lol_core::attack::{Attack, WindupConfig};
 use lol_core::base::bounding::Bounding;
 use lol_core::base::level::ExperienceDrop;
@@ -9,8 +10,12 @@ use lol_core::damage::{Armor, Damage};
 use lol_core::entities::champion::Champion;
 use lol_core::life::Health;
 use lol_core::movement::Movement;
+use lol_core::skill::{
+    CoolDown, CoolDownState, Skill, SkillCooldownMode, SkillOf, SkillSlot, Skills,
+};
 
 use super::skin::extract_skin_for_champion;
+use super::spell::extract_spells_for_champion;
 use super::utils::write_to_file;
 
 /// Champion 记录数据
@@ -114,6 +119,7 @@ pub fn export_champion_scene(
     armor: Armor,
     movement: Movement,
     experience_drop: Option<ExperienceDrop>,
+    skills: Vec<Skill>,
 ) {
     let mut world = World::new();
 
@@ -131,13 +137,20 @@ pub fn export_champion_scene(
     type_registry.write().register::<Armor>();
     type_registry.write().register::<Movement>();
     type_registry.write().register::<ExperienceDrop>();
+    type_registry.write().register::<Skill>();
+    type_registry.write().register::<SkillSlot>();
+    type_registry.write().register::<SkillCooldownMode>();
+    type_registry.write().register::<CoolDown>();
+    type_registry.write().register::<CoolDownState>();
+    type_registry.write().register::<SkillOf>();
+    type_registry.write().register::<Skills>();
     world.insert_resource(type_registry);
 
     let champ_name_string = champ_name.to_string();
-    let entity = world
+    let champion_entity = world
         .spawn((
             Character,
-            Name::new(champ_name_string),
+            Name::new(champ_name_string.clone()),
             Champion,
             bounding,
             attack,
@@ -149,7 +162,14 @@ pub fn export_champion_scene(
         .id();
 
     if let Some(exp_drop) = experience_drop {
-        world.entity_mut(entity).insert(exp_drop);
+        world.entity_mut(champion_entity).insert(exp_drop);
+    }
+
+    // 为每个技能创建独立的技能实体
+    for skill in skills {
+        world
+            .entity_mut(champion_entity)
+            .with_related::<SkillOf>((skill, CoolDown { duration: 0.0 }));
     }
 
     let scene = DynamicWorld::from_world(&world);
@@ -179,6 +199,9 @@ pub fn extract_champion_from_record(
         return false;
     };
 
+    // 先提取技能数据到文件
+    extract_spells_for_champion(champ_name, &prop_group);
+
     let bounding = Bounding {
         radius: record.pathfinding_collision_radius.unwrap_or(0.0),
         height: record.health_bar_height.unwrap_or(200.0),
@@ -186,6 +209,10 @@ pub fn extract_champion_from_record(
 
     let (attack, health, damage, armor, movement, experience_drop) =
         create_champion_components_from_record(&record);
+
+    // 从 spells 哈希创建 Skill 组件（使用 AssetServer 加载路径以获得正确的 Handle）
+    let skills = create_skills_from_record(&prop_group, champ_name, &record);
+
     export_champion_scene(
         champ_name,
         bounding,
@@ -195,10 +222,94 @@ pub fn extract_champion_from_record(
         armor,
         movement,
         experience_drop,
+        skills,
     );
 
     // 提取皮肤 GLB 和皮肤场景
     extract_skin_for_champion(loader, champ_name, skin_bin_path);
 
     true
+}
+
+/// 从 CharacterRecord 创建 Skill 组件
+fn create_skills_from_record(
+    prop_group: &PropGroup,
+    champ_name: &str,
+    record: &CharacterRecord,
+) -> Vec<Skill> {
+    let mut app = App::new();
+    app.add_plugins(AssetPlugin::default());
+    app.add_plugins(TaskPoolPlugin::default());
+    app.init_asset::<Spell>();
+    app.finish();
+    app.cleanup();
+
+    let world = app.world_mut();
+    let asset_server = world.resource::<AssetServer>();
+
+    let mut skills = Vec::new();
+
+    // 获取 Q/W/E/R 技能
+    if let Some(spell_hashes) = &record.spells {
+        let slots = [SkillSlot::Q, SkillSlot::W, SkillSlot::E, SkillSlot::R];
+        for (i, hash) in spell_hashes.iter().enumerate() {
+            if i >= slots.len() {
+                break;
+            }
+            let slot = slots[i];
+
+            if let Some(spell_obj) = prop_group.get_data_option::<SpellObject>(*hash) {
+                let spell_path = format!(
+                    "characters/{}/spells/{}.ron",
+                    champ_name.to_lowercase(),
+                    spell_obj.object_name
+                );
+                let spell_handle: Handle<Spell> = asset_server.load(&spell_path);
+                skills.push(Skill {
+                    spell: spell_handle,
+                    level: 1,
+                    slot,
+                    cooldown_mode: SkillCooldownMode::AfterCast,
+                });
+                println!(
+                    "[INFO] 技能 {} -> {}",
+                    slot_to_string(slot),
+                    spell_obj.object_name
+                );
+            }
+        }
+    }
+
+    // 获取被动技能
+    if let Some(passive_hash) = record.m_character_passive_spell {
+        if let Some(spell_obj) = prop_group.get_data_option::<SpellObject>(passive_hash) {
+            let spell_path = format!(
+                "characters/{}/spells/{}.ron",
+                champ_name.to_lowercase(),
+                spell_obj.object_name
+            );
+            let spell_handle: Handle<Spell> = asset_server.load(&spell_path);
+            skills.push(Skill {
+                spell: spell_handle,
+                level: 1,
+                slot: SkillSlot::Passive,
+                cooldown_mode: SkillCooldownMode::AfterCast,
+            });
+            println!("[INFO] 被动技能 -> {}", spell_obj.object_name);
+        }
+    }
+
+    skills
+}
+
+/// SkillSlot 转字符串
+fn slot_to_string(slot: SkillSlot) -> &'static str {
+    match slot {
+        SkillSlot::Passive => "Passive",
+        SkillSlot::Q => "Q",
+        SkillSlot::W => "W",
+        SkillSlot::E => "E",
+        SkillSlot::R => "R",
+        SkillSlot::Custom(_) => "Custom",
+    }
 }

@@ -46,8 +46,8 @@ fn on_rengar_skill_cast(
 
     match skill.slot {
         SkillSlot::Q => cast_rengar_q(&mut commands, entity),
-        SkillSlot::W => cast_rengar_w(&mut commands, entity, skill.key_spell_object.clone()),
-        SkillSlot::E => cast_rengar_e(&mut commands, entity, skill.key_spell_object.clone()),
+        SkillSlot::W => cast_rengar_w(&mut commands, entity, skill.spell.clone()),
+        SkillSlot::E => cast_rengar_e(&mut commands, entity, skill.spell.clone()),
         SkillSlot::R => cast_rengar_r(&mut commands, entity),
         _ => {}
     }

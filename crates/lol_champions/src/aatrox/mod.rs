@@ -9,8 +9,8 @@ use lol_core::buffs::common_buffs::{BuffMoveSpeed, BuffSelfHeal};
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
 use lol_core::skill::{
-    CoolDown, EventSkillCast, Skill, SkillRecastWindow, SkillSlot, play_skill_animation,
-    skill_damage, skill_dash, spawn_skill_particle,
+    CoolDown, CoolDownState, EventSkillCast, Skill, SkillRecastWindow, SkillSlot,
+    play_skill_animation, skill_damage, skill_dash, spawn_skill_particle,
 };
 
 const AATROX_Q_RECAST_WINDOW: f32 = 3.0;
@@ -55,17 +55,17 @@ fn on_aatrox_skill_cast(
             trigger.point,
             cooldown,
             recast,
-            skill.key_spell_object.clone(),
+            skill.spell.clone(),
         ),
-        SkillSlot::W => cast_aatrox_w(&mut commands, entity, skill.key_spell_object.clone()),
+        SkillSlot::W => cast_aatrox_w(&mut commands, entity, skill.spell.clone()),
         SkillSlot::E => cast_aatrox_e(
             &mut commands,
             &q_transform,
             entity,
             trigger.point,
-            skill.key_spell_object.clone(),
+            skill.spell.clone(),
         ),
-        SkillSlot::R => cast_aatrox_r(&mut commands, entity, skill.key_spell_object.clone()),
+        SkillSlot::R => cast_aatrox_r(&mut commands, entity, skill.spell.clone()),
         _ => {}
     }
 }
@@ -117,10 +117,14 @@ fn cast_aatrox_q(
     if stage >= 3 {
         commands.entity(skill_entity).remove::<SkillRecastWindow>();
         // After 3rd Q, start cooldown
-        commands.entity(skill_entity).insert(CoolDown {
-            timer: Timer::from_seconds(cooldown.duration, TimerMode::Once),
-            duration: cooldown.duration,
-        });
+        commands.entity(skill_entity).insert((
+            CoolDown {
+                duration: cooldown.duration,
+            },
+            CoolDownState {
+                timer: Timer::from_seconds(cooldown.duration, TimerMode::Once),
+            },
+        ));
         debug!(
             "{:?} 释放了 {} 技能，当前阶段 {}，开始冷却",
             entity, "Aatrox Q", stage

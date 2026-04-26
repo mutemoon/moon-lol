@@ -35,8 +35,8 @@ use lol_core::navigation::grid::ResourceGrid;
 use lol_core::navigation::navigation::{NavigationDebug, NavigationStats, PluginNavigaton};
 use lol_core::resource::PluginResource;
 use lol_core::skill::{
-    CoolDown, Skill, SkillCooldownMode, SkillOf, SkillPoints, SkillRecastWindow, SkillSlot, Skills,
-    get_skill_value,
+    CoolDown, CoolDownState, Skill, SkillCooldownMode, SkillOf, SkillPoints, SkillRecastWindow,
+    SkillSlot, Skills, get_skill_value,
 };
 use lol_core::team::Team;
 use lol_render::animation::PluginAnimation;
@@ -275,13 +275,13 @@ impl RivenHarness {
                 }
                 commands.entity(riven).with_related::<SkillOf>((
                     skill,
-                    CoolDown {
+                    CoolDown { duration: 10.0 },
+                    CoolDownState {
                         timer: {
                             let mut t = Timer::from_seconds(10.0, TimerMode::Once);
                             t.set_elapsed(Duration::from_secs(10));
                             t
                         },
-                        duration: 10.0,
                     },
                 ));
             };
@@ -443,8 +443,8 @@ impl RivenHarness {
         let skill_entity = skills[index];
         self.app
             .world()
-            .get::<CoolDown>(skill_entity)
-            .expect("cooldown should exist")
+            .get::<CoolDownState>(skill_entity)
+            .expect("cooldown state should exist")
             .timer
             .is_finished()
     }
@@ -460,7 +460,7 @@ impl RivenHarness {
         self.app
             .world()
             .resource::<Assets<Spell>>()
-            .load_hash(skill.key_spell_object.id())
+            .load_hash(skill.spell.id())
     }
 
     fn print_skill_logs(&self) {

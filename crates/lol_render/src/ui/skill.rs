@@ -83,7 +83,7 @@ fn update_player_skill_icon(
         };
 
         // let spell = res_assets_spell_object
-        //     .load_hash(skill.key_spell_object)
+        //     .load_hash(skill.spell)
         //     .unwrap();
 
         // let icon_name = spell

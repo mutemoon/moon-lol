@@ -8,8 +8,8 @@ use lol_core::buffs::cc_debuffs::DebuffSlow;
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
 use lol_core::skill::{
-    CoolDown, EventSkillCast, Skill, SkillRecastWindow, SkillSlot, play_skill_animation,
-    reset_skill_attack, skill_damage, skill_dash, spawn_skill_particle,
+    CoolDown, CoolDownState, EventSkillCast, Skill, SkillRecastWindow, SkillSlot,
+    play_skill_animation, reset_skill_attack, skill_damage, skill_dash, spawn_skill_particle,
 };
 
 const CAMILLE_Q_RECAST_WINDOW: f32 = 3.0;
@@ -46,7 +46,7 @@ fn on_camille_skill_cast(
         return;
     };
 
-    let skill_spell = skill.key_spell_object.clone();
+    let skill_spell = skill.spell.clone();
 
     match skill.slot {
         SkillSlot::Q => cast_camille_q(
@@ -117,10 +117,14 @@ fn cast_camille_q(
             Some(hash_bin("Camille_Q2_Hit")),
         );
         commands.entity(skill_entity).remove::<SkillRecastWindow>();
-        commands.entity(skill_entity).insert(CoolDown {
-            timer: Timer::from_seconds(cooldown.duration, TimerMode::Once),
-            duration: cooldown.duration,
-        });
+        commands.entity(skill_entity).insert((
+            CoolDown {
+                duration: cooldown.duration,
+            },
+            CoolDownState {
+                timer: Timer::from_seconds(cooldown.duration, TimerMode::Once),
+            },
+        ));
     }
 }
 
@@ -188,10 +192,14 @@ fn cast_camille_e(
             },
         );
         commands.entity(skill_entity).remove::<SkillRecastWindow>();
-        commands.entity(skill_entity).insert(CoolDown {
-            timer: Timer::from_seconds(cooldown.duration, TimerMode::Once),
-            duration: cooldown.duration,
-        });
+        commands.entity(skill_entity).insert((
+            CoolDown {
+                duration: cooldown.duration,
+            },
+            CoolDownState {
+                timer: Timer::from_seconds(cooldown.duration, TimerMode::Once),
+            },
+        ));
     }
 }
 

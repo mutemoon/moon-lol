@@ -35,12 +35,14 @@ impl Plugin for PluginSkill {
     }
 }
 
-#[derive(Component, Debug)]
+#[derive(Component, Reflect, Debug)]
 #[relationship(relationship_target = Skills)]
+#[reflect(Component)]
 pub struct SkillOf(pub Entity);
 
-#[derive(Component, Debug)]
+#[derive(Component, Reflect, Debug)]
 #[relationship_target(relationship = SkillOf, linked_spawn)]
+#[reflect(Component)]
 pub struct Skills(Vec<Entity>);
 
 #[derive(Component, Debug)]
@@ -71,16 +73,34 @@ impl Skills {
         Skills(vec![entity])
     }
 
+    /// Create a Skills list from a vector of entities
+    pub fn from_vec(entities: Vec<Entity>) -> Self {
+        Skills(entities)
+    }
+
     /// Add a skill entity to this Skills list
     pub fn push(&mut self, entity: Entity) {
         self.0.push(entity);
     }
 }
 
-#[derive(Component, Default)]
+#[derive(Component, Reflect)]
+#[reflect(Component)]
 pub struct CoolDown {
-    pub timer: Timer,
     pub duration: f32,
+}
+
+impl Default for CoolDown {
+    fn default() -> Self {
+        Self { duration: 0.0 }
+    }
+}
+
+/// 技能冷却状态（运行时状态，包含 timer）
+#[derive(Component, Reflect, Default)]
+#[reflect(Component)]
+pub struct CoolDownState {
+    pub timer: Timer,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Reflect, Default)]
@@ -101,10 +121,11 @@ pub enum SkillCooldownMode {
     Manual,
 }
 
-#[derive(Component)]
+#[derive(Component, Reflect)]
 #[require(CoolDown)]
+#[reflect(Component)]
 pub struct Skill {
-    pub key_spell_object: Handle<Spell>,
+    pub spell: Handle<Spell>,
     pub level: usize,
     pub slot: SkillSlot,
     pub cooldown_mode: SkillCooldownMode,
@@ -113,7 +134,7 @@ pub struct Skill {
 impl Default for Skill {
     fn default() -> Self {
         Self {
-            key_spell_object: Handle::<Spell>::default(),
+            spell: Handle::<Spell>::default(),
             level: 0,
             slot: SkillSlot::Q,
             cooldown_mode: SkillCooldownMode::AfterCast,
@@ -122,9 +143,9 @@ impl Default for Skill {
 }
 
 impl Skill {
-    pub fn new(slot: SkillSlot, key_spell_object: Handle<Spell>) -> Self {
+    pub fn new(slot: SkillSlot, spell: Handle<Spell>) -> Self {
         Self {
-            key_spell_object,
+            spell: spell,
             level: 0,
             slot,
             cooldown_mode: SkillCooldownMode::AfterCast,
@@ -255,7 +276,7 @@ fn on_skill_cast(
     mut commands: Commands,
     skills: Query<&Skills>,
     res_assets_spell_object: Res<Assets<Spell>>,
-    mut q_skill: Query<(&Skill, &mut CoolDown)>,
+    mut q_skill: Query<(&Skill, &CoolDown, &mut CoolDownState)>,
     mut q_ability_resource: Query<&mut AbilityResource>,
     mut log: ResMut<SkillCastLog>,
 ) {
@@ -284,7 +305,7 @@ fn on_skill_cast(
         );
         return;
     };
-    let Ok((skill, mut cooldown)) = q_skill.get_mut(skill_entity) else {
+    let Ok((skill, cooldown, mut cooldown_state)) = q_skill.get_mut(skill_entity) else {
         push_skill_log(
             &mut log,
             entity,
@@ -297,12 +318,12 @@ fn on_skill_cast(
         return;
     };
 
-    if !cooldown.timer.is_finished() {
+    if !cooldown_state.timer.is_finished() {
         debug!(
             "{} 技能 {} 冷却中，剩余 {:.2}s",
             entity,
             trigger.index,
-            cooldown.timer.remaining_secs()
+            cooldown_state.timer.remaining_secs()
         );
         push_skill_log(
             &mut log,
@@ -316,7 +337,7 @@ fn on_skill_cast(
         return;
     }
 
-    let Some(spell_object) = res_assets_spell_object.get(&skill.key_spell_object) else {
+    let Some(spell_object) = res_assets_spell_object.get(&skill.spell) else {
         push_skill_log(
             &mut log,
             entity,
@@ -404,7 +425,7 @@ fn on_skill_cast(
     commands.trigger(cast_event);
 
     if skill.cooldown_mode == SkillCooldownMode::AfterCast {
-        cooldown.timer = Timer::from_seconds(cooldown.duration, TimerMode::Once);
+        cooldown_state.timer = Timer::from_seconds(cooldown.duration, TimerMode::Once);
         debug!(
             "{} 技能 {} 开始冷却 {}s",
             entity, trigger.index, cooldown.duration

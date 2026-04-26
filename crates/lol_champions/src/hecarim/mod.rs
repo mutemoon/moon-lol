@@ -57,15 +57,15 @@ fn on_hecarim_skill_cast(
     };
 
     match skill.slot {
-        SkillSlot::Q => cast_hecarim_q(&mut commands, entity, skill.key_spell_object.clone()),
-        SkillSlot::W => cast_hecarim_w(&mut commands, entity, skill.key_spell_object.clone()),
+        SkillSlot::Q => cast_hecarim_q(&mut commands, entity, skill.spell.clone()),
+        SkillSlot::W => cast_hecarim_w(&mut commands, entity, skill.spell.clone()),
         SkillSlot::E => cast_hecarim_e(&mut commands, &q_transform, entity, trigger.point),
         SkillSlot::R => cast_hecarim_r(
             &mut commands,
             &q_transform,
             entity,
             trigger.point,
-            skill.key_spell_object.clone(),
+            skill.spell.clone(),
         ),
         _ => {}
     }

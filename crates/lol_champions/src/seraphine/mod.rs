@@ -45,10 +45,10 @@ fn on_seraphine_skill_cast(
     };
 
     match skill.slot {
-        SkillSlot::Q => cast_seraphine_q(&mut commands, entity, skill.key_spell_object.clone()),
+        SkillSlot::Q => cast_seraphine_q(&mut commands, entity, skill.spell.clone()),
         SkillSlot::W => cast_seraphine_w(&mut commands, entity),
-        SkillSlot::E => cast_seraphine_e(&mut commands, entity, skill.key_spell_object.clone()),
-        SkillSlot::R => cast_seraphine_r(&mut commands, entity, skill.key_spell_object.clone()),
+        SkillSlot::E => cast_seraphine_e(&mut commands, entity, skill.spell.clone()),
+        SkillSlot::R => cast_seraphine_r(&mut commands, entity, skill.spell.clone()),
         _ => {}
     }
 }

@@ -45,10 +45,10 @@ fn on_rammus_skill_cast(
     };
 
     match skill.slot {
-        SkillSlot::Q => cast_rammus_q(&mut commands, entity, skill.key_spell_object.clone()),
+        SkillSlot::Q => cast_rammus_q(&mut commands, entity, skill.spell.clone()),
         SkillSlot::W => cast_rammus_w(&mut commands, entity),
-        SkillSlot::E => cast_rammus_e(&mut commands, entity, skill.key_spell_object.clone()),
-        SkillSlot::R => cast_rammus_r(&mut commands, entity, skill.key_spell_object.clone()),
+        SkillSlot::E => cast_rammus_e(&mut commands, entity, skill.spell.clone()),
+        SkillSlot::R => cast_rammus_r(&mut commands, entity, skill.spell.clone()),
         _ => {}
     }
 }

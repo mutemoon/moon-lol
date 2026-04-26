@@ -45,10 +45,10 @@ fn on_senna_skill_cast(
     };
 
     match skill.slot {
-        SkillSlot::Q => cast_senna_q(&mut commands, entity, skill.key_spell_object.clone()),
-        SkillSlot::W => cast_senna_w(&mut commands, entity, skill.key_spell_object.clone()),
+        SkillSlot::Q => cast_senna_q(&mut commands, entity, skill.spell.clone()),
+        SkillSlot::W => cast_senna_w(&mut commands, entity, skill.spell.clone()),
         SkillSlot::E => cast_senna_e(&mut commands, entity),
-        SkillSlot::R => cast_senna_r(&mut commands, entity, skill.key_spell_object.clone()),
+        SkillSlot::R => cast_senna_r(&mut commands, entity, skill.spell.clone()),
         _ => {}
     }
 }

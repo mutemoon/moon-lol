@@ -11,8 +11,8 @@ use lol_core::buffs::shield_white::BuffShieldWhite;
 use lol_core::damage::DamageType;
 use lol_core::entities::champion::Champion;
 use lol_core::skill::{
-    CoolDown, EventSkillCast, Skill, SkillRecastWindow, SkillSlot, play_skill_animation,
-    skill_damage, skill_dash, spawn_skill_particle,
+    CoolDown, CoolDownState, EventSkillCast, Skill, SkillRecastWindow, SkillSlot,
+    play_skill_animation, skill_damage, skill_dash, spawn_skill_particle,
 };
 
 use crate::riven::passive::BuffRivenPassive;
@@ -59,15 +59,15 @@ fn on_riven_skill_cast(
             trigger.point,
             cooldown,
             recast,
-            skill.key_spell_object.clone(),
+            skill.spell.clone(),
         ),
-        SkillSlot::W => cast_riven_w(&mut commands, entity, skill.key_spell_object.clone()),
+        SkillSlot::W => cast_riven_w(&mut commands, entity, skill.spell.clone()),
         SkillSlot::E => cast_riven_e(
             &mut commands,
             &q_transform,
             entity,
             trigger.point,
-            skill.key_spell_object.clone(),
+            skill.spell.clone(),
         ),
         SkillSlot::R => cast_riven_r(&mut commands, entity),
         _ => {}
@@ -119,10 +119,14 @@ fn cast_riven_q(
 
     if stage >= 3 {
         commands.entity(skill_entity).remove::<SkillRecastWindow>();
-        commands.entity(skill_entity).insert(CoolDown {
-            timer: Timer::from_seconds(cooldown.duration, TimerMode::Once),
-            duration: cooldown.duration,
-        });
+        commands.entity(skill_entity).insert((
+            CoolDown {
+                duration: cooldown.duration,
+            },
+            CoolDownState {
+                timer: Timer::from_seconds(cooldown.duration, TimerMode::Once),
+            },
+        ));
     } else {
         commands.entity(skill_entity).insert(SkillRecastWindow::new(
             stage + 1,

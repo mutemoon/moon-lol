@@ -53,16 +53,16 @@ fn on_gnar_skill_cast(
     };
 
     match skill.slot {
-        SkillSlot::Q => cast_gnar_q(&mut commands, entity, skill.key_spell_object.clone()),
-        SkillSlot::W => cast_gnar_w(&mut commands, entity, skill.key_spell_object.clone()),
+        SkillSlot::Q => cast_gnar_q(&mut commands, entity, skill.spell.clone()),
+        SkillSlot::W => cast_gnar_w(&mut commands, entity, skill.spell.clone()),
         SkillSlot::E => cast_gnar_e(
             &mut commands,
             &q_transform,
             entity,
             trigger.point,
-            skill.key_spell_object.clone(),
+            skill.spell.clone(),
         ),
-        SkillSlot::R => cast_gnar_r(&mut commands, entity, skill.key_spell_object.clone()),
+        SkillSlot::R => cast_gnar_r(&mut commands, entity, skill.spell.clone()),
         _ => {}
     }
 }

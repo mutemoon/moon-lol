@@ -11,8 +11,8 @@ use lol_core::buffs::common_buffs::BuffSelfHeal;
 use lol_core::damage::DamageType;
 use lol_core::entities::champion::Champion;
 use lol_core::skill::{
-    CoolDown, EventSkillCast, Skill, SkillRecastWindow, SkillSlot, play_skill_animation,
-    reset_skill_attack, skill_damage, skill_dash, spawn_skill_particle,
+    CoolDown, CoolDownState, EventSkillCast, Skill, SkillRecastWindow, SkillSlot,
+    play_skill_animation, reset_skill_attack, skill_damage, skill_dash, spawn_skill_particle,
 };
 
 use crate::renekton::buffs::BuffRenektonR;
@@ -55,9 +55,9 @@ fn on_renekton_skill_cast(
             &mut commands,
             entity,
             &mut q_ability_resource,
-            skill.key_spell_object.clone(),
+            skill.spell.clone(),
         ),
-        SkillSlot::W => cast_renekton_w(&mut commands, entity, skill.key_spell_object.clone()),
+        SkillSlot::W => cast_renekton_w(&mut commands, entity, skill.spell.clone()),
         SkillSlot::E => cast_renekton_e(
             &mut commands,
             &q_transform,
@@ -66,9 +66,9 @@ fn on_renekton_skill_cast(
             trigger.point,
             cooldown,
             recast,
-            skill.key_spell_object.clone(),
+            skill.spell.clone(),
         ),
-        SkillSlot::R => cast_renekton_r(&mut commands, entity, skill.key_spell_object.clone()),
+        SkillSlot::R => cast_renekton_r(&mut commands, entity, skill.spell.clone()),
         _ => {}
     }
 }
@@ -210,10 +210,14 @@ fn cast_renekton_e(
             },
         );
         commands.entity(skill_entity).remove::<SkillRecastWindow>();
-        commands.entity(skill_entity).insert(CoolDown {
-            timer: Timer::from_seconds(cooldown.duration, TimerMode::Once),
-            duration: cooldown.duration,
-        });
+        commands.entity(skill_entity).insert((
+            CoolDown {
+                duration: cooldown.duration,
+            },
+            CoolDownState {
+                timer: Timer::from_seconds(cooldown.duration, TimerMode::Once),
+            },
+        ));
     }
 }
 

@@ -112,14 +112,14 @@ observer 可以直接：
 
 `Skill` 现在只表达代码驱动技能所需的最小元数据：
 
-- `key_spell_object`
+- `spell`
 - `level`
 - `slot`
 - `cooldown_mode`
 
 字段语义：
 
-- `key_spell_object`：数值来源
+- `spell`：数值来源
 - `level`：技能等级
 - `slot`：`Q/W/E/R/Passive/Custom`
 - `cooldown_mode`：默认施法后冷却，或手动冷却

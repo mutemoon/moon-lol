@@ -6,6 +6,10 @@ node_modules
 assets/*
 !assets/games
 !assets/shaders
+!assets/characters
+assets/characters/*/animations
+
+*.glb
 
 .vs
 

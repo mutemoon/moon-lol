@@ -12,8 +12,8 @@ use lol_core::buffs::shield_white::BuffShieldWhite;
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
 use lol_core::skill::{
-    CoolDown, EventSkillCast, Skill, SkillRecastWindow, SkillSlot, play_skill_animation,
-    reset_skill_attack, skill_damage, skill_dash, spawn_skill_particle,
+    CoolDown, CoolDownState, EventSkillCast, Skill, SkillRecastWindow, SkillSlot,
+    play_skill_animation, reset_skill_attack, skill_damage, skill_dash, spawn_skill_particle,
 };
 
 use crate::volibear::buffs::{BuffVolibearQ, DebuffVolibearWMark};
@@ -51,7 +51,7 @@ fn on_volibear_skill_cast(
         return;
     };
 
-    let skill_spell = skill.key_spell_object.clone();
+    let skill_spell = skill.spell.clone();
 
     match skill.slot {
         SkillSlot::Q => cast_volibear_q(&mut commands, entity),
@@ -129,10 +129,14 @@ fn cast_volibear_w(
             .entity(entity)
             .with_related::<BuffOf>(BuffSelfHeal::new(50.0));
         commands.entity(skill_entity).remove::<SkillRecastWindow>();
-        commands.entity(skill_entity).insert(CoolDown {
-            timer: Timer::from_seconds(cooldown.duration, TimerMode::Once),
-            duration: cooldown.duration,
-        });
+        commands.entity(skill_entity).insert((
+            CoolDown {
+                duration: cooldown.duration,
+            },
+            CoolDownState {
+                timer: Timer::from_seconds(cooldown.duration, TimerMode::Once),
+            },
+        ));
     }
 }
 

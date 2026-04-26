@@ -58,13 +58,8 @@ fn on_garen_skill_cast(
     match skill.slot {
         SkillSlot::Q => cast_garen_q(&mut commands, entity),
         SkillSlot::W => cast_garen_w(&mut commands, entity),
-        SkillSlot::E => cast_garen_e(&mut commands, entity, skill.key_spell_object.clone()),
-        SkillSlot::R => cast_garen_r(
-            &mut commands,
-            entity,
-            trigger.point,
-            skill.key_spell_object.clone(),
-        ),
+        SkillSlot::E => cast_garen_e(&mut commands, entity, skill.spell.clone()),
+        SkillSlot::R => cast_garen_r(&mut commands, entity, trigger.point, skill.spell.clone()),
         _ => {}
     }
 }

@@ -45,10 +45,10 @@ fn on_sejuani_skill_cast(
     };
 
     match skill.slot {
-        SkillSlot::Q => cast_sejuani_q(&mut commands, entity, skill.key_spell_object.clone()),
-        SkillSlot::W => cast_sejuani_w(&mut commands, entity, skill.key_spell_object.clone()),
-        SkillSlot::E => cast_sejuani_e(&mut commands, entity, skill.key_spell_object.clone()),
-        SkillSlot::R => cast_sejuani_r(&mut commands, entity, skill.key_spell_object.clone()),
+        SkillSlot::Q => cast_sejuani_q(&mut commands, entity, skill.spell.clone()),
+        SkillSlot::W => cast_sejuani_w(&mut commands, entity, skill.spell.clone()),
+        SkillSlot::E => cast_sejuani_e(&mut commands, entity, skill.spell.clone()),
+        SkillSlot::R => cast_sejuani_r(&mut commands, entity, skill.spell.clone()),
         _ => {}
     }
 }

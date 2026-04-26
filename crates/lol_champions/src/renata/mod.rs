@@ -45,10 +45,10 @@ fn on_renata_skill_cast(
     };
 
     match skill.slot {
-        SkillSlot::Q => cast_renata_q(&mut commands, entity, skill.key_spell_object.clone()),
+        SkillSlot::Q => cast_renata_q(&mut commands, entity, skill.spell.clone()),
         SkillSlot::W => cast_renata_w(&mut commands, entity),
-        SkillSlot::E => cast_renata_e(&mut commands, entity, skill.key_spell_object.clone()),
-        SkillSlot::R => cast_renata_r(&mut commands, entity, skill.key_spell_object.clone()),
+        SkillSlot::E => cast_renata_e(&mut commands, entity, skill.spell.clone()),
+        SkillSlot::R => cast_renata_r(&mut commands, entity, skill.spell.clone()),
         _ => {}
     }
 }

@@ -1,4 +1,5 @@
 pub mod buffs;
+pub mod q;
 
 use bevy::prelude::*;
 use league_utils::hash_bin;
@@ -14,6 +15,7 @@ use lol_core::skill::{
 };
 
 use crate::darius::buffs::BuffDariusBleed;
+use crate::darius::q::cast_darius_q as execute_darius_q;
 
 #[derive(Default)]
 pub struct PluginDarius;
@@ -45,7 +47,7 @@ fn on_darius_skill_cast(
         return;
     };
 
-    let skill_spell = skill.key_spell_object.clone();
+    let skill_spell = skill.spell.clone();
 
     match skill.slot {
         SkillSlot::Q => cast_darius_q(&mut commands, entity, skill_spell),
@@ -57,20 +59,19 @@ fn on_darius_skill_cast(
 }
 
 fn cast_darius_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell1"));
-    spawn_skill_particle(commands, entity, hash_bin("Darius_Q_Cast"));
-    // Q is a cleave with inner and outer damage (using circle as approximation)
-    skill_damage(
+    // Q damage values at max level (level 5):
+    // Outer blade: 150 + 0.9 AD
+    // Inner blade: 75 + 0.45 AD (half of outer)
+    let outer_damage = 150.0;
+    let inner_damage = 75.0;
+
+    execute_darius_q(
         commands,
         entity,
         skill_spell,
-        DamageShape::Circle { radius: 350.0 },
-        vec![TargetDamage {
-            filter: TargetFilter::All,
-            amount: hash_bin("TotalDamage"),
-            damage_type: DamageType::Physical,
-        }],
-        Some(hash_bin("Darius_Q_Hit")),
+        inner_damage,
+        outer_damage,
+        true,
     );
 }
 

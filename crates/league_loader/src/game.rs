@@ -131,6 +131,8 @@ pub trait Data {
     ) -> Option<T>;
 
     fn get_by_class<T: TypePath + DeserializeOwned>(&self) -> Option<T>;
+
+    fn get_all_by_class<T: TypePath + DeserializeOwned>(&self) -> Vec<T>;
 }
 
 impl Data for PropGroup {
@@ -147,6 +149,14 @@ impl Data for PropGroup {
     /// 通过 class hash 获取数据
     fn get_by_class<T: TypePath + DeserializeOwned>(&self) -> Option<T> {
         self.prop_file.iter().find_map(|v| v.get_by_class::<T>())
+    }
+
+    /// 获取所有某类型的数据
+    fn get_all_by_class<T: TypePath + DeserializeOwned>(&self) -> Vec<T> {
+        self.prop_file
+            .iter()
+            .flat_map(|v| v.get_all_by_class::<T>())
+            .collect()
     }
 }
 
@@ -168,5 +178,14 @@ impl Data for PropFile {
             }
         }
         None
+    }
+
+    fn get_all_by_class<T: TypePath + DeserializeOwned>(&self) -> Vec<T> {
+        let type_name = T::short_type_path();
+        let class_hash = type_name_to_hash(type_name);
+        self.iter_class_hash_and_entry()
+            .filter(|(bin_class_hash, _)| *bin_class_hash == class_hash)
+            .filter_map(|(_, entry)| from_entry::<T>(entry).ok())
+            .collect()
     }
 }

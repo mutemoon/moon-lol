@@ -51,7 +51,7 @@ fn on_fizz_skill_cast(
             &q_transform,
             entity,
             trigger.point,
-            skill.key_spell_object.clone(),
+            skill.spell.clone(),
         ),
         SkillSlot::W => cast_fizz_w(&mut commands, entity),
         SkillSlot::E => cast_fizz_e(
@@ -59,9 +59,9 @@ fn on_fizz_skill_cast(
             &q_transform,
             entity,
             trigger.point,
-            skill.key_spell_object.clone(),
+            skill.spell.clone(),
         ),
-        SkillSlot::R => cast_fizz_r(&mut commands, entity, skill.key_spell_object.clone()),
+        SkillSlot::R => cast_fizz_r(&mut commands, entity, skill.spell.clone()),
         _ => {}
     }
 }

@@ -45,7 +45,7 @@ fn on_caitlyn_skill_cast(
         return;
     };
 
-    let skill_spell = skill.key_spell_object.clone();
+    let skill_spell = skill.spell.clone();
 
     match skill.slot {
         SkillSlot::Q => cast_caitlyn_q(&mut commands, entity, skill_spell),

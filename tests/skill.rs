@@ -15,9 +15,9 @@ use lol_core::damage::{DamageType, PluginDamage};
 use lol_core::life::{Health, PluginLife};
 use lol_core::movement::PluginMovement;
 use lol_core::skill::{
-    CommandSkillLevelUp, CommandSkillStart, CoolDown, EventSkillCast, PluginSkill, Skill,
-    SkillCastFailureReason, SkillCastLog, SkillCastResult, SkillCooldownMode, SkillOf, SkillPoints,
-    SkillRecastWindow, SkillSlot, Skills, skill_damage,
+    CommandSkillLevelUp, CommandSkillStart, CoolDown, CoolDownState, EventSkillCast, PluginSkill,
+    Skill, SkillCastFailureReason, SkillCastLog, SkillCastResult, SkillCooldownMode, SkillOf,
+    SkillPoints, SkillRecastWindow, SkillSlot, Skills, skill_damage,
 };
 use lol_core::team::Team;
 
@@ -70,10 +70,14 @@ fn on_test_observer_skill_cast(
         commands
             .entity(trigger.skill_entity)
             .remove::<SkillRecastWindow>();
-        commands.entity(trigger.skill_entity).insert(CoolDown {
-            timer: Timer::from_seconds(cooldown.duration, TimerMode::Once),
-            duration: cooldown.duration,
-        });
+        commands.entity(trigger.skill_entity).insert((
+            CoolDown {
+                duration: cooldown.duration,
+            },
+            CoolDownState {
+                timer: Timer::from_seconds(cooldown.duration, TimerMode::Once),
+            },
+        ));
     } else {
         commands
             .entity(trigger.skill_entity)
@@ -202,9 +206,9 @@ impl SkillHarness {
                 SkillOf(self.caster),
                 skill,
                 CoolDown {
-                    timer,
                     duration: cooldown_duration,
                 },
+                CoolDownState { timer },
                 extra,
             ))
             .id();
@@ -337,12 +341,12 @@ fn observer_skill_cast_spends_mana_starts_cooldown_and_applies_damage() {
     assert!((harness.mana() - 70.0).abs() < EPSILON);
     assert!((harness.health(harness.enemy) - 960.0).abs() < EPSILON);
 
-    let cooldown = harness
+    let cooldown_state = harness
         .app
         .world()
-        .get::<CoolDown>(harness.skill_entity(0))
+        .get::<CoolDownState>(harness.skill_entity(0))
         .unwrap();
-    assert!(!cooldown.timer.is_finished());
+    assert!(!cooldown_state.timer.is_finished());
 
     let log = harness.app.world().resource::<SkillCastLog>();
     assert!(matches!(
@@ -383,7 +387,7 @@ fn observer_skill_can_drive_recast_state_and_manual_cooldown() {
         !harness
             .app
             .world()
-            .get::<CoolDown>(skill_entity)
+            .get::<CoolDownState>(skill_entity)
             .unwrap()
             .timer
             .is_finished()
@@ -442,7 +446,7 @@ fn insufficient_mana_is_recorded_without_starting_cooldown() {
         harness
             .app
             .world()
-            .get::<CoolDown>(harness.skill_entity(0))
+            .get::<CoolDownState>(harness.skill_entity(0))
             .unwrap()
             .timer
             .is_finished()

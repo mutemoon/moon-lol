@@ -46,7 +46,7 @@ fn on_ezreal_skill_cast(
         return;
     };
 
-    let skill_spell = skill.key_spell_object.clone();
+    let skill_spell = skill.spell.clone();
 
     match skill.slot {
         SkillSlot::Q => cast_ezreal_q(&mut commands, entity, skill_spell),

@@ -45,9 +45,9 @@ fn on_ryze_skill_cast(
     };
 
     match skill.slot {
-        SkillSlot::Q => cast_ryze_q(&mut commands, entity, skill.key_spell_object.clone()),
-        SkillSlot::W => cast_ryze_w(&mut commands, entity, skill.key_spell_object.clone()),
-        SkillSlot::E => cast_ryze_e(&mut commands, entity, skill.key_spell_object.clone()),
+        SkillSlot::Q => cast_ryze_q(&mut commands, entity, skill.spell.clone()),
+        SkillSlot::W => cast_ryze_w(&mut commands, entity, skill.spell.clone()),
+        SkillSlot::E => cast_ryze_e(&mut commands, entity, skill.spell.clone()),
         SkillSlot::R => cast_ryze_r(&mut commands, entity),
         _ => {}
     }

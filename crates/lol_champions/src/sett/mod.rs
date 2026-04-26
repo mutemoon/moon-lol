@@ -50,14 +50,14 @@ fn on_sett_skill_cast(
 
     match skill.slot {
         SkillSlot::Q => cast_sett_q(&mut commands, entity),
-        SkillSlot::W => cast_sett_w(&mut commands, entity, skill.key_spell_object.clone()),
-        SkillSlot::E => cast_sett_e(&mut commands, entity, skill.key_spell_object.clone()),
+        SkillSlot::W => cast_sett_w(&mut commands, entity, skill.spell.clone()),
+        SkillSlot::E => cast_sett_e(&mut commands, entity, skill.spell.clone()),
         SkillSlot::R => cast_sett_r(
             &mut commands,
             &q_transform,
             entity,
             trigger.point,
-            skill.key_spell_object.clone(),
+            skill.spell.clone(),
         ),
         _ => {}
     }

@@ -45,10 +45,10 @@ fn on_samira_skill_cast(
     };
 
     match skill.slot {
-        SkillSlot::Q => cast_samira_q(&mut commands, entity, skill.key_spell_object.clone()),
-        SkillSlot::W => cast_samira_w(&mut commands, entity, skill.key_spell_object.clone()),
+        SkillSlot::Q => cast_samira_q(&mut commands, entity, skill.spell.clone()),
+        SkillSlot::W => cast_samira_w(&mut commands, entity, skill.spell.clone()),
         SkillSlot::E => cast_samira_e(&mut commands, entity),
-        SkillSlot::R => cast_samira_r(&mut commands, entity, skill.key_spell_object.clone()),
+        SkillSlot::R => cast_samira_r(&mut commands, entity, skill.spell.clone()),
         _ => {}
     }
 }
