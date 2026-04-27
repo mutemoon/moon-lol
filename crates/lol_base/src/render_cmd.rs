@@ -13,12 +13,6 @@ pub struct CommandSkinParticleDespawn {
 }
 
 #[derive(EntityEvent)]
-pub struct CommandSkinSpawn {
-    pub entity: Entity,
-    pub key: String,
-}
-
-#[derive(EntityEvent)]
 pub struct CommandAnimationPlay {
     pub entity: Entity,
     pub hash: u32,

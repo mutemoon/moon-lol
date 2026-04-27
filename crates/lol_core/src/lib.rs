@@ -21,8 +21,6 @@ pub mod map;
 pub mod missile;
 pub mod movement;
 pub mod navigation;
-pub mod render_cmd;
-pub mod resource;
 pub mod rotate;
 pub mod run;
 pub mod skill;

@@ -5,10 +5,10 @@ use league_utils::hash_bin;
 use lol_base::animation::{
     AnimationHandler, AnimationState, ConfigAnimation, ConfigParametricUpdater,
 };
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_core::attack::Attack;
 use lol_core::base::state::State;
 use lol_core::movement::Movement;
-use lol_core::render_cmd::CommandAnimationPlay;
 
 use crate::loaders::animation::LoaderConfigAnimation;
 

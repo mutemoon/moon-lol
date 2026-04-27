@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use lol_base::character::Skin;
-use lol_core::render_cmd::{CommandSkinParticleDespawn, CommandSkinParticleSpawn};
+use lol_base::render_cmd::{CommandSkinParticleDespawn, CommandSkinParticleSpawn};
 
 // fn resolve_skin_resource_record<'a>(
 //     entity: Entity,

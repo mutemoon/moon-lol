@@ -12,11 +12,11 @@ mod tests {
     use lol_core::damage::PluginDamage;
     use lol_core::entities::barrack::PluginBarrack;
     use lol_core::entities::minion::PluginMinion;
+    use lol_core::game::PluginGame;
     use lol_core::life::PluginLife;
     use lol_core::map::MinionPath;
     use lol_core::movement::PluginMovement;
     use lol_core::navigation::navigation::PluginNavigaton;
-    use lol_core::resource::PluginResource;
 
     #[test]
     fn test_complete_attack_cycle() {
@@ -40,8 +40,8 @@ mod tests {
 
         app.add_plugins(PluginAttackAuto);
         app.add_plugins(PluginBarrack);
-        app.add_plugins(PluginResource {
-            game_config_path: "games/null.ron".to_owned(),
+        app.add_plugins(PluginGame {
+            scenes: vec!["games/null.ron".to_owned()],
         });
 
         app.insert_resource(TimeUpdateStrategy::ManualDuration(Duration::from_millis(

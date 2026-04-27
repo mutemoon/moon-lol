@@ -26,7 +26,6 @@ use lol_core::map::PluginMap;
 use lol_core::missile::PluginMissile;
 use lol_core::movement::PluginMovement;
 use lol_core::navigation::navigation::PluginNavigaton;
-use lol_core::resource::PluginResource;
 use lol_core::rotate::PluginRotate;
 use lol_core::run::PluginRun;
 use lol_core::skill::PluginSkill;
@@ -62,7 +61,6 @@ plugin_group! {
         :PluginMissile,
         :PluginMovement,
         :PluginNavigaton,
-        :PluginResource,
         :PluginRotate,
         :PluginRun,
         :PluginSkill,

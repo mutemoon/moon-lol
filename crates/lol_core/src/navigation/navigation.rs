@@ -17,6 +17,7 @@ pub struct PluginNavigaton;
 
 impl Plugin for PluginNavigaton {
     fn build(&self, app: &mut App) {
+        app.init_asset::<ConfigNavigationGrid>();
         app.init_asset_loader::<NavGridLoader>();
 
         app.init_resource::<NavigationStats>();

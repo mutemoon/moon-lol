@@ -31,3 +31,11 @@ spawn(AnimationHandler(asset_server.load("characters/ahri/animation.ron")));
 
 // 导入时：只需确保 Asset 路径正确，Bevy 自动处理
 ```
+
+## cargo check 检查
+
+检查必须包括 examples 和 tests
+
+```sh
+cargo check --examples --tests
+```

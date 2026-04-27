@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use lol_core::resource::PluginResource;
+use lol_core::game::PluginGame;
 use moon_lol::PluginCore;
 
 fn main() {
@@ -14,8 +14,8 @@ fn main() {
                 }),
                 ..default()
             }),
-            PluginCore.build().set(PluginResource {
-                game_config_path: "games/attack.ron".to_owned(),
+            PluginCore.build().set(PluginGame {
+                scenes: vec!["games/attack.ron".to_owned()],
             }),
             // .disable::<PluginBarrack>(),
         ))

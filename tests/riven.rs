@@ -29,11 +29,11 @@ use lol_core::entities::champion::Champion;
 use lol_core::entities::minion::PluginMinion;
 use lol_core::entities::shpere::PluginDebugSphere;
 use lol_core::entities::turret::PluginTurret;
+use lol_core::game::PluginGame;
 use lol_core::life::Health;
 use lol_core::movement::{Movement, MovementState};
 use lol_core::navigation::grid::ResourceGrid;
 use lol_core::navigation::navigation::{NavigationDebug, NavigationStats, PluginNavigaton};
-use lol_core::resource::PluginResource;
 use lol_core::skill::{
     CoolDown, CoolDownState, Skill, SkillCooldownMode, SkillOf, SkillPoints, SkillRecastWindow,
     SkillSlot, Skills, get_skill_value,
@@ -102,8 +102,8 @@ impl RivenHarness {
             16,
         )));
 
-        let mut plugin_group = PluginCore.build().set(PluginResource {
-            game_config_path: "games/riven_render.ron".to_string(),
+        let mut plugin_group = PluginCore.build().set(PluginGame {
+            scenes: vec!["games/riven_render.ron".to_string()],
         });
 
         plugin_group = plugin_group

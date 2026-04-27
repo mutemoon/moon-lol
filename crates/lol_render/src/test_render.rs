@@ -28,7 +28,6 @@ use lol_base::shader::{ResourceShaderChunk, ResourceShaderPackage};
 use lol_core::action::{Action, CommandAction};
 use lol_core::game::FixedFrameCount;
 use lol_core::navigation::grid::ResourceGrid;
-use lol_core::resource::loading::PluginResourceLoading;
 use lol_core::rotate::PluginRotate;
 use lol_core::skill::{SkillPoints, Skills};
 
@@ -177,7 +176,6 @@ plugin_group! {
         :PluginAnimation,
         :PluginCamera,
         :PluginParticle,
-        :PluginResourceLoading,
         :PluginRotate,
         :PluginSkin,
         :PluginSkillTestRender,

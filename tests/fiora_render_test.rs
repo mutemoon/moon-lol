@@ -11,8 +11,8 @@ use lol_core::action::Action;
 use lol_core::entities::barrack::PluginBarrack;
 use lol_core::entities::minion::PluginMinion;
 use lol_core::entities::turret::PluginTurret;
+use lol_core::game::PluginGame;
 use lol_core::map::PluginMap;
-use lol_core::resource::PluginResource;
 use lol_render::test_render::{
     PluginSkillTestRender, SkillTestRenderConfig, SkillTestScript, SkillTestScriptStep,
     SkillTestVideoFormat, SkillTestVideoOutput, attach_skill_test_actor,
@@ -118,8 +118,8 @@ fn run_fiora_case_inner(test_name: &str, max_frames: u32, mut steps: Vec<SkillTe
     app.add_plugins(
         PluginCore
             .build()
-            .set(PluginResource {
-                game_config_path: "games/fiora_render.ron".to_owned(),
+            .set(PluginGame {
+                scenes: vec!["games/fiora_render.ron".to_owned()],
             })
             .disable::<PluginBarrack>()
             .disable::<PluginMap>()

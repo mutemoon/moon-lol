@@ -3,9 +3,9 @@ use bevy::render::render_resource::Face;
 // use bevy_egui::{egui, EguiContexts, EguiPlugin, EguiPrimaryContextPass};
 use lol_base::grid::{ConfigNavigationGrid, GridFlagsVisionPathing};
 use lol_core::entities::barrack::PluginBarrack;
+use lol_core::game::PluginGame;
 use lol_core::navigation::grid::ResourceGrid;
 use lol_core::navigation::navigation::NavigationDebug;
-use lol_core::resource::PluginResource;
 use lol_render::camera::CameraState;
 use lol_render::map::{Map, on_click_map};
 use moon_lol::PluginCore;
@@ -26,8 +26,8 @@ fn main() {
             PluginCore
                 .build()
                 .disable::<PluginBarrack>()
-                .set(PluginResource {
-                    game_config_path: "games/attack.ron".to_string(),
+                .set(PluginGame {
+                    scenes: vec!["games/attack.ron".to_string()],
                 }),
         ))
         .init_resource::<FlagFilters>()
