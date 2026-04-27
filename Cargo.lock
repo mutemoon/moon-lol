@@ -504,6 +504,8 @@ checksum = "72b3254f16251a8381aa12e40e3c4d2f0199f8c6508fbecb9d91f575e0fbb8c6"
 [[package]]
 name = "basisu_c_sys"
 version = "0.6.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a03497e27e225c38b0a8b084106a1ff8ce81ed7a8402ca7680f6d95a290b275a"
 dependencies = [
  "async-lock",
  "bindgen",

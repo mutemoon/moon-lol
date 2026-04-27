@@ -23,7 +23,7 @@ lol_champions = { path = "crates/lol_champions" }
 gltf = "1.4.1"
 bevy_gltf_draco = { path = "../bevy_gltf_draco" }
 serde_json = "1.0"
-bevy = { path = "../bevy-ktx2", features = [
+bevy = { git = "https://github.com/mutemoon/bevy", branch = "bevy_basisu", features = [
     "webp",
     "basis_universal",
     "free_camera",
