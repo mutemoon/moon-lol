@@ -19,9 +19,9 @@ lol_base = { path = "crates/lol_base" }
 lol_core = { path = "crates/lol_core" }
 lol_render = { path = "crates/lol_render" }
 lol_champions = { path = "crates/lol_champions" }
+bevy_gltf_draco = { path = "crates/bevy_gltf_draco" }
 
 gltf = "1.4.1"
-bevy_gltf_draco = { path = "../bevy_gltf_draco" }
 serde_json = "1.0"
 bevy = { git = "https://github.com/mutemoon/bevy", branch = "bevy_basisu", features = [
     "webp",

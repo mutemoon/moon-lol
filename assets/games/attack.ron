@@ -13,10 +13,10 @@
                 "lol_render::camera::Focus": (),
                 "lol_render::controller::Controller": (),
                 "lol_base::character::ConfigCharacterRecord": (
-                    character_record: Path("characters/Riven/config.ron"),
+                    character_record: Path("characters/riven/config.ron"),
                 ),
                 "lol_base::character::ConfigSkin": (
-                    skin: Path("Characters/Riven/Skin.ron"),
+                    skin: Path("characters/riven/skin.ron"),
                 ),
             },
         ),
@@ -33,7 +33,7 @@
                     max: 6000.0,
                 ),
                 "lol_base::character::ConfigSkin": (
-                    skin: Path("Characters/Fiora/Skin.ron"),
+                    skin: Path("characters/fiora/skin.ron"),
                 ),
             },
         ),
