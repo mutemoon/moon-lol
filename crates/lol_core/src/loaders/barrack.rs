@@ -2,7 +2,7 @@ use bevy::asset::{AssetLoader, LoadContext};
 use bevy::reflect::TypePath;
 use lol_base::barrack::ConfigBarracks;
 
-use super::error::Error;
+use crate::error::Error;
 
 #[derive(Default, TypePath)]
 pub struct ConfigBarracksLoader;

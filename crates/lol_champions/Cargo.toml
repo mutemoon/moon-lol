@@ -12,4 +12,3 @@ league_file.workspace = true
 lol_base.workspace = true
 lol_core.workspace = true
 rand.workspace = true
-lol_loader.workspace = true

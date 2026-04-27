@@ -14,6 +14,7 @@ use crate::action::dash::{ActionDash, DashDamageComponent, DashMoveType};
 use crate::attack::CommandAttackReset;
 use crate::base::ability_resource::AbilityResource;
 use crate::base::level::{EventLevelUp, Level};
+use crate::loaders::spell::LoaderSpell;
 use crate::movement::{CommandMovement, MovementAction, MovementWay};
 use crate::render_cmd::{
     CommandAnimationPlay, CommandSkinParticleDespawn, CommandSkinParticleSpawn,
@@ -25,6 +26,7 @@ pub struct PluginSkill;
 impl Plugin for PluginSkill {
     fn build(&self, app: &mut App) {
         app.init_asset::<Spell>();
+        app.init_asset_loader::<LoaderSpell>();
 
         app.init_resource::<SkillCastLog>();
 

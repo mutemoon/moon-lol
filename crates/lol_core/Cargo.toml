@@ -10,5 +10,6 @@ league_utils.workspace = true
 league_file.workspace = true
 lol_base.workspace = true
 rand.workspace = true
-lol_loader.workspace = true
 ron.workspace = true
+thiserror.workspace = true
+bincode.workspace = true

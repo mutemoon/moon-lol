@@ -6,10 +6,10 @@ use lol_base::barrack::{
     ConfigBarracks, ConstantWaveBehavior, EnumWaveBehavior, InhibitorWaveBehavior,
     RotatingWaveBehavior, TimedVariableWaveBehavior,
 };
-use lol_loader::barrack::ConfigBarracksLoader;
 
 use crate::entities::minion::Minion;
 use crate::lane::Lane;
+use crate::loaders::barrack::ConfigBarracksLoader;
 use crate::team::Team;
 
 #[derive(Default)]

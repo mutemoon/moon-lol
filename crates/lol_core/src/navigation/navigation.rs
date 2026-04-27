@@ -5,10 +5,10 @@ use bevy::color::palettes;
 use bevy::prelude::*;
 use bevy::render::render_resource::Face;
 use lol_base::grid::{CELL_COST_IMPASSABLE, ConfigNavigationGrid};
-use lol_loader::navgrid::NavGridLoader;
 
 use crate::base::bounding::Bounding;
 use crate::character::Character;
+use crate::loaders::navgrid::NavGridLoader;
 use crate::navigation::astar::find_grid_path_with_result;
 use crate::navigation::grid::ResourceGrid;
 

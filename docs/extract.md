@@ -33,6 +33,7 @@ league_to_lol::extract
 ├── utils.rs            # 文件写入工具
 ├── champion.rs         # Champion 提取逻辑
 ├── skin.rs            # 皮肤提取逻辑
+├── spell.rs           # 技能提取逻辑
 └── map.rs             # 地图提取逻辑和阶段函数
 ```
 
@@ -49,15 +50,28 @@ league_to_lol::extract
 `extract_phase_2_champions(loader: &LeagueLoader)`
 
 并行提取所有英雄角色数据：
+
 - 遍历 `Champions/*.wad.client` 文件
 - 使用 rayon 并行处理
-- 每个英雄导出 `config.ron`、`skin.glb`、`skin.ron`
+- 每个英雄导出 `config.ron`、`skin.glb`、`skin.ron`、`spells/*.ron`
+
+#### 技能数据提取
+
+从 `CharacterRecord.spells` 获取技能哈希列表，通过 `prop_group.get_data::<SpellObject>(hash)` 解析每个技能，转换为 `DataSpell` 后导出到 `spells/{object_name}.ron`。
+
+角色实体通过 `Skills(Vec<Entity>)` 组件关联技能实体，每个技能实体包含：
+
+- **SkillOf** - 关联到角色实体
+- **Skill** - 技能配置（spell Handle、level、slot、cooldown_mode）
+- **CoolDown** - 冷却持续时间配置
+- **CoolDownState** - 运行时冷却状态（timer）
 
 ### Phase 3: 提取地图块数据
 
 `extract_phase_3_map_chunks(world: &mut World, loader: &LeagueLoader, map_name: &MapName) -> HashMap<String, ChampionRecordData>`
 
 遍历地图可放置物，提取：
+
 - **小兵路径** (Unk0x3c995caf)：兵线路径点
 - **兵营** (Unk0xba138ae3)：生成兵营实体
 - **角色** (Unk0xad65d8c4)：收集角色记录数据
@@ -138,14 +152,15 @@ extract_phase_2_champions(&loader);
 
 ## 输出文件
 
-| 文件                                  | 描述                                                                                                |
-| ------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| `assets/characters/{name}/config.ron` | 角色场景（包含 Bounding、Attack、Health、Damage、Armor、Movement、Skills、Name 等组件的序列化实体） |
-| `assets/characters/{name}/skin.glb`   | 皮肤 GLB 文件（网格 + 材质 + 贴图）                                                                 |
-| `assets/characters/{name}/skin.ron`   | 皮肤场景（包含 Skin、HealthBar、Visibility 组件）                                                   |
-| `assets/maps/{map_name}_navgrid.bin`  | 二进制导航网格数据                                                                                  |
-| `assets/maps/{map_name}_mapgeo.glb`   | GLTF 格式的地图几何                                                                                 |
-| `assets/maps/{map_name}_scene.ron`    | 包含所有地图对象的序列化场景                                                                        |
+| 文件                                    | 描述                                                                                                |
+| --------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `assets/characters/{name}/config.ron`   | 角色场景（包含 Bounding、Attack、Health、Damage、Armor、Movement、Skills、Name 等组件的序列化实体） |
+| `assets/characters/{name}/skin.glb`     | 皮肤 GLB 文件（网格 + 材质 + 贴图）                                                                 |
+| `assets/characters/{name}/skin.ron`     | 皮肤场景（包含 Skin、HealthBar、Visibility 组件）                                                   |
+| `assets/characters/{name}/spells/*.ron` | 技能数据 Asset（包含 Spell、DataSpell、calculations、effect_amounts 等）                            |
+| `assets/maps/{map_name}_navgrid.bin`    | 二进制导航网格数据                                                                                  |
+| `assets/maps/{map_name}_mapgeo.glb`     | GLTF 格式的地图几何                                                                                 |
+| `assets/maps/{map_name}_scene.ron`      | 包含所有地图对象的序列化场景                                                                        |
 
 ### Character 场景文件结构
 
@@ -158,8 +173,15 @@ extract_phase_2_champions(&loader);
 - **Damage** - 包含 `0`（攻击力）
 - **Armor** - 包含 `0`（护甲值）
 - **Movement** - 包含 `speed`（移动速度）
-- **Skills** - 包含技能实体列表
+- **Skills** - 包含技能实体列表（`Vec<Entity>`）
 - **Name** - 实体名称
+
+技能实体独立存在，通过 `SkillOf` relationship 关联到角色实体。每个技能实体包含：
+
+- **SkillOf** - 关联到角色实体（`SkillOf(Entity)`）
+- **Skill** - 技能配置（spell Handle 指向 spells/\*.ron、level、slot、cooldown_mode）
+- **CoolDown** - 冷却持续时间配置
+- **CoolDownState** - 运行时冷却状态（timer，不序列化）
 
 可直接通过 Bevy 的场景系统反序列化加载为实体。
 
@@ -276,6 +298,7 @@ let type_hash = type_name_to_hash(type_name);
 ### Asset Loader 注册
 
 新增 Asset 类型后，需在 `lol_render/loaders` 中注册对应的 AssetLoader：
+
 - `lol_base::animation::ConfigAnimation` → `lol_render::loaders::animation::AnimationLoader`
 
 ## 粒子特效提取
