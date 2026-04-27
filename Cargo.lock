@@ -1050,18 +1050,16 @@ dependencies = [
 [[package]]
 name = "bevy_gltf_draco"
 version = "0.1.0"
+source = "git+https://github.com/mutemoon/bevy_gltf_draco?branch=ktx2#f7133613163425207fa2608686d1c19e11e9fe6f"
 dependencies = [
  "bevy",
  "draco_decoder",
  "futures",
  "gltf",
- "js-sys",
  "serde",
  "serde_json",
  "tracing",
- "wasm-bindgen",
  "wasm-bindgen-futures",
- "web-sys",
 ]
 
 [[package]]
