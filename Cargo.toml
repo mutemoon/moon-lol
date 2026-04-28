@@ -28,7 +28,8 @@ bevy = { git = "https://github.com/mutemoon/bevy", branch = "bevy_basisu", featu
     "free_camera",
     "serialize",
     "bevy_debug_stepping",
-    "webgpu",
+    "webgpu",              # 在 web 平台使用 webgpu
+    "dynamic_linking",     # 动态链接大幅降低链接时间
 ] }
 bevy_gltf_draco = { git = "https://github.com/mutemoon/bevy_gltf_draco", branch = "ktx2" }
 
@@ -87,3 +88,7 @@ rayon.workspace = true
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 wasm-bindgen-futures = "0.4"
+
+[profile.dev.package."*"]
+# 为了开启 bevy 的动态链接
+opt-level = 3
