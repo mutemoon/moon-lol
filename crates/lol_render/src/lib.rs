@@ -4,6 +4,7 @@ pub mod controller;
 pub mod error;
 pub mod loaders;
 pub mod map;
+pub mod navigation;
 pub mod particle;
 pub mod resource;
 pub mod shader;
@@ -16,6 +17,7 @@ use bevy::prelude::{App, Plugin};
 use camera::PluginCamera;
 use controller::PluginController;
 use map::PluginRenderMap;
+use navigation::PluginRenderNavigation;
 use resource::PluginRenderResource;
 use skin::PluginSkin;
 
@@ -28,6 +30,7 @@ impl Plugin for PluginRender {
         app.add_plugins(PluginCamera);
         app.add_plugins(PluginController);
         app.add_plugins(PluginRenderMap);
+        app.add_plugins(PluginRenderNavigation);
         // app.add_plugins(PluginParticle);
         app.add_plugins(PluginRenderResource);
         app.add_plugins(PluginSkin);

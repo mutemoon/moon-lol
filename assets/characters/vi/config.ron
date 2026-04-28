@@ -97,15 +97,15 @@
           experience_to_next_level: 280,
         ),
         "lol_core::character::Character": (),
-        "lol_core::damage::Armor": (30.0),
-        "lol_core::damage::Damage": (50.0),
+        "lol_core::damage::Armor": (4.7),
+        "lol_core::damage::Damage": (63.0),
         "lol_core::entities::champion::Champion": (),
         "lol_core::life::Health": (
-          value: 1000.0,
-          max: 1000.0,
+          value: 655.0,
+          max: 655.0,
         ),
         "lol_core::movement::Movement": (
-          speed: 5.0,
+          speed: 340.0,
         ),
         "lol_core::skill::Skills": ([
           4294967270,

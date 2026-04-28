@@ -69,12 +69,12 @@ pub struct AbilityResourceSlotInfo {
     pub ar_override_spacer_name: Option<String>,
     pub ar_type: Option<u8>,
     pub hide_empty_pips: Option<bool>,
-    pub unk_0x3a509002: Option<Unk0xce9b917b>,
-    pub unk_0x452033bb: Option<Unk0xce9b917b>,
+    pub unk_0x3a509002: Option<ModifiableFloat>,
+    pub unk_0x452033bb: Option<ModifiableFloat>,
     pub unk_0x4eb6a404: Option<u8>,
-    pub unk_0x6216bf7b: Option<Unk0xce9b917b>,
-    pub unk_0x726ee5cd: Option<Unk0xce9b917b>,
-    pub unk_0xc4ab3550: Option<Unk0xce9b917b>,
+    pub unk_0x6216bf7b: Option<ModifiableFloat>,
+    pub unk_0x726ee5cd: Option<ModifiableFloat>,
+    pub unk_0xc4ab3550: Option<ModifiableFloat>,
     pub unk_0xfa70e5c9: Option<bool>,
     pub visibility_flags: Option<u8>,
 }
@@ -82,8 +82,8 @@ pub struct AbilityResourceSlotInfo {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct AboveHealthPercentCastRequirement {
+    pub data_value: u32,
     pub m_invert_result: bool,
-    pub unk_0x137cf12a: u32,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -448,9 +448,19 @@ pub struct CharacterRecord {
     pub area_indicator_radius: Option<f32>,
     pub area_indicator_target_distance: Option<f32>,
     pub area_indicator_texture_size: Option<f32>,
+    pub armor_per_level_modifiable: Option<ModifiableFloat>,
     pub attack_auto_interrupt_percent: Option<f32>,
+    pub attack_range_modifiable: Option<ModifiableFloat>,
+    pub attack_speed_modifiable: Option<ModifiableFloat>,
+    pub attack_speed_per_level_modifiable: Option<ModifiableFloat>,
+    pub attack_speed_ratio_modifiable: Option<ModifiableFloat>,
+    pub base_armor_modifiable: Option<ModifiableFloat>,
     pub base_crit_chance: Option<f32>,
-    pub base_mr: Option<Unk0xce9b917b>,
+    pub base_damage_modifiable: Option<ModifiableFloat>,
+    pub base_hp_modifiable: Option<ModifiableFloat>,
+    pub base_move_speed_modifiable: Option<ModifiableFloat>,
+    pub base_mr: Option<ModifiableFloat>,
+    pub base_static_hp_regen_modifiable: Option<ModifiableFloat>,
     pub basic_attack: Option<AttackSlotData>,
     pub char_audio_name_override: Option<String>,
     pub character_tool_data: Option<CharacterToolData>,
@@ -458,6 +468,7 @@ pub struct CharacterRecord {
     pub crit_damage_multiplier: Option<f32>,
     pub crit_per_level: Option<f32>,
     pub critical_attack: Option<String>,
+    pub damage_per_level_modifiable: Option<ModifiableFloat>,
     pub death_event_listening_radius: Option<f32>,
     pub death_time: Option<f32>,
     pub disabled_target_laser_effects: Option<TargetLaserComponentEffects>,
@@ -492,6 +503,8 @@ pub struct CharacterRecord {
     pub hover_line_indicator_target_texture_name: Option<String>,
     pub hover_line_indicator_width: Option<f32>,
     pub hover_line_indicator_width_minimap: Option<f32>,
+    pub hp_per_level_modifiable: Option<ModifiableFloat>,
+    pub hp_regen_per_level_modifiable: Option<ModifiableFloat>,
     pub joint_for_anim_adjusted_selection: Option<String>,
     pub launch_area_data: Option<LaunchAreaData>,
     pub local_exp_given_on_death: Option<f32>,
@@ -549,30 +562,17 @@ pub struct CharacterRecord {
     pub tower_targeting_priority_boost: Option<f32>,
     pub treat_auto_attacks_as_normal_spells: Option<TreatAutoAttacksAsNormalSpells>,
     pub unit_tags_string: Option<String>,
-    pub unk_0x1262a25: Option<Unk0xce9b917b>,
-    pub unk_0x18956a21: Option<Unk0xce9b917b>,
+    pub unk_0x1262a25: Option<ModifiableFloat>,
     pub unk_0x1abb82c0: Option<Unk0xef35eacc>,
-    pub unk_0x2290fc9a: Option<Unk0xce9b917b>,
+    pub unk_0x2290fc9a: Option<ModifiableFloat>,
     pub unk_0x3f975e4a: Option<bool>,
     pub unk_0x43135375: Option<f32>,
-    pub unk_0x4af40dc3: Option<Unk0xce9b917b>,
-    pub unk_0x4d37af28: Option<Unk0xce9b917b>,
-    pub unk_0x4f89c991: Option<Unk0xce9b917b>,
     pub unk_0x6854087e: Option<Vec<Unk0x47f13ab0>>,
-    pub unk_0x7bd4b298: Option<Unk0xce9b917b>,
     pub unk_0x81f10af9: Option<bool>,
-    pub unk_0x836cc82a: Option<Unk0xce9b917b>,
-    pub unk_0x8662cf12: Option<Unk0xce9b917b>,
-    pub unk_0x913157bb: Option<Unk0xce9b917b>,
     pub unk_0x9836cd87: Option<u8>,
-    pub unk_0x9eedebad: Option<Unk0xce9b917b>,
-    pub unk_0xb9f2b365: Option<Unk0xce9b917b>,
     pub unk_0xc1984296: Option<Vec<u32>>,
     pub unk_0xc5c48b41: Option<u8>,
     pub unk_0xdd661aab: Option<Unk0x280745b1>,
-    pub unk_0xe2b5d80d: Option<Unk0xce9b917b>,
-    pub unk_0xe62d9d92: Option<Unk0xce9b917b>,
-    pub unk_0xea6100d5: Option<Unk0xce9b917b>,
     pub unk_0xeb74898c: Option<f32>,
     pub untargetable_spawn_time: Option<f32>,
     pub use_riot_relationships: Option<bool>,
@@ -2274,6 +2274,12 @@ pub struct MissileSpecification {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
+pub struct ModifiableFloat {
+    pub base_value: f32,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct NamedDataValueCalculationPart {
     pub m_data_value: u32,
 }
@@ -3952,8 +3958,8 @@ pub struct Unk0x1d12c4da {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Unk0x1d452085 {
+    pub data_value: u32,
     pub m_stat: Option<u8>,
-    pub unk_0x137cf12a: u32,
     pub unk_0xa519b194: u32,
     pub unk_0xa8cb9c14: Option<bool>,
 }
@@ -4305,8 +4311,8 @@ pub struct Unk0x9d62f7e {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Unk0x9e9e2e5c {
+    pub data_value: u32,
     pub source_object: u32,
-    pub unk_0x137cf12a: u32,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Asset, TypePath)]
@@ -4429,12 +4435,6 @@ pub struct Unk0xcdb1c8f6 {
 pub struct Unk0xcdf661db {
     pub category: String,
     pub unk_0x2de18da: String,
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-#[serde(rename_all = "camelCase")]
-pub struct Unk0xce9b917b {
-    pub unk_0xb35aa769: f32,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

@@ -19,17 +19,7 @@
                 ),
                 "lol_core::skill_script::SkillScript": (
                     steps: [
-                        (frame: 0, command: SetSkillPoints(4)),
-                        (frame: 0, command: Action(SkillLevelUp(0))),
-                        (frame: 5, command: Action(SkillLevelUp(1))),
-                        (frame: 10, command: Action(SkillLevelUp(2))),
-                        (frame: 15, command: Action(SkillLevelUp(3))),
-                        (frame: 20, command: Action(Skill (index: 0, point: (140.0, 0.0)))),
-                        (frame: 45, command: Action(Skill (index: 0, point: (140.0, 0.0)))),
-                        (frame: 70, command: Action(Skill (index: 0, point: (140.0, 0.0)))),
-                        (frame: 100, command: Action(Skill (index: 1, point: (140.0, 0.0)))),
-                        (frame: 130, command: Action(Skill (index: 2, point: (140.0, 0.0)))),
-                        (frame: 160, command: Action(Skill (index: 3, point: (140.0, 0.0)))),
+                        (frame: 10, command: Action(Move((1000.0,1000.0)))),
                     ],
                 ),
             },

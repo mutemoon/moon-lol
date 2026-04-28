@@ -3,8 +3,11 @@ use std::time::Duration;
 
 use bevy::prelude::*;
 use bevy::time::TimeUpdateStrategy;
+use lol_base::map::MapPaths;
 use lol_core::game::PluginGame;
-use lol_render::test_render::{SkillTestRenderConfig, SkillTestVideoFormat, SkillTestVideoOutput};
+use lol_render::test_render::{
+    PluginSkillTestRender, SkillTestRenderConfig, SkillTestVideoFormat, SkillTestVideoOutput,
+};
 use moon_lol::PluginCore;
 
 fn main() {
@@ -29,6 +32,7 @@ fn main() {
     app.insert_resource(TimeUpdateStrategy::ManualDuration(Duration::from_millis(
         16,
     )));
+    app.insert_resource(MapPaths::new("test"));
     app.add_plugins(DefaultPlugins.set(WindowPlugin {
         primary_window: Some(Window {
             visible: false,
@@ -36,6 +40,7 @@ fn main() {
         }),
         ..default()
     }));
+    app.add_plugins(PluginSkillTestRender);
     app.add_plugins(PluginCore.set(PluginGame {
         scenes: vec!["games/riven_render.ron".to_owned()],
     }));

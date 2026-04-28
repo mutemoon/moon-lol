@@ -78,19 +78,36 @@ pub fn create_champion_components_from_record(
         WindupConfig::Legacy { attack_offset } => Attack::from_legacy(range, 1.0, attack_offset),
     };
 
-    // TODO: 摸清字段对应关系后替换为正确的值
-    // 占位符：使用 exp_given_on_death 作为 health（待替换）
-    let health = Health::new(record.exp_given_on_death.unwrap_or(1000.0));
+    let health = Health::new(
+        record
+            .base_hp_modifiable
+            .as_ref()
+            .map(|v| v.base_value)
+            .unwrap_or(0.0),
+    );
 
-    // 占位符：使用 unk_0x43135375 作为 damage（待替换）
-    let damage = Damage(record.unk_0x43135375.unwrap_or(50.0));
+    let damage = Damage(
+        record
+            .base_damage_modifiable
+            .as_ref()
+            .map(|v| v.base_value)
+            .unwrap_or(0.0),
+    );
 
-    // 占位符：使用 unk_0x4af40dc3 中的某个值作为 armor（待替换）
-    let armor = Armor(record.area_indicator_radius.unwrap_or(30.0));
+    let armor = Armor(
+        record
+            .armor_per_level_modifiable
+            .as_ref()
+            .map(|v| v.base_value)
+            .unwrap_or(0.0),
+    );
 
-    // 占位符：使用 perception_bubble_radius 作为 move speed（待替换）
     let movement = Movement {
-        speed: record.perception_bubble_radius.unwrap_or(5.0),
+        speed: record
+            .base_move_speed_modifiable
+            .as_ref()
+            .map(|v| v.base_value)
+            .unwrap_or(0.0),
     };
 
     // 经验掉落

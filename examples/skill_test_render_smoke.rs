@@ -3,7 +3,7 @@ use std::time::Duration;
 
 use bevy::prelude::*;
 use bevy::time::TimeUpdateStrategy;
-use lol_render::test_render::{PluginSkillTestRenderSuite, SkillTestRenderConfig};
+use lol_render::test_render::SkillTestRenderConfig;
 
 fn main() {
     let output_dir = PathBuf::from("artifacts/skill_test_render_smoke");
@@ -30,7 +30,6 @@ fn main() {
         }),
         ..default()
     }));
-    app.add_plugins(PluginSkillTestRenderSuite);
     app.finish();
     app.cleanup();
 

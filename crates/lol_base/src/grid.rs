@@ -265,7 +265,7 @@ impl From<u8> for GridFlagsSRX {
     }
 }
 
-#[derive(Asset, TypePath, Clone, Default, Serialize, Deserialize)]
+#[derive(Asset, TypePath, Clone, Default, Serialize, Deserialize, Debug)]
 pub struct ConfigNavigationGrid {
     pub min_position: Vec2,
     pub cell_size: f32,

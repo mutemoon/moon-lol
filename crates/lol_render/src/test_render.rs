@@ -4,7 +4,6 @@ use std::process::Command;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
 
-use bevy::app::plugin_group;
 use bevy::asset::RenderAssetUsages;
 use bevy::camera::RenderTarget;
 use bevy::ecs::schedule::common_conditions::run_once;
@@ -18,23 +17,12 @@ use bevy::render::renderer::{RenderDevice, RenderQueue};
 use bevy::render::{Extract, ExtractSchedule, Render, RenderApp, RenderSystems};
 use crossbeam_channel::{Receiver, Sender};
 use image::{ImageBuffer, Rgba};
-use league_file::skeleton::LeagueSkeleton;
 use lol_base::grid::{
     ConfigNavigationGrid, ConfigNavigationGridCell, GridFlagsJungleQuadrant, GridFlagsMainRegion,
     GridFlagsNearestLane, GridFlagsPOI, GridFlagsRing, GridFlagsRiverRegion, GridFlagsSRX,
     GridFlagsVisionPathing,
 };
-use lol_base::shader::{ResourceShaderChunk, ResourceShaderPackage};
 use lol_core::navigation::grid::ResourceGrid;
-use lol_core::rotate::PluginRotate;
-use lol_core::skill_script::PluginSkillScript;
-
-use crate::animation::PluginAnimation;
-use crate::camera::PluginCamera;
-use crate::particle::PluginParticle;
-use crate::resource::ResourceCache;
-use crate::shader::ResourceShaderHandles;
-use crate::skin::PluginSkin;
 
 #[derive(Resource, Clone)]
 pub struct SkillTestRenderConfig {
@@ -91,12 +79,6 @@ struct CapturePostProcessState {
     attempted: bool,
 }
 
-// Re-export from lol_core for backward compatibility
-pub use lol_core::skill_script::{
-    SkillScript as SkillTestScript, SkillScriptCursor as SkillTestScriptCursor,
-    SkillScriptStep as SkillTestScriptStep,
-};
-
 #[derive(Resource, Deref)]
 struct MainWorldReceiver(Receiver<Vec<u8>>);
 
@@ -125,35 +107,14 @@ struct ImageCopier {
     src_image: Handle<Image>,
 }
 
-// Removed ImageCopyNode and ImageCopyDriver as RenderGraph is replaced by systems.
-
 #[derive(Default)]
 pub struct PluginSkillTestRender;
-
-plugin_group! {
-    pub struct PluginSkillTestRenderSuite {
-        :PluginAnimation,
-        :PluginCamera,
-        :PluginParticle,
-        :PluginRotate,
-        :PluginSkin,
-        :PluginSkillScript,
-        :PluginSkillTestRender,
-    }
-}
 
 impl Plugin for PluginSkillTestRender {
     fn build(&self, app: &mut App) {
         if !app.world().contains_resource::<SkillTestRenderConfig>() {
             app.insert_resource(SkillTestRenderConfig::default());
         }
-
-        app.init_asset::<ConfigNavigationGrid>();
-        app.init_asset::<LeagueSkeleton>();
-        app.init_asset::<ResourceShaderPackage>();
-        app.init_asset::<ResourceShaderChunk>();
-        app.init_resource::<ResourceShaderHandles>();
-        app.init_resource::<ResourceCache>();
 
         let (sender, receiver) = crossbeam_channel::unbounded();
 

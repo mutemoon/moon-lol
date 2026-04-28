@@ -1,9 +1,7 @@
 use std::collections::{HashMap, HashSet, VecDeque};
 use std::time::Duration;
 
-use bevy::color::palettes;
 use bevy::prelude::*;
-use bevy::render::render_resource::Face;
 use lol_base::grid::{CELL_COST_IMPASSABLE, ConfigNavigationGrid};
 
 use crate::base::bounding::Bounding;
@@ -41,15 +39,7 @@ impl Plugin for PluginNavigaton {
             PreUpdate,
             pre_update_global_occupied_cells.run_if(resource_exists::<ResourceGrid>),
         );
-        app.add_systems(
-            Update,
-            (
-                update_y,
-                update_visualization_astar,
-                update_visualization_move_path,
-            )
-                .run_if(resource_exists::<ResourceGrid>),
-        );
+        app.add_systems(Update, update_y.run_if(resource_exists::<ResourceGrid>));
     }
 }
 
@@ -82,15 +72,6 @@ pub struct NavigationDebug {
     pub unoptimized_path: Vec<Vec2>,
     pub optimized_path: Vec<Vec2>,
 }
-
-#[derive(Component)]
-struct AStarCell;
-
-#[derive(Component)]
-struct AStarPathCell;
-
-#[derive(Component)]
-struct ObstacleCell;
 
 fn update_y(
     res_grid: Res<ResourceGrid>,
@@ -565,156 +546,4 @@ fn calculate_cell_cost(distance: f32, radius_in_cells: i32) -> f32 {
     let t = (distance - radius_in_cells as f32 * 0.7) / (radius_in_cells as f32 * 0.3);
     let t = t.clamp(0.0, 1.0);
     (1.0 - t) * 100.0 + 10.0
-}
-
-fn update_visualization_astar(
-    mut commands: Commands,
-    res_grid: Res<ResourceGrid>,
-    assets_grid: Res<Assets<ConfigNavigationGrid>>,
-    nav_debug: Res<NavigationDebug>,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
-    visited_query: Query<Entity, With<AStarCell>>,
-    path_query: Query<Entity, With<AStarPathCell>>,
-    obstacle_query: Query<Entity, With<ObstacleCell>>,
-) {
-    let Some(grid) = assets_grid.get(&res_grid.0) else {
-        return;
-    };
-
-    if !nav_debug.enabled {
-        return;
-    }
-
-    if !nav_debug.is_changed() && !assets_grid.is_changed() {
-        return;
-    }
-
-    // 删除旧的 A* 可视化单元格
-    for entity in visited_query.iter() {
-        commands.entity(entity).despawn();
-    }
-
-    for entity in path_query.iter() {
-        commands.entity(entity).despawn();
-    }
-
-    for entity in obstacle_query.iter() {
-        commands.entity(entity).despawn();
-    }
-
-    let mesh = meshes.add(Plane3d::new(
-        vec3(0.0, 1.0, 0.0),
-        Vec2::splat(grid.cell_size / 2.0 - 3.0),
-    ));
-
-    // 障碍物格子（红色正五边形）
-    let red_material = materials.add(StandardMaterial {
-        base_color: Color::srgb(1.0, 0.3, 0.3),
-        unlit: true,
-        depth_bias: 40.0,
-        cull_mode: Some(Face::Front),
-        ..default()
-    });
-
-    let mut blue_materials = Vec::new();
-    for i in 0..11 {
-        blue_materials.push(materials.add(StandardMaterial {
-            base_color: Color::srgb(0.1, 0.1, i as f32 / 10.0),
-            unlit: true,
-            depth_bias: 40.0,
-            cull_mode: Some(Face::Front),
-            ..default()
-        }));
-    }
-
-    for (&(x, y), cost) in grid.occupied_cells.iter() {
-        commands.spawn((
-            Mesh3d(mesh.clone()),
-            MeshMaterial3d(if *cost == CELL_COST_IMPASSABLE {
-                red_material.clone()
-            } else {
-                blue_materials[(cost / 100.0 * 10.0).floor() as usize].clone()
-            }),
-            Transform::from_translation(
-                grid.get_cell_center_position_by_xy((x, y)) + Vec3::new(0.0, 1.5, 0.0),
-            ),
-            ObstacleCell,
-            Visibility::Visible,
-        ));
-    }
-
-    // 访问的单元格（黄色）
-    let yellow_material = materials.add(StandardMaterial {
-        base_color: Color::srgb(1.0, 1.0, 0.0),
-        unlit: true,
-        depth_bias: 50.0,
-        cull_mode: Some(Face::Front),
-        ..default()
-    });
-
-    for &(x, y) in &nav_debug.visited_cells {
-        commands.spawn((
-            Mesh3d(mesh.clone()),
-            MeshMaterial3d(yellow_material.clone()),
-            Transform::from_translation(
-                grid.get_cell_center_position_by_xy((x, y)) + Vec3::new(0.0, 2.0, 0.0),
-            ),
-            AStarCell,
-            Visibility::Visible,
-        ));
-    }
-
-    // 路径单元格（白色）
-    let white_material = materials.add(StandardMaterial {
-        base_color: Color::srgb(1.0, 1.0, 1.0),
-        unlit: true,
-        depth_bias: 60.0,
-        cull_mode: Some(Face::Front),
-        ..default()
-    });
-
-    for &(x, y) in &nav_debug.path_cells {
-        commands.spawn((
-            Mesh3d(mesh.clone()),
-            MeshMaterial3d(white_material.clone()),
-            Transform::from_translation(
-                grid.get_cell_center_position_by_xy((x, y)) + Vec3::new(0.0, 3.0, 0.0),
-            ),
-            AStarPathCell,
-            Visibility::Visible,
-        ));
-    }
-}
-
-/// 绘制移动路径（粉色为未优化路径，蓝色为优化后路径）
-fn update_visualization_move_path(
-    res_grid: Res<ResourceGrid>,
-    assets_grid: Res<Assets<ConfigNavigationGrid>>,
-    mut gizmos: Gizmos,
-    nav_debug: Res<NavigationDebug>,
-) {
-    let Some(grid) = assets_grid.get(&res_grid.0) else {
-        return;
-    };
-
-    if !nav_debug.enabled {
-        return;
-    }
-
-    for path_point in nav_debug.unoptimized_path.windows(2) {
-        gizmos.line(
-            grid.get_world_position_by_position(&path_point[0]) + vec3(0.0, 4.0, 0.0),
-            grid.get_world_position_by_position(&path_point[1]) + vec3(0.0, 4.0, 0.0),
-            Color::Srgba(palettes::tailwind::PINK_500),
-        );
-    }
-
-    for path_point in nav_debug.optimized_path.windows(2) {
-        gizmos.line(
-            grid.get_world_position_by_position(&path_point[0]) + vec3(0.0, 5.0, 0.0),
-            grid.get_world_position_by_position(&path_point[1]) + vec3(0.0, 5.0, 0.0),
-            Color::Srgba(palettes::tailwind::BLUE_500),
-        );
-    }
 }

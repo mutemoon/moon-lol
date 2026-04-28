@@ -1,6 +1,6 @@
 (
   resources: {
-    "lol_core::navigation::grid::ResourceGrid": (Path("maps/sr_seasonal_map/navgrid.bin")),
+    
   },
   entities: {},
 )

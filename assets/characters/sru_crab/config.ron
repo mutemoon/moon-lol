@@ -68,14 +68,14 @@
           experience_radius: -1.0,
         ),
         "lol_core::character::Character": (),
-        "lol_core::damage::Armor": (30.0),
-        "lol_core::damage::Damage": (50.0),
+        "lol_core::damage::Armor": (0.0),
+        "lol_core::damage::Damage": (35.0),
         "lol_core::life::Health": (
-          value: 100.0,
-          max: 100.0,
+          value: 1550.0,
+          max: 1550.0,
         ),
         "lol_core::movement::Movement": (
-          speed: 5.0,
+          speed: 255.0,
         ),
         "lol_core::skill::Skills": ([
           4294967270,

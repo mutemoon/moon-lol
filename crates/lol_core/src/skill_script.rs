@@ -6,6 +6,7 @@ use crate::skill::SkillPoints;
 
 #[derive(Component, Clone, Default, Reflect)]
 #[reflect(Component)]
+#[require(SkillScriptCursor)]
 pub struct SkillScript {
     pub steps: Vec<SkillScriptStep>,
 }
