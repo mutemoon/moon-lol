@@ -89,6 +89,10 @@ rayon.workspace = true
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 wasm-bindgen-futures = "0.4"
 
+[profile.dev]
+# 只保留行号信息，大幅缩小 PDB 体积，减少链接时间
+debug = "line-tables-only"
+
 [profile.dev.package."*"]
 # 为了开启 bevy 的动态链接
 opt-level = 3
