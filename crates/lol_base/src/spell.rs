@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 
 use bevy::asset::Asset;
 use bevy::reflect::TypePath;
@@ -26,7 +26,7 @@ pub struct ValuesData {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct DataSpell {
-    pub calculations: Option<HashMap<u32, CalculationType>>,
+    pub calculations: Option<BTreeMap<u32, CalculationType>>,
     pub effect_amounts: Option<Vec<ValuesEffect>>,
     pub data_values: Option<Vec<ValuesData>>,
     pub mana: Option<Vec<f32>>,

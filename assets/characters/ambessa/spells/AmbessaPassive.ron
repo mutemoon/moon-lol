@@ -12,12 +12,6 @@
                 multiplier: None,
                 precision: None,
             ),
-            1514620317: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: None,
-            ),
             1473407573: (
                 type: "CalculationSpell",
                 formulaParts: Some([
@@ -31,7 +25,7 @@
                 multiplier: None,
                 precision: None,
             ),
-            3632088843: (
+            1514620317: (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
@@ -47,6 +41,12 @@
                         statFormula: Some(2),
                     ),
                 ]),
+                multiplier: None,
+                precision: None,
+            ),
+            3632088843: (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),

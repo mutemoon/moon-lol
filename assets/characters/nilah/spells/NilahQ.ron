@@ -13,14 +13,13 @@
                 multiplier: None,
                 precision: None,
             ),
-            3663209131: (
+            2943429559: (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
-                        type: "CalculationPartStatCoefficient",
-                        stat: Some(2),
-                        coefficient: Some(1.0),
-                        statFormula: None,
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(8),
+                        dataValue: 159628123,
                     ),
                 ]),
                 multiplier: None,
@@ -42,13 +41,14 @@
                 multiplier: None,
                 precision: None,
             ),
-            2943429559: (
+            3663209131: (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: Some(8),
-                        dataValue: 159628123,
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(2),
+                        coefficient: Some(1.0),
+                        statFormula: None,
                     ),
                 ]),
                 multiplier: None,

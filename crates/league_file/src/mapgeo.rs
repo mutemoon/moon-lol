@@ -125,7 +125,7 @@ impl SceneGraph {
             buckets = b;
             current_i = i_next;
 
-            if environment_visibility != EnvironmentVisibility::NoLayer {
+            if environment_visibility != EnvironmentVisibility::NO_LAYER {
                 let (i_next, f) = count(le_u8, (index_count / 3) as usize).parse(current_i)?;
                 face_visibility_flags = f;
                 current_i = i_next;

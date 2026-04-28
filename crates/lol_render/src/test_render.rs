@@ -25,11 +25,9 @@ use lol_base::grid::{
     GridFlagsVisionPathing,
 };
 use lol_base::shader::{ResourceShaderChunk, ResourceShaderPackage};
-use lol_core::action::{Action, CommandAction};
-use lol_core::game::FixedFrameCount;
 use lol_core::navigation::grid::ResourceGrid;
 use lol_core::rotate::PluginRotate;
-use lol_core::skill::{SkillPoints, Skills};
+use lol_core::skill_script::PluginSkillScript;
 
 use crate::animation::PluginAnimation;
 use crate::camera::PluginCamera;
@@ -93,50 +91,11 @@ struct CapturePostProcessState {
     attempted: bool,
 }
 
-#[derive(Resource, Clone)]
-pub struct SkillTestScript {
-    pub steps: Vec<SkillTestScriptStep>,
-}
-
-impl SkillTestScript {
-    pub fn new(steps: Vec<SkillTestScriptStep>) -> Self {
-        Self { steps }
-    }
-}
-
-#[derive(Clone)]
-pub struct SkillTestScriptStep {
-    pub frame: u32,
-    pub command: SkillTestScriptCommand,
-}
-
-impl SkillTestScriptStep {
-    pub fn action(frame: u32, action: Action) -> Self {
-        Self {
-            frame,
-            command: SkillTestScriptCommand::Action(action),
-        }
-    }
-
-    pub fn set_skill_points(frame: u32, value: u32) -> Self {
-        Self {
-            frame,
-            command: SkillTestScriptCommand::SetSkillPoints(value),
-        }
-    }
-}
-
-#[derive(Clone)]
-pub enum SkillTestScriptCommand {
-    Action(Action),
-    SetSkillPoints(u32),
-}
-
-#[derive(Resource, Default)]
-pub struct SkillTestScriptCursor(pub usize);
-
-#[derive(Component, Default)]
-pub struct SkillTestActor;
+// Re-export from lol_core for backward compatibility
+pub use lol_core::skill_script::{
+    SkillScript as SkillTestScript, SkillScriptCursor as SkillTestScriptCursor,
+    SkillScriptStep as SkillTestScriptStep,
+};
 
 #[derive(Resource, Deref)]
 struct MainWorldReceiver(Receiver<Vec<u8>>);
@@ -178,6 +137,7 @@ plugin_group! {
         :PluginParticle,
         :PluginRotate,
         :PluginSkin,
+        :PluginSkillScript,
         :PluginSkillTestRender,
     }
 }
@@ -201,14 +161,12 @@ impl Plugin for PluginSkillTestRender {
         app.init_resource::<CapturedFrameCount>();
         app.init_resource::<CapturedFrameWriteIndex>();
         app.init_resource::<CapturePostProcessState>();
-        app.init_resource::<SkillTestScriptCursor>();
         app.add_systems(
             Update,
             setup_skill_test_render
                 .run_if(resource_exists::<RenderDevice>)
                 .run_if(run_once),
         );
-        app.add_systems(FixedUpdate, run_skill_test_script);
         app.add_systems(
             Last,
             (write_captured_frames, run_post_process_after_capture),
@@ -586,63 +544,6 @@ fn make_test_grid() -> ConfigNavigationGrid {
         height_samples: vec![vec![0.0; 2]; 2],
         occupied_cells: Default::default(),
         exclude_cells: Default::default(),
-    }
-}
-
-pub fn attach_skill_test_actor<T: Component>(
-    mut commands: Commands,
-    q_tagged: Query<(), With<SkillTestActor>>,
-    q_actor: Query<Entity, (With<T>, Without<SkillTestActor>)>,
-) {
-    if !q_tagged.is_empty() {
-        return;
-    }
-
-    let Ok(actor) = q_actor.single() else {
-        return;
-    };
-
-    commands.entity(actor).insert(SkillTestActor);
-}
-
-pub fn run_skill_test_script(
-    mut commands: Commands,
-    frame: Option<Res<FixedFrameCount>>,
-    script: Option<Res<SkillTestScript>>,
-    mut cursor: ResMut<SkillTestScriptCursor>,
-    mut q_actor: Query<(Entity, Option<&mut SkillPoints>), (With<SkillTestActor>, With<Skills>)>,
-) {
-    let Some(frame) = frame else {
-        return;
-    };
-    let Some(script) = script else {
-        return;
-    };
-
-    let Ok((actor, mut skill_points)) = q_actor.single_mut() else {
-        return;
-    };
-
-    while let Some(step) = script.steps.get(cursor.0) {
-        if step.frame > frame.0 {
-            break;
-        }
-
-        match &step.command {
-            SkillTestScriptCommand::Action(action) => {
-                commands.trigger(CommandAction {
-                    entity: actor,
-                    action: action.clone(),
-                });
-            }
-            SkillTestScriptCommand::SetSkillPoints(value) => {
-                if let Some(skill_points) = skill_points.as_deref_mut() {
-                    skill_points.0 = *value;
-                }
-            }
-        }
-
-        cursor.0 += 1;
     }
 }
 

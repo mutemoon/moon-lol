@@ -18,22 +18,6 @@
                 multiplier: None,
                 precision: None,
             ),
-            4240365573: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 714503628,
-                    ),
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: None,
-                        dataValue: 3682589971,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
             2462553231: (
                 type: "CalculationSpell",
                 formulaParts: Some([
@@ -45,6 +29,22 @@
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
                         dataValue: 785485013,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            4240365573: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 714503628,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: 3682589971,
                     ),
                 ]),
                 multiplier: None,

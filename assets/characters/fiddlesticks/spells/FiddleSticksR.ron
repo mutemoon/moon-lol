@@ -1,13 +1,24 @@
 (
     spellData: Some((
         calculations: Some({
-            3979498608: (
+            208559206: (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 4209723727,
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: 3809245599,
                     ),
+                ]),
+                multiplier: Some((
+                    type: "CalculationPartNamedDataValue",
+                    dataValue: 799079693,
+                )),
+                precision: None,
+            ),
+            2260532014: (
+                type: "CalculationSpell",
+                formulaParts: Some([
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
@@ -33,9 +44,13 @@
                 multiplier: None,
                 precision: None,
             ),
-            2260532014: (
+            3979498608: (
                 type: "CalculationSpell",
                 formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 4209723727,
+                    ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
@@ -43,21 +58,6 @@
                     ),
                 ]),
                 multiplier: None,
-                precision: None,
-            ),
-            208559206: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: None,
-                        dataValue: 3809245599,
-                    ),
-                ]),
-                multiplier: Some((
-                    type: "CalculationPartNamedDataValue",
-                    dataValue: 799079693,
-                )),
                 precision: None,
             ),
         }),

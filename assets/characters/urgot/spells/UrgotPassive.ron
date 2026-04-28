@@ -1,6 +1,25 @@
 (
     spellData: Some((
         calculations: Some({
+            463256987: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(31),
+                        coefficient: Some(1.0),
+                        statFormula: Some(2),
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            473387303: (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: Some(1),
+            ),
             1151544441: (
                 type: "CalculationSpell",
                 formulaParts: Some([
@@ -13,28 +32,9 @@
                 multiplier: None,
                 precision: None,
             ),
-            3530706673: (
+            1455393055: (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
-                multiplier: None,
-                precision: None,
-            ),
-            473387303: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: Some(1),
-            ),
-            463256987: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartStatCoefficient",
-                        stat: Some(31),
-                        coefficient: Some(1.0),
-                        statFormula: Some(2),
-                    ),
-                ]),
                 multiplier: None,
                 precision: None,
             ),
@@ -51,7 +51,7 @@
                 multiplier: None,
                 precision: None,
             ),
-            1455393055: (
+            3530706673: (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,

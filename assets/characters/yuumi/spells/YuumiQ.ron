@@ -1,18 +1,17 @@
 (
     spellData: Some((
         calculations: Some({
-            2479441565: (
+            842194336: (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
-                        type: "CalculationPartStatCoefficient",
-                        stat: None,
-                        coefficient: Some(0.05),
-                        statFormula: None,
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 648559830,
                     ),
                     (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 447487992,
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: 2550192411,
                     ),
                 ]),
                 multiplier: None,
@@ -34,17 +33,18 @@
                 multiplier: None,
                 precision: None,
             ),
-            842194336: (
+            2479441565: (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 648559830,
+                        type: "CalculationPartStatCoefficient",
+                        stat: None,
+                        coefficient: Some(0.05),
+                        statFormula: None,
                     ),
                     (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: None,
-                        dataValue: 2550192411,
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 447487992,
                     ),
                 ]),
                 multiplier: None,

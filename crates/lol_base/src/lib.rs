@@ -4,6 +4,7 @@ pub mod character;
 pub mod character_record;
 pub mod game;
 pub mod grid;
+pub mod map;
 pub mod mesh;
 pub mod movement;
 pub mod prop;

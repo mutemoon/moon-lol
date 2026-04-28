@@ -639,7 +639,6 @@ pub fn get_skill_value(
             }
             Some(value)
         }
-        _ => todo!("CalculationType variant not implemented: {:?}", calculation),
     }
 }
 
@@ -735,13 +734,13 @@ fn calculate_part(
             }
             get_stat(stat) * data_val
         }
-        _ => todo!("CalculationPart not implemented: {:?}", part),
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use std::collections::HashMap;
+
+    use std::collections::BTreeMap;
 
     use lol_base::spell::{DataSpell, Spell, ValuesData, ValuesEffect};
     use lol_base::spell_calc::{
@@ -752,7 +751,7 @@ mod tests {
     use super::*;
 
     fn create_mock_spell(
-        calculations: HashMap<u32, CalculationType>,
+        calculations: BTreeMap<u32, CalculationType>,
         effect_amounts: Option<Vec<ValuesEffect>>,
         data_values: Option<Vec<ValuesData>>,
     ) -> Spell {
@@ -789,7 +788,7 @@ mod tests {
             precision: None,
         });
 
-        let mut calculations = HashMap::new();
+        let mut calculations = BTreeMap::new();
         calculations.insert(hash, calc);
 
         let effect_amounts = vec![ValuesEffect {
@@ -829,7 +828,7 @@ mod tests {
             precision: None,
         });
 
-        let mut calculations = HashMap::new();
+        let mut calculations = BTreeMap::new();
         calculations.insert(hash, calc);
 
         let spell = create_mock_spell(calculations, None, None);
@@ -860,7 +859,7 @@ mod tests {
             precision: None,
         });
 
-        let mut calculations = HashMap::new();
+        let mut calculations = BTreeMap::new();
         calculations.insert(hash, calc);
 
         let data_values = vec![ValuesData {

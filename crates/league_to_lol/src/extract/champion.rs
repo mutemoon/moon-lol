@@ -10,9 +10,7 @@ use lol_core::damage::{Armor, Damage};
 use lol_core::entities::champion::Champion;
 use lol_core::life::Health;
 use lol_core::movement::Movement;
-use lol_core::skill::{
-    CoolDown, CoolDownState, Skill, SkillCooldownMode, SkillOf, SkillSlot, Skills,
-};
+use lol_core::skill::{CoolDown, Skill, SkillCooldownMode, SkillOf, SkillSlot};
 
 use super::skin::extract_skin_for_champion;
 use super::spell::extract_spells_for_champion;
@@ -27,7 +25,7 @@ pub struct ChampionRecordData {
 
 /// 将 skin 路径转换为 skin bin 文件路径
 /// 例如: "Characters/Aatrox/Skins/Skin0" -> "data/characters/aatrox/skins/skin0.bin"
-pub fn skin_path_to_skin_bin_path(champ_name: &str, skin_path: &str) -> String {
+pub fn skin_path_to_skin_bin_path(character_name: &str, skin_path: &str) -> String {
     // skin_path 格式: "Characters/{Name}/Skins/{SkinName}"
     // 例如: "Characters/Aatrox/Skins/Skin0"
     // 输出: "data/characters/{name}/skins/{skinname}.bin"
@@ -36,14 +34,14 @@ pub fn skin_path_to_skin_bin_path(champ_name: &str, skin_path: &str) -> String {
         let skin_name = parts[parts.len() - 1].to_lowercase();
         format!(
             "data/characters/{}/skins/{}.bin",
-            champ_name.to_lowercase(),
+            character_name.to_lowercase(),
             skin_name
         )
     } else {
         // Fallback: 假设格式是 "{SkinName}"，直接拼接
         format!(
             "data/characters/{}/skins/{}.bin",
-            champ_name.to_lowercase(),
+            character_name.to_lowercase(),
             skin_path.to_lowercase()
         )
     }
@@ -109,57 +107,68 @@ pub fn create_champion_components_from_record(
     (attack, health, damage, armor, movement, experience_drop)
 }
 
-/// 导出 champion 实体为 Scene 文件
-pub fn export_champion_scene(
-    champ_name: &str,
-    bounding: Bounding,
-    attack: Attack,
-    health: Health,
-    damage: Damage,
-    armor: Armor,
-    movement: Movement,
-    experience_drop: Option<ExperienceDrop>,
-    skills: Vec<Skill>,
-) {
-    let mut world = World::new();
+/// 从 CharacterRecord 提取 character 并导出场景
+pub fn extract_character_from_record(
+    loader: &LeagueLoader,
+    character_name: &str,
+    is_champion: bool,
+    skin_bin_path: Option<&str>,
+) -> bool {
+    let bin_path = format!("data/characters/{}/{}.bin", character_name, character_name);
 
-    // 注册类型
-    let type_registry = AppTypeRegistry::default();
-    type_registry.write().register::<Champion>();
-    type_registry.write().register::<Bounding>();
-    type_registry.write().register::<Transform>();
-    type_registry.write().register::<GlobalTransform>();
-    type_registry.write().register::<Name>();
-    type_registry.write().register::<Attack>();
-    type_registry.write().register::<WindupConfig>();
-    type_registry.write().register::<Health>();
-    type_registry.write().register::<Damage>();
-    type_registry.write().register::<Armor>();
-    type_registry.write().register::<Movement>();
-    type_registry.write().register::<ExperienceDrop>();
-    type_registry.write().register::<Skill>();
-    type_registry.write().register::<SkillSlot>();
-    type_registry.write().register::<SkillCooldownMode>();
-    type_registry.write().register::<CoolDown>();
-    type_registry.write().register::<CoolDownState>();
-    type_registry.write().register::<SkillOf>();
-    type_registry.write().register::<Skills>();
-    world.insert_resource(type_registry);
+    let Ok(prop_group) = loader.get_prop_group_by_paths(vec![&bin_path]) else {
+        println!("[WARN] 无法加载 bin 文件: {}", bin_path);
+        return false;
+    };
 
-    let champ_name_string = champ_name.to_string();
-    let champion_entity = world
-        .spawn((
-            Character,
-            Name::new(champ_name_string.clone()),
-            Champion,
-            bounding,
-            attack,
-            health,
-            damage,
-            armor,
-            movement,
-        ))
-        .id();
+    let Some(record) = prop_group.get_by_class::<CharacterRecord>() else {
+        println!("[WARN] 无法获取 CharacterRecord: {}", bin_path);
+        return false;
+    };
+
+    // 提取技能数据到文件
+    extract_spells_for_champion(character_name, &prop_group);
+
+    // 创建 App 用于获取 AssetServer
+    let mut app = App::new();
+    app.add_plugins(AssetPlugin::default());
+    app.add_plugins(TaskPoolPlugin::default());
+    app.init_asset::<Spell>();
+    app.finish();
+    app.cleanup();
+
+    let asset_server = app.world().resource::<AssetServer>().clone();
+
+    let bounding = Bounding {
+        radius: record.pathfinding_collision_radius.unwrap_or(0.0),
+        height: record.health_bar_height.unwrap_or(200.0),
+    };
+
+    let (attack, health, damage, armor, movement, experience_drop) =
+        create_champion_components_from_record(&record);
+
+    // 从 spells 哈希创建 Skill 组件（使用 AssetServer 加载路径以获得正确的 Handle）
+    let skills = create_skills_from_record(&prop_group, character_name, &record, &asset_server);
+
+    let world = app.world_mut();
+
+    let character_name_string = character_name.to_string();
+    let mut builder = world.spawn((
+        Character,
+        Name::new(character_name_string.clone()),
+        bounding,
+        attack,
+        health,
+        damage,
+        armor,
+        movement,
+    ));
+
+    if is_champion {
+        builder.insert(Champion);
+    }
+
+    let champion_entity = builder.id();
 
     if let Some(exp_drop) = experience_drop {
         world.entity_mut(champion_entity).insert(exp_drop);
@@ -172,61 +181,18 @@ pub fn export_champion_scene(
             .with_related::<SkillOf>((skill, CoolDown { duration: 0.0 }));
     }
 
-    let scene = DynamicWorld::from_world(&world);
-    let type_registry = world.resource::<AppTypeRegistry>();
+    let scene = DynamicWorld::from_world(world);
+    let type_registry = app.world().resource::<AppTypeRegistry>();
     let type_registry = type_registry.read();
     let serialized_scene = scene.serialize(&type_registry).unwrap();
 
-    let output_path = format!("assets/characters/{}/config.ron", champ_name.to_lowercase());
-    write_to_file(&output_path, serialized_scene);
-}
-
-/// 从 CharacterRecord 提取 champion 并导出场景
-pub fn extract_champion_from_record(
-    loader: &LeagueLoader,
-    champ_name: &str,
-    skin_bin_path: Option<&str>,
-) -> bool {
-    let bin_path = format!("data/characters/{}/{}.bin", champ_name, champ_name);
-
-    let Ok(prop_group) = loader.get_prop_group_by_paths(vec![&bin_path]) else {
-        println!("[WARN] 无法加载 bin 文件: {}", bin_path);
-        return false;
-    };
-
-    let Some(record) = prop_group.get_by_class::<CharacterRecord>() else {
-        println!("[WARN] 无法获取 CharacterRecord: {}", bin_path);
-        return false;
-    };
-
-    // 先提取技能数据到文件
-    extract_spells_for_champion(champ_name, &prop_group);
-
-    let bounding = Bounding {
-        radius: record.pathfinding_collision_radius.unwrap_or(0.0),
-        height: record.health_bar_height.unwrap_or(200.0),
-    };
-
-    let (attack, health, damage, armor, movement, experience_drop) =
-        create_champion_components_from_record(&record);
-
-    // 从 spells 哈希创建 Skill 组件（使用 AssetServer 加载路径以获得正确的 Handle）
-    let skills = create_skills_from_record(&prop_group, champ_name, &record);
-
-    export_champion_scene(
-        champ_name,
-        bounding,
-        attack,
-        health,
-        damage,
-        armor,
-        movement,
-        experience_drop,
-        skills,
+    let output_path = format!(
+        "assets/characters/{}/config.ron",
+        character_name.to_lowercase()
     );
+    write_to_file(&output_path, serialized_scene);
 
-    // 提取皮肤 GLB 和皮肤场景
-    extract_skin_for_champion(loader, champ_name, skin_bin_path);
+    extract_skin_for_champion(loader, character_name, skin_bin_path);
 
     true
 }
@@ -234,19 +200,10 @@ pub fn extract_champion_from_record(
 /// 从 CharacterRecord 创建 Skill 组件
 fn create_skills_from_record(
     prop_group: &PropGroup,
-    champ_name: &str,
+    character_name: &str,
     record: &CharacterRecord,
+    asset_server: &AssetServer,
 ) -> Vec<Skill> {
-    let mut app = App::new();
-    app.add_plugins(AssetPlugin::default());
-    app.add_plugins(TaskPoolPlugin::default());
-    app.init_asset::<Spell>();
-    app.finish();
-    app.cleanup();
-
-    let world = app.world_mut();
-    let asset_server = world.resource::<AssetServer>();
-
     let mut skills = Vec::new();
 
     // 获取 Q/W/E/R 技能
@@ -261,7 +218,7 @@ fn create_skills_from_record(
             if let Some(spell_obj) = prop_group.get_data_option::<SpellObject>(*hash) {
                 let spell_path = format!(
                     "characters/{}/spells/{}.ron",
-                    champ_name.to_lowercase(),
+                    character_name.to_lowercase(),
                     spell_obj.object_name
                 );
                 let spell_handle: Handle<Spell> = asset_server.load(&spell_path);
@@ -285,7 +242,7 @@ fn create_skills_from_record(
         if let Some(spell_obj) = prop_group.get_data_option::<SpellObject>(passive_hash) {
             let spell_path = format!(
                 "characters/{}/spells/{}.ron",
-                champ_name.to_lowercase(),
+                character_name.to_lowercase(),
                 spell_obj.object_name
             );
             let spell_handle: Handle<Spell> = asset_server.load(&spell_path);

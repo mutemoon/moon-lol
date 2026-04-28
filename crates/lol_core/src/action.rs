@@ -30,7 +30,7 @@ pub struct CommandAction {
     pub action: Action,
 }
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize, Reflect, Debug)]
 pub enum Action {
     Attack(Entity),
     Move(Vec2),

@@ -1,7 +1,7 @@
 (
   resources: {},
   entities: {
-    4294967291: (
+    4294967269: (
       components: {
         "lol_core::skill::CoolDown": (
           duration: 0.0,
@@ -12,10 +12,10 @@
           slot: R,
           cooldown_mode: AfterCast,
         ),
-        "lol_core::skill::SkillOf": (4294967293),
+        "lol_core::skill::SkillOf": (4294967271),
       },
     ),
-    4294967292: (
+    4294967270: (
       components: {
         "lol_core::skill::CoolDown": (
           duration: 0.0,
@@ -26,10 +26,10 @@
           slot: E,
           cooldown_mode: AfterCast,
         ),
-        "lol_core::skill::SkillOf": (4294967293),
+        "lol_core::skill::SkillOf": (4294967271),
       },
     ),
-    4294967293: (
+    4294967271: (
       components: {
         "bevy_ecs::name::Name": "sru_dragon_elder",
         "lol_core::attack::Attack": (
@@ -53,9 +53,9 @@
           exp_given_on_death: 0.0,
           experience_radius: 2000.0,
         ),
+        "lol_core::character::Character": (),
         "lol_core::damage::Armor": (30.0),
         "lol_core::damage::Damage": (50.0),
-        "lol_core::entities::champion::Champion": (),
         "lol_core::life::Health": (
           value: 0.0,
           max: 0.0,
@@ -64,8 +64,8 @@
           speed: 5.0,
         ),
         "lol_core::skill::Skills": ([
-          4294967292,
-          4294967291,
+          4294967270,
+          4294967269,
         ]),
       },
     ),

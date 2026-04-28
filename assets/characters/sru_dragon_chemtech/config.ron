@@ -1,7 +1,7 @@
 (
   resources: {},
   entities: {
-    4294967292: (
+    4294967270: (
       components: {
         "lol_core::skill::CoolDown": (
           duration: 0.0,
@@ -12,10 +12,10 @@
           slot: W,
           cooldown_mode: AfterCast,
         ),
-        "lol_core::skill::SkillOf": (4294967293),
+        "lol_core::skill::SkillOf": (4294967271),
       },
     ),
-    4294967293: (
+    4294967271: (
       components: {
         "bevy_ecs::name::Name": "sru_dragon_chemtech",
         "lol_core::attack::Attack": (
@@ -39,9 +39,9 @@
           exp_given_on_death: 160.0,
           experience_radius: 2000.0,
         ),
+        "lol_core::character::Character": (),
         "lol_core::damage::Armor": (30.0),
         "lol_core::damage::Damage": (50.0),
-        "lol_core::entities::champion::Champion": (),
         "lol_core::life::Health": (
           value: 160.0,
           max: 160.0,
@@ -50,7 +50,7 @@
           speed: 5.0,
         ),
         "lol_core::skill::Skills": ([
-          4294967292,
+          4294967270,
         ]),
       },
     ),

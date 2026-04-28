@@ -1,12 +1,12 @@
 (
     spellData: Some((
         calculations: Some({
-            2713094069: (
+            501147496: (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 500244075,
+                        dataValue: 435677466,
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
@@ -34,12 +34,12 @@
                 multiplier: None,
                 precision: None,
             ),
-            501147496: (
+            2713094069: (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 435677466,
+                        dataValue: 500244075,
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",

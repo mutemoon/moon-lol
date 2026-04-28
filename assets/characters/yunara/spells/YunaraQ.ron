@@ -18,6 +18,35 @@
                 multiplier: None,
                 precision: None,
             ),
+            513504021: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 180331449,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            983152942: (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            2634938258: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(2),
+                        dataValue: 2654352846,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
             3107773990: (
                 type: "CalculationSpell",
                 formulaParts: Some([
@@ -38,35 +67,6 @@
             4098806307: (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
-                multiplier: None,
-                precision: None,
-            ),
-            2634938258: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: Some(2),
-                        dataValue: 2654352846,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            983152942: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: None,
-            ),
-            513504021: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 180331449,
-                    ),
-                ]),
                 multiplier: None,
                 precision: None,
             ),

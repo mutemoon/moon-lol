@@ -158,9 +158,10 @@ extract_phase_2_champions(&loader);
 | `assets/characters/{name}/skin.glb`     | 皮肤 GLB 文件（网格 + 材质 + 贴图）                                                                 |
 | `assets/characters/{name}/skin.ron`     | 皮肤场景（包含 Skin、HealthBar、Visibility 组件）                                                   |
 | `assets/characters/{name}/spells/*.ron` | 技能数据 Asset（包含 Spell、DataSpell、calculations、effect_amounts 等）                            |
-| `assets/maps/{map_name}_navgrid.bin`    | 二进制导航网格数据                                                                                  |
-| `assets/maps/{map_name}_mapgeo.glb`     | GLTF 格式的地图几何                                                                                 |
-| `assets/maps/{map_name}_scene.ron`      | 包含所有地图对象的序列化场景                                                                        |
+| `assets/maps/{map_name}/navgrid.bin`    | 二进制导航网格数据                                                                                  |
+| `assets/maps/{map_name}/mapgeo.glb`     | GLTF 格式的地图几何                                                                                 |
+| `assets/maps/{map_name}/scene.ron`      | 包含所有地图对象的序列化场景                                                                        |
+| `assets/maps/{map_name}/barracks/{id}.ron` | 兵营配置                                                                                    |
 
 ### Character 场景文件结构
 

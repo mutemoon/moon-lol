@@ -3,18 +3,14 @@ use std::time::Duration;
 
 use bevy::prelude::*;
 use bevy::time::TimeUpdateStrategy;
-use lol_champions::fiora::Fiora;
-use lol_core::action::Action;
 use lol_core::entities::barrack::PluginBarrack;
 use lol_core::entities::minion::PluginMinion;
 use lol_core::entities::turret::PluginTurret;
 use lol_core::game::PluginGame;
 use lol_core::map::PluginMap;
 use lol_render::test_render::{
-    PluginSkillTestRender, SkillTestRenderConfig, SkillTestScript, SkillTestScriptCursor,
-    SkillTestScriptStep, SkillTestVideoFormat, SkillTestVideoOutput, attach_skill_test_actor,
+    PluginSkillTestRender, SkillTestRenderConfig, SkillTestVideoFormat, SkillTestVideoOutput,
 };
-use lol_render::ui::PluginUI;
 use moon_lol::PluginCore;
 
 fn main() {
@@ -39,8 +35,6 @@ fn main() {
     app.insert_resource(TimeUpdateStrategy::ManualDuration(Duration::from_millis(
         16,
     )));
-    app.insert_resource(make_fiora_script());
-    app.init_resource::<SkillTestScriptCursor>();
     app.add_plugins(DefaultPlugins.set(WindowPlugin {
         primary_window: Some(Window {
             visible: false,
@@ -58,11 +52,9 @@ fn main() {
             .disable::<PluginBarrack>()
             .disable::<PluginMap>()
             .disable::<PluginMinion>()
-            .disable::<PluginTurret>()
-            .disable::<PluginUI>(),
+            .disable::<PluginTurret>(),
     );
     app.add_systems(Startup, setup_stage);
-    app.add_systems(Update, attach_skill_test_actor::<Fiora>);
     app.finish();
     app.cleanup();
 
@@ -94,49 +86,4 @@ fn setup_stage(
         })),
         Name::new("RenderTestPlatform"),
     ));
-}
-
-fn make_fiora_script() -> SkillTestScript {
-    SkillTestScript::new(vec![
-        SkillTestScriptStep::set_skill_points(0, 4),
-        SkillTestScriptStep::action(0, Action::SkillLevelUp(0)),
-        SkillTestScriptStep::action(0, Action::SkillLevelUp(1)),
-        SkillTestScriptStep::action(0, Action::SkillLevelUp(2)),
-        SkillTestScriptStep::action(0, Action::SkillLevelUp(3)),
-        SkillTestScriptStep::action(
-            15,
-            Action::Skill {
-                index: 0,
-                point: Vec2::new(170.0, 0.0),
-            },
-        ),
-        SkillTestScriptStep::action(
-            45,
-            Action::Skill {
-                index: 1,
-                point: Vec2::new(170.0, 0.0),
-            },
-        ),
-        SkillTestScriptStep::action(
-            80,
-            Action::Skill {
-                index: 2,
-                point: Vec2::new(170.0, 0.0),
-            },
-        ),
-        SkillTestScriptStep::action(
-            115,
-            Action::Skill {
-                index: 0,
-                point: Vec2::new(170.0, 0.0),
-            },
-        ),
-        SkillTestScriptStep::action(
-            145,
-            Action::Skill {
-                index: 3,
-                point: Vec2::new(170.0, 0.0),
-            },
-        ),
-    ])
 }

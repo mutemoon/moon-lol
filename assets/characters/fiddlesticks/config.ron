@@ -1,7 +1,7 @@
 (
   resources: {},
   entities: {
-    4294967288: (
+    4294967266: (
       components: {
         "lol_core::skill::CoolDown": (
           duration: 0.0,
@@ -12,10 +12,10 @@
           slot: Passive,
           cooldown_mode: AfterCast,
         ),
-        "lol_core::skill::SkillOf": (4294967293),
+        "lol_core::skill::SkillOf": (4294967271),
       },
     ),
-    4294967289: (
+    4294967267: (
       components: {
         "lol_core::skill::CoolDown": (
           duration: 0.0,
@@ -26,10 +26,10 @@
           slot: R,
           cooldown_mode: AfterCast,
         ),
-        "lol_core::skill::SkillOf": (4294967293),
+        "lol_core::skill::SkillOf": (4294967271),
       },
     ),
-    4294967290: (
+    4294967268: (
       components: {
         "lol_core::skill::CoolDown": (
           duration: 0.0,
@@ -40,10 +40,10 @@
           slot: E,
           cooldown_mode: AfterCast,
         ),
-        "lol_core::skill::SkillOf": (4294967293),
+        "lol_core::skill::SkillOf": (4294967271),
       },
     ),
-    4294967291: (
+    4294967269: (
       components: {
         "lol_core::skill::CoolDown": (
           duration: 0.0,
@@ -54,10 +54,10 @@
           slot: W,
           cooldown_mode: AfterCast,
         ),
-        "lol_core::skill::SkillOf": (4294967293),
+        "lol_core::skill::SkillOf": (4294967271),
       },
     ),
-    4294967292: (
+    4294967270: (
       components: {
         "lol_core::skill::CoolDown": (
           duration: 0.0,
@@ -68,10 +68,10 @@
           slot: Q,
           cooldown_mode: AfterCast,
         ),
-        "lol_core::skill::SkillOf": (4294967293),
+        "lol_core::skill::SkillOf": (4294967271),
       },
     ),
-    4294967293: (
+    4294967271: (
       components: {
         "bevy_ecs::name::Name": "fiddlesticks",
         "lol_core::attack::Attack": (
@@ -91,6 +91,12 @@
           radius: 35.0,
           height: 110.0,
         ),
+        "lol_core::base::level::Level": (
+          value: 1,
+          experience: 0,
+          experience_to_next_level: 280,
+        ),
+        "lol_core::character::Character": (),
         "lol_core::damage::Armor": (30.0),
         "lol_core::damage::Damage": (50.0),
         "lol_core::entities::champion::Champion": (),
@@ -102,11 +108,11 @@
           speed: 5.0,
         ),
         "lol_core::skill::Skills": ([
-          4294967292,
-          4294967291,
-          4294967290,
-          4294967289,
-          4294967288,
+          4294967270,
+          4294967269,
+          4294967268,
+          4294967267,
+          4294967266,
         ]),
       },
     ),

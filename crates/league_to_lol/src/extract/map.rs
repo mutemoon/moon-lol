@@ -8,16 +8,17 @@ use league_file::mapgeo::LeagueMapGeo;
 use league_loader::game::{Data, LeagueLoader};
 use league_loader::prop_bin::LeagueWadLoaderTrait;
 use lol_base::character::{ConfigCharacterRecord, ConfigSkin};
+use lol_base::map::MapPaths;
 use lol_core::entities::barrack::BarrackConfigHandler;
 use lol_core::lane::Lane;
-use lol_core::map::{MapName, MinionPath};
+use lol_core::map::MinionPath;
 use lol_core::navigation::grid::ResourceGrid;
 use lol_core::team::Team;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 
 use crate::barrack::barracks_config_to_barracks;
 use crate::extract::champion::{
-    ChampionRecordData, extract_champion_from_record, skin_path_to_skin_bin_path,
+    ChampionRecordData, extract_character_from_record, skin_path_to_skin_bin_path,
 };
 use crate::extract::utils::write_to_file;
 use crate::gltf_export::export_mapgeo_to_gltf;
@@ -71,7 +72,7 @@ pub fn extract_phase_2_champions(loader: &LeagueLoader) {
     let wad_entries: Vec<_> = entries.flatten().collect();
     println!("[INFO] 发现 {} 个 WAD 文件", wad_entries.len());
 
-    let champ_names: Vec<String> = wad_entries
+    let character_names: Vec<String> = wad_entries
         .iter()
         .filter_map(|entry| {
             let path = entry.path();
@@ -84,15 +85,22 @@ pub fn extract_phase_2_champions(loader: &LeagueLoader) {
         })
         .collect();
 
-    println!("[INFO] 开始并行提取 {} 个英雄...", champ_names.len());
+    println!("[INFO] 开始并行提取 {} 个英雄...", character_names.len());
 
-    let results: Vec<(String, bool)> = champ_names
+    let results: Vec<(String, bool)> = character_names
         .into_par_iter()
-        .map(|champ_name: String| {
-            let skin_bin_path = Some(format!("data/characters/{}/skins/skin0.bin", champ_name));
-            let success =
-                extract_champion_from_record(loader, &champ_name, skin_bin_path.as_deref());
-            (champ_name, success)
+        .map(|character_name: String| {
+            let skin_bin_path = Some(format!(
+                "data/characters/{}/skins/skin0.bin",
+                character_name
+            ));
+            let success = extract_character_from_record(
+                loader,
+                &character_name,
+                true,
+                skin_bin_path.as_deref(),
+            );
+            (character_name, success)
         })
         .collect();
 
@@ -100,9 +108,9 @@ pub fn extract_phase_2_champions(loader: &LeagueLoader) {
     let skip_count = results.len() - success_count;
 
     // 只打印失败项
-    for (champ_name, success) in &results {
+    for (character_name, success) in &results {
         if !*success {
-            println!("[WARN] 跳过: {}", champ_name);
+            println!("[WARN] 跳过: {}", character_name);
         }
     }
 
@@ -116,17 +124,17 @@ pub fn extract_phase_2_champions(loader: &LeagueLoader) {
 pub fn extract_phase_3_map_chunks(
     world: &mut World,
     loader: &LeagueLoader,
-    map_name: &MapName,
+    map_paths: &MapPaths,
 ) -> std::collections::HashMap<String, ChampionRecordData> {
     println!("[3/7] Phase 3: 提取地图块数据...");
     let prop_group = loader
         .get_prop_group_by_paths(vec![
-            &map_name.get_materials_bin_path(),
+            &map_paths.materials_bin_path(),
             "data/maps/shipping/map11/map11.bin",
         ])
         .unwrap();
 
-    let map_container = prop_group.get_data::<MapContainer>(map_name.get_materials_path());
+    let map_container = prop_group.get_data::<MapContainer>(map_paths.materials_path());
 
     let mut minion_path = MinionPath::default();
     let mut map_character_records: std::collections::HashMap<String, ChampionRecordData> =
@@ -174,7 +182,7 @@ pub fn extract_phase_3_map_chunks(
                     let config_barracks = barracks_config_to_barracks(barracks_config.clone());
                     let ron_content = ron::to_string(&config_barracks).unwrap();
                     write_to_file(
-                        &format!("assets/maps/{}.ron", barracks_config_hash),
+                        &map_paths.barracks_ron_export(barracks_config_hash),
                         ron_content,
                     );
 
@@ -185,7 +193,7 @@ pub fn extract_phase_3_map_chunks(
                         BarrackConfigHandler::new(
                             world
                                 .resource::<AssetServer>()
-                                .load(&format!("maps/{}.ron", barracks_config_hash)),
+                                .load(&map_paths.barracks_ron(barracks_config_hash)),
                         ),
                     ));
                 }
@@ -193,16 +201,16 @@ pub fn extract_phase_3_map_chunks(
                     let transform = Transform::from_matrix(unk0xad65d8c4.transform.unwrap());
 
                     // 从路径提取英雄名
-                    let champ_name = unk0xad65d8c4
+                    let character_name = unk0xad65d8c4
                         .character
                         .character_record
                         .split('/')
                         .skip(1)
                         .next();
 
-                    if let Some(champ_name) = champ_name {
+                    if let Some(character_name) = character_name {
                         map_character_records.insert(
-                            champ_name.to_lowercase(),
+                            character_name.to_lowercase(),
                             ChampionRecordData {
                                 char_record_path: unk0xad65d8c4.character.character_record.clone(),
                                 skin_path: Some(unk0xad65d8c4.character.skin.clone()),
@@ -215,12 +223,12 @@ pub fn extract_phase_3_map_chunks(
                             ConfigSkin {
                                 skin: world
                                     .resource::<AssetServer>()
-                                    .load(&format!("characters/{}/skin.ron", champ_name)),
+                                    .load(&format!("characters/{}/skin.ron", character_name)),
                             },
                             ConfigCharacterRecord {
                                 character_record: world
                                     .resource::<AssetServer>()
-                                    .load(&format!("characters/{}/config.ron", champ_name)),
+                                    .load(&format!("characters/{}/config.ron", character_name)),
                             },
                         ));
                     }
@@ -235,16 +243,16 @@ pub fn extract_phase_3_map_chunks(
 }
 
 /// Phase 4: 提取导航网格
-pub fn extract_phase_4_nav_grid(world: &mut World, loader: &LeagueLoader, map_name: &MapName) {
+pub fn extract_phase_4_nav_grid(world: &mut World, loader: &LeagueLoader, map_paths: &MapPaths) {
     println!("[4/7] Phase 4: 提取导航网格...");
     let prop_group = loader
         .get_prop_group_by_paths(vec![
-            &map_name.get_materials_bin_path(),
+            &map_paths.materials_bin_path(),
             "data/maps/shipping/map11/map11.bin",
         ])
         .unwrap();
 
-    let map_container = prop_group.get_data::<MapContainer>(map_name.get_materials_path());
+    let map_container = prop_group.get_data::<MapContainer>(map_paths.materials_path());
 
     if let Some(map_nav_grid) = map_container.components.iter().find_map(|item| {
         if let EnumMap::MapNavGrid(map_nav_grid) = item {
@@ -259,30 +267,30 @@ pub fn extract_phase_4_nav_grid(world: &mut World, loader: &LeagueLoader, map_na
         let config_navigation_grid = load_league_nav_grid(nav_grid);
 
         crate::extract::utils::write_bin_to_file(
-            &format!("assets/maps/{}_navgrid.bin", map_name),
+            &map_paths.navgrid_bin_export(),
             &config_navigation_grid,
         );
 
         world.insert_resource(ResourceGrid(
             world
                 .resource::<AssetServer>()
-                .load(&format!("maps/{}_navgrid.bin", map_name)),
+                .load(&map_paths.navgrid_bin()),
         ));
     }
 }
 
 /// Phase 5: 导出地图几何到 GLTF
-pub fn extract_phase_5_map_geo(loader: &LeagueLoader, map_name: &MapName) {
+pub fn extract_phase_5_map_geo(loader: &LeagueLoader, map_paths: &MapPaths) {
     println!("[5/7] Phase 5: 导出地图几何到 GLTF...");
     let prop_group = loader
         .get_prop_group_by_paths(vec![
-            &map_name.get_materials_bin_path(),
+            &map_paths.materials_bin_path(),
             "data/maps/shipping/map11/map11.bin",
         ])
         .unwrap();
 
     let buf = loader
-        .get_wad_entry_buffer_by_path(&map_name.get_mapgeo_path())
+        .get_wad_entry_buffer_by_path(&map_paths.mapgeo_path())
         .unwrap();
     let (_, league_mapgeo) = LeagueMapGeo::parse(&buf).unwrap();
 
@@ -299,7 +307,7 @@ pub fn extract_phase_5_map_geo(loader: &LeagueLoader, map_name: &MapName) {
 
     export_mapgeo_to_gltf(
         &league_mapgeo,
-        &format!("assets/maps/{}_mapgeo", map_name),
+        &map_paths.mapgeo_glb_export().replace(".glb", ""),
         &material_defs,
         loader,
     )
@@ -327,23 +335,27 @@ pub fn extract_phase_6_map_character_records(
 
     let results: Vec<(String, bool)> = items
         .into_par_iter()
-        .map(|(champ_name, record_data)| {
+        .map(|(character_name, record_data)| {
             let skin_bin_path = record_data
                 .skin_path
                 .as_ref()
-                .map(|skin_path| skin_path_to_skin_bin_path(&champ_name, skin_path));
-            let success =
-                extract_champion_from_record(loader, &champ_name, skin_bin_path.as_deref());
-            (champ_name, success)
+                .map(|skin_path| skin_path_to_skin_bin_path(&character_name, skin_path));
+            let success = extract_character_from_record(
+                loader,
+                &character_name,
+                false,
+                skin_bin_path.as_deref(),
+            );
+            (character_name, success)
         })
         .collect();
 
     let success_count = results.iter().filter(|(_, success)| *success).count();
 
     // 只打印失败项
-    for (champ_name, success) in &results {
+    for (character_name, success) in &results {
         if !*success {
-            println!("[WARN] 跳过: {}", champ_name);
+            println!("[WARN] 跳过: {}", character_name);
         }
     }
 
@@ -351,23 +363,20 @@ pub fn extract_phase_6_map_character_records(
 }
 
 /// Phase 7: 序列化 World 到文件
-pub fn extract_phase_7_serialize_world(world: &mut World, map_name: &MapName) {
+pub fn extract_phase_7_serialize_world(world: &mut World, map_paths: &MapPaths) {
     println!("[7/7] Phase 7: 序列化 World 到文件...");
     let scene = DynamicWorld::from_world(world);
     let type_registry = world.resource::<AppTypeRegistry>();
     let type_registry = type_registry.read();
     let serialized_scene = scene.serialize(&type_registry).unwrap();
 
-    write_to_file(
-        &format!("assets/{}", map_name.get_ron_path()),
-        &serialized_scene,
-    );
+    write_to_file(&map_paths.scene_ron_export(), &serialized_scene);
 }
 
 /// 一键提取所有数据（英雄 + 地图）
 pub fn extract_all(game_path: &str) {
     let loader = extract_phase_1_create_loader(game_path);
-    let map_name = MapName::default();
+    let map_paths = MapPaths::default();
 
     let mut app = App::new();
     app.add_plugins(AssetPlugin::default());
@@ -385,17 +394,17 @@ pub fn extract_all(game_path: &str) {
     extract_phase_2_champions(&loader);
 
     // Phase 3: 提取地图块
-    let map_character_records = extract_phase_3_map_chunks(world, &loader, &map_name);
+    let map_character_records = extract_phase_3_map_chunks(world, &loader, &map_paths);
 
     // Phase 4: 提取导航网格
-    extract_phase_4_nav_grid(world, &loader, &map_name);
+    extract_phase_4_nav_grid(world, &loader, &map_paths);
 
     // Phase 5: 导出地图几何
-    extract_phase_5_map_geo(&loader, &map_name);
+    extract_phase_5_map_geo(&loader, &map_paths);
 
     // Phase 6: 从地图提取角色记录
     extract_phase_6_map_character_records(&loader, &map_character_records);
 
     // Phase 7: 序列化 World
-    extract_phase_7_serialize_world(world, &map_name);
+    extract_phase_7_serialize_world(world, &map_paths);
 }

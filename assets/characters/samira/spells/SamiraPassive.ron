@@ -1,15 +1,9 @@
 (
     spellData: Some((
         calculations: Some({
-            2931851617: (
+            342470442: (
                 type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartStatSub",
-                        stat: Some(2),
-                        subpart: None,
-                    ),
-                ]),
+                formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),
@@ -19,9 +13,15 @@
                 multiplier: None,
                 precision: Some(1),
             ),
-            342470442: (
+            2931851617: (
                 type: "CalculationSpell",
-                formulaParts: Some([]),
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatSub",
+                        stat: Some(2),
+                        subpart: None,
+                    ),
+                ]),
                 multiplier: None,
                 precision: None,
             ),

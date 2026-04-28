@@ -1,7 +1,7 @@
 (
   resources: {},
   entities: {
-    4294967293: (
+    4294967271: (
       components: {
         "bevy_ecs::name::Name": "tftchampion",
         "lol_core::attack::Attack": (
@@ -20,6 +20,12 @@
           radius: 0.0,
           height: 65.0,
         ),
+        "lol_core::base::level::Level": (
+          value: 1,
+          experience: 0,
+          experience_to_next_level: 280,
+        ),
+        "lol_core::character::Character": (),
         "lol_core::damage::Armor": (30.0),
         "lol_core::damage::Damage": (50.0),
         "lol_core::entities::champion::Champion": (),

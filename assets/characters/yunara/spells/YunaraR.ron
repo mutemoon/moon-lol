@@ -1,33 +1,12 @@
 (
     spellData: Some((
         calculations: Some({
-            3596606078: (
+            211655295: (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 3746997602,
-                    ),
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: Some(2),
-                        dataValue: 2524999493,
-                    ),
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: None,
-                        dataValue: 2128282665,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            1117146549: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 2351022553,
+                        dataValue: 3741939819,
                     ),
                 ]),
                 multiplier: None,
@@ -44,12 +23,33 @@
                 multiplier: None,
                 precision: None,
             ),
-            211655295: (
+            1117146549: (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 3741939819,
+                        dataValue: 2351022553,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            3596606078: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 3746997602,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(2),
+                        dataValue: 2524999493,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: 2128282665,
                     ),
                 ]),
                 multiplier: None,

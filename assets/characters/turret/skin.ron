@@ -5,7 +5,7 @@
       components: {
         "bevy_camera::visibility::Visibility": Inherited,
         "bevy_world_serialization::components::WorldAssetRoot": (Path("characters/turret/skin.glb#Scene0")),
-        "lol_base::animation::AnimationHandler": (Path("characters/turret/animations/skin49.ron")),
+        "lol_base::animation::AnimationHandler": (Path("characters/turret/animations/skin48.ron")),
         "lol_base::character::HealthBar": (
           bar_type: 8,
         ),

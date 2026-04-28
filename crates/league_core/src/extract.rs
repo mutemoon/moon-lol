@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 
 use bevy::asset::Asset;
 use bevy::math::{Mat4, Vec2, Vec3, Vec4};
@@ -30,14 +30,14 @@ pub struct AbilityResourceDynamicMaterialFloatDriver {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct AbilityResourcePipSpacerTypeMap {
-    pub additional_pip_spacer_types: HashMap<u32, u32>,
+    pub additional_pip_spacer_types: BTreeMap<u32, u32>,
     pub default_pip_spacer: u32,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct AbilityResourcePipTypeMap {
-    pub additional_pip_types: HashMap<u32, u32>,
+    pub additional_pip_types: BTreeMap<u32, u32>,
     pub default_empty_pip: u32,
     pub default_large_pip: u32,
     pub default_medium_pip: u32,
@@ -96,7 +96,7 @@ pub struct AcceleratingMovement {
     pub m_offset_initial_target_height: Option<f32>,
     pub m_project_target_to_cast_range: Option<bool>,
     pub m_start_bone_name: Option<String>,
-    pub m_start_bone_skin_overrides: Option<HashMap<u32, String>>,
+    pub m_start_bone_skin_overrides: Option<BTreeMap<u32, String>>,
     pub m_target_bone_name: Option<String>,
     pub m_target_height_augment: Option<f32>,
     pub m_tracks_target: Option<bool>,
@@ -139,12 +139,12 @@ pub struct AnimationFractionDynamicMaterialFloatDriver {
 #[derive(Serialize, Deserialize, Debug, Clone, Asset, TypePath)]
 #[serde(rename_all = "camelCase")]
 pub struct AnimationGraphData {
-    pub m_blend_data_table: Option<HashMap<u64, EnumBlendData>>,
+    pub m_blend_data_table: Option<BTreeMap<u64, EnumBlendData>>,
     pub m_cascade_blend_value: Option<f32>,
-    pub m_clip_data_map: Option<HashMap<u32, EnumClipData>>,
-    pub m_mask_data_map: Option<HashMap<u32, MaskData>>,
-    pub m_sync_group_data_map: Option<HashMap<u32, SyncGroupData>>,
-    pub m_track_data_map: HashMap<u32, TrackData>,
+    pub m_clip_data_map: Option<BTreeMap<u32, EnumClipData>>,
+    pub m_mask_data_map: Option<BTreeMap<u32, MaskData>>,
+    pub m_sync_group_data_map: Option<BTreeMap<u32, SyncGroupData>>,
+    pub m_track_data_map: BTreeMap<u32, TrackData>,
     pub m_use_cascade_blend: Option<bool>,
 }
 
@@ -204,7 +204,7 @@ pub struct AtomicClipData {
     pub end_frame: Option<f32>,
     pub m_animation_interruption_group_names: Option<Vec<u32>>,
     pub m_animation_resource_data: AnimationResourceData,
-    pub m_event_data_map: Option<HashMap<u32, EnumEventData>>,
+    pub m_event_data_map: Option<BTreeMap<u32, EnumEventData>>,
     pub m_flags: Option<u32>,
     pub m_mask_data_name: Option<u32>,
     pub m_sync_group_data_name: Option<u32>,
@@ -249,7 +249,7 @@ pub struct BankUnit {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct BarTypeMap {
-    pub additional_bar_types: Option<HashMap<u32, u32>>,
+    pub additional_bar_types: Option<BTreeMap<u32, u32>>,
     pub default_bar: u32,
     pub min_display_percent_override: Option<f32>,
 }
@@ -389,7 +389,7 @@ pub struct CcBehaviorData {
 #[serde(rename_all = "camelCase")]
 pub struct CensoredImage {
     pub image: String,
-    pub uncensored_images: Option<HashMap<u32, String>>,
+    pub uncensored_images: Option<BTreeMap<u32, String>>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -500,7 +500,7 @@ pub struct CharacterRecord {
     pub m_abilities: Option<Vec<u32>>,
     pub m_ability_slot_cc: Option<Vec<i32>>,
     pub m_adaptive_force_to_ability_power_weight: Option<f32>,
-    pub m_character_calculations: Option<HashMap<u32, GameCalculation>>,
+    pub m_character_calculations: Option<BTreeMap<u32, GameCalculation>>,
     pub m_character_name: String,
     pub m_character_passive_buffs: Option<Vec<CharacterPassiveData>>,
     pub m_character_passive_spell: Option<u32>,
@@ -604,7 +604,7 @@ pub struct CharacterToolData {
     pub level_spell_effectiveness: Option<f32>,
     pub lore2: Option<String>,
     pub magic_rank: Option<i32>,
-    pub map_ai_presence: Option<HashMap<u32, ToolAiPresence>>,
+    pub map_ai_presence: Option<BTreeMap<u32, ToolAiPresence>>,
     pub par_fade_color: Option<String>,
     pub pass_lev1_desc: Option<Vec<String>>,
     pub passive_data: Option<Vec<ToolPassiveData>>,
@@ -1443,7 +1443,7 @@ pub struct FixedSpeedMovement {
     pub m_project_target_to_cast_range: Option<bool>,
     pub m_speed: Option<f32>,
     pub m_start_bone_name: Option<String>,
-    pub m_start_bone_skin_overrides: Option<HashMap<u32, String>>,
+    pub m_start_bone_skin_overrides: Option<BTreeMap<u32, String>>,
     pub m_target_bone_name: Option<String>,
     pub m_target_height_augment: Option<f32>,
     pub m_tracks_target: Option<bool>,
@@ -1474,7 +1474,7 @@ pub struct FixedTimeMovement {
     pub m_offset_initial_target_height: Option<f32>,
     pub m_project_target_to_cast_range: Option<bool>,
     pub m_start_bone_name: Option<String>,
-    pub m_start_bone_skin_overrides: Option<HashMap<u32, String>>,
+    pub m_start_bone_skin_overrides: Option<BTreeMap<u32, String>>,
     pub m_target_bone_name: Option<String>,
     pub m_target_height_augment: Option<f32>,
     pub m_tracks_target: Option<bool>,
@@ -1567,7 +1567,7 @@ pub struct FloatingHealthBarBurstData {
 #[serde(rename_all = "camelCase")]
 pub struct FloatingInfoBarViewController {
     pub base_loadable: u32,
-    pub info_bar_style_source_map: HashMap<u8, u32>,
+    pub info_bar_style_source_map: BTreeMap<u8, u32>,
     pub path_hash_to_self: u64,
     pub unit_status_priority_list: u32,
 }
@@ -1817,14 +1817,14 @@ pub struct HeroFloatingInfoBarData {
     pub sar_bar: Option<AbilityResourceBarData>,
     pub sar_pips: Option<AbilityResourcePipsData>,
     pub scene: u32,
-    pub scripted_threshold_types: HashMap<u32, u32>,
+    pub scripted_threshold_types: BTreeMap<u32, u32>,
     pub unit_status: UiUnitStatusData,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct HeroFloatingInfoBorderData {
-    pub additional_status_icons: Option<HashMap<u32, u32>>,
+    pub additional_status_icons: Option<BTreeMap<u32, u32>>,
     pub default_border: HeroFloatingInfoBorderTypeData,
     pub defense_modifier_icons: Option<HeroFloatingInfoBorderDefenseIconData>,
     pub executable_border: HeroFloatingInfoBorderTypeData,
@@ -1869,7 +1869,7 @@ pub struct HeroFloatingInfoBorderTypeData {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct HeroFloatingInfoCharacterStateIndicatorData {
-    pub character_states_map: HashMap<u32, HeroFloatingInfoCharacterStateIndicatorList>,
+    pub character_states_map: BTreeMap<u32, HeroFloatingInfoCharacterStateIndicatorList>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -1982,7 +1982,7 @@ pub struct KeyFrameFloatClipReaderDriver {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct KeyFrameFloatMapClipAccessoryData {
-    pub key_frame_floatmap: Option<HashMap<u32, f32>>,
+    pub key_frame_floatmap: Option<BTreeMap<u32, f32>>,
     pub name: u32,
 }
 
@@ -2102,7 +2102,7 @@ pub struct MapBakeProperties {
 pub struct MapContainer {
     pub bounds_max: Vec2,
     pub bounds_min: Option<Vec2>,
-    pub chunks: HashMap<u32, u32>,
+    pub chunks: BTreeMap<u32, u32>,
     pub components: Vec<EnumMap>,
     pub convert_streams_to_half_float: Option<bool>,
     pub lowest_walkable_height: f32,
@@ -2168,7 +2168,7 @@ pub struct MapParticle {
 #[derive(Serialize, Deserialize, Debug, Clone, Asset, TypePath)]
 #[serde(rename_all = "camelCase")]
 pub struct MapPlaceableContainer {
-    pub items: Option<HashMap<u32, EnumMap>>,
+    pub items: Option<BTreeMap<u32, EnumMap>>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -2331,7 +2331,7 @@ pub struct PackManagerData {
     pub leash_distance: Option<f32>,
     pub on_leader_move_follower_animation: u32,
     pub order_trailing_delay: Option<f32>,
-    pub rank_to_formation_map: Option<HashMap<u32, PackFormationData>>,
+    pub rank_to_formation_map: Option<BTreeMap<u32, PackFormationData>>,
     pub ui_target_forgiveness_range: Option<f32>,
     pub unk_0x377491e8: EnumUnk0x1aae122,
     pub unk_0xb97a9b92: Option<bool>,
@@ -2348,7 +2348,7 @@ pub struct ParallelClipData {
 #[serde(rename_all = "camelCase")]
 pub struct ParametricClipData {
     pub m_animation_interruption_group_names: Option<Vec<u32>>,
-    pub m_event_data_map: Option<HashMap<u32, EnumEventData>>,
+    pub m_event_data_map: Option<BTreeMap<u32, EnumEventData>>,
     pub m_flags: Option<u32>,
     pub m_mask_data_name: Option<u32>,
     pub m_parametric_pair_data_list: Vec<ParametricPairData>,
@@ -2534,14 +2534,14 @@ pub struct ResimulateTrailVfxOnEnterVisibility {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct ResourceMeterIconData {
-    pub additional_bar_types: Option<HashMap<u32, u32>>,
+    pub additional_bar_types: Option<BTreeMap<u32, u32>>,
     pub default_bar: u32,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Asset, TypePath)]
 #[serde(rename_all = "camelCase")]
 pub struct ResourceResolver {
-    pub resource_map: Option<HashMap<u32, u32>>,
+    pub resource_map: Option<BTreeMap<u32, u32>>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -2606,7 +2606,7 @@ pub struct SelectorPairData {
 #[serde(rename_all = "camelCase")]
 pub struct SequencerClipData {
     pub m_clip_name_list: Vec<u32>,
-    pub m_event_data_map: Option<HashMap<u32, EnumEventData>>,
+    pub m_event_data_map: Option<BTreeMap<u32, EnumEventData>>,
     pub m_flags: Option<u32>,
 }
 
@@ -2693,8 +2693,8 @@ pub struct SkinCharacterDataProperties {
     pub skin_parent: Option<i32>,
     pub skin_upgrade_data: Option<SkinUpgradeData>,
     pub theme_music: Option<Vec<String>>,
-    pub uncensored_icon_circles: Option<HashMap<u32, String>>,
-    pub uncensored_icon_squares: Option<HashMap<u32, String>>,
+    pub uncensored_icon_circles: Option<BTreeMap<u32, String>>,
+    pub uncensored_icon_squares: Option<BTreeMap<u32, String>>,
     pub unk_0x2ac577e2: Option<bool>,
     pub unk_0xb67a2dd8: Option<Vec<Unk0x9c1d99c0>>,
     pub unk_0xc3a944e7: Option<EnumUnk0xc96d9140>,
@@ -2834,7 +2834,7 @@ pub struct SpellDataResource {
     pub cast_target_additional_units_radius: Option<f32>,
     pub cooldown_time: Option<Vec<f32>>,
     pub data_values: Option<Vec<SpellDataValue>>,
-    pub data_values_mode_override: Option<HashMap<u32, SpellDataValueVector>>,
+    pub data_values_mode_override: Option<BTreeMap<u32, SpellDataValueVector>>,
     pub flags: Option<u32>,
     pub img_icon_path: Option<String>,
     pub loadable: Option<u32>,
@@ -2936,7 +2936,7 @@ pub struct SpellDataResource {
     pub m_resource_resolvers: Option<Vec<u32>>,
     pub m_roll_for_critical_hit: Option<bool>,
     pub m_show_channel_bar: Option<bool>,
-    pub m_spell_calculations: Option<HashMap<u32, EnumGameCalculation>>,
+    pub m_spell_calculations: Option<BTreeMap<u32, EnumGameCalculation>>,
     pub m_spell_cooldown_or_sealed_queue_threshold: Option<f32>,
     pub m_spell_reveals_champion: Option<bool>,
     pub m_spell_tags: Option<Vec<String>>,
@@ -2956,17 +2956,17 @@ pub struct SpellDataResource {
     pub selection_priority: Option<u32>,
     pub should_receive_input_events: Option<bool>,
     pub show_channel_bar_per_spell_level_override: Option<Vec<bool>>,
-    pub spell_event_to_audio_event_suffix: Option<HashMap<u32, String>>,
+    pub spell_event_to_audio_event_suffix: Option<BTreeMap<u32, String>>,
     pub targeting_forgiveness_definitions: Option<Vec<TargetingForgivenessDefinitions>>,
     pub unk_0x11704a2b: Option<f32>,
     pub unk_0x288b8edc: Option<EnumUnk0x6bbc3db6>,
     pub unk_0x48201b0d: Option<f32>,
     pub unk_0x66769fb4: Option<bool>,
     pub unk_0x8958fee2: Option<Unk0x8958fee2>,
-    pub unk_0xb08bc498: Option<HashMap<u32, SpellEffectAmount>>,
+    pub unk_0xb08bc498: Option<BTreeMap<u32, SpellEffectAmount>>,
     pub unk_0xf26881a0: Option<f32>,
     pub unk_0xf4ca428f: Option<u8>,
-    pub unk_0xf9c2333e: Option<HashMap<u32, SpellEffectAmount>>,
+    pub unk_0xf9c2333e: Option<BTreeMap<u32, SpellEffectAmount>>,
     pub unk_0xfe87f21e: Option<Vec<Unk0xfe87f21e>>,
     pub use_animator_framerate: Option<bool>,
 }
@@ -2974,7 +2974,7 @@ pub struct SpellDataResource {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct SpellDataResourceClient {
-    pub m_custom_targeter_definitions: Option<HashMap<u32, CustomTargeterDefinitions>>,
+    pub m_custom_targeter_definitions: Option<BTreeMap<u32, CustomTargeterDefinitions>>,
     pub m_left_click_spell_action: Option<u32>,
     pub m_missile_targeter_definitions: Option<Vec<MissileAttachedTargetingDefinition>>,
     pub m_right_click_spell_action: Option<u32>,
@@ -3109,7 +3109,7 @@ pub struct StatEfficiencyPerHundred {
 pub struct StaticMaterialChildTechniqueDef {
     pub name: String,
     pub parent_name: String,
-    pub shader_macros: HashMap<String, String>,
+    pub shader_macros: BTreeMap<String, String>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Asset, TypePath)]
@@ -3121,7 +3121,7 @@ pub struct StaticMaterialDef {
     pub param_values: Option<Vec<StaticMaterialShaderParamDef>>,
     pub r#type: Option<u32>,
     pub sampler_values: Option<Vec<StaticMaterialShaderSamplerDef>>,
-    pub shader_macros: Option<HashMap<String, String>>,
+    pub shader_macros: Option<BTreeMap<String, String>>,
     pub switches: Option<Vec<StaticMaterialSwitchDef>>,
     pub techniques: Vec<StaticMaterialTechniqueDef>,
     pub unk_0xe251b20a: Option<bool>,
@@ -3140,7 +3140,7 @@ pub struct StaticMaterialPassDef {
     pub dst_color_blend_factor: Option<u32>,
     pub polygon_depth_bias_enable: Option<bool>,
     pub shader: u32,
-    pub shader_macros: Option<HashMap<String, String>>,
+    pub shader_macros: Option<BTreeMap<String, String>>,
     pub src_alpha_blend_factor: Option<u32>,
     pub src_color_blend_factor: Option<u32>,
     pub stencil_compare_func: Option<u32>,
@@ -3167,7 +3167,7 @@ pub struct StaticMaterialShaderSamplerDef {
     pub sampler_name: Option<String>,
     pub texture_name: String,
     pub texture_path: Option<String>,
-    pub uncensored_textures: Option<HashMap<u32, String>>,
+    pub uncensored_textures: Option<BTreeMap<u32, String>>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -3584,7 +3584,7 @@ pub struct ToolSpellDesc {
 #[serde(rename_all = "camelCase")]
 pub struct TooltipInstanceBuff {
     pub m_format: u32,
-    pub m_loc_keys: Option<HashMap<String, String>>,
+    pub m_loc_keys: Option<BTreeMap<String, String>>,
     pub m_object_name: String,
 }
 
@@ -3610,8 +3610,8 @@ pub struct TooltipInstanceListElement {
 pub struct TooltipInstanceSpell {
     pub enable_extended_tooltip: Option<bool>,
     pub m_format: u32,
-    pub m_lists: Option<HashMap<String, TooltipInstanceList>>,
-    pub m_loc_keys: Option<HashMap<String, String>>,
+    pub m_lists: Option<BTreeMap<String, TooltipInstanceList>>,
+    pub m_loc_keys: Option<BTreeMap<String, String>>,
     pub m_object_name: String,
 }
 
@@ -3884,7 +3884,7 @@ pub struct UnitFloatingInfoBarData {
     pub objective_bounty_enemy: Option<u32>,
     pub par_bar: Option<AbilityResourceBarData>,
     pub scene: u32,
-    pub scripted_threshold_types: Option<HashMap<u32, u32>>,
+    pub scripted_threshold_types: Option<BTreeMap<u32, u32>>,
     pub unk_0xc1be745d: Option<u32>,
     pub unk_0xea3d3f5: Option<u32>,
 }
@@ -4100,7 +4100,7 @@ pub struct Unk0x55f6bf86 {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Unk0x56bb851 {
-    pub unk_0xe6d60f41: Option<HashMap<u8, Unk0xc76c1b9a>>,
+    pub unk_0xe6d60f41: Option<BTreeMap<u8, Unk0xc76c1b9a>>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -4393,8 +4393,8 @@ pub struct Unk0xc7e628b9 {
 #[serde(rename_all = "camelCase")]
 pub struct Unk0xc96d9140 {
     pub unk_0x1418c47f: u32,
-    pub unk_0xa2cb8e03: Option<HashMap<String, u32>>,
-    pub unk_0xc19c58be: Option<HashMap<String, String>>,
+    pub unk_0xa2cb8e03: Option<BTreeMap<String, u32>>,
+    pub unk_0xc19c58be: Option<BTreeMap<String, String>>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -4458,7 +4458,7 @@ pub struct Unk0xd178749c {
 #[serde(rename_all = "camelCase")]
 pub struct Unk0xd5c9eb1 {
     pub event_name: u32,
-    pub unk_0x1004c9c8: HashMap<u32, Unk0x56bb851>,
+    pub unk_0x1004c9c8: BTreeMap<u32, Unk0x56bb851>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -4544,8 +4544,8 @@ pub struct Unk0xe7b61183 {
 #[serde(rename_all = "camelCase")]
 pub struct Unk0xe7ee4f28 {
     pub unk_0x7dd33afb: u32,
-    pub unk_0xa2cb8e03: Option<HashMap<String, u32>>,
-    pub unk_0xc19c58be: Option<HashMap<String, String>>,
+    pub unk_0xa2cb8e03: Option<BTreeMap<String, u32>>,
+    pub unk_0xc19c58be: Option<BTreeMap<String, String>>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -5068,7 +5068,7 @@ pub struct VfxLingerDefinitionData {
 #[serde(rename_all = "camelCase")]
 pub struct VfxMaterialDefinitionData {
     pub material: u32,
-    pub material_drivers: Option<HashMap<String, EnumOverLifeMaterialDriver>>,
+    pub material_drivers: Option<BTreeMap<String, EnumOverLifeMaterialDriver>>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

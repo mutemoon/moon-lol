@@ -22,16 +22,16 @@ impl From<u8> for LayerTransitionBehavior {
 pub struct EnvironmentVisibility(u8);
 
 impl EnvironmentVisibility {
-    pub const NoLayer: Self = Self(0);
-    pub const Layer1: Self = Self(1 << 0);
-    pub const Layer2: Self = Self(1 << 1);
-    pub const Layer3: Self = Self(1 << 2);
-    pub const Layer4: Self = Self(1 << 3);
-    pub const Layer5: Self = Self(1 << 4);
-    pub const Layer6: Self = Self(1 << 5);
-    pub const Layer7: Self = Self(1 << 6);
-    pub const Layer8: Self = Self(1 << 7);
-    pub const AllLayers: Self = Self(255);
+    pub const NO_LAYER: Self = Self(0);
+    pub const LAYER1: Self = Self(1 << 0);
+    pub const LAYER2: Self = Self(1 << 1);
+    pub const LAYER3: Self = Self(1 << 2);
+    pub const LAYER4: Self = Self(1 << 3);
+    pub const LAYER5: Self = Self(1 << 4);
+    pub const LAYER6: Self = Self(1 << 5);
+    pub const LAYER7: Self = Self(1 << 6);
+    pub const LAYER8: Self = Self(1 << 7);
+    pub const ALL_LAYERS: Self = Self(255);
 
     #[inline]
     pub fn bits(&self) -> u8 {

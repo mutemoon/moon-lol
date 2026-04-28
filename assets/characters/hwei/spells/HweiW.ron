@@ -18,7 +18,7 @@
                 multiplier: None,
                 precision: None,
             ),
-            2652693472: (
+            1441538734: (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -52,7 +52,7 @@
                 multiplier: None,
                 precision: None,
             ),
-            1441538734: (
+            2652693472: (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (

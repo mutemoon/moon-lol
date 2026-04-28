@@ -1,59 +1,20 @@
 (
     spellData: Some((
         calculations: Some({
-            2903963272: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: None,
-            ),
-            3346360670: (
+            241153302: (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 204386453,
-                    ),
-                    (
-                        type: "CalculationPartStatCoefficient",
-                        stat: None,
-                        coefficient: Some(0.65),
-                        statFormula: None,
-                    ),
-                    (
                         type: "CalculationPartStatCoefficient",
                         stat: Some(12),
-                        coefficient: Some(0.08),
+                        coefficient: Some(0.05),
                         statFormula: None,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            2457073275: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: Some(12),
-                        dataValue: 1112667854,
-                    ),
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: None,
-                        dataValue: 3073608905,
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
             1607285636: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: None,
-            ),
-            3149494603: (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
@@ -80,13 +41,52 @@
                 multiplier: None,
                 precision: None,
             ),
-            241153302: (
+            2457073275: (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(12),
+                        dataValue: 1112667854,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: 3073608905,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            2903963272: (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            3149494603: (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            3346360670: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 204386453,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: None,
+                        coefficient: Some(0.65),
+                        statFormula: None,
+                    ),
+                    (
                         type: "CalculationPartStatCoefficient",
                         stat: Some(12),
-                        coefficient: Some(0.05),
+                        coefficient: Some(0.08),
                         statFormula: None,
                     ),
                 ]),

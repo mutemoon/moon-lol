@@ -7,18 +7,6 @@
                 multiplier: None,
                 precision: Some(2),
             ),
-            3168109745: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: Some(2),
-                        dataValue: 1878564470,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
             2958159350: (
                 type: "CalculationSpell",
                 formulaParts: Some([
@@ -36,14 +24,13 @@
                 multiplier: None,
                 precision: None,
             ),
-            4081769832: (
+            3168109745: (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
-                        type: "CalculationPartStatCoefficient",
+                        type: "CalculationPartStatNamedDataValue",
                         stat: Some(2),
-                        coefficient: Some(1.0),
-                        statFormula: None,
+                        dataValue: 1878564470,
                     ),
                 ]),
                 multiplier: None,
@@ -68,6 +55,19 @@
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(2),
                         dataValue: 1644957732,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            4081769832: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(2),
+                        coefficient: Some(1.0),
+                        statFormula: None,
                     ),
                 ]),
                 multiplier: None,

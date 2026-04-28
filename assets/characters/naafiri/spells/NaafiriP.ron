@@ -7,12 +7,6 @@
                 multiplier: None,
                 precision: None,
             ),
-            4249921529: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: None,
-            ),
             143708584: (
                 type: "CalculationSpell",
                 formulaParts: Some([
@@ -32,6 +26,12 @@
                 precision: None,
             ),
             2389517200: (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            4249921529: (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,

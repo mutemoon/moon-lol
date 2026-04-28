@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 
 use league_core::extract::{
     EnumGameCalculation, GameCalculation, SpellDataResource, SpellDataValue, SpellEffectAmount,
@@ -73,7 +73,10 @@ pub fn extract_spells_for_champion(champ_name: &str, prop_group: &PropGroup) {
 /// 将 SpellDataResource 转换为 DataSpell
 fn convert_spell_data_resource(spell: &SpellDataResource) -> DataSpell {
     DataSpell {
-        calculations: convert_calculations(&spell.m_spell_calculations),
+        calculations: spell
+            .m_spell_calculations
+            .as_ref()
+            .map(convert_calculations),
         effect_amounts: convert_effect_amounts(&spell.m_effect_amount),
         data_values: convert_data_values(&spell.data_values),
         mana: spell.mana.clone(),
@@ -143,17 +146,15 @@ fn convert_movement(movement: &league_core::extract::EnumMovement) -> MovementTy
 
 /// 转换计算公式
 fn convert_calculations(
-    calcs: &Option<HashMap<u32, EnumGameCalculation>>,
-) -> Option<HashMap<u32, CalculationType>> {
-    calcs.as_ref().map(|calcs| {
-        calcs
-            .iter()
-            .filter_map(|(key, calc)| {
-                let converted = convert_enum_calculation(calc);
-                converted.map(|c| (*key, c))
-            })
-            .collect()
-    })
+    calcs: &BTreeMap<u32, EnumGameCalculation>,
+) -> BTreeMap<u32, CalculationType> {
+    calcs
+        .iter()
+        .filter_map(|(key, calc)| {
+            let converted = convert_enum_calculation(calc);
+            converted.map(|c| (*key, c))
+        })
+        .collect()
 }
 
 /// 转换计算枚举

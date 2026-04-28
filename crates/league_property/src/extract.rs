@@ -467,7 +467,7 @@ fn field_type_to_string(
             let value =
                 field_type_to_string(class_map, value_data, hashes, merged_enums, cyclic_types);
             let key = if key == "f32" { "u32".to_string() } else { key };
-            format!("HashMap<{}, {}>", key, value)
+            format!("BTreeMap<{}, {}>", key, value)
         }
         ClassData::Option(value_data) => {
             format!(

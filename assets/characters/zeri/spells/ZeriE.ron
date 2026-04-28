@@ -22,7 +22,7 @@
                 multiplier: None,
                 precision: None,
             ),
-            2481185184: (
+            1406565072: (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -35,7 +35,7 @@
                 multiplier: None,
                 precision: None,
             ),
-            1406565072: (
+            2481185184: (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (

@@ -19,7 +19,19 @@
                 multiplier: None,
                 precision: None,
             ),
+            2376857072: (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: Some(2),
+            ),
             3181519304: (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            3737656915: (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
@@ -37,18 +49,6 @@
                 ]),
                 multiplier: None,
                 precision: None,
-            ),
-            3737656915: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: None,
-            ),
-            2376857072: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: Some(2),
             ),
         }),
         effectAmounts: None,

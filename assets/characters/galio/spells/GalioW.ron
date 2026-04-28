@@ -1,18 +1,19 @@
 (
     spellData: Some((
         calculations: Some({
-            3276826942: (
+            289768791: (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            2029842363: (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 1184888896,
-                    ),
-                    (
-                        type: "CalculationPartStatCoefficient",
-                        stat: None,
-                        coefficient: Some(0.3),
-                        statFormula: None,
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(12),
+                        dataValue: 2554292644,
                     ),
                 ]),
                 multiplier: None,
@@ -47,19 +48,18 @@
                 multiplier: None,
                 precision: None,
             ),
-            289768791: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: None,
-            ),
-            2029842363: (
+            3276826942: (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: Some(12),
-                        dataValue: 2554292644,
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 1184888896,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: None,
+                        coefficient: Some(0.3),
+                        statFormula: None,
                     ),
                 ]),
                 multiplier: None,

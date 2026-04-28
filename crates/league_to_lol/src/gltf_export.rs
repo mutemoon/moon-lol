@@ -42,7 +42,7 @@ pub fn export_mapgeo_to_gltf(
         .iter()
         .filter(|v| {
             v.environment_visibility
-                .contains(EnvironmentVisibility::Layer1)
+                .contains(EnvironmentVisibility::LAYER1)
         })
         .collect();
 

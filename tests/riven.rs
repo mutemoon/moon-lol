@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 use std::panic::{AssertUnwindSafe, catch_unwind};
 use std::time::Duration;
 
@@ -44,8 +44,7 @@ use lol_render::camera::PluginCamera;
 use lol_render::particle::PluginParticle;
 use lol_render::skin::PluginSkin;
 use lol_render::test_render::{
-    PluginSkillTestRender, SkillTestActor, SkillTestRenderConfig, SkillTestVideoFormat,
-    SkillTestVideoOutput, attach_skill_test_actor,
+    PluginSkillTestRender, SkillTestRenderConfig, SkillTestVideoFormat, SkillTestVideoOutput,
 };
 use lol_render::ui::PluginUI;
 use moon_lol::PluginCore;
@@ -135,7 +134,6 @@ impl RivenHarness {
             app.add_plugins(plugin_group);
 
             app.add_systems(Startup, setup_render_stage);
-            app.add_systems(Update, attach_skill_test_actor::<Riven>);
         } else {
             app.add_plugins(MinimalPlugins);
             app.add_plugins(AssetPlugin::default());
@@ -176,7 +174,7 @@ impl RivenHarness {
         {
             let mut spell_objects = app.world_mut().resource_mut::<Assets<Spell>>();
             let make_spell = || {
-                let mut calculations = HashMap::new();
+                let mut calculations = BTreeMap::new();
 
                 let make_calc = |name: &str| {
                     CalculationType::CalculationSpell(CalculationSpell {
@@ -262,7 +260,6 @@ impl RivenHarness {
                     Armor(0.0),
                     Movement { speed: 340.0 },
                     MovementState::default(),
-                    SkillTestActor,
                 ))
                 .id();
 

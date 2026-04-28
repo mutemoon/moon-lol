@@ -29,6 +29,7 @@ use lol_core::navigation::navigation::PluginNavigaton;
 use lol_core::rotate::PluginRotate;
 use lol_core::run::PluginRun;
 use lol_core::skill::PluginSkill;
+use lol_core::skill_script::PluginSkillScript;
 use lol_render::PluginRender;
 
 plugin_group! {
@@ -47,7 +48,6 @@ plugin_group! {
         :PluginTurret,
 
         :PluginAction,
-        :PluginRender,
         :PluginAttack,
         :PluginAttackAuto,
         :PluginAggro,
@@ -65,5 +65,9 @@ plugin_group! {
         :PluginRun,
         :PluginSkill,
         :PluginState,
+
+        :PluginSkillScript,
+
+        :PluginRender,
     }
 }

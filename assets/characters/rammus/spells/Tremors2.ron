@@ -1,20 +1,13 @@
 (
     spellData: Some((
         calculations: Some({
-            2322344295: (
+            1370528516: (
                 type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 1772179026,
-                    ),
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: None,
-                        dataValue: 3809245599,
-                    ),
-                ]),
-                multiplier: None,
+                formulaParts: Some([]),
+                multiplier: Some((
+                    type: "CalculationPartNamedDataValue",
+                    dataValue: 2553835275,
+                )),
                 precision: None,
             ),
             1568802690: (
@@ -34,15 +27,6 @@
                 multiplier: None,
                 precision: None,
             ),
-            1370528516: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: Some((
-                    type: "CalculationPartNamedDataValue",
-                    dataValue: 2553835275,
-                )),
-                precision: None,
-            ),
             2122101474: (
                 type: "CalculationSpell",
                 formulaParts: Some([
@@ -55,6 +39,22 @@
                         stat: None,
                         coefficient: Some(0.1),
                         statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            2322344295: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 1772179026,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: 3809245599,
                     ),
                 ]),
                 multiplier: None,

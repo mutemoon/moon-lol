@@ -1,7 +1,7 @@
 (
     spellData: Some((
         calculations: Some({
-            1594141771: (
+            495391923: (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
@@ -13,19 +13,19 @@
                 multiplier: None,
                 precision: None,
             ),
-            4010822230: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: None,
-            ),
-            495391923: (
+            1594141771: (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),
             3431215217: (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            4010822230: (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,

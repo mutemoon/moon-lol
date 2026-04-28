@@ -14,10 +14,19 @@ impl Plugin for PluginCharacter {
     fn build(&self, app: &mut App) {
         app.add_observer(on_event_dead);
         app.add_systems(FixedUpdate, try_load_config_characters);
+        // app.add_systems(
+        //     FixedUpdate,
+        //     |mut commands: Commands, q: Query<Entity, (With<Character>, With<Champion>)>| {
+        //         q.iter().for_each(|e| {
+        //             commands.entity(e).log_components();
+        //         })
+        //     },
+        // );
     }
 }
 
-#[derive(Component, Debug)]
+#[derive(Component, Reflect, Default, Debug)]
+#[reflect(Component)]
 pub struct Character;
 
 fn on_event_dead(
@@ -86,13 +95,25 @@ fn try_load_config_characters(
                     .ok_or(WorldInstanceSpawnError::NonExistentDynamicWorld { id: handle.id() })?;
 
                 let mut map = EntityHashMap::new();
-                map.entry(dynamic_world.entities.get(0).unwrap().entity)
-                    .insert(entity);
-                debug!(
-                    "{} -> {}",
-                    dynamic_world.entities.get(0).unwrap().entity,
-                    entity
-                );
+                dynamic_world.entities.iter().for_each(|v| {
+                    let components: Vec<_> = v
+                        .components
+                        .iter()
+                        .map(|v| v.reflect_short_type_path())
+                        .collect();
+                    debug!("{}: [{}]", v.entity, components.join(", "));
+                });
+                let source_entity = dynamic_world
+                    .entities
+                    .iter()
+                    .find(|v| {
+                        v.components
+                            .iter()
+                            .any(|c| c.reflect_short_type_path().eq("Character"))
+                    })
+                    .expect("Character component not found in character config");
+                map.entry(source_entity.entity).insert(entity);
+                debug!("{} -> {}", source_entity.entity, entity);
                 dynamic_world.write_to_world(world, &mut map)
             })
         });

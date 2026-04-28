@@ -1,33 +1,6 @@
 (
     spellData: Some((
         calculations: Some({
-            1474349906: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: None,
-            ),
-            2836243956: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 3705937568,
-                    ),
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: Some(2),
-                        dataValue: 952261348,
-                    ),
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: None,
-                        dataValue: 4165699736,
-                    ),
-                ]),
-                multiplier: None,
-                precision: Some(1),
-            ),
             315608060: (
                 type: "CalculationSpell",
                 formulaParts: Some([
@@ -66,6 +39,33 @@
                 ]),
                 multiplier: None,
                 precision: None,
+            ),
+            1474349906: (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            2836243956: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 3705937568,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(2),
+                        dataValue: 952261348,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: 4165699736,
+                    ),
+                ]),
+                multiplier: None,
+                precision: Some(1),
             ),
             2934088168: (
                 type: "CalculationSpell",

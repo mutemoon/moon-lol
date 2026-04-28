@@ -1,6 +1,34 @@
 (
     spellData: Some((
         calculations: Some({
+            1918996162: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 1869542814,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(2),
+                        coefficient: Some(1.0),
+                        statFormula: None,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: None,
+                        coefficient: Some(0.5),
+                        statFormula: None,
+                    ),
+                    (
+                        type: "CalculationPartStatSub",
+                        stat: Some(8),
+                        subpart: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
             3074434168: (
                 type: "CalculationSpell",
                 formulaParts: Some([
@@ -46,34 +74,6 @@
                         type: "CalculationPartStatCoefficient",
                         stat: None,
                         coefficient: Some(0.7),
-                        statFormula: None,
-                    ),
-                    (
-                        type: "CalculationPartStatSub",
-                        stat: Some(8),
-                        subpart: None,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            1918996162: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 1869542814,
-                    ),
-                    (
-                        type: "CalculationPartStatCoefficient",
-                        stat: Some(2),
-                        coefficient: Some(1.0),
-                        statFormula: None,
-                    ),
-                    (
-                        type: "CalculationPartStatCoefficient",
-                        stat: None,
-                        coefficient: Some(0.5),
                         statFormula: None,
                     ),
                     (

@@ -1,22 +1,6 @@
 (
     spellData: Some((
         calculations: Some({
-            492071202: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 64618745,
-                    ),
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: Some(2),
-                        dataValue: 1068076572,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
             105272699: (
                 type: "CalculationSpell",
                 formulaParts: Some([
@@ -39,9 +23,19 @@
                 multiplier: None,
                 precision: None,
             ),
-            825358472: (
+            492071202: (
                 type: "CalculationSpell",
-                formulaParts: Some([]),
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: 64618745,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(2),
+                        dataValue: 1068076572,
+                    ),
+                ]),
                 multiplier: None,
                 precision: None,
             ),
@@ -63,6 +57,18 @@
                 multiplier: None,
                 precision: None,
             ),
+            825358472: (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            2512898564: (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
             3567532734: (
                 type: "CalculationSpell",
                 formulaParts: Some([
@@ -72,12 +78,6 @@
                         dataValue: 1121971103,
                     ),
                 ]),
-                multiplier: None,
-                precision: None,
-            ),
-            2512898564: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),

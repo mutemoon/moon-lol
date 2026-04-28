@@ -1,7 +1,7 @@
 (
   resources: {},
   entities: {
-    4294967293: (
+    4294967271: (
       components: {
         "bevy_ecs::name::Name": "sruap_magecrystal",
         "lol_core::attack::Attack": (
@@ -21,9 +21,9 @@
           radius: 88.4,
           height: 200.0,
         ),
+        "lol_core::character::Character": (),
         "lol_core::damage::Armor": (30.0),
         "lol_core::damage::Damage": (50.0),
-        "lol_core::entities::champion::Champion": (),
         "lol_core::life::Health": (
           value: 1000.0,
           max: 1000.0,

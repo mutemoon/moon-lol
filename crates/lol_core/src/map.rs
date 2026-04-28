@@ -1,9 +1,9 @@
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 use std::f32;
-use std::fmt::Display;
 
 use bevy::math::bounding::Aabb3d;
 use bevy::prelude::*;
+use lol_base::map::MapPaths;
 
 use crate::lane::Lane;
 
@@ -18,7 +18,7 @@ pub struct PluginMap;
 
 impl Plugin for PluginMap {
     fn build(&self, app: &mut App) {
-        app.init_resource::<MapName>();
+        app.init_resource::<MapPaths>();
         app.init_resource::<MinionPath>();
 
         app.add_systems(Startup, startup_load_map_geometry);
@@ -30,52 +30,19 @@ pub struct MapGeometry {
     pub bounding_box: Aabb3d,
 }
 
-#[derive(Resource)]
-pub struct MapName(pub String);
-
-impl Default for MapName {
-    fn default() -> Self {
-        Self("sr_seasonal_map".to_string())
-    }
-}
-
-impl MapName {
-    pub fn get_materials_path(&self) -> String {
-        format!("Maps/MapGeometry/Map11/{}", &self.0)
-    }
-
-    pub fn get_materials_bin_path(&self) -> String {
-        format!("data/{}.materials.bin", &self.get_materials_path())
-    }
-
-    pub fn get_ron_path(&self) -> String {
-        format!("maps/{}.ron", &self.0)
-    }
-
-    pub fn get_mapgeo_path(&self) -> String {
-        format!("data/maps/mapgeometry/map11/{}.mapgeo", &self.0)
-    }
-}
-
-impl Display for MapName {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.0)
-    }
-}
-
 #[derive(Resource, Reflect, Default)]
 #[reflect(Resource)]
-pub struct MinionPath(pub HashMap<Lane, Vec<Vec2>>);
+pub struct MinionPath(pub BTreeMap<Lane, Vec<Vec2>>);
 
 #[derive(Resource)]
 pub struct DynamicWorldHandle(pub Handle<DynamicWorld>);
 
 fn startup_load_map_geometry(
     mut commands: Commands,
-    res_map_name: Res<MapName>,
+    res_map_paths: Res<MapPaths>,
     res_asset_server: Res<AssetServer>,
 ) {
     commands.spawn(DynamicWorldRoot(
-        res_asset_server.load(res_map_name.get_ron_path()),
+        res_asset_server.load(res_map_paths.scene_ron()),
     ));
 }

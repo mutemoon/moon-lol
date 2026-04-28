@@ -1,19 +1,6 @@
 (
     spellData: Some((
         calculations: Some({
-            3583203333: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartStatCoefficient",
-                        stat: Some(12),
-                        coefficient: Some(0.013),
-                        statFormula: None,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
             2831277281: (
                 type: "CalculationSpell",
                 formulaParts: Some([
@@ -26,6 +13,19 @@
                         stat: Some(2),
                         coefficient: Some(0.7),
                         statFormula: Some(2),
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            3583203333: (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(12),
+                        coefficient: Some(0.013),
+                        statFormula: None,
                     ),
                 ]),
                 multiplier: None,

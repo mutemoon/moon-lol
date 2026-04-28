@@ -8,6 +8,7 @@ assets/*
 !assets/shaders
 !assets/characters
 assets/characters/*/animations
+!assets/maps
 
 *.glb
 

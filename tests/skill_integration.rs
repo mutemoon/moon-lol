@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 use std::time::Duration;
 
 use bevy::prelude::*;
@@ -131,7 +131,7 @@ impl ActionSkillHarness {
     fn register_spell(&mut self, mana_cost: f32, base_damage: f32) -> &mut Self {
         use lol_base::spell_calc::CalculationPart;
 
-        let mut calculations = HashMap::new();
+        let mut calculations = BTreeMap::new();
         calculations.insert(
             DAMAGE_AMOUNT_KEY,
             CalculationType::CalculationSpell(CalculationSpell {

@@ -6,91 +6,48 @@ use std::time::Duration;
 use bevy::prelude::*;
 use bevy::time::TimeUpdateStrategy;
 use bevy::winit::WinitPlugin;
-use lol_champions::fiora::Fiora;
-use lol_core::action::Action;
+use lol_base::map::MapPaths;
 use lol_core::entities::barrack::PluginBarrack;
 use lol_core::entities::minion::PluginMinion;
 use lol_core::entities::turret::PluginTurret;
 use lol_core::game::PluginGame;
 use lol_core::map::PluginMap;
 use lol_render::test_render::{
-    PluginSkillTestRender, SkillTestRenderConfig, SkillTestScript, SkillTestScriptStep,
-    SkillTestVideoFormat, SkillTestVideoOutput, attach_skill_test_actor,
+    PluginSkillTestRender, SkillTestRenderConfig, SkillTestVideoFormat, SkillTestVideoOutput,
 };
-use lol_render::ui::PluginUI;
 use moon_lol::PluginCore;
 
 #[test]
 fn fiora_q_writes_video() {
-    run_fiora_case(
-        "fiora_q_writes_video",
-        120,
-        vec![SkillTestScriptStep::action(
-            20,
-            Action::Skill {
-                index: 0,
-                point: Vec2::new(170.0, 0.0),
-            },
-        )],
-    );
+    run_fiora_case("fiora_q_writes_video", 120);
 }
 
 #[test]
 fn fiora_w_writes_video() {
-    run_fiora_case(
-        "fiora_w_writes_video",
-        120,
-        vec![SkillTestScriptStep::action(
-            20,
-            Action::Skill {
-                index: 1,
-                point: Vec2::new(170.0, 0.0),
-            },
-        )],
-    );
+    run_fiora_case("fiora_w_writes_video", 120);
 }
 
 #[test]
 fn fiora_e_writes_video() {
-    run_fiora_case(
-        "fiora_e_writes_video",
-        120,
-        vec![SkillTestScriptStep::action(
-            20,
-            Action::Skill {
-                index: 2,
-                point: Vec2::new(170.0, 0.0),
-            },
-        )],
-    );
+    run_fiora_case("fiora_e_writes_video", 120);
 }
 
 #[test]
 fn fiora_r_writes_video() {
-    run_fiora_case(
-        "fiora_r_writes_video",
-        140,
-        vec![SkillTestScriptStep::action(
-            20,
-            Action::Skill {
-                index: 3,
-                point: Vec2::new(170.0, 0.0),
-            },
-        )],
-    );
+    run_fiora_case("fiora_r_writes_video", 140);
 }
 
-fn run_fiora_case(test_name: &str, max_frames: u32, steps: Vec<SkillTestScriptStep>) {
+fn run_fiora_case(test_name: &str, max_frames: u32) {
     if std::env::var("MOON_LOL_RUN_RENDER_TESTS").as_deref() != Ok("1") {
         eprintln!("skipping render test: set MOON_LOL_RUN_RENDER_TESTS=1 to enable");
         return;
     }
-    if skip_due_to_missing_gpu(|| run_fiora_case_inner(test_name, max_frames, steps)) {
+    if skip_due_to_missing_gpu(|| run_fiora_case_inner(test_name, max_frames)) {
         return;
     }
 }
 
-fn run_fiora_case_inner(test_name: &str, max_frames: u32, mut steps: Vec<SkillTestScriptStep>) {
+fn run_fiora_case_inner(test_name: &str, max_frames: u32) {
     let output_dir = PathBuf::from(format!("artifacts/tests/{test_name}"));
     let _ = fs::remove_dir_all(&output_dir);
 
@@ -112,7 +69,7 @@ fn run_fiora_case_inner(test_name: &str, max_frames: u32, mut steps: Vec<SkillTe
     app.insert_resource(TimeUpdateStrategy::ManualDuration(Duration::from_millis(
         16,
     )));
-    app.insert_resource(make_script(steps.as_mut_slice()));
+    app.insert_resource(MapPaths::default());
     app.add_plugins(DefaultPlugins.build().disable::<WinitPlugin>());
     app.add_plugins(PluginSkillTestRender);
     app.add_plugins(
@@ -124,11 +81,9 @@ fn run_fiora_case_inner(test_name: &str, max_frames: u32, mut steps: Vec<SkillTe
             .disable::<PluginBarrack>()
             .disable::<PluginMap>()
             .disable::<PluginMinion>()
-            .disable::<PluginTurret>()
-            .disable::<PluginUI>(),
+            .disable::<PluginTurret>(),
     );
     app.add_systems(Startup, setup_stage);
-    app.add_systems(Update, attach_skill_test_actor::<Fiora>);
     app.finish();
     app.cleanup();
 
@@ -163,18 +118,6 @@ fn skip_due_to_missing_gpu(run: impl FnOnce()) -> bool {
             }
         }
     }
-}
-
-fn make_script(skill_steps: &mut [SkillTestScriptStep]) -> SkillTestScript {
-    let mut steps = vec![
-        SkillTestScriptStep::set_skill_points(0, 4),
-        SkillTestScriptStep::action(0, Action::SkillLevelUp(0)),
-        SkillTestScriptStep::action(0, Action::SkillLevelUp(1)),
-        SkillTestScriptStep::action(0, Action::SkillLevelUp(2)),
-        SkillTestScriptStep::action(0, Action::SkillLevelUp(3)),
-    ];
-    steps.extend_from_slice(skill_steps);
-    SkillTestScript::new(steps)
 }
 
 fn setup_stage(

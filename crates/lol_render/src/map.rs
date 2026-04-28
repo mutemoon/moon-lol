@@ -3,8 +3,8 @@ use bevy::gltf::GltfLoaderSettings;
 use bevy::light::CascadeShadowConfigBuilder;
 use bevy::prelude::*;
 use bevy_gltf_draco::GltfDracoDecoderPlugin;
+use lol_base::map::MapPaths;
 use lol_core::action::{Action, CommandAction};
-use lol_core::map::MapName;
 
 use crate::controller::Controller;
 
@@ -26,7 +26,7 @@ pub struct Map;
 fn setup(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    res_map_name: Res<MapName>,
+    res_map_paths: Res<MapPaths>,
     mut ambient_light: ResMut<GlobalAmbientLight>,
 ) {
     let handle = asset_server
@@ -35,7 +35,7 @@ fn setup(
             s.validate = false;
             s.load_materials = RenderAssetUsages::RENDER_WORLD;
         })
-        .load(GltfAssetLabel::Scene(0).from_asset(format!("maps/{}_mapgeo.glb", res_map_name.0)));
+        .load(GltfAssetLabel::Scene(0).from_asset(res_map_paths.mapgeo_glb()));
 
     commands.spawn(WorldAssetRoot(handle));
 

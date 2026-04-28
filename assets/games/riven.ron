@@ -1,51 +1,66 @@
-[
-    (
-        skin_path: "Characters/Riven/Skins/Skin0",
-        character_record: "Characters/Riven/CharacterRecords/Root",
-    ),
-    {
-        "bevy_transform::components::transform::Transform": (
-            translation: (7300.0, 0.0, 7300.0),
-            rotation: (0.0, 0.0, 0.0, 1.0),
-            scale: (1.0, 1.0, 1.0),
+(
+    resources: {},
+    entities: {
+        4294967185: (
+            components: {
+                "bevy_transform::components::transform::Transform": (
+                    translation: (7300.0, 0.0, 7300.0),
+                    rotation: (0.0, 0.0, 0.0, 1.0),
+                    scale: (1.0, 1.0, 1.0),
+                ),
+                "lol_champions::riven::Riven": (),
+                "lol_core::team::Team": Order,
+                "lol_render::camera::Focus": (),
+                "lol_render::controller::Controller": (),
+                "lol_base::character::ConfigCharacterRecord": (
+                    character_record: Path("characters/riven/config.ron"),
+                ),
+                "lol_base::character::ConfigSkin": (
+                    skin: Path("characters/riven/skin.ron"),
+                ),
+            },
         ),
-        "lol_champions::riven::Riven": (),
-        "lol_core::team::Team": Order,
-        "lol_render::camera::Focus": (),
-        "lol_render::controller::Controller": (),
+        4294967186: (
+            components: {
+                "bevy_transform::components::transform::Transform": (
+                    translation: (7400.0, 0.0, 7400.0),
+                    rotation: (0.0, 0.0, 0.0, 1.0),
+                    scale: (1.0, 1.0, 1.0),
+                ),
+                "lol_core::team::Team": Chaos,
+                "lol_core::entities::champion::Champion": (),
+                "lol_core::life::Health": (
+                    value: 6000.0,
+                    max: 6000.0,
+                ),
+                "lol_base::character::ConfigCharacterRecord": (
+                    character_record: Path("characters/fiora/config.ron"),
+                ),
+                "lol_base::character::ConfigSkin": (
+                    skin: Path("characters/fiora/skin.ron"),
+                ),
+            },
+        ),
+        4294967187: (
+            components: {
+                "bevy_transform::components::transform::Transform": (
+                    translation: (7300.0, 0.0, 7400.0),
+                    rotation: (0.0, 0.0, 0.0, 1.0),
+                    scale: (1.0, 1.0, 1.0),
+                ),
+                "lol_core::team::Team": Chaos,
+                "lol_core::entities::champion::Champion": (),
+                "lol_core::life::Health": (
+                    value: 6000.0,
+                    max: 6000.0,
+                ),
+                "lol_base::character::ConfigCharacterRecord": (
+                    character_record: Path("characters/fiora/config.ron"),
+                ),
+                "lol_base::character::ConfigSkin": (
+                    skin: Path("characters/fiora/skin.ron"),
+                ),
+            },
+        ),
     },
-    (
-        skin_path: "Characters/Fiora/Skins/Skin22",
-        character_record: "Characters/Fiora/CharacterRecords/Root",
-    ),
-    {
-        "bevy_transform::components::transform::Transform": (
-            translation: (7400.0, 0.0, 7400.0),
-            rotation: (0.0, 0.0, 0.0, 1.0),
-            scale: (1.0, 1.0, 1.0),
-        ),
-        "lol_core::team::Team": Chaos,
-        "lol_core::entities::champion::Champion": (),
-        "lol_core::life::Health": (
-            value: 6000.0,
-            max: 6000.0,
-        ),
-    },
-    (
-        skin_path: "Characters/Fiora/Skins/Skin22",
-        character_record: "Characters/Fiora/CharacterRecords/Root",
-    ),
-    {
-        "bevy_transform::components::transform::Transform": (
-            translation: (7300.0, 0.0, 7400.0),
-            rotation: (0.0, 0.0, 0.0, 1.0),
-            scale: (1.0, 1.0, 1.0),
-        ),
-        "lol_core::team::Team": Chaos,
-        "lol_core::entities::champion::Champion": (),
-        "lol_core::life::Health": (
-            value: 6000.0,
-            max: 6000.0,
-        ),
-    },
-]
+)

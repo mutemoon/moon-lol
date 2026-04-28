@@ -1,6 +1,12 @@
 (
     spellData: Some((
         calculations: Some({
+            2232309695: (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
             2422831839: (
                 type: "CalculationSpell",
                 formulaParts: Some([
@@ -13,7 +19,7 @@
                 multiplier: None,
                 precision: None,
             ),
-            2232309695: (
+            3377590753: (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
@@ -24,12 +30,6 @@
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: Some(1),
-            ),
-            3377590753: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: None,
             ),
         }),
         effectAmounts: Some([

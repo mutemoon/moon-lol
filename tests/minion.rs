@@ -27,6 +27,7 @@ mod tests {
         app.add_plugins(LogPlugin::default());
         app.add_plugins(AnimationPlugin::default());
         app.init_asset::<Shader>();
+        app.init_asset::<DynamicWorld>();
 
         app.add_plugins(PluginMinion);
 

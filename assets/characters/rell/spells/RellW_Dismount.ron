@@ -1,26 +1,19 @@
 (
     spellData: Some((
         calculations: Some({
-            3157802241: (
+            863312304: (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 1032447157,
+                        dataValue: 204386453,
                     ),
                     (
-                        type: "CalculationPartStatCoefficient",
-                        stat: None,
-                        coefficient: Some(0.6),
-                        statFormula: None,
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(12),
+                        dataValue: 3941748685,
                     ),
                 ]),
-                multiplier: None,
-                precision: None,
-            ),
-            2803503575: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),
@@ -41,17 +34,24 @@
                 multiplier: None,
                 precision: None,
             ),
-            863312304: (
+            2803503575: (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            3157802241: (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 204386453,
+                        dataValue: 1032447157,
                     ),
                     (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: Some(12),
-                        dataValue: 3941748685,
+                        type: "CalculationPartStatCoefficient",
+                        stat: None,
+                        coefficient: Some(0.6),
+                        statFormula: None,
                     ),
                 ]),
                 multiplier: None,
