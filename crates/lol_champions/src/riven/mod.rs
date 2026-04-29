@@ -11,8 +11,8 @@ use lol_core::buffs::shield_white::BuffShieldWhite;
 use lol_core::damage::DamageType;
 use lol_core::entities::champion::Champion;
 use lol_core::skill::{
-    CoolDown, CoolDownState, EventSkillCast, Skill, SkillRecastWindow, SkillSlot,
-    play_skill_animation, skill_damage, skill_dash, spawn_skill_particle,
+    CoolDown, EventSkillCast, Skill, SkillRecastWindow, SkillSlot, play_skill_animation,
+    skill_damage, skill_dash, spawn_skill_particle,
 };
 
 use crate::riven::passive::BuffRivenPassive;
@@ -119,14 +119,10 @@ fn cast_riven_q(
 
     if stage >= 3 {
         commands.entity(skill_entity).remove::<SkillRecastWindow>();
-        commands.entity(skill_entity).insert((
-            CoolDown {
-                duration: cooldown.duration,
-            },
-            CoolDownState {
-                timer: Timer::from_seconds(cooldown.duration, TimerMode::Once),
-            },
-        ));
+        commands.entity(skill_entity).insert((CoolDown {
+            duration: cooldown.duration,
+            timer: Some(Timer::from_seconds(cooldown.duration, TimerMode::Once)),
+        },));
     } else {
         commands.entity(skill_entity).insert(SkillRecastWindow::new(
             stage + 1,

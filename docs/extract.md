@@ -66,6 +66,35 @@ league_to_lol::extract
 - **CoolDown** - 冷却持续时间配置
 - **CoolDownState** - 运行时冷却状态（timer）
 
+#### 资源数据提取
+
+从 `CharacterRecord.primary_ability_resource` 提取资源数据到 `AbilityResource` 组件：
+
+- **ar_type** - 资源类型（`AbilityResourceSlotInfo.ar_type`）
+  - 0: Mana
+  - 1: Energy
+  - 7: Turret
+  - 8: Camp
+- **value/max** - 当前/最大资源值（初始为 base 值）
+- **base** - 基础资源值（从 `AbilityResourceSlotInfo.unk_0x3a509002.base_value` 获取）
+- **per_level** - 每级成长值（从 `AbilityResourceSlotInfo.unk_0x452033bb.base_value` 获取）
+- **base_static_regen** - 基础资源回复（从 `AbilityResourceSlotInfo.unk_0x6216bf7b.base_value` 获取）
+- **regen_per_level** - 每级回复成长（从 `AbilityResourceSlotInfo.unk_0x726ee5cd.base_value` 获取）
+
+lol_core 中的 `AbilityResource` 组件结构：
+
+```rust
+pub struct AbilityResource {
+    pub ar_type: AbilityResourceType,  // Mana, Energy, Turret, Camp
+    pub value: f32,
+    pub max: f32,
+    pub base: f32,
+    pub per_level: f32,
+    pub base_static_regen: f32,
+    pub regen_per_level: f32,
+}
+```
+
 ### Phase 3: 提取地图块数据
 
 `extract_phase_3_map_chunks(world: &mut World, loader: &LeagueLoader, map_name: &MapName) -> HashMap<String, ChampionRecordData>`
@@ -174,6 +203,7 @@ extract_phase_2_champions(&loader);
 - **Damage** - 包含 `0`（攻击力）
 - **Armor** - 包含 `0`（护甲值）
 - **Movement** - 包含 `speed`（移动速度）
+- **AbilityResource** - 包含 `ar_type`（资源类型：Mana/Energy/Turret/Camp）、`value`、`max`、`base`、`per_level`、`base_static_regen`、`regen_per_level`
 - **Skills** - 包含技能实体列表（`Vec<Entity>`）
 - **Name** - 实体名称
 

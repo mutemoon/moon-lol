@@ -11,8 +11,8 @@ use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
 use lol_core::movement::{CommandMovement, MovementAction, MovementWay};
 use lol_core::skill::{
-    CoolDown, CoolDownState, EventSkillCast, Skill, SkillRecastWindow, SkillSlot,
-    play_skill_animation, skill_damage, skill_dash, spawn_skill_particle,
+    CoolDown, EventSkillCast, Skill, SkillRecastWindow, SkillSlot, play_skill_animation,
+    skill_damage, skill_dash, spawn_skill_particle,
 };
 
 use crate::leesin::buffs::BuffLeeSinIronWill;
@@ -152,14 +152,10 @@ fn cast_leesin_q(
             },
         );
         commands.entity(skill_entity).remove::<SkillRecastWindow>();
-        commands.entity(skill_entity).insert((
-            CoolDown {
-                duration: cooldown.duration,
-            },
-            CoolDownState {
-                timer: Timer::from_seconds(cooldown.duration, TimerMode::Once),
-            },
-        ));
+        commands.entity(skill_entity).insert((CoolDown {
+            duration: cooldown.duration,
+            timer: Some(Timer::from_seconds(cooldown.duration, TimerMode::Once)),
+        },));
         debug!(
             "{:?} 释放了 {} 技能，当前阶段 {}，开始冷却",
             entity, "Lee Sin Q", stage
@@ -207,14 +203,10 @@ fn cast_leesin_w(
             .entity(entity)
             .with_related::<BuffOf>(BuffLeeSinIronWill::new(0.1, 0.1, 4.0));
         commands.entity(skill_entity).remove::<SkillRecastWindow>();
-        commands.entity(skill_entity).insert((
-            CoolDown {
-                duration: cooldown.duration,
-            },
-            CoolDownState {
-                timer: Timer::from_seconds(cooldown.duration, TimerMode::Once),
-            },
-        ));
+        commands.entity(skill_entity).insert((CoolDown {
+            duration: cooldown.duration,
+            timer: Some(Timer::from_seconds(cooldown.duration, TimerMode::Once)),
+        },));
         debug!(
             "{:?} 释放了 {} 技能，当前阶段 {}，开始冷却",
             entity, "Lee Sin W", stage
@@ -273,14 +265,10 @@ fn cast_leesin_e(
             Some(hash_bin("LeeSin_E2_Hit")),
         );
         commands.entity(skill_entity).remove::<SkillRecastWindow>();
-        commands.entity(skill_entity).insert((
-            CoolDown {
-                duration: cooldown.duration,
-            },
-            CoolDownState {
-                timer: Timer::from_seconds(cooldown.duration, TimerMode::Once),
-            },
-        ));
+        commands.entity(skill_entity).insert((CoolDown {
+            duration: cooldown.duration,
+            timer: Some(Timer::from_seconds(cooldown.duration, TimerMode::Once)),
+        },));
         debug!(
             "{:?} 释放了 {} 技能，当前阶段 {}，开始冷却",
             entity, "Lee Sin E", stage

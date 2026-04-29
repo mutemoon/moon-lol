@@ -19,22 +19,16 @@ impl Plugin for PluginNavigaton {
         app.init_asset_loader::<NavGridLoader>();
 
         app.init_resource::<NavigationStats>();
-        app.init_resource::<NavigationDebug>();
+        app.init_resource::<NavigationDebugState>();
 
         app.add_systems(First, |mut res_stats: ResMut<NavigationStats>| {
             *res_stats = Default::default();
         });
-        app.add_systems(
-            Last,
-            |nav_debug: Res<NavigationDebug>, res_stats: Res<NavigationStats>| {
-                if !nav_debug.enabled {
-                    return;
-                }
-                if res_stats.get_nav_path_time > Duration::from_millis(10) {
-                    info!("{:#?}", res_stats);
-                }
-            },
-        );
+        app.add_systems(Last, |res_stats: Res<NavigationStats>| {
+            if res_stats.get_nav_path_time > Duration::from_millis(10) {
+                info!("{:#?}", res_stats);
+            }
+        });
         app.add_systems(
             PreUpdate,
             pre_update_global_occupied_cells.run_if(resource_exists::<ResourceGrid>),
@@ -63,10 +57,13 @@ pub struct NavigationStats {
     pub check_path_time: Duration,
 }
 
-/// A* 可视化 debug 资源
+/// A* 可视化 debug 标记资源
+#[derive(Resource)]
+pub struct NavigationDebug;
+
+/// A* 可视化 debug 状态资源
 #[derive(Resource, Default)]
-pub struct NavigationDebug {
-    pub enabled: bool,
+pub struct NavigationDebugState {
     pub visited_cells: Vec<(usize, usize)>,
     pub path_cells: Vec<(usize, usize)>,
     pub unoptimized_path: Vec<Vec2>,
@@ -100,7 +97,7 @@ pub fn get_nav_path_with_debug(
     end_pos: &Vec2,
     grid: &ConfigNavigationGrid,
     stats: &mut NavigationStats,
-    mut debug: Option<&mut NavigationDebug>,
+    mut debug: Option<&mut NavigationDebugState>,
 ) -> Option<Vec<Vec2>> {
     // let start = Instant::now();
 

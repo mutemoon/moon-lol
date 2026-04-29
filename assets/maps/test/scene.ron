@@ -1,6 +1,6 @@
 (
   resources: {
-    
+    "lol_core::navigation::grid::ResourceGrid": (Path("maps/test/navgrid.bin")),
   },
   entities: {},
 )

@@ -33,10 +33,10 @@ use lol_core::game::PluginGame;
 use lol_core::life::Health;
 use lol_core::movement::{Movement, MovementState};
 use lol_core::navigation::grid::ResourceGrid;
-use lol_core::navigation::navigation::{NavigationDebug, NavigationStats, PluginNavigaton};
+use lol_core::navigation::navigation::{NavigationDebugState, NavigationStats, PluginNavigaton};
 use lol_core::skill::{
-    CoolDown, CoolDownState, Skill, SkillCooldownMode, SkillOf, SkillPoints, SkillRecastWindow,
-    SkillSlot, Skills, get_skill_value,
+    CoolDown, Skill, SkillCooldownMode, SkillOf, SkillPoints, SkillRecastWindow, SkillSlot, Skills,
+    get_skill_value,
 };
 use lol_core::team::Team;
 use lol_render::animation::PluginAnimation;
@@ -155,7 +155,7 @@ impl RivenHarness {
         }
 
         app.init_resource::<NavigationStats>();
-        app.init_resource::<NavigationDebug>();
+        app.init_resource::<NavigationDebugState>();
         app.init_asset::<ConfigNavigationGrid>();
         app.init_asset::<Spell>();
         app.init_asset::<Image>();
@@ -272,13 +272,13 @@ impl RivenHarness {
                 }
                 commands.entity(riven).with_related::<SkillOf>((
                     skill,
-                    CoolDown { duration: 10.0 },
-                    CoolDownState {
-                        timer: {
+                    CoolDown {
+                        duration: 10.0,
+                        timer: Some({
                             let mut t = Timer::from_seconds(10.0, TimerMode::Once);
                             t.set_elapsed(Duration::from_secs(10));
                             t
-                        },
+                        }),
                     },
                 ));
             };
@@ -440,10 +440,11 @@ impl RivenHarness {
         let skill_entity = skills[index];
         self.app
             .world()
-            .get::<CoolDownState>(skill_entity)
+            .get::<CoolDown>(skill_entity)
             .expect("cooldown state should exist")
             .timer
-            .is_finished()
+            .as_ref()
+            .map_or(true, |t| t.is_finished())
     }
 
     fn spell(&self, index: usize) -> Option<&Spell> {

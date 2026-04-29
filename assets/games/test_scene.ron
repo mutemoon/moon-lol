@@ -1,0 +1,51 @@
+(
+    resources: {},
+    entities: {
+        4294967185: (
+            components: {
+                "bevy_transform::components::transform::Transform": (
+                    translation: (0.0, 0.0, 0.0),
+                    rotation: (0.0, 0.0, 0.0, 1.0),
+                    scale: (1.0, 1.0, 1.0),
+                ),
+                "lol_champions::riven::Riven": (),
+                "lol_core::team::Team": Order,
+                "lol_render::camera::Focus": (),
+                "lol_render::controller::Controller": (),
+                "lol_base::character::ConfigCharacterRecord": (
+                    character_record: Path("characters/riven/config.ron"),
+                ),
+                "lol_base::character::ConfigSkin": (
+                    skin: Path("characters/riven/skin.ron"),
+                ),
+                "lol_core::skill_script::SkillScript": (
+                    steps: [
+                        (frame: 10, command: Action(Move((100.0,100.0)))),
+                        (frame: 20, command: Action(SkillLevelUp(0))),
+                    ],
+                ),
+            },
+        ),
+        4294967186: (
+            components: {
+                "bevy_transform::components::transform::Transform": (
+                    translation: (300.0, 0.0, 0.0),
+                    rotation: (0.0, 1.0, 0.0, 0.0),
+                    scale: (1.0, 1.0, 1.0),
+                ),
+                "lol_core::team::Team": Chaos,
+                "lol_core::entities::champion::Champion": (),
+                "lol_core::life::Health": (
+                    value: 6000.0,
+                    max: 6000.0,
+                ),
+                "lol_base::character::ConfigCharacterRecord": (
+                    character_record: Path("characters/fiora/config.ron"),
+                ),
+                "lol_base::character::ConfigSkin": (
+                    skin: Path("characters/fiora/skin.ron"),
+                ),
+            },
+        ),
+    },
+)

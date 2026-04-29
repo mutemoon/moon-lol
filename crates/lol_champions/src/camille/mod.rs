@@ -8,8 +8,8 @@ use lol_core::buffs::cc_debuffs::DebuffSlow;
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
 use lol_core::skill::{
-    CoolDown, CoolDownState, EventSkillCast, Skill, SkillRecastWindow, SkillSlot,
-    play_skill_animation, reset_skill_attack, skill_damage, skill_dash, spawn_skill_particle,
+    CoolDown, EventSkillCast, Skill, SkillRecastWindow, SkillSlot, play_skill_animation,
+    reset_skill_attack, skill_damage, skill_dash, spawn_skill_particle,
 };
 
 const CAMILLE_Q_RECAST_WINDOW: f32 = 3.0;
@@ -117,14 +117,10 @@ fn cast_camille_q(
             Some(hash_bin("Camille_Q2_Hit")),
         );
         commands.entity(skill_entity).remove::<SkillRecastWindow>();
-        commands.entity(skill_entity).insert((
-            CoolDown {
-                duration: cooldown.duration,
-            },
-            CoolDownState {
-                timer: Timer::from_seconds(cooldown.duration, TimerMode::Once),
-            },
-        ));
+        commands.entity(skill_entity).insert((CoolDown {
+            duration: cooldown.duration,
+            timer: Some(Timer::from_seconds(cooldown.duration, TimerMode::Once)),
+        },));
     }
 }
 
@@ -192,14 +188,10 @@ fn cast_camille_e(
             },
         );
         commands.entity(skill_entity).remove::<SkillRecastWindow>();
-        commands.entity(skill_entity).insert((
-            CoolDown {
-                duration: cooldown.duration,
-            },
-            CoolDownState {
-                timer: Timer::from_seconds(cooldown.duration, TimerMode::Once),
-            },
-        ));
+        commands.entity(skill_entity).insert((CoolDown {
+            duration: cooldown.duration,
+            timer: Some(Timer::from_seconds(cooldown.duration, TimerMode::Once)),
+        },));
     }
 }
 

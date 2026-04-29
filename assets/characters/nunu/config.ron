@@ -4,6 +4,7 @@
     4294967266: (
       components: {
         "lol_core::skill::CoolDown": (
+          timer: None,
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
@@ -18,6 +19,7 @@
     4294967267: (
       components: {
         "lol_core::skill::CoolDown": (
+          timer: None,
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
@@ -32,6 +34,7 @@
     4294967268: (
       components: {
         "lol_core::skill::CoolDown": (
+          timer: None,
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
@@ -46,6 +49,7 @@
     4294967269: (
       components: {
         "lol_core::skill::CoolDown": (
+          timer: None,
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
@@ -60,6 +64,7 @@
     4294967270: (
       components: {
         "lol_core::skill::CoolDown": (
+          timer: None,
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
@@ -86,6 +91,15 @@
           ),
           windup_modifier: 1.0,
           spell_key: None,
+        ),
+        "lol_core::base::ability_resource::AbilityResource": (
+          ar_type: Mana,
+          value: 0.1,
+          max: 0.1,
+          base: 0.1,
+          per_level: 0.0,
+          base_static_regen: 42.0,
+          regen_per_level: 280.0,
         ),
         "lol_core::base::bounding::Bounding": (
           radius: 35.0,

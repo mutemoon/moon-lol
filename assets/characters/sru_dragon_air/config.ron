@@ -4,6 +4,7 @@
     4294967270: (
       components: {
         "lol_core::skill::CoolDown": (
+          cd_timer: None,
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (

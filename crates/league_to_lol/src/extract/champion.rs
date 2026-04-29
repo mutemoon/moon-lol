@@ -1,8 +1,9 @@
 use bevy::prelude::*;
-use league_core::extract::{CharacterRecord, SpellObject};
+use league_core::extract::{AbilityResourceSlotInfo, CharacterRecord, SpellObject};
 use league_loader::game::{Data, LeagueLoader, PropGroup};
 use lol_base::spell::Spell;
 use lol_core::attack::{Attack, WindupConfig};
+use lol_core::base::ability_resource::{AbilityResource, AbilityResourceType};
 use lol_core::base::bounding::Bounding;
 use lol_core::base::level::ExperienceDrop;
 use lol_core::character::Character;
@@ -57,6 +58,7 @@ pub fn create_champion_components_from_record(
     Armor,
     Movement,
     Option<ExperienceDrop>,
+    Option<AbilityResource>,
 ) {
     // Attack
     let range = record.acquisition_range.unwrap_or(0.0);
@@ -121,7 +123,57 @@ pub fn create_champion_components_from_record(
             None
         };
 
-    (attack, health, damage, armor, movement, experience_drop)
+    // 资源数据（蓝条/能量条等）
+    let ability_resource = create_ability_resource_from_record(&record.primary_ability_resource);
+
+    (
+        attack,
+        health,
+        damage,
+        armor,
+        movement,
+        experience_drop,
+        ability_resource,
+    )
+}
+
+/// 从 AbilityResourceSlotInfo 创建 AbilityResource 组件
+fn create_ability_resource_from_record(
+    slot_info: &Option<AbilityResourceSlotInfo>,
+) -> Option<AbilityResource> {
+    let slot_info = slot_info.as_ref()?;
+
+    let ar_type = AbilityResourceType::from(slot_info.ar_type);
+    let base = slot_info
+        .unk_0x3a509002
+        .as_ref()
+        .map(|v| v.base_value)
+        .unwrap_or(0.0);
+    let per_level = slot_info
+        .unk_0x452033bb
+        .as_ref()
+        .map(|v| v.base_value)
+        .unwrap_or(0.0);
+    let base_static_regen = slot_info
+        .unk_0x6216bf7b
+        .as_ref()
+        .map(|v| v.base_value)
+        .unwrap_or(0.0);
+    let regen_per_level = slot_info
+        .unk_0x726ee5cd
+        .as_ref()
+        .map(|v| v.base_value)
+        .unwrap_or(0.0);
+
+    Some(AbilityResource {
+        ar_type,
+        value: base,
+        max: base,
+        base,
+        per_level,
+        base_static_regen,
+        regen_per_level,
+    })
 }
 
 /// 从 CharacterRecord 提取 character 并导出场景
@@ -161,7 +213,7 @@ pub fn extract_character_from_record(
         height: record.health_bar_height.unwrap_or(200.0),
     };
 
-    let (attack, health, damage, armor, movement, experience_drop) =
+    let (attack, health, damage, armor, movement, experience_drop, ability_resource) =
         create_champion_components_from_record(&record);
 
     // 从 spells 哈希创建 Skill 组件（使用 AssetServer 加载路径以获得正确的 Handle）
@@ -191,11 +243,19 @@ pub fn extract_character_from_record(
         world.entity_mut(champion_entity).insert(exp_drop);
     }
 
+    if let Some(ar) = ability_resource {
+        world.entity_mut(champion_entity).insert(ar);
+    }
+
     // 为每个技能创建独立的技能实体
     for skill in skills {
-        world
-            .entity_mut(champion_entity)
-            .with_related::<SkillOf>((skill, CoolDown { duration: 0.0 }));
+        world.entity_mut(champion_entity).with_related::<SkillOf>((
+            skill,
+            CoolDown {
+                timer: None,
+                duration: 0.0,
+            },
+        ));
     }
 
     let scene = DynamicWorld::from_world(world);

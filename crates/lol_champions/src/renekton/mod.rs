@@ -11,8 +11,8 @@ use lol_core::buffs::common_buffs::BuffSelfHeal;
 use lol_core::damage::DamageType;
 use lol_core::entities::champion::Champion;
 use lol_core::skill::{
-    CoolDown, CoolDownState, EventSkillCast, Skill, SkillRecastWindow, SkillSlot,
-    play_skill_animation, reset_skill_attack, skill_damage, skill_dash, spawn_skill_particle,
+    CoolDown, EventSkillCast, Skill, SkillRecastWindow, SkillSlot, play_skill_animation,
+    reset_skill_attack, skill_damage, skill_dash, spawn_skill_particle,
 };
 
 use crate::renekton::buffs::BuffRenektonR;
@@ -210,14 +210,10 @@ fn cast_renekton_e(
             },
         );
         commands.entity(skill_entity).remove::<SkillRecastWindow>();
-        commands.entity(skill_entity).insert((
-            CoolDown {
-                duration: cooldown.duration,
-            },
-            CoolDownState {
-                timer: Timer::from_seconds(cooldown.duration, TimerMode::Once),
-            },
-        ));
+        commands.entity(skill_entity).insert((CoolDown {
+            duration: cooldown.duration,
+            timer: Some(Timer::from_seconds(cooldown.duration, TimerMode::Once)),
+        },));
     }
 }
 

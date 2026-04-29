@@ -15,8 +15,8 @@ use lol_core::cooldown::PluginCooldown;
 use lol_core::damage::{DamageType, PluginDamage};
 use lol_core::life::{Health, PluginLife};
 use lol_core::skill::{
-    CoolDown, CoolDownState, EventSkillCast, PluginSkill, Skill, SkillCastLog, SkillCastResult,
-    SkillOf, SkillPoints, SkillSlot, Skills, skill_damage,
+    CoolDown, EventSkillCast, PluginSkill, Skill, SkillCastLog, SkillCastResult, SkillOf,
+    SkillPoints, SkillSlot, Skills, skill_damage,
 };
 use lol_core::team::Team;
 
@@ -181,8 +181,10 @@ impl ActionSkillHarness {
             .spawn((
                 SkillOf(self.caster),
                 skill,
-                CoolDown { duration: 3.0 },
-                CoolDownState { timer },
+                CoolDown {
+                    duration: 3.0,
+                    timer: Some(timer),
+                },
                 extra,
             ))
             .id();

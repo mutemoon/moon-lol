@@ -65,8 +65,8 @@ impl CameraState {
     }
 
     pub fn set_scale(&mut self, scale: f32) {
-        self.scale = scale.clamp(0.1, 1.0);
-        // self.scale = scale;
+        // self.scale = scale.clamp(0.1, 1.0);
+        self.scale = scale;
     }
 }
 
@@ -124,8 +124,10 @@ fn setup(
             // Projection::custom(CustomFlipXProjection::default()),
         ));
 
-    if let Ok((_, mut cursor_options)) = window.single_mut() {
-        cursor_options.grab_mode = CursorGrabMode::Confined;
+    if !cfg!(debug_assertions) {
+        if let Ok((_, mut cursor_options)) = window.single_mut() {
+            cursor_options.grab_mode = CursorGrabMode::Confined;
+        }
     }
 }
 

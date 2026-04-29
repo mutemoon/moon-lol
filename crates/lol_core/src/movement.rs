@@ -11,7 +11,7 @@ use crate::base::pipeline::{
 };
 use crate::navigation::grid::ResourceGrid;
 use crate::navigation::navigation::{
-    NavigationDebug, NavigationStats, get_nav_path_with_debug, is_path_blocked,
+    NavigationDebugState, NavigationStats, get_nav_path_with_debug, is_path_blocked,
     world_pos_to_grid_xy,
 };
 use crate::rotate::CommandRotate;
@@ -345,7 +345,7 @@ fn apply_final_movement_decision(
     res_grid: Res<ResourceGrid>,
     mut assets_grid: ResMut<Assets<ConfigNavigationGrid>>,
     mut stats: ResMut<NavigationStats>,
-    mut nav_debug: ResMut<NavigationDebug>,
+    mut nav_debug: Option<ResMut<NavigationDebugState>>,
     time: Res<Time>,
 ) {
     let Some(mut grid) = assets_grid.get_mut(&res_grid.0) else {
@@ -407,11 +407,7 @@ fn apply_final_movement_decision(
 
                         debug!("{} 寻路到 {:?}", entity, target);
 
-                        let debug_ref = if nav_debug.enabled {
-                            Some(&mut *nav_debug)
-                        } else {
-                            None
-                        };
+                        let debug_ref = nav_debug.as_mut().map(|d| &mut **d);
 
                         if let Some(path) = get_nav_path_with_debug(
                             &transform.translation.xz(),

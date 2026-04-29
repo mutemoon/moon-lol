@@ -17,12 +17,6 @@ use bevy::render::renderer::{RenderDevice, RenderQueue};
 use bevy::render::{Extract, ExtractSchedule, Render, RenderApp, RenderSystems};
 use crossbeam_channel::{Receiver, Sender};
 use image::{ImageBuffer, Rgba};
-use lol_base::grid::{
-    ConfigNavigationGrid, ConfigNavigationGridCell, GridFlagsJungleQuadrant, GridFlagsMainRegion,
-    GridFlagsNearestLane, GridFlagsPOI, GridFlagsRing, GridFlagsRiverRegion, GridFlagsSRX,
-    GridFlagsVisionPathing,
-};
-use lol_core::navigation::grid::ResourceGrid;
 
 #[derive(Resource, Clone)]
 pub struct SkillTestRenderConfig {
@@ -178,12 +172,10 @@ impl ImageCopier {
 fn setup_skill_test_render(
     mut commands: Commands,
     config: Res<SkillTestRenderConfig>,
-    mut navigation_grids: ResMut<Assets<ConfigNavigationGrid>>,
     mut images: ResMut<Assets<Image>>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
     render_device: Res<RenderDevice>,
-    res_grid: Option<Res<ResourceGrid>>,
     q_camera: Query<Entity, With<Camera>>,
 ) {
     let _ = fs::create_dir_all(&config.output_dir);
@@ -192,11 +184,6 @@ fn setup_skill_test_render(
         width: config.width,
         height: config.height,
     });
-
-    if res_grid.is_none() {
-        let grid = navigation_grids.add(make_test_grid());
-        commands.insert_resource(ResourceGrid(grid));
-    }
 
     let size = Extent3d {
         width: config.width,
@@ -479,33 +466,6 @@ fn ffmpeg_exists() -> bool {
         .output()
         .map(|output| output.status.success())
         .unwrap_or(false)
-}
-
-fn make_test_grid() -> ConfigNavigationGrid {
-    let cell = ConfigNavigationGridCell {
-        heuristic: 1.0,
-        vision_pathing_flags: GridFlagsVisionPathing::Walkable,
-        river_region_flags: GridFlagsRiverRegion::empty(),
-        jungle_quadrant_flags: GridFlagsJungleQuadrant::empty(),
-        main_region_flags: GridFlagsMainRegion::from(0),
-        nearest_lane_flags: GridFlagsNearestLane::from(0),
-        poi_flags: GridFlagsPOI::from(0),
-        ring_flags: GridFlagsRing::from(0),
-        srx_flags: GridFlagsSRX::from(0),
-    };
-
-    ConfigNavigationGrid {
-        min_position: Vec2::new(-2000.0, -2000.0),
-        cell_size: 50.0,
-        x_len: 100,
-        y_len: 100,
-        cells: vec![vec![cell; 100]; 100],
-        height_x_len: 2,
-        height_y_len: 2,
-        height_samples: vec![vec![0.0; 2]; 2],
-        occupied_cells: Default::default(),
-        exclude_cells: Default::default(),
-    }
 }
 
 fn rgba_from_padded_buffer(raw: &[u8], width: u32, height: u32) -> ImageBuffer<Rgba<u8>, Vec<u8>> {

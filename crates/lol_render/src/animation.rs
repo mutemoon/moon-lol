@@ -27,7 +27,7 @@ impl Plugin for PluginAnimation {
         app.add_systems(Update, update_condition_animation);
         app.add_systems(Update, apply_animation_speed);
 
-        app.add_observer(on_command_animation_play);
+        // app.add_observer(on_command_animation_play);
     }
 }
 
