@@ -1,8 +1,7 @@
 {
   "name": "fsm-demo-rust",
   "scripts": {
-    "extract": "cargo run --example extract_map_data",
-    "extract:ts": "ts-node scripts/extract.ts",
+    "extract": "cargo run --example extract",
     "fix": "cargo fix --allow-dirty --workspace",
     "format": "cargo +nightly fmt",
     "hot:patch": "dx serve --hot-patch --features \"bevy/hotpatching\"",

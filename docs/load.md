@@ -168,7 +168,7 @@ pub struct CharacterSkin {
 
 ### Export: 皮肤场景文件
 
-#### [MODIFY] [extract_map_data.rs](file:///d:/Users/admin/workspace/moon-lol/examples/extract_map_data.rs)
+#### [MODIFY] [extract.rs](file:///d:/Users/admin/workspace/moon-lol/examples/extract.rs)
 
 新增 `export_skin` 函数：
 
@@ -191,7 +191,7 @@ pub struct CharacterSkin {
 cargo check -p lol_base
 cargo check -p lol_render
 cargo check -p league_to_lol
-cargo check --example extract_map_data
+cargo check --example extract
 ```
 
 ### Manual Verification
