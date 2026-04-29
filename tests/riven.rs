@@ -24,7 +24,6 @@ use lol_core::base::buff::Buffs;
 use lol_core::base::level::Level;
 use lol_core::buffs::shield_white::BuffShieldWhite;
 use lol_core::damage::{Armor, CommandDamageCreate, Damage, DamageType};
-use lol_core::entities::barrack::PluginBarrack;
 use lol_core::entities::champion::Champion;
 use lol_core::entities::minion::PluginMinion;
 use lol_core::entities::shpere::PluginDebugSphere;
@@ -106,7 +105,6 @@ impl RivenHarness {
         });
 
         plugin_group = plugin_group
-            .disable::<PluginBarrack>()
             .disable::<PluginMinion>()
             .disable::<PluginTurret>()
             .disable::<PluginUI>();

@@ -7,7 +7,6 @@ use bevy::prelude::*;
 use bevy::time::TimeUpdateStrategy;
 use bevy::winit::WinitPlugin;
 use lol_base::map::MapPaths;
-use lol_core::entities::barrack::PluginBarrack;
 use lol_core::entities::minion::PluginMinion;
 use lol_core::entities::turret::PluginTurret;
 use lol_core::game::PluginGame;
@@ -78,7 +77,6 @@ fn run_fiora_case_inner(test_name: &str, max_frames: u32) {
             .set(PluginGame {
                 scenes: vec!["games/fiora_render.ron".to_owned()],
             })
-            .disable::<PluginBarrack>()
             .disable::<PluginMap>()
             .disable::<PluginMinion>()
             .disable::<PluginTurret>(),

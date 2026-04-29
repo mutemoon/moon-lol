@@ -1,5 +1,3 @@
-pub mod server;
-
 use bevy::app::plugin_group;
 use lol_champions::PluginChampions;
 use lol_core::action::PluginAction;

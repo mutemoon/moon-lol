@@ -3,7 +3,6 @@ use std::time::Duration;
 
 use bevy::prelude::*;
 use bevy::time::TimeUpdateStrategy;
-use lol_core::entities::barrack::PluginBarrack;
 use lol_core::entities::minion::PluginMinion;
 use lol_core::entities::turret::PluginTurret;
 use lol_core::game::PluginGame;
@@ -49,7 +48,6 @@ fn main() {
             .set(PluginGame {
                 scenes: vec!["games/fiora_render.ron".to_owned()],
             })
-            .disable::<PluginBarrack>()
             .disable::<PluginMap>()
             .disable::<PluginMinion>()
             .disable::<PluginTurret>(),

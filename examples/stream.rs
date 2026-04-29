@@ -21,17 +21,18 @@ use image::codecs::jpeg::JpegEncoder;
 use lol_champions::fiora::passive::Vital;
 use lol_core::action::{Action, CommandAction};
 use lol_core::attack::AttackState;
-use lol_core::entities::barrack::PluginBarrack;
 use lol_core::life::Health;
 use lol_render::camera::CameraInit;
 use lol_render::controller::Controller;
 use moon_lol::PluginCore;
-use moon_lol::server::gym::{AttackTarget, PluginGymEnv};
 use rocket::http::{ContentType, Method, Status};
 use rocket::serde::json::Json;
 use rocket::{State, get, launch, post, routes};
 use rocket_cors::{AllowedOrigins, CorsOptions};
 use serde::{Deserialize, Serialize};
+
+#[derive(Component)]
+pub struct AttackTarget;
 
 #[derive(Resource, Deref)]
 struct MainWorldReceiver(Receiver<Vec<u8>>);
@@ -347,8 +348,7 @@ fn rocket() -> _ {
                 })
                 .disable::<WinitPlugin>(),
         )
-        .add_plugins(PluginCore.build().disable::<PluginBarrack>())
-        .add_plugins(PluginGymEnv)
+        .add_plugins(PluginCore.build())
         .add_plugins(PluginImageCopy)
         .insert_resource(TimeUpdateStrategy::ManualDuration(fixed_update_timestep))
         .insert_resource(SceneController::new(1920, 1080))

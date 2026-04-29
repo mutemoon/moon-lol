@@ -17,7 +17,6 @@ fn main() {
             PluginCore.build().set(PluginGame {
                 scenes: vec!["games/attack.ron".to_owned()],
             }),
-            // .disable::<PluginBarrack>(),
         ))
         .run();
 }

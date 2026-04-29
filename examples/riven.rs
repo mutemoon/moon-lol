@@ -2,7 +2,6 @@ use std::time::Duration;
 
 use bevy::prelude::*;
 use bevy::winit::{UpdateMode, WinitSettings};
-use lol_core::entities::barrack::PluginBarrack;
 use lol_core::game::PluginGame;
 use lol_core::log::create_log_plugin;
 use moon_lol::PluginCore;
@@ -22,12 +21,9 @@ fn main() {
                     }),
                     ..default()
                 }),
-            PluginCore
-                .build()
-                .set(PluginGame {
-                    scenes: vec!["games/riven.ron".to_owned()],
-                })
-                .disable::<PluginBarrack>(),
+            PluginCore.build().set(PluginGame {
+                scenes: vec!["games/riven.ron".to_owned()],
+            }),
         ))
         .insert_resource(WinitSettings {
             focused_mode: UpdateMode::Reactive {

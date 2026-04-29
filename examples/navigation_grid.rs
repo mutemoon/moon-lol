@@ -1,6 +1,5 @@
 use bevy::prelude::*;
 use lol_base::grid::ConfigNavigationGrid;
-use lol_core::entities::barrack::PluginBarrack;
 use lol_core::game::PluginGame;
 use lol_core::navigation::grid::ResourceGrid;
 use lol_render::camera::CameraState;
@@ -19,12 +18,9 @@ fn main() {
                 }),
                 ..default()
             }),
-            PluginCore
-                .build()
-                .disable::<PluginBarrack>()
-                .set(PluginGame {
-                    scenes: vec!["games/attack.ron".to_string()],
-                }),
+            PluginCore.build().set(PluginGame {
+                scenes: vec!["games/attack.ron".to_string()],
+            }),
         ))
         .add_systems(Update, on_key_space)
         .add_systems(Update, on_key_m)
