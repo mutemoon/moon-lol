@@ -1,9 +1,50 @@
 # 地图数据提取流程
 
+## WAD 文件结构
+
+游戏资源存储在 `.wad.client` 文件中，采用 hash 索引机制：
+
+```
+.wad.client 文件 → 文件表 + 二进制内容
+```
+
+### 文件表条目
+
+每个文件在文件表中记录：
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| 路径 hash | u64 | 文件路径的 FNV-1a hash 值 |
+| offset | u64 | 文件内容在二进制数据中的偏移 |
+| size | u32 | 文件大小 |
+| 其它 | - | 额外元数据 |
+
+### Hash 算法
+
+路径到 hash 的转换使用 **FNV-1a** 算法，源码来自 [LeagueToolkit](https://github.com/Keengs/LibraryForLeagueToolkit)：
+
+```
+示例: "data/maps/mapgeometry/map11/bloom.mapgeo"
+  → hash: 0xe8b4704f422901d9
+```
+
+已知路径即可算出 hash，再通过 hash 查找 offset 和 size，最后从二进制数据中读取文件内容。
+
+### 文件类型
+
+WAD 中的文件主要包括：
+
+| 类型 | 后缀 | 说明 |
+|------|------|------|
+| 模型文件 | `.skn`, `.skl`, `.glb` | 网格、骨骼、GLTF 模型 |
+| 贴图文件 | `.tex` | 纹理数据 |
+| 动画文件 | `.anm` | 骨骼动画 |
+| 配置文件 | `.bin` | 游戏数据配置 |
+
 ## 架构概述
 
 ```
-游戏文件 → league_core::extract (解析) → league_to_lol (转换) → lol_base (稳定配置)
+游戏文件 (wad.client) → league_core::extract (解析) → league_to_lol (转换) → lol_base (稳定配置)
                                                       ↓
                                               lol_core (运行时逻辑)
                                                       ↓
