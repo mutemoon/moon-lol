@@ -20,18 +20,17 @@ impl Plugin for PluginRenderNavigation {
         });
         app.add_systems(
             Update,
-            setup_grid_visualization.run_if(resource_exists::<ResourceGrid>),
+            setup_grid_visualization.run_if(
+                resource_exists::<ResourceGrid>
+                    .and_then(resource_exists::<NavigationDebug>)
+                    .and_then(run_once),
+            ),
         );
         app.add_systems(
             Update,
-            (
-                update_grid_visibility,
-                update_visualization_astar,
-                update_visualization_move_path,
-            )
-                .run_if(
-                    resource_exists::<ResourceGrid>.and_then(resource_exists::<NavigationDebug>),
-                ),
+            (update_visualization_astar, update_visualization_move_path).run_if(
+                resource_exists::<ResourceGrid>.and_then(resource_exists::<NavigationDebug>),
+            ),
         );
     }
 }
@@ -44,11 +43,6 @@ struct AStarPathCell;
 
 #[derive(Component)]
 struct ObstacleCell;
-
-#[derive(Component)]
-struct GridCell {
-    flags: u32,
-}
 
 #[derive(Resource, Default)]
 pub struct FlagFilters {
@@ -158,15 +152,12 @@ fn setup_grid_visualization(
     mut materials: ResMut<Assets<StandardMaterial>>,
     mut images: ResMut<Assets<Image>>,
     mut flag_filters: ResMut<FlagFilters>,
-    q_cells: Query<Entity, With<GridCell>>,
 ) {
-    if !q_cells.is_empty() {
-        return;
-    }
-
     let Some(grid) = assets_grid.get(&res_grid.0) else {
+        info!("网格未加载");
         return;
     };
+    info!("生成网格");
 
     flag_filters.show_all = true;
 
@@ -189,32 +180,6 @@ fn setup_grid_visualization(
             Map,
         ))
         .observe(on_click_map);
-}
-
-fn update_grid_visibility(
-    flag_filters: Res<FlagFilters>,
-    mut query: Query<(&GridCell, &mut Visibility)>,
-) {
-    if !flag_filters.is_changed() {
-        return;
-    }
-
-    for (_grid_cell, mut visibility) in query.iter_mut() {
-        if flag_filters.show_all {
-            *visibility = Visibility::Visible;
-        } else {
-            *visibility = Visibility::Visible;
-            // *visibility = if flag_filters
-            //     .enabled_flags
-            //     .iter()
-            //     .all(|&flag| (grid_cell.flags & flag) != 0)
-            // {
-            //     Visibility::Visible
-            // } else {
-            //     Visibility::Hidden
-            // };
-        }
-    }
 }
 
 fn update_visualization_astar(

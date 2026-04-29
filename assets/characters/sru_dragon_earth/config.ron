@@ -4,7 +4,7 @@
     4294967270: (
       components: {
         "lol_core::skill::CoolDown": (
-          cd_timer: None,
+          timer: None,
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
@@ -31,6 +31,15 @@
           ),
           windup_modifier: 1.0,
           spell_key: None,
+        ),
+        "lol_core::base::ability_resource::AbilityResource": (
+          ar_type: Camp,
+          value: 0.0,
+          max: 0.0,
+          base: 0.0,
+          per_level: 0.0,
+          base_static_regen: 0.0,
+          regen_per_level: 0.0,
         ),
         "lol_core::base::bounding::Bounding": (
           radius: 1.0,

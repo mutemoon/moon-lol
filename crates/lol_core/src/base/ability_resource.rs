@@ -19,6 +19,7 @@ pub enum AbilityResourceType {
     Energy,
     Turret,
     Camp,
+    Unknown(u8),
 }
 
 impl From<u8> for AbilityResourceType {
@@ -28,7 +29,7 @@ impl From<u8> for AbilityResourceType {
             1 => AbilityResourceType::Energy,
             7 => AbilityResourceType::Turret,
             8 => AbilityResourceType::Camp,
-            _ => panic!("Invalid AbilityResourceType {}", value),
+            _ => AbilityResourceType::Unknown(value),
         }
     }
 }
