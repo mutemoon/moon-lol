@@ -65,7 +65,7 @@ fn on_leona_skill_cast(
 }
 
 fn cast_leona_q(commands: &mut Commands, entity: Entity) {
-    play_skill_animation(commands, entity, hash_bin("Spell1"));
+    play_skill_animation(commands, entity, "spell1".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Leona_Q_Cast"));
 
     // Q is an empowered auto attack that stuns
@@ -73,7 +73,7 @@ fn cast_leona_q(commands: &mut Commands, entity: Entity) {
 }
 
 fn cast_leona_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell2"));
+    play_skill_animation(commands, entity, "spell2".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Leona_W_Cast"));
 
     // W grants damage reduction and armor/mr
@@ -102,7 +102,7 @@ fn cast_leona_e(
     _point: Vec2,
     skill_spell: Handle<Spell>,
 ) {
-    play_skill_animation(commands, entity, hash_bin("Spell3"));
+    play_skill_animation(commands, entity, "spell3".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Leona_E_Cast"));
 
     // E is a dash that roots on hit
@@ -124,7 +124,7 @@ fn cast_leona_e(
 }
 
 fn cast_leona_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell4"));
+    play_skill_animation(commands, entity, "spell4".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Leona_R_Cast"));
 
     // R is a global nuke that slows and stuns center

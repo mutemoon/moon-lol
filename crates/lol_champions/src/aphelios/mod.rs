@@ -54,7 +54,7 @@ fn on_aphelios_skill_cast(
 }
 
 fn cast_aphelios_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell1"));
+    play_skill_animation(commands, entity, "spell1".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Aphelios_Q_Cast"));
 
     skill_damage(
@@ -75,7 +75,7 @@ fn cast_aphelios_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<
 }
 
 fn cast_aphelios_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell4"));
+    play_skill_animation(commands, entity, "spell4".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Aphelios_R_Cast"));
 
     skill_damage(

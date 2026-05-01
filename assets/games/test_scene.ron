@@ -16,12 +16,14 @@
                     character_record: Path("characters/riven/config.ron"),
                 ),
                 "lol_base::character::ConfigSkin": (
-                    skin: Path("characters/riven/skin.ron"),
+                    skin: Path("characters/riven/skins/skin0.ron"),
                 ),
                 "lol_core::skill_script::SkillScript": (
                     steps: [
                         (frame: 10, command: Action(Move((100.0,100.0)))),
                         (frame: 20, command: Action(SkillLevelUp(0))),
+                        (frame: 100, command: Action(Move((1000.0,1000.0)))),
+                        (frame: 500, command: Action(Move((200.0,500.0)))),
                     ],
                 ),
             },
@@ -43,7 +45,7 @@
                     character_record: Path("characters/fiora/config.ron"),
                 ),
                 "lol_base::character::ConfigSkin": (
-                    skin: Path("characters/fiora/skin.ron"),
+                    skin: Path("characters/fiora/skins/skin0.ron"),
                 ),
             },
         ),

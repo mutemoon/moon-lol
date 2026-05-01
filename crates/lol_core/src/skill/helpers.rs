@@ -15,7 +15,7 @@ use crate::action::dash::{ActionDash, DashDamageComponent, DashMoveType};
 use crate::attack::CommandAttackReset;
 use crate::movement::{CommandMovement, MovementAction, MovementWay};
 
-pub fn play_skill_animation(commands: &mut Commands, entity: Entity, hash: u32) {
+pub fn play_skill_animation(commands: &mut Commands, entity: Entity, hash: String) {
     commands.trigger(CommandAnimationPlay {
         entity,
         hash,

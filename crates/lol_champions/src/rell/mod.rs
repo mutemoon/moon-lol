@@ -54,7 +54,7 @@ fn on_rell_skill_cast(
 }
 
 fn cast_rell_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell1"));
+    play_skill_animation(commands, entity, "spell1".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Rell_Q_Cast"));
 
     // Q is shattering strike - damage and armor reduction
@@ -76,7 +76,7 @@ fn cast_rell_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spel
 }
 
 fn cast_rell_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell2"));
+    play_skill_animation(commands, entity, "spell2".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Rell_W_Cast"));
 
     // W is crashing blow - damage and knockup
@@ -95,7 +95,7 @@ fn cast_rell_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spel
 }
 
 fn cast_rell_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell3"));
+    play_skill_animation(commands, entity, "spell3".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Rell_E_Cast"));
 
     // E is full bind - stun
@@ -114,7 +114,7 @@ fn cast_rell_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spel
 }
 
 fn cast_rell_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell4"));
+    play_skill_animation(commands, entity, "spell4".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Rell_R_Cast"));
 
     // R is catharsis - AoE damage and slow

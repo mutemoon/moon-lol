@@ -56,7 +56,7 @@ fn on_shyvana_skill_cast(
 }
 
 fn cast_shyvana_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell1"));
+    play_skill_animation(commands, entity, "spell1".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Shyvana_Q_Cast"));
 
     // Q is twin bite - damage
@@ -75,7 +75,7 @@ fn cast_shyvana_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<S
 }
 
 fn cast_shyvana_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell2"));
+    play_skill_animation(commands, entity, "spell2".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Shyvana_W_Cast"));
 
     // W is flame breath - damage over time
@@ -97,7 +97,7 @@ fn cast_shyvana_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<S
 }
 
 fn cast_shyvana_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell3"));
+    play_skill_animation(commands, entity, "spell3".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Shyvana_E_Cast"));
 
     // E is dragon descent - knockup
@@ -116,7 +116,7 @@ fn cast_shyvana_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<S
 }
 
 fn cast_shyvana_r(commands: &mut Commands, entity: Entity) {
-    play_skill_animation(commands, entity, hash_bin("Spell4"));
+    play_skill_animation(commands, entity, "spell4".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Shyvana_R_Cast"));
 
     // R is shape shift - transformation

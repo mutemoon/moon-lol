@@ -64,7 +64,7 @@ fn on_sett_skill_cast(
 }
 
 fn cast_sett_q(commands: &mut Commands, entity: Entity) {
-    play_skill_animation(commands, entity, hash_bin("Spell1"));
+    play_skill_animation(commands, entity, "spell1".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Sett_Q_Cast"));
     // Q is a buff that enhances next 2 attacks with bonus damage and move speed
     reset_skill_attack(commands, entity);
@@ -74,7 +74,7 @@ fn cast_sett_q(commands: &mut Commands, entity: Entity) {
 }
 
 fn cast_sett_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell2"));
+    play_skill_animation(commands, entity, "spell2".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Sett_W_Cast"));
     // W deals true damage in a cone and grants shield based on damage taken
     skill_damage(
@@ -99,7 +99,7 @@ fn cast_sett_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spel
 }
 
 fn cast_sett_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell3"));
+    play_skill_animation(commands, entity, "spell3".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Sett_E_Cast"));
     // E is a两边拉扯 that damages and stuns enemies caught by both sides
     skill_damage(
@@ -126,7 +126,7 @@ fn cast_sett_r(
     point: Vec2,
     skill_spell: Handle<Spell>,
 ) {
-    play_skill_animation(commands, entity, hash_bin("Spell4"));
+    play_skill_animation(commands, entity, "spell4".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Sett_R_Cast"));
     // R is a dash that carries enemy to target location and deals damage
     skill_dash(

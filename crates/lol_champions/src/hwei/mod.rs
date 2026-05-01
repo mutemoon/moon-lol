@@ -34,7 +34,7 @@ fn on_hwei_skill_cast(
         return;
     };
 
-    play_skill_animation(&mut commands, entity, hash_bin("Spell1"));
+    play_skill_animation(&mut commands, entity, "spell1".to_string());
 
     match skill.slot {
         SkillSlot::Q => spawn_skill_particle(&mut commands, entity, hash_bin("Hwei_Q_Q_Tar")),

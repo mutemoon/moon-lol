@@ -58,7 +58,7 @@ pub fn cast_darius_q(
     );
 
     // Play Q animation
-    lol_core::skill::play_skill_animation(commands, entity, league_utils::hash_bin("Spell1"));
+    lol_core::skill::play_skill_animation(commands, entity, "spell1".to_string());
 
     // Inner blade damage (Circle, radius = inner_radius)
     // Inner blade does NOT apply hemorrhage

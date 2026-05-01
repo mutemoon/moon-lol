@@ -65,7 +65,7 @@ fn on_garen_skill_cast(
 }
 
 fn cast_garen_q(commands: &mut Commands, entity: Entity) {
-    play_skill_animation(commands, entity, hash_bin("Spell1"));
+    play_skill_animation(commands, entity, "spell1".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Garen_Q_Cast"));
 
     // Q provides movement speed buff and enhanced next attack
@@ -87,7 +87,7 @@ fn cast_garen_q(commands: &mut Commands, entity: Entity) {
 }
 
 fn cast_garen_w(commands: &mut Commands, entity: Entity) {
-    play_skill_animation(commands, entity, hash_bin("Spell2"));
+    play_skill_animation(commands, entity, "spell2".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Garen_W_Cast"));
 
     // W provides tenacity, damage reduction, and a shield
@@ -111,7 +111,7 @@ fn cast_garen_w(commands: &mut Commands, entity: Entity) {
 }
 
 fn cast_garen_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell3"));
+    play_skill_animation(commands, entity, "spell3".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Garen_E_Cast"));
     skill_damage(
         commands,
@@ -128,7 +128,7 @@ fn cast_garen_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
 }
 
 fn cast_garen_r(commands: &mut Commands, entity: Entity, _point: Vec2, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell4"));
+    play_skill_animation(commands, entity, "spell4".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Garen_R_Cast"));
     // R is a targeted execute ability - use Nearest shape for single target
     skill_damage(

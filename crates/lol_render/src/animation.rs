@@ -1,25 +1,23 @@
 use std::time::Duration;
 
 use bevy::prelude::*;
-use league_utils::hash_bin;
 use lol_base::animation::{
-    AnimationHandler, AnimationState, ConfigAnimation, ConfigParametricUpdater,
+    AnimationState, ConfigParametricUpdater, LOLAnimationGraph, LOLAnimationGraphHandler,
 };
-use lol_base::render_cmd::CommandAnimationPlay;
 use lol_core::attack::Attack;
 use lol_core::base::state::State;
 use lol_core::movement::Movement;
 
-use crate::loaders::animation::LoaderConfigAnimation;
+use crate::loaders::animation::LoaderConfigAnimationLoader;
 
 #[derive(Default)]
 pub struct PluginAnimation;
 
 impl Plugin for PluginAnimation {
     fn build(&self, app: &mut App) {
-        app.init_asset::<ConfigAnimation>();
+        app.init_asset::<LOLAnimationGraph>();
 
-        app.init_asset_loader::<LoaderConfigAnimation>();
+        app.init_asset_loader::<LoaderConfigAnimationLoader>();
 
         app.add_systems(Update, on_state_change);
         app.add_systems(Update, on_animation_state_change);
@@ -33,7 +31,7 @@ impl Plugin for PluginAnimation {
 
 #[derive(Component)]
 pub struct AnimationTransitionOut {
-    pub hash: u32,
+    pub hash: String,
     pub weight: f32,
     pub duration: Duration,
     pub start_time: f32,
@@ -46,35 +44,19 @@ fn on_state_change(
     for (entity, state, mut animation_state) in query.iter_mut() {
         match state {
             State::Idle => {
-                animation_state.update(hash_bin("Idle1"));
+                animation_state.update("Idle1".to_string());
             }
             State::Running => {
-                animation_state.update(hash_bin("Run"));
+                animation_state.update("Run".to_string());
             }
             State::Attacking => {
                 let attack = q_attack.get(entity).unwrap();
                 animation_state
-                    .update(hash_bin("Attack"))
+                    .update("Attack".to_string())
                     .with_repeat(false)
                     .with_duration(attack.animation_duration());
             }
         }
-    }
-}
-
-fn on_command_animation_play(
-    trigger: On<CommandAnimationPlay>,
-    mut query: Query<&mut AnimationState>,
-) {
-    let event = trigger.event();
-    let entity = trigger.event_target();
-
-    let mut animation_state = query.get_mut(entity).unwrap();
-
-    animation_state.update(event.hash).with_repeat(event.repeat);
-
-    if let Some(duration) = event.duration {
-        animation_state.with_duration(duration);
     }
 }
 
@@ -83,13 +65,13 @@ fn on_animation_state_change(
         (
             Entity,
             &mut AnimationPlayer,
-            &AnimationHandler,
+            &LOLAnimationGraphHandler,
             &mut AnimationState,
         ),
         Changed<AnimationState>,
     >,
     q_transition_out: Query<&AnimationTransitionOut>,
-    res_animation: Res<Assets<ConfigAnimation>>,
+    res_animation: Res<Assets<LOLAnimationGraph>>,
     mut commands: Commands,
     time: Res<Time>,
 ) {
@@ -98,19 +80,23 @@ fn on_animation_state_change(
             continue;
         };
         if let Ok(transition_out) = q_transition_out.get(entity) {
-            animation.stop(&mut player, transition_out.hash, &mut state);
+            animation.stop(&mut player, &transition_out.hash, &mut state);
         }
 
-        if let Some(last_hash) = state.last_hash {
-            if state.current_hash == last_hash {
-                if state.repeat {
+        let last_hash = state.last.clone();
+        let current_hash = state.current.clone();
+        let should_repeat = state.repeat;
+
+        if let Some(ref last_hash_ref) = last_hash {
+            if current_hash == *last_hash_ref {
+                if should_repeat {
                     continue;
                 } else {
-                    animation.stop(&mut player, last_hash, &mut state);
+                    animation.stop(&mut player, last_hash_ref, &mut state);
                 }
             } else {
                 commands.entity(entity).insert(AnimationTransitionOut {
-                    hash: last_hash,
+                    hash: last_hash_ref.clone(),
                     weight: 1.0,
                     duration: Duration::from_millis(100),
                     start_time: time.elapsed_secs(),
@@ -118,9 +104,9 @@ fn on_animation_state_change(
             }
         }
 
-        animation.play(&mut player, state.current_hash, 1.0, &mut state);
-        if state.repeat {
-            animation.repeat(&mut player, state.current_hash, &state);
+        animation.play(&mut player, &current_hash, 1.0, &mut state);
+        if should_repeat {
+            animation.repeat(&mut player, &current_hash, &state);
         }
     }
 }
@@ -130,11 +116,11 @@ fn update_transition_out(
     mut query: Query<(
         Entity,
         &mut AnimationPlayer,
-        &AnimationHandler,
+        &LOLAnimationGraphHandler,
         &AnimationTransitionOut,
         &mut AnimationState,
     )>,
-    res_animation: Res<Assets<ConfigAnimation>>,
+    res_animation: Res<Assets<LOLAnimationGraph>>,
     time: Res<Time>,
 ) {
     for (entity, mut player, animation_handler, transition_out, mut state) in query.iter_mut() {
@@ -148,22 +134,26 @@ fn update_transition_out(
         let duration = transition_out.duration.as_secs_f32();
 
         if elapsed > duration {
-            animation.stop(&mut player, transition_out.hash, &mut state);
+            animation.stop(&mut player, &transition_out.hash, &mut state);
             commands.entity(entity).remove::<AnimationTransitionOut>();
             continue;
         }
 
         let weight = transition_out.weight * (1.0 - (elapsed / duration));
 
-        animation.set_weight(&mut player, transition_out.hash, weight, &state);
+        animation.set_weight(&mut player, &transition_out.hash, weight, &state);
     }
 }
 
 fn update_condition_animation(
-    query: Query<(Entity, &AnimationHandler, &AnimationState)>,
-    mut q_animation: Query<(&mut AnimationPlayer, &AnimationHandler, &AnimationState)>,
+    query: Query<(Entity, &LOLAnimationGraphHandler, &AnimationState)>,
+    mut q_animation: Query<(
+        &mut AnimationPlayer,
+        &LOLAnimationGraphHandler,
+        &AnimationState,
+    )>,
     q_movement: Query<&Movement>,
-    res_animation: Res<Assets<ConfigAnimation>>,
+    res_animation: Res<Assets<LOLAnimationGraph>>,
 ) {
     use lol_base::animation::ConfigAnimationNode;
 
@@ -175,7 +165,7 @@ fn update_condition_animation(
             };
             let Some(node) = animation
                 .hash_to_node
-                .get(&state.current_hash)
+                .get(&state.current)
                 .map(|v| v.clone())
             else {
                 return None;
@@ -211,13 +201,13 @@ fn update_condition_animation(
                     .rev()
                     .map(|v| {
                         if found {
-                            (v.key, 0.0)
+                            (v.key.clone(), 0.0)
                         } else {
                             if value >= v.value {
                                 found = true;
-                                (v.key, 1.0)
+                                (v.key.clone(), 1.0)
                             } else {
-                                (v.key, 0.0)
+                                (v.key.clone(), 0.0)
                             }
                         }
                     })
@@ -235,7 +225,7 @@ fn update_condition_animation(
         };
 
         for (key, weight) in nodes {
-            animation.set_weight(&mut player, key, weight, state);
+            animation.set_weight(&mut player, &key, weight, state);
         }
     }
 }
@@ -243,13 +233,13 @@ fn update_condition_animation(
 fn apply_animation_speed(
     mut query: Query<(
         &mut AnimationPlayer,
-        &AnimationHandler,
+        &LOLAnimationGraphHandler,
         &AnimationState,
         &AnimationGraphHandle,
     )>,
     res_animation_graph: Res<Assets<AnimationGraph>>,
     res_animation_clip: Res<Assets<AnimationClip>>,
-    res_animation: Res<Assets<ConfigAnimation>>,
+    res_animation: Res<Assets<LOLAnimationGraph>>,
 ) {
     for (mut player, animation_handler, animation_state, animation_graph_handle) in query.iter_mut()
     {
@@ -265,7 +255,7 @@ fn apply_animation_speed(
         };
 
         let current_node_indices =
-            animation.get_current_node_indices(animation_state.current_hash, animation_state);
+            animation.get_current_node_indices(&animation_state.current, animation_state);
 
         for index in current_node_indices {
             let Some(node) = animation_graph.get(index) else {
@@ -284,7 +274,7 @@ fn apply_animation_speed(
 
             animation.set_speed(
                 &mut player,
-                animation_state.current_hash,
+                &animation_state.current,
                 duration / current_duration,
                 animation_state,
             );

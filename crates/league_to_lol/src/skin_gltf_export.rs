@@ -21,7 +21,7 @@ use image::{ExtendedColorType, ImageEncoder};
 use league_file::mesh_skinned::LeagueSkinnedMesh;
 use league_file::skeleton::LeagueSkeleton;
 use league_file::texture::{LeagueTexture, LeagueTextureFormat};
-use league_utils::hash_joint;
+use league_utils::{hash_joint, hash_to_type_name};
 use lol_base::animation::ConfigAnimationClip;
 use texpresso::Format;
 
@@ -79,9 +79,10 @@ pub fn export_skin_to_glb(
     skinned_mesh: &LeagueSkinnedMesh,
     texture_png: Option<Vec<u8>>,
     skeleton: Option<&LeagueSkeleton>,
-    animations: &[(String, ConfigAnimationClip)],
+    animations: &[(u32, ConfigAnimationClip)],
     output_path: &str,
     material_override: Option<&std::collections::HashMap<String, Vec<u8>>>,
+    hashes: &HashMap<u32, String>,
 ) -> Result<(), Error> {
     let mut builder = SkinGltfBuilder::new();
 
@@ -163,7 +164,7 @@ pub fn export_skin_to_glb(
 
     // 添加动画
     for (name, clip) in animations {
-        builder.add_animation(clip, name);
+        builder.add_animation(clip, &hash_to_type_name(name, hashes));
     }
 
     builder.write_to_glb(output_path)
@@ -370,7 +371,31 @@ impl SkinGltfBuilder {
         }
 
         if samplers.is_empty() {
-            return;
+            // 添加一个"静止"动画：单关键帧，不改变任何值
+            let time = 0.0_f32;
+            let input_idx = self.add_float_accessor(&[time]);
+            let output_idx = self.add_vec4_accessor(&[[0.0, 0.0, 0.0, 1.0]], None);
+            samplers.push(Sampler {
+                input: Index::new(input_idx),
+                interpolation: Checked::Valid(Interpolation::Linear),
+                output: Index::new(output_idx),
+                extensions: None,
+                extras: Default::default(),
+            });
+            // 给根节点添加一个 rotation channel，使用单位四元数不影响姿态
+            if let Some(&root_node) = self.root_node_indices.first() {
+                channels.push(Channel {
+                    sampler: Index::new(0),
+                    target: AnimationTarget {
+                        node: Index::new(root_node),
+                        path: Checked::Valid(Property::Rotation),
+                        extensions: None,
+                        extras: Default::default(),
+                    },
+                    extensions: None,
+                    extras: Default::default(),
+                });
+            }
         }
 
         self.animations.push(Animation {

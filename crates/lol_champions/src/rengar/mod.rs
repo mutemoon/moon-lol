@@ -54,14 +54,14 @@ fn on_rengar_skill_cast(
 }
 
 fn cast_rengar_q(commands: &mut Commands, entity: Entity) {
-    play_skill_animation(commands, entity, hash_bin("Spell1"));
+    play_skill_animation(commands, entity, "spell1".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Rengar_Q_Cast"));
 
     // Q is savagery - enhanced attack
 }
 
 fn cast_rengar_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell2"));
+    play_skill_animation(commands, entity, "spell2".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Rengar_W_Cast"));
 
     // W is battle roar - AoE damage and heal
@@ -80,7 +80,7 @@ fn cast_rengar_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
 }
 
 fn cast_rengar_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell3"));
+    play_skill_animation(commands, entity, "spell3".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Rengar_E_Cast"));
 
     // E is bola strike - damage and slow
@@ -102,7 +102,7 @@ fn cast_rengar_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
 }
 
 fn cast_rengar_r(commands: &mut Commands, entity: Entity) {
-    play_skill_animation(commands, entity, hash_bin("Spell4"));
+    play_skill_animation(commands, entity, "spell4".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Rengar_R_Cast"));
 
     // R is thrill of the hunt - camouflage and movespeed

@@ -56,7 +56,7 @@ fn on_sion_skill_cast(
 }
 
 fn cast_sion_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell1"));
+    play_skill_animation(commands, entity, "spell1".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Sion_Q_Cast"));
 
     // Q is brutal strike - damage and knockup
@@ -78,7 +78,7 @@ fn cast_sion_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spel
 }
 
 fn cast_sion_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell2"));
+    play_skill_animation(commands, entity, "spell2".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Sion_W_Cast"));
 
     // W is roar of kor - damage
@@ -97,7 +97,7 @@ fn cast_sion_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spel
 }
 
 fn cast_sion_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell3"));
+    play_skill_animation(commands, entity, "spell3".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Sion_E_Cast"));
 
     // E is unwind - damage and slow
@@ -119,7 +119,7 @@ fn cast_sion_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spel
 }
 
 fn cast_sion_r(commands: &mut Commands, entity: Entity, _skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell4"));
+    play_skill_animation(commands, entity, "spell4".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Sion_R_Cast"));
 
     // R is unleash the nightmare - charge

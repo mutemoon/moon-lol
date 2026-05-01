@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use bevy::math::Vec3Swizzles;
 use bevy::prelude::*;
 use league_core::extract::{
@@ -7,6 +9,7 @@ use league_file::grid::AiMeshNGrid;
 use league_file::mapgeo::LeagueMapGeo;
 use league_loader::game::{Data, LeagueLoader};
 use league_loader::prop_bin::LeagueWadLoaderTrait;
+use league_property::extract::get_hashes;
 use lol_base::character::{ConfigCharacterRecord, ConfigSkin};
 use lol_base::map::MapPaths;
 use lol_core::entities::barrack::BarrackConfigHandler;
@@ -58,7 +61,7 @@ pub fn extract_phase_1_create_loader(game_path: &str) -> LeagueLoader {
 }
 
 /// Phase 2: 提取所有英雄
-pub fn extract_phase_2_champions(loader: &LeagueLoader) {
+pub fn extract_phase_2_champions(loader: &LeagueLoader, hashes: &HashMap<u32, String>) {
     println!("[2/7] Phase 2: 提取所有英雄...");
     let champions_path = std::path::Path::new(&loader.root_dir).join("DATA/FINAL/Champions");
     let Ok(entries) = std::fs::read_dir(&champions_path) else {
@@ -99,6 +102,7 @@ pub fn extract_phase_2_champions(loader: &LeagueLoader) {
                 &character_name,
                 true,
                 skin_bin_path.as_deref(),
+                hashes,
             );
             (character_name, success)
         })
@@ -125,7 +129,7 @@ pub fn extract_phase_3_map_chunks(
     world: &mut World,
     loader: &LeagueLoader,
     map_paths: &MapPaths,
-) -> std::collections::HashMap<String, ChampionRecordData> {
+) -> std::collections::HashMap<String, Vec<ChampionRecordData>> {
     println!("[3/7] Phase 3: 提取地图块数据...");
     let prop_group = loader
         .get_prop_group_by_paths(vec![
@@ -137,7 +141,7 @@ pub fn extract_phase_3_map_chunks(
     let map_container = prop_group.get_data::<MapContainer>(map_paths.materials_path());
 
     let mut minion_path = MinionPath::default();
-    let mut map_character_records: std::collections::HashMap<String, ChampionRecordData> =
+    let mut map_character_records: std::collections::HashMap<String, Vec<ChampionRecordData>> =
         std::collections::HashMap::new();
 
     for (_, &link) in &map_container.chunks {
@@ -209,21 +213,31 @@ pub fn extract_phase_3_map_chunks(
                         .next();
 
                     if let Some(character_name) = character_name {
-                        map_character_records.insert(
-                            character_name.to_lowercase(),
-                            ChampionRecordData {
+                        // Extract skin_id from skin path (e.g., "Characters/Aatrox/Skins/Skin0" -> "skin0")
+                        let skin_id = unk0xad65d8c4
+                            .character
+                            .skin
+                            .split('/')
+                            .last()
+                            .unwrap_or("skin0")
+                            .to_lowercase();
+
+                        map_character_records
+                            .entry(character_name.to_lowercase())
+                            .or_insert_with(Vec::new)
+                            .push(ChampionRecordData {
                                 char_record_path: unk0xad65d8c4.character.character_record.clone(),
                                 skin_path: Some(unk0xad65d8c4.character.skin.clone()),
-                            },
-                        );
+                            });
 
                         world.spawn((
                             transform,
                             Team::from(unk0xad65d8c4.team.as_ref().map(|x| x.team)),
                             ConfigSkin {
-                                skin: world
-                                    .resource::<AssetServer>()
-                                    .load(&format!("characters/{}/skin.ron", character_name)),
+                                skin: world.resource::<AssetServer>().load(&format!(
+                                    "characters/{}/skins/{}.ron",
+                                    character_name, skin_id
+                                )),
                             },
                             ConfigCharacterRecord {
                                 character_record: world
@@ -317,7 +331,8 @@ pub fn extract_phase_5_map_geo(loader: &LeagueLoader, map_paths: &MapPaths) {
 /// Phase 6: 从地图中提取角色记录
 pub fn extract_phase_6_map_character_records(
     loader: &LeagueLoader,
-    map_character_records: &std::collections::HashMap<String, ChampionRecordData>,
+    map_character_records: &std::collections::HashMap<String, Vec<ChampionRecordData>>,
+    hashes: &HashMap<u32, String>,
 ) {
     if map_character_records.is_empty() {
         return;
@@ -328,26 +343,32 @@ pub fn extract_phase_6_map_character_records(
         map_character_records.len()
     );
 
-    let items: Vec<(String, ChampionRecordData)> = map_character_records
+    let items: Vec<(String, Vec<ChampionRecordData>)> = map_character_records
         .iter()
         .map(|(k, v)| (k.clone(), v.clone()))
         .collect();
 
     let results: Vec<(String, bool)> = items
         .into_par_iter()
-        .map(|(character_name, record_data)| {
-            let skin_bin_path = record_data
-                .skin_path
-                .as_ref()
-                .map(|skin_path| skin_path_to_skin_bin_path(&character_name, skin_path));
-            let success = extract_character_from_record(
-                loader,
-                &character_name,
-                false,
-                skin_bin_path.as_deref(),
-            );
-            (character_name, success)
+        .map(|(character_name, records)| {
+            let mut results = Vec::new();
+            for record_data in records {
+                let skin_bin_path = record_data
+                    .skin_path
+                    .as_ref()
+                    .map(|skin_path| skin_path_to_skin_bin_path(&character_name, skin_path));
+                let success = extract_character_from_record(
+                    loader,
+                    &character_name,
+                    false,
+                    skin_bin_path.as_deref(),
+                    hashes,
+                );
+                results.push((character_name.clone(), success));
+            }
+            results
         })
+        .flatten()
         .collect();
 
     let success_count = results.iter().filter(|(_, success)| *success).count();
@@ -374,9 +395,18 @@ pub fn extract_phase_7_serialize_world(world: &mut World, map_paths: &MapPaths) 
 }
 
 /// 一键提取所有数据（英雄 + 地图）
-pub fn extract_all(game_path: &str) {
+pub fn extract_all(game_path: &str, hashes_dir: &str) {
     let loader = extract_phase_1_create_loader(game_path);
     let map_paths = MapPaths::default();
+
+    // 加载 hash 对照表
+    let hash_paths = vec![
+        format!("{}/hashes.binentries.txt", hashes_dir),
+        format!("{}/hashes.binfields.txt", hashes_dir),
+        format!("{}/hashes.binhashes.txt", hashes_dir),
+        format!("{}/hashes.bintypes.txt", hashes_dir),
+    ];
+    let hashes = get_hashes(&hash_paths.iter().map(|s| s.as_str()).collect::<Vec<_>>());
 
     let mut app = App::new();
     app.add_plugins(AssetPlugin::default());
@@ -391,7 +421,7 @@ pub fn extract_all(game_path: &str) {
     let world = app.world_mut();
 
     // Phase 2: 提取英雄
-    extract_phase_2_champions(&loader);
+    extract_phase_2_champions(&loader, &hashes);
 
     // Phase 3: 提取地图块
     let map_character_records = extract_phase_3_map_chunks(world, &loader, &map_paths);
@@ -403,7 +433,7 @@ pub fn extract_all(game_path: &str) {
     extract_phase_5_map_geo(&loader, &map_paths);
 
     // Phase 6: 从地图提取角色记录
-    extract_phase_6_map_character_records(&loader, &map_character_records);
+    extract_phase_6_map_character_records(&loader, &map_character_records, &hashes);
 
     // Phase 7: 序列化 World
     extract_phase_7_serialize_world(world, &map_paths);

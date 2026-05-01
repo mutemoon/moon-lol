@@ -57,7 +57,7 @@ fn on_annie_skill_cast(
 }
 
 fn cast_annie_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell1"));
+    play_skill_animation(commands, entity, "spell1".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Annie_Q_Cast"));
 
     // Q is targeted damage
@@ -81,7 +81,7 @@ fn cast_annie_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
 }
 
 fn cast_annie_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell2"));
+    play_skill_animation(commands, entity, "spell2".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Annie_W_Cast"));
 
     // W is a cone
@@ -107,7 +107,7 @@ fn cast_annie_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
 }
 
 fn cast_annie_e(commands: &mut Commands, entity: Entity) {
-    play_skill_animation(commands, entity, hash_bin("Spell3"));
+    play_skill_animation(commands, entity, "spell3".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Annie_E_Cast"));
 
     // E grants shield
@@ -117,7 +117,7 @@ fn cast_annie_e(commands: &mut Commands, entity: Entity) {
 }
 
 fn cast_annie_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell4"));
+    play_skill_animation(commands, entity, "spell4".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Annie_R_Cast"));
 
     // R summons Tibbers - area damage

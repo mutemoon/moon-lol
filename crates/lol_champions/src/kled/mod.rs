@@ -70,7 +70,7 @@ fn on_kled_skill_cast(
 }
 
 fn cast_kled_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell1"));
+    play_skill_animation(commands, entity, "spell1".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Kled_Q_Cast"));
 
     // Q throws bear trap
@@ -92,7 +92,7 @@ fn cast_kled_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spel
 }
 
 fn cast_kled_w(commands: &mut Commands, entity: Entity) {
-    play_skill_animation(commands, entity, hash_bin("Spell2"));
+    play_skill_animation(commands, entity, "spell2".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Kled_W_Cast"));
 
     // W grants attackspeed
@@ -108,7 +108,7 @@ fn cast_kled_e(
     point: Vec2,
     skill_spell: Handle<Spell>,
 ) {
-    play_skill_animation(commands, entity, hash_bin("Spell3"));
+    play_skill_animation(commands, entity, "spell3".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Kled_E_Cast"));
 
     // E is a dash
@@ -144,7 +144,7 @@ fn cast_kled_r(
     point: Vec2,
     skill_spell: Handle<Spell>,
 ) {
-    play_skill_animation(commands, entity, hash_bin("Spell4"));
+    play_skill_animation(commands, entity, "spell4".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Kled_R_Cast"));
 
     // R is a charge that provides shield

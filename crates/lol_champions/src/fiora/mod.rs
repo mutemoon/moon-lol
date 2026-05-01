@@ -83,7 +83,7 @@ fn cast_fiora_q(
     point: Vec2,
     skill_spell: Handle<Spell>,
 ) {
-    play_skill_animation(commands, entity, hash_bin("Spell1"));
+    play_skill_animation(commands, entity, "spell1".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Fiora_Q_Dash_Trail_ground"));
     skill_dash(
         commands,
@@ -115,9 +115,9 @@ fn cast_fiora_q(
 
 fn cast_fiora_w(commands: &mut Commands, entity: Entity) {
     spawn_skill_particle(commands, entity, hash_bin("Fiora_W_Telegraph_Blue"));
-    play_skill_animation(commands, entity, hash_bin("Spell2_In"));
+    play_skill_animation(commands, entity, "spell2_in".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Fiora_W_Cas"));
-    play_skill_animation(commands, entity, hash_bin("Spell2"));
+    play_skill_animation(commands, entity, "spell2".to_string());
     despawn_skill_particle(commands, entity, hash_bin("Fiora_W_Telegraph_Blue"));
 }
 

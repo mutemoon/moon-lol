@@ -19,7 +19,7 @@ pub fn try_load_config_skin_characters(
         return;
     }
 
-    info!("加载 {} 个皮肤", skin_len);
+    // info!("加载 {} 个皮肤", skin_len);
 
     // 处理 ConfigSkin - 写入皮肤数据到世界
     for (entity, config) in &skin_query {

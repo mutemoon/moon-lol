@@ -54,7 +54,7 @@ fn on_renata_skill_cast(
 }
 
 fn cast_renata_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell1"));
+    play_skill_animation(commands, entity, "spell1".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Renata_Q_Cast"));
 
     // Q is header lash - damage and slow
@@ -76,7 +76,7 @@ fn cast_renata_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
 }
 
 fn cast_renata_w(commands: &mut Commands, entity: Entity) {
-    play_skill_animation(commands, entity, hash_bin("Spell2"));
+    play_skill_animation(commands, entity, "spell2".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Renata_W_Cast"));
 
     // W is loyalty program - attackspeed buff to ally
@@ -86,7 +86,7 @@ fn cast_renata_w(commands: &mut Commands, entity: Entity) {
 }
 
 fn cast_renata_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell3"));
+    play_skill_animation(commands, entity, "spell3".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Renata_E_Cast"));
 
     // E is trusim - damage and shield
@@ -108,7 +108,7 @@ fn cast_renata_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
 }
 
 fn cast_renata_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell4"));
+    play_skill_animation(commands, entity, "spell4".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Renata_R_Cast"));
 
     // R is hostile takeovers - AoE stun

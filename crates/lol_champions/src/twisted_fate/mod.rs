@@ -56,7 +56,7 @@ fn on_twisted_fate_skill_cast(
 }
 
 fn cast_twisted_fate_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell1"));
+    play_skill_animation(commands, entity, "spell1".to_string());
     spawn_skill_particle(commands, entity, hash_bin("TwistedFate_Q_Cast"));
 
     skill_damage(
@@ -77,7 +77,7 @@ fn cast_twisted_fate_q(commands: &mut Commands, entity: Entity, skill_spell: Han
 }
 
 fn cast_twisted_fate_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell2"));
+    play_skill_animation(commands, entity, "spell2".to_string());
     spawn_skill_particle(commands, entity, hash_bin("TwistedFate_W_Cast"));
 
     skill_damage(
@@ -95,12 +95,12 @@ fn cast_twisted_fate_w(commands: &mut Commands, entity: Entity, skill_spell: Han
 }
 
 fn cast_twisted_fate_e(commands: &mut Commands, entity: Entity) {
-    play_skill_animation(commands, entity, hash_bin("Spell3"));
+    play_skill_animation(commands, entity, "spell3".to_string());
     spawn_skill_particle(commands, entity, hash_bin("TwistedFate_E_Cast"));
 }
 
 fn cast_twisted_fate_r(commands: &mut Commands, entity: Entity) {
-    play_skill_animation(commands, entity, hash_bin("Spell4"));
+    play_skill_animation(commands, entity, "spell4".to_string());
     spawn_skill_particle(commands, entity, hash_bin("TwistedFate_R_Cast"));
 }
 

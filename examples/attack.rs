@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 use lol_core::game::PluginGame;
+use lol_core::navigation::navigation::NavigationDebug;
 use moon_lol::PluginCore;
 
 fn main() {
@@ -18,5 +19,6 @@ fn main() {
                 scenes: vec!["games/attack.ron".to_owned()],
             }),
         ))
+        .insert_resource(NavigationDebug)
         .run();
 }

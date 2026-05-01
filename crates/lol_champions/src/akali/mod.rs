@@ -77,7 +77,7 @@ fn on_akali_skill_cast(
 }
 
 fn cast_akali_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell1"));
+    play_skill_animation(commands, entity, "spell1".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Akali_Q_Cast"));
 
     // Q is a cone damage that slows distant enemies
@@ -104,7 +104,7 @@ fn cast_akali_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
 }
 
 fn cast_akali_w(commands: &mut Commands, entity: Entity) {
-    play_skill_animation(commands, entity, hash_bin("Spell2"));
+    play_skill_animation(commands, entity, "spell2".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Akali_W_Cast"));
 
     // W drops a smoke bomb and grants stealth and move speed
@@ -128,7 +128,7 @@ fn cast_akali_e(
 ) {
     let stage = recast.map(|w| w.stage).unwrap_or(1);
 
-    play_skill_animation(commands, entity, hash_bin("Spell3"));
+    play_skill_animation(commands, entity, "spell3".to_string());
 
     if stage == 1 {
         // First cast: throw shuriken and mark first enemy
@@ -194,7 +194,7 @@ fn cast_akali_r(
 ) {
     let stage = recast.map(|w| w.stage).unwrap_or(1);
 
-    play_skill_animation(commands, entity, hash_bin("Spell4"));
+    play_skill_animation(commands, entity, "spell4".to_string());
 
     if stage == 1 {
         // First cast: dash to target

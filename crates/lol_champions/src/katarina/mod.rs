@@ -56,7 +56,7 @@ fn on_katarina_skill_cast(
 }
 
 fn cast_katarina_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell1"));
+    play_skill_animation(commands, entity, "spell1".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Katarina_Q_Cast"));
 
     // Q bounces between enemies
@@ -75,7 +75,7 @@ fn cast_katarina_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<
 }
 
 fn cast_katarina_w(commands: &mut Commands, entity: Entity) {
-    play_skill_animation(commands, entity, hash_bin("Spell2"));
+    play_skill_animation(commands, entity, "spell2".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Katarina_W_Cast"));
 
     // W throws dagger up and grants movespeed
@@ -85,7 +85,7 @@ fn cast_katarina_w(commands: &mut Commands, entity: Entity) {
 }
 
 fn cast_katarina_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell3"));
+    play_skill_animation(commands, entity, "spell3".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Katarina_E_Cast"));
 
     // E is a dash to target
@@ -104,7 +104,7 @@ fn cast_katarina_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<
 }
 
 fn cast_katarina_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell4"));
+    play_skill_animation(commands, entity, "spell4".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Katarina_R_Cast"));
 
     // R throws daggers in area

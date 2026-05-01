@@ -54,7 +54,7 @@ fn on_sejuani_skill_cast(
 }
 
 fn cast_sejuani_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell1"));
+    play_skill_animation(commands, entity, "spell1".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Sejuani_Q_Cast"));
 
     // Q is arctic assault - dash and knockup
@@ -73,7 +73,7 @@ fn cast_sejuani_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<S
 }
 
 fn cast_sejuani_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell2"));
+    play_skill_animation(commands, entity, "spell2".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Sejuani_W_Cast"));
 
     // W is winters wrath - damage
@@ -95,7 +95,7 @@ fn cast_sejuani_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<S
 }
 
 fn cast_sejuani_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell3"));
+    play_skill_animation(commands, entity, "spell3".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Sejuani_E_Cast"));
 
     // E is glacial prison - stun
@@ -114,7 +114,7 @@ fn cast_sejuani_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<S
 }
 
 fn cast_sejuani_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell4"));
+    play_skill_animation(commands, entity, "spell4".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Sejuani_R_Cast"));
 
     // R is ambush - AoE stun

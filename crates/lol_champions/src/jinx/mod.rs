@@ -56,7 +56,7 @@ fn on_jinx_skill_cast(
 }
 
 fn cast_jinx_q(commands: &mut Commands, entity: Entity) {
-    play_skill_animation(commands, entity, hash_bin("Spell1"));
+    play_skill_animation(commands, entity, "spell1".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Jinx_Q_Cast"));
     // Q switches between minigun and rocket launcher
     // Minigun gives attackspeed stacks, rocket deals AoE
@@ -64,7 +64,7 @@ fn cast_jinx_q(commands: &mut Commands, entity: Entity) {
 }
 
 fn cast_jinx_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell2"));
+    play_skill_animation(commands, entity, "spell2".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Jinx_W_Cast"));
 
     // W is a skillshot that slows
@@ -86,7 +86,7 @@ fn cast_jinx_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spel
 }
 
 fn cast_jinx_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell3"));
+    play_skill_animation(commands, entity, "spell3".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Jinx_E_Cast"));
 
     // E places traps that explode and knock up
@@ -105,7 +105,7 @@ fn cast_jinx_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spel
 }
 
 fn cast_jinx_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell4"));
+    play_skill_animation(commands, entity, "spell4".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Jinx_R_Cast"));
 
     // R is a global rocket with damage based on distance

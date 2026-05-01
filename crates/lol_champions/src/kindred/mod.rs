@@ -68,7 +68,7 @@ fn cast_kindred_q(
     _point: Vec2,
     skill_spell: Handle<Spell>,
 ) {
-    play_skill_animation(commands, entity, hash_bin("Spell1"));
+    play_skill_animation(commands, entity, "spell1".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Kindred_Q_Cast"));
 
     // Q is a dash that shoots arrows
@@ -87,7 +87,7 @@ fn cast_kindred_q(
 }
 
 fn cast_kindred_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell2"));
+    play_skill_animation(commands, entity, "spell2".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Kindred_W_Cast"));
 
     // W marks an area where Wolf attacks
@@ -110,7 +110,7 @@ fn cast_kindred_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<S
 }
 
 fn cast_kindred_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell3"));
+    play_skill_animation(commands, entity, "spell3".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Kindred_E_Cast"));
 
     // E marks and slows, 3 marks = Wolf attacks
@@ -132,7 +132,7 @@ fn cast_kindred_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<S
 }
 
 fn cast_kindred_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell4"));
+    play_skill_animation(commands, entity, "spell4".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Kindred_R_Cast"));
 
     // R creates a protective zone

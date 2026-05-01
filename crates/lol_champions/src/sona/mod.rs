@@ -56,7 +56,7 @@ fn on_sona_skill_cast(
 }
 
 fn cast_sona_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell1"));
+    play_skill_animation(commands, entity, "spell1".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Sona_Q_Cast"));
 
     // Q is hymn of valor - damage
@@ -75,7 +75,7 @@ fn cast_sona_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spel
 }
 
 fn cast_sona_w(commands: &mut Commands, entity: Entity) {
-    play_skill_animation(commands, entity, hash_bin("Spell2"));
+    play_skill_animation(commands, entity, "spell2".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Sona_W_Cast"));
 
     // W is aria of perseverance - shield
@@ -85,7 +85,7 @@ fn cast_sona_w(commands: &mut Commands, entity: Entity) {
 }
 
 fn cast_sona_e(commands: &mut Commands, entity: Entity) {
-    play_skill_animation(commands, entity, hash_bin("Spell3"));
+    play_skill_animation(commands, entity, "spell3".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Sona_E_Cast"));
 
     // E is song of celerity - movespeed buff
@@ -95,7 +95,7 @@ fn cast_sona_e(commands: &mut Commands, entity: Entity) {
 }
 
 fn cast_sona_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell4"));
+    play_skill_animation(commands, entity, "spell4".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Sona_R_Cast"));
 
     // R is cure - AoE stun

@@ -10,7 +10,7 @@ fn main() {
             DefaultPlugins.build().set(WindowPlugin {
                 primary_window: Some(Window {
                     title: "classic 1v1 fiora".to_string(),
-                    resolution: (100, 100).into(),
+                    resolution: (1000, 1000).into(),
                     position: WindowPosition::At((0, 0).into()),
                     ..default()
                 }),

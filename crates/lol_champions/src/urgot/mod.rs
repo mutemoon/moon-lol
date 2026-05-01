@@ -75,7 +75,7 @@ fn on_urgot_skill_cast(
 }
 
 fn cast_urgot_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell1"));
+    play_skill_animation(commands, entity, "spell1".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Urgot_Q_Cast"));
     // Q is a mortar shot that damages and slows enemies in area
     skill_damage(
@@ -93,7 +93,7 @@ fn cast_urgot_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
 }
 
 fn cast_urgot_w(commands: &mut Commands, entity: Entity) {
-    play_skill_animation(commands, entity, hash_bin("Spell2"));
+    play_skill_animation(commands, entity, "spell2".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Urgot_W_Cast"));
 
     // W is a toggle that makes Urgot fire at nearby enemies with reduced move speed
@@ -120,7 +120,7 @@ fn cast_urgot_e(
     point: Vec2,
     skill_spell: Handle<Spell>,
 ) {
-    play_skill_animation(commands, entity, hash_bin("Spell3"));
+    play_skill_animation(commands, entity, "spell3".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Urgot_E_Cast"));
     // E is a dash that provides shield and knocks back enemies
     skill_dash(
@@ -141,7 +141,7 @@ fn cast_urgot_e(
 }
 
 fn cast_urgot_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell4"));
+    play_skill_animation(commands, entity, "spell4".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Urgot_R_Cast"));
     // R is a long-range targeted ability that executes and marks enemy
     skill_damage(

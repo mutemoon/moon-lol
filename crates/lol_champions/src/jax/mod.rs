@@ -75,7 +75,7 @@ fn cast_jax_q(
     point: Vec2,
     skill_spell: Handle<Spell>,
 ) {
-    play_skill_animation(commands, entity, hash_bin("Spell1"));
+    play_skill_animation(commands, entity, "spell1".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Jax_Q_Cast"));
     skill_dash(
         commands,
@@ -99,7 +99,7 @@ fn cast_jax_q(
 }
 
 fn cast_jax_w(commands: &mut Commands, entity: Entity) {
-    play_skill_animation(commands, entity, hash_bin("Spell2"));
+    play_skill_animation(commands, entity, "spell2".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Jax_W_Cast"));
     // W resets attack timer and enhances next attack
     reset_skill_attack(commands, entity);
@@ -109,7 +109,7 @@ fn cast_jax_w(commands: &mut Commands, entity: Entity) {
 }
 
 fn cast_jax_e(commands: &mut Commands, entity: Entity) {
-    play_skill_animation(commands, entity, hash_bin("Spell3"));
+    play_skill_animation(commands, entity, "spell3".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Jax_E_Cast"));
 
     // E provides dodge buff
@@ -130,7 +130,7 @@ fn cast_jax_e(commands: &mut Commands, entity: Entity) {
 }
 
 fn cast_jax_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell4"));
+    play_skill_animation(commands, entity, "spell4".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Jax_R_Cast"));
     // R is a self-cast that deals AoE damage and grants armor/mr
     skill_damage(

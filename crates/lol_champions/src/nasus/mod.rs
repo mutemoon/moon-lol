@@ -56,14 +56,14 @@ fn on_nasus_skill_cast(
 }
 
 fn cast_nasus_q(commands: &mut Commands, entity: Entity) {
-    play_skill_animation(commands, entity, hash_bin("Spell1"));
+    play_skill_animation(commands, entity, "spell1".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Nasus_Q_Cast"));
 
     // Q is a siphoning strike
 }
 
 fn cast_nasus_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell2"));
+    play_skill_animation(commands, entity, "spell2".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Nasus_W_Cast"));
 
     // W is a slow
@@ -82,7 +82,7 @@ fn cast_nasus_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
 }
 
 fn cast_nasus_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell3"));
+    play_skill_animation(commands, entity, "spell3".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Nasus_E_Cast"));
 
     // E is an area damage and armor reduction
@@ -101,7 +101,7 @@ fn cast_nasus_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
 }
 
 fn cast_nasus_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell4"));
+    play_skill_animation(commands, entity, "spell4".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Nasus_R_Cast"));
 
     // R transforms Nasus

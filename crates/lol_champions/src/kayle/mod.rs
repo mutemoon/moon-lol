@@ -56,7 +56,7 @@ fn on_kayle_skill_cast(
 }
 
 fn cast_kayle_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell1"));
+    play_skill_animation(commands, entity, "spell1".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Kayle_Q_Cast"));
 
     // Q is a skillshot that slows
@@ -78,7 +78,7 @@ fn cast_kayle_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
 }
 
 fn cast_kayle_w(commands: &mut Commands, entity: Entity) {
-    play_skill_animation(commands, entity, hash_bin("Spell2"));
+    play_skill_animation(commands, entity, "spell2".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Kayle_W_Cast"));
 
     // W heals and grants movespeed
@@ -88,14 +88,14 @@ fn cast_kayle_w(commands: &mut Commands, entity: Entity) {
 }
 
 fn cast_kayle_e(commands: &mut Commands, entity: Entity) {
-    play_skill_animation(commands, entity, hash_bin("Spell3"));
+    play_skill_animation(commands, entity, "spell3".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Kayle_E_Cast"));
 
     // E enhances next attack
 }
 
 fn cast_kayle_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell4"));
+    play_skill_animation(commands, entity, "spell4".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Kayle_R_Cast"));
 
     // R makes Kayle invulnerable and deals damage after delay

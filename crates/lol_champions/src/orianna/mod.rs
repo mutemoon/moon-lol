@@ -57,7 +57,7 @@ fn on_orianna_skill_cast(
 }
 
 fn cast_orianna_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell1"));
+    play_skill_animation(commands, entity, "spell1".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Orianna_Q_Cast"));
 
     // Q commands ball to location
@@ -76,7 +76,7 @@ fn cast_orianna_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<S
 }
 
 fn cast_orianna_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell2"));
+    play_skill_animation(commands, entity, "spell2".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Orianna_W_Cast"));
 
     // W deals damage and slows
@@ -95,7 +95,7 @@ fn cast_orianna_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<S
 }
 
 fn cast_orianna_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell3"));
+    play_skill_animation(commands, entity, "spell3".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Orianna_E_Cast"));
 
     // E shields ball carrier
@@ -118,7 +118,7 @@ fn cast_orianna_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<S
 }
 
 fn cast_orianna_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell4"));
+    play_skill_animation(commands, entity, "spell4".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Orianna_R_Cast"));
 
     // R is a shockwave that knocks back

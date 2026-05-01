@@ -73,7 +73,7 @@ fn on_sylas_skill_cast(
 }
 
 fn cast_sylas_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell1"));
+    play_skill_animation(commands, entity, "spell1".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Sylas_Q_Cast"));
     // Q is a lash that slows enemies in the center
     skill_damage(
@@ -100,7 +100,7 @@ fn cast_sylas_w(
     skill_spell: Handle<Spell>,
     point: Vec2,
 ) {
-    play_skill_animation(commands, entity, hash_bin("Spell2"));
+    play_skill_animation(commands, entity, "spell2".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Sylas_W_Cast"));
     // W is a dash to target that deals damage and heals based on missing health
     skill_dash(
@@ -140,7 +140,7 @@ fn cast_sylas_e(
 ) {
     let stage = recast.map(|w| w.stage).unwrap_or(1);
 
-    play_skill_animation(commands, entity, hash_bin("Spell3"));
+    play_skill_animation(commands, entity, "spell3".to_string());
 
     if stage == 1 {
         // First cast: Throws chain toward enemy - damage in narrow cone
@@ -194,7 +194,7 @@ fn cast_sylas_e(
 }
 
 fn cast_sylas_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>, _point: Vec2) {
-    play_skill_animation(commands, entity, hash_bin("Spell4"));
+    play_skill_animation(commands, entity, "spell4".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Sylas_R_Cast"));
     // R 对最近敌方英雄造成魔法伤害
     skill_damage(

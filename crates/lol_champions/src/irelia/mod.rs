@@ -81,7 +81,7 @@ fn cast_irelia_q(
     point: Vec2,
     skill_spell: Handle<Spell>,
 ) {
-    play_skill_animation(commands, entity, hash_bin("Spell1"));
+    play_skill_animation(commands, entity, "spell1".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Irelia_Q_Cast"));
     // Q is a dash that resets on kill and marks enemies as Unsteady
     skill_dash(
@@ -106,7 +106,7 @@ fn cast_irelia_q(
 }
 
 fn cast_irelia_w(commands: &mut Commands, entity: Entity) {
-    play_skill_animation(commands, entity, hash_bin("Spell2"));
+    play_skill_animation(commands, entity, "spell2".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Irelia_W_Cast"));
     // W is a channel that grants damage reduction then releases damage
     let (buff_irelia_w, buff_damage_reduction) = BuffDamageReduction::irelia_w(0.5, 1.5);
@@ -128,7 +128,7 @@ fn cast_irelia_e(
 ) {
     let stage = recast.map(|w| w.stage).unwrap_or(1);
 
-    play_skill_animation(commands, entity, hash_bin("Spell3"));
+    play_skill_animation(commands, entity, "spell3".to_string());
 
     if stage == 1 {
         // First cast: Throws a blade forward
@@ -165,7 +165,7 @@ fn cast_irelia_r(
     _point: Vec2,
     skill_spell: Handle<Spell>,
 ) {
-    play_skill_animation(commands, entity, hash_bin("Spell4"));
+    play_skill_animation(commands, entity, "spell4".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Irelia_R_Cast"));
     // R is a long-range blade wave that creates a zone and marks enemies
     skill_damage(

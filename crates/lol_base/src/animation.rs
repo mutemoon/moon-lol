@@ -21,9 +21,10 @@ pub struct ConfigAnimationClip {
 
 /// Animation graph asset - stable version of lol_render::Animation
 #[derive(Asset, TypePath, Clone, Serialize, Deserialize)]
-pub struct ConfigAnimation {
-    pub hash_to_node: HashMap<u32, ConfigAnimationNode>,
-    pub blend_data: HashMap<(u32, u32), ConfigBlendData>,
+pub struct LOLAnimationGraph {
+    pub gltf_path: String,
+    pub hash_to_node: HashMap<String, ConfigAnimationNode>,
+    pub blend_data: HashMap<(String, String), ConfigBlendData>,
 }
 
 /// Animation node types
@@ -40,19 +41,25 @@ pub enum ConfigAnimationNode {
         probably_nodes: Vec<ConfigAnimationNodeF32>,
     },
     Sequence {
-        hashes: Vec<u32>,
+        hashes: Vec<String>,
+    },
+    Parallel {
+        hashes: Vec<String>,
+    },
+    Parametric {
+        pairs: Vec<ConfigAnimationNodeF32>,
     },
     ConditionBool {
         updater: ConfigParametricUpdater,
-        true_node: u32,
-        false_node: u32,
+        true_node: String,
+        false_node: String,
     },
 }
 
 /// Float condition for animation nodes
 #[derive(Clone, Serialize, Deserialize)]
 pub struct ConfigAnimationNodeF32 {
-    pub key: u32,
+    pub key: String,
     pub value: f32,
 }
 
@@ -93,30 +100,30 @@ pub enum ConfigParametricUpdater {
 #[derive(Clone, Serialize, Deserialize)]
 pub enum ConfigBlendData {
     Time { time: f32 },
-    TransitionClip { clip_name: u32 },
+    TransitionClip { clip_name: String },
 }
 
 /// Animation handler component - holds handle to ConfigAnimation asset
 #[derive(Component, Reflect, Debug)]
 #[reflect(Component)]
-pub struct AnimationHandler(pub Handle<ConfigAnimation>);
+pub struct LOLAnimationGraphHandler(pub Handle<LOLAnimationGraph>);
 
 /// Per-entity animation state for Selector and Sequence nodes
 #[derive(Component, Clone, Debug)]
 pub struct AnimationState {
-    pub current_hash: u32,
-    pub last_hash: Option<u32>,
+    pub current: String,
+    pub last: Option<String>,
     pub current_duration: Option<f32>,
     pub repeat: bool,
-    pub selector_states: HashMap<u32, usize>,
-    pub sequence_states: HashMap<u32, usize>,
+    pub selector_states: HashMap<String, usize>,
+    pub sequence_states: HashMap<String, usize>,
 }
 
 impl Default for AnimationState {
     fn default() -> Self {
         Self {
-            current_hash: 0,
-            last_hash: None,
+            current: String::new(),
+            last: None,
             current_duration: None,
             repeat: true,
             selector_states: HashMap::new(),
@@ -126,9 +133,9 @@ impl Default for AnimationState {
 }
 
 impl AnimationState {
-    pub fn update(&mut self, hash: u32) -> &mut Self {
-        self.last_hash = Some(self.current_hash);
-        self.current_hash = hash;
+    pub fn update(&mut self, key: String) -> &mut Self {
+        self.last = Some(self.current.clone());
+        self.current = key;
         self.current_duration = None;
         self.repeat = true;
         self
@@ -145,51 +152,59 @@ impl AnimationState {
     }
 }
 
-impl ConfigAnimation {
-    pub fn get_node_indices(
+impl LOLAnimationGraph {
+    pub fn figure_node_indices(
         &self,
-        key: u32,
+        key: &str,
         state: &mut AnimationState,
     ) -> Vec<AnimationNodeIndex> {
-        let Some(node) = self.hash_to_node.get(&key) else {
+        let Some(node) = self.hash_to_node.get(key) else {
             return Vec::new();
         };
 
-        let keys = match node {
+        match node {
             ConfigAnimationNode::Clip { node_index, .. } => {
-                return vec![*node_index];
+                vec![*node_index]
             }
-            ConfigAnimationNode::ConditionFloat { conditions, .. } => {
-                conditions.iter().map(|v| v.key).collect()
-            }
+            ConfigAnimationNode::ConditionFloat { conditions, .. } => conditions
+                .iter()
+                .flat_map(|v| self.figure_node_indices(&v.key, state))
+                .collect(),
             ConfigAnimationNode::Selector { probably_nodes } => {
-                let index = state.selector_states.entry(key).or_insert_with(|| {
-                    let weights = probably_nodes.iter().map(|v| v.value).collect::<Vec<_>>();
-                    let dist = WeightedIndex::new(weights).unwrap();
-                    dist.sample(&mut rng())
-                });
-                vec![probably_nodes[*index].key]
+                let index = state
+                    .selector_states
+                    .entry(key.to_string())
+                    .or_insert_with(|| {
+                        let weights = probably_nodes.iter().map(|v| v.value).collect::<Vec<_>>();
+                        let dist = WeightedIndex::new(weights).unwrap();
+                        dist.sample(&mut rng())
+                    });
+                self.figure_node_indices(&probably_nodes[*index].key, state)
             }
             ConfigAnimationNode::Sequence { hashes } => {
-                state.sequence_states.entry(key).or_insert(0);
-                vec![hashes[0]]
+                state.sequence_states.entry(key.to_string()).or_insert(0);
+                self.figure_node_indices(&hashes[0], state)
             }
+            ConfigAnimationNode::Parallel { hashes } => hashes
+                .iter()
+                .flat_map(|h| self.figure_node_indices(h, state))
+                .collect(),
+            ConfigAnimationNode::Parametric { pairs, .. } => pairs
+                .iter()
+                .flat_map(|v| self.figure_node_indices(&v.key, state))
+                .collect(),
             ConfigAnimationNode::ConditionBool { false_node, .. } => {
-                vec![*false_node]
+                self.figure_node_indices(&false_node, state)
             }
-        };
-
-        keys.iter()
-            .flat_map(|v| self.get_node_indices(*v, state))
-            .collect()
+        }
     }
 
     pub fn get_current_node_indices(
         &self,
-        key: u32,
+        key: &str,
         state: &AnimationState,
     ) -> Vec<AnimationNodeIndex> {
-        let Some(node) = self.hash_to_node.get(&key) else {
+        let Some(node) = self.hash_to_node.get(key) else {
             return Vec::new();
         };
 
@@ -199,28 +214,38 @@ impl ConfigAnimation {
             }
             ConfigAnimationNode::ConditionFloat { conditions, .. } => conditions
                 .iter()
-                .flat_map(|v| self.get_current_node_indices(v.key, state))
+                .flat_map(|v| self.get_current_node_indices(&v.key, state))
                 .collect(),
             ConfigAnimationNode::Selector { probably_nodes } => {
-                match state.selector_states.get(&key) {
-                    Some(index) => self.get_current_node_indices(probably_nodes[*index].key, state),
+                match state.selector_states.get(key) {
+                    Some(index) => {
+                        self.get_current_node_indices(&probably_nodes[*index].key, state)
+                    }
                     None => vec![],
                 }
             }
-            ConfigAnimationNode::Sequence { hashes } => match state.sequence_states.get(&key) {
-                Some(index) => self.get_current_node_indices(hashes[*index], state),
+            ConfigAnimationNode::Sequence { hashes } => match state.sequence_states.get(key) {
+                Some(index) => self.get_current_node_indices(&hashes[*index], state),
                 None => vec![],
             },
+            ConfigAnimationNode::Parallel { hashes } => hashes
+                .iter()
+                .flat_map(|h| self.get_current_node_indices(h, state))
+                .collect(),
+            ConfigAnimationNode::Parametric { pairs, .. } => pairs
+                .iter()
+                .flat_map(|v| self.get_current_node_indices(&v.key, state))
+                .collect(),
             ConfigAnimationNode::ConditionBool { false_node, .. } => {
-                self.get_current_node_indices(*false_node, state)
+                self.get_current_node_indices(&false_node, state)
             }
         }
     }
 
-    pub fn get_current_nodes(&self, key: u32, state: &AnimationState) -> Vec<u32> {
-        let mut result = vec![key];
+    pub fn get_current_nodes(&self, key: &str, state: &AnimationState) -> Vec<String> {
+        let mut result = vec![key.to_string()];
 
-        let Some(node) = self.hash_to_node.get(&key) else {
+        let Some(node) = self.hash_to_node.get(key) else {
             return Vec::new();
         };
 
@@ -230,26 +255,32 @@ impl ConfigAnimation {
                 result.extend(
                     conditions
                         .iter()
-                        .flat_map(|v| self.get_current_nodes(v.key, state)),
+                        .flat_map(|v| self.get_current_nodes(&v.key, state)),
                 );
             }
             ConfigAnimationNode::Selector { probably_nodes } => {
-                match state.selector_states.get(&key) {
+                match state.selector_states.get(key) {
                     Some(index) => {
-                        result.extend(self.get_current_nodes(probably_nodes[*index].key, state));
+                        result.extend(self.get_current_nodes(&probably_nodes[*index].key, state));
                     }
                     None => {}
                 }
             }
             ConfigAnimationNode::Sequence { hashes, .. } => {
+                result.extend(hashes.iter().flat_map(|v| self.get_current_nodes(v, state)));
+            }
+            ConfigAnimationNode::Parallel { hashes, .. } => {
+                result.extend(hashes.iter().flat_map(|v| self.get_current_nodes(v, state)));
+            }
+            ConfigAnimationNode::Parametric { pairs, .. } => {
                 result.extend(
-                    hashes
+                    pairs
                         .iter()
-                        .flat_map(|v| self.get_current_nodes(*v, state)),
+                        .flat_map(|v| self.get_current_nodes(&v.key, state)),
                 );
             }
             ConfigAnimationNode::ConditionBool { false_node, .. } => {
-                result.extend(self.get_current_nodes(*false_node, state));
+                result.extend(self.get_current_nodes(&false_node, state));
             }
         }
 
@@ -259,18 +290,18 @@ impl ConfigAnimation {
     pub fn play(
         &self,
         player: &mut AnimationPlayer,
-        key: u32,
+        key: &str,
         weight: f32,
         state: &mut AnimationState,
     ) {
-        let node_indices = self.get_node_indices(key, state);
+        let node_indices = self.figure_node_indices(key, state);
 
         for node_index in node_indices {
             player.play(node_index).set_weight(weight);
         }
     }
 
-    pub fn repeat(&self, player: &mut AnimationPlayer, key: u32, state: &AnimationState) {
+    pub fn repeat(&self, player: &mut AnimationPlayer, key: &str, state: &AnimationState) {
         let node_indices = self.get_current_node_indices(key, state);
         for node_index in node_indices {
             if let Some(animation) = player.animation_mut(node_index) {
@@ -279,17 +310,17 @@ impl ConfigAnimation {
         }
     }
 
-    pub fn stop(&self, player: &mut AnimationPlayer, key: u32, state: &mut AnimationState) {
+    pub fn stop(&self, player: &mut AnimationPlayer, key: &str, state: &mut AnimationState) {
         let nodes = self.get_current_nodes(key, state);
-        for node_hash in nodes {
-            let node = self.hash_to_node.get(&node_hash).unwrap();
+        for node_name in nodes {
+            let node = self.hash_to_node.get(&node_name).unwrap();
 
             match node {
                 ConfigAnimationNode::Clip { node_index, .. } => {
                     player.stop(*node_index);
                 }
                 ConfigAnimationNode::Selector { .. } => {
-                    state.selector_states.remove(&node_hash);
+                    state.selector_states.remove(&node_name);
                 }
                 _ => {}
             }
@@ -299,7 +330,7 @@ impl ConfigAnimation {
     pub fn set_speed(
         &self,
         player: &mut AnimationPlayer,
-        key: u32,
+        key: &str,
         speed: f32,
         state: &AnimationState,
     ) {
@@ -314,7 +345,7 @@ impl ConfigAnimation {
     pub fn set_weight(
         &self,
         player: &mut AnimationPlayer,
-        key: u32,
+        key: &str,
         weight: f32,
         state: &AnimationState,
     ) {
@@ -326,7 +357,7 @@ impl ConfigAnimation {
         }
     }
 
-    pub fn get_weight(&self, player: &AnimationPlayer, key: u32, state: &AnimationState) -> f32 {
+    pub fn get_weight(&self, player: &AnimationPlayer, key: &str, state: &AnimationState) -> f32 {
         let node_indices = self.get_current_node_indices(key, state);
         let mut weight = 0.0;
         for node_index in node_indices {

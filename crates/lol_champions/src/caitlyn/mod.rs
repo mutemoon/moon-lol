@@ -57,7 +57,7 @@ fn on_caitlyn_skill_cast(
 }
 
 fn cast_caitlyn_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell1"));
+    play_skill_animation(commands, entity, "spell1".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Caitlyn_Q_Cast"));
 
     // Q is a long range piercing shot
@@ -79,13 +79,13 @@ fn cast_caitlyn_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<S
 }
 
 fn cast_caitlyn_w(commands: &mut Commands, entity: Entity) {
-    play_skill_animation(commands, entity, hash_bin("Spell2"));
+    play_skill_animation(commands, entity, "spell2".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Caitlyn_W_Cast"));
     // W places traps - no direct damage
 }
 
 fn cast_caitlyn_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell3"));
+    play_skill_animation(commands, entity, "spell3".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Caitlyn_E_Cast"));
 
     // E is a net that slows
@@ -107,7 +107,7 @@ fn cast_caitlyn_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<S
 }
 
 fn cast_caitlyn_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell4"));
+    play_skill_animation(commands, entity, "spell4".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Caitlyn_R_Cast"));
 
     // R is a global targeted shot

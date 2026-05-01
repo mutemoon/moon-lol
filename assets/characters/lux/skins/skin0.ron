@@ -1,0 +1,18 @@
+(
+  resources: {},
+  entities: {
+    4294967265: (
+      components: {
+        "bevy_camera::visibility::Visibility": Inherited,
+        "bevy_world_serialization::components::WorldAssetRoot": (Path("characters/lux/skins/skin0.glb#Scene0")),
+        "lol_base::animation::LOLAnimationGraphHandler": (Path("characters/lux/animations/skin0.ron")),
+        "lol_base::character::HealthBar": (
+          bar_type: 12,
+        ),
+        "lol_base::character::Skin": (
+          scale: 1.5,
+        ),
+      },
+    ),
+  },
+)

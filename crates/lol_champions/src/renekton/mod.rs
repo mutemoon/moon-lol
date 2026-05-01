@@ -79,7 +79,7 @@ fn cast_renekton_q(
     q_ability_resource: &mut Query<&mut AbilityResource>,
     skill_spell: Handle<Spell>,
 ) {
-    play_skill_animation(commands, entity, hash_bin("Spell1"));
+    play_skill_animation(commands, entity, "spell1".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Renekton_Q_Cast"));
     // Q is a cleave that deals damage in a circle
     let rage = q_ability_resource
@@ -126,7 +126,7 @@ fn cast_renekton_q(
 }
 
 fn cast_renekton_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell2"));
+    play_skill_animation(commands, entity, "spell2".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Renekton_W_Cast"));
     // W is an empowered auto attack that stuns
     reset_skill_attack(commands, entity);
@@ -158,7 +158,7 @@ fn cast_renekton_e(
 ) {
     let stage = recast.map(|w| w.stage).unwrap_or(1);
 
-    play_skill_animation(commands, entity, hash_bin("Spell3"));
+    play_skill_animation(commands, entity, "spell3".to_string());
 
     if stage == 1 {
         // First cast: Dash forward
@@ -218,7 +218,7 @@ fn cast_renekton_e(
 }
 
 fn cast_renekton_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell4"));
+    play_skill_animation(commands, entity, "spell4".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Renekton_R_Cast"));
     // R is a transformation that deals damage around and generates rage
     skill_damage(

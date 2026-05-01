@@ -37,10 +37,6 @@ fn fiora_r_writes_video() {
 }
 
 fn run_fiora_case(test_name: &str, max_frames: u32) {
-    if std::env::var("MOON_LOL_RUN_RENDER_TESTS").as_deref() != Ok("1") {
-        eprintln!("skipping render test: set MOON_LOL_RUN_RENDER_TESTS=1 to enable");
-        return;
-    }
     if skip_due_to_missing_gpu(|| run_fiora_case_inner(test_name, max_frames)) {
         return;
     }

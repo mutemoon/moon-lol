@@ -68,7 +68,7 @@ fn on_gnar_skill_cast(
 }
 
 fn cast_gnar_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell1"));
+    play_skill_animation(commands, entity, "spell1".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Gnar_Q_Cast"));
     // Q 回旋镖：Sector 模拟直线飞行
     skill_damage(
@@ -89,7 +89,7 @@ fn cast_gnar_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spel
 }
 
 fn cast_gnar_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell2"));
+    play_skill_animation(commands, entity, "spell2".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Gnar_W_Cast"));
     // Mega 形态 W：AOE 伤害 + 眩晕
     skill_damage(
@@ -116,7 +116,7 @@ fn cast_gnar_e(
     point: Vec2,
     skill_spell: Handle<Spell>,
 ) {
-    play_skill_animation(commands, entity, hash_bin("Spell3"));
+    play_skill_animation(commands, entity, "spell3".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Gnar_E_Cast"));
     // E 是跳跃，可以二段跳
     skill_dash(
@@ -141,7 +141,7 @@ fn cast_gnar_e(
 }
 
 fn cast_gnar_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell4"));
+    play_skill_animation(commands, entity, "spell4".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Gnar_R_Cast"));
     // R is only available in Mega form - throws enemies and stuns
     skill_damage(

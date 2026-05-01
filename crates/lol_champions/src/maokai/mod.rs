@@ -58,7 +58,7 @@ fn on_maokai_skill_cast(
 }
 
 fn cast_maokai_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell1"));
+    play_skill_animation(commands, entity, "spell1".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Maokai_Q_Cast"));
 
     // Q is a knockback
@@ -80,7 +80,7 @@ fn cast_maokai_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
 }
 
 fn cast_maokai_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell2"));
+    play_skill_animation(commands, entity, "spell2".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Maokai_W_Cast"));
 
     // W is a dash that roots
@@ -99,7 +99,7 @@ fn cast_maokai_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
 }
 
 fn cast_maokai_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell3"));
+    play_skill_animation(commands, entity, "spell3".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Maokai_E_Cast"));
 
     // E throws sapling that slows
@@ -118,7 +118,7 @@ fn cast_maokai_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
 }
 
 fn cast_maokai_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell4"));
+    play_skill_animation(commands, entity, "spell4".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Maokai_R_Cast"));
 
     // R is a global knockup

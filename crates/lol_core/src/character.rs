@@ -14,14 +14,6 @@ impl Plugin for PluginCharacter {
     fn build(&self, app: &mut App) {
         app.add_observer(on_event_dead);
         app.add_systems(FixedUpdate, try_load_config_characters);
-        // app.add_systems(
-        //     FixedUpdate,
-        //     |mut commands: Commands, q: Query<Entity, (With<Character>, With<Champion>)>| {
-        //         q.iter().for_each(|e| {
-        //             commands.entity(e).log_components();
-        //         })
-        //     },
-        // );
     }
 }
 

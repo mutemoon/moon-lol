@@ -56,7 +56,7 @@ fn on_pyke_skill_cast(
 }
 
 fn cast_pyke_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell1"));
+    play_skill_animation(commands, entity, "spell1".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Pyke_Q_Cast"));
 
     // Q is bone skewer - damage and pull
@@ -78,14 +78,14 @@ fn cast_pyke_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spel
 }
 
 fn cast_pyke_w(commands: &mut Commands, entity: Entity) {
-    play_skill_animation(commands, entity, hash_bin("Spell2"));
+    play_skill_animation(commands, entity, "spell2".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Pyke_W_Cast"));
 
     // W is ghostwater dive - invisibility and movespeed
 }
 
 fn cast_pyke_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell3"));
+    play_skill_animation(commands, entity, "spell3".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Pyke_E_Cast"));
 
     // E is phantom undertow - dash and stun on return
@@ -107,7 +107,7 @@ fn cast_pyke_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spel
 }
 
 fn cast_pyke_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell4"));
+    play_skill_animation(commands, entity, "spell4".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Pyke_R_Cast"));
 
     // R is death from below - execute damage in AoE

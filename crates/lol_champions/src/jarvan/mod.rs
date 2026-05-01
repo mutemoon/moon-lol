@@ -63,7 +63,7 @@ fn on_jarvan_skill_cast(
 }
 
 fn cast_jarvan_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell1"));
+    play_skill_animation(commands, entity, "spell1".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Jarvan_Q_Cast"));
 
     // Q is a line damage and armor shred
@@ -85,7 +85,7 @@ fn cast_jarvan_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
 }
 
 fn cast_jarvan_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell2"));
+    play_skill_animation(commands, entity, "spell2".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Jarvan_W_Cast"));
 
     // W is an AoE slow
@@ -104,7 +104,7 @@ fn cast_jarvan_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
 }
 
 fn cast_jarvan_e(commands: &mut Commands, entity: Entity) {
-    play_skill_animation(commands, entity, hash_bin("Spell3"));
+    play_skill_animation(commands, entity, "spell3".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Jarvan_E_Cast"));
 
     // E grants attack speed aura
@@ -117,7 +117,7 @@ fn cast_jarvan_r(
     point: Vec2,
     skill_spell: Handle<Spell>,
 ) {
-    play_skill_animation(commands, entity, hash_bin("Spell4"));
+    play_skill_animation(commands, entity, "spell4".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Jarvan_R_Cast"));
 
     // R is a targeted dash that creates arena

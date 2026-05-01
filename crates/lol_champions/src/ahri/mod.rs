@@ -72,7 +72,7 @@ fn cast_ahri_q(
     entity: Entity,
     skill_spell: Handle<Spell>,
 ) {
-    play_skill_animation(commands, entity, hash_bin("Spell1"));
+    play_skill_animation(commands, entity, "spell1".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Ahri_Q_Cast"));
 
     // Q creates a missile that travels out and returns
@@ -100,7 +100,7 @@ fn cast_ahri_q(
 }
 
 fn cast_ahri_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell2"));
+    play_skill_animation(commands, entity, "spell2".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Ahri_W_Cast"));
 
     // Fox-fire: Three flames orbit Ahri and can attack enemies
@@ -124,7 +124,7 @@ fn cast_ahri_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spel
 }
 
 fn cast_ahri_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell3"));
+    play_skill_animation(commands, entity, "spell3".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Ahri_E_Cast"));
 
     // E is a charm missile that charms on hit
@@ -157,7 +157,7 @@ fn cast_ahri_r(
 ) {
     let stage = recast.map(|w| w.stage).unwrap_or(1);
 
-    play_skill_animation(commands, entity, hash_bin("Spell4"));
+    play_skill_animation(commands, entity, "spell4".to_string());
 
     if stage == 1 {
         // First cast: dash toward target

@@ -53,7 +53,7 @@ fn on_gangplank_skill_cast(
 }
 
 fn cast_gangplank_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell1"));
+    play_skill_animation(commands, entity, "spell1".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Gangplank_Q_Cast"));
 
     // Q is targeted damage
@@ -74,19 +74,19 @@ fn cast_gangplank_q(commands: &mut Commands, entity: Entity, skill_spell: Handle
 }
 
 fn cast_gangplank_w(commands: &mut Commands, entity: Entity) {
-    play_skill_animation(commands, entity, hash_bin("Spell2"));
+    play_skill_animation(commands, entity, "spell2".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Gangplank_W_Cast"));
     // W removes CC and heals
 }
 
 fn cast_gangplank_e(commands: &mut Commands, entity: Entity) {
-    play_skill_animation(commands, entity, hash_bin("Spell3"));
+    play_skill_animation(commands, entity, "spell3".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Gangplank_E_Cast"));
     // E places barrel
 }
 
 fn cast_gangplank_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell4"));
+    play_skill_animation(commands, entity, "spell4".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Gangplank_R_Cast"));
 
     // R is global AoE

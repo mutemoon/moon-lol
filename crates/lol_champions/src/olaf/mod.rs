@@ -62,13 +62,13 @@ fn on_olaf_skill_cast(
 }
 
 fn cast_olaf_q(commands: &mut Commands, entity: Entity, _point: Vec2) {
-    play_skill_animation(commands, entity, hash_bin("Spell1"));
+    play_skill_animation(commands, entity, "spell1".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Olaf_Q_Cast"));
     // Q is a linear axe throw - could add dash damage or just particle
 }
 
 fn cast_olaf_w(commands: &mut Commands, entity: Entity) {
-    play_skill_animation(commands, entity, hash_bin("Spell2"));
+    play_skill_animation(commands, entity, "spell2".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Olaf_W_Cast"));
 
     // W provides attack speed buff and shield
@@ -90,7 +90,7 @@ fn cast_olaf_w(commands: &mut Commands, entity: Entity) {
 }
 
 fn cast_olaf_e(commands: &mut Commands, entity: Entity, _point: Vec2, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell3"));
+    play_skill_animation(commands, entity, "spell3".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Olaf_E_Cast"));
     skill_damage(
         commands,
@@ -110,7 +110,7 @@ fn cast_olaf_e(commands: &mut Commands, entity: Entity, _point: Vec2, skill_spel
 }
 
 fn cast_olaf_r(commands: &mut Commands, entity: Entity) {
-    play_skill_animation(commands, entity, hash_bin("Spell4"));
+    play_skill_animation(commands, entity, "spell4".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Olaf_R_Cast"));
 
     // R provides CC immunity

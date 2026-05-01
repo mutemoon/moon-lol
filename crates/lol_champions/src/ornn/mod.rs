@@ -56,7 +56,7 @@ fn on_ornn_skill_cast(
 }
 
 fn cast_ornn_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell1"));
+    play_skill_animation(commands, entity, "spell1".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Ornn_Q_Cast"));
 
     // Q is volcanic rupture - damage and slow
@@ -82,7 +82,7 @@ fn cast_ornn_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spel
 }
 
 fn cast_ornn_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell2"));
+    play_skill_animation(commands, entity, "spell2".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Ornn_W_Cast"));
 
     // W is bellows breath - continuous damage and brittle
@@ -104,7 +104,7 @@ fn cast_ornn_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spel
 }
 
 fn cast_ornn_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell3"));
+    play_skill_animation(commands, entity, "spell3".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Ornn_E_Cast"));
 
     // E is searing charge - dash that creates shockwave on terrain hit
@@ -123,7 +123,7 @@ fn cast_ornn_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spel
 }
 
 fn cast_ornn_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell4"));
+    play_skill_animation(commands, entity, "spell4".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Ornn_R_Cast"));
 
     // R is call of the forge god - large AoE damage and knockup

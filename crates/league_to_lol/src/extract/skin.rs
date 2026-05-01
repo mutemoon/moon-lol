@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use bevy::asset::{AssetPath, Handle};
 use bevy::ecs::archetype;
 use bevy::prelude::*;
@@ -9,7 +11,7 @@ use league_file::mesh_skinned::LeagueSkinnedMesh;
 use league_file::skeleton::LeagueSkeleton;
 use league_loader::game::{Data, LeagueLoader, PropGroup};
 use league_loader::prop_bin::LeagueWadLoaderTrait;
-use lol_base::animation::{AnimationHandler, ConfigAnimation, ConfigAnimationClip};
+use lol_base::animation::{ConfigAnimationClip, LOLAnimationGraph, LOLAnimationGraphHandler};
 use lol_base::character::{HealthBar, Skin};
 use ron::ser::{PrettyConfig, to_string_pretty};
 
@@ -22,12 +24,20 @@ pub fn extract_skin_for_champion(
     loader: &LeagueLoader,
     champ_name: &str,
     skin_bin_path: Option<&str>,
+    hashes: &HashMap<u32, String>,
 ) {
     let Some(skin_bin_path) = skin_bin_path else {
         return;
     };
 
-    println!("[DEBUG] 正在加载 {}", champ_name);
+    // Get skin_id from skin_bin_path (e.g., "skin0" from ".../skins/skin0.bin")
+    let skin_id = skin_bin_path
+        .split('/')
+        .last()
+        .unwrap_or("skin0")
+        .trim_end_matches(".bin");
+
+    println!("[DEBUG] 正在加载 {} skin {}", champ_name, skin_id);
 
     let skin_prop_group = match loader.get_prop_group_by_paths(vec![skin_bin_path]) {
         Ok(group) => group,
@@ -96,10 +106,15 @@ pub fn extract_skin_for_champion(
             .and_then(|buf| LeagueSkeleton::parse(&buf).ok().map(|(_, s)| s))
     });
 
-    let output_glb_path = format!("assets/characters/{}/skin.glb", champ_name.to_lowercase());
+    let output_glb_path = format!(
+        "assets/characters/{}/skins/{}.glb",
+        champ_name.to_lowercase(),
+        skin_id
+    );
 
     // 加载动画数据并导出到 GLB
-    let animations = load_animations_for_skin(loader, &skin_prop_group, anim_graph_hash);
+    let (animations, hash_to_glb_index) =
+        load_animations_for_skin(loader, &skin_prop_group, anim_graph_hash, hashes);
 
     // 加载 material override 的贴图
     // materialOverride 的 material 字段是 link 哈希，需要加载对应的 bin 文件获取贴图
@@ -162,16 +177,13 @@ pub fn extract_skin_for_champion(
         &animations,
         &output_glb_path,
         material_override.as_ref(),
+        hashes,
     ) {
         println!("[WARN] 皮肤 GLB 导出失败: {}", e);
         return;
     } else {
         println!("{:?}", skin_mesh_properties.material_override);
     }
-
-    // 导出动画 Asset（保留独立的 ron 文件用于运行时加载）
-    let animation_ron_path =
-        export_animation_for_skin(champ_name, skin_bin_path, &skin_prop_group, &skin_data);
 
     // 获取 scale 和 bar_type
     let scale = skin_mesh_properties.skin_scale.unwrap_or(1.0);
@@ -187,8 +199,9 @@ pub fn extract_skin_for_champion(
     app.add_plugins(AssetPlugin::default());
     app.add_plugins(TaskPoolPlugin::default());
 
+    app.init_asset::<AnimationClip>();
     app.init_asset::<WorldAsset>();
-    app.init_asset::<ConfigAnimation>();
+    app.init_asset::<LOLAnimationGraph>();
 
     app.finish();
     app.cleanup();
@@ -197,14 +210,35 @@ pub fn extract_skin_for_champion(
 
     let asset_server = world.resource::<AssetServer>();
     let skin_handle: Handle<WorldAsset> = asset_server.load(
-        AssetPath::from(format!("characters/{}/skin.glb", champ_name.to_lowercase()))
-            .with_label(GltfAssetLabel::Scene(0).to_string()),
+        AssetPath::from(format!(
+            "characters/{}/skins/{}.glb",
+            champ_name.to_lowercase(),
+            skin_id
+        ))
+        .with_label(GltfAssetLabel::Scene(0).to_string()),
+    );
+
+    // 导出动画 Asset（保留独立的 ron 文件用于运行时加载）
+    let gltf_path = format!(
+        "characters/{}/skins/{}.glb",
+        champ_name.to_lowercase(),
+        skin_id
+    );
+    let animation_ron_path = export_animation_for_skin(
+        asset_server,
+        champ_name,
+        skin_bin_path,
+        &skin_prop_group,
+        &skin_data,
+        hashes,
+        &gltf_path,
+        &hash_to_glb_index,
     );
 
     // 如果有动画，创建 AnimationHandler
     let animation_handler = animation_ron_path.map(|anim_path| {
-        let anim_handle: Handle<ConfigAnimation> = asset_server.load(&anim_path);
-        AnimationHandler(anim_handle)
+        let anim_handle: Handle<LOLAnimationGraph> = asset_server.load(&anim_path);
+        LOLAnimationGraphHandler(anim_handle)
     });
 
     let mut entity_builder = world.spawn((
@@ -239,69 +273,88 @@ pub fn extract_skin_for_champion(
         .build();
     let serialized_scene = scene.serialize(&type_registry).unwrap();
 
-    let output_skin_path = format!("assets/characters/{}/skin.ron", champ_name.to_lowercase());
+    let output_skin_path = format!(
+        "assets/characters/{}/skins/{}.ron",
+        champ_name.to_lowercase(),
+        skin_id
+    );
     super::utils::write_to_file(&output_skin_path, serialized_scene);
 }
 
 /// 加载动画数据并导出到 GLB
 /// 从 skin bin 的 links 组成的 PropGroup 中获取 AnimationGraphData
+/// 返回 (animations, hash_to_glb_index) - animations 按 hash 排序，hash_to_glb_index 记录 hash 对应的 GLB 动画索引
 fn load_animations_for_skin(
     loader: &LeagueLoader,
     anim_prop_group: &PropGroup,
     anim_graph_hash: u32,
-) -> Vec<(String, ConfigAnimationClip)> {
+    _hashes: &HashMap<u32, String>,
+) -> (Vec<(u32, ConfigAnimationClip)>, HashMap<u32, usize>) {
     // 从 PropGroup 中获取 AnimationGraphData
     let Some(anim_graph_data) =
         anim_prop_group.get_data_option::<AnimationGraphData>(anim_graph_hash)
     else {
         println!("[WARN] 无法获取 AnimationGraphData，从 links 中未找到");
-        return Vec::new();
+        return (Vec::new(), HashMap::new());
     };
 
-    let mut animations = Vec::new();
+    let mut animations: Vec<(u32, ConfigAnimationClip)> = Vec::new();
+    let mut hash_to_glb_index: HashMap<u32, usize> = HashMap::new();
 
     // 遍历所有 AtomicClipData，加载对应的 .anm 文件
-    if let Some(clip_data_map) = &anim_graph_data.m_clip_data_map {
-        for (hash, clip) in clip_data_map {
-            if let EnumClipData::AtomicClipData(atomic_clip) = clip {
-                let anm_path = &atomic_clip.m_animation_resource_data.m_animation_file_path;
+    let Some(clip_data_map) = &anim_graph_data.m_clip_data_map else {
+        return (animations, hash_to_glb_index);
+    };
 
-                // 跳过空路径
-                if anm_path.is_empty() {
-                    continue;
-                }
+    for (hash, clip) in clip_data_map {
+        let EnumClipData::AtomicClipData(atomic_clip) = clip else {
+            continue;
+        };
 
-                // 加载 .anm 文件
-                let Ok(anm_buf) = loader.get_wad_entry_buffer_by_path(anm_path) else {
-                    println!("[WARN] 无法加载 .anm 文件: {}", anm_path);
-                    continue;
-                };
-
-                // 解析 .anm 文件
-                let Ok((_, anm_file)) = AnimationFile::parse(&anm_buf) else {
-                    println!("[WARN] 无法解析 .anm 文件: {}", anm_path);
-                    continue;
-                };
-
-                // 转换为 ConfigAnimationClip
-                let clip_data = load_animation_file(anm_file);
-
-                // 使用 hash 作为动画名称
-                let name = format!("anim_{}", hash);
-                animations.push((name, clip_data));
-            }
+        let anm_path = &atomic_clip.m_animation_resource_data.m_animation_file_path;
+        if anm_path.is_empty() {
+            continue;
         }
+
+        // 加载 .anm 文件
+        let Ok(anm_buf) = loader.get_wad_entry_buffer_by_path(anm_path) else {
+            println!("[WARN] 无法加载 .anm 文件: {}", anm_path);
+            continue;
+        };
+
+        // 解析 .anm 文件
+        let Ok((_, anm_file)) = AnimationFile::parse(&anm_buf) else {
+            println!("[WARN] 无法解析 .anm 文件: {}", anm_path);
+            continue;
+        };
+
+        // 转换为 ConfigAnimationClip
+        let clip_data = load_animation_file(anm_file);
+
+        animations.push((*hash, clip_data));
     }
 
-    animations
+    // 记录每个 hash 对应的 GLB 动画索引
+    for (idx, (hash, _)) in animations.iter().enumerate() {
+        hash_to_glb_index.insert(*hash, idx);
+    }
+
+    println!("{:?}", hash_to_glb_index);
+
+    (animations, hash_to_glb_index)
 }
 
 /// 导出动画 Asset 并返回 asset 路径
+/// hash_to_glb_index: 记录每个 hash 对应的 GLB 动画索引
 fn export_animation_for_skin(
+    _asset_server: &AssetServer,
     champ_name: &str,
     skin_bin_path: &str,
     skin_prop_group: &PropGroup,
     skin_data: &SkinCharacterDataProperties,
+    hashes: &HashMap<u32, String>,
+    gltf_path: &str,
+    hash_to_glb_index: &HashMap<u32, usize>,
 ) -> Option<String> {
     let anim_graph_hash = skin_data.skin_animation_properties.animation_graph_data;
 
@@ -322,19 +375,25 @@ fn export_animation_for_skin(
         .unwrap_or("skin0")
         .trim_end_matches(".bin");
 
-    // Build node_index_map for AtomicClipData nodes
+    // Build node_index_map using the GLB indices from hash_to_glb_index
     let mut node_index_map = std::collections::HashMap::new();
     if let Some(ref clip_data_map) = anim_graph_data.m_clip_data_map {
         for (hash, clip) in clip_data_map {
-            if matches!(clip, EnumClipData::AtomicClipData(_)) {
-                let next_index = node_index_map.len();
-                node_index_map.insert(*hash, AnimationNodeIndex::new(next_index));
+            if let EnumClipData::AtomicClipData(_) = clip {
+                if let Some(&glb_index) = hash_to_glb_index.get(hash) {
+                    node_index_map.insert(*hash, AnimationNodeIndex::new(glb_index));
+                }
             }
         }
     }
 
     // Convert to ConfigAnimation
-    let config_animation = animation_graph_to_config(&anim_graph_data, &node_index_map);
+    let config_animation = animation_graph_to_config(
+        &anim_graph_data,
+        &node_index_map,
+        hashes,
+        gltf_path.to_string(),
+    );
 
     // Export to .ron file
     let anim_path = format!(

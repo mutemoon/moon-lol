@@ -54,7 +54,7 @@ fn on_samira_skill_cast(
 }
 
 fn cast_samira_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell1"));
+    play_skill_animation(commands, entity, "spell1".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Samira_Q_Cast"));
 
     // Q is flonen - damage
@@ -76,7 +76,7 @@ fn cast_samira_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
 }
 
 fn cast_samira_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell2"));
+    play_skill_animation(commands, entity, "spell2".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Samira_W_Cast"));
 
     // W is blade storm - AoE damage
@@ -95,14 +95,14 @@ fn cast_samira_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
 }
 
 fn cast_samira_e(commands: &mut Commands, entity: Entity) {
-    play_skill_animation(commands, entity, hash_bin("Spell3"));
+    play_skill_animation(commands, entity, "spell3".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Samira_E_Cast"));
 
     // E is blade rush - dash
 }
 
 fn cast_samira_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell4"));
+    play_skill_animation(commands, entity, "spell4".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Samira_R_Cast"));
 
     // R is infernum - large AoE damage

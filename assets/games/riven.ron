@@ -16,7 +16,7 @@
                     character_record: Path("characters/riven/config.ron"),
                 ),
                 "lol_base::character::ConfigSkin": (
-                    skin: Path("characters/riven/skin.ron"),
+                    skin: Path("characters/riven/skins/skin0.ron"),
                 ),
             },
         ),
@@ -37,7 +37,7 @@
                     character_record: Path("characters/fiora/config.ron"),
                 ),
                 "lol_base::character::ConfigSkin": (
-                    skin: Path("characters/fiora/skin.ron"),
+                    skin: Path("characters/fiora/skins/skin0.ron"),
                 ),
             },
         ),
@@ -58,7 +58,7 @@
                     character_record: Path("characters/fiora/config.ron"),
                 ),
                 "lol_base::character::ConfigSkin": (
-                    skin: Path("characters/fiora/skin.ron"),
+                    skin: Path("characters/fiora/skins/skin0.ron"),
                 ),
             },
         ),

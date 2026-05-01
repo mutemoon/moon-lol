@@ -64,7 +64,7 @@ fn on_kalista_skill_cast(
 }
 
 fn cast_kalista_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell1"));
+    play_skill_animation(commands, entity, "spell1".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Kalista_Q_Cast"));
 
     // Q is a spear that passes through enemies
@@ -86,14 +86,14 @@ fn cast_kalista_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<S
 }
 
 fn cast_kalista_w(commands: &mut Commands, entity: Entity) {
-    play_skill_animation(commands, entity, hash_bin("Spell2"));
+    play_skill_animation(commands, entity, "spell2".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Kalista_W_Cast"));
 
     // W is a sentinel that provides vision and deals damage on basic attacks
 }
 
 fn cast_kalista_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell3"));
+    play_skill_animation(commands, entity, "spell3".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Kalista_E_Cast"));
 
     // E deals damage to speared enemies and slows
@@ -118,7 +118,7 @@ fn cast_kalista_r(
     point: Vec2,
     skill_spell: Handle<Spell>,
 ) {
-    play_skill_animation(commands, entity, hash_bin("Spell4"));
+    play_skill_animation(commands, entity, "spell4".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Kalista_R_Cast"));
 
     // R pulls oathsworn ally and grants invulnerability

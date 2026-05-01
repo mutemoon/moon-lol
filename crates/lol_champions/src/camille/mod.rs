@@ -89,7 +89,7 @@ fn cast_camille_q(
 ) {
     let stage = recast.map(|w| w.stage).unwrap_or(1);
 
-    play_skill_animation(commands, entity, hash_bin("Spell1"));
+    play_skill_animation(commands, entity, "spell1".to_string());
 
     if stage == 1 {
         // First cast: Prepares the hookshot
@@ -125,7 +125,7 @@ fn cast_camille_q(
 }
 
 fn cast_camille_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell2"));
+    play_skill_animation(commands, entity, "spell2".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Camille_W_Cast"));
     // W is a swept cone that slows
     skill_damage(
@@ -157,7 +157,7 @@ fn cast_camille_e(
 ) {
     let stage = recast.map(|w| w.stage).unwrap_or(1);
 
-    play_skill_animation(commands, entity, hash_bin("Spell3"));
+    play_skill_animation(commands, entity, "spell3".to_string());
 
     if stage == 1 {
         // First cast: Hookshot - launches toward terrain
@@ -202,7 +202,7 @@ fn cast_camille_r(
     point: Vec2,
     skill_spell: Handle<Spell>,
 ) {
-    play_skill_animation(commands, entity, hash_bin("Spell4"));
+    play_skill_animation(commands, entity, "spell4".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Camille_R_Cast"));
     // R is a hookshot-like leap that marks and traps target champion
     skill_dash(

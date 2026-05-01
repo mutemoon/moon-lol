@@ -56,7 +56,7 @@ fn on_neeko_skill_cast(
 }
 
 fn cast_neeko_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell1"));
+    play_skill_animation(commands, entity, "spell1".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Neeko_Q_Cast"));
 
     // Q is a bloom burst
@@ -75,14 +75,14 @@ fn cast_neeko_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
 }
 
 fn cast_neeko_w(commands: &mut Commands, entity: Entity) {
-    play_skill_animation(commands, entity, hash_bin("Spell2"));
+    play_skill_animation(commands, entity, "spell2".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Neeko_W_Cast"));
 
     // W is a shapesplitter dash
 }
 
 fn cast_neeko_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell3"));
+    play_skill_animation(commands, entity, "spell3".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Neeko_E_Cast"));
 
     // E is a root
@@ -104,7 +104,7 @@ fn cast_neeko_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
 }
 
 fn cast_neeko_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell4"));
+    play_skill_animation(commands, entity, "spell4".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Neeko_R_Cast"));
 
     // R is an AoE knockup/stun

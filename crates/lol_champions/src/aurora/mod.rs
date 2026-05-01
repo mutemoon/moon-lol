@@ -65,7 +65,7 @@ fn on_aurora_skill_cast(
 }
 
 fn cast_aurora_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell1"));
+    play_skill_animation(commands, entity, "spell1".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Aurora_Q_Cast"));
 
     // Q is a projectile
@@ -98,7 +98,7 @@ fn cast_aurora_w(
     skill_spell: Handle<Spell>,
     point: Vec2,
 ) {
-    play_skill_animation(commands, entity, hash_bin("Spell2"));
+    play_skill_animation(commands, entity, "spell2".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Aurora_W_Cast"));
 
     // W creates a portal - dash to it
@@ -124,7 +124,7 @@ fn cast_aurora_w(
 }
 
 fn cast_aurora_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell3"));
+    play_skill_animation(commands, entity, "spell3".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Aurora_E_Cast"));
 
     // E creates a path
@@ -146,7 +146,7 @@ fn cast_aurora_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
 }
 
 fn cast_aurora_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell4"));
+    play_skill_animation(commands, entity, "spell4".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Aurora_R_Cast"));
 
     // R is area damage and freeze

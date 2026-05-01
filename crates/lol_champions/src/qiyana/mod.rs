@@ -56,7 +56,7 @@ fn on_qiyana_skill_cast(
 }
 
 fn cast_qiyana_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell1"));
+    play_skill_animation(commands, entity, "spell1".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Qiyana_Q_Cast"));
 
     // Q is edge of Ixtal - damage
@@ -78,7 +78,7 @@ fn cast_qiyana_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
 }
 
 fn cast_qiyana_w(commands: &mut Commands, entity: Entity) {
-    play_skill_animation(commands, entity, hash_bin("Spell2"));
+    play_skill_animation(commands, entity, "spell2".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Qiyana_W_Cast"));
 
     // W is elemental wrath - dash and element buff
@@ -88,14 +88,14 @@ fn cast_qiyana_w(commands: &mut Commands, entity: Entity) {
 }
 
 fn cast_qiyana_e(commands: &mut Commands, entity: Entity) {
-    play_skill_animation(commands, entity, hash_bin("Spell3"));
+    play_skill_animation(commands, entity, "spell3".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Qiyana_E_Cast"));
 
     // E is terrashape - dash through terrain
 }
 
 fn cast_qiyana_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell4"));
+    play_skill_animation(commands, entity, "spell4".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Qiyana_R_Cast"));
 
     // R is audacity/supreme display - large AoE knockup

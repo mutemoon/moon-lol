@@ -76,7 +76,7 @@ fn cast_anivia_q(
 ) {
     let stage = recast.map(|w| w.stage).unwrap_or(1);
 
-    play_skill_animation(commands, entity, hash_bin("Spell1"));
+    play_skill_animation(commands, entity, "spell1".to_string());
 
     if stage == 1 {
         // First cast: launch the crystal
@@ -108,13 +108,13 @@ fn cast_anivia_q(
 }
 
 fn cast_anivia_w(commands: &mut Commands, entity: Entity) {
-    play_skill_animation(commands, entity, hash_bin("Spell2"));
+    play_skill_animation(commands, entity, "spell2".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Anivia_W_Cast"));
     // W creates a wall that blocks movement
 }
 
 fn cast_anivia_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell3"));
+    play_skill_animation(commands, entity, "spell3".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Anivia_E_Cast"));
 
     // E deals extra damage to frozen targets
@@ -133,7 +133,7 @@ fn cast_anivia_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
 }
 
 fn cast_anivia_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell4"));
+    play_skill_animation(commands, entity, "spell4".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Anivia_R_Cast"));
 
     // R is a continuous storm

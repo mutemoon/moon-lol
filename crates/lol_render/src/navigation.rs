@@ -3,11 +3,14 @@ use bevy::color::palettes;
 use bevy::prelude::*;
 use bevy::render::mesh::{Indices, PrimitiveTopology};
 use bevy::render::render_resource::{Extent3d, TextureDimension, TextureFormat};
-use lol_base::grid::{CELL_COST_IMPASSABLE, ConfigNavigationGrid, GridFlagsVisionPathing};
+use lol_base::grid::{CELL_COST_IMPASSABLE, ConfigNavigationGrid};
 use lol_core::navigation::grid::ResourceGrid;
 use lol_core::navigation::navigation::{NavigationDebug, NavigationDebugState};
 
 use crate::map::{Map, on_click_map};
+
+// 纹理中每个单元格的像素尺寸（越大线条越精细）
+const CELL_TEX_SIZE: u32 = 24;
 
 #[derive(Default)]
 pub struct PluginRenderNavigation;
@@ -18,12 +21,17 @@ impl Plugin for PluginRenderNavigation {
             // enabled_flags: todo!(),
             show_all: true,
         });
+        // 去掉了 run_once，使网格线持续绘制
         app.add_systems(
             Update,
             setup_grid_visualization.run_if(
-                resource_exists::<ResourceGrid>
-                    .and_then(resource_exists::<NavigationDebug>)
-                    .and_then(run_once),
+                resource_exists::<ResourceGrid>.and_then(resource_exists::<NavigationDebug>), // .and_then(run_once),
+            ),
+        );
+        app.add_systems(
+            Update,
+            draw_grid.run_if(
+                resource_exists::<ResourceGrid>.and_then(resource_exists::<NavigationDebug>),
             ),
         );
         app.add_systems(
@@ -101,35 +109,41 @@ fn build_merged_grid_mesh(grid: &ConfigNavigationGrid, gap: f32) -> Mesh {
 }
 
 fn build_grid_texture(grid: &ConfigNavigationGrid, images: &mut Assets<Image>) -> Handle<Image> {
-    let width = grid.x_len as u32;
-    let height = grid.y_len as u32;
-    let mut data = vec![0u8; (width * height * 4) as usize];
+    let w = grid.x_len as u32 * CELL_TEX_SIZE;
+    let h = grid.y_len as u32 * CELL_TEX_SIZE;
+    let mut data = vec![0u8; (w * h * 4) as usize];
 
-    for (y, row) in grid.cells.iter().enumerate() {
-        for (x, cell) in row.iter().enumerate() {
-            let color = if cell
-                .vision_pathing_flags
-                .contains(GridFlagsVisionPathing::BlueTeamOnly)
-            {
-                [0u8, 0, 255, 255]
-            } else if cell
-                .vision_pathing_flags
-                .contains(GridFlagsVisionPathing::Wall)
-            {
-                [255, 0, 0, 255]
-            } else {
-                [0, 255, 0, 255]
-            };
+    for row in 0..grid.y_len as u32 {
+        for col in 0..grid.x_len as u32 {
+            let x0 = col * CELL_TEX_SIZE;
+            let y0 = row * CELL_TEX_SIZE;
 
-            let idx = ((y as u32 * width + x as u32) * 4) as usize;
-            data[idx..idx + 4].copy_from_slice(&color);
+            for dy in 0..CELL_TEX_SIZE {
+                for dx in 0..CELL_TEX_SIZE {
+                    let px = x0 + dx;
+                    let py = y0 + dy;
+                    let idx = ((py * w + px) * 4) as usize;
+
+                    // 网格线：在左/下边界（或最右/最上）画线，颜色灰色，不透明
+                    let is_border =
+                        dx == 0 || dy == 0 || dx == CELL_TEX_SIZE - 1 || dy == CELL_TEX_SIZE - 1;
+                    if is_border {
+                        // data[idx..idx + 4].copy_from_slice(&[60, 60, 60, 128]);
+                        data[idx..idx + 4].copy_from_slice(&[0, 0, 0, 0]);
+                    } else {
+                        // 非线区域：完全透明，颜色任意
+                        data[idx..idx + 4].copy_from_slice(&[0, 0, 0, 0]);
+                        // data[idx..idx + 4].copy_from_slice(&[60, 60, 60, 128]);
+                    }
+                }
+            }
         }
     }
 
     let mut image = Image::new(
         Extent3d {
-            width,
-            height,
+            width: w,
+            height: h,
             depth_or_array_layers: 1,
         },
         TextureDimension::D2,
@@ -137,10 +151,7 @@ fn build_grid_texture(grid: &ConfigNavigationGrid, images: &mut Assets<Image>) -
         TextureFormat::Rgba8Unorm,
         RenderAssetUsages::default(),
     );
-
-    // Set nearest neighbor sampling to prevent blurring between cells
     image.sampler = bevy::image::ImageSampler::nearest();
-
     images.add(image)
 }
 
@@ -152,22 +163,27 @@ fn setup_grid_visualization(
     mut materials: ResMut<Assets<StandardMaterial>>,
     mut images: ResMut<Assets<Image>>,
     mut flag_filters: ResMut<FlagFilters>,
+    q_map: Query<&Map>,
 ) {
+    if !q_map.is_empty() {
+        return;
+    }
+
     let Some(grid) = assets_grid.get(&res_grid.0) else {
-        info!("网格未加载");
+        info!("没有网格");
         return;
     };
     info!("生成网格");
 
     flag_filters.show_all = true;
 
-    let mesh = build_merged_grid_mesh(grid, 5.0);
+    let mesh = build_merged_grid_mesh(grid, 0.0);
     let texture = build_grid_texture(grid, &mut images);
 
     let material = materials.add(StandardMaterial {
         base_color_texture: Some(texture),
         unlit: true,
-        depth_bias: 100.0,
+        alpha_mode: AlphaMode::Blend,
         ..default()
     });
 
@@ -180,6 +196,90 @@ fn setup_grid_visualization(
             Map,
         ))
         .observe(on_click_map);
+}
+
+fn draw_grid(
+    res_grid: Res<ResourceGrid>,
+    assets_grid: Res<Assets<ConfigNavigationGrid>>,
+    mut gizmos: Gizmos,
+) {
+    let Some(grid) = assets_grid.get(&res_grid.0) else {
+        return;
+    };
+
+    let height_offset = 0.1;
+    let cell_size = grid.cell_size;
+    let x_len = grid.x_len;
+    let y_len = grid.y_len;
+
+    let thin_color = Color::srgb(0.3, 0.3, 0.3);
+    let thick_color = Color::srgb(0.8, 0.8, 0.8);
+
+    // 遍历每个格子，绘制其左边线和下边线（高度使用该格子的中心高度）
+    for y in 0..y_len {
+        for x in 0..x_len {
+            let center = grid.get_cell_center_position_by_xy((x, y));
+            let half = cell_size / 2.0;
+            let height = center.y + height_offset; // 可以让线条略高于格子表面
+
+            let left = center.x - half;
+            let right = center.x + half;
+            let bottom = center.z - half;
+            let top = center.z + half;
+
+            // 左边线（垂直方向）
+            let start_left = Vec3::new(left, height, bottom);
+            let end_left = Vec3::new(left, height, top);
+            let color_left = if x % 10 == 0 { thick_color } else { thin_color };
+            gizmos.line(start_left, end_left, color_left);
+
+            // 下边线（水平方向）
+            let start_bottom = Vec3::new(left, height, bottom);
+            let end_bottom = Vec3::new(right, height, bottom);
+            let color_bottom = if y % 10 == 0 { thick_color } else { thin_color };
+            gizmos.line(start_bottom, end_bottom, color_bottom);
+        }
+    }
+
+    // 补充最右边边界线（右侧无格子再画左边线，需单独绘制）
+    for y in 0..y_len {
+        let center = grid.get_cell_center_position_by_xy((x_len - 1, y));
+        let half = cell_size / 2.0;
+        let height = center.y + height_offset;
+        let right_x = center.x + half;
+        let z_start = center.z - half;
+        let z_end = center.z + half;
+        let color = if x_len % 10 == 0 {
+            thick_color
+        } else {
+            thin_color
+        };
+        gizmos.line(
+            Vec3::new(right_x, height, z_start),
+            Vec3::new(right_x, height, z_end),
+            color,
+        );
+    }
+
+    // 补充最上边边界线
+    for x in 0..x_len {
+        let center = grid.get_cell_center_position_by_xy((x, y_len - 1));
+        let half = cell_size / 2.0;
+        let height = center.y + height_offset;
+        let top_z = center.z + half;
+        let x_start = center.x - half;
+        let x_end = center.x + half;
+        let color = if y_len % 10 == 0 {
+            thick_color
+        } else {
+            thin_color
+        };
+        gizmos.line(
+            Vec3::new(x_start, height, top_z),
+            Vec3::new(x_end, height, top_z),
+            color,
+        );
+    }
 }
 
 fn update_visualization_astar(

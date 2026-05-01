@@ -15,7 +15,7 @@ pub struct CommandSkinParticleDespawn {
 #[derive(EntityEvent)]
 pub struct CommandAnimationPlay {
     pub entity: Entity,
-    pub hash: u32,
+    pub hash: String,
     pub repeat: bool,
     pub duration: Option<f32>,
 }

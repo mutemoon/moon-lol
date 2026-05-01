@@ -87,9 +87,9 @@ fn cast_riven_q(
     let stage = recast.map(|window| window.stage).unwrap_or(1);
 
     let (animation_hash, particle_hash) = match stage {
-        1 => (hash_bin("Spell1A"), hash_bin("Riven_Q_01_Detonate")),
-        2 => (hash_bin("Spell1B"), hash_bin("Riven_Q_02_Detonate")),
-        _ => (hash_bin("Spell1C"), hash_bin("Riven_Q_03_Detonate")),
+        1 => ("spell1a".to_string(), hash_bin("Riven_Q_01_Detonate")),
+        2 => ("spell1b".to_string(), hash_bin("Riven_Q_02_Detonate")),
+        _ => ("spell1c".to_string(), hash_bin("Riven_Q_03_Detonate")),
     };
 
     play_skill_animation(commands, entity, animation_hash);
@@ -134,7 +134,7 @@ fn cast_riven_q(
 
 fn cast_riven_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     spawn_skill_particle(commands, entity, hash_bin("Riven_W_Cast"));
-    play_skill_animation(commands, entity, hash_bin("Spell2"));
+    play_skill_animation(commands, entity, "spell2".to_string());
     skill_damage(
         commands,
         entity,
@@ -157,7 +157,7 @@ fn cast_riven_e(
     skill_spell: Handle<Spell>,
 ) {
     spawn_skill_particle(commands, entity, hash_bin("Riven_E_Mis"));
-    play_skill_animation(commands, entity, hash_bin("Spell3"));
+    play_skill_animation(commands, entity, "spell3".to_string());
     commands
         .entity(entity)
         .with_related::<BuffOf>(BuffShieldWhite::new(100.0));

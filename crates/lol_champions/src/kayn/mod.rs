@@ -83,7 +83,7 @@ fn cast_kayn_q(
     point: Vec2,
     skill_spell: Handle<Spell>,
 ) {
-    play_skill_animation(commands, entity, hash_bin("Spell1"));
+    play_skill_animation(commands, entity, "spell1".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Kayn_Q_Cast"));
     // Q is a dash that deals damage
     skill_dash(
@@ -108,7 +108,7 @@ fn cast_kayn_q(
 }
 
 fn cast_kayn_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell2"));
+    play_skill_animation(commands, entity, "spell2".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Kayn_W_Cast"));
     // W is an upward slash that slows
     skill_damage(
@@ -134,7 +134,7 @@ fn cast_kayn_e(
     entity: Entity,
     _point: Vec2,
 ) {
-    play_skill_animation(commands, entity, hash_bin("Spell3"));
+    play_skill_animation(commands, entity, "spell3".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Kayn_E_Cast"));
     // E is a ghost-like dash that allows passing through terrain
     // Movement speed buff
@@ -144,7 +144,7 @@ fn cast_kayn_e(
 }
 
 fn cast_kayn_r(commands: &mut Commands, entity: Entity) {
-    play_skill_animation(commands, entity, hash_bin("Spell4"));
+    play_skill_animation(commands, entity, "spell4".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Kayn_R_Cast"));
     // R 寄生：给自身挂 BuffKaynRActive（不可选中状态）
     commands

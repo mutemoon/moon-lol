@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use bevy::prelude::*;
 use league_core::extract::{AbilityResourceSlotInfo, CharacterRecord, SpellObject};
 use league_loader::game::{Data, LeagueLoader, PropGroup};
@@ -182,6 +184,7 @@ pub fn extract_character_from_record(
     character_name: &str,
     is_champion: bool,
     skin_bin_path: Option<&str>,
+    hashes: &HashMap<u32, String>,
 ) -> bool {
     let bin_path = format!("data/characters/{}/{}.bin", character_name, character_name);
 
@@ -269,7 +272,7 @@ pub fn extract_character_from_record(
     );
     write_to_file(&output_path, serialized_scene);
 
-    extract_skin_for_champion(loader, character_name, skin_bin_path);
+    extract_skin_for_champion(loader, character_name, skin_bin_path, hashes);
 
     true
 }

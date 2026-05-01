@@ -62,7 +62,7 @@ fn on_galio_skill_cast(
 }
 
 fn cast_galio_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell1"));
+    play_skill_animation(commands, entity, "spell1".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Galio_Q_Cast"));
 
     // Q is a tornado
@@ -84,7 +84,7 @@ fn cast_galio_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
 }
 
 fn cast_galio_w(commands: &mut Commands, entity: Entity) {
-    play_skill_animation(commands, entity, hash_bin("Spell2"));
+    play_skill_animation(commands, entity, "spell2".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Galio_W_Cast"));
 
     // W provides shield and reduces damage
@@ -100,7 +100,7 @@ fn cast_galio_e(
     point: Vec2,
     skill_spell: Handle<Spell>,
 ) {
-    play_skill_animation(commands, entity, hash_bin("Spell3"));
+    play_skill_animation(commands, entity, "spell3".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Galio_E_Cast"));
 
     // E is a dash that knocks up
@@ -126,7 +126,7 @@ fn cast_galio_e(
 }
 
 fn cast_galio_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell4"));
+    play_skill_animation(commands, entity, "spell4".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Galio_R_Cast"));
 
     // R is a large AoE knockback

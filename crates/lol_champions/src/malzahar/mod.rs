@@ -58,7 +58,7 @@ fn on_malzahar_skill_cast(
 }
 
 fn cast_malzahar_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell1"));
+    play_skill_animation(commands, entity, "spell1".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Malzahar_Q_Cast"));
 
     // Q opens void gates and silences
@@ -80,7 +80,7 @@ fn cast_malzahar_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<
 }
 
 fn cast_malzahar_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell2"));
+    play_skill_animation(commands, entity, "spell2".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Malzahar_W_Cast"));
 
     // W summons voidlings
@@ -99,7 +99,7 @@ fn cast_malzahar_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<
 }
 
 fn cast_malzahar_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell3"));
+    play_skill_animation(commands, entity, "spell3".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Malzahar_E_Cast"));
 
     // E infects target
@@ -118,7 +118,7 @@ fn cast_malzahar_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<
 }
 
 fn cast_malzahar_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell4"));
+    play_skill_animation(commands, entity, "spell4".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Malzahar_R_Cast"));
 
     // R suppresses target

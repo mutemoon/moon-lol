@@ -94,7 +94,7 @@ league_to_lol::extract
 
 - 遍历 `Champions/*.wad.client` 文件
 - 使用 rayon 并行处理
-- 每个英雄导出 `config.ron`、`skin.glb`、`skin.ron`、`spells/*.ron`
+- 每个英雄导出 `config.ron`、`skins/{skinN}.glb`、`skins/{skinN}.ron`、`spells/*.ron`
 
 #### 技能数据提取
 
@@ -179,7 +179,8 @@ use league_to_lol::extract::extract_all;
 
 fn main() {
     let game_path = r"D:\WeGameApps\英雄联盟\Game";
-    extract_all(game_path);
+    let hashes_dir = "assets/hashes";
+    extract_all(game_path, hashes_dir);
 }
 ```
 
@@ -225,8 +226,8 @@ extract_phase_2_champions(&loader);
 | 文件                                    | 描述                                                                                                |
 | --------------------------------------- | --------------------------------------------------------------------------------------------------- |
 | `assets/characters/{name}/config.ron`   | 角色场景（包含 Bounding、Attack、Health、Damage、Armor、Movement、Skills、Name 等组件的序列化实体） |
-| `assets/characters/{name}/skin.glb`     | 皮肤 GLB 文件（网格 + 材质 + 贴图）                                                                 |
-| `assets/characters/{name}/skin.ron`     | 皮肤场景（包含 Skin、HealthBar、Visibility 组件）                                                   |
+| `assets/characters/{name}/skins/{skinN}.glb` | 皮肤 GLB 文件（网格 + 材质 + 贴图）                                                               |
+| `assets/characters/{name}/skins/{skinN}.ron` | 皮肤场景（包含 Skin、HealthBar、Visibility 组件）                                               |
 | `assets/characters/{name}/spells/*.ron` | 技能数据 Asset（包含 Spell、DataSpell、calculations、effect_amounts 等）                            |
 | `assets/maps/{map_name}/navgrid.bin`    | 二进制导航网格数据                                                                                  |
 | `assets/maps/{map_name}/mapgeo.glb`     | GLTF 格式的地图几何                                                                                 |
@@ -278,18 +279,18 @@ extract_phase_2_champions(&loader);
 
 #### 皮肤 GLB 文件结构
 
-`assets/characters/{name}/skin.glb` 包含：
+`assets/characters/{name}/skins/{skinN}.glb` 包含：
 
 - **Mesh**: 从 `.skn` 解析的网格数据（Position、Normal、UV、JOINTS_0、WEIGHTS_0）
 - **Material**: PBR 材质（metallic=0, roughness=1, alpha_mask=0.3）
 - **Texture**: 从 `.tex` 解码的 PNG 贴图
 - **Skeleton**: 从 `.skl` 解析的骨骼节点树，使用 `local_transform` 作为 rest pose
 - **Skin**: 蒙皮信息，`joints` 和 `inverseBindMatrices` 按 `influences` 顺序排列
-- **Animation**: 从 `.anm` 文件解析的动画数据，通道通过 `hash_joint` 匹配到正确的骨骼节点
+- **Animation**: 从 `.anm` 文件解析的动画数据，通道通过 `hash_joint` 匹配到正确的骨骼节点。**动画名称**通过 `clip_data_map` 的 key（u32 hash）查找 hash 对照表获取可读名称，导出时 `hash_to_node` 使用 string 类型作为 key。
 
 #### 皮肤场景文件结构
 
-`assets/characters/{name}/skin.ron` 是一个 Bevy DynamicScene RON 文件，包含以下组件：
+`assets/characters/{name}/skins/{skinN}.ron` 是一个 Bevy DynamicScene RON 文件，包含以下组件：
 
 - **Skin** - 包含 `scale`（皮肤缩放）
 - **HealthBar** - 包含 `bar_type`（血条类型）

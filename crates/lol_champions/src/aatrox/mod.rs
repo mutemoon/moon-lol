@@ -84,9 +84,9 @@ fn cast_aatrox_q(
     let stage = recast.map(|w| w.stage).unwrap_or(1);
 
     let animation_hash = match stage {
-        1 => hash_bin("Spell1A"),
-        2 => hash_bin("Spell1B"),
-        _ => hash_bin("Spell1C"),
+        1 => "spell1a".to_string(),
+        2 => "spell1b".to_string(),
+        _ => "spell1c".to_string(),
     };
 
     play_skill_animation(commands, entity, animation_hash);
@@ -139,7 +139,7 @@ fn cast_aatrox_q(
 }
 
 fn cast_aatrox_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell2"));
+    play_skill_animation(commands, entity, "spell2".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Aatrox_W_Cast"));
     // W is a chain that pulls enemies back after delay
     skill_damage(
@@ -163,7 +163,7 @@ fn cast_aatrox_e(
     point: Vec2,
     skill_spell: Handle<Spell>,
 ) {
-    play_skill_animation(commands, entity, hash_bin("Spell3"));
+    play_skill_animation(commands, entity, "spell3".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Aatrox_E_Cast"));
     // E is a dash that heals based on damage dealt
     skill_dash(
@@ -185,7 +185,7 @@ fn cast_aatrox_e(
 }
 
 fn cast_aatrox_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell4"));
+    play_skill_animation(commands, entity, "spell4".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Aatrox_R_Cast"));
     // R is a self-cast that makes Aatrox unstoppable and deals damage
     skill_damage(

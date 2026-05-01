@@ -56,12 +56,12 @@ fn on_twitch_skill_cast(
 }
 
 fn cast_twitch_q(commands: &mut Commands, entity: Entity) {
-    play_skill_animation(commands, entity, hash_bin("Spell1"));
+    play_skill_animation(commands, entity, "spell1".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Twitch_Q_Cast"));
 }
 
 fn cast_twitch_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell2"));
+    play_skill_animation(commands, entity, "spell2".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Twitch_W_Cast"));
 
     skill_damage(
@@ -79,7 +79,7 @@ fn cast_twitch_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
 }
 
 fn cast_twitch_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell3"));
+    play_skill_animation(commands, entity, "spell3".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Twitch_E_Cast"));
 
     skill_damage(
@@ -97,7 +97,7 @@ fn cast_twitch_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
 }
 
 fn cast_twitch_r(commands: &mut Commands, entity: Entity) {
-    play_skill_animation(commands, entity, hash_bin("Spell4"));
+    play_skill_animation(commands, entity, "spell4".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Twitch_R_Cast"));
 }
 

@@ -57,7 +57,7 @@ fn on_nocturne_skill_cast(
 }
 
 fn cast_nocturne_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell1"));
+    play_skill_animation(commands, entity, "spell1".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Nocturne_Q_Cast"));
 
     // Q is a throwing blade that leaves a trail
@@ -79,7 +79,7 @@ fn cast_nocturne_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<
 }
 
 fn cast_nocturne_w(commands: &mut Commands, entity: Entity) {
-    play_skill_animation(commands, entity, hash_bin("Spell2"));
+    play_skill_animation(commands, entity, "spell2".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Nocturne_W_Cast"));
 
     // W grants attackspeed
@@ -89,7 +89,7 @@ fn cast_nocturne_w(commands: &mut Commands, entity: Entity) {
 }
 
 fn cast_nocturne_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell3"));
+    play_skill_animation(commands, entity, "spell3".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Nocturne_E_Cast"));
 
     // E is a fear after delay
@@ -108,7 +108,7 @@ fn cast_nocturne_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<
 }
 
 fn cast_nocturne_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell4"));
+    play_skill_animation(commands, entity, "spell4".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Nocturne_R_Cast"));
 
     // R is a global fear

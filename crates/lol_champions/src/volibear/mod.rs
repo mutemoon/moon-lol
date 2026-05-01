@@ -77,7 +77,7 @@ fn on_volibear_skill_cast(
 }
 
 fn cast_volibear_q(commands: &mut Commands, entity: Entity) {
-    play_skill_animation(commands, entity, hash_bin("Spell1"));
+    play_skill_animation(commands, entity, "spell1".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Volibear_Q_Cast"));
     // Q is movement speed boost + stun on contact
     reset_skill_attack(commands, entity);
@@ -97,7 +97,7 @@ fn cast_volibear_w(
 ) {
     let stage = recast.map(|w| w.stage).unwrap_or(1);
 
-    play_skill_animation(commands, entity, hash_bin("Spell2"));
+    play_skill_animation(commands, entity, "spell2".to_string());
 
     if stage == 1 {
         // First cast: W marks target
@@ -137,7 +137,7 @@ fn cast_volibear_w(
 }
 
 fn cast_volibear_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell3"));
+    play_skill_animation(commands, entity, "spell3".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Volibear_E_Cast"));
     // E is AoE damage + slow + shield
     skill_damage(
@@ -164,7 +164,7 @@ fn cast_volibear_r(
     skill_spell: Handle<Spell>,
     point: Vec2,
 ) {
-    play_skill_animation(commands, entity, hash_bin("Spell4"));
+    play_skill_animation(commands, entity, "spell4".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Volibear_R_Cast"));
     // R is a leap that deals damage and marks towers as vulnerable
     skill_dash(

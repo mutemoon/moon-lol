@@ -71,7 +71,7 @@
           character_record: Path("characters/sru_dragon_hextech/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/sru_dragon_hextech/skin.ron"),
+          skin: Path("characters/sru_dragon_hextech/skins/skin0.ron"),
         ),
         "lol_core::team::Team": Neutral,
       },
@@ -89,7 +89,7 @@
           character_record: Path("characters/SRU_Dragon/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/SRU_Dragon/skin.ron"),
+          skin: Path("characters/SRU_Dragon/skins/skin0.ron"),
         ),
         "lol_core::team::Team": Neutral,
       },
@@ -107,7 +107,7 @@
           character_record: Path("characters/sru_dragon_earth/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/sru_dragon_earth/skin.ron"),
+          skin: Path("characters/sru_dragon_earth/skins/skin0.ron"),
         ),
         "lol_core::team::Team": Neutral,
       },
@@ -125,7 +125,7 @@
           character_record: Path("characters/sru_dragon_air/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/sru_dragon_air/skin.ron"),
+          skin: Path("characters/sru_dragon_air/skins/skin0.ron"),
         ),
         "lol_core::team::Team": Neutral,
       },
@@ -143,7 +143,7 @@
           character_record: Path("characters/sru_dragon_elder/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/sru_dragon_elder/skin.ron"),
+          skin: Path("characters/sru_dragon_elder/skins/skin0.ron"),
         ),
         "lol_core::team::Team": Neutral,
       },
@@ -161,7 +161,7 @@
           character_record: Path("characters/sru_dragon_fire/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/sru_dragon_fire/skin.ron"),
+          skin: Path("characters/sru_dragon_fire/skins/skin0.ron"),
         ),
         "lol_core::team::Team": Neutral,
       },
@@ -179,7 +179,7 @@
           character_record: Path("characters/sru_dragon_water/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/sru_dragon_water/skin.ron"),
+          skin: Path("characters/sru_dragon_water/skins/skin0.ron"),
         ),
         "lol_core::team::Team": Neutral,
       },
@@ -197,7 +197,7 @@
           character_record: Path("characters/sru_dragon_chemtech/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/sru_dragon_chemtech/skin.ron"),
+          skin: Path("characters/sru_dragon_chemtech/skins/skin0.ron"),
         ),
         "lol_core::team::Team": Neutral,
       },
@@ -231,7 +231,7 @@
           character_record: Path("characters/Nexus/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/Nexus/skin.ron"),
+          skin: Path("characters/Nexus/skins/skin44.ron"),
         ),
         "lol_core::team::Team": Order,
       },
@@ -249,7 +249,7 @@
           character_record: Path("characters/Turret/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/Turret/skin.ron"),
+          skin: Path("characters/Turret/skins/skin48.ron"),
         ),
         "lol_core::team::Team": Order,
       },
@@ -283,7 +283,7 @@
           character_record: Path("characters/SRUAP_MageCrystal/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/SRUAP_MageCrystal/skin.ron"),
+          skin: Path("characters/SRUAP_MageCrystal/skins/skin0.ron"),
         ),
         "lol_core::team::Team": Chaos,
       },
@@ -301,7 +301,7 @@
           character_record: Path("characters/Nexus/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/Nexus/skin.ron"),
+          skin: Path("characters/Nexus/skins/skin45.ron"),
         ),
         "lol_core::team::Team": Chaos,
       },
@@ -319,7 +319,7 @@
           character_record: Path("characters/Turret/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/Turret/skin.ron"),
+          skin: Path("characters/Turret/skins/skin49.ron"),
         ),
         "lol_core::team::Team": Chaos,
       },
@@ -337,7 +337,7 @@
           character_record: Path("characters/Turret/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/Turret/skin.ron"),
+          skin: Path("characters/Turret/skins/skin48.ron"),
         ),
         "lol_core::team::Team": Order,
       },
@@ -355,7 +355,7 @@
           character_record: Path("characters/Turret/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/Turret/skin.ron"),
+          skin: Path("characters/Turret/skins/skin49.ron"),
         ),
         "lol_core::team::Team": Chaos,
       },
@@ -373,7 +373,7 @@
           character_record: Path("characters/Turret/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/Turret/skin.ron"),
+          skin: Path("characters/Turret/skins/skin49.ron"),
         ),
         "lol_core::team::Team": Chaos,
       },
@@ -391,7 +391,7 @@
           character_record: Path("characters/Turret/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/Turret/skin.ron"),
+          skin: Path("characters/Turret/skins/skin48.ron"),
         ),
         "lol_core::team::Team": Order,
       },
@@ -409,7 +409,7 @@
           character_record: Path("characters/Turret/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/Turret/skin.ron"),
+          skin: Path("characters/Turret/skins/skin48.ron"),
         ),
         "lol_core::team::Team": Order,
       },
@@ -427,7 +427,7 @@
           character_record: Path("characters/Turret/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/Turret/skin.ron"),
+          skin: Path("characters/Turret/skins/skin49.ron"),
         ),
         "lol_core::team::Team": Chaos,
       },
@@ -445,7 +445,7 @@
           character_record: Path("characters/Turret/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/Turret/skin.ron"),
+          skin: Path("characters/Turret/skins/skin49.ron"),
         ),
         "lol_core::team::Team": Chaos,
       },
@@ -463,7 +463,7 @@
           character_record: Path("characters/Inhibitor/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/Inhibitor/skin.ron"),
+          skin: Path("characters/Inhibitor/skins/skin41.ron"),
         ),
         "lol_core::team::Team": Chaos,
       },
@@ -481,7 +481,7 @@
           character_record: Path("characters/Inhibitor/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/Inhibitor/skin.ron"),
+          skin: Path("characters/Inhibitor/skins/skin41.ron"),
         ),
         "lol_core::team::Team": Chaos,
       },
@@ -499,7 +499,7 @@
           character_record: Path("characters/Inhibitor/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/Inhibitor/skin.ron"),
+          skin: Path("characters/Inhibitor/skins/skin40.ron"),
         ),
         "lol_core::team::Team": Order,
       },
@@ -517,7 +517,7 @@
           character_record: Path("characters/SRUAP_Turret_Order5/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/SRUAP_Turret_Order5/skin.ron"),
+          skin: Path("characters/SRUAP_Turret_Order5/skins/skin0.ron"),
         ),
         "lol_core::team::Team": Order,
       },
@@ -535,7 +535,7 @@
           character_record: Path("characters/Turret/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/Turret/skin.ron"),
+          skin: Path("characters/Turret/skins/skin49.ron"),
         ),
         "lol_core::team::Team": Chaos,
       },
@@ -553,7 +553,7 @@
           character_record: Path("characters/Turret/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/Turret/skin.ron"),
+          skin: Path("characters/Turret/skins/skin48.ron"),
         ),
         "lol_core::team::Team": Order,
       },
@@ -587,7 +587,7 @@
           character_record: Path("characters/Turret/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/Turret/skin.ron"),
+          skin: Path("characters/Turret/skins/skin49.ron"),
         ),
         "lol_core::team::Team": Chaos,
       },
@@ -605,7 +605,7 @@
           character_record: Path("characters/Turret/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/Turret/skin.ron"),
+          skin: Path("characters/Turret/skins/skin49.ron"),
         ),
         "lol_core::team::Team": Chaos,
       },
@@ -623,7 +623,7 @@
           character_record: Path("characters/Turret/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/Turret/skin.ron"),
+          skin: Path("characters/Turret/skins/skin49.ron"),
         ),
         "lol_core::team::Team": Chaos,
       },
@@ -657,7 +657,7 @@
           character_record: Path("characters/Turret/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/Turret/skin.ron"),
+          skin: Path("characters/Turret/skins/skin48.ron"),
         ),
         "lol_core::team::Team": Order,
       },
@@ -675,7 +675,7 @@
           character_record: Path("characters/Turret/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/Turret/skin.ron"),
+          skin: Path("characters/Turret/skins/skin49.ron"),
         ),
         "lol_core::team::Team": Chaos,
       },
@@ -693,7 +693,7 @@
           character_record: Path("characters/Turret/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/Turret/skin.ron"),
+          skin: Path("characters/Turret/skins/skin49.ron"),
         ),
         "lol_core::team::Team": Chaos,
       },
@@ -711,7 +711,7 @@
           character_record: Path("characters/Inhibitor/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/Inhibitor/skin.ron"),
+          skin: Path("characters/Inhibitor/skins/skin40.ron"),
         ),
         "lol_core::team::Team": Order,
       },
@@ -745,7 +745,7 @@
           character_record: Path("characters/Inhibitor/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/Inhibitor/skin.ron"),
+          skin: Path("characters/Inhibitor/skins/skin41.ron"),
         ),
         "lol_core::team::Team": Chaos,
       },
@@ -763,7 +763,7 @@
           character_record: Path("characters/Turret/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/Turret/skin.ron"),
+          skin: Path("characters/Turret/skins/skin48.ron"),
         ),
         "lol_core::team::Team": Order,
       },
@@ -781,7 +781,7 @@
           character_record: Path("characters/Turret/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/Turret/skin.ron"),
+          skin: Path("characters/Turret/skins/skin48.ron"),
         ),
         "lol_core::team::Team": Order,
       },
@@ -799,7 +799,7 @@
           character_record: Path("characters/Turret/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/Turret/skin.ron"),
+          skin: Path("characters/Turret/skins/skin48.ron"),
         ),
         "lol_core::team::Team": Order,
       },
@@ -817,7 +817,7 @@
           character_record: Path("characters/Turret/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/Turret/skin.ron"),
+          skin: Path("characters/Turret/skins/skin48.ron"),
         ),
         "lol_core::team::Team": Order,
       },
@@ -835,7 +835,7 @@
           character_record: Path("characters/Inhibitor/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/Inhibitor/skin.ron"),
+          skin: Path("characters/Inhibitor/skins/skin40.ron"),
         ),
         "lol_core::team::Team": Order,
       },
@@ -869,7 +869,7 @@
           character_record: Path("characters/Turret/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/Turret/skin.ron"),
+          skin: Path("characters/Turret/skins/skin48.ron"),
         ),
         "lol_core::team::Team": Order,
       },
@@ -887,7 +887,7 @@
           character_record: Path("characters/SRU_Blue/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/SRU_Blue/skin.ron"),
+          skin: Path("characters/SRU_Blue/skins/skin4.ron"),
         ),
         "lol_core::team::Team": Neutral,
       },
@@ -905,7 +905,7 @@
           character_record: Path("characters/SRU_MurkwolfMini/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/SRU_MurkwolfMini/skin.ron"),
+          skin: Path("characters/SRU_MurkwolfMini/skins/skin0.ron"),
         ),
         "lol_core::team::Team": Order,
       },
@@ -923,7 +923,7 @@
           character_record: Path("characters/SRU_RazorbeakMini/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/SRU_RazorbeakMini/skin.ron"),
+          skin: Path("characters/SRU_RazorbeakMini/skins/skin0.ron"),
         ),
         "lol_core::team::Team": Neutral,
       },
@@ -941,7 +941,7 @@
           character_record: Path("characters/SRU_Murkwolf/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/SRU_Murkwolf/skin.ron"),
+          skin: Path("characters/SRU_Murkwolf/skins/skin0.ron"),
         ),
         "lol_core::team::Team": Neutral,
       },
@@ -959,7 +959,7 @@
           character_record: Path("characters/SRU_KrugMini/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/SRU_KrugMini/skin.ron"),
+          skin: Path("characters/SRU_KrugMini/skins/skin0.ron"),
         ),
         "lol_core::team::Team": Neutral,
       },
@@ -977,7 +977,7 @@
           character_record: Path("characters/SRU_Blue/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/SRU_Blue/skin.ron"),
+          skin: Path("characters/SRU_Blue/skins/skin4.ron"),
         ),
         "lol_core::team::Team": Neutral,
       },
@@ -995,7 +995,7 @@
           character_record: Path("characters/SRU_Krug/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/SRU_Krug/skin.ron"),
+          skin: Path("characters/SRU_Krug/skins/skin0.ron"),
         ),
         "lol_core::team::Team": Neutral,
       },
@@ -1013,7 +1013,7 @@
           character_record: Path("characters/SRU_Razorbeak/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/SRU_Razorbeak/skin.ron"),
+          skin: Path("characters/SRU_Razorbeak/skins/skin0.ron"),
         ),
         "lol_core::team::Team": Neutral,
       },
@@ -1031,7 +1031,7 @@
           character_record: Path("characters/SRU_Red/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/SRU_Red/skin.ron"),
+          skin: Path("characters/SRU_Red/skins/skin3.ron"),
         ),
         "lol_core::team::Team": Neutral,
       },
@@ -1049,7 +1049,7 @@
           character_record: Path("characters/SRU_RazorbeakMini/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/SRU_RazorbeakMini/skin.ron"),
+          skin: Path("characters/SRU_RazorbeakMini/skins/skin0.ron"),
         ),
         "lol_core::team::Team": Neutral,
       },
@@ -1067,7 +1067,7 @@
           character_record: Path("characters/Sru_Crab/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/Sru_Crab/skin.ron"),
+          skin: Path("characters/Sru_Crab/skins/skin0.ron"),
         ),
         "lol_core::team::Team": Neutral,
       },
@@ -1085,7 +1085,7 @@
           character_record: Path("characters/Sru_Crab/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/Sru_Crab/skin.ron"),
+          skin: Path("characters/Sru_Crab/skins/skin0.ron"),
         ),
         "lol_core::team::Team": Neutral,
       },
@@ -1103,7 +1103,7 @@
           character_record: Path("characters/SRU_Horde/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/SRU_Horde/skin.ron"),
+          skin: Path("characters/SRU_Horde/skins/skin0.ron"),
         ),
         "lol_core::team::Team": Neutral,
       },
@@ -1121,7 +1121,7 @@
           character_record: Path("characters/SRU_RazorbeakMini/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/SRU_RazorbeakMini/skin.ron"),
+          skin: Path("characters/SRU_RazorbeakMini/skins/skin0.ron"),
         ),
         "lol_core::team::Team": Neutral,
       },
@@ -1139,7 +1139,7 @@
           character_record: Path("characters/SRU_RazorbeakMini/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/SRU_RazorbeakMini/skin.ron"),
+          skin: Path("characters/SRU_RazorbeakMini/skins/skin0.ron"),
         ),
         "lol_core::team::Team": Neutral,
       },
@@ -1157,7 +1157,7 @@
           character_record: Path("characters/SRU_Baron/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/SRU_Baron/skin.ron"),
+          skin: Path("characters/SRU_Baron/skins/skin0.ron"),
         ),
         "lol_core::team::Team": Neutral,
       },
@@ -1175,7 +1175,7 @@
           character_record: Path("characters/SRU_Gromp/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/SRU_Gromp/skin.ron"),
+          skin: Path("characters/SRU_Gromp/skins/skin0.ron"),
         ),
         "lol_core::team::Team": Neutral,
       },
@@ -1193,7 +1193,7 @@
           character_record: Path("characters/SRU_RazorbeakMini/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/SRU_RazorbeakMini/skin.ron"),
+          skin: Path("characters/SRU_RazorbeakMini/skins/skin0.ron"),
         ),
         "lol_core::team::Team": Neutral,
       },
@@ -1211,7 +1211,7 @@
           character_record: Path("characters/SRU_RiftHerald/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/SRU_RiftHerald/skin.ron"),
+          skin: Path("characters/SRU_RiftHerald/skins/skin0.ron"),
         ),
         "lol_core::team::Team": Neutral,
       },
@@ -1229,7 +1229,7 @@
           character_record: Path("characters/SRU_MurkwolfMini/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/SRU_MurkwolfMini/skin.ron"),
+          skin: Path("characters/SRU_MurkwolfMini/skins/skin0.ron"),
         ),
         "lol_core::team::Team": Neutral,
       },
@@ -1247,7 +1247,7 @@
           character_record: Path("characters/SRU_RazorbeakMini/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/SRU_RazorbeakMini/skin.ron"),
+          skin: Path("characters/SRU_RazorbeakMini/skins/skin0.ron"),
         ),
         "lol_core::team::Team": Neutral,
       },
@@ -1265,7 +1265,7 @@
           character_record: Path("characters/SRU_RazorbeakMini/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/SRU_RazorbeakMini/skin.ron"),
+          skin: Path("characters/SRU_RazorbeakMini/skins/skin0.ron"),
         ),
         "lol_core::team::Team": Neutral,
       },
@@ -1283,7 +1283,7 @@
           character_record: Path("characters/SRU_Krug/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/SRU_Krug/skin.ron"),
+          skin: Path("characters/SRU_Krug/skins/skin0.ron"),
         ),
         "lol_core::team::Team": Neutral,
       },
@@ -1301,7 +1301,7 @@
           character_record: Path("characters/SRU_MurkwolfMini/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/SRU_MurkwolfMini/skin.ron"),
+          skin: Path("characters/SRU_MurkwolfMini/skins/skin0.ron"),
         ),
         "lol_core::team::Team": Order,
       },
@@ -1319,7 +1319,7 @@
           character_record: Path("characters/SRU_Razorbeak/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/SRU_Razorbeak/skin.ron"),
+          skin: Path("characters/SRU_Razorbeak/skins/skin0.ron"),
         ),
         "lol_core::team::Team": Neutral,
       },
@@ -1337,7 +1337,7 @@
           character_record: Path("characters/SRU_Red/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/SRU_Red/skin.ron"),
+          skin: Path("characters/SRU_Red/skins/skin3.ron"),
         ),
         "lol_core::team::Team": Neutral,
       },
@@ -1355,7 +1355,7 @@
           character_record: Path("characters/SRU_RazorbeakMini/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/SRU_RazorbeakMini/skin.ron"),
+          skin: Path("characters/SRU_RazorbeakMini/skins/skin0.ron"),
         ),
         "lol_core::team::Team": Neutral,
       },
@@ -1373,7 +1373,7 @@
           character_record: Path("characters/SRU_Murkwolf/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/SRU_Murkwolf/skin.ron"),
+          skin: Path("characters/SRU_Murkwolf/skins/skin0.ron"),
         ),
         "lol_core::team::Team": Neutral,
       },
@@ -1391,7 +1391,7 @@
           character_record: Path("characters/SRU_Horde/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/SRU_Horde/skin.ron"),
+          skin: Path("characters/SRU_Horde/skins/skin0.ron"),
         ),
         "lol_core::team::Team": Neutral,
       },
@@ -1409,7 +1409,7 @@
           character_record: Path("characters/SRU_MurkwolfMini/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/SRU_MurkwolfMini/skin.ron"),
+          skin: Path("characters/SRU_MurkwolfMini/skins/skin0.ron"),
         ),
         "lol_core::team::Team": Neutral,
       },
@@ -1427,7 +1427,7 @@
           character_record: Path("characters/SRU_RazorbeakMini/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/SRU_RazorbeakMini/skin.ron"),
+          skin: Path("characters/SRU_RazorbeakMini/skins/skin0.ron"),
         ),
         "lol_core::team::Team": Neutral,
       },
@@ -1445,7 +1445,7 @@
           character_record: Path("characters/SRU_Gromp/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/SRU_Gromp/skin.ron"),
+          skin: Path("characters/SRU_Gromp/skins/skin0.ron"),
         ),
         "lol_core::team::Team": Neutral,
       },
@@ -1463,7 +1463,7 @@
           character_record: Path("characters/SRU_KrugMini/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/SRU_KrugMini/skin.ron"),
+          skin: Path("characters/SRU_KrugMini/skins/skin0.ron"),
         ),
         "lol_core::team::Team": Neutral,
       },
@@ -1481,7 +1481,7 @@
           character_record: Path("characters/SRU_RazorbeakMini/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/SRU_RazorbeakMini/skin.ron"),
+          skin: Path("characters/SRU_RazorbeakMini/skins/skin0.ron"),
         ),
         "lol_core::team::Team": Neutral,
       },
@@ -1499,7 +1499,7 @@
           character_record: Path("characters/SRU_Horde/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/SRU_Horde/skin.ron"),
+          skin: Path("characters/SRU_Horde/skins/skin0.ron"),
         ),
         "lol_core::team::Team": Neutral,
       },

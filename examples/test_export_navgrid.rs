@@ -38,7 +38,7 @@ fn make_test_grid() -> ConfigNavigationGrid {
     };
 
     ConfigNavigationGrid {
-        min_position: Vec2::new(-2000.0, -2000.0),
+        min_position: Vec2::new(0.0, 0.0),
         cell_size: 50.0,
         x_len: 100,
         y_len: 100,

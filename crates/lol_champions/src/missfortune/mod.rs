@@ -58,7 +58,7 @@ fn on_missfortune_skill_cast(
 }
 
 fn cast_missfortune_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell1"));
+    play_skill_animation(commands, entity, "spell1".to_string());
     spawn_skill_particle(commands, entity, hash_bin("MissFortune_Q_Cast"));
 
     // Q bounces to second target
@@ -80,7 +80,7 @@ fn cast_missfortune_q(commands: &mut Commands, entity: Entity, skill_spell: Hand
 }
 
 fn cast_missfortune_w(commands: &mut Commands, entity: Entity) {
-    play_skill_animation(commands, entity, hash_bin("Spell2"));
+    play_skill_animation(commands, entity, "spell2".to_string());
     spawn_skill_particle(commands, entity, hash_bin("MissFortune_W_Cast"));
 
     // W grants movespeed and attackspeed
@@ -90,7 +90,7 @@ fn cast_missfortune_w(commands: &mut Commands, entity: Entity) {
 }
 
 fn cast_missfortune_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell3"));
+    play_skill_animation(commands, entity, "spell3".to_string());
     spawn_skill_particle(commands, entity, hash_bin("MissFortune_E_Cast"));
 
     // E is a zone that slows
@@ -109,7 +109,7 @@ fn cast_missfortune_e(commands: &mut Commands, entity: Entity, skill_spell: Hand
 }
 
 fn cast_missfortune_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell4"));
+    play_skill_animation(commands, entity, "spell4".to_string());
     spawn_skill_particle(commands, entity, hash_bin("MissFortune_R_Cast"));
 
     // R is a cone of bullets

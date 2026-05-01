@@ -76,7 +76,7 @@ fn cast_pantheon_q(
     _point: Vec2,
     skill_spell: Handle<Spell>,
 ) {
-    play_skill_animation(commands, entity, hash_bin("Spell1"));
+    play_skill_animation(commands, entity, "spell1".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Pantheon_Q_Cast"));
     // Q is a spear throw that can be held for more damage
     skill_damage(
@@ -103,7 +103,7 @@ fn cast_pantheon_w(
     point: Vec2,
     skill_spell: Handle<Spell>,
 ) {
-    play_skill_animation(commands, entity, hash_bin("Spell2"));
+    play_skill_animation(commands, entity, "spell2".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Pantheon_W_Cast"));
     // W is a dash to target that stuns
     skill_dash(
@@ -128,7 +128,7 @@ fn cast_pantheon_w(
 }
 
 fn cast_pantheon_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell3"));
+    play_skill_animation(commands, entity, "spell3".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Pantheon_E_Cast"));
     // E is a shield block that deals damage in a cone when released
     skill_damage(
@@ -158,7 +158,7 @@ fn cast_pantheon_r(
     point: Vec2,
     skill_spell: Handle<Spell>,
 ) {
-    play_skill_animation(commands, entity, hash_bin("Spell4"));
+    play_skill_animation(commands, entity, "spell4".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Pantheon_R_Cast"));
     // R is a long-range leap that damages enemies in area
     skill_dash(

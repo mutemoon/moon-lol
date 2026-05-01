@@ -64,7 +64,7 @@ fn on_ezreal_skill_cast(
 }
 
 fn cast_ezreal_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell1"));
+    play_skill_animation(commands, entity, "spell1".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Ezreal_Q_Cast"));
 
     // Q is a long range skillshot
@@ -86,7 +86,7 @@ fn cast_ezreal_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
 }
 
 fn cast_ezreal_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell2"));
+    play_skill_animation(commands, entity, "spell2".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Ezreal_W_Cast"));
 
     // W marks target
@@ -114,7 +114,7 @@ fn cast_ezreal_e(
     point: Vec2,
     skill_spell: Handle<Spell>,
 ) {
-    play_skill_animation(commands, entity, hash_bin("Spell3"));
+    play_skill_animation(commands, entity, "spell3".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Ezreal_E_Cast"));
 
     // E is a blink/dash
@@ -140,7 +140,7 @@ fn cast_ezreal_e(
 }
 
 fn cast_ezreal_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell4"));
+    play_skill_animation(commands, entity, "spell4".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Ezreal_R_Cast"));
 
     // R is global AoE

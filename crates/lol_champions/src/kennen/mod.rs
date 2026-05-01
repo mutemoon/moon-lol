@@ -55,7 +55,7 @@ fn on_kennen_skill_cast(
 }
 
 fn cast_kennen_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell1"));
+    play_skill_animation(commands, entity, "spell1".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Kennen_Q_Cast"));
 
     // Q is a shuriken that applies mark
@@ -77,7 +77,7 @@ fn cast_kennen_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
 }
 
 fn cast_kennen_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell2"));
+    play_skill_animation(commands, entity, "spell2".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Kennen_W_Cast"));
 
     // W deals damage to marked enemies
@@ -96,7 +96,7 @@ fn cast_kennen_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
 }
 
 fn cast_kennen_e(commands: &mut Commands, entity: Entity) {
-    play_skill_animation(commands, entity, hash_bin("Spell3"));
+    play_skill_animation(commands, entity, "spell3".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Kennen_E_Cast"));
 
     // E grants movespeed and immunity
@@ -106,7 +106,7 @@ fn cast_kennen_e(commands: &mut Commands, entity: Entity) {
 }
 
 fn cast_kennen_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell4"));
+    play_skill_animation(commands, entity, "spell4".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Kennen_R_Cast"));
 
     // R summons storm that damages and applies marks

@@ -64,7 +64,7 @@ fn on_kaisa_skill_cast(
 }
 
 fn cast_kaisa_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell1"));
+    play_skill_animation(commands, entity, "spell1".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Kaisa_Q_Cast"));
 
     // Q fires 6 missiles that spread to nearby enemies
@@ -83,7 +83,7 @@ fn cast_kaisa_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
 }
 
 fn cast_kaisa_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell2"));
+    play_skill_animation(commands, entity, "spell2".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Kaisa_W_Cast"));
 
     // W is a long-range missile that applies 2 plasma stacks
@@ -105,7 +105,7 @@ fn cast_kaisa_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
 }
 
 fn cast_kaisa_e(commands: &mut Commands, entity: Entity) {
-    play_skill_animation(commands, entity, hash_bin("Spell3"));
+    play_skill_animation(commands, entity, "spell3".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Kaisa_E_Cast"));
 
     // E charges movement speed then grants attackspeed
@@ -121,7 +121,7 @@ fn cast_kaisa_r(
     point: Vec2,
     skill_spell: Handle<Spell>,
 ) {
-    play_skill_animation(commands, entity, hash_bin("Spell4"));
+    play_skill_animation(commands, entity, "spell4".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Kaisa_R_Cast"));
 
     // R is a dash to a plasma-marked enemy with shield

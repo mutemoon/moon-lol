@@ -57,7 +57,7 @@ fn on_morgana_skill_cast(
 }
 
 fn cast_morgana_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell1"));
+    play_skill_animation(commands, entity, "spell1".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Morgana_Q_Cast"));
 
     // Q binds enemy
@@ -79,7 +79,7 @@ fn cast_morgana_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<S
 }
 
 fn cast_morgana_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell2"));
+    play_skill_animation(commands, entity, "spell2".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Morgana_W_Cast"));
 
     // W is a DoT zone
@@ -98,7 +98,7 @@ fn cast_morgana_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<S
 }
 
 fn cast_morgana_e(commands: &mut Commands, entity: Entity) {
-    play_skill_animation(commands, entity, hash_bin("Spell3"));
+    play_skill_animation(commands, entity, "spell3".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Morgana_E_Cast"));
 
     // E is a shield that blocks CC
@@ -108,7 +108,7 @@ fn cast_morgana_e(commands: &mut Commands, entity: Entity) {
 }
 
 fn cast_morgana_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, hash_bin("Spell4"));
+    play_skill_animation(commands, entity, "spell4".to_string());
     spawn_skill_particle(commands, entity, hash_bin("Morgana_R_Cast"));
 
     // R chains nearby enemies
