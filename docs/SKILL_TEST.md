@@ -9,6 +9,9 @@
 
 ## 技能测试规则
 
+- 通用技能系统测试位于 `lol_core::skill::tests` / `integration_tests`。
+- 英雄技能测试位于 `lol_champions::<hero>::tests`（`#[cfg(test)]` 条件编译）。
+- 渲染录像测试位于 `tests/`（需要 `moon_lol::PluginCore` + GPU 环境）。
 - `skill` 测试默认运行在无头 Bevy 实例里。
 - 必须显式构造最小完整场景：施法者、敌方目标、友方目标，以及必要的 `Transform`、`Team`、`Health`、`Skills`、`SkillPoints`、`AbilityResource`。
 - 必须显式注册技能依赖资产，如 `SpellObject`，不要依赖隐式全局状态。
@@ -26,8 +29,8 @@
 
 ## 已落地经验
 
-- `tests/skill_integration.rs` 是当前推荐方向：无头 Bevy `App` + `CommandAction` 输入 + 手动时间推进 + 场景目标断言。
-- `tests/riven_integration.rs` 证明了英雄技能正确性测试应优先使用本地真实导出资源。
+- `lol_core::skill::integration_tests` 是当前推荐方向：无头 Bevy `App` + `CommandAction` 输入 + 手动时间推进 + 场景目标断言。
+- `tests/riven.rs` 证明了英雄技能正确性测试应优先使用本地真实导出资源。
 - 不要猜 `assets/data/*.lol` 路径；更稳的做法是从英雄主 bin 读取，例如 `DATA/Characters/Riven/Riven.bin`，遍历 `SpellObject` 后按 `m_script_name` / `object_name` 筛选目标技能。
 - 技能录像测试也必须走 `cargo test`，不要再依赖 `examples/*` 作为主入口。
 - 每个 `#[test]` 都应独立产出自己的视频文件，不要把多个技能流程混成一个“英雄展示视频”。
@@ -78,20 +81,20 @@
 
 ## 对技能测试的推荐分层
 
-- `*_integration.rs`
-- 无头 Bevy + 真实英雄资源，验证该英雄技能的真实行为
+- `lol_core::skill::tests` / `integration_tests`
+  - 无头 Bevy + 最小手工资源，验证技能系统公共行为
 
-- `skill_integration.rs`
-- 无头 Bevy + 最小手工资源，验证技能系统公共行为
+- `lol_champions::<hero>::tests`（`#[cfg(test)]`）
+  - 无头 Bevy + hero 模块内真实或 mock 资源，验证该英雄技能的核心逻辑
 
-- `*_render_test.rs`
-- 无头 Bevy + 离屏渲染 + 真实英雄资源
-- 每个 `#[test]` 只录一个技能行为
-- 产物是独立视频文件，方便直接回看和比对
+- `tests/<hero>.rs` / `tests/<hero>_render_test.rs`
+  - 无头 Bevy + 离屏渲染 + 真实英雄资源
+  - 每个 `#[test]` 只录一个技能行为
+  - 产物是独立视频文件，方便直接回看和比对
 
 - 最新版本兼容性检查
-- 可以额外增加一层面向最新导出资源的检查测试
-- 但不要让所有基础开发都绑定在这层之上
+  - 可以额外增加一层面向最新导出资源的检查测试
+  - 但不要让所有基础开发都绑定在这层之上
 
 ## 写测试时的自检问题
 
@@ -106,15 +109,17 @@
 
 ## 技能系统测试策略
 
-技能系统必须优先保证在 tests 中可验证。
+技能系统必须优先保证在测试中可验证。
 
-当前测试关注两层：
+当前测试关注三层：
 
-### 1. 核心技能单测
+### 1. 核心技能单测 + 管线集成测试
 
-见：
+位于 `crates/lol_core/src/skill/`：
 
-- `tests/skill.rs`
+- `tests.rs` — spell 数值计算单测 + 管线集成测试
+- `integration_tests.rs` — 技能系统公共行为集成测试（冷却、蓝耗、重施窗口等）
+- `test_utils.rs` — 共享 headless 测试 harness（`test_app()`、`spawn_caster()` 等）
 
 覆盖内容：
 
@@ -124,19 +129,30 @@
 - observer 技能执行
 - `SkillRecastWindow` 生命周期
 - 手动冷却逻辑
+- 通过 `Action` 输入走完整施法管线
 
-### 2. 管线集成测试
+### 2. 英雄逻辑测试
 
-见：
+位于 `crates/lol_champions/src/<hero>/tests.rs`（条件编译 `#[cfg(test)]`）：
 
-- `tests/skill_integration.rs`
-- `tests/riven_integration.rs`
+- headless Bevy + 真实英雄资源或 mock 资源
+- 验证该英雄技能的真实行为
+
+当前已有：
+
+- `lol_champions::riven::tests` — 锐雯 Q/W/E/R headless 逻辑测试
+
+### 3. 英雄渲染测试
+
+位于 `tests/`（需要 `moon_lol::PluginCore` 和 GPU）：
+
+- `tests/riven.rs` — 锐雯技能渲染录像测试
+- `tests/fiora_render_test.rs` — 菲奥娜技能渲染录像测试
 
 覆盖内容：
 
-- 通过 `Action` 输入走完整施法管线
-- headless 环境中的资源、伤害、冷却变化
-- 代码驱动技能的真实阶段推进
+- 离屏渲染 + ffmpeg 视频后处理
+- 每个 `#[test]` 只录一个技能行为
 
 ### 可测试性标准
 
@@ -146,3 +162,4 @@
 - 能直接断言技能实体状态
 - 能直接断言施法失败原因
 - 不依赖渲染即可验证技能结果
+- 测试应放在对应英雄模块的 `#[cfg(test)] mod tests` 中

@@ -19,12 +19,14 @@ use bevy::winit::WinitPlugin;
 use crossbeam_channel::{Receiver, Sender};
 use image::codecs::jpeg::JpegEncoder;
 use lol_champions::fiora::passive::Vital;
+use lol_core::PluginCore;
 use lol_core::action::{Action, CommandAction};
 use lol_core::attack::AttackState;
 use lol_core::life::Health;
+use lol_render::PluginRender;
 use lol_render::camera::CameraInit;
 use lol_render::controller::Controller;
-use moon_lol::PluginCore;
+use moon_lol::PluginLOL;
 use rocket::http::{ContentType, Method, Status};
 use rocket::serde::json::Json;
 use rocket::{State, get, launch, post, routes};
@@ -348,7 +350,7 @@ fn rocket() -> _ {
                 })
                 .disable::<WinitPlugin>(),
         )
-        .add_plugins(PluginCore.build())
+        .add_plugins((PluginCore, PluginRender))
         .add_plugins(PluginImageCopy)
         .insert_resource(TimeUpdateStrategy::ManualDuration(fixed_update_timestep))
         .insert_resource(SceneController::new(1920, 1080))

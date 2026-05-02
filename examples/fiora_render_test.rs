@@ -3,14 +3,17 @@ use std::time::Duration;
 
 use bevy::prelude::*;
 use bevy::time::TimeUpdateStrategy;
+use lol_champions::fiora::PluginFiora;
+use lol_core::PluginCore;
 use lol_core::entities::minion::PluginMinion;
 use lol_core::entities::turret::PluginTurret;
 use lol_core::game::PluginGame;
 use lol_core::map::PluginMap;
+use lol_render::PluginRender;
 use lol_render::test_render::{
     PluginSkillTestRender, SkillTestRenderConfig, SkillTestVideoFormat, SkillTestVideoOutput,
 };
-use moon_lol::PluginCore;
+use moon_lol::PluginLOL;
 
 fn main() {
     let output_dir = PathBuf::from("artifacts/fiora_render_test");
@@ -42,7 +45,7 @@ fn main() {
         ..default()
     }));
     app.add_plugins(PluginSkillTestRender);
-    app.add_plugins(
+    app.add_plugins((
         PluginCore
             .build()
             .set(PluginGame {
@@ -51,7 +54,9 @@ fn main() {
             .disable::<PluginMap>()
             .disable::<PluginMinion>()
             .disable::<PluginTurret>(),
-    );
+        PluginRender,
+        PluginFiora,
+    ));
     app.add_systems(Startup, setup_stage);
     app.finish();
     app.cleanup();

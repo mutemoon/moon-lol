@@ -2,9 +2,11 @@ use std::time::Duration;
 
 use bevy::prelude::*;
 use bevy::winit::{UpdateMode, WinitSettings};
+use lol_champions::riven::PluginRiven;
+use lol_core::PluginCore;
 use lol_core::game::PluginGame;
 use lol_core::log::create_log_plugin;
-use moon_lol::PluginCore;
+use lol_render::PluginRender;
 
 fn main() {
     App::new()
@@ -21,9 +23,11 @@ fn main() {
                     }),
                     ..default()
                 }),
-            PluginCore.build().set(PluginGame {
+            PluginCore.set(PluginGame {
                 scenes: vec!["games/riven.ron".to_owned()],
             }),
+            PluginRender,
+            PluginRiven,
         ))
         .insert_resource(WinitSettings {
             focused_mode: UpdateMode::Reactive {

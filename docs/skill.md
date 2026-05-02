@@ -359,4 +359,4 @@ observer 可以直接：
 - **统一施法管线只做通用校验和派发**
 - **不再依赖任何静态 effect 配置**
 
-这套设计才能覆盖 `docs/champions` 中那些真正复杂的英雄机制，并在 tests 中保持足够高的可测试性。
+这套设计才能覆盖 `docs/champions` 中那些真正复杂的英雄机制，并在 `lol_core::skill::tests` / `lol_champions::<hero>::tests` 中保持足够高的可测试性。

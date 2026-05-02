@@ -1,9 +1,9 @@
 mod enums;
 mod events;
 mod helpers;
-mod observers;
 #[cfg(test)]
 mod integration_tests;
+mod observers;
 #[cfg(test)]
 mod test_utils;
 #[cfg(test)]

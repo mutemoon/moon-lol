@@ -312,9 +312,10 @@ fn action_input_can_level_up_skill_through_same_pipeline() {
 
 // ========== Unit tests for spell value calculation ==========
 
+use league_utils::hash_bin;
+
 use super::*;
 use crate::skill::get_skill_value;
-use league_utils::hash_bin;
 
 fn create_mock_spell(
     calculations: std::collections::BTreeMap<u32, lol_base::spell_calc::CalculationType>,
@@ -339,8 +340,11 @@ fn create_mock_spell(
 #[test]
 fn test_effect_value_calculation() {
     use std::collections::BTreeMap;
+
     use lol_base::spell::ValuesEffect;
-    use lol_base::spell_calc::{CalculationPart, CalculationPartEffectValue, CalculationSpell, CalculationType};
+    use lol_base::spell_calc::{
+        CalculationPart, CalculationPartEffectValue, CalculationSpell, CalculationType,
+    };
 
     let hash = 123;
     let effect_index = 1;
@@ -376,8 +380,11 @@ fn test_effect_value_calculation() {
 #[test]
 fn test_stat_by_coefficient_calculation() {
     use std::collections::BTreeMap;
+
     use lol_base::spell::ValuesEffect;
-    use lol_base::spell_calc::{CalculationPart, CalculationPartStatCoefficient, CalculationSpell, CalculationType};
+    use lol_base::spell_calc::{
+        CalculationPart, CalculationPartStatCoefficient, CalculationSpell, CalculationType,
+    };
 
     let hash = 456;
     let stat_id = 2;
@@ -412,8 +419,11 @@ fn test_stat_by_coefficient_calculation() {
 #[test]
 fn test_named_data_value_calculation() {
     use std::collections::BTreeMap;
+
     use lol_base::spell::{ValuesData, ValuesEffect};
-    use lol_base::spell_calc::{CalculationPart, CalculationPartNamedDataValue, CalculationSpell, CalculationType};
+    use lol_base::spell_calc::{
+        CalculationPart, CalculationPartNamedDataValue, CalculationSpell, CalculationType,
+    };
 
     let hash = 789;
     let data_name = "BaseDamage";

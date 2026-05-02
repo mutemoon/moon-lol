@@ -7,14 +7,17 @@ use bevy::prelude::*;
 use bevy::time::TimeUpdateStrategy;
 use bevy::winit::WinitPlugin;
 use lol_base::map::MapPaths;
+use lol_champions::PluginChampions;
+use lol_champions::fiora::PluginFiora;
+use lol_core::PluginCore;
 use lol_core::entities::minion::PluginMinion;
 use lol_core::entities::turret::PluginTurret;
 use lol_core::game::PluginGame;
 use lol_core::map::PluginMap;
+use lol_render::PluginRender;
 use lol_render::test_render::{
     PluginSkillTestRender, SkillTestRenderConfig, SkillTestVideoFormat, SkillTestVideoOutput,
 };
-use moon_lol::PluginCore;
 
 #[test]
 fn fiora_q_writes_video() {
@@ -67,7 +70,7 @@ fn run_fiora_case_inner(test_name: &str, max_frames: u32) {
     app.insert_resource(MapPaths::default());
     app.add_plugins(DefaultPlugins.build().disable::<WinitPlugin>());
     app.add_plugins(PluginSkillTestRender);
-    app.add_plugins(
+    app.add_plugins((
         PluginCore
             .build()
             .set(PluginGame {
@@ -76,7 +79,9 @@ fn run_fiora_case_inner(test_name: &str, max_frames: u32) {
             .disable::<PluginMap>()
             .disable::<PluginMinion>()
             .disable::<PluginTurret>(),
-    );
+        PluginRender,
+        PluginFiora,
+    ));
     app.add_systems(Startup, setup_stage);
     app.finish();
     app.cleanup();

@@ -4,11 +4,13 @@ use std::time::Duration;
 use bevy::prelude::*;
 use bevy::time::TimeUpdateStrategy;
 use lol_base::map::MapPaths;
+use lol_champions::riven::PluginRiven;
+use lol_core::PluginCore;
 use lol_core::game::PluginGame;
+use lol_render::PluginRender;
 use lol_render::test_render::{
     PluginSkillTestRender, SkillTestRenderConfig, SkillTestVideoFormat, SkillTestVideoOutput,
 };
-use moon_lol::PluginCore;
 
 fn main() {
     let output_dir = PathBuf::from("artifacts/riven_render_test");
@@ -41,9 +43,13 @@ fn main() {
         ..default()
     }));
     app.add_plugins(PluginSkillTestRender);
-    app.add_plugins(PluginCore.set(PluginGame {
-        scenes: vec!["games/riven_render.ron".to_owned()],
-    }));
+    app.add_plugins((
+        PluginCore.set(PluginGame {
+            scenes: vec!["games/riven_render.ron".to_owned()],
+        }),
+        PluginRender,
+        PluginRiven,
+    ));
     app.add_systems(Startup, setup_stage);
     app.finish();
     app.cleanup();

@@ -25,8 +25,6 @@ use lol_base::spell::{DataSpell, Spell, ValuesData};
 use lol_base::spell_calc::{
     CalculationPart, CalculationPartNamedDataValue, CalculationSpell, CalculationType,
 };
-
-use crate::riven::Riven;
 use lol_core::action::{Action, CommandAction};
 use lol_core::base::ability_resource::{AbilityResource, AbilityResourceType};
 use lol_core::base::buff::Buffs;
@@ -43,6 +41,8 @@ use lol_core::skill::{
     get_skill_value,
 };
 use lol_core::team::Team;
+
+use crate::riven::Riven;
 
 const RIVEN_Q_KEY: &str = "Characters/Riven/Spells/RivenTriCleaveAbility/RivenTriCleave";
 const RIVEN_W_KEY: &str = "Characters/Riven/Spells/RivenMartyrAbility/RivenMartyr";

@@ -17,7 +17,9 @@ use lol_base::spell::{DataSpell, Spell, ValuesData};
 use lol_base::spell_calc::{
     CalculationPart, CalculationPartNamedDataValue, CalculationSpell, CalculationType,
 };
+use lol_champions::PluginChampions;
 use lol_champions::riven::Riven;
+use lol_core::PluginCore;
 use lol_core::action::{Action, CommandAction};
 use lol_core::base::ability_resource::{AbilityResource, AbilityResourceType};
 use lol_core::base::buff::Buffs;
@@ -38,6 +40,7 @@ use lol_core::skill::{
     get_skill_value,
 };
 use lol_core::team::Team;
+use lol_render::PluginRender;
 use lol_render::animation::PluginAnimation;
 use lol_render::camera::PluginCamera;
 use lol_render::particle::PluginParticle;
@@ -46,7 +49,7 @@ use lol_render::test_render::{
     PluginSkillTestRender, SkillTestRenderConfig, SkillTestVideoFormat, SkillTestVideoOutput,
 };
 use lol_render::ui::PluginUI;
-use moon_lol::PluginCore;
+use moon_lol::PluginLOL;
 
 const RIVEN_Q_KEY: &str = "Characters/Riven/Spells/RivenTriCleaveAbility/RivenTriCleave";
 const RIVEN_W_KEY: &str = "Characters/Riven/Spells/RivenMartyrAbility/RivenMartyr";
@@ -129,7 +132,7 @@ impl RivenHarness {
 
             app.add_plugins(DefaultPlugins.build().disable::<WinitPlugin>());
             app.add_plugins(PluginSkillTestRender);
-            app.add_plugins(plugin_group);
+            app.add_plugins((PluginChampions, plugin_group, PluginRender));
 
             app.add_systems(Startup, setup_render_stage);
         } else {
@@ -149,7 +152,7 @@ impl RivenHarness {
                 .disable::<PluginDebugSphere>()
                 .disable::<PluginCamera>();
 
-            app.add_plugins(plugin_group);
+            app.add_plugins((PluginChampions, plugin_group, PluginRender));
         }
 
         app.init_resource::<NavigationStats>();

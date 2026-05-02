@@ -1,8 +1,10 @@
 use bevy::prelude::*;
 use lol_base::map::MapPaths;
+use lol_champions::PluginChampions;
+use lol_core::PluginCore;
 use lol_core::game::PluginGame;
 use lol_core::navigation::navigation::NavigationDebug;
-use moon_lol::PluginCore;
+use lol_render::PluginRender;
 
 fn main() {
     App::new()
@@ -16,9 +18,11 @@ fn main() {
                 }),
                 ..default()
             }),
-            PluginCore.build().set(PluginGame {
+            PluginCore.set(PluginGame {
                 scenes: vec!["games/test_scene.ron".to_owned()],
             }),
+            PluginRender,
+            PluginChampions,
         ))
         .insert_resource(MapPaths::new("test"))
         .insert_resource(NavigationDebug)
