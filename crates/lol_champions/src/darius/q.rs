@@ -51,14 +51,18 @@ pub fn cast_darius_q(
     _apply_hemorrhage_outer: bool,
 ) {
     // Spawn the Q cast particle
-    lol_core::skill::spawn_skill_particle(
-        commands,
+    commands.trigger(lol_base::render_cmd::CommandSkinParticleSpawn {
         entity,
-        league_utils::hash_bin("Darius_Q_Cast"),
-    );
+        hash: league_utils::hash_bin("Darius_Q_Cast"),
+    });
 
     // Play Q animation
-    lol_core::skill::play_skill_animation(commands, entity, "spell1".to_string());
+    commands.trigger(lol_base::render_cmd::CommandAnimationPlay {
+        entity,
+        hash: "spell1".to_string(),
+        repeat: false,
+        duration: None,
+    });
 
     // Inner blade damage (Circle, radius = inner_radius)
     // Inner blade does NOT apply hemorrhage

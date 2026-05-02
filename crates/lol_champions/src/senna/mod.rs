@@ -2,15 +2,15 @@ pub mod buffs;
 
 use bevy::prelude::*;
 use league_utils::hash_bin;
+use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
 use lol_base::spell::Spell;
-use lol_core::action::damage::{DamageShape, TargetDamage, TargetFilter};
+use lol_core::action::damage::{
+    ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
+};
 use lol_core::base::buff::BuffOf;
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
-use lol_core::skill::{
-    CoolDown, EventSkillCast, Skill, SkillSlot, play_skill_animation, skill_damage,
-    spawn_skill_particle,
-};
+use lol_core::skill::{CoolDown, EventSkillCast, Skill, SkillSlot};
 
 use crate::senna::buffs::BuffSennaW;
 
@@ -54,73 +54,108 @@ fn on_senna_skill_cast(
 }
 
 fn cast_senna_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, "spell1".to_string());
-    spawn_skill_particle(commands, entity, hash_bin("Senna_Q_Cast"));
+    commands.trigger(CommandAnimationPlay {
+        entity,
+        hash: "spell1".to_string(),
+        repeat: false,
+        duration: None,
+    });
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: hash_bin("Senna_Q_Cast"),
+    });
 
     // Q is duskblade of shadow - damage
-    skill_damage(
-        commands,
+    commands.trigger(ActionDamage {
         entity,
-        skill_spell,
-        DamageShape::Sector {
-            radius: 600.0,
-            angle: 15.0,
-        },
-        vec![TargetDamage {
-            filter: TargetFilter::All,
-            amount: hash_bin("TotalDamage"),
-            damage_type: DamageType::Physical,
+        skill: skill_spell,
+        effects: vec![ActionDamageEffect {
+            shape: DamageShape::Sector {
+                radius: 600.0,
+                angle: 15.0,
+            },
+            damage_list: vec![TargetDamage {
+                filter: TargetFilter::All,
+                amount: hash_bin("TotalDamage"),
+                damage_type: DamageType::Physical,
+            }],
+            particle: Some(hash_bin("Senna_Q_Hit")),
         }],
-        Some(hash_bin("Senna_Q_Hit")),
-    );
+    });
 }
 
 fn cast_senna_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, "spell2".to_string());
-    spawn_skill_particle(commands, entity, hash_bin("Senna_W_Cast"));
+    commands.trigger(CommandAnimationPlay {
+        entity,
+        hash: "spell2".to_string(),
+        repeat: false,
+        duration: None,
+    });
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: hash_bin("Senna_W_Cast"),
+    });
 
     // W is last embrace - root
-    skill_damage(
-        commands,
+    commands.trigger(ActionDamage {
         entity,
-        skill_spell,
-        DamageShape::Circle { radius: 1000.0 },
-        vec![TargetDamage {
-            filter: TargetFilter::All,
-            amount: hash_bin("TotalDamage"),
-            damage_type: DamageType::Magic,
+        skill: skill_spell,
+        effects: vec![ActionDamageEffect {
+            shape: DamageShape::Circle { radius: 1000.0 },
+            damage_list: vec![TargetDamage {
+                filter: TargetFilter::All,
+                amount: hash_bin("TotalDamage"),
+                damage_type: DamageType::Magic,
+            }],
+            particle: Some(hash_bin("Senna_W_Hit")),
         }],
-        Some(hash_bin("Senna_W_Hit")),
-    );
+    });
 }
 
 fn cast_senna_e(commands: &mut Commands, entity: Entity) {
-    play_skill_animation(commands, entity, "spell3".to_string());
-    spawn_skill_particle(commands, entity, hash_bin("Senna_E_Cast"));
+    commands.trigger(CommandAnimationPlay {
+        entity,
+        hash: "spell3".to_string(),
+        repeat: false,
+        duration: None,
+    });
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: hash_bin("Senna_E_Cast"),
+    });
 
     // E is curtain of darkness - camouflage
 }
 
 fn cast_senna_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, "spell4".to_string());
-    spawn_skill_particle(commands, entity, hash_bin("Senna_R_Cast"));
+    commands.trigger(CommandAnimationPlay {
+        entity,
+        hash: "spell4".to_string(),
+        repeat: false,
+        duration: None,
+    });
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: hash_bin("Senna_R_Cast"),
+    });
 
     // R is pierce the veil - AoE damage and shield
-    skill_damage(
-        commands,
+    commands.trigger(ActionDamage {
         entity,
-        skill_spell,
-        DamageShape::Sector {
-            radius: 2500.0,
-            angle: 50.0,
-        },
-        vec![TargetDamage {
-            filter: TargetFilter::All,
-            amount: hash_bin("TotalDamage"),
-            damage_type: DamageType::Magic,
+        skill: skill_spell,
+        effects: vec![ActionDamageEffect {
+            shape: DamageShape::Sector {
+                radius: 2500.0,
+                angle: 50.0,
+            },
+            damage_list: vec![TargetDamage {
+                filter: TargetFilter::All,
+                amount: hash_bin("TotalDamage"),
+                damage_type: DamageType::Magic,
+            }],
+            particle: Some(hash_bin("Senna_R_Hit")),
         }],
-        Some(hash_bin("Senna_R_Hit")),
-    );
+    });
 }
 
 fn on_senna_damage_hit(

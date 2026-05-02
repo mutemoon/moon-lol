@@ -4,7 +4,7 @@ use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
 
 use crate::action::damage::on_action_damage;
-use crate::action::dash::{on_dash_end, update_dash_damage};
+use crate::action::dash::{on_action_dash, on_dash_end, update_dash_damage};
 use crate::attack_auto::{CommandAttackAutoStart, CommandAttackAutoStop};
 use crate::movement::{CommandMovement, MovementAction};
 use crate::run::{CommandRunStart, RunTarget};
@@ -15,6 +15,7 @@ pub struct PluginAction;
 
 impl Plugin for PluginAction {
     fn build(&self, app: &mut App) {
+        app.add_observer(on_action_dash);
         app.add_observer(on_dash_end);
         app.add_observer(on_action_damage);
 

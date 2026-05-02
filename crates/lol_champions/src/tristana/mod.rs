@@ -2,15 +2,15 @@ pub mod buffs;
 
 use bevy::prelude::*;
 use league_utils::hash_bin;
+use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
 use lol_base::spell::Spell;
-use lol_core::action::damage::{DamageShape, TargetDamage, TargetFilter};
+use lol_core::action::damage::{
+    ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
+};
 use lol_core::base::buff::BuffOf;
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
-use lol_core::skill::{
-    CoolDown, EventSkillCast, Skill, SkillSlot, play_skill_animation, skill_damage,
-    spawn_skill_particle,
-};
+use lol_core::skill::{CoolDown, EventSkillCast, Skill, SkillSlot};
 
 use crate::tristana::buffs::BuffTristanaW;
 
@@ -56,66 +56,101 @@ fn on_tristana_skill_cast(
 }
 
 fn cast_tristana_q(commands: &mut Commands, entity: Entity) {
-    play_skill_animation(commands, entity, "spell1".to_string());
-    spawn_skill_particle(commands, entity, hash_bin("Tristana_Q_Cast"));
+    commands.trigger(CommandAnimationPlay {
+        entity,
+        hash: "spell1".to_string(),
+        repeat: false,
+        duration: None,
+    });
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: hash_bin("Tristana_Q_Cast"),
+    });
 }
 
 fn cast_tristana_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, "spell2".to_string());
-    spawn_skill_particle(commands, entity, hash_bin("Tristana_W_Cast"));
-
-    skill_damage(
-        commands,
+    commands.trigger(CommandAnimationPlay {
         entity,
-        skill_spell,
-        DamageShape::Circle { radius: 900.0 },
-        vec![TargetDamage {
-            filter: TargetFilter::All,
-            amount: hash_bin("TotalDamage"),
-            damage_type: DamageType::Magic,
+        hash: "spell2".to_string(),
+        repeat: false,
+        duration: None,
+    });
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: hash_bin("Tristana_W_Cast"),
+    });
+
+    commands.trigger(ActionDamage {
+        entity,
+        skill: skill_spell,
+        effects: vec![ActionDamageEffect {
+            shape: DamageShape::Circle { radius: 900.0 },
+            damage_list: vec![TargetDamage {
+                filter: TargetFilter::All,
+                amount: hash_bin("TotalDamage"),
+                damage_type: DamageType::Magic,
+            }],
+            particle: Some(hash_bin("Tristana_W_Hit")),
         }],
-        Some(hash_bin("Tristana_W_Hit")),
-    );
+    });
 }
 
 fn cast_tristana_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, "spell3".to_string());
-    spawn_skill_particle(commands, entity, hash_bin("Tristana_E_Cast"));
-
-    skill_damage(
-        commands,
+    commands.trigger(CommandAnimationPlay {
         entity,
-        skill_spell,
-        DamageShape::Nearest {
-            max_distance: 700.0,
-        },
-        vec![TargetDamage {
-            filter: TargetFilter::All,
-            amount: hash_bin("TotalDamage"),
-            damage_type: DamageType::Physical,
+        hash: "spell3".to_string(),
+        repeat: false,
+        duration: None,
+    });
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: hash_bin("Tristana_E_Cast"),
+    });
+
+    commands.trigger(ActionDamage {
+        entity,
+        skill: skill_spell,
+        effects: vec![ActionDamageEffect {
+            shape: DamageShape::Nearest {
+                max_distance: 700.0,
+            },
+            damage_list: vec![TargetDamage {
+                filter: TargetFilter::All,
+                amount: hash_bin("TotalDamage"),
+                damage_type: DamageType::Physical,
+            }],
+            particle: Some(hash_bin("Tristana_E_Hit")),
         }],
-        Some(hash_bin("Tristana_E_Hit")),
-    );
+    });
 }
 
 fn cast_tristana_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, "spell4".to_string());
-    spawn_skill_particle(commands, entity, hash_bin("Tristana_R_Cast"));
-
-    skill_damage(
-        commands,
+    commands.trigger(CommandAnimationPlay {
         entity,
-        skill_spell,
-        DamageShape::Nearest {
-            max_distance: 700.0,
-        },
-        vec![TargetDamage {
-            filter: TargetFilter::All,
-            amount: hash_bin("TotalDamage"),
-            damage_type: DamageType::Physical,
+        hash: "spell4".to_string(),
+        repeat: false,
+        duration: None,
+    });
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: hash_bin("Tristana_R_Cast"),
+    });
+
+    commands.trigger(ActionDamage {
+        entity,
+        skill: skill_spell,
+        effects: vec![ActionDamageEffect {
+            shape: DamageShape::Nearest {
+                max_distance: 700.0,
+            },
+            damage_list: vec![TargetDamage {
+                filter: TargetFilter::All,
+                amount: hash_bin("TotalDamage"),
+                damage_type: DamageType::Physical,
+            }],
+            particle: Some(hash_bin("Tristana_R_Hit")),
         }],
-        Some(hash_bin("Tristana_R_Hit")),
-    );
+    });
 }
 
 fn on_tristana_damage_hit(

@@ -2,16 +2,16 @@ pub mod buffs;
 
 use bevy::prelude::*;
 use league_utils::hash_bin;
+use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
 use lol_base::spell::Spell;
-use lol_core::action::damage::{DamageShape, TargetDamage, TargetFilter};
+use lol_core::action::damage::{
+    ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
+};
 use lol_core::action::dash::{ActionDash, DashMoveType};
 use lol_core::base::buff::BuffOf;
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
-use lol_core::skill::{
-    CoolDown, EventSkillCast, Skill, SkillSlot, play_skill_animation, skill_damage, skill_dash,
-    spawn_skill_particle,
-};
+use lol_core::skill::{CoolDown, EventSkillCast, Skill, SkillSlot};
 
 use crate::kalista::buffs::{BuffKalistaE, BuffKalistaR};
 
@@ -64,80 +64,110 @@ fn on_kalista_skill_cast(
 }
 
 fn cast_kalista_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, "spell1".to_string());
-    spawn_skill_particle(commands, entity, hash_bin("Kalista_Q_Cast"));
+    commands.trigger(CommandAnimationPlay {
+        entity,
+        hash: "spell1".to_string(),
+        repeat: false,
+        duration: None,
+    });
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: hash_bin("Kalista_Q_Cast"),
+    });
 
     // Q is a spear that passes through enemies
-    skill_damage(
-        commands,
+    commands.trigger(ActionDamage {
         entity,
-        skill_spell,
-        DamageShape::Sector {
-            radius: 1200.0,
-            angle: 10.0,
-        },
-        vec![TargetDamage {
-            filter: TargetFilter::All,
-            amount: hash_bin("TotalDamage"),
-            damage_type: DamageType::Physical,
+        skill: skill_spell,
+        effects: vec![ActionDamageEffect {
+            shape: DamageShape::Sector {
+                radius: 1200.0,
+                angle: 10.0,
+            },
+            damage_list: vec![TargetDamage {
+                filter: TargetFilter::All,
+                amount: hash_bin("TotalDamage"),
+                damage_type: DamageType::Physical,
+            }],
+            particle: Some(hash_bin("Kalista_Q_Hit")),
         }],
-        Some(hash_bin("Kalista_Q_Hit")),
-    );
+    });
 }
 
 fn cast_kalista_w(commands: &mut Commands, entity: Entity) {
-    play_skill_animation(commands, entity, "spell2".to_string());
-    spawn_skill_particle(commands, entity, hash_bin("Kalista_W_Cast"));
+    commands.trigger(CommandAnimationPlay {
+        entity,
+        hash: "spell2".to_string(),
+        repeat: false,
+        duration: None,
+    });
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: hash_bin("Kalista_W_Cast"),
+    });
 
     // W is a sentinel that provides vision and deals damage on basic attacks
 }
 
 fn cast_kalista_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, "spell3".to_string());
-    spawn_skill_particle(commands, entity, hash_bin("Kalista_E_Cast"));
+    commands.trigger(CommandAnimationPlay {
+        entity,
+        hash: "spell3".to_string(),
+        repeat: false,
+        duration: None,
+    });
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: hash_bin("Kalista_E_Cast"),
+    });
 
     // E deals damage to speared enemies and slows
-    skill_damage(
-        commands,
+    commands.trigger(ActionDamage {
         entity,
-        skill_spell,
-        DamageShape::Circle { radius: 1100.0 },
-        vec![TargetDamage {
-            filter: TargetFilter::All,
-            amount: hash_bin("TotalDamage"),
-            damage_type: DamageType::Physical,
+        skill: skill_spell,
+        effects: vec![ActionDamageEffect {
+            shape: DamageShape::Circle { radius: 1100.0 },
+            damage_list: vec![TargetDamage {
+                filter: TargetFilter::All,
+                amount: hash_bin("TotalDamage"),
+                damage_type: DamageType::Physical,
+            }],
+            particle: Some(hash_bin("Kalista_E_Hit")),
         }],
-        Some(hash_bin("Kalista_E_Hit")),
-    );
+    });
 }
 
 fn cast_kalista_r(
     commands: &mut Commands,
-    q_transform: &Query<&Transform>,
+    _q_transform: &Query<&Transform>,
     entity: Entity,
     point: Vec2,
     skill_spell: Handle<Spell>,
 ) {
-    play_skill_animation(commands, entity, "spell4".to_string());
-    spawn_skill_particle(commands, entity, hash_bin("Kalista_R_Cast"));
+    commands.trigger(CommandAnimationPlay {
+        entity,
+        hash: "spell4".to_string(),
+        repeat: false,
+        duration: None,
+    });
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: hash_bin("Kalista_R_Cast"),
+    });
 
     // R pulls oathsworn ally and grants invulnerability
     commands
         .entity(entity)
         .with_related::<BuffOf>(BuffKalistaR::new(4.0));
 
-    skill_dash(
-        commands,
-        q_transform,
+    commands.trigger(ActionDash {
         entity,
-        point,
-        &ActionDash {
-            skill: skill_spell,
-            move_type: DashMoveType::Pointer { max: 1200.0 },
-            damage: None,
-            speed: 1000.0,
-        },
-    );
+        point: point,
+        skill: skill_spell,
+        move_type: DashMoveType::Pointer { max: 1200.0 },
+        damage: None,
+        speed: 1000.0,
+    });
 }
 
 fn on_kalista_damage_hit(

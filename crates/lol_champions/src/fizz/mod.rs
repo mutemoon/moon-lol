@@ -2,17 +2,17 @@ pub mod buffs;
 
 use bevy::prelude::*;
 use league_utils::hash_bin;
+use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
 use lol_base::spell::Spell;
-use lol_core::action::damage::{DamageShape, TargetDamage, TargetFilter};
+use lol_core::action::damage::{
+    ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
+};
 use lol_core::action::dash::{ActionDash, DashDamage, DashMoveType};
 use lol_core::base::buff::BuffOf;
 use lol_core::buffs::cc_debuffs::DebuffSlow;
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
-use lol_core::skill::{
-    EventSkillCast, Skill, SkillSlot, play_skill_animation, skill_damage, skill_dash,
-    spawn_skill_particle,
-};
+use lol_core::skill::{EventSkillCast, Skill, SkillSlot};
 
 #[derive(Default)]
 pub struct PluginFizz;
@@ -68,91 +68,116 @@ fn on_fizz_skill_cast(
 
 fn cast_fizz_q(
     commands: &mut Commands,
-    q_transform: &Query<&Transform>,
+    _q_transform: &Query<&Transform>,
     entity: Entity,
     point: Vec2,
     skill_spell: Handle<Spell>,
 ) {
-    play_skill_animation(commands, entity, "spell1".to_string());
-    spawn_skill_particle(commands, entity, hash_bin("Fizz_Q_Cast"));
+    commands.trigger(CommandAnimationPlay {
+        entity,
+        hash: "spell1".to_string(),
+        repeat: false,
+        duration: None,
+    });
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: hash_bin("Fizz_Q_Cast"),
+    });
 
     // Q is a dash to target
-    skill_dash(
-        commands,
-        q_transform,
+    commands.trigger(ActionDash {
         entity,
-        point,
-        &ActionDash {
-            skill: skill_spell.clone(),
-            move_type: DashMoveType::Pointer { max: 550.0 },
-            damage: Some(DashDamage {
-                radius_end: 100.0,
-                damage: TargetDamage {
-                    filter: TargetFilter::All,
-                    amount: hash_bin("TotalDamage"),
-                    damage_type: DamageType::Magic,
-                },
-            }),
-            speed: 1000.0,
-        },
-    );
+        point: point,
+        skill: skill_spell.clone(),
+        move_type: DashMoveType::Pointer { max: 550.0 },
+        damage: Some(DashDamage {
+            radius_end: 100.0,
+            damage: TargetDamage {
+                filter: TargetFilter::All,
+                amount: hash_bin("TotalDamage"),
+                damage_type: DamageType::Magic,
+            },
+        }),
+        speed: 1000.0,
+    });
 }
 
 fn cast_fizz_w(commands: &mut Commands, entity: Entity) {
-    play_skill_animation(commands, entity, "spell2".to_string());
-    spawn_skill_particle(commands, entity, hash_bin("Fizz_W_Cast"));
+    commands.trigger(CommandAnimationPlay {
+        entity,
+        hash: "spell2".to_string(),
+        repeat: false,
+        duration: None,
+    });
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: hash_bin("Fizz_W_Cast"),
+    });
     // W is a damage buff on next attack
 }
 
 fn cast_fizz_e(
     commands: &mut Commands,
-    q_transform: &Query<&Transform>,
+    _q_transform: &Query<&Transform>,
     entity: Entity,
     point: Vec2,
     skill_spell: Handle<Spell>,
 ) {
-    play_skill_animation(commands, entity, "spell3".to_string());
-    spawn_skill_particle(commands, entity, hash_bin("Fizz_E_Cast"));
+    commands.trigger(CommandAnimationPlay {
+        entity,
+        hash: "spell3".to_string(),
+        repeat: false,
+        duration: None,
+    });
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: hash_bin("Fizz_E_Cast"),
+    });
 
     // E is a dash that can't be targeted
-    skill_dash(
-        commands,
-        q_transform,
+    commands.trigger(ActionDash {
         entity,
-        point,
-        &ActionDash {
-            skill: skill_spell.clone(),
-            move_type: DashMoveType::Pointer { max: 400.0 },
-            damage: Some(DashDamage {
-                radius_end: 150.0,
-                damage: TargetDamage {
-                    filter: TargetFilter::All,
-                    amount: hash_bin("TotalDamage"),
-                    damage_type: DamageType::Magic,
-                },
-            }),
-            speed: 800.0,
-        },
-    );
+        point: point,
+        skill: skill_spell.clone(),
+        move_type: DashMoveType::Pointer { max: 400.0 },
+        damage: Some(DashDamage {
+            radius_end: 150.0,
+            damage: TargetDamage {
+                filter: TargetFilter::All,
+                amount: hash_bin("TotalDamage"),
+                damage_type: DamageType::Magic,
+            },
+        }),
+        speed: 800.0,
+    });
 }
 
 fn cast_fizz_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, "spell4".to_string());
-    spawn_skill_particle(commands, entity, hash_bin("Fizz_R_Cast"));
+    commands.trigger(CommandAnimationPlay {
+        entity,
+        hash: "spell4".to_string(),
+        repeat: false,
+        duration: None,
+    });
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: hash_bin("Fizz_R_Cast"),
+    });
 
     // R is a shark nado
-    skill_damage(
-        commands,
+    commands.trigger(ActionDamage {
         entity,
-        skill_spell,
-        DamageShape::Circle { radius: 1300.0 },
-        vec![TargetDamage {
-            filter: TargetFilter::All,
-            amount: hash_bin("TotalDamage"),
-            damage_type: DamageType::Magic,
+        skill: skill_spell,
+        effects: vec![ActionDamageEffect {
+            shape: DamageShape::Circle { radius: 1300.0 },
+            damage_list: vec![TargetDamage {
+                filter: TargetFilter::All,
+                amount: hash_bin("TotalDamage"),
+                damage_type: DamageType::Magic,
+            }],
+            particle: Some(hash_bin("Fizz_R_Hit")),
         }],
-        Some(hash_bin("Fizz_R_Hit")),
-    );
+    });
 }
 
 fn on_fizz_damage_hit(

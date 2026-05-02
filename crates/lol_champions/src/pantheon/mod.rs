@@ -2,17 +2,17 @@ pub mod buffs;
 
 use bevy::prelude::{Handle, *};
 use league_utils::hash_bin;
+use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
 use lol_base::spell::Spell;
-use lol_core::action::damage::{DamageShape, TargetDamage, TargetFilter};
+use lol_core::action::damage::{
+    ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
+};
 use lol_core::action::dash::{ActionDash, DashDamage, DashMoveType};
 use lol_core::base::buff::BuffOf;
 use lol_core::buffs::cc_debuffs::DebuffStun;
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
-use lol_core::skill::{
-    EventSkillCast, Skill, SkillSlot, play_skill_animation, skill_damage, skill_dash,
-    spawn_skill_particle,
-};
+use lol_core::skill::{EventSkillCast, Skill, SkillSlot};
 
 use crate::pantheon::buffs::BuffPantheonE;
 
@@ -76,76 +76,98 @@ fn cast_pantheon_q(
     _point: Vec2,
     skill_spell: Handle<Spell>,
 ) {
-    play_skill_animation(commands, entity, "spell1".to_string());
-    spawn_skill_particle(commands, entity, hash_bin("Pantheon_Q_Cast"));
-    // Q is a spear throw that can be held for more damage
-    skill_damage(
-        commands,
+    commands.trigger(CommandAnimationPlay {
         entity,
-        skill_spell,
-        DamageShape::Sector {
-            radius: 400.0,
-            angle: 45.0,
-        },
-        vec![TargetDamage {
-            filter: TargetFilter::All,
-            amount: hash_bin("TotalDamage"),
-            damage_type: DamageType::Physical,
+        hash: "spell1".to_string(),
+        repeat: false,
+        duration: None,
+    });
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: hash_bin("Pantheon_Q_Cast"),
+    });
+    // Q is a spear throw that can be held for more damage
+    commands.trigger(ActionDamage {
+        entity,
+        skill: skill_spell,
+        effects: vec![ActionDamageEffect {
+            shape: DamageShape::Sector {
+                radius: 400.0,
+                angle: 45.0,
+            },
+            damage_list: vec![TargetDamage {
+                filter: TargetFilter::All,
+                amount: hash_bin("TotalDamage"),
+                damage_type: DamageType::Physical,
+            }],
+            particle: Some(hash_bin("Pantheon_Q_Hit")),
         }],
-        Some(hash_bin("Pantheon_Q_Hit")),
-    );
+    });
 }
 
 fn cast_pantheon_w(
     commands: &mut Commands,
-    q_transform: &Query<&Transform>,
+    _q_transform: &Query<&Transform>,
     entity: Entity,
     point: Vec2,
     skill_spell: Handle<Spell>,
 ) {
-    play_skill_animation(commands, entity, "spell2".to_string());
-    spawn_skill_particle(commands, entity, hash_bin("Pantheon_W_Cast"));
-    // W is a dash to target that stuns
-    skill_dash(
-        commands,
-        q_transform,
+    commands.trigger(CommandAnimationPlay {
         entity,
-        point,
-        &ActionDash {
-            skill: skill_spell,
-            move_type: DashMoveType::Pointer { max: 200.0 },
-            damage: Some(DashDamage {
-                radius_end: 100.0,
-                damage: TargetDamage {
-                    filter: TargetFilter::All,
-                    amount: hash_bin("TotalDamage"),
-                    damage_type: DamageType::Physical,
-                },
-            }),
-            speed: 1000.0,
-        },
-    );
+        hash: "spell2".to_string(),
+        repeat: false,
+        duration: None,
+    });
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: hash_bin("Pantheon_W_Cast"),
+    });
+    // W is a dash to target that stuns
+    commands.trigger(ActionDash {
+        entity,
+        point: point,
+        skill: skill_spell,
+        move_type: DashMoveType::Pointer { max: 200.0 },
+        damage: Some(DashDamage {
+            radius_end: 100.0,
+            damage: TargetDamage {
+                filter: TargetFilter::All,
+                amount: hash_bin("TotalDamage"),
+                damage_type: DamageType::Physical,
+            },
+        }),
+        speed: 1000.0,
+    });
 }
 
 fn cast_pantheon_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, "spell3".to_string());
-    spawn_skill_particle(commands, entity, hash_bin("Pantheon_E_Cast"));
-    // E is a shield block that deals damage in a cone when released
-    skill_damage(
-        commands,
+    commands.trigger(CommandAnimationPlay {
         entity,
-        skill_spell,
-        DamageShape::Sector {
-            radius: 300.0,
-            angle: 90.0,
-        },
-        vec![TargetDamage {
-            filter: TargetFilter::All,
-            amount: hash_bin("TotalDamage"),
-            damage_type: DamageType::Physical,
+        hash: "spell3".to_string(),
+        repeat: false,
+        duration: None,
+    });
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: hash_bin("Pantheon_E_Cast"),
+    });
+    // E is a shield block that deals damage in a cone when released
+    commands.trigger(ActionDamage {
+        entity,
+        skill: skill_spell,
+        effects: vec![ActionDamageEffect {
+            shape: DamageShape::Sector {
+                radius: 300.0,
+                angle: 90.0,
+            },
+            damage_list: vec![TargetDamage {
+                filter: TargetFilter::All,
+                amount: hash_bin("TotalDamage"),
+                damage_type: DamageType::Physical,
+            }],
+            particle: Some(hash_bin("Pantheon_E_Hit")),
         }],
-        Some(hash_bin("Pantheon_E_Hit")),
-    );
+    });
     commands
         .entity(entity)
         .with_related::<BuffOf>(BuffPantheonE::new(Vec2::ZERO, 1.5));
@@ -153,33 +175,37 @@ fn cast_pantheon_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<
 
 fn cast_pantheon_r(
     commands: &mut Commands,
-    q_transform: &Query<&Transform>,
+    _q_transform: &Query<&Transform>,
     entity: Entity,
     point: Vec2,
     skill_spell: Handle<Spell>,
 ) {
-    play_skill_animation(commands, entity, "spell4".to_string());
-    spawn_skill_particle(commands, entity, hash_bin("Pantheon_R_Cast"));
-    // R is a long-range leap that damages enemies in area
-    skill_dash(
-        commands,
-        q_transform,
+    commands.trigger(CommandAnimationPlay {
         entity,
-        point,
-        &ActionDash {
-            skill: skill_spell,
-            move_type: DashMoveType::Pointer { max: 2000.0 },
-            damage: Some(DashDamage {
-                radius_end: 200.0,
-                damage: TargetDamage {
-                    filter: TargetFilter::All,
-                    amount: hash_bin("TotalDamage"),
-                    damage_type: DamageType::Physical,
-                },
-            }),
-            speed: 1500.0,
-        },
-    );
+        hash: "spell4".to_string(),
+        repeat: false,
+        duration: None,
+    });
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: hash_bin("Pantheon_R_Cast"),
+    });
+    // R is a long-range leap that damages enemies in area
+    commands.trigger(ActionDash {
+        entity,
+        point: point,
+        skill: skill_spell,
+        move_type: DashMoveType::Pointer { max: 2000.0 },
+        damage: Some(DashDamage {
+            radius_end: 200.0,
+            damage: TargetDamage {
+                filter: TargetFilter::All,
+                amount: hash_bin("TotalDamage"),
+                damage_type: DamageType::Physical,
+            },
+        }),
+        speed: 1500.0,
+    });
 }
 
 /// 监听 Pantheon 造成的伤害，W 命中时眩晕

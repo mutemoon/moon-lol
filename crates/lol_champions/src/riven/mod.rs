@@ -9,17 +9,17 @@ mod tests;
 
 use bevy::prelude::*;
 use league_utils::hash_bin;
+use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
 use lol_base::spell::Spell;
-use lol_core::action::damage::{DamageShape, TargetDamage, TargetFilter};
+use lol_core::action::damage::{
+    ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
+};
 use lol_core::action::dash::{ActionDash, DashDamage, DashMoveType};
 use lol_core::base::buff::BuffOf;
 use lol_core::buffs::shield_white::BuffShieldWhite;
 use lol_core::damage::DamageType;
 use lol_core::entities::champion::Champion;
-use lol_core::skill::{
-    CoolDown, EventSkillCast, Skill, SkillRecastWindow, SkillSlot, play_skill_animation,
-    skill_damage, skill_dash, spawn_skill_particle,
-};
+use lol_core::skill::{CoolDown, EventSkillCast, Skill, SkillRecastWindow, SkillSlot};
 
 use crate::riven::passive::BuffRivenPassive;
 
@@ -82,7 +82,7 @@ fn on_riven_skill_cast(
 
 fn cast_riven_q(
     commands: &mut Commands,
-    q_transform: &Query<&Transform>,
+    _q_transform: &Query<&Transform>,
     entity: Entity,
     skill_entity: Entity,
     point: Vec2,
@@ -98,30 +98,34 @@ fn cast_riven_q(
         _ => ("Spell1C".to_string(), hash_bin("Riven_Q_03_Detonate")),
     };
 
-    play_skill_animation(commands, entity, animation_hash);
-    skill_dash(
-        commands,
-        q_transform,
+    commands.trigger(CommandAnimationPlay {
         entity,
-        point,
-        &ActionDash {
-            skill: skill_spell,
-            move_type: DashMoveType::Fixed(250.0),
-            damage: Some(DashDamage {
-                radius_end: 250.0,
-                damage: TargetDamage {
-                    filter: TargetFilter::All,
-                    amount: hash_bin("FirstSlashDamage"),
-                    damage_type: DamageType::Physical,
-                },
-            }),
-            speed: 1000.0,
-        },
-    );
+        hash: animation_hash,
+        repeat: false,
+        duration: None,
+    });
+    commands.trigger(ActionDash {
+        entity,
+        point: point,
+        skill: skill_spell,
+        move_type: DashMoveType::Fixed(250.0),
+        damage: Some(DashDamage {
+            radius_end: 250.0,
+            damage: TargetDamage {
+                filter: TargetFilter::All,
+                amount: hash_bin("FirstSlashDamage"),
+                damage_type: DamageType::Physical,
+            },
+        }),
+        speed: 1000.0,
+    });
     commands
         .entity(entity)
         .with_related::<BuffOf>(BuffRivenPassive);
-    spawn_skill_particle(commands, entity, particle_hash);
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: particle_hash,
+    });
 
     if stage >= 3 {
         commands.entity(skill_entity).remove::<SkillRecastWindow>();
@@ -139,49 +143,68 @@ fn cast_riven_q(
 }
 
 fn cast_riven_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    spawn_skill_particle(commands, entity, hash_bin("Riven_W_Cast"));
-    play_skill_animation(commands, entity, "spell2".to_string());
-    skill_damage(
-        commands,
+    commands.trigger(CommandSkinParticleSpawn {
         entity,
-        skill_spell,
-        DamageShape::Circle { radius: 300.0 },
-        vec![TargetDamage {
-            filter: TargetFilter::All,
-            amount: hash_bin("TotalDamage"),
-            damage_type: DamageType::Physical,
+        hash: hash_bin("Riven_W_Cast"),
+    });
+    commands.trigger(CommandAnimationPlay {
+        entity,
+        hash: "spell2".to_string(),
+        repeat: false,
+        duration: None,
+    });
+    commands.trigger(ActionDamage {
+        entity,
+        skill: skill_spell,
+        effects: vec![ActionDamageEffect {
+            shape: DamageShape::Circle { radius: 300.0 },
+            damage_list: vec![TargetDamage {
+                filter: TargetFilter::All,
+                amount: hash_bin("TotalDamage"),
+                damage_type: DamageType::Physical,
+            }],
+            particle: None,
         }],
-        None,
-    );
+    });
 }
 
 fn cast_riven_e(
     commands: &mut Commands,
-    q_transform: &Query<&Transform>,
+    _q_transform: &Query<&Transform>,
     entity: Entity,
     point: Vec2,
     skill_spell: Handle<Spell>,
 ) {
-    spawn_skill_particle(commands, entity, hash_bin("Riven_E_Mis"));
-    play_skill_animation(commands, entity, "spell3".to_string());
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: hash_bin("Riven_E_Mis"),
+    });
+    commands.trigger(CommandAnimationPlay {
+        entity,
+        hash: "spell3".to_string(),
+        repeat: false,
+        duration: None,
+    });
     commands
         .entity(entity)
         .with_related::<BuffOf>(BuffShieldWhite::new(100.0));
-    skill_dash(
-        commands,
-        q_transform,
+    commands.trigger(ActionDash {
         entity,
-        point,
-        &ActionDash {
-            skill: skill_spell,
-            move_type: DashMoveType::Fixed(250.0),
-            damage: None,
-            speed: 1000.0,
-        },
-    );
+        point: point,
+        skill: skill_spell,
+        move_type: DashMoveType::Fixed(250.0),
+        damage: None,
+        speed: 1000.0,
+    });
 }
 
 fn cast_riven_r(commands: &mut Commands, entity: Entity) {
-    spawn_skill_particle(commands, entity, hash_bin("Riven_R_Indicator_Ring"));
-    spawn_skill_particle(commands, entity, hash_bin("Riven_R_ALL_Warning"));
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: hash_bin("Riven_R_Indicator_Ring"),
+    });
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: hash_bin("Riven_R_ALL_Warning"),
+    });
 }

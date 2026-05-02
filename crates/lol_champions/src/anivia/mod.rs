@@ -2,16 +2,16 @@ pub mod buffs;
 
 use bevy::prelude::*;
 use league_utils::hash_bin;
+use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
 use lol_base::spell::Spell;
-use lol_core::action::damage::{DamageShape, TargetDamage, TargetFilter};
+use lol_core::action::damage::{
+    ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
+};
 use lol_core::base::buff::BuffOf;
 use lol_core::buffs::cc_debuffs::DebuffSlow;
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
-use lol_core::skill::{
-    CoolDown, EventSkillCast, Skill, SkillRecastWindow, SkillSlot, play_skill_animation,
-    skill_damage, spawn_skill_particle,
-};
+use lol_core::skill::{CoolDown, EventSkillCast, Skill, SkillRecastWindow, SkillSlot};
 
 use crate::anivia::buffs::BuffAniviaR;
 
@@ -76,29 +76,41 @@ fn cast_anivia_q(
 ) {
     let stage = recast.map(|w| w.stage).unwrap_or(1);
 
-    play_skill_animation(commands, entity, "spell1".to_string());
+    commands.trigger(CommandAnimationPlay {
+        entity,
+        hash: "spell1".to_string(),
+        repeat: false,
+        duration: None,
+    });
 
     if stage == 1 {
         // First cast: launch the crystal
-        spawn_skill_particle(commands, entity, hash_bin("Anivia_Q_Cast"));
+        commands.trigger(CommandSkinParticleSpawn {
+            entity,
+            hash: hash_bin("Anivia_Q_Cast"),
+        });
         commands
             .entity(skill_entity)
             .insert(SkillRecastWindow::new(2, 2, ANIVIA_Q_RECAST_WINDOW));
     } else {
         // Second cast: detonate for extra damage and stun
-        spawn_skill_particle(commands, entity, hash_bin("Anivia_Q_Explode"));
-        skill_damage(
-            commands,
+        commands.trigger(CommandSkinParticleSpawn {
             entity,
-            skill_spell,
-            DamageShape::Circle { radius: 150.0 },
-            vec![TargetDamage {
-                filter: TargetFilter::All,
-                amount: hash_bin("TotalDamage"),
-                damage_type: DamageType::Magic,
+            hash: hash_bin("Anivia_Q_Explode"),
+        });
+        commands.trigger(ActionDamage {
+            entity,
+            skill: skill_spell,
+            effects: vec![ActionDamageEffect {
+                shape: DamageShape::Circle { radius: 150.0 },
+                damage_list: vec![TargetDamage {
+                    filter: TargetFilter::All,
+                    amount: hash_bin("TotalDamage"),
+                    damage_type: DamageType::Magic,
+                }],
+                particle: Some(hash_bin("Anivia_Q_Hit")),
             }],
-            Some(hash_bin("Anivia_Q_Hit")),
-        );
+        });
         commands.entity(skill_entity).remove::<SkillRecastWindow>();
         commands.entity(skill_entity).insert(CoolDown {
             duration: cooldown.duration,
@@ -108,47 +120,73 @@ fn cast_anivia_q(
 }
 
 fn cast_anivia_w(commands: &mut Commands, entity: Entity) {
-    play_skill_animation(commands, entity, "spell2".to_string());
-    spawn_skill_particle(commands, entity, hash_bin("Anivia_W_Cast"));
+    commands.trigger(CommandAnimationPlay {
+        entity,
+        hash: "spell2".to_string(),
+        repeat: false,
+        duration: None,
+    });
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: hash_bin("Anivia_W_Cast"),
+    });
     // W creates a wall that blocks movement
 }
 
 fn cast_anivia_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, "spell3".to_string());
-    spawn_skill_particle(commands, entity, hash_bin("Anivia_E_Cast"));
+    commands.trigger(CommandAnimationPlay {
+        entity,
+        hash: "spell3".to_string(),
+        repeat: false,
+        duration: None,
+    });
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: hash_bin("Anivia_E_Cast"),
+    });
 
     // E deals extra damage to frozen targets
-    skill_damage(
-        commands,
+    commands.trigger(ActionDamage {
         entity,
-        skill_spell,
-        DamageShape::Circle { radius: 600.0 },
-        vec![TargetDamage {
-            filter: TargetFilter::All,
-            amount: hash_bin("TotalDamage"),
-            damage_type: DamageType::Magic,
+        skill: skill_spell,
+        effects: vec![ActionDamageEffect {
+            shape: DamageShape::Circle { radius: 600.0 },
+            damage_list: vec![TargetDamage {
+                filter: TargetFilter::All,
+                amount: hash_bin("TotalDamage"),
+                damage_type: DamageType::Magic,
+            }],
+            particle: Some(hash_bin("Anivia_E_Hit")),
         }],
-        Some(hash_bin("Anivia_E_Hit")),
-    );
+    });
 }
 
 fn cast_anivia_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, "spell4".to_string());
-    spawn_skill_particle(commands, entity, hash_bin("Anivia_R_Cast"));
+    commands.trigger(CommandAnimationPlay {
+        entity,
+        hash: "spell4".to_string(),
+        repeat: false,
+        duration: None,
+    });
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: hash_bin("Anivia_R_Cast"),
+    });
 
     // R is a continuous storm
-    skill_damage(
-        commands,
+    commands.trigger(ActionDamage {
         entity,
-        skill_spell,
-        DamageShape::Circle { radius: 750.0 },
-        vec![TargetDamage {
-            filter: TargetFilter::All,
-            amount: hash_bin("TotalDamage"),
-            damage_type: DamageType::Magic,
+        skill: skill_spell,
+        effects: vec![ActionDamageEffect {
+            shape: DamageShape::Circle { radius: 750.0 },
+            damage_list: vec![TargetDamage {
+                filter: TargetFilter::All,
+                amount: hash_bin("TotalDamage"),
+                damage_type: DamageType::Magic,
+            }],
+            particle: Some(hash_bin("Anivia_R_Hit")),
         }],
-        Some(hash_bin("Anivia_R_Hit")),
-    );
+    });
 
     commands
         .entity(entity)
