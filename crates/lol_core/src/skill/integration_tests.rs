@@ -1,3 +1,7 @@
+#![cfg(test)]
+
+//! Integration tests for the skill pipeline, migrated from root tests/skill_integration.rs.
+
 use std::collections::BTreeMap;
 use std::time::Duration;
 
@@ -6,20 +10,21 @@ use league_utils::hash_key::HashKey;
 use lol_base::prop::LoadHashKeyTrait;
 use lol_base::spell::{DataSpell, Spell, ValuesEffect};
 use lol_base::spell_calc::{CalculationPartEffectValue, CalculationSpell, CalculationType};
-use lol_core::action::PluginAction;
-use lol_core::action::damage::{DamageShape, TargetDamage, TargetFilter};
-use lol_core::base::ability_resource::{AbilityResource, AbilityResourceType};
-use lol_core::base::level::Level;
-use lol_core::cooldown::PluginCooldown;
-use lol_core::damage::{DamageType, PluginDamage};
-use lol_core::life::{Health, PluginLife};
-use lol_core::movement::PluginMovement;
-use lol_core::skill::{
+
+use crate::action::PluginAction;
+use crate::action::damage::{DamageShape, TargetDamage, TargetFilter};
+use crate::base::ability_resource::{AbilityResource, AbilityResourceType};
+use crate::base::level::Level;
+use crate::cooldown::PluginCooldown;
+use crate::damage::{DamageType, PluginDamage};
+use crate::life::{Health, PluginLife};
+use crate::movement::PluginMovement;
+use crate::skill::{
     CommandSkillLevelUp, CommandSkillStart, CoolDown, EventSkillCast, PluginSkill, Skill,
     SkillCastFailureReason, SkillCastLog, SkillCastResult, SkillCooldownMode, SkillOf, SkillPoints,
     SkillRecastWindow, SkillSlot, Skills, skill_damage,
 };
-use lol_core::team::Team;
+use crate::team::Team;
 
 const TEST_FPS: f32 = 30.0;
 const SPELL_KEY: u32 = 0x1001;

@@ -350,51 +350,6 @@ observer 可以直接：
 
 ---
 
-## 测试策略
-
-技能系统必须优先保证在 tests 中可验证。
-
-当前测试关注两层：
-
-### 1. 核心技能单测
-
-见：
-
-- [tests/skill.rs](/Users/zhr/Documents/workspace/moon-lol/tests/skill.rs)
-
-覆盖内容：
-
-- 升级规则
-- 资源门槛
-- 施法日志
-- observer 技能执行
-- `SkillRecastWindow` 生命周期
-- 手动冷却逻辑
-
-### 2. 管线集成测试
-
-见：
-
-- [tests/skill_integration.rs](/Users/zhr/Documents/workspace/moon-lol/tests/skill_integration.rs)
-- [tests/riven_integration.rs](/Users/zhr/Documents/workspace/moon-lol/tests/riven_integration.rs)
-
-覆盖内容：
-
-- 通过 `Action` 输入走完整施法管线
-- headless 环境中的资源、伤害、冷却变化
-- 代码驱动技能的真实阶段推进
-
-### 可测试性标准
-
-一个技能设计如果做不到下面几点，通常说明实现方式不够好：
-
-- 能在 headless `App` 中直接施放
-- 能直接断言技能实体状态
-- 能直接断言施法失败原因
-- 不依赖渲染即可验证技能结果
-
----
-
 ## 当前结论
 
 现在的技能系统是彻底的代码驱动版本：

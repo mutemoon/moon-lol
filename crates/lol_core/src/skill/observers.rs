@@ -1,7 +1,7 @@
 use bevy::ecs::event::EntityEvent;
 use bevy::log::debug;
 use bevy::prelude::{
-    Assets, Commands, Entity, Fixed, On, Query, Res, ResMut, Time, Timer, TimerMode, info, warn,
+    Assets, Commands, Entity, Fixed, On, Query, Res, ResMut, Time, Timer, TimerMode, warn,
 };
 use lol_base::spell::Spell;
 

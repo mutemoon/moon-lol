@@ -3,6 +3,10 @@ mod events;
 mod helpers;
 mod observers;
 #[cfg(test)]
+mod integration_tests;
+#[cfg(test)]
+mod test_utils;
+#[cfg(test)]
 mod tests;
 
 use std::ops::Deref;

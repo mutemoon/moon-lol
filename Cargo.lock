@@ -4234,13 +4234,17 @@ name = "lol_champions"
 version = "0.1.0"
 dependencies = [
  "bevy",
+ "crossbeam-channel",
+ "image",
  "league_core",
  "league_file",
  "league_utils",
  "lol_base",
  "lol_core",
  "rand 0.9.4",
+ "ron 0.8.1",
  "serde",
+ "serde_json",
 ]
 
 [[package]]

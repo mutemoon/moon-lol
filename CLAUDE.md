@@ -1,8 +1,22 @@
 # 目录
 
-## 资源导出 `docs/extract.md`
+## 文档
 
-## 资源加载 `docs/load.md`
+- [资源导出](docs/extract.md) - WAD 文件结构、7 阶段提取流程、输出文件格式
+- [资源加载](docs/load.md) - 三种资源管理方案对比（直接读取/按需提取/完全提取）
+- [动画](docs/animation.md) - LOL 动画图组件、AnimationPlayer、骨骼实体层级
+- [资产系统](docs/asset.md) - GLTF 导出时预构建皮肤、运行时加载流程
+- [粒子系统](docs/particle_system.md) - 发射器层级、生命管理、Transform 父子关系
+- [着色器](docs/shader.md) - 不同条件下 shader 的 struct 和 uniform 处理
+- [技能系统](docs/skill.md) - ECS + Observer 架构、代码驱动、冷却管理
+- [状态机](docs/state.md) - 移动系统、攻击系统、自动攻击、位移优先级
+- [项目概览](docs/project.md) - 编译性能对比、wasm vs windows 速度
+- [介绍](docs/introduction.md) - 左手坐标系转右手、bevy 版本
+- [待办](docs/todo.md) - 开发进度追踪（粒子/技能/UI/寻路等）
+- [提示词](docs/prompt.md) - 导弹系统设计、dash 与伤害分离
+- [技能测试](docs/skill_test.md) - 测试方法论、harness 规则、真实资源测试策略
+- [技能研究](docs/skill_research.md) - 官方/社区数据获取、英雄文档结构
+- [英雄](docs/champions/) - 156 个英雄的详细技能文档
 
 # 架构设计
 
