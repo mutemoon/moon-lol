@@ -1,89 +1,13 @@
 #![cfg(test)]
 //! Logic and render/video tests for Riven skills.
-//!
-//! Headless mode uses mock spells; render mode uses real `ConfigCharacterRecord` + skin.
-
-use std::collections::BTreeMap;
 
 use bevy::math::{Vec2, Vec3};
-use league_utils::hash_bin;
-use lol_base::spell::{DataSpell, Spell, ValuesData};
-use lol_base::spell_calc::{
-    CalculationPart, CalculationPartNamedDataValue, CalculationSpell, CalculationType,
-};
-use lol_core::skill::{SkillCooldownMode, SkillRecastWindow, SkillSlot, Skills, get_skill_value};
+use lol_core::skill::{SkillRecastWindow, Skills, get_skill_value};
 
 use crate::riven::Riven;
 use crate::test_utils::*;
 
-const RIVEN_Q_KEY: &str = "Characters/Riven/Spells/RivenTriCleaveAbility/RivenTriCleave";
-const RIVEN_W_KEY: &str = "Characters/Riven/Spells/RivenMartyrAbility/RivenMartyr";
-const RIVEN_E_KEY: &str = "Characters/Riven/Spells/RivenFeintAbility/RivenFeint";
-const RIVEN_R_KEY: &str = "Characters/Riven/Spells/RivenFengShuiEngineAbility/RivenFengShuiEngine";
-
 const EPSILON: f32 = 1e-3;
-
-fn riven_spell_keys() -> SpellKeySet {
-    SpellKeySet {
-        q: RIVEN_Q_KEY,
-        w: RIVEN_W_KEY,
-        e: RIVEN_E_KEY,
-        r: RIVEN_R_KEY,
-        passive: "Characters/Riven/Spells/RivenPassiveAbility/RivenPassive",
-    }
-}
-
-fn riven_mock_spell() -> Spell {
-    let mut calculations = BTreeMap::new();
-    let make_calc = |name: &str| {
-        CalculationType::CalculationSpell(CalculationSpell {
-            formula_parts: Some(vec![CalculationPart::CalculationPartNamedDataValue(
-                CalculationPartNamedDataValue {
-                    data_value: name.to_string(),
-                },
-            )]),
-            multiplier: None,
-            precision: None,
-        })
-    };
-    calculations.insert("m_damage".to_string(), make_calc("m_damage"));
-    calculations.insert("total_damage".to_string(), make_calc("total_damage"));
-    calculations.insert(
-        "first_slash_damage".to_string(),
-        make_calc("first_slash_damage"),
-    );
-    calculations.insert("shield_strength".to_string(), make_calc("shield_strength"));
-    Spell {
-        spell_data: Some(DataSpell {
-            calculations: Some(calculations),
-            data_values: Some(vec![
-                ValuesData {
-                    name: "mDamage".into(),
-                    values: Some(vec![130.0; 6]),
-                },
-                ValuesData {
-                    name: "total_damage".into(),
-                    values: Some(vec![130.0; 6]),
-                },
-                ValuesData {
-                    name: "first_slash_damage".into(),
-                    values: Some(vec![130.0; 6]),
-                },
-                ValuesData {
-                    name: "ShieldStrength".into(),
-                    values: Some(vec![100.0; 6]),
-                },
-            ]),
-            effect_amounts: None,
-            mana: None,
-            missile_spec: None,
-            hit_bone_name: None,
-            missile_speed: None,
-            missile_effect_key: None,
-            cast_type: None,
-        }),
-    }
-}
 
 fn riven_config() -> ChampionHarnessConfig {
     ChampionHarnessConfig {
@@ -93,15 +17,6 @@ fn riven_config() -> ChampionHarnessConfig {
         add_champion_plugin: |app| {
             app.add_plugins(crate::riven::PluginRiven);
         },
-        make_mock_spell: riven_mock_spell,
-        cooldown_mode_for: |slot| {
-            if slot == SkillSlot::Q {
-                SkillCooldownMode::Manual
-            } else {
-                SkillCooldownMode::AfterCast
-            }
-        },
-        spell_keys: riven_spell_keys(),
     }
 }
 

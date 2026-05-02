@@ -1,68 +1,10 @@
 #![cfg(test)]
 //! Logic and render/video tests for Fiora skills.
-//!
-//! Headless mode uses mock spells; render mode uses real `ConfigCharacterRecord` + skin.
-
-use std::collections::BTreeMap;
 
 use bevy::math::Vec2;
-use league_utils::hash_bin;
-use lol_base::spell::{DataSpell, Spell, ValuesData};
-use lol_base::spell_calc::{
-    CalculationPart, CalculationPartNamedDataValue, CalculationSpell, CalculationType,
-};
-use lol_core::skill::SkillCooldownMode;
 
 use crate::fiora::Fiora;
 use crate::test_utils::*;
-
-const FIORA_Q_KEY: &str = "Characters/Fiora/Spells/FioraQ/FioraQ";
-const FIORA_W_KEY: &str = "Characters/Fiora/Spells/FioraW/FioraW";
-const FIORA_E_KEY: &str = "Characters/Fiora/Spells/FioraE/FioraE";
-const FIORA_R_KEY: &str = "Characters/Fiora/Spells/FioraR/FioraR";
-const FIORA_PASSIVE_KEY: &str = "Characters/Fiora/Spells/FioraPassive/FioraPassive";
-
-fn fiora_spell_keys() -> SpellKeySet {
-    SpellKeySet {
-        q: FIORA_Q_KEY,
-        w: FIORA_W_KEY,
-        e: FIORA_E_KEY,
-        r: FIORA_R_KEY,
-        passive: FIORA_PASSIVE_KEY,
-    }
-}
-
-fn fiora_mock_spell() -> Spell {
-    let mut calculations = BTreeMap::new();
-    calculations.insert(
-        "total_damage".to_string(),
-        CalculationType::CalculationSpell(CalculationSpell {
-            formula_parts: Some(vec![CalculationPart::CalculationPartNamedDataValue(
-                CalculationPartNamedDataValue {
-                    data_value: "total_damage".to_string(),
-                },
-            )]),
-            multiplier: None,
-            precision: None,
-        }),
-    );
-    Spell {
-        spell_data: Some(DataSpell {
-            calculations: Some(calculations),
-            data_values: Some(vec![ValuesData {
-                name: "total_damage".into(),
-                values: Some(vec![130.0; 6]),
-            }]),
-            effect_amounts: None,
-            mana: None,
-            missile_spec: None,
-            hit_bone_name: None,
-            missile_speed: None,
-            missile_effect_key: None,
-            cast_type: None,
-        }),
-    }
-}
 
 fn fiora_config() -> ChampionHarnessConfig {
     ChampionHarnessConfig {
@@ -72,9 +14,6 @@ fn fiora_config() -> ChampionHarnessConfig {
         add_champion_plugin: |app| {
             app.add_plugins(crate::fiora::PluginFiora);
         },
-        make_mock_spell: fiora_mock_spell,
-        cooldown_mode_for: |_| SkillCooldownMode::Manual,
-        spell_keys: fiora_spell_keys(),
     }
 }
 

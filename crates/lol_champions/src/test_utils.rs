@@ -29,7 +29,6 @@ use std::time::Duration;
 use bevy::prelude::*;
 use bevy::time::TimeUpdateStrategy;
 use bevy::winit::WinitPlugin;
-use league_utils::hash_key::HashKey;
 use lol_base::character::{ConfigCharacterRecord, ConfigSkin};
 use lol_base::grid::{
     ConfigNavigationGrid, ConfigNavigationGridCell, GridFlagsJungleQuadrant, GridFlagsMainRegion,
@@ -47,7 +46,7 @@ use lol_core::damage::{CommandDamageCreate, Damage, DamageType};
 use lol_core::entities::champion::Champion;
 use lol_core::life::Health;
 use lol_core::navigation::grid::ResourceGrid;
-use lol_core::skill::{CoolDown, Skill, SkillCooldownMode, SkillPoints, SkillSlot, Skills};
+use lol_core::skill::{CoolDown, Skill, SkillPoints, Skills};
 use lol_core::team::Team;
 use lol_render::test_render::{
     PluginSkillTestRender, SkillTestRenderConfig, SkillTestVideoFormat, SkillTestVideoOutput,
@@ -78,27 +77,12 @@ impl HarnessMode {
 
 pub struct ChampionHarnessConfig {
     pub champion_dir: &'static str,
-    /// Path to the champion's config scene, e.g. `"characters/riven/config.ron"` (render mode).
+    /// Path to the champion's config scene, e.g. `"characters/riven/config.ron"`.
     pub config_path: &'static str,
-    /// Path to the skin scene (render mode).
+    /// Path to the skin scene.
     pub skin_path: &'static str,
     /// Add the champion's plugin (e.g. `PluginRiven`) to the `App`.
     pub add_champion_plugin: fn(&mut App),
-    /// Mock spell factory (headless mode — fast, synchronous, no asset IO needed).
-    pub make_mock_spell: fn() -> Spell,
-    /// Cooldown mode per skill slot (headless mode).
-    pub cooldown_mode_for: fn(SkillSlot) -> SkillCooldownMode,
-    /// Spell keys for mock registration (headless mode).
-    pub spell_keys: SpellKeySet,
-}
-
-/// Path-string config for a champion's spell slots (used in headless mock-spell mode).
-pub struct SpellKeySet {
-    pub q: &'static str,
-    pub w: &'static str,
-    pub e: &'static str,
-    pub r: &'static str,
-    pub passive: &'static str,
 }
 
 // ── Shared harness ──
@@ -121,19 +105,6 @@ impl ChampionTestHarness {
         mode: HarnessMode,
         config: &ChampionHarnessConfig,
     ) -> Self {
-        if mode.is_render() {
-            Self::build_with_real_assets::<C>(test_name, mode, config)
-        } else {
-            Self::build_with_mocks::<C>(test_name, mode, config)
-        }
-    }
-
-    /// Headless: fast synchronous setup with mock spells.
-    fn build_with_mocks<C: Component + Default + Send + Sync + 'static>(
-        test_name: &str,
-        mode: HarnessMode,
-        config: &ChampionHarnessConfig,
-    ) -> Self {
         let mut app = App::new();
         app.insert_resource(Time::<Fixed>::from_duration(Duration::from_millis(16)));
         app.insert_resource(TimeUpdateStrategy::ManualDuration(Duration::from_millis(
@@ -143,167 +114,11 @@ impl ChampionTestHarness {
         setup_app_plugins(&mut app, &mode, test_name, config.champion_dir);
         add_common_plugins_and_init(&mut app, config.add_champion_plugin);
 
-        // Mock spells
-        {
-            let spell = (config.make_mock_spell)();
-            let mut objects = app.world_mut().resource_mut::<Assets<Spell>>();
-            objects.add_hash(config.spell_keys.q, spell.clone());
-            objects.add_hash(config.spell_keys.w, spell.clone());
-            objects.add_hash(config.spell_keys.e, spell.clone());
-            objects.add_hash(config.spell_keys.r, spell.clone());
-            objects.add_hash(config.spell_keys.passive, spell);
-        }
-
-        let q = config.spell_keys.q;
-        let w = config.spell_keys.w;
-        let e = config.spell_keys.e;
-        let r = config.spell_keys.r;
-        let cooldown_for = config.cooldown_mode_for;
-        app.add_systems(Startup, move |mut commands: Commands| {
-            let champion = commands
-                .spawn((
-                    C::default(),
-                    Team::Order,
-                    Transform::default(),
-                    Health::new(1000.0),
-                    AbilityResource {
-                        ar_type: AbilityResourceType::Mana,
-                        value: 1000.0,
-                        max: 1000.0,
-                        base: 1000.0,
-                        per_level: 0.0,
-                        base_static_regen: 0.0,
-                        regen_per_level: 0.0,
-                    },
-                    Level {
-                        value: 18,
-                        ..default()
-                    },
-                    SkillPoints(4),
-                    Damage(100.0),
-                    lol_core::damage::Armor(0.0),
-                    lol_core::movement::Movement { speed: 340.0 },
-                    lol_core::movement::MovementState::default(),
-                ))
-                .id();
-            for (slot, key) in [
-                (SkillSlot::Q, q),
-                (SkillSlot::W, w),
-                (SkillSlot::E, e),
-                (SkillSlot::R, r),
-            ] {
-                let mut skill = Skill::new(
-                    slot,
-                    Handle::from(league_utils::hash_key::HashKey::<Spell>::from(key)),
-                )
-                .with_level(1);
-                let m = cooldown_for(slot);
-                if m != SkillCooldownMode::AfterCast {
-                    skill = skill.with_cooldown_mode(m);
-                }
-                commands
-                    .entity(champion)
-                    .with_related::<lol_core::skill::SkillOf>((
-                        skill,
-                        CoolDown {
-                            duration: 10.0,
-                            timer: Some({
-                                let mut t = Timer::from_seconds(10.0, TimerMode::Once);
-                                t.set_elapsed(Duration::from_secs(10));
-                                t
-                            }),
-                        },
-                    ));
-            }
-            commands.insert_resource(HarnessEntities {
-                champion,
-                enemy_near: Entity::PLACEHOLDER,
-                enemy_far: Entity::PLACEHOLDER,
-                ally_near: Entity::PLACEHOLDER,
-            });
-        });
-
-        app.finish();
-        app.cleanup();
-        app.update();
-        let champion = app
-            .world()
-            .get_resource::<HarnessEntities>()
-            .unwrap()
-            .champion;
-        app.world_mut().remove_resource::<HarnessEntities>();
-
-        // Enemies + ally
-        let enemy_near = app
-            .world_mut()
-            .spawn((
-                Champion,
-                Team::Chaos,
-                Transform::from_xyz(100.0, 0.0, 0.0),
-                Health::new(6000.0),
-                lol_core::damage::Armor(0.0),
-            ))
-            .id();
-        let enemy_far = app
-            .world_mut()
-            .spawn((
-                Champion,
-                Team::Chaos,
-                Transform::from_xyz(420.0, 0.0, 0.0),
-                Health::new(6000.0),
-                lol_core::damage::Armor(0.0),
-            ))
-            .id();
-        let ally_near = app
-            .world_mut()
-            .spawn((
-                Team::Order,
-                Transform::from_xyz(60.0, 0.0, 0.0),
-                Health::new(6000.0),
-                lol_core::damage::Armor(0.0),
-            ))
-            .id();
-
-        if let Some(mut t) = app.world_mut().get_mut::<Transform>(champion) {
-            t.look_to(Vec3::X, Vec3::Y);
-        }
-        for _ in 0..15 {
-            app.update();
-        }
-
-        Self {
-            app,
-            champion_dir: config.champion_dir,
-            test_name: test_name.into(),
-            mode,
-            champion,
-            enemy_near,
-            enemy_far,
-            ally_near,
-            current_frame: 15,
-        }
-    }
-
-    /// Render: real ConfigCharacterRecord + ConfigSkin via AssetServer.
-    fn build_with_real_assets<C: Component + Default + Send + Sync + 'static>(
-        test_name: &str,
-        mode: HarnessMode,
-        config: &ChampionHarnessConfig,
-    ) -> Self {
-        let mut app = App::new();
-        app.insert_resource(Time::<Fixed>::from_duration(Duration::from_millis(16)));
-        app.insert_resource(TimeUpdateStrategy::ManualDuration(Duration::from_millis(
-            16,
-        )));
-
-        setup_app_plugins(&mut app, &mode, test_name, config.champion_dir);
-        add_common_plugins_and_init(&mut app, config.add_champion_plugin);
-
-        let config_handle = app
-            .world()
-            .resource::<AssetServer>()
-            .load(config.config_path);
-        let skin_handle = app.world().resource::<AssetServer>().load(config.skin_path);
+        // file_path is now ../../assets, so just use characters/...
+        let config_path = Box::leak(format!("{}", config.config_path).into_boxed_str());
+        let skin_path = Box::leak(format!("{}", config.skin_path).into_boxed_str());
+        let config_handle = app.world().resource::<AssetServer>().load(&*config_path);
+        let skin_handle = app.world().resource::<AssetServer>().load(&*skin_path);
 
         let champion = app
             .world_mut()
@@ -336,18 +151,6 @@ impl ChampionTestHarness {
             "config load failed: {}",
             config.config_path
         );
-        for _ in 0..500 {
-            app.update();
-            if !app.world().entity(champion).contains::<ConfigSkin>() {
-                break;
-            }
-        }
-        assert!(
-            !app.world().entity(champion).contains::<ConfigSkin>(),
-            "skin load failed: {}",
-            config.skin_path
-        );
-
         // Override stats
         let lvl = app.world().entity(champion).get::<Level>().cloned();
         app.world_mut().entity_mut(champion).insert((
@@ -370,7 +173,7 @@ impl ChampionTestHarness {
             SkillPoints(4),
         ));
 
-        // Set initial cooldowns
+        // Collect skill entities and poll until spell assets are loaded
         let skill_entities: Vec<Entity> = {
             let skills = app
                 .world()
@@ -378,6 +181,25 @@ impl ChampionTestHarness {
                 .expect("Skills missing after config load");
             (0..skills.len()).map(|i| skills[i]).collect()
         };
+
+        // Collect spell asset IDs for polling
+        let spell_ids = skill_entities
+            .iter()
+            .filter_map(|&se| app.world().get::<Skill>(se).map(|s| s.spell.id()))
+            .collect::<Vec<_>>();
+
+        // Poll until all spell assets are loaded
+        for _ in 0..1000 {
+            app.update();
+            if spell_ids
+                .iter()
+                .all(|id| app.world().resource::<Assets<Spell>>().contains(*id))
+            {
+                break;
+            }
+        }
+
+        // Set initial cooldowns
         for se in skill_entities {
             app.world_mut().entity_mut(se).insert(CoolDown {
                 duration: 10.0,
@@ -664,10 +486,6 @@ fn add_common_plugins_and_init(app: &mut App, add_champion_plugin: fn(&mut App))
     app.init_asset::<bevy::prelude::DynamicWorld>();
     app.init_asset::<ConfigNavigationGrid>();
     app.init_asset::<Spell>();
-    app.init_asset::<Image>();
-    app.init_asset::<Mesh>();
-    app.init_asset::<Shader>();
-    app.init_asset::<StandardMaterial>();
     app.finish();
     app.cleanup();
     let grid_handle = app
@@ -677,24 +495,17 @@ fn add_common_plugins_and_init(app: &mut App, add_champion_plugin: fn(&mut App))
     app.insert_resource(ResourceGrid(grid_handle));
 }
 
-#[derive(Resource)]
-struct HarnessEntities {
-    champion: Entity,
-    enemy_near: Entity,
-    enemy_far: Entity,
-    ally_near: Entity,
-}
-
 fn setup_app_plugins(app: &mut App, mode: &HarnessMode, test_name: &str, champion_dir: &str) {
     match mode {
         HarnessMode::Headless => {
-            app.add_plugins(MinimalPlugins);
-            app.add_plugins(AssetPlugin::default());
-            app.add_plugins(bevy::input::InputPlugin);
-            app.add_plugins(bevy::state::app::StatesPlugin);
-            app.add_plugins(bevy::picking::PickingPlugin);
-            // ScenePlugin is needed for loading .ron files as DynamicWorld assets
-            app.add_plugins(bevy::scene::ScenePlugin);
+            // Configure AssetPlugin to use ../../assets as the asset root and allow unapproved paths.
+            app.add_plugins(DefaultPlugins.build().disable::<WinitPlugin>().set(
+                bevy::asset::AssetPlugin {
+                    file_path: "../../assets".to_string(),
+                    unapproved_path_mode: bevy::asset::UnapprovedPathMode::Allow,
+                    ..Default::default()
+                },
+            ));
         }
         HarnessMode::Render { max_frames } => {
             let output_dir = render_output_dir(champion_dir);
@@ -716,9 +527,6 @@ fn setup_app_plugins(app: &mut App, mode: &HarnessMode, test_name: &str, champio
             app.insert_resource(lol_base::map::MapPaths::default());
             app.add_plugins(DefaultPlugins.build().disable::<WinitPlugin>());
             app.add_plugins(PluginSkillTestRender);
-            app.add_plugins(bevy::input::InputPlugin);
-            app.add_plugins(bevy::state::app::StatesPlugin);
-            app.add_plugins(bevy::picking::PickingPlugin);
         }
     }
 }
