@@ -1,0 +1,168 @@
+(
+    gltf_path: "characters/ziggs/skins/skin0.glb",
+    hash_to_node: {
+        "Attack": Selector(
+            probably_nodes: [
+                (
+                    key: "Attack1",
+                    value: 1.0,
+                ),
+                (
+                    key: "Attack2",
+                    value: 1.0,
+                ),
+            ],
+        ),
+        "Attack1": Clip(
+            node_index: 2,
+        ),
+        "Attack2": Clip(
+            node_index: 4,
+        ),
+        "Channel": Clip(
+            node_index: 0,
+        ),
+        "ChannelWndup": Clip(
+            node_index: 6,
+        ),
+        "Crit": Clip(
+            node_index: 5,
+        ),
+        "Dance": Clip(
+            node_index: 19,
+        ),
+        "Death": Clip(
+            node_index: 13,
+        ),
+        "Idle1": Selector(
+            probably_nodes: [
+                (
+                    key: "Unk0xf29d5598",
+                    value: 25.0,
+                ),
+                (
+                    key: "Unk0xf59d5a51",
+                    value: 25.0,
+                ),
+                (
+                    key: "Unk0xf49d58be",
+                    value: 25.0,
+                ),
+                (
+                    key: "Unk0xf79d5d77",
+                    value: 25.0,
+                ),
+            ],
+        ),
+        "Joke": Clip(
+            node_index: 14,
+        ),
+        "Laugh": Clip(
+            node_index: 10,
+        ),
+        "Recall": Sequence(
+            hashes: [
+                "Joke",
+                "Idle1",
+            ],
+        ),
+        "Run": Clip(
+            node_index: 1,
+        ),
+        "Run2": Clip(
+            node_index: 3,
+        ),
+        "Spell1": Clip(
+            node_index: 7,
+        ),
+        "Spell2": Clip(
+            node_index: 9,
+        ),
+        "Spell3": Clip(
+            node_index: 8,
+        ),
+        "Spell4": Clip(
+            node_index: 11,
+        ),
+        "Taunt": Clip(
+            node_index: 12,
+        ),
+        "Unk0xf29d5598": Clip(
+            node_index: 15,
+        ),
+        "Unk0xf49d58be": Clip(
+            node_index: 16,
+        ),
+        "Unk0xf59d5a51": Clip(
+            node_index: 17,
+        ),
+        "Unk0xf79d5d77": Clip(
+            node_index: 18,
+        ),
+    },
+    blend_data: {
+        ("Attack1", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Attack2", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Channel", "Death"): Time(
+            time: 0.0,
+        ),
+        ("ChannelWndup", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Crit", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Dance", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Death", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Idle1", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Joke", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Laugh", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Run", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Run2", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell1", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell2", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell3", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell4", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Taunt", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xf29d5598", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xf49d58be", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xf59d5a51", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xf79d5d77", "Death"): Time(
+            time: 0.0,
+        ),
+    },
+)

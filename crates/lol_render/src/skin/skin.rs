@@ -1,6 +1,8 @@
+use bevy::animation::graph::AnimationGraphHandle;
 use bevy::ecs::entity::EntityHashMap;
 use bevy::prelude::*;
-use bevy::world_serialization::WorldInstanceSpawnError;
+use bevy::world_serialization::{WorldInstanceReady, WorldInstanceSpawnError};
+use lol_base::animation::{AnimationConfigOf, LOLAnimationState};
 use lol_base::character::{ConfigSkin, Skin};
 
 pub fn update_skin_scale(mut query: Query<(&Skin, &mut Transform)>) {
@@ -19,7 +21,7 @@ pub fn try_load_config_skin_characters(
         return;
     }
 
-    // info!("加载 {} 个皮肤", skin_len);
+    info!("加载 {} 个皮肤", skin_len);
 
     // 处理 ConfigSkin - 写入皮肤数据到世界
     for (entity, config) in &skin_query {
@@ -41,6 +43,39 @@ pub fn try_load_config_skin_characters(
             })
         });
 
-        commands.entity(entity).remove::<ConfigSkin>();
+        commands
+            .entity(entity)
+            .remove::<ConfigSkin>()
+            .observe(migrate_animation_graph_handle);
     }
+}
+
+#[derive(Component)]
+pub struct BoneRoot;
+
+pub fn migrate_animation_graph_handle(
+    trigger: On<WorldInstanceReady>,
+    mut q_character: Query<(&AnimationGraphHandle, &mut LOLAnimationState)>,
+    q_children: Query<&Children>,
+    q_bone: Query<&AnimationPlayer>,
+    mut commands: Commands,
+) {
+    let root_entity = trigger.event_target();
+    let (graph_handle, mut state) = q_character.get_mut(root_entity).unwrap();
+    for descendant in q_children.iter_descendants(root_entity) {
+        if q_bone.contains(descendant) {
+            info!(
+                "角色实体 {:?} 加载动画 {:?} 骨骼数量 {}",
+                root_entity,
+                descendant,
+                q_bone.count()
+            );
+            commands
+                .entity(descendant)
+                .insert(graph_handle.clone())
+                .insert(BoneRoot)
+                .insert(AnimationConfigOf(root_entity));
+        }
+    }
+    state.current = state.current.clone();
 }

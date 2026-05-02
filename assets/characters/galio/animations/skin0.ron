@@ -1,0 +1,2214 @@
+(
+    gltf_path: "characters/galio/skins/skin0.glb",
+    hash_to_node: {
+        "Attack": Selector(
+            probably_nodes: [
+                (
+                    key: "Attack1",
+                    value: 1.0,
+                ),
+                (
+                    key: "Attack2",
+                    value: 1.0,
+                ),
+            ],
+        ),
+        "Attack1": Clip(
+            node_index: 8,
+        ),
+        "Attack2": Clip(
+            node_index: 11,
+        ),
+        "Attack3": Clip(
+            node_index: 9,
+        ),
+        "Attack4": Clip(
+            node_index: 7,
+        ),
+        "AttackPassive": Clip(
+            node_index: 1,
+        ),
+        "Channel": Clip(
+            node_index: 3,
+        ),
+        "ChannelWndup": Clip(
+            node_index: 22,
+        ),
+        "Crit": Clip(
+            node_index: 20,
+        ),
+        "Dance": Sequence(
+            hashes: [
+                "DanceIn",
+                "DanceLoop",
+            ],
+        ),
+        "DanceIn": Clip(
+            node_index: 37,
+        ),
+        "DanceLoop": Clip(
+            node_index: 2,
+        ),
+        "Death": Clip(
+            node_index: 31,
+        ),
+        "Idle1": Selector(
+            probably_nodes: [
+                (
+                    key: "Idle1Base",
+                    value: 9.0,
+                ),
+                (
+                    key: "Idle2Base",
+                    value: 1.0,
+                ),
+            ],
+        ),
+        "Idle1Base": Clip(
+            node_index: 14,
+        ),
+        "Idle2Base": Clip(
+            node_index: 35,
+        ),
+        "IdleIn": Clip(
+            node_index: 36,
+        ),
+        "Joke": Clip(
+            node_index: 33,
+        ),
+        "Laugh": Clip(
+            node_index: 28,
+        ),
+        "Recall": Clip(
+            node_index: 12,
+        ),
+        "RecallWinddown": Clip(
+            node_index: 23,
+        ),
+        "Respawn": Clip(
+            node_index: 21,
+        ),
+        "Run": ConditionFloat(
+            updater: MoveSpeed,
+            conditions: [
+                (
+                    key: "RunBase",
+                    value: 0.0,
+                ),
+                (
+                    key: "RunHaste",
+                    value: 495.0,
+                ),
+            ],
+        ),
+        "RunBase": Clip(
+            node_index: 38,
+        ),
+        "RunHaste": Clip(
+            node_index: 4,
+        ),
+        "Spell1": Clip(
+            node_index: 26,
+        ),
+        "Spell1ToRun": Clip(
+            node_index: 19,
+        ),
+        "Spell2Cast": ConditionBool(
+            updater: IsMoving,
+            true_node: "Spell2RunCast",
+            false_node: "Spell2IdleCast",
+        ),
+        "Spell2Charge": ConditionBool(
+            updater: IsMoving,
+            true_node: "Unk0xb2201fd8",
+            false_node: "Unk0xcb19b94d",
+        ),
+        "Spell2IdleCast": Clip(
+            node_index: 15,
+        ),
+        "Spell2RunCast": Clip(
+            node_index: 32,
+        ),
+        "Spell2Tra": Clip(
+            node_index: 18,
+        ),
+        "Spell3": Clip(
+            node_index: 27,
+        ),
+        "Spell3Hit": Clip(
+            node_index: 17,
+        ),
+        "Spell3Windup": Clip(
+            node_index: 6,
+        ),
+        "Spell4": Clip(
+            node_index: 29,
+        ),
+        "Spell4Channel": Clip(
+            node_index: 13,
+        ),
+        "Spell4In": Clip(
+            node_index: 10,
+        ),
+        "Spell4Out": Clip(
+            node_index: 24,
+        ),
+        "Spell4Short": Clip(
+            node_index: 5,
+        ),
+        "Spell4ShortIn": Clip(
+            node_index: 0,
+        ),
+        "Spell4ShortOut": Clip(
+            node_index: 16,
+        ),
+        "Taunt": Clip(
+            node_index: 30,
+        ),
+        "Unk0xb2201fd8": Clip(
+            node_index: 25,
+        ),
+        "Unk0xcb19b94d": Clip(
+            node_index: 34,
+        ),
+    },
+    blend_data: {
+        ("Attack1", "Attack1"): Time(
+            time: 0.1,
+        ),
+        ("Attack1", "Attack2"): Time(
+            time: 0.1,
+        ),
+        ("Attack1", "Attack3"): Time(
+            time: 0.1,
+        ),
+        ("Attack1", "Attack4"): Time(
+            time: 0.1,
+        ),
+        ("Attack1", "AttackPassive"): Time(
+            time: 0.1,
+        ),
+        ("Attack1", "Channel"): Time(
+            time: 0.1,
+        ),
+        ("Attack1", "ChannelWndup"): Time(
+            time: 0.1,
+        ),
+        ("Attack1", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("Attack1", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Attack1", "Idle1"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("Attack1", "Idle1Base"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("Attack1", "Idle2Base"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("Attack1", "IdleIn"): Time(
+            time: 0.1,
+        ),
+        ("Attack1", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Attack1", "Spell2IdleCast"): Time(
+            time: 0.05,
+        ),
+        ("Attack1", "Spell2RunCast"): Time(
+            time: 0.1,
+        ),
+        ("Attack1", "Spell2Tra"): Time(
+            time: 0.1,
+        ),
+        ("Attack1", "Spell3Windup"): Time(
+            time: 0.05,
+        ),
+        ("Attack1", "Spell4Channel"): Time(
+            time: 0.05,
+        ),
+        ("Attack1", "Unk0xb2201fd8"): TransitionClip(
+            clip_name: "Spell2Tra",
+        ),
+        ("Attack1", "Unk0xcb19b94d"): TransitionClip(
+            clip_name: "Spell2Tra",
+        ),
+        ("Attack2", "Attack1"): Time(
+            time: 0.1,
+        ),
+        ("Attack2", "Attack2"): Time(
+            time: 0.1,
+        ),
+        ("Attack2", "Attack3"): Time(
+            time: 0.1,
+        ),
+        ("Attack2", "Attack4"): Time(
+            time: 0.1,
+        ),
+        ("Attack2", "AttackPassive"): Time(
+            time: 0.1,
+        ),
+        ("Attack2", "Channel"): Time(
+            time: 0.1,
+        ),
+        ("Attack2", "ChannelWndup"): Time(
+            time: 0.1,
+        ),
+        ("Attack2", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("Attack2", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Attack2", "Idle1"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("Attack2", "Idle1Base"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("Attack2", "Idle2Base"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("Attack2", "IdleIn"): Time(
+            time: 0.1,
+        ),
+        ("Attack2", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Attack2", "Spell2IdleCast"): Time(
+            time: 0.05,
+        ),
+        ("Attack2", "Spell2RunCast"): Time(
+            time: 0.1,
+        ),
+        ("Attack2", "Spell2Tra"): Time(
+            time: 0.1,
+        ),
+        ("Attack2", "Spell3Windup"): Time(
+            time: 0.05,
+        ),
+        ("Attack2", "Spell4Channel"): Time(
+            time: 0.05,
+        ),
+        ("Attack2", "Unk0xb2201fd8"): TransitionClip(
+            clip_name: "Spell2Tra",
+        ),
+        ("Attack2", "Unk0xcb19b94d"): TransitionClip(
+            clip_name: "Spell2Tra",
+        ),
+        ("Attack3", "Attack1"): Time(
+            time: 0.1,
+        ),
+        ("Attack3", "Attack2"): Time(
+            time: 0.1,
+        ),
+        ("Attack3", "Attack3"): Time(
+            time: 0.1,
+        ),
+        ("Attack3", "Attack4"): Time(
+            time: 0.1,
+        ),
+        ("Attack3", "AttackPassive"): Time(
+            time: 0.1,
+        ),
+        ("Attack3", "Channel"): Time(
+            time: 0.1,
+        ),
+        ("Attack3", "ChannelWndup"): Time(
+            time: 0.1,
+        ),
+        ("Attack3", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("Attack3", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Attack3", "Idle1"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("Attack3", "Idle1Base"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("Attack3", "Idle2Base"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("Attack3", "IdleIn"): Time(
+            time: 0.1,
+        ),
+        ("Attack3", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Attack3", "Spell2IdleCast"): Time(
+            time: 0.05,
+        ),
+        ("Attack3", "Spell2RunCast"): Time(
+            time: 0.1,
+        ),
+        ("Attack3", "Spell2Tra"): Time(
+            time: 0.1,
+        ),
+        ("Attack3", "Spell3Windup"): Time(
+            time: 0.05,
+        ),
+        ("Attack3", "Spell4Channel"): Time(
+            time: 0.05,
+        ),
+        ("Attack3", "Unk0xb2201fd8"): TransitionClip(
+            clip_name: "Spell2Tra",
+        ),
+        ("Attack3", "Unk0xcb19b94d"): TransitionClip(
+            clip_name: "Spell2Tra",
+        ),
+        ("Attack4", "Attack1"): Time(
+            time: 0.1,
+        ),
+        ("Attack4", "Attack2"): Time(
+            time: 0.1,
+        ),
+        ("Attack4", "Attack3"): Time(
+            time: 0.1,
+        ),
+        ("Attack4", "Attack4"): Time(
+            time: 0.1,
+        ),
+        ("Attack4", "AttackPassive"): Time(
+            time: 0.1,
+        ),
+        ("Attack4", "Channel"): Time(
+            time: 0.1,
+        ),
+        ("Attack4", "ChannelWndup"): Time(
+            time: 0.1,
+        ),
+        ("Attack4", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("Attack4", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Attack4", "Idle1"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("Attack4", "Idle1Base"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("Attack4", "Idle2Base"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("Attack4", "IdleIn"): Time(
+            time: 0.1,
+        ),
+        ("Attack4", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Attack4", "Spell2IdleCast"): Time(
+            time: 0.05,
+        ),
+        ("Attack4", "Spell2RunCast"): Time(
+            time: 0.1,
+        ),
+        ("Attack4", "Spell2Tra"): Time(
+            time: 0.1,
+        ),
+        ("Attack4", "Spell3Windup"): Time(
+            time: 0.05,
+        ),
+        ("Attack4", "Spell4Channel"): Time(
+            time: 0.05,
+        ),
+        ("Attack4", "Unk0xb2201fd8"): TransitionClip(
+            clip_name: "Spell2Tra",
+        ),
+        ("Attack4", "Unk0xcb19b94d"): TransitionClip(
+            clip_name: "Spell2Tra",
+        ),
+        ("AttackPassive", "Attack1"): Time(
+            time: 0.1,
+        ),
+        ("AttackPassive", "Attack2"): Time(
+            time: 0.1,
+        ),
+        ("AttackPassive", "Attack3"): Time(
+            time: 0.1,
+        ),
+        ("AttackPassive", "Attack4"): Time(
+            time: 0.1,
+        ),
+        ("AttackPassive", "AttackPassive"): Time(
+            time: 0.1,
+        ),
+        ("AttackPassive", "Channel"): Time(
+            time: 0.1,
+        ),
+        ("AttackPassive", "ChannelWndup"): Time(
+            time: 0.1,
+        ),
+        ("AttackPassive", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("AttackPassive", "Death"): Time(
+            time: 0.0,
+        ),
+        ("AttackPassive", "Idle1"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("AttackPassive", "Idle1Base"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("AttackPassive", "Idle2Base"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("AttackPassive", "IdleIn"): Time(
+            time: 0.1,
+        ),
+        ("AttackPassive", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("AttackPassive", "Spell2IdleCast"): Time(
+            time: 0.05,
+        ),
+        ("AttackPassive", "Spell2RunCast"): Time(
+            time: 0.1,
+        ),
+        ("AttackPassive", "Spell2Tra"): Time(
+            time: 0.1,
+        ),
+        ("AttackPassive", "Spell3Windup"): Time(
+            time: 0.05,
+        ),
+        ("AttackPassive", "Spell4Channel"): Time(
+            time: 0.05,
+        ),
+        ("AttackPassive", "Unk0xb2201fd8"): TransitionClip(
+            clip_name: "Spell2Tra",
+        ),
+        ("AttackPassive", "Unk0xcb19b94d"): TransitionClip(
+            clip_name: "Spell2Tra",
+        ),
+        ("Channel", "Attack1"): Time(
+            time: 0.1,
+        ),
+        ("Channel", "Attack2"): Time(
+            time: 0.1,
+        ),
+        ("Channel", "Attack3"): Time(
+            time: 0.1,
+        ),
+        ("Channel", "Attack4"): Time(
+            time: 0.1,
+        ),
+        ("Channel", "AttackPassive"): Time(
+            time: 0.1,
+        ),
+        ("Channel", "Channel"): Time(
+            time: 0.1,
+        ),
+        ("Channel", "ChannelWndup"): Time(
+            time: 0.1,
+        ),
+        ("Channel", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("Channel", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Channel", "IdleIn"): Time(
+            time: 0.1,
+        ),
+        ("Channel", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Channel", "Spell2IdleCast"): Time(
+            time: 0.05,
+        ),
+        ("Channel", "Spell2RunCast"): Time(
+            time: 0.1,
+        ),
+        ("Channel", "Spell2Tra"): Time(
+            time: 0.1,
+        ),
+        ("Channel", "Spell3Windup"): Time(
+            time: 0.05,
+        ),
+        ("Channel", "Spell4Channel"): Time(
+            time: 0.05,
+        ),
+        ("Channel", "Unk0xb2201fd8"): TransitionClip(
+            clip_name: "Spell2Tra",
+        ),
+        ("Channel", "Unk0xcb19b94d"): TransitionClip(
+            clip_name: "Spell2Tra",
+        ),
+        ("ChannelWndup", "Attack1"): Time(
+            time: 0.1,
+        ),
+        ("ChannelWndup", "Attack2"): Time(
+            time: 0.1,
+        ),
+        ("ChannelWndup", "Attack3"): Time(
+            time: 0.1,
+        ),
+        ("ChannelWndup", "Attack4"): Time(
+            time: 0.1,
+        ),
+        ("ChannelWndup", "AttackPassive"): Time(
+            time: 0.1,
+        ),
+        ("ChannelWndup", "Channel"): Time(
+            time: 0.1,
+        ),
+        ("ChannelWndup", "ChannelWndup"): Time(
+            time: 0.1,
+        ),
+        ("ChannelWndup", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("ChannelWndup", "Death"): Time(
+            time: 0.0,
+        ),
+        ("ChannelWndup", "IdleIn"): Time(
+            time: 0.1,
+        ),
+        ("ChannelWndup", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("ChannelWndup", "Spell2IdleCast"): Time(
+            time: 0.05,
+        ),
+        ("ChannelWndup", "Spell2RunCast"): Time(
+            time: 0.1,
+        ),
+        ("ChannelWndup", "Spell2Tra"): Time(
+            time: 0.1,
+        ),
+        ("ChannelWndup", "Spell3Windup"): Time(
+            time: 0.05,
+        ),
+        ("ChannelWndup", "Spell4Channel"): Time(
+            time: 0.05,
+        ),
+        ("ChannelWndup", "Unk0xb2201fd8"): TransitionClip(
+            clip_name: "Spell2Tra",
+        ),
+        ("ChannelWndup", "Unk0xcb19b94d"): TransitionClip(
+            clip_name: "Spell2Tra",
+        ),
+        ("Crit", "Attack1"): Time(
+            time: 0.1,
+        ),
+        ("Crit", "Attack2"): Time(
+            time: 0.1,
+        ),
+        ("Crit", "Attack3"): Time(
+            time: 0.1,
+        ),
+        ("Crit", "Attack4"): Time(
+            time: 0.1,
+        ),
+        ("Crit", "AttackPassive"): Time(
+            time: 0.1,
+        ),
+        ("Crit", "Channel"): Time(
+            time: 0.1,
+        ),
+        ("Crit", "ChannelWndup"): Time(
+            time: 0.1,
+        ),
+        ("Crit", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("Crit", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Crit", "Idle1"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("Crit", "Idle1Base"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("Crit", "Idle2Base"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("Crit", "IdleIn"): Time(
+            time: 0.1,
+        ),
+        ("Crit", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Crit", "Spell2IdleCast"): Time(
+            time: 0.05,
+        ),
+        ("Crit", "Spell2RunCast"): Time(
+            time: 0.1,
+        ),
+        ("Crit", "Spell2Tra"): Time(
+            time: 0.1,
+        ),
+        ("Crit", "Spell3Windup"): Time(
+            time: 0.05,
+        ),
+        ("Crit", "Spell4Channel"): Time(
+            time: 0.05,
+        ),
+        ("Crit", "Unk0xb2201fd8"): TransitionClip(
+            clip_name: "Spell2Tra",
+        ),
+        ("Crit", "Unk0xcb19b94d"): TransitionClip(
+            clip_name: "Spell2Tra",
+        ),
+        ("Dance", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Dance", "IdleIn"): Time(
+            time: 0.1,
+        ),
+        ("Dance", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Dance", "Spell2IdleCast"): Time(
+            time: 0.05,
+        ),
+        ("Dance", "Spell2RunCast"): Time(
+            time: 0.1,
+        ),
+        ("Dance", "Spell2Tra"): Time(
+            time: 0.1,
+        ),
+        ("Dance", "Spell3Windup"): Time(
+            time: 0.05,
+        ),
+        ("Dance", "Spell4Channel"): Time(
+            time: 0.05,
+        ),
+        ("Dance", "Unk0xb2201fd8"): TransitionClip(
+            clip_name: "Spell2Tra",
+        ),
+        ("Dance", "Unk0xcb19b94d"): TransitionClip(
+            clip_name: "Spell2Tra",
+        ),
+        ("DanceIn", "Attack1"): Time(
+            time: 0.1,
+        ),
+        ("DanceIn", "Attack2"): Time(
+            time: 0.1,
+        ),
+        ("DanceIn", "Attack3"): Time(
+            time: 0.1,
+        ),
+        ("DanceIn", "Attack4"): Time(
+            time: 0.1,
+        ),
+        ("DanceIn", "AttackPassive"): Time(
+            time: 0.1,
+        ),
+        ("DanceIn", "Channel"): Time(
+            time: 0.1,
+        ),
+        ("DanceIn", "ChannelWndup"): Time(
+            time: 0.1,
+        ),
+        ("DanceIn", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("DanceIn", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("DanceIn", "Death"): Time(
+            time: 0.0,
+        ),
+        ("DanceIn", "IdleIn"): Time(
+            time: 0.1,
+        ),
+        ("DanceIn", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("DanceIn", "Spell2IdleCast"): Time(
+            time: 0.05,
+        ),
+        ("DanceIn", "Spell2RunCast"): Time(
+            time: 0.1,
+        ),
+        ("DanceIn", "Spell2Tra"): Time(
+            time: 0.1,
+        ),
+        ("DanceIn", "Spell3Windup"): Time(
+            time: 0.05,
+        ),
+        ("DanceIn", "Spell4Channel"): Time(
+            time: 0.05,
+        ),
+        ("DanceIn", "Unk0xb2201fd8"): TransitionClip(
+            clip_name: "Spell2Tra",
+        ),
+        ("DanceIn", "Unk0xcb19b94d"): TransitionClip(
+            clip_name: "Spell2Tra",
+        ),
+        ("DanceLoop", "Attack1"): Time(
+            time: 0.1,
+        ),
+        ("DanceLoop", "Attack2"): Time(
+            time: 0.1,
+        ),
+        ("DanceLoop", "Attack3"): Time(
+            time: 0.1,
+        ),
+        ("DanceLoop", "Attack4"): Time(
+            time: 0.1,
+        ),
+        ("DanceLoop", "AttackPassive"): Time(
+            time: 0.1,
+        ),
+        ("DanceLoop", "Channel"): Time(
+            time: 0.1,
+        ),
+        ("DanceLoop", "ChannelWndup"): Time(
+            time: 0.1,
+        ),
+        ("DanceLoop", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("Death", "Attack1"): Time(
+            time: 0.1,
+        ),
+        ("Death", "Attack2"): Time(
+            time: 0.1,
+        ),
+        ("Death", "Attack3"): Time(
+            time: 0.1,
+        ),
+        ("Death", "Attack4"): Time(
+            time: 0.1,
+        ),
+        ("Death", "AttackPassive"): Time(
+            time: 0.1,
+        ),
+        ("Death", "Channel"): Time(
+            time: 0.1,
+        ),
+        ("Death", "ChannelWndup"): Time(
+            time: 0.1,
+        ),
+        ("Death", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("Death", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Death", "IdleIn"): Time(
+            time: 0.1,
+        ),
+        ("Death", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Death", "Spell2IdleCast"): Time(
+            time: 0.05,
+        ),
+        ("Death", "Spell2RunCast"): Time(
+            time: 0.1,
+        ),
+        ("Death", "Spell2Tra"): Time(
+            time: 0.1,
+        ),
+        ("Death", "Spell3Windup"): Time(
+            time: 0.05,
+        ),
+        ("Death", "Spell4Channel"): Time(
+            time: 0.05,
+        ),
+        ("Death", "Unk0xb2201fd8"): TransitionClip(
+            clip_name: "Spell2Tra",
+        ),
+        ("Death", "Unk0xcb19b94d"): TransitionClip(
+            clip_name: "Spell2Tra",
+        ),
+        ("Idle1", "AttackPassive"): Time(
+            time: 0.1,
+        ),
+        ("Idle1", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Idle1", "IdleIn"): Time(
+            time: 0.1,
+        ),
+        ("Idle1", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Idle1", "Spell2IdleCast"): Time(
+            time: 0.05,
+        ),
+        ("Idle1", "Spell2RunCast"): Time(
+            time: 0.1,
+        ),
+        ("Idle1", "Spell2Tra"): Time(
+            time: 0.1,
+        ),
+        ("Idle1", "Spell3"): Time(
+            time: 0.0,
+        ),
+        ("Idle1", "Spell3Windup"): Time(
+            time: 0.05,
+        ),
+        ("Idle1", "Spell4Channel"): Time(
+            time: 0.05,
+        ),
+        ("Idle1", "Unk0xb2201fd8"): TransitionClip(
+            clip_name: "Spell2Tra",
+        ),
+        ("Idle1", "Unk0xcb19b94d"): TransitionClip(
+            clip_name: "Spell2Tra",
+        ),
+        ("Idle1Base", "Attack1"): Time(
+            time: 0.1,
+        ),
+        ("Idle1Base", "Attack2"): Time(
+            time: 0.1,
+        ),
+        ("Idle1Base", "Attack3"): Time(
+            time: 0.1,
+        ),
+        ("Idle1Base", "Attack4"): Time(
+            time: 0.1,
+        ),
+        ("Idle1Base", "AttackPassive"): Time(
+            time: 0.1,
+        ),
+        ("Idle1Base", "Channel"): Time(
+            time: 0.1,
+        ),
+        ("Idle1Base", "ChannelWndup"): Time(
+            time: 0.1,
+        ),
+        ("Idle1Base", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("Idle1Base", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Idle1Base", "IdleIn"): Time(
+            time: 0.1,
+        ),
+        ("Idle1Base", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Idle1Base", "Spell2IdleCast"): Time(
+            time: 0.05,
+        ),
+        ("Idle1Base", "Spell2RunCast"): Time(
+            time: 0.1,
+        ),
+        ("Idle1Base", "Spell2Tra"): Time(
+            time: 0.1,
+        ),
+        ("Idle1Base", "Spell3"): Time(
+            time: 0.0,
+        ),
+        ("Idle1Base", "Spell3Windup"): Time(
+            time: 0.05,
+        ),
+        ("Idle1Base", "Spell4Channel"): Time(
+            time: 0.05,
+        ),
+        ("Idle1Base", "Unk0xb2201fd8"): TransitionClip(
+            clip_name: "Spell2Tra",
+        ),
+        ("Idle1Base", "Unk0xcb19b94d"): TransitionClip(
+            clip_name: "Spell2Tra",
+        ),
+        ("Idle2Base", "Attack1"): Time(
+            time: 0.1,
+        ),
+        ("Idle2Base", "Attack2"): Time(
+            time: 0.1,
+        ),
+        ("Idle2Base", "Attack3"): Time(
+            time: 0.1,
+        ),
+        ("Idle2Base", "Attack4"): Time(
+            time: 0.1,
+        ),
+        ("Idle2Base", "AttackPassive"): Time(
+            time: 0.1,
+        ),
+        ("Idle2Base", "Channel"): Time(
+            time: 0.1,
+        ),
+        ("Idle2Base", "ChannelWndup"): Time(
+            time: 0.1,
+        ),
+        ("Idle2Base", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("Idle2Base", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Idle2Base", "IdleIn"): Time(
+            time: 0.1,
+        ),
+        ("Idle2Base", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Idle2Base", "Spell2IdleCast"): Time(
+            time: 0.05,
+        ),
+        ("Idle2Base", "Spell2RunCast"): Time(
+            time: 0.1,
+        ),
+        ("Idle2Base", "Spell2Tra"): Time(
+            time: 0.1,
+        ),
+        ("Idle2Base", "Spell3Windup"): Time(
+            time: 0.05,
+        ),
+        ("Idle2Base", "Spell4Channel"): Time(
+            time: 0.05,
+        ),
+        ("Idle2Base", "Unk0xb2201fd8"): TransitionClip(
+            clip_name: "Spell2Tra",
+        ),
+        ("Idle2Base", "Unk0xcb19b94d"): TransitionClip(
+            clip_name: "Spell2Tra",
+        ),
+        ("Idle3", "Death"): Time(
+            time: 0.0,
+        ),
+        ("IdleIn", "Attack1"): Time(
+            time: 0.1,
+        ),
+        ("IdleIn", "Attack2"): Time(
+            time: 0.1,
+        ),
+        ("IdleIn", "Attack3"): Time(
+            time: 0.1,
+        ),
+        ("IdleIn", "Attack4"): Time(
+            time: 0.1,
+        ),
+        ("IdleIn", "AttackPassive"): Time(
+            time: 0.1,
+        ),
+        ("IdleIn", "Channel"): Time(
+            time: 0.1,
+        ),
+        ("IdleIn", "ChannelWndup"): Time(
+            time: 0.1,
+        ),
+        ("IdleIn", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("IdleIn", "Idle1"): Time(
+            time: 0.0,
+        ),
+        ("IdleIn", "Idle1Base"): Time(
+            time: 0.0,
+        ),
+        ("IdleIn", "Idle2Base"): Time(
+            time: 0.0,
+        ),
+        ("IdleIn", "IdleIn"): Time(
+            time: 0.1,
+        ),
+        ("IdleIn", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("IdleIn", "Spell2IdleCast"): Time(
+            time: 0.05,
+        ),
+        ("IdleIn", "Spell2RunCast"): Time(
+            time: 0.1,
+        ),
+        ("IdleIn", "Spell2Tra"): Time(
+            time: 0.1,
+        ),
+        ("IdleIn", "Spell3Windup"): Time(
+            time: 0.05,
+        ),
+        ("IdleIn", "Spell4Channel"): Time(
+            time: 0.05,
+        ),
+        ("IdleIn", "Unk0xb2201fd8"): TransitionClip(
+            clip_name: "Spell2Tra",
+        ),
+        ("IdleIn", "Unk0xcb19b94d"): TransitionClip(
+            clip_name: "Spell2Tra",
+        ),
+        ("Joke", "Attack1"): Time(
+            time: 0.1,
+        ),
+        ("Joke", "Attack2"): Time(
+            time: 0.1,
+        ),
+        ("Joke", "Attack3"): Time(
+            time: 0.1,
+        ),
+        ("Joke", "Attack4"): Time(
+            time: 0.1,
+        ),
+        ("Joke", "AttackPassive"): Time(
+            time: 0.1,
+        ),
+        ("Joke", "Channel"): Time(
+            time: 0.1,
+        ),
+        ("Joke", "ChannelWndup"): Time(
+            time: 0.1,
+        ),
+        ("Joke", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("Laugh", "Attack1"): Time(
+            time: 0.1,
+        ),
+        ("Laugh", "Attack2"): Time(
+            time: 0.1,
+        ),
+        ("Laugh", "Attack3"): Time(
+            time: 0.1,
+        ),
+        ("Laugh", "Attack4"): Time(
+            time: 0.1,
+        ),
+        ("Laugh", "AttackPassive"): Time(
+            time: 0.1,
+        ),
+        ("Laugh", "Channel"): Time(
+            time: 0.1,
+        ),
+        ("Laugh", "ChannelWndup"): Time(
+            time: 0.1,
+        ),
+        ("Laugh", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("Laugh", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Laugh", "IdleIn"): Time(
+            time: 0.1,
+        ),
+        ("Laugh", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Laugh", "Spell2IdleCast"): Time(
+            time: 0.05,
+        ),
+        ("Laugh", "Spell2RunCast"): Time(
+            time: 0.1,
+        ),
+        ("Laugh", "Spell2Tra"): Time(
+            time: 0.1,
+        ),
+        ("Laugh", "Spell3Windup"): Time(
+            time: 0.05,
+        ),
+        ("Laugh", "Spell4Channel"): Time(
+            time: 0.05,
+        ),
+        ("Laugh", "Unk0xb2201fd8"): TransitionClip(
+            clip_name: "Spell2Tra",
+        ),
+        ("Laugh", "Unk0xcb19b94d"): TransitionClip(
+            clip_name: "Spell2Tra",
+        ),
+        ("Recall", "Attack1"): Time(
+            time: 0.1,
+        ),
+        ("Recall", "Attack2"): Time(
+            time: 0.1,
+        ),
+        ("Recall", "Attack3"): Time(
+            time: 0.1,
+        ),
+        ("Recall", "Attack4"): Time(
+            time: 0.1,
+        ),
+        ("Recall", "AttackPassive"): Time(
+            time: 0.1,
+        ),
+        ("Recall", "Channel"): Time(
+            time: 0.1,
+        ),
+        ("Recall", "ChannelWndup"): Time(
+            time: 0.1,
+        ),
+        ("Recall", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("Recall", "Spell2IdleCast"): Time(
+            time: 0.05,
+        ),
+        ("Recall", "Spell2RunCast"): Time(
+            time: 0.1,
+        ),
+        ("Recall", "Spell3Windup"): Time(
+            time: 0.05,
+        ),
+        ("Recall", "Spell4Channel"): Time(
+            time: 0.05,
+        ),
+        ("Recall", "Unk0x13f95189"): Time(
+            time: 0.0,
+        ),
+        ("RecallWinddown", "Attack1"): Time(
+            time: 0.1,
+        ),
+        ("RecallWinddown", "Attack2"): Time(
+            time: 0.1,
+        ),
+        ("RecallWinddown", "Attack3"): Time(
+            time: 0.1,
+        ),
+        ("RecallWinddown", "Attack4"): Time(
+            time: 0.1,
+        ),
+        ("RecallWinddown", "AttackPassive"): Time(
+            time: 0.1,
+        ),
+        ("RecallWinddown", "Channel"): Time(
+            time: 0.1,
+        ),
+        ("RecallWinddown", "ChannelWndup"): Time(
+            time: 0.1,
+        ),
+        ("RecallWinddown", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("RecallWinddown", "Idle1"): Time(
+            time: 0.1,
+        ),
+        ("RecallWinddown", "Idle1Base"): Time(
+            time: 0.1,
+        ),
+        ("RecallWinddown", "Idle2Base"): Time(
+            time: 0.1,
+        ),
+        ("Respawn", "Attack1"): Time(
+            time: 0.1,
+        ),
+        ("Respawn", "Attack2"): Time(
+            time: 0.1,
+        ),
+        ("Respawn", "Attack3"): Time(
+            time: 0.1,
+        ),
+        ("Respawn", "Attack4"): Time(
+            time: 0.1,
+        ),
+        ("Respawn", "AttackPassive"): Time(
+            time: 0.1,
+        ),
+        ("Respawn", "Channel"): Time(
+            time: 0.1,
+        ),
+        ("Respawn", "ChannelWndup"): Time(
+            time: 0.1,
+        ),
+        ("Respawn", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("Respawn", "Idle1"): Time(
+            time: 0.1,
+        ),
+        ("Respawn", "Idle1Base"): Time(
+            time: 0.1,
+        ),
+        ("Respawn", "Idle2Base"): Time(
+            time: 0.1,
+        ),
+        ("RunBase", "Attack1"): Time(
+            time: 0.1,
+        ),
+        ("RunBase", "Attack2"): Time(
+            time: 0.1,
+        ),
+        ("RunBase", "Attack3"): Time(
+            time: 0.1,
+        ),
+        ("RunBase", "Attack4"): Time(
+            time: 0.1,
+        ),
+        ("RunBase", "AttackPassive"): Time(
+            time: 0.1,
+        ),
+        ("RunBase", "Channel"): Time(
+            time: 0.1,
+        ),
+        ("RunBase", "ChannelWndup"): Time(
+            time: 0.1,
+        ),
+        ("RunBase", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("RunBase", "Death"): Time(
+            time: 0.0,
+        ),
+        ("RunBase", "Idle1"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("RunBase", "Idle1Base"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("RunBase", "Idle2Base"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("RunBase", "IdleIn"): Time(
+            time: 0.1,
+        ),
+        ("RunBase", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("RunBase", "Spell2IdleCast"): Time(
+            time: 0.05,
+        ),
+        ("RunBase", "Spell2RunCast"): Time(
+            time: 0.1,
+        ),
+        ("RunBase", "Spell2Tra"): Time(
+            time: 0.1,
+        ),
+        ("RunBase", "Spell3Windup"): Time(
+            time: 0.05,
+        ),
+        ("RunBase", "Spell4Channel"): Time(
+            time: 0.05,
+        ),
+        ("RunBase", "Unk0xb2201fd8"): TransitionClip(
+            clip_name: "Spell2Tra",
+        ),
+        ("RunBase", "Unk0xcb19b94d"): TransitionClip(
+            clip_name: "Spell2Tra",
+        ),
+        ("RunHaste", "Attack1"): Time(
+            time: 0.1,
+        ),
+        ("RunHaste", "Attack2"): Time(
+            time: 0.1,
+        ),
+        ("RunHaste", "Attack3"): Time(
+            time: 0.1,
+        ),
+        ("RunHaste", "Attack4"): Time(
+            time: 0.1,
+        ),
+        ("RunHaste", "AttackPassive"): Time(
+            time: 0.1,
+        ),
+        ("RunHaste", "Channel"): Time(
+            time: 0.1,
+        ),
+        ("RunHaste", "ChannelWndup"): Time(
+            time: 0.1,
+        ),
+        ("RunHaste", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("RunHaste", "Idle1"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("RunHaste", "Idle1Base"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("RunHaste", "Idle2Base"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("RunHaste", "IdleIn"): Time(
+            time: 0.1,
+        ),
+        ("Spell1", "Attack1"): Time(
+            time: 0.1,
+        ),
+        ("Spell1", "Attack2"): Time(
+            time: 0.1,
+        ),
+        ("Spell1", "Attack3"): Time(
+            time: 0.1,
+        ),
+        ("Spell1", "Attack4"): Time(
+            time: 0.1,
+        ),
+        ("Spell1", "AttackPassive"): Time(
+            time: 0.1,
+        ),
+        ("Spell1", "Channel"): Time(
+            time: 0.1,
+        ),
+        ("Spell1", "ChannelWndup"): Time(
+            time: 0.1,
+        ),
+        ("Spell1", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("Spell1", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell1", "Idle1"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("Spell1", "Idle1Base"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("Spell1", "Idle2Base"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("Spell1", "RunBase"): TransitionClip(
+            clip_name: "Spell1ToRun",
+        ),
+        ("Spell1", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Spell1", "Spell1ToRun"): Time(
+            time: 0.0,
+        ),
+        ("Spell1", "Spell2IdleCast"): Time(
+            time: 0.05,
+        ),
+        ("Spell1", "Spell2RunCast"): Time(
+            time: 0.1,
+        ),
+        ("Spell1", "Spell2Tra"): Time(
+            time: 0.1,
+        ),
+        ("Spell1", "Spell3Windup"): Time(
+            time: 0.05,
+        ),
+        ("Spell1", "Spell4Channel"): Time(
+            time: 0.05,
+        ),
+        ("Spell1", "Unk0xb2201fd8"): TransitionClip(
+            clip_name: "Spell2Tra",
+        ),
+        ("Spell1", "Unk0xcb19b94d"): TransitionClip(
+            clip_name: "Spell2Tra",
+        ),
+        ("Spell1ToRun", "Attack1"): Time(
+            time: 0.1,
+        ),
+        ("Spell1ToRun", "Attack2"): Time(
+            time: 0.1,
+        ),
+        ("Spell1ToRun", "Attack3"): Time(
+            time: 0.1,
+        ),
+        ("Spell1ToRun", "Attack4"): Time(
+            time: 0.1,
+        ),
+        ("Spell1ToRun", "AttackPassive"): Time(
+            time: 0.1,
+        ),
+        ("Spell1ToRun", "Channel"): Time(
+            time: 0.1,
+        ),
+        ("Spell1ToRun", "ChannelWndup"): Time(
+            time: 0.1,
+        ),
+        ("Spell1ToRun", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("Spell1ToRun", "Idle1"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("Spell1ToRun", "Idle1Base"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("Spell1ToRun", "Idle2Base"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("Spell1ToRun", "RunBase"): Time(
+            time: 0.0,
+        ),
+        ("Spell1ToRun", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Spell1ToRun", "Spell2IdleCast"): Time(
+            time: 0.05,
+        ),
+        ("Spell1ToRun", "Spell2RunCast"): Time(
+            time: 0.1,
+        ),
+        ("Spell1ToRun", "Spell3Windup"): Time(
+            time: 0.05,
+        ),
+        ("Spell1ToRun", "Spell4Channel"): Time(
+            time: 0.05,
+        ),
+        ("Spell2", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell2IdleCast", "Attack1"): Time(
+            time: 0.1,
+        ),
+        ("Spell2IdleCast", "Attack2"): Time(
+            time: 0.1,
+        ),
+        ("Spell2IdleCast", "Attack3"): Time(
+            time: 0.1,
+        ),
+        ("Spell2IdleCast", "Attack4"): Time(
+            time: 0.1,
+        ),
+        ("Spell2IdleCast", "AttackPassive"): Time(
+            time: 0.1,
+        ),
+        ("Spell2IdleCast", "Channel"): Time(
+            time: 0.1,
+        ),
+        ("Spell2IdleCast", "ChannelWndup"): Time(
+            time: 0.1,
+        ),
+        ("Spell2IdleCast", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("Spell2IdleCast", "Idle1"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("Spell2IdleCast", "Idle1Base"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("Spell2IdleCast", "Idle2Base"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("Spell2IdleCast", "IdleIn"): Time(
+            time: 0.1,
+        ),
+        ("Spell2IdleCast", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Spell2IdleCast", "Spell2IdleCast"): Time(
+            time: 0.05,
+        ),
+        ("Spell2IdleCast", "Spell2RunCast"): Time(
+            time: 0.1,
+        ),
+        ("Spell2IdleCast", "Spell3Windup"): Time(
+            time: 0.05,
+        ),
+        ("Spell2IdleCast", "Spell4Channel"): Time(
+            time: 0.05,
+        ),
+        ("Spell2RunCast", "Attack1"): Time(
+            time: 0.1,
+        ),
+        ("Spell2RunCast", "Attack2"): Time(
+            time: 0.1,
+        ),
+        ("Spell2RunCast", "Attack3"): Time(
+            time: 0.1,
+        ),
+        ("Spell2RunCast", "Attack4"): Time(
+            time: 0.1,
+        ),
+        ("Spell2RunCast", "AttackPassive"): Time(
+            time: 0.1,
+        ),
+        ("Spell2RunCast", "Channel"): Time(
+            time: 0.1,
+        ),
+        ("Spell2RunCast", "ChannelWndup"): Time(
+            time: 0.1,
+        ),
+        ("Spell2RunCast", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("Spell2RunCast", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Spell2RunCast", "Spell2IdleCast"): Time(
+            time: 0.05,
+        ),
+        ("Spell2RunCast", "Spell2RunCast"): Time(
+            time: 0.1,
+        ),
+        ("Spell2RunCast", "Spell3Windup"): Time(
+            time: 0.05,
+        ),
+        ("Spell2RunCast", "Spell4Channel"): Time(
+            time: 0.05,
+        ),
+        ("Spell2Tra", "Attack1"): Time(
+            time: 0.1,
+        ),
+        ("Spell2Tra", "Attack2"): Time(
+            time: 0.1,
+        ),
+        ("Spell2Tra", "Attack3"): Time(
+            time: 0.1,
+        ),
+        ("Spell2Tra", "Attack4"): Time(
+            time: 0.1,
+        ),
+        ("Spell2Tra", "AttackPassive"): Time(
+            time: 0.1,
+        ),
+        ("Spell2Tra", "Channel"): Time(
+            time: 0.1,
+        ),
+        ("Spell2Tra", "ChannelWndup"): Time(
+            time: 0.1,
+        ),
+        ("Spell2Tra", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("Spell2Tra", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Spell2Tra", "Spell2IdleCast"): Time(
+            time: 0.05,
+        ),
+        ("Spell2Tra", "Spell2RunCast"): Time(
+            time: 0.1,
+        ),
+        ("Spell2Tra", "Spell2Tra"): Time(
+            time: 0.1,
+        ),
+        ("Spell2Tra", "Spell3Windup"): Time(
+            time: 0.05,
+        ),
+        ("Spell2Tra", "Spell4Channel"): Time(
+            time: 0.05,
+        ),
+        ("Spell3", "Attack1"): Time(
+            time: 0.1,
+        ),
+        ("Spell3", "Attack2"): Time(
+            time: 0.1,
+        ),
+        ("Spell3", "Attack3"): Time(
+            time: 0.1,
+        ),
+        ("Spell3", "Attack4"): Time(
+            time: 0.1,
+        ),
+        ("Spell3", "AttackPassive"): Time(
+            time: 0.1,
+        ),
+        ("Spell3", "Channel"): Time(
+            time: 0.1,
+        ),
+        ("Spell3", "ChannelWndup"): Time(
+            time: 0.1,
+        ),
+        ("Spell3", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("Spell3", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell3", "Idle1"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("Spell3", "Idle1Base"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("Spell3", "Idle2Base"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("Spell3", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Spell3", "Spell2IdleCast"): Time(
+            time: 0.05,
+        ),
+        ("Spell3", "Spell2RunCast"): Time(
+            time: 0.1,
+        ),
+        ("Spell3", "Spell2Tra"): Time(
+            time: 0.1,
+        ),
+        ("Spell3", "Spell3Hit"): Time(
+            time: 0.0,
+        ),
+        ("Spell3", "Spell3Windup"): Time(
+            time: 0.05,
+        ),
+        ("Spell3", "Spell4Channel"): Time(
+            time: 0.05,
+        ),
+        ("Spell3", "Unk0xb2201fd8"): TransitionClip(
+            clip_name: "Spell2Tra",
+        ),
+        ("Spell3", "Unk0xcb19b94d"): TransitionClip(
+            clip_name: "Spell2Tra",
+        ),
+        ("Spell3Hit", "Attack1"): Time(
+            time: 0.1,
+        ),
+        ("Spell3Hit", "Attack2"): Time(
+            time: 0.1,
+        ),
+        ("Spell3Hit", "Attack3"): Time(
+            time: 0.1,
+        ),
+        ("Spell3Hit", "Attack4"): Time(
+            time: 0.1,
+        ),
+        ("Spell3Hit", "AttackPassive"): Time(
+            time: 0.1,
+        ),
+        ("Spell3Hit", "Channel"): Time(
+            time: 0.1,
+        ),
+        ("Spell3Hit", "ChannelWndup"): Time(
+            time: 0.1,
+        ),
+        ("Spell3Hit", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("Spell3Hit", "Idle1"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("Spell3Hit", "Idle1Base"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("Spell3Hit", "Idle2Base"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("Spell3Hit", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Spell3Hit", "Spell2IdleCast"): Time(
+            time: 0.05,
+        ),
+        ("Spell3Hit", "Spell2RunCast"): Time(
+            time: 0.1,
+        ),
+        ("Spell3Hit", "Spell3Windup"): Time(
+            time: 0.05,
+        ),
+        ("Spell3Hit", "Spell4Channel"): Time(
+            time: 0.05,
+        ),
+        ("Spell3Windup", "Attack1"): Time(
+            time: 0.1,
+        ),
+        ("Spell3Windup", "Attack2"): Time(
+            time: 0.1,
+        ),
+        ("Spell3Windup", "Attack3"): Time(
+            time: 0.1,
+        ),
+        ("Spell3Windup", "Attack4"): Time(
+            time: 0.1,
+        ),
+        ("Spell3Windup", "AttackPassive"): Time(
+            time: 0.1,
+        ),
+        ("Spell3Windup", "Channel"): Time(
+            time: 0.1,
+        ),
+        ("Spell3Windup", "ChannelWndup"): Time(
+            time: 0.1,
+        ),
+        ("Spell3Windup", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("Spell3Windup", "IdleIn"): Time(
+            time: 0.1,
+        ),
+        ("Spell3Windup", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Spell3Windup", "Spell2IdleCast"): Time(
+            time: 0.05,
+        ),
+        ("Spell3Windup", "Spell2RunCast"): Time(
+            time: 0.1,
+        ),
+        ("Spell3Windup", "Spell2Tra"): Time(
+            time: 0.1,
+        ),
+        ("Spell3Windup", "Spell3"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Windup", "Spell3Hit"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Windup", "Spell3Windup"): Time(
+            time: 0.05,
+        ),
+        ("Spell3Windup", "Spell4Channel"): Time(
+            time: 0.05,
+        ),
+        ("Spell3Windup", "Unk0xb2201fd8"): TransitionClip(
+            clip_name: "Spell2Tra",
+        ),
+        ("Spell3Windup", "Unk0xcb19b94d"): TransitionClip(
+            clip_name: "Spell2Tra",
+        ),
+        ("Spell4", "Attack1"): Time(
+            time: 0.1,
+        ),
+        ("Spell4", "Attack2"): Time(
+            time: 0.1,
+        ),
+        ("Spell4", "Attack3"): Time(
+            time: 0.1,
+        ),
+        ("Spell4", "Attack4"): Time(
+            time: 0.1,
+        ),
+        ("Spell4", "AttackPassive"): Time(
+            time: 0.1,
+        ),
+        ("Spell4", "Channel"): Time(
+            time: 0.1,
+        ),
+        ("Spell4", "ChannelWndup"): Time(
+            time: 0.1,
+        ),
+        ("Spell4", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("Spell4", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell4", "IdleIn"): Time(
+            time: 0.1,
+        ),
+        ("Spell4", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Spell4", "Spell2IdleCast"): Time(
+            time: 0.05,
+        ),
+        ("Spell4", "Spell2RunCast"): Time(
+            time: 0.1,
+        ),
+        ("Spell4", "Spell2Tra"): Time(
+            time: 0.1,
+        ),
+        ("Spell4", "Spell3Windup"): Time(
+            time: 0.05,
+        ),
+        ("Spell4", "Spell4Channel"): Time(
+            time: 0.05,
+        ),
+        ("Spell4", "Spell4Out"): Time(
+            time: 0.05,
+        ),
+        ("Spell4", "Spell4ShortOut"): Time(
+            time: 0.05,
+        ),
+        ("Spell4", "Unk0xb2201fd8"): TransitionClip(
+            clip_name: "Spell2Tra",
+        ),
+        ("Spell4", "Unk0xcb19b94d"): TransitionClip(
+            clip_name: "Spell2Tra",
+        ),
+        ("Spell4Channel", "Attack1"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Channel", "Attack2"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Channel", "Attack3"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Channel", "Attack4"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Channel", "AttackPassive"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Channel", "Channel"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Channel", "ChannelWndup"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Channel", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Channel", "IdleIn"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Channel", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Channel", "Spell2IdleCast"): Time(
+            time: 0.05,
+        ),
+        ("Spell4Channel", "Spell2RunCast"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Channel", "Spell2Tra"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Channel", "Spell3Windup"): Time(
+            time: 0.05,
+        ),
+        ("Spell4Channel", "Spell4Channel"): Time(
+            time: 0.05,
+        ),
+        ("Spell4Channel", "Spell4In"): Time(
+            time: 0.0,
+        ),
+        ("Spell4Channel", "Spell4ShortIn"): Time(
+            time: 0.0,
+        ),
+        ("Spell4Channel", "Unk0xb2201fd8"): TransitionClip(
+            clip_name: "Spell2Tra",
+        ),
+        ("Spell4Channel", "Unk0xcb19b94d"): TransitionClip(
+            clip_name: "Spell2Tra",
+        ),
+        ("Spell4In", "Attack1"): Time(
+            time: 0.1,
+        ),
+        ("Spell4In", "Attack2"): Time(
+            time: 0.1,
+        ),
+        ("Spell4In", "Attack3"): Time(
+            time: 0.1,
+        ),
+        ("Spell4In", "Attack4"): Time(
+            time: 0.1,
+        ),
+        ("Spell4In", "AttackPassive"): Time(
+            time: 0.1,
+        ),
+        ("Spell4In", "Channel"): Time(
+            time: 0.1,
+        ),
+        ("Spell4In", "ChannelWndup"): Time(
+            time: 0.1,
+        ),
+        ("Spell4In", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("Spell4In", "IdleIn"): Time(
+            time: 0.1,
+        ),
+        ("Spell4In", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Spell4In", "Spell2IdleCast"): Time(
+            time: 0.05,
+        ),
+        ("Spell4In", "Spell2RunCast"): Time(
+            time: 0.1,
+        ),
+        ("Spell4In", "Spell2Tra"): Time(
+            time: 0.1,
+        ),
+        ("Spell4In", "Spell3Windup"): Time(
+            time: 0.05,
+        ),
+        ("Spell4In", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("Spell4In", "Spell4Channel"): Time(
+            time: 0.05,
+        ),
+        ("Spell4In", "Spell4Short"): Time(
+            time: 0.05,
+        ),
+        ("Spell4In", "Unk0xb2201fd8"): TransitionClip(
+            clip_name: "Spell2Tra",
+        ),
+        ("Spell4In", "Unk0xcb19b94d"): TransitionClip(
+            clip_name: "Spell2Tra",
+        ),
+        ("Spell4Out", "Attack1"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Out", "Attack2"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Out", "Attack3"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Out", "Attack4"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Out", "AttackPassive"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Out", "Channel"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Out", "ChannelWndup"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Out", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Out", "Idle1"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("Spell4Out", "Idle1Base"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("Spell4Out", "Idle2Base"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("Spell4Short", "Attack1"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Short", "Attack2"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Short", "Attack3"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Short", "Attack4"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Short", "AttackPassive"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Short", "Channel"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Short", "ChannelWndup"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Short", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Short", "Spell2IdleCast"): Time(
+            time: 0.05,
+        ),
+        ("Spell4Short", "Spell3Windup"): Time(
+            time: 0.05,
+        ),
+        ("Spell4Short", "Spell4ShortOut"): Time(
+            time: 0.05,
+        ),
+        ("Spell4ShortIn", "Attack1"): Time(
+            time: 0.1,
+        ),
+        ("Spell4ShortIn", "Attack2"): Time(
+            time: 0.1,
+        ),
+        ("Spell4ShortIn", "Attack3"): Time(
+            time: 0.1,
+        ),
+        ("Spell4ShortIn", "Attack4"): Time(
+            time: 0.1,
+        ),
+        ("Spell4ShortIn", "AttackPassive"): Time(
+            time: 0.1,
+        ),
+        ("Spell4ShortIn", "Channel"): Time(
+            time: 0.1,
+        ),
+        ("Spell4ShortIn", "ChannelWndup"): Time(
+            time: 0.1,
+        ),
+        ("Spell4ShortIn", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("Spell4ShortIn", "Spell2IdleCast"): Time(
+            time: 0.05,
+        ),
+        ("Spell4ShortIn", "Spell3Windup"): Time(
+            time: 0.05,
+        ),
+        ("Spell4ShortOut", "Attack1"): Time(
+            time: 0.1,
+        ),
+        ("Spell4ShortOut", "Attack2"): Time(
+            time: 0.1,
+        ),
+        ("Spell4ShortOut", "Attack3"): Time(
+            time: 0.1,
+        ),
+        ("Spell4ShortOut", "Attack4"): Time(
+            time: 0.1,
+        ),
+        ("Spell4ShortOut", "AttackPassive"): Time(
+            time: 0.1,
+        ),
+        ("Spell4ShortOut", "Channel"): Time(
+            time: 0.1,
+        ),
+        ("Spell4ShortOut", "ChannelWndup"): Time(
+            time: 0.1,
+        ),
+        ("Spell4ShortOut", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("Spell4ShortOut", "Idle1Base"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("Spell4ShortOut", "Idle2Base"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("Spell4ShortOut", "Spell2IdleCast"): Time(
+            time: 0.05,
+        ),
+        ("Spell4ShortOut", "Spell3Windup"): Time(
+            time: 0.05,
+        ),
+        ("Spell4ShortOut", "Spell4Short"): Time(
+            time: 0.05,
+        ),
+        ("Spell4Winddown", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Taunt", "Attack1"): Time(
+            time: 0.1,
+        ),
+        ("Taunt", "Attack2"): Time(
+            time: 0.1,
+        ),
+        ("Taunt", "Attack3"): Time(
+            time: 0.1,
+        ),
+        ("Taunt", "Attack4"): Time(
+            time: 0.1,
+        ),
+        ("Taunt", "AttackPassive"): Time(
+            time: 0.1,
+        ),
+        ("Taunt", "Channel"): Time(
+            time: 0.1,
+        ),
+        ("Taunt", "ChannelWndup"): Time(
+            time: 0.1,
+        ),
+        ("Taunt", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("Taunt", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Taunt", "IdleIn"): Time(
+            time: 0.1,
+        ),
+        ("Taunt", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Taunt", "Spell2IdleCast"): Time(
+            time: 0.05,
+        ),
+        ("Taunt", "Spell2RunCast"): Time(
+            time: 0.1,
+        ),
+        ("Taunt", "Spell2Tra"): Time(
+            time: 0.1,
+        ),
+        ("Taunt", "Spell3Windup"): Time(
+            time: 0.05,
+        ),
+        ("Taunt", "Spell4Channel"): Time(
+            time: 0.05,
+        ),
+        ("Taunt", "Unk0xb2201fd8"): TransitionClip(
+            clip_name: "Spell2Tra",
+        ),
+        ("Taunt", "Unk0xcb19b94d"): TransitionClip(
+            clip_name: "Spell2Tra",
+        ),
+        ("Unk0xb2201fd8", "Attack1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xb2201fd8", "Attack2"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xb2201fd8", "Attack3"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xb2201fd8", "Attack4"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xb2201fd8", "AttackPassive"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xb2201fd8", "Channel"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xb2201fd8", "ChannelWndup"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xb2201fd8", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xb2201fd8", "Idle1"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("Unk0xb2201fd8", "Idle1Base"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("Unk0xb2201fd8", "Idle2Base"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("Unk0xb2201fd8", "IdleIn"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xb2201fd8", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xb2201fd8", "Spell2IdleCast"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xb2201fd8", "Spell2RunCast"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xb2201fd8", "Spell2Tra"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xb2201fd8", "Spell3Windup"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xb2201fd8", "Spell4Channel"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xcb19b94d", "Attack1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xcb19b94d", "Attack2"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xcb19b94d", "Attack3"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xcb19b94d", "Attack4"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xcb19b94d", "AttackPassive"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xcb19b94d", "Channel"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xcb19b94d", "ChannelWndup"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xcb19b94d", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xcb19b94d", "Idle1"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("Unk0xcb19b94d", "Idle1Base"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("Unk0xcb19b94d", "Idle2Base"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("Unk0xcb19b94d", "IdleIn"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xcb19b94d", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xcb19b94d", "Spell2IdleCast"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xcb19b94d", "Spell2RunCast"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xcb19b94d", "Spell2Tra"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xcb19b94d", "Spell3Windup"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xcb19b94d", "Spell4Channel"): Time(
+            time: 0.05,
+        ),
+    },
+)

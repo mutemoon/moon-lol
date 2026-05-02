@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{BTreeMap, HashMap};
 
 use bevy::animation::graph::AnimationNodeIndex;
 use league_core::extract::{
@@ -183,7 +183,7 @@ pub fn animation_graph_to_config(
     hashes: &HashMap<u32, String>,
     gltf_path: String,
 ) -> LOLAnimationGraph {
-    let mut hash_to_node = HashMap::new();
+    let mut hash_to_node = BTreeMap::new();
 
     // Convert clip data map to nodes
     if let Some(clip_data_map) = &graph_data.m_clip_data_map {
@@ -217,7 +217,7 @@ pub fn animation_graph_to_config(
     );
 
     // Convert blend data
-    let mut blend_data = HashMap::new();
+    let mut blend_data = BTreeMap::new();
     if let Some(blend_table) = &graph_data.m_blend_data_table {
         for (key, value) in blend_table {
             // Key is u64, split into two u32

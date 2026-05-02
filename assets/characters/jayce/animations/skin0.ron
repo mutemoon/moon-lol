@@ -1,0 +1,350 @@
+(
+    gltf_path: "characters/jayce/skins/skin0.glb",
+    hash_to_node: {
+        "Attack": Selector(
+            probably_nodes: [
+                (
+                    key: "Attack1",
+                    value: 1.0,
+                ),
+                (
+                    key: "Attack2",
+                    value: 1.0,
+                ),
+            ],
+        ),
+        "Attack1": Clip(
+            node_index: 12,
+        ),
+        "Attack2": Clip(
+            node_index: 15,
+        ),
+        "Channel": Clip(
+            node_index: 5,
+        ),
+        "ChannelWndup": Clip(
+            node_index: 28,
+        ),
+        "Crit": Clip(
+            node_index: 25,
+        ),
+        "Dance": Sequence(
+            hashes: [
+                "Unk0x7bdcdb48",
+                "Unk0xda2aef9",
+            ],
+        ),
+        "Death": Clip(
+            node_index: 36,
+        ),
+        "Idle1": Selector(
+            probably_nodes: [
+                (
+                    key: "Unk0x56f6d84b",
+                    value: 80.0,
+                ),
+                (
+                    key: "Unk0x120aa0ea",
+                    value: 10.0,
+                ),
+                (
+                    key: "Unk0xb99d8609",
+                    value: 10.0,
+                ),
+            ],
+        ),
+        "Joke": ConditionBool(
+            updater: IsRanged,
+            true_node: "Unk0x2811c1cd",
+            false_node: "Unk0x20858056",
+        ),
+        "Laugh": ConditionBool(
+            updater: IsRanged,
+            true_node: "Unk0xe60fec37",
+            false_node: "Unk0xe761d170",
+        ),
+        "MeleePassive": Clip(
+            node_index: 24,
+        ),
+        "RangedAttack1": Clip(
+            node_index: 39,
+        ),
+        "RangedAttack2": Clip(
+            node_index: 38,
+        ),
+        "RangedPassive": Clip(
+            node_index: 43,
+        ),
+        "RangedRun": Clip(
+            node_index: 35,
+        ),
+        "RangedSpell1": Clip(
+            node_index: 18,
+        ),
+        "RangedSpell2Attack1": Clip(
+            node_index: 26,
+        ),
+        "RangedSpell2Attack2": Clip(
+            node_index: 27,
+        ),
+        "RangedSpell3": Clip(
+            node_index: 16,
+        ),
+        "Recall": Sequence(
+            hashes: [
+                "Unk0xf9e3de90",
+                "Unk0x5a8cb071",
+            ],
+        ),
+        "Run": Clip(
+            node_index: 7,
+        ),
+        "RunFast": Clip(
+            node_index: 29,
+        ),
+        "Spell1": Clip(
+            node_index: 30,
+        ),
+        "Spell2": Clip(
+            node_index: 32,
+        ),
+        "Spell3": Clip(
+            node_index: 31,
+        ),
+        "Spell4": Clip(
+            node_index: 33,
+        ),
+        "Taunt": ConditionBool(
+            updater: IsRanged,
+            true_node: "Unk0x2c40b5fc",
+            false_node: "Unk0x1d16a41d",
+        ),
+        "Unk0x120aa0ea": Clip(
+            node_index: 2,
+        ),
+        "Unk0x1d16a41d": Clip(
+            node_index: 3,
+        ),
+        "Unk0x20858056": Clip(
+            node_index: 4,
+        ),
+        "Unk0x2811c1cd": Clip(
+            node_index: 6,
+        ),
+        "Unk0x2c40b5fc": Clip(
+            node_index: 8,
+        ),
+        "Unk0x47958194": Clip(
+            node_index: 9,
+        ),
+        "Unk0x48958327": Clip(
+            node_index: 10,
+        ),
+        "Unk0x499584ba": Clip(
+            node_index: 11,
+        ),
+        "Unk0x56f6d84b": Clip(
+            node_index: 13,
+        ),
+        "Unk0x5785d0e3": Clip(
+            node_index: 14,
+        ),
+        "Unk0x5a8cb071": ConditionBool(
+            updater: IsRanged,
+            true_node: "Unk0x87350dc9",
+            false_node: "Unk0xc611ea82",
+        ),
+        "Unk0x5c802173": Clip(
+            node_index: 17,
+        ),
+        "Unk0x5fa053cb": Clip(
+            node_index: 19,
+        ),
+        "Unk0x61bfedc2": Clip(
+            node_index: 20,
+        ),
+        "Unk0x62802ae5": Clip(
+            node_index: 21,
+        ),
+        "Unk0x64314d7": Clip(
+            node_index: 0,
+        ),
+        "Unk0x73be870a": Clip(
+            node_index: 22,
+        ),
+        "Unk0x7538cc7": Clip(
+            node_index: 1,
+        ),
+        "Unk0x7bdcdb48": ConditionBool(
+            updater: IsRanged,
+            true_node: "Unk0x61bfedc2",
+            false_node: "Unk0x5fa053cb",
+        ),
+        "Unk0x87350dc9": Clip(
+            node_index: 23,
+        ),
+        "Unk0xb99d8609": Clip(
+            node_index: 34,
+        ),
+        "Unk0xc611ea82": Clip(
+            node_index: 37,
+        ),
+        "Unk0xda2aef9": ConditionBool(
+            updater: IsRanged,
+            true_node: "Unk0xffcfe561",
+            false_node: "Unk0xed54a0fa",
+        ),
+        "Unk0xdd06b40c": Selector(
+            probably_nodes: [
+                (
+                    key: "Unk0x499584ba",
+                    value: 60.0,
+                ),
+                (
+                    key: "Unk0x48958327",
+                    value: 20.0,
+                ),
+                (
+                    key: "Unk0x47958194",
+                    value: 20.0,
+                ),
+            ],
+        ),
+        "Unk0xe60fec37": Clip(
+            node_index: 40,
+        ),
+        "Unk0xe761d170": Clip(
+            node_index: 41,
+        ),
+        "Unk0xed54a0fa": Clip(
+            node_index: 42,
+        ),
+        "Unk0xf9e3de90": ConditionBool(
+            updater: IsRanged,
+            true_node: "Unk0x73be870a",
+            false_node: "Unk0x5785d0e3",
+        ),
+        "Unk0xffcfe561": Clip(
+            node_index: 44,
+        ),
+    },
+    blend_data: {
+        ("Attack1", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Attack2", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Channel", "Death"): Time(
+            time: 0.0,
+        ),
+        ("ChannelWndup", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Crit", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Death", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Idle1", "Death"): Time(
+            time: 0.0,
+        ),
+        ("MeleePassive", "Death"): Time(
+            time: 0.0,
+        ),
+        ("RangedAttack1", "Death"): Time(
+            time: 0.0,
+        ),
+        ("RangedAttack2", "Death"): Time(
+            time: 0.0,
+        ),
+        ("RangedPassive", "Death"): Time(
+            time: 0.0,
+        ),
+        ("RangedRun", "Death"): Time(
+            time: 0.0,
+        ),
+        ("RangedSpell1", "Death"): Time(
+            time: 0.0,
+        ),
+        ("RangedSpell2Attack1", "Death"): Time(
+            time: 0.0,
+        ),
+        ("RangedSpell2Attack2", "Death"): Time(
+            time: 0.0,
+        ),
+        ("RangedSpell3", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Run", "Death"): Time(
+            time: 0.0,
+        ),
+        ("RunFast", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell1", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell2", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell3", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell4", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x120aa0ea", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x2811c1cd", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x47958194", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x48958327", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x499584ba", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x56f6d84b", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x5785d0e3", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x5c802173", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x62802ae5", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x64314d7", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x7538cc7", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x7bdcdb48", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xb99d8609", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xda2aef9", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xdd06b40c", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xe60fec37", "Death"): Time(
+            time: 0.0,
+        ),
+    },
+)

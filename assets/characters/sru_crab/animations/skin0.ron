@@ -1,0 +1,192 @@
+(
+    gltf_path: "characters/sru_crab/skins/skin0.glb",
+    hash_to_node: {
+        "Attack": Selector(
+            probably_nodes: [
+                (
+                    key: "Attack1",
+                    value: 1.0,
+                ),
+                (
+                    key: "Attack2",
+                    value: 1.0,
+                ),
+            ],
+        ),
+        "CrabDance": Clip(
+            node_index: 0,
+        ),
+        "CrabDash": Clip(
+            node_index: 15,
+        ),
+        "CrabDashOut": Clip(
+            node_index: 14,
+        ),
+        "CrabFleeToRun": Clip(
+            node_index: 5,
+        ),
+        "CrabHide": Clip(
+            node_index: 10,
+        ),
+        "CrabIdleToRun": Clip(
+            node_index: 6,
+        ),
+        "CrabRunToFlee": Clip(
+            node_index: 11,
+        ),
+        "CrabSpawn": Clip(
+            node_index: 7,
+        ),
+        "CrabStun": Clip(
+            node_index: 2,
+        ),
+        "Idle1": Clip(
+            node_index: 13,
+        ),
+        "Run": Clip(
+            node_index: 4,
+        ),
+        "Turn": Parametric(
+            pairs: [
+                (
+                    key: "TurnLeft180",
+                    value: -120.0,
+                ),
+                (
+                    key: "TurnLeft45",
+                    value: -45.0,
+                ),
+                (
+                    key: "TurnRight45",
+                    value: 45.0,
+                ),
+                (
+                    key: "TurnRight180",
+                    value: 120.0,
+                ),
+            ],
+        ),
+        "TurnLeft180": Clip(
+            node_index: 12,
+        ),
+        "TurnLeft45": Clip(
+            node_index: 16,
+        ),
+        "TurnRight180": Clip(
+            node_index: 1,
+        ),
+        "TurnRight45": Clip(
+            node_index: 3,
+        ),
+        "Unk0x3d2d1fe6": Clip(
+            node_index: 8,
+        ),
+        "Unk0x3debaa64": Clip(
+            node_index: 9,
+        ),
+        "Unk0x8d021706": Selector(
+            probably_nodes: [
+                (
+                    key: "Unk0x3d2d1fe6",
+                    value: 50.0,
+                ),
+                (
+                    key: "Unk0x3debaa64",
+                    value: 50.0,
+                ),
+            ],
+        ),
+    },
+    blend_data: {
+        ("CrabDash", "CrabDashOut"): Time(
+            time: 0.1,
+        ),
+        ("CrabDash", "Run"): TransitionClip(
+            clip_name: "CrabDashOut",
+        ),
+        ("CrabDashOut", "Run"): Time(
+            time: 0.1,
+        ),
+        ("CrabFleeToRun", "Run"): Time(
+            time: 0.1,
+        ),
+        ("CrabHide", "CrabDash"): Time(
+            time: 0.0,
+        ),
+        ("CrabHide", "CrabDashOut"): Time(
+            time: 0.0,
+        ),
+        ("CrabHide", "CrabFleeToRun"): Time(
+            time: 0.0,
+        ),
+        ("CrabHide", "CrabHide"): Time(
+            time: 0.0,
+        ),
+        ("CrabHide", "CrabIdleToRun"): Time(
+            time: 0.0,
+        ),
+        ("CrabHide", "CrabRunToFlee"): Time(
+            time: 0.0,
+        ),
+        ("CrabHide", "CrabSpawn"): Time(
+            time: 0.0,
+        ),
+        ("CrabHide", "CrabStun"): Time(
+            time: 0.0,
+        ),
+        ("CrabHide", "Idle1"): Time(
+            time: 0.0,
+        ),
+        ("CrabHide", "Run"): Time(
+            time: 0.0,
+        ),
+        ("CrabHide", "Turn"): Time(
+            time: 0.0,
+        ),
+        ("CrabHide", "TurnLeft180"): Time(
+            time: 0.0,
+        ),
+        ("CrabHide", "TurnLeft45"): Time(
+            time: 0.0,
+        ),
+        ("CrabHide", "TurnRight180"): Time(
+            time: 0.0,
+        ),
+        ("CrabHide", "TurnRight45"): Time(
+            time: 0.0,
+        ),
+        ("CrabHide", "Unk0x3d2d1fe6"): Time(
+            time: 0.0,
+        ),
+        ("CrabHide", "Unk0x3debaa64"): Time(
+            time: 0.0,
+        ),
+        ("CrabIdleToRun", "Run"): Time(
+            time: 0.1,
+        ),
+        ("CrabRunToFlee", "Unk0x3d2d1fe6"): Time(
+            time: 0.0,
+        ),
+        ("CrabRunToFlee", "Unk0x3debaa64"): Time(
+            time: 0.0,
+        ),
+        ("Idle1", "Run"): TransitionClip(
+            clip_name: "CrabIdleToRun",
+        ),
+        ("Run", "CrabStun"): Time(
+            time: 0.0,
+        ),
+        ("Run", "Unk0x3d2d1fe6"): TransitionClip(
+            clip_name: "CrabRunToFlee",
+        ),
+        ("Run", "Unk0x3debaa64"): TransitionClip(
+            clip_name: "CrabRunToFlee",
+        ),
+        ("Unk0x3d2d1fe6", "Run"): TransitionClip(
+            clip_name: "CrabFleeToRun",
+        ),
+        ("Unk0x3debaa64", "Run"): TransitionClip(
+            clip_name: "CrabFleeToRun",
+        ),
+    },
+)

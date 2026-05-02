@@ -1,7 +1,6 @@
 use bevy::animation::AnimationClip;
 use bevy::animation::graph::AnimationGraph;
 use bevy::asset::{AssetLoader, LoadContext};
-use bevy::log::info;
 use bevy::reflect::TypePath;
 use lol_base::animation::{ConfigAnimationNode, LOLAnimationGraph};
 
@@ -44,6 +43,8 @@ impl AssetLoader for LoaderConfigAnimationLoader {
                 *node_index = animation_graph.add_clip(handle, 1.0, animation_graph.root);
             }
         });
+
+        load_context.add_labeled_asset("animation_graph", animation_graph);
 
         Ok(config_animation)
     }

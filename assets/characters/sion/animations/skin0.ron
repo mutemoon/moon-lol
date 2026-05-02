@@ -1,0 +1,1267 @@
+(
+    gltf_path: "characters/sion/skins/skin0.glb",
+    hash_to_node: {
+        "Attack": Selector(
+            probably_nodes: [
+                (
+                    key: "Attack1",
+                    value: 1.0,
+                ),
+                (
+                    key: "Attack2",
+                    value: 1.0,
+                ),
+            ],
+        ),
+        "Attack1": Clip(
+            node_index: 14,
+        ),
+        "Attack2": Clip(
+            node_index: 16,
+        ),
+        "Attack3": Clip(
+            node_index: 15,
+        ),
+        "AttackTower": Clip(
+            node_index: 19,
+        ),
+        "AttackTower2": Clip(
+            node_index: 44,
+        ),
+        "Channel": Clip(
+            node_index: 5,
+        ),
+        "ChannelWndup": Clip(
+            node_index: 29,
+        ),
+        "Crit": Clip(
+            node_index: 26,
+        ),
+        "Dance": Sequence(
+            hashes: [
+                "DanceIn",
+                "Unk0x9733b790",
+            ],
+        ),
+        "DanceIn": Clip(
+            node_index: 46,
+        ),
+        "DanceLoop": Clip(
+            node_index: 4,
+        ),
+        "DanceSpin": Clip(
+            node_index: 22,
+        ),
+        "Death": Clip(
+            node_index: 39,
+        ),
+        "Idle1": Selector(
+            probably_nodes: [
+                (
+                    key: "Idle1Base",
+                    value: 95.0,
+                ),
+                (
+                    key: "Idle2Base",
+                    value: 5.0,
+                ),
+            ],
+        ),
+        "Idle1Base": Clip(
+            node_index: 21,
+        ),
+        "Idle2Base": Clip(
+            node_index: 45,
+        ),
+        "IdleIn": Clip(
+            node_index: 34,
+        ),
+        "Joke": Clip(
+            node_index: 41,
+        ),
+        "KnockedUp": Sequence(
+            hashes: [
+                "KnockedUpIn",
+                "Unk0xbb7b9f71",
+            ],
+        ),
+        "KnockedUpIn": Clip(
+            node_index: 24,
+        ),
+        "Laugh": Clip(
+            node_index: 33,
+        ),
+        "PassiveAttack1": Clip(
+            node_index: 2,
+        ),
+        "PassiveAttack2": Clip(
+            node_index: 1,
+        ),
+        "PassiveDanceIn": Clip(
+            node_index: 25,
+        ),
+        "PassiveDanceLoop": Clip(
+            node_index: 27,
+        ),
+        "PassiveDash": Clip(
+            node_index: 18,
+        ),
+        "PassiveDeath": Clip(
+            node_index: 13,
+        ),
+        "PassiveIdle1": Clip(
+            node_index: 9,
+        ),
+        "PassiveRun": Sequence(
+            hashes: [
+                "Unk0xa09e88b7",
+                "Unk0x7ff7bfcd",
+            ],
+        ),
+        "Recall": Clip(
+            node_index: 17,
+        ),
+        "Run": Clip(
+            node_index: 8,
+        ),
+        "RunFast": Clip(
+            node_index: 30,
+        ),
+        "RunHaste": Clip(
+            node_index: 7,
+        ),
+        "RunSlow": Clip(
+            node_index: 43,
+        ),
+        "Spell1": Clip(
+            node_index: 31,
+        ),
+        "Spell1Chrg": Clip(
+            node_index: 40,
+        ),
+        "Spell1Hit1": Clip(
+            node_index: 12,
+        ),
+        "Spell1Hit2": Clip(
+            node_index: 10,
+        ),
+        "Spell2B": Clip(
+            node_index: 0,
+        ),
+        "Spell3": Clip(
+            node_index: 32,
+        ),
+        "Spell4": Clip(
+            node_index: 35,
+        ),
+        "Spell4Hit": Clip(
+            node_index: 42,
+        ),
+        "Spell4Run": Sequence(
+            hashes: [
+                "Spell4RunIn",
+                "Spell4RunIn",
+                "Unk0xe2d9deb",
+            ],
+        ),
+        "Spell4RunIn": Clip(
+            node_index: 36,
+        ),
+        "Spell4Stop": Clip(
+            node_index: 11,
+        ),
+        "Stunned": Clip(
+            node_index: 20,
+        ),
+        "Taunt": Clip(
+            node_index: 38,
+        ),
+        "Unk0x1c772fea": Sequence(
+            hashes: [
+                "PassiveDanceLoop",
+                "PassiveDanceLoop",
+                "Unk0x2469b82f",
+            ],
+        ),
+        "Unk0x2469b82f": Clip(
+            node_index: 6,
+        ),
+        "Unk0x7ff7bfcd": Clip(
+            node_index: 23,
+        ),
+        "Unk0x9733b790": Sequence(
+            hashes: [
+                "DanceLoop",
+                "DanceLoop",
+                "DanceSpin",
+            ],
+        ),
+        "Unk0xa09e88b7": Clip(
+            node_index: 28,
+        ),
+        "Unk0xbb7b9f71": Clip(
+            node_index: 37,
+        ),
+        "Unk0xe2d9deb": Clip(
+            node_index: 3,
+        ),
+        "Unk0xf721651e": Sequence(
+            hashes: [
+                "PassiveDanceIn",
+                "Unk0x1c772fea",
+            ],
+        ),
+    },
+    blend_data: {
+        ("Attack1", "Attack1"): Time(
+            time: 0.0,
+        ),
+        ("Attack1", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Attack1", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("Attack1", "Idle1Base"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("Attack1", "Spell1Chrg"): Time(
+            time: 0.8,
+        ),
+        ("Attack1", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("Attack1", "Spell4Hit"): Time(
+            time: 0.0,
+        ),
+        ("Attack1", "Spell4Stop"): Time(
+            time: 0.1,
+        ),
+        ("Attack2", "Attack2"): Time(
+            time: 0.0,
+        ),
+        ("Attack2", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("Attack2", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Attack2", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("Attack2", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Attack2", "Idle1Base"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("Attack2", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("Attack2", "Spell1Chrg"): Time(
+            time: 0.8,
+        ),
+        ("Attack2", "Spell3"): Time(
+            time: 0.0,
+        ),
+        ("Attack2", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("Attack2", "Spell4Hit"): Time(
+            time: 0.0,
+        ),
+        ("Attack2", "Spell4Stop"): Time(
+            time: 0.1,
+        ),
+        ("Attack3", "Attack3"): Time(
+            time: 0.0,
+        ),
+        ("Attack3", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Attack3", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("Attack3", "Idle1Base"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("Attack3", "Spell1Chrg"): Time(
+            time: 0.8,
+        ),
+        ("Attack3", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("Attack3", "Spell4Hit"): Time(
+            time: 0.0,
+        ),
+        ("Attack3", "Spell4Stop"): Time(
+            time: 0.1,
+        ),
+        ("AttackTower", "AttackTower"): Time(
+            time: 0.0,
+        ),
+        ("AttackTower", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("AttackTower", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("AttackTower", "Idle1Base"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("AttackTower", "Spell1Chrg"): Time(
+            time: 0.8,
+        ),
+        ("AttackTower", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("AttackTower", "Spell4Hit"): Time(
+            time: 0.0,
+        ),
+        ("AttackTower", "Spell4Stop"): Time(
+            time: 0.1,
+        ),
+        ("AttackTower2", "AttackTower2"): Time(
+            time: 0.0,
+        ),
+        ("AttackTower2", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("AttackTower2", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("AttackTower2", "Idle1Base"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("AttackTower2", "Spell1Chrg"): Time(
+            time: 0.8,
+        ),
+        ("AttackTower2", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("AttackTower2", "Spell4Stop"): Time(
+            time: 0.1,
+        ),
+        ("Channel", "Channel"): Time(
+            time: 0.0,
+        ),
+        ("Channel", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Channel", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("Channel", "Spell1Chrg"): Time(
+            time: 0.8,
+        ),
+        ("Channel", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("Channel", "Spell4Hit"): Time(
+            time: 0.0,
+        ),
+        ("Channel", "Spell4Stop"): Time(
+            time: 0.1,
+        ),
+        ("ChannelWndup", "ChannelWndup"): Time(
+            time: 0.0,
+        ),
+        ("ChannelWndup", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("ChannelWndup", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("ChannelWndup", "Spell1Chrg"): Time(
+            time: 0.8,
+        ),
+        ("ChannelWndup", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("ChannelWndup", "Spell4Hit"): Time(
+            time: 0.0,
+        ),
+        ("ChannelWndup", "Spell4Stop"): Time(
+            time: 0.1,
+        ),
+        ("Crit", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("Crit", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Crit", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("Crit", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Crit", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("Crit", "Spell1Chrg"): Time(
+            time: 0.8,
+        ),
+        ("Crit", "Spell3"): Time(
+            time: 0.0,
+        ),
+        ("Crit", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("Crit", "Spell4Hit"): Time(
+            time: 0.0,
+        ),
+        ("Crit", "Spell4Stop"): Time(
+            time: 0.1,
+        ),
+        ("Dance", "Dance"): Time(
+            time: 0.0,
+        ),
+        ("DanceIn", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("DanceIn", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("DanceIn", "Spell1Chrg"): Time(
+            time: 0.8,
+        ),
+        ("DanceIn", "Spell4Stop"): Time(
+            time: 0.1,
+        ),
+        ("DanceLoop", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("DanceLoop", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("DanceLoop", "Spell1Chrg"): Time(
+            time: 0.8,
+        ),
+        ("DanceLoop", "Spell4Stop"): Time(
+            time: 0.1,
+        ),
+        ("DanceSpin", "DanceSpin"): Time(
+            time: 0.0,
+        ),
+        ("DanceSpin", "Spell1Chrg"): Time(
+            time: 0.8,
+        ),
+        ("DanceSpin", "Spell4Stop"): Time(
+            time: 0.1,
+        ),
+        ("Death", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("Death", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Death", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("Death", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Death", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("Death", "Spell1Chrg"): Time(
+            time: 0.8,
+        ),
+        ("Death", "Spell3"): Time(
+            time: 0.0,
+        ),
+        ("Death", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("Death", "Spell4Hit"): Time(
+            time: 0.0,
+        ),
+        ("Death", "Spell4Stop"): Time(
+            time: 0.1,
+        ),
+        ("Idle1Base", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Idle1Base", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("Idle1Base", "Idle1Base"): Time(
+            time: 0.0,
+        ),
+        ("Idle1Base", "Spell1Chrg"): Time(
+            time: 0.8,
+        ),
+        ("Idle1Base", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("Idle1Base", "Spell4Hit"): Time(
+            time: 0.0,
+        ),
+        ("Idle1Base", "Spell4Stop"): Time(
+            time: 0.1,
+        ),
+        ("Idle2Base", "Idle2Base"): Time(
+            time: 0.0,
+        ),
+        ("Idle2Base", "Spell1Chrg"): Time(
+            time: 0.8,
+        ),
+        ("Idle2Base", "Spell4Stop"): Time(
+            time: 0.1,
+        ),
+        ("IdleIn", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("IdleIn", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("IdleIn", "Idle1Base"): Time(
+            time: 0.0,
+        ),
+        ("IdleIn", "IdleIn"): Time(
+            time: 0.0,
+        ),
+        ("IdleIn", "Spell1Chrg"): Time(
+            time: 0.8,
+        ),
+        ("IdleIn", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("IdleIn", "Spell4Hit"): Time(
+            time: 0.0,
+        ),
+        ("IdleIn", "Spell4Stop"): Time(
+            time: 0.1,
+        ),
+        ("Joke", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("Joke", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Joke", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("Joke", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Joke", "Joke"): Time(
+            time: 0.0,
+        ),
+        ("Joke", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("Joke", "Spell1Chrg"): Time(
+            time: 0.8,
+        ),
+        ("Joke", "Spell3"): Time(
+            time: 0.0,
+        ),
+        ("Joke", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("Joke", "Spell4Hit"): Time(
+            time: 0.0,
+        ),
+        ("Joke", "Spell4Stop"): Time(
+            time: 0.1,
+        ),
+        ("KnockedUpIn", "KnockedUpIn"): Time(
+            time: 0.0,
+        ),
+        ("KnockedUpIn", "Unk0xbb7b9f71"): Time(
+            time: 0.0,
+        ),
+        ("Laugh", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Laugh", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("Laugh", "Laugh"): Time(
+            time: 0.0,
+        ),
+        ("Laugh", "Spell1Chrg"): Time(
+            time: 0.8,
+        ),
+        ("Laugh", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("Laugh", "Spell4Hit"): Time(
+            time: 0.0,
+        ),
+        ("Laugh", "Spell4Stop"): Time(
+            time: 0.1,
+        ),
+        ("PassiveAttack1", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("PassiveAttack1", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("PassiveAttack1", "PassiveAttack1"): Time(
+            time: 0.0,
+        ),
+        ("PassiveAttack1", "Spell1Chrg"): Time(
+            time: 0.8,
+        ),
+        ("PassiveAttack1", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("PassiveAttack1", "Spell4Hit"): Time(
+            time: 0.0,
+        ),
+        ("PassiveAttack1", "Spell4Stop"): Time(
+            time: 0.1,
+        ),
+        ("PassiveAttack2", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("PassiveAttack2", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("PassiveAttack2", "PassiveAttack2"): Time(
+            time: 0.0,
+        ),
+        ("PassiveAttack2", "Spell1Chrg"): Time(
+            time: 0.8,
+        ),
+        ("PassiveAttack2", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("PassiveAttack2", "Spell4Hit"): Time(
+            time: 0.0,
+        ),
+        ("PassiveAttack2", "Spell4Stop"): Time(
+            time: 0.1,
+        ),
+        ("PassiveDash", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("PassiveDash", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("PassiveDash", "PassiveDash"): Time(
+            time: 0.0,
+        ),
+        ("PassiveDash", "Spell1Chrg"): Time(
+            time: 0.8,
+        ),
+        ("PassiveDash", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("PassiveDash", "Spell4Hit"): Time(
+            time: 0.0,
+        ),
+        ("PassiveDash", "Spell4Stop"): Time(
+            time: 0.1,
+        ),
+        ("PassiveDeath", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("PassiveDeath", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("PassiveDeath", "PassiveDeath"): Time(
+            time: 0.0,
+        ),
+        ("PassiveDeath", "Spell1Chrg"): Time(
+            time: 0.8,
+        ),
+        ("PassiveDeath", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("PassiveDeath", "Spell4Hit"): Time(
+            time: 0.0,
+        ),
+        ("PassiveDeath", "Spell4Stop"): Time(
+            time: 0.1,
+        ),
+        ("PassiveIdle1", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("PassiveIdle1", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("PassiveIdle1", "PassiveIdle1"): Time(
+            time: 0.0,
+        ),
+        ("PassiveIdle1", "Spell1Chrg"): Time(
+            time: 0.8,
+        ),
+        ("PassiveIdle1", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("PassiveIdle1", "Spell4Hit"): Time(
+            time: 0.0,
+        ),
+        ("PassiveIdle1", "Spell4Stop"): Time(
+            time: 0.1,
+        ),
+        ("PassiveRun", "PassiveRun"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Recall"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Spell1Chrg"): Time(
+            time: 0.8,
+        ),
+        ("Recall", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Spell4Hit"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Spell4Stop"): Time(
+            time: 0.1,
+        ),
+        ("Run", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Run", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("Run", "Idle1Base"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("Run", "Run"): Time(
+            time: 0.0,
+        ),
+        ("Run", "Spell1Chrg"): Time(
+            time: 0.8,
+        ),
+        ("Run", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("Run", "Spell4Hit"): Time(
+            time: 0.0,
+        ),
+        ("Run", "Spell4Stop"): Time(
+            time: 0.1,
+        ),
+        ("RunFast", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("RunFast", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("RunFast", "Idle1Base"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("RunFast", "RunFast"): Time(
+            time: 0.0,
+        ),
+        ("RunFast", "Spell1Chrg"): Time(
+            time: 0.8,
+        ),
+        ("RunFast", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("RunFast", "Spell4Hit"): Time(
+            time: 0.0,
+        ),
+        ("RunFast", "Spell4Stop"): Time(
+            time: 0.1,
+        ),
+        ("RunHaste", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("RunHaste", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("RunHaste", "Idle1Base"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("RunHaste", "RunHaste"): Time(
+            time: 0.0,
+        ),
+        ("RunHaste", "Spell1Chrg"): Time(
+            time: 0.8,
+        ),
+        ("RunHaste", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("RunHaste", "Spell4Hit"): Time(
+            time: 0.0,
+        ),
+        ("RunHaste", "Spell4Stop"): Time(
+            time: 0.1,
+        ),
+        ("RunSlow", "Idle1Base"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("RunSlow", "RunSlow"): Time(
+            time: 0.0,
+        ),
+        ("RunSlow", "Spell1Chrg"): Time(
+            time: 0.8,
+        ),
+        ("Spell1", "Attack2"): Time(
+            time: 0.3,
+        ),
+        ("Spell1", "Crit"): Time(
+            time: 0.3,
+        ),
+        ("Spell1", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Spell1", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("Spell1", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell1", "Joke"): Time(
+            time: 0.3,
+        ),
+        ("Spell1", "Spell1"): Time(
+            time: 0.3,
+        ),
+        ("Spell1", "Spell1Chrg"): Time(
+            time: 0.8,
+        ),
+        ("Spell1", "Spell3"): Time(
+            time: 0.3,
+        ),
+        ("Spell1", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("Spell1", "Spell4Hit"): Time(
+            time: 0.0,
+        ),
+        ("Spell1", "Spell4Stop"): Time(
+            time: 0.1,
+        ),
+        ("Spell1", "Taunt"): Time(
+            time: 0.3,
+        ),
+        ("Spell1Chrg", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Spell1Chrg", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("Spell1Chrg", "Spell1Chrg"): Time(
+            time: 0.8,
+        ),
+        ("Spell1Chrg", "Spell1Hit1"): Time(
+            time: 0.0,
+        ),
+        ("Spell1Chrg", "Spell1Hit2"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Chrg", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("Spell1Chrg", "Spell4Hit"): Time(
+            time: 0.0,
+        ),
+        ("Spell1Chrg", "Spell4Stop"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Hit1", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell1Hit1", "Idle1Base"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("Spell1Hit2", "Attack1"): Time(
+            time: 0.7,
+        ),
+        ("Spell1Hit2", "Attack2"): Time(
+            time: 0.7,
+        ),
+        ("Spell1Hit2", "Attack3"): Time(
+            time: 0.7,
+        ),
+        ("Spell1Hit2", "AttackTower"): Time(
+            time: 0.7,
+        ),
+        ("Spell1Hit2", "AttackTower2"): Time(
+            time: 0.7,
+        ),
+        ("Spell1Hit2", "Channel"): Time(
+            time: 0.7,
+        ),
+        ("Spell1Hit2", "ChannelWndup"): Time(
+            time: 0.7,
+        ),
+        ("Spell1Hit2", "Crit"): Time(
+            time: 0.7,
+        ),
+        ("Spell1Hit2", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Spell1Hit2", "DanceLoop"): Time(
+            time: 0.7,
+        ),
+        ("Spell1Hit2", "DanceSpin"): Time(
+            time: 0.7,
+        ),
+        ("Spell1Hit2", "Death"): Time(
+            time: 0.7,
+        ),
+        ("Spell1Hit2", "Idle1Base"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("Spell1Hit2", "Idle2Base"): Time(
+            time: 0.7,
+        ),
+        ("Spell1Hit2", "IdleIn"): Time(
+            time: 0.4,
+        ),
+        ("Spell1Hit2", "PassiveAttack1"): Time(
+            time: 0.7,
+        ),
+        ("Spell1Hit2", "PassiveAttack2"): Time(
+            time: 0.7,
+        ),
+        ("Spell1Hit2", "PassiveDash"): Time(
+            time: 0.7,
+        ),
+        ("Spell1Hit2", "PassiveDeath"): Time(
+            time: 0.7,
+        ),
+        ("Spell1Hit2", "PassiveIdle1"): Time(
+            time: 0.7,
+        ),
+        ("Spell1Hit2", "Recall"): Time(
+            time: 0.7,
+        ),
+        ("Spell1Hit2", "Run"): Time(
+            time: 0.7,
+        ),
+        ("Spell1Hit2", "RunFast"): Time(
+            time: 0.7,
+        ),
+        ("Spell1Hit2", "RunHaste"): Time(
+            time: 0.7,
+        ),
+        ("Spell1Hit2", "RunSlow"): Time(
+            time: 0.7,
+        ),
+        ("Spell1Hit2", "Spell1"): Time(
+            time: 0.7,
+        ),
+        ("Spell1Hit2", "Spell1Chrg"): Time(
+            time: 0.7,
+        ),
+        ("Spell1Hit2", "Spell1Hit1"): Time(
+            time: 0.7,
+        ),
+        ("Spell1Hit2", "Spell1Hit2"): Time(
+            time: 0.7,
+        ),
+        ("Spell1Hit2", "Spell2B"): Time(
+            time: 0.7,
+        ),
+        ("Spell1Hit2", "Spell3"): Time(
+            time: 0.7,
+        ),
+        ("Spell1Hit2", "Spell4"): Time(
+            time: 0.7,
+        ),
+        ("Spell1Hit2", "Spell4Hit"): Time(
+            time: 0.7,
+        ),
+        ("Spell1Hit2", "Spell4RunIn"): Time(
+            time: 0.7,
+        ),
+        ("Spell1Hit2", "Spell4Stop"): Time(
+            time: 0.7,
+        ),
+        ("Spell1Hit2", "Stunned"): Time(
+            time: 0.7,
+        ),
+        ("Spell1Hit2", "Taunt"): Time(
+            time: 0.7,
+        ),
+        ("Spell1Hit2", "Unk0x7ff7bfcd"): Time(
+            time: 0.7,
+        ),
+        ("Spell1Hit2", "Unk0xa09e88b7"): Time(
+            time: 0.7,
+        ),
+        ("Spell1Hit2", "Unk0xbb7b9f71"): Time(
+            time: 0.7,
+        ),
+        ("Spell1Hit2", "Unk0xe2d9deb"): Time(
+            time: 0.7,
+        ),
+        ("Spell2B", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Spell2B", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("Spell2B", "Spell1Chrg"): Time(
+            time: 0.8,
+        ),
+        ("Spell2B", "Spell2B"): Time(
+            time: 0.0,
+        ),
+        ("Spell2B", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("Spell2B", "Spell4Stop"): Time(
+            time: 0.1,
+        ),
+        ("Spell3", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("Spell3", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Spell3", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("Spell3", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell3", "Idle1Base"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("Spell3", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("Spell3", "Spell1Chrg"): Time(
+            time: 0.8,
+        ),
+        ("Spell3", "Spell3"): Time(
+            time: 0.0,
+        ),
+        ("Spell3", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("Spell3", "Spell4Hit"): Time(
+            time: 0.0,
+        ),
+        ("Spell3", "Spell4Stop"): Time(
+            time: 0.1,
+        ),
+        ("Spell4", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Spell4", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("Spell4", "Spell1Chrg"): Time(
+            time: 0.8,
+        ),
+        ("Spell4", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("Spell4", "Spell4Hit"): Time(
+            time: 0.0,
+        ),
+        ("Spell4", "Spell4Stop"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Hit", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Spell4Hit", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("Spell4Hit", "Spell1Chrg"): Time(
+            time: 0.8,
+        ),
+        ("Spell4Hit", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("Spell4Hit", "Spell4Hit"): Time(
+            time: 0.0,
+        ),
+        ("Spell4Hit", "Spell4Stop"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Run", "Spell4Run"): Time(
+            time: 0.0,
+        ),
+        ("Spell4RunIn", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Spell4RunIn", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("Spell4RunIn", "Spell1Chrg"): Time(
+            time: 0.8,
+        ),
+        ("Spell4RunIn", "Spell4RunIn"): Time(
+            time: 0.0,
+        ),
+        ("Spell4RunIn", "Spell4Stop"): Time(
+            time: 0.1,
+        ),
+        ("Spell4RunIn", "Unk0xe2d9deb"): Time(
+            time: 0.4,
+        ),
+        ("Spell4Stop", "Idle1Base"): Time(
+            time: 1.0,
+        ),
+        ("Spell4Stop", "IdleIn"): Time(
+            time: 1.0,
+        ),
+        ("Spell4Stop", "Spell1Chrg"): Time(
+            time: 0.8,
+        ),
+        ("Spell4Stop", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("Spell4Stop", "Spell4Hit"): Time(
+            time: 0.0,
+        ),
+        ("Spell4Stop", "Spell4Stop"): Time(
+            time: 0.1,
+        ),
+        ("Stunned", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Stunned", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("Stunned", "Spell1Chrg"): Time(
+            time: 0.8,
+        ),
+        ("Stunned", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("Stunned", "Spell4Hit"): Time(
+            time: 0.0,
+        ),
+        ("Stunned", "Spell4Stop"): Time(
+            time: 0.1,
+        ),
+        ("Stunned", "Stunned"): Time(
+            time: 0.0,
+        ),
+        ("Taunt", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("Taunt", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Taunt", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("Taunt", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Taunt", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("Taunt", "Spell1Chrg"): Time(
+            time: 0.8,
+        ),
+        ("Taunt", "Spell3"): Time(
+            time: 0.0,
+        ),
+        ("Taunt", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("Taunt", "Spell4Hit"): Time(
+            time: 0.0,
+        ),
+        ("Taunt", "Spell4Stop"): Time(
+            time: 0.1,
+        ),
+        ("Taunt", "Taunt"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x7ff7bfcd", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x7ff7bfcd", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x7ff7bfcd", "Spell1Chrg"): Time(
+            time: 0.8,
+        ),
+        ("Unk0x7ff7bfcd", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x7ff7bfcd", "Spell4Hit"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x7ff7bfcd", "Spell4Stop"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x7ff7bfcd", "Unk0x7ff7bfcd"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x9733b790", "Unk0x9733b790"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xa09e88b7", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xa09e88b7", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xa09e88b7", "Spell1Chrg"): Time(
+            time: 0.8,
+        ),
+        ("Unk0xa09e88b7", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xa09e88b7", "Spell4Hit"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xa09e88b7", "Spell4Stop"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xa09e88b7", "Unk0xa09e88b7"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xbb7b9f71", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xbb7b9f71", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xbb7b9f71", "Spell1Chrg"): Time(
+            time: 0.8,
+        ),
+        ("Unk0xbb7b9f71", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xbb7b9f71", "Spell4Hit"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xbb7b9f71", "Spell4Stop"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xbb7b9f71", "Unk0xbb7b9f71"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xe2d9deb", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xe2d9deb", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xe2d9deb", "Spell1Chrg"): Time(
+            time: 0.8,
+        ),
+        ("Unk0xe2d9deb", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xe2d9deb", "Spell4Hit"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xe2d9deb", "Spell4Stop"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xe2d9deb", "Unk0xe2d9deb"): Time(
+            time: 0.0,
+        ),
+    },
+)

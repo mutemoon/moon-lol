@@ -1,0 +1,1045 @@
+(
+    gltf_path: "characters/velkoz/skins/skin0.glb",
+    hash_to_node: {
+        "Attack": Selector(
+            probably_nodes: [
+                (
+                    key: "Attack1",
+                    value: 1.0,
+                ),
+                (
+                    key: "Attack2",
+                    value: 1.0,
+                ),
+            ],
+        ),
+        "Attack1": Parallel(
+            hashes: [
+                "Attack1Base",
+                "Unk0x12c9f94b",
+            ],
+        ),
+        "Attack1Base": Clip(
+            node_index: 35,
+        ),
+        "Attack2": Parallel(
+            hashes: [
+                "Attack2Base",
+                "Unk0x9d46c40a",
+            ],
+        ),
+        "Attack2Base": Clip(
+            node_index: 19,
+        ),
+        "Attack3": Parallel(
+            hashes: [
+                "Unk0xc656e32",
+                "Unk0xcfbba229",
+            ],
+        ),
+        "Channel": Clip(
+            node_index: 3,
+        ),
+        "ChannelWndup": Parallel(
+            hashes: [
+                "Unk0x4dce503b",
+                "Unk0xa358bbda",
+            ],
+        ),
+        "Crit": Parallel(
+            hashes: [
+                "CritBase",
+                "Unk0x515bea5a",
+            ],
+        ),
+        "CritBase": Clip(
+            node_index: 15,
+        ),
+        "Dance": Clip(
+            node_index: 39,
+        ),
+        "Death": Parallel(
+            hashes: [
+                "DeathBase",
+                "TurnZeroAdditive",
+            ],
+        ),
+        "DeathBase": Clip(
+            node_index: 37,
+        ),
+        "Idle1": Sequence(
+            hashes: [
+                "IdleIn",
+                "IdleSelector",
+            ],
+        ),
+        "IdleIn": Parallel(
+            hashes: [
+                "Unk0x56f6d84b",
+                "IdleInAdditive",
+            ],
+        ),
+        "IdleInAdditive": Clip(
+            node_index: 6,
+        ),
+        "IdleSelector": Selector(
+            probably_nodes: [
+                (
+                    key: "Unk0x56f6d84b",
+                    value: 1.0,
+                ),
+                (
+                    key: "Unk0xf51f166a",
+                    value: 1.0,
+                ),
+            ],
+        ),
+        "Joke": Clip(
+            node_index: 33,
+        ),
+        "Laugh": Clip(
+            node_index: 30,
+        ),
+        "Recall": Clip(
+            node_index: 17,
+        ),
+        "RecallLeadout": Clip(
+            node_index: 10,
+        ),
+        "RecallWinddown": Clip(
+            node_index: 27,
+        ),
+        "Respawn": Clip(
+            node_index: 24,
+        ),
+        "Run": Clip(
+            node_index: 7,
+        ),
+        "RunHaste": Clip(
+            node_index: 5,
+        ),
+        "Spell1": Clip(
+            node_index: 28,
+        ),
+        "Spell2": Sequence(
+            hashes: [
+                "Unk0xfa48f91e",
+                "Spell2LeadOut",
+            ],
+        ),
+        "Spell2Base": Clip(
+            node_index: 21,
+        ),
+        "Spell2LeadOut": Clip(
+            node_index: 8,
+        ),
+        "Spell3": Sequence(
+            hashes: [
+                "Unk0x7f22d309",
+                "Spell3LeadOut",
+            ],
+        ),
+        "Spell3LeadOut": Clip(
+            node_index: 20,
+        ),
+        "Spell3Upper": Clip(
+            node_index: 36,
+        ),
+        "Spell4Base": Clip(
+            node_index: 26,
+        ),
+        "Spell4In": Clip(
+            node_index: 16,
+        ),
+        "Spell4LeadOut": Clip(
+            node_index: 4,
+        ),
+        "Taunt": Clip(
+            node_index: 31,
+        ),
+        "TurnAdditveLeft": Clip(
+            node_index: 18,
+        ),
+        "TurnAdditveRight": Clip(
+            node_index: 0,
+        ),
+        "TurnZeroAdditive": Clip(
+            node_index: 32,
+        ),
+        "Unk0x12c9f94b": Clip(
+            node_index: 2,
+        ),
+        "Unk0x2d1191a8": Clip(
+            node_index: 9,
+        ),
+        "Unk0x432b1d96": Clip(
+            node_index: 11,
+        ),
+        "Unk0x4dce503b": Clip(
+            node_index: 12,
+        ),
+        "Unk0x515bea5a": Clip(
+            node_index: 13,
+        ),
+        "Unk0x56f6d84b": Clip(
+            node_index: 14,
+        ),
+        "Unk0x631bcd28": Parallel(
+            hashes: [
+                "Unk0xf51f166a",
+            ],
+        ),
+        "Unk0x7f22d309": Parallel(
+            hashes: [
+                "Unk0x7fc23e3a",
+                "Spell3Upper",
+            ],
+        ),
+        "Unk0x7fc23e3a": Clip(
+            node_index: 22,
+        ),
+        "Unk0x9d46c40a": Clip(
+            node_index: 23,
+        ),
+        "Unk0xa358bbda": Clip(
+            node_index: 25,
+        ),
+        "Unk0xb64120f4": Clip(
+            node_index: 29,
+        ),
+        "Unk0xc656e32": Clip(
+            node_index: 1,
+        ),
+        "Unk0xcbc20625": Parametric(
+            pairs: [
+                (
+                    key: "TurnAdditveLeft",
+                    value: -179.0,
+                ),
+                (
+                    key: "TurnZeroAdditive",
+                    value: 0.0,
+                ),
+                (
+                    key: "TurnAdditveRight",
+                    value: 179.0,
+                ),
+            ],
+        ),
+        "Unk0xcfbba229": Clip(
+            node_index: 34,
+        ),
+        "Unk0xf51f166a": Clip(
+            node_index: 38,
+        ),
+        "Unk0xfa48f91e": Parallel(
+            hashes: [
+                "Spell2Base",
+                "Unk0x432b1d96",
+            ],
+        ),
+    },
+    blend_data: {
+        ("Attack1", "Attack1"): Time(
+            time: 0.0,
+        ),
+        ("Attack1", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Base", "Attack1Base"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Base", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Base", "Run"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Base", "Unk0x56f6d84b"): Time(
+            time: 0.0,
+        ),
+        ("Attack2", "Attack2"): Time(
+            time: 0.0,
+        ),
+        ("Attack2", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Attack2Base", "Attack2Base"): Time(
+            time: 0.0,
+        ),
+        ("Attack2Base", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Attack2Base", "Run"): Time(
+            time: 0.0,
+        ),
+        ("Attack2Base", "Unk0x56f6d84b"): Time(
+            time: 0.0,
+        ),
+        ("Attack3", "Attack3"): Time(
+            time: 0.0,
+        ),
+        ("Attack3", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Channel", "Channel"): Time(
+            time: 0.0,
+        ),
+        ("Channel", "Death"): Time(
+            time: 0.0,
+        ),
+        ("ChannelWndup", "ChannelWndup"): Time(
+            time: 0.0,
+        ),
+        ("ChannelWndup", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Crit", "Crit"): Time(
+            time: 0.0,
+        ),
+        ("Crit", "Death"): Time(
+            time: 0.0,
+        ),
+        ("CritBase", "CritBase"): Time(
+            time: 0.0,
+        ),
+        ("CritBase", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Dance", "Attack1Base"): Time(
+            time: 0.1,
+        ),
+        ("Dance", "Attack2Base"): Time(
+            time: 0.1,
+        ),
+        ("Dance", "Channel"): Time(
+            time: 0.1,
+        ),
+        ("Dance", "CritBase"): Time(
+            time: 0.1,
+        ),
+        ("Dance", "Dance"): Time(
+            time: 0.1,
+        ),
+        ("Dance", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Dance", "DeathBase"): Time(
+            time: 0.1,
+        ),
+        ("Dance", "Joke"): Time(
+            time: 0.1,
+        ),
+        ("Dance", "Laugh"): Time(
+            time: 0.1,
+        ),
+        ("Dance", "Recall"): Time(
+            time: 0.1,
+        ),
+        ("Dance", "RecallLeadout"): Time(
+            time: 0.1,
+        ),
+        ("Dance", "RecallWinddown"): Time(
+            time: 0.1,
+        ),
+        ("Dance", "Respawn"): Time(
+            time: 0.1,
+        ),
+        ("Dance", "Run"): Time(
+            time: 0.1,
+        ),
+        ("Dance", "RunHaste"): Time(
+            time: 0.1,
+        ),
+        ("Dance", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Dance", "Spell2Base"): Time(
+            time: 0.1,
+        ),
+        ("Dance", "Spell2LeadOut"): Time(
+            time: 0.1,
+        ),
+        ("Dance", "Spell3LeadOut"): Time(
+            time: 0.1,
+        ),
+        ("Dance", "Taunt"): Time(
+            time: 0.1,
+        ),
+        ("Dance", "TurnAdditveLeft"): Time(
+            time: 0.1,
+        ),
+        ("Dance", "TurnAdditveRight"): Time(
+            time: 0.1,
+        ),
+        ("Dance", "TurnZeroAdditive"): Time(
+            time: 0.1,
+        ),
+        ("Dance", "Unk0x4dce503b"): Time(
+            time: 0.1,
+        ),
+        ("Dance", "Unk0x56f6d84b"): Time(
+            time: 0.1,
+        ),
+        ("Dance", "Unk0x7fc23e3a"): Time(
+            time: 0.1,
+        ),
+        ("Dance", "Unk0xc656e32"): Time(
+            time: 0.1,
+        ),
+        ("Dance", "Unk0xcbc20625"): Time(
+            time: 0.1,
+        ),
+        ("Dance", "Unk0xf51f166a"): Time(
+            time: 0.1,
+        ),
+        ("Death", "Death"): Time(
+            time: 0.0,
+        ),
+        ("DeathBase", "Death"): Time(
+            time: 0.0,
+        ),
+        ("DeathBase", "DeathBase"): Time(
+            time: 0.0,
+        ),
+        ("Idle1", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Idle1", "Idle1"): Time(
+            time: 0.0,
+        ),
+        ("IdleIn", "Death"): Time(
+            time: 0.0,
+        ),
+        ("IdleIn", "IdleIn"): Time(
+            time: 0.0,
+        ),
+        ("IdleInAdditive", "Death"): Time(
+            time: 0.0,
+        ),
+        ("IdleSelector", "Death"): Time(
+            time: 0.0,
+        ),
+        ("IdleSelector", "IdleSelector"): Time(
+            time: 0.0,
+        ),
+        ("Joke", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Joke", "Joke"): Time(
+            time: 0.0,
+        ),
+        ("Laugh", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Laugh", "Laugh"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Recall"): Time(
+            time: 0.0,
+        ),
+        ("RecallLeadout", "Death"): Time(
+            time: 0.0,
+        ),
+        ("RecallLeadout", "RecallLeadout"): Time(
+            time: 0.0,
+        ),
+        ("RecallWinddown", "Death"): Time(
+            time: 0.0,
+        ),
+        ("RecallWinddown", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("RecallWinddown", "Run"): Time(
+            time: 0.8,
+        ),
+        ("RecallWinddown", "Unk0x56f6d84b"): Time(
+            time: 0.0,
+        ),
+        ("Respawn", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Respawn", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Respawn", "Run"): Time(
+            time: 0.8,
+        ),
+        ("Run", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Run", "Run"): Time(
+            time: 0.0,
+        ),
+        ("Run", "Unk0x2d1191a8"): Time(
+            time: 0.8,
+        ),
+        ("Run", "Unk0x56f6d84b"): Time(
+            time: 0.8,
+        ),
+        ("Run", "Unk0xf51f166a"): Time(
+            time: 1.0,
+        ),
+        ("RunHaste", "Death"): Time(
+            time: 0.0,
+        ),
+        ("RunHaste", "RunHaste"): Time(
+            time: 0.0,
+        ),
+        ("Spell1", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell1", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("Spell2", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell2", "Spell2"): Time(
+            time: 0.0,
+        ),
+        ("Spell2Base", "Channel"): Time(
+            time: 1.0,
+        ),
+        ("Spell2Base", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell2Base", "DeathBase"): Time(
+            time: 1.0,
+        ),
+        ("Spell2Base", "RecallLeadout"): Time(
+            time: 1.0,
+        ),
+        ("Spell2Base", "RecallWinddown"): Time(
+            time: 1.0,
+        ),
+        ("Spell2Base", "Run"): Time(
+            time: 1.0,
+        ),
+        ("Spell2Base", "Spell2Base"): Time(
+            time: 0.0,
+        ),
+        ("Spell2Base", "Spell2LeadOut"): Time(
+            time: 0.0,
+        ),
+        ("Spell2Base", "Taunt"): Time(
+            time: 1.0,
+        ),
+        ("Spell2Base", "Unk0x4dce503b"): Time(
+            time: 1.0,
+        ),
+        ("Spell2LeadOut", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell2LeadOut", "Spell2Base"): Time(
+            time: 0.0,
+        ),
+        ("Spell2LeadOut", "Spell2LeadOut"): Time(
+            time: 0.0,
+        ),
+        ("Spell3", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell3", "Spell3"): Time(
+            time: 0.0,
+        ),
+        ("Spell3LeadOut", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell3LeadOut", "Spell3LeadOut"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Upper", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Upper", "Spell3Upper"): Time(
+            time: 0.0,
+        ),
+        ("Spell4Base", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell4Base", "Spell4Base"): Time(
+            time: 0.0,
+        ),
+        ("Spell4In", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell4In", "Spell4In"): Time(
+            time: 0.0,
+        ),
+        ("Spell4LeadOut", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell4LeadOut", "Spell4LeadOut"): Time(
+            time: 0.0,
+        ),
+        ("Taunt", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Taunt", "Taunt"): Time(
+            time: 0.0,
+        ),
+        ("TurnAdditveLeft", "Attack1Base"): Time(
+            time: 0.0,
+        ),
+        ("TurnAdditveLeft", "Attack2Base"): Time(
+            time: 0.0,
+        ),
+        ("TurnAdditveLeft", "Channel"): Time(
+            time: 0.0,
+        ),
+        ("TurnAdditveLeft", "CritBase"): Time(
+            time: 0.0,
+        ),
+        ("TurnAdditveLeft", "Dance"): Time(
+            time: 0.0,
+        ),
+        ("TurnAdditveLeft", "Death"): Time(
+            time: 0.0,
+        ),
+        ("TurnAdditveLeft", "DeathBase"): Time(
+            time: 0.0,
+        ),
+        ("TurnAdditveLeft", "Joke"): Time(
+            time: 0.0,
+        ),
+        ("TurnAdditveLeft", "Laugh"): Time(
+            time: 0.0,
+        ),
+        ("TurnAdditveLeft", "Recall"): Time(
+            time: 0.0,
+        ),
+        ("TurnAdditveLeft", "RecallLeadout"): Time(
+            time: 0.0,
+        ),
+        ("TurnAdditveLeft", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("TurnAdditveLeft", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("TurnAdditveLeft", "Run"): Time(
+            time: 0.0,
+        ),
+        ("TurnAdditveLeft", "RunHaste"): Time(
+            time: 0.0,
+        ),
+        ("TurnAdditveLeft", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("TurnAdditveLeft", "Spell2Base"): Time(
+            time: 0.0,
+        ),
+        ("TurnAdditveLeft", "Spell2LeadOut"): Time(
+            time: 0.0,
+        ),
+        ("TurnAdditveLeft", "Spell3LeadOut"): Time(
+            time: 0.0,
+        ),
+        ("TurnAdditveLeft", "Taunt"): Time(
+            time: 0.0,
+        ),
+        ("TurnAdditveLeft", "TurnAdditveLeft"): Time(
+            time: 0.0,
+        ),
+        ("TurnAdditveLeft", "TurnAdditveRight"): Time(
+            time: 0.0,
+        ),
+        ("TurnAdditveLeft", "TurnZeroAdditive"): Time(
+            time: 0.0,
+        ),
+        ("TurnAdditveLeft", "Unk0x4dce503b"): Time(
+            time: 0.0,
+        ),
+        ("TurnAdditveLeft", "Unk0x56f6d84b"): Time(
+            time: 0.0,
+        ),
+        ("TurnAdditveLeft", "Unk0x7fc23e3a"): Time(
+            time: 0.0,
+        ),
+        ("TurnAdditveLeft", "Unk0xc656e32"): Time(
+            time: 0.0,
+        ),
+        ("TurnAdditveLeft", "Unk0xcbc20625"): Time(
+            time: 0.0,
+        ),
+        ("TurnAdditveLeft", "Unk0xf51f166a"): Time(
+            time: 0.0,
+        ),
+        ("TurnAdditveRight", "Attack1Base"): Time(
+            time: 0.0,
+        ),
+        ("TurnAdditveRight", "Attack2Base"): Time(
+            time: 0.0,
+        ),
+        ("TurnAdditveRight", "Channel"): Time(
+            time: 0.0,
+        ),
+        ("TurnAdditveRight", "CritBase"): Time(
+            time: 0.0,
+        ),
+        ("TurnAdditveRight", "Dance"): Time(
+            time: 0.0,
+        ),
+        ("TurnAdditveRight", "Death"): Time(
+            time: 0.0,
+        ),
+        ("TurnAdditveRight", "DeathBase"): Time(
+            time: 0.0,
+        ),
+        ("TurnAdditveRight", "Joke"): Time(
+            time: 0.0,
+        ),
+        ("TurnAdditveRight", "Laugh"): Time(
+            time: 0.0,
+        ),
+        ("TurnAdditveRight", "Recall"): Time(
+            time: 0.0,
+        ),
+        ("TurnAdditveRight", "RecallLeadout"): Time(
+            time: 0.0,
+        ),
+        ("TurnAdditveRight", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("TurnAdditveRight", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("TurnAdditveRight", "Run"): Time(
+            time: 0.0,
+        ),
+        ("TurnAdditveRight", "RunHaste"): Time(
+            time: 0.0,
+        ),
+        ("TurnAdditveRight", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("TurnAdditveRight", "Spell2Base"): Time(
+            time: 0.0,
+        ),
+        ("TurnAdditveRight", "Spell2LeadOut"): Time(
+            time: 0.0,
+        ),
+        ("TurnAdditveRight", "Spell3LeadOut"): Time(
+            time: 0.0,
+        ),
+        ("TurnAdditveRight", "Taunt"): Time(
+            time: 0.0,
+        ),
+        ("TurnAdditveRight", "TurnAdditveLeft"): Time(
+            time: 0.0,
+        ),
+        ("TurnAdditveRight", "TurnAdditveRight"): Time(
+            time: 0.0,
+        ),
+        ("TurnAdditveRight", "TurnZeroAdditive"): Time(
+            time: 0.0,
+        ),
+        ("TurnAdditveRight", "Unk0x4dce503b"): Time(
+            time: 0.0,
+        ),
+        ("TurnAdditveRight", "Unk0x56f6d84b"): Time(
+            time: 0.0,
+        ),
+        ("TurnAdditveRight", "Unk0x7fc23e3a"): Time(
+            time: 0.0,
+        ),
+        ("TurnAdditveRight", "Unk0xc656e32"): Time(
+            time: 0.0,
+        ),
+        ("TurnAdditveRight", "Unk0xcbc20625"): Time(
+            time: 0.0,
+        ),
+        ("TurnAdditveRight", "Unk0xf51f166a"): Time(
+            time: 0.0,
+        ),
+        ("TurnZeroAdditive", "Attack1Base"): Time(
+            time: 0.0,
+        ),
+        ("TurnZeroAdditive", "Attack2Base"): Time(
+            time: 0.0,
+        ),
+        ("TurnZeroAdditive", "Channel"): Time(
+            time: 0.0,
+        ),
+        ("TurnZeroAdditive", "CritBase"): Time(
+            time: 0.0,
+        ),
+        ("TurnZeroAdditive", "Dance"): Time(
+            time: 0.0,
+        ),
+        ("TurnZeroAdditive", "Death"): Time(
+            time: 0.0,
+        ),
+        ("TurnZeroAdditive", "DeathBase"): Time(
+            time: 0.0,
+        ),
+        ("TurnZeroAdditive", "Joke"): Time(
+            time: 0.0,
+        ),
+        ("TurnZeroAdditive", "Laugh"): Time(
+            time: 0.0,
+        ),
+        ("TurnZeroAdditive", "Recall"): Time(
+            time: 0.0,
+        ),
+        ("TurnZeroAdditive", "RecallLeadout"): Time(
+            time: 0.0,
+        ),
+        ("TurnZeroAdditive", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("TurnZeroAdditive", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("TurnZeroAdditive", "Run"): Time(
+            time: 0.0,
+        ),
+        ("TurnZeroAdditive", "RunHaste"): Time(
+            time: 0.0,
+        ),
+        ("TurnZeroAdditive", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("TurnZeroAdditive", "Spell2Base"): Time(
+            time: 0.0,
+        ),
+        ("TurnZeroAdditive", "Spell2LeadOut"): Time(
+            time: 0.0,
+        ),
+        ("TurnZeroAdditive", "Spell3LeadOut"): Time(
+            time: 0.0,
+        ),
+        ("TurnZeroAdditive", "Taunt"): Time(
+            time: 0.0,
+        ),
+        ("TurnZeroAdditive", "TurnAdditveLeft"): Time(
+            time: 0.0,
+        ),
+        ("TurnZeroAdditive", "TurnAdditveRight"): Time(
+            time: 0.0,
+        ),
+        ("TurnZeroAdditive", "TurnZeroAdditive"): Time(
+            time: 0.0,
+        ),
+        ("TurnZeroAdditive", "Unk0x4dce503b"): Time(
+            time: 0.0,
+        ),
+        ("TurnZeroAdditive", "Unk0x56f6d84b"): Time(
+            time: 0.0,
+        ),
+        ("TurnZeroAdditive", "Unk0x7fc23e3a"): Time(
+            time: 0.0,
+        ),
+        ("TurnZeroAdditive", "Unk0xc656e32"): Time(
+            time: 0.0,
+        ),
+        ("TurnZeroAdditive", "Unk0xcbc20625"): Time(
+            time: 0.0,
+        ),
+        ("TurnZeroAdditive", "Unk0xf51f166a"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x12c9f94b", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x12c9f94b", "Run"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x12c9f94b", "Unk0x12c9f94b"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x12c9f94b", "Unk0x56f6d84b"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x2d1191a8", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x432b1d96", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x432b1d96", "Unk0x432b1d96"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x4dce503b", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x4dce503b", "Unk0x4dce503b"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x515bea5a", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x515bea5a", "Unk0x515bea5a"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x56f6d84b", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x631bcd28", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x631bcd28", "Unk0x631bcd28"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x7f22d309", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x7f22d309", "Unk0x7f22d309"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x7fc23e3a", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x7fc23e3a", "Unk0x7fc23e3a"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x9d46c40a", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x9d46c40a", "Run"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x9d46c40a", "Unk0x56f6d84b"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x9d46c40a", "Unk0x9d46c40a"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xa358bbda", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xa358bbda", "Unk0xa358bbda"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xb64120f4", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xb64120f4", "Unk0xb64120f4"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xc656e32", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xc656e32", "Run"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xc656e32", "Unk0x56f6d84b"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xc656e32", "Unk0xc656e32"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xcbc20625", "Attack1Base"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xcbc20625", "Attack2Base"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xcbc20625", "Channel"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xcbc20625", "CritBase"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xcbc20625", "Dance"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xcbc20625", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xcbc20625", "DeathBase"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xcbc20625", "Joke"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xcbc20625", "Laugh"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xcbc20625", "Recall"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xcbc20625", "RecallLeadout"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xcbc20625", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xcbc20625", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xcbc20625", "Run"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xcbc20625", "RunHaste"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xcbc20625", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xcbc20625", "Spell2Base"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xcbc20625", "Spell2LeadOut"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xcbc20625", "Spell3LeadOut"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xcbc20625", "Taunt"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xcbc20625", "TurnAdditveLeft"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xcbc20625", "TurnAdditveRight"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xcbc20625", "TurnZeroAdditive"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xcbc20625", "Unk0x4dce503b"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xcbc20625", "Unk0x56f6d84b"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xcbc20625", "Unk0x7fc23e3a"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xcbc20625", "Unk0xc656e32"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xcbc20625", "Unk0xcbc20625"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xcbc20625", "Unk0xf51f166a"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xcfbba229", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xcfbba229", "Run"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xcfbba229", "Unk0x56f6d84b"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xcfbba229", "Unk0xcfbba229"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xf51f166a", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xfa48f91e", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xfa48f91e", "Unk0xfa48f91e"): Time(
+            time: 0.0,
+        ),
+    },
+)

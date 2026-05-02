@@ -1,4 +1,5 @@
 use bevy::ecs::event::EntityEvent;
+use bevy::log::debug;
 use bevy::prelude::{
     Assets, Commands, Entity, Fixed, On, Query, Res, ResMut, Time, Timer, TimerMode, info, warn,
 };
@@ -23,7 +24,7 @@ fn push_skill_log(
     point: bevy::prelude::Vec2,
     result: SkillCastResult,
 ) {
-    info!(
+    debug!(
         "{:?}",
         SkillCastRecord {
             caster,
@@ -98,7 +99,7 @@ pub fn on_skill_cast(
 
     if let Some(ref timer) = cooldown_state.timer {
         if !timer.is_finished() {
-            info!(
+            debug!(
                 "{} 技能 {} 冷却中，剩余 {:.2}s",
                 entity,
                 trigger.index,
@@ -131,7 +132,7 @@ pub fn on_skill_cast(
     };
 
     if skill.level == 0 {
-        info!("{} 技能 {} 未学习，无法释放", entity, trigger.index);
+        debug!("{} 技能 {} 未学习，无法释放", entity, trigger.index);
         push_skill_log(
             &mut log,
             entity,
@@ -161,7 +162,7 @@ pub fn on_skill_cast(
         let &current_mana = mana.get(skill.level as usize).unwrap();
 
         if ability_resource.value < current_mana {
-            info!(
+            debug!(
                 "{} 技能 {} 蓝量不足，需要 {:.0}，当前 {:.0}",
                 entity, trigger.index, current_mana, ability_resource.value
             );
@@ -178,7 +179,7 @@ pub fn on_skill_cast(
         }
 
         ability_resource.value -= current_mana;
-        info!(
+        debug!(
             "{} 技能 {} 消耗 {:.0} 蓝量，剩余 {:.0}",
             entity, trigger.index, current_mana, ability_resource.value
         );
@@ -201,7 +202,7 @@ pub fn on_skill_cast(
         point: trigger.point,
     };
 
-    info!("{} 技能 {} 进入代码驱动观察者流程", entity, trigger.index);
+    debug!("{} 技能 {} 进入代码驱动观察者流程", entity, trigger.index);
     commands.trigger(cast_event);
 
     if skill.cooldown_mode == SkillCooldownMode::AfterCast {
@@ -209,7 +210,7 @@ pub fn on_skill_cast(
             cooldown_state.duration,
             TimerMode::Once,
         ));
-        info!(
+        debug!(
             "{} 技能 {} 开始冷却 {}s",
             entity, trigger.index, cooldown_state.duration
         );
@@ -236,24 +237,24 @@ pub fn on_skill_level_up(
         return;
     };
 
-    info!("{} 尝试升级技能: 索引 {}", entity, trigger.index);
+    debug!("{} 尝试升级技能: 索引 {}", entity, trigger.index);
 
     if skill_points.0 == 0 {
-        info!("{} 升级失败: 技能点不足", entity);
+        debug!("{} 升级失败: 技能点不足", entity);
         return;
     }
 
     // 1 级只能加点 q w e，6 级才能加点 r，6 级前一个技能最多加 3 点
     if level.value < 6 {
         if trigger.index == 3 {
-            info!(
+            debug!(
                 "{} 升级失败: 等级 {} 小于 6 级不能升级大招",
                 entity, level.value
             );
             return;
         }
         if skill.level >= 3 {
-            info!(
+            debug!(
                 "{} 升级失败: 等级 {} 小于 6 级，技能 {} 已达上限 (3)",
                 entity, level.value, trigger.index
             );
@@ -263,7 +264,7 @@ pub fn on_skill_level_up(
 
     skill.level += 1;
     skill_points.0 -= 1;
-    info!(
+    debug!(
         "{} 技能升级成功: 索引 {}, 新等级 {}, 剩余技能点 {}",
         entity, trigger.index, skill.level, skill_points.0
     );
@@ -273,7 +274,7 @@ pub fn on_level_up(event: On<EventLevelUp>, mut q_skill_points: Query<&mut Skill
     let entity = event.event_target();
     if let Ok(mut skill_points) = q_skill_points.get_mut(entity) {
         skill_points.0 += event.delta;
-        info!(
+        debug!(
             "{} 升级: 获得 {} 技能点，当前技能点 {}",
             entity, event.delta, skill_points.0
         );

@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{BTreeMap, HashMap};
 
 use bevy::animation::AnimationPlayer;
 use bevy::animation::graph::AnimationNodeIndex;
@@ -17,14 +17,18 @@ pub struct ConfigAnimationClip {
     pub translates: Vec<Vec<(f32, Vec3)>>,
     pub rotations: Vec<Vec<(f32, Quat)>>,
     pub scales: Vec<Vec<(f32, Vec3)>>,
+    /// 每个骨骼的蒙版权重，按 skeleton.influences 顺序排列
+    /// None = 无蒙版，全部关节驱动
+    /// Some(weights) = weights[i] 对应 influences[i] 的权重，0 = 不驱动
+    pub mask_weights: Option<Vec<f32>>,
 }
 
 /// Animation graph asset - stable version of lol_render::Animation
 #[derive(Asset, TypePath, Clone, Serialize, Deserialize)]
 pub struct LOLAnimationGraph {
     pub gltf_path: String,
-    pub hash_to_node: HashMap<String, ConfigAnimationNode>,
-    pub blend_data: HashMap<(String, String), ConfigBlendData>,
+    pub hash_to_node: BTreeMap<String, ConfigAnimationNode>,
+    pub blend_data: BTreeMap<(String, String), ConfigBlendData>,
 }
 
 /// Animation node types
@@ -106,11 +110,34 @@ pub enum ConfigBlendData {
 /// Animation handler component - holds handle to ConfigAnimation asset
 #[derive(Component, Reflect, Debug)]
 #[reflect(Component)]
-pub struct LOLAnimationGraphHandler(pub Handle<LOLAnimationGraph>);
+#[require(LOLAnimationState)]
+pub struct LOLAnimationGraphHandle(pub Handle<LOLAnimationGraph>);
+
+/// Marks the entity that holds the AnimationPlayer and AnimationGraphHandle,
+/// pointing back to the character entity that has the animation config.
+#[derive(Component, Debug, Reflect)]
+#[reflect(Component)]
+#[relationship(relationship_target = AnimationConfig)]
+pub struct AnimationConfigOf(pub Entity);
+
+/// Auto-maintained by Bevy on the character entity, pointing to the bone entity
+/// that holds the AnimationPlayer.
+#[derive(Component, Debug, Reflect)]
+#[reflect(Component)]
+#[relationship_target(relationship = AnimationConfigOf, linked_spawn)]
+pub struct AnimationConfig(Entity);
+
+impl std::ops::Deref for AnimationConfig {
+    type Target = Entity;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
 
 /// Per-entity animation state for Selector and Sequence nodes
 #[derive(Component, Clone, Debug)]
-pub struct AnimationState {
+pub struct LOLAnimationState {
     pub current: String,
     pub last: Option<String>,
     pub current_duration: Option<f32>,
@@ -119,10 +146,10 @@ pub struct AnimationState {
     pub sequence_states: HashMap<String, usize>,
 }
 
-impl Default for AnimationState {
+impl Default for LOLAnimationState {
     fn default() -> Self {
         Self {
-            current: String::new(),
+            current: String::from("Idle1"),
             last: None,
             current_duration: None,
             repeat: true,
@@ -132,7 +159,7 @@ impl Default for AnimationState {
     }
 }
 
-impl AnimationState {
+impl LOLAnimationState {
     pub fn update(&mut self, key: String) -> &mut Self {
         self.last = Some(self.current.clone());
         self.current = key;
@@ -156,7 +183,7 @@ impl LOLAnimationGraph {
     pub fn figure_node_indices(
         &self,
         key: &str,
-        state: &mut AnimationState,
+        state: &mut LOLAnimationState,
     ) -> Vec<AnimationNodeIndex> {
         let Some(node) = self.hash_to_node.get(key) else {
             return Vec::new();
@@ -168,8 +195,9 @@ impl LOLAnimationGraph {
             }
             ConfigAnimationNode::ConditionFloat { conditions, .. } => conditions
                 .iter()
-                .flat_map(|v| self.figure_node_indices(&v.key, state))
-                .collect(),
+                .last()
+                .map(|v| self.figure_node_indices(&v.key, state))
+                .unwrap(),
             ConfigAnimationNode::Selector { probably_nodes } => {
                 let index = state
                     .selector_states
@@ -179,6 +207,7 @@ impl LOLAnimationGraph {
                         let dist = WeightedIndex::new(weights).unwrap();
                         dist.sample(&mut rng())
                     });
+                info!("{:?}", probably_nodes[*index].key);
                 self.figure_node_indices(&probably_nodes[*index].key, state)
             }
             ConfigAnimationNode::Sequence { hashes } => {
@@ -202,7 +231,7 @@ impl LOLAnimationGraph {
     pub fn get_current_node_indices(
         &self,
         key: &str,
-        state: &AnimationState,
+        state: &LOLAnimationState,
     ) -> Vec<AnimationNodeIndex> {
         let Some(node) = self.hash_to_node.get(key) else {
             return Vec::new();
@@ -242,7 +271,7 @@ impl LOLAnimationGraph {
         }
     }
 
-    pub fn get_current_nodes(&self, key: &str, state: &AnimationState) -> Vec<String> {
+    pub fn get_current_nodes(&self, key: &str, state: &LOLAnimationState) -> Vec<String> {
         let mut result = vec![key.to_string()];
 
         let Some(node) = self.hash_to_node.get(key) else {
@@ -292,7 +321,7 @@ impl LOLAnimationGraph {
         player: &mut AnimationPlayer,
         key: &str,
         weight: f32,
-        state: &mut AnimationState,
+        state: &mut LOLAnimationState,
     ) {
         let node_indices = self.figure_node_indices(key, state);
 
@@ -301,7 +330,7 @@ impl LOLAnimationGraph {
         }
     }
 
-    pub fn repeat(&self, player: &mut AnimationPlayer, key: &str, state: &AnimationState) {
+    pub fn repeat(&self, player: &mut AnimationPlayer, key: &str, state: &LOLAnimationState) {
         let node_indices = self.get_current_node_indices(key, state);
         for node_index in node_indices {
             if let Some(animation) = player.animation_mut(node_index) {
@@ -310,7 +339,7 @@ impl LOLAnimationGraph {
         }
     }
 
-    pub fn stop(&self, player: &mut AnimationPlayer, key: &str, state: &mut AnimationState) {
+    pub fn stop(&self, player: &mut AnimationPlayer, key: &str, state: &mut LOLAnimationState) {
         let nodes = self.get_current_nodes(key, state);
         for node_name in nodes {
             let node = self.hash_to_node.get(&node_name).unwrap();
@@ -332,7 +361,7 @@ impl LOLAnimationGraph {
         player: &mut AnimationPlayer,
         key: &str,
         speed: f32,
-        state: &AnimationState,
+        state: &LOLAnimationState,
     ) {
         let node_indices = self.get_current_node_indices(key, state);
         for node_index in node_indices {
@@ -347,7 +376,7 @@ impl LOLAnimationGraph {
         player: &mut AnimationPlayer,
         key: &str,
         weight: f32,
-        state: &AnimationState,
+        state: &LOLAnimationState,
     ) {
         let node_indices = self.get_current_node_indices(key, state);
         for node_index in node_indices {
@@ -357,7 +386,12 @@ impl LOLAnimationGraph {
         }
     }
 
-    pub fn get_weight(&self, player: &AnimationPlayer, key: &str, state: &AnimationState) -> f32 {
+    pub fn get_weight(
+        &self,
+        player: &AnimationPlayer,
+        key: &str,
+        state: &LOLAnimationState,
+    ) -> f32 {
         let node_indices = self.get_current_node_indices(key, state);
         let mut weight = 0.0;
         for node_index in node_indices {

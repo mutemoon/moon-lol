@@ -1,0 +1,697 @@
+(
+    gltf_path: "characters/sru_horde/skins/skin0.glb",
+    hash_to_node: {
+        "Attack": Selector(
+            probably_nodes: [
+                (
+                    key: "Attack1",
+                    value: 1.0,
+                ),
+                (
+                    key: "Attack2",
+                    value: 1.0,
+                ),
+            ],
+        ),
+        "Attack1": Selector(
+            probably_nodes: [
+                (
+                    key: "Unk0x63793e68",
+                    value: 25.0,
+                ),
+                (
+                    key: "Unk0x5608bbf6",
+                    value: 25.0,
+                ),
+                (
+                    key: "Unk0xb2610c3b",
+                    value: 25.0,
+                ),
+                (
+                    key: "Unk0x8f9b7cbd",
+                    value: 25.0,
+                ),
+            ],
+        ),
+        "Attack1B": Clip(
+            node_index: 25,
+        ),
+        "Attack1a": Clip(
+            node_index: 24,
+        ),
+        "Attack2B": Clip(
+            node_index: 35,
+        ),
+        "Attack2a": Clip(
+            node_index: 34,
+        ),
+        "Attack3B": Clip(
+            node_index: 26,
+        ),
+        "Dance": Sequence(
+            hashes: [
+                "DanceIn",
+                "DanceBase",
+            ],
+        ),
+        "DanceBase": Clip(
+            node_index: 13,
+        ),
+        "DanceIn": Clip(
+            node_index: 32,
+        ),
+        "Death": Selector(
+            probably_nodes: [
+                (
+                    key: "Death1",
+                    value: 50.0,
+                ),
+                (
+                    key: "Death2",
+                    value: 50.0,
+                ),
+            ],
+        ),
+        "Death1": Clip(
+            node_index: 7,
+        ),
+        "Death2": Clip(
+            node_index: 9,
+        ),
+        "Dormant": Sequence(
+            hashes: [
+                "Unk0x7f08bd00",
+                "DormantLoop",
+            ],
+        ),
+        "DormantLoop": Clip(
+            node_index: 16,
+        ),
+        "Hatch": Clip(
+            node_index: 14,
+        ),
+        "Idle1": ConditionFloat(
+            updater: LookAtInterestDistance,
+            conditions: [
+                (
+                    key: "Unk0xf2ca7e97",
+                    value: 0.0,
+                ),
+                (
+                    key: "Unk0xe0bca822",
+                    value: 501.0,
+                ),
+            ],
+        ),
+        "IdleHidden": Clip(
+            node_index: 10,
+        ),
+        "IdleVar1": Clip(
+            node_index: 0,
+        ),
+        "Run": Clip(
+            node_index: 3,
+        ),
+        "Spawn": Sequence(
+            hashes: [
+                "SpawnIn",
+                "SpawnOut",
+            ],
+        ),
+        "SpawnIn": Clip(
+            node_index: 6,
+        ),
+        "SpawnOut": Clip(
+            node_index: 22,
+        ),
+        "Unk0x15d07de": Clip(
+            node_index: 1,
+        ),
+        "Unk0x174dca4e": Sequence(
+            hashes: [
+                "Unk0xbdb92b56",
+                "Unk0x4cc4677f",
+            ],
+        ),
+        "Unk0x25d0971": Clip(
+            node_index: 2,
+        ),
+        "Unk0x34dad3a3": Clip(
+            node_index: 4,
+        ),
+        "Unk0x35befeb9": Clip(
+            node_index: 5,
+        ),
+        "Unk0x3b7dbc09": Selector(
+            probably_nodes: [
+                (
+                    key: "IdleVar1",
+                    value: 4.0,
+                ),
+                (
+                    key: "Unk0x15d07de",
+                    value: 2.0,
+                ),
+                (
+                    key: "Unk0x25d0971",
+                    value: 2.0,
+                ),
+            ],
+        ),
+        "Unk0x4cc4677f": Clip(
+            node_index: 11,
+        ),
+        "Unk0x5177e504": Clip(
+            node_index: 12,
+        ),
+        "Unk0x5608bbf6": Sequence(
+            hashes: [
+                "Unk0xcb16c7b1",
+                "Attack3B",
+            ],
+        ),
+        "Unk0x63793e68": Sequence(
+            hashes: [
+                "Attack1a",
+                "Attack1B",
+            ],
+        ),
+        "Unk0x64ae7bbd": Clip(
+            node_index: 15,
+        ),
+        "Unk0x7f08bd00": Clip(
+            node_index: 17,
+        ),
+        "Unk0x8235451d": Clip(
+            node_index: 18,
+        ),
+        "Unk0x8f9b7cbd": Sequence(
+            hashes: [
+                "Attack2a",
+                "Attack2B",
+            ],
+        ),
+        "Unk0x98e9e556": Clip(
+            node_index: 19,
+        ),
+        "Unk0x99f6b2dc": Clip(
+            node_index: 20,
+        ),
+        "Unk0xa006e667": Parametric(
+            pairs: [
+                (
+                    key: "Unk0xd3096938",
+                    value: -180.0,
+                ),
+                (
+                    key: "Unk0x98e9e556",
+                    value: -135.0,
+                ),
+                (
+                    key: "Unk0x99f6b2dc",
+                    value: -60.0,
+                ),
+                (
+                    key: "Unk0xd3096938",
+                    value: 0.0,
+                ),
+                (
+                    key: "Unk0x34dad3a3",
+                    value: 60.0,
+                ),
+                (
+                    key: "Unk0x35befeb9",
+                    value: 135.0,
+                ),
+                (
+                    key: "Unk0xd3096938",
+                    value: 180.0,
+                ),
+            ],
+        ),
+        "Unk0xb0e8a3ce": Clip(
+            node_index: 21,
+        ),
+        "Unk0xb2610c3b": Sequence(
+            hashes: [
+                "Unk0xcb09fbbe",
+                "Unk0xca09fa2b",
+            ],
+        ),
+        "Unk0xb50f572c": Sequence(
+            hashes: [
+                "Unk0xbdb92b56",
+                "Unk0xea40d6a5",
+            ],
+        ),
+        "Unk0xbdb92b56": Clip(
+            node_index: 23,
+        ),
+        "Unk0xca09fa2b": Clip(
+            node_index: 27,
+        ),
+        "Unk0xcb09fbbe": Clip(
+            node_index: 28,
+        ),
+        "Unk0xcb16c7b1": Clip(
+            node_index: 29,
+        ),
+        "Unk0xcc4a043b": Sequence(
+            hashes: [
+                "Unk0xbdb92b56",
+                "Unk0xb0e8a3ce",
+            ],
+        ),
+        "Unk0xd3096938": Clip(
+            node_index: 30,
+        ),
+        "Unk0xe0bca822": Sequence(
+            hashes: [
+                "IdleVar1",
+                "Unk0x3b7dbc09",
+            ],
+        ),
+        "Unk0xe1fa9d59": Clip(
+            node_index: 31,
+        ),
+        "Unk0xea40d6a5": Clip(
+            node_index: 33,
+        ),
+        "Unk0xf2ca7e97": Parallel(
+            hashes: [
+                "Unk0x64ae7bbd",
+                "Unk0xa006e667",
+            ],
+        ),
+        "Up": Clip(
+            node_index: 8,
+        ),
+    },
+    blend_data: {
+        ("Attack1", "Death"): Time(
+            time: 0.1,
+        ),
+        ("Attack1", "Death1"): Time(
+            time: 0.1,
+        ),
+        ("Attack1", "Hatch"): Time(
+            time: 0.02,
+        ),
+        ("Attack1B", "Attack1B"): Time(
+            time: 0.0,
+        ),
+        ("Attack1B", "Attack1a"): Time(
+            time: 0.05,
+        ),
+        ("Attack1B", "Attack2a"): Time(
+            time: 0.05,
+        ),
+        ("Attack1B", "Death"): Time(
+            time: 0.1,
+        ),
+        ("Attack1B", "Death1"): Time(
+            time: 0.1,
+        ),
+        ("Attack1B", "Hatch"): Time(
+            time: 0.02,
+        ),
+        ("Attack1B", "Unk0xcb09fbbe"): Time(
+            time: 0.05,
+        ),
+        ("Attack1B", "Unk0xcb16c7b1"): Time(
+            time: 0.05,
+        ),
+        ("Attack1a", "Attack1B"): Time(
+            time: 0.0,
+        ),
+        ("Attack1a", "Attack1a"): Time(
+            time: 0.0,
+        ),
+        ("Attack1a", "Death"): Time(
+            time: 0.1,
+        ),
+        ("Attack1a", "Death1"): Time(
+            time: 0.1,
+        ),
+        ("Attack1a", "Hatch"): Time(
+            time: 0.02,
+        ),
+        ("Attack1a", "IdleVar1"): Time(
+            time: 0.0,
+        ),
+        ("Attack2B", "Attack1a"): Time(
+            time: 0.05,
+        ),
+        ("Attack2B", "Attack2B"): Time(
+            time: 0.0,
+        ),
+        ("Attack2B", "Attack2a"): Time(
+            time: 0.05,
+        ),
+        ("Attack2B", "Death"): Time(
+            time: 0.1,
+        ),
+        ("Attack2B", "Death1"): Time(
+            time: 0.1,
+        ),
+        ("Attack2B", "Hatch"): Time(
+            time: 0.02,
+        ),
+        ("Attack2B", "Unk0xcb09fbbe"): Time(
+            time: 0.05,
+        ),
+        ("Attack2B", "Unk0xcb16c7b1"): Time(
+            time: 0.05,
+        ),
+        ("Attack2a", "Attack2B"): Time(
+            time: 0.0,
+        ),
+        ("Attack2a", "Attack2a"): Time(
+            time: 0.0,
+        ),
+        ("Attack2a", "Death"): Time(
+            time: 0.1,
+        ),
+        ("Attack2a", "Death1"): Time(
+            time: 0.1,
+        ),
+        ("Attack2a", "Hatch"): Time(
+            time: 0.02,
+        ),
+        ("Attack3B", "Attack1a"): Time(
+            time: 0.05,
+        ),
+        ("Attack3B", "Attack2a"): Time(
+            time: 0.05,
+        ),
+        ("Attack3B", "Attack3B"): Time(
+            time: 0.0,
+        ),
+        ("Attack3B", "Death"): Time(
+            time: 0.1,
+        ),
+        ("Attack3B", "Death1"): Time(
+            time: 0.1,
+        ),
+        ("Attack3B", "Hatch"): Time(
+            time: 0.02,
+        ),
+        ("Attack3B", "Unk0xcb09fbbe"): Time(
+            time: 0.05,
+        ),
+        ("Attack3B", "Unk0xcb16c7b1"): Time(
+            time: 0.05,
+        ),
+        ("DanceBase", "Death"): Time(
+            time: 0.1,
+        ),
+        ("DanceBase", "Death1"): Time(
+            time: 0.1,
+        ),
+        ("DanceBase", "Hatch"): Time(
+            time: 0.02,
+        ),
+        ("DanceIn", "Death"): Time(
+            time: 0.1,
+        ),
+        ("DanceIn", "Death1"): Time(
+            time: 0.1,
+        ),
+        ("DanceIn", "Hatch"): Time(
+            time: 0.02,
+        ),
+        ("Death", "Death"): Time(
+            time: 0.1,
+        ),
+        ("Death", "Death1"): Time(
+            time: 0.1,
+        ),
+        ("Death", "Hatch"): Time(
+            time: 0.02,
+        ),
+        ("Death1", "Death"): Time(
+            time: 0.1,
+        ),
+        ("Death1", "Death1"): Time(
+            time: 0.1,
+        ),
+        ("Death1", "Hatch"): Time(
+            time: 0.02,
+        ),
+        ("Death2", "Death"): Time(
+            time: 0.1,
+        ),
+        ("Death2", "Death1"): Time(
+            time: 0.1,
+        ),
+        ("Death2", "Hatch"): Time(
+            time: 0.02,
+        ),
+        ("DormantLoop", "Death"): Time(
+            time: 0.1,
+        ),
+        ("DormantLoop", "Death1"): Time(
+            time: 0.1,
+        ),
+        ("DormantLoop", "Hatch"): Time(
+            time: 0.02,
+        ),
+        ("Hatch", "Attack1"): Time(
+            time: 0.1,
+        ),
+        ("Hatch", "Attack1B"): Time(
+            time: 0.1,
+        ),
+        ("Hatch", "Attack1a"): Time(
+            time: 0.1,
+        ),
+        ("Hatch", "Attack2B"): Time(
+            time: 0.1,
+        ),
+        ("Hatch", "Attack2a"): Time(
+            time: 0.1,
+        ),
+        ("Hatch", "Attack3B"): Time(
+            time: 0.1,
+        ),
+        ("Hatch", "DanceBase"): Time(
+            time: 0.1,
+        ),
+        ("Hatch", "DanceIn"): Time(
+            time: 0.1,
+        ),
+        ("Hatch", "Death"): Time(
+            time: 0.1,
+        ),
+        ("Hatch", "Death1"): Time(
+            time: 0.1,
+        ),
+        ("Hatch", "Death2"): Time(
+            time: 0.1,
+        ),
+        ("Hatch", "DormantLoop"): Time(
+            time: 0.1,
+        ),
+        ("Hatch", "Hatch"): Time(
+            time: 0.02,
+        ),
+        ("Hatch", "IdleHidden"): Time(
+            time: 0.1,
+        ),
+        ("Hatch", "IdleVar1"): Time(
+            time: 0.1,
+        ),
+        ("Hatch", "Run"): Time(
+            time: 0.1,
+        ),
+        ("Hatch", "SpawnIn"): Time(
+            time: 0.1,
+        ),
+        ("Hatch", "SpawnOut"): Time(
+            time: 0.1,
+        ),
+        ("Hatch", "Unk0x0"): Time(
+            time: 0.1,
+        ),
+        ("Hatch", "Unk0x7f08bd00"): Time(
+            time: 0.1,
+        ),
+        ("Hatch", "Unk0xca09fa2b"): Time(
+            time: 0.1,
+        ),
+        ("Hatch", "Unk0xcb09fbbe"): Time(
+            time: 0.1,
+        ),
+        ("Hatch", "Unk0xcb16c7b1"): Time(
+            time: 0.1,
+        ),
+        ("Hatch", "Unk0xe1fa9d59"): Time(
+            time: 0.1,
+        ),
+        ("Hatch", "Up"): Time(
+            time: 0.1,
+        ),
+        ("IdleHidden", "Death"): Time(
+            time: 0.1,
+        ),
+        ("IdleHidden", "Death1"): Time(
+            time: 0.1,
+        ),
+        ("IdleHidden", "Hatch"): Time(
+            time: 0.02,
+        ),
+        ("IdleVar1", "Attack1a"): Time(
+            time: 0.0,
+        ),
+        ("IdleVar1", "Death"): Time(
+            time: 0.1,
+        ),
+        ("IdleVar1", "Death1"): Time(
+            time: 0.1,
+        ),
+        ("IdleVar1", "Hatch"): Time(
+            time: 0.02,
+        ),
+        ("IdleVar1", "Unk0x64ae7bbd"): TransitionClip(
+            clip_name: "Unk0x8235451d",
+        ),
+        ("IdleVar1", "Unk0x8235451d"): Time(
+            time: 0.1,
+        ),
+        ("Run", "Death"): Time(
+            time: 0.1,
+        ),
+        ("Run", "Death1"): Time(
+            time: 0.1,
+        ),
+        ("Run", "Hatch"): Time(
+            time: 0.02,
+        ),
+        ("SpawnIn", "Death"): Time(
+            time: 0.1,
+        ),
+        ("SpawnIn", "Death1"): Time(
+            time: 0.1,
+        ),
+        ("SpawnIn", "Hatch"): Time(
+            time: 0.02,
+        ),
+        ("SpawnIn", "SpawnOut"): Time(
+            time: 0.0,
+        ),
+        ("SpawnOut", "Death"): Time(
+            time: 0.1,
+        ),
+        ("SpawnOut", "Death1"): Time(
+            time: 0.1,
+        ),
+        ("SpawnOut", "Hatch"): Time(
+            time: 0.02,
+        ),
+        ("Unk0x15d07de", "Unk0x64ae7bbd"): TransitionClip(
+            clip_name: "Unk0x8235451d",
+        ),
+        ("Unk0x15d07de", "Unk0x8235451d"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x25d0971", "Unk0x64ae7bbd"): TransitionClip(
+            clip_name: "Unk0x8235451d",
+        ),
+        ("Unk0x25d0971", "Unk0x8235451d"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x64ae7bbd", "IdleVar1"): TransitionClip(
+            clip_name: "Unk0x5177e504",
+        ),
+        ("Unk0x64ae7bbd", "Unk0x15d07de"): TransitionClip(
+            clip_name: "Unk0x5177e504",
+        ),
+        ("Unk0x64ae7bbd", "Unk0x25d0971"): TransitionClip(
+            clip_name: "Unk0x5177e504",
+        ),
+        ("Unk0x64ae7bbd", "Unk0x5177e504"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x7f08bd00", "Death"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x7f08bd00", "Death1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x7f08bd00", "Hatch"): Time(
+            time: 0.02,
+        ),
+        ("Unk0xca09fa2b", "Attack1a"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xca09fa2b", "Attack2a"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xca09fa2b", "Death"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xca09fa2b", "Death1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xca09fa2b", "Hatch"): Time(
+            time: 0.02,
+        ),
+        ("Unk0xca09fa2b", "Unk0xca09fa2b"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xca09fa2b", "Unk0xcb09fbbe"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xca09fa2b", "Unk0xcb16c7b1"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xcb09fbbe", "Death"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xcb09fbbe", "Death1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xcb09fbbe", "Hatch"): Time(
+            time: 0.02,
+        ),
+        ("Unk0xcb09fbbe", "Unk0xca09fa2b"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xcb09fbbe", "Unk0xcb09fbbe"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xcb16c7b1", "Attack3B"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xcb16c7b1", "Death"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xcb16c7b1", "Death1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xcb16c7b1", "Hatch"): Time(
+            time: 0.02,
+        ),
+        ("Unk0xcb16c7b1", "Unk0xcb16c7b1"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xe1fa9d59", "Death"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xe1fa9d59", "Death1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xe1fa9d59", "Hatch"): Time(
+            time: 0.02,
+        ),
+        ("Up", "Death"): Time(
+            time: 0.1,
+        ),
+        ("Up", "Death1"): Time(
+            time: 0.1,
+        ),
+        ("Up", "Hatch"): Time(
+            time: 0.02,
+        ),
+    },
+)

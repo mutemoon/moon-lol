@@ -1,0 +1,165 @@
+(
+    gltf_path: "characters/janna/skins/skin0.glb",
+    hash_to_node: {
+        "Attack": Selector(
+            probably_nodes: [
+                (
+                    key: "Attack1",
+                    value: 1.0,
+                ),
+                (
+                    key: "Attack2",
+                    value: 1.0,
+                ),
+            ],
+        ),
+        "Attack1": Clip(
+            node_index: 6,
+        ),
+        "Attack2": Clip(
+            node_index: 7,
+        ),
+        "Channel": Clip(
+            node_index: 2,
+        ),
+        "ChannelWndup": Clip(
+            node_index: 12,
+        ),
+        "Crit": Clip(
+            node_index: 8,
+        ),
+        "Dance": Clip(
+            node_index: 21,
+        ),
+        "Death": Clip(
+            node_index: 18,
+        ),
+        "Idle1": Clip(
+            node_index: 11,
+        ),
+        "Idle2": Clip(
+            node_index: 10,
+        ),
+        "Idle3": Clip(
+            node_index: 9,
+        ),
+        "Joke": Clip(
+            node_index: 19,
+        ),
+        "Laugh": Clip(
+            node_index: 16,
+        ),
+        "Recall": Sequence(
+            hashes: [
+                "Unk0x3f42d8ca",
+                "Unk0xd4ad438e",
+                "Idle1",
+            ],
+        ),
+        "Run": Clip(
+            node_index: 3,
+        ),
+        "Spell1": Clip(
+            node_index: 13,
+        ),
+        "Spell2": Clip(
+            node_index: 15,
+        ),
+        "Spell3": Clip(
+            node_index: 14,
+        ),
+        "Spell4": Sequence(
+            hashes: [
+                "UltWindup",
+                "UltLoop",
+                "UltLoop",
+                "UltLoop",
+                "UltLoop",
+                "UltWinddown",
+            ],
+        ),
+        "Taunt": Clip(
+            node_index: 17,
+        ),
+        "UltLoop": Clip(
+            node_index: 0,
+        ),
+        "UltWinddown": Clip(
+            node_index: 1,
+        ),
+        "UltWindup": Clip(
+            node_index: 4,
+        ),
+        "Unk0x3f42d8ca": Clip(
+            node_index: 5,
+        ),
+        "Unk0xd4ad438e": Clip(
+            node_index: 20,
+        ),
+    },
+    blend_data: {
+        ("Attack1", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Attack2", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Channel", "Death"): Time(
+            time: 0.0,
+        ),
+        ("ChannelWndup", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Crit", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Dance", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Death", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Idle1", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Idle2", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Idle3", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Joke", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Laugh", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Run", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell1", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell2", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell3", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell4", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Taunt", "Death"): Time(
+            time: 0.0,
+        ),
+        ("UltLoop", "Death"): Time(
+            time: 0.0,
+        ),
+        ("UltWinddown", "Death"): Time(
+            time: 0.0,
+        ),
+        ("UltWindup", "Death"): Time(
+            time: 0.0,
+        ),
+    },
+)

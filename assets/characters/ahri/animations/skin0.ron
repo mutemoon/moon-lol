@@ -1,0 +1,2462 @@
+(
+    gltf_path: "characters/ahri/skins/skin0.glb",
+    hash_to_node: {
+        "Attack": Selector(
+            probably_nodes: [
+                (
+                    key: "Attack1",
+                    value: 1.0,
+                ),
+                (
+                    key: "Attack2",
+                    value: 1.0,
+                ),
+            ],
+        ),
+        "Attack1": Clip(
+            node_index: 12,
+        ),
+        "Attack1ToIdle": Clip(
+            node_index: 52,
+        ),
+        "Attack1Torun": Clip(
+            node_index: 47,
+        ),
+        "Attack2": Clip(
+            node_index: 14,
+        ),
+        "Attack2ToIdle": Clip(
+            node_index: 24,
+        ),
+        "Attack2Torun": Clip(
+            node_index: 1,
+        ),
+        "Channel": Clip(
+            node_index: 5,
+        ),
+        "ChannelWndup": Clip(
+            node_index: 28,
+        ),
+        "Crit": Clip(
+            node_index: 26,
+        ),
+        "CritToIdle": Clip(
+            node_index: 8,
+        ),
+        "Dance": Sequence(
+            hashes: [
+                "DanceIn",
+                "DanceLoop",
+            ],
+        ),
+        "DanceIn": Clip(
+            node_index: 51,
+        ),
+        "DanceLoop": Clip(
+            node_index: 4,
+        ),
+        "Death": Clip(
+            node_index: 41,
+        ),
+        "Idle1": ConditionBool(
+            updater: LogicDriverBool,
+            true_node: "Spell4ToIdle",
+            false_node: "Idle1Base",
+        ),
+        "Idle1Base": Sequence(
+            hashes: [
+                "Unk0x1efabc75",
+                "Unk0xd5bc96d1",
+            ],
+        ),
+        "IdleIn": Clip(
+            node_index: 36,
+        ),
+        "IdleVar2": Clip(
+            node_index: 39,
+        ),
+        "Joke": Sequence(
+            hashes: [
+                "JokeIn",
+                "JokeLoop",
+            ],
+        ),
+        "JokeIn": Clip(
+            node_index: 49,
+        ),
+        "JokeLoop": Clip(
+            node_index: 54,
+        ),
+        "KnockUp": Clip(
+            node_index: 7,
+        ),
+        "Laugh": Clip(
+            node_index: 35,
+        ),
+        "Recall": Clip(
+            node_index: 15,
+        ),
+        "RecallWinddown": Clip(
+            node_index: 30,
+        ),
+        "Respawn": Clip(
+            node_index: 27,
+        ),
+        "Run": ConditionBool(
+            updater: IsHomeguard,
+            true_node: "RunHomeguard",
+            false_node: "Unk0xae1afd78",
+        ),
+        "RunBase": Sequence(
+            hashes: [
+                "Unk0xcc7e3fac",
+                "Unk0x52185746",
+            ],
+        ),
+        "RunFast": Clip(
+            node_index: 29,
+        ),
+        "RunHaste": Clip(
+            node_index: 6,
+        ),
+        "RunHomeguard": Clip(
+            node_index: 23,
+        ),
+        "RunIn": Clip(
+            node_index: 2,
+        ),
+        "RunSpell4": Clip(
+            node_index: 22,
+        ),
+        "Spell1": Clip(
+            node_index: 33,
+        ),
+        "Spell1ToIdle": Clip(
+            node_index: 32,
+        ),
+        "Spell1ToRun": Clip(
+            node_index: 9,
+        ),
+        "Spell2": Clip(
+            node_index: 34,
+        ),
+        "Spell2ToIdle": Clip(
+            node_index: 11,
+        ),
+        "Spell2ToRun": Clip(
+            node_index: 21,
+        ),
+        "Spell3": ConditionFloat(
+            updater: Facing,
+            conditions: [
+                (
+                    key: "Unk0x571c8c8e",
+                    value: 0.0,
+                ),
+                (
+                    key: "Unk0xe3c50754",
+                    value: 100.0,
+                ),
+                (
+                    key: "Unk0xcbb80704",
+                    value: 210.0,
+                ),
+                (
+                    key: "Unk0xc6880272",
+                    value: 260.0,
+                ),
+                (
+                    key: "Unk0x571c8c8e",
+                    value: 360.0,
+                ),
+            ],
+        ),
+        "Spell3ToRun": Clip(
+            node_index: 31,
+        ),
+        "Spell4": Clip(
+            node_index: 37,
+        ),
+        "Spell4ToIdle": Sequence(
+            hashes: [
+                "Unk0x5f28fb20",
+                "Unk0x489d5b81",
+            ],
+        ),
+        "Stunned": Clip(
+            node_index: 19,
+        ),
+        "Taunt": Clip(
+            node_index: 40,
+        ),
+        "Unk0x1efabc75": Clip(
+            node_index: 3,
+        ),
+        "Unk0x2bf6994d": Sequence(
+            hashes: [
+                "Unk0x960cce87",
+                "Unk0x7411e92b",
+            ],
+        ),
+        "Unk0x489d5b81": Clip(
+            node_index: 10,
+        ),
+        "Unk0x52185746": Selector(
+            probably_nodes: [
+                (
+                    key: "Unk0xcc7e3fac",
+                    value: 50.0,
+                ),
+                (
+                    key: "Unk0xc2c5c38e",
+                    value: 25.0,
+                ),
+                (
+                    key: "Unk0xc1c5c1fb",
+                    value: 25.0,
+                ),
+            ],
+        ),
+        "Unk0x571c8c8e": Clip(
+            node_index: 13,
+        ),
+        "Unk0x5d07a297": Clip(
+            node_index: 16,
+        ),
+        "Unk0x5f28fb20": Clip(
+            node_index: 17,
+        ),
+        "Unk0x670b119d": Clip(
+            node_index: 18,
+        ),
+        "Unk0x7411e92b": Clip(
+            node_index: 20,
+        ),
+        "Unk0x871388dc": ConditionBool(
+            updater: LogicDriverBool,
+            true_node: "RunSpell4",
+            false_node: "Unk0xc380648a",
+        ),
+        "Unk0x960cce87": Clip(
+            node_index: 25,
+        ),
+        "Unk0x9a6b0962": ConditionBool(
+            updater: LogicDriverBool,
+            true_node: "Attack1Torun",
+            false_node: "Laugh",
+        ),
+        "Unk0x9bb30075": Sequence(
+            hashes: [
+                "Unk0x960cce87",
+                "Unk0x7411e92b",
+            ],
+        ),
+        "Unk0xa621ddf": Clip(
+            node_index: 0,
+        ),
+        "Unk0xae1afd78": ConditionBool(
+            updater: LogicDriverBool,
+            true_node: "RunSpell4",
+            false_node: "Unk0xc380648a",
+        ),
+        "Unk0xbb020a62": Clip(
+            node_index: 38,
+        ),
+        "Unk0xc1c5c1fb": Clip(
+            node_index: 42,
+        ),
+        "Unk0xc2c5c38e": Clip(
+            node_index: 43,
+        ),
+        "Unk0xc380648a": ConditionFloat(
+            updater: MoveSpeed,
+            conditions: [
+                (
+                    key: "RunBase",
+                    value: 0.0,
+                ),
+                (
+                    key: "RunHaste",
+                    value: 451.0,
+                ),
+            ],
+        ),
+        "Unk0xc6880272": Clip(
+            node_index: 44,
+        ),
+        "Unk0xcbb80704": Clip(
+            node_index: 45,
+        ),
+        "Unk0xcc7e3fac": Clip(
+            node_index: 46,
+        ),
+        "Unk0xd5bc96d1": Selector(
+            probably_nodes: [
+                (
+                    key: "IdleVar2",
+                    value: 50.0,
+                ),
+                (
+                    key: "Unk0xbb020a62",
+                    value: 50.0,
+                ),
+            ],
+        ),
+        "Unk0xe3c50754": Clip(
+            node_index: 48,
+        ),
+        "Unk0xe9472732": Clip(
+            node_index: 50,
+        ),
+        "Unk0xef042329": Clip(
+            node_index: 53,
+        ),
+        "Unk0xff732e0c": Sequence(
+            hashes: [
+                "Unk0xcc7e3fac",
+                "Unk0x52185746",
+            ],
+        ),
+    },
+    blend_data: {
+        ("Attack1", "Attack1ToIdle"): Time(
+            time: 0.0,
+        ),
+        ("Attack1", "Attack2ToIdle"): Time(
+            time: 0.0,
+        ),
+        ("Attack1", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Attack1", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("Attack1", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Attack1", "Idle1Base"): TransitionClip(
+            clip_name: "Attack1ToIdle",
+        ),
+        ("Attack1", "JokeIn"): Time(
+            time: 0.1,
+        ),
+        ("Attack1", "Laugh"): Time(
+            time: 0.0,
+        ),
+        ("Attack1", "RunBase"): TransitionClip(
+            clip_name: "Attack1Torun",
+        ),
+        ("Attack1", "RunFast"): TransitionClip(
+            clip_name: "Attack1Torun",
+        ),
+        ("Attack1", "RunHaste"): TransitionClip(
+            clip_name: "Attack1Torun",
+        ),
+        ("Attack1", "RunHomeguard"): TransitionClip(
+            clip_name: "Attack1Torun",
+        ),
+        ("Attack1", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("Attack1", "Taunt"): Time(
+            time: 0.0,
+        ),
+        ("Attack1", "Unk0x16b0f5fd"): Time(
+            time: 0.1,
+        ),
+        ("Attack1", "Unk0x1efabc75"): TransitionClip(
+            clip_name: "Attack1ToIdle",
+        ),
+        ("Attack1", "Unk0x571c8c8e"): Time(
+            time: 0.0,
+        ),
+        ("Attack1", "Unk0xc1c5c1fb"): TransitionClip(
+            clip_name: "Attack1Torun",
+        ),
+        ("Attack1", "Unk0xc2c5c38e"): TransitionClip(
+            clip_name: "Attack1Torun",
+        ),
+        ("Attack1", "Unk0xc6880272"): Time(
+            time: 0.0,
+        ),
+        ("Attack1", "Unk0xcbb80704"): Time(
+            time: 0.0,
+        ),
+        ("Attack1", "Unk0xcc7e3fac"): TransitionClip(
+            clip_name: "Attack1Torun",
+        ),
+        ("Attack1", "Unk0xe3c50754"): Time(
+            time: 0.0,
+        ),
+        ("Attack1ToIdle", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Attack1ToIdle", "DanceLoop"): Time(
+            time: 0.05,
+        ),
+        ("Attack1ToIdle", "Death"): Time(
+            time: 0.05,
+        ),
+        ("Attack1ToIdle", "JokeIn"): Time(
+            time: 0.1,
+        ),
+        ("Attack1ToIdle", "RunBase"): TransitionClip(
+            clip_name: "Attack1Torun",
+        ),
+        ("Attack1ToIdle", "RunFast"): TransitionClip(
+            clip_name: "Attack1Torun",
+        ),
+        ("Attack1ToIdle", "RunHaste"): TransitionClip(
+            clip_name: "Attack1Torun",
+        ),
+        ("Attack1ToIdle", "RunHomeguard"): TransitionClip(
+            clip_name: "Attack1Torun",
+        ),
+        ("Attack1ToIdle", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("Attack1ToIdle", "Unk0x16b0f5fd"): Time(
+            time: 0.1,
+        ),
+        ("Attack1ToIdle", "Unk0x571c8c8e"): Time(
+            time: 0.0,
+        ),
+        ("Attack1ToIdle", "Unk0xc1c5c1fb"): TransitionClip(
+            clip_name: "Attack1Torun",
+        ),
+        ("Attack1ToIdle", "Unk0xc2c5c38e"): TransitionClip(
+            clip_name: "Attack1Torun",
+        ),
+        ("Attack1ToIdle", "Unk0xc6880272"): Time(
+            time: 0.0,
+        ),
+        ("Attack1ToIdle", "Unk0xcbb80704"): Time(
+            time: 0.0,
+        ),
+        ("Attack1ToIdle", "Unk0xcc7e3fac"): TransitionClip(
+            clip_name: "Attack1Torun",
+        ),
+        ("Attack1ToIdle", "Unk0xe3c50754"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Torun", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Torun", "JokeIn"): Time(
+            time: 0.1,
+        ),
+        ("Attack1Torun", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Torun", "Unk0x16b0f5fd"): Time(
+            time: 0.1,
+        ),
+        ("Attack1Torun", "Unk0x1efabc75"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("Attack1Torun", "Unk0x571c8c8e"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Torun", "Unk0xc6880272"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Torun", "Unk0xcbb80704"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Torun", "Unk0xe3c50754"): Time(
+            time: 0.0,
+        ),
+        ("Attack2", "Attack1ToIdle"): Time(
+            time: 0.0,
+        ),
+        ("Attack2", "Attack2ToIdle"): Time(
+            time: 0.0,
+        ),
+        ("Attack2", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Attack2", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("Attack2", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Attack2", "Idle1Base"): TransitionClip(
+            clip_name: "Attack2ToIdle",
+        ),
+        ("Attack2", "JokeIn"): Time(
+            time: 0.1,
+        ),
+        ("Attack2", "Laugh"): Time(
+            time: 0.0,
+        ),
+        ("Attack2", "RunBase"): TransitionClip(
+            clip_name: "Attack2Torun",
+        ),
+        ("Attack2", "RunFast"): TransitionClip(
+            clip_name: "Attack2Torun",
+        ),
+        ("Attack2", "RunHaste"): TransitionClip(
+            clip_name: "Attack2Torun",
+        ),
+        ("Attack2", "RunHomeguard"): TransitionClip(
+            clip_name: "Attack2Torun",
+        ),
+        ("Attack2", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("Attack2", "Taunt"): Time(
+            time: 0.0,
+        ),
+        ("Attack2", "Unk0x16b0f5fd"): Time(
+            time: 0.1,
+        ),
+        ("Attack2", "Unk0x1efabc75"): TransitionClip(
+            clip_name: "Attack2ToIdle",
+        ),
+        ("Attack2", "Unk0x571c8c8e"): Time(
+            time: 0.0,
+        ),
+        ("Attack2", "Unk0xc1c5c1fb"): TransitionClip(
+            clip_name: "Attack2Torun",
+        ),
+        ("Attack2", "Unk0xc2c5c38e"): TransitionClip(
+            clip_name: "Attack2Torun",
+        ),
+        ("Attack2", "Unk0xc6880272"): Time(
+            time: 0.0,
+        ),
+        ("Attack2", "Unk0xcbb80704"): Time(
+            time: 0.0,
+        ),
+        ("Attack2", "Unk0xcc7e3fac"): TransitionClip(
+            clip_name: "Attack2Torun",
+        ),
+        ("Attack2", "Unk0xe3c50754"): Time(
+            time: 0.0,
+        ),
+        ("Attack2ToIdle", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Attack2ToIdle", "DanceLoop"): Time(
+            time: 0.05,
+        ),
+        ("Attack2ToIdle", "Death"): Time(
+            time: 0.05,
+        ),
+        ("Attack2ToIdle", "JokeIn"): Time(
+            time: 0.1,
+        ),
+        ("Attack2ToIdle", "RunBase"): TransitionClip(
+            clip_name: "Attack2Torun",
+        ),
+        ("Attack2ToIdle", "RunFast"): TransitionClip(
+            clip_name: "Attack2Torun",
+        ),
+        ("Attack2ToIdle", "RunHaste"): TransitionClip(
+            clip_name: "Attack2Torun",
+        ),
+        ("Attack2ToIdle", "RunHomeguard"): TransitionClip(
+            clip_name: "Attack2Torun",
+        ),
+        ("Attack2ToIdle", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("Attack2ToIdle", "Unk0x16b0f5fd"): Time(
+            time: 0.1,
+        ),
+        ("Attack2ToIdle", "Unk0x571c8c8e"): Time(
+            time: 0.0,
+        ),
+        ("Attack2ToIdle", "Unk0xc1c5c1fb"): TransitionClip(
+            clip_name: "Attack2Torun",
+        ),
+        ("Attack2ToIdle", "Unk0xc2c5c38e"): TransitionClip(
+            clip_name: "Attack2Torun",
+        ),
+        ("Attack2ToIdle", "Unk0xc6880272"): Time(
+            time: 0.0,
+        ),
+        ("Attack2ToIdle", "Unk0xcbb80704"): Time(
+            time: 0.0,
+        ),
+        ("Attack2ToIdle", "Unk0xcc7e3fac"): TransitionClip(
+            clip_name: "Attack2Torun",
+        ),
+        ("Attack2ToIdle", "Unk0xe3c50754"): Time(
+            time: 0.0,
+        ),
+        ("Attack2Torun", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Attack2Torun", "JokeIn"): Time(
+            time: 0.1,
+        ),
+        ("Attack2Torun", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("Attack2Torun", "Unk0x16b0f5fd"): Time(
+            time: 0.1,
+        ),
+        ("Attack2Torun", "Unk0x1efabc75"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("Attack2Torun", "Unk0x571c8c8e"): Time(
+            time: 0.0,
+        ),
+        ("Attack2Torun", "Unk0xc6880272"): Time(
+            time: 0.0,
+        ),
+        ("Attack2Torun", "Unk0xcbb80704"): Time(
+            time: 0.0,
+        ),
+        ("Attack2Torun", "Unk0xe3c50754"): Time(
+            time: 0.0,
+        ),
+        ("Channel", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Channel", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("Channel", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Channel", "JokeIn"): Time(
+            time: 0.1,
+        ),
+        ("Channel", "Laugh"): Time(
+            time: 0.0,
+        ),
+        ("Channel", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("Channel", "Taunt"): Time(
+            time: 0.0,
+        ),
+        ("Channel", "Unk0x16b0f5fd"): Time(
+            time: 0.1,
+        ),
+        ("Channel", "Unk0x571c8c8e"): Time(
+            time: 0.0,
+        ),
+        ("Channel", "Unk0xc6880272"): Time(
+            time: 0.0,
+        ),
+        ("Channel", "Unk0xcbb80704"): Time(
+            time: 0.0,
+        ),
+        ("Channel", "Unk0xe3c50754"): Time(
+            time: 0.0,
+        ),
+        ("ChannelWndup", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("ChannelWndup", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("ChannelWndup", "Death"): Time(
+            time: 0.0,
+        ),
+        ("ChannelWndup", "JokeIn"): Time(
+            time: 0.1,
+        ),
+        ("ChannelWndup", "Laugh"): Time(
+            time: 0.0,
+        ),
+        ("ChannelWndup", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("ChannelWndup", "Taunt"): Time(
+            time: 0.0,
+        ),
+        ("ChannelWndup", "Unk0x16b0f5fd"): Time(
+            time: 0.1,
+        ),
+        ("ChannelWndup", "Unk0x1efabc75"): TransitionClip(
+            clip_name: "Channel",
+        ),
+        ("ChannelWndup", "Unk0x571c8c8e"): Time(
+            time: 0.0,
+        ),
+        ("ChannelWndup", "Unk0xc6880272"): Time(
+            time: 0.0,
+        ),
+        ("ChannelWndup", "Unk0xcbb80704"): Time(
+            time: 0.0,
+        ),
+        ("ChannelWndup", "Unk0xe3c50754"): Time(
+            time: 0.0,
+        ),
+        ("Crit", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Crit", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("Crit", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Crit", "Idle1Base"): TransitionClip(
+            clip_name: "CritToIdle",
+        ),
+        ("Crit", "JokeIn"): Time(
+            time: 0.1,
+        ),
+        ("Crit", "Laugh"): Time(
+            time: 0.0,
+        ),
+        ("Crit", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("Crit", "Taunt"): Time(
+            time: 0.0,
+        ),
+        ("Crit", "Unk0x16b0f5fd"): Time(
+            time: 0.1,
+        ),
+        ("Crit", "Unk0x1efabc75"): TransitionClip(
+            clip_name: "CritToIdle",
+        ),
+        ("Crit", "Unk0x571c8c8e"): Time(
+            time: 0.0,
+        ),
+        ("Crit", "Unk0xc6880272"): Time(
+            time: 0.0,
+        ),
+        ("Crit", "Unk0xcbb80704"): Time(
+            time: 0.0,
+        ),
+        ("Crit", "Unk0xe3c50754"): Time(
+            time: 0.0,
+        ),
+        ("CritToIdle", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("CritToIdle", "JokeIn"): Time(
+            time: 0.1,
+        ),
+        ("CritToIdle", "Unk0x571c8c8e"): Time(
+            time: 0.0,
+        ),
+        ("CritToIdle", "Unk0xc6880272"): Time(
+            time: 0.0,
+        ),
+        ("CritToIdle", "Unk0xcbb80704"): Time(
+            time: 0.0,
+        ),
+        ("CritToIdle", "Unk0xe3c50754"): Time(
+            time: 0.0,
+        ),
+        ("DanceIn", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("DanceIn", "JokeIn"): Time(
+            time: 0.1,
+        ),
+        ("DanceIn", "Unk0x571c8c8e"): Time(
+            time: 0.0,
+        ),
+        ("DanceIn", "Unk0xc6880272"): Time(
+            time: 0.0,
+        ),
+        ("DanceIn", "Unk0xcbb80704"): Time(
+            time: 0.0,
+        ),
+        ("DanceIn", "Unk0xe3c50754"): Time(
+            time: 0.0,
+        ),
+        ("DanceLoop", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("DanceLoop", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("DanceLoop", "Death"): Time(
+            time: 0.0,
+        ),
+        ("DanceLoop", "JokeIn"): Time(
+            time: 0.1,
+        ),
+        ("DanceLoop", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("DanceLoop", "Unk0x16b0f5fd"): Time(
+            time: 0.1,
+        ),
+        ("DanceLoop", "Unk0x571c8c8e"): Time(
+            time: 0.0,
+        ),
+        ("DanceLoop", "Unk0xc6880272"): Time(
+            time: 0.0,
+        ),
+        ("DanceLoop", "Unk0xcbb80704"): Time(
+            time: 0.0,
+        ),
+        ("DanceLoop", "Unk0xe3c50754"): Time(
+            time: 0.0,
+        ),
+        ("Death", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Death", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("Death", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Death", "JokeIn"): Time(
+            time: 0.1,
+        ),
+        ("Death", "Laugh"): Time(
+            time: 0.0,
+        ),
+        ("Death", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("Death", "Taunt"): Time(
+            time: 0.0,
+        ),
+        ("Death", "Unk0x16b0f5fd"): Time(
+            time: 0.1,
+        ),
+        ("Death", "Unk0x571c8c8e"): Time(
+            time: 0.0,
+        ),
+        ("Death", "Unk0xc6880272"): Time(
+            time: 0.0,
+        ),
+        ("Death", "Unk0xcbb80704"): Time(
+            time: 0.0,
+        ),
+        ("Death", "Unk0xe3c50754"): Time(
+            time: 0.0,
+        ),
+        ("Idle1", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Idle1", "JokeIn"): Time(
+            time: 0.1,
+        ),
+        ("Idle1", "RunHomeguard"): TransitionClip(
+            clip_name: "Unk0x5d07a297",
+        ),
+        ("Idle1", "Unk0x571c8c8e"): Time(
+            time: 0.0,
+        ),
+        ("Idle1", "Unk0xc6880272"): Time(
+            time: 0.0,
+        ),
+        ("Idle1", "Unk0xcbb80704"): Time(
+            time: 0.0,
+        ),
+        ("Idle1", "Unk0xe3c50754"): Time(
+            time: 0.0,
+        ),
+        ("Idle1Base", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Idle1Base", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("Idle1Base", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Idle1Base", "JokeIn"): Time(
+            time: 0.1,
+        ),
+        ("Idle1Base", "Laugh"): Time(
+            time: 0.0,
+        ),
+        ("Idle1Base", "RunHomeguard"): TransitionClip(
+            clip_name: "Unk0x5d07a297",
+        ),
+        ("Idle1Base", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("Idle1Base", "Taunt"): Time(
+            time: 0.0,
+        ),
+        ("Idle1Base", "Unk0x16b0f5fd"): Time(
+            time: 0.1,
+        ),
+        ("Idle1Base", "Unk0x571c8c8e"): Time(
+            time: 0.1,
+        ),
+        ("Idle1Base", "Unk0xc6880272"): Time(
+            time: 0.1,
+        ),
+        ("Idle1Base", "Unk0xe3c50754"): Time(
+            time: 0.1,
+        ),
+        ("IdleIn", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("IdleIn", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("IdleIn", "JokeIn"): Time(
+            time: 0.1,
+        ),
+        ("IdleIn", "RunHomeguard"): TransitionClip(
+            clip_name: "Unk0x5d07a297",
+        ),
+        ("IdleIn", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("IdleIn", "Unk0x16b0f5fd"): Time(
+            time: 0.1,
+        ),
+        ("IdleIn", "Unk0x571c8c8e"): Time(
+            time: 0.0,
+        ),
+        ("IdleIn", "Unk0xc6880272"): Time(
+            time: 0.0,
+        ),
+        ("IdleIn", "Unk0xcbb80704"): Time(
+            time: 0.0,
+        ),
+        ("IdleIn", "Unk0xe3c50754"): Time(
+            time: 0.0,
+        ),
+        ("IdleVar2", "Unk0x571c8c8e"): Time(
+            time: 0.0,
+        ),
+        ("IdleVar2", "Unk0xc6880272"): Time(
+            time: 0.0,
+        ),
+        ("IdleVar2", "Unk0xcbb80704"): Time(
+            time: 0.0,
+        ),
+        ("IdleVar2", "Unk0xe3c50754"): Time(
+            time: 0.0,
+        ),
+        ("JokeIn", "Attack2"): Time(
+            time: 0.0,
+        ),
+        ("JokeIn", "Channel"): Time(
+            time: 0.0,
+        ),
+        ("JokeIn", "ChannelWndup"): Time(
+            time: 0.0,
+        ),
+        ("JokeIn", "Crit"): Time(
+            time: 0.0,
+        ),
+        ("JokeIn", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("JokeIn", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("JokeIn", "Death"): Time(
+            time: 0.0,
+        ),
+        ("JokeIn", "Idle1Base"): Time(
+            time: 0.0,
+        ),
+        ("JokeIn", "JokeIn"): Time(
+            time: 0.1,
+        ),
+        ("JokeIn", "Laugh"): Time(
+            time: 0.0,
+        ),
+        ("JokeIn", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("JokeIn", "Spell2"): Time(
+            time: 0.0,
+        ),
+        ("JokeIn", "Spell3"): Time(
+            time: 0.0,
+        ),
+        ("JokeIn", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("JokeIn", "Taunt"): Time(
+            time: 0.0,
+        ),
+        ("JokeIn", "Unk0x16b0f5fd"): Time(
+            time: 0.1,
+        ),
+        ("JokeIn", "Unk0x571c8c8e"): Time(
+            time: 0.0,
+        ),
+        ("JokeIn", "Unk0xc6880272"): Time(
+            time: 0.0,
+        ),
+        ("JokeIn", "Unk0xcbb80704"): Time(
+            time: 0.0,
+        ),
+        ("JokeIn", "Unk0xe3c50754"): Time(
+            time: 0.0,
+        ),
+        ("JokeLoop", "JokeIn"): Time(
+            time: 0.1,
+        ),
+        ("JokeLoop", "Unk0x571c8c8e"): Time(
+            time: 0.0,
+        ),
+        ("JokeLoop", "Unk0xc6880272"): Time(
+            time: 0.0,
+        ),
+        ("JokeLoop", "Unk0xcbb80704"): Time(
+            time: 0.0,
+        ),
+        ("JokeLoop", "Unk0xe3c50754"): Time(
+            time: 0.0,
+        ),
+        ("KnockUp", "Unk0x571c8c8e"): Time(
+            time: 0.0,
+        ),
+        ("KnockUp", "Unk0xc6880272"): Time(
+            time: 0.0,
+        ),
+        ("KnockUp", "Unk0xcbb80704"): Time(
+            time: 0.0,
+        ),
+        ("KnockUp", "Unk0xe3c50754"): Time(
+            time: 0.0,
+        ),
+        ("Laugh", "Attack2"): Time(
+            time: 0.0,
+        ),
+        ("Laugh", "Channel"): Time(
+            time: 0.0,
+        ),
+        ("Laugh", "ChannelWndup"): Time(
+            time: 0.0,
+        ),
+        ("Laugh", "Crit"): Time(
+            time: 0.0,
+        ),
+        ("Laugh", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Laugh", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("Laugh", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Laugh", "Idle1Base"): Time(
+            time: 0.0,
+        ),
+        ("Laugh", "JokeIn"): Time(
+            time: 0.1,
+        ),
+        ("Laugh", "Laugh"): Time(
+            time: 0.0,
+        ),
+        ("Laugh", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("Laugh", "Spell2"): Time(
+            time: 0.0,
+        ),
+        ("Laugh", "Spell3"): Time(
+            time: 0.0,
+        ),
+        ("Laugh", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("Laugh", "Taunt"): Time(
+            time: 0.0,
+        ),
+        ("Laugh", "Unk0x16b0f5fd"): Time(
+            time: 0.1,
+        ),
+        ("Laugh", "Unk0x571c8c8e"): Time(
+            time: 0.0,
+        ),
+        ("Laugh", "Unk0xc6880272"): Time(
+            time: 0.0,
+        ),
+        ("Laugh", "Unk0xcbb80704"): Time(
+            time: 0.0,
+        ),
+        ("Laugh", "Unk0xe3c50754"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "JokeIn"): Time(
+            time: 0.1,
+        ),
+        ("Recall", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Unk0x16b0f5fd"): Time(
+            time: 0.1,
+        ),
+        ("Recall", "Unk0x571c8c8e"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Unk0xc6880272"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Unk0xcbb80704"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Unk0xe3c50754"): Time(
+            time: 0.0,
+        ),
+        ("RecallWinddown", "Unk0x571c8c8e"): Time(
+            time: 0.0,
+        ),
+        ("RecallWinddown", "Unk0xc6880272"): Time(
+            time: 0.0,
+        ),
+        ("RecallWinddown", "Unk0xcbb80704"): Time(
+            time: 0.0,
+        ),
+        ("RecallWinddown", "Unk0xe3c50754"): Time(
+            time: 0.0,
+        ),
+        ("Respawn", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Respawn", "Idle1"): Time(
+            time: 0.1,
+        ),
+        ("Respawn", "Idle1Base"): Time(
+            time: 0.1,
+        ),
+        ("Respawn", "JokeIn"): Time(
+            time: 0.1,
+        ),
+        ("Respawn", "Unk0x571c8c8e"): Time(
+            time: 0.0,
+        ),
+        ("Respawn", "Unk0xc6880272"): Time(
+            time: 0.0,
+        ),
+        ("Respawn", "Unk0xcbb80704"): Time(
+            time: 0.0,
+        ),
+        ("Respawn", "Unk0xe3c50754"): Time(
+            time: 0.0,
+        ),
+        ("Run", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Run", "JokeIn"): Time(
+            time: 0.1,
+        ),
+        ("Run", "Unk0x571c8c8e"): Time(
+            time: 0.0,
+        ),
+        ("Run", "Unk0xc6880272"): Time(
+            time: 0.0,
+        ),
+        ("Run", "Unk0xcbb80704"): Time(
+            time: 0.0,
+        ),
+        ("Run", "Unk0xe3c50754"): Time(
+            time: 0.0,
+        ),
+        ("RunBase", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("RunBase", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("RunBase", "Death"): Time(
+            time: 0.0,
+        ),
+        ("RunBase", "Idle1Base"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("RunBase", "JokeIn"): Time(
+            time: 0.1,
+        ),
+        ("RunBase", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("RunBase", "Unk0x16b0f5fd"): Time(
+            time: 0.1,
+        ),
+        ("RunBase", "Unk0x571c8c8e"): Time(
+            time: 0.1,
+        ),
+        ("RunBase", "Unk0xc6880272"): Time(
+            time: 0.1,
+        ),
+        ("RunBase", "Unk0xe3c50754"): Time(
+            time: 0.1,
+        ),
+        ("RunFast", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("RunFast", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("RunFast", "JokeIn"): Time(
+            time: 0.1,
+        ),
+        ("RunFast", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("RunFast", "Unk0x16b0f5fd"): Time(
+            time: 0.1,
+        ),
+        ("RunFast", "Unk0x571c8c8e"): Time(
+            time: 0.0,
+        ),
+        ("RunFast", "Unk0xc6880272"): Time(
+            time: 0.0,
+        ),
+        ("RunFast", "Unk0xcbb80704"): Time(
+            time: 0.0,
+        ),
+        ("RunFast", "Unk0xe3c50754"): Time(
+            time: 0.0,
+        ),
+        ("RunHaste", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("RunHaste", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("RunHaste", "Idle1"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("RunHaste", "Idle1Base"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("RunHaste", "IdleVar2"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("RunHaste", "JokeIn"): Time(
+            time: 0.1,
+        ),
+        ("RunHaste", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("RunHaste", "Unk0x16b0f5fd"): Time(
+            time: 0.1,
+        ),
+        ("RunHaste", "Unk0x1efabc75"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("RunHaste", "Unk0x571c8c8e"): Time(
+            time: 0.0,
+        ),
+        ("RunHaste", "Unk0xbb020a62"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("RunHaste", "Unk0xc6880272"): Time(
+            time: 0.0,
+        ),
+        ("RunHaste", "Unk0xcbb80704"): Time(
+            time: 0.0,
+        ),
+        ("RunHaste", "Unk0xd5bc96d1"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("RunHaste", "Unk0xe3c50754"): Time(
+            time: 0.0,
+        ),
+        ("RunHomeguard", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("RunHomeguard", "Idle1"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("RunHomeguard", "Idle1Base"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("RunHomeguard", "IdleVar2"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("RunHomeguard", "JokeIn"): Time(
+            time: 0.1,
+        ),
+        ("RunHomeguard", "Unk0x1efabc75"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("RunHomeguard", "Unk0x571c8c8e"): Time(
+            time: 0.0,
+        ),
+        ("RunHomeguard", "Unk0xbb020a62"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("RunHomeguard", "Unk0xc6880272"): Time(
+            time: 0.0,
+        ),
+        ("RunHomeguard", "Unk0xcbb80704"): Time(
+            time: 0.0,
+        ),
+        ("RunHomeguard", "Unk0xcc7e3fac"): Time(
+            time: 1.0,
+        ),
+        ("RunHomeguard", "Unk0xd5bc96d1"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("RunHomeguard", "Unk0xe3c50754"): Time(
+            time: 0.0,
+        ),
+        ("RunIn", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("RunIn", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("RunIn", "Idle1"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("RunIn", "Idle1Base"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("RunIn", "IdleVar2"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("RunIn", "JokeIn"): Time(
+            time: 0.1,
+        ),
+        ("RunIn", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("RunIn", "Unk0x16b0f5fd"): Time(
+            time: 0.1,
+        ),
+        ("RunIn", "Unk0x1efabc75"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("RunIn", "Unk0x571c8c8e"): Time(
+            time: 0.0,
+        ),
+        ("RunIn", "Unk0xbb020a62"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("RunIn", "Unk0xc6880272"): Time(
+            time: 0.0,
+        ),
+        ("RunIn", "Unk0xcbb80704"): Time(
+            time: 0.0,
+        ),
+        ("RunIn", "Unk0xd5bc96d1"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("RunIn", "Unk0xe3c50754"): Time(
+            time: 0.0,
+        ),
+        ("RunSpell4", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("RunSpell4", "JokeIn"): Time(
+            time: 0.1,
+        ),
+        ("RunSpell4", "Unk0x571c8c8e"): Time(
+            time: 0.0,
+        ),
+        ("RunSpell4", "Unk0xc6880272"): Time(
+            time: 0.0,
+        ),
+        ("RunSpell4", "Unk0xcbb80704"): Time(
+            time: 0.0,
+        ),
+        ("RunSpell4", "Unk0xe3c50754"): Time(
+            time: 0.0,
+        ),
+        ("Spell1", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Spell1", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("Spell1", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell1", "Idle1Base"): TransitionClip(
+            clip_name: "Spell1ToIdle",
+        ),
+        ("Spell1", "JokeIn"): Time(
+            time: 0.1,
+        ),
+        ("Spell1", "Laugh"): Time(
+            time: 0.0,
+        ),
+        ("Spell1", "RunBase"): TransitionClip(
+            clip_name: "Spell1ToRun",
+        ),
+        ("Spell1", "RunFast"): TransitionClip(
+            clip_name: "Spell1ToRun",
+        ),
+        ("Spell1", "RunHaste"): TransitionClip(
+            clip_name: "Spell1ToRun",
+        ),
+        ("Spell1", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("Spell1", "Taunt"): Time(
+            time: 0.0,
+        ),
+        ("Spell1", "Unk0x16b0f5fd"): Time(
+            time: 0.1,
+        ),
+        ("Spell1", "Unk0x1efabc75"): TransitionClip(
+            clip_name: "Spell1ToIdle",
+        ),
+        ("Spell1", "Unk0x571c8c8e"): Time(
+            time: 0.0,
+        ),
+        ("Spell1", "Unk0x5f28fb20"): TransitionClip(
+            clip_name: "Spell1ToIdle",
+        ),
+        ("Spell1", "Unk0xc1c5c1fb"): TransitionClip(
+            clip_name: "Spell1ToRun",
+        ),
+        ("Spell1", "Unk0xc2c5c38e"): TransitionClip(
+            clip_name: "Spell1ToRun",
+        ),
+        ("Spell1", "Unk0xc6880272"): Time(
+            time: 0.0,
+        ),
+        ("Spell1", "Unk0xcbb80704"): Time(
+            time: 0.0,
+        ),
+        ("Spell1", "Unk0xcc7e3fac"): TransitionClip(
+            clip_name: "Spell1ToRun",
+        ),
+        ("Spell1", "Unk0xe3c50754"): Time(
+            time: 0.0,
+        ),
+        ("Spell1ToIdle", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Spell1ToIdle", "JokeIn"): Time(
+            time: 0.1,
+        ),
+        ("Spell1ToIdle", "RunBase"): TransitionClip(
+            clip_name: "Spell1ToRun",
+        ),
+        ("Spell1ToIdle", "RunFast"): TransitionClip(
+            clip_name: "Spell1ToRun",
+        ),
+        ("Spell1ToIdle", "RunHaste"): TransitionClip(
+            clip_name: "Spell1ToRun",
+        ),
+        ("Spell1ToIdle", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("Spell1ToIdle", "Unk0x16b0f5fd"): Time(
+            time: 0.1,
+        ),
+        ("Spell1ToIdle", "Unk0x571c8c8e"): Time(
+            time: 0.0,
+        ),
+        ("Spell1ToIdle", "Unk0xc1c5c1fb"): TransitionClip(
+            clip_name: "Spell1ToRun",
+        ),
+        ("Spell1ToIdle", "Unk0xc2c5c38e"): TransitionClip(
+            clip_name: "Spell1ToRun",
+        ),
+        ("Spell1ToIdle", "Unk0xc6880272"): Time(
+            time: 0.0,
+        ),
+        ("Spell1ToIdle", "Unk0xcbb80704"): Time(
+            time: 0.0,
+        ),
+        ("Spell1ToIdle", "Unk0xcc7e3fac"): TransitionClip(
+            clip_name: "Spell1ToRun",
+        ),
+        ("Spell1ToIdle", "Unk0xe3c50754"): Time(
+            time: 0.0,
+        ),
+        ("Spell1ToRun", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Spell1ToRun", "JokeIn"): Time(
+            time: 0.1,
+        ),
+        ("Spell1ToRun", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("Spell1ToRun", "Unk0x16b0f5fd"): Time(
+            time: 0.1,
+        ),
+        ("Spell1ToRun", "Unk0x1efabc75"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("Spell1ToRun", "Unk0x571c8c8e"): Time(
+            time: 0.0,
+        ),
+        ("Spell1ToRun", "Unk0xc6880272"): Time(
+            time: 0.0,
+        ),
+        ("Spell1ToRun", "Unk0xcbb80704"): Time(
+            time: 0.0,
+        ),
+        ("Spell1ToRun", "Unk0xe3c50754"): Time(
+            time: 0.0,
+        ),
+        ("Spell2", "Attack2"): Time(
+            time: 0.0,
+        ),
+        ("Spell2", "Channel"): Time(
+            time: 0.0,
+        ),
+        ("Spell2", "ChannelWndup"): Time(
+            time: 0.0,
+        ),
+        ("Spell2", "Crit"): Time(
+            time: 0.0,
+        ),
+        ("Spell2", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Spell2", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("Spell2", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell2", "Idle1Base"): TransitionClip(
+            clip_name: "Spell2ToIdle",
+        ),
+        ("Spell2", "JokeIn"): Time(
+            time: 0.1,
+        ),
+        ("Spell2", "Laugh"): Time(
+            time: 0.0,
+        ),
+        ("Spell2", "RunBase"): TransitionClip(
+            clip_name: "Spell2ToRun",
+        ),
+        ("Spell2", "RunFast"): TransitionClip(
+            clip_name: "Spell2ToRun",
+        ),
+        ("Spell2", "RunHaste"): TransitionClip(
+            clip_name: "Spell2ToRun",
+        ),
+        ("Spell2", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("Spell2", "Spell2"): Time(
+            time: 0.0,
+        ),
+        ("Spell2", "Spell2ToRun"): Time(
+            time: 0.1,
+        ),
+        ("Spell2", "Spell3"): Time(
+            time: 0.0,
+        ),
+        ("Spell2", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("Spell2", "Taunt"): Time(
+            time: 0.0,
+        ),
+        ("Spell2", "Unk0x16b0f5fd"): Time(
+            time: 0.1,
+        ),
+        ("Spell2", "Unk0x1efabc75"): TransitionClip(
+            clip_name: "Spell2ToIdle",
+        ),
+        ("Spell2", "Unk0x571c8c8e"): Time(
+            time: 0.0,
+        ),
+        ("Spell2", "Unk0x5f28fb20"): TransitionClip(
+            clip_name: "Spell2ToIdle",
+        ),
+        ("Spell2", "Unk0xc1c5c1fb"): TransitionClip(
+            clip_name: "Spell2ToRun",
+        ),
+        ("Spell2", "Unk0xc2c5c38e"): TransitionClip(
+            clip_name: "Spell2ToRun",
+        ),
+        ("Spell2", "Unk0xc6880272"): Time(
+            time: 0.0,
+        ),
+        ("Spell2", "Unk0xcbb80704"): Time(
+            time: 0.0,
+        ),
+        ("Spell2", "Unk0xcc7e3fac"): TransitionClip(
+            clip_name: "Spell2ToRun",
+        ),
+        ("Spell2", "Unk0xe3c50754"): Time(
+            time: 0.0,
+        ),
+        ("Spell2ToIdle", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Spell2ToIdle", "JokeIn"): Time(
+            time: 0.1,
+        ),
+        ("Spell2ToIdle", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("Spell2ToIdle", "Unk0x16b0f5fd"): Time(
+            time: 0.1,
+        ),
+        ("Spell2ToIdle", "Unk0x571c8c8e"): Time(
+            time: 0.0,
+        ),
+        ("Spell2ToIdle", "Unk0xc6880272"): Time(
+            time: 0.0,
+        ),
+        ("Spell2ToIdle", "Unk0xcbb80704"): Time(
+            time: 0.0,
+        ),
+        ("Spell2ToIdle", "Unk0xe3c50754"): Time(
+            time: 0.0,
+        ),
+        ("Spell2ToRun", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Spell2ToRun", "JokeIn"): Time(
+            time: 0.1,
+        ),
+        ("Spell2ToRun", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("Spell2ToRun", "Unk0x16b0f5fd"): Time(
+            time: 0.1,
+        ),
+        ("Spell2ToRun", "Unk0x1efabc75"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("Spell2ToRun", "Unk0x571c8c8e"): Time(
+            time: 0.0,
+        ),
+        ("Spell2ToRun", "Unk0xc6880272"): Time(
+            time: 0.0,
+        ),
+        ("Spell2ToRun", "Unk0xcbb80704"): Time(
+            time: 0.0,
+        ),
+        ("Spell2ToRun", "Unk0xcc7e3fac"): Time(
+            time: 0.1,
+        ),
+        ("Spell2ToRun", "Unk0xe3c50754"): Time(
+            time: 0.0,
+        ),
+        ("Spell3", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Spell3", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("Spell3", "JokeIn"): Time(
+            time: 0.1,
+        ),
+        ("Spell3", "Laugh"): Time(
+            time: 0.0,
+        ),
+        ("Spell3", "RunBase"): Time(
+            time: 0.5,
+        ),
+        ("Spell3", "RunFast"): Time(
+            time: 0.5,
+        ),
+        ("Spell3", "RunHaste"): Time(
+            time: 0.5,
+        ),
+        ("Spell3", "Taunt"): Time(
+            time: 0.0,
+        ),
+        ("Spell3", "Unk0x16b0f5fd"): Time(
+            time: 0.1,
+        ),
+        ("Spell3", "Unk0x571c8c8e"): Time(
+            time: 0.0,
+        ),
+        ("Spell3", "Unk0xc1c5c1fb"): TransitionClip(
+            clip_name: "Spell3ToRun",
+        ),
+        ("Spell3", "Unk0xc2c5c38e"): TransitionClip(
+            clip_name: "Spell3ToRun",
+        ),
+        ("Spell3", "Unk0xc6880272"): Time(
+            time: 0.0,
+        ),
+        ("Spell3", "Unk0xcbb80704"): Time(
+            time: 0.0,
+        ),
+        ("Spell3", "Unk0xcc7e3fac"): TransitionClip(
+            clip_name: "Spell3ToRun",
+        ),
+        ("Spell3", "Unk0xe3c50754"): Time(
+            time: 0.0,
+        ),
+        ("Spell3ToRun", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Spell3ToRun", "JokeIn"): Time(
+            time: 0.1,
+        ),
+        ("Spell3ToRun", "Unk0x16b0f5fd"): Time(
+            time: 0.1,
+        ),
+        ("Spell3ToRun", "Unk0x1efabc75"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("Spell3ToRun", "Unk0x571c8c8e"): Time(
+            time: 0.0,
+        ),
+        ("Spell3ToRun", "Unk0xc1c5c1fb"): TransitionClip(
+            clip_name: "Spell3ToRun",
+        ),
+        ("Spell3ToRun", "Unk0xc2c5c38e"): TransitionClip(
+            clip_name: "Spell3ToRun",
+        ),
+        ("Spell3ToRun", "Unk0xc6880272"): Time(
+            time: 0.0,
+        ),
+        ("Spell3ToRun", "Unk0xcbb80704"): Time(
+            time: 0.0,
+        ),
+        ("Spell3ToRun", "Unk0xcc7e3fac"): TransitionClip(
+            clip_name: "Spell3ToRun",
+        ),
+        ("Spell3ToRun", "Unk0xe3c50754"): Time(
+            time: 0.0,
+        ),
+        ("Spell4", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Spell4", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("Spell4", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell4", "Idle1Base"): TransitionClip(
+            clip_name: "Spell4ToIdle",
+        ),
+        ("Spell4", "JokeIn"): Time(
+            time: 0.1,
+        ),
+        ("Spell4", "Laugh"): Time(
+            time: 0.0,
+        ),
+        ("Spell4", "RunBase"): TransitionClip(
+            clip_name: "Unk0x2bf6994d",
+        ),
+        ("Spell4", "RunFast"): TransitionClip(
+            clip_name: "Unk0x2bf6994d",
+        ),
+        ("Spell4", "RunHaste"): TransitionClip(
+            clip_name: "Unk0x2bf6994d",
+        ),
+        ("Spell4", "RunIn"): TransitionClip(
+            clip_name: "Unk0x2bf6994d",
+        ),
+        ("Spell4", "RunSpell4"): TransitionClip(
+            clip_name: "Unk0x2bf6994d",
+        ),
+        ("Spell4", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("Spell4", "Taunt"): Time(
+            time: 0.0,
+        ),
+        ("Spell4", "Unk0x16b0f5fd"): Time(
+            time: 0.1,
+        ),
+        ("Spell4", "Unk0x571c8c8e"): Time(
+            time: 0.0,
+        ),
+        ("Spell4", "Unk0xc6880272"): Time(
+            time: 0.0,
+        ),
+        ("Spell4", "Unk0xcbb80704"): Time(
+            time: 0.0,
+        ),
+        ("Spell4", "Unk0xe3c50754"): Time(
+            time: 0.0,
+        ),
+        ("Spell4ToIdle", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Spell4ToIdle", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("Spell4ToIdle", "JokeIn"): Time(
+            time: 0.1,
+        ),
+        ("Spell4ToIdle", "RunBase"): TransitionClip(
+            clip_name: "Unk0x2bf6994d",
+        ),
+        ("Spell4ToIdle", "RunFast"): TransitionClip(
+            clip_name: "Unk0x2bf6994d",
+        ),
+        ("Spell4ToIdle", "RunHaste"): TransitionClip(
+            clip_name: "Unk0x2bf6994d",
+        ),
+        ("Spell4ToIdle", "RunIn"): TransitionClip(
+            clip_name: "Unk0x2bf6994d",
+        ),
+        ("Spell4ToIdle", "RunSpell4"): TransitionClip(
+            clip_name: "Unk0x2bf6994d",
+        ),
+        ("Spell4ToIdle", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("Spell4ToIdle", "Unk0x16b0f5fd"): Time(
+            time: 0.1,
+        ),
+        ("Spell4ToIdle", "Unk0x571c8c8e"): Time(
+            time: 0.1,
+        ),
+        ("Spell4ToIdle", "Unk0xc6880272"): Time(
+            time: 0.1,
+        ),
+        ("Spell4ToIdle", "Unk0xe3c50754"): Time(
+            time: 0.1,
+        ),
+        ("Stunned", "Unk0x571c8c8e"): Time(
+            time: 0.0,
+        ),
+        ("Stunned", "Unk0xc6880272"): Time(
+            time: 0.0,
+        ),
+        ("Stunned", "Unk0xcbb80704"): Time(
+            time: 0.0,
+        ),
+        ("Stunned", "Unk0xe3c50754"): Time(
+            time: 0.0,
+        ),
+        ("Taunt", "Attack2"): Time(
+            time: 0.0,
+        ),
+        ("Taunt", "Channel"): Time(
+            time: 0.0,
+        ),
+        ("Taunt", "ChannelWndup"): Time(
+            time: 0.0,
+        ),
+        ("Taunt", "Crit"): Time(
+            time: 0.0,
+        ),
+        ("Taunt", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Taunt", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("Taunt", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Taunt", "Idle1"): Time(
+            time: 0.1,
+        ),
+        ("Taunt", "Idle1Base"): Time(
+            time: 0.1,
+        ),
+        ("Taunt", "JokeIn"): Time(
+            time: 0.1,
+        ),
+        ("Taunt", "Laugh"): Time(
+            time: 0.0,
+        ),
+        ("Taunt", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("Taunt", "Spell2"): Time(
+            time: 0.0,
+        ),
+        ("Taunt", "Spell3"): Time(
+            time: 0.0,
+        ),
+        ("Taunt", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("Taunt", "Taunt"): Time(
+            time: 0.0,
+        ),
+        ("Taunt", "Unk0x16b0f5fd"): Time(
+            time: 0.1,
+        ),
+        ("Taunt", "Unk0x571c8c8e"): Time(
+            time: 0.0,
+        ),
+        ("Taunt", "Unk0xc6880272"): Time(
+            time: 0.0,
+        ),
+        ("Taunt", "Unk0xcbb80704"): Time(
+            time: 0.0,
+        ),
+        ("Taunt", "Unk0xe3c50754"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x16b0f5fd", "Attack1"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x16b0f5fd", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x16b0f5fd", "RunBase"): TransitionClip(
+            clip_name: "Spell3ToRun",
+        ),
+        ("Unk0x16b0f5fd", "RunFast"): TransitionClip(
+            clip_name: "Spell3ToRun",
+        ),
+        ("Unk0x16b0f5fd", "RunHaste"): TransitionClip(
+            clip_name: "Spell3ToRun",
+        ),
+        ("Unk0x16b0f5fd", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x16b0f5fd", "Spell3ToRun"): Time(
+            time: 0.5,
+        ),
+        ("Unk0x16b0f5fd", "Unk0x16b0f5fd"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x16b0f5fd", "Unk0x571c8c8e"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x16b0f5fd", "Unk0xc6880272"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x16b0f5fd", "Unk0xe3c50754"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x1efabc75", "Unk0x571c8c8e"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x1efabc75", "Unk0xc6880272"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x1efabc75", "Unk0xcbb80704"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x1efabc75", "Unk0xe3c50754"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x2bf6994d", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x2bf6994d", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x2bf6994d", "Idle1Base"): TransitionClip(
+            clip_name: "Spell4ToIdle",
+        ),
+        ("Unk0x2bf6994d", "JokeIn"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x2bf6994d", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x2bf6994d", "Unk0x16b0f5fd"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x2bf6994d", "Unk0x571c8c8e"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x2bf6994d", "Unk0xc6880272"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x2bf6994d", "Unk0xe3c50754"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x489d5b81", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x489d5b81", "JokeIn"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x489d5b81", "Unk0x1efabc75"): TransitionClip(
+            clip_name: "Unk0xe9472732",
+        ),
+        ("Unk0x489d5b81", "Unk0x571c8c8e"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x489d5b81", "Unk0xc6880272"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x489d5b81", "Unk0xcbb80704"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x489d5b81", "Unk0xcc7e3fac"): TransitionClip(
+            clip_name: "Unk0x7411e92b",
+        ),
+        ("Unk0x489d5b81", "Unk0xe3c50754"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x52185746", "Unk0x571c8c8e"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x52185746", "Unk0xc6880272"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x52185746", "Unk0xcbb80704"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x52185746", "Unk0xe3c50754"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x571c8c8e", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x571c8c8e", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x571c8c8e", "JokeIn"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x571c8c8e", "RunBase"): TransitionClip(
+            clip_name: "Spell3ToRun",
+        ),
+        ("Unk0x571c8c8e", "RunFast"): TransitionClip(
+            clip_name: "Spell3ToRun",
+        ),
+        ("Unk0x571c8c8e", "RunHaste"): TransitionClip(
+            clip_name: "Spell3ToRun",
+        ),
+        ("Unk0x571c8c8e", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x571c8c8e", "Spell3ToRun"): Time(
+            time: 0.5,
+        ),
+        ("Unk0x571c8c8e", "Unk0x16b0f5fd"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x571c8c8e", "Unk0x571c8c8e"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x571c8c8e", "Unk0xc1c5c1fb"): TransitionClip(
+            clip_name: "Spell3ToRun",
+        ),
+        ("Unk0x571c8c8e", "Unk0xc2c5c38e"): TransitionClip(
+            clip_name: "Spell3ToRun",
+        ),
+        ("Unk0x571c8c8e", "Unk0xc6880272"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x571c8c8e", "Unk0xcbb80704"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x571c8c8e", "Unk0xcc7e3fac"): TransitionClip(
+            clip_name: "Spell3ToRun",
+        ),
+        ("Unk0x571c8c8e", "Unk0xe3c50754"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x5d07a297", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x5d07a297", "Idle1"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("Unk0x5d07a297", "JokeIn"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x5d07a297", "Unk0x1efabc75"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("Unk0x5d07a297", "Unk0x571c8c8e"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x5d07a297", "Unk0xc6880272"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x5d07a297", "Unk0xcbb80704"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x5d07a297", "Unk0xe3c50754"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x5f28fb20", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x5f28fb20", "JokeIn"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x5f28fb20", "RunSpell4"): TransitionClip(
+            clip_name: "Unk0x2bf6994d",
+        ),
+        ("Unk0x5f28fb20", "Unk0x1efabc75"): TransitionClip(
+            clip_name: "Unk0xe9472732",
+        ),
+        ("Unk0x5f28fb20", "Unk0x489d5b81"): Time(
+            time: 0.4,
+        ),
+        ("Unk0x5f28fb20", "Unk0x571c8c8e"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x5f28fb20", "Unk0xc6880272"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x5f28fb20", "Unk0xcbb80704"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x5f28fb20", "Unk0xe3c50754"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x670b119d", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x670b119d", "JokeIn"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x670b119d", "Unk0x1efabc75"): TransitionClip(
+            clip_name: "Unk0xe9472732",
+        ),
+        ("Unk0x670b119d", "Unk0x571c8c8e"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x670b119d", "Unk0xc6880272"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x670b119d", "Unk0xcbb80704"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x670b119d", "Unk0xe3c50754"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x7411e92b", "Unk0x571c8c8e"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x7411e92b", "Unk0xc6880272"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x7411e92b", "Unk0xcbb80704"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x7411e92b", "Unk0xe3c50754"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x871388dc", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x871388dc", "JokeIn"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x871388dc", "Unk0x571c8c8e"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x871388dc", "Unk0xc6880272"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x871388dc", "Unk0xcbb80704"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x871388dc", "Unk0xe3c50754"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x960cce87", "Unk0x571c8c8e"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x960cce87", "Unk0xc6880272"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x960cce87", "Unk0xcbb80704"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x960cce87", "Unk0xe3c50754"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x9a6b0962", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x9a6b0962", "JokeIn"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x9a6b0962", "Unk0x571c8c8e"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x9a6b0962", "Unk0xc6880272"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x9a6b0962", "Unk0xcbb80704"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x9a6b0962", "Unk0xe3c50754"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xa621ddf", "Unk0x1efabc75"): TransitionClip(
+            clip_name: "Unk0xe9472732",
+        ),
+        ("Unk0xa621ddf", "Unk0x571c8c8e"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xa621ddf", "Unk0xc6880272"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xa621ddf", "Unk0xcbb80704"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xa621ddf", "Unk0xe3c50754"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xae1afd78", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xae1afd78", "JokeIn"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xae1afd78", "Unk0x571c8c8e"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xae1afd78", "Unk0xc6880272"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xae1afd78", "Unk0xcbb80704"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xae1afd78", "Unk0xe3c50754"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xbb020a62", "Unk0x571c8c8e"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xbb020a62", "Unk0xc6880272"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xbb020a62", "Unk0xcbb80704"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xbb020a62", "Unk0xe3c50754"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xc1c5c1fb", "Idle1Base"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("Unk0xc1c5c1fb", "Unk0x1efabc75"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("Unk0xc1c5c1fb", "Unk0x571c8c8e"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xc1c5c1fb", "Unk0xc6880272"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xc1c5c1fb", "Unk0xcbb80704"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xc1c5c1fb", "Unk0xe3c50754"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xc2c5c38e", "Idle1Base"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("Unk0xc2c5c38e", "Unk0x1efabc75"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("Unk0xc2c5c38e", "Unk0x571c8c8e"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xc2c5c38e", "Unk0xc6880272"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xc2c5c38e", "Unk0xcbb80704"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xc2c5c38e", "Unk0xe3c50754"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xc380648a", "Unk0x571c8c8e"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xc380648a", "Unk0xc6880272"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xc380648a", "Unk0xcbb80704"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xc380648a", "Unk0xe3c50754"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xc6880272", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xc6880272", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xc6880272", "JokeIn"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xc6880272", "RunBase"): TransitionClip(
+            clip_name: "Spell3ToRun",
+        ),
+        ("Unk0xc6880272", "RunFast"): TransitionClip(
+            clip_name: "Spell3ToRun",
+        ),
+        ("Unk0xc6880272", "RunHaste"): TransitionClip(
+            clip_name: "Spell3ToRun",
+        ),
+        ("Unk0xc6880272", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xc6880272", "Spell3ToRun"): Time(
+            time: 0.5,
+        ),
+        ("Unk0xc6880272", "Unk0x16b0f5fd"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xc6880272", "Unk0x571c8c8e"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xc6880272", "Unk0xc1c5c1fb"): TransitionClip(
+            clip_name: "Spell3ToRun",
+        ),
+        ("Unk0xc6880272", "Unk0xc2c5c38e"): TransitionClip(
+            clip_name: "Spell3ToRun",
+        ),
+        ("Unk0xc6880272", "Unk0xc6880272"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xc6880272", "Unk0xcbb80704"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xc6880272", "Unk0xcc7e3fac"): TransitionClip(
+            clip_name: "Spell3ToRun",
+        ),
+        ("Unk0xc6880272", "Unk0xe3c50754"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xcbb80704", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xcbb80704", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xcbb80704", "JokeIn"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xcbb80704", "RunBase"): TransitionClip(
+            clip_name: "Spell3ToRun",
+        ),
+        ("Unk0xcbb80704", "RunFast"): TransitionClip(
+            clip_name: "Spell3ToRun",
+        ),
+        ("Unk0xcbb80704", "RunHaste"): TransitionClip(
+            clip_name: "Spell3ToRun",
+        ),
+        ("Unk0xcbb80704", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xcbb80704", "Spell3ToRun"): Time(
+            time: 0.5,
+        ),
+        ("Unk0xcbb80704", "Unk0x16b0f5fd"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xcbb80704", "Unk0x571c8c8e"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xcbb80704", "Unk0xc1c5c1fb"): TransitionClip(
+            clip_name: "Spell3ToRun",
+        ),
+        ("Unk0xcbb80704", "Unk0xc2c5c38e"): TransitionClip(
+            clip_name: "Spell3ToRun",
+        ),
+        ("Unk0xcbb80704", "Unk0xc6880272"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xcbb80704", "Unk0xcbb80704"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xcbb80704", "Unk0xcc7e3fac"): TransitionClip(
+            clip_name: "Spell3ToRun",
+        ),
+        ("Unk0xcbb80704", "Unk0xe3c50754"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xcc7e3fac", "Idle1Base"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("Unk0xcc7e3fac", "Unk0x1efabc75"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("Unk0xcc7e3fac", "Unk0x571c8c8e"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xcc7e3fac", "Unk0xc6880272"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xcc7e3fac", "Unk0xcbb80704"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xcc7e3fac", "Unk0xe3c50754"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xd5bc96d1", "Unk0x571c8c8e"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xd5bc96d1", "Unk0xc6880272"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xd5bc96d1", "Unk0xcbb80704"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xd5bc96d1", "Unk0xe3c50754"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xe3c50754", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xe3c50754", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xe3c50754", "JokeIn"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xe3c50754", "RunBase"): TransitionClip(
+            clip_name: "Spell3ToRun",
+        ),
+        ("Unk0xe3c50754", "RunFast"): TransitionClip(
+            clip_name: "Spell3ToRun",
+        ),
+        ("Unk0xe3c50754", "RunHaste"): TransitionClip(
+            clip_name: "Spell3ToRun",
+        ),
+        ("Unk0xe3c50754", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xe3c50754", "Spell3ToRun"): Time(
+            time: 0.5,
+        ),
+        ("Unk0xe3c50754", "Unk0x16b0f5fd"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xe3c50754", "Unk0x571c8c8e"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xe3c50754", "Unk0xc1c5c1fb"): TransitionClip(
+            clip_name: "Spell3ToRun",
+        ),
+        ("Unk0xe3c50754", "Unk0xc2c5c38e"): TransitionClip(
+            clip_name: "Spell3ToRun",
+        ),
+        ("Unk0xe3c50754", "Unk0xc6880272"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xe3c50754", "Unk0xcbb80704"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xe3c50754", "Unk0xcc7e3fac"): TransitionClip(
+            clip_name: "Spell3ToRun",
+        ),
+        ("Unk0xe3c50754", "Unk0xe3c50754"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xef042329", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xef042329", "JokeIn"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xef042329", "Unk0x571c8c8e"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xef042329", "Unk0xc6880272"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xef042329", "Unk0xcbb80704"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xef042329", "Unk0xe3c50754"): Time(
+            time: 0.0,
+        ),
+    },
+)

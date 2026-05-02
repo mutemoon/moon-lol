@@ -40,10 +40,7 @@ pub fn export_mapgeo_to_gltf(
     let target_meshes: Vec<_> = league_mapgeo
         .meshes
         .iter()
-        .filter(|v| {
-            v.environment_visibility
-                .contains(EnvironmentVisibility::LAYER1)
-        })
+        .filter(|v| v.environment_visibility == (EnvironmentVisibility::LAYER1))
         .collect();
 
     // 2. 从选定的 Mesh 中收集贴图路径，并过滤掉 Diffuse 贴图缺失的模型

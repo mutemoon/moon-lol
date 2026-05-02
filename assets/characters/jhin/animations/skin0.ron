@@ -1,0 +1,2069 @@
+(
+    gltf_path: "characters/jhin/skins/skin0.glb",
+    hash_to_node: {
+        "Attack": Selector(
+            probably_nodes: [
+                (
+                    key: "Attack1",
+                    value: 1.0,
+                ),
+                (
+                    key: "Attack2",
+                    value: 1.0,
+                ),
+            ],
+        ),
+        "Attack1": Clip(
+            node_index: 5,
+        ),
+        "Attack2": Clip(
+            node_index: 8,
+        ),
+        "Attack3": Clip(
+            node_index: 7,
+        ),
+        "Attack4": Clip(
+            node_index: 3,
+        ),
+        "BasicAttacks": Sequence(
+            hashes: [
+                "Attack1",
+                "Attack3",
+            ],
+        ),
+        "Channel": Clip(
+            node_index: 0,
+        ),
+        "ChannelWndup": Clip(
+            node_index: 16,
+        ),
+        "Crit": Clip(
+            node_index: 13,
+        ),
+        "Dance": Sequence(
+            hashes: [
+                "DanceIn",
+                "DanceLoop",
+            ],
+        ),
+        "DanceIn": Clip(
+            node_index: 14,
+        ),
+        "DanceLoop": Clip(
+            node_index: 6,
+        ),
+        "Death": Clip(
+            node_index: 28,
+        ),
+        "Idle1": Selector(
+            probably_nodes: [
+                (
+                    key: "IdleBase",
+                    value: 85.0,
+                ),
+                (
+                    key: "Unk0x220f1ff5",
+                    value: 15.0,
+                ),
+            ],
+        ),
+        "IdleBase": Clip(
+            node_index: 12,
+        ),
+        "IdleIn": Clip(
+            node_index: 25,
+        ),
+        "Joke": Clip(
+            node_index: 30,
+        ),
+        "Laugh": Clip(
+            node_index: 24,
+        ),
+        "Recall": Clip(
+            node_index: 9,
+        ),
+        "RecallWinddown": Clip(
+            node_index: 19,
+        ),
+        "Reload": Clip(
+            node_index: 34,
+        ),
+        "ReloadRecoil": Clip(
+            node_index: 4,
+        ),
+        "Respawn": Clip(
+            node_index: 15,
+        ),
+        "Run": ConditionBool(
+            updater: LogicDriverBool,
+            true_node: "RunPassive",
+            false_node: "Unk0xb87a3f27",
+        ),
+        "RunBase": Clip(
+            node_index: 35,
+        ),
+        "RunFast": Clip(
+            node_index: 18,
+        ),
+        "RunHaste": Clip(
+            node_index: 10,
+        ),
+        "RunInjured": Clip(
+            node_index: 11,
+        ),
+        "RunPassive": Clip(
+            node_index: 33,
+        ),
+        "RunSlow": Clip(
+            node_index: 31,
+        ),
+        "Spell1": Clip(
+            node_index: 20,
+        ),
+        "Spell2": Clip(
+            node_index: 23,
+        ),
+        "Spell2ToRun": Clip(
+            node_index: 36,
+        ),
+        "Spell3": Clip(
+            node_index: 21,
+        ),
+        "Spell3ToRun": Clip(
+            node_index: 32,
+        ),
+        "Spell4": Clip(
+            node_index: 26,
+        ),
+        "Spell4Idle": Clip(
+            node_index: 22,
+        ),
+        "Spell4ToRun": Clip(
+            node_index: 29,
+        ),
+        "Taunt": Clip(
+            node_index: 27,
+        ),
+        "Unk0x220f1ff5": Clip(
+            node_index: 1,
+        ),
+        "Unk0xa6df5992": Clip(
+            node_index: 17,
+        ),
+        "Unk0xb87a3f27": ConditionBool(
+            updater: IsHomeguard,
+            true_node: "Unk0xbc1ef3fb",
+            false_node: "Unk0xbc1ef3fb",
+        ),
+        "Unk0xbc1ef3fb": ConditionFloat(
+            updater: MoveSpeed,
+            conditions: [
+                (
+                    key: "RunSlow",
+                    value: 0.0,
+                ),
+                (
+                    key: "RunBase",
+                    value: 310.0,
+                ),
+                (
+                    key: "RunFast",
+                    value: 375.0,
+                ),
+                (
+                    key: "RunHaste",
+                    value: 480.0,
+                ),
+            ],
+        ),
+    },
+    blend_data: {
+        ("Attack1", "Attack1"): Time(
+            time: 0.05,
+        ),
+        ("Attack1", "Attack2"): Time(
+            time: 0.05,
+        ),
+        ("Attack1", "Attack3"): Time(
+            time: 0.05,
+        ),
+        ("Attack1", "Attack4"): Time(
+            time: 0.05,
+        ),
+        ("Attack1", "Channel"): Time(
+            time: 0.0,
+        ),
+        ("Attack1", "ChannelWndup"): Time(
+            time: 0.0,
+        ),
+        ("Attack1", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("Attack1", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Attack1", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("Attack1", "Laugh"): Time(
+            time: 0.0,
+        ),
+        ("Attack1", "Reload"): Time(
+            time: 0.1,
+        ),
+        ("Attack1", "ReloadRecoil"): Time(
+            time: 0.1,
+        ),
+        ("Attack1", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Attack1", "RunBase"): Time(
+            time: 0.0,
+        ),
+        ("Attack1", "RunFast"): Time(
+            time: 0.0,
+        ),
+        ("Attack1", "RunHaste"): Time(
+            time: 0.0,
+        ),
+        ("Attack1", "RunPassive"): Time(
+            time: 0.0,
+        ),
+        ("Attack1", "RunSlow"): Time(
+            time: 0.0,
+        ),
+        ("Attack1", "Spell2"): Time(
+            time: 0.1,
+        ),
+        ("Attack1", "Spell4"): Time(
+            time: 0.1,
+        ),
+        ("Attack1", "Taunt"): Time(
+            time: 0.0,
+        ),
+        ("Attack1", "Unk0x220f1ff5"): Time(
+            time: 0.1,
+        ),
+        ("Attack2", "Attack1"): Time(
+            time: 0.05,
+        ),
+        ("Attack2", "Attack2"): Time(
+            time: 0.05,
+        ),
+        ("Attack2", "Attack3"): Time(
+            time: 0.05,
+        ),
+        ("Attack2", "Attack4"): Time(
+            time: 0.05,
+        ),
+        ("Attack2", "Channel"): Time(
+            time: 0.0,
+        ),
+        ("Attack2", "ChannelWndup"): Time(
+            time: 0.0,
+        ),
+        ("Attack2", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("Attack2", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Attack2", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("Attack2", "Laugh"): Time(
+            time: 0.0,
+        ),
+        ("Attack2", "Reload"): Time(
+            time: 0.1,
+        ),
+        ("Attack2", "ReloadRecoil"): Time(
+            time: 0.1,
+        ),
+        ("Attack2", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Attack2", "RunBase"): Time(
+            time: 0.0,
+        ),
+        ("Attack2", "RunFast"): Time(
+            time: 0.0,
+        ),
+        ("Attack2", "RunHaste"): Time(
+            time: 0.0,
+        ),
+        ("Attack2", "RunPassive"): Time(
+            time: 0.0,
+        ),
+        ("Attack2", "RunSlow"): Time(
+            time: 0.0,
+        ),
+        ("Attack2", "Spell2"): Time(
+            time: 0.1,
+        ),
+        ("Attack2", "Spell4"): Time(
+            time: 0.1,
+        ),
+        ("Attack2", "Taunt"): Time(
+            time: 0.0,
+        ),
+        ("Attack2", "Unk0x220f1ff5"): Time(
+            time: 0.1,
+        ),
+        ("Attack3", "Attack1"): Time(
+            time: 0.05,
+        ),
+        ("Attack3", "Attack2"): Time(
+            time: 0.05,
+        ),
+        ("Attack3", "Attack3"): Time(
+            time: 0.05,
+        ),
+        ("Attack3", "Attack4"): Time(
+            time: 0.05,
+        ),
+        ("Attack3", "Channel"): Time(
+            time: 0.0,
+        ),
+        ("Attack3", "ChannelWndup"): Time(
+            time: 0.0,
+        ),
+        ("Attack3", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("Attack3", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Attack3", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("Attack3", "Laugh"): Time(
+            time: 0.0,
+        ),
+        ("Attack3", "Reload"): Time(
+            time: 0.1,
+        ),
+        ("Attack3", "ReloadRecoil"): Time(
+            time: 0.1,
+        ),
+        ("Attack3", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Attack3", "RunBase"): Time(
+            time: 0.0,
+        ),
+        ("Attack3", "RunFast"): Time(
+            time: 0.0,
+        ),
+        ("Attack3", "RunHaste"): Time(
+            time: 0.0,
+        ),
+        ("Attack3", "RunPassive"): Time(
+            time: 0.0,
+        ),
+        ("Attack3", "RunSlow"): Time(
+            time: 0.0,
+        ),
+        ("Attack3", "Spell2"): Time(
+            time: 0.1,
+        ),
+        ("Attack3", "Spell4"): Time(
+            time: 0.1,
+        ),
+        ("Attack3", "Taunt"): Time(
+            time: 0.0,
+        ),
+        ("Attack3", "Unk0x220f1ff5"): Time(
+            time: 0.1,
+        ),
+        ("Attack4", "Attack1"): Time(
+            time: 0.05,
+        ),
+        ("Attack4", "Attack2"): Time(
+            time: 0.05,
+        ),
+        ("Attack4", "Attack3"): Time(
+            time: 0.05,
+        ),
+        ("Attack4", "Attack4"): Time(
+            time: 0.05,
+        ),
+        ("Attack4", "Channel"): Time(
+            time: 0.0,
+        ),
+        ("Attack4", "ChannelWndup"): Time(
+            time: 0.0,
+        ),
+        ("Attack4", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("Attack4", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Attack4", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("Attack4", "IdleBase"): Time(
+            time: 0.0,
+        ),
+        ("Attack4", "Laugh"): Time(
+            time: 0.0,
+        ),
+        ("Attack4", "Reload"): Time(
+            time: 0.1,
+        ),
+        ("Attack4", "ReloadRecoil"): Time(
+            time: 0.1,
+        ),
+        ("Attack4", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Attack4", "RunBase"): Time(
+            time: 0.1,
+        ),
+        ("Attack4", "RunFast"): Time(
+            time: 0.1,
+        ),
+        ("Attack4", "RunHaste"): Time(
+            time: 0.1,
+        ),
+        ("Attack4", "RunInjured"): Time(
+            time: 0.1,
+        ),
+        ("Attack4", "RunPassive"): Time(
+            time: 0.1,
+        ),
+        ("Attack4", "RunSlow"): Time(
+            time: 0.1,
+        ),
+        ("Attack4", "Spell2"): Time(
+            time: 0.0,
+        ),
+        ("Attack4", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("Attack4", "Taunt"): Time(
+            time: 0.0,
+        ),
+        ("Attack4", "Unk0x220f1ff5"): Time(
+            time: 0.0,
+        ),
+        ("Channel", "Attack1"): Time(
+            time: 0.05,
+        ),
+        ("Channel", "Attack2"): Time(
+            time: 0.05,
+        ),
+        ("Channel", "Attack3"): Time(
+            time: 0.05,
+        ),
+        ("Channel", "Attack4"): Time(
+            time: 0.05,
+        ),
+        ("Channel", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("Channel", "Reload"): Time(
+            time: 0.1,
+        ),
+        ("Channel", "ReloadRecoil"): Time(
+            time: 0.1,
+        ),
+        ("Channel", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("ChannelWndup", "Attack1"): Time(
+            time: 0.05,
+        ),
+        ("ChannelWndup", "Attack2"): Time(
+            time: 0.05,
+        ),
+        ("ChannelWndup", "Attack3"): Time(
+            time: 0.05,
+        ),
+        ("ChannelWndup", "Attack4"): Time(
+            time: 0.05,
+        ),
+        ("ChannelWndup", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("ChannelWndup", "Reload"): Time(
+            time: 0.1,
+        ),
+        ("ChannelWndup", "ReloadRecoil"): Time(
+            time: 0.1,
+        ),
+        ("ChannelWndup", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Crit", "Attack1"): Time(
+            time: 0.05,
+        ),
+        ("Crit", "Attack2"): Time(
+            time: 0.05,
+        ),
+        ("Crit", "Attack3"): Time(
+            time: 0.05,
+        ),
+        ("Crit", "Attack4"): Time(
+            time: 0.05,
+        ),
+        ("Crit", "Channel"): Time(
+            time: 0.1,
+        ),
+        ("Crit", "ChannelWndup"): Time(
+            time: 0.1,
+        ),
+        ("Crit", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("Crit", "DanceIn"): Time(
+            time: 0.1,
+        ),
+        ("Crit", "DanceLoop"): Time(
+            time: 0.1,
+        ),
+        ("Crit", "IdleBase"): Time(
+            time: 0.1,
+        ),
+        ("Crit", "Laugh"): Time(
+            time: 0.1,
+        ),
+        ("Crit", "Reload"): Time(
+            time: 0.1,
+        ),
+        ("Crit", "ReloadRecoil"): Time(
+            time: 0.1,
+        ),
+        ("Crit", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Crit", "RunBase"): Time(
+            time: 0.1,
+        ),
+        ("Crit", "RunFast"): Time(
+            time: 0.1,
+        ),
+        ("Crit", "RunPassive"): Time(
+            time: 0.1,
+        ),
+        ("Crit", "Spell2"): Time(
+            time: 0.1,
+        ),
+        ("Crit", "Spell4"): Time(
+            time: 0.1,
+        ),
+        ("Crit", "Taunt"): Time(
+            time: 0.1,
+        ),
+        ("Crit", "Unk0x220f1ff5"): Time(
+            time: 0.1,
+        ),
+        ("DanceIn", "Attack1"): Time(
+            time: 0.05,
+        ),
+        ("DanceIn", "Attack2"): Time(
+            time: 0.05,
+        ),
+        ("DanceIn", "Attack3"): Time(
+            time: 0.05,
+        ),
+        ("DanceIn", "Attack4"): Time(
+            time: 0.05,
+        ),
+        ("DanceIn", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("DanceIn", "Reload"): Time(
+            time: 0.1,
+        ),
+        ("DanceIn", "ReloadRecoil"): Time(
+            time: 0.1,
+        ),
+        ("DanceIn", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("DanceLoop", "Attack1"): Time(
+            time: 0.05,
+        ),
+        ("DanceLoop", "Attack2"): Time(
+            time: 0.05,
+        ),
+        ("DanceLoop", "Attack3"): Time(
+            time: 0.05,
+        ),
+        ("DanceLoop", "Attack4"): Time(
+            time: 0.05,
+        ),
+        ("DanceLoop", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("DanceLoop", "Reload"): Time(
+            time: 0.1,
+        ),
+        ("DanceLoop", "ReloadRecoil"): Time(
+            time: 0.1,
+        ),
+        ("DanceLoop", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Death", "Attack1"): Time(
+            time: 0.05,
+        ),
+        ("Death", "Attack2"): Time(
+            time: 0.05,
+        ),
+        ("Death", "Attack3"): Time(
+            time: 0.05,
+        ),
+        ("Death", "Attack4"): Time(
+            time: 0.05,
+        ),
+        ("Death", "Reload"): Time(
+            time: 0.1,
+        ),
+        ("Death", "ReloadRecoil"): Time(
+            time: 0.1,
+        ),
+        ("Death", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("IdleBase", "Attack1"): Time(
+            time: 0.05,
+        ),
+        ("IdleBase", "Attack2"): Time(
+            time: 0.05,
+        ),
+        ("IdleBase", "Attack3"): Time(
+            time: 0.05,
+        ),
+        ("IdleBase", "Attack4"): Time(
+            time: 0.05,
+        ),
+        ("IdleBase", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("IdleBase", "Reload"): Time(
+            time: 0.1,
+        ),
+        ("IdleBase", "ReloadRecoil"): Time(
+            time: 0.1,
+        ),
+        ("IdleBase", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("IdleIn", "Attack1"): Time(
+            time: 0.05,
+        ),
+        ("IdleIn", "Attack2"): Time(
+            time: 0.05,
+        ),
+        ("IdleIn", "Attack3"): Time(
+            time: 0.05,
+        ),
+        ("IdleIn", "Attack4"): Time(
+            time: 0.05,
+        ),
+        ("IdleIn", "IdleBase"): Time(
+            time: 0.5,
+        ),
+        ("IdleIn", "Reload"): Time(
+            time: 0.1,
+        ),
+        ("IdleIn", "ReloadRecoil"): Time(
+            time: 0.1,
+        ),
+        ("IdleIn", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Joke", "Attack1"): Time(
+            time: 0.05,
+        ),
+        ("Joke", "Attack2"): Time(
+            time: 0.05,
+        ),
+        ("Joke", "Attack3"): Time(
+            time: 0.05,
+        ),
+        ("Joke", "Attack4"): Time(
+            time: 0.05,
+        ),
+        ("Joke", "Reload"): Time(
+            time: 0.1,
+        ),
+        ("Joke", "ReloadRecoil"): Time(
+            time: 0.1,
+        ),
+        ("Joke", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Laugh", "Attack1"): Time(
+            time: 0.05,
+        ),
+        ("Laugh", "Attack2"): Time(
+            time: 0.05,
+        ),
+        ("Laugh", "Attack3"): Time(
+            time: 0.05,
+        ),
+        ("Laugh", "Attack4"): Time(
+            time: 0.05,
+        ),
+        ("Laugh", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("Laugh", "Reload"): Time(
+            time: 0.1,
+        ),
+        ("Laugh", "ReloadRecoil"): Time(
+            time: 0.1,
+        ),
+        ("Laugh", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Attack1"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Attack2"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Attack3"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Attack4"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Channel"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "ChannelWndup"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Crit"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "IdleBase"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "IdleIn"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Joke"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Laugh"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Recall"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Reload"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "ReloadRecoil"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "RunBase"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "RunFast"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "RunHaste"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "RunInjured"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "RunPassive"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "RunSlow"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Spell2"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Spell2ToRun"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Spell3"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Spell3ToRun"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Spell4Idle"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Spell4ToRun"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Taunt"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Unk0x220f1ff5"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Unk0xa6df5992"): Time(
+            time: 0.0,
+        ),
+        ("RecallWinddown", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Reload", "Attack1"): Time(
+            time: 0.05,
+        ),
+        ("Reload", "Attack2"): Time(
+            time: 0.05,
+        ),
+        ("Reload", "Attack3"): Time(
+            time: 0.05,
+        ),
+        ("Reload", "Attack4"): Time(
+            time: 0.05,
+        ),
+        ("Reload", "Channel"): Time(
+            time: 0.1,
+        ),
+        ("Reload", "ChannelWndup"): Time(
+            time: 0.1,
+        ),
+        ("Reload", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("Reload", "DanceIn"): Time(
+            time: 0.1,
+        ),
+        ("Reload", "DanceLoop"): Time(
+            time: 0.1,
+        ),
+        ("Reload", "IdleBase"): Time(
+            time: 0.1,
+        ),
+        ("Reload", "Laugh"): Time(
+            time: 0.1,
+        ),
+        ("Reload", "Reload"): Time(
+            time: 0.1,
+        ),
+        ("Reload", "ReloadRecoil"): Time(
+            time: 0.1,
+        ),
+        ("Reload", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Reload", "Spell2"): Time(
+            time: 0.1,
+        ),
+        ("Reload", "Spell4"): Time(
+            time: 0.1,
+        ),
+        ("Reload", "Taunt"): Time(
+            time: 0.1,
+        ),
+        ("Reload", "Unk0x220f1ff5"): Time(
+            time: 0.1,
+        ),
+        ("ReloadRecoil", "Attack1"): Time(
+            time: 0.05,
+        ),
+        ("ReloadRecoil", "Attack2"): Time(
+            time: 0.05,
+        ),
+        ("ReloadRecoil", "Attack3"): Time(
+            time: 0.05,
+        ),
+        ("ReloadRecoil", "Attack4"): Time(
+            time: 0.05,
+        ),
+        ("ReloadRecoil", "Reload"): Time(
+            time: 0.1,
+        ),
+        ("ReloadRecoil", "ReloadRecoil"): Time(
+            time: 0.1,
+        ),
+        ("ReloadRecoil", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("ReloadRecoil", "RunBase"): Time(
+            time: 0.3,
+        ),
+        ("ReloadRecoil", "RunFast"): Time(
+            time: 0.3,
+        ),
+        ("ReloadRecoil", "RunHaste"): Time(
+            time: 0.3,
+        ),
+        ("ReloadRecoil", "RunInjured"): Time(
+            time: 0.3,
+        ),
+        ("ReloadRecoil", "RunPassive"): Time(
+            time: 0.3,
+        ),
+        ("ReloadRecoil", "RunSlow"): Time(
+            time: 0.3,
+        ),
+        ("Respawn", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("RunBase", "Attack1"): Time(
+            time: 0.05,
+        ),
+        ("RunBase", "Attack2"): Time(
+            time: 0.05,
+        ),
+        ("RunBase", "Attack3"): Time(
+            time: 0.05,
+        ),
+        ("RunBase", "Attack4"): Time(
+            time: 0.05,
+        ),
+        ("RunBase", "Channel"): Time(
+            time: 0.1,
+        ),
+        ("RunBase", "ChannelWndup"): Time(
+            time: 0.1,
+        ),
+        ("RunBase", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("RunBase", "DanceIn"): Time(
+            time: 0.1,
+        ),
+        ("RunBase", "DanceLoop"): Time(
+            time: 0.1,
+        ),
+        ("RunBase", "IdleBase"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("RunBase", "IdleIn"): Time(
+            time: 0.1,
+        ),
+        ("RunBase", "Laugh"): Time(
+            time: 0.1,
+        ),
+        ("RunBase", "Reload"): Time(
+            time: 0.1,
+        ),
+        ("RunBase", "ReloadRecoil"): Time(
+            time: 0.1,
+        ),
+        ("RunBase", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("RunBase", "Spell2"): Time(
+            time: 0.1,
+        ),
+        ("RunBase", "Spell4"): Time(
+            time: 0.1,
+        ),
+        ("RunBase", "Taunt"): Time(
+            time: 0.1,
+        ),
+        ("RunBase", "Unk0x220f1ff5"): Time(
+            time: 0.1,
+        ),
+        ("RunFast", "Attack1"): Time(
+            time: 0.05,
+        ),
+        ("RunFast", "Attack2"): Time(
+            time: 0.05,
+        ),
+        ("RunFast", "Attack3"): Time(
+            time: 0.05,
+        ),
+        ("RunFast", "Attack4"): Time(
+            time: 0.05,
+        ),
+        ("RunFast", "Channel"): Time(
+            time: 0.1,
+        ),
+        ("RunFast", "ChannelWndup"): Time(
+            time: 0.1,
+        ),
+        ("RunFast", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("RunFast", "DanceIn"): Time(
+            time: 0.1,
+        ),
+        ("RunFast", "DanceLoop"): Time(
+            time: 0.1,
+        ),
+        ("RunFast", "IdleBase"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("RunFast", "IdleIn"): Time(
+            time: 0.3,
+        ),
+        ("RunFast", "Laugh"): Time(
+            time: 0.1,
+        ),
+        ("RunFast", "Reload"): Time(
+            time: 0.1,
+        ),
+        ("RunFast", "ReloadRecoil"): Time(
+            time: 0.1,
+        ),
+        ("RunFast", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("RunFast", "Spell2"): Time(
+            time: 0.1,
+        ),
+        ("RunFast", "Spell4"): Time(
+            time: 0.1,
+        ),
+        ("RunFast", "Taunt"): Time(
+            time: 0.1,
+        ),
+        ("RunFast", "Unk0x220f1ff5"): Time(
+            time: 0.1,
+        ),
+        ("RunHaste", "Attack1"): Time(
+            time: 0.05,
+        ),
+        ("RunHaste", "Attack2"): Time(
+            time: 0.05,
+        ),
+        ("RunHaste", "Attack3"): Time(
+            time: 0.05,
+        ),
+        ("RunHaste", "Attack4"): Time(
+            time: 0.05,
+        ),
+        ("RunHaste", "IdleBase"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("RunHaste", "IdleIn"): Time(
+            time: 0.3,
+        ),
+        ("RunHaste", "Reload"): Time(
+            time: 0.1,
+        ),
+        ("RunHaste", "ReloadRecoil"): Time(
+            time: 0.1,
+        ),
+        ("RunHaste", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("RunHaste", "Unk0x220f1ff5"): TransitionClip(
+            clip_name: "Spell4ToRun",
+        ),
+        ("RunInjured", "Attack1"): Time(
+            time: 0.05,
+        ),
+        ("RunInjured", "Attack2"): Time(
+            time: 0.05,
+        ),
+        ("RunInjured", "Attack3"): Time(
+            time: 0.05,
+        ),
+        ("RunInjured", "Attack4"): Time(
+            time: 0.05,
+        ),
+        ("RunInjured", "IdleBase"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("RunInjured", "IdleIn"): Time(
+            time: 0.3,
+        ),
+        ("RunInjured", "Reload"): Time(
+            time: 0.1,
+        ),
+        ("RunInjured", "ReloadRecoil"): Time(
+            time: 0.1,
+        ),
+        ("RunInjured", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("RunPassive", "Attack1"): Time(
+            time: 0.05,
+        ),
+        ("RunPassive", "Attack2"): Time(
+            time: 0.05,
+        ),
+        ("RunPassive", "Attack3"): Time(
+            time: 0.05,
+        ),
+        ("RunPassive", "Attack4"): Time(
+            time: 0.05,
+        ),
+        ("RunPassive", "Channel"): Time(
+            time: 0.0,
+        ),
+        ("RunPassive", "ChannelWndup"): Time(
+            time: 0.0,
+        ),
+        ("RunPassive", "Crit"): Time(
+            time: 0.0,
+        ),
+        ("RunPassive", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("RunPassive", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("RunPassive", "IdleBase"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("RunPassive", "IdleIn"): Time(
+            time: 0.3,
+        ),
+        ("RunPassive", "Laugh"): Time(
+            time: 0.0,
+        ),
+        ("RunPassive", "Reload"): Time(
+            time: 0.1,
+        ),
+        ("RunPassive", "ReloadRecoil"): Time(
+            time: 0.1,
+        ),
+        ("RunPassive", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("RunPassive", "Spell2"): Time(
+            time: 0.0,
+        ),
+        ("RunPassive", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("RunPassive", "Taunt"): Time(
+            time: 0.0,
+        ),
+        ("RunPassive", "Unk0x220f1ff5"): Time(
+            time: 0.0,
+        ),
+        ("RunSlow", "Attack1"): Time(
+            time: 0.05,
+        ),
+        ("RunSlow", "Attack2"): Time(
+            time: 0.05,
+        ),
+        ("RunSlow", "Attack3"): Time(
+            time: 0.05,
+        ),
+        ("RunSlow", "Attack4"): Time(
+            time: 0.05,
+        ),
+        ("RunSlow", "IdleBase"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("RunSlow", "IdleIn"): Time(
+            time: 0.3,
+        ),
+        ("RunSlow", "Reload"): Time(
+            time: 0.1,
+        ),
+        ("RunSlow", "ReloadRecoil"): Time(
+            time: 0.1,
+        ),
+        ("RunSlow", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Spell1", "Attack1"): Time(
+            time: 0.05,
+        ),
+        ("Spell1", "Attack2"): Time(
+            time: 0.05,
+        ),
+        ("Spell1", "Attack3"): Time(
+            time: 0.05,
+        ),
+        ("Spell1", "Attack4"): Time(
+            time: 0.05,
+        ),
+        ("Spell1", "Channel"): Time(
+            time: 0.1,
+        ),
+        ("Spell1", "ChannelWndup"): Time(
+            time: 0.1,
+        ),
+        ("Spell1", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("Spell1", "DanceIn"): Time(
+            time: 0.1,
+        ),
+        ("Spell1", "DanceLoop"): Time(
+            time: 0.1,
+        ),
+        ("Spell1", "Death"): Time(
+            time: 0.1,
+        ),
+        ("Spell1", "IdleBase"): Time(
+            time: 0.1,
+        ),
+        ("Spell1", "IdleIn"): Time(
+            time: 0.1,
+        ),
+        ("Spell1", "Joke"): Time(
+            time: 0.1,
+        ),
+        ("Spell1", "Laugh"): Time(
+            time: 0.1,
+        ),
+        ("Spell1", "Recall"): Time(
+            time: 0.1,
+        ),
+        ("Spell1", "Reload"): Time(
+            time: 0.1,
+        ),
+        ("Spell1", "ReloadRecoil"): Time(
+            time: 0.1,
+        ),
+        ("Spell1", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Spell1", "RunBase"): Time(
+            time: 0.1,
+        ),
+        ("Spell1", "RunFast"): Time(
+            time: 0.1,
+        ),
+        ("Spell1", "RunHaste"): Time(
+            time: 0.1,
+        ),
+        ("Spell1", "RunInjured"): Time(
+            time: 0.1,
+        ),
+        ("Spell1", "RunPassive"): Time(
+            time: 0.1,
+        ),
+        ("Spell1", "RunSlow"): Time(
+            time: 0.1,
+        ),
+        ("Spell1", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Spell1", "Spell2"): Time(
+            time: 0.1,
+        ),
+        ("Spell1", "Spell2ToRun"): Time(
+            time: 0.1,
+        ),
+        ("Spell1", "Spell3"): Time(
+            time: 0.1,
+        ),
+        ("Spell1", "Spell4"): Time(
+            time: 0.1,
+        ),
+        ("Spell1", "Spell4Idle"): Time(
+            time: 0.1,
+        ),
+        ("Spell1", "Taunt"): Time(
+            time: 0.1,
+        ),
+        ("Spell1", "Unk0x220f1ff5"): Time(
+            time: 0.1,
+        ),
+        ("Spell1", "Unk0xa6df5992"): Time(
+            time: 0.1,
+        ),
+        ("Spell2", "Attack1"): Time(
+            time: 0.05,
+        ),
+        ("Spell2", "Attack2"): Time(
+            time: 0.05,
+        ),
+        ("Spell2", "Attack3"): Time(
+            time: 0.05,
+        ),
+        ("Spell2", "Attack4"): Time(
+            time: 0.05,
+        ),
+        ("Spell2", "Channel"): Time(
+            time: 0.05,
+        ),
+        ("Spell2", "ChannelWndup"): Time(
+            time: 0.05,
+        ),
+        ("Spell2", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("Spell2", "DanceIn"): Time(
+            time: 0.05,
+        ),
+        ("Spell2", "DanceLoop"): Time(
+            time: 0.05,
+        ),
+        ("Spell2", "Death"): Time(
+            time: 0.05,
+        ),
+        ("Spell2", "IdleBase"): Time(
+            time: 0.05,
+        ),
+        ("Spell2", "IdleIn"): Time(
+            time: 0.05,
+        ),
+        ("Spell2", "Joke"): Time(
+            time: 0.05,
+        ),
+        ("Spell2", "Laugh"): Time(
+            time: 0.05,
+        ),
+        ("Spell2", "Recall"): Time(
+            time: 0.05,
+        ),
+        ("Spell2", "Reload"): Time(
+            time: 0.1,
+        ),
+        ("Spell2", "ReloadRecoil"): Time(
+            time: 0.1,
+        ),
+        ("Spell2", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Spell2", "RunBase"): TransitionClip(
+            clip_name: "Spell2ToRun",
+        ),
+        ("Spell2", "RunFast"): TransitionClip(
+            clip_name: "Spell2ToRun",
+        ),
+        ("Spell2", "RunHaste"): TransitionClip(
+            clip_name: "Spell2ToRun",
+        ),
+        ("Spell2", "RunInjured"): Time(
+            time: 0.05,
+        ),
+        ("Spell2", "RunPassive"): TransitionClip(
+            clip_name: "Spell2ToRun",
+        ),
+        ("Spell2", "RunSlow"): TransitionClip(
+            clip_name: "Spell2ToRun",
+        ),
+        ("Spell2", "Spell1"): Time(
+            time: 0.05,
+        ),
+        ("Spell2", "Spell2"): Time(
+            time: 0.05,
+        ),
+        ("Spell2", "Spell2ToRun"): Time(
+            time: 0.05,
+        ),
+        ("Spell2", "Spell3"): Time(
+            time: 0.05,
+        ),
+        ("Spell2", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("Spell2", "Spell4Idle"): Time(
+            time: 0.05,
+        ),
+        ("Spell2", "Taunt"): Time(
+            time: 0.05,
+        ),
+        ("Spell2", "Unk0x220f1ff5"): Time(
+            time: 0.05,
+        ),
+        ("Spell2", "Unk0xa6df5992"): Time(
+            time: 0.05,
+        ),
+        ("Spell2ToRun", "Attack1"): Time(
+            time: 0.05,
+        ),
+        ("Spell2ToRun", "Attack2"): Time(
+            time: 0.05,
+        ),
+        ("Spell2ToRun", "Attack3"): Time(
+            time: 0.05,
+        ),
+        ("Spell2ToRun", "Attack4"): Time(
+            time: 0.05,
+        ),
+        ("Spell2ToRun", "Channel"): Time(
+            time: 0.15,
+        ),
+        ("Spell2ToRun", "ChannelWndup"): Time(
+            time: 0.15,
+        ),
+        ("Spell2ToRun", "Crit"): Time(
+            time: 0.15,
+        ),
+        ("Spell2ToRun", "DanceIn"): Time(
+            time: 0.15,
+        ),
+        ("Spell2ToRun", "DanceLoop"): Time(
+            time: 0.15,
+        ),
+        ("Spell2ToRun", "Death"): Time(
+            time: 0.15,
+        ),
+        ("Spell2ToRun", "IdleBase"): Time(
+            time: 0.15,
+        ),
+        ("Spell2ToRun", "IdleIn"): Time(
+            time: 0.15,
+        ),
+        ("Spell2ToRun", "Joke"): Time(
+            time: 0.15,
+        ),
+        ("Spell2ToRun", "Laugh"): Time(
+            time: 0.15,
+        ),
+        ("Spell2ToRun", "Recall"): Time(
+            time: 0.15,
+        ),
+        ("Spell2ToRun", "Reload"): Time(
+            time: 0.1,
+        ),
+        ("Spell2ToRun", "ReloadRecoil"): Time(
+            time: 0.1,
+        ),
+        ("Spell2ToRun", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Spell2ToRun", "RunBase"): Time(
+            time: 0.15,
+        ),
+        ("Spell2ToRun", "RunFast"): Time(
+            time: 0.15,
+        ),
+        ("Spell2ToRun", "RunHaste"): Time(
+            time: 0.15,
+        ),
+        ("Spell2ToRun", "RunInjured"): Time(
+            time: 0.15,
+        ),
+        ("Spell2ToRun", "RunPassive"): Time(
+            time: 0.15,
+        ),
+        ("Spell2ToRun", "RunSlow"): Time(
+            time: 0.15,
+        ),
+        ("Spell2ToRun", "Spell1"): Time(
+            time: 0.15,
+        ),
+        ("Spell2ToRun", "Spell2"): Time(
+            time: 0.15,
+        ),
+        ("Spell2ToRun", "Spell2ToRun"): Time(
+            time: 0.15,
+        ),
+        ("Spell2ToRun", "Spell3"): Time(
+            time: 0.15,
+        ),
+        ("Spell2ToRun", "Spell3ToRun"): Time(
+            time: 0.15,
+        ),
+        ("Spell2ToRun", "Spell4"): Time(
+            time: 0.15,
+        ),
+        ("Spell2ToRun", "Spell4Idle"): Time(
+            time: 0.15,
+        ),
+        ("Spell2ToRun", "Spell4ToRun"): Time(
+            time: 0.15,
+        ),
+        ("Spell2ToRun", "Taunt"): Time(
+            time: 0.15,
+        ),
+        ("Spell2ToRun", "Unk0x220f1ff5"): Time(
+            time: 0.15,
+        ),
+        ("Spell2ToRun", "Unk0xa6df5992"): Time(
+            time: 0.15,
+        ),
+        ("Spell3", "Attack1"): Time(
+            time: 0.05,
+        ),
+        ("Spell3", "Attack2"): Time(
+            time: 0.05,
+        ),
+        ("Spell3", "Attack3"): Time(
+            time: 0.05,
+        ),
+        ("Spell3", "Attack4"): Time(
+            time: 0.05,
+        ),
+        ("Spell3", "Channel"): Time(
+            time: 0.05,
+        ),
+        ("Spell3", "ChannelWndup"): Time(
+            time: 0.05,
+        ),
+        ("Spell3", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("Spell3", "DanceIn"): Time(
+            time: 0.05,
+        ),
+        ("Spell3", "DanceLoop"): Time(
+            time: 0.05,
+        ),
+        ("Spell3", "Death"): Time(
+            time: 0.05,
+        ),
+        ("Spell3", "IdleBase"): Time(
+            time: 0.05,
+        ),
+        ("Spell3", "IdleIn"): Time(
+            time: 0.05,
+        ),
+        ("Spell3", "Joke"): Time(
+            time: 0.05,
+        ),
+        ("Spell3", "Laugh"): Time(
+            time: 0.05,
+        ),
+        ("Spell3", "Recall"): Time(
+            time: 0.05,
+        ),
+        ("Spell3", "Reload"): Time(
+            time: 0.1,
+        ),
+        ("Spell3", "ReloadRecoil"): Time(
+            time: 0.1,
+        ),
+        ("Spell3", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Spell3", "RunBase"): TransitionClip(
+            clip_name: "Spell3ToRun",
+        ),
+        ("Spell3", "RunFast"): TransitionClip(
+            clip_name: "Spell3ToRun",
+        ),
+        ("Spell3", "RunHaste"): TransitionClip(
+            clip_name: "Spell3ToRun",
+        ),
+        ("Spell3", "RunInjured"): Time(
+            time: 0.05,
+        ),
+        ("Spell3", "RunPassive"): TransitionClip(
+            clip_name: "Spell3ToRun",
+        ),
+        ("Spell3", "RunSlow"): TransitionClip(
+            clip_name: "Spell3ToRun",
+        ),
+        ("Spell3", "Spell1"): Time(
+            time: 0.05,
+        ),
+        ("Spell3", "Spell2"): Time(
+            time: 0.05,
+        ),
+        ("Spell3", "Spell2ToRun"): Time(
+            time: 0.05,
+        ),
+        ("Spell3", "Spell3"): Time(
+            time: 0.05,
+        ),
+        ("Spell3", "Spell3ToRun"): Time(
+            time: 0.05,
+        ),
+        ("Spell3", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("Spell3", "Spell4Idle"): Time(
+            time: 0.05,
+        ),
+        ("Spell3", "Taunt"): Time(
+            time: 0.05,
+        ),
+        ("Spell3", "Unk0x220f1ff5"): Time(
+            time: 0.05,
+        ),
+        ("Spell3", "Unk0xa6df5992"): Time(
+            time: 0.05,
+        ),
+        ("Spell3ToRun", "Attack1"): Time(
+            time: 0.05,
+        ),
+        ("Spell3ToRun", "Attack2"): Time(
+            time: 0.05,
+        ),
+        ("Spell3ToRun", "Attack3"): Time(
+            time: 0.05,
+        ),
+        ("Spell3ToRun", "Attack4"): Time(
+            time: 0.05,
+        ),
+        ("Spell3ToRun", "Channel"): Time(
+            time: 0.1,
+        ),
+        ("Spell3ToRun", "ChannelWndup"): Time(
+            time: 0.1,
+        ),
+        ("Spell3ToRun", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("Spell3ToRun", "DanceIn"): Time(
+            time: 0.1,
+        ),
+        ("Spell3ToRun", "DanceLoop"): Time(
+            time: 0.1,
+        ),
+        ("Spell3ToRun", "Death"): Time(
+            time: 0.1,
+        ),
+        ("Spell3ToRun", "IdleBase"): Time(
+            time: 0.1,
+        ),
+        ("Spell3ToRun", "IdleIn"): Time(
+            time: 0.1,
+        ),
+        ("Spell3ToRun", "Joke"): Time(
+            time: 0.1,
+        ),
+        ("Spell3ToRun", "Laugh"): Time(
+            time: 0.1,
+        ),
+        ("Spell3ToRun", "Recall"): Time(
+            time: 0.1,
+        ),
+        ("Spell3ToRun", "Reload"): Time(
+            time: 0.1,
+        ),
+        ("Spell3ToRun", "ReloadRecoil"): Time(
+            time: 0.1,
+        ),
+        ("Spell3ToRun", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Spell3ToRun", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Spell3ToRun", "Spell2"): Time(
+            time: 0.1,
+        ),
+        ("Spell3ToRun", "Spell2ToRun"): Time(
+            time: 0.1,
+        ),
+        ("Spell3ToRun", "Spell3"): Time(
+            time: 0.1,
+        ),
+        ("Spell3ToRun", "Spell3ToRun"): Time(
+            time: 0.1,
+        ),
+        ("Spell3ToRun", "Spell4"): Time(
+            time: 0.1,
+        ),
+        ("Spell3ToRun", "Spell4Idle"): Time(
+            time: 0.1,
+        ),
+        ("Spell3ToRun", "Spell4ToRun"): Time(
+            time: 0.1,
+        ),
+        ("Spell3ToRun", "Taunt"): Time(
+            time: 0.1,
+        ),
+        ("Spell3ToRun", "Unk0x220f1ff5"): Time(
+            time: 0.1,
+        ),
+        ("Spell3ToRun", "Unk0xa6df5992"): Time(
+            time: 0.1,
+        ),
+        ("Spell4", "Attack1"): Time(
+            time: 0.05,
+        ),
+        ("Spell4", "Attack2"): Time(
+            time: 0.05,
+        ),
+        ("Spell4", "Attack3"): Time(
+            time: 0.05,
+        ),
+        ("Spell4", "Attack4"): Time(
+            time: 0.05,
+        ),
+        ("Spell4", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell4", "IdleBase"): TransitionClip(
+            clip_name: "Spell4ToRun",
+        ),
+        ("Spell4", "Reload"): Time(
+            time: 0.1,
+        ),
+        ("Spell4", "ReloadRecoil"): Time(
+            time: 0.1,
+        ),
+        ("Spell4", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Spell4", "RunBase"): TransitionClip(
+            clip_name: "Spell4ToRun",
+        ),
+        ("Spell4", "RunFast"): TransitionClip(
+            clip_name: "Spell4ToRun",
+        ),
+        ("Spell4", "RunHaste"): TransitionClip(
+            clip_name: "Spell4ToRun",
+        ),
+        ("Spell4", "RunPassive"): TransitionClip(
+            clip_name: "Spell4ToRun",
+        ),
+        ("Spell4", "RunSlow"): TransitionClip(
+            clip_name: "Spell4ToRun",
+        ),
+        ("Spell4", "Spell4"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Idle", "Attack1"): Time(
+            time: 0.15,
+        ),
+        ("Spell4Idle", "Attack2"): Time(
+            time: 0.15,
+        ),
+        ("Spell4Idle", "Attack3"): Time(
+            time: 0.15,
+        ),
+        ("Spell4Idle", "Attack4"): Time(
+            time: 0.15,
+        ),
+        ("Spell4Idle", "Channel"): Time(
+            time: 0.15,
+        ),
+        ("Spell4Idle", "ChannelWndup"): Time(
+            time: 0.15,
+        ),
+        ("Spell4Idle", "Crit"): Time(
+            time: 0.15,
+        ),
+        ("Spell4Idle", "DanceIn"): Time(
+            time: 0.15,
+        ),
+        ("Spell4Idle", "DanceLoop"): Time(
+            time: 0.15,
+        ),
+        ("Spell4Idle", "Death"): Time(
+            time: 0.15,
+        ),
+        ("Spell4Idle", "IdleBase"): TransitionClip(
+            clip_name: "Spell4ToRun",
+        ),
+        ("Spell4Idle", "IdleIn"): Time(
+            time: 0.15,
+        ),
+        ("Spell4Idle", "Joke"): Time(
+            time: 0.15,
+        ),
+        ("Spell4Idle", "Laugh"): Time(
+            time: 0.15,
+        ),
+        ("Spell4Idle", "Recall"): Time(
+            time: 0.15,
+        ),
+        ("Spell4Idle", "Reload"): Time(
+            time: 0.15,
+        ),
+        ("Spell4Idle", "ReloadRecoil"): Time(
+            time: 0.15,
+        ),
+        ("Spell4Idle", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Spell4Idle", "RunBase"): TransitionClip(
+            clip_name: "Spell4ToRun",
+        ),
+        ("Spell4Idle", "RunFast"): TransitionClip(
+            clip_name: "Spell4ToRun",
+        ),
+        ("Spell4Idle", "RunHaste"): TransitionClip(
+            clip_name: "Spell4ToRun",
+        ),
+        ("Spell4Idle", "RunInjured"): Time(
+            time: 0.15,
+        ),
+        ("Spell4Idle", "RunPassive"): TransitionClip(
+            clip_name: "Spell4ToRun",
+        ),
+        ("Spell4Idle", "RunSlow"): TransitionClip(
+            clip_name: "Spell4ToRun",
+        ),
+        ("Spell4Idle", "Spell1"): Time(
+            time: 0.15,
+        ),
+        ("Spell4Idle", "Spell2"): Time(
+            time: 0.15,
+        ),
+        ("Spell4Idle", "Spell2ToRun"): Time(
+            time: 0.15,
+        ),
+        ("Spell4Idle", "Spell3"): Time(
+            time: 0.15,
+        ),
+        ("Spell4Idle", "Spell3ToRun"): Time(
+            time: 0.15,
+        ),
+        ("Spell4Idle", "Spell4"): Time(
+            time: 0.15,
+        ),
+        ("Spell4Idle", "Spell4Idle"): Time(
+            time: 0.15,
+        ),
+        ("Spell4Idle", "Spell4ToRun"): Time(
+            time: 0.15,
+        ),
+        ("Spell4Idle", "Taunt"): Time(
+            time: 0.15,
+        ),
+        ("Spell4Idle", "Unk0x220f1ff5"): Time(
+            time: 0.15,
+        ),
+        ("Spell4Idle", "Unk0xa6df5992"): Time(
+            time: 0.15,
+        ),
+        ("Spell4ToRun", "Attack1"): Time(
+            time: 0.05,
+        ),
+        ("Spell4ToRun", "Attack2"): Time(
+            time: 0.05,
+        ),
+        ("Spell4ToRun", "Attack3"): Time(
+            time: 0.05,
+        ),
+        ("Spell4ToRun", "Attack4"): Time(
+            time: 0.05,
+        ),
+        ("Spell4ToRun", "Channel"): Time(
+            time: 0.1,
+        ),
+        ("Spell4ToRun", "ChannelWndup"): Time(
+            time: 0.1,
+        ),
+        ("Spell4ToRun", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("Spell4ToRun", "DanceIn"): Time(
+            time: 0.1,
+        ),
+        ("Spell4ToRun", "DanceLoop"): Time(
+            time: 0.1,
+        ),
+        ("Spell4ToRun", "Death"): Time(
+            time: 0.1,
+        ),
+        ("Spell4ToRun", "IdleBase"): Time(
+            time: 0.1,
+        ),
+        ("Spell4ToRun", "IdleIn"): Time(
+            time: 0.1,
+        ),
+        ("Spell4ToRun", "Joke"): Time(
+            time: 0.1,
+        ),
+        ("Spell4ToRun", "Laugh"): Time(
+            time: 0.1,
+        ),
+        ("Spell4ToRun", "Recall"): Time(
+            time: 0.1,
+        ),
+        ("Spell4ToRun", "Reload"): Time(
+            time: 0.1,
+        ),
+        ("Spell4ToRun", "ReloadRecoil"): Time(
+            time: 0.1,
+        ),
+        ("Spell4ToRun", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Spell4ToRun", "RunBase"): Time(
+            time: 0.1,
+        ),
+        ("Spell4ToRun", "RunFast"): Time(
+            time: 0.1,
+        ),
+        ("Spell4ToRun", "RunHaste"): Time(
+            time: 0.1,
+        ),
+        ("Spell4ToRun", "RunInjured"): Time(
+            time: 0.1,
+        ),
+        ("Spell4ToRun", "RunPassive"): Time(
+            time: 0.1,
+        ),
+        ("Spell4ToRun", "RunSlow"): Time(
+            time: 0.1,
+        ),
+        ("Spell4ToRun", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Spell4ToRun", "Spell2"): Time(
+            time: 0.1,
+        ),
+        ("Spell4ToRun", "Spell2ToRun"): Time(
+            time: 0.1,
+        ),
+        ("Spell4ToRun", "Spell3"): Time(
+            time: 0.1,
+        ),
+        ("Spell4ToRun", "Spell3ToRun"): Time(
+            time: 0.1,
+        ),
+        ("Spell4ToRun", "Spell4"): Time(
+            time: 0.1,
+        ),
+        ("Spell4ToRun", "Spell4Idle"): Time(
+            time: 0.1,
+        ),
+        ("Spell4ToRun", "Spell4ToRun"): Time(
+            time: 0.1,
+        ),
+        ("Spell4ToRun", "Taunt"): Time(
+            time: 0.1,
+        ),
+        ("Spell4ToRun", "Unk0x220f1ff5"): Time(
+            time: 0.1,
+        ),
+        ("Spell4ToRun", "Unk0xa6df5992"): Time(
+            time: 0.1,
+        ),
+        ("Taunt", "Attack1"): Time(
+            time: 0.05,
+        ),
+        ("Taunt", "Attack2"): Time(
+            time: 0.05,
+        ),
+        ("Taunt", "Attack3"): Time(
+            time: 0.05,
+        ),
+        ("Taunt", "Attack4"): Time(
+            time: 0.05,
+        ),
+        ("Taunt", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("Taunt", "Reload"): Time(
+            time: 0.1,
+        ),
+        ("Taunt", "ReloadRecoil"): Time(
+            time: 0.1,
+        ),
+        ("Taunt", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x220f1ff5", "Attack1"): Time(
+            time: 0.05,
+        ),
+        ("Unk0x220f1ff5", "Attack2"): Time(
+            time: 0.05,
+        ),
+        ("Unk0x220f1ff5", "Attack3"): Time(
+            time: 0.05,
+        ),
+        ("Unk0x220f1ff5", "Attack4"): Time(
+            time: 0.05,
+        ),
+        ("Unk0x220f1ff5", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x220f1ff5", "Reload"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x220f1ff5", "ReloadRecoil"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x220f1ff5", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xa6df5992", "Attack1"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xa6df5992", "Attack2"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xa6df5992", "Attack3"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xa6df5992", "Attack4"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xa6df5992", "Channel"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xa6df5992", "ChannelWndup"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xa6df5992", "Crit"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xa6df5992", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xa6df5992", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xa6df5992", "IdleBase"): TransitionClip(
+            clip_name: "Spell4ToRun",
+        ),
+        ("Unk0xa6df5992", "IdleIn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xa6df5992", "Joke"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xa6df5992", "Laugh"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xa6df5992", "Recall"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xa6df5992", "Reload"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xa6df5992", "ReloadRecoil"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xa6df5992", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xa6df5992", "RunBase"): TransitionClip(
+            clip_name: "Spell4ToRun",
+        ),
+        ("Unk0xa6df5992", "RunFast"): TransitionClip(
+            clip_name: "Spell4ToRun",
+        ),
+        ("Unk0xa6df5992", "RunHaste"): TransitionClip(
+            clip_name: "Spell4ToRun",
+        ),
+        ("Unk0xa6df5992", "RunInjured"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xa6df5992", "RunPassive"): TransitionClip(
+            clip_name: "Spell4ToRun",
+        ),
+        ("Unk0xa6df5992", "RunSlow"): TransitionClip(
+            clip_name: "Spell4ToRun",
+        ),
+        ("Unk0xa6df5992", "Spell2"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xa6df5992", "Spell2ToRun"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xa6df5992", "Spell3"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xa6df5992", "Spell4"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xa6df5992", "Spell4ToRun"): Time(
+            time: 0.15,
+        ),
+        ("Unk0xa6df5992", "Taunt"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xa6df5992", "Unk0x220f1ff5"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xa6df5992", "Unk0xa6df5992"): Time(
+            time: 0.1,
+        ),
+    },
+)

@@ -1,0 +1,615 @@
+(
+    gltf_path: "characters/sru_gromp/skins/skin0.glb",
+    hash_to_node: {
+        "Attack": Selector(
+            probably_nodes: [
+                (
+                    key: "Attack1",
+                    value: 1.0,
+                ),
+                (
+                    key: "Attack2",
+                    value: 1.0,
+                ),
+            ],
+        ),
+        "Attack1Left": Clip(
+            node_index: 24,
+        ),
+        "Attack1Mid": Clip(
+            node_index: 19,
+        ),
+        "Attack1Right": Clip(
+            node_index: 23,
+        ),
+        "Attack1bLeft": Clip(
+            node_index: 5,
+        ),
+        "Attack1bRight": Clip(
+            node_index: 20,
+        ),
+        "Death": Clip(
+            node_index: 14,
+        ),
+        "Idle1": ConditionFloat(
+            updater: LookAtInterestDistance,
+            conditions: [
+                (
+                    key: "Unk0x32b38b96",
+                    value: 0.0,
+                ),
+                (
+                    key: "Unk0x78a49bc0",
+                    value: 500.0,
+                ),
+            ],
+        ),
+        "Run": Clip(
+            node_index: 0,
+        ),
+        "Spawn": Sequence(
+            hashes: [
+                "Unk0xe4cb0f58",
+                "Unk0xeaadec65",
+                "Idle1",
+            ],
+        ),
+        "Unk0x16021d4f": Sequence(
+            hashes: [
+                "Unk0xc1859e94",
+                "Unk0xb6a527d3",
+            ],
+        ),
+        "Unk0x308b189f": Clip(
+            node_index: 1,
+        ),
+        "Unk0x31dc9e56": Clip(
+            node_index: 2,
+        ),
+        "Unk0x32b38b96": Parallel(
+            hashes: [
+                "Unk0x76cefaf0",
+                "Unk0x85572a11",
+            ],
+        ),
+        "Unk0x3cd6aa70": Sequence(
+            hashes: [
+                "Unk0x554e8c84",
+                "Unk0x31dc9e56",
+            ],
+        ),
+        "Unk0x419d82cf": Clip(
+            node_index: 3,
+        ),
+        "Unk0x48ca57fa": Clip(
+            node_index: 4,
+        ),
+        "Unk0x4d8a4fff": Sequence(
+            hashes: [
+                "Unk0x554f5315",
+                "Unk0x90c6bb8a",
+            ],
+        ),
+        "Unk0x554e8c84": Clip(
+            node_index: 6,
+        ),
+        "Unk0x554f5315": Clip(
+            node_index: 7,
+        ),
+        "Unk0x713be959": Parametric(
+            pairs: [
+                (
+                    key: "Attack1Left",
+                    value: -20.0,
+                ),
+                (
+                    key: "Attack1Mid",
+                    value: 0.0,
+                ),
+                (
+                    key: "Attack1Right",
+                    value: 20.0,
+                ),
+            ],
+        ),
+        "Unk0x76cefaf0": Selector(
+            probably_nodes: [
+                (
+                    key: "Unk0x16021d4f",
+                    value: 25.0,
+                ),
+                (
+                    key: "Unk0xec5a5b00",
+                    value: 25.0,
+                ),
+                (
+                    key: "Unk0x7708fb66",
+                    value: 20.0,
+                ),
+                (
+                    key: "Unk0xb6a527d3",
+                    value: 30.0,
+                ),
+            ],
+        ),
+        "Unk0x7708fb66": Clip(
+            node_index: 8,
+        ),
+        "Unk0x78a49bc0": Selector(
+            probably_nodes: [
+                (
+                    key: "Unk0x90c6bb8a",
+                    value: 25.0,
+                ),
+                (
+                    key: "Unk0x31dc9e56",
+                    value: 30.0,
+                ),
+                (
+                    key: "Unk0xc43b07a1",
+                    value: 25.0,
+                ),
+                (
+                    key: "Unk0x4d8a4fff",
+                    value: 15.0,
+                ),
+                (
+                    key: "Unk0x3cd6aa70",
+                    value: 10.0,
+                ),
+                (
+                    key: "Unk0x8139d6f9",
+                    value: 15.0,
+                ),
+            ],
+        ),
+        "Unk0x8139d6f9": Sequence(
+            hashes: [
+                "Unk0x308b189f",
+                "Unk0x90c6bb8a",
+            ],
+        ),
+        "Unk0x85572a11": Parametric(
+            pairs: [
+                (
+                    key: "Unk0x48ca57fa",
+                    value: -45.0,
+                ),
+                (
+                    key: "Unk0xa8658ee7",
+                    value: 0.0,
+                ),
+                (
+                    key: "Unk0x8efaa000",
+                    value: 45.0,
+                ),
+            ],
+        ),
+        "Unk0x8efaa000": Clip(
+            node_index: 9,
+        ),
+        "Unk0x90c6bb8a": Clip(
+            node_index: 10,
+        ),
+        "Unk0xa8658ee7": Clip(
+            node_index: 11,
+        ),
+        "Unk0xa8cc186b": Clip(
+            node_index: 12,
+        ),
+        "Unk0xb6a527d3": Clip(
+            node_index: 13,
+        ),
+        "Unk0xc1859e94": Clip(
+            node_index: 15,
+        ),
+        "Unk0xc43b07a1": Clip(
+            node_index: 16,
+        ),
+        "Unk0xcadb534d": Clip(
+            node_index: 17,
+        ),
+        "Unk0xd227b3d3": Clip(
+            node_index: 18,
+        ),
+        "Unk0xd36438f5": Parallel(
+            hashes: [
+                "Unk0x713be959",
+                "Unk0xcadb534d",
+            ],
+        ),
+        "Unk0xe07930da": Parametric(
+            pairs: [
+                (
+                    key: "Attack1bLeft",
+                    value: -20.0,
+                ),
+                (
+                    key: "Unk0xd227b3d3",
+                    value: 0.0,
+                ),
+                (
+                    key: "Attack1bRight",
+                    value: 20.0,
+                ),
+            ],
+        ),
+        "Unk0xe4cb0f58": Clip(
+            node_index: 21,
+        ),
+        "Unk0xeaadec65": Clip(
+            node_index: 22,
+        ),
+        "Unk0xec5a5b00": Sequence(
+            hashes: [
+                "Unk0xeaadec65",
+                "Unk0xb6a527d3",
+            ],
+        ),
+    },
+    blend_data: {
+        ("Attack1Left", "Attack1Left"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Left", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Mid", "Attack1Mid"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Mid", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Mid", "Unk0xd227b3d3"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Right", "Attack1Right"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Right", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Attack1bLeft", "Attack1bLeft"): Time(
+            time: 0.0,
+        ),
+        ("Attack1bLeft", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Attack1bRight", "Attack1bRight"): Time(
+            time: 0.0,
+        ),
+        ("Attack1bRight", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Death", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Idle1", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Run", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Run", "Run"): Time(
+            time: 0.0,
+        ),
+        ("Spawn", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x16021d4f", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x16021d4f", "Unk0x16021d4f"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x308b189f", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x308b189f", "Unk0x308b189f"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x308b189f", "Unk0x7708fb66"): TransitionClip(
+            clip_name: "Unk0xa8cc186b",
+        ),
+        ("Unk0x308b189f", "Unk0xb6a527d3"): TransitionClip(
+            clip_name: "Unk0xa8cc186b",
+        ),
+        ("Unk0x308b189f", "Unk0xc1859e94"): TransitionClip(
+            clip_name: "Unk0xa8cc186b",
+        ),
+        ("Unk0x308b189f", "Unk0xeaadec65"): TransitionClip(
+            clip_name: "Unk0xa8cc186b",
+        ),
+        ("Unk0x31dc9e56", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x31dc9e56", "Unk0x31dc9e56"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x31dc9e56", "Unk0x7708fb66"): TransitionClip(
+            clip_name: "Unk0xa8cc186b",
+        ),
+        ("Unk0x31dc9e56", "Unk0xb6a527d3"): TransitionClip(
+            clip_name: "Unk0xa8cc186b",
+        ),
+        ("Unk0x31dc9e56", "Unk0xc1859e94"): TransitionClip(
+            clip_name: "Unk0xa8cc186b",
+        ),
+        ("Unk0x31dc9e56", "Unk0xeaadec65"): TransitionClip(
+            clip_name: "Unk0xa8cc186b",
+        ),
+        ("Unk0x32b38b96", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x32b38b96", "Unk0x32b38b96"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x3cd6aa70", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x3cd6aa70", "Unk0x3cd6aa70"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x419d82cf", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x419d82cf", "Unk0x419d82cf"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x48ca57fa", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x48ca57fa", "Unk0x48ca57fa"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x4d8a4fff", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x4d8a4fff", "Unk0x4d8a4fff"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x554e8c84", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x554e8c84", "Unk0x554e8c84"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x554e8c84", "Unk0x7708fb66"): TransitionClip(
+            clip_name: "Unk0xa8cc186b",
+        ),
+        ("Unk0x554e8c84", "Unk0xb6a527d3"): TransitionClip(
+            clip_name: "Unk0xa8cc186b",
+        ),
+        ("Unk0x554e8c84", "Unk0xc1859e94"): TransitionClip(
+            clip_name: "Unk0xa8cc186b",
+        ),
+        ("Unk0x554e8c84", "Unk0xeaadec65"): TransitionClip(
+            clip_name: "Unk0xa8cc186b",
+        ),
+        ("Unk0x554f5315", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x554f5315", "Unk0x554f5315"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x554f5315", "Unk0x7708fb66"): TransitionClip(
+            clip_name: "Unk0xa8cc186b",
+        ),
+        ("Unk0x554f5315", "Unk0xb6a527d3"): TransitionClip(
+            clip_name: "Unk0xa8cc186b",
+        ),
+        ("Unk0x554f5315", "Unk0xc1859e94"): TransitionClip(
+            clip_name: "Unk0xa8cc186b",
+        ),
+        ("Unk0x554f5315", "Unk0xeaadec65"): TransitionClip(
+            clip_name: "Unk0xa8cc186b",
+        ),
+        ("Unk0x713be959", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x713be959", "Unk0x713be959"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x76cefaf0", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x76cefaf0", "Unk0x76cefaf0"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x7708fb66", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x7708fb66", "Unk0x308b189f"): TransitionClip(
+            clip_name: "Unk0x419d82cf",
+        ),
+        ("Unk0x7708fb66", "Unk0x554e8c84"): TransitionClip(
+            clip_name: "Unk0x419d82cf",
+        ),
+        ("Unk0x7708fb66", "Unk0x554f5315"): TransitionClip(
+            clip_name: "Unk0x419d82cf",
+        ),
+        ("Unk0x7708fb66", "Unk0x7708fb66"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x7708fb66", "Unk0x90c6bb8a"): TransitionClip(
+            clip_name: "Unk0x419d82cf",
+        ),
+        ("Unk0x78a49bc0", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x78a49bc0", "Unk0x78a49bc0"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x8139d6f9", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x8139d6f9", "Unk0x8139d6f9"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x85572a11", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x85572a11", "Unk0x85572a11"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x8efaa000", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x8efaa000", "Unk0x8efaa000"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x90c6bb8a", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x90c6bb8a", "Unk0x7708fb66"): TransitionClip(
+            clip_name: "Unk0xa8cc186b",
+        ),
+        ("Unk0x90c6bb8a", "Unk0x90c6bb8a"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x90c6bb8a", "Unk0xb6a527d3"): TransitionClip(
+            clip_name: "Unk0xa8cc186b",
+        ),
+        ("Unk0x90c6bb8a", "Unk0xc1859e94"): TransitionClip(
+            clip_name: "Unk0xa8cc186b",
+        ),
+        ("Unk0x90c6bb8a", "Unk0xeaadec65"): TransitionClip(
+            clip_name: "Unk0xa8cc186b",
+        ),
+        ("Unk0xa8658ee7", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xa8658ee7", "Unk0xa8658ee7"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xa8cc186b", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xa8cc186b", "Unk0xa8cc186b"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xb6a527d3", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xb6a527d3", "Unk0x308b189f"): TransitionClip(
+            clip_name: "Unk0x419d82cf",
+        ),
+        ("Unk0xb6a527d3", "Unk0x31dc9e56"): TransitionClip(
+            clip_name: "Unk0x419d82cf",
+        ),
+        ("Unk0xb6a527d3", "Unk0x554e8c84"): TransitionClip(
+            clip_name: "Unk0x419d82cf",
+        ),
+        ("Unk0xb6a527d3", "Unk0x554f5315"): TransitionClip(
+            clip_name: "Unk0x419d82cf",
+        ),
+        ("Unk0xb6a527d3", "Unk0x90c6bb8a"): TransitionClip(
+            clip_name: "Unk0x419d82cf",
+        ),
+        ("Unk0xb6a527d3", "Unk0xb6a527d3"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xb6a527d3", "Unk0xc43b07a1"): TransitionClip(
+            clip_name: "Unk0x419d82cf",
+        ),
+        ("Unk0xc1859e94", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xc1859e94", "Unk0x308b189f"): TransitionClip(
+            clip_name: "Unk0x419d82cf",
+        ),
+        ("Unk0xc1859e94", "Unk0x31dc9e56"): TransitionClip(
+            clip_name: "Unk0x419d82cf",
+        ),
+        ("Unk0xc1859e94", "Unk0x554e8c84"): TransitionClip(
+            clip_name: "Unk0x419d82cf",
+        ),
+        ("Unk0xc1859e94", "Unk0x554f5315"): TransitionClip(
+            clip_name: "Unk0x419d82cf",
+        ),
+        ("Unk0xc1859e94", "Unk0x90c6bb8a"): TransitionClip(
+            clip_name: "Unk0x419d82cf",
+        ),
+        ("Unk0xc1859e94", "Unk0xc1859e94"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xc1859e94", "Unk0xc43b07a1"): TransitionClip(
+            clip_name: "Unk0x419d82cf",
+        ),
+        ("Unk0xc43b07a1", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xc43b07a1", "Unk0x7708fb66"): TransitionClip(
+            clip_name: "Unk0xa8cc186b",
+        ),
+        ("Unk0xc43b07a1", "Unk0xb6a527d3"): TransitionClip(
+            clip_name: "Unk0xa8cc186b",
+        ),
+        ("Unk0xc43b07a1", "Unk0xc1859e94"): TransitionClip(
+            clip_name: "Unk0xa8cc186b",
+        ),
+        ("Unk0xc43b07a1", "Unk0xc43b07a1"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xc43b07a1", "Unk0xeaadec65"): TransitionClip(
+            clip_name: "Unk0xa8cc186b",
+        ),
+        ("Unk0xcadb534d", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xd227b3d3", "Attack1Mid"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xd227b3d3", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xd227b3d3", "Unk0xd227b3d3"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xd36438f5", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xe07930da", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xe07930da", "Unk0xe07930da"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xe4cb0f58", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xe4cb0f58", "Unk0xe4cb0f58"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xeaadec65", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xeaadec65", "Unk0x308b189f"): TransitionClip(
+            clip_name: "Unk0x419d82cf",
+        ),
+        ("Unk0xeaadec65", "Unk0x31dc9e56"): TransitionClip(
+            clip_name: "Unk0x419d82cf",
+        ),
+        ("Unk0xeaadec65", "Unk0x554e8c84"): TransitionClip(
+            clip_name: "Unk0x419d82cf",
+        ),
+        ("Unk0xeaadec65", "Unk0x554f5315"): TransitionClip(
+            clip_name: "Unk0x419d82cf",
+        ),
+        ("Unk0xeaadec65", "Unk0x90c6bb8a"): TransitionClip(
+            clip_name: "Unk0x419d82cf",
+        ),
+        ("Unk0xeaadec65", "Unk0xc43b07a1"): TransitionClip(
+            clip_name: "Unk0x419d82cf",
+        ),
+        ("Unk0xeaadec65", "Unk0xeaadec65"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xec5a5b00", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xec5a5b00", "Unk0xec5a5b00"): Time(
+            time: 0.0,
+        ),
+    },
+)

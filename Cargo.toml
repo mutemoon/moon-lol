@@ -78,13 +78,13 @@ crossbeam-channel.workspace = true
 image.workspace = true
 serde_json.workspace = true
 ron.workspace = true
+rayon.workspace = true
 
 walkdir = "2.5.0"
 
 [target.'cfg(not(target_arch = "wasm32"))'.dev-dependencies]
 rocket = { version = "*", features = ["json"] }
 rocket_cors = "0.6"
-rayon.workspace = true
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 wasm-bindgen-futures = "0.4"

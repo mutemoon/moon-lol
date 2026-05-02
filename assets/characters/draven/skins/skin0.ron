@@ -1,11 +1,12 @@
 (
   resources: {},
   entities: {
-    4294967265: (
+    4294967262: (
       components: {
+        "bevy_animation::graph::AnimationGraphHandle": (Path("characters/draven/animations/skin0.ron#animation_graph")),
         "bevy_camera::visibility::Visibility": Inherited,
         "bevy_world_serialization::components::WorldAssetRoot": (Path("characters/draven/skins/skin0.glb#Scene0")),
-        "lol_base::animation::LOLAnimationGraphHandler": (Path("characters/draven/animations/skin0.ron")),
+        "lol_base::animation::LOLAnimationGraphHandle": (Path("characters/draven/animations/skin0.ron")),
         "lol_base::character::HealthBar": (
           bar_type: 12,
         ),

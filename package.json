@@ -1,6 +1,7 @@
 {
   "name": "fsm-demo-rust",
   "scripts": {
+    "example": "cargo run --example",
     "extract": "cargo run --example extract",
     "fix": "cargo fix --allow-dirty --workspace",
     "format": "cargo +nightly fmt",

@@ -1,0 +1,622 @@
+(
+    gltf_path: "characters/darius/skins/skin0.glb",
+    hash_to_node: {
+        "Attack": Selector(
+            probably_nodes: [
+                (
+                    key: "Attack1",
+                    value: 1.0,
+                ),
+                (
+                    key: "Attack2",
+                    value: 1.0,
+                ),
+            ],
+        ),
+        "Attack1": Clip(
+            node_index: 5,
+        ),
+        "Attack2": Clip(
+            node_index: 6,
+        ),
+        "BasePose": Clip(
+            node_index: 4,
+        ),
+        "Channel": Clip(
+            node_index: 2,
+        ),
+        "ChannelWndup": Clip(
+            node_index: 12,
+        ),
+        "Crit": Clip(
+            node_index: 9,
+        ),
+        "Dance": Clip(
+            node_index: 22,
+        ),
+        "Death": Clip(
+            node_index: 19,
+        ),
+        "Idle1": Clip(
+            node_index: 11,
+        ),
+        "Idle2": Clip(
+            node_index: 10,
+        ),
+        "Joke": Clip(
+            node_index: 20,
+        ),
+        "Laugh": Clip(
+            node_index: 16,
+        ),
+        "Recall": Clip(
+            node_index: 7,
+        ),
+        "Run": Clip(
+            node_index: 3,
+        ),
+        "Spell1": Clip(
+            node_index: 13,
+        ),
+        "Spell1WindupBase": Clip(
+            node_index: 8,
+        ),
+        "Spell2": Clip(
+            node_index: 15,
+        ),
+        "Spell2Idle": Clip(
+            node_index: 21,
+        ),
+        "Spell2Run": Clip(
+            node_index: 0,
+        ),
+        "Spell3": Clip(
+            node_index: 14,
+        ),
+        "Spell4": Clip(
+            node_index: 17,
+        ),
+        "Taunt": Clip(
+            node_index: 18,
+        ),
+        "Unk0x1a24a1f0": Clip(
+            node_index: 1,
+        ),
+        "Unk0xa742331b": Parallel(
+            hashes: [
+                "Unk0x1a24a1f0",
+                "Spell1WindupBase",
+            ],
+        ),
+    },
+    blend_data: {
+        ("Attack1", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("Attack1", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Attack1", "Recall"): Time(
+            time: 0.1,
+        ),
+        ("Attack1", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("Attack1", "Spell2"): Time(
+            time: 0.0,
+        ),
+        ("Attack1", "Spell3"): Time(
+            time: 0.0,
+        ),
+        ("Attack1", "Spell4"): Time(
+            time: 0.15,
+        ),
+        ("Attack2", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("Attack2", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Attack2", "Recall"): Time(
+            time: 0.1,
+        ),
+        ("Attack2", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("Attack2", "Spell2"): Time(
+            time: 0.0,
+        ),
+        ("Attack2", "Spell3"): Time(
+            time: 0.0,
+        ),
+        ("Attack2", "Spell4"): Time(
+            time: 0.15,
+        ),
+        ("Channel", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("Channel", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Channel", "Recall"): Time(
+            time: 0.1,
+        ),
+        ("Channel", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("Channel", "Spell2"): Time(
+            time: 0.0,
+        ),
+        ("Channel", "Spell3"): Time(
+            time: 0.0,
+        ),
+        ("Channel", "Spell4"): Time(
+            time: 0.15,
+        ),
+        ("ChannelWndup", "ChannelWndup"): Time(
+            time: 0.0,
+        ),
+        ("ChannelWndup", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("ChannelWndup", "Death"): Time(
+            time: 0.0,
+        ),
+        ("ChannelWndup", "Recall"): Time(
+            time: 0.1,
+        ),
+        ("ChannelWndup", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("ChannelWndup", "Spell2"): Time(
+            time: 0.0,
+        ),
+        ("ChannelWndup", "Spell3"): Time(
+            time: 0.0,
+        ),
+        ("ChannelWndup", "Spell4"): Time(
+            time: 0.15,
+        ),
+        ("Crit", "ChannelWndup"): Time(
+            time: 0.0,
+        ),
+        ("Crit", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("Crit", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Crit", "Recall"): Time(
+            time: 0.1,
+        ),
+        ("Crit", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("Crit", "Spell2"): Time(
+            time: 0.0,
+        ),
+        ("Crit", "Spell3"): Time(
+            time: 0.0,
+        ),
+        ("Crit", "Spell4"): Time(
+            time: 0.15,
+        ),
+        ("Dance", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("Dance", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Dance", "Recall"): Time(
+            time: 0.1,
+        ),
+        ("Dance", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("Dance", "Spell2"): Time(
+            time: 0.0,
+        ),
+        ("Dance", "Spell3"): Time(
+            time: 0.0,
+        ),
+        ("Dance", "Spell4"): Time(
+            time: 0.15,
+        ),
+        ("Death", "ChannelWndup"): Time(
+            time: 0.0,
+        ),
+        ("Death", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("Death", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Death", "Recall"): Time(
+            time: 0.1,
+        ),
+        ("Death", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("Death", "Spell2"): Time(
+            time: 0.0,
+        ),
+        ("Death", "Spell3"): Time(
+            time: 0.0,
+        ),
+        ("Death", "Spell4"): Time(
+            time: 0.15,
+        ),
+        ("Idle1", "ChannelWndup"): Time(
+            time: 0.0,
+        ),
+        ("Idle1", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("Idle1", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Idle1", "Recall"): Time(
+            time: 0.1,
+        ),
+        ("Idle1", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("Idle1", "Spell2"): Time(
+            time: 0.0,
+        ),
+        ("Idle1", "Spell3"): Time(
+            time: 0.0,
+        ),
+        ("Idle1", "Spell4"): Time(
+            time: 0.15,
+        ),
+        ("Idle2", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("Idle2", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Idle2", "Recall"): Time(
+            time: 0.1,
+        ),
+        ("Idle2", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("Idle2", "Spell2"): Time(
+            time: 0.0,
+        ),
+        ("Idle2", "Spell3"): Time(
+            time: 0.0,
+        ),
+        ("Idle2", "Spell4"): Time(
+            time: 0.15,
+        ),
+        ("Joke", "ChannelWndup"): Time(
+            time: 0.0,
+        ),
+        ("Joke", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("Joke", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Joke", "Recall"): Time(
+            time: 0.1,
+        ),
+        ("Joke", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("Joke", "Spell2"): Time(
+            time: 0.0,
+        ),
+        ("Joke", "Spell3"): Time(
+            time: 0.0,
+        ),
+        ("Joke", "Spell4"): Time(
+            time: 0.15,
+        ),
+        ("Laugh", "ChannelWndup"): Time(
+            time: 0.0,
+        ),
+        ("Laugh", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("Laugh", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Laugh", "Recall"): Time(
+            time: 0.1,
+        ),
+        ("Laugh", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("Laugh", "Spell2"): Time(
+            time: 0.0,
+        ),
+        ("Laugh", "Spell3"): Time(
+            time: 0.0,
+        ),
+        ("Laugh", "Spell4"): Time(
+            time: 0.15,
+        ),
+        ("Recall", "ChannelWndup"): Time(
+            time: 0.1,
+        ),
+        ("Recall", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("Recall", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Idle1"): Time(
+            time: 0.1,
+        ),
+        ("Recall", "Joke"): Time(
+            time: 0.1,
+        ),
+        ("Recall", "Laugh"): Time(
+            time: 0.1,
+        ),
+        ("Recall", "Recall"): Time(
+            time: 0.1,
+        ),
+        ("Recall", "Run"): Time(
+            time: 0.1,
+        ),
+        ("Recall", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Recall", "Spell2"): Time(
+            time: 0.1,
+        ),
+        ("Recall", "Spell3"): Time(
+            time: 0.1,
+        ),
+        ("Recall", "Spell4"): Time(
+            time: 0.1,
+        ),
+        ("Recall", "Taunt"): Time(
+            time: 0.1,
+        ),
+        ("Run", "ChannelWndup"): Time(
+            time: 0.0,
+        ),
+        ("Run", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("Run", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Run", "Recall"): Time(
+            time: 0.1,
+        ),
+        ("Run", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("Run", "Spell2"): Time(
+            time: 0.0,
+        ),
+        ("Run", "Spell3"): Time(
+            time: 0.0,
+        ),
+        ("Run", "Spell4"): Time(
+            time: 0.15,
+        ),
+        ("Spell1", "Attack1"): Time(
+            time: 0.3,
+        ),
+        ("Spell1", "Attack2"): Time(
+            time: 0.3,
+        ),
+        ("Spell1", "Channel"): Time(
+            time: 0.3,
+        ),
+        ("Spell1", "ChannelWndup"): Time(
+            time: 0.3,
+        ),
+        ("Spell1", "Crit"): Time(
+            time: 0.3,
+        ),
+        ("Spell1", "Dance"): Time(
+            time: 0.3,
+        ),
+        ("Spell1", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell1", "Idle1"): Time(
+            time: 0.3,
+        ),
+        ("Spell1", "Idle2"): Time(
+            time: 0.3,
+        ),
+        ("Spell1", "Joke"): Time(
+            time: 0.3,
+        ),
+        ("Spell1", "Laugh"): Time(
+            time: 0.3,
+        ),
+        ("Spell1", "Recall"): Time(
+            time: 0.3,
+        ),
+        ("Spell1", "Run"): Time(
+            time: 0.3,
+        ),
+        ("Spell1", "Spell1"): Time(
+            time: 0.3,
+        ),
+        ("Spell1", "Spell2"): Time(
+            time: 0.3,
+        ),
+        ("Spell1", "Spell2Idle"): Time(
+            time: 0.3,
+        ),
+        ("Spell1", "Spell2Run"): Time(
+            time: 0.3,
+        ),
+        ("Spell1", "Spell3"): Time(
+            time: 0.3,
+        ),
+        ("Spell1", "Spell4"): Time(
+            time: 0.3,
+        ),
+        ("Spell1", "Taunt"): Time(
+            time: 0.3,
+        ),
+        ("Spell2", "ChannelWndup"): Time(
+            time: 0.0,
+        ),
+        ("Spell2", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("Spell2", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell2", "Recall"): Time(
+            time: 0.1,
+        ),
+        ("Spell2", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("Spell2", "Spell2"): Time(
+            time: 0.0,
+        ),
+        ("Spell2", "Spell3"): Time(
+            time: 0.0,
+        ),
+        ("Spell2", "Spell4"): Time(
+            time: 0.15,
+        ),
+        ("Spell2Idle", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("Spell2Idle", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell2Idle", "Recall"): Time(
+            time: 0.1,
+        ),
+        ("Spell2Idle", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("Spell2Idle", "Spell2"): Time(
+            time: 0.0,
+        ),
+        ("Spell2Idle", "Spell3"): Time(
+            time: 0.0,
+        ),
+        ("Spell2Idle", "Spell4"): Time(
+            time: 0.15,
+        ),
+        ("Spell2Run", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("Spell2Run", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell2Run", "Recall"): Time(
+            time: 0.1,
+        ),
+        ("Spell2Run", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("Spell2Run", "Spell2"): Time(
+            time: 0.0,
+        ),
+        ("Spell2Run", "Spell3"): Time(
+            time: 0.0,
+        ),
+        ("Spell2Run", "Spell4"): Time(
+            time: 0.15,
+        ),
+        ("Spell3", "ChannelWndup"): Time(
+            time: 0.0,
+        ),
+        ("Spell3", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("Spell3", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell3", "Recall"): Time(
+            time: 0.1,
+        ),
+        ("Spell3", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("Spell3", "Spell2"): Time(
+            time: 0.0,
+        ),
+        ("Spell3", "Spell3"): Time(
+            time: 0.0,
+        ),
+        ("Spell3", "Spell4"): Time(
+            time: 0.15,
+        ),
+        ("Spell4", "ChannelWndup"): Time(
+            time: 0.0,
+        ),
+        ("Spell4", "Crit"): Time(
+            time: 0.15,
+        ),
+        ("Spell4", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell4", "Idle1"): Time(
+            time: 0.0,
+        ),
+        ("Spell4", "Joke"): Time(
+            time: 0.0,
+        ),
+        ("Spell4", "Laugh"): Time(
+            time: 0.0,
+        ),
+        ("Spell4", "Recall"): Time(
+            time: 0.1,
+        ),
+        ("Spell4", "Run"): Time(
+            time: 0.0,
+        ),
+        ("Spell4", "Spell1"): Time(
+            time: 0.15,
+        ),
+        ("Spell4", "Spell2"): Time(
+            time: 0.15,
+        ),
+        ("Spell4", "Spell3"): Time(
+            time: 0.15,
+        ),
+        ("Spell4", "Spell4"): Time(
+            time: 0.15,
+        ),
+        ("Spell4", "Taunt"): Time(
+            time: 0.0,
+        ),
+        ("Taunt", "ChannelWndup"): Time(
+            time: 0.0,
+        ),
+        ("Taunt", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("Taunt", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Taunt", "Recall"): Time(
+            time: 0.1,
+        ),
+        ("Taunt", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("Taunt", "Spell2"): Time(
+            time: 0.0,
+        ),
+        ("Taunt", "Spell3"): Time(
+            time: 0.0,
+        ),
+        ("Taunt", "Spell4"): Time(
+            time: 0.15,
+        ),
+        ("Unk0x1a24a1f0", "Spell1"): Time(
+            time: 0.0,
+        ),
+    },
+)

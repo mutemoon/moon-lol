@@ -1,0 +1,34 @@
+(
+    gltf_path: "characters/sruap_magecrystal/skins/skin0.glb",
+    hash_to_node: {
+        "Attack": Selector(
+            probably_nodes: [
+                (
+                    key: "Attack1",
+                    value: 1.0,
+                ),
+                (
+                    key: "Attack2",
+                    value: 1.0,
+                ),
+            ],
+        ),
+        "Idle1": Sequence(
+            hashes: [
+                "Spawn",
+                "Idle1Base",
+            ],
+        ),
+        "Idle1Base": Clip(
+            node_index: 1,
+        ),
+        "Spawn": Clip(
+            node_index: 0,
+        ),
+    },
+    blend_data: {
+        ("Idle1Base", "Idle1Base"): Time(
+            time: 0.0,
+        ),
+    },
+)

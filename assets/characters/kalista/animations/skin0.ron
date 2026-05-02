@@ -1,0 +1,1776 @@
+(
+    gltf_path: "characters/kalista/skins/skin0.glb",
+    hash_to_node: {
+        "Attack": Selector(
+            probably_nodes: [
+                (
+                    key: "Attack1",
+                    value: 1.0,
+                ),
+                (
+                    key: "Attack2",
+                    value: 1.0,
+                ),
+            ],
+        ),
+        "Attack1": Parametric(
+            pairs: [
+                (
+                    key: "Attack1180",
+                    value: -180.0,
+                ),
+                (
+                    key: "Attack190",
+                    value: -90.0,
+                ),
+                (
+                    key: "Attack10",
+                    value: -0.0001,
+                ),
+                (
+                    key: "Attack1Base",
+                    value: 0.0,
+                ),
+                (
+                    key: "Attack10",
+                    value: 0.0001,
+                ),
+                (
+                    key: "Attack190",
+                    value: 90.0,
+                ),
+                (
+                    key: "Attack1180",
+                    value: 180.0,
+                ),
+            ],
+        ),
+        "Attack10": Clip(
+            node_index: 29,
+        ),
+        "Attack1180": Clip(
+            node_index: 6,
+        ),
+        "Attack190": Clip(
+            node_index: 60,
+        ),
+        "Attack1Base": Clip(
+            node_index: 59,
+        ),
+        "Attack1Dash0": Clip(
+            node_index: 61,
+        ),
+        "Attack1Dash180": Clip(
+            node_index: 65,
+        ),
+        "Attack1Dash2Idle0": Clip(
+            node_index: 40,
+        ),
+        "Attack1Dash2Idle180": Clip(
+            node_index: 27,
+        ),
+        "Attack1Dash2Idle90": Clip(
+            node_index: 49,
+        ),
+        "Attack1Dash2Run0": Clip(
+            node_index: 0,
+        ),
+        "Attack1Dash2Run180": Clip(
+            node_index: 35,
+        ),
+        "Attack1Dash2Run90": Clip(
+            node_index: 57,
+        ),
+        "Attack1Dash90": Clip(
+            node_index: 64,
+        ),
+        "Channel": Clip(
+            node_index: 12,
+        ),
+        "ChannelWndup": Clip(
+            node_index: 43,
+        ),
+        "Crit": Parametric(
+            pairs: [
+                (
+                    key: "Attack1180",
+                    value: -180.0,
+                ),
+                (
+                    key: "Attack190",
+                    value: -90.0,
+                ),
+                (
+                    key: "Attack10",
+                    value: -0.0001,
+                ),
+                (
+                    key: "Attack1Base",
+                    value: 0.0,
+                ),
+                (
+                    key: "Attack10",
+                    value: 0.0001,
+                ),
+                (
+                    key: "Attack190",
+                    value: 90.0,
+                ),
+                (
+                    key: "Attack1180",
+                    value: 180.0,
+                ),
+            ],
+        ),
+        "Dance": Clip(
+            node_index: 63,
+        ),
+        "Death": Clip(
+            node_index: 54,
+        ),
+        "Idle1": Sequence(
+            hashes: [
+                "Unk0xd5bc96d1",
+            ],
+        ),
+        "Idle1AltA": Clip(
+            node_index: 38,
+        ),
+        "Idle1AltB": Clip(
+            node_index: 37,
+        ),
+        "Idle1Base": Clip(
+            node_index: 34,
+        ),
+        "Idle1In": Clip(
+            node_index: 45,
+        ),
+        "Invocation": Sequence(
+            hashes: [
+                "Unk0x1f69ef31",
+                "InvocationLoop",
+            ],
+        ),
+        "InvocationLoop": Clip(
+            node_index: 39,
+        ),
+        "Joke": Clip(
+            node_index: 56,
+        ),
+        "Laugh": Clip(
+            node_index: 51,
+        ),
+        "Recall": Clip(
+            node_index: 26,
+        ),
+        "RecallLeadout": Clip(
+            node_index: 19,
+        ),
+        "RecallWinddown": Clip(
+            node_index: 47,
+        ),
+        "Run": ConditionFloat(
+            updater: MoveSpeed,
+            conditions: [
+                (
+                    key: "Unk0x97e7e0b2",
+                    value: 0.0,
+                ),
+                (
+                    key: "Unk0xcf93f48",
+                    value: 365.0,
+                ),
+                (
+                    key: "Unk0x330693f7",
+                    value: 450.0,
+                ),
+                (
+                    key: "RunHaste",
+                    value: 550.0,
+                ),
+            ],
+        ),
+        "Run1AltC": Clip(
+            node_index: 23,
+        ),
+        "Run1AltD": Clip(
+            node_index: 25,
+        ),
+        "RunHaste": Clip(
+            node_index: 15,
+        ),
+        "RunInjured": Clip(
+            node_index: 36,
+        ),
+        "Spell1": ConditionBool(
+            updater: IsMoving,
+            true_node: "Unk0x34c8bc04",
+            false_node: "Spell1Base",
+        ),
+        "Spell12idle": Clip(
+            node_index: 28,
+        ),
+        "Spell1Base": Clip(
+            node_index: 58,
+        ),
+        "Spell1Dash": ConditionFloat(
+            updater: LookAtSpellTargetAngle,
+            conditions: [
+                (
+                    key: "Spell1Dash180",
+                    value: -180.0,
+                ),
+                (
+                    key: "Spell1Dash180",
+                    value: -135.0,
+                ),
+                (
+                    key: "Spell1Dash90",
+                    value: -45.0,
+                ),
+                (
+                    key: "Spell1Dash0",
+                    value: -0.0001,
+                ),
+                (
+                    key: "Spell1Base",
+                    value: 0.0,
+                ),
+                (
+                    key: "Spell1Dash0",
+                    value: 0.0001,
+                ),
+                (
+                    key: "Spell1Dash90",
+                    value: 45.0,
+                ),
+                (
+                    key: "Spell1Dash180",
+                    value: 135.0,
+                ),
+                (
+                    key: "Spell1Dash180",
+                    value: 180.0,
+                ),
+            ],
+        ),
+        "Spell1Dash0": Clip(
+            node_index: 31,
+        ),
+        "Spell1Dash180": Clip(
+            node_index: 46,
+        ),
+        "Spell1Dash90": Clip(
+            node_index: 62,
+        ),
+        "Spell1Up": Clip(
+            node_index: 55,
+        ),
+        "Spell2": Clip(
+            node_index: 50,
+        ),
+        "Spell3": Parallel(
+            hashes: [
+                "Spell3Move",
+                "Spell3Base",
+            ],
+        ),
+        "Spell3Base": Clip(
+            node_index: 48,
+        ),
+        "Spell3Move": Clip(
+            node_index: 24,
+        ),
+        "Spell4Throw2Idle": Clip(
+            node_index: 8,
+        ),
+        "Stunned": Clip(
+            node_index: 32,
+        ),
+        "Taunt": Clip(
+            node_index: 53,
+        ),
+        "Unk0x1df7959": ConditionFloat(
+            updater: LookAtSpellTargetAngle,
+            conditions: [
+                (
+                    key: "Attack1Dash180",
+                    value: -180.0,
+                ),
+                (
+                    key: "Attack1Dash180",
+                    value: -135.0,
+                ),
+                (
+                    key: "Attack1Dash90",
+                    value: -30.0,
+                ),
+                (
+                    key: "Attack1Dash0",
+                    value: -0.0001,
+                ),
+                (
+                    key: "Unk0xe1a91a8",
+                    value: 0.0,
+                ),
+                (
+                    key: "Attack1Dash0",
+                    value: 0.0001,
+                ),
+                (
+                    key: "Attack1Dash90",
+                    value: 30.0,
+                ),
+                (
+                    key: "Attack1Dash180",
+                    value: 135.0,
+                ),
+                (
+                    key: "Attack1Dash180",
+                    value: 180.0,
+                ),
+            ],
+        ),
+        "Unk0x1f69ef31": Clip(
+            node_index: 9,
+        ),
+        "Unk0x20a1023c": Clip(
+            node_index: 11,
+        ),
+        "Unk0x25539770": Clip(
+            node_index: 14,
+        ),
+        "Unk0x2ddf4948": Clip(
+            node_index: 16,
+        ),
+        "Unk0x330693f7": Clip(
+            node_index: 17,
+        ),
+        "Unk0x34c8bc04": Parallel(
+            hashes: [
+                "Spell1Base",
+                "Spell1Up",
+            ],
+        ),
+        "Unk0x401e7e68": Parallel(
+            hashes: [
+                "Unk0x2ddf4948",
+                "Unk0x25539770",
+            ],
+        ),
+        "Unk0x63654418": Clip(
+            node_index: 30,
+        ),
+        "Unk0x6aca13cd": Clip(
+            node_index: 33,
+        ),
+        "Unk0x7dd2ee5e": Sequence(
+            hashes: [
+                "Unk0xb910f2d7",
+                "Run1AltD",
+            ],
+        ),
+        "Unk0x8134e810": Parallel(
+            hashes: [
+                "Unk0xa381f330",
+                "Unk0x63654418",
+            ],
+        ),
+        "Unk0x85da93c": Clip(
+            node_index: 1,
+        ),
+        "Unk0x97e7e0b2": Selector(
+            probably_nodes: [
+                (
+                    key: "Unk0xcc148d77",
+                    value: 55.0,
+                ),
+                (
+                    key: "Unk0xbc07a483",
+                    value: 15.0,
+                ),
+                (
+                    key: "Unk0x7dd2ee5e",
+                    value: 30.0,
+                ),
+            ],
+        ),
+        "Unk0xa381f330": Clip(
+            node_index: 42,
+        ),
+        "Unk0xa4f9ee17": Clip(
+            node_index: 44,
+        ),
+        "Unk0xb910f2d7": Clip(
+            node_index: 52,
+        ),
+        "Unk0xbc07a483": Sequence(
+            hashes: [
+                "Unk0xb910f2d7",
+                "Run1AltC",
+            ],
+        ),
+        "Unk0xcc148d77": Sequence(
+            hashes: [
+                "Unk0xb910f2d7",
+                "Unk0xb910f2d7",
+            ],
+        ),
+        "Unk0xcf93f48": Clip(
+            node_index: 3,
+        ),
+        "Unk0xd2a677bf": Sequence(
+            hashes: [
+                "Idle1Base",
+                "Idle1AltB",
+            ],
+        ),
+        "Unk0xd3a67952": Sequence(
+            hashes: [
+                "Idle1Base",
+                "Idle1AltA",
+            ],
+        ),
+        "Unk0xd5bc96d1": Selector(
+            probably_nodes: [
+                (
+                    key: "Idle1Base",
+                    value: 55.0,
+                ),
+                (
+                    key: "Unk0xd3a67952",
+                    value: 20.0,
+                ),
+                (
+                    key: "Unk0xd2a677bf",
+                    value: 25.0,
+                ),
+            ],
+        ),
+        "Unk0xe1a91a8": Clip(
+            node_index: 5,
+        ),
+    },
+    blend_data: {
+        ("Attack1", "Attack1Dash0"): Time(
+            time: 0.0,
+        ),
+        ("Attack1", "Attack1Dash180"): Time(
+            time: 0.0,
+        ),
+        ("Attack1", "Attack1Dash90"): Time(
+            time: 0.0,
+        ),
+        ("Attack1", "Spell1Base"): Time(
+            time: 0.0,
+        ),
+        ("Attack1", "Spell3Base"): Time(
+            time: 0.0,
+        ),
+        ("Attack1", "Spell3Move"): Time(
+            time: 0.0,
+        ),
+        ("Attack1", "Unk0xe1a91a8"): Time(
+            time: 0.0,
+        ),
+        ("Attack10", "Attack1Dash0"): Time(
+            time: 0.0,
+        ),
+        ("Attack10", "Attack1Dash180"): Time(
+            time: 0.0,
+        ),
+        ("Attack10", "Attack1Dash90"): Time(
+            time: 0.0,
+        ),
+        ("Attack10", "Spell1Base"): Time(
+            time: 0.0,
+        ),
+        ("Attack10", "Spell3Base"): Time(
+            time: 0.0,
+        ),
+        ("Attack10", "Spell3Move"): Time(
+            time: 0.0,
+        ),
+        ("Attack10", "Unk0xe1a91a8"): Time(
+            time: 0.0,
+        ),
+        ("Attack1180", "Attack1Dash0"): Time(
+            time: 0.0,
+        ),
+        ("Attack1180", "Attack1Dash180"): Time(
+            time: 0.0,
+        ),
+        ("Attack1180", "Attack1Dash90"): Time(
+            time: 0.0,
+        ),
+        ("Attack1180", "Spell1Base"): Time(
+            time: 0.0,
+        ),
+        ("Attack1180", "Spell3Base"): Time(
+            time: 0.0,
+        ),
+        ("Attack1180", "Spell3Move"): Time(
+            time: 0.0,
+        ),
+        ("Attack1180", "Unk0xe1a91a8"): Time(
+            time: 0.0,
+        ),
+        ("Attack190", "Attack1Dash0"): Time(
+            time: 0.0,
+        ),
+        ("Attack190", "Attack1Dash180"): Time(
+            time: 0.0,
+        ),
+        ("Attack190", "Attack1Dash90"): Time(
+            time: 0.0,
+        ),
+        ("Attack190", "Spell1Base"): Time(
+            time: 0.0,
+        ),
+        ("Attack190", "Spell3Base"): Time(
+            time: 0.0,
+        ),
+        ("Attack190", "Spell3Move"): Time(
+            time: 0.0,
+        ),
+        ("Attack190", "Unk0xe1a91a8"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Base", "Attack1Dash0"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Base", "Attack1Dash180"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Base", "Attack1Dash90"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Base", "Joke"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Base", "Laugh"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Base", "Spell1Base"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Base", "Spell3Base"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Base", "Spell3Move"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Base", "Taunt"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Base", "Unk0xe1a91a8"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Dash0", "Attack1Dash0"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Dash0", "Attack1Dash180"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Dash0", "Attack1Dash2Run0"): Time(
+            time: 0.1,
+        ),
+        ("Attack1Dash0", "Attack1Dash2Run180"): Time(
+            time: 0.1,
+        ),
+        ("Attack1Dash0", "Attack1Dash2Run90"): Time(
+            time: 0.1,
+        ),
+        ("Attack1Dash0", "Attack1Dash90"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Dash0", "Idle1Base"): TransitionClip(
+            clip_name: "Attack1Dash2Idle0",
+        ),
+        ("Attack1Dash0", "Spell1Base"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Dash0", "Spell3Base"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Dash0", "Spell3Move"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Dash0", "Unk0xb910f2d7"): TransitionClip(
+            clip_name: "Attack1Dash2Run0",
+        ),
+        ("Attack1Dash0", "Unk0xcf93f48"): TransitionClip(
+            clip_name: "Attack1Dash2Run0",
+        ),
+        ("Attack1Dash0", "Unk0xe1a91a8"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Dash180", "Attack1Dash0"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Dash180", "Attack1Dash180"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Dash180", "Attack1Dash2Run0"): Time(
+            time: 0.1,
+        ),
+        ("Attack1Dash180", "Attack1Dash2Run180"): Time(
+            time: 0.1,
+        ),
+        ("Attack1Dash180", "Attack1Dash2Run90"): Time(
+            time: 0.1,
+        ),
+        ("Attack1Dash180", "Attack1Dash90"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Dash180", "Idle1Base"): TransitionClip(
+            clip_name: "Attack1Dash2Idle180",
+        ),
+        ("Attack1Dash180", "Spell1Base"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Dash180", "Spell3Base"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Dash180", "Spell3Move"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Dash180", "Unk0xb910f2d7"): TransitionClip(
+            clip_name: "Attack1Dash2Run180",
+        ),
+        ("Attack1Dash180", "Unk0xcf93f48"): TransitionClip(
+            clip_name: "Attack1Dash2Run180",
+        ),
+        ("Attack1Dash180", "Unk0xe1a91a8"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Dash2Idle0", "Attack1"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Dash2Idle0", "Attack10"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Dash2Idle0", "Attack1180"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Dash2Idle0", "Attack190"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Dash2Idle0", "Attack1Base"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Dash2Idle0", "Spell1Base"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Dash2Idle180", "Attack1"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Dash2Idle180", "Attack10"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Dash2Idle180", "Attack1180"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Dash2Idle180", "Attack190"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Dash2Idle180", "Attack1Base"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Dash2Idle180", "Spell1Base"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Dash2Idle90", "Attack1"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Dash2Idle90", "Attack10"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Dash2Idle90", "Attack1180"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Dash2Idle90", "Attack190"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Dash2Idle90", "Attack1Base"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Dash2Idle90", "Spell1Base"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Dash2Run0", "Spell1Base"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Dash2Run0", "Spell3Base"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Dash2Run0", "Spell3Move"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Dash2Run180", "Spell1Base"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Dash2Run180", "Spell3Base"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Dash2Run180", "Spell3Move"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Dash2Run90", "Spell1Base"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Dash2Run90", "Spell3Base"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Dash2Run90", "Spell3Move"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Dash90", "Attack1Dash0"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Dash90", "Attack1Dash180"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Dash90", "Attack1Dash2Run0"): Time(
+            time: 0.1,
+        ),
+        ("Attack1Dash90", "Attack1Dash2Run180"): Time(
+            time: 0.1,
+        ),
+        ("Attack1Dash90", "Attack1Dash2Run90"): Time(
+            time: 0.1,
+        ),
+        ("Attack1Dash90", "Attack1Dash90"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Dash90", "Idle1Base"): TransitionClip(
+            clip_name: "Attack1Dash2Idle90",
+        ),
+        ("Attack1Dash90", "Spell1Base"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Dash90", "Spell3Base"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Dash90", "Spell3Move"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Dash90", "Unk0xb910f2d7"): TransitionClip(
+            clip_name: "Attack1Dash2Run90",
+        ),
+        ("Attack1Dash90", "Unk0xcf93f48"): TransitionClip(
+            clip_name: "Attack1Dash2Run90",
+        ),
+        ("Attack1Dash90", "Unk0xe1a91a8"): Time(
+            time: 0.0,
+        ),
+        ("Crit", "Spell1Base"): Time(
+            time: 0.0,
+        ),
+        ("Crit", "Spell3Base"): Time(
+            time: 0.0,
+        ),
+        ("Crit", "Spell3Move"): Time(
+            time: 0.0,
+        ),
+        ("Dance", "Attack1Dash0"): Time(
+            time: 0.0,
+        ),
+        ("Dance", "Attack1Dash180"): Time(
+            time: 0.0,
+        ),
+        ("Dance", "Attack1Dash90"): Time(
+            time: 0.0,
+        ),
+        ("Dance", "Dance"): Time(
+            time: 0.0,
+        ),
+        ("Dance", "Spell1Base"): Time(
+            time: 0.0,
+        ),
+        ("Dance", "Spell3Base"): Time(
+            time: 0.0,
+        ),
+        ("Dance", "Spell3Move"): Time(
+            time: 0.0,
+        ),
+        ("Dance", "Unk0xe1a91a8"): Time(
+            time: 0.0,
+        ),
+        ("Death", "Attack1Dash0"): Time(
+            time: 0.0,
+        ),
+        ("Death", "Attack1Dash180"): Time(
+            time: 0.0,
+        ),
+        ("Death", "Attack1Dash90"): Time(
+            time: 0.0,
+        ),
+        ("Death", "Joke"): Time(
+            time: 0.0,
+        ),
+        ("Death", "Laugh"): Time(
+            time: 0.0,
+        ),
+        ("Death", "Spell1Base"): Time(
+            time: 0.0,
+        ),
+        ("Death", "Spell3Base"): Time(
+            time: 0.0,
+        ),
+        ("Death", "Spell3Move"): Time(
+            time: 0.0,
+        ),
+        ("Death", "Taunt"): Time(
+            time: 0.0,
+        ),
+        ("Death", "Unk0xe1a91a8"): Time(
+            time: 0.0,
+        ),
+        ("Idle1AltA", "Attack1Base"): Time(
+            time: 0.0,
+        ),
+        ("Idle1AltA", "Idle1Base"): Time(
+            time: 0.1,
+        ),
+        ("Idle1AltA", "Spell1Base"): Time(
+            time: 0.0,
+        ),
+        ("Idle1AltB", "Attack1Base"): Time(
+            time: 0.0,
+        ),
+        ("Idle1AltB", "Spell1Base"): Time(
+            time: 0.0,
+        ),
+        ("Idle1Base", "Attack1Base"): Time(
+            time: 0.0,
+        ),
+        ("Idle1Base", "Spell1Base"): Time(
+            time: 0.0,
+        ),
+        ("Idle1In", "Idle1Base"): Time(
+            time: 0.1,
+        ),
+        ("Idle1In", "Spell1Base"): Time(
+            time: 0.0,
+        ),
+        ("InvocationLoop", "Spell1Base"): Time(
+            time: 0.0,
+        ),
+        ("Joke", "Attack1Base"): Time(
+            time: 0.0,
+        ),
+        ("Joke", "Attack1Dash0"): Time(
+            time: 0.0,
+        ),
+        ("Joke", "Attack1Dash180"): Time(
+            time: 0.0,
+        ),
+        ("Joke", "Attack1Dash90"): Time(
+            time: 0.0,
+        ),
+        ("Joke", "Joke"): Time(
+            time: 0.0,
+        ),
+        ("Joke", "Laugh"): Time(
+            time: 0.0,
+        ),
+        ("Joke", "Spell1Base"): Time(
+            time: 0.0,
+        ),
+        ("Joke", "Spell2"): Time(
+            time: 0.0,
+        ),
+        ("Joke", "Spell3Base"): Time(
+            time: 0.0,
+        ),
+        ("Joke", "Spell3Move"): Time(
+            time: 0.0,
+        ),
+        ("Joke", "Taunt"): Time(
+            time: 0.0,
+        ),
+        ("Joke", "Unk0xe1a91a8"): Time(
+            time: 0.0,
+        ),
+        ("Laugh", "Attack1Base"): Time(
+            time: 0.0,
+        ),
+        ("Laugh", "Attack1Dash0"): Time(
+            time: 0.0,
+        ),
+        ("Laugh", "Attack1Dash180"): Time(
+            time: 0.0,
+        ),
+        ("Laugh", "Attack1Dash90"): Time(
+            time: 0.0,
+        ),
+        ("Laugh", "Joke"): Time(
+            time: 0.0,
+        ),
+        ("Laugh", "Laugh"): Time(
+            time: 0.0,
+        ),
+        ("Laugh", "Spell1Base"): Time(
+            time: 0.0,
+        ),
+        ("Laugh", "Spell2"): Time(
+            time: 0.0,
+        ),
+        ("Laugh", "Spell3Base"): Time(
+            time: 0.0,
+        ),
+        ("Laugh", "Spell3Move"): Time(
+            time: 0.0,
+        ),
+        ("Laugh", "Taunt"): Time(
+            time: 0.0,
+        ),
+        ("Laugh", "Unk0xe1a91a8"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Spell1Base"): Time(
+            time: 0.0,
+        ),
+        ("RecallLeadout", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("RecallLeadout", "Spell1Base"): Time(
+            time: 0.0,
+        ),
+        ("RecallWinddown", "Spell1Base"): Time(
+            time: 0.0,
+        ),
+        ("Run1AltC", "Idle1AltA"): TransitionClip(
+            clip_name: "Idle1In",
+        ),
+        ("Run1AltC", "Idle1AltB"): TransitionClip(
+            clip_name: "Idle1In",
+        ),
+        ("Run1AltC", "Idle1Base"): TransitionClip(
+            clip_name: "Idle1In",
+        ),
+        ("Run1AltC", "Spell1Base"): Time(
+            time: 0.0,
+        ),
+        ("Run1AltD", "Idle1AltA"): TransitionClip(
+            clip_name: "Idle1In",
+        ),
+        ("Run1AltD", "Idle1AltB"): TransitionClip(
+            clip_name: "Idle1In",
+        ),
+        ("Run1AltD", "Idle1Base"): TransitionClip(
+            clip_name: "Idle1In",
+        ),
+        ("Run1AltD", "Spell1Base"): Time(
+            time: 0.0,
+        ),
+        ("RunHaste", "Idle1Base"): TransitionClip(
+            clip_name: "Idle1In",
+        ),
+        ("RunHaste", "Spell1Base"): Time(
+            time: 0.0,
+        ),
+        ("RunInjured", "Idle1AltB"): TransitionClip(
+            clip_name: "Idle1In",
+        ),
+        ("RunInjured", "Idle1Base"): TransitionClip(
+            clip_name: "Idle1In",
+        ),
+        ("RunInjured", "Spell1Base"): Time(
+            time: 0.0,
+        ),
+        ("Spell1Base", "Attack1Dash0"): Time(
+            time: 0.0,
+        ),
+        ("Spell1Base", "Attack1Dash180"): Time(
+            time: 0.0,
+        ),
+        ("Spell1Base", "Attack1Dash90"): Time(
+            time: 0.0,
+        ),
+        ("Spell1Base", "Idle1Base"): TransitionClip(
+            clip_name: "Spell12idle",
+        ),
+        ("Spell1Base", "Joke"): Time(
+            time: 0.0,
+        ),
+        ("Spell1Base", "Laugh"): Time(
+            time: 0.0,
+        ),
+        ("Spell1Base", "Spell12idle"): Time(
+            time: 0.05,
+        ),
+        ("Spell1Base", "Spell1Base"): Time(
+            time: 0.0,
+        ),
+        ("Spell1Base", "Spell1Dash0"): Time(
+            time: 0.0,
+        ),
+        ("Spell1Base", "Spell1Dash180"): Time(
+            time: 0.0,
+        ),
+        ("Spell1Base", "Spell1Dash90"): Time(
+            time: 0.0,
+        ),
+        ("Spell1Base", "Spell3Base"): Time(
+            time: 0.0,
+        ),
+        ("Spell1Base", "Spell3Move"): Time(
+            time: 0.0,
+        ),
+        ("Spell1Base", "Taunt"): Time(
+            time: 0.0,
+        ),
+        ("Spell1Base", "Unk0xe1a91a8"): Time(
+            time: 0.0,
+        ),
+        ("Spell1Dash0", "Attack1"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash0", "Attack10"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash0", "Attack1180"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash0", "Attack190"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash0", "Attack1Base"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash0", "Attack1Dash0"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash0", "Attack1Dash180"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash0", "Attack1Dash2Idle0"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash0", "Attack1Dash2Idle180"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash0", "Attack1Dash2Idle90"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash0", "Attack1Dash2Run0"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash0", "Attack1Dash2Run180"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash0", "Attack1Dash2Run90"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash0", "Attack1Dash90"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash0", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash0", "Dance"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash0", "Death"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash0", "Idle1AltA"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash0", "Idle1AltB"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash0", "Idle1Base"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash0", "Idle1In"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash0", "InvocationLoop"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash0", "Joke"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash0", "Laugh"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash0", "Recall"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash0", "RecallLeadout"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash0", "RecallWinddown"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash0", "Run1AltC"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash0", "Run1AltD"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash0", "RunHaste"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash0", "RunInjured"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash0", "Spell1Base"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash0", "Spell1Dash0"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash0", "Spell1Dash180"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash0", "Spell1Dash90"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash0", "Spell1Up"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash0", "Spell2"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash0", "Spell3Base"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash0", "Spell3Move"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash0", "Stunned"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash0", "Taunt"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash0", "Unk0x1f69ef31"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash0", "Unk0x20a1023c"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash0", "Unk0x25539770"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash0", "Unk0x2ddf4948"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash0", "Unk0x6aca13cd"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash0", "Unk0x85da93c"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash0", "Unk0xa4f9ee17"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash0", "Unk0xb910f2d7"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash0", "Unk0xcf93f48"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash0", "Unk0xe1a91a8"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash180", "Attack1"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash180", "Attack10"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash180", "Attack1180"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash180", "Attack190"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash180", "Attack1Base"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash180", "Attack1Dash0"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash180", "Attack1Dash180"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash180", "Attack1Dash2Idle0"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash180", "Attack1Dash2Idle180"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash180", "Attack1Dash2Idle90"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash180", "Attack1Dash2Run0"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash180", "Attack1Dash2Run180"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash180", "Attack1Dash2Run90"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash180", "Attack1Dash90"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash180", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash180", "Dance"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash180", "Death"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash180", "Idle1AltA"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash180", "Idle1AltB"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash180", "Idle1Base"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash180", "Idle1In"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash180", "InvocationLoop"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash180", "Joke"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash180", "Laugh"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash180", "Recall"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash180", "RecallLeadout"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash180", "RecallWinddown"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash180", "Run1AltC"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash180", "Run1AltD"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash180", "RunHaste"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash180", "RunInjured"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash180", "Spell1Base"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash180", "Spell1Dash0"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash180", "Spell1Dash180"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash180", "Spell1Dash90"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash180", "Spell1Up"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash180", "Spell2"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash180", "Spell3Base"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash180", "Spell3Move"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash180", "Stunned"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash180", "Taunt"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash180", "Unk0x1f69ef31"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash180", "Unk0x20a1023c"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash180", "Unk0x25539770"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash180", "Unk0x2ddf4948"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash180", "Unk0x6aca13cd"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash180", "Unk0x85da93c"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash180", "Unk0xa4f9ee17"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash180", "Unk0xb910f2d7"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash180", "Unk0xcf93f48"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash180", "Unk0xe1a91a8"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash90", "Attack1"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash90", "Attack10"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash90", "Attack1180"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash90", "Attack190"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash90", "Attack1Base"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash90", "Attack1Dash0"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash90", "Attack1Dash180"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash90", "Attack1Dash2Idle0"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash90", "Attack1Dash2Idle180"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash90", "Attack1Dash2Idle90"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash90", "Attack1Dash2Run0"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash90", "Attack1Dash2Run180"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash90", "Attack1Dash2Run90"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash90", "Attack1Dash90"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash90", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash90", "Dance"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash90", "Death"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash90", "Idle1AltA"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash90", "Idle1AltB"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash90", "Idle1Base"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash90", "Idle1In"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash90", "InvocationLoop"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash90", "Joke"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash90", "Laugh"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash90", "Recall"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash90", "RecallLeadout"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash90", "RecallWinddown"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash90", "Run1AltC"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash90", "Run1AltD"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash90", "RunHaste"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash90", "RunInjured"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash90", "Spell1Base"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash90", "Spell1Dash0"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash90", "Spell1Dash180"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash90", "Spell1Dash90"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash90", "Spell1Up"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash90", "Spell2"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash90", "Spell3Base"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash90", "Spell3Move"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash90", "Stunned"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash90", "Taunt"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash90", "Unk0x1f69ef31"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash90", "Unk0x20a1023c"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash90", "Unk0x25539770"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash90", "Unk0x2ddf4948"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash90", "Unk0x6aca13cd"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash90", "Unk0x85da93c"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash90", "Unk0xa4f9ee17"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash90", "Unk0xb910f2d7"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash90", "Unk0xcf93f48"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Dash90", "Unk0xe1a91a8"): Time(
+            time: 0.1,
+        ),
+        ("Spell2", "Attack1Base"): Time(
+            time: 0.0,
+        ),
+        ("Spell2", "Attack1Dash0"): Time(
+            time: 0.0,
+        ),
+        ("Spell2", "Attack1Dash180"): Time(
+            time: 0.0,
+        ),
+        ("Spell2", "Attack1Dash90"): Time(
+            time: 0.0,
+        ),
+        ("Spell2", "Joke"): Time(
+            time: 0.0,
+        ),
+        ("Spell2", "Laugh"): Time(
+            time: 0.0,
+        ),
+        ("Spell2", "Spell1Base"): Time(
+            time: 0.0,
+        ),
+        ("Spell2", "Spell2"): Time(
+            time: 0.0,
+        ),
+        ("Spell2", "Spell3Base"): Time(
+            time: 0.0,
+        ),
+        ("Spell2", "Spell3Move"): Time(
+            time: 0.0,
+        ),
+        ("Spell2", "Taunt"): Time(
+            time: 0.0,
+        ),
+        ("Spell2", "Unk0xe1a91a8"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Base", "Attack1Dash0"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Base", "Attack1Dash180"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Base", "Attack1Dash90"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Base", "Idle1Base"): TransitionClip(
+            clip_name: "Idle1In",
+        ),
+        ("Spell3Base", "Joke"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Base", "Laugh"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Base", "Spell1Base"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Base", "Spell3Base"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Base", "Spell3Move"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Base", "Taunt"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Base", "Unk0xe1a91a8"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Move", "Spell1Base"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Move", "Spell3Base"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Move", "Spell3Move"): Time(
+            time: 0.0,
+        ),
+        ("Spell4Throw2Idle", "Idle1Base"): Time(
+            time: 0.1,
+        ),
+        ("Taunt", "Attack1Base"): Time(
+            time: 0.0,
+        ),
+        ("Taunt", "Attack1Dash0"): Time(
+            time: 0.0,
+        ),
+        ("Taunt", "Attack1Dash180"): Time(
+            time: 0.0,
+        ),
+        ("Taunt", "Attack1Dash90"): Time(
+            time: 0.0,
+        ),
+        ("Taunt", "Joke"): Time(
+            time: 0.0,
+        ),
+        ("Taunt", "Laugh"): Time(
+            time: 0.0,
+        ),
+        ("Taunt", "Spell1Base"): Time(
+            time: 0.0,
+        ),
+        ("Taunt", "Spell2"): Time(
+            time: 0.0,
+        ),
+        ("Taunt", "Spell3Base"): Time(
+            time: 0.0,
+        ),
+        ("Taunt", "Spell3Move"): Time(
+            time: 0.0,
+        ),
+        ("Taunt", "Taunt"): Time(
+            time: 0.0,
+        ),
+        ("Taunt", "Unk0xe1a91a8"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x1f69ef31", "Spell1Base"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x20a1023c", "Attack1Dash0"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x20a1023c", "Attack1Dash180"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x20a1023c", "Attack1Dash90"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x20a1023c", "Idle1AltA"): TransitionClip(
+            clip_name: "Idle1In",
+        ),
+        ("Unk0x20a1023c", "Idle1AltB"): TransitionClip(
+            clip_name: "Idle1In",
+        ),
+        ("Unk0x20a1023c", "Idle1Base"): TransitionClip(
+            clip_name: "Idle1In",
+        ),
+        ("Unk0x20a1023c", "Spell1Base"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x20a1023c", "Spell3Base"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x20a1023c", "Spell3Move"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x20a1023c", "Unk0xe1a91a8"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x25539770", "Spell1Base"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x2ddf4948", "Spell1Base"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x330693f7", "Idle1Base"): TransitionClip(
+            clip_name: "Idle1In",
+        ),
+        ("Unk0x63654418", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x6aca13cd", "Attack1Dash0"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x6aca13cd", "Attack1Dash180"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x6aca13cd", "Attack1Dash90"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x6aca13cd", "Idle1AltA"): TransitionClip(
+            clip_name: "Idle1In",
+        ),
+        ("Unk0x6aca13cd", "Idle1AltB"): TransitionClip(
+            clip_name: "Idle1In",
+        ),
+        ("Unk0x6aca13cd", "Idle1Base"): TransitionClip(
+            clip_name: "Idle1In",
+        ),
+        ("Unk0x6aca13cd", "Spell1Base"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x6aca13cd", "Spell3Base"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x6aca13cd", "Spell3Move"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x6aca13cd", "Unk0xe1a91a8"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x85da93c", "Spell1Base"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xa381f330", "Idle1Base"): TransitionClip(
+            clip_name: "Spell4Throw2Idle",
+        ),
+        ("Unk0xa381f330", "Spell4Throw2Idle"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xa4f9ee17", "Spell1Base"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xb910f2d7", "Attack1Dash0"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xb910f2d7", "Attack1Dash180"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xb910f2d7", "Attack1Dash90"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xb910f2d7", "Idle1AltA"): TransitionClip(
+            clip_name: "Idle1In",
+        ),
+        ("Unk0xb910f2d7", "Idle1AltB"): TransitionClip(
+            clip_name: "Idle1In",
+        ),
+        ("Unk0xb910f2d7", "Idle1Base"): TransitionClip(
+            clip_name: "Idle1In",
+        ),
+        ("Unk0xb910f2d7", "Spell1Base"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xb910f2d7", "Spell3Base"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xb910f2d7", "Spell3Move"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xb910f2d7", "Unk0xe1a91a8"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xcf93f48", "Attack1Dash0"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xcf93f48", "Attack1Dash180"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xcf93f48", "Attack1Dash90"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xcf93f48", "Idle1AltA"): TransitionClip(
+            clip_name: "Idle1In",
+        ),
+        ("Unk0xcf93f48", "Idle1AltB"): TransitionClip(
+            clip_name: "Idle1In",
+        ),
+        ("Unk0xcf93f48", "Idle1Base"): TransitionClip(
+            clip_name: "Idle1In",
+        ),
+        ("Unk0xcf93f48", "Spell1Base"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xcf93f48", "Spell3Base"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xcf93f48", "Spell3Move"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xcf93f48", "Unk0xe1a91a8"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xe1a91a8", "Attack1Dash0"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xe1a91a8", "Attack1Dash180"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xe1a91a8", "Attack1Dash90"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xe1a91a8", "Spell1Base"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xe1a91a8", "Spell3Base"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xe1a91a8", "Spell3Move"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xe1a91a8", "Unk0xe1a91a8"): Time(
+            time: 0.0,
+        ),
+    },
+)

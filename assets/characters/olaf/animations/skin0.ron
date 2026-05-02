@@ -1,0 +1,139 @@
+(
+    gltf_path: "characters/olaf/skins/skin0.glb",
+    hash_to_node: {
+        "Attack": Selector(
+            probably_nodes: [
+                (
+                    key: "Attack1",
+                    value: 1.0,
+                ),
+                (
+                    key: "Attack2",
+                    value: 1.0,
+                ),
+            ],
+        ),
+        "Attack1": Clip(
+            node_index: 2,
+        ),
+        "Attack2": Clip(
+            node_index: 4,
+        ),
+        "Attack3": Clip(
+            node_index: 3,
+        ),
+        "Channel": Clip(
+            node_index: 0,
+        ),
+        "ChannelWndup": Clip(
+            node_index: 10,
+        ),
+        "Crit": Clip(
+            node_index: 5,
+        ),
+        "Dance": Clip(
+            node_index: 18,
+        ),
+        "Death": Clip(
+            node_index: 17,
+        ),
+        "Idle1": Clip(
+            node_index: 8,
+        ),
+        "Idle2": Clip(
+            node_index: 7,
+        ),
+        "Idle3": Clip(
+            node_index: 6,
+        ),
+        "Idle4": Clip(
+            node_index: 9,
+        ),
+        "Laugh": Clip(
+            node_index: 14,
+        ),
+        "Recall": Sequence(
+            hashes: [
+                "Idle3",
+                "Idle1",
+            ],
+        ),
+        "Run": Clip(
+            node_index: 1,
+        ),
+        "Spell1": Clip(
+            node_index: 11,
+        ),
+        "Spell2": Clip(
+            node_index: 13,
+        ),
+        "Spell3": Clip(
+            node_index: 12,
+        ),
+        "Spell4": Clip(
+            node_index: 15,
+        ),
+        "Taunt": Clip(
+            node_index: 16,
+        ),
+    },
+    blend_data: {
+        ("Attack1", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Attack2", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Attack3", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Channel", "Death"): Time(
+            time: 0.0,
+        ),
+        ("ChannelWndup", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Crit", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Dance", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Death", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Idle1", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Idle2", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Idle3", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Idle4", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Laugh", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Run", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell1", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell2", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell3", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell4", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Taunt", "Death"): Time(
+            time: 0.0,
+        ),
+    },
+)

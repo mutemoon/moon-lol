@@ -1,0 +1,89 @@
+(
+    gltf_path: "characters/inhibitor/skins/skin41.glb",
+    hash_to_node: {
+        "Attack": Selector(
+            probably_nodes: [
+                (
+                    key: "Attack1",
+                    value: 1.0,
+                ),
+                (
+                    key: "Attack2",
+                    value: 1.0,
+                ),
+            ],
+        ),
+        "Death": Sequence(
+            hashes: [
+                "DeathBase",
+                "Unk0xc3247102",
+            ],
+        ),
+        "DeathBase": Clip(
+            node_index: 6,
+        ),
+        "Idle1": Sequence(
+            hashes: [
+                "IdleHold",
+                "Unk0xe4cb0f58",
+                "IdleNormal1",
+            ],
+        ),
+        "IdleHold": Clip(
+            node_index: 2,
+        ),
+        "IdleNormal1": Clip(
+            node_index: 1,
+        ),
+        "Respawn": Sequence(
+            hashes: [
+                "RespawnBase",
+                "Unk0x68538d8e",
+                "IdleNormal1",
+            ],
+        ),
+        "RespawnBase": Clip(
+            node_index: 0,
+        ),
+        "Spawn": Sequence(
+            hashes: [
+                "Unk0xe4cb0f58",
+            ],
+        ),
+        "Unk0x68538d8e": Clip(
+            node_index: 3,
+        ),
+        "Unk0xc3247102": Clip(
+            node_index: 4,
+        ),
+        "Unk0xe4cb0f58": Clip(
+            node_index: 5,
+        ),
+    },
+    blend_data: {
+        ("DeathBase", "DeathBase"): Time(
+            time: 0.0,
+        ),
+        ("DeathBase", "Unk0xc3247102"): Time(
+            time: 0.0,
+        ),
+        ("Idle1", "DeathBase"): Time(
+            time: 0.0,
+        ),
+        ("IdleNormal1", "DeathBase"): Time(
+            time: 0.0,
+        ),
+        ("RespawnBase", "IdleNormal1"): Time(
+            time: 0.0,
+        ),
+        ("Spawn", "DeathBase"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xe4cb0f58", "DeathBase"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xe4cb0f58", "IdleNormal1"): Time(
+            time: 0.0,
+        ),
+    },
+)

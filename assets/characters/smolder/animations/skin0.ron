@@ -1,0 +1,3348 @@
+(
+    gltf_path: "characters/smolder/skins/skin0.glb",
+    hash_to_node: {
+        "Attack": Selector(
+            probably_nodes: [
+                (
+                    key: "Attack1",
+                    value: 1.0,
+                ),
+                (
+                    key: "Attack2",
+                    value: 1.0,
+                ),
+            ],
+        ),
+        "Attack1": Clip(
+            node_index: 13,
+        ),
+        "Attack1ToIdle": Clip(
+            node_index: 28,
+        ),
+        "Attack1ToRun": Clip(
+            node_index: 3,
+        ),
+        "Attack2": Clip(
+            node_index: 14,
+        ),
+        "Attack2ToIdle": Clip(
+            node_index: 20,
+        ),
+        "Attack2ToRun": Clip(
+            node_index: 10,
+        ),
+        "Channel": Clip(
+            node_index: 1,
+        ),
+        "ChannelWndup": Clip(
+            node_index: 30,
+        ),
+        "Crit": Clip(
+            node_index: 26,
+        ),
+        "CritToIdle": Clip(
+            node_index: 6,
+        ),
+        "CritToRun": Clip(
+            node_index: 41,
+        ),
+        "Dance": Clip(
+            node_index: 48,
+        ),
+        "Death": Clip(
+            node_index: 38,
+        ),
+        "Idle1": Sequence(
+            hashes: [
+                "Unk0xf6ce4790",
+                "Unk0xf6ce4790",
+                "Unk0xf6ce4790",
+                "Unk0x52d0d005",
+            ],
+        ),
+        "IdleIn": Clip(
+            node_index: 36,
+        ),
+        "Joke": Sequence(
+            hashes: [
+                "JokeIntro",
+                "JokeLoop",
+            ],
+        ),
+        "JokeIntro": Clip(
+            node_index: 22,
+        ),
+        "JokeLoop": Clip(
+            node_index: 49,
+        ),
+        "KnockUp": Clip(
+            node_index: 2,
+        ),
+        "Laugh": Sequence(
+            hashes: [
+                "LaughIntro",
+                "LaughLoop",
+            ],
+        ),
+        "LaughIntro": Clip(
+            node_index: 43,
+        ),
+        "LaughLoop": Clip(
+            node_index: 27,
+        ),
+        "Recall": Clip(
+            node_index: 15,
+        ),
+        "RecallWinddown": Clip(
+            node_index: 32,
+        ),
+        "Respawn": Clip(
+            node_index: 29,
+        ),
+        "Run": ConditionBool(
+            updater: IsHomeguard,
+            true_node: "RunHomeguard",
+            false_node: "RunBase",
+        ),
+        "RunBase": Clip(
+            node_index: 45,
+        ),
+        "RunHomeguard": Clip(
+            node_index: 24,
+        ),
+        "Spell1": Clip(
+            node_index: 34,
+        ),
+        "Spell1Attack2": Clip(
+            node_index: 12,
+        ),
+        "Spell1Attack2ToIdle": Clip(
+            node_index: 31,
+        ),
+        "Spell1ToIdle": Clip(
+            node_index: 40,
+        ),
+        "Spell1ToRun": Clip(
+            node_index: 25,
+        ),
+        "Spell2": Clip(
+            node_index: 35,
+        ),
+        "Spell2ToIdle": Clip(
+            node_index: 50,
+        ),
+        "Spell2ToRun": Clip(
+            node_index: 47,
+        ),
+        "Spell30": Clip(
+            node_index: 5,
+        ),
+        "Spell3180": Clip(
+            node_index: 4,
+        ),
+        "Spell390": Clip(
+            node_index: 44,
+        ),
+        "Spell3Attack": Parametric(
+            pairs: [
+                (
+                    key: "Spell3180",
+                    value: -180.0,
+                ),
+                (
+                    key: "Spell390",
+                    value: -90.0,
+                ),
+                (
+                    key: "Spell30",
+                    value: 0.0,
+                ),
+                (
+                    key: "Spell390",
+                    value: 90.0,
+                ),
+                (
+                    key: "Spell3180",
+                    value: 180.0,
+                ),
+            ],
+        ),
+        "Spell3Idle": Clip(
+            node_index: 23,
+        ),
+        "Spell3ToIdle": Clip(
+            node_index: 33,
+        ),
+        "Spell3ToRun": Clip(
+            node_index: 42,
+        ),
+        "Spell4": Clip(
+            node_index: 37,
+        ),
+        "Spell4ToIdle": Clip(
+            node_index: 21,
+        ),
+        "Spell4ToRun": Clip(
+            node_index: 39,
+        ),
+        "Stunned": Clip(
+            node_index: 18,
+        ),
+        "Taunt": Sequence(
+            hashes: [
+                "TauntIntro",
+                "TauntLoop",
+            ],
+        ),
+        "TauntIntro": Clip(
+            node_index: 17,
+        ),
+        "TauntLoop": Clip(
+            node_index: 16,
+        ),
+        "Unk0x18556bad": ConditionBool(
+            updater: IsMoving,
+            true_node: "CritToRun",
+            false_node: "CritToIdle",
+        ),
+        "Unk0x46745975": Clip(
+            node_index: 7,
+        ),
+        "Unk0x52d0d005": Clip(
+            node_index: 9,
+        ),
+        "Unk0x56006399": Clip(
+            node_index: 11,
+        ),
+        "Unk0x6eb6e179": Clip(
+            node_index: 19,
+        ),
+        "Unk0x7b02878d": ConditionBool(
+            updater: IsMoving,
+            true_node: "Unk0x56006399",
+            false_node: "Spell1Attack2ToIdle",
+        ),
+        "Unk0x9cbc4532": ConditionBool(
+            updater: IsMoving,
+            true_node: "Spell1ToRun",
+            false_node: "Spell1ToIdle",
+        ),
+        "Unk0xb59cad6": ConditionBool(
+            updater: IsMoving,
+            true_node: "Attack1ToRun",
+            false_node: "Attack1ToIdle",
+        ),
+        "Unk0xd1011199": ConditionBool(
+            updater: IsMoving,
+            true_node: "Spell2ToRun",
+            false_node: "Spell2ToIdle",
+        ),
+        "Unk0xf6ce4790": Clip(
+            node_index: 46,
+        ),
+    },
+    blend_data: {
+        ("Attack1", "Attack1"): Time(
+            time: 0.02,
+        ),
+        ("Attack1", "Attack1ToIdle"): Time(
+            time: 0.0,
+        ),
+        ("Attack1", "Attack1ToRun"): Time(
+            time: 0.0,
+        ),
+        ("Attack1", "Attack2"): Time(
+            time: 0.02,
+        ),
+        ("Attack1", "Crit"): Time(
+            time: 0.02,
+        ),
+        ("Attack1", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Attack1", "JokeIntro"): Time(
+            time: 0.0,
+        ),
+        ("Attack1", "JokeLoop"): Time(
+            time: 0.0,
+        ),
+        ("Attack1", "KnockUp"): Time(
+            time: 0.0,
+        ),
+        ("Attack1", "LaughIntro"): Time(
+            time: 0.0,
+        ),
+        ("Attack1", "LaughLoop"): Time(
+            time: 0.0,
+        ),
+        ("Attack1", "Recall"): Time(
+            time: 0.02,
+        ),
+        ("Attack1", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Attack1", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Attack1", "RunBase"): TransitionClip(
+            clip_name: "Attack1ToRun",
+        ),
+        ("Attack1", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("Attack1", "Spell1ToIdle"): Time(
+            time: 0.0,
+        ),
+        ("Attack1", "Spell1ToRun"): Time(
+            time: 0.0,
+        ),
+        ("Attack1", "Spell2"): Time(
+            time: 0.0,
+        ),
+        ("Attack1", "Spell3ToRun"): Time(
+            time: 0.08,
+        ),
+        ("Attack1", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("Attack1", "TauntIntro"): Time(
+            time: 0.02,
+        ),
+        ("Attack1", "TauntLoop"): Time(
+            time: 0.0,
+        ),
+        ("Attack1", "Unk0x52d0d005"): TransitionClip(
+            clip_name: "Attack1ToIdle",
+        ),
+        ("Attack1", "Unk0x6eb6e179"): Time(
+            time: 0.0,
+        ),
+        ("Attack1", "Unk0xf6ce4790"): TransitionClip(
+            clip_name: "Attack1ToIdle",
+        ),
+        ("Attack1ToIdle", "Attack1"): Time(
+            time: 0.02,
+        ),
+        ("Attack1ToIdle", "Attack2"): Time(
+            time: 0.02,
+        ),
+        ("Attack1ToIdle", "Crit"): Time(
+            time: 0.02,
+        ),
+        ("Attack1ToIdle", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Attack1ToIdle", "JokeIntro"): Time(
+            time: 0.0,
+        ),
+        ("Attack1ToIdle", "JokeLoop"): Time(
+            time: 0.0,
+        ),
+        ("Attack1ToIdle", "KnockUp"): Time(
+            time: 0.0,
+        ),
+        ("Attack1ToIdle", "LaughIntro"): Time(
+            time: 0.0,
+        ),
+        ("Attack1ToIdle", "LaughLoop"): Time(
+            time: 0.0,
+        ),
+        ("Attack1ToIdle", "Recall"): Time(
+            time: 0.02,
+        ),
+        ("Attack1ToIdle", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Attack1ToIdle", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Attack1ToIdle", "RunBase"): TransitionClip(
+            clip_name: "Attack1ToRun",
+        ),
+        ("Attack1ToIdle", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("Attack1ToIdle", "TauntIntro"): Time(
+            time: 0.02,
+        ),
+        ("Attack1ToIdle", "TauntLoop"): Time(
+            time: 0.0,
+        ),
+        ("Attack1ToRun", "Attack1"): Time(
+            time: 0.02,
+        ),
+        ("Attack1ToRun", "Attack2"): Time(
+            time: 0.02,
+        ),
+        ("Attack1ToRun", "Crit"): Time(
+            time: 0.02,
+        ),
+        ("Attack1ToRun", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Attack1ToRun", "JokeIntro"): Time(
+            time: 0.0,
+        ),
+        ("Attack1ToRun", "JokeLoop"): Time(
+            time: 0.0,
+        ),
+        ("Attack1ToRun", "KnockUp"): Time(
+            time: 0.0,
+        ),
+        ("Attack1ToRun", "LaughIntro"): Time(
+            time: 0.0,
+        ),
+        ("Attack1ToRun", "LaughLoop"): Time(
+            time: 0.0,
+        ),
+        ("Attack1ToRun", "Recall"): Time(
+            time: 0.02,
+        ),
+        ("Attack1ToRun", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Attack1ToRun", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Attack1ToRun", "RunBase"): Time(
+            time: 0.0,
+        ),
+        ("Attack1ToRun", "TauntIntro"): Time(
+            time: 0.02,
+        ),
+        ("Attack1ToRun", "TauntLoop"): Time(
+            time: 0.0,
+        ),
+        ("Attack1ToRun", "Unk0x52d0d005"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("Attack1ToRun", "Unk0xf6ce4790"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("Attack2", "Attack1"): Time(
+            time: 0.02,
+        ),
+        ("Attack2", "Attack2"): Time(
+            time: 0.02,
+        ),
+        ("Attack2", "Attack2ToIdle"): Time(
+            time: 0.0,
+        ),
+        ("Attack2", "Attack2ToRun"): Time(
+            time: 0.0,
+        ),
+        ("Attack2", "Crit"): Time(
+            time: 0.02,
+        ),
+        ("Attack2", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Attack2", "JokeIntro"): Time(
+            time: 0.0,
+        ),
+        ("Attack2", "JokeLoop"): Time(
+            time: 0.0,
+        ),
+        ("Attack2", "KnockUp"): Time(
+            time: 0.0,
+        ),
+        ("Attack2", "LaughIntro"): Time(
+            time: 0.0,
+        ),
+        ("Attack2", "LaughLoop"): Time(
+            time: 0.0,
+        ),
+        ("Attack2", "Recall"): Time(
+            time: 0.02,
+        ),
+        ("Attack2", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Attack2", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Attack2", "RunBase"): TransitionClip(
+            clip_name: "Attack2ToRun",
+        ),
+        ("Attack2", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("Attack2", "Spell1ToIdle"): Time(
+            time: 0.0,
+        ),
+        ("Attack2", "Spell2"): Time(
+            time: 0.0,
+        ),
+        ("Attack2", "Spell3ToRun"): Time(
+            time: 0.08,
+        ),
+        ("Attack2", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("Attack2", "TauntIntro"): Time(
+            time: 0.02,
+        ),
+        ("Attack2", "TauntLoop"): Time(
+            time: 0.0,
+        ),
+        ("Attack2", "Unk0x52d0d005"): TransitionClip(
+            clip_name: "Attack2ToIdle",
+        ),
+        ("Attack2", "Unk0x6eb6e179"): Time(
+            time: 0.0,
+        ),
+        ("Attack2", "Unk0xf6ce4790"): TransitionClip(
+            clip_name: "Attack2ToIdle",
+        ),
+        ("Attack2ToIdle", "Attack1"): Time(
+            time: 0.02,
+        ),
+        ("Attack2ToIdle", "Attack2"): Time(
+            time: 0.02,
+        ),
+        ("Attack2ToIdle", "Attack2ToIdle"): Time(
+            time: 0.0,
+        ),
+        ("Attack2ToIdle", "Crit"): Time(
+            time: 0.02,
+        ),
+        ("Attack2ToIdle", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Attack2ToIdle", "JokeIntro"): Time(
+            time: 0.0,
+        ),
+        ("Attack2ToIdle", "JokeLoop"): Time(
+            time: 0.0,
+        ),
+        ("Attack2ToIdle", "KnockUp"): Time(
+            time: 0.0,
+        ),
+        ("Attack2ToIdle", "LaughIntro"): Time(
+            time: 0.0,
+        ),
+        ("Attack2ToIdle", "LaughLoop"): Time(
+            time: 0.0,
+        ),
+        ("Attack2ToIdle", "Recall"): Time(
+            time: 0.02,
+        ),
+        ("Attack2ToIdle", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Attack2ToIdle", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Attack2ToIdle", "RunBase"): TransitionClip(
+            clip_name: "Attack2ToRun",
+        ),
+        ("Attack2ToIdle", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("Attack2ToIdle", "TauntIntro"): Time(
+            time: 0.02,
+        ),
+        ("Attack2ToIdle", "TauntLoop"): Time(
+            time: 0.0,
+        ),
+        ("Attack2ToIdle", "Unk0x52d0d005"): Time(
+            time: 0.0,
+        ),
+        ("Attack2ToIdle", "Unk0xf6ce4790"): Time(
+            time: 0.0,
+        ),
+        ("Attack2ToRun", "Attack1"): Time(
+            time: 0.02,
+        ),
+        ("Attack2ToRun", "Attack2"): Time(
+            time: 0.02,
+        ),
+        ("Attack2ToRun", "Crit"): Time(
+            time: 0.02,
+        ),
+        ("Attack2ToRun", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Attack2ToRun", "JokeIntro"): Time(
+            time: 0.0,
+        ),
+        ("Attack2ToRun", "JokeLoop"): Time(
+            time: 0.0,
+        ),
+        ("Attack2ToRun", "KnockUp"): Time(
+            time: 0.0,
+        ),
+        ("Attack2ToRun", "LaughIntro"): Time(
+            time: 0.0,
+        ),
+        ("Attack2ToRun", "LaughLoop"): Time(
+            time: 0.0,
+        ),
+        ("Attack2ToRun", "Recall"): Time(
+            time: 0.02,
+        ),
+        ("Attack2ToRun", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Attack2ToRun", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Attack2ToRun", "RunBase"): Time(
+            time: 0.0,
+        ),
+        ("Attack2ToRun", "TauntIntro"): Time(
+            time: 0.02,
+        ),
+        ("Attack2ToRun", "TauntLoop"): Time(
+            time: 0.0,
+        ),
+        ("Attack2ToRun", "Unk0x52d0d005"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("Attack2ToRun", "Unk0xf6ce4790"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("Channel", "Attack1"): Time(
+            time: 0.02,
+        ),
+        ("Channel", "Attack2"): Time(
+            time: 0.02,
+        ),
+        ("Channel", "Crit"): Time(
+            time: 0.02,
+        ),
+        ("Channel", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Channel", "JokeIntro"): Time(
+            time: 0.0,
+        ),
+        ("Channel", "JokeLoop"): Time(
+            time: 0.0,
+        ),
+        ("Channel", "KnockUp"): Time(
+            time: 0.0,
+        ),
+        ("Channel", "LaughIntro"): Time(
+            time: 0.0,
+        ),
+        ("Channel", "LaughLoop"): Time(
+            time: 0.0,
+        ),
+        ("Channel", "Recall"): Time(
+            time: 0.02,
+        ),
+        ("Channel", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Channel", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Channel", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("Channel", "Spell1ToIdle"): Time(
+            time: 0.0,
+        ),
+        ("Channel", "Spell2"): Time(
+            time: 0.0,
+        ),
+        ("Channel", "Spell3ToRun"): Time(
+            time: 0.08,
+        ),
+        ("Channel", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("Channel", "TauntIntro"): Time(
+            time: 0.02,
+        ),
+        ("Channel", "TauntLoop"): Time(
+            time: 0.0,
+        ),
+        ("Channel", "Unk0x6eb6e179"): Time(
+            time: 0.0,
+        ),
+        ("ChannelWndup", "Attack1"): Time(
+            time: 0.02,
+        ),
+        ("ChannelWndup", "Attack2"): Time(
+            time: 0.02,
+        ),
+        ("ChannelWndup", "Crit"): Time(
+            time: 0.02,
+        ),
+        ("ChannelWndup", "Death"): Time(
+            time: 0.0,
+        ),
+        ("ChannelWndup", "JokeIntro"): Time(
+            time: 0.0,
+        ),
+        ("ChannelWndup", "JokeLoop"): Time(
+            time: 0.0,
+        ),
+        ("ChannelWndup", "KnockUp"): Time(
+            time: 0.0,
+        ),
+        ("ChannelWndup", "LaughIntro"): Time(
+            time: 0.0,
+        ),
+        ("ChannelWndup", "LaughLoop"): Time(
+            time: 0.0,
+        ),
+        ("ChannelWndup", "Recall"): Time(
+            time: 0.02,
+        ),
+        ("ChannelWndup", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("ChannelWndup", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("ChannelWndup", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("ChannelWndup", "Spell1ToIdle"): Time(
+            time: 0.0,
+        ),
+        ("ChannelWndup", "Spell2"): Time(
+            time: 0.0,
+        ),
+        ("ChannelWndup", "Spell3ToRun"): Time(
+            time: 0.08,
+        ),
+        ("ChannelWndup", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("ChannelWndup", "TauntIntro"): Time(
+            time: 0.02,
+        ),
+        ("ChannelWndup", "TauntLoop"): Time(
+            time: 0.0,
+        ),
+        ("ChannelWndup", "Unk0x6eb6e179"): Time(
+            time: 0.0,
+        ),
+        ("Crit", "Attack1"): Time(
+            time: 0.02,
+        ),
+        ("Crit", "Attack2"): Time(
+            time: 0.02,
+        ),
+        ("Crit", "Crit"): Time(
+            time: 0.02,
+        ),
+        ("Crit", "CritToIdle"): Time(
+            time: 0.0,
+        ),
+        ("Crit", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Crit", "JokeIntro"): Time(
+            time: 0.0,
+        ),
+        ("Crit", "JokeLoop"): Time(
+            time: 0.0,
+        ),
+        ("Crit", "KnockUp"): Time(
+            time: 0.0,
+        ),
+        ("Crit", "LaughIntro"): Time(
+            time: 0.0,
+        ),
+        ("Crit", "LaughLoop"): Time(
+            time: 0.0,
+        ),
+        ("Crit", "Recall"): Time(
+            time: 0.02,
+        ),
+        ("Crit", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Crit", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Crit", "RunBase"): TransitionClip(
+            clip_name: "CritToRun",
+        ),
+        ("Crit", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("Crit", "Spell1ToIdle"): Time(
+            time: 0.0,
+        ),
+        ("Crit", "Spell2"): Time(
+            time: 0.0,
+        ),
+        ("Crit", "Spell3ToRun"): Time(
+            time: 0.08,
+        ),
+        ("Crit", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("Crit", "TauntIntro"): Time(
+            time: 0.02,
+        ),
+        ("Crit", "TauntLoop"): Time(
+            time: 0.0,
+        ),
+        ("Crit", "Unk0x52d0d005"): TransitionClip(
+            clip_name: "CritToIdle",
+        ),
+        ("Crit", "Unk0x6eb6e179"): Time(
+            time: 0.0,
+        ),
+        ("Crit", "Unk0xf6ce4790"): TransitionClip(
+            clip_name: "CritToIdle",
+        ),
+        ("CritToIdle", "Attack1"): Time(
+            time: 0.02,
+        ),
+        ("CritToIdle", "Attack2"): Time(
+            time: 0.02,
+        ),
+        ("CritToIdle", "Crit"): Time(
+            time: 0.02,
+        ),
+        ("CritToIdle", "Death"): Time(
+            time: 0.0,
+        ),
+        ("CritToIdle", "JokeIntro"): Time(
+            time: 0.0,
+        ),
+        ("CritToIdle", "JokeLoop"): Time(
+            time: 0.0,
+        ),
+        ("CritToIdle", "KnockUp"): Time(
+            time: 0.0,
+        ),
+        ("CritToIdle", "LaughIntro"): Time(
+            time: 0.0,
+        ),
+        ("CritToIdle", "LaughLoop"): Time(
+            time: 0.0,
+        ),
+        ("CritToIdle", "Recall"): Time(
+            time: 0.02,
+        ),
+        ("CritToIdle", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("CritToIdle", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("CritToIdle", "RunBase"): TransitionClip(
+            clip_name: "CritToRun",
+        ),
+        ("CritToIdle", "TauntIntro"): Time(
+            time: 0.02,
+        ),
+        ("CritToIdle", "TauntLoop"): Time(
+            time: 0.0,
+        ),
+        ("CritToRun", "Attack1"): Time(
+            time: 0.02,
+        ),
+        ("CritToRun", "Attack2"): Time(
+            time: 0.02,
+        ),
+        ("CritToRun", "Crit"): Time(
+            time: 0.02,
+        ),
+        ("CritToRun", "Death"): Time(
+            time: 0.0,
+        ),
+        ("CritToRun", "JokeIntro"): Time(
+            time: 0.0,
+        ),
+        ("CritToRun", "JokeLoop"): Time(
+            time: 0.0,
+        ),
+        ("CritToRun", "KnockUp"): Time(
+            time: 0.0,
+        ),
+        ("CritToRun", "LaughIntro"): Time(
+            time: 0.0,
+        ),
+        ("CritToRun", "LaughLoop"): Time(
+            time: 0.0,
+        ),
+        ("CritToRun", "Recall"): Time(
+            time: 0.02,
+        ),
+        ("CritToRun", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("CritToRun", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("CritToRun", "RunBase"): Time(
+            time: 0.0,
+        ),
+        ("CritToRun", "TauntIntro"): Time(
+            time: 0.02,
+        ),
+        ("CritToRun", "TauntLoop"): Time(
+            time: 0.0,
+        ),
+        ("CritToRun", "Unk0x52d0d005"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("CritToRun", "Unk0xf6ce4790"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("Dance", "Attack1"): Time(
+            time: 0.02,
+        ),
+        ("Dance", "Attack2"): Time(
+            time: 0.02,
+        ),
+        ("Dance", "Crit"): Time(
+            time: 0.02,
+        ),
+        ("Dance", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Dance", "JokeIntro"): Time(
+            time: 0.0,
+        ),
+        ("Dance", "JokeLoop"): Time(
+            time: 0.0,
+        ),
+        ("Dance", "KnockUp"): Time(
+            time: 0.0,
+        ),
+        ("Dance", "LaughIntro"): Time(
+            time: 0.0,
+        ),
+        ("Dance", "LaughLoop"): Time(
+            time: 0.0,
+        ),
+        ("Dance", "Recall"): Time(
+            time: 0.02,
+        ),
+        ("Dance", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Dance", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Dance", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("Dance", "TauntIntro"): Time(
+            time: 0.02,
+        ),
+        ("Dance", "TauntLoop"): Time(
+            time: 0.0,
+        ),
+        ("Death", "Attack1"): Time(
+            time: 0.02,
+        ),
+        ("Death", "Attack2"): Time(
+            time: 0.02,
+        ),
+        ("Death", "Crit"): Time(
+            time: 0.02,
+        ),
+        ("Death", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Death", "JokeIntro"): Time(
+            time: 0.0,
+        ),
+        ("Death", "JokeLoop"): Time(
+            time: 0.0,
+        ),
+        ("Death", "KnockUp"): Time(
+            time: 0.0,
+        ),
+        ("Death", "LaughIntro"): Time(
+            time: 0.0,
+        ),
+        ("Death", "LaughLoop"): Time(
+            time: 0.0,
+        ),
+        ("Death", "Recall"): Time(
+            time: 0.02,
+        ),
+        ("Death", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Death", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Death", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("Death", "Spell1ToIdle"): Time(
+            time: 0.0,
+        ),
+        ("Death", "Spell2"): Time(
+            time: 0.0,
+        ),
+        ("Death", "Spell3ToRun"): Time(
+            time: 0.08,
+        ),
+        ("Death", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("Death", "TauntIntro"): Time(
+            time: 0.02,
+        ),
+        ("Death", "TauntLoop"): Time(
+            time: 0.0,
+        ),
+        ("Death", "Unk0x6eb6e179"): Time(
+            time: 0.0,
+        ),
+        ("IdleIn", "Attack1"): Time(
+            time: 0.02,
+        ),
+        ("IdleIn", "Attack2"): Time(
+            time: 0.02,
+        ),
+        ("IdleIn", "Crit"): Time(
+            time: 0.02,
+        ),
+        ("IdleIn", "Death"): Time(
+            time: 0.0,
+        ),
+        ("IdleIn", "JokeIntro"): Time(
+            time: 0.0,
+        ),
+        ("IdleIn", "JokeLoop"): Time(
+            time: 0.0,
+        ),
+        ("IdleIn", "KnockUp"): Time(
+            time: 0.0,
+        ),
+        ("IdleIn", "LaughIntro"): Time(
+            time: 0.0,
+        ),
+        ("IdleIn", "LaughLoop"): Time(
+            time: 0.0,
+        ),
+        ("IdleIn", "Recall"): Time(
+            time: 0.02,
+        ),
+        ("IdleIn", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("IdleIn", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("IdleIn", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("IdleIn", "Spell1ToIdle"): Time(
+            time: 0.0,
+        ),
+        ("IdleIn", "Spell2"): Time(
+            time: 0.0,
+        ),
+        ("IdleIn", "Spell3ToRun"): Time(
+            time: 0.08,
+        ),
+        ("IdleIn", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("IdleIn", "TauntIntro"): Time(
+            time: 0.02,
+        ),
+        ("IdleIn", "TauntLoop"): Time(
+            time: 0.0,
+        ),
+        ("IdleIn", "Unk0x52d0d005"): Time(
+            time: 0.0,
+        ),
+        ("IdleIn", "Unk0xf6ce4790"): Time(
+            time: 0.0,
+        ),
+        ("JokeIntro", "Attack1"): Time(
+            time: 0.02,
+        ),
+        ("JokeIntro", "Attack2"): Time(
+            time: 0.02,
+        ),
+        ("JokeIntro", "Crit"): Time(
+            time: 0.02,
+        ),
+        ("JokeIntro", "Death"): Time(
+            time: 0.0,
+        ),
+        ("JokeIntro", "JokeIntro"): Time(
+            time: 0.0,
+        ),
+        ("JokeIntro", "JokeLoop"): Time(
+            time: 0.0,
+        ),
+        ("JokeIntro", "KnockUp"): Time(
+            time: 0.0,
+        ),
+        ("JokeIntro", "LaughIntro"): Time(
+            time: 0.0,
+        ),
+        ("JokeIntro", "LaughLoop"): Time(
+            time: 0.0,
+        ),
+        ("JokeIntro", "Recall"): Time(
+            time: 0.02,
+        ),
+        ("JokeIntro", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("JokeIntro", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("JokeIntro", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("JokeIntro", "Spell1ToIdle"): Time(
+            time: 0.0,
+        ),
+        ("JokeIntro", "Spell2"): Time(
+            time: 0.0,
+        ),
+        ("JokeIntro", "Spell3ToRun"): Time(
+            time: 0.08,
+        ),
+        ("JokeIntro", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("JokeIntro", "TauntIntro"): Time(
+            time: 0.02,
+        ),
+        ("JokeIntro", "TauntLoop"): Time(
+            time: 0.0,
+        ),
+        ("JokeIntro", "Unk0x6eb6e179"): Time(
+            time: 0.0,
+        ),
+        ("JokeLoop", "Attack1"): Time(
+            time: 0.02,
+        ),
+        ("JokeLoop", "Attack2"): Time(
+            time: 0.02,
+        ),
+        ("JokeLoop", "Crit"): Time(
+            time: 0.02,
+        ),
+        ("JokeLoop", "Death"): Time(
+            time: 0.0,
+        ),
+        ("JokeLoop", "JokeIntro"): Time(
+            time: 0.0,
+        ),
+        ("JokeLoop", "JokeLoop"): Time(
+            time: 0.0,
+        ),
+        ("JokeLoop", "KnockUp"): Time(
+            time: 0.0,
+        ),
+        ("JokeLoop", "LaughIntro"): Time(
+            time: 0.0,
+        ),
+        ("JokeLoop", "LaughLoop"): Time(
+            time: 0.0,
+        ),
+        ("JokeLoop", "Recall"): Time(
+            time: 0.02,
+        ),
+        ("JokeLoop", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("JokeLoop", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("JokeLoop", "TauntIntro"): Time(
+            time: 0.02,
+        ),
+        ("JokeLoop", "TauntLoop"): Time(
+            time: 0.0,
+        ),
+        ("KnockUp", "Attack1"): Time(
+            time: 0.02,
+        ),
+        ("KnockUp", "Attack2"): Time(
+            time: 0.02,
+        ),
+        ("KnockUp", "Crit"): Time(
+            time: 0.02,
+        ),
+        ("KnockUp", "Death"): Time(
+            time: 0.0,
+        ),
+        ("KnockUp", "JokeIntro"): Time(
+            time: 0.0,
+        ),
+        ("KnockUp", "JokeLoop"): Time(
+            time: 0.0,
+        ),
+        ("KnockUp", "KnockUp"): Time(
+            time: 0.0,
+        ),
+        ("KnockUp", "LaughIntro"): Time(
+            time: 0.0,
+        ),
+        ("KnockUp", "LaughLoop"): Time(
+            time: 0.0,
+        ),
+        ("KnockUp", "Recall"): Time(
+            time: 0.02,
+        ),
+        ("KnockUp", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("KnockUp", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("KnockUp", "Spell2"): Time(
+            time: 0.0,
+        ),
+        ("KnockUp", "Spell3ToRun"): Time(
+            time: 0.08,
+        ),
+        ("KnockUp", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("KnockUp", "TauntIntro"): Time(
+            time: 0.02,
+        ),
+        ("KnockUp", "TauntLoop"): Time(
+            time: 0.0,
+        ),
+        ("LaughIntro", "Attack1"): Time(
+            time: 0.02,
+        ),
+        ("LaughIntro", "Attack2"): Time(
+            time: 0.02,
+        ),
+        ("LaughIntro", "Crit"): Time(
+            time: 0.02,
+        ),
+        ("LaughIntro", "Death"): Time(
+            time: 0.0,
+        ),
+        ("LaughIntro", "JokeIntro"): Time(
+            time: 0.0,
+        ),
+        ("LaughIntro", "JokeLoop"): Time(
+            time: 0.0,
+        ),
+        ("LaughIntro", "KnockUp"): Time(
+            time: 0.0,
+        ),
+        ("LaughIntro", "LaughIntro"): Time(
+            time: 0.0,
+        ),
+        ("LaughIntro", "LaughLoop"): Time(
+            time: 0.0,
+        ),
+        ("LaughIntro", "Recall"): Time(
+            time: 0.02,
+        ),
+        ("LaughIntro", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("LaughIntro", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("LaughIntro", "TauntIntro"): Time(
+            time: 0.02,
+        ),
+        ("LaughIntro", "TauntLoop"): Time(
+            time: 0.0,
+        ),
+        ("LaughLoop", "Attack1"): Time(
+            time: 0.02,
+        ),
+        ("LaughLoop", "Attack2"): Time(
+            time: 0.02,
+        ),
+        ("LaughLoop", "Crit"): Time(
+            time: 0.02,
+        ),
+        ("LaughLoop", "Death"): Time(
+            time: 0.0,
+        ),
+        ("LaughLoop", "JokeIntro"): Time(
+            time: 0.0,
+        ),
+        ("LaughLoop", "JokeLoop"): Time(
+            time: 0.0,
+        ),
+        ("LaughLoop", "KnockUp"): Time(
+            time: 0.0,
+        ),
+        ("LaughLoop", "LaughIntro"): Time(
+            time: 0.0,
+        ),
+        ("LaughLoop", "LaughLoop"): Time(
+            time: 0.0,
+        ),
+        ("LaughLoop", "Recall"): Time(
+            time: 0.02,
+        ),
+        ("LaughLoop", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("LaughLoop", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("LaughLoop", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("LaughLoop", "Spell1ToIdle"): Time(
+            time: 0.0,
+        ),
+        ("LaughLoop", "Spell2"): Time(
+            time: 0.0,
+        ),
+        ("LaughLoop", "Spell3ToRun"): Time(
+            time: 0.08,
+        ),
+        ("LaughLoop", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("LaughLoop", "TauntIntro"): Time(
+            time: 0.02,
+        ),
+        ("LaughLoop", "TauntLoop"): Time(
+            time: 0.0,
+        ),
+        ("LaughLoop", "Unk0x6eb6e179"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Attack1"): Time(
+            time: 0.02,
+        ),
+        ("Recall", "Attack2"): Time(
+            time: 0.02,
+        ),
+        ("Recall", "Crit"): Time(
+            time: 0.02,
+        ),
+        ("Recall", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "JokeIntro"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "JokeLoop"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "KnockUp"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "LaughIntro"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "LaughLoop"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Recall"): Time(
+            time: 0.02,
+        ),
+        ("Recall", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "TauntIntro"): Time(
+            time: 0.02,
+        ),
+        ("Recall", "TauntLoop"): Time(
+            time: 0.0,
+        ),
+        ("RecallWinddown", "Attack1"): Time(
+            time: 0.02,
+        ),
+        ("RecallWinddown", "Attack2"): Time(
+            time: 0.02,
+        ),
+        ("RecallWinddown", "Crit"): Time(
+            time: 0.02,
+        ),
+        ("RecallWinddown", "Death"): Time(
+            time: 0.0,
+        ),
+        ("RecallWinddown", "JokeIntro"): Time(
+            time: 0.0,
+        ),
+        ("RecallWinddown", "JokeLoop"): Time(
+            time: 0.0,
+        ),
+        ("RecallWinddown", "KnockUp"): Time(
+            time: 0.0,
+        ),
+        ("RecallWinddown", "LaughIntro"): Time(
+            time: 0.0,
+        ),
+        ("RecallWinddown", "LaughLoop"): Time(
+            time: 0.0,
+        ),
+        ("RecallWinddown", "Recall"): Time(
+            time: 0.02,
+        ),
+        ("RecallWinddown", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("RecallWinddown", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("RecallWinddown", "TauntIntro"): Time(
+            time: 0.02,
+        ),
+        ("RecallWinddown", "TauntLoop"): Time(
+            time: 0.0,
+        ),
+        ("Respawn", "Attack1"): Time(
+            time: 0.02,
+        ),
+        ("Respawn", "Attack2"): Time(
+            time: 0.02,
+        ),
+        ("Respawn", "Crit"): Time(
+            time: 0.02,
+        ),
+        ("Respawn", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Respawn", "JokeIntro"): Time(
+            time: 0.0,
+        ),
+        ("Respawn", "JokeLoop"): Time(
+            time: 0.0,
+        ),
+        ("Respawn", "KnockUp"): Time(
+            time: 0.0,
+        ),
+        ("Respawn", "LaughIntro"): Time(
+            time: 0.0,
+        ),
+        ("Respawn", "LaughLoop"): Time(
+            time: 0.0,
+        ),
+        ("Respawn", "Recall"): Time(
+            time: 0.02,
+        ),
+        ("Respawn", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Respawn", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Respawn", "TauntIntro"): Time(
+            time: 0.02,
+        ),
+        ("Respawn", "TauntLoop"): Time(
+            time: 0.0,
+        ),
+        ("Run", "Attack1"): Time(
+            time: 0.02,
+        ),
+        ("Run", "Attack2"): Time(
+            time: 0.02,
+        ),
+        ("Run", "Crit"): Time(
+            time: 0.02,
+        ),
+        ("Run", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Run", "JokeIntro"): Time(
+            time: 0.0,
+        ),
+        ("Run", "JokeLoop"): Time(
+            time: 0.0,
+        ),
+        ("Run", "KnockUp"): Time(
+            time: 0.0,
+        ),
+        ("Run", "LaughIntro"): Time(
+            time: 0.0,
+        ),
+        ("Run", "LaughLoop"): Time(
+            time: 0.0,
+        ),
+        ("Run", "Recall"): Time(
+            time: 0.02,
+        ),
+        ("Run", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Run", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Run", "TauntIntro"): Time(
+            time: 0.02,
+        ),
+        ("Run", "TauntLoop"): Time(
+            time: 0.0,
+        ),
+        ("RunBase", "Attack1"): Time(
+            time: 0.02,
+        ),
+        ("RunBase", "Attack2"): Time(
+            time: 0.02,
+        ),
+        ("RunBase", "Crit"): Time(
+            time: 0.02,
+        ),
+        ("RunBase", "Death"): Time(
+            time: 0.0,
+        ),
+        ("RunBase", "JokeIntro"): Time(
+            time: 0.0,
+        ),
+        ("RunBase", "JokeLoop"): Time(
+            time: 0.0,
+        ),
+        ("RunBase", "KnockUp"): Time(
+            time: 0.0,
+        ),
+        ("RunBase", "LaughIntro"): Time(
+            time: 0.0,
+        ),
+        ("RunBase", "LaughLoop"): Time(
+            time: 0.0,
+        ),
+        ("RunBase", "Recall"): Time(
+            time: 0.02,
+        ),
+        ("RunBase", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("RunBase", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("RunBase", "RunBase"): Time(
+            time: 0.0,
+        ),
+        ("RunBase", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("RunBase", "Spell1ToIdle"): Time(
+            time: 0.0,
+        ),
+        ("RunBase", "Spell2"): Time(
+            time: 0.0,
+        ),
+        ("RunBase", "Spell3ToRun"): Time(
+            time: 0.08,
+        ),
+        ("RunBase", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("RunBase", "TauntIntro"): Time(
+            time: 0.02,
+        ),
+        ("RunBase", "TauntLoop"): Time(
+            time: 0.0,
+        ),
+        ("RunBase", "Unk0x52d0d005"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("RunBase", "Unk0x6eb6e179"): Time(
+            time: 0.0,
+        ),
+        ("RunBase", "Unk0xf6ce4790"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("RunHomeguard", "Attack1"): Time(
+            time: 0.02,
+        ),
+        ("RunHomeguard", "Attack2"): Time(
+            time: 0.02,
+        ),
+        ("RunHomeguard", "Crit"): Time(
+            time: 0.02,
+        ),
+        ("RunHomeguard", "Death"): Time(
+            time: 0.0,
+        ),
+        ("RunHomeguard", "JokeIntro"): Time(
+            time: 0.0,
+        ),
+        ("RunHomeguard", "JokeLoop"): Time(
+            time: 0.0,
+        ),
+        ("RunHomeguard", "KnockUp"): Time(
+            time: 0.0,
+        ),
+        ("RunHomeguard", "LaughIntro"): Time(
+            time: 0.0,
+        ),
+        ("RunHomeguard", "LaughLoop"): Time(
+            time: 0.0,
+        ),
+        ("RunHomeguard", "Recall"): Time(
+            time: 0.02,
+        ),
+        ("RunHomeguard", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("RunHomeguard", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("RunHomeguard", "RunBase"): TransitionClip(
+            clip_name: "Unk0x46745975",
+        ),
+        ("RunHomeguard", "TauntIntro"): Time(
+            time: 0.02,
+        ),
+        ("RunHomeguard", "TauntLoop"): Time(
+            time: 0.0,
+        ),
+        ("RunHomeguard", "Unk0xf6ce4790"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("Spell1", "Attack1"): Time(
+            time: 0.02,
+        ),
+        ("Spell1", "Attack2"): Time(
+            time: 0.02,
+        ),
+        ("Spell1", "Crit"): Time(
+            time: 0.02,
+        ),
+        ("Spell1", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell1", "JokeIntro"): Time(
+            time: 0.0,
+        ),
+        ("Spell1", "JokeLoop"): Time(
+            time: 0.0,
+        ),
+        ("Spell1", "KnockUp"): Time(
+            time: 0.0,
+        ),
+        ("Spell1", "LaughIntro"): Time(
+            time: 0.0,
+        ),
+        ("Spell1", "LaughLoop"): Time(
+            time: 0.0,
+        ),
+        ("Spell1", "Recall"): Time(
+            time: 0.02,
+        ),
+        ("Spell1", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Spell1", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Spell1", "RunBase"): TransitionClip(
+            clip_name: "Spell1ToRun",
+        ),
+        ("Spell1", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("Spell1", "Spell1ToIdle"): Time(
+            time: 0.0,
+        ),
+        ("Spell1", "Spell1ToRun"): Time(
+            time: 0.0,
+        ),
+        ("Spell1", "Spell2"): Time(
+            time: 0.0,
+        ),
+        ("Spell1", "Spell3ToRun"): Time(
+            time: 0.08,
+        ),
+        ("Spell1", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("Spell1", "TauntIntro"): Time(
+            time: 0.02,
+        ),
+        ("Spell1", "TauntLoop"): Time(
+            time: 0.0,
+        ),
+        ("Spell1", "Unk0x52d0d005"): TransitionClip(
+            clip_name: "Spell1ToIdle",
+        ),
+        ("Spell1", "Unk0x6eb6e179"): Time(
+            time: 0.0,
+        ),
+        ("Spell1", "Unk0xf6ce4790"): TransitionClip(
+            clip_name: "Spell1ToIdle",
+        ),
+        ("Spell1Attack2", "Attack1"): Time(
+            time: 0.02,
+        ),
+        ("Spell1Attack2", "Attack2"): Time(
+            time: 0.02,
+        ),
+        ("Spell1Attack2", "Crit"): Time(
+            time: 0.02,
+        ),
+        ("Spell1Attack2", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell1Attack2", "JokeIntro"): Time(
+            time: 0.0,
+        ),
+        ("Spell1Attack2", "JokeLoop"): Time(
+            time: 0.0,
+        ),
+        ("Spell1Attack2", "KnockUp"): Time(
+            time: 0.0,
+        ),
+        ("Spell1Attack2", "LaughIntro"): Time(
+            time: 0.0,
+        ),
+        ("Spell1Attack2", "LaughLoop"): Time(
+            time: 0.0,
+        ),
+        ("Spell1Attack2", "Recall"): Time(
+            time: 0.02,
+        ),
+        ("Spell1Attack2", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Spell1Attack2", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Spell1Attack2", "RunBase"): TransitionClip(
+            clip_name: "Unk0x56006399",
+        ),
+        ("Spell1Attack2", "Spell1Attack2"): Time(
+            time: 0.0,
+        ),
+        ("Spell1Attack2", "Spell1Attack2ToIdle"): Time(
+            time: 0.0,
+        ),
+        ("Spell1Attack2", "TauntIntro"): Time(
+            time: 0.02,
+        ),
+        ("Spell1Attack2", "TauntLoop"): Time(
+            time: 0.0,
+        ),
+        ("Spell1Attack2", "Unk0x52d0d005"): TransitionClip(
+            clip_name: "Spell1Attack2ToIdle",
+        ),
+        ("Spell1Attack2", "Unk0x56006399"): Time(
+            time: 0.0,
+        ),
+        ("Spell1Attack2", "Unk0xf6ce4790"): TransitionClip(
+            clip_name: "Spell1Attack2ToIdle",
+        ),
+        ("Spell1Attack2ToIdle", "Attack1"): Time(
+            time: 0.02,
+        ),
+        ("Spell1Attack2ToIdle", "Attack1ToIdle"): TransitionClip(
+            clip_name: "Unk0x56006399",
+        ),
+        ("Spell1Attack2ToIdle", "Attack1ToRun"): TransitionClip(
+            clip_name: "Unk0x56006399",
+        ),
+        ("Spell1Attack2ToIdle", "Attack2"): Time(
+            time: 0.02,
+        ),
+        ("Spell1Attack2ToIdle", "Attack2ToIdle"): TransitionClip(
+            clip_name: "Unk0x56006399",
+        ),
+        ("Spell1Attack2ToIdle", "Attack2ToRun"): TransitionClip(
+            clip_name: "Unk0x56006399",
+        ),
+        ("Spell1Attack2ToIdle", "Crit"): Time(
+            time: 0.02,
+        ),
+        ("Spell1Attack2ToIdle", "Dance"): Time(
+            time: 0.0,
+        ),
+        ("Spell1Attack2ToIdle", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell1Attack2ToIdle", "IdleIn"): TransitionClip(
+            clip_name: "Unk0x56006399",
+        ),
+        ("Spell1Attack2ToIdle", "JokeIntro"): Time(
+            time: 0.0,
+        ),
+        ("Spell1Attack2ToIdle", "JokeLoop"): Time(
+            time: 0.0,
+        ),
+        ("Spell1Attack2ToIdle", "KnockUp"): Time(
+            time: 0.0,
+        ),
+        ("Spell1Attack2ToIdle", "LaughIntro"): Time(
+            time: 0.0,
+        ),
+        ("Spell1Attack2ToIdle", "LaughLoop"): Time(
+            time: 0.0,
+        ),
+        ("Spell1Attack2ToIdle", "Recall"): Time(
+            time: 0.02,
+        ),
+        ("Spell1Attack2ToIdle", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Spell1Attack2ToIdle", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Spell1Attack2ToIdle", "RunBase"): TransitionClip(
+            clip_name: "Unk0x56006399",
+        ),
+        ("Spell1Attack2ToIdle", "Spell1Attack2"): Time(
+            time: 0.0,
+        ),
+        ("Spell1Attack2ToIdle", "Spell1Attack2ToIdle"): Time(
+            time: 0.0,
+        ),
+        ("Spell1Attack2ToIdle", "TauntIntro"): Time(
+            time: 0.02,
+        ),
+        ("Spell1Attack2ToIdle", "TauntLoop"): Time(
+            time: 0.0,
+        ),
+        ("Spell1Attack2ToIdle", "Unk0x52d0d005"): TransitionClip(
+            clip_name: "Unk0x56006399",
+        ),
+        ("Spell1Attack2ToIdle", "Unk0x56006399"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Attack2ToIdle", "Unk0xb59cad6"): TransitionClip(
+            clip_name: "Unk0x56006399",
+        ),
+        ("Spell1Attack2ToIdle", "Unk0xf6ce4790"): TransitionClip(
+            clip_name: "Unk0x56006399",
+        ),
+        ("Spell1ToIdle", "Attack1"): Time(
+            time: 0.02,
+        ),
+        ("Spell1ToIdle", "Attack2"): Time(
+            time: 0.02,
+        ),
+        ("Spell1ToIdle", "Crit"): Time(
+            time: 0.02,
+        ),
+        ("Spell1ToIdle", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell1ToIdle", "JokeIntro"): Time(
+            time: 0.0,
+        ),
+        ("Spell1ToIdle", "JokeLoop"): Time(
+            time: 0.0,
+        ),
+        ("Spell1ToIdle", "KnockUp"): Time(
+            time: 0.0,
+        ),
+        ("Spell1ToIdle", "LaughIntro"): Time(
+            time: 0.0,
+        ),
+        ("Spell1ToIdle", "LaughLoop"): Time(
+            time: 0.0,
+        ),
+        ("Spell1ToIdle", "Recall"): Time(
+            time: 0.02,
+        ),
+        ("Spell1ToIdle", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Spell1ToIdle", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Spell1ToIdle", "RunBase"): TransitionClip(
+            clip_name: "Spell1ToRun",
+        ),
+        ("Spell1ToIdle", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("Spell1ToIdle", "Spell1ToIdle"): Time(
+            time: 0.0,
+        ),
+        ("Spell1ToIdle", "Spell1ToRun"): Time(
+            time: 0.1,
+        ),
+        ("Spell1ToIdle", "Spell2"): Time(
+            time: 0.0,
+        ),
+        ("Spell1ToIdle", "Spell3ToRun"): Time(
+            time: 0.08,
+        ),
+        ("Spell1ToIdle", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("Spell1ToIdle", "TauntIntro"): Time(
+            time: 0.02,
+        ),
+        ("Spell1ToIdle", "TauntLoop"): Time(
+            time: 0.0,
+        ),
+        ("Spell1ToIdle", "Unk0x52d0d005"): Time(
+            time: 0.0,
+        ),
+        ("Spell1ToIdle", "Unk0x6eb6e179"): Time(
+            time: 0.0,
+        ),
+        ("Spell1ToIdle", "Unk0xf6ce4790"): Time(
+            time: 0.0,
+        ),
+        ("Spell1ToRun", "Attack1"): Time(
+            time: 0.02,
+        ),
+        ("Spell1ToRun", "Attack2"): Time(
+            time: 0.02,
+        ),
+        ("Spell1ToRun", "Crit"): Time(
+            time: 0.02,
+        ),
+        ("Spell1ToRun", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell1ToRun", "JokeIntro"): Time(
+            time: 0.0,
+        ),
+        ("Spell1ToRun", "JokeLoop"): Time(
+            time: 0.0,
+        ),
+        ("Spell1ToRun", "KnockUp"): Time(
+            time: 0.0,
+        ),
+        ("Spell1ToRun", "LaughIntro"): Time(
+            time: 0.0,
+        ),
+        ("Spell1ToRun", "LaughLoop"): Time(
+            time: 0.0,
+        ),
+        ("Spell1ToRun", "Recall"): Time(
+            time: 0.02,
+        ),
+        ("Spell1ToRun", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Spell1ToRun", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Spell1ToRun", "RunBase"): Time(
+            time: 0.0,
+        ),
+        ("Spell1ToRun", "Spell2"): Time(
+            time: 0.0,
+        ),
+        ("Spell1ToRun", "Spell3ToRun"): Time(
+            time: 0.08,
+        ),
+        ("Spell1ToRun", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("Spell1ToRun", "TauntIntro"): Time(
+            time: 0.02,
+        ),
+        ("Spell1ToRun", "TauntLoop"): Time(
+            time: 0.0,
+        ),
+        ("Spell1ToRun", "Unk0x52d0d005"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("Spell1ToRun", "Unk0xf6ce4790"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("Spell2", "Attack1"): Time(
+            time: 0.02,
+        ),
+        ("Spell2", "Attack2"): Time(
+            time: 0.02,
+        ),
+        ("Spell2", "Crit"): Time(
+            time: 0.02,
+        ),
+        ("Spell2", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell2", "JokeIntro"): Time(
+            time: 0.0,
+        ),
+        ("Spell2", "JokeLoop"): Time(
+            time: 0.0,
+        ),
+        ("Spell2", "KnockUp"): Time(
+            time: 0.0,
+        ),
+        ("Spell2", "LaughIntro"): Time(
+            time: 0.0,
+        ),
+        ("Spell2", "LaughLoop"): Time(
+            time: 0.0,
+        ),
+        ("Spell2", "Recall"): Time(
+            time: 0.02,
+        ),
+        ("Spell2", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Spell2", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Spell2", "RunBase"): TransitionClip(
+            clip_name: "Spell2ToRun",
+        ),
+        ("Spell2", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("Spell2", "Spell1ToIdle"): Time(
+            time: 0.0,
+        ),
+        ("Spell2", "Spell2"): Time(
+            time: 0.0,
+        ),
+        ("Spell2", "Spell2ToIdle"): Time(
+            time: 0.0,
+        ),
+        ("Spell2", "Spell2ToRun"): Time(
+            time: 0.0,
+        ),
+        ("Spell2", "Spell3ToRun"): Time(
+            time: 0.08,
+        ),
+        ("Spell2", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("Spell2", "TauntIntro"): Time(
+            time: 0.02,
+        ),
+        ("Spell2", "TauntLoop"): Time(
+            time: 0.0,
+        ),
+        ("Spell2", "Unk0x52d0d005"): TransitionClip(
+            clip_name: "Spell2ToIdle",
+        ),
+        ("Spell2", "Unk0x6eb6e179"): Time(
+            time: 0.0,
+        ),
+        ("Spell2", "Unk0xf6ce4790"): TransitionClip(
+            clip_name: "Spell2ToIdle",
+        ),
+        ("Spell2ToIdle", "Attack1"): Time(
+            time: 0.02,
+        ),
+        ("Spell2ToIdle", "Attack2"): Time(
+            time: 0.02,
+        ),
+        ("Spell2ToIdle", "Crit"): Time(
+            time: 0.02,
+        ),
+        ("Spell2ToIdle", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell2ToIdle", "JokeIntro"): Time(
+            time: 0.0,
+        ),
+        ("Spell2ToIdle", "JokeLoop"): Time(
+            time: 0.0,
+        ),
+        ("Spell2ToIdle", "KnockUp"): Time(
+            time: 0.0,
+        ),
+        ("Spell2ToIdle", "LaughIntro"): Time(
+            time: 0.0,
+        ),
+        ("Spell2ToIdle", "LaughLoop"): Time(
+            time: 0.0,
+        ),
+        ("Spell2ToIdle", "Recall"): Time(
+            time: 0.02,
+        ),
+        ("Spell2ToIdle", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Spell2ToIdle", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Spell2ToIdle", "RunBase"): TransitionClip(
+            clip_name: "Spell2ToRun",
+        ),
+        ("Spell2ToIdle", "Spell2"): Time(
+            time: 0.0,
+        ),
+        ("Spell2ToIdle", "Spell2ToRun"): Time(
+            time: 0.0,
+        ),
+        ("Spell2ToIdle", "Spell3ToRun"): Time(
+            time: 0.08,
+        ),
+        ("Spell2ToIdle", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("Spell2ToIdle", "TauntIntro"): Time(
+            time: 0.02,
+        ),
+        ("Spell2ToIdle", "TauntLoop"): Time(
+            time: 0.0,
+        ),
+        ("Spell2ToIdle", "Unk0x52d0d005"): Time(
+            time: 0.0,
+        ),
+        ("Spell2ToIdle", "Unk0xf6ce4790"): Time(
+            time: 0.0,
+        ),
+        ("Spell2ToRun", "Attack1"): Time(
+            time: 0.02,
+        ),
+        ("Spell2ToRun", "Attack2"): Time(
+            time: 0.02,
+        ),
+        ("Spell2ToRun", "Crit"): Time(
+            time: 0.02,
+        ),
+        ("Spell2ToRun", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell2ToRun", "JokeIntro"): Time(
+            time: 0.0,
+        ),
+        ("Spell2ToRun", "JokeLoop"): Time(
+            time: 0.0,
+        ),
+        ("Spell2ToRun", "KnockUp"): Time(
+            time: 0.0,
+        ),
+        ("Spell2ToRun", "LaughIntro"): Time(
+            time: 0.0,
+        ),
+        ("Spell2ToRun", "LaughLoop"): Time(
+            time: 0.0,
+        ),
+        ("Spell2ToRun", "Recall"): Time(
+            time: 0.02,
+        ),
+        ("Spell2ToRun", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Spell2ToRun", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Spell2ToRun", "RunBase"): Time(
+            time: 0.0,
+        ),
+        ("Spell2ToRun", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("Spell2ToRun", "TauntIntro"): Time(
+            time: 0.02,
+        ),
+        ("Spell2ToRun", "TauntLoop"): Time(
+            time: 0.0,
+        ),
+        ("Spell2ToRun", "Unk0x52d0d005"): TransitionClip(
+            clip_name: "Spell2ToIdle",
+        ),
+        ("Spell2ToRun", "Unk0xf6ce4790"): TransitionClip(
+            clip_name: "Spell2ToIdle",
+        ),
+        ("Spell30", "Attack1"): Time(
+            time: 0.02,
+        ),
+        ("Spell30", "Attack2"): Time(
+            time: 0.02,
+        ),
+        ("Spell30", "Crit"): Time(
+            time: 0.02,
+        ),
+        ("Spell30", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell30", "JokeIntro"): Time(
+            time: 0.0,
+        ),
+        ("Spell30", "JokeLoop"): Time(
+            time: 0.0,
+        ),
+        ("Spell30", "KnockUp"): Time(
+            time: 0.0,
+        ),
+        ("Spell30", "LaughIntro"): Time(
+            time: 0.0,
+        ),
+        ("Spell30", "LaughLoop"): Time(
+            time: 0.0,
+        ),
+        ("Spell30", "Recall"): Time(
+            time: 0.02,
+        ),
+        ("Spell30", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Spell30", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Spell30", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("Spell30", "Spell1ToIdle"): Time(
+            time: 0.0,
+        ),
+        ("Spell30", "Spell2"): Time(
+            time: 0.0,
+        ),
+        ("Spell30", "Spell3ToRun"): Time(
+            time: 0.08,
+        ),
+        ("Spell30", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("Spell30", "TauntIntro"): Time(
+            time: 0.02,
+        ),
+        ("Spell30", "TauntLoop"): Time(
+            time: 0.0,
+        ),
+        ("Spell3180", "Attack1"): Time(
+            time: 0.02,
+        ),
+        ("Spell3180", "Attack2"): Time(
+            time: 0.02,
+        ),
+        ("Spell3180", "Crit"): Time(
+            time: 0.02,
+        ),
+        ("Spell3180", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell3180", "JokeIntro"): Time(
+            time: 0.0,
+        ),
+        ("Spell3180", "JokeLoop"): Time(
+            time: 0.0,
+        ),
+        ("Spell3180", "KnockUp"): Time(
+            time: 0.0,
+        ),
+        ("Spell3180", "LaughIntro"): Time(
+            time: 0.0,
+        ),
+        ("Spell3180", "LaughLoop"): Time(
+            time: 0.0,
+        ),
+        ("Spell3180", "Recall"): Time(
+            time: 0.02,
+        ),
+        ("Spell3180", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Spell3180", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Spell3180", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("Spell3180", "Spell1ToIdle"): Time(
+            time: 0.0,
+        ),
+        ("Spell3180", "Spell2"): Time(
+            time: 0.0,
+        ),
+        ("Spell3180", "Spell3ToRun"): Time(
+            time: 0.08,
+        ),
+        ("Spell3180", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("Spell3180", "TauntIntro"): Time(
+            time: 0.02,
+        ),
+        ("Spell3180", "TauntLoop"): Time(
+            time: 0.0,
+        ),
+        ("Spell390", "Attack1"): Time(
+            time: 0.02,
+        ),
+        ("Spell390", "Attack2"): Time(
+            time: 0.02,
+        ),
+        ("Spell390", "Crit"): Time(
+            time: 0.02,
+        ),
+        ("Spell390", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell390", "JokeIntro"): Time(
+            time: 0.0,
+        ),
+        ("Spell390", "JokeLoop"): Time(
+            time: 0.0,
+        ),
+        ("Spell390", "KnockUp"): Time(
+            time: 0.0,
+        ),
+        ("Spell390", "LaughIntro"): Time(
+            time: 0.0,
+        ),
+        ("Spell390", "LaughLoop"): Time(
+            time: 0.0,
+        ),
+        ("Spell390", "Recall"): Time(
+            time: 0.02,
+        ),
+        ("Spell390", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Spell390", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Spell390", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("Spell390", "Spell1ToIdle"): Time(
+            time: 0.0,
+        ),
+        ("Spell390", "Spell2"): Time(
+            time: 0.0,
+        ),
+        ("Spell390", "Spell3ToRun"): Time(
+            time: 0.08,
+        ),
+        ("Spell390", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("Spell390", "TauntIntro"): Time(
+            time: 0.02,
+        ),
+        ("Spell390", "TauntLoop"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Attack", "Attack1"): Time(
+            time: 0.02,
+        ),
+        ("Spell3Attack", "Attack2"): Time(
+            time: 0.02,
+        ),
+        ("Spell3Attack", "Crit"): Time(
+            time: 0.02,
+        ),
+        ("Spell3Attack", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Attack", "JokeIntro"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Attack", "JokeLoop"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Attack", "KnockUp"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Attack", "LaughIntro"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Attack", "LaughLoop"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Attack", "Recall"): Time(
+            time: 0.02,
+        ),
+        ("Spell3Attack", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Attack", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Attack", "RunBase"): TransitionClip(
+            clip_name: "Spell3ToRun",
+        ),
+        ("Spell3Attack", "RunHomeguard"): TransitionClip(
+            clip_name: "Spell3ToRun",
+        ),
+        ("Spell3Attack", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Attack", "Spell1ToIdle"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Attack", "Spell2"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Attack", "Spell3ToRun"): Time(
+            time: 0.08,
+        ),
+        ("Spell3Attack", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Attack", "TauntIntro"): Time(
+            time: 0.02,
+        ),
+        ("Spell3Attack", "TauntLoop"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Attack", "Unk0x6eb6e179"): Time(
+            time: 0.3,
+        ),
+        ("Spell3Idle", "Attack1"): Time(
+            time: 0.02,
+        ),
+        ("Spell3Idle", "Attack2"): Time(
+            time: 0.02,
+        ),
+        ("Spell3Idle", "Crit"): Time(
+            time: 0.02,
+        ),
+        ("Spell3Idle", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Idle", "JokeIntro"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Idle", "JokeLoop"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Idle", "KnockUp"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Idle", "LaughIntro"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Idle", "LaughLoop"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Idle", "Recall"): Time(
+            time: 0.02,
+        ),
+        ("Spell3Idle", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Idle", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Idle", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Idle", "Spell1ToIdle"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Idle", "Spell2"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Idle", "Spell3ToIdle"): Time(
+            time: 0.1,
+        ),
+        ("Spell3Idle", "Spell3ToRun"): Time(
+            time: 0.08,
+        ),
+        ("Spell3Idle", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Idle", "TauntIntro"): Time(
+            time: 0.02,
+        ),
+        ("Spell3Idle", "TauntLoop"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Idle", "Unk0x52d0d005"): TransitionClip(
+            clip_name: "Spell3ToIdle",
+        ),
+        ("Spell3Idle", "Unk0xf6ce4790"): TransitionClip(
+            clip_name: "Spell3ToIdle",
+        ),
+        ("Spell3ToIdle", "Attack1"): Time(
+            time: 0.02,
+        ),
+        ("Spell3ToIdle", "Attack2"): Time(
+            time: 0.02,
+        ),
+        ("Spell3ToIdle", "Crit"): Time(
+            time: 0.02,
+        ),
+        ("Spell3ToIdle", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell3ToIdle", "JokeIntro"): Time(
+            time: 0.0,
+        ),
+        ("Spell3ToIdle", "JokeLoop"): Time(
+            time: 0.0,
+        ),
+        ("Spell3ToIdle", "KnockUp"): Time(
+            time: 0.0,
+        ),
+        ("Spell3ToIdle", "LaughIntro"): Time(
+            time: 0.0,
+        ),
+        ("Spell3ToIdle", "LaughLoop"): Time(
+            time: 0.0,
+        ),
+        ("Spell3ToIdle", "Recall"): Time(
+            time: 0.02,
+        ),
+        ("Spell3ToIdle", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Spell3ToIdle", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Spell3ToIdle", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("Spell3ToIdle", "TauntIntro"): Time(
+            time: 0.02,
+        ),
+        ("Spell3ToIdle", "TauntLoop"): Time(
+            time: 0.0,
+        ),
+        ("Spell3ToIdle", "Unk0x52d0d005"): Time(
+            time: 0.0,
+        ),
+        ("Spell3ToIdle", "Unk0xf6ce4790"): Time(
+            time: 0.0,
+        ),
+        ("Spell3ToRun", "Attack1"): Time(
+            time: 0.02,
+        ),
+        ("Spell3ToRun", "Attack2"): Time(
+            time: 0.02,
+        ),
+        ("Spell3ToRun", "Crit"): Time(
+            time: 0.02,
+        ),
+        ("Spell3ToRun", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell3ToRun", "JokeIntro"): Time(
+            time: 0.0,
+        ),
+        ("Spell3ToRun", "JokeLoop"): Time(
+            time: 0.0,
+        ),
+        ("Spell3ToRun", "KnockUp"): Time(
+            time: 0.0,
+        ),
+        ("Spell3ToRun", "LaughIntro"): Time(
+            time: 0.0,
+        ),
+        ("Spell3ToRun", "LaughLoop"): Time(
+            time: 0.0,
+        ),
+        ("Spell3ToRun", "Recall"): Time(
+            time: 0.02,
+        ),
+        ("Spell3ToRun", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Spell3ToRun", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Spell3ToRun", "RunBase"): Time(
+            time: 0.0,
+        ),
+        ("Spell3ToRun", "Spell3ToRun"): Time(
+            time: 0.08,
+        ),
+        ("Spell3ToRun", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("Spell3ToRun", "TauntIntro"): Time(
+            time: 0.02,
+        ),
+        ("Spell3ToRun", "TauntLoop"): Time(
+            time: 0.0,
+        ),
+        ("Spell4", "Attack1"): Time(
+            time: 0.02,
+        ),
+        ("Spell4", "Attack2"): Time(
+            time: 0.02,
+        ),
+        ("Spell4", "Crit"): Time(
+            time: 0.02,
+        ),
+        ("Spell4", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell4", "JokeIntro"): Time(
+            time: 0.0,
+        ),
+        ("Spell4", "JokeLoop"): Time(
+            time: 0.0,
+        ),
+        ("Spell4", "KnockUp"): Time(
+            time: 0.0,
+        ),
+        ("Spell4", "LaughIntro"): Time(
+            time: 0.0,
+        ),
+        ("Spell4", "LaughLoop"): Time(
+            time: 0.0,
+        ),
+        ("Spell4", "Recall"): Time(
+            time: 0.02,
+        ),
+        ("Spell4", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Spell4", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Spell4", "RunBase"): TransitionClip(
+            clip_name: "Spell4ToRun",
+        ),
+        ("Spell4", "RunHomeguard"): TransitionClip(
+            clip_name: "Spell4ToRun",
+        ),
+        ("Spell4", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("Spell4", "Spell1ToIdle"): Time(
+            time: 0.0,
+        ),
+        ("Spell4", "Spell2"): Time(
+            time: 0.0,
+        ),
+        ("Spell4", "Spell3ToRun"): Time(
+            time: 0.08,
+        ),
+        ("Spell4", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("Spell4", "Spell4ToIdle"): Time(
+            time: 0.0,
+        ),
+        ("Spell4", "Spell4ToRun"): Time(
+            time: 0.0,
+        ),
+        ("Spell4", "TauntIntro"): Time(
+            time: 0.02,
+        ),
+        ("Spell4", "TauntLoop"): Time(
+            time: 0.0,
+        ),
+        ("Spell4", "Unk0x52d0d005"): TransitionClip(
+            clip_name: "Spell4ToIdle",
+        ),
+        ("Spell4", "Unk0x6eb6e179"): Time(
+            time: 0.0,
+        ),
+        ("Spell4", "Unk0xf6ce4790"): TransitionClip(
+            clip_name: "Spell4ToIdle",
+        ),
+        ("Spell4ToIdle", "Attack1"): Time(
+            time: 0.02,
+        ),
+        ("Spell4ToIdle", "Attack2"): Time(
+            time: 0.02,
+        ),
+        ("Spell4ToIdle", "Crit"): Time(
+            time: 0.02,
+        ),
+        ("Spell4ToIdle", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell4ToIdle", "JokeIntro"): Time(
+            time: 0.0,
+        ),
+        ("Spell4ToIdle", "JokeLoop"): Time(
+            time: 0.0,
+        ),
+        ("Spell4ToIdle", "KnockUp"): Time(
+            time: 0.0,
+        ),
+        ("Spell4ToIdle", "LaughIntro"): Time(
+            time: 0.0,
+        ),
+        ("Spell4ToIdle", "LaughLoop"): Time(
+            time: 0.0,
+        ),
+        ("Spell4ToIdle", "Recall"): Time(
+            time: 0.02,
+        ),
+        ("Spell4ToIdle", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Spell4ToIdle", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Spell4ToIdle", "RunBase"): TransitionClip(
+            clip_name: "Spell4ToRun",
+        ),
+        ("Spell4ToIdle", "RunHomeguard"): TransitionClip(
+            clip_name: "Spell4ToRun",
+        ),
+        ("Spell4ToIdle", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("Spell4ToIdle", "Spell1ToIdle"): Time(
+            time: 0.0,
+        ),
+        ("Spell4ToIdle", "Spell2"): Time(
+            time: 0.0,
+        ),
+        ("Spell4ToIdle", "Spell3ToRun"): Time(
+            time: 0.08,
+        ),
+        ("Spell4ToIdle", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("Spell4ToIdle", "TauntIntro"): Time(
+            time: 0.02,
+        ),
+        ("Spell4ToIdle", "TauntLoop"): Time(
+            time: 0.0,
+        ),
+        ("Spell4ToIdle", "Unk0x52d0d005"): Time(
+            time: 0.0,
+        ),
+        ("Spell4ToIdle", "Unk0xf6ce4790"): Time(
+            time: 0.0,
+        ),
+        ("Spell4ToRun", "Attack1"): Time(
+            time: 0.02,
+        ),
+        ("Spell4ToRun", "Attack2"): Time(
+            time: 0.02,
+        ),
+        ("Spell4ToRun", "Crit"): Time(
+            time: 0.02,
+        ),
+        ("Spell4ToRun", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell4ToRun", "JokeIntro"): Time(
+            time: 0.0,
+        ),
+        ("Spell4ToRun", "JokeLoop"): Time(
+            time: 0.0,
+        ),
+        ("Spell4ToRun", "KnockUp"): Time(
+            time: 0.0,
+        ),
+        ("Spell4ToRun", "LaughIntro"): Time(
+            time: 0.0,
+        ),
+        ("Spell4ToRun", "LaughLoop"): Time(
+            time: 0.0,
+        ),
+        ("Spell4ToRun", "Recall"): Time(
+            time: 0.02,
+        ),
+        ("Spell4ToRun", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Spell4ToRun", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Spell4ToRun", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("Spell4ToRun", "Spell1ToIdle"): Time(
+            time: 0.0,
+        ),
+        ("Spell4ToRun", "Spell2"): Time(
+            time: 0.0,
+        ),
+        ("Spell4ToRun", "Spell3ToRun"): Time(
+            time: 0.08,
+        ),
+        ("Spell4ToRun", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("Spell4ToRun", "TauntIntro"): Time(
+            time: 0.02,
+        ),
+        ("Spell4ToRun", "TauntLoop"): Time(
+            time: 0.0,
+        ),
+        ("Spell4ToRun", "Unk0x52d0d005"): TransitionClip(
+            clip_name: "Spell4ToIdle",
+        ),
+        ("Spell4ToRun", "Unk0xf6ce4790"): TransitionClip(
+            clip_name: "Spell4ToIdle",
+        ),
+        ("Stunned", "Attack1"): Time(
+            time: 0.02,
+        ),
+        ("Stunned", "Attack2"): Time(
+            time: 0.02,
+        ),
+        ("Stunned", "Crit"): Time(
+            time: 0.02,
+        ),
+        ("Stunned", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Stunned", "JokeIntro"): Time(
+            time: 0.0,
+        ),
+        ("Stunned", "JokeLoop"): Time(
+            time: 0.0,
+        ),
+        ("Stunned", "KnockUp"): Time(
+            time: 0.0,
+        ),
+        ("Stunned", "LaughIntro"): Time(
+            time: 0.0,
+        ),
+        ("Stunned", "LaughLoop"): Time(
+            time: 0.0,
+        ),
+        ("Stunned", "Recall"): Time(
+            time: 0.02,
+        ),
+        ("Stunned", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Stunned", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Stunned", "Spell3ToRun"): Time(
+            time: 0.08,
+        ),
+        ("Stunned", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("Stunned", "TauntIntro"): Time(
+            time: 0.02,
+        ),
+        ("Stunned", "TauntLoop"): Time(
+            time: 0.0,
+        ),
+        ("TauntIntro", "Attack1"): Time(
+            time: 0.02,
+        ),
+        ("TauntIntro", "Attack2"): Time(
+            time: 0.02,
+        ),
+        ("TauntIntro", "Crit"): Time(
+            time: 0.02,
+        ),
+        ("TauntIntro", "Death"): Time(
+            time: 0.0,
+        ),
+        ("TauntIntro", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("TauntIntro", "TauntIntro"): Time(
+            time: 0.02,
+        ),
+        ("TauntIntro", "TauntLoop"): Time(
+            time: 0.0,
+        ),
+        ("TauntLoop", "Attack1"): Time(
+            time: 0.02,
+        ),
+        ("TauntLoop", "Attack2"): Time(
+            time: 0.02,
+        ),
+        ("TauntLoop", "Crit"): Time(
+            time: 0.02,
+        ),
+        ("TauntLoop", "Death"): Time(
+            time: 0.0,
+        ),
+        ("TauntLoop", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("TauntLoop", "TauntIntro"): Time(
+            time: 0.02,
+        ),
+        ("TauntLoop", "TauntLoop"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x18556bad", "Attack1"): Time(
+            time: 0.02,
+        ),
+        ("Unk0x18556bad", "Attack2"): Time(
+            time: 0.02,
+        ),
+        ("Unk0x18556bad", "Crit"): Time(
+            time: 0.02,
+        ),
+        ("Unk0x18556bad", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x18556bad", "JokeIntro"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x18556bad", "JokeLoop"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x18556bad", "KnockUp"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x18556bad", "LaughIntro"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x18556bad", "LaughLoop"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x18556bad", "Recall"): Time(
+            time: 0.02,
+        ),
+        ("Unk0x18556bad", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x18556bad", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x18556bad", "TauntIntro"): Time(
+            time: 0.02,
+        ),
+        ("Unk0x18556bad", "TauntLoop"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x46745975", "Attack1"): Time(
+            time: 0.02,
+        ),
+        ("Unk0x46745975", "Attack2"): Time(
+            time: 0.02,
+        ),
+        ("Unk0x46745975", "Crit"): Time(
+            time: 0.02,
+        ),
+        ("Unk0x46745975", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x46745975", "JokeIntro"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x46745975", "JokeLoop"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x46745975", "KnockUp"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x46745975", "LaughIntro"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x46745975", "LaughLoop"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x46745975", "Recall"): Time(
+            time: 0.02,
+        ),
+        ("Unk0x46745975", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x46745975", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x46745975", "TauntIntro"): Time(
+            time: 0.02,
+        ),
+        ("Unk0x46745975", "TauntLoop"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x52d0d005", "Attack1"): Time(
+            time: 0.02,
+        ),
+        ("Unk0x52d0d005", "Attack2"): Time(
+            time: 0.02,
+        ),
+        ("Unk0x52d0d005", "Crit"): Time(
+            time: 0.02,
+        ),
+        ("Unk0x52d0d005", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x52d0d005", "JokeIntro"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x52d0d005", "JokeLoop"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x52d0d005", "KnockUp"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x52d0d005", "LaughIntro"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x52d0d005", "LaughLoop"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x52d0d005", "Recall"): Time(
+            time: 0.02,
+        ),
+        ("Unk0x52d0d005", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x52d0d005", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x52d0d005", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x52d0d005", "Spell1ToIdle"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x52d0d005", "Spell2"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x52d0d005", "Spell3ToRun"): Time(
+            time: 0.08,
+        ),
+        ("Unk0x52d0d005", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x52d0d005", "TauntIntro"): Time(
+            time: 0.02,
+        ),
+        ("Unk0x52d0d005", "TauntLoop"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x52d0d005", "Unk0x52d0d005"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x52d0d005", "Unk0x6eb6e179"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x52d0d005", "Unk0xf6ce4790"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x56006399", "Attack1"): Time(
+            time: 0.02,
+        ),
+        ("Unk0x56006399", "Attack2"): Time(
+            time: 0.02,
+        ),
+        ("Unk0x56006399", "Crit"): Time(
+            time: 0.02,
+        ),
+        ("Unk0x56006399", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x56006399", "JokeIntro"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x56006399", "JokeLoop"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x56006399", "KnockUp"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x56006399", "LaughIntro"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x56006399", "LaughLoop"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x56006399", "Recall"): Time(
+            time: 0.02,
+        ),
+        ("Unk0x56006399", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x56006399", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x56006399", "TauntIntro"): Time(
+            time: 0.02,
+        ),
+        ("Unk0x56006399", "TauntLoop"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x56006399", "Unk0x52d0d005"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("Unk0x56006399", "Unk0xf6ce4790"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("Unk0x6eb6e179", "Attack1"): Time(
+            time: 0.02,
+        ),
+        ("Unk0x6eb6e179", "Attack2"): Time(
+            time: 0.02,
+        ),
+        ("Unk0x6eb6e179", "Crit"): Time(
+            time: 0.02,
+        ),
+        ("Unk0x6eb6e179", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x6eb6e179", "JokeIntro"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x6eb6e179", "JokeLoop"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x6eb6e179", "KnockUp"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x6eb6e179", "LaughIntro"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x6eb6e179", "LaughLoop"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x6eb6e179", "Recall"): Time(
+            time: 0.02,
+        ),
+        ("Unk0x6eb6e179", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x6eb6e179", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x6eb6e179", "RunBase"): TransitionClip(
+            clip_name: "Spell3ToRun",
+        ),
+        ("Unk0x6eb6e179", "RunHomeguard"): TransitionClip(
+            clip_name: "Spell3ToRun",
+        ),
+        ("Unk0x6eb6e179", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x6eb6e179", "Spell1ToIdle"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x6eb6e179", "Spell2"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x6eb6e179", "Spell3ToRun"): Time(
+            time: 0.08,
+        ),
+        ("Unk0x6eb6e179", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x6eb6e179", "TauntIntro"): Time(
+            time: 0.02,
+        ),
+        ("Unk0x6eb6e179", "TauntLoop"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x6eb6e179", "Unk0x6eb6e179"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x7b02878d", "Attack1"): Time(
+            time: 0.02,
+        ),
+        ("Unk0x7b02878d", "Attack2"): Time(
+            time: 0.02,
+        ),
+        ("Unk0x7b02878d", "Crit"): Time(
+            time: 0.02,
+        ),
+        ("Unk0x7b02878d", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x7b02878d", "JokeIntro"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x7b02878d", "JokeLoop"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x7b02878d", "KnockUp"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x7b02878d", "LaughIntro"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x7b02878d", "LaughLoop"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x7b02878d", "Recall"): Time(
+            time: 0.02,
+        ),
+        ("Unk0x7b02878d", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x7b02878d", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x7b02878d", "TauntIntro"): Time(
+            time: 0.02,
+        ),
+        ("Unk0x7b02878d", "TauntLoop"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x9cbc4532", "Attack1"): Time(
+            time: 0.02,
+        ),
+        ("Unk0x9cbc4532", "Attack2"): Time(
+            time: 0.02,
+        ),
+        ("Unk0x9cbc4532", "Crit"): Time(
+            time: 0.02,
+        ),
+        ("Unk0x9cbc4532", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x9cbc4532", "JokeIntro"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x9cbc4532", "JokeLoop"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x9cbc4532", "KnockUp"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x9cbc4532", "LaughIntro"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x9cbc4532", "LaughLoop"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x9cbc4532", "Recall"): Time(
+            time: 0.02,
+        ),
+        ("Unk0x9cbc4532", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x9cbc4532", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x9cbc4532", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x9cbc4532", "TauntIntro"): Time(
+            time: 0.02,
+        ),
+        ("Unk0x9cbc4532", "TauntLoop"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xb59cad6", "Attack1"): Time(
+            time: 0.02,
+        ),
+        ("Unk0xb59cad6", "Attack2"): Time(
+            time: 0.02,
+        ),
+        ("Unk0xb59cad6", "Crit"): Time(
+            time: 0.02,
+        ),
+        ("Unk0xb59cad6", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xb59cad6", "JokeIntro"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xb59cad6", "JokeLoop"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xb59cad6", "KnockUp"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xb59cad6", "LaughIntro"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xb59cad6", "LaughLoop"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xb59cad6", "Recall"): Time(
+            time: 0.02,
+        ),
+        ("Unk0xb59cad6", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xb59cad6", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xb59cad6", "TauntIntro"): Time(
+            time: 0.02,
+        ),
+        ("Unk0xb59cad6", "TauntLoop"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xd1011199", "Attack1"): Time(
+            time: 0.02,
+        ),
+        ("Unk0xd1011199", "Attack2"): Time(
+            time: 0.02,
+        ),
+        ("Unk0xd1011199", "Crit"): Time(
+            time: 0.02,
+        ),
+        ("Unk0xd1011199", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xd1011199", "JokeIntro"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xd1011199", "JokeLoop"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xd1011199", "KnockUp"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xd1011199", "LaughIntro"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xd1011199", "LaughLoop"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xd1011199", "Recall"): Time(
+            time: 0.02,
+        ),
+        ("Unk0xd1011199", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xd1011199", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xd1011199", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xd1011199", "TauntIntro"): Time(
+            time: 0.02,
+        ),
+        ("Unk0xd1011199", "TauntLoop"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xf6ce4790", "Attack1"): Time(
+            time: 0.02,
+        ),
+        ("Unk0xf6ce4790", "Attack2"): Time(
+            time: 0.02,
+        ),
+        ("Unk0xf6ce4790", "Crit"): Time(
+            time: 0.02,
+        ),
+        ("Unk0xf6ce4790", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xf6ce4790", "JokeIntro"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xf6ce4790", "JokeLoop"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xf6ce4790", "KnockUp"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xf6ce4790", "LaughIntro"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xf6ce4790", "LaughLoop"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xf6ce4790", "Recall"): Time(
+            time: 0.02,
+        ),
+        ("Unk0xf6ce4790", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xf6ce4790", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xf6ce4790", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xf6ce4790", "Spell1ToIdle"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xf6ce4790", "Spell2"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xf6ce4790", "Spell3ToRun"): Time(
+            time: 0.08,
+        ),
+        ("Unk0xf6ce4790", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xf6ce4790", "TauntIntro"): Time(
+            time: 0.02,
+        ),
+        ("Unk0xf6ce4790", "TauntLoop"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xf6ce4790", "Unk0x52d0d005"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xf6ce4790", "Unk0x6eb6e179"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xf6ce4790", "Unk0xf6ce4790"): Time(
+            time: 0.0,
+        ),
+    },
+)

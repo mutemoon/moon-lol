@@ -1,7 +1,7 @@
 (
   resources: {},
   entities: {
-    4294967265: (
+    4294967262: (
       components: {
         "bevy_camera::visibility::Visibility": Inherited,
         "bevy_world_serialization::components::WorldAssetRoot": (Path("characters/milio/skins/skin0.glb#Scene0")),

@@ -45,6 +45,7 @@ pub fn load_animation_file(value: AnimationFile) -> ConfigAnimationClip {
                 translates,
                 rotations,
                 scales,
+                mask_weights: None,
             }
         }
         AnimationFile::Uncompressed(uncompressed) => match uncompressed.data {
@@ -92,6 +93,7 @@ pub fn load_animation_file(value: AnimationFile) -> ConfigAnimationClip {
                     translates,
                     rotations,
                     scales,
+                    mask_weights: None,
                 }
             }
             UncompressedData::V4(data) => {
@@ -138,6 +140,7 @@ pub fn load_animation_file(value: AnimationFile) -> ConfigAnimationClip {
                     translates,
                     rotations,
                     scales,
+                    mask_weights: None,
                 }
             }
             UncompressedData::V5(data) => {
@@ -193,6 +196,7 @@ pub fn load_animation_file(value: AnimationFile) -> ConfigAnimationClip {
                     translates,
                     rotations,
                     scales,
+                    mask_weights: None,
                 }
             }
         },

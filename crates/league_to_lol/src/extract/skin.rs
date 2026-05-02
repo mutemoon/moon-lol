@@ -11,7 +11,7 @@ use league_file::mesh_skinned::LeagueSkinnedMesh;
 use league_file::skeleton::LeagueSkeleton;
 use league_loader::game::{Data, LeagueLoader, PropGroup};
 use league_loader::prop_bin::LeagueWadLoaderTrait;
-use lol_base::animation::{ConfigAnimationClip, LOLAnimationGraph, LOLAnimationGraphHandler};
+use lol_base::animation::{ConfigAnimationClip, LOLAnimationGraph, LOLAnimationGraphHandle};
 use lol_base::character::{HealthBar, Skin};
 use ron::ser::{PrettyConfig, to_string_pretty};
 
@@ -199,6 +199,7 @@ pub fn extract_skin_for_champion(
     app.add_plugins(AssetPlugin::default());
     app.add_plugins(TaskPoolPlugin::default());
 
+    app.init_asset::<AnimationGraph>();
     app.init_asset::<AnimationClip>();
     app.init_asset::<WorldAsset>();
     app.init_asset::<LOLAnimationGraph>();
@@ -238,7 +239,12 @@ pub fn extract_skin_for_champion(
     // 如果有动画，创建 AnimationHandler
     let animation_handler = animation_ron_path.map(|anim_path| {
         let anim_handle: Handle<LOLAnimationGraph> = asset_server.load(&anim_path);
-        LOLAnimationGraphHandler(anim_handle)
+        let anim_graph_handle =
+            asset_server.load::<AnimationGraph>(&format!("{}#animation_graph", anim_path));
+        (
+            LOLAnimationGraphHandle(anim_handle),
+            AnimationGraphHandle(anim_graph_handle),
+        )
     });
 
     let mut entity_builder = world.spawn((
@@ -329,7 +335,16 @@ fn load_animations_for_skin(
         };
 
         // 转换为 ConfigAnimationClip
-        let clip_data = load_animation_file(anm_file);
+        let mut clip_data = load_animation_file(anm_file);
+
+        // 附加蒙版数据（m_mask_data_map）
+        if let Some(mask_name) = atomic_clip.m_mask_data_name {
+            if let Some(mask_map) = &anim_graph_data.m_mask_data_map {
+                if let Some(mask_data) = mask_map.get(&mask_name) {
+                    clip_data.mask_weights = Some(mask_data.m_weight_list.clone());
+                }
+            }
+        }
 
         animations.push((*hash, clip_data));
     }

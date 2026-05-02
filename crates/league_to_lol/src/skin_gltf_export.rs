@@ -159,12 +159,13 @@ pub fn export_skin_to_glb(
             skin: None,
         };
         builder.nodes.push(node);
+        builder.root_node_indices.push(node_idx);
         (node_idx, None)
     };
 
     // 添加动画
     for (name, clip) in animations {
-        builder.add_animation(clip, &hash_to_type_name(name, hashes));
+        builder.add_animation(clip, &hash_to_type_name(name, hashes), skeleton);
     }
 
     builder.write_to_glb(output_path)
@@ -183,6 +184,34 @@ struct SkinGltfBuilder {
     skins: Vec<gltf::json::skin::Skin>,
     root_node_indices: Vec<u32>,
     joint_hash_to_node: HashMap<u32, u32>,
+}
+
+/// 从 ConfigAnimationClip 的 mask_weights + 骨架构建 joint_hash → max_weight 映射
+/// 返回 None 表示无蒙版（全部关节驱动）
+fn build_joint_mask_map(
+    clip: &ConfigAnimationClip,
+    skeleton: &LeagueSkeleton,
+) -> Option<HashMap<u32, f32>> {
+    let weights = clip.mask_weights.as_ref()?;
+    let influences = &skeleton.modern_data.influences;
+    let joints = &skeleton.modern_data.joints;
+
+    let mut joint_to_max_weight: HashMap<i16, f32> = HashMap::new();
+    for (skin_bone_idx, &weight) in weights.iter().enumerate() {
+        if let Some(&joint_idx) = influences.get(skin_bone_idx) {
+            if joint_idx >= 0 && (joint_idx as usize) < joints.len() {
+                let max_w = joint_to_max_weight.entry(joint_idx).or_insert(0.0);
+                *max_w = max_w.max(weight);
+            }
+        }
+    }
+
+    let mut hash_to_weight = HashMap::new();
+    for (&joint_idx, &weight) in &joint_to_max_weight {
+        let joint_hash = hash_joint(&joints[joint_idx as usize].name);
+        hash_to_weight.insert(joint_hash, weight);
+    }
+    Some(hash_to_weight)
 }
 
 impl SkinGltfBuilder {
@@ -215,10 +244,6 @@ impl SkinGltfBuilder {
         for joint in joints {
             let node_idx = self.nodes.len() as u32;
             joint_vec_index_to_node.push(node_idx);
-
-            if joint.parent_index == -1 {
-                self.root_node_indices.push(node_idx);
-            }
 
             let (scale, rotation, translation) =
                 joint.local_transform.to_scale_rotation_translation();
@@ -263,6 +288,14 @@ impl SkinGltfBuilder {
             }
         }
 
+        // 收集原始骨架的根关节（parent_index == -1）
+        let skeleton_root_indices: Vec<u32> = joints
+            .iter()
+            .enumerate()
+            .filter(|(_, j)| j.parent_index == -1)
+            .map(|(i, _)| joint_vec_index_to_node[i])
+            .collect();
+
         // 原始代码逻辑: skin.joints 和 IBM 都按 influences 顺序
         // skin.joints[i] = index_to_entity[influences[i]]
         // IBM[i] = joints[influences[i]].inverse_bind_transform
@@ -273,7 +306,7 @@ impl SkinGltfBuilder {
 
         let ibm_accessor_idx = self.add_inverse_bind_matrices_ordered_by_influences(skeleton)?;
 
-        // 创建 Skin
+        // 创建 Skin（skeleton 稍后设置为统一根节点）
         let skin_idx = self.skins.len() as u32;
         let skin = JsonSkin {
             extensions: None,
@@ -284,13 +317,12 @@ impl SkinGltfBuilder {
                 .map(|&i| Index::new(i))
                 .collect(),
             name: Some("armature".to_string()),
-            skeleton: Some(Index::new(0)), // 根节点作为 skeleton root
+            skeleton: None, // 将在创建统一根节点后设置
         };
         self.skins.push(skin);
 
-        // 创建 mesh 节点，关联到 skin，mesh 节点也是 scene 根节点
+        // 创建 mesh 节点，关联到 skin
         let mesh_node_idx = self.nodes.len() as u32;
-        self.root_node_indices.push(mesh_node_idx);
         let node = Node {
             name: Some("skin_node".to_string()),
             camera: None,
@@ -306,6 +338,36 @@ impl SkinGltfBuilder {
             skin: Some(Index::new(skin_idx)),
         };
         self.nodes.push(node);
+
+        // 创建统一的根节点，父所有骨架根关节 + mesh 节点
+        let root_node_idx = self.nodes.len() as u32;
+        let mut root_children: Vec<Index<Node>> = skeleton_root_indices
+            .iter()
+            .map(|&i| Index::new(i))
+            .collect();
+        root_children.push(Index::new(mesh_node_idx));
+
+        let root_node = Node {
+            name: Some("root".to_string()),
+            camera: None,
+            children: Some(root_children),
+            extensions: None,
+            extras: Default::default(),
+            matrix: None,
+            mesh: None,
+            rotation: None,
+            scale: None,
+            translation: None,
+            weights: None,
+            skin: None,
+        };
+        self.nodes.push(root_node);
+
+        // 更新 Skin 的 skeleton 指向统一根节点
+        self.skins[skin_idx as usize].skeleton = Some(Index::new(root_node_idx));
+
+        // 场景根节点只有一个：统一根节点
+        self.root_node_indices.push(root_node_idx);
 
         Ok((mesh_node_idx, skin_idx))
     }
@@ -362,19 +424,39 @@ impl SkinGltfBuilder {
         Ok(accessor_idx)
     }
 
-    fn add_animation(&mut self, clip: &ConfigAnimationClip, name: &str) {
+    fn add_animation(
+        &mut self,
+        clip: &ConfigAnimationClip,
+        name: &str,
+        skeleton: Option<&LeagueSkeleton>,
+    ) {
         let mut samplers = Vec::new();
         let mut channels = Vec::new();
 
+        let mask_map = skeleton.and_then(|skel| build_joint_mask_map(clip, skel));
+
         for joint_idx in 0..clip.joint_hashes.len() {
+            // 蒙版过滤：weight == 0 的关节不写 animation channel，留在 rest pose
+            if let Some(ref mask) = mask_map {
+                match mask.get(&clip.joint_hashes[joint_idx]) {
+                    Some(&w) if w == 0.0 => continue,
+                    _ => {}
+                }
+            }
             self.process_joint_channels(clip, joint_idx, &mut samplers, &mut channels);
         }
 
         if samplers.is_empty() {
-            // 添加一个"静止"动画：单关键帧，不改变任何值
-            let time = 0.0_f32;
-            let input_idx = self.add_float_accessor(&[time]);
-            let output_idx = self.add_vec4_accessor(&[[0.0, 0.0, 0.0, 1.0]], None);
+            println!(
+                "[gltf_export] Animation '{}': ALL channels filtered out, using idle fallback",
+                name
+            );
+            // Use 2 keyframes so Bevy creates an UnevenSampleAutoCurve with finite domain,
+            // which extends AnimationClip::duration > 0 and prevents seek_time NaN.
+            let idle_times = [0.0_f32, 0.0001_f32];
+            let idle_values = [[0.0, 0.0, 0.0, 1.0], [0.0, 0.0, 0.0, 1.0]];
+            let input_idx = self.add_float_accessor(&idle_times);
+            let output_idx = self.add_vec4_accessor(&idle_values, None);
             samplers.push(Sampler {
                 input: Index::new(input_idx),
                 interpolation: Checked::Valid(Interpolation::Linear),
@@ -462,6 +544,42 @@ impl SkinGltfBuilder {
         }
     }
 
+    /// Sanitize keyframe data: filter NaN/Inf, sort by time, deduplicate, and ensure
+    /// strictly increasing timestamps. Returns None if fewer than 2 valid keyframes remain.
+    fn sanitize_keyframes<T: Copy>(times: &[f32], values: &[T]) -> Option<(Vec<f32>, Vec<T>)> {
+        // Pair times and values, filtering out non-finite timestamps
+        let mut pairs: Vec<(f32, T)> = times
+            .iter()
+            .copied()
+            .zip(values.iter().copied())
+            .filter(|(t, _)| t.is_finite())
+            .collect();
+
+        if pairs.len() < 2 {
+            return None;
+        }
+
+        pairs.sort_by(|(a, _), (b, _)| a.total_cmp(b));
+
+        let mut clean_times = Vec::with_capacity(pairs.len());
+        let mut clean_values = Vec::with_capacity(pairs.len());
+
+        for (t, v) in pairs {
+            if let Some(&last_t) = clean_times.last() {
+                if t <= last_t {
+                    clean_times.push(last_t + 0.0001);
+                } else {
+                    clean_times.push(t);
+                }
+            } else {
+                clean_times.push(t);
+            }
+            clean_values.push(v);
+        }
+
+        Some((clean_times, clean_values))
+    }
+
     fn push_channel(
         &mut self,
         node_idx: u32,
@@ -471,8 +589,11 @@ impl SkinGltfBuilder {
         samplers: &mut Vec<Sampler>,
         channels: &mut Vec<Channel>,
     ) {
-        let input_idx = self.add_float_accessor(times);
-        let output_idx = self.add_vec3_accessor(values, false, None);
+        let Some((clean_times, clean_values)) = Self::sanitize_keyframes(times, values) else {
+            return;
+        };
+        let input_idx = self.add_float_accessor(&clean_times);
+        let output_idx = self.add_vec3_accessor(&clean_values, false, None);
         let sampler_idx = samplers.len() as u32;
 
         samplers.push(Sampler {
@@ -505,8 +626,11 @@ impl SkinGltfBuilder {
         samplers: &mut Vec<Sampler>,
         channels: &mut Vec<Channel>,
     ) {
-        let input_idx = self.add_float_accessor(times);
-        let output_idx = self.add_vec4_accessor(values, None);
+        let Some((clean_times, clean_values)) = Self::sanitize_keyframes(times, values) else {
+            return;
+        };
+        let input_idx = self.add_float_accessor(&clean_times);
+        let output_idx = self.add_vec4_accessor(&clean_values, None);
         let sampler_idx = samplers.len() as u32;
 
         samplers.push(Sampler {
@@ -531,30 +655,14 @@ impl SkinGltfBuilder {
     }
 
     fn add_float_accessor(&mut self, data: &[f32]) -> u32 {
-        // Ensure strictly increasing times for glTF animation validity
-        let mut times: Vec<f32> = Vec::with_capacity(data.len());
-        for (i, &t) in data.iter().enumerate() {
-            if i == 0 {
-                times.push(t);
-            } else {
-                // Add small epsilon to ensure strictly increasing
-                let prev = times[i - 1];
-                if t <= prev {
-                    times.push(prev + 0.0001);
-                } else {
-                    times.push(t);
-                }
-            }
-        }
-
         self.align_to_4();
         let offset = self.buffer_data.len();
 
-        for &v in &times {
+        for &v in data {
             self.buffer_data.extend_from_slice(&v.to_le_bytes());
         }
 
-        let byte_length = times.len() * 4;
+        let byte_length = data.len() * 4;
         let view_idx = self.buffer_views.len() as u32;
         self.buffer_views.push(View {
             name: None,
@@ -569,15 +677,15 @@ impl SkinGltfBuilder {
 
         // Compute min/max for animation input accessors (required by spec)
         // For SCALAR type, min/max must be arrays with one element
-        let min_val = times.iter().cloned().fold(f32::MAX, f32::min);
-        let max_val = times.iter().cloned().fold(f32::MIN, f32::max);
+        let min_val = data.iter().cloned().fold(f32::MAX, f32::min);
+        let max_val = data.iter().cloned().fold(f32::MIN, f32::max);
 
         let accessor_idx = self.accessors.len() as u32;
         self.accessors.push(Accessor {
             buffer_view: Some(Index::new(view_idx)),
             byte_offset: Some(USize64(0)),
             component_type: Checked::Valid(GenericComponentType(DataType::F32)),
-            count: USize64(times.len() as u64),
+            count: USize64(data.len() as u64),
             type_: Checked::Valid(Type::Scalar),
             extensions: None,
             extras: Default::default(),

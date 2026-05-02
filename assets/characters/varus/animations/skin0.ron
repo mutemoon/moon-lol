@@ -1,0 +1,393 @@
+(
+    gltf_path: "characters/varus/skins/skin0.glb",
+    hash_to_node: {
+        "Attack": Selector(
+            probably_nodes: [
+                (
+                    key: "Attack1",
+                    value: 1.0,
+                ),
+                (
+                    key: "Attack2",
+                    value: 1.0,
+                ),
+            ],
+        ),
+        "Attack1": Clip(
+            node_index: 3,
+        ),
+        "Attack2": Clip(
+            node_index: 6,
+        ),
+        "Channel": Clip(
+            node_index: 1,
+        ),
+        "ChannelWndup": Clip(
+            node_index: 10,
+        ),
+        "Crit": Clip(
+            node_index: 9,
+        ),
+        "Dance": Clip(
+            node_index: 22,
+        ),
+        "Death": Clip(
+            node_index: 18,
+        ),
+        "Idle1": ConditionBool(
+            updater: LogicDriverBool,
+            true_node: "Spell1Idle",
+            false_node: "Unk0x2f4723e4",
+        ),
+        "Joke": Clip(
+            node_index: 19,
+        ),
+        "Laugh": Clip(
+            node_index: 14,
+        ),
+        "Recall": Sequence(
+            hashes: [
+                "Unk0x120aa0ea",
+                "Unk0x56f6d84b",
+            ],
+        ),
+        "Run": ConditionFloat(
+            updater: MoveSpeed,
+            conditions: [
+                (
+                    key: "RunNormal",
+                    value: 0.0,
+                ),
+                (
+                    key: "RunFast",
+                    value: 375.0,
+                ),
+            ],
+        ),
+        "RunFast": Clip(
+            node_index: 11,
+        ),
+        "RunNormal": Clip(
+            node_index: 20,
+        ),
+        "Spell1": Clip(
+            node_index: 12,
+        ),
+        "Spell1Fire": Clip(
+            node_index: 21,
+        ),
+        "Spell1Idle": Clip(
+            node_index: 5,
+        ),
+        "Spell1Walk": Clip(
+            node_index: 2,
+        ),
+        "Spell3": Clip(
+            node_index: 13,
+        ),
+        "Spell4": Clip(
+            node_index: 15,
+        ),
+        "Taunt": Clip(
+            node_index: 17,
+        ),
+        "Unk0x120aa0ea": Clip(
+            node_index: 0,
+        ),
+        "Unk0x2f4723e4": Selector(
+            probably_nodes: [
+                (
+                    key: "Unk0x120aa0ea",
+                    value: 20.0,
+                ),
+                (
+                    key: "Unk0xb99d8609",
+                    value: 10.0,
+                ),
+                (
+                    key: "Unk0x95578268",
+                    value: 10.0,
+                ),
+                (
+                    key: "Unk0x56f6d84b",
+                    value: 60.0,
+                ),
+            ],
+        ),
+        "Unk0x56f6d84b": Clip(
+            node_index: 4,
+        ),
+        "Unk0x72f76bc2": Clip(
+            node_index: 7,
+        ),
+        "Unk0x95578268": Clip(
+            node_index: 8,
+        ),
+        "Unk0xb99d8609": Clip(
+            node_index: 16,
+        ),
+    },
+    blend_data: {
+        ("Attack1", "Attack1"): Time(
+            time: 0.0,
+        ),
+        ("Attack1", "Attack2"): Time(
+            time: 0.0,
+        ),
+        ("Attack1", "Crit"): Time(
+            time: 0.0,
+        ),
+        ("Attack1", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Attack1", "Spell1Fire"): Time(
+            time: 0.0,
+        ),
+        ("Attack2", "Attack1"): Time(
+            time: 0.0,
+        ),
+        ("Attack2", "Attack2"): Time(
+            time: 0.0,
+        ),
+        ("Attack2", "Crit"): Time(
+            time: 0.0,
+        ),
+        ("Attack2", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Attack2", "Spell1Fire"): Time(
+            time: 0.0,
+        ),
+        ("Channel", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Channel", "Spell1Fire"): Time(
+            time: 0.0,
+        ),
+        ("ChannelWndup", "Death"): Time(
+            time: 0.0,
+        ),
+        ("ChannelWndup", "Spell1Fire"): Time(
+            time: 0.0,
+        ),
+        ("Crit", "Attack1"): Time(
+            time: 0.0,
+        ),
+        ("Crit", "Attack2"): Time(
+            time: 0.0,
+        ),
+        ("Crit", "Crit"): Time(
+            time: 0.0,
+        ),
+        ("Crit", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Crit", "Spell1Fire"): Time(
+            time: 0.0,
+        ),
+        ("Dance", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Dance", "Spell1Fire"): Time(
+            time: 0.0,
+        ),
+        ("Death", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Death", "Spell1Fire"): Time(
+            time: 0.0,
+        ),
+        ("Joke", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Joke", "Spell1Fire"): Time(
+            time: 0.0,
+        ),
+        ("Laugh", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Laugh", "Spell1Fire"): Time(
+            time: 0.0,
+        ),
+        ("RunFast", "Death"): Time(
+            time: 0.0,
+        ),
+        ("RunNormal", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell1", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell1", "Spell1Fire"): Time(
+            time: 0.0,
+        ),
+        ("Spell1Fire", "Attack1"): Time(
+            time: 0.3,
+        ),
+        ("Spell1Fire", "Attack2"): Time(
+            time: 0.3,
+        ),
+        ("Spell1Fire", "Channel"): Time(
+            time: 0.3,
+        ),
+        ("Spell1Fire", "ChannelWndup"): Time(
+            time: 0.3,
+        ),
+        ("Spell1Fire", "Crit"): Time(
+            time: 0.3,
+        ),
+        ("Spell1Fire", "Dance"): Time(
+            time: 0.3,
+        ),
+        ("Spell1Fire", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell1Fire", "Joke"): Time(
+            time: 0.3,
+        ),
+        ("Spell1Fire", "Laugh"): Time(
+            time: 0.3,
+        ),
+        ("Spell1Fire", "Spell1"): Time(
+            time: 0.3,
+        ),
+        ("Spell1Fire", "Spell1Fire"): Time(
+            time: 0.3,
+        ),
+        ("Spell1Fire", "Spell1Idle"): Time(
+            time: 0.3,
+        ),
+        ("Spell1Fire", "Spell1Walk"): Time(
+            time: 0.3,
+        ),
+        ("Spell1Fire", "Spell3"): Time(
+            time: 0.3,
+        ),
+        ("Spell1Fire", "Spell4"): Time(
+            time: 0.3,
+        ),
+        ("Spell1Fire", "Taunt"): Time(
+            time: 0.3,
+        ),
+        ("Spell1Fire", "Unk0x120aa0ea"): Time(
+            time: 0.3,
+        ),
+        ("Spell1Fire", "Unk0x56f6d84b"): Time(
+            time: 0.3,
+        ),
+        ("Spell1Fire", "Unk0x95578268"): Time(
+            time: 0.3,
+        ),
+        ("Spell1Fire", "Unk0xb99d8609"): Time(
+            time: 0.3,
+        ),
+        ("Spell1Idle", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell1Idle", "Spell1Fire"): Time(
+            time: 0.0,
+        ),
+        ("Spell1Walk", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell1Walk", "Spell1Fire"): Time(
+            time: 0.0,
+        ),
+        ("Spell3", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell3", "Spell1Fire"): Time(
+            time: 0.0,
+        ),
+        ("Spell4", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell4", "Spell1Fire"): Time(
+            time: 0.0,
+        ),
+        ("Taunt", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Taunt", "Spell1Fire"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x120aa0ea", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x120aa0ea", "Spell1Fire"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x120aa0ea", "Unk0x120aa0ea"): Time(
+            time: 0.4,
+        ),
+        ("Unk0x120aa0ea", "Unk0x56f6d84b"): Time(
+            time: 0.4,
+        ),
+        ("Unk0x120aa0ea", "Unk0x95578268"): Time(
+            time: 0.4,
+        ),
+        ("Unk0x120aa0ea", "Unk0xb99d8609"): Time(
+            time: 0.4,
+        ),
+        ("Unk0x2f4723e4", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x56f6d84b", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x56f6d84b", "Spell1Fire"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x56f6d84b", "Unk0x120aa0ea"): Time(
+            time: 0.4,
+        ),
+        ("Unk0x56f6d84b", "Unk0x56f6d84b"): Time(
+            time: 0.4,
+        ),
+        ("Unk0x56f6d84b", "Unk0x95578268"): Time(
+            time: 0.4,
+        ),
+        ("Unk0x56f6d84b", "Unk0xb99d8609"): Time(
+            time: 0.4,
+        ),
+        ("Unk0x72f76bc2", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x95578268", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x95578268", "Spell1Fire"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x95578268", "Unk0x120aa0ea"): Time(
+            time: 0.4,
+        ),
+        ("Unk0x95578268", "Unk0x56f6d84b"): Time(
+            time: 0.4,
+        ),
+        ("Unk0x95578268", "Unk0x95578268"): Time(
+            time: 0.4,
+        ),
+        ("Unk0x95578268", "Unk0xb99d8609"): Time(
+            time: 0.4,
+        ),
+        ("Unk0xb99d8609", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xb99d8609", "Spell1Fire"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xb99d8609", "Unk0x120aa0ea"): Time(
+            time: 0.4,
+        ),
+        ("Unk0xb99d8609", "Unk0x56f6d84b"): Time(
+            time: 0.4,
+        ),
+        ("Unk0xb99d8609", "Unk0x95578268"): Time(
+            time: 0.4,
+        ),
+        ("Unk0xb99d8609", "Unk0xb99d8609"): Time(
+            time: 0.4,
+        ),
+    },
+)

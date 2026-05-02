@@ -19,4 +19,6 @@ description: 开发、实现英雄的技能、buff
 
 英雄的配置、定义存放在 @/assets/characters/{champion_name}/config.ron 中
 
+播放动画时，使用的动画名字必须与 @/assets/characters/{champion_name}/animations/skin{N}.ron 中的定义一致，区分大小写
+
 你需要在 @/crates/lol_champions/src/{champion_name} 中写代码，包括测试

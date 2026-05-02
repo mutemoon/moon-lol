@@ -1,0 +1,226 @@
+(
+    gltf_path: "characters/riven/skins/skin0.glb",
+    hash_to_node: {
+        "Attack": Selector(
+            probably_nodes: [
+                (
+                    key: "Attack1",
+                    value: 1.0,
+                ),
+                (
+                    key: "Attack2",
+                    value: 1.0,
+                ),
+            ],
+        ),
+        "Attack1": Clip(
+            node_index: 6,
+        ),
+        "Attack1Ult": Clip(
+            node_index: 3,
+        ),
+        "Attack2": Clip(
+            node_index: 8,
+        ),
+        "Attack2Ult": Clip(
+            node_index: 20,
+        ),
+        "Attack3": Clip(
+            node_index: 7,
+        ),
+        "Channel": Clip(
+            node_index: 1,
+        ),
+        "ChannelWndup": Clip(
+            node_index: 19,
+        ),
+        "Crit": Clip(
+            node_index: 13,
+        ),
+        "CritUlt": Clip(
+            node_index: 12,
+        ),
+        "Dance": Clip(
+            node_index: 33,
+        ),
+        "Death": Clip(
+            node_index: 26,
+        ),
+        "Idle1": Clip(
+            node_index: 16,
+        ),
+        "Idle1Ult": Clip(
+            node_index: 10,
+        ),
+        "Idle2": Clip(
+            node_index: 15,
+        ),
+        "Idle3": Clip(
+            node_index: 14,
+        ),
+        "Idle4": Clip(
+            node_index: 17,
+        ),
+        "Joke": Clip(
+            node_index: 29,
+        ),
+        "Laugh": Clip(
+            node_index: 23,
+        ),
+        "Recall": Clip(
+            node_index: 9,
+        ),
+        "Run": Clip(
+            node_index: 2,
+        ),
+        "RunUlt": Clip(
+            node_index: 0,
+        ),
+        "Spell1A": Clip(
+            node_index: 30,
+        ),
+        "Spell1B": Clip(
+            node_index: 31,
+        ),
+        "Spell1C": Clip(
+            node_index: 32,
+        ),
+        "Spell2": Clip(
+            node_index: 22,
+        ),
+        "Spell3": Clip(
+            node_index: 21,
+        ),
+        "Spell3Ult": Clip(
+            node_index: 4,
+        ),
+        "Spell4A": Clip(
+            node_index: 28,
+        ),
+        "Spell4B": Clip(
+            node_index: 27,
+        ),
+        "Taunt": Clip(
+            node_index: 25,
+        ),
+        "Unk0x3b150d25": Clip(
+            node_index: 5,
+        ),
+        "Unk0x7fc2d3b6": Clip(
+            node_index: 11,
+        ),
+        "Unk0xa335c38a": Clip(
+            node_index: 18,
+        ),
+        "Unk0xba9e5c43": Clip(
+            node_index: 24,
+        ),
+        "Unk0xfa584295": Clip(
+            node_index: 34,
+        ),
+    },
+    blend_data: {
+        ("Attack1", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Ult", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Attack2", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Attack2Ult", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Attack3", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Channel", "Death"): Time(
+            time: 0.0,
+        ),
+        ("ChannelWndup", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Crit", "Death"): Time(
+            time: 0.0,
+        ),
+        ("CritUlt", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Dance", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Death", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Idle1", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Idle1Ult", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Idle2", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Idle3", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Idle4", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Joke", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Laugh", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Run", "Death"): Time(
+            time: 0.0,
+        ),
+        ("RunUlt", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell1A", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell1B", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell1C", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell2", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell3", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Ult", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell4A", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell4B", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Taunt", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x3b150d25", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x7fc2d3b6", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xa335c38a", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xba9e5c43", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xfa584295", "Death"): Time(
+            time: 0.0,
+        ),
+    },
+)

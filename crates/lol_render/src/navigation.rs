@@ -25,7 +25,7 @@ impl Plugin for PluginRenderNavigation {
         app.add_systems(
             Update,
             setup_grid_visualization.run_if(
-                resource_exists::<ResourceGrid>.and_then(resource_exists::<NavigationDebug>), // .and_then(run_once),
+                resource_exists::<ResourceGrid>, // .and_then(resource_exists::<NavigationDebug>), // .and_then(run_once),
             ),
         );
         app.add_systems(

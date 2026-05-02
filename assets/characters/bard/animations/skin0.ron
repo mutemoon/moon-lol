@@ -1,0 +1,856 @@
+(
+    gltf_path: "characters/bard/skins/skin0.glb",
+    hash_to_node: {
+        "Attack": Selector(
+            probably_nodes: [
+                (
+                    key: "Attack1",
+                    value: 1.0,
+                ),
+                (
+                    key: "Attack2",
+                    value: 1.0,
+                ),
+            ],
+        ),
+        "Attack1": Sequence(
+            hashes: [
+                "Unk0xe33529b9",
+            ],
+        ),
+        "Attack2": Sequence(
+            hashes: [
+                "Unk0x9fc60bce",
+            ],
+        ),
+        "Attack3": Clip(
+            node_index: 7,
+        ),
+        "Channel": Clip(
+            node_index: 1,
+        ),
+        "ChannelTransition": Clip(
+            node_index: 23,
+        ),
+        "ChannelWndup": Clip(
+            node_index: 22,
+        ),
+        "Crit": Clip(
+            node_index: 20,
+        ),
+        "Dance": Sequence(
+            hashes: [
+                "DanceBase",
+                "DanceLoop",
+            ],
+        ),
+        "DanceBase": Clip(
+            node_index: 9,
+        ),
+        "DanceLoop": Clip(
+            node_index: 0,
+        ),
+        "Death": Clip(
+            node_index: 32,
+        ),
+        "FloatIdle01": Clip(
+            node_index: 34,
+        ),
+        "FloatIdleIn": Clip(
+            node_index: 17,
+        ),
+        "FloatRun01": Clip(
+            node_index: 16,
+        ),
+        "FloatRun01Boost": Clip(
+            node_index: 11,
+        ),
+        "FloatRun01Into": Clip(
+            node_index: 28,
+        ),
+        "FloatRun01Out": Clip(
+            node_index: 5,
+        ),
+        "FloatSpell2": Clip(
+            node_index: 12,
+        ),
+        "FloatSpell3": Clip(
+            node_index: 13,
+        ),
+        "Idle1": Selector(
+            probably_nodes: [
+                (
+                    key: "Idle1Base",
+                    value: 90.0,
+                ),
+                (
+                    key: "Unk0x68e26f73",
+                    value: 10.0,
+                ),
+            ],
+        ),
+        "Idle1Base": Clip(
+            node_index: 15,
+        ),
+        "Idle2Base": Clip(
+            node_index: 36,
+        ),
+        "IdleIn": Clip(
+            node_index: 29,
+        ),
+        "Joke": Clip(
+            node_index: 33,
+        ),
+        "KnockUp": Clip(
+            node_index: 2,
+        ),
+        "Laugh": Clip(
+            node_index: 27,
+        ),
+        "Recall": Clip(
+            node_index: 8,
+        ),
+        "Run": ConditionFloat(
+            updater: MoveSpeed,
+            conditions: [
+                (
+                    key: "RunSlow",
+                    value: 0.0,
+                ),
+                (
+                    key: "RunBase",
+                    value: 310.0,
+                ),
+                (
+                    key: "Unk0xf925da22",
+                    value: 565.0,
+                ),
+            ],
+        ),
+        "RunBase": Clip(
+            node_index: 38,
+        ),
+        "RunIn": Clip(
+            node_index: 19,
+        ),
+        "RunSlow": Clip(
+            node_index: 35,
+        ),
+        "Spell1": Clip(
+            node_index: 24,
+        ),
+        "Spell2": Clip(
+            node_index: 26,
+        ),
+        "Spell3": Clip(
+            node_index: 25,
+        ),
+        "Spell4": Clip(
+            node_index: 30,
+        ),
+        "Stunned": Clip(
+            node_index: 14,
+        ),
+        "Taunt": Clip(
+            node_index: 31,
+        ),
+        "Turn": Clip(
+            node_index: 18,
+        ),
+        "Unk0x1c80f9b8": Parametric(
+            pairs: [
+                (
+                    key: "Unk0x2afbac70",
+                    value: -10.0,
+                ),
+                (
+                    key: "Unk0x57216de5",
+                    value: 10.0,
+                ),
+            ],
+        ),
+        "Unk0x2afbac70": Clip(
+            node_index: 3,
+        ),
+        "Unk0x416d164b": Clip(
+            node_index: 4,
+        ),
+        "Unk0x57216de5": Clip(
+            node_index: 6,
+        ),
+        "Unk0x5dd24f96": Clip(
+            node_index: 10,
+        ),
+        "Unk0x68e26f73": Sequence(
+            hashes: [
+                "Idle2Base",
+                "Idle1Base",
+            ],
+        ),
+        "Unk0x69cdb385": Parametric(
+            pairs: [
+                (
+                    key: "Unk0x5dd24f96",
+                    value: -90.0,
+                ),
+                (
+                    key: "Unk0x416d164b",
+                    value: 90.0,
+                ),
+            ],
+        ),
+        "Unk0x9fc60bce": Clip(
+            node_index: 21,
+        ),
+        "Unk0xe33529b9": Clip(
+            node_index: 37,
+        ),
+        "Unk0xf2d666e5": Parallel(
+            hashes: [
+                "Unk0x1c80f9b8",
+                "Unk0x69cdb385",
+            ],
+        ),
+        "Unk0xf925da22": Clip(
+            node_index: 39,
+        ),
+    },
+    blend_data: {
+        ("Attack1", "Attack1"): Time(
+            time: 0.0,
+        ),
+        ("Attack2", "Attack2"): Time(
+            time: 0.0,
+        ),
+        ("Attack3", "Attack3"): Time(
+            time: 0.1,
+        ),
+        ("Attack3", "FloatRun01"): Time(
+            time: 0.1,
+        ),
+        ("Attack3", "Spell3"): Time(
+            time: 0.1,
+        ),
+        ("Attack3", "Unk0x9fc60bce"): Time(
+            time: 0.1,
+        ),
+        ("Attack3", "Unk0xe33529b9"): Time(
+            time: 0.1,
+        ),
+        ("Channel", "Channel"): Time(
+            time: 0.0,
+        ),
+        ("Channel", "FloatRun01"): Time(
+            time: 0.1,
+        ),
+        ("Channel", "Spell3"): Time(
+            time: 0.1,
+        ),
+        ("ChannelTransition", "ChannelTransition"): Time(
+            time: 0.0,
+        ),
+        ("ChannelTransition", "FloatRun01"): Time(
+            time: 0.1,
+        ),
+        ("ChannelTransition", "Spell3"): Time(
+            time: 0.1,
+        ),
+        ("ChannelWndup", "ChannelWndup"): Time(
+            time: 0.0,
+        ),
+        ("ChannelWndup", "FloatRun01"): Time(
+            time: 0.1,
+        ),
+        ("ChannelWndup", "Spell3"): Time(
+            time: 0.1,
+        ),
+        ("Crit", "FloatRun01"): Time(
+            time: 0.1,
+        ),
+        ("Crit", "Spell3"): Time(
+            time: 0.1,
+        ),
+        ("Dance", "Dance"): Time(
+            time: 0.0,
+        ),
+        ("DanceBase", "DanceBase"): Time(
+            time: 0.0,
+        ),
+        ("DanceBase", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("DanceBase", "FloatRun01"): Time(
+            time: 0.1,
+        ),
+        ("DanceBase", "Spell3"): Time(
+            time: 0.1,
+        ),
+        ("DanceLoop", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("DanceLoop", "FloatRun01"): Time(
+            time: 0.1,
+        ),
+        ("DanceLoop", "Spell3"): Time(
+            time: 0.1,
+        ),
+        ("Death", "FloatRun01"): Time(
+            time: 0.1,
+        ),
+        ("Death", "Spell3"): Time(
+            time: 0.1,
+        ),
+        ("FloatIdle01", "FloatSpell3"): Time(
+            time: 0.1,
+        ),
+        ("FloatIdle01", "Idle1Base"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("FloatIdle01", "Idle2Base"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("FloatIdleIn", "FloatSpell3"): Time(
+            time: 0.1,
+        ),
+        ("FloatRun01", "DanceBase"): Time(
+            time: 0.1,
+        ),
+        ("FloatRun01", "FloatIdle01"): TransitionClip(
+            clip_name: "FloatIdleIn",
+        ),
+        ("FloatRun01", "FloatRun01Into"): Time(
+            time: 0.1,
+        ),
+        ("FloatRun01", "FloatSpell3"): Time(
+            time: 0.0,
+        ),
+        ("FloatRun01", "RunBase"): TransitionClip(
+            clip_name: "FloatRun01Out",
+        ),
+        ("FloatRun01", "Spell3"): Time(
+            time: 0.1,
+        ),
+        ("FloatRun01Boost", "FloatSpell3"): Time(
+            time: 0.0,
+        ),
+        ("FloatRun01Into", "Attack3"): Time(
+            time: 0.1,
+        ),
+        ("FloatRun01Into", "Channel"): Time(
+            time: 0.1,
+        ),
+        ("FloatRun01Into", "ChannelTransition"): Time(
+            time: 0.1,
+        ),
+        ("FloatRun01Into", "ChannelWndup"): Time(
+            time: 0.1,
+        ),
+        ("FloatRun01Into", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("FloatRun01Into", "DanceBase"): Time(
+            time: 0.1,
+        ),
+        ("FloatRun01Into", "DanceLoop"): Time(
+            time: 0.1,
+        ),
+        ("FloatRun01Into", "Death"): Time(
+            time: 0.1,
+        ),
+        ("FloatRun01Into", "FloatRun01Into"): Time(
+            time: 0.1,
+        ),
+        ("FloatRun01Into", "FloatSpell3"): Time(
+            time: 0.1,
+        ),
+        ("FloatRun01Into", "Idle1Base"): Time(
+            time: 0.1,
+        ),
+        ("FloatRun01Into", "Idle2Base"): Time(
+            time: 0.1,
+        ),
+        ("FloatRun01Into", "IdleIn"): Time(
+            time: 0.1,
+        ),
+        ("FloatRun01Into", "Joke"): Time(
+            time: 0.1,
+        ),
+        ("FloatRun01Into", "KnockUp"): Time(
+            time: 0.1,
+        ),
+        ("FloatRun01Into", "Laugh"): Time(
+            time: 0.1,
+        ),
+        ("FloatRun01Into", "RunBase"): Time(
+            time: 0.1,
+        ),
+        ("FloatRun01Into", "RunIn"): Time(
+            time: 0.1,
+        ),
+        ("FloatRun01Into", "RunSlow"): Time(
+            time: 0.1,
+        ),
+        ("FloatRun01Into", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("FloatRun01Into", "Spell2"): Time(
+            time: 0.1,
+        ),
+        ("FloatRun01Into", "Spell3"): Time(
+            time: 0.1,
+        ),
+        ("FloatRun01Into", "Stunned"): Time(
+            time: 0.1,
+        ),
+        ("FloatRun01Into", "Taunt"): Time(
+            time: 0.1,
+        ),
+        ("FloatRun01Into", "Unk0x9fc60bce"): Time(
+            time: 0.1,
+        ),
+        ("FloatRun01Into", "Unk0xe33529b9"): Time(
+            time: 0.1,
+        ),
+        ("FloatRun01Into", "Unk0xf925da22"): Time(
+            time: 0.1,
+        ),
+        ("FloatRun01Out", "Attack3"): Time(
+            time: 0.1,
+        ),
+        ("FloatRun01Out", "Channel"): Time(
+            time: 0.1,
+        ),
+        ("FloatRun01Out", "ChannelTransition"): Time(
+            time: 0.1,
+        ),
+        ("FloatRun01Out", "ChannelWndup"): Time(
+            time: 0.1,
+        ),
+        ("FloatRun01Out", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("FloatRun01Out", "DanceBase"): Time(
+            time: 0.1,
+        ),
+        ("FloatRun01Out", "DanceLoop"): Time(
+            time: 0.1,
+        ),
+        ("FloatRun01Out", "Death"): Time(
+            time: 0.1,
+        ),
+        ("FloatRun01Out", "FloatRun01Into"): Time(
+            time: 0.1,
+        ),
+        ("FloatRun01Out", "FloatRun01Out"): Time(
+            time: 0.1,
+        ),
+        ("FloatRun01Out", "FloatSpell3"): Time(
+            time: 0.1,
+        ),
+        ("FloatRun01Out", "Idle1Base"): Time(
+            time: 0.1,
+        ),
+        ("FloatRun01Out", "Idle2Base"): Time(
+            time: 0.1,
+        ),
+        ("FloatRun01Out", "IdleIn"): Time(
+            time: 0.1,
+        ),
+        ("FloatRun01Out", "Joke"): Time(
+            time: 0.1,
+        ),
+        ("FloatRun01Out", "KnockUp"): Time(
+            time: 0.1,
+        ),
+        ("FloatRun01Out", "Laugh"): Time(
+            time: 0.1,
+        ),
+        ("FloatRun01Out", "RunBase"): Time(
+            time: 0.1,
+        ),
+        ("FloatRun01Out", "RunIn"): Time(
+            time: 0.1,
+        ),
+        ("FloatRun01Out", "RunSlow"): Time(
+            time: 0.1,
+        ),
+        ("FloatRun01Out", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("FloatRun01Out", "Spell2"): Time(
+            time: 0.1,
+        ),
+        ("FloatRun01Out", "Spell3"): Time(
+            time: 0.1,
+        ),
+        ("FloatRun01Out", "Stunned"): Time(
+            time: 0.1,
+        ),
+        ("FloatRun01Out", "Taunt"): Time(
+            time: 0.1,
+        ),
+        ("FloatRun01Out", "Unk0x9fc60bce"): Time(
+            time: 0.1,
+        ),
+        ("FloatRun01Out", "Unk0xe33529b9"): Time(
+            time: 0.1,
+        ),
+        ("FloatRun01Out", "Unk0xf925da22"): Time(
+            time: 0.1,
+        ),
+        ("Idle1", "Idle1"): Time(
+            time: 0.0,
+        ),
+        ("Idle1Base", "FloatRun01"): Time(
+            time: 0.1,
+        ),
+        ("Idle1Base", "Idle1Base"): Time(
+            time: 0.0,
+        ),
+        ("Idle1Base", "Spell3"): Time(
+            time: 0.1,
+        ),
+        ("Idle2Base", "FloatRun01"): Time(
+            time: 0.1,
+        ),
+        ("Idle2Base", "Idle1Base"): Time(
+            time: 0.0,
+        ),
+        ("Idle2Base", "Idle2Base"): Time(
+            time: 0.0,
+        ),
+        ("Idle2Base", "Spell3"): Time(
+            time: 0.1,
+        ),
+        ("IdleIn", "FloatRun01"): Time(
+            time: 0.1,
+        ),
+        ("IdleIn", "IdleIn"): Time(
+            time: 0.0,
+        ),
+        ("IdleIn", "Spell3"): Time(
+            time: 0.1,
+        ),
+        ("Joke", "FloatRun01"): Time(
+            time: 0.1,
+        ),
+        ("Joke", "Joke"): Time(
+            time: 0.0,
+        ),
+        ("Joke", "Spell3"): Time(
+            time: 0.1,
+        ),
+        ("KnockUp", "FloatRun01"): Time(
+            time: 0.1,
+        ),
+        ("KnockUp", "Spell3"): Time(
+            time: 0.1,
+        ),
+        ("Laugh", "FloatRun01"): Time(
+            time: 0.1,
+        ),
+        ("Laugh", "Laugh"): Time(
+            time: 0.0,
+        ),
+        ("Laugh", "Spell3"): Time(
+            time: 0.1,
+        ),
+        ("RunBase", "FloatRun01"): TransitionClip(
+            clip_name: "FloatRun01Into",
+        ),
+        ("RunBase", "Idle1Base"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
+        ("RunBase", "RunBase"): Time(
+            time: 0.0,
+        ),
+        ("RunBase", "Spell3"): Time(
+            time: 0.1,
+        ),
+        ("RunIn", "FloatRun01"): Time(
+            time: 0.1,
+        ),
+        ("RunIn", "RunIn"): Time(
+            time: 0.0,
+        ),
+        ("RunIn", "Spell3"): Time(
+            time: 0.1,
+        ),
+        ("RunSlow", "FloatRun01"): TransitionClip(
+            clip_name: "FloatRun01Into",
+        ),
+        ("RunSlow", "Spell3"): Time(
+            time: 0.1,
+        ),
+        ("Spell1", "Attack3"): Time(
+            time: 0.1,
+        ),
+        ("Spell1", "Channel"): Time(
+            time: 0.1,
+        ),
+        ("Spell1", "ChannelTransition"): Time(
+            time: 0.1,
+        ),
+        ("Spell1", "ChannelWndup"): Time(
+            time: 0.1,
+        ),
+        ("Spell1", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("Spell1", "DanceBase"): Time(
+            time: 0.1,
+        ),
+        ("Spell1", "DanceLoop"): Time(
+            time: 0.1,
+        ),
+        ("Spell1", "Death"): Time(
+            time: 0.1,
+        ),
+        ("Spell1", "FloatRun01"): Time(
+            time: 0.1,
+        ),
+        ("Spell1", "FloatRun01Into"): Time(
+            time: 0.1,
+        ),
+        ("Spell1", "Idle1Base"): Time(
+            time: 0.1,
+        ),
+        ("Spell1", "Idle2Base"): Time(
+            time: 0.1,
+        ),
+        ("Spell1", "IdleIn"): Time(
+            time: 0.1,
+        ),
+        ("Spell1", "Joke"): Time(
+            time: 0.1,
+        ),
+        ("Spell1", "KnockUp"): Time(
+            time: 0.1,
+        ),
+        ("Spell1", "Laugh"): Time(
+            time: 0.1,
+        ),
+        ("Spell1", "RunBase"): Time(
+            time: 0.1,
+        ),
+        ("Spell1", "RunIn"): Time(
+            time: 0.1,
+        ),
+        ("Spell1", "RunSlow"): Time(
+            time: 0.1,
+        ),
+        ("Spell1", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("Spell1", "Spell2"): Time(
+            time: 0.1,
+        ),
+        ("Spell1", "Spell3"): Time(
+            time: 0.1,
+        ),
+        ("Spell1", "Stunned"): Time(
+            time: 0.1,
+        ),
+        ("Spell1", "Taunt"): Time(
+            time: 0.1,
+        ),
+        ("Spell1", "Unk0x9fc60bce"): Time(
+            time: 0.1,
+        ),
+        ("Spell1", "Unk0xe33529b9"): Time(
+            time: 0.1,
+        ),
+        ("Spell1", "Unk0xf925da22"): Time(
+            time: 0.1,
+        ),
+        ("Spell2", "Attack3"): Time(
+            time: 0.1,
+        ),
+        ("Spell2", "Channel"): Time(
+            time: 0.1,
+        ),
+        ("Spell2", "ChannelTransition"): Time(
+            time: 0.1,
+        ),
+        ("Spell2", "ChannelWndup"): Time(
+            time: 0.1,
+        ),
+        ("Spell2", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("Spell2", "DanceBase"): Time(
+            time: 0.1,
+        ),
+        ("Spell2", "DanceLoop"): Time(
+            time: 0.1,
+        ),
+        ("Spell2", "Death"): Time(
+            time: 0.1,
+        ),
+        ("Spell2", "FloatRun01"): Time(
+            time: 0.1,
+        ),
+        ("Spell2", "FloatRun01Into"): Time(
+            time: 0.1,
+        ),
+        ("Spell2", "Idle1Base"): Time(
+            time: 0.1,
+        ),
+        ("Spell2", "Idle2Base"): Time(
+            time: 0.1,
+        ),
+        ("Spell2", "IdleIn"): Time(
+            time: 0.1,
+        ),
+        ("Spell2", "Joke"): Time(
+            time: 0.1,
+        ),
+        ("Spell2", "KnockUp"): Time(
+            time: 0.1,
+        ),
+        ("Spell2", "Laugh"): Time(
+            time: 0.1,
+        ),
+        ("Spell2", "RunBase"): Time(
+            time: 0.1,
+        ),
+        ("Spell2", "RunIn"): Time(
+            time: 0.1,
+        ),
+        ("Spell2", "RunSlow"): Time(
+            time: 0.1,
+        ),
+        ("Spell2", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Spell2", "Spell2"): Time(
+            time: 0.0,
+        ),
+        ("Spell2", "Spell3"): Time(
+            time: 0.1,
+        ),
+        ("Spell2", "Stunned"): Time(
+            time: 0.1,
+        ),
+        ("Spell2", "Taunt"): Time(
+            time: 0.1,
+        ),
+        ("Spell2", "Unk0x9fc60bce"): Time(
+            time: 0.1,
+        ),
+        ("Spell2", "Unk0xe33529b9"): Time(
+            time: 0.1,
+        ),
+        ("Spell2", "Unk0xf925da22"): Time(
+            time: 0.1,
+        ),
+        ("Spell3", "Attack3"): Time(
+            time: 0.1,
+        ),
+        ("Spell3", "Channel"): Time(
+            time: 0.1,
+        ),
+        ("Spell3", "ChannelWndup"): Time(
+            time: 0.1,
+        ),
+        ("Spell3", "DanceBase"): Time(
+            time: 0.1,
+        ),
+        ("Spell3", "DanceLoop"): Time(
+            time: 0.1,
+        ),
+        ("Spell3", "FloatRun01"): Time(
+            time: 0.1,
+        ),
+        ("Spell3", "Idle1Base"): Time(
+            time: 0.1,
+        ),
+        ("Spell3", "Joke"): Time(
+            time: 0.1,
+        ),
+        ("Spell3", "Laugh"): Time(
+            time: 0.1,
+        ),
+        ("Spell3", "RunBase"): Time(
+            time: 0.1,
+        ),
+        ("Spell3", "RunIn"): Time(
+            time: 0.1,
+        ),
+        ("Spell3", "RunSlow"): Time(
+            time: 0.1,
+        ),
+        ("Spell3", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Spell3", "Spell3"): Time(
+            time: 0.1,
+        ),
+        ("Spell3", "Taunt"): Time(
+            time: 0.1,
+        ),
+        ("Spell3", "Unk0x9fc60bce"): Time(
+            time: 0.1,
+        ),
+        ("Spell3", "Unk0xe33529b9"): Time(
+            time: 0.1,
+        ),
+        ("Spell3", "Unk0xf925da22"): Time(
+            time: 0.1,
+        ),
+        ("Stunned", "FloatRun01"): Time(
+            time: 0.1,
+        ),
+        ("Stunned", "Spell3"): Time(
+            time: 0.1,
+        ),
+        ("Taunt", "FloatRun01"): Time(
+            time: 0.1,
+        ),
+        ("Taunt", "Spell3"): Time(
+            time: 0.1,
+        ),
+        ("Taunt", "Taunt"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x68e26f73", "Unk0x68e26f73"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x9fc60bce", "Attack3"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x9fc60bce", "FloatRun01"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x9fc60bce", "Spell3"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x9fc60bce", "Unk0x9fc60bce"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x9fc60bce", "Unk0xe33529b9"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xe33529b9", "Attack3"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xe33529b9", "FloatRun01"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xe33529b9", "Spell3"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xe33529b9", "Unk0x9fc60bce"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xe33529b9", "Unk0xe33529b9"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xf925da22", "FloatRun01"): TransitionClip(
+            clip_name: "FloatRun01Into",
+        ),
+        ("Unk0xf925da22", "Spell3"): Time(
+            time: 0.1,
+        ),
+    },
+)

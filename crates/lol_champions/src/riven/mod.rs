@@ -87,9 +87,9 @@ fn cast_riven_q(
     let stage = recast.map(|window| window.stage).unwrap_or(1);
 
     let (animation_hash, particle_hash) = match stage {
-        1 => ("spell1a".to_string(), hash_bin("Riven_Q_01_Detonate")),
-        2 => ("spell1b".to_string(), hash_bin("Riven_Q_02_Detonate")),
-        _ => ("spell1c".to_string(), hash_bin("Riven_Q_03_Detonate")),
+        1 => ("Spell1A".to_string(), hash_bin("Riven_Q_01_Detonate")),
+        2 => ("Spell1B".to_string(), hash_bin("Riven_Q_02_Detonate")),
+        _ => ("Spell1C".to_string(), hash_bin("Riven_Q_03_Detonate")),
     };
 
     play_skill_animation(commands, entity, animation_hash);

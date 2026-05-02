@@ -1,0 +1,3130 @@
+(
+    gltf_path: "characters/azir/skins/skin0.glb",
+    hash_to_node: {
+        "Attack": Selector(
+            probably_nodes: [
+                (
+                    key: "Attack1",
+                    value: 1.0,
+                ),
+                (
+                    key: "Attack2",
+                    value: 1.0,
+                ),
+            ],
+        ),
+        "Attack1": Parallel(
+            hashes: [
+                "Unk0x3362f8de",
+                "Unk0x25875a32",
+            ],
+        ),
+        "Attack2": Parallel(
+            hashes: [
+                "Unk0xb7fea5f3",
+                "Unk0xbda0cf7b",
+            ],
+        ),
+        "Buffbones": Clip(
+            node_index: 2,
+        ),
+        "Channel": Clip(
+            node_index: 12,
+        ),
+        "ChannelWndup": Clip(
+            node_index: 36,
+        ),
+        "Crit": Clip(
+            node_index: 30,
+        ),
+        "Dance": Sequence(
+            hashes: [
+                "DanceWindup",
+                "DanceLoop",
+            ],
+        ),
+        "DanceLoop": Clip(
+            node_index: 10,
+        ),
+        "DanceWindup": Clip(
+            node_index: 46,
+        ),
+        "Death": Clip(
+            node_index: 40,
+        ),
+        "GaDeath": Clip(
+            node_index: 33,
+        ),
+        "Idle1": Sequence(
+            hashes: [
+                "IdleIn",
+                "Idle1Base",
+                "IdleSelector",
+            ],
+        ),
+        "Idle1Base": Clip(
+            node_index: 23,
+        ),
+        "Idle2Base": Clip(
+            node_index: 47,
+        ),
+        "IdleIn": Selector(
+            probably_nodes: [
+                (
+                    key: "IdleIn1",
+                    value: 1.0,
+                ),
+                (
+                    key: "IdleIn2",
+                    value: 1.0,
+                ),
+            ],
+        ),
+        "IdleIn1": Clip(
+            node_index: 4,
+        ),
+        "IdleIn2": Clip(
+            node_index: 3,
+        ),
+        "IdleSelector": Selector(
+            probably_nodes: [
+                (
+                    key: "Idle1Base",
+                    value: 1.0,
+                ),
+                (
+                    key: "Idle2Base",
+                    value: 1.0,
+                ),
+                (
+                    key: "Unk0xabc75b53",
+                    value: 1.0,
+                ),
+                (
+                    key: "Unk0x76bbc6a0",
+                    value: 1.0,
+                ),
+            ],
+        ),
+        "Joke": Clip(
+            node_index: 43,
+        ),
+        "KnockUp": Sequence(
+            hashes: [
+                "KnockupIn",
+                "KnockUpLoop",
+            ],
+        ),
+        "KnockUpLoop": Clip(
+            node_index: 21,
+        ),
+        "KnockupIn": Clip(
+            node_index: 38,
+        ),
+        "Laugh": Sequence(
+            hashes: [
+                "Unk0x9e55a33e",
+                "IdleSelector",
+            ],
+        ),
+        "Recall": Sequence(
+            hashes: [
+                "RecallLeadIn",
+                "RecallLoop",
+            ],
+        ),
+        "RecallLeadIn": Clip(
+            node_index: 9,
+        ),
+        "RecallLeadout": Clip(
+            node_index: 19,
+        ),
+        "RecallLoop": Clip(
+            node_index: 8,
+        ),
+        "RecallWinddown": Sequence(
+            hashes: [
+                "Unk0x13f95189",
+                "IdleSelector",
+            ],
+        ),
+        "Respawn": Clip(
+            node_index: 35,
+        ),
+        "Run": Clip(
+            node_index: 16,
+        ),
+        "RunFast": Selector(
+            probably_nodes: [
+                (
+                    key: "Unk0x41472d6f",
+                    value: 70.0,
+                ),
+                (
+                    key: "Unk0x7e466a93",
+                    value: 30.0,
+                ),
+            ],
+        ),
+        "RunHaste": Clip(
+            node_index: 15,
+        ),
+        "Spell1": Parallel(
+            hashes: [
+                "Unk0xc4ba7841",
+                "Unk0x601eedd5",
+            ],
+        ),
+        "Spell2": Parallel(
+            hashes: [
+                "Unk0x8bc9eaf",
+                "Unk0xc4dd18f",
+            ],
+        ),
+        "Spell3Dash": Sequence(
+            hashes: [
+                "Unk0x8f2d4d45",
+                "Spell3DashLoop",
+            ],
+        ),
+        "Spell3DashLoop": Clip(
+            node_index: 48,
+        ),
+        "Spell4": Parallel(
+            hashes: [
+                "Unk0x89075e81",
+                "Unk0x246bd415",
+            ],
+        ),
+        "Taunt": Sequence(
+            hashes: [
+                "TauntBase",
+                "IdleSelector",
+            ],
+        ),
+        "TauntBase": Clip(
+            node_index: 6,
+        ),
+        "Turn": Parametric(
+            pairs: [
+                (
+                    key: "TurnNeg180",
+                    value: -180.0,
+                ),
+                (
+                    key: "TurnNeg90",
+                    value: -90.0,
+                ),
+                (
+                    key: "Turn0",
+                    value: 0.0,
+                ),
+                (
+                    key: "Turn90",
+                    value: 90.0,
+                ),
+                (
+                    key: "Turn180",
+                    value: 180.0,
+                ),
+            ],
+        ),
+        "Turn0": Clip(
+            node_index: 0,
+        ),
+        "Turn180": Clip(
+            node_index: 24,
+        ),
+        "Turn90": Clip(
+            node_index: 11,
+        ),
+        "TurnNeg180": Clip(
+            node_index: 26,
+        ),
+        "TurnNeg90": Clip(
+            node_index: 32,
+        ),
+        "Unk0x13f95189": Clip(
+            node_index: 7,
+        ),
+        "Unk0x246bd415": Clip(
+            node_index: 13,
+        ),
+        "Unk0x25875a32": Clip(
+            node_index: 14,
+        ),
+        "Unk0x31dde19e": Clip(
+            node_index: 17,
+        ),
+        "Unk0x3362f8de": Clip(
+            node_index: 18,
+        ),
+        "Unk0x41472d6f": Clip(
+            node_index: 20,
+        ),
+        "Unk0x601eedd5": Parametric(
+            pairs: [
+                (
+                    key: "Unk0xbed4198e",
+                    value: -180.0,
+                ),
+                (
+                    key: "Unk0xbed4198e",
+                    value: -90.0,
+                ),
+                (
+                    key: "Unk0xc4ba7841",
+                    value: 0.0,
+                ),
+                (
+                    key: "Unk0x31dde19e",
+                    value: 90.0,
+                ),
+                (
+                    key: "Unk0x31dde19e",
+                    value: 180.0,
+                ),
+            ],
+        ),
+        "Unk0x67e51852": Clip(
+            node_index: 22,
+        ),
+        "Unk0x6980ab07": Parallel(
+            hashes: [
+                "Unk0xc4ba7841",
+                "Unk0x601eedd5",
+            ],
+        ),
+        "Unk0x76bbc6a0": Clip(
+            node_index: 25,
+        ),
+        "Unk0x7e466a93": Clip(
+            node_index: 27,
+        ),
+        "Unk0x89075e81": Clip(
+            node_index: 28,
+        ),
+        "Unk0x8bc9eaf": Clip(
+            node_index: 1,
+        ),
+        "Unk0x8f2d4d45": Clip(
+            node_index: 29,
+        ),
+        "Unk0x9ac964f0": Clip(
+            node_index: 31,
+        ),
+        "Unk0x9e55a33e": Clip(
+            node_index: 34,
+        ),
+        "Unk0xabc75b53": Clip(
+            node_index: 37,
+        ),
+        "Unk0xb7fea5f3": Clip(
+            node_index: 39,
+        ),
+        "Unk0xbda0cf7b": Clip(
+            node_index: 41,
+        ),
+        "Unk0xbed4198e": Clip(
+            node_index: 42,
+        ),
+        "Unk0xc4a83b16": Clip(
+            node_index: 44,
+        ),
+        "Unk0xc4ba7841": Clip(
+            node_index: 45,
+        ),
+        "Unk0xc4dd18f": Clip(
+            node_index: 5,
+        ),
+        "Unk0xee412bd0": Sequence(
+            hashes: [
+                "Unk0x9ac964f0",
+                "IdleSelector",
+            ],
+        ),
+        "Unk0xf93e165f": Clip(
+            node_index: 49,
+        ),
+    },
+    blend_data: {
+        ("Attack1", "Attack1"): Time(
+            time: 0.0,
+        ),
+        ("Attack1", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Attack2", "Attack2"): Time(
+            time: 0.0,
+        ),
+        ("Attack2", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Buffbones", "Buffbones"): Time(
+            time: 0.0,
+        ),
+        ("Buffbones", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Buffbones", "Turn"): Time(
+            time: 0.1,
+        ),
+        ("Buffbones", "Turn0"): Time(
+            time: 0.1,
+        ),
+        ("Buffbones", "Turn180"): Time(
+            time: 0.1,
+        ),
+        ("Buffbones", "Turn90"): Time(
+            time: 0.1,
+        ),
+        ("Buffbones", "TurnNeg180"): Time(
+            time: 0.1,
+        ),
+        ("Buffbones", "TurnNeg90"): Time(
+            time: 0.1,
+        ),
+        ("Buffbones", "Unk0x8f2d4d45"): Time(
+            time: 0.0,
+        ),
+        ("Channel", "Channel"): Time(
+            time: 0.0,
+        ),
+        ("Channel", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Channel", "Run"): TransitionClip(
+            clip_name: "Unk0x67e51852",
+        ),
+        ("Channel", "Turn"): Time(
+            time: 0.1,
+        ),
+        ("Channel", "Turn0"): Time(
+            time: 0.1,
+        ),
+        ("Channel", "Turn180"): Time(
+            time: 0.1,
+        ),
+        ("Channel", "Turn90"): Time(
+            time: 0.1,
+        ),
+        ("Channel", "TurnNeg180"): Time(
+            time: 0.1,
+        ),
+        ("Channel", "TurnNeg90"): Time(
+            time: 0.1,
+        ),
+        ("Channel", "Unk0x246bd415"): Time(
+            time: 0.1,
+        ),
+        ("Channel", "Unk0x41472d6f"): TransitionClip(
+            clip_name: "Unk0xf93e165f",
+        ),
+        ("Channel", "Unk0x7e466a93"): TransitionClip(
+            clip_name: "Unk0xf93e165f",
+        ),
+        ("Channel", "Unk0x89075e81"): Time(
+            time: 0.1,
+        ),
+        ("Channel", "Unk0x8bc9eaf"): Time(
+            time: 0.1,
+        ),
+        ("Channel", "Unk0x8f2d4d45"): Time(
+            time: 0.0,
+        ),
+        ("Channel", "Unk0xc4dd18f"): Time(
+            time: 0.1,
+        ),
+        ("ChannelWndup", "ChannelWndup"): Time(
+            time: 0.0,
+        ),
+        ("ChannelWndup", "Death"): Time(
+            time: 0.0,
+        ),
+        ("ChannelWndup", "Run"): TransitionClip(
+            clip_name: "Unk0x67e51852",
+        ),
+        ("ChannelWndup", "Turn"): Time(
+            time: 0.1,
+        ),
+        ("ChannelWndup", "Turn0"): Time(
+            time: 0.1,
+        ),
+        ("ChannelWndup", "Turn180"): Time(
+            time: 0.1,
+        ),
+        ("ChannelWndup", "Turn90"): Time(
+            time: 0.1,
+        ),
+        ("ChannelWndup", "TurnNeg180"): Time(
+            time: 0.1,
+        ),
+        ("ChannelWndup", "TurnNeg90"): Time(
+            time: 0.1,
+        ),
+        ("ChannelWndup", "Unk0x246bd415"): Time(
+            time: 0.1,
+        ),
+        ("ChannelWndup", "Unk0x41472d6f"): TransitionClip(
+            clip_name: "Unk0xf93e165f",
+        ),
+        ("ChannelWndup", "Unk0x7e466a93"): TransitionClip(
+            clip_name: "Unk0xf93e165f",
+        ),
+        ("ChannelWndup", "Unk0x89075e81"): Time(
+            time: 0.1,
+        ),
+        ("ChannelWndup", "Unk0x8bc9eaf"): Time(
+            time: 0.1,
+        ),
+        ("ChannelWndup", "Unk0x8f2d4d45"): Time(
+            time: 0.0,
+        ),
+        ("ChannelWndup", "Unk0xc4dd18f"): Time(
+            time: 0.1,
+        ),
+        ("Crit", "Crit"): Time(
+            time: 0.0,
+        ),
+        ("Crit", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Crit", "Turn"): Time(
+            time: 0.1,
+        ),
+        ("Crit", "Turn0"): Time(
+            time: 0.1,
+        ),
+        ("Crit", "Turn180"): Time(
+            time: 0.1,
+        ),
+        ("Crit", "Turn90"): Time(
+            time: 0.1,
+        ),
+        ("Crit", "TurnNeg180"): Time(
+            time: 0.1,
+        ),
+        ("Crit", "TurnNeg90"): Time(
+            time: 0.1,
+        ),
+        ("Crit", "Unk0x246bd415"): Time(
+            time: 0.1,
+        ),
+        ("Crit", "Unk0x89075e81"): Time(
+            time: 0.1,
+        ),
+        ("Crit", "Unk0x8bc9eaf"): Time(
+            time: 0.1,
+        ),
+        ("Crit", "Unk0x8f2d4d45"): Time(
+            time: 0.0,
+        ),
+        ("Crit", "Unk0xc4dd18f"): Time(
+            time: 0.1,
+        ),
+        ("Dance", "Dance"): Time(
+            time: 0.0,
+        ),
+        ("Dance", "Death"): Time(
+            time: 0.0,
+        ),
+        ("DanceLoop", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("DanceLoop", "Death"): Time(
+            time: 0.0,
+        ),
+        ("DanceLoop", "Run"): TransitionClip(
+            clip_name: "Unk0x67e51852",
+        ),
+        ("DanceLoop", "Turn"): Time(
+            time: 0.1,
+        ),
+        ("DanceLoop", "Turn0"): Time(
+            time: 0.1,
+        ),
+        ("DanceLoop", "Turn180"): Time(
+            time: 0.1,
+        ),
+        ("DanceLoop", "Turn90"): Time(
+            time: 0.1,
+        ),
+        ("DanceLoop", "TurnNeg180"): Time(
+            time: 0.1,
+        ),
+        ("DanceLoop", "TurnNeg90"): Time(
+            time: 0.1,
+        ),
+        ("DanceLoop", "Unk0x41472d6f"): TransitionClip(
+            clip_name: "Unk0xf93e165f",
+        ),
+        ("DanceLoop", "Unk0x7e466a93"): TransitionClip(
+            clip_name: "Unk0xf93e165f",
+        ),
+        ("DanceLoop", "Unk0x8f2d4d45"): Time(
+            time: 0.0,
+        ),
+        ("DanceWindup", "DanceWindup"): Time(
+            time: 0.0,
+        ),
+        ("DanceWindup", "Death"): Time(
+            time: 0.0,
+        ),
+        ("DanceWindup", "Run"): TransitionClip(
+            clip_name: "Unk0x67e51852",
+        ),
+        ("DanceWindup", "Turn"): Time(
+            time: 0.1,
+        ),
+        ("DanceWindup", "Turn0"): Time(
+            time: 0.1,
+        ),
+        ("DanceWindup", "Turn180"): Time(
+            time: 0.1,
+        ),
+        ("DanceWindup", "Turn90"): Time(
+            time: 0.1,
+        ),
+        ("DanceWindup", "TurnNeg180"): Time(
+            time: 0.1,
+        ),
+        ("DanceWindup", "TurnNeg90"): Time(
+            time: 0.1,
+        ),
+        ("DanceWindup", "Unk0x41472d6f"): TransitionClip(
+            clip_name: "Unk0xf93e165f",
+        ),
+        ("DanceWindup", "Unk0x7e466a93"): TransitionClip(
+            clip_name: "Unk0xf93e165f",
+        ),
+        ("DanceWindup", "Unk0x8f2d4d45"): Time(
+            time: 0.0,
+        ),
+        ("Death", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Death", "Turn"): Time(
+            time: 0.1,
+        ),
+        ("Death", "Turn0"): Time(
+            time: 0.1,
+        ),
+        ("Death", "Turn180"): Time(
+            time: 0.1,
+        ),
+        ("Death", "Turn90"): Time(
+            time: 0.1,
+        ),
+        ("Death", "TurnNeg180"): Time(
+            time: 0.1,
+        ),
+        ("Death", "TurnNeg90"): Time(
+            time: 0.1,
+        ),
+        ("Death", "Unk0x8f2d4d45"): Time(
+            time: 0.0,
+        ),
+        ("GaDeath", "GaDeath"): Time(
+            time: 0.0,
+        ),
+        ("Idle1", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Idle1", "Idle1"): Time(
+            time: 0.0,
+        ),
+        ("Idle1Base", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Idle1Base", "Idle1Base"): Time(
+            time: 0.0,
+        ),
+        ("Idle1Base", "Run"): TransitionClip(
+            clip_name: "Unk0x67e51852",
+        ),
+        ("Idle1Base", "Turn"): Time(
+            time: 0.1,
+        ),
+        ("Idle1Base", "Turn0"): Time(
+            time: 0.1,
+        ),
+        ("Idle1Base", "Turn180"): Time(
+            time: 0.1,
+        ),
+        ("Idle1Base", "Turn90"): Time(
+            time: 0.1,
+        ),
+        ("Idle1Base", "TurnNeg180"): Time(
+            time: 0.1,
+        ),
+        ("Idle1Base", "TurnNeg90"): Time(
+            time: 0.1,
+        ),
+        ("Idle1Base", "Unk0x246bd415"): Time(
+            time: 0.1,
+        ),
+        ("Idle1Base", "Unk0x41472d6f"): TransitionClip(
+            clip_name: "Unk0xf93e165f",
+        ),
+        ("Idle1Base", "Unk0x7e466a93"): TransitionClip(
+            clip_name: "Unk0xf93e165f",
+        ),
+        ("Idle1Base", "Unk0x89075e81"): Time(
+            time: 0.1,
+        ),
+        ("Idle1Base", "Unk0x8bc9eaf"): Time(
+            time: 0.1,
+        ),
+        ("Idle1Base", "Unk0x8f2d4d45"): Time(
+            time: 0.0,
+        ),
+        ("Idle1Base", "Unk0xc4dd18f"): Time(
+            time: 0.1,
+        ),
+        ("Idle2Base", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Idle2Base", "Idle2Base"): Time(
+            time: 0.0,
+        ),
+        ("Idle2Base", "Run"): TransitionClip(
+            clip_name: "Unk0x67e51852",
+        ),
+        ("Idle2Base", "Turn"): Time(
+            time: 0.1,
+        ),
+        ("Idle2Base", "Turn0"): Time(
+            time: 0.1,
+        ),
+        ("Idle2Base", "Turn180"): Time(
+            time: 0.1,
+        ),
+        ("Idle2Base", "Turn90"): Time(
+            time: 0.1,
+        ),
+        ("Idle2Base", "TurnNeg180"): Time(
+            time: 0.1,
+        ),
+        ("Idle2Base", "TurnNeg90"): Time(
+            time: 0.1,
+        ),
+        ("Idle2Base", "Unk0x246bd415"): Time(
+            time: 0.1,
+        ),
+        ("Idle2Base", "Unk0x41472d6f"): TransitionClip(
+            clip_name: "Unk0xf93e165f",
+        ),
+        ("Idle2Base", "Unk0x7e466a93"): TransitionClip(
+            clip_name: "Unk0xf93e165f",
+        ),
+        ("Idle2Base", "Unk0x89075e81"): Time(
+            time: 0.1,
+        ),
+        ("Idle2Base", "Unk0x8bc9eaf"): Time(
+            time: 0.1,
+        ),
+        ("Idle2Base", "Unk0x8f2d4d45"): Time(
+            time: 0.0,
+        ),
+        ("Idle2Base", "Unk0xc4dd18f"): Time(
+            time: 0.1,
+        ),
+        ("IdleIn", "Death"): Time(
+            time: 0.0,
+        ),
+        ("IdleIn", "IdleIn"): Time(
+            time: 0.0,
+        ),
+        ("IdleIn1", "Death"): Time(
+            time: 0.0,
+        ),
+        ("IdleIn1", "IdleIn1"): Time(
+            time: 0.0,
+        ),
+        ("IdleIn1", "Run"): TransitionClip(
+            clip_name: "Unk0x67e51852",
+        ),
+        ("IdleIn1", "Turn"): Time(
+            time: 0.1,
+        ),
+        ("IdleIn1", "Turn0"): Time(
+            time: 0.1,
+        ),
+        ("IdleIn1", "Turn180"): Time(
+            time: 0.1,
+        ),
+        ("IdleIn1", "Turn90"): Time(
+            time: 0.1,
+        ),
+        ("IdleIn1", "TurnNeg180"): Time(
+            time: 0.1,
+        ),
+        ("IdleIn1", "TurnNeg90"): Time(
+            time: 0.1,
+        ),
+        ("IdleIn1", "Unk0x246bd415"): Time(
+            time: 0.1,
+        ),
+        ("IdleIn1", "Unk0x41472d6f"): TransitionClip(
+            clip_name: "Unk0xf93e165f",
+        ),
+        ("IdleIn1", "Unk0x7e466a93"): TransitionClip(
+            clip_name: "Unk0xf93e165f",
+        ),
+        ("IdleIn1", "Unk0x89075e81"): Time(
+            time: 0.1,
+        ),
+        ("IdleIn1", "Unk0x8bc9eaf"): Time(
+            time: 0.1,
+        ),
+        ("IdleIn1", "Unk0x8f2d4d45"): Time(
+            time: 0.0,
+        ),
+        ("IdleIn1", "Unk0xc4dd18f"): Time(
+            time: 0.1,
+        ),
+        ("IdleIn2", "Death"): Time(
+            time: 0.0,
+        ),
+        ("IdleIn2", "IdleIn2"): Time(
+            time: 0.0,
+        ),
+        ("IdleIn2", "Run"): TransitionClip(
+            clip_name: "Unk0x67e51852",
+        ),
+        ("IdleIn2", "Turn"): Time(
+            time: 0.1,
+        ),
+        ("IdleIn2", "Turn0"): Time(
+            time: 0.1,
+        ),
+        ("IdleIn2", "Turn180"): Time(
+            time: 0.1,
+        ),
+        ("IdleIn2", "Turn90"): Time(
+            time: 0.1,
+        ),
+        ("IdleIn2", "TurnNeg180"): Time(
+            time: 0.1,
+        ),
+        ("IdleIn2", "TurnNeg90"): Time(
+            time: 0.1,
+        ),
+        ("IdleIn2", "Unk0x246bd415"): Time(
+            time: 0.1,
+        ),
+        ("IdleIn2", "Unk0x41472d6f"): TransitionClip(
+            clip_name: "Unk0xf93e165f",
+        ),
+        ("IdleIn2", "Unk0x7e466a93"): TransitionClip(
+            clip_name: "Unk0xf93e165f",
+        ),
+        ("IdleIn2", "Unk0x89075e81"): Time(
+            time: 0.1,
+        ),
+        ("IdleIn2", "Unk0x8bc9eaf"): Time(
+            time: 0.1,
+        ),
+        ("IdleIn2", "Unk0x8f2d4d45"): Time(
+            time: 0.0,
+        ),
+        ("IdleIn2", "Unk0xc4dd18f"): Time(
+            time: 0.1,
+        ),
+        ("IdleSelector", "Death"): Time(
+            time: 0.0,
+        ),
+        ("IdleSelector", "IdleSelector"): Time(
+            time: 0.0,
+        ),
+        ("Joke", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Joke", "Joke"): Time(
+            time: 0.0,
+        ),
+        ("Joke", "Turn"): Time(
+            time: 0.1,
+        ),
+        ("Joke", "Turn0"): Time(
+            time: 0.1,
+        ),
+        ("Joke", "Turn180"): Time(
+            time: 0.1,
+        ),
+        ("Joke", "Turn90"): Time(
+            time: 0.1,
+        ),
+        ("Joke", "TurnNeg180"): Time(
+            time: 0.1,
+        ),
+        ("Joke", "TurnNeg90"): Time(
+            time: 0.1,
+        ),
+        ("Joke", "Unk0x246bd415"): Time(
+            time: 0.1,
+        ),
+        ("Joke", "Unk0x89075e81"): Time(
+            time: 0.1,
+        ),
+        ("Joke", "Unk0x8bc9eaf"): Time(
+            time: 0.1,
+        ),
+        ("Joke", "Unk0x8f2d4d45"): Time(
+            time: 0.0,
+        ),
+        ("Joke", "Unk0xc4dd18f"): Time(
+            time: 0.1,
+        ),
+        ("KnockUp", "KnockUp"): Time(
+            time: 0.0,
+        ),
+        ("KnockUpLoop", "KnockUpLoop"): Time(
+            time: 0.0,
+        ),
+        ("KnockupIn", "KnockupIn"): Time(
+            time: 0.0,
+        ),
+        ("Laugh", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Laugh", "Laugh"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Recall"): Time(
+            time: 0.0,
+        ),
+        ("RecallLeadIn", "Death"): Time(
+            time: 0.0,
+        ),
+        ("RecallLeadIn", "RecallLeadIn"): Time(
+            time: 0.0,
+        ),
+        ("RecallLeadIn", "Run"): TransitionClip(
+            clip_name: "Unk0x67e51852",
+        ),
+        ("RecallLeadIn", "Turn"): Time(
+            time: 0.1,
+        ),
+        ("RecallLeadIn", "Turn0"): Time(
+            time: 0.1,
+        ),
+        ("RecallLeadIn", "Turn180"): Time(
+            time: 0.1,
+        ),
+        ("RecallLeadIn", "Turn90"): Time(
+            time: 0.1,
+        ),
+        ("RecallLeadIn", "TurnNeg180"): Time(
+            time: 0.1,
+        ),
+        ("RecallLeadIn", "TurnNeg90"): Time(
+            time: 0.1,
+        ),
+        ("RecallLeadIn", "Unk0x246bd415"): Time(
+            time: 0.1,
+        ),
+        ("RecallLeadIn", "Unk0x41472d6f"): TransitionClip(
+            clip_name: "Unk0xf93e165f",
+        ),
+        ("RecallLeadIn", "Unk0x7e466a93"): TransitionClip(
+            clip_name: "Unk0xf93e165f",
+        ),
+        ("RecallLeadIn", "Unk0x89075e81"): Time(
+            time: 0.1,
+        ),
+        ("RecallLeadIn", "Unk0x8bc9eaf"): Time(
+            time: 0.1,
+        ),
+        ("RecallLeadIn", "Unk0x8f2d4d45"): Time(
+            time: 0.0,
+        ),
+        ("RecallLeadIn", "Unk0xc4dd18f"): Time(
+            time: 0.1,
+        ),
+        ("RecallLeadout", "Death"): Time(
+            time: 0.0,
+        ),
+        ("RecallLeadout", "RecallLeadout"): Time(
+            time: 0.0,
+        ),
+        ("RecallLeadout", "Turn"): Time(
+            time: 0.1,
+        ),
+        ("RecallLeadout", "Turn0"): Time(
+            time: 0.1,
+        ),
+        ("RecallLeadout", "Turn180"): Time(
+            time: 0.1,
+        ),
+        ("RecallLeadout", "Turn90"): Time(
+            time: 0.1,
+        ),
+        ("RecallLeadout", "TurnNeg180"): Time(
+            time: 0.1,
+        ),
+        ("RecallLeadout", "TurnNeg90"): Time(
+            time: 0.1,
+        ),
+        ("RecallLeadout", "Unk0x246bd415"): Time(
+            time: 0.1,
+        ),
+        ("RecallLeadout", "Unk0x89075e81"): Time(
+            time: 0.1,
+        ),
+        ("RecallLeadout", "Unk0x8bc9eaf"): Time(
+            time: 0.1,
+        ),
+        ("RecallLeadout", "Unk0x8f2d4d45"): Time(
+            time: 0.0,
+        ),
+        ("RecallLeadout", "Unk0xc4dd18f"): Time(
+            time: 0.1,
+        ),
+        ("RecallLoop", "Death"): Time(
+            time: 0.0,
+        ),
+        ("RecallLoop", "RecallLoop"): Time(
+            time: 0.0,
+        ),
+        ("RecallLoop", "Run"): TransitionClip(
+            clip_name: "Unk0x67e51852",
+        ),
+        ("RecallLoop", "Turn"): Time(
+            time: 0.1,
+        ),
+        ("RecallLoop", "Turn0"): Time(
+            time: 0.1,
+        ),
+        ("RecallLoop", "Turn180"): Time(
+            time: 0.1,
+        ),
+        ("RecallLoop", "Turn90"): Time(
+            time: 0.1,
+        ),
+        ("RecallLoop", "TurnNeg180"): Time(
+            time: 0.1,
+        ),
+        ("RecallLoop", "TurnNeg90"): Time(
+            time: 0.1,
+        ),
+        ("RecallLoop", "Unk0x246bd415"): Time(
+            time: 0.1,
+        ),
+        ("RecallLoop", "Unk0x41472d6f"): TransitionClip(
+            clip_name: "Unk0xf93e165f",
+        ),
+        ("RecallLoop", "Unk0x7e466a93"): TransitionClip(
+            clip_name: "Unk0xf93e165f",
+        ),
+        ("RecallLoop", "Unk0x89075e81"): Time(
+            time: 0.1,
+        ),
+        ("RecallLoop", "Unk0x8bc9eaf"): Time(
+            time: 0.1,
+        ),
+        ("RecallLoop", "Unk0x8f2d4d45"): Time(
+            time: 0.0,
+        ),
+        ("RecallLoop", "Unk0xc4dd18f"): Time(
+            time: 0.1,
+        ),
+        ("RecallWinddown", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Respawn", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Respawn", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Respawn", "Turn"): Time(
+            time: 0.1,
+        ),
+        ("Respawn", "Turn0"): Time(
+            time: 0.1,
+        ),
+        ("Respawn", "Turn180"): Time(
+            time: 0.1,
+        ),
+        ("Respawn", "Turn90"): Time(
+            time: 0.1,
+        ),
+        ("Respawn", "TurnNeg180"): Time(
+            time: 0.1,
+        ),
+        ("Respawn", "TurnNeg90"): Time(
+            time: 0.1,
+        ),
+        ("Respawn", "Unk0x246bd415"): Time(
+            time: 0.1,
+        ),
+        ("Respawn", "Unk0x89075e81"): Time(
+            time: 0.1,
+        ),
+        ("Respawn", "Unk0x8bc9eaf"): Time(
+            time: 0.1,
+        ),
+        ("Respawn", "Unk0x8f2d4d45"): Time(
+            time: 0.0,
+        ),
+        ("Respawn", "Unk0xc4dd18f"): Time(
+            time: 0.1,
+        ),
+        ("Run", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Run", "Run"): Time(
+            time: 0.0,
+        ),
+        ("Run", "Turn"): Time(
+            time: 0.1,
+        ),
+        ("Run", "Turn0"): Time(
+            time: 0.1,
+        ),
+        ("Run", "Turn180"): Time(
+            time: 0.1,
+        ),
+        ("Run", "Turn90"): Time(
+            time: 0.1,
+        ),
+        ("Run", "TurnNeg180"): Time(
+            time: 0.1,
+        ),
+        ("Run", "TurnNeg90"): Time(
+            time: 0.1,
+        ),
+        ("Run", "Unk0x246bd415"): Time(
+            time: 0.1,
+        ),
+        ("Run", "Unk0x89075e81"): Time(
+            time: 0.1,
+        ),
+        ("Run", "Unk0x8bc9eaf"): Time(
+            time: 0.1,
+        ),
+        ("Run", "Unk0x8f2d4d45"): Time(
+            time: 0.0,
+        ),
+        ("Run", "Unk0xc4dd18f"): Time(
+            time: 0.1,
+        ),
+        ("RunFast", "Death"): Time(
+            time: 0.0,
+        ),
+        ("RunFast", "RunFast"): Time(
+            time: 0.0,
+        ),
+        ("RunHaste", "Death"): Time(
+            time: 0.0,
+        ),
+        ("RunHaste", "RunHaste"): Time(
+            time: 0.0,
+        ),
+        ("RunHaste", "Turn"): Time(
+            time: 0.1,
+        ),
+        ("RunHaste", "Turn0"): Time(
+            time: 0.1,
+        ),
+        ("RunHaste", "Turn180"): Time(
+            time: 0.1,
+        ),
+        ("RunHaste", "Turn90"): Time(
+            time: 0.1,
+        ),
+        ("RunHaste", "TurnNeg180"): Time(
+            time: 0.1,
+        ),
+        ("RunHaste", "TurnNeg90"): Time(
+            time: 0.1,
+        ),
+        ("RunHaste", "Unk0x246bd415"): Time(
+            time: 0.1,
+        ),
+        ("RunHaste", "Unk0x89075e81"): Time(
+            time: 0.1,
+        ),
+        ("RunHaste", "Unk0x8bc9eaf"): Time(
+            time: 0.1,
+        ),
+        ("RunHaste", "Unk0x8f2d4d45"): Time(
+            time: 0.0,
+        ),
+        ("RunHaste", "Unk0xc4dd18f"): Time(
+            time: 0.1,
+        ),
+        ("Spell1", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("Spell2", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell2", "Spell2"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Dash", "Spell3Dash"): Time(
+            time: 0.0,
+        ),
+        ("Spell3DashLoop", "Spell3DashLoop"): Time(
+            time: 0.0,
+        ),
+        ("Spell3DashLoop", "Unk0x8f2d4d45"): Time(
+            time: 0.0,
+        ),
+        ("Spell4", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell4", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("Taunt", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Taunt", "Taunt"): Time(
+            time: 0.0,
+        ),
+        ("TauntBase", "Death"): Time(
+            time: 0.0,
+        ),
+        ("TauntBase", "Run"): TransitionClip(
+            clip_name: "Unk0x67e51852",
+        ),
+        ("TauntBase", "TauntBase"): Time(
+            time: 0.0,
+        ),
+        ("TauntBase", "Turn"): Time(
+            time: 0.1,
+        ),
+        ("TauntBase", "Turn0"): Time(
+            time: 0.1,
+        ),
+        ("TauntBase", "Turn180"): Time(
+            time: 0.1,
+        ),
+        ("TauntBase", "Turn90"): Time(
+            time: 0.1,
+        ),
+        ("TauntBase", "TurnNeg180"): Time(
+            time: 0.1,
+        ),
+        ("TauntBase", "TurnNeg90"): Time(
+            time: 0.1,
+        ),
+        ("TauntBase", "Unk0x246bd415"): Time(
+            time: 0.1,
+        ),
+        ("TauntBase", "Unk0x41472d6f"): TransitionClip(
+            clip_name: "Unk0xf93e165f",
+        ),
+        ("TauntBase", "Unk0x7e466a93"): TransitionClip(
+            clip_name: "Unk0xf93e165f",
+        ),
+        ("TauntBase", "Unk0x89075e81"): Time(
+            time: 0.1,
+        ),
+        ("TauntBase", "Unk0x8bc9eaf"): Time(
+            time: 0.1,
+        ),
+        ("TauntBase", "Unk0x8f2d4d45"): Time(
+            time: 0.0,
+        ),
+        ("TauntBase", "Unk0xc4dd18f"): Time(
+            time: 0.1,
+        ),
+        ("Turn", "Buffbones"): Time(
+            time: 0.0,
+        ),
+        ("Turn", "Channel"): Time(
+            time: 0.0,
+        ),
+        ("Turn", "ChannelWndup"): Time(
+            time: 0.0,
+        ),
+        ("Turn", "Crit"): Time(
+            time: 0.0,
+        ),
+        ("Turn", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("Turn", "DanceWindup"): Time(
+            time: 0.0,
+        ),
+        ("Turn", "Idle1Base"): Time(
+            time: 0.0,
+        ),
+        ("Turn", "Idle2Base"): Time(
+            time: 0.0,
+        ),
+        ("Turn", "IdleIn1"): Time(
+            time: 0.0,
+        ),
+        ("Turn", "IdleIn2"): Time(
+            time: 0.0,
+        ),
+        ("Turn", "Joke"): Time(
+            time: 0.0,
+        ),
+        ("Turn", "RecallLeadIn"): Time(
+            time: 0.0,
+        ),
+        ("Turn", "RecallLeadout"): Time(
+            time: 0.0,
+        ),
+        ("Turn", "RecallLoop"): Time(
+            time: 0.0,
+        ),
+        ("Turn", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Turn", "Run"): Time(
+            time: 0.0,
+        ),
+        ("Turn", "RunHaste"): Time(
+            time: 0.0,
+        ),
+        ("Turn", "TauntBase"): Time(
+            time: 0.0,
+        ),
+        ("Turn", "Turn"): Time(
+            time: 0.0,
+        ),
+        ("Turn", "Turn0"): Time(
+            time: 0.0,
+        ),
+        ("Turn", "Turn180"): Time(
+            time: 0.0,
+        ),
+        ("Turn", "Turn90"): Time(
+            time: 0.0,
+        ),
+        ("Turn", "TurnNeg180"): Time(
+            time: 0.0,
+        ),
+        ("Turn", "TurnNeg90"): Time(
+            time: 0.0,
+        ),
+        ("Turn", "Unk0x13f95189"): Time(
+            time: 0.0,
+        ),
+        ("Turn", "Unk0x246bd415"): Time(
+            time: 0.0,
+        ),
+        ("Turn", "Unk0x25875a32"): Time(
+            time: 0.0,
+        ),
+        ("Turn", "Unk0x3362f8de"): Time(
+            time: 0.0,
+        ),
+        ("Turn", "Unk0x41472d6f"): Time(
+            time: 0.0,
+        ),
+        ("Turn", "Unk0x67e51852"): Time(
+            time: 0.0,
+        ),
+        ("Turn", "Unk0x76bbc6a0"): Time(
+            time: 0.0,
+        ),
+        ("Turn", "Unk0x7e466a93"): Time(
+            time: 0.0,
+        ),
+        ("Turn", "Unk0x89075e81"): Time(
+            time: 0.0,
+        ),
+        ("Turn", "Unk0x8bc9eaf"): Time(
+            time: 0.0,
+        ),
+        ("Turn", "Unk0x8f2d4d45"): Time(
+            time: 0.0,
+        ),
+        ("Turn", "Unk0x9ac964f0"): Time(
+            time: 0.0,
+        ),
+        ("Turn", "Unk0x9e55a33e"): Time(
+            time: 0.0,
+        ),
+        ("Turn", "Unk0xabc75b53"): Time(
+            time: 0.0,
+        ),
+        ("Turn", "Unk0xb7fea5f3"): Time(
+            time: 0.0,
+        ),
+        ("Turn", "Unk0xbda0cf7b"): Time(
+            time: 0.0,
+        ),
+        ("Turn", "Unk0xc4a83b16"): Time(
+            time: 0.0,
+        ),
+        ("Turn", "Unk0xc4ba7841"): Time(
+            time: 0.0,
+        ),
+        ("Turn", "Unk0xc4dd18f"): Time(
+            time: 0.0,
+        ),
+        ("Turn", "Unk0xf93e165f"): Time(
+            time: 0.0,
+        ),
+        ("Turn0", "Buffbones"): Time(
+            time: 0.0,
+        ),
+        ("Turn0", "Channel"): Time(
+            time: 0.0,
+        ),
+        ("Turn0", "ChannelWndup"): Time(
+            time: 0.0,
+        ),
+        ("Turn0", "Crit"): Time(
+            time: 0.0,
+        ),
+        ("Turn0", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("Turn0", "DanceWindup"): Time(
+            time: 0.0,
+        ),
+        ("Turn0", "Idle1Base"): Time(
+            time: 0.0,
+        ),
+        ("Turn0", "Idle2Base"): Time(
+            time: 0.0,
+        ),
+        ("Turn0", "IdleIn1"): Time(
+            time: 0.0,
+        ),
+        ("Turn0", "IdleIn2"): Time(
+            time: 0.0,
+        ),
+        ("Turn0", "Joke"): Time(
+            time: 0.0,
+        ),
+        ("Turn0", "RecallLeadIn"): Time(
+            time: 0.0,
+        ),
+        ("Turn0", "RecallLeadout"): Time(
+            time: 0.0,
+        ),
+        ("Turn0", "RecallLoop"): Time(
+            time: 0.0,
+        ),
+        ("Turn0", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Turn0", "Run"): Time(
+            time: 0.0,
+        ),
+        ("Turn0", "RunHaste"): Time(
+            time: 0.0,
+        ),
+        ("Turn0", "TauntBase"): Time(
+            time: 0.0,
+        ),
+        ("Turn0", "Turn"): Time(
+            time: 0.0,
+        ),
+        ("Turn0", "Turn0"): Time(
+            time: 0.0,
+        ),
+        ("Turn0", "Turn180"): Time(
+            time: 0.0,
+        ),
+        ("Turn0", "Turn90"): Time(
+            time: 0.0,
+        ),
+        ("Turn0", "TurnNeg180"): Time(
+            time: 0.0,
+        ),
+        ("Turn0", "TurnNeg90"): Time(
+            time: 0.0,
+        ),
+        ("Turn0", "Unk0x13f95189"): Time(
+            time: 0.0,
+        ),
+        ("Turn0", "Unk0x246bd415"): Time(
+            time: 0.0,
+        ),
+        ("Turn0", "Unk0x25875a32"): Time(
+            time: 0.0,
+        ),
+        ("Turn0", "Unk0x3362f8de"): Time(
+            time: 0.0,
+        ),
+        ("Turn0", "Unk0x41472d6f"): Time(
+            time: 0.0,
+        ),
+        ("Turn0", "Unk0x67e51852"): Time(
+            time: 0.0,
+        ),
+        ("Turn0", "Unk0x76bbc6a0"): Time(
+            time: 0.0,
+        ),
+        ("Turn0", "Unk0x7e466a93"): Time(
+            time: 0.0,
+        ),
+        ("Turn0", "Unk0x89075e81"): Time(
+            time: 0.0,
+        ),
+        ("Turn0", "Unk0x8bc9eaf"): Time(
+            time: 0.0,
+        ),
+        ("Turn0", "Unk0x8f2d4d45"): Time(
+            time: 0.0,
+        ),
+        ("Turn0", "Unk0x9ac964f0"): Time(
+            time: 0.0,
+        ),
+        ("Turn0", "Unk0x9e55a33e"): Time(
+            time: 0.0,
+        ),
+        ("Turn0", "Unk0xabc75b53"): Time(
+            time: 0.0,
+        ),
+        ("Turn0", "Unk0xb7fea5f3"): Time(
+            time: 0.0,
+        ),
+        ("Turn0", "Unk0xbda0cf7b"): Time(
+            time: 0.0,
+        ),
+        ("Turn0", "Unk0xc4a83b16"): Time(
+            time: 0.0,
+        ),
+        ("Turn0", "Unk0xc4ba7841"): Time(
+            time: 0.0,
+        ),
+        ("Turn0", "Unk0xc4dd18f"): Time(
+            time: 0.0,
+        ),
+        ("Turn0", "Unk0xf93e165f"): Time(
+            time: 0.0,
+        ),
+        ("Turn180", "Buffbones"): Time(
+            time: 0.0,
+        ),
+        ("Turn180", "Channel"): Time(
+            time: 0.0,
+        ),
+        ("Turn180", "ChannelWndup"): Time(
+            time: 0.0,
+        ),
+        ("Turn180", "Crit"): Time(
+            time: 0.0,
+        ),
+        ("Turn180", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("Turn180", "DanceWindup"): Time(
+            time: 0.0,
+        ),
+        ("Turn180", "Idle1Base"): Time(
+            time: 0.0,
+        ),
+        ("Turn180", "Idle2Base"): Time(
+            time: 0.0,
+        ),
+        ("Turn180", "IdleIn1"): Time(
+            time: 0.0,
+        ),
+        ("Turn180", "IdleIn2"): Time(
+            time: 0.0,
+        ),
+        ("Turn180", "Joke"): Time(
+            time: 0.0,
+        ),
+        ("Turn180", "RecallLeadIn"): Time(
+            time: 0.0,
+        ),
+        ("Turn180", "RecallLeadout"): Time(
+            time: 0.0,
+        ),
+        ("Turn180", "RecallLoop"): Time(
+            time: 0.0,
+        ),
+        ("Turn180", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Turn180", "Run"): Time(
+            time: 0.0,
+        ),
+        ("Turn180", "RunHaste"): Time(
+            time: 0.0,
+        ),
+        ("Turn180", "TauntBase"): Time(
+            time: 0.0,
+        ),
+        ("Turn180", "Turn"): Time(
+            time: 0.0,
+        ),
+        ("Turn180", "Turn0"): Time(
+            time: 0.0,
+        ),
+        ("Turn180", "Turn180"): Time(
+            time: 0.0,
+        ),
+        ("Turn180", "Turn90"): Time(
+            time: 0.0,
+        ),
+        ("Turn180", "TurnNeg180"): Time(
+            time: 0.0,
+        ),
+        ("Turn180", "TurnNeg90"): Time(
+            time: 0.0,
+        ),
+        ("Turn180", "Unk0x13f95189"): Time(
+            time: 0.0,
+        ),
+        ("Turn180", "Unk0x246bd415"): Time(
+            time: 0.0,
+        ),
+        ("Turn180", "Unk0x25875a32"): Time(
+            time: 0.0,
+        ),
+        ("Turn180", "Unk0x3362f8de"): Time(
+            time: 0.0,
+        ),
+        ("Turn180", "Unk0x41472d6f"): Time(
+            time: 0.0,
+        ),
+        ("Turn180", "Unk0x67e51852"): Time(
+            time: 0.0,
+        ),
+        ("Turn180", "Unk0x76bbc6a0"): Time(
+            time: 0.0,
+        ),
+        ("Turn180", "Unk0x7e466a93"): Time(
+            time: 0.0,
+        ),
+        ("Turn180", "Unk0x89075e81"): Time(
+            time: 0.0,
+        ),
+        ("Turn180", "Unk0x8bc9eaf"): Time(
+            time: 0.0,
+        ),
+        ("Turn180", "Unk0x8f2d4d45"): Time(
+            time: 0.0,
+        ),
+        ("Turn180", "Unk0x9ac964f0"): Time(
+            time: 0.0,
+        ),
+        ("Turn180", "Unk0x9e55a33e"): Time(
+            time: 0.0,
+        ),
+        ("Turn180", "Unk0xabc75b53"): Time(
+            time: 0.0,
+        ),
+        ("Turn180", "Unk0xb7fea5f3"): Time(
+            time: 0.0,
+        ),
+        ("Turn180", "Unk0xbda0cf7b"): Time(
+            time: 0.0,
+        ),
+        ("Turn180", "Unk0xc4a83b16"): Time(
+            time: 0.0,
+        ),
+        ("Turn180", "Unk0xc4ba7841"): Time(
+            time: 0.0,
+        ),
+        ("Turn180", "Unk0xc4dd18f"): Time(
+            time: 0.0,
+        ),
+        ("Turn180", "Unk0xf93e165f"): Time(
+            time: 0.0,
+        ),
+        ("Turn90", "Buffbones"): Time(
+            time: 0.0,
+        ),
+        ("Turn90", "Channel"): Time(
+            time: 0.0,
+        ),
+        ("Turn90", "ChannelWndup"): Time(
+            time: 0.0,
+        ),
+        ("Turn90", "Crit"): Time(
+            time: 0.0,
+        ),
+        ("Turn90", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("Turn90", "DanceWindup"): Time(
+            time: 0.0,
+        ),
+        ("Turn90", "Idle1Base"): Time(
+            time: 0.0,
+        ),
+        ("Turn90", "Idle2Base"): Time(
+            time: 0.0,
+        ),
+        ("Turn90", "IdleIn1"): Time(
+            time: 0.0,
+        ),
+        ("Turn90", "IdleIn2"): Time(
+            time: 0.0,
+        ),
+        ("Turn90", "Joke"): Time(
+            time: 0.0,
+        ),
+        ("Turn90", "RecallLeadIn"): Time(
+            time: 0.0,
+        ),
+        ("Turn90", "RecallLeadout"): Time(
+            time: 0.0,
+        ),
+        ("Turn90", "RecallLoop"): Time(
+            time: 0.0,
+        ),
+        ("Turn90", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Turn90", "Run"): Time(
+            time: 0.0,
+        ),
+        ("Turn90", "RunHaste"): Time(
+            time: 0.0,
+        ),
+        ("Turn90", "TauntBase"): Time(
+            time: 0.0,
+        ),
+        ("Turn90", "Turn"): Time(
+            time: 0.0,
+        ),
+        ("Turn90", "Turn0"): Time(
+            time: 0.0,
+        ),
+        ("Turn90", "Turn180"): Time(
+            time: 0.0,
+        ),
+        ("Turn90", "Turn90"): Time(
+            time: 0.0,
+        ),
+        ("Turn90", "TurnNeg180"): Time(
+            time: 0.0,
+        ),
+        ("Turn90", "TurnNeg90"): Time(
+            time: 0.0,
+        ),
+        ("Turn90", "Unk0x13f95189"): Time(
+            time: 0.0,
+        ),
+        ("Turn90", "Unk0x246bd415"): Time(
+            time: 0.0,
+        ),
+        ("Turn90", "Unk0x25875a32"): Time(
+            time: 0.0,
+        ),
+        ("Turn90", "Unk0x3362f8de"): Time(
+            time: 0.0,
+        ),
+        ("Turn90", "Unk0x41472d6f"): Time(
+            time: 0.0,
+        ),
+        ("Turn90", "Unk0x67e51852"): Time(
+            time: 0.0,
+        ),
+        ("Turn90", "Unk0x76bbc6a0"): Time(
+            time: 0.0,
+        ),
+        ("Turn90", "Unk0x7e466a93"): Time(
+            time: 0.0,
+        ),
+        ("Turn90", "Unk0x89075e81"): Time(
+            time: 0.0,
+        ),
+        ("Turn90", "Unk0x8bc9eaf"): Time(
+            time: 0.0,
+        ),
+        ("Turn90", "Unk0x8f2d4d45"): Time(
+            time: 0.0,
+        ),
+        ("Turn90", "Unk0x9ac964f0"): Time(
+            time: 0.0,
+        ),
+        ("Turn90", "Unk0x9e55a33e"): Time(
+            time: 0.0,
+        ),
+        ("Turn90", "Unk0xabc75b53"): Time(
+            time: 0.0,
+        ),
+        ("Turn90", "Unk0xb7fea5f3"): Time(
+            time: 0.0,
+        ),
+        ("Turn90", "Unk0xbda0cf7b"): Time(
+            time: 0.0,
+        ),
+        ("Turn90", "Unk0xc4a83b16"): Time(
+            time: 0.0,
+        ),
+        ("Turn90", "Unk0xc4ba7841"): Time(
+            time: 0.0,
+        ),
+        ("Turn90", "Unk0xc4dd18f"): Time(
+            time: 0.0,
+        ),
+        ("Turn90", "Unk0xf93e165f"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg180", "Buffbones"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg180", "Channel"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg180", "ChannelWndup"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg180", "Crit"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg180", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg180", "DanceWindup"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg180", "Idle1Base"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg180", "Idle2Base"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg180", "IdleIn1"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg180", "IdleIn2"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg180", "Joke"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg180", "RecallLeadIn"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg180", "RecallLeadout"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg180", "RecallLoop"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg180", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg180", "Run"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg180", "RunHaste"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg180", "TauntBase"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg180", "Turn"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg180", "Turn0"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg180", "Turn180"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg180", "Turn90"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg180", "TurnNeg180"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg180", "TurnNeg90"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg180", "Unk0x13f95189"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg180", "Unk0x246bd415"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg180", "Unk0x25875a32"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg180", "Unk0x3362f8de"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg180", "Unk0x41472d6f"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg180", "Unk0x67e51852"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg180", "Unk0x76bbc6a0"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg180", "Unk0x7e466a93"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg180", "Unk0x89075e81"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg180", "Unk0x8bc9eaf"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg180", "Unk0x8f2d4d45"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg180", "Unk0x9ac964f0"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg180", "Unk0x9e55a33e"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg180", "Unk0xabc75b53"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg180", "Unk0xb7fea5f3"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg180", "Unk0xbda0cf7b"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg180", "Unk0xc4a83b16"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg180", "Unk0xc4ba7841"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg180", "Unk0xc4dd18f"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg180", "Unk0xf93e165f"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg90", "Buffbones"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg90", "Channel"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg90", "ChannelWndup"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg90", "Crit"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg90", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg90", "DanceWindup"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg90", "Idle1Base"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg90", "Idle2Base"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg90", "IdleIn1"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg90", "IdleIn2"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg90", "Joke"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg90", "RecallLeadIn"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg90", "RecallLeadout"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg90", "RecallLoop"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg90", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg90", "Run"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg90", "RunHaste"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg90", "TauntBase"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg90", "Turn"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg90", "Turn0"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg90", "Turn180"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg90", "Turn90"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg90", "TurnNeg180"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg90", "TurnNeg90"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg90", "Unk0x13f95189"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg90", "Unk0x246bd415"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg90", "Unk0x25875a32"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg90", "Unk0x3362f8de"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg90", "Unk0x41472d6f"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg90", "Unk0x67e51852"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg90", "Unk0x76bbc6a0"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg90", "Unk0x7e466a93"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg90", "Unk0x89075e81"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg90", "Unk0x8bc9eaf"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg90", "Unk0x8f2d4d45"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg90", "Unk0x9ac964f0"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg90", "Unk0x9e55a33e"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg90", "Unk0xabc75b53"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg90", "Unk0xb7fea5f3"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg90", "Unk0xbda0cf7b"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg90", "Unk0xc4a83b16"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg90", "Unk0xc4ba7841"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg90", "Unk0xc4dd18f"): Time(
+            time: 0.0,
+        ),
+        ("TurnNeg90", "Unk0xf93e165f"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x13f95189", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x13f95189", "Run"): TransitionClip(
+            clip_name: "Unk0x67e51852",
+        ),
+        ("Unk0x13f95189", "Turn"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x13f95189", "Turn0"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x13f95189", "Turn180"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x13f95189", "Turn90"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x13f95189", "TurnNeg180"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x13f95189", "TurnNeg90"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x13f95189", "Unk0x13f95189"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x13f95189", "Unk0x246bd415"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x13f95189", "Unk0x41472d6f"): TransitionClip(
+            clip_name: "Unk0xf93e165f",
+        ),
+        ("Unk0x13f95189", "Unk0x7e466a93"): TransitionClip(
+            clip_name: "Unk0xf93e165f",
+        ),
+        ("Unk0x13f95189", "Unk0x89075e81"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x13f95189", "Unk0x8bc9eaf"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x13f95189", "Unk0x8f2d4d45"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x13f95189", "Unk0xc4dd18f"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x246bd415", "Channel"): Time(
+            time: 0.5,
+        ),
+        ("Unk0x246bd415", "ChannelWndup"): Time(
+            time: 0.5,
+        ),
+        ("Unk0x246bd415", "Crit"): Time(
+            time: 0.5,
+        ),
+        ("Unk0x246bd415", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x246bd415", "Idle1Base"): Time(
+            time: 0.5,
+        ),
+        ("Unk0x246bd415", "Idle2Base"): Time(
+            time: 0.5,
+        ),
+        ("Unk0x246bd415", "IdleIn1"): Time(
+            time: 0.5,
+        ),
+        ("Unk0x246bd415", "IdleIn2"): Time(
+            time: 0.5,
+        ),
+        ("Unk0x246bd415", "Joke"): Time(
+            time: 0.5,
+        ),
+        ("Unk0x246bd415", "RecallLeadIn"): Time(
+            time: 0.5,
+        ),
+        ("Unk0x246bd415", "RecallLeadout"): Time(
+            time: 0.5,
+        ),
+        ("Unk0x246bd415", "RecallLoop"): Time(
+            time: 0.5,
+        ),
+        ("Unk0x246bd415", "Respawn"): Time(
+            time: 0.5,
+        ),
+        ("Unk0x246bd415", "Run"): TransitionClip(
+            clip_name: "Unk0x67e51852",
+        ),
+        ("Unk0x246bd415", "RunHaste"): Time(
+            time: 0.5,
+        ),
+        ("Unk0x246bd415", "TauntBase"): Time(
+            time: 0.5,
+        ),
+        ("Unk0x246bd415", "Turn"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x246bd415", "Turn0"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x246bd415", "Turn180"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x246bd415", "Turn90"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x246bd415", "TurnNeg180"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x246bd415", "TurnNeg90"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x246bd415", "Unk0x13f95189"): Time(
+            time: 0.5,
+        ),
+        ("Unk0x246bd415", "Unk0x246bd415"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x246bd415", "Unk0x3362f8de"): Time(
+            time: 0.5,
+        ),
+        ("Unk0x246bd415", "Unk0x41472d6f"): TransitionClip(
+            clip_name: "Unk0xf93e165f",
+        ),
+        ("Unk0x246bd415", "Unk0x76bbc6a0"): Time(
+            time: 0.5,
+        ),
+        ("Unk0x246bd415", "Unk0x7e466a93"): TransitionClip(
+            clip_name: "Unk0xf93e165f",
+        ),
+        ("Unk0x246bd415", "Unk0x89075e81"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x246bd415", "Unk0x8bc9eaf"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x246bd415", "Unk0x8f2d4d45"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x246bd415", "Unk0x9e55a33e"): Time(
+            time: 0.5,
+        ),
+        ("Unk0x246bd415", "Unk0xabc75b53"): Time(
+            time: 0.5,
+        ),
+        ("Unk0x246bd415", "Unk0xb7fea5f3"): Time(
+            time: 0.5,
+        ),
+        ("Unk0x246bd415", "Unk0xc4dd18f"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x246bd415", "Unk0xf93e165f"): Time(
+            time: 0.5,
+        ),
+        ("Unk0x25875a32", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x25875a32", "Turn"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x25875a32", "Turn0"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x25875a32", "Turn180"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x25875a32", "Turn90"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x25875a32", "TurnNeg180"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x25875a32", "TurnNeg90"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x25875a32", "Unk0x25875a32"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x25875a32", "Unk0x3362f8de"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x25875a32", "Unk0x8f2d4d45"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x25875a32", "Unk0xb7fea5f3"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x25875a32", "Unk0xbda0cf7b"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x31dde19e", "Run"): TransitionClip(
+            clip_name: "Unk0x67e51852",
+        ),
+        ("Unk0x31dde19e", "Unk0x31dde19e"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x31dde19e", "Unk0x41472d6f"): TransitionClip(
+            clip_name: "Unk0xf93e165f",
+        ),
+        ("Unk0x31dde19e", "Unk0x7e466a93"): TransitionClip(
+            clip_name: "Unk0xf93e165f",
+        ),
+        ("Unk0x31dde19e", "Unk0x8f2d4d45"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x3362f8de", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x3362f8de", "Turn"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x3362f8de", "Turn0"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x3362f8de", "Turn180"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x3362f8de", "Turn90"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x3362f8de", "TurnNeg180"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x3362f8de", "TurnNeg90"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x3362f8de", "Unk0x246bd415"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x3362f8de", "Unk0x25875a32"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x3362f8de", "Unk0x3362f8de"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x3362f8de", "Unk0x89075e81"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x3362f8de", "Unk0x8bc9eaf"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x3362f8de", "Unk0x8f2d4d45"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x3362f8de", "Unk0xb7fea5f3"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x3362f8de", "Unk0xbda0cf7b"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x3362f8de", "Unk0xc4dd18f"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x41472d6f", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x41472d6f", "Turn"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x41472d6f", "Turn0"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x41472d6f", "Turn180"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x41472d6f", "Turn90"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x41472d6f", "TurnNeg180"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x41472d6f", "TurnNeg90"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x41472d6f", "Unk0x246bd415"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x41472d6f", "Unk0x41472d6f"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x41472d6f", "Unk0x89075e81"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x41472d6f", "Unk0x8bc9eaf"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x41472d6f", "Unk0x8f2d4d45"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x41472d6f", "Unk0xc4dd18f"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x601eedd5", "Run"): TransitionClip(
+            clip_name: "Unk0x67e51852",
+        ),
+        ("Unk0x601eedd5", "Unk0x41472d6f"): TransitionClip(
+            clip_name: "Unk0xf93e165f",
+        ),
+        ("Unk0x601eedd5", "Unk0x601eedd5"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x601eedd5", "Unk0x7e466a93"): TransitionClip(
+            clip_name: "Unk0xf93e165f",
+        ),
+        ("Unk0x601eedd5", "Unk0x8f2d4d45"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x67e51852", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x67e51852", "Turn"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x67e51852", "Turn0"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x67e51852", "Turn180"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x67e51852", "Turn90"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x67e51852", "TurnNeg180"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x67e51852", "TurnNeg90"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x67e51852", "Unk0x67e51852"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x67e51852", "Unk0x8f2d4d45"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x6980ab07", "Unk0x6980ab07"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x76bbc6a0", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x76bbc6a0", "Run"): TransitionClip(
+            clip_name: "Unk0x67e51852",
+        ),
+        ("Unk0x76bbc6a0", "Turn"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x76bbc6a0", "Turn0"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x76bbc6a0", "Turn180"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x76bbc6a0", "Turn90"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x76bbc6a0", "TurnNeg180"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x76bbc6a0", "TurnNeg90"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x76bbc6a0", "Unk0x246bd415"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x76bbc6a0", "Unk0x41472d6f"): TransitionClip(
+            clip_name: "Unk0xf93e165f",
+        ),
+        ("Unk0x76bbc6a0", "Unk0x76bbc6a0"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x76bbc6a0", "Unk0x7e466a93"): TransitionClip(
+            clip_name: "Unk0xf93e165f",
+        ),
+        ("Unk0x76bbc6a0", "Unk0x89075e81"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x76bbc6a0", "Unk0x8bc9eaf"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x76bbc6a0", "Unk0x8f2d4d45"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x76bbc6a0", "Unk0xc4dd18f"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x7e466a93", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x7e466a93", "Turn"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x7e466a93", "Turn0"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x7e466a93", "Turn180"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x7e466a93", "Turn90"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x7e466a93", "TurnNeg180"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x7e466a93", "TurnNeg90"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x7e466a93", "Unk0x246bd415"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x7e466a93", "Unk0x7e466a93"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x7e466a93", "Unk0x89075e81"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x7e466a93", "Unk0x8bc9eaf"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x7e466a93", "Unk0x8f2d4d45"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x7e466a93", "Unk0xc4dd18f"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x89075e81", "Channel"): Time(
+            time: 0.5,
+        ),
+        ("Unk0x89075e81", "ChannelWndup"): Time(
+            time: 0.5,
+        ),
+        ("Unk0x89075e81", "Crit"): Time(
+            time: 0.5,
+        ),
+        ("Unk0x89075e81", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x89075e81", "Idle1Base"): Time(
+            time: 0.5,
+        ),
+        ("Unk0x89075e81", "Idle2Base"): Time(
+            time: 0.5,
+        ),
+        ("Unk0x89075e81", "IdleIn1"): Time(
+            time: 0.5,
+        ),
+        ("Unk0x89075e81", "IdleIn2"): Time(
+            time: 0.5,
+        ),
+        ("Unk0x89075e81", "Joke"): Time(
+            time: 0.5,
+        ),
+        ("Unk0x89075e81", "RecallLeadIn"): Time(
+            time: 0.5,
+        ),
+        ("Unk0x89075e81", "RecallLeadout"): Time(
+            time: 0.5,
+        ),
+        ("Unk0x89075e81", "RecallLoop"): Time(
+            time: 0.5,
+        ),
+        ("Unk0x89075e81", "Respawn"): Time(
+            time: 0.5,
+        ),
+        ("Unk0x89075e81", "Run"): TransitionClip(
+            clip_name: "Unk0x67e51852",
+        ),
+        ("Unk0x89075e81", "RunHaste"): Time(
+            time: 0.5,
+        ),
+        ("Unk0x89075e81", "TauntBase"): Time(
+            time: 0.5,
+        ),
+        ("Unk0x89075e81", "Turn"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x89075e81", "Turn0"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x89075e81", "Turn180"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x89075e81", "Turn90"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x89075e81", "TurnNeg180"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x89075e81", "TurnNeg90"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x89075e81", "Unk0x13f95189"): Time(
+            time: 0.5,
+        ),
+        ("Unk0x89075e81", "Unk0x246bd415"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x89075e81", "Unk0x3362f8de"): Time(
+            time: 0.5,
+        ),
+        ("Unk0x89075e81", "Unk0x41472d6f"): TransitionClip(
+            clip_name: "Unk0xf93e165f",
+        ),
+        ("Unk0x89075e81", "Unk0x76bbc6a0"): Time(
+            time: 0.5,
+        ),
+        ("Unk0x89075e81", "Unk0x7e466a93"): TransitionClip(
+            clip_name: "Unk0xf93e165f",
+        ),
+        ("Unk0x89075e81", "Unk0x89075e81"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x89075e81", "Unk0x8bc9eaf"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x89075e81", "Unk0x8f2d4d45"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x89075e81", "Unk0x9e55a33e"): Time(
+            time: 0.5,
+        ),
+        ("Unk0x89075e81", "Unk0xabc75b53"): Time(
+            time: 0.5,
+        ),
+        ("Unk0x89075e81", "Unk0xb7fea5f3"): Time(
+            time: 0.5,
+        ),
+        ("Unk0x89075e81", "Unk0xc4dd18f"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x89075e81", "Unk0xf93e165f"): Time(
+            time: 0.5,
+        ),
+        ("Unk0x8bc9eaf", "Channel"): Time(
+            time: 0.5,
+        ),
+        ("Unk0x8bc9eaf", "ChannelWndup"): Time(
+            time: 0.5,
+        ),
+        ("Unk0x8bc9eaf", "Crit"): Time(
+            time: 0.5,
+        ),
+        ("Unk0x8bc9eaf", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x8bc9eaf", "Idle1Base"): Time(
+            time: 0.5,
+        ),
+        ("Unk0x8bc9eaf", "Idle2Base"): Time(
+            time: 0.5,
+        ),
+        ("Unk0x8bc9eaf", "IdleIn1"): Time(
+            time: 0.5,
+        ),
+        ("Unk0x8bc9eaf", "IdleIn2"): Time(
+            time: 0.5,
+        ),
+        ("Unk0x8bc9eaf", "Joke"): Time(
+            time: 0.5,
+        ),
+        ("Unk0x8bc9eaf", "RecallLeadIn"): Time(
+            time: 0.5,
+        ),
+        ("Unk0x8bc9eaf", "RecallLeadout"): Time(
+            time: 0.5,
+        ),
+        ("Unk0x8bc9eaf", "RecallLoop"): Time(
+            time: 0.5,
+        ),
+        ("Unk0x8bc9eaf", "Respawn"): Time(
+            time: 0.5,
+        ),
+        ("Unk0x8bc9eaf", "Run"): TransitionClip(
+            clip_name: "Unk0x67e51852",
+        ),
+        ("Unk0x8bc9eaf", "RunHaste"): Time(
+            time: 0.5,
+        ),
+        ("Unk0x8bc9eaf", "TauntBase"): Time(
+            time: 0.5,
+        ),
+        ("Unk0x8bc9eaf", "Turn"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x8bc9eaf", "Turn0"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x8bc9eaf", "Turn180"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x8bc9eaf", "Turn90"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x8bc9eaf", "TurnNeg180"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x8bc9eaf", "TurnNeg90"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x8bc9eaf", "Unk0x13f95189"): Time(
+            time: 0.5,
+        ),
+        ("Unk0x8bc9eaf", "Unk0x246bd415"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x8bc9eaf", "Unk0x3362f8de"): Time(
+            time: 0.5,
+        ),
+        ("Unk0x8bc9eaf", "Unk0x41472d6f"): TransitionClip(
+            clip_name: "Unk0xf93e165f",
+        ),
+        ("Unk0x8bc9eaf", "Unk0x76bbc6a0"): Time(
+            time: 0.5,
+        ),
+        ("Unk0x8bc9eaf", "Unk0x7e466a93"): TransitionClip(
+            clip_name: "Unk0xf93e165f",
+        ),
+        ("Unk0x8bc9eaf", "Unk0x89075e81"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x8bc9eaf", "Unk0x8bc9eaf"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x8bc9eaf", "Unk0x8f2d4d45"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x8bc9eaf", "Unk0x9e55a33e"): Time(
+            time: 0.5,
+        ),
+        ("Unk0x8bc9eaf", "Unk0xabc75b53"): Time(
+            time: 0.5,
+        ),
+        ("Unk0x8bc9eaf", "Unk0xb7fea5f3"): Time(
+            time: 0.5,
+        ),
+        ("Unk0x8bc9eaf", "Unk0xc4dd18f"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x8bc9eaf", "Unk0xf93e165f"): Time(
+            time: 0.5,
+        ),
+        ("Unk0x8f2d4d45", "Turn"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x8f2d4d45", "Turn0"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x8f2d4d45", "Turn180"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x8f2d4d45", "Turn90"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x8f2d4d45", "TurnNeg180"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x8f2d4d45", "TurnNeg90"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x8f2d4d45", "Unk0x8f2d4d45"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x9ac964f0", "Turn"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x9ac964f0", "Turn0"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x9ac964f0", "Turn180"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x9ac964f0", "Turn90"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x9ac964f0", "TurnNeg180"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x9ac964f0", "TurnNeg90"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x9ac964f0", "Unk0x8f2d4d45"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x9ac964f0", "Unk0x9ac964f0"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x9e55a33e", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x9e55a33e", "Run"): TransitionClip(
+            clip_name: "Unk0x67e51852",
+        ),
+        ("Unk0x9e55a33e", "Turn"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x9e55a33e", "Turn0"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x9e55a33e", "Turn180"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x9e55a33e", "Turn90"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x9e55a33e", "TurnNeg180"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x9e55a33e", "TurnNeg90"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x9e55a33e", "Unk0x246bd415"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x9e55a33e", "Unk0x41472d6f"): TransitionClip(
+            clip_name: "Unk0xf93e165f",
+        ),
+        ("Unk0x9e55a33e", "Unk0x7e466a93"): TransitionClip(
+            clip_name: "Unk0xf93e165f",
+        ),
+        ("Unk0x9e55a33e", "Unk0x89075e81"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x9e55a33e", "Unk0x8bc9eaf"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x9e55a33e", "Unk0x8f2d4d45"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x9e55a33e", "Unk0x9e55a33e"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x9e55a33e", "Unk0xc4dd18f"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xabc75b53", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xabc75b53", "Run"): TransitionClip(
+            clip_name: "Unk0x67e51852",
+        ),
+        ("Unk0xabc75b53", "Turn"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xabc75b53", "Turn0"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xabc75b53", "Turn180"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xabc75b53", "Turn90"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xabc75b53", "TurnNeg180"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xabc75b53", "TurnNeg90"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xabc75b53", "Unk0x246bd415"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xabc75b53", "Unk0x41472d6f"): TransitionClip(
+            clip_name: "Unk0xf93e165f",
+        ),
+        ("Unk0xabc75b53", "Unk0x7e466a93"): TransitionClip(
+            clip_name: "Unk0xf93e165f",
+        ),
+        ("Unk0xabc75b53", "Unk0x89075e81"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xabc75b53", "Unk0x8bc9eaf"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xabc75b53", "Unk0x8f2d4d45"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xabc75b53", "Unk0xabc75b53"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xabc75b53", "Unk0xc4dd18f"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xb7fea5f3", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xb7fea5f3", "Turn"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xb7fea5f3", "Turn0"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xb7fea5f3", "Turn180"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xb7fea5f3", "Turn90"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xb7fea5f3", "TurnNeg180"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xb7fea5f3", "TurnNeg90"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xb7fea5f3", "Unk0x246bd415"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xb7fea5f3", "Unk0x25875a32"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xb7fea5f3", "Unk0x3362f8de"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xb7fea5f3", "Unk0x89075e81"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xb7fea5f3", "Unk0x8bc9eaf"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xb7fea5f3", "Unk0x8f2d4d45"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xb7fea5f3", "Unk0xb7fea5f3"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xb7fea5f3", "Unk0xbda0cf7b"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xb7fea5f3", "Unk0xc4dd18f"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xbda0cf7b", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xbda0cf7b", "Turn"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xbda0cf7b", "Turn0"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xbda0cf7b", "Turn180"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xbda0cf7b", "Turn90"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xbda0cf7b", "TurnNeg180"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xbda0cf7b", "TurnNeg90"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xbda0cf7b", "Unk0x25875a32"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xbda0cf7b", "Unk0x3362f8de"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xbda0cf7b", "Unk0x8f2d4d45"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xbda0cf7b", "Unk0xb7fea5f3"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xbda0cf7b", "Unk0xbda0cf7b"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xbed4198e", "Run"): TransitionClip(
+            clip_name: "Unk0x67e51852",
+        ),
+        ("Unk0xbed4198e", "Unk0x41472d6f"): TransitionClip(
+            clip_name: "Unk0xf93e165f",
+        ),
+        ("Unk0xbed4198e", "Unk0x7e466a93"): TransitionClip(
+            clip_name: "Unk0xf93e165f",
+        ),
+        ("Unk0xbed4198e", "Unk0x8f2d4d45"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xbed4198e", "Unk0xbed4198e"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xc4a83b16", "Run"): TransitionClip(
+            clip_name: "Unk0x67e51852",
+        ),
+        ("Unk0xc4a83b16", "Turn"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xc4a83b16", "Turn0"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xc4a83b16", "Turn180"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xc4a83b16", "Turn90"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xc4a83b16", "TurnNeg180"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xc4a83b16", "TurnNeg90"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xc4a83b16", "Unk0x41472d6f"): TransitionClip(
+            clip_name: "Unk0xf93e165f",
+        ),
+        ("Unk0xc4a83b16", "Unk0x7e466a93"): TransitionClip(
+            clip_name: "Unk0xf93e165f",
+        ),
+        ("Unk0xc4a83b16", "Unk0x8f2d4d45"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xc4a83b16", "Unk0xc4a83b16"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xc4ba7841", "Run"): TransitionClip(
+            clip_name: "Unk0x67e51852",
+        ),
+        ("Unk0xc4ba7841", "Turn"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xc4ba7841", "Turn0"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xc4ba7841", "Turn180"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xc4ba7841", "Turn90"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xc4ba7841", "TurnNeg180"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xc4ba7841", "TurnNeg90"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xc4ba7841", "Unk0x41472d6f"): TransitionClip(
+            clip_name: "Unk0xf93e165f",
+        ),
+        ("Unk0xc4ba7841", "Unk0x7e466a93"): TransitionClip(
+            clip_name: "Unk0xf93e165f",
+        ),
+        ("Unk0xc4ba7841", "Unk0x8f2d4d45"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xc4ba7841", "Unk0xc4ba7841"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xc4dd18f", "Channel"): Time(
+            time: 0.5,
+        ),
+        ("Unk0xc4dd18f", "ChannelWndup"): Time(
+            time: 0.5,
+        ),
+        ("Unk0xc4dd18f", "Crit"): Time(
+            time: 0.5,
+        ),
+        ("Unk0xc4dd18f", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xc4dd18f", "Idle1Base"): Time(
+            time: 0.5,
+        ),
+        ("Unk0xc4dd18f", "Idle2Base"): Time(
+            time: 0.5,
+        ),
+        ("Unk0xc4dd18f", "IdleIn1"): Time(
+            time: 0.5,
+        ),
+        ("Unk0xc4dd18f", "IdleIn2"): Time(
+            time: 0.5,
+        ),
+        ("Unk0xc4dd18f", "Joke"): Time(
+            time: 0.5,
+        ),
+        ("Unk0xc4dd18f", "RecallLeadIn"): Time(
+            time: 0.5,
+        ),
+        ("Unk0xc4dd18f", "RecallLeadout"): Time(
+            time: 0.5,
+        ),
+        ("Unk0xc4dd18f", "RecallLoop"): Time(
+            time: 0.5,
+        ),
+        ("Unk0xc4dd18f", "Respawn"): Time(
+            time: 0.5,
+        ),
+        ("Unk0xc4dd18f", "Run"): TransitionClip(
+            clip_name: "Unk0x67e51852",
+        ),
+        ("Unk0xc4dd18f", "RunHaste"): Time(
+            time: 0.5,
+        ),
+        ("Unk0xc4dd18f", "TauntBase"): Time(
+            time: 0.5,
+        ),
+        ("Unk0xc4dd18f", "Turn"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xc4dd18f", "Turn0"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xc4dd18f", "Turn180"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xc4dd18f", "Turn90"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xc4dd18f", "TurnNeg180"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xc4dd18f", "TurnNeg90"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xc4dd18f", "Unk0x13f95189"): Time(
+            time: 0.5,
+        ),
+        ("Unk0xc4dd18f", "Unk0x246bd415"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xc4dd18f", "Unk0x3362f8de"): Time(
+            time: 0.5,
+        ),
+        ("Unk0xc4dd18f", "Unk0x41472d6f"): TransitionClip(
+            clip_name: "Unk0xf93e165f",
+        ),
+        ("Unk0xc4dd18f", "Unk0x76bbc6a0"): Time(
+            time: 0.5,
+        ),
+        ("Unk0xc4dd18f", "Unk0x7e466a93"): TransitionClip(
+            clip_name: "Unk0xf93e165f",
+        ),
+        ("Unk0xc4dd18f", "Unk0x89075e81"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xc4dd18f", "Unk0x8bc9eaf"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xc4dd18f", "Unk0x8f2d4d45"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xc4dd18f", "Unk0x9e55a33e"): Time(
+            time: 0.5,
+        ),
+        ("Unk0xc4dd18f", "Unk0xabc75b53"): Time(
+            time: 0.5,
+        ),
+        ("Unk0xc4dd18f", "Unk0xb7fea5f3"): Time(
+            time: 0.5,
+        ),
+        ("Unk0xc4dd18f", "Unk0xc4dd18f"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xc4dd18f", "Unk0xf93e165f"): Time(
+            time: 0.5,
+        ),
+        ("Unk0xee412bd0", "Unk0xee412bd0"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xf93e165f", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xf93e165f", "Turn"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xf93e165f", "Turn0"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xf93e165f", "Turn180"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xf93e165f", "Turn90"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xf93e165f", "TurnNeg180"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xf93e165f", "TurnNeg90"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xf93e165f", "Unk0x246bd415"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xf93e165f", "Unk0x89075e81"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xf93e165f", "Unk0x8bc9eaf"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xf93e165f", "Unk0x8f2d4d45"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xf93e165f", "Unk0xc4dd18f"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xf93e165f", "Unk0xf93e165f"): Time(
+            time: 0.0,
+        ),
+    },
+)

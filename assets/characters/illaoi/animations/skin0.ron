@@ -1,0 +1,499 @@
+(
+    gltf_path: "characters/illaoi/skins/skin0.glb",
+    hash_to_node: {
+        "Attack": Selector(
+            probably_nodes: [
+                (
+                    key: "Attack1",
+                    value: 1.0,
+                ),
+                (
+                    key: "Attack2",
+                    value: 1.0,
+                ),
+            ],
+        ),
+        "Attack1": Clip(
+            node_index: 4,
+        ),
+        "Attack2": Clip(
+            node_index: 6,
+        ),
+        "Attack3": Clip(
+            node_index: 5,
+        ),
+        "AttackTower": Clip(
+            node_index: 9,
+        ),
+        "Channel": Clip(
+            node_index: 1,
+        ),
+        "ChannelWndup": Clip(
+            node_index: 15,
+        ),
+        "Crit": Clip(
+            node_index: 14,
+        ),
+        "Dance": Clip(
+            node_index: 36,
+        ),
+        "DanceIn": Clip(
+            node_index: 32,
+        ),
+        "Death": Clip(
+            node_index: 25,
+        ),
+        "Idle1": Selector(
+            probably_nodes: [
+                (
+                    key: "Idle1Base",
+                    value: 80.0,
+                ),
+                (
+                    key: "Unk0x68e26f73",
+                    value: 20.0,
+                ),
+            ],
+        ),
+        "Idle1Base": Clip(
+            node_index: 10,
+        ),
+        "Idle1In1": Clip(
+            node_index: 8,
+        ),
+        "Idle2Base": Clip(
+            node_index: 31,
+        ),
+        "IdleTransition": Clip(
+            node_index: 27,
+        ),
+        "Joke": Clip(
+            node_index: 26,
+        ),
+        "Laugh": Clip(
+            node_index: 21,
+        ),
+        "Passive": Clip(
+            node_index: 16,
+        ),
+        "Recall": Clip(
+            node_index: 7,
+        ),
+        "RecallWinddown": Clip(
+            node_index: 17,
+        ),
+        "Run": ConditionFloat(
+            updater: MoveSpeed,
+            conditions: [
+                (
+                    key: "RunSlow",
+                    value: 0.0,
+                ),
+                (
+                    key: "RunBase",
+                    value: 300.0,
+                ),
+                (
+                    key: "RunHaste",
+                    value: 500.0,
+                ),
+            ],
+        ),
+        "RunBase": Clip(
+            node_index: 33,
+        ),
+        "RunHaste": Clip(
+            node_index: 3,
+        ),
+        "RunSlow": Clip(
+            node_index: 28,
+        ),
+        "Spell1": Clip(
+            node_index: 19,
+        ),
+        "Spell1ToRun": Clip(
+            node_index: 12,
+        ),
+        "Spell2": Clip(
+            node_index: 20,
+        ),
+        "Spell2Long": Clip(
+            node_index: 18,
+        ),
+        "Spell2LongA": Clip(
+            node_index: 29,
+        ),
+        "Spell2LongB": Clip(
+            node_index: 30,
+        ),
+        "Spell2LongToRun": Clip(
+            node_index: 40,
+        ),
+        "Spell2ToIdle": Clip(
+            node_index: 39,
+        ),
+        "Spell2ToRun": Clip(
+            node_index: 35,
+        ),
+        "Spell3AScale": Clip(
+            node_index: 2,
+        ),
+        "Spell3AToidle": Clip(
+            node_index: 34,
+        ),
+        "Spell3BLong": Clip(
+            node_index: 13,
+        ),
+        "Spell3BMedium": Clip(
+            node_index: 38,
+        ),
+        "Spell3BMediumFurther": Clip(
+            node_index: 11,
+        ),
+        "Spell3BShort": Clip(
+            node_index: 37,
+        ),
+        "Spell4": Clip(
+            node_index: 22,
+        ),
+        "Spell4ToIdle": Clip(
+            node_index: 23,
+        ),
+        "Taunt": Clip(
+            node_index: 24,
+        ),
+        "Unk0x1535a26": Clip(
+            node_index: 0,
+        ),
+        "Unk0x48937871": Parametric(
+            pairs: [
+                (
+                    key: "Spell3BShort",
+                    value: 0.0,
+                ),
+                (
+                    key: "Spell3BShort",
+                    value: 50.0,
+                ),
+                (
+                    key: "Spell3BMedium",
+                    value: 350.0,
+                ),
+                (
+                    key: "Spell3BMediumFurther",
+                    value: 600.0,
+                ),
+                (
+                    key: "Spell3BLong",
+                    value: 900.0,
+                ),
+            ],
+        ),
+        "Unk0x68e26f73": Sequence(
+            hashes: [
+                "Idle1Base",
+                "Idle1Base",
+                "Idle1Base",
+                "Idle1Base",
+                "Idle2Base",
+                "Idle1Base",
+                "Idle1Base",
+                "Idle1Base",
+                "Idle1Base",
+            ],
+        ),
+        "Unk0x6d22b6b3": Parametric(
+            pairs: [
+                (
+                    key: "Unk0x48937871",
+                    value: 1.0,
+                ),
+                (
+                    key: "Unk0xd17752be",
+                    value: 1.5,
+                ),
+            ],
+        ),
+        "Unk0x6e22b846": Parametric(
+            pairs: [
+                (
+                    key: "Unk0x1535a26",
+                    value: 1.0,
+                ),
+                (
+                    key: "Spell3AScale",
+                    value: 1.5,
+                ),
+            ],
+        ),
+        "Unk0xd17752be": Parametric(
+            pairs: [
+                (
+                    key: "Spell3BShort",
+                    value: 0.0,
+                ),
+                (
+                    key: "Spell3BShort",
+                    value: 100.0,
+                ),
+                (
+                    key: "Spell3BMedium",
+                    value: 600.0,
+                ),
+                (
+                    key: "Spell3BMediumFurther",
+                    value: 1000.0,
+                ),
+                (
+                    key: "Spell3BLong",
+                    value: 1200.0,
+                ),
+            ],
+        ),
+    },
+    blend_data: {
+        ("Attack1", "ChannelWndup"): Time(
+            time: 0.1,
+        ),
+        ("Attack1", "Dance"): TransitionClip(
+            clip_name: "DanceIn",
+        ),
+        ("Attack1", "RunBase"): Time(
+            time: 0.0,
+        ),
+        ("Attack1", "RunHaste"): Time(
+            time: 0.0,
+        ),
+        ("Attack1", "RunSlow"): Time(
+            time: 0.0,
+        ),
+        ("Attack2", "ChannelWndup"): Time(
+            time: 0.1,
+        ),
+        ("Attack2", "Dance"): TransitionClip(
+            clip_name: "DanceIn",
+        ),
+        ("Attack2", "RunBase"): Time(
+            time: 0.0,
+        ),
+        ("Attack2", "RunHaste"): Time(
+            time: 0.0,
+        ),
+        ("Attack2", "RunSlow"): Time(
+            time: 0.0,
+        ),
+        ("Attack3", "ChannelWndup"): Time(
+            time: 0.1,
+        ),
+        ("Attack3", "Dance"): TransitionClip(
+            clip_name: "DanceIn",
+        ),
+        ("Attack3", "RunBase"): Time(
+            time: 0.0,
+        ),
+        ("Attack3", "RunHaste"): Time(
+            time: 0.0,
+        ),
+        ("Attack3", "RunSlow"): Time(
+            time: 0.0,
+        ),
+        ("AttackTower", "AttackTower"): Time(
+            time: 0.1,
+        ),
+        ("AttackTower", "ChannelWndup"): Time(
+            time: 0.1,
+        ),
+        ("AttackTower", "Dance"): TransitionClip(
+            clip_name: "DanceIn",
+        ),
+        ("Channel", "ChannelWndup"): Time(
+            time: 0.1,
+        ),
+        ("Channel", "Dance"): TransitionClip(
+            clip_name: "DanceIn",
+        ),
+        ("ChannelWndup", "Channel"): Time(
+            time: 0.0,
+        ),
+        ("ChannelWndup", "ChannelWndup"): Time(
+            time: 0.1,
+        ),
+        ("ChannelWndup", "Dance"): TransitionClip(
+            clip_name: "DanceIn",
+        ),
+        ("Dance", "Dance"): Time(
+            time: 0.0,
+        ),
+        ("Death", "ChannelWndup"): Time(
+            time: 0.1,
+        ),
+        ("Death", "Dance"): TransitionClip(
+            clip_name: "DanceIn",
+        ),
+        ("Idle1Base", "ChannelWndup"): Time(
+            time: 0.1,
+        ),
+        ("Idle1Base", "Dance"): TransitionClip(
+            clip_name: "DanceIn",
+        ),
+        ("Idle1In1", "ChannelWndup"): Time(
+            time: 0.1,
+        ),
+        ("Idle1In1", "Dance"): TransitionClip(
+            clip_name: "DanceIn",
+        ),
+        ("Idle2Base", "ChannelWndup"): Time(
+            time: 0.1,
+        ),
+        ("Idle2Base", "Dance"): TransitionClip(
+            clip_name: "DanceIn",
+        ),
+        ("IdleTransition", "Dance"): TransitionClip(
+            clip_name: "DanceIn",
+        ),
+        ("Joke", "Dance"): TransitionClip(
+            clip_name: "DanceIn",
+        ),
+        ("Laugh", "Dance"): TransitionClip(
+            clip_name: "DanceIn",
+        ),
+        ("Passive", "ChannelWndup"): Time(
+            time: 0.1,
+        ),
+        ("Passive", "Dance"): TransitionClip(
+            clip_name: "DanceIn",
+        ),
+        ("Recall", "ChannelWndup"): Time(
+            time: 0.1,
+        ),
+        ("Recall", "Dance"): TransitionClip(
+            clip_name: "DanceIn",
+        ),
+        ("RecallWinddown", "ChannelWndup"): Time(
+            time: 0.1,
+        ),
+        ("RecallWinddown", "Dance"): TransitionClip(
+            clip_name: "DanceIn",
+        ),
+        ("RunBase", "ChannelWndup"): Time(
+            time: 0.1,
+        ),
+        ("RunBase", "Dance"): TransitionClip(
+            clip_name: "DanceIn",
+        ),
+        ("RunBase", "Idle1Base"): TransitionClip(
+            clip_name: "Idle1In1",
+        ),
+        ("RunBase", "Idle2Base"): TransitionClip(
+            clip_name: "Idle1In1",
+        ),
+        ("RunHaste", "ChannelWndup"): Time(
+            time: 0.1,
+        ),
+        ("RunHaste", "Idle1Base"): TransitionClip(
+            clip_name: "Idle1In1",
+        ),
+        ("RunSlow", "ChannelWndup"): Time(
+            time: 0.1,
+        ),
+        ("RunSlow", "Idle1Base"): TransitionClip(
+            clip_name: "Idle1In1",
+        ),
+        ("Spell1", "ChannelWndup"): Time(
+            time: 0.1,
+        ),
+        ("Spell1", "Dance"): TransitionClip(
+            clip_name: "DanceIn",
+        ),
+        ("Spell1", "Idle1Base"): TransitionClip(
+            clip_name: "IdleTransition",
+        ),
+        ("Spell1", "IdleTransition"): Time(
+            time: 0.0,
+        ),
+        ("Spell1", "RunBase"): TransitionClip(
+            clip_name: "Spell1ToRun",
+        ),
+        ("Spell1", "Spell1ToRun"): Time(
+            time: 0.1,
+        ),
+        ("Spell2", "ChannelWndup"): Time(
+            time: 0.1,
+        ),
+        ("Spell2", "Dance"): TransitionClip(
+            clip_name: "DanceIn",
+        ),
+        ("Spell2", "Idle1Base"): TransitionClip(
+            clip_name: "Spell2ToIdle",
+        ),
+        ("Spell2", "RunBase"): TransitionClip(
+            clip_name: "Spell2ToRun",
+        ),
+        ("Spell2", "Spell2ToIdle"): Time(
+            time: 0.0,
+        ),
+        ("Spell2LongB", "Idle1Base"): TransitionClip(
+            clip_name: "Spell2ToIdle",
+        ),
+        ("Spell2LongB", "RunBase"): Time(
+            time: 0.1,
+        ),
+        ("Spell2LongB", "Spell2ToIdle"): Time(
+            time: 0.1,
+        ),
+        ("Spell2LongToRun", "RunBase"): Time(
+            time: 0.0,
+        ),
+        ("Spell2ToRun", "RunBase"): Time(
+            time: 0.0,
+        ),
+        ("Spell3BLong", "Dance"): TransitionClip(
+            clip_name: "DanceIn",
+        ),
+        ("Spell3BMedium", "Dance"): TransitionClip(
+            clip_name: "DanceIn",
+        ),
+        ("Spell3BMediumFurther", "Dance"): TransitionClip(
+            clip_name: "DanceIn",
+        ),
+        ("Spell3BShort", "Dance"): TransitionClip(
+            clip_name: "DanceIn",
+        ),
+        ("Spell4", "ChannelWndup"): Time(
+            time: 0.1,
+        ),
+        ("Spell4", "Idle1Base"): TransitionClip(
+            clip_name: "Spell4ToIdle",
+        ),
+        ("Spell4", "Spell4ToIdle"): Time(
+            time: 0.0,
+        ),
+        ("Spell4ToIdle", "Dance"): TransitionClip(
+            clip_name: "DanceIn",
+        ),
+        ("Taunt", "ChannelWndup"): Time(
+            time: 0.1,
+        ),
+        ("Taunt", "Dance"): TransitionClip(
+            clip_name: "DanceIn",
+        ),
+        ("Unk0x1535a26", "Dance"): TransitionClip(
+            clip_name: "DanceIn",
+        ),
+        ("Unk0x1535a26", "Idle1Base"): TransitionClip(
+            clip_name: "Spell3AToidle",
+        ),
+        ("Unk0x1535a26", "Spell3BLong"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x1535a26", "Spell3BShort"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x1535a26", "Unk0x48937871"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x48937871", "Idle1Base"): TransitionClip(
+            clip_name: "IdleTransition",
+        ),
+    },
+)

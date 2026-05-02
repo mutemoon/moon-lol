@@ -1,0 +1,1230 @@
+(
+    gltf_path: "characters/gnar/skins/skin0.glb",
+    hash_to_node: {
+        "Attack": Selector(
+            probably_nodes: [
+                (
+                    key: "Attack1",
+                    value: 1.0,
+                ),
+                (
+                    key: "Attack2",
+                    value: 1.0,
+                ),
+            ],
+        ),
+        "Attack1": ConditionFloat(
+            updater: AttackSpeed,
+            conditions: [
+                (
+                    key: "Unk0x92d964b3",
+                    value: 0.0,
+                ),
+                (
+                    key: "Unk0x10a58aa7",
+                    value: 1.3,
+                ),
+            ],
+        ),
+        "Attack1Base": Clip(
+            node_index: 58,
+        ),
+        "Attack1Fast": Clip(
+            node_index: 9,
+        ),
+        "Attack2": ConditionFloat(
+            updater: AttackSpeed,
+            conditions: [
+                (
+                    key: "Unk0x123a858",
+                    value: 0.0,
+                ),
+                (
+                    key: "Unk0xcd6cc2e4",
+                    value: 1.3,
+                ),
+            ],
+        ),
+        "Attack2Base": Clip(
+            node_index: 28,
+        ),
+        "Attack2Fast": Clip(
+            node_index: 2,
+        ),
+        "Channel": Clip(
+            node_index: 11,
+        ),
+        "ChannelWndup": Clip(
+            node_index: 38,
+        ),
+        "Crit1": Parallel(
+            hashes: [
+                "Unk0xd35b4a3c",
+                "Unk0xb670f4bb",
+            ],
+        ),
+        "Crit2": Parallel(
+            hashes: [
+                "Unk0x3a93c1b",
+                "Unk0x5084a53a",
+            ],
+        ),
+        "Dance": Sequence(
+            hashes: [
+                "DanceIn",
+                "DanceLoop",
+            ],
+        ),
+        "DanceIn": Clip(
+            node_index: 60,
+        ),
+        "DanceLoop": Parallel(
+            hashes: [
+                "Unk0x8721c9f7",
+                "Unk0x4b9eba75",
+            ],
+        ),
+        "DanceLoopBase": Clip(
+            node_index: 63,
+        ),
+        "DanceStart": Clip(
+            node_index: 5,
+        ),
+        "Death": Clip(
+            node_index: 50,
+        ),
+        "Idle1": Sequence(
+            hashes: [
+                "Idle1In",
+                "Idle1Base",
+                "Unk0xd5bc96d1",
+            ],
+        ),
+        "Idle1AltA": Clip(
+            node_index: 34,
+        ),
+        "Idle1AltB": Clip(
+            node_index: 33,
+        ),
+        "Idle1AltC": Clip(
+            node_index: 32,
+        ),
+        "Idle1Base": Clip(
+            node_index: 27,
+        ),
+        "Idle1In": Selector(
+            probably_nodes: [
+                (
+                    key: "Idle1In2",
+                    value: 100.0,
+                ),
+            ],
+        ),
+        "Idle1In2": Clip(
+            node_index: 23,
+        ),
+        "Idle2In": Clip(
+            node_index: 26,
+        ),
+        "IdleRage2": Clip(
+            node_index: 62,
+        ),
+        "Joke": Clip(
+            node_index: 51,
+        ),
+        "KnockUp": Sequence(
+            hashes: [
+                "KnockUpIn",
+                "KnockUpLoop",
+            ],
+        ),
+        "KnockUpIn": Clip(
+            node_index: 43,
+        ),
+        "KnockUpLoop": Clip(
+            node_index: 14,
+        ),
+        "Laugh": Sequence(
+            hashes: [
+                "Unk0x195611d3",
+                "Idle1Base",
+                "Idle1Base",
+                "Idle1Base",
+            ],
+        ),
+        "Rage1Run": Clip(
+            node_index: 54,
+        ),
+        "Recall": Clip(
+            node_index: 22,
+        ),
+        "RecallWinddown": Clip(
+            node_index: 40,
+        ),
+        "Respawn": Clip(
+            node_index: 37,
+        ),
+        "RevertScale": Clip(
+            node_index: 25,
+        ),
+        "Run": Sequence(
+            hashes: [
+                "Run1In",
+                "RunBase",
+            ],
+        ),
+        "Run1In": Clip(
+            node_index: 17,
+        ),
+        "Run2": Parallel(
+            hashes: [
+                "Unk0xcf93f48",
+            ],
+        ),
+        "Run3": Parallel(
+            hashes: [
+                "Unk0x35d1db39",
+            ],
+        ),
+        "RunBase": Clip(
+            node_index: 61,
+        ),
+        "ScaleBase": Clip(
+            node_index: 55,
+        ),
+        "Spell1": Parallel(
+            hashes: [
+                "Spell1Base",
+                "Unk0xd3cfcf3a",
+            ],
+        ),
+        "Spell1Base": Clip(
+            node_index: 56,
+        ),
+        "Spell1Catch": Clip(
+            node_index: 15,
+        ),
+        "Spell2": Clip(
+            node_index: 46,
+        ),
+        "Spell3": Clip(
+            node_index: 45,
+        ),
+        "Spell3Bounce": Clip(
+            node_index: 53,
+        ),
+        "Spell4": Clip(
+            node_index: 48,
+        ),
+        "Stunned": Clip(
+            node_index: 24,
+        ),
+        "TailHairIn": Clip(
+            node_index: 39,
+        ),
+        "TailHairOut": Clip(
+            node_index: 41,
+        ),
+        "Taunt": Sequence(
+            hashes: [
+                "Unk0x18329eba",
+                "Idle1Base",
+                "Idle1Base",
+                "Idle1Base",
+                "Idle1Base",
+            ],
+        ),
+        "Unk0x10a58aa7": Parallel(
+            hashes: [
+                "Attack1Fast",
+                "Unk0x1acc8ef1",
+            ],
+        ),
+        "Unk0x123a858": Parallel(
+            hashes: [
+                "Attack2Base",
+                "Unk0x9d46c40a",
+            ],
+        ),
+        "Unk0x12c9f94b": Clip(
+            node_index: 4,
+        ),
+        "Unk0x18329eba": Clip(
+            node_index: 6,
+        ),
+        "Unk0x195611d3": Clip(
+            node_index: 7,
+        ),
+        "Unk0x1acc8ef1": Clip(
+            node_index: 8,
+        ),
+        "Unk0x1fc36bdc": Sequence(
+            hashes: [
+                "Idle1AltC",
+                "Idle1Base",
+                "Idle1AltA",
+            ],
+        ),
+        "Unk0x206d2432": Clip(
+            node_index: 10,
+        ),
+        "Unk0x35d1db39": Clip(
+            node_index: 12,
+        ),
+        "Unk0x3a93c1b": Clip(
+            node_index: 0,
+        ),
+        "Unk0x3e9550fc": Clip(
+            node_index: 13,
+        ),
+        "Unk0x47996a4f": Selector(
+            probably_nodes: [
+                (
+                    key: "Unk0x7d656431",
+                    value: 100.0,
+                ),
+            ],
+        ),
+        "Unk0x4b9eba75": Clip(
+            node_index: 16,
+        ),
+        "Unk0x5084a53a": Clip(
+            node_index: 18,
+        ),
+        "Unk0x5118bb68": Clip(
+            node_index: 19,
+        ),
+        "Unk0x55dbe6dd": Clip(
+            node_index: 20,
+        ),
+        "Unk0x56c75e18": Clip(
+            node_index: 21,
+        ),
+        "Unk0x5f6eb383": Parallel(
+            hashes: [
+                "RevertScale",
+                "Unk0xb47fa921",
+                "Unk0x5118bb68",
+            ],
+        ),
+        "Unk0x70cb24b2": Selector(
+            probably_nodes: [
+                (
+                    key: "Unk0xc482693a",
+                    value: 50.0,
+                ),
+                (
+                    key: "Unk0xe77efaa7",
+                    value: 30.0,
+                ),
+            ],
+        ),
+        "Unk0x7d656431": Clip(
+            node_index: 29,
+        ),
+        "Unk0x8015d4a6": Clip(
+            node_index: 30,
+        ),
+        "Unk0x8721c9f7": Sequence(
+            hashes: [
+                "DanceStart",
+                "DanceLoopBase",
+            ],
+        ),
+        "Unk0x89779994": Clip(
+            node_index: 31,
+        ),
+        "Unk0x92d964b3": Parallel(
+            hashes: [
+                "Attack1Base",
+                "Unk0x12c9f94b",
+            ],
+        ),
+        "Unk0x951eb97d": Parallel(
+            hashes: [
+                "Unk0x56c75e18",
+                "Unk0xf72de0b",
+            ],
+        ),
+        "Unk0x9c691f68": Clip(
+            node_index: 35,
+        ),
+        "Unk0x9d46c40a": Clip(
+            node_index: 36,
+        ),
+        "Unk0xb049dd07": Clip(
+            node_index: 42,
+        ),
+        "Unk0xb47fa921": Clip(
+            node_index: 44,
+        ),
+        "Unk0xb670f4bb": Clip(
+            node_index: 47,
+        ),
+        "Unk0xb829e275": Clip(
+            node_index: 49,
+        ),
+        "Unk0xc1bba11d": Sequence(
+            hashes: [
+                "Unk0x951eb97d",
+                "Idle1Base",
+                "Idle1AltA",
+            ],
+        ),
+        "Unk0xc3aa5921": Sequence(
+            hashes: [
+                "Idle2In",
+                "Unk0x70cb24b2",
+            ],
+        ),
+        "Unk0xc482693a": Clip(
+            node_index: 52,
+        ),
+        "Unk0xcd6cc2e4": Parallel(
+            hashes: [
+                "Attack2Fast",
+                "Unk0x3e9550fc",
+            ],
+        ),
+        "Unk0xcf93f48": Clip(
+            node_index: 1,
+        ),
+        "Unk0xd35b4a3c": Clip(
+            node_index: 57,
+        ),
+        "Unk0xd3cfcf3a": Parametric(
+            pairs: [
+                (
+                    key: "Unk0xb829e275",
+                    value: -180.0,
+                ),
+                (
+                    key: "Unk0xe1e2c537",
+                    value: -90.0,
+                ),
+                (
+                    key: "Unk0x55dbe6dd",
+                    value: 0.0,
+                ),
+                (
+                    key: "Unk0x8015d4a6",
+                    value: 90.0,
+                ),
+                (
+                    key: "Unk0x206d2432",
+                    value: 180.0,
+                ),
+            ],
+        ),
+        "Unk0xd5bc96d1": Selector(
+            probably_nodes: [
+                (
+                    key: "Idle1Base",
+                    value: 20.0,
+                ),
+                (
+                    key: "Idle1AltA",
+                    value: 35.0,
+                ),
+                (
+                    key: "Unk0xfaa24c1b",
+                    value: 15.0,
+                ),
+                (
+                    key: "Unk0x1fc36bdc",
+                    value: 15.0,
+                ),
+                (
+                    key: "Unk0xc1bba11d",
+                    value: 15.0,
+                ),
+            ],
+        ),
+        "Unk0xdc959373": Parametric(
+            pairs: [
+                (
+                    key: "TailHairIn",
+                    value: 0.5,
+                ),
+                (
+                    key: "TailHairOut",
+                    value: 1.0,
+                ),
+            ],
+        ),
+        "Unk0xe1e2c537": Clip(
+            node_index: 59,
+        ),
+        "Unk0xe77efaa7": Sequence(
+            hashes: [
+                "IdleRage2",
+                "Unk0xc482693a",
+            ],
+        ),
+        "Unk0xf72de0b": Clip(
+            node_index: 3,
+        ),
+        "Unk0xfaa24c1b": Sequence(
+            hashes: [
+                "Idle1AltB",
+                "Idle1AltA",
+                "Idle1Base",
+            ],
+        ),
+    },
+    blend_data: {
+        ("Attack1Base", "Attack1Base"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Base", "Attack2Base"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Base", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Base", "DanceLoopBase"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Base", "RevertScale"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Base", "Unk0x89779994"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Fast", "RevertScale"): Time(
+            time: 0.0,
+        ),
+        ("Attack2Base", "Attack1Base"): Time(
+            time: 0.0,
+        ),
+        ("Attack2Base", "Attack2Base"): Time(
+            time: 0.0,
+        ),
+        ("Attack2Base", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Attack2Base", "DanceLoopBase"): Time(
+            time: 0.0,
+        ),
+        ("Attack2Base", "RevertScale"): Time(
+            time: 0.0,
+        ),
+        ("Attack2Base", "Unk0x89779994"): Time(
+            time: 0.0,
+        ),
+        ("Attack2Fast", "RevertScale"): Time(
+            time: 0.0,
+        ),
+        ("Channel", "RevertScale"): Time(
+            time: 0.0,
+        ),
+        ("ChannelWndup", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("ChannelWndup", "DanceLoopBase"): Time(
+            time: 0.0,
+        ),
+        ("ChannelWndup", "RevertScale"): Time(
+            time: 0.0,
+        ),
+        ("ChannelWndup", "Unk0x89779994"): Time(
+            time: 0.0,
+        ),
+        ("DanceIn", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("DanceIn", "DanceLoopBase"): Time(
+            time: 0.0,
+        ),
+        ("DanceIn", "RevertScale"): Time(
+            time: 0.0,
+        ),
+        ("DanceIn", "Unk0x89779994"): Time(
+            time: 0.0,
+        ),
+        ("DanceLoopBase", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("DanceLoopBase", "DanceLoopBase"): Time(
+            time: 0.0,
+        ),
+        ("DanceLoopBase", "RevertScale"): Time(
+            time: 0.0,
+        ),
+        ("DanceLoopBase", "Unk0x89779994"): Time(
+            time: 0.0,
+        ),
+        ("Death", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Death", "DanceLoopBase"): Time(
+            time: 0.0,
+        ),
+        ("Death", "RevertScale"): Time(
+            time: 0.0,
+        ),
+        ("Death", "Unk0x89779994"): Time(
+            time: 0.0,
+        ),
+        ("Idle1AltA", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Idle1AltA", "DanceLoopBase"): Time(
+            time: 0.0,
+        ),
+        ("Idle1AltA", "RevertScale"): Time(
+            time: 0.0,
+        ),
+        ("Idle1AltA", "Unk0x89779994"): Time(
+            time: 0.0,
+        ),
+        ("Idle1AltB", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Idle1AltB", "DanceLoopBase"): Time(
+            time: 0.0,
+        ),
+        ("Idle1AltB", "RevertScale"): Time(
+            time: 0.0,
+        ),
+        ("Idle1AltB", "Unk0x89779994"): Time(
+            time: 0.0,
+        ),
+        ("Idle1AltC", "RevertScale"): Time(
+            time: 0.0,
+        ),
+        ("Idle1Base", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Idle1Base", "DanceLoopBase"): Time(
+            time: 0.0,
+        ),
+        ("Idle1Base", "RevertScale"): Time(
+            time: 0.0,
+        ),
+        ("Idle1Base", "Unk0x89779994"): Time(
+            time: 0.0,
+        ),
+        ("Idle1In2", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Idle1In2", "RevertScale"): Time(
+            time: 0.0,
+        ),
+        ("Idle2In", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Idle2In", "DanceLoopBase"): Time(
+            time: 0.0,
+        ),
+        ("Idle2In", "RevertScale"): Time(
+            time: 0.0,
+        ),
+        ("Idle2In", "Unk0x89779994"): Time(
+            time: 0.0,
+        ),
+        ("IdleRage2", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("IdleRage2", "DanceLoopBase"): Time(
+            time: 0.0,
+        ),
+        ("IdleRage2", "RevertScale"): Time(
+            time: 0.0,
+        ),
+        ("IdleRage2", "Unk0x89779994"): Time(
+            time: 0.0,
+        ),
+        ("Joke", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Joke", "DanceLoopBase"): Time(
+            time: 0.0,
+        ),
+        ("Joke", "RevertScale"): Time(
+            time: 0.0,
+        ),
+        ("Joke", "Unk0x89779994"): Time(
+            time: 0.0,
+        ),
+        ("KnockUpIn", "KnockUpLoop"): Time(
+            time: 0.0,
+        ),
+        ("KnockUpIn", "RevertScale"): Time(
+            time: 0.0,
+        ),
+        ("KnockUpLoop", "RevertScale"): Time(
+            time: 0.0,
+        ),
+        ("Rage1Run", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Rage1Run", "DanceLoopBase"): Time(
+            time: 0.0,
+        ),
+        ("Rage1Run", "RevertScale"): Time(
+            time: 0.0,
+        ),
+        ("Rage1Run", "Unk0x89779994"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Attack1Base"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Attack1Fast"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Attack2Base"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Attack2Fast"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Channel"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "ChannelWndup"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "DanceLoopBase"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Idle1AltA"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Idle1AltB"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Idle1AltC"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Idle1Base"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Idle1In2"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Idle2In"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "IdleRage2"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Joke"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Rage1Run"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Recall"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "RevertScale"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Run1In"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "RunBase"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "ScaleBase"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Spell1Base"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Spell1Catch"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Spell2"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Spell3"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Spell3Bounce"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Stunned"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "TailHairIn"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "TailHairOut"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Unk0x12c9f94b"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Unk0x18329eba"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Unk0x195611d3"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Unk0x1acc8ef1"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Unk0x206d2432"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Unk0x35d1db39"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Unk0x3a93c1b"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Unk0x3e9550fc"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Unk0x5084a53a"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Unk0x5118bb68"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Unk0x55dbe6dd"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Unk0x7d656431"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Unk0x8015d4a6"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Unk0x89779994"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Unk0x9c691f68"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Unk0x9d46c40a"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Unk0xb049dd07"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Unk0xb47fa921"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Unk0xb670f4bb"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Unk0xb829e275"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Unk0xc482693a"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Unk0xcf93f48"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Unk0xd35b4a3c"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Unk0xd3cfcf3a"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Unk0xdc959373"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Unk0xe1e2c537"): Time(
+            time: 0.0,
+        ),
+        ("RecallWinddown", "Death"): Time(
+            time: 0.0,
+        ),
+        ("RevertScale", "RevertScale"): Time(
+            time: 0.0,
+        ),
+        ("Run1In", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Run1In", "DanceLoopBase"): Time(
+            time: 0.0,
+        ),
+        ("Run1In", "RevertScale"): Time(
+            time: 0.0,
+        ),
+        ("Run1In", "RunBase"): Time(
+            time: 0.0,
+        ),
+        ("Run1In", "Unk0x89779994"): Time(
+            time: 0.0,
+        ),
+        ("RunBase", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("RunBase", "DanceLoopBase"): Time(
+            time: 0.0,
+        ),
+        ("RunBase", "RevertScale"): Time(
+            time: 0.0,
+        ),
+        ("RunBase", "Unk0x89779994"): Time(
+            time: 0.0,
+        ),
+        ("ScaleBase", "RevertScale"): Time(
+            time: 0.0,
+        ),
+        ("Spell1Base", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Spell1Base", "DanceLoopBase"): Time(
+            time: 0.0,
+        ),
+        ("Spell1Base", "RevertScale"): Time(
+            time: 0.0,
+        ),
+        ("Spell1Base", "Unk0x89779994"): Time(
+            time: 0.0,
+        ),
+        ("Spell1Catch", "RevertScale"): Time(
+            time: 0.0,
+        ),
+        ("Spell2", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Spell2", "DanceLoopBase"): Time(
+            time: 0.0,
+        ),
+        ("Spell2", "RevertScale"): Time(
+            time: 0.0,
+        ),
+        ("Spell2", "Unk0x89779994"): Time(
+            time: 0.0,
+        ),
+        ("Spell3", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Spell3", "DanceLoopBase"): Time(
+            time: 0.0,
+        ),
+        ("Spell3", "RevertScale"): Time(
+            time: 0.0,
+        ),
+        ("Spell3", "Spell3Bounce"): Time(
+            time: 0.0,
+        ),
+        ("Spell3", "Unk0x89779994"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Bounce", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Bounce", "DanceLoopBase"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Bounce", "RevertScale"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Bounce", "Unk0x89779994"): Time(
+            time: 0.0,
+        ),
+        ("Spell4", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Spell4", "DanceLoopBase"): Time(
+            time: 0.0,
+        ),
+        ("Spell4", "RevertScale"): Time(
+            time: 0.0,
+        ),
+        ("Spell4", "Unk0x89779994"): Time(
+            time: 0.0,
+        ),
+        ("TailHairIn", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("TailHairIn", "DanceLoopBase"): Time(
+            time: 0.0,
+        ),
+        ("TailHairIn", "RevertScale"): Time(
+            time: 0.0,
+        ),
+        ("TailHairIn", "Unk0x89779994"): Time(
+            time: 0.0,
+        ),
+        ("TailHairOut", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("TailHairOut", "DanceLoopBase"): Time(
+            time: 0.0,
+        ),
+        ("TailHairOut", "RevertScale"): Time(
+            time: 0.0,
+        ),
+        ("TailHairOut", "Unk0x89779994"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x12c9f94b", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x12c9f94b", "DanceLoopBase"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x12c9f94b", "RevertScale"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x12c9f94b", "Unk0x89779994"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x18329eba", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x18329eba", "DanceLoopBase"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x18329eba", "RevertScale"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x18329eba", "Unk0x89779994"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x195611d3", "RevertScale"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x1acc8ef1", "RevertScale"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x206d2432", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x206d2432", "DanceLoopBase"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x206d2432", "RevertScale"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x206d2432", "Unk0x89779994"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x35d1db39", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x35d1db39", "DanceLoopBase"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x35d1db39", "RevertScale"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x35d1db39", "Unk0x89779994"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x3a93c1b", "RevertScale"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x3e9550fc", "RevertScale"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x5084a53a", "RevertScale"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x5118bb68", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x5118bb68", "DanceLoopBase"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x5118bb68", "RevertScale"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x5118bb68", "Unk0x89779994"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x55dbe6dd", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x55dbe6dd", "DanceLoopBase"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x55dbe6dd", "RevertScale"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x55dbe6dd", "Unk0x89779994"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x56c75e18", "RevertScale"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x7d656431", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x7d656431", "DanceLoopBase"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x7d656431", "RevertScale"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x7d656431", "Unk0x89779994"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x8015d4a6", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x8015d4a6", "DanceLoopBase"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x8015d4a6", "RevertScale"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x8015d4a6", "Unk0x89779994"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x89779994", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x89779994", "DanceLoopBase"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x89779994", "RevertScale"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x89779994", "Unk0x89779994"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x9c691f68", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x9c691f68", "DanceLoopBase"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x9c691f68", "RevertScale"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x9c691f68", "Unk0x89779994"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x9d46c40a", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x9d46c40a", "DanceLoopBase"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x9d46c40a", "RevertScale"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x9d46c40a", "Unk0x89779994"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xb049dd07", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xb049dd07", "DanceLoopBase"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xb049dd07", "RevertScale"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xb049dd07", "Unk0x89779994"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xb47fa921", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xb47fa921", "DanceLoopBase"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xb47fa921", "RevertScale"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xb47fa921", "Unk0x89779994"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xb670f4bb", "RevertScale"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xb829e275", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xb829e275", "DanceLoopBase"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xb829e275", "RevertScale"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xb829e275", "Unk0x89779994"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xc482693a", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xc482693a", "DanceLoopBase"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xc482693a", "RevertScale"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xc482693a", "Unk0x89779994"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xcf93f48", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xcf93f48", "DanceLoopBase"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xcf93f48", "RevertScale"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xcf93f48", "Unk0x89779994"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xd35b4a3c", "RevertScale"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xd3cfcf3a", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xd3cfcf3a", "DanceLoopBase"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xd3cfcf3a", "RevertScale"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xd3cfcf3a", "Unk0x89779994"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xdc959373", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xdc959373", "DanceLoopBase"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xdc959373", "RevertScale"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xdc959373", "Unk0x89779994"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xe1e2c537", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xe1e2c537", "DanceLoopBase"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xe1e2c537", "RevertScale"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xe1e2c537", "Unk0x89779994"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xf72de0b", "RevertScale"): Time(
+            time: 0.0,
+        ),
+    },
+)

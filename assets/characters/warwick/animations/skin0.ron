@@ -1,0 +1,7193 @@
+(
+    gltf_path: "characters/warwick/skins/skin0.glb",
+    hash_to_node: {
+        "Attack": Selector(
+            probably_nodes: [
+                (
+                    key: "Attack1",
+                    value: 1.0,
+                ),
+                (
+                    key: "Attack2",
+                    value: 1.0,
+                ),
+            ],
+        ),
+        "Attack1": Clip(
+            node_index: 16,
+        ),
+        "Attack1Fast": Clip(
+            node_index: 34,
+        ),
+        "Attack2": ConditionFloat(
+            updater: AttackSpeed,
+            conditions: [
+                (
+                    key: "Unk0xf0462cf0",
+                    value: 0.0,
+                ),
+                (
+                    key: "Attack2Fast",
+                    value: 1.75,
+                ),
+            ],
+        ),
+        "Attack2Fast": Clip(
+            node_index: 46,
+        ),
+        "Attack3": ConditionFloat(
+            updater: AttackSpeed,
+            conditions: [
+                (
+                    key: "Unk0x201849db",
+                    value: 0.0,
+                ),
+                (
+                    key: "Attack3Fast",
+                    value: 1.75,
+                ),
+            ],
+        ),
+        "Attack3Fast": Clip(
+            node_index: 27,
+        ),
+        "Attack4": ConditionFloat(
+            updater: AttackSpeed,
+            conditions: [
+                (
+                    key: "Unk0x30d92e0a",
+                    value: 0.0,
+                ),
+                (
+                    key: "Attack4Fast",
+                    value: 1.75,
+                ),
+            ],
+        ),
+        "Attack4Fast": Clip(
+            node_index: 10,
+        ),
+        "Channel": Clip(
+            node_index: 5,
+        ),
+        "ChannelIn": Clip(
+            node_index: 52,
+        ),
+        "ChannelWndup": Sequence(
+            hashes: [
+                "ChannelIn",
+                "Channel",
+            ],
+        ),
+        "Crit": Clip(
+            node_index: 30,
+        ),
+        "Dance": Sequence(
+            hashes: [
+                "DanceWindup",
+                "DanceLoop",
+            ],
+        ),
+        "DanceLoop": Clip(
+            node_index: 3,
+        ),
+        "DanceWindup": Clip(
+            node_index: 53,
+        ),
+        "Death": Clip(
+            node_index: 48,
+        ),
+        "Idle1": Sequence(
+            hashes: [
+                "Idle1Base",
+                "Unk0xd5bc96d1",
+            ],
+        ),
+        "Idle1Base": Clip(
+            node_index: 24,
+        ),
+        "IdleVar1": Clip(
+            node_index: 45,
+        ),
+        "Joke": Clip(
+            node_index: 51,
+        ),
+        "Laugh": Clip(
+            node_index: 43,
+        ),
+        "Recall": Clip(
+            node_index: 21,
+        ),
+        "RecallLeadout": Clip(
+            node_index: 12,
+        ),
+        "RecallWinddown": Clip(
+            node_index: 35,
+        ),
+        "Respawn": Clip(
+            node_index: 32,
+        ),
+        "Run": Selector(
+            probably_nodes: [
+                (
+                    key: "RunBase",
+                    value: 60.0,
+                ),
+                (
+                    key: "RunVar1",
+                    value: 20.0,
+                ),
+                (
+                    key: "RunVar2",
+                    value: 20.0,
+                ),
+            ],
+        ),
+        "RunBase": Clip(
+            node_index: 67,
+        ),
+        "RunHUntToIdle": Clip(
+            node_index: 58,
+        ),
+        "RunHaste": Clip(
+            node_index: 6,
+        ),
+        "RunStart": Clip(
+            node_index: 62,
+        ),
+        "RunToIdle": Clip(
+            node_index: 63,
+        ),
+        "RunVar1": Clip(
+            node_index: 56,
+        ),
+        "RunVar2": Clip(
+            node_index: 57,
+        ),
+        "Spell1": Clip(
+            node_index: 39,
+        ),
+        "Spell1Release": Clip(
+            node_index: 31,
+        ),
+        "Spell1Turn": Clip(
+            node_index: 55,
+        ),
+        "Spell2": Clip(
+            node_index: 42,
+        ),
+        "Spell2MissRun": Clip(
+            node_index: 20,
+        ),
+        "Spell2ToIdle": Clip(
+            node_index: 70,
+        ),
+        "Spell2ToRunHunt": Clip(
+            node_index: 14,
+        ),
+        "Spell3": ConditionBool(
+            updater: IsMoving,
+            true_node: "Spell3Run",
+            false_node: "Spell3Idle",
+        ),
+        "Spell3HowlRun": Clip(
+            node_index: 59,
+        ),
+        "Spell3Idle": Clip(
+            node_index: 28,
+        ),
+        "Spell3Run": Clip(
+            node_index: 69,
+        ),
+        "Spell4": Clip(
+            node_index: 44,
+        ),
+        "Spell4Dash": Clip(
+            node_index: 2,
+        ),
+        "Spell4Hit": Clip(
+            node_index: 1,
+        ),
+        "Spell4Miss": Clip(
+            node_index: 36,
+        ),
+        "Spell4MissToIdle": Clip(
+            node_index: 0,
+        ),
+        "Taunt": Clip(
+            node_index: 47,
+        ),
+        "Turn": Parametric(
+            pairs: [
+                (
+                    key: "Turn180",
+                    value: -180.0,
+                ),
+                (
+                    key: "Turn90",
+                    value: -90.0,
+                ),
+                (
+                    key: "Turn0",
+                    value: 0.0,
+                ),
+                (
+                    key: "Turn90",
+                    value: 90.0,
+                ),
+                (
+                    key: "Turn180",
+                    value: 180.0,
+                ),
+            ],
+        ),
+        "Turn0": Clip(
+            node_index: 37,
+        ),
+        "Turn180": Clip(
+            node_index: 49,
+        ),
+        "Turn90": Clip(
+            node_index: 38,
+        ),
+        "TurnHunt0": Clip(
+            node_index: 8,
+        ),
+        "TurnHunt180": Clip(
+            node_index: 64,
+        ),
+        "TurnHunt90": Clip(
+            node_index: 41,
+        ),
+        "Unk0x1777011": ConditionFloat(
+            updater: AttackSpeed,
+            conditions: [
+                (
+                    key: "Unk0x3ee785b1",
+                    value: 0.0,
+                ),
+                (
+                    key: "Attack1Fast",
+                    value: 1.75,
+                ),
+            ],
+        ),
+        "Unk0x201849db": Clip(
+            node_index: 4,
+        ),
+        "Unk0x278e42e9": Clip(
+            node_index: 7,
+        ),
+        "Unk0x30d92e0a": Clip(
+            node_index: 9,
+        ),
+        "Unk0x3ee785b1": Clip(
+            node_index: 13,
+        ),
+        "Unk0x42c649f3": Parametric(
+            pairs: [
+                (
+                    key: "TurnHunt180",
+                    value: -180.0,
+                ),
+                (
+                    key: "TurnHunt90",
+                    value: -90.0,
+                ),
+                (
+                    key: "TurnHunt0",
+                    value: 0.0,
+                ),
+                (
+                    key: "TurnHunt90",
+                    value: 90.0,
+                ),
+                (
+                    key: "TurnHunt180",
+                    value: 180.0,
+                ),
+            ],
+        ),
+        "Unk0x56edff21": Clip(
+            node_index: 17,
+        ),
+        "Unk0x56fc2d22": Clip(
+            node_index: 18,
+        ),
+        "Unk0x597c4fcd": Clip(
+            node_index: 19,
+        ),
+        "Unk0x623b38c9": Clip(
+            node_index: 22,
+        ),
+        "Unk0x69b480cc": Clip(
+            node_index: 23,
+        ),
+        "Unk0x6af7a583": ConditionFloat(
+            updater: MoveSpeed,
+            conditions: [
+                (
+                    key: "Unk0xf6b678a1",
+                    value: 0.0,
+                ),
+                (
+                    key: "Unk0x56edff21",
+                    value: 480.0,
+                ),
+            ],
+        ),
+        "Unk0x6b93696d": ConditionBool(
+            updater: IsMoving,
+            true_node: "Spell2MissRun",
+            false_node: "Unk0xd3b8b200",
+        ),
+        "Unk0x70da5341": ConditionBool(
+            updater: IsMoving,
+            true_node: "Spell3HowlRun",
+            false_node: "Unk0xd8090a2c",
+        ),
+        "Unk0x7dd98b2c": Clip(
+            node_index: 26,
+        ),
+        "Unk0x84b1bd5f": ConditionFloat(
+            updater: AttackSpeed,
+            conditions: [
+                (
+                    key: "Unk0x95bf7a66",
+                    value: 0.0,
+                ),
+                (
+                    key: "Unk0x278e42e9",
+                    value: 1.75,
+                ),
+            ],
+        ),
+        "Unk0x95bf7a66": Clip(
+            node_index: 29,
+        ),
+        "Unk0xa0a65fb0": Clip(
+            node_index: 33,
+        ),
+        "Unk0xa1687744": ConditionFloat(
+            updater: AttackSpeed,
+            conditions: [
+                (
+                    key: "Unk0xf0d88ad1",
+                    value: 0.0,
+                ),
+                (
+                    key: "Unk0x7dd98b2c",
+                    value: 1.75,
+                ),
+            ],
+        ),
+        "Unk0xa9286476": ConditionFloat(
+            updater: AttackSpeed,
+            conditions: [
+                (
+                    key: "Unk0xbe2a0b3f",
+                    value: 0.0,
+                ),
+                (
+                    key: "Unk0x7dd98b2c",
+                    value: 1.75,
+                ),
+            ],
+        ),
+        "Unk0xbe2a0b3f": Clip(
+            node_index: 50,
+        ),
+        "Unk0xc757d161": ConditionFloat(
+            updater: AttackSpeed,
+            conditions: [
+                (
+                    key: "Unk0x69b480cc",
+                    value: 0.0,
+                ),
+                (
+                    key: "Unk0xcb57323b",
+                    value: 1.75,
+                ),
+            ],
+        ),
+        "Unk0xcb57323b": Clip(
+            node_index: 54,
+        ),
+        "Unk0xd3b8b200": Clip(
+            node_index: 60,
+        ),
+        "Unk0xd5bc96d1": Selector(
+            probably_nodes: [
+                (
+                    key: "Idle1Base",
+                    value: 80.0,
+                ),
+                (
+                    key: "IdleVar1",
+                    value: 20.0,
+                ),
+            ],
+        ),
+        "Unk0xd8090a2c": Clip(
+            node_index: 61,
+        ),
+        "Unk0xf0462cf0": Clip(
+            node_index: 65,
+        ),
+        "Unk0xf0d88ad1": Clip(
+            node_index: 66,
+        ),
+        "Unk0xf517c676": Sequence(
+            hashes: [
+                "RunStart",
+                "Run",
+            ],
+        ),
+        "Unk0xf6b678a1": Clip(
+            node_index: 68,
+        ),
+    },
+    blend_data: {
+        ("Attack1", "Attack1"): Time(
+            time: 0.1,
+        ),
+        ("Attack1", "Attack1Fast"): Time(
+            time: 0.1,
+        ),
+        ("Attack1", "Attack2"): Time(
+            time: 0.1,
+        ),
+        ("Attack1", "Attack2Fast"): Time(
+            time: 0.1,
+        ),
+        ("Attack1", "Attack3"): Time(
+            time: 0.1,
+        ),
+        ("Attack1", "Attack3Fast"): Time(
+            time: 0.1,
+        ),
+        ("Attack1", "Attack4Fast"): Time(
+            time: 0.1,
+        ),
+        ("Attack1", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("Attack1", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Attack1", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Attack1", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Attack1", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("Attack1", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("Attack1", "Spell2"): Time(
+            time: 0.08,
+        ),
+        ("Attack1", "Spell2MissRun"): Time(
+            time: 0.1,
+        ),
+        ("Attack1", "Spell3HowlRun"): Time(
+            time: 0.1,
+        ),
+        ("Attack1", "Spell3Idle"): Time(
+            time: 0.1,
+        ),
+        ("Attack1", "Spell3Run"): Time(
+            time: 0.1,
+        ),
+        ("Attack1", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("Attack1", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("Attack1", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("Attack1", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("Attack1", "Unk0x169444b0"): Time(
+            time: 0.1,
+        ),
+        ("Attack1", "Unk0x1997894a"): Time(
+            time: 0.1,
+        ),
+        ("Attack1", "Unk0x201849db"): Time(
+            time: 0.1,
+        ),
+        ("Attack1", "Unk0x278e42e9"): Time(
+            time: 0.1,
+        ),
+        ("Attack1", "Unk0x30d92e0a"): Time(
+            time: 0.1,
+        ),
+        ("Attack1", "Unk0x3ee785b1"): Time(
+            time: 0.1,
+        ),
+        ("Attack1", "Unk0x56fc2d22"): Time(
+            time: 0.1,
+        ),
+        ("Attack1", "Unk0x69b480cc"): Time(
+            time: 0.1,
+        ),
+        ("Attack1", "Unk0x70da5341"): Time(
+            time: 0.0,
+        ),
+        ("Attack1", "Unk0x7dd98b2c"): Time(
+            time: 0.1,
+        ),
+        ("Attack1", "Unk0x84b1bd5f"): Time(
+            time: 0.1,
+        ),
+        ("Attack1", "Unk0x95bf7a66"): Time(
+            time: 0.1,
+        ),
+        ("Attack1", "Unk0x9f6b0ef5"): Time(
+            time: 0.0,
+        ),
+        ("Attack1", "Unk0xa9286476"): Time(
+            time: 0.1,
+        ),
+        ("Attack1", "Unk0xbe062659"): Time(
+            time: 0.1,
+        ),
+        ("Attack1", "Unk0xbe2a0b3f"): Time(
+            time: 0.1,
+        ),
+        ("Attack1", "Unk0xc757d161"): Time(
+            time: 0.1,
+        ),
+        ("Attack1", "Unk0xcb57323b"): Time(
+            time: 0.1,
+        ),
+        ("Attack1", "Unk0xd3b8b200"): Time(
+            time: 0.1,
+        ),
+        ("Attack1", "Unk0xd8090a2c"): Time(
+            time: 0.1,
+        ),
+        ("Attack1", "Unk0xe4511bd6"): Time(
+            time: 0.0,
+        ),
+        ("Attack1", "Unk0xf0462cf0"): Time(
+            time: 0.1,
+        ),
+        ("Attack1", "Unk0xf0d88ad1"): Time(
+            time: 0.1,
+        ),
+        ("Attack1Fast", "Attack1"): Time(
+            time: 0.1,
+        ),
+        ("Attack1Fast", "Attack1Fast"): Time(
+            time: 0.1,
+        ),
+        ("Attack1Fast", "Attack2Fast"): Time(
+            time: 0.1,
+        ),
+        ("Attack1Fast", "Attack3Fast"): Time(
+            time: 0.1,
+        ),
+        ("Attack1Fast", "Attack4Fast"): Time(
+            time: 0.1,
+        ),
+        ("Attack1Fast", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("Attack1Fast", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Fast", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Fast", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Attack1Fast", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("Attack1Fast", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Fast", "Spell2"): Time(
+            time: 0.08,
+        ),
+        ("Attack1Fast", "Spell2MissRun"): Time(
+            time: 0.1,
+        ),
+        ("Attack1Fast", "Spell3HowlRun"): Time(
+            time: 0.1,
+        ),
+        ("Attack1Fast", "Spell3Idle"): Time(
+            time: 0.1,
+        ),
+        ("Attack1Fast", "Spell3Run"): Time(
+            time: 0.1,
+        ),
+        ("Attack1Fast", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("Attack1Fast", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("Attack1Fast", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("Attack1Fast", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Fast", "Unk0x201849db"): Time(
+            time: 0.1,
+        ),
+        ("Attack1Fast", "Unk0x278e42e9"): Time(
+            time: 0.1,
+        ),
+        ("Attack1Fast", "Unk0x30d92e0a"): Time(
+            time: 0.1,
+        ),
+        ("Attack1Fast", "Unk0x3ee785b1"): Time(
+            time: 0.1,
+        ),
+        ("Attack1Fast", "Unk0x56fc2d22"): Time(
+            time: 0.1,
+        ),
+        ("Attack1Fast", "Unk0x69b480cc"): Time(
+            time: 0.1,
+        ),
+        ("Attack1Fast", "Unk0x7dd98b2c"): Time(
+            time: 0.1,
+        ),
+        ("Attack1Fast", "Unk0x95bf7a66"): Time(
+            time: 0.1,
+        ),
+        ("Attack1Fast", "Unk0xbe2a0b3f"): Time(
+            time: 0.1,
+        ),
+        ("Attack1Fast", "Unk0xcb57323b"): Time(
+            time: 0.1,
+        ),
+        ("Attack1Fast", "Unk0xd3b8b200"): Time(
+            time: 0.1,
+        ),
+        ("Attack1Fast", "Unk0xd8090a2c"): Time(
+            time: 0.1,
+        ),
+        ("Attack1Fast", "Unk0xf0462cf0"): Time(
+            time: 0.1,
+        ),
+        ("Attack1Fast", "Unk0xf0d88ad1"): Time(
+            time: 0.1,
+        ),
+        ("Attack2", "Attack1"): Time(
+            time: 0.1,
+        ),
+        ("Attack2", "Attack2"): Time(
+            time: 0.1,
+        ),
+        ("Attack2", "Attack3"): Time(
+            time: 0.1,
+        ),
+        ("Attack2", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("Attack2", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Attack2", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Attack2", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("Attack2", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("Attack2", "Spell2"): Time(
+            time: 0.075,
+        ),
+        ("Attack2", "Spell3HowlRun"): Time(
+            time: 0.0,
+        ),
+        ("Attack2", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("Attack2", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("Attack2", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("Attack2", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("Attack2", "Unk0x1777011"): Time(
+            time: 0.1,
+        ),
+        ("Attack2", "Unk0x201849db"): Time(
+            time: 0.1,
+        ),
+        ("Attack2", "Unk0x3ee785b1"): Time(
+            time: 0.1,
+        ),
+        ("Attack2", "Unk0x69b480cc"): Time(
+            time: 0.1,
+        ),
+        ("Attack2", "Unk0x70da5341"): Time(
+            time: 0.0,
+        ),
+        ("Attack2", "Unk0x84b1bd5f"): Time(
+            time: 0.1,
+        ),
+        ("Attack2", "Unk0x95bf7a66"): Time(
+            time: 0.1,
+        ),
+        ("Attack2", "Unk0x9f6b0ef5"): Time(
+            time: 0.0,
+        ),
+        ("Attack2", "Unk0xa9286476"): Time(
+            time: 0.1,
+        ),
+        ("Attack2", "Unk0xb2d1e1e7"): Time(
+            time: 0.1,
+        ),
+        ("Attack2", "Unk0xbe062659"): Time(
+            time: 0.1,
+        ),
+        ("Attack2", "Unk0xbe2a0b3f"): Time(
+            time: 0.1,
+        ),
+        ("Attack2", "Unk0xc757d161"): Time(
+            time: 0.1,
+        ),
+        ("Attack2", "Unk0xd3b8b200"): Time(
+            time: 0.0,
+        ),
+        ("Attack2", "Unk0xd7edb000"): Time(
+            time: 0.1,
+        ),
+        ("Attack2", "Unk0xd8090a2c"): Time(
+            time: 0.0,
+        ),
+        ("Attack2", "Unk0xe4511bd6"): Time(
+            time: 0.0,
+        ),
+        ("Attack2Fast", "Attack1"): Time(
+            time: 0.1,
+        ),
+        ("Attack2Fast", "Attack1Fast"): Time(
+            time: 0.1,
+        ),
+        ("Attack2Fast", "Attack2Fast"): Time(
+            time: 0.1,
+        ),
+        ("Attack2Fast", "Attack3Fast"): Time(
+            time: 0.1,
+        ),
+        ("Attack2Fast", "Attack4Fast"): Time(
+            time: 0.1,
+        ),
+        ("Attack2Fast", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("Attack2Fast", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Attack2Fast", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Attack2Fast", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Attack2Fast", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("Attack2Fast", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("Attack2Fast", "Spell2"): Time(
+            time: 0.08,
+        ),
+        ("Attack2Fast", "Spell2MissRun"): Time(
+            time: 0.1,
+        ),
+        ("Attack2Fast", "Spell3HowlRun"): Time(
+            time: 0.1,
+        ),
+        ("Attack2Fast", "Spell3Idle"): Time(
+            time: 0.1,
+        ),
+        ("Attack2Fast", "Spell3Run"): Time(
+            time: 0.1,
+        ),
+        ("Attack2Fast", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("Attack2Fast", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("Attack2Fast", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("Attack2Fast", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("Attack2Fast", "Unk0x201849db"): Time(
+            time: 0.1,
+        ),
+        ("Attack2Fast", "Unk0x278e42e9"): Time(
+            time: 0.1,
+        ),
+        ("Attack2Fast", "Unk0x30d92e0a"): Time(
+            time: 0.1,
+        ),
+        ("Attack2Fast", "Unk0x3ee785b1"): Time(
+            time: 0.1,
+        ),
+        ("Attack2Fast", "Unk0x56fc2d22"): Time(
+            time: 0.1,
+        ),
+        ("Attack2Fast", "Unk0x69b480cc"): Time(
+            time: 0.1,
+        ),
+        ("Attack2Fast", "Unk0x7dd98b2c"): Time(
+            time: 0.1,
+        ),
+        ("Attack2Fast", "Unk0x95bf7a66"): Time(
+            time: 0.1,
+        ),
+        ("Attack2Fast", "Unk0xbe2a0b3f"): Time(
+            time: 0.1,
+        ),
+        ("Attack2Fast", "Unk0xcb57323b"): Time(
+            time: 0.1,
+        ),
+        ("Attack2Fast", "Unk0xd3b8b200"): Time(
+            time: 0.1,
+        ),
+        ("Attack2Fast", "Unk0xd8090a2c"): Time(
+            time: 0.1,
+        ),
+        ("Attack2Fast", "Unk0xf0462cf0"): Time(
+            time: 0.1,
+        ),
+        ("Attack2Fast", "Unk0xf0d88ad1"): Time(
+            time: 0.1,
+        ),
+        ("Attack3", "Attack1"): Time(
+            time: 0.1,
+        ),
+        ("Attack3", "Attack2"): Time(
+            time: 0.1,
+        ),
+        ("Attack3", "Attack3"): Time(
+            time: 0.1,
+        ),
+        ("Attack3", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("Attack3", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Attack3", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Attack3", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("Attack3", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("Attack3", "Spell2"): Time(
+            time: 0.075,
+        ),
+        ("Attack3", "Spell3HowlRun"): Time(
+            time: 0.0,
+        ),
+        ("Attack3", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("Attack3", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("Attack3", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("Attack3", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("Attack3", "Unk0x169444b0"): Time(
+            time: 0.1,
+        ),
+        ("Attack3", "Unk0x1777011"): Time(
+            time: 0.1,
+        ),
+        ("Attack3", "Unk0x1997894a"): Time(
+            time: 0.1,
+        ),
+        ("Attack3", "Unk0x3ee785b1"): Time(
+            time: 0.1,
+        ),
+        ("Attack3", "Unk0x69b480cc"): Time(
+            time: 0.1,
+        ),
+        ("Attack3", "Unk0x70da5341"): Time(
+            time: 0.0,
+        ),
+        ("Attack3", "Unk0x84b1bd5f"): Time(
+            time: 0.1,
+        ),
+        ("Attack3", "Unk0x95bf7a66"): Time(
+            time: 0.1,
+        ),
+        ("Attack3", "Unk0x9f6b0ef5"): Time(
+            time: 0.0,
+        ),
+        ("Attack3", "Unk0xa9286476"): Time(
+            time: 0.1,
+        ),
+        ("Attack3", "Unk0xb2d1e1e7"): Time(
+            time: 0.1,
+        ),
+        ("Attack3", "Unk0xbe2a0b3f"): Time(
+            time: 0.1,
+        ),
+        ("Attack3", "Unk0xc757d161"): Time(
+            time: 0.1,
+        ),
+        ("Attack3", "Unk0xd3b8b200"): Time(
+            time: 0.0,
+        ),
+        ("Attack3", "Unk0xd7edb000"): Time(
+            time: 0.1,
+        ),
+        ("Attack3", "Unk0xd8090a2c"): Time(
+            time: 0.0,
+        ),
+        ("Attack3", "Unk0xe4511bd6"): Time(
+            time: 0.0,
+        ),
+        ("Attack3", "Unk0xf0462cf0"): Time(
+            time: 0.1,
+        ),
+        ("Attack3Fast", "Attack1"): Time(
+            time: 0.1,
+        ),
+        ("Attack3Fast", "Attack1Fast"): Time(
+            time: 0.1,
+        ),
+        ("Attack3Fast", "Attack2Fast"): Time(
+            time: 0.1,
+        ),
+        ("Attack3Fast", "Attack3Fast"): Time(
+            time: 0.1,
+        ),
+        ("Attack3Fast", "Attack4Fast"): Time(
+            time: 0.1,
+        ),
+        ("Attack3Fast", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("Attack3Fast", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Attack3Fast", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Attack3Fast", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Attack3Fast", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("Attack3Fast", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("Attack3Fast", "Spell2"): Time(
+            time: 0.08,
+        ),
+        ("Attack3Fast", "Spell2MissRun"): Time(
+            time: 0.1,
+        ),
+        ("Attack3Fast", "Spell3HowlRun"): Time(
+            time: 0.1,
+        ),
+        ("Attack3Fast", "Spell3Idle"): Time(
+            time: 0.1,
+        ),
+        ("Attack3Fast", "Spell3Run"): Time(
+            time: 0.1,
+        ),
+        ("Attack3Fast", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("Attack3Fast", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("Attack3Fast", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("Attack3Fast", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("Attack3Fast", "Unk0x201849db"): Time(
+            time: 0.1,
+        ),
+        ("Attack3Fast", "Unk0x278e42e9"): Time(
+            time: 0.1,
+        ),
+        ("Attack3Fast", "Unk0x30d92e0a"): Time(
+            time: 0.1,
+        ),
+        ("Attack3Fast", "Unk0x3ee785b1"): Time(
+            time: 0.1,
+        ),
+        ("Attack3Fast", "Unk0x56fc2d22"): Time(
+            time: 0.1,
+        ),
+        ("Attack3Fast", "Unk0x69b480cc"): Time(
+            time: 0.1,
+        ),
+        ("Attack3Fast", "Unk0x7dd98b2c"): Time(
+            time: 0.1,
+        ),
+        ("Attack3Fast", "Unk0x95bf7a66"): Time(
+            time: 0.1,
+        ),
+        ("Attack3Fast", "Unk0xbe2a0b3f"): Time(
+            time: 0.1,
+        ),
+        ("Attack3Fast", "Unk0xcb57323b"): Time(
+            time: 0.1,
+        ),
+        ("Attack3Fast", "Unk0xd3b8b200"): Time(
+            time: 0.1,
+        ),
+        ("Attack3Fast", "Unk0xd8090a2c"): Time(
+            time: 0.1,
+        ),
+        ("Attack3Fast", "Unk0xf0462cf0"): Time(
+            time: 0.1,
+        ),
+        ("Attack3Fast", "Unk0xf0d88ad1"): Time(
+            time: 0.1,
+        ),
+        ("Attack4", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Attack4", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("Attack4", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("Attack4", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("Attack4", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("Attack4", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("Attack4", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("Attack4Fast", "Attack1"): Time(
+            time: 0.1,
+        ),
+        ("Attack4Fast", "Attack1Fast"): Time(
+            time: 0.1,
+        ),
+        ("Attack4Fast", "Attack2Fast"): Time(
+            time: 0.1,
+        ),
+        ("Attack4Fast", "Attack3Fast"): Time(
+            time: 0.1,
+        ),
+        ("Attack4Fast", "Attack4Fast"): Time(
+            time: 0.1,
+        ),
+        ("Attack4Fast", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("Attack4Fast", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Attack4Fast", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Attack4Fast", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Attack4Fast", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("Attack4Fast", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("Attack4Fast", "Spell2"): Time(
+            time: 0.08,
+        ),
+        ("Attack4Fast", "Spell2MissRun"): Time(
+            time: 0.1,
+        ),
+        ("Attack4Fast", "Spell3HowlRun"): Time(
+            time: 0.1,
+        ),
+        ("Attack4Fast", "Spell3Idle"): Time(
+            time: 0.1,
+        ),
+        ("Attack4Fast", "Spell3Run"): Time(
+            time: 0.1,
+        ),
+        ("Attack4Fast", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("Attack4Fast", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("Attack4Fast", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("Attack4Fast", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("Attack4Fast", "Unk0x201849db"): Time(
+            time: 0.1,
+        ),
+        ("Attack4Fast", "Unk0x278e42e9"): Time(
+            time: 0.1,
+        ),
+        ("Attack4Fast", "Unk0x30d92e0a"): Time(
+            time: 0.1,
+        ),
+        ("Attack4Fast", "Unk0x3ee785b1"): Time(
+            time: 0.1,
+        ),
+        ("Attack4Fast", "Unk0x56fc2d22"): Time(
+            time: 0.1,
+        ),
+        ("Attack4Fast", "Unk0x69b480cc"): Time(
+            time: 0.1,
+        ),
+        ("Attack4Fast", "Unk0x7dd98b2c"): Time(
+            time: 0.1,
+        ),
+        ("Attack4Fast", "Unk0x95bf7a66"): Time(
+            time: 0.1,
+        ),
+        ("Attack4Fast", "Unk0xbe2a0b3f"): Time(
+            time: 0.1,
+        ),
+        ("Attack4Fast", "Unk0xcb57323b"): Time(
+            time: 0.1,
+        ),
+        ("Attack4Fast", "Unk0xd3b8b200"): Time(
+            time: 0.1,
+        ),
+        ("Attack4Fast", "Unk0xd8090a2c"): Time(
+            time: 0.1,
+        ),
+        ("Attack4Fast", "Unk0xf0462cf0"): Time(
+            time: 0.1,
+        ),
+        ("Attack4Fast", "Unk0xf0d88ad1"): Time(
+            time: 0.1,
+        ),
+        ("Channel", "Channel"): Time(
+            time: 0.0,
+        ),
+        ("Channel", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("Channel", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Channel", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Channel", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Channel", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("Channel", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("Channel", "Spell2"): Time(
+            time: 0.08,
+        ),
+        ("Channel", "Spell3HowlRun"): Time(
+            time: 0.0,
+        ),
+        ("Channel", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("Channel", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("Channel", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("Channel", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("Channel", "Unk0x70da5341"): Time(
+            time: 0.0,
+        ),
+        ("Channel", "Unk0x9f6b0ef5"): Time(
+            time: 0.0,
+        ),
+        ("Channel", "Unk0xd3b8b200"): Time(
+            time: 0.0,
+        ),
+        ("Channel", "Unk0xd8090a2c"): Time(
+            time: 0.0,
+        ),
+        ("Channel", "Unk0xe4511bd6"): Time(
+            time: 0.0,
+        ),
+        ("Crit", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("Crit", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Crit", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Crit", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Crit", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("Crit", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("Crit", "Spell2"): Time(
+            time: 0.08,
+        ),
+        ("Crit", "Spell3HowlRun"): Time(
+            time: 0.0,
+        ),
+        ("Crit", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("Crit", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("Crit", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("Crit", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("Crit", "Unk0x70da5341"): Time(
+            time: 0.0,
+        ),
+        ("Crit", "Unk0x9f6b0ef5"): Time(
+            time: 0.0,
+        ),
+        ("Crit", "Unk0xd3b8b200"): Time(
+            time: 0.0,
+        ),
+        ("Crit", "Unk0xd8090a2c"): Time(
+            time: 0.0,
+        ),
+        ("Crit", "Unk0xe4511bd6"): Time(
+            time: 0.0,
+        ),
+        ("Dance", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("Dance", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Dance", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Dance", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("Dance", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("Dance", "Spell2"): Time(
+            time: 0.08,
+        ),
+        ("Dance", "Spell3HowlRun"): Time(
+            time: 0.0,
+        ),
+        ("Dance", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("Dance", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("Dance", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("Dance", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("Dance", "Unk0x70da5341"): Time(
+            time: 0.0,
+        ),
+        ("Dance", "Unk0x9f6b0ef5"): Time(
+            time: 0.0,
+        ),
+        ("Dance", "Unk0xd3b8b200"): Time(
+            time: 0.0,
+        ),
+        ("Dance", "Unk0xd8090a2c"): Time(
+            time: 0.0,
+        ),
+        ("Dance", "Unk0xe4511bd6"): Time(
+            time: 0.0,
+        ),
+        ("DanceLoop", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("DanceLoop", "Death"): Time(
+            time: 0.0,
+        ),
+        ("DanceLoop", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("DanceLoop", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("DanceLoop", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("DanceLoop", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("DanceLoop", "Spell2"): Time(
+            time: 0.08,
+        ),
+        ("DanceLoop", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("DanceLoop", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("DanceLoop", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("DanceLoop", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("DanceWindup", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("DanceWindup", "DanceWindup"): Time(
+            time: 0.1,
+        ),
+        ("DanceWindup", "Death"): Time(
+            time: 0.0,
+        ),
+        ("DanceWindup", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("DanceWindup", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("DanceWindup", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("DanceWindup", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("DanceWindup", "Spell2"): Time(
+            time: 0.08,
+        ),
+        ("DanceWindup", "Spell3HowlRun"): Time(
+            time: 0.0,
+        ),
+        ("DanceWindup", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("DanceWindup", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("DanceWindup", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("DanceWindup", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("DanceWindup", "Unk0x70da5341"): Time(
+            time: 0.0,
+        ),
+        ("DanceWindup", "Unk0x9f6b0ef5"): Time(
+            time: 0.0,
+        ),
+        ("DanceWindup", "Unk0xd3b8b200"): Time(
+            time: 0.0,
+        ),
+        ("DanceWindup", "Unk0xd8090a2c"): Time(
+            time: 0.0,
+        ),
+        ("DanceWindup", "Unk0xe4511bd6"): Time(
+            time: 0.0,
+        ),
+        ("Death", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("Death", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Death", "Idle1Base"): Time(
+            time: 0.0,
+        ),
+        ("Death", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Death", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Death", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("Death", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("Death", "Spell2"): Time(
+            time: 0.08,
+        ),
+        ("Death", "Spell3HowlRun"): Time(
+            time: 0.0,
+        ),
+        ("Death", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("Death", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("Death", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("Death", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("Death", "Unk0x70da5341"): Time(
+            time: 0.0,
+        ),
+        ("Death", "Unk0x9f6b0ef5"): Time(
+            time: 0.0,
+        ),
+        ("Death", "Unk0xd3b8b200"): Time(
+            time: 0.0,
+        ),
+        ("Death", "Unk0xd8090a2c"): Time(
+            time: 0.0,
+        ),
+        ("Death", "Unk0xe4511bd6"): Time(
+            time: 0.0,
+        ),
+        ("Idle1Base", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("Idle1Base", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Idle1Base", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Idle1Base", "RunBase"): TransitionClip(
+            clip_name: "RunStart",
+        ),
+        ("Idle1Base", "RunVar1"): TransitionClip(
+            clip_name: "RunStart",
+        ),
+        ("Idle1Base", "RunVar2"): TransitionClip(
+            clip_name: "RunStart",
+        ),
+        ("Idle1Base", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Idle1Base", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("Idle1Base", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("Idle1Base", "Spell2"): Time(
+            time: 0.08,
+        ),
+        ("Idle1Base", "Spell3HowlRun"): Time(
+            time: 0.0,
+        ),
+        ("Idle1Base", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("Idle1Base", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("Idle1Base", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("Idle1Base", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("Idle1Base", "Unk0x70da5341"): Time(
+            time: 0.0,
+        ),
+        ("Idle1Base", "Unk0x9f6b0ef5"): Time(
+            time: 0.0,
+        ),
+        ("Idle1Base", "Unk0xd3b8b200"): Time(
+            time: 0.0,
+        ),
+        ("Idle1Base", "Unk0xd8090a2c"): Time(
+            time: 0.0,
+        ),
+        ("Idle1Base", "Unk0xe4511bd6"): Time(
+            time: 0.0,
+        ),
+        ("IdleVar1", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("IdleVar1", "Death"): Time(
+            time: 0.0,
+        ),
+        ("IdleVar1", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("IdleVar1", "RunBase"): TransitionClip(
+            clip_name: "RunStart",
+        ),
+        ("IdleVar1", "RunVar1"): TransitionClip(
+            clip_name: "RunStart",
+        ),
+        ("IdleVar1", "RunVar2"): TransitionClip(
+            clip_name: "RunStart",
+        ),
+        ("IdleVar1", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("IdleVar1", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("IdleVar1", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("IdleVar1", "Spell2"): Time(
+            time: 0.08,
+        ),
+        ("IdleVar1", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("IdleVar1", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("IdleVar1", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("IdleVar1", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("Joke", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("Joke", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Joke", "Joke"): Time(
+            time: 0.1,
+        ),
+        ("Joke", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Joke", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Joke", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("Joke", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("Joke", "Spell2"): Time(
+            time: 0.08,
+        ),
+        ("Joke", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("Joke", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("Joke", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("Joke", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("Laugh", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("Laugh", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Laugh", "Laugh"): Time(
+            time: 0.1,
+        ),
+        ("Laugh", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Laugh", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Laugh", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("Laugh", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("Laugh", "Spell2"): Time(
+            time: 0.08,
+        ),
+        ("Laugh", "Spell3HowlRun"): Time(
+            time: 0.0,
+        ),
+        ("Laugh", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("Laugh", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("Laugh", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("Laugh", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("Laugh", "Unk0x70da5341"): Time(
+            time: 0.0,
+        ),
+        ("Laugh", "Unk0x9f6b0ef5"): Time(
+            time: 0.0,
+        ),
+        ("Laugh", "Unk0xd3b8b200"): Time(
+            time: 0.0,
+        ),
+        ("Laugh", "Unk0xd8090a2c"): Time(
+            time: 0.0,
+        ),
+        ("Laugh", "Unk0xe4511bd6"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("Recall", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Recall", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("Recall", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Spell2"): Time(
+            time: 0.08,
+        ),
+        ("Recall", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("Recall", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("Recall", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("Recall", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("RecallLeadout", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("RecallLeadout", "Death"): Time(
+            time: 0.0,
+        ),
+        ("RecallLeadout", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("RecallLeadout", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("RecallLeadout", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("RecallLeadout", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("RecallLeadout", "Spell2"): Time(
+            time: 0.08,
+        ),
+        ("RecallLeadout", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("RecallLeadout", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("RecallLeadout", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("RecallLeadout", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("RecallWinddown", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("RecallWinddown", "Death"): Time(
+            time: 0.0,
+        ),
+        ("RecallWinddown", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("RecallWinddown", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("RecallWinddown", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("RecallWinddown", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("RecallWinddown", "Spell2"): Time(
+            time: 0.08,
+        ),
+        ("RecallWinddown", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("RecallWinddown", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("RecallWinddown", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("RecallWinddown", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("Respawn", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("Respawn", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Respawn", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Respawn", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Respawn", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("Respawn", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("Respawn", "Spell2"): Time(
+            time: 0.08,
+        ),
+        ("Respawn", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("Respawn", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("Respawn", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("Respawn", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("RunBase", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("RunBase", "Death"): Time(
+            time: 0.0,
+        ),
+        ("RunBase", "Idle1Base"): TransitionClip(
+            clip_name: "RunToIdle",
+        ),
+        ("RunBase", "IdleVar1"): TransitionClip(
+            clip_name: "RunToIdle",
+        ),
+        ("RunBase", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("RunBase", "RunBase"): Time(
+            time: 0.0,
+        ),
+        ("RunBase", "RunHaste"): Time(
+            time: 0.0,
+        ),
+        ("RunBase", "RunToIdle"): Time(
+            time: 0.1,
+        ),
+        ("RunBase", "RunVar1"): Time(
+            time: 0.0,
+        ),
+        ("RunBase", "RunVar2"): Time(
+            time: 0.0,
+        ),
+        ("RunBase", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("RunBase", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("RunBase", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("RunBase", "Spell2"): Time(
+            time: 0.08,
+        ),
+        ("RunBase", "Spell3HowlRun"): Time(
+            time: 0.0,
+        ),
+        ("RunBase", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("RunBase", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("RunBase", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("RunBase", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("RunBase", "Unk0x70da5341"): Time(
+            time: 0.0,
+        ),
+        ("RunBase", "Unk0x9f6b0ef5"): Time(
+            time: 0.0,
+        ),
+        ("RunBase", "Unk0xd3b8b200"): Time(
+            time: 0.0,
+        ),
+        ("RunBase", "Unk0xd8090a2c"): Time(
+            time: 0.0,
+        ),
+        ("RunBase", "Unk0xe4511bd6"): Time(
+            time: 0.0,
+        ),
+        ("RunHUntToIdle", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("RunHUntToIdle", "Death"): Time(
+            time: 0.0,
+        ),
+        ("RunHUntToIdle", "Idle1Base"): Time(
+            time: 0.0,
+        ),
+        ("RunHUntToIdle", "IdleVar1"): Time(
+            time: 0.0,
+        ),
+        ("RunHUntToIdle", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("RunHUntToIdle", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("RunHUntToIdle", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("RunHUntToIdle", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("RunHUntToIdle", "Spell2"): Time(
+            time: 0.08,
+        ),
+        ("RunHUntToIdle", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("RunHUntToIdle", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("RunHUntToIdle", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("RunHUntToIdle", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("RunHaste", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("RunHaste", "Death"): Time(
+            time: 0.0,
+        ),
+        ("RunHaste", "Idle1Base"): TransitionClip(
+            clip_name: "RunToIdle",
+        ),
+        ("RunHaste", "IdleVar1"): TransitionClip(
+            clip_name: "RunToIdle",
+        ),
+        ("RunHaste", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("RunHaste", "RunBase"): Time(
+            time: 0.0,
+        ),
+        ("RunHaste", "RunHaste"): Time(
+            time: 0.0,
+        ),
+        ("RunHaste", "RunToIdle"): Time(
+            time: 0.1,
+        ),
+        ("RunHaste", "RunVar1"): Time(
+            time: 0.0,
+        ),
+        ("RunHaste", "RunVar2"): Time(
+            time: 0.0,
+        ),
+        ("RunHaste", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("RunHaste", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("RunHaste", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("RunHaste", "Spell2"): Time(
+            time: 0.08,
+        ),
+        ("RunHaste", "Spell3HowlRun"): Time(
+            time: 0.0,
+        ),
+        ("RunHaste", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("RunHaste", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("RunHaste", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("RunHaste", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("RunHaste", "Unk0x70da5341"): Time(
+            time: 0.0,
+        ),
+        ("RunHaste", "Unk0x9f6b0ef5"): Time(
+            time: 0.0,
+        ),
+        ("RunHaste", "Unk0xd3b8b200"): Time(
+            time: 0.0,
+        ),
+        ("RunHaste", "Unk0xd8090a2c"): Time(
+            time: 0.0,
+        ),
+        ("RunHaste", "Unk0xe4511bd6"): Time(
+            time: 0.0,
+        ),
+        ("RunStart", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("RunStart", "Death"): Time(
+            time: 0.0,
+        ),
+        ("RunStart", "Idle1Base"): TransitionClip(
+            clip_name: "RunToIdle",
+        ),
+        ("RunStart", "IdleVar1"): TransitionClip(
+            clip_name: "RunToIdle",
+        ),
+        ("RunStart", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("RunStart", "RunBase"): Time(
+            time: 0.0,
+        ),
+        ("RunStart", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("RunStart", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("RunStart", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("RunStart", "Spell2"): Time(
+            time: 0.08,
+        ),
+        ("RunStart", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("RunStart", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("RunStart", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("RunStart", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("RunToIdle", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("RunToIdle", "Death"): Time(
+            time: 0.0,
+        ),
+        ("RunToIdle", "Idle1Base"): Time(
+            time: 0.0,
+        ),
+        ("RunToIdle", "IdleVar1"): Time(
+            time: 0.0,
+        ),
+        ("RunToIdle", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("RunToIdle", "RunBase"): TransitionClip(
+            clip_name: "RunStart",
+        ),
+        ("RunToIdle", "RunHaste"): Time(
+            time: 0.05,
+        ),
+        ("RunToIdle", "RunToIdle"): Time(
+            time: 0.1,
+        ),
+        ("RunToIdle", "RunVar1"): TransitionClip(
+            clip_name: "RunStart",
+        ),
+        ("RunToIdle", "RunVar2"): TransitionClip(
+            clip_name: "RunStart",
+        ),
+        ("RunToIdle", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("RunToIdle", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("RunToIdle", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("RunToIdle", "Spell2"): Time(
+            time: 0.08,
+        ),
+        ("RunToIdle", "Spell3HowlRun"): Time(
+            time: 0.0,
+        ),
+        ("RunToIdle", "Spell3Idle"): Time(
+            time: 0.0,
+        ),
+        ("RunToIdle", "Spell3Run"): Time(
+            time: 0.0,
+        ),
+        ("RunToIdle", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("RunToIdle", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("RunToIdle", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("RunToIdle", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("RunToIdle", "Unk0x70da5341"): Time(
+            time: 0.0,
+        ),
+        ("RunToIdle", "Unk0x9f6b0ef5"): Time(
+            time: 0.0,
+        ),
+        ("RunToIdle", "Unk0xd3b8b200"): Time(
+            time: 0.0,
+        ),
+        ("RunToIdle", "Unk0xd8090a2c"): Time(
+            time: 0.0,
+        ),
+        ("RunToIdle", "Unk0xe4511bd6"): Time(
+            time: 0.0,
+        ),
+        ("RunVar1", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("RunVar1", "Death"): Time(
+            time: 0.0,
+        ),
+        ("RunVar1", "Idle1Base"): TransitionClip(
+            clip_name: "RunToIdle",
+        ),
+        ("RunVar1", "IdleVar1"): TransitionClip(
+            clip_name: "RunToIdle",
+        ),
+        ("RunVar1", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("RunVar1", "RunBase"): Time(
+            time: 0.0,
+        ),
+        ("RunVar1", "RunHaste"): Time(
+            time: 0.0,
+        ),
+        ("RunVar1", "RunToIdle"): Time(
+            time: 0.1,
+        ),
+        ("RunVar1", "RunVar1"): Time(
+            time: 0.0,
+        ),
+        ("RunVar1", "RunVar2"): Time(
+            time: 0.0,
+        ),
+        ("RunVar1", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("RunVar1", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("RunVar1", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("RunVar1", "Spell2"): Time(
+            time: 0.08,
+        ),
+        ("RunVar1", "Spell3HowlRun"): Time(
+            time: 0.0,
+        ),
+        ("RunVar1", "Spell3Idle"): Time(
+            time: 0.0,
+        ),
+        ("RunVar1", "Spell3Run"): Time(
+            time: 0.0,
+        ),
+        ("RunVar1", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("RunVar1", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("RunVar1", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("RunVar1", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("RunVar1", "Unk0x70da5341"): Time(
+            time: 0.0,
+        ),
+        ("RunVar1", "Unk0x9f6b0ef5"): Time(
+            time: 0.0,
+        ),
+        ("RunVar1", "Unk0xd3b8b200"): Time(
+            time: 0.0,
+        ),
+        ("RunVar1", "Unk0xd8090a2c"): Time(
+            time: 0.0,
+        ),
+        ("RunVar1", "Unk0xe4511bd6"): Time(
+            time: 0.0,
+        ),
+        ("RunVar2", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("RunVar2", "Death"): Time(
+            time: 0.0,
+        ),
+        ("RunVar2", "Idle1Base"): TransitionClip(
+            clip_name: "RunToIdle",
+        ),
+        ("RunVar2", "IdleVar1"): TransitionClip(
+            clip_name: "RunToIdle",
+        ),
+        ("RunVar2", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("RunVar2", "RunBase"): Time(
+            time: 0.0,
+        ),
+        ("RunVar2", "RunHaste"): Time(
+            time: 0.0,
+        ),
+        ("RunVar2", "RunToIdle"): Time(
+            time: 0.1,
+        ),
+        ("RunVar2", "RunVar1"): Time(
+            time: 0.0,
+        ),
+        ("RunVar2", "RunVar2"): Time(
+            time: 0.0,
+        ),
+        ("RunVar2", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("RunVar2", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("RunVar2", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("RunVar2", "Spell2"): Time(
+            time: 0.08,
+        ),
+        ("RunVar2", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("RunVar2", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("RunVar2", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("RunVar2", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("Spell1", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("Spell1", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell1", "Idle1Base"): TransitionClip(
+            clip_name: "RunToIdle",
+        ),
+        ("Spell1", "IdleVar1"): TransitionClip(
+            clip_name: "RunToIdle",
+        ),
+        ("Spell1", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Spell1", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Spell1", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("Spell1", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("Spell1", "Spell2"): Time(
+            time: 0.08,
+        ),
+        ("Spell1", "Spell3HowlRun"): Time(
+            time: 0.0,
+        ),
+        ("Spell1", "Spell3Idle"): Time(
+            time: 0.0,
+        ),
+        ("Spell1", "Spell3Run"): Time(
+            time: 0.0,
+        ),
+        ("Spell1", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("Spell1", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("Spell1", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("Spell1", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("Spell1", "Unk0x70da5341"): Time(
+            time: 0.0,
+        ),
+        ("Spell1", "Unk0x9f6b0ef5"): Time(
+            time: 0.0,
+        ),
+        ("Spell1", "Unk0xd3b8b200"): Time(
+            time: 0.0,
+        ),
+        ("Spell1", "Unk0xd8090a2c"): Time(
+            time: 0.0,
+        ),
+        ("Spell1", "Unk0xe4511bd6"): Time(
+            time: 0.0,
+        ),
+        ("Spell1Release", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("Spell1Release", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell1Release", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Spell1Release", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Release", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Release", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("Spell1Release", "Spell2"): Time(
+            time: 0.08,
+        ),
+        ("Spell1Release", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("Spell1Release", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Release", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Release", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("Spell1Release", "Unk0x70da5341"): Time(
+            time: 0.0,
+        ),
+        ("Spell1Release", "Unk0x9f6b0ef5"): Time(
+            time: 0.0,
+        ),
+        ("Spell1Release", "Unk0xe4511bd6"): Time(
+            time: 0.0,
+        ),
+        ("Spell1Turn", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("Spell1Turn", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell1Turn", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Spell1Turn", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Turn", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Turn", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("Spell1Turn", "Spell2"): Time(
+            time: 0.08,
+        ),
+        ("Spell1Turn", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("Spell1Turn", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Turn", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("Spell1Turn", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("Spell2", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("Spell2", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell2", "Idle1Base"): TransitionClip(
+            clip_name: "Spell2ToIdle",
+        ),
+        ("Spell2", "IdleVar1"): TransitionClip(
+            clip_name: "Spell2ToIdle",
+        ),
+        ("Spell2", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Spell2", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Spell2", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("Spell2", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("Spell2", "Spell2"): Time(
+            time: 0.08,
+        ),
+        ("Spell2", "Spell3HowlRun"): Time(
+            time: 0.0,
+        ),
+        ("Spell2", "Spell3Idle"): Time(
+            time: 0.05,
+        ),
+        ("Spell2", "Spell3Run"): Time(
+            time: 0.05,
+        ),
+        ("Spell2", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("Spell2", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("Spell2", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("Spell2", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("Spell2", "Unk0x597c4fcd"): TransitionClip(
+            clip_name: "Unk0xa0a65fb0",
+        ),
+        ("Spell2", "Unk0x6af7a583"): TransitionClip(
+            clip_name: "Spell2ToRunHunt",
+        ),
+        ("Spell2", "Unk0x70da5341"): Time(
+            time: 0.0,
+        ),
+        ("Spell2", "Unk0x9f6b0ef5"): Time(
+            time: 0.0,
+        ),
+        ("Spell2", "Unk0xd3b8b200"): Time(
+            time: 0.0,
+        ),
+        ("Spell2", "Unk0xd8090a2c"): Time(
+            time: 0.0,
+        ),
+        ("Spell2", "Unk0xe4511bd6"): Time(
+            time: 0.0,
+        ),
+        ("Spell2MissRun", "Attack1"): Time(
+            time: 0.0,
+        ),
+        ("Spell2MissRun", "Attack1Fast"): Time(
+            time: 0.1,
+        ),
+        ("Spell2MissRun", "Attack2Fast"): Time(
+            time: 0.1,
+        ),
+        ("Spell2MissRun", "Attack3Fast"): Time(
+            time: 0.1,
+        ),
+        ("Spell2MissRun", "Attack4Fast"): Time(
+            time: 0.1,
+        ),
+        ("Spell2MissRun", "Channel"): Time(
+            time: 0.1,
+        ),
+        ("Spell2MissRun", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("Spell2MissRun", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell2MissRun", "Idle1Base"): TransitionClip(
+            clip_name: "RunToIdle",
+        ),
+        ("Spell2MissRun", "IdleVar1"): TransitionClip(
+            clip_name: "RunToIdle",
+        ),
+        ("Spell2MissRun", "Laugh"): Time(
+            time: 0.0,
+        ),
+        ("Spell2MissRun", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Spell2MissRun", "RunBase"): Time(
+            time: 0.0,
+        ),
+        ("Spell2MissRun", "RunToIdle"): Time(
+            time: 0.0,
+        ),
+        ("Spell2MissRun", "RunVar1"): Time(
+            time: 0.0,
+        ),
+        ("Spell2MissRun", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Spell2MissRun", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("Spell2MissRun", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("Spell2MissRun", "Spell2"): Time(
+            time: 0.08,
+        ),
+        ("Spell2MissRun", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("Spell2MissRun", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("Spell2MissRun", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("Spell2MissRun", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("Spell2MissRun", "Unk0x201849db"): Time(
+            time: 0.1,
+        ),
+        ("Spell2MissRun", "Unk0x278e42e9"): Time(
+            time: 0.1,
+        ),
+        ("Spell2MissRun", "Unk0x30d92e0a"): Time(
+            time: 0.1,
+        ),
+        ("Spell2MissRun", "Unk0x3ee785b1"): Time(
+            time: 0.1,
+        ),
+        ("Spell2MissRun", "Unk0x56fc2d22"): Time(
+            time: 0.1,
+        ),
+        ("Spell2MissRun", "Unk0x69b480cc"): Time(
+            time: 0.1,
+        ),
+        ("Spell2MissRun", "Unk0x7dd98b2c"): Time(
+            time: 0.1,
+        ),
+        ("Spell2MissRun", "Unk0x95bf7a66"): Time(
+            time: 0.1,
+        ),
+        ("Spell2MissRun", "Unk0xbe2a0b3f"): Time(
+            time: 0.1,
+        ),
+        ("Spell2MissRun", "Unk0xcb57323b"): Time(
+            time: 0.1,
+        ),
+        ("Spell2MissRun", "Unk0xf0462cf0"): Time(
+            time: 0.1,
+        ),
+        ("Spell2MissRun", "Unk0xf0d88ad1"): Time(
+            time: 0.1,
+        ),
+        ("Spell2ToIdle", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("Spell2ToIdle", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell2ToIdle", "Idle1Base"): Time(
+            time: 0.0,
+        ),
+        ("Spell2ToIdle", "IdleVar1"): Time(
+            time: 0.0,
+        ),
+        ("Spell2ToIdle", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Spell2ToIdle", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Spell2ToIdle", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("Spell2ToIdle", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("Spell2ToIdle", "Spell2"): Time(
+            time: 0.08,
+        ),
+        ("Spell2ToIdle", "Spell3Idle"): Time(
+            time: 0.05,
+        ),
+        ("Spell2ToIdle", "Spell3Run"): Time(
+            time: 0.05,
+        ),
+        ("Spell2ToIdle", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("Spell2ToIdle", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("Spell2ToIdle", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("Spell2ToIdle", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("Spell2ToRunHunt", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("Spell2ToRunHunt", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell2ToRunHunt", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Spell2ToRunHunt", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Spell2ToRunHunt", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("Spell2ToRunHunt", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("Spell2ToRunHunt", "Spell2"): Time(
+            time: 0.08,
+        ),
+        ("Spell2ToRunHunt", "Spell3Idle"): Time(
+            time: 0.05,
+        ),
+        ("Spell2ToRunHunt", "Spell3Run"): Time(
+            time: 0.05,
+        ),
+        ("Spell2ToRunHunt", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("Spell2ToRunHunt", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("Spell2ToRunHunt", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("Spell2ToRunHunt", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("Spell3HowlRun", "Attack1"): Time(
+            time: 0.05,
+        ),
+        ("Spell3HowlRun", "Attack1Fast"): Time(
+            time: 0.05,
+        ),
+        ("Spell3HowlRun", "Attack2"): Time(
+            time: 0.0,
+        ),
+        ("Spell3HowlRun", "Attack2Fast"): Time(
+            time: 0.05,
+        ),
+        ("Spell3HowlRun", "Attack3"): Time(
+            time: 0.0,
+        ),
+        ("Spell3HowlRun", "Attack3Fast"): Time(
+            time: 0.05,
+        ),
+        ("Spell3HowlRun", "Attack4"): Time(
+            time: 0.0,
+        ),
+        ("Spell3HowlRun", "Attack4Fast"): Time(
+            time: 0.05,
+        ),
+        ("Spell3HowlRun", "Channel"): Time(
+            time: 0.05,
+        ),
+        ("Spell3HowlRun", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("Spell3HowlRun", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell3HowlRun", "Idle1Base"): TransitionClip(
+            clip_name: "RunToIdle",
+        ),
+        ("Spell3HowlRun", "Joke"): Time(
+            time: 0.05,
+        ),
+        ("Spell3HowlRun", "Laugh"): Time(
+            time: 0.05,
+        ),
+        ("Spell3HowlRun", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Spell3HowlRun", "RunBase"): Time(
+            time: 0.0,
+        ),
+        ("Spell3HowlRun", "RunToIdle"): Time(
+            time: 0.05,
+        ),
+        ("Spell3HowlRun", "RunVar1"): Time(
+            time: 0.05,
+        ),
+        ("Spell3HowlRun", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Spell3HowlRun", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("Spell3HowlRun", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("Spell3HowlRun", "Spell2"): Time(
+            time: 0.08,
+        ),
+        ("Spell3HowlRun", "Spell2ToIdle"): Time(
+            time: 0.05,
+        ),
+        ("Spell3HowlRun", "Spell2ToRunHunt"): Time(
+            time: 0.05,
+        ),
+        ("Spell3HowlRun", "Spell3Idle"): Time(
+            time: 0.0,
+        ),
+        ("Spell3HowlRun", "Spell3Run"): Time(
+            time: 0.0,
+        ),
+        ("Spell3HowlRun", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("Spell3HowlRun", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("Spell3HowlRun", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("Spell3HowlRun", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("Spell3HowlRun", "Spell4MissToIdle"): Time(
+            time: 0.05,
+        ),
+        ("Spell3HowlRun", "Unk0x169444b0"): Time(
+            time: 0.05,
+        ),
+        ("Spell3HowlRun", "Unk0x1777011"): Time(
+            time: 0.0,
+        ),
+        ("Spell3HowlRun", "Unk0x1997894a"): Time(
+            time: 0.05,
+        ),
+        ("Spell3HowlRun", "Unk0x201849db"): Time(
+            time: 0.05,
+        ),
+        ("Spell3HowlRun", "Unk0x278e42e9"): Time(
+            time: 0.05,
+        ),
+        ("Spell3HowlRun", "Unk0x30d92e0a"): Time(
+            time: 0.05,
+        ),
+        ("Spell3HowlRun", "Unk0x3ee785b1"): Time(
+            time: 0.05,
+        ),
+        ("Spell3HowlRun", "Unk0x56edff21"): Time(
+            time: 0.05,
+        ),
+        ("Spell3HowlRun", "Unk0x56fc2d22"): Time(
+            time: 0.05,
+        ),
+        ("Spell3HowlRun", "Unk0x597c4fcd"): Time(
+            time: 0.05,
+        ),
+        ("Spell3HowlRun", "Unk0x61e0814"): Time(
+            time: 0.05,
+        ),
+        ("Spell3HowlRun", "Unk0x69b480cc"): Time(
+            time: 0.05,
+        ),
+        ("Spell3HowlRun", "Unk0x7dd98b2c"): Time(
+            time: 0.05,
+        ),
+        ("Spell3HowlRun", "Unk0x84b1bd5f"): Time(
+            time: 0.05,
+        ),
+        ("Spell3HowlRun", "Unk0x95bf7a66"): Time(
+            time: 0.05,
+        ),
+        ("Spell3HowlRun", "Unk0x9e6ef929"): Time(
+            time: 0.05,
+        ),
+        ("Spell3HowlRun", "Unk0xa0a65fb0"): Time(
+            time: 0.05,
+        ),
+        ("Spell3HowlRun", "Unk0xa1687744"): Time(
+            time: 0.05,
+        ),
+        ("Spell3HowlRun", "Unk0xa9286476"): Time(
+            time: 0.05,
+        ),
+        ("Spell3HowlRun", "Unk0xb2d1e1e7"): Time(
+            time: 0.05,
+        ),
+        ("Spell3HowlRun", "Unk0xbe062659"): Time(
+            time: 0.05,
+        ),
+        ("Spell3HowlRun", "Unk0xbe2a0b3f"): Time(
+            time: 0.05,
+        ),
+        ("Spell3HowlRun", "Unk0xc757d161"): Time(
+            time: 0.05,
+        ),
+        ("Spell3HowlRun", "Unk0xcb57323b"): Time(
+            time: 0.05,
+        ),
+        ("Spell3HowlRun", "Unk0xd3b8b200"): Time(
+            time: 0.05,
+        ),
+        ("Spell3HowlRun", "Unk0xd7edb000"): Time(
+            time: 0.0,
+        ),
+        ("Spell3HowlRun", "Unk0xf0462cf0"): Time(
+            time: 0.05,
+        ),
+        ("Spell3HowlRun", "Unk0xf0d88ad1"): Time(
+            time: 0.05,
+        ),
+        ("Spell3HowlRun", "Unk0xf6b678a1"): Time(
+            time: 0.05,
+        ),
+        ("Spell3Idle", "Attack1"): Time(
+            time: 0.05,
+        ),
+        ("Spell3Idle", "Attack1Fast"): Time(
+            time: 0.05,
+        ),
+        ("Spell3Idle", "Attack2"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Idle", "Attack2Fast"): Time(
+            time: 0.05,
+        ),
+        ("Spell3Idle", "Attack3"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Idle", "Attack3Fast"): Time(
+            time: 0.05,
+        ),
+        ("Spell3Idle", "Attack4"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Idle", "Attack4Fast"): Time(
+            time: 0.05,
+        ),
+        ("Spell3Idle", "Channel"): Time(
+            time: 0.05,
+        ),
+        ("Spell3Idle", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("Spell3Idle", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Idle", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Idle", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Spell3Idle", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("Spell3Idle", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Idle", "Spell2"): Time(
+            time: 0.08,
+        ),
+        ("Spell3Idle", "Spell3HowlRun"): Time(
+            time: 0.05,
+        ),
+        ("Spell3Idle", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("Spell3Idle", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("Spell3Idle", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("Spell3Idle", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Idle", "Unk0x169444b0"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Idle", "Unk0x1777011"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Idle", "Unk0x1997894a"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Idle", "Unk0x201849db"): Time(
+            time: 0.05,
+        ),
+        ("Spell3Idle", "Unk0x278e42e9"): Time(
+            time: 0.05,
+        ),
+        ("Spell3Idle", "Unk0x30d92e0a"): Time(
+            time: 0.05,
+        ),
+        ("Spell3Idle", "Unk0x3ee785b1"): Time(
+            time: 0.05,
+        ),
+        ("Spell3Idle", "Unk0x56fc2d22"): Time(
+            time: 0.05,
+        ),
+        ("Spell3Idle", "Unk0x61e0814"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Idle", "Unk0x69b480cc"): Time(
+            time: 0.05,
+        ),
+        ("Spell3Idle", "Unk0x7dd98b2c"): Time(
+            time: 0.05,
+        ),
+        ("Spell3Idle", "Unk0x84b1bd5f"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Idle", "Unk0x95bf7a66"): Time(
+            time: 0.05,
+        ),
+        ("Spell3Idle", "Unk0xa1687744"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Idle", "Unk0xa9286476"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Idle", "Unk0xb2d1e1e7"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Idle", "Unk0xbe062659"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Idle", "Unk0xbe2a0b3f"): Time(
+            time: 0.05,
+        ),
+        ("Spell3Idle", "Unk0xc757d161"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Idle", "Unk0xcb57323b"): Time(
+            time: 0.05,
+        ),
+        ("Spell3Idle", "Unk0xd7edb000"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Idle", "Unk0xd8090a2c"): Time(
+            time: 0.05,
+        ),
+        ("Spell3Idle", "Unk0xf0462cf0"): Time(
+            time: 0.05,
+        ),
+        ("Spell3Idle", "Unk0xf0d88ad1"): Time(
+            time: 0.05,
+        ),
+        ("Spell3Run", "Attack1"): Time(
+            time: 0.05,
+        ),
+        ("Spell3Run", "Attack1Fast"): Time(
+            time: 0.05,
+        ),
+        ("Spell3Run", "Attack2"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Run", "Attack2Fast"): Time(
+            time: 0.05,
+        ),
+        ("Spell3Run", "Attack3"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Run", "Attack3Fast"): Time(
+            time: 0.05,
+        ),
+        ("Spell3Run", "Attack4"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Run", "Attack4Fast"): Time(
+            time: 0.05,
+        ),
+        ("Spell3Run", "Channel"): Time(
+            time: 0.05,
+        ),
+        ("Spell3Run", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("Spell3Run", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Run", "Idle1Base"): TransitionClip(
+            clip_name: "RunToIdle",
+        ),
+        ("Spell3Run", "IdleVar1"): TransitionClip(
+            clip_name: "RunToIdle",
+        ),
+        ("Spell3Run", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Run", "RunBase"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Run", "RunVar1"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Run", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Spell3Run", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("Spell3Run", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Run", "Spell2"): Time(
+            time: 0.08,
+        ),
+        ("Spell3Run", "Spell3HowlRun"): Time(
+            time: 0.05,
+        ),
+        ("Spell3Run", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("Spell3Run", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("Spell3Run", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("Spell3Run", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Run", "Unk0x169444b0"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Run", "Unk0x1777011"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Run", "Unk0x1997894a"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Run", "Unk0x201849db"): Time(
+            time: 0.05,
+        ),
+        ("Spell3Run", "Unk0x278e42e9"): Time(
+            time: 0.05,
+        ),
+        ("Spell3Run", "Unk0x30d92e0a"): Time(
+            time: 0.05,
+        ),
+        ("Spell3Run", "Unk0x3ee785b1"): Time(
+            time: 0.05,
+        ),
+        ("Spell3Run", "Unk0x56fc2d22"): Time(
+            time: 0.05,
+        ),
+        ("Spell3Run", "Unk0x61e0814"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Run", "Unk0x69b480cc"): Time(
+            time: 0.05,
+        ),
+        ("Spell3Run", "Unk0x7dd98b2c"): Time(
+            time: 0.05,
+        ),
+        ("Spell3Run", "Unk0x84b1bd5f"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Run", "Unk0x95bf7a66"): Time(
+            time: 0.05,
+        ),
+        ("Spell3Run", "Unk0xa1687744"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Run", "Unk0xa9286476"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Run", "Unk0xb2d1e1e7"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Run", "Unk0xbe062659"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Run", "Unk0xbe2a0b3f"): Time(
+            time: 0.05,
+        ),
+        ("Spell3Run", "Unk0xc757d161"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Run", "Unk0xcb57323b"): Time(
+            time: 0.05,
+        ),
+        ("Spell3Run", "Unk0xd7edb000"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Run", "Unk0xd8090a2c"): Time(
+            time: 0.05,
+        ),
+        ("Spell3Run", "Unk0xf0462cf0"): Time(
+            time: 0.05,
+        ),
+        ("Spell3Run", "Unk0xf0d88ad1"): Time(
+            time: 0.05,
+        ),
+        ("Spell4", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("Spell4", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell4", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Spell4", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Spell4", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("Spell4", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("Spell4", "Spell2"): Time(
+            time: 0.08,
+        ),
+        ("Spell4", "Spell3Idle"): Time(
+            time: 0.0,
+        ),
+        ("Spell4", "Spell3Run"): Time(
+            time: 0.0,
+        ),
+        ("Spell4", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("Spell4", "Spell4Dash"): Time(
+            time: 0.0,
+        ),
+        ("Spell4", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("Spell4", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("Spell4Dash", "Attack1"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Dash", "Attack1Fast"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Dash", "Attack2"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Dash", "Attack2Fast"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Dash", "Attack3"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Dash", "Attack3Fast"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Dash", "Attack4Fast"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Dash", "Channel"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Dash", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("Spell4Dash", "DanceLoop"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Dash", "DanceWindup"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Dash", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell4Dash", "Idle1Base"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Dash", "IdleVar1"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Dash", "Joke"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Dash", "Laugh"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Dash", "Recall"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Dash", "RecallLeadout"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Dash", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Spell4Dash", "Respawn"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Dash", "RunBase"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Dash", "RunHUntToIdle"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Dash", "RunHaste"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Dash", "RunStart"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Dash", "RunToIdle"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Dash", "RunVar1"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Dash", "RunVar2"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Dash", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Dash", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Dash", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("Spell4Dash", "Spell2"): Time(
+            time: 0.08,
+        ),
+        ("Spell4Dash", "Spell2MissRun"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Dash", "Spell2ToIdle"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Dash", "Spell2ToRunHunt"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Dash", "Spell3HowlRun"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Dash", "Spell3Idle"): Time(
+            time: 0.0,
+        ),
+        ("Spell4Dash", "Spell3Run"): Time(
+            time: 0.0,
+        ),
+        ("Spell4Dash", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("Spell4Dash", "Spell4Dash"): Time(
+            time: 0.0,
+        ),
+        ("Spell4Dash", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Dash", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("Spell4Dash", "Spell4MissToIdle"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Dash", "Unk0x169444b0"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Dash", "Unk0x1777011"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Dash", "Unk0x1997894a"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Dash", "Unk0x1b53b935"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Dash", "Unk0x201849db"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Dash", "Unk0x278e42e9"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Dash", "Unk0x30d92e0a"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Dash", "Unk0x3ee785b1"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Dash", "Unk0x56edff21"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Dash", "Unk0x56fc2d22"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Dash", "Unk0x597c4fcd"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Dash", "Unk0x623b38c9"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Dash", "Unk0x69b480cc"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Dash", "Unk0x7dd98b2c"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Dash", "Unk0x84b1bd5f"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Dash", "Unk0x95bf7a66"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Dash", "Unk0x9e6ef929"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Dash", "Unk0xa0a65fb0"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Dash", "Unk0xa251b291"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Dash", "Unk0xa9286476"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Dash", "Unk0xb2d1e1e7"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Dash", "Unk0xbe062659"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Dash", "Unk0xbe2a0b3f"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Dash", "Unk0xc757d161"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Dash", "Unk0xcb57323b"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Dash", "Unk0xd3b8b200"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Dash", "Unk0xd7edb000"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Dash", "Unk0xd8090a2c"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Dash", "Unk0xf0462cf0"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Dash", "Unk0xf0d88ad1"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Dash", "Unk0xf6b678a1"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Hit", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("Spell4Hit", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell4Hit", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Spell4Hit", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Hit", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Hit", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("Spell4Hit", "Spell2"): Time(
+            time: 0.08,
+        ),
+        ("Spell4Hit", "Spell3Idle"): Time(
+            time: 0.0,
+        ),
+        ("Spell4Hit", "Spell3Run"): Time(
+            time: 0.0,
+        ),
+        ("Spell4Hit", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("Spell4Hit", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Hit", "Spell4Hit"): Time(
+            time: 0.0,
+        ),
+        ("Spell4Hit", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("Spell4Miss", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("Spell4Miss", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell4Miss", "Idle1Base"): TransitionClip(
+            clip_name: "Spell4MissToIdle",
+        ),
+        ("Spell4Miss", "IdleVar1"): TransitionClip(
+            clip_name: "Spell4MissToIdle",
+        ),
+        ("Spell4Miss", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Spell4Miss", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Miss", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Miss", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("Spell4Miss", "Spell2"): Time(
+            time: 0.08,
+        ),
+        ("Spell4Miss", "Spell3HowlRun"): Time(
+            time: 0.0,
+        ),
+        ("Spell4Miss", "Spell3Idle"): Time(
+            time: 0.0,
+        ),
+        ("Spell4Miss", "Spell3Run"): Time(
+            time: 0.0,
+        ),
+        ("Spell4Miss", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("Spell4Miss", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("Spell4Miss", "Spell4Hit"): Time(
+            time: 0.0,
+        ),
+        ("Spell4Miss", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("Spell4Miss", "Spell4MissToIdle"): Time(
+            time: 0.0,
+        ),
+        ("Spell4Miss", "Unk0x70da5341"): Time(
+            time: 0.0,
+        ),
+        ("Spell4Miss", "Unk0x9f6b0ef5"): Time(
+            time: 0.0,
+        ),
+        ("Spell4Miss", "Unk0xd3b8b200"): Time(
+            time: 0.0,
+        ),
+        ("Spell4Miss", "Unk0xd8090a2c"): Time(
+            time: 0.0,
+        ),
+        ("Spell4Miss", "Unk0xe4511bd6"): Time(
+            time: 0.0,
+        ),
+        ("Spell4MissToIdle", "Attack1"): Time(
+            time: 0.4,
+        ),
+        ("Spell4MissToIdle", "Attack1Fast"): Time(
+            time: 0.4,
+        ),
+        ("Spell4MissToIdle", "Attack2Fast"): Time(
+            time: 0.4,
+        ),
+        ("Spell4MissToIdle", "Attack3Fast"): Time(
+            time: 0.4,
+        ),
+        ("Spell4MissToIdle", "Attack4Fast"): Time(
+            time: 0.4,
+        ),
+        ("Spell4MissToIdle", "Channel"): Time(
+            time: 0.4,
+        ),
+        ("Spell4MissToIdle", "Crit"): Time(
+            time: 0.4,
+        ),
+        ("Spell4MissToIdle", "DanceLoop"): Time(
+            time: 0.4,
+        ),
+        ("Spell4MissToIdle", "DanceWindup"): Time(
+            time: 0.4,
+        ),
+        ("Spell4MissToIdle", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell4MissToIdle", "Idle1Base"): Time(
+            time: 0.0,
+        ),
+        ("Spell4MissToIdle", "IdleVar1"): Time(
+            time: 0.0,
+        ),
+        ("Spell4MissToIdle", "Joke"): Time(
+            time: 0.4,
+        ),
+        ("Spell4MissToIdle", "Laugh"): Time(
+            time: 0.4,
+        ),
+        ("Spell4MissToIdle", "Recall"): Time(
+            time: 0.4,
+        ),
+        ("Spell4MissToIdle", "RecallLeadout"): Time(
+            time: 0.4,
+        ),
+        ("Spell4MissToIdle", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Spell4MissToIdle", "Respawn"): Time(
+            time: 0.4,
+        ),
+        ("Spell4MissToIdle", "RunBase"): Time(
+            time: 0.4,
+        ),
+        ("Spell4MissToIdle", "RunHUntToIdle"): Time(
+            time: 0.4,
+        ),
+        ("Spell4MissToIdle", "RunHaste"): Time(
+            time: 0.4,
+        ),
+        ("Spell4MissToIdle", "RunStart"): Time(
+            time: 0.4,
+        ),
+        ("Spell4MissToIdle", "RunToIdle"): Time(
+            time: 0.4,
+        ),
+        ("Spell4MissToIdle", "RunVar1"): Time(
+            time: 0.4,
+        ),
+        ("Spell4MissToIdle", "RunVar2"): Time(
+            time: 0.4,
+        ),
+        ("Spell4MissToIdle", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Spell4MissToIdle", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("Spell4MissToIdle", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("Spell4MissToIdle", "Spell2"): Time(
+            time: 0.08,
+        ),
+        ("Spell4MissToIdle", "Spell2MissRun"): Time(
+            time: 0.4,
+        ),
+        ("Spell4MissToIdle", "Spell2ToIdle"): Time(
+            time: 0.4,
+        ),
+        ("Spell4MissToIdle", "Spell2ToRunHunt"): Time(
+            time: 0.4,
+        ),
+        ("Spell4MissToIdle", "Spell3HowlRun"): Time(
+            time: 0.4,
+        ),
+        ("Spell4MissToIdle", "Spell3Idle"): Time(
+            time: 0.4,
+        ),
+        ("Spell4MissToIdle", "Spell3Run"): Time(
+            time: 0.4,
+        ),
+        ("Spell4MissToIdle", "Spell4"): Time(
+            time: 0.4,
+        ),
+        ("Spell4MissToIdle", "Spell4Dash"): Time(
+            time: 0.4,
+        ),
+        ("Spell4MissToIdle", "Spell4Hit"): Time(
+            time: 0.4,
+        ),
+        ("Spell4MissToIdle", "Spell4Miss"): Time(
+            time: 0.4,
+        ),
+        ("Spell4MissToIdle", "Spell4MissToIdle"): Time(
+            time: 0.4,
+        ),
+        ("Spell4MissToIdle", "Unk0x201849db"): Time(
+            time: 0.4,
+        ),
+        ("Spell4MissToIdle", "Unk0x278e42e9"): Time(
+            time: 0.4,
+        ),
+        ("Spell4MissToIdle", "Unk0x30d92e0a"): Time(
+            time: 0.4,
+        ),
+        ("Spell4MissToIdle", "Unk0x3ee785b1"): Time(
+            time: 0.4,
+        ),
+        ("Spell4MissToIdle", "Unk0x56edff21"): Time(
+            time: 0.4,
+        ),
+        ("Spell4MissToIdle", "Unk0x56fc2d22"): Time(
+            time: 0.4,
+        ),
+        ("Spell4MissToIdle", "Unk0x597c4fcd"): Time(
+            time: 0.4,
+        ),
+        ("Spell4MissToIdle", "Unk0x623b38c9"): Time(
+            time: 0.4,
+        ),
+        ("Spell4MissToIdle", "Unk0x69b480cc"): Time(
+            time: 0.4,
+        ),
+        ("Spell4MissToIdle", "Unk0x7dd98b2c"): Time(
+            time: 0.4,
+        ),
+        ("Spell4MissToIdle", "Unk0x95bf7a66"): Time(
+            time: 0.4,
+        ),
+        ("Spell4MissToIdle", "Unk0xa0a65fb0"): Time(
+            time: 0.4,
+        ),
+        ("Spell4MissToIdle", "Unk0xbe2a0b3f"): Time(
+            time: 0.4,
+        ),
+        ("Spell4MissToIdle", "Unk0xcb57323b"): Time(
+            time: 0.4,
+        ),
+        ("Spell4MissToIdle", "Unk0xd3b8b200"): Time(
+            time: 0.4,
+        ),
+        ("Spell4MissToIdle", "Unk0xd8090a2c"): Time(
+            time: 0.4,
+        ),
+        ("Spell4MissToIdle", "Unk0xf0462cf0"): Time(
+            time: 0.4,
+        ),
+        ("Spell4MissToIdle", "Unk0xf0d88ad1"): Time(
+            time: 0.4,
+        ),
+        ("Spell4MissToIdle", "Unk0xf6b678a1"): Time(
+            time: 0.4,
+        ),
+        ("Taunt", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("Taunt", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Taunt", "Idle1Base"): Time(
+            time: 0.0,
+        ),
+        ("Taunt", "IdleVar1"): Time(
+            time: 0.0,
+        ),
+        ("Taunt", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Taunt", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Taunt", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("Taunt", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("Taunt", "Spell2"): Time(
+            time: 0.08,
+        ),
+        ("Taunt", "Spell3HowlRun"): Time(
+            time: 0.0,
+        ),
+        ("Taunt", "Spell3Idle"): Time(
+            time: 0.0,
+        ),
+        ("Taunt", "Spell3Run"): Time(
+            time: 0.0,
+        ),
+        ("Taunt", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("Taunt", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("Taunt", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("Taunt", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("Taunt", "Taunt"): Time(
+            time: 0.1,
+        ),
+        ("Taunt", "Unk0x70da5341"): Time(
+            time: 0.0,
+        ),
+        ("Taunt", "Unk0x9f6b0ef5"): Time(
+            time: 0.0,
+        ),
+        ("Taunt", "Unk0xd3b8b200"): Time(
+            time: 0.0,
+        ),
+        ("Taunt", "Unk0xd8090a2c"): Time(
+            time: 0.0,
+        ),
+        ("Taunt", "Unk0xe4511bd6"): Time(
+            time: 0.0,
+        ),
+        ("Turn", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("Turn", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Turn", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Turn", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Turn", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("Turn", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("Turn", "Spell2"): Time(
+            time: 0.08,
+        ),
+        ("Turn", "Spell3HowlRun"): Time(
+            time: 0.0,
+        ),
+        ("Turn", "Spell3Idle"): Time(
+            time: 0.0,
+        ),
+        ("Turn", "Spell3Run"): Time(
+            time: 0.0,
+        ),
+        ("Turn", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("Turn", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("Turn", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("Turn", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("Turn", "Unk0x70da5341"): Time(
+            time: 0.0,
+        ),
+        ("Turn", "Unk0x9f6b0ef5"): Time(
+            time: 0.0,
+        ),
+        ("Turn", "Unk0xd3b8b200"): Time(
+            time: 0.0,
+        ),
+        ("Turn", "Unk0xd8090a2c"): Time(
+            time: 0.0,
+        ),
+        ("Turn", "Unk0xe4511bd6"): Time(
+            time: 0.0,
+        ),
+        ("Turn0", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("Turn0", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Turn0", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Turn0", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Turn0", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("Turn0", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("Turn0", "Spell2"): Time(
+            time: 0.08,
+        ),
+        ("Turn0", "Spell3HowlRun"): Time(
+            time: 0.0,
+        ),
+        ("Turn0", "Spell3Idle"): Time(
+            time: 0.0,
+        ),
+        ("Turn0", "Spell3Run"): Time(
+            time: 0.0,
+        ),
+        ("Turn0", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("Turn0", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("Turn0", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("Turn0", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("Turn0", "Unk0x70da5341"): Time(
+            time: 0.0,
+        ),
+        ("Turn0", "Unk0x9f6b0ef5"): Time(
+            time: 0.0,
+        ),
+        ("Turn0", "Unk0xd3b8b200"): Time(
+            time: 0.0,
+        ),
+        ("Turn0", "Unk0xd8090a2c"): Time(
+            time: 0.0,
+        ),
+        ("Turn0", "Unk0xe4511bd6"): Time(
+            time: 0.0,
+        ),
+        ("Turn180", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("Turn180", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Turn180", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Turn180", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Turn180", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("Turn180", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("Turn180", "Spell2"): Time(
+            time: 0.08,
+        ),
+        ("Turn180", "Spell3HowlRun"): Time(
+            time: 0.0,
+        ),
+        ("Turn180", "Spell3Idle"): Time(
+            time: 0.0,
+        ),
+        ("Turn180", "Spell3Run"): Time(
+            time: 0.0,
+        ),
+        ("Turn180", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("Turn180", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("Turn180", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("Turn180", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("Turn180", "Unk0x70da5341"): Time(
+            time: 0.0,
+        ),
+        ("Turn180", "Unk0x9f6b0ef5"): Time(
+            time: 0.0,
+        ),
+        ("Turn180", "Unk0xd3b8b200"): Time(
+            time: 0.0,
+        ),
+        ("Turn180", "Unk0xd8090a2c"): Time(
+            time: 0.0,
+        ),
+        ("Turn180", "Unk0xe4511bd6"): Time(
+            time: 0.0,
+        ),
+        ("Turn90", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("Turn90", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Turn90", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Turn90", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Turn90", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("Turn90", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("Turn90", "Spell2"): Time(
+            time: 0.08,
+        ),
+        ("Turn90", "Spell3HowlRun"): Time(
+            time: 0.0,
+        ),
+        ("Turn90", "Spell3Idle"): Time(
+            time: 0.0,
+        ),
+        ("Turn90", "Spell3Run"): Time(
+            time: 0.0,
+        ),
+        ("Turn90", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("Turn90", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("Turn90", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("Turn90", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("Turn90", "Unk0x70da5341"): Time(
+            time: 0.0,
+        ),
+        ("Turn90", "Unk0x9f6b0ef5"): Time(
+            time: 0.0,
+        ),
+        ("Turn90", "Unk0xd3b8b200"): Time(
+            time: 0.0,
+        ),
+        ("Turn90", "Unk0xd8090a2c"): Time(
+            time: 0.0,
+        ),
+        ("Turn90", "Unk0xe4511bd6"): Time(
+            time: 0.0,
+        ),
+        ("TurnHunt0", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("TurnHunt0", "Death"): Time(
+            time: 0.0,
+        ),
+        ("TurnHunt0", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("TurnHunt0", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("TurnHunt0", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("TurnHunt0", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("TurnHunt0", "Spell2"): Time(
+            time: 0.08,
+        ),
+        ("TurnHunt0", "Spell3HowlRun"): Time(
+            time: 0.0,
+        ),
+        ("TurnHunt0", "Spell3Idle"): Time(
+            time: 0.0,
+        ),
+        ("TurnHunt0", "Spell3Run"): Time(
+            time: 0.0,
+        ),
+        ("TurnHunt0", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("TurnHunt0", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("TurnHunt0", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("TurnHunt0", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("TurnHunt0", "Unk0x70da5341"): Time(
+            time: 0.0,
+        ),
+        ("TurnHunt0", "Unk0x9f6b0ef5"): Time(
+            time: 0.0,
+        ),
+        ("TurnHunt0", "Unk0xd3b8b200"): Time(
+            time: 0.0,
+        ),
+        ("TurnHunt0", "Unk0xd8090a2c"): Time(
+            time: 0.0,
+        ),
+        ("TurnHunt0", "Unk0xe4511bd6"): Time(
+            time: 0.0,
+        ),
+        ("TurnHunt180", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("TurnHunt180", "Death"): Time(
+            time: 0.0,
+        ),
+        ("TurnHunt180", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("TurnHunt180", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("TurnHunt180", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("TurnHunt180", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("TurnHunt180", "Spell2"): Time(
+            time: 0.08,
+        ),
+        ("TurnHunt180", "Spell3HowlRun"): Time(
+            time: 0.0,
+        ),
+        ("TurnHunt180", "Spell3Idle"): Time(
+            time: 0.0,
+        ),
+        ("TurnHunt180", "Spell3Run"): Time(
+            time: 0.0,
+        ),
+        ("TurnHunt180", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("TurnHunt180", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("TurnHunt180", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("TurnHunt180", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("TurnHunt180", "Unk0x70da5341"): Time(
+            time: 0.0,
+        ),
+        ("TurnHunt180", "Unk0x9f6b0ef5"): Time(
+            time: 0.0,
+        ),
+        ("TurnHunt180", "Unk0xd3b8b200"): Time(
+            time: 0.0,
+        ),
+        ("TurnHunt180", "Unk0xd8090a2c"): Time(
+            time: 0.0,
+        ),
+        ("TurnHunt180", "Unk0xe4511bd6"): Time(
+            time: 0.0,
+        ),
+        ("TurnHunt90", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("TurnHunt90", "Death"): Time(
+            time: 0.0,
+        ),
+        ("TurnHunt90", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("TurnHunt90", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("TurnHunt90", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("TurnHunt90", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("TurnHunt90", "Spell2"): Time(
+            time: 0.08,
+        ),
+        ("TurnHunt90", "Spell3HowlRun"): Time(
+            time: 0.0,
+        ),
+        ("TurnHunt90", "Spell3Idle"): Time(
+            time: 0.0,
+        ),
+        ("TurnHunt90", "Spell3Run"): Time(
+            time: 0.0,
+        ),
+        ("TurnHunt90", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("TurnHunt90", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("TurnHunt90", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("TurnHunt90", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("TurnHunt90", "Unk0x70da5341"): Time(
+            time: 0.0,
+        ),
+        ("TurnHunt90", "Unk0x9f6b0ef5"): Time(
+            time: 0.0,
+        ),
+        ("TurnHunt90", "Unk0xd3b8b200"): Time(
+            time: 0.0,
+        ),
+        ("TurnHunt90", "Unk0xd8090a2c"): Time(
+            time: 0.0,
+        ),
+        ("TurnHunt90", "Unk0xe4511bd6"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x169444b0", "Attack1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x169444b0", "Attack3"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x169444b0", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("Unk0x169444b0", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x169444b0", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x169444b0", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x169444b0", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x169444b0", "Spell2"): Time(
+            time: 0.075,
+        ),
+        ("Unk0x169444b0", "Spell3HowlRun"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x169444b0", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("Unk0x169444b0", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x169444b0", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x169444b0", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x169444b0", "Unk0x169444b0"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x169444b0", "Unk0x1777011"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x169444b0", "Unk0x201849db"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x169444b0", "Unk0x3ee785b1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x169444b0", "Unk0x69b480cc"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x169444b0", "Unk0x70da5341"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x169444b0", "Unk0x84b1bd5f"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x169444b0", "Unk0x95bf7a66"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x169444b0", "Unk0x9f6b0ef5"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x169444b0", "Unk0xa9286476"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x169444b0", "Unk0xb2d1e1e7"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x169444b0", "Unk0xbe062659"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x169444b0", "Unk0xbe2a0b3f"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x169444b0", "Unk0xc757d161"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x169444b0", "Unk0xd3b8b200"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x169444b0", "Unk0xd7edb000"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x169444b0", "Unk0xd8090a2c"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x169444b0", "Unk0xe4511bd6"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x1777011", "Attack2"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x1777011", "Attack3"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x1777011", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("Unk0x1777011", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x1777011", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x1777011", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x1777011", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x1777011", "Spell2"): Time(
+            time: 0.075,
+        ),
+        ("Unk0x1777011", "Spell3HowlRun"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x1777011", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("Unk0x1777011", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x1777011", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x1777011", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x1777011", "Unk0x169444b0"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x1777011", "Unk0x1777011"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x1777011", "Unk0x1997894a"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x1777011", "Unk0x201849db"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x1777011", "Unk0x69b480cc"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x1777011", "Unk0x70da5341"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x1777011", "Unk0x84b1bd5f"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x1777011", "Unk0x95bf7a66"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x1777011", "Unk0x9f6b0ef5"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x1777011", "Unk0xa9286476"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x1777011", "Unk0xbe062659"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x1777011", "Unk0xbe2a0b3f"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x1777011", "Unk0xc757d161"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x1777011", "Unk0xd3b8b200"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x1777011", "Unk0xd8090a2c"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x1777011", "Unk0xe4511bd6"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x1777011", "Unk0xf0462cf0"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x1997894a", "Attack1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x1997894a", "Attack3"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x1997894a", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("Unk0x1997894a", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x1997894a", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x1997894a", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x1997894a", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x1997894a", "Spell2"): Time(
+            time: 0.075,
+        ),
+        ("Unk0x1997894a", "Spell3HowlRun"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x1997894a", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("Unk0x1997894a", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x1997894a", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x1997894a", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x1997894a", "Unk0x1777011"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x1997894a", "Unk0x1997894a"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x1997894a", "Unk0x201849db"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x1997894a", "Unk0x3ee785b1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x1997894a", "Unk0x69b480cc"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x1997894a", "Unk0x70da5341"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x1997894a", "Unk0x84b1bd5f"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x1997894a", "Unk0x95bf7a66"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x1997894a", "Unk0x9f6b0ef5"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x1997894a", "Unk0xa9286476"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x1997894a", "Unk0xb2d1e1e7"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x1997894a", "Unk0xbe062659"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x1997894a", "Unk0xbe2a0b3f"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x1997894a", "Unk0xc757d161"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x1997894a", "Unk0xd3b8b200"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x1997894a", "Unk0xd7edb000"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x1997894a", "Unk0xd8090a2c"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x1997894a", "Unk0xe4511bd6"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x1b53b935", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x1b53b935", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x1b53b935", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x1b53b935", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x201849db", "Attack1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x201849db", "Attack1Fast"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x201849db", "Attack2"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x201849db", "Attack2Fast"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x201849db", "Attack3Fast"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x201849db", "Attack4Fast"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x201849db", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("Unk0x201849db", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x201849db", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x201849db", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x201849db", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x201849db", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x201849db", "Spell2"): Time(
+            time: 0.08,
+        ),
+        ("Unk0x201849db", "Spell2MissRun"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x201849db", "Spell3HowlRun"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x201849db", "Spell3Idle"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x201849db", "Spell3Run"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x201849db", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("Unk0x201849db", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x201849db", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x201849db", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x201849db", "Unk0x169444b0"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x201849db", "Unk0x1777011"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x201849db", "Unk0x1997894a"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x201849db", "Unk0x201849db"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x201849db", "Unk0x278e42e9"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x201849db", "Unk0x30d92e0a"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x201849db", "Unk0x3ee785b1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x201849db", "Unk0x56fc2d22"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x201849db", "Unk0x69b480cc"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x201849db", "Unk0x70da5341"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x201849db", "Unk0x7dd98b2c"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x201849db", "Unk0x84b1bd5f"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x201849db", "Unk0x95bf7a66"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x201849db", "Unk0x9f6b0ef5"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x201849db", "Unk0xa9286476"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x201849db", "Unk0xb2d1e1e7"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x201849db", "Unk0xbe2a0b3f"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x201849db", "Unk0xc757d161"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x201849db", "Unk0xcb57323b"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x201849db", "Unk0xd3b8b200"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x201849db", "Unk0xd7edb000"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x201849db", "Unk0xd8090a2c"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x201849db", "Unk0xe4511bd6"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x201849db", "Unk0xf0462cf0"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x201849db", "Unk0xf0d88ad1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x278e42e9", "Attack1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x278e42e9", "Attack1Fast"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x278e42e9", "Attack2Fast"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x278e42e9", "Attack3Fast"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x278e42e9", "Attack4Fast"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x278e42e9", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("Unk0x278e42e9", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x278e42e9", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x278e42e9", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x278e42e9", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x278e42e9", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x278e42e9", "Spell2"): Time(
+            time: 0.08,
+        ),
+        ("Unk0x278e42e9", "Spell2MissRun"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x278e42e9", "Spell3HowlRun"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x278e42e9", "Spell3Idle"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x278e42e9", "Spell3Run"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x278e42e9", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("Unk0x278e42e9", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x278e42e9", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x278e42e9", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x278e42e9", "Unk0x201849db"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x278e42e9", "Unk0x278e42e9"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x278e42e9", "Unk0x30d92e0a"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x278e42e9", "Unk0x3ee785b1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x278e42e9", "Unk0x56fc2d22"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x278e42e9", "Unk0x69b480cc"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x278e42e9", "Unk0x7dd98b2c"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x278e42e9", "Unk0x95bf7a66"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x278e42e9", "Unk0xbe2a0b3f"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x278e42e9", "Unk0xcb57323b"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x278e42e9", "Unk0xd3b8b200"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x278e42e9", "Unk0xd8090a2c"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x278e42e9", "Unk0xf0462cf0"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x278e42e9", "Unk0xf0d88ad1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x30d92e0a", "Attack1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x30d92e0a", "Attack1Fast"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x30d92e0a", "Attack2Fast"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x30d92e0a", "Attack3Fast"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x30d92e0a", "Attack4Fast"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x30d92e0a", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("Unk0x30d92e0a", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x30d92e0a", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x30d92e0a", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x30d92e0a", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x30d92e0a", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x30d92e0a", "Spell2"): Time(
+            time: 0.08,
+        ),
+        ("Unk0x30d92e0a", "Spell2MissRun"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x30d92e0a", "Spell3HowlRun"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x30d92e0a", "Spell3Idle"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x30d92e0a", "Spell3Run"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x30d92e0a", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("Unk0x30d92e0a", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x30d92e0a", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x30d92e0a", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x30d92e0a", "Unk0x201849db"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x30d92e0a", "Unk0x278e42e9"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x30d92e0a", "Unk0x30d92e0a"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x30d92e0a", "Unk0x3ee785b1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x30d92e0a", "Unk0x56fc2d22"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x30d92e0a", "Unk0x69b480cc"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x30d92e0a", "Unk0x7dd98b2c"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x30d92e0a", "Unk0x95bf7a66"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x30d92e0a", "Unk0xbe2a0b3f"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x30d92e0a", "Unk0xcb57323b"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x30d92e0a", "Unk0xd3b8b200"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x30d92e0a", "Unk0xd8090a2c"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x30d92e0a", "Unk0xf0462cf0"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x30d92e0a", "Unk0xf0d88ad1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x3ee785b1", "Attack1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x3ee785b1", "Attack1Fast"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x3ee785b1", "Attack2"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x3ee785b1", "Attack2Fast"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x3ee785b1", "Attack3"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x3ee785b1", "Attack3Fast"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x3ee785b1", "Attack4Fast"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x3ee785b1", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("Unk0x3ee785b1", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x3ee785b1", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x3ee785b1", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x3ee785b1", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x3ee785b1", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x3ee785b1", "Spell2"): Time(
+            time: 0.08,
+        ),
+        ("Unk0x3ee785b1", "Spell2MissRun"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x3ee785b1", "Spell3HowlRun"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x3ee785b1", "Spell3Idle"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x3ee785b1", "Spell3Run"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x3ee785b1", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("Unk0x3ee785b1", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x3ee785b1", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x3ee785b1", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x3ee785b1", "Unk0x169444b0"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x3ee785b1", "Unk0x1997894a"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x3ee785b1", "Unk0x201849db"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x3ee785b1", "Unk0x278e42e9"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x3ee785b1", "Unk0x30d92e0a"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x3ee785b1", "Unk0x3ee785b1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x3ee785b1", "Unk0x56fc2d22"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x3ee785b1", "Unk0x69b480cc"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x3ee785b1", "Unk0x70da5341"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x3ee785b1", "Unk0x7dd98b2c"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x3ee785b1", "Unk0x84b1bd5f"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x3ee785b1", "Unk0x95bf7a66"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x3ee785b1", "Unk0x9f6b0ef5"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x3ee785b1", "Unk0xa9286476"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x3ee785b1", "Unk0xbe062659"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x3ee785b1", "Unk0xbe2a0b3f"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x3ee785b1", "Unk0xc757d161"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x3ee785b1", "Unk0xcb57323b"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x3ee785b1", "Unk0xd3b8b200"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x3ee785b1", "Unk0xd8090a2c"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x3ee785b1", "Unk0xe4511bd6"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x3ee785b1", "Unk0xf0462cf0"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x3ee785b1", "Unk0xf0d88ad1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x42c649f3", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("Unk0x42c649f3", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x42c649f3", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x42c649f3", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x42c649f3", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x42c649f3", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x42c649f3", "Spell2"): Time(
+            time: 0.08,
+        ),
+        ("Unk0x42c649f3", "Spell3HowlRun"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x42c649f3", "Spell3Idle"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x42c649f3", "Spell3Run"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x42c649f3", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("Unk0x42c649f3", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x42c649f3", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x42c649f3", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x42c649f3", "Unk0x70da5341"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x42c649f3", "Unk0x9f6b0ef5"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x42c649f3", "Unk0xd3b8b200"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x42c649f3", "Unk0xd8090a2c"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x42c649f3", "Unk0xe4511bd6"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x56edff21", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("Unk0x56edff21", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x56edff21", "Idle1Base"): TransitionClip(
+            clip_name: "RunHUntToIdle",
+        ),
+        ("Unk0x56edff21", "IdleVar1"): TransitionClip(
+            clip_name: "RunHUntToIdle",
+        ),
+        ("Unk0x56edff21", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x56edff21", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x56edff21", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x56edff21", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x56edff21", "Spell2"): Time(
+            time: 0.08,
+        ),
+        ("Unk0x56edff21", "Spell3HowlRun"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x56edff21", "Spell3Idle"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x56edff21", "Spell3Run"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x56edff21", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("Unk0x56edff21", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x56edff21", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x56edff21", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x56edff21", "Unk0x597c4fcd"): TransitionClip(
+            clip_name: "Unk0xa0a65fb0",
+        ),
+        ("Unk0x56edff21", "Unk0x70da5341"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x56edff21", "Unk0x9f6b0ef5"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x56edff21", "Unk0xa0a65fb0"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x56edff21", "Unk0xb615542a"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x56edff21", "Unk0xd3b8b200"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x56edff21", "Unk0xd8090a2c"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x56edff21", "Unk0xe4511bd6"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x56fc2d22", "Attack1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x56fc2d22", "Attack1Fast"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x56fc2d22", "Attack2Fast"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x56fc2d22", "Attack3Fast"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x56fc2d22", "Attack4Fast"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x56fc2d22", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("Unk0x56fc2d22", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x56fc2d22", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x56fc2d22", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x56fc2d22", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x56fc2d22", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x56fc2d22", "Spell2"): Time(
+            time: 0.08,
+        ),
+        ("Unk0x56fc2d22", "Spell2MissRun"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x56fc2d22", "Spell3HowlRun"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x56fc2d22", "Spell3Idle"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x56fc2d22", "Spell3Run"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x56fc2d22", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("Unk0x56fc2d22", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x56fc2d22", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x56fc2d22", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x56fc2d22", "Unk0x201849db"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x56fc2d22", "Unk0x278e42e9"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x56fc2d22", "Unk0x30d92e0a"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x56fc2d22", "Unk0x3ee785b1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x56fc2d22", "Unk0x56fc2d22"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x56fc2d22", "Unk0x69b480cc"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x56fc2d22", "Unk0x7dd98b2c"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x56fc2d22", "Unk0x95bf7a66"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x56fc2d22", "Unk0xbe2a0b3f"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x56fc2d22", "Unk0xcb57323b"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x56fc2d22", "Unk0xd3b8b200"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x56fc2d22", "Unk0xd8090a2c"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x56fc2d22", "Unk0xf0462cf0"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x56fc2d22", "Unk0xf0d88ad1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x597c4fcd", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("Unk0x597c4fcd", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x597c4fcd", "Idle1Base"): TransitionClip(
+            clip_name: "RunToIdle",
+        ),
+        ("Unk0x597c4fcd", "IdleVar1"): TransitionClip(
+            clip_name: "RunToIdle",
+        ),
+        ("Unk0x597c4fcd", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x597c4fcd", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x597c4fcd", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x597c4fcd", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x597c4fcd", "Spell2"): Time(
+            time: 0.08,
+        ),
+        ("Unk0x597c4fcd", "Spell3Idle"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x597c4fcd", "Spell3Run"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x597c4fcd", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("Unk0x597c4fcd", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x597c4fcd", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x597c4fcd", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x61e0814", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x61e0814", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x61e0814", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x61e0814", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x61e0814", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("Unk0x61e0814", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x61e0814", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x61e0814", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x623b38c9", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("Unk0x623b38c9", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x623b38c9", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x623b38c9", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x623b38c9", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x623b38c9", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x623b38c9", "Spell2"): Time(
+            time: 0.08,
+        ),
+        ("Unk0x623b38c9", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("Unk0x623b38c9", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x623b38c9", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x623b38c9", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x69b480cc", "Attack1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x69b480cc", "Attack1Fast"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x69b480cc", "Attack2"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x69b480cc", "Attack2Fast"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x69b480cc", "Attack3"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x69b480cc", "Attack3Fast"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x69b480cc", "Attack4Fast"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x69b480cc", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("Unk0x69b480cc", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x69b480cc", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x69b480cc", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x69b480cc", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x69b480cc", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x69b480cc", "Spell2"): Time(
+            time: 0.08,
+        ),
+        ("Unk0x69b480cc", "Spell2MissRun"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x69b480cc", "Spell3HowlRun"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x69b480cc", "Spell3Idle"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x69b480cc", "Spell3Run"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x69b480cc", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("Unk0x69b480cc", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x69b480cc", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x69b480cc", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x69b480cc", "Unk0x169444b0"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x69b480cc", "Unk0x1777011"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x69b480cc", "Unk0x1997894a"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x69b480cc", "Unk0x201849db"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x69b480cc", "Unk0x278e42e9"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x69b480cc", "Unk0x30d92e0a"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x69b480cc", "Unk0x3ee785b1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x69b480cc", "Unk0x56fc2d22"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x69b480cc", "Unk0x69b480cc"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x69b480cc", "Unk0x70da5341"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x69b480cc", "Unk0x7dd98b2c"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x69b480cc", "Unk0x84b1bd5f"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x69b480cc", "Unk0x95bf7a66"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x69b480cc", "Unk0x9f6b0ef5"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x69b480cc", "Unk0xa9286476"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x69b480cc", "Unk0xb2d1e1e7"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x69b480cc", "Unk0xbe062659"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x69b480cc", "Unk0xbe2a0b3f"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x69b480cc", "Unk0xcb57323b"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x69b480cc", "Unk0xd3b8b200"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x69b480cc", "Unk0xd7edb000"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x69b480cc", "Unk0xd8090a2c"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x69b480cc", "Unk0xe4511bd6"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x69b480cc", "Unk0xf0462cf0"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x69b480cc", "Unk0xf0d88ad1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x6af7a583", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("Unk0x6af7a583", "Spell2"): Time(
+            time: 0.075,
+        ),
+        ("Unk0x7dd98b2c", "Attack1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x7dd98b2c", "Attack1Fast"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x7dd98b2c", "Attack2Fast"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x7dd98b2c", "Attack3Fast"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x7dd98b2c", "Attack4Fast"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x7dd98b2c", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("Unk0x7dd98b2c", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x7dd98b2c", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x7dd98b2c", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x7dd98b2c", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x7dd98b2c", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x7dd98b2c", "Spell2"): Time(
+            time: 0.08,
+        ),
+        ("Unk0x7dd98b2c", "Spell2MissRun"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x7dd98b2c", "Spell3HowlRun"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x7dd98b2c", "Spell3Idle"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x7dd98b2c", "Spell3Run"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x7dd98b2c", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("Unk0x7dd98b2c", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x7dd98b2c", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x7dd98b2c", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x7dd98b2c", "Unk0x201849db"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x7dd98b2c", "Unk0x278e42e9"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x7dd98b2c", "Unk0x30d92e0a"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x7dd98b2c", "Unk0x3ee785b1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x7dd98b2c", "Unk0x56fc2d22"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x7dd98b2c", "Unk0x69b480cc"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x7dd98b2c", "Unk0x7dd98b2c"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x7dd98b2c", "Unk0x95bf7a66"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x7dd98b2c", "Unk0xbe2a0b3f"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x7dd98b2c", "Unk0xcb57323b"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x7dd98b2c", "Unk0xd3b8b200"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x7dd98b2c", "Unk0xd8090a2c"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x7dd98b2c", "Unk0xf0462cf0"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x7dd98b2c", "Unk0xf0d88ad1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x84b1bd5f", "Attack1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x84b1bd5f", "Attack2"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x84b1bd5f", "Attack3"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x84b1bd5f", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("Unk0x84b1bd5f", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x84b1bd5f", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x84b1bd5f", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x84b1bd5f", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x84b1bd5f", "Spell2"): Time(
+            time: 0.075,
+        ),
+        ("Unk0x84b1bd5f", "Spell3HowlRun"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x84b1bd5f", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("Unk0x84b1bd5f", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x84b1bd5f", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x84b1bd5f", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x84b1bd5f", "Unk0x169444b0"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x84b1bd5f", "Unk0x1777011"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x84b1bd5f", "Unk0x1997894a"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x84b1bd5f", "Unk0x201849db"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x84b1bd5f", "Unk0x3ee785b1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x84b1bd5f", "Unk0x69b480cc"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x84b1bd5f", "Unk0x70da5341"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x84b1bd5f", "Unk0x84b1bd5f"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x84b1bd5f", "Unk0x9f6b0ef5"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x84b1bd5f", "Unk0xa9286476"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x84b1bd5f", "Unk0xb2d1e1e7"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x84b1bd5f", "Unk0xbe062659"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x84b1bd5f", "Unk0xbe2a0b3f"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x84b1bd5f", "Unk0xc757d161"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x84b1bd5f", "Unk0xd3b8b200"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x84b1bd5f", "Unk0xd7edb000"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x84b1bd5f", "Unk0xd8090a2c"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x84b1bd5f", "Unk0xe4511bd6"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x84b1bd5f", "Unk0xf0462cf0"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x95bf7a66", "Attack1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x95bf7a66", "Attack1Fast"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x95bf7a66", "Attack2"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x95bf7a66", "Attack2Fast"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x95bf7a66", "Attack3"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x95bf7a66", "Attack3Fast"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x95bf7a66", "Attack4Fast"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x95bf7a66", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("Unk0x95bf7a66", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x95bf7a66", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x95bf7a66", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x95bf7a66", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x95bf7a66", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x95bf7a66", "Spell2"): Time(
+            time: 0.08,
+        ),
+        ("Unk0x95bf7a66", "Spell2MissRun"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x95bf7a66", "Spell3HowlRun"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x95bf7a66", "Spell3Idle"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x95bf7a66", "Spell3Run"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x95bf7a66", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("Unk0x95bf7a66", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x95bf7a66", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x95bf7a66", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x95bf7a66", "Unk0x169444b0"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x95bf7a66", "Unk0x1777011"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x95bf7a66", "Unk0x1997894a"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x95bf7a66", "Unk0x201849db"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x95bf7a66", "Unk0x278e42e9"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x95bf7a66", "Unk0x30d92e0a"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x95bf7a66", "Unk0x3ee785b1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x95bf7a66", "Unk0x56fc2d22"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x95bf7a66", "Unk0x69b480cc"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x95bf7a66", "Unk0x70da5341"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x95bf7a66", "Unk0x7dd98b2c"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x95bf7a66", "Unk0x95bf7a66"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x95bf7a66", "Unk0x9f6b0ef5"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x95bf7a66", "Unk0xa9286476"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x95bf7a66", "Unk0xb2d1e1e7"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x95bf7a66", "Unk0xbe062659"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x95bf7a66", "Unk0xbe2a0b3f"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x95bf7a66", "Unk0xc757d161"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x95bf7a66", "Unk0xcb57323b"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x95bf7a66", "Unk0xd3b8b200"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x95bf7a66", "Unk0xd7edb000"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x95bf7a66", "Unk0xd8090a2c"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x95bf7a66", "Unk0xe4511bd6"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x95bf7a66", "Unk0xf0462cf0"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x95bf7a66", "Unk0xf0d88ad1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x9e6ef929", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x9e6ef929", "Idle1Base"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x9e6ef929", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x9e6ef929", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x9e6ef929", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x9e6ef929", "Spell3HowlRun"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x9e6ef929", "Spell3Idle"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x9e6ef929", "Spell3Run"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x9e6ef929", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("Unk0x9e6ef929", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x9e6ef929", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x9e6ef929", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x9e6ef929", "Unk0x70da5341"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x9e6ef929", "Unk0x9f6b0ef5"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x9e6ef929", "Unk0xd3b8b200"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x9e6ef929", "Unk0xd8090a2c"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x9e6ef929", "Unk0xe4511bd6"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xa0a65fb0", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xa0a65fb0", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xa0a65fb0", "Idle1Base"): TransitionClip(
+            clip_name: "RunToIdle",
+        ),
+        ("Unk0xa0a65fb0", "IdleVar1"): TransitionClip(
+            clip_name: "RunToIdle",
+        ),
+        ("Unk0xa0a65fb0", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xa0a65fb0", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xa0a65fb0", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xa0a65fb0", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xa0a65fb0", "Spell2"): Time(
+            time: 0.08,
+        ),
+        ("Unk0xa0a65fb0", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xa0a65fb0", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xa0a65fb0", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xa0a65fb0", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xa1687744", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xa1687744", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xa1687744", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xa1687744", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xa1687744", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xa1687744", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xa1687744", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xa1687744", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xa251b291", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xa251b291", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xa251b291", "Spell3HowlRun"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xa251b291", "Spell3Idle"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xa251b291", "Spell3Run"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xa251b291", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xa251b291", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xa251b291", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xa251b291", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xa251b291", "Unk0x70da5341"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xa251b291", "Unk0x9f6b0ef5"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xa251b291", "Unk0xd3b8b200"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xa251b291", "Unk0xd8090a2c"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xa251b291", "Unk0xe4511bd6"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xa9286476", "Attack1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xa9286476", "Attack2"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xa9286476", "Attack3"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xa9286476", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xa9286476", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xa9286476", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xa9286476", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xa9286476", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xa9286476", "Spell2"): Time(
+            time: 0.075,
+        ),
+        ("Unk0xa9286476", "Spell3HowlRun"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xa9286476", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xa9286476", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xa9286476", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xa9286476", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xa9286476", "Unk0x169444b0"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xa9286476", "Unk0x1777011"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xa9286476", "Unk0x1997894a"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xa9286476", "Unk0x201849db"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xa9286476", "Unk0x3ee785b1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xa9286476", "Unk0x69b480cc"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xa9286476", "Unk0x70da5341"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xa9286476", "Unk0x84b1bd5f"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xa9286476", "Unk0x95bf7a66"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xa9286476", "Unk0x9f6b0ef5"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xa9286476", "Unk0xa9286476"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xa9286476", "Unk0xb2d1e1e7"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xa9286476", "Unk0xbe062659"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xa9286476", "Unk0xc757d161"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xa9286476", "Unk0xd3b8b200"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xa9286476", "Unk0xd7edb000"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xa9286476", "Unk0xd8090a2c"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xa9286476", "Unk0xe4511bd6"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xa9286476", "Unk0xf0462cf0"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xb2d1e1e7", "Attack2"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xb2d1e1e7", "Attack3"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xb2d1e1e7", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xb2d1e1e7", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xb2d1e1e7", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xb2d1e1e7", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xb2d1e1e7", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xb2d1e1e7", "Spell2"): Time(
+            time: 0.075,
+        ),
+        ("Unk0xb2d1e1e7", "Spell3HowlRun"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xb2d1e1e7", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xb2d1e1e7", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xb2d1e1e7", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xb2d1e1e7", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xb2d1e1e7", "Unk0x169444b0"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xb2d1e1e7", "Unk0x1997894a"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xb2d1e1e7", "Unk0x201849db"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xb2d1e1e7", "Unk0x69b480cc"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xb2d1e1e7", "Unk0x70da5341"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xb2d1e1e7", "Unk0x84b1bd5f"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xb2d1e1e7", "Unk0x95bf7a66"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xb2d1e1e7", "Unk0x9f6b0ef5"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xb2d1e1e7", "Unk0xa9286476"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xb2d1e1e7", "Unk0xb2d1e1e7"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xb2d1e1e7", "Unk0xbe062659"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xb2d1e1e7", "Unk0xbe2a0b3f"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xb2d1e1e7", "Unk0xc757d161"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xb2d1e1e7", "Unk0xd3b8b200"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xb2d1e1e7", "Unk0xd8090a2c"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xb2d1e1e7", "Unk0xe4511bd6"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xb2d1e1e7", "Unk0xf0462cf0"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xbe062659", "Attack1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xbe062659", "Attack2"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xbe062659", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xbe062659", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xbe062659", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xbe062659", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xbe062659", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xbe062659", "Spell2"): Time(
+            time: 0.075,
+        ),
+        ("Unk0xbe062659", "Spell3HowlRun"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xbe062659", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xbe062659", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xbe062659", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xbe062659", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xbe062659", "Unk0x169444b0"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xbe062659", "Unk0x1777011"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xbe062659", "Unk0x1997894a"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xbe062659", "Unk0x3ee785b1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xbe062659", "Unk0x69b480cc"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xbe062659", "Unk0x70da5341"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xbe062659", "Unk0x84b1bd5f"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xbe062659", "Unk0x95bf7a66"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xbe062659", "Unk0x9f6b0ef5"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xbe062659", "Unk0xa9286476"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xbe062659", "Unk0xb2d1e1e7"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xbe062659", "Unk0xbe062659"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xbe062659", "Unk0xbe2a0b3f"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xbe062659", "Unk0xc757d161"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xbe062659", "Unk0xd3b8b200"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xbe062659", "Unk0xd7edb000"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xbe062659", "Unk0xd8090a2c"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xbe062659", "Unk0xe4511bd6"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xbe062659", "Unk0xf0462cf0"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xbe2a0b3f", "Attack1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xbe2a0b3f", "Attack1Fast"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xbe2a0b3f", "Attack2"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xbe2a0b3f", "Attack2Fast"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xbe2a0b3f", "Attack3"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xbe2a0b3f", "Attack3Fast"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xbe2a0b3f", "Attack4Fast"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xbe2a0b3f", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xbe2a0b3f", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xbe2a0b3f", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xbe2a0b3f", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xbe2a0b3f", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xbe2a0b3f", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xbe2a0b3f", "Spell2"): Time(
+            time: 0.08,
+        ),
+        ("Unk0xbe2a0b3f", "Spell2MissRun"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xbe2a0b3f", "Spell3HowlRun"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xbe2a0b3f", "Spell3Idle"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xbe2a0b3f", "Spell3Run"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xbe2a0b3f", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xbe2a0b3f", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xbe2a0b3f", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xbe2a0b3f", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xbe2a0b3f", "Unk0x169444b0"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xbe2a0b3f", "Unk0x1777011"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xbe2a0b3f", "Unk0x1997894a"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xbe2a0b3f", "Unk0x201849db"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xbe2a0b3f", "Unk0x278e42e9"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xbe2a0b3f", "Unk0x30d92e0a"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xbe2a0b3f", "Unk0x3ee785b1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xbe2a0b3f", "Unk0x56fc2d22"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xbe2a0b3f", "Unk0x69b480cc"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xbe2a0b3f", "Unk0x70da5341"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xbe2a0b3f", "Unk0x7dd98b2c"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xbe2a0b3f", "Unk0x84b1bd5f"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xbe2a0b3f", "Unk0x95bf7a66"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xbe2a0b3f", "Unk0x9f6b0ef5"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xbe2a0b3f", "Unk0xb2d1e1e7"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xbe2a0b3f", "Unk0xbe062659"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xbe2a0b3f", "Unk0xbe2a0b3f"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xbe2a0b3f", "Unk0xc757d161"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xbe2a0b3f", "Unk0xcb57323b"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xbe2a0b3f", "Unk0xd3b8b200"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xbe2a0b3f", "Unk0xd7edb000"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xbe2a0b3f", "Unk0xd8090a2c"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xbe2a0b3f", "Unk0xe4511bd6"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xbe2a0b3f", "Unk0xf0462cf0"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xbe2a0b3f", "Unk0xf0d88ad1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xc757d161", "Attack1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xc757d161", "Attack2"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xc757d161", "Attack3"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xc757d161", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xc757d161", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xc757d161", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xc757d161", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xc757d161", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xc757d161", "Spell2"): Time(
+            time: 0.075,
+        ),
+        ("Unk0xc757d161", "Spell3HowlRun"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xc757d161", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xc757d161", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xc757d161", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xc757d161", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xc757d161", "Unk0x169444b0"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xc757d161", "Unk0x1777011"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xc757d161", "Unk0x1997894a"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xc757d161", "Unk0x201849db"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xc757d161", "Unk0x3ee785b1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xc757d161", "Unk0x70da5341"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xc757d161", "Unk0x84b1bd5f"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xc757d161", "Unk0x95bf7a66"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xc757d161", "Unk0x9f6b0ef5"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xc757d161", "Unk0xa9286476"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xc757d161", "Unk0xb2d1e1e7"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xc757d161", "Unk0xbe062659"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xc757d161", "Unk0xbe2a0b3f"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xc757d161", "Unk0xc757d161"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xc757d161", "Unk0xd3b8b200"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xc757d161", "Unk0xd7edb000"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xc757d161", "Unk0xd8090a2c"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xc757d161", "Unk0xe4511bd6"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xc757d161", "Unk0xf0462cf0"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xcb57323b", "Attack1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xcb57323b", "Attack1Fast"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xcb57323b", "Attack2Fast"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xcb57323b", "Attack3Fast"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xcb57323b", "Attack4Fast"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xcb57323b", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xcb57323b", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xcb57323b", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xcb57323b", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xcb57323b", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xcb57323b", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xcb57323b", "Spell2"): Time(
+            time: 0.08,
+        ),
+        ("Unk0xcb57323b", "Spell2MissRun"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xcb57323b", "Spell3HowlRun"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xcb57323b", "Spell3Idle"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xcb57323b", "Spell3Run"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xcb57323b", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xcb57323b", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xcb57323b", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xcb57323b", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xcb57323b", "Unk0x201849db"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xcb57323b", "Unk0x278e42e9"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xcb57323b", "Unk0x30d92e0a"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xcb57323b", "Unk0x3ee785b1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xcb57323b", "Unk0x56fc2d22"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xcb57323b", "Unk0x69b480cc"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xcb57323b", "Unk0x7dd98b2c"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xcb57323b", "Unk0x95bf7a66"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xcb57323b", "Unk0xbe2a0b3f"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xcb57323b", "Unk0xcb57323b"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xcb57323b", "Unk0xd3b8b200"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xcb57323b", "Unk0xd8090a2c"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xcb57323b", "Unk0xf0462cf0"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xcb57323b", "Unk0xf0d88ad1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xd3b8b200", "Attack1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xd3b8b200", "Attack1Fast"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xd3b8b200", "Attack2Fast"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xd3b8b200", "Attack3Fast"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xd3b8b200", "Attack4Fast"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xd3b8b200", "Channel"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xd3b8b200", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xd3b8b200", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xd3b8b200", "Idle1Base"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xd3b8b200", "Laugh"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xd3b8b200", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xd3b8b200", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xd3b8b200", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xd3b8b200", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xd3b8b200", "Spell2"): Time(
+            time: 0.08,
+        ),
+        ("Unk0xd3b8b200", "Spell3Idle"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xd3b8b200", "Spell3Run"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xd3b8b200", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xd3b8b200", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xd3b8b200", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xd3b8b200", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xd3b8b200", "Unk0x169444b0"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xd3b8b200", "Unk0x1777011"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xd3b8b200", "Unk0x1997894a"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xd3b8b200", "Unk0x201849db"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xd3b8b200", "Unk0x278e42e9"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xd3b8b200", "Unk0x30d92e0a"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xd3b8b200", "Unk0x3ee785b1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xd3b8b200", "Unk0x56fc2d22"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xd3b8b200", "Unk0x61e0814"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xd3b8b200", "Unk0x69b480cc"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xd3b8b200", "Unk0x7dd98b2c"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xd3b8b200", "Unk0x84b1bd5f"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xd3b8b200", "Unk0x95bf7a66"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xd3b8b200", "Unk0xa1687744"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xd3b8b200", "Unk0xa9286476"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xd3b8b200", "Unk0xb2d1e1e7"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xd3b8b200", "Unk0xbe062659"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xd3b8b200", "Unk0xbe2a0b3f"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xd3b8b200", "Unk0xc757d161"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xd3b8b200", "Unk0xcb57323b"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xd3b8b200", "Unk0xf0462cf0"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xd3b8b200", "Unk0xf0d88ad1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xd7edb000", "Attack2"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xd7edb000", "Attack3"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xd7edb000", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xd7edb000", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xd7edb000", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xd7edb000", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xd7edb000", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xd7edb000", "Spell2"): Time(
+            time: 0.075,
+        ),
+        ("Unk0xd7edb000", "Spell3HowlRun"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xd7edb000", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xd7edb000", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xd7edb000", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xd7edb000", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xd7edb000", "Unk0x169444b0"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xd7edb000", "Unk0x1997894a"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xd7edb000", "Unk0x201849db"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xd7edb000", "Unk0x69b480cc"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xd7edb000", "Unk0x70da5341"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xd7edb000", "Unk0x84b1bd5f"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xd7edb000", "Unk0x95bf7a66"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xd7edb000", "Unk0x9f6b0ef5"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xd7edb000", "Unk0xa9286476"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xd7edb000", "Unk0xbe062659"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xd7edb000", "Unk0xbe2a0b3f"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xd7edb000", "Unk0xc757d161"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xd7edb000", "Unk0xd3b8b200"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xd7edb000", "Unk0xd7edb000"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xd7edb000", "Unk0xd8090a2c"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xd7edb000", "Unk0xe4511bd6"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xd7edb000", "Unk0xf0462cf0"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xd8090a2c", "Attack1"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xd8090a2c", "Attack1Fast"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xd8090a2c", "Attack2"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xd8090a2c", "Attack2Fast"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xd8090a2c", "Attack3"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xd8090a2c", "Attack3Fast"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xd8090a2c", "Attack4"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xd8090a2c", "Attack4Fast"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xd8090a2c", "Channel"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xd8090a2c", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xd8090a2c", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xd8090a2c", "Idle1Base"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xd8090a2c", "Joke"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xd8090a2c", "Laugh"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xd8090a2c", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xd8090a2c", "RunToIdle"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xd8090a2c", "RunVar1"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xd8090a2c", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xd8090a2c", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xd8090a2c", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xd8090a2c", "Spell2"): Time(
+            time: 0.08,
+        ),
+        ("Unk0xd8090a2c", "Spell2ToIdle"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xd8090a2c", "Spell2ToRunHunt"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xd8090a2c", "Spell3Idle"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xd8090a2c", "Spell3Run"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xd8090a2c", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xd8090a2c", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xd8090a2c", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xd8090a2c", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xd8090a2c", "Spell4MissToIdle"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xd8090a2c", "Unk0x169444b0"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xd8090a2c", "Unk0x1777011"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xd8090a2c", "Unk0x1997894a"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xd8090a2c", "Unk0x201849db"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xd8090a2c", "Unk0x278e42e9"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xd8090a2c", "Unk0x30d92e0a"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xd8090a2c", "Unk0x3ee785b1"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xd8090a2c", "Unk0x56edff21"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xd8090a2c", "Unk0x56fc2d22"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xd8090a2c", "Unk0x597c4fcd"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xd8090a2c", "Unk0x61e0814"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xd8090a2c", "Unk0x69b480cc"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xd8090a2c", "Unk0x7dd98b2c"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xd8090a2c", "Unk0x84b1bd5f"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xd8090a2c", "Unk0x95bf7a66"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xd8090a2c", "Unk0x9e6ef929"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xd8090a2c", "Unk0xa0a65fb0"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xd8090a2c", "Unk0xa1687744"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xd8090a2c", "Unk0xa9286476"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xd8090a2c", "Unk0xb2d1e1e7"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xd8090a2c", "Unk0xbe062659"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xd8090a2c", "Unk0xbe2a0b3f"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xd8090a2c", "Unk0xc757d161"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xd8090a2c", "Unk0xcb57323b"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xd8090a2c", "Unk0xd3b8b200"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xd8090a2c", "Unk0xd7edb000"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xd8090a2c", "Unk0xf0462cf0"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xd8090a2c", "Unk0xf0d88ad1"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xd8090a2c", "Unk0xf6b678a1"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xf0462cf0", "Attack1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xf0462cf0", "Attack1Fast"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xf0462cf0", "Attack2Fast"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xf0462cf0", "Attack3"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xf0462cf0", "Attack3Fast"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xf0462cf0", "Attack4Fast"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xf0462cf0", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xf0462cf0", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xf0462cf0", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xf0462cf0", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xf0462cf0", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xf0462cf0", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xf0462cf0", "Spell2"): Time(
+            time: 0.08,
+        ),
+        ("Unk0xf0462cf0", "Spell2MissRun"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xf0462cf0", "Spell3HowlRun"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xf0462cf0", "Spell3Idle"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xf0462cf0", "Spell3Run"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xf0462cf0", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xf0462cf0", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xf0462cf0", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xf0462cf0", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xf0462cf0", "Unk0x1777011"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xf0462cf0", "Unk0x201849db"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xf0462cf0", "Unk0x278e42e9"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xf0462cf0", "Unk0x30d92e0a"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xf0462cf0", "Unk0x3ee785b1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xf0462cf0", "Unk0x56fc2d22"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xf0462cf0", "Unk0x69b480cc"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xf0462cf0", "Unk0x70da5341"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xf0462cf0", "Unk0x7dd98b2c"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xf0462cf0", "Unk0x84b1bd5f"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xf0462cf0", "Unk0x95bf7a66"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xf0462cf0", "Unk0x9f6b0ef5"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xf0462cf0", "Unk0xa9286476"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xf0462cf0", "Unk0xb2d1e1e7"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xf0462cf0", "Unk0xbe062659"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xf0462cf0", "Unk0xbe2a0b3f"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xf0462cf0", "Unk0xc757d161"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xf0462cf0", "Unk0xcb57323b"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xf0462cf0", "Unk0xd3b8b200"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xf0462cf0", "Unk0xd7edb000"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xf0462cf0", "Unk0xd8090a2c"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xf0462cf0", "Unk0xe4511bd6"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xf0462cf0", "Unk0xf0462cf0"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xf0462cf0", "Unk0xf0d88ad1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xf0d88ad1", "Attack1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xf0d88ad1", "Attack1Fast"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xf0d88ad1", "Attack2Fast"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xf0d88ad1", "Attack3Fast"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xf0d88ad1", "Attack4Fast"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xf0d88ad1", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xf0d88ad1", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xf0d88ad1", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xf0d88ad1", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xf0d88ad1", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xf0d88ad1", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xf0d88ad1", "Spell2"): Time(
+            time: 0.08,
+        ),
+        ("Unk0xf0d88ad1", "Spell2MissRun"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xf0d88ad1", "Spell3HowlRun"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xf0d88ad1", "Spell3Idle"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xf0d88ad1", "Spell3Run"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xf0d88ad1", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xf0d88ad1", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xf0d88ad1", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xf0d88ad1", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xf0d88ad1", "Unk0x201849db"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xf0d88ad1", "Unk0x278e42e9"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xf0d88ad1", "Unk0x30d92e0a"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xf0d88ad1", "Unk0x3ee785b1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xf0d88ad1", "Unk0x56fc2d22"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xf0d88ad1", "Unk0x69b480cc"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xf0d88ad1", "Unk0x7dd98b2c"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xf0d88ad1", "Unk0x95bf7a66"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xf0d88ad1", "Unk0xbe2a0b3f"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xf0d88ad1", "Unk0xcb57323b"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xf0d88ad1", "Unk0xd3b8b200"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xf0d88ad1", "Unk0xd8090a2c"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xf0d88ad1", "Unk0xf0462cf0"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xf0d88ad1", "Unk0xf0d88ad1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xf6b678a1", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xf6b678a1", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xf6b678a1", "Idle1Base"): TransitionClip(
+            clip_name: "RunHUntToIdle",
+        ),
+        ("Unk0xf6b678a1", "IdleVar1"): TransitionClip(
+            clip_name: "RunHUntToIdle",
+        ),
+        ("Unk0xf6b678a1", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xf6b678a1", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xf6b678a1", "Spell1Release"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xf6b678a1", "Spell1Turn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xf6b678a1", "Spell2"): Time(
+            time: 0.08,
+        ),
+        ("Unk0xf6b678a1", "Spell3HowlRun"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xf6b678a1", "Spell3Idle"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xf6b678a1", "Spell3Run"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xf6b678a1", "Spell4"): Time(
+            time: 0.05,
+        ),
+        ("Unk0xf6b678a1", "Spell4Dash"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xf6b678a1", "Spell4Hit"): Time(
+            time: 0.1,
+        ),
+        ("Unk0xf6b678a1", "Spell4Miss"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xf6b678a1", "Unk0x597c4fcd"): TransitionClip(
+            clip_name: "Unk0xa0a65fb0",
+        ),
+        ("Unk0xf6b678a1", "Unk0x70da5341"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xf6b678a1", "Unk0x9f6b0ef5"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xf6b678a1", "Unk0xa0a65fb0"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xf6b678a1", "Unk0xd3b8b200"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xf6b678a1", "Unk0xd8090a2c"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xf6b678a1", "Unk0xe4511bd6"): Time(
+            time: 0.0,
+        ),
+    },
+)
