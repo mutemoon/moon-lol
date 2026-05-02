@@ -1,4 +1,13 @@
 use bevy::app::Plugin;
+use bevy::prelude::*;
+use lol_core::base::ability_resource::{AbilityResource, AbilityResourceType};
+use lol_core::base::level::Level;
+use lol_core::damage::{Armor, Damage};
+use lol_core::debug::handlers::ChampionSwitchQueue;
+use lol_core::life::Health;
+use lol_core::movement::{Movement, MovementState};
+use lol_core::skill::SkillPoints;
+use lol_core::team::Team;
 
 pub mod aatrox;
 pub mod ahri;
@@ -127,6 +136,8 @@ pub struct PluginChampions;
 
 impl Plugin for PluginChampions {
     fn build(&self, app: &mut bevy::app::App) {
+        app.add_systems(Update, process_champion_switch_queue);
+
         app.add_plugins(aatrox::PluginAatrox);
         app.add_plugins(ahri::PluginAhri);
         app.add_plugins(akali::PluginAkali);
@@ -245,5 +256,68 @@ impl Plugin for PluginChampions {
         app.add_plugins(twitch::PluginTwitch);
         app.add_plugins(urgot::PluginUrgot);
         app.add_plugins(volibear::PluginVolibear);
+    }
+}
+
+/// Processes the ChampionSwitchQueue: spawns new champion entities when a switch is requested.
+fn process_champion_switch_queue(mut commands: Commands, mut queue: ResMut<ChampionSwitchQueue>) {
+    for name in queue.0.drain(..) {
+        match name.as_str() {
+            "Riven" => {
+                commands.spawn((
+                    crate::riven::Riven,
+                    Team::Order,
+                    Transform::default(),
+                    Health::new(1000.0),
+                    AbilityResource {
+                        ar_type: AbilityResourceType::Mana,
+                        value: 1000.0,
+                        max: 1000.0,
+                        base: 1000.0,
+                        per_level: 0.0,
+                        base_static_regen: 0.0,
+                        regen_per_level: 0.0,
+                    },
+                    Level {
+                        value: 18,
+                        ..default()
+                    },
+                    SkillPoints(4),
+                    Damage(100.0),
+                    Armor(0.0),
+                    Movement { speed: 340.0 },
+                    MovementState::default(),
+                ));
+            }
+            "Fiora" => {
+                commands.spawn((
+                    crate::fiora::Fiora,
+                    Team::Order,
+                    Transform::default(),
+                    Health::new(1000.0),
+                    AbilityResource {
+                        ar_type: AbilityResourceType::Mana,
+                        value: 1000.0,
+                        max: 1000.0,
+                        base: 1000.0,
+                        per_level: 0.0,
+                        base_static_regen: 0.0,
+                        regen_per_level: 0.0,
+                    },
+                    Level {
+                        value: 18,
+                        ..default()
+                    },
+                    SkillPoints(4),
+                    Damage(100.0),
+                    Armor(0.0),
+                    Movement { speed: 340.0 },
+                    MovementState::default(),
+                ));
+            }
+            _ => {
+                warn!(target: "debug", "unknown champion: {}", name);
+            }
+        }
     }
 }
