@@ -75,7 +75,7 @@ fn cast_katarina_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<
             shape: DamageShape::Circle { radius: 625.0 },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
             }],
             particle: Some(hash_bin("Katarina_Q_Hit")),
@@ -121,7 +121,7 @@ fn cast_katarina_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<
             shape: DamageShape::Circle { radius: 100.0 },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
             }],
             particle: Some(hash_bin("Katarina_E_Hit")),
@@ -149,7 +149,7 @@ fn cast_katarina_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<
             shape: DamageShape::Circle { radius: 550.0 },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
             }],
             particle: Some(hash_bin("Katarina_R_Hit")),

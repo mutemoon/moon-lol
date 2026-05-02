@@ -427,7 +427,7 @@ fn test_named_data_value_calculation() {
 
     let key = "named_data_value".to_string();
     let data_name = "BaseDamage";
-    let data_value_name = "base_damage".to_string();
+    let data_value_name = "BaseDamage".to_string();
     let expected_value = 50.0;
 
     let calc_part = CalculationPart::CalculationPartNamedDataValue(CalculationPartNamedDataValue {

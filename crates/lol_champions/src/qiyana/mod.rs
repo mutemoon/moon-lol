@@ -78,7 +78,7 @@ fn cast_qiyana_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
             },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Physical,
             }],
             particle: Some(hash_bin("Qiyana_Q_Hit")),
@@ -139,7 +139,7 @@ fn cast_qiyana_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
             shape: DamageShape::Circle { radius: 875.0 },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Physical,
             }],
             particle: Some(hash_bin("Qiyana_R_Hit")),

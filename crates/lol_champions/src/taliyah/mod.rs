@@ -77,7 +77,7 @@ fn cast_taliyah_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<S
             },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
             }],
             particle: Some(hash_bin("Taliyah_Q_Hit")),
@@ -104,7 +104,7 @@ fn cast_taliyah_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<S
             shape: DamageShape::Circle { radius: 400.0 },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
             }],
             particle: Some(hash_bin("Taliyah_W_Hit")),
@@ -131,7 +131,7 @@ fn cast_taliyah_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<S
             shape: DamageShape::Circle { radius: 800.0 },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
             }],
             particle: Some(hash_bin("Taliyah_E_Hit")),

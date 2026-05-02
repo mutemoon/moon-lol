@@ -61,11 +61,11 @@ fn riven_mock_spell() -> Spell {
                     values: Some(vec![130.0; 6]),
                 },
                 ValuesData {
-                    name: "TotalDamage".into(),
+                    name: "total_damage".into(),
                     values: Some(vec![130.0; 6]),
                 },
                 ValuesData {
-                    name: "FirstSlashDamage".into(),
+                    name: "first_slash_damage".into(),
                     values: Some(vec![130.0; 6]),
                 },
                 ValuesData {

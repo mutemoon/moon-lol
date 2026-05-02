@@ -79,7 +79,7 @@ fn cast_caitlyn_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<S
             },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Physical,
             }],
             particle: Some(hash_bin("Caitlyn_Q_Hit")),
@@ -124,7 +124,7 @@ fn cast_caitlyn_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<S
             },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
             }],
             particle: Some(hash_bin("Caitlyn_E_Hit")),
@@ -152,7 +152,7 @@ fn cast_caitlyn_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<S
             shape: DamageShape::Circle { radius: 3500.0 },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::Champion,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Physical,
             }],
             particle: Some(hash_bin("Caitlyn_R_Hit")),

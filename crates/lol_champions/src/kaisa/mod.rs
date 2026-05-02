@@ -83,7 +83,7 @@ fn cast_kaisa_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
             shape: DamageShape::Circle { radius: 600.0 },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Physical,
             }],
             particle: Some(hash_bin("Kaisa_Q_Hit")),
@@ -114,7 +114,7 @@ fn cast_kaisa_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
             },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
             }],
             particle: Some(hash_bin("Kaisa_W_Hit")),
@@ -172,7 +172,7 @@ fn cast_kaisa_r(
             radius_end: 150.0,
             damage: TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Physical,
             },
         }),

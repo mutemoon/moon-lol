@@ -77,7 +77,7 @@ fn cast_evelynn_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<S
             },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
             }],
             particle: Some(hash_bin("Evelynn_Q_Hit")),
@@ -121,7 +121,7 @@ fn cast_evelynn_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<S
             },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
             }],
             particle: Some(hash_bin("Evelynn_E_Hit")),
@@ -149,7 +149,7 @@ fn cast_evelynn_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<S
             shape: DamageShape::Circle { radius: 500.0 },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
             }],
             particle: Some(hash_bin("Evelynn_R_Hit")),

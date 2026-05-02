@@ -110,7 +110,7 @@ fn cast_riven_q(
             radius_end: 250.0,
             damage: TargetDamage {
                 filter: TargetFilter::All,
-                amount: "FirstSlashDamage".to_string(),
+                amount: "first_slash_damage".to_string(),
                 damage_type: DamageType::Physical,
             },
         }),
@@ -157,7 +157,7 @@ fn cast_riven_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
             shape: DamageShape::Circle { radius: 300.0 },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Physical,
             }],
             particle: None,

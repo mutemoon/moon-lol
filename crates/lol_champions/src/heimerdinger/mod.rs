@@ -92,7 +92,7 @@ fn cast_heimer_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
             },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
             }],
             particle: Some(hash_bin("Heimerdinger_W_Hit")),
@@ -120,7 +120,7 @@ fn cast_heimer_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
             shape: DamageShape::Circle { radius: 250.0 },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
             }],
             particle: Some(hash_bin("Heimerdinger_E_Hit")),

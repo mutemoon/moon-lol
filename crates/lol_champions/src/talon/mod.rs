@@ -76,7 +76,7 @@ fn cast_talon_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
             },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Physical,
             }],
             particle: Some(hash_bin("Talon_Q_Hit")),
@@ -106,7 +106,7 @@ fn cast_talon_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
             },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Physical,
             }],
             particle: Some(hash_bin("Talon_W_Hit")),
@@ -146,7 +146,7 @@ fn cast_talon_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
             shape: DamageShape::Circle { radius: 600.0 },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Physical,
             }],
             particle: Some(hash_bin("Talon_R_Hit")),

@@ -77,7 +77,7 @@ fn cast_twisted_fate_q(commands: &mut Commands, entity: Entity, skill_spell: Han
             },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
             }],
             particle: Some(hash_bin("TwistedFate_Q_Hit")),
@@ -104,7 +104,7 @@ fn cast_twisted_fate_w(commands: &mut Commands, entity: Entity, skill_spell: Han
             shape: DamageShape::Circle { radius: 325.0 },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
             }],
             particle: Some(hash_bin("TwistedFate_W_Hit")),

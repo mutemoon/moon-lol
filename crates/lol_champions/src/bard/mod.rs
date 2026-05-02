@@ -77,7 +77,7 @@ fn cast_bard_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spel
             },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
             }],
             particle: Some(hash_bin("Bard_Q_Hit")),
@@ -132,7 +132,7 @@ fn cast_bard_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spel
             shape: DamageShape::Circle { radius: 3400.0 },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
             }],
             particle: Some(hash_bin("Bard_R_Hit")),

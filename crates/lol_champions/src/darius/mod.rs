@@ -91,7 +91,7 @@ fn cast_darius_w(commands: &mut Commands, entity: Entity) {
     commands.trigger(CommandAttackReset { entity });
 }
 
-fn cast_darius_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
+fn cast_darius_e(commands: &mut Commands, entity: Entity, _skill_spell: Handle<Spell>) {
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: "spell3".to_string(),
@@ -102,23 +102,7 @@ fn cast_darius_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
         entity,
         hash: hash_bin("Darius_E_Cast"),
     });
-    // E is a cone pull
-    commands.trigger(ActionDamage {
-        entity,
-        skill: skill_spell,
-        effects: vec![ActionDamageEffect {
-            shape: DamageShape::Sector {
-                radius: 300.0,
-                angle: 90.0,
-            },
-            damage_list: vec![TargetDamage {
-                filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
-                damage_type: DamageType::Physical,
-            }],
-            particle: Some(hash_bin("Darius_E_Hit")),
-        }],
-    });
+    // E is a cone pull - no damage (calculations: None in .ron)
 }
 
 fn cast_darius_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
@@ -142,7 +126,7 @@ fn cast_darius_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
             },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::Champion,
-                amount: "TotalDamage".to_string(),
+                amount: "damage".to_string(),
                 damage_type: DamageType::Physical,
             }],
             particle: Some(hash_bin("Darius_R_Hit")),

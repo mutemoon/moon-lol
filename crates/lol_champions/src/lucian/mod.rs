@@ -88,7 +88,7 @@ fn cast_lucian_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
             },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Physical,
             }],
             particle: Some(hash_bin("Lucian_Q_Hit")),
@@ -123,7 +123,7 @@ fn cast_lucian_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
             },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
             }],
             particle: Some(hash_bin("Lucian_W_Hit")),
@@ -185,7 +185,7 @@ fn cast_lucian_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
             },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Physical,
             }],
             particle: Some(hash_bin("Lucian_R_Hit")),

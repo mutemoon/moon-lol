@@ -77,7 +77,7 @@ fn cast_thresh_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
             },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
             }],
             particle: Some(hash_bin("Thresh_Q_Hit")),
@@ -120,7 +120,7 @@ fn cast_thresh_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
             },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
             }],
             particle: Some(hash_bin("Thresh_E_Hit")),
@@ -147,7 +147,7 @@ fn cast_thresh_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
             shape: DamageShape::Circle { radius: 450.0 },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
             }],
             particle: Some(hash_bin("Thresh_R_Hit")),

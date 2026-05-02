@@ -88,7 +88,7 @@ fn cast_kindred_q(
             shape: DamageShape::Circle { radius: 300.0 },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Physical,
             }],
             particle: Some(hash_bin("Kindred_Q_Hit")),
@@ -120,7 +120,7 @@ fn cast_kindred_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<S
             shape: DamageShape::Circle { radius: 500.0 },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Physical,
             }],
             particle: Some(hash_bin("Kindred_W_Hit")),
@@ -151,7 +151,7 @@ fn cast_kindred_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<S
             },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Physical,
             }],
             particle: Some(hash_bin("Kindred_E_Hit")),
@@ -179,7 +179,7 @@ fn cast_kindred_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<S
             shape: DamageShape::Circle { radius: 535.0 },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
             }],
             particle: Some(hash_bin("Kindred_R_Hit")),

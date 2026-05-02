@@ -111,7 +111,7 @@ fn cast_aatrox_q(
             radius_end: 200.0,
             damage: TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Physical,
             },
         }),
@@ -161,7 +161,7 @@ fn cast_aatrox_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
             shape: DamageShape::Circle { radius: 300.0 },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Physical,
             }],
             particle: Some(hash_bin("Aatrox_W_Hit")),
@@ -220,7 +220,7 @@ fn cast_aatrox_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
             shape: DamageShape::Circle { radius: 300.0 },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Physical,
             }],
             particle: Some(hash_bin("Aatrox_R_Hit")),

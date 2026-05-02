@@ -99,7 +99,7 @@ fn cast_akali_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
             },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
             }],
             particle: Some(hash_bin("Akali_Q_Hit")),
@@ -168,7 +168,7 @@ fn cast_akali_e(
                 },
                 damage_list: vec![TargetDamage {
                     filter: TargetFilter::All,
-                    amount: "TotalDamage".to_string(),
+                    amount: "total_damage".to_string(),
                     damage_type: DamageType::Magic,
                 }],
                 particle: Some(hash_bin("Akali_E_Hit")),
@@ -193,7 +193,7 @@ fn cast_akali_e(
                 radius_end: 100.0,
                 damage: TargetDamage {
                     filter: TargetFilter::All,
-                    amount: "TotalDamage".to_string(),
+                    amount: "total_damage".to_string(),
                     damage_type: DamageType::Magic,
                 },
             }),
@@ -245,7 +245,7 @@ fn cast_akali_r(
                 shape: DamageShape::Circle { radius: 300.0 },
                 damage_list: vec![TargetDamage {
                     filter: TargetFilter::Champion,
-                    amount: "TotalDamage".to_string(),
+                    amount: "total_damage".to_string(),
                     damage_type: DamageType::Magic,
                 }],
                 particle: Some(hash_bin("Akali_R2_Hit")),
@@ -264,7 +264,7 @@ fn cast_akali_r(
                 radius_end: 150.0,
                 damage: TargetDamage {
                     filter: TargetFilter::Champion,
-                    amount: "TotalDamage".to_string(),
+                    amount: "total_damage".to_string(),
                     damage_type: DamageType::Magic,
                 },
             })

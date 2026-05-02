@@ -95,7 +95,7 @@ fn cast_jinx_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spel
             },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Physical,
             }],
             particle: Some(hash_bin("Jinx_W_Hit")),
@@ -123,7 +123,7 @@ fn cast_jinx_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spel
             shape: DamageShape::Circle { radius: 250.0 },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
             }],
             particle: Some(hash_bin("Jinx_E_Hit")),
@@ -154,7 +154,7 @@ fn cast_jinx_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spel
             },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Physical,
             }],
             particle: Some(hash_bin("Jinx_R_Hit")),

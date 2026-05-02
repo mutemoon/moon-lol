@@ -78,7 +78,7 @@ fn cast_kennen_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
             },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
             }],
             particle: Some(hash_bin("Kennen_Q_Hit")),
@@ -106,7 +106,7 @@ fn cast_kennen_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
             shape: DamageShape::Circle { radius: 775.0 },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
             }],
             particle: Some(hash_bin("Kennen_W_Hit")),
@@ -152,7 +152,7 @@ fn cast_kennen_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
             shape: DamageShape::Circle { radius: 550.0 },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
             }],
             particle: Some(hash_bin("Kennen_R_Hit")),

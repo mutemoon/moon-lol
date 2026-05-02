@@ -80,7 +80,7 @@ fn cast_missfortune_q(commands: &mut Commands, entity: Entity, skill_spell: Hand
             },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Physical,
             }],
             particle: Some(hash_bin("MissFortune_Q_Hit")),
@@ -126,7 +126,7 @@ fn cast_missfortune_e(commands: &mut Commands, entity: Entity, skill_spell: Hand
             shape: DamageShape::Circle { radius: 1000.0 },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
             }],
             particle: Some(hash_bin("MissFortune_E_Hit")),
@@ -157,7 +157,7 @@ fn cast_missfortune_r(commands: &mut Commands, entity: Entity, skill_spell: Hand
             },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Physical,
             }],
             particle: Some(hash_bin("MissFortune_R_Hit")),

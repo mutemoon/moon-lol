@@ -73,7 +73,7 @@ fn cast_seraphine_q(commands: &mut Commands, entity: Entity, skill_spell: Handle
             shape: DamageShape::Circle { radius: 900.0 },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
             }],
             particle: Some(hash_bin("Seraphine_Q_Hit")),
@@ -122,7 +122,7 @@ fn cast_seraphine_e(commands: &mut Commands, entity: Entity, skill_spell: Handle
             },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
             }],
             particle: Some(hash_bin("Seraphine_E_Hit")),
@@ -153,7 +153,7 @@ fn cast_seraphine_r(commands: &mut Commands, entity: Entity, skill_spell: Handle
             },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
             }],
             particle: Some(hash_bin("Seraphine_R_Hit")),

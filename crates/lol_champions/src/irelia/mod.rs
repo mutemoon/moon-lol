@@ -101,7 +101,7 @@ fn cast_irelia_q(
             radius_end: 80.0,
             damage: TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Physical,
             },
         }),
@@ -169,7 +169,7 @@ fn cast_irelia_e(
                 shape: DamageShape::Circle { radius: 200.0 },
                 damage_list: vec![TargetDamage {
                     filter: TargetFilter::All,
-                    amount: "TotalDamage".to_string(),
+                    amount: "total_damage".to_string(),
                     damage_type: DamageType::Magic,
                 }],
                 particle: Some(hash_bin("Irelia_E_Hit")),
@@ -207,7 +207,7 @@ fn cast_irelia_r(
             shape: DamageShape::Circle { radius: 350.0 },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Physical,
             }],
             particle: Some(hash_bin("Irelia_R_Hit")),

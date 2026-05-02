@@ -145,7 +145,7 @@ fn cast_garen_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
             shape: DamageShape::Circle { radius: 200.0 },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Physical,
             }],
             particle: Some(hash_bin("Garen_E_Hit")),
@@ -174,7 +174,7 @@ fn cast_garen_r(commands: &mut Commands, entity: Entity, _point: Vec2, skill_spe
             },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::Champion,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Physical,
             }],
             particle: Some(hash_bin("Garen_R_Hit")),
