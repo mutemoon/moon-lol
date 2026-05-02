@@ -1,23 +1,18 @@
 (
     spellData: Some((
         calculations: Some({
-            501147496: (
+            "tier2_number_of_blowback": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 64618745,
-                    ),
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: Some(2),
-                        dataValue: 942499611,
+                        dataValue: "tier2_blowback_amount_base",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            579179818: (
+            "tier3_burn": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -30,23 +25,28 @@
                 multiplier: None,
                 precision: Some(1),
             ),
-            1290255457: (
+            "tier3_execute_threshold": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 4199780755,
+                        dataValue: "tier3_execute_threshold_start",
                     ),
                 ]),
                 multiplier: None,
                 precision: Some(1),
             ),
-            3486099609: (
+            "total_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 4083972360,
+                        dataValue: "base_damage",
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(2),
+                        dataValue: "ad_ratio",
                     ),
                 ]),
                 multiplier: None,

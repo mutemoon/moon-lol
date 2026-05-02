@@ -1,13 +1,13 @@
 (
     spellData: Some((
         calculations: Some({
-            294442677: (
+            "ad_burst_ratio": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),
-            2194343097: (
+            "burn_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (

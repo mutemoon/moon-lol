@@ -1,12 +1,12 @@
 (
     spellData: Some((
         calculations: Some({
-            539608150: (
+            "tooltip_ee_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 1753171863,
+                        dataValue: "tooltip_ee_base_damage",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -18,12 +18,12 @@
                 multiplier: None,
                 precision: None,
             ),
-            2767420026: (
+            "tooltip_eq_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 30983971,
+                        dataValue: "tooltip_eq_base_damage",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -35,12 +35,12 @@
                 multiplier: None,
                 precision: None,
             ),
-            2895496984: (
+            "tooltip_ew_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 4239876305,
+                        dataValue: "tooltip_ew_base_damage",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",

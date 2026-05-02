@@ -1,12 +1,28 @@
 (
     spellData: Some((
         calculations: Some({
-            1508461632: (
+            "area_damage_per_second": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 64618745,
+                        dataValue: "base_area_damage",
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: "area_ap_ratio",
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "damage": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "base_damage",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -18,25 +34,9 @@
                 multiplier: None,
                 precision: None,
             ),
-            2288093660: (
+            "minion_mod_tooltip": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
-                multiplier: None,
-                precision: None,
-            ),
-            3694130688: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 280041756,
-                    ),
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: None,
-                        dataValue: 192328524,
-                    ),
-                ]),
                 multiplier: None,
                 precision: None,
             ),

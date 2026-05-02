@@ -1,7 +1,7 @@
 (
     spellData: Some((
         calculations: Some({
-            1005137512: (
+            "champion_heal": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -14,7 +14,7 @@
                 multiplier: None,
                 precision: None,
             ),
-            1208046177: (
+            "minion_heal": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (

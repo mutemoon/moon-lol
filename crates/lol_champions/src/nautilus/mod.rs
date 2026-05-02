@@ -78,7 +78,7 @@ fn cast_nautilus_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<
             },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: hash_bin("TotalDamage"),
+                amount: "TotalDamage".to_string(),
                 damage_type: DamageType::Magic,
             }],
             particle: Some(hash_bin("Nautilus_Q_Hit")),
@@ -124,7 +124,7 @@ fn cast_nautilus_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<
             shape: DamageShape::Circle { radius: 350.0 },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: hash_bin("TotalDamage"),
+                amount: "TotalDamage".to_string(),
                 damage_type: DamageType::Magic,
             }],
             particle: Some(hash_bin("Nautilus_E_Hit")),
@@ -154,7 +154,7 @@ fn cast_nautilus_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<
             },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: hash_bin("TotalDamage"),
+                amount: "TotalDamage".to_string(),
                 damage_type: DamageType::Magic,
             }],
             particle: Some(hash_bin("Nautilus_R_Hit")),

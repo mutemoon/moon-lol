@@ -90,7 +90,7 @@ fn cast_singed_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
             shape: DamageShape::Circle { radius: 400.0 },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: hash_bin("TotalDamage"),
+                amount: "TotalDamage".to_string(),
                 damage_type: DamageType::Magic,
             }],
             particle: Some(hash_bin("Singed_W_Hit")),
@@ -120,7 +120,7 @@ fn cast_singed_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
             },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: hash_bin("TotalDamage"),
+                amount: "TotalDamage".to_string(),
                 damage_type: DamageType::Magic,
             }],
             particle: Some(hash_bin("Singed_E_Hit")),

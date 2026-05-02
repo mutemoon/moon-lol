@@ -128,7 +128,7 @@ fn cast_leesin_q(
                 },
                 damage_list: vec![TargetDamage {
                     filter: TargetFilter::All,
-                    amount: hash_bin("TotalDamage"),
+                    amount: "TotalDamage".to_string(),
                     damage_type: DamageType::Physical,
                 }],
                 particle: Some(hash_bin("LeeSin_Q_Hit")),
@@ -153,7 +153,7 @@ fn cast_leesin_q(
                 radius_end: 100.0,
                 damage: TargetDamage {
                     filter: TargetFilter::All,
-                    amount: hash_bin("TotalDamage"),
+                    amount: "TotalDamage".to_string(),
                     damage_type: DamageType::Physical,
                 },
             }),
@@ -259,7 +259,7 @@ fn cast_leesin_e(
                 shape: DamageShape::Circle { radius: 250.0 },
                 damage_list: vec![TargetDamage {
                     filter: TargetFilter::All,
-                    amount: hash_bin("TotalDamage"),
+                    amount: "TotalDamage".to_string(),
                     damage_type: DamageType::Physical,
                 }],
                 particle: Some(hash_bin("LeeSin_E_Hit")),
@@ -286,7 +286,7 @@ fn cast_leesin_e(
                 shape: DamageShape::Circle { radius: 250.0 },
                 damage_list: vec![TargetDamage {
                     filter: TargetFilter::All,
-                    amount: hash_bin("TotalDamage"),
+                    amount: "TotalDamage".to_string(),
                     damage_type: DamageType::Physical,
                 }],
                 particle: Some(hash_bin("LeeSin_E2_Hit")),
@@ -329,7 +329,7 @@ fn cast_leesin_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
             },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::Champion,
-                amount: hash_bin("TotalDamage"),
+                amount: "TotalDamage".to_string(),
                 damage_type: DamageType::Physical,
             }],
             particle: Some(hash_bin("LeeSin_R_Hit")),

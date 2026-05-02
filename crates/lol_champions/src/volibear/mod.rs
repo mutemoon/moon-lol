@@ -139,7 +139,7 @@ fn cast_volibear_w(
                 },
                 damage_list: vec![TargetDamage {
                     filter: TargetFilter::All,
-                    amount: hash_bin("TotalDamage"),
+                    amount: "TotalDamage".to_string(),
                     damage_type: DamageType::Physical,
                 }],
                 particle: Some(hash_bin("Volibear_W_Hit")),
@@ -176,7 +176,7 @@ fn cast_volibear_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<
             shape: DamageShape::Circle { radius: 300.0 },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: hash_bin("TotalDamage"),
+                amount: "TotalDamage".to_string(),
                 damage_type: DamageType::Magic,
             }],
             particle: Some(hash_bin("Volibear_E_Hit")),
@@ -214,7 +214,7 @@ fn cast_volibear_r(
             radius_end: 150.0,
             damage: TargetDamage {
                 filter: TargetFilter::All,
-                amount: hash_bin("TotalDamage"),
+                amount: "TotalDamage".to_string(),
                 damage_type: DamageType::Physical,
             },
         }),

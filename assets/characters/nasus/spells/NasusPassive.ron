@@ -1,7 +1,7 @@
 (
     spellData: Some((
         calculations: Some({
-            3274185641: (
+            "lifesteal_tooltip": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,

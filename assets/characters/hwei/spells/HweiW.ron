@@ -1,12 +1,12 @@
 (
     spellData: Some((
         calculations: Some({
-            528563676: (
+            "tooltip_we_on_hit_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 1120150391,
+                        dataValue: "tooltip_we_base_on_hit_damage",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -18,29 +18,12 @@
                 multiplier: None,
                 precision: None,
             ),
-            1441538734: (
+            "tooltip_wq_move_speed": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 1942684723,
-                    ),
-                    (
-                        type: "CalculationPartStatCoefficient",
-                        stat: None,
-                        coefficient: Some(0.6),
-                        statFormula: None,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            1594066183: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 2335405800,
+                        dataValue: "tooltip_wq_base_move_speed",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -52,12 +35,29 @@
                 multiplier: None,
                 precision: None,
             ),
-            2652693472: (
+            "tooltip_ww_shield_amount": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 1942684723,
+                        dataValue: "tooltip_ww_shield_amount_base",
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: None,
+                        coefficient: Some(0.6),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "tooltip_ww_start_shield_amount": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "tooltip_ww_shield_amount_base",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",

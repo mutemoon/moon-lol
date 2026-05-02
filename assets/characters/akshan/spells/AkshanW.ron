@@ -1,13 +1,13 @@
 (
     spellData: Some((
         calculations: Some({
-            2682188363: (
+            "second_auto_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(2),
-                        dataValue: 2313175972,
+                        dataValue: "passive_second_auto_ratio",
                     ),
                 ]),
                 multiplier: None,

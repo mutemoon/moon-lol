@@ -29,7 +29,7 @@ pub struct CalculationPartStatCoefficient {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct CalculationPartNamedDataValue {
-    pub data_value: u32,
+    pub data_value: String,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -43,7 +43,7 @@ pub struct CalculationPartStatSub {
 #[serde(rename_all = "camelCase")]
 pub struct CalculationPartStatNamedDataValue {
     pub stat: Option<u8>,
-    pub data_value: u32,
+    pub data_value: String,
 }
 
 /// 计算类型

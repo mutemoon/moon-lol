@@ -1,7 +1,7 @@
 (
     spellData: Some((
         calculations: Some({
-            501147496: (
+            "total_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -13,18 +13,18 @@
                 multiplier: None,
                 precision: None,
             ),
-            1780114153: (
+            "unk_0x6a1a62e9": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),
-            2906486879: (
+            "unk_0xad3d785f": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 1887862529,
+                        dataValue: "shen_zed_quest_bonus",
                     ),
                 ]),
                 multiplier: None,

@@ -1,17 +1,17 @@
 (
     spellData: Some((
         calculations: Some({
-            620905175: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: None,
-            ),
-            2407877160: (
+            "max_health_regen": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: Some(2),
+            ),
+            "passive_cooldown": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
             ),
         }),
         effectAmounts: None,

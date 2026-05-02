@@ -1,12 +1,12 @@
 (
     spellData: Some((
         calculations: Some({
-            3067682359: (
+            "flat_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 435677466,
+                        dataValue: "flat_damage_base",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -18,12 +18,12 @@
                 multiplier: None,
                 precision: None,
             ),
-            3354121813: (
+            "flat_damage_sweet_spot": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 435677466,
+                        dataValue: "flat_damage_base",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -34,7 +34,7 @@
                 ]),
                 multiplier: Some((
                     type: "CalculationPartNamedDataValue",
-                    dataValue: 1088165754,
+                    dataValue: "sweet_spot_bonus",
                 )),
                 precision: None,
             ),

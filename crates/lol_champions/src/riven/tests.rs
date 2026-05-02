@@ -39,17 +39,20 @@ fn riven_mock_spell() -> Spell {
         CalculationType::CalculationSpell(CalculationSpell {
             formula_parts: Some(vec![CalculationPart::CalculationPartNamedDataValue(
                 CalculationPartNamedDataValue {
-                    data_value: hash_bin(name),
+                    data_value: name.to_string(),
                 },
             )]),
             multiplier: None,
             precision: None,
         })
     };
-    calculations.insert(hash_bin("mDamage"), make_calc("mDamage"));
-    calculations.insert(hash_bin("TotalDamage"), make_calc("TotalDamage"));
-    calculations.insert(hash_bin("FirstSlashDamage"), make_calc("FirstSlashDamage"));
-    calculations.insert(hash_bin("ShieldStrength"), make_calc("ShieldStrength"));
+    calculations.insert("m_damage".to_string(), make_calc("m_damage"));
+    calculations.insert("total_damage".to_string(), make_calc("total_damage"));
+    calculations.insert(
+        "first_slash_damage".to_string(),
+        make_calc("first_slash_damage"),
+    );
+    calculations.insert("shield_strength".to_string(), make_calc("shield_strength"));
     Spell {
         spell_data: Some(DataSpell {
             calculations: Some(calculations),
@@ -110,8 +113,8 @@ fn build_render(name: &str, max_frames: u32) -> ChampionTestHarness {
     ChampionTestHarness::build::<Riven>(name, HarnessMode::Render { max_frames }, &riven_config())
 }
 
-fn w_damage_key() -> u32 {
-    hash_bin("TotalDamage")
+fn w_damage_key() -> &'static str {
+    "total_damage"
 }
 
 // ═══════════════════════════════════════════════════════════

@@ -1,22 +1,22 @@
 (
     spellData: Some((
         calculations: Some({
-            501147496: (
+            "total_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 64618745,
+                        dataValue: "base_damage",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(1),
-                        dataValue: 770143391,
+                        dataValue: "armor_ratio",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(6),
-                        dataValue: 1929964645,
+                        dataValue: "mr_ratio",
                     ),
                 ]),
                 multiplier: None,

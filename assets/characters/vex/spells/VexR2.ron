@@ -1,12 +1,12 @@
 (
     spellData: Some((
         calculations: Some({
-            602845611: (
+            "recast_damage_calc": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 1979514766,
+                        dataValue: "recast_damage",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",

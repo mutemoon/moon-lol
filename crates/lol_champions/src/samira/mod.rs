@@ -76,7 +76,7 @@ fn cast_samira_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
             },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: hash_bin("TotalDamage"),
+                amount: "TotalDamage".to_string(),
                 damage_type: DamageType::Physical,
             }],
             particle: Some(hash_bin("Samira_Q_Hit")),
@@ -104,7 +104,7 @@ fn cast_samira_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
             shape: DamageShape::Circle { radius: 250.0 },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: hash_bin("TotalDamage"),
+                amount: "TotalDamage".to_string(),
                 damage_type: DamageType::Physical,
             }],
             particle: Some(hash_bin("Samira_W_Hit")),
@@ -150,7 +150,7 @@ fn cast_samira_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
             },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: hash_bin("TotalDamage"),
+                amount: "TotalDamage".to_string(),
                 damage_type: DamageType::Physical,
             }],
             particle: Some(hash_bin("Samira_R_Hit")),

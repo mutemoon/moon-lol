@@ -78,7 +78,7 @@ fn cast_quinn_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
             },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: hash_bin("TotalDamage"),
+                amount: "TotalDamage".to_string(),
                 damage_type: DamageType::Physical,
             }],
             particle: Some(hash_bin("Quinn_Q_Hit")),
@@ -126,7 +126,7 @@ fn cast_quinn_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
             },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: hash_bin("TotalDamage"),
+                amount: "TotalDamage".to_string(),
                 damage_type: DamageType::Physical,
             }],
             particle: Some(hash_bin("Quinn_E_Hit")),

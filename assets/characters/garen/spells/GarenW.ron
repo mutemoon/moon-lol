@@ -1,25 +1,25 @@
 (
     spellData: Some((
         calculations: Some({
-            1704249176: (
+            "resists_for_tooltip": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            "total_shield": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 2831277281,
+                        dataValue: "base_shield",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(12),
-                        dataValue: 3941748685,
+                        dataValue: "shield_health_ratio",
                     ),
                 ]),
-                multiplier: None,
-                precision: None,
-            ),
-            4165443826: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),

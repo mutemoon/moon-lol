@@ -84,7 +84,7 @@ fn cast_galio_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
             },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: hash_bin("TotalDamage"),
+                amount: "TotalDamage".to_string(),
                 damage_type: DamageType::Magic,
             }],
             particle: Some(hash_bin("Galio_Q_Hit")),
@@ -138,7 +138,7 @@ fn cast_galio_e(
             radius_end: 150.0,
             damage: TargetDamage {
                 filter: TargetFilter::All,
-                amount: hash_bin("TotalDamage"),
+                amount: "TotalDamage".to_string(),
                 damage_type: DamageType::Magic,
             },
         }),
@@ -166,7 +166,7 @@ fn cast_galio_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
             shape: DamageShape::Circle { radius: 400.0 },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: hash_bin("TotalDamage"),
+                amount: "TotalDamage".to_string(),
                 damage_type: DamageType::Magic,
             }],
             particle: Some(hash_bin("Galio_R_Hit")),

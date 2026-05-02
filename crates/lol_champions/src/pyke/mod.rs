@@ -78,7 +78,7 @@ fn cast_pyke_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spel
             },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: hash_bin("TotalDamage"),
+                amount: "TotalDamage".to_string(),
                 damage_type: DamageType::Physical,
             }],
             particle: Some(hash_bin("Pyke_Q_Hit")),
@@ -124,7 +124,7 @@ fn cast_pyke_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spel
             },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: hash_bin("TotalDamage"),
+                amount: "TotalDamage".to_string(),
                 damage_type: DamageType::Physical,
             }],
             particle: Some(hash_bin("Pyke_E_Hit")),
@@ -152,7 +152,7 @@ fn cast_pyke_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spel
             shape: DamageShape::Circle { radius: 750.0 },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: hash_bin("TotalDamage"),
+                amount: "TotalDamage".to_string(),
                 damage_type: DamageType::Physical,
             }],
             particle: Some(hash_bin("Pyke_R_Hit")),

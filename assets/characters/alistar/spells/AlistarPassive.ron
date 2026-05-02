@@ -1,13 +1,13 @@
 (
     spellData: Some((
         calculations: Some({
-            969836114: (
+            "base_heal": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(12),
-                        dataValue: 91968833,
+                        dataValue: "alistar_passive_heal_ratio",
                     ),
                 ]),
                 multiplier: None,

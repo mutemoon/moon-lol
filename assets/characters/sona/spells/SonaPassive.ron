@@ -1,7 +1,13 @@
 (
     spellData: Some((
         calculations: Some({
-            1200072321: (
+            "accelerando_ah_current": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            "power_chord_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -11,12 +17,6 @@
                         statFormula: None,
                     ),
                 ]),
-                multiplier: None,
-                precision: None,
-            ),
-            1733883196: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),

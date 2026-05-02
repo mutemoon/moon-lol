@@ -1,13 +1,13 @@
 (
     spellData: Some((
         calculations: Some({
-            562217142: (
+            "shield_cooldown_reduction": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: Some(1),
             ),
-            1486921252: (
+            "unk_0x58a09e24": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -20,16 +20,16 @@
                 multiplier: None,
                 precision: None,
             ),
-            2123443140: (
+            "unk_0x7e912bc4": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: Some((
                     type: "CalculationPartNamedDataValue",
-                    dataValue: 1245095544,
+                    dataValue: "shen_zed_quest_shield_multiplier",
                 )),
                 precision: None,
             ),
-            2267611529: (
+            "unk_0x87290189": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -42,12 +42,12 @@
                 multiplier: None,
                 precision: None,
             ),
-            2804964735: (
+            "unk_0xa7305d7f": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: Some((
                     type: "CalculationPartNamedDataValue",
-                    dataValue: 1245095544,
+                    dataValue: "shen_zed_quest_shield_multiplier",
                 )),
                 precision: None,
             ),

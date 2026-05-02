@@ -1,12 +1,28 @@
 (
     spellData: Some((
         calculations: Some({
-            501147496: (
+            "shield_calc": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 1508461632,
+                        dataValue: "shield_value",
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: "shield_ap_ratio",
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "total_damage": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "damage",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -18,28 +34,12 @@
                 multiplier: None,
                 precision: None,
             ),
-            3304846765: (
+            "unk_0xfe737c05": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 3609980641,
-                    ),
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: None,
-                        dataValue: 4106273920,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            4268981253: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 4253000201,
+                        dataValue: "slow_percent",
                     ),
                 ]),
                 multiplier: None,

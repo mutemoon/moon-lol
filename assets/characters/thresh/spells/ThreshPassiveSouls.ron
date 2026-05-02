@@ -1,7 +1,7 @@
 (
     spellData: Some((
         calculations: Some({
-            3491715252: (
+            "current_soul_bonus": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,

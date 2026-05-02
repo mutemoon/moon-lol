@@ -1,28 +1,28 @@
 (
     spellData: Some((
         calculations: Some({
-            501147496: (
+            "number_of_strikes": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 3029543557,
-                    ),
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: Some(2),
-                        dataValue: 3971278895,
+                        dataValue: "num_ticks",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            4223235112: (
+            "total_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 3752148091,
+                        dataValue: "base_damage_per_tick",
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(2),
+                        dataValue: "ad_ratio_per_tick",
                     ),
                 ]),
                 multiplier: None,

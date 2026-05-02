@@ -1,19 +1,19 @@
 (
     spellData: Some((
         calculations: Some({
-            620905175: (
+            "passive_cooldown": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),
-            1089369324: (
+            "shield_amount": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(12),
-                        dataValue: 2574924118,
+                        dataValue: "max_hp_coefficient",
                     ),
                 ]),
                 multiplier: None,

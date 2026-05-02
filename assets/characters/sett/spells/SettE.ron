@@ -1,9 +1,13 @@
 (
     spellData: Some((
         calculations: Some({
-            742615500: (
+            "damage_calc": (
                 type: "CalculationSpell",
                 formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "base_damage",
+                    ),
                     (
                         type: "CalculationPartStatCoefficient",
                         stat: Some(2),
@@ -14,19 +18,15 @@
                 multiplier: None,
                 precision: None,
             ),
-            2273741664: (
+            "monster_bonus": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),
-            3387110781: (
+            "tooltipadratio_e": (
                 type: "CalculationSpell",
                 formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 64618745,
-                    ),
                     (
                         type: "CalculationPartStatCoefficient",
                         stat: Some(2),

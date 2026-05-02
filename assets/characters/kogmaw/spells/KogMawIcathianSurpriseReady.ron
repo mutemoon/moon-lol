@@ -1,7 +1,7 @@
 (
     spellData: Some((
         calculations: Some({
-            767745579: (
+            "passive_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,

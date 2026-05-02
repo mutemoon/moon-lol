@@ -1,7 +1,30 @@
 (
     spellData: Some((
         calculations: Some({
-            454723602: (
+            "bonus_ms_calc": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "bonus_ms_increase",
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: None,
+                        coefficient: Some(0.00015),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "cooldown_duration": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            "heal_calc": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -14,47 +37,7 @@
                 multiplier: None,
                 precision: None,
             ),
-            552713676: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 4181784465,
-                    ),
-                    (
-                        type: "CalculationPartStatCoefficient",
-                        stat: None,
-                        coefficient: Some(0.00027),
-                        statFormula: None,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            961353601: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 2237401296,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            1080782398: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartStatSub",
-                        stat: Some(12),
-                        subpart: None,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            1418119438: (
+            "move_speed_calc": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -67,26 +50,43 @@
                 multiplier: None,
                 precision: None,
             ),
-            1843679093: (
+            "proc_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 2039437136,
+                        dataValue: "base_hp_damage",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
                         stat: None,
-                        coefficient: Some(0.00015),
+                        coefficient: Some(0.00027),
                         statFormula: None,
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            2728677912: (
+            "unk_0x394d1781": (
                 type: "CalculationSpell",
-                formulaParts: Some([]),
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "monster_max_damage",
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "unk_0x406b6e3e": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatSub",
+                        stat: Some(12),
+                        subpart: None,
+                    ),
+                ]),
                 multiplier: None,
                 precision: None,
             ),

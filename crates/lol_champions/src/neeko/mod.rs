@@ -75,7 +75,7 @@ fn cast_neeko_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
             shape: DamageShape::Circle { radius: 800.0 },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: hash_bin("TotalDamage"),
+                amount: "TotalDamage".to_string(),
                 damage_type: DamageType::Magic,
             }],
             particle: Some(hash_bin("Neeko_Q_Hit")),
@@ -121,7 +121,7 @@ fn cast_neeko_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
             },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: hash_bin("TotalDamage"),
+                amount: "TotalDamage".to_string(),
                 damage_type: DamageType::Magic,
             }],
             particle: Some(hash_bin("Neeko_E_Hit")),
@@ -149,7 +149,7 @@ fn cast_neeko_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
             shape: DamageShape::Circle { radius: 590.0 },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: hash_bin("TotalDamage"),
+                amount: "TotalDamage".to_string(),
                 damage_type: DamageType::Magic,
             }],
             particle: Some(hash_bin("Neeko_R_Hit")),

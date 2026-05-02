@@ -1,12 +1,12 @@
 (
     spellData: Some((
         calculations: Some({
-            709026093: (
+            "maximum_charge_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 1174239535,
+                        dataValue: "percent_hp_base",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -18,7 +18,41 @@
                 multiplier: None,
                 precision: None,
             ),
-            834214706: (
+            "maximum_shield": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "shield_cap_base",
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(2),
+                        coefficient: Some(3.0),
+                        statFormula: Some(2),
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "minimum_damage_tooltip": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "percent_hp_base",
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(2),
+                        coefficient: Some(0.03),
+                        statFormula: Some(2),
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "unk_0x31b91b32": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -31,46 +65,12 @@
                 multiplier: None,
                 precision: None,
             ),
-            1502494419: (
+            "unk_0x598e3ed3": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 1174239535,
-                    ),
-                    (
-                        type: "CalculationPartStatCoefficient",
-                        stat: Some(2),
-                        coefficient: Some(0.03),
-                        statFormula: Some(2),
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            1923398388: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 2871000285,
-                    ),
-                    (
-                        type: "CalculationPartStatCoefficient",
-                        stat: Some(2),
-                        coefficient: Some(3.0),
-                        statFormula: Some(2),
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            1976883544: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 1174239535,
+                        dataValue: "percent_hp_base",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",

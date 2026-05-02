@@ -1,34 +1,34 @@
 (
     spellData: Some((
         calculations: Some({
-            1027436371: (
+            "total_haste": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 979982427,
+                        dataValue: "haste",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
                         stat: None,
-                        coefficient: Some(0.25),
+                        coefficient: Some(0.0008),
                         statFormula: None,
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            3243286920: (
+            "total_heal": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 888767856,
+                        dataValue: "heal",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
                         stat: None,
-                        coefficient: Some(0.0008),
+                        coefficient: Some(0.25),
                         statFormula: None,
                     ),
                 ]),

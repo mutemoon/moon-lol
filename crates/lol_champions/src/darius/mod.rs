@@ -113,7 +113,7 @@ fn cast_darius_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
             },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: hash_bin("TotalDamage"),
+                amount: "TotalDamage".to_string(),
                 damage_type: DamageType::Physical,
             }],
             particle: Some(hash_bin("Darius_E_Hit")),
@@ -142,7 +142,7 @@ fn cast_darius_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
             },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::Champion,
-                amount: hash_bin("TotalDamage"),
+                amount: "TotalDamage".to_string(),
                 damage_type: DamageType::Physical,
             }],
             particle: Some(hash_bin("Darius_R_Hit")),

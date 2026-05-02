@@ -1,12 +1,12 @@
 (
     spellData: Some((
         calculations: Some({
-            3301898489: (
+            "total_shield_strength": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 1928665297,
+                        dataValue: "shield_strength",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",

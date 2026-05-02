@@ -1,13 +1,20 @@
 (
     spellData: Some((
         calculations: Some({
-            835036450: (
+            "attack_damage": (
                 type: "CalculationSpell",
-                formulaParts: Some([]),
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(2),
+                        coefficient: Some(1.0),
+                        statFormula: None,
+                    ),
+                ]),
                 multiplier: None,
                 precision: None,
             ),
-            888767856: (
+            "haste": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -20,54 +27,13 @@
                 multiplier: None,
                 precision: None,
             ),
-            1061957287: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: None,
-            ),
-            1756461745: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: None,
-            ),
-            2491475535: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartStatSub",
-                        stat: Some(2),
-                        subpart: None,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            2716537284: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: None,
-            ),
-            3202745679: (
+            "heal_amount": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: Some(1),
             ),
-            3303698691: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 1299802551,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            3660878268: (
+            "max_shield": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -80,29 +46,63 @@
                 multiplier: None,
                 precision: None,
             ),
-            3967759176: (
+            "num_attacks": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(4),
-                        dataValue: 3845635706,
+                        dataValue: "as_coeff",
                     ),
                 ]),
                 multiplier: Some((
                     type: "CalculationPartNamedDataValue",
-                    dataValue: 1634389462,
+                    dataValue: "starting_attacks",
                 )),
                 precision: None,
             ),
-            4081769832: (
+            "on_hit_damage_reduction": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            "severum_qcd": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            "total_decay_duration_for_tooltip": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
-                        type: "CalculationPartStatCoefficient",
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "decay_takes",
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "unk_0x31c5a522": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            "unk_0x3f4c2ea7": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            "unk_0x9480e64f": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatSub",
                         stat: Some(2),
-                        coefficient: Some(1.0),
-                        statFormula: None,
+                        subpart: None,
                     ),
                 ]),
                 multiplier: None,

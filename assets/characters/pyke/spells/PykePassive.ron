@@ -1,7 +1,24 @@
 (
     spellData: Some((
         calculations: Some({
-            237540773: (
+            "additional_bonus_calc": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "additional_bonus",
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(29),
+                        coefficient: Some(0.004),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "damage_storage_max": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -14,29 +31,12 @@
                 multiplier: None,
                 precision: None,
             ),
-            2606936506: (
+            "one_enemy_calc": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 3255368499,
-                    ),
-                    (
-                        type: "CalculationPartStatCoefficient",
-                        stat: Some(29),
-                        coefficient: Some(0.004),
-                        statFormula: None,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            3021121996: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 2613842605,
+                        dataValue: "one_enemy",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",

@@ -1,29 +1,7 @@
 (
     spellData: Some((
         calculations: Some({
-            152212916: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartStatCoefficient",
-                        stat: Some(4),
-                        coefficient: Some(1.0),
-                        statFormula: None,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            1462302689: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: Some((
-                    type: "CalculationPartNamedDataValue",
-                    dataValue: 2459213498,
-                )),
-                precision: Some(2),
-            ),
-            2233777796: (
+            "move_speed_multiplier": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -36,7 +14,29 @@
                 multiplier: None,
                 precision: None,
             ),
-            3273037337: (
+            "unk_0x5728f7e1": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: Some((
+                    type: "CalculationPartNamedDataValue",
+                    dataValue: "modes_a_sto_ad_ratio",
+                )),
+                precision: Some(2),
+            ),
+            "unk_0x91295b4": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(4),
+                        coefficient: Some(1.0),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "unk_0xc3169619": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -48,7 +48,7 @@
                 ]),
                 multiplier: Some((
                     type: "CalculationPartNamedDataValue",
-                    dataValue: 420673158,
+                    dataValue: "dash_speed_divisor",
                 )),
                 precision: None,
             ),

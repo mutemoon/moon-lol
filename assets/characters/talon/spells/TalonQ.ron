@@ -1,23 +1,23 @@
 (
     spellData: Some((
         calculations: Some({
-            2469047522: (
+            "leap_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 64618745,
+                        dataValue: "base_damage",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(2),
-                        dataValue: 162078152,
+                        dataValue: "bonus_ad_ratio",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            2993592581: (
+            "total_healing": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,

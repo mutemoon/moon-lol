@@ -1,7 +1,7 @@
 (
     spellData: Some((
         calculations: Some({
-            724829665: (
+            "tooltip_cooldown": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,

@@ -1,65 +1,65 @@
 (
     spellData: Some((
         calculations: Some({
-            236254731: (
+            "re_bonus_shield": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 492071202,
+                        dataValue: "e_bonus_shield",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 3418721809,
+                        dataValue: "e_bonus_shield_ratio",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            1144732182: (
+            "rq_field_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 1952925990,
+                        dataValue: "q_detonation_damage",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 2815225149,
+                        dataValue: "q_detonation_ap_ratio",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            2235193409: (
+            "rq_impact_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 3443128444,
+                        dataValue: "q_bonus_damage",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 3655814163,
+                        dataValue: "q_bonus_ap_ratio",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            2979803764: (
+            "rw_heal_amount": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 3314893593,
+                        dataValue: "rw_base_heal",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 2493426667,
+                        dataValue: "rw_heal_ratio",
                     ),
                 ]),
                 multiplier: None,

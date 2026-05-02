@@ -1,7 +1,13 @@
 (
     spellData: Some((
         calculations: Some({
-            1463380026: (
+            "grey_health_healing_ratio": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            "grey_health_maximum": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -11,12 +17,6 @@
                         statFormula: None,
                     ),
                 ]),
-                multiplier: None,
-                precision: None,
-            ),
-            2645958353: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),

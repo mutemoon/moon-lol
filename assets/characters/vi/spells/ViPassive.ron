@@ -1,7 +1,13 @@
 (
     spellData: Some((
         calculations: Some({
-            1704249176: (
+            "shield_cooldown": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            "total_shield": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -11,12 +17,6 @@
                         statFormula: None,
                     ),
                 ]),
-                multiplier: None,
-                precision: None,
-            ),
-            4175896801: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),

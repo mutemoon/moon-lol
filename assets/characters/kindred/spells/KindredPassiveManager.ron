@@ -1,19 +1,19 @@
 (
     spellData: Some((
         calculations: Some({
-            756402004: (
+            "e_mark_bonus": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),
-            3346014890: (
+            "q_mark_bonus": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),
-            3834483248: (
+            "w_mark_bonus": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,

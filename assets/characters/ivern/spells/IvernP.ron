@@ -1,22 +1,22 @@
 (
     spellData: Some((
         calculations: Some({
-            1621780079: (
+            "harvest_duration": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: Some((
+                    type: "CalculationPartNamedDataValue",
+                    dataValue: "mode_speed_override",
+                )),
+                precision: None,
+            ),
+            "unk_0x60aa666f": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),
-            1824105134: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: Some((
-                    type: "CalculationPartNamedDataValue",
-                    dataValue: 83471741,
-                )),
-                precision: None,
-            ),
-            3326294280: (
+            "unk_0xc6433908": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,

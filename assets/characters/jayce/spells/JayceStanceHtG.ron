@@ -1,19 +1,25 @@
 (
     spellData: Some((
         calculations: Some({
-            1508461632: (
+            "damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(2),
-                        dataValue: 942499611,
+                        dataValue: "ad_ratio",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            2800975084: (
+            "ranged_form_shred": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            "resists": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -23,12 +29,6 @@
                         statFormula: Some(2),
                     ),
                 ]),
-                multiplier: None,
-                precision: None,
-            ),
-            4219298558: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),

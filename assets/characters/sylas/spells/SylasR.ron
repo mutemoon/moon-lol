@@ -1,7 +1,7 @@
 (
     spellData: Some((
         calculations: Some({
-            3793779392: (
+            "per_target_cooldown": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,

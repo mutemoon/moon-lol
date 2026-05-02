@@ -1,7 +1,19 @@
 (
     spellData: Some((
         calculations: Some({
-            17493447: (
+            "basic_attack_damage": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(2),
+                        dataValue: "attack_bonus_ad_ratio",
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "monster_damage_tooltip": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -12,25 +24,13 @@
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 3809245599,
+                        dataValue: "ap_ratio",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            457385632: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: Some(2),
-                        dataValue: 4134476800,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            4131124692: (
+            "shiv_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (

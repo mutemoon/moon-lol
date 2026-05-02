@@ -1,12 +1,24 @@
 (
     spellData: Some((
         calculations: Some({
-            1204873108: (
+            "bonus_ad": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(2),
+                        dataValue: "percent_bonus_ad",
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "max_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 2210378052,
+                        dataValue: "max_base",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -18,24 +30,12 @@
                 multiplier: None,
                 precision: None,
             ),
-            3768369729: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: Some(2),
-                        dataValue: 3254938624,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            4266938262: (
+            "min_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 1649423674,
+                        dataValue: "min_base",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",

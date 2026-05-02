@@ -1,17 +1,17 @@
 (
     spellData: Some((
         calculations: Some({
-            4087026918: (
+            "total_dps": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 4209723727,
+                        dataValue: "damage_per_second",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 1203350458,
+                        dataValue: "ap_ratio_per_second",
                     ),
                 ]),
                 multiplier: None,

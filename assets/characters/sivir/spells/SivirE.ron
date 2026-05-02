@@ -1,13 +1,13 @@
 (
     spellData: Some((
         calculations: Some({
-            1027436371: (
+            "total_heal": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(2),
-                        dataValue: 2212226638,
+                        dataValue: "heal_ratio",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",

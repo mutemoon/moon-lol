@@ -175,7 +175,7 @@ pub fn update_dash_damage(
 
             let damage_amount = get_skill_value(
                 &skill_object,
-                dash_damage.damage.damage.amount,
+                &dash_damage.damage.damage.amount,
                 skill.level,
                 |stat| {
                     if stat == 2 {

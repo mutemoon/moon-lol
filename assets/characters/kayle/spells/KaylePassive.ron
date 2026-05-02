@@ -1,29 +1,29 @@
 (
     spellData: Some((
         calculations: Some({
-            1400803174: (
+            "enrage_total_as_per_stack": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: None,
-                        dataValue: 1729954045,
-                    ),
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: Some(2),
-                        dataValue: 1019642442,
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "enrage_as_per_stack",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            3097540478: (
+            "passive_wave_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 2329379038,
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: "passive_wave_ap_ratio",
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(2),
+                        dataValue: "passive_wave_bonus_ad_ratio",
                     ),
                 ]),
                 multiplier: None,

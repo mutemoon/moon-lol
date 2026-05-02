@@ -1,34 +1,34 @@
 (
     spellData: Some((
         calculations: Some({
-            260564154: (
+            "calculated_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 2147810812,
-                    ),
-                ]),
-                multiplier: Some((
-                    type: "CalculationPartNamedDataValue",
-                    dataValue: 1908986589,
-                )),
-                precision: None,
-            ),
-            704689212: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 64618745,
+                        dataValue: "base_damage",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 3809245599,
+                        dataValue: "ap_ratio",
                     ),
                 ]),
                 multiplier: None,
+                precision: None,
+            ),
+            "unk_0xf87e4ba": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "blind_duration",
+                    ),
+                ]),
+                multiplier: Some((
+                    type: "CalculationPartNamedDataValue",
+                    dataValue: "minion_monster_duration_mod",
+                )),
                 precision: None,
             ),
         }),

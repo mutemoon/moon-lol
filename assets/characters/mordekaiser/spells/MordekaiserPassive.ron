@@ -1,19 +1,7 @@
 (
     spellData: Some((
         calculations: Some({
-            110054445: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: None,
-            ),
-            404981492: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: None,
-            ),
-            3258869002: (
+            "aura_damage_per_stack": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -26,7 +14,7 @@
                 multiplier: None,
                 precision: None,
             ),
-            3892658430: (
+            "bonus_ap_auto": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -39,7 +27,19 @@
                 multiplier: None,
                 precision: None,
             ),
-            4294529130: (
+            "max_aura_monster_damage": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            "passive_movement_speed": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            "percent_health_for_aura": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,

@@ -1,55 +1,55 @@
 (
     spellData: Some((
         calculations: Some({
-            211655295: (
+            "calc_rw_cooldown_reduction": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 3741939819,
+                        dataValue: "rw_cdr",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            530819824: (
+            "calc_rw_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 3424418274,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            1117146549: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 2351022553,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            3596606078: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 3746997602,
+                        dataValue: "rw_damage_base",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(2),
-                        dataValue: 2524999493,
+                        dataValue: "rw_ad_ratio",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 2128282665,
+                        dataValue: "rw_ap_ratio",
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "calc_rw_slow_amount": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "rw_slow_amount",
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "unk_0x42964db5": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "re_dash_speed",
                     ),
                 ]),
                 multiplier: None,

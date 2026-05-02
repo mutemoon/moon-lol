@@ -1,18 +1,18 @@
 (
     spellData: Some((
         calculations: Some({
-            501147496: (
+            "total_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(1),
-                        dataValue: 770143391,
+                        dataValue: "armor_ratio",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(6),
-                        dataValue: 2515479605,
+                        dataValue: "magic_resist_ratio",
                     ),
                 ]),
                 multiplier: None,

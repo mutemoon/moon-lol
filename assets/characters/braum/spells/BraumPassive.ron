@@ -1,19 +1,19 @@
 (
     spellData: Some((
         calculations: Some({
-            501147496: (
+            "stun_cd": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),
-            703846385: (
+            "stun_duration": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: Some(2),
             ),
-            3666897062: (
+            "total_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,

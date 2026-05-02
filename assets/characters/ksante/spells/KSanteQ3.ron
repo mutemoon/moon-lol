@@ -1,24 +1,31 @@
 (
     spellData: Some((
         calculations: Some({
-            70405542: (
+            "bonus_health_tooltip": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 3401302993,
-                    ),
-                    (
                         type: "CalculationPartStatCoefficient",
-                        stat: Some(2),
+                        stat: Some(12),
                         coefficient: Some(1.0),
-                        statFormula: None,
+                        statFormula: Some(2),
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            302268766: (
+            "bonus_percent_health": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "percent_health_damage",
+                    ),
+                ]),
+                multiplier: None,
+                precision: Some(-1),
+            ),
+            "bonus_resists_tooltip": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -37,7 +44,7 @@
                 multiplier: None,
                 precision: None,
             ),
-            1237280252: (
+            "empowered_attack_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -50,58 +57,51 @@
                 multiplier: None,
                 precision: None,
             ),
-            2838213447: (
+            "r_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 749309793,
+                        dataValue: "r_damage_base",
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(2),
+                        coefficient: Some(1.0),
+                        statFormula: None,
                     ),
                 ]),
                 multiplier: None,
-                precision: Some(-1),
+                precision: None,
             ),
-            3453587918: (
+            "unk_0x4324da6": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 2437445289,
+                        dataValue: "damage_one_base",
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(2),
+                        coefficient: Some(1.0),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "unk_0xcdd991ce": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "cooldown_one_base",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
                         stat: Some(12),
                         coefficient: Some(-0.001),
-                        statFormula: Some(2),
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            3854996560: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 2129239861,
-                    ),
-                    (
-                        type: "CalculationPartStatCoefficient",
-                        stat: Some(2),
-                        coefficient: Some(1.0),
-                        statFormula: None,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            3899333289: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartStatCoefficient",
-                        stat: Some(12),
-                        coefficient: Some(1.0),
                         statFormula: Some(2),
                     ),
                 ]),

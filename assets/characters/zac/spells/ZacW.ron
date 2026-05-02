@@ -1,23 +1,23 @@
 (
     spellData: Some((
         calculations: Some({
-            2627576967: (
+            "display_percent_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 1026009727,
+                        dataValue: "health_percent_tooltip",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 3884952906,
+                        dataValue: "ap_ratio_to_percent_damage",
                     ),
                 ]),
                 multiplier: None,
                 precision: Some(1),
             ),
-            3227409543: (
+            "tooltip_health_cost": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,

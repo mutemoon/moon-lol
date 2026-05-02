@@ -1,33 +1,43 @@
 (
     spellData: Some((
         calculations: Some({
-            1321918026: (
+            "healing_per_stack": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 3464528284,
+                        dataValue: "healing_per_stack_base",
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: "healing_ap_ratio",
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(12),
+                        dataValue: "healing_hp_ratio",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            3257017247: (
+            "max_stack_healing": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 1226500001,
+                        dataValue: "healing_per_stack_base",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 1246041831,
+                        dataValue: "healing_ap_ratio",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(12),
-                        dataValue: 165520444,
+                        dataValue: "healing_hp_ratio",
                     ),
                 ]),
                 multiplier: Some((
@@ -36,22 +46,12 @@
                 )),
                 precision: None,
             ),
-            4224809428: (
+            "stack_cooldown": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 1226500001,
-                    ),
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: None,
-                        dataValue: 1246041831,
-                    ),
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: Some(12),
-                        dataValue: 165520444,
+                        dataValue: "recharge",
                     ),
                 ]),
                 multiplier: None,

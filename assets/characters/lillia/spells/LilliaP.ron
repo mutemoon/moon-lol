@@ -1,7 +1,7 @@
 (
     spellData: Some((
         calculations: Some({
-            1005137512: (
+            "champion_heal": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -14,12 +14,12 @@
                 multiplier: None,
                 precision: None,
             ),
-            1598041921: (
+            "dot_percent_total": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 1517344446,
+                        dataValue: "dot_damage_percent",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -31,13 +31,13 @@
                 multiplier: None,
                 precision: Some(-1),
             ),
-            2282348956: (
+            "monster_damage_cap": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),
-            3050320239: (
+            "unk_0xb5d0316f": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (

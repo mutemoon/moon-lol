@@ -1,33 +1,33 @@
 (
     spellData: Some((
         calculations: Some({
-            1704249176: (
+            "empowered_ms": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 2831277281,
-                    ),
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: None,
-                        dataValue: 3809245599,
-                    ),
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: Some(12),
-                        dataValue: 2951746318,
+                        dataValue: "move_speed",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            3287557709: (
+            "total_shield": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 2672392607,
+                        dataValue: "base_shield",
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: "ap_ratio",
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(12),
+                        dataValue: "health_shield",
                     ),
                 ]),
                 multiplier: None,

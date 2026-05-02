@@ -1,48 +1,48 @@
 (
     spellData: Some((
         calculations: Some({
-            1577104742: (
+            "dismounted_attack_penalty": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            "dismounted_ms": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            "dismounted_resist_bonus": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(12),
-                        dataValue: 2319345142,
+                        dataValue: "dismounted_resist_ratio",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            1697510098: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: None,
-            ),
-            2486514475: (
+            "mount_cooldown": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 1943001709,
+                        dataValue: "mount_cd",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            2581392069: (
+            "skaarl_health": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),
-            2812290501: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: None,
-            ),
-            3327787653: (
+            "skaarl_remount_health": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,

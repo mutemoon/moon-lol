@@ -1,12 +1,12 @@
 (
     spellData: Some((
         calculations: Some({
-            596773490: (
+            "final_on_hit_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 3484084320,
+                        dataValue: "on_hit_damage",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -18,12 +18,12 @@
                 multiplier: None,
                 precision: None,
             ),
-            817413377: (
+            "max_health_on_devour": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 469042084,
+                        dataValue: "base_max_health",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -41,12 +41,12 @@
                 multiplier: None,
                 precision: None,
             ),
-            3260799625: (
+            "total_explosion_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 64618745,
+                        dataValue: "base_damage",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",

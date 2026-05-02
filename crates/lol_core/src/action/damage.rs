@@ -42,7 +42,7 @@ pub enum TargetFilter {
 #[derive(Debug, Clone)]
 pub struct TargetDamage {
     pub filter: TargetFilter,
-    pub amount: u32,
+    pub amount: String,
     pub damage_type: DamageType,
 }
 
@@ -175,7 +175,7 @@ pub fn on_action_damage(
                 };
 
                 let damage_amount =
-                    get_skill_value(&skill_object, damage.amount, skill.level, |stat| {
+                    get_skill_value(&skill_object, &damage.amount, skill.level, |stat| {
                         if stat == 2 {
                             if let Ok(damage) = q_damage.get(entity) {
                                 return damage.0;

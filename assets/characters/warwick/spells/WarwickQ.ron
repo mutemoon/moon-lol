@@ -1,13 +1,13 @@
 (
     spellData: Some((
         calculations: Some({
-            3746727455: (
+            "base_bite_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(2),
-                        dataValue: 942499611,
+                        dataValue: "ad_ratio",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",

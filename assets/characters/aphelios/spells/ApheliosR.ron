@@ -1,25 +1,52 @@
 (
     spellData: Some((
         calculations: Some({
-            921424847: (
+            "crit_damage_mod_calc": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            "gravitum_r_bonus_slow": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
-                        type: "CalculationPartStatCoefficient",
-                        stat: Some(9),
-                        coefficient: Some(1.0),
-                        statFormula: None,
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "gravitum_r_bonus_slow_base",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            1204873108: (
+            "infernum_r_bonus_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 467962025,
+                        dataValue: "infernum_r_bonus_damage_base",
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(2),
+                        coefficient: Some(0.25),
+                        statFormula: Some(2),
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "infernum_r_penalty": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            "max_damage": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "r_base_damage",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -37,43 +64,16 @@
                 multiplier: None,
                 precision: None,
             ),
-            1813913134: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: None,
-            ),
-            2190914312: (
+            "unk_0x36ebd3cf": (
                 type: "CalculationSpell",
                 formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 99231949,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            2756090093: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 899331808,
-                    ),
                     (
                         type: "CalculationPartStatCoefficient",
-                        stat: Some(2),
-                        coefficient: Some(0.25),
-                        statFormula: Some(2),
+                        stat: Some(9),
+                        coefficient: Some(1.0),
+                        statFormula: None,
                     ),
                 ]),
-                multiplier: None,
-                precision: None,
-            ),
-            3545745361: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),

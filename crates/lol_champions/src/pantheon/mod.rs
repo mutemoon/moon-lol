@@ -97,7 +97,7 @@ fn cast_pantheon_q(
             },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: hash_bin("TotalDamage"),
+                amount: "TotalDamage".to_string(),
                 damage_type: DamageType::Physical,
             }],
             particle: Some(hash_bin("Pantheon_Q_Hit")),
@@ -132,7 +132,7 @@ fn cast_pantheon_w(
             radius_end: 100.0,
             damage: TargetDamage {
                 filter: TargetFilter::All,
-                amount: hash_bin("TotalDamage"),
+                amount: "TotalDamage".to_string(),
                 damage_type: DamageType::Physical,
             },
         }),
@@ -162,7 +162,7 @@ fn cast_pantheon_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<
             },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: hash_bin("TotalDamage"),
+                amount: "TotalDamage".to_string(),
                 damage_type: DamageType::Physical,
             }],
             particle: Some(hash_bin("Pantheon_E_Hit")),
@@ -200,7 +200,7 @@ fn cast_pantheon_r(
             radius_end: 200.0,
             damage: TargetDamage {
                 filter: TargetFilter::All,
-                amount: hash_bin("TotalDamage"),
+                amount: "TotalDamage".to_string(),
                 damage_type: DamageType::Physical,
             },
         }),

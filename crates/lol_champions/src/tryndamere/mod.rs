@@ -90,7 +90,7 @@ fn cast_tryndamere_w(commands: &mut Commands, entity: Entity, skill_spell: Handl
             },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: hash_bin("TotalDamage"),
+                amount: "TotalDamage".to_string(),
                 damage_type: DamageType::Magic,
             }],
             particle: Some(hash_bin("Tryndamere_W_Hit")),
@@ -117,7 +117,7 @@ fn cast_tryndamere_e(commands: &mut Commands, entity: Entity, skill_spell: Handl
             shape: DamageShape::Circle { radius: 660.0 },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: hash_bin("TotalDamage"),
+                amount: "TotalDamage".to_string(),
                 damage_type: DamageType::Physical,
             }],
             particle: Some(hash_bin("Tryndamere_E_Hit")),

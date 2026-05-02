@@ -1,49 +1,49 @@
 (
     spellData: Some((
         calculations: Some({
-            512586750: (
+            "active_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 3643339423,
+                        dataValue: "active_base_damage",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 1406739882,
+                        dataValue: "active_ratio",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            1798444177: (
+            "do_t_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 4055505120,
+                        dataValue: "do_t_base_damage",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 1567185299,
+                        dataValue: "do_t_ratio",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            3567430925: (
+            "on_hit_buff_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 1522021492,
+                        dataValue: "on_hit_buff_base_damage",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 260746276,
+                        dataValue: "on_hit_ratio",
                     ),
                 ]),
                 multiplier: None,

@@ -1,7 +1,20 @@
 (
     spellData: Some((
         calculations: Some({
-            1508461632: (
+            "attack_damage": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(2),
+                        coefficient: Some(1.0),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -19,34 +32,21 @@
                 multiplier: None,
                 precision: None,
             ),
-            2376857072: (
+            "gravitum_qcd": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: Some(2),
             ),
-            3181519304: (
+            "slow_amount_initial": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),
-            3737656915: (
+            "unk_0xdec81e53": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
-                multiplier: None,
-                precision: None,
-            ),
-            4081769832: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartStatCoefficient",
-                        stat: Some(2),
-                        coefficient: Some(1.0),
-                        statFormula: None,
-                    ),
-                ]),
                 multiplier: None,
                 precision: None,
             ),

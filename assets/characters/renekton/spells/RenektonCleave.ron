@@ -1,65 +1,65 @@
 (
     spellData: Some((
         calculations: Some({
-            784591872: (
+            "basic_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 865623685,
+                        dataValue: "base_damage",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(2),
-                        dataValue: 1121971103,
+                        dataValue: "base_ad_ratio",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            3520600646: (
+            "champ_healing": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 2308854010,
+                        dataValue: "champ_heal",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(2),
-                        dataValue: 1817093708,
+                        dataValue: "champion_heal_ad_ratio",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            3643536579: (
+            "emp_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 3330190372,
+                        dataValue: "empowered_base_damage",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(2),
-                        dataValue: 3460261031,
+                        dataValue: "empowered_ad_ratio",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            4190636200: (
+            "non_champ_healing": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 64618745,
+                        dataValue: "base_minion_heal",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(2),
-                        dataValue: 1068076572,
+                        dataValue: "minion_heal_ad_ratio",
                     ),
                 ]),
                 multiplier: None,

@@ -126,7 +126,7 @@ fn cast_olaf_e(commands: &mut Commands, entity: Entity, _point: Vec2, skill_spel
             },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: hash_bin("TotalDamage"),
+                amount: "TotalDamage".to_string(),
                 damage_type: DamageType::True,
             }],
             particle: Some(hash_bin("Olaf_E_Hit")),

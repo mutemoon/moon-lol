@@ -1,23 +1,7 @@
 (
     spellData: Some((
         calculations: Some({
-            1027436371: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 969836114,
-                    ),
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: None,
-                        dataValue: 2212226638,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            1496371381: (
+            "total_diminuendo_weaken_percent": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -30,17 +14,33 @@
                 multiplier: None,
                 precision: None,
             ),
-            1704249176: (
+            "total_heal": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 2831277281,
+                        dataValue: "base_heal",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 720451715,
+                        dataValue: "heal_ratio",
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "total_shield": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "base_shield",
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: "shield_ratio",
                     ),
                 ]),
                 multiplier: None,

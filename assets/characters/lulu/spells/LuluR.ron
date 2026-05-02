@@ -1,12 +1,12 @@
 (
     spellData: Some((
         calculations: Some({
-            2943173802: (
+            "total_bonus_health": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 1382069074,
+                        dataValue: "bonus_health",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",

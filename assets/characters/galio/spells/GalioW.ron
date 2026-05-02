@@ -1,25 +1,7 @@
 (
     spellData: Some((
         calculations: Some({
-            289768791: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: None,
-            ),
-            2029842363: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: Some(12),
-                        dataValue: 2554292644,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            3020549114: (
+            "magic_damage_reduction": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -48,18 +30,36 @@
                 multiplier: None,
                 precision: None,
             ),
-            3276826942: (
+            "min_total_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 1184888896,
+                        dataValue: "minimum_w_base_damage",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
                         stat: None,
                         coefficient: Some(0.3),
                         statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "passive_shield_ooc_timer": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            "total_passive_shield": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(12),
+                        dataValue: "passive_shield_health_ratio",
                     ),
                 ]),
                 multiplier: None,

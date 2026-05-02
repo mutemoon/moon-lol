@@ -1,13 +1,13 @@
 (
     spellData: Some((
         calculations: Some({
-            2133307309: (
+            "mana_per_proc": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),
-            2174057475: (
+            "stacks_per_proc": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,

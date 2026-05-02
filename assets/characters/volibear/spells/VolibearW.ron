@@ -1,12 +1,23 @@
 (
     spellData: Some((
         calculations: Some({
-            501147496: (
+            "percent_missing_health_healing_ratio": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 64618745,
+                        dataValue: "heal_percent",
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "total_damage": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "base_damage",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -17,18 +28,7 @@
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(12),
-                        dataValue: 4292780561,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            3792260089: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 3767019112,
+                        dataValue: "bonus_health_ratio",
                     ),
                 ]),
                 multiplier: None,

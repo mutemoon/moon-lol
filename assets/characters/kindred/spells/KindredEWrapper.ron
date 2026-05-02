@@ -1,44 +1,44 @@
 (
     spellData: Some((
         calculations: Some({
-            2037259121: (
+            "base_bite_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 3417386532,
-                    ),
-                ]),
-                multiplier: None,
-                precision: Some(1),
-            ),
-            2638488080: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 2361366308,
+                        dataValue: "base_damage",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
-                        stat: None,
-                        dataValue: 3350336792,
+                        stat: Some(2),
+                        dataValue: "bonus_ad_ratio",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            3746727455: (
+            "percent_bite_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 64618745,
+                        dataValue: "base_percent_damage",
+                    ),
+                ]),
+                multiplier: None,
+                precision: Some(1),
+            ),
+            "total_slow": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "slow_amount",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
-                        stat: Some(2),
-                        dataValue: 162078152,
+                        stat: None,
+                        dataValue: "slow_ap_ratio",
                     ),
                 ]),
                 multiplier: None,

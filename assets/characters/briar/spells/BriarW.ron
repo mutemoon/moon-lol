@@ -1,29 +1,37 @@
 (
     spellData: Some((
         calculations: Some({
-            862343836: (
+            "attack_max_hp_heal": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 3815639028,
-                    ),
-                    (
                         type: "CalculationPartStatCoefficient",
-                        stat: Some(2),
-                        coefficient: Some(0.025),
-                        statFormula: Some(2),
+                        stat: Some(12),
+                        coefficient: Some(0.05),
+                        statFormula: None,
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            1691308501: (
+            "total_ao_e_damage": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(2),
+                        dataValue: "ao_e_attack_damage_percent",
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "total_attack_bonus_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 4122580781,
+                        dataValue: "attack_bonus_damage",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -35,26 +43,18 @@
                 multiplier: None,
                 precision: None,
             ),
-            2716031533: (
+            "total_attack_percent_missing_health": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: Some(2),
-                        dataValue: 2097096702,
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "attack_percent_missing_health",
                     ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            4256112263: (
-                type: "CalculationSpell",
-                formulaParts: Some([
                     (
                         type: "CalculationPartStatCoefficient",
-                        stat: Some(12),
-                        coefficient: Some(0.05),
-                        statFormula: None,
+                        stat: Some(2),
+                        coefficient: Some(0.025),
+                        statFormula: Some(2),
                     ),
                 ]),
                 multiplier: None,

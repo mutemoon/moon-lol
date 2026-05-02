@@ -1,7 +1,40 @@
 (
     spellData: Some((
         calculations: Some({
-            39955312: (
+            "attack_damage": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(2),
+                        coefficient: Some(1.0),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: Some((
+                    type: "CalculationPartNamedDataValue",
+                    dataValue: "infernum_damage_multiplier",
+                )),
+                precision: None,
+            ),
+            "infernum_qcd": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            "minion_penalty": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "minion_penalty_base",
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "q_wave_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -19,43 +52,10 @@
                 multiplier: None,
                 precision: None,
             ),
-            812115729: (
+            "secondary_target_penalty": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
-                precision: None,
-            ),
-            1218814547: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: None,
-            ),
-            2216099428: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 2175888721,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            4081769832: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartStatCoefficient",
-                        stat: Some(2),
-                        coefficient: Some(1.0),
-                        statFormula: None,
-                    ),
-                ]),
-                multiplier: Some((
-                    type: "CalculationPartNamedDataValue",
-                    dataValue: 909787919,
-                )),
                 precision: None,
             ),
         }),

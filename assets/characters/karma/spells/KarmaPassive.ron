@@ -1,7 +1,7 @@
 (
     spellData: Some((
         calculations: Some({
-            3255280542: (
+            "spell_mantra_refund": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,

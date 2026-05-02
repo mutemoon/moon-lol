@@ -1,7 +1,7 @@
 (
     spellData: Some((
         calculations: Some({
-            208484500: (
+            "calc_heal_min": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -20,12 +20,29 @@
                 multiplier: None,
                 precision: None,
             ),
-            1508461632: (
+            "calc_shield": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 64618745,
+                        dataValue: "shield",
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(12),
+                        coefficient: Some(0.05),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "damage": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "base_damage",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -43,29 +60,12 @@
                 multiplier: None,
                 precision: None,
             ),
-            2672392607: (
+            "move_speed": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 2018645152,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            3444738404: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 863312304,
-                    ),
-                    (
-                        type: "CalculationPartStatCoefficient",
-                        stat: Some(12),
-                        coefficient: Some(0.05),
-                        statFormula: None,
+                        dataValue: "base_move_speed",
                     ),
                 ]),
                 multiplier: None,

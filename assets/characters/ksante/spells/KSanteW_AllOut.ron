@@ -1,13 +1,13 @@
 (
     spellData: Some((
         calculations: Some({
-            2564440924: (
+            "max_monster_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),
-            3667337808: (
+            "unk_0x98da435c": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,

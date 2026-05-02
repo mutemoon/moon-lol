@@ -1,41 +1,41 @@
 (
     spellData: Some((
         calculations: Some({
-            743758831: (
+            "damage_per_bounce": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: None,
-                        dataValue: 2550644758,
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "base_damage_bounce",
                     ),
                     (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 4021088689,
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: "bounce_ap_ratio_tooltip",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            2792492895: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 4021088689,
-                    ),
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: None,
-                        dataValue: 2550644758,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            3961918952: (
+            "duration_tooltip": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            "max_damage_tooltip": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: "bounce_ap_ratio_tooltip",
+                    ),
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "base_damage_bounce",
+                    ),
+                ]),
                 multiplier: None,
                 precision: None,
             ),

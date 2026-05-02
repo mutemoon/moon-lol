@@ -1,12 +1,12 @@
 (
     spellData: Some((
         calculations: Some({
-            241153302: (
+            "heal_per_second": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 1074825741,
+                        dataValue: "heal_base_per_second",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",

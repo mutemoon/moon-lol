@@ -1,74 +1,74 @@
 (
     spellData: Some((
         calculations: Some({
-            2020165279: (
+            "as_duration": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),
-            2036942898: (
+            "champion_ad": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(4),
-                        dataValue: 2071296771,
+                        dataValue: "a_sto_ad_champion",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            2238274326: (
+            "champion_ap": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(4),
-                        dataValue: 2648470023,
+                        dataValue: "a_sto_ap_champion",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            3563825907: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: Some(4),
-                        dataValue: 1921561474,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            3660367429: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: None,
-            ),
-            3899378287: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: Some(4),
-                        dataValue: 564734838,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            3916155906: (
+            "champion_as": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 3191555322,
+                        dataValue: "passive_as",
                     ),
                 ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "minion_ad": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(4),
+                        dataValue: "a_sto_ad_minion",
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "minion_ap": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(4),
+                        dataValue: "a_sto_ap_minion",
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "minion_as": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),

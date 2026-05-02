@@ -105,7 +105,7 @@ fn cast_anivia_q(
                 shape: DamageShape::Circle { radius: 150.0 },
                 damage_list: vec![TargetDamage {
                     filter: TargetFilter::All,
-                    amount: hash_bin("TotalDamage"),
+                    amount: "TotalDamage".to_string(),
                     damage_type: DamageType::Magic,
                 }],
                 particle: Some(hash_bin("Anivia_Q_Hit")),
@@ -153,7 +153,7 @@ fn cast_anivia_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
             shape: DamageShape::Circle { radius: 600.0 },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: hash_bin("TotalDamage"),
+                amount: "TotalDamage".to_string(),
                 damage_type: DamageType::Magic,
             }],
             particle: Some(hash_bin("Anivia_E_Hit")),
@@ -181,7 +181,7 @@ fn cast_anivia_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
             shape: DamageShape::Circle { radius: 750.0 },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: hash_bin("TotalDamage"),
+                amount: "TotalDamage".to_string(),
                 damage_type: DamageType::Magic,
             }],
             particle: Some(hash_bin("Anivia_R_Hit")),

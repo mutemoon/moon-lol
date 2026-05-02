@@ -1,39 +1,39 @@
 (
     spellData: Some((
         calculations: Some({
-            501147496: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 64618745,
-                    ),
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: None,
-                        dataValue: 77565491,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            1398536392: (
+            "aoe_mod": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),
-            2638488080: (
+            "total_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 1834737981,
+                        dataValue: "base_damage",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 3469088763,
+                        dataValue: "damage_ratio",
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "total_slow": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "base_slow",
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: "slow_ratio",
                     ),
                 ]),
                 multiplier: None,

@@ -123,7 +123,7 @@ fn cast_camille_q(
                 },
                 damage_list: vec![TargetDamage {
                     filter: TargetFilter::All,
-                    amount: hash_bin("TotalDamage"),
+                    amount: "TotalDamage".to_string(),
                     damage_type: DamageType::Physical,
                 }],
                 particle: Some(hash_bin("Camille_Q2_Hit")),
@@ -159,7 +159,7 @@ fn cast_camille_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<S
             },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: hash_bin("TotalDamage"),
+                amount: "TotalDamage".to_string(),
                 damage_type: DamageType::Physical,
             }],
             particle: Some(hash_bin("Camille_W_Hit")),
@@ -210,7 +210,7 @@ fn cast_camille_e(
                 radius_end: 150.0,
                 damage: TargetDamage {
                     filter: TargetFilter::All,
-                    amount: hash_bin("TotalDamage"),
+                    amount: "TotalDamage".to_string(),
                     damage_type: DamageType::Physical,
                 },
             }),
@@ -251,7 +251,7 @@ fn cast_camille_r(
             radius_end: 150.0,
             damage: TargetDamage {
                 filter: TargetFilter::Champion,
-                amount: hash_bin("TotalDamage"),
+                amount: "TotalDamage".to_string(),
                 damage_type: DamageType::Physical,
             },
         }),

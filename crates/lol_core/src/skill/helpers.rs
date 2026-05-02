@@ -1,4 +1,3 @@
-use league_utils::hash_bin;
 use lol_base::spell::Spell;
 use lol_base::spell_calc::{
     CalculationPart, CalculationPartEffectValue, CalculationPartNamedDataValue,
@@ -8,13 +7,13 @@ use lol_base::spell_calc::{
 
 pub fn get_skill_value(
     skill_object: &Spell,
-    hash: u32,
+    name: &str,
     level: usize,
     get_stat: impl Fn(u8) -> f32,
 ) -> Option<f32> {
     let spell = skill_object.spell_data.as_ref()?;
     let calculations = spell.calculations.as_ref()?;
-    let calculation = calculations.get(&hash)?;
+    let calculation = calculations.get(name)?;
 
     match calculation {
         CalculationType::CalculationSpell(calc) => {
@@ -77,9 +76,8 @@ fn calculate_part(
                 .and_then(|s| s.data_values.as_ref())
             {
                 for dv in data_values {
-                    // Check if hash of name matches data_value
-                    let hash = hash_bin(&dv.name);
-                    if hash == *data_value {
+                    //直接通过名称匹配
+                    if &dv.name == data_value {
                         if let Some(values) = &dv.values {
                             let lvl_idx = if level > 0 { level - 1 } else { 0 };
                             return *values.get(lvl_idx).unwrap_or(&0.0);
@@ -113,8 +111,7 @@ fn calculate_part(
                 .and_then(|s| s.data_values.as_ref())
             {
                 for dv in data_values {
-                    let hash = hash_bin(&dv.name);
-                    if hash == *data_value {
+                    if &dv.name == data_value {
                         if let Some(values) = &dv.values {
                             let lvl_idx = if level > 0 { level - 1 } else { 0 };
                             data_val = *values.get(lvl_idx).unwrap_or(&0.0);

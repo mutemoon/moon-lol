@@ -1,12 +1,12 @@
 (
     spellData: Some((
         calculations: Some({
-            1067737825: (
+            "r_explosion_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 1508461632,
+                        dataValue: "damage",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -18,12 +18,12 @@
                 multiplier: None,
                 precision: None,
             ),
-            2031378691: (
+            "r_multi_hit_amplification": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 2320411891,
+                        dataValue: "multi_hit_amp",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",

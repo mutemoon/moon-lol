@@ -1,7 +1,7 @@
 (
     spellData: Some((
         calculations: Some({
-            501147496: (
+            "total_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -18,7 +18,7 @@
                 multiplier: None,
                 precision: None,
             ),
-            1704249176: (
+            "total_shield": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -34,7 +34,7 @@
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(12),
-                        dataValue: 2986624386,
+                        dataValue: "shield_percent_health_tooltip",
                     ),
                 ]),
                 multiplier: None,

@@ -1,28 +1,28 @@
 (
     spellData: Some((
         calculations: Some({
-            501147496: (
+            "bonus_true_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 435677466,
+                        dataValue: "flat_damage_true",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 3809245599,
+                        dataValue: "ap_ratio",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            1470046459: (
+            "prance_speed": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 542374326,
+                        dataValue: "prance_bonus_per_stack",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -34,17 +34,17 @@
                 multiplier: None,
                 precision: None,
             ),
-            2713094069: (
+            "total_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 500244075,
+                        dataValue: "flat_damage_base",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 3809245599,
+                        dataValue: "ap_ratio",
                     ),
                 ]),
                 multiplier: None,

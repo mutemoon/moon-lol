@@ -1,43 +1,43 @@
 (
     spellData: Some((
         calculations: Some({
-            1759244075: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 1253694117,
-                    ),
-                ]),
-                multiplier: None,
-                precision: Some(1),
-            ),
-            2528048467: (
+            "attack_heal": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),
-            3674411801: (
+            "base_wolf_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 3543365352,
+                        dataValue: "clone_damage_flat",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(2),
-                        dataValue: 1727577746,
+                        dataValue: "clone_ad_ratio",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 3809245599,
+                        dataValue: "ap_ratio",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
+            ),
+            "percent_wolf_damage": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "clone_base_percent_damage",
+                    ),
+                ]),
+                multiplier: None,
+                precision: Some(1),
             ),
         }),
         effectAmounts: Some([

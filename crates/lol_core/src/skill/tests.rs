@@ -29,7 +29,7 @@ use crate::team::Team;
 
 const TEST_FPS: f32 = 30.0;
 const SPELL_KEY: u32 = 0x5001;
-const DAMAGE_AMOUNT_KEY: u32 = 0x5003;
+const DAMAGE_AMOUNT_KEY: &str = "damage_amount";
 const EPSILON: f32 = 1e-4;
 
 fn spell_handle(key: u32) -> Handle<Spell> {
@@ -82,7 +82,7 @@ fn on_action_damage_skill_cast(
             shape: DamageShape::Circle { radius: 120.0 },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: DAMAGE_AMOUNT_KEY,
+                amount: DAMAGE_AMOUNT_KEY.to_string(),
                 damage_type: DamageType::Physical,
             }],
             particle: None,
@@ -141,7 +141,7 @@ impl ActionSkillHarness {
 
         let mut calculations = BTreeMap::new();
         calculations.insert(
-            DAMAGE_AMOUNT_KEY,
+            DAMAGE_AMOUNT_KEY.to_string(),
             CalculationType::CalculationSpell(CalculationSpell {
                 formula_parts: Some(vec![CalculationPart::CalculationPartEffectValue(
                     CalculationPartEffectValue {
@@ -321,7 +321,7 @@ use super::*;
 use crate::skill::get_skill_value;
 
 fn create_mock_spell(
-    calculations: std::collections::BTreeMap<u32, lol_base::spell_calc::CalculationType>,
+    calculations: std::collections::BTreeMap<String, lol_base::spell_calc::CalculationType>,
     effect_amounts: Option<Vec<lol_base::spell::ValuesEffect>>,
     data_values: Option<Vec<lol_base::spell::ValuesData>>,
 ) -> Spell {
@@ -349,7 +349,7 @@ fn test_effect_value_calculation() {
         CalculationPart, CalculationPartEffectValue, CalculationSpell, CalculationType,
     };
 
-    let hash = 123;
+    let key = "effect_damage".to_string();
     let effect_index = 1;
     let expected_value_lvl1 = 10.0;
     let expected_value_lvl2 = 20.0;
@@ -365,7 +365,7 @@ fn test_effect_value_calculation() {
     });
 
     let mut calculations = BTreeMap::new();
-    calculations.insert(hash, calc);
+    calculations.insert(key.clone(), calc);
 
     let effect_amounts = vec![ValuesEffect {
         values: Some(vec![expected_value_lvl1, expected_value_lvl2, 30.0]),
@@ -373,10 +373,10 @@ fn test_effect_value_calculation() {
 
     let spell = create_mock_spell(calculations, Some(effect_amounts), None);
 
-    let result = get_skill_value(&spell, hash, 1, |_| 0.0);
+    let result = get_skill_value(&spell, &key, 1, |_| 0.0);
     assert_eq!(result, Some(expected_value_lvl1));
 
-    let result = get_skill_value(&spell, hash, 2, |_| 0.0);
+    let result = get_skill_value(&spell, &key, 2, |_| 0.0);
     assert_eq!(result, Some(expected_value_lvl2));
 }
 
@@ -389,7 +389,7 @@ fn test_stat_by_coefficient_calculation() {
         CalculationPart, CalculationPartStatCoefficient, CalculationSpell, CalculationType,
     };
 
-    let hash = 456;
+    let key = "stat_coefficient".to_string();
     let stat_id = 2;
     let coefficient = 1.5;
     let stat_value = 100.0;
@@ -409,11 +409,11 @@ fn test_stat_by_coefficient_calculation() {
     });
 
     let mut calculations = BTreeMap::new();
-    calculations.insert(hash, calc);
+    calculations.insert(key.clone(), calc);
 
     let spell = create_mock_spell(calculations, None, None);
 
-    let result = get_skill_value(&spell, hash, 1, |id| {
+    let result = get_skill_value(&spell, &key, 1, |id| {
         if id == stat_id { stat_value } else { 0.0 }
     });
     assert_eq!(result, Some(expected_value));
@@ -428,13 +428,13 @@ fn test_named_data_value_calculation() {
         CalculationPart, CalculationPartNamedDataValue, CalculationSpell, CalculationType,
     };
 
-    let hash = 789;
+    let key = "named_data_value".to_string();
     let data_name = "BaseDamage";
-    let data_name_hash = hash_bin(data_name);
+    let data_value_name = "base_damage".to_string();
     let expected_value = 50.0;
 
     let calc_part = CalculationPart::CalculationPartNamedDataValue(CalculationPartNamedDataValue {
-        data_value: data_name_hash,
+        data_value: data_value_name,
     });
 
     let calc = CalculationType::CalculationSpell(CalculationSpell {
@@ -444,7 +444,7 @@ fn test_named_data_value_calculation() {
     });
 
     let mut calculations = BTreeMap::new();
-    calculations.insert(hash, calc);
+    calculations.insert(key.clone(), calc);
 
     let data_values = vec![ValuesData {
         name: data_name.to_string(),
@@ -453,6 +453,6 @@ fn test_named_data_value_calculation() {
 
     let spell = create_mock_spell(calculations, None, Some(data_values));
 
-    let result = get_skill_value(&spell, hash, 1, |_| 0.0);
+    let result = get_skill_value(&spell, &key, 1, |_| 0.0);
     assert_eq!(result, Some(expected_value));
 }

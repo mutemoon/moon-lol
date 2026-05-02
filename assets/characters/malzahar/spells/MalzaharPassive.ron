@@ -1,7 +1,7 @@
 (
     spellData: Some((
         calculations: Some({
-            4175896801: (
+            "shield_cooldown": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,

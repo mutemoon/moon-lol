@@ -1,13 +1,13 @@
 (
     spellData: Some((
         calculations: Some({
-            3768369729: (
+            "bonus_ad": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(2),
-                        dataValue: 3301364314,
+                        dataValue: "naafiri_ad_percent_boost",
                     ),
                 ]),
                 multiplier: None,

@@ -199,7 +199,7 @@ pub fn extract_character_from_record(
     };
 
     // 提取技能数据到文件
-    extract_spells_for_champion(character_name, &prop_group);
+    extract_spells_for_champion(character_name, &prop_group, hashes);
 
     // 创建 App 用于获取 AssetServer
     let mut app = App::new();

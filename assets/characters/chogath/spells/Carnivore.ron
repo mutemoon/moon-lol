@@ -1,13 +1,13 @@
 (
     spellData: Some((
         calculations: Some({
-            1879046366: (
+            "chogath_carnivore_heal": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),
-            2149571699: (
+            "chogath_carnivore_mana": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,

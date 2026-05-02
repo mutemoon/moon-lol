@@ -1,7 +1,7 @@
 (
     spellData: Some((
         calculations: Some({
-            3167263264: (
+            "total_damage_tt": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -18,12 +18,12 @@
                 multiplier: None,
                 precision: None,
             ),
-            4002878692: (
+            "unk_0xee9714e4": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 4253000201,
+                        dataValue: "slow_percent",
                     ),
                 ]),
                 multiplier: None,

@@ -1,7 +1,20 @@
 (
     spellData: Some((
         calculations: Some({
-            454723602: (
+            "damage_calc": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(2),
+                        coefficient: Some(1.0),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "heal_calc": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -14,7 +27,7 @@
                 multiplier: None,
                 precision: None,
             ),
-            761057777: (
+            "resists_calc": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -27,31 +40,18 @@
                 multiplier: None,
                 precision: None,
             ),
-            2702025016: (
+            "shield_damage_calc": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 2945036752,
+                        dataValue: "shield_base_damage",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
                         stat: Some(2),
                         coefficient: Some(1.5),
                         statFormula: Some(2),
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            3387110781: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartStatCoefficient",
-                        stat: Some(2),
-                        coefficient: Some(1.0),
-                        statFormula: None,
                     ),
                 ]),
                 multiplier: None,

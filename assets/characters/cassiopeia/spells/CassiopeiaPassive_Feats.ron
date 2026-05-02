@@ -1,18 +1,18 @@
 (
     spellData: Some((
         calculations: Some({
-            855179667: (
+            "bonus_ability_power": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),
-            3589343195: (
+            "total_movement_speed": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: Some((
                     type: "CalculationPartNamedDataValue",
-                    dataValue: 165341113,
+                    dataValue: "modes_ms_mod",
                 )),
                 precision: None,
             ),

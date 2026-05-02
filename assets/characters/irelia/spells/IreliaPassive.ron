@@ -1,7 +1,7 @@
 (
     spellData: Some((
         calculations: Some({
-            505226468: (
+            "on_hit_bonus": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -14,7 +14,7 @@
                 multiplier: None,
                 precision: None,
             ),
-            2699826063: (
+            "single_stack_as": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,

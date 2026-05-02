@@ -1,7 +1,24 @@
 (
     spellData: Some((
         calculations: Some({
-            943540971: (
+            "throw_damage": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "base_damage",
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: None,
+                        coefficient: Some(0.65),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "tooltiponly_passive_bonus_percent": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -14,29 +31,12 @@
                 multiplier: None,
                 precision: Some(1),
             ),
-            3734071550: (
+            "total_slow_amount": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 64618745,
-                    ),
-                    (
-                        type: "CalculationPartStatCoefficient",
-                        stat: None,
-                        coefficient: Some(0.65),
-                        statFormula: None,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            3941670476: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 1834737981,
+                        dataValue: "base_slow",
                     ),
                 ]),
                 multiplier: None,

@@ -1,65 +1,65 @@
 (
     spellData: Some((
         calculations: Some({
-            1109669948: (
+            "granted_ally_armor": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 1653255099,
+                        dataValue: "base_resists",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(1),
-                        dataValue: 4180576614,
+                        dataValue: "ally_armor_percent",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            1420829926: (
+            "granted_ally_mr": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 1653255099,
+                        dataValue: "base_resists",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(6),
-                        dataValue: 4180576614,
+                        dataValue: "ally_armor_percent",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            1674693833: (
+            "granted_braum_armor": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 1653255099,
+                        dataValue: "base_resists",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(1),
-                        dataValue: 2191029255,
+                        dataValue: "braum_armor_percent",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            3073507133: (
+            "granted_braum_mr": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 1653255099,
+                        dataValue: "base_resists",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(6),
-                        dataValue: 2191029255,
+                        dataValue: "braum_armor_percent",
                     ),
                 ]),
                 multiplier: None,

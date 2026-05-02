@@ -1,91 +1,12 @@
 (
     spellData: Some((
         calculations: Some({
-            391362326: (
+            "calc_damage_1_max": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 2981364178,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            694363095: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 980153502,
-                    ),
-                    (
-                        type: "CalculationPartStatCoefficient",
-                        stat: Some(2),
-                        coefficient: Some(0.0003),
-                        statFormula: Some(2),
-                    ),
-                ]),
-                multiplier: None,
-                precision: Some(1),
-            ),
-            707753674: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 1994395151,
-                    ),
-                    (
-                        type: "CalculationPartStatCoefficient",
-                        stat: Some(2),
-                        coefficient: Some(0.0004),
-                        statFormula: Some(2),
-                    ),
-                ]),
-                multiplier: None,
-                precision: Some(1),
-            ),
-            1322594364: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 1556013019,
-                    ),
-                    (
-                        type: "CalculationPartStatCoefficient",
-                        stat: Some(2),
-                        coefficient: Some(0.9),
-                        statFormula: Some(2),
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            1741163824: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: None,
-            ),
-            1975905851: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 3911128919,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            3047430457: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 3275800060,
+                        dataValue: "damage_1_base",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -97,7 +18,86 @@
                 multiplier: None,
                 precision: None,
             ),
-            3127954165: (
+            "calc_damage_1_min_ratio": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "damage_1_min_ratio",
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "calc_damage_1_percent_max": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "damage_1_percent",
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(2),
+                        coefficient: Some(0.0003),
+                        statFormula: Some(2),
+                    ),
+                ]),
+                multiplier: None,
+                precision: Some(1),
+            ),
+            "calc_damage_2_max": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "damage_2_base",
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(2),
+                        coefficient: Some(0.9),
+                        statFormula: Some(2),
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "calc_damage_2_min_ratio": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "damage_2_min_ratio",
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "calc_damage_2_percent_max": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "damage_2_percent",
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(2),
+                        coefficient: Some(0.0004),
+                        statFormula: Some(2),
+                    ),
+                ]),
+                multiplier: None,
+                precision: Some(1),
+            ),
+            "calc_damage_monster_flat_bonus": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            "calc_damage_monster_percent_cap": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,

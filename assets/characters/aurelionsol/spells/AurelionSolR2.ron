@@ -1,61 +1,61 @@
 (
     spellData: Some((
         calculations: Some({
-            75129323: (
+            "max_damage_tooltip": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 754750083,
+                        dataValue: "base_damage_center",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 3424583977,
+                        dataValue: "ap_ratio_center",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            113261266: (
+            "min_damage_tooltip": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "base_damage",
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: "ap_ratio",
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "unk_0x47a61eb": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "calamity_base_damage",
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: "calamity_ap_ratio",
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "unk_0x6c03ad2": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: Some((
                     type: "CalculationPartNamedDataValue",
-                    dataValue: 1065024672,
+                    dataValue: "inverse_pi",
                 )),
-                precision: None,
-            ),
-            646963981: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 64618745,
-                    ),
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: None,
-                        dataValue: 3809245599,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            743758831: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 999281912,
-                    ),
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: None,
-                        dataValue: 2499458930,
-                    ),
-                ]),
-                multiplier: None,
                 precision: None,
             ),
         }),

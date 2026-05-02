@@ -1,12 +1,12 @@
 (
     spellData: Some((
         calculations: Some({
-            2217972460: (
+            "love_tap_refund": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 1301987201,
+                        dataValue: "love_tap_base_refund",
                     ),
                 ]),
                 multiplier: None,

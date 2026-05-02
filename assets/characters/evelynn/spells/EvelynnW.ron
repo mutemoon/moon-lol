@@ -1,12 +1,12 @@
 (
     spellData: Some((
         calculations: Some({
-            194726997: (
+            "monster_damage_total_tooltip": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 883098300,
+                        dataValue: "monster_damage",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",

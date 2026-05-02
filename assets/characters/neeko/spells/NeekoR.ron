@@ -1,29 +1,29 @@
 (
     spellData: Some((
         calculations: Some({
-            501147496: (
+            "base_shield": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 1508461632,
+                        dataValue: "shield_amount",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
                         stat: None,
-                        coefficient: Some(1.2),
+                        coefficient: Some(0.75),
                         statFormula: None,
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            2535160807: (
+            "shield_multiplier": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 3405562308,
+                        dataValue: "shield_per_champion",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -35,17 +35,17 @@
                 multiplier: None,
                 precision: None,
             ),
-            2831277281: (
+            "total_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 1089369324,
+                        dataValue: "damage",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
                         stat: None,
-                        coefficient: Some(0.75),
+                        coefficient: Some(1.2),
                         statFormula: None,
                     ),
                 ]),

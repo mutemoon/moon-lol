@@ -1,7 +1,7 @@
 (
     spellData: Some((
         calculations: Some({
-            1476535861: (
+            "bonus_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (

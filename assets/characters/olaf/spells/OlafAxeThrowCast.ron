@@ -1,12 +1,23 @@
 (
     spellData: Some((
         calculations: Some({
-            501147496: (
+            "tooltip_cd_refund": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 64618745,
+                        dataValue: "minimum_cooldown",
+                    ),
+                ]),
+                multiplier: None,
+                precision: Some(1),
+            ),
+            "total_damage": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "base_damage",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -17,17 +28,6 @@
                 ]),
                 multiplier: None,
                 precision: None,
-            ),
-            3353897965: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 1017153906,
-                    ),
-                ]),
-                multiplier: None,
-                precision: Some(1),
             ),
         }),
         effectAmounts: None,

@@ -1,17 +1,17 @@
 (
     spellData: Some((
         calculations: Some({
-            4207551932: (
+            "total_e_vamp": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 1772265762,
+                        dataValue: "e_spell_vamp",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(12),
-                        dataValue: 82913047,
+                        dataValue: "e_vamp_hp_ratio",
                     ),
                 ]),
                 multiplier: None,

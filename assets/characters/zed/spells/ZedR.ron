@@ -1,7 +1,7 @@
 (
     spellData: Some((
         calculations: Some({
-            1074619340: (
+            "r_calculated_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -14,12 +14,12 @@
                 multiplier: None,
                 precision: None,
             ),
-            1134565867: (
+            "unk_0x43a019eb": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 3754703024,
+                        dataValue: "r_shadow_duration_displayed",
                     ),
                 ]),
                 multiplier: None,

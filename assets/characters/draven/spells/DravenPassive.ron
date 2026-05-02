@@ -1,13 +1,13 @@
 (
     spellData: Some((
         calculations: Some({
-            901688691: (
+            "draven_passive_gold_earned": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),
-            3339218573: (
+            "draven_passive_highest_bounty": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,

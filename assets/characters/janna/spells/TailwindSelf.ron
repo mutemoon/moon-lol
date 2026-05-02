@@ -1,24 +1,24 @@
 (
     spellData: Some((
         calculations: Some({
-            237532172: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 36351330,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            1476535861: (
+            "bonus_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(7),
-                        dataValue: 36351330,
+                        dataValue: "ms_bonus_magic_damage",
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "ms_to_on_hit_conversion_rate": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "ms_bonus_magic_damage",
                     ),
                 ]),
                 multiplier: None,

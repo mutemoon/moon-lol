@@ -1,17 +1,17 @@
 (
     spellData: Some((
         calculations: Some({
-            1193606232: (
+            "ad": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 2913351839,
+                        dataValue: "flat_ad",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(2),
-                        dataValue: 1493414613,
+                        dataValue: "percent_total_ad_amp",
                     ),
                 ]),
                 multiplier: None,

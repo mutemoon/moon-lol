@@ -1,23 +1,23 @@
 (
     spellData: Some((
         calculations: Some({
-            1426481597: (
+            "q_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 4035213700,
+                        dataValue: "q_base_damage",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(2),
-                        dataValue: 1508478382,
+                        dataValue: "q_total_ad_ratio",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            2967766355: (
+            "q_minion_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,

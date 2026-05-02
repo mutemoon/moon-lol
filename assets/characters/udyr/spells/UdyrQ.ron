@@ -1,13 +1,58 @@
 (
     spellData: Some((
         calculations: Some({
-            1014169952: (
+            "empowered_lightning_bonus": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: "lightning_ap_ratio",
+                    ),
+                ]),
+                multiplier: None,
+                precision: Some(1),
+            ),
+            "empowered_lightning_bonus_max": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: Some(1),
+            ),
+            "empowered_total_as": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "attack_speed_base",
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "lightning_damage_to_minions_min": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),
-            1455393055: (
+            "max_hp_on_hit1": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "max_hp_on_hit_base",
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(2),
+                        dataValue: "max_hpad_ratio",
+                    ),
+                ]),
+                multiplier: None,
+                precision: Some(1),
+            ),
+            "monster_cap": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -26,63 +71,12 @@
                 multiplier: None,
                 precision: None,
             ),
-            2468566240: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: None,
-                        dataValue: 1550032095,
-                    ),
-                ]),
-                multiplier: None,
-                precision: Some(1),
-            ),
-            2636505447: (
+            "on_hit_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 2226609652,
-                    ),
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: Some(2),
-                        dataValue: 1346873256,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            2938477640: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: None,
-            ),
-            3174453934: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: Some(1),
-            ),
-            3315939665: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 16315917,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            3484084320: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 64618745,
+                        dataValue: "base_damage",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -94,23 +88,29 @@
                 multiplier: None,
                 precision: None,
             ),
-            3895804424: (
+            "q2_total_on_hit_hp_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 2226609652,
+                        dataValue: "max_hp_on_hit_base",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(2),
-                        dataValue: 708912383,
+                        dataValue: "q2_max_hpad_ratio",
                     ),
                 ]),
                 multiplier: None,
-                precision: Some(1),
+                precision: None,
             ),
-            3960584390: (
+            "unk_0xaf259c48": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            "unk_0xec11b8c6": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,

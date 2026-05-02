@@ -1,13 +1,13 @@
 (
     spellData: Some((
         calculations: Some({
-            937010576: (
+            "rocket_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(2),
-                        dataValue: 3407905334,
+                        dataValue: "rocket_tad",
                     ),
                 ]),
                 multiplier: None,

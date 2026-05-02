@@ -1,7 +1,7 @@
 (
     spellData: Some((
         calculations: Some({
-            3119446990: (
+            "base_health": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (

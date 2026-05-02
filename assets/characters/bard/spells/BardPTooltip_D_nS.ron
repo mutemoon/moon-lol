@@ -1,50 +1,50 @@
 (
     spellData: Some((
         calculations: Some({
-            1257926103: (
+            "chimes_for_slow_upgrade": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 3613020745,
+                        dataValue: "chimes_per_upgrade",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            1946414976: (
+            "chimes_for_splash_area_upgrade": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 3750294930,
+                        dataValue: "chimes_per_upgrade",
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "chimes_for_splash_damage_upgrade": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "chimes_per_upgrade",
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "meep_damage_no_chime": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "base_meep_damage",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 253072382,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            3099108330: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 3613020745,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            4123677207: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 3613020745,
+                        dataValue: "meep_ap_ratio",
                     ),
                 ]),
                 multiplier: None,

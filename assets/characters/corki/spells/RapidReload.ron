@@ -1,13 +1,13 @@
 (
     spellData: Some((
         calculations: Some({
-            2581971600: (
+            "basic_attack_tooltip": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(2),
-                        dataValue: 4206920653,
+                        dataValue: "attack_conversion",
                     ),
                 ]),
                 multiplier: None,

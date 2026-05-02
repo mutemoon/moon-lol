@@ -1,32 +1,32 @@
 (
     spellData: Some((
         calculations: Some({
-            1203212646: (
+            "damage_per_hit": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 1466524846,
-                    ),
-                ]),
-                multiplier: None,
-                precision: Some(2),
-            ),
-            4158291768: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 64618745,
+                        dataValue: "base_damage",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(2),
-                        dataValue: 942499611,
+                        dataValue: "ad_ratio",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
+            ),
+            "total_number_of_attacks": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "num_of_attacks_base",
+                    ),
+                ]),
+                multiplier: None,
+                precision: Some(2),
             ),
         }),
         effectAmounts: None,

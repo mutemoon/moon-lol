@@ -1,13 +1,13 @@
 (
     spellData: Some((
         calculations: Some({
-            1161527013: (
+            "max_health_gained": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),
-            2077653553: (
+            "passive_heal_percent": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,

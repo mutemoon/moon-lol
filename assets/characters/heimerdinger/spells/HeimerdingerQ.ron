@@ -1,57 +1,51 @@
 (
     spellData: Some((
         calculations: Some({
-            680522911: (
+            "beam_cooldown": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            "damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 1301251566,
+                        dataValue: "base_damage",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 1876366470,
+                        dataValue: "turret_ap_ratio",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            1332180587: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: None,
-            ),
-            1508461632: (
+            "damage_beam": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 64618745,
+                        dataValue: "base_damage_beam",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 34709901,
+                        dataValue: "beam_ap_ratio",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            1839564722: (
+            "kit_cooldown": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),
-            2164895355: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: None,
-            ),
-            2972332161: (
+            "turret_health": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -62,11 +56,17 @@
                 ]),
                 multiplier: Some((
                     type: "CalculationPartNamedDataValue",
-                    dataValue: 1922566287,
+                    dataValue: "turret_health_mod",
                 )),
                 precision: None,
             ),
-            4031869745: (
+            "unk_0x8109ae7b": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            "unk_0xf0517331": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,

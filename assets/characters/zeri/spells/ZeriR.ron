@@ -1,24 +1,24 @@
 (
     spellData: Some((
         calculations: Some({
-            558378698: (
+            "chain_physical_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(2),
-                        dataValue: 1858932358,
+                        dataValue: "chain_ad_ratio",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            3194562070: (
+            "total_active_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 512586750,
+                        dataValue: "active_damage",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -36,12 +36,12 @@
                 multiplier: None,
                 precision: None,
             ),
-            4181931309: (
+            "total_bonus_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 2478640766,
+                        dataValue: "bonus_magic_damage",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",

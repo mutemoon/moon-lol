@@ -1,40 +1,40 @@
 (
     spellData: Some((
         calculations: Some({
-            40884989: (
+            "additional_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 64618745,
+                        dataValue: "base_damage",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(12),
-                        dataValue: 4292780561,
+                        dataValue: "bonus_health_ratio",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            210462332: (
+            "max_damage_amp_tooltip": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: Some(12),
-                        dataValue: 3732678346,
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "max_damage_amp",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            3223459321: (
+            "passive_bonus_ad": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 1521540002,
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(12),
+                        dataValue: "health_to_ad_ratio",
                     ),
                 ]),
                 multiplier: None,

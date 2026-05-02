@@ -1,52 +1,52 @@
 (
     spellData: Some((
         calculations: Some({
-            432011975: (
+            "frost_armor_ooc": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            "percent_hp_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 109753470,
+                        dataValue: "percent_hp_damage_base",
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "total_armor_tooltip": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "bonus_armor_base",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(1),
-                        dataValue: 2560008502,
+                        dataValue: "bonus_armor_ratio",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            600178175: (
+            "total_mr_tooltip": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 2074095362,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            2107044957: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 3430477510,
+                        dataValue: "bonus_mr_base",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(6),
-                        dataValue: 3458184558,
+                        dataValue: "bonus_mr_ratio",
                     ),
                 ]),
-                multiplier: None,
-                precision: None,
-            ),
-            3012103443: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),

@@ -1,7 +1,7 @@
 (
     spellData: Some((
         calculations: Some({
-            1844455852: (
+            "total_damage_crit": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -14,7 +14,7 @@
                 multiplier: None,
                 precision: None,
             ),
-            2273767047: (
+            "total_damage_no_crit": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -27,7 +27,7 @@
                 multiplier: None,
                 precision: None,
             ),
-            2993592581: (
+            "total_healing": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (

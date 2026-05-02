@@ -1,7 +1,7 @@
 (
     spellData: Some((
         calculations: Some({
-            2993592581: (
+            "total_healing": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (

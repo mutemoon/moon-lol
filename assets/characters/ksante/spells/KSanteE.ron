@@ -1,17 +1,17 @@
 (
     spellData: Some((
         calculations: Some({
-            1704249176: (
+            "total_shield": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 1719398739,
+                        dataValue: "shield_base_amount_fast",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(12),
-                        dataValue: 3941748685,
+                        dataValue: "shield_health_ratio",
                     ),
                 ]),
                 multiplier: None,

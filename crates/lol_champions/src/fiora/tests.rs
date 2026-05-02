@@ -35,11 +35,11 @@ fn fiora_spell_keys() -> SpellKeySet {
 fn fiora_mock_spell() -> Spell {
     let mut calculations = BTreeMap::new();
     calculations.insert(
-        hash_bin("TotalDamage"),
+        "TotalDamage".to_string(),
         CalculationType::CalculationSpell(CalculationSpell {
             formula_parts: Some(vec![CalculationPart::CalculationPartNamedDataValue(
                 CalculationPartNamedDataValue {
-                    data_value: hash_bin("TotalDamage"),
+                    data_value: "TotalDamage".to_string(),
                 },
             )]),
             multiplier: None,

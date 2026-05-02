@@ -1,7 +1,13 @@
 (
     spellData: Some((
         calculations: Some({
-            913063040: (
+            "crit_damage_mult": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            "single_bullet_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -13,7 +19,7 @@
                 multiplier: None,
                 precision: None,
             ),
-            1419565645: (
+            "unk_0x549cda4d": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -23,12 +29,6 @@
                         statFormula: None,
                     ),
                 ]),
-                multiplier: None,
-                precision: None,
-            ),
-            2249435254: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),

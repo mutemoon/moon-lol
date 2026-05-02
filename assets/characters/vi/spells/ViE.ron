@@ -1,12 +1,21 @@
 (
     spellData: Some((
         calculations: Some({
-            921424847: (
+            "total_damage_tooltip": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "base_damage",
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(2),
+                        dataValue: "ad_ratio",
+                    ),
+                    (
                         type: "CalculationPartStatCoefficient",
-                        stat: Some(9),
+                        stat: None,
                         coefficient: Some(1.0),
                         statFormula: None,
                     ),
@@ -14,21 +23,12 @@
                 multiplier: None,
                 precision: None,
             ),
-            4073446979: (
+            "unk_0x36ebd3cf": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 64618745,
-                    ),
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: Some(2),
-                        dataValue: 942499611,
-                    ),
-                    (
                         type: "CalculationPartStatCoefficient",
-                        stat: None,
+                        stat: Some(9),
                         coefficient: Some(1.0),
                         statFormula: None,
                     ),

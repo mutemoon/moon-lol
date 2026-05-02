@@ -1,7 +1,7 @@
 (
     spellData: Some((
         calculations: Some({
-            501147496: (
+            "total_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -13,7 +13,7 @@
                 multiplier: None,
                 precision: None,
             ),
-            2993592581: (
+            "total_healing": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -24,7 +24,7 @@
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 1886965801,
+                        dataValue: "heal_ap_ratio",
                     ),
                 ]),
                 multiplier: None,

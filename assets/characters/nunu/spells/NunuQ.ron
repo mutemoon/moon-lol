@@ -1,43 +1,43 @@
 (
     spellData: Some((
         calculations: Some({
-            975448091: (
+            "monster_healing": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 1451939075,
+                        dataValue: "base_healing",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(12),
-                        dataValue: 2840862647,
+                        dataValue: "percentage_of_bonus_hp",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 739308531,
+                        dataValue: "monster_healing_ap_ratio",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            2462788001: (
+            "total_champion_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 1788080398,
+                        dataValue: "champion_damage",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(12),
-                        dataValue: 2217103903,
+                        dataValue: "bonus_max_hp_damage",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 3973874403,
+                        dataValue: "champ_damage_ap_ratio",
                     ),
                 ]),
                 multiplier: None,

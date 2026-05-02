@@ -1,7 +1,36 @@
 (
     spellData: Some((
         calculations: Some({
-            501147496: (
+            "darkin_flat_damage": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(2),
+                        coefficient: Some(0.65),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "darkin_percent_damage": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "slayer_base_max_hp_damage",
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(2),
+                        dataValue: "slayer_max_hp_per100_badtooltiponly",
+                    ),
+                ]),
+                multiplier: None,
+                precision: Some(1),
+            ),
+            "total_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -11,36 +40,7 @@
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(2),
-                        dataValue: 162078152,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            2090171030: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 1212966605,
-                    ),
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: Some(2),
-                        dataValue: 933991445,
-                    ),
-                ]),
-                multiplier: None,
-                precision: Some(1),
-            ),
-            3122262164: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartStatCoefficient",
-                        stat: Some(2),
-                        coefficient: Some(0.65),
-                        statFormula: None,
+                        dataValue: "bonus_ad_ratio",
                     ),
                 ]),
                 multiplier: None,

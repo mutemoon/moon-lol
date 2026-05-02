@@ -1,27 +1,27 @@
 (
     spellData: Some((
         calculations: Some({
-            934732877: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 467962025,
-                    ),
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: None,
-                        dataValue: 2970198068,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            3615491851: (
+            "min_stun": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: Some(1),
+            ),
+            "r_damage_calc": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "r_base_damage",
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: "r_ratio",
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
             ),
         }),
         effectAmounts: None,

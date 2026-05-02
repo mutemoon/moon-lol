@@ -1,12 +1,12 @@
 (
     spellData: Some((
         calculations: Some({
-            4152679161: (
+            "total_ms": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 3034116160,
+                        dataValue: "movement_speed_percent",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",

@@ -1,12 +1,12 @@
 (
     spellData: Some((
         calculations: Some({
-            42546197: (
+            "q_missile_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 64618745,
+                        dataValue: "base_damage",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -18,12 +18,18 @@
                 multiplier: None,
                 precision: None,
             ),
-            2247409897: (
+            "super_q_monster_max_damage_total": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            "unk_0x85f4c0e9": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 2042526066,
+                        dataValue: "super_q_base_percentage",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -32,12 +38,6 @@
                         statFormula: None,
                     ),
                 ]),
-                multiplier: None,
-                precision: None,
-            ),
-            2356409024: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),

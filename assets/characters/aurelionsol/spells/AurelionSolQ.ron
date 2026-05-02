@@ -1,47 +1,47 @@
 (
     spellData: Some((
         calculations: Some({
-            1765605772: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 2461107554,
-                    ),
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: None,
-                        dataValue: 199315427,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            1913260376: (
+            "burst_bonus_true_damage_to_champs": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: Some(1),
             ),
-            3793195086: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: None,
-            ),
-            4209723727: (
+            "burst_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 3476250957,
+                        dataValue: "rank_burst_damage",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 1984148579,
+                        dataValue: "burst_ap_ratio",
                     ),
                 ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "damage_per_second": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "rank_damage_per_second",
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: "ap_per_second",
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "level_based_range_scaling": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),

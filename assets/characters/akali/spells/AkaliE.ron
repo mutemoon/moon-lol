@@ -1,51 +1,51 @@
 (
     spellData: Some((
         calculations: Some({
-            2384880754: (
+            "e1_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 64618745,
+                        dataValue: "base_damage",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(2),
-                        dataValue: 1446754083,
+                        dataValue: "total_ad_ratio",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 3586158119,
+                        dataValue: "total_ap_ratio",
                     ),
                 ]),
                 multiplier: Some((
                     type: "CalculationPartNamedDataValue",
-                    dataValue: 1594592816,
+                    dataValue: "e1_percentage_of_total",
                 )),
                 precision: None,
             ),
-            3457731194: (
+            "e2_damage_calc": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 64618745,
+                        dataValue: "base_damage",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(2),
-                        dataValue: 1446754083,
+                        dataValue: "total_ad_ratio",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 3586158119,
+                        dataValue: "total_ap_ratio",
                     ),
                 ]),
                 multiplier: Some((
                     type: "CalculationPartNamedDataValue",
-                    dataValue: 1356583295,
+                    dataValue: "e2_percentage_of_total",
                 )),
                 precision: None,
             ),

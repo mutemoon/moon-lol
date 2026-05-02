@@ -1,71 +1,71 @@
 (
     spellData: Some((
         calculations: Some({
-            884421387: (
+            "current_execution_threshold": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 3748834729,
+                        dataValue: "base_execution_threshold",
                     ),
                 ]),
                 multiplier: None,
                 precision: Some(1),
             ),
-            1472537072: (
+            "damage_per_second": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 588418665,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            1576714633: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: Some((
-                    type: "CalculationPartNamedDataValue",
-                    dataValue: 1065024672,
-                )),
-                precision: None,
-            ),
-            2000803720: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: None,
-            ),
-            2963774616: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 2494368455,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            3793195086: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: None,
-            ),
-            4209723727: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 670785668,
+                        dataValue: "base_damage_per_second",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 3556570933,
+                        dataValue: "damageper_second_ap_ratio",
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "level_based_range_scaling": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            "unk_0x57c521f0": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "starting_gravity",
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "unk_0x5dfac189": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: Some((
+                    type: "CalculationPartNamedDataValue",
+                    dataValue: "inverse_pi",
+                )),
+                precision: None,
+            ),
+            "unk_0x7741d788": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            "unk_0xb0a79c98": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "starting_radius",
                     ),
                 ]),
                 multiplier: None,

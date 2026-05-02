@@ -1,23 +1,23 @@
 (
     spellData: Some((
         calculations: Some({
-            1166929275: (
+            "bonus_attack_speed": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 383788463,
+                        dataValue: "base_attack_speed",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            3484084320: (
+            "on_hit_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 64618745,
+                        dataValue: "base_damage",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",

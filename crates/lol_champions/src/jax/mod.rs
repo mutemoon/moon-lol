@@ -95,7 +95,7 @@ fn cast_jax_q(
             radius_end: 100.0,
             damage: TargetDamage {
                 filter: TargetFilter::All,
-                amount: hash_bin("TotalDamage"),
+                amount: "TotalDamage".to_string(),
                 damage_type: DamageType::Physical,
             },
         }),
@@ -169,7 +169,7 @@ fn cast_jax_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell
             shape: DamageShape::Circle { radius: 300.0 },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: hash_bin("TotalDamage"),
+                amount: "TotalDamage".to_string(),
                 damage_type: DamageType::Magic,
             }],
             particle: Some(hash_bin("Jax_R_Hit")),

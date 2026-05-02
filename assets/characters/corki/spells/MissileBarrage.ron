@@ -1,7 +1,7 @@
 (
     spellData: Some((
         calculations: Some({
-            1132416231: (
+            "attack_refund": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -13,21 +13,21 @@
                 ]),
                 multiplier: Some((
                     type: "CalculationPartNamedDataValue",
-                    dataValue: 1903867547,
+                    dataValue: "cd_reduction_on_hit",
                 )),
                 precision: Some(1),
             ),
-            3061774677: (
+            "r_small_missile_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 64618745,
+                        dataValue: "base_damage",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(2),
-                        dataValue: 942499611,
+                        dataValue: "ad_ratio",
                     ),
                 ]),
                 multiplier: None,

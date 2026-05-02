@@ -1,12 +1,40 @@
 (
     spellData: Some((
         calculations: Some({
-            1918996162: (
+            "blue_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 1869542814,
+                        dataValue: "blue_base",
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(2),
+                        coefficient: Some(1.0),
+                        statFormula: None,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: None,
+                        coefficient: Some(1.0),
+                        statFormula: None,
+                    ),
+                    (
+                        type: "CalculationPartStatSub",
+                        stat: Some(8),
+                        subpart: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "gold_damage": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "gold_base",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -29,40 +57,12 @@
                 multiplier: None,
                 precision: None,
             ),
-            3074434168: (
+            "red_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 917064896,
-                    ),
-                    (
-                        type: "CalculationPartStatCoefficient",
-                        stat: Some(2),
-                        coefficient: Some(1.0),
-                        statFormula: None,
-                    ),
-                    (
-                        type: "CalculationPartStatCoefficient",
-                        stat: None,
-                        coefficient: Some(1.0),
-                        statFormula: None,
-                    ),
-                    (
-                        type: "CalculationPartStatSub",
-                        stat: Some(8),
-                        subpart: None,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            4156075069: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 1970749065,
+                        dataValue: "red_base",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",

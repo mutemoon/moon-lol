@@ -1,38 +1,38 @@
 (
     spellData: Some((
         calculations: Some({
-            1406565072: (
+            "dash_speed": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 1437691317,
+                        dataValue: "dash_speed_base",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(7),
-                        dataValue: 4068083491,
+                        dataValue: "dash_speed_ratio",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            3084473964: (
+            "maximum_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 64618745,
+                        dataValue: "base_damage",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 3809245599,
+                        dataValue: "ap_ratio",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(2),
-                        dataValue: 942499611,
+                        dataValue: "ad_ratio",
                     ),
                 ]),
                 multiplier: None,

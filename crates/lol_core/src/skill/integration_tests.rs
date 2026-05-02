@@ -30,7 +30,7 @@ use crate::team::Team;
 
 const TEST_FPS: f32 = 30.0;
 const SPELL_KEY: u32 = 0x1001;
-const DAMAGE_AMOUNT_KEY: u32 = 0x3001;
+const DAMAGE_AMOUNT_KEY: &str = "damage_amount";
 const EPSILON: f32 = 1e-4;
 
 fn spell_handle(key: u32) -> Handle<Spell> {
@@ -104,7 +104,7 @@ fn on_test_damage_skill_cast(
             shape: DamageShape::Circle { radius: 100.0 },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: DAMAGE_AMOUNT_KEY,
+                amount: DAMAGE_AMOUNT_KEY.to_string(),
                 damage_type: DamageType::Physical,
             }],
             particle: None,
@@ -161,7 +161,7 @@ impl SkillHarness {
 
         let mut calculations = BTreeMap::new();
         calculations.insert(
-            DAMAGE_AMOUNT_KEY,
+            DAMAGE_AMOUNT_KEY.to_string(),
             CalculationType::CalculationSpell(CalculationSpell {
                 formula_parts: Some(vec![CalculationPart::CalculationPartEffectValue(
                     CalculationPartEffectValue {

@@ -1,45 +1,45 @@
 (
     spellData: Some((
         calculations: Some({
-            492124225: (
+            "aoe_damage_modifier": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),
-            593708921: (
+            "bonus_attack_speed": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            "yorick_passive_ghoul_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(2),
-                        dataValue: 2850652902,
+                        dataValue: "ghoul_ad_ratio",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            1166929275: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: None,
-            ),
-            2389517200: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: None,
-            ),
-            3648537166: (
+            "yorick_passive_ghoul_health": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(12),
-                        dataValue: 1982270031,
+                        dataValue: "ghoul_health_ratio",
                     ),
                 ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "yorick_passive_spawn_threshold": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),

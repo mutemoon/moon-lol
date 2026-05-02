@@ -1,7 +1,7 @@
 (
     spellData: Some((
         calculations: Some({
-            3768369729: (
+            "bonus_ad": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (

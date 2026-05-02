@@ -1,51 +1,51 @@
 (
     spellData: Some((
         calculations: Some({
-            498817312: (
+            "thunderclap_splash": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 1226768017,
+                        dataValue: "thunderclap_splash_damage",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 2732739097,
+                        dataValue: "thunderclap_splash_ap",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(1),
-                        dataValue: 4292998919,
+                        dataValue: "thunderclap_splash_armor",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            1905529429: (
+            "total_bonus_damage": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "thunderclap_base_damage",
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: "thunderclap_base_damage_ap_ratio",
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(1),
+                        dataValue: "thunderclap_base_damage_armor_ratio",
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "unk_0x71941255": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
-                multiplier: None,
-                precision: None,
-            ),
-            4181931309: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 1292069527,
-                    ),
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: None,
-                        dataValue: 3055216621,
-                    ),
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: Some(1),
-                        dataValue: 3883694053,
-                    ),
-                ]),
                 multiplier: None,
                 precision: None,
             ),

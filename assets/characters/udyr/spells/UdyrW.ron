@@ -1,7 +1,7 @@
 (
     spellData: Some((
         calculations: Some({
-            241153302: (
+            "heal_per_second": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -14,68 +14,41 @@
                 multiplier: None,
                 precision: None,
             ),
-            1607285636: (
+            "health_per_tick": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),
-            1704249176: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 204386453,
-                    ),
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: Some(12),
-                        dataValue: 1940388851,
-                    ),
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: None,
-                        dataValue: 4106273920,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            2457073275: (
+            "life_on_hit": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(12),
-                        dataValue: 1112667854,
+                        dataValue: "life_on_hit_hp_ratio",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 3073608905,
+                        dataValue: "on_hit_heal_ap_ratio",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            2903963272: (
+            "omnivamp": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),
-            3149494603: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: None,
-            ),
-            3346360670: (
+            "recast_shield": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 204386453,
+                        dataValue: "shield_base",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -90,6 +63,33 @@
                         statFormula: None,
                     ),
                 ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "total_shield": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "shield_base",
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(12),
+                        dataValue: "shield_percent_health",
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: "shield_ap_ratio",
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "unk_0x5fcd3b84": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),

@@ -1,13 +1,13 @@
 (
     spellData: Some((
         calculations: Some({
-            690701809: (
+            "e_passive_scaling_execute": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: Some(1),
             ),
-            3724573734: (
+            "q_passive_scaling": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,

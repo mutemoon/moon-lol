@@ -1,12 +1,12 @@
 (
     spellData: Some((
         calculations: Some({
-            433551270: (
+            "initial_burst_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 1772179026,
+                        dataValue: "initial_damage",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -18,12 +18,28 @@
                 multiplier: None,
                 precision: None,
             ),
-            566014276: (
+            "tibbers_aa_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 4159098347,
+                        dataValue: "tibbers_attack_damage",
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: "tibbers_attack_ap_ratio",
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "tibbers_aura_damage": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "aura_damage",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -35,29 +51,7 @@
                 multiplier: None,
                 precision: None,
             ),
-            1630182905: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 808967243,
-                    ),
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: None,
-                        dataValue: 2884050194,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            2431201207: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: None,
-            ),
-            2726678020: (
+            "tibbers_total_hp": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -67,6 +61,12 @@
                         statFormula: None,
                     ),
                 ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "tibbers_total_resists": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),

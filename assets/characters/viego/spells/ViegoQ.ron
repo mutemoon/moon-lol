@@ -1,40 +1,13 @@
 (
     spellData: Some((
         calculations: Some({
-            501147496: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 1508461632,
-                    ),
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: Some(2),
-                        dataValue: 142106905,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            1535528182: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 1141205950,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            2923944430: (
+            "health_crit_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: Some(1),
             ),
-            3750459968: (
+            "second_attack_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -48,6 +21,33 @@
                         stat: None,
                         coefficient: Some(0.15),
                         statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "total_damage": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "damage",
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(2),
+                        dataValue: "active_ad_ratio",
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "total_percent_health_on_hit": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "percent_health_on_hit",
                     ),
                 ]),
                 multiplier: None,

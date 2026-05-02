@@ -1,7 +1,7 @@
 (
     spellData: Some((
         calculations: Some({
-            949235716: (
+            "unk_0x38943004": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,

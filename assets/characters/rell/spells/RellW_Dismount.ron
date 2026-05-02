@@ -1,28 +1,29 @@
 (
     spellData: Some((
         calculations: Some({
-            863312304: (
+            "dismount_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 204386453,
+                        dataValue: "crash_down_damage",
                     ),
                     (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: Some(12),
-                        dataValue: 3941748685,
+                        type: "CalculationPartStatCoefficient",
+                        stat: None,
+                        coefficient: Some(0.6),
+                        statFormula: None,
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            1032671171: (
+            "flip_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 673452950,
+                        dataValue: "mount_up_damage",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -34,26 +35,25 @@
                 multiplier: None,
                 precision: None,
             ),
-            2803503575: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: None,
-            ),
-            3157802241: (
+            "shield": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 1032447157,
+                        dataValue: "shield_base",
                     ),
                     (
-                        type: "CalculationPartStatCoefficient",
-                        stat: None,
-                        coefficient: Some(0.6),
-                        statFormula: None,
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(12),
+                        dataValue: "shield_health_ratio",
                     ),
                 ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "unk_0xa71a11d7": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),

@@ -1,12 +1,29 @@
 (
     spellData: Some((
         calculations: Some({
-            427393183: (
+            "damage_calc": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 1768213658,
+                        dataValue: "base_damage",
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: None,
+                        coefficient: Some(1.0),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "max_health_damage_calc": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "max_health_damage",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -17,36 +34,19 @@
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 2951438104,
+                        dataValue: "max_health_per100_ap",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            453077015: (
+            "unk_0x1b016817": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartStatSub",
                         stat: Some(2),
                         subpart: None,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            3387110781: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 64618745,
-                    ),
-                    (
-                        type: "CalculationPartStatCoefficient",
-                        stat: None,
-                        coefficient: Some(1.0),
-                        statFormula: None,
                     ),
                 ]),
                 multiplier: None,

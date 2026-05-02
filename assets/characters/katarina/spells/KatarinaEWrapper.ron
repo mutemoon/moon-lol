@@ -1,38 +1,38 @@
 (
     spellData: Some((
         calculations: Some({
-            23909555: (
+            "tooltip_dagger_reduction": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
-                precision: Some(2),
+                precision: None,
             ),
-            501147496: (
+            "total_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 64618745,
+                        dataValue: "base_damage",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 1284980080,
+                        dataValue: "eap_ratio",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(2),
-                        dataValue: 3843756404,
+                        dataValue: "ead_ratio",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            1161571147: (
+            "unk_0x16cd4b3": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
-                precision: None,
+                precision: Some(2),
             ),
         }),
         effectAmounts: None,

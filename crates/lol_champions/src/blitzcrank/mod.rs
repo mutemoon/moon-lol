@@ -92,7 +92,7 @@ fn cast_blitzcrank_q(
             radius_end: 100.0,
             damage: TargetDamage {
                 filter: TargetFilter::Champion,
-                amount: hash_bin("TotalDamage"),
+                amount: "TotalDamage".to_string(),
                 damage_type: DamageType::Magic,
             },
         }),
@@ -140,7 +140,7 @@ fn cast_blitzcrank_e(commands: &mut Commands, entity: Entity, skill_spell: Handl
             },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: hash_bin("TotalDamage"),
+                amount: "TotalDamage".to_string(),
                 damage_type: DamageType::Magic,
             }],
             particle: Some(hash_bin("Blitzcrank_E_Hit")),
@@ -168,7 +168,7 @@ fn cast_blitzcrank_r(commands: &mut Commands, entity: Entity, skill_spell: Handl
             shape: DamageShape::Circle { radius: 600.0 },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: hash_bin("TotalDamage"),
+                amount: "TotalDamage".to_string(),
                 damage_type: DamageType::Magic,
             }],
             particle: Some(hash_bin("Blitzcrank_R_Hit")),

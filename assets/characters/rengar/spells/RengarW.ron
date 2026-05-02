@@ -1,37 +1,37 @@
 (
     spellData: Some((
         calculations: Some({
-            325658718: (
+            "bonus_monster_damage": (
                 type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: None,
-                        dataValue: 2550192411,
-                    ),
-                ]),
+                formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),
-            501147496: (
+            "total_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 64618745,
+                        dataValue: "base_damage",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 3809245599,
+                        dataValue: "ap_ratio",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            2476842167: (
+            "total_damage_empowered": (
                 type: "CalculationSpell",
-                formulaParts: Some([]),
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: "empowered_ap_ratio",
+                    ),
+                ]),
                 multiplier: None,
                 precision: None,
             ),

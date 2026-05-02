@@ -1,7 +1,7 @@
 (
     spellData: Some((
         calculations: Some({
-            703846385: (
+            "stun_duration": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,

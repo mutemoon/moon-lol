@@ -1,26 +1,7 @@
 (
     spellData: Some((
         calculations: Some({
-            463256987: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartStatCoefficient",
-                        stat: Some(31),
-                        coefficient: Some(1.0),
-                        statFormula: Some(2),
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            473387303: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: Some(1),
-            ),
-            1151544441: (
+            "ad_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -32,13 +13,7 @@
                 multiplier: None,
                 precision: None,
             ),
-            1455393055: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: None,
-            ),
-            2449466328: (
+            "cast_range": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -51,9 +26,34 @@
                 multiplier: None,
                 precision: None,
             ),
-            3530706673: (
+            "monster_cap": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            "per_leg_cd": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: Some(1),
+            ),
+            "percent_hp_ratio": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            "unk_0x91ffe3d8": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(31),
+                        coefficient: Some(1.0),
+                        statFormula: Some(2),
+                    ),
+                ]),
                 multiplier: None,
                 precision: None,
             ),

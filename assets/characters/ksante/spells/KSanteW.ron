@@ -1,22 +1,22 @@
 (
     spellData: Some((
         calculations: Some({
-            3037618562: (
+            "total_max_health_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 1768213658,
+                        dataValue: "max_health_damage",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(1),
-                        dataValue: 3153783731,
+                        dataValue: "max_health_damage_resist_ratio",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(6),
-                        dataValue: 3153783731,
+                        dataValue: "max_health_damage_resist_ratio",
                     ),
                 ]),
                 multiplier: None,

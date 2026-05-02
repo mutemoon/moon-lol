@@ -1,12 +1,12 @@
 (
     spellData: Some((
         calculations: Some({
-            501147496: (
+            "total_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 3180975557,
+                        dataValue: "spell_base_damage",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",

@@ -1,39 +1,7 @@
 (
     spellData: Some((
         calculations: Some({
-            842194336: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 648559830,
-                    ),
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: None,
-                        dataValue: 2550192411,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            2103368842: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 2492084722,
-                    ),
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: None,
-                        dataValue: 3809245599,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            2479441565: (
+            "on_hit_damage_calc": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -44,7 +12,39 @@
                     ),
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 447487992,
+                        dataValue: "on_hit_base",
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "total_missile_damage": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "missile_damage",
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: "ap_ratio",
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "total_missile_damage_empowered": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "empowered_missile_damage",
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: "empowered_ap_ratio",
                     ),
                 ]),
                 multiplier: None,

@@ -1,7 +1,7 @@
 (
     spellData: Some((
         calculations: Some({
-            2013612275: (
+            "current_crit_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (

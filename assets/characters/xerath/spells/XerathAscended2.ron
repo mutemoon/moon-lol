@@ -1,7 +1,7 @@
 (
     spellData: Some((
         calculations: Some({
-            609093854: (
+            "minion_mana_restore_tt": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,

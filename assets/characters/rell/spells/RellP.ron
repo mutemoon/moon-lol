@@ -1,13 +1,7 @@
 (
     spellData: Some((
         calculations: Some({
-            1299648214: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: Some(1),
-            ),
-            3484084320: (
+            "on_hit_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -25,6 +19,12 @@
                 ]),
                 multiplier: None,
                 precision: None,
+            ),
+            "steal_floor": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: Some(1),
             ),
         }),
         effectAmounts: None,
