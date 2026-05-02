@@ -7,17 +7,19 @@ mod tests;
 
 use bevy::prelude::*;
 use league_utils::hash_bin;
+use lol_base::render_cmd::{
+    CommandAnimationPlay, CommandSkinParticleDespawn, CommandSkinParticleSpawn,
+};
 use lol_base::spell::Spell;
-use lol_core::action::damage::{DamageShape, TargetDamage, TargetFilter};
+use lol_core::action::damage::{
+    ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
+};
 use lol_core::action::dash::{ActionDash, DashMoveType};
-use lol_core::attack::BuffAttack;
+use lol_core::attack::{BuffAttack, CommandAttackReset};
 use lol_core::base::buff::BuffOf;
 use lol_core::damage::DamageType;
 use lol_core::entities::champion::Champion;
-use lol_core::skill::{
-    EventSkillCast, Skill, SkillSlot, despawn_skill_particle, play_skill_animation,
-    reset_skill_attack, skill_damage, skill_dash, spawn_skill_particle,
-};
+use lol_core::skill::{EventSkillCast, Skill, SkillSlot};
 
 use crate::fiora::e::BuffFioraE;
 use crate::fiora::r::BuffFioraR;
@@ -81,47 +83,71 @@ fn on_fiora_skill_cast(
 
 fn cast_fiora_q(
     commands: &mut Commands,
-    q_transform: &Query<&Transform>,
+    _q_transform: &Query<&Transform>,
     entity: Entity,
     point: Vec2,
     skill_spell: Handle<Spell>,
 ) {
-    play_skill_animation(commands, entity, "spell1".to_string());
-    spawn_skill_particle(commands, entity, hash_bin("Fiora_Q_Dash_Trail_ground"));
-    skill_dash(
-        commands,
-        q_transform,
+    commands.trigger(CommandAnimationPlay {
         entity,
-        point,
-        &ActionDash {
-            skill: skill_spell.clone(),
-            move_type: DashMoveType::Pointer { max: 300.0 },
-            damage: None,
-            speed: 1000.0,
-        },
-    );
-    skill_damage(
-        commands,
+        hash: "spell1".to_string(),
+        repeat: false,
+        duration: None,
+    });
+    commands.trigger(CommandSkinParticleSpawn {
         entity,
-        skill_spell,
-        DamageShape::Nearest {
-            max_distance: 300.0,
-        },
-        vec![TargetDamage {
-            filter: TargetFilter::All,
-            amount: hash_bin("TotalDamage"),
-            damage_type: DamageType::Physical,
+        hash: hash_bin("Fiora_Q_Dash_Trail_ground"),
+    });
+    commands.trigger(ActionDash {
+        entity,
+        point: point,
+        skill: skill_spell.clone(),
+        move_type: DashMoveType::Pointer { max: 300.0 },
+        damage: None,
+        speed: 1000.0,
+    });
+    commands.trigger(ActionDamage {
+        entity,
+        skill: skill_spell,
+        effects: vec![ActionDamageEffect {
+            shape: DamageShape::Nearest {
+                max_distance: 300.0,
+            },
+            damage_list: vec![TargetDamage {
+                filter: TargetFilter::All,
+                amount: hash_bin("TotalDamage"),
+                damage_type: DamageType::Physical,
+            }],
+            particle: Some(hash_bin("Fiora_Q_Slash_Cas")),
         }],
-        Some(hash_bin("Fiora_Q_Slash_Cas")),
-    );
+    });
 }
 
 fn cast_fiora_w(commands: &mut Commands, entity: Entity) {
-    spawn_skill_particle(commands, entity, hash_bin("Fiora_W_Telegraph_Blue"));
-    play_skill_animation(commands, entity, "spell2_in".to_string());
-    spawn_skill_particle(commands, entity, hash_bin("Fiora_W_Cas"));
-    play_skill_animation(commands, entity, "spell2".to_string());
-    despawn_skill_particle(commands, entity, hash_bin("Fiora_W_Telegraph_Blue"));
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: hash_bin("Fiora_W_Telegraph_Blue"),
+    });
+    commands.trigger(CommandAnimationPlay {
+        entity,
+        hash: "spell2_in".to_string(),
+        repeat: false,
+        duration: None,
+    });
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: hash_bin("Fiora_W_Cas"),
+    });
+    commands.trigger(CommandAnimationPlay {
+        entity,
+        hash: "spell2".to_string(),
+        repeat: false,
+        duration: None,
+    });
+    commands.trigger(CommandSkinParticleDespawn {
+        entity,
+        hash: hash_bin("Fiora_W_Telegraph_Blue"),
+    });
 }
 
 fn cast_fiora_e(commands: &mut Commands, entity: Entity) {
@@ -131,12 +157,18 @@ fn cast_fiora_e(commands: &mut Commands, entity: Entity) {
     commands
         .entity(entity)
         .with_related::<BuffOf>(BuffFioraE::default());
-    reset_skill_attack(commands, entity);
+    commands.trigger(CommandAttackReset { entity });
 }
 
 fn cast_fiora_r(commands: &mut Commands, entity: Entity) {
-    spawn_skill_particle(commands, entity, hash_bin("Fiora_R_Indicator_Ring"));
-    spawn_skill_particle(commands, entity, hash_bin("Fiora_R_ALL_Warning"));
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: hash_bin("Fiora_R_Indicator_Ring"),
+    });
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: hash_bin("Fiora_R_ALL_Warning"),
+    });
     commands
         .entity(entity)
         .with_related::<BuffOf>(BuffFioraR::default());

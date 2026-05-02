@@ -12,7 +12,9 @@ use lol_base::prop::LoadHashKeyTrait;
 use lol_base::spell::{DataSpell, Spell, ValuesEffect};
 use lol_base::spell_calc::{CalculationPartEffectValue, CalculationSpell, CalculationType};
 
-use crate::action::damage::{DamageShape, TargetDamage, TargetFilter};
+use crate::action::damage::{
+    ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
+};
 use crate::action::{Action, CommandAction, PluginAction};
 use crate::base::ability_resource::{AbilityResource, AbilityResourceType};
 use crate::base::level::Level;
@@ -21,7 +23,7 @@ use crate::damage::{DamageType, PluginDamage};
 use crate::life::{Health, PluginLife};
 use crate::skill::{
     CoolDown, EventSkillCast, PluginSkill, Skill, SkillCastLog, SkillCastResult, SkillOf,
-    SkillPoints, SkillSlot, Skills, skill_damage,
+    SkillPoints, SkillSlot, Skills,
 };
 use crate::team::Team;
 
@@ -73,18 +75,19 @@ fn on_action_damage_skill_cast(
         return;
     }
 
-    skill_damage(
-        &mut commands,
-        trigger.entity,
-        spell_handle(SPELL_KEY),
-        DamageShape::Circle { radius: 120.0 },
-        vec![TargetDamage {
-            filter: TargetFilter::All,
-            amount: DAMAGE_AMOUNT_KEY,
-            damage_type: DamageType::Physical,
+    commands.trigger(ActionDamage {
+        entity: trigger.entity,
+        skill: spell_handle(SPELL_KEY),
+        effects: vec![ActionDamageEffect {
+            shape: DamageShape::Circle { radius: 120.0 },
+            damage_list: vec![TargetDamage {
+                filter: TargetFilter::All,
+                amount: DAMAGE_AMOUNT_KEY,
+                damage_type: DamageType::Physical,
+            }],
+            particle: None,
         }],
-        None,
-    );
+    });
 }
 
 struct ActionSkillHarness {
