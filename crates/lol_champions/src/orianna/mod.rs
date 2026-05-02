@@ -76,7 +76,7 @@ fn cast_orianna_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<S
             shape: DamageShape::Circle { radius: 825.0 },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
             }],
             particle: Some(hash_bin("Orianna_Q_Hit")),
@@ -104,7 +104,7 @@ fn cast_orianna_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<S
             shape: DamageShape::Circle { radius: 225.0 },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
             }],
             particle: Some(hash_bin("Orianna_W_Hit")),
@@ -136,7 +136,7 @@ fn cast_orianna_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<S
             shape: DamageShape::Circle { radius: 1120.0 },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
             }],
             particle: Some(hash_bin("Orianna_E_Hit")),
@@ -164,7 +164,7 @@ fn cast_orianna_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<S
             shape: DamageShape::Circle { radius: 415.0 },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
             }],
             particle: Some(hash_bin("Orianna_R_Hit")),

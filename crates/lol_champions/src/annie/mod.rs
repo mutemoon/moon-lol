@@ -76,7 +76,7 @@ fn cast_annie_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
             shape: DamageShape::Circle { radius: 625.0 },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
             }],
             particle: Some(hash_bin("Annie_Q_Hit")),
@@ -112,7 +112,7 @@ fn cast_annie_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
             },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
             }],
             particle: Some(hash_bin("Annie_W_Hit")),
@@ -162,7 +162,7 @@ fn cast_annie_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
             shape: DamageShape::Circle { radius: 600.0 },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
             }],
             particle: Some(hash_bin("Annie_R_Hit")),

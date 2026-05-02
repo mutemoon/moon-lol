@@ -72,7 +72,7 @@ pub fn cast_darius_q(
         },
         damage_list: vec![TargetDamage {
             filter: TargetFilter::All,
-            amount: "InnerDamage".to_string(),
+            amount: "blade_damage".to_string(),
             damage_type: DamageType::Physical,
         }],
         particle: Some(league_utils::hash_bin("Darius_Q_Inner_Hit")),
@@ -87,7 +87,7 @@ pub fn cast_darius_q(
         },
         damage_list: vec![TargetDamage {
             filter: TargetFilter::All,
-            amount: "OuterDamage".to_string(),
+            amount: "blade_damage".to_string(),
             damage_type: DamageType::Physical,
         }],
         particle: Some(league_utils::hash_bin("Darius_Q_Outer_Hit")),

@@ -103,7 +103,7 @@ fn cast_kayn_q(
             radius_end: 150.0,
             damage: TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Physical,
             },
         }),
@@ -133,7 +133,7 @@ fn cast_kayn_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spel
             },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Physical,
             }],
             particle: Some(hash_bin("Kayn_W_Hit")),

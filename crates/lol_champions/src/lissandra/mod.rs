@@ -86,7 +86,7 @@ fn cast_lissandra_q(commands: &mut Commands, entity: Entity, skill_spell: Handle
             },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
             }],
             particle: Some(hash_bin("Lissandra_Q_Hit")),
@@ -114,7 +114,7 @@ fn cast_lissandra_w(commands: &mut Commands, entity: Entity, skill_spell: Handle
             shape: DamageShape::Circle { radius: 275.0 },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
             }],
             particle: Some(hash_bin("Lissandra_W_Hit")),
@@ -151,7 +151,7 @@ fn cast_lissandra_e(
             },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
             }],
             particle: Some(hash_bin("Lissandra_E_Hit")),
@@ -183,7 +183,7 @@ fn cast_lissandra_r(commands: &mut Commands, entity: Entity, skill_spell: Handle
             shape: DamageShape::Circle { radius: 550.0 },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
             }],
             particle: Some(hash_bin("Lissandra_R_Hit")),

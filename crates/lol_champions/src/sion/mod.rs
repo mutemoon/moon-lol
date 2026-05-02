@@ -78,7 +78,7 @@ fn cast_sion_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spel
             },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Physical,
             }],
             particle: Some(hash_bin("Sion_Q_Hit")),
@@ -106,7 +106,7 @@ fn cast_sion_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spel
             shape: DamageShape::Circle { radius: 300.0 },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
             }],
             particle: Some(hash_bin("Sion_W_Hit")),
@@ -137,7 +137,7 @@ fn cast_sion_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spel
             },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Physical,
             }],
             particle: Some(hash_bin("Sion_E_Hit")),

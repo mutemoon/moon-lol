@@ -92,7 +92,7 @@ fn cast_kled_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spel
             },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Physical,
             }],
             particle: Some(hash_bin("Kled_Q_Hit")),
@@ -146,7 +146,7 @@ fn cast_kled_e(
             radius_end: 100.0,
             damage: TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Physical,
             },
         }),

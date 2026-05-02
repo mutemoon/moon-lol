@@ -79,7 +79,7 @@ fn cast_nocturne_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<
             },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Physical,
             }],
             particle: Some(hash_bin("Nocturne_Q_Hit")),
@@ -125,7 +125,7 @@ fn cast_nocturne_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<
             shape: DamageShape::Circle { radius: 425.0 },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
             }],
             particle: Some(hash_bin("Nocturne_E_Hit")),
@@ -153,7 +153,7 @@ fn cast_nocturne_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<
             shape: DamageShape::Circle { radius: 2500.0 },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Physical,
             }],
             particle: Some(hash_bin("Nocturne_R_Hit")),

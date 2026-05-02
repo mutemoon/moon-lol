@@ -80,7 +80,7 @@ fn cast_malzahar_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<
             },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
             }],
             particle: Some(hash_bin("Malzahar_Q_Hit")),
@@ -108,7 +108,7 @@ fn cast_malzahar_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<
             shape: DamageShape::Circle { radius: 150.0 },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
             }],
             particle: Some(hash_bin("Malzahar_W_Hit")),
@@ -136,7 +136,7 @@ fn cast_malzahar_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<
             shape: DamageShape::Circle { radius: 650.0 },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
             }],
             particle: Some(hash_bin("Malzahar_E_Hit")),
@@ -164,7 +164,7 @@ fn cast_malzahar_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<
             shape: DamageShape::Circle { radius: 700.0 },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
             }],
             particle: Some(hash_bin("Malzahar_R_Hit")),

@@ -75,7 +75,7 @@ fn cast_sona_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spel
             shape: DamageShape::Circle { radius: 700.0 },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
             }],
             particle: Some(hash_bin("Sona_Q_Hit")),
@@ -142,7 +142,7 @@ fn cast_sona_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spel
             },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
             }],
             particle: Some(hash_bin("Sona_R_Hit")),

@@ -94,7 +94,7 @@ fn cast_sylas_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
             },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
             }],
             particle: Some(hash_bin("Sylas_Q_Hit")),
@@ -129,7 +129,7 @@ fn cast_sylas_w(
             radius_end: 100.0,
             damage: TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
             },
         }),
@@ -176,7 +176,7 @@ fn cast_sylas_e(
                 },
                 damage_list: vec![TargetDamage {
                     filter: TargetFilter::All,
-                    amount: "TotalDamage".to_string(),
+                    amount: "total_damage".to_string(),
                     damage_type: DamageType::Magic,
                 }],
                 particle: Some(hash_bin("Sylas_E_Hit")),
@@ -200,7 +200,7 @@ fn cast_sylas_e(
                 radius_end: 100.0,
                 damage: TargetDamage {
                     filter: TargetFilter::All,
-                    amount: "TotalDamage".to_string(),
+                    amount: "total_damage".to_string(),
                     damage_type: DamageType::Magic,
                 },
             }),
@@ -235,7 +235,7 @@ fn cast_sylas_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
             },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::Champion,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
             }],
             particle: Some(hash_bin("Sylas_R_Hit")),

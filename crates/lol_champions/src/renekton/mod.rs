@@ -107,7 +107,7 @@ fn cast_renekton_q(
                 shape: DamageShape::Circle { radius: 300.0 },
                 damage_list: vec![TargetDamage {
                     filter: TargetFilter::All,
-                    amount: "TotalDamage".to_string(),
+                    amount: "total_damage".to_string(),
                     damage_type: DamageType::Physical,
                 }],
                 particle: Some(hash_bin("Renekton_Q_Hit")),
@@ -124,7 +124,7 @@ fn cast_renekton_q(
                 shape: DamageShape::Circle { radius: 250.0 },
                 damage_list: vec![TargetDamage {
                     filter: TargetFilter::All,
-                    amount: "TotalDamage".to_string(),
+                    amount: "total_damage".to_string(),
                     damage_type: DamageType::Physical,
                 }],
                 particle: Some(hash_bin("Renekton_Q_Hit")),
@@ -158,7 +158,7 @@ fn cast_renekton_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<
             },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Physical,
             }],
             particle: Some(hash_bin("Renekton_W_Hit")),
@@ -200,7 +200,7 @@ fn cast_renekton_e(
                 radius_end: 100.0,
                 damage: TargetDamage {
                     filter: TargetFilter::All,
-                    amount: "TotalDamage".to_string(),
+                    amount: "total_damage".to_string(),
                     damage_type: DamageType::Physical,
                 },
             }),
@@ -226,7 +226,7 @@ fn cast_renekton_e(
                 radius_end: 100.0,
                 damage: TargetDamage {
                     filter: TargetFilter::All,
-                    amount: "TotalDamage".to_string(),
+                    amount: "total_damage".to_string(),
                     damage_type: DamageType::Physical,
                 },
             }),
@@ -259,7 +259,7 @@ fn cast_renekton_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<
             shape: DamageShape::Circle { radius: 300.0 },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Physical,
             }],
             particle: Some(hash_bin("Renekton_R_Hit")),

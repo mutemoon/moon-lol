@@ -75,7 +75,7 @@ fn cast_gangplank_q(commands: &mut Commands, entity: Entity, skill_spell: Handle
             },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Physical,
             }],
             particle: Some(hash_bin("Gangplank_Q_Hit")),
@@ -131,7 +131,7 @@ fn cast_gangplank_r(commands: &mut Commands, entity: Entity, skill_spell: Handle
             shape: DamageShape::Circle { radius: 20000.0 },
             damage_list: vec![TargetDamage {
                 filter: TargetFilter::All,
-                amount: "TotalDamage".to_string(),
+                amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
             }],
             particle: Some(hash_bin("Gangplank_R_Hit")),
