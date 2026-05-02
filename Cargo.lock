@@ -4241,6 +4241,7 @@ dependencies = [
  "league_utils",
  "lol_base",
  "lol_core",
+ "lol_render",
  "rand 0.9.4",
  "ron 0.8.1",
  "serde",

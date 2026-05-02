@@ -3,9 +3,6 @@ pub mod q;
 
 #[cfg(test)]
 mod tests;
-// NOTE: render_tests.rs requires moon_lol::PluginCore which creates a circular
-// dependency (lol_champions -> lol_core/lol_render -> moon_lol -> lol_champions).
-// Render tests for Riven remain in tests/riven.rs for now.
 
 use bevy::prelude::*;
 use league_utils::hash_bin;
@@ -35,7 +32,7 @@ impl Plugin for PluginRiven {
     }
 }
 
-#[derive(Component, Reflect)]
+#[derive(Component, Default, Reflect)]
 #[require(Champion, Name = Name::new("Riven"))]
 #[reflect(Component)]
 pub struct Riven;

@@ -119,6 +119,9 @@ pub mod twitch;
 pub mod urgot;
 pub mod volibear;
 
+#[cfg(test)]
+mod test_utils;
+
 #[derive(Default)]
 pub struct PluginChampions;
 

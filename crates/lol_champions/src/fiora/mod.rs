@@ -2,6 +2,9 @@ pub mod e;
 pub mod passive;
 pub mod r;
 
+#[cfg(test)]
+mod tests;
+
 use bevy::prelude::*;
 use league_utils::hash_bin;
 use lol_base::spell::Spell;
@@ -40,7 +43,7 @@ impl Plugin for PluginFiora {
     }
 }
 
-#[derive(Component, Reflect)]
+#[derive(Component, Default, Reflect)]
 #[require(Champion, Name = Name::new("Fiora"))]
 #[reflect(Component)]
 pub struct Fiora;
