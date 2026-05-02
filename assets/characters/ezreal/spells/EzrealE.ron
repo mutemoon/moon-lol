@@ -1,12 +1,12 @@
 (
     spellData: Some((
         calculations: Some({
-            1508461632: (
+            "damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 64618745,
+                        dataValue: "base_damage",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -17,7 +17,7 @@
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 1284980080,
+                        dataValue: "eap_ratio",
                     ),
                 ]),
                 multiplier: None,

@@ -1,7 +1,7 @@
 (
     spellData: Some((
         calculations: Some({
-            501147496: (
+            "total_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -19,7 +19,7 @@
                 multiplier: None,
                 precision: None,
             ),
-            807397168: (
+            "unk_0x301fe730": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -32,13 +32,13 @@
                 multiplier: None,
                 precision: None,
             ),
-            1821795929: (
+            "unk_0x6c966659": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(12),
-                        dataValue: 982365132,
+                        dataValue: "ap_ratio_per100_bonus_hp",
                     ),
                 ]),
                 multiplier: Some((

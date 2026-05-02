@@ -1,24 +1,23 @@
 (
     spellData: Some((
         calculations: Some({
-            1204418572: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: None,
-            ),
-            1473407573: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: None,
-            ),
-            1508461632: (
+            "calc_bonus_health": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 64618745,
+                        dataValue: "bonus_health",
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "damage": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "base_damage",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -30,25 +29,26 @@
                 multiplier: None,
                 precision: None,
             ),
-            2257883337: (
+            "tt_fury_ao_e_penalty": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            "tt_fury_mult": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 830258826,
+                        dataValue: "fury_dragon_form_mult",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            2446568647: (
+            "unk_0x57d26a55": (
                 type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 1382069074,
-                    ),
-                ]),
+                formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),

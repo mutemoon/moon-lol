@@ -1,17 +1,17 @@
 (
     spellData: Some((
         calculations: Some({
-            749309793: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: Some(1),
-            ),
-            3441972526: (
+            "damage_monster_cap": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
+            ),
+            "percent_health_damage": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: Some(1),
             ),
         }),
         effectAmounts: None,

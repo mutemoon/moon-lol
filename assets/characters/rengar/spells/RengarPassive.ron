@@ -1,7 +1,7 @@
 (
     spellData: Some((
         calculations: Some({
-            3287557709: (
+            "empowered_ms": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,

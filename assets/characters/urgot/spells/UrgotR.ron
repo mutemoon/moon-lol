@@ -1,17 +1,17 @@
 (
     spellData: Some((
         calculations: Some({
-            1074619340: (
+            "r_calculated_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 467962025,
+                        dataValue: "r_base_damage",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(2),
-                        dataValue: 3037361240,
+                        dataValue: "r_bonus_ad_ratio",
                     ),
                 ]),
                 multiplier: None,

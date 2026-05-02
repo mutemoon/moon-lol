@@ -1,12 +1,12 @@
 (
     spellData: Some((
         calculations: Some({
-            121223968: (
+            "total_attack_speed": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 3245187764,
+                        dataValue: "attack_speed_amount",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -18,17 +18,17 @@
                 multiplier: None,
                 precision: None,
             ),
-            4081834736: (
+            "total_shielding": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 3893852351,
+                        dataValue: "base_shielding",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 3809245599,
+                        dataValue: "ap_ratio",
                     ),
                 ]),
                 multiplier: None,

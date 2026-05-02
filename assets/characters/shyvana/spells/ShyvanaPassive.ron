@@ -1,13 +1,13 @@
 (
     spellData: Some((
         calculations: Some({
-            2246954124: (
+            "calc_bonus_armor": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: Some(1),
             ),
-            3683583862: (
+            "calc_bonus_mr": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,

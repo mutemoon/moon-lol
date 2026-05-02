@@ -1,18 +1,18 @@
 (
     spellData: Some((
         calculations: Some({
-            118485103: (
+            "ammo_recharge_rate_tooltip": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),
-            501147496: (
+            "total_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 64618745,
+                        dataValue: "base_damage",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",

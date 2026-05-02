@@ -1,23 +1,23 @@
 (
     spellData: Some((
         calculations: Some({
-            54494901: (
+            "bonus_enemy_max_health_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: Some(1),
             ),
-            427393183: (
+            "max_health_damage_calc": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 1842040048,
+                        dataValue: "enemy_max_health_damage",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(2),
-                        dataValue: 1555870947,
+                        dataValue: "max_health_tad_ratio",
                     ),
                 ]),
                 multiplier: None,

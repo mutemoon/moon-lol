@@ -1,17 +1,17 @@
 (
     spellData: Some((
         calculations: Some({
-            315608060: (
+            "calc_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 180745984,
+                        dataValue: "base_damage",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(2),
-                        dataValue: 2446420668,
+                        dataValue: "damage_ad_ratio",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -23,51 +23,51 @@
                 multiplier: None,
                 precision: None,
             ),
-            949230040: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: None,
-            ),
-            1120533625: (
+            "calc_max_health_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 548834997,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            1474349906: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: None,
-            ),
-            2836243956: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 3705937568,
+                        dataValue: "max_health_damage",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(2),
-                        dataValue: 952261348,
+                        dataValue: "max_health_ad_ratio",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 4165699736,
+                        dataValue: "max_health_ap_ratio",
                     ),
                 ]),
                 multiplier: None,
                 precision: Some(1),
             ),
-            2934088168: (
+            "calc_max_health_monster_maximum": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            "calc_max_health_monster_minimum": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            "calc_monster_bonus": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "damage_monster_bonus",
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "unk_0xaee2a1e8": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,

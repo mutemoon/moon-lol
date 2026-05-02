@@ -1,7 +1,37 @@
 (
     spellData: Some((
         calculations: Some({
-            921424847: (
+            "brush_attack_total": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            "head_shot_bonus_damage": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatSub",
+                        stat: Some(2),
+                        subpart: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "head_shot_minion_bonus_damage": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatSub",
+                        stat: Some(2),
+                        subpart: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "unk_0x36ebd3cf": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -14,39 +44,9 @@
                 multiplier: None,
                 precision: None,
             ),
-            1117136005: (
+            "unk_0x42962485": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
-                multiplier: None,
-                precision: None,
-            ),
-            2313119763: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartStatSub",
-                        stat: Some(2),
-                        subpart: None,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            4073490395: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: None,
-            ),
-            4207753261: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartStatSub",
-                        stat: Some(2),
-                        subpart: None,
-                    ),
-                ]),
                 multiplier: None,
                 precision: None,
             ),

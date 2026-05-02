@@ -1,50 +1,50 @@
 (
     spellData: Some((
         calculations: Some({
-            233353330: (
+            "p_base_damage": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: "pap_ratio_base",
+                    ),
+                ]),
+                multiplier: Some((
+                    type: "CalculationPartNamedDataValue",
+                    dataValue: "p_total_damage_multiplier_for_modes_balance",
+                )),
+                precision: None,
+            ),
+            "p_current_per_stack_damage": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: "pap_ratio_per_stack",
+                    ),
+                ]),
+                multiplier: Some((
+                    type: "CalculationPartNamedDataValue",
+                    dataValue: "p_total_damage_multiplier_for_modes_balance",
+                )),
+                precision: None,
+            ),
+            "p_execute_percentage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 992042465,
+                        dataValue: "p_execute_ratio",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 4011061662,
+                        dataValue: "p_execute_ap_ratio",
                     ),
                 ]),
                 multiplier: None,
-                precision: None,
-            ),
-            1299607135: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: None,
-                        dataValue: 442334472,
-                    ),
-                ]),
-                multiplier: Some((
-                    type: "CalculationPartNamedDataValue",
-                    dataValue: 674112453,
-                )),
-                precision: None,
-            ),
-            3546937620: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: None,
-                        dataValue: 906285820,
-                    ),
-                ]),
-                multiplier: Some((
-                    type: "CalculationPartNamedDataValue",
-                    dataValue: 674112453,
-                )),
                 precision: None,
             ),
         }),

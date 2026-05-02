@@ -1,13 +1,7 @@
 (
     spellData: Some((
         calculations: Some({
-            342470442: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: None,
-            ),
-            2931851617: (
+            "bonus_melee_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -17,6 +11,12 @@
                         statFormula: None,
                     ),
                 ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "queen_max_dash_range": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),

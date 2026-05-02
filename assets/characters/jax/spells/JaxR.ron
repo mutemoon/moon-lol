@@ -1,29 +1,12 @@
 (
     spellData: Some((
         calculations: Some({
-            9219846: (
+            "base_armor": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 3494683057,
-                    ),
-                    (
-                        type: "CalculationPartStatCoefficient",
-                        stat: None,
-                        coefficient: Some(1.0),
-                        statFormula: Some(2),
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            126349775: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 1653255099,
+                        dataValue: "base_resists",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -35,12 +18,12 @@
                 multiplier: None,
                 precision: None,
             ),
-            2238985075: (
+            "bonus_armor": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 3432698146,
+                        dataValue: "resists_per_extra_target",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -52,18 +35,35 @@
                 multiplier: None,
                 precision: None,
             ),
-            3484084320: (
+            "on_hit_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 3907785970,
+                        dataValue: "passive_base_damage",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
                         stat: None,
                         coefficient: Some(0.6),
                         statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "swing_damage_total": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "swing_damage_base",
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: None,
+                        coefficient: Some(1.0),
+                        statFormula: Some(2),
                     ),
                 ]),
                 multiplier: None,

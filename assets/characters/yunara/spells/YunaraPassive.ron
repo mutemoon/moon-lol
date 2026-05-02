@@ -1,7 +1,7 @@
 (
     spellData: Some((
         calculations: Some({
-            3348400509: (
+            "calc_damage_amp": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (

@@ -1,7 +1,7 @@
 (
     spellData: Some((
         calculations: Some({
-            2209632939: (
+            "regen_percent": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,

@@ -1,7 +1,7 @@
 (
     spellData: Some((
         calculations: Some({
-            1237280252: (
+            "empowered_attack_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (

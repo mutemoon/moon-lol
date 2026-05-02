@@ -1,12 +1,33 @@
 (
     spellData: Some((
         calculations: Some({
-            1976250603: (
+            "on_hit_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 396037120,
+                        dataValue: "varus_w_on_hit_damage",
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: "on_hit_ratio",
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(2),
+                        dataValue: "on_hit_ad_ratio",
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "percent_hp_per_stack": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "base_percent_hp_per_stack",
                     ),
                     (
                         type: "CalculationPartStatSub",
@@ -17,33 +38,12 @@
                 multiplier: None,
                 precision: Some(1),
             ),
-            2189869368: (
+            "q_empower_percent_hp": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 2083783262,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            3484084320: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 4258916174,
-                    ),
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: None,
-                        dataValue: 260746276,
-                    ),
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: Some(2),
-                        dataValue: 3698461115,
+                        dataValue: "wq_health_damage",
                     ),
                 ]),
                 multiplier: None,

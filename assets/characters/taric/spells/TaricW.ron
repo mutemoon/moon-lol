@@ -1,13 +1,13 @@
 (
     spellData: Some((
         calculations: Some({
-            2238985075: (
+            "bonus_armor": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(1),
-                        dataValue: 2349896947,
+                        dataValue: "armor_bonus_percentage",
                     ),
                 ]),
                 multiplier: None,

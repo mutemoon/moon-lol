@@ -1,25 +1,25 @@
 (
     spellData: Some((
         calculations: Some({
-            1084772410: (
+            "kayn_ass_bonus_damage": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            "kayn_slayer_healing": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 574865171,
+                        dataValue: "slayer_healing",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(12),
-                        dataValue: 1038350229,
+                        dataValue: "bonus_heal_ratio",
                     ),
                 ]),
-                multiplier: None,
-                precision: None,
-            ),
-            2183739863: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),

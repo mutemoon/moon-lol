@@ -1,17 +1,29 @@
 (
     spellData: Some((
         calculations: Some({
-            501147496: (
+            "crit_scaling": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(8),
+                        dataValue: "crit_ratio",
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "pre_crit_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 64618745,
+                        dataValue: "base_damage",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(2),
-                        dataValue: 942499611,
+                        dataValue: "ad_ratio",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -23,29 +35,17 @@
                 multiplier: None,
                 precision: None,
             ),
-            1072668330: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: Some(8),
-                        dataValue: 3723671324,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            3718505415: (
+            "total_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 64618745,
+                        dataValue: "base_damage",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(2),
-                        dataValue: 942499611,
+                        dataValue: "ad_ratio",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",

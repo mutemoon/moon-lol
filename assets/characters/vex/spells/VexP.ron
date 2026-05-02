@@ -1,37 +1,37 @@
 (
     spellData: Some((
         calculations: Some({
-            265269075: (
+            "doom_cd": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            "fear_duration": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: Some(-1),
             ),
-            635451690: (
+            "gloom_minion_mod": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            "gloom_proc_calc": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 3809245599,
+                        dataValue: "ap_ratio",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            1300619395: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: None,
-            ),
-            3256624716: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: None,
-            ),
-            3781903987: (
+            "unk_0xc21c264c": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,

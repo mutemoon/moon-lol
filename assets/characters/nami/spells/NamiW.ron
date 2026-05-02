@@ -1,49 +1,49 @@
 (
     spellData: Some((
         calculations: Some({
-            501147496: (
+            "bounce_scaling": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 64618745,
+                        dataValue: "bounce_ratio",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 2218269008,
+                        dataValue: "bounce_ratio_scaling",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            1027436371: (
+            "total_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 969836114,
+                        dataValue: "base_damage",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 1886965801,
+                        dataValue: "damage_ap_ratio",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            2437600666: (
+            "total_heal": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 2808508332,
+                        dataValue: "base_heal",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 2197301297,
+                        dataValue: "heal_ap_ratio",
                     ),
                 ]),
                 multiplier: None,

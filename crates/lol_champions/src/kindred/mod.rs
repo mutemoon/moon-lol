@@ -2,14 +2,15 @@ pub mod buffs;
 
 use bevy::prelude::*;
 use league_utils::hash_bin;
+use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
 use lol_base::spell::Spell;
-use lol_core::action::damage::{DamageShape, TargetDamage, TargetFilter};
+use lol_core::action::damage::{
+    ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
+};
 use lol_core::base::buff::BuffOf;
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
-use lol_core::skill::{
-    EventSkillCast, Skill, SkillSlot, play_skill_animation, skill_damage, spawn_skill_particle,
-};
+use lol_core::skill::{EventSkillCast, Skill, SkillSlot};
 
 use crate::kindred::buffs::{BuffKindredE, BuffKindredW};
 
@@ -68,86 +69,122 @@ fn cast_kindred_q(
     _point: Vec2,
     skill_spell: Handle<Spell>,
 ) {
-    play_skill_animation(commands, entity, "spell1".to_string());
-    spawn_skill_particle(commands, entity, hash_bin("Kindred_Q_Cast"));
+    commands.trigger(CommandAnimationPlay {
+        entity,
+        hash: "spell1".to_string(),
+        repeat: false,
+        duration: None,
+    });
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: hash_bin("Kindred_Q_Cast"),
+    });
 
     // Q is a dash that shoots arrows
-    skill_damage(
-        commands,
+    commands.trigger(ActionDamage {
         entity,
-        skill_spell,
-        DamageShape::Circle { radius: 300.0 },
-        vec![TargetDamage {
-            filter: TargetFilter::All,
-            amount: hash_bin("TotalDamage"),
-            damage_type: DamageType::Physical,
+        skill: skill_spell,
+        effects: vec![ActionDamageEffect {
+            shape: DamageShape::Circle { radius: 300.0 },
+            damage_list: vec![TargetDamage {
+                filter: TargetFilter::All,
+                amount: "TotalDamage".to_string(),
+                damage_type: DamageType::Physical,
+            }],
+            particle: Some(hash_bin("Kindred_Q_Hit")),
         }],
-        Some(hash_bin("Kindred_Q_Hit")),
-    );
+    });
 }
 
 fn cast_kindred_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, "spell2".to_string());
-    spawn_skill_particle(commands, entity, hash_bin("Kindred_W_Cast"));
+    commands.trigger(CommandAnimationPlay {
+        entity,
+        hash: "spell2".to_string(),
+        repeat: false,
+        duration: None,
+    });
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: hash_bin("Kindred_W_Cast"),
+    });
 
     // W marks an area where Wolf attacks
     commands
         .entity(entity)
         .with_related::<BuffOf>(BuffKindredW::new(50.0, 8.5));
 
-    skill_damage(
-        commands,
+    commands.trigger(ActionDamage {
         entity,
-        skill_spell,
-        DamageShape::Circle { radius: 500.0 },
-        vec![TargetDamage {
-            filter: TargetFilter::All,
-            amount: hash_bin("TotalDamage"),
-            damage_type: DamageType::Physical,
+        skill: skill_spell,
+        effects: vec![ActionDamageEffect {
+            shape: DamageShape::Circle { radius: 500.0 },
+            damage_list: vec![TargetDamage {
+                filter: TargetFilter::All,
+                amount: "TotalDamage".to_string(),
+                damage_type: DamageType::Physical,
+            }],
+            particle: Some(hash_bin("Kindred_W_Hit")),
         }],
-        Some(hash_bin("Kindred_W_Hit")),
-    );
+    });
 }
 
 fn cast_kindred_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, "spell3".to_string());
-    spawn_skill_particle(commands, entity, hash_bin("Kindred_E_Cast"));
+    commands.trigger(CommandAnimationPlay {
+        entity,
+        hash: "spell3".to_string(),
+        repeat: false,
+        duration: None,
+    });
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: hash_bin("Kindred_E_Cast"),
+    });
 
     // E marks and slows, 3 marks = Wolf attacks
-    skill_damage(
-        commands,
+    commands.trigger(ActionDamage {
         entity,
-        skill_spell,
-        DamageShape::Sector {
-            radius: 500.0,
-            angle: 30.0,
-        },
-        vec![TargetDamage {
-            filter: TargetFilter::All,
-            amount: hash_bin("TotalDamage"),
-            damage_type: DamageType::Physical,
+        skill: skill_spell,
+        effects: vec![ActionDamageEffect {
+            shape: DamageShape::Sector {
+                radius: 500.0,
+                angle: 30.0,
+            },
+            damage_list: vec![TargetDamage {
+                filter: TargetFilter::All,
+                amount: "TotalDamage".to_string(),
+                damage_type: DamageType::Physical,
+            }],
+            particle: Some(hash_bin("Kindred_E_Hit")),
         }],
-        Some(hash_bin("Kindred_E_Hit")),
-    );
+    });
 }
 
 fn cast_kindred_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, "spell4".to_string());
-    spawn_skill_particle(commands, entity, hash_bin("Kindred_R_Cast"));
+    commands.trigger(CommandAnimationPlay {
+        entity,
+        hash: "spell4".to_string(),
+        repeat: false,
+        duration: None,
+    });
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: hash_bin("Kindred_R_Cast"),
+    });
 
     // R creates a protective zone
-    skill_damage(
-        commands,
+    commands.trigger(ActionDamage {
         entity,
-        skill_spell,
-        DamageShape::Circle { radius: 535.0 },
-        vec![TargetDamage {
-            filter: TargetFilter::All,
-            amount: hash_bin("TotalDamage"),
-            damage_type: DamageType::Magic,
+        skill: skill_spell,
+        effects: vec![ActionDamageEffect {
+            shape: DamageShape::Circle { radius: 535.0 },
+            damage_list: vec![TargetDamage {
+                filter: TargetFilter::All,
+                amount: "TotalDamage".to_string(),
+                damage_type: DamageType::Magic,
+            }],
+            particle: Some(hash_bin("Kindred_R_Hit")),
         }],
-        Some(hash_bin("Kindred_R_Hit")),
-    );
+    });
 }
 
 fn on_kindred_damage_hit(

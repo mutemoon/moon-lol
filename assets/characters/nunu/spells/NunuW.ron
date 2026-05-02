@@ -1,32 +1,32 @@
 (
     spellData: Some((
         calculations: Some({
-            1380198502: (
+            "maximum_snowball_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 64618745,
+                        dataValue: "base_damage",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 2912702531,
+                        dataValue: "maximum_ap_ratio",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            3923265805: (
+            "maximum_stun_duration": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 3759254153,
+                        dataValue: "base_knockup_duration",
                     ),
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 2035725215,
+                        dataValue: "additional_stun_duration_over_time",
                     ),
                 ]),
                 multiplier: None,

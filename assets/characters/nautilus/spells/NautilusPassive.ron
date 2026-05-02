@@ -1,19 +1,19 @@
 (
     spellData: Some((
         calculations: Some({
-            902757773: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: Some(2),
-            ),
-            1476535861: (
+            "bonus_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),
-            4073446979: (
+            "root_duration": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: Some(2),
+            ),
+            "total_damage_tooltip": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (

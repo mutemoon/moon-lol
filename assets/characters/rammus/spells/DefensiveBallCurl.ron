@@ -1,67 +1,67 @@
 (
     spellData: Some((
         calculations: Some({
-            466789754: (
+            "bonus_armor_tooltip": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartStatNamedDataValue",
-                        stat: Some(6),
-                        dataValue: 1152277384,
+                        stat: Some(1),
+                        dataValue: "bonus_armor_percent",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            758099115: (
+            "bonus_mr_tooltip": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(6),
+                        dataValue: "bonus_mr_percent",
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "recast_damage_tooltip": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 2435027013,
+                        dataValue: "flat_damage_return",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(1),
-                        dataValue: 373940146,
+                        dataValue: "damage_armor_ratio",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(6),
-                        dataValue: 2393835866,
+                        dataValue: "damage_mr_ratio",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            2307255381: (
+            "return_damage_calc": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 2435027013,
+                        dataValue: "flat_damage_return",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(1),
-                        dataValue: 373940146,
+                        dataValue: "damage_armor_ratio",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(6),
-                        dataValue: 2393835866,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            4138774530: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: Some(1),
-                        dataValue: 1093812064,
+                        dataValue: "damage_mr_ratio",
                     ),
                 ]),
                 multiplier: None,

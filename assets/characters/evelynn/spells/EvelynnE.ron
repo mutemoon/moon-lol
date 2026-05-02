@@ -1,34 +1,34 @@
 (
     spellData: Some((
         calculations: Some({
-            722128141: (
+            "percent_health_base_tooltip": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 3074522276,
+                        dataValue: "base_percent_health",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
                         stat: None,
-                        coefficient: Some(0.025),
+                        coefficient: Some(0.015),
                         statFormula: None,
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            1001393024: (
+            "percent_health_empowered_tooltip": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 3378955467,
+                        dataValue: "empowered_percent_health",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
                         stat: None,
-                        coefficient: Some(0.015),
+                        coefficient: Some(0.025),
                         statFormula: None,
                     ),
                 ]),

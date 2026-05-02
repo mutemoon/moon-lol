@@ -1,12 +1,12 @@
 (
     spellData: Some((
         calculations: Some({
-            1455393055: (
+            "damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 3620914978,
+                        dataValue: "base_damage",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -18,29 +18,29 @@
                 multiplier: None,
                 precision: None,
             ),
-            1508461632: (
+            "missing_health_damage_rock": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 64618745,
+                        dataValue: "percent_hp_damage_base_rock",
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "monster_cap": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "monster_cap_base",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
                         stat: Some(2),
                         coefficient: Some(1.25),
                         statFormula: Some(2),
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            3175338061: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 1485788531,
                     ),
                 ]),
                 multiplier: None,

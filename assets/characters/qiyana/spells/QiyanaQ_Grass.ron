@@ -1,18 +1,35 @@
 (
     spellData: Some((
         calculations: Some({
-            383152960: (
+            "enchanted_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 4115040131,
+                        dataValue: "base_damage",
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(2),
+                        coefficient: Some(0.85),
+                        statFormula: Some(2),
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            2110000242: (
+            "falloff_damage": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "falloff_mod",
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "unk_0x7dc40c72": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -25,29 +42,12 @@
                 multiplier: None,
                 precision: None,
             ),
-            2684702625: (
+            "vanilla_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 2673471573,
-                    ),
-                    (
-                        type: "CalculationPartStatCoefficient",
-                        stat: Some(2),
-                        coefficient: Some(0.85),
-                        statFormula: Some(2),
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            3312526322: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 64618745,
+                        dataValue: "vanilla_base",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",

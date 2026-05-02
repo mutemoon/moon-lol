@@ -1,40 +1,40 @@
 (
     spellData: Some((
         calculations: Some({
-            702715002: (
+            "root_duration": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: Some(1),
+            ),
+            "total_root_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 64618745,
+                        dataValue: "root_damage",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
                         stat: None,
-                        coefficient: Some(0.12),
+                        coefficient: Some(0.8),
                         statFormula: None,
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            902757773: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: Some(1),
-            ),
-            1259793256: (
+            "total_snowball_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 3259119808,
+                        dataValue: "base_damage",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
                         stat: None,
-                        coefficient: Some(0.8),
+                        coefficient: Some(0.12),
                         statFormula: None,
                     ),
                 ]),

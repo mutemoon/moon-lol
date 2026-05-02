@@ -1,49 +1,49 @@
 (
     spellData: Some((
         calculations: Some({
-            969836114: (
+            "base_heal": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 1788080398,
+                        dataValue: "base_healing",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 3809245599,
+                        dataValue: "ap_ratio",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            3588743310: (
+            "heal_per_fury": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 4176648857,
+                        dataValue: "bonus_heal_per_fury",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 3902115858,
+                        dataValue: "ap_ratio_per_fury",
                     ),
                 ]),
                 multiplier: None,
                 precision: Some(1),
             ),
-            3605258375: (
+            "maximum_heal": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 1788080398,
+                        dataValue: "base_healing",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 3809245599,
+                        dataValue: "ap_ratio",
                     ),
                 ]),
                 multiplier: None,

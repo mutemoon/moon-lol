@@ -1,12 +1,18 @@
 (
     spellData: Some((
         calculations: Some({
-            1373287948: (
+            "bonus_attack_range": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            "r_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 1208306187,
+                        dataValue: "r_base_damage",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -24,24 +30,12 @@
                 multiplier: None,
                 precision: None,
             ),
-            2675542992: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: None,
-            ),
-            3541226981: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: None,
-            ),
-            3854996560: (
+            "r_monster_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 467962025,
+                        dataValue: "r_base_monster_damage",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -56,6 +50,12 @@
                         statFormula: Some(2),
                     ),
                 ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "unk_0x9f798bd0": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),

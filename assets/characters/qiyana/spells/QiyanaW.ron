@@ -1,12 +1,12 @@
 (
     spellData: Some((
         calculations: Some({
-            2265319492: (
+            "cleave_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 64618745,
+                        dataValue: "base_damage",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -18,22 +18,22 @@
                 multiplier: None,
                 precision: None,
             ),
-            3484084320: (
+            "on_hit_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 64618745,
+                        dataValue: "base_damage",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 2694697279,
+                        dataValue: "on_hit_ap_ratio",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(2),
-                        dataValue: 3698461115,
+                        dataValue: "on_hit_ad_ratio",
                     ),
                 ]),
                 multiplier: None,

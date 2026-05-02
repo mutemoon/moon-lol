@@ -1,12 +1,12 @@
 (
     spellData: Some((
         calculations: Some({
-            37780851: (
+            "total_heal_per_wave": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 1594660408,
+                        dataValue: "base_heal_per_wave",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -18,12 +18,12 @@
                 multiplier: None,
                 precision: None,
             ),
-            2103368842: (
+            "total_missile_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 1037839889,
+                        dataValue: "base_missile_damage",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -35,12 +35,12 @@
                 multiplier: None,
                 precision: None,
             ),
-            3926941142: (
+            "unk_0xea105dd6": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 334078423,
+                        dataValue: "base_bonus_resistances",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",

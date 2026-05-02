@@ -57,5 +57,6 @@ spawn(AnimationHandler(asset_server.load("characters/ahri/animation.ron")));
 检查必须包括 examples 和 tests
 
 ```sh
+cargo check --workspace
 cargo check --examples --tests
 ```

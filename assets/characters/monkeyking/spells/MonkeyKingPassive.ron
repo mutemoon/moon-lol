@@ -1,7 +1,7 @@
 (
     spellData: Some((
         calculations: Some({
-            2238985075: (
+            "bonus_armor": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,

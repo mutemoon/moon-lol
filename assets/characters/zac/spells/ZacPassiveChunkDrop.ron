@@ -1,13 +1,13 @@
 (
     spellData: Some((
         calculations: Some({
-            3767019112: (
+            "heal_percent": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: Some(1),
             ),
-            4062553148: (
+            "revive_bloblet_duration": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,

@@ -1,12 +1,18 @@
 (
     spellData: Some((
         calculations: Some({
-            617541452: (
+            "total_bonus_resists": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            "total_daisy_ad": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 236399492,
+                        dataValue: "daisy_ad",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -18,7 +24,7 @@
                 multiplier: None,
                 precision: None,
             ),
-            1189510689: (
+            "total_daisy_hp": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -31,12 +37,12 @@
                 multiplier: None,
                 precision: None,
             ),
-            2100175297: (
+            "total_shockwave_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 3644924936,
+                        dataValue: "shockwave_base_damage",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -45,12 +51,6 @@
                         statFormula: None,
                     ),
                 ]),
-                multiplier: None,
-                precision: None,
-            ),
-            3344253095: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),

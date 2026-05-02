@@ -1,25 +1,25 @@
 (
     spellData: Some((
         calculations: Some({
-            2199443515: (
+            "percent_amp_calc": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 1269549457,
+                        dataValue: "ap_to_percent_ratio",
                     ),
                 ]),
                 multiplier: None,
                 precision: Some(1),
             ),
-            4122267009: (
+            "percent_amp_calc_self": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 1269549457,
+                        dataValue: "ap_to_percent_ratio",
                     ),
                 ]),
                 multiplier: None,

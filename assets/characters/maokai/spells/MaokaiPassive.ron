@@ -1,13 +1,13 @@
 (
     spellData: Some((
         calculations: Some({
-            620905175: (
+            "passive_cooldown": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),
-            3835899954: (
+            "passive_healing_total": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (

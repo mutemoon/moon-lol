@@ -1,30 +1,20 @@
 (
     spellData: Some((
         calculations: Some({
-            646963981: (
+            "charge_health_tooltip": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
-                        type: "CalculationPartEffectValue",
-                        effectIndex: Some(3),
-                    ),
-                    (
                         type: "CalculationPartStatCoefficient",
                         stat: Some(12),
-                        coefficient: Some(0.015),
-                        statFormula: None,
-                    ),
-                    (
-                        type: "CalculationPartStatCoefficient",
-                        stat: None,
-                        coefficient: Some(0.35),
+                        coefficient: Some(0.08),
                         statFormula: None,
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            743758831: (
+            "max_damage_tooltip": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -47,13 +37,23 @@
                 multiplier: None,
                 precision: None,
             ),
-            1166006994: (
+            "min_damage_tooltip": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
+                        type: "CalculationPartEffectValue",
+                        effectIndex: Some(3),
+                    ),
+                    (
                         type: "CalculationPartStatCoefficient",
                         stat: Some(12),
-                        coefficient: Some(0.08),
+                        coefficient: Some(0.015),
+                        statFormula: None,
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: None,
+                        coefficient: Some(0.35),
                         statFormula: None,
                     ),
                 ]),

@@ -1,41 +1,41 @@
 (
     spellData: Some((
         calculations: Some({
-            3574189785: (
+            "base_damage_total": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 64618745,
+                        dataValue: "base_damage",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(2),
-                        dataValue: 690732475,
+                        dataValue: "bad_ratio",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            3631239828: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 2864791846,
-                    ),
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: Some(2),
-                        dataValue: 2166805334,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            3803081250: (
+            "monster_health_damage_cap": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            "outer_edge_tooltip": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "outer_cone_max_hp_damage",
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(2),
+                        dataValue: "ad_required_tooltip_only",
+                    ),
+                ]),
                 multiplier: None,
                 precision: None,
             ),

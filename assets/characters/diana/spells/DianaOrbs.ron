@@ -1,38 +1,38 @@
 (
     spellData: Some((
         calculations: Some({
-            501147496: (
+            "shield_value": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 4121431647,
+                        dataValue: "shield_base",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 552750574,
+                        dataValue: "shield_ap_ratio",
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(12),
+                        dataValue: "shield_bhp_ratio",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            3609980641: (
+            "total_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 204386453,
+                        dataValue: "orb_damage",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 4106273920,
-                    ),
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: Some(12),
-                        dataValue: 3955444421,
+                        dataValue: "orb_ap_ratio",
                     ),
                 ]),
                 multiplier: None,

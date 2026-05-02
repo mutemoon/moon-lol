@@ -1,41 +1,41 @@
 (
     spellData: Some((
         calculations: Some({
-            123204321: (
+            "final_swipe_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 3469833424,
+                        dataValue: "swipe_damage_base",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 1597713792,
+                        dataValue: "ap_ratio",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            1054045030: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 2971760641,
-                    ),
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: None,
-                        dataValue: 3809245599,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            1204873108: (
+            "max_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            "mini_swipe_damage": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "mini_swipe_base_damage",
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: "mini_swipe_ap_ratio",
+                    ),
+                ]),
                 multiplier: None,
                 precision: None,
             ),

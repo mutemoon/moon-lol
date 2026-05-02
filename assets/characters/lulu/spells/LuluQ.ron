@@ -1,39 +1,39 @@
 (
     spellData: Some((
         calculations: Some({
-            501147496: (
+            "bonus_missile_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 64618745,
+                        dataValue: "base_damage",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 3809245599,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            2336220701: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 64618745,
-                    ),
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: None,
-                        dataValue: 3809245599,
+                        dataValue: "ap_ratio",
                     ),
                 ]),
                 multiplier: Some((
                     type: "CalculationPartNamedDataValue",
-                    dataValue: 2263412476,
+                    dataValue: "double_hit_bonus",
                 )),
+                precision: None,
+            ),
+            "total_damage": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "base_damage",
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: "ap_ratio",
+                    ),
+                ]),
+                multiplier: None,
                 precision: None,
             ),
         }),

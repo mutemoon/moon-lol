@@ -1,7 +1,7 @@
 (
     spellData: Some((
         calculations: Some({
-            219511452: (
+            "charge_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -11,7 +11,7 @@
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 3809245599,
+                        dataValue: "ap_ratio",
                     ),
                 ]),
                 multiplier: None,

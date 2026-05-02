@@ -1,19 +1,19 @@
 (
     spellData: Some((
         calculations: Some({
-            2282348956: (
+            "monster_damage_cap": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),
-            2801874458: (
+            "p_cooldown": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),
-            2810236862: (
+            "p_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,

@@ -1,21 +1,21 @@
 (
     spellData: Some((
         calculations: Some({
-            2272344318: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: None,
-            ),
-            3202745679: (
+            "heal_amount": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(12),
-                        dataValue: 2212226638,
+                        dataValue: "heal_ratio",
                     ),
                 ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "heal_cooldown": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),

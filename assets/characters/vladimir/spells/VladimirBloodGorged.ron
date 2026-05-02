@@ -1,13 +1,13 @@
 (
     spellData: Some((
         calculations: Some({
-            1053264105: (
+            "approximate_ap_bonus_avoiding_recursion": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),
-            3529533684: (
+            "approximate_hp_bonus_avoiding_recursion": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,

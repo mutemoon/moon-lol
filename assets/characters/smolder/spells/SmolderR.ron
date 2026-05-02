@@ -1,34 +1,12 @@
 (
     spellData: Some((
         calculations: Some({
-            501147496: (
+            "mom_heal_calc": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 64618745,
-                    ),
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: Some(2),
-                        dataValue: 942499611,
-                    ),
-                    (
-                        type: "CalculationPartStatCoefficient",
-                        stat: None,
-                        coefficient: Some(1.0),
-                        statFormula: None,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            2014264343: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 37984770,
+                        dataValue: "mom_heal",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -40,6 +18,28 @@
                         type: "CalculationPartStatCoefficient",
                         stat: None,
                         coefficient: Some(0.75),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "total_damage": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "base_damage",
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(2),
+                        dataValue: "ad_ratio",
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: None,
+                        coefficient: Some(1.0),
                         statFormula: None,
                     ),
                 ]),

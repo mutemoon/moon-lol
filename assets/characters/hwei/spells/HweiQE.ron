@@ -1,12 +1,12 @@
 (
     spellData: Some((
         calculations: Some({
-            1508461632: (
+            "damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 64618745,
+                        dataValue: "base_damage",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -18,18 +18,12 @@
                 multiplier: None,
                 precision: None,
             ),
-            2834761132: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: None,
-            ),
-            4209723727: (
+            "damage_per_second": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 3597755565,
+                        dataValue: "base_dps",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -38,6 +32,12 @@
                         statFormula: None,
                     ),
                 ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "unk_0xa8f705ac": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),

@@ -1,19 +1,7 @@
 (
     spellData: Some((
         calculations: Some({
-            501147496: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartStatSub",
-                        stat: Some(2),
-                        subpart: None,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            1798361858: (
+            "minion_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -26,18 +14,30 @@
                 multiplier: None,
                 precision: None,
             ),
-            3788448417: (
+            "passive_total_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 2196513046,
+                        dataValue: "passive_damage_base",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
                         stat: Some(2),
                         coefficient: Some(0.2),
                         statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "total_damage": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatSub",
+                        stat: Some(2),
+                        subpart: None,
                     ),
                 ]),
                 multiplier: None,

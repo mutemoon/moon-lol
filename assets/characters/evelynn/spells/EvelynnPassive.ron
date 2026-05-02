@@ -1,7 +1,13 @@
 (
     spellData: Some((
         calculations: Some({
-            1768389355: (
+            "heal_per_second_tooltip": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            "healing_threshold_tooltip": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -11,12 +17,6 @@
                         statFormula: None,
                     ),
                 ]),
-                multiplier: None,
-                precision: None,
-            ),
-            2914412429: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),

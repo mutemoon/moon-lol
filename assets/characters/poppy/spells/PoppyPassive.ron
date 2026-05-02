@@ -1,19 +1,13 @@
 (
     spellData: Some((
         calculations: Some({
-            501147496: (
+            "actual_cooldown": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),
-            758897394: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: None,
-            ),
-            3609980641: (
+            "shield_value": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -22,6 +16,12 @@
                         subpart: None,
                     ),
                 ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "total_damage": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),

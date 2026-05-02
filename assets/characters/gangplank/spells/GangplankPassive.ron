@@ -1,21 +1,21 @@
 (
     spellData: Some((
         calculations: Some({
-            501147496: (
+            "move_speed": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            "total_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(2),
-                        dataValue: 942499611,
+                        dataValue: "ad_ratio",
                     ),
                 ]),
-                multiplier: None,
-                precision: None,
-            ),
-            2672392607: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),

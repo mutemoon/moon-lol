@@ -1,48 +1,48 @@
 (
     spellData: Some((
         calculations: Some({
-            2359448121: (
+            "total_shield_strength": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 2220742873,
+                        dataValue: "shield_strength",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 2099928811,
-                    ),
-                ]),
-                multiplier: None,
-                precision: Some(1),
-            ),
-            2364274116: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 1194863775,
-                    ),
-                ]),
-                multiplier: None,
-                precision: Some(1),
-            ),
-            3301898489: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 1928665297,
-                    ),
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: None,
-                        dataValue: 4106273920,
+                        dataValue: "shield_ap_ratio",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
+            ),
+            "w_missing_hp_heal": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "w_missing_hp_base",
+                    ),
+                ]),
+                multiplier: None,
+                precision: Some(1),
+            ),
+            "wms_bonus_total": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "wms_bonus",
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: "wms_bonus_ap_ratio",
+                    ),
+                ]),
+                multiplier: None,
+                precision: Some(1),
             ),
         }),
         effectAmounts: None,

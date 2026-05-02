@@ -1,7 +1,7 @@
 (
     spellData: Some((
         calculations: Some({
-            3239398929: (
+            "damage_reduction": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -24,7 +24,7 @@
                 multiplier: None,
                 precision: None,
             ),
-            3578265417: (
+            "tantrum_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (

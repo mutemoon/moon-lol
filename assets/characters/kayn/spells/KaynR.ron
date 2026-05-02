@@ -1,12 +1,12 @@
 (
     spellData: Some((
         calculations: Some({
-            1508461632: (
+            "damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 64618745,
+                        dataValue: "base_damage",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -18,17 +18,17 @@
                 multiplier: None,
                 precision: None,
             ),
-            4237690846: (
+            "slayer_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 3474404311,
+                        dataValue: "slayer_max_hp_base_damage",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(2),
-                        dataValue: 468798707,
+                        dataValue: "slayer_max_hp_damager_per100_ad",
                     ),
                 ]),
                 multiplier: None,

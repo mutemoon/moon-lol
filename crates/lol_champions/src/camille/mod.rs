@@ -1,16 +1,17 @@
 use bevy::prelude::*;
 use league_utils::hash_bin;
+use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
 use lol_base::spell::Spell;
-use lol_core::action::damage::{DamageShape, TargetDamage, TargetFilter};
+use lol_core::action::damage::{
+    ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
+};
 use lol_core::action::dash::{ActionDash, DashDamage, DashMoveType};
+use lol_core::attack::CommandAttackReset;
 use lol_core::base::buff::BuffOf;
 use lol_core::buffs::cc_debuffs::DebuffSlow;
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
-use lol_core::skill::{
-    CoolDown, EventSkillCast, Skill, SkillRecastWindow, SkillSlot, play_skill_animation,
-    reset_skill_attack, skill_damage, skill_dash, spawn_skill_particle,
-};
+use lol_core::skill::{CoolDown, EventSkillCast, Skill, SkillRecastWindow, SkillSlot};
 
 const CAMILLE_Q_RECAST_WINDOW: f32 = 3.0;
 const CAMILLE_E_RECAST_WINDOW: f32 = 4.0;
@@ -89,33 +90,45 @@ fn cast_camille_q(
 ) {
     let stage = recast.map(|w| w.stage).unwrap_or(1);
 
-    play_skill_animation(commands, entity, "spell1".to_string());
+    commands.trigger(CommandAnimationPlay {
+        entity,
+        hash: "spell1".to_string(),
+        repeat: false,
+        duration: None,
+    });
 
     if stage == 1 {
         // First cast: Prepares the hookshot
-        spawn_skill_particle(commands, entity, hash_bin("Camille_Q_Cast"));
+        commands.trigger(CommandSkinParticleSpawn {
+            entity,
+            hash: hash_bin("Camille_Q_Cast"),
+        });
         // Q1 doesn't deal damage, just marks for second cast
         commands
             .entity(skill_entity)
             .insert(SkillRecastWindow::new(2, 2, CAMILLE_Q_RECAST_WINDOW));
     } else {
         // Second cast: Deals bonus damage and resets attack
-        spawn_skill_particle(commands, entity, hash_bin("Camille_Q2_Cast"));
-        reset_skill_attack(commands, entity);
-        skill_damage(
-            commands,
+        commands.trigger(CommandSkinParticleSpawn {
             entity,
-            skill_spell,
-            DamageShape::Nearest {
-                max_distance: 150.0,
-            },
-            vec![TargetDamage {
-                filter: TargetFilter::All,
-                amount: hash_bin("TotalDamage"),
-                damage_type: DamageType::Physical,
+            hash: hash_bin("Camille_Q2_Cast"),
+        });
+        commands.trigger(CommandAttackReset { entity });
+        commands.trigger(ActionDamage {
+            entity,
+            skill: skill_spell,
+            effects: vec![ActionDamageEffect {
+                shape: DamageShape::Nearest {
+                    max_distance: 150.0,
+                },
+                damage_list: vec![TargetDamage {
+                    filter: TargetFilter::All,
+                    amount: "TotalDamage".to_string(),
+                    damage_type: DamageType::Physical,
+                }],
+                particle: Some(hash_bin("Camille_Q2_Hit")),
             }],
-            Some(hash_bin("Camille_Q2_Hit")),
-        );
+        });
         commands.entity(skill_entity).remove::<SkillRecastWindow>();
         commands.entity(skill_entity).insert((CoolDown {
             duration: cooldown.duration,
@@ -125,29 +138,38 @@ fn cast_camille_q(
 }
 
 fn cast_camille_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, "spell2".to_string());
-    spawn_skill_particle(commands, entity, hash_bin("Camille_W_Cast"));
-    // W is a swept cone that slows
-    skill_damage(
-        commands,
+    commands.trigger(CommandAnimationPlay {
         entity,
-        skill_spell,
-        DamageShape::Sector {
-            radius: 300.0,
-            angle: 90.0,
-        },
-        vec![TargetDamage {
-            filter: TargetFilter::All,
-            amount: hash_bin("TotalDamage"),
-            damage_type: DamageType::Physical,
+        hash: "spell2".to_string(),
+        repeat: false,
+        duration: None,
+    });
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: hash_bin("Camille_W_Cast"),
+    });
+    // W is a swept cone that slows
+    commands.trigger(ActionDamage {
+        entity,
+        skill: skill_spell,
+        effects: vec![ActionDamageEffect {
+            shape: DamageShape::Sector {
+                radius: 300.0,
+                angle: 90.0,
+            },
+            damage_list: vec![TargetDamage {
+                filter: TargetFilter::All,
+                amount: "TotalDamage".to_string(),
+                damage_type: DamageType::Physical,
+            }],
+            particle: Some(hash_bin("Camille_W_Hit")),
         }],
-        Some(hash_bin("Camille_W_Hit")),
-    );
+    });
 }
 
 fn cast_camille_e(
     commands: &mut Commands,
-    q_transform: &Query<&Transform>,
+    _q_transform: &Query<&Transform>,
     entity: Entity,
     skill_entity: Entity,
     point: Vec2,
@@ -157,36 +179,43 @@ fn cast_camille_e(
 ) {
     let stage = recast.map(|w| w.stage).unwrap_or(1);
 
-    play_skill_animation(commands, entity, "spell3".to_string());
+    commands.trigger(CommandAnimationPlay {
+        entity,
+        hash: "spell3".to_string(),
+        repeat: false,
+        duration: None,
+    });
 
     if stage == 1 {
         // First cast: Hookshot - launches toward terrain
-        spawn_skill_particle(commands, entity, hash_bin("Camille_E_Cast"));
+        commands.trigger(CommandSkinParticleSpawn {
+            entity,
+            hash: hash_bin("Camille_E_Cast"),
+        });
         commands
             .entity(skill_entity)
             .insert(SkillRecastWindow::new(2, 2, CAMILLE_E_RECAST_WINDOW));
     } else {
         // Second cast: Dash toward hooked terrain
-        spawn_skill_particle(commands, entity, hash_bin("Camille_E2_Cast"));
-        skill_dash(
-            commands,
-            q_transform,
+        commands.trigger(CommandSkinParticleSpawn {
             entity,
-            point,
-            &ActionDash {
-                skill: skill_spell,
-                move_type: DashMoveType::Pointer { max: 400.0 },
-                damage: Some(DashDamage {
-                    radius_end: 150.0,
-                    damage: TargetDamage {
-                        filter: TargetFilter::All,
-                        amount: hash_bin("TotalDamage"),
-                        damage_type: DamageType::Physical,
-                    },
-                }),
-                speed: 900.0,
-            },
-        );
+            hash: hash_bin("Camille_E2_Cast"),
+        });
+        commands.trigger(ActionDash {
+            entity,
+            point: point,
+            skill: skill_spell,
+            move_type: DashMoveType::Pointer { max: 400.0 },
+            damage: Some(DashDamage {
+                radius_end: 150.0,
+                damage: TargetDamage {
+                    filter: TargetFilter::All,
+                    amount: "TotalDamage".to_string(),
+                    damage_type: DamageType::Physical,
+                },
+            }),
+            speed: 900.0,
+        });
         commands.entity(skill_entity).remove::<SkillRecastWindow>();
         commands.entity(skill_entity).insert((CoolDown {
             duration: cooldown.duration,
@@ -197,33 +226,37 @@ fn cast_camille_e(
 
 fn cast_camille_r(
     commands: &mut Commands,
-    q_transform: &Query<&Transform>,
+    _q_transform: &Query<&Transform>,
     entity: Entity,
     point: Vec2,
     skill_spell: Handle<Spell>,
 ) {
-    play_skill_animation(commands, entity, "spell4".to_string());
-    spawn_skill_particle(commands, entity, hash_bin("Camille_R_Cast"));
-    // R is a hookshot-like leap that marks and traps target champion
-    skill_dash(
-        commands,
-        q_transform,
+    commands.trigger(CommandAnimationPlay {
         entity,
-        point,
-        &ActionDash {
-            skill: skill_spell,
-            move_type: DashMoveType::Pointer { max: 350.0 },
-            damage: Some(DashDamage {
-                radius_end: 150.0,
-                damage: TargetDamage {
-                    filter: TargetFilter::Champion,
-                    amount: hash_bin("TotalDamage"),
-                    damage_type: DamageType::Physical,
-                },
-            }),
-            speed: 800.0,
-        },
-    );
+        hash: "spell4".to_string(),
+        repeat: false,
+        duration: None,
+    });
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: hash_bin("Camille_R_Cast"),
+    });
+    // R is a hookshot-like leap that marks and traps target champion
+    commands.trigger(ActionDash {
+        entity,
+        point: point,
+        skill: skill_spell,
+        move_type: DashMoveType::Pointer { max: 350.0 },
+        damage: Some(DashDamage {
+            radius_end: 150.0,
+            damage: TargetDamage {
+                filter: TargetFilter::Champion,
+                amount: "TotalDamage".to_string(),
+                damage_type: DamageType::Physical,
+            },
+        }),
+        speed: 800.0,
+    });
 }
 
 /// 监听 Camille 造成的伤害，给目标施加减速

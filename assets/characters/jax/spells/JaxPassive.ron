@@ -1,13 +1,13 @@
 (
     spellData: Some((
         calculations: Some({
-            2852380849: (
+            "attack_speed_per_stack": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: Some(1),
             ),
-            4008292152: (
+            "belveth_vs_jax_quest_reward_attack_speed_per_stack": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,

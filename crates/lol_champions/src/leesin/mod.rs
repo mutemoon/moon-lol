@@ -2,18 +2,18 @@ pub mod buffs;
 
 use bevy::prelude::*;
 use league_utils::hash_bin;
+use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
 use lol_base::spell::Spell;
-use lol_core::action::damage::{DamageShape, TargetDamage, TargetFilter};
+use lol_core::action::damage::{
+    ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
+};
 use lol_core::action::dash::{ActionDash, DashDamage, DashMoveType};
 use lol_core::base::buff::BuffOf;
 use lol_core::buffs::cc_debuffs::{DebuffSlow, DebuffStun};
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
 use lol_core::movement::{CommandMovement, MovementAction, MovementWay};
-use lol_core::skill::{
-    CoolDown, EventSkillCast, Skill, SkillRecastWindow, SkillSlot, play_skill_animation,
-    skill_damage, skill_dash, spawn_skill_particle,
-};
+use lol_core::skill::{CoolDown, EventSkillCast, Skill, SkillRecastWindow, SkillSlot};
 
 use crate::leesin::buffs::BuffLeeSinIronWill;
 
@@ -95,7 +95,7 @@ fn on_leesin_skill_cast(
 
 fn cast_leesin_q(
     commands: &mut Commands,
-    q_transform: &Query<&Transform>,
+    _q_transform: &Query<&Transform>,
     entity: Entity,
     skill_entity: Entity,
     point: Vec2,
@@ -105,52 +105,60 @@ fn cast_leesin_q(
 ) {
     let stage = recast.map(|w| w.stage).unwrap_or(1);
 
-    play_skill_animation(commands, entity, "spell1".to_string());
+    commands.trigger(CommandAnimationPlay {
+        entity,
+        hash: "spell1".to_string(),
+        repeat: false,
+        duration: None,
+    });
 
     if stage == 1 {
         // First cast: Sonic Wave - skillshot that marks enemy
-        spawn_skill_particle(commands, entity, hash_bin("LeeSin_Q_Cast"));
-        skill_damage(
-            commands,
+        commands.trigger(CommandSkinParticleSpawn {
             entity,
-            skill_spell,
-            DamageShape::Sector {
-                radius: 400.0,
-                angle: 30.0,
-            },
-            vec![TargetDamage {
-                filter: TargetFilter::All,
-                amount: hash_bin("TotalDamage"),
-                damage_type: DamageType::Physical,
+            hash: hash_bin("LeeSin_Q_Cast"),
+        });
+        commands.trigger(ActionDamage {
+            entity,
+            skill: skill_spell,
+            effects: vec![ActionDamageEffect {
+                shape: DamageShape::Sector {
+                    radius: 400.0,
+                    angle: 30.0,
+                },
+                damage_list: vec![TargetDamage {
+                    filter: TargetFilter::All,
+                    amount: "TotalDamage".to_string(),
+                    damage_type: DamageType::Physical,
+                }],
+                particle: Some(hash_bin("LeeSin_Q_Hit")),
             }],
-            Some(hash_bin("LeeSin_Q_Hit")),
-        );
+        });
         // Insert recast window for second cast (Resonating Strike)
         commands
             .entity(skill_entity)
             .insert(SkillRecastWindow::new(2, 2, LEESIN_RECAST_WINDOW));
     } else {
         // Second cast: Resonating Strike - dash to marked enemy
-        spawn_skill_particle(commands, entity, hash_bin("LeeSin_Q2_Cast"));
-        skill_dash(
-            commands,
-            q_transform,
+        commands.trigger(CommandSkinParticleSpawn {
             entity,
-            point,
-            &ActionDash {
-                skill: skill_spell,
-                move_type: DashMoveType::Pointer { max: 500.0 },
-                damage: Some(DashDamage {
-                    radius_end: 100.0,
-                    damage: TargetDamage {
-                        filter: TargetFilter::All,
-                        amount: hash_bin("TotalDamage"),
-                        damage_type: DamageType::Physical,
-                    },
-                }),
-                speed: 800.0,
-            },
-        );
+            hash: hash_bin("LeeSin_Q2_Cast"),
+        });
+        commands.trigger(ActionDash {
+            entity,
+            point: point,
+            skill: skill_spell,
+            move_type: DashMoveType::Pointer { max: 500.0 },
+            damage: Some(DashDamage {
+                radius_end: 100.0,
+                damage: TargetDamage {
+                    filter: TargetFilter::All,
+                    amount: "TotalDamage".to_string(),
+                    damage_type: DamageType::Physical,
+                },
+            }),
+            speed: 800.0,
+        });
         commands.entity(skill_entity).remove::<SkillRecastWindow>();
         commands.entity(skill_entity).insert((CoolDown {
             duration: cooldown.duration,
@@ -165,7 +173,7 @@ fn cast_leesin_q(
 
 fn cast_leesin_w(
     commands: &mut Commands,
-    q_transform: &Query<&Transform>,
+    _q_transform: &Query<&Transform>,
     entity: Entity,
     skill_entity: Entity,
     point: Vec2,
@@ -175,30 +183,37 @@ fn cast_leesin_w(
 ) {
     let stage = recast.map(|w| w.stage).unwrap_or(1);
 
-    play_skill_animation(commands, entity, "spell2".to_string());
+    commands.trigger(CommandAnimationPlay {
+        entity,
+        hash: "spell2".to_string(),
+        repeat: false,
+        duration: None,
+    });
 
     if stage == 1 {
         // First cast: Safeguard - dash to ally/windwall
-        spawn_skill_particle(commands, entity, hash_bin("LeeSin_W_Cast"));
-        skill_dash(
-            commands,
-            q_transform,
+        commands.trigger(CommandSkinParticleSpawn {
             entity,
-            point,
-            &ActionDash {
-                skill: skill_spell,
-                move_type: DashMoveType::Pointer { max: 300.0 },
-                damage: None,
-                speed: 700.0,
-            },
-        );
+            hash: hash_bin("LeeSin_W_Cast"),
+        });
+        commands.trigger(ActionDash {
+            entity,
+            point: point,
+            skill: skill_spell,
+            move_type: DashMoveType::Pointer { max: 300.0 },
+            damage: None,
+            speed: 700.0,
+        });
         // Insert recast window for second cast (Iron Will)
         commands
             .entity(skill_entity)
             .insert(SkillRecastWindow::new(2, 2, LEESIN_RECAST_WINDOW));
     } else {
         // Second cast: Iron Will - lifesteal and attack speed buff
-        spawn_skill_particle(commands, entity, hash_bin("LeeSin_W2_Cast"));
+        commands.trigger(CommandSkinParticleSpawn {
+            entity,
+            hash: hash_bin("LeeSin_W2_Cast"),
+        });
         commands
             .entity(entity)
             .with_related::<BuffOf>(BuffLeeSinIronWill::new(0.1, 0.1, 4.0));
@@ -224,46 +239,59 @@ fn cast_leesin_e(
 ) {
     let stage = recast.map(|w| w.stage).unwrap_or(1);
 
-    play_skill_animation(commands, entity, "spell3".to_string());
+    commands.trigger(CommandAnimationPlay {
+        entity,
+        hash: "spell3".to_string(),
+        repeat: false,
+        duration: None,
+    });
 
     if stage == 1 {
         // First cast: Tempest - AoE damage (no slow)
-        spawn_skill_particle(commands, entity, hash_bin("LeeSin_E_Cast"));
-        skill_damage(
-            commands,
+        commands.trigger(CommandSkinParticleSpawn {
             entity,
-            skill_spell,
-            DamageShape::Circle { radius: 250.0 },
-            vec![TargetDamage {
-                filter: TargetFilter::All,
-                amount: hash_bin("TotalDamage"),
-                damage_type: DamageType::Physical,
+            hash: hash_bin("LeeSin_E_Cast"),
+        });
+        commands.trigger(ActionDamage {
+            entity,
+            skill: skill_spell,
+            effects: vec![ActionDamageEffect {
+                shape: DamageShape::Circle { radius: 250.0 },
+                damage_list: vec![TargetDamage {
+                    filter: TargetFilter::All,
+                    amount: "TotalDamage".to_string(),
+                    damage_type: DamageType::Physical,
+                }],
+                particle: Some(hash_bin("LeeSin_E_Hit")),
             }],
-            Some(hash_bin("LeeSin_E_Hit")),
-        );
+        });
         // Insert recast window for second cast (Cripple)
         commands
             .entity(skill_entity)
             .insert(SkillRecastWindow::new(2, 2, LEESIN_RECAST_WINDOW));
     } else {
         // Second cast: Cripple - slow enemies already affected by Tempest
-        spawn_skill_particle(commands, entity, hash_bin("LeeSin_E2_Cast"));
+        commands.trigger(CommandSkinParticleSpawn {
+            entity,
+            hash: hash_bin("LeeSin_E2_Cast"),
+        });
         // Mark E2 so observer applies slow on damage hit
         commands
             .entity(entity)
             .insert(LeeSinActiveAbility { stage: 2 });
-        skill_damage(
-            commands,
+        commands.trigger(ActionDamage {
             entity,
-            skill_spell,
-            DamageShape::Circle { radius: 250.0 },
-            vec![TargetDamage {
-                filter: TargetFilter::All,
-                amount: hash_bin("TotalDamage"),
-                damage_type: DamageType::Physical,
+            skill: skill_spell,
+            effects: vec![ActionDamageEffect {
+                shape: DamageShape::Circle { radius: 250.0 },
+                damage_list: vec![TargetDamage {
+                    filter: TargetFilter::All,
+                    amount: "TotalDamage".to_string(),
+                    damage_type: DamageType::Physical,
+                }],
+                particle: Some(hash_bin("LeeSin_E2_Hit")),
             }],
-            Some(hash_bin("LeeSin_E2_Hit")),
-        );
+        });
         commands.entity(skill_entity).remove::<SkillRecastWindow>();
         commands.entity(skill_entity).insert((CoolDown {
             duration: cooldown.duration,
@@ -277,27 +305,36 @@ fn cast_leesin_e(
 }
 
 fn cast_leesin_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, "spell4".to_string());
-    spawn_skill_particle(commands, entity, hash_bin("LeeSin_R_Cast"));
+    commands.trigger(CommandAnimationPlay {
+        entity,
+        hash: "spell4".to_string(),
+        repeat: false,
+        duration: None,
+    });
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: hash_bin("LeeSin_R_Cast"),
+    });
     // Mark R so observer applies knockback + stun on damage hit
     commands
         .entity(entity)
         .insert(LeeSinActiveAbility { stage: 3 });
 
-    skill_damage(
-        commands,
+    commands.trigger(ActionDamage {
         entity,
-        skill_spell,
-        DamageShape::Nearest {
-            max_distance: 150.0,
-        },
-        vec![TargetDamage {
-            filter: TargetFilter::Champion,
-            amount: hash_bin("TotalDamage"),
-            damage_type: DamageType::Physical,
+        skill: skill_spell,
+        effects: vec![ActionDamageEffect {
+            shape: DamageShape::Nearest {
+                max_distance: 150.0,
+            },
+            damage_list: vec![TargetDamage {
+                filter: TargetFilter::Champion,
+                amount: "TotalDamage".to_string(),
+                damage_type: DamageType::Physical,
+            }],
+            particle: Some(hash_bin("LeeSin_R_Hit")),
         }],
-        Some(hash_bin("LeeSin_R_Hit")),
-    );
+    });
 }
 
 /// 监听李青造成的伤害，应用E2减速和R击退眩晕

@@ -1,25 +1,25 @@
 (
     spellData: Some((
         calculations: Some({
-            34037068: (
+            "crit_move_speed_percent": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(4),
-                        dataValue: 2475179623,
+                        dataValue: "crit_move_speed_percent_as_ratio",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            1055530653: (
+            "fourth_shot_execute_percent": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),
-            3493522913: (
+            "total_ad_percent": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (

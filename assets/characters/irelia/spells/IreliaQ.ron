@@ -1,12 +1,12 @@
 (
     spellData: Some((
         calculations: Some({
-            1451939075: (
+            "champion_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 64618745,
+                        dataValue: "base_damage",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -18,30 +18,30 @@
                 multiplier: None,
                 precision: None,
             ),
-            1798361858: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 64618745,
-                    ),
-                    (
-                        type: "CalculationPartStatCoefficient",
-                        stat: Some(2),
-                        coefficient: Some(0.7),
-                        statFormula: None,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            3202745679: (
+            "heal_amount": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(2),
-                        dataValue: 2627268465,
+                        dataValue: "heal_tad_coefficient",
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "minion_damage": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "base_damage",
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(2),
+                        coefficient: Some(0.7),
+                        statFormula: None,
                     ),
                 ]),
                 multiplier: None,

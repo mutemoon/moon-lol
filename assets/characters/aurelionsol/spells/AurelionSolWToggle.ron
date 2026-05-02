@@ -1,12 +1,12 @@
 (
     spellData: Some((
         calculations: Some({
-            1406565072: (
+            "dash_speed": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 851492244,
+                        dataValue: "base_ms",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -18,18 +18,18 @@
                 multiplier: None,
                 precision: None,
             ),
-            3822957258: (
+            "unk_0xe3ddb2ca": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),
-            4292313141: (
+            "unk_0xffd78035": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 851492244,
+                        dataValue: "base_ms",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",

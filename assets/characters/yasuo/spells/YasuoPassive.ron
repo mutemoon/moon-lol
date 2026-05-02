@@ -1,13 +1,7 @@
 (
     spellData: Some((
         calculations: Some({
-            1959679032: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: None,
-            ),
-            2013612275: (
+            "current_crit_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -20,7 +14,13 @@
                 multiplier: None,
                 precision: None,
             ),
-            3609980641: (
+            "shield_value": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            "unk_0x74ce5438": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,

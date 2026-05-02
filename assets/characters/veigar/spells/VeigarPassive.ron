@@ -1,7 +1,7 @@
 (
     spellData: Some((
         calculations: Some({
-            3881751757: (
+            "ap_per_stack": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,

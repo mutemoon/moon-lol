@@ -1,12 +1,18 @@
 (
     spellData: Some((
         calculations: Some({
-            501147496: (
+            "gray_health_storage_initial": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            "total_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 4288634895,
+                        dataValue: "recast_base_damage",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -15,12 +21,6 @@
                         statFormula: Some(2),
                     ),
                 ]),
-                multiplier: None,
-                precision: None,
-            ),
-            2889400095: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),

@@ -1,17 +1,17 @@
 use bevy::prelude::*;
 use league_utils::hash_bin;
+use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
 use lol_base::spell::Spell;
-use lol_core::action::damage::{DamageShape, TargetDamage, TargetFilter};
+use lol_core::action::damage::{
+    ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
+};
 use lol_core::action::dash::{ActionDash, DashDamage, DashMoveType};
 use lol_core::base::buff::BuffOf;
 use lol_core::buffs::cc_debuffs::DebuffSlow;
 use lol_core::buffs::common_buffs::{BuffMoveSpeed, BuffSelfHeal};
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
-use lol_core::skill::{
-    CoolDown, EventSkillCast, Skill, SkillRecastWindow, SkillSlot, play_skill_animation,
-    skill_damage, skill_dash, spawn_skill_particle,
-};
+use lol_core::skill::{CoolDown, EventSkillCast, Skill, SkillRecastWindow, SkillSlot};
 
 const AATROX_Q_RECAST_WINDOW: f32 = 3.0;
 
@@ -72,7 +72,7 @@ fn on_aatrox_skill_cast(
 
 fn cast_aatrox_q(
     commands: &mut Commands,
-    q_transform: &Query<&Transform>,
+    _q_transform: &Query<&Transform>,
     entity: Entity,
     skill_entity: Entity,
     point: Vec2,
@@ -89,30 +89,34 @@ fn cast_aatrox_q(
         _ => "spell1c".to_string(),
     };
 
-    play_skill_animation(commands, entity, animation_hash);
-    spawn_skill_particle(commands, entity, hash_bin("Aatrox_Q_Cast"));
+    commands.trigger(CommandAnimationPlay {
+        entity,
+        hash: animation_hash,
+        repeat: false,
+        duration: None,
+    });
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: hash_bin("Aatrox_Q_Cast"),
+    });
 
     // Q is a 3-hit combo, each hit has different damage shape
     // Using circular damage similar to Riven
-    skill_dash(
-        commands,
-        q_transform,
+    commands.trigger(ActionDash {
         entity,
-        point,
-        &ActionDash {
-            skill: skill_spell,
-            move_type: DashMoveType::Fixed(200.0),
-            damage: Some(DashDamage {
-                radius_end: 200.0,
-                damage: TargetDamage {
-                    filter: TargetFilter::All,
-                    amount: hash_bin("TotalDamage"),
-                    damage_type: DamageType::Physical,
-                },
-            }),
-            speed: 800.0,
-        },
-    );
+        point: point,
+        skill: skill_spell,
+        move_type: DashMoveType::Fixed(200.0),
+        damage: Some(DashDamage {
+            radius_end: 200.0,
+            damage: TargetDamage {
+                filter: TargetFilter::All,
+                amount: "TotalDamage".to_string(),
+                damage_type: DamageType::Physical,
+            },
+        }),
+        speed: 800.0,
+    });
 
     if stage >= 3 {
         commands.entity(skill_entity).remove::<SkillRecastWindow>();
@@ -139,45 +143,58 @@ fn cast_aatrox_q(
 }
 
 fn cast_aatrox_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, "spell2".to_string());
-    spawn_skill_particle(commands, entity, hash_bin("Aatrox_W_Cast"));
-    // W is a chain that pulls enemies back after delay
-    skill_damage(
-        commands,
+    commands.trigger(CommandAnimationPlay {
         entity,
-        skill_spell,
-        DamageShape::Circle { radius: 300.0 },
-        vec![TargetDamage {
-            filter: TargetFilter::All,
-            amount: hash_bin("TotalDamage"),
-            damage_type: DamageType::Physical,
+        hash: "spell2".to_string(),
+        repeat: false,
+        duration: None,
+    });
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: hash_bin("Aatrox_W_Cast"),
+    });
+    // W is a chain that pulls enemies back after delay
+    commands.trigger(ActionDamage {
+        entity,
+        skill: skill_spell,
+        effects: vec![ActionDamageEffect {
+            shape: DamageShape::Circle { radius: 300.0 },
+            damage_list: vec![TargetDamage {
+                filter: TargetFilter::All,
+                amount: "TotalDamage".to_string(),
+                damage_type: DamageType::Physical,
+            }],
+            particle: Some(hash_bin("Aatrox_W_Hit")),
         }],
-        Some(hash_bin("Aatrox_W_Hit")),
-    );
+    });
 }
 
 fn cast_aatrox_e(
     commands: &mut Commands,
-    q_transform: &Query<&Transform>,
+    _q_transform: &Query<&Transform>,
     entity: Entity,
     point: Vec2,
     skill_spell: Handle<Spell>,
 ) {
-    play_skill_animation(commands, entity, "spell3".to_string());
-    spawn_skill_particle(commands, entity, hash_bin("Aatrox_E_Cast"));
-    // E is a dash that heals based on damage dealt
-    skill_dash(
-        commands,
-        q_transform,
+    commands.trigger(CommandAnimationPlay {
         entity,
-        point,
-        &ActionDash {
-            skill: skill_spell,
-            move_type: DashMoveType::Pointer { max: 250.0 },
-            damage: None,
-            speed: 900.0,
-        },
-    );
+        hash: "spell3".to_string(),
+        repeat: false,
+        duration: None,
+    });
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: hash_bin("Aatrox_E_Cast"),
+    });
+    // E is a dash that heals based on damage dealt
+    commands.trigger(ActionDash {
+        entity,
+        point: point,
+        skill: skill_spell,
+        move_type: DashMoveType::Pointer { max: 250.0 },
+        damage: None,
+        speed: 900.0,
+    });
     // Self-heal based on damage
     commands
         .entity(entity)
@@ -185,21 +202,30 @@ fn cast_aatrox_e(
 }
 
 fn cast_aatrox_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, "spell4".to_string());
-    spawn_skill_particle(commands, entity, hash_bin("Aatrox_R_Cast"));
-    // R is a self-cast that makes Aatrox unstoppable and deals damage
-    skill_damage(
-        commands,
+    commands.trigger(CommandAnimationPlay {
         entity,
-        skill_spell,
-        DamageShape::Circle { radius: 300.0 },
-        vec![TargetDamage {
-            filter: TargetFilter::All,
-            amount: hash_bin("TotalDamage"),
-            damage_type: DamageType::Physical,
+        hash: "spell4".to_string(),
+        repeat: false,
+        duration: None,
+    });
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: hash_bin("Aatrox_R_Cast"),
+    });
+    // R is a self-cast that makes Aatrox unstoppable and deals damage
+    commands.trigger(ActionDamage {
+        entity,
+        skill: skill_spell,
+        effects: vec![ActionDamageEffect {
+            shape: DamageShape::Circle { radius: 300.0 },
+            damage_list: vec![TargetDamage {
+                filter: TargetFilter::All,
+                amount: "TotalDamage".to_string(),
+                damage_type: DamageType::Physical,
+            }],
+            particle: Some(hash_bin("Aatrox_R_Hit")),
         }],
-        Some(hash_bin("Aatrox_R_Hit")),
-    );
+    });
     // Movement speed buff
     commands
         .entity(entity)

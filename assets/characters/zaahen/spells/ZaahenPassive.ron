@@ -1,19 +1,19 @@
 (
     spellData: Some((
         calculations: Some({
-            1044924888: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: None,
-            ),
-            2070049341: (
+            "percent_bonus_ad_calc": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: Some(1),
             ),
-            3410066040: (
+            "revive_cooldown_calc": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            "revive_percent_calc": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,

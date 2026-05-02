@@ -1,22 +1,22 @@
 (
     spellData: Some((
         calculations: Some({
-            1379818893: (
+            "r_calculated_shield_value": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 154940601,
+                        dataValue: "r_base_value",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(2),
-                        dataValue: 103826291,
+                        dataValue: "r_total_ad_ratio",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 1374513391,
+                        dataValue: "rap_ratio",
                     ),
                 ]),
                 multiplier: None,

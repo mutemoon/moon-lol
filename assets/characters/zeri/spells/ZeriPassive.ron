@@ -1,7 +1,7 @@
 (
     spellData: Some((
         calculations: Some({
-            2444225661: (
+            "passive_attack_speed": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,

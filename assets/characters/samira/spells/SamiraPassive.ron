@@ -1,19 +1,7 @@
 (
     spellData: Some((
         calculations: Some({
-            342470442: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: None,
-            ),
-            2094207166: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: Some(1),
-            ),
-            2931851617: (
+            "bonus_melee_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -22,6 +10,18 @@
                         subpart: None,
                     ),
                 ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "ms_bonus_new": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: Some(1),
+            ),
+            "queen_max_dash_range": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),

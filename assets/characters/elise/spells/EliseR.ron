@@ -1,12 +1,29 @@
 (
     spellData: Some((
         calculations: Some({
-            1075750678: (
+            "passive_total_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 3230601256,
+                        dataValue: "passive_bonus_damage",
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: None,
+                        coefficient: Some(0.15),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "passive_total_healing": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "passive_healing",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -18,34 +35,17 @@
                 multiplier: None,
                 precision: None,
             ),
-            2270950091: (
+            "spiderling_total_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 4044285460,
+                        dataValue: "spiderling_base_damage",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 2082629988,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            3788448417: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 2308262364,
-                    ),
-                    (
-                        type: "CalculationPartStatCoefficient",
-                        stat: None,
-                        coefficient: Some(0.15),
-                        statFormula: None,
+                        dataValue: "spiderling_ap_ratio",
                     ),
                 ]),
                 multiplier: None,

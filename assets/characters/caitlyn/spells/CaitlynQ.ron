@@ -1,19 +1,19 @@
 (
     spellData: Some((
         calculations: Some({
-            1772179026: (
+            "initial_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 64618745,
+                        dataValue: "base_damage",
                     ),
                     (
                         type: "CalculationPartStatSub",
                         stat: Some(2),
                         subpart: Some((
                             type: "CalculationPartNamedDataValue",
-                            dataValue: 1360270141,
+                            dataValue: "t_ad_ratio",
                         )),
                     ),
                 ]),

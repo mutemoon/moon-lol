@@ -1,46 +1,29 @@
 (
     spellData: Some((
         calculations: Some({
-            707375524: (
+            "tooltip_qe_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 3357680165,
+                        dataValue: "tooltip_qe_base_damage",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
                         stat: None,
-                        coefficient: Some(0.25),
+                        coefficient: Some(0.3),
                         statFormula: None,
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            822301470: (
+            "tooltip_qe_damage_per_second": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 1248407231,
-                    ),
-                    (
-                        type: "CalculationPartStatCoefficient",
-                        stat: None,
-                        coefficient: Some(0.7),
-                        statFormula: None,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            2142592777: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 3056683083,
+                        dataValue: "tooltip_qe_base_dps",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -52,17 +35,34 @@
                 multiplier: None,
                 precision: None,
             ),
-            2826286850: (
+            "tooltip_qq_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 247463083,
+                        dataValue: "tooltip_qq_base_damage",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
                         stat: None,
-                        coefficient: Some(0.3),
+                        coefficient: Some(0.7),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "tooltip_qw_damage": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "tooltip_qw_base_damage",
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: None,
+                        coefficient: Some(0.25),
                         statFormula: None,
                     ),
                 ]),

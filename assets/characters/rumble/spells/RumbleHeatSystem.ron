@@ -1,13 +1,19 @@
 (
     spellData: Some((
         calculations: Some({
-            86689229: (
+            "monster_cap_scaling": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),
-            320467457: (
+            "overheat_as": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            "total_base_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -17,12 +23,6 @@
                         statFormula: None,
                     ),
                 ]),
-                multiplier: None,
-                precision: None,
-            ),
-            2902820904: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),

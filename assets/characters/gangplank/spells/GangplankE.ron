@@ -1,22 +1,22 @@
 (
     spellData: Some((
         calculations: Some({
-            2342050882: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 2338299836,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            2349786216: (
+            "barrel_decay_time": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: Some(1),
+            ),
+            "final_slow_amount": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "barrel_slow",
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
             ),
         }),
         effectAmounts: Some([

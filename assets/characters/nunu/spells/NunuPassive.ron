@@ -1,13 +1,13 @@
 (
     spellData: Some((
         calculations: Some({
-            2265319492: (
+            "cleave_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(2),
-                        dataValue: 1909392409,
+                        dataValue: "ad_ratio_for_aoe",
                     ),
                 ]),
                 multiplier: None,

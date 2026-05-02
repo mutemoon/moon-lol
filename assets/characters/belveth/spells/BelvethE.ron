@@ -1,23 +1,29 @@
 (
     spellData: Some((
         calculations: Some({
-            2123730108: (
+            "damage_per_strike": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 4223235112,
+                        dataValue: "damage_per_hit",
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(2),
+                        coefficient: Some(0.08),
+                        statFormula: None,
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            3685428874: (
+            "total_lifesteal": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 3802419017,
+                        dataValue: "bonus_lifesteal",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -29,18 +35,12 @@
                 multiplier: None,
                 precision: None,
             ),
-            4013396525: (
+            "total_strikes": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 4158291768,
-                    ),
-                    (
-                        type: "CalculationPartStatCoefficient",
-                        stat: Some(2),
-                        coefficient: Some(0.08),
-                        statFormula: None,
+                        dataValue: "number_of_strikes",
                     ),
                 ]),
                 multiplier: None,

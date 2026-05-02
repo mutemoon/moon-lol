@@ -1,7 +1,7 @@
 (
     spellData: Some((
         calculations: Some({
-            589852431: (
+            "energy_return": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,

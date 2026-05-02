@@ -1,45 +1,45 @@
 (
     spellData: Some((
         calculations: Some({
-            501147496: (
+            "mounted_q_calc": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 3676851261,
+                        dataValue: "mounted_base_damage",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
                         stat: Some(2),
-                        coefficient: Some(0.65),
+                        coefficient: Some(0.6),
                         statFormula: Some(2),
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            1558548579: (
+            "tooltip_ammo_recharge": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 1458675421,
+                        dataValue: "recharge_time",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            2228346219: (
+            "total_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 3039609747,
+                        dataValue: "dismounted_base_damage",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
                         stat: Some(2),
-                        coefficient: Some(0.6),
+                        coefficient: Some(0.65),
                         statFormula: Some(2),
                     ),
                 ]),

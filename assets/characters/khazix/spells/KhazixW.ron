@@ -1,7 +1,7 @@
 (
     spellData: Some((
         calculations: Some({
-            64618745: (
+            "base_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -18,31 +18,31 @@
                 multiplier: None,
                 precision: None,
             ),
-            2339366755: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: None,
-            ),
-            3123124719: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: None,
-            ),
-            3202745679: (
+            "heal_amount": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 969836114,
+                        dataValue: "base_heal",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 1886965801,
+                        dataValue: "heal_ap_ratio",
                     ),
                 ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "unk_0x8b6fe763": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            "unk_0xba2719ef": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),

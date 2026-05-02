@@ -1,30 +1,30 @@
 (
     spellData: Some((
         calculations: Some({
-            1027436371: (
+            "minimum_health": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(12),
+                        dataValue: "minimum_percent_health",
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "total_heal": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 969836114,
+                        dataValue: "base_heal",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
                         stat: None,
                         coefficient: Some(0.5),
                         statFormula: None,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            3045043905: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: Some(12),
-                        dataValue: 3961539882,
                     ),
                 ]),
                 multiplier: None,

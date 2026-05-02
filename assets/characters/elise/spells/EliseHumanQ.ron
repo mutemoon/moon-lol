@@ -1,28 +1,28 @@
 (
     spellData: Some((
         calculations: Some({
-            1803842605: (
+            "human_percent_health": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 1772089697,
+                        dataValue: "target_hp_damage",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 3809245599,
+                        dataValue: "ap_ratio",
                     ),
                 ]),
                 multiplier: None,
                 precision: Some(1),
             ),
-            3821826465: (
+            "monster_damage_cap_calc": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 3036283630,
+                        dataValue: "monster_cap_damage",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",

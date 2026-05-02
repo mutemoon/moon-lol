@@ -3,15 +3,15 @@ pub mod buffs;
 use bevy::asset::Handle;
 use bevy::prelude::*;
 use league_utils::hash_bin;
+use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
 use lol_base::spell::Spell;
-use lol_core::action::damage::{DamageShape, TargetDamage, TargetFilter};
+use lol_core::action::damage::{
+    ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
+};
 use lol_core::base::buff::BuffOf;
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
-use lol_core::skill::{
-    CoolDown, EventSkillCast, Skill, SkillSlot, play_skill_animation, skill_damage,
-    spawn_skill_particle,
-};
+use lol_core::skill::{CoolDown, EventSkillCast, Skill, SkillSlot};
 
 use crate::lissandra::buffs::{BuffLissandraQ, BuffLissandraR, BuffLissandraW};
 
@@ -64,44 +64,62 @@ fn on_lissandra_skill_cast(
 }
 
 fn cast_lissandra_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, "spell1".to_string());
-    spawn_skill_particle(commands, entity, hash_bin("Lissandra_Q_Cast"));
+    commands.trigger(CommandAnimationPlay {
+        entity,
+        hash: "spell1".to_string(),
+        repeat: false,
+        duration: None,
+    });
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: hash_bin("Lissandra_Q_Cast"),
+    });
 
     // Q is a piercing ice shard that slows
-    skill_damage(
-        commands,
+    commands.trigger(ActionDamage {
         entity,
-        skill_spell,
-        DamageShape::Sector {
-            radius: 825.0,
-            angle: 15.0,
-        },
-        vec![TargetDamage {
-            filter: TargetFilter::All,
-            amount: hash_bin("TotalDamage"),
-            damage_type: DamageType::Magic,
+        skill: skill_spell,
+        effects: vec![ActionDamageEffect {
+            shape: DamageShape::Sector {
+                radius: 825.0,
+                angle: 15.0,
+            },
+            damage_list: vec![TargetDamage {
+                filter: TargetFilter::All,
+                amount: "TotalDamage".to_string(),
+                damage_type: DamageType::Magic,
+            }],
+            particle: Some(hash_bin("Lissandra_Q_Hit")),
         }],
-        Some(hash_bin("Lissandra_Q_Hit")),
-    );
+    });
 }
 
 fn cast_lissandra_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, "spell2".to_string());
-    spawn_skill_particle(commands, entity, hash_bin("Lissandra_W_Cast"));
+    commands.trigger(CommandAnimationPlay {
+        entity,
+        hash: "spell2".to_string(),
+        repeat: false,
+        duration: None,
+    });
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: hash_bin("Lissandra_W_Cast"),
+    });
 
     // W is a circle root
-    skill_damage(
-        commands,
+    commands.trigger(ActionDamage {
         entity,
-        skill_spell,
-        DamageShape::Circle { radius: 275.0 },
-        vec![TargetDamage {
-            filter: TargetFilter::All,
-            amount: hash_bin("TotalDamage"),
-            damage_type: DamageType::Magic,
+        skill: skill_spell,
+        effects: vec![ActionDamageEffect {
+            shape: DamageShape::Circle { radius: 275.0 },
+            damage_list: vec![TargetDamage {
+                filter: TargetFilter::All,
+                amount: "TotalDamage".to_string(),
+                damage_type: DamageType::Magic,
+            }],
+            particle: Some(hash_bin("Lissandra_W_Hit")),
         }],
-        Some(hash_bin("Lissandra_W_Hit")),
-    );
+    });
 }
 
 fn cast_lissandra_e(
@@ -111,48 +129,66 @@ fn cast_lissandra_e(
     _point: Vec2,
     skill_spell: Handle<Spell>,
 ) {
-    play_skill_animation(commands, entity, "spell3".to_string());
-    spawn_skill_particle(commands, entity, hash_bin("Lissandra_E_Cast"));
+    commands.trigger(CommandAnimationPlay {
+        entity,
+        hash: "spell3".to_string(),
+        repeat: false,
+        duration: None,
+    });
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: hash_bin("Lissandra_E_Cast"),
+    });
 
     // E is a dash-like skill
-    skill_damage(
-        commands,
+    commands.trigger(ActionDamage {
         entity,
-        skill_spell,
-        DamageShape::Sector {
-            radius: 1025.0,
-            angle: 10.0,
-        },
-        vec![TargetDamage {
-            filter: TargetFilter::All,
-            amount: hash_bin("TotalDamage"),
-            damage_type: DamageType::Magic,
+        skill: skill_spell,
+        effects: vec![ActionDamageEffect {
+            shape: DamageShape::Sector {
+                radius: 1025.0,
+                angle: 10.0,
+            },
+            damage_list: vec![TargetDamage {
+                filter: TargetFilter::All,
+                amount: "TotalDamage".to_string(),
+                damage_type: DamageType::Magic,
+            }],
+            particle: Some(hash_bin("Lissandra_E_Hit")),
         }],
-        Some(hash_bin("Lissandra_E_Hit")),
-    );
+    });
 }
 
 fn cast_lissandra_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, "spell4".to_string());
-    spawn_skill_particle(commands, entity, hash_bin("Lissandra_R_Cast"));
+    commands.trigger(CommandAnimationPlay {
+        entity,
+        hash: "spell4".to_string(),
+        repeat: false,
+        duration: None,
+    });
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: hash_bin("Lissandra_R_Cast"),
+    });
 
     // R can self-cast for shield or enemy cast for damage+root
     commands
         .entity(entity)
         .with_related::<BuffOf>(BuffLissandraR::new(true, 100.0, 2.5));
 
-    skill_damage(
-        commands,
+    commands.trigger(ActionDamage {
         entity,
-        skill_spell,
-        DamageShape::Circle { radius: 550.0 },
-        vec![TargetDamage {
-            filter: TargetFilter::All,
-            amount: hash_bin("TotalDamage"),
-            damage_type: DamageType::Magic,
+        skill: skill_spell,
+        effects: vec![ActionDamageEffect {
+            shape: DamageShape::Circle { radius: 550.0 },
+            damage_list: vec![TargetDamage {
+                filter: TargetFilter::All,
+                amount: "TotalDamage".to_string(),
+                damage_type: DamageType::Magic,
+            }],
+            particle: Some(hash_bin("Lissandra_R_Hit")),
         }],
-        Some(hash_bin("Lissandra_R_Hit")),
-    );
+    });
 }
 
 fn on_lissandra_damage_hit(

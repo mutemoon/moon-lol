@@ -1,17 +1,17 @@
 (
     spellData: Some((
         calculations: Some({
-            1682222624: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: None,
-            ),
-            2852380849: (
+            "attack_speed_per_stack": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: Some(2),
+            ),
+            "sheen_speed_per_stack": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
             ),
         }),
         effectAmounts: None,

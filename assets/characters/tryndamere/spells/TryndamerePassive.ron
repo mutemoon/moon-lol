@@ -1,17 +1,17 @@
 (
     spellData: Some((
         calculations: Some({
-            3697522199: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: None,
-            ),
-            3907213017: (
+            "passive_crit_conversion_tooltip": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: Some(1),
+            ),
+            "unk_0xdc63b617": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
             ),
         }),
         effectAmounts: None,

@@ -1,33 +1,33 @@
 (
     spellData: Some((
         calculations: Some({
-            147862120: (
+            "dot_damage_calc": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 2282449820,
+                        dataValue: "dot_damage_base",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 3401369171,
+                        dataValue: "dot_damage_ap_ratio",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            3304846765: (
+            "shield_calc": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 204386453,
+                        dataValue: "shield_base",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(12),
-                        dataValue: 3941748685,
+                        dataValue: "shield_health_ratio",
                     ),
                 ]),
                 multiplier: None,

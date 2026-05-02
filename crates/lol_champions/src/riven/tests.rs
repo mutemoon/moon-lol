@@ -1,48 +1,20 @@
 #![cfg(test)]
-//! Headless logic tests for Riven skills.
+//! Logic and render/video tests for Riven skills.
 //!
-//! These tests run without GPU/rendering infrastructure. They verify skill logic:
-//! - Q recast window stage progression
-//! - W damage targeting
-//! - E shield + dash
-//! - R cooldown and mana cost
-//!
-//! Render/video tests remain in root tests/riven.rs (requires moon_lol::PluginCore).
+//! Headless mode uses mock spells; render mode uses real `ConfigCharacterRecord` + skin.
 
 use std::collections::BTreeMap;
-use std::time::Duration;
 
-use bevy::prelude::*;
+use bevy::math::{Vec2, Vec3};
 use league_utils::hash_bin;
-use league_utils::hash_key::HashKey;
-use lol_base::grid::{
-    ConfigNavigationGrid, ConfigNavigationGridCell, GridFlagsJungleQuadrant, GridFlagsMainRegion,
-    GridFlagsNearestLane, GridFlagsPOI, GridFlagsRing, GridFlagsRiverRegion, GridFlagsSRX,
-    GridFlagsVisionPathing,
-};
-use lol_base::prop::LoadHashKeyTrait;
 use lol_base::spell::{DataSpell, Spell, ValuesData};
 use lol_base::spell_calc::{
     CalculationPart, CalculationPartNamedDataValue, CalculationSpell, CalculationType,
 };
-use lol_core::action::{Action, CommandAction};
-use lol_core::base::ability_resource::{AbilityResource, AbilityResourceType};
-use lol_core::base::buff::Buffs;
-use lol_core::base::level::Level;
-use lol_core::buffs::shield_white::BuffShieldWhite;
-use lol_core::damage::{CommandDamageCreate, Damage, DamageType};
-use lol_core::entities::champion::Champion;
-use lol_core::life::Health;
-use lol_core::movement::{Movement, MovementState};
-use lol_core::navigation::grid::ResourceGrid;
-use lol_core::navigation::navigation::{NavigationDebugState, NavigationStats};
-use lol_core::skill::{
-    CoolDown, Skill, SkillCooldownMode, SkillOf, SkillPoints, SkillRecastWindow, SkillSlot, Skills,
-    get_skill_value,
-};
-use lol_core::team::Team;
+use lol_core::skill::{SkillCooldownMode, SkillRecastWindow, SkillSlot, Skills, get_skill_value};
 
 use crate::riven::Riven;
+use crate::test_utils::*;
 
 const RIVEN_Q_KEY: &str = "Characters/Riven/Spells/RivenTriCleaveAbility/RivenTriCleave";
 const RIVEN_W_KEY: &str = "Characters/Riven/Spells/RivenMartyrAbility/RivenMartyr";
@@ -51,537 +23,237 @@ const RIVEN_R_KEY: &str = "Characters/Riven/Spells/RivenFengShuiEngineAbility/Ri
 
 const EPSILON: f32 = 1e-3;
 
-struct RivenHarness {
-    app: App,
-    riven: Entity,
-    enemy_near: Entity,
-    enemy_far: Entity,
-    ally_near: Entity,
-    current_frame: u32,
-}
-
-impl RivenHarness {
-    fn new(_test_name: &str) -> Self {
-        let mut app = App::new();
-
-        app.insert_resource(Time::<Fixed>::from_duration(Duration::from_millis(16)));
-
-        // Minimal headless setup — register only what the tests actually need
-        app.add_plugins(MinimalPlugins);
-        app.add_plugins(AssetPlugin::default());
-        app.add_plugins(bevy::input::InputPlugin);
-        app.add_plugins(bevy::state::app::StatesPlugin);
-        app.add_plugins(bevy::picking::PickingPlugin);
-
-        // Core skill pipeline
-        app.add_plugins(lol_core::action::PluginAction);
-        app.add_plugins(lol_core::cooldown::PluginCooldown);
-        app.add_plugins(lol_core::damage::PluginDamage);
-        app.add_plugins(lol_core::life::PluginLife);
-        app.add_plugins(lol_core::movement::PluginMovement);
-        app.add_plugins(lol_core::skill::PluginSkill);
-
-        // Riven's own skill plugin
-        app.add_plugins(crate::riven::PluginRiven);
-
-        app.init_resource::<NavigationStats>();
-        app.init_resource::<NavigationDebugState>();
-        app.init_asset::<ConfigNavigationGrid>();
-        app.init_asset::<Spell>();
-        app.init_asset::<Image>();
-        app.init_asset::<Mesh>();
-        app.init_asset::<Shader>();
-        app.init_asset::<StandardMaterial>();
-
-        app.finish();
-        app.cleanup();
-
-        // Grid Mock
-        let grid_handle = app
-            .world_mut()
-            .resource_mut::<Assets<ConfigNavigationGrid>>()
-            .add(make_test_grid());
-        app.insert_resource(ResourceGrid(grid_handle));
-
-        // Mock Spell assets
-        {
-            let mut spell_objects = app.world_mut().resource_mut::<Assets<Spell>>();
-            let make_spell = || {
-                let mut calculations = BTreeMap::new();
-
-                let make_calc = |name: &str| {
-                    CalculationType::CalculationSpell(CalculationSpell {
-                        formula_parts: Some(vec![CalculationPart::CalculationPartNamedDataValue(
-                            CalculationPartNamedDataValue {
-                                data_value: hash_bin(name),
-                            },
-                        )]),
-                        multiplier: None,
-                        precision: None,
-                    })
-                };
-
-                calculations.insert(hash_bin("mDamage"), make_calc("mDamage"));
-                calculations.insert(hash_bin("TotalDamage"), make_calc("TotalDamage"));
-                calculations.insert(hash_bin("FirstSlashDamage"), make_calc("FirstSlashDamage"));
-                calculations.insert(hash_bin("ShieldStrength"), make_calc("ShieldStrength"));
-
-                Spell {
-                    spell_data: Some(DataSpell {
-                        calculations: Some(calculations),
-                        data_values: Some(vec![
-                            ValuesData {
-                                name: "mDamage".to_string(),
-                                values: Some(vec![130.0f32; 6]),
-                            },
-                            ValuesData {
-                                name: "TotalDamage".to_string(),
-                                values: Some(vec![130.0f32; 6]),
-                            },
-                            ValuesData {
-                                name: "FirstSlashDamage".to_string(),
-                                values: Some(vec![130.0f32; 6]),
-                            },
-                            ValuesData {
-                                name: "ShieldStrength".to_string(),
-                                values: Some(vec![100.0f32; 6]),
-                            },
-                        ]),
-                        effect_amounts: None,
-                        mana: None,
-                        missile_spec: None,
-                        hit_bone_name: None,
-                        missile_speed: None,
-                        missile_effect_key: None,
-                        cast_type: None,
-                    }),
-                }
-            };
-            spell_objects.add_hash(RIVEN_Q_KEY, make_spell());
-            spell_objects.add_hash(RIVEN_W_KEY, make_spell());
-            spell_objects.add_hash(RIVEN_E_KEY, make_spell());
-            spell_objects.add_hash(RIVEN_R_KEY, make_spell());
-            spell_objects.add_hash(
-                "Characters/Riven/Spells/RivenPassiveAbility/RivenPassive",
-                make_spell(),
-            );
-        }
-
-        // Initialization system
-        app.add_systems(Startup, |mut commands: Commands| {
-            let riven = commands
-                .spawn((
-                    Riven,
-                    Team::Order,
-                    Transform::default(),
-                    Health::new(1000.0),
-                    AbilityResource {
-                        ar_type: AbilityResourceType::Mana,
-                        value: 1000.0,
-                        max: 1000.0,
-                        base: 1000.0,
-                        per_level: 0.0,
-                        base_static_regen: 0.0,
-                        regen_per_level: 0.0,
-                    },
-                    Level {
-                        value: 18,
-                        ..default()
-                    },
-                    SkillPoints(4),
-                    Damage(100.0),
-                    lol_core::damage::Armor(0.0),
-                    Movement { speed: 340.0 },
-                    MovementState::default(),
-                ))
-                .id();
-
-            let add_sk = |commands: &mut Commands, slot: SkillSlot, key: &str, manual: bool| {
-                let mut skill =
-                    Skill::new(slot, Handle::from(HashKey::<Spell>::from(key))).with_level(1);
-                if manual {
-                    skill = skill.with_cooldown_mode(SkillCooldownMode::Manual);
-                }
-                commands.entity(riven).with_related::<SkillOf>((
-                    skill,
-                    CoolDown {
-                        duration: 10.0,
-                        timer: Some({
-                            let mut t = Timer::from_seconds(10.0, TimerMode::Once);
-                            t.set_elapsed(Duration::from_secs(10));
-                            t
-                        }),
-                    },
-                ));
-            };
-            add_sk(&mut commands, SkillSlot::Q, RIVEN_Q_KEY, true);
-            add_sk(&mut commands, SkillSlot::W, RIVEN_W_KEY, false);
-            add_sk(&mut commands, SkillSlot::E, RIVEN_E_KEY, false);
-            add_sk(&mut commands, SkillSlot::R, RIVEN_R_KEY, false);
-
-            let enemy_near = commands
-                .spawn((
-                    Champion,
-                    Team::Chaos,
-                    Transform::from_xyz(100.0, 0.0, 0.0),
-                    Health::new(6000.0),
-                    lol_core::damage::Armor(0.0),
-                ))
-                .id();
-
-            let enemy_far = commands
-                .spawn((
-                    Champion,
-                    Team::Chaos,
-                    Transform::from_xyz(420.0, 0.0, 0.0),
-                    Health::new(6000.0),
-                    lol_core::damage::Armor(0.0),
-                ))
-                .id();
-
-            let ally_near = commands
-                .spawn((
-                    Team::Order,
-                    Transform::from_xyz(60.0, 0.0, 0.0),
-                    Health::new(6000.0),
-                    lol_core::damage::Armor(0.0),
-                ))
-                .id();
-
-            commands.insert_resource(RivenHarnessEntities {
-                riven,
-                enemy_near,
-                enemy_far,
-                ally_near,
-            });
-        });
-
-        app.finish();
-        app.cleanup();
-
-        // Run startup systems
-        app.update();
-
-        let ents = app
-            .world()
-            .get_resource::<RivenHarnessEntities>()
-            .expect("Harness entities failed to initialize");
-        let riven = ents.riven;
-        let enemy_near = ents.enemy_near;
-        let enemy_far = ents.enemy_far;
-        let ally_near = ents.ally_near;
-
-        // Setup Riven facing X+
-        if let Some(mut transform) = app.world_mut().get_mut::<Transform>(riven) {
-            transform.look_to(Vec3::new(1.0, 0.0, 0.0), Vec3::Y);
-        }
-
-        // Run settle frames
-        for _ in 0..15 {
-            app.update();
-        }
-
-        Self {
-            app,
-            riven,
-            enemy_near,
-            enemy_far,
-            ally_near,
-            current_frame: 15,
-        }
-    }
-
-    fn w_damage_key() -> u32 {
-        hash_bin("TotalDamage")
-    }
-
-    fn advance_frame(&mut self) -> &mut Self {
-        self.app.update();
-        self.current_frame += 1;
-        self
-    }
-
-    fn advance(&mut self, seconds: f32) -> &mut Self {
-        let ticks = (seconds / 0.016).ceil() as u32;
-        for _ in 0..ticks {
-            self.advance_frame();
-        }
-        self
-    }
-
-    fn cast_skill(&mut self, index: usize, point: Vec2) -> &mut Self {
-        self.app.world_mut().trigger(CommandAction {
-            entity: self.riven,
-            action: Action::Skill { index, point },
-        });
-        self.app.update();
-        self
-    }
-
-    fn apply_damage_to_riven(&mut self, amount: f32) -> &mut Self {
-        self.app.world_mut().trigger(CommandDamageCreate {
-            entity: self.riven,
-            source: self.enemy_near,
-            damage_type: DamageType::Physical,
-            amount,
-        });
-        self.app.update();
-        self
-    }
-
-    fn shield_value(&self) -> Option<f32> {
-        let buffs = self.app.world().get::<Buffs>(self.riven)?;
-        for buff in buffs.iter() {
-            if let Some(shield) = self.app.world().get::<BuffShieldWhite>(buff) {
-                return Some(shield.current);
-            }
-        }
-        None
-    }
-
-    fn position(&self, entity: Entity) -> Vec3 {
-        self.app
-            .world()
-            .get::<Transform>(entity)
-            .expect("transform should exist")
-            .translation
-    }
-
-    fn health(&self, entity: Entity) -> f32 {
-        self.app
-            .world()
-            .get::<Health>(entity)
-            .expect("health should exist")
-            .value
-    }
-
-    fn mana(&self) -> f32 {
-        self.app
-            .world()
-            .get::<AbilityResource>(self.riven)
-            .map(|r| r.value)
-            .unwrap_or(0.0)
-    }
-
-    fn cooldown_finished(&self, index: usize) -> bool {
-        let skills = self
-            .app
-            .world()
-            .get::<Skills>(self.riven)
-            .expect("skills should exist");
-        let skill_entity = skills[index];
-        self.app
-            .world()
-            .get::<CoolDown>(skill_entity)
-            .expect("cooldown state should exist")
-            .timer
-            .as_ref()
-            .map_or(true, |t| t.is_finished())
-    }
-
-    fn spell(&self, index: usize) -> Option<&Spell> {
-        let skills = self.app.world().get::<Skills>(self.riven)?;
-        let skill_entity = if index < skills.len() {
-            Some(skills[index])
-        } else {
-            None
-        }?;
-        let skill = self.app.world().get::<Skill>(skill_entity)?;
-        self.app
-            .world()
-            .resource::<Assets<Spell>>()
-            .load_hash(skill.spell.id())
-    }
-
-    fn print_skill_logs(&self) {
-        use lol_core::skill::SkillCastLog;
-        if let Some(log) = self.app.world().get_resource::<SkillCastLog>() {
-            for record in &log.0 {
-                println!("Skill Cast Record: {:?}", record);
-            }
-        }
+fn riven_spell_keys() -> SpellKeySet {
+    SpellKeySet {
+        q: RIVEN_Q_KEY,
+        w: RIVEN_W_KEY,
+        e: RIVEN_E_KEY,
+        r: RIVEN_R_KEY,
+        passive: "Characters/Riven/Spells/RivenPassiveAbility/RivenPassive",
     }
 }
 
-#[derive(Resource)]
-struct RivenHarnessEntities {
-    riven: Entity,
-    enemy_near: Entity,
-    enemy_far: Entity,
-    ally_near: Entity,
-}
-
-fn make_test_grid() -> ConfigNavigationGrid {
-    let cell = ConfigNavigationGridCell {
-        heuristic: 1.0,
-        vision_pathing_flags: GridFlagsVisionPathing::Walkable,
-        river_region_flags: GridFlagsRiverRegion::NonJungle,
-        jungle_quadrant_flags: GridFlagsJungleQuadrant::None,
-        main_region_flags: GridFlagsMainRegion::Spawn,
-        nearest_lane_flags: GridFlagsNearestLane::BlueSideTopLane,
-        poi_flags: GridFlagsPOI::None,
-        ring_flags: GridFlagsRing::BlueSpawnToNexus,
-        srx_flags: GridFlagsSRX::Walkable,
+fn riven_mock_spell() -> Spell {
+    let mut calculations = BTreeMap::new();
+    let make_calc = |name: &str| {
+        CalculationType::CalculationSpell(CalculationSpell {
+            formula_parts: Some(vec![CalculationPart::CalculationPartNamedDataValue(
+                CalculationPartNamedDataValue {
+                    data_value: name.to_string(),
+                },
+            )]),
+            multiplier: None,
+            precision: None,
+        })
     };
-
-    ConfigNavigationGrid {
-        min_position: Vec2::new(-2000.0, -2000.0),
-        cell_size: 50.0,
-        x_len: 100,
-        y_len: 100,
-        cells: vec![vec![cell; 100]; 100],
-        height_x_len: 2,
-        height_y_len: 2,
-        height_samples: vec![vec![0.0; 2]; 2],
-        occupied_cells: Default::default(),
-        exclude_cells: Default::default(),
+    calculations.insert("m_damage".to_string(), make_calc("m_damage"));
+    calculations.insert("total_damage".to_string(), make_calc("total_damage"));
+    calculations.insert(
+        "first_slash_damage".to_string(),
+        make_calc("first_slash_damage"),
+    );
+    calculations.insert("shield_strength".to_string(), make_calc("shield_strength"));
+    Spell {
+        spell_data: Some(DataSpell {
+            calculations: Some(calculations),
+            data_values: Some(vec![
+                ValuesData {
+                    name: "mDamage".into(),
+                    values: Some(vec![130.0; 6]),
+                },
+                ValuesData {
+                    name: "TotalDamage".into(),
+                    values: Some(vec![130.0; 6]),
+                },
+                ValuesData {
+                    name: "FirstSlashDamage".into(),
+                    values: Some(vec![130.0; 6]),
+                },
+                ValuesData {
+                    name: "ShieldStrength".into(),
+                    values: Some(vec![100.0; 6]),
+                },
+            ]),
+            effect_amounts: None,
+            mana: None,
+            missile_spec: None,
+            hit_bone_name: None,
+            missile_speed: None,
+            missile_effect_key: None,
+            cast_type: None,
+        }),
     }
 }
 
-// ── Tests ──
+fn riven_config() -> ChampionHarnessConfig {
+    ChampionHarnessConfig {
+        champion_dir: "riven",
+        config_path: "characters/riven/config.ron",
+        skin_path: "characters/riven/skins/skin0.ron",
+        add_champion_plugin: |app| {
+            app.add_plugins(crate::riven::PluginRiven);
+        },
+        make_mock_spell: riven_mock_spell,
+        cooldown_mode_for: |slot| {
+            if slot == SkillSlot::Q {
+                SkillCooldownMode::Manual
+            } else {
+                SkillCooldownMode::AfterCast
+            }
+        },
+        spell_keys: riven_spell_keys(),
+    }
+}
+
+fn build_headless(name: &str) -> ChampionTestHarness {
+    ChampionTestHarness::build::<Riven>(name, HarnessMode::Headless, &riven_config())
+}
+
+fn build_render(name: &str, max_frames: u32) -> ChampionTestHarness {
+    ChampionTestHarness::build::<Riven>(name, HarnessMode::Render { max_frames }, &riven_config())
+}
+
+fn w_damage_key() -> &'static str {
+    "total_damage"
+}
+
+// ═══════════════════════════════════════════════════════════
+// Headless tests
+// ═══════════════════════════════════════════════════════════
 
 #[test]
 fn riven_q_cycles_through_three_real_stages() {
-    let mut harness = RivenHarness::new("riven_q");
-
-    harness.cast_skill(0, Vec2::new(140.0, 0.0)).advance(0.4);
-    let q_entity = (harness
+    let mut h = build_headless("riven_q");
+    h.cast_skill(0, Vec2::new(140.0, 0.0)).advance(0.4);
+    let q_entity = (h
         .app
         .world()
-        .get::<Skills>(harness.riven)
-        .expect("Skills missing on Riven"))[0];
-    let q_stage = harness
+        .get::<Skills>(h.champion)
+        .expect("Skills missing"))[0];
+    let q_stage = h
         .app
         .world()
         .get::<SkillRecastWindow>(q_entity)
-        .map(|window| window.stage);
+        .map(|w| w.stage);
     if q_stage != Some(2) {
-        harness.print_skill_logs();
+        h.print_skill_logs();
     }
     assert_eq!(q_stage, Some(2));
-    assert!(harness.cooldown_finished(0));
-
-    harness.cast_skill(0, Vec2::new(140.0, 0.0)).advance(0.4);
+    assert!(h.cooldown_finished(0));
+    h.cast_skill(0, Vec2::new(140.0, 0.0)).advance(0.4);
     assert_eq!(
-        harness
-            .app
+        h.app
             .world()
             .get::<SkillRecastWindow>(q_entity)
-            .map(|window| window.stage),
+            .map(|w| w.stage),
         Some(3)
     );
-    assert!(harness.cooldown_finished(0));
-
-    harness.cast_skill(0, Vec2::new(140.0, 0.0)).advance(0.1);
-    assert!(
-        harness
-            .app
-            .world()
-            .get::<SkillRecastWindow>(q_entity)
-            .is_none()
-    );
-    assert!(!harness.cooldown_finished(0));
-    harness.advance(10.1);
-    assert!(harness.cooldown_finished(0));
-
-    let q_pos = harness.position(harness.riven);
-    assert!(
-        q_pos.length() > 5.0,
-        "expected q combo movement, got {q_pos:?}"
-    );
+    assert!(h.cooldown_finished(0));
+    h.cast_skill(0, Vec2::new(140.0, 0.0)).advance(0.1);
+    assert!(h.app.world().get::<SkillRecastWindow>(q_entity).is_none());
+    assert!(!h.cooldown_finished(0));
+    h.advance(10.1);
+    assert!(h.cooldown_finished(0));
+    assert!(h.position(h.champion).length() > 5.0);
 }
 
 #[test]
 fn riven_w_hits_only_enemies_in_range() {
-    let mut harness = RivenHarness::new("riven_w");
-
+    let mut h = build_headless("riven_w");
     let expected_damage = get_skill_value(
-        &harness.spell(1).expect("W spell missing"),
-        RivenHarness::w_damage_key(),
+        &h.spell(1).expect("W spell missing"),
+        w_damage_key(),
         1,
-        |stat| if stat == 2 { 100.0 } else { 0.0 }, // Base AD
+        |stat| if stat == 2 { 100.0 } else { 0.0 },
     )
     .expect("riven w damage should exist");
-
-    let initial_near = harness.health(harness.enemy_near);
-    let initial_far = harness.health(harness.enemy_far);
-    let initial_ally = harness.health(harness.ally_near);
-
-    harness.cast_skill(1, Vec2::new(140.0, 0.0));
-    harness.advance(0.2);
-
-    let near = harness.health(harness.enemy_near);
-    let far = harness.health(harness.enemy_far);
-    let ally = harness.health(harness.ally_near);
-    assert!(
-        (initial_near - near - expected_damage).abs() < EPSILON,
-        "expected near enemy damage {}, got {}",
-        expected_damage,
-        initial_near - near
-    );
-    assert!(
-        (far - initial_far).abs() < EPSILON,
-        "expected far enemy health unchanged"
-    );
-    assert!(
-        (ally - initial_ally).abs() < EPSILON,
-        "expected ally health unchanged"
-    );
+    let initial_near = h.health(h.enemy_near);
+    let initial_far = h.health(h.enemy_far);
+    let initial_ally = h.health(h.ally_near);
+    h.cast_skill(1, Vec2::new(140.0, 0.0));
+    h.advance(0.2);
+    assert!((initial_near - h.health(h.enemy_near) - expected_damage).abs() < EPSILON);
+    assert!((h.health(h.enemy_far) - initial_far).abs() < EPSILON);
+    assert!((h.health(h.ally_near) - initial_ally).abs() < EPSILON);
 }
 
 #[test]
 fn riven_e_spawns_shield_and_dash_absorbs_damage() {
-    let mut harness = RivenHarness::new("riven_e");
-
-    harness.cast_skill(2, Vec2::new(140.0, 0.0)).advance(0.4);
-
-    let e_pos = harness.position(harness.riven);
-    assert!(
-        e_pos.length() > 2.0,
-        "expected e dash position, got {e_pos:?}"
-    );
-    let initial_health = harness.health(harness.riven);
-    let shield_val = harness.shield_value().unwrap_or(0.0);
-    assert!(
-        shield_val > 80.0 && shield_val <= 100.0,
-        "Expected shield value near 100, got {}",
-        shield_val
-    );
-
-    harness.apply_damage_to_riven(60.0);
-    assert!((harness.health(harness.riven) - initial_health).abs() < EPSILON);
-    let remaining_shield = harness.shield_value().unwrap_or(0.0);
+    let mut h = build_headless("riven_e");
+    h.cast_skill(2, Vec2::new(140.0, 0.0)).advance(0.4);
+    assert!(h.position(h.champion).length() > 2.0);
+    let initial_health = h.health(h.champion);
+    let shield_val = h.shield_value().unwrap_or(0.0);
+    assert!(shield_val > 80.0 && shield_val <= 100.0);
+    h.apply_damage(60.0);
+    assert!((h.health(h.champion) - initial_health).abs() < EPSILON);
+    let remaining_shield = h.shield_value().unwrap_or(0.0);
     assert!(remaining_shield > 20.0 && remaining_shield < shield_val);
-
-    harness.apply_damage_to_riven(50.0);
-    assert!(harness.health(harness.riven) < initial_health);
+    h.apply_damage(50.0);
+    assert!(h.health(h.champion) < initial_health);
 }
 
 #[test]
 fn riven_r_starts_cooldown_without_moving_or_damaging() {
-    let mut harness = RivenHarness::new("riven_r");
-
-    let expected_mana_cost = harness
+    let mut h = build_headless("riven_r");
+    let expected_mana_cost = h
         .spell(3)
         .expect("R spell missing")
         .spell_data
         .as_ref()
-        .and_then(|spell| spell.mana.as_ref())
-        .and_then(|mana| mana.first().copied())
+        .and_then(|s| s.mana.as_ref())
+        .and_then(|m| m.first().copied())
         .unwrap_or(0.0);
+    let initial_mana = h.mana();
+    let initial_enemy_hp = h.health(h.enemy_near);
+    h.cast_skill(3, Vec2::new(140.0, 0.0)).advance(0.2);
+    assert!((h.mana() - (initial_mana - expected_mana_cost)).abs() < EPSILON);
+    assert!(!h.cooldown_finished(3));
+    assert!(h.position(h.champion).distance(Vec3::ZERO) < EPSILON);
+    assert!((h.health(h.enemy_near) - initial_enemy_hp).abs() < EPSILON);
+}
 
-    let initial_mana = harness.mana();
-    let initial_enemy_hp = harness.health(harness.enemy_near);
+// ═══════════════════════════════════════════════════════════
+// Render tests
+// ═══════════════════════════════════════════════════════════
 
-    harness.cast_skill(3, Vec2::new(140.0, 0.0)).advance(0.2);
-
-    assert!((harness.mana() - (initial_mana - expected_mana_cost)).abs() < EPSILON);
-    assert!(!harness.cooldown_finished(3));
-    assert!(
-        harness
-            .position(harness.riven)
-            .distance(Vec3::new(0.0, 0.0, 0.0))
-            < EPSILON
+#[test]
+fn riven_q_writes_video() {
+    run_render_test(
+        || build_render("riven_q_writes_video", 180),
+        |h| {
+            h.cast_skill(0, Vec2::new(140.0, 0.0)).advance(0.4);
+            h.cast_skill(0, Vec2::new(140.0, 0.0)).advance(0.4);
+            h.cast_skill(0, Vec2::new(140.0, 0.0)).advance(0.1);
+        },
     );
-    assert!((harness.health(harness.enemy_near) - initial_enemy_hp).abs() < EPSILON);
+}
+#[test]
+fn riven_w_writes_video() {
+    run_render_test(
+        || build_render("riven_w_writes_video", 120),
+        |h| {
+            h.cast_skill(1, Vec2::new(140.0, 0.0)).advance(0.2);
+        },
+    );
+}
+#[test]
+fn riven_e_writes_video() {
+    run_render_test(
+        || build_render("riven_e_writes_video", 120),
+        |h| {
+            h.cast_skill(2, Vec2::new(140.0, 0.0)).advance(0.4);
+            h.apply_damage(60.0);
+            h.apply_damage(50.0);
+        },
+    );
+}
+#[test]
+fn riven_r_writes_video() {
+    run_render_test(
+        || build_render("riven_r_writes_video", 140),
+        |h| {
+            h.cast_skill(3, Vec2::new(140.0, 0.0)).advance(0.2);
+        },
+    );
 }

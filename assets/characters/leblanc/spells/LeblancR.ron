@@ -1,12 +1,28 @@
 (
     spellData: Some((
         calculations: Some({
-            994187939: (
+            "re1_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 3570343371,
+                        dataValue: "re1_base",
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: "rq1re1_base_ap_ratio",
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "re2_damage": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "re2_base",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -18,12 +34,28 @@
                 multiplier: None,
                 precision: None,
             ),
-            1101335959: (
+            "rq1_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 4027495543,
+                        dataValue: "rq1_base",
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: "rq1re1_base_ap_ratio",
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "rq2_damage": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "rq2_base",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -35,50 +67,18 @@
                 multiplier: None,
                 precision: None,
             ),
-            1619911138: (
+            "rw_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 2664135870,
-                    ),
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: None,
-                        dataValue: 3538761312,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            2733965475: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 3021083595,
+                        dataValue: "rw_base",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
                         stat: None,
                         coefficient: Some(0.8),
                         statFormula: None,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            3416442790: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 4115664746,
-                    ),
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: None,
-                        dataValue: 3538761312,
                     ),
                 ]),
                 multiplier: None,

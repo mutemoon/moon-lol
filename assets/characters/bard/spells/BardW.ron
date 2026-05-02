@@ -1,58 +1,58 @@
 (
     spellData: Some((
         calculations: Some({
-            758228593: (
+            "calc_move_speed": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 3760774677,
+                        dataValue: "move_speed_base",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 191733916,
-                    ),
-                ]),
-                multiplier: Some((
-                    type: "CalculationPartNamedDataValue",
-                    dataValue: 2528960647,
-                )),
-                precision: None,
-            ),
-            1987755231: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 3605258375,
-                    ),
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: None,
-                        dataValue: 4183424142,
-                    ),
-                ]),
-                multiplier: Some((
-                    type: "CalculationPartNamedDataValue",
-                    dataValue: 2528960647,
-                )),
-                precision: None,
-            ),
-            2046096443: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 4256130949,
-                    ),
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: None,
-                        dataValue: 3585369395,
+                        dataValue: "move_speed_ratio",
                     ),
                 ]),
                 multiplier: None,
+                precision: None,
+            ),
+            "initial_heal": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "minimum_heal",
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: "ap_ratio_min",
+                    ),
+                ]),
+                multiplier: Some((
+                    type: "CalculationPartNamedDataValue",
+                    dataValue: "healing_mult",
+                )),
+                precision: None,
+            ),
+            "max_heal": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "maximum_heal",
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: "ap_ratio_max",
+                    ),
+                ]),
+                multiplier: Some((
+                    type: "CalculationPartNamedDataValue",
+                    dataValue: "healing_mult",
+                )),
                 precision: None,
             ),
         }),

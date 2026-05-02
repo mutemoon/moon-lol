@@ -1,34 +1,34 @@
 (
     spellData: Some((
         calculations: Some({
-            602845611: (
+            "r_damage_calc": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 1979514766,
+                        dataValue: "base_damage",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
                         stat: None,
-                        coefficient: Some(0.5),
+                        coefficient: Some(0.2),
                         statFormula: None,
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            934732877: (
+            "recast_damage_calc": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 64618745,
+                        dataValue: "recast_damage",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
                         stat: None,
-                        coefficient: Some(0.2),
+                        coefficient: Some(0.5),
                         statFormula: None,
                     ),
                 ]),

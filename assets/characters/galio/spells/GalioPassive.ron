@@ -1,7 +1,13 @@
 (
     spellData: Some((
         calculations: Some({
-            501147496: (
+            "passive_cooldown_modified": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: Some(-1),
+            ),
+            "total_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -25,12 +31,6 @@
                 ]),
                 multiplier: None,
                 precision: None,
-            ),
-            1813064660: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: Some(-1),
             ),
         }),
         effectAmounts: None,

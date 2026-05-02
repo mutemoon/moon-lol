@@ -1,38 +1,38 @@
 (
     spellData: Some((
         calculations: Some({
-            673044596: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: Some(-1),
-            ),
-            749309793: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: Some(-1),
-            ),
-            1509675819: (
+            "max_health_damage_percent": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 2466211350,
+                        dataValue: "max_health_damage_percent_base",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(1),
-                        dataValue: 3153783731,
+                        dataValue: "max_health_damage_resist_ratio",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(6),
-                        dataValue: 3153783731,
+                        dataValue: "max_health_damage_resist_ratio",
                     ),
                 ]),
                 multiplier: None,
                 precision: Some(2),
+            ),
+            "percent_health_damage": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: Some(-1),
+            ),
+            "unk_0x281dd874": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: Some(-1),
             ),
         }),
         effectAmounts: None,

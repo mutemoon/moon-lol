@@ -1,44 +1,44 @@
 (
     spellData: Some((
         calculations: Some({
-            10334664: (
+            "dash_speed": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 4029017048,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            1406565072: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 1437691317,
+                        dataValue: "dash_speed_base",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(7),
-                        dataValue: 510047956,
+                        dataValue: "dash_speed_mod",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            3397572612: (
+            "empowered_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 865623685,
+                        dataValue: "empowered_base_damage",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(2),
-                        dataValue: 1121971103,
+                        dataValue: "empowered_ad_ratio",
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "unk_0x9db1c8": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "tunnel_duration_minutes",
                     ),
                 ]),
                 multiplier: None,

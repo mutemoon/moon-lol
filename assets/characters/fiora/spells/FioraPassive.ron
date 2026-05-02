@@ -1,27 +1,27 @@
 (
     spellData: Some((
         calculations: Some({
-            97015132: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: None,
-            ),
-            806412507: (
+            "passive_damage_total": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 2196513046,
+                        dataValue: "passive_damage_base",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(2),
-                        dataValue: 2726746677,
+                        dataValue: "passive_damage_ad_ratio",
                     ),
                 ]),
                 multiplier: None,
                 precision: Some(1),
+            ),
+            "passive_heal_amount": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
             ),
         }),
         effectAmounts: None,

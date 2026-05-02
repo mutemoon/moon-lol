@@ -1,28 +1,24 @@
 (
     spellData: Some((
         calculations: Some({
-            272648529: (
+            "ad_ratio_tooltip": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(2),
-                        dataValue: 162078152,
-                    ),
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 64618745,
+                        dataValue: "bonus_ad_ratio",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            704689212: (
+            "calculated_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 64618745,
+                        dataValue: "base_damage",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -33,41 +29,45 @@
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(2),
-                        dataValue: 162078152,
+                        dataValue: "bonus_ad_ratio",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            714284314: (
+            "max_speed_calc": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "max_speed",
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "min_speed_calc": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "min_speed",
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "unk_0x10404951": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(2),
-                        dataValue: 162078152,
+                        dataValue: "bonus_ad_ratio",
                     ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            1028877529: (
-                type: "CalculationSpell",
-                formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 2262762340,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            2479541367: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 4225952610,
+                        dataValue: "base_damage",
                     ),
                 ]),
                 multiplier: None,

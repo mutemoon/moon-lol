@@ -1,17 +1,42 @@
 (
     spellData: Some((
         calculations: Some({
-            323330478: (
+            "ad_ratio": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(2),
+                        coefficient: Some(2.5),
+                        statFormula: Some(2),
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "ap_ratio_tooltip": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: "ap_ratio",
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "sweet_spot_damage_tooltip": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 1503179695,
+                        dataValue: "sweet_spot_damage",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 3809245599,
+                        dataValue: "ap_ratio",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -23,25 +48,34 @@
                 multiplier: None,
                 precision: None,
             ),
-            942499611: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartStatCoefficient",
-                        stat: Some(2),
-                        coefficient: Some(2.5),
-                        statFormula: Some(2),
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            1141027066: (
+            "tower_damage_tooltip": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 3417610166,
+                        dataValue: "tower_damage",
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: "ap_ratio",
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(2),
+                        coefficient: Some(2.5),
+                        statFormula: Some(2),
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "unk_0x4402b0fa": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "sweet_spot_damage",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -59,46 +93,12 @@
                 multiplier: None,
                 precision: None,
             ),
-            1656645549: (
+            "unk_0xd9a2963e": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 3417610166,
-                    ),
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: None,
-                        dataValue: 3809245599,
-                    ),
-                    (
-                        type: "CalculationPartStatCoefficient",
-                        stat: Some(2),
-                        coefficient: Some(2.5),
-                        statFormula: Some(2),
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            3651311166: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 3023511867,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            3941538718: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: None,
-                        dataValue: 3809245599,
+                        dataValue: "health_amount",
                     ),
                 ]),
                 multiplier: None,

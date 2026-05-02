@@ -2,16 +2,16 @@ pub mod buffs;
 
 use bevy::prelude::*;
 use league_utils::hash_bin;
+use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
 use lol_base::spell::Spell;
-use lol_core::action::damage::{DamageShape, TargetDamage, TargetFilter};
+use lol_core::action::damage::{
+    ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
+};
 use lol_core::base::buff::BuffOf;
 use lol_core::buffs::cc_debuffs::DebuffStun;
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
-use lol_core::skill::{
-    CoolDown, EventSkillCast, Skill, SkillSlot, play_skill_animation, skill_damage,
-    spawn_skill_particle,
-};
+use lol_core::skill::{CoolDown, EventSkillCast, Skill, SkillSlot};
 
 use crate::annie::buffs::{BuffAnniePassive, BuffAnnieShield};
 
@@ -57,22 +57,31 @@ fn on_annie_skill_cast(
 }
 
 fn cast_annie_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, "spell1".to_string());
-    spawn_skill_particle(commands, entity, hash_bin("Annie_Q_Cast"));
+    commands.trigger(CommandAnimationPlay {
+        entity,
+        hash: "spell1".to_string(),
+        repeat: false,
+        duration: None,
+    });
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: hash_bin("Annie_Q_Cast"),
+    });
 
     // Q is targeted damage
-    skill_damage(
-        commands,
+    commands.trigger(ActionDamage {
         entity,
-        skill_spell,
-        DamageShape::Circle { radius: 625.0 },
-        vec![TargetDamage {
-            filter: TargetFilter::All,
-            amount: hash_bin("TotalDamage"),
-            damage_type: DamageType::Magic,
+        skill: skill_spell,
+        effects: vec![ActionDamageEffect {
+            shape: DamageShape::Circle { radius: 625.0 },
+            damage_list: vec![TargetDamage {
+                filter: TargetFilter::All,
+                amount: "TotalDamage".to_string(),
+                damage_type: DamageType::Magic,
+            }],
+            particle: Some(hash_bin("Annie_Q_Hit")),
         }],
-        Some(hash_bin("Annie_Q_Hit")),
-    );
+    });
 
     // Increment passive stacks
     commands
@@ -81,25 +90,34 @@ fn cast_annie_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
 }
 
 fn cast_annie_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, "spell2".to_string());
-    spawn_skill_particle(commands, entity, hash_bin("Annie_W_Cast"));
+    commands.trigger(CommandAnimationPlay {
+        entity,
+        hash: "spell2".to_string(),
+        repeat: false,
+        duration: None,
+    });
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: hash_bin("Annie_W_Cast"),
+    });
 
     // W is a cone
-    skill_damage(
-        commands,
+    commands.trigger(ActionDamage {
         entity,
-        skill_spell,
-        DamageShape::Sector {
-            radius: 600.0,
-            angle: 50.0,
-        },
-        vec![TargetDamage {
-            filter: TargetFilter::All,
-            amount: hash_bin("TotalDamage"),
-            damage_type: DamageType::Magic,
+        skill: skill_spell,
+        effects: vec![ActionDamageEffect {
+            shape: DamageShape::Sector {
+                radius: 600.0,
+                angle: 50.0,
+            },
+            damage_list: vec![TargetDamage {
+                filter: TargetFilter::All,
+                amount: "TotalDamage".to_string(),
+                damage_type: DamageType::Magic,
+            }],
+            particle: Some(hash_bin("Annie_W_Hit")),
         }],
-        Some(hash_bin("Annie_W_Hit")),
-    );
+    });
 
     commands
         .entity(entity)
@@ -107,8 +125,16 @@ fn cast_annie_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
 }
 
 fn cast_annie_e(commands: &mut Commands, entity: Entity) {
-    play_skill_animation(commands, entity, "spell3".to_string());
-    spawn_skill_particle(commands, entity, hash_bin("Annie_E_Cast"));
+    commands.trigger(CommandAnimationPlay {
+        entity,
+        hash: "spell3".to_string(),
+        repeat: false,
+        duration: None,
+    });
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: hash_bin("Annie_E_Cast"),
+    });
 
     // E grants shield
     commands
@@ -117,22 +143,31 @@ fn cast_annie_e(commands: &mut Commands, entity: Entity) {
 }
 
 fn cast_annie_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, "spell4".to_string());
-    spawn_skill_particle(commands, entity, hash_bin("Annie_R_Cast"));
+    commands.trigger(CommandAnimationPlay {
+        entity,
+        hash: "spell4".to_string(),
+        repeat: false,
+        duration: None,
+    });
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: hash_bin("Annie_R_Cast"),
+    });
 
     // R summons Tibbers - area damage
-    skill_damage(
-        commands,
+    commands.trigger(ActionDamage {
         entity,
-        skill_spell,
-        DamageShape::Circle { radius: 600.0 },
-        vec![TargetDamage {
-            filter: TargetFilter::All,
-            amount: hash_bin("TotalDamage"),
-            damage_type: DamageType::Magic,
+        skill: skill_spell,
+        effects: vec![ActionDamageEffect {
+            shape: DamageShape::Circle { radius: 600.0 },
+            damage_list: vec![TargetDamage {
+                filter: TargetFilter::All,
+                amount: "TotalDamage".to_string(),
+                damage_type: DamageType::Magic,
+            }],
+            particle: Some(hash_bin("Annie_R_Hit")),
         }],
-        Some(hash_bin("Annie_R_Hit")),
-    );
+    });
 
     commands
         .entity(entity)

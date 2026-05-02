@@ -1,13 +1,13 @@
 (
     spellData: Some((
         calculations: Some({
-            2339366755: (
+            "unk_0x8b6fe763": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),
-            3123124719: (
+            "unk_0xba2719ef": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,

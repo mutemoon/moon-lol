@@ -1,7 +1,24 @@
 (
     spellData: Some((
         calculations: Some({
-            1704249176: (
+            "missing_health_percent": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "base_on_hit_damage",
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: None,
+                        coefficient: Some(0.03),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "total_shield": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -12,23 +29,6 @@
                         type: "CalculationPartStatCoefficient",
                         stat: None,
                         coefficient: Some(1.5),
-                        statFormula: None,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            2438917086: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 1381148019,
-                    ),
-                    (
-                        type: "CalculationPartStatCoefficient",
-                        stat: None,
-                        coefficient: Some(0.03),
                         statFormula: None,
                     ),
                 ]),

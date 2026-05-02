@@ -1,41 +1,41 @@
 (
     spellData: Some((
         calculations: Some({
-            501147496: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 64618745,
-                    ),
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: Some(2),
-                        dataValue: 2784720075,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            1611674196: (
+            "basic_attack_cdr": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),
-            3065227568: (
+            "single_crit_total_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),
-            3201409285: (
+            "subesquent_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: Some((
                     type: "CalculationPartNamedDataValue",
-                    dataValue: 3398025838,
+                    dataValue: "subsequent_hit_multiplier",
                 )),
+                precision: None,
+            ),
+            "total_damage": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "base_damage",
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(2),
+                        dataValue: "attack_damage_ratio",
+                    ),
+                ]),
+                multiplier: None,
                 precision: None,
             ),
         }),

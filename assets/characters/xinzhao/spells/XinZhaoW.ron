@@ -1,12 +1,18 @@
 (
     spellData: Some((
         calculations: Some({
-            1335700871: (
+            "minion_mod": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            "slash_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 3287142022,
+                        dataValue: "slash_base_damage",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -18,12 +24,12 @@
                 multiplier: None,
                 precision: None,
             ),
-            1918579810: (
+            "thrust_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 1425815051,
+                        dataValue: "thrust_base_damage",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -38,12 +44,6 @@
                         statFormula: None,
                     ),
                 ]),
-                multiplier: None,
-                precision: None,
-            ),
-            2219251473: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),

@@ -1,30 +1,30 @@
 (
     spellData: Some((
         calculations: Some({
-            1508461632: (
+            "damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(2),
-                        dataValue: 3998945432,
+                        dataValue: "passive_bad_ratio",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 3988382322,
+                        dataValue: "passive_ap_ratio",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            2486096641: (
+            "energy_restore": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),
-            3709412528: (
+            "passive_speed_bonus": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,

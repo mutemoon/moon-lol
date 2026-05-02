@@ -1,20 +1,7 @@
 (
     spellData: Some((
         calculations: Some({
-            501147496: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartStatCoefficient",
-                        stat: Some(2),
-                        coefficient: Some(1.0),
-                        statFormula: None,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            1426481597: (
+            "q_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -25,6 +12,19 @@
                         type: "CalculationPartStatCoefficient",
                         stat: None,
                         coefficient: Some(0.55),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "total_damage": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(2),
+                        coefficient: Some(1.0),
                         statFormula: None,
                     ),
                 ]),

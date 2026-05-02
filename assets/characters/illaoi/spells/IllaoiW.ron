@@ -1,12 +1,12 @@
 (
     spellData: Some((
         calculations: Some({
-            1406565072: (
+            "dash_speed": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 3004650727,
+                        dataValue: "dash_speed_bonus",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -18,17 +18,17 @@
                 multiplier: None,
                 precision: None,
             ),
-            3172588582: (
+            "health_percent_total": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 1822033493,
+                        dataValue: "health_percent_damage",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(2),
-                        dataValue: 3274812734,
+                        dataValue: "health_damage_ad_ratio",
                     ),
                 ]),
                 multiplier: None,

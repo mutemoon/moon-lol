@@ -1,45 +1,45 @@
 (
     spellData: Some((
         calculations: Some({
-            529682664: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 2549795729,
-                    ),
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: Some(2),
-                        dataValue: 1131186906,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            1105342340: (
+            "magic_damage_per_stack": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 2904810718,
+                        dataValue: "ap_ratio_per_stack",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            4142185965: (
+            "max_physical_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 64618745,
+                        dataValue: "base_damage",
                     ),
                     (
                         type: "CalculationPartStatSub",
                         stat: Some(2),
                         subpart: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "physical_damage_per_stack": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "base_physical_damage_per_stack",
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(2),
+                        dataValue: "b_ad_ratio_per_stack",
                     ),
                 ]),
                 multiplier: None,

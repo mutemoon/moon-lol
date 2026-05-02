@@ -1,10 +1,11 @@
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashMap};
 
 use league_core::extract::{
     EnumGameCalculation, GameCalculation, SpellDataResource, SpellDataValue, SpellEffectAmount,
     SpellObject,
 };
 use league_loader::game::{Data, PropGroup};
+use league_utils::hash_to_field_name;
 use lol_base::movement::{MissileSpecification, MovementType, MovementTypeFixedSpeed};
 use lol_base::spell::{DataSpell, Spell, ValuesData, ValuesEffect};
 use lol_base::spell_calc::{
@@ -16,7 +17,11 @@ use lol_base::spell_calc::{
 use super::utils::write_to_file;
 
 /// 从 CharacterRecord 所在 bin 文件提取所有 SpellObject，转换为 DataSpell 并导出
-pub fn extract_spells_for_champion(champ_name: &str, prop_group: &PropGroup) {
+pub fn extract_spells_for_champion(
+    champ_name: &str,
+    prop_group: &PropGroup,
+    hashes: &HashMap<u32, String>,
+) {
     let spells = prop_group.get_all_by_class::<SpellObject>();
 
     if spells.is_empty() {
@@ -40,7 +45,7 @@ pub fn extract_spells_for_champion(champ_name: &str, prop_group: &PropGroup) {
             continue;
         };
 
-        let data_spell = convert_spell_data_resource(spell_data);
+        let data_spell = convert_spell_data_resource(spell_data, hashes);
 
         let spell = Spell {
             spell_data: Some(data_spell),
@@ -71,12 +76,15 @@ pub fn extract_spells_for_champion(champ_name: &str, prop_group: &PropGroup) {
 }
 
 /// 将 SpellDataResource 转换为 DataSpell
-fn convert_spell_data_resource(spell: &SpellDataResource) -> DataSpell {
+fn convert_spell_data_resource(
+    spell: &SpellDataResource,
+    hashes: &HashMap<u32, String>,
+) -> DataSpell {
     DataSpell {
         calculations: spell
             .m_spell_calculations
             .as_ref()
-            .map(convert_calculations),
+            .map(|calcs| convert_calculations(calcs, hashes)),
         effect_amounts: convert_effect_amounts(&spell.m_effect_amount),
         data_values: convert_data_values(&spell.data_values),
         mana: spell.mana.clone(),
@@ -147,21 +155,25 @@ fn convert_movement(movement: &league_core::extract::EnumMovement) -> MovementTy
 /// 转换计算公式
 fn convert_calculations(
     calcs: &BTreeMap<u32, EnumGameCalculation>,
-) -> BTreeMap<u32, CalculationType> {
+    hashes: &HashMap<u32, String>,
+) -> BTreeMap<String, CalculationType> {
     calcs
         .iter()
         .filter_map(|(key, calc)| {
-            let converted = convert_enum_calculation(calc);
-            converted.map(|c| (*key, c))
+            let converted = convert_enum_calculation(calc, hashes);
+            converted.map(|c| (hash_to_field_name(key, hashes), c))
         })
         .collect()
 }
 
 /// 转换计算枚举
-fn convert_enum_calculation(calc: &EnumGameCalculation) -> Option<CalculationType> {
+fn convert_enum_calculation(
+    calc: &EnumGameCalculation,
+    hashes: &HashMap<u32, String>,
+) -> Option<CalculationType> {
     match calc {
         EnumGameCalculation::GameCalculation(gc) => Some(CalculationType::CalculationSpell(
-            convert_game_calculation(gc),
+            convert_game_calculation(gc, hashes),
         )),
         _ => {
             // 暂不支持 Conditional 和 Modified
@@ -171,18 +183,21 @@ fn convert_enum_calculation(calc: &EnumGameCalculation) -> Option<CalculationTyp
 }
 
 /// 转换游戏计算
-fn convert_game_calculation(gc: &GameCalculation) -> CalculationSpell {
+fn convert_game_calculation(
+    gc: &GameCalculation,
+    hashes: &HashMap<u32, String>,
+) -> CalculationSpell {
     CalculationSpell {
         formula_parts: gc.m_formula_parts.as_ref().map(|parts| {
             parts
                 .iter()
-                .filter_map(|p| convert_calculation_part(p))
+                .filter_map(|p| convert_calculation_part(p, hashes))
                 .collect()
         }),
         multiplier: gc
             .m_multiplier
             .as_ref()
-            .and_then(|m| convert_calculation_part(m)),
+            .and_then(|m| convert_calculation_part(m, hashes)),
         precision: gc.m_precision,
     }
 }
@@ -190,6 +205,7 @@ fn convert_game_calculation(gc: &GameCalculation) -> CalculationSpell {
 /// 转换计算部件
 fn convert_calculation_part(
     part: &league_core::extract::EnumAbilityResourceByCoefficientCalculationPart,
+    hashes: &HashMap<u32, String>,
 ) -> Option<CalculationPart> {
     match part {
         league_core::extract::EnumAbilityResourceByCoefficientCalculationPart::EffectValueCalculationPart(
@@ -212,13 +228,13 @@ fn convert_calculation_part(
             p,
         ) => Some(CalculationPart::CalculationPartNamedDataValue(
             CalculationPartNamedDataValue {
-                data_value: p.m_data_value,
+                data_value: hash_to_field_name(&p.m_data_value, hashes),
             },
         )),
         league_core::extract::EnumAbilityResourceByCoefficientCalculationPart::StatBySubPartCalculationPart(
             p,
         ) => {
-            let subpart = convert_calculation_part(&p.m_subpart);
+            let subpart = convert_calculation_part(&p.m_subpart, hashes);
             Some(CalculationPart::CalculationPartStatSub(
                 CalculationPartStatSub {
                     stat: p.m_stat,
@@ -231,7 +247,7 @@ fn convert_calculation_part(
         ) => Some(CalculationPart::CalculationPartStatNamedDataValue(
             CalculationPartStatNamedDataValue {
                 stat: p.m_stat,
-                data_value: p.m_data_value,
+                data_value: hash_to_field_name(&p.m_data_value, hashes),
             },
         )),
         _ => None,

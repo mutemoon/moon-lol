@@ -1,76 +1,76 @@
 (
     spellData: Some((
         calculations: Some({
-            1849838508: (
+            "as_calc": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 1166929275,
+                        dataValue: "bonus_attack_speed",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 1269549457,
+                        dataValue: "ap_to_percent_ratio",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            1862149928: (
+            "final_as_calc": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 2368579180,
+                        dataValue: "bonus_attack_speed",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 1269549457,
+                        dataValue: "ap_to_percent_ratio",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            1917711910: (
+            "final_ms_calc": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 2368579180,
+                        dataValue: "bonus_move_speed",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 1269549457,
+                        dataValue: "ap_to_percent_ratio",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            2245515248: (
+            "ms_calc": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 1905418908,
+                        dataValue: "bonus_move_speed",
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: "ap_to_percent_ratio",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            2953195018: (
+            "unk_0x85d7d7f0": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 1166929275,
-                    ),
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: None,
-                        dataValue: 1269549457,
+                        dataValue: "ticks_before_death",
                     ),
                 ]),
                 multiplier: None,

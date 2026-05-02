@@ -1,12 +1,12 @@
 (
     spellData: Some((
         calculations: Some({
-            427393183: (
+            "max_health_damage_calc": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 749309793,
+                        dataValue: "percent_health_damage",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -18,7 +18,7 @@
                 multiplier: None,
                 precision: Some(1),
             ),
-            1925773807: (
+            "percent_health_damage_cap": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,

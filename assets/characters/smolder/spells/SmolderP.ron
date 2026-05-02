@@ -1,31 +1,31 @@
 (
     spellData: Some((
         calculations: Some({
-            495391923: (
+            "e_bonus_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),
-            1370944245: (
+            "passive_q_damage_increase": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),
-            1594141771: (
+            "passive_w_damage_increase": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),
-            3431215217: (
+            "tooltip_only_q_crit_multiplier": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),
-            4010822230: (
+            "tooltip_only_q_stacks": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,

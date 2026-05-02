@@ -1,7 +1,7 @@
 (
     spellData: Some((
         calculations: Some({
-            3498653279: (
+            "bonus_resists": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,

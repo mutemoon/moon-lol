@@ -1,19 +1,19 @@
 (
     spellData: Some((
         calculations: Some({
-            2746991072: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: Some(1),
-            ),
-            3383176040: (
+            "bonus_ms": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),
-            4133804453: (
+            "speed_duration": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: Some(1),
+            ),
+            "three_hit_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -25,7 +25,7 @@
                 ]),
                 multiplier: Some((
                     type: "CalculationPartNamedDataValue",
-                    dataValue: 2003233928,
+                    dataValue: "modes_multiplier",
                 )),
                 precision: None,
             ),

@@ -1,12 +1,35 @@
 (
     spellData: Some((
         calculations: Some({
-            963894299: (
+            "minion_mod_tooltip": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            "passive_flat_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 2625116134,
+                        dataValue: "base_passive_flat_damage",
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: None,
+                        coefficient: Some(0.1),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "passive_stack_damage": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "base_passive_stack_damage",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -18,35 +41,12 @@
                 multiplier: None,
                 precision: None,
             ),
-            2055828025: (
+            "ult_flat_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 192176300,
-                    ),
-                    (
-                        type: "CalculationPartStatCoefficient",
-                        stat: None,
-                        coefficient: Some(0.04),
-                        statFormula: None,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            2288093660: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: None,
-            ),
-            2412069022: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 3348065417,
+                        dataValue: "base_ult_flat_damage",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -58,17 +58,17 @@
                 multiplier: None,
                 precision: None,
             ),
-            3853420756: (
+            "ult_stack_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 2204731583,
+                        dataValue: "base_ult_stack_damage",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
                         stat: None,
-                        coefficient: Some(0.1),
+                        coefficient: Some(0.04),
                         statFormula: None,
                     ),
                 ]),

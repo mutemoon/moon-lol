@@ -1,33 +1,33 @@
 (
     spellData: Some((
         calculations: Some({
-            2276456157: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: None,
-            ),
-            2628362541: (
+            "echo_percent": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 3398547467,
+                        dataValue: "base_damage_transfer_percent",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(2),
-                        dataValue: 1102049885,
+                        dataValue: "echo_tad_scalar",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            2962901678: (
+            "time_between_vessel_tentacle_slams": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: Some(1),
+            ),
+            "unk_0x87aff6dd": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
             ),
         }),
         effectAmounts: None,

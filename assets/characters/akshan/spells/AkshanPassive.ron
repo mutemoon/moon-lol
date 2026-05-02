@@ -1,49 +1,49 @@
 (
     spellData: Some((
         calculations: Some({
-            620905175: (
+            "ms": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),
-            693437503: (
+            "passive_cooldown": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            "passive_proc_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 3809245599,
+                        dataValue: "ap_ratio",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            1445858897: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: None,
-            ),
-            2444390852: (
+            "second_auto_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(2),
-                        dataValue: 1968900422,
+                        dataValue: "second_auto_ad_ratio",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            2682188363: (
+            "total_shield_amount": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(2),
-                        dataValue: 2019141598,
+                        dataValue: "shield_bad_ratio",
                     ),
                 ]),
                 multiplier: None,

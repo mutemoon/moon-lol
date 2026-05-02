@@ -2,18 +2,18 @@ pub mod buffs;
 
 use bevy::prelude::*;
 use league_utils::hash_bin;
+use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
 use lol_base::spell::Spell;
-use lol_core::action::damage::{DamageShape, TargetDamage, TargetFilter};
+use lol_core::action::damage::{
+    ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
+};
 use lol_core::action::dash::{ActionDash, DashDamage, DashMoveType};
 use lol_core::base::buff::BuffOf;
 use lol_core::buffs::cc_debuffs::DebuffStun;
 use lol_core::buffs::damage_reduction::BuffDamageReduction;
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
-use lol_core::skill::{
-    CoolDown, EventSkillCast, Skill, SkillRecastWindow, SkillSlot, play_skill_animation,
-    skill_damage, skill_dash, spawn_skill_particle,
-};
+use lol_core::skill::{CoolDown, EventSkillCast, Skill, SkillRecastWindow, SkillSlot};
 
 use crate::irelia::buffs::{DebuffIreliaUnsteady, IreliaBuff};
 
@@ -76,38 +76,50 @@ fn on_irelia_skill_cast(
 
 fn cast_irelia_q(
     commands: &mut Commands,
-    q_transform: &Query<&Transform>,
+    _q_transform: &Query<&Transform>,
     entity: Entity,
     point: Vec2,
     skill_spell: Handle<Spell>,
 ) {
-    play_skill_animation(commands, entity, "spell1".to_string());
-    spawn_skill_particle(commands, entity, hash_bin("Irelia_Q_Cast"));
-    // Q is a dash that resets on kill and marks enemies as Unsteady
-    skill_dash(
-        commands,
-        q_transform,
+    commands.trigger(CommandAnimationPlay {
         entity,
-        point,
-        &ActionDash {
-            skill: skill_spell,
-            move_type: DashMoveType::Pointer { max: 250.0 },
-            damage: Some(DashDamage {
-                radius_end: 80.0,
-                damage: TargetDamage {
-                    filter: TargetFilter::All,
-                    amount: hash_bin("TotalDamage"),
-                    damage_type: DamageType::Physical,
-                },
-            }),
-            speed: 800.0,
-        },
-    );
+        hash: "spell1".to_string(),
+        repeat: false,
+        duration: None,
+    });
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: hash_bin("Irelia_Q_Cast"),
+    });
+    // Q is a dash that resets on kill and marks enemies as Unsteady
+    commands.trigger(ActionDash {
+        entity,
+        point: point,
+        skill: skill_spell,
+        move_type: DashMoveType::Pointer { max: 250.0 },
+        damage: Some(DashDamage {
+            radius_end: 80.0,
+            damage: TargetDamage {
+                filter: TargetFilter::All,
+                amount: "TotalDamage".to_string(),
+                damage_type: DamageType::Physical,
+            },
+        }),
+        speed: 800.0,
+    });
 }
 
 fn cast_irelia_w(commands: &mut Commands, entity: Entity) {
-    play_skill_animation(commands, entity, "spell2".to_string());
-    spawn_skill_particle(commands, entity, hash_bin("Irelia_W_Cast"));
+    commands.trigger(CommandAnimationPlay {
+        entity,
+        hash: "spell2".to_string(),
+        repeat: false,
+        duration: None,
+    });
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: hash_bin("Irelia_W_Cast"),
+    });
     // W is a channel that grants damage reduction then releases damage
     let (buff_irelia_w, buff_damage_reduction) = BuffDamageReduction::irelia_w(0.5, 1.5);
     commands
@@ -128,29 +140,41 @@ fn cast_irelia_e(
 ) {
     let stage = recast.map(|w| w.stage).unwrap_or(1);
 
-    play_skill_animation(commands, entity, "spell3".to_string());
+    commands.trigger(CommandAnimationPlay {
+        entity,
+        hash: "spell3".to_string(),
+        repeat: false,
+        duration: None,
+    });
 
     if stage == 1 {
         // First cast: Throws a blade forward
-        spawn_skill_particle(commands, entity, hash_bin("Irelia_E_Cast"));
+        commands.trigger(CommandSkinParticleSpawn {
+            entity,
+            hash: hash_bin("Irelia_E_Cast"),
+        });
         commands
             .entity(skill_entity)
             .insert(SkillRecastWindow::new(2, 2, IRELIA_E_RECAST_WINDOW));
     } else {
         // Second cast: Throws second blade and stuns marked enemies
-        spawn_skill_particle(commands, entity, hash_bin("Irelia_E2_Cast"));
-        skill_damage(
-            commands,
+        commands.trigger(CommandSkinParticleSpawn {
             entity,
-            skill_spell,
-            DamageShape::Circle { radius: 200.0 },
-            vec![TargetDamage {
-                filter: TargetFilter::All,
-                amount: hash_bin("TotalDamage"),
-                damage_type: DamageType::Magic,
+            hash: hash_bin("Irelia_E2_Cast"),
+        });
+        commands.trigger(ActionDamage {
+            entity,
+            skill: skill_spell,
+            effects: vec![ActionDamageEffect {
+                shape: DamageShape::Circle { radius: 200.0 },
+                damage_list: vec![TargetDamage {
+                    filter: TargetFilter::All,
+                    amount: "TotalDamage".to_string(),
+                    damage_type: DamageType::Magic,
+                }],
+                particle: Some(hash_bin("Irelia_E_Hit")),
             }],
-            Some(hash_bin("Irelia_E_Hit")),
-        );
+        });
         commands.entity(skill_entity).remove::<SkillRecastWindow>();
         commands.entity(skill_entity).insert((CoolDown {
             duration: cooldown.duration,
@@ -165,21 +189,30 @@ fn cast_irelia_r(
     _point: Vec2,
     skill_spell: Handle<Spell>,
 ) {
-    play_skill_animation(commands, entity, "spell4".to_string());
-    spawn_skill_particle(commands, entity, hash_bin("Irelia_R_Cast"));
-    // R is a long-range blade wave that creates a zone and marks enemies
-    skill_damage(
-        commands,
+    commands.trigger(CommandAnimationPlay {
         entity,
-        skill_spell,
-        DamageShape::Circle { radius: 350.0 },
-        vec![TargetDamage {
-            filter: TargetFilter::All,
-            amount: hash_bin("TotalDamage"),
-            damage_type: DamageType::Physical,
+        hash: "spell4".to_string(),
+        repeat: false,
+        duration: None,
+    });
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: hash_bin("Irelia_R_Cast"),
+    });
+    // R is a long-range blade wave that creates a zone and marks enemies
+    commands.trigger(ActionDamage {
+        entity,
+        skill: skill_spell,
+        effects: vec![ActionDamageEffect {
+            shape: DamageShape::Circle { radius: 350.0 },
+            damage_list: vec![TargetDamage {
+                filter: TargetFilter::All,
+                amount: "TotalDamage".to_string(),
+                damage_type: DamageType::Physical,
+            }],
+            particle: Some(hash_bin("Irelia_R_Hit")),
         }],
-        Some(hash_bin("Irelia_R_Hit")),
-    );
+    });
 }
 
 /// 监听 Irelia 造成的伤害，E/R 命中给目标标记不稳 + 眩晕

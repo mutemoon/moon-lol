@@ -1,28 +1,28 @@
 (
     spellData: Some((
         calculations: Some({
-            955865097: (
+            "human_minimum_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 366638630,
+                        dataValue: "spear_minimum_damage",
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: "spear_minimum_ap_ratio",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            3362959451: (
+            "unk_0x38f95809": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 2660837215,
-                    ),
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: None,
-                        dataValue: 343714030,
+                        dataValue: "tooltip_cougar_minimum_damage",
                     ),
                 ]),
                 multiplier: None,

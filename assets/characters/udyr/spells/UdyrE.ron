@@ -1,13 +1,13 @@
 (
     spellData: Some((
         calculations: Some({
-            497973746: (
+            "move_speed_bonus": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),
-            2933830860: (
+            "unk_0xaedeb4cc": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,

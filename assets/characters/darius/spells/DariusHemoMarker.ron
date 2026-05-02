@@ -1,13 +1,7 @@
 (
     spellData: Some((
         calculations: Some({
-            2998361757: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: None,
-            ),
-            3855117923: (
+            "bleed_damage_per_stack": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -17,6 +11,12 @@
                         statFormula: Some(2),
                     ),
                 ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "noxian_might_bonus_ad": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),

@@ -1,7 +1,7 @@
 (
     spellData: Some((
         calculations: Some({
-            3961472185: (
+            "max_duration": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (

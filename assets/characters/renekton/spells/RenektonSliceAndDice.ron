@@ -1,28 +1,28 @@
 (
     spellData: Some((
         calculations: Some({
-            784591872: (
+            "basic_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 4236491945,
+                        dataValue: "base_damage",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(2),
-                        dataValue: 1459547851,
+                        dataValue: "base_ad_ratio",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            1406565072: (
+            "dash_speed": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 2615300831,
+                        dataValue: "base_dash_speed",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -34,17 +34,17 @@
                 multiplier: None,
                 precision: None,
             ),
-            4190636200: (
+            "emp_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 64618745,
+                        dataValue: "enraged_base_damage",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(2),
-                        dataValue: 1068076572,
+                        dataValue: "enraged_ad_ratio",
                     ),
                 ]),
                 multiplier: None,

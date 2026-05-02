@@ -1,12 +1,12 @@
 (
     spellData: Some((
         calculations: Some({
-            568589670: (
+            "damage_return": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 3128338877,
+                        dataValue: "damage_reflection",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -18,18 +18,18 @@
                 multiplier: None,
                 precision: None,
             ),
-            1418119438: (
+            "move_speed_calc": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),
-            3662687857: (
+            "shield_block_total": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 1089369324,
+                        dataValue: "shield_amount",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",

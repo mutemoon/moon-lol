@@ -1,13 +1,50 @@
 (
     spellData: Some((
         calculations: Some({
-            36294060: (
+            "attack_damage": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(2),
+                        coefficient: Some(1.0),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "crescendum_qcd": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: Some(2),
             ),
-            2958159350: (
+            "mini_damage_max": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(2),
+                        dataValue: "mini_damage_ratio_max",
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "mini_damage_min": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(2),
+                        dataValue: "mini_damage_ratio_min",
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "turret_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -18,56 +55,19 @@
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 34709901,
+                        dataValue: "turret_ap_ratio",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            3168109745: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: Some(2),
-                        dataValue: 1878564470,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            3323977015: (
+            "unk_0xc61fdd37": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(4),
-                        dataValue: 2688685986,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            3471386815: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: Some(2),
-                        dataValue: 1644957732,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            4081769832: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartStatCoefficient",
-                        stat: Some(2),
-                        coefficient: Some(1.0),
-                        statFormula: None,
+                        dataValue: "units_per_percent_attack_speed_per_second",
                     ),
                 ]),
                 multiplier: None,

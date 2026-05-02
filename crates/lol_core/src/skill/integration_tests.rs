@@ -12,7 +12,9 @@ use lol_base::spell::{DataSpell, Spell, ValuesEffect};
 use lol_base::spell_calc::{CalculationPartEffectValue, CalculationSpell, CalculationType};
 
 use crate::action::PluginAction;
-use crate::action::damage::{DamageShape, TargetDamage, TargetFilter};
+use crate::action::damage::{
+    ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
+};
 use crate::base::ability_resource::{AbilityResource, AbilityResourceType};
 use crate::base::level::Level;
 use crate::cooldown::PluginCooldown;
@@ -22,13 +24,13 @@ use crate::movement::PluginMovement;
 use crate::skill::{
     CommandSkillLevelUp, CommandSkillStart, CoolDown, EventSkillCast, PluginSkill, Skill,
     SkillCastFailureReason, SkillCastLog, SkillCastResult, SkillCooldownMode, SkillOf, SkillPoints,
-    SkillRecastWindow, SkillSlot, Skills, skill_damage,
+    SkillRecastWindow, SkillSlot, Skills,
 };
 use crate::team::Team;
 
 const TEST_FPS: f32 = 30.0;
 const SPELL_KEY: u32 = 0x1001;
-const DAMAGE_AMOUNT_KEY: u32 = 0x3001;
+const DAMAGE_AMOUNT_KEY: &str = "damage_amount";
 const EPSILON: f32 = 1e-4;
 
 fn spell_handle(key: u32) -> Handle<Spell> {
@@ -95,18 +97,19 @@ fn on_test_damage_skill_cast(
         return;
     }
 
-    skill_damage(
-        &mut commands,
-        trigger.entity,
-        spell_handle(SPELL_KEY),
-        DamageShape::Circle { radius: 100.0 },
-        vec![TargetDamage {
-            filter: TargetFilter::All,
-            amount: DAMAGE_AMOUNT_KEY,
-            damage_type: DamageType::Physical,
+    commands.trigger(ActionDamage {
+        entity: trigger.entity,
+        skill: spell_handle(SPELL_KEY),
+        effects: vec![ActionDamageEffect {
+            shape: DamageShape::Circle { radius: 100.0 },
+            damage_list: vec![TargetDamage {
+                filter: TargetFilter::All,
+                amount: DAMAGE_AMOUNT_KEY.to_string(),
+                damage_type: DamageType::Physical,
+            }],
+            particle: None,
         }],
-        None,
-    );
+    });
 }
 
 struct SkillHarness {
@@ -158,7 +161,7 @@ impl SkillHarness {
 
         let mut calculations = BTreeMap::new();
         calculations.insert(
-            DAMAGE_AMOUNT_KEY,
+            DAMAGE_AMOUNT_KEY.to_string(),
             CalculationType::CalculationSpell(CalculationSpell {
                 formula_parts: Some(vec![CalculationPart::CalculationPartEffectValue(
                     CalculationPartEffectValue {

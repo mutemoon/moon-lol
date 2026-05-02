@@ -1,60 +1,60 @@
 (
     spellData: Some((
         calculations: Some({
-            1125837934: (
+            "extra_damage_per_second_charged": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 4258253897,
+                        dataValue: "bonus_damage",
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: "bonus_ratio",
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "max_damage": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "min_damage",
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: "minimum_ratio",
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "max_knockup": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "base_knockup",
                     ),
                 ]),
                 multiplier: None,
                 precision: Some(2),
             ),
-            1204873108: (
+            "minimum_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 4266938262,
+                        dataValue: "min_damage",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 2951690786,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            2009109253: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 1476535861,
-                    ),
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: None,
-                        dataValue: 3494570415,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            3307064374: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 4266938262,
-                    ),
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: None,
-                        dataValue: 2951690786,
+                        dataValue: "minimum_ratio",
                     ),
                 ]),
                 multiplier: None,

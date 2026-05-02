@@ -2,18 +2,19 @@ pub mod buffs;
 
 use bevy::prelude::*;
 use league_utils::hash_bin;
+use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
 use lol_base::spell::Spell;
-use lol_core::action::damage::{DamageShape, TargetDamage, TargetFilter};
+use lol_core::action::damage::{
+    ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
+};
 use lol_core::action::dash::{ActionDash, DashDamage, DashMoveType};
+use lol_core::attack::CommandAttackReset;
 use lol_core::base::ability_resource::AbilityResource;
 use lol_core::base::buff::BuffOf;
 use lol_core::buffs::common_buffs::BuffSelfHeal;
 use lol_core::damage::DamageType;
 use lol_core::entities::champion::Champion;
-use lol_core::skill::{
-    CoolDown, EventSkillCast, Skill, SkillRecastWindow, SkillSlot, play_skill_animation,
-    reset_skill_attack, skill_damage, skill_dash, spawn_skill_particle,
-};
+use lol_core::skill::{CoolDown, EventSkillCast, Skill, SkillRecastWindow, SkillSlot};
 
 use crate::renekton::buffs::BuffRenektonR;
 
@@ -79,8 +80,16 @@ fn cast_renekton_q(
     q_ability_resource: &mut Query<&mut AbilityResource>,
     skill_spell: Handle<Spell>,
 ) {
-    play_skill_animation(commands, entity, "spell1".to_string());
-    spawn_skill_particle(commands, entity, hash_bin("Renekton_Q_Cast"));
+    commands.trigger(CommandAnimationPlay {
+        entity,
+        hash: "spell1".to_string(),
+        repeat: false,
+        duration: None,
+    });
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: hash_bin("Renekton_Q_Cast"),
+    });
     // Q is a cleave that deals damage in a circle
     let rage = q_ability_resource
         .get(entity)
@@ -91,34 +100,36 @@ fn cast_renekton_q(
         if let Ok(mut resource) = q_ability_resource.get_mut(entity) {
             resource.value -= 50.0;
         }
-        skill_damage(
-            commands,
+        commands.trigger(ActionDamage {
             entity,
-            skill_spell,
-            DamageShape::Circle { radius: 300.0 },
-            vec![TargetDamage {
-                filter: TargetFilter::All,
-                amount: hash_bin("TotalDamage"),
-                damage_type: DamageType::Physical,
+            skill: skill_spell,
+            effects: vec![ActionDamageEffect {
+                shape: DamageShape::Circle { radius: 300.0 },
+                damage_list: vec![TargetDamage {
+                    filter: TargetFilter::All,
+                    amount: "TotalDamage".to_string(),
+                    damage_type: DamageType::Physical,
+                }],
+                particle: Some(hash_bin("Renekton_Q_Hit")),
             }],
-            Some(hash_bin("Renekton_Q_Hit")),
-        );
+        });
         commands
             .entity(entity)
             .with_related::<BuffOf>(BuffSelfHeal::new(80.0)); // 翻倍治疗
     } else {
-        skill_damage(
-            commands,
+        commands.trigger(ActionDamage {
             entity,
-            skill_spell,
-            DamageShape::Circle { radius: 250.0 },
-            vec![TargetDamage {
-                filter: TargetFilter::All,
-                amount: hash_bin("TotalDamage"),
-                damage_type: DamageType::Physical,
+            skill: skill_spell,
+            effects: vec![ActionDamageEffect {
+                shape: DamageShape::Circle { radius: 250.0 },
+                damage_list: vec![TargetDamage {
+                    filter: TargetFilter::All,
+                    amount: "TotalDamage".to_string(),
+                    damage_type: DamageType::Physical,
+                }],
+                particle: Some(hash_bin("Renekton_Q_Hit")),
             }],
-            Some(hash_bin("Renekton_Q_Hit")),
-        );
+        });
         commands
             .entity(entity)
             .with_related::<BuffOf>(BuffSelfHeal::new(40.0));
@@ -126,29 +137,38 @@ fn cast_renekton_q(
 }
 
 fn cast_renekton_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, "spell2".to_string());
-    spawn_skill_particle(commands, entity, hash_bin("Renekton_W_Cast"));
-    // W is an empowered auto attack that stuns
-    reset_skill_attack(commands, entity);
-    skill_damage(
-        commands,
+    commands.trigger(CommandAnimationPlay {
         entity,
-        skill_spell,
-        DamageShape::Nearest {
-            max_distance: 150.0,
-        },
-        vec![TargetDamage {
-            filter: TargetFilter::All,
-            amount: hash_bin("TotalDamage"),
-            damage_type: DamageType::Physical,
+        hash: "spell2".to_string(),
+        repeat: false,
+        duration: None,
+    });
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: hash_bin("Renekton_W_Cast"),
+    });
+    // W is an empowered auto attack that stuns
+    commands.trigger(CommandAttackReset { entity });
+    commands.trigger(ActionDamage {
+        entity,
+        skill: skill_spell,
+        effects: vec![ActionDamageEffect {
+            shape: DamageShape::Nearest {
+                max_distance: 150.0,
+            },
+            damage_list: vec![TargetDamage {
+                filter: TargetFilter::All,
+                amount: "TotalDamage".to_string(),
+                damage_type: DamageType::Physical,
+            }],
+            particle: Some(hash_bin("Renekton_W_Hit")),
         }],
-        Some(hash_bin("Renekton_W_Hit")),
-    );
+    });
 }
 
 fn cast_renekton_e(
     commands: &mut Commands,
-    q_transform: &Query<&Transform>,
+    _q_transform: &Query<&Transform>,
     entity: Entity,
     skill_entity: Entity,
     point: Vec2,
@@ -158,30 +178,34 @@ fn cast_renekton_e(
 ) {
     let stage = recast.map(|w| w.stage).unwrap_or(1);
 
-    play_skill_animation(commands, entity, "spell3".to_string());
+    commands.trigger(CommandAnimationPlay {
+        entity,
+        hash: "spell3".to_string(),
+        repeat: false,
+        duration: None,
+    });
 
     if stage == 1 {
         // First cast: Dash forward
-        spawn_skill_particle(commands, entity, hash_bin("Renekton_E_Cast"));
-        skill_dash(
-            commands,
-            q_transform,
+        commands.trigger(CommandSkinParticleSpawn {
             entity,
-            point,
-            &ActionDash {
-                skill: skill_spell,
-                move_type: DashMoveType::Pointer { max: 200.0 },
-                damage: Some(DashDamage {
-                    radius_end: 100.0,
-                    damage: TargetDamage {
-                        filter: TargetFilter::All,
-                        amount: hash_bin("TotalDamage"),
-                        damage_type: DamageType::Physical,
-                    },
-                }),
-                speed: 700.0,
-            },
-        );
+            hash: hash_bin("Renekton_E_Cast"),
+        });
+        commands.trigger(ActionDash {
+            entity,
+            point: point,
+            skill: skill_spell,
+            move_type: DashMoveType::Pointer { max: 200.0 },
+            damage: Some(DashDamage {
+                radius_end: 100.0,
+                damage: TargetDamage {
+                    filter: TargetFilter::All,
+                    amount: "TotalDamage".to_string(),
+                    damage_type: DamageType::Physical,
+                },
+            }),
+            speed: 700.0,
+        });
         commands.entity(skill_entity).insert(SkillRecastWindow::new(
             2,
             2,
@@ -189,26 +213,25 @@ fn cast_renekton_e(
         ));
     } else {
         // Second cast: Dash again
-        spawn_skill_particle(commands, entity, hash_bin("Renekton_E2_Cast"));
-        skill_dash(
-            commands,
-            q_transform,
+        commands.trigger(CommandSkinParticleSpawn {
             entity,
-            point,
-            &ActionDash {
-                skill: skill_spell,
-                move_type: DashMoveType::Pointer { max: 200.0 },
-                damage: Some(DashDamage {
-                    radius_end: 100.0,
-                    damage: TargetDamage {
-                        filter: TargetFilter::All,
-                        amount: hash_bin("TotalDamage"),
-                        damage_type: DamageType::Physical,
-                    },
-                }),
-                speed: 700.0,
-            },
-        );
+            hash: hash_bin("Renekton_E2_Cast"),
+        });
+        commands.trigger(ActionDash {
+            entity,
+            point: point,
+            skill: skill_spell,
+            move_type: DashMoveType::Pointer { max: 200.0 },
+            damage: Some(DashDamage {
+                radius_end: 100.0,
+                damage: TargetDamage {
+                    filter: TargetFilter::All,
+                    amount: "TotalDamage".to_string(),
+                    damage_type: DamageType::Physical,
+                },
+            }),
+            speed: 700.0,
+        });
         commands.entity(skill_entity).remove::<SkillRecastWindow>();
         commands.entity(skill_entity).insert((CoolDown {
             duration: cooldown.duration,
@@ -218,21 +241,30 @@ fn cast_renekton_e(
 }
 
 fn cast_renekton_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, "spell4".to_string());
-    spawn_skill_particle(commands, entity, hash_bin("Renekton_R_Cast"));
-    // R is a transformation that deals damage around and generates rage
-    skill_damage(
-        commands,
+    commands.trigger(CommandAnimationPlay {
         entity,
-        skill_spell,
-        DamageShape::Circle { radius: 300.0 },
-        vec![TargetDamage {
-            filter: TargetFilter::All,
-            amount: hash_bin("TotalDamage"),
-            damage_type: DamageType::Physical,
+        hash: "spell4".to_string(),
+        repeat: false,
+        duration: None,
+    });
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: hash_bin("Renekton_R_Cast"),
+    });
+    // R is a transformation that deals damage around and generates rage
+    commands.trigger(ActionDamage {
+        entity,
+        skill: skill_spell,
+        effects: vec![ActionDamageEffect {
+            shape: DamageShape::Circle { radius: 300.0 },
+            damage_list: vec![TargetDamage {
+                filter: TargetFilter::All,
+                amount: "TotalDamage".to_string(),
+                damage_type: DamageType::Physical,
+            }],
+            particle: Some(hash_bin("Renekton_R_Hit")),
         }],
-        Some(hash_bin("Renekton_R_Hit")),
-    );
+    });
     commands
         .entity(entity)
         .with_related::<BuffOf>(BuffRenektonR::new(0.0, 5.0, 15.0));

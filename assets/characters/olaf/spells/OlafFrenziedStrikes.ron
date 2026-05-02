@@ -1,12 +1,12 @@
 (
     spellData: Some((
         calculations: Some({
-            2202804673: (
+            "max_shield_calc": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 2831277281,
+                        dataValue: "base_shield",
                     ),
                     (
                         type: "CalculationPartStatSub",
@@ -17,12 +17,12 @@
                 multiplier: None,
                 precision: None,
             ),
-            3304846765: (
+            "shield_calc": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 2831277281,
+                        dataValue: "base_shield",
                     ),
                     (
                         type: "CalculationPartStatSub",
@@ -30,7 +30,7 @@
                         subpart: Some((
                             type: "CalculationPartStatNamedDataValue",
                             stat: Some(12),
-                            dataValue: 4064017492,
+                            dataValue: "shield_perc_missing_hp",
                         )),
                     ),
                 ]),

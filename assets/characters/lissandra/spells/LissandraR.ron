@@ -1,33 +1,33 @@
 (
     spellData: Some((
         calculations: Some({
-            704689212: (
+            "calculated_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 64618745,
+                        dataValue: "base_damage",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 3809245599,
+                        dataValue: "ap_ratio",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            3202745679: (
+            "heal_amount": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 2787609909,
+                        dataValue: "self_cast_flat_heal",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 3546411757,
+                        dataValue: "percent_missing_hp_ratio",
                     ),
                 ]),
                 multiplier: None,

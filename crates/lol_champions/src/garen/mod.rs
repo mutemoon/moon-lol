@@ -3,14 +3,15 @@ pub mod w;
 
 use bevy::prelude::*;
 use league_utils::hash_bin;
+use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
 use lol_base::spell::Spell;
-use lol_core::action::damage::{DamageShape, TargetDamage, TargetFilter};
+use lol_core::action::damage::{
+    ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
+};
 use lol_core::base::buff::BuffOf;
 use lol_core::damage::DamageType;
 use lol_core::entities::champion::Champion;
-use lol_core::skill::{
-    EventSkillCast, Skill, SkillSlot, play_skill_animation, skill_damage, spawn_skill_particle,
-};
+use lol_core::skill::{EventSkillCast, Skill, SkillSlot};
 
 use crate::garen::q::{BuffGarenQ, BuffGarenQAttack};
 use crate::garen::w::BuffGarenW;
@@ -65,8 +66,16 @@ fn on_garen_skill_cast(
 }
 
 fn cast_garen_q(commands: &mut Commands, entity: Entity) {
-    play_skill_animation(commands, entity, "spell1".to_string());
-    spawn_skill_particle(commands, entity, hash_bin("Garen_Q_Cast"));
+    commands.trigger(CommandAnimationPlay {
+        entity,
+        hash: "spell1".to_string(),
+        repeat: false,
+        duration: None,
+    });
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: hash_bin("Garen_Q_Cast"),
+    });
 
     // Q provides movement speed buff and enhanced next attack
     commands
@@ -87,8 +96,16 @@ fn cast_garen_q(commands: &mut Commands, entity: Entity) {
 }
 
 fn cast_garen_w(commands: &mut Commands, entity: Entity) {
-    play_skill_animation(commands, entity, "spell2".to_string());
-    spawn_skill_particle(commands, entity, hash_bin("Garen_W_Cast"));
+    commands.trigger(CommandAnimationPlay {
+        entity,
+        hash: "spell2".to_string(),
+        repeat: false,
+        duration: None,
+    });
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: hash_bin("Garen_W_Cast"),
+    });
 
     // W provides tenacity, damage reduction, and a shield
     commands
@@ -111,38 +128,56 @@ fn cast_garen_w(commands: &mut Commands, entity: Entity) {
 }
 
 fn cast_garen_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, "spell3".to_string());
-    spawn_skill_particle(commands, entity, hash_bin("Garen_E_Cast"));
-    skill_damage(
-        commands,
+    commands.trigger(CommandAnimationPlay {
         entity,
-        skill_spell,
-        DamageShape::Circle { radius: 200.0 },
-        vec![TargetDamage {
-            filter: TargetFilter::All,
-            amount: hash_bin("TotalDamage"),
-            damage_type: DamageType::Physical,
+        hash: "spell3".to_string(),
+        repeat: false,
+        duration: None,
+    });
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: hash_bin("Garen_E_Cast"),
+    });
+    commands.trigger(ActionDamage {
+        entity,
+        skill: skill_spell,
+        effects: vec![ActionDamageEffect {
+            shape: DamageShape::Circle { radius: 200.0 },
+            damage_list: vec![TargetDamage {
+                filter: TargetFilter::All,
+                amount: "TotalDamage".to_string(),
+                damage_type: DamageType::Physical,
+            }],
+            particle: Some(hash_bin("Garen_E_Hit")),
         }],
-        Some(hash_bin("Garen_E_Hit")),
-    );
+    });
 }
 
 fn cast_garen_r(commands: &mut Commands, entity: Entity, _point: Vec2, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, "spell4".to_string());
-    spawn_skill_particle(commands, entity, hash_bin("Garen_R_Cast"));
-    // R is a targeted execute ability - use Nearest shape for single target
-    skill_damage(
-        commands,
+    commands.trigger(CommandAnimationPlay {
         entity,
-        skill_spell,
-        DamageShape::Nearest {
-            max_distance: 400.0,
-        },
-        vec![TargetDamage {
-            filter: TargetFilter::Champion,
-            amount: hash_bin("TotalDamage"),
-            damage_type: DamageType::Physical,
+        hash: "spell4".to_string(),
+        repeat: false,
+        duration: None,
+    });
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: hash_bin("Garen_R_Cast"),
+    });
+    // R is a targeted execute ability - use Nearest shape for single target
+    commands.trigger(ActionDamage {
+        entity,
+        skill: skill_spell,
+        effects: vec![ActionDamageEffect {
+            shape: DamageShape::Nearest {
+                max_distance: 400.0,
+            },
+            damage_list: vec![TargetDamage {
+                filter: TargetFilter::Champion,
+                amount: "TotalDamage".to_string(),
+                damage_type: DamageType::Physical,
+            }],
+            particle: Some(hash_bin("Garen_R_Hit")),
         }],
-        Some(hash_bin("Garen_R_Hit")),
-    );
+    });
 }

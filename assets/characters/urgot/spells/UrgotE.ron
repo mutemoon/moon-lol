@@ -1,39 +1,39 @@
 (
     spellData: Some((
         calculations: Some({
-            217250673: (
+            "e_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 419554226,
-                    ),
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: Some(2),
-                        dataValue: 289330247,
-                    ),
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: Some(12),
-                        dataValue: 2465176789,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            2948886609: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 1587924896,
+                        dataValue: "e_base_damage",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
                         stat: Some(2),
                         coefficient: Some(1.0),
                         statFormula: Some(2),
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "e_total_shield_health": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "e_shield_base_health",
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(2),
+                        dataValue: "e_shieldb_ad_ratio",
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(12),
+                        dataValue: "e_shield_bonus_health_ratio",
                     ),
                 ]),
                 multiplier: None,

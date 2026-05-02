@@ -2,17 +2,17 @@ pub mod buffs;
 
 use bevy::prelude::*;
 use league_utils::hash_bin;
+use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
 use lol_base::spell::Spell;
-use lol_core::action::damage::{DamageShape, TargetDamage, TargetFilter};
+use lol_core::action::damage::{
+    ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
+};
 use lol_core::action::dash::{ActionDash, DashDamage, DashMoveType};
 use lol_core::base::buff::BuffOf;
 use lol_core::buffs::cc_debuffs::DebuffSlow;
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
-use lol_core::skill::{
-    CoolDown, EventSkillCast, Skill, SkillRecastWindow, SkillSlot, play_skill_animation,
-    skill_damage, skill_dash, spawn_skill_particle,
-};
+use lol_core::skill::{CoolDown, EventSkillCast, Skill, SkillRecastWindow, SkillSlot};
 
 use crate::akali::buffs::{BuffAkaliPassive, BuffAkaliStealth, BuffAkaliW};
 
@@ -77,25 +77,34 @@ fn on_akali_skill_cast(
 }
 
 fn cast_akali_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, "spell1".to_string());
-    spawn_skill_particle(commands, entity, hash_bin("Akali_Q_Cast"));
+    commands.trigger(CommandAnimationPlay {
+        entity,
+        hash: "spell1".to_string(),
+        repeat: false,
+        duration: None,
+    });
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: hash_bin("Akali_Q_Cast"),
+    });
 
     // Q is a cone damage that slows distant enemies
-    skill_damage(
-        commands,
+    commands.trigger(ActionDamage {
         entity,
-        skill_spell,
-        DamageShape::Sector {
-            radius: 500.0,
-            angle: 45.0,
-        },
-        vec![TargetDamage {
-            filter: TargetFilter::All,
-            amount: hash_bin("TotalDamage"),
-            damage_type: DamageType::Magic,
+        skill: skill_spell,
+        effects: vec![ActionDamageEffect {
+            shape: DamageShape::Sector {
+                radius: 500.0,
+                angle: 45.0,
+            },
+            damage_list: vec![TargetDamage {
+                filter: TargetFilter::All,
+                amount: "TotalDamage".to_string(),
+                damage_type: DamageType::Magic,
+            }],
+            particle: Some(hash_bin("Akali_Q_Hit")),
         }],
-        Some(hash_bin("Akali_Q_Hit")),
-    );
+    });
 
     // Mark for passive ring
     commands
@@ -104,8 +113,16 @@ fn cast_akali_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
 }
 
 fn cast_akali_w(commands: &mut Commands, entity: Entity) {
-    play_skill_animation(commands, entity, "spell2".to_string());
-    spawn_skill_particle(commands, entity, hash_bin("Akali_W_Cast"));
+    commands.trigger(CommandAnimationPlay {
+        entity,
+        hash: "spell2".to_string(),
+        repeat: false,
+        duration: None,
+    });
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: hash_bin("Akali_W_Cast"),
+    });
 
     // W drops a smoke bomb and grants stealth and move speed
     commands
@@ -118,7 +135,7 @@ fn cast_akali_w(commands: &mut Commands, entity: Entity) {
 
 fn cast_akali_e(
     commands: &mut Commands,
-    q_transform: &Query<&Transform>,
+    _q_transform: &Query<&Transform>,
     entity: Entity,
     skill_spell: Handle<Spell>,
     skill_entity: Entity,
@@ -128,52 +145,60 @@ fn cast_akali_e(
 ) {
     let stage = recast.map(|w| w.stage).unwrap_or(1);
 
-    play_skill_animation(commands, entity, "spell3".to_string());
+    commands.trigger(CommandAnimationPlay {
+        entity,
+        hash: "spell3".to_string(),
+        repeat: false,
+        duration: None,
+    });
 
     if stage == 1 {
         // First cast: throw shuriken and mark first enemy
-        spawn_skill_particle(commands, entity, hash_bin("Akali_E_Cast"));
-        skill_damage(
-            commands,
+        commands.trigger(CommandSkinParticleSpawn {
             entity,
-            skill_spell,
-            DamageShape::Sector {
-                radius: 825.0,
-                angle: 45.0,
-            },
-            vec![TargetDamage {
-                filter: TargetFilter::All,
-                amount: hash_bin("TotalDamage"),
-                damage_type: DamageType::Magic,
+            hash: hash_bin("Akali_E_Cast"),
+        });
+        commands.trigger(ActionDamage {
+            entity,
+            skill: skill_spell,
+            effects: vec![ActionDamageEffect {
+                shape: DamageShape::Sector {
+                    radius: 825.0,
+                    angle: 45.0,
+                },
+                damage_list: vec![TargetDamage {
+                    filter: TargetFilter::All,
+                    amount: "TotalDamage".to_string(),
+                    damage_type: DamageType::Magic,
+                }],
+                particle: Some(hash_bin("Akali_E_Hit")),
             }],
-            Some(hash_bin("Akali_E_Hit")),
-        );
+        });
         // Mark for recast
         commands
             .entity(skill_entity)
             .insert(SkillRecastWindow::new(2, 2, 16.0));
     } else {
         // Second cast: dash to marked target
-        spawn_skill_particle(commands, entity, hash_bin("Akali_E2_Cast"));
-        skill_dash(
-            commands,
-            q_transform,
+        commands.trigger(CommandSkinParticleSpawn {
             entity,
-            point,
-            &ActionDash {
-                skill: skill_spell,
-                move_type: DashMoveType::Pointer { max: 825.0 },
-                damage: Some(DashDamage {
-                    radius_end: 100.0,
-                    damage: TargetDamage {
-                        filter: TargetFilter::All,
-                        amount: hash_bin("TotalDamage"),
-                        damage_type: DamageType::Magic,
-                    },
-                }),
-                speed: 1200.0,
-            },
-        );
+            hash: hash_bin("Akali_E2_Cast"),
+        });
+        commands.trigger(ActionDash {
+            entity,
+            point: point,
+            skill: skill_spell,
+            move_type: DashMoveType::Pointer { max: 825.0 },
+            damage: Some(DashDamage {
+                radius_end: 100.0,
+                damage: TargetDamage {
+                    filter: TargetFilter::All,
+                    amount: "TotalDamage".to_string(),
+                    damage_type: DamageType::Magic,
+                },
+            }),
+            speed: 1200.0,
+        });
         commands.entity(skill_entity).remove::<SkillRecastWindow>();
         commands.entity(skill_entity).insert((CoolDown {
             duration: cooldown.duration,
@@ -184,7 +209,7 @@ fn cast_akali_e(
 
 fn cast_akali_r(
     commands: &mut Commands,
-    q_transform: &Query<&Transform>,
+    _q_transform: &Query<&Transform>,
     entity: Entity,
     skill_spell: Handle<Spell>,
     skill_entity: Entity,
@@ -194,52 +219,60 @@ fn cast_akali_r(
 ) {
     let stage = recast.map(|w| w.stage).unwrap_or(1);
 
-    play_skill_animation(commands, entity, "spell4".to_string());
+    commands.trigger(CommandAnimationPlay {
+        entity,
+        hash: "spell4".to_string(),
+        repeat: false,
+        duration: None,
+    });
 
     if stage == 1 {
         // First cast: dash to target
-        spawn_skill_particle(commands, entity, hash_bin("Akali_R_Cast"));
+        commands.trigger(CommandSkinParticleSpawn {
+            entity,
+            hash: hash_bin("Akali_R_Cast"),
+        });
     } else {
         // Second cast: execute damage based on missing health
-        spawn_skill_particle(commands, entity, hash_bin("Akali_R2_Cast"));
-        skill_damage(
-            commands,
+        commands.trigger(CommandSkinParticleSpawn {
             entity,
-            skill_spell.clone(),
-            DamageShape::Circle { radius: 300.0 },
-            vec![TargetDamage {
-                filter: TargetFilter::Champion,
-                amount: hash_bin("TotalDamage"),
-                damage_type: DamageType::Magic,
+            hash: hash_bin("Akali_R2_Cast"),
+        });
+        commands.trigger(ActionDamage {
+            entity,
+            skill: skill_spell.clone(),
+            effects: vec![ActionDamageEffect {
+                shape: DamageShape::Circle { radius: 300.0 },
+                damage_list: vec![TargetDamage {
+                    filter: TargetFilter::Champion,
+                    amount: "TotalDamage".to_string(),
+                    damage_type: DamageType::Magic,
+                }],
+                particle: Some(hash_bin("Akali_R2_Hit")),
             }],
-            Some(hash_bin("Akali_R2_Hit")),
-        );
+        });
     }
 
     // R is a dash that can be recast
-    skill_dash(
-        commands,
-        q_transform,
+    commands.trigger(ActionDash {
         entity,
-        point,
-        &ActionDash {
-            skill: skill_spell,
-            move_type: DashMoveType::Pointer { max: 675.0 },
-            damage: if stage == 1 {
-                Some(DashDamage {
-                    radius_end: 150.0,
-                    damage: TargetDamage {
-                        filter: TargetFilter::Champion,
-                        amount: hash_bin("TotalDamage"),
-                        damage_type: DamageType::Magic,
-                    },
-                })
-            } else {
-                None
-            },
-            speed: 900.0,
+        point: point,
+        skill: skill_spell,
+        move_type: DashMoveType::Pointer { max: 675.0 },
+        damage: if stage == 1 {
+            Some(DashDamage {
+                radius_end: 150.0,
+                damage: TargetDamage {
+                    filter: TargetFilter::Champion,
+                    amount: "TotalDamage".to_string(),
+                    damage_type: DamageType::Magic,
+                },
+            })
+        } else {
+            None
         },
-    );
+        speed: 900.0,
+    });
 
     if stage >= 2 {
         commands.entity(skill_entity).remove::<SkillRecastWindow>();

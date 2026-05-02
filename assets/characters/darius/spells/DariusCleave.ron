@@ -1,7 +1,7 @@
 (
     spellData: Some((
         calculations: Some({
-            947287420: (
+            "blade_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (

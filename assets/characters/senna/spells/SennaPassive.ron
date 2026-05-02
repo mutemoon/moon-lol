@@ -1,38 +1,13 @@
 (
     spellData: Some((
         calculations: Some({
-            230231776: (
+            "bonus_curent_health_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),
-            945684841: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartStatCoefficient",
-                        stat: Some(9),
-                        coefficient: Some(1.0),
-                        statFormula: None,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            1672586780: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: None,
-            ),
-            1743203555: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: None,
-            ),
-            2770470831: (
+            "bonus_on_hit_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -45,7 +20,32 @@
                 multiplier: None,
                 precision: None,
             ),
-            3143216392: (
+            "critical_damage": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(9),
+                        coefficient: Some(1.0),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "debuff_duration": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            "ms_steal": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            "unk_0xbb59ad08": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,

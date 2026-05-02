@@ -1,13 +1,13 @@
 (
     spellData: Some((
         calculations: Some({
-            144632637: (
+            "health_restore_on_hit_champion_monster": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),
-            1381849710: (
+            "health_restore_on_hit_minion": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,

@@ -1,45 +1,7 @@
 (
     spellData: Some((
         calculations: Some({
-            105272699: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 64618745,
-                    ),
-                    (
-                        type: "CalculationPartStatCoefficient",
-                        stat: Some(2),
-                        coefficient: Some(1.0),
-                        statFormula: None,
-                    ),
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: Some(2),
-                        dataValue: 1068076572,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            492071202: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 64618745,
-                    ),
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: Some(2),
-                        dataValue: 1068076572,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            531702207: (
+            "empowered_q_total_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -51,37 +13,75 @@
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(2),
-                        dataValue: 1121971103,
+                        dataValue: "empowered_ad_ratio",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            825358472: (
+            "empowered_qas": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),
-            2512898564: (
+            "q_bonus_damage": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "base_damage",
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(2),
+                        dataValue: "base_ad_ratio",
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "q_total_damage": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "base_damage",
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(2),
+                        coefficient: Some(1.0),
+                        statFormula: None,
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(2),
+                        dataValue: "base_ad_ratio",
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "unk_0x95c7ca04": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),
-            3567532734: (
+            "unk_0xd4a43abe": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(2),
-                        dataValue: 1121971103,
+                        dataValue: "empowered_ad_ratio",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            4073334016: (
+            "unk_0xf2ca2500": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,

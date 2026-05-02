@@ -1,34 +1,34 @@
 (
     spellData: Some((
         calculations: Some({
-            2134942022: (
+            "burrow_damage_tooltip": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 3643626387,
+                        dataValue: "burrowed_base_damage",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(2),
-                        dataValue: 2685516206,
+                        dataValue: "burrowed_bonus_ad_ratio",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 3931438681,
+                        dataValue: "burrowed_ap_ratio",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            4073446979: (
+            "total_damage_tooltip": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(2),
-                        dataValue: 2790965480,
+                        dataValue: "unburrowed_ad_ratio",
                     ),
                 ]),
                 multiplier: None,

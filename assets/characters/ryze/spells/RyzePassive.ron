@@ -1,19 +1,19 @@
 (
     spellData: Some((
         calculations: Some({
-            2209454571: (
+            "passive_mana_calc_tooltip": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 3976517405,
+                        dataValue: "percent_mana_increase",
                     ),
                 ]),
                 multiplier: None,
                 precision: Some(-1),
             ),
-            2461794432: (
+            "unk_0x92bc0080": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (

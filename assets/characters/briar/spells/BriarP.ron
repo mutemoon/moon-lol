@@ -1,7 +1,7 @@
 (
     spellData: Some((
         calculations: Some({
-            366638765: (
+            "unk_0x15da76ad": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -14,12 +14,12 @@
                 multiplier: None,
                 precision: None,
             ),
-            3012506759: (
+            "unk_0xb38f3487": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 1080381728,
+                        dataValue: "heal_shield_per_missing_hp_percent",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",

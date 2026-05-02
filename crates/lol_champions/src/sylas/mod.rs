@@ -1,17 +1,17 @@
 use bevy::prelude::*;
 use league_utils::hash_bin;
+use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
 use lol_base::spell::Spell;
-use lol_core::action::damage::{DamageShape, TargetDamage, TargetFilter};
+use lol_core::action::damage::{
+    ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
+};
 use lol_core::action::dash::{ActionDash, DashDamage, DashMoveType};
 use lol_core::base::buff::BuffOf;
 use lol_core::buffs::cc_debuffs::DebuffSlow;
 use lol_core::buffs::common_buffs::BuffSelfHeal;
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
-use lol_core::skill::{
-    CoolDown, EventSkillCast, Skill, SkillRecastWindow, SkillSlot, play_skill_animation,
-    skill_damage, skill_dash, spawn_skill_particle,
-};
+use lol_core::skill::{CoolDown, EventSkillCast, Skill, SkillRecastWindow, SkillSlot};
 
 const SYLAS_E_RECAST_WINDOW: f32 = 4.0;
 
@@ -73,55 +73,68 @@ fn on_sylas_skill_cast(
 }
 
 fn cast_sylas_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, "spell1".to_string());
-    spawn_skill_particle(commands, entity, hash_bin("Sylas_Q_Cast"));
-    // Q is a lash that slows enemies in the center
-    skill_damage(
-        commands,
+    commands.trigger(CommandAnimationPlay {
         entity,
-        skill_spell,
-        DamageShape::Sector {
-            radius: 350.0,
-            angle: 60.0,
-        },
-        vec![TargetDamage {
-            filter: TargetFilter::All,
-            amount: hash_bin("TotalDamage"),
-            damage_type: DamageType::Magic,
+        hash: "spell1".to_string(),
+        repeat: false,
+        duration: None,
+    });
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: hash_bin("Sylas_Q_Cast"),
+    });
+    // Q is a lash that slows enemies in the center
+    commands.trigger(ActionDamage {
+        entity,
+        skill: skill_spell,
+        effects: vec![ActionDamageEffect {
+            shape: DamageShape::Sector {
+                radius: 350.0,
+                angle: 60.0,
+            },
+            damage_list: vec![TargetDamage {
+                filter: TargetFilter::All,
+                amount: "TotalDamage".to_string(),
+                damage_type: DamageType::Magic,
+            }],
+            particle: Some(hash_bin("Sylas_Q_Hit")),
         }],
-        Some(hash_bin("Sylas_Q_Hit")),
-    );
+    });
 }
 
 fn cast_sylas_w(
     commands: &mut Commands,
-    q_transform: &Query<&Transform>,
+    _q_transform: &Query<&Transform>,
     entity: Entity,
     skill_spell: Handle<Spell>,
     point: Vec2,
 ) {
-    play_skill_animation(commands, entity, "spell2".to_string());
-    spawn_skill_particle(commands, entity, hash_bin("Sylas_W_Cast"));
-    // W is a dash to target that deals damage and heals based on missing health
-    skill_dash(
-        commands,
-        q_transform,
+    commands.trigger(CommandAnimationPlay {
         entity,
-        point,
-        &ActionDash {
-            skill: skill_spell,
-            move_type: DashMoveType::Pointer { max: 200.0 },
-            damage: Some(DashDamage {
-                radius_end: 100.0,
-                damage: TargetDamage {
-                    filter: TargetFilter::All,
-                    amount: hash_bin("TotalDamage"),
-                    damage_type: DamageType::Magic,
-                },
-            }),
-            speed: 900.0,
-        },
-    );
+        hash: "spell2".to_string(),
+        repeat: false,
+        duration: None,
+    });
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: hash_bin("Sylas_W_Cast"),
+    });
+    // W is a dash to target that deals damage and heals based on missing health
+    commands.trigger(ActionDash {
+        entity,
+        point: point,
+        skill: skill_spell,
+        move_type: DashMoveType::Pointer { max: 200.0 },
+        damage: Some(DashDamage {
+            radius_end: 100.0,
+            damage: TargetDamage {
+                filter: TargetFilter::All,
+                amount: "TotalDamage".to_string(),
+                damage_type: DamageType::Magic,
+            },
+        }),
+        speed: 900.0,
+    });
     // Heal based on missing health
     commands
         .entity(entity)
@@ -130,7 +143,7 @@ fn cast_sylas_w(
 
 fn cast_sylas_e(
     commands: &mut Commands,
-    q_transform: &Query<&Transform>,
+    _q_transform: &Query<&Transform>,
     entity: Entity,
     skill_spell: Handle<Spell>,
     skill_entity: Entity,
@@ -140,51 +153,59 @@ fn cast_sylas_e(
 ) {
     let stage = recast.map(|w| w.stage).unwrap_or(1);
 
-    play_skill_animation(commands, entity, "spell3".to_string());
+    commands.trigger(CommandAnimationPlay {
+        entity,
+        hash: "spell3".to_string(),
+        repeat: false,
+        duration: None,
+    });
 
     if stage == 1 {
         // First cast: Throws chain toward enemy - damage in narrow cone
-        spawn_skill_particle(commands, entity, hash_bin("Sylas_E_Cast"));
-        skill_damage(
-            commands,
+        commands.trigger(CommandSkinParticleSpawn {
             entity,
-            skill_spell,
-            DamageShape::Sector {
-                radius: 400.0,
-                angle: 20.0,
-            },
-            vec![TargetDamage {
-                filter: TargetFilter::All,
-                amount: hash_bin("TotalDamage"),
-                damage_type: DamageType::Magic,
+            hash: hash_bin("Sylas_E_Cast"),
+        });
+        commands.trigger(ActionDamage {
+            entity,
+            skill: skill_spell,
+            effects: vec![ActionDamageEffect {
+                shape: DamageShape::Sector {
+                    radius: 400.0,
+                    angle: 20.0,
+                },
+                damage_list: vec![TargetDamage {
+                    filter: TargetFilter::All,
+                    amount: "TotalDamage".to_string(),
+                    damage_type: DamageType::Magic,
+                }],
+                particle: Some(hash_bin("Sylas_E_Hit")),
             }],
-            Some(hash_bin("Sylas_E_Hit")),
-        );
+        });
         commands
             .entity(skill_entity)
             .insert(SkillRecastWindow::new(2, 2, SYLAS_E_RECAST_WINDOW));
     } else {
         // Second cast: Dash to enemy and pull
-        spawn_skill_particle(commands, entity, hash_bin("Sylas_E2_Cast"));
-        skill_dash(
-            commands,
-            q_transform,
+        commands.trigger(CommandSkinParticleSpawn {
             entity,
-            point,
-            &ActionDash {
-                skill: skill_spell,
-                move_type: DashMoveType::Pointer { max: 300.0 },
-                damage: Some(DashDamage {
-                    radius_end: 100.0,
-                    damage: TargetDamage {
-                        filter: TargetFilter::All,
-                        amount: hash_bin("TotalDamage"),
-                        damage_type: DamageType::Magic,
-                    },
-                }),
-                speed: 800.0,
-            },
-        );
+            hash: hash_bin("Sylas_E2_Cast"),
+        });
+        commands.trigger(ActionDash {
+            entity,
+            point: point,
+            skill: skill_spell,
+            move_type: DashMoveType::Pointer { max: 300.0 },
+            damage: Some(DashDamage {
+                radius_end: 100.0,
+                damage: TargetDamage {
+                    filter: TargetFilter::All,
+                    amount: "TotalDamage".to_string(),
+                    damage_type: DamageType::Magic,
+                },
+            }),
+            speed: 800.0,
+        });
         commands.entity(skill_entity).remove::<SkillRecastWindow>();
         commands.entity(skill_entity).insert((CoolDown {
             duration: cooldown.duration,
@@ -194,23 +215,32 @@ fn cast_sylas_e(
 }
 
 fn cast_sylas_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>, _point: Vec2) {
-    play_skill_animation(commands, entity, "spell4".to_string());
-    spawn_skill_particle(commands, entity, hash_bin("Sylas_R_Cast"));
-    // R 对最近敌方英雄造成魔法伤害
-    skill_damage(
-        commands,
+    commands.trigger(CommandAnimationPlay {
         entity,
-        skill_spell,
-        DamageShape::Nearest {
-            max_distance: 400.0,
-        },
-        vec![TargetDamage {
-            filter: TargetFilter::Champion,
-            amount: hash_bin("TotalDamage"),
-            damage_type: DamageType::Magic,
+        hash: "spell4".to_string(),
+        repeat: false,
+        duration: None,
+    });
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: hash_bin("Sylas_R_Cast"),
+    });
+    // R 对最近敌方英雄造成魔法伤害
+    commands.trigger(ActionDamage {
+        entity,
+        skill: skill_spell,
+        effects: vec![ActionDamageEffect {
+            shape: DamageShape::Nearest {
+                max_distance: 400.0,
+            },
+            damage_list: vec![TargetDamage {
+                filter: TargetFilter::Champion,
+                amount: "TotalDamage".to_string(),
+                damage_type: DamageType::Magic,
+            }],
+            particle: Some(hash_bin("Sylas_R_Hit")),
         }],
-        Some(hash_bin("Sylas_R_Hit")),
-    );
+    });
 }
 
 /// 监听 Sylas 造成的伤害，Q 命中减速

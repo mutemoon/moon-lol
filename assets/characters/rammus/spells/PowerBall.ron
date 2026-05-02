@@ -1,26 +1,26 @@
 (
     spellData: Some((
         calculations: Some({
-            478389425: (
+            "minimum_move_speed": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: Some((
                     type: "CalculationPartNamedDataValue",
-                    dataValue: 281976482,
+                    dataValue: "ms_multiplier",
                 )),
                 precision: None,
             ),
-            1291939734: (
+            "power_ball_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 4035213700,
+                        dataValue: "q_base_damage",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 3809245599,
+                        dataValue: "ap_ratio",
                     ),
                 ]),
                 multiplier: None,

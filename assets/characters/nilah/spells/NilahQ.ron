@@ -1,47 +1,7 @@
 (
     spellData: Some((
         calculations: Some({
-            2326095802: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: Some(8),
-                        dataValue: 2414076847,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            2943429559: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: Some(8),
-                        dataValue: 159628123,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            3387110781: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 64618745,
-                    ),
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: Some(2),
-                        dataValue: 2173799024,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            3663209131: (
+            "attack_total_damage_tooltip": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -54,9 +14,49 @@
                 multiplier: None,
                 precision: None,
             ),
-            4158267954: (
+            "bonus_attack_speed_calc": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            "crit_armor_pen": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(8),
+                        dataValue: "crit_armor_pen_scalar",
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "crit_lifesteal": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(8),
+                        dataValue: "crit_heal_scalar",
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "damage_calc": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "base_damage",
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(2),
+                        dataValue: "qad_ratio",
+                    ),
+                ]),
                 multiplier: None,
                 precision: None,
             ),

@@ -1,7 +1,13 @@
 (
     spellData: Some((
         calculations: Some({
-            774720001: (
+            "execute_damage": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            "heal_cap": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -14,32 +20,13 @@
                 multiplier: None,
                 precision: None,
             ),
-            1410059908: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartStatCoefficient",
-                        stat: None,
-                        coefficient: Some(0.006),
-                        statFormula: None,
-                    ),
-                ]),
-                multiplier: None,
-                precision: Some(2),
-            ),
-            1415498169: (
+            "healing_percent": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),
-            1538122044: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: None,
-            ),
-            2282348956: (
+            "monster_damage_cap": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -52,7 +39,20 @@
                 multiplier: None,
                 precision: None,
             ),
-            3462682098: (
+            "unk_0x540bce84": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: None,
+                        coefficient: Some(0.006),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: Some(2),
+            ),
+            "unk_0x5bade13c": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,

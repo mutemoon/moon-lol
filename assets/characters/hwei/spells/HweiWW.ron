@@ -1,33 +1,33 @@
 (
     spellData: Some((
         calculations: Some({
-            547608610: (
+            "shield_amount": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 3728980217,
+                        dataValue: "shield_amount_base",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 4106273920,
+                        dataValue: "shield_ap_ratio",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            1089369324: (
+            "unk_0x20a3d822": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 3728980217,
+                        dataValue: "shield_amount_base",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 4106273920,
+                        dataValue: "shield_ap_ratio",
                     ),
                 ]),
                 multiplier: None,

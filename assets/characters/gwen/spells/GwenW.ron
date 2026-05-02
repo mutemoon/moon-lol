@@ -1,12 +1,12 @@
 (
     spellData: Some((
         calculations: Some({
-            3349203428: (
+            "total_resists": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 1653255099,
+                        dataValue: "base_resists",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",

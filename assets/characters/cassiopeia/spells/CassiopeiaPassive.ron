@@ -1,7 +1,7 @@
 (
     spellData: Some((
         calculations: Some({
-            3353850067: (
+            "percent_haste_mod": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,

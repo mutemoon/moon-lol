@@ -1,29 +1,29 @@
 (
     spellData: Some((
         calculations: Some({
-            352029287: (
+            "enhanced_slow": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 4209723727,
+                        dataValue: "slow_amount",
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "total_damage_per_second": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "damage_per_second",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
                         stat: None,
                         coefficient: Some(0.125),
                         statFormula: None,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            2838794398: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 2361366308,
                     ),
                 ]),
                 multiplier: None,

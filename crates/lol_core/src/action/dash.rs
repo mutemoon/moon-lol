@@ -7,15 +7,18 @@ use crate::action::damage::{TargetDamage, TargetFilter};
 use crate::damage::{CommandDamageCreate, Damage};
 use crate::entities::champion::Champion;
 use crate::entities::minion::Minion;
+use crate::movement::{CommandMovement, MovementAction, MovementWay};
 use crate::skill::{Skill, Skills, get_skill_value};
 use crate::team::Team;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, EntityEvent)]
 pub struct ActionDash {
+    pub entity: Entity,
     pub move_type: DashMoveType,
     pub damage: Option<DashDamage>,
     pub speed: f32,
     pub skill: Handle<Spell>,
+    pub point: Vec2,
 }
 
 #[derive(Debug, Clone)]
@@ -37,6 +40,63 @@ pub struct DashDamageComponent {
     pub damage: DashDamage,
     pub skill: Handle<Spell>,
     pub hit_entities: HashSet<Entity>,
+}
+
+pub fn on_action_dash(
+    trigger: On<ActionDash>,
+    mut commands: Commands,
+    q_transform: Query<&Transform>,
+) {
+    let entity = trigger.event_target();
+
+    let Ok(transform) = q_transform.get(entity) else {
+        return;
+    };
+    let vector = trigger.point - transform.translation.xz();
+    let distance = vector.length();
+
+    let destination = match trigger.move_type {
+        DashMoveType::Fixed(fixed_distance) => {
+            let direction = if distance < 0.001 {
+                transform.forward().xz().normalize()
+            } else {
+                vector.normalize()
+            };
+            transform.translation.xz() + direction * fixed_distance
+        }
+        DashMoveType::Pointer { max } => {
+            if distance < max {
+                trigger.point
+            } else {
+                let direction = vector.normalize();
+                transform.translation.xz() + direction * max
+            }
+        }
+    };
+
+    if let Some(damage) = &trigger.damage {
+        commands.entity(entity).insert(DashDamageComponent {
+            start_pos: transform.translation,
+            target_pos: Vec3::new(destination.x, transform.translation.y, destination.y),
+            damage: damage.clone(),
+            skill: trigger.skill.clone(),
+            hit_entities: std::collections::HashSet::default(),
+        });
+    }
+
+    commands.trigger(CommandMovement {
+        entity,
+        priority: 100,
+        action: MovementAction::Start {
+            way: MovementWay::Path(vec![Vec3::new(
+                destination.x,
+                transform.translation.y,
+                destination.y,
+            )]),
+            speed: Some(trigger.speed),
+            source: "Dash".to_string(),
+        },
+    });
 }
 
 pub fn on_dash_end(
@@ -115,7 +175,7 @@ pub fn update_dash_damage(
 
             let damage_amount = get_skill_value(
                 &skill_object,
-                dash_damage.damage.damage.amount,
+                &dash_damage.damage.damage.amount,
                 skill.level,
                 |stat| {
                     if stat == 2 {

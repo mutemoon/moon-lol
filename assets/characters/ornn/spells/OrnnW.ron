@@ -1,31 +1,31 @@
 (
     spellData: Some((
         calculations: Some({
-            655433876: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 3030751338,
-                    ),
-                ]),
-                multiplier: Some((
-                    type: "CalculationPartNamedDataValue",
-                    dataValue: 3325475057,
-                )),
-                precision: None,
-            ),
-            2411183662: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: None,
-            ),
-            3557624063: (
+            "brittle_percent_max_hp_calc": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: Some(1),
+            ),
+            "total_minimum_damage": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            "total_monster_damage_cap": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "monster_damage_per_tick_cap",
+                    ),
+                ]),
+                multiplier: Some((
+                    type: "CalculationPartNamedDataValue",
+                    dataValue: "number_of_ticks",
+                )),
+                precision: None,
             ),
         }),
         effectAmounts: None,

@@ -1,25 +1,25 @@
 (
     spellData: Some((
         calculations: Some({
-            589922514: (
+            "energyrefund": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            "taunt_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 64618745,
+                        dataValue: "base_damage",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(12),
-                        dataValue: 4065674999,
+                        dataValue: "bonus_hp_ratio",
                     ),
                 ]),
-                multiplier: None,
-                precision: None,
-            ),
-            1342400751: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),

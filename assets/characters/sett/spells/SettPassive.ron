@@ -1,19 +1,13 @@
 (
     spellData: Some((
         calculations: Some({
-            1999888524: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: Some(2),
-            ),
-            2706832348: (
+            "healing_calc": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),
-            3574331158: (
+            "right_punch_bonus": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -26,7 +20,13 @@
                 multiplier: None,
                 precision: None,
             ),
-            3866234524: (
+            "unk_0x7733e08c": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: Some(2),
+            ),
+            "unk_0xa156fbdc": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,

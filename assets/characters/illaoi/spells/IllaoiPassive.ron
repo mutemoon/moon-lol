@@ -1,7 +1,7 @@
 (
     spellData: Some((
         calculations: Some({
-            858903199: (
+            "spawn_cd": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,

@@ -1,7 +1,18 @@
 (
     spellData: Some((
         calculations: Some({
-            241153302: (
+            "dot_percent_total": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "dot_damage_percent",
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "heal_per_second": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -14,12 +25,18 @@
                 multiplier: None,
                 precision: None,
             ),
-            411344656: (
+            "monster_damage_cap": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            "unk_0x18849f10": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 1643134739,
+                        dataValue: "base_heal_percent_conversion",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -31,12 +48,12 @@
                 multiplier: None,
                 precision: None,
             ),
-            1153628631: (
+            "unk_0x44c2f9d7": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 553756974,
+                        dataValue: "dot_damage_flat",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -48,30 +65,13 @@
                 multiplier: None,
                 precision: None,
             ),
-            1598041921: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 1517344446,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            2005023096: (
+            "unk_0x77823978": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: Some(1),
             ),
-            2282348956: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: None,
-            ),
-            2327704104: (
+            "unk_0x8abdf228": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -83,7 +83,7 @@
                 ]),
                 multiplier: Some((
                     type: "CalculationPartNamedDataValue",
-                    dataValue: 169929457,
+                    dataValue: "low_health_mod",
                 )),
                 precision: None,
             ),

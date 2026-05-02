@@ -1,23 +1,23 @@
 (
     spellData: Some((
         calculations: Some({
-            3690117031: (
+            "damage_per_shot": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 64618745,
+                        dataValue: "base_damage",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(2),
-                        dataValue: 46687595,
+                        dataValue: "ad_ratio_tt",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            4038043378: (
+            "range_check": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (

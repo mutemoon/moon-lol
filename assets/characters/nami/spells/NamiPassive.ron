@@ -1,12 +1,12 @@
 (
     spellData: Some((
         calculations: Some({
-            2722298520: (
+            "total_ms_bonus": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 3264990290,
+                        dataValue: "flat_ms",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",

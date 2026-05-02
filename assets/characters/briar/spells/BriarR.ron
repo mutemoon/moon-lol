@@ -1,12 +1,12 @@
 (
     spellData: Some((
         calculations: Some({
-            1508461632: (
+            "damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 64618745,
+                        dataValue: "base_damage",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -18,13 +18,13 @@
                 multiplier: None,
                 precision: None,
             ),
-            3349203428: (
+            "total_resists": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(2),
-                        dataValue: 927853713,
+                        dataValue: "resist_ad_ratio",
                     ),
                 ]),
                 multiplier: None,

@@ -1,7 +1,7 @@
 (
     spellData: Some((
         calculations: Some({
-            1704249176: (
+            "total_shield": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (

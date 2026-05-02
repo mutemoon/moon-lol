@@ -1,32 +1,32 @@
 (
     spellData: Some((
         calculations: Some({
-            1081515850: (
+            "rock_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 313693502,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            2956383141: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 64618745,
+                        dataValue: "base_damage",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 3809245599,
+                        dataValue: "ap_ratio",
                     ),
                 ]),
                 multiplier: None,
                 precision: Some(-1),
+            ),
+            "total_bonus_flat_monster_damage": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "monster_bonus_flat_damage",
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
             ),
         }),
         effectAmounts: Some([

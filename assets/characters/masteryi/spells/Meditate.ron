@@ -1,18 +1,18 @@
 (
     spellData: Some((
         calculations: Some({
-            425338325: (
+            "initial_dr": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),
-            1027436371: (
+            "total_heal": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 969836114,
+                        dataValue: "base_heal",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",

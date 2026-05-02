@@ -1,12 +1,12 @@
 (
     spellData: Some((
         calculations: Some({
-            3743621737: (
+            "unk_0xdf232269": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 1958345293,
+                        dataValue: "deathmark_base",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",

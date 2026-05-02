@@ -1,37 +1,37 @@
 (
     spellData: Some((
         calculations: Some({
-            418775819: (
+            "yorick_big_ghoul_damage": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "r_big_ghoul_bonus_ad",
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(2),
+                        dataValue: "maiden_ad_ratio",
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "yorick_big_ghoul_health": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(12),
-                        dataValue: 1555569642,
+                        dataValue: "maiden_health_ratio",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            1074810273: (
+            "yorick_maiden_resists": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
-                multiplier: None,
-                precision: None,
-            ),
-            3070887524: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 1730090392,
-                    ),
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: Some(2),
-                        dataValue: 1494465147,
-                    ),
-                ]),
                 multiplier: None,
                 precision: None,
             ),

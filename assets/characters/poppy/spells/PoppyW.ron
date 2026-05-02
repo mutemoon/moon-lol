@@ -1,19 +1,31 @@
 (
     spellData: Some((
         calculations: Some({
-            2238985075: (
+            "bonus_armor": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(1),
-                        dataValue: 941770429,
+                        dataValue: "passive_resist_percent",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            2614364801: (
+            "bonus_mr": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(6),
+                        dataValue: "passive_resist_percent",
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "interrupt_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -25,18 +37,6 @@
                         stat: None,
                         coefficient: Some(0.7),
                         statFormula: None,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            3399953659: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: Some(6),
-                        dataValue: 941770429,
                     ),
                 ]),
                 multiplier: None,

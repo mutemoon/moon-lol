@@ -1,19 +1,7 @@
 (
     spellData: Some((
         calculations: Some({
-            55134928: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: None,
-            ),
-            1092924095: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: None,
-            ),
-            1125352785: (
+            "explosion_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -26,13 +14,25 @@
                 multiplier: None,
                 precision: Some(2),
             ),
-            2948546634: (
+            "jungle_monster_explosion_flat_cap": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),
-            3132056930: (
+            "mana_restore": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            "unk_0x4124b2bf": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            "unk_0xafbf404a": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,

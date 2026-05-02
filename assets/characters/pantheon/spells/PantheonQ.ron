@@ -1,7 +1,7 @@
 (
     spellData: Some((
         calculations: Some({
-            1097191289: (
+            "empowered_damage_calc": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -14,12 +14,25 @@
                 multiplier: None,
                 precision: None,
             ),
-            1566302944: (
+            "execute_damage_calc_modified": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(2),
+                        coefficient: Some(2.3),
+                        statFormula: Some(2),
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "hold_damage_calc": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 41648857,
+                        dataValue: "hold_damage",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -37,25 +50,12 @@
                 multiplier: None,
                 precision: None,
             ),
-            1739493087: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartStatCoefficient",
-                        stat: Some(2),
-                        coefficient: Some(2.3),
-                        statFormula: Some(2),
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            1874873792: (
+            "tap_damage_calc": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 4007867558,
+                        dataValue: "tap_damage",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -67,12 +67,12 @@
                 multiplier: None,
                 precision: None,
             ),
-            3294009246: (
+            "unk_0x6fc04dc0": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 552337135,
+                        dataValue: "hold_execute_damage",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",

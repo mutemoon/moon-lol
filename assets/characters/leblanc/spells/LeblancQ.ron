@@ -1,41 +1,41 @@
 (
     spellData: Some((
         calculations: Some({
-            1508461632: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 64618745,
-                    ),
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: None,
-                        dataValue: 3809245599,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            2240163345: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 1807938356,
-                    ),
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: None,
-                        dataValue: 3809245599,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            3881730411: (
+            "bonus_minion_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            "damage": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "base_damage",
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: "ap_ratio",
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "mark_damage": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "base_mark_damage",
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: "ap_ratio",
+                    ),
+                ]),
                 multiplier: None,
                 precision: None,
             ),

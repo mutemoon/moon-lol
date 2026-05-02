@@ -1,7 +1,7 @@
 (
     spellData: Some((
         calculations: Some({
-            1508461632: (
+            "damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -20,13 +20,13 @@
                 multiplier: None,
                 precision: None,
             ),
-            2486096641: (
+            "energy_restore": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),
-            3709412528: (
+            "passive_speed_bonus": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,

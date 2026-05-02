@@ -1,64 +1,64 @@
 (
     spellData: Some((
         calculations: Some({
-            427289187: (
+            "total_pounce_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 1554316530,
+                        dataValue: "pounce_damage",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(2),
-                        dataValue: 2102455358,
+                        dataValue: "pounce_ad_ratio",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 1919654514,
+                        dataValue: "pounce_ap_ratio",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            494718204: (
+            "total_swipe_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 2493156404,
+                        dataValue: "swipe_damage",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(2),
-                        dataValue: 2102660975,
+                        dataValue: "swipe_ad_ratio",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 2017229131,
+                        dataValue: "swipe_ap_ratio",
                     ),
                 ]),
                 multiplier: None,
                 precision: None,
             ),
-            1171940454: (
+            "total_takedown_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 1426458110,
+                        dataValue: "takedown_base_damage",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(2),
-                        dataValue: 3360044825,
+                        dataValue: "takedown_ad_ratio",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 2906607765,
+                        dataValue: "takedown_ap_ratio",
                     ),
                 ]),
                 multiplier: None,

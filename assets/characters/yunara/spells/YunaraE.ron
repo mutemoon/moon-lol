@@ -1,12 +1,12 @@
 (
     spellData: Some((
         calculations: Some({
-            874391720: (
+            "calc_move_speed": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 4203995948,
+                        dataValue: "move_speed",
                     ),
                 ]),
                 multiplier: None,

@@ -1,55 +1,55 @@
 (
     spellData: Some((
         calculations: Some({
-            2260242013: (
+            "aftershock_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 1918808473,
+                        dataValue: "base_damage_aftershock",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: 2425236703,
+                        dataValue: "aftershock_ap_ratio",
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "laser_damage": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "base_damage_laser",
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: "laser_ap_ratio",
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "unk_0x86b88e5d": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "base_damage_aftershock",
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: None,
+                        dataValue: "aftershock_ap_ratio",
                     ),
                 ]),
                 multiplier: Some((
                     type: "CalculationPartNamedDataValue",
-                    dataValue: 752233140,
+                    dataValue: "aftershock_minion_multi",
                 )),
-                precision: None,
-            ),
-            3523131565: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 1378229880,
-                    ),
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: None,
-                        dataValue: 785269604,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            4208668288: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: 1918808473,
-                    ),
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: None,
-                        dataValue: 2425236703,
-                    ),
-                ]),
-                multiplier: None,
                 precision: None,
             ),
         }),

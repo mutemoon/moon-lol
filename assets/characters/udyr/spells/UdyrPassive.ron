@@ -1,41 +1,13 @@
 (
     spellData: Some((
         calculations: Some({
-            31226166: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartStatCoefficient",
-                        stat: Some(2),
-                        coefficient: Some(0.4),
-                        statFormula: None,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            402715851: (
+            "attack_speed": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),
-            486326206: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: None,
-            ),
-            562802503: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: Some((
-                    type: "CalculationPartNamedDataValue",
-                    dataValue: 577425724,
-                )),
-                precision: None,
-            ),
-            1456864896: (
+            "lightning_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -54,7 +26,41 @@
                 multiplier: None,
                 precision: None,
             ),
-            1578378435: (
+            "ult_cd": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: Some((
+                    type: "CalculationPartNamedDataValue",
+                    dataValue: "ult_cd_multiplier",
+                )),
+                precision: None,
+            ),
+            "unk_0x1800f4cb": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            "unk_0x1cfcbfbe": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            "unk_0x1dc7936": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(2),
+                        coefficient: Some(0.4),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "unk_0x5e1424c3": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -67,13 +73,13 @@
                 multiplier: None,
                 precision: None,
             ),
-            1787472585: (
+            "unk_0x6a8aaac9": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),
-            1945811198: (
+            "unk_0x73fab8fe": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -89,12 +95,6 @@
                         statFormula: None,
                     ),
                 ]),
-                multiplier: None,
-                precision: None,
-            ),
-            2048957000: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),

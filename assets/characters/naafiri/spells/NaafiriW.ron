@@ -1,12 +1,18 @@
 (
     spellData: Some((
         calculations: Some({
-            138771626: (
+            "armor_shred": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            "shield_total": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 1178729473,
+                        dataValue: "shield_size",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -18,12 +24,12 @@
                 multiplier: None,
                 precision: None,
             ),
-            501147496: (
+            "total_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: 64618745,
+                        dataValue: "base_damage",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -32,12 +38,6 @@
                         statFormula: Some(2),
                     ),
                 ]),
-                multiplier: None,
-                precision: None,
-            ),
-            2188242206: (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),

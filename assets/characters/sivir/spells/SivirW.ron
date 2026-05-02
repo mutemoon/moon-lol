@@ -1,7 +1,19 @@
 (
     spellData: Some((
         calculations: Some({
-            1882026373: (
+            "bounce_damage": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(2),
+                        dataValue: "bounce_ad_ratio",
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "first_target_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -14,21 +26,9 @@
                 multiplier: None,
                 precision: None,
             ),
-            2912814476: (
+            "total_max_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
-                multiplier: None,
-                precision: None,
-            ),
-            3680717992: (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: Some(2),
-                        dataValue: 821862499,
-                    ),
-                ]),
                 multiplier: None,
                 precision: None,
             ),

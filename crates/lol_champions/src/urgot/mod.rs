@@ -2,18 +2,18 @@ pub mod buffs;
 
 use bevy::prelude::*;
 use league_utils::hash_bin;
+use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
 use lol_base::spell::Spell;
-use lol_core::action::damage::{DamageShape, TargetDamage, TargetFilter};
+use lol_core::action::damage::{
+    ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
+};
 use lol_core::action::dash::{ActionDash, DashMoveType};
 use lol_core::base::buff::BuffOf;
 use lol_core::buffs::cc_debuffs::DebuffSlow;
 use lol_core::buffs::shield_white::BuffShieldWhite;
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
-use lol_core::skill::{
-    EventSkillCast, Skill, SkillSlot, play_skill_animation, skill_damage, skill_dash,
-    spawn_skill_particle,
-};
+use lol_core::skill::{EventSkillCast, Skill, SkillSlot};
 
 use crate::urgot::buffs::BuffUrgotW;
 
@@ -75,26 +75,43 @@ fn on_urgot_skill_cast(
 }
 
 fn cast_urgot_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, "spell1".to_string());
-    spawn_skill_particle(commands, entity, hash_bin("Urgot_Q_Cast"));
-    // Q is a mortar shot that damages and slows enemies in area
-    skill_damage(
-        commands,
+    commands.trigger(CommandAnimationPlay {
         entity,
-        skill_spell,
-        DamageShape::Circle { radius: 200.0 },
-        vec![TargetDamage {
-            filter: TargetFilter::All,
-            amount: hash_bin("TotalDamage"),
-            damage_type: DamageType::Physical,
+        hash: "spell1".to_string(),
+        repeat: false,
+        duration: None,
+    });
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: hash_bin("Urgot_Q_Cast"),
+    });
+    // Q is a mortar shot that damages and slows enemies in area
+    commands.trigger(ActionDamage {
+        entity,
+        skill: skill_spell,
+        effects: vec![ActionDamageEffect {
+            shape: DamageShape::Circle { radius: 200.0 },
+            damage_list: vec![TargetDamage {
+                filter: TargetFilter::All,
+                amount: "TotalDamage".to_string(),
+                damage_type: DamageType::Physical,
+            }],
+            particle: Some(hash_bin("Urgot_Q_Hit")),
         }],
-        Some(hash_bin("Urgot_Q_Hit")),
-    );
+    });
 }
 
 fn cast_urgot_w(commands: &mut Commands, entity: Entity) {
-    play_skill_animation(commands, entity, "spell2".to_string());
-    spawn_skill_particle(commands, entity, hash_bin("Urgot_W_Cast"));
+    commands.trigger(CommandAnimationPlay {
+        entity,
+        hash: "spell2".to_string(),
+        repeat: false,
+        duration: None,
+    });
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: hash_bin("Urgot_W_Cast"),
+    });
 
     // W is a toggle that makes Urgot fire at nearby enemies with reduced move speed
     commands
@@ -115,49 +132,63 @@ fn cast_urgot_w(commands: &mut Commands, entity: Entity) {
 
 fn cast_urgot_e(
     commands: &mut Commands,
-    q_transform: &Query<&Transform>,
+    _q_transform: &Query<&Transform>,
     entity: Entity,
     point: Vec2,
     skill_spell: Handle<Spell>,
 ) {
-    play_skill_animation(commands, entity, "spell3".to_string());
-    spawn_skill_particle(commands, entity, hash_bin("Urgot_E_Cast"));
-    // E is a dash that provides shield and knocks back enemies
-    skill_dash(
-        commands,
-        q_transform,
+    commands.trigger(CommandAnimationPlay {
         entity,
-        point,
-        &ActionDash {
-            skill: skill_spell,
-            move_type: DashMoveType::Pointer { max: 300.0 },
-            damage: None, // E doesn't deal damage directly but knockback
-            speed: 700.0,
-        },
-    );
+        hash: "spell3".to_string(),
+        repeat: false,
+        duration: None,
+    });
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: hash_bin("Urgot_E_Cast"),
+    });
+    // E is a dash that provides shield and knocks back enemies
+    commands.trigger(ActionDash {
+        entity,
+        point: point,
+        skill: skill_spell,
+        move_type: DashMoveType::Pointer { max: 300.0 },
+        damage: None,
+        // E doesn't deal damage directly but knockback
+        speed: 700.0,
+    });
     commands
         .entity(entity)
         .with_related::<BuffOf>(BuffShieldWhite::new(100.0));
 }
 
 fn cast_urgot_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    play_skill_animation(commands, entity, "spell4".to_string());
-    spawn_skill_particle(commands, entity, hash_bin("Urgot_R_Cast"));
-    // R is a long-range targeted ability that executes and marks enemy
-    skill_damage(
-        commands,
+    commands.trigger(CommandAnimationPlay {
         entity,
-        skill_spell,
-        DamageShape::Nearest {
-            max_distance: 500.0,
-        },
-        vec![TargetDamage {
-            filter: TargetFilter::Champion,
-            amount: hash_bin("TotalDamage"),
-            damage_type: DamageType::Physical,
+        hash: "spell4".to_string(),
+        repeat: false,
+        duration: None,
+    });
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: hash_bin("Urgot_R_Cast"),
+    });
+    // R is a long-range targeted ability that executes and marks enemy
+    commands.trigger(ActionDamage {
+        entity,
+        skill: skill_spell,
+        effects: vec![ActionDamageEffect {
+            shape: DamageShape::Nearest {
+                max_distance: 500.0,
+            },
+            damage_list: vec![TargetDamage {
+                filter: TargetFilter::Champion,
+                amount: "TotalDamage".to_string(),
+                damage_type: DamageType::Physical,
+            }],
+            particle: Some(hash_bin("Urgot_R_Hit")),
         }],
-        Some(hash_bin("Urgot_R_Hit")),
-    );
+    });
     debug!("{:?} R 发射钻头，低血量可处决", entity);
 }
 

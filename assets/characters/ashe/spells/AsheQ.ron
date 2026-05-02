@@ -1,13 +1,13 @@
 (
     spellData: Some((
         calculations: Some({
-            3397572612: (
+            "empowered_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(2),
-                        dataValue: 4013396525,
+                        dataValue: "damage_per_strike",
                     ),
                 ]),
                 multiplier: None,
