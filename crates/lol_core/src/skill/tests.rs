@@ -315,9 +315,6 @@ fn action_input_can_level_up_skill_through_same_pipeline() {
 
 // ========== Unit tests for spell value calculation ==========
 
-use league_utils::hash_bin;
-
-use super::*;
 use crate::skill::get_skill_value;
 
 fn create_mock_spell(
