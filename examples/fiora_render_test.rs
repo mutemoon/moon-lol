@@ -13,7 +13,6 @@ use lol_render::PluginRender;
 use lol_render::test_render::{
     PluginSkillTestRender, SkillTestRenderConfig, SkillTestVideoFormat, SkillTestVideoOutput,
 };
-use moon_lol::PluginLOL;
 
 fn main() {
     let output_dir = PathBuf::from("artifacts/fiora_render_test");

@@ -26,7 +26,6 @@ use lol_core::life::Health;
 use lol_render::PluginRender;
 use lol_render::camera::CameraInit;
 use lol_render::controller::Controller;
-use moon_lol::PluginLOL;
 use rocket::http::{ContentType, Method, Status};
 use rocket::serde::json::Json;
 use rocket::{State, get, launch, post, routes};

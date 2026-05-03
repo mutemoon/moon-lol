@@ -45,7 +45,6 @@ use damage::PluginDamage;
 use entities::barrack::PluginBarrack;
 use entities::champion::PluginChampion;
 use entities::minion::PluginMinion;
-use entities::shpere::PluginDebugSphere;
 use entities::turret::PluginTurret;
 use game::PluginGame;
 use life::PluginLife;
@@ -76,7 +75,6 @@ plugin_group! {
         :PluginBarrack,
         :PluginChampion,
         :PluginMinion,
-        :PluginDebugSphere,
         :PluginTurret,
         :PluginGame,
         :PluginLife,
