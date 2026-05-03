@@ -8,7 +8,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/twistedfate/spells/SecondSight.ron"),
+          spell: Path("characters/TwistedFate/spells/SecondSight.ron"),
           level: 1,
           slot: Passive,
           cooldown_mode: AfterCast,
@@ -20,10 +20,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 170.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/twistedfate/spells/Destiny.ron"),
+          spell: Path("characters/TwistedFate/spells/Destiny.ron"),
           level: 1,
           slot: R,
           cooldown_mode: AfterCast,
@@ -38,7 +38,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/twistedfate/spells/CardmasterStack.ron"),
+          spell: Path("characters/TwistedFate/spells/CardmasterStack.ron"),
           level: 1,
           slot: E,
           cooldown_mode: AfterCast,
@@ -50,10 +50,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 6.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/twistedfate/spells/PickACard.ron"),
+          spell: Path("characters/TwistedFate/spells/PickACard.ron"),
           level: 1,
           slot: W,
           cooldown_mode: AfterCast,
@@ -65,10 +65,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 6.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/twistedfate/spells/WildCards.ron"),
+          spell: Path("characters/TwistedFate/spells/WildCards.ron"),
           level: 1,
           slot: Q,
           cooldown_mode: AfterCast,
@@ -78,7 +78,7 @@
     ),
     4294967271: (
       components: {
-        "bevy_ecs::name::Name": "twistedfate",
+        "bevy_ecs::name::Name": "TwistedFate",
         "lol_core::attack::Attack": (
           range: 0.0,
           base_attack_speed: 1.4285715,

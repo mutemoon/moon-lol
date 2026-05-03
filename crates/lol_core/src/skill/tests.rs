@@ -315,9 +315,6 @@ fn action_input_can_level_up_skill_through_same_pipeline() {
 
 // ========== Unit tests for spell value calculation ==========
 
-use league_utils::hash_bin;
-
-use super::*;
 use crate::skill::get_skill_value;
 
 fn create_mock_spell(
@@ -384,7 +381,6 @@ fn test_effect_value_calculation() {
 fn test_stat_by_coefficient_calculation() {
     use std::collections::BTreeMap;
 
-    use lol_base::spell::ValuesEffect;
     use lol_base::spell_calc::{
         CalculationPart, CalculationPartStatCoefficient, CalculationSpell, CalculationType,
     };
@@ -423,7 +419,7 @@ fn test_stat_by_coefficient_calculation() {
 fn test_named_data_value_calculation() {
     use std::collections::BTreeMap;
 
-    use lol_base::spell::{ValuesData, ValuesEffect};
+    use lol_base::spell::ValuesData;
     use lol_base::spell_calc::{
         CalculationPart, CalculationPartNamedDataValue, CalculationSpell, CalculationType,
     };

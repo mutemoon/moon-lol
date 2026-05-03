@@ -106,11 +106,7 @@ pub fn extract_skin_for_champion(
             .and_then(|buf| LeagueSkeleton::parse(&buf).ok().map(|(_, s)| s))
     });
 
-    let output_glb_path = format!(
-        "assets/characters/{}/skins/{}.glb",
-        champ_name.to_lowercase(),
-        skin_id
-    );
+    let output_glb_path = format!("assets/characters/{}/skins/{}.glb", champ_name, skin_id);
 
     // 加载动画数据并导出到 GLB
     let (animations, hash_to_glb_index) =
@@ -211,20 +207,12 @@ pub fn extract_skin_for_champion(
 
     let asset_server = world.resource::<AssetServer>();
     let skin_handle: Handle<WorldAsset> = asset_server.load(
-        AssetPath::from(format!(
-            "characters/{}/skins/{}.glb",
-            champ_name.to_lowercase(),
-            skin_id
-        ))
-        .with_label(GltfAssetLabel::Scene(0).to_string()),
+        AssetPath::from(format!("characters/{}/skins/{}.glb", champ_name, skin_id))
+            .with_label(GltfAssetLabel::Scene(0).to_string()),
     );
 
     // 导出动画 Asset（保留独立的 ron 文件用于运行时加载）
-    let gltf_path = format!(
-        "characters/{}/skins/{}.glb",
-        champ_name.to_lowercase(),
-        skin_id
-    );
+    let gltf_path = format!("characters/{}/skins/{}.glb", champ_name, skin_id);
     let animation_ron_path = export_animation_for_skin(
         asset_server,
         champ_name,
@@ -279,11 +267,7 @@ pub fn extract_skin_for_champion(
         .build();
     let serialized_scene = scene.serialize(&type_registry).unwrap();
 
-    let output_skin_path = format!(
-        "assets/characters/{}/skins/{}.ron",
-        champ_name.to_lowercase(),
-        skin_id
-    );
+    let output_skin_path = format!("assets/characters/{}/skins/{}.ron", champ_name, skin_id);
     super::utils::write_to_file(&output_skin_path, serialized_scene);
 }
 
@@ -411,11 +395,7 @@ fn export_animation_for_skin(
     );
 
     // Export to .ron file
-    let anim_path = format!(
-        "characters/{}/animations/{}.ron",
-        champ_name.to_lowercase(),
-        skin_id.to_lowercase()
-    );
+    let anim_path = format!("characters/{}/animations/{}.ron", champ_name, skin_id);
     let output_path = format!("assets/{}", anim_path);
     let serialized = to_string_pretty(&config_animation, PrettyConfig::default()).unwrap();
     super::utils::write_to_file(&output_path, &serialized);

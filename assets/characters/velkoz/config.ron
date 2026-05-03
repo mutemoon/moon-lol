@@ -8,7 +8,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/velkoz/spells/VelkozPassive.ron"),
+          spell: Path("characters/Velkoz/spells/VelkozPassive.ron"),
           level: 1,
           slot: Passive,
           cooldown_mode: AfterCast,
@@ -20,10 +20,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 10.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/velkoz/spells/VelkozR.ron"),
+          spell: Path("characters/Velkoz/spells/VelkozR.ron"),
           level: 1,
           slot: R,
           cooldown_mode: AfterCast,
@@ -35,10 +35,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 12.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/velkoz/spells/VelkozE.ron"),
+          spell: Path("characters/Velkoz/spells/VelkozE.ron"),
           level: 1,
           slot: E,
           cooldown_mode: AfterCast,
@@ -50,10 +50,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 1.5,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/velkoz/spells/VelkozW.ron"),
+          spell: Path("characters/Velkoz/spells/VelkozW.ron"),
           level: 1,
           slot: W,
           cooldown_mode: AfterCast,
@@ -65,10 +65,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 7.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/velkoz/spells/VelkozQ.ron"),
+          spell: Path("characters/Velkoz/spells/VelkozQ.ron"),
           level: 1,
           slot: Q,
           cooldown_mode: AfterCast,
@@ -78,7 +78,7 @@
     ),
     4294967271: (
       components: {
-        "bevy_ecs::name::Name": "velkoz",
+        "bevy_ecs::name::Name": "Velkoz",
         "lol_core::attack::Attack": (
           range: 575.0,
           base_attack_speed: 1.4285715,

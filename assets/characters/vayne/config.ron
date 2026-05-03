@@ -8,7 +8,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/vayne/spells/VaynePassive.ron"),
+          spell: Path("characters/Vayne/spells/VaynePassive.ron"),
           level: 1,
           slot: Passive,
           cooldown_mode: AfterCast,
@@ -20,10 +20,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 100.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/vayne/spells/VayneInquisition.ron"),
+          spell: Path("characters/Vayne/spells/VayneInquisition.ron"),
           level: 1,
           slot: R,
           cooldown_mode: AfterCast,
@@ -35,10 +35,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 22.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/vayne/spells/VayneCondemn.ron"),
+          spell: Path("characters/Vayne/spells/VayneCondemn.ron"),
           level: 1,
           slot: E,
           cooldown_mode: AfterCast,
@@ -53,7 +53,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/vayne/spells/VayneSilveredBolts.ron"),
+          spell: Path("characters/Vayne/spells/VayneSilveredBolts.ron"),
           level: 1,
           slot: W,
           cooldown_mode: AfterCast,
@@ -65,10 +65,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 6.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/vayne/spells/VayneTumble.ron"),
+          spell: Path("characters/Vayne/spells/VayneTumble.ron"),
           level: 1,
           slot: Q,
           cooldown_mode: AfterCast,
@@ -78,7 +78,7 @@
     ),
     4294967271: (
       components: {
-        "bevy_ecs::name::Name": "vayne",
+        "bevy_ecs::name::Name": "Vayne",
         "lol_core::attack::Attack": (
           range: 575.0,
           base_attack_speed: 1.4285715,

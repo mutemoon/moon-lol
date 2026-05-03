@@ -8,7 +8,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/kled/spells/KledPassive.ron"),
+          spell: Path("characters/Kled/spells/KledPassive.ron"),
           level: 1,
           slot: Passive,
           cooldown_mode: AfterCast,
@@ -20,10 +20,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 140.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/kled/spells/KledR.ron"),
+          spell: Path("characters/Kled/spells/KledR.ron"),
           level: 1,
           slot: R,
           cooldown_mode: AfterCast,
@@ -35,10 +35,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 14.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/kled/spells/KledE.ron"),
+          spell: Path("characters/Kled/spells/KledE.ron"),
           level: 1,
           slot: E,
           cooldown_mode: AfterCast,
@@ -50,10 +50,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 14.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/kled/spells/KledW.ron"),
+          spell: Path("characters/Kled/spells/KledW.ron"),
           level: 1,
           slot: W,
           cooldown_mode: AfterCast,
@@ -65,10 +65,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 12.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/kled/spells/KledQ.ron"),
+          spell: Path("characters/Kled/spells/KledQ.ron"),
           level: 1,
           slot: Q,
           cooldown_mode: AfterCast,
@@ -78,7 +78,7 @@
     ),
     4294967271: (
       components: {
-        "bevy_ecs::name::Name": "kled",
+        "bevy_ecs::name::Name": "Kled",
         "lol_core::attack::Attack": (
           range: 0.0,
           base_attack_speed: 0.625,

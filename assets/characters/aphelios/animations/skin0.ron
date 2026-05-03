@@ -1,5 +1,5 @@
 (
-    gltf_path: "characters/aphelios/skins/skin0.glb",
+    gltf_path: "characters/Aphelios/skins/skin0.glb",
     hash_to_node: {
         "AAttack1": Clip(
             node_index: 137,

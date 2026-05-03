@@ -8,7 +8,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/karthus/spells/KarthusDeathDefied.ron"),
+          spell: Path("characters/Karthus/spells/KarthusDeathDefied.ron"),
           level: 1,
           slot: Passive,
           cooldown_mode: AfterCast,
@@ -20,10 +20,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 200.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/karthus/spells/KarthusFallenOne.ron"),
+          spell: Path("characters/Karthus/spells/KarthusFallenOne.ron"),
           level: 1,
           slot: R,
           cooldown_mode: AfterCast,
@@ -35,10 +35,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 0.5,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/karthus/spells/KarthusDefile.ron"),
+          spell: Path("characters/Karthus/spells/KarthusDefile.ron"),
           level: 1,
           slot: E,
           cooldown_mode: AfterCast,
@@ -50,10 +50,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 15.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/karthus/spells/KarthusWallOfPain.ron"),
+          spell: Path("characters/Karthus/spells/KarthusWallOfPain.ron"),
           level: 1,
           slot: W,
           cooldown_mode: AfterCast,
@@ -68,7 +68,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/karthus/spells/KarthusLayWasteA1.ron"),
+          spell: Path("characters/Karthus/spells/KarthusLayWasteA1.ron"),
           level: 1,
           slot: Q,
           cooldown_mode: AfterCast,
@@ -78,7 +78,7 @@
     ),
     4294967271: (
       components: {
-        "bevy_ecs::name::Name": "karthus",
+        "bevy_ecs::name::Name": "Karthus",
         "lol_core::attack::Attack": (
           range: 450.0,
           base_attack_speed: 1.4285715,

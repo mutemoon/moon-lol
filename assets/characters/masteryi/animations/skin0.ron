@@ -1,5 +1,5 @@
 (
-    gltf_path: "characters/masteryi/skins/skin0.glb",
+    gltf_path: "characters/MasterYi/skins/skin0.glb",
     hash_to_node: {
         "2013RunHaste": Clip(
             node_index: 25,

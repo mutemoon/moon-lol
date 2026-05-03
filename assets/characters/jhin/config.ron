@@ -8,7 +8,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/jhin/spells/JhinPassive.ron"),
+          spell: Path("characters/Jhin/spells/JhinPassive.ron"),
           level: 1,
           slot: Passive,
           cooldown_mode: AfterCast,
@@ -20,10 +20,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 120.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/jhin/spells/JhinR.ron"),
+          spell: Path("characters/Jhin/spells/JhinR.ron"),
           level: 1,
           slot: R,
           cooldown_mode: AfterCast,
@@ -35,10 +35,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 2.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/jhin/spells/JhinE.ron"),
+          spell: Path("characters/Jhin/spells/JhinE.ron"),
           level: 1,
           slot: E,
           cooldown_mode: AfterCast,
@@ -50,10 +50,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 12.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/jhin/spells/JhinW.ron"),
+          spell: Path("characters/Jhin/spells/JhinW.ron"),
           level: 1,
           slot: W,
           cooldown_mode: AfterCast,
@@ -65,10 +65,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 7.5,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/jhin/spells/JhinQ.ron"),
+          spell: Path("characters/Jhin/spells/JhinQ.ron"),
           level: 1,
           slot: Q,
           cooldown_mode: AfterCast,
@@ -78,7 +78,7 @@
     ),
     4294967271: (
       components: {
-        "bevy_ecs::name::Name": "jhin",
+        "bevy_ecs::name::Name": "Jhin",
         "lol_core::attack::Attack": (
           range: 800.0,
           base_attack_speed: 0.625,

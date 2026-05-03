@@ -93,6 +93,27 @@ impl LeagueLoader {
         }
     }
 
+    /// 扫描 Champions 目录并将所有英雄 WAD 文件添加到 loader
+    pub fn with_all_champions(mut self) -> Self {
+        let champions_path = std::path::Path::new(&self.root_dir).join("DATA/FINAL/Champions");
+        if let Ok(entries) = std::fs::read_dir(&champions_path) {
+            for entry in entries.flatten() {
+                let path = entry.path();
+                if let Some(name) = path.file_name().and_then(|s| s.to_str()) {
+                    if name.ends_with(".wad.client") && !name.contains('_') {
+                        let rel_path = format!("DATA/FINAL/Champions/{}", name);
+                        if let Ok(wad_loader) =
+                            LeagueWadLoader::from_relative_path(&self.root_dir, &rel_path)
+                        {
+                            self.wads.push(wad_loader);
+                        }
+                    }
+                }
+            }
+        }
+        self
+    }
+
     pub fn iter_wad_entries(&self) -> impl Iterator<Item = (&u64, &LeagueWadEntry)> {
         self.wads.iter().flat_map(|wad| wad.wad.entries.iter())
     }

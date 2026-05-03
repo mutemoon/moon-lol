@@ -1,5 +1,5 @@
 (
-    gltf_path: "characters/sru_riftherald/skins/skin0.glb",
+    gltf_path: "characters/SRU_RiftHerald/skins/Skin0.glb",
     hash_to_node: {
         "AngryIdle": Clip(
             node_index: 17,

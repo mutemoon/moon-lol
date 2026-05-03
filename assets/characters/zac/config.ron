@@ -5,10 +5,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 300.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/zac/spells/ZacPassiveChunkDrop.ron"),
+          spell: Path("characters/Zac/spells/ZacPassiveChunkDrop.ron"),
           level: 1,
           slot: Passive,
           cooldown_mode: AfterCast,
@@ -20,10 +20,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 120.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/zac/spells/ZacR.ron"),
+          spell: Path("characters/Zac/spells/ZacR.ron"),
           level: 1,
           slot: R,
           cooldown_mode: AfterCast,
@@ -35,10 +35,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 25.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/zac/spells/ZacE.ron"),
+          spell: Path("characters/Zac/spells/ZacE.ron"),
           level: 1,
           slot: E,
           cooldown_mode: AfterCast,
@@ -50,10 +50,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 5.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/zac/spells/ZacW.ron"),
+          spell: Path("characters/Zac/spells/ZacW.ron"),
           level: 1,
           slot: W,
           cooldown_mode: AfterCast,
@@ -65,10 +65,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 14.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/zac/spells/ZacQ.ron"),
+          spell: Path("characters/Zac/spells/ZacQ.ron"),
           level: 1,
           slot: Q,
           cooldown_mode: AfterCast,
@@ -78,7 +78,7 @@
     ),
     4294967271: (
       components: {
-        "bevy_ecs::name::Name": "zac",
+        "bevy_ecs::name::Name": "Zac",
         "lol_core::attack::Attack": (
           range: 400.0,
           base_attack_speed: 0.6377551,

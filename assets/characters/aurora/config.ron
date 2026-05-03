@@ -8,7 +8,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/aurora/spells/AuroraPassive.ron"),
+          spell: Path("characters/Aurora/spells/AuroraPassive.ron"),
           level: 1,
           slot: Passive,
           cooldown_mode: AfterCast,
@@ -20,10 +20,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 140.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/aurora/spells/AuroraR.ron"),
+          spell: Path("characters/Aurora/spells/AuroraR.ron"),
           level: 1,
           slot: R,
           cooldown_mode: AfterCast,
@@ -35,10 +35,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 15.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/aurora/spells/AuroraE.ron"),
+          spell: Path("characters/Aurora/spells/AuroraE.ron"),
           level: 1,
           slot: E,
           cooldown_mode: AfterCast,
@@ -50,10 +50,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 22.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/aurora/spells/AuroraW.ron"),
+          spell: Path("characters/Aurora/spells/AuroraW.ron"),
           level: 1,
           slot: W,
           cooldown_mode: AfterCast,
@@ -65,10 +65,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 9.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/aurora/spells/AuroraQ.ron"),
+          spell: Path("characters/Aurora/spells/AuroraQ.ron"),
           level: 1,
           slot: Q,
           cooldown_mode: AfterCast,
@@ -78,7 +78,7 @@
     ),
     4294967271: (
       components: {
-        "bevy_ecs::name::Name": "aurora",
+        "bevy_ecs::name::Name": "Aurora",
         "lol_core::attack::Attack": (
           range: 525.0,
           base_attack_speed: 1.4285715,

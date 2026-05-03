@@ -8,7 +8,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/varus/spells/VarusPassive.ron"),
+          spell: Path("characters/Varus/spells/VarusPassive.ron"),
           level: 1,
           slot: Passive,
           cooldown_mode: AfterCast,
@@ -20,10 +20,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 100.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/varus/spells/VarusR.ron"),
+          spell: Path("characters/Varus/spells/VarusR.ron"),
           level: 1,
           slot: R,
           cooldown_mode: AfterCast,
@@ -35,10 +35,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 18.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/varus/spells/VarusE.ron"),
+          spell: Path("characters/Varus/spells/VarusE.ron"),
           level: 1,
           slot: E,
           cooldown_mode: AfterCast,
@@ -50,10 +50,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 40.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/varus/spells/VarusW.ron"),
+          spell: Path("characters/Varus/spells/VarusW.ron"),
           level: 1,
           slot: W,
           cooldown_mode: AfterCast,
@@ -65,10 +65,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 17.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/varus/spells/VarusQ.ron"),
+          spell: Path("characters/Varus/spells/VarusQ.ron"),
           level: 1,
           slot: Q,
           cooldown_mode: AfterCast,
@@ -78,7 +78,7 @@
     ),
     4294967271: (
       components: {
-        "bevy_ecs::name::Name": "varus",
+        "bevy_ecs::name::Name": "Varus",
         "lol_core::attack::Attack": (
           range: 600.0,
           base_attack_speed: 1.4285715,

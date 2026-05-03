@@ -8,7 +8,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/hecarim/spells/HecarimPassive.ron"),
+          spell: Path("characters/Hecarim/spells/HecarimPassive.ron"),
           level: 1,
           slot: Passive,
           cooldown_mode: AfterCast,
@@ -23,7 +23,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/hecarim/spells/HecarimUlt.ron"),
+          spell: Path("characters/Hecarim/spells/HecarimUlt.ron"),
           level: 1,
           slot: R,
           cooldown_mode: AfterCast,
@@ -35,10 +35,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 20.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/hecarim/spells/HecarimRamp.ron"),
+          spell: Path("characters/Hecarim/spells/HecarimRamp.ron"),
           level: 1,
           slot: E,
           cooldown_mode: AfterCast,
@@ -50,10 +50,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 14.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/hecarim/spells/HecarimW.ron"),
+          spell: Path("characters/Hecarim/spells/HecarimW.ron"),
           level: 1,
           slot: W,
           cooldown_mode: AfterCast,
@@ -65,10 +65,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 4.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/hecarim/spells/HecarimRapidSlash.ron"),
+          spell: Path("characters/Hecarim/spells/HecarimRapidSlash.ron"),
           level: 1,
           slot: Q,
           cooldown_mode: AfterCast,
@@ -78,7 +78,7 @@
     ),
     4294967271: (
       components: {
-        "bevy_ecs::name::Name": "hecarim",
+        "bevy_ecs::name::Name": "Hecarim",
         "lol_core::attack::Attack": (
           range: 0.0,
           base_attack_speed: 1.4285715,

@@ -8,7 +8,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/naafiri/spells/NaafiriP.ron"),
+          spell: Path("characters/Naafiri/spells/NaafiriP.ron"),
           level: 1,
           slot: Passive,
           cooldown_mode: AfterCast,
@@ -20,10 +20,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 110.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/naafiri/spells/NaafiriW.ron"),
+          spell: Path("characters/Naafiri/spells/NaafiriW.ron"),
           level: 1,
           slot: R,
           cooldown_mode: AfterCast,
@@ -35,10 +35,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 11.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/naafiri/spells/NaafiriE.ron"),
+          spell: Path("characters/Naafiri/spells/NaafiriE.ron"),
           level: 1,
           slot: E,
           cooldown_mode: AfterCast,
@@ -50,10 +50,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 26.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/naafiri/spells/NaafiriR.ron"),
+          spell: Path("characters/Naafiri/spells/NaafiriR.ron"),
           level: 1,
           slot: W,
           cooldown_mode: AfterCast,
@@ -65,10 +65,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 9.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/naafiri/spells/NaafiriQ.ron"),
+          spell: Path("characters/Naafiri/spells/NaafiriQ.ron"),
           level: 1,
           slot: Q,
           cooldown_mode: AfterCast,
@@ -78,7 +78,7 @@
     ),
     4294967271: (
       components: {
-        "bevy_ecs::name::Name": "naafiri",
+        "bevy_ecs::name::Name": "Naafiri",
         "lol_core::attack::Attack": (
           range: 400.0,
           base_attack_speed: 0.6896551,

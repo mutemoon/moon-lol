@@ -8,7 +8,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/sru_dragon/spells/DragonFireball2.ron"),
+          spell: Path("characters/SRU_Dragon/spells/DragonFireball2.ron"),
           level: 1,
           slot: R,
           cooldown_mode: AfterCast,
@@ -23,7 +23,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/sru_dragon/spells/DragonFireball.ron"),
+          spell: Path("characters/SRU_Dragon/spells/DragonFireball.ron"),
           level: 1,
           slot: E,
           cooldown_mode: AfterCast,
@@ -38,7 +38,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/sru_dragon/spells/SRUDragonBasicAttack.ron"),
+          spell: Path("characters/SRU_Dragon/spells/SRUDragonBasicAttack.ron"),
           level: 1,
           slot: W,
           cooldown_mode: AfterCast,
@@ -50,10 +50,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 1.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/sru_dragon/spells/DragonTakeoff.ron"),
+          spell: Path("characters/SRU_Dragon/spells/DragonTakeoff.ron"),
           level: 1,
           slot: Q,
           cooldown_mode: AfterCast,
@@ -63,7 +63,7 @@
     ),
     4294967271: (
       components: {
-        "bevy_ecs::name::Name": "sru_dragon",
+        "bevy_ecs::name::Name": "SRU_Dragon",
         "lol_core::attack::Attack": (
           range: 1000.0,
           base_attack_speed: 0.5,

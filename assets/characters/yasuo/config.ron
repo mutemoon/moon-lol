@@ -8,7 +8,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/yasuo/spells/YasuoPassive.ron"),
+          spell: Path("characters/Yasuo/spells/YasuoPassive.ron"),
           level: 1,
           slot: Passive,
           cooldown_mode: AfterCast,
@@ -20,10 +20,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 105.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/yasuo/spells/YasuoR.ron"),
+          spell: Path("characters/Yasuo/spells/YasuoR.ron"),
           level: 1,
           slot: R,
           cooldown_mode: AfterCast,
@@ -35,10 +35,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 0.5,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/yasuo/spells/YasuoE.ron"),
+          spell: Path("characters/Yasuo/spells/YasuoE.ron"),
           level: 1,
           slot: E,
           cooldown_mode: AfterCast,
@@ -50,10 +50,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 27.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/yasuo/spells/YasuoW.ron"),
+          spell: Path("characters/Yasuo/spells/YasuoW.ron"),
           level: 1,
           slot: W,
           cooldown_mode: AfterCast,
@@ -65,10 +65,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 4.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/yasuo/spells/YasuoQ1Wrapper.ron"),
+          spell: Path("characters/Yasuo/spells/YasuoQ1Wrapper.ron"),
           level: 1,
           slot: Q,
           cooldown_mode: AfterCast,
@@ -78,7 +78,7 @@
     ),
     4294967271: (
       components: {
-        "bevy_ecs::name::Name": "yasuo",
+        "bevy_ecs::name::Name": "Yasuo",
         "lol_core::attack::Attack": (
           range: 400.0,
           base_attack_speed: 1.4285715,

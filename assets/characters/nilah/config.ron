@@ -8,7 +8,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/nilah/spells/NilahPassive.ron"),
+          spell: Path("characters/Nilah/spells/NilahPassive.ron"),
           level: 1,
           slot: Passive,
           cooldown_mode: AfterCast,
@@ -20,10 +20,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 110.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/nilah/spells/NilahR.ron"),
+          spell: Path("characters/Nilah/spells/NilahR.ron"),
           level: 1,
           slot: R,
           cooldown_mode: AfterCast,
@@ -35,10 +35,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 0.5,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/nilah/spells/NilahE.ron"),
+          spell: Path("characters/Nilah/spells/NilahE.ron"),
           level: 1,
           slot: E,
           cooldown_mode: AfterCast,
@@ -50,10 +50,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 26.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/nilah/spells/NilahW.ron"),
+          spell: Path("characters/Nilah/spells/NilahW.ron"),
           level: 1,
           slot: W,
           cooldown_mode: AfterCast,
@@ -65,10 +65,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 4.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/nilah/spells/NilahQ.ron"),
+          spell: Path("characters/Nilah/spells/NilahQ.ron"),
           level: 1,
           slot: Q,
           cooldown_mode: AfterCast,
@@ -78,7 +78,7 @@
     ),
     4294967271: (
       components: {
-        "bevy_ecs::name::Name": "nilah",
+        "bevy_ecs::name::Name": "Nilah",
         "lol_core::attack::Attack": (
           range: 400.0,
           base_attack_speed: 1.4285715,

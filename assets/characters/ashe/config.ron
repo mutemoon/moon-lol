@@ -8,7 +8,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/ashe/spells/AshePassive.ron"),
+          spell: Path("characters/Ashe/spells/AshePassive.ron"),
           level: 1,
           slot: Passive,
           cooldown_mode: AfterCast,
@@ -20,10 +20,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 100.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/ashe/spells/EnchantedCrystalArrow.ron"),
+          spell: Path("characters/Ashe/spells/EnchantedCrystalArrow.ron"),
           level: 1,
           slot: R,
           cooldown_mode: AfterCast,
@@ -35,10 +35,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 5.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/ashe/spells/AsheSpiritOfTheHawk.ron"),
+          spell: Path("characters/Ashe/spells/AsheSpiritOfTheHawk.ron"),
           level: 1,
           slot: E,
           cooldown_mode: AfterCast,
@@ -50,10 +50,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 18.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/ashe/spells/Volley.ron"),
+          spell: Path("characters/Ashe/spells/Volley.ron"),
           level: 1,
           slot: W,
           cooldown_mode: AfterCast,
@@ -68,7 +68,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/ashe/spells/AsheQ.ron"),
+          spell: Path("characters/Ashe/spells/AsheQ.ron"),
           level: 1,
           slot: Q,
           cooldown_mode: AfterCast,
@@ -78,7 +78,7 @@
     ),
     4294967271: (
       components: {
-        "bevy_ecs::name::Name": "ashe",
+        "bevy_ecs::name::Name": "Ashe",
         "lol_core::attack::Attack": (
           range: 600.0,
           base_attack_speed: 1.4285715,

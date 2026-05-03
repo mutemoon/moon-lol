@@ -8,7 +8,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/rengar/spells/RengarPassive.ron"),
+          spell: Path("characters/Rengar/spells/RengarPassive.ron"),
           level: 1,
           slot: Passive,
           cooldown_mode: AfterCast,
@@ -20,10 +20,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 100.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/rengar/spells/RengarR.ron"),
+          spell: Path("characters/Rengar/spells/RengarR.ron"),
           level: 1,
           slot: R,
           cooldown_mode: AfterCast,
@@ -35,10 +35,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 0.25,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/rengar/spells/RengarE.ron"),
+          spell: Path("characters/Rengar/spells/RengarE.ron"),
           level: 1,
           slot: E,
           cooldown_mode: AfterCast,
@@ -50,10 +50,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 0.25,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/rengar/spells/RengarW.ron"),
+          spell: Path("characters/Rengar/spells/RengarW.ron"),
           level: 1,
           slot: W,
           cooldown_mode: AfterCast,
@@ -65,10 +65,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 0.25,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/rengar/spells/RengarQ.ron"),
+          spell: Path("characters/Rengar/spells/RengarQ.ron"),
           level: 1,
           slot: Q,
           cooldown_mode: AfterCast,
@@ -78,7 +78,7 @@
     ),
     4294967271: (
       components: {
-        "bevy_ecs::name::Name": "rengar",
+        "bevy_ecs::name::Name": "Rengar",
         "lol_core::attack::Attack": (
           range: 600.0,
           base_attack_speed: 0.6666667,

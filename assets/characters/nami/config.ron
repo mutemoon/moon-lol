@@ -8,7 +8,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/nami/spells/NamiPassive.ron"),
+          spell: Path("characters/Nami/spells/NamiPassive.ron"),
           level: 1,
           slot: Passive,
           cooldown_mode: AfterCast,
@@ -20,10 +20,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 10.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/nami/spells/NamiR.ron"),
+          spell: Path("characters/Nami/spells/NamiR.ron"),
           level: 1,
           slot: R,
           cooldown_mode: AfterCast,
@@ -35,10 +35,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 11.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/nami/spells/NamiE.ron"),
+          spell: Path("characters/Nami/spells/NamiE.ron"),
           level: 1,
           slot: E,
           cooldown_mode: AfterCast,
@@ -53,7 +53,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/nami/spells/NamiW.ron"),
+          spell: Path("characters/Nami/spells/NamiW.ron"),
           level: 1,
           slot: W,
           cooldown_mode: AfterCast,
@@ -65,10 +65,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 12.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/nami/spells/NamiQ.ron"),
+          spell: Path("characters/Nami/spells/NamiQ.ron"),
           level: 1,
           slot: Q,
           cooldown_mode: AfterCast,
@@ -78,7 +78,7 @@
     ),
     4294967271: (
       components: {
-        "bevy_ecs::name::Name": "nami",
+        "bevy_ecs::name::Name": "Nami",
         "lol_core::attack::Attack": (
           range: 600.0,
           base_attack_speed: 1.4285715,

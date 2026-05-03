@@ -1,0 +1,1 @@
+英雄联盟的装备定义位于 DATA/FINAL/Global.wad.client 的路径为 items 的 prop 文件，其中有 SpellObject、ItemData、VfxSystemDefinitionData 结构体

@@ -8,7 +8,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/blitzcrank/spells/ManaBarrierIcon.ron"),
+          spell: Path("characters/Blitzcrank/spells/ManaBarrierIcon.ron"),
           level: 1,
           slot: Passive,
           cooldown_mode: AfterCast,
@@ -23,7 +23,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/blitzcrank/spells/StaticField.ron"),
+          spell: Path("characters/Blitzcrank/spells/StaticField.ron"),
           level: 1,
           slot: R,
           cooldown_mode: AfterCast,
@@ -35,10 +35,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 7.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/blitzcrank/spells/PowerFist.ron"),
+          spell: Path("characters/Blitzcrank/spells/PowerFist.ron"),
           level: 1,
           slot: E,
           cooldown_mode: AfterCast,
@@ -50,10 +50,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 15.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/blitzcrank/spells/Overdrive.ron"),
+          spell: Path("characters/Blitzcrank/spells/Overdrive.ron"),
           level: 1,
           slot: W,
           cooldown_mode: AfterCast,
@@ -65,10 +65,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 21.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/blitzcrank/spells/RocketGrab.ron"),
+          spell: Path("characters/Blitzcrank/spells/RocketGrab.ron"),
           level: 1,
           slot: Q,
           cooldown_mode: AfterCast,
@@ -78,7 +78,7 @@
     ),
     4294967271: (
       components: {
-        "bevy_ecs::name::Name": "blitzcrank",
+        "bevy_ecs::name::Name": "Blitzcrank",
         "lol_core::attack::Attack": (
           range: 600.0,
           base_attack_speed: 1.4285715,

@@ -8,7 +8,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/thresh/spells/ThreshPassiveSouls.ron"),
+          spell: Path("characters/Thresh/spells/ThreshPassiveSouls.ron"),
           level: 1,
           slot: Passive,
           cooldown_mode: AfterCast,
@@ -20,10 +20,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 120.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/thresh/spells/ThreshRPenta.ron"),
+          spell: Path("characters/Thresh/spells/ThreshRPenta.ron"),
           level: 1,
           slot: R,
           cooldown_mode: AfterCast,
@@ -35,10 +35,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 13.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/thresh/spells/ThreshE.ron"),
+          spell: Path("characters/Thresh/spells/ThreshE.ron"),
           level: 1,
           slot: E,
           cooldown_mode: AfterCast,
@@ -50,10 +50,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 21.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/thresh/spells/ThreshW.ron"),
+          spell: Path("characters/Thresh/spells/ThreshW.ron"),
           level: 1,
           slot: W,
           cooldown_mode: AfterCast,
@@ -65,10 +65,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 19.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/thresh/spells/ThreshQ.ron"),
+          spell: Path("characters/Thresh/spells/ThreshQ.ron"),
           level: 1,
           slot: Q,
           cooldown_mode: AfterCast,
@@ -78,7 +78,7 @@
     ),
     4294967271: (
       components: {
-        "bevy_ecs::name::Name": "thresh",
+        "bevy_ecs::name::Name": "Thresh",
         "lol_core::attack::Attack": (
           range: 475.0,
           base_attack_speed: 1.4285715,

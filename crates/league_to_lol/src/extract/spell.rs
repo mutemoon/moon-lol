@@ -51,7 +51,7 @@ pub fn extract_spells_for_champion(
             spell_data: Some(data_spell),
         };
 
-        let output_dir = format!("assets/characters/{}/spells", champ_name.to_lowercase());
+        let output_dir = format!("assets/characters/{}/spells", champ_name);
         let output_path = format!("{}/{}.ron", output_dir, object_name);
 
         // 确保目录存在
@@ -134,9 +134,9 @@ fn convert_missile_spec(
 }
 
 /// 转换移动类型
-fn convert_movement(movement: &league_core::extract::EnumMovement) -> MovementType {
+fn convert_movement(movement: &Option<league_core::extract::EnumMovement>) -> MovementType {
     match movement {
-        league_core::extract::EnumMovement::FixedSpeedMovement(fixed) => {
+        Some(league_core::extract::EnumMovement::FixedSpeedMovement(fixed)) => {
             MovementType::MovementTypeFixedSpeed(MovementTypeFixedSpeed {
                 speed: fixed.m_speed,
                 start_bone_name: fixed.m_start_bone_name.clone(),

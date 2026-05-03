@@ -8,7 +8,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/seraphine/spells/SeraphinePassive.ron"),
+          spell: Path("characters/Seraphine/spells/SeraphinePassive.ron"),
           level: 1,
           slot: Passive,
           cooldown_mode: AfterCast,
@@ -20,10 +20,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 160.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/seraphine/spells/SeraphineR.ron"),
+          spell: Path("characters/Seraphine/spells/SeraphineR.ron"),
           level: 1,
           slot: R,
           cooldown_mode: AfterCast,
@@ -35,10 +35,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 11.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/seraphine/spells/SeraphineE.ron"),
+          spell: Path("characters/Seraphine/spells/SeraphineE.ron"),
           level: 1,
           slot: E,
           cooldown_mode: AfterCast,
@@ -50,10 +50,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 22.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/seraphine/spells/SeraphineW.ron"),
+          spell: Path("characters/Seraphine/spells/SeraphineW.ron"),
           level: 1,
           slot: W,
           cooldown_mode: AfterCast,
@@ -65,10 +65,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 8.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/seraphine/spells/SeraphineQ.ron"),
+          spell: Path("characters/Seraphine/spells/SeraphineQ.ron"),
           level: 1,
           slot: Q,
           cooldown_mode: AfterCast,
@@ -78,7 +78,7 @@
     ),
     4294967271: (
       components: {
-        "bevy_ecs::name::Name": "seraphine",
+        "bevy_ecs::name::Name": "Seraphine",
         "lol_core::attack::Attack": (
           range: 525.0,
           base_attack_speed: 1.4285715,

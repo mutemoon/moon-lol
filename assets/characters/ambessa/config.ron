@@ -8,7 +8,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/ambessa/spells/AmbessaPassive.ron"),
+          spell: Path("characters/Ambessa/spells/AmbessaPassive.ron"),
           level: 1,
           slot: Passive,
           cooldown_mode: AfterCast,
@@ -20,10 +20,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 130.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/ambessa/spells/AmbessaR.ron"),
+          spell: Path("characters/Ambessa/spells/AmbessaR.ron"),
           level: 1,
           slot: R,
           cooldown_mode: AfterCast,
@@ -35,10 +35,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 13.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/ambessa/spells/AmbessaE.ron"),
+          spell: Path("characters/Ambessa/spells/AmbessaE.ron"),
           level: 1,
           slot: E,
           cooldown_mode: AfterCast,
@@ -50,10 +50,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 18.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/ambessa/spells/AmbessaW.ron"),
+          spell: Path("characters/Ambessa/spells/AmbessaW.ron"),
           level: 1,
           slot: W,
           cooldown_mode: AfterCast,
@@ -65,10 +65,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 14.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/ambessa/spells/AmbessaQ.ron"),
+          spell: Path("characters/Ambessa/spells/AmbessaQ.ron"),
           level: 1,
           slot: Q,
           cooldown_mode: AfterCast,
@@ -78,7 +78,7 @@
     ),
     4294967271: (
       components: {
-        "bevy_ecs::name::Name": "ambessa",
+        "bevy_ecs::name::Name": "Ambessa",
         "lol_core::attack::Attack": (
           range: 600.0,
           base_attack_speed: 0.625,

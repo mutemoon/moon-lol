@@ -3,10 +3,10 @@
   entities: {
     4294967262: (
       components: {
-        "bevy_animation::graph::AnimationGraphHandle": (Path("characters/diana/animations/skin0.ron#animation_graph")),
+        "bevy_animation::graph::AnimationGraphHandle": (Path("characters/Diana/animations/skin0.ron#animation_graph")),
         "bevy_camera::visibility::Visibility": Inherited,
-        "bevy_world_serialization::components::WorldAssetRoot": (Path("characters/diana/skins/skin0.glb#Scene0")),
-        "lol_base::animation::LOLAnimationGraphHandle": (Path("characters/diana/animations/skin0.ron")),
+        "bevy_world_serialization::components::WorldAssetRoot": (Path("characters/Diana/skins/skin0.glb#Scene0")),
+        "lol_base::animation::LOLAnimationGraphHandle": (Path("characters/Diana/animations/skin0.ron")),
         "lol_base::character::HealthBar": (
           bar_type: 12,
         ),

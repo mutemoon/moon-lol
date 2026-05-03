@@ -8,7 +8,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/kalista/spells/KalistaPassiveBuff.ron"),
+          spell: Path("characters/Kalista/spells/KalistaPassiveBuff.ron"),
           level: 1,
           slot: Passive,
           cooldown_mode: AfterCast,
@@ -20,10 +20,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 160.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/kalista/spells/KalistaRx.ron"),
+          spell: Path("characters/Kalista/spells/KalistaRx.ron"),
           level: 1,
           slot: R,
           cooldown_mode: AfterCast,
@@ -38,7 +38,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/kalista/spells/KalistaExpungeWrapper.ron"),
+          spell: Path("characters/Kalista/spells/KalistaExpungeWrapper.ron"),
           level: 1,
           slot: E,
           cooldown_mode: AfterCast,
@@ -50,10 +50,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 30.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/kalista/spells/KalistaW.ron"),
+          spell: Path("characters/Kalista/spells/KalistaW.ron"),
           level: 1,
           slot: W,
           cooldown_mode: AfterCast,
@@ -65,10 +65,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 9.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/kalista/spells/KalistaMysticShot.ron"),
+          spell: Path("characters/Kalista/spells/KalistaMysticShot.ron"),
           level: 1,
           slot: Q,
           cooldown_mode: AfterCast,
@@ -78,7 +78,7 @@
     ),
     4294967271: (
       components: {
-        "bevy_ecs::name::Name": "kalista",
+        "bevy_ecs::name::Name": "Kalista",
         "lol_core::attack::Attack": (
           range: 900.0,
           base_attack_speed: 1.4285715,

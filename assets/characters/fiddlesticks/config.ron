@@ -8,7 +8,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/fiddlesticks/spells/FiddleSticksPassive.ron"),
+          spell: Path("characters/FiddleSticks/spells/FiddleSticksPassive.ron"),
           level: 1,
           slot: Passive,
           cooldown_mode: AfterCast,
@@ -20,10 +20,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 140.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/fiddlesticks/spells/FiddleSticksR.ron"),
+          spell: Path("characters/FiddleSticks/spells/FiddleSticksR.ron"),
           level: 1,
           slot: R,
           cooldown_mode: AfterCast,
@@ -35,10 +35,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 10.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/fiddlesticks/spells/FiddleSticksE.ron"),
+          spell: Path("characters/FiddleSticks/spells/FiddleSticksE.ron"),
           level: 1,
           slot: E,
           cooldown_mode: AfterCast,
@@ -50,10 +50,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 10.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/fiddlesticks/spells/FiddleSticksW.ron"),
+          spell: Path("characters/FiddleSticks/spells/FiddleSticksW.ron"),
           level: 1,
           slot: W,
           cooldown_mode: AfterCast,
@@ -65,10 +65,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 16.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/fiddlesticks/spells/FiddleSticksQ.ron"),
+          spell: Path("characters/FiddleSticks/spells/FiddleSticksQ.ron"),
           level: 1,
           slot: Q,
           cooldown_mode: AfterCast,
@@ -78,7 +78,7 @@
     ),
     4294967271: (
       components: {
-        "bevy_ecs::name::Name": "fiddlesticks",
+        "bevy_ecs::name::Name": "FiddleSticks",
         "lol_core::attack::Attack": (
           range: 520.0,
           base_attack_speed: 1.4285715,

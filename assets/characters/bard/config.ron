@@ -8,7 +8,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/bard/spells/BardPTooltip_D_nS.ron"),
+          spell: Path("characters/Bard/spells/BardPTooltip_D_nS.ron"),
           level: 1,
           slot: Passive,
           cooldown_mode: AfterCast,
@@ -20,10 +20,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 10.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/bard/spells/BardR.ron"),
+          spell: Path("characters/Bard/spells/BardR.ron"),
           level: 1,
           slot: R,
           cooldown_mode: AfterCast,
@@ -35,10 +35,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 22.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/bard/spells/BardE.ron"),
+          spell: Path("characters/Bard/spells/BardE.ron"),
           level: 1,
           slot: E,
           cooldown_mode: AfterCast,
@@ -53,7 +53,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/bard/spells/BardW.ron"),
+          spell: Path("characters/Bard/spells/BardW.ron"),
           level: 1,
           slot: W,
           cooldown_mode: AfterCast,
@@ -65,10 +65,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 12.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/bard/spells/BardQ.ron"),
+          spell: Path("characters/Bard/spells/BardQ.ron"),
           level: 1,
           slot: Q,
           cooldown_mode: AfterCast,
@@ -78,7 +78,7 @@
     ),
     4294967271: (
       components: {
-        "bevy_ecs::name::Name": "bard",
+        "bevy_ecs::name::Name": "Bard",
         "lol_core::attack::Attack": (
           range: 600.0,
           base_attack_speed: 0.625,

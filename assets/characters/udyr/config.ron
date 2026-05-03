@@ -8,7 +8,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/udyr/spells/UdyrPassive.ron"),
+          spell: Path("characters/Udyr/spells/UdyrPassive.ron"),
           level: 1,
           slot: Passive,
           cooldown_mode: AfterCast,
@@ -20,10 +20,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 6.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/udyr/spells/UdyrR.ron"),
+          spell: Path("characters/Udyr/spells/UdyrR.ron"),
           level: 1,
           slot: R,
           cooldown_mode: AfterCast,
@@ -35,10 +35,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 6.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/udyr/spells/UdyrE.ron"),
+          spell: Path("characters/Udyr/spells/UdyrE.ron"),
           level: 1,
           slot: E,
           cooldown_mode: AfterCast,
@@ -50,10 +50,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 6.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/udyr/spells/UdyrW.ron"),
+          spell: Path("characters/Udyr/spells/UdyrW.ron"),
           level: 1,
           slot: W,
           cooldown_mode: AfterCast,
@@ -65,10 +65,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 6.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/udyr/spells/UdyrQ.ron"),
+          spell: Path("characters/Udyr/spells/UdyrQ.ron"),
           level: 1,
           slot: Q,
           cooldown_mode: AfterCast,
@@ -78,7 +78,7 @@
     ),
     4294967271: (
       components: {
-        "bevy_ecs::name::Name": "udyr",
+        "bevy_ecs::name::Name": "Udyr",
         "lol_core::attack::Attack": (
           range: 400.0,
           base_attack_speed: 1.4285715,

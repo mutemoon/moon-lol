@@ -8,7 +8,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/leona/spells/LeonaSunlightPassive.ron"),
+          spell: Path("characters/Leona/spells/LeonaSunlightPassive.ron"),
           level: 1,
           slot: Passive,
           cooldown_mode: AfterCast,
@@ -20,10 +20,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 90.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/leona/spells/LeonaSolarFlare.ron"),
+          spell: Path("characters/Leona/spells/LeonaSolarFlare.ron"),
           level: 1,
           slot: R,
           cooldown_mode: AfterCast,
@@ -35,10 +35,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 13.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/leona/spells/LeonaZenithBlade.ron"),
+          spell: Path("characters/Leona/spells/LeonaZenithBlade.ron"),
           level: 1,
           slot: E,
           cooldown_mode: AfterCast,
@@ -50,10 +50,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 14.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/leona/spells/LeonaSolarBarrier.ron"),
+          spell: Path("characters/Leona/spells/LeonaSolarBarrier.ron"),
           level: 1,
           slot: W,
           cooldown_mode: AfterCast,
@@ -65,10 +65,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 5.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/leona/spells/LeonaShieldOfDaybreak.ron"),
+          spell: Path("characters/Leona/spells/LeonaShieldOfDaybreak.ron"),
           level: 1,
           slot: Q,
           cooldown_mode: AfterCast,
@@ -78,7 +78,7 @@
     ),
     4294967271: (
       components: {
-        "bevy_ecs::name::Name": "leona",
+        "bevy_ecs::name::Name": "Leona",
         "lol_core::attack::Attack": (
           range: 400.0,
           base_attack_speed: 1.4285715,

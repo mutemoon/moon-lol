@@ -8,7 +8,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/braum/spells/BraumPassive.ron"),
+          spell: Path("characters/Braum/spells/BraumPassive.ron"),
           level: 1,
           slot: Passive,
           cooldown_mode: AfterCast,
@@ -20,10 +20,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 130.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/braum/spells/BraumRWrapper.ron"),
+          spell: Path("characters/Braum/spells/BraumRWrapper.ron"),
           level: 1,
           slot: R,
           cooldown_mode: AfterCast,
@@ -35,10 +35,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 18.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/braum/spells/BraumE.ron"),
+          spell: Path("characters/Braum/spells/BraumE.ron"),
           level: 1,
           slot: E,
           cooldown_mode: AfterCast,
@@ -50,10 +50,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 13.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/braum/spells/BraumW.ron"),
+          spell: Path("characters/Braum/spells/BraumW.ron"),
           level: 1,
           slot: W,
           cooldown_mode: AfterCast,
@@ -65,10 +65,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 8.5,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/braum/spells/BraumQ.ron"),
+          spell: Path("characters/Braum/spells/BraumQ.ron"),
           level: 1,
           slot: Q,
           cooldown_mode: AfterCast,
@@ -78,7 +78,7 @@
     ),
     4294967271: (
       components: {
-        "bevy_ecs::name::Name": "braum",
+        "bevy_ecs::name::Name": "Braum",
         "lol_core::attack::Attack": (
           range: 600.0,
           base_attack_speed: 1.4285715,

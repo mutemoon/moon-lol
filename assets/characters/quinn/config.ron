@@ -8,7 +8,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/quinn/spells/QuinnPassive.ron"),
+          spell: Path("characters/Quinn/spells/QuinnPassive.ron"),
           level: 1,
           slot: Passive,
           cooldown_mode: AfterCast,
@@ -20,10 +20,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 3.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/quinn/spells/QuinnR.ron"),
+          spell: Path("characters/Quinn/spells/QuinnR.ron"),
           level: 1,
           slot: R,
           cooldown_mode: AfterCast,
@@ -35,10 +35,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 13.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/quinn/spells/QuinnE.ron"),
+          spell: Path("characters/Quinn/spells/QuinnE.ron"),
           level: 1,
           slot: E,
           cooldown_mode: AfterCast,
@@ -50,10 +50,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 55.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/quinn/spells/QuinnW.ron"),
+          spell: Path("characters/Quinn/spells/QuinnW.ron"),
           level: 1,
           slot: W,
           cooldown_mode: AfterCast,
@@ -65,10 +65,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 11.5,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/quinn/spells/QuinnQ.ron"),
+          spell: Path("characters/Quinn/spells/QuinnQ.ron"),
           level: 1,
           slot: Q,
           cooldown_mode: AfterCast,
@@ -78,7 +78,7 @@
     ),
     4294967271: (
       components: {
-        "bevy_ecs::name::Name": "quinn",
+        "bevy_ecs::name::Name": "Quinn",
         "lol_core::attack::Attack": (
           range: 0.0,
           base_attack_speed: 1.4285715,

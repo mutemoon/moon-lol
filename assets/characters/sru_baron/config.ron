@@ -8,7 +8,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/sru_baron/spells/BaronSpellCaster.ron"),
+          spell: Path("characters/SRU_Baron/spells/BaronSpellCaster.ron"),
           level: 1,
           slot: E,
           cooldown_mode: AfterCast,
@@ -23,7 +23,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/sru_baron/spells/BaronSpike.ron"),
+          spell: Path("characters/SRU_Baron/spells/BaronSpike.ron"),
           level: 1,
           slot: W,
           cooldown_mode: AfterCast,
@@ -38,7 +38,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/sru_baron/spells/BaronAttackMelee.ron"),
+          spell: Path("characters/SRU_Baron/spells/BaronAttackMelee.ron"),
           level: 1,
           slot: Q,
           cooldown_mode: AfterCast,
@@ -48,7 +48,7 @@
     ),
     4294967271: (
       components: {
-        "bevy_ecs::name::Name": "sru_baron",
+        "bevy_ecs::name::Name": "SRU_Baron",
         "lol_core::attack::Attack": (
           range: 400.0,
           base_attack_speed: 0.625,

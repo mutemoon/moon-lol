@@ -8,7 +8,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/sru_riftherald/spells/RiftHeraldMercenary.ron"),
+          spell: Path("characters/SRU_RiftHerald/spells/RiftHeraldMercenary.ron"),
           level: 1,
           slot: Passive,
           cooldown_mode: AfterCast,
@@ -23,7 +23,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/sru_riftherald/spells/SRU_RiftHerald_Gaze.ron"),
+          spell: Path("characters/SRU_RiftHerald/spells/SRU_RiftHerald_Gaze.ron"),
           level: 1,
           slot: E,
           cooldown_mode: AfterCast,
@@ -35,10 +35,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 1.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/sru_riftherald/spells/HeraldSpinAttack.ron"),
+          spell: Path("characters/SRU_RiftHerald/spells/HeraldSpinAttack.ron"),
           level: 1,
           slot: W,
           cooldown_mode: AfterCast,
@@ -50,10 +50,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 1.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/sru_riftherald/spells/HeraldLeapAttack.ron"),
+          spell: Path("characters/SRU_RiftHerald/spells/HeraldLeapAttack.ron"),
           level: 1,
           slot: Q,
           cooldown_mode: AfterCast,
@@ -63,7 +63,7 @@
     ),
     4294967271: (
       components: {
-        "bevy_ecs::name::Name": "sru_riftherald",
+        "bevy_ecs::name::Name": "SRU_RiftHerald",
         "lol_core::attack::Attack": (
           range: 0.0,
           base_attack_speed: 0.5,

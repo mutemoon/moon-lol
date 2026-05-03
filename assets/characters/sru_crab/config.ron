@@ -8,7 +8,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/sru_crab/spells/Sru_CrabShrineStats.ron"),
+          spell: Path("characters/Sru_Crab/spells/Sru_CrabShrineStats.ron"),
           level: 1,
           slot: E,
           cooldown_mode: AfterCast,
@@ -23,7 +23,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/sru_crab/spells/Sru_CrabDashLong.ron"),
+          spell: Path("characters/Sru_Crab/spells/Sru_CrabDashLong.ron"),
           level: 1,
           slot: W,
           cooldown_mode: AfterCast,
@@ -38,7 +38,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/sru_crab/spells/Sru_CrabDash.ron"),
+          spell: Path("characters/Sru_Crab/spells/Sru_CrabDash.ron"),
           level: 1,
           slot: Q,
           cooldown_mode: AfterCast,
@@ -48,7 +48,7 @@
     ),
     4294967271: (
       components: {
-        "bevy_ecs::name::Name": "sru_crab",
+        "bevy_ecs::name::Name": "Sru_Crab",
         "lol_core::attack::Attack": (
           range: 0.0,
           base_attack_speed: 1.4285715,

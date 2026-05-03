@@ -8,7 +8,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/annie/spells/AnniePassive.ron"),
+          spell: Path("characters/Annie/spells/AnniePassive.ron"),
           level: 1,
           slot: Passive,
           cooldown_mode: AfterCast,
@@ -20,10 +20,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 130.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/annie/spells/AnnieR.ron"),
+          spell: Path("characters/Annie/spells/AnnieR.ron"),
           level: 1,
           slot: R,
           cooldown_mode: AfterCast,
@@ -38,7 +38,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/annie/spells/AnnieE.ron"),
+          spell: Path("characters/Annie/spells/AnnieE.ron"),
           level: 1,
           slot: E,
           cooldown_mode: AfterCast,
@@ -50,10 +50,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 7.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/annie/spells/AnnieW.ron"),
+          spell: Path("characters/Annie/spells/AnnieW.ron"),
           level: 1,
           slot: W,
           cooldown_mode: AfterCast,
@@ -65,10 +65,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 4.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/annie/spells/AnnieQ.ron"),
+          spell: Path("characters/Annie/spells/AnnieQ.ron"),
           level: 1,
           slot: Q,
           cooldown_mode: AfterCast,
@@ -78,7 +78,7 @@
     ),
     4294967271: (
       components: {
-        "bevy_ecs::name::Name": "annie",
+        "bevy_ecs::name::Name": "Annie",
         "lol_core::attack::Attack": (
           range: 625.0,
           base_attack_speed: 1.4285715,

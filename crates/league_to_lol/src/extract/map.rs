@@ -36,28 +36,14 @@ pub struct MapExtractResult {
 pub fn extract_phase_1_create_loader(game_path: &str) -> LeagueLoader {
     println!("[1/7] Phase 1: 扫描 WAD 文件并创建 Loader...");
 
-    let mut champion_wad_files = Vec::new();
-    let champions_path = std::path::Path::new(game_path).join("DATA/FINAL/Champions");
-    if let Ok(entries) = std::fs::read_dir(&champions_path) {
-        for entry in entries.flatten() {
-            let path = entry.path();
-            if let Some(name) = path.file_name().and_then(|s| s.to_str()) {
-                if name.ends_with(".wad.client") && !name.contains('_') {
-                    champion_wad_files.push(format!("DATA/FINAL/Champions/{}", name));
-                }
-            }
-        }
-    }
-
-    let mut wad_files: Vec<&str> = vec![
+    let wad_files: Vec<&str> = vec![
         "DATA/FINAL/UI.wad.client",
         "DATA/FINAL/UI.zh_CN.wad.client",
         "DATA/FINAL/Maps/Shipping/Map11.wad.client",
         "DATA/FINAL/Bootstrap.windows.wad.client",
     ];
-    wad_files.extend(champion_wad_files.iter().map(|s| s.as_str()));
 
-    LeagueLoader::from_relative_path(game_path, wad_files)
+    LeagueLoader::from_relative_path(game_path, wad_files).with_all_champions()
 }
 
 /// Phase 2: 提取所有英雄
@@ -81,7 +67,7 @@ pub fn extract_phase_2_champions(loader: &LeagueLoader, hashes: &HashMap<u32, St
             let path = entry.path();
             let file_name = path.file_name()?.to_str()?;
             if file_name.ends_with(".wad.client") && !file_name.contains('_') {
-                Some(file_name.trim_end_matches(".wad.client").to_lowercase())
+                Some(file_name.trim_end_matches(".wad.client").to_string())
             } else {
                 None
             }
@@ -219,11 +205,10 @@ pub fn extract_phase_3_map_chunks(
                             .skin
                             .split('/')
                             .last()
-                            .unwrap_or("skin0")
-                            .to_lowercase();
+                            .unwrap_or("skin0");
 
                         map_character_records
-                            .entry(character_name.to_lowercase())
+                            .entry(character_name.to_string())
                             .or_insert_with(Vec::new)
                             .push(ChampionRecordData {
                                 char_record_path: unk0xad65d8c4.character.character_record.clone(),

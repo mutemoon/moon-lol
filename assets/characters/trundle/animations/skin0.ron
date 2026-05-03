@@ -1,5 +1,5 @@
 (
-    gltf_path: "characters/trundle/skins/skin0.glb",
+    gltf_path: "characters/Trundle/skins/skin0.glb",
     hash_to_node: {
         "2013Dance": Clip(
             node_index: 19,

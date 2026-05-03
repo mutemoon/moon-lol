@@ -1,5 +1,5 @@
 (
-    gltf_path: "characters/jarvaniv/skins/skin0.glb",
+    gltf_path: "characters/JarvanIV/skins/skin0.glb",
     hash_to_node: {
         "Attack": Selector(
             probably_nodes: [
