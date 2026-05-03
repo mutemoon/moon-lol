@@ -5,10 +5,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 9.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/karma/spells/KarmaPassive.ron"),
+          spell: Path("characters/Karma/spells/KarmaPassive.ron"),
           level: 1,
           slot: Passive,
           cooldown_mode: AfterCast,
@@ -20,10 +20,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 40.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/karma/spells/KarmaMantra.ron"),
+          spell: Path("characters/Karma/spells/KarmaMantra.ron"),
           level: 1,
           slot: R,
           cooldown_mode: AfterCast,
@@ -35,10 +35,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 10.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/karma/spells/KarmaSolKimShield.ron"),
+          spell: Path("characters/Karma/spells/KarmaSolKimShield.ron"),
           level: 1,
           slot: E,
           cooldown_mode: AfterCast,
@@ -50,10 +50,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 12.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/karma/spells/KarmaSpiritBind.ron"),
+          spell: Path("characters/Karma/spells/KarmaSpiritBind.ron"),
           level: 1,
           slot: W,
           cooldown_mode: AfterCast,
@@ -65,10 +65,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 9.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/karma/spells/KarmaQ.ron"),
+          spell: Path("characters/Karma/spells/KarmaQ.ron"),
           level: 1,
           slot: Q,
           cooldown_mode: AfterCast,
@@ -78,7 +78,7 @@
     ),
     4294967271: (
       components: {
-        "bevy_ecs::name::Name": "karma",
+        "bevy_ecs::name::Name": "Karma",
         "lol_core::attack::Attack": (
           range: 525.0,
           base_attack_speed: 1.4285715,

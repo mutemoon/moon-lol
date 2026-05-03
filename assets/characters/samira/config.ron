@@ -8,7 +8,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/samira/spells/SamiraPassive.ron"),
+          spell: Path("characters/Samira/spells/SamiraPassive.ron"),
           level: 1,
           slot: Passive,
           cooldown_mode: AfterCast,
@@ -20,10 +20,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 5.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/samira/spells/SamiraR.ron"),
+          spell: Path("characters/Samira/spells/SamiraR.ron"),
           level: 1,
           slot: R,
           cooldown_mode: AfterCast,
@@ -35,10 +35,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 22.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/samira/spells/SamiraE.ron"),
+          spell: Path("characters/Samira/spells/SamiraE.ron"),
           level: 1,
           slot: E,
           cooldown_mode: AfterCast,
@@ -50,10 +50,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 30.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/samira/spells/SamiraW.ron"),
+          spell: Path("characters/Samira/spells/SamiraW.ron"),
           level: 1,
           slot: W,
           cooldown_mode: AfterCast,
@@ -65,10 +65,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 6.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/samira/spells/SamiraQ.ron"),
+          spell: Path("characters/Samira/spells/SamiraQ.ron"),
           level: 1,
           slot: Q,
           cooldown_mode: AfterCast,
@@ -78,7 +78,7 @@
     ),
     4294967271: (
       components: {
-        "bevy_ecs::name::Name": "samira",
+        "bevy_ecs::name::Name": "Samira",
         "lol_core::attack::Attack": (
           range: 800.0,
           base_attack_speed: 1.4285715,

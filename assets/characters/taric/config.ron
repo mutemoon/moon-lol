@@ -8,7 +8,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/taric/spells/TaricPassive.ron"),
+          spell: Path("characters/Taric/spells/TaricPassive.ron"),
           level: 1,
           slot: Passive,
           cooldown_mode: AfterCast,
@@ -20,10 +20,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 210.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/taric/spells/TaricR.ron"),
+          spell: Path("characters/Taric/spells/TaricR.ron"),
           level: 1,
           slot: R,
           cooldown_mode: AfterCast,
@@ -35,10 +35,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 17.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/taric/spells/TaricE.ron"),
+          spell: Path("characters/Taric/spells/TaricE.ron"),
           level: 1,
           slot: E,
           cooldown_mode: AfterCast,
@@ -50,10 +50,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 15.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/taric/spells/TaricW.ron"),
+          spell: Path("characters/Taric/spells/TaricW.ron"),
           level: 1,
           slot: W,
           cooldown_mode: AfterCast,
@@ -65,10 +65,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 3.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/taric/spells/TaricQ.ron"),
+          spell: Path("characters/Taric/spells/TaricQ.ron"),
           level: 1,
           slot: Q,
           cooldown_mode: AfterCast,
@@ -78,7 +78,7 @@
     ),
     4294967271: (
       components: {
-        "bevy_ecs::name::Name": "taric",
+        "bevy_ecs::name::Name": "Taric",
         "lol_core::attack::Attack": (
           range: 350.0,
           base_attack_speed: 1.4285715,

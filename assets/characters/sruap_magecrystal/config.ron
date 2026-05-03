@@ -3,7 +3,7 @@
   entities: {
     4294967271: (
       components: {
-        "bevy_ecs::name::Name": "sruap_magecrystal",
+        "bevy_ecs::name::Name": "SRUAP_MageCrystal",
         "lol_core::attack::Attack": (
           range: 1250.0,
           base_attack_speed: 1.4285715,

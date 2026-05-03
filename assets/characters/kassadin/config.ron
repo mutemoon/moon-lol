@@ -8,7 +8,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/kassadin/spells/VoidStone.ron"),
+          spell: Path("characters/Kassadin/spells/VoidStone.ron"),
           level: 1,
           slot: Passive,
           cooldown_mode: AfterCast,
@@ -20,10 +20,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 5.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/kassadin/spells/RiftWalk.ron"),
+          spell: Path("characters/Kassadin/spells/RiftWalk.ron"),
           level: 1,
           slot: R,
           cooldown_mode: AfterCast,
@@ -35,10 +35,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 22.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/kassadin/spells/ForcePulse.ron"),
+          spell: Path("characters/Kassadin/spells/ForcePulse.ron"),
           level: 1,
           slot: E,
           cooldown_mode: AfterCast,
@@ -50,10 +50,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 7.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/kassadin/spells/NetherBlade.ron"),
+          spell: Path("characters/Kassadin/spells/NetherBlade.ron"),
           level: 1,
           slot: W,
           cooldown_mode: AfterCast,
@@ -65,10 +65,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 10.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/kassadin/spells/NullLance.ron"),
+          spell: Path("characters/Kassadin/spells/NullLance.ron"),
           level: 1,
           slot: Q,
           cooldown_mode: AfterCast,
@@ -78,7 +78,7 @@
     ),
     4294967271: (
       components: {
-        "bevy_ecs::name::Name": "kassadin",
+        "bevy_ecs::name::Name": "Kassadin",
         "lol_core::attack::Attack": (
           range: 400.0,
           base_attack_speed: 1.4285715,

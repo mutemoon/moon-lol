@@ -5,10 +5,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 20.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/monkeyking/spells/MonkeyKingPassive.ron"),
+          spell: Path("characters/MonkeyKing/spells/MonkeyKingPassive.ron"),
           level: 1,
           slot: Passive,
           cooldown_mode: AfterCast,
@@ -20,10 +20,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 10.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/monkeyking/spells/MonkeyKingSpinToWin.ron"),
+          spell: Path("characters/MonkeyKing/spells/MonkeyKingSpinToWin.ron"),
           level: 1,
           slot: R,
           cooldown_mode: AfterCast,
@@ -35,10 +35,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 10.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/monkeyking/spells/MonkeyKingNimbus.ron"),
+          spell: Path("characters/MonkeyKing/spells/MonkeyKingNimbus.ron"),
           level: 1,
           slot: E,
           cooldown_mode: AfterCast,
@@ -50,10 +50,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 22.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/monkeyking/spells/MonkeyKingDecoy.ron"),
+          spell: Path("characters/MonkeyKing/spells/MonkeyKingDecoy.ron"),
           level: 1,
           slot: W,
           cooldown_mode: AfterCast,
@@ -65,10 +65,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 8.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/monkeyking/spells/MonkeyKingDoubleAttack.ron"),
+          spell: Path("characters/MonkeyKing/spells/MonkeyKingDoubleAttack.ron"),
           level: 1,
           slot: Q,
           cooldown_mode: AfterCast,
@@ -78,7 +78,7 @@
     ),
     4294967271: (
       components: {
-        "bevy_ecs::name::Name": "monkeyking",
+        "bevy_ecs::name::Name": "MonkeyKing",
         "lol_core::attack::Attack": (
           range: 600.0,
           base_attack_speed: 1.4285715,

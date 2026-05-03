@@ -3,7 +3,7 @@
   entities: {
     4294967271: (
       components: {
-        "bevy_ecs::name::Name": "sru_razorbeak",
+        "bevy_ecs::name::Name": "SRU_Razorbeak",
         "lol_core::attack::Attack": (
           range: 0.0,
           base_attack_speed: 0.6666667,

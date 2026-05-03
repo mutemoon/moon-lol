@@ -8,7 +8,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/katarina/spells/KatarinaPassive.ron"),
+          spell: Path("characters/Katarina/spells/KatarinaPassive.ron"),
           level: 1,
           slot: Passive,
           cooldown_mode: AfterCast,
@@ -20,10 +20,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 75.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/katarina/spells/KatarinaR.ron"),
+          spell: Path("characters/Katarina/spells/KatarinaR.ron"),
           level: 1,
           slot: R,
           cooldown_mode: AfterCast,
@@ -35,10 +35,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 12.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/katarina/spells/KatarinaEWrapper.ron"),
+          spell: Path("characters/Katarina/spells/KatarinaEWrapper.ron"),
           level: 1,
           slot: E,
           cooldown_mode: AfterCast,
@@ -50,10 +50,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 16.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/katarina/spells/KatarinaW.ron"),
+          spell: Path("characters/Katarina/spells/KatarinaW.ron"),
           level: 1,
           slot: W,
           cooldown_mode: AfterCast,
@@ -65,10 +65,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 12.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/katarina/spells/KatarinaQ.ron"),
+          spell: Path("characters/Katarina/spells/KatarinaQ.ron"),
           level: 1,
           slot: Q,
           cooldown_mode: AfterCast,
@@ -78,7 +78,7 @@
     ),
     4294967271: (
       components: {
-        "bevy_ecs::name::Name": "katarina",
+        "bevy_ecs::name::Name": "Katarina",
         "lol_core::attack::Attack": (
           range: 400.0,
           base_attack_speed: 1.4285715,

@@ -8,7 +8,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/rammus/spells/RammusP.ron"),
+          spell: Path("characters/Rammus/spells/RammusP.ron"),
           level: 1,
           slot: Passive,
           cooldown_mode: AfterCast,
@@ -20,10 +20,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 120.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/rammus/spells/Tremors2.ron"),
+          spell: Path("characters/Rammus/spells/Tremors2.ron"),
           level: 1,
           slot: R,
           cooldown_mode: AfterCast,
@@ -35,10 +35,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 12.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/rammus/spells/PuncturingTaunt.ron"),
+          spell: Path("characters/Rammus/spells/PuncturingTaunt.ron"),
           level: 1,
           slot: E,
           cooldown_mode: AfterCast,
@@ -50,10 +50,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 7.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/rammus/spells/DefensiveBallCurl.ron"),
+          spell: Path("characters/Rammus/spells/DefensiveBallCurl.ron"),
           level: 1,
           slot: W,
           cooldown_mode: AfterCast,
@@ -65,10 +65,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 12.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/rammus/spells/PowerBall.ron"),
+          spell: Path("characters/Rammus/spells/PowerBall.ron"),
           level: 1,
           slot: Q,
           cooldown_mode: AfterCast,
@@ -78,7 +78,7 @@
     ),
     4294967271: (
       components: {
-        "bevy_ecs::name::Name": "rammus",
+        "bevy_ecs::name::Name": "Rammus",
         "lol_core::attack::Attack": (
           range: 600.0,
           base_attack_speed: 1.4285715,

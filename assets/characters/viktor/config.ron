@@ -8,7 +8,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/viktor/spells/ViktorPassive.ron"),
+          spell: Path("characters/Viktor/spells/ViktorPassive.ron"),
           level: 1,
           slot: Passive,
           cooldown_mode: AfterCast,
@@ -23,7 +23,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/viktor/spells/ViktorR.ron"),
+          spell: Path("characters/Viktor/spells/ViktorR.ron"),
           level: 1,
           slot: R,
           cooldown_mode: AfterCast,
@@ -35,10 +35,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 12.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/viktor/spells/ViktorE.ron"),
+          spell: Path("characters/Viktor/spells/ViktorE.ron"),
           level: 1,
           slot: E,
           cooldown_mode: AfterCast,
@@ -50,10 +50,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 18.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/viktor/spells/ViktorW.ron"),
+          spell: Path("characters/Viktor/spells/ViktorW.ron"),
           level: 1,
           slot: W,
           cooldown_mode: AfterCast,
@@ -65,10 +65,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 9.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/viktor/spells/ViktorQ.ron"),
+          spell: Path("characters/Viktor/spells/ViktorQ.ron"),
           level: 1,
           slot: Q,
           cooldown_mode: AfterCast,
@@ -78,7 +78,7 @@
     ),
     4294967271: (
       components: {
-        "bevy_ecs::name::Name": "viktor",
+        "bevy_ecs::name::Name": "Viktor",
         "lol_core::attack::Attack": (
           range: 525.0,
           base_attack_speed: 1.4285715,

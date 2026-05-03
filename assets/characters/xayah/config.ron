@@ -8,7 +8,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/xayah/spells/XayahPassive.ron"),
+          spell: Path("characters/Xayah/spells/XayahPassive.ron"),
           level: 1,
           slot: Passive,
           cooldown_mode: AfterCast,
@@ -20,10 +20,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 160.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/xayah/spells/XayahR.ron"),
+          spell: Path("characters/Xayah/spells/XayahR.ron"),
           level: 1,
           slot: R,
           cooldown_mode: AfterCast,
@@ -35,10 +35,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 12.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/xayah/spells/XayahE.ron"),
+          spell: Path("characters/Xayah/spells/XayahE.ron"),
           level: 1,
           slot: E,
           cooldown_mode: AfterCast,
@@ -50,10 +50,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 20.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/xayah/spells/XayahW.ron"),
+          spell: Path("characters/Xayah/spells/XayahW.ron"),
           level: 1,
           slot: W,
           cooldown_mode: AfterCast,
@@ -65,10 +65,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 10.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/xayah/spells/XayahQ.ron"),
+          spell: Path("characters/Xayah/spells/XayahQ.ron"),
           level: 1,
           slot: Q,
           cooldown_mode: AfterCast,
@@ -78,7 +78,7 @@
     ),
     4294967271: (
       components: {
-        "bevy_ecs::name::Name": "xayah",
+        "bevy_ecs::name::Name": "Xayah",
         "lol_core::attack::Attack": (
           range: 800.0,
           base_attack_speed: 0.625,

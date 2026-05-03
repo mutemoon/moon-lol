@@ -82,7 +82,8 @@ pub struct AbilityResourceSlotInfo {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct AboveHealthPercentCastRequirement {
-    pub data_value: u32,
+    pub data_value: Option<u32>,
+    pub m_current_percent_health: Option<f32>,
     pub m_invert_result: bool,
 }
 
@@ -369,6 +370,13 @@ pub struct ByCharLevelInterpolationCalculationPart {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
+pub struct ByItemEpicnessCountCalculationPart {
+    pub coefficient: Option<f32>,
+    pub epicness: u8,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct Cast {
     pub roll_for_critical_hit_result: Option<bool>,
 }
@@ -626,7 +634,7 @@ pub struct CharacterToolData {
 #[serde(rename_all = "camelCase")]
 pub struct CircleMovement {
     pub m_angular_velocity: Option<f32>,
-    pub m_lifetime: f32,
+    pub m_lifetime: Option<f32>,
     pub m_linear_velocity: Option<f32>,
     pub m_start_bone_name: String,
 }
@@ -885,6 +893,7 @@ pub enum EnumAbilityResourceByCoefficientCalculationPart {
     ByCharLevelBreakpointsCalculationPart(ByCharLevelBreakpointsCalculationPart),
     ByCharLevelFormulaCalculationPart(ByCharLevelFormulaCalculationPart),
     ByCharLevelInterpolationCalculationPart(ByCharLevelInterpolationCalculationPart),
+    ByItemEpicnessCountCalculationPart(ByItemEpicnessCountCalculationPart),
     ClampSubPartsCalculationPart(ClampSubPartsCalculationPart),
     CooldownMultiplierCalculationPart,
     EffectValueCalculationPart(EffectValueCalculationPart),
@@ -920,11 +929,18 @@ pub enum EnumAboveHealthPercentCastRequirement {
     HasNNearbyVisibleUnitsRequirement(HasNNearbyVisibleUnitsRequirement),
     HasTypeAndStatusFlags(HasTypeAndStatusFlags),
     HasUnitTagsCastRequirement(HasUnitTagsCastRequirement),
+    IsRangedCastRequirement,
     IsSpecifiedUnitCastRequirement(IsSpecifiedUnitCastRequirement),
+    ItemSlotHasChargesCastRequirement,
     SameTeamCastRequirement(SameTeamCastRequirement),
     SpellSlotEqualOrGreaterThanLevelRequirement(SpellSlotEqualOrGreaterThanLevelRequirement),
+    TargetIsWithinNDistanceOfCaster(TargetIsWithinNDistanceOfCaster),
     Unk0x303c66f4(Unk0x303c66f4),
+    Unk0x43b8e695(Unk0x43b8e695),
+    Unk0x89ea8a95(Unk0x89ea8a95),
+    Unk0xbf62176c(Unk0xbf62176c),
     Unk0xe2ef74d0(Unk0xe2ef74d0),
+    Unk0xea1f541a,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -944,6 +960,7 @@ pub enum EnumArea {
     Location,
     LocationClamped,
     MySelf,
+    NudgeIntoBrush,
     SelfAoe,
     Target(Target),
     TargetOrLocation,
@@ -1113,6 +1130,7 @@ pub enum EnumGameCalculation {
     GameCalculation(GameCalculation),
     GameCalculationConditional(GameCalculationConditional),
     GameCalculationModified(GameCalculationModified),
+    Unk0xe9a3c91d(Unk0xe9a3c91d),
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -1460,6 +1478,7 @@ pub struct FixedSpeedSplineMovement {
     pub m_speed: f32,
     pub m_spline_info: HermiteSplineInfo,
     pub m_start_bone_name: Option<String>,
+    pub m_start_bone_skin_overrides: Option<BTreeMap<u32, String>>,
     pub m_target_bone_name: Option<String>,
     pub m_target_height_augment: Option<f32>,
     pub m_tracks_target: Option<bool>,
@@ -1488,10 +1507,12 @@ pub struct FixedTimeMovement {
 #[serde(rename_all = "camelCase")]
 pub struct FixedTimeSplineMovement {
     pub m_spline_info: HermiteSplineInfo,
-    pub m_start_bone_name: String,
+    pub m_start_bone_name: Option<String>,
+    pub m_start_bone_skin_overrides: Option<BTreeMap<u32, String>>,
     pub m_target_bone_name: Option<String>,
     pub m_target_height_augment: Option<f32>,
     pub m_travel_time: f32,
+    pub m_use_height_offset_at_end: Option<bool>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -1518,6 +1539,7 @@ pub struct FlexValueVector2 {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct FlexValueVector3 {
+    pub m_flex_id: Option<u32>,
     pub m_value: Option<ValueVector3>,
 }
 
@@ -1711,7 +1733,7 @@ pub struct HasNNearbyUnitsRequirement {
 pub struct HasNNearbyVisibleUnitsRequirement {
     pub m_distance_type: Option<u32>,
     pub m_range: f32,
-    pub m_units_required: u32,
+    pub m_units_required: Option<u32>,
     pub m_units_requirements: Vec<Box<EnumAboveHealthPercentCastRequirement>>,
     pub unk_0x990ecf03: Option<bool>,
 }
@@ -1725,6 +1747,7 @@ pub struct HasTypeAndStatusFlags {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct HasUnitTagsCastRequirement {
+    pub m_invert_result: Option<bool>,
     pub m_unit_tags: ObjectTags,
 }
 
@@ -1951,6 +1974,139 @@ pub struct IsCastingBoolDriver {
 pub struct IsSpecifiedUnitCastRequirement {
     pub m_invert_result: Option<bool>,
     pub m_unit: u32,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, Asset, TypePath)]
+#[serde(rename_all = "camelCase")]
+pub struct ItemData {
+    pub clear_undo_history: Option<u8>,
+    pub clickable: Option<bool>,
+    pub consume_on_acquire: Option<bool>,
+    pub consumed: Option<bool>,
+    pub data_values_mode_override: Option<BTreeMap<u32, ItemDataValues>>,
+    pub epicness: Option<u8>,
+    pub flat_mp_pool_mod: Option<f32>,
+    pub flat_mp_regen_mod: Option<f32>,
+    pub item_id: u32,
+    pub item_vo_group: Option<u32>,
+    pub last_major_change_major_patch_version: Option<u8>,
+    pub last_major_change_minor_patch_version: Option<u8>,
+    pub m_ability_haste_mod: Option<f32>,
+    pub m_can_be_sold: Option<bool>,
+    pub m_categories: Option<Vec<String>>,
+    pub m_cooldown_show_disabled_duration: Option<f32>,
+    pub m_data_values: Option<Vec<ItemDataValue>>,
+    pub m_death_recap_name: Option<String>,
+    pub m_disabled_description_override: Option<String>,
+    pub m_display_name: Option<String>,
+    pub m_effect_amount: Option<Vec<f32>>,
+    pub m_effect_by_level_amount: Option<Vec<f32>>,
+    pub m_flat_armor_mod: Option<f32>,
+    pub m_flat_armor_penetration_mod: Option<f32>,
+    pub m_flat_attack_range_mod: Option<f32>,
+    pub m_flat_crit_chance_mod: Option<f32>,
+    pub m_flat_crit_damage_mod: Option<f32>,
+    pub m_flat_hp_pool_mod: Option<f32>,
+    pub m_flat_hp_regen_mod: Option<f32>,
+    pub m_flat_magic_damage_mod: Option<f32>,
+    pub m_flat_magic_penetration_mod: Option<f32>,
+    pub m_flat_movement_speed_mod: Option<f32>,
+    pub m_flat_physical_damage_mod: Option<f32>,
+    pub m_flat_spell_block_mod: Option<f32>,
+    pub m_hidden_from_opponents: Option<bool>,
+    pub m_item_advice_attributes: Option<Vec<u32>>,
+    pub m_item_attributes: Option<Vec<u8>>,
+    pub m_item_calculations: Option<BTreeMap<u32, EnumGameCalculation>>,
+    pub m_item_callout_player: Option<bool>,
+    pub m_item_callout_spectator: Option<bool>,
+    pub m_item_data_availability: Option<ItemDataAvailability>,
+    pub m_item_data_build: Option<ItemDataBuild>,
+    pub m_item_data_client: ItemDataClient,
+    pub m_item_groups: Vec<u32>,
+    pub m_item_modifiers: Option<Vec<u32>>,
+    pub m_percent_armor_penetration_mod: Option<f32>,
+    pub m_percent_attack_speed_mod: Option<f32>,
+    pub m_percent_base_hp_regen_mod: Option<f32>,
+    pub m_percent_healing_amount_mod: Option<f32>,
+    pub m_percent_life_steal_mod: Option<f32>,
+    pub m_percent_magic_penetration_mod: Option<f32>,
+    pub m_percent_movement_speed_mod: Option<f32>,
+    pub m_percent_multiplicative_attack_speed_mod: Option<f32>,
+    pub m_percent_slow_resist_mod: Option<f32>,
+    pub m_percent_tenacity_item_mod: Option<f32>,
+    pub m_required_buff_currency_cost: Option<i32>,
+    pub m_required_buff_currency_name: Option<String>,
+    pub m_required_champion: Option<String>,
+    pub m_required_level: Option<i32>,
+    pub m_required_purchase_identities: Option<Vec<u32>>,
+    pub m_required_spell_name: Option<String>,
+    pub m_scripts: Option<Vec<String>>,
+    pub m_vfx_resource_resolver: Option<ResourceResolver>,
+    pub max_stack: Option<i32>,
+    pub percent_base_mp_regen_mod: Option<f32>,
+    pub percent_omni_vamp_mod: Option<f32>,
+    pub physical_lethality: Option<f32>,
+    pub price: Option<i32>,
+    pub recipe_item_links: Option<Vec<u32>>,
+    pub recommendation_tags: Option<Vec<u32>>,
+    pub required_item_links: Option<Vec<u32>>,
+    pub restricted_buff_name: Option<String>,
+    pub secondary_epicness: Option<u8>,
+    pub sell_back_modifier: Option<f32>,
+    pub shop_order_priority: Option<u8>,
+    pub show_cooldown_in_pings: Option<bool>,
+    pub show_cooldown_vfx_to_allies: Option<bool>,
+    pub sidegrade_item_links: Option<Vec<u32>>,
+    pub special_recipe: Option<u32>,
+    pub spell_name: Option<String>,
+    pub string_calculations: Option<BTreeMap<u32, Unk0x4750ceb6>>,
+    pub unk_0x4f958685: Option<u32>,
+    pub unk_0x582c6f60: Option<Vec<u32>>,
+    pub unk_0xfe87f21e: Option<Vec<Unk0xfe87f21e>>,
+    pub usable_in_store: Option<bool>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct ItemDataAvailability {
+    pub m_force_load: Option<bool>,
+    pub m_hidefrom_all: Option<bool>,
+    pub m_in_store: Option<bool>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct ItemDataBuild {
+    pub item_links: Vec<u32>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct ItemDataClient {
+    pub effect_radius: Option<f32>,
+    pub epicness: Option<u8>,
+    pub inventory_icon: String,
+    pub inventory_icon_large: Option<String>,
+    pub inventory_icon_material: Option<u32>,
+    pub inventory_icon_small: Option<String>,
+    pub m_description: Option<String>,
+    pub m_dynamic_tooltip: Option<String>,
+    pub m_float_vars_decimals: Option<Vec<i32>>,
+    pub m_shop_tooltip: Option<String>,
+    pub m_tooltip_data: Option<TooltipInstanceItem>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct ItemDataValue {
+    pub m_name: String,
+    pub m_value: Option<f32>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct ItemDataValues {
+    pub data_values: Vec<ItemDataValue>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -2266,7 +2422,7 @@ pub struct MissileSpecification {
     pub height_solver: Option<EnumHeightSolver>,
     pub m_missile_width: Option<f32>,
     pub missile_group_spawners: Option<Vec<MissileGroupSpawnerSpec>>,
-    pub movement_component: EnumMovement,
+    pub movement_component: Option<EnumMovement>,
     pub unk_0xc195fba6: Option<bool>,
     pub vertical_facing: Option<EnumFacing>,
     pub visibility_component: Option<EnumDefaultvisibility>,
@@ -2855,6 +3011,7 @@ pub struct SpellDataResource {
     pub m_ammo_not_affected_by_cdr: Option<bool>,
     pub m_ammo_recharge_time: Option<Vec<f32>>,
     pub m_ammo_used: Option<Vec<i32>>,
+    pub m_animation_lead_out_name: Option<String>,
     pub m_animation_loop_name: Option<String>,
     pub m_animation_name: Option<String>,
     pub m_animation_winddown_name: Option<String>,
@@ -2923,6 +3080,7 @@ pub struct SpellDataResource {
     pub m_minimap_icon_name: Option<String>,
     pub m_minimap_icon_rotation: Option<bool>,
     pub m_missile_effect_enemy_key: Option<u32>,
+    pub m_missile_effect_enemy_name: Option<String>,
     pub m_missile_effect_key: Option<u32>,
     pub m_missile_effect_name: Option<String>,
     pub m_missile_effect_player_key: Option<u32>,
@@ -2980,6 +3138,7 @@ pub struct SpellDataResource {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct SpellDataResourceClient {
+    pub add_additional_reticle_if_required_for_game_mode: Option<bool>,
     pub m_custom_targeter_definitions: Option<BTreeMap<u32, CustomTargeterDefinitions>>,
     pub m_left_click_spell_action: Option<u32>,
     pub m_missile_targeter_definitions: Option<Vec<MissileAttachedTargetingDefinition>>,
@@ -3152,6 +3311,7 @@ pub struct StaticMaterialPassDef {
     pub stencil_compare_func: Option<u32>,
     pub stencil_enable: Option<bool>,
     pub stencil_mask: Option<u32>,
+    pub stencil_reference_id: Option<u32>,
     pub stencil_reference_val: Option<u8>,
     pub winding_to_cull: Option<u32>,
     pub write_mask: Option<u32>,
@@ -3304,6 +3464,13 @@ pub struct Target {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
+pub struct TargetIsWithinNDistanceOfCaster {
+    pub distance: f32,
+    pub m_invert_result: bool,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct TargetLaserComponentEffects {
     pub beam_effect_definition: SkinCharacterDataPropertiesCharacterIdleEffect,
     pub champ_targeting_effect_definition: Option<SkinCharacterDataPropertiesCharacterIdleEffect>,
@@ -3369,6 +3536,8 @@ pub struct TargeterDefinitionLine {
     pub m_center_arrow_to_end_point: Option<bool>,
     pub m_fade_behavior: Option<FadeOverTimeBehavior>,
     pub max_angle: Option<f32>,
+    pub max_angle_range_factor: Option<f32>,
+    pub min_angle_range_factor: Option<f32>,
     pub minimum_displayed_range: Option<f32>,
     pub override_base_range: Option<FloatPerSpellLevel>,
     pub range_growth_duration: Option<FloatPerSpellLevel>,
@@ -3456,6 +3625,7 @@ pub struct TargeterDefinitionWall {
 pub struct TargetingForgivenessDefinitions {
     pub caster_forgiveness_definitions: Option<Vec<SameTeamCastRequirement>>,
     pub forgiveness_range: f32,
+    pub m_affects_status_override: Option<u32>,
     pub m_affects_type_override: Option<u32>,
     pub override_affects_flags: Option<bool>,
     pub target_forgiveness_definitions: Option<Vec<EnumAboveHealthPercentCastRequirement>>,
@@ -3591,6 +3761,16 @@ pub struct ToolSpellDesc {
 pub struct TooltipInstanceBuff {
     pub m_format: u32,
     pub m_loc_keys: Option<BTreeMap<String, String>>,
+    pub m_object_name: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct TooltipInstanceItem {
+    pub enable_extended_tooltip: Option<bool>,
+    pub m_format: u32,
+    pub m_lists: BTreeMap<String, TooltipInstanceList>,
+    pub m_loc_keys: BTreeMap<String, String>,
     pub m_object_name: String,
 }
 
@@ -4058,6 +4238,21 @@ pub struct Unk0x3df230bf {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
+pub struct Unk0x43b8e695 {
+    pub m_invert_result: bool,
+    pub unk_0x6166b756: u32,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct Unk0x4750ceb6 {
+    pub default_result: String,
+    pub melee_result: String,
+    pub ranged_result: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct Unk0x47f13ab0 {
     pub unk_0xcf19cb5d: Unk0x770f7888,
     pub unk_0xe4f7105d: u32,
@@ -4074,7 +4269,7 @@ pub struct Unk0x4a70b12c {
 #[serde(rename_all = "camelCase")]
 pub struct Unk0x4ce08984 {
     pub unk_0x91d404a5: u32,
-    pub unk_0x9823b29a: Vec<Unk0x333530c>,
+    pub unk_0x9823b29a: Option<Vec<Unk0x333530c>>,
     pub unk_0xbbd778a2: u32,
 }
 
@@ -4244,6 +4439,12 @@ pub struct Unk0x8958fee2 {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
+pub struct Unk0x89ea8a95 {
+    pub m_invert_result: bool,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct Unk0x8a533844 {
     pub name: u32,
     pub tags: Option<Vec<u32>>,
@@ -4377,6 +4578,13 @@ pub struct Unk0xba138ae3 {
     pub name: u32,
     pub team: Option<Unk0x1b1b0d1a>,
     pub transform: Mat4,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct Unk0xbf62176c {
+    pub unk_0xd6b6109c: u32,
+    pub unk_0xfbd4eefd: u8,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -4553,6 +4761,17 @@ pub struct Unk0xe7ee4f28 {
 pub struct Unk0xe90af953 {
     pub buff: u32,
     pub unk_0xbe161d6e: u8,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct Unk0xe9a3c91d {
+    pub m_display_as_percent: Option<bool>,
+    pub m_expanded_tooltip_calculation_display: Option<u8>,
+    pub m_formula_parts: Vec<EnumAbilityResourceByCoefficientCalculationPart>,
+    pub m_precision: Option<i32>,
+    pub m_ranged_multiplier: EnumAbilityResourceByCoefficientCalculationPart,
+    pub m_simple_tooltip_calculation_display: Option<u8>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -4789,6 +5008,7 @@ pub struct VfxChildParticleSetDefinitionData {
 #[serde(rename_all = "camelCase")]
 pub struct VfxColorOverLifeMaterialDriver {
     pub colors: VfxAnimatedColorVariableData,
+    pub frequency: Option<u8>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

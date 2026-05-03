@@ -8,7 +8,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/ezreal/spells/EzrealPassive.ron"),
+          spell: Path("characters/Ezreal/spells/EzrealPassive.ron"),
           level: 1,
           slot: Passive,
           cooldown_mode: AfterCast,
@@ -20,10 +20,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 10.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/ezreal/spells/EzrealR.ron"),
+          spell: Path("characters/Ezreal/spells/EzrealR.ron"),
           level: 1,
           slot: R,
           cooldown_mode: AfterCast,
@@ -35,10 +35,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 26.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/ezreal/spells/EzrealE.ron"),
+          spell: Path("characters/Ezreal/spells/EzrealE.ron"),
           level: 1,
           slot: E,
           cooldown_mode: AfterCast,
@@ -50,10 +50,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 8.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/ezreal/spells/EzrealW.ron"),
+          spell: Path("characters/Ezreal/spells/EzrealW.ron"),
           level: 1,
           slot: W,
           cooldown_mode: AfterCast,
@@ -65,10 +65,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 5.75,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/ezreal/spells/EzrealQ.ron"),
+          spell: Path("characters/Ezreal/spells/EzrealQ.ron"),
           level: 1,
           slot: Q,
           cooldown_mode: AfterCast,
@@ -78,7 +78,7 @@
     ),
     4294967271: (
       components: {
-        "bevy_ecs::name::Name": "ezreal",
+        "bevy_ecs::name::Name": "Ezreal",
         "lol_core::attack::Attack": (
           range: 550.0,
           base_attack_speed: 1.4285715,

@@ -5,10 +5,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 32.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/diana/spells/DianaPassive.ron"),
+          spell: Path("characters/Diana/spells/DianaPassive.ron"),
           level: 1,
           slot: Passive,
           cooldown_mode: AfterCast,
@@ -20,10 +20,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 100.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/diana/spells/DianaR.ron"),
+          spell: Path("characters/Diana/spells/DianaR.ron"),
           level: 1,
           slot: R,
           cooldown_mode: AfterCast,
@@ -35,10 +35,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 22.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/diana/spells/DianaTeleport.ron"),
+          spell: Path("characters/Diana/spells/DianaTeleport.ron"),
           level: 1,
           slot: E,
           cooldown_mode: AfterCast,
@@ -50,10 +50,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 15.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/diana/spells/DianaOrbs.ron"),
+          spell: Path("characters/Diana/spells/DianaOrbs.ron"),
           level: 1,
           slot: W,
           cooldown_mode: AfterCast,
@@ -65,10 +65,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 8.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/diana/spells/DianaQ.ron"),
+          spell: Path("characters/Diana/spells/DianaQ.ron"),
           level: 1,
           slot: Q,
           cooldown_mode: AfterCast,
@@ -78,7 +78,7 @@
     ),
     4294967271: (
       components: {
-        "bevy_ecs::name::Name": "diana",
+        "bevy_ecs::name::Name": "Diana",
         "lol_core::attack::Attack": (
           range: 400.0,
           base_attack_speed: 1.4285715,

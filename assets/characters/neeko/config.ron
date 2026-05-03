@@ -8,7 +8,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/neeko/spells/NeekoPassive.ron"),
+          spell: Path("characters/Neeko/spells/NeekoPassive.ron"),
           level: 1,
           slot: Passive,
           cooldown_mode: AfterCast,
@@ -20,10 +20,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 120.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/neeko/spells/NeekoR.ron"),
+          spell: Path("characters/Neeko/spells/NeekoR.ron"),
           level: 1,
           slot: R,
           cooldown_mode: AfterCast,
@@ -35,10 +35,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 12.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/neeko/spells/NeekoE.ron"),
+          spell: Path("characters/Neeko/spells/NeekoE.ron"),
           level: 1,
           slot: E,
           cooldown_mode: AfterCast,
@@ -50,10 +50,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 16.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/neeko/spells/NeekoW.ron"),
+          spell: Path("characters/Neeko/spells/NeekoW.ron"),
           level: 1,
           slot: W,
           cooldown_mode: AfterCast,
@@ -65,10 +65,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 9.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/neeko/spells/NeekoQ.ron"),
+          spell: Path("characters/Neeko/spells/NeekoQ.ron"),
           level: 1,
           slot: Q,
           cooldown_mode: AfterCast,
@@ -78,7 +78,7 @@
     ),
     4294967271: (
       components: {
-        "bevy_ecs::name::Name": "neeko",
+        "bevy_ecs::name::Name": "Neeko",
         "lol_core::attack::Attack": (
           range: 600.0,
           base_attack_speed: 0.64516133,

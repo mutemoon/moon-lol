@@ -1,5 +1,5 @@
 use bevy::ecs::event::EntityEvent;
-use bevy::log::debug;
+use bevy::log::{debug, info};
 use bevy::prelude::{
     Assets, Commands, Entity, Fixed, On, Query, Res, ResMut, Time, Timer, TimerMode, warn,
 };
@@ -10,7 +10,7 @@ use super::events::{
     CommandSkillLevelUp, CommandSkillStart, EventSkillCast, SkillCastFailureReason, SkillCastLog,
     SkillCastRecord, SkillCastResult,
 };
-use super::{CoolDown, SkillPoints, Skills};
+use super::{CoolDown, SkillPoints, SkillRecastWindow, Skills};
 use crate::base::ability_resource::AbilityResource;
 use crate::base::level::{EventLevelUp, Level};
 use crate::skill::Skill;
@@ -24,7 +24,7 @@ fn push_skill_log(
     point: bevy::prelude::Vec2,
     result: SkillCastResult,
 ) {
-    debug!(
+    info!(
         "{:?}",
         SkillCastRecord {
             caster,
@@ -50,7 +50,7 @@ pub fn on_skill_cast(
     mut commands: Commands,
     skills: Query<&Skills>,
     res_assets_spell_object: Res<Assets<Spell>>,
-    mut q_skill: Query<(&Skill, &mut CoolDown)>,
+    mut q_skill: Query<(&Skill, &mut CoolDown, Option<&SkillRecastWindow>)>,
     mut q_ability_resource: Query<&mut AbilityResource>,
     mut log: ResMut<SkillCastLog>,
 ) {
@@ -79,7 +79,7 @@ pub fn on_skill_cast(
         );
         return;
     };
-    let Ok((skill, mut cooldown_state)) = q_skill.get_mut(skill_entity) else {
+    let Ok((skill, mut cooldown_state, recast_window)) = q_skill.get_mut(skill_entity) else {
         warn!(
             "skill_entity {:?} not found or missing Skill component",
             skill_entity
@@ -97,24 +97,31 @@ pub fn on_skill_cast(
         return;
     };
 
-    if let Some(ref timer) = cooldown_state.timer {
-        if !timer.is_finished() {
-            debug!(
-                "{} 技能 {} 冷却中，剩余 {:.2}s",
-                entity,
-                trigger.index,
-                timer.remaining_secs()
-            );
-            push_skill_log(
-                &mut log,
-                entity,
-                Some(skill_entity),
-                trigger.index,
-                Some(skill.slot),
-                trigger.point,
-                SkillCastResult::Failed(SkillCastFailureReason::CoolingDown),
-            );
-            return;
+    // Skip cooldown check if there's an active recast window (e.g., Riven Q stages)
+    let can_cast_despite_cooldown = recast_window
+        .map(|w| !w.timer.is_finished())
+        .unwrap_or(false);
+
+    if !can_cast_despite_cooldown {
+        if let Some(ref timer) = cooldown_state.timer {
+            if !timer.is_finished() {
+                debug!(
+                    "{} 技能 {} 冷却中，剩余 {:.2}s",
+                    entity,
+                    trigger.index,
+                    timer.remaining_secs()
+                );
+                push_skill_log(
+                    &mut log,
+                    entity,
+                    Some(skill_entity),
+                    trigger.index,
+                    Some(skill.slot),
+                    trigger.point,
+                    SkillCastResult::Failed(SkillCastFailureReason::CoolingDown),
+                );
+                return;
+            }
         }
     }
 

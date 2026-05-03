@@ -3,7 +3,7 @@
   entities: {
     4294967271: (
       components: {
-        "bevy_ecs::name::Name": "sru_gromp",
+        "bevy_ecs::name::Name": "SRU_Gromp",
         "lol_core::attack::Attack": (
           range: 0.0,
           base_attack_speed: 1.4285715,

@@ -8,7 +8,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/gnar/spells/GnarPassive.ron"),
+          spell: Path("characters/Gnar/spells/GnarPassive.ron"),
           level: 1,
           slot: Passive,
           cooldown_mode: AfterCast,
@@ -23,7 +23,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/gnar/spells/GnarR.ron"),
+          spell: Path("characters/Gnar/spells/GnarR.ron"),
           level: 1,
           slot: R,
           cooldown_mode: AfterCast,
@@ -35,10 +35,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 24.5,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/gnar/spells/GnarE.ron"),
+          spell: Path("characters/Gnar/spells/GnarE.ron"),
           level: 1,
           slot: E,
           cooldown_mode: AfterCast,
@@ -50,10 +50,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 7.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/gnar/spells/GnarW.ron"),
+          spell: Path("characters/Gnar/spells/GnarW.ron"),
           level: 1,
           slot: W,
           cooldown_mode: AfterCast,
@@ -65,10 +65,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 17.5,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/gnar/spells/GnarQ.ron"),
+          spell: Path("characters/Gnar/spells/GnarQ.ron"),
           level: 1,
           slot: Q,
           cooldown_mode: AfterCast,
@@ -78,7 +78,7 @@
     ),
     4294967271: (
       components: {
-        "bevy_ecs::name::Name": "gnar",
+        "bevy_ecs::name::Name": "Gnar",
         "lol_core::attack::Attack": (
           range: 600.0,
           base_attack_speed: 1.4285715,

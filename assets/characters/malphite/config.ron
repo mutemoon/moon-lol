@@ -8,7 +8,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/malphite/spells/MalphiteShield.ron"),
+          spell: Path("characters/Malphite/spells/MalphiteShield.ron"),
           level: 1,
           slot: Passive,
           cooldown_mode: AfterCast,
@@ -20,10 +20,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 130.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/malphite/spells/UFSlash.ron"),
+          spell: Path("characters/Malphite/spells/UFSlash.ron"),
           level: 1,
           slot: R,
           cooldown_mode: AfterCast,
@@ -35,10 +35,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 7.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/malphite/spells/Landslide.ron"),
+          spell: Path("characters/Malphite/spells/Landslide.ron"),
           level: 1,
           slot: E,
           cooldown_mode: AfterCast,
@@ -50,10 +50,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 10.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/malphite/spells/Obduracy.ron"),
+          spell: Path("characters/Malphite/spells/Obduracy.ron"),
           level: 1,
           slot: W,
           cooldown_mode: AfterCast,
@@ -65,10 +65,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 8.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/malphite/spells/SeismicShard.ron"),
+          spell: Path("characters/Malphite/spells/SeismicShard.ron"),
           level: 1,
           slot: Q,
           cooldown_mode: AfterCast,
@@ -78,7 +78,7 @@
     ),
     4294967271: (
       components: {
-        "bevy_ecs::name::Name": "malphite",
+        "bevy_ecs::name::Name": "Malphite",
         "lol_core::attack::Attack": (
           range: 400.0,
           base_attack_speed: 1.4285715,

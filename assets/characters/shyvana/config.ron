@@ -8,7 +8,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/shyvana/spells/ShyvanaPassive.ron"),
+          spell: Path("characters/Shyvana/spells/ShyvanaPassive.ron"),
           level: 1,
           slot: Passive,
           cooldown_mode: AfterCast,
@@ -23,7 +23,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/shyvana/spells/ShyvanaR.ron"),
+          spell: Path("characters/Shyvana/spells/ShyvanaR.ron"),
           level: 1,
           slot: R,
           cooldown_mode: AfterCast,
@@ -35,10 +35,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 12.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/shyvana/spells/ShyvanaE.ron"),
+          spell: Path("characters/Shyvana/spells/ShyvanaE.ron"),
           level: 1,
           slot: E,
           cooldown_mode: AfterCast,
@@ -50,10 +50,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 14.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/shyvana/spells/ShyvanaW.ron"),
+          spell: Path("characters/Shyvana/spells/ShyvanaW.ron"),
           level: 1,
           slot: W,
           cooldown_mode: AfterCast,
@@ -65,10 +65,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 10.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/shyvana/spells/ShyvanaQ.ron"),
+          spell: Path("characters/Shyvana/spells/ShyvanaQ.ron"),
           level: 1,
           slot: Q,
           cooldown_mode: AfterCast,
@@ -78,7 +78,7 @@
     ),
     4294967271: (
       components: {
-        "bevy_ecs::name::Name": "shyvana",
+        "bevy_ecs::name::Name": "Shyvana",
         "lol_core::attack::Attack": (
           range: 600.0,
           base_attack_speed: 0.625,

@@ -8,7 +8,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/tahmkench/spells/TahmKenchPassive.ron"),
+          spell: Path("characters/TahmKench/spells/TahmKenchPassive.ron"),
           level: 1,
           slot: Passive,
           cooldown_mode: AfterCast,
@@ -23,7 +23,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/tahmkench/spells/TahmKenchRWrapper.ron"),
+          spell: Path("characters/TahmKench/spells/TahmKenchRWrapper.ron"),
           level: 1,
           slot: R,
           cooldown_mode: AfterCast,
@@ -35,10 +35,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 3.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/tahmkench/spells/TahmKenchE.ron"),
+          spell: Path("characters/TahmKench/spells/TahmKenchE.ron"),
           level: 1,
           slot: E,
           cooldown_mode: AfterCast,
@@ -50,10 +50,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 22.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/tahmkench/spells/TahmKenchW.ron"),
+          spell: Path("characters/TahmKench/spells/TahmKenchW.ron"),
           level: 1,
           slot: W,
           cooldown_mode: AfterCast,
@@ -65,10 +65,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 7.5,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/tahmkench/spells/TahmKenchQ.ron"),
+          spell: Path("characters/TahmKench/spells/TahmKenchQ.ron"),
           level: 1,
           slot: Q,
           cooldown_mode: AfterCast,
@@ -78,7 +78,7 @@
     ),
     4294967271: (
       components: {
-        "bevy_ecs::name::Name": "tahmkench",
+        "bevy_ecs::name::Name": "TahmKench",
         "lol_core::attack::Attack": (
           range: 600.0,
           base_attack_speed: 0.6583278,

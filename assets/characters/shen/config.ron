@@ -5,10 +5,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 11.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/shen/spells/ShenPassive.ron"),
+          spell: Path("characters/Shen/spells/ShenPassive.ron"),
           level: 1,
           slot: Passive,
           cooldown_mode: AfterCast,
@@ -20,10 +20,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 200.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/shen/spells/ShenR.ron"),
+          spell: Path("characters/Shen/spells/ShenR.ron"),
           level: 1,
           slot: R,
           cooldown_mode: AfterCast,
@@ -35,10 +35,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 20.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/shen/spells/ShenE.ron"),
+          spell: Path("characters/Shen/spells/ShenE.ron"),
           level: 1,
           slot: E,
           cooldown_mode: AfterCast,
@@ -50,10 +50,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 18.5,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/shen/spells/ShenW.ron"),
+          spell: Path("characters/Shen/spells/ShenW.ron"),
           level: 1,
           slot: W,
           cooldown_mode: AfterCast,
@@ -65,10 +65,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 8.75,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/shen/spells/ShenQ.ron"),
+          spell: Path("characters/Shen/spells/ShenQ.ron"),
           level: 1,
           slot: Q,
           cooldown_mode: AfterCast,
@@ -78,7 +78,7 @@
     ),
     4294967271: (
       components: {
-        "bevy_ecs::name::Name": "shen",
+        "bevy_ecs::name::Name": "Shen",
         "lol_core::attack::Attack": (
           range: 400.0,
           base_attack_speed: 0.6510417,

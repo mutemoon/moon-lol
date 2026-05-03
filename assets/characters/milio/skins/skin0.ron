@@ -4,7 +4,7 @@
     4294967262: (
       components: {
         "bevy_camera::visibility::Visibility": Inherited,
-        "bevy_world_serialization::components::WorldAssetRoot": (Path("characters/milio/skins/skin0.glb#Scene0")),
+        "bevy_world_serialization::components::WorldAssetRoot": (Path("characters/Milio/skins/skin0.glb#Scene0")),
         "lol_base::character::HealthBar": (
           bar_type: 12,
         ),

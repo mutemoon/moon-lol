@@ -8,7 +8,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/vi/spells/ViPassive.ron"),
+          spell: Path("characters/Vi/spells/ViPassive.ron"),
           level: 1,
           slot: Passive,
           cooldown_mode: AfterCast,
@@ -20,10 +20,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 140.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/vi/spells/ViR.ron"),
+          spell: Path("characters/Vi/spells/ViR.ron"),
           level: 1,
           slot: R,
           cooldown_mode: AfterCast,
@@ -35,10 +35,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 1.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/vi/spells/ViE.ron"),
+          spell: Path("characters/Vi/spells/ViE.ron"),
           level: 1,
           slot: E,
           cooldown_mode: AfterCast,
@@ -53,7 +53,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/vi/spells/ViW.ron"),
+          spell: Path("characters/Vi/spells/ViW.ron"),
           level: 1,
           slot: W,
           cooldown_mode: AfterCast,
@@ -65,10 +65,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 12.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/vi/spells/ViQ.ron"),
+          spell: Path("characters/Vi/spells/ViQ.ron"),
           level: 1,
           slot: Q,
           cooldown_mode: AfterCast,
@@ -78,7 +78,7 @@
     ),
     4294967271: (
       components: {
-        "bevy_ecs::name::Name": "vi",
+        "bevy_ecs::name::Name": "Vi",
         "lol_core::attack::Attack": (
           range: 600.0,
           base_attack_speed: 0.625,

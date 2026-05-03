@@ -8,7 +8,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/reksai/spells/RekSaiPassive.ron"),
+          spell: Path("characters/RekSai/spells/RekSaiPassive.ron"),
           level: 1,
           slot: Passive,
           cooldown_mode: AfterCast,
@@ -20,10 +20,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 120.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/reksai/spells/RekSaiR.ron"),
+          spell: Path("characters/RekSai/spells/RekSaiR.ron"),
           level: 1,
           slot: R,
           cooldown_mode: AfterCast,
@@ -35,10 +35,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 6.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/reksai/spells/RekSaiE.ron"),
+          spell: Path("characters/RekSai/spells/RekSaiE.ron"),
           level: 1,
           slot: E,
           cooldown_mode: AfterCast,
@@ -50,10 +50,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 4.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/reksai/spells/RekSaiW.ron"),
+          spell: Path("characters/RekSai/spells/RekSaiW.ron"),
           level: 1,
           slot: W,
           cooldown_mode: AfterCast,
@@ -65,10 +65,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 4.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/reksai/spells/RekSaiQ.ron"),
+          spell: Path("characters/RekSai/spells/RekSaiQ.ron"),
           level: 1,
           slot: Q,
           cooldown_mode: AfterCast,
@@ -78,7 +78,7 @@
     ),
     4294967271: (
       components: {
-        "bevy_ecs::name::Name": "reksai",
+        "bevy_ecs::name::Name": "RekSai",
         "lol_core::attack::Attack": (
           range: 600.0,
           base_attack_speed: 0.6666667,

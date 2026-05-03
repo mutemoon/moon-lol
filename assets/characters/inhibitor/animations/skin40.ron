@@ -1,5 +1,5 @@
 (
-    gltf_path: "characters/inhibitor/skins/skin40.glb",
+    gltf_path: "characters/Inhibitor/skins/Skin40.glb",
     hash_to_node: {
         "Attack": Selector(
             probably_nodes: [

@@ -8,7 +8,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/pyke/spells/PykePassive.ron"),
+          spell: Path("characters/Pyke/spells/PykePassive.ron"),
           level: 1,
           slot: Passive,
           cooldown_mode: AfterCast,
@@ -20,10 +20,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 115.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/pyke/spells/PykeR.ron"),
+          spell: Path("characters/Pyke/spells/PykeR.ron"),
           level: 1,
           slot: R,
           cooldown_mode: AfterCast,
@@ -35,10 +35,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 15.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/pyke/spells/PykeE.ron"),
+          spell: Path("characters/Pyke/spells/PykeE.ron"),
           level: 1,
           slot: E,
           cooldown_mode: AfterCast,
@@ -50,10 +50,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 14.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/pyke/spells/PykeW.ron"),
+          spell: Path("characters/Pyke/spells/PykeW.ron"),
           level: 1,
           slot: W,
           cooldown_mode: AfterCast,
@@ -65,10 +65,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 10.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/pyke/spells/PykeQ.ron"),
+          spell: Path("characters/Pyke/spells/PykeQ.ron"),
           level: 1,
           slot: Q,
           cooldown_mode: AfterCast,
@@ -78,7 +78,7 @@
     ),
     4294967271: (
       components: {
-        "bevy_ecs::name::Name": "pyke",
+        "bevy_ecs::name::Name": "Pyke",
         "lol_core::attack::Attack": (
           range: 400.0,
           base_attack_speed: 0.6666667,

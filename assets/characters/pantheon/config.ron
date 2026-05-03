@@ -8,7 +8,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/pantheon/spells/PantheonPassive.ron"),
+          spell: Path("characters/Pantheon/spells/PantheonPassive.ron"),
           level: 1,
           slot: Passive,
           cooldown_mode: AfterCast,
@@ -20,10 +20,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 180.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/pantheon/spells/PantheonR.ron"),
+          spell: Path("characters/Pantheon/spells/PantheonR.ron"),
           level: 1,
           slot: R,
           cooldown_mode: AfterCast,
@@ -35,10 +35,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 22.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/pantheon/spells/PantheonE.ron"),
+          spell: Path("characters/Pantheon/spells/PantheonE.ron"),
           level: 1,
           slot: E,
           cooldown_mode: AfterCast,
@@ -50,10 +50,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 13.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/pantheon/spells/PantheonW.ron"),
+          spell: Path("characters/Pantheon/spells/PantheonW.ron"),
           level: 1,
           slot: W,
           cooldown_mode: AfterCast,
@@ -65,10 +65,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 11.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/pantheon/spells/PantheonQ.ron"),
+          spell: Path("characters/Pantheon/spells/PantheonQ.ron"),
           level: 1,
           slot: Q,
           cooldown_mode: AfterCast,
@@ -78,7 +78,7 @@
     ),
     4294967271: (
       components: {
-        "bevy_ecs::name::Name": "pantheon",
+        "bevy_ecs::name::Name": "Pantheon",
         "lol_core::attack::Attack": (
           range: 600.0,
           base_attack_speed: 1.4285715,

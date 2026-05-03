@@ -5,10 +5,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 2.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/aphelios/spells/ApheliosP.ron"),
+          spell: Path("characters/Aphelios/spells/ApheliosP.ron"),
           level: 1,
           slot: Passive,
           cooldown_mode: AfterCast,
@@ -20,10 +20,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 120.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/aphelios/spells/ApheliosR.ron"),
+          spell: Path("characters/Aphelios/spells/ApheliosR.ron"),
           level: 1,
           slot: R,
           cooldown_mode: AfterCast,
@@ -38,7 +38,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/aphelios/spells/ApheliosE_ClientTooltipWrapper.ron"),
+          spell: Path("characters/Aphelios/spells/ApheliosE_ClientTooltipWrapper.ron"),
           level: 1,
           slot: E,
           cooldown_mode: AfterCast,
@@ -50,10 +50,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 0.8,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/aphelios/spells/ApheliosW.ron"),
+          spell: Path("characters/Aphelios/spells/ApheliosW.ron"),
           level: 1,
           slot: W,
           cooldown_mode: AfterCast,
@@ -65,10 +65,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 9.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/aphelios/spells/ApheliosQ_ClientTooltipWrapper.ron"),
+          spell: Path("characters/Aphelios/spells/ApheliosQ_ClientTooltipWrapper.ron"),
           level: 1,
           slot: Q,
           cooldown_mode: AfterCast,
@@ -78,7 +78,7 @@
     ),
     4294967271: (
       components: {
-        "bevy_ecs::name::Name": "aphelios",
+        "bevy_ecs::name::Name": "Aphelios",
         "lol_core::attack::Attack": (
           range: 0.0,
           base_attack_speed: 0.6666667,

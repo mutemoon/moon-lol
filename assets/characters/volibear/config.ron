@@ -8,7 +8,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/volibear/spells/VolibearP.ron"),
+          spell: Path("characters/Volibear/spells/VolibearP.ron"),
           level: 1,
           slot: Passive,
           cooldown_mode: AfterCast,
@@ -20,10 +20,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 160.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/volibear/spells/VolibearR.ron"),
+          spell: Path("characters/Volibear/spells/VolibearR.ron"),
           level: 1,
           slot: R,
           cooldown_mode: AfterCast,
@@ -35,10 +35,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 16.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/volibear/spells/VolibearE.ron"),
+          spell: Path("characters/Volibear/spells/VolibearE.ron"),
           level: 1,
           slot: E,
           cooldown_mode: AfterCast,
@@ -50,10 +50,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 5.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/volibear/spells/VolibearW.ron"),
+          spell: Path("characters/Volibear/spells/VolibearW.ron"),
           level: 1,
           slot: W,
           cooldown_mode: AfterCast,
@@ -68,7 +68,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/volibear/spells/VolibearQ.ron"),
+          spell: Path("characters/Volibear/spells/VolibearQ.ron"),
           level: 1,
           slot: Q,
           cooldown_mode: AfterCast,
@@ -78,7 +78,7 @@
     ),
     4294967271: (
       components: {
-        "bevy_ecs::name::Name": "volibear",
+        "bevy_ecs::name::Name": "Volibear",
         "lol_core::attack::Attack": (
           range: 400.0,
           base_attack_speed: 1.4285715,

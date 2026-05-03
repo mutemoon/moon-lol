@@ -8,7 +8,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/ekko/spells/EkkoPassive.ron"),
+          spell: Path("characters/Ekko/spells/EkkoPassive.ron"),
           level: 1,
           slot: Passive,
           cooldown_mode: AfterCast,
@@ -20,10 +20,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 110.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/ekko/spells/EkkoR.ron"),
+          spell: Path("characters/Ekko/spells/EkkoR.ron"),
           level: 1,
           slot: R,
           cooldown_mode: AfterCast,
@@ -35,10 +35,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 9.5,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/ekko/spells/EkkoE.ron"),
+          spell: Path("characters/Ekko/spells/EkkoE.ron"),
           level: 1,
           slot: E,
           cooldown_mode: AfterCast,
@@ -50,10 +50,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 24.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/ekko/spells/EkkoW.ron"),
+          spell: Path("characters/Ekko/spells/EkkoW.ron"),
           level: 1,
           slot: W,
           cooldown_mode: AfterCast,
@@ -65,10 +65,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 9.5,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/ekko/spells/EkkoQ.ron"),
+          spell: Path("characters/Ekko/spells/EkkoQ.ron"),
           level: 1,
           slot: Q,
           cooldown_mode: AfterCast,
@@ -78,7 +78,7 @@
     ),
     4294967271: (
       components: {
-        "bevy_ecs::name::Name": "ekko",
+        "bevy_ecs::name::Name": "Ekko",
         "lol_core::attack::Attack": (
           range: 600.0,
           base_attack_speed: 0.625,

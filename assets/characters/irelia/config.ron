@@ -8,7 +8,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/irelia/spells/IreliaPassive.ron"),
+          spell: Path("characters/Irelia/spells/IreliaPassive.ron"),
           level: 1,
           slot: Passive,
           cooldown_mode: AfterCast,
@@ -20,10 +20,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 125.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/irelia/spells/IreliaR.ron"),
+          spell: Path("characters/Irelia/spells/IreliaR.ron"),
           level: 1,
           slot: R,
           cooldown_mode: AfterCast,
@@ -35,10 +35,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 16.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/irelia/spells/IreliaE.ron"),
+          spell: Path("characters/Irelia/spells/IreliaE.ron"),
           level: 1,
           slot: E,
           cooldown_mode: AfterCast,
@@ -50,10 +50,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 20.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/irelia/spells/IreliaW.ron"),
+          spell: Path("characters/Irelia/spells/IreliaW.ron"),
           level: 1,
           slot: W,
           cooldown_mode: AfterCast,
@@ -65,10 +65,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 10.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/irelia/spells/IreliaQ.ron"),
+          spell: Path("characters/Irelia/spells/IreliaQ.ron"),
           level: 1,
           slot: Q,
           cooldown_mode: AfterCast,
@@ -78,7 +78,7 @@
     ),
     4294967271: (
       components: {
-        "bevy_ecs::name::Name": "irelia",
+        "bevy_ecs::name::Name": "Irelia",
         "lol_core::attack::Attack": (
           range: 600.0,
           base_attack_speed: 0.6557377,

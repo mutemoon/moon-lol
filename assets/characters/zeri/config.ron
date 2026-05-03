@@ -8,7 +8,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/zeri/spells/ZeriPassive.ron"),
+          spell: Path("characters/Zeri/spells/ZeriPassive.ron"),
           level: 1,
           slot: Passive,
           cooldown_mode: AfterCast,
@@ -20,10 +20,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 80.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/zeri/spells/ZeriR.ron"),
+          spell: Path("characters/Zeri/spells/ZeriR.ron"),
           level: 1,
           slot: R,
           cooldown_mode: AfterCast,
@@ -35,10 +35,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 22.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/zeri/spells/ZeriE.ron"),
+          spell: Path("characters/Zeri/spells/ZeriE.ron"),
           level: 1,
           slot: E,
           cooldown_mode: AfterCast,
@@ -50,10 +50,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 12.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/zeri/spells/ZeriW.ron"),
+          spell: Path("characters/Zeri/spells/ZeriW.ron"),
           level: 1,
           slot: W,
           cooldown_mode: AfterCast,
@@ -68,7 +68,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/zeri/spells/ZeriQ.ron"),
+          spell: Path("characters/Zeri/spells/ZeriQ.ron"),
           level: 1,
           slot: Q,
           cooldown_mode: AfterCast,
@@ -78,7 +78,7 @@
     ),
     4294967271: (
       components: {
-        "bevy_ecs::name::Name": "zeri",
+        "bevy_ecs::name::Name": "Zeri",
         "lol_core::attack::Attack": (
           range: 800.0,
           base_attack_speed: 0.625,

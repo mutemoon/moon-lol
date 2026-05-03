@@ -28,20 +28,19 @@ use std::time::Duration;
 use bevy::prelude::*;
 use bevy::time::TimeUpdateStrategy;
 use bevy::winit::WinitPlugin;
-use lol_base::animation::LOLAnimationGraph;
 use lol_base::character::{ConfigCharacterRecord, ConfigSkin};
 use lol_base::prop::LoadHashKeyTrait;
 use lol_base::spell::Spell;
 use lol_core::action::{Action, CommandAction};
-use lol_core::base::ability_resource::{AbilityResource, AbilityResourceType};
+use lol_core::base::ability_resource::AbilityResource;
 use lol_core::base::buff::Buffs;
-use lol_core::base::level::Level;
 use lol_core::buffs::shield_white::BuffShieldWhite;
-use lol_core::damage::{CommandDamageCreate, Damage, DamageType};
+use lol_core::damage::{CommandDamageCreate, DamageType};
 use lol_core::entities::champion::Champion;
 use lol_core::life::Health;
+use lol_core::log::create_log_plugin;
 use lol_core::navigation::navigation::NavigationDebug;
-use lol_core::skill::{CoolDown, Skill, SkillPoints, Skills};
+use lol_core::skill::{CoolDown, Skill, SkillRecastWindow, Skills};
 use lol_core::team::Team;
 use lol_render::PluginRender;
 use lol_render::test_render::{
@@ -130,18 +129,21 @@ impl ChampionTestHarness {
             file_path: workspace_root.join("assets").to_string_lossy().to_string(),
             ..Default::default()
         };
+        let log_plugin = create_log_plugin();
         match mode {
             HarnessMode::Headless => {
                 app.add_plugins((
                     MinimalPlugins,
                     asset_plugin,
                     bevy::world_serialization::WorldSerializationPlugin,
+                    log_plugin,
                 ));
             }
             HarnessMode::Render { max_frames } => {
                 app.add_plugins(
                     DefaultPlugins
                         .build()
+                        .set(log_plugin)
                         .set(asset_plugin)
                         .disable::<WinitPlugin>(),
                 );
@@ -169,29 +171,31 @@ impl ChampionTestHarness {
             }
         }
         app.add_plugins(lol_core::PluginCore);
+        (config.add_champion_plugin)(&mut app);
+
         app.insert_resource(lol_base::map::MapPaths::new("test"));
 
         app.finish();
         app.cleanup();
 
         let asset_server = app.world().resource::<AssetServer>();
-        let config_handle = asset_server.load(config.config_path);
-        let skin_handle = asset_server.load(config.skin_path);
+        let config_handle = asset_server.load::<DynamicWorld>(config.config_path);
 
         let champion = app
             .world_mut()
             .spawn((
                 C::default(),
-                ConfigCharacterRecord {
-                    character_record: config_handle,
-                },
-                Team::Order,
                 Transform::default(),
+                ConfigCharacterRecord {
+                    character_record: config_handle.clone(),
+                },
             ))
             .id();
 
         // Only load skin in render mode
         if mode.is_render() {
+            let asset_server = app.world().resource::<AssetServer>();
+            let skin_handle = asset_server.load::<DynamicWorld>(config.skin_path);
             app.world_mut()
                 .entity_mut(champion)
                 .insert(ConfigSkin { skin: skin_handle });
@@ -200,8 +204,14 @@ impl ChampionTestHarness {
         // Poll until ConfigCharacterRecord is processed
         for i in 0..10 {
             app.update();
-            if !app.world().entity(champion).contains::<Health>() {
-                println!("第 {} 帧检测到 Health 组件", i);
+            if app
+                .world()
+                .resource::<AssetServer>()
+                .get_recursive_dependency_load_state(&config_handle)
+                .map(|v| v.is_loaded())
+                .eq(&Some(true))
+            {
+                info!("第 {} 帧 ConfigCharacterRecord 加载完毕已被移出", i);
                 break;
             }
         }
@@ -213,11 +223,6 @@ impl ChampionTestHarness {
             "config load failed: {}",
             config.config_path
         );
-
-        // Settle frames
-        for _ in 0..15 {
-            app.update();
-        }
 
         Self {
             app,
@@ -380,13 +385,21 @@ impl ChampionTestHarness {
             .unwrap_or(0.0)
     }
 
-    pub fn cooldown_finished(&self, index: usize) -> bool {
+    pub fn can_cast(&self, index: usize) -> bool {
         let skills = self
             .app
             .world()
             .get::<Skills>(self.champion)
             .expect("skills should exist");
         let skill_entity = skills[index];
+
+        // If there's an active recast window, the skill is ready (can cast next stage)
+        if let Some(recast) = self.app.world().get::<SkillRecastWindow>(skill_entity) {
+            if !recast.timer.is_finished() {
+                return true;
+            }
+        }
+
         self.app
             .world()
             .get::<CoolDown>(skill_entity)
@@ -408,15 +421,6 @@ impl ChampionTestHarness {
             .world()
             .resource::<Assets<Spell>>()
             .load_hash(skill.spell.id())
-    }
-
-    pub fn print_skill_logs(&self) {
-        use lol_core::skill::SkillCastLog;
-        if let Some(log) = self.app.world().get_resource::<SkillCastLog>() {
-            for record in &log.0 {
-                println!("Skill Cast Record: {:?}", record);
-            }
-        }
     }
 
     /// Pad frames and produce the video file.  No-op in headless mode.
@@ -441,10 +445,6 @@ impl ChampionTestHarness {
         );
     }
 }
-
-// ── Internal helpers ──
-
-fn setup_app_plugins(app: &mut App, mode: &HarnessMode, test_name: &str, champion_dir: &str) {}
 
 // ── Shared free functions ──
 

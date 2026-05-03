@@ -8,7 +8,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/jarvaniv/spells/JarvanIVMartialCadence.ron"),
+          spell: Path("characters/JarvanIV/spells/JarvanIVMartialCadence.ron"),
           level: 1,
           slot: Passive,
           cooldown_mode: AfterCast,
@@ -23,7 +23,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/jarvaniv/spells/JarvanIVCataclysm.ron"),
+          spell: Path("characters/JarvanIV/spells/JarvanIVCataclysm.ron"),
           level: 1,
           slot: R,
           cooldown_mode: AfterCast,
@@ -35,10 +35,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 12.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/jarvaniv/spells/JarvanIVDemacianStandard.ron"),
+          spell: Path("characters/JarvanIV/spells/JarvanIVDemacianStandard.ron"),
           level: 1,
           slot: E,
           cooldown_mode: AfterCast,
@@ -50,10 +50,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 9.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/jarvaniv/spells/JarvanIVGoldenAegis.ron"),
+          spell: Path("characters/JarvanIV/spells/JarvanIVGoldenAegis.ron"),
           level: 1,
           slot: W,
           cooldown_mode: AfterCast,
@@ -65,10 +65,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 10.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/jarvaniv/spells/JarvanIVDragonStrike.ron"),
+          spell: Path("characters/JarvanIV/spells/JarvanIVDragonStrike.ron"),
           level: 1,
           slot: Q,
           cooldown_mode: AfterCast,
@@ -78,7 +78,7 @@
     ),
     4294967271: (
       components: {
-        "bevy_ecs::name::Name": "jarvaniv",
+        "bevy_ecs::name::Name": "JarvanIV",
         "lol_core::attack::Attack": (
           range: 600.0,
           base_attack_speed: 1.4285715,

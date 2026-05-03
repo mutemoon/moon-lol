@@ -8,7 +8,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/camille/spells/CamillePassive.ron"),
+          spell: Path("characters/Camille/spells/CamillePassive.ron"),
           level: 1,
           slot: Passive,
           cooldown_mode: AfterCast,
@@ -20,10 +20,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 140.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/camille/spells/CamilleR.ron"),
+          spell: Path("characters/Camille/spells/CamilleR.ron"),
           level: 1,
           slot: R,
           cooldown_mode: AfterCast,
@@ -35,10 +35,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 16.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/camille/spells/CamilleE.ron"),
+          spell: Path("characters/Camille/spells/CamilleE.ron"),
           level: 1,
           slot: E,
           cooldown_mode: AfterCast,
@@ -50,10 +50,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 15.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/camille/spells/CamilleW.ron"),
+          spell: Path("characters/Camille/spells/CamilleW.ron"),
           level: 1,
           slot: W,
           cooldown_mode: AfterCast,
@@ -65,10 +65,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 9.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/camille/spells/CamilleQ.ron"),
+          spell: Path("characters/Camille/spells/CamilleQ.ron"),
           level: 1,
           slot: Q,
           cooldown_mode: AfterCast,
@@ -78,7 +78,7 @@
     ),
     4294967271: (
       components: {
-        "bevy_ecs::name::Name": "camille",
+        "bevy_ecs::name::Name": "Camille",
         "lol_core::attack::Attack": (
           range: 600.0,
           base_attack_speed: 0.6443299,

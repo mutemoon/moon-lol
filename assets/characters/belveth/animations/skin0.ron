@@ -1,5 +1,5 @@
 (
-    gltf_path: "characters/belveth/skins/skin0.glb",
+    gltf_path: "characters/Belveth/skins/skin0.glb",
     hash_to_node: {
         "AttacKFast1a": Clip(
             node_index: 54,

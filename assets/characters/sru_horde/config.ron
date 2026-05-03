@@ -3,7 +3,7 @@
   entities: {
     4294967271: (
       components: {
-        "bevy_ecs::name::Name": "sru_horde",
+        "bevy_ecs::name::Name": "SRU_Horde",
         "lol_core::attack::Attack": (
           range: 600.0,
           base_attack_speed: 0.6666667,

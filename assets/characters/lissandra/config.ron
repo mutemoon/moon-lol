@@ -8,7 +8,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/lissandra/spells/LissandraPassive.ron"),
+          spell: Path("characters/Lissandra/spells/LissandraPassive.ron"),
           level: 1,
           slot: Passive,
           cooldown_mode: AfterCast,
@@ -20,10 +20,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 10.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/lissandra/spells/LissandraR.ron"),
+          spell: Path("characters/Lissandra/spells/LissandraR.ron"),
           level: 1,
           slot: R,
           cooldown_mode: AfterCast,
@@ -35,10 +35,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 27.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/lissandra/spells/LissandraE.ron"),
+          spell: Path("characters/Lissandra/spells/LissandraE.ron"),
           level: 1,
           slot: E,
           cooldown_mode: AfterCast,
@@ -50,10 +50,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 10.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/lissandra/spells/LissandraW.ron"),
+          spell: Path("characters/Lissandra/spells/LissandraW.ron"),
           level: 1,
           slot: W,
           cooldown_mode: AfterCast,
@@ -65,10 +65,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 8.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/lissandra/spells/LissandraQ.ron"),
+          spell: Path("characters/Lissandra/spells/LissandraQ.ron"),
           level: 1,
           slot: Q,
           cooldown_mode: AfterCast,
@@ -78,7 +78,7 @@
     ),
     4294967271: (
       components: {
-        "bevy_ecs::name::Name": "lissandra",
+        "bevy_ecs::name::Name": "Lissandra",
         "lol_core::attack::Attack": (
           range: 600.0,
           base_attack_speed: 1.4285715,

@@ -8,7 +8,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/corki/spells/RapidReload.ron"),
+          spell: Path("characters/Corki/spells/RapidReload.ron"),
           level: 1,
           slot: Passive,
           cooldown_mode: AfterCast,
@@ -20,10 +20,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 2.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/corki/spells/MissileBarrage.ron"),
+          spell: Path("characters/Corki/spells/MissileBarrage.ron"),
           level: 1,
           slot: R,
           cooldown_mode: AfterCast,
@@ -35,10 +35,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 12.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/corki/spells/GGun.ron"),
+          spell: Path("characters/Corki/spells/GGun.ron"),
           level: 1,
           slot: E,
           cooldown_mode: AfterCast,
@@ -50,10 +50,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 20.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/corki/spells/CarpetBomb.ron"),
+          spell: Path("characters/Corki/spells/CarpetBomb.ron"),
           level: 1,
           slot: W,
           cooldown_mode: AfterCast,
@@ -65,10 +65,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 8.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/corki/spells/PhosphorusBomb.ron"),
+          spell: Path("characters/Corki/spells/PhosphorusBomb.ron"),
           level: 1,
           slot: Q,
           cooldown_mode: AfterCast,
@@ -78,7 +78,7 @@
     ),
     4294967271: (
       components: {
-        "bevy_ecs::name::Name": "corki",
+        "bevy_ecs::name::Name": "Corki",
         "lol_core::attack::Attack": (
           range: 550.0,
           base_attack_speed: 0.643915,

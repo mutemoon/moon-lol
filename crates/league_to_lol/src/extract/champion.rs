@@ -34,19 +34,11 @@ pub fn skin_path_to_skin_bin_path(character_name: &str, skin_path: &str) -> Stri
     // 输出: "data/characters/{name}/skins/{skinname}.bin"
     let parts: Vec<&str> = skin_path.split('/').collect();
     if parts.len() >= 4 {
-        let skin_name = parts[parts.len() - 1].to_lowercase();
-        format!(
-            "data/characters/{}/skins/{}.bin",
-            character_name.to_lowercase(),
-            skin_name
-        )
+        let skin_name = parts[parts.len() - 1];
+        format!("data/characters/{}/skins/{}.bin", character_name, skin_name)
     } else {
         // Fallback: 假设格式是 "{SkinName}"，直接拼接
-        format!(
-            "data/characters/{}/skins/{}.bin",
-            character_name.to_lowercase(),
-            skin_path.to_lowercase()
-        )
+        format!("data/characters/{}/skins/{}.bin", character_name, skin_path)
     }
 }
 
@@ -219,8 +211,9 @@ pub fn extract_character_from_record(
     let (attack, health, damage, armor, movement, experience_drop, ability_resource) =
         create_champion_components_from_record(&record);
 
-    // 从 spells 哈希创建 Skill 组件（使用 AssetServer 加载路径以获得正确的 Handle）
-    let skills = create_skills_from_record(&prop_group, character_name, &record, &asset_server);
+    // 从 spells 哈希创建 Skill 组件和冷却时间（使用 AssetServer 加载路径以获得正确的 Handle）
+    let skill_with_cooldowns =
+        create_skills_from_record(&prop_group, character_name, &record, &asset_server);
 
     let world = app.world_mut();
 
@@ -251,12 +244,12 @@ pub fn extract_character_from_record(
     }
 
     // 为每个技能创建独立的技能实体
-    for skill in skills {
+    for (skill, cooldown_duration) in skill_with_cooldowns {
         world.entity_mut(champion_entity).with_related::<SkillOf>((
             skill,
             CoolDown {
                 timer: None,
-                duration: 0.0,
+                duration: cooldown_duration,
             },
         ));
     }
@@ -266,10 +259,7 @@ pub fn extract_character_from_record(
     let type_registry = type_registry.read();
     let serialized_scene = scene.serialize(&type_registry).unwrap();
 
-    let output_path = format!(
-        "assets/characters/{}/config.ron",
-        character_name.to_lowercase()
-    );
+    let output_path = format!("assets/characters/{}/config.ron", character_name);
     write_to_file(&output_path, serialized_scene);
 
     extract_skin_for_champion(loader, character_name, skin_bin_path, hashes);
@@ -277,14 +267,15 @@ pub fn extract_character_from_record(
     true
 }
 
-/// 从 CharacterRecord 创建 Skill 组件
+/// 从 CharacterRecord 创建 Skill 组件和冷却时间
+/// 返回 Vec<(Skill, cooldown_duration)> 元组
 fn create_skills_from_record(
     prop_group: &PropGroup,
     character_name: &str,
     record: &CharacterRecord,
     asset_server: &AssetServer,
-) -> Vec<Skill> {
-    let mut skills = Vec::new();
+) -> Vec<(Skill, f32)> {
+    let mut skills: Vec<(Skill, f32)> = Vec::new();
 
     // 获取 Q/W/E/R 技能
     if let Some(spell_hashes) = &record.spells {
@@ -298,20 +289,24 @@ fn create_skills_from_record(
             if let Some(spell_obj) = prop_group.get_data_option::<SpellObject>(*hash) {
                 let spell_path = format!(
                     "characters/{}/spells/{}.ron",
-                    character_name.to_lowercase(),
-                    spell_obj.object_name
+                    character_name, spell_obj.object_name
                 );
                 let spell_handle: Handle<Spell> = asset_server.load(&spell_path);
-                skills.push(Skill {
-                    spell: spell_handle,
-                    level: 1,
-                    slot,
-                    cooldown_mode: SkillCooldownMode::AfterCast,
-                });
+                let cooldown_duration = get_spell_cooldown(&spell_obj);
+                skills.push((
+                    Skill {
+                        spell: spell_handle,
+                        level: 1,
+                        slot,
+                        cooldown_mode: SkillCooldownMode::AfterCast,
+                    },
+                    cooldown_duration,
+                ));
                 println!(
-                    "[INFO] 技能 {} -> {}",
+                    "[INFO] 技能 {} -> {} (cd: {}s)",
                     slot_to_string(slot),
-                    spell_obj.object_name
+                    spell_obj.object_name,
+                    cooldown_duration
                 );
             }
         }
@@ -322,21 +317,38 @@ fn create_skills_from_record(
         if let Some(spell_obj) = prop_group.get_data_option::<SpellObject>(passive_hash) {
             let spell_path = format!(
                 "characters/{}/spells/{}.ron",
-                character_name.to_lowercase(),
-                spell_obj.object_name
+                character_name, spell_obj.object_name
             );
             let spell_handle: Handle<Spell> = asset_server.load(&spell_path);
-            skills.push(Skill {
-                spell: spell_handle,
-                level: 1,
-                slot: SkillSlot::Passive,
-                cooldown_mode: SkillCooldownMode::AfterCast,
-            });
-            println!("[INFO] 被动技能 -> {}", spell_obj.object_name);
+            let cooldown_duration = get_spell_cooldown(&spell_obj);
+            skills.push((
+                Skill {
+                    spell: spell_handle,
+                    level: 1,
+                    slot: SkillSlot::Passive,
+                    cooldown_mode: SkillCooldownMode::AfterCast,
+                },
+                cooldown_duration,
+            ));
+            println!(
+                "[INFO] 被动技能 -> {} (cd: {}s)",
+                spell_obj.object_name, cooldown_duration
+            );
         }
     }
 
     skills
+}
+
+/// 从 SpellObject 获取技能冷却时间（返回 1 级冷却）
+fn get_spell_cooldown(spell_obj: &SpellObject) -> f32 {
+    spell_obj
+        .m_spell
+        .as_ref()
+        .and_then(|spell_data| spell_data.cooldown_time.as_ref())
+        .and_then(|cooldowns| cooldowns.first())
+        .copied()
+        .unwrap_or(0.0)
 }
 
 /// SkillSlot 转字符串

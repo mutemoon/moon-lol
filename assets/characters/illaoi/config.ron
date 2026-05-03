@@ -8,7 +8,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/illaoi/spells/IllaoiPassive.ron"),
+          spell: Path("characters/Illaoi/spells/IllaoiPassive.ron"),
           level: 1,
           slot: Passive,
           cooldown_mode: AfterCast,
@@ -20,10 +20,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 120.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/illaoi/spells/IllaoiR.ron"),
+          spell: Path("characters/Illaoi/spells/IllaoiR.ron"),
           level: 1,
           slot: R,
           cooldown_mode: AfterCast,
@@ -35,10 +35,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 16.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/illaoi/spells/IllaoiE.ron"),
+          spell: Path("characters/Illaoi/spells/IllaoiE.ron"),
           level: 1,
           slot: E,
           cooldown_mode: AfterCast,
@@ -50,10 +50,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 4.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/illaoi/spells/IllaoiW.ron"),
+          spell: Path("characters/Illaoi/spells/IllaoiW.ron"),
           level: 1,
           slot: W,
           cooldown_mode: AfterCast,
@@ -65,10 +65,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 11.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/illaoi/spells/IllaoiQ.ron"),
+          spell: Path("characters/Illaoi/spells/IllaoiQ.ron"),
           level: 1,
           slot: Q,
           cooldown_mode: AfterCast,
@@ -78,7 +78,7 @@
     ),
     4294967271: (
       components: {
-        "bevy_ecs::name::Name": "illaoi",
+        "bevy_ecs::name::Name": "Illaoi",
         "lol_core::attack::Attack": (
           range: 600.0,
           base_attack_speed: 0.5714286,

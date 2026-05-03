@@ -8,7 +8,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/jax/spells/JaxPassive.ron"),
+          spell: Path("characters/Jax/spells/JaxPassive.ron"),
           level: 1,
           slot: Passive,
           cooldown_mode: AfterCast,
@@ -20,10 +20,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 110.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/jax/spells/JaxR.ron"),
+          spell: Path("characters/Jax/spells/JaxR.ron"),
           level: 1,
           slot: R,
           cooldown_mode: AfterCast,
@@ -35,10 +35,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 17.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/jax/spells/JaxE.ron"),
+          spell: Path("characters/Jax/spells/JaxE.ron"),
           level: 1,
           slot: E,
           cooldown_mode: AfterCast,
@@ -50,10 +50,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 8.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/jax/spells/JaxW.ron"),
+          spell: Path("characters/Jax/spells/JaxW.ron"),
           level: 1,
           slot: W,
           cooldown_mode: AfterCast,
@@ -65,10 +65,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 8.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/jax/spells/JaxQ.ron"),
+          spell: Path("characters/Jax/spells/JaxQ.ron"),
           level: 1,
           slot: Q,
           cooldown_mode: AfterCast,
@@ -78,7 +78,7 @@
     ),
     4294967271: (
       components: {
-        "bevy_ecs::name::Name": "jax",
+        "bevy_ecs::name::Name": "Jax",
         "lol_core::attack::Attack": (
           range: 400.0,
           base_attack_speed: 1.4285715,

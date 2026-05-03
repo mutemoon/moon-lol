@@ -50,49 +50,88 @@ pub fn on_action_dash(
     let entity = trigger.event_target();
 
     let Ok(transform) = q_transform.get(entity) else {
+        debug!(
+            "on_action_dash: entity {:?} has no Transform, skipping",
+            entity
+        );
         return;
     };
-    let vector = trigger.point - transform.translation.xz();
+
+    let current_pos = transform.translation;
+    let vector = trigger.point - current_pos.xz();
     let distance = vector.length();
 
-    let destination = match trigger.move_type {
+    debug!(
+        "on_action_dash: entity {:?} at ({:.2}, {:.2}, {:.2}) -> point ({:.2}, {:.2}), distance: {:.2}, speed: {:.2}",
+        entity,
+        current_pos.x,
+        current_pos.y,
+        current_pos.z,
+        trigger.point.x,
+        trigger.point.y,
+        distance,
+        trigger.speed
+    );
+
+    let (destination, move_type_desc) = match trigger.move_type {
         DashMoveType::Fixed(fixed_distance) => {
             let direction = if distance < 0.001 {
                 transform.forward().xz().normalize()
             } else {
                 vector.normalize()
             };
-            transform.translation.xz() + direction * fixed_distance
+            let dest = current_pos.xz() + direction * fixed_distance;
+            debug!(
+                "on_action_dash: DashMoveType::Fixed distance {:.2}, direction ({:.2}, {:.2}), destination ({:.2}, {:.2})",
+                fixed_distance, direction.x, direction.y, dest.x, dest.y
+            );
+            (dest, format!("Fixed({:.2})", fixed_distance))
         }
         DashMoveType::Pointer { max } => {
-            if distance < max {
+            let dest = if distance < max {
+                debug!(
+                    "on_action_dash: DashMoveType::Pointer distance {:.2} < max {:.2}, going to point",
+                    distance, max
+                );
                 trigger.point
             } else {
                 let direction = vector.normalize();
-                transform.translation.xz() + direction * max
-            }
+                let dest = current_pos.xz() + direction * max;
+                debug!(
+                    "on_action_dash: DashMoveType::Pointer distance {:.2} >= max {:.2}, clamping to max",
+                    distance, max
+                );
+                dest
+            };
+            (dest, format!("Pointer(max: {:.2})", max))
         }
     };
 
     if let Some(damage) = &trigger.damage {
+        debug!(
+            "on_action_dash: adding DashDamageComponent with radius_end {:.2}, filter: {:?}",
+            damage.radius_end, damage.damage.filter
+        );
         commands.entity(entity).insert(DashDamageComponent {
-            start_pos: transform.translation,
-            target_pos: Vec3::new(destination.x, transform.translation.y, destination.y),
+            start_pos: current_pos,
+            target_pos: Vec3::new(destination.x, current_pos.y, destination.y),
             damage: damage.clone(),
             skill: trigger.skill.clone(),
             hit_entities: std::collections::HashSet::default(),
         });
+    } else {
+        debug!("on_action_dash: no damage component to add");
     }
 
+    debug!(
+        "on_action_dash: triggering CommandMovement for entity {:?}, destination ({:.2}, {:.2}, {:.2}), move_type: {}",
+        entity, destination.x, current_pos.y, destination.y, move_type_desc
+    );
     commands.trigger(CommandMovement {
         entity,
         priority: 100,
         action: MovementAction::Start {
-            way: MovementWay::Path(vec![Vec3::new(
-                destination.x,
-                transform.translation.y,
-                destination.y,
-            )]),
+            way: MovementWay::Path(vec![Vec3::new(destination.x, current_pos.y, destination.y)]),
             speed: Some(trigger.speed),
             source: "Dash".to_string(),
         },

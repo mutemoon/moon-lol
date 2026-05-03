@@ -5,10 +5,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 90.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/azir/spells/AzirPassive.ron"),
+          spell: Path("characters/Azir/spells/AzirPassive.ron"),
           level: 1,
           slot: Passive,
           cooldown_mode: AfterCast,
@@ -20,10 +20,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 120.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/azir/spells/AzirR.ron"),
+          spell: Path("characters/Azir/spells/AzirR.ron"),
           level: 1,
           slot: R,
           cooldown_mode: AfterCast,
@@ -35,10 +35,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 22.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/azir/spells/AzirEWrapper.ron"),
+          spell: Path("characters/Azir/spells/AzirEWrapper.ron"),
           level: 1,
           slot: E,
           cooldown_mode: AfterCast,
@@ -50,10 +50,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 1.5,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/azir/spells/AzirW.ron"),
+          spell: Path("characters/Azir/spells/AzirW.ron"),
           level: 1,
           slot: W,
           cooldown_mode: AfterCast,
@@ -65,10 +65,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 14.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/azir/spells/AzirQWrapper.ron"),
+          spell: Path("characters/Azir/spells/AzirQWrapper.ron"),
           level: 1,
           slot: Q,
           cooldown_mode: AfterCast,
@@ -78,7 +78,7 @@
     ),
     4294967271: (
       components: {
-        "bevy_ecs::name::Name": "azir",
+        "bevy_ecs::name::Name": "Azir",
         "lol_core::attack::Attack": (
           range: 700.0,
           base_attack_speed: 0.625,

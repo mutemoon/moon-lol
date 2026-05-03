@@ -8,7 +8,7 @@
           duration: 0.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/belveth/spells/BelvethPassive.ron"),
+          spell: Path("characters/Belveth/spells/BelvethPassive.ron"),
           level: 1,
           slot: Passive,
           cooldown_mode: AfterCast,
@@ -20,10 +20,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 1.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/belveth/spells/BelvethR.ron"),
+          spell: Path("characters/Belveth/spells/BelvethR.ron"),
           level: 1,
           slot: R,
           cooldown_mode: AfterCast,
@@ -35,10 +35,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 20.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/belveth/spells/BelvethE.ron"),
+          spell: Path("characters/Belveth/spells/BelvethE.ron"),
           level: 1,
           slot: E,
           cooldown_mode: AfterCast,
@@ -50,10 +50,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 12.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/belveth/spells/BelvethW.ron"),
+          spell: Path("characters/Belveth/spells/BelvethW.ron"),
           level: 1,
           slot: W,
           cooldown_mode: AfterCast,
@@ -65,10 +65,10 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 0.0,
+          duration: 1.0,
         ),
         "lol_core::skill::Skill": (
-          spell: Path("characters/belveth/spells/BelvethQ.ron"),
+          spell: Path("characters/Belveth/spells/BelvethQ.ron"),
           level: 1,
           slot: Q,
           cooldown_mode: AfterCast,
@@ -78,7 +78,7 @@
     ),
     4294967271: (
       components: {
-        "bevy_ecs::name::Name": "belveth",
+        "bevy_ecs::name::Name": "Belveth",
         "lol_core::attack::Attack": (
           range: 600.0,
           base_attack_speed: 0.990099,
