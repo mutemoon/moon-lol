@@ -75,7 +75,7 @@ pub fn migrate_animation_graph_handle(
                 .insert(graph_handle.clone())
                 .insert(BoneRoot)
                 .insert(AnimationConfigOf(root_entity));
+            state.current = state.current.clone();
         }
     }
-    state.current = state.current.clone();
 }

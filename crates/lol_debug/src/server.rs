@@ -8,7 +8,7 @@ use tokio::net::TcpListener;
 use tokio::sync::Mutex as TokioMutex;
 use tokio_tungstenite::accept_async;
 
-use super::protocol::{CmdKind, WsEvent, WsRequest};
+use crate::protocol::{CmdKind, WsEvent, WsRequest};
 
 /// Channel for Bevy ← WS communication.
 #[derive(Resource)]
@@ -110,7 +110,7 @@ pub fn poll_commands(world: &mut World) {
     };
 
     while let Ok((id, cmd, params)) = cmd_rx.try_recv() {
-        let response = super::handlers::dispatch(world, id, cmd, params);
+        let response = crate::handlers::dispatch(world, id, cmd, params);
         let out_tx = world
             .get_resource::<DebugWsChannel>()
             .map(|ch| ch.out_tx.clone());

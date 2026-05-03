@@ -21,35 +21,28 @@ async function startGame() {
   isStarting.value = true;
 
   try {
-    // 1. Start Bevy process via Tauri
     await invoke("start_game", {
       config: {
         mode: mode.value,
         champion: champion.value,
       },
     });
-
-    // 2. Wait briefly for Bevy to bind the port
-    await new Promise((r) => setTimeout(r, 1000));
-
-    // 3. Connect WS
-    await ws.connect();
-
-    view.value = "debug";
   } catch (e: any) {
     error.value = typeof e === "string" ? e : e.message || "Unknown error";
-  } finally {
     isStarting.value = false;
+    return;
   }
+
+  // Start connecting (retries internally, never throws)
+  ws.connect().then(() => {
+    isStarting.value = false;
+    view.value = "debug";
+  });
 }
 
-async function stopGame() {
+function stopGame() {
   ws.disconnect();
-  try {
-    await invoke("stop_game");
-  } catch (_) {
-    // ignore errors
-  }
+  invoke("stop_game").catch(() => {});
   view.value = "launcher";
 }
 </script>
@@ -62,16 +55,28 @@ async function stopGame() {
       <p class="subtitle">Desktop Launcher</p>
 
       <div class="launcher-card">
+        <!-- Connecting overlay -->
+        <div v-if="ws.connecting.value" class="connecting-overlay">
+          <div class="spinner"></div>
+          <p v-if="!ws.connectTimeout.value" class="connecting-text">
+            Connecting to game...
+          </p>
+          <p v-else class="connecting-text timeout">
+            Still connecting... game may be slow to start.
+          </p>
+          <button class="cancel-btn" @click="stopGame">Cancel</button>
+        </div>
+
         <div class="field">
           <label>Champion</label>
-          <select v-model="champion">
+          <select v-model="champion" :disabled="isStarting">
             <option v-for="c in champions" :key="c" :value="c">{{ c }}</option>
           </select>
         </div>
 
         <div class="field">
           <label>Mode</label>
-          <select v-model="mode">
+          <select v-model="mode" :disabled="isStarting">
             <option value="sandbox">Sandbox</option>
           </select>
         </div>
@@ -146,11 +151,64 @@ h1 {
 }
 
 .launcher-card {
+  position: relative;
   background: #1a1a2e;
   padding: 32px;
   border-radius: 12px;
   width: 100%;
   max-width: 400px;
+}
+
+/* Connecting spinner overlay */
+.connecting-overlay {
+  position: absolute;
+  inset: 0;
+  background: #1a1a2e;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  z-index: 10;
+}
+
+.spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid #333;
+  border-top-color: #00ffff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.connecting-text {
+  color: #aaa;
+  font-size: 14px;
+}
+
+.connecting-text.timeout {
+  color: #ffaa00;
+}
+
+.cancel-btn {
+  margin-top: 4px;
+  background: #333;
+  color: #999;
+  border: 1px solid #444;
+  padding: 6px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.cancel-btn:hover {
+  background: #444;
+  color: #ccc;
 }
 
 .field {

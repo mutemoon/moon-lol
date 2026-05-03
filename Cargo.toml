@@ -18,6 +18,7 @@ league_to_lol = { path = "crates/league_to_lol" }
 league_utils = { path = "crates/league_utils" }
 lol_base = { path = "crates/lol_base" }
 lol_core = { path = "crates/lol_core" }
+lol_debug = { path = "crates/lol_debug" }
 lol_render = { path = "crates/lol_render" }
 lol_champions = { path = "crates/lol_champions" }
 gltf = "1.4.1"
@@ -71,6 +72,7 @@ league_file.workspace = true
 league_utils.workspace = true
 lol_base.workspace = true
 lol_core.workspace = true
+lol_debug.workspace = true
 lol_render.workspace = true
 lol_champions.workspace = true
 clap.workspace = true

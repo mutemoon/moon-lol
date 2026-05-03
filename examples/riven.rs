@@ -9,20 +9,19 @@ use lol_core::log::create_log_plugin;
 use lol_render::PluginRender;
 
 fn main() {
+    let (log_plugin, _log_rx) = create_log_plugin();
+
     App::new()
         .add_plugins((
-            DefaultPlugins
-                .build()
-                .set(create_log_plugin())
-                .set(WindowPlugin {
-                    primary_window: Some(Window {
-                        title: "锐雯技能测试".to_string(),
-                        // resolution: (300, 300).into(),
-                        // position: WindowPosition::At((0, 1000).into()),
-                        ..default()
-                    }),
+            DefaultPlugins.build().set(log_plugin).set(WindowPlugin {
+                primary_window: Some(Window {
+                    title: "锐雯技能测试".to_string(),
+                    // resolution: (300, 300).into(),
+                    // position: WindowPosition::At((0, 1000).into()),
                     ..default()
                 }),
+                ..default()
+            }),
             PluginCore.set(PluginGame {
                 scenes: vec!["games/riven.ron".to_owned()],
             }),

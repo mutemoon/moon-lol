@@ -8,7 +8,6 @@ pub mod character;
 pub mod config;
 pub mod cooldown;
 pub mod damage;
-pub mod debug;
 pub mod effect;
 pub mod entities;
 pub mod error;

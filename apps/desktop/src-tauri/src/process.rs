@@ -47,8 +47,19 @@ pub fn start_game(
 ) -> Result<(), String> {
     let mut s = state.lock().map_err(|e| e.to_string())?;
 
-    if s.bevy.is_some() {
-        return Err("game already running".into());
+    // If the previous process died on its own, clear the stale handle.
+    if let Some(ref mut proc) = s.bevy {
+        match proc.child.try_wait() {
+            Ok(Some(_)) => {
+                println!("[tauri] Previous Bevy process already exited, clearing stale state");
+                s.bevy = None;
+            }
+            Ok(None) => return Err("game already running".into()),
+            Err(e) => {
+                println!("[tauri] Error checking Bevy process status: {e}, clearing state");
+                s.bevy = None;
+            }
+        }
     }
 
     let port: u16 = 9001;
@@ -85,8 +96,8 @@ fn start_dev(
         .arg(&config.mode)
         .arg("--champion")
         .arg(&config.champion)
-        .stdout(Stdio::piped())
-        .stderr(Stdio::piped())
+        .stdout(Stdio::inherit())
+        .stderr(Stdio::inherit())
         .spawn()
         .map_err(|e| format!("failed to start game: {e}"))
 }
@@ -126,8 +137,8 @@ fn start_release(
         .arg(&config.mode)
         .arg("--champion")
         .arg(&config.champion)
-        .stdout(Stdio::piped())
-        .stderr(Stdio::piped())
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
         .spawn()
         .map_err(|e| format!("failed to start game: {e}"))
 }

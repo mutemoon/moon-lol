@@ -1,11 +1,14 @@
 use bevy::prelude::*;
+use lol_base::character::{ConfigCharacterRecord, ConfigSkin};
+use lol_champions::fiora::Fiora;
+use lol_champions::riven::Riven;
+use lol_core::buffs::damage_reduction::BuffDamageReduction;
+use lol_core::entities::champion::Champion;
+use lol_core::skill::{CoolDown, Skill, SkillCooldownMode};
 
-use super::protocol::{
+use crate::protocol::{
     CmdKind, GodModeParams, SwitchChampionParams, ToggleCooldownParams, WsResponse,
 };
-use crate::buffs::damage_reduction::BuffDamageReduction;
-use crate::entities::champion::Champion;
-use crate::skill::{CoolDown, Skill, SkillCooldownMode};
 
 /// Dispatch a WS command to the appropriate handler.
 pub fn dispatch(world: &mut World, id: u64, cmd: CmdKind, params: serde_json::Value) -> WsResponse {
@@ -33,38 +36,50 @@ fn handle_switch_champion(
 
     let name = p.name.clone();
 
-    // Collect champion entity and its skill children.
-    let (champion_entity, skill_entities) = {
-        let champion_entity = world
-            .query::<(Entity, &Champion)>()
-            .iter(world)
-            .map(|(e, _)| e)
-            .next();
+    let champion_entity = world
+        .query::<(Entity, &Champion)>()
+        .iter(world)
+        .map(|(e, _)| e)
+        .next()
+        .ok_or("no champion found")?;
 
-        let mut skill_entities = Vec::new();
-        if let Some(champion) = champion_entity {
-            for (e, skill_of) in world
-                .query::<(Entity, &crate::skill::SkillOf)>()
-                .iter(world)
-            {
-                if skill_of.0 == champion {
-                    skill_entities.push(e);
-                }
-            }
-        }
-        (champion_entity, skill_entities)
+    let name_lower = name.to_lowercase();
+    let config_path = format!("characters/{name_lower}/config.ron");
+    let skin_path = format!("characters/{name_lower}/skins/skin0.ron");
+
+    info!(target: "debug", "Switching champion to {name} (entity {champion_entity:?})");
+
+    let config_record = {
+        let asset_server = world.resource::<AssetServer>();
+        asset_server.load(&config_path)
+    };
+    let config_skin = {
+        let asset_server = world.resource::<AssetServer>();
+        asset_server.load(&skin_path)
     };
 
-    for se in skill_entities {
-        world.commands().entity(se).despawn();
-    }
-    if let Some(entity) = champion_entity {
-        world.commands().entity(entity).despawn();
+    let mut commands = world.commands();
+    let mut e = commands.entity(champion_entity);
+    e.remove::<Riven>();
+    e.remove::<Fiora>();
+
+    match name.as_str() {
+        "Riven" => {
+            e.insert(Riven);
+        }
+        "Fiora" => {
+            e.insert(Fiora);
+        }
+        _ => {
+            warn!(target: "debug", "unknown champion: {name}");
+            return Err("unknown champion".into());
+        }
     }
 
-    // Push to the switch queue for lol_champions to process.
-    let mut queue = world.resource_mut::<ChampionSwitchQueue>();
-    queue.0.push(name.clone());
+    e.insert(ConfigCharacterRecord {
+        character_record: config_record,
+    });
+    e.insert(ConfigSkin { skin: config_skin });
 
     Ok(serde_json::json!({"name": name}))
 }
@@ -95,7 +110,7 @@ fn handle_god_mode(
     }
 
     {
-        let mut state = world.resource_mut::<super::GlobalDebugState>();
+        let mut state = world.resource_mut::<crate::GlobalDebugState>();
         state.god_mode = p.enabled;
     }
 
@@ -132,7 +147,7 @@ fn handle_toggle_cooldown(
     }
 
     {
-        let mut state = world.resource_mut::<super::GlobalDebugState>();
+        let mut state = world.resource_mut::<crate::GlobalDebugState>();
         state.cooldown_disabled = p.enabled;
     }
 
@@ -162,7 +177,7 @@ fn handle_reset_position(world: &mut World) -> Result<serde_json::Value, String>
 
 fn handle_toggle_pause(world: &mut World) -> Result<serde_json::Value, String> {
     let paused = {
-        let state = world.resource::<super::GlobalDebugState>();
+        let state = world.resource::<crate::GlobalDebugState>();
         !state.paused
     };
 
@@ -170,7 +185,7 @@ fn handle_toggle_pause(world: &mut World) -> Result<serde_json::Value, String> {
     time.set_relative_speed(if paused { 0.0 } else { 1.0 });
 
     {
-        let mut state = world.resource_mut::<super::GlobalDebugState>();
+        let mut state = world.resource_mut::<crate::GlobalDebugState>();
         state.paused = paused;
     }
 
@@ -179,7 +194,7 @@ fn handle_toggle_pause(world: &mut World) -> Result<serde_json::Value, String> {
 
 fn handle_get_state(world: &mut World) -> Result<serde_json::Value, String> {
     let saved = {
-        let state = world.resource::<super::GlobalDebugState>();
+        let state = world.resource::<crate::GlobalDebugState>();
         (state.god_mode, state.cooldown_disabled, state.paused)
     };
 
@@ -197,7 +212,3 @@ fn handle_get_state(world: &mut World) -> Result<serde_json::Value, String> {
         "paused": saved.2,
     }))
 }
-
-/// Simple queue resource — lol_champions reads from this each frame.
-#[derive(Resource, Default)]
-pub struct ChampionSwitchQueue(pub Vec<String>);
