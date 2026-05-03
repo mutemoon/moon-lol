@@ -20,6 +20,7 @@ fn fiora_config() -> ChampionHarnessConfig {
 fn build_headless(name: &str) -> ChampionTestHarness {
     ChampionTestHarness::build::<Fiora>(name, HarnessMode::Headless, &fiora_config())
 }
+
 fn build_render(name: &str, max_frames: u32) -> ChampionTestHarness {
     ChampionTestHarness::build::<Fiora>(name, HarnessMode::Render { max_frames }, &fiora_config())
 }
@@ -31,37 +32,28 @@ fn fiora_harness_builds_and_settles() {
 
 #[test]
 fn fiora_q_writes_video() {
-    run_render_test(
-        || build_render("fiora_q_writes_video", 120),
-        |h| {
-            h.cast_skill(0, Vec2::new(170.0, 0.0)).advance(0.4);
-        },
-    );
+    let mut h = build_render("fiora_q_writes_video", 120);
+    h.cast_skill(0, Vec2::new(170.0, 0.0)).advance(0.4);
+    h.finish();
 }
+
 #[test]
 fn fiora_w_writes_video() {
-    run_render_test(
-        || build_render("fiora_w_writes_video", 120),
-        |h| {
-            h.cast_skill(1, Vec2::new(170.0, 0.0)).advance(0.4);
-        },
-    );
+    let mut h = build_render("fiora_w_writes_video", 120);
+    h.cast_skill(1, Vec2::new(170.0, 0.0)).advance(0.4);
+    h.finish();
 }
+
 #[test]
 fn fiora_e_writes_video() {
-    run_render_test(
-        || build_render("fiora_e_writes_video", 120),
-        |h| {
-            h.cast_skill(2, Vec2::new(170.0, 0.0)).advance(0.4);
-        },
-    );
+    let mut h = build_render("fiora_e_writes_video", 120);
+    h.cast_skill(2, Vec2::new(170.0, 0.0)).advance(0.4);
+    h.finish();
 }
+
 #[test]
 fn fiora_r_writes_video() {
-    run_render_test(
-        || build_render("fiora_r_writes_video", 140),
-        |h| {
-            h.cast_skill(3, Vec2::new(170.0, 0.0)).advance(0.4);
-        },
-    );
+    let mut h = build_render("fiora_r_writes_video", 140);
+    h.cast_skill(3, Vec2::new(170.0, 0.0)).advance(0.4);
+    h.finish();
 }

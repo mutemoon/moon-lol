@@ -1,10 +1,5 @@
 use bevy::prelude::*;
-
-#[derive(Component)]
-pub struct DebugSphere {
-    pub radius: f32,
-    pub color: Color,
-}
+use lol_base::debug_sphere::DebugSphere;
 
 #[derive(Default)]
 pub struct PluginDebugSphere;

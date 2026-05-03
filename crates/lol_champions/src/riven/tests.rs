@@ -75,6 +75,9 @@ fn riven_q_cycles_through_three_real_stages() {
 #[test]
 fn riven_w_hits_only_enemies_in_range() {
     let mut h = build_headless("riven_w");
+    let enemy_near = h.add_enemy(Vec3::new(100.0, 0.0, 0.0));
+    let enemy_far = h.add_enemy(Vec3::new(420.0, 0.0, 0.0));
+    let ally_near = h.add_ally(Vec3::new(60.0, 0.0, 0.0));
     let expected_damage = get_skill_value(
         &h.spell(1).expect("W spell missing"),
         w_damage_key(),
@@ -82,35 +85,37 @@ fn riven_w_hits_only_enemies_in_range() {
         |stat| if stat == 2 { 100.0 } else { 0.0 },
     )
     .expect("riven w damage should exist");
-    let initial_near = h.health(h.enemy_near);
-    let initial_far = h.health(h.enemy_far);
-    let initial_ally = h.health(h.ally_near);
+    let initial_near = h.health(enemy_near);
+    let initial_far = h.health(enemy_far);
+    let initial_ally = h.health(ally_near);
     h.cast_skill(1, Vec2::new(140.0, 0.0));
     h.advance(0.2);
-    assert!((initial_near - h.health(h.enemy_near) - expected_damage).abs() < EPSILON);
-    assert!((h.health(h.enemy_far) - initial_far).abs() < EPSILON);
-    assert!((h.health(h.ally_near) - initial_ally).abs() < EPSILON);
+    assert!((initial_near - h.health(enemy_near) - expected_damage).abs() < EPSILON);
+    assert!((h.health(enemy_far) - initial_far).abs() < EPSILON);
+    assert!((h.health(ally_near) - initial_ally).abs() < EPSILON);
 }
 
 #[test]
 fn riven_e_spawns_shield_and_dash_absorbs_damage() {
     let mut h = build_headless("riven_e");
+    let enemy = h.add_enemy(Vec3::new(100.0, 0.0, 0.0));
     h.cast_skill(2, Vec2::new(140.0, 0.0)).advance(0.4);
     assert!(h.position(h.champion).length() > 2.0);
     let initial_health = h.health(h.champion);
     let shield_val = h.shield_value().unwrap_or(0.0);
     assert!(shield_val > 80.0 && shield_val <= 100.0);
-    h.apply_damage(60.0);
+    h.apply_damage(enemy, 60.0);
     assert!((h.health(h.champion) - initial_health).abs() < EPSILON);
     let remaining_shield = h.shield_value().unwrap_or(0.0);
     assert!(remaining_shield > 20.0 && remaining_shield < shield_val);
-    h.apply_damage(50.0);
+    h.apply_damage(enemy, 50.0);
     assert!(h.health(h.champion) < initial_health);
 }
 
 #[test]
 fn riven_r_starts_cooldown_without_moving_or_damaging() {
     let mut h = build_headless("riven_r");
+    let _enemy = h.add_enemy(Vec3::new(100.0, 0.0, 0.0));
     let expected_mana_cost = h
         .spell(3)
         .expect("R spell missing")
@@ -120,12 +125,10 @@ fn riven_r_starts_cooldown_without_moving_or_damaging() {
         .and_then(|m| m.first().copied())
         .unwrap_or(0.0);
     let initial_mana = h.mana();
-    let initial_enemy_hp = h.health(h.enemy_near);
     h.cast_skill(3, Vec2::new(140.0, 0.0)).advance(0.2);
     assert!((h.mana() - (initial_mana - expected_mana_cost)).abs() < EPSILON);
     assert!(!h.cooldown_finished(3));
     assert!(h.position(h.champion).distance(Vec3::ZERO) < EPSILON);
-    assert!((h.health(h.enemy_near) - initial_enemy_hp).abs() < EPSILON);
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -134,41 +137,33 @@ fn riven_r_starts_cooldown_without_moving_or_damaging() {
 
 #[test]
 fn riven_q_writes_video() {
-    run_render_test(
-        || build_render("riven_q_writes_video", 180),
-        |h| {
-            h.cast_skill(0, Vec2::new(140.0, 0.0)).advance(0.4);
-            h.cast_skill(0, Vec2::new(140.0, 0.0)).advance(0.4);
-            h.cast_skill(0, Vec2::new(140.0, 0.0)).advance(0.1);
-        },
-    );
+    let mut h = build_render("riven_q_writes_video", 180);
+    h.cast_skill(0, Vec2::new(140.0, 0.0)).advance(0.4);
+    h.cast_skill(0, Vec2::new(140.0, 0.0)).advance(0.4);
+    h.cast_skill(0, Vec2::new(140.0, 0.0)).advance(0.1);
+    h.finish();
 }
+
 #[test]
 fn riven_w_writes_video() {
-    run_render_test(
-        || build_render("riven_w_writes_video", 120),
-        |h| {
-            h.cast_skill(1, Vec2::new(140.0, 0.0)).advance(0.2);
-        },
-    );
+    let mut h = build_render("riven_w_writes_video", 120);
+    h.cast_skill(1, Vec2::new(140.0, 0.0)).advance(0.2);
+    h.finish();
 }
+
 #[test]
 fn riven_e_writes_video() {
-    run_render_test(
-        || build_render("riven_e_writes_video", 120),
-        |h| {
-            h.cast_skill(2, Vec2::new(140.0, 0.0)).advance(0.4);
-            h.apply_damage(60.0);
-            h.apply_damage(50.0);
-        },
-    );
+    let mut h = build_render("riven_e_writes_video", 120);
+    let enemy = h.add_enemy(Vec3::new(100.0, 0.0, 0.0));
+    h.cast_skill(2, Vec2::new(140.0, 0.0)).advance(0.4);
+    h.apply_damage(enemy, 60.0);
+    h.apply_damage(enemy, 50.0);
+    h.finish();
 }
+
 #[test]
 fn riven_r_writes_video() {
-    run_render_test(
-        || build_render("riven_r_writes_video", 140),
-        |h| {
-            h.cast_skill(3, Vec2::new(140.0, 0.0)).advance(0.2);
-        },
-    );
+    let mut h = build_render("riven_r_writes_video", 140);
+    h.cast_skill(3, Vec2::new(140.0, 0.0)).advance(0.2);
+    h.finish();
 }

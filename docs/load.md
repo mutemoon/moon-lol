@@ -1,212 +1,382 @@
-# 重构皮肤渲染：从运行时加载到 GLTF 导出
+# 资源加载流程
 
-将 `lol_render` 中的运行时皮肤加载链路重构为导出时预构建。每个皮肤导出为一个 `.glb` 文件（包含网格、材质、贴图、骨骼、动画），皮肤场景文件中只有一个实体，运行时将该实体的所有组件写入到角色实体上。
+## 概述
 
-## 当前运行时加载链路（待废弃）
+运行时加载分为两条独立链路：
 
-```mermaid
-graph TD
-    A["ConfigSkin(Handle&lt;DynamicWorld&gt;)"] -->|"try_load_config_skin_characters"| B["写入 World → CommandSkinSpawn"]
-    B --> C["update_skin_spawn: 从 SkinCharacterDataProperties 读取"]
-    C --> D["Skin{ key, scale } + Visibility"]
-    C --> E["CommandSkinMeshSpawn"]
-    C --> F["CommandSkinAnimationSpawn"]
-    C --> G["HealthBar"]
-    E --> H["load_league .skn → LeagueSkinMesh(Handle&lt;Mesh&gt;[])"]
-    E --> I["load_league_labeled .tex#srgb → StandardMaterial"]
-    E --> J["CommandSkinSkeletonSpawn"]
-    J --> K["load_league .skl → LeagueSkeleton"]
-    K --> L["构建 Joint 实体层级 + SkinnedMesh + InverseBindposes"]
-    H --> M["子实体: Mesh3d + MeshMaterial3d + SkinnedMesh"]
-    F --> N["load AnimationGraphData 通过 HashKey"]
-    N --> O["构建 AnimationGraph + AnimationClip(Handle) + Animation 组件"]
+1. **游戏场景加载** — 从 `games/{game_setting}.ron` 加载英雄角色出生点
+2. **地图加载** — 从 `maps/{map_name}/scene.ron` 加载地图对象（防御塔、野怪、兵营、草丛等）
+
+两条链路最终都将 `DynamicWorld` 反序列化为实体组件，写入 ECS World。**地图场景中的防御塔、野怪、兵营等同样是有 `ConfigCharacterRecord` + `ConfigSkin` 的角色实体，共享英雄的加载逻辑。**
+
+```
+App Startup
+├── PluginGame → startup_load_game_scenes → DynamicWorldRoot("games/riven.ron")
+├── PluginMap  → startup_load_map_geometry → DynamicWorldRoot("maps/sr/scene.ron")
+└── PluginRender → setup → WorldAssetRoot("maps/sr/mapgeo.glb")
+
+FixedUpdate
+├── try_load_config_characters (lol_core)
+│      读取 ConfigCharacterRecord → 反序列化 config.ron → 写入 Health/Attack/Skills 等
+├── try_load_config_skin_characters (lol_render)
+│      读取 ConfigSkin → 反序列化 skin.ron → 写入 WorldAssetRoot + Skin + HealthBar
+└── glTF 加载完成后 → Bevy 自动处理 Mesh/Material/SkinnedMesh/AnimationPlayer
 ```
 
-## 目标架构
+## 1. 游戏场景加载
 
-在导出时，直接读取 League 原始二进制文件（.skn/.skl/.tex/.anm），参考 [gltf_export.rs](file:///d:/Users/admin/workspace/moon-lol/crates/league_to_lol/src/gltf_export.rs) 中 `GltfBuilder` 的网格、材质、贴图导出实现，将所有数据转换为标准 GLTF 格式（含骨骼和动画），导出为 `.glb` 文件。每个皮肤一个 `.glb`。
+### 1.1 入口：games/{game_setting}.ron
 
-皮肤场景文件中只有 **一个实体**，该实体上挂载 `CharacterSkin { scene: Handle<Gltf> }` 等组件。运行时加载后，将 GLTF Scene 中唯一一个实体的组件（Mesh、Material、SkinnedMesh 等 Bevy 原生组件）写入到角色实体上。
+游戏场景文件（如 `assets/games/riven.ron`）定义了一局游戏中所有角色出生点：
 
-```mermaid
-graph TD
-    subgraph 导出时
-        A["读取 SkinCharacterDataProperties"] --> B["读取 .skn → 网格"]
-        A --> C["读取 .tex → 贴图（转 PNG 内嵌）"]
-        A --> D["读取 .skl → 骨骼 + InverseBindposes"]
-        A --> E["读取 .anm → 动画"]
-        B --> F["GltfBuilder 构建 GLTF"]
-        C --> F
-        D --> F
-        E --> F
-        F --> G["导出 skin.glb"]
-        A --> H["构建皮肤场景 skin.ron"]
-        H -->|"包含"| I["CharacterSkin { scene: Handle&lt;Gltf&gt; }"]
-        H -->|"包含"| J["Skin { scale }"]
-        H -->|"包含"| K["HealthBar"]
-    end
-
-    subgraph 运行时
-        L["加载 skin.ron → 角色实体"] --> M["读取 CharacterSkin.scene"]
-        M --> N["加载 skin.glb"]
-        N --> O["GLTF Scene 唯一实体的组件"]
-        O --> P["写入角色实体: Mesh3d, Material, SkinnedMesh, AnimationPlayer..."]
-        L --> Q["Skin.scale → 计算 Transform"]
-    end
+```ron
+(
+  resources: {},
+  entities: {
+    4294967262: (
+      components: {
+        "lol_base::character::ConfigCharacterRecord": (
+          character_record: Path("characters/riven/config.ron"),
+        ),
+        "lol_base::character::ConfigSkin": (
+          skin: Path("characters/riven/skins/skin0.ron"),
+        ),
+        "lol_base::team::Team": (team: Blue),
+        "lol_base::transform::Transform": (scale: [1.0, 1.0, 1.0], ...),
+        "lol_core::character::Champion": (),
+        "lol_base::life::HealthBar": (bar_type: 12),
+      },
+    ),
+  },
+)
 ```
 
-## 导出内容与架构
+### 1.2 加载系统：PluginGame
 
-### GLTF 文件（skin.glb）
-
-每个皮肤导出一个 `.glb`，包含以下数据（参考 `GltfBuilder` 的实现方式）：
-
-| 数据类型          | 来源              | GLTF 中的表示                                                             |
-| ----------------- | ----------------- | ------------------------------------------------------------------------- |
-| 网格（Mesh）      | `.skn` 各 submesh | GLTF Mesh + Primitives，顶点/索引数据内嵌 Buffer                          |
-| 材质（Material）  | 材质定义          | GLTF Material（PBR：metallic=0, roughness=1）                             |
-| 贴图（Texture）   | `.tex` 文件       | GLTF Image（解码为 PNG 内嵌 Buffer），关联到 Material 的 baseColorTexture |
-| 骨骼（Skeleton）  | `.skl` 文件       | GLTF Skin + Joint 节点层级 + InverseBindMatrices                          |
-| 动画（Animation） | `.anm` 文件       | GLTF Animation（channel + sampler）                                       |
-
-### 皮肤场景文件（skin.ron）
-
-皮肤场景文件中只有**一个实体**，该实体上的组件将被写入角色实体：
-
-| 组件                                    | 值                        | 说明                                  |
-| --------------------------------------- | ------------------------- | ------------------------------------- |
-| `CharacterSkin { scene: Handle<Gltf> }` | 指向 `skin.glb`           | **新组件**，GLTF 场景引用             |
-| `Skin { scale }`                        | 从 `skin_scale` 读取      | 不存 Transform，运行时根据 scale 计算 |
-| `HealthBar { bar_type }`                | 从 `health_bar_data` 读取 | 可选                                  |
-| `Visibility`                            | 默认值                    | —                                     |
-
-### 运行时流程
-
-1. 加载 `skin.ron`，将组件写入角色实体（角色拥有 `CharacterSkin`、`Skin`、`HealthBar` 等）
-2. 监听 `CharacterSkin` 组件 Added，加载对应的 `skin.glb`
-3. GLTF 加载完成后，取 Scene 中唯一一个实体的组件（Mesh3d、MeshMaterial3d、SkinnedMesh、AnimationPlayer 等 Bevy 原生组件）
-4. 将这些组件写入角色实体
-5. 从 `Skin.scale` 计算 Transform 并写入角色实体
-
----
-
-## 被废弃的运行时链路
-
-| 废弃项                                                                                                                  | 原因                                  |
-| ----------------------------------------------------------------------------------------------------------------------- | ------------------------------------- |
-| [CommandSkinSpawn](file:///d:/Users/admin/workspace/moon-lol/crates/lol_core/src/render_cmd.rs#16-20)                   | 不再需要，数据直接从 skin.ron 获取    |
-| [update_skin_spawn](file:///d:/Users/admin/workspace/moon-lol/crates/lol_render/src/skin/skin.rs#44-86)                 | 不再需要，Skin 组件直接在 skin.ron 中 |
-| [on_command_skin_spawn](file:///d:/Users/admin/workspace/moon-lol/crates/lol_render/src/skin/skin.rs#27-43)             | 不再需要                              |
-| [CommandSkinMeshSpawn](file:///d:/Users/admin/workspace/moon-lol/crates/lol_render/src/skin/mesh.rs#15-18)              | GLTF 已包含网格+材质+贴图+骨骼        |
-| [CommandSkinAnimationSpawn](file:///d:/Users/admin/workspace/moon-lol/crates/lol_render/src/skin/animation.rs#18-21)    | GLTF 已包含动画                       |
-| [CommandSkinSkeletonSpawn](file:///d:/Users/admin/workspace/moon-lol/crates/lol_render/src/skin/skeleton.rs)            | GLTF 已包含骨骼                       |
-| `Loading<HashKey<SkinCharacterDataProperties>>`                                                                         | 不再需要                              |
-| `Loading<HashKey<AnimationGraphData>>`                                                                                  | 不再需要                              |
-| `Loading<(Handle<LeagueSkinMesh>, Handle<StandardMaterial>)>`                                                           | 不再需要                              |
-| `Loading<Handle<LeagueSkeleton>>`                                                                                       | 不再需要                              |
-| [LeagueLoaderMesh](file:///d:/Users/admin/workspace/moon-lol/crates/lol_render/src/loaders/mesh.rs#10-11)               | GLTF 内嵌网格                         |
-| [LeagueLoaderImage](file:///d:/Users/admin/workspace/moon-lol/crates/lol_render/src/loaders/image.rs#12-13)             | GLTF 内嵌贴图                         |
-| [LeagueLoaderAnimationClip](file:///d:/Users/admin/workspace/moon-lol/crates/lol_render/src/loaders/animation.rs#11-12) | GLTF 内嵌动画                         |
-
----
-
-## Proposed Changes
-
-### Component: `lol_base`（新增 CharacterSkin 组件）
-
-#### [MODIFY] [character.rs](file:///d:/Users/admin/workspace/moon-lol/crates/lol_base/src/character.rs)
-
-新增 `CharacterSkin` 组件：
+**文件：** [lol_core/src/game.rs](file:///d:/Users/admin/workspace/moon-lol-minimax/crates/lol_core/src/game.rs)
 
 ```rust
-/// 角色皮肤 GLTF 场景引用
-#[derive(Component, Reflect, Debug, Clone)]
-#[reflect(Component)]
-pub struct CharacterSkin {
-    /// 指向皮肤 .glb 文件
-    pub scene: Handle<Gltf>,
+pub struct PluginGame {
+    pub scenes: Vec<String>,  // e.g., vec!["games/riven.ron"]
+}
+
+fn startup_load_game_scenes(
+    mut commands: Commands,
+    res_asset_server: Res<AssetServer>,
+    scenes: Res<GameScenes>,
+) {
+    for scene_path in scenes.0.iter() {
+        commands.spawn(DynamicWorldRoot(res_asset_server.load(scene_path)));
+    }
 }
 ```
 
----
+`DynamicWorldRoot` 是 Bevy 场景系统的根组件，挂载后 Bevy 会自动将 `.ron` 反序列化为 `DynamicWorld` Asset。
 
-### Export: GLTF 导出（参考 `gltf_export.rs`）
+### 1.3 ConfigCharacterRecord 消费
 
-#### [NEW] 皮肤 GLTF 导出函数
+**文件：** [lol_core/src/character.rs](file:///d:/Users/admin/workspace/moon-lol-minimax/crates/lol_core/src/character.rs)
 
-参考 [gltf_export.rs](file:///d:/Users/admin/workspace/moon-lol/crates/league_to_lol/src/gltf_export.rs) 中 `GltfBuilder` 的实现，新增角色皮肤 GLTF 导出：
-
-1. **网格导出**：从 `.skn` 读取顶点（Position/Normal/UV/BoneWeights/BoneIndices）和索引，构建 GLTF Mesh + Primitives
-2. **材质导出**：创建 PBR Material（metallic=0, roughness=1），关联 baseColorTexture
-3. **贴图导出**：从 `.tex` 解码为 RGBA，编码为 PNG 内嵌 GLTF Buffer（同 `GltfBuilder.load_texture_index` 实现）
-4. **骨骼导出**：从 `.skl` 构建 Joint 节点层级，计算 InverseBindMatrices，创建 GLTF Skin
-5. **动画导出**：从 `.anm` 读取关键帧，创建 GLTF Animation（channel 关联到 Joint 节点）
-
----
-
-### Component: `lol_render/skin`（简化运行时）
-
-#### [MODIFY] [skin.rs](file:///d:/Users/admin/workspace/moon-lol/crates/lol_render/src/skin/skin.rs)
-
-- 保留 `Skin` 组件（移除 `key` 字段，只保留 `scale`）
-- 废弃 `on_command_skin_spawn` 和 `update_skin_spawn`
-- 新增监听 `CharacterSkin` Added 的 system，加载 GLTF 并将 Scene 实体组件写入角色实体
-
-```diff
- #[derive(Component, Debug, Clone, Copy)]
- pub struct Skin {
--    pub key: HashKey<SkinCharacterDataProperties>,
-     pub scale: f32,
- }
+```rust
+fn try_load_config_characters(
+    mut commands: Commands,
+    character_record_query: Query<(Entity, &ConfigCharacterRecord)>,
+    dynamic_worlds: Res<Assets<DynamicWorld>>,
+) {
+    for (entity, config) in &character_record_query {
+        if dynamic_worlds.get(&config.character_record).is_none() {
+            return;  // Asset 尚未加载完成，等待下一帧
+        }
+        // 取出 handle，queue 中使用
+        let handle = config.character_record.clone();
+        commands.queue(move |world: &mut World| {
+            world.resource_scope(|world, dynamic_worlds: Mut<Assets<DynamicWorld>>| {
+                let dw = dynamic_worlds.get(&handle).unwrap();
+                let mut map = EntityMap::default();
+                // 将 DynamicWorld 中所有实体写入目标 World
+                // 第一个实体会映射到角色实体
+                dw.write_to_world(world, &mut map);
+            });
+        });
+        commands.entity(entity).remove::<ConfigCharacterRecord>();
+    }
+}
 ```
 
-#### [DELETE/SIMPLIFY] mesh.rs / skeleton.rs / animation.rs
+### 1.4 ConfigSkin 消费
 
-这些模块的运行时加载逻辑大部分可以废弃，因为 GLTF 加载后 Bevy 会自动处理 Mesh、Material、SkinnedMesh、AnimationPlayer 等组件。
+**文件：** [lol_render/src/skin/skin.rs](file:///d:/Users/admin/workspace/moon-lol-minimax/crates/lol_render/src/skin/skin.rs)
 
----
-
-### Export: 皮肤场景文件
-
-#### [MODIFY] [extract.rs](file:///d:/Users/admin/workspace/moon-lol/examples/extract.rs)
-
-新增 `export_skin` 函数：
-
-1. 读取 `SkinCharacterDataProperties`
-2. 调用皮肤 GLTF 导出，生成 `assets/characters/{name}/skin.glb`
-3. 构建皮肤场景 World，spawn 单一实体：
-   - `CharacterSkin { scene: "characters/{name}/skin.glb" }`
-   - `Skin { scale }`
-   - `HealthBar { bar_type }`（如有）
-   - `Visibility::default()`
-4. 序列化为 `assets/characters/{name}/skin.ron`
-
----
-
-## Verification Plan
-
-### Automated Tests
-
-```bash
-cargo check -p lol_base
-cargo check -p lol_render
-cargo check -p league_to_lol
-cargo check --example extract
+```rust
+fn try_load_config_skin_characters(
+    mut commands: Commands,
+    skin_query: Query<(Entity, &ConfigSkin)>,
+    dynamic_worlds: Res<Assets<DynamicWorld>>,
+) {
+    for (entity, config) in &skin_query {
+        if dynamic_worlds.get(&config.skin).is_none() {
+            return;
+        }
+        let handle = config.skin.clone();
+        commands.queue(move |world: &mut World| {
+            world.resource_scope(|world, dynamic_worlds: Mut<Assets<DynamicWorld>>| {
+                let dw = dynamic_worlds.get(&handle).unwrap();
+                let mut map = EntityMap::default();
+                map.insert(entity, entity);  // 关键：原始第一个实体映射到角色实体
+                dw.write_to_world(world, &mut map);
+            });
+        });
+        commands.entity(entity)
+            .remove::<ConfigSkin>()
+            .observe(migrate_animation_graph_handle);  // 动画迁移
+    }
+}
 ```
 
-### Manual Verification
+## 2. 角色配置结构
 
-1. 运行导出工具，生成 `skin.glb`，用 glTF 查看器（如 https://gltf-viewer.donmccurdy.com/）验证模型、材质、骨骼、动画正确
-2. 运行游戏主程序，验证角色渲染正常
+### 2.1 Character config.ron
 
-## 地图加载速度
+**文件：** `assets/characters/{name}/config.ron`
 
-### wasm
+包含角色的逻辑组件（Health、Attack、Skills 等），由 `ConfigCharacterRecord` 引用时触发写入：
 
-- webp 15s
-- etc1s 9.8s
+```ron
+(
+  resources: {},
+  entities: {
+    4294967262: (  // 根实体（glb mesh 挂载点）
+      components: {
+        "bevy_world_serialization::components::WorldAssetRoot": (
+          Path("characters/riven/skins/skin0.glb#Scene0"),
+        ),
+        "lol_base::character::Skin": (scale: 1.5),
+        "lol_base::life::HealthBar": (bar_type: 12),
+      },
+    ),
+    4294967271: (  // 角色逻辑实体
+      components: {
+        "lol_core::character::Character": (),
+        "lol_core::life::Health": (value: 630.0, max: 630.0),
+        "lol_core::attack::Attack": (range: 600.0, ...),
+        "lol_core::movement::Movement": (speed: 340.0),
+        "lol_core::skill::Skills": ([Q, W, E, R, Passive]),
+        ...
+      },
+    ),
+  },
+)
+```
 
-### windows
+### 2.2 Skin.ron
 
-- webp ?
-- etc1s 3s
+**文件：** `assets/characters/{name}/skins/{skinN}.ron`
+
+包含皮肤的渲染组件（WorldAssetRoot、Skin、HealthBar）：
+
+```ron
+(
+  resources: {},
+  entities: {
+    4294967262: (
+      components: {
+        "bevy_world_serialization::components::WorldAssetRoot": (
+          Path("characters/zyra/skins/skin0.glb#Scene0"),
+        ),
+        "lol_base::character::Skin": (scale: 1.0),
+        "lol_base::life::HealthBar": (bar_type: 12),
+        "lol_base::transform::Visibility": (),
+      },
+    ),
+  },
+)
+```
+
+### 2.3 CharacterSkin 组件
+
+当前实现使用两个独立组件：
+
+| 组件 | 文件 | 用途 |
+|------|------|------|
+| `ConfigCharacterRecord` | `lol_base/src/character.rs` | 持有 `Handle<DynamicWorld>` 指向 `config.ron` |
+| `ConfigSkin` | `lol_base/src/character.rs` | 持有 `Handle<DynamicWorld>` 指向 `skin.ron` |
+
+在 `load.md` 重构完成后，将合并为单一 `CharacterSkin` 组件，详见 [load-refactor](docs/load.md)（重构皮肤渲染：从运行时加载到 GLTF 导出）。
+
+## 3. 地图加载
+
+### 3.1 地图场景加载
+
+**文件：** [lol_core/src/map.rs](file:///d:/Users/admin/workspace/moon-lol-minimax/crates/lol_core/src/map.rs)
+
+```rust
+fn startup_load_map_geometry(
+    mut commands: Commands,
+    res_map_paths: Res<MapPaths>,
+    res_asset_server: Res<AssetServer>,
+) {
+    commands.spawn(DynamicWorldRoot(
+        res_asset_server.load(res_map_paths.scene_ron()),
+    ));
+}
+```
+
+`MapPaths::scene_ron()` 返回 `"maps/{map_name}/scene.ron"`。
+
+### 3.2 地图场景内容
+
+`maps/{map_name}/scene.ron` 包含地图上所有可放置对象：
+
+| 对象类型 | 组件 | 说明 |
+|----------|------|------|
+| 防御塔 | `ConfigCharacterRecord` + `ConfigSkin` + `Team` | 归属蓝/红方 |
+| 水晶/兵营 | `ConfigCharacterRecord` + `ConfigSkin` + `Team` | 归属蓝/红方 |
+| 野怪营地 | `ConfigCharacterRecord` + `ConfigSkin` + `MinionPath` | 包含刷新路径 |
+| 草丛/障碍物 | 仅 `Transform` + `Visibility` | 无角色逻辑 |
+
+**地图场景结构示例：**
+
+```ron
+(
+  resources: {},
+  entities: {
+    // 蓝方防御塔
+    100001: (
+      components: {
+        "lol_base::character::ConfigCharacterRecord": (
+          character_record: Path("characters/turret_tower_ascension/config.ron"),
+        ),
+        "lol_base::character::ConfigSkin": (
+          skin: Path("characters/turret_tower_ascension/skins/skin0.ron"),
+        ),
+        "lol_base::team::Team": (team: Blue),
+        "lol_base::transform::Transform": (...),
+      },
+    ),
+    // 红方野怪
+    200002: (
+      components: {
+        "lol_base::character::ConfigCharacterRecord": (
+          character_record: Path("characters/wormboss/config.ron"),
+        ),
+        "lol_base::character::ConfigSkin": (
+          skin: Path("characters/wormboss/skins/skin0.ron"),
+        ),
+        "lol_base::team::Team": (team: Neutral),
+        "lol_core::map::MinionPath": (waypoints: [...]),
+      },
+    ),
+    // 草丛（无角色逻辑）
+    300003: (
+      components: {
+        "lol_base::transform::Transform": (...),
+        "lol_base::transform::Visibility": (),
+      },
+    ),
+  },
+)
+```
+
+### 3.3 地图场景的角色加载
+
+**地图场景中的实体同样是角色实体**，共享 `try_load_config_characters` 和 `try_load_config_skin_characters` 系统：
+
+- 防御塔有 `config.ron`（包含 `Health`、攻击力等）和 `skin.ron`（包含 glb 引用）
+- 野怪有 `config.ron`（包含 `Health`、金币/经验值等）和 `skin.ron`
+- 只有 `Transform` + `Visibility` 的实体不触发角色加载
+
+### 3.4 地图几何加载
+
+**文件：** [lol_render/src/map.rs](file:///d:/Users/admin/workspace/moon-lol-minimax/crates/lol_render/src/map.rs)
+
+```rust
+fn setup(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    res_map_paths: Res<MapPaths>,
+) {
+    let handle = asset_server
+        .load_builder()
+        .with_settings(|s: &mut GltfLoaderSettings| {
+            s.validate = false;
+            s.load_materials = RenderAssetUsages::RENDER_WORLD;
+        })
+        .load(GltfAssetLabel::Scene(0).from_asset(res_map_paths.mapgeo_glb()));
+
+    commands.spawn(WorldAssetRoot(handle));
+}
+```
+
+`MapPaths::mapgeo_glb()` 返回 `"maps/{map_name}/mapgeo.glb"`。
+
+## 4. 组件类型说明
+
+### lol_base vs lol_core
+
+| 层 | 类型 | 用途 |
+|----|------|------|
+| `lol_base` | `ConfigCharacterRecord`, `ConfigSkin`, `Skin`, `HealthBar`, `Team` | 配置数据，直接序列化到场景文件 |
+| `lol_core` | `Character`, `Health`, `Attack`, `Movement`, `Skills` | 运行时逻辑组件，通过 `config.ron` 写入 |
+
+配置数据（`lol_base`）与逻辑数据（`lol_core`）分离的好处：
+- `lol_base` 类型可直接序列化到 RON 文件
+- `lol_core` 类型可自由增删，不影响场景文件兼容性
+
+### Component vs Asset
+
+| 类型 | 存储位置 | 加载方式 |
+|------|----------|----------|
+| `DynamicWorld` (Asset) | `lol_base` | 通过 `Handle<DynamicWorld>` 引用 |
+| `Gltf` (Asset) | Bevy 内置 | 通过 `Handle<Gltf>` 引用 |
+| 组件 (Component) | ECS World | 通过 `DynamicWorld.write_to_world` 写入 |
+
+## 5. glTF 加载后自动处理
+
+当 `WorldAssetRoot` 持有的 `Handle<Gltf>` 加载完成后，Bevy 会自动：
+
+1. 解析 GLTF Scene 中的节点层级
+2. 为每个 Mesh 节点生成 `Mesh3d` + `MeshMaterial3d` 组件
+3. 为带骨骼的 Mesh 生成 `SkinnedMesh` + `InverseBindMatrices` 组件
+4. 为动画片段生成 `AnimationPlayer` 组件
+
+`lol_render` 中无需额外系统处理这些原生组件，动画迁移通过 Observer 模式实现（见 [lol_render/src/skin/skin.rs](file:///d:/Users/admin/workspace/moon-lol-minimax/crates/lol_render/src/skin/skin.rs) 的 `migrate_animation_graph_handle`）。
+
+## 6. 完整时序
+
+```
+App::run()
+└── PluginCore::build()
+│      └── PluginGame::build()
+│             └── GameScenes { scenes: ["games/riven.ron"] }
+│
+└── PluginRender::build()
+       └── PluginSkin::build()
+              └── try_load_config_skin_characters (触发条件: ConfigSkin Added)
+       └── PluginRenderMap::build()
+              └── setup → spawn WorldAssetRoot(mapgeo.glb)
+
+【Startup】
+│
+├─ startup_load_game_scenes
+│      └─ spawn DynamicWorldRoot("games/riven.ron")
+│
+├─ startup_load_map_geometry
+│      └─ spawn DynamicWorldRoot("maps/sr/scene.ron")
+│
+└─ setup
+       └─ spawn WorldAssetRoot("maps/sr/mapgeo.glb")
+
+【FixedUpdate】(等 Asset 加载完成)
+
+**来自 games/{game_setting}.ron 的角色**（如英雄）
+├─ try_load_config_characters
+│      └─ DynamicWorld(config.ron) → write_to_world → Health/Attack/Skills...
+└─ try_load_config_skin_characters
+       └─ DynamicWorld(skin.ron) → write_to_world → WorldAssetRoot/Skin/HealthBar
+
+**来自 maps/{map_name}/scene.ron 的角色**（如防御塔、野怪、兵营）
+└─ 复用同一套系统，流程同上
+
+**glTF Ready (Bevy 自动)**
+└─ Mesh3d + MeshMaterial3d + SkinnedMesh + AnimationPlayer
+```
