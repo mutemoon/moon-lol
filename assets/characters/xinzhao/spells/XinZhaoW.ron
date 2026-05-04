@@ -47,6 +47,23 @@
                 multiplier: None,
                 precision: None,
             ),
+            "total_slow_duration": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "base_slow_duration",
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: None,
+                        coefficient: Some(0.005),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: Some(1),
+            ),
         }),
         effectAmounts: Some([
             (
@@ -100,15 +117,7 @@
                 ]),
             ),
             (
-                values: Some([
-                    1.5,
-                    1.5,
-                    1.5,
-                    1.5,
-                    1.5,
-                    1.5,
-                    1.5,
-                ]),
+                values: None,
             ),
             (
                 values: Some([
@@ -207,6 +216,18 @@
                     0.05,
                     0.05,
                     0.05,
+                ]),
+            ),
+            (
+                name: "BaseSlowDuration",
+                values: Some([
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
                 ]),
             ),
         ]),

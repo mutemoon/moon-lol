@@ -222,16 +222,16 @@
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
-          translation: (1550.669, 91.0, 1660.319),
-          rotation: (0.0, 0.92387956, 0.0, -0.3826834),
-          scale: (1.0, 0.99999994, 0.99999994),
+          translation: (1550.669, 90.99974, 1660.319),
+          rotation: (0.0, 0.38268343, 0.0, 0.92387956),
+          scale: (1.0, 1.0, 1.0),
         ),
         "bevy_transform::components::transform::TransformTreeChanged": (),
         "lol_base::character::ConfigCharacterRecord": (
           character_record: Path("characters/Nexus/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/Nexus/skins/Skin44.ron"),
+          skin: Path("characters/Nexus/skins/Skin0.ron"),
         ),
         "lol_core::team::Team": Order,
       },
@@ -249,7 +249,7 @@
           character_record: Path("characters/Turret/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/Turret/skins/Skin48.ron"),
+          skin: Path("characters/Turret/skins/Skin0.ron"),
         ),
         "lol_core::team::Team": Order,
       },
@@ -293,15 +293,15 @@
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
           translation: (13243.0, 91.0, 13235.0),
-          rotation: (0.0, 0.4192371, 0.0, 0.9078768),
-          scale: (1.0, 0.99999994, 0.9999999),
+          rotation: (0.0, 0.0, 0.0, 1.0),
+          scale: (1.0, 1.0, 1.0),
         ),
         "bevy_transform::components::transform::TransformTreeChanged": (),
         "lol_base::character::ConfigCharacterRecord": (
           character_record: Path("characters/Nexus/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/Nexus/skins/Skin45.ron"),
+          skin: Path("characters/Nexus/skins/Skin3.ron"),
         ),
         "lol_core::team::Team": Chaos,
       },
@@ -319,7 +319,7 @@
           character_record: Path("characters/Turret/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/Turret/skins/Skin49.ron"),
+          skin: Path("characters/Turret/skins/Skin3.ron"),
         ),
         "lol_core::team::Team": Chaos,
       },
@@ -337,7 +337,7 @@
           character_record: Path("characters/Turret/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/Turret/skins/Skin48.ron"),
+          skin: Path("characters/Turret/skins/Skin0.ron"),
         ),
         "lol_core::team::Team": Order,
       },
@@ -355,7 +355,7 @@
           character_record: Path("characters/Turret/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/Turret/skins/Skin49.ron"),
+          skin: Path("characters/Turret/skins/Skin3.ron"),
         ),
         "lol_core::team::Team": Chaos,
       },
@@ -373,7 +373,7 @@
           character_record: Path("characters/Turret/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/Turret/skins/Skin49.ron"),
+          skin: Path("characters/Turret/skins/Skin3.ron"),
         ),
         "lol_core::team::Team": Chaos,
       },
@@ -391,7 +391,7 @@
           character_record: Path("characters/Turret/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/Turret/skins/Skin48.ron"),
+          skin: Path("characters/Turret/skins/Skin0.ron"),
         ),
         "lol_core::team::Team": Order,
       },
@@ -409,7 +409,7 @@
           character_record: Path("characters/Turret/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/Turret/skins/Skin48.ron"),
+          skin: Path("characters/Turret/skins/Skin0.ron"),
         ),
         "lol_core::team::Team": Order,
       },
@@ -427,7 +427,7 @@
           character_record: Path("characters/Turret/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/Turret/skins/Skin49.ron"),
+          skin: Path("characters/Turret/skins/Skin3.ron"),
         ),
         "lol_core::team::Team": Chaos,
       },
@@ -445,7 +445,7 @@
           character_record: Path("characters/Turret/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/Turret/skins/Skin49.ron"),
+          skin: Path("characters/Turret/skins/Skin3.ron"),
         ),
         "lol_core::team::Team": Chaos,
       },
@@ -454,7 +454,7 @@
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
-          translation: (13611.213, 88.001, 11319.917),
+          translation: (13599.171, 88.001, 11319.917),
           rotation: (0.0, 0.0, 0.0, 1.0),
           scale: (0.99999994, 0.99999994, 0.9999999),
         ),
@@ -463,7 +463,7 @@
           character_record: Path("characters/Inhibitor/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/Inhibitor/skins/Skin41.ron"),
+          skin: Path("characters/Inhibitor/skins/Skin3.ron"),
         ),
         "lol_core::team::Team": Chaos,
       },
@@ -472,16 +472,16 @@
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
-          translation: (11275.23, 95.291, 13663.683),
-          rotation: (0.0, 0.70710677, 0.0, 0.7071067),
-          scale: (0.99999994, 0.99999994, 0.9999999),
+          translation: (11275.23, 95.291, 13657.173),
+          rotation: (0.0000000000000033719683, 0.7071067, 0.0000000000000045444143, 0.70710677),
+          scale: (0.99999994, 0.9999999, 0.9999998),
         ),
         "bevy_transform::components::transform::TransformTreeChanged": (),
         "lol_base::character::ConfigCharacterRecord": (
           character_record: Path("characters/Inhibitor/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/Inhibitor/skins/Skin41.ron"),
+          skin: Path("characters/Inhibitor/skins/Skin3.ron"),
         ),
         "lol_core::team::Team": Chaos,
       },
@@ -490,16 +490,16 @@
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
-          translation: (3468.068, 88.003006, 1230.9547),
-          rotation: (0.0, 0.72040117, 0.0, 0.69355756),
-          scale: (1.0000011, 0.99999994, 1.0000011),
+          translation: (3468.068, 88.003, 1230.955),
+          rotation: (0.0, 0.0, 0.0, 1.0),
+          scale: (0.99999994, 0.99999994, 0.9999999),
         ),
         "bevy_transform::components::transform::TransformTreeChanged": (),
         "lol_base::character::ConfigCharacterRecord": (
           character_record: Path("characters/Inhibitor/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/Inhibitor/skins/Skin40.ron"),
+          skin: Path("characters/Inhibitor/skins/Skin0.ron"),
         ),
         "lol_core::team::Team": Order,
       },
@@ -535,7 +535,7 @@
           character_record: Path("characters/Turret/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/Turret/skins/Skin49.ron"),
+          skin: Path("characters/Turret/skins/Skin3.ron"),
         ),
         "lol_core::team::Team": Chaos,
       },
@@ -553,7 +553,7 @@
           character_record: Path("characters/Turret/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/Turret/skins/Skin48.ron"),
+          skin: Path("characters/Turret/skins/Skin0.ron"),
         ),
         "lol_core::team::Team": Order,
       },
@@ -587,7 +587,7 @@
           character_record: Path("characters/Turret/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/Turret/skins/Skin49.ron"),
+          skin: Path("characters/Turret/skins/Skin3.ron"),
         ),
         "lol_core::team::Team": Chaos,
       },
@@ -605,7 +605,7 @@
           character_record: Path("characters/Turret/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/Turret/skins/Skin49.ron"),
+          skin: Path("characters/Turret/skins/Skin3.ron"),
         ),
         "lol_core::team::Team": Chaos,
       },
@@ -623,7 +623,7 @@
           character_record: Path("characters/Turret/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/Turret/skins/Skin49.ron"),
+          skin: Path("characters/Turret/skins/Skin3.ron"),
         ),
         "lol_core::team::Team": Chaos,
       },
@@ -657,7 +657,7 @@
           character_record: Path("characters/Turret/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/Turret/skins/Skin48.ron"),
+          skin: Path("characters/Turret/skins/Skin0.ron"),
         ),
         "lol_core::team::Team": Order,
       },
@@ -675,7 +675,7 @@
           character_record: Path("characters/Turret/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/Turret/skins/Skin49.ron"),
+          skin: Path("characters/Turret/skins/Skin3.ron"),
         ),
         "lol_core::team::Team": Chaos,
       },
@@ -693,7 +693,7 @@
           character_record: Path("characters/Turret/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/Turret/skins/Skin49.ron"),
+          skin: Path("characters/Turret/skins/Skin3.ron"),
         ),
         "lol_core::team::Team": Chaos,
       },
@@ -703,15 +703,15 @@
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
           translation: (3210.616, 88.00265, 3217.5273),
-          rotation: (0.0, 0.37079665, 0.0, 0.9287141),
-          scale: (1.000001, 0.99999994, 1.0000008),
+          rotation: (0.0, -0.3802613, 0.0, 0.9248792),
+          scale: (1.0000008, 0.99999994, 1.0000007),
         ),
         "bevy_transform::components::transform::TransformTreeChanged": (),
         "lol_base::character::ConfigCharacterRecord": (
           character_record: Path("characters/Inhibitor/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/Inhibitor/skins/Skin40.ron"),
+          skin: Path("characters/Inhibitor/skins/Skin0.ron"),
         ),
         "lol_core::team::Team": Order,
       },
@@ -736,16 +736,16 @@
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
-          translation: (11593.575, 88.001, 11669.565),
-          rotation: (0.0, 0.38268346, 0.0, 0.92387956),
-          scale: (0.99999994, 0.99999994, 0.9999999),
+          translation: (11593.575, 88.00086, 11669.565),
+          rotation: (0.0, 0.389782, 0.0, 0.920907),
+          scale: (1.0000005, 0.99999994, 1.0000005),
         ),
         "bevy_transform::components::transform::TransformTreeChanged": (),
         "lol_base::character::ConfigCharacterRecord": (
           character_record: Path("characters/Inhibitor/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/Inhibitor/skins/Skin41.ron"),
+          skin: Path("characters/Inhibitor/skins/Skin3.ron"),
         ),
         "lol_core::team::Team": Chaos,
       },
@@ -763,7 +763,7 @@
           character_record: Path("characters/Turret/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/Turret/skins/Skin48.ron"),
+          skin: Path("characters/Turret/skins/Skin0.ron"),
         ),
         "lol_core::team::Team": Order,
       },
@@ -781,7 +781,7 @@
           character_record: Path("characters/Turret/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/Turret/skins/Skin48.ron"),
+          skin: Path("characters/Turret/skins/Skin0.ron"),
         ),
         "lol_core::team::Team": Order,
       },
@@ -799,7 +799,7 @@
           character_record: Path("characters/Turret/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/Turret/skins/Skin48.ron"),
+          skin: Path("characters/Turret/skins/Skin0.ron"),
         ),
         "lol_core::team::Team": Order,
       },
@@ -817,7 +817,7 @@
           character_record: Path("characters/Turret/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/Turret/skins/Skin48.ron"),
+          skin: Path("characters/Turret/skins/Skin0.ron"),
         ),
         "lol_core::team::Team": Order,
       },
@@ -827,7 +827,7 @@
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
           translation: (1172.7019, 88.00346, 3583.286),
-          rotation: (0.0, -0.00016991835, 0.0, 1.0),
+          rotation: (0.0, 0.7137624, 0.0, -0.7003879),
           scale: (1.0000008, 0.99999994, 1.0000006),
         ),
         "bevy_transform::components::transform::TransformTreeChanged": (),
@@ -835,7 +835,7 @@
           character_record: Path("characters/Inhibitor/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/Inhibitor/skins/Skin40.ron"),
+          skin: Path("characters/Inhibitor/skins/Skin0.ron"),
         ),
         "lol_core::team::Team": Order,
       },
@@ -869,7 +869,7 @@
           character_record: Path("characters/Turret/config.ron"),
         ),
         "lol_base::character::ConfigSkin": (
-          skin: Path("characters/Turret/skins/Skin48.ron"),
+          skin: Path("characters/Turret/skins/Skin0.ron"),
         ),
         "lol_core::team::Team": Order,
       },

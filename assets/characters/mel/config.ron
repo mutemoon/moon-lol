@@ -50,7 +50,7 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 35.0,
+          duration: 38.0,
         ),
         "lol_core::skill::Skill": (
           spell: Path("characters/Mel/spells/MelW.ron"),

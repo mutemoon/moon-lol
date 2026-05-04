@@ -14,40 +14,40 @@
             ],
         ),
         "Attack1": Clip(
-            node_index: 2,
-        ),
-        "Attack2": Clip(
             node_index: 3,
         ),
-        "BuffbonesAdditive": Clip(
+        "Attack2": Clip(
             node_index: 4,
         ),
-        "Channel": Clip(
-            node_index: 0,
-        ),
-        "ChannelWndup": Clip(
-            node_index: 9,
-        ),
-        "Crit": Clip(
+        "BuffbonesAdditive": Clip(
             node_index: 5,
         ),
-        "Dance": Clip(
-            node_index: 17,
+        "Channel": Clip(
+            node_index: 1,
         ),
-        "Death": Clip(
-            node_index: 16,
+        "ChannelWndup": Clip(
+            node_index: 10,
         ),
-        "Idle1": Clip(
-            node_index: 8,
-        ),
-        "Idle2": Clip(
-            node_index: 7,
-        ),
-        "Idle3": Clip(
+        "Crit": Clip(
             node_index: 6,
         ),
+        "Dance": Clip(
+            node_index: 18,
+        ),
+        "Death": Clip(
+            node_index: 17,
+        ),
+        "Idle1": Clip(
+            node_index: 9,
+        ),
+        "Idle2": Clip(
+            node_index: 8,
+        ),
+        "Idle3": Clip(
+            node_index: 7,
+        ),
         "Laugh": Clip(
-            node_index: 13,
+            node_index: 14,
         ),
         "Recall": Sequence(
             hashes: [
@@ -57,22 +57,22 @@
             ],
         ),
         "Run": Clip(
-            node_index: 1,
+            node_index: 2,
         ),
         "Spell1": Clip(
-            node_index: 10,
-        ),
-        "Spell2": Clip(
-            node_index: 12,
-        ),
-        "Spell3": Clip(
             node_index: 11,
         ),
+        "Spell2": Clip(
+            node_index: 13,
+        ),
+        "Spell3": Clip(
+            node_index: 12,
+        ),
         "Spell4": Clip(
-            node_index: 14,
+            node_index: 15,
         ),
         "Taunt": Clip(
-            node_index: 15,
+            node_index: 16,
         ),
     },
     blend_data: {

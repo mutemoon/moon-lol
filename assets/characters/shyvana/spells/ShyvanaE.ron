@@ -1,6 +1,29 @@
 (
     spellData: Some((
         calculations: Some({
+            "calc_max_health_damage": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "max_health_damage",
+                    ),
+                ]),
+                multiplier: None,
+                precision: Some(1),
+            ),
+            "calc_max_health_monster_maximum": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            "calc_max_health_monster_minimum": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
             "calc_multihit_efficacy": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
@@ -26,16 +49,9 @@
                         dataValue: "base_damage",
                     ),
                     (
-                        type: "CalculationPartStatCoefficient",
-                        stat: Some(2),
-                        coefficient: Some(0.35),
-                        statFormula: Some(2),
-                    ),
-                    (
-                        type: "CalculationPartStatCoefficient",
+                        type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        coefficient: Some(0.7),
-                        statFormula: None,
+                        dataValue: "damage_ap_ratio",
                     ),
                 ]),
                 multiplier: None,
@@ -60,13 +76,13 @@
             (
                 name: "BaseDamage",
                 values: Some([
+                    35.0,
                     50.0,
+                    65.0,
                     80.0,
+                    95.0,
                     110.0,
-                    140.0,
-                    170.0,
-                    200.0,
-                    230.0,
+                    125.0,
                 ]),
             ),
             (
@@ -132,13 +148,13 @@
             (
                 name: "SlowAmount",
                 values: Some([
-                    0.15,
-                    0.2,
-                    0.25,
                     0.3,
-                    0.35,
-                    0.4,
-                    0.45,
+                    0.3,
+                    0.3,
+                    0.3,
+                    0.3,
+                    0.3,
+                    0.3,
                 ]),
             ),
             (
@@ -187,6 +203,42 @@
                     0.25,
                     0.25,
                     0.25,
+                ]),
+            ),
+            (
+                name: "DamageAPRatio",
+                values: Some([
+                    0.55,
+                    0.6,
+                    0.65,
+                    0.7,
+                    0.75,
+                    0.8,
+                    0.85,
+                ]),
+            ),
+            (
+                name: "MaxHealthDamage",
+                values: Some([
+                    0.05,
+                    0.05,
+                    0.05,
+                    0.05,
+                    0.05,
+                    0.05,
+                    0.05,
+                ]),
+            ),
+            (
+                name: "DamageDragonMod",
+                values: Some([
+                    1.25,
+                    1.25,
+                    1.25,
+                    1.25,
+                    1.25,
+                    1.25,
+                    1.25,
                 ]),
             ),
         ]),

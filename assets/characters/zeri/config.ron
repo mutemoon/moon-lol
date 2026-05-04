@@ -35,7 +35,7 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 22.0,
+          duration: 24.0,
         ),
         "lol_core::skill::Skill": (
           spell: Path("characters/Zeri/spells/ZeriE.ron"),

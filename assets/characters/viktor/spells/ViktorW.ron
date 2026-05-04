@@ -99,6 +99,14 @@
                     275.0,
                 ]),
             ),
+            (
+                name: "IGNORE___replaced_the_values_in_the__json",
+                values: None,
+            ),
+            (
+                name: "IGNORE___replaced_the_values_in_the__json",
+                values: None,
+            ),
         ]),
         mana: Some([
             65.0,

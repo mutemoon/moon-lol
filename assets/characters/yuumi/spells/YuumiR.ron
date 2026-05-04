@@ -1,6 +1,12 @@
 (
     spellData: Some((
         calculations: Some({
+            "ally_healing_perc": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
             "total_heal_per_wave": (
                 type: "CalculationSpell",
                 formulaParts: Some([
@@ -11,7 +17,7 @@
                     (
                         type: "CalculationPartStatCoefficient",
                         stat: None,
-                        coefficient: Some(0.1),
+                        coefficient: Some(0.12),
                         statFormula: None,
                     ),
                 ]),
@@ -29,23 +35,6 @@
                         type: "CalculationPartStatCoefficient",
                         stat: None,
                         coefficient: Some(0.25),
-                        statFormula: None,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            "unk_0xea105dd6": (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: "base_bonus_resistances",
-                    ),
-                    (
-                        type: "CalculationPartStatCoefficient",
-                        stat: None,
-                        coefficient: Some(0.1),
                         statFormula: None,
                     ),
                 ]),
@@ -178,13 +167,13 @@
             (
                 name: "BaseHealPerWave",
                 values: Some([
-                    20.0,
+                    10.0,
                     30.0,
-                    40.0,
                     50.0,
-                    60.0,
                     70.0,
-                    80.0,
+                    90.0,
+                    110.0,
+                    130.0,
                 ]),
             ),
             (
@@ -234,22 +223,6 @@
                     10.0,
                     10.0,
                 ]),
-            ),
-            (
-                name: "AllyHealingPerc",
-                values: Some([
-                    1.3,
-                    1.3,
-                    1.3,
-                    1.3,
-                    1.3,
-                    1.3,
-                    1.3,
-                ]),
-            ),
-            (
-                name: "BaseBonusResistances",
-                values: None,
             ),
         ]),
         mana: Some([

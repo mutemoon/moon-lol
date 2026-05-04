@@ -5,8 +5,8 @@
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
-                        type: "CalculationPartEffectValue",
-                        effectIndex: Some(1),
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "base_heal",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -91,7 +91,68 @@
                 values: None,
             ),
         ]),
-        dataValues: None,
+        dataValues: Some([
+            (
+                name: "BaseHeal",
+                values: Some([
+                    20.0,
+                    45.0,
+                    70.0,
+                    95.0,
+                    120.0,
+                    145.0,
+                    170.0,
+                ]),
+            ),
+            (
+                name: "PercentHeal",
+                values: Some([
+                    13.0,
+                    13.0,
+                    13.0,
+                    13.0,
+                    13.0,
+                    13.0,
+                    13.0,
+                ]),
+            ),
+            (
+                name: "BuffDuration_unused",
+                values: Some([
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                ]),
+            ),
+            (
+                name: "HasteAmount",
+                values: Some([
+                    200.0,
+                    200.0,
+                    200.0,
+                    200.0,
+                    200.0,
+                    200.0,
+                    200.0,
+                ]),
+            ),
+            (
+                name: "SteroidAmount_unused",
+                values: Some([
+                    20.0,
+                    30.0,
+                    40.0,
+                    50.0,
+                    60.0,
+                    70.0,
+                    80.0,
+                ]),
+            ),
+        ]),
         mana: Some([
             60.0,
             70.0,

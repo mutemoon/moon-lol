@@ -5,8 +5,8 @@
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
-                        type: "CalculationPartEffectValue",
-                        effectIndex: Some(1),
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "damage_to_deal",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -94,6 +94,54 @@
                     0.9,
                     0.9,
                     0.9,
+                ]),
+            ),
+            (
+                name: "DamageToDeal",
+                values: Some([
+                    35.0,
+                    80.0,
+                    125.0,
+                    170.0,
+                    215.0,
+                    260.0,
+                    305.0,
+                ]),
+            ),
+            (
+                name: "CCDuration",
+                values: Some([
+                    1.0,
+                    1.25,
+                    1.5,
+                    1.75,
+                    2.0,
+                    2.25,
+                    2.5,
+                ]),
+            ),
+            (
+                name: "LeashDuration",
+                values: Some([
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                    2.0,
+                ]),
+            ),
+            (
+                name: "LeashBreakRange",
+                values: Some([
+                    465.0,
+                    465.0,
+                    465.0,
+                    465.0,
+                    465.0,
+                    465.0,
+                    465.0,
                 ]),
             ),
         ]),

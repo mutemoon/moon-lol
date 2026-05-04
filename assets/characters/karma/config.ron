@@ -112,7 +112,7 @@
         ),
         "lol_core::character::Character": (),
         "lol_core::damage::Armor": (5.0),
-        "lol_core::damage::Damage": (51.0),
+        "lol_core::damage::Damage": (49.0),
         "lol_core::entities::champion::Champion": (),
         "lol_core::life::Health": (
           value: 630.0,

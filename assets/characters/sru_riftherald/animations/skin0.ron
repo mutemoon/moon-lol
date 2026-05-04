@@ -2,7 +2,7 @@
     gltf_path: "characters/SRU_RiftHerald/skins/Skin0.glb",
     hash_to_node: {
         "AngryIdle": Clip(
-            node_index: 17,
+            node_index: 18,
         ),
         "Attack": Selector(
             probably_nodes: [
@@ -17,31 +17,31 @@
             ],
         ),
         "Attack1": Clip(
-            node_index: 7,
-        ),
-        "Attack2": Clip(
-            node_index: 9,
-        ),
-        "Attack3": Clip(
             node_index: 8,
         ),
+        "Attack2": Clip(
+            node_index: 10,
+        ),
+        "Attack3": Clip(
+            node_index: 9,
+        ),
         "Dance": Clip(
-            node_index: 25,
+            node_index: 26,
         ),
         "Dash": Clip(
-            node_index: 0,
+            node_index: 1,
         ),
         "DashHit": Clip(
-            node_index: 22,
-        ),
-        "DashWindup": Clip(
             node_index: 23,
         ),
+        "DashWindup": Clip(
+            node_index: 24,
+        ),
         "Death": Clip(
-            node_index: 20,
+            node_index: 21,
         ),
         "EyeOpen": Clip(
-            node_index: 21,
+            node_index: 22,
         ),
         "Idle1": ConditionFloat(
             updater: LookAtInterestDistance,
@@ -57,55 +57,55 @@
             ],
         ),
         "IdleBase": Clip(
-            node_index: 13,
-        ),
-        "IdleIn": Clip(
-            node_index: 18,
-        ),
-        "PilotEnter": Clip(
-            node_index: 2,
-        ),
-        "Run": Clip(
-            node_index: 3,
-        ),
-        "SgSpawn": Clip(
-            node_index: 6,
-        ),
-        "Spawn": Clip(
-            node_index: 5,
-        ),
-        "SpawnPlacement": Clip(
-            node_index: 11,
-        ),
-        "Stun": Clip(
-            node_index: 24,
-        ),
-        "Taunt": Clip(
-            node_index: 19,
-        ),
-        "TowerAttack": Clip(
-            node_index: 16,
-        ),
-        "TowerattackLoopAttack": Clip(
             node_index: 14,
         ),
-        "Unk0x19dac8a1": Clip(
-            node_index: 1,
+        "IdleIn": Clip(
+            node_index: 19,
         ),
-        "Unk0x359abda9": Clip(
+        "PilotEnter": Clip(
+            node_index: 3,
+        ),
+        "Run": Clip(
             node_index: 4,
         ),
-        "Unk0x660a7645": Clip(
-            node_index: 10,
+        "SgSpawn": Clip(
+            node_index: 7,
         ),
-        "Unk0x84829257": Clip(
+        "Spawn": Clip(
+            node_index: 6,
+        ),
+        "SpawnPlacement": Clip(
             node_index: 12,
         ),
-        "Unk0x881a046c": Clip(
+        "Stun": Clip(
+            node_index: 25,
+        ),
+        "Taunt": Clip(
+            node_index: 20,
+        ),
+        "TowerAttack": Clip(
+            node_index: 17,
+        ),
+        "TowerattackLoopAttack": Clip(
             node_index: 15,
         ),
+        "Unk0x19dac8a1": Clip(
+            node_index: 2,
+        ),
+        "Unk0x359abda9": Clip(
+            node_index: 5,
+        ),
+        "Unk0x660a7645": Clip(
+            node_index: 11,
+        ),
+        "Unk0x84829257": Clip(
+            node_index: 13,
+        ),
+        "Unk0x881a046c": Clip(
+            node_index: 16,
+        ),
         "Unk0xf90ba22b": Clip(
-            node_index: 26,
+            node_index: 27,
         ),
     },
     blend_data: {

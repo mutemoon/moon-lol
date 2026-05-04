@@ -7,7 +7,7 @@
                     (
                         type: "CalculationPartStatCoefficient",
                         stat: Some(12),
-                        coefficient: Some(0.045),
+                        coefficient: Some(0.04),
                         statFormula: Some(2),
                     ),
                     (
@@ -17,36 +17,6 @@
                     ),
                 ]),
                 multiplier: None,
-                precision: None,
-            ),
-            "unk_0x301fe730": (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartStatCoefficient",
-                        stat: Some(12),
-                        coefficient: Some(0.03),
-                        statFormula: Some(2),
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            "unk_0x6c966659": (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: Some(12),
-                        dataValue: "ap_ratio_per100_bonus_hp",
-                    ),
-                ]),
-                multiplier: Some((
-                    type: "CalculationPartStatCoefficient",
-                    stat: None,
-                    coefficient: Some(0.01),
-                    statFormula: None,
-                )),
                 precision: None,
             ),
         }),
@@ -91,13 +61,13 @@
             (
                 name: "APRatioPer100BonusHP",
                 values: Some([
-                    0.015,
-                    0.015,
-                    0.015,
-                    0.015,
-                    0.015,
-                    0.015,
-                    0.015,
+                    0.0125,
+                    0.0125,
+                    0.0125,
+                    0.0125,
+                    0.0125,
+                    0.0125,
+                    0.0125,
                 ]),
             ),
         ]),

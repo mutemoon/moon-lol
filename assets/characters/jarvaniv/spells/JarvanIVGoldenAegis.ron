@@ -1,7 +1,20 @@
 (
     spellData: Some((
         calculations: Some({
-            "base_shield": (
+            "bonus_shield": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(12),
+                        coefficient: Some(0.013),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "total_shield": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
@@ -13,19 +26,6 @@
                         stat: Some(2),
                         coefficient: Some(0.7),
                         statFormula: Some(2),
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            "bonus_shield": (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartStatCoefficient",
-                        stat: Some(12),
-                        coefficient: Some(0.013),
-                        statFormula: None,
                     ),
                 ]),
                 multiplier: None,
@@ -45,15 +45,7 @@
                 ]),
             ),
             (
-                values: Some([
-                    10.0,
-                    15.0,
-                    20.0,
-                    25.0,
-                    30.0,
-                    35.0,
-                    40.0,
-                ]),
+                values: None,
             ),
             (
                 values: Some([
@@ -112,7 +104,20 @@
                 values: None,
             ),
         ]),
-        dataValues: None,
+        dataValues: Some([
+            (
+                name: "BaseSlowAmount",
+                values: Some([
+                    0.1,
+                    0.15,
+                    0.2,
+                    0.25,
+                    0.3,
+                    0.35,
+                    0.4,
+                ]),
+            ),
+        ]),
         mana: Some([
             30.0,
             30.0,

@@ -143,6 +143,46 @@
                     1.0,
                 ]),
             ),
+            (
+                name: "GoldProc",
+                values: Some([
+                    2.0,
+                    3.0,
+                    4.0,
+                    5.0,
+                    6.0,
+                    7.0,
+                    8.0,
+                ]),
+            ),
+            (
+                name: "SSProc",
+                values: Some([
+                    3.0,
+                    4.0,
+                    5.0,
+                    6.0,
+                    7.0,
+                    8.0,
+                    9.0,
+                ]),
+            ),
+            (
+                name: "ManaRefundPercent",
+                values: None,
+            ),
+            (
+                name: "PlunderThreshold",
+                values: Some([
+                    500.0,
+                    500.0,
+                    500.0,
+                    500.0,
+                    500.0,
+                    500.0,
+                    500.0,
+                ]),
+            ),
         ]),
         mana: Some([
             50.0,

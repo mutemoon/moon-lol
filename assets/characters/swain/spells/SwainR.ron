@@ -285,6 +285,22 @@
                     8.0,
                 ]),
             ),
+            (
+                name: "BasePercentHealthSteal",
+                values: None,
+            ),
+            (
+                name: "TicksPerSecond",
+                values: None,
+            ),
+            (
+                name: "DotDuration",
+                values: None,
+            ),
+            (
+                name: "MinDamage",
+                values: None,
+            ),
         ]),
         mana: Some([
             100.0,

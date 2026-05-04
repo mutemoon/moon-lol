@@ -108,6 +108,30 @@
                     0.5,
                 ]),
             ),
+            (
+                name: "VisionReductionRadius",
+                values: Some([
+                    -1000.0,
+                    -1000.0,
+                    -1000.0,
+                    -1000.0,
+                    -1000.0,
+                    -1000.0,
+                    -1000.0,
+                ]),
+            ),
+            (
+                name: "VisionReductionDuration",
+                values: Some([
+                    1.75,
+                    1.75,
+                    1.75,
+                    1.75,
+                    1.75,
+                    1.75,
+                    1.75,
+                ]),
+            ),
         ]),
         mana: Some([
             50.0,

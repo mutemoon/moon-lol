@@ -113,7 +113,32 @@
                 ]),
             ),
         ]),
-        dataValues: None,
+        dataValues: Some([
+            (
+                name: "ChampionBonusDamage",
+                values: Some([
+                    80.0,
+                    80.0,
+                    105.0,
+                    130.0,
+                    155.0,
+                    180.0,
+                    205.0,
+                ]),
+            ),
+            (
+                name: "SlowAmount",
+                values: Some([
+                    30.0,
+                    40.0,
+                    50.0,
+                    60.0,
+                    70.0,
+                    80.0,
+                    90.0,
+                ]),
+            ),
+        ]),
         mana: None,
         missileSpec: None,
         hitBoneName: None,

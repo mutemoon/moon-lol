@@ -16,7 +16,7 @@
                     (
                         type: "CalculationPartStatCoefficient",
                         stat: None,
-                        coefficient: Some(0.25),
+                        coefficient: Some(0.3),
                         statFormula: None,
                     ),
                 ]),
@@ -34,11 +34,6 @@
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(2),
                         dataValue: "max_health_ad_ratio",
-                    ),
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: None,
-                        dataValue: "max_health_ap_ratio",
                     ),
                 ]),
                 multiplier: None,
@@ -139,13 +134,13 @@
             (
                 name: "Cooldown_Reduction",
                 values: Some([
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
                 ]),
             ),
             (
@@ -162,18 +157,6 @@
             ),
             (
                 name: "Max_Health_AD_Ratio",
-                values: Some([
-                    0.00011,
-                    0.00011,
-                    0.00011,
-                    0.00011,
-                    0.00011,
-                    0.00011,
-                    0.00011,
-                ]),
-            ),
-            (
-                name: "Max_Health_AP_Ratio",
                 values: Some([
                     0.00011,
                     0.00011,

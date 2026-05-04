@@ -41,7 +41,20 @@
                 values: None,
             ),
         ]),
-        dataValues: None,
+        dataValues: Some([
+            (
+                name: "BaseDamage",
+                values: Some([
+                    25.0,
+                    70.0,
+                    115.0,
+                    160.0,
+                    205.0,
+                    250.0,
+                    295.0,
+                ]),
+            ),
+        ]),
         mana: Some([
             70.0,
             80.0,

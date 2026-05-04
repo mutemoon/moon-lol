@@ -1,0 +1,74 @@
+(
+    gltf_path: "characters/Nexus/skins/Skin0.glb",
+    hash_to_node: {
+        "Attack": Selector(
+            probably_nodes: [
+                (
+                    key: "Attack1",
+                    value: 1.0,
+                ),
+                (
+                    key: "Attack2",
+                    value: 1.0,
+                ),
+            ],
+        ),
+        "Death": Clip(
+            node_index: 3,
+        ),
+        "Idle1": Sequence(
+            hashes: [
+                "Unk0x1115b967",
+                "Unk0xdd94ffb9",
+                "Idle1Base",
+            ],
+        ),
+        "Idle1Base": Clip(
+            node_index: 2,
+        ),
+        "Unk0x1115b967": Clip(
+            node_index: 1,
+        ),
+        "Unk0xdd94ffb9": Clip(
+            node_index: 4,
+        ),
+    },
+    blend_data: {
+        ("Death", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Death", "Idle1Base"): Time(
+            time: 0.0,
+        ),
+        ("Death", "Unk0xdd94ffb9"): Time(
+            time: 0.0,
+        ),
+        ("Idle1", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Idle1", "Idle1"): Time(
+            time: 0.0,
+        ),
+        ("Idle1Base", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Idle1Base", "Idle1Base"): Time(
+            time: 0.0,
+        ),
+        ("Idle1Base", "Unk0xdd94ffb9"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x1115b967", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xdd94ffb9", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xdd94ffb9", "Idle1Base"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xdd94ffb9", "Unk0xdd94ffb9"): Time(
+            time: 0.0,
+        ),
+    },
+)

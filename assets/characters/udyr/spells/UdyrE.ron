@@ -1,9 +1,33 @@
 (
     spellData: Some((
         calculations: Some({
+            "move_speed": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "base_move_speed",
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(2),
+                        coefficient: Some(0.0005),
+                        statFormula: Some(2),
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
             "move_speed_bonus": (
                 type: "CalculationSpell",
-                formulaParts: Some([]),
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(2),
+                        coefficient: Some(0.001),
+                        statFormula: Some(2),
+                    ),
+                ]),
                 multiplier: None,
                 precision: None,
             ),
@@ -29,7 +53,7 @@
                 ]),
             ),
             (
-                name: "MoveSpeed",
+                name: "BaseMoveSpeed",
                 values: Some([
                     0.19,
                     0.25,

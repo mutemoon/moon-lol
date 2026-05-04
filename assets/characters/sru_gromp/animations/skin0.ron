@@ -14,22 +14,22 @@
             ],
         ),
         "Attack1Left": Clip(
-            node_index: 24,
+            node_index: 25,
         ),
         "Attack1Mid": Clip(
-            node_index: 19,
-        ),
-        "Attack1Right": Clip(
-            node_index: 23,
-        ),
-        "Attack1bLeft": Clip(
-            node_index: 5,
-        ),
-        "Attack1bRight": Clip(
             node_index: 20,
         ),
+        "Attack1Right": Clip(
+            node_index: 24,
+        ),
+        "Attack1bLeft": Clip(
+            node_index: 6,
+        ),
+        "Attack1bRight": Clip(
+            node_index: 21,
+        ),
         "Death": Clip(
-            node_index: 14,
+            node_index: 15,
         ),
         "Idle1": ConditionFloat(
             updater: LookAtInterestDistance,
@@ -45,7 +45,7 @@
             ],
         ),
         "Run": Clip(
-            node_index: 0,
+            node_index: 1,
         ),
         "Spawn": Sequence(
             hashes: [
@@ -61,10 +61,10 @@
             ],
         ),
         "Unk0x308b189f": Clip(
-            node_index: 1,
+            node_index: 2,
         ),
         "Unk0x31dc9e56": Clip(
-            node_index: 2,
+            node_index: 3,
         ),
         "Unk0x32b38b96": Parallel(
             hashes: [
@@ -79,10 +79,10 @@
             ],
         ),
         "Unk0x419d82cf": Clip(
-            node_index: 3,
+            node_index: 4,
         ),
         "Unk0x48ca57fa": Clip(
-            node_index: 4,
+            node_index: 5,
         ),
         "Unk0x4d8a4fff": Sequence(
             hashes: [
@@ -91,10 +91,10 @@
             ],
         ),
         "Unk0x554e8c84": Clip(
-            node_index: 6,
+            node_index: 7,
         ),
         "Unk0x554f5315": Clip(
-            node_index: 7,
+            node_index: 8,
         ),
         "Unk0x713be959": Parametric(
             pairs: [
@@ -133,7 +133,7 @@
             ],
         ),
         "Unk0x7708fb66": Clip(
-            node_index: 8,
+            node_index: 9,
         ),
         "Unk0x78a49bc0": Selector(
             probably_nodes: [
@@ -186,31 +186,31 @@
             ],
         ),
         "Unk0x8efaa000": Clip(
-            node_index: 9,
-        ),
-        "Unk0x90c6bb8a": Clip(
             node_index: 10,
         ),
-        "Unk0xa8658ee7": Clip(
+        "Unk0x90c6bb8a": Clip(
             node_index: 11,
         ),
-        "Unk0xa8cc186b": Clip(
+        "Unk0xa8658ee7": Clip(
             node_index: 12,
         ),
-        "Unk0xb6a527d3": Clip(
+        "Unk0xa8cc186b": Clip(
             node_index: 13,
         ),
-        "Unk0xc1859e94": Clip(
-            node_index: 15,
+        "Unk0xb6a527d3": Clip(
+            node_index: 14,
         ),
-        "Unk0xc43b07a1": Clip(
+        "Unk0xc1859e94": Clip(
             node_index: 16,
         ),
-        "Unk0xcadb534d": Clip(
+        "Unk0xc43b07a1": Clip(
             node_index: 17,
         ),
-        "Unk0xd227b3d3": Clip(
+        "Unk0xcadb534d": Clip(
             node_index: 18,
+        ),
+        "Unk0xd227b3d3": Clip(
+            node_index: 19,
         ),
         "Unk0xd36438f5": Parallel(
             hashes: [
@@ -235,10 +235,10 @@
             ],
         ),
         "Unk0xe4cb0f58": Clip(
-            node_index: 21,
+            node_index: 22,
         ),
         "Unk0xeaadec65": Clip(
-            node_index: 22,
+            node_index: 23,
         ),
         "Unk0xec5a5b00": Sequence(
             hashes: [

@@ -104,6 +104,10 @@
                     8.0,
                 ]),
             ),
+            (
+                name: "DamagePerTick",
+                values: None,
+            ),
         ]),
         mana: Some([
             13.0,

@@ -7,13 +7,13 @@
         missileSpec: Some((
             movementComponent: (
                 type: "MovementTypeFixedSpeed",
-                speed: None,
-                startBoneName: None,
+                speed: Some(600.0),
+                startBoneName: Some("R_buffbone_Glb_Foot_Loc"),
             ),
         )),
         hitBoneName: None,
-        missileSpeed: None,
+        missileSpeed: Some(400.0),
         missileEffectKey: None,
-        castType: Some(3),
+        castType: Some(7),
     )),
 )

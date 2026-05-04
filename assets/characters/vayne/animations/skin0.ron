@@ -13,59 +13,65 @@
                 ),
             ],
         ),
-        "Attack1": Clip(
-            node_index: 7,
-        ),
-        "Attack2": Clip(
-            node_index: 8,
+        "Attack1": Selector(
+            probably_nodes: [
+                (
+                    key: "Unk0xbe3c99d2",
+                    value: 50.0,
+                ),
+                (
+                    key: "Unk0xbd3c983f",
+                    value: 50.0,
+                ),
+            ],
         ),
         "AttackTumble": Clip(
-            node_index: 1,
+            node_index: 2,
         ),
         "AttackTumbleUlt": Clip(
-            node_index: 9,
+            node_index: 8,
         ),
         "AttackUlt": Clip(
-            node_index: 23,
-        ),
-        "Channel": Clip(
-            node_index: 3,
-        ),
-        "ChannelWndup": Clip(
-            node_index: 16,
-        ),
-        "Crit": Clip(
-            node_index: 10,
-        ),
-        "Dance": Clip(
             node_index: 24,
         ),
-        "Death": Clip(
-            node_index: 21,
+        "Channel": Clip(
+            node_index: 4,
         ),
-        "Idle1": Clip(
-            node_index: 13,
-        ),
-        "Idle2": Clip(
-            node_index: 12,
-        ),
-        "Idle3": Clip(
-            node_index: 11,
-        ),
-        "Idle4": Clip(
+        "ChannelWndup": Clip(
             node_index: 15,
         ),
-        "IdleTumbleUlt": Clip(
-            node_index: 5,
+        "Crit": Clip(
+            node_index: 9,
         ),
-        "IdleUlt": Clip(
+        "Dance": Clip(
             node_index: 25,
         ),
+        "Death": Clip(
+            node_index: 20,
+        ),
+        "Idle1": Clip(
+            node_index: 12,
+        ),
+        "Idle2": Clip(
+            node_index: 11,
+        ),
+        "Idle3": Clip(
+            node_index: 10,
+        ),
+        "Idle4": Clip(
+            node_index: 14,
+        ),
+        "IdleTumbleUlt": Clip(
+            node_index: 6,
+        ),
+        "IdleUlt": Clip(
+            node_index: 26,
+        ),
         "Joke": Clip(
-            node_index: 22,
+            node_index: 23,
         ),
         "Laugh": Clip(
-            node_index: 19,
+            node_index: 18,
         ),
         "Recall": Sequence(
             hashes: [
@@ -74,35 +80,38 @@
             ],
         ),
         "Run": Clip(
-            node_index: 4,
+            node_index: 5,
         ),
         "RunTumble": Clip(
-            node_index: 6,
+            node_index: 7,
         ),
         "RunUlt": Clip(
-            node_index: 2,
+            node_index: 3,
         ),
         "Spell1": Clip(
-            node_index: 17,
+            node_index: 16,
         ),
         "Spell3": Clip(
-            node_index: 18,
+            node_index: 17,
         ),
         "Taunt": Clip(
-            node_index: 20,
+            node_index: 19,
         ),
         "Unk0x37e9b0f": Clip(
-            node_index: 0,
+            node_index: 1,
         ),
         "Unk0xa22e456f": Clip(
-            node_index: 14,
+            node_index: 13,
+        ),
+        "Unk0xbd3c983f": Clip(
+            node_index: 21,
+        ),
+        "Unk0xbe3c99d2": Clip(
+            node_index: 22,
         ),
     },
     blend_data: {
         ("Attack1", "Death"): Time(
-            time: 0.0,
-        ),
-        ("Attack2", "Death"): Time(
             time: 0.0,
         ),
         ("AttackTumble", "Death"): Time(
@@ -175,6 +184,12 @@
             time: 0.0,
         ),
         ("Unk0xa22e456f", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xbd3c983f", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xbe3c99d2", "Death"): Time(
             time: 0.0,
         ),
     },

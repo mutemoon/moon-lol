@@ -14,25 +14,25 @@
             ],
         ),
         "Attack1": Clip(
-            node_index: 12,
-        ),
-        "Attack2": Clip(
             node_index: 13,
         ),
+        "Attack2": Clip(
+            node_index: 14,
+        ),
         "Channel": Clip(
-            node_index: 5,
+            node_index: 6,
         ),
         "ChannelWndup": Clip(
-            node_index: 21,
+            node_index: 22,
         ),
         "Crit": Clip(
-            node_index: 18,
+            node_index: 19,
         ),
         "Dance": Clip(
-            node_index: 32,
+            node_index: 33,
         ),
         "Death": Clip(
-            node_index: 25,
+            node_index: 26,
         ),
         "Idle1": Sequence(
             hashes: [
@@ -42,7 +42,7 @@
             ],
         ),
         "Idle1Base": Clip(
-            node_index: 14,
+            node_index: 15,
         ),
         "Idle2": Sequence(
             hashes: [
@@ -55,7 +55,7 @@
             ],
         ),
         "Idle2Base": Clip(
-            node_index: 29,
+            node_index: 30,
         ),
         "Joke": Sequence(
             hashes: [
@@ -88,22 +88,22 @@
             ],
         ),
         "RespawnBase": Clip(
-            node_index: 3,
+            node_index: 4,
         ),
         "Run": Clip(
-            node_index: 8,
+            node_index: 9,
         ),
         "Run1In": Clip(
-            node_index: 11,
+            node_index: 12,
         ),
         "RunFast": Clip(
-            node_index: 23,
+            node_index: 24,
         ),
         "RunHaste": Clip(
-            node_index: 6,
+            node_index: 7,
         ),
         "RunUlt": Clip(
-            node_index: 4,
+            node_index: 5,
         ),
         "Spell1": Parallel(
             hashes: [
@@ -112,10 +112,10 @@
             ],
         ),
         "Spell1Base": Clip(
-            node_index: 27,
+            node_index: 28,
         ),
         "Spell1Upper": Clip(
-            node_index: 9,
+            node_index: 10,
         ),
         "Spell2": Parallel(
             hashes: [
@@ -124,7 +124,7 @@
             ],
         ),
         "Spell2Base": Clip(
-            node_index: 17,
+            node_index: 18,
         ),
         "Spell3": Parallel(
             hashes: [
@@ -133,10 +133,10 @@
             ],
         ),
         "Spell3Base": Clip(
-            node_index: 24,
+            node_index: 25,
         ),
         "Spell3Upper": Clip(
-            node_index: 30,
+            node_index: 31,
         ),
         "Spell4": Parallel(
             hashes: [
@@ -145,10 +145,10 @@
             ],
         ),
         "Spell4Base": Clip(
-            node_index: 22,
+            node_index: 23,
         ),
         "Spell4Upper": Clip(
-            node_index: 28,
+            node_index: 29,
         ),
         "Taunt": Sequence(
             hashes: [
@@ -157,34 +157,34 @@
             ],
         ),
         "TauntBase": Clip(
-            node_index: 0,
-        ),
-        "Unk0x125f46e4": Clip(
             node_index: 1,
         ),
-        "Unk0x13f95189": Clip(
+        "Unk0x125f46e4": Clip(
             node_index: 2,
         ),
+        "Unk0x13f95189": Clip(
+            node_index: 3,
+        ),
         "Unk0x2930a435": Clip(
-            node_index: 7,
+            node_index: 8,
         ),
         "Unk0x432b1d96": Clip(
-            node_index: 10,
+            node_index: 11,
         ),
         "Unk0x70075e7e": Clip(
-            node_index: 15,
-        ),
-        "Unk0x7b201d91": Clip(
             node_index: 16,
         ),
-        "Unk0x9d46ce26": Clip(
-            node_index: 19,
+        "Unk0x7b201d91": Clip(
+            node_index: 17,
         ),
-        "Unk0x9e55a33e": Clip(
+        "Unk0x9d46ce26": Clip(
             node_index: 20,
         ),
+        "Unk0x9e55a33e": Clip(
+            node_index: 21,
+        ),
         "Unk0xcb99887e": Clip(
-            node_index: 26,
+            node_index: 27,
         ),
         "Unk0xd949c0fe": Sequence(
             hashes: [
@@ -193,7 +193,7 @@
             ],
         ),
         "Unk0xe9ba192a": Clip(
-            node_index: 31,
+            node_index: 32,
         ),
     },
     blend_data: {

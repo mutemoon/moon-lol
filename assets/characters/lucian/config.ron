@@ -35,7 +35,7 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 18.0,
+          duration: 16.0,
         ),
         "lol_core::skill::Skill": (
           spell: Path("characters/Lucian/spells/LucianE.ron"),

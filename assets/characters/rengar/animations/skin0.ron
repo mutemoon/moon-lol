@@ -14,31 +14,31 @@
             ],
         ),
         "Attack1": Clip(
-            node_index: 7,
-        ),
-        "Attack2": Clip(
-            node_index: 10,
-        ),
-        "Attack3": Clip(
             node_index: 8,
         ),
+        "Attack2": Clip(
+            node_index: 11,
+        ),
+        "Attack3": Clip(
+            node_index: 9,
+        ),
         "Attack4": Clip(
-            node_index: 6,
+            node_index: 7,
         ),
         "Channel": Clip(
-            node_index: 2,
+            node_index: 3,
         ),
         "ChannelWndup": Clip(
-            node_index: 17,
+            node_index: 18,
         ),
         "Crit": Clip(
-            node_index: 16,
+            node_index: 17,
         ),
         "Dance": Clip(
-            node_index: 32,
+            node_index: 33,
         ),
         "Death": Clip(
-            node_index: 27,
+            node_index: 28,
         ),
         "Idle1": Selector(
             probably_nodes: [
@@ -53,16 +53,16 @@
             ],
         ),
         "Idle1Base": Clip(
-            node_index: 13,
+            node_index: 14,
         ),
         "Idle2Base": Clip(
-            node_index: 31,
+            node_index: 32,
         ),
         "Joke": Clip(
-            node_index: 29,
+            node_index: 30,
         ),
         "Laugh": Clip(
-            node_index: 22,
+            node_index: 23,
         ),
         "Recall": Sequence(
             hashes: [
@@ -71,22 +71,22 @@
             ],
         ),
         "Run": Clip(
-            node_index: 3,
-        ),
-        "Run1Fast": Clip(
             node_index: 4,
         ),
+        "Run1Fast": Clip(
+            node_index: 5,
+        ),
         "Run2": Clip(
-            node_index: 9,
+            node_index: 10,
         ),
         "Spell1": Clip(
-            node_index: 19,
+            node_index: 20,
         ),
         "Spell1Run2Tra": Clip(
-            node_index: 15,
+            node_index: 16,
         ),
         "Spell1RunTra": Clip(
-            node_index: 28,
+            node_index: 29,
         ),
         "Spell2": ConditionBool(
             updater: IsMoving,
@@ -94,46 +94,46 @@
             false_node: "Spell2Idle",
         ),
         "Spell2Idle": Clip(
-            node_index: 30,
+            node_index: 31,
         ),
         "Spell2Run": Clip(
-            node_index: 1,
+            node_index: 2,
         ),
         "Spell3": Clip(
-            node_index: 20,
-        ),
-        "Spell4": Clip(
-            node_index: 24,
-        ),
-        "Spell4Idle": Clip(
             node_index: 21,
         ),
-        "Spell4Loop": Clip(
-            node_index: 18,
-        ),
-        "Spell4Winddown": Clip(
-            node_index: 5,
-        ),
-        "Spell5": Clip(
-            node_index: 23,
-        ),
-        "Spell6": Clip(
+        "Spell4": Clip(
             node_index: 25,
         ),
-        "Taunt": Clip(
+        "Spell4Idle": Clip(
+            node_index: 22,
+        ),
+        "Spell4Loop": Clip(
+            node_index: 19,
+        ),
+        "Spell4Winddown": Clip(
+            node_index: 6,
+        ),
+        "Spell5": Clip(
+            node_index: 24,
+        ),
+        "Spell6": Clip(
             node_index: 26,
         ),
-        "Unk0x602b063d": Clip(
-            node_index: 11,
+        "Taunt": Clip(
+            node_index: 27,
         ),
-        "Unk0x6208af50": Clip(
+        "Unk0x602b063d": Clip(
             node_index: 12,
         ),
+        "Unk0x6208af50": Clip(
+            node_index: 13,
+        ),
         "Unk0x713ed5b5": Clip(
-            node_index: 14,
+            node_index: 15,
         ),
         "Unk0xfb24234": Clip(
-            node_index: 0,
+            node_index: 1,
         ),
     },
     blend_data: {

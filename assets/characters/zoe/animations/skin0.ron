@@ -14,22 +14,22 @@
             ],
         ),
         "Attack1": Clip(
-            node_index: 25,
-        ),
-        "Attack2": Clip(
-            node_index: 27,
-        ),
-        "Attack3": Clip(
             node_index: 26,
         ),
+        "Attack2": Clip(
+            node_index: 28,
+        ),
+        "Attack3": Clip(
+            node_index: 27,
+        ),
         "Channel": Clip(
-            node_index: 13,
+            node_index: 14,
         ),
         "ChannelWndup": Clip(
-            node_index: 57,
+            node_index: 58,
         ),
         "Crit": Clip(
-            node_index: 49,
+            node_index: 50,
         ),
         "Dance": Sequence(
             hashes: [
@@ -38,19 +38,19 @@
             ],
         ),
         "DanceLoop": Clip(
-            node_index: 12,
+            node_index: 13,
         ),
         "DanceStart": Clip(
-            node_index: 11,
+            node_index: 12,
         ),
         "Death": Clip(
-            node_index: 71,
+            node_index: 72,
         ),
         "EmpoweredAttack": Clip(
-            node_index: 66,
+            node_index: 67,
         ),
         "EmpoweredAttackToRun": Clip(
-            node_index: 24,
+            node_index: 25,
         ),
         "Idle1": Selector(
             probably_nodes: [
@@ -69,25 +69,25 @@
             ],
         ),
         "Idle1Base": Clip(
-            node_index: 29,
+            node_index: 30,
         ),
         "Idle2Base": Clip(
-            node_index: 86,
+            node_index: 87,
         ),
         "IdleIn1": Clip(
-            node_index: 6,
+            node_index: 7,
         ),
         "IdleIn2": Clip(
-            node_index: 5,
+            node_index: 6,
         ),
         "IdleIn3": Clip(
-            node_index: 4,
+            node_index: 5,
         ),
         "IdleToHasteRun": Clip(
-            node_index: 9,
+            node_index: 10,
         ),
         "IdleToRun": Clip(
-            node_index: 47,
+            node_index: 48,
         ),
         "Joke": Sequence(
             hashes: [
@@ -96,28 +96,28 @@
             ],
         ),
         "JokeLoop": Clip(
-            node_index: 89,
-        ),
-        "JokeStart": Clip(
             node_index: 90,
         ),
+        "JokeStart": Clip(
+            node_index: 91,
+        ),
         "Laugh": Clip(
-            node_index: 68,
+            node_index: 69,
         ),
         "Orbs": Clip(
-            node_index: 85,
+            node_index: 86,
         ),
         "OrbsInto": Clip(
-            node_index: 54,
+            node_index: 55,
         ),
         "Recall": Clip(
-            node_index: 28,
+            node_index: 29,
         ),
         "RecallWinddown": Clip(
-            node_index: 58,
+            node_index: 59,
         ),
         "Respawn": Clip(
-            node_index: 56,
+            node_index: 57,
         ),
         "Run": ConditionFloat(
             updater: MoveSpeed,
@@ -141,7 +141,7 @@
             ],
         ),
         "Run01": Clip(
-            node_index: 23,
+            node_index: 24,
         ),
         "RunBase": Selector(
             probably_nodes: [
@@ -160,34 +160,34 @@
             ],
         ),
         "RunHaste": Clip(
-            node_index: 14,
+            node_index: 15,
         ),
         "RunHomeguard": Clip(
-            node_index: 46,
+            node_index: 47,
         ),
         "RunSlow": Clip(
-            node_index: 77,
+            node_index: 78,
         ),
         "RunVariant01": Clip(
-            node_index: 74,
-        ),
-        "RunVariant01ToRun": Clip(
-            node_index: 38,
-        ),
-        "RunVariant02": Clip(
             node_index: 75,
         ),
+        "RunVariant01ToRun": Clip(
+            node_index: 39,
+        ),
+        "RunVariant02": Clip(
+            node_index: 76,
+        ),
         "RunVariant02ToRun": Clip(
-            node_index: 0,
+            node_index: 1,
         ),
         "RunhomeguardInto": Clip(
-            node_index: 3,
+            node_index: 4,
         ),
         "RunhomeguardOut": Clip(
-            node_index: 42,
+            node_index: 43,
         ),
         "SkippingRopeRun01": Clip(
-            node_index: 87,
+            node_index: 88,
         ),
         "Spell1": Parametric(
             pairs: [
@@ -214,10 +214,10 @@
             ],
         ),
         "Spell1180": Clip(
-            node_index: 82,
+            node_index: 83,
         ),
         "Spell190": Clip(
-            node_index: 64,
+            node_index: 65,
         ),
         "Spell1B": Parametric(
             pairs: [
@@ -244,70 +244,70 @@
             ],
         ),
         "Spell1Base": Clip(
-            node_index: 79,
-        ),
-        "Spell1ToIdle": Clip(
-            node_index: 76,
-        ),
-        "Spell1ToRun": Clip(
-            node_index: 48,
-        ),
-        "Spell2": Clip(
-            node_index: 67,
-        ),
-        "Spell2Missile180": Clip(
-            node_index: 88,
-        ),
-        "Spell2Missile2180": Clip(
             node_index: 80,
         ),
-        "Spell2Missile290": Clip(
-            node_index: 15,
+        "Spell1ToIdle": Clip(
+            node_index: 77,
         ),
-        "Spell2Missile2ToHasteRun": Clip(
-            node_index: 73,
+        "Spell1ToRun": Clip(
+            node_index: 49,
         ),
-        "Spell2Missile2ToIdle": Clip(
-            node_index: 55,
+        "Spell2": Clip(
+            node_index: 68,
         ),
-        "Spell2Missile90": Clip(
-            node_index: 18,
+        "Spell2Missile180": Clip(
+            node_index: 89,
         ),
-        "Spell2MissileToIdle": Clip(
-            node_index: 44,
-        ),
-        "Spell3": Clip(
-            node_index: 65,
-        ),
-        "Spell3ToIdle": Clip(
-            node_index: 61,
-        ),
-        "Spell3ToRun": Clip(
+        "Spell2Missile2180": Clip(
             node_index: 81,
         ),
+        "Spell2Missile290": Clip(
+            node_index: 16,
+        ),
+        "Spell2Missile2ToHasteRun": Clip(
+            node_index: 74,
+        ),
+        "Spell2Missile2ToIdle": Clip(
+            node_index: 56,
+        ),
+        "Spell2Missile90": Clip(
+            node_index: 19,
+        ),
+        "Spell2MissileToIdle": Clip(
+            node_index: 45,
+        ),
+        "Spell3": Clip(
+            node_index: 66,
+        ),
+        "Spell3ToIdle": Clip(
+            node_index: 62,
+        ),
+        "Spell3ToRun": Clip(
+            node_index: 82,
+        ),
         "Spell4": Clip(
-            node_index: 69,
-        ),
-        "Spell4B": Clip(
-            node_index: 72,
-        ),
-        "Spell4Enter": Clip(
-            node_index: 17,
-        ),
-        "Spell4Exit": Clip(
-            node_index: 35,
-        ),
-        "Spell4ExitB": Clip(
-            node_index: 83,
-        ),
-        "Spell4ExitToRun": Clip(
-            node_index: 84,
-        ),
-        "Taunt": Clip(
             node_index: 70,
         ),
+        "Spell4B": Clip(
+            node_index: 73,
+        ),
+        "Spell4Enter": Clip(
+            node_index: 18,
+        ),
+        "Spell4Exit": Clip(
+            node_index: 36,
+        ),
+        "Spell4ExitB": Clip(
+            node_index: 84,
+        ),
+        "Spell4ExitToRun": Clip(
+            node_index: 85,
+        ),
+        "Taunt": Clip(
+            node_index: 71,
+        ),
         "Tpose": Clip(
-            node_index: 78,
+            node_index: 79,
         ),
         "Unk0x1ede054e": Selector(
             probably_nodes: [
@@ -358,61 +358,61 @@
             ],
         ),
         "Unk0x4bcfbe3": Clip(
-            node_index: 1,
+            node_index: 2,
         ),
         "Unk0x4d658e11": Clip(
-            node_index: 22,
+            node_index: 23,
         ),
         "Unk0x6cf13304": Clip(
-            node_index: 30,
-        ),
-        "Unk0x71f03283": Clip(
             node_index: 31,
         ),
-        "Unk0x72c85a1d": Clip(
+        "Unk0x71f03283": Clip(
             node_index: 32,
         ),
-        "Unk0x76bbc6a0": Clip(
+        "Unk0x72c85a1d": Clip(
             node_index: 33,
         ),
+        "Unk0x76bbc6a0": Clip(
+            node_index: 34,
+        ),
         "Unk0x784f5507": Clip(
-            node_index: 36,
+            node_index: 37,
         ),
         "Unk0x80538d7e": Clip(
-            node_index: 39,
-        ),
-        "Unk0x81395963": Clip(
             node_index: 40,
         ),
+        "Unk0x81395963": Clip(
+            node_index: 41,
+        ),
         "Unk0x88115fc0": Clip(
-            node_index: 43,
+            node_index: 44,
         ),
         "Unk0x8ec3d5ce": Clip(
-            node_index: 45,
+            node_index: 46,
         ),
         "Unk0x97f1a9d7": Clip(
-            node_index: 50,
+            node_index: 51,
         ),
         "Unk0x99d6af6f": Clip(
-            node_index: 52,
+            node_index: 53,
         ),
         "Unk0xaafddb39": Clip(
-            node_index: 59,
-        ),
-        "Unk0xab2873d7": Clip(
             node_index: 60,
         ),
-        "Unk0xac0217a7": Clip(
-            node_index: 62,
+        "Unk0xab2873d7": Clip(
+            node_index: 61,
         ),
-        "Unk0xad7c3b86": Clip(
+        "Unk0xac0217a7": Clip(
             node_index: 63,
         ),
+        "Unk0xad7c3b86": Clip(
+            node_index: 64,
+        ),
         "Unk0xb6982e0": Clip(
-            node_index: 7,
+            node_index: 8,
         ),
         "Unk0xf3500ef": Clip(
-            node_index: 10,
+            node_index: 11,
         ),
         "Unk0xff9d4f3c": Parametric(
             pairs: [
@@ -439,19 +439,19 @@
             ],
         ),
         "YoYoAttack1": Clip(
-            node_index: 51,
+            node_index: 52,
         ),
         "YoYoIdle01": Clip(
-            node_index: 34,
+            node_index: 35,
         ),
         "YoYoIdle02": Clip(
-            node_index: 37,
+            node_index: 38,
         ),
         "YoYoIdleToRun": Clip(
-            node_index: 21,
+            node_index: 22,
         ),
         "YoYoIdlein01": Clip(
-            node_index: 41,
+            node_index: 42,
         ),
     },
     blend_data: {

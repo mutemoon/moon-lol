@@ -14,40 +14,40 @@
             ],
         ),
         "Attack1": Clip(
-            node_index: 2,
-        ),
-        "Attack2": Clip(
             node_index: 3,
         ),
-        "Channel": Clip(
-            node_index: 0,
-        ),
-        "ChannelWndup": Clip(
-            node_index: 8,
-        ),
-        "Crit": Clip(
+        "Attack2": Clip(
             node_index: 4,
         ),
-        "Dance": Clip(
-            node_index: 18,
+        "Channel": Clip(
+            node_index: 1,
         ),
-        "Death": Clip(
-            node_index: 16,
+        "ChannelWndup": Clip(
+            node_index: 9,
         ),
-        "Idle1": Clip(
-            node_index: 7,
-        ),
-        "Idle2": Clip(
-            node_index: 6,
-        ),
-        "Idle3": Clip(
+        "Crit": Clip(
             node_index: 5,
         ),
-        "Joke": Clip(
+        "Dance": Clip(
+            node_index: 19,
+        ),
+        "Death": Clip(
             node_index: 17,
         ),
+        "Idle1": Clip(
+            node_index: 8,
+        ),
+        "Idle2": Clip(
+            node_index: 7,
+        ),
+        "Idle3": Clip(
+            node_index: 6,
+        ),
+        "Joke": Clip(
+            node_index: 18,
+        ),
         "Laugh": Clip(
-            node_index: 13,
+            node_index: 14,
         ),
         "Recall": Sequence(
             hashes: [
@@ -57,25 +57,25 @@
             ],
         ),
         "Run": Clip(
-            node_index: 1,
+            node_index: 2,
         ),
         "Spell1": Clip(
-            node_index: 9,
-        ),
-        "Spell2": Clip(
-            node_index: 12,
-        ),
-        "Spell2b": Clip(
-            node_index: 11,
-        ),
-        "Spell3": Clip(
             node_index: 10,
         ),
+        "Spell2": Clip(
+            node_index: 13,
+        ),
+        "Spell2b": Clip(
+            node_index: 12,
+        ),
+        "Spell3": Clip(
+            node_index: 11,
+        ),
         "Spell4": Clip(
-            node_index: 14,
+            node_index: 15,
         ),
         "Taunt": Clip(
-            node_index: 15,
+            node_index: 16,
         ),
     },
     blend_data: {

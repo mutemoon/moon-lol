@@ -170,6 +170,14 @@
                     60.0,
                 ]),
             ),
+            (
+                name: "UnnamedEffectAmount0",
+                values: None,
+            ),
+            (
+                name: "UnnamedEffectAmount3",
+                values: None,
+            ),
         ]),
         mana: None,
         missileSpec: None,

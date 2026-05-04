@@ -186,9 +186,9 @@
                 ]),
             ),
             (
-                name: "SpiderlingsStored",
+                name: "BaseSpiderlingsStored",
                 values: Some([
-                    1.0,
+                    2.0,
                     2.0,
                     3.0,
                     4.0,
@@ -231,6 +231,46 @@
                     60.0,
                     80.0,
                     100.0,
+                ]),
+            ),
+            (
+                name: "UnnamedEffectAmount0",
+                values: None,
+            ),
+            (
+                name: "SpiderlingArmor",
+                values: Some([
+                    0.0,
+                    30.0,
+                    50.0,
+                    70.0,
+                    90.0,
+                    0.0,
+                    0.0,
+                ]),
+            ),
+            (
+                name: "SpiderlingsStoredCap",
+                values: Some([
+                    20.0,
+                    20.0,
+                    20.0,
+                    20.0,
+                    20.0,
+                    20.0,
+                    20.0,
+                ]),
+            ),
+            (
+                name: "SpiderlingMagicResist",
+                values: Some([
+                    0.0,
+                    50.0,
+                    70.0,
+                    90.0,
+                    110.0,
+                    0.0,
+                    0.0,
                 ]),
             ),
         ]),

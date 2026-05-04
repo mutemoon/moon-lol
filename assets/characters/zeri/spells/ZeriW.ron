@@ -16,7 +16,7 @@
                     (
                         type: "CalculationPartStatCoefficient",
                         stat: None,
-                        coefficient: Some(0.25),
+                        coefficient: Some(0.5),
                         statFormula: None,
                     ),
                 ]),
@@ -53,13 +53,13 @@
             (
                 name: "CriticalEffectiveness",
                 values: Some([
-                    0.75,
-                    0.75,
-                    0.75,
-                    0.75,
-                    0.75,
-                    0.75,
-                    0.75,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
                 ]),
             ),
             (

@@ -14,16 +14,16 @@
             ],
         ),
         "Attack1": Clip(
-            node_index: 5,
+            node_index: 6,
         ),
         "Attack2": Clip(
-            node_index: 8,
+            node_index: 9,
         ),
         "Attack3": Clip(
-            node_index: 7,
+            node_index: 8,
         ),
         "Attack4": Clip(
-            node_index: 3,
+            node_index: 4,
         ),
         "BasicAttacks": Sequence(
             hashes: [
@@ -32,13 +32,13 @@
             ],
         ),
         "Channel": Clip(
-            node_index: 0,
+            node_index: 1,
         ),
         "ChannelWndup": Clip(
-            node_index: 16,
+            node_index: 17,
         ),
         "Crit": Clip(
-            node_index: 13,
+            node_index: 14,
         ),
         "Dance": Sequence(
             hashes: [
@@ -47,13 +47,13 @@
             ],
         ),
         "DanceIn": Clip(
-            node_index: 14,
+            node_index: 15,
         ),
         "DanceLoop": Clip(
-            node_index: 6,
+            node_index: 7,
         ),
         "Death": Clip(
-            node_index: 28,
+            node_index: 29,
         ),
         "Idle1": Selector(
             probably_nodes: [
@@ -68,31 +68,31 @@
             ],
         ),
         "IdleBase": Clip(
-            node_index: 12,
+            node_index: 13,
         ),
         "IdleIn": Clip(
-            node_index: 25,
+            node_index: 26,
         ),
         "Joke": Clip(
-            node_index: 30,
+            node_index: 31,
         ),
         "Laugh": Clip(
-            node_index: 24,
+            node_index: 25,
         ),
         "Recall": Clip(
-            node_index: 9,
+            node_index: 10,
         ),
         "RecallWinddown": Clip(
-            node_index: 19,
+            node_index: 20,
         ),
         "Reload": Clip(
-            node_index: 34,
+            node_index: 35,
         ),
         "ReloadRecoil": Clip(
-            node_index: 4,
+            node_index: 5,
         ),
         "Respawn": Clip(
-            node_index: 15,
+            node_index: 16,
         ),
         "Run": ConditionBool(
             updater: LogicDriverBool,
@@ -100,55 +100,55 @@
             false_node: "Unk0xb87a3f27",
         ),
         "RunBase": Clip(
-            node_index: 35,
-        ),
-        "RunFast": Clip(
-            node_index: 18,
-        ),
-        "RunHaste": Clip(
-            node_index: 10,
-        ),
-        "RunInjured": Clip(
-            node_index: 11,
-        ),
-        "RunPassive": Clip(
-            node_index: 33,
-        ),
-        "RunSlow": Clip(
-            node_index: 31,
-        ),
-        "Spell1": Clip(
-            node_index: 20,
-        ),
-        "Spell2": Clip(
-            node_index: 23,
-        ),
-        "Spell2ToRun": Clip(
             node_index: 36,
         ),
-        "Spell3": Clip(
-            node_index: 21,
+        "RunFast": Clip(
+            node_index: 19,
         ),
-        "Spell3ToRun": Clip(
+        "RunHaste": Clip(
+            node_index: 11,
+        ),
+        "RunInjured": Clip(
+            node_index: 12,
+        ),
+        "RunPassive": Clip(
+            node_index: 34,
+        ),
+        "RunSlow": Clip(
             node_index: 32,
         ),
-        "Spell4": Clip(
-            node_index: 26,
+        "Spell1": Clip(
+            node_index: 21,
         ),
-        "Spell4Idle": Clip(
+        "Spell2": Clip(
+            node_index: 24,
+        ),
+        "Spell2ToRun": Clip(
+            node_index: 37,
+        ),
+        "Spell3": Clip(
             node_index: 22,
         ),
-        "Spell4ToRun": Clip(
-            node_index: 29,
+        "Spell3ToRun": Clip(
+            node_index: 33,
         ),
-        "Taunt": Clip(
+        "Spell4": Clip(
             node_index: 27,
         ),
+        "Spell4Idle": Clip(
+            node_index: 23,
+        ),
+        "Spell4ToRun": Clip(
+            node_index: 30,
+        ),
+        "Taunt": Clip(
+            node_index: 28,
+        ),
         "Unk0x220f1ff5": Clip(
-            node_index: 1,
+            node_index: 2,
         ),
         "Unk0xa6df5992": Clip(
-            node_index: 17,
+            node_index: 18,
         ),
         "Unk0xb87a3f27": ConditionBool(
             updater: IsHomeguard,

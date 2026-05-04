@@ -126,6 +126,46 @@
                     110.0,
                 ]),
             ),
+            (
+                name: "UnnamedEffectAmount0",
+                values: None,
+            ),
+            (
+                name: "BonusRange",
+                values: Some([
+                    50.0,
+                    50.0,
+                    50.0,
+                    50.0,
+                    50.0,
+                    50.0,
+                    50.0,
+                ]),
+            ),
+            (
+                name: "AttackBuffDuration",
+                values: Some([
+                    6.0,
+                    6.0,
+                    6.0,
+                    6.0,
+                    6.0,
+                    6.0,
+                    6.0,
+                ]),
+            ),
+            (
+                name: "StaticCooldown",
+                values: Some([
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                ]),
+            ),
         ]),
         mana: Some([
             26.0,

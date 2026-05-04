@@ -34,19 +34,19 @@
             ],
         ),
         "Attack1B": Clip(
-            node_index: 25,
+            node_index: 23,
         ),
         "Attack1a": Clip(
-            node_index: 24,
+            node_index: 22,
         ),
         "Attack2B": Clip(
-            node_index: 35,
+            node_index: 32,
         ),
         "Attack2a": Clip(
-            node_index: 34,
+            node_index: 31,
         ),
         "Attack3B": Clip(
-            node_index: 26,
+            node_index: 24,
         ),
         "Dance": Sequence(
             hashes: [
@@ -58,7 +58,7 @@
             node_index: 13,
         ),
         "DanceIn": Clip(
-            node_index: 32,
+            node_index: 30,
         ),
         "Death": Selector(
             probably_nodes: [
@@ -73,10 +73,10 @@
             ],
         ),
         "Death1": Clip(
-            node_index: 7,
+            node_index: 8,
         ),
         "Death2": Clip(
-            node_index: 9,
+            node_index: 10,
         ),
         "Dormant": Sequence(
             hashes: [
@@ -104,13 +104,13 @@
             ],
         ),
         "IdleHidden": Clip(
-            node_index: 10,
+            node_index: 11,
         ),
         "IdleVar1": Clip(
-            node_index: 0,
+            node_index: 1,
         ),
         "Run": Clip(
-            node_index: 3,
+            node_index: 4,
         ),
         "Spawn": Sequence(
             hashes: [
@@ -119,28 +119,22 @@
             ],
         ),
         "SpawnIn": Clip(
-            node_index: 6,
+            node_index: 7,
         ),
         "SpawnOut": Clip(
-            node_index: 22,
+            node_index: 21,
         ),
         "Unk0x15d07de": Clip(
-            node_index: 1,
-        ),
-        "Unk0x174dca4e": Sequence(
-            hashes: [
-                "Unk0xbdb92b56",
-                "Unk0x4cc4677f",
-            ],
-        ),
-        "Unk0x25d0971": Clip(
             node_index: 2,
         ),
+        "Unk0x25d0971": Clip(
+            node_index: 3,
+        ),
         "Unk0x34dad3a3": Clip(
-            node_index: 4,
+            node_index: 5,
         ),
         "Unk0x35befeb9": Clip(
-            node_index: 5,
+            node_index: 6,
         ),
         "Unk0x3b7dbc09": Selector(
             probably_nodes: [
@@ -157,9 +151,6 @@
                     value: 2.0,
                 ),
             ],
-        ),
-        "Unk0x4cc4677f": Clip(
-            node_index: 11,
         ),
         "Unk0x5177e504": Clip(
             node_index: 12,
@@ -229,41 +220,23 @@
                 ),
             ],
         ),
-        "Unk0xb0e8a3ce": Clip(
-            node_index: 21,
-        ),
         "Unk0xb2610c3b": Sequence(
             hashes: [
                 "Unk0xcb09fbbe",
                 "Unk0xca09fa2b",
             ],
         ),
-        "Unk0xb50f572c": Sequence(
-            hashes: [
-                "Unk0xbdb92b56",
-                "Unk0xea40d6a5",
-            ],
-        ),
-        "Unk0xbdb92b56": Clip(
-            node_index: 23,
-        ),
         "Unk0xca09fa2b": Clip(
-            node_index: 27,
+            node_index: 25,
         ),
         "Unk0xcb09fbbe": Clip(
-            node_index: 28,
+            node_index: 26,
         ),
         "Unk0xcb16c7b1": Clip(
-            node_index: 29,
-        ),
-        "Unk0xcc4a043b": Sequence(
-            hashes: [
-                "Unk0xbdb92b56",
-                "Unk0xb0e8a3ce",
-            ],
+            node_index: 27,
         ),
         "Unk0xd3096938": Clip(
-            node_index: 30,
+            node_index: 28,
         ),
         "Unk0xe0bca822": Sequence(
             hashes: [
@@ -272,10 +245,7 @@
             ],
         ),
         "Unk0xe1fa9d59": Clip(
-            node_index: 31,
-        ),
-        "Unk0xea40d6a5": Clip(
-            node_index: 33,
+            node_index: 29,
         ),
         "Unk0xf2ca7e97": Parallel(
             hashes: [
@@ -284,7 +254,7 @@
             ],
         ),
         "Up": Clip(
-            node_index: 8,
+            node_index: 9,
         ),
     },
     blend_data: {

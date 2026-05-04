@@ -14,15 +14,7 @@
                 ]),
             ),
             (
-                values: Some([
-                    10.0,
-                    10.0,
-                    10.0,
-                    10.0,
-                    10.0,
-                    10.0,
-                    10.0,
-                ]),
+                values: None,
             ),
             (
                 values: Some([
@@ -57,7 +49,36 @@
                 values: None,
             ),
         ]),
-        dataValues: None,
+        dataValues: Some([
+            (
+                name: "CooldownReduction",
+                values: Some([
+                    10.0,
+                    10.0,
+                    10.0,
+                    10.0,
+                    10.0,
+                    10.0,
+                    10.0,
+                ]),
+            ),
+            (
+                name: "UNUSED",
+                values: None,
+            ),
+            (
+                name: "ManaCost",
+                values: Some([
+                    35.0,
+                    35.0,
+                    35.0,
+                    35.0,
+                    35.0,
+                    35.0,
+                    35.0,
+                ]),
+            ),
+        ]),
         mana: Some([
             35.0,
             35.0,

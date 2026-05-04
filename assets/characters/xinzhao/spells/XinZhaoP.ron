@@ -1,6 +1,18 @@
 (
     spellData: Some((
         calculations: Some({
+            "heal_ap_ratio": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            "heal_hp_ratio": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
             "total_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
@@ -22,9 +34,9 @@
                         subpart: None,
                     ),
                     (
-                        type: "CalculationPartStatNamedDataValue",
+                        type: "CalculationPartStatSub",
                         stat: None,
-                        dataValue: "heal_ap_ratio",
+                        subpart: None,
                     ),
                 ]),
                 multiplier: None,
@@ -32,20 +44,7 @@
             ),
         }),
         effectAmounts: None,
-        dataValues: Some([
-            (
-                name: "HealAPRatio",
-                values: Some([
-                    0.65,
-                    0.65,
-                    0.65,
-                    0.65,
-                    0.65,
-                    0.65,
-                    0.65,
-                ]),
-            ),
-        ]),
+        dataValues: None,
         mana: None,
         missileSpec: None,
         hitBoneName: None,

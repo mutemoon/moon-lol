@@ -51,6 +51,10 @@
                     0.375,
                 ]),
             ),
+            (
+                name: "Radius",
+                values: None,
+            ),
         ]),
         mana: Some([
             60.0,

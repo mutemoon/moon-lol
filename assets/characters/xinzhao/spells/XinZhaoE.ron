@@ -5,8 +5,8 @@
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
-                        type: "CalculationPartEffectValue",
-                        effectIndex: Some(1),
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "base_damage",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
@@ -20,48 +20,16 @@
         }),
         effectAmounts: Some([
             (
-                values: Some([
-                    20.0,
-                    50.0,
-                    75.0,
-                    100.0,
-                    125.0,
-                    150.0,
-                    225.0,
-                ]),
+                values: None,
             ),
             (
-                values: Some([
-                    -0.3,
-                    -0.3,
-                    -0.3,
-                    -0.3,
-                    -0.3,
-                    -0.3,
-                    -0.3,
-                ]),
+                values: None,
             ),
             (
-                values: Some([
-                    0.4,
-                    0.4,
-                    0.5,
-                    0.6,
-                    0.7,
-                    0.8,
-                    0.9,
-                ]),
+                values: None,
             ),
             (
-                values: Some([
-                    5.0,
-                    5.0,
-                    5.0,
-                    5.0,
-                    5.0,
-                    5.0,
-                    5.0,
-                ]),
+                values: None,
             ),
             (
                 values: Some([
@@ -75,15 +43,7 @@
                 ]),
             ),
             (
-                values: Some([
-                    0.5,
-                    0.5,
-                    0.5,
-                    0.5,
-                    0.5,
-                    0.5,
-                    0.5,
-                ]),
+                values: None,
             ),
             (
                 values: None,
@@ -100,7 +60,67 @@
         ]),
         dataValues: Some([
             (
-                name: "BaseSlowAmount",
+                name: "APRatio",
+                values: Some([
+                    1.2,
+                    1.2,
+                    1.2,
+                    1.2,
+                    1.2,
+                    1.2,
+                    1.2,
+                ]),
+            ),
+            (
+                name: "ASMod",
+                values: Some([
+                    0.38,
+                    0.38,
+                    0.46,
+                    0.54,
+                    0.62,
+                    0.7,
+                    0.78,
+                ]),
+            ),
+            (
+                name: "BaseDamage",
+                values: Some([
+                    25.0,
+                    50.0,
+                    75.0,
+                    100.0,
+                    125.0,
+                    150.0,
+                    175.0,
+                ]),
+            ),
+            (
+                name: "ASDuration",
+                values: Some([
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                ]),
+            ),
+            (
+                name: "SlowDuration",
+                values: Some([
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                ]),
+            ),
+            (
+                name: "SlowAmount",
                 values: Some([
                     30.0,
                     30.0,
@@ -112,15 +132,39 @@
                 ]),
             ),
             (
-                name: "APRatio",
+                name: "APToASRatio",
                 values: Some([
-                    0.6,
-                    0.6,
-                    0.6,
-                    0.6,
-                    0.6,
-                    0.6,
-                    0.6,
+                    0.001,
+                    0.001,
+                    0.001,
+                    0.001,
+                    0.001,
+                    0.001,
+                    0.001,
+                ]),
+            ),
+            (
+                name: "PermanentASToASRatio",
+                values: Some([
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                ]),
+            ),
+            (
+                name: "AoERadius",
+                values: Some([
+                    250.0,
+                    250.0,
+                    250.0,
+                    250.0,
+                    250.0,
+                    250.0,
+                    250.0,
                 ]),
             ),
         ]),

@@ -5,8 +5,8 @@
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
-                        type: "CalculationPartEffectValue",
-                        effectIndex: Some(1),
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "base_damage_value",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -91,7 +91,68 @@
                 values: None,
             ),
         ]),
-        dataValues: None,
+        dataValues: Some([
+            (
+                name: "BaseDamageValue",
+                values: Some([
+                    50.0,
+                    50.0,
+                    60.0,
+                    70.0,
+                    80.0,
+                    90.0,
+                    100.0,
+                ]),
+            ),
+            (
+                name: "RootDuration",
+                values: Some([
+                    0.75,
+                    1.0,
+                    1.25,
+                    1.5,
+                    1.75,
+                    2.0,
+                    2.25,
+                ]),
+            ),
+            (
+                name: "MaxHPDamage",
+                values: Some([
+                    6.0,
+                    6.0,
+                    6.5,
+                    7.0,
+                    7.5,
+                    8.0,
+                    8.5,
+                ]),
+            ),
+            (
+                name: "FlingDistance",
+                values: Some([
+                    420.0,
+                    420.0,
+                    420.0,
+                    420.0,
+                    420.0,
+                    420.0,
+                    420.0,
+                ]),
+            ),
+            (
+                name: "NonChampionDamageCap",
+                values: Some([
+                    300.0,
+                    300.0,
+                    300.0,
+                    300.0,
+                    300.0,
+                    300.0,
+                    300.0,
+                ]),
+            ),
+        ]),
         mana: Some([
             60.0,
             70.0,

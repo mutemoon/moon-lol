@@ -10,11 +10,6 @@
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
-                        stat: Some(2),
-                        dataValue: "bonus_ad_ratio",
-                    ),
-                    (
-                        type: "CalculationPartStatNamedDataValue",
                         stat: None,
                         dataValue: "bonus_ap_ratio",
                     ),
@@ -162,25 +157,13 @@
             (
                 name: "BonusDamageBase",
                 values: Some([
-                    15.0,
-                    17.0,
-                    19.0,
-                    21.0,
-                    23.0,
-                    25.0,
-                    27.0,
-                ]),
-            ),
-            (
-                name: "BonusADRatio",
-                values: Some([
-                    0.1,
-                    0.1,
-                    0.1,
-                    0.1,
-                    0.1,
-                    0.1,
-                    0.1,
+                    20.0,
+                    22.0,
+                    24.0,
+                    26.0,
+                    28.0,
+                    30.0,
+                    32.0,
                 ]),
             ),
             (
@@ -229,6 +212,18 @@
                     1.5,
                     1.5,
                     1.5,
+                ]),
+            ),
+            (
+                name: "CDReductionModNonChamp",
+                values: Some([
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
                 ]),
             ),
         ]),

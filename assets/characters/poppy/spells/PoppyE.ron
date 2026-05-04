@@ -5,8 +5,8 @@
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
-                        type: "CalculationPartEffectValue",
-                        effectIndex: Some(1),
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "base_damage_value",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -91,7 +91,68 @@
                 values: None,
             ),
         ]),
-        dataValues: None,
+        dataValues: Some([
+            (
+                name: "BaseDamageValue",
+                values: Some([
+                    0.0,
+                    40.0,
+                    60.0,
+                    80.0,
+                    100.0,
+                    120.0,
+                    140.0,
+                ]),
+            ),
+            (
+                name: "WallDamage",
+                values: Some([
+                    0.0,
+                    40.0,
+                    60.0,
+                    80.0,
+                    100.0,
+                    120.0,
+                    140.0,
+                ]),
+            ),
+            (
+                name: "StunDuration",
+                values: Some([
+                    1.5,
+                    1.6,
+                    1.7,
+                    1.8,
+                    1.9,
+                    2.0,
+                    2.1,
+                ]),
+            ),
+            (
+                name: "DashSpeed",
+                values: Some([
+                    1800.0,
+                    1800.0,
+                    1800.0,
+                    1800.0,
+                    1800.0,
+                    1800.0,
+                    1800.0,
+                ]),
+            ),
+            (
+                name: "MaxEnemyPushbackDistance",
+                values: Some([
+                    400.0,
+                    400.0,
+                    400.0,
+                    400.0,
+                    400.0,
+                    400.0,
+                    400.0,
+                ]),
+            ),
+        ]),
         mana: Some([
             70.0,
             70.0,

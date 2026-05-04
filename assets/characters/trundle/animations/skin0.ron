@@ -2,10 +2,10 @@
     gltf_path: "characters/Trundle/skins/skin0.glb",
     hash_to_node: {
         "2013Dance": Clip(
-            node_index: 19,
+            node_index: 20,
         ),
         "2013Spell4": Clip(
-            node_index: 17,
+            node_index: 18,
         ),
         "Attack": Selector(
             probably_nodes: [
@@ -20,25 +20,25 @@
             ],
         ),
         "Attack1": Clip(
-            node_index: 6,
+            node_index: 7,
         ),
         "Attack2": Clip(
-            node_index: 8,
+            node_index: 9,
         ),
         "Channel": Clip(
-            node_index: 4,
+            node_index: 5,
         ),
         "ChannelWndup": Clip(
-            node_index: 16,
+            node_index: 17,
         ),
         "Crit": Clip(
-            node_index: 14,
+            node_index: 15,
         ),
         "Dance": Clip(
-            node_index: 29,
+            node_index: 30,
         ),
         "Death": Clip(
-            node_index: 26,
+            node_index: 27,
         ),
         "Idle1": Sequence(
             hashes: [
@@ -49,7 +49,7 @@
             ],
         ),
         "Joke": Clip(
-            node_index: 27,
+            node_index: 28,
         ),
         "Laugh": Sequence(
             hashes: [
@@ -61,13 +61,13 @@
             ],
         ),
         "Recall": Clip(
-            node_index: 9,
+            node_index: 10,
         ),
         "RecallWinddown": Clip(
-            node_index: 18,
+            node_index: 19,
         ),
         "Respawn": Clip(
-            node_index: 15,
+            node_index: 16,
         ),
         "Run": Selector(
             probably_nodes: [
@@ -82,28 +82,28 @@
             ],
         ),
         "RunExhaust": Clip(
-            node_index: 5,
+            node_index: 6,
         ),
         "RunHomeguard": Clip(
-            node_index: 2,
+            node_index: 3,
         ),
         "Spell1": Clip(
-            node_index: 20,
-        ),
-        "Spell1A": Clip(
-            node_index: 28,
-        ),
-        "Spell2": Clip(
-            node_index: 22,
-        ),
-        "Spell3": Clip(
             node_index: 21,
         ),
+        "Spell1A": Clip(
+            node_index: 29,
+        ),
+        "Spell2": Clip(
+            node_index: 23,
+        ),
+        "Spell3": Clip(
+            node_index: 22,
+        ),
         "Spell4": Clip(
-            node_index: 24,
+            node_index: 25,
         ),
         "Stunned": Clip(
-            node_index: 12,
+            node_index: 13,
         ),
         "Taunt": Sequence(
             hashes: [
@@ -115,25 +115,25 @@
             ],
         ),
         "Unk0x120aa0ea": Clip(
-            node_index: 0,
-        ),
-        "Unk0x18329eba": Clip(
             node_index: 1,
         ),
+        "Unk0x18329eba": Clip(
+            node_index: 2,
+        ),
         "Unk0x195611d3": Clip(
-            node_index: 3,
+            node_index: 4,
         ),
         "Unk0x56f6d84b": Clip(
-            node_index: 7,
+            node_index: 8,
         ),
         "Unk0x5e9b0000": Clip(
-            node_index: 10,
-        ),
-        "Unk0x6363debf": Clip(
             node_index: 11,
         ),
+        "Unk0x6363debf": Clip(
+            node_index: 12,
+        ),
         "Unk0x6f3f9cbc": Clip(
-            node_index: 13,
+            node_index: 14,
         ),
         "Unk0x914db254": Selector(
             probably_nodes: [
@@ -152,10 +152,10 @@
             ],
         ),
         "Unk0xb6da0aa7": Clip(
-            node_index: 23,
+            node_index: 24,
         ),
         "Unk0xb99d8609": Clip(
-            node_index: 25,
+            node_index: 26,
         ),
         "Unk0xe0bca822": Sequence(
             hashes: [

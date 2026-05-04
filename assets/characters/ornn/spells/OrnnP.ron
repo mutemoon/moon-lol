@@ -1,6 +1,13 @@
 (
     spellData: Some((
-        calculations: None,
+        calculations: Some({
+            "unk_0x7325018d": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+        }),
         effectAmounts: Some([
             (
                 values: Some([

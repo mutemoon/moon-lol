@@ -1,0 +1,105 @@
+(
+    gltf_path: "characters/Nexus/skins/Skin3.glb",
+    hash_to_node: {
+        "Attack": Selector(
+            probably_nodes: [
+                (
+                    key: "Attack1",
+                    value: 1.0,
+                ),
+                (
+                    key: "Attack2",
+                    value: 1.0,
+                ),
+            ],
+        ),
+        "Death": Clip(
+            node_index: 4,
+        ),
+        "Idle1": Sequence(
+            hashes: [
+                "SpawnHold",
+                "Spawn",
+                "IdleIn",
+                "Idle1Base",
+            ],
+        ),
+        "Idle1Base": Clip(
+            node_index: 3,
+        ),
+        "IdleIn": Clip(
+            node_index: 5,
+        ),
+        "Spawn": Clip(
+            node_index: 1,
+        ),
+        "SpawnHold": Clip(
+            node_index: 2,
+        ),
+    },
+    blend_data: {
+        ("Death", "Idle1Base"): Time(
+            time: 0.0,
+        ),
+        ("Death", "IdleIn"): Time(
+            time: 0.0,
+        ),
+        ("Death", "Spawn"): Time(
+            time: 0.0,
+        ),
+        ("Death", "SpawnHold"): Time(
+            time: 0.0,
+        ),
+        ("Idle1", "Idle1"): Time(
+            time: 0.0,
+        ),
+        ("Idle1Base", "Idle1Base"): Time(
+            time: 0.0,
+        ),
+        ("Idle1Base", "IdleIn"): Time(
+            time: 0.0,
+        ),
+        ("Idle1Base", "Spawn"): Time(
+            time: 0.0,
+        ),
+        ("Idle1Base", "SpawnHold"): Time(
+            time: 0.0,
+        ),
+        ("IdleIn", "Idle1Base"): Time(
+            time: 0.0,
+        ),
+        ("IdleIn", "IdleIn"): Time(
+            time: 0.0,
+        ),
+        ("IdleIn", "Spawn"): Time(
+            time: 0.0,
+        ),
+        ("IdleIn", "SpawnHold"): Time(
+            time: 0.0,
+        ),
+        ("Spawn", "Idle1Base"): Time(
+            time: 0.0,
+        ),
+        ("Spawn", "IdleIn"): Time(
+            time: 0.0,
+        ),
+        ("Spawn", "Spawn"): Time(
+            time: 0.0,
+        ),
+        ("Spawn", "SpawnHold"): Time(
+            time: 0.0,
+        ),
+        ("SpawnHold", "Idle1Base"): Time(
+            time: 0.0,
+        ),
+        ("SpawnHold", "IdleIn"): Time(
+            time: 0.0,
+        ),
+        ("SpawnHold", "Spawn"): Time(
+            time: 0.0,
+        ),
+        ("SpawnHold", "SpawnHold"): Time(
+            time: 0.0,
+        ),
+    },
+)

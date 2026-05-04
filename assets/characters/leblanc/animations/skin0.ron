@@ -14,19 +14,19 @@
             ],
         ),
         "Attack1": Clip(
-            node_index: 10,
-        ),
-        "Attack2": Clip(
             node_index: 11,
         ),
+        "Attack2": Clip(
+            node_index: 12,
+        ),
         "Channel": Clip(
-            node_index: 5,
+            node_index: 6,
         ),
         "ChannelWndup": Clip(
-            node_index: 23,
+            node_index: 24,
         ),
         "Crit": Clip(
-            node_index: 19,
+            node_index: 20,
         ),
         "Dance": Sequence(
             hashes: [
@@ -35,40 +35,40 @@
             ],
         ),
         "DanceIn": Clip(
-            node_index: 34,
+            node_index: 35,
         ),
         "DanceLoop": Clip(
-            node_index: 4,
+            node_index: 5,
         ),
         "Death": Clip(
-            node_index: 31,
-        ),
-        "Idle1": Clip(
-            node_index: 21,
-        ),
-        "IdleIn": Clip(
-            node_index: 29,
-        ),
-        "IdleIn2": Clip(
-            node_index: 2,
-        ),
-        "Joke": Clip(
             node_index: 32,
         ),
+        "Idle1": Clip(
+            node_index: 22,
+        ),
+        "IdleIn": Clip(
+            node_index: 30,
+        ),
+        "IdleIn2": Clip(
+            node_index: 3,
+        ),
+        "Joke": Clip(
+            node_index: 33,
+        ),
         "KnockUp": Clip(
-            node_index: 6,
+            node_index: 7,
         ),
         "Laugh": Clip(
-            node_index: 28,
+            node_index: 29,
         ),
         "Recall": Clip(
-            node_index: 12,
+            node_index: 13,
         ),
         "RecallWinddown": Clip(
-            node_index: 24,
+            node_index: 25,
         ),
         "Respawn": Clip(
-            node_index: 22,
+            node_index: 23,
         ),
         "Run": ConditionBool(
             updater: IsHomeguard,
@@ -76,7 +76,7 @@
             false_node: "RunBase",
         ),
         "RunBase": Clip(
-            node_index: 35,
+            node_index: 36,
         ),
         "RunHomeguard": Sequence(
             hashes: [
@@ -85,19 +85,19 @@
             ],
         ),
         "RunHomeguardIn": Clip(
-            node_index: 7,
-        ),
-        "Spell1": Clip(
-            node_index: 26,
-        ),
-        "Spell1ToIdle": Clip(
-            node_index: 25,
-        ),
-        "Spell1ToRun": Clip(
             node_index: 8,
         ),
-        "Spell2": Clip(
+        "Spell1": Clip(
             node_index: 27,
+        ),
+        "Spell1ToIdle": Clip(
+            node_index: 26,
+        ),
+        "Spell1ToRun": Clip(
+            node_index: 9,
+        ),
+        "Spell2": Clip(
+            node_index: 28,
         ),
         "Spell2Out": ConditionBool(
             updater: IsMoving,
@@ -105,10 +105,10 @@
             false_node: "Spell2ToIdle",
         ),
         "Spell2ToIdle": Clip(
-            node_index: 9,
+            node_index: 10,
         ),
         "Spell2ToRun": Clip(
-            node_index: 16,
+            node_index: 17,
         ),
         "Spell3": ConditionBool(
             updater: IsMoving,
@@ -116,28 +116,28 @@
             false_node: "Spell3Idle",
         ),
         "Spell3Channel": Clip(
-            node_index: 14,
-        ),
-        "Spell3Idle": Clip(
-            node_index: 18,
-        ),
-        "Spell3Run": Clip(
-            node_index: 36,
-        ),
-        "Stunned": Clip(
             node_index: 15,
         ),
+        "Spell3Idle": Clip(
+            node_index: 19,
+        ),
+        "Spell3Run": Clip(
+            node_index: 37,
+        ),
+        "Stunned": Clip(
+            node_index: 16,
+        ),
         "Taunt": Clip(
-            node_index: 30,
+            node_index: 31,
         ),
         "Unk0x12ba247d": Clip(
-            node_index: 3,
+            node_index: 4,
         ),
         "Unk0x25d777b": Clip(
-            node_index: 0,
+            node_index: 1,
         ),
         "Unk0x35d790e": Clip(
-            node_index: 1,
+            node_index: 2,
         ),
         "Unk0x374638ef": ConditionBool(
             updater: IsMoving,
@@ -145,13 +145,13 @@
             false_node: "Unk0x9a0ef283",
         ),
         "Unk0x607bc5bf": Clip(
-            node_index: 13,
+            node_index: 14,
         ),
         "Unk0x88480348": Clip(
-            node_index: 17,
+            node_index: 18,
         ),
         "Unk0x9a0ef283": Clip(
-            node_index: 20,
+            node_index: 21,
         ),
         "Unk0xcd2be5db": Selector(
             probably_nodes: [
@@ -166,7 +166,7 @@
             ],
         ),
         "Unk0xd417fd93": Clip(
-            node_index: 33,
+            node_index: 34,
         ),
     },
     blend_data: {

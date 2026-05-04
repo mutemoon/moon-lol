@@ -47,10 +47,9 @@
                         dataValue: "base_slow",
                     ),
                     (
-                        type: "CalculationPartStatCoefficient",
+                        type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        coefficient: Some(0.001),
-                        statFormula: None,
+                        dataValue: "slow_ap_ratio",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -207,6 +206,18 @@
                     1.75,
                     2.0,
                     2.25,
+                ]),
+            ),
+            (
+                name: "SlowAPRatio",
+                values: Some([
+                    0.001,
+                    0.001,
+                    0.001,
+                    0.001,
+                    0.001,
+                    0.001,
+                    0.001,
                 ]),
             ),
         ]),

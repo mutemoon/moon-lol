@@ -11,30 +11,6 @@
         effectAmounts: None,
         dataValues: Some([
             (
-                name: "SpiderlingBaseHP",
-                values: Some([
-                    80.0,
-                    80.0,
-                    80.0,
-                    80.0,
-                    80.0,
-                    80.0,
-                    80.0,
-                ]),
-            ),
-            (
-                name: "SpiderlingMagicDamage",
-                values: Some([
-                    2.0,
-                    8.0,
-                    14.0,
-                    20.0,
-                    26.0,
-                    32.0,
-                    38.0,
-                ]),
-            ),
-            (
                 name: "SpiderlingAPRatio",
                 values: Some([
                     0.15,

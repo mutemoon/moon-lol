@@ -1,22 +1,6 @@
 (
     spellData: Some((
-        calculations: Some({
-            "max_duration": (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartEffectValue",
-                        effectIndex: Some(4),
-                    ),
-                    (
-                        type: "CalculationPartEffectValue",
-                        effectIndex: Some(6),
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-        }),
+        calculations: None,
         effectAmounts: None,
         dataValues: Some([
             (
@@ -113,6 +97,18 @@
                     3.0,
                     3.0,
                     3.0,
+                ]),
+            ),
+            (
+                name: "AttackCooldownRefund",
+                values: Some([
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
                 ]),
             ),
         ]),

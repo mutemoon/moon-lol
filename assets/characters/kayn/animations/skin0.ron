@@ -14,31 +14,31 @@
             ],
         ),
         "Attack1": Clip(
-            node_index: 17,
-        ),
-        "Attack2": Clip(
-            node_index: 19,
-        ),
-        "Attack3": Clip(
             node_index: 18,
         ),
+        "Attack2": Clip(
+            node_index: 20,
+        ),
+        "Attack3": Clip(
+            node_index: 19,
+        ),
         "Channel": Clip(
-            node_index: 7,
+            node_index: 8,
         ),
         "ChannelWndup": Clip(
-            node_index: 34,
+            node_index: 35,
         ),
         "Crit": Clip(
-            node_index: 31,
+            node_index: 32,
         ),
         "Dance": Clip(
-            node_index: 51,
+            node_index: 52,
         ),
         "Death": Clip(
-            node_index: 41,
+            node_index: 42,
         ),
         "EyeCycle": Clip(
-            node_index: 42,
+            node_index: 43,
         ),
         "Idle1": Selector(
             probably_nodes: [
@@ -69,31 +69,31 @@
             ],
         ),
         "Idle1Base": Clip(
-            node_index: 25,
+            node_index: 26,
         ),
         "Idle1In": Clip(
-            node_index: 35,
-        ),
-        "Idle1In2": Clip(
-            node_index: 23,
-        ),
-        "Idle1InAssassin": Clip(
             node_index: 36,
         ),
-        "Idle1InSlayer": Clip(
+        "Idle1In2": Clip(
             node_index: 24,
         ),
+        "Idle1InAssassin": Clip(
+            node_index: 37,
+        ),
+        "Idle1InSlayer": Clip(
+            node_index: 25,
+        ),
         "Idle1Slayer": Clip(
-            node_index: 14,
+            node_index: 15,
         ),
         "Idle2Assassin": Clip(
-            node_index: 13,
+            node_index: 14,
         ),
         "Idle2Base": Clip(
-            node_index: 47,
+            node_index: 48,
         ),
         "Idle3Assassin": Clip(
-            node_index: 0,
+            node_index: 1,
         ),
         "Joke": Sequence(
             hashes: [
@@ -102,88 +102,88 @@
             ],
         ),
         "JokeIn": Clip(
-            node_index: 49,
-        ),
-        "JokeLoop": Clip(
-            node_index: 52,
-        ),
-        "Laugh": Clip(
-            node_index: 39,
-        ),
-        "LaughToIdle": Clip(
-            node_index: 4,
-        ),
-        "Recall": Clip(
-            node_index: 20,
-        ),
-        "RecallLeadout": Clip(
-            node_index: 12,
-        ),
-        "Run": Clip(
-            node_index: 9,
-        ),
-        "RunAssassin": Clip(
-            node_index: 48,
-        ),
-        "RunSlayer": Clip(
-            node_index: 10,
-        ),
-        "Spell1Circle": Clip(
-            node_index: 26,
-        ),
-        "Spell1Dash": Clip(
-            node_index: 6,
-        ),
-        "Spell1ExitToRun": Clip(
-            node_index: 2,
-        ),
-        "Spell1Stop": Clip(
-            node_index: 8,
-        ),
-        "Spell2": Clip(
-            node_index: 38,
-        ),
-        "Spell2AssassinCast": Clip(
-            node_index: 3,
-        ),
-        "Spell2Idle": Clip(
-            node_index: 46,
-        ),
-        "Spell2IntoRun": Clip(
-            node_index: 1,
-        ),
-        "Spell2Slayer": Clip(
-            node_index: 5,
-        ),
-        "Spell2SlayerIdle": Clip(
-            node_index: 16,
-        ),
-        "Spell2SlayerRun": Clip(
-            node_index: 40,
-        ),
-        "Spell3": Clip(
-            node_index: 37,
-        ),
-        "Spell3Idle": Clip(
-            node_index: 28,
-        ),
-        "Spell3Run": Clip(
             node_index: 50,
         ),
+        "JokeLoop": Clip(
+            node_index: 53,
+        ),
+        "Laugh": Clip(
+            node_index: 40,
+        ),
+        "LaughToIdle": Clip(
+            node_index: 5,
+        ),
+        "Recall": Clip(
+            node_index: 21,
+        ),
+        "RecallLeadout": Clip(
+            node_index: 13,
+        ),
+        "Run": Clip(
+            node_index: 10,
+        ),
+        "RunAssassin": Clip(
+            node_index: 49,
+        ),
+        "RunSlayer": Clip(
+            node_index: 11,
+        ),
+        "Spell1Circle": Clip(
+            node_index: 27,
+        ),
+        "Spell1Dash": Clip(
+            node_index: 7,
+        ),
+        "Spell1ExitToRun": Clip(
+            node_index: 3,
+        ),
+        "Spell1Stop": Clip(
+            node_index: 9,
+        ),
+        "Spell2": Clip(
+            node_index: 39,
+        ),
+        "Spell2AssassinCast": Clip(
+            node_index: 4,
+        ),
+        "Spell2Idle": Clip(
+            node_index: 47,
+        ),
+        "Spell2IntoRun": Clip(
+            node_index: 2,
+        ),
+        "Spell2Slayer": Clip(
+            node_index: 6,
+        ),
+        "Spell2SlayerIdle": Clip(
+            node_index: 17,
+        ),
+        "Spell2SlayerRun": Clip(
+            node_index: 41,
+        ),
+        "Spell3": Clip(
+            node_index: 38,
+        ),
+        "Spell3Idle": Clip(
+            node_index: 29,
+        ),
+        "Spell3Run": Clip(
+            node_index: 51,
+        ),
         "Spell3RunIn": Clip(
-            node_index: 32,
-        ),
-        "Spell4Air": Clip(
-            node_index: 30,
-        ),
-        "Spell4AirAssassin": Clip(
-            node_index: 45,
-        ),
-        "Spell4AirSlayer": Clip(
             node_index: 33,
         ),
+        "Spell4Air": Clip(
+            node_index: 31,
+        ),
+        "Spell4AirAssassin": Clip(
+            node_index: 46,
+        ),
+        "Spell4AirSlayer": Clip(
+            node_index: 34,
+        ),
         "Spell4Hit": Clip(
-            node_index: 44,
+            node_index: 45,
         ),
         "Taunt": Sequence(
             hashes: [
@@ -192,25 +192,25 @@
             ],
         ),
         "TauntLoop": Clip(
-            node_index: 21,
-        ),
-        "TauntStart": Clip(
-            node_index: 11,
-        ),
-        "TransformAssassin": Clip(
-            node_index: 15,
-        ),
-        "TransformSlayer": Clip(
-            node_index: 29,
-        ),
-        "Unk0x644af22f": Clip(
             node_index: 22,
         ),
+        "TauntStart": Clip(
+            node_index: 12,
+        ),
+        "TransformAssassin": Clip(
+            node_index: 16,
+        ),
+        "TransformSlayer": Clip(
+            node_index: 30,
+        ),
+        "Unk0x644af22f": Clip(
+            node_index: 23,
+        ),
         "Unk0x87fd35ef": Clip(
-            node_index: 27,
+            node_index: 28,
         ),
         "Unk0xc990562c": Clip(
-            node_index: 43,
+            node_index: 44,
         ),
         "Unk0xd1011199": ConditionBool(
             updater: IsMoving,

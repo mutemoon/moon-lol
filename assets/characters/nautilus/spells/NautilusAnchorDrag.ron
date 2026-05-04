@@ -112,6 +112,30 @@
                     0.5,
                 ]),
             ),
+            (
+                name: "TerrainReduction",
+                values: Some([
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                ]),
+            ),
+            (
+                name: "TerrainManaRefund",
+                values: Some([
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                ]),
+            ),
         ]),
         mana: Some([
             60.0,

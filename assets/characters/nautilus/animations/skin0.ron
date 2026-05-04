@@ -14,88 +14,88 @@
             ],
         ),
         "Attack1": Clip(
-            node_index: 6,
-        ),
-        "Attack2": Clip(
-            node_index: 10,
-        ),
-        "Attack3": Clip(
-            node_index: 8,
-        ),
-        "Attack4": Clip(
-            node_index: 5,
-        ),
-        "AttackBack": Clip(
-            node_index: 4,
-        ),
-        "Buffbones": Clip(
-            node_index: 0,
-        ),
-        "Channel": Clip(
-            node_index: 2,
-        ),
-        "ChannelWndup": Clip(
-            node_index: 18,
-        ),
-        "Crit": Clip(
-            node_index: 13,
-        ),
-        "Dance": Clip(
-            node_index: 27,
-        ),
-        "Death": Clip(
-            node_index: 25,
-        ),
-        "Idle1": Clip(
-            node_index: 16,
-        ),
-        "Idle2": Clip(
-            node_index: 15,
-        ),
-        "Idle3": Clip(
-            node_index: 14,
-        ),
-        "Idle4": Clip(
-            node_index: 17,
-        ),
-        "Joke": Clip(
-            node_index: 26,
-        ),
-        "Laugh": Clip(
-            node_index: 22,
-        ),
-        "Passive": Clip(
-            node_index: 19,
-        ),
-        "Recall": Clip(
-            node_index: 11,
-        ),
-        "Run": Clip(
-            node_index: 3,
-        ),
-        "Run1": Clip(
-            node_index: 12,
-        ),
-        "Run2": Clip(
-            node_index: 9,
-        ),
-        "Spell1": Clip(
-            node_index: 20,
-        ),
-        "Spell1Dash": Clip(
-            node_index: 1,
-        ),
-        "Spell1Idle": Clip(
             node_index: 7,
         ),
-        "Spell3": Clip(
-            node_index: 21,
+        "Attack2": Clip(
+            node_index: 11,
         ),
-        "Spell4": Clip(
+        "Attack3": Clip(
+            node_index: 9,
+        ),
+        "Attack4": Clip(
+            node_index: 6,
+        ),
+        "AttackBack": Clip(
+            node_index: 5,
+        ),
+        "Buffbones": Clip(
+            node_index: 1,
+        ),
+        "Channel": Clip(
+            node_index: 3,
+        ),
+        "ChannelWndup": Clip(
+            node_index: 19,
+        ),
+        "Crit": Clip(
+            node_index: 14,
+        ),
+        "Dance": Clip(
+            node_index: 28,
+        ),
+        "Death": Clip(
+            node_index: 26,
+        ),
+        "Idle1": Clip(
+            node_index: 17,
+        ),
+        "Idle2": Clip(
+            node_index: 16,
+        ),
+        "Idle3": Clip(
+            node_index: 15,
+        ),
+        "Idle4": Clip(
+            node_index: 18,
+        ),
+        "Joke": Clip(
+            node_index: 27,
+        ),
+        "Laugh": Clip(
             node_index: 23,
         ),
-        "Taunt": Clip(
+        "Passive": Clip(
+            node_index: 20,
+        ),
+        "Recall": Clip(
+            node_index: 12,
+        ),
+        "Run": Clip(
+            node_index: 4,
+        ),
+        "Run1": Clip(
+            node_index: 13,
+        ),
+        "Run2": Clip(
+            node_index: 10,
+        ),
+        "Spell1": Clip(
+            node_index: 21,
+        ),
+        "Spell1Dash": Clip(
+            node_index: 2,
+        ),
+        "Spell1Idle": Clip(
+            node_index: 8,
+        ),
+        "Spell3": Clip(
+            node_index: 22,
+        ),
+        "Spell4": Clip(
             node_index: 24,
+        ),
+        "Taunt": Clip(
+            node_index: 25,
         ),
     },
     blend_data: {

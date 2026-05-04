@@ -9,10 +9,9 @@
                         dataValue: "damage",
                     ),
                     (
-                        type: "CalculationPartStatCoefficient",
+                        type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        coefficient: Some(0.7),
-                        statFormula: None,
+                        dataValue: "damage_ap_ratio",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -32,10 +31,9 @@
                         dataValue: "shield",
                     ),
                     (
-                        type: "CalculationPartStatCoefficient",
+                        type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        coefficient: Some(0.5),
-                        statFormula: None,
+                        dataValue: "shield_ap_ratio",
                     ),
                 ]),
                 multiplier: None,
@@ -82,6 +80,30 @@
             ),
             (
                 name: "PostCastAnimLock",
+                values: Some([
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                ]),
+            ),
+            (
+                name: "DamageAPRatio",
+                values: Some([
+                    0.7,
+                    0.7,
+                    0.7,
+                    0.7,
+                    0.7,
+                    0.7,
+                    0.7,
+                ]),
+            ),
+            (
+                name: "ShieldAPRatio",
                 values: Some([
                     0.5,
                     0.5,

@@ -65,7 +65,32 @@
                 values: None,
             ),
         ]),
-        dataValues: None,
+        dataValues: Some([
+            (
+                name: "Duration",
+                values: Some([
+                    2.5,
+                    2.5,
+                    2.5,
+                    2.5,
+                    2.5,
+                    2.5,
+                    2.5,
+                ]),
+            ),
+            (
+                name: "SpeedAmount",
+                values: Some([
+                    25.0,
+                    40.0,
+                    55.0,
+                    70.0,
+                    85.0,
+                    99.0,
+                    114.0,
+                ]),
+            ),
+        ]),
         mana: Some([
             50.0,
             50.0,

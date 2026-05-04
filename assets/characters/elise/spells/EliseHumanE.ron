@@ -1,6 +1,18 @@
 (
     spellData: Some((
-        calculations: None,
+        calculations: Some({
+            "total_stun_duration": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "base_stun_duration",
+                    ),
+                ]),
+                multiplier: None,
+                precision: Some(1),
+            ),
+        }),
         effectAmounts: Some([
             (
                 values: Some([
@@ -47,15 +59,7 @@
                 ]),
             ),
             (
-                values: Some([
-                    1.6,
-                    1.6,
-                    1.8,
-                    2.0,
-                    2.2,
-                    2.4,
-                    2.4,
-                ]),
+                values: None,
             ),
             (
                 values: Some([
@@ -91,7 +95,7 @@
         ]),
         dataValues: Some([
             (
-                name: "StunDuration",
+                name: "BaseStunDuration",
                 values: Some([
                     1.4,
                     1.6,
@@ -112,6 +116,30 @@
                     250.0,
                     250.0,
                     250.0,
+                ]),
+            ),
+            (
+                name: "RappelCooldown",
+                values: Some([
+                    22.0,
+                    22.0,
+                    21.0,
+                    20.0,
+                    19.0,
+                    18.0,
+                    18.0,
+                ]),
+            ),
+            (
+                name: "RappelDamageAmp",
+                values: Some([
+                    25.0,
+                    40.0,
+                    55.0,
+                    70.0,
+                    85.0,
+                    100.0,
+                    115.0,
                 ]),
             ),
         ]),

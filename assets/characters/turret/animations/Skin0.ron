@@ -1,0 +1,233 @@
+(
+    gltf_path: "characters/Turret/skins/Skin0.glb",
+    hash_to_node: {
+        "Attack": Selector(
+            probably_nodes: [
+                (
+                    key: "Attack1",
+                    value: 1.0,
+                ),
+                (
+                    key: "Attack2",
+                    value: 1.0,
+                ),
+            ],
+        ),
+        "Death": Parallel(
+            hashes: [
+                "Unk0x35f43992",
+            ],
+        ),
+        "Destroyed": Clip(
+            node_index: 2,
+        ),
+        "Idle1": Clip(
+            node_index: 3,
+        ),
+        "Respawn": Clip(
+            node_index: 4,
+        ),
+        "State2": Clip(
+            node_index: 7,
+        ),
+        "State3": Clip(
+            node_index: 8,
+        ),
+        "Unk0x35f43992": Clip(
+            node_index: 1,
+        ),
+        "Unk0xa9522ec4": Sequence(
+            hashes: [
+                "Unk0xf5c65fef",
+                "State3",
+            ],
+        ),
+        "Unk0xaa006aba": Parallel(
+            hashes: [
+                "Destroyed",
+            ],
+        ),
+        "Unk0xcc2030a0": Clip(
+            node_index: 5,
+        ),
+        "Unk0xf5c65fef": Clip(
+            node_index: 6,
+        ),
+    },
+    blend_data: {
+        ("Destroyed", "Destroyed"): Time(
+            time: 0.0,
+        ),
+        ("Destroyed", "Idle1"): Time(
+            time: 0.0,
+        ),
+        ("Destroyed", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Destroyed", "State2"): Time(
+            time: 0.0,
+        ),
+        ("Destroyed", "State3"): Time(
+            time: 0.0,
+        ),
+        ("Destroyed", "Unk0x35f43992"): Time(
+            time: 0.0,
+        ),
+        ("Destroyed", "Unk0xcc2030a0"): Time(
+            time: 0.0,
+        ),
+        ("Destroyed", "Unk0xf5c65fef"): Time(
+            time: 0.0,
+        ),
+        ("Idle1", "Destroyed"): Time(
+            time: 0.0,
+        ),
+        ("Idle1", "Idle1"): Time(
+            time: 0.0,
+        ),
+        ("Idle1", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Idle1", "State2"): Time(
+            time: 0.0,
+        ),
+        ("Idle1", "State3"): Time(
+            time: 0.0,
+        ),
+        ("Idle1", "Unk0x35f43992"): Time(
+            time: 0.0,
+        ),
+        ("Idle1", "Unk0xcc2030a0"): Time(
+            time: 0.0,
+        ),
+        ("Idle1", "Unk0xf5c65fef"): Time(
+            time: 0.0,
+        ),
+        ("Respawn", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("State2", "Destroyed"): Time(
+            time: 0.0,
+        ),
+        ("State2", "Idle1"): Time(
+            time: 0.0,
+        ),
+        ("State2", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("State2", "State2"): Time(
+            time: 0.0,
+        ),
+        ("State2", "State3"): Time(
+            time: 0.0,
+        ),
+        ("State2", "Unk0x35f43992"): Time(
+            time: 0.0,
+        ),
+        ("State2", "Unk0xcc2030a0"): Time(
+            time: 0.0,
+        ),
+        ("State2", "Unk0xf5c65fef"): Time(
+            time: 0.0,
+        ),
+        ("State3", "Destroyed"): Time(
+            time: 0.0,
+        ),
+        ("State3", "Idle1"): Time(
+            time: 0.0,
+        ),
+        ("State3", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("State3", "State2"): Time(
+            time: 0.0,
+        ),
+        ("State3", "State3"): Time(
+            time: 0.0,
+        ),
+        ("State3", "Unk0x35f43992"): Time(
+            time: 0.0,
+        ),
+        ("State3", "Unk0xcc2030a0"): Time(
+            time: 0.0,
+        ),
+        ("State3", "Unk0xf5c65fef"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x35f43992", "Destroyed"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x35f43992", "Idle1"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x35f43992", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x35f43992", "State2"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x35f43992", "State3"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x35f43992", "Unk0x35f43992"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x35f43992", "Unk0xcc2030a0"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x35f43992", "Unk0xf5c65fef"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xa9522ec4", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xcc2030a0", "Destroyed"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xcc2030a0", "Idle1"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xcc2030a0", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xcc2030a0", "State2"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xcc2030a0", "State3"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xcc2030a0", "Unk0x35f43992"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xcc2030a0", "Unk0xcc2030a0"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xcc2030a0", "Unk0xf5c65fef"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xf5c65fef", "Destroyed"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xf5c65fef", "Idle1"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xf5c65fef", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xf5c65fef", "State2"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xf5c65fef", "State3"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xf5c65fef", "Unk0x35f43992"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xf5c65fef", "Unk0xcc2030a0"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xf5c65fef", "Unk0xf5c65fef"): Time(
+            time: 0.0,
+        ),
+    },
+)

@@ -14,43 +14,43 @@
             ],
         ),
         "Attack1": Clip(
-            node_index: 3,
-        ),
-        "Attack2": Clip(
-            node_index: 5,
-        ),
-        "Attack3": Clip(
             node_index: 4,
         ),
+        "Attack2": Clip(
+            node_index: 6,
+        ),
+        "Attack3": Clip(
+            node_index: 5,
+        ),
         "Channel": Clip(
-            node_index: 1,
+            node_index: 2,
         ),
         "ChannelWndup": Clip(
-            node_index: 10,
+            node_index: 11,
         ),
         "Dance": Clip(
-            node_index: 25,
+            node_index: 26,
         ),
         "Death": Clip(
-            node_index: 20,
-        ),
-        "DeathAnim": Clip(
-            node_index: 12,
-        ),
-        "Idle1": Clip(
-            node_index: 9,
-        ),
-        "Idle2": Clip(
-            node_index: 8,
-        ),
-        "Idle3": Clip(
-            node_index: 7,
-        ),
-        "Joke": Clip(
             node_index: 21,
         ),
+        "DeathAnim": Clip(
+            node_index: 13,
+        ),
+        "Idle1": Clip(
+            node_index: 10,
+        ),
+        "Idle2": Clip(
+            node_index: 9,
+        ),
+        "Idle3": Clip(
+            node_index: 8,
+        ),
+        "Joke": Clip(
+            node_index: 22,
+        ),
         "Laugh": Clip(
-            node_index: 17,
+            node_index: 18,
         ),
         "Recall": Sequence(
             hashes: [
@@ -59,13 +59,13 @@
             ],
         ),
         "RecallLoop": Clip(
-            node_index: 0,
+            node_index: 1,
         ),
         "RecallWinddown": Clip(
-            node_index: 13,
+            node_index: 14,
         ),
         "RecallWindup": Clip(
-            node_index: 6,
+            node_index: 7,
         ),
         "Run": ConditionFloat(
             updater: MoveSpeed,
@@ -85,34 +85,34 @@
             ],
         ),
         "RunBase": Clip(
-            node_index: 24,
+            node_index: 25,
         ),
         "RunFast": Clip(
-            node_index: 11,
+            node_index: 12,
         ),
         "RunHaste": Clip(
-            node_index: 2,
+            node_index: 3,
         ),
         "RunSlow": Clip(
-            node_index: 23,
+            node_index: 24,
         ),
         "RunSlowBack": Clip(
-            node_index: 22,
+            node_index: 23,
         ),
         "Spell1": Clip(
-            node_index: 14,
-        ),
-        "Spell2": Clip(
-            node_index: 16,
-        ),
-        "Spell3": Clip(
             node_index: 15,
         ),
+        "Spell2": Clip(
+            node_index: 17,
+        ),
+        "Spell3": Clip(
+            node_index: 16,
+        ),
         "Spell4": Clip(
-            node_index: 18,
+            node_index: 19,
         ),
         "Taunt": Clip(
-            node_index: 19,
+            node_index: 20,
         ),
         "Unk0x127227b2": Sequence(
             hashes: [

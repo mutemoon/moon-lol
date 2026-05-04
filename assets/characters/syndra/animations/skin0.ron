@@ -14,19 +14,19 @@
             ],
         ),
         "Attack1": Clip(
-            node_index: 14,
+            node_index: 15,
         ),
         "Attack2": Clip(
-            node_index: 16,
+            node_index: 17,
         ),
         "Channel": Clip(
-            node_index: 5,
+            node_index: 6,
         ),
         "ChannelWndup": Clip(
-            node_index: 25,
+            node_index: 26,
         ),
         "Dance": Clip(
-            node_index: 32,
+            node_index: 33,
         ),
         "Death": Parallel(
             hashes: [
@@ -35,13 +35,13 @@
             ],
         ),
         "DeathBody": Clip(
-            node_index: 20,
+            node_index: 21,
         ),
         "Idle1": Clip(
-            node_index: 23,
+            node_index: 24,
         ),
         "Idle2": Clip(
-            node_index: 21,
+            node_index: 22,
         ),
         "Idle3": Parallel(
             hashes: [
@@ -68,7 +68,7 @@
             ],
         ),
         "Orbs": Clip(
-            node_index: 30,
+            node_index: 31,
         ),
         "Passive": Parallel(
             hashes: [
@@ -77,7 +77,7 @@
             ],
         ),
         "PassivePowerup": Clip(
-            node_index: 10,
+            node_index: 11,
         ),
         "Recall": Sequence(
             hashes: [
@@ -86,43 +86,43 @@
             ],
         ),
         "RecallLoop": Clip(
-            node_index: 3,
+            node_index: 4,
         ),
         "RecallWinddown": Clip(
-            node_index: 26,
+            node_index: 27,
         ),
         "RecallWindup": Clip(
-            node_index: 19,
+            node_index: 20,
         ),
         "Run": Clip(
-            node_index: 6,
+            node_index: 7,
         ),
         "Run1": Clip(
-            node_index: 17,
+            node_index: 18,
         ),
         "Run2": Clip(
-            node_index: 15,
+            node_index: 16,
         ),
         "Spell1": Clip(
-            node_index: 29,
+            node_index: 30,
         ),
         "Spell2Pull": Clip(
-            node_index: 2,
+            node_index: 3,
         ),
         "Spell2Throw": Clip(
-            node_index: 9,
+            node_index: 10,
         ),
         "Spell3Cast": Clip(
-            node_index: 28,
+            node_index: 29,
         ),
         "Spell3Start": Clip(
-            node_index: 34,
+            node_index: 35,
         ),
         "Spell4Cast": Clip(
-            node_index: 8,
+            node_index: 9,
         ),
         "Spell4Start": Clip(
-            node_index: 27,
+            node_index: 28,
         ),
         "Taunt": Parallel(
             hashes: [
@@ -131,40 +131,40 @@
             ],
         ),
         "Unk0x1e8e8a5": Clip(
-            node_index: 1,
+            node_index: 2,
         ),
         "Unk0x1fb0c8e3": Clip(
-            node_index: 4,
+            node_index: 5,
         ),
         "Unk0x2ecff3f0": Clip(
-            node_index: 7,
+            node_index: 8,
         ),
         "Unk0x3db699c6": Clip(
-            node_index: 11,
-        ),
-        "Unk0x4e18c85c": Clip(
             node_index: 12,
         ),
-        "Unk0x519f7171": Clip(
+        "Unk0x4e18c85c": Clip(
             node_index: 13,
         ),
+        "Unk0x519f7171": Clip(
+            node_index: 14,
+        ),
         "Unk0x5575a6": Clip(
-            node_index: 0,
+            node_index: 1,
         ),
         "Unk0x66901f43": Clip(
-            node_index: 18,
+            node_index: 19,
         ),
         "Unk0x9d029959": Clip(
-            node_index: 22,
+            node_index: 23,
         ),
         "Unk0xa0de1688": Clip(
-            node_index: 24,
+            node_index: 25,
         ),
         "Unk0xe067bb9b": Clip(
-            node_index: 31,
+            node_index: 32,
         ),
         "Unk0xf898cf1c": Clip(
-            node_index: 33,
+            node_index: 34,
         ),
     },
     blend_data: {
