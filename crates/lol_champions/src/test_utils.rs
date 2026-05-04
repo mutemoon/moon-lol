@@ -40,11 +40,12 @@ use lol_core::entities::champion::Champion;
 use lol_core::life::Health;
 use lol_core::log::create_log_plugin;
 use lol_core::navigation::navigation::NavigationDebug;
-use lol_core::skill::{CoolDown, Skill, SkillRecastWindow, Skills};
+use lol_core::skill::{CoolDown, Skill, SkillRecastWindow, Skills, get_skill_value};
 use lol_core::team::Team;
 use lol_render::PluginRender;
 use lol_render::test_render::{
-    PluginSkillTestRender, SkillTestRenderConfig, SkillTestVideoFormat, SkillTestVideoOutput,
+    CommandRenderVideo, PluginSkillTestRender, SkillTestRenderConfig, SkillTestVideoFormat,
+    SkillTestVideoOutput,
 };
 
 // ── Harness mode ──
@@ -52,25 +53,18 @@ use lol_render::test_render::{
 #[derive(Clone, Copy, Debug)]
 pub enum HarnessMode {
     Headless,
-    Render { max_frames: u32 },
+    Render,
 }
 
 impl HarnessMode {
-    fn max_frames(&self) -> Option<u32> {
-        match self {
-            Self::Render { max_frames } => Some(*max_frames),
-            Self::Headless => None,
-        }
-    }
-
     fn is_render(&self) -> bool {
-        matches!(self, Self::Render { .. })
+        matches!(self, Self::Render)
     }
 
     /// If Render mode but `render_test_guard()` is false, fall back to Headless.
     fn resolve(&self) -> Self {
         match self {
-            Self::Render { .. } if !render_test_guard() => {
+            Self::Render if !render_test_guard() => {
                 eprintln!("falling back to headless mode: MOON_LOL_RUN_RENDER_TESTS not set");
                 Self::Headless
             }
@@ -96,9 +90,6 @@ pub struct ChampionHarnessConfig {
 pub struct ChampionTestHarness {
     pub app: App,
     pub champion: Entity,
-    pub current_frame: u32,
-    champion_dir: &'static str,
-    test_name: String,
     mode: HarnessMode,
 }
 
@@ -109,10 +100,7 @@ impl ChampionTestHarness {
         config: &ChampionHarnessConfig,
     ) -> Self {
         let mut app = App::new();
-        app.insert_resource(Time::<Fixed>::from_duration(Duration::from_millis(16)));
-        app.insert_resource(TimeUpdateStrategy::ManualDuration(Duration::from_millis(
-            16,
-        )));
+        app.insert_resource(TimeUpdateStrategy::FixedTimesteps(1));
 
         let mode = mode.resolve();
 
@@ -129,7 +117,7 @@ impl ChampionTestHarness {
             file_path: workspace_root.join("assets").to_string_lossy().to_string(),
             ..Default::default()
         };
-        let log_plugin = create_log_plugin();
+        let (log_plugin, _) = create_log_plugin();
         match mode {
             HarnessMode::Headless => {
                 app.add_plugins((
@@ -139,7 +127,7 @@ impl ChampionTestHarness {
                     log_plugin,
                 ));
             }
-            HarnessMode::Render { max_frames } => {
+            HarnessMode::Render => {
                 app.add_plugins(
                     DefaultPlugins
                         .build()
@@ -150,7 +138,7 @@ impl ChampionTestHarness {
                 app.add_plugins(PluginRender);
                 app.add_plugins(PluginSkillTestRender);
 
-                let output_dir = render_output_dir(config.champion_dir);
+                let output_dir = render_output_dir(&workspace_root, config.champion_dir);
                 let _ = fs::create_dir_all(&output_dir);
 
                 app.insert_resource(NavigationDebug);
@@ -159,7 +147,6 @@ impl ChampionTestHarness {
                     width: 1280,
                     height: 720,
                     capture_every_nth_frame: 1,
-                    max_frames: Some(max_frames),
                     spawn_default_scene: false,
                     video_output: Some(SkillTestVideoOutput {
                         format: SkillTestVideoFormat::Mp4,
@@ -192,28 +179,47 @@ impl ChampionTestHarness {
             ))
             .id();
 
+        let mut skin_handle = None;
         // Only load skin in render mode
         if mode.is_render() {
             let asset_server = app.world().resource::<AssetServer>();
-            let skin_handle = asset_server.load::<DynamicWorld>(config.skin_path);
-            app.world_mut()
-                .entity_mut(champion)
-                .insert(ConfigSkin { skin: skin_handle });
+            skin_handle = Some(asset_server.load::<DynamicWorld>(config.skin_path));
+            app.world_mut().entity_mut(champion).insert(ConfigSkin {
+                skin: skin_handle.clone().unwrap(),
+            });
         }
 
         // Poll until ConfigCharacterRecord is processed
         for i in 0..10 {
-            app.update();
-            if app
-                .world()
-                .resource::<AssetServer>()
-                .get_recursive_dependency_load_state(&config_handle)
-                .map(|v| v.is_loaded())
-                .eq(&Some(true))
-            {
-                info!("第 {} 帧 ConfigCharacterRecord 加载完毕已被移出", i);
-                break;
+            if mode.is_render() {
+                let load_state = app
+                    .world()
+                    .resource::<AssetServer>()
+                    .get_recursive_dependency_load_state(&skin_handle.clone().unwrap());
+                // info!("帧 {} 加载状态: {:?}", i, load_state);
+                if load_state.map(|v| v.is_loaded()).eq(&Some(true)) {
+                    info!("第 {} 帧 ConfigSkin 加载完毕", i);
+
+                    assert!(
+                        !app.world().entity(champion).contains::<ConfigSkin>(),
+                        "config skin load failed: {}",
+                        config.config_path
+                    );
+
+                    break;
+                }
+            } else {
+                let load_state = app
+                    .world()
+                    .resource::<AssetServer>()
+                    .get_recursive_dependency_load_state(&config_handle);
+                // info!("帧 {} 加载状态: {:?}", i, load_state);
+                if load_state.map(|v| v.is_loaded()).eq(&Some(true)) {
+                    info!("第 {} 帧 ConfigCharacterRecord 加载完毕", i);
+                    break;
+                }
             }
+            app.update();
         }
 
         assert!(
@@ -226,11 +232,8 @@ impl ChampionTestHarness {
 
         Self {
             app,
-            champion_dir: config.champion_dir,
-            test_name: test_name.to_string(),
             mode,
             champion,
-            current_frame: 15,
         }
     }
 
@@ -311,18 +314,16 @@ impl ChampionTestHarness {
         a.id()
     }
 
-    // ── time ──
-
-    pub fn advance_frame(&mut self) -> &mut Self {
-        self.app.update();
-        self.current_frame += 1;
-        self
-    }
-
-    pub fn advance(&mut self, seconds: f32) -> &mut Self {
-        let ticks = (seconds / 0.016).ceil() as u32;
-        for _ in 0..ticks {
-            self.advance_frame();
+    pub fn advance(&mut self, time: f32) -> &mut Self {
+        let timestep = self
+            .app
+            .world()
+            .resource::<Time<Fixed>>()
+            .timestep()
+            .as_secs_f32();
+        let frame = (time / timestep).ceil() as usize;
+        for _ in 0..frame {
+            self.app.update();
         }
         self
     }
@@ -334,7 +335,6 @@ impl ChampionTestHarness {
             entity: self.champion,
             action: Action::Skill { index, point },
         });
-        self.app.update();
         self
     }
 
@@ -345,7 +345,6 @@ impl ChampionTestHarness {
             damage_type: DamageType::Physical,
             amount,
         });
-        self.app.update();
         self
     }
 
@@ -409,6 +408,43 @@ impl ChampionTestHarness {
             .map_or(true, |t| t.is_finished())
     }
 
+    /// Returns the entity ID for the skill in slot `index` (0=Q, 1=W, 2=E, 3=R).
+    pub fn skill_entity(&self, index: usize) -> Entity {
+        self.app
+            .world()
+            .get::<Skills>(self.champion)
+            .expect("skills should exist")[index]
+    }
+
+    /// Returns the current recast window stage for the given skill entity.
+    /// Some(stage) when a recast window is active, None when expired or no window.
+    pub fn recast_window_stage(&self, skill_entity: Entity) -> Option<u8> {
+        self.app
+            .world()
+            .get::<SkillRecastWindow>(skill_entity)
+            .map(|w| w.stage)
+    }
+
+    /// Returns true if the skill entity has an active recast window.
+    pub fn has_recast_window(&self, skill_entity: Entity) -> bool {
+        self.app
+            .world()
+            .entity(skill_entity)
+            .contains::<SkillRecastWindow>()
+    }
+
+    /// Calculates a skill effect value by name, e.g., "total_damage".
+    pub fn get_skill_value(
+        &self,
+        index: usize,
+        name: &str,
+        level: usize,
+        stat_getter: impl Fn(u8) -> f32,
+    ) -> Option<f32> {
+        let spell = self.spell(index)?;
+        get_skill_value(spell, name, level, stat_getter)
+    }
+
     pub fn spell(&self, index: usize) -> Option<&Spell> {
         let skills = self.app.world().get::<Skills>(self.champion)?;
         let skill_entity = if index < skills.len() {
@@ -425,31 +461,21 @@ impl ChampionTestHarness {
 
     /// Pad frames and produce the video file.  No-op in headless mode.
     pub fn finish(&mut self) {
-        let Some(max_frames) = self.mode.max_frames() else {
+        if !self.mode.is_render() {
             return;
-        };
-
-        while self.current_frame < max_frames {
-            self.advance_frame();
         }
 
-        for _ in 0..40 {
-            self.advance_frame();
-        }
-
-        let video = render_output_dir(self.champion_dir).join(format!("{}.mp4", self.test_name));
-        assert!(
-            video.is_file(),
-            "expected capture video at {}",
-            video.display()
-        );
+        self.app.world_mut().trigger(CommandRenderVideo);
     }
 }
 
 // ── Shared free functions ──
 
-pub fn render_output_dir(champion: &str) -> PathBuf {
-    PathBuf::from("assets").join("test_videos").join(champion)
+pub fn render_output_dir(workspace_root: &PathBuf, champion: &str) -> PathBuf {
+    workspace_root
+        .join("assets")
+        .join("test_videos")
+        .join(champion)
 }
 
 pub fn should_run_render_tests() -> bool {

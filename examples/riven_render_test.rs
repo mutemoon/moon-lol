@@ -22,7 +22,6 @@ fn main() {
         width: 1280,
         height: 720,
         capture_every_nth_frame: 1,
-        max_frames: Some(180),
         spawn_default_scene: false,
         video_output: Some(SkillTestVideoOutput {
             format: SkillTestVideoFormat::Mp4,

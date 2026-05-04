@@ -11,7 +11,7 @@ use lol_core::attack::Attack;
 use lol_core::base::state::State;
 use lol_core::movement::Movement;
 
-use crate::loaders::animation::LoaderConfigAnimationLoader;
+use crate::loaders::animation::{LoaderAnimationLoader, LoaderConfigAnimationLoader};
 
 #[derive(Default)]
 pub struct PluginAnimation;
@@ -21,6 +21,7 @@ impl Plugin for PluginAnimation {
         app.init_asset::<LOLAnimationGraph>();
 
         app.init_asset_loader::<LoaderConfigAnimationLoader>();
+        app.init_asset_loader::<LoaderAnimationLoader>();
 
         app.add_systems(Update, on_state_change);
         app.add_systems(Update, on_animation_state_change);

@@ -29,7 +29,6 @@ fn skill_test_render_writes_frames_inner() {
         width: 320,
         height: 180,
         capture_every_nth_frame: 1,
-        max_frames: Some(3),
         spawn_default_scene: true,
         video_output: None,
         keep_frame_images: false,

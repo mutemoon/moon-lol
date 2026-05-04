@@ -226,9 +226,8 @@ pub fn extract_skin_for_champion(
 
     // 如果有动画，创建 AnimationHandler
     let animation_handler = animation_ron_path.map(|anim_path| {
-        let anim_handle: Handle<LOLAnimationGraph> = asset_server.load(&anim_path);
-        let anim_graph_handle =
-            asset_server.load::<AnimationGraph>(&format!("{}#animation_graph", anim_path));
+        let anim_handle = asset_server.load(&anim_path);
+        let anim_graph_handle = asset_server.load(&anim_path);
         (
             LOLAnimationGraphHandle(anim_handle),
             AnimationGraphHandle(anim_graph_handle),
@@ -380,7 +379,7 @@ fn export_animation_for_skin(
         for (hash, clip) in clip_data_map {
             if let EnumClipData::AtomicClipData(_) = clip {
                 if let Some(&glb_index) = hash_to_glb_index.get(hash) {
-                    node_index_map.insert(*hash, AnimationNodeIndex::new(glb_index));
+                    node_index_map.insert(*hash, AnimationNodeIndex::new(glb_index + 1));
                 }
             }
         }

@@ -15,7 +15,6 @@ fn main() {
         width: 640,
         height: 360,
         capture_every_nth_frame: 1,
-        max_frames: Some(8),
         spawn_default_scene: true,
         video_output: None,
         keep_frame_images: false,

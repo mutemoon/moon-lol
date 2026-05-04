@@ -1,8 +1,6 @@
 #![cfg(test)]
-//! Logic and render/video tests for Riven skills.
 
 use bevy::math::{Vec2, Vec3};
-use lol_core::skill::{SkillRecastWindow, Skills, get_skill_value};
 
 use crate::riven::Riven;
 use crate::test_utils::*;
@@ -24,31 +22,20 @@ fn build_headless(name: &str) -> ChampionTestHarness {
     ChampionTestHarness::build::<Riven>(name, HarnessMode::Headless, &riven_config())
 }
 
-fn build_render(name: &str, max_frames: u32) -> ChampionTestHarness {
-    ChampionTestHarness::build::<Riven>(name, HarnessMode::Render { max_frames }, &riven_config())
+fn build_render(name: &str) -> ChampionTestHarness {
+    ChampionTestHarness::build::<Riven>(name, HarnessMode::Render, &riven_config())
 }
-
-// ═══════════════════════════════════════════════════════════
-// Headless tests
-// ═══════════════════════════════════════════════════════════
 
 #[test]
 fn riven_q_cycles_through_three_real_stages() {
-    let mut h = build_headless("riven_q");
+    let mut h = build_render("riven_q");
 
     h.cast_skill(0, Vec2::new(140.0, 0.0)).advance(3.5);
 
-    let q_entity = (h
-        .app
-        .world()
-        .get::<Skills>(h.champion)
-        .expect("Skills missing"))[0];
+    let q_entity = h.skill_entity(0);
 
     assert_eq!(
-        h.app
-            .world()
-            .get::<SkillRecastWindow>(q_entity)
-            .map(|w| w.stage),
+        h.recast_window_stage(q_entity),
         Some(2),
         "第一次Q释放后应为第2阶段（总共3阶段，0=已用完）"
     );
@@ -57,28 +44,26 @@ fn riven_q_cycles_through_three_real_stages() {
     h.cast_skill(0, Vec2::new(140.0, 0.0)).advance(3.5);
 
     assert_eq!(
-        h.app
-            .world()
-            .get::<SkillRecastWindow>(q_entity)
-            .map(|w| w.stage),
+        h.recast_window_stage(q_entity),
         Some(3),
         "第二次Q释放后应为第3阶段（最后一次，可跃起击飞）"
     );
     assert!(h.can_cast(0), "Q技能应该可以释放第 3 段");
 
-    h.cast_skill(0, Vec2::new(140.0, 0.0));
+    h.cast_skill(0, Vec2::new(140.0, 0.0)).advance(1.0);
 
     assert!(
-        h.app.world().get::<SkillRecastWindow>(q_entity).is_none(),
+        !h.has_recast_window(q_entity),
         "Q技能三段全用完，RecastWindow应被移除"
     );
-    assert!(!h.can_cast(0), "Q技能三段用完，开始进入冷却");
+    assert!(!h.can_cast(0), "Q技能三段不能再释放");
 
-    h.advance(7.0);
+    h.advance(6.0);
+    h.finish();
 
     assert!(
         h.can_cast(0),
-        "等待 3.5 + 3.5 + 7 = 14 秒后，13秒冷却应已结束"
+        "等待 3.5 + 3.5 + 1 + 6 = 14 秒后，13秒冷却应已结束"
     );
     assert!(
         h.position(h.champion).length() > 5.0,
@@ -93,17 +78,10 @@ fn riven_q_recast_window_expires_after_4_seconds() {
     // Cast first Q
     h.cast_skill(0, Vec2::new(140.0, 0.0)).advance(0.4);
 
-    let q_entity = (h
-        .app
-        .world()
-        .get::<Skills>(h.champion)
-        .expect("Skills missing"))[0];
+    let q_entity = h.skill_entity(0);
 
     assert_eq!(
-        h.app
-            .world()
-            .get::<SkillRecastWindow>(q_entity)
-            .map(|w| w.stage),
+        h.recast_window_stage(q_entity),
         Some(2),
         "第一次Q释放后应为第2阶段"
     );
@@ -113,10 +91,7 @@ fn riven_q_recast_window_expires_after_4_seconds() {
     h.cast_skill(0, Vec2::new(140.0, 0.0)).advance(0.1);
 
     assert_eq!(
-        h.app
-            .world()
-            .get::<SkillRecastWindow>(q_entity)
-            .map(|w| w.stage),
+        h.recast_window_stage(q_entity),
         Some(3),
         "3.9秒时释放Q2，应进入第3阶段"
     );
@@ -124,16 +99,14 @@ fn riven_q_recast_window_expires_after_4_seconds() {
     // Q2 creates a NEW window with fresh 4s timer (expires at t=7.9)
     h.advance(0.15);
     assert!(
-        h.app.world().get::<SkillRecastWindow>(q_entity).is_some(),
+        h.has_recast_window(q_entity),
         "Q2创建了新窗口，新的4秒计时器未到期"
     );
 
     // Now wait for Q2's window to expire (need 7.9s from Q2 cast)
     h.advance(3.9); // total = 8.05s > 7.9s
-    assert!(
-        h.app.world().get::<SkillRecastWindow>(q_entity).is_none(),
-        "Q2的4秒窗口到期消失"
-    );
+    assert!(!h.has_recast_window(q_entity), "Q2的4秒窗口到期消失");
+    h.finish();
 }
 
 #[test]
@@ -142,13 +115,16 @@ fn riven_w_hits_only_enemies_in_range() {
     let enemy_near = h.add_enemy(Vec3::new(100.0, 0.0, 0.0));
     let enemy_far = h.add_enemy(Vec3::new(420.0, 0.0, 0.0));
     let ally_near = h.add_ally(Vec3::new(60.0, 0.0, 0.0));
-    let expected_damage = get_skill_value(
-        &h.spell(1).expect("W spell missing"),
-        "total_damage",
-        1,
-        |stat| if stat == 2 { 100.0 } else { 0.0 },
-    )
-    .expect("riven w damage should exist");
+    let expected_damage = h
+        .get_skill_value(
+            1,
+            "total_damage",
+            1,
+            |stat| {
+                if stat == 2 { 100.0 } else { 0.0 }
+            },
+        )
+        .expect("riven w damage should exist");
     let initial_near = h.health(enemy_near);
     let initial_far = h.health(enemy_far);
     let initial_ally = h.health(ally_near);
@@ -169,6 +145,7 @@ fn riven_w_hits_only_enemies_in_range() {
         (h.health(ally_near) - initial_ally).abs() < EPSILON,
         "友军不应受W技能影响（W是敌方伤害技能）"
     );
+    h.finish();
 }
 
 #[test]
@@ -207,6 +184,7 @@ fn riven_e_spawns_shield_and_dash_absorbs_damage() {
         h.health(h.champion) < initial_health,
         "护盾耗尽后，生命值应下降"
     );
+    h.finish();
 }
 
 #[test]
@@ -234,53 +212,5 @@ fn riven_r_starts_cooldown_without_moving_or_damaging() {
         h.position(h.champion).distance(Vec3::ZERO) < EPSILON,
         "R技能是Buff型技能，释放后位置应在原点不移动"
     );
-}
-
-// ═══════════════════════════════════════════════════════════
-// Render tests
-// ═══════════════════════════════════════════════════════════
-
-#[test]
-fn riven_q_writes_video() {
-    let mut h = build_render("riven_q_writes_video", 180);
-
-    h.cast_skill(0, Vec2::new(140.0, 0.0)).advance(0.4);
-
-    h.cast_skill(0, Vec2::new(140.0, 0.0)).advance(0.4);
-
-    h.cast_skill(0, Vec2::new(140.0, 0.0)).advance(0.1);
-
-    h.finish();
-}
-
-#[test]
-fn riven_w_writes_video() {
-    let mut h = build_render("riven_w_writes_video", 120);
-
-    h.cast_skill(1, Vec2::new(140.0, 0.0)).advance(0.2);
-
-    h.finish();
-}
-
-#[test]
-fn riven_e_writes_video() {
-    let mut h = build_render("riven_e_writes_video", 120);
-    let enemy = h.add_enemy(Vec3::new(100.0, 0.0, 0.0));
-
-    h.cast_skill(2, Vec2::new(140.0, 0.0)).advance(0.4);
-
-    h.apply_damage(enemy, 60.0);
-
-    h.apply_damage(enemy, 50.0);
-
-    h.finish();
-}
-
-#[test]
-fn riven_r_writes_video() {
-    let mut h = build_render("riven_r_writes_video", 140);
-
-    h.cast_skill(3, Vec2::new(140.0, 0.0)).advance(0.2);
-
     h.finish();
 }

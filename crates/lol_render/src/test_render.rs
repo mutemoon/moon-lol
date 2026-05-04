@@ -3,6 +3,7 @@ use std::path::PathBuf;
 use std::process::Command;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
+use std::time::Instant;
 
 use bevy::asset::RenderAssetUsages;
 use bevy::camera::RenderTarget;
@@ -24,7 +25,6 @@ pub struct SkillTestRenderConfig {
     pub width: u32,
     pub height: u32,
     pub capture_every_nth_frame: u32,
-    pub max_frames: Option<u32>,
     pub spawn_default_scene: bool,
     pub video_output: Option<SkillTestVideoOutput>,
     pub keep_frame_images: bool,
@@ -37,7 +37,6 @@ impl Default for SkillTestRenderConfig {
             width: 1280,
             height: 720,
             capture_every_nth_frame: 1,
-            max_frames: None,
             spawn_default_scene: true,
             video_output: None,
             keep_frame_images: false,
@@ -101,6 +100,9 @@ struct ImageCopier {
     src_image: Handle<Image>,
 }
 
+#[derive(Event)]
+pub struct CommandRenderVideo;
+
 #[derive(Default)]
 pub struct PluginSkillTestRender;
 
@@ -122,10 +124,8 @@ impl Plugin for PluginSkillTestRender {
                 .run_if(resource_exists::<RenderDevice>)
                 .run_if(run_once),
         );
-        app.add_systems(
-            Last,
-            (write_captured_frames, run_post_process_after_capture),
-        );
+        app.add_systems(Last, write_captured_frames);
+        app.add_observer(on_command_render_video);
 
         let render_app = app.sub_app_mut(RenderApp);
 
@@ -263,7 +263,7 @@ fn image_copy_extract(mut commands: Commands, image_copiers: Extract<Query<&Imag
     ));
 }
 
-pub fn image_copy_pass(
+fn image_copy_pass(
     image_copiers: Res<ImageCopiers>,
     gpu_images: Res<RenderAssets<bevy::render::texture::GpuImage>>,
     render_device: Res<RenderDevice>,
@@ -330,7 +330,13 @@ fn receive_image_from_buffer(
             let _ = map_sender.send(result);
         });
 
+        let poll_start = Instant::now();
         render_device.poll(PollType::wait_indefinitely()).unwrap();
+        let poll_elapsed = poll_start.elapsed();
+        if poll_elapsed.as_millis() > 1 {
+            info!("receive_image_from_buffer: poll waited {:?}", poll_elapsed);
+        }
+
         let Ok(Ok(())) = map_receiver.recv() else {
             continue;
         };
@@ -347,15 +353,11 @@ fn write_captured_frames(
     mut capture_count: ResMut<CapturedFrameCount>,
     mut write_index: ResMut<CapturedFrameWriteIndex>,
 ) {
+    let start = Instant::now();
+    let mut frames_written = 0;
     for raw in receiver.try_iter() {
         let current_frame = capture_count.0;
         capture_count.0 += 1;
-
-        if let Some(max_frames) = config.max_frames {
-            if write_index.0 >= max_frames {
-                continue;
-            }
-        }
 
         if current_frame % config.capture_every_nth_frame != 0 {
             continue;
@@ -365,31 +367,42 @@ fn write_captured_frames(
         let frame_path =
             frames_dir(&config.output_dir).join(format!("frame_{:06}.png", write_index.0));
 
-        let _ = image.save(frame_path);
+        let _ = image.save(&frame_path);
         write_index.0 += 1;
+        frames_written += 1;
+    }
+    let elapsed = start.elapsed();
+    if frames_written > 0 {
+        info!(
+            "write_captured_frames: wrote {} frames in {:?}",
+            frames_written, elapsed
+        );
     }
 }
 
-fn run_post_process_after_capture(
+fn on_command_render_video(
+    _event: On<CommandRenderVideo>,
     config: Res<SkillTestRenderConfig>,
     write_index: Res<CapturedFrameWriteIndex>,
     mut state: ResMut<CapturePostProcessState>,
 ) {
     if state.attempted {
+        info!("on_command_render_video: already attempted, skipping");
         return;
     }
 
-    let Some(max_frames) = config.max_frames else {
-        return;
-    };
-
-    if write_index.0 < max_frames {
+    if write_index.0 == 0 {
+        info!(
+            "on_command_render_video: no frames captured (write_index={}), skipping",
+            write_index.0
+        );
         return;
     }
 
     state.attempted = true;
 
     let Some(video_output) = &config.video_output else {
+        info!("on_command_render_video: no video_output configured, skipping");
         return;
     };
 
@@ -409,6 +422,13 @@ fn run_post_process_after_capture(
             .unwrap_or(frames_dir(&config.output_dir).as_path())
             .display()
     );
+
+    info!(
+        "on_command_render_video: starting ffmpeg for {} frames, output={}",
+        write_index.0,
+        output_path.display()
+    );
+    let ffmpeg_start = Instant::now();
     let status = match video_output.format {
         SkillTestVideoFormat::Gif => Command::new("ffmpeg")
             .args([
@@ -443,18 +463,25 @@ fn run_post_process_after_capture(
             if !config.keep_frame_images {
                 let _ = fs::remove_dir_all(frames_dir(&config.output_dir));
             }
-            info!("exported capture video to {}", output_path.display());
+            info!(
+                "exported capture video to {} in {:?}",
+                output_path.display(),
+                ffmpeg_start.elapsed()
+            );
         }
         Ok(status) => {
             warn!(
-                "ffmpeg exited with status {status}; skipped usable video output for {}",
-                output_path.display()
+                "failed to execute ffmpeg for {}: {} ({:?})",
+                output_path.display(),
+                status,
+                ffmpeg_start.elapsed()
             );
         }
         Err(error) => {
             warn!(
-                "failed to execute ffmpeg for {}: {error}",
-                output_path.display()
+                "failed to execute ffmpeg for {}: {error} ({:?})",
+                output_path.display(),
+                ffmpeg_start.elapsed()
             );
         }
     }
