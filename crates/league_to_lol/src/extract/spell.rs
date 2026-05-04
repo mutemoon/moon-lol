@@ -6,7 +6,10 @@ use league_core::extract::{
 };
 use league_loader::game::{Data, PropGroup};
 use league_utils::hash_to_field_name;
-use lol_base::movement::{MissileSpecification, MovementType, MovementTypeFixedSpeed};
+use lol_base::movement::{
+    HeightSolver, MissileBehavior, MissileSpecification, MovementType, MovementTypeFixedSpeed,
+    VerticalFacing,
+};
 use lol_base::spell::{DataSpell, Spell, ValuesData, ValuesEffect};
 use lol_base::spell_calc::{
     CalculationPart, CalculationPartEffectValue, CalculationPartNamedDataValue,
@@ -93,6 +96,22 @@ fn convert_spell_data_resource(
         missile_speed: spell.missile_speed,
         missile_effect_key: spell.m_missile_effect_key,
         cast_type: spell.m_cast_type,
+        cast_range: spell.cast_range.clone(),
+        cast_radius: spell.cast_radius.clone(),
+        cast_cone_angle: spell.cast_cone_angle,
+        cast_cone_distance: spell.cast_cone_distance,
+        line_width: spell.m_line_width,
+        cast_frame: spell.cast_frame,
+        animation_name: spell.m_animation_name.clone(),
+        cooldown_time: spell.cooldown_time.clone(),
+        cant_cancel_while_winding_up: spell.m_cant_cancel_while_winding_up,
+        spell_reveals_champion: spell.m_spell_reveals_champion,
+        affects_type_flags: spell.m_affects_type_flags,
+        alternate_name: spell.m_alternate_name.clone(),
+        coefficient: spell.m_coefficient,
+        hit_effect_key: spell.m_hit_effect_key,
+        selection_priority: spell.selection_priority,
+        use_animator_framerate: spell.use_animator_framerate,
     }
 }
 
@@ -125,10 +144,38 @@ fn convert_data_values(values: &Option<Vec<SpellDataValue>>) -> Option<Vec<Value
 fn convert_missile_spec(
     spec: &Option<league_core::extract::MissileSpecification>,
 ) -> Option<MissileSpecification> {
+    use league_core::extract::{EnumCastOnHit, EnumFacing, EnumHeightSolver};
+
     spec.as_ref().map(|spec| {
         let movement = convert_movement(&spec.movement_component);
+        let behaviors = spec.behaviors.as_ref().map(|behaviors| {
+            behaviors
+                .iter()
+                .filter_map(|b| match b {
+                    EnumCastOnHit::CastOnHit => Some(MissileBehavior::CastOnHit),
+                    EnumCastOnHit::DestroyOnMovementComplete(_) => {
+                        Some(MissileBehavior::DestroyOnMovementComplete)
+                    }
+                    _ => None,
+                })
+                .collect()
+        });
+        let height_solver = spec.height_solver.as_ref().and_then(|h| match h {
+            EnumHeightSolver::BlendedLinearHeightSolver => {
+                Some(HeightSolver::BlendedLinearHeightSolver)
+            }
+            _ => None,
+        });
+        let vertical_facing = spec.vertical_facing.as_ref().and_then(|f| match f {
+            EnumFacing::VerticalFacingFaceTarget => Some(VerticalFacing::VerticalFacingFaceTarget),
+            _ => None,
+        });
         MissileSpecification {
             movement_component: movement,
+            missile_width: spec.m_missile_width,
+            behaviors,
+            height_solver,
+            vertical_facing,
         }
     })
 }
@@ -140,15 +187,20 @@ fn convert_movement(movement: &Option<league_core::extract::EnumMovement>) -> Mo
             MovementType::MovementTypeFixedSpeed(MovementTypeFixedSpeed {
                 speed: fixed.m_speed,
                 start_bone_name: fixed.m_start_bone_name.clone(),
+                tracks_target: fixed.m_tracks_target,
+                project_target_to_cast_range: fixed.m_project_target_to_cast_range,
+                use_height_offset_at_end: fixed.m_use_height_offset_at_end,
+                offset_initial_target_height: fixed.m_offset_initial_target_height,
             })
         }
-        _ => {
-            // 其他移动类型暂时使用默认构造
-            MovementType::MovementTypeFixedSpeed(MovementTypeFixedSpeed {
-                speed: None,
-                start_bone_name: None,
-            })
-        }
+        _ => MovementType::MovementTypeFixedSpeed(MovementTypeFixedSpeed {
+            speed: None,
+            start_bone_name: None,
+            tracks_target: None,
+            project_target_to_cast_range: None,
+            use_height_offset_at_end: None,
+            offset_initial_target_height: None,
+        }),
     }
 }
 
