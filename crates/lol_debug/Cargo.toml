@@ -1,20 +1,17 @@
 [package]
-name = "lol_core"
+name = "lol_debug"
 version = "0.1.0"
 edition = "2024"
 
 [dependencies]
 bevy.workspace = true
-serde.workspace = true
-league_utils.workspace = true
-league_file.workspace = true
 lol_base.workspace = true
-rand.workspace = true
-ron.workspace = true
-thiserror.workspace = true
-bincode.workspace = true
+lol_core.workspace = true
+lol_champions.workspace = true
+serde.workspace = true
+serde_json.workspace = true
 tokio.workspace = true
 tokio-tungstenite.workspace = true
 async-channel.workspace = true
 futures-util.workspace = true
-serde_json.workspace = true
+tracing = "0.1"

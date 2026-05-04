@@ -207,7 +207,6 @@ impl LOLAnimationGraph {
                         let dist = WeightedIndex::new(weights).unwrap();
                         dist.sample(&mut rng())
                     });
-                info!("{:?}", probably_nodes[*index].key);
                 self.figure_node_indices(&probably_nodes[*index].key, state)
             }
             ConfigAnimationNode::Sequence { hashes } => {

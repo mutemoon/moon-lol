@@ -1,5 +1,6 @@
 [workspace]
 members = ["crates/*"]
+exclude = ["apps/desktop/src-tauri"]
 resolver = "2"
 
 [package]
@@ -17,6 +18,7 @@ league_to_lol = { path = "crates/league_to_lol" }
 league_utils = { path = "crates/league_utils" }
 lol_base = { path = "crates/lol_base" }
 lol_core = { path = "crates/lol_core" }
+lol_debug = { path = "crates/lol_debug" }
 lol_render = { path = "crates/lol_render" }
 lol_champions = { path = "crates/lol_champions" }
 gltf = "1.4.1"
@@ -29,7 +31,6 @@ bevy = { git = "https://github.com/mutemoon/bevy", branch = "bevy_basisu", featu
     "serialize",
     "bevy_debug_stepping",
     "webgpu",              # 在 web 平台使用 webgpu
-    "dynamic_linking",     # 动态链接大幅降低链接时间
 ] }
 bevy_gltf_draco = { git = "https://github.com/mutemoon/bevy_gltf_draco", branch = "ktx2" }
 
@@ -51,6 +52,14 @@ getrandom_03 = { package = "getrandom", version = "0.3", features = [
     "wasm_js",
 ] }
 wasm-bindgen = "0.2"
+clap = { version = "4", features = ["derive"] }
+tokio = { version = "1", features = ["full"] }
+tokio-tungstenite = "0.24"
+async-channel = "2"
+futures-util = "0.3"
+
+[features]
+default = ["bevy/dynamic_linking"]
 
 [dependencies]
 getrandom_02.workspace = true
@@ -63,8 +72,10 @@ league_file.workspace = true
 league_utils.workspace = true
 lol_base.workspace = true
 lol_core.workspace = true
+lol_debug.workspace = true
 lol_render.workspace = true
 lol_champions.workspace = true
+clap.workspace = true
 serde.workspace = true
 rand.workspace = true
 bincode.workspace = true
