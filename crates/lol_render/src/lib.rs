@@ -23,6 +23,8 @@ use navigation::PluginRenderNavigation;
 use resource::PluginRenderResource;
 use skin::PluginSkin;
 
+use crate::particle::PluginParticle;
+
 #[derive(Default)]
 pub struct PluginRender;
 
@@ -34,7 +36,7 @@ impl Plugin for PluginRender {
         app.add_plugins(PluginDebugSphere);
         app.add_plugins(PluginRenderMap);
         app.add_plugins(PluginRenderNavigation);
-        // app.add_plugins(PluginParticle);
+        app.add_plugins(PluginParticle);
         app.add_plugins(PluginRenderResource);
         app.add_plugins(PluginSkin);
         // app.add_plugins(PluginUI);

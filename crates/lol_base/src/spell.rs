@@ -23,7 +23,7 @@ pub struct ValuesData {
 }
 
 /// 技能数据资源
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Default, Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct DataSpell {
     pub calculations: Option<BTreeMap<String, CalculationType>>,
@@ -35,6 +35,22 @@ pub struct DataSpell {
     pub missile_speed: Option<f32>,
     pub missile_effect_key: Option<u32>,
     pub cast_type: Option<u32>,
+    pub cast_range: Option<Vec<f32>>,
+    pub cast_radius: Option<Vec<f32>>,
+    pub cast_cone_angle: Option<f32>,
+    pub cast_cone_distance: Option<f32>,
+    pub line_width: Option<f32>,
+    pub cast_frame: Option<f32>,
+    pub animation_name: Option<String>,
+    pub cooldown_time: Option<Vec<f32>>,
+    pub cant_cancel_while_winding_up: Option<bool>,
+    pub spell_reveals_champion: Option<bool>,
+    pub affects_type_flags: Option<u32>,
+    pub alternate_name: Option<String>,
+    pub coefficient: Option<f32>,
+    pub hit_effect_key: Option<u32>,
+    pub selection_priority: Option<u32>,
+    pub use_animator_framerate: Option<bool>,
 }
 
 /// 技能对象 (Bevy Asset)

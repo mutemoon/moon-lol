@@ -391,8 +391,12 @@ fn fixed_update(
                                 if spell.spell_data.as_ref().unwrap().cast_type.unwrap_or(0) == 1 {
                                     commands.trigger(CommandMissileCreate {
                                         entity,
-                                        target: *target,
-                                        spell_key: spell_handle.clone(),
+                                        target: Some(*target),
+                                        destination: None,
+                                        spell: spell_handle.clone(),
+                                        damage: 0.0,
+                                        speed: None,
+                                        particle_hash: None,
                                     });
                                 } else if let Some(damage) = damage {
                                     commands.try_trigger(CommandDamageCreate {

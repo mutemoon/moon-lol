@@ -212,7 +212,8 @@ pub fn on_skill_cast(
     debug!("{} 技能 {} 进入代码驱动观察者流程", entity, trigger.index);
     commands.trigger(cast_event);
 
-    if skill.cooldown_mode == SkillCooldownMode::AfterCast {
+    // 通过连招窗口释放的技能不重置冷却（如锐雯 Q 从第一段开始计时）
+    if skill.cooldown_mode == SkillCooldownMode::AfterCast && !can_cast_despite_cooldown {
         cooldown_state.timer = Some(Timer::from_seconds(
             cooldown_state.duration,
             TimerMode::Once,

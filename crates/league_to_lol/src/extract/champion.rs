@@ -13,7 +13,7 @@ use lol_core::damage::{Armor, Damage};
 use lol_core::entities::champion::Champion;
 use lol_core::life::Health;
 use lol_core::movement::Movement;
-use lol_core::skill::{CoolDown, Skill, SkillCooldownMode, SkillOf, SkillSlot};
+use lol_core::skill::{CoolDown, LOLSpells, Skill, SkillCooldownMode, SkillOf, SkillSlot};
 
 use super::skin::extract_skin_for_champion;
 use super::spell::extract_spells_for_champion;
@@ -190,8 +190,8 @@ pub fn extract_character_from_record(
         return false;
     };
 
-    // 提取技能数据到文件
-    extract_spells_for_champion(character_name, &prop_group, hashes);
+    // 提取技能数据到文件，获取所有技能名称列表
+    let all_spell_names = extract_spells_for_champion(character_name, &prop_group, hashes);
 
     // 创建 App 用于获取 AssetServer
     let mut app = App::new();
@@ -215,6 +215,14 @@ pub fn extract_character_from_record(
     let skill_with_cooldowns =
         create_skills_from_record(&prop_group, character_name, &record, &asset_server);
 
+    // 构建 LOLSpells，包含 bin 文件中所有 SpellObject
+    let mut lol_spells = LOLSpells::new();
+    for spell_name in &all_spell_names {
+        let spell_path = format!("characters/{}/spells/{}.ron", character_name, spell_name);
+        let spell_handle: Handle<Spell> = asset_server.load(&spell_path);
+        lol_spells.insert(spell_name.clone(), spell_handle);
+    }
+
     let world = app.world_mut();
 
     let character_name_string = character_name.to_string();
@@ -227,6 +235,7 @@ pub fn extract_character_from_record(
         damage,
         armor,
         movement,
+        lol_spells,
     ));
 
     if is_champion {
@@ -302,12 +311,12 @@ fn create_skills_from_record(
                     },
                     cooldown_duration,
                 ));
-                println!(
-                    "[INFO] 技能 {} -> {} (cd: {}s)",
-                    slot_to_string(slot),
-                    spell_obj.object_name,
-                    cooldown_duration
-                );
+                // println!(
+                //     "[INFO] 技能 {} -> {} (cd: {}s)",
+                //     slot_to_string(slot),
+                //     spell_obj.object_name,
+                //     cooldown_duration
+                // );
             }
         }
     }
@@ -330,10 +339,10 @@ fn create_skills_from_record(
                 },
                 cooldown_duration,
             ));
-            println!(
-                "[INFO] 被动技能 -> {} (cd: {}s)",
-                spell_obj.object_name, cooldown_duration
-            );
+            // println!(
+            //     "[INFO] 被动技能 -> {} (cd: {}s)",
+            //     spell_obj.object_name, cooldown_duration
+            // );
         }
     }
 

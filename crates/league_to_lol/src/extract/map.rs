@@ -51,7 +51,7 @@ pub fn extract_phase_2_champions(loader: &LeagueLoader, hashes: &HashMap<u32, St
     println!("[2/7] Phase 2: 提取所有英雄...");
     let champions_path = std::path::Path::new(&loader.root_dir).join("DATA/FINAL/Champions");
     let Ok(entries) = std::fs::read_dir(&champions_path) else {
-        eprintln!(
+        println!(
             "[ERROR] 无法读取 Champions 目录: {:?}",
             champions_path.display()
         );

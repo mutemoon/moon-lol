@@ -20,16 +20,17 @@ use lol_base::spell_calc::{
 use super::utils::write_to_file;
 
 /// 从 CharacterRecord 所在 bin 文件提取所有 SpellObject，转换为 DataSpell 并导出
+/// 返回所有技能对象名称列表
 pub fn extract_spells_for_champion(
     champ_name: &str,
     prop_group: &PropGroup,
     hashes: &HashMap<u32, String>,
-) {
+) -> Vec<String> {
     let spells = prop_group.get_all_by_class::<SpellObject>();
 
     if spells.is_empty() {
         println!("[WARN] 未在 {} bin 中找到 SpellObject", champ_name);
-        return;
+        return Vec::new();
     }
 
     println!(
@@ -37,6 +38,8 @@ pub fn extract_spells_for_champion(
         champ_name,
         spells.len()
     );
+
+    let mut spell_names = Vec::new();
 
     for spell_obj in spells {
         let object_name = &spell_obj.object_name;
@@ -69,13 +72,16 @@ pub fn extract_spells_for_champion(
         match serialized {
             Ok(s) => {
                 write_to_file(&output_path, s);
-                println!("[INFO] 已导出技能: {}", output_path);
+                // println!("[INFO] 已导出技能: {}", output_path);
+                spell_names.push(object_name.clone());
             }
             Err(e) => {
                 println!("[WARN] 序列化 {} 失败: {}", object_name, e);
             }
         }
     }
+
+    spell_names
 }
 
 /// 将 SpellDataResource 转换为 DataSpell

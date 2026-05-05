@@ -1,26 +1,36 @@
+pub mod buffs;
+pub mod e;
 pub mod passive;
 pub mod q;
+pub mod r;
+pub mod w;
 
 #[cfg(test)]
+mod e_tests;
+#[cfg(test)]
+mod q_tests;
+#[cfg(test)]
+mod r_tests;
+#[cfg(test)]
 mod tests;
+#[cfg(test)]
+mod w_tests;
 
 use bevy::prelude::*;
-use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
 use lol_base::spell::Spell;
-use lol_core::action::damage::{
-    ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
-};
-use lol_core::action::dash::{ActionDash, DashDamage, DashMoveType};
+use lol_core::attack::Attack;
 use lol_core::base::buff::BuffOf;
-use lol_core::buffs::shield_white::BuffShieldWhite;
-use lol_core::damage::DamageType;
+use lol_core::damage::Damage;
 use lol_core::entities::champion::Champion;
-use lol_core::skill::{CoolDown, EventSkillCast, Skill, SkillRecastWindow, SkillSlot};
+use lol_core::life::Health;
+use lol_core::skill::{
+    CoolDown, EventSkillCast, Skill, SkillRecastWindow, SkillSlot, get_skill_value,
+};
+use lol_core::team::Team;
 
-use crate::riven::passive::BuffRivenPassive;
+use crate::riven::buffs::{BuffRivenR, BuffStun};
 
-const RIVEN_Q_RECAST_WINDOW: f32 = 4.0;
+const RIVEN_R_DURATION: f32 = 15.0;
 
 #[derive(Default)]
 pub struct PluginRiven;
@@ -29,6 +39,9 @@ impl Plugin for PluginRiven {
     fn build(&self, app: &mut App) {
         app.add_observer(on_riven_skill_cast);
         app.add_observer(passive::on_damage_create_trigger_bonus);
+        app.add_observer(q::on_riven_dash_end);
+        app.add_systems(FixedUpdate, r::update_riven_buffs);
+        app.add_systems(FixedUpdate, w::update_riven_stun);
     }
 }
 
@@ -37,171 +50,138 @@ impl Plugin for PluginRiven {
 #[reflect(Component)]
 pub struct Riven;
 
+fn get_r_cooldown(level: usize) -> f32 {
+    match level {
+        1 => 120.0,
+        2 => 90.0,
+        3 => 60.0,
+        _ => 120.0,
+    }
+}
+
 fn on_riven_skill_cast(
     trigger: On<EventSkillCast>,
     mut commands: Commands,
     q_riven: Query<(), With<Riven>>,
     q_transform: Query<&Transform>,
-    q_skill: Query<(&Skill, &CoolDown, Option<&SkillRecastWindow>)>,
+    mut q_skill: Query<(&Skill, &mut CoolDown, Option<&SkillRecastWindow>)>,
+    mut q_damage: Query<&mut Damage>,
+    mut q_attack: Query<&mut Attack>,
+    q_stun: Query<&BuffStun>,
+    q_targets: Query<(Entity, &Team, &Transform, &Health)>,
+    q_team: Query<&Team>,
+    res_spells: Res<Assets<Spell>>,
+    res_asset_server: Res<AssetServer>,
 ) {
     let entity = trigger.event_target();
     if q_riven.get(entity).is_err() {
         return;
     }
 
-    let Ok((skill, cooldown, recast)) = q_skill.get(trigger.skill_entity) else {
+    // 眩晕中无法施放技能
+    if q_stun.get(entity).is_ok() {
+        return;
+    }
+
+    let Ok((skill, mut cooldown, recast)) = q_skill.get_mut(trigger.skill_entity) else {
         return;
     };
 
+    let Some(spell_obj) = res_spells.get(&skill.spell) else {
+        return;
+    };
+
+    // 预读取伤害值（后面可能修改）
+    let damage_value = q_damage.get(entity).map(|d| d.0).unwrap_or(64.0);
+
     match skill.slot {
-        SkillSlot::Q => cast_riven_q(
+        SkillSlot::Q => q::cast_riven_q(
             &mut commands,
-            &q_transform,
             entity,
             trigger.skill_entity,
             trigger.point,
-            cooldown,
             recast,
             skill.spell.clone(),
         ),
-        SkillSlot::W => cast_riven_w(&mut commands, entity, skill.spell.clone()),
-        SkillSlot::E => cast_riven_e(
-            &mut commands,
-            &q_transform,
-            entity,
-            trigger.point,
-            skill.spell.clone(),
-        ),
-        SkillSlot::R => cast_riven_r(&mut commands, entity),
+        SkillSlot::W => {
+            w::cast_riven_w(&mut commands, entity, skill.spell.clone());
+
+            // 对范围内敌人施加眩晕
+            w::apply_w_stun_to_targets(&mut commands, entity, &q_transform, &q_team, &q_targets);
+        }
+        SkillSlot::E => {
+            let shield_value = get_skill_value(spell_obj, "total_shield", skill.level, |stat| {
+                if stat == 2 { damage_value } else { 0.0 }
+            })
+            .unwrap_or(100.0);
+
+            e::cast_riven_e(
+                &mut commands,
+                &q_transform,
+                entity,
+                trigger.point,
+                shield_value,
+            );
+        }
+        SkillSlot::R => {
+            let is_recast = recast
+                .as_ref()
+                .map(|w| !w.timer.is_finished())
+                .unwrap_or(false);
+
+            if is_recast {
+                // Wind Slash
+                let missile_handles = [
+                    res_asset_server.load("characters/riven/spells/RivenWindslashMissileRight.ron"),
+                    res_asset_server
+                        .load("characters/riven/spells/RivenWindslashMissileCenter.ron"),
+                    res_asset_server.load("characters/riven/spells/RivenWindslashMissileLeft.ron"),
+                ];
+                r::cast_riven_wind_slash(
+                    &mut commands,
+                    entity,
+                    &missile_handles,
+                    &q_transform,
+                    &q_team,
+                    &q_targets,
+                    spell_obj,
+                    skill.level,
+                    damage_value,
+                );
+
+                commands
+                    .entity(trigger.skill_entity)
+                    .remove::<SkillRecastWindow>();
+
+                let r_cd = get_r_cooldown(skill.level);
+                cooldown.duration = r_cd;
+                cooldown.timer = Some(Timer::from_seconds(r_cd, TimerMode::Once));
+            } else {
+                // 初次 R - 获取增伤、开启连招窗口
+                let bonus_ad = damage_value * 0.25;
+                let bonus_range = 75.0;
+
+                if let Ok(mut dmg) = q_damage.get_mut(entity) {
+                    dmg.0 += bonus_ad;
+                }
+                if let Ok(mut atk) = q_attack.get_mut(entity) {
+                    atk.range += bonus_range;
+                }
+
+                commands.entity(entity).with_related::<BuffOf>(BuffRivenR {
+                    timer: Timer::from_seconds(RIVEN_R_DURATION, TimerMode::Once),
+                });
+
+                // 覆盖冷却为真实 R 冷却，同时添加连招窗口
+                let r_cd = get_r_cooldown(skill.level);
+                cooldown.duration = r_cd;
+                cooldown.timer = Some(Timer::from_seconds(r_cd, TimerMode::Once));
+
+                commands
+                    .entity(trigger.skill_entity)
+                    .insert(SkillRecastWindow::new(1, 1, RIVEN_R_DURATION));
+            }
+        }
         _ => {}
     }
-}
-
-fn cast_riven_q(
-    commands: &mut Commands,
-    _q_transform: &Query<&Transform>,
-    entity: Entity,
-    skill_entity: Entity,
-    point: Vec2,
-    cooldown: &CoolDown,
-    recast: Option<&SkillRecastWindow>,
-    skill_spell: Handle<Spell>,
-) {
-    let stage = recast.map(|window| window.stage).unwrap_or(1);
-
-    let (animation_hash, particle_hash) = match stage {
-        1 => ("Spell1A".to_string(), hash_bin("Riven_Q_01_Detonate")),
-        2 => ("Spell1B".to_string(), hash_bin("Riven_Q_02_Detonate")),
-        _ => ("Spell1C".to_string(), hash_bin("Riven_Q_03_Detonate")),
-    };
-
-    commands.trigger(CommandAnimationPlay {
-        entity,
-        hash: animation_hash,
-        repeat: false,
-        duration: None,
-    });
-    commands.trigger(ActionDash {
-        entity,
-        point: point,
-        skill: skill_spell,
-        move_type: DashMoveType::Fixed(250.0),
-        damage: Some(DashDamage {
-            radius_end: 250.0,
-            damage: TargetDamage {
-                filter: TargetFilter::All,
-                amount: "first_slash_damage".to_string(),
-                damage_type: DamageType::Physical,
-            },
-        }),
-        speed: 1000.0,
-    });
-    commands
-        .entity(entity)
-        .with_related::<BuffOf>(BuffRivenPassive);
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: particle_hash,
-    });
-
-    if stage >= 3 {
-        commands.entity(skill_entity).remove::<SkillRecastWindow>();
-        commands.entity(skill_entity).insert((CoolDown {
-            duration: cooldown.duration,
-            timer: Some(Timer::from_seconds(cooldown.duration, TimerMode::Once)),
-        },));
-    } else {
-        commands.entity(skill_entity).insert(SkillRecastWindow::new(
-            stage + 1,
-            3,
-            RIVEN_Q_RECAST_WINDOW,
-        ));
-    }
-}
-
-fn cast_riven_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Riven_W_Cast"),
-    });
-    commands.trigger(CommandAnimationPlay {
-        entity,
-        hash: "spell2".to_string(),
-        repeat: false,
-        duration: None,
-    });
-    commands.trigger(ActionDamage {
-        entity,
-        skill: skill_spell,
-        effects: vec![ActionDamageEffect {
-            shape: DamageShape::Circle { radius: 300.0 },
-            damage_list: vec![TargetDamage {
-                filter: TargetFilter::All,
-                amount: "total_damage".to_string(),
-                damage_type: DamageType::Physical,
-            }],
-            particle: None,
-        }],
-    });
-}
-
-fn cast_riven_e(
-    commands: &mut Commands,
-    _q_transform: &Query<&Transform>,
-    entity: Entity,
-    point: Vec2,
-    skill_spell: Handle<Spell>,
-) {
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Riven_E_Mis"),
-    });
-    commands.trigger(CommandAnimationPlay {
-        entity,
-        hash: "spell3".to_string(),
-        repeat: false,
-        duration: None,
-    });
-    commands
-        .entity(entity)
-        .with_related::<BuffOf>(BuffShieldWhite::new(100.0));
-    commands.trigger(ActionDash {
-        entity,
-        point: point,
-        skill: skill_spell,
-        move_type: DashMoveType::Fixed(250.0),
-        damage: None,
-        speed: 1000.0,
-    });
-}
-
-fn cast_riven_r(commands: &mut Commands, entity: Entity) {
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Riven_R_Indicator_Ring"),
-    });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Riven_R_ALL_Warning"),
-    });
 }

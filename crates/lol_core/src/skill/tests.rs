@@ -166,13 +166,8 @@ impl ActionSkillHarness {
                     spell_data: Some(DataSpell {
                         calculations: Some(calculations),
                         effect_amounts: Some(vec![effect_values]),
-                        data_values: None,
                         mana: Some(vec![mana_cost; 6]),
-                        missile_spec: None,
-                        hit_bone_name: None,
-                        missile_speed: None,
-                        missile_effect_key: None,
-                        cast_type: None,
+                        ..Default::default()
                     }),
                 },
             );
@@ -327,12 +322,7 @@ fn create_mock_spell(
             calculations: Some(calculations),
             effect_amounts,
             data_values,
-            mana: None,
-            missile_spec: None,
-            hit_bone_name: None,
-            missile_speed: None,
-            missile_effect_key: None,
-            cast_type: None,
+            ..Default::default()
         }),
     }
 }

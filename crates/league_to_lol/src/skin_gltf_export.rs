@@ -95,11 +95,11 @@ pub fn export_skin_to_glb(
         // 获取 submesh 名称
         let submesh_name = &range.name;
 
-        println!(
-            "{} - {:?}",
-            submesh_name,
-            material_override.map(|v| v.keys().map(|v| v.to_string()).collect::<Vec<_>>())
-        );
+        // println!(
+        //     "{} - {:?}",
+        //     submesh_name,
+        //     material_override.map(|v| v.keys().map(|v| v.to_string()).collect::<Vec<_>>())
+        // );
 
         // 检查是否有材质覆盖
         let material_index = if let Some(overrides) = material_override {

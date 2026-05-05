@@ -1,35 +1,12 @@
 #![cfg(test)]
-//! Shared champion test harness.
-//!
-//! Uses real exported champion assets (`ConfigCharacterRecord`, `ConfigSkin`) so skill data
-//! comes from the game files — no manual mock-spell construction needed.
-//!
-//! # Usage
-//!
-//! ```ignore
-//! use crate::test_utils::*;
-//!
-//! fn my_config() -> ChampionHarnessConfig { ... }
-//!
-//! #[test]
-//! fn my_skill_test() {
-//!     let mut h = ChampionTestHarness::build::<MyChamp>(
-//!         "test_name", HarnessMode::Headless, &my_config(),
-//!     );
-//!     h.cast_skill(0, Vec2::new(100.0, 0.0));
-//!     h.advance(0.2);
-//! }
-//! ```
 
 use std::fs;
 use std::path::PathBuf;
-use std::time::Duration;
 
 use bevy::prelude::*;
 use bevy::time::TimeUpdateStrategy;
 use bevy::winit::WinitPlugin;
 use lol_base::character::{ConfigCharacterRecord, ConfigSkin};
-use lol_base::prop::LoadHashKeyTrait;
 use lol_base::spell::Spell;
 use lol_core::action::{Action, CommandAction};
 use lol_core::base::ability_resource::AbilityResource;
@@ -39,6 +16,7 @@ use lol_core::damage::{CommandDamageCreate, DamageType};
 use lol_core::entities::champion::Champion;
 use lol_core::life::Health;
 use lol_core::log::create_log_plugin;
+use lol_core::navigation::grid::ResourceGrid;
 use lol_core::navigation::navigation::NavigationDebug;
 use lol_core::skill::{CoolDown, Skill, SkillRecastWindow, Skills, get_skill_value};
 use lol_core::team::Team;
@@ -173,6 +151,7 @@ impl ChampionTestHarness {
             .spawn((
                 C::default(),
                 Transform::default(),
+                Team::Order,
                 ConfigCharacterRecord {
                     character_record: config_handle.clone(),
                 },
@@ -189,46 +168,52 @@ impl ChampionTestHarness {
             });
         }
 
-        // Poll until ConfigCharacterRecord is processed
-        for i in 0..10 {
-            if mode.is_render() {
-                let load_state = app
-                    .world()
-                    .resource::<AssetServer>()
-                    .get_recursive_dependency_load_state(&skin_handle.clone().unwrap());
-                // info!("帧 {} 加载状态: {:?}", i, load_state);
-                if load_state.map(|v| v.is_loaded()).eq(&Some(true)) {
-                    info!("第 {} 帧 ConfigSkin 加载完毕", i);
+        // Wait for config and grid assets to load
+        let mut character_loaded = false;
+        let mut grid_loaded = false;
 
-                    assert!(
-                        !app.world().entity(champion).contains::<ConfigSkin>(),
-                        "config skin load failed: {}",
-                        config.config_path
-                    );
+        for i in 0..1000 {
+            if !character_loaded {
+                let asset_server = app.world().resource::<AssetServer>();
+                let ready = if mode.is_render() {
+                    asset_server.get_recursive_dependency_load_state(&skin_handle.clone().unwrap())
+                } else {
+                    asset_server.get_recursive_dependency_load_state(&config_handle)
+                }
+                .is_some_and(|s| s.is_loaded());
 
-                    break;
+                if ready {
+                    info!("第 {} 帧角色加载完毕", i);
+                    character_loaded = true;
                 }
-            } else {
-                let load_state = app
-                    .world()
-                    .resource::<AssetServer>()
-                    .get_recursive_dependency_load_state(&config_handle);
-                // info!("帧 {} 加载状态: {:?}", i, load_state);
-                if load_state.map(|v| v.is_loaded()).eq(&Some(true)) {
-                    info!("第 {} 帧 ConfigCharacterRecord 加载完毕", i);
-                    break;
+            }
+
+            if !grid_loaded {
+                if let Some(grid) = app.world().get_resource::<ResourceGrid>() {
+                    if app
+                        .world()
+                        .resource::<AssetServer>()
+                        .get_load_state(&grid.0)
+                        .is_some_and(|s| s.is_loaded())
+                    {
+                        info!("第 {} 帧 ResourceGrid 加载完毕", i);
+                        grid_loaded = true;
+                    }
                 }
+            }
+
+            if character_loaded && grid_loaded {
+                break;
             }
             app.update();
         }
 
         assert!(
-            !app.world()
-                .entity(champion)
-                .contains::<ConfigCharacterRecord>(),
-            "config load failed: {}",
+            character_loaded,
+            "config asset failed to load: {}",
             config.config_path
         );
+        assert!(grid_loaded, "ResourceGrid asset failed to load");
 
         Self {
             app,
@@ -456,7 +441,7 @@ impl ChampionTestHarness {
         self.app
             .world()
             .resource::<Assets<Spell>>()
-            .load_hash(skill.spell.id())
+            .get(skill.spell.id())
     }
 
     /// Pad frames and produce the video file.  No-op in headless mode.

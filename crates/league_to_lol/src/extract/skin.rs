@@ -178,7 +178,7 @@ pub fn extract_skin_for_champion(
         println!("[WARN] 皮肤 GLB 导出失败: {}", e);
         return;
     } else {
-        println!("{:?}", skin_mesh_properties.material_override);
+        // println!("{:?}", skin_mesh_properties.material_override);
     }
 
     // 获取 scale 和 bar_type
@@ -337,7 +337,7 @@ fn load_animations_for_skin(
         hash_to_glb_index.insert(*hash, idx);
     }
 
-    println!("{:?}", hash_to_glb_index);
+    // println!("{:?}", hash_to_glb_index);
 
     (animations, hash_to_glb_index)
 }

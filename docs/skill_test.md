@@ -32,7 +32,7 @@
   - **Render 模式**：使用真实 `ConfigCharacterRecord` + `ConfigSkin`，通过 `AssetServer` 加载角色配置和皮肤。
   - 生成初始实体、提供"模拟输入""推进时间""查询世界状态"辅助方法。
 - 这样每个测试只描述：给定什么场景、玩家做了什么、最终应发生什么。
-- `.render(max_frames)` 将 harness 切换为渲染模式，测试结束后自动调用 `finish()` 生成视频。
+- `build_render(name)`（内部传 `HarnessMode::Render`）创建渲染模式 harness，测试结束后自动调用 `finish()` 生成视频。
 
 ## 已落地经验
 
@@ -104,7 +104,7 @@
   - 无头 Bevy + mock spell（headless）或 `ConfigCharacterRecord`（render）
   - 验证该英雄技能的核心逻辑
   - 统一使用 `ChampionTestHarness`，通过 `HarnessMode` 切换模式
-  - 添加 `.render(max_frames)` 即可录制视频到 `assets/test_videos/<hero>/<test_name>.mp4`
+  - 使用 `build_render(name)`（`HarnessMode::Render`）录制视频到 `assets/test_videos/<hero>/<test_name>.mp4`
 
 - `lol_champions::test_utils`（`#[cfg(test)]`）
   - 共享 harness：`ChampionTestHarness`、`ChampionHarnessConfig`、`SpellKeySet`、`HarnessMode`
@@ -157,17 +157,11 @@
 - 统一使用 `ChampionTestHarness`（定义在 `crates/lol_champions/src/test_utils.rs`）
 - 验证该英雄技能的真实行为
 
-当前已有：
-
-- `lol_champions::riven::tests` — 锐雯 Q/W/E/R headless 逻辑测试
-- `lol_champions::fiora::tests` — 菲奥娜 smoke 测试（headless）
+当前实现参考 `crates/lol_champions/src/riven/tests.rs`：
 
 ### 3. 英雄渲染测试
 
-位于各英雄 `tests.rs` 中，通过 `.render()` 触发：
-
-- 锐雯 Q/W/E/R 渲染录像测试
-- 菲奥娜 Q/W/E/R 渲染录像测试
+使用 `build_render()` 创建（参考 `riven_q_cycles_through_three_real_stages`），`HarnessMode::Render` 同时验证逻辑行为并录制视频。
 
 覆盖内容：
 
