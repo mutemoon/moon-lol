@@ -2,7 +2,7 @@ pub mod buffs;
 
 use bevy::prelude::{Handle, *};
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -62,11 +62,6 @@ fn cast_pyke_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spel
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Pyke_Q_Cast"),
-    });
-
     // Q is bone skewer - damage and pull
     commands.trigger(ActionDamage {
         entity,
@@ -93,11 +88,6 @@ fn cast_pyke_w(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Pyke_W_Cast"),
-    });
-
     // W is ghostwater dive - invisibility and movespeed
 }
 
@@ -108,11 +98,6 @@ fn cast_pyke_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spel
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Pyke_E_Cast"),
-    });
-
     // E is phantom undertow - dash and stun on return
     commands.trigger(ActionDamage {
         entity,
@@ -139,11 +124,6 @@ fn cast_pyke_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spel
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Pyke_R_Cast"),
-    });
-
     // R is death from below - execute damage in AoE
     commands.trigger(ActionDamage {
         entity,

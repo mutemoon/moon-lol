@@ -1,5 +1,4 @@
 use bevy::prelude::*;
-use lol_base::render_cmd::CommandSkinParticleSpawn;
 use lol_base::spell::Spell;
 
 use crate::damage::{CommandDamageCreate, Damage, DamageType};
@@ -196,8 +195,5 @@ pub fn on_action_damage(
             }
         }
 
-        if let Some(hash) = effect.particle {
-            commands.trigger(CommandSkinParticleSpawn { entity, hash });
-        }
     }
 }

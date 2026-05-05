@@ -2,7 +2,7 @@ pub mod buffs;
 
 use bevy::prelude::*;
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -60,11 +60,6 @@ fn cast_senna_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Senna_Q_Cast"),
-    });
-
     // Q is duskblade of shadow - damage
     commands.trigger(ActionDamage {
         entity,
@@ -91,11 +86,6 @@ fn cast_senna_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Senna_W_Cast"),
-    });
-
     // W is last embrace - root
     commands.trigger(ActionDamage {
         entity,
@@ -119,11 +109,6 @@ fn cast_senna_e(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Senna_E_Cast"),
-    });
-
     // E is curtain of darkness - camouflage
 }
 
@@ -134,11 +119,6 @@ fn cast_senna_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Senna_R_Cast"),
-    });
-
     // R is pierce the veil - AoE damage and shield
     commands.trigger(ActionDamage {
         entity,

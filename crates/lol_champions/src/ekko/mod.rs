@@ -2,7 +2,7 @@ pub mod buffs;
 
 use bevy::prelude::*;
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -71,11 +71,6 @@ fn cast_ekko_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spel
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Ekko_Q_Cast"),
-    });
-
     // Q is a projectile that slows
     commands.trigger(ActionDamage {
         entity,
@@ -102,11 +97,6 @@ fn cast_ekko_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spel
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Ekko_W_Cast"),
-    });
-
     // W creates a zone that slows
     commands.trigger(ActionDamage {
         entity,
@@ -136,11 +126,6 @@ fn cast_ekko_e(
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Ekko_E_Cast"),
-    });
-
     // E is a dash that enhances next attack
     commands.trigger(ActionDash {
         entity,
@@ -166,11 +151,6 @@ fn cast_ekko_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spel
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Ekko_R_Cast"),
-    });
-
     // R is an AoE damage around previous position
     commands.trigger(ActionDamage {
         entity,

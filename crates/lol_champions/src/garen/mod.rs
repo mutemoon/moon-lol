@@ -3,7 +3,7 @@ pub mod w;
 
 use bevy::prelude::*;
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -72,11 +72,6 @@ fn cast_garen_q(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Garen_Q_Cast"),
-    });
-
     // Q provides movement speed buff and enhanced next attack
     commands
         .entity(entity)
@@ -102,11 +97,6 @@ fn cast_garen_w(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Garen_W_Cast"),
-    });
-
     // W provides tenacity, damage reduction, and a shield
     commands
         .entity(entity)
@@ -134,10 +124,6 @@ fn cast_garen_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Garen_E_Cast"),
-    });
     commands.trigger(ActionDamage {
         entity,
         skill: skill_spell,
@@ -159,10 +145,6 @@ fn cast_garen_r(commands: &mut Commands, entity: Entity, _point: Vec2, skill_spe
         hash: "spell4".to_string(),
         repeat: false,
         duration: None,
-    });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Garen_R_Cast"),
     });
     // R is a targeted execute ability - use Nearest shape for single target
     commands.trigger(ActionDamage {

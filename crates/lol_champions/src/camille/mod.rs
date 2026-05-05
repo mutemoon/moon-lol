@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -99,20 +99,12 @@ fn cast_camille_q(
 
     if stage == 1 {
         // First cast: Prepares the hookshot
-        commands.trigger(CommandSkinParticleSpawn {
-            entity,
-            hash: hash_bin("Camille_Q_Cast"),
-        });
         // Q1 doesn't deal damage, just marks for second cast
         commands
             .entity(skill_entity)
             .insert(SkillRecastWindow::new(2, 2, CAMILLE_Q_RECAST_WINDOW));
     } else {
         // Second cast: Deals bonus damage and resets attack
-        commands.trigger(CommandSkinParticleSpawn {
-            entity,
-            hash: hash_bin("Camille_Q2_Cast"),
-        });
         commands.trigger(CommandAttackReset { entity });
         commands.trigger(ActionDamage {
             entity,
@@ -143,10 +135,6 @@ fn cast_camille_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<S
         hash: "spell2".to_string(),
         repeat: false,
         duration: None,
-    });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Camille_W_Cast"),
     });
     // W is a swept cone that slows
     commands.trigger(ActionDamage {
@@ -188,19 +176,11 @@ fn cast_camille_e(
 
     if stage == 1 {
         // First cast: Hookshot - launches toward terrain
-        commands.trigger(CommandSkinParticleSpawn {
-            entity,
-            hash: hash_bin("Camille_E_Cast"),
-        });
         commands
             .entity(skill_entity)
             .insert(SkillRecastWindow::new(2, 2, CAMILLE_E_RECAST_WINDOW));
     } else {
         // Second cast: Dash toward hooked terrain
-        commands.trigger(CommandSkinParticleSpawn {
-            entity,
-            hash: hash_bin("Camille_E2_Cast"),
-        });
         commands.trigger(ActionDash {
             entity,
             point: point,
@@ -236,10 +216,6 @@ fn cast_camille_r(
         hash: "spell4".to_string(),
         repeat: false,
         duration: None,
-    });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Camille_R_Cast"),
     });
     // R is a hookshot-like leap that marks and traps target champion
     commands.trigger(ActionDash {

@@ -1,14 +1,10 @@
 use bevy::ecs::relationship::Relationship;
 use bevy::prelude::*;
-use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandSkinParticleDespawn, CommandSkinParticleSpawn};
 use lol_core::base::buff::{Buff, BuffOf};
 use lol_core::base::direction::{Direction, is_in_direction};
 use lol_core::damage::EventDamageCreate;
 use lol_core::life::Health;
 use lol_core::team::Team;
-
-use crate::fiora::passive::get_particle_hash;
 
 const VITAL_R_TIMEOUT: f32 = 1.5;
 const FIORA_R_ACTIVE_DURATION: f32 = 0.5;
@@ -55,56 +51,16 @@ pub fn fixed_update(
 
         if !buff.is_active() {
             buff.active_timer.tick(time.delta());
-
-            if buff.is_active() {
-                for direction in buff.vitals.iter() {
-                    commands.trigger(CommandSkinParticleSpawn {
-                        entity: target_entity,
-                        hash: get_particle_hash(direction, "Fiora_R_Mark_", ""),
-                    });
-                    commands.trigger(CommandSkinParticleSpawn {
-                        entity: target_entity,
-                        hash: get_particle_hash(direction, "Fiora_R_Mark_", "_FioraOnly"),
-                    });
-                }
-            }
             continue;
         }
 
         if !buff.timeout_red_triggered && buff.remove_timer.remaining_secs() <= VITAL_R_TIMEOUT {
-            for direction in buff.vitals.iter() {
-                commands.entity(target_entity);
-                commands.trigger(CommandSkinParticleDespawn {
-                    entity: target_entity,
-                    hash: get_particle_hash(direction, "Fiora_R_Mark_", ""),
-                });
-                commands.trigger(CommandSkinParticleSpawn {
-                    entity: target_entity,
-                    hash: get_particle_hash(direction, "Fiora_R_", "_Timeout"),
-                });
-            }
             buff.timeout_red_triggered = true;
         }
 
         buff.remove_timer.tick(time.delta());
 
         if buff.remove_timer.is_finished() {
-            // 清理所有剩余的粒子
-            for direction in buff.vitals.iter() {
-                commands.entity(target_entity);
-                commands.trigger(CommandSkinParticleDespawn {
-                    entity: target_entity,
-                    hash: get_particle_hash(direction, "Fiora_R_Mark_", ""),
-                });
-                commands.trigger(CommandSkinParticleDespawn {
-                    entity: target_entity,
-                    hash: get_particle_hash(direction, "Fiora_R_Mark_", "_FioraOnly"),
-                });
-                commands.trigger(CommandSkinParticleDespawn {
-                    entity: target_entity,
-                    hash: get_particle_hash(direction, "Fiora_R_", "_Timeout"),
-                });
-            }
             commands.entity(entity).despawn();
         }
     }
@@ -165,23 +121,6 @@ pub fn on_r_damage_create(
     let Some(direction) = hit_direction else {
         return;
     };
-
-    commands.trigger(CommandSkinParticleSpawn {
-        entity: target_entity,
-        hash: hash_bin("Fiora_Passive_Hit_Tar"),
-    });
-    commands.trigger(CommandSkinParticleDespawn {
-        entity: target_entity,
-        hash: get_particle_hash(&direction, "Fiora_R_Mark_", ""),
-    });
-    commands.trigger(CommandSkinParticleDespawn {
-        entity: target_entity,
-        hash: get_particle_hash(&direction, "Fiora_R_Mark_", "_FioraOnly"),
-    });
-    commands.trigger(CommandSkinParticleDespawn {
-        entity: target_entity,
-        hash: get_particle_hash(&direction, "Fiora_R_", "_Timeout"),
-    });
 
     if buff_fiora_r.vitals.is_empty() {
         // TODO: 在这里触发治疗光环

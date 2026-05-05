@@ -6,7 +6,6 @@ use lol_base::debug_area::DebugArea;
 use lol_base::debug_missile::DebugMissile;
 use lol_base::debug_sphere::DebugSphere;
 use lol_base::movement::{MissileBehavior, MovementType};
-use lol_base::render_cmd::CommandSkinParticleSpawn;
 use lol_base::spell::Spell;
 use serde::{Deserialize, Serialize};
 
@@ -227,9 +226,6 @@ fn on_command_missile_create(
             })
         })
         .unwrap_or(true);
-    let missile_effect = trigger
-        .particle_hash
-        .or(spell_data.and_then(|d| d.missile_effect_key));
 
     let translation = match &start_bone {
         Some(bone_name) => find_bone_translation(
@@ -289,19 +285,12 @@ fn on_command_missile_create(
             },
         });
 
-        if let Some(particle) = missile_effect {
-            commands.trigger(CommandSkinParticleSpawn {
-                entity: missile_entity,
-                hash: particle,
-            });
-        } else {
-            // 用矩形条显示导弹的碰撞宽度
-            commands.entity(missile_entity).insert(DebugMissile {
-                width: missile_width.unwrap_or(100.0),
-                length: 100.0,
-                color: Color::srgba(1.0, 0.3, 0.3, 0.6),
-            });
-        }
+        // 用矩形条显示导弹的碰撞宽度
+        commands.entity(missile_entity).insert(DebugMissile {
+            width: missile_width.unwrap_or(100.0),
+            length: 100.0,
+            color: Color::srgba(1.0, 0.3, 0.3, 0.6),
+        });
 
         return;
     }
@@ -356,17 +345,10 @@ fn on_command_missile_create(
             source: "Missile".to_string(),
         },
     });
-    if let Some(particle) = missile_effect {
-        commands.trigger(CommandSkinParticleSpawn {
-            entity: missile_entity,
-            hash: particle,
-        });
-    } else {
-        commands.entity(missile_entity).insert(DebugSphere {
-            color: RED_500.into(),
-            radius: 10.0,
-        });
-    }
+    commands.entity(missile_entity).insert(DebugSphere {
+        color: RED_500.into(),
+        radius: 10.0,
+    });
 }
 
 fn on_event_movement_end(

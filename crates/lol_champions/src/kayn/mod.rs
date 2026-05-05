@@ -2,7 +2,7 @@ pub mod buffs;
 
 use bevy::prelude::*;
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -89,10 +89,6 @@ fn cast_kayn_q(
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Kayn_Q_Cast"),
-    });
     // Q is a dash that deals damage
     commands.trigger(ActionDash {
         entity,
@@ -117,10 +113,6 @@ fn cast_kayn_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spel
         hash: "spell2".to_string(),
         repeat: false,
         duration: None,
-    });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Kayn_W_Cast"),
     });
     // W is an upward slash that slows
     commands.trigger(ActionDamage {
@@ -153,10 +145,6 @@ fn cast_kayn_e(
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Kayn_E_Cast"),
-    });
     // E is a ghost-like dash that allows passing through terrain
     // Movement speed buff
     commands
@@ -170,10 +158,6 @@ fn cast_kayn_r(commands: &mut Commands, entity: Entity) {
         hash: "spell4".to_string(),
         repeat: false,
         duration: None,
-    });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Kayn_R_Cast"),
     });
     // R 寄生：给自身挂 BuffKaynRActive（不可选中状态）
     commands

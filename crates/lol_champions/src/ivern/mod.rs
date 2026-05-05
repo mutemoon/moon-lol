@@ -2,7 +2,7 @@ pub mod buffs;
 
 use bevy::prelude::*;
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -61,11 +61,6 @@ fn cast_ivern_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Ivern_Q_Cast"),
-    });
-
     // Q roots enemies
     commands.trigger(ActionDamage {
         entity,
@@ -92,10 +87,6 @@ fn cast_ivern_w(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Ivern_W_Cast"),
-    });
     // W creates brush
 }
 
@@ -106,11 +97,6 @@ fn cast_ivern_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Ivern_E_Cast"),
-    });
-
     // E is a shield that explodes
     commands.trigger(ActionDamage {
         entity,
@@ -133,10 +119,6 @@ fn cast_ivern_r(commands: &mut Commands, entity: Entity) {
         hash: "spell4".to_string(),
         repeat: false,
         duration: None,
-    });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Ivern_R_Cast"),
     });
     // R summons Daisy
 }

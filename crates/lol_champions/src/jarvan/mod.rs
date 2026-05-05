@@ -2,7 +2,7 @@ pub mod buffs;
 
 use bevy::prelude::*;
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -69,11 +69,6 @@ fn cast_jarvan_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Jarvan_Q_Cast"),
-    });
-
     // Q is a line damage and armor shred
     commands.trigger(ActionDamage {
         entity,
@@ -100,11 +95,6 @@ fn cast_jarvan_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Jarvan_W_Cast"),
-    });
-
     // W is an AoE slow
     commands.trigger(ActionDamage {
         entity,
@@ -128,11 +118,6 @@ fn cast_jarvan_e(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Jarvan_E_Cast"),
-    });
-
     // E grants attack speed aura
 }
 
@@ -149,11 +134,6 @@ fn cast_jarvan_r(
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Jarvan_R_Cast"),
-    });
-
     // R is a targeted dash that creates arena
     commands.trigger(ActionDash {
         entity,

@@ -2,7 +2,7 @@ pub mod buffs;
 
 use bevy::prelude::*;
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -81,10 +81,6 @@ fn cast_urgot_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Urgot_Q_Cast"),
-    });
     // Q is a mortar shot that damages and slows enemies in area
     commands.trigger(ActionDamage {
         entity,
@@ -108,11 +104,6 @@ fn cast_urgot_w(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Urgot_W_Cast"),
-    });
-
     // W is a toggle that makes Urgot fire at nearby enemies with reduced move speed
     commands
         .entity(entity)
@@ -143,10 +134,6 @@ fn cast_urgot_e(
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Urgot_E_Cast"),
-    });
     // E is a dash that provides shield and knocks back enemies
     commands.trigger(ActionDash {
         entity,
@@ -168,10 +155,6 @@ fn cast_urgot_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
         hash: "spell4".to_string(),
         repeat: false,
         duration: None,
-    });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Urgot_R_Cast"),
     });
     // R is a long-range targeted ability that executes and marks enemy
     commands.trigger(ActionDamage {

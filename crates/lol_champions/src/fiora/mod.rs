@@ -7,9 +7,7 @@ mod tests;
 
 use bevy::prelude::*;
 use league_utils::hash_bin;
-use lol_base::render_cmd::{
-    CommandAnimationPlay, CommandSkinParticleDespawn, CommandSkinParticleSpawn,
-};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -94,10 +92,6 @@ fn cast_fiora_q(
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Fiora_Q_Dash_Trail_ground"),
-    });
     commands.trigger(ActionDash {
         entity,
         point: point,
@@ -124,29 +118,17 @@ fn cast_fiora_q(
 }
 
 fn cast_fiora_w(commands: &mut Commands, entity: Entity) {
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Fiora_W_Telegraph_Blue"),
-    });
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: "spell2_in".to_string(),
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Fiora_W_Cas"),
-    });
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: "spell2".to_string(),
         repeat: false,
         duration: None,
-    });
-    commands.trigger(CommandSkinParticleDespawn {
-        entity,
-        hash: hash_bin("Fiora_W_Telegraph_Blue"),
     });
 }
 
@@ -161,14 +143,6 @@ fn cast_fiora_e(commands: &mut Commands, entity: Entity) {
 }
 
 fn cast_fiora_r(commands: &mut Commands, entity: Entity) {
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Fiora_R_Indicator_Ring"),
-    });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Fiora_R_ALL_Warning"),
-    });
     commands
         .entity(entity)
         .with_related::<BuffOf>(BuffFioraR::default());

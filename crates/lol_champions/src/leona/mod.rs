@@ -3,7 +3,7 @@ pub mod buffs;
 use bevy::asset::Handle;
 use bevy::prelude::*;
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -72,10 +72,6 @@ fn cast_leona_q(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Leona_Q_Cast"),
-    });
 
     // Q is an empowered auto attack that stuns
     commands.trigger(CommandAttackReset { entity });
@@ -87,10 +83,6 @@ fn cast_leona_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
         hash: "spell2".to_string(),
         repeat: false,
         duration: None,
-    });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Leona_W_Cast"),
     });
 
     // W grants damage reduction and armor/mr
@@ -126,10 +118,6 @@ fn cast_leona_e(
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Leona_E_Cast"),
-    });
 
     // E is a dash that roots on hit
     commands.trigger(ActionDamage {
@@ -156,10 +144,6 @@ fn cast_leona_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
         hash: "spell4".to_string(),
         repeat: false,
         duration: None,
-    });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Leona_R_Cast"),
     });
 
     // R is a global nuke that slows and stuns center

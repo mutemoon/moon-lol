@@ -2,7 +2,7 @@ pub mod buffs;
 
 use bevy::prelude::*;
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -70,11 +70,6 @@ fn cast_ezreal_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Ezreal_Q_Cast"),
-    });
-
     // Q is a long range skillshot
     commands.trigger(ActionDamage {
         entity,
@@ -101,11 +96,6 @@ fn cast_ezreal_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Ezreal_W_Cast"),
-    });
-
     // W marks target
     commands.trigger(ActionDamage {
         entity,
@@ -138,11 +128,6 @@ fn cast_ezreal_e(
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Ezreal_E_Cast"),
-    });
-
     // E is a blink/dash
     commands.trigger(ActionDash {
         entity,
@@ -168,11 +153,6 @@ fn cast_ezreal_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Ezreal_R_Cast"),
-    });
-
     // R is global AoE
     commands.trigger(ActionDamage {
         entity,

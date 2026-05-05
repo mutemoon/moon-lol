@@ -2,7 +2,7 @@ pub mod buffs;
 
 use bevy::prelude::*;
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -62,11 +62,6 @@ fn cast_teemo_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Teemo_Q_Cast"),
-    });
-
     commands.trigger(ActionDamage {
         entity,
         skill: skill_spell,
@@ -91,11 +86,7 @@ fn cast_teemo_w(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Teemo_W_Cast"),
-    });
-}
+    }
 
 fn cast_teemo_e(commands: &mut Commands, entity: Entity) {
     commands.trigger(CommandAnimationPlay {
@@ -104,11 +95,7 @@ fn cast_teemo_e(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Teemo_E_Cast"),
-    });
-}
+    }
 
 fn cast_teemo_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     commands.trigger(CommandAnimationPlay {
@@ -117,11 +104,6 @@ fn cast_teemo_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Teemo_R_Cast"),
-    });
-
     commands.trigger(ActionDamage {
         entity,
         skill: skill_spell,

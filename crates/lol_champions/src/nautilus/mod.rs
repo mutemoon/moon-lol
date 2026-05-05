@@ -2,7 +2,7 @@ pub mod buffs;
 
 use bevy::prelude::{Handle, *};
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -62,11 +62,6 @@ fn cast_nautilus_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Nautilus_Q_Cast"),
-    });
-
     // Q is a hook that drags
     commands.trigger(ActionDamage {
         entity,
@@ -93,11 +88,6 @@ fn cast_nautilus_w(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Nautilus_W_Cast"),
-    });
-
     // W is a shield
     commands
         .entity(entity)
@@ -111,11 +101,6 @@ fn cast_nautilus_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Nautilus_E_Cast"),
-    });
-
     // E is a three-hit wave that slows
     commands.trigger(ActionDamage {
         entity,
@@ -139,11 +124,6 @@ fn cast_nautilus_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Nautilus_R_Cast"),
-    });
-
     // R is a targeted knockup
     commands.trigger(ActionDamage {
         entity,

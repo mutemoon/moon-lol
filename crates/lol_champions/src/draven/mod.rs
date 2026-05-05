@@ -2,7 +2,7 @@ pub mod buffs;
 
 use bevy::prelude::*;
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -63,11 +63,6 @@ fn cast_draven_q(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Draven_Q_Cast"),
-    });
-
     // Q enhances next attack - handled by buff system
     commands
         .entity(entity)
@@ -81,10 +76,6 @@ fn cast_draven_w(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Draven_W_Cast"),
-    });
     // W is movement speed buff - handled by buff system
 }
 
@@ -95,11 +86,6 @@ fn cast_draven_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Draven_E_Cast"),
-    });
-
     // E is a knockback skillshot
     commands.trigger(ActionDamage {
         entity,
@@ -126,11 +112,6 @@ fn cast_draven_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Draven_R_Cast"),
-    });
-
     // R is global damage
     commands.trigger(ActionDamage {
         entity,

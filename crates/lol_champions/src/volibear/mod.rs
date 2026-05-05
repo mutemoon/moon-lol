@@ -2,7 +2,7 @@ pub mod buffs;
 
 use bevy::prelude::*;
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -84,10 +84,6 @@ fn cast_volibear_q(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Volibear_Q_Cast"),
-    });
     // Q is movement speed boost + stun on contact
     commands.trigger(CommandAttackReset { entity });
     commands
@@ -115,10 +111,6 @@ fn cast_volibear_w(
 
     if stage == 1 {
         // First cast: W marks target
-        commands.trigger(CommandSkinParticleSpawn {
-            entity,
-            hash: hash_bin("Volibear_W_Cast"),
-        });
         commands.entity(skill_entity).insert(SkillRecastWindow::new(
             2,
             2,
@@ -126,10 +118,6 @@ fn cast_volibear_w(
         ));
     } else {
         // Second cast: W detonates mark for bonus damage + heal
-        commands.trigger(CommandSkinParticleSpawn {
-            entity,
-            hash: hash_bin("Volibear_W2_Cast"),
-        });
         commands.trigger(ActionDamage {
             entity,
             skill: skill_spell,
@@ -164,10 +152,6 @@ fn cast_volibear_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Volibear_E_Cast"),
-    });
     // E is AoE damage + slow + shield
     commands.trigger(ActionDamage {
         entity,
@@ -199,10 +183,6 @@ fn cast_volibear_r(
         hash: "spell4".to_string(),
         repeat: false,
         duration: None,
-    });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Volibear_R_Cast"),
     });
     // R is a leap that deals damage and marks towers as vulnerable
     commands.trigger(ActionDash {

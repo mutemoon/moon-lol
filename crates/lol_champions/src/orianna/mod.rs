@@ -2,7 +2,7 @@ pub mod buffs;
 
 use bevy::prelude::{Handle, *};
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -63,11 +63,6 @@ fn cast_orianna_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<S
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Orianna_Q_Cast"),
-    });
-
     // Q commands ball to location
     commands.trigger(ActionDamage {
         entity,
@@ -91,11 +86,6 @@ fn cast_orianna_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<S
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Orianna_W_Cast"),
-    });
-
     // W deals damage and slows
     commands.trigger(ActionDamage {
         entity,
@@ -119,11 +109,6 @@ fn cast_orianna_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<S
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Orianna_E_Cast"),
-    });
-
     // E shields ball carrier
     commands
         .entity(entity)
@@ -151,11 +136,6 @@ fn cast_orianna_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<S
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Orianna_R_Cast"),
-    });
-
     // R is a shockwave that knocks back
     commands.trigger(ActionDamage {
         entity,

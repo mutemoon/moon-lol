@@ -3,7 +3,7 @@ pub mod buffs;
 use bevy::asset::Handle;
 use bevy::prelude::*;
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -64,11 +64,6 @@ fn cast_maokai_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Maokai_Q_Cast"),
-    });
-
     // Q is a knockback
     commands.trigger(ActionDamage {
         entity,
@@ -95,11 +90,6 @@ fn cast_maokai_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Maokai_W_Cast"),
-    });
-
     // W is a dash that roots
     commands.trigger(ActionDamage {
         entity,
@@ -123,11 +113,6 @@ fn cast_maokai_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Maokai_E_Cast"),
-    });
-
     // E throws sapling that slows
     commands.trigger(ActionDamage {
         entity,
@@ -151,11 +136,6 @@ fn cast_maokai_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Maokai_R_Cast"),
-    });
-
     // R is a global knockup
     commands.trigger(ActionDamage {
         entity,

@@ -3,7 +3,7 @@ pub mod buffs;
 use bevy::asset::Handle;
 use bevy::prelude::*;
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -64,11 +64,6 @@ fn cast_masteryi_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("MasterYi_Q_Cast"),
-    });
-
     // Q is a dash that damages multiple targets
     commands.trigger(ActionDamage {
         entity,
@@ -92,11 +87,6 @@ fn cast_masteryi_w(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("MasterYi_W_Cast"),
-    });
-
     // W is meditate (heal and damage reduction)
 }
 
@@ -107,11 +97,6 @@ fn cast_masteryi_e(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("MasterYi_E_Cast"),
-    });
-
     // E grants bonus true damage on attacks
     commands
         .entity(entity)
@@ -125,11 +110,6 @@ fn cast_masteryi_r(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("MasterYi_R_Cast"),
-    });
-
     // R grants attackspeed and movespeed
     commands
         .entity(entity)

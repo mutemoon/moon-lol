@@ -2,7 +2,7 @@ pub mod buffs;
 
 use bevy::prelude::*;
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -62,11 +62,6 @@ fn cast_shaco_q(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Shaco_Q_Cast"),
-    });
-
     // Q is vanish - invisibility
 }
 
@@ -77,11 +72,6 @@ fn cast_shaco_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Shaco_W_Cast"),
-    });
-
     // W is jack inp - fear
     commands.trigger(ActionDamage {
         entity,
@@ -105,11 +95,6 @@ fn cast_shaco_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Shaco_E_Cast"),
-    });
-
     // E is two shiv - damage and slow
     commands.trigger(ActionDamage {
         entity,
@@ -135,11 +120,6 @@ fn cast_shaco_r(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Shaco_R_Cast"),
-    });
-
     // R is halluate - explosion
 }
 

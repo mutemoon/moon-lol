@@ -1,6 +1,5 @@
 use bevy::prelude::*;
-use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_core::life::Health;
 use lol_core::missile::CommandAttachedFieldCreate;
 use lol_core::movement::MovementBlock;
@@ -19,10 +18,6 @@ impl Plugin for PluginRivenW {
 }
 
 pub fn cast_riven_w(commands: &mut Commands, entity: Entity, damage_amount: f32) {
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Riven_W_Cast"),
-    });
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: "Spell2".to_string(),

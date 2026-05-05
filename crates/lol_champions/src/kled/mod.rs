@@ -2,7 +2,7 @@ pub mod buffs;
 
 use bevy::prelude::*;
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -76,10 +76,6 @@ fn cast_kled_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spel
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Kled_Q_Cast"),
-    });
 
     // Q throws bear trap
     commands.trigger(ActionDamage {
@@ -107,10 +103,6 @@ fn cast_kled_w(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Kled_W_Cast"),
-    });
 
     // W grants attackspeed
     commands
@@ -130,10 +122,6 @@ fn cast_kled_e(
         hash: "spell3".to_string(),
         repeat: false,
         duration: None,
-    });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Kled_E_Cast"),
     });
 
     // E is a dash
@@ -170,10 +158,6 @@ fn cast_kled_r(
         hash: "spell4".to_string(),
         repeat: false,
         duration: None,
-    });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Kled_R_Cast"),
     });
 
     // R is a charge that provides shield

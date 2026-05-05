@@ -2,7 +2,7 @@ pub mod buffs;
 
 use bevy::prelude::*;
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -60,11 +60,6 @@ fn cast_ryze_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spel
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Ryze_Q_Cast"),
-    });
-
     // Q is overload - damage
     commands.trigger(ActionDamage {
         entity,
@@ -91,11 +86,6 @@ fn cast_ryze_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spel
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Ryze_W_Cast"),
-    });
-
     // W is rune prison - root
     commands.trigger(ActionDamage {
         entity,
@@ -119,11 +109,6 @@ fn cast_ryze_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spel
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Ryze_E_Cast"),
-    });
-
     // E is spell flux - damage
     commands.trigger(ActionDamage {
         entity,
@@ -147,11 +132,6 @@ fn cast_ryze_r(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Ryze_R_Cast"),
-    });
-
     // R is realm warp - teleport
 }
 

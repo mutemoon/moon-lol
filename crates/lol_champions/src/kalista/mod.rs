@@ -2,7 +2,7 @@ pub mod buffs;
 
 use bevy::prelude::*;
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -70,10 +70,6 @@ fn cast_kalista_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<S
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Kalista_Q_Cast"),
-    });
 
     // Q is a spear that passes through enemies
     commands.trigger(ActionDamage {
@@ -101,10 +97,6 @@ fn cast_kalista_w(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Kalista_W_Cast"),
-    });
 
     // W is a sentinel that provides vision and deals damage on basic attacks
 }
@@ -115,10 +107,6 @@ fn cast_kalista_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<S
         hash: "spell3".to_string(),
         repeat: false,
         duration: None,
-    });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Kalista_E_Cast"),
     });
 
     // E deals damage to speared enemies and slows
@@ -149,10 +137,6 @@ fn cast_kalista_r(
         hash: "spell4".to_string(),
         repeat: false,
         duration: None,
-    });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Kalista_R_Cast"),
     });
 
     // R pulls oathsworn ally and grants invulnerability

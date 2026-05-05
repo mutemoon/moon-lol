@@ -2,7 +2,7 @@ pub mod buffs;
 
 use bevy::prelude::*;
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -62,11 +62,6 @@ fn cast_swain_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Swain_Q_Cast"),
-    });
-
     // Q is death flare - damage
     commands.trigger(ActionDamage {
         entity,
@@ -93,11 +88,6 @@ fn cast_swain_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Swain_W_Cast"),
-    });
-
     // W is vision of empire - damage
     commands.trigger(ActionDamage {
         entity,
@@ -121,11 +111,6 @@ fn cast_swain_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Swain_E_Cast"),
-    });
-
     // E is nevermove - root
     commands.trigger(ActionDamage {
         entity,
@@ -149,11 +134,6 @@ fn cast_swain_r(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Swain_R_Cast"),
-    });
-
     // R is demonic ascension - transformation
 }
 

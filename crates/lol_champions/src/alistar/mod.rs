@@ -2,7 +2,7 @@ pub mod buffs;
 
 use bevy::prelude::*;
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -71,11 +71,6 @@ fn cast_alistar_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<S
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Alistar_Q_Cast"),
-    });
-
     // Q is a knockup and stun in area
     commands.trigger(ActionDamage {
         entity,
@@ -110,11 +105,6 @@ fn cast_alistar_w(
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Alistar_W_Cast"),
-    });
-
     // W is a dash that knocks back target
     commands.trigger(ActionDash {
         entity,
@@ -140,11 +130,6 @@ fn cast_alistar_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<S
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Alistar_E_Cast"),
-    });
-
     // E is area damage that stuns on 5th hit
     commands.trigger(ActionDamage {
         entity,
@@ -168,11 +153,6 @@ fn cast_alistar_r(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Alistar_R_Cast"),
-    });
-
     // R grants damage reduction
     commands
         .entity(entity)

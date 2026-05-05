@@ -2,7 +2,7 @@ pub mod buffs;
 
 use bevy::prelude::*;
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -75,10 +75,6 @@ fn cast_kindred_q(
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Kindred_Q_Cast"),
-    });
 
     // Q is a dash that shoots arrows
     commands.trigger(ActionDamage {
@@ -102,10 +98,6 @@ fn cast_kindred_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<S
         hash: "spell2".to_string(),
         repeat: false,
         duration: None,
-    });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Kindred_W_Cast"),
     });
 
     // W marks an area where Wolf attacks
@@ -135,10 +127,6 @@ fn cast_kindred_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<S
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Kindred_E_Cast"),
-    });
 
     // E marks and slows, 3 marks = Wolf attacks
     commands.trigger(ActionDamage {
@@ -165,10 +153,6 @@ fn cast_kindred_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<S
         hash: "spell4".to_string(),
         repeat: false,
         duration: None,
-    });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Kindred_R_Cast"),
     });
 
     // R creates a protective zone

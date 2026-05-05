@@ -2,7 +2,7 @@ pub mod buffs;
 
 use bevy::prelude::*;
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -82,10 +82,6 @@ fn cast_jax_q(
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Jax_Q_Cast"),
-    });
     commands.trigger(ActionDash {
         entity,
         point: point,
@@ -110,10 +106,6 @@ fn cast_jax_w(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Jax_W_Cast"),
-    });
     // W resets attack timer and enhances next attack
     commands.trigger(CommandAttackReset { entity });
     commands
@@ -128,11 +120,6 @@ fn cast_jax_e(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Jax_E_Cast"),
-    });
-
     // E provides dodge buff
     commands
         .entity(entity)
@@ -156,10 +143,6 @@ fn cast_jax_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell
         hash: "spell4".to_string(),
         repeat: false,
         duration: None,
-    });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Jax_R_Cast"),
     });
     // R is a self-cast that deals AoE damage and grants armor/mr
     commands.trigger(ActionDamage {

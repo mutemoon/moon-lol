@@ -2,7 +2,7 @@ pub mod buffs;
 
 use bevy::prelude::*;
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -61,11 +61,6 @@ fn cast_bard_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spel
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Bard_Q_Cast"),
-    });
-
     // Q is a binding missile
     commands.trigger(ActionDamage {
         entity,
@@ -92,10 +87,6 @@ fn cast_bard_w(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Bard_W_Cast"),
-    });
     // W is a heal shrine - no direct damage
 }
 
@@ -106,10 +97,6 @@ fn cast_bard_e(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Bard_E_Cast"),
-    });
     // E is a tunnel - no direct damage
 }
 
@@ -119,10 +106,6 @@ fn cast_bard_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spel
         hash: "spell4".to_string(),
         repeat: false,
         duration: None,
-    });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Bard_R_Cast"),
     });
     // R is a global AoE stun
     commands.trigger(ActionDamage {

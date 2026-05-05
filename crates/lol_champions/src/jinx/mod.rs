@@ -2,7 +2,7 @@ pub mod buffs;
 
 use bevy::prelude::*;
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -63,10 +63,6 @@ fn cast_jinx_q(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Jinx_Q_Cast"),
-    });
     // Q switches between minigun and rocket launcher
     // Minigun gives attackspeed stacks, rocket deals AoE
     commands.trigger(CommandAttackReset { entity });
@@ -79,11 +75,6 @@ fn cast_jinx_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spel
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Jinx_W_Cast"),
-    });
-
     // W is a skillshot that slows
     commands.trigger(ActionDamage {
         entity,
@@ -110,11 +101,6 @@ fn cast_jinx_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spel
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Jinx_E_Cast"),
-    });
-
     // E places traps that explode and knock up
     commands.trigger(ActionDamage {
         entity,
@@ -138,11 +124,6 @@ fn cast_jinx_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spel
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Jinx_R_Cast"),
-    });
-
     // R is a global rocket with damage based on distance
     commands.trigger(ActionDamage {
         entity,

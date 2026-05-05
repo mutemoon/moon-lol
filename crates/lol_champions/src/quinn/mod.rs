@@ -2,7 +2,7 @@ pub mod buffs;
 
 use bevy::prelude::{Handle, *};
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -62,11 +62,6 @@ fn cast_quinn_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Quinn_Q_Cast"),
-    });
-
     // Q is blinding assault - damage and blind
     commands.trigger(ActionDamage {
         entity,
@@ -93,11 +88,6 @@ fn cast_quinn_w(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Quinn_W_Cast"),
-    });
-
     // W is heightened senses - attackspeed and movespeed buff
     commands
         .entity(entity)
@@ -111,11 +101,6 @@ fn cast_quinn_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Quinn_E_Cast"),
-    });
-
     // E is vault - knockback and slow
     commands.trigger(ActionDamage {
         entity,
@@ -141,11 +126,6 @@ fn cast_quinn_r(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Quinn_R_Cast"),
-    });
-
     // R is behind enemy lines - high movespeed
 }
 

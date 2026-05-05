@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -74,10 +74,6 @@ fn cast_gnar_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spel
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Gnar_Q_Cast"),
-    });
     // Q 回旋镖：Sector 模拟直线飞行
     commands.trigger(ActionDamage {
         entity,
@@ -103,10 +99,6 @@ fn cast_gnar_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spel
         hash: "spell2".to_string(),
         repeat: false,
         duration: None,
-    });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Gnar_W_Cast"),
     });
     // Mega 形态 W：AOE 伤害 + 眩晕
     commands.trigger(ActionDamage {
@@ -140,10 +132,6 @@ fn cast_gnar_e(
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Gnar_E_Cast"),
-    });
     // E 是跳跃，可以二段跳
     commands.trigger(ActionDash {
         entity,
@@ -168,10 +156,6 @@ fn cast_gnar_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spel
         hash: "spell4".to_string(),
         repeat: false,
         duration: None,
-    });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Gnar_R_Cast"),
     });
     // R is only available in Mega form - throws enemies and stuns
     commands.trigger(ActionDamage {

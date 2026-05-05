@@ -2,7 +2,7 @@ pub mod buffs;
 
 use bevy::prelude::{Handle, *};
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -62,11 +62,6 @@ fn cast_ornn_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spel
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Ornn_Q_Cast"),
-    });
-
     // Q is volcanic rupture - damage and slow
     commands.trigger(ActionDamage {
         entity,
@@ -97,11 +92,6 @@ fn cast_ornn_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spel
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Ornn_W_Cast"),
-    });
-
     // W is bellows breath - continuous damage and brittle
     commands.trigger(ActionDamage {
         entity,
@@ -128,11 +118,6 @@ fn cast_ornn_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spel
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Ornn_E_Cast"),
-    });
-
     // E is searing charge - dash that creates shockwave on terrain hit
     commands.trigger(ActionDamage {
         entity,
@@ -156,11 +141,6 @@ fn cast_ornn_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spel
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Ornn_R_Cast"),
-    });
-
     // R is call of the forge god - large AoE damage and knockup
     commands.trigger(ActionDamage {
         entity,

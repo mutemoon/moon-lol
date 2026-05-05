@@ -2,7 +2,7 @@ pub mod buffs;
 
 use bevy::prelude::*;
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -60,11 +60,6 @@ fn cast_rakan_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Rakan_Q_Cast"),
-    });
-
     // Q is gleaming quill - damage
     commands.trigger(ActionDamage {
         entity,
@@ -91,11 +86,6 @@ fn cast_rakan_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Rakan_W_Cast"),
-    });
-
     // W is grand entrance - knockup
     commands.trigger(ActionDamage {
         entity,
@@ -119,11 +109,6 @@ fn cast_rakan_e(commands: &mut Commands, entity: Entity, _skill_spell: Handle<Sp
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Rakan_E_Cast"),
-    });
-
     // E is battle dance - shield to ally
 }
 
@@ -134,11 +119,6 @@ fn cast_rakan_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Rakan_R_Cast"),
-    });
-
     // R is the quickness - damage and charm
     commands.trigger(ActionDamage {
         entity,

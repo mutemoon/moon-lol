@@ -2,7 +2,7 @@ pub mod buffs;
 
 use bevy::prelude::*;
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -71,11 +71,6 @@ fn cast_diana_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Diana_Q_Cast"),
-    });
-
     // Q is a crescent arc
     commands.trigger(ActionDamage {
         entity,
@@ -102,11 +97,6 @@ fn cast_diana_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Diana_W_Cast"),
-    });
-
     // W creates orbs that damage nearby enemies
     commands.trigger(ActionDamage {
         entity,
@@ -136,11 +126,6 @@ fn cast_diana_e(
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Diana_E_Cast"),
-    });
-
     // E is a dash to target
     commands.trigger(ActionDash {
         entity,
@@ -166,11 +151,6 @@ fn cast_diana_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Diana_R_Cast"),
-    });
-
     // R pulls and damages nearby enemies
     commands.trigger(ActionDamage {
         entity,

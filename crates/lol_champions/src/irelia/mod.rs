@@ -2,7 +2,7 @@ pub mod buffs;
 
 use bevy::prelude::*;
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -87,10 +87,6 @@ fn cast_irelia_q(
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Irelia_Q_Cast"),
-    });
     // Q is a dash that resets on kill and marks enemies as Unsteady
     commands.trigger(ActionDash {
         entity,
@@ -115,10 +111,6 @@ fn cast_irelia_w(commands: &mut Commands, entity: Entity) {
         hash: "spell2".to_string(),
         repeat: false,
         duration: None,
-    });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Irelia_W_Cast"),
     });
     // W is a channel that grants damage reduction then releases damage
     let (buff_irelia_w, buff_damage_reduction) = BuffDamageReduction::irelia_w(0.5, 1.5);
@@ -149,19 +141,11 @@ fn cast_irelia_e(
 
     if stage == 1 {
         // First cast: Throws a blade forward
-        commands.trigger(CommandSkinParticleSpawn {
-            entity,
-            hash: hash_bin("Irelia_E_Cast"),
-        });
         commands
             .entity(skill_entity)
             .insert(SkillRecastWindow::new(2, 2, IRELIA_E_RECAST_WINDOW));
     } else {
         // Second cast: Throws second blade and stuns marked enemies
-        commands.trigger(CommandSkinParticleSpawn {
-            entity,
-            hash: hash_bin("Irelia_E2_Cast"),
-        });
         commands.trigger(ActionDamage {
             entity,
             skill: skill_spell,
@@ -194,10 +178,6 @@ fn cast_irelia_r(
         hash: "spell4".to_string(),
         repeat: false,
         duration: None,
-    });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Irelia_R_Cast"),
     });
     // R is a long-range blade wave that creates a zone and marks enemies
     commands.trigger(ActionDamage {

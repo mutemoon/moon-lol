@@ -2,7 +2,7 @@ pub mod buffs;
 
 use bevy::prelude::{Handle, *};
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -62,11 +62,6 @@ fn cast_nami_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spel
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Nami_Q_Cast"),
-    });
-
     // Q is a bubble that roots
     commands.trigger(ActionDamage {
         entity,
@@ -90,11 +85,6 @@ fn cast_nami_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spel
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Nami_W_Cast"),
-    });
-
     // W bounces between allies and enemies
     commands.trigger(ActionDamage {
         entity,
@@ -118,11 +108,6 @@ fn cast_nami_e(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Nami_E_Cast"),
-    });
-
     // E buffs allied attacks with bonus damage and slow
     commands
         .entity(entity)
@@ -136,11 +121,6 @@ fn cast_nami_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spel
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Nami_R_Cast"),
-    });
-
     // R is a giant wave that knocks up
     commands.trigger(ActionDamage {
         entity,

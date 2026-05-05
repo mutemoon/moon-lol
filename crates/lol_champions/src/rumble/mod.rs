@@ -2,7 +2,7 @@ pub mod buffs;
 
 use bevy::prelude::*;
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -60,11 +60,6 @@ fn cast_rumble_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Rumble_Q_Cast"),
-    });
-
     // Q is electro harpoon - damage over time
     commands.trigger(ActionDamage {
         entity,
@@ -91,11 +86,6 @@ fn cast_rumble_w(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Rumble_W_Cast"),
-    });
-
     // W is scrap shield - shield
     commands
         .entity(entity)
@@ -109,11 +99,6 @@ fn cast_rumble_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Rumble_E_Cast"),
-    });
-
     // E is electro harpoon - damage
     commands.trigger(ActionDamage {
         entity,
@@ -140,11 +125,6 @@ fn cast_rumble_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Rumble_R_Cast"),
-    });
-
     // R is electro fire - large AoE damage
     commands.trigger(ActionDamage {
         entity,

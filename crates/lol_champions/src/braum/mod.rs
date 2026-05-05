@@ -2,7 +2,7 @@ pub mod buffs;
 
 use bevy::prelude::*;
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -63,11 +63,6 @@ fn cast_braum_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Braum_Q_Cast"),
-    });
-
     // Q is a skillshot that slows
     commands.trigger(ActionDamage {
         entity,
@@ -94,11 +89,6 @@ fn cast_braum_w(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Braum_W_Cast"),
-    });
-
     // W jumps to ally and grants armor/mr buff
     commands
         .entity(entity)
@@ -112,10 +102,6 @@ fn cast_braum_e(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Braum_E_Cast"),
-    });
     // E blocks projectiles - no direct damage
 }
 
@@ -126,11 +112,6 @@ fn cast_braum_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Braum_R_Cast"),
-    });
-
     // R is a knockup
     commands.trigger(ActionDamage {
         entity,

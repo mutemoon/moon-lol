@@ -3,7 +3,7 @@ pub mod buffs;
 use bevy::asset::Handle;
 use bevy::prelude::*;
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -70,10 +70,6 @@ fn cast_lissandra_q(commands: &mut Commands, entity: Entity, skill_spell: Handle
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Lissandra_Q_Cast"),
-    });
 
     // Q is a piercing ice shard that slows
     commands.trigger(ActionDamage {
@@ -100,10 +96,6 @@ fn cast_lissandra_w(commands: &mut Commands, entity: Entity, skill_spell: Handle
         hash: "spell2".to_string(),
         repeat: false,
         duration: None,
-    });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Lissandra_W_Cast"),
     });
 
     // W is a circle root
@@ -135,10 +127,6 @@ fn cast_lissandra_e(
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Lissandra_E_Cast"),
-    });
 
     // E is a dash-like skill
     commands.trigger(ActionDamage {
@@ -165,10 +153,6 @@ fn cast_lissandra_r(commands: &mut Commands, entity: Entity, skill_spell: Handle
         hash: "spell4".to_string(),
         repeat: false,
         duration: None,
-    });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Lissandra_R_Cast"),
     });
 
     // R can self-cast for shield or enemy cast for damage+root

@@ -2,7 +2,7 @@ pub mod buffs;
 
 use bevy::prelude::*;
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -63,11 +63,6 @@ fn cast_brand_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Brand_Q_Cast"),
-    });
-
     // Q is a fireball that stuns ablazed targets
     commands.trigger(ActionDamage {
         entity,
@@ -94,11 +89,6 @@ fn cast_brand_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Brand_W_Cast"),
-    });
-
     // W is a ground targeted area
     commands.trigger(ActionDamage {
         entity,
@@ -122,11 +112,6 @@ fn cast_brand_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Brand_E_Cast"),
-    });
-
     // E spreads to nearby enemies
     commands.trigger(ActionDamage {
         entity,
@@ -150,11 +135,6 @@ fn cast_brand_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Brand_R_Cast"),
-    });
-
     // R bounces between enemies
     commands.trigger(ActionDamage {
         entity,

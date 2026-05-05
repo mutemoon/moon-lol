@@ -2,7 +2,7 @@ pub mod buffs;
 
 use bevy::prelude::*;
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -62,11 +62,7 @@ fn cast_tryndamere_q(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Tryndamere_Q_Cast"),
-    });
-}
+    }
 
 fn cast_tryndamere_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     commands.trigger(CommandAnimationPlay {
@@ -75,11 +71,6 @@ fn cast_tryndamere_w(commands: &mut Commands, entity: Entity, skill_spell: Handl
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Tryndamere_W_Cast"),
-    });
-
     commands.trigger(ActionDamage {
         entity,
         skill: skill_spell,
@@ -105,11 +96,6 @@ fn cast_tryndamere_e(commands: &mut Commands, entity: Entity, skill_spell: Handl
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Tryndamere_E_Cast"),
-    });
-
     commands.trigger(ActionDamage {
         entity,
         skill: skill_spell,
@@ -132,11 +118,7 @@ fn cast_tryndamere_r(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Tryndamere_R_Cast"),
-    });
-}
+    }
 
 fn on_tryndamere_damage_hit(
     trigger: On<EventDamageCreate>,

@@ -2,7 +2,7 @@ pub mod buffs;
 
 use bevy::prelude::*;
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -70,11 +70,6 @@ fn cast_jayce_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Jayce_Q_Cast"),
-    });
-
     // Q is a skillshot
     commands.trigger(ActionDamage {
         entity,
@@ -101,11 +96,6 @@ fn cast_jayce_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Jayce_W_Cast"),
-    });
-
     // W is an area slow
     commands.trigger(ActionDamage {
         entity,
@@ -135,11 +125,6 @@ fn cast_jayce_e(
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Jayce_E_Cast"),
-    });
-
     // E is a knockback
     commands.trigger(ActionDash {
         entity,
@@ -164,10 +149,6 @@ fn cast_jayce_r(commands: &mut Commands, entity: Entity) {
         hash: "spell4".to_string(),
         repeat: false,
         duration: None,
-    });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Jayce_R_Cast"),
     });
     // R transforms between hammer and cannon forms
 }

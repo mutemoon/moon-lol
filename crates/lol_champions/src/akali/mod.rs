@@ -2,7 +2,7 @@ pub mod buffs;
 
 use bevy::prelude::*;
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -83,11 +83,6 @@ fn cast_akali_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Akali_Q_Cast"),
-    });
-
     // Q is a cone damage that slows distant enemies
     commands.trigger(ActionDamage {
         entity,
@@ -119,11 +114,6 @@ fn cast_akali_w(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Akali_W_Cast"),
-    });
-
     // W drops a smoke bomb and grants stealth and move speed
     commands
         .entity(entity)
@@ -154,10 +144,6 @@ fn cast_akali_e(
 
     if stage == 1 {
         // First cast: throw shuriken and mark first enemy
-        commands.trigger(CommandSkinParticleSpawn {
-            entity,
-            hash: hash_bin("Akali_E_Cast"),
-        });
         commands.trigger(ActionDamage {
             entity,
             skill: skill_spell,
@@ -180,10 +166,6 @@ fn cast_akali_e(
             .insert(SkillRecastWindow::new(2, 2, 16.0));
     } else {
         // Second cast: dash to marked target
-        commands.trigger(CommandSkinParticleSpawn {
-            entity,
-            hash: hash_bin("Akali_E2_Cast"),
-        });
         commands.trigger(ActionDash {
             entity,
             point: point,
@@ -228,16 +210,8 @@ fn cast_akali_r(
 
     if stage == 1 {
         // First cast: dash to target
-        commands.trigger(CommandSkinParticleSpawn {
-            entity,
-            hash: hash_bin("Akali_R_Cast"),
-        });
     } else {
         // Second cast: execute damage based on missing health
-        commands.trigger(CommandSkinParticleSpawn {
-            entity,
-            hash: hash_bin("Akali_R2_Cast"),
-        });
         commands.trigger(ActionDamage {
             entity,
             skill: skill_spell.clone(),

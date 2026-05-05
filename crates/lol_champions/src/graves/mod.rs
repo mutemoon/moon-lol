@@ -2,7 +2,7 @@ pub mod buffs;
 
 use bevy::prelude::*;
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -69,11 +69,6 @@ fn cast_graves_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Graves_Q_Cast"),
-    });
-
     // Q is a line shot that explodes
     commands.trigger(ActionDamage {
         entity,
@@ -100,11 +95,6 @@ fn cast_graves_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Graves_W_Cast"),
-    });
-
     // W is a smoke screen
     commands.trigger(ActionDamage {
         entity,
@@ -134,11 +124,6 @@ fn cast_graves_e(
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Graves_E_Cast"),
-    });
-
     // E is a dash
     commands.trigger(ActionDash {
         entity,
@@ -162,11 +147,6 @@ fn cast_graves_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Graves_R_Cast"),
-    });
-
     // R is a big shot
     commands.trigger(ActionDamage {
         entity,

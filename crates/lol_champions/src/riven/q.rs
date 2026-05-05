@@ -1,6 +1,5 @@
 use bevy::prelude::*;
-use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_core::action::dash::{ActionDash, DashMoveType};
 use lol_core::base::buff::BuffOf;
 use lol_core::missile::CommandAttachedFieldCreate;
@@ -37,22 +36,10 @@ pub fn cast_riven_q(
 ) {
     let stage = recast.map(|window| window.stage).unwrap_or(1);
 
-    let (animation_hash, particle_hash, radius) = match stage {
-        1 => (
-            "Spell1A".to_string(),
-            hash_bin("Riven_Q_01_Detonate"),
-            RIVEN_Q_RADII[0],
-        ),
-        2 => (
-            "Spell1B".to_string(),
-            hash_bin("Riven_Q_02_Detonate"),
-            RIVEN_Q_RADII[1],
-        ),
-        _ => (
-            "Spell1C".to_string(),
-            hash_bin("Riven_Q_03_Detonate"),
-            RIVEN_Q_RADII[2],
-        ),
+    let (animation_hash, radius) = match stage {
+        1 => ("Spell1A".to_string(), RIVEN_Q_RADII[0]),
+        2 => ("Spell1B".to_string(), RIVEN_Q_RADII[1]),
+        _ => ("Spell1C".to_string(), RIVEN_Q_RADII[2]),
     };
 
     commands.trigger(CommandAnimationPlay {
@@ -99,10 +86,6 @@ pub fn cast_riven_q(
         ));
     }
 
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: particle_hash,
-    });
 }
 
 /// 锐雯 Q3 位移结束后触发击退

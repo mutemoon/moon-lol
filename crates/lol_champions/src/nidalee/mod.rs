@@ -2,7 +2,7 @@ pub mod buffs;
 
 use bevy::prelude::{Handle, *};
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -62,11 +62,6 @@ fn cast_nidalee_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<S
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Nidalee_Q_Cast"),
-    });
-
     // Q is a spear (human form)
     commands.trigger(ActionDamage {
         entity,
@@ -93,11 +88,6 @@ fn cast_nidalee_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<S
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Nidalee_W_Cast"),
-    });
-
     // W is a trap (human form) or pounce (cougar form)
     commands.trigger(ActionDamage {
         entity,
@@ -121,11 +111,6 @@ fn cast_nidalee_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<S
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Nidalee_E_Cast"),
-    });
-
     // E is a heal (human form) or swipe (cougar form)
     commands
         .entity(entity)
@@ -153,11 +138,6 @@ fn cast_nidalee_r(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Nidalee_R_Cast"),
-    });
-
     // R transforms between human and cougar forms
 }
 

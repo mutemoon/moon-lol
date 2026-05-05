@@ -2,7 +2,7 @@ pub mod buffs;
 
 use bevy::prelude::{Handle, *};
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -62,11 +62,6 @@ fn cast_qiyana_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Qiyana_Q_Cast"),
-    });
-
     // Q is edge of Ixtal - damage
     commands.trigger(ActionDamage {
         entity,
@@ -93,11 +88,6 @@ fn cast_qiyana_w(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Qiyana_W_Cast"),
-    });
-
     // W is elemental wrath - dash and element buff
     commands
         .entity(entity)
@@ -111,11 +101,6 @@ fn cast_qiyana_e(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Qiyana_E_Cast"),
-    });
-
     // E is terrashape - dash through terrain
 }
 
@@ -126,11 +111,6 @@ fn cast_qiyana_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Qiyana_R_Cast"),
-    });
-
     // R is audacity/supreme display - large AoE knockup
     commands.trigger(ActionDamage {
         entity,

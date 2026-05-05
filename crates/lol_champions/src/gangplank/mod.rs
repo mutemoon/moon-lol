@@ -2,7 +2,7 @@ pub mod buffs;
 
 use bevy::prelude::*;
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -60,11 +60,6 @@ fn cast_gangplank_q(commands: &mut Commands, entity: Entity, skill_spell: Handle
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Gangplank_Q_Cast"),
-    });
-
     // Q is targeted damage
     commands.trigger(ActionDamage {
         entity,
@@ -90,10 +85,6 @@ fn cast_gangplank_w(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Gangplank_W_Cast"),
-    });
     // W removes CC and heals
 }
 
@@ -103,10 +94,6 @@ fn cast_gangplank_e(commands: &mut Commands, entity: Entity) {
         hash: "spell3".to_string(),
         repeat: false,
         duration: None,
-    });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Gangplank_E_Cast"),
     });
     // E places barrel
 }
@@ -118,11 +105,6 @@ fn cast_gangplank_r(commands: &mut Commands, entity: Entity, skill_spell: Handle
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Gangplank_R_Cast"),
-    });
-
     // R is global AoE
     commands.trigger(ActionDamage {
         entity,

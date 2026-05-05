@@ -2,7 +2,7 @@ pub mod buffs;
 
 use bevy::prelude::*;
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -77,11 +77,6 @@ fn cast_amumu_q(
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Amumu_Q_Cast"),
-    });
-
     // Q is a targeted dash that stuns
     commands.trigger(ActionDash {
         entity,
@@ -107,11 +102,6 @@ fn cast_amumu_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Amumu_W_Cast"),
-    });
-
     // W is toggle damage around self
     commands.trigger(ActionDamage {
         entity,
@@ -135,11 +125,6 @@ fn cast_amumu_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Amumu_E_Cast"),
-    });
-
     // E is area damage
     commands.trigger(ActionDamage {
         entity,
@@ -163,11 +148,6 @@ fn cast_amumu_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Amumu_R_Cast"),
-    });
-
     // R is area stun
     commands.trigger(ActionDamage {
         entity,

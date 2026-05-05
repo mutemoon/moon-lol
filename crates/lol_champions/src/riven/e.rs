@@ -1,7 +1,6 @@
 use bevy::prelude::*;
-use league_utils::hash_bin;
 use lol_base::debug_sphere::DebugSphere;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_core::action::dash::{ActionDash, DashMoveType};
 use lol_core::base::buff::BuffOf;
 use lol_core::buffs::shield_white::BuffShieldWhite;
@@ -21,10 +20,6 @@ pub fn cast_riven_e(
     point: Vec2,
     shield_value: f32,
 ) {
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Riven_E_Mis"),
-    });
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: "Spell3".to_string(),

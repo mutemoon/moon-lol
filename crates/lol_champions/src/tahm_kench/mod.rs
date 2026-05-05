@@ -2,7 +2,7 @@ pub mod buffs;
 
 use bevy::prelude::*;
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -62,11 +62,6 @@ fn cast_tahm_kench_q(commands: &mut Commands, entity: Entity, skill_spell: Handl
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("TahmKench_Q_Cast"),
-    });
-
     commands.trigger(ActionDamage {
         entity,
         skill: skill_spell,
@@ -91,11 +86,6 @@ fn cast_tahm_kench_w(commands: &mut Commands, entity: Entity, skill_spell: Handl
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("TahmKench_W_Cast"),
-    });
-
     commands.trigger(ActionDamage {
         entity,
         skill: skill_spell,
@@ -118,11 +108,6 @@ fn cast_tahm_kench_e(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("TahmKench_E_Cast"),
-    });
-
     commands
         .entity(entity)
         .with_related::<BuffOf>(BuffTahmKenchE::new(100.0, 2.0));
@@ -135,11 +120,7 @@ fn cast_tahm_kench_r(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("TahmKench_R_Cast"),
-    });
-}
+    }
 
 fn on_tahm_kench_damage_hit(
     trigger: On<EventDamageCreate>,

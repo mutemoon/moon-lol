@@ -2,7 +2,7 @@ pub mod buffs;
 
 use bevy::prelude::*;
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -62,11 +62,6 @@ fn cast_sion_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spel
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Sion_Q_Cast"),
-    });
-
     // Q is brutal strike - damage and knockup
     commands.trigger(ActionDamage {
         entity,
@@ -93,11 +88,6 @@ fn cast_sion_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spel
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Sion_W_Cast"),
-    });
-
     // W is roar of kor - damage
     commands.trigger(ActionDamage {
         entity,
@@ -121,11 +111,6 @@ fn cast_sion_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spel
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Sion_E_Cast"),
-    });
-
     // E is unwind - damage and slow
     commands.trigger(ActionDamage {
         entity,
@@ -152,11 +137,6 @@ fn cast_sion_r(commands: &mut Commands, entity: Entity, _skill_spell: Handle<Spe
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Sion_R_Cast"),
-    });
-
     // R is unleash the nightmare - charge
 }
 

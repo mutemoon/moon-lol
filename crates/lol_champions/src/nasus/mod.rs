@@ -2,7 +2,7 @@ pub mod buffs;
 
 use bevy::prelude::{Handle, *};
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -62,11 +62,6 @@ fn cast_nasus_q(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Nasus_Q_Cast"),
-    });
-
     // Q is a siphoning strike
 }
 
@@ -77,11 +72,6 @@ fn cast_nasus_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Nasus_W_Cast"),
-    });
-
     // W is a slow
     commands.trigger(ActionDamage {
         entity,
@@ -105,11 +95,6 @@ fn cast_nasus_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Nasus_E_Cast"),
-    });
-
     // E is an area damage and armor reduction
     commands.trigger(ActionDamage {
         entity,
@@ -133,11 +118,6 @@ fn cast_nasus_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Nasus_R_Cast"),
-    });
-
     // R transforms Nasus
     commands.trigger(ActionDamage {
         entity,

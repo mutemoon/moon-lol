@@ -2,7 +2,7 @@ pub mod buffs;
 
 use bevy::prelude::*;
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -63,11 +63,6 @@ fn cast_annie_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Annie_Q_Cast"),
-    });
-
     // Q is targeted damage
     commands.trigger(ActionDamage {
         entity,
@@ -96,11 +91,6 @@ fn cast_annie_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Annie_W_Cast"),
-    });
-
     // W is a cone
     commands.trigger(ActionDamage {
         entity,
@@ -131,11 +121,6 @@ fn cast_annie_e(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Annie_E_Cast"),
-    });
-
     // E grants shield
     commands
         .entity(entity)
@@ -149,11 +134,6 @@ fn cast_annie_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Annie_R_Cast"),
-    });
-
     // R summons Tibbers - area damage
     commands.trigger(ActionDamage {
         entity,
