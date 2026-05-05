@@ -121,6 +121,20 @@
         "lol_core::movement::Movement": (
           speed: 345.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "ZaahenBasicAttack": Path("characters/Zaahen/spells/ZaahenBasicAttack.ron"),
+          "ZaahenBasicAttack2": Path("characters/Zaahen/spells/ZaahenBasicAttack2.ron"),
+          "ZaahenBasicAttack3": Path("characters/Zaahen/spells/ZaahenBasicAttack3.ron"),
+          "ZaahenCritAttack": Path("characters/Zaahen/spells/ZaahenCritAttack.ron"),
+          "ZaahenE": Path("characters/Zaahen/spells/ZaahenE.ron"),
+          "ZaahenPassive": Path("characters/Zaahen/spells/ZaahenPassive.ron"),
+          "ZaahenQ": Path("characters/Zaahen/spells/ZaahenQ.ron"),
+          "ZaahenQ2": Path("characters/Zaahen/spells/ZaahenQ2.ron"),
+          "ZaahenQ2Attack": Path("characters/Zaahen/spells/ZaahenQ2Attack.ron"),
+          "ZaahenQAttack": Path("characters/Zaahen/spells/ZaahenQAttack.ron"),
+          "ZaahenR": Path("characters/Zaahen/spells/ZaahenR.ron"),
+          "ZaahenW": Path("characters/Zaahen/spells/ZaahenW.ron"),
+        }),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

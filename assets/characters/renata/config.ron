@@ -121,6 +121,21 @@
         "lol_core::movement::Movement": (
           speed: 330.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "RenataBasicAttack": Path("characters/Renata/spells/RenataBasicAttack.ron"),
+          "RenataBasicAttack2": Path("characters/Renata/spells/RenataBasicAttack2.ron"),
+          "RenataE": Path("characters/Renata/spells/RenataE.ron"),
+          "RenataPassive": Path("characters/Renata/spells/RenataPassive.ron"),
+          "RenataPassiveBasicAttack": Path("characters/Renata/spells/RenataPassiveBasicAttack.ron"),
+          "RenataPassiveDebuff": Path("characters/Renata/spells/RenataPassiveDebuff.ron"),
+          "RenataQ": Path("characters/Renata/spells/RenataQ.ron"),
+          "RenataQRecast": Path("characters/Renata/spells/RenataQRecast.ron"),
+          "RenataR": Path("characters/Renata/spells/RenataR.ron"),
+          "RenataRDebuff": Path("characters/Renata/spells/RenataRDebuff.ron"),
+          "RenataRMissile": Path("characters/Renata/spells/RenataRMissile.ron"),
+          "RenataRMissileSides": Path("characters/Renata/spells/RenataRMissileSides.ron"),
+          "RenataW": Path("characters/Renata/spells/RenataW.ron"),
+        }),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

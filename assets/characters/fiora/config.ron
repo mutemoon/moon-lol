@@ -121,6 +121,20 @@
         "lol_core::movement::Movement": (
           speed: 345.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "FioraBasicAttack": Path("characters/Fiora/spells/FioraBasicAttack.ron"),
+          "FioraBasicAttack2": Path("characters/Fiora/spells/FioraBasicAttack2.ron"),
+          "FioraCritAttack": Path("characters/Fiora/spells/FioraCritAttack.ron"),
+          "FioraE": Path("characters/Fiora/spells/FioraE.ron"),
+          "FioraEAttack": Path("characters/Fiora/spells/FioraEAttack.ron"),
+          "FioraEAttack2": Path("characters/Fiora/spells/FioraEAttack2.ron"),
+          "FioraPassive": Path("characters/Fiora/spells/FioraPassive.ron"),
+          "FioraQ": Path("characters/Fiora/spells/FioraQ.ron"),
+          "FioraR": Path("characters/Fiora/spells/FioraR.ron"),
+          "FioraW": Path("characters/Fiora/spells/FioraW.ron"),
+          "FioraWMissile": Path("characters/Fiora/spells/FioraWMissile.ron"),
+          "FioraWMissile2": Path("characters/Fiora/spells/FioraWMissile2.ron"),
+        }),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

@@ -121,6 +121,18 @@
         "lol_core::movement::Movement": (
           speed: 345.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "NocturneBasicAttack": Path("characters/Nocturne/spells/NocturneBasicAttack.ron"),
+          "NocturneBasicAttack2": Path("characters/Nocturne/spells/NocturneBasicAttack2.ron"),
+          "NocturneCritAttack": Path("characters/Nocturne/spells/NocturneCritAttack.ron"),
+          "NocturneDuskbringer": Path("characters/Nocturne/spells/NocturneDuskbringer.ron"),
+          "NocturneP": Path("characters/Nocturne/spells/NocturneP.ron"),
+          "NocturneParanoia": Path("characters/Nocturne/spells/NocturneParanoia.ron"),
+          "NocturneParanoia2": Path("characters/Nocturne/spells/NocturneParanoia2.ron"),
+          "NocturneShroudofDarkness": Path("characters/Nocturne/spells/NocturneShroudofDarkness.ron"),
+          "NocturneUmbraBladesAttack": Path("characters/Nocturne/spells/NocturneUmbraBladesAttack.ron"),
+          "NocturneUnspeakableHorror": Path("characters/Nocturne/spells/NocturneUnspeakableHorror.ron"),
+        }),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

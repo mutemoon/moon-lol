@@ -121,6 +121,22 @@
         "lol_core::movement::Movement": (
           speed: 335.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "KarmaBasicAttack": Path("characters/Karma/spells/KarmaBasicAttack.ron"),
+          "KarmaBasicAttack2": Path("characters/Karma/spells/KarmaBasicAttack2.ron"),
+          "KarmaCritAttack": Path("characters/Karma/spells/KarmaCritAttack.ron"),
+          "KarmaMantra": Path("characters/Karma/spells/KarmaMantra.ron"),
+          "KarmaPassive": Path("characters/Karma/spells/KarmaPassive.ron"),
+          "KarmaQ": Path("characters/Karma/spells/KarmaQ.ron"),
+          "KarmaQMissile": Path("characters/Karma/spells/KarmaQMissile.ron"),
+          "KarmaQMissileMantra": Path("characters/Karma/spells/KarmaQMissileMantra.ron"),
+          "KarmaQMissileMantraSlow": Path("characters/Karma/spells/KarmaQMissileMantraSlow.ron"),
+          "KarmaQMissileSlow": Path("characters/Karma/spells/KarmaQMissileSlow.ron"),
+          "KarmaSolKimShield": Path("characters/Karma/spells/KarmaSolKimShield.ron"),
+          "KarmaSolKimShieldLocket": Path("characters/Karma/spells/KarmaSolKimShieldLocket.ron"),
+          "KarmaSpiritBind": Path("characters/Karma/spells/KarmaSpiritBind.ron"),
+          "ScarmaAwesomeWaveSpeed": Path("characters/Karma/spells/ScarmaAwesomeWaveSpeed.ron"),
+        }),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

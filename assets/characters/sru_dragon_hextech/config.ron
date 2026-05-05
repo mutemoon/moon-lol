@@ -59,6 +59,11 @@
         "lol_core::movement::Movement": (
           speed: 330.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "sru_dragon_hextech_Attack": Path("characters/sru_dragon_hextech/spells/sru_dragon_hextech_Attack.ron"),
+          "sru_dragon_hextech_Attack2": Path("characters/sru_dragon_hextech/spells/sru_dragon_hextech_Attack2.ron"),
+          "sru_dragon_hextech_Attack2_Slow": Path("characters/sru_dragon_hextech/spells/sru_dragon_hextech_Attack2_Slow.ron"),
+        }),
         "lol_core::skill::Skills": ([
           4294967270,
         ]),

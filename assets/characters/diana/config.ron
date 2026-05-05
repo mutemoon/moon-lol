@@ -121,6 +121,21 @@
         "lol_core::movement::Movement": (
           speed: 345.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "DianaAttackSpeed": Path("characters/Diana/spells/DianaAttackSpeed.ron"),
+          "DianaBasicAttack": Path("characters/Diana/spells/DianaBasicAttack.ron"),
+          "DianaBasicAttack2": Path("characters/Diana/spells/DianaBasicAttack2.ron"),
+          "DianaBasicAttack3": Path("characters/Diana/spells/DianaBasicAttack3.ron"),
+          "DianaOrbs": Path("characters/Diana/spells/DianaOrbs.ron"),
+          "DianaOrbsMissile": Path("characters/Diana/spells/DianaOrbsMissile.ron"),
+          "DianaPassive": Path("characters/Diana/spells/DianaPassive.ron"),
+          "DianaQ": Path("characters/Diana/spells/DianaQ.ron"),
+          "DianaQInnerMissile": Path("characters/Diana/spells/DianaQInnerMissile.ron"),
+          "DianaQOuterMissile": Path("characters/Diana/spells/DianaQOuterMissile.ron"),
+          "DianaR": Path("characters/Diana/spells/DianaR.ron"),
+          "DianaShield": Path("characters/Diana/spells/DianaShield.ron"),
+          "DianaTeleport": Path("characters/Diana/spells/DianaTeleport.ron"),
+        }),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

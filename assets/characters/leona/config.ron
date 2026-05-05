@@ -121,6 +121,21 @@
         "lol_core::movement::Movement": (
           speed: 335.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "LeonaBasicAttack": Path("characters/Leona/spells/LeonaBasicAttack.ron"),
+          "LeonaBasicAttack2": Path("characters/Leona/spells/LeonaBasicAttack2.ron"),
+          "LeonaBasicAttack3": Path("characters/Leona/spells/LeonaBasicAttack3.ron"),
+          "LeonaBasicAttack4": Path("characters/Leona/spells/LeonaBasicAttack4.ron"),
+          "LeonaCritAttack": Path("characters/Leona/spells/LeonaCritAttack.ron"),
+          "LeonaShieldOfDaybreak": Path("characters/Leona/spells/LeonaShieldOfDaybreak.ron"),
+          "LeonaShieldOfDaybreakAttack": Path("characters/Leona/spells/LeonaShieldOfDaybreakAttack.ron"),
+          "LeonaSolarBarrier": Path("characters/Leona/spells/LeonaSolarBarrier.ron"),
+          "LeonaSolarFlare": Path("characters/Leona/spells/LeonaSolarFlare.ron"),
+          "LeonaSunlight": Path("characters/Leona/spells/LeonaSunlight.ron"),
+          "LeonaSunlightPassive": Path("characters/Leona/spells/LeonaSunlightPassive.ron"),
+          "LeonaZenithBlade": Path("characters/Leona/spells/LeonaZenithBlade.ron"),
+          "LeonaZenithBladeMissile": Path("characters/Leona/spells/LeonaZenithBladeMissile.ron"),
+        }),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

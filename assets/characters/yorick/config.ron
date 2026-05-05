@@ -121,6 +121,20 @@
         "lol_core::movement::Movement": (
           speed: 340.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "YorickBasicAttack": Path("characters/Yorick/spells/YorickBasicAttack.ron"),
+          "YorickBasicAttack2": Path("characters/Yorick/spells/YorickBasicAttack2.ron"),
+          "YorickCritAttack": Path("characters/Yorick/spells/YorickCritAttack.ron"),
+          "YorickE": Path("characters/Yorick/spells/YorickE.ron"),
+          "YorickEMissile": Path("characters/Yorick/spells/YorickEMissile.ron"),
+          "YorickPassive": Path("characters/Yorick/spells/YorickPassive.ron"),
+          "YorickQ": Path("characters/Yorick/spells/YorickQ.ron"),
+          "YorickQ2": Path("characters/Yorick/spells/YorickQ2.ron"),
+          "YorickQAttack": Path("characters/Yorick/spells/YorickQAttack.ron"),
+          "YorickR": Path("characters/Yorick/spells/YorickR.ron"),
+          "YorickR2": Path("characters/Yorick/spells/YorickR2.ron"),
+          "YorickW": Path("characters/Yorick/spells/YorickW.ron"),
+        }),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

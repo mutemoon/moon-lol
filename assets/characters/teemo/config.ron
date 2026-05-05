@@ -121,6 +121,22 @@
         "lol_core::movement::Movement": (
           speed: 330.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "TeemoBasicAttack": Path("characters/Teemo/spells/TeemoBasicAttack.ron"),
+          "TeemoCritAttack": Path("characters/Teemo/spells/TeemoCritAttack.ron"),
+          "TeemoE": Path("characters/Teemo/spells/TeemoE.ron"),
+          "TeemoEAttack": Path("characters/Teemo/spells/TeemoEAttack.ron"),
+          "TeemoECrit": Path("characters/Teemo/spells/TeemoECrit.ron"),
+          "TeemoEDot": Path("characters/Teemo/spells/TeemoEDot.ron"),
+          "TeemoPAttackSpeedBuff": Path("characters/Teemo/spells/TeemoPAttackSpeedBuff.ron"),
+          "TeemoPassive": Path("characters/Teemo/spells/TeemoPassive.ron"),
+          "TeemoQ": Path("characters/Teemo/spells/TeemoQ.ron"),
+          "TeemoR": Path("characters/Teemo/spells/TeemoR.ron"),
+          "TeemoRDot": Path("characters/Teemo/spells/TeemoRDot.ron"),
+          "TeemoRTrap": Path("characters/Teemo/spells/TeemoRTrap.ron"),
+          "TeemoW": Path("characters/Teemo/spells/TeemoW.ron"),
+          "TeemoWPassiveCooldown": Path("characters/Teemo/spells/TeemoWPassiveCooldown.ron"),
+        }),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

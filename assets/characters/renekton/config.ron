@@ -121,6 +121,23 @@
         "lol_core::movement::Movement": (
           speed: 345.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "RenektonBasicAttack": Path("characters/Renekton/spells/RenektonBasicAttack.ron"),
+          "RenektonBasicAttack2": Path("characters/Renekton/spells/RenektonBasicAttack2.ron"),
+          "RenektonCleave": Path("characters/Renekton/spells/RenektonCleave.ron"),
+          "RenektonCritAttack": Path("characters/Renekton/spells/RenektonCritAttack.ron"),
+          "RenektonDice": Path("characters/Renekton/spells/RenektonDice.ron"),
+          "RenektonExecute": Path("characters/Renekton/spells/RenektonExecute.ron"),
+          "RenektonExecuteAttack": Path("characters/Renekton/spells/RenektonExecuteAttack.ron"),
+          "RenektonPreExecute": Path("characters/Renekton/spells/RenektonPreExecute.ron"),
+          "RenektonPredator": Path("characters/Renekton/spells/RenektonPredator.ron"),
+          "RenektonReignOfTheTyrant": Path("characters/Renekton/spells/RenektonReignOfTheTyrant.ron"),
+          "RenektonSiblingRivalryActive": Path("characters/Renekton/spells/RenektonSiblingRivalryActive.ron"),
+          "RenektonSiblingRivalryDefeat": Path("characters/Renekton/spells/RenektonSiblingRivalryDefeat.ron"),
+          "RenektonSiblingRivalryVictory": Path("characters/Renekton/spells/RenektonSiblingRivalryVictory.ron"),
+          "RenektonSliceAndDice": Path("characters/Renekton/spells/RenektonSliceAndDice.ron"),
+          "RenektonSuperExecute": Path("characters/Renekton/spells/RenektonSuperExecute.ron"),
+        }),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

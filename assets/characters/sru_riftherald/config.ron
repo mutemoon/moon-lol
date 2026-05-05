@@ -104,6 +104,22 @@
         "lol_core::movement::Movement": (
           speed: 325.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "HeraldLeapAttack": Path("characters/SRU_RiftHerald/spells/HeraldLeapAttack.ron"),
+          "HeraldMoveAway": Path("characters/SRU_RiftHerald/spells/HeraldMoveAway.ron"),
+          "HeraldSpinAttack": Path("characters/SRU_RiftHerald/spells/HeraldSpinAttack.ron"),
+          "MiniBaronVulnerable": Path("characters/SRU_RiftHerald/spells/MiniBaronVulnerable.ron"),
+          "ResistantSkinMiniBaron": Path("characters/SRU_RiftHerald/spells/ResistantSkinMiniBaron.ron"),
+          "RiftHeraldBasicAttackTower": Path("characters/SRU_RiftHerald/spells/RiftHeraldBasicAttackTower.ron"),
+          "RiftHeraldBasicAttackTowerLoop": Path("characters/SRU_RiftHerald/spells/RiftHeraldBasicAttackTowerLoop.ron"),
+          "RiftHeraldMercenary": Path("characters/SRU_RiftHerald/spells/RiftHeraldMercenary.ron"),
+          "SRU_RiftHeraldBasicAttack": Path("characters/SRU_RiftHerald/spells/SRU_RiftHeraldBasicAttack.ron"),
+          "SRU_RiftHeraldBasicAttack2": Path("characters/SRU_RiftHerald/spells/SRU_RiftHeraldBasicAttack2.ron"),
+          "SRU_RiftHeraldBasicAttack3": Path("characters/SRU_RiftHerald/spells/SRU_RiftHeraldBasicAttack3.ron"),
+          "SRU_RiftHeraldSpell1": Path("characters/SRU_RiftHerald/spells/SRU_RiftHeraldSpell1.ron"),
+          "SRU_RiftHerald_Gaze": Path("characters/SRU_RiftHerald/spells/SRU_RiftHerald_Gaze.ron"),
+          "SRU_RiftHerald_Gaze_Debuff": Path("characters/SRU_RiftHerald/spells/SRU_RiftHerald_Gaze_Debuff.ron"),
+        }),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

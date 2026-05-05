@@ -121,6 +121,19 @@
         "lol_core::movement::Movement": (
           speed: 325.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "BlitzcrankBasicAttack": Path("characters/Blitzcrank/spells/BlitzcrankBasicAttack.ron"),
+          "BlitzcrankBasicAttack2": Path("characters/Blitzcrank/spells/BlitzcrankBasicAttack2.ron"),
+          "BlitzcrankCritAttack": Path("characters/Blitzcrank/spells/BlitzcrankCritAttack.ron"),
+          "ManaBarrierCooldown": Path("characters/Blitzcrank/spells/ManaBarrierCooldown.ron"),
+          "ManaBarrierIcon": Path("characters/Blitzcrank/spells/ManaBarrierIcon.ron"),
+          "Overdrive": Path("characters/Blitzcrank/spells/Overdrive.ron"),
+          "PowerFist": Path("characters/Blitzcrank/spells/PowerFist.ron"),
+          "PowerFistAttack": Path("characters/Blitzcrank/spells/PowerFistAttack.ron"),
+          "RocketGrab": Path("characters/Blitzcrank/spells/RocketGrab.ron"),
+          "RocketGrabMissile": Path("characters/Blitzcrank/spells/RocketGrabMissile.ron"),
+          "StaticField": Path("characters/Blitzcrank/spells/StaticField.ron"),
+        }),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

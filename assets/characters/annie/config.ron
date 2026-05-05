@@ -121,6 +121,21 @@
         "lol_core::movement::Movement": (
           speed: 335.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "AnnieBasicAttack": Path("characters/Annie/spells/AnnieBasicAttack.ron"),
+          "AnnieBasicAttack2": Path("characters/Annie/spells/AnnieBasicAttack2.ron"),
+          "AnnieCritAttack": Path("characters/Annie/spells/AnnieCritAttack.ron"),
+          "AnnieE": Path("characters/Annie/spells/AnnieE.ron"),
+          "AnniePassive": Path("characters/Annie/spells/AnniePassive.ron"),
+          "AnnieQ": Path("characters/Annie/spells/AnnieQ.ron"),
+          "AnnieR": Path("characters/Annie/spells/AnnieR.ron"),
+          "AnnieRController": Path("characters/Annie/spells/AnnieRController.ron"),
+          "AnnieW": Path("characters/Annie/spells/AnnieW.ron"),
+          "Disintegrate": Path("characters/Annie/spells/Disintegrate.ron"),
+          "Incinerate": Path("characters/Annie/spells/Incinerate.ron"),
+          "InfernalGuardian": Path("characters/Annie/spells/InfernalGuardian.ron"),
+          "InfernalGuardianGuide": Path("characters/Annie/spells/InfernalGuardianGuide.ron"),
+        }),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

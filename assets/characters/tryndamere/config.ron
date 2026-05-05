@@ -121,6 +121,20 @@
         "lol_core::movement::Movement": (
           speed: 345.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "TryndamereBasicAttack": Path("characters/Tryndamere/spells/TryndamereBasicAttack.ron"),
+          "TryndamereBasicAttack2": Path("characters/Tryndamere/spells/TryndamereBasicAttack2.ron"),
+          "TryndamereCritAttack": Path("characters/Tryndamere/spells/TryndamereCritAttack.ron"),
+          "TryndamereE": Path("characters/Tryndamere/spells/TryndamereE.ron"),
+          "TryndamerePassive": Path("characters/Tryndamere/spells/TryndamerePassive.ron"),
+          "TryndamereQ": Path("characters/Tryndamere/spells/TryndamereQ.ron"),
+          "TryndamereVsKindredKindredLoss": Path("characters/Tryndamere/spells/TryndamereVsKindredKindredLoss.ron"),
+          "TryndamereVsKindredTryndamereDescription": Path("characters/Tryndamere/spells/TryndamereVsKindredTryndamereDescription.ron"),
+          "TryndamereVsKindredTryndamereReward": Path("characters/Tryndamere/spells/TryndamereVsKindredTryndamereReward.ron"),
+          "TryndamereW": Path("characters/Tryndamere/spells/TryndamereW.ron"),
+          "UndyingRage": Path("characters/Tryndamere/spells/UndyingRage.ron"),
+          "slash": Path("characters/Tryndamere/spells/slash.ron"),
+        }),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

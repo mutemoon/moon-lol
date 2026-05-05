@@ -121,6 +121,19 @@
         "lol_core::movement::Movement": (
           speed: 340.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "JarvanIVBasicAttack": Path("characters/JarvanIV/spells/JarvanIVBasicAttack.ron"),
+          "JarvanIVBasicAttack2": Path("characters/JarvanIV/spells/JarvanIVBasicAttack2.ron"),
+          "JarvanIVBasicAttack3": Path("characters/JarvanIV/spells/JarvanIVBasicAttack3.ron"),
+          "JarvanIVCataclysm": Path("characters/JarvanIV/spells/JarvanIVCataclysm.ron"),
+          "JarvanIVCataclysmAttack": Path("characters/JarvanIV/spells/JarvanIVCataclysmAttack.ron"),
+          "JarvanIVCritAttack": Path("characters/JarvanIV/spells/JarvanIVCritAttack.ron"),
+          "JarvanIVDemacianStandard": Path("characters/JarvanIV/spells/JarvanIVDemacianStandard.ron"),
+          "JarvanIVDragonStrike": Path("characters/JarvanIV/spells/JarvanIVDragonStrike.ron"),
+          "JarvanIVGoldenAegis": Path("characters/JarvanIV/spells/JarvanIVGoldenAegis.ron"),
+          "JarvanIVMartialCadence": Path("characters/JarvanIV/spells/JarvanIVMartialCadence.ron"),
+          "JarvanIVMartialCadenceAttack": Path("characters/JarvanIV/spells/JarvanIVMartialCadenceAttack.ron"),
+        }),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

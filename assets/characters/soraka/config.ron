@@ -121,6 +121,22 @@
         "lol_core::movement::Movement": (
           speed: 325.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "Consecration_Self": Path("characters/Soraka/spells/Consecration_Self.ron"),
+          "SorakaBasicAttack": Path("characters/Soraka/spells/SorakaBasicAttack.ron"),
+          "SorakaBasicAttack2": Path("characters/Soraka/spells/SorakaBasicAttack2.ron"),
+          "SorakaCritAttack": Path("characters/Soraka/spells/SorakaCritAttack.ron"),
+          "SorakaE": Path("characters/Soraka/spells/SorakaE.ron"),
+          "SorakaQ": Path("characters/Soraka/spells/SorakaQ.ron"),
+          "SorakaQMissile": Path("characters/Soraka/spells/SorakaQMissile.ron"),
+          "SorakaQReturnMissile": Path("characters/Soraka/spells/SorakaQReturnMissile.ron"),
+          "SorakaR": Path("characters/Soraka/spells/SorakaR.ron"),
+          "SorakaRCastTime": Path("characters/Soraka/spells/SorakaRCastTime.ron"),
+          "SorakaW": Path("characters/Soraka/spells/SorakaW.ron"),
+          "SorakaWCastTime": Path("characters/Soraka/spells/SorakaWCastTime.ron"),
+          "SorakaWParticleMissile": Path("characters/Soraka/spells/SorakaWParticleMissile.ron"),
+          "Soraka_BasicAttack": Path("characters/Soraka/spells/Soraka_BasicAttack.ron"),
+        }),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

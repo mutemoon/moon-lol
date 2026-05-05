@@ -121,6 +121,22 @@
         "lol_core::movement::Movement": (
           speed: 340.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "NeekoBasicAttack": Path("characters/Neeko/spells/NeekoBasicAttack.ron"),
+          "NeekoBubbleDebuff": Path("characters/Neeko/spells/NeekoBubbleDebuff.ron"),
+          "NeekoCritAttack": Path("characters/Neeko/spells/NeekoCritAttack.ron"),
+          "NeekoDataSelector": Path("characters/Neeko/spells/NeekoDataSelector.ron"),
+          "NeekoE": Path("characters/Neeko/spells/NeekoE.ron"),
+          "NeekoPassive": Path("characters/Neeko/spells/NeekoPassive.ron"),
+          "NeekoQ": Path("characters/Neeko/spells/NeekoQ.ron"),
+          "NeekoR": Path("characters/Neeko/spells/NeekoR.ron"),
+          "NeekoRDummySpell": Path("characters/Neeko/spells/NeekoRDummySpell.ron"),
+          "NeekoRIndicatorMis": Path("characters/Neeko/spells/NeekoRIndicatorMis.ron"),
+          "NeekoW": Path("characters/Neeko/spells/NeekoW.ron"),
+          "NeekoW2": Path("characters/Neeko/spells/NeekoW2.ron"),
+          "NeekoWPassiveAttack": Path("characters/Neeko/spells/NeekoWPassiveAttack.ron"),
+          "NeekoWPassiveMissile": Path("characters/Neeko/spells/NeekoWPassiveMissile.ron"),
+        }),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

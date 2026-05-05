@@ -121,6 +121,23 @@
         "lol_core::movement::Movement": (
           speed: 335.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "VexBasicAttack": Path("characters/Vex/spells/VexBasicAttack.ron"),
+          "VexBasicAttack2": Path("characters/Vex/spells/VexBasicAttack2.ron"),
+          "VexCritAttack": Path("characters/Vex/spells/VexCritAttack.ron"),
+          "VexE": Path("characters/Vex/spells/VexE.ron"),
+          "VexP": Path("characters/Vex/spells/VexP.ron"),
+          "VexPCooldown": Path("characters/Vex/spells/VexPCooldown.ron"),
+          "VexPDoom": Path("characters/Vex/spells/VexPDoom.ron"),
+          "VexPGloom": Path("characters/Vex/spells/VexPGloom.ron"),
+          "VexPGloomAttack": Path("characters/Vex/spells/VexPGloomAttack.ron"),
+          "VexPGloomAttackMissile": Path("characters/Vex/spells/VexPGloomAttackMissile.ron"),
+          "VexQ": Path("characters/Vex/spells/VexQ.ron"),
+          "VexR": Path("characters/Vex/spells/VexR.ron"),
+          "VexR2": Path("characters/Vex/spells/VexR2.ron"),
+          "VexRTarget": Path("characters/Vex/spells/VexRTarget.ron"),
+          "VexW": Path("characters/Vex/spells/VexW.ron"),
+        }),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

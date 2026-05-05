@@ -121,6 +121,23 @@
         "lol_core::movement::Movement": (
           speed: 340.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "VelkozBasicAttack": Path("characters/Velkoz/spells/VelkozBasicAttack.ron"),
+          "VelkozBasicAttack2": Path("characters/Velkoz/spells/VelkozBasicAttack2.ron"),
+          "VelkozBasicAttack3": Path("characters/Velkoz/spells/VelkozBasicAttack3.ron"),
+          "VelkozCritAttack": Path("characters/Velkoz/spells/VelkozCritAttack.ron"),
+          "VelkozE": Path("characters/Velkoz/spells/VelkozE.ron"),
+          "VelkozEMissile": Path("characters/Velkoz/spells/VelkozEMissile.ron"),
+          "VelkozPassive": Path("characters/Velkoz/spells/VelkozPassive.ron"),
+          "VelkozQ": Path("characters/Velkoz/spells/VelkozQ.ron"),
+          "VelkozQMissile": Path("characters/Velkoz/spells/VelkozQMissile.ron"),
+          "VelkozQMissileSplit": Path("characters/Velkoz/spells/VelkozQMissileSplit.ron"),
+          "VelkozQSplitActivate": Path("characters/Velkoz/spells/VelkozQSplitActivate.ron"),
+          "VelkozR": Path("characters/Velkoz/spells/VelkozR.ron"),
+          "VelkozResearchProc": Path("characters/Velkoz/spells/VelkozResearchProc.ron"),
+          "VelkozW": Path("characters/Velkoz/spells/VelkozW.ron"),
+          "VelkozWMissile": Path("characters/Velkoz/spells/VelkozWMissile.ron"),
+        }),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

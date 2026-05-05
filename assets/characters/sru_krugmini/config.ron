@@ -44,6 +44,14 @@
         "lol_core::movement::Movement": (
           speed: 400.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "SRU_KrugMiniBasicAttack": Path("characters/SRU_KrugMini/spells/SRU_KrugMiniBasicAttack.ron"),
+          "SRU_KrugMiniBasicAttack2": Path("characters/SRU_KrugMini/spells/SRU_KrugMiniBasicAttack2.ron"),
+          "SRU_KrugMiniBasicAttack3": Path("characters/SRU_KrugMini/spells/SRU_KrugMiniBasicAttack3.ron"),
+          "SRU_KrugMiniBasicAttack4": Path("characters/SRU_KrugMini/spells/SRU_KrugMiniBasicAttack4.ron"),
+          "SRU_KrugMiniBasicAttack5": Path("characters/SRU_KrugMini/spells/SRU_KrugMiniBasicAttack5.ron"),
+          "SpawnMiniMiniKrug_Mis": Path("characters/SRU_KrugMini/spells/SpawnMiniMiniKrug_Mis.ron"),
+        }),
       },
     ),
   },

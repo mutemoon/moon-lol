@@ -121,6 +121,21 @@
         "lol_core::movement::Movement": (
           speed: 340.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "DariusAxeGrabCone": Path("characters/Darius/spells/DariusAxeGrabCone.ron"),
+          "DariusBasicAttack": Path("characters/Darius/spells/DariusBasicAttack.ron"),
+          "DariusBasicAttack2": Path("characters/Darius/spells/DariusBasicAttack2.ron"),
+          "DariusCleave": Path("characters/Darius/spells/DariusCleave.ron"),
+          "DariusCritAttack": Path("characters/Darius/spells/DariusCritAttack.ron"),
+          "DariusExecute": Path("characters/Darius/spells/DariusExecute.ron"),
+          "DariusHemo": Path("characters/Darius/spells/DariusHemo.ron"),
+          "DariusHemoInternal": Path("characters/Darius/spells/DariusHemoInternal.ron"),
+          "DariusHemoMarker": Path("characters/Darius/spells/DariusHemoMarker.ron"),
+          "DariusHemoVisual": Path("characters/Darius/spells/DariusHemoVisual.ron"),
+          "DariusNoxianTacticsONH": Path("characters/Darius/spells/DariusNoxianTacticsONH.ron"),
+          "DariusNoxianTacticsONHAttack": Path("characters/Darius/spells/DariusNoxianTacticsONHAttack.ron"),
+          "DariusNoxianTacticsSlow": Path("characters/Darius/spells/DariusNoxianTacticsSlow.ron"),
+        }),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

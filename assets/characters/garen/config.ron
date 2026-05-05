@@ -121,6 +121,19 @@
         "lol_core::movement::Movement": (
           speed: 340.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "GarenBasicAttack": Path("characters/Garen/spells/GarenBasicAttack.ron"),
+          "GarenBasicAttack2": Path("characters/Garen/spells/GarenBasicAttack2.ron"),
+          "GarenBasicAttack3": Path("characters/Garen/spells/GarenBasicAttack3.ron"),
+          "GarenCritAttack": Path("characters/Garen/spells/GarenCritAttack.ron"),
+          "GarenE": Path("characters/Garen/spells/GarenE.ron"),
+          "GarenECancel": Path("characters/Garen/spells/GarenECancel.ron"),
+          "GarenPassive": Path("characters/Garen/spells/GarenPassive.ron"),
+          "GarenQ": Path("characters/Garen/spells/GarenQ.ron"),
+          "GarenQAttack": Path("characters/Garen/spells/GarenQAttack.ron"),
+          "GarenR": Path("characters/Garen/spells/GarenR.ron"),
+          "GarenW": Path("characters/Garen/spells/GarenW.ron"),
+        }),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

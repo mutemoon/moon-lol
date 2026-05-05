@@ -121,6 +121,20 @@
         "lol_core::movement::Movement": (
           speed: 345.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "Crepe_SingedVsHeimerdinger_HeimerdingerLose": Path("characters/Singed/spells/Crepe_SingedVsHeimerdinger_HeimerdingerLose.ron"),
+          "Crepe_SingedVsHeimerdinger_SingedReward": Path("characters/Singed/spells/Crepe_SingedVsHeimerdinger_SingedReward.ron"),
+          "Crepe_SingedVsHeimerdinger_SingedStart": Path("characters/Singed/spells/Crepe_SingedVsHeimerdinger_SingedStart.ron"),
+          "Fling": Path("characters/Singed/spells/Fling.ron"),
+          "InsanityPotion": Path("characters/Singed/spells/InsanityPotion.ron"),
+          "MegaAdhesive": Path("characters/Singed/spells/MegaAdhesive.ron"),
+          "PoisonTrail": Path("characters/Singed/spells/PoisonTrail.ron"),
+          "SingedBasicAttack": Path("characters/Singed/spells/SingedBasicAttack.ron"),
+          "SingedBasicAttack2": Path("characters/Singed/spells/SingedBasicAttack2.ron"),
+          "SingedCritAttack": Path("characters/Singed/spells/SingedCritAttack.ron"),
+          "SingedP": Path("characters/Singed/spells/SingedP.ron"),
+          "SingedWParticleMissile": Path("characters/Singed/spells/SingedWParticleMissile.ron"),
+        }),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

@@ -121,6 +121,23 @@
         "lol_core::movement::Movement": (
           speed: 335.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "SivirBasicAttack": Path("characters/Sivir/spells/SivirBasicAttack.ron"),
+          "SivirBasicAttack2": Path("characters/Sivir/spells/SivirBasicAttack2.ron"),
+          "SivirCritAttack": Path("characters/Sivir/spells/SivirCritAttack.ron"),
+          "SivirE": Path("characters/Sivir/spells/SivirE.ron"),
+          "SivirPassive": Path("characters/Sivir/spells/SivirPassive.ron"),
+          "SivirQ": Path("characters/Sivir/spells/SivirQ.ron"),
+          "SivirQMissile": Path("characters/Sivir/spells/SivirQMissile.ron"),
+          "SivirQMissileReturn": Path("characters/Sivir/spells/SivirQMissileReturn.ron"),
+          "SivirQMissileReturnDead": Path("characters/Sivir/spells/SivirQMissileReturnDead.ron"),
+          "SivirR": Path("characters/Sivir/spells/SivirR.ron"),
+          "SivirRMissile": Path("characters/Sivir/spells/SivirRMissile.ron"),
+          "SivirW": Path("characters/Sivir/spells/SivirW.ron"),
+          "SivirWAttack": Path("characters/Sivir/spells/SivirWAttack.ron"),
+          "SivirWAttackBounce": Path("characters/Sivir/spells/SivirWAttackBounce.ron"),
+          "SivirWMarker": Path("characters/Sivir/spells/SivirWMarker.ron"),
+        }),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

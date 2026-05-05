@@ -121,6 +121,18 @@
         "lol_core::movement::Movement": (
           speed: 335.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "MalzaharBasicAttack": Path("characters/Malzahar/spells/MalzaharBasicAttack.ron"),
+          "MalzaharBasicAttack2": Path("characters/Malzahar/spells/MalzaharBasicAttack2.ron"),
+          "MalzaharCritAttack": Path("characters/Malzahar/spells/MalzaharCritAttack.ron"),
+          "MalzaharE": Path("characters/Malzahar/spells/MalzaharE.ron"),
+          "MalzaharPassive": Path("characters/Malzahar/spells/MalzaharPassive.ron"),
+          "MalzaharQ": Path("characters/Malzahar/spells/MalzaharQ.ron"),
+          "MalzaharQMissile": Path("characters/Malzahar/spells/MalzaharQMissile.ron"),
+          "MalzaharR": Path("characters/Malzahar/spells/MalzaharR.ron"),
+          "MalzaharW": Path("characters/Malzahar/spells/MalzaharW.ron"),
+          "MalzaharWCancel": Path("characters/Malzahar/spells/MalzaharWCancel.ron"),
+        }),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

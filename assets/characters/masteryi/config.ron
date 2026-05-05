@@ -121,6 +121,22 @@
         "lol_core::movement::Movement": (
           speed: 355.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "AlphaStrike": Path("characters/MasterYi/spells/AlphaStrike.ron"),
+          "AlphaStrikeBounce": Path("characters/MasterYi/spells/AlphaStrikeBounce.ron"),
+          "AlphaStrikeMissile": Path("characters/MasterYi/spells/AlphaStrikeMissile.ron"),
+          "AlphaStrikeMissileReturn": Path("characters/MasterYi/spells/AlphaStrikeMissileReturn.ron"),
+          "AlphaStrikeTeleport": Path("characters/MasterYi/spells/AlphaStrikeTeleport.ron"),
+          "Highlander": Path("characters/MasterYi/spells/Highlander.ron"),
+          "MasterYiBasicAttack": Path("characters/MasterYi/spells/MasterYiBasicAttack.ron"),
+          "MasterYiBasicAttack2": Path("characters/MasterYi/spells/MasterYiBasicAttack2.ron"),
+          "MasterYiCritAttack": Path("characters/MasterYi/spells/MasterYiCritAttack.ron"),
+          "MasterYiDoubleStrike": Path("characters/MasterYi/spells/MasterYiDoubleStrike.ron"),
+          "MasterYiPassive": Path("characters/MasterYi/spells/MasterYiPassive.ron"),
+          "MasterYi_Q_Reposition": Path("characters/MasterYi/spells/MasterYi_Q_Reposition.ron"),
+          "Meditate": Path("characters/MasterYi/spells/Meditate.ron"),
+          "WujuStyle": Path("characters/MasterYi/spells/WujuStyle.ron"),
+        }),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

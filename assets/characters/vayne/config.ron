@@ -121,6 +121,23 @@
         "lol_core::movement::Movement": (
           speed: 330.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "VayneBasicAttack": Path("characters/Vayne/spells/VayneBasicAttack.ron"),
+          "VayneBasicAttack2": Path("characters/Vayne/spells/VayneBasicAttack2.ron"),
+          "VayneBasicAttack3": Path("characters/Vayne/spells/VayneBasicAttack3.ron"),
+          "VayneBasicAttack4": Path("characters/Vayne/spells/VayneBasicAttack4.ron"),
+          "VayneCondemn": Path("characters/Vayne/spells/VayneCondemn.ron"),
+          "VayneCondemnMissile": Path("characters/Vayne/spells/VayneCondemnMissile.ron"),
+          "VayneCritAttack": Path("characters/Vayne/spells/VayneCritAttack.ron"),
+          "VayneInquisition": Path("characters/Vayne/spells/VayneInquisition.ron"),
+          "VaynePassive": Path("characters/Vayne/spells/VaynePassive.ron"),
+          "VayneSilveredBolts": Path("characters/Vayne/spells/VayneSilveredBolts.ron"),
+          "VayneSilveredDebuff": Path("characters/Vayne/spells/VayneSilveredDebuff.ron"),
+          "VayneTumble": Path("characters/Vayne/spells/VayneTumble.ron"),
+          "VayneTumbleAttack": Path("characters/Vayne/spells/VayneTumbleAttack.ron"),
+          "VayneTumbleUltAttack": Path("characters/Vayne/spells/VayneTumbleUltAttack.ron"),
+          "VayneUltAttack": Path("characters/Vayne/spells/VayneUltAttack.ron"),
+        }),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

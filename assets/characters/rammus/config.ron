@@ -121,6 +121,18 @@
         "lol_core::movement::Movement": (
           speed: 335.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "DefensiveBallCurl": Path("characters/Rammus/spells/DefensiveBallCurl.ron"),
+          "PowerBall": Path("characters/Rammus/spells/PowerBall.ron"),
+          "PowerBallCancel": Path("characters/Rammus/spells/PowerBallCancel.ron"),
+          "PuncturingTaunt": Path("characters/Rammus/spells/PuncturingTaunt.ron"),
+          "RammusBasicAttack": Path("characters/Rammus/spells/RammusBasicAttack.ron"),
+          "RammusBasicAttack2": Path("characters/Rammus/spells/RammusBasicAttack2.ron"),
+          "RammusCritAttack": Path("characters/Rammus/spells/RammusCritAttack.ron"),
+          "RammusP": Path("characters/Rammus/spells/RammusP.ron"),
+          "RammusPowerBallBot": Path("characters/Rammus/spells/RammusPowerBallBot.ron"),
+          "Tremors2": Path("characters/Rammus/spells/Tremors2.ron"),
+        }),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

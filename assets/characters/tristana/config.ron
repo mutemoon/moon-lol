@@ -121,6 +121,16 @@
         "lol_core::movement::Movement": (
           speed: 325.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "TristanaBasicAttack": Path("characters/Tristana/spells/TristanaBasicAttack.ron"),
+          "TristanaBasicAttack2": Path("characters/Tristana/spells/TristanaBasicAttack2.ron"),
+          "TristanaCritAttack": Path("characters/Tristana/spells/TristanaCritAttack.ron"),
+          "TristanaE": Path("characters/Tristana/spells/TristanaE.ron"),
+          "TristanaPassive": Path("characters/Tristana/spells/TristanaPassive.ron"),
+          "TristanaQ": Path("characters/Tristana/spells/TristanaQ.ron"),
+          "TristanaR": Path("characters/Tristana/spells/TristanaR.ron"),
+          "TristanaW": Path("characters/Tristana/spells/TristanaW.ron"),
+        }),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

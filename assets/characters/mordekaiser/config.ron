@@ -121,6 +121,20 @@
         "lol_core::movement::Movement": (
           speed: 335.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "MordekaiserBasicAttack": Path("characters/Mordekaiser/spells/MordekaiserBasicAttack.ron"),
+          "MordekaiserBasicAttack2": Path("characters/Mordekaiser/spells/MordekaiserBasicAttack2.ron"),
+          "MordekaiserCritAttack": Path("characters/Mordekaiser/spells/MordekaiserCritAttack.ron"),
+          "MordekaiserE": Path("characters/Mordekaiser/spells/MordekaiserE.ron"),
+          "MordekaiserEMissile": Path("characters/Mordekaiser/spells/MordekaiserEMissile.ron"),
+          "MordekaiserPassive": Path("characters/Mordekaiser/spells/MordekaiserPassive.ron"),
+          "MordekaiserQ": Path("characters/Mordekaiser/spells/MordekaiserQ.ron"),
+          "MordekaiserR": Path("characters/Mordekaiser/spells/MordekaiserR.ron"),
+          "MordekaiserRWispMis": Path("characters/Mordekaiser/spells/MordekaiserRWispMis.ron"),
+          "MordekaiserSkin54Manager": Path("characters/Mordekaiser/spells/MordekaiserSkin54Manager.ron"),
+          "MordekaiserSoulMissile": Path("characters/Mordekaiser/spells/MordekaiserSoulMissile.ron"),
+          "MordekaiserW": Path("characters/Mordekaiser/spells/MordekaiserW.ron"),
+        }),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

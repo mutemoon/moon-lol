@@ -40,6 +40,14 @@
         "lol_core::movement::Movement": (
           speed: 0.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "NexusTurretBasicAttack": Path("characters/Turret/spells/NexusTurretBasicAttack.ron"),
+          "TurretBasicAttack": Path("characters/Turret/spells/TurretBasicAttack.ron"),
+          "TurretBasicAttack2": Path("characters/Turret/spells/TurretBasicAttack2.ron"),
+          "TurretBasicAttack3": Path("characters/Turret/spells/TurretBasicAttack3.ron"),
+          "TurretBasicAttack4": Path("characters/Turret/spells/TurretBasicAttack4.ron"),
+          "TurretGoldRewardParticleMissile": Path("characters/Turret/spells/TurretGoldRewardParticleMissile.ron"),
+        }),
       },
     ),
   },

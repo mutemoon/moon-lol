@@ -121,6 +121,22 @@
         "lol_core::movement::Movement": (
           speed: 330.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "MilioBasicAttack": Path("characters/Milio/spells/MilioBasicAttack.ron"),
+          "MilioBasicAttack2": Path("characters/Milio/spells/MilioBasicAttack2.ron"),
+          "MilioCritAttack": Path("characters/Milio/spells/MilioCritAttack.ron"),
+          "MilioE": Path("characters/Milio/spells/MilioE.ron"),
+          "MilioPBuff": Path("characters/Milio/spells/MilioPBuff.ron"),
+          "MilioPBurn": Path("characters/Milio/spells/MilioPBurn.ron"),
+          "MilioPassive": Path("characters/Milio/spells/MilioPassive.ron"),
+          "MilioQ": Path("characters/Milio/spells/MilioQ.ron"),
+          "MilioQHit": Path("characters/Milio/spells/MilioQHit.ron"),
+          "MilioQHitMinion": Path("characters/Milio/spells/MilioQHitMinion.ron"),
+          "MilioQSlow": Path("characters/Milio/spells/MilioQSlow.ron"),
+          "MilioR": Path("characters/Milio/spells/MilioR.ron"),
+          "MilioW": Path("characters/Milio/spells/MilioW.ron"),
+          "MilioWRetarget": Path("characters/Milio/spells/MilioWRetarget.ron"),
+        }),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

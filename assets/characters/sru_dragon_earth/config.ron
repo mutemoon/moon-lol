@@ -59,6 +59,9 @@
         "lol_core::movement::Movement": (
           speed: 330.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "SRU_Dragon_Mountain_Attack": Path("characters/sru_dragon_earth/spells/SRU_Dragon_Mountain_Attack.ron"),
+        }),
         "lol_core::skill::Skills": ([
           4294967270,
         ]),

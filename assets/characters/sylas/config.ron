@@ -121,6 +121,23 @@
         "lol_core::movement::Movement": (
           speed: 340.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "SylasBasicAttack": Path("characters/Sylas/spells/SylasBasicAttack.ron"),
+          "SylasBasicAttack2": Path("characters/Sylas/spells/SylasBasicAttack2.ron"),
+          "SylasCheatExtraSpellTest": Path("characters/Sylas/spells/SylasCheatExtraSpellTest.ron"),
+          "SylasCritAttack": Path("characters/Sylas/spells/SylasCritAttack.ron"),
+          "SylasE": Path("characters/Sylas/spells/SylasE.ron"),
+          "SylasE2": Path("characters/Sylas/spells/SylasE2.ron"),
+          "SylasEShield": Path("characters/Sylas/spells/SylasEShield.ron"),
+          "SylasPassive": Path("characters/Sylas/spells/SylasPassive.ron"),
+          "SylasPassiveAttack": Path("characters/Sylas/spells/SylasPassiveAttack.ron"),
+          "SylasPassiveAttackNoAnim": Path("characters/Sylas/spells/SylasPassiveAttackNoAnim.ron"),
+          "SylasQ": Path("characters/Sylas/spells/SylasQ.ron"),
+          "SylasR": Path("characters/Sylas/spells/SylasR.ron"),
+          "SylasRBuff": Path("characters/Sylas/spells/SylasRBuff.ron"),
+          "SylasRCosmeticMissile": Path("characters/Sylas/spells/SylasRCosmeticMissile.ron"),
+          "SylasW": Path("characters/Sylas/spells/SylasW.ron"),
+        }),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

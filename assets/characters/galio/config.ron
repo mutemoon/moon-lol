@@ -121,6 +121,21 @@
         "lol_core::movement::Movement": (
           speed: 340.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "GalioBasicAttack": Path("characters/Galio/spells/GalioBasicAttack.ron"),
+          "GalioCritAttack": Path("characters/Galio/spells/GalioCritAttack.ron"),
+          "GalioE": Path("characters/Galio/spells/GalioE.ron"),
+          "GalioPassive": Path("characters/Galio/spells/GalioPassive.ron"),
+          "GalioPassiveAttack": Path("characters/Galio/spells/GalioPassiveAttack.ron"),
+          "GalioQ": Path("characters/Galio/spells/GalioQ.ron"),
+          "GalioQMissile": Path("characters/Galio/spells/GalioQMissile.ron"),
+          "GalioQMissileR": Path("characters/Galio/spells/GalioQMissileR.ron"),
+          "GalioQSuper": Path("characters/Galio/spells/GalioQSuper.ron"),
+          "GalioR": Path("characters/Galio/spells/GalioR.ron"),
+          "GalioRSpellPassive": Path("characters/Galio/spells/GalioRSpellPassive.ron"),
+          "GalioW": Path("characters/Galio/spells/GalioW.ron"),
+          "GalioW2": Path("characters/Galio/spells/GalioW2.ron"),
+        }),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

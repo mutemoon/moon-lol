@@ -121,6 +121,21 @@
         "lol_core::movement::Movement": (
           speed: 350.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "TrundleBasicAttack": Path("characters/Trundle/spells/TrundleBasicAttack.ron"),
+          "TrundleBasicAttack2": Path("characters/Trundle/spells/TrundleBasicAttack2.ron"),
+          "TrundleBasicAttack3": Path("characters/Trundle/spells/TrundleBasicAttack3.ron"),
+          "TrundleCircle": Path("characters/Trundle/spells/TrundleCircle.ron"),
+          "TrundleCritAttack": Path("characters/Trundle/spells/TrundleCritAttack.ron"),
+          "TrundleDiseaseOverseer": Path("characters/Trundle/spells/TrundleDiseaseOverseer.ron"),
+          "TrundlePain": Path("characters/Trundle/spells/TrundlePain.ron"),
+          "TrundlePainBuff": Path("characters/Trundle/spells/TrundlePainBuff.ron"),
+          "TrundlePainHeal": Path("characters/Trundle/spells/TrundlePainHeal.ron"),
+          "TrundlePainHealBig": Path("characters/Trundle/spells/TrundlePainHealBig.ron"),
+          "TrundleQ": Path("characters/Trundle/spells/TrundleQ.ron"),
+          "TrundleTrollSmash": Path("characters/Trundle/spells/TrundleTrollSmash.ron"),
+          "trundledesecrate": Path("characters/Trundle/spells/trundledesecrate.ron"),
+        }),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

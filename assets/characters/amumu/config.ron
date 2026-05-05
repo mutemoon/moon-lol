@@ -121,6 +121,17 @@
         "lol_core::movement::Movement": (
           speed: 335.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "AmumuBasicAttack": Path("characters/Amumu/spells/AmumuBasicAttack.ron"),
+          "AmumuBasicAttack2": Path("characters/Amumu/spells/AmumuBasicAttack2.ron"),
+          "AmumuCritAttack": Path("characters/Amumu/spells/AmumuCritAttack.ron"),
+          "AmumuP": Path("characters/Amumu/spells/AmumuP.ron"),
+          "AuraofDespair": Path("characters/Amumu/spells/AuraofDespair.ron"),
+          "BandageToss": Path("characters/Amumu/spells/BandageToss.ron"),
+          "CurseoftheSadMummy": Path("characters/Amumu/spells/CurseoftheSadMummy.ron"),
+          "SadMummyBandageToss": Path("characters/Amumu/spells/SadMummyBandageToss.ron"),
+          "Tantrum": Path("characters/Amumu/spells/Tantrum.ron"),
+        }),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

@@ -121,6 +121,22 @@
         "lol_core::movement::Movement": (
           speed: 325.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "CarpetBomb": Path("characters/Corki/spells/CarpetBomb.ron"),
+          "CorkiBasicAttack": Path("characters/Corki/spells/CorkiBasicAttack.ron"),
+          "CorkiBasicAttack2": Path("characters/Corki/spells/CorkiBasicAttack2.ron"),
+          "CorkiCritAttack": Path("characters/Corki/spells/CorkiCritAttack.ron"),
+          "DangerZone": Path("characters/Corki/spells/DangerZone.ron"),
+          "GGSpray": Path("characters/Corki/spells/GGSpray.ron"),
+          "GGun": Path("characters/Corki/spells/GGun.ron"),
+          "MissileBarrage": Path("characters/Corki/spells/MissileBarrage.ron"),
+          "MissileBarrageMissile": Path("characters/Corki/spells/MissileBarrageMissile.ron"),
+          "MissileBarrageMissile2": Path("characters/Corki/spells/MissileBarrageMissile2.ron"),
+          "PhosphorusBomb": Path("characters/Corki/spells/PhosphorusBomb.ron"),
+          "PhosphorusBombMissile": Path("characters/Corki/spells/PhosphorusBombMissile.ron"),
+          "PhosphorusBombMissileMin": Path("characters/Corki/spells/PhosphorusBombMissileMin.ron"),
+          "RapidReload": Path("characters/Corki/spells/RapidReload.ron"),
+        }),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

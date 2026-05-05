@@ -121,6 +121,20 @@
         "lol_core::movement::Movement": (
           speed: 325.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "EzrealBasicAttack": Path("characters/Ezreal/spells/EzrealBasicAttack.ron"),
+          "EzrealBasicAttack2": Path("characters/Ezreal/spells/EzrealBasicAttack2.ron"),
+          "EzrealCritAttack": Path("characters/Ezreal/spells/EzrealCritAttack.ron"),
+          "EzrealE": Path("characters/Ezreal/spells/EzrealE.ron"),
+          "EzrealEMissile": Path("characters/Ezreal/spells/EzrealEMissile.ron"),
+          "EzrealPFEManager": Path("characters/Ezreal/spells/EzrealPFEManager.ron"),
+          "EzrealPassive": Path("characters/Ezreal/spells/EzrealPassive.ron"),
+          "EzrealPassiveStacks": Path("characters/Ezreal/spells/EzrealPassiveStacks.ron"),
+          "EzrealQ": Path("characters/Ezreal/spells/EzrealQ.ron"),
+          "EzrealR": Path("characters/Ezreal/spells/EzrealR.ron"),
+          "EzrealRecallOverride": Path("characters/Ezreal/spells/EzrealRecallOverride.ron"),
+          "EzrealW": Path("characters/Ezreal/spells/EzrealW.ron"),
+        }),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

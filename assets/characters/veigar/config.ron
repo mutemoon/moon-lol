@@ -121,6 +121,18 @@
         "lol_core::movement::Movement": (
           speed: 340.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "VeigarBalefulStrike": Path("characters/Veigar/spells/VeigarBalefulStrike.ron"),
+          "VeigarBalefulStrikeMis": Path("characters/Veigar/spells/VeigarBalefulStrikeMis.ron"),
+          "VeigarBasicAttack": Path("characters/Veigar/spells/VeigarBasicAttack.ron"),
+          "VeigarBasicAttack2": Path("characters/Veigar/spells/VeigarBasicAttack2.ron"),
+          "VeigarCritAttack": Path("characters/Veigar/spells/VeigarCritAttack.ron"),
+          "VeigarDarkMatter": Path("characters/Veigar/spells/VeigarDarkMatter.ron"),
+          "VeigarDarkMatterCastLockout": Path("characters/Veigar/spells/VeigarDarkMatterCastLockout.ron"),
+          "VeigarEventHorizon": Path("characters/Veigar/spells/VeigarEventHorizon.ron"),
+          "VeigarPassive": Path("characters/Veigar/spells/VeigarPassive.ron"),
+          "VeigarR": Path("characters/Veigar/spells/VeigarR.ron"),
+        }),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

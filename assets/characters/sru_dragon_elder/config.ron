@@ -74,6 +74,10 @@
         "lol_core::movement::Movement": (
           speed: 330.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "ElderDragonAttack": Path("characters/sru_dragon_elder/spells/ElderDragonAttack.ron"),
+          "ElderDragonAttack2": Path("characters/sru_dragon_elder/spells/ElderDragonAttack2.ron"),
+        }),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

@@ -121,6 +121,17 @@
         "lol_core::movement::Movement": (
           speed: 335.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "ForcePulse": Path("characters/Kassadin/spells/ForcePulse.ron"),
+          "KassadinBasicAttack": Path("characters/Kassadin/spells/KassadinBasicAttack.ron"),
+          "KassadinBasicAttack2": Path("characters/Kassadin/spells/KassadinBasicAttack2.ron"),
+          "KassadinBasicAttack3": Path("characters/Kassadin/spells/KassadinBasicAttack3.ron"),
+          "KassadinCritAttack": Path("characters/Kassadin/spells/KassadinCritAttack.ron"),
+          "NetherBlade": Path("characters/Kassadin/spells/NetherBlade.ron"),
+          "NullLance": Path("characters/Kassadin/spells/NullLance.ron"),
+          "RiftWalk": Path("characters/Kassadin/spells/RiftWalk.ron"),
+          "VoidStone": Path("characters/Kassadin/spells/VoidStone.ron"),
+        }),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

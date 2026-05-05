@@ -121,6 +121,23 @@
         "lol_core::movement::Movement": (
           speed: 335.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "FizzBasicAttack": Path("characters/Fizz/spells/FizzBasicAttack.ron"),
+          "FizzBasicAttack2": Path("characters/Fizz/spells/FizzBasicAttack2.ron"),
+          "FizzCritAttack": Path("characters/Fizz/spells/FizzCritAttack.ron"),
+          "FizzE": Path("characters/Fizz/spells/FizzE.ron"),
+          "FizzEBuffer": Path("characters/Fizz/spells/FizzEBuffer.ron"),
+          "FizzEOne": Path("characters/Fizz/spells/FizzEOne.ron"),
+          "FizzETwo": Path("characters/Fizz/spells/FizzETwo.ron"),
+          "FizzPassive": Path("characters/Fizz/spells/FizzPassive.ron"),
+          "FizzQ": Path("characters/Fizz/spells/FizzQ.ron"),
+          "FizzR": Path("characters/Fizz/spells/FizzR.ron"),
+          "FizzRHop": Path("characters/Fizz/spells/FizzRHop.ron"),
+          "FizzRMissile": Path("characters/Fizz/spells/FizzRMissile.ron"),
+          "FizzW": Path("characters/Fizz/spells/FizzW.ron"),
+          "FizzWAttack": Path("characters/Fizz/spells/FizzWAttack.ron"),
+          "FizzWBasicAttack": Path("characters/Fizz/spells/FizzWBasicAttack.ron"),
+        }),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

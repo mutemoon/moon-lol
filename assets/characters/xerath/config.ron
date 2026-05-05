@@ -121,6 +121,21 @@
         "lol_core::movement::Movement": (
           speed: 340.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "XerathArcaneBarrage2": Path("characters/Xerath/spells/XerathArcaneBarrage2.ron"),
+          "XerathArcanopulse2": Path("characters/Xerath/spells/XerathArcanopulse2.ron"),
+          "XerathArcanopulseChargeUp": Path("characters/Xerath/spells/XerathArcanopulseChargeUp.ron"),
+          "XerathAscended2": Path("characters/Xerath/spells/XerathAscended2.ron"),
+          "XerathBasicAttack": Path("characters/Xerath/spells/XerathBasicAttack.ron"),
+          "XerathBasicAttack2": Path("characters/Xerath/spells/XerathBasicAttack2.ron"),
+          "XerathCritAttack": Path("characters/Xerath/spells/XerathCritAttack.ron"),
+          "XerathLocusOfPower2": Path("characters/Xerath/spells/XerathLocusOfPower2.ron"),
+          "XerathLocusOfPower2Toggle": Path("characters/Xerath/spells/XerathLocusOfPower2Toggle.ron"),
+          "XerathLocusPulse": Path("characters/Xerath/spells/XerathLocusPulse.ron"),
+          "XerathMageSpear": Path("characters/Xerath/spells/XerathMageSpear.ron"),
+          "XerathMageSpearMissile": Path("characters/Xerath/spells/XerathMageSpearMissile.ron"),
+          "XerathRMissileWrapper": Path("characters/Xerath/spells/XerathRMissileWrapper.ron"),
+        }),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

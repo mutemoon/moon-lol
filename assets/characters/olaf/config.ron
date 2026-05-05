@@ -121,6 +121,22 @@
         "lol_core::movement::Movement": (
           speed: 350.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "OlafAxeThrow": Path("characters/Olaf/spells/OlafAxeThrow.ron"),
+          "OlafAxeThrowCast": Path("characters/Olaf/spells/OlafAxeThrowCast.ron"),
+          "OlafAxeThrowDamage": Path("characters/Olaf/spells/OlafAxeThrowDamage.ron"),
+          "OlafBasicAttack": Path("characters/Olaf/spells/OlafBasicAttack.ron"),
+          "OlafBasicAttack2": Path("characters/Olaf/spells/OlafBasicAttack2.ron"),
+          "OlafBasicAttack3": Path("characters/Olaf/spells/OlafBasicAttack3.ron"),
+          "OlafBerzerkerRage": Path("characters/Olaf/spells/OlafBerzerkerRage.ron"),
+          "OlafCritAttack": Path("characters/Olaf/spells/OlafCritAttack.ron"),
+          "OlafCritAttack2": Path("characters/Olaf/spells/OlafCritAttack2.ron"),
+          "OlafFrenziedStrikes": Path("characters/Olaf/spells/OlafFrenziedStrikes.ron"),
+          "OlafRagnarok": Path("characters/Olaf/spells/OlafRagnarok.ron"),
+          "OlafRagnarokPassiveBuff": Path("characters/Olaf/spells/OlafRagnarokPassiveBuff.ron"),
+          "OlafRecklessStrike": Path("characters/Olaf/spells/OlafRecklessStrike.ron"),
+          "OlafWShield": Path("characters/Olaf/spells/OlafWShield.ron"),
+        }),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

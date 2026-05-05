@@ -121,6 +121,18 @@
         "lol_core::movement::Movement": (
           speed: 325.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "AniviaBasicAttack": Path("characters/Anivia/spells/AniviaBasicAttack.ron"),
+          "AniviaBasicAttack2": Path("characters/Anivia/spells/AniviaBasicAttack2.ron"),
+          "AniviaCritAttack": Path("characters/Anivia/spells/AniviaCritAttack.ron"),
+          "Crystallize": Path("characters/Anivia/spells/Crystallize.ron"),
+          "FlashFrost": Path("characters/Anivia/spells/FlashFrost.ron"),
+          "FlashFrostSpell": Path("characters/Anivia/spells/FlashFrostSpell.ron"),
+          "Frostbite": Path("characters/Anivia/spells/Frostbite.ron"),
+          "GlacialStorm": Path("characters/Anivia/spells/GlacialStorm.ron"),
+          "GlacialStormSpell": Path("characters/Anivia/spells/GlacialStormSpell.ron"),
+          "RebirthMarker": Path("characters/Anivia/spells/RebirthMarker.ron"),
+        }),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

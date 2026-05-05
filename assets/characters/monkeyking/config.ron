@@ -121,6 +121,21 @@
         "lol_core::movement::Movement": (
           speed: 340.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "MonkeyKingBasicAttack": Path("characters/MonkeyKing/spells/MonkeyKingBasicAttack.ron"),
+          "MonkeyKingBasicAttack2": Path("characters/MonkeyKing/spells/MonkeyKingBasicAttack2.ron"),
+          "MonkeyKingCritAttack": Path("characters/MonkeyKing/spells/MonkeyKingCritAttack.ron"),
+          "MonkeyKingDecoy": Path("characters/MonkeyKing/spells/MonkeyKingDecoy.ron"),
+          "MonkeyKingDoubleAttack": Path("characters/MonkeyKing/spells/MonkeyKingDoubleAttack.ron"),
+          "MonkeyKingDummySpell": Path("characters/MonkeyKing/spells/MonkeyKingDummySpell.ron"),
+          "MonkeyKingNimbus": Path("characters/MonkeyKing/spells/MonkeyKingNimbus.ron"),
+          "MonkeyKingNimbusKick": Path("characters/MonkeyKing/spells/MonkeyKingNimbusKick.ron"),
+          "MonkeyKingNimbusKickClone": Path("characters/MonkeyKing/spells/MonkeyKingNimbusKickClone.ron"),
+          "MonkeyKingPassive": Path("characters/MonkeyKing/spells/MonkeyKingPassive.ron"),
+          "MonkeyKingQAttack": Path("characters/MonkeyKing/spells/MonkeyKingQAttack.ron"),
+          "MonkeyKingSpinToWin": Path("characters/MonkeyKing/spells/MonkeyKingSpinToWin.ron"),
+          "MonkeyKingSpinToWinLeave": Path("characters/MonkeyKing/spells/MonkeyKingSpinToWinLeave.ron"),
+        }),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

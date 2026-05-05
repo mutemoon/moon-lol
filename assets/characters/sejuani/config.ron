@@ -121,6 +121,23 @@
         "lol_core::movement::Movement": (
           speed: 340.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "SejuaniBasicAttack": Path("characters/Sejuani/spells/SejuaniBasicAttack.ron"),
+          "SejuaniCritAttack": Path("characters/Sejuani/spells/SejuaniCritAttack.ron"),
+          "SejuaniE": Path("characters/Sejuani/spells/SejuaniE.ron"),
+          "SejuaniE2": Path("characters/Sejuani/spells/SejuaniE2.ron"),
+          "SejuaniECD": Path("characters/Sejuani/spells/SejuaniECD.ron"),
+          "SejuaniEMarker": Path("characters/Sejuani/spells/SejuaniEMarker.ron"),
+          "SejuaniEMarkerMax": Path("characters/Sejuani/spells/SejuaniEMarkerMax.ron"),
+          "SejuaniEPassiveMissile": Path("characters/Sejuani/spells/SejuaniEPassiveMissile.ron"),
+          "SejuaniPassive": Path("characters/Sejuani/spells/SejuaniPassive.ron"),
+          "SejuaniPassiveDefense": Path("characters/Sejuani/spells/SejuaniPassiveDefense.ron"),
+          "SejuaniQ": Path("characters/Sejuani/spells/SejuaniQ.ron"),
+          "SejuaniR": Path("characters/Sejuani/spells/SejuaniR.ron"),
+          "SejuaniRMissile": Path("characters/Sejuani/spells/SejuaniRMissile.ron"),
+          "SejuaniW": Path("characters/Sejuani/spells/SejuaniW.ron"),
+          "SejuaniWDummy": Path("characters/Sejuani/spells/SejuaniWDummy.ron"),
+        }),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

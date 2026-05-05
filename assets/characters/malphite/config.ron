@@ -121,6 +121,21 @@
         "lol_core::movement::Movement": (
           speed: 335.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "Landslide": Path("characters/Malphite/spells/Landslide.ron"),
+          "MalphiteBasicAttack": Path("characters/Malphite/spells/MalphiteBasicAttack.ron"),
+          "MalphiteBasicAttack2": Path("characters/Malphite/spells/MalphiteBasicAttack2.ron"),
+          "MalphiteCleave": Path("characters/Malphite/spells/MalphiteCleave.ron"),
+          "MalphiteCritAttack": Path("characters/Malphite/spells/MalphiteCritAttack.ron"),
+          "MalphiteShield": Path("characters/Malphite/spells/MalphiteShield.ron"),
+          "MalphiteThunderclap": Path("characters/Malphite/spells/MalphiteThunderclap.ron"),
+          "Obduracy": Path("characters/Malphite/spells/Obduracy.ron"),
+          "ObduracyAttack": Path("characters/Malphite/spells/ObduracyAttack.ron"),
+          "SeismicShard": Path("characters/Malphite/spells/SeismicShard.ron"),
+          "SeismicShardBuff": Path("characters/Malphite/spells/SeismicShardBuff.ron"),
+          "UFSlash": Path("characters/Malphite/spells/UFSlash.ron"),
+          "UnstoppableForceStun": Path("characters/Malphite/spells/UnstoppableForceStun.ron"),
+        }),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

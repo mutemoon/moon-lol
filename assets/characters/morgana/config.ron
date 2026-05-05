@@ -121,6 +121,21 @@
         "lol_core::movement::Movement": (
           speed: 335.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "KayleVsAatroxMorganaReward": Path("characters/Morgana/spells/KayleVsAatroxMorganaReward.ron"),
+          "KayleVsAatroxMorganaStart": Path("characters/Morgana/spells/KayleVsAatroxMorganaStart.ron"),
+          "MorganaBasicAttack": Path("characters/Morgana/spells/MorganaBasicAttack.ron"),
+          "MorganaBasicAttack2": Path("characters/Morgana/spells/MorganaBasicAttack2.ron"),
+          "MorganaCritAttack": Path("characters/Morgana/spells/MorganaCritAttack.ron"),
+          "MorganaE": Path("characters/Morgana/spells/MorganaE.ron"),
+          "MorganaPassive": Path("characters/Morgana/spells/MorganaPassive.ron"),
+          "MorganaQ": Path("characters/Morgana/spells/MorganaQ.ron"),
+          "MorganaR": Path("characters/Morgana/spells/MorganaR.ron"),
+          "MorganaRVFXMis": Path("characters/Morgana/spells/MorganaRVFXMis.ron"),
+          "MorganaSkin80MapWallSpawn": Path("characters/Morgana/spells/MorganaSkin80MapWallSpawn.ron"),
+          "MorganaW": Path("characters/Morgana/spells/MorganaW.ron"),
+          "Morgana_Skin80_Manager": Path("characters/Morgana/spells/Morgana_Skin80_Manager.ron"),
+        }),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

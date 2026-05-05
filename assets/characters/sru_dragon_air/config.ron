@@ -59,6 +59,9 @@
         "lol_core::movement::Movement": (
           speed: 330.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "SRU_Dragon_Cloud_Attack": Path("characters/sru_dragon_air/spells/SRU_Dragon_Cloud_Attack.ron"),
+        }),
         "lol_core::skill::Skills": ([
           4294967270,
         ]),

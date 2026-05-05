@@ -121,6 +121,18 @@
         "lol_core::movement::Movement": (
           speed: 325.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "EyeOfTheStorm": Path("characters/Janna/spells/EyeOfTheStorm.ron"),
+          "HowlingGale": Path("characters/Janna/spells/HowlingGale.ron"),
+          "HowlingGaleSpell": Path("characters/Janna/spells/HowlingGaleSpell.ron"),
+          "HowlingGale_URF": Path("characters/Janna/spells/HowlingGale_URF.ron"),
+          "JannaBasicAttack": Path("characters/Janna/spells/JannaBasicAttack.ron"),
+          "JannaBasicAttack2": Path("characters/Janna/spells/JannaBasicAttack2.ron"),
+          "JannaCritAttack": Path("characters/Janna/spells/JannaCritAttack.ron"),
+          "ReapTheWhirlwind": Path("characters/Janna/spells/ReapTheWhirlwind.ron"),
+          "SowTheWind": Path("characters/Janna/spells/SowTheWind.ron"),
+          "TailwindSelf": Path("characters/Janna/spells/TailwindSelf.ron"),
+        }),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

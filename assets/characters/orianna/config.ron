@@ -121,6 +121,20 @@
         "lol_core::movement::Movement": (
           speed: 325.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "OrianaDetonateCommand": Path("characters/Orianna/spells/OrianaDetonateCommand.ron"),
+          "OrianaDissonanceCommand": Path("characters/Orianna/spells/OrianaDissonanceCommand.ron"),
+          "OrianaIzuna": Path("characters/Orianna/spells/OrianaIzuna.ron"),
+          "OrianaIzunaCommand": Path("characters/Orianna/spells/OrianaIzunaCommand.ron"),
+          "OrianaRedact": Path("characters/Orianna/spells/OrianaRedact.ron"),
+          "OrianaRedactCommand": Path("characters/Orianna/spells/OrianaRedactCommand.ron"),
+          "OrianaReturn": Path("characters/Orianna/spells/OrianaReturn.ron"),
+          "OriannaBasicAttack": Path("characters/Orianna/spells/OriannaBasicAttack.ron"),
+          "OriannaBasicAttack2": Path("characters/Orianna/spells/OriannaBasicAttack2.ron"),
+          "OriannaBasicAttack3": Path("characters/Orianna/spells/OriannaBasicAttack3.ron"),
+          "OriannaCritAttack": Path("characters/Orianna/spells/OriannaCritAttack.ron"),
+          "OriannaP": Path("characters/Orianna/spells/OriannaP.ron"),
+        }),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

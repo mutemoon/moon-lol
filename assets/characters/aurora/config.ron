@@ -121,6 +121,22 @@
         "lol_core::movement::Movement": (
           speed: 335.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "AuroraBasicAttack": Path("characters/Aurora/spells/AuroraBasicAttack.ron"),
+          "AuroraBasicAttack2": Path("characters/Aurora/spells/AuroraBasicAttack2.ron"),
+          "AuroraCritAttack": Path("characters/Aurora/spells/AuroraCritAttack.ron"),
+          "AuroraE": Path("characters/Aurora/spells/AuroraE.ron"),
+          "AuroraPNumSpiritsTracker": Path("characters/Aurora/spells/AuroraPNumSpiritsTracker.ron"),
+          "AuroraPassive": Path("characters/Aurora/spells/AuroraPassive.ron"),
+          "AuroraQ": Path("characters/Aurora/spells/AuroraQ.ron"),
+          "AuroraQRecast": Path("characters/Aurora/spells/AuroraQRecast.ron"),
+          "AuroraQReturnMissile": Path("characters/Aurora/spells/AuroraQReturnMissile.ron"),
+          "AuroraR": Path("characters/Aurora/spells/AuroraR.ron"),
+          "AuroraRMissile": Path("characters/Aurora/spells/AuroraRMissile.ron"),
+          "AuroraRRecast": Path("characters/Aurora/spells/AuroraRRecast.ron"),
+          "AuroraW": Path("characters/Aurora/spells/AuroraW.ron"),
+          "AuroraWMS": Path("characters/Aurora/spells/AuroraWMS.ron"),
+        }),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

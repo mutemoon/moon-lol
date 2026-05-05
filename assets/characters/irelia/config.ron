@@ -121,6 +121,22 @@
         "lol_core::movement::Movement": (
           speed: 335.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "IreliaBasicAttack": Path("characters/Irelia/spells/IreliaBasicAttack.ron"),
+          "IreliaBasicAttack2": Path("characters/Irelia/spells/IreliaBasicAttack2.ron"),
+          "IreliaCritAttack": Path("characters/Irelia/spells/IreliaCritAttack.ron"),
+          "IreliaE": Path("characters/Irelia/spells/IreliaE.ron"),
+          "IreliaE2": Path("characters/Irelia/spells/IreliaE2.ron"),
+          "IreliaEMissile": Path("characters/Irelia/spells/IreliaEMissile.ron"),
+          "IreliaEParticleMissile": Path("characters/Irelia/spells/IreliaEParticleMissile.ron"),
+          "IreliaESecondary": Path("characters/Irelia/spells/IreliaESecondary.ron"),
+          "IreliaPassive": Path("characters/Irelia/spells/IreliaPassive.ron"),
+          "IreliaQ": Path("characters/Irelia/spells/IreliaQ.ron"),
+          "IreliaR": Path("characters/Irelia/spells/IreliaR.ron"),
+          "IreliaR2": Path("characters/Irelia/spells/IreliaR2.ron"),
+          "IreliaW": Path("characters/Irelia/spells/IreliaW.ron"),
+          "IreliaW2": Path("characters/Irelia/spells/IreliaW2.ron"),
+        }),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

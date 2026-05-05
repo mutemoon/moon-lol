@@ -121,6 +121,23 @@
         "lol_core::movement::Movement": (
           speed: 325.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "MissFortuneBasicAttack": Path("characters/MissFortune/spells/MissFortuneBasicAttack.ron"),
+          "MissFortuneBasicAttack2": Path("characters/MissFortune/spells/MissFortuneBasicAttack2.ron"),
+          "MissFortuneBulletEMPTY": Path("characters/MissFortune/spells/MissFortuneBulletEMPTY.ron"),
+          "MissFortuneBulletTime": Path("characters/MissFortune/spells/MissFortuneBulletTime.ron"),
+          "MissFortuneBullets": Path("characters/MissFortune/spells/MissFortuneBullets.ron"),
+          "MissFortuneCritAttack": Path("characters/MissFortune/spells/MissFortuneCritAttack.ron"),
+          "MissFortunePassive": Path("characters/MissFortune/spells/MissFortunePassive.ron"),
+          "MissFortunePassiveAttack": Path("characters/MissFortune/spells/MissFortunePassiveAttack.ron"),
+          "MissFortunePassiveAttack2": Path("characters/MissFortune/spells/MissFortunePassiveAttack2.ron"),
+          "MissFortunePassiveAttackCrit": Path("characters/MissFortune/spells/MissFortunePassiveAttackCrit.ron"),
+          "MissFortuneRShotExtra": Path("characters/MissFortune/spells/MissFortuneRShotExtra.ron"),
+          "MissFortuneRicochetShot": Path("characters/MissFortune/spells/MissFortuneRicochetShot.ron"),
+          "MissFortuneRicochetShotDud": Path("characters/MissFortune/spells/MissFortuneRicochetShotDud.ron"),
+          "MissFortuneScattershot": Path("characters/MissFortune/spells/MissFortuneScattershot.ron"),
+          "MissFortuneViciousStrikes": Path("characters/MissFortune/spells/MissFortuneViciousStrikes.ron"),
+        }),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

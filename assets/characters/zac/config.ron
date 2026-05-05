@@ -121,6 +121,19 @@
         "lol_core::movement::Movement": (
           speed: 340.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "ZacBasicAttack": Path("characters/Zac/spells/ZacBasicAttack.ron"),
+          "ZacBasicAttack2": Path("characters/Zac/spells/ZacBasicAttack2.ron"),
+          "ZacCritAttack": Path("characters/Zac/spells/ZacCritAttack.ron"),
+          "ZacE": Path("characters/Zac/spells/ZacE.ron"),
+          "ZacETimingMissile": Path("characters/Zac/spells/ZacETimingMissile.ron"),
+          "ZacPassiveChunkDrop": Path("characters/Zac/spells/ZacPassiveChunkDrop.ron"),
+          "ZacQ": Path("characters/Zac/spells/ZacQ.ron"),
+          "ZacQAttack": Path("characters/Zac/spells/ZacQAttack.ron"),
+          "ZacQMissile": Path("characters/Zac/spells/ZacQMissile.ron"),
+          "ZacR": Path("characters/Zac/spells/ZacR.ron"),
+          "ZacW": Path("characters/Zac/spells/ZacW.ron"),
+        }),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

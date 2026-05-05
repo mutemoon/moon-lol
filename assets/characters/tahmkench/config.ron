@@ -121,6 +121,20 @@
         "lol_core::movement::Movement": (
           speed: 335.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "TahmKenchBasicAttack": Path("characters/TahmKench/spells/TahmKenchBasicAttack.ron"),
+          "TahmKenchBasicAttack2": Path("characters/TahmKench/spells/TahmKenchBasicAttack2.ron"),
+          "TahmKenchBasicAttack3": Path("characters/TahmKench/spells/TahmKenchBasicAttack3.ron"),
+          "TahmKenchCritAttack": Path("characters/TahmKench/spells/TahmKenchCritAttack.ron"),
+          "TahmKenchE": Path("characters/TahmKench/spells/TahmKenchE.ron"),
+          "TahmKenchPassive": Path("characters/TahmKench/spells/TahmKenchPassive.ron"),
+          "TahmKenchQ": Path("characters/TahmKench/spells/TahmKenchQ.ron"),
+          "TahmKenchR": Path("characters/TahmKench/spells/TahmKenchR.ron"),
+          "TahmKenchR2": Path("characters/TahmKench/spells/TahmKenchR2.ron"),
+          "TahmKenchRTargetAlly": Path("characters/TahmKench/spells/TahmKenchRTargetAlly.ron"),
+          "TahmKenchRWrapper": Path("characters/TahmKench/spells/TahmKenchRWrapper.ron"),
+          "TahmKenchW": Path("characters/TahmKench/spells/TahmKenchW.ron"),
+        }),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

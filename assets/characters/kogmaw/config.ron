@@ -121,6 +121,22 @@
         "lol_core::movement::Movement": (
           speed: 330.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "KogMawBasicAttack": Path("characters/KogMaw/spells/KogMawBasicAttack.ron"),
+          "KogMawBasicAttack2": Path("characters/KogMaw/spells/KogMawBasicAttack2.ron"),
+          "KogMawBioArcaneBarrage": Path("characters/KogMaw/spells/KogMawBioArcaneBarrage.ron"),
+          "KogMawBioArcaneBarrageAttack": Path("characters/KogMaw/spells/KogMawBioArcaneBarrageAttack.ron"),
+          "KogMawCausticSpittle": Path("characters/KogMaw/spells/KogMawCausticSpittle.ron"),
+          "KogMawCritAttack": Path("characters/KogMaw/spells/KogMawCritAttack.ron"),
+          "KogMawIcathianDisplay": Path("characters/KogMaw/spells/KogMawIcathianDisplay.ron"),
+          "KogMawIcathianSurprise": Path("characters/KogMaw/spells/KogMawIcathianSurprise.ron"),
+          "KogMawIcathianSurpriseReady": Path("characters/KogMaw/spells/KogMawIcathianSurpriseReady.ron"),
+          "KogMawLivingArtillery": Path("characters/KogMaw/spells/KogMawLivingArtillery.ron"),
+          "KogMawQ": Path("characters/KogMaw/spells/KogMawQ.ron"),
+          "KogMawQMis": Path("characters/KogMaw/spells/KogMawQMis.ron"),
+          "KogMawVoidOoze": Path("characters/KogMaw/spells/KogMawVoidOoze.ron"),
+          "KogMawVoidOozeMissile": Path("characters/KogMaw/spells/KogMawVoidOozeMissile.ron"),
+        }),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

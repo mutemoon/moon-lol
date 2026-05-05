@@ -121,6 +121,18 @@
         "lol_core::movement::Movement": (
           speed: 330.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "AlistarBasicAttack": Path("characters/Alistar/spells/AlistarBasicAttack.ron"),
+          "AlistarBasicAttack2": Path("characters/Alistar/spells/AlistarBasicAttack2.ron"),
+          "AlistarCritAttack": Path("characters/Alistar/spells/AlistarCritAttack.ron"),
+          "AlistarE": Path("characters/Alistar/spells/AlistarE.ron"),
+          "AlistarPassive": Path("characters/Alistar/spells/AlistarPassive.ron"),
+          "AlistarPassiveHeal": Path("characters/Alistar/spells/AlistarPassiveHeal.ron"),
+          "AlistarPassiveHealMis": Path("characters/Alistar/spells/AlistarPassiveHealMis.ron"),
+          "FerociousHowl": Path("characters/Alistar/spells/FerociousHowl.ron"),
+          "Headbutt": Path("characters/Alistar/spells/Headbutt.ron"),
+          "Pulverize": Path("characters/Alistar/spells/Pulverize.ron"),
+        }),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

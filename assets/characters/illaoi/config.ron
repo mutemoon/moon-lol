@@ -121,6 +121,23 @@
         "lol_core::movement::Movement": (
           speed: 350.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "IllaoiBasicAttack": Path("characters/Illaoi/spells/IllaoiBasicAttack.ron"),
+          "IllaoiBasicAttack2": Path("characters/Illaoi/spells/IllaoiBasicAttack2.ron"),
+          "IllaoiBasicAttack3": Path("characters/Illaoi/spells/IllaoiBasicAttack3.ron"),
+          "IllaoiBasicAttackTurret": Path("characters/Illaoi/spells/IllaoiBasicAttackTurret.ron"),
+          "IllaoiCritAttack": Path("characters/Illaoi/spells/IllaoiCritAttack.ron"),
+          "IllaoiDummySpell": Path("characters/Illaoi/spells/IllaoiDummySpell.ron"),
+          "IllaoiE": Path("characters/Illaoi/spells/IllaoiE.ron"),
+          "IllaoiEMis": Path("characters/Illaoi/spells/IllaoiEMis.ron"),
+          "IllaoiESpiritMissile": Path("characters/Illaoi/spells/IllaoiESpiritMissile.ron"),
+          "IllaoiPassive": Path("characters/Illaoi/spells/IllaoiPassive.ron"),
+          "IllaoiQ": Path("characters/Illaoi/spells/IllaoiQ.ron"),
+          "IllaoiR": Path("characters/Illaoi/spells/IllaoiR.ron"),
+          "IllaoiTentacleHeal": Path("characters/Illaoi/spells/IllaoiTentacleHeal.ron"),
+          "IllaoiW": Path("characters/Illaoi/spells/IllaoiW.ron"),
+          "IllaoiWAttack": Path("characters/Illaoi/spells/IllaoiWAttack.ron"),
+        }),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

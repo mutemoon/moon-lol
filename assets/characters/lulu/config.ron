@@ -121,6 +121,21 @@
         "lol_core::movement::Movement": (
           speed: 330.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "LuluBasicAttack": Path("characters/Lulu/spells/LuluBasicAttack.ron"),
+          "LuluBasicAttack2": Path("characters/Lulu/spells/LuluBasicAttack2.ron"),
+          "LuluCritAttack": Path("characters/Lulu/spells/LuluCritAttack.ron"),
+          "LuluE": Path("characters/Lulu/spells/LuluE.ron"),
+          "LuluPassive": Path("characters/Lulu/spells/LuluPassive.ron"),
+          "LuluPassiveMissile": Path("characters/Lulu/spells/LuluPassiveMissile.ron"),
+          "LuluPassiveMissileController": Path("characters/Lulu/spells/LuluPassiveMissileController.ron"),
+          "LuluQ": Path("characters/Lulu/spells/LuluQ.ron"),
+          "LuluQMissile": Path("characters/Lulu/spells/LuluQMissile.ron"),
+          "LuluQMissileTwo": Path("characters/Lulu/spells/LuluQMissileTwo.ron"),
+          "LuluR": Path("characters/Lulu/spells/LuluR.ron"),
+          "LuluW": Path("characters/Lulu/spells/LuluW.ron"),
+          "LuluWTwo": Path("characters/Lulu/spells/LuluWTwo.ron"),
+        }),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

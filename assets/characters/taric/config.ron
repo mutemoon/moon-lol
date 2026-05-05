@@ -121,6 +121,20 @@
         "lol_core::movement::Movement": (
           speed: 340.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "TaricBasicAttack": Path("characters/Taric/spells/TaricBasicAttack.ron"),
+          "TaricBasicAttack2": Path("characters/Taric/spells/TaricBasicAttack2.ron"),
+          "TaricBasicAttack3": Path("characters/Taric/spells/TaricBasicAttack3.ron"),
+          "TaricCritAttack": Path("characters/Taric/spells/TaricCritAttack.ron"),
+          "TaricE": Path("characters/Taric/spells/TaricE.ron"),
+          "TaricPassive": Path("characters/Taric/spells/TaricPassive.ron"),
+          "TaricPassiveAttack": Path("characters/Taric/spells/TaricPassiveAttack.ron"),
+          "TaricPassiveAttack2": Path("characters/Taric/spells/TaricPassiveAttack2.ron"),
+          "TaricQ": Path("characters/Taric/spells/TaricQ.ron"),
+          "TaricR": Path("characters/Taric/spells/TaricR.ron"),
+          "TaricW": Path("characters/Taric/spells/TaricW.ron"),
+          "TaricWAllyBuffMissile": Path("characters/Taric/spells/TaricWAllyBuffMissile.ron"),
+        }),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

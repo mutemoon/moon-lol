@@ -121,6 +121,22 @@
         "lol_core::movement::Movement": (
           speed: 330.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "QuinnBasicAttack": Path("characters/Quinn/spells/QuinnBasicAttack.ron"),
+          "QuinnCritAttack": Path("characters/Quinn/spells/QuinnCritAttack.ron"),
+          "QuinnE": Path("characters/Quinn/spells/QuinnE.ron"),
+          "QuinnESecond": Path("characters/Quinn/spells/QuinnESecond.ron"),
+          "QuinnPassive": Path("characters/Quinn/spells/QuinnPassive.ron"),
+          "QuinnQ": Path("characters/Quinn/spells/QuinnQ.ron"),
+          "QuinnR": Path("characters/Quinn/spells/QuinnR.ron"),
+          "QuinnRChannel": Path("characters/Quinn/spells/QuinnRChannel.ron"),
+          "QuinnRFinale": Path("characters/Quinn/spells/QuinnRFinale.ron"),
+          "QuinnRReturnToQuinn": Path("characters/Quinn/spells/QuinnRReturnToQuinn.ron"),
+          "QuinnW": Path("characters/Quinn/spells/QuinnW.ron"),
+          "QuinnWEnhanced": Path("characters/Quinn/spells/QuinnWEnhanced.ron"),
+          "QuinnWInFlight": Path("characters/Quinn/spells/QuinnWInFlight.ron"),
+          "QuinnWTimingMissile": Path("characters/Quinn/spells/QuinnWTimingMissile.ron"),
+        }),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

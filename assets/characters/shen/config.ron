@@ -121,6 +121,22 @@
         "lol_core::movement::Movement": (
           speed: 340.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "ShenBasicAttack": Path("characters/Shen/spells/ShenBasicAttack.ron"),
+          "ShenBasicAttack2": Path("characters/Shen/spells/ShenBasicAttack2.ron"),
+          "ShenCritAttack": Path("characters/Shen/spells/ShenCritAttack.ron"),
+          "ShenE": Path("characters/Shen/spells/ShenE.ron"),
+          "ShenPassive": Path("characters/Shen/spells/ShenPassive.ron"),
+          "ShenQ": Path("characters/Shen/spells/ShenQ.ron"),
+          "ShenQAttack": Path("characters/Shen/spells/ShenQAttack.ron"),
+          "ShenQMissile": Path("characters/Shen/spells/ShenQMissile.ron"),
+          "ShenR": Path("characters/Shen/spells/ShenR.ron"),
+          "ShenSpiritShadowQuestLoss": Path("characters/Shen/spells/ShenSpiritShadowQuestLoss.ron"),
+          "ShenSpiritShadowQuestReward": Path("characters/Shen/spells/ShenSpiritShadowQuestReward.ron"),
+          "ShenSpiritShadowQuestStart": Path("characters/Shen/spells/ShenSpiritShadowQuestStart.ron"),
+          "ShenW": Path("characters/Shen/spells/ShenW.ron"),
+          "ShenWBuff": Path("characters/Shen/spells/ShenWBuff.ron"),
+        }),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

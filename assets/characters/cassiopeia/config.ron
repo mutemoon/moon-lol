@@ -121,6 +121,20 @@
         "lol_core::movement::Movement": (
           speed: 335.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "CassiopeiaBasicAttack": Path("characters/Cassiopeia/spells/CassiopeiaBasicAttack.ron"),
+          "CassiopeiaBasicAttack2": Path("characters/Cassiopeia/spells/CassiopeiaBasicAttack2.ron"),
+          "CassiopeiaCritAttack": Path("characters/Cassiopeia/spells/CassiopeiaCritAttack.ron"),
+          "CassiopeiaE": Path("characters/Cassiopeia/spells/CassiopeiaE.ron"),
+          "CassiopeiaPassive": Path("characters/Cassiopeia/spells/CassiopeiaPassive.ron"),
+          "CassiopeiaPassive_Feats": Path("characters/Cassiopeia/spells/CassiopeiaPassive_Feats.ron"),
+          "CassiopeiaQ": Path("characters/Cassiopeia/spells/CassiopeiaQ.ron"),
+          "CassiopeiaR": Path("characters/Cassiopeia/spells/CassiopeiaR.ron"),
+          "CassiopeiaRStun": Path("characters/Cassiopeia/spells/CassiopeiaRStun.ron"),
+          "CassiopeiaW": Path("characters/Cassiopeia/spells/CassiopeiaW.ron"),
+          "CassiopeiaWMissile": Path("characters/Cassiopeia/spells/CassiopeiaWMissile.ron"),
+          "CassiopeiaWSlow": Path("characters/Cassiopeia/spells/CassiopeiaWSlow.ron"),
+        }),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

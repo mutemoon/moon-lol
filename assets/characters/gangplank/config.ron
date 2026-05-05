@@ -121,6 +121,20 @@
         "lol_core::movement::Movement": (
           speed: 345.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "GangplankBasicAttack": Path("characters/Gangplank/spells/GangplankBasicAttack.ron"),
+          "GangplankCritAttack": Path("characters/Gangplank/spells/GangplankCritAttack.ron"),
+          "GangplankE": Path("characters/Gangplank/spells/GangplankE.ron"),
+          "GangplankEBarrelFuseMissile": Path("characters/Gangplank/spells/GangplankEBarrelFuseMissile.ron"),
+          "GangplankESpellPassive": Path("characters/Gangplank/spells/GangplankESpellPassive.ron"),
+          "GangplankPassive": Path("characters/Gangplank/spells/GangplankPassive.ron"),
+          "GangplankQProceed": Path("characters/Gangplank/spells/GangplankQProceed.ron"),
+          "GangplankQProceedCrit": Path("characters/Gangplank/spells/GangplankQProceedCrit.ron"),
+          "GangplankQWrapper": Path("characters/Gangplank/spells/GangplankQWrapper.ron"),
+          "GangplankR": Path("characters/Gangplank/spells/GangplankR.ron"),
+          "GangplankRWithRaiseMorale": Path("characters/Gangplank/spells/GangplankRWithRaiseMorale.ron"),
+          "GangplankW": Path("characters/Gangplank/spells/GangplankW.ron"),
+        }),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

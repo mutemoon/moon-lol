@@ -121,6 +121,22 @@
         "lol_core::movement::Movement": (
           speed: 350.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "NasusBasicAttack": Path("characters/Nasus/spells/NasusBasicAttack.ron"),
+          "NasusBasicAttack2": Path("characters/Nasus/spells/NasusBasicAttack2.ron"),
+          "NasusCritAttack": Path("characters/Nasus/spells/NasusCritAttack.ron"),
+          "NasusE": Path("characters/Nasus/spells/NasusE.ron"),
+          "NasusPassive": Path("characters/Nasus/spells/NasusPassive.ron"),
+          "NasusQ": Path("characters/Nasus/spells/NasusQ.ron"),
+          "NasusQAttack": Path("characters/Nasus/spells/NasusQAttack.ron"),
+          "NasusQStacks": Path("characters/Nasus/spells/NasusQStacks.ron"),
+          "NasusR": Path("characters/Nasus/spells/NasusR.ron"),
+          "NasusSiblingRivalryActive": Path("characters/Nasus/spells/NasusSiblingRivalryActive.ron"),
+          "NasusSiblingRivalryDefeat": Path("characters/Nasus/spells/NasusSiblingRivalryDefeat.ron"),
+          "NasusSiblingRivalryVictory": Path("characters/Nasus/spells/NasusSiblingRivalryVictory.ron"),
+          "NasusW": Path("characters/Nasus/spells/NasusW.ron"),
+          "SiphoningStrike": Path("characters/Nasus/spells/SiphoningStrike.ron"),
+        }),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

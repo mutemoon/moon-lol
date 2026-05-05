@@ -121,6 +121,22 @@
         "lol_core::movement::Movement": (
           speed: 325.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "CaitlynBasicAttack": Path("characters/Caitlyn/spells/CaitlynBasicAttack.ron"),
+          "CaitlynCritAttack": Path("characters/Caitlyn/spells/CaitlynCritAttack.ron"),
+          "CaitlynE": Path("characters/Caitlyn/spells/CaitlynE.ron"),
+          "CaitlynEMissile": Path("characters/Caitlyn/spells/CaitlynEMissile.ron"),
+          "CaitlynPassive": Path("characters/Caitlyn/spells/CaitlynPassive.ron"),
+          "CaitlynPassiveMissile": Path("characters/Caitlyn/spells/CaitlynPassiveMissile.ron"),
+          "CaitlynQ": Path("characters/Caitlyn/spells/CaitlynQ.ron"),
+          "CaitlynQ2": Path("characters/Caitlyn/spells/CaitlynQ2.ron"),
+          "CaitlynR": Path("characters/Caitlyn/spells/CaitlynR.ron"),
+          "CaitlynRMissile": Path("characters/Caitlyn/spells/CaitlynRMissile.ron"),
+          "CaitlynW": Path("characters/Caitlyn/spells/CaitlynW.ron"),
+          "CaitlynWSnare": Path("characters/Caitlyn/spells/CaitlynWSnare.ron"),
+          "Crepe_JinxVsCaitlyn_CaitlynReward": Path("characters/Caitlyn/spells/Crepe_JinxVsCaitlyn_CaitlynReward.ron"),
+          "Crepe_JinxVsCaitlyn_JinxLose": Path("characters/Caitlyn/spells/Crepe_JinxVsCaitlyn_JinxLose.ron"),
+        }),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

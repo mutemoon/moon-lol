@@ -121,6 +121,21 @@
         "lol_core::movement::Movement": (
           speed: 330.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "GragasBasicAttack": Path("characters/Gragas/spells/GragasBasicAttack.ron"),
+          "GragasBasicAttack2": Path("characters/Gragas/spells/GragasBasicAttack2.ron"),
+          "GragasCritAttack": Path("characters/Gragas/spells/GragasCritAttack.ron"),
+          "GragasE": Path("characters/Gragas/spells/GragasE.ron"),
+          "GragasPassive": Path("characters/Gragas/spells/GragasPassive.ron"),
+          "GragasQ": Path("characters/Gragas/spells/GragasQ.ron"),
+          "GragasQMissile": Path("characters/Gragas/spells/GragasQMissile.ron"),
+          "GragasQSpellPassive": Path("characters/Gragas/spells/GragasQSpellPassive.ron"),
+          "GragasQToggle": Path("characters/Gragas/spells/GragasQToggle.ron"),
+          "GragasR": Path("characters/Gragas/spells/GragasR.ron"),
+          "GragasRBoom": Path("characters/Gragas/spells/GragasRBoom.ron"),
+          "GragasW": Path("characters/Gragas/spells/GragasW.ron"),
+          "GragasWAttack": Path("characters/Gragas/spells/GragasWAttack.ron"),
+        }),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

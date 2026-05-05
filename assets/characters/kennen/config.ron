@@ -121,6 +121,22 @@
         "lol_core::movement::Movement": (
           speed: 335.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "KennenBasicAttack": Path("characters/Kennen/spells/KennenBasicAttack.ron"),
+          "KennenBasicAttack2": Path("characters/Kennen/spells/KennenBasicAttack2.ron"),
+          "KennenBringTheLight": Path("characters/Kennen/spells/KennenBringTheLight.ron"),
+          "KennenCritAttack": Path("characters/Kennen/spells/KennenCritAttack.ron"),
+          "KennenDoubleStrikeProc": Path("characters/Kennen/spells/KennenDoubleStrikeProc.ron"),
+          "KennenLRCancel": Path("characters/Kennen/spells/KennenLRCancel.ron"),
+          "KennenLightningRush": Path("characters/Kennen/spells/KennenLightningRush.ron"),
+          "KennenLightningRushDamage": Path("characters/Kennen/spells/KennenLightningRushDamage.ron"),
+          "KennenMegaProc": Path("characters/Kennen/spells/KennenMegaProc.ron"),
+          "KennenMoSDiminish": Path("characters/Kennen/spells/KennenMoSDiminish.ron"),
+          "KennenPassive": Path("characters/Kennen/spells/KennenPassive.ron"),
+          "KennenShurikenHurl1": Path("characters/Kennen/spells/KennenShurikenHurl1.ron"),
+          "KennenShurikenHurlMissile1": Path("characters/Kennen/spells/KennenShurikenHurlMissile1.ron"),
+          "KennenShurikenStorm": Path("characters/Kennen/spells/KennenShurikenStorm.ron"),
+        }),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

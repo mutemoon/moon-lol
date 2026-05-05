@@ -121,6 +121,22 @@
         "lol_core::movement::Movement": (
           speed: 345.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "PoppyBasicAttack": Path("characters/Poppy/spells/PoppyBasicAttack.ron"),
+          "PoppyCritAttack": Path("characters/Poppy/spells/PoppyCritAttack.ron"),
+          "PoppyE": Path("characters/Poppy/spells/PoppyE.ron"),
+          "PoppyPassive": Path("characters/Poppy/spells/PoppyPassive.ron"),
+          "PoppyPassiveAttack": Path("characters/Poppy/spells/PoppyPassiveAttack.ron"),
+          "PoppyPassiveBounce": Path("characters/Poppy/spells/PoppyPassiveBounce.ron"),
+          "PoppyPassiveKillBounce": Path("characters/Poppy/spells/PoppyPassiveKillBounce.ron"),
+          "PoppyQ": Path("characters/Poppy/spells/PoppyQ.ron"),
+          "PoppyQSpell": Path("characters/Poppy/spells/PoppyQSpell.ron"),
+          "PoppyR": Path("characters/Poppy/spells/PoppyR.ron"),
+          "PoppyRMissile": Path("characters/Poppy/spells/PoppyRMissile.ron"),
+          "PoppyRSpell": Path("characters/Poppy/spells/PoppyRSpell.ron"),
+          "PoppyRSpellInstant": Path("characters/Poppy/spells/PoppyRSpellInstant.ron"),
+          "PoppyW": Path("characters/Poppy/spells/PoppyW.ron"),
+        }),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

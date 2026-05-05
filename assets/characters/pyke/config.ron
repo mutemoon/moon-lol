@@ -121,6 +121,23 @@
         "lol_core::movement::Movement": (
           speed: 330.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "PykeBasicAttack": Path("characters/Pyke/spells/PykeBasicAttack.ron"),
+          "PykeBasicAttack2": Path("characters/Pyke/spells/PykeBasicAttack2.ron"),
+          "PykeCritAttack": Path("characters/Pyke/spells/PykeCritAttack.ron"),
+          "PykeE": Path("characters/Pyke/spells/PykeE.ron"),
+          "PykeEMissile": Path("characters/Pyke/spells/PykeEMissile.ron"),
+          "PykePHealOFF": Path("characters/Pyke/spells/PykePHealOFF.ron"),
+          "PykePHealON": Path("characters/Pyke/spells/PykePHealON.ron"),
+          "PykePassive": Path("characters/Pyke/spells/PykePassive.ron"),
+          "PykeQ": Path("characters/Pyke/spells/PykeQ.ron"),
+          "PykeQMelee": Path("characters/Pyke/spells/PykeQMelee.ron"),
+          "PykeQRange": Path("characters/Pyke/spells/PykeQRange.ron"),
+          "PykeR": Path("characters/Pyke/spells/PykeR.ron"),
+          "PykeRSpellPassive": Path("characters/Pyke/spells/PykeRSpellPassive.ron"),
+          "PykeRTrail": Path("characters/Pyke/spells/PykeRTrail.ron"),
+          "PykeW": Path("characters/Pyke/spells/PykeW.ron"),
+        }),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,
