@@ -131,7 +131,7 @@ fn cast_taliyah_r(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    }
+}
 
 fn on_taliyah_damage_hit(
     trigger: On<EventDamageCreate>,

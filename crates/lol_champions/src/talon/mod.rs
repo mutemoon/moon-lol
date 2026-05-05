@@ -111,7 +111,7 @@ fn cast_talon_e(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    }
+}
 
 fn cast_talon_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     commands.trigger(CommandAnimationPlay {

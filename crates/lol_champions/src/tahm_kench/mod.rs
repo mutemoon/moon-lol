@@ -120,7 +120,7 @@ fn cast_tahm_kench_r(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    }
+}
 
 fn on_tahm_kench_damage_hit(
     trigger: On<EventDamageCreate>,

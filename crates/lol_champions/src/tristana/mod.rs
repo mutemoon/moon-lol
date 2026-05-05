@@ -62,7 +62,7 @@ fn cast_tristana_q(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    }
+}
 
 fn cast_tristana_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     commands.trigger(CommandAnimationPlay {

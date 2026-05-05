@@ -85,7 +85,6 @@ pub fn cast_riven_q(
             RIVEN_Q_RECAST_WINDOW,
         ));
     }
-
 }
 
 /// 锐雯 Q3 位移结束后触发击退

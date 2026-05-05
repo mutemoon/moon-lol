@@ -62,7 +62,7 @@ fn cast_twitch_q(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    }
+}
 
 fn cast_twitch_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     commands.trigger(CommandAnimationPlay {
@@ -115,7 +115,7 @@ fn cast_twitch_r(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    }
+}
 
 fn on_twitch_damage_hit(
     trigger: On<EventDamageCreate>,

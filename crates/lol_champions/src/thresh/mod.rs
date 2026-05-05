@@ -87,7 +87,7 @@ fn cast_thresh_w(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    }
+}
 
 fn cast_thresh_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     commands.trigger(CommandAnimationPlay {

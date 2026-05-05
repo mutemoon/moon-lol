@@ -194,6 +194,5 @@ pub fn on_action_damage(
                 }
             }
         }
-
     }
 }

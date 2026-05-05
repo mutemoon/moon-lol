@@ -109,7 +109,7 @@ fn cast_twisted_fate_e(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    }
+}
 
 fn cast_twisted_fate_r(commands: &mut Commands, entity: Entity) {
     commands.trigger(CommandAnimationPlay {
@@ -118,7 +118,7 @@ fn cast_twisted_fate_r(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    }
+}
 
 fn on_twisted_fate_damage_hit(
     trigger: On<EventDamageCreate>,

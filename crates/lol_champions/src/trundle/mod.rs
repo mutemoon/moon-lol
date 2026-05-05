@@ -62,7 +62,7 @@ fn cast_trundle_q(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    }
+}
 
 fn cast_trundle_w(commands: &mut Commands, entity: Entity) {
     commands.trigger(CommandAnimationPlay {
@@ -71,7 +71,7 @@ fn cast_trundle_w(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    }
+}
 
 fn cast_trundle_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     commands.trigger(CommandAnimationPlay {

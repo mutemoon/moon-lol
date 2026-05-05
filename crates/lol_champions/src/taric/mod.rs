@@ -62,7 +62,7 @@ fn cast_taric_q(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    }
+}
 
 fn cast_taric_w(commands: &mut Commands, entity: Entity) {
     commands.trigger(CommandAnimationPlay {
@@ -71,7 +71,7 @@ fn cast_taric_w(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    }
+}
 
 fn cast_taric_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     commands.trigger(CommandAnimationPlay {
@@ -105,7 +105,7 @@ fn cast_taric_r(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    }
+}
 
 fn on_taric_damage_hit(
     trigger: On<EventDamageCreate>,

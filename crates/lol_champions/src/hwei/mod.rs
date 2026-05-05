@@ -1,8 +1,7 @@
 use bevy::prelude::*;
-use league_utils::hash_bin;
 use lol_base::render_cmd::CommandAnimationPlay;
 use lol_core::entities::champion::Champion;
-use lol_core::skill::{EventSkillCast, Skill, SkillSlot};
+use lol_core::skill::{EventSkillCast, Skill};
 
 #[derive(Default)]
 pub struct PluginHwei;

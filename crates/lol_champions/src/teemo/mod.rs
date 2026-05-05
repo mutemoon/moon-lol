@@ -86,7 +86,7 @@ fn cast_teemo_w(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    }
+}
 
 fn cast_teemo_e(commands: &mut Commands, entity: Entity) {
     commands.trigger(CommandAnimationPlay {
@@ -95,7 +95,7 @@ fn cast_teemo_e(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    }
+}
 
 fn cast_teemo_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     commands.trigger(CommandAnimationPlay {

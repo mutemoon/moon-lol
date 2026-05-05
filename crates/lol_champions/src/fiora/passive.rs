@@ -2,7 +2,6 @@ use std::collections::HashMap;
 
 use bevy::ecs::relationship::Relationship;
 use bevy::prelude::*;
-use lol_core::attack::EntityCommandsTrigger;
 use lol_core::base::buff::BuffOf;
 use lol_core::base::direction::{Direction, is_in_direction};
 use lol_core::damage::{CommandDamageCreate, DamageType, EventDamageCreate};

@@ -47,7 +47,7 @@ pub fn fixed_update(
     time: Res<Time<Fixed>>,
 ) {
     for (entity, buff_of, mut buff) in q_buff_fiora_r.iter_mut() {
-        let target_entity = buff_of.get();
+        let _target_entity = buff_of.get();
 
         if !buff.is_active() {
             buff.active_timer.tick(time.delta());
@@ -118,7 +118,7 @@ pub fn on_r_damage_create(
         }
     });
 
-    let Some(direction) = hit_direction else {
+    let Some(_direction) = hit_direction else {
         return;
     };
 
