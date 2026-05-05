@@ -8,7 +8,6 @@ pub mod error;
 pub mod loaders;
 pub mod map;
 pub mod navigation;
-pub mod particle;
 pub mod resource;
 pub mod shader;
 pub mod skin;
