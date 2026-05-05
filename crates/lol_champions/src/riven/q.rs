@@ -1,11 +1,9 @@
 use bevy::prelude::*;
 use league_utils::hash_bin;
 use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
-use lol_base::spell::Spell;
-use lol_core::action::damage::{TargetDamage, TargetFilter};
-use lol_core::action::dash::{ActionDash, DashDamage, DashMoveType};
+use lol_core::action::dash::{ActionDash, DashMoveType};
 use lol_core::base::buff::BuffOf;
-use lol_core::damage::DamageType;
+use lol_core::missile::CommandAttachedFieldCreate;
 use lol_core::movement::EventMovementEnd;
 use lol_core::skill::SkillRecastWindow;
 use lol_core::team::Team;
@@ -16,6 +14,10 @@ use crate::riven::passive::BuffRivenPassive;
 const RIVEN_Q_RECAST_WINDOW: f32 = 4.0;
 const RIVEN_Q3_KNOCKBACK_DISTANCE: f32 = 75.0;
 const RIVEN_Q3_KNOCKBACK_RADIUS: f32 = 250.0;
+const RIVEN_Q_FIELD_DURATION: f32 = 0.5;
+
+/// Q 段对应的半径：Q1 < Q2 < Q3
+const RIVEN_Q_RADII: [f32; 3] = [175.0, 215.0, 250.0];
 
 pub struct PluginRivenQ;
 
@@ -31,14 +33,26 @@ pub fn cast_riven_q(
     skill_entity: Entity,
     point: Vec2,
     recast: Option<&SkillRecastWindow>,
-    skill_spell: Handle<Spell>,
+    damage_amount: f32,
 ) {
     let stage = recast.map(|window| window.stage).unwrap_or(1);
 
-    let (animation_hash, particle_hash) = match stage {
-        1 => ("Spell1A".to_string(), hash_bin("Riven_Q_01_Detonate")),
-        2 => ("Spell1B".to_string(), hash_bin("Riven_Q_02_Detonate")),
-        _ => ("Spell1C".to_string(), hash_bin("Riven_Q_03_Detonate")),
+    let (animation_hash, particle_hash, radius) = match stage {
+        1 => (
+            "Spell1A".to_string(),
+            hash_bin("Riven_Q_01_Detonate"),
+            RIVEN_Q_RADII[0],
+        ),
+        2 => (
+            "Spell1B".to_string(),
+            hash_bin("Riven_Q_02_Detonate"),
+            RIVEN_Q_RADII[1],
+        ),
+        _ => (
+            "Spell1C".to_string(),
+            hash_bin("Riven_Q_03_Detonate"),
+            RIVEN_Q_RADII[2],
+        ),
     };
 
     commands.trigger(CommandAnimationPlay {
@@ -48,34 +62,25 @@ pub fn cast_riven_q(
         duration: None,
     });
 
-    let dash_damage = if stage >= 3 {
-        // Q3 击退伤害
-        Some(DashDamage {
-            radius_end: 250.0,
-            damage: TargetDamage {
-                filter: TargetFilter::All,
-                amount: "first_slash_damage".to_string(),
-                damage_type: DamageType::Physical,
-            },
-        })
-    } else {
-        Some(DashDamage {
-            radius_end: 250.0,
-            damage: TargetDamage {
-                filter: TargetFilter::All,
-                amount: "first_slash_damage".to_string(),
-                damage_type: DamageType::Physical,
-            },
-        })
-    };
-
+    // 纯位移（伤害由 AttachedField 处理）
     commands.trigger(ActionDash {
         entity,
         point,
-        skill: skill_spell,
+        skill: Handle::default(),
         move_type: DashMoveType::Fixed(250.0),
-        damage: dash_damage,
+        damage: None,
         speed: 1000.0,
+    });
+
+    // 生成附着在锐雯身上的通用伤害场，随锐雯移动
+    // 半径从小变大，匹配位移过程中的碰撞区增长
+    commands.trigger(CommandAttachedFieldCreate {
+        entity,
+        radius,
+        damage: damage_amount,
+        duration: RIVEN_Q_FIELD_DURATION,
+        grow_from: Some(65.0),
+        grow_duration: Some(0.25), // dash 250unit @ 1000speed = 0.25s
     });
 
     commands

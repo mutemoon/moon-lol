@@ -17,6 +17,7 @@ mod tests;
 mod w_tests;
 
 use bevy::prelude::*;
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::attack::Attack;
 use lol_core::base::buff::BuffOf;
@@ -42,6 +43,8 @@ impl Plugin for PluginRiven {
         app.add_observer(q::on_riven_dash_end);
         app.add_systems(FixedUpdate, r::update_riven_buffs);
         app.add_systems(FixedUpdate, w::update_riven_stun);
+        app.add_systems(FixedUpdate, buffs::update_shield_visuals);
+        app.add_systems(FixedUpdate, buffs::cleanup_shield_visuals);
     }
 }
 
@@ -95,16 +98,27 @@ fn on_riven_skill_cast(
     let damage_value = q_damage.get(entity).map(|d| d.0).unwrap_or(64.0);
 
     match skill.slot {
-        SkillSlot::Q => q::cast_riven_q(
-            &mut commands,
-            entity,
-            trigger.skill_entity,
-            trigger.point,
-            recast,
-            skill.spell.clone(),
-        ),
+        SkillSlot::Q => {
+            let q_damage = get_skill_value(spell_obj, "first_slash_damage", skill.level, |stat| {
+                if stat == 2 { damage_value } else { 0.0 }
+            })
+            .unwrap_or(0.0);
+            q::cast_riven_q(
+                &mut commands,
+                entity,
+                trigger.skill_entity,
+                trigger.point,
+                recast,
+                q_damage,
+            );
+        }
         SkillSlot::W => {
-            w::cast_riven_w(&mut commands, entity, skill.spell.clone());
+            let w_damage = get_skill_value(spell_obj, "total_damage", skill.level, |stat| {
+                if stat == 2 { damage_value } else { 0.0 }
+            })
+            .unwrap_or(150.0);
+
+            w::cast_riven_w(&mut commands, entity, w_damage);
 
             // 对范围内敌人施加眩晕
             w::apply_w_stun_to_targets(&mut commands, entity, &q_transform, &q_team, &q_targets);
@@ -180,6 +194,13 @@ fn on_riven_skill_cast(
                 commands
                     .entity(trigger.skill_entity)
                     .insert(SkillRecastWindow::new(1, 1, RIVEN_R_DURATION));
+
+                commands.trigger(CommandAnimationPlay {
+                    entity,
+                    hash: "Spell4A".to_string(),
+                    repeat: false,
+                    duration: None,
+                });
             }
         }
         _ => {}

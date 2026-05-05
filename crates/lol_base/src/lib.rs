@@ -2,6 +2,8 @@ pub mod animation;
 pub mod barrack;
 pub mod character;
 pub mod character_record;
+pub mod debug_area;
+pub mod debug_missile;
 pub mod debug_sphere;
 pub mod game;
 pub mod grid;

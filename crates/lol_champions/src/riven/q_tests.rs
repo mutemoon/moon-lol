@@ -2,9 +2,7 @@
 
 use bevy::math::{Vec2, Vec3};
 
-use super::tests::{build_headless, build_render, riven_config};
-use crate::riven::Riven;
-use crate::test_utils::*;
+use super::tests::{build_headless, build_render};
 
 #[test]
 fn riven_q_cycles_through_three_real_stages() {
@@ -111,5 +109,80 @@ fn riven_q3_knocks_back_enemies() {
         "Q3 位移结束后 RivenQ3Pending 应被移除"
     );
 
+    h.finish();
+}
+
+#[test]
+fn riven_q_field_damages_enemy_once() {
+    let mut h = build_headless("riven_q_field_damage");
+    let enemy = h.add_enemy(Vec3::new(150.0, 0.0, 0.0));
+
+    let hp_before = h.health(enemy);
+    h.cast_skill(0, Vec2::new(100.0, 0.0)).advance(0.1);
+
+    // 第一次检查：敌人应已受到伤害
+    let hp_first = h.health(enemy);
+    assert!(
+        hp_first < hp_before,
+        "Q1 的 RivenQField 应对附近敌人造成伤害 ({} < {})",
+        hp_first,
+        hp_before
+    );
+
+    // 持续前进：同一字段不应重复伤害同一敌人
+    h.advance(0.3);
+    assert_eq!(
+        h.health(enemy),
+        hp_first,
+        "RivenQField 不应重复伤害同一敌人"
+    );
+
+    // 等待字段过期并验证字段已销毁
+    h.advance(1.0);
+    let field_exists = {
+        let world = h.app.world_mut();
+        let mut q = world.query::<&lol_core::missile::AttachedField>();
+        q.iter(world).next().is_some()
+    };
+    assert!(!field_exists, "AttachedField 应在计时结束后销毁");
+
+    h.finish();
+}
+
+#[test]
+fn riven_q_field_spawns_per_stage() {
+    let mut h = build_headless("riven_q_field_stages");
+    let enemy = h.add_enemy(Vec3::new(200.0, 0.0, 0.0));
+    let q_entity = h.skill_entity(0);
+
+    // Q1 释放
+    h.cast_skill(0, Vec2::new(140.0, 0.0)).advance(0.1);
+    let hp_after_q1 = h.health(enemy);
+    assert!(hp_after_q1 < 6000.0, "Q1 field should deal damage");
+
+    // 字段应在 0.5 秒后销毁
+    h.advance(1.0);
+    let field_removed = {
+        let world = h.app.world_mut();
+        let mut q = world.query::<&lol_core::missile::AttachedField>();
+        q.iter(world).next().is_none()
+    };
+    assert!(field_removed, "Q1 field should be despawned before Q2");
+
+    // Q2 释放
+    assert_eq!(h.recast_window_stage(q_entity), Some(2), "Q1 后应为第2阶段");
+    h.cast_skill(0, Vec2::new(140.0, 0.0)).advance(0.1);
+    let hp_after_q2 = h.health(enemy);
+    assert!(hp_after_q2 < hp_after_q1, "Q2 field should deal damage");
+
+    // 字段销毁
+    h.advance(1.0);
+
+    // Q3 释放
+    h.cast_skill(0, Vec2::new(140.0, 0.0)).advance(0.1);
+    let hp_after_q3 = h.health(enemy);
+    assert!(hp_after_q3 < hp_after_q2, "Q3 field should deal damage");
+
+    h.advance(1.0);
     h.finish();
 }

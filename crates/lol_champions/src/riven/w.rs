@@ -1,12 +1,8 @@
 use bevy::prelude::*;
 use league_utils::hash_bin;
 use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
-use lol_base::spell::Spell;
-use lol_core::action::damage::{
-    ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
-};
-use lol_core::damage::DamageType;
 use lol_core::life::Health;
+use lol_core::missile::CommandAttachedFieldCreate;
 use lol_core::movement::MovementBlock;
 use lol_core::team::Team;
 
@@ -14,6 +10,7 @@ use crate::riven::buffs::BuffStun;
 
 const RIVEN_W_STUN_DURATION: f32 = 0.75;
 const RIVEN_W_STUN_RADIUS: f32 = 300.0;
+const RIVEN_W_FIELD_DURATION: f32 = 0.25;
 
 pub struct PluginRivenW;
 
@@ -21,29 +18,26 @@ impl Plugin for PluginRivenW {
     fn build(&self, _app: &mut App) {}
 }
 
-pub fn cast_riven_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
+pub fn cast_riven_w(commands: &mut Commands, entity: Entity, damage_amount: f32) {
     commands.trigger(CommandSkinParticleSpawn {
         entity,
         hash: hash_bin("Riven_W_Cast"),
     });
     commands.trigger(CommandAnimationPlay {
         entity,
-        hash: "spell2".to_string(),
+        hash: "Spell2".to_string(),
         repeat: false,
         duration: None,
     });
-    commands.trigger(ActionDamage {
+
+    // 使用通用附着伤害场替代 ActionDamage
+    commands.trigger(CommandAttachedFieldCreate {
         entity,
-        skill: skill_spell,
-        effects: vec![ActionDamageEffect {
-            shape: DamageShape::Circle { radius: 300.0 },
-            damage_list: vec![TargetDamage {
-                filter: TargetFilter::All,
-                amount: "total_damage".to_string(),
-                damage_type: DamageType::Physical,
-            }],
-            particle: None,
-        }],
+        radius: RIVEN_W_STUN_RADIUS,
+        damage: damage_amount,
+        duration: RIVEN_W_FIELD_DURATION,
+        grow_from: None,
+        grow_duration: None,
     });
 }
 

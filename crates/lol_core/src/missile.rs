@@ -2,6 +2,8 @@ use bevy::animation::AnimationTargetId;
 use bevy::color::palettes::tailwind::RED_500;
 use bevy::prelude::*;
 use league_utils::hash_joint;
+use lol_base::debug_area::DebugArea;
+use lol_base::debug_missile::DebugMissile;
 use lol_base::debug_sphere::DebugSphere;
 use lol_base::movement::{MissileBehavior, MovementType};
 use lol_base::render_cmd::CommandSkinParticleSpawn;
@@ -20,9 +22,11 @@ impl Plugin for PluginMissile {
     fn build(&self, app: &mut App) {
         app.add_observer(on_command_missile_create);
         app.add_observer(on_event_movement_end);
+        app.add_observer(on_command_attached_field_create);
 
         app.add_systems(FixedUpdate, fixed_update);
         app.add_systems(FixedUpdate, linear_missile_collision);
+        app.add_systems(FixedUpdate, update_attached_fields);
     }
 }
 
@@ -66,6 +70,37 @@ pub struct CommandMissileCreate {
     pub speed: Option<f32>,
     /// 覆盖 missile effect particle（None 则使用 spell data 中的 missileEffectKey）
     pub particle_hash: Option<u32>,
+}
+
+/// 附着在施法者身上的范围伤害场组件
+///
+/// 作为施法者的子实体存在，跟随施法者移动。
+/// 在持续时间内每帧检测范围内的敌人，每个敌人只造成一次伤害。
+/// 支持半径从 radius_start 到 radius_end 随时间增长（grow_duration 控制增长时长）。
+#[derive(Component, Debug)]
+pub struct AttachedField {
+    pub radius: f32,
+    pub radius_start: f32,
+    pub radius_end: f32,
+    /// 半径从 start 增长到 end 所需的秒数（超过后保持 radius_end）
+    pub grow_duration: f32,
+    pub damage_amount: f32,
+    pub hit_enemies: Vec<Entity>,
+    pub timer: Timer,
+}
+
+/// 创建附着在实体上的伤害场
+#[derive(EntityEvent, Debug)]
+pub struct CommandAttachedFieldCreate {
+    pub entity: Entity,
+    /// 最终半径
+    pub radius: f32,
+    pub damage: f32,
+    pub duration: f32,
+    /// 半径起始值，Some(start) 表示从 start 增长到 radius，None 表示固定半径
+    pub grow_from: Option<f32>,
+    /// 半径增长持续时长（秒），不填则随 field duration 增长
+    pub grow_duration: Option<f32>,
 }
 
 fn fixed_update(
@@ -127,6 +162,8 @@ fn linear_missile_collision(
         let step = (missile.speed * dt).min(distance);
         let direction = diff / distance;
         transform.translation = current + direction * step;
+        // 旋转矩形条面朝移动方向（Cuboid 沿 Z 轴伸长）
+        transform.rotation = Quat::from_rotation_arc(Vec3::Z, direction);
 
         let Ok(source_team) = q_source_team.get(state.source) else {
             continue;
@@ -258,9 +295,11 @@ fn on_command_missile_create(
                 hash: particle,
             });
         } else {
-            commands.entity(missile_entity).insert(DebugSphere {
-                color: RED_500.into(),
-                radius: 10.0,
+            // 用矩形条显示导弹的碰撞宽度
+            commands.entity(missile_entity).insert(DebugMissile {
+                width: missile_width.unwrap_or(100.0),
+                length: 100.0,
+                color: Color::srgba(1.0, 0.3, 0.3, 0.6),
             });
         }
 
@@ -362,6 +401,95 @@ fn on_event_movement_end(
             damage_type: DamageType::Physical,
             amount: damage.0,
         });
+    }
+}
+
+fn on_command_attached_field_create(
+    trigger: On<CommandAttachedFieldCreate>,
+    mut commands: Commands,
+) {
+    let entity = trigger.event_target();
+    let radius_end = trigger.radius;
+    let radius_start = trigger.grow_from.unwrap_or(radius_end);
+    let grow_duration = trigger.grow_duration.unwrap_or(trigger.duration);
+    let field = commands
+        .spawn((
+            AttachedField {
+                radius: radius_start,
+                radius_start,
+                radius_end,
+                grow_duration,
+                damage_amount: trigger.damage,
+                hit_enemies: Vec::new(),
+                timer: Timer::from_seconds(trigger.duration, TimerMode::Once),
+            },
+            Transform::default(),
+            DebugArea {
+                color: Color::srgba(0.3, 0.6, 1.0, 0.25),
+            },
+        ))
+        .id();
+    commands.entity(entity).add_child(field);
+}
+
+/// 每帧检查附着伤害场，对范围内的敌人造成伤害（每个敌人只一次）
+/// 同时插值半径（从 radius_start 到 radius_end）并更新可视化圆盘大小
+fn update_attached_fields(
+    mut commands: Commands,
+    mut q_fields: Query<(Entity, &mut AttachedField, &ChildOf, &mut Transform)>,
+    q_parent_transform: Query<&Transform, Without<AttachedField>>,
+    q_enemies: Query<(Entity, &Team, &Transform), Without<AttachedField>>,
+    q_parent_team: Query<&Team, Without<AttachedField>>,
+    time: Res<Time<Fixed>>,
+) {
+    for (field_entity, mut field, child_of, mut transform) in q_fields.iter_mut() {
+        field.timer.tick(time.delta());
+        if field.timer.is_finished() {
+            commands.entity(field_entity).despawn();
+            continue;
+        }
+
+        // 插值半径：在 grow_duration 内从 radius_start 增长到 radius_end
+        // grow_duration 到达后保持最大半径直到 field 销毁
+        let grow_progress = if field.grow_duration > 0.0 {
+            (field.timer.elapsed_secs() / field.grow_duration).clamp(0.0, 1.0)
+        } else {
+            1.0
+        };
+        field.radius = field.radius_start + (field.radius_end - field.radius_start) * grow_progress;
+
+        // 缩放可视化圆盘（DebugArea mesh 是单位圆盘 radius=1，用 scale 控制可见大小）
+        transform.scale = Vec3::new(field.radius, 1.0, field.radius);
+
+        let parent_entity = child_of.0;
+        let Ok(parent_transform) = q_parent_transform.get(parent_entity) else {
+            continue;
+        };
+        let field_pos = parent_transform.translation;
+
+        let Ok(team) = q_parent_team.get(parent_entity) else {
+            continue;
+        };
+
+        for (enemy, enemy_team, enemy_transform) in q_enemies.iter() {
+            if *enemy_team == *team {
+                continue;
+            }
+            if field.hit_enemies.contains(&enemy) {
+                continue;
+            }
+
+            let dist = enemy_transform.translation.distance(field_pos);
+            if dist <= field.radius {
+                field.hit_enemies.push(enemy);
+                commands.trigger(CommandDamageCreate {
+                    entity: enemy,
+                    source: parent_entity,
+                    damage_type: DamageType::Physical,
+                    amount: field.damage_amount,
+                });
+            }
+        }
     }
 }
 
