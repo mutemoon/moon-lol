@@ -7,7 +7,7 @@ use lol_champions::fiora::PluginFiora;
 use lol_core::PluginCore;
 use lol_core::entities::minion::PluginMinion;
 use lol_core::entities::turret::PluginTurret;
-use lol_core::game::PluginGame;
+use lol_core::game::GameScenes;
 use lol_core::map::PluginMap;
 use lol_render::PluginRender;
 use lol_render::test_render::{
@@ -32,6 +32,7 @@ fn main() {
         }),
         keep_frame_images: false,
     });
+    app.insert_resource(GameScenes::new(vec!["games/fiora_render.ron".to_owned()]));
     app.insert_resource(TimeUpdateStrategy::ManualDuration(Duration::from_millis(
         16,
     )));
@@ -46,9 +47,6 @@ fn main() {
     app.add_plugins((
         PluginCore
             .build()
-            .set(PluginGame {
-                scenes: vec!["games/fiora_render.ron".to_owned()],
-            })
             .disable::<PluginMap>()
             .disable::<PluginMinion>()
             .disable::<PluginTurret>(),

@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use clap::Parser;
 use lol_champions::PluginChampions;
 use lol_core::PluginCore;
-use lol_core::game::PluginGame;
+use lol_core::game::GameScenes;
 use lol_core::log::create_log_plugin;
 use lol_debug::PluginDebugPanel;
 use lol_render::PluginRender;
@@ -35,9 +35,7 @@ fn main() {
                 }),
                 ..default()
             }),
-            PluginCore.build().set(PluginGame {
-                scenes: vec!["games/classic_fiora.ron".to_owned()],
-            }),
+            PluginCore,
             PluginRender,
             PluginChampions,
             PluginDebugPanel {
@@ -45,5 +43,8 @@ fn main() {
                 log_receiver: log_rx,
             },
         ))
+        .insert_resource(GameScenes::new(vec![
+            "games/classic_fiora.ron".to_owned()
+        ]))
         .run();
 }

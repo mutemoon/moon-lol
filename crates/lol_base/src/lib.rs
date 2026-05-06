@@ -7,6 +7,7 @@ pub mod debug_missile;
 pub mod debug_sphere;
 pub mod game;
 pub mod grid;
+pub mod item;
 pub mod map;
 pub mod mesh;
 pub mod movement;

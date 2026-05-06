@@ -172,6 +172,12 @@ pub struct AbilityResource {
 
 将所有生成的实体序列化为 RON 格式保存。
 
+### Phase 8: 提取装备信息
+
+`extract_phase_8_items(loader: &LeagueLoader)`
+
+从 `data/items/items.bin` 提取所有装备数据，转换为 `ConfigItem` 并导出到 `assets/items/{id}.ron`。
+
 ## 一键提取
 
 ```rust
@@ -184,7 +190,7 @@ fn main() {
 }
 ```
 
-`extract_all` 函数自动完成所有 7 个阶段的提取工作。
+`extract_all` 函数自动完成所有 8 个阶段的提取工作。
 
 ## 独立阶段调用
 
@@ -204,6 +210,7 @@ use league_to_lol::extract::{
 let loader = extract_phase_1_create_loader(game_path);
 extract_phase_2_champions(&loader);
 // ... 调用其他阶段
+extract_phase_8_items(&loader);
 ```
 
 ## 日志输出
@@ -219,6 +226,8 @@ extract_phase_2_champions(&loader);
 [6/7] Phase 6: 从地图中提取 26 个角色记录...
 [SUMMARY] 地图角色记录提取完成: 成功 26 个
 [7/7] Phase 7: 序列化 World 到文件...
+[8/7] Phase 8: 提取装备信息...
+[INFO] 发现 254 个装备
 ```
 
 ## 输出文件
@@ -233,6 +242,7 @@ extract_phase_2_champions(&loader);
 | `assets/maps/{map_name}/mapgeo.glb`     | GLTF 格式的地图几何                                                                                 |
 | `assets/maps/{map_name}/scene.ron`      | 包含所有地图对象的序列化场景                                                                        |
 | `assets/maps/{map_name}/barracks/{id}.ron` | 兵营配置                                                                                    |
+| `assets/items/{id}.ron`                   | 装备配置                                                                                    |
 
 ### Character 场景文件结构
 

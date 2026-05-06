@@ -4,7 +4,7 @@
         4294967185: (
             components: {
                 "bevy_transform::components::transform::Transform": (
-                    translation: (7300.0, 0.0, 7300.0),
+                    translation: (0.0, 0.0, 0.0),
                     rotation: (0.0, 0.0, 0.0, 1.0),
                     scale: (1.0, 1.0, 1.0),
                 ),
@@ -23,7 +23,7 @@
         4294967186: (
             components: {
                 "bevy_transform::components::transform::Transform": (
-                    translation: (7400.0, 0.0, 7400.0),
+                    translation: (100.0, 0.0, 100.0),
                     rotation: (0.0, 0.0, 0.0, 1.0),
                     scale: (1.0, 1.0, 1.0),
                 ),

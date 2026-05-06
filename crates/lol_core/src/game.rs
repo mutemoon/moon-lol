@@ -1,14 +1,12 @@
 use bevy::prelude::*;
 
 #[derive(Default)]
-pub struct PluginGame {
-    pub scenes: Vec<String>,
-}
+pub struct PluginGame;
 
 impl Plugin for PluginGame {
     fn build(&self, app: &mut App) {
         app.init_resource::<FixedFrameCount>();
-        app.insert_resource(GameScenes(self.scenes.clone()));
+        app.init_resource::<GameScenes>();
 
         app.add_systems(Startup, startup_load_game_scenes);
         app.add_systems(FixedLast, fixed_update_frame);
@@ -18,8 +16,14 @@ impl Plugin for PluginGame {
 #[derive(Resource, Default)]
 pub struct FixedFrameCount(pub u32);
 
-#[derive(Resource)]
+#[derive(Resource, Default)]
 pub struct GameScenes(pub Vec<String>);
+
+impl GameScenes {
+    pub fn new(scenes: Vec<String>) -> Self {
+        Self(scenes)
+    }
+}
 
 fn startup_load_game_scenes(
     mut commands: Commands,

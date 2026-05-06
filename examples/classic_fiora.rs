@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use lol_champions::PluginChampions;
 use lol_core::PluginCore;
-use lol_core::game::PluginGame;
+use lol_core::game::GameScenes;
 use lol_render::PluginRender;
 
 fn main() {
@@ -17,10 +17,9 @@ fn main() {
                 ..default()
             }),
             PluginChampions,
-            PluginCore.build().set(PluginGame {
-                scenes: vec!["games/classic_fiora.ron".to_owned()],
-            }),
+            PluginCore,
             PluginRender,
         ))
+        .insert_resource(GameScenes::new(vec!["games/classic_fiora.ron".to_owned()]))
         .run();
 }

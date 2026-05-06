@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use lol_base::grid::ConfigNavigationGrid;
 use lol_champions::PluginChampions;
 use lol_core::PluginCore;
-use lol_core::game::PluginGame;
+use lol_core::game::GameScenes;
 use lol_core::navigation::grid::ResourceGrid;
 use lol_render::PluginRender;
 use lol_render::camera::CameraState;
@@ -20,12 +20,11 @@ fn main() {
                 }),
                 ..default()
             }),
-            PluginCore.build().set(PluginGame {
-                scenes: vec!["games/attack.ron".to_owned()],
-            }),
+            PluginCore,
             PluginRender,
             PluginChampions,
         ))
+        .insert_resource(GameScenes::new(vec!["games/attack.ron".to_owned()]))
         .add_systems(Update, on_key_space)
         .add_systems(Update, on_key_m)
         .run();

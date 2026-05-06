@@ -30,6 +30,7 @@ pub fn update_buff_cast_block(
         if cast_block.timer.is_finished() {
             commands.entity(entity).remove::<BuffCastBlock>();
             commands.entity(entity).remove::<MovementBlock>();
+            commands.entity(entity).remove::<CastBlock>();
         }
     }
 }

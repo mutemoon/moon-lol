@@ -4,7 +4,7 @@ use bevy::prelude::*;
 use bevy::winit::{UpdateMode, WinitSettings};
 use lol_champions::riven::PluginRiven;
 use lol_core::PluginCore;
-use lol_core::game::PluginGame;
+use lol_core::game::GameScenes;
 use lol_core::log::create_log_plugin;
 use lol_render::PluginRender;
 
@@ -22,12 +22,11 @@ fn main() {
                 }),
                 ..default()
             }),
-            PluginCore.set(PluginGame {
-                scenes: vec!["games/riven.ron".to_owned()],
-            }),
+            PluginCore,
             PluginRender,
             PluginRiven,
         ))
+        .insert_resource(GameScenes::new(vec!["games/riven.ron".to_owned()]))
         .insert_resource(WinitSettings {
             focused_mode: UpdateMode::Reactive {
                 wait: Duration::MAX,           // 不超时，只靠你触发

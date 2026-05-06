@@ -5,10 +5,8 @@ use lol_core::buffs::cc_debuffs::DebuffStun;
 use lol_core::buffs::common_buffs::BuffCastBlock;
 use lol_core::movement::MovementBlock;
 
-use super::tests::{build_headless, riven_config};
-use crate::riven::Riven;
+use super::tests::build_headless;
 use crate::riven::w::RIVEN_W_CAST_BLOCK_DURATION;
-use crate::test_utils::*;
 
 const EPSILON: f32 = 1e-3;
 
@@ -93,7 +91,6 @@ fn riven_w_stuns_enemies_in_range() {
 #[test]
 fn riven_w_casting_blocks_skill_and_movement() {
     let mut h = build_headless("riven_w_cast_block");
-    let _enemy = h.add_enemy(Vec3::new(150.0, 0.0, 0.0));
 
     // 施放 W
     h.cast_skill(1, Vec2::new(0.0, 0.0));
@@ -105,7 +102,10 @@ fn riven_w_casting_blocks_skill_and_movement() {
         "W 施法期间应有 BuffCastBlock"
     );
     let q_entity = h.skill_entity(0);
-    assert!(h.recast_window_stage(q_entity).is_none(), "Q 初始阶段应为 None");
+    assert!(
+        h.recast_window_stage(q_entity).is_none(),
+        "Q 初始阶段应为 None"
+    );
 
     // 尝试在阻塞期间施放 Q，应该被阻止
     h.cast_skill(0, Vec2::new(150.0, 0.0));
@@ -123,6 +123,15 @@ fn riven_w_casting_blocks_skill_and_movement() {
     assert!(
         h.app.world().get::<BuffCastBlock>(h.champion).is_none(),
         "W 施法阻塞结束后 BuffCastBlock 应移除"
+    );
+
+    // 此时施放 Q 应该成功
+    h.cast_skill(0, Vec2::new(150.0, 0.0));
+    h.advance(0.1);
+    assert_eq!(
+        h.recast_window_stage(q_entity),
+        Some(2),
+        "阻塞结束后施放 Q 应进入第 2 阶段"
     );
 
     h.finish();

@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use lol_champions::PluginChampions;
 use lol_core::PluginCore;
-use lol_core::game::PluginGame;
+use lol_core::game::GameScenes;
 use lol_core::log::create_log_plugin;
 use lol_core::navigation::navigation::NavigationDebug;
 use lol_render::PluginRender;
@@ -20,12 +20,11 @@ fn main() {
                 }),
                 ..default()
             }),
-            PluginCore.set(PluginGame {
-                scenes: vec!["games/attack.ron".to_owned()],
-            }),
+            PluginCore,
             PluginRender,
             PluginChampions,
         ))
+        .insert_resource(GameScenes::new(vec!["games/attack.ron".to_owned()]))
         .insert_resource(NavigationDebug)
         .run();
 }

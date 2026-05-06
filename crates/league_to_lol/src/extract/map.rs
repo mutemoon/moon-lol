@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use bevy::math::Vec3Swizzles;
 use bevy::prelude::*;
 use league_core::extract::{
-    BarracksConfig, EnumMap, MapContainer, MapPlaceableContainer, StaticMaterialDef,
+    BarracksConfig, EnumMap, ItemData, MapContainer, MapPlaceableContainer, StaticMaterialDef,
 };
 use league_file::grid::AiMeshNGrid;
 use league_file::mapgeo::LeagueMapGeo;
@@ -23,6 +23,7 @@ use crate::barrack::barracks_config_to_barracks;
 use crate::extract::champion::{
     ChampionRecordData, extract_character_from_record, skin_path_to_skin_bin_path,
 };
+use crate::extract::item::extract_item_data;
 use crate::extract::utils::write_to_file;
 use crate::gltf_export::export_mapgeo_to_gltf;
 use crate::navgrid::load_league_nav_grid;
@@ -37,6 +38,7 @@ pub fn extract_phase_1_create_loader(game_path: &str) -> LeagueLoader {
     println!("[1/7] Phase 1: 扫描 WAD 文件并创建 Loader...");
 
     let wad_files: Vec<&str> = vec![
+        "DATA/FINAL/Global.wad.client",
         "DATA/FINAL/UI.wad.client",
         "DATA/FINAL/UI.zh_CN.wad.client",
         "DATA/FINAL/Maps/Shipping/Map11.wad.client",
@@ -379,6 +381,28 @@ pub fn extract_phase_7_serialize_world(world: &mut World, map_paths: &MapPaths) 
     write_to_file(&map_paths.scene_ron_export(), &serialized_scene);
 }
 
+/// Phase 8: 提取装备信息
+pub fn extract_phase_8_items(loader: &LeagueLoader) {
+    println!("[8/7] Phase 8: 提取装备信息...");
+    let Ok(items_prop) = loader.get_prop_group_by_paths(vec!["items"]) else {
+        println!("[WARN] 找不到 items");
+        return;
+    };
+
+    let items: Vec<ItemData> = items_prop.get_all_by_class::<ItemData>();
+    println!("[INFO] 发现 {} 个装备", items.len());
+
+    for item_data in items {
+        let config_item = extract_item_data(&item_data);
+        let ron_content =
+            ron::ser::to_string_pretty(&config_item, ron::ser::PrettyConfig::default()).unwrap();
+        write_to_file(
+            &format!("assets/items/{}.ron", item_data.item_id),
+            ron_content,
+        );
+    }
+}
+
 /// 一键提取所有数据（英雄 + 地图）
 pub fn extract_all(game_path: &str, hashes_dir: &str) {
     let loader = extract_phase_1_create_loader(game_path);
@@ -399,6 +423,7 @@ pub fn extract_all(game_path: &str, hashes_dir: &str) {
     app.init_asset::<DynamicWorld>();
     app.init_asset::<lol_base::barrack::ConfigBarracks>();
     app.init_asset::<lol_base::grid::ConfigNavigationGrid>();
+    app.init_asset::<lol_base::item::ConfigItem>();
     app.init_asset_loader::<lol_core::loaders::barrack::ConfigBarracksLoader>();
     app.finish();
     app.cleanup();
@@ -422,4 +447,7 @@ pub fn extract_all(game_path: &str, hashes_dir: &str) {
 
     // Phase 7: 序列化 World
     extract_phase_7_serialize_world(world, &map_paths);
+
+    // Phase 8: 提取装备
+    extract_phase_8_items(&loader);
 }

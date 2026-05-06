@@ -16,7 +16,7 @@ const RIVEN_Q3_KNOCKBACK_RADIUS: f32 = 250.0;
 const RIVEN_Q_FIELD_DURATION: f32 = 0.5;
 
 /// Q 段对应的半径：Q1 < Q2 < Q3
-const RIVEN_Q_RADII: [f32; 3] = [175.0, 215.0, 250.0];
+const RIVEN_Q_RADII: [f32; 3] = [100.0, 100.0, 100.0];
 
 pub struct PluginRivenQ;
 

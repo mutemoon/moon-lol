@@ -6,7 +6,7 @@ use bevy::time::TimeUpdateStrategy;
 use lol_base::map::MapPaths;
 use lol_champions::riven::PluginRiven;
 use lol_core::PluginCore;
-use lol_core::game::PluginGame;
+use lol_core::game::GameScenes;
 use lol_render::PluginRender;
 use lol_render::test_render::{
     PluginSkillTestRender, SkillTestRenderConfig, SkillTestVideoFormat, SkillTestVideoOutput,
@@ -33,6 +33,7 @@ fn main() {
     app.insert_resource(TimeUpdateStrategy::ManualDuration(Duration::from_millis(
         16,
     )));
+    app.insert_resource(GameScenes::new(vec!["games/riven_render.ron".to_owned()]));
     app.insert_resource(MapPaths::new("test"));
     app.add_plugins(DefaultPlugins.set(WindowPlugin {
         primary_window: Some(Window {
@@ -43,9 +44,7 @@ fn main() {
     }));
     app.add_plugins(PluginSkillTestRender);
     app.add_plugins((
-        PluginCore.set(PluginGame {
-            scenes: vec!["games/riven_render.ron".to_owned()],
-        }),
+        PluginCore,
         PluginRender,
         PluginRiven,
     ));
