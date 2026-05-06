@@ -12,6 +12,7 @@ pub enum SkillCastFailureReason {
     MissingAbilityResource,
     InsufficientAbilityResource,
     CoolingDown,
+    Blocked,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -32,6 +33,13 @@ pub struct SkillCastRecord {
 
 #[derive(Resource, Default, Debug)]
 pub struct SkillCastLog(pub Vec<SkillCastRecord>);
+
+impl SkillCastLog {
+    pub fn push(&mut self, record: SkillCastRecord) {
+        bevy::log::info!("{:?}", record);
+        self.0.push(record);
+    }
+}
 
 #[derive(EntityEvent)]
 pub struct CommandSkillStart {

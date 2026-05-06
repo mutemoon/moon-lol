@@ -1,7 +1,7 @@
 use bevy::ecs::event::EntityEvent;
-use bevy::log::{debug, info};
+use bevy::log::debug;
 use bevy::prelude::{
-    Assets, Commands, Entity, Fixed, On, Query, Res, ResMut, Time, Timer, TimerMode, warn,
+    Assets, Commands, Entity, Fixed, On, Query, Res, ResMut, Time, Timer, TimerMode, With,
 };
 use lol_base::spell::Spell;
 
@@ -13,89 +13,55 @@ use super::events::{
 use super::{CoolDown, SkillPoints, SkillRecastWindow, Skills};
 use crate::base::ability_resource::AbilityResource;
 use crate::base::level::{EventLevelUp, Level};
+use crate::movement::CastBlock;
 use crate::skill::Skill;
-
-fn push_skill_log(
-    log: &mut ResMut<SkillCastLog>,
-    caster: Entity,
-    skill_entity: Option<Entity>,
-    index: usize,
-    slot: Option<super::SkillSlot>,
-    point: bevy::prelude::Vec2,
-    result: SkillCastResult,
-) {
-    info!(
-        "{:?}",
-        SkillCastRecord {
-            caster,
-            skill_entity,
-            index,
-            slot,
-            point,
-            result,
-        }
-    );
-    log.0.push(SkillCastRecord {
-        caster,
-        skill_entity,
-        index,
-        slot,
-        point,
-        result,
-    });
-}
 
 pub fn on_skill_cast(
     trigger: On<CommandSkillStart>,
     mut commands: Commands,
     skills: Query<&Skills>,
+    q_cast_block: Query<(), With<CastBlock>>,
     res_assets_spell_object: Res<Assets<Spell>>,
     mut q_skill: Query<(&Skill, &mut CoolDown, Option<&SkillRecastWindow>)>,
     mut q_ability_resource: Query<&mut AbilityResource>,
     mut log: ResMut<SkillCastLog>,
 ) {
     let entity = trigger.event_target();
+    let mut record = SkillCastRecord {
+        caster: entity,
+        skill_entity: None,
+        index: trigger.index,
+        slot: None,
+        point: trigger.point,
+        result: SkillCastResult::Started,
+    };
+
     let Ok(skills) = skills.get(entity) else {
-        push_skill_log(
-            &mut log,
-            entity,
-            None,
-            trigger.index,
-            None,
-            trigger.point,
-            SkillCastResult::Failed(SkillCastFailureReason::MissingSkills),
-        );
+        record.result = SkillCastResult::Failed(SkillCastFailureReason::MissingSkills);
+        log.push(record);
         return;
     };
-    let Some(&skill_entity) = skills.get(trigger.index) else {
-        push_skill_log(
-            &mut log,
-            entity,
-            None,
-            trigger.index,
-            None,
-            trigger.point,
-            SkillCastResult::Failed(SkillCastFailureReason::InvalidSkillIndex),
-        );
+
+    // 检查是否处于施法阻塞状态
+    if q_cast_block.get(entity).is_ok() {
+        record.result = SkillCastResult::Failed(SkillCastFailureReason::Blocked);
+        log.push(record);
+        return;
+    }
+
+    let Some(&skill_entity_id) = skills.get(trigger.index) else {
+        record.result = SkillCastResult::Failed(SkillCastFailureReason::InvalidSkillIndex);
+        log.push(record);
         return;
     };
-    let Ok((skill, mut cooldown_state, recast_window)) = q_skill.get_mut(skill_entity) else {
-        warn!(
-            "skill_entity {:?} not found or missing Skill component",
-            skill_entity
-        );
-        commands.entity(skill_entity).log_components();
-        push_skill_log(
-            &mut log,
-            entity,
-            Some(skill_entity),
-            trigger.index,
-            None,
-            trigger.point,
-            SkillCastResult::Failed(SkillCastFailureReason::MissingSkillEntity),
-        );
+    record.skill_entity = Some(skill_entity_id);
+
+    let Ok((skill, mut cooldown_state, recast_window)) = q_skill.get_mut(skill_entity_id) else {
+        record.result = SkillCastResult::Failed(SkillCastFailureReason::MissingSkillEntity);
+        log.push(record);
         return;
     };
+    record.slot = Some(skill.slot);
 
     // Skip cooldown check if there's an active recast window (e.g., Riven Q stages)
     let can_cast_despite_cooldown = recast_window
@@ -105,63 +71,28 @@ pub fn on_skill_cast(
     if !can_cast_despite_cooldown {
         if let Some(ref timer) = cooldown_state.timer {
             if !timer.is_finished() {
-                debug!(
-                    "{} 技能 {} 冷却中，剩余 {:.2}s",
-                    entity,
-                    trigger.index,
-                    timer.remaining_secs()
-                );
-                push_skill_log(
-                    &mut log,
-                    entity,
-                    Some(skill_entity),
-                    trigger.index,
-                    Some(skill.slot),
-                    trigger.point,
-                    SkillCastResult::Failed(SkillCastFailureReason::CoolingDown),
-                );
+                record.result = SkillCastResult::Failed(SkillCastFailureReason::CoolingDown);
+                log.push(record);
                 return;
             }
         }
     }
 
     let Some(spell_object) = res_assets_spell_object.get(&skill.spell) else {
-        push_skill_log(
-            &mut log,
-            entity,
-            Some(skill_entity),
-            trigger.index,
-            Some(skill.slot),
-            trigger.point,
-            SkillCastResult::Failed(SkillCastFailureReason::MissingSpellObject),
-        );
+        record.result = SkillCastResult::Failed(SkillCastFailureReason::MissingSpellObject);
+        log.push(record);
         return;
     };
 
     if skill.level == 0 {
-        debug!("{} 技能 {} 未学习，无法释放", entity, trigger.index);
-        push_skill_log(
-            &mut log,
-            entity,
-            Some(skill_entity),
-            trigger.index,
-            Some(skill.slot),
-            trigger.point,
-            SkillCastResult::Failed(SkillCastFailureReason::NotLearned),
-        );
+        record.result = SkillCastResult::Failed(SkillCastFailureReason::NotLearned);
+        log.push(record);
         return;
     }
 
     let Ok(mut ability_resource) = q_ability_resource.get_mut(entity) else {
-        push_skill_log(
-            &mut log,
-            entity,
-            Some(skill_entity),
-            trigger.index,
-            Some(skill.slot),
-            trigger.point,
-            SkillCastResult::Failed(SkillCastFailureReason::MissingAbilityResource),
-        );
+        record.result = SkillCastResult::Failed(SkillCastFailureReason::MissingAbilityResource);
+        log.push(record);
         return;
     };
 
@@ -169,47 +100,25 @@ pub fn on_skill_cast(
         let &current_mana = mana.get(skill.level as usize).unwrap();
 
         if ability_resource.value < current_mana {
-            debug!(
-                "{} 技能 {} 蓝量不足，需要 {:.0}，当前 {:.0}",
-                entity, trigger.index, current_mana, ability_resource.value
-            );
-            push_skill_log(
-                &mut log,
-                entity,
-                Some(skill_entity),
-                trigger.index,
-                Some(skill.slot),
-                trigger.point,
-                SkillCastResult::Failed(SkillCastFailureReason::InsufficientAbilityResource),
-            );
+            record.result =
+                SkillCastResult::Failed(SkillCastFailureReason::InsufficientAbilityResource);
+            log.push(record);
             return;
         }
 
         ability_resource.value -= current_mana;
-        debug!(
-            "{} 技能 {} 消耗 {:.0} 蓝量，剩余 {:.0}",
-            entity, trigger.index, current_mana, ability_resource.value
-        );
     }
 
-    push_skill_log(
-        &mut log,
-        entity,
-        Some(skill_entity),
-        trigger.index,
-        Some(skill.slot),
-        trigger.point,
-        SkillCastResult::Started,
-    );
+    record.result = SkillCastResult::Started;
+    log.push(record);
 
     let cast_event = EventSkillCast {
         entity,
-        skill_entity,
+        skill_entity: skill_entity_id,
         index: trigger.index,
         point: trigger.point,
     };
 
-    debug!("{} 技能 {} 进入代码驱动观察者流程", entity, trigger.index);
     commands.trigger(cast_event);
 
     // 通过连招窗口释放的技能不重置冷却（如锐雯 Q 从第一段开始计时）
@@ -218,10 +127,6 @@ pub fn on_skill_cast(
             cooldown_state.duration,
             TimerMode::Once,
         ));
-        debug!(
-            "{} 技能 {} 开始冷却 {}s",
-            entity, trigger.index, cooldown_state.duration
-        );
     }
 }
 

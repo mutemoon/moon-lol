@@ -1,10 +1,13 @@
 #![cfg(test)]
 
 use bevy::math::{Vec2, Vec3};
+use lol_core::buffs::cc_debuffs::DebuffStun;
+use lol_core::buffs::common_buffs::BuffCastBlock;
 use lol_core::movement::MovementBlock;
 
 use super::tests::{build_headless, riven_config};
-use crate::riven::{BuffStun, Riven};
+use crate::riven::Riven;
+use crate::riven::w::RIVEN_W_CAST_BLOCK_DURATION;
 use crate::test_utils::*;
 
 const EPSILON: f32 = 1e-3;
@@ -58,7 +61,7 @@ fn riven_w_stuns_enemies_in_range() {
 
     // 近距离敌人被眩晕
     assert!(
-        h.app.world().get::<BuffStun>(enemy_near).is_some(),
+        h.app.world().get::<DebuffStun>(enemy_near).is_some(),
         "范围内敌人应被 W 眩晕"
     );
     assert!(
@@ -68,19 +71,58 @@ fn riven_w_stuns_enemies_in_range() {
 
     // 远距离敌人不被眩晕
     assert!(
-        h.app.world().get::<BuffStun>(enemy_far).is_none(),
+        h.app.world().get::<DebuffStun>(enemy_far).is_none(),
         "范围外敌人不应被眩晕"
     );
 
     // 等待眩晕过期
     h.advance(0.8);
     assert!(
-        h.app.world().get::<BuffStun>(enemy_near).is_none(),
+        h.app.world().get::<DebuffStun>(enemy_near).is_none(),
         "0.75 秒后眩晕应过期"
     );
     assert!(
         h.app.world().get::<MovementBlock>(enemy_near).is_none(),
         "眩晕过期后 MovementBlock 应移除"
+    );
+
+    h.finish();
+}
+
+/// Tests that W casting blocks other skills and movement for 8 frames (0.2667s)
+#[test]
+fn riven_w_casting_blocks_skill_and_movement() {
+    let mut h = build_headless("riven_w_cast_block");
+    let _enemy = h.add_enemy(Vec3::new(150.0, 0.0, 0.0));
+
+    // 施放 W
+    h.cast_skill(1, Vec2::new(0.0, 0.0));
+    h.advance(0.05); // 推进一点让系统处理事件
+
+    // W 施法期间应有阻塞组件
+    assert!(
+        h.app.world().get::<BuffCastBlock>(h.champion).is_some(),
+        "W 施法期间应有 BuffCastBlock"
+    );
+    let q_entity = h.skill_entity(0);
+    assert!(h.recast_window_stage(q_entity).is_none(), "Q 初始阶段应为 None");
+
+    // 尝试在阻塞期间施放 Q，应该被阻止
+    h.cast_skill(0, Vec2::new(150.0, 0.0));
+    h.advance(0.1);
+
+    // 通过 stage 判断：被阻止的 Q 不应进入下一阶段（即不应创建 RecastWindow）
+    assert!(
+        h.recast_window_stage(q_entity).is_none(),
+        "W 施法期间施放的 Q 不应进入下一阶段"
+    );
+
+    h.advance(RIVEN_W_CAST_BLOCK_DURATION + 0.05);
+
+    // 阻塞结束后应移除
+    assert!(
+        h.app.world().get::<BuffCastBlock>(h.champion).is_none(),
+        "W 施法阻塞结束后 BuffCastBlock 应移除"
     );
 
     h.finish();

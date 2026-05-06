@@ -1,15 +1,17 @@
 use bevy::prelude::*;
 use lol_base::render_cmd::CommandAnimationPlay;
+use lol_core::buffs::cc_debuffs::DebuffStun;
+use lol_core::buffs::common_buffs::BuffCastBlock;
 use lol_core::life::Health;
 use lol_core::missile::CommandAttachedFieldCreate;
 use lol_core::movement::MovementBlock;
 use lol_core::team::Team;
 
-use crate::riven::buffs::BuffStun;
-
 const RIVEN_W_STUN_DURATION: f32 = 0.75;
-const RIVEN_W_STUN_RADIUS: f32 = 300.0;
+const RIVEN_W_STUN_RADIUS: f32 = 100.0;
 const RIVEN_W_FIELD_DURATION: f32 = 0.25;
+/// W 施法期间阻塞持续时间：8帧 at 30fps ≈ 0.2667s
+pub const RIVEN_W_CAST_BLOCK_DURATION: f32 = 8.0 / 30.0;
 
 pub struct PluginRivenW;
 
@@ -34,6 +36,12 @@ pub fn cast_riven_w(commands: &mut Commands, entity: Entity, damage_amount: f32)
         grow_from: None,
         grow_duration: None,
     });
+
+    // W 施法期间添加阻塞：阻止移动和其他技能
+    commands.entity(entity).insert(MovementBlock);
+    commands
+        .entity(entity)
+        .insert(BuffCastBlock::new(RIVEN_W_CAST_BLOCK_DURATION));
 }
 
 pub fn apply_w_stun_to_targets(
@@ -49,26 +57,11 @@ pub fn apply_w_stun_to_targets(
                 continue;
             }
             if target_transform.translation.distance(transform.translation) <= RIVEN_W_STUN_RADIUS {
-                commands.entity(target).insert(BuffStun {
-                    timer: Timer::from_seconds(RIVEN_W_STUN_DURATION, TimerMode::Once),
-                });
+                commands
+                    .entity(target)
+                    .insert(DebuffStun::new(RIVEN_W_STUN_DURATION));
                 commands.entity(target).insert(MovementBlock);
             }
-        }
-    }
-}
-
-/// 更新眩晕计时
-pub fn update_riven_stun(
-    mut commands: Commands,
-    mut q_stun: Query<(Entity, &mut BuffStun)>,
-    time: Res<Time<Fixed>>,
-) {
-    for (entity, mut stun) in q_stun.iter_mut() {
-        stun.timer.tick(time.delta());
-        if stun.timer.is_finished() {
-            commands.entity(entity).remove::<BuffStun>();
-            commands.entity(entity).remove::<MovementBlock>();
         }
     }
 }

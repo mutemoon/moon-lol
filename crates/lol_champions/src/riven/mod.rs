@@ -21,6 +21,8 @@ use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::attack::Attack;
 use lol_core::base::buff::BuffOf;
+use lol_core::buffs::cc_debuffs::{DebuffStun, update_debuff_stun};
+use lol_core::buffs::common_buffs::update_buff_cast_block;
 use lol_core::damage::Damage;
 use lol_core::entities::champion::Champion;
 use lol_core::life::Health;
@@ -29,7 +31,7 @@ use lol_core::skill::{
 };
 use lol_core::team::Team;
 
-use crate::riven::buffs::{BuffRivenR, BuffStun};
+use crate::riven::buffs::BuffRivenR;
 
 const RIVEN_R_DURATION: f32 = 15.0;
 
@@ -42,7 +44,8 @@ impl Plugin for PluginRiven {
         app.add_observer(passive::on_damage_create_trigger_bonus);
         app.add_observer(q::on_riven_dash_end);
         app.add_systems(FixedUpdate, r::update_riven_buffs);
-        app.add_systems(FixedUpdate, w::update_riven_stun);
+        app.add_systems(FixedUpdate, update_debuff_stun);
+        app.add_systems(FixedUpdate, update_buff_cast_block);
         app.add_systems(FixedUpdate, buffs::update_shield_visuals);
         app.add_systems(FixedUpdate, buffs::cleanup_shield_visuals);
     }
@@ -70,7 +73,7 @@ fn on_riven_skill_cast(
     mut q_skill: Query<(&Skill, &mut CoolDown, Option<&SkillRecastWindow>)>,
     mut q_damage: Query<&mut Damage>,
     mut q_attack: Query<&mut Attack>,
-    q_stun: Query<&BuffStun>,
+    q_stun: Query<&DebuffStun>,
     q_targets: Query<(Entity, &Team, &Transform, &Health)>,
     q_team: Query<&Team>,
     res_spells: Res<Assets<Spell>>,
@@ -97,8 +100,10 @@ fn on_riven_skill_cast(
     // 预读取伤害值（后面可能修改）
     let damage_value = q_damage.get(entity).map(|d| d.0).unwrap_or(64.0);
 
-    match skill.slot {
-        SkillSlot::Q => {
+    let stage = recast.map(|w| w.stage).unwrap_or(1);
+
+    match (skill.slot, stage) {
+        (SkillSlot::Q, _) => {
             let q_damage = get_skill_value(spell_obj, "first_slash_damage", skill.level, |stat| {
                 if stat == 2 { damage_value } else { 0.0 }
             })
@@ -112,7 +117,7 @@ fn on_riven_skill_cast(
                 q_damage,
             );
         }
-        SkillSlot::W => {
+        (SkillSlot::W, _) => {
             let w_damage = get_skill_value(spell_obj, "total_damage", skill.level, |stat| {
                 if stat == 2 { damage_value } else { 0.0 }
             })
@@ -123,7 +128,7 @@ fn on_riven_skill_cast(
             // 对范围内敌人施加眩晕
             w::apply_w_stun_to_targets(&mut commands, entity, &q_transform, &q_team, &q_targets);
         }
-        SkillSlot::E => {
+        (SkillSlot::E, _) => {
             let shield_value = get_skill_value(spell_obj, "total_shield", skill.level, |stat| {
                 if stat == 2 { damage_value } else { 0.0 }
             })
@@ -137,71 +142,64 @@ fn on_riven_skill_cast(
                 shield_value,
             );
         }
-        SkillSlot::R => {
-            let is_recast = recast
-                .as_ref()
-                .map(|w| !w.timer.is_finished())
-                .unwrap_or(false);
+        (SkillSlot::R, 2) => {
+            // Wind Slash
+            let missile_handles = [
+                res_asset_server.load("characters/riven/spells/RivenWindslashMissileRight.ron"),
+                res_asset_server.load("characters/riven/spells/RivenWindslashMissileCenter.ron"),
+                res_asset_server.load("characters/riven/spells/RivenWindslashMissileLeft.ron"),
+            ];
+            r::cast_riven_wind_slash(
+                &mut commands,
+                entity,
+                &missile_handles,
+                &q_transform,
+                &q_team,
+                &q_targets,
+                spell_obj,
+                skill.level,
+                damage_value,
+            );
 
-            if is_recast {
-                // Wind Slash
-                let missile_handles = [
-                    res_asset_server.load("characters/riven/spells/RivenWindslashMissileRight.ron"),
-                    res_asset_server
-                        .load("characters/riven/spells/RivenWindslashMissileCenter.ron"),
-                    res_asset_server.load("characters/riven/spells/RivenWindslashMissileLeft.ron"),
-                ];
-                r::cast_riven_wind_slash(
-                    &mut commands,
-                    entity,
-                    &missile_handles,
-                    &q_transform,
-                    &q_team,
-                    &q_targets,
-                    spell_obj,
-                    skill.level,
-                    damage_value,
-                );
+            commands
+                .entity(trigger.skill_entity)
+                .remove::<SkillRecastWindow>();
 
-                commands
-                    .entity(trigger.skill_entity)
-                    .remove::<SkillRecastWindow>();
+            let r_cd = get_r_cooldown(skill.level);
+            cooldown.duration = r_cd;
+            cooldown.timer = Some(Timer::from_seconds(r_cd, TimerMode::Once));
+        }
+        (SkillSlot::R, 1) => {
+            // 初次 R - 获取增伤、开启连招窗口
+            let bonus_ad = damage_value * 0.25;
+            let bonus_range = 75.0;
 
-                let r_cd = get_r_cooldown(skill.level);
-                cooldown.duration = r_cd;
-                cooldown.timer = Some(Timer::from_seconds(r_cd, TimerMode::Once));
-            } else {
-                // 初次 R - 获取增伤、开启连招窗口
-                let bonus_ad = damage_value * 0.25;
-                let bonus_range = 75.0;
-
-                if let Ok(mut dmg) = q_damage.get_mut(entity) {
-                    dmg.0 += bonus_ad;
-                }
-                if let Ok(mut atk) = q_attack.get_mut(entity) {
-                    atk.range += bonus_range;
-                }
-
-                commands.entity(entity).with_related::<BuffOf>(BuffRivenR {
-                    timer: Timer::from_seconds(RIVEN_R_DURATION, TimerMode::Once),
-                });
-
-                // 覆盖冷却为真实 R 冷却，同时添加连招窗口
-                let r_cd = get_r_cooldown(skill.level);
-                cooldown.duration = r_cd;
-                cooldown.timer = Some(Timer::from_seconds(r_cd, TimerMode::Once));
-
-                commands
-                    .entity(trigger.skill_entity)
-                    .insert(SkillRecastWindow::new(1, 1, RIVEN_R_DURATION));
-
-                commands.trigger(CommandAnimationPlay {
-                    entity,
-                    hash: "Spell4A".to_string(),
-                    repeat: false,
-                    duration: None,
-                });
+            if let Ok(mut dmg) = q_damage.get_mut(entity) {
+                dmg.0 += bonus_ad;
             }
+            if let Ok(mut atk) = q_attack.get_mut(entity) {
+                atk.range += bonus_range;
+            }
+
+            commands.entity(entity).with_related::<BuffOf>(BuffRivenR {
+                timer: Timer::from_seconds(RIVEN_R_DURATION, TimerMode::Once),
+            });
+
+            // 覆盖冷却为真实 R 冷却，同时添加连招窗口
+            let r_cd = get_r_cooldown(skill.level);
+            cooldown.duration = r_cd;
+            cooldown.timer = Some(Timer::from_seconds(r_cd, TimerMode::Once));
+
+            commands
+                .entity(trigger.skill_entity)
+                .insert(SkillRecastWindow::new(2, 2, RIVEN_R_DURATION));
+
+            commands.trigger(CommandAnimationPlay {
+                entity,
+                hash: "Spell4A".to_string(),
+                repeat: false,
+                duration: None,
+            });
         }
         _ => {}
     }

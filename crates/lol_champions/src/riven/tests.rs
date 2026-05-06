@@ -4,9 +4,10 @@
 //! Individual skill tests are in their respective *_tests.rs files.
 
 use bevy::math::{Vec2, Vec3};
+use lol_core::buffs::cc_debuffs::DebuffStun;
 use lol_core::movement::MovementBlock;
 
-use crate::riven::{BuffStun, Riven};
+use crate::riven::Riven;
 use crate::test_utils::*;
 
 const EPSILON: f32 = 1e-3;
@@ -42,9 +43,10 @@ fn riven_stun_prevents_skill_cast() {
 
     // 敌人在眩晕中不应该能施放技能……但没有敌人技能系统可以测试
     // 而是通过 Riven 自身模拟：给自己加一个眩晕
-    h.app.world_mut().entity_mut(h.champion).insert(BuffStun {
-        timer: bevy::prelude::Timer::from_seconds(10.0, bevy::prelude::TimerMode::Once),
-    });
+    h.app
+        .world_mut()
+        .entity_mut(h.champion)
+        .insert(DebuffStun::new(10.0));
     h.app
         .world_mut()
         .entity_mut(h.champion)
