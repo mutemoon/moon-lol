@@ -3,11 +3,11 @@
   "tasks": [
     {
       "type": "cargo",
-      "command": "build",
-      "args": ["--example", "classic_fiora", "--package", "moon_lol"],
+      "command": "run",
+      "args": ["--example", "lol"],
       "problemMatcher": ["$rustc"],
       "group": "build",
-      "label": "cargo build classic_fiora"
+      "label": "cargo run lol"
     }
   ]
 }
