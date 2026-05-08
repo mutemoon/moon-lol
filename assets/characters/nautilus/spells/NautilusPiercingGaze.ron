@@ -149,6 +149,9 @@
         coefficient: Some(0.4),
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Nautilus/HUD/Icons2D/Nautilus_Wrath.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

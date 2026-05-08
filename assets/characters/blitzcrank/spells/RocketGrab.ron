@@ -152,6 +152,9 @@
         coefficient: Some(1.0),
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Blitzcrank/HUD/Icons2D/BlitzcrankQ.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

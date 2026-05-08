@@ -47,6 +47,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Tristana/HUD/Icons2D/Tristana_Passive.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

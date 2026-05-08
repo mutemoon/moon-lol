@@ -244,6 +244,9 @@
         coefficient: None,
         hitEffectKey: Some(1503769169),
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Milio/HUD/Icons2D/Milio_Q.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

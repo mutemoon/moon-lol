@@ -123,6 +123,9 @@
         coefficient: Some(0.4),
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Bard/HUD/Icons2D/Bard_E.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

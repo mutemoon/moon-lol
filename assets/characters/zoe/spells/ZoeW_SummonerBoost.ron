@@ -95,6 +95,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Spells/Icons2D/Summoner_boost.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

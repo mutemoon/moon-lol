@@ -48,6 +48,9 @@
         coefficient: None,
         hitEffectKey: Some(3397384669),
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Elise/HUD/Icons2D/EliseSpiderQ.DDS",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

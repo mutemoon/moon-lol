@@ -50,8 +50,13 @@ pub fn try_load_config_skin_characters(
     }
 }
 
-#[derive(Component)]
+#[derive(Component, Reflect, Default)]
+#[reflect(Component)]
 pub struct BoneRoot;
+
+#[derive(Component, Reflect, Default)]
+#[reflect(Component)]
+pub struct SkinReady;
 
 pub fn migrate_animation_graph_handle(
     trigger: On<WorldInstanceReady>,
@@ -76,6 +81,7 @@ pub fn migrate_animation_graph_handle(
                 .insert(BoneRoot)
                 .insert(AnimationConfigOf(root_entity));
             state.current = state.current.clone();
+            commands.entity(root_entity).insert(SkinReady);
         }
     }
 }

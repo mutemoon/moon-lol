@@ -181,6 +181,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Trundle/HUD/Icons2D/Trundle_R.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

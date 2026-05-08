@@ -127,6 +127,9 @@
         coefficient: None,
         hitEffectKey: Some(3707620381),
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Caitlyn/HUD/Icons2D/CaitlynP.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

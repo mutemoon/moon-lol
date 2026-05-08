@@ -122,6 +122,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Jinx/HUD/Icons2D/Jinx_E.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

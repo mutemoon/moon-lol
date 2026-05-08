@@ -48,6 +48,9 @@
         coefficient: Some(0.6),
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Rengar/HUD/Icons2D/Rengar_Q.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

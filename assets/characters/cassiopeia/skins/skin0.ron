@@ -12,6 +12,7 @@
         ),
         "lol_base::character::Skin": (
           scale: 1.7,
+          avatar: "ASSETS/Characters/Cassiopeia/HUD/Cassiopeia_Circle_0.png",
         ),
       },
     ),

@@ -47,6 +47,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/TahmKench/HUD/Icons2D/TahmKenchRWrapper.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

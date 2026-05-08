@@ -180,6 +180,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Yasuo/HUD/Icons2D/Yasuo_W.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

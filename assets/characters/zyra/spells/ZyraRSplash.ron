@@ -104,6 +104,9 @@
         coefficient: Some(0.5),
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Zyra/HUD/Icons2D/ZyraR.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

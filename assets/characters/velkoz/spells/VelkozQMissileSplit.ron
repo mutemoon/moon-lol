@@ -104,6 +104,9 @@
         coefficient: Some(1.2),
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

@@ -7,13 +7,13 @@
           timer: None,
           duration: 12.0,
         ),
+        "lol_core::skill::PassiveSkillOf": (4294967271),
         "lol_core::skill::Skill": (
           spell: Path("characters/Nocturne/spells/NocturneP.ron"),
           level: 1,
           slot: Passive,
           cooldown_mode: AfterCast,
         ),
-        "lol_core::skill::SkillOf": (4294967271),
       },
     ),
     4294967267: (
@@ -133,12 +133,12 @@
           "NocturneUmbraBladesAttack": Path("characters/Nocturne/spells/NocturneUmbraBladesAttack.ron"),
           "NocturneUnspeakableHorror": Path("characters/Nocturne/spells/NocturneUnspeakableHorror.ron"),
         }),
+        "lol_core::skill::PassiveSkill": (4294967266),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,
           4294967268,
           4294967267,
-          4294967266,
         ]),
       },
     ),

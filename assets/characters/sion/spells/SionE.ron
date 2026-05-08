@@ -240,6 +240,10 @@
         coefficient: Some(0.55),
         hitEffectKey: None,
         selectionPriority: Some(2),
+        iconPath: Some([
+            "ASSETS/Characters/Sion/HUD/Icons2D/Sion_E.dds",
+            "ASSETS/Characters/Sion/HUD/Icons2D/Sion_E.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

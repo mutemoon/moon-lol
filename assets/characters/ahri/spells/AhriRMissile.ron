@@ -103,6 +103,9 @@
         coefficient: Some(0.7),
         hitEffectKey: Some(1265547876),
         selectionPriority: Some(1),
+        iconPath: Some([
+            "Annie_Disintegrate.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

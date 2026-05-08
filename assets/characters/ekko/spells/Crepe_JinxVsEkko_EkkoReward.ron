@@ -37,6 +37,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Jinx/HUD/Icons2D/JinxEkko64.HA_CREPE.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

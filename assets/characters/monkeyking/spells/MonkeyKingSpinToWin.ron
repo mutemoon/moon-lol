@@ -182,6 +182,11 @@
         coefficient: Some(1.1),
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/MonkeyKing/HUD/Icons2D/MonkeyKingCyclone.dds",
+            "ASSETS/Characters/MonkeyKing/HUD/Icons2D/MonkeyKingCycloneCancel.dds",
+            "ASSETS/Characters/MonkeyKing/HUD/Icons2D/MonkeyKingCyclone2.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

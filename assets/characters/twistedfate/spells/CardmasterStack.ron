@@ -170,6 +170,10 @@
         coefficient: Some(0.5),
         hitEffectKey: None,
         selectionPriority: Some(2),
+        iconPath: Some([
+            "ASSETS/Characters/TwistedFate/HUD/Icons2D/Cardmaster_RapidToss.dds",
+            "ASSETS/Characters/TwistedFate/HUD/Icons2D/Cardmaster_RapidToss_Charging.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

@@ -139,6 +139,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Anivia/HUD/Icons2D/Anivia_Q.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

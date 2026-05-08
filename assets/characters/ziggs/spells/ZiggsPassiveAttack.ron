@@ -64,6 +64,10 @@
         coefficient: None,
         hitEffectKey: Some(322014688),
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Ziggs/HUD/Icons2D/ZiggsPassiveReady.dds",
+            "ASSETS/Characters/Ziggs/HUD/Icons2D/ZiggsPassiveReady.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

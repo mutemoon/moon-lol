@@ -147,6 +147,10 @@
         coefficient: Some(0.65),
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Kled/HUD/Icons2D/Kled_E1.dds",
+            "ASSETS/Characters/Kled/HUD/Icons2D/Kled_E_Grey.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

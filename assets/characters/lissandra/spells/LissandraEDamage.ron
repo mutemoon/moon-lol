@@ -112,6 +112,9 @@
         coefficient: Some(0.4),
         hitEffectKey: Some(2363801160),
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Spells/Icons2D/Cryophoenix_FrigidOrb.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

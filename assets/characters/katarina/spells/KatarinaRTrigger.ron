@@ -111,6 +111,9 @@
         coefficient: Some(0.4),
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Katarina/HUD/Textures/Katarina_DeathLotus.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

@@ -40,6 +40,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Sejuani/HUD/Icons2D/Sejuani_W.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

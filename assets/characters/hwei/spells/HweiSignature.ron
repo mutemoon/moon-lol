@@ -48,6 +48,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Hwei/HUD/Icons2D/HweiPassive.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

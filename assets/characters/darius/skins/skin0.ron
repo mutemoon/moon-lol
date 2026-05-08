@@ -12,6 +12,7 @@
         ),
         "lol_base::character::Skin": (
           scale: 1.05,
+          avatar: "ASSETS/Characters/Darius/HUD/Darius_Circle_0.png",
         ),
       },
     ),

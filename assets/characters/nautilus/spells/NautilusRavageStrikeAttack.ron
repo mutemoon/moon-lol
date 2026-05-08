@@ -48,6 +48,9 @@
         coefficient: None,
         hitEffectKey: Some(1936063181),
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Nautilus/HUD/Icons2D/Nautilus_StaggeringBlow.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

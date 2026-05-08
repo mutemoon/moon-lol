@@ -221,6 +221,9 @@
         coefficient: Some(0.2),
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Diana/HUD/Icons2D/Diana_W_LunarShower.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

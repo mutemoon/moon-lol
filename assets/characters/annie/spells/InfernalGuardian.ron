@@ -275,6 +275,9 @@
         coefficient: Some(0.65),
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Annie/HUD/Icons2D/Annie_R1.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

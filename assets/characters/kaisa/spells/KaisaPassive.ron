@@ -200,6 +200,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Kaisa/HUD/Icons2D/Kaisa_Passive.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

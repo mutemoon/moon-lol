@@ -246,6 +246,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Akshan/HUD/Icons2D/akshan_e.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

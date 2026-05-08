@@ -127,6 +127,10 @@
         coefficient: Some(1.5),
         hitEffectKey: None,
         selectionPriority: Some(2),
+        iconPath: Some([
+            "ASSETS/Characters/Graves/HUD/Icons2D/GravesR.dds",
+            "",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

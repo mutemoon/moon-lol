@@ -12,6 +12,7 @@
         ),
         "lol_base::character::Skin": (
           scale: 0.925,
+          avatar: "ASSETS/Characters/Swain/HUD/Swain_Circle_0.png",
         ),
       },
     ),

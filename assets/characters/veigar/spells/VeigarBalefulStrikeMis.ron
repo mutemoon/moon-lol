@@ -112,6 +112,9 @@
         coefficient: Some(0.6),
         hitEffectKey: Some(144180815),
         selectionPriority: Some(2),
+        iconPath: Some([
+            "ASSETS/Characters/Veigar/HUD/Icons2D/VeigarBalefulStrike.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

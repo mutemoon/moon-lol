@@ -166,6 +166,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Elise/HUD/Icons2D/EliseHumanQ.DDS",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

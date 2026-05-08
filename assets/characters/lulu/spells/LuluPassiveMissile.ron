@@ -112,6 +112,9 @@
         coefficient: Some(1.2),
         hitEffectKey: Some(3399641297),
         selectionPriority: Some(2),
+        iconPath: Some([
+            "ASSETS/Characters/Lulu/HUD/Icons2D/Lulu_PixFaerieCompanion.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

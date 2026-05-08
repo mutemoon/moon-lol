@@ -107,6 +107,9 @@
         coefficient: Some(0.85),
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Annie/HUD/Icons2D/Annie_W.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

@@ -95,6 +95,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: Some(2),
+        iconPath: Some([
+            "ASSETS/Spells/Icons2D/Summoner_teleport.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

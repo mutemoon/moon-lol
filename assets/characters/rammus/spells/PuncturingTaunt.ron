@@ -109,6 +109,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Rammus/HUD/Icons2D/Armordillo_ScaledPlating.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

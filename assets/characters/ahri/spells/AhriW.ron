@@ -229,6 +229,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Ahri/HUD/Icons2D/Icons_Ahri_W.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

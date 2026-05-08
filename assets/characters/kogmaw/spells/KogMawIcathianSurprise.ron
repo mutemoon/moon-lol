@@ -150,6 +150,9 @@
         coefficient: Some(0.7),
         hitEffectKey: Some(1355469355),
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/KogMaw/HUD/Icons2D/KogMaw_IcathianSurprise.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

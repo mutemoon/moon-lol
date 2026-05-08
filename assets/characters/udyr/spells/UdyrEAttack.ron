@@ -48,6 +48,9 @@
         coefficient: None,
         hitEffectKey: Some(1416560011),
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Udyr/HUD/Icons2D/Udyr_E.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

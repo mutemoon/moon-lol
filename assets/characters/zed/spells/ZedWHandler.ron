@@ -111,6 +111,9 @@
         coefficient: None,
         hitEffectKey: Some(509153862),
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Zed/HUD/Icons2D/shadowninja_W2.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

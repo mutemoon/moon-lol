@@ -149,6 +149,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Olaf/HUD/Icons2D/OlafR.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

@@ -104,6 +104,9 @@
         coefficient: Some(1.0),
         hitEffectKey: Some(4250956352),
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Amumu/HUD/Icons2D/Amumu_Q.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

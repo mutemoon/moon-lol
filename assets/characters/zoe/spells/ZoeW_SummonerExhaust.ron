@@ -103,6 +103,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "Summoner_exhaust_Zoe.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

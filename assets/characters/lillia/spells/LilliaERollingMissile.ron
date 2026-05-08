@@ -57,6 +57,9 @@
         coefficient: Some(0.65),
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/CuteJungler/HUD/Icons2D/MordekaiserQ2.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

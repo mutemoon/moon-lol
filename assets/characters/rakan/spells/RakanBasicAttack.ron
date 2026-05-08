@@ -48,6 +48,7 @@
         coefficient: None,
         hitEffectKey: Some(1207378404),
         selectionPriority: None,
+        iconPath: None,
         useAnimatorFramerate: None,
     )),
 )

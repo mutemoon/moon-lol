@@ -25,6 +25,7 @@ use map::PluginRenderMap;
 use navigation::PluginRenderNavigation;
 use resource::PluginRenderResource;
 use skin::PluginSkin;
+use ui::PluginUI;
 
 #[derive(Default)]
 pub struct PluginRender;
@@ -42,6 +43,6 @@ impl Plugin for PluginRender {
         // app.add_plugins(PluginParticle);
         app.add_plugins(PluginRenderResource);
         app.add_plugins(PluginSkin);
-        // app.add_plugins(PluginUI);
+        app.add_plugins(PluginUI);
     }
 }

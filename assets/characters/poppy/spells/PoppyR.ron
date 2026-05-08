@@ -186,6 +186,10 @@
         coefficient: Some(0.9),
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Poppy/HUD/Icons2D/Poppy_R.dds",
+            "",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

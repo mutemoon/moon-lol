@@ -87,6 +87,9 @@
         coefficient: Some(0.5),
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Azir/HUD/Icons2D/Azir_Q.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

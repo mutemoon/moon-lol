@@ -103,6 +103,10 @@
         coefficient: Some(0.6),
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Lux/HUD/Icons2D/LuxLightStrikeKugel.dds",
+            "",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

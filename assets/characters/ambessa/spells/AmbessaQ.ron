@@ -255,6 +255,10 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Ambessa/HUD/Icons2D/Icon_Ambessa_Q1.dds",
+            "ASSETS/Characters/Ambessa/HUD/Icons2D/Icon_Ambessa_Q2.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

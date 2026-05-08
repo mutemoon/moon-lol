@@ -95,6 +95,9 @@
         coefficient: Some(1.0),
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Spells/Icons2D/Wolfman_Bloodscent.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

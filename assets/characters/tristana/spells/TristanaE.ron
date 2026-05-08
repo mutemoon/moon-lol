@@ -246,6 +246,9 @@
         coefficient: None,
         hitEffectKey: Some(2530834653),
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Tristana/HUD/Icons2D/Tristana_E.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

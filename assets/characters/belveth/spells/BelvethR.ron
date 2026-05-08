@@ -339,6 +339,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Belveth/HUD/Icons2D/BelvethR.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

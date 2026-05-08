@@ -40,6 +40,9 @@
         coefficient: Some(0.5),
         hitEffectKey: None,
         selectionPriority: Some(2),
+        iconPath: Some([
+            "ASSETS/Characters/Kayle/HUD/Icons2D/Kayle_W.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

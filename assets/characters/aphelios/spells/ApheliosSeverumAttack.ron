@@ -48,6 +48,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Aphelios/HUD/Icons2D/Severum_U.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

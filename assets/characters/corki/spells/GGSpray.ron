@@ -87,6 +87,9 @@
         coefficient: Some(0.5),
         hitEffectKey: Some(3978399855),
         selectionPriority: Some(1),
+        iconPath: Some([
+            "Annie_Incinerate.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

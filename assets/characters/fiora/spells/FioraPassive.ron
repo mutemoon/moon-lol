@@ -92,6 +92,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Fiora/HUD/Icons2D/Fiora_P.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

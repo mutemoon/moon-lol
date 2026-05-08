@@ -24,6 +24,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Yuumi/HUD/Icons2D/YuumiQ2.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

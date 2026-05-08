@@ -92,6 +92,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Vladimir/HUD/Icons2D/VladimirP.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

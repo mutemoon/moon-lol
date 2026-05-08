@@ -95,6 +95,9 @@
         coefficient: Some(1.0),
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Quinn/HUD/Spell_Quinn_Square.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

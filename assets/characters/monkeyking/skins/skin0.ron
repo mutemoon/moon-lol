@@ -12,6 +12,7 @@
         ),
         "lol_base::character::Skin": (
           scale: 1.2,
+          avatar: "ASSETS/Characters/MonkeyKing/HUD/MonkeyKing_Circle.png",
         ),
       },
     ),

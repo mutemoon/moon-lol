@@ -132,6 +132,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Smolder/HUD/Icons2D/Icons_Smolder_Passive.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

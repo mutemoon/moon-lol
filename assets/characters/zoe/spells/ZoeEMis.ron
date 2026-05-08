@@ -176,6 +176,9 @@
         coefficient: Some(0.4),
         hitEffectKey: Some(4113901101),
         selectionPriority: Some(2),
+        iconPath: Some([
+            "ASSETS/Characters/Zoe/HUD/Icons2D/Zoe_E.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

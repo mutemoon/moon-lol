@@ -95,6 +95,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "Summoner_haste_Zoe.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

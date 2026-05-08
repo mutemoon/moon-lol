@@ -122,6 +122,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: Some(2),
+        iconPath: Some([
+            "ASSETS/Characters/Nocturne/HUD/Icons2D/Nocturne_Paranoia.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

@@ -12,6 +12,7 @@
         ),
         "lol_base::character::Skin": (
           scale: 1.75,
+          avatar: "ASSETS/Characters/Malphite/HUD/Malphite_Circle.png",
         ),
       },
     ),

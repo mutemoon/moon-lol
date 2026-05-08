@@ -95,6 +95,9 @@
         coefficient: Some(1.0),
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Spells/Icons2D/Wolfman_SeverArmor.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

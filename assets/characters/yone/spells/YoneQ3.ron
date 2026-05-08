@@ -32,6 +32,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Yone/HUD/Icons2D/YoneQ3.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

@@ -138,6 +138,9 @@
         coefficient: None,
         hitEffectKey: Some(1118475972),
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Garen/HUD/Icons2D/Garen_Q.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

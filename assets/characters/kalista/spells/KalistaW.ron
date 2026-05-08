@@ -180,6 +180,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: Some(2),
+        iconPath: Some([
+            "ASSETS/Characters/Kalista/HUD/Icons2D/Kalista_W.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

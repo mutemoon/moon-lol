@@ -122,6 +122,10 @@
         coefficient: Some(1.2),
         hitEffectKey: None,
         selectionPriority: Some(2),
+        iconPath: Some([
+            "ASSETS/Characters/Jayce/HUD/Icons2D/JayceQ_Melee.dds",
+            "ASSETS/Characters/Jayce/HUD/Icons2D/JayceQ_Melee.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

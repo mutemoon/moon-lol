@@ -64,6 +64,10 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "",
+            "",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

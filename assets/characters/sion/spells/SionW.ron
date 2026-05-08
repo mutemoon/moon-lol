@@ -281,6 +281,9 @@
         coefficient: Some(0.4),
         hitEffectKey: None,
         selectionPriority: Some(2),
+        iconPath: Some([
+            "ASSETS/Characters/Sion/HUD/Icons2D/Sion_W1.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

@@ -110,6 +110,9 @@
         coefficient: Some(0.6),
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Darius/HUD/Icons2D/Darius_Icon_Axe_Grab.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

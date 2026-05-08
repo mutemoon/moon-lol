@@ -24,6 +24,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Sett/HUD/Icons2D/Sett_Buff.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

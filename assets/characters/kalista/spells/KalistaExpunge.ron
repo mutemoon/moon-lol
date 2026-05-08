@@ -111,6 +111,9 @@
         coefficient: Some(0.7),
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Kalista/HUD/Icons2D/Kalista_E.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

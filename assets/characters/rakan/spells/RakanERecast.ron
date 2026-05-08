@@ -48,6 +48,9 @@
         coefficient: Some(0.8),
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Rakan/HUD/Icons2D/Rakan_E2.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

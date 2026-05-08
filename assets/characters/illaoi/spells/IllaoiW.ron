@@ -213,6 +213,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: Some(2),
+        iconPath: Some([
+            "ASSETS/Characters/Illaoi/HUD/Icons2D/Illaoi_W.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

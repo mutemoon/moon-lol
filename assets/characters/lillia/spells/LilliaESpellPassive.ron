@@ -92,6 +92,9 @@
         coefficient: Some(0.8),
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/CuteJungler/HUD/Icons2D/Evelynn_E_passive.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

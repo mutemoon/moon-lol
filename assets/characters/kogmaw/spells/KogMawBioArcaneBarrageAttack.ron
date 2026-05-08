@@ -64,6 +64,9 @@
         coefficient: None,
         hitEffectKey: Some(3800158981),
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/KogMaw/HUD/Icons2D/KogMaw_BioArcaneBarrage.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

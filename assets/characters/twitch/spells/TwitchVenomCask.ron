@@ -121,6 +121,9 @@
         coefficient: Some(0.7),
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Twitch/HUD/Icons2D/Twitch_W.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

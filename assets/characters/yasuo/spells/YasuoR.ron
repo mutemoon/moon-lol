@@ -139,6 +139,10 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Yasuo/HUD/Icons2D/Yasuo_R.dds",
+            "ASSETS/Characters/Yasuo/HUD/Icons2D/Yasuo_R_Grey.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

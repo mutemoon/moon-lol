@@ -160,6 +160,9 @@
         coefficient: Some(1.0),
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Elise/HUD/Icons2D/EliseSpiderE.DDS",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

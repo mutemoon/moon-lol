@@ -95,6 +95,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "SummonerBarrier_Zoe.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

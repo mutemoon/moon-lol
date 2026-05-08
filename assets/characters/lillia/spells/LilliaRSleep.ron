@@ -24,6 +24,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Lillia/HUD/Icons2D/Lillia_Icon_Buff_Sleep.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

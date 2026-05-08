@@ -144,6 +144,9 @@
         coefficient: Some(0.5),
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Nami/HUD/Icons2D/NamiQ.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

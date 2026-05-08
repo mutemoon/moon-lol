@@ -52,6 +52,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Sivir/HUD/Icons2D/Sivir_Passive.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

@@ -178,6 +178,9 @@
         coefficient: Some(0.6),
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Fiora/HUD/Icons2D/Fiora_R.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

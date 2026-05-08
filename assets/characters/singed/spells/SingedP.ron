@@ -89,6 +89,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Singed/HUD/Icons2D/Singed_Passive.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

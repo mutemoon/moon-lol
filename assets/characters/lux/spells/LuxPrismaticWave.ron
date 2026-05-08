@@ -164,6 +164,10 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Lux/HUD/Icons2D/LuxPrismaWrap.dds",
+            "",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

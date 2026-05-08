@@ -64,6 +64,9 @@
         coefficient: Some(1.0),
         hitEffectKey: Some(1253558085),
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/MasterYi/HUD/Icons2D/MasterYi_Q.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

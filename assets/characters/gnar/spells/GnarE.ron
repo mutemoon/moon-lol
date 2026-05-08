@@ -228,6 +228,10 @@
         coefficient: Some(6.0),
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Gnar/HUD/Icons2D/Gnar_E.dds",
+            "ASSETS/Characters/Gnar/HUD/Icons2D/Gnar_E_cancel.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

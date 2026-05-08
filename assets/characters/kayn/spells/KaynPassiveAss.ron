@@ -120,6 +120,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Kayn/HUD/Icons2D/Kayn_Passive_Ass.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

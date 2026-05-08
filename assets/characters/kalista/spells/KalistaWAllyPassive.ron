@@ -103,6 +103,9 @@
         coefficient: Some(0.3),
         hitEffectKey: None,
         selectionPriority: Some(2),
+        iconPath: Some([
+            "ASSETS/Spells/Icons2D/YorickUnholyCovenant.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

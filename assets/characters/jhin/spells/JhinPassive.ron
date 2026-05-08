@@ -179,6 +179,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Jhin/HUD/Icons2D/Jhin_P.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

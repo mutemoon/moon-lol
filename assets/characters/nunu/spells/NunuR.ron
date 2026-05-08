@@ -204,6 +204,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Nunu/HUD/Icons2D/Nunu_R.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

@@ -194,6 +194,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Zaahen/HUD/Icons2D/ZaahenE.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

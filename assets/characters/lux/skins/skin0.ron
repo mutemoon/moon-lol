@@ -12,6 +12,7 @@
         ),
         "lol_base::character::Skin": (
           scale: 1.5,
+          avatar: "ASSETS/Characters/Lux/HUD/Lux_Circle_0.png",
         ),
       },
     ),

@@ -64,6 +64,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Teemo/HUD/Icons2D/TeemoPassive.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

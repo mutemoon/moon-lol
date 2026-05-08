@@ -228,6 +228,10 @@
         coefficient: None,
         hitEffectKey: Some(2951063898),
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Briar/HUD/Icons2D/BriarR.dds",
+            "ASSETS/Characters/Briar/HUD/Icons2D/BriarWBuff.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

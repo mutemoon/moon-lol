@@ -2,17 +2,19 @@
 
 ## 概述
 
-运行时加载分为两条独立链路：
+运行时加载分为三条独立链路：
 
 1. **游戏场景加载** — 从 `games/{game_setting}.ron` 加载英雄角色出生点
 2. **地图加载** — 从 `maps/{map_name}/scene.ron` 加载地图对象（防御塔、野怪、兵营、草丛等）
+3. **UI 场景加载** — 从 `ui/gameplay.xxx.ron` 加载 UI 数据并重建实体
 
-两条链路最终都将 `DynamicWorld` 反序列化为实体组件，写入 ECS World。**地图场景中的防御塔、野怪、兵营等同样是有 `ConfigCharacterRecord` + `ConfigSkin` 的角色实体，共享英雄的加载逻辑。**
+三条链路最终都将 `DynamicWorld` 反序列化为实体组件，写入 ECS World。**地图场景中的防御塔、野怪、兵营等同样是有 `ConfigCharacterRecord` + `ConfigSkin` 的角色实体，共享英雄的加载逻辑。**
 
 ```
 App Startup
 ├── PluginGame → startup_load_game_scenes → DynamicWorldRoot("games/riven.ron")
 ├── PluginMap  → startup_load_map_geometry → DynamicWorldRoot("maps/sr/scene.ron")
+├── PluginUI   → startup_load_ui_data → LOLUiFile("ui/gameplay.playerframe.ron")
 └── PluginRender → setup → WorldAssetRoot("maps/sr/mapgeo.glb")
 
 FixedUpdate
@@ -309,6 +311,60 @@ fn setup(
 
 `MapPaths::mapgeo_glb()` 返回 `"maps/{map_name}/mapgeo.glb"`。
 
+### 3.5 UI 数据加载
+
+**文件：** [lol_render/src/ui/element.rs](file:///d:/Users/admin/workspace/moon-lol/crates/lol_render/src/ui/element.rs)
+
+UI 系统不再使用 Bevy 场景系统加载，而是在启动时解析 RON 数据文件并注册到 `Assets`。
+
+```rust
+fn startup_load_ui_data(
+    mut commands: Commands,
+    mut res_ui_scenes: ResMut<LOLUiScenes>,
+    mut res_ui_handles: ResMut<LOLUiHandles>,
+    mut res_ui_element_entity: ResMut<UIElementEntity>,
+    mut icon_assets: ResMut<Assets<LOLUiElementIconData>>,
+    // ... 其他资产
+) {
+    // 1. 读取并解析 RON (LOLUiFile)
+    let data = ron::from_str::<LOLUiFile>(&content).unwrap();
+
+    // 2. 注册场景使能状态
+    for (hash, scene_data) in data.scenes {
+        res_ui_scenes.scenes.insert(hash, scene_data);
+    }
+
+    // 3. 将 UI 数据存入 Assets 并保留句柄
+    for (hash, icon_data) in data.elements {
+        let handle = icon_assets.add(icon_data.clone());
+        res_ui_handles.icon_handles.insert(hash, handle.clone());
+
+        // 4. 判断运行时可见性并 Spawn 实体
+        let is_visible = determine_visibility(&icon_data, &res_ui_scenes);
+        let entity = commands.spawn((
+            ZIndex(icon_data.layer.unwrap_or(0) as i32),
+            UIElement::Handle(handle),
+            if is_visible { Visibility::Visible } else { Visibility::Hidden },
+        )).id();
+        
+        res_ui_element_entity.map.insert(hash, entity);
+    }
+}
+```
+
+**关键资源**：
+- **`LOLUiHandles`**：存储所有 UI 元素的 `Handle<T>`，用于后续查找。
+- **`LOLUiScenes`**：存储场景的 `enabled` 状态，用于运行时可见性控制。
+- **`UIElementEntity`**：存储 `u32` 哈希到 `Entity` 的映射，用于脚本化控制。
+
+**加载时序**：
+1. `startup_load_ui_data` 在 Startup 阶段直接解析 RON 并注册资产。
+2. 实体被创建后挂载 `UIElement` 组件。
+3. `update_element_layout` 系统检测到新实体，自动为其创建子实体 `UIElementChild` 并挂载 `ImageNode`。
+4. UI 进入 `Loaded` 状态，启用后续交互系统。
+
+**UI 纹理路径**：导出的纹理路径存储在数据中（如 `assets/ASSETS/UX/LoL/Clarity_LevelUpAtlas.png` 或 `.dds`），加载时直接使用该路径。
+
 ## 4. 组件类型说明
 
 ### lol_base vs lol_core
@@ -354,6 +410,9 @@ App::run()
               └── try_load_config_skin_characters (触发条件: ConfigSkin Added)
        └── PluginRenderMap::build()
               └── setup → spawn WorldAssetRoot(mapgeo.glb)
+       └── PluginUI::build()
+              └── startup_load_ui_scene (Startup)
+              └── check_ui_scene_loaded (Loading 状态)
 
 【Startup】
 │
@@ -363,16 +422,24 @@ App::run()
 ├─ startup_load_map_geometry
 │      └─ spawn DynamicWorldRoot("maps/sr/scene.ron")
 │
+├─ startup_load_ui_scene
+│      └─ spawn DynamicWorldRoot("ui/ui_scene.ron")
+│
 └─ setup
        └─ spawn WorldAssetRoot("maps/sr/mapgeo.glb")
 
-【FixedUpdate】(等 Asset 加载完成)
+【Update】(等 Asset 加载完成)
 
 **来自 games/{game_setting}.ron 的角色**（如英雄）
 ├─ try_load_config_characters
 │      └─ DynamicWorld(config.ron) → write_to_world → Health/Attack/Skills...
 └─ try_load_config_skin_characters
        └─ DynamicWorld(skin.ron) → write_to_world → WorldAssetRoot/Skin/HealthBar
+
+**来自 ui/gameplay.xxx.ron 的 UI 元素**
+└─ startup_load_ui_data (Startup)
+       └─ 解析 RON → 注册 Assets → Spawn 实体 (UIElement::Handle)
+       └─ state.set(UIState::Loaded) → 启用交互系统
 
 **来自 maps/{map_name}/scene.ron 的角色**（如防御塔、野怪、兵营）
 └─ 复用同一套系统，流程同上

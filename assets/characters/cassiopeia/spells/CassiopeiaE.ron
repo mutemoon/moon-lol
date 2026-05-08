@@ -177,6 +177,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Cassiopeia/HUD/Icons2D/Cassiopeia_E.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

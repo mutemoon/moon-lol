@@ -103,6 +103,9 @@
         coefficient: Some(0.1),
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Lucian/HUD/Icons2D/Lucian_R.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

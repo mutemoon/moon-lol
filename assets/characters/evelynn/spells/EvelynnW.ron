@@ -265,6 +265,9 @@
         coefficient: Some(0.6),
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Evelynn/HUD/Icons2D/Evelynn_W.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

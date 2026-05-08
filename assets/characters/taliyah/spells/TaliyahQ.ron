@@ -279,6 +279,10 @@
         coefficient: Some(0.45),
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Taliyah/HUD/Icons2D/Taliyah_Q.dds",
+            "ASSETS/Characters/Taliyah/HUD/Icons2D/Taliyah_Q2.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

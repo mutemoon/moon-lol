@@ -204,6 +204,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Gnar/HUD/Icons2D/Gnar_W.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

@@ -40,6 +40,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Riven/HUD/Icons2D/RivenRunicBlades.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

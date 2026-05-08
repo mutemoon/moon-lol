@@ -24,6 +24,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/LeeSin/HUD/Icons2D/LeeSinP.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

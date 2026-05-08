@@ -87,6 +87,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Zoe/HUD/Icons2D/Summoner_smite.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

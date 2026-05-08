@@ -184,6 +184,10 @@
         coefficient: Some(0.9),
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Senna/HUD/Icons2D/Senna_R.dds",
+            "ASSETS/Characters/Senna/HUD/Icons2D/Senna_R2.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

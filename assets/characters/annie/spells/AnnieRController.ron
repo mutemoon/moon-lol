@@ -48,6 +48,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Annie/HUD/Icons2D/Annie_R2.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

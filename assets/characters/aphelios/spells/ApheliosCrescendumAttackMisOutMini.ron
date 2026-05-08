@@ -64,6 +64,9 @@
         coefficient: None,
         hitEffectKey: Some(2001782686),
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Aphelios/HUD/Icons2D/Crescendum_U.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

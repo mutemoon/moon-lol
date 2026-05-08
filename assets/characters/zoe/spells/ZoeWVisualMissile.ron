@@ -111,6 +111,9 @@
         coefficient: Some(0.8),
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ZoeE.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

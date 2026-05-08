@@ -287,6 +287,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Karma/HUD/Icons2D/Karma_R.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

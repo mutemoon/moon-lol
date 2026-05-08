@@ -168,6 +168,10 @@
         coefficient: Some(0.25),
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Ashe/HUD/Icons2D/Ashe_Q.dds",
+            "ASSETS/Characters/Ashe/HUD/Icons2D/Ashe_Q_active.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

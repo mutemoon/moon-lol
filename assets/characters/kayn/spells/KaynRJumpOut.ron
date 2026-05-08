@@ -40,6 +40,11 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Kayn/HUD/Icons2D/Kayn_R2_Primary.dds",
+            "ASSETS/Characters/Kayn/HUD/Icons2D/Kayn_R2_Ass.dds",
+            "ASSETS/Characters/Kayn/HUD/Icons2D/Kayn_R2_Slay.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

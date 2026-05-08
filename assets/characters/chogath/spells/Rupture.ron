@@ -161,6 +161,9 @@
         coefficient: Some(1.0),
         hitEffectKey: None,
         selectionPriority: Some(2),
+        iconPath: Some([
+            "ASSETS/Characters/Chogath/HUD/Icons2D/GreenTerror_SpikeSlam.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

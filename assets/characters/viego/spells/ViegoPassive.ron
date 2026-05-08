@@ -135,6 +135,11 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Viego/HUD/Icons2D/Viego_Passive.dds",
+            "ASSETS/Characters/Azir/HUD/Icons2D/Azir_Passive.dds",
+            "ASSETS/Characters/Anivia/HUD/Icons2D/Anivia_P_CD.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

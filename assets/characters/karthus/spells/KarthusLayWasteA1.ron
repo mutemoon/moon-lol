@@ -148,6 +148,10 @@
         coefficient: Some(0.35),
         hitEffectKey: None,
         selectionPriority: Some(2),
+        iconPath: Some([
+            "ASSETS/Characters/Karthus/HUD/Icons2D/Karthus_Q.dds",
+            "ASSETS/Characters/Karthus/HUD/Icons2D/Karthus_Q_OnCooldown.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

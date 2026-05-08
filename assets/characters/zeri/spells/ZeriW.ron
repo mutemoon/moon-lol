@@ -228,6 +228,9 @@
         coefficient: Some(1.4),
         hitEffectKey: None,
         selectionPriority: Some(2),
+        iconPath: Some([
+            "ASSETS/Characters/Zeri/HUD/Icons2D/ZeriW.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

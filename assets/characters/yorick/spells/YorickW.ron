@@ -116,6 +116,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Yorick/HUD/Icons2D/Yorick_W.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

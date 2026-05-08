@@ -12,6 +12,7 @@
         ),
         "lol_base::character::Skin": (
           scale: 1.61,
+          avatar: "ASSETS/Characters/Renekton/HUD/Renekton_Circle_0.png",
         ),
       },
     ),

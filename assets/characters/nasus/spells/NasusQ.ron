@@ -140,6 +140,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Nasus/HUD/Icons2D/Nasus_Q.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

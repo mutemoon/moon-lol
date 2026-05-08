@@ -87,6 +87,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "Summoner_flash_Zoe.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

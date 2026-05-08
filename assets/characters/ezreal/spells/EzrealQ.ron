@@ -143,6 +143,9 @@
         coefficient: None,
         hitEffectKey: Some(3078341810),
         selectionPriority: Some(2),
+        iconPath: Some([
+            "ASSETS/Characters/Ezreal/HUD/Icons2D/Ezreal_Q.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

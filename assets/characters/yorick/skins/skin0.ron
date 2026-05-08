@@ -12,6 +12,7 @@
         ),
         "lol_base::character::Skin": (
           scale: 1.08,
+          avatar: "ASSETS/Characters/Yorick/HUD/Yorick_Circle.png",
         ),
       },
     ),

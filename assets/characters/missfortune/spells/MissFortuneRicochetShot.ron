@@ -234,6 +234,9 @@
         coefficient: Some(0.35),
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/MissFortune/HUD/Icons2D/MissFortune_Q.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

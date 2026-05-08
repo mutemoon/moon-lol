@@ -12,6 +12,7 @@
         ),
         "lol_base::character::Skin": (
           scale: 0.95,
+          avatar: "ASSETS/Characters/Zac/HUD/Zac_Circle.png",
         ),
       },
     ),

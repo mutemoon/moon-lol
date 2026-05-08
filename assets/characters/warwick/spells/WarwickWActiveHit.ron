@@ -48,6 +48,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: Some(2),
+        iconPath: Some([
+            "ASSETS/Characters/Warwick/HUD/Icons2D/WarwickW.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

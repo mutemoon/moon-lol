@@ -111,6 +111,9 @@
         coefficient: Some(3.0),
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "SummonerIgnite_Zoe.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

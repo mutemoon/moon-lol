@@ -93,6 +93,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Jinx/HUD/Icons2D/Jinx_Passive.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

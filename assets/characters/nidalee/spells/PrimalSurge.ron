@@ -134,6 +134,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Nidalee/HUD/Icons2D/Nidalee_E1.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

@@ -216,6 +216,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Varus/HUD/Icons2D/VarusE.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

@@ -53,6 +53,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Morgana/HUD/Icons2D/FallenAngel_Empathize.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

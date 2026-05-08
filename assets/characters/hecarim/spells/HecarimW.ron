@@ -192,6 +192,9 @@
         coefficient: Some(0.8),
         hitEffectKey: Some(109433531),
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Hecarim/HUD/Icons2D/Hecarim_SpiritofDread.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

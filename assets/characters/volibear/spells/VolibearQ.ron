@@ -217,6 +217,9 @@
         coefficient: Some(1.0),
         hitEffectKey: Some(3390540789),
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Volibear/HUD/Icons2D/Volibear_Icon_Q.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

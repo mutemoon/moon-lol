@@ -87,12 +87,14 @@ pub struct SkillOf(pub Entity);
 #[reflect(Component)]
 pub struct Skills(Vec<Entity>);
 
-#[derive(Component, Debug)]
+#[derive(Component, Reflect, Debug)]
 #[relationship(relationship_target = PassiveSkill)]
+#[reflect(Component)]
 pub struct PassiveSkillOf(pub Entity);
 
-#[derive(Component, Debug)]
+#[derive(Component, Reflect, Debug)]
 #[relationship_target(relationship = PassiveSkillOf, linked_spawn)]
+#[reflect(Component)]
 pub struct PassiveSkill(Entity);
 
 impl Deref for Skills {

@@ -218,6 +218,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Rumble/HUD/Icons2D/Rumble_Flamespitter.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

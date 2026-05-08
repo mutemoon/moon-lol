@@ -233,6 +233,9 @@
         coefficient: Some(0.9),
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Hecarim/HUD/Icons2D/Hecarim_Rampage.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

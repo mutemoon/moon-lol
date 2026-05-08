@@ -79,6 +79,10 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Gragas/HUD/Icons2D/GragasBarrelRoll.dds",
+            "ASSETS/Characters/Gragas/HUD/Icons2D/GragasQCrit.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

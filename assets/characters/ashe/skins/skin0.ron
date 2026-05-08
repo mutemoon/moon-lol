@@ -12,6 +12,7 @@
         ),
         "lol_base::character::Skin": (
           scale: 1.1,
+          avatar: "ASSETS/Characters/Ashe/HUD/Ashe_Circle.png",
         ),
       },
     ),

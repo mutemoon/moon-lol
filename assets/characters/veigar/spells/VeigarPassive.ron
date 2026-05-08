@@ -112,6 +112,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Veigar/HUD/Icons2D/Veigar_Entropy.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

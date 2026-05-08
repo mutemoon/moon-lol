@@ -141,6 +141,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Naafiri/HUD/Icons2D/Icons_Naafiri_R.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

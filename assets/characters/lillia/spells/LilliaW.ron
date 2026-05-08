@@ -230,6 +230,9 @@
         coefficient: Some(0.4),
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Lillia/HUD/Icons2D/Lillia_Icon_W.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

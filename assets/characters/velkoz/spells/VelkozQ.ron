@@ -158,6 +158,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: Some(2),
+        iconPath: Some([
+            "ASSETS/Characters/Velkoz/HUD/Icons2D/VelKoz_Q1.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

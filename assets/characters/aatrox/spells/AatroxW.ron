@@ -135,6 +135,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Aatrox/HUD/Icons2D/Aatrox_W.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

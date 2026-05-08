@@ -24,6 +24,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Belveth/HUD/Icons2D/JaxR.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

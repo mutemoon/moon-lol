@@ -86,6 +86,9 @@
         coefficient: None,
         hitEffectKey: Some(3444478636),
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Jax/HUD/Icons2D/JaxQ.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

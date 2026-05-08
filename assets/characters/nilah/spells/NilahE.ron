@@ -118,6 +118,9 @@
         coefficient: Some(0.6),
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Nilah/HUD/Icons2D/NilahE.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

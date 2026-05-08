@@ -103,6 +103,10 @@
         coefficient: Some(0.3),
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Spells/Icons2D/Summoner_haste.dds",
+            "",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

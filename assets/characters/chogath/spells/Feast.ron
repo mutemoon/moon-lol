@@ -215,6 +215,9 @@
         coefficient: None,
         hitEffectKey: Some(1262186302),
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Chogath/HUD/Icons2D/GreenTerror_Feast.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

@@ -213,6 +213,9 @@
         coefficient: Some(0.8),
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Kindred/HUD/Icons2D/Kindred_E.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

@@ -102,6 +102,9 @@
         coefficient: Some(0.01),
         hitEffectKey: None,
         selectionPriority: Some(2),
+        iconPath: Some([
+            "Vayne_SilveredBolts.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

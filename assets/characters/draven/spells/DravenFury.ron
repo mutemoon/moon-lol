@@ -175,6 +175,9 @@
         coefficient: Some(1.0),
         hitEffectKey: None,
         selectionPriority: Some(2),
+        iconPath: Some([
+            "ASSETS/Characters/Draven/HUD/Icons2D/Draven_Bloodrage.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

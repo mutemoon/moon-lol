@@ -205,6 +205,9 @@
         coefficient: Some(0.65),
         hitEffectKey: None,
         selectionPriority: Some(2),
+        iconPath: Some([
+            "ASSETS/Characters/Cassiopeia/HUD/Icons2D/Cassiopeia_Q.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

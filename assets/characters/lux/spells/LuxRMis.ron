@@ -87,6 +87,10 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Lux/HUD/Icons2D/LuxFinaleFunkeln.dds",
+            "",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

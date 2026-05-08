@@ -87,6 +87,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Aatrox/HUD/Icons2D/Aatrox_Q3.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

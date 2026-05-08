@@ -142,6 +142,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Twitch/HUD/Icons2D/Twitch_Q.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

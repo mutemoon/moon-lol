@@ -120,6 +120,9 @@
         coefficient: Some(0.2),
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "MordekaiserCreepingDeath.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

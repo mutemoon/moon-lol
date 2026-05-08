@@ -205,6 +205,9 @@
         coefficient: Some(0.55),
         hitEffectKey: Some(3146380080),
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Singed/HUD/Icons2D/Singed_E.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

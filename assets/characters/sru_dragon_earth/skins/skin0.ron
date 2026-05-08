@@ -12,6 +12,7 @@
         ),
         "lol_base::character::Skin": (
           scale: 1.25,
+          avatar: "ASSETS/Characters/sru_dragon_earth/HUD/Dragon_Circle_Earth.png",
         ),
       },
     ),

@@ -226,6 +226,10 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Kayle/HUD/Icons2D/Kayle_P.dds",
+            "ASSETS/Characters/Kayle/HUD/Icons2D/Kayle_P_AttackSpeed.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

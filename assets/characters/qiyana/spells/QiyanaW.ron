@@ -231,6 +231,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Qiyana/HUD/Icons2D/Qiyana_W.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

@@ -194,6 +194,9 @@
         coefficient: Some(0.3),
         hitEffectKey: None,
         selectionPriority: Some(2),
+        iconPath: Some([
+            "ASSETS/Characters/Ekko/HUD/Icons2D/Ekko_Q.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

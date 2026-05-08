@@ -12,6 +12,7 @@
         ),
         "lol_base::character::Skin": (
           scale: 1.0,
+          avatar: "ASSETS/Characters/Nilah/HUD/Nilah_Circle_0.png",
         ),
       },
     ),

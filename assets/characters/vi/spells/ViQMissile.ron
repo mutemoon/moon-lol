@@ -104,6 +104,9 @@
         coefficient: Some(1.0),
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Spells/Icons2D/Bowmaster_EnchantedArrow.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

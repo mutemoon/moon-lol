@@ -127,6 +127,9 @@
         coefficient: Some(0.5),
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/RekSai/HUD/Icons2D/RekSai_Q1.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

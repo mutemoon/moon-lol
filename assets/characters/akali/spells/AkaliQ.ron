@@ -150,6 +150,10 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: Some(2),
+        iconPath: Some([
+            "ASSETS/Characters/Akali/HUD/Icons2D/Akali_Q.dds",
+            "ASSETS/Characters/Akali/HUD/Icons2D/Akali_Q2.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

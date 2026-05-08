@@ -53,6 +53,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/MissFortune/HUD/Icons2D/MissFortune_W.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

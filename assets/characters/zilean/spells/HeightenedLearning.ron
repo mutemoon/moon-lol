@@ -70,6 +70,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Zilean/HUD/Icons2D/Zilean_Passive.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

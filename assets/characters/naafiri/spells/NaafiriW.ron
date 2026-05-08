@@ -277,6 +277,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Naafiri/HUD/Icons2D/Icons_Naafiri_W.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

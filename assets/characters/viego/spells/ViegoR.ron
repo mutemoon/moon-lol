@@ -187,6 +187,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Viego/HUD/Icons2D/Viego_R.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

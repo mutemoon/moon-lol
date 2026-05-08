@@ -103,6 +103,9 @@
         coefficient: Some(2.5),
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Spells/Icons2D/Yeti_Shatter.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

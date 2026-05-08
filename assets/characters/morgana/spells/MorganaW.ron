@@ -157,6 +157,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: Some(2),
+        iconPath: Some([
+            "ASSETS/Characters/Morgana/HUD/Icons2D/FallenAngel_TormentedSoil.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

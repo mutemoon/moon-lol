@@ -190,6 +190,9 @@
         coefficient: None,
         hitEffectKey: Some(3369913939),
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Nautilus/HUD/Icons2D/Nautilus_RippleEffect.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

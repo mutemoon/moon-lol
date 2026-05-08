@@ -12,6 +12,7 @@
         ),
         "lol_base::character::Skin": (
           scale: 1.175,
+          avatar: "ASSETS/Characters/Kayle/HUD/Kayle_Circle_0.png",
         ),
       },
     ),

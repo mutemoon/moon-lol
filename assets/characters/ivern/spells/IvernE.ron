@@ -173,6 +173,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Ivern/HUD/Icons2D/IvernE.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

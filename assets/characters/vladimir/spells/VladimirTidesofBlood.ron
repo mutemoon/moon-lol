@@ -111,6 +111,9 @@
         coefficient: Some(0.45),
         hitEffectKey: Some(2413477863),
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Vladimir/HUD/Icons2D/Vladimir_TidesofBlood.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

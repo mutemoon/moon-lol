@@ -110,6 +110,10 @@
         coefficient: Some(0.2),
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Kayn/HUD/Icons2D/Kayn_W_Ass.dds",
+            "ASSETS/Characters/Kayn/HUD/Icons2D/Kayn_W_Ass.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

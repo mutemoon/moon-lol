@@ -181,6 +181,10 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Rakan/HUD/Icons2D/Rakan_E.dds",
+            "ASSETS/Characters/Rakan/HUD/Icons2D/Rakan_E2.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

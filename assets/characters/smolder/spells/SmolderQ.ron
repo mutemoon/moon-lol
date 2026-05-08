@@ -364,6 +364,12 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Smolder/HUD/Icons2D/Icons_Smolder_Q1.dds",
+            "ASSETS/Characters/Smolder/HUD/Icons2D/Icons_Smolder_Q2.dds",
+            "ASSETS/Characters/Smolder/HUD/Icons2D/Icons_Smolder_Q3.dds",
+            "ASSETS/Characters/Smolder/HUD/Icons2D/Icons_Smolder_Q4.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

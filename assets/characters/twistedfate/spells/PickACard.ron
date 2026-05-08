@@ -340,6 +340,9 @@
         coefficient: Some(0.5),
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/TwistedFate/HUD/Icons2D/CardMaster_FatesGambit.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

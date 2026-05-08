@@ -213,6 +213,9 @@
         coefficient: Some(0.5),
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Xayah/HUD/Icons2D/XayahQ.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

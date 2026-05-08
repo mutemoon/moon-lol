@@ -136,6 +136,9 @@
         coefficient: Some(1.5),
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Pyke/HUD/Icons2D/PykeR.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

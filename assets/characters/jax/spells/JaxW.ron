@@ -98,6 +98,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Jax/HUD/Icons2D/JaxW.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

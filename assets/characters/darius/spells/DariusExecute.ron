@@ -110,6 +110,9 @@
         coefficient: Some(1.2),
         hitEffectKey: Some(1451413931),
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Darius/HUD/Icons2D/Darius_Icon_Sudden_Death.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

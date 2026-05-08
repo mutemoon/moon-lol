@@ -112,6 +112,9 @@
         coefficient: Some(0.6),
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "Ahri_OrbofDeception.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

@@ -24,6 +24,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Akali/HUD/Icons2D/Akali_W.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

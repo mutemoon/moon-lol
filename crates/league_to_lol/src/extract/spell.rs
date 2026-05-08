@@ -17,11 +17,12 @@ use lol_base::spell_calc::{
     CalculationSpell, CalculationType,
 };
 
-use super::utils::write_to_file;
+use crate::extract::utils::{extract_texture, write_to_file};
 
 /// 从 CharacterRecord 所在 bin 文件提取所有 SpellObject，转换为 DataSpell 并导出
 /// 返回所有技能对象名称列表
 pub fn extract_spells_for_champion(
+    loader: &league_loader::game::LeagueLoader,
     champ_name: &str,
     prop_group: &PropGroup,
     hashes: &HashMap<u32, String>,
@@ -51,20 +52,21 @@ pub fn extract_spells_for_champion(
             continue;
         };
 
-        let data_spell = convert_spell_data_resource(spell_data, hashes);
+        let mut data_spell = convert_spell_data_resource(spell_data, hashes);
+
+        // 导出技能图标并更新路径
+        if let Some(icons) = &mut data_spell.icon_path {
+            for icon in icons {
+                *icon = extract_texture(loader, icon);
+            }
+        }
 
         let spell = Spell {
             spell_data: Some(data_spell),
         };
 
-        let output_dir = format!("assets/characters/{}/spells", champ_name);
+        let output_dir = format!("characters/{}/spells", champ_name);
         let output_path = format!("{}/{}.ron", output_dir, object_name);
-
-        // 确保目录存在
-        if let Err(e) = std::fs::create_dir_all(&output_dir) {
-            println!("[WARN] 无法创建目录 {}: {}", output_dir, e);
-            continue;
-        }
 
         let serialized = ron::ser::to_string_pretty(&spell, ron::ser::PrettyConfig::default())
             .map_err(|e| format!("序列化失败: {}", e));
@@ -117,6 +119,7 @@ fn convert_spell_data_resource(
         coefficient: spell.m_coefficient,
         hit_effect_key: spell.m_hit_effect_key,
         selection_priority: spell.selection_priority,
+        icon_path: spell.m_img_icon_name.clone(),
         use_animator_framerate: spell.use_animator_framerate,
     }
 }

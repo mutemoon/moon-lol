@@ -40,6 +40,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Swain/HUD/Icons2D/Swain_e2.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

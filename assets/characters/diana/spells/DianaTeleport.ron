@@ -164,6 +164,9 @@
         coefficient: Some(0.6),
         hitEffectKey: None,
         selectionPriority: Some(2),
+        iconPath: Some([
+            "ASSETS/Characters/Diana/HUD/Icons2D/Diana_E_FasterThanLight.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

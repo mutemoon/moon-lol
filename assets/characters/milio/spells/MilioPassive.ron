@@ -109,6 +109,10 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Milio/HUD/Icons2D/Milio_P.dds",
+            "Milio_P2.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

@@ -64,6 +64,9 @@
         coefficient: None,
         hitEffectKey: Some(1292515712),
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Leblanc/HUD/Icons2D/LeblancRQ.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

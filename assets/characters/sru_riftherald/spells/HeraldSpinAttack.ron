@@ -119,6 +119,9 @@
         coefficient: Some(1.25),
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/SRU_RiftHerald/HUD/Icons2D/SRURiftHerald_Death_Recap_Square.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

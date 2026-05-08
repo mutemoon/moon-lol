@@ -55,6 +55,10 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Spells/Icons2D/TalonNoxianDiplomacy.dds",
+            "ASSETS/Spells/Icons2D/TalonNoxianDiplomacy.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

@@ -277,6 +277,9 @@
         coefficient: Some(0.8),
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Kennen/HUD/Icons2D/Kennen_E.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

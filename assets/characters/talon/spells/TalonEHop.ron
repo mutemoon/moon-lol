@@ -127,6 +127,9 @@
         coefficient: Some(0.5),
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Talon/HUD/Icons2D/TalonE.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

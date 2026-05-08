@@ -158,6 +158,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: Some(2),
+        iconPath: Some([
+            "ASSETS/Characters/Xerath/HUD/Icons2D/Xerath_W1.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

@@ -135,6 +135,9 @@
         coefficient: Some(1.0),
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Urgot/HUD/Icons2D/Urgot_WCancel.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

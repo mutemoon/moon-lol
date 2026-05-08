@@ -169,6 +169,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Vi/HUD/Icons2D/ViR.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

@@ -56,6 +56,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "Cryophoenix_FrigidOrb.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

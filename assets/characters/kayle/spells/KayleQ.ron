@@ -244,6 +244,10 @@
         coefficient: None,
         hitEffectKey: Some(3522284295),
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Kayle/HUD/Icons2D/Kayle_Q.dds",
+            "ASSETS/Characters/Kayle/HUD/Icons2D/Kayle_Q_Shred.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

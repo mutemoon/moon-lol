@@ -114,6 +114,9 @@
         coefficient: None,
         hitEffectKey: Some(2104761970),
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/TwistedFate/HUD/Icons2D/Cardmaster_PowerCard.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

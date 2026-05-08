@@ -113,6 +113,9 @@
         coefficient: Some(0.01),
         hitEffectKey: None,
         selectionPriority: Some(2),
+        iconPath: Some([
+            "ASSETS/Characters/Vayne/HUD/Icons2D/Vayne_W.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

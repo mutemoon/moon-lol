@@ -108,6 +108,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Chogath/HUD/Icons2D/GreenTerror_TailSpike.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

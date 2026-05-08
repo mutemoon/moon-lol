@@ -12,6 +12,7 @@
         ),
         "lol_base::character::Skin": (
           scale: 1.3,
+          avatar: "ASSETS/Characters/Orianna/HUD/Oriana_Circle.png",
         ),
       },
     ),

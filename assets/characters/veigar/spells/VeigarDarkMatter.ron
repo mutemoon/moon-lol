@@ -168,6 +168,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: Some(2),
+        iconPath: Some([
+            "ASSETS/Characters/Veigar/HUD/Icons2D/VeigarDarkMatter.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

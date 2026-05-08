@@ -64,6 +64,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/MissFortune/HUD/Icons2D/MissFortune_DoubleUp.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

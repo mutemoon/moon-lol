@@ -241,6 +241,9 @@
         coefficient: Some(0.5),
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Ryze/HUD/Icons2D/Ryze_Q.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

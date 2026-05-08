@@ -64,6 +64,9 @@
         coefficient: None,
         hitEffectKey: Some(3813407604),
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Aphelios/HUD/Icons2D/Gravitum_U.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

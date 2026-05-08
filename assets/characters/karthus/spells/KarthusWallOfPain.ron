@@ -126,6 +126,9 @@
         coefficient: Some(1.0),
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Karthus/HUD/Icons2D/Karthus_W.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

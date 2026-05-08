@@ -12,6 +12,7 @@
         ),
         "lol_base::character::Skin": (
           scale: 1.03,
+          avatar: "ASSETS/Characters/Volibear/HUD/Volibear_Circle_0.png",
         ),
       },
     ),

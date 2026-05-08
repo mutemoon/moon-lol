@@ -109,6 +109,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: Some(2),
+        iconPath: Some([
+            "ASSETS/Characters/Zoe/HUD/Icons2D/Zoe_Q.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

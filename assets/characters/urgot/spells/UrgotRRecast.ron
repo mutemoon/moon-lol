@@ -40,6 +40,10 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Urgot/HUD/Icons2D/Urgot_RRecast.dds",
+            "ASSETS/Characters/Urgot/HUD/Icons2D/Urgot_RRecast_Grey.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

@@ -24,6 +24,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Skarner/HUD/Icons2D/Skarner_E.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

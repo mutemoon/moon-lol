@@ -90,6 +90,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/AurelionSol/HUD/Icons2D/AurelionSolP.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

@@ -86,6 +86,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Poppy/HUD/Icons2D/Poppy_Passive.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

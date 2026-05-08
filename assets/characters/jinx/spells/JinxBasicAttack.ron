@@ -64,6 +64,9 @@
         coefficient: None,
         hitEffectKey: Some(1429177430),
         selectionPriority: None,
+        iconPath: Some([
+            "Udyr_TigerStance.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

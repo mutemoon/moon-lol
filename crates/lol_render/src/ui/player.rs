@@ -5,6 +5,7 @@ use lol_core::base::level::Level;
 use lol_core::life::Health;
 
 use crate::controller::Controller;
+use crate::skin::skin::SkinReady;
 use crate::ui::element::{CommandUpdateUIElement, NodeType, SizeType, UIElementEntity, UIState};
 
 #[derive(Component, Reflect, Default)]
@@ -26,7 +27,11 @@ impl Plugin for PluginUIPlayer {
                 update_player_health,
                 update_player_health_fade,
                 update_player_ability_resource,
-                update_player_icon.run_if(in_state(UIState::Loaded).and_then(run_once)),
+                update_player_icon.run_if(
+                    in_state(UIState::Loaded)
+                        .and_then(any_match_filter::<(With<Controller>, With<SkinReady>)>)
+                        .and_then(run_once),
+                ),
             ),
         );
     }
@@ -171,41 +176,48 @@ fn update_player_ability_resource(
 }
 
 fn update_player_icon(
-    _asset_server: Res<AssetServer>,
-    _commands: Commands,
-    _q_image_node: Query<&mut ImageNode>,
-    q_skin: Query<&Skin, With<Controller>>,
-    _q_children: Query<&Children>,
+    asset_server: Res<AssetServer>,
+    mut commands: Commands,
+    q_image_node: Query<&ImageNode>,
+    q_skin: Query<&Skin, (With<Controller>, With<SkinReady>)>,
+    q_children: Query<&Children>,
     res_ui_element_entity: Res<UIElementEntity>,
 ) {
     let key = "ClientStates/Gameplay/UX/LoL/PlayerFrame/UIBase/Player_Frame_Root/Player_Frame/PlayerIcon_Base";
-    let Some(&_entity) = res_ui_element_entity.get_by_string(key) else {
+    let Some(&entity) = res_ui_element_entity.get_by_string(key) else {
+        info!("未找到玩家头像的父节点");
         return;
     };
 
-    let Ok(_skin) = q_skin.single() else {
+    let Ok(skin) = q_skin.single() else {
+        info!("未找到玩家的皮肤");
         return;
     };
 
-    // let skin = res_assets_skin_character_data_properties
-    //     .load_hash(skin.key)
-    //     .unwrap();
+    if skin.avatar.is_empty() {
+        info!("玩家的皮肤为空");
+        return;
+    }
 
-    // let icon_name = skin
-    //     .icon_avatar
-    //     .as_ref()
-    //     .unwrap_or(skin.icon_circle.as_ref().unwrap());
+    let Ok(children) = q_children.get(entity) else {
+        info!("未找到玩家头像的子节点");
+        return;
+    };
+    let Some(&child) = children.get(0) else {
+        info!("未找到玩家头像的子节点");
+        return;
+    };
 
-    // let &child = q_children.get(entity).unwrap().get(0).unwrap();
-    // if q_image_node.get_mut(child).is_ok() {
-    //     return;
-    // }
+    if q_image_node.get(child).is_ok() {
+        info!("玩家头像已经加载");
+        return;
+    }
 
-    // commands.entity(entity).insert((
-    //     ImageNode {
-    //         image: asset_server.load_league_labeled(icon_name, "srgb"),
-    //         ..default()
-    //     },
-    //     Visibility::Visible,
-    // ));
+    commands.entity(child).insert((
+        ImageNode {
+            image: asset_server.load(&skin.avatar),
+            ..default()
+        },
+        Visibility::Visible,
+    ));
 }

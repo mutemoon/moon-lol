@@ -110,6 +110,9 @@
         coefficient: Some(0.7),
         hitEffectKey: None,
         selectionPriority: Some(2),
+        iconPath: Some([
+            "ASSETS/Characters/Galio/HUD/Icons2D/Galio_R.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

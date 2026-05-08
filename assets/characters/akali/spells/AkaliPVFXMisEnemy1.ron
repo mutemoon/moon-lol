@@ -64,6 +64,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "XayahW.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

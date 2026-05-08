@@ -158,6 +158,9 @@
         coefficient: Some(0.8),
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/LeeSin/HUD/Icons2D/LeeSinW1.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

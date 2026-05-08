@@ -48,6 +48,9 @@
         coefficient: Some(1.0),
         hitEffectKey: None,
         selectionPriority: Some(2),
+        iconPath: Some([
+            "ASSETS/Characters/Aphelios/HUD/Icons2D/Calibrum_L.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

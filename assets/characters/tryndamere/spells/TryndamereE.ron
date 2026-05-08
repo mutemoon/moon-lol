@@ -167,6 +167,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Tryndamere/HUD/Icons2D/Tryndamere_E.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

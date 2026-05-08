@@ -7,13 +7,13 @@
           timer: None,
           duration: 0.0,
         ),
+        "lol_core::skill::PassiveSkillOf": (4294967271),
         "lol_core::skill::Skill": (
           spell: Path("characters/SRU_RiftHerald/spells/RiftHeraldMercenary.ron"),
           level: 1,
           slot: Passive,
           cooldown_mode: AfterCast,
         ),
-        "lol_core::skill::SkillOf": (4294967271),
       },
     ),
     4294967268: (
@@ -120,11 +120,11 @@
           "SRU_RiftHerald_Gaze": Path("characters/SRU_RiftHerald/spells/SRU_RiftHerald_Gaze.ron"),
           "SRU_RiftHerald_Gaze_Debuff": Path("characters/SRU_RiftHerald/spells/SRU_RiftHerald_Gaze_Debuff.ron"),
         }),
+        "lol_core::skill::PassiveSkill": (4294967267),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,
           4294967268,
-          4294967267,
         ]),
       },
     ),

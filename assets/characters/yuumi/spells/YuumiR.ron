@@ -269,6 +269,9 @@
         coefficient: Some(0.06),
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Yuumi/HUD/Icons2D/YuumiR.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

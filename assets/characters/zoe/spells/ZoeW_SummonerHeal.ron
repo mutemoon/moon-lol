@@ -111,6 +111,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "Summoner_heal_Zoe.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

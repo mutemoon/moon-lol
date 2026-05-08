@@ -21,6 +21,10 @@ impl Plugin for PluginCharacter {
 #[reflect(Component)]
 pub struct Character;
 
+#[derive(Component, Reflect, Default, Debug)]
+#[reflect(Component)]
+pub struct CharacterReady;
+
 fn on_event_dead(
     event: On<EventDead>,
     query: Query<(Entity, &GlobalTransform, &ExperienceDrop, &Team)>,
@@ -106,7 +110,9 @@ fn try_load_config_characters(
                     .expect("Character component not found in character config");
                 map.entry(source_entity.entity).insert(entity);
                 debug!("{} -> {}", source_entity.entity, entity);
-                dynamic_world.write_to_world(world, &mut map)
+                dynamic_world.write_to_world(world, &mut map)?;
+                world.entity_mut(entity).insert(CharacterReady);
+                Ok::<(), WorldInstanceSpawnError>(())
             })
         });
 

@@ -40,6 +40,9 @@
         coefficient: Some(1.0),
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Gnar/HUD/Icons2D/GnarBig_W.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

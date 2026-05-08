@@ -156,6 +156,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Draven/HUD/Icons2D/Draven_SpinningAxe.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

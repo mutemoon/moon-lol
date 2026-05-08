@@ -158,6 +158,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/TahmKench/HUD/Icons2D/TahmKenchW.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

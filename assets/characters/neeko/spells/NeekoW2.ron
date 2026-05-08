@@ -155,6 +155,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Neeko/HUD/Icons2D/Neeko_W2.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

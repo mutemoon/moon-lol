@@ -121,6 +121,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Irelia/HUD/Icons2D/Irelia_Passive.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

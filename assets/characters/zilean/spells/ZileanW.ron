@@ -131,6 +131,10 @@
         coefficient: Some(1.0),
         hitEffectKey: None,
         selectionPriority: Some(2),
+        iconPath: Some([
+            "ASSETS/Characters/Zilean/HUD/Icons2D/Zilean_W.dds",
+            "ASSETS/Characters/Zilean/HUD/Icons2D/Zilean_W_Disabled.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

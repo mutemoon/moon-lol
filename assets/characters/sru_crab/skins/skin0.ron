@@ -12,6 +12,7 @@
         ),
         "lol_base::character::Skin": (
           scale: 0.75,
+          avatar: "ASSETS/Characters/Sru_Crab/HUD/Crab_Circle_0.png",
         ),
       },
     ),

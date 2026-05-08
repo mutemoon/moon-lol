@@ -88,6 +88,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Camille/HUD/Icons2D/Camille_R.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

@@ -57,6 +57,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: Some(2),
+        iconPath: Some([
+            "ASSETS/Characters/Pyke/HUD/Icons2D/PykeE.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

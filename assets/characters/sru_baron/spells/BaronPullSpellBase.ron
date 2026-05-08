@@ -54,6 +54,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Shared/Spells/Icons2D/Baron_Debuff1.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

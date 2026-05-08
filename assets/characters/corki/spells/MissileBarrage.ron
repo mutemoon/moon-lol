@@ -185,6 +185,10 @@
         coefficient: None,
         hitEffectKey: Some(3530514102),
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Corki/HUD/Icons2D/Corki_MissileBarrage.dds",
+            "ASSETS/Characters/Corki/HUD/Icons2D/Corki_R_BigOne.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

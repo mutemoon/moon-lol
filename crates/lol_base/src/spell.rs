@@ -50,6 +50,7 @@ pub struct DataSpell {
     pub coefficient: Option<f32>,
     pub hit_effect_key: Option<u32>,
     pub selection_priority: Option<u32>,
+    pub icon_path: Option<Vec<String>>,
     pub use_animator_framerate: Option<bool>,
 }
 

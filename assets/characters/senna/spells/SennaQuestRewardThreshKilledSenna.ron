@@ -24,6 +24,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Senna/HUD/Icons2D/Senna_Quest_Senna.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

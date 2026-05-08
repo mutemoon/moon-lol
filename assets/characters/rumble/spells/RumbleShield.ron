@@ -237,6 +237,9 @@
         coefficient: Some(0.3),
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Rumble/HUD/Icons2D/Rumble_ScrapShield.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

@@ -237,6 +237,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Sylas/HUD/Icons2D/SylasQ.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

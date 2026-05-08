@@ -104,6 +104,9 @@
         coefficient: Some(0.4),
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "LuxLightStrikeKugel.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

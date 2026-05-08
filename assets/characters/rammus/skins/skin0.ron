@@ -12,6 +12,7 @@
         ),
         "lol_base::character::Skin": (
           scale: 1.6,
+          avatar: "ASSETS/Characters/Rammus/HUD/Armordillo_Circle.png",
         ),
       },
     ),

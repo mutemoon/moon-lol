@@ -109,6 +109,9 @@
         coefficient: Some(0.8),
         hitEffectKey: None,
         selectionPriority: Some(2),
+        iconPath: Some([
+            "ASSETS/Characters/Gragas/HUD/Icons2D/GragasExplosiveCask.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

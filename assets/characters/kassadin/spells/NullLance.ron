@@ -198,6 +198,9 @@
         coefficient: Some(0.7),
         hitEffectKey: Some(3101820421),
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Kassadin/HUD/Icons2D/Kassadin_Q.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

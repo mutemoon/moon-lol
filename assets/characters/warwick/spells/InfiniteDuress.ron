@@ -118,6 +118,9 @@
         coefficient: Some(1.67),
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Warwick/HUD/Icons2D/Wolfman_InfiniteDuress.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

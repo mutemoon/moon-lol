@@ -48,6 +48,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: Some(2),
+        iconPath: Some([
+            "FallenAngel_TormentedSoil.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

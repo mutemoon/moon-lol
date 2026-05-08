@@ -176,6 +176,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Darius/HUD/Icons2D/Darius_Icon_Decimate.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

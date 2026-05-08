@@ -218,6 +218,10 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Fiddlesticks/HUD/Icons2D/FiddlesticksW.dds",
+            "ASSETS/Characters/Fiddlesticks/HUD/Icons2D/FiddlesticksW2.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

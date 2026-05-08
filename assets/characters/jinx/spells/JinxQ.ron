@@ -153,6 +153,10 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Jinx/HUD/Icons2D/Jinx_Q1.dds",
+            "ASSETS/Characters/Jinx/HUD/Icons2D/Jinx_Q2.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

@@ -110,6 +110,9 @@
         coefficient: Some(1.0),
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Malphite/HUD/Icons2D/Malphite_R.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

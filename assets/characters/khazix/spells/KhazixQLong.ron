@@ -118,6 +118,9 @@
         coefficient: Some(1.15),
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/KhaZix/HUD/Icons2D/Khazix_Q_red.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

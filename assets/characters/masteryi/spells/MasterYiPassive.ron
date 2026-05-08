@@ -71,6 +71,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/MasterYi/HUD/Icons2D/MasterYi_Passive1.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

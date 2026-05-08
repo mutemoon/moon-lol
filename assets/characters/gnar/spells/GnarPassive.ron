@@ -75,6 +75,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Gnar/HUD/Icons2D/Gnar_Passive.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

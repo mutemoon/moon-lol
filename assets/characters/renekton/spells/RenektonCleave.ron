@@ -306,6 +306,9 @@
         coefficient: None,
         hitEffectKey: Some(922838024),
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Renekton/HUD/Icons2D/Renekton_Q.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

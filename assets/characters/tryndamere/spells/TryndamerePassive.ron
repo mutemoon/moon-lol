@@ -50,6 +50,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Tryndamere/HUD/Icons2D/Tryndamere_Passive.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

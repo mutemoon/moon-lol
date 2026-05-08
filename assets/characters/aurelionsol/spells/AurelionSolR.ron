@@ -266,6 +266,10 @@
         coefficient: Some(0.75),
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/AurelionSol/HUD/Icons2D/AurelionSolR1.dds",
+            "ASSETS/Characters/AurelionSol/HUD/Icons2D/AurelionSolR2.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

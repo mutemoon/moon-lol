@@ -166,6 +166,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Yuumi/HUD/Icons2D/YuumiP.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

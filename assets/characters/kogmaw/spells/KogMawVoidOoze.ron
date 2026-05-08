@@ -133,6 +133,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: Some(2),
+        iconPath: Some([
+            "ASSETS/Characters/KogMaw/HUD/Icons2D/KogMaw_VoidOoze.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

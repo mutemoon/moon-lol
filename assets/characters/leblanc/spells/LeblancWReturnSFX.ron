@@ -95,6 +95,9 @@
         coefficient: Some(0.6),
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Leblanc/HUD/Icons2D/LeblancWReturn.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

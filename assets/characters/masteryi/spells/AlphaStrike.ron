@@ -190,6 +190,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/MasterYi/HUD/Icons2D/MasterYi_Q.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

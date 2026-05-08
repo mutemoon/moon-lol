@@ -214,6 +214,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Zac/HUD/Icons2D/ZacQ.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

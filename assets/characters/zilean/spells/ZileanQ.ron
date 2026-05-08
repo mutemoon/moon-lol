@@ -184,6 +184,9 @@
         coefficient: Some(0.9),
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Zilean/HUD/Icons2D/Zilean_Q.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

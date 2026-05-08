@@ -111,6 +111,10 @@
         coefficient: Some(0.8),
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Syndra/HUD/Icons2D/SyndraW2.dds",
+            "ASSETS/Characters/Syndra/HUD/Icons2D/SyndraW2.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

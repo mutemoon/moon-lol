@@ -94,6 +94,12 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Jax/HUD/Icons2D/JaxP.dds",
+            "ASSETS/Characters/Jax/HUD/Icons2D/Jax_Fishing.dds",
+            "ASSETS/Characters/Jax/HUD/Icons2D/Fish_1.dds",
+            "ASSETS/Characters/Jax/HUD/Icons2D/Fish_2.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

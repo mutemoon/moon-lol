@@ -216,6 +216,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Chogath/HUD/Icons2D/GreenTerror_ChitinousExoplates.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

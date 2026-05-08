@@ -216,6 +216,10 @@
         coefficient: Some(1.0),
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Pantheon/HUD/Icons2D/Pantheon_W1.dds",
+            "ASSETS/Characters/Pantheon/HUD/Icons2D/Pantheon_W2.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

@@ -106,6 +106,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Corki/HUD/Icons2D/Corki_RapidReload.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

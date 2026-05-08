@@ -372,6 +372,14 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Senna/HUD/Icons2D/Senna_Passive.dds",
+            "ASSETS/Characters/Senna/HUD/Icons2D/Senna_PassiveHaste.dds",
+            "ASSETS/Characters/Senna/HUD/Icons2D/Senna_Quest_Lucian.dds",
+            "ASSETS/Characters/Senna/HUD/Icons2D/Senna_Quest_Senna.dds",
+            "ASSETS/Characters/Senna/HUD/Icons2D/Senna_Quest_Thresh.dds",
+            "ASSETS/Characters/Senna/HUD/Icons2D/Senna_Quest_Active.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

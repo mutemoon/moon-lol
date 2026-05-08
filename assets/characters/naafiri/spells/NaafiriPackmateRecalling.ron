@@ -24,6 +24,9 @@
         coefficient: Some(0.65),
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

@@ -64,6 +64,9 @@
         coefficient: None,
         hitEffectKey: Some(2706448570),
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Mel/HUD/Icons2D/Mel_Passive.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

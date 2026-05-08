@@ -162,6 +162,10 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Katarina/HUD/Icons2D/Katarina_R.dds",
+            "ASSETS/Characters/Katarina/HUD/Icons2D/Katarina_R_CannotCast.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

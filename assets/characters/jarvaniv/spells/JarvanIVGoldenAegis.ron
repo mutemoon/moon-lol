@@ -170,6 +170,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/JarvanIV/HUD/Icons2D/JarvanIVW.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

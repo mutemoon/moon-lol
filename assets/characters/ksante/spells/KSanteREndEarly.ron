@@ -87,6 +87,9 @@
         coefficient: Some(0.75),
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/KSante/HUD/Icons2D/Icons_KSante_R2.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

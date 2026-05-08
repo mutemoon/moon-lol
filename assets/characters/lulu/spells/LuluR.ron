@@ -146,6 +146,9 @@
         coefficient: Some(0.55),
         hitEffectKey: None,
         selectionPriority: Some(2),
+        iconPath: Some([
+            "ASSETS/Characters/Lulu/HUD/Icons2D/Lulu_GiantGrowth.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

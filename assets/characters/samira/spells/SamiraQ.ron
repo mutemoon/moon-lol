@@ -125,6 +125,9 @@
         coefficient: Some(0.9),
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Samira/HUD/Icons2D/SamiraQ.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

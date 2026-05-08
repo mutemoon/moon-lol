@@ -127,6 +127,9 @@
         coefficient: Some(0.5),
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Spells/Icons2D/CardMaster_gold.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

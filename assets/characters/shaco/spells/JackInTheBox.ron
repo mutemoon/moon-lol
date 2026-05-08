@@ -273,6 +273,9 @@
         coefficient: Some(0.2),
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Shaco/HUD/Icons2D/Jester_DeathWard.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

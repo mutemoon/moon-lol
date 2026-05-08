@@ -354,6 +354,11 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Swain/HUD/Icons2D/Swain_R.dds",
+            "ASSETS/Characters/Swain/HUD/Icons2D/Swain_R2.dds",
+            "ASSETS/Characters/Swain/HUD/Icons2D/Swain_R2_No_Charge.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

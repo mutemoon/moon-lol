@@ -58,7 +58,7 @@
     "lol_core::navigation::grid::ResourceGrid": (Path("maps/sr_seasonal_map/navgrid.bin")),
   },
   entities: {
-    4294967185: (
+    4294967182: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -76,7 +76,7 @@
         "lol_core::team::Team": Neutral,
       },
     ),
-    4294967186: (
+    4294967183: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -94,7 +94,7 @@
         "lol_core::team::Team": Neutral,
       },
     ),
-    4294967187: (
+    4294967184: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -112,7 +112,7 @@
         "lol_core::team::Team": Neutral,
       },
     ),
-    4294967188: (
+    4294967185: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -130,7 +130,7 @@
         "lol_core::team::Team": Neutral,
       },
     ),
-    4294967189: (
+    4294967186: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -148,7 +148,7 @@
         "lol_core::team::Team": Neutral,
       },
     ),
-    4294967190: (
+    4294967187: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -166,7 +166,7 @@
         "lol_core::team::Team": Neutral,
       },
     ),
-    4294967191: (
+    4294967188: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -184,7 +184,7 @@
         "lol_core::team::Team": Neutral,
       },
     ),
-    4294967192: (
+    4294967189: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -202,7 +202,7 @@
         "lol_core::team::Team": Neutral,
       },
     ),
-    4294967193: (
+    4294967190: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -218,7 +218,7 @@
         "lol_core::team::Team": Chaos,
       },
     ),
-    4294967194: (
+    4294967191: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -236,7 +236,7 @@
         "lol_core::team::Team": Order,
       },
     ),
-    4294967195: (
+    4294967192: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -254,7 +254,7 @@
         "lol_core::team::Team": Order,
       },
     ),
-    4294967196: (
+    4294967193: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -270,7 +270,7 @@
         "lol_core::team::Team": Chaos,
       },
     ),
-    4294967197: (
+    4294967194: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -288,7 +288,7 @@
         "lol_core::team::Team": Chaos,
       },
     ),
-    4294967198: (
+    4294967195: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -306,7 +306,7 @@
         "lol_core::team::Team": Chaos,
       },
     ),
-    4294967199: (
+    4294967196: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -324,7 +324,7 @@
         "lol_core::team::Team": Chaos,
       },
     ),
-    4294967200: (
+    4294967197: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -342,7 +342,7 @@
         "lol_core::team::Team": Order,
       },
     ),
-    4294967201: (
+    4294967198: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -360,7 +360,7 @@
         "lol_core::team::Team": Chaos,
       },
     ),
-    4294967202: (
+    4294967199: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -378,7 +378,7 @@
         "lol_core::team::Team": Chaos,
       },
     ),
-    4294967203: (
+    4294967200: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -396,7 +396,7 @@
         "lol_core::team::Team": Order,
       },
     ),
-    4294967204: (
+    4294967201: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -414,7 +414,7 @@
         "lol_core::team::Team": Order,
       },
     ),
-    4294967205: (
+    4294967202: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -432,7 +432,7 @@
         "lol_core::team::Team": Chaos,
       },
     ),
-    4294967206: (
+    4294967203: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -450,7 +450,7 @@
         "lol_core::team::Team": Chaos,
       },
     ),
-    4294967207: (
+    4294967204: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -468,7 +468,7 @@
         "lol_core::team::Team": Chaos,
       },
     ),
-    4294967208: (
+    4294967205: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -486,7 +486,7 @@
         "lol_core::team::Team": Chaos,
       },
     ),
-    4294967209: (
+    4294967206: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -504,7 +504,7 @@
         "lol_core::team::Team": Order,
       },
     ),
-    4294967210: (
+    4294967207: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -522,7 +522,7 @@
         "lol_core::team::Team": Order,
       },
     ),
-    4294967211: (
+    4294967208: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -540,7 +540,7 @@
         "lol_core::team::Team": Chaos,
       },
     ),
-    4294967212: (
+    4294967209: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -558,7 +558,7 @@
         "lol_core::team::Team": Order,
       },
     ),
-    4294967213: (
+    4294967210: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -574,7 +574,7 @@
         "lol_core::team::Team": Order,
       },
     ),
-    4294967214: (
+    4294967211: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -592,7 +592,7 @@
         "lol_core::team::Team": Chaos,
       },
     ),
-    4294967215: (
+    4294967212: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -610,7 +610,7 @@
         "lol_core::team::Team": Chaos,
       },
     ),
-    4294967216: (
+    4294967213: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -628,7 +628,7 @@
         "lol_core::team::Team": Chaos,
       },
     ),
-    4294967217: (
+    4294967214: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -644,7 +644,7 @@
         "lol_core::team::Team": Chaos,
       },
     ),
-    4294967218: (
+    4294967215: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -662,7 +662,7 @@
         "lol_core::team::Team": Order,
       },
     ),
-    4294967219: (
+    4294967216: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -680,7 +680,7 @@
         "lol_core::team::Team": Chaos,
       },
     ),
-    4294967220: (
+    4294967217: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -698,7 +698,7 @@
         "lol_core::team::Team": Chaos,
       },
     ),
-    4294967221: (
+    4294967218: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -716,7 +716,7 @@
         "lol_core::team::Team": Order,
       },
     ),
-    4294967222: (
+    4294967219: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -732,7 +732,7 @@
         "lol_core::team::Team": Order,
       },
     ),
-    4294967223: (
+    4294967220: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -750,7 +750,7 @@
         "lol_core::team::Team": Chaos,
       },
     ),
-    4294967224: (
+    4294967221: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -768,7 +768,7 @@
         "lol_core::team::Team": Order,
       },
     ),
-    4294967225: (
+    4294967222: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -786,7 +786,7 @@
         "lol_core::team::Team": Order,
       },
     ),
-    4294967226: (
+    4294967223: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -804,7 +804,7 @@
         "lol_core::team::Team": Order,
       },
     ),
-    4294967227: (
+    4294967224: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -822,7 +822,7 @@
         "lol_core::team::Team": Order,
       },
     ),
-    4294967228: (
+    4294967225: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -840,7 +840,7 @@
         "lol_core::team::Team": Order,
       },
     ),
-    4294967229: (
+    4294967226: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -856,7 +856,7 @@
         "lol_core::team::Team": Order,
       },
     ),
-    4294967230: (
+    4294967227: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -874,7 +874,7 @@
         "lol_core::team::Team": Order,
       },
     ),
-    4294967231: (
+    4294967228: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -892,7 +892,7 @@
         "lol_core::team::Team": Neutral,
       },
     ),
-    4294967232: (
+    4294967229: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -910,7 +910,7 @@
         "lol_core::team::Team": Order,
       },
     ),
-    4294967233: (
+    4294967230: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -928,7 +928,7 @@
         "lol_core::team::Team": Neutral,
       },
     ),
-    4294967234: (
+    4294967231: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -946,7 +946,7 @@
         "lol_core::team::Team": Neutral,
       },
     ),
-    4294967235: (
+    4294967232: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -964,7 +964,7 @@
         "lol_core::team::Team": Neutral,
       },
     ),
-    4294967236: (
+    4294967233: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -982,7 +982,7 @@
         "lol_core::team::Team": Neutral,
       },
     ),
-    4294967237: (
+    4294967234: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -1000,7 +1000,7 @@
         "lol_core::team::Team": Neutral,
       },
     ),
-    4294967238: (
+    4294967235: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -1018,7 +1018,7 @@
         "lol_core::team::Team": Neutral,
       },
     ),
-    4294967239: (
+    4294967236: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -1036,7 +1036,7 @@
         "lol_core::team::Team": Neutral,
       },
     ),
-    4294967240: (
+    4294967237: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -1054,7 +1054,7 @@
         "lol_core::team::Team": Neutral,
       },
     ),
-    4294967241: (
+    4294967238: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -1072,7 +1072,7 @@
         "lol_core::team::Team": Neutral,
       },
     ),
-    4294967242: (
+    4294967239: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -1090,7 +1090,7 @@
         "lol_core::team::Team": Neutral,
       },
     ),
-    4294967243: (
+    4294967240: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -1108,7 +1108,7 @@
         "lol_core::team::Team": Neutral,
       },
     ),
-    4294967244: (
+    4294967241: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -1126,7 +1126,7 @@
         "lol_core::team::Team": Neutral,
       },
     ),
-    4294967245: (
+    4294967242: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -1144,7 +1144,7 @@
         "lol_core::team::Team": Neutral,
       },
     ),
-    4294967246: (
+    4294967243: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -1162,7 +1162,7 @@
         "lol_core::team::Team": Neutral,
       },
     ),
-    4294967247: (
+    4294967244: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -1180,7 +1180,7 @@
         "lol_core::team::Team": Neutral,
       },
     ),
-    4294967248: (
+    4294967245: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -1198,7 +1198,7 @@
         "lol_core::team::Team": Neutral,
       },
     ),
-    4294967249: (
+    4294967246: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -1216,7 +1216,7 @@
         "lol_core::team::Team": Neutral,
       },
     ),
-    4294967250: (
+    4294967247: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -1234,7 +1234,7 @@
         "lol_core::team::Team": Neutral,
       },
     ),
-    4294967251: (
+    4294967248: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -1252,7 +1252,7 @@
         "lol_core::team::Team": Neutral,
       },
     ),
-    4294967252: (
+    4294967249: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -1270,7 +1270,7 @@
         "lol_core::team::Team": Neutral,
       },
     ),
-    4294967253: (
+    4294967250: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -1288,7 +1288,7 @@
         "lol_core::team::Team": Neutral,
       },
     ),
-    4294967254: (
+    4294967251: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -1306,7 +1306,7 @@
         "lol_core::team::Team": Order,
       },
     ),
-    4294967255: (
+    4294967252: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -1324,7 +1324,7 @@
         "lol_core::team::Team": Neutral,
       },
     ),
-    4294967256: (
+    4294967253: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -1342,7 +1342,7 @@
         "lol_core::team::Team": Neutral,
       },
     ),
-    4294967257: (
+    4294967254: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -1360,7 +1360,7 @@
         "lol_core::team::Team": Neutral,
       },
     ),
-    4294967258: (
+    4294967255: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -1378,7 +1378,7 @@
         "lol_core::team::Team": Neutral,
       },
     ),
-    4294967259: (
+    4294967256: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -1396,7 +1396,7 @@
         "lol_core::team::Team": Neutral,
       },
     ),
-    4294967260: (
+    4294967257: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -1414,7 +1414,7 @@
         "lol_core::team::Team": Neutral,
       },
     ),
-    4294967261: (
+    4294967258: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -1432,7 +1432,7 @@
         "lol_core::team::Team": Neutral,
       },
     ),
-    4294967262: (
+    4294967259: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -1450,7 +1450,7 @@
         "lol_core::team::Team": Neutral,
       },
     ),
-    4294967263: (
+    4294967260: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -1468,7 +1468,7 @@
         "lol_core::team::Team": Neutral,
       },
     ),
-    4294967264: (
+    4294967261: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (
@@ -1486,7 +1486,7 @@
         "lol_core::team::Team": Neutral,
       },
     ),
-    4294967265: (
+    4294967262: (
       components: {
         "bevy_transform::components::global_transform::GlobalTransform": ((1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0)),
         "bevy_transform::components::transform::Transform": (

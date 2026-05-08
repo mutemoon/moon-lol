@@ -48,6 +48,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Zoe/HUD/Icons2D/Smite_Red.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

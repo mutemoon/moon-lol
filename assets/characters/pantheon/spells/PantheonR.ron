@@ -181,6 +181,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Pantheon/HUD/Icons2D/Pantheon_R.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

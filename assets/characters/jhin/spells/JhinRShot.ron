@@ -48,6 +48,10 @@
         coefficient: Some(1.0),
         hitEffectKey: None,
         selectionPriority: Some(2),
+        iconPath: Some([
+            "ASSETS/Characters/Jhin/HUD/Icons2D/Jhin_R_Shot.dds",
+            "",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

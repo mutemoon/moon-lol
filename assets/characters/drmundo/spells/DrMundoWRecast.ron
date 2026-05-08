@@ -153,6 +153,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/DrMundo/HUD/Icons2D/DrMundo_W2.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

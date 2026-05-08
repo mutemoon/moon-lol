@@ -102,6 +102,9 @@
         coefficient: Some(1.0),
         hitEffectKey: None,
         selectionPriority: Some(2),
+        iconPath: Some([
+            "ASSETS/Characters/Hecarim/HUD/Icons2D/Hecarim_DevastingCharge.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

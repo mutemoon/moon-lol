@@ -140,6 +140,10 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: Some(2),
+        iconPath: Some([
+            "ASSETS/Characters/Lux/HUD/Icons2D/LuxCrashingBlitz2.dds",
+            "",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

@@ -212,6 +212,9 @@
         coefficient: None,
         hitEffectKey: Some(237453280),
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Sona/HUD/Icons2D/Sona_E.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

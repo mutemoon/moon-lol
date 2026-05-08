@@ -136,6 +136,9 @@
         coefficient: Some(0.6),
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Lissandra/HUD/Icons2D/Lissandra_E.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

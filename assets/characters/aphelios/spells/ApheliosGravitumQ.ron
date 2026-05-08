@@ -122,6 +122,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Aphelios/HUD/Icons2D/Q_Gravitum.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

@@ -285,6 +285,10 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Fizz/HUD/Icons2D/Fizz_W.dds",
+            "ASSETS/Characters/Fizz/HUD/Icons2D/Fizz_W.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

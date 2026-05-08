@@ -303,6 +303,9 @@
         coefficient: Some(0.1),
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Sett/HUD/Icons2D/Sett_R.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

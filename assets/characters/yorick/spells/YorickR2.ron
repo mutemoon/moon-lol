@@ -40,6 +40,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Yorick/HUD/Icons2D/Yorick_R2.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

@@ -162,6 +162,9 @@
         coefficient: Some(0.05),
         hitEffectKey: None,
         selectionPriority: Some(2),
+        iconPath: Some([
+            "ASSETS/Characters/Vi/HUD/Icons2D/ViW.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

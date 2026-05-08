@@ -223,6 +223,9 @@
         coefficient: None,
         hitEffectKey: Some(3967461338),
         selectionPriority: Some(2),
+        iconPath: Some([
+            "ASSETS/Characters/KogMaw/HUD/Icons2D/KogMaw_LivingArtillery.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

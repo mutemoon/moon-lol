@@ -226,6 +226,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Corki/HUD/Icons2D/Corki_Valkyrie.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

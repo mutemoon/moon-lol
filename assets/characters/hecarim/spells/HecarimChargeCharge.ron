@@ -103,6 +103,9 @@
         coefficient: Some(0.5),
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "GragasBodySlam.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

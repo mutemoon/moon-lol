@@ -234,6 +234,9 @@
         coefficient: Some(0.6),
         hitEffectKey: Some(3456509720),
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Diana/HUD/Icons2D/Diana_R_MoonFall.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

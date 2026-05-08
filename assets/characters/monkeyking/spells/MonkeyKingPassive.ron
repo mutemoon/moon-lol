@@ -144,6 +144,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/MonkeyKing/HUD/Icons2D/MonkeyKingStoneSkin.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

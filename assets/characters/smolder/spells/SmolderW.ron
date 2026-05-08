@@ -221,6 +221,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: Some(2),
+        iconPath: Some([
+            "ASSETS/Characters/Smolder/HUD/Icons2D/Icons_Smolder_W.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

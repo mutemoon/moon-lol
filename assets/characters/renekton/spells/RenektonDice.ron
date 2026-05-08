@@ -159,6 +159,9 @@
         coefficient: Some(0.9),
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Renekton/HUD/Icons2D/Renekton_E2.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

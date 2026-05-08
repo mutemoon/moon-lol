@@ -96,6 +96,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Yunara/HUD/Icons2D/Yunara_E.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

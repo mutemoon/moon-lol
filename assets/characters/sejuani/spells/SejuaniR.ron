@@ -185,6 +185,9 @@
         coefficient: Some(0.4),
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Sejuani/HUD/Icons2D/Sejuani_R.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

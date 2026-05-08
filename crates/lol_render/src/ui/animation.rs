@@ -1,9 +1,10 @@
 use bevy::prelude::*;
-use league_core::extract::{EnumData, EnumUiPosition, UiElementEffectAnimationData};
 use league_utils::hash_bin;
-use lol_base::prop::LoadHashKeyTrait;
+use lol_base::ui::{
+    LOLEnumData, LOLEnumUiPosition, LOLUiElementEffectAnimationData, LOLUiHandles,
+};
+use lol_base::ui_components::UIElement;
 
-use crate::ui::element::spawn_ui_atom;
 
 #[derive(Component)]
 pub struct UiAnimationState {
@@ -30,43 +31,54 @@ impl Plugin for PluginUIAnimation {
 fn on_command_ui_animation_start(
     event: On<CommandUiAnimationStart>,
     mut commands: Commands,
-    res_asset_server: Res<AssetServer>,
-    res_ui_animation: Res<Assets<UiElementEffectAnimationData>>,
+    res_ui_handles: Res<LOLUiHandles>,
+    anim_assets: Res<Assets<LOLUiElementEffectAnimationData>>,
 ) {
-    let ui_animation = res_ui_animation.load_hash(&hash_bin(&event.key)).unwrap();
-    let Some(entity) = spawn_ui_atom(
-        &mut commands,
-        &res_asset_server,
-        &ui_animation.name,
-        &EnumUiPosition::UiPositionRect(ui_animation.position.clone()),
-        &ui_animation.layer,
-        &Some(ui_animation.texture_data.clone()),
-    ) else {
+    let hash = hash_bin(&event.key);
+    let Some(handle) = res_ui_handles.animation_handles.get(&hash) else {
+        warn!("未找到动画句柄: {}", event.key);
+        return;
+    };
+    let Some(ui_animation) = anim_assets.get(handle) else {
+        warn!("未找到动画资源: {}", event.key);
         return;
     };
 
-    commands.entity(entity).insert((
-        UiAnimationState {
-            key: event.key.clone(),
-            current_frame: 0,
-            timer: 0.0,
-        },
-        Visibility::Visible,
-    ));
+    let entity = commands
+        .spawn((
+            ZIndex(ui_animation.layer.unwrap_or(0) as i32),
+            UIElement::Data {
+                position: LOLEnumUiPosition::UiPositionRect(ui_animation.position.clone()),
+                texture_data: ui_animation.texture_data.clone(),
+            },
+            Visibility::Visible,
+        ))
+        .id();
+
+    commands.entity(entity).insert(UiAnimationState {
+        key: event.key.clone(),
+        current_frame: 0,
+        timer: 0.0,
+    });
 }
 
 fn update_ui_animation(
     mut commands: Commands,
     mut q_ui_animation_state: Query<(Entity, &mut UiAnimationState)>,
-    res_ui_animation: Res<Assets<UiElementEffectAnimationData>>,
+    res_ui_handles: Res<LOLUiHandles>,
+    anim_assets: Res<Assets<LOLUiElementEffectAnimationData>>,
     q_children: Query<&Children>,
     mut q_image_node: Query<&mut ImageNode>,
     time: Res<Time>,
 ) {
     for (entity, mut ui_animation_state) in q_ui_animation_state.iter_mut() {
-        let ui_animation = res_ui_animation
-            .load_hash(&hash_bin(&ui_animation_state.key))
-            .unwrap();
+        let hash = hash_bin(&ui_animation_state.key);
+        let Some(handle) = res_ui_handles.animation_handles.get(&hash) else {
+            continue;
+        };
+        let Some(ui_animation) = anim_assets.get(handle) else {
+            continue;
+        };
 
         let frames_per_second = ui_animation.frames_per_second.unwrap_or(30.0);
 
@@ -78,8 +90,7 @@ fn update_ui_animation(
 
         ui_animation_state.current_frame += 1;
 
-        // let is_loop = ui_animation.m_finish_behavior.unwrap_or(0) == 1;
-        let is_loop = true;
+        let is_loop = ui_animation.finish_behavior.unwrap_or(0) == 1;
 
         if ui_animation_state.current_frame
             >= ui_animation.total_number_of_frames.unwrap_or(1.0) as u32
@@ -88,10 +99,11 @@ fn update_ui_animation(
                 ui_animation_state.current_frame = 0;
             } else {
                 commands.entity(entity).despawn();
+                continue;
             }
         }
 
-        let EnumData::AtlasData(ref atlas_data) = ui_animation.texture_data else {
+        let Some(LOLEnumData::AtlasData(atlas_data)) = ui_animation.texture_data.as_ref() else {
             continue;
         };
         let Some(m_texture_uv) = atlas_data.m_texture_uv else {
@@ -112,8 +124,15 @@ fn update_ui_animation(
         let z = x + width;
         let w = y + height;
 
-        let &child = q_children.get(entity).unwrap().first().unwrap();
-        let mut image_node = q_image_node.get_mut(child).unwrap();
+        let Ok(children) = q_children.get(entity) else {
+            continue;
+        };
+        let Some(&child) = children.first() else {
+            continue;
+        };
+        let Ok(mut image_node) = q_image_node.get_mut(child) else {
+            continue;
+        };
         image_node.rect = Some(Rect::new(x, y, z, w));
     }
 }

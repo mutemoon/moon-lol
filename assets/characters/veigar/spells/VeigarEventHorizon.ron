@@ -127,6 +127,9 @@
         coefficient: Some(0.2),
         hitEffectKey: None,
         selectionPriority: Some(2),
+        iconPath: Some([
+            "ASSETS/Characters/Veigar/HUD/Icons2D/VeigarEventHorizon.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

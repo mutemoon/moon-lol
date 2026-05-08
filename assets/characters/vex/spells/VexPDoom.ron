@@ -24,6 +24,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Vex/HUD/Icons2D/Icons_Vex_Passive.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

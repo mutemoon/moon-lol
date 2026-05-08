@@ -244,6 +244,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Gwen/HUD/Icons2D/Gwen_Q.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

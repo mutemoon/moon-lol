@@ -144,6 +144,9 @@
         coefficient: Some(0.3),
         hitEffectKey: None,
         selectionPriority: Some(2),
+        iconPath: Some([
+            "ASSETS/Characters/Taric/HUD/Icons2D/Taric_W.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

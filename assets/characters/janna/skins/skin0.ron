@@ -12,6 +12,7 @@
         ),
         "lol_base::character::Skin": (
           scale: 1.31,
+          avatar: "ASSETS/Characters/Janna/HUD/Janna_Circle.png",
         ),
       },
     ),

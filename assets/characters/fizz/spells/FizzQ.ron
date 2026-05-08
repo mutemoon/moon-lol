@@ -165,6 +165,9 @@
         coefficient: Some(0.55),
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Fizz/HUD/Icons2D/Fizz_Q.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

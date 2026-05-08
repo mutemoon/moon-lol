@@ -24,6 +24,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/sru_dragon_hextech/HUD/Icons2D/Spell_Dragon_Square_Hextech.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

@@ -87,6 +87,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Rammus/HUD/Icons2D/Armordillo_ScavengeArmor.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

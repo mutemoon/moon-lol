@@ -157,6 +157,10 @@
         coefficient: Some(0.2),
         hitEffectKey: None,
         selectionPriority: Some(2),
+        iconPath: Some([
+            "ASSETS/Characters/Gnar/HUD/Icons2D/GnarBig_R.dds",
+            "ASSETS/Characters/Gnar/HUD/Icons2D/Gnar_R_Grey.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

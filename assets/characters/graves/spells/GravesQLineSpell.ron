@@ -149,6 +149,10 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Graves/HUD/Icons2D/GravesQ.dds",
+            "",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

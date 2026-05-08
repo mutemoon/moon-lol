@@ -48,6 +48,9 @@
         coefficient: None,
         hitEffectKey: Some(4132668880),
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Spells/Icons2D/1041_Long_Staff.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

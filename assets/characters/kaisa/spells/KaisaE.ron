@@ -166,6 +166,10 @@
         coefficient: Some(1.0),
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Kaisa/HUD/Icons2D/Kaisa_E.dds",
+            "ASSETS/Characters/Kaisa/HUD/Icons2D/Kaisa_E2.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

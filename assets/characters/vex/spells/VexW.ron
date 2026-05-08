@@ -162,6 +162,10 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Vex/HUD/Icons2D/Icons_Vex_W01.dds",
+            "ASSETS/Characters/Vex/HUD/Icons2D/Icons_Vex_W02.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

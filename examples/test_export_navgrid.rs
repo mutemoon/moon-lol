@@ -9,7 +9,7 @@ use lol_base::map::MapPaths;
 fn main() {
     let map_paths = MapPaths::new("test");
 
-    println!("导出路径: {}", map_paths.navgrid_bin_export());
+    println!("导出路径: {}", map_paths.navgrid_bin());
 
     println!("正在创建测试导航网格...");
     let nav_grid = make_test_grid();
@@ -18,8 +18,8 @@ fn main() {
         nav_grid.x_len, nav_grid.y_len, nav_grid.cell_size
     );
 
-    println!("正在导出到 {}...", map_paths.navgrid_bin_export());
-    write_nav_grid(&nav_grid, &map_paths.navgrid_bin_export());
+    println!("正在导出到 {}...", map_paths.navgrid_bin());
+    write_nav_grid(&nav_grid, &map_paths.navgrid_bin());
 
     println!("导出完成!");
 }

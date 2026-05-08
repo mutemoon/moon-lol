@@ -258,6 +258,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Bard/HUD/Icons2D/Bard_Passive.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

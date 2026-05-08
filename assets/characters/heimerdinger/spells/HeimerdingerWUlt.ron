@@ -135,6 +135,10 @@
         coefficient: Some(0.45),
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Heimerdinger/HUD/Icons2D/Heimerdinger_W2.dds",
+            "ASSETS/Characters/Heimerdinger/HUD/Icons2D/Heimerdinger_W2.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

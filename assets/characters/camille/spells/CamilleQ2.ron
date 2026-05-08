@@ -143,6 +143,11 @@
         coefficient: Some(0.5),
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Camille/HUD/Icons2D/Camille_Q1.dds",
+            "ASSETS/Characters/Camille/HUD/Icons2D/Camille_Q2.dds",
+            "ASSETS/Characters/Camille/HUD/Icons2D/Camille_Q3.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

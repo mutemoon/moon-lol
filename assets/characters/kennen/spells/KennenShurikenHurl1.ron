@@ -118,6 +118,9 @@
         coefficient: Some(0.66),
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "Kennen_ThunderingShuriken.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

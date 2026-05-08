@@ -65,6 +65,9 @@
         coefficient: None,
         hitEffectKey: Some(2968371449),
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Aphelios/HUD/Icons2D/Infernum_U.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

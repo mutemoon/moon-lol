@@ -114,6 +114,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Renata/HUD/Icons2D/Renata_P.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

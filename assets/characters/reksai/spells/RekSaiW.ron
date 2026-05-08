@@ -361,6 +361,10 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/RekSai/HUD/Icons2D/RekSai_W1.dds",
+            "ASSETS/Characters/RekSai/HUD/Icons2D/RekSai_W2.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

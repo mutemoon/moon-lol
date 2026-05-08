@@ -173,6 +173,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: Some(2),
+        iconPath: Some([
+            "ASSETS/Characters/MonkeyKing/HUD/Icons2D/MonkeyKingCrushingBlow.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

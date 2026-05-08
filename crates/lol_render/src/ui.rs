@@ -13,7 +13,6 @@ use bind::PluginUIBind;
 use button::PluginUIButton;
 use damage::PluginUIDamage;
 use element::PluginUIElement;
-use health_bar::PluginUIHealthBar;
 use player::PluginUIPlayer;
 use skill::PluginUISkill;
 
@@ -23,7 +22,7 @@ pub struct PluginUI;
 impl Plugin for PluginUI {
     fn build(&self, app: &mut App) {
         app.add_plugins(PluginUIElement);
-        app.add_plugins(PluginUIHealthBar);
+        // app.add_plugins(PluginUIHealthBar);
         app.add_plugins(PluginUIBind);
         app.add_plugins(PluginUIButton);
         app.add_plugins(PluginUISkill);

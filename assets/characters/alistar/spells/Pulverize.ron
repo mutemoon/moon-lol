@@ -121,6 +121,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Alistar/HUD/Icons2D/Alistar_Q.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

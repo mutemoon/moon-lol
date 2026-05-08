@@ -2,9 +2,13 @@ use std::collections::HashMap;
 
 use bevy::prelude::*;
 use bevy::window::{PrimaryWindow, WindowResized};
-use league_core::extract::{EnumAnchor, EnumData, EnumUiPosition, UiElementIconData};
 use league_utils::hash_bin;
-use lol_core::utils::AssetServerLoadLeague;
+use lol_base::ui::{
+    LOLEnumAnchor, LOLEnumData, LOLEnumUiPosition, LOLUiElementEffectAnimationData,
+    LOLUiElementGroupButtonData, LOLUiElementIconData, LOLUiElementRegionData, LOLUiFile,
+    LOLUiHandles, LOLUiPaths, LOLUiScenes,
+};
+use lol_base::ui_components::{UIElement, UIElementChild};
 
 pub struct PluginUIElement;
 
@@ -12,15 +16,19 @@ impl Plugin for PluginUIElement {
     fn build(&self, app: &mut App) {
         app.init_state::<UIState>();
         app.init_resource::<UIElementEntity>();
+        app.init_resource::<LOLUiScenes>();
+        app.init_resource::<LOLUiHandles>();
+        app.init_asset::<LOLUiElementIconData>();
+        app.init_asset::<LOLUiElementEffectAnimationData>();
+        app.init_asset::<LOLUiElementGroupButtonData>();
+        app.init_asset::<LOLUiElementRegionData>();
 
-        // app.add_systems(Startup, startup_load_ui);
+        app.add_systems(Startup, startup_load_ui_data);
         app.add_systems(
             Update,
             (update_on_window_resized, update_on_add_ui_element).run_if(in_state(UIState::Loaded)),
         );
 
-        // app.add_observer(on_event_load_prop_end_ui_gameplay);
-        // app.add_observer(on_event_load_prop_end_ui);
         app.add_observer(on_command_update_ui_element);
     }
 }
@@ -35,13 +43,6 @@ pub enum UIState {
 #[derive(Resource, Default)]
 pub struct UIElementEntity {
     pub map: HashMap<u32, Entity>,
-}
-
-#[derive(Component)]
-pub struct UIElement {
-    pub key: String,
-    pub position: EnumUiPosition,
-    pub update_child: bool,
 }
 
 #[derive(EntityEvent, Debug)]
@@ -70,177 +71,96 @@ impl UIElementEntity {
     }
 }
 
-// fn startup_load_ui(mut commands: Commands) {
-//     let paths = vec![
-//         // "gameplay.playeraugments.bin".to_string(),
-//         "gameplay.playerframe.bin".to_string(),
-//         // "gameplay.playerinventory.bin".to_string(),
-//         // "gameplay.playermute.bin".to_string(),
-//         // "gameplay.playerperks.bin".to_string(),
-//         // "gameplay.playerreport.bin".to_string(),
-//         // "gameplay.playerstats.bin".to_string(),
-//         // "gameplay.playerstatstones.bin".to_string(),
-//         "gameplay.lolfloatinginfobars.bin".to_string(),
-//     ];
-//
-//     commands.trigger(CommandLoadPropBin {
-//         path: PropPath::Path(paths),
-//         label: Some("gameplay 系列".to_string()),
-//     });
-// }
+fn startup_load_ui_data(
+    mut commands: Commands,
+    mut res_ui_scenes: ResMut<LOLUiScenes>,
+    mut res_ui_handles: ResMut<LOLUiHandles>,
+    mut res_ui_element_entity: ResMut<UIElementEntity>,
+    mut icon_assets: ResMut<Assets<LOLUiElementIconData>>,
+    mut anim_assets: ResMut<Assets<LOLUiElementEffectAnimationData>>,
+    mut button_assets: ResMut<Assets<LOLUiElementGroupButtonData>>,
+    mut region_assets: ResMut<Assets<LOLUiElementRegionData>>,
+) {
+    let ui_paths = LOLUiPaths::default();
+    let ron_paths = vec![
+        ui_paths.player_frame_ron(),
+        ui_paths.floating_info_bars_ron(),
+    ];
 
-// fn on_event_load_prop_end_ui_gameplay(
-//     event: On<EventLoadPropEnd>,
-//     mut commands: Commands,
-//     res_assets_ui_property_loadable: Res<Assets<UiPropertyLoadable>>,
-// ) {
-//     if event.label != "gameplay 系列" {
-//         return;
-//     }
+    for path in ron_paths {
+        let Ok(content) = std::fs::read_to_string(format!("assets/{}", path)) else {
+            warn!("无法读取 UI 数据文件: {}", path);
+            continue;
+        };
 
-//     commands.trigger(CommandLoadPropBin {
-//         path: PropPath::Hash(
-//             res_assets_ui_property_loadable
-//                 .iter()
-//                 .map(|v| v.1.filepath_hash)
-//                 .collect(),
-//         ),
-//         label: Some("ui 系列".to_string()),
-//     });
-// }
+        let Ok(data) = ron::from_str::<LOLUiFile>(&content) else {
+            warn!("无法解析 UI 数据文件: {}", path);
+            continue;
+        };
 
-// fn on_event_load_prop_end_ui(
-//     event: On<EventLoadPropEnd>,
-//     mut commands: Commands,
-//     mut res_ui_element_entity: ResMut<UIElementEntity>,
-//     res_asset_server: Res<AssetServer>,
-//     res_assets_ui_element_icon_data: Res<Assets<UiElementIconData>>,
-//     res_assets_ui_scene_data: Res<Assets<UiSceneData>>,
-// ) {
-//     if event.label != "ui 系列" {
-//         return;
-//     }
-//
-//     info!("开始初始化 ui 元素");
-//
-//     for (_, ui) in res_assets_ui_element_icon_data.iter() {
-//         let Some(entity) = spawn_ui_element(&mut commands, &res_asset_server, ui) else {
-//             continue;
-//         };
-//
-//         commands.entity(entity).insert(Visibility::Hidden);
-//
-//         if let Some(scene_data) = res_assets_ui_scene_data.load_hash(&ui.scene) {
-//             if let Some(&enabled) = scene_data.enabled.as_ref() {
-//                 if enabled {
-//                     commands.entity(entity).insert(Visibility::Visible);
-//                 } else {
-//                     commands.entity(entity).insert(Visibility::Hidden);
-//                 }
-//             }
-//         }
-//
-//         if let Some(&enabled) = ui.enabled.as_ref() {
-//             if enabled {
-//                 commands.entity(entity).insert(Visibility::Visible);
-//             } else {
-//                 commands.entity(entity).insert(Visibility::Hidden);
-//             }
-//         }
-//
-//         // 应该根据技能是否可释放来显示，暂时全部显示为可用
-//         if ui.name.contains("_BorderAvailable") {
-//             commands.entity(entity).insert(Visibility::Visible);
-//         }
-//
-//         res_ui_element_entity.map.insert(hash_bin(&ui.name), entity);
-//     }
-//
-//     info!(
-//         "ui 元素初始化完成，一共 {} 个元素",
-//         res_ui_element_entity.map.len()
-//     );
-//
-//     // commands.trigger(CommandUiAnimationStart {
-//     //     key: "ClientStates/Gameplay/UX/LoL/PlayerFrame/UIBase/Player_Frame_Root/LevelUpFxIn/LevelUp0_ButtonIn".to_string(),
-//     // });
-//     commands.set_state(UIState::Loaded);
-// }
+        for (hash, scene_data) in data.scenes {
+            res_ui_scenes.scenes.insert(hash, scene_data);
+        }
 
-pub fn spawn_ui_element(
-    commands: &mut Commands,
-    res_asset_server: &Res<AssetServer>,
-    ui: &UiElementIconData,
-) -> Option<Entity> {
-    spawn_ui_atom(
-        commands,
-        res_asset_server,
-        &ui.name,
-        &ui.position,
-        &ui.layer,
-        &ui.texture_data,
-    )
+        // 合并数据并 spawn 实体
+        for (hash, icon_data) in data.elements {
+            let handle = icon_assets.add(icon_data.clone());
+            res_ui_handles.icon_handles.insert(hash, handle.clone());
+
+            let is_visible = determine_visibility(&icon_data, &res_ui_scenes);
+            let entity = commands
+                .spawn((
+                    ZIndex(icon_data.layer.unwrap_or(0) as i32),
+                    UIElement::Handle(handle),
+                    if is_visible {
+                        Visibility::Visible
+                    } else {
+                        Visibility::Hidden
+                    },
+                ))
+                .id();
+            res_ui_element_entity.map.insert(hash, entity);
+        }
+
+        for (hash, anim_data) in data.animation_elements {
+            let handle = anim_assets.add(anim_data.clone());
+            res_ui_handles.animation_handles.insert(hash, handle);
+        }
+
+        for (hash, button_data) in data.button_elements {
+            let handle = button_assets.add(button_data.clone());
+            res_ui_handles.button_handles.insert(hash, handle);
+        }
+
+        for (hash, region_data) in data.region_elements {
+            let handle = region_assets.add(region_data.clone());
+            res_ui_handles.region_handles.insert(hash, handle);
+        }
+    }
+
+    info!(
+        "UI 元素初始化完成，一共 {} 个实体",
+        res_ui_element_entity.map.len()
+    );
+    commands.set_state(UIState::Loaded);
 }
 
-pub fn spawn_ui_atom(
-    commands: &mut Commands,
-    res_asset_server: &Res<AssetServer>,
-    key: &String,
-    position: &EnumUiPosition,
-    layer: &Option<u32>,
-    texture_data: &Option<EnumData>,
-) -> Option<Entity> {
-    let entity = commands
-        .spawn((
-            Node {
-                position_type: PositionType::Absolute,
-                overflow: Overflow::hidden(),
-                ..default()
-            },
-            ZIndex(layer.unwrap_or(0) as i32),
-            Pickable::IGNORE,
-            UIElement {
-                key: key.clone(),
-                position: position.clone(),
-                update_child: true,
-            },
-        ))
-        .observe(
-            |event: On<Pointer<Click>>, q_ui_element: Query<&UIElement>| {
-                let ui_element = q_ui_element.get(event.entity).unwrap();
-                println!("点击了 {}", ui_element.key);
-            },
-        )
-        .id();
-
-    let child_entity = commands.spawn((Node::default(), Pickable::IGNORE)).id();
-
-    if let Some(texture_data) = texture_data {
-        if let EnumData::AtlasData(atlas_data) = texture_data {
-            if let Some(m_texture_uv) = atlas_data.m_texture_uv {
-                commands.entity(child_entity).insert(ImageNode {
-                    image: res_asset_server.load_league_labeled(&atlas_data.m_texture_name, "srgb"),
-                    rect: Some(Rect::new(
-                        m_texture_uv.x,
-                        m_texture_uv.y,
-                        m_texture_uv.z,
-                        m_texture_uv.w,
-                    )),
-                    ..default()
-                });
-            }
+fn determine_visibility(icon_data: &LOLUiElementIconData, res_ui_scenes: &LOLUiScenes) -> bool {
+    if let Some(scene) = res_ui_scenes.scenes.get(&icon_data.scene) {
+        if !scene.enabled {
+            return false;
         }
-    };
-
-    commands.entity(entity).add_child(child_entity);
-
-    Some(entity)
+    }
+    icon_data.enabled
 }
 
 fn update_element_layout(
+    commands: &mut Commands,
+    asset_server: &AssetServer,
     entity: Entity,
     ui_element: &UIElement,
     window_size: Vec2,
+    icon_assets: &Assets<LOLUiElementIconData>,
     q_node: &mut Query<&mut Node>,
     q_children: &Query<&Children>,
 ) {
@@ -248,16 +168,27 @@ fn update_element_layout(
         return;
     };
 
-    let EnumUiPosition::UiPositionRect(ref position) = ui_element.position else {
+    let (position, texture_data) = match ui_element {
+        UIElement::Handle(handle) => {
+            let Some(icon_data) = icon_assets.get(handle) else {
+                return;
+            };
+            (&icon_data.position, &icon_data.texture_data)
+        }
+        UIElement::Data {
+            position,
+            texture_data,
+        } => (position, texture_data),
+    };
+
+    let LOLEnumUiPosition::UiPositionRect(position_rect) = position;
+
+    let Some(ui_rect) = &position_rect.ui_rect else {
         return;
     };
 
-    let Some(ui_rect) = &position.ui_rect else {
-        return;
-    };
-
-    let anchor = match &position.anchors {
-        Some(EnumAnchor::AnchorSingle(anchor)) => anchor.anchor,
+    let anchor = match &position_rect.anchors {
+        Some(LOLEnumAnchor::AnchorSingle(anchor)) => anchor.anchor,
         _ => Vec2::ZERO,
     };
 
@@ -297,31 +228,51 @@ fn update_element_layout(
     node.width = Val::Px(size_new.x);
     node.height = Val::Px(size_new.y);
 
-    if !ui_element.update_child {
-        return;
+    let child = if let Ok(children) = q_children.get(entity) {
+        if let Some(&child) = children.first() {
+            child
+        } else {
+            let child = commands.spawn(UIElementChild).id();
+            commands.entity(entity).add_child(child);
+            child
+        }
+    } else {
+        let child = commands.spawn(UIElementChild).id();
+        commands.entity(entity).add_child(child);
+        child
+    };
+
+    // 更新子实体的 ImageNode
+    if let Some(texture_data) = texture_data {
+        let LOLEnumData::AtlasData(atlas_data) = texture_data;
+        if let Some(m_texture_uv) = atlas_data.m_texture_uv {
+            commands.entity(child).insert(ImageNode {
+                image: asset_server.load(&atlas_data.m_texture_name),
+                rect: Some(Rect::new(
+                    m_texture_uv.x,
+                    m_texture_uv.y,
+                    m_texture_uv.z,
+                    m_texture_uv.w,
+                )),
+                ..default()
+            });
+        }
     }
 
-    let Ok(children) = q_children.get(entity) else {
-        return;
-    };
-
-    let Some(&child) = children.first() else {
-        return;
-    };
-
-    let Ok(mut child_node) = q_node.get_mut(child) else {
-        return;
-    };
-
-    child_node.width = Val::Px(size_new.x);
-    child_node.height = Val::Px(size_new.y);
+    if let Ok(mut child_node) = q_node.get_mut(child) {
+        child_node.width = Val::Px(size_new.x);
+        child_node.height = Val::Px(size_new.y);
+    }
 }
 
 fn update_on_add_ui_element(
+    mut commands: Commands,
     mut q_element: Query<(Entity, &UIElement), Added<UIElement>>,
     mut q_node: Query<&mut Node>,
     q_children: Query<&Children>,
     q_window: Query<&Window, With<PrimaryWindow>>,
+    icon_assets: Res<Assets<LOLUiElementIconData>>,
+    asset_server: Res<AssetServer>,
 ) {
     let Ok(window) = q_window.single() else {
         return;
@@ -329,20 +280,55 @@ fn update_on_add_ui_element(
     let window_size = vec2(window.width(), window.height());
 
     for (entity, ui_element) in q_element.iter_mut() {
-        update_element_layout(entity, ui_element, window_size, &mut q_node, &q_children);
+        update_element_layout(
+            &mut commands,
+            &asset_server,
+            entity,
+            ui_element,
+            window_size,
+            &icon_assets,
+            &mut q_node,
+            &q_children,
+        );
+
+        commands.entity(entity).observe(
+            |event: On<Pointer<Click>>,
+             q_ui_element: Query<&UIElement>,
+             icon_assets: Res<Assets<LOLUiElementIconData>>| {
+                let ui_element = q_ui_element.get(event.entity).unwrap();
+                let icon_data = match ui_element {
+                    UIElement::Handle(handle) => icon_assets.get(handle),
+                    UIElement::Data { .. } => None, // Data variant doesn't have name anymore
+                };
+                let name = icon_data.map(|v| v.name.as_str()).unwrap_or("dynamic");
+                println!("点击了 {}", name);
+            },
+        );
     }
 }
 
 fn update_on_window_resized(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
     mut resize_reader: MessageReader<WindowResized>,
     mut q_element: Query<(Entity, &UIElement)>,
     mut q_node: Query<&mut Node>,
     q_children: Query<&Children>,
+    icon_assets: Res<Assets<LOLUiElementIconData>>,
 ) {
     for e in resize_reader.read() {
         let window_size = vec2(e.width, e.height);
         for (entity, ui_element) in q_element.iter_mut() {
-            update_element_layout(entity, ui_element, window_size, &mut q_node, &q_children);
+            update_element_layout(
+                &mut commands,
+                &asset_server,
+                entity,
+                ui_element,
+                window_size,
+                &icon_assets,
+                &mut q_node,
+                &q_children,
+            );
         }
     }
 }

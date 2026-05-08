@@ -65,6 +65,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "GreenTerror_Feast.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

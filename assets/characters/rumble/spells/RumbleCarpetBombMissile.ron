@@ -65,6 +65,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Rumble/HUD/Icons2D/Rumble_R.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

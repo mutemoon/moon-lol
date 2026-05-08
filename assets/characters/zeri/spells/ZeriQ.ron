@@ -272,6 +272,14 @@
         coefficient: Some(1.1),
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Zeri/HUD/Icons2D/ZeriQ.dds",
+            "ASSETS/Characters/Zeri/HUD/Icons2D/ZeriQE.dds",
+            "ASSETS/Characters/Zeri/HUD/Icons2D/ZeriQR.dds",
+            "ASSETS/Characters/Zeri/HUD/Icons2D/ZeriQRE.dds",
+            "ASSETS/Characters/Zeri/HUD/Icons2D/ZeriQPassive.dds",
+            "ASSETS/Characters/Zeri/HUD/Icons2D/ZeriQPassiveCharged.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

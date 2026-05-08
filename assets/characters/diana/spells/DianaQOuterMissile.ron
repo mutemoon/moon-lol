@@ -57,6 +57,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "DianaNew_Q_MoonsEdge.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

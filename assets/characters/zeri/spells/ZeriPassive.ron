@@ -100,6 +100,10 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Zeri/HUD/Icons2D/ZeriQPassiveCharged.dds",
+            "ASSETS/Characters/Zeri/HUD/Icons2D/ZeriXEkko.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

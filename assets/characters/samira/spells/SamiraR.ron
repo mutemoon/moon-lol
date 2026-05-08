@@ -118,6 +118,16 @@
         coefficient: Some(0.9),
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Samira/HUD/Icons2D/SamiraR1.dds",
+            "ASSETS/Characters/Samira/HUD/Icons2D/SamiraR2.dds",
+            "ASSETS/Characters/Samira/HUD/Icons2D/SamiraR3.dds",
+            "ASSETS/Characters/Samira/HUD/Icons2D/SamiraR4.dds",
+            "ASSETS/Characters/Samira/HUD/Icons2D/SamiraR5.dds",
+            "ASSETS/Characters/Samira/HUD/Icons2D/SamiraR6.dds",
+            "ASSETS/Characters/Samira/HUD/Icons2D/SamiraR7.dds",
+            "ASSETS/Characters/Samira/HUD/Icons2D/SamiraR8.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

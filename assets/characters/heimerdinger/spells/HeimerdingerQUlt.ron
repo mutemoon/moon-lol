@@ -48,6 +48,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Heimerdinger/HUD/Icons2D/Heimerdinger_Q2.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

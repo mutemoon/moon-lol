@@ -335,6 +335,9 @@
         coefficient: Some(0.9),
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Zac/HUD/Icons2D/ZacR.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

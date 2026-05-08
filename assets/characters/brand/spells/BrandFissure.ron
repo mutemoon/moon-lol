@@ -94,6 +94,9 @@
         coefficient: Some(0.6),
         hitEffectKey: None,
         selectionPriority: Some(2),
+        iconPath: Some([
+            "ASSETS/Characters/Brand/HUD/Icons2D/BrandPillarOfFlame.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

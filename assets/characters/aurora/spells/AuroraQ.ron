@@ -209,6 +209,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: Some(2),
+        iconPath: Some([
+            "ASSETS/Characters/Aurora/HUD/Icons2D/AuroraQ.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

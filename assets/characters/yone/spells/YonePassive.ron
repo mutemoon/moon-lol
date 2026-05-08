@@ -103,6 +103,9 @@
         coefficient: Some(0.65),
         hitEffectKey: None,
         selectionPriority: Some(2),
+        iconPath: Some([
+            "ASSETS/Characters/Yone/HUD/Icons2D/YonePassive.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

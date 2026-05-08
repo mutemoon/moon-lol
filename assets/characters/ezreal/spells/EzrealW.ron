@@ -144,6 +144,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: Some(2),
+        iconPath: Some([
+            "ASSETS/Characters/Ezreal/HUD/Icons2D/Ezreal_W.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

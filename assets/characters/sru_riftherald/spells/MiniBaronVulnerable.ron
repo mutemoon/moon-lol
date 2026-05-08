@@ -24,6 +24,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Shared/Spells/Icons2D/SRU_RiftHerald_Vulnerable.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::path::Path;
 
 use bevy::math::Vec3Swizzles;
 use bevy::prelude::*;
@@ -174,7 +175,7 @@ pub fn extract_phase_3_map_chunks(
                     let config_barracks = barracks_config_to_barracks(barracks_config.clone());
                     let ron_content = ron::to_string(&config_barracks).unwrap();
                     write_to_file(
-                        &map_paths.barracks_ron_export(barracks_config_hash),
+                        &map_paths.barracks_ron(barracks_config_hash),
                         ron_content,
                     );
 
@@ -268,7 +269,7 @@ pub fn extract_phase_4_nav_grid(world: &mut World, loader: &LeagueLoader, map_pa
         let config_navigation_grid = load_league_nav_grid(nav_grid);
 
         crate::extract::utils::write_bin_to_file(
-            &map_paths.navgrid_bin_export(),
+            &map_paths.navgrid_bin(),
             &config_navigation_grid,
         );
 
@@ -306,9 +307,15 @@ pub fn extract_phase_5_map_geo(loader: &LeagueLoader, map_paths: &MapPaths) {
         }
     }
 
+    let glb_path_str = map_paths.mapgeo_glb();
+    let glb_path = Path::new("assets").join(&glb_path_str);
+    if let Some(parent) = glb_path.parent() {
+        std::fs::create_dir_all(parent).expect("无法创建地图资源目录");
+    }
+
     export_mapgeo_to_gltf(
         &league_mapgeo,
-        &map_paths.mapgeo_glb_export().replace(".glb", ""),
+        &glb_path_str.replace(".glb", ""),
         &material_defs,
         loader,
     )
@@ -378,7 +385,7 @@ pub fn extract_phase_7_serialize_world(world: &mut World, map_paths: &MapPaths) 
     let type_registry = type_registry.read();
     let serialized_scene = scene.serialize(&type_registry).unwrap();
 
-    write_to_file(&map_paths.scene_ron_export(), &serialized_scene);
+    write_to_file(&map_paths.scene_ron(), &serialized_scene);
 }
 
 /// Phase 8: 提取装备信息
@@ -397,7 +404,7 @@ pub fn extract_phase_8_items(loader: &LeagueLoader) {
         let ron_content =
             ron::ser::to_string_pretty(&config_item, ron::ser::PrettyConfig::default()).unwrap();
         write_to_file(
-            &format!("assets/items/{}.ron", item_data.item_id),
+            &format!("items/{}.ron", item_data.item_id),
             ron_content,
         );
     }

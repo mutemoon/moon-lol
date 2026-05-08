@@ -199,6 +199,9 @@
         coefficient: Some(0.2),
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Ornn/HUD/Icons2D/OrnnR1.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

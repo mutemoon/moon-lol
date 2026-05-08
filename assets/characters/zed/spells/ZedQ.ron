@@ -97,6 +97,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Zed/HUD/Icons2D/ZedQ.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

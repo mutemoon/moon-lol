@@ -156,6 +156,9 @@
         coefficient: Some(0.12),
         hitEffectKey: None,
         selectionPriority: Some(2),
+        iconPath: Some([
+            "ASSETS/Characters/Nasus/HUD/Icons2D/Nasus_E.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

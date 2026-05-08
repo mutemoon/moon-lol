@@ -89,6 +89,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Galio/HUD/Icons2D/Galio_Passive.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

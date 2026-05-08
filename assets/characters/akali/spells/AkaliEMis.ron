@@ -112,6 +112,9 @@
         coefficient: Some(1.2),
         hitEffectKey: None,
         selectionPriority: Some(2),
+        iconPath: Some([
+            "ASSETS/Characters/Akali/HUD/Icons2D/Akali_E2.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

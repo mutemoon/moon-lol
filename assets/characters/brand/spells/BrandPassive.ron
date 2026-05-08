@@ -158,6 +158,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Brand/HUD/Icons2D/BrandP.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

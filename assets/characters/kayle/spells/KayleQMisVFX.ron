@@ -64,6 +64,9 @@
         coefficient: None,
         hitEffectKey: Some(3522284295),
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Kayle/HUD/Icons2D/Kayle_Q.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

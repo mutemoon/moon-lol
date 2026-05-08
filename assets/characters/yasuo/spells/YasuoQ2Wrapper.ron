@@ -48,6 +48,9 @@
         coefficient: Some(1.0),
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Yasuo/HUD/Icons2D/Yasuo_Q2.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

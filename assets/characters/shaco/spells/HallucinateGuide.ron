@@ -135,6 +135,9 @@
         coefficient: Some(1.0),
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Shaco/HUD/Icons2D/Jester_HallucinogenBomb_R.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

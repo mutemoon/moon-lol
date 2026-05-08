@@ -134,6 +134,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Darius/HUD/Icons2D/Darius_Icon_Hamstring.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

@@ -186,6 +186,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Soraka/HUD/Icons2D/Soraka_Q.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

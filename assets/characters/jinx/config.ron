@@ -7,13 +7,13 @@
           timer: None,
           duration: 0.0,
         ),
+        "lol_core::skill::PassiveSkillOf": (4294967271),
         "lol_core::skill::Skill": (
           spell: Path("characters/Jinx/spells/JinxPassiveMarker.ron"),
           level: 1,
           slot: Passive,
           cooldown_mode: AfterCast,
         ),
-        "lol_core::skill::SkillOf": (4294967271),
       },
     ),
     4294967267: (
@@ -157,12 +157,12 @@
           "JinxW": Path("characters/Jinx/spells/JinxW.ron"),
           "JinxWMissile": Path("characters/Jinx/spells/JinxWMissile.ron"),
         }),
+        "lol_core::skill::PassiveSkill": (4294967266),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,
           4294967268,
           4294967267,
-          4294967266,
         ]),
       },
     ),

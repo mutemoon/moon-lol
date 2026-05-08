@@ -311,6 +311,10 @@
         coefficient: Some(0.5),
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Viktor/HUD/Icons2D/Viktor_R1.dds",
+            "ASSETS/Characters/Viktor/HUD/Icons2D/Viktor_R2.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

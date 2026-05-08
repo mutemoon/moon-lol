@@ -182,6 +182,9 @@
         coefficient: None,
         hitEffectKey: Some(2082240047),
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Shaco/HUD/Icons2D/Jester_IncrediblyPrecise.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

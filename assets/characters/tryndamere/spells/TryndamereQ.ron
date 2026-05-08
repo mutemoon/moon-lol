@@ -162,6 +162,9 @@
         coefficient: Some(0.3),
         hitEffectKey: Some(3960687335),
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Tryndamere/HUD/Icons2D/Tryndamere_Q.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

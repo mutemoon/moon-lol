@@ -259,6 +259,12 @@
         coefficient: Some(0.4),
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Qiyana/HUD/Icons2D/Qiyana_Q2_Red.dds",
+            "ASSETS/Characters/Qiyana/HUD/Icons2D/Qiyana_Q2_Green.dds",
+            "ASSETS/Characters/Qiyana/HUD/Icons2D/Qiyana_Q2_Blue.dds",
+            "ASSETS/Characters/Qiyana/HUD/Icons2D/Qiyana_Q1.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

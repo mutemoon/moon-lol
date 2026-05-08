@@ -126,6 +126,11 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "Kayn_Q_base.dds",
+            "ASSETS/Characters/Kayn/HUD/Icons2D/Kayn_Q_Ass.dds",
+            "Kayn_Q.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

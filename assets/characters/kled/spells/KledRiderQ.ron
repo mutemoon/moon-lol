@@ -183,6 +183,9 @@
         coefficient: Some(0.8),
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Kled/HUD/Icons2D/Kled_Q2.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

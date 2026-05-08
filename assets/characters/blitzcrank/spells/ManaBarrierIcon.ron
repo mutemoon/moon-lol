@@ -147,6 +147,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Blitzcrank/HUD/Icons2D/BlitzcrankP.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

@@ -220,6 +220,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Lulu/HUD/Icons2D/Lulu_CommandPix.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

@@ -133,6 +133,10 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: Some(2),
+        iconPath: Some([
+            "ASSETS/Characters/Karma/HUD/Icons2D/Karma_W1.dds",
+            "ASSETS/Characters/Karma/HUD/Icons2D/Karma_W2.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

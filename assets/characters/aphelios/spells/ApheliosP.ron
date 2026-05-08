@@ -141,6 +141,15 @@
         coefficient: Some(1.0),
         hitEffectKey: None,
         selectionPriority: Some(2),
+        iconPath: Some([
+            "ASSETS/Characters/Aphelios/HUD/Icons2D/ApheliosP.dds",
+            "ASSETS/Characters/Aphelios/HUD/Icons2D/ApheliosP_Skin01.dds",
+            "ASSETS/Characters/Aphelios/HUD/Icons2D/ApheliosP_Skin09.dds",
+            "ASSETS/Characters/Aphelios/HUD/Icons2D/ApheliosP_Skin18.dds",
+            "ASSETS/Characters/Aphelios/HUD/Icons2D/ApheliosP_Skin20.dds",
+            "ASSETS/Characters/Aphelios/HUD/Icons2D/ApheliosP_Skin30.dds",
+            "ASSETS/Characters/Aphelios/HUD/Icons2D/ApheliosP_Skin40.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

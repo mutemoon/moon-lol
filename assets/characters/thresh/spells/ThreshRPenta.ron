@@ -184,6 +184,9 @@
         coefficient: Some(1.0),
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Thresh/HUD/Icons2D/Thresh_R.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

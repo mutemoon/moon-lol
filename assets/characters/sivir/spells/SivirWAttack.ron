@@ -64,6 +64,9 @@
         coefficient: None,
         hitEffectKey: Some(2891457380),
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Sivir/HUD/Icons2D/Sivir_W.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

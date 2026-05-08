@@ -310,6 +310,10 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Kalista/HUD/Icons2D/Kalista_E.dds",
+            "ASSETS/Characters/Kalista/HUD/Icons2D/Kalista_E_Off.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

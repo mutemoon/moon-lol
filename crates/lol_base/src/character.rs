@@ -5,6 +5,7 @@ use bevy::prelude::*;
 #[reflect(Component)]
 pub struct Skin {
     pub scale: f32,
+    pub avatar: String,
 }
 
 /// 血条组件

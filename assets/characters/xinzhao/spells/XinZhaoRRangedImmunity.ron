@@ -55,6 +55,9 @@
         coefficient: Some(0.4),
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/XinZhao/HUD/Icons2D/XinZhaoReworkR.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

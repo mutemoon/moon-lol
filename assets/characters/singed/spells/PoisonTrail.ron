@@ -161,6 +161,10 @@
         coefficient: Some(0.1),
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Singed/HUD/Icons2D/Singed_Q.dds",
+            "ASSETS/Characters/Singed/HUD/Icons2D/Singed_Q_Off.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

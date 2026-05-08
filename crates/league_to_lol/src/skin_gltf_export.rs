@@ -16,61 +16,13 @@ use gltf::json::skin::Skin as JsonSkin;
 use gltf::json::texture::{Info, Texture};
 use gltf::json::validation::{Checked, USize64};
 use gltf::json::{Index, Node, Root};
-use image::codecs::png::{CompressionType, FilterType};
-use image::{ExtendedColorType, ImageEncoder};
 use league_file::mesh_skinned::LeagueSkinnedMesh;
 use league_file::skeleton::LeagueSkeleton;
-use league_file::texture::{LeagueTexture, LeagueTextureFormat};
 use league_utils::{hash_joint, hash_to_type_name};
 use lol_base::animation::ConfigAnimationClip;
-use texpresso::Format;
 
+use crate::extract::write_to_file;
 use crate::utils::Error;
-
-/// 将 LeagueTexture 解码为 PNG 格式
-pub fn decode_texture_to_png(texture: &LeagueTexture) -> Option<Vec<u8>> {
-    let format = match texture.format {
-        LeagueTextureFormat::Bc1 => Some(Format::Bc1),
-        LeagueTextureFormat::Bc3 => Some(Format::Bc3),
-        LeagueTextureFormat::Bgra8 => None,
-        _ => return None,
-    };
-
-    let rgba_data = if let Some(f) = format {
-        let mut rgba = vec![0u8; texture.width as usize * texture.height as usize * 4];
-        f.decompress(
-            &texture.mipmaps[0],
-            texture.width as usize,
-            texture.height as usize,
-            &mut rgba,
-        );
-        rgba
-    } else if texture.format == LeagueTextureFormat::Bgra8 {
-        let mut data = texture.mipmaps[0].clone();
-        for chunk in data.chunks_exact_mut(4) {
-            chunk.swap(0, 2);
-        }
-        data
-    } else {
-        return None;
-    };
-
-    let mut png_data = Vec::new();
-    let encoder = image::codecs::png::PngEncoder::new_with_quality(
-        &mut png_data,
-        CompressionType::Fast,
-        FilterType::NoFilter,
-    );
-    encoder
-        .write_image(
-            &rgba_data,
-            texture.width as u32,
-            texture.height as u32,
-            ExtendedColorType::Rgba8,
-        )
-        .ok()?;
-    Some(png_data)
-}
 
 /// 将角色皮肤（网格 + 材质 + 贴图 + 动画）导出为 GLB 文件
 /// animations: map of (clip_name, ConfigAnimationClip)
@@ -1275,14 +1227,7 @@ impl SkinGltfBuilder {
             .to_vec()
             .map_err(|e| Error::Parse(format!("生成 GLB 失败: {}", e)))?;
 
-        let path = std::path::Path::new(output_path);
-        if let Some(parent) = path.parent() {
-            std::fs::create_dir_all(parent)
-                .map_err(|e| Error::Parse(format!("创建目录失败: {}", e)))?;
-        }
-
-        std::fs::write(output_path, glb_data)
-            .map_err(|e| Error::Parse(format!("写入 GLB 失败: {}", e)))?;
+        write_to_file(output_path, glb_data);
 
         Ok(())
     }

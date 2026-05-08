@@ -24,6 +24,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Seraphine/HUD/Icons2D/Seraphine_E1.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

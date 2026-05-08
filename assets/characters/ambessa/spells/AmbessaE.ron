@@ -121,6 +121,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Ambessa/HUD/Icons2D/Icon_Ambessa_E.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

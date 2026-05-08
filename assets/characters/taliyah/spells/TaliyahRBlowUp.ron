@@ -48,6 +48,9 @@
         coefficient: Some(1.0),
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Taliyah/HUD/Icons2D/Taliyah_R.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

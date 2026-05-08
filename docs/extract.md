@@ -73,9 +73,10 @@ league_to_lol::extract
 ├── mod.rs              # 模块入口，导出所有公共函数
 ├── utils.rs            # 文件写入工具
 ├── champion.rs         # Champion 提取逻辑
-├── skin.rs            # 皮肤提取逻辑
-├── spell.rs           # 技能提取逻辑
-└── map.rs             # 地图提取逻辑和阶段函数
+├── skin.rs             # 皮肤提取逻辑
+├── spell.rs            # 技能提取逻辑
+├── map.rs              # 地图提取逻辑和阶段函数
+└── ui.rs               # UI 元素提取逻辑
 ```
 
 ## 提取流程（7 阶段）
@@ -100,9 +101,9 @@ league_to_lol::extract
 
 从 `CharacterRecord.spells` 获取技能哈希列表，通过 `prop_group.get_data::<SpellObject>(hash)` 解析每个技能，转换为 `DataSpell` 后导出到 `spells/{object_name}.ron`。
 
-角色实体通过 `Skills(Vec<Entity>)` 组件关联技能实体，每个技能实体包含：
+角色实体通过 `Skills(Vec<Entity>)`（主动技能）和 `PassiveSkill(Entity)`（被动技能）关联技能实体。每个技能实体包含：
 
-- **SkillOf** - 关联到角色实体
+- **SkillOf** / **PassiveSkillOf** - 关联到角色实体
 - **Skill** - 技能配置（spell Handle、level、slot、cooldown_mode）
 - **CoolDown** - 冷却持续时间配置
 - **CoolDownState** - 运行时冷却状态（timer）
@@ -178,6 +179,43 @@ pub struct AbilityResource {
 
 从 `data/items/items.bin` 提取所有装备数据，转换为 `ConfigItem` 并导出到 `assets/items/{id}.ron`。
 
+### Phase UI: 提取 UI 元素数据
+
+UI 元素从 `gameplay.playerframe.bin` 等文件提取，并导出为分类的 RON 数据文件（`LOLUiFile`）。
+
+```rust
+use league_to_lol::extract::extract_ui_all;
+
+extract_ui_all(game_path);
+```
+
+**步骤**：
+1. **解析 Bin**：从 WAD 中加载 `gameplay.playerframe.bin` 等配置。
+2. **转换数据**：将 `league_core` 的 UI 类型转换为 `lol_base` 的稳定类型（`LOLUiElementIconData` 等），保留原始的 `enabled` 和 `scene` 信息。
+3. **导出 RON**：将所有提取到的 UI 元素、动画、按钮、区域和场景元数据填充到 `LOLUiFile` 结构中，并序列化为 `assets/ui/gameplay.xxx.ron`。
+4. **提取纹理**：收集所有用到的 `m_texture_name`，从 WAD 提取并解码为 PNG 贴图。
+
+#### 纹理提取
+
+游戏中的纹理（如 UI 元素、角色头像等）从 WAD 加载并解码为 PNG：
+
+- **公共逻辑**：使用 `league_to_lol::extract::utils::extract_texture` 实现统一提取
+- **路径转换**：`.tex` 文件后缀会被替换为 `.png`，例如 `.../icon.tex` → `assets/.../icon.png`；`.dds` 文件保持原始后缀，例如 `.../icon.dds` → `assets/.../icon.dds`。
+- **增量导出**：已存在的文件会跳过（避免重复解码）。
+- **解码算法**：使用 `decode_texture_to_png` 处理 `.tex` 中的 BC1/BC3/Bgra8 格式并保存为 PNG。
+
+导出文件结构：
+
+| 文件 | 描述 |
+|------|------|
+| `assets/ui/gameplay.playerframe.ron` | 玩家框 UI 数据文件（包含 `LOLUiFile` 序列化数据） |
+| `assets/ui/gameplay.lolfloatinginfobars.ron` | 血条等浮动条 UI 数据文件 |
+| `assets/{texture_path}` | UI 纹理图片（如 `assets/ASSETS/UX/LoL/Clarity_LevelUpAtlas.png` 或 `.dds`） |
+
+**UI 组件位置**：UI 组件（`UIElement`、`HealthBind`、`UIBind`、`UIButton`）定义在 `lol_base::ui_components` 中，可在导出时访问。
+
+运行时，`PluginUIElement` 在启动时加载这些 RON 文件，并将其内容注册到 Bevy 的 `Assets<T>` 中，随后 spawn 对应的 UI 实体。
+
 ## 一键提取
 
 ```rust
@@ -243,6 +281,8 @@ extract_phase_8_items(&loader);
 | `assets/maps/{map_name}/scene.ron`      | 包含所有地图对象的序列化场景                                                                        |
 | `assets/maps/{map_name}/barracks/{id}.ron` | 兵营配置                                                                                    |
 | `assets/items/{id}.ron`                   | 装备配置                                                                                    |
+| `assets/ui/gameplay.xxx.ron`           | UI 元素数据文件（包含所有 UI 组件的数据定义）                      |
+| `assets/{texture_path}`           | 纹理图片（如 `assets/ASSETS/UX/LoL/Clarity_LevelUpAtlas.png` 或 `.dds`） |
 
 ### Character 场景文件结构
 
@@ -276,6 +316,7 @@ extract_phase_8_items(&loader);
 | -------- | ------------------------------------------- |
 | 皮肤缩放 | `skin_mesh_properties.skin_scale`           |
 | 血条类型 | `health_bar_data.unit_health_bar_style`     |
+| 头像路径 | `icon_avatar` / `icon_circle`               |
 | 网格路径 | `skin_mesh_properties.simple_skin` (`.skn`) |
 | 贴图路径 | `skin_mesh_properties.texture` (`.tex`)     |
 
@@ -302,7 +343,7 @@ extract_phase_8_items(&loader);
 
 `assets/characters/{name}/skins/{skinN}.ron` 是一个 Bevy DynamicScene RON 文件，包含以下组件：
 
-- **Skin** - 包含 `scale`（皮肤缩放）
+- **Skin** - 包含 `scale`（皮肤缩放）和 `avatar`（头像贴图路径，`.png` 或 `.dds`）
 - **HealthBar** - 包含 `bar_type`（血条类型）
 - **Visibility** - 默认为 `Visible`
 

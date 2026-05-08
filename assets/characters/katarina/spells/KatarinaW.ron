@@ -87,6 +87,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Katarina/HUD/Icons2D/Katarina_W.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

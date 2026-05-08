@@ -121,6 +121,11 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Seraphine/HUD/Icons2D/Seraphine_Q1.dds",
+            "ASSETS/Characters/Seraphine/HUD/Icons2D/Seraphine_Q2.dds",
+            "ASSETS/Characters/Seraphine/HUD/Icons2D/Seraphine_Q3.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

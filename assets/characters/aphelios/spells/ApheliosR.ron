@@ -229,6 +229,13 @@
         coefficient: Some(0.45),
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Aphelios/HUD/Icons2D/ApheliosR.dds",
+            "ASSETS/Characters/Aphelios/HUD/Icons2D/ApheliosR.dds",
+            "ASSETS/Characters/Aphelios/HUD/Icons2D/ApheliosR.dds",
+            "ASSETS/Characters/Aphelios/HUD/Icons2D/ApheliosR.dds",
+            "ASSETS/Characters/Aphelios/HUD/Icons2D/ApheliosR.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

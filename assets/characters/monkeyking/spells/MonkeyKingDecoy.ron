@@ -120,6 +120,10 @@
         coefficient: None,
         hitEffectKey: Some(2818774016),
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/MonkeyKing/HUD/Icons2D/MonkeyKingDecoy.dds",
+            "ASSETS/Characters/MonkeyKing/HUD/Icons2D/MonkeyKingDecoy.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

@@ -172,6 +172,9 @@
         coefficient: Some(1.35),
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Shen/HUD/Icons2D/Shen_R.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

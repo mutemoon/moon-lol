@@ -244,6 +244,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: Some(2),
+        iconPath: Some([
+            "ASSETS/Characters/Leona/HUD/Icons2D/LeonaR.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

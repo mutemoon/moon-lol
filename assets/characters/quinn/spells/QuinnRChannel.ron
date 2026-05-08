@@ -48,6 +48,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Quinn/HUD/Icons2D/Quinn_R1.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

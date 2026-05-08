@@ -137,6 +137,9 @@
         coefficient: Some(1.0),
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Riven/HUD/Icons2D/RivenKiShout.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

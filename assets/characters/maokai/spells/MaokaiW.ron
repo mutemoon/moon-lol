@@ -169,6 +169,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Maokai/HUD/Icons2D/Maokai_W.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

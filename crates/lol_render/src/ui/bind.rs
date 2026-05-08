@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
+use lol_base::ui_components::UIBind;
 
 use crate::camera::CameraState;
 
@@ -12,13 +13,7 @@ impl Plugin for PluginUIBind {
     }
 }
 
-#[derive(Component)]
-pub struct UIBind {
-    pub entity: Entity,
-    pub position: Vec3,
-    pub offset: Vec2,
-    pub anchor: Vec2,
-}
+// UIBind 已移至 lol_base::ui_components
 
 fn update_ui_bind(
     mut commands: Commands,

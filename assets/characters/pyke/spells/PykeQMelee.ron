@@ -40,6 +40,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Pyke/HUD/Icons2D/PykeQ.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

@@ -134,6 +134,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Hwei/HUD/Icons2D/HweiEE.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

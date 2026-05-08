@@ -186,6 +186,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Jax/HUD/Icons2D/JaxE.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

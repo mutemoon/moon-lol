@@ -79,6 +79,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Evelynn/HUD/Icons2D/Evelynn_Ravage.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

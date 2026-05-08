@@ -110,6 +110,9 @@
         coefficient: Some(0.7),
         hitEffectKey: None,
         selectionPriority: Some(2),
+        iconPath: Some([
+            "ASSETS/Characters/Orianna/HUD/Icons2D/OriannaR.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

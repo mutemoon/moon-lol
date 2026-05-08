@@ -117,6 +117,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Katarina/HUD/Icons2D/Katarina_Passive.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

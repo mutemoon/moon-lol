@@ -119,6 +119,9 @@
         coefficient: Some(0.4),
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Riven/HUD/Icons2D/RivenWindScar.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

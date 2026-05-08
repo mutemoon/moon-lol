@@ -65,6 +65,9 @@
         coefficient: None,
         hitEffectKey: Some(2880238282),
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Xayah/HUD/Icons2D/XayahPassive.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

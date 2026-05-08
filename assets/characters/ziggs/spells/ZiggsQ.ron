@@ -212,6 +212,9 @@
         coefficient: Some(0.65),
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Ziggs/HUD/Icons2D/ZiggsQ.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

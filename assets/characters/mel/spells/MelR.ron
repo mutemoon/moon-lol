@@ -195,6 +195,10 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Mel/HUD/Icons2D/Mel_R.dds",
+            "ASSETS/Characters/Mel/HUD/Icons2D/Mel_R2.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

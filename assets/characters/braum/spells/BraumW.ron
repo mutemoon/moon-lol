@@ -248,6 +248,9 @@
         coefficient: Some(0.2),
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Braum/HUD/Icons2D/Braum_W.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

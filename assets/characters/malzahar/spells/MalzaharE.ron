@@ -173,6 +173,9 @@
         coefficient: Some(0.8),
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Malzahar/HUD/Icons2D/Malzahar_E.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

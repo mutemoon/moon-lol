@@ -12,6 +12,7 @@
         ),
         "lol_base::character::Skin": (
           scale: 0.9,
+          avatar: "ASSETS/Characters/Corki/HUD/Corki_Circle_0.png",
         ),
       },
     ),

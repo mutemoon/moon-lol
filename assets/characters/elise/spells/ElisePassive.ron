@@ -64,6 +64,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Elise/HUD/Icons2D/ElisePassive.DDS",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

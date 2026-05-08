@@ -80,6 +80,9 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: Some(1),
+        iconPath: Some([
+            "ASSETS/Characters/Tristana/HUD/Icons2D/Tristana_Q.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )

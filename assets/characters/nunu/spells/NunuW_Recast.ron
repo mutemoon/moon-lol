@@ -103,6 +103,9 @@
         coefficient: Some(2.5),
         hitEffectKey: Some(2313334094),
         selectionPriority: Some(2),
+        iconPath: Some([
+            "ASSETS/Characters/Nunu/HUD/Icons2D/NunuW2.dds",
+        ]),
         useAnimatorFramerate: Some(true),
     )),
 )

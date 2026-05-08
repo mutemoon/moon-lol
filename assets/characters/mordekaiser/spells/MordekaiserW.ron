@@ -188,6 +188,10 @@
         coefficient: None,
         hitEffectKey: None,
         selectionPriority: None,
+        iconPath: Some([
+            "ASSETS/Characters/Mordekaiser/HUD/Icons2D/MordekaiserW.dds",
+            "ASSETS/Characters/Mordekaiser/HUD/Icons2D/MordekaiserW2.dds",
+        ]),
         useAnimatorFramerate: None,
     )),
 )
