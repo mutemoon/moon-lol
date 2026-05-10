@@ -1,0 +1,55 @@
+(
+  resources: {},
+  entities: {
+    4294967271: (
+      components: {
+        "bevy_ecs::name::Name": "SRU_ChaosMinionMelee",
+        "lol_core::attack::Attack": (
+          range: 0.0,
+          base_attack_speed: 1.25,
+          bonus_attack_speed: 0.0,
+          buff_bonus_attack_speed: 0.0,
+          attack_speed_cap: 2.5,
+          windup_config: Modern(
+            attack_cast_time: 0.393,
+            attack_total_time: 0.8,
+          ),
+          windup_modifier: 1.0,
+          spell_key: None,
+        ),
+        "lol_core::base::ability_resource::AbilityResource": (
+          ar_type: Mana,
+          value: 0.0,
+          max: 0.0,
+          base: 0.0,
+          per_level: 0.0,
+          base_static_regen: 0.0,
+          regen_per_level: 0.0,
+        ),
+        "lol_core::base::bounding::Bounding": (
+          radius: 35.7437,
+          height: 40.0,
+        ),
+        "lol_core::base::level::ExperienceDrop": (
+          exp_given_on_death: 62.0,
+          experience_radius: 1400.0,
+        ),
+        "lol_core::character::Character": (),
+        "lol_core::damage::Armor": (0.0),
+        "lol_core::damage::Damage": (11.0),
+        "lol_core::life::Health": (
+          value: 430.0,
+          max: 430.0,
+        ),
+        "lol_core::movement::Movement": (
+          speed: 350.0,
+        ),
+        "lol_core::skill::LOLSpells": ({
+          "SRU_ChaosMinionMeleeBasicAttack": Path("characters/SRU_ChaosMinionMelee/spells/SRU_ChaosMinionMeleeBasicAttack.ron"),
+          "SRU_ChaosMinionMeleeBasicAttack2": Path("characters/SRU_ChaosMinionMelee/spells/SRU_ChaosMinionMeleeBasicAttack2.ron"),
+          "SRU_ChaosMinionMeleeBasicAttack3": Path("characters/SRU_ChaosMinionMelee/spells/SRU_ChaosMinionMeleeBasicAttack3.ron"),
+        }),
+      },
+    ),
+  },
+)

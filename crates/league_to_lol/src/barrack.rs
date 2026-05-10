@@ -1,11 +1,31 @@
+use std::collections::HashMap;
+
+use bevy::ecs::archetype;
+use bevy::prelude::*;
+use bevy::world_serialization::WorldSerializationPlugin;
 use league_core::extract;
+use league_loader::game::{Data, PropGroup};
 use lol_base::barrack::{
     ConfigBarracks, ConfigBarracksMinion, ConfigMinionUpgrade, ConstantWaveBehavior,
     EnumWaveBehavior, InhibitorWaveBehavior, RotatingWaveBehavior, TimedVariableWaveBehavior,
     TimedWaveBehaviorInfo,
 };
+use lol_base::map::MapPaths;
+use lol_core::entities::minion::Minion;
+use lol_core::lane::Lane;
+use lol_core::team::Team;
 
-pub fn barracks_config_to_barracks(value: extract::BarracksConfig) -> ConfigBarracks {
+use crate::extract::champion::ChampionRecordData;
+use crate::extract::map::spawn_character_record;
+use crate::extract::utils::write_to_file;
+
+pub fn barracks_config_to_barracks(
+    value: extract::BarracksConfig,
+    prop_group: &PropGroup,
+    map_paths: &MapPaths,
+    map_character_records: &mut HashMap<String, Vec<ChampionRecordData>>,
+    team: Team,
+) -> ConfigBarracks {
     ConfigBarracks {
         exp_radius: value.exp_radius,
         gold_radius: value.gold_radius,
@@ -18,7 +38,15 @@ pub fn barracks_config_to_barracks(value: extract::BarracksConfig) -> ConfigBarr
         units: value
             .units
             .into_iter()
-            .map(barracks_minion_config_to_barracks_minion)
+            .map(|u| {
+                barracks_minion_config_to_barracks_minion(
+                    u,
+                    prop_group,
+                    map_paths,
+                    map_character_records,
+                    team.clone(),
+                )
+            })
             .collect(),
         upgrade_interval_secs: value.upgrade_interval_secs,
         upgrades_before_late_game_scaling: value.upgrades_before_late_game_scaling,
@@ -28,11 +56,56 @@ pub fn barracks_config_to_barracks(value: extract::BarracksConfig) -> ConfigBarr
 
 pub fn barracks_minion_config_to_barracks_minion(
     value: extract::BarracksMinionConfig,
+    prop_group: &PropGroup,
+    map_paths: &MapPaths,
+    map_character_records: &mut HashMap<String, Vec<ChampionRecordData>>,
+    team: Team,
 ) -> ConfigBarracksMinion {
+    let unk0xad65d8c4 = prop_group.get_data::<extract::Unk0xad65d8c4>(value.unk_0xfee040bc);
+
+    // 创建一个临时的 World 来 spawn 小兵并序列化
+    let mut app = App::new();
+    app.add_plugins(AssetPlugin::default());
+    app.add_plugins(WorldSerializationPlugin);
+    app.finish();
+    app.cleanup();
+
+    let world = app.world_mut();
+    spawn_character_record(
+        world,
+        &unk0xad65d8c4,
+        map_character_records,
+        (Minion::from(value.minion_type), team),
+    );
+
+    let type_registry = world.resource::<AppTypeRegistry>();
+    let type_registry = type_registry.read();
+    let scene = DynamicWorldBuilder::from_world(&world, &type_registry)
+        .deny_component::<GlobalTransform>()
+        .deny_component::<TransformTreeChanged>()
+        .extract_entities(
+            // we do this instead of a query, in order to completely sidestep default query filters.
+            // while we could use `Allow<_>`, this wouldn't account for custom disabled components
+            world
+                .archetypes()
+                .iter()
+                .flat_map(archetype::Archetype::entities)
+                .map(archetype::ArchetypeEntity::id),
+        )
+        .extract_resources()
+        .build();
+    let serialized_scene = scene.serialize(&type_registry).unwrap();
+
+    let minion_template = format!(
+        "maps/{}/minions/{:x}.ron",
+        map_paths.name, value.unk_0xfee040bc
+    );
+    write_to_file(&minion_template, serialized_scene);
+
     ConfigBarracksMinion {
         minion_type: value.minion_type,
         minion_upgrade_stats: minion_upgrade_config_to_minion_upgrade(value.minion_upgrade_stats),
-        unk_0xfee040bc: value.unk_0xfee040bc,
+        minion_template,
         wave_behavior: enum_wave_behavior_to_enum_wave_behavior(value.wave_behavior),
     }
 }

@@ -2,6 +2,7 @@ use std::collections::VecDeque;
 use std::time::Duration;
 
 use bevy::prelude::*;
+use bevy::world_serialization::WorldInstanceReady;
 use lol_base::barrack::{
     ConfigBarracks, ConstantWaveBehavior, EnumWaveBehavior, InhibitorWaveBehavior,
     RotatingWaveBehavior, TimedVariableWaveBehavior,
@@ -107,7 +108,7 @@ fn barracks_spawning_system(
     inhibitor_state: Res<InhibitorState>,
     mut commands: Commands,
     mut query: Query<(
-        &GlobalTransform,
+        &Transform,
         &BarrackConfigHandler,
         &mut BarrackState,
         &Team,
@@ -115,7 +116,7 @@ fn barracks_spawning_system(
     )>,
     res_barracks_config: Res<Assets<ConfigBarracks>>,
     time: Res<Time>,
-    // res_assets_unk_ad65d8c4: Res<Assets<Unk0xad65d8c4>>,
+    asset_server: Res<AssetServer>,
 ) {
     for (transform, config_handler, mut barrack_state, team, lane) in query.iter_mut() {
         let Some(barracks_config) = res_barracks_config.get(&config_handler.config_handle) else {
@@ -134,7 +135,7 @@ fn barracks_spawning_system(
         // --- 2. 处理属性和移速升级 ---
         if barrack_state.upgrade_timer.just_finished() {
             barrack_state.upgrade_count += 1;
-            debug!(
+            info!(
                 "Barrack upgraded! New count: {}",
                 barrack_state.upgrade_count
             );
@@ -145,7 +146,7 @@ fn barracks_spawning_system(
                 < barracks_config.move_speed_increase_max_times
             {
                 barrack_state.move_speed_upgrade_count += 1;
-                debug!(
+                info!(
                     "Minion move speed upgraded! New count: {}",
                     barrack_state.move_speed_upgrade_count
                 );
@@ -239,23 +240,24 @@ fn barracks_spawning_system(
         // movement.speed +=
         //     (barracks_config.move_speed_increase_increment * move_speed_upgrade_count) as f32;
 
-        debug!("生成一个小兵");
-
-        let _entity = commands
-            .spawn((
-                Transform::from_matrix(transform.to_matrix()),
-                Minion::from(minion_config.minion_type),
-                lane.clone(),
-                team.clone(),
-            ))
-            .id();
-
-        // 触发角色生成命令（创建基础组件并加载皮肤）
-        // commands.trigger(CommandCharacterSpawn {
-        //     entity,
-        //     character_record: (&character.character.character_record).into(),
-        //     skin: (&character.character.skin).into(),
-        // });
+        let lane = lane.clone();
+        let transform = transform.clone();
+        commands
+            .spawn((DynamicWorldRoot(
+                asset_server.load(&minion_config.minion_template),
+            ),))
+            .observe(
+                move |trigger: On<WorldInstanceReady>,
+                      q_children: Query<&Children>,
+                      mut commands: Commands| {
+                    for descendant in q_children.iter_descendants(trigger.event_target()) {
+                        commands
+                            .entity(descendant)
+                            .insert(lane.clone())
+                            .insert(transform.clone());
+                    }
+                },
+            );
 
         // commands
         //     .entity(entity)

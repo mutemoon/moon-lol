@@ -25,7 +25,7 @@ impl MapPaths {
 
     /// 兵营 RON 资源路径
     pub fn barracks_ron(&self, id: u32) -> String {
-        format!("maps/{}/barracks/{}.ron", self.name, id)
+        format!("maps/{}/barracks/{:x}.ron", self.name, id)
     }
 
     /// 地图几何 GLB 资源路径

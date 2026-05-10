@@ -1,0 +1,17 @@
+(
+  resources: {},
+  entities: {
+    4294967267: (
+      components: {
+        "lol_base::character::ConfigCharacterRecord": (
+          character_record: Path("characters/SRU_OrderMinionSiege/config.ron"),
+        ),
+        "lol_base::character::ConfigSkin": (
+          skin: Path("characters/SRU_OrderMinionSiege/skins/Skin0.ron"),
+        ),
+        "lol_core::entities::minion::Minion": Siege,
+        "lol_core::team::Team": Order,
+      },
+    ),
+  },
+)

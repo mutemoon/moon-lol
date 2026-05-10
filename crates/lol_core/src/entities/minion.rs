@@ -11,7 +11,8 @@ use crate::map::MinionPath;
 use crate::movement::{CommandMovement, MovementAction, MovementWay};
 use crate::team::Team;
 
-#[derive(Component, Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+#[derive(Component, Debug, Clone, Copy, PartialEq, Serialize, Deserialize, Reflect)]
+#[reflect(Component)]
 #[require(MinionState, Aggro = Aggro { range: 1000.0 }, State)]
 pub enum Minion {
     Siege,

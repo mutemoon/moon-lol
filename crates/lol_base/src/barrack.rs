@@ -21,7 +21,7 @@ pub struct ConfigBarracks {
 pub struct ConfigBarracksMinion {
     pub minion_type: u8,
     pub minion_upgrade_stats: ConfigMinionUpgrade,
-    pub unk_0xfee040bc: u32,
+    pub minion_template: String,
     pub wave_behavior: EnumWaveBehavior,
 }
 
