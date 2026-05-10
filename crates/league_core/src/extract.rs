@@ -7,10 +7,23 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
+pub struct AbilitiesUiData {
+    pub champion_spells: Vec<SpellSlotDetailedUiDefinition>,
+    pub custom_abilities: Option<CustomAbilitiesUiData>,
+    pub passive: SpellSlotDetailedUiDefinition,
+    pub spell_rank_pips: SpellRankPipsUiData,
+    pub summoner_spells: Vec<SpellSlotDetailedUiDefinition>,
+    pub unk_0x40aa9d58: Option<u8>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct AbilityResourceBarData {
-    pub ability_resource_bars: ResourceMeterIconData,
+    pub ability_resource_bars: EnumResourceMeter,
     pub backdrop: Option<u32>,
-    pub standard_tick: u32,
+    pub standard_tick: Option<u32>,
+    pub use_animated_skins: Option<bool>,
+    pub value_text: Option<u32>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -343,6 +356,26 @@ pub struct BuffData {
     pub m_show_duration: Option<bool>,
     pub m_tooltip_data: Option<TooltipInstanceBuff>,
     pub persistent_effect_conditions: Option<Vec<PersistentEffectConditionData>>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct BuffDisplayData {
+    pub cooldown_fx: u32,
+    pub group: u32,
+    pub hit_region: u32,
+    pub icon: u32,
+    pub icon_border_negative: u32,
+    pub icon_border_positive: u32,
+    pub stacks_text: u32,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct BuffDisplayList {
+    pub buff_display_template: BuffDisplayData,
+    pub layout: u32,
+    pub max_buff_display_count: u32,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -744,6 +777,23 @@ pub struct ConstantWaveBehavior {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
+pub struct CooldownEffectUiData {
+    pub cooldown_complete_effect: u32,
+    pub cooldown_jump_effect: Option<u32>,
+    pub cooldown_text: Option<u32>,
+    pub radial_effect: u32,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct CooldownGemUiData {
+    pub ally_gem: u32,
+    pub cooldown_effects: CooldownEffectUiData,
+    pub gem_background: u32,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct CursorData {
     pub m_texture_name: String,
 }
@@ -752,6 +802,12 @@ pub struct CursorData {
 #[serde(rename_all = "camelCase")]
 pub struct CurveTheDifferenceHeightSolver {
     pub m_initial_target_height_offset: Option<f32>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct CustomAbilitiesUiData {
+    pub extra_abilities: BTreeMap<u32, SpellSlotDetailedUiDefinition>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -810,6 +866,15 @@ pub struct DestroyOnMovementComplete {
 pub struct DistanceToPlayerMaterialFloatDriver {
     pub max_distance: f32,
     pub min_distance: f32,
+    pub unk_0x8370ee35: Option<bool>,
+    pub unk_0x8cb9c019: Option<u8>,
+    pub unk_0xf9c21175: Option<bool>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct DrawAreaList {
+    pub draw_regions: Vec<u32>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -905,11 +970,9 @@ pub enum EnumAbilityResourceByCoefficientCalculationPart {
     StatByCoefficientCalculationPart(StatByCoefficientCalculationPart),
     StatByNamedDataValueCalculationPart(StatByNamedDataValueCalculationPart),
     StatBySubPartCalculationPart(StatBySubPartCalculationPart),
-    StatEfficiencyPerHundred(StatEfficiencyPerHundred),
     SubPartScaledProportionalToStat(SubPartScaledProportionalToStat),
     SumOfSubPartsCalculationPart(SumOfSubPartsCalculationPart),
     Unk0x1d452085(Unk0x1d452085),
-    Unk0x382277da(Unk0x382277da),
     Unk0x4ce08984(Unk0x4ce08984),
     Unk0x8a96ea3c(Unk0x8a96ea3c),
     Unk0x9e9e2e5c(Unk0x9e9e2e5c),
@@ -998,7 +1061,6 @@ pub enum EnumCastOnHit {
     CastOnHit,
     CastOnMovementComplete(CastOnMovementComplete),
     DelayStart(DelayStart),
-    DestroyOnExitMap,
     DestroyOnHit,
     DestroyOnMovementComplete(DestroyOnMovementComplete),
     FixedDistanceIgnoringTerrain(FixedDistanceIgnoringTerrain),
@@ -1009,7 +1071,6 @@ pub enum EnumCastOnHit {
     TriggerOnHit(TriggerOnHit),
     TriggerOnMovementComplete(TriggerOnMovementComplete),
     Unk0x72f86c81(Unk0x72f86c81),
-    Unk0x91fd0920,
     WidthPerSecond(WidthPerSecond),
 }
 
@@ -1094,6 +1155,8 @@ pub enum EnumDriver {
     Unk0x83a9f4f8,
     Unk0x9bc366ca(Unk0x9bc366ca),
     Unk0xb7b43e1d(Unk0xb7b43e1d),
+    Unk0xd4933ea0,
+    Unk0xde125976(Unk0xde125976),
     Unk0xef339ef9(Unk0xef339ef9),
     Unk0xf5821f8b,
     Unk0xfe70e9c4(Unk0xfe70e9c4),
@@ -1258,6 +1321,12 @@ pub enum EnumRequirement {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+pub enum EnumResourceMeter {
+    ResourceMeterGroupData(ResourceMeterGroupData),
+    ResourceMeterIconData(ResourceMeterIconData),
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum EnumRigPoseModifierData {
     ConformToPathRigPoseModifierData(ConformToPathRigPoseModifierData),
     SpringPhysicsRigPoseModifierData(SpringPhysicsRigPoseModifierData),
@@ -1391,8 +1460,8 @@ pub struct EvolutionDescription {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct ExponentSubPartsCalculationPart {
-    pub part1: NamedDataValueCalculationPart,
-    pub part2: NumberCalculationPart,
+    pub part1: Box<EnumAbilityResourceByCoefficientCalculationPart>,
+    pub part2: Box<EnumAbilityResourceByCoefficientCalculationPart>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -1811,6 +1880,14 @@ pub struct HealthBarTickStyleUnit {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
+pub struct HealthMeter {
+    pub fade_bar: u32,
+    pub meter: u32,
+    pub value_text: u32,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct HermiteSplineInfo {
     pub m_control_point1: Option<Vec3>,
     pub m_control_point2: Option<Vec3>,
@@ -1913,6 +1990,36 @@ pub struct HeroFloatingInfoIconData {
 #[serde(rename_all = "camelCase")]
 pub struct HeroFloatingInfoIconsData {
     pub icons: Vec<HeroFloatingInfoIconData>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct HudAbilityResourceThresholdIndicator {
+    pub threshold_indicator_elements: Vec<u32>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct HudCenterFrameGlowData {
+    pub ease_type: Option<u8>,
+    pub icon: u32,
+    pub unk_0xcdeba821: Option<f32>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct HudPlayerResourceBars {
+    pub ar_threshold_indicator: Option<HudAbilityResourceThresholdIndicator>,
+    pub experience_bar: u32,
+    pub experience_hit_region: u32,
+    pub health_animated_meter_skin: UiElementMeterSkin,
+    pub health_hit_region: u32,
+    pub health_meter: HealthMeter,
+    pub health_regen_text: u32,
+    pub par_hit_region: u32,
+    pub par_meter_data: AbilityResourceBarData,
+    pub par_regen_text: u32,
+    pub sar_text: u32,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -2647,6 +2754,40 @@ pub struct PlatformSpellInfo {
     pub m_spell_id: Option<i32>,
 }
 
+#[derive(Serialize, Deserialize, Debug, Clone, Asset, TypePath)]
+#[serde(rename_all = "camelCase")]
+pub struct PlayerFrameViewController {
+    pub abilities_ui_data: AbilitiesUiData,
+    pub base_loadable: u32,
+    pub center_tooltip_region: u32,
+    pub draw_area_list: Option<DrawAreaList>,
+    pub hud_center_frame_glow_data: HudCenterFrameGlowData,
+    pub level_up_display: UiLevelUp,
+    pub level_up_links: Vec<u32>,
+    pub negative_buffs: BuffDisplayList,
+    pub path_hash_to_self: u64,
+    pub player_buffs_scene: u32,
+    pub portrait_ui_data: PlayerPortraitUiData,
+    pub positive_buffs: BuffDisplayList,
+    pub resource_bars: HudPlayerResourceBars,
+    pub root_scene: u32,
+    pub spell_cast_message: u32,
+    pub status_message: u32,
+    pub summoner_spell_specialist: UiPerkSummonerSpecialistToggles,
+    pub unk_0x1c05ee9d: Vec<Unk0xc3f95838>,
+    pub unk_0xdb2e37dc: Option<u32>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct PlayerPortraitUiData {
+    pub icon: u32,
+    pub level_text: u32,
+    pub respawn_timer: u32,
+    pub tooltip_region: u32,
+    pub voice_chat_halo: u32,
+}
+
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct ProductOfSubPartsCalculationPart {
@@ -2695,9 +2836,23 @@ pub struct ResimulateTrailVfxOnEnterVisibility {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
+pub struct ResourceMeterGroupData {
+    pub meter: u32,
+    pub meter_skins: ResourceMeterSkinData,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct ResourceMeterIconData {
     pub additional_bar_types: Option<BTreeMap<u32, u32>>,
     pub default_bar: u32,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct ResourceMeterSkinData {
+    pub additional_meter_skins: BTreeMap<u32, UiElementMeterSkin>,
+    pub default_meter_skin: UiElementMeterSkin,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Asset, TypePath)]
@@ -3171,8 +3326,29 @@ pub struct SpellEffectAmount {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
+pub struct SpellEvolutionUiData {
+    pub button: u32,
+    pub icon: u32,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct SpellLevelUpInfo {
     pub m_requirements: Vec<SpellRankUpRequirements>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct SpellLevelUpUiData {
+    pub ability_fx_in: u32,
+    pub button_fx_in: u32,
+    pub button_fx_out_selected: u32,
+    pub button_fx_out_unselected: u32,
+    pub button_idle_glow_fx: u32,
+    pub button_idle_sheen_fx: u32,
+    pub button_post_fx_in: u32,
+    pub evolution: Option<SpellEvolutionUiData>,
+    pub skill_up_button: u32,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -3195,14 +3371,59 @@ pub struct SpellObject {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
+pub struct SpellPipsUiData {
+    pub empty_pips: Vec<u32>,
+    pub full_pips: Vec<u32>,
+    pub pip_target_rect: u32,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct SpellRankIntDriver {
     pub spell_slot: u32,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
+pub struct SpellRankPipsUiData {
+    pub rank_pips: Vec<SpellPipsUiData>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct SpellRankUpRequirements {
     pub m_requirements: Option<Vec<EnumRequirement>>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct SpellSlotBuffTimerData {
+    pub timer_bar_bg: u32,
+    pub timer_bar_fill: u32,
+    pub timer_border_bg: u32,
+    pub timer_border_fx: u32,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct SpellSlotDetailedUiDefinition {
+    pub ammo_fx: Option<u32>,
+    pub ammo_text: Option<u32>,
+    pub border_disabled: u32,
+    pub border_enabled: u32,
+    pub buff_timer: Option<SpellSlotBuffTimerData>,
+    pub content_element: Option<u32>,
+    pub cooldown_gem: Option<CooldownGemUiData>,
+    pub cooldown_ui_data: Option<CooldownEffectUiData>,
+    pub cost: Option<u32>,
+    pub cost_bg: Option<u32>,
+    pub hotkey: Option<u32>,
+    pub mouseover_region: Option<u32>,
+    pub overlay_cced: Option<u32>,
+    pub overlay_disabled: Option<u32>,
+    pub overlay_oom: Option<u32>,
+    pub reset_flash_fx_attention: Option<u32>,
+    pub toggle_fx: Option<u32>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -3241,6 +3462,8 @@ pub struct StatByCoefficientCalculationPart {
     pub m_coefficient: Option<f32>,
     pub m_stat: Option<u8>,
     pub m_stat_formula: Option<u8>,
+    pub output_type: Option<u8>,
+    pub stat_type: Option<u8>,
     pub unk_0xa8cb9c14: Option<bool>,
 }
 
@@ -3260,13 +3483,6 @@ pub struct StatBySubPartCalculationPart {
     pub m_stat_formula: Option<u8>,
     pub m_subpart: Box<EnumAbilityResourceByCoefficientCalculationPart>,
     pub unk_0xa8cb9c14: Option<bool>,
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-#[serde(rename_all = "camelCase")]
-pub struct StatEfficiencyPerHundred {
-    pub m_bonus_stat_for_efficiency: f32,
-    pub m_data_value: u32,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -3386,7 +3602,7 @@ pub struct SubPartScaledProportionalToStat {
     pub m_stat: Option<u8>,
     pub m_style_tag: Option<String>,
     pub m_style_tag_if_scaled: Option<String>,
-    pub m_subpart: Box<EnumAbilityResourceByCoefficientCalculationPart>,
+    pub m_subpart: NamedDataValueCalculationPart,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -3593,9 +3809,9 @@ pub struct TargeterDefinitionRange {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct TargeterDefinitionSkipTerrain {
-    pub m_base_texture_name: Option<String>,
-    pub m_end_locator: Option<DrawablePositionLocator>,
-    pub m_terrain_texture_name: Option<String>,
+    pub m_base_texture_name: String,
+    pub m_end_locator: DrawablePositionLocator,
+    pub m_terrain_texture_name: String,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -3899,10 +4115,35 @@ pub struct UiElementEffectAnimationData {
     pub m_per_pixel_uvs_x: Option<bool>,
     pub name: String,
     pub number_of_frames_per_row_in_atlas: Option<f32>,
-    pub position: UiPositionRect,
+    pub position: EnumUiPosition,
     pub scene: u32,
     pub texture_data: EnumData,
     pub total_number_of_frames: Option<f32>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, Asset, TypePath)]
+#[serde(rename_all = "camelCase")]
+pub struct UiElementEffectDesaturateData {
+    pub enabled: Option<bool>,
+    pub layer: Option<u32>,
+    pub minimum_saturation: Option<f32>,
+    pub name: String,
+    pub position: EnumUiPosition,
+    pub scene: u32,
+    pub texture_data: Option<EnumData>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, Asset, TypePath)]
+#[serde(rename_all = "camelCase")]
+pub struct UiElementEffectInstancedData {
+    pub enabled: Option<bool>,
+    pub layer: u32,
+    pub m_color: Option<[u8; 4]>,
+    pub m_per_pixel_uvs_x: Option<bool>,
+    pub name: String,
+    pub position: EnumUiPosition,
+    pub scene: u32,
+    pub texture_data: Option<AtlasData>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Asset, TypePath)]
@@ -3975,6 +4216,12 @@ pub struct UiElementIconData {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
+pub struct UiElementMeterSkin {
+    pub bar_elements: Vec<u32>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct UiElementRect {
     pub position: Option<Vec2>,
     pub size: Option<Vec2>,
@@ -3992,6 +4239,60 @@ pub struct UiElementRegionData {
     pub name: String,
     pub position: Option<EnumUiPosition>,
     pub scene: u32,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, Asset, TypePath)]
+#[serde(rename_all = "camelCase")]
+pub struct UiElementTextData {
+    pub block_input_events: Option<bool>,
+    pub color: Option<[u8; 4]>,
+    pub enabled: Option<bool>,
+    pub flip_for_rtl: Option<bool>,
+    pub font_description: u32,
+    pub html_style_sheet: Option<u32>,
+    pub icon_scale: Option<f32>,
+    pub layer: Option<u32>,
+    pub name: String,
+    pub position: Option<UiPositionRect>,
+    pub scene: u32,
+    pub text_alignment_horizontal: Option<u8>,
+    pub text_alignment_vertical: Option<u8>,
+    pub tra_key: Option<String>,
+    pub unk_0x24972bb9: Option<f32>,
+    pub unk_0xc1d0e91a: Option<f32>,
+    pub wrapping_mode: Option<u8>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct UiLevelUp {
+    pub buttons_scene: u32,
+    pub fx_in_scene: u32,
+    pub spells: Option<Vec<SpellLevelUpUiData>>,
+    pub title: u32,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct UiPerkSummonerSpecialistSelector {
+    pub layout: u32,
+    pub scene: u32,
+    pub selector_button_template: UiPerkSummonerSpecialistSelectorButtonData,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct UiPerkSummonerSpecialistSelectorButtonData {
+    pub button: u32,
+    pub spell_icon: u32,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct UiPerkSummonerSpecialistToggles {
+    pub scene: u32,
+    pub selector_menu: UiPerkSummonerSpecialistSelector,
+    pub toggle_buttons: Vec<u32>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -4146,6 +4447,14 @@ pub struct Unk0x1d452085 {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
+pub struct Unk0x1e2d1428 {
+    pub button: u32,
+    pub stat_page_view_controller: u32,
+    pub unk_0x5b5f63b5: Option<bool>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct Unk0x1f1f50f2 {
     pub name: u32,
     pub team: Option<Unk0x1b1b0d1a>,
@@ -4217,12 +4526,6 @@ pub struct Unk0x34262325 {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
-pub struct Unk0x382277da {
-    pub m_subparts: Vec<Box<EnumAbilityResourceByCoefficientCalculationPart>>,
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-#[serde(rename_all = "camelCase")]
 pub struct Unk0x3c995caf {
     pub name: String,
     pub segments: Vec<Vec3>,
@@ -4262,7 +4565,6 @@ pub struct Unk0x47f13ab0 {
 #[serde(rename_all = "camelCase")]
 pub struct Unk0x4a70b12c {
     pub augment_group: Vec<u32>,
-    pub unk_0x9a676645: Option<u32>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -4589,6 +4891,14 @@ pub struct Unk0xbf62176c {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
+pub struct Unk0xc3f95838 {
+    pub button: u32,
+    pub stat_page_view_controller: u32,
+    pub unk_0xcfb90a94: Option<BTreeMap<u32, Unk0x1e2d1428>>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct Unk0xc76c1b9a {
     pub modifiers: Vec<EnumUnk0x51445de9>,
 }
@@ -4700,9 +5010,16 @@ pub struct Unk0xdd661aab {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
+pub struct Unk0xde125976 {
+    pub max_distance: f32,
+    pub min_distance: f32,
+    pub unk_0x8370ee35: bool,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct Unk0xe1555e0a {
     pub augment_group: Vec<u32>,
-    pub unk_0x9a676645: Option<u32>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

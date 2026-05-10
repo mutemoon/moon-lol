@@ -174,10 +174,7 @@ pub fn extract_phase_3_map_chunks(
 
                     let config_barracks = barracks_config_to_barracks(barracks_config.clone());
                     let ron_content = ron::to_string(&config_barracks).unwrap();
-                    write_to_file(
-                        &map_paths.barracks_ron(barracks_config_hash),
-                        ron_content,
-                    );
+                    write_to_file(&map_paths.barracks_ron(barracks_config_hash), ron_content);
 
                     world.spawn((
                         Transform::from_matrix(unk0xba138ae3.transform),
@@ -268,10 +265,7 @@ pub fn extract_phase_4_nav_grid(world: &mut World, loader: &LeagueLoader, map_pa
         let (_, nav_grid) = AiMeshNGrid::parse(&buf).unwrap();
         let config_navigation_grid = load_league_nav_grid(nav_grid);
 
-        crate::extract::utils::write_bin_to_file(
-            &map_paths.navgrid_bin(),
-            &config_navigation_grid,
-        );
+        crate::extract::utils::write_bin_to_file(&map_paths.navgrid_bin(), &config_navigation_grid);
 
         world.insert_resource(ResourceGrid(
             world
@@ -403,10 +397,7 @@ pub fn extract_phase_8_items(loader: &LeagueLoader) {
         let config_item = extract_item_data(&item_data);
         let ron_content =
             ron::ser::to_string_pretty(&config_item, ron::ser::PrettyConfig::default()).unwrap();
-        write_to_file(
-            &format!("items/{}.ron", item_data.item_id),
-            ron_content,
-        );
+        write_to_file(&format!("items/{}.ron", item_data.item_id), ron_content);
     }
 }
 

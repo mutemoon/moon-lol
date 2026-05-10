@@ -38,7 +38,7 @@ impl Plugin for PluginCamera {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, setup.in_set(CameraInit));
         app.add_systems(Update, update);
-        app.add_systems(FixedUpdate, update_focus);
+        app.add_systems(Update, update_focus);
         app.add_systems(Update, on_wheel);
         app.add_systems(Update, on_mouse_scroll);
     }

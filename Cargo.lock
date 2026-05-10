@@ -4445,6 +4445,7 @@ dependencies = [
  "regex",
  "ron 0.8.1",
  "serde",
+ "serde_json",
  "thiserror 2.0.18",
 ]
 

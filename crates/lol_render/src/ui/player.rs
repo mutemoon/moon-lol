@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 use lol_base::character::Skin;
+use lol_base::ui::LOLPlayerFrameViewController;
 use lol_core::base::ability_resource::AbilityResource;
 use lol_core::base::level::Level;
 use lol_core::life::Health;
@@ -32,6 +33,7 @@ impl Plugin for PluginUIPlayer {
                         .and_then(any_match_filter::<(With<Controller>, With<SkinReady>)>)
                         .and_then(run_once),
                 ),
+                update_stat_page_buttons.run_if(in_state(UIState::Loaded).and_then(run_once)),
             ),
         );
     }
@@ -220,4 +222,16 @@ fn update_player_icon(
         },
         Visibility::Visible,
     ));
+}
+
+fn update_stat_page_buttons(
+    res_player_frame: Res<LOLPlayerFrameViewController>,
+    res_ui_element_entity: Res<UIElementEntity>,
+    mut commands: Commands,
+) {
+    for stat_page in &res_player_frame.stat_pages {
+        let entity = res_ui_element_entity.get_entity(&stat_page.button);
+
+        commands.entity(entity).insert(Visibility::Visible);
+    }
 }

@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
-use lol_base::ui_components::UIBind;
+use lol_base::ui_components::{UIBindData, UIBindOf};
 
 use crate::camera::CameraState;
 
@@ -13,54 +13,30 @@ impl Plugin for PluginUIBind {
     }
 }
 
-// UIBind 已移至 lol_base::ui_components
-
 fn update_ui_bind(
     mut commands: Commands,
     camera_info: Single<(&Camera, &GlobalTransform), With<CameraState>>,
     q_global_transform: Query<&GlobalTransform>,
-    mut q_ui_bind: Query<(Entity, &mut Node, &UIBind, &Children)>,
-    q_window: Query<&Window, With<PrimaryWindow>>,
+    mut q_ui_bind: Query<(Entity, &mut Node, &UIBindOf, &UIBindData)>,
 ) {
     let (camera, camera_global_transform) = camera_info.into_inner();
 
-    let Ok(window) = q_window.single() else {
-        return;
-    };
-
-    for (entity, mut node, ui_bind, children) in q_ui_bind.iter_mut() {
-        let Ok(bind_target) = q_global_transform.get(ui_bind.entity) else {
+    for (entity, mut node, ui_bind_of, ui_bind_data) in q_ui_bind.iter_mut() {
+        let Ok(bind_target) = q_global_transform.get(ui_bind_of.0) else {
             commands.entity(entity).despawn();
             continue;
         };
 
         let Ok(viewport_position) = camera.world_to_viewport(
             camera_global_transform,
-            bind_target.translation() + ui_bind.position,
+            bind_target.translation() + ui_bind_data.position,
         ) else {
             continue;
         };
 
-        let viewport_position = viewport_position + ui_bind.offset;
-
-        if viewport_position.x < 0.0
-            || viewport_position.y < 0.0
-            || viewport_position.x > window.width()
-            || viewport_position.y > window.height()
-        {
-            commands.entity(entity).insert(Visibility::Hidden);
-            for child in children {
-                commands.entity(*child).insert(Visibility::Hidden);
-            }
-            continue;
-        }
-
-        for child in children {
-            commands.entity(*child).insert(Visibility::Visible);
-        }
         commands.entity(entity).insert(Visibility::Visible);
 
-        let viewport_position = viewport_position - ui_bind.anchor;
+        let viewport_position = viewport_position - ui_bind_data.anchor;
         node.left = Val::Px(viewport_position.x);
         node.top = Val::Px(viewport_position.y);
     }

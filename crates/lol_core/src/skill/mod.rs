@@ -97,6 +97,12 @@ pub struct PassiveSkillOf(pub Entity);
 #[reflect(Component)]
 pub struct PassiveSkill(Entity);
 
+impl PassiveSkill {
+    pub fn entity(&self) -> Entity {
+        self.0
+    }
+}
+
 impl Deref for Skills {
     type Target = Vec<Entity>;
 

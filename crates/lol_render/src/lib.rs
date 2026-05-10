@@ -1,6 +1,7 @@
 pub mod animation;
 pub mod camera;
 pub mod controller;
+pub mod cursor;
 pub mod debug_area;
 pub mod debug_missile;
 pub mod debug_sphere;
@@ -18,6 +19,7 @@ use animation::PluginAnimation;
 use bevy::prelude::{App, Plugin};
 use camera::PluginCamera;
 use controller::PluginController;
+use cursor::PluginCursor;
 use debug_area::PluginDebugArea;
 use debug_missile::PluginDebugMissile;
 use debug_sphere::PluginDebugSphere;
@@ -35,6 +37,7 @@ impl Plugin for PluginRender {
         app.add_plugins(PluginAnimation);
         app.add_plugins(PluginCamera);
         app.add_plugins(PluginController);
+        app.add_plugins(PluginCursor);
         app.add_plugins(PluginDebugArea);
         app.add_plugins(PluginDebugMissile);
         app.add_plugins(PluginDebugSphere);
