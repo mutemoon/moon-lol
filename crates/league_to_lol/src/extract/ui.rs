@@ -23,9 +23,8 @@ use lol_base::ui::{
     LOLSpellLevelUpUiData, LOLSpellSlotBuffTimerData, LOLSpellSlotDetailedUiDefinition,
     LOLStatPageCategoryData, LOLStatPageViewController, LOLStructureFloatingInfoBarData,
     LOLUiElementEffectAnimationData, LOLUiElementEffectDesaturateData,
-    LOLUiElementEffectInstancedData, LOLUiElementIconData,
-    LOLUiElementTextData, LOLUiFile, LOLUiLevelUp, LOLUiPaths, LOLUiPositionRect,
-    LOLUnitFloatingInfoBarData,
+    LOLUiElementEffectInstancedData, LOLUiElementIconData, LOLUiElementTextData, LOLUiFile,
+    LOLUiLevelUp, LOLUiPaths, LOLUiPositionRect, LOLUnitFloatingInfoBarData,
 };
 
 use crate::extract::utils::write_to_file;
@@ -73,7 +72,8 @@ pub fn extract_ui_data(
                 let anim_hash = league_utils::type_name_to_hash("UiElementEffectAnimationData");
                 let desaturate_hash =
                     league_utils::type_name_to_hash("UiElementEffectDesaturateData");
-                let instanced_hash = league_utils::type_name_to_hash("UiElementEffectInstancedData");
+                let instanced_hash =
+                    league_utils::type_name_to_hash("UiElementEffectInstancedData");
                 let button_hash = league_utils::type_name_to_hash("UiElementGroupButtonData");
                 let icon_hash = league_utils::type_name_to_hash("UiElementIconData");
                 let region_hash = league_utils::type_name_to_hash("UiElementRegionData");
@@ -861,8 +861,14 @@ fn convert_hero_floating_info_border_defense_icon_data(
     data: &league_core::extract::HeroFloatingInfoBorderDefenseIconData,
 ) -> lol_base::ui::LOLHeroFloatingInfoBorderDefenseIconData {
     lol_base::ui::LOLHeroFloatingInfoBorderDefenseIconData {
-        defense_down_icons: data.defense_down_icons.iter().map(convert_hero_floating_info_border_defense_icon_threshold_data).collect(),
-        defense_up_icon: convert_hero_floating_info_border_defense_icon_threshold_data(&data.defense_up_icon),
+        defense_down_icons: data
+            .defense_down_icons
+            .iter()
+            .map(convert_hero_floating_info_border_defense_icon_threshold_data)
+            .collect(),
+        defense_up_icon: convert_hero_floating_info_border_defense_icon_threshold_data(
+            &data.defense_up_icon,
+        ),
         left_icon_region: data.left_icon_region.into(),
     }
 }
@@ -882,19 +888,32 @@ fn convert_hero_floating_info_border_data(
     data: &HeroFloatingInfoBorderData,
 ) -> lol_base::ui::LOLHeroFloatingInfoBorderData {
     lol_base::ui::LOLHeroFloatingInfoBorderData {
-        additional_status_icons: data.additional_status_icons.as_ref().map(|map| {
-            map.iter().map(|(&k, &v)| (k, v.into())).collect()
-        }),
+        additional_status_icons: data
+            .additional_status_icons
+            .as_ref()
+            .map(|map| map.iter().map(|(&k, &v)| (k, v.into())).collect()),
         default_border: convert_hero_floating_info_border_type_data(&data.default_border),
-        defense_modifier_icons: data.defense_modifier_icons.as_ref().map(convert_hero_floating_info_border_defense_icon_data),
+        defense_modifier_icons: data
+            .defense_modifier_icons
+            .as_ref()
+            .map(convert_hero_floating_info_border_defense_icon_data),
         executable_border: convert_hero_floating_info_border_type_data(&data.executable_border),
-        has_attached_ally_border: data.has_attached_ally_border.as_ref().map(convert_hero_floating_info_border_type_data),
-        invulnerable_border: data.invulnerable_border.as_ref().map(convert_hero_floating_info_border_type_data),
+        has_attached_ally_border: data
+            .has_attached_ally_border
+            .as_ref()
+            .map(convert_hero_floating_info_border_type_data),
+        invulnerable_border: data
+            .invulnerable_border
+            .as_ref()
+            .map(convert_hero_floating_info_border_type_data),
         level_text: data.level_text.into(),
         level_text_color_ally: data.level_text_color_ally,
         level_text_color_enemy: data.level_text_color_enemy,
         level_text_color_self_colorblind: data.level_text_color_self_colorblind,
-        spell_shield_border: data.spell_shield_border.as_ref().map(convert_hero_floating_info_border_type_data),
+        spell_shield_border: data
+            .spell_shield_border
+            .as_ref()
+            .map(convert_hero_floating_info_border_type_data),
     }
 }
 

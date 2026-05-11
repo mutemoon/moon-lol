@@ -4,9 +4,8 @@ use std::io::Write;
 
 use bevy::prelude::info;
 use lol_base::ui::{
-    LOLUiElementEffectAnimationData, LOLUiElementEffectDesaturateData,
-    LOLUiElementEffectInstancedData, LOLUiElementGroupButtonData, LOLUiElementIconData,
-    LOLUiElementRegionData, LOLUiElementTextData, LOLUiSceneData,
+    LOLUiElementEffectAnimationData, LOLUiElementEffectInstancedData, LOLUiElementGroupButtonData,
+    LOLUiElementIconData, LOLUiElementRegionData, LOLUiElementTextData, LOLUiSceneData,
 };
 use serde::Serialize;
 

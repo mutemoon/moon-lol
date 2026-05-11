@@ -12,7 +12,6 @@ use lol_base::barrack::{
 };
 use lol_base::map::MapPaths;
 use lol_core::entities::minion::Minion;
-use lol_core::lane::Lane;
 use lol_core::team::Team;
 
 use crate::extract::champion::ChampionRecordData;

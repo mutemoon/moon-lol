@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use crate::ui::{
     HashKey, LOLUiElementEffectAnimationData, LOLUiElementEffectDesaturateData,
     LOLUiElementGroupButtonData, LOLUiElementIconData, LOLUiElementRegionData,
-    LOLUiElementTextData
+    LOLUiElementTextData,
 };
 
 /// UI 元素组件
