@@ -2,7 +2,7 @@ pub mod buffs;
 
 use bevy::prelude::*;
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -86,10 +86,6 @@ fn cast_renekton_q(
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Renekton_Q_Cast"),
-    });
     // Q is a cleave that deals damage in a circle
     let rage = q_ability_resource
         .get(entity)
@@ -143,10 +139,6 @@ fn cast_renekton_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Renekton_W_Cast"),
-    });
     // W is an empowered auto attack that stuns
     commands.trigger(CommandAttackReset { entity });
     commands.trigger(ActionDamage {
@@ -187,10 +179,6 @@ fn cast_renekton_e(
 
     if stage == 1 {
         // First cast: Dash forward
-        commands.trigger(CommandSkinParticleSpawn {
-            entity,
-            hash: hash_bin("Renekton_E_Cast"),
-        });
         commands.trigger(ActionDash {
             entity,
             point: point,
@@ -213,10 +201,6 @@ fn cast_renekton_e(
         ));
     } else {
         // Second cast: Dash again
-        commands.trigger(CommandSkinParticleSpawn {
-            entity,
-            hash: hash_bin("Renekton_E2_Cast"),
-        });
         commands.trigger(ActionDash {
             entity,
             point: point,
@@ -246,10 +230,6 @@ fn cast_renekton_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<
         hash: "spell4".to_string(),
         repeat: false,
         duration: None,
-    });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Renekton_R_Cast"),
     });
     // R is a transformation that deals damage around and generates rage
     commands.trigger(ActionDamage {

@@ -1,8 +1,7 @@
 use bevy::prelude::*;
-use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_core::entities::champion::Champion;
-use lol_core::skill::{EventSkillCast, Skill, SkillSlot};
+use lol_core::skill::{EventSkillCast, Skill};
 
 #[derive(Default)]
 pub struct PluginHwei;
@@ -41,22 +40,6 @@ fn on_hwei_skill_cast(
     });
 
     match skill.slot {
-        SkillSlot::Q => commands.trigger(CommandSkinParticleSpawn {
-            entity,
-            hash: hash_bin("Hwei_Q_Q_Tar"),
-        }),
-        SkillSlot::W => commands.trigger(CommandSkinParticleSpawn {
-            entity,
-            hash: hash_bin("Hwei_Q_W_AoE"),
-        }),
-        SkillSlot::E => commands.trigger(CommandSkinParticleSpawn {
-            entity,
-            hash: hash_bin("Hwei_Q_Q_Tar"),
-        }),
-        SkillSlot::R => commands.trigger(CommandSkinParticleSpawn {
-            entity,
-            hash: hash_bin("Hwei_Q_Q_Tar"),
-        }),
         _ => {}
     }
 }

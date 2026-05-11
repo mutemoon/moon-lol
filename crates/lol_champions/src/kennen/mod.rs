@@ -2,7 +2,7 @@ pub mod buffs;
 
 use bevy::prelude::*;
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -62,10 +62,6 @@ fn cast_kennen_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Kennen_Q_Cast"),
-    });
 
     // Q is a shuriken that applies mark
     commands.trigger(ActionDamage {
@@ -93,10 +89,6 @@ fn cast_kennen_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Kennen_W_Cast"),
-    });
 
     // W deals damage to marked enemies
     commands.trigger(ActionDamage {
@@ -121,10 +113,6 @@ fn cast_kennen_e(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Kennen_E_Cast"),
-    });
 
     // E grants movespeed and immunity
     commands
@@ -138,10 +126,6 @@ fn cast_kennen_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
         hash: "spell4".to_string(),
         repeat: false,
         duration: None,
-    });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Kennen_R_Cast"),
     });
 
     // R summons storm that damages and applies marks

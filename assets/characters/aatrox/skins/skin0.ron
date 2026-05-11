@@ -12,6 +12,7 @@
         ),
         "lol_base::character::Skin": (
           scale: 1.09,
+          avatar: "ASSETS/Characters/Aatrox/HUD/Aatrox_Circle.png",
         ),
       },
     ),

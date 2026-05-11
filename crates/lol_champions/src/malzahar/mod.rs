@@ -3,7 +3,7 @@ pub mod buffs;
 use bevy::asset::Handle;
 use bevy::prelude::*;
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -64,11 +64,6 @@ fn cast_malzahar_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Malzahar_Q_Cast"),
-    });
-
     // Q opens void gates and silences
     commands.trigger(ActionDamage {
         entity,
@@ -95,11 +90,6 @@ fn cast_malzahar_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Malzahar_W_Cast"),
-    });
-
     // W summons voidlings
     commands.trigger(ActionDamage {
         entity,
@@ -123,11 +113,6 @@ fn cast_malzahar_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Malzahar_E_Cast"),
-    });
-
     // E infects target
     commands.trigger(ActionDamage {
         entity,
@@ -151,11 +136,6 @@ fn cast_malzahar_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Malzahar_R_Cast"),
-    });
-
     // R suppresses target
     commands.trigger(ActionDamage {
         entity,

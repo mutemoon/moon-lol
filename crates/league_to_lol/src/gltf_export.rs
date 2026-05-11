@@ -24,6 +24,7 @@ use league_utils::hash_bin;
 use rayon::prelude::*;
 use texpresso::Format;
 
+use crate::extract::write_to_file;
 use crate::utils::Error;
 
 /// 将 LeagueMapGeo 导出为 gltf 文件
@@ -745,8 +746,7 @@ impl<'a> GltfBuilder<'a> {
             .to_vec()
             .map_err(|e| Error::Parse(format!("Failed to generate GLB: {}", e)))?;
 
-        std::fs::write(&glb_path, glb_data)
-            .map_err(|e| Error::Parse(format!("Failed to write GLB file: {}", e)))?;
+        write_to_file(&glb_path, glb_data);
 
         Ok(())
     }

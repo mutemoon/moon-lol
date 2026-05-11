@@ -12,6 +12,7 @@
         ),
         "lol_base::character::Skin": (
           scale: 0.85,
+          avatar: "ASSETS/Characters/AurelionSol/HUD/AurelionSol_Circle.png",
         ),
       },
     ),

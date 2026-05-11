@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -79,10 +79,6 @@ fn cast_sylas_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Sylas_Q_Cast"),
-    });
     // Q is a lash that slows enemies in the center
     commands.trigger(ActionDamage {
         entity,
@@ -114,10 +110,6 @@ fn cast_sylas_w(
         hash: "spell2".to_string(),
         repeat: false,
         duration: None,
-    });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Sylas_W_Cast"),
     });
     // W is a dash to target that deals damage and heals based on missing health
     commands.trigger(ActionDash {
@@ -162,10 +154,6 @@ fn cast_sylas_e(
 
     if stage == 1 {
         // First cast: Throws chain toward enemy - damage in narrow cone
-        commands.trigger(CommandSkinParticleSpawn {
-            entity,
-            hash: hash_bin("Sylas_E_Cast"),
-        });
         commands.trigger(ActionDamage {
             entity,
             skill: skill_spell,
@@ -187,10 +175,6 @@ fn cast_sylas_e(
             .insert(SkillRecastWindow::new(2, 2, SYLAS_E_RECAST_WINDOW));
     } else {
         // Second cast: Dash to enemy and pull
-        commands.trigger(CommandSkinParticleSpawn {
-            entity,
-            hash: hash_bin("Sylas_E2_Cast"),
-        });
         commands.trigger(ActionDash {
             entity,
             point: point,
@@ -220,10 +204,6 @@ fn cast_sylas_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
         hash: "spell4".to_string(),
         repeat: false,
         duration: None,
-    });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Sylas_R_Cast"),
     });
     // R 对最近敌方英雄造成魔法伤害
     commands.trigger(ActionDamage {

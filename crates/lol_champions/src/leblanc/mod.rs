@@ -2,7 +2,7 @@ pub mod buffs;
 
 use bevy::prelude::*;
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -75,10 +75,6 @@ fn cast_leblanc_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<S
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("LeBlanc_Q_Cast"),
-    });
 
     // Q marks enemy
     commands.trigger(ActionDamage {
@@ -112,10 +108,6 @@ fn cast_leblanc_w(
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("LeBlanc_W_Cast"),
-    });
 
     // W is a dash with damage
     commands.trigger(ActionDamage {
@@ -139,10 +131,6 @@ fn cast_leblanc_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<S
         hash: "spell3".to_string(),
         repeat: false,
         duration: None,
-    });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("LeBlanc_E_Cast"),
     });
 
     // E chains enemy
@@ -176,10 +164,6 @@ fn cast_leblanc_r(
         hash: "spell4".to_string(),
         repeat: false,
         duration: None,
-    });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("LeBlanc_R_Cast"),
     });
 
     // R mimics the last used skill

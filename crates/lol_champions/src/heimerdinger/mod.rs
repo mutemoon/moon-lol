@@ -2,7 +2,7 @@ pub mod buffs;
 
 use bevy::prelude::*;
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -62,10 +62,6 @@ fn cast_heimer_q(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Heimerdinger_Q_Cast"),
-    });
     // Q places a turret
 }
 
@@ -76,11 +72,6 @@ fn cast_heimer_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Heimerdinger_W_Cast"),
-    });
-
     // W fires rockets
     commands.trigger(ActionDamage {
         entity,
@@ -107,11 +98,6 @@ fn cast_heimer_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Heimerdinger_E_Cast"),
-    });
-
     // E is a grenade that stuns
     commands.trigger(ActionDamage {
         entity,
@@ -134,10 +120,6 @@ fn cast_heimer_r(commands: &mut Commands, entity: Entity) {
         hash: "spell4".to_string(),
         repeat: false,
         duration: None,
-    });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Heimerdinger_R_Cast"),
     });
     // R enhances the next spell
 }

@@ -12,6 +12,7 @@
         ),
         "lol_base::character::Skin": (
           scale: 1.05,
+          avatar: "ASSETS/Characters/Nami/HUD/Nami_Circle.png",
         ),
       },
     ),

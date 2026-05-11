@@ -154,6 +154,8 @@ pub trait Data {
     fn get_by_class<T: TypePath + DeserializeOwned>(&self) -> Option<T>;
 
     fn get_all_by_class<T: TypePath + DeserializeOwned>(&self) -> Vec<T>;
+
+    fn get_all_by_class_with_hash<T: TypePath + DeserializeOwned>(&self) -> Vec<(u32, T)>;
 }
 
 impl Data for PropGroup {
@@ -177,6 +179,13 @@ impl Data for PropGroup {
         self.prop_file
             .iter()
             .flat_map(|v| v.get_all_by_class::<T>())
+            .collect()
+    }
+
+    fn get_all_by_class_with_hash<T: TypePath + DeserializeOwned>(&self) -> Vec<(u32, T)> {
+        self.prop_file
+            .iter()
+            .flat_map(|v| v.get_all_by_class_with_hash::<T>())
             .collect()
     }
 }
@@ -207,6 +216,15 @@ impl Data for PropFile {
         self.iter_class_hash_and_entry()
             .filter(|(bin_class_hash, _)| *bin_class_hash == class_hash)
             .filter_map(|(_, entry)| from_entry::<T>(entry).ok())
+            .collect()
+    }
+
+    fn get_all_by_class_with_hash<T: TypePath + DeserializeOwned>(&self) -> Vec<(u32, T)> {
+        let type_name = T::short_type_path();
+        let class_hash = type_name_to_hash(type_name);
+        self.iter_class_hash_and_entry()
+            .filter(|(bin_class_hash, _)| *bin_class_hash == class_hash)
+            .filter_map(|(_, entry)| from_entry::<T>(entry).ok().map(|v| (entry.hash, v)))
             .collect()
     }
 }

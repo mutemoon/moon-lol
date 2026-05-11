@@ -2,7 +2,7 @@ pub mod buffs;
 
 use bevy::prelude::*;
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -79,11 +79,6 @@ fn cast_fizz_q(
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Fizz_Q_Cast"),
-    });
-
     // Q is a dash to target
     commands.trigger(ActionDash {
         entity,
@@ -109,10 +104,6 @@ fn cast_fizz_w(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Fizz_W_Cast"),
-    });
     // W is a damage buff on next attack
 }
 
@@ -129,11 +120,6 @@ fn cast_fizz_e(
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Fizz_E_Cast"),
-    });
-
     // E is a dash that can't be targeted
     commands.trigger(ActionDash {
         entity,
@@ -159,11 +145,6 @@ fn cast_fizz_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spel
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Fizz_R_Cast"),
-    });
-
     // R is a shark nado
     commands.trigger(ActionDamage {
         entity,

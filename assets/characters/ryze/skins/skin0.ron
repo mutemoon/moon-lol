@@ -12,6 +12,7 @@
         ),
         "lol_base::character::Skin": (
           scale: 0.92,
+          avatar: "ASSETS/Characters/Ryze/HUD/Ryze_Circle_0.png",
         ),
       },
     ),

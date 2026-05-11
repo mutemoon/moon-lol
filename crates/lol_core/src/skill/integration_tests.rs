@@ -7,7 +7,6 @@ use std::time::Duration;
 
 use bevy::prelude::*;
 use league_utils::hash_key::HashKey;
-use lol_base::prop::LoadHashKeyTrait;
 use lol_base::spell::{DataSpell, Spell, ValuesEffect};
 use lol_base::spell_calc::{CalculationPartEffectValue, CalculationSpell, CalculationType};
 
@@ -177,25 +176,7 @@ impl SkillHarness {
             values: Some(effect_amounts),
         };
 
-        self.app
-            .world_mut()
-            .resource_mut::<Assets<Spell>>()
-            .add_hash(
-                SPELL_KEY,
-                Spell {
-                    spell_data: Some(DataSpell {
-                        calculations: Some(calculations),
-                        effect_amounts: Some(vec![effect_values]),
-                        data_values: None,
-                        mana: Some(vec![mana_cost; 6]),
-                        missile_spec: None,
-                        hit_bone_name: None,
-                        missile_speed: None,
-                        missile_effect_key: None,
-                        cast_type: None,
-                    }),
-                },
-            );
+        self.app.world_mut().resource_mut::<Assets<Spell>>();
         self
     }
 

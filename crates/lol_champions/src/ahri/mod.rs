@@ -2,7 +2,7 @@ pub mod buffs;
 
 use bevy::prelude::*;
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -78,11 +78,6 @@ fn cast_ahri_q(
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Ahri_Q_Cast"),
-    });
-
     // Q creates a missile that travels out and returns
     // First pass: magic damage in a cone
     commands.trigger(ActionDamage {
@@ -115,11 +110,6 @@ fn cast_ahri_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spel
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Ahri_W_Cast"),
-    });
-
     // Fox-fire: Three flames orbit Ahri and can attack enemies
     commands
         .entity(entity)
@@ -148,11 +138,6 @@ fn cast_ahri_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spel
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Ahri_E_Cast"),
-    });
-
     // E is a charm missile that charms on hit
     commands.trigger(ActionDamage {
         entity,
@@ -190,19 +175,6 @@ fn cast_ahri_r(
         repeat: false,
         duration: None,
     });
-
-    if stage == 1 {
-        // First cast: dash toward target
-        commands.trigger(CommandSkinParticleSpawn {
-            entity,
-            hash: hash_bin("Ahri_R_Cast"),
-        });
-    } else {
-        commands.trigger(CommandSkinParticleSpawn {
-            entity,
-            hash: hash_bin("Ahri_R2_Cast"),
-        });
-    }
 
     // R is a dash that can be recast twice
     commands.trigger(ActionDash {

@@ -2,7 +2,7 @@ pub mod buffs;
 
 use bevy::prelude::{GlobalTransform, *};
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -78,10 +78,6 @@ fn cast_hecarim_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<S
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Hecarim_Q_Cast"),
-    });
     commands.trigger(ActionDamage {
         entity,
         skill: skill_spell,
@@ -112,10 +108,6 @@ fn cast_hecarim_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<S
         hash: "spell2".to_string(),
         repeat: false,
         duration: None,
-    });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Hecarim_W_Cast"),
     });
     // W is AoE damage in area + healing based on damage dealt
     // Apply BuffHecarimW that will trigger heal on damage dealt
@@ -149,10 +141,6 @@ fn cast_hecarim_e(
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Hecarim_E_Cast"),
-    });
     // E is movement speed boost + knockback on contact
     // Movement speed buff with knockback on collision
     commands
@@ -172,10 +160,6 @@ fn cast_hecarim_r(
         hash: "spell4".to_string(),
         repeat: false,
         duration: None,
-    });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Hecarim_R_Cast"),
     });
     // R is a long dash with fear
     commands.trigger(ActionDash {

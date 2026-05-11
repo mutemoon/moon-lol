@@ -12,6 +12,7 @@
         ),
         "lol_base::character::Skin": (
           scale: 1.12,
+          avatar: "ASSETS/Characters/Lissandra/HUD/Lissandra_Circle.png",
         ),
       },
     ),

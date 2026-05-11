@@ -1,9 +1,11 @@
 use std::collections::HashMap;
+use std::path::Path;
 
+use bevy::ecs::archetype;
 use bevy::math::Vec3Swizzles;
 use bevy::prelude::*;
 use league_core::extract::{
-    BarracksConfig, EnumMap, MapContainer, MapPlaceableContainer, StaticMaterialDef,
+    BarracksConfig, EnumMap, ItemData, MapContainer, MapPlaceableContainer, StaticMaterialDef,
 };
 use league_file::grid::AiMeshNGrid;
 use league_file::mapgeo::LeagueMapGeo;
@@ -18,11 +20,13 @@ use lol_core::map::MinionPath;
 use lol_core::navigation::grid::ResourceGrid;
 use lol_core::team::Team;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
+use ron::ser::{PrettyConfig, to_string_pretty};
 
 use crate::barrack::barracks_config_to_barracks;
 use crate::extract::champion::{
     ChampionRecordData, extract_character_from_record, skin_path_to_skin_bin_path,
 };
+use crate::extract::item::extract_item_data;
 use crate::extract::utils::write_to_file;
 use crate::gltf_export::export_mapgeo_to_gltf;
 use crate::navgrid::load_league_nav_grid;
@@ -37,6 +41,7 @@ pub fn extract_phase_1_create_loader(game_path: &str) -> LeagueLoader {
     println!("[1/7] Phase 1: 扫描 WAD 文件并创建 Loader...");
 
     let wad_files: Vec<&str> = vec![
+        "DATA/FINAL/Global.wad.client",
         "DATA/FINAL/UI.wad.client",
         "DATA/FINAL/UI.zh_CN.wad.client",
         "DATA/FINAL/Maps/Shipping/Map11.wad.client",
@@ -51,7 +56,7 @@ pub fn extract_phase_2_champions(loader: &LeagueLoader, hashes: &HashMap<u32, St
     println!("[2/7] Phase 2: 提取所有英雄...");
     let champions_path = std::path::Path::new(&loader.root_dir).join("DATA/FINAL/Champions");
     let Ok(entries) = std::fs::read_dir(&champions_path) else {
-        eprintln!(
+        println!(
             "[ERROR] 无法读取 Champions 目录: {:?}",
             champions_path.display()
         );
@@ -139,6 +144,15 @@ pub fn extract_phase_3_map_chunks(
 
         for (_, value) in items {
             match value {
+                EnumMap::Unk0xad65d8c4(unk0xad65d8c4) => {
+                    let transform = Transform::from_matrix(unk0xad65d8c4.transform.unwrap());
+                    spawn_character_record(
+                        world,
+                        unk0xad65d8c4,
+                        &mut map_character_records,
+                        transform,
+                    );
+                }
                 EnumMap::Unk0x3c995caf(unk0x3c995caf) => {
                     let lane = match unk0x3c995caf.name.as_str() {
                         "MinionPath_Top" => Lane::Top,
@@ -165,21 +179,29 @@ pub fn extract_phase_3_map_chunks(
                     minion_path.0.entry(lane).or_insert(path);
                 }
                 EnumMap::Unk0xba138ae3(unk0xba138ae3) => {
+                    let transform = Transform::from_matrix(unk0xba138ae3.transform);
+                    let team = Team::from(unk0xba138ae3.team.as_ref().map(|x| x.team));
+                    let lane = Lane::from(unk0xba138ae3.barracks.lane);
+
                     let barracks_config_hash = unk0xba138ae3.barracks.barracks_config;
                     let barracks_config =
                         prop_group.get_data::<BarracksConfig>(barracks_config_hash);
 
-                    let config_barracks = barracks_config_to_barracks(barracks_config.clone());
-                    let ron_content = ron::to_string(&config_barracks).unwrap();
-                    write_to_file(
-                        &map_paths.barracks_ron_export(barracks_config_hash),
-                        ron_content,
+                    let config_barracks = barracks_config_to_barracks(
+                        barracks_config.clone(),
+                        &prop_group,
+                        map_paths,
+                        &mut map_character_records,
+                        team.clone(),
                     );
+                    let ron_content =
+                        to_string_pretty(&config_barracks, PrettyConfig::default()).unwrap();
+                    write_to_file(&map_paths.barracks_ron(barracks_config_hash), ron_content);
 
                     world.spawn((
-                        Transform::from_matrix(unk0xba138ae3.transform),
-                        Team::from(unk0xba138ae3.team.as_ref().map(|x| x.team)),
-                        Lane::from(unk0xba138ae3.barracks.lane),
+                        transform,
+                        team,
+                        lane,
                         BarrackConfigHandler::new(
                             world
                                 .resource::<AssetServer>()
@@ -187,51 +209,7 @@ pub fn extract_phase_3_map_chunks(
                         ),
                     ));
                 }
-                EnumMap::Unk0xad65d8c4(unk0xad65d8c4) => {
-                    let transform = Transform::from_matrix(unk0xad65d8c4.transform.unwrap());
 
-                    // 从路径提取英雄名
-                    let character_name = unk0xad65d8c4
-                        .character
-                        .character_record
-                        .split('/')
-                        .skip(1)
-                        .next();
-
-                    if let Some(character_name) = character_name {
-                        // Extract skin_id from skin path (e.g., "Characters/Aatrox/Skins/Skin0" -> "skin0")
-                        let skin_id = unk0xad65d8c4
-                            .character
-                            .skin
-                            .split('/')
-                            .last()
-                            .unwrap_or("skin0");
-
-                        map_character_records
-                            .entry(character_name.to_string())
-                            .or_insert_with(Vec::new)
-                            .push(ChampionRecordData {
-                                char_record_path: unk0xad65d8c4.character.character_record.clone(),
-                                skin_path: Some(unk0xad65d8c4.character.skin.clone()),
-                            });
-
-                        world.spawn((
-                            transform,
-                            Team::from(unk0xad65d8c4.team.as_ref().map(|x| x.team)),
-                            ConfigSkin {
-                                skin: world.resource::<AssetServer>().load(&format!(
-                                    "characters/{}/skins/{}.ron",
-                                    character_name, skin_id
-                                )),
-                            },
-                            ConfigCharacterRecord {
-                                character_record: world
-                                    .resource::<AssetServer>()
-                                    .load(&format!("characters/{}/config.ron", character_name)),
-                            },
-                        ));
-                    }
-                }
                 _ => {}
             }
         }
@@ -265,10 +243,7 @@ pub fn extract_phase_4_nav_grid(world: &mut World, loader: &LeagueLoader, map_pa
         let (_, nav_grid) = AiMeshNGrid::parse(&buf).unwrap();
         let config_navigation_grid = load_league_nav_grid(nav_grid);
 
-        crate::extract::utils::write_bin_to_file(
-            &map_paths.navgrid_bin_export(),
-            &config_navigation_grid,
-        );
+        crate::extract::utils::write_bin_to_file(&map_paths.navgrid_bin(), &config_navigation_grid);
 
         world.insert_resource(ResourceGrid(
             world
@@ -304,9 +279,15 @@ pub fn extract_phase_5_map_geo(loader: &LeagueLoader, map_paths: &MapPaths) {
         }
     }
 
+    let glb_path_str = map_paths.mapgeo_glb();
+    let glb_path = Path::new("assets").join(&glb_path_str);
+    if let Some(parent) = glb_path.parent() {
+        std::fs::create_dir_all(parent).expect("无法创建地图资源目录");
+    }
+
     export_mapgeo_to_gltf(
         &league_mapgeo,
-        &map_paths.mapgeo_glb_export().replace(".glb", ""),
+        &glb_path_str.replace(".glb", ""),
         &material_defs,
         loader,
     )
@@ -371,12 +352,96 @@ pub fn extract_phase_6_map_character_records(
 /// Phase 7: 序列化 World 到文件
 pub fn extract_phase_7_serialize_world(world: &mut World, map_paths: &MapPaths) {
     println!("[7/7] Phase 7: 序列化 World 到文件...");
-    let scene = DynamicWorld::from_world(world);
     let type_registry = world.resource::<AppTypeRegistry>();
     let type_registry = type_registry.read();
+    let scene = DynamicWorldBuilder::from_world(&world, &type_registry)
+        .deny_component::<GlobalTransform>()
+        .deny_component::<TransformTreeChanged>()
+        .extract_entities(
+            // we do this instead of a query, in order to completely sidestep default query filters.
+            // while we could use `Allow<_>`, this wouldn't account for custom disabled components
+            world
+                .archetypes()
+                .iter()
+                .flat_map(archetype::Archetype::entities)
+                .map(archetype::ArchetypeEntity::id),
+        )
+        .extract_resources()
+        .build();
     let serialized_scene = scene.serialize(&type_registry).unwrap();
 
-    write_to_file(&map_paths.scene_ron_export(), &serialized_scene);
+    write_to_file(&map_paths.scene_ron(), &serialized_scene);
+}
+
+/// Phase 8: 提取装备信息
+pub fn extract_phase_8_items(loader: &LeagueLoader) {
+    println!("[8/7] Phase 8: 提取装备信息...");
+    let Ok(items_prop) = loader.get_prop_group_by_paths(vec!["items"]) else {
+        println!("[WARN] 找不到 items");
+        return;
+    };
+
+    let items: Vec<ItemData> = items_prop.get_all_by_class::<ItemData>();
+    println!("[INFO] 发现 {} 个装备", items.len());
+
+    for item_data in items {
+        let config_item = extract_item_data(&item_data);
+        let ron_content =
+            ron::ser::to_string_pretty(&config_item, ron::ser::PrettyConfig::default()).unwrap();
+        write_to_file(&format!("items/{}.ron", item_data.item_id), ron_content);
+    }
+}
+
+pub fn spawn_character_record<B: Bundle>(
+    world: &mut World,
+    unk0xad65d8c4: &league_core::extract::Unk0xad65d8c4,
+    map_character_records: &mut std::collections::HashMap<String, Vec<ChampionRecordData>>,
+    bundle: B,
+) {
+    // 从路径提取英雄名
+    let character_name = unk0xad65d8c4
+        .character
+        .character_record
+        .split('/')
+        .skip(1)
+        .next();
+
+    if let Some(character_name) = character_name {
+        // Extract skin_id from skin path (e.g., "Characters/Aatrox/Skins/Skin0" -> "skin0")
+        let skin_id = unk0xad65d8c4
+            .character
+            .skin
+            .split('/')
+            .last()
+            .unwrap_or("skin0");
+
+        map_character_records
+            .entry(character_name.to_string())
+            .or_insert_with(Vec::new)
+            .push(ChampionRecordData {
+                char_record_path: unk0xad65d8c4.character.character_record.clone(),
+                skin_path: Some(unk0xad65d8c4.character.skin.clone()),
+            });
+
+        let mut entity_mut = world.spawn((
+            ConfigSkin {
+                skin: world.resource::<AssetServer>().load(&format!(
+                    "characters/{}/skins/{}.ron",
+                    character_name, skin_id
+                )),
+            },
+            ConfigCharacterRecord {
+                character_record: world
+                    .resource::<AssetServer>()
+                    .load(&format!("characters/{}/config.ron", character_name)),
+            },
+            bundle,
+        ));
+
+        if let Some(team) = unk0xad65d8c4.team.as_ref().map(|x| x.team) {
+            entity_mut.insert(Team::from(team));
+        }
+    }
 }
 
 /// 一键提取所有数据（英雄 + 地图）
@@ -399,6 +464,7 @@ pub fn extract_all(game_path: &str, hashes_dir: &str) {
     app.init_asset::<DynamicWorld>();
     app.init_asset::<lol_base::barrack::ConfigBarracks>();
     app.init_asset::<lol_base::grid::ConfigNavigationGrid>();
+    app.init_asset::<lol_base::item::ConfigItem>();
     app.init_asset_loader::<lol_core::loaders::barrack::ConfigBarracksLoader>();
     app.finish();
     app.cleanup();
@@ -422,4 +488,7 @@ pub fn extract_all(game_path: &str, hashes_dir: &str) {
 
     // Phase 7: 序列化 World
     extract_phase_7_serialize_world(world, &map_paths);
+
+    // Phase 8: 提取装备
+    extract_phase_8_items(&loader);
 }

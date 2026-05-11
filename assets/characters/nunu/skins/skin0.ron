@@ -12,6 +12,7 @@
         ),
         "lol_base::character::Skin": (
           scale: 1.42,
+          avatar: "ASSETS/Characters/Nunu/HUD/Nunu_Circle_0.png",
         ),
       },
     ),

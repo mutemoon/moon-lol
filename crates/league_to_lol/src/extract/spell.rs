@@ -6,7 +6,10 @@ use league_core::extract::{
 };
 use league_loader::game::{Data, PropGroup};
 use league_utils::hash_to_field_name;
-use lol_base::movement::{MissileSpecification, MovementType, MovementTypeFixedSpeed};
+use lol_base::movement::{
+    HeightSolver, MissileBehavior, MissileSpecification, MovementType, MovementTypeFixedSpeed,
+    VerticalFacing,
+};
 use lol_base::spell::{DataSpell, Spell, ValuesData, ValuesEffect};
 use lol_base::spell_calc::{
     CalculationPart, CalculationPartEffectValue, CalculationPartNamedDataValue,
@@ -14,19 +17,21 @@ use lol_base::spell_calc::{
     CalculationSpell, CalculationType,
 };
 
-use super::utils::write_to_file;
+use crate::extract::utils::{extract_texture, write_to_file};
 
 /// 从 CharacterRecord 所在 bin 文件提取所有 SpellObject，转换为 DataSpell 并导出
+/// 返回所有技能对象名称列表
 pub fn extract_spells_for_champion(
+    loader: &league_loader::game::LeagueLoader,
     champ_name: &str,
     prop_group: &PropGroup,
     hashes: &HashMap<u32, String>,
-) {
+) -> Vec<String> {
     let spells = prop_group.get_all_by_class::<SpellObject>();
 
     if spells.is_empty() {
         println!("[WARN] 未在 {} bin 中找到 SpellObject", champ_name);
-        return;
+        return Vec::new();
     }
 
     println!(
@@ -34,6 +39,8 @@ pub fn extract_spells_for_champion(
         champ_name,
         spells.len()
     );
+
+    let mut spell_names = Vec::new();
 
     for spell_obj in spells {
         let object_name = &spell_obj.object_name;
@@ -45,20 +52,21 @@ pub fn extract_spells_for_champion(
             continue;
         };
 
-        let data_spell = convert_spell_data_resource(spell_data, hashes);
+        let mut data_spell = convert_spell_data_resource(spell_data, hashes);
+
+        // 导出技能图标并更新路径
+        if let Some(icons) = &mut data_spell.icon_path {
+            for icon in icons {
+                *icon = extract_texture(loader, icon);
+            }
+        }
 
         let spell = Spell {
             spell_data: Some(data_spell),
         };
 
-        let output_dir = format!("assets/characters/{}/spells", champ_name);
+        let output_dir = format!("characters/{}/spells", champ_name);
         let output_path = format!("{}/{}.ron", output_dir, object_name);
-
-        // 确保目录存在
-        if let Err(e) = std::fs::create_dir_all(&output_dir) {
-            println!("[WARN] 无法创建目录 {}: {}", output_dir, e);
-            continue;
-        }
 
         let serialized = ron::ser::to_string_pretty(&spell, ron::ser::PrettyConfig::default())
             .map_err(|e| format!("序列化失败: {}", e));
@@ -66,13 +74,16 @@ pub fn extract_spells_for_champion(
         match serialized {
             Ok(s) => {
                 write_to_file(&output_path, s);
-                println!("[INFO] 已导出技能: {}", output_path);
+                // println!("[INFO] 已导出技能: {}", output_path);
+                spell_names.push(object_name.clone());
             }
             Err(e) => {
                 println!("[WARN] 序列化 {} 失败: {}", object_name, e);
             }
         }
     }
+
+    spell_names
 }
 
 /// 将 SpellDataResource 转换为 DataSpell
@@ -93,6 +104,23 @@ fn convert_spell_data_resource(
         missile_speed: spell.missile_speed,
         missile_effect_key: spell.m_missile_effect_key,
         cast_type: spell.m_cast_type,
+        cast_range: spell.cast_range.clone(),
+        cast_radius: spell.cast_radius.clone(),
+        cast_cone_angle: spell.cast_cone_angle,
+        cast_cone_distance: spell.cast_cone_distance,
+        line_width: spell.m_line_width,
+        cast_frame: spell.cast_frame,
+        animation_name: spell.m_animation_name.clone(),
+        cooldown_time: spell.cooldown_time.clone(),
+        cant_cancel_while_winding_up: spell.m_cant_cancel_while_winding_up,
+        spell_reveals_champion: spell.m_spell_reveals_champion,
+        affects_type_flags: spell.m_affects_type_flags,
+        alternate_name: spell.m_alternate_name.clone(),
+        coefficient: spell.m_coefficient,
+        hit_effect_key: spell.m_hit_effect_key,
+        selection_priority: spell.selection_priority,
+        icon_path: spell.m_img_icon_name.clone(),
+        use_animator_framerate: spell.use_animator_framerate,
     }
 }
 
@@ -125,10 +153,38 @@ fn convert_data_values(values: &Option<Vec<SpellDataValue>>) -> Option<Vec<Value
 fn convert_missile_spec(
     spec: &Option<league_core::extract::MissileSpecification>,
 ) -> Option<MissileSpecification> {
+    use league_core::extract::{EnumCastOnHit, EnumFacing, EnumHeightSolver};
+
     spec.as_ref().map(|spec| {
         let movement = convert_movement(&spec.movement_component);
+        let behaviors = spec.behaviors.as_ref().map(|behaviors| {
+            behaviors
+                .iter()
+                .filter_map(|b| match b {
+                    EnumCastOnHit::CastOnHit => Some(MissileBehavior::CastOnHit),
+                    EnumCastOnHit::DestroyOnMovementComplete(_) => {
+                        Some(MissileBehavior::DestroyOnMovementComplete)
+                    }
+                    _ => None,
+                })
+                .collect()
+        });
+        let height_solver = spec.height_solver.as_ref().and_then(|h| match h {
+            EnumHeightSolver::BlendedLinearHeightSolver => {
+                Some(HeightSolver::BlendedLinearHeightSolver)
+            }
+            _ => None,
+        });
+        let vertical_facing = spec.vertical_facing.as_ref().and_then(|f| match f {
+            EnumFacing::VerticalFacingFaceTarget => Some(VerticalFacing::VerticalFacingFaceTarget),
+            _ => None,
+        });
         MissileSpecification {
             movement_component: movement,
+            missile_width: spec.m_missile_width,
+            behaviors,
+            height_solver,
+            vertical_facing,
         }
     })
 }
@@ -140,15 +196,20 @@ fn convert_movement(movement: &Option<league_core::extract::EnumMovement>) -> Mo
             MovementType::MovementTypeFixedSpeed(MovementTypeFixedSpeed {
                 speed: fixed.m_speed,
                 start_bone_name: fixed.m_start_bone_name.clone(),
+                tracks_target: fixed.m_tracks_target,
+                project_target_to_cast_range: fixed.m_project_target_to_cast_range,
+                use_height_offset_at_end: fixed.m_use_height_offset_at_end,
+                offset_initial_target_height: fixed.m_offset_initial_target_height,
             })
         }
-        _ => {
-            // 其他移动类型暂时使用默认构造
-            MovementType::MovementTypeFixedSpeed(MovementTypeFixedSpeed {
-                speed: None,
-                start_bone_name: None,
-            })
-        }
+        _ => MovementType::MovementTypeFixedSpeed(MovementTypeFixedSpeed {
+            speed: None,
+            start_bone_name: None,
+            tracks_target: None,
+            project_target_to_cast_range: None,
+            use_height_offset_at_end: None,
+            offset_initial_target_height: None,
+        }),
     }
 }
 

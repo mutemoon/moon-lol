@@ -2,9 +2,6 @@ use std::collections::HashMap;
 
 use bevy::ecs::relationship::Relationship;
 use bevy::prelude::*;
-use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandSkinParticleDespawn, CommandSkinParticleSpawn};
-use lol_core::attack::EntityCommandsTrigger;
 use lol_core::base::buff::BuffOf;
 use lol_core::base::direction::{Direction, is_in_direction};
 use lol_core::damage::{CommandDamageCreate, DamageType, EventDamageCreate};
@@ -64,17 +61,6 @@ impl Vital {
     pub fn is_active(&self) -> bool {
         self.active_timer.is_finished()
     }
-}
-
-pub fn get_particle_hash(direction: &Direction, postfix: &str, suffix: &str) -> u32 {
-    let base_name = match direction {
-        Direction::Up => "NE",
-        Direction::Right => "NW",
-        Direction::Down => "SW",
-        Direction::Left => "SE",
-    };
-
-    hash_bin(&format!("{}{}{}", postfix, base_name, suffix))
 }
 
 pub fn update_add_vital(
@@ -153,11 +139,6 @@ pub fn update_add_vital(
                 FIORA_PASSIVE_ACTIVE_DURATION,
                 FIORA_PASSIVE_DURATION,
             ));
-
-            commands.trigger(CommandSkinParticleSpawn {
-                entity: target_entity,
-                hash: get_particle_hash(&direction, "Fiora_Passive_", "_Warning"),
-            });
         }
     }
 }
@@ -196,31 +177,11 @@ pub fn update_remove_vital(
 
             if !vital.is_active() {
                 vital.active_timer.tick(time.delta());
-
-                if vital.is_active() {
-                    commands.trigger(CommandSkinParticleDespawn {
-                        entity: target_entity,
-                        hash: get_particle_hash(&vital.direction, "Fiora_Passive_", "_Warning"),
-                    });
-                    commands.trigger(CommandSkinParticleSpawn {
-                        entity: target_entity,
-                        hash: get_particle_hash(&vital.direction, "Fiora_Passive_", ""),
-                    });
-                }
                 continue;
             }
 
             if !vital.timeout_red_triggered && vital.remove_timer.remaining_secs() <= VITAL_TIMEOUT
             {
-                commands.trigger(CommandSkinParticleDespawn {
-                    entity: target_entity,
-                    hash: get_particle_hash(&vital.direction, "Fiora_Passive_", ""),
-                });
-                commands.trigger(CommandSkinParticleSpawn {
-                    entity: target_entity,
-                    hash: get_particle_hash(&vital.direction, "Fiora_Passive_", "_TimeOut_Red"),
-                });
-
                 vital.timeout_red_triggered = true;
             }
 
@@ -265,20 +226,6 @@ pub fn on_passive_damage_create(
     if !is_in_direction(source_position, target_position, &vital.direction) {
         return;
     }
-
-    commands.try_trigger(CommandSkinParticleSpawn {
-        entity: target_entity,
-        hash: hash_bin("Fiora_Passive_Hit_Tar"),
-    });
-
-    commands.trigger(CommandSkinParticleDespawn {
-        entity: target_entity,
-        hash: get_particle_hash(&vital.direction, "Fiora_Passive_", "_Warning"),
-    });
-    commands.trigger(CommandSkinParticleDespawn {
-        entity: target_entity,
-        hash: get_particle_hash(&vital.direction, "Fiora_Passive_", ""),
-    });
 
     let distance = source_position.distance(target_position);
 
@@ -327,10 +274,5 @@ pub fn on_passive_damage_create(
         source: trigger.source,
         damage_type: DamageType::True,
         amount: hp.max * 0.05,
-    });
-
-    commands.try_trigger(CommandSkinParticleSpawn {
-        entity: target_entity,
-        hash: get_particle_hash(&direction, "Fiora_Passive_", "_Warning"),
     });
 }

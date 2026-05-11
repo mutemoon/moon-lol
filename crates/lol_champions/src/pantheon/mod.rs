@@ -2,7 +2,7 @@ pub mod buffs;
 
 use bevy::prelude::{Handle, *};
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -82,10 +82,6 @@ fn cast_pantheon_q(
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Pantheon_Q_Cast"),
-    });
     // Q is a spear throw that can be held for more damage
     commands.trigger(ActionDamage {
         entity,
@@ -118,10 +114,6 @@ fn cast_pantheon_w(
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Pantheon_W_Cast"),
-    });
     // W is a dash to target that stuns
     commands.trigger(ActionDash {
         entity,
@@ -146,10 +138,6 @@ fn cast_pantheon_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<
         hash: "spell3".to_string(),
         repeat: false,
         duration: None,
-    });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Pantheon_E_Cast"),
     });
     // E is a shield block that deals damage in a cone when released
     commands.trigger(ActionDamage {
@@ -185,10 +173,6 @@ fn cast_pantheon_r(
         hash: "spell4".to_string(),
         repeat: false,
         duration: None,
-    });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Pantheon_R_Cast"),
     });
     // R is a long-range leap that damages enemies in area
     commands.trigger(ActionDash {

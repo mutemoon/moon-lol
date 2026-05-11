@@ -39,6 +39,7 @@
         "lol_core::movement::Movement": (
           speed: 0.0,
         ),
+        "lol_core::skill::LOLSpells": ({}),
       },
     ),
   },

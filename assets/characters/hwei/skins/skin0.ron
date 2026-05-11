@@ -12,6 +12,7 @@
         ),
         "lol_base::character::Skin": (
           scale: 1.15,
+          avatar: "ASSETS/Characters/Hwei/HUD/Hwei_Circle_0.png",
         ),
       },
     ),

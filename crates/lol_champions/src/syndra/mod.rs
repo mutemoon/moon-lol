@@ -2,7 +2,7 @@ pub mod buffs;
 
 use bevy::prelude::*;
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -62,11 +62,6 @@ fn cast_syndra_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Syndra_Q_Cast"),
-    });
-
     commands.trigger(ActionDamage {
         entity,
         skill: skill_spell,
@@ -89,11 +84,6 @@ fn cast_syndra_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Syndra_W_Cast"),
-    });
-
     commands.trigger(ActionDamage {
         entity,
         skill: skill_spell,
@@ -116,11 +106,6 @@ fn cast_syndra_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Syndra_E_Cast"),
-    });
-
     commands.trigger(ActionDamage {
         entity,
         skill: skill_spell,
@@ -146,11 +131,6 @@ fn cast_syndra_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Syndra_R_Cast"),
-    });
-
     commands.trigger(ActionDamage {
         entity,
         skill: skill_spell,

@@ -2,7 +2,7 @@ pub mod buffs;
 
 use bevy::prelude::*;
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -62,11 +62,6 @@ fn cast_sona_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spel
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Sona_Q_Cast"),
-    });
-
     // Q is hymn of valor - damage
     commands.trigger(ActionDamage {
         entity,
@@ -90,11 +85,6 @@ fn cast_sona_w(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Sona_W_Cast"),
-    });
-
     // W is aria of perseverance - shield
     commands
         .entity(entity)
@@ -108,11 +98,6 @@ fn cast_sona_e(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Sona_E_Cast"),
-    });
-
     // E is song of celerity - movespeed buff
     commands
         .entity(entity)
@@ -126,11 +111,6 @@ fn cast_sona_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spel
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Sona_R_Cast"),
-    });
-
     // R is cure - AoE stun
     commands.trigger(ActionDamage {
         entity,

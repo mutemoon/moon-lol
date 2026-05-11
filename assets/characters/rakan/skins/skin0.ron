@@ -12,6 +12,7 @@
         ),
         "lol_base::character::Skin": (
           scale: 1.28,
+          avatar: "ASSETS/Characters/Rakan/HUD/Rakan_Circle.png",
         ),
       },
     ),

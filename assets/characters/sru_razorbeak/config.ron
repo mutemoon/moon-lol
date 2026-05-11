@@ -44,6 +44,10 @@
         "lol_core::movement::Movement": (
           speed: 450.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "SRU_RazorbeakBasicAttack": Path("characters/SRU_Razorbeak/spells/SRU_RazorbeakBasicAttack.ron"),
+          "SRU_RazorbeakBasicAttack2": Path("characters/SRU_Razorbeak/spells/SRU_RazorbeakBasicAttack2.ron"),
+        }),
       },
     ),
   },

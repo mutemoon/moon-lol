@@ -2,7 +2,7 @@ pub mod buffs;
 
 use bevy::prelude::*;
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -62,11 +62,6 @@ fn cast_twisted_fate_q(commands: &mut Commands, entity: Entity, skill_spell: Han
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("TwistedFate_Q_Cast"),
-    });
-
     commands.trigger(ActionDamage {
         entity,
         skill: skill_spell,
@@ -92,11 +87,6 @@ fn cast_twisted_fate_w(commands: &mut Commands, entity: Entity, skill_spell: Han
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("TwistedFate_W_Cast"),
-    });
-
     commands.trigger(ActionDamage {
         entity,
         skill: skill_spell,
@@ -119,10 +109,6 @@ fn cast_twisted_fate_e(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("TwistedFate_E_Cast"),
-    });
 }
 
 fn cast_twisted_fate_r(commands: &mut Commands, entity: Entity) {
@@ -131,10 +117,6 @@ fn cast_twisted_fate_r(commands: &mut Commands, entity: Entity) {
         hash: "spell4".to_string(),
         repeat: false,
         duration: None,
-    });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("TwistedFate_R_Cast"),
     });
 }
 

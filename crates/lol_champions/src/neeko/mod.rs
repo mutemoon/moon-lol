@@ -2,7 +2,7 @@ pub mod buffs;
 
 use bevy::prelude::{Handle, *};
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -62,11 +62,6 @@ fn cast_neeko_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Neeko_Q_Cast"),
-    });
-
     // Q is a bloom burst
     commands.trigger(ActionDamage {
         entity,
@@ -90,11 +85,6 @@ fn cast_neeko_w(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Neeko_W_Cast"),
-    });
-
     // W is a shapesplitter dash
 }
 
@@ -105,11 +95,6 @@ fn cast_neeko_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Neeko_E_Cast"),
-    });
-
     // E is a root
     commands.trigger(ActionDamage {
         entity,
@@ -136,11 +121,6 @@ fn cast_neeko_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Neeko_R_Cast"),
-    });
-
     // R is an AoE knockup/stun
     commands.trigger(ActionDamage {
         entity,

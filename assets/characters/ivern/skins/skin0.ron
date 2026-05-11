@@ -12,6 +12,7 @@
         ),
         "lol_base::character::Skin": (
           scale: 1.1,
+          avatar: "ASSETS/Characters/Ivern/HUD/Ivern_circle.png",
         ),
       },
     ),

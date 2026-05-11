@@ -2,7 +2,7 @@ pub mod buffs;
 
 use bevy::prelude::*;
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -77,11 +77,6 @@ fn cast_blitzcrank_q(
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Blitzcrank_Q_Cast"),
-    });
-
     // Q is a hook that pulls enemy
     commands.trigger(ActionDash {
         entity,
@@ -107,11 +102,6 @@ fn cast_blitzcrank_w(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Blitzcrank_W_Cast"),
-    });
-
     // W grants movement and attack speed
     commands
         .entity(entity)
@@ -125,11 +115,6 @@ fn cast_blitzcrank_e(commands: &mut Commands, entity: Entity, skill_spell: Handl
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Blitzcrank_E_Cast"),
-    });
-
     // E is an empowered attack that knocks up
     commands.trigger(ActionDamage {
         entity,
@@ -155,11 +140,6 @@ fn cast_blitzcrank_r(commands: &mut Commands, entity: Entity, skill_spell: Handl
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Blitzcrank_R_Cast"),
-    });
-
     // R is an AoE that silences
     commands.trigger(ActionDamage {
         entity,

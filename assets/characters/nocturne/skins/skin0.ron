@@ -12,6 +12,7 @@
         ),
         "lol_base::character::Skin": (
           scale: 1.2,
+          avatar: "ASSETS/Characters/Nocturne/HUD/Nocturne_Circle_0.png",
         ),
       },
     ),

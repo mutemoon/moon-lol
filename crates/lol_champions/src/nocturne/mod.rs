@@ -2,7 +2,7 @@ pub mod buffs;
 
 use bevy::prelude::{Handle, *};
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -63,11 +63,6 @@ fn cast_nocturne_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Nocturne_Q_Cast"),
-    });
-
     // Q is a throwing blade that leaves a trail
     commands.trigger(ActionDamage {
         entity,
@@ -94,11 +89,6 @@ fn cast_nocturne_w(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Nocturne_W_Cast"),
-    });
-
     // W grants attackspeed
     commands
         .entity(entity)
@@ -112,11 +102,6 @@ fn cast_nocturne_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Nocturne_E_Cast"),
-    });
-
     // E is a fear after delay
     commands.trigger(ActionDamage {
         entity,
@@ -140,11 +125,6 @@ fn cast_nocturne_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Nocturne_R_Cast"),
-    });
-
     // R is a global fear
     commands.trigger(ActionDamage {
         entity,

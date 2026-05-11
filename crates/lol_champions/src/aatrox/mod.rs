@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -95,11 +95,6 @@ fn cast_aatrox_q(
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Aatrox_Q_Cast"),
-    });
-
     // Q is a 3-hit combo, each hit has different damage shape
     // Using circular damage similar to Riven
     commands.trigger(ActionDash {
@@ -149,10 +144,6 @@ fn cast_aatrox_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Aatrox_W_Cast"),
-    });
     // W is a chain that pulls enemies back after delay
     commands.trigger(ActionDamage {
         entity,
@@ -182,10 +173,6 @@ fn cast_aatrox_e(
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Aatrox_E_Cast"),
-    });
     // E is a dash that heals based on damage dealt
     commands.trigger(ActionDash {
         entity,
@@ -207,10 +194,6 @@ fn cast_aatrox_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
         hash: "spell4".to_string(),
         repeat: false,
         duration: None,
-    });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Aatrox_R_Cast"),
     });
     // R is a self-cast that makes Aatrox unstoppable and deals damage
     commands.trigger(ActionDamage {

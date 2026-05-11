@@ -2,8 +2,6 @@ use std::collections::HashMap;
 use std::collections::hash_map::Iter;
 
 use bevy::prelude::*;
-use league_utils::hash_bin;
-use lol_base::render_cmd::CommandSkinParticleSpawn;
 use lol_core::action::{Action, CommandAction};
 use lol_core::team::Team;
 
@@ -75,17 +73,6 @@ pub fn on_key_pressed(
         "刚刚按下的键: {:?}",
         res_input.get_just_pressed().collect::<Vec<_>>()
     );
-
-    for (entity, _team, _controller) in q_controller.iter() {
-        if res_input.just_pressed(KeyCode::KeyV) {
-            debug!("检测到 KeyV 按下，触发 Riven_Q_03_Detonate 粒子特效");
-            commands.trigger(CommandSkinParticleSpawn {
-                entity,
-                hash: hash_bin("Riven_Q_03_Detonate"),
-            });
-            return;
-        };
-    }
 
     let Some(viewport_position) = window.cursor_position() else {
         debug!("无鼠标位置，跳过");

@@ -61,6 +61,10 @@ pub struct MovementState {
 #[derive(Component, Default)]
 pub struct MovementBlock;
 
+/// 施法阻塞组件，如果实体拥有此组件，则无法施放新技能
+#[derive(Component, Default)]
+pub struct CastBlock;
+
 #[derive(EntityEvent, Debug, Clone, PartialEq)]
 pub struct CommandMovement {
     pub entity: Entity,

@@ -44,6 +44,10 @@
         "lol_core::movement::Movement": (
           speed: 330.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "SRU_GrompBasicAttack": Path("characters/SRU_Gromp/spells/SRU_GrompBasicAttack.ron"),
+          "SRU_GrompBasicAttackMelee": Path("characters/SRU_Gromp/spells/SRU_GrompBasicAttackMelee.ron"),
+        }),
       },
     ),
   },

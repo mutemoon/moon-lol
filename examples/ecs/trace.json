@@ -1,0 +1,1978 @@
+[
+  {
+    "name": "PreUpdate",
+    "cat": "System",
+    "ph": "X",
+    "ts": 1117.6,
+    "dur": 749.0,
+    "pid": 1,
+    "tid": "ThreadId(25)",
+    "args": {
+      "fixed_frame": 0,
+      "frame": 0
+    }
+  },
+  {
+    "name": "Observer L1 (PreUpdate)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 1901.5,
+    "dur": 983.7,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 0,
+      "frame": 0
+    }
+  },
+  {
+    "name": "Observer L2 (PreUpdate)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 2909.2,
+    "dur": 951.9,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 0,
+      "frame": 0
+    }
+  },
+  {
+    "name": "Observer L3 (PreUpdate)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 3872.2,
+    "dur": 1049.7,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 0,
+      "frame": 0
+    }
+  },
+  {
+    "name": "Observer L4 (PreUpdate)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 4931.7,
+    "dur": 927.9,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 0,
+      "frame": 0
+    }
+  },
+  {
+    "name": "Update",
+    "cat": "System",
+    "ph": "X",
+    "ts": 5957.0,
+    "dur": 947.8,
+    "pid": 1,
+    "tid": "ThreadId(25)",
+    "args": {
+      "fixed_frame": 0,
+      "frame": 0
+    }
+  },
+  {
+    "name": "Observer L1 (Update)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 6939.3,
+    "dur": 947.3,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 0,
+      "frame": 0
+    }
+  },
+  {
+    "name": "Observer L2 (Update)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 7894.3,
+    "dur": 964.7,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 0,
+      "frame": 0
+    }
+  },
+  {
+    "name": "Observer L3 (Update)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 8865.1,
+    "dur": 1022.8,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 0,
+      "frame": 0
+    }
+  },
+  {
+    "name": "Observer L4 (Update)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 9928.6,
+    "dur": 941.8,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 0,
+      "frame": 0
+    }
+  },
+  {
+    "name": "PostUpdate",
+    "cat": "System",
+    "ph": "X",
+    "ts": 10913.2,
+    "dur": 1000.8,
+    "pid": 1,
+    "tid": "ThreadId(25)",
+    "args": {
+      "fixed_frame": 0,
+      "frame": 0
+    }
+  },
+  {
+    "name": "Observer L1 (PostUpdate)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 11986.1,
+    "dur": 935.7,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 0,
+      "frame": 0
+    }
+  },
+  {
+    "name": "Observer L2 (PostUpdate)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 12933.8,
+    "dur": 977.2,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 0,
+      "frame": 0
+    }
+  },
+  {
+    "name": "Observer L3 (PostUpdate)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 13940.0,
+    "dur": 1023.5,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 0,
+      "frame": 0
+    }
+  },
+  {
+    "name": "Observer L4 (PostUpdate)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 14974.8,
+    "dur": 914.5,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 0,
+      "frame": 0
+    }
+  },
+  {
+    "name": "Frame 0",
+    "cat": "Frame",
+    "ph": "X",
+    "ts": 907.8,
+    "dur": 15062.3,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 0,
+      "frame": 0
+    }
+  },
+  {
+    "name": "PreUpdate",
+    "cat": "System",
+    "ph": "X",
+    "ts": 16004.8,
+    "dur": 944.0,
+    "pid": 1,
+    "tid": "ThreadId(23)",
+    "args": {
+      "fixed_frame": 0,
+      "frame": 1
+    }
+  },
+  {
+    "name": "Observer L1 (PreUpdate)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 16979.0,
+    "dur": 925.3,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 0,
+      "frame": 1
+    }
+  },
+  {
+    "name": "Observer L2 (PreUpdate)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 17940.7,
+    "dur": 962.1,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 0,
+      "frame": 1
+    }
+  },
+  {
+    "name": "Observer L3 (PreUpdate)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 18922.5,
+    "dur": 995.9,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 0,
+      "frame": 1
+    }
+  },
+  {
+    "name": "Observer L4 (PreUpdate)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 19960.4,
+    "dur": 951.5,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 0,
+      "frame": 1
+    }
+  },
+  {
+    "name": "FixedParallel 3",
+    "cat": "System",
+    "ph": "X",
+    "ts": 21038.5,
+    "dur": 821.5,
+    "pid": 1,
+    "tid": "ThreadId(23)",
+    "args": {
+      "fixed_frame": 0,
+      "frame": 1
+    }
+  },
+  {
+    "name": "FixedParallel 2",
+    "cat": "System",
+    "ph": "X",
+    "ts": 21058.0,
+    "dur": 803.2,
+    "pid": 1,
+    "tid": "ThreadId(11)",
+    "args": {
+      "fixed_frame": 0,
+      "frame": 1
+    }
+  },
+  {
+    "name": "FixedParallel 1",
+    "cat": "System",
+    "ph": "X",
+    "ts": 21046.5,
+    "dur": 815.1,
+    "pid": 1,
+    "tid": "ThreadId(25)",
+    "args": {
+      "fixed_frame": 0,
+      "frame": 1
+    }
+  },
+  {
+    "name": "FixedParallel 0",
+    "cat": "System",
+    "ph": "X",
+    "ts": 21046.8,
+    "dur": 815.8,
+    "pid": 1,
+    "tid": "ThreadId(24)",
+    "args": {
+      "fixed_frame": 0,
+      "frame": 1
+    }
+  },
+  {
+    "name": "Observer L1 (FixedParallel 3)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 21875.7,
+    "dur": 997.3,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 0,
+      "frame": 1
+    }
+  },
+  {
+    "name": "Observer L2 (FixedParallel 3)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 22879.8,
+    "dur": 1060.5,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 0,
+      "frame": 1
+    }
+  },
+  {
+    "name": "Observer L3 (FixedParallel 3)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 23966.9,
+    "dur": 953.5,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 0,
+      "frame": 1
+    }
+  },
+  {
+    "name": "Observer L4 (FixedParallel 3)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 24952.8,
+    "dur": 940.0,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 0,
+      "frame": 1
+    }
+  },
+  {
+    "name": "Observer L1 (FixedParallel 1)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 25913.4,
+    "dur": 982.3,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 0,
+      "frame": 1
+    }
+  },
+  {
+    "name": "Observer L2 (FixedParallel 1)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 26920.9,
+    "dur": 938.1,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 0,
+      "frame": 1
+    }
+  },
+  {
+    "name": "Observer L3 (FixedParallel 1)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 27871.6,
+    "dur": 1039.4,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 0,
+      "frame": 1
+    }
+  },
+  {
+    "name": "Observer L4 (FixedParallel 1)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 28915.8,
+    "dur": 1096.7,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 0,
+      "frame": 1
+    }
+  },
+  {
+    "name": "Observer L1 (FixedParallel 2)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 30020.1,
+    "dur": 835.5,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 0,
+      "frame": 1
+    }
+  },
+  {
+    "name": "Observer L2 (FixedParallel 2)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 30861.5,
+    "dur": 1073.7,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 0,
+      "frame": 1
+    }
+  },
+  {
+    "name": "Observer L3 (FixedParallel 2)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 31999.0,
+    "dur": 922.4,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 0,
+      "frame": 1
+    }
+  },
+  {
+    "name": "Observer L4 (FixedParallel 2)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 32936.8,
+    "dur": 967.1,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 0,
+      "frame": 1
+    }
+  },
+  {
+    "name": "Observer L1 (FixedParallel 0)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 33938.6,
+    "dur": 987.0,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 0,
+      "frame": 1
+    }
+  },
+  {
+    "name": "Observer L2 (FixedParallel 0)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 34932.0,
+    "dur": 993.1,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 0,
+      "frame": 1
+    }
+  },
+  {
+    "name": "Observer L3 (FixedParallel 0)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 35958.2,
+    "dur": 986.0,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 0,
+      "frame": 1
+    }
+  },
+  {
+    "name": "Observer L4 (FixedParallel 0)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 36954.4,
+    "dur": 491.3,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 0,
+      "frame": 1
+    }
+  },
+  {
+    "name": "FixedPostUpdate",
+    "cat": "System",
+    "ph": "X",
+    "ts": 37486.2,
+    "dur": 993.6,
+    "pid": 1,
+    "tid": "ThreadId(24)",
+    "args": {
+      "fixed_frame": 0,
+      "frame": 1
+    }
+  },
+  {
+    "name": "Observer L1 (FixedPostUpdate)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 38492.7,
+    "dur": 525.3,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 0,
+      "frame": 1
+    }
+  },
+  {
+    "name": "Observer L2 (FixedPostUpdate)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 39022.6,
+    "dur": 521.2,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 0,
+      "frame": 1
+    }
+  },
+  {
+    "name": "Observer L3 (FixedPostUpdate)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 39554.4,
+    "dur": 520.4,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 0,
+      "frame": 1
+    }
+  },
+  {
+    "name": "Observer L4 (FixedPostUpdate)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 40079.6,
+    "dur": 521.3,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 0,
+      "frame": 1
+    }
+  },
+  {
+    "name": "FixedLast",
+    "cat": "System",
+    "ph": "X",
+    "ts": 40631.7,
+    "dur": 520.3,
+    "pid": 1,
+    "tid": "ThreadId(24)",
+    "args": {
+      "fixed_frame": 1,
+      "frame": 1
+    }
+  },
+  {
+    "name": "FixedParallel 2",
+    "cat": "System",
+    "ph": "X",
+    "ts": 41227.4,
+    "dur": 967.3,
+    "pid": 1,
+    "tid": "ThreadId(23)",
+    "args": {
+      "fixed_frame": 1,
+      "frame": 1
+    }
+  },
+  {
+    "name": "FixedParallel 1",
+    "cat": "System",
+    "ph": "X",
+    "ts": 41223.2,
+    "dur": 972.4,
+    "pid": 1,
+    "tid": "ThreadId(25)",
+    "args": {
+      "fixed_frame": 1,
+      "frame": 1
+    }
+  },
+  {
+    "name": "FixedParallel 3",
+    "cat": "System",
+    "ph": "X",
+    "ts": 41213.3,
+    "dur": 1000.9,
+    "pid": 1,
+    "tid": "ThreadId(24)",
+    "args": {
+      "fixed_frame": 1,
+      "frame": 1
+    }
+  },
+  {
+    "name": "FixedParallel 0",
+    "cat": "System",
+    "ph": "X",
+    "ts": 41219.3,
+    "dur": 995.2,
+    "pid": 1,
+    "tid": "ThreadId(11)",
+    "args": {
+      "fixed_frame": 1,
+      "frame": 1
+    }
+  },
+  {
+    "name": "Observer L1 (FixedParallel 3)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 42236.9,
+    "dur": 474.7,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 1,
+      "frame": 1
+    }
+  },
+  {
+    "name": "Observer L2 (FixedParallel 3)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 42717.7,
+    "dur": 519.4,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 1,
+      "frame": 1
+    }
+  },
+  {
+    "name": "Observer L3 (FixedParallel 3)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 43242.2,
+    "dur": 506.0,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 1,
+      "frame": 1
+    }
+  },
+  {
+    "name": "Observer L4 (FixedParallel 3)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 43762.0,
+    "dur": 518.2,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 1,
+      "frame": 1
+    }
+  },
+  {
+    "name": "Observer L1 (FixedParallel 1)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 44287.8,
+    "dur": 530.3,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 1,
+      "frame": 1
+    }
+  },
+  {
+    "name": "Observer L2 (FixedParallel 1)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 44843.4,
+    "dur": 1156.4,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 1,
+      "frame": 1
+    }
+  },
+  {
+    "name": "Observer L3 (FixedParallel 1)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 46004.9,
+    "dur": 531.7,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 1,
+      "frame": 1
+    }
+  },
+  {
+    "name": "Observer L4 (FixedParallel 1)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 46545.1,
+    "dur": 517.8,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 1,
+      "frame": 1
+    }
+  },
+  {
+    "name": "Observer L1 (FixedParallel 2)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 47067.6,
+    "dur": 518.2,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 1,
+      "frame": 1
+    }
+  },
+  {
+    "name": "Observer L2 (FixedParallel 2)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 47590.6,
+    "dur": 531.4,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 1,
+      "frame": 1
+    }
+  },
+  {
+    "name": "Observer L3 (FixedParallel 2)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 48143.6,
+    "dur": 480.9,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 1,
+      "frame": 1
+    }
+  },
+  {
+    "name": "Observer L4 (FixedParallel 2)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 48628.7,
+    "dur": 521.1,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 1,
+      "frame": 1
+    }
+  },
+  {
+    "name": "Observer L1 (FixedParallel 0)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 49157.3,
+    "dur": 505.7,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 1,
+      "frame": 1
+    }
+  },
+  {
+    "name": "Observer L2 (FixedParallel 0)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 49667.1,
+    "dur": 531.1,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 1,
+      "frame": 1
+    }
+  },
+  {
+    "name": "Observer L3 (FixedParallel 0)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 50245.9,
+    "dur": 470.7,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 1,
+      "frame": 1
+    }
+  },
+  {
+    "name": "Observer L4 (FixedParallel 0)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 50756.1,
+    "dur": 531.2,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 1,
+      "frame": 1
+    }
+  },
+  {
+    "name": "FixedPostUpdate",
+    "cat": "System",
+    "ph": "X",
+    "ts": 51301.5,
+    "dur": 499.4,
+    "pid": 1,
+    "tid": "ThreadId(11)",
+    "args": {
+      "fixed_frame": 1,
+      "frame": 1
+    }
+  },
+  {
+    "name": "Observer L1 (FixedPostUpdate)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 51811.9,
+    "dur": 511.0,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 1,
+      "frame": 1
+    }
+  },
+  {
+    "name": "Observer L2 (FixedPostUpdate)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 52326.3,
+    "dur": 510.2,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 1,
+      "frame": 1
+    }
+  },
+  {
+    "name": "Observer L3 (FixedPostUpdate)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 52845.5,
+    "dur": 531.6,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 1,
+      "frame": 1
+    }
+  },
+  {
+    "name": "Observer L4 (FixedPostUpdate)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 53397.5,
+    "dur": 478.9,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 1,
+      "frame": 1
+    }
+  },
+  {
+    "name": "FixedLast",
+    "cat": "System",
+    "ph": "X",
+    "ts": 53889.6,
+    "dur": 519.0,
+    "pid": 1,
+    "tid": "ThreadId(11)",
+    "args": {
+      "fixed_frame": 2,
+      "frame": 1
+    }
+  },
+  {
+    "name": "Update",
+    "cat": "System",
+    "ph": "X",
+    "ts": 54466.5,
+    "dur": 518.1,
+    "pid": 1,
+    "tid": "ThreadId(11)",
+    "args": {
+      "fixed_frame": 2,
+      "frame": 1
+    }
+  },
+  {
+    "name": "Observer L1 (Update)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 54993.9,
+    "dur": 510.0,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 2,
+      "frame": 1
+    }
+  },
+  {
+    "name": "Observer L2 (Update)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 55511.9,
+    "dur": 529.1,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 2,
+      "frame": 1
+    }
+  },
+  {
+    "name": "Observer L3 (Update)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 56047.4,
+    "dur": 559.6,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 2,
+      "frame": 1
+    }
+  },
+  {
+    "name": "Observer L4 (Update)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 56617.1,
+    "dur": 475.4,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 2,
+      "frame": 1
+    }
+  },
+  {
+    "name": "PostUpdate",
+    "cat": "System",
+    "ph": "X",
+    "ts": 57109.5,
+    "dur": 500.8,
+    "pid": 1,
+    "tid": "ThreadId(11)",
+    "args": {
+      "fixed_frame": 2,
+      "frame": 1
+    }
+  },
+  {
+    "name": "Observer L1 (PostUpdate)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 57658.9,
+    "dur": 554.9,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 2,
+      "frame": 1
+    }
+  },
+  {
+    "name": "Observer L2 (PostUpdate)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 58232.5,
+    "dur": 535.3,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 2,
+      "frame": 1
+    }
+  },
+  {
+    "name": "Observer L3 (PostUpdate)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 58791.5,
+    "dur": 525.4,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 2,
+      "frame": 1
+    }
+  },
+  {
+    "name": "Observer L4 (PostUpdate)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 59322.1,
+    "dur": 1102.2,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 2,
+      "frame": 1
+    }
+  },
+  {
+    "name": "Frame 1",
+    "cat": "Frame",
+    "ph": "X",
+    "ts": 15975.5,
+    "dur": 44477.1,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 0,
+      "frame": 1
+    }
+  },
+  {
+    "name": "PreUpdate",
+    "cat": "System",
+    "ph": "X",
+    "ts": 60505.8,
+    "dur": 595.0,
+    "pid": 1,
+    "tid": "ThreadId(25)",
+    "args": {
+      "fixed_frame": 2,
+      "frame": 2
+    }
+  },
+  {
+    "name": "Observer L1 (PreUpdate)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 61123.0,
+    "dur": 523.9,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 2,
+      "frame": 2
+    }
+  },
+  {
+    "name": "Observer L2 (PreUpdate)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 61656.6,
+    "dur": 510.0,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 2,
+      "frame": 2
+    }
+  },
+  {
+    "name": "Observer L3 (PreUpdate)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 62180.4,
+    "dur": 561.3,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 2,
+      "frame": 2
+    }
+  },
+  {
+    "name": "Observer L4 (PreUpdate)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 62746.3,
+    "dur": 470.0,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 2,
+      "frame": 2
+    }
+  },
+  {
+    "name": "FixedParallel 0",
+    "cat": "System",
+    "ph": "X",
+    "ts": 63246.8,
+    "dur": 518.1,
+    "pid": 1,
+    "tid": "ThreadId(24)",
+    "args": {
+      "fixed_frame": 2,
+      "frame": 2
+    }
+  },
+  {
+    "name": "FixedParallel 1",
+    "cat": "System",
+    "ph": "X",
+    "ts": 63252.6,
+    "dur": 511.7,
+    "pid": 1,
+    "tid": "ThreadId(11)",
+    "args": {
+      "fixed_frame": 2,
+      "frame": 2
+    }
+  },
+  {
+    "name": "FixedParallel 2",
+    "cat": "System",
+    "ph": "X",
+    "ts": 63258.3,
+    "dur": 511.9,
+    "pid": 1,
+    "tid": "ThreadId(23)",
+    "args": {
+      "fixed_frame": 2,
+      "frame": 2
+    }
+  },
+  {
+    "name": "FixedParallel 3",
+    "cat": "System",
+    "ph": "X",
+    "ts": 63242.4,
+    "dur": 1042.7,
+    "pid": 1,
+    "tid": "ThreadId(25)",
+    "args": {
+      "fixed_frame": 2,
+      "frame": 2
+    }
+  },
+  {
+    "name": "Observer L1 (FixedParallel 3)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 64329.4,
+    "dur": 527.0,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 2,
+      "frame": 2
+    }
+  },
+  {
+    "name": "Observer L2 (FixedParallel 3)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 64861.6,
+    "dur": 521.1,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 2,
+      "frame": 2
+    }
+  },
+  {
+    "name": "Observer L3 (FixedParallel 3)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 65390.8,
+    "dur": 528.8,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 2,
+      "frame": 2
+    }
+  },
+  {
+    "name": "Observer L4 (FixedParallel 3)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 65944.3,
+    "dur": 527.0,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 2,
+      "frame": 2
+    }
+  },
+  {
+    "name": "Observer L1 (FixedParallel 1)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 66484.1,
+    "dur": 514.1,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 2,
+      "frame": 2
+    }
+  },
+  {
+    "name": "Observer L2 (FixedParallel 1)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 67003.2,
+    "dur": 520.8,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 2,
+      "frame": 2
+    }
+  },
+  {
+    "name": "Observer L3 (FixedParallel 1)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 67528.7,
+    "dur": 517.7,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 2,
+      "frame": 2
+    }
+  },
+  {
+    "name": "Observer L4 (FixedParallel 1)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 68052.2,
+    "dur": 505.4,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 2,
+      "frame": 2
+    }
+  },
+  {
+    "name": "Observer L1 (FixedParallel 2)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 68562.9,
+    "dur": 520.2,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 2,
+      "frame": 2
+    }
+  },
+  {
+    "name": "Observer L2 (FixedParallel 2)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 69087.8,
+    "dur": 509.9,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 2,
+      "frame": 2
+    }
+  },
+  {
+    "name": "Observer L3 (FixedParallel 2)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 69601.5,
+    "dur": 508.6,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 2,
+      "frame": 2
+    }
+  },
+  {
+    "name": "Observer L4 (FixedParallel 2)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 70122.0,
+    "dur": 530.0,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 2,
+      "frame": 2
+    }
+  },
+  {
+    "name": "Observer L1 (FixedParallel 0)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 70681.2,
+    "dur": 472.2,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 2,
+      "frame": 2
+    }
+  },
+  {
+    "name": "Observer L2 (FixedParallel 0)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 71159.8,
+    "dur": 532.9,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 2,
+      "frame": 2
+    }
+  },
+  {
+    "name": "Observer L3 (FixedParallel 0)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 71712.7,
+    "dur": 546.3,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 2,
+      "frame": 2
+    }
+  },
+  {
+    "name": "Observer L4 (FixedParallel 0)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 72268.4,
+    "dur": 522.2,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 2,
+      "frame": 2
+    }
+  },
+  {
+    "name": "FixedPostUpdate",
+    "cat": "System",
+    "ph": "X",
+    "ts": 72804.0,
+    "dur": 537.3,
+    "pid": 1,
+    "tid": "ThreadId(25)",
+    "args": {
+      "fixed_frame": 2,
+      "frame": 2
+    }
+  },
+  {
+    "name": "Observer L1 (FixedPostUpdate)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 73367.3,
+    "dur": 518.2,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 2,
+      "frame": 2
+    }
+  },
+  {
+    "name": "Observer L2 (FixedPostUpdate)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 73889.6,
+    "dur": 510.9,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 2,
+      "frame": 2
+    }
+  },
+  {
+    "name": "Observer L3 (FixedPostUpdate)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 74408.6,
+    "dur": 522.0,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 2,
+      "frame": 2
+    }
+  },
+  {
+    "name": "Observer L4 (FixedPostUpdate)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 74934.8,
+    "dur": 518.2,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 2,
+      "frame": 2
+    }
+  },
+  {
+    "name": "FixedLast",
+    "cat": "System",
+    "ph": "X",
+    "ts": 75464.1,
+    "dur": 503.6,
+    "pid": 1,
+    "tid": "ThreadId(25)",
+    "args": {
+      "fixed_frame": 3,
+      "frame": 2
+    }
+  },
+  {
+    "name": "FixedParallel 1",
+    "cat": "System",
+    "ph": "X",
+    "ts": 76000.0,
+    "dur": 602.4,
+    "pid": 1,
+    "tid": "ThreadId(23)",
+    "args": {
+      "fixed_frame": 3,
+      "frame": 2
+    }
+  },
+  {
+    "name": "FixedParallel 0",
+    "cat": "System",
+    "ph": "X",
+    "ts": 75994.3,
+    "dur": 608.1,
+    "pid": 1,
+    "tid": "ThreadId(11)",
+    "args": {
+      "fixed_frame": 3,
+      "frame": 2
+    }
+  },
+  {
+    "name": "FixedParallel 2",
+    "cat": "System",
+    "ph": "X",
+    "ts": 76004.6,
+    "dur": 600.6,
+    "pid": 1,
+    "tid": "ThreadId(24)",
+    "args": {
+      "fixed_frame": 3,
+      "frame": 2
+    }
+  },
+  {
+    "name": "FixedParallel 3",
+    "cat": "System",
+    "ph": "X",
+    "ts": 75989.0,
+    "dur": 629.7,
+    "pid": 1,
+    "tid": "ThreadId(25)",
+    "args": {
+      "fixed_frame": 3,
+      "frame": 2
+    }
+  },
+  {
+    "name": "Observer L1 (FixedParallel 3)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 76637.1,
+    "dur": 523.9,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 3,
+      "frame": 2
+    }
+  },
+  {
+    "name": "Observer L2 (FixedParallel 3)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 77165.2,
+    "dur": 532.3,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 3,
+      "frame": 2
+    }
+  },
+  {
+    "name": "Observer L3 (FixedParallel 3)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 77710.4,
+    "dur": 521.0,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 3,
+      "frame": 2
+    }
+  },
+  {
+    "name": "Observer L4 (FixedParallel 3)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 78237.4,
+    "dur": 519.4,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 3,
+      "frame": 2
+    }
+  },
+  {
+    "name": "Observer L1 (FixedParallel 1)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 78761.3,
+    "dur": 520.3,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 3,
+      "frame": 2
+    }
+  },
+  {
+    "name": "Observer L2 (FixedParallel 1)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 79307.1,
+    "dur": 540.4,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 3,
+      "frame": 2
+    }
+  },
+  {
+    "name": "Observer L3 (FixedParallel 1)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 79878.1,
+    "dur": 518.3,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 3,
+      "frame": 2
+    }
+  },
+  {
+    "name": "Observer L4 (FixedParallel 1)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 80403.5,
+    "dur": 516.9,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 3,
+      "frame": 2
+    }
+  },
+  {
+    "name": "Observer L1 (FixedParallel 2)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 80925.0,
+    "dur": 543.9,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 3,
+      "frame": 2
+    }
+  },
+  {
+    "name": "Observer L2 (FixedParallel 2)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 81499.0,
+    "dur": 517.8,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 3,
+      "frame": 2
+    }
+  },
+  {
+    "name": "Observer L3 (FixedParallel 2)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 82038.5,
+    "dur": 489.7,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 3,
+      "frame": 2
+    }
+  },
+  {
+    "name": "Observer L4 (FixedParallel 2)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 82531.7,
+    "dur": 537.6,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 3,
+      "frame": 2
+    }
+  },
+  {
+    "name": "Observer L1 (FixedParallel 0)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 83079.8,
+    "dur": 520.1,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 3,
+      "frame": 2
+    }
+  },
+  {
+    "name": "Observer L2 (FixedParallel 0)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 83603.4,
+    "dur": 536.1,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 3,
+      "frame": 2
+    }
+  },
+  {
+    "name": "Observer L3 (FixedParallel 0)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 84166.7,
+    "dur": 522.5,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 3,
+      "frame": 2
+    }
+  },
+  {
+    "name": "Observer L4 (FixedParallel 0)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 84693.3,
+    "dur": 508.8,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 3,
+      "frame": 2
+    }
+  },
+  {
+    "name": "FixedPostUpdate",
+    "cat": "System",
+    "ph": "X",
+    "ts": 85220.9,
+    "dur": 520.6,
+    "pid": 1,
+    "tid": "ThreadId(25)",
+    "args": {
+      "fixed_frame": 3,
+      "frame": 2
+    }
+  },
+  {
+    "name": "Observer L1 (FixedPostUpdate)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 85752.4,
+    "dur": 503.5,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 3,
+      "frame": 2
+    }
+  },
+  {
+    "name": "Observer L2 (FixedPostUpdate)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 86262.4,
+    "dur": 511.6,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 3,
+      "frame": 2
+    }
+  },
+  {
+    "name": "Observer L3 (FixedPostUpdate)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 86778.7,
+    "dur": 509.9,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 3,
+      "frame": 2
+    }
+  },
+  {
+    "name": "Observer L4 (FixedPostUpdate)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 87293.0,
+    "dur": 520.5,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 3,
+      "frame": 2
+    }
+  },
+  {
+    "name": "FixedLast",
+    "cat": "System",
+    "ph": "X",
+    "ts": 87824.5,
+    "dur": 513.4,
+    "pid": 1,
+    "tid": "ThreadId(25)",
+    "args": {
+      "fixed_frame": 4,
+      "frame": 2
+    }
+  },
+  {
+    "name": "Update",
+    "cat": "System",
+    "ph": "X",
+    "ts": 88357.7,
+    "dur": 522.4,
+    "pid": 1,
+    "tid": "ThreadId(25)",
+    "args": {
+      "fixed_frame": 4,
+      "frame": 2
+    }
+  },
+  {
+    "name": "Observer L1 (Update)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 88896.3,
+    "dur": 522.6,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 4,
+      "frame": 2
+    }
+  },
+  {
+    "name": "Observer L2 (Update)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 89428.8,
+    "dur": 502.6,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 4,
+      "frame": 2
+    }
+  },
+  {
+    "name": "Observer L3 (Update)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 89939.6,
+    "dur": 524.2,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 4,
+      "frame": 2
+    }
+  },
+  {
+    "name": "Observer L4 (Update)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 90468.8,
+    "dur": 516.5,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 4,
+      "frame": 2
+    }
+  },
+  {
+    "name": "PostUpdate",
+    "cat": "System",
+    "ph": "X",
+    "ts": 90999.2,
+    "dur": 534.9,
+    "pid": 1,
+    "tid": "ThreadId(25)",
+    "args": {
+      "fixed_frame": 4,
+      "frame": 2
+    }
+  },
+  {
+    "name": "Observer L1 (PostUpdate)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 91558.9,
+    "dur": 610.5,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 4,
+      "frame": 2
+    }
+  },
+  {
+    "name": "Observer L2 (PostUpdate)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 92187.6,
+    "dur": 525.5,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 4,
+      "frame": 2
+    }
+  },
+  {
+    "name": "Observer L3 (PostUpdate)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 92724.2,
+    "dur": 521.6,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 4,
+      "frame": 2
+    }
+  },
+  {
+    "name": "Observer L4 (PostUpdate)",
+    "cat": "Observer",
+    "ph": "X",
+    "ts": 93253.1,
+    "dur": 526.5,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 4,
+      "frame": 2
+    }
+  },
+  {
+    "name": "Frame 2",
+    "cat": "Frame",
+    "ph": "X",
+    "ts": 60455.3,
+    "dur": 33350.3,
+    "pid": 1,
+    "tid": "ThreadId(1)",
+    "args": {
+      "fixed_frame": 0,
+      "frame": 2
+    }
+  }
+]

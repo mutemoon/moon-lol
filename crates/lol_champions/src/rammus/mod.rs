@@ -2,7 +2,7 @@ pub mod buffs;
 
 use bevy::prelude::*;
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -60,11 +60,6 @@ fn cast_rammus_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Rammus_Q_Cast"),
-    });
-
     // Q is powerball - damage and knockup
     commands.trigger(ActionDamage {
         entity,
@@ -88,11 +83,6 @@ fn cast_rammus_w(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Rammus_W_Cast"),
-    });
-
     // W is defensive ball curl - damage reflection
 }
 
@@ -103,11 +93,6 @@ fn cast_rammus_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Rammus_E_Cast"),
-    });
-
     // E is frencying taunt - taunt enemies
     commands.trigger(ActionDamage {
         entity,
@@ -131,11 +116,6 @@ fn cast_rammus_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Rammus_R_Cast"),
-    });
-
     // R is soaring slam - AoE damage and slow
     commands.trigger(ActionDamage {
         entity,

@@ -12,6 +12,7 @@
         ),
         "lol_base::character::Skin": (
           scale: 0.9,
+          avatar: "ASSETS/Characters/SRU_Baron/HUD/Baron_Circle.png",
         ),
       },
     ),

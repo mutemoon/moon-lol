@@ -2,7 +2,7 @@ pub mod buffs;
 
 use bevy::prelude::*;
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -62,11 +62,6 @@ fn cast_skarner_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<S
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Skarner_Q_Cast"),
-    });
-
     // Q is crystal slash - damage
     commands.trigger(ActionDamage {
         entity,
@@ -90,11 +85,6 @@ fn cast_skarner_w(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Skarner_W_Cast"),
-    });
-
     // W is crystalline exoskeleton - shield
 }
 
@@ -105,11 +95,6 @@ fn cast_skarner_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<S
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Skarner_E_Cast"),
-    });
-
     // E is fracture - damage
     commands.trigger(ActionDamage {
         entity,
@@ -136,11 +121,6 @@ fn cast_skarner_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<S
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Skarner_R_Cast"),
-    });
-
     // R is impale - stun and damage
     commands.trigger(ActionDamage {
         entity,

@@ -221,4 +221,4 @@ pub fn get_extension_by_bytes(bytes: &[u8]) -> &str {
 }
 
 pub mod hash_key;
-pub use hash_key::{HashKey, LoadHashKeyTrait};
+pub use hash_key::HashKey;

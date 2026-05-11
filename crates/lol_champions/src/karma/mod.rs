@@ -2,7 +2,7 @@ pub mod buffs;
 
 use bevy::prelude::*;
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -62,10 +62,6 @@ fn cast_karma_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Karma_Q_Cast"),
-    });
 
     // Q is a skillshot that damages and slows
     commands.trigger(ActionDamage {
@@ -93,10 +89,6 @@ fn cast_karma_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Karma_W_Cast"),
-    });
 
     // W roots after delay
     commands.trigger(ActionDamage {
@@ -121,10 +113,6 @@ fn cast_karma_e(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Karma_E_Cast"),
-    });
 
     // E provides shield and movement speed
     commands
@@ -138,10 +126,6 @@ fn cast_karma_r(commands: &mut Commands, entity: Entity) {
         hash: "spell4".to_string(),
         repeat: false,
         duration: None,
-    });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Karma_R_Cast"),
     });
 
     // R empowers next skill (handled by gathering fire passive)

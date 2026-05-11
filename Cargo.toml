@@ -25,6 +25,8 @@ gltf = "1.4.1"
 serde_json = "1.0"
 
 bevy = { git = "https://github.com/mutemoon/bevy", branch = "bevy_basisu", features = [
+    "dds",
+    "tga",
     "webp",
     "basis_universal",
     "free_camera",

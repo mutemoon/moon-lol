@@ -40,6 +40,9 @@
         "lol_core::movement::Movement": (
           speed: 0.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "SRUAP_MageCrystalBasicAttack": Path("characters/SRUAP_MageCrystal/spells/SRUAP_MageCrystalBasicAttack.ron"),
+        }),
       },
     ),
   },

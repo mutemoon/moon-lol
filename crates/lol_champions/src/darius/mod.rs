@@ -3,7 +3,7 @@ pub mod q;
 
 use bevy::prelude::*;
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -83,10 +83,6 @@ fn cast_darius_w(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Darius_W_Cast"),
-    });
     // W is an empowered auto attack that applies slow
     commands.trigger(CommandAttackReset { entity });
 }
@@ -98,10 +94,6 @@ fn cast_darius_e(commands: &mut Commands, entity: Entity, _skill_spell: Handle<S
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Darius_E_Cast"),
-    });
     // E is a cone pull - no damage (calculations: None in .ron)
 }
 
@@ -111,10 +103,6 @@ fn cast_darius_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
         hash: "spell4".to_string(),
         repeat: false,
         duration: None,
-    });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Darius_R_Cast"),
     });
     // R is a targeted execute ability
     commands.trigger(ActionDamage {

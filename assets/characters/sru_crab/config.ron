@@ -89,6 +89,12 @@
         "lol_core::movement::Movement": (
           speed: 255.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "Sru_CrabDash": Path("characters/Sru_Crab/spells/Sru_CrabDash.ron"),
+          "Sru_CrabDashLong": Path("characters/Sru_Crab/spells/Sru_CrabDashLong.ron"),
+          "Sru_CrabShrineStats": Path("characters/Sru_Crab/spells/Sru_CrabShrineStats.ron"),
+          "Sru_CrabSpeedBoost": Path("characters/Sru_Crab/spells/Sru_CrabSpeedBoost.ron"),
+        }),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

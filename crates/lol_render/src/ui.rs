@@ -6,6 +6,7 @@ pub mod element;
 pub mod health_bar;
 pub mod player;
 pub mod skill;
+pub mod text;
 
 use animation::PluginUIAnimation;
 use bevy::prelude::*;
@@ -16,6 +17,7 @@ use element::PluginUIElement;
 use health_bar::PluginUIHealthBar;
 use player::PluginUIPlayer;
 use skill::PluginUISkill;
+use text::PluginUIText;
 
 #[derive(Default)]
 pub struct PluginUI;
@@ -30,5 +32,6 @@ impl Plugin for PluginUI {
         app.add_plugins(PluginUIPlayer);
         app.add_plugins(PluginUIDamage);
         app.add_plugins(PluginUIAnimation);
+        app.add_plugins(PluginUIText);
     }
 }

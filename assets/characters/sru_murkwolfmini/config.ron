@@ -44,6 +44,10 @@
         "lol_core::movement::Movement": (
           speed: 525.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "SRU_MurkwolfMiniBasicAttack": Path("characters/SRU_MurkwolfMini/spells/SRU_MurkwolfMiniBasicAttack.ron"),
+          "SRU_MurkwolfMiniBasicAttack2": Path("characters/SRU_MurkwolfMini/spells/SRU_MurkwolfMiniBasicAttack2.ron"),
+        }),
       },
     ),
   },

@@ -1,12 +1,13 @@
 use std::process::Command;
 
-use league_to_lol::extract::extract_all;
+use league_to_lol::extract::{extract_all, extract_ui_all};
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 
 fn main() {
     let game_path = r"D:\WeGameApps\英雄联盟\Game";
     let hashes_dir = "assets/hashes";
     extract_all(game_path, hashes_dir);
+    extract_ui_all(game_path);
     post_process_mapgeo();
     // post_process_all_skin_glb();
 }

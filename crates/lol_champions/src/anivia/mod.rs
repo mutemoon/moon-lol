@@ -2,7 +2,7 @@ pub mod buffs;
 
 use bevy::prelude::*;
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -85,19 +85,11 @@ fn cast_anivia_q(
 
     if stage == 1 {
         // First cast: launch the crystal
-        commands.trigger(CommandSkinParticleSpawn {
-            entity,
-            hash: hash_bin("Anivia_Q_Cast"),
-        });
         commands
             .entity(skill_entity)
             .insert(SkillRecastWindow::new(2, 2, ANIVIA_Q_RECAST_WINDOW));
     } else {
         // Second cast: detonate for extra damage and stun
-        commands.trigger(CommandSkinParticleSpawn {
-            entity,
-            hash: hash_bin("Anivia_Q_Explode"),
-        });
         commands.trigger(ActionDamage {
             entity,
             skill: skill_spell,
@@ -126,10 +118,6 @@ fn cast_anivia_w(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Anivia_W_Cast"),
-    });
     // W creates a wall that blocks movement
 }
 
@@ -140,11 +128,6 @@ fn cast_anivia_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Anivia_E_Cast"),
-    });
-
     // E deals extra damage to frozen targets
     commands.trigger(ActionDamage {
         entity,
@@ -168,11 +151,6 @@ fn cast_anivia_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Anivia_R_Cast"),
-    });
-
     // R is a continuous storm
     commands.trigger(ActionDamage {
         entity,

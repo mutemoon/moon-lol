@@ -4,10 +4,30 @@ use std::marker::PhantomData;
 use bevy::asset::uuid::Uuid;
 use bevy::asset::{Asset, AssetId, Assets, Handle, UntypedHandle};
 use bevy::reflect::TypePath;
+use serde::{Deserialize, Serialize};
 
 use crate::hash_bin;
 
 pub struct HashKey<T: TypePath>(pub (u32, PhantomData<T>));
+
+impl<T: TypePath> Serialize for HashKey<T> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        serializer.serialize_u32(self.0.0)
+    }
+}
+
+impl<'de, T: TypePath> Deserialize<'de> for HashKey<T> {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let val = u32::deserialize(deserializer)?;
+        Ok(HashKey((val, PhantomData)))
+    }
+}
 
 impl<T: TypePath> Debug for HashKey<T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -97,7 +117,7 @@ impl<T: Asset> From<HashKey<T>> for UntypedHandle {
 pub trait LoadHashKeyTrait<T: Asset> {
     fn load_hash(&self, hash: impl Into<HashKey<T>>) -> Option<&T>;
 
-    fn add_hash(&mut self, hash: impl Into<HashKey<T>>, asset: T);
+    fn add_hash(&mut self, hash: impl Into<HashKey<T>>, asset: T) -> Handle<T>;
 }
 
 impl<T: Asset> LoadHashKeyTrait<T> for Assets<T> {
@@ -105,7 +125,9 @@ impl<T: Asset> LoadHashKeyTrait<T> for Assets<T> {
         self.get(AssetId::from(hash.into()))
     }
 
-    fn add_hash(&mut self, hash: impl Into<HashKey<T>>, asset: T) {
-        self.insert(AssetId::from(hash.into()), asset).unwrap();
+    fn add_hash(&mut self, hash: impl Into<HashKey<T>>, asset: T) -> Handle<T> {
+        let handle = Handle::from(hash.into());
+        self.insert(&handle, asset).unwrap();
+        handle
     }
 }

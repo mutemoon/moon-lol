@@ -44,6 +44,11 @@
         "lol_core::movement::Movement": (
           speed: 275.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "SRU_RedBasicAttack": Path("characters/SRU_Red/spells/SRU_RedBasicAttack.ron"),
+          "SRU_RedBasicAttack2": Path("characters/SRU_Red/spells/SRU_RedBasicAttack2.ron"),
+          "SRU_RedBasicAttack3": Path("characters/SRU_Red/spells/SRU_RedBasicAttack3.ron"),
+        }),
       },
     ),
   },

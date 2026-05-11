@@ -59,6 +59,10 @@
         "lol_core::movement::Movement": (
           speed: 330.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "SRU_Dragon_Ocean_Attack": Path("characters/sru_dragon_water/spells/SRU_Dragon_Ocean_Attack.ron"),
+          "WaterDragonSlow": Path("characters/sru_dragon_water/spells/WaterDragonSlow.ron"),
+        }),
         "lol_core::skill::Skills": ([
           4294967270,
         ]),

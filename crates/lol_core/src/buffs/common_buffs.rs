@@ -1,6 +1,39 @@
 use bevy::prelude::*;
 
 use crate::base::buff::Buff;
+use crate::movement::{CastBlock, MovementBlock};
+
+/// 施法期间阻塞 buff（通用）
+/// 阻止移动和技能施放
+#[derive(Component, Debug)]
+#[require(CastBlock)]
+pub struct BuffCastBlock {
+    pub timer: Timer,
+}
+
+impl BuffCastBlock {
+    pub fn new(duration: f32) -> Self {
+        Self {
+            timer: Timer::from_seconds(duration, TimerMode::Once),
+        }
+    }
+}
+
+/// 更新施法阻塞计时，结束后移除阻塞
+pub fn update_buff_cast_block(
+    mut commands: Commands,
+    mut q_cast_block: Query<(Entity, &mut BuffCastBlock)>,
+    time: Res<Time<Fixed>>,
+) {
+    for (entity, mut cast_block) in q_cast_block.iter_mut() {
+        cast_block.timer.tick(time.delta());
+        if cast_block.timer.is_finished() {
+            commands.entity(entity).remove::<BuffCastBlock>();
+            commands.entity(entity).remove::<MovementBlock>();
+            commands.entity(entity).remove::<CastBlock>();
+        }
+    }
+}
 
 /// 移动速度加成 buff（通用）
 #[derive(Component, Debug, Clone)]

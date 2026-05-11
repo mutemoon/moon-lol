@@ -44,6 +44,9 @@
         "lol_core::movement::Movement": (
           speed: 350.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "SRU_HordeBasicAttack": Path("characters/SRU_Horde/spells/SRU_HordeBasicAttack.ron"),
+        }),
       },
     ),
   },

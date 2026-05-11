@@ -3,7 +3,7 @@ pub mod buffs;
 use bevy::asset::Handle;
 use bevy::prelude::*;
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -63,11 +63,6 @@ fn cast_morgana_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<S
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Morgana_Q_Cast"),
-    });
-
     // Q binds enemy
     commands.trigger(ActionDamage {
         entity,
@@ -94,11 +89,6 @@ fn cast_morgana_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<S
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Morgana_W_Cast"),
-    });
-
     // W is a DoT zone
     commands.trigger(ActionDamage {
         entity,
@@ -122,11 +112,6 @@ fn cast_morgana_e(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Morgana_E_Cast"),
-    });
-
     // E is a shield that blocks CC
     commands
         .entity(entity)
@@ -140,11 +125,6 @@ fn cast_morgana_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<S
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Morgana_R_Cast"),
-    });
-
     // R chains nearby enemies
     commands.trigger(ActionDamage {
         entity,

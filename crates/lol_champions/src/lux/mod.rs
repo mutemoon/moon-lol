@@ -3,7 +3,7 @@ pub mod buffs;
 use bevy::asset::Handle;
 use bevy::prelude::*;
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -64,10 +64,6 @@ fn cast_lux_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Lux_Q_Cast"),
-    });
 
     // Q roots enemies
     commands.trigger(ActionDamage {
@@ -95,10 +91,6 @@ fn cast_lux_w(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Lux_W_Cast"),
-    });
 
     // W is a shield
 }
@@ -109,10 +101,6 @@ fn cast_lux_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell
         hash: "spell3".to_string(),
         repeat: false,
         duration: None,
-    });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Lux_E_Cast"),
     });
 
     // E slows and deals damage
@@ -137,10 +125,6 @@ fn cast_lux_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell
         hash: "spell4".to_string(),
         repeat: false,
         duration: None,
-    });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Lux_R_Cast"),
     });
 
     // R is a global beam

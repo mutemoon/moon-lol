@@ -2,7 +2,7 @@ pub mod buffs;
 
 use bevy::prelude::*;
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -61,11 +61,6 @@ fn cast_evelynn_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<S
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Evelynn_Q_Cast"),
-    });
-
     // Q is a skillshot
     commands.trigger(ActionDamage {
         entity,
@@ -92,10 +87,6 @@ fn cast_evelynn_w(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Evelynn_W_Cast"),
-    });
     // W is a charm/slow - handled by damage observer
 }
 
@@ -106,11 +97,6 @@ fn cast_evelynn_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<S
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Evelynn_E_Cast"),
-    });
-
     // E is targeted damage
     commands.trigger(ActionDamage {
         entity,
@@ -136,11 +122,6 @@ fn cast_evelynn_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<S
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Evelynn_R_Cast"),
-    });
-
     // R is AoE damage with execute
     commands.trigger(ActionDamage {
         entity,

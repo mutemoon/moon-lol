@@ -13,7 +13,7 @@ impl MapPaths {
         }
     }
 
-    /// 场景 RON 资源路径（用于 AssetServer 加载）
+    /// 场景 RON 资源路径
     pub fn scene_ron(&self) -> String {
         format!("maps/{}/scene.ron", self.name)
     }
@@ -25,32 +25,12 @@ impl MapPaths {
 
     /// 兵营 RON 资源路径
     pub fn barracks_ron(&self, id: u32) -> String {
-        format!("maps/{}/barracks/{}.ron", self.name, id)
+        format!("maps/{}/barracks/{:x}.ron", self.name, id)
     }
 
     /// 地图几何 GLB 资源路径
     pub fn mapgeo_glb(&self) -> String {
         format!("maps/{}/mapgeo.glb", self.name)
-    }
-
-    /// 场景 RON 导出路径（用于写入文件）
-    pub fn scene_ron_export(&self) -> String {
-        format!("assets/maps/{}/scene.ron", self.name)
-    }
-
-    /// 导航网格 Bin 导出路径
-    pub fn navgrid_bin_export(&self) -> String {
-        format!("assets/maps/{}/navgrid.bin", self.name)
-    }
-
-    /// 兵营 RON 导出路径
-    pub fn barracks_ron_export(&self, id: u32) -> String {
-        format!("assets/maps/{}/barracks/{}.ron", self.name, id)
-    }
-
-    /// 地图几何 GLB 导出路径
-    pub fn mapgeo_glb_export(&self) -> String {
-        format!("assets/maps/{}/mapgeo.glb", self.name)
     }
 
     /// 游戏内素材路径（读取 WAD 用）

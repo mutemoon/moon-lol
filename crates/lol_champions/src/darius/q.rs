@@ -50,12 +50,6 @@ pub fn cast_darius_q(
     outer_damage: f32,
     _apply_hemorrhage_outer: bool,
 ) {
-    // Spawn the Q cast particle
-    commands.trigger(lol_base::render_cmd::CommandSkinParticleSpawn {
-        entity,
-        hash: league_utils::hash_bin("Darius_Q_Cast"),
-    });
-
     // Play Q animation
     commands.trigger(lol_base::render_cmd::CommandAnimationPlay {
         entity,

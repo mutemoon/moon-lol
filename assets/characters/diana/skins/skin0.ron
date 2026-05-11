@@ -12,6 +12,7 @@
         ),
         "lol_base::character::Skin": (
           scale: 1.2,
+          avatar: "ASSETS/Characters/Diana/HUD/Diana_Circle_0.png",
         ),
       },
     ),

@@ -2,7 +2,7 @@ pub mod buffs;
 
 use bevy::prelude::*;
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -114,10 +114,6 @@ fn cast_leesin_q(
 
     if stage == 1 {
         // First cast: Sonic Wave - skillshot that marks enemy
-        commands.trigger(CommandSkinParticleSpawn {
-            entity,
-            hash: hash_bin("LeeSin_Q_Cast"),
-        });
         commands.trigger(ActionDamage {
             entity,
             skill: skill_spell,
@@ -140,10 +136,6 @@ fn cast_leesin_q(
             .insert(SkillRecastWindow::new(2, 2, LEESIN_RECAST_WINDOW));
     } else {
         // Second cast: Resonating Strike - dash to marked enemy
-        commands.trigger(CommandSkinParticleSpawn {
-            entity,
-            hash: hash_bin("LeeSin_Q2_Cast"),
-        });
         commands.trigger(ActionDash {
             entity,
             point: point,
@@ -192,10 +184,6 @@ fn cast_leesin_w(
 
     if stage == 1 {
         // First cast: Safeguard - dash to ally/windwall
-        commands.trigger(CommandSkinParticleSpawn {
-            entity,
-            hash: hash_bin("LeeSin_W_Cast"),
-        });
         commands.trigger(ActionDash {
             entity,
             point: point,
@@ -210,10 +198,6 @@ fn cast_leesin_w(
             .insert(SkillRecastWindow::new(2, 2, LEESIN_RECAST_WINDOW));
     } else {
         // Second cast: Iron Will - lifesteal and attack speed buff
-        commands.trigger(CommandSkinParticleSpawn {
-            entity,
-            hash: hash_bin("LeeSin_W2_Cast"),
-        });
         commands
             .entity(entity)
             .with_related::<BuffOf>(BuffLeeSinIronWill::new(0.1, 0.1, 4.0));
@@ -248,10 +232,6 @@ fn cast_leesin_e(
 
     if stage == 1 {
         // First cast: Tempest - AoE damage (no slow)
-        commands.trigger(CommandSkinParticleSpawn {
-            entity,
-            hash: hash_bin("LeeSin_E_Cast"),
-        });
         commands.trigger(ActionDamage {
             entity,
             skill: skill_spell,
@@ -271,10 +251,6 @@ fn cast_leesin_e(
             .insert(SkillRecastWindow::new(2, 2, LEESIN_RECAST_WINDOW));
     } else {
         // Second cast: Cripple - slow enemies already affected by Tempest
-        commands.trigger(CommandSkinParticleSpawn {
-            entity,
-            hash: hash_bin("LeeSin_E2_Cast"),
-        });
         // Mark E2 so observer applies slow on damage hit
         commands
             .entity(entity)
@@ -310,10 +286,6 @@ fn cast_leesin_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
         hash: "spell4".to_string(),
         repeat: false,
         duration: None,
-    });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("LeeSin_R_Cast"),
     });
     // Mark R so observer applies knockback + stun on damage hit
     commands

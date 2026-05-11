@@ -12,6 +12,7 @@
         ),
         "lol_base::character::Skin": (
           scale: 0.89,
+          avatar: "ASSETS/Characters/TahmKench/HUD/TahmKench_Circle.png",
         ),
       },
     ),

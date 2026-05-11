@@ -7,6 +7,7 @@ mod observers;
 #[cfg(test)]
 mod tests;
 
+use std::collections::BTreeMap;
 use std::ops::Deref;
 
 use bevy::prelude::{Component, Handle, Reflect, ReflectComponent, *};
@@ -86,13 +87,21 @@ pub struct SkillOf(pub Entity);
 #[reflect(Component)]
 pub struct Skills(Vec<Entity>);
 
-#[derive(Component, Debug)]
+#[derive(Component, Reflect, Debug)]
 #[relationship(relationship_target = PassiveSkill)]
+#[reflect(Component)]
 pub struct PassiveSkillOf(pub Entity);
 
-#[derive(Component, Debug)]
+#[derive(Component, Reflect, Debug)]
 #[relationship_target(relationship = PassiveSkillOf, linked_spawn)]
+#[reflect(Component)]
 pub struct PassiveSkill(Entity);
+
+impl PassiveSkill {
+    pub fn entity(&self) -> Entity {
+        self.0
+    }
+}
 
 impl Deref for Skills {
     type Target = Vec<Entity>;
@@ -161,5 +170,20 @@ impl SkillRecastWindow {
             max_stage,
             timer: Timer::from_seconds(duration, TimerMode::Once),
         }
+    }
+}
+
+/// 英雄所有技能映射（导出时附加到角色实体上）
+#[derive(Component, Reflect, Debug, Default)]
+#[reflect(Component)]
+pub struct LOLSpells(pub BTreeMap<String, Handle<Spell>>);
+
+impl LOLSpells {
+    pub fn new() -> Self {
+        LOLSpells(BTreeMap::new())
+    }
+
+    pub fn insert(&mut self, name: String, handle: Handle<Spell>) {
+        self.0.insert(name, handle);
     }
 }

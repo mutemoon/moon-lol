@@ -2,7 +2,7 @@ pub mod buffs;
 
 use bevy::prelude::{Handle, *};
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -69,10 +69,6 @@ fn cast_olaf_q(commands: &mut Commands, entity: Entity, _point: Vec2) {
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Olaf_Q_Cast"),
-    });
     // Q is a linear axe throw - could add dash damage or just particle
 }
 
@@ -83,11 +79,6 @@ fn cast_olaf_w(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Olaf_W_Cast"),
-    });
-
     // W provides attack speed buff and shield
     commands
         .entity(entity)
@@ -112,10 +103,6 @@ fn cast_olaf_e(commands: &mut Commands, entity: Entity, _point: Vec2, skill_spel
         hash: "spell3".to_string(),
         repeat: false,
         duration: None,
-    });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Olaf_E_Cast"),
     });
     commands.trigger(ActionDamage {
         entity,
@@ -142,11 +129,6 @@ fn cast_olaf_r(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Olaf_R_Cast"),
-    });
-
     // R provides CC immunity
     commands
         .entity(entity)

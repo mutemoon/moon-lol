@@ -2,7 +2,7 @@ pub mod buffs;
 
 use bevy::prelude::*;
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -60,11 +60,6 @@ fn cast_seraphine_q(commands: &mut Commands, entity: Entity, skill_spell: Handle
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Seraphine_Q_Cast"),
-    });
-
     // Q is high note - damage
     commands.trigger(ActionDamage {
         entity,
@@ -88,11 +83,6 @@ fn cast_seraphine_w(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Seraphine_W_Cast"),
-    });
-
     // W is solo - shield and slow
     commands
         .entity(entity)
@@ -106,11 +96,6 @@ fn cast_seraphine_e(commands: &mut Commands, entity: Entity, skill_spell: Handle
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Seraphine_E_Cast"),
-    });
-
     // E is beat drop - stun
     commands.trigger(ActionDamage {
         entity,
@@ -137,11 +122,6 @@ fn cast_seraphine_r(commands: &mut Commands, entity: Entity, skill_spell: Handle
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Seraphine_R_Cast"),
-    });
-
     // R is encore - AoE charm
     commands.trigger(ActionDamage {
         entity,

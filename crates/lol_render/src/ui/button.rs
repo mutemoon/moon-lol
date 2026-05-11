@@ -1,175 +1,117 @@
 use bevy::prelude::*;
-use league_core::extract::{UiElementGroupButtonData, UiElementRegionData};
-use lol_base::prop::{HashKey, LoadHashKeyTrait};
+use lol_base::prop::LoadHashKeyTrait;
+use lol_base::ui::{LOLUiElementGroupButtonData, LOLUiElementGroupButtonState};
+use lol_base::ui_components::{UIButton, UIButtonEntities, UIElement};
 
-use crate::ui::element::{UIElement, UIElementEntity, UIState};
+use crate::ui::element::{UIElementEntity, UIState};
 
 #[derive(Default)]
 pub struct PluginUIButton;
 
 impl Plugin for PluginUIButton {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, startup_spawn_buttons);
-        app.add_systems(Update, update_button.run_if(in_state(UIState::Loaded)));
-        app.add_observer(on_command_spawn_button);
-        app.add_observer(on_command_despawn_button);
+        app.add_systems(
+            Update,
+            (update_button_entities, update_button, update_visibility)
+                .chain()
+                .run_if(in_state(UIState::Loaded)),
+        );
     }
 }
 
-#[derive(Component)]
-#[require(Interaction)]
-pub struct UIButton {
-    pub key: HashKey<UiElementGroupButtonData>,
-}
-
-#[derive(Event)]
-pub struct CommandSpawnButton {
-    pub entity: Option<Entity>,
-    pub key: HashKey<UiElementGroupButtonData>,
-}
-
-#[derive(EntityEvent)]
-pub struct CommandDespawnButton {
-    pub entity: Entity,
-}
-
-fn startup_spawn_buttons(
+fn update_visibility(
     mut commands: Commands,
-    res_assets_ui_element_group_button_data: Res<Assets<UiElementGroupButtonData>>,
+    q_ui_button: Query<(&UIButtonEntities, &InheritedVisibility), Changed<InheritedVisibility>>,
 ) {
-    for (key, ui_element_group_button_data) in
-        res_assets_ui_element_group_button_data.iter().filter(|v| {
-            v.1.name
-                .contains("ClientStates/Gameplay/UX/LoL/PlayerFrame/")
-        })
-    {
-        let is_enabled = ui_element_group_button_data.is_enabled.unwrap_or(false);
-        if !is_enabled {
+    for (entities, visibility) in q_ui_button.iter() {
+        if visibility.get() {
+            commands
+                .entity(entities.default.unwrap())
+                .insert(Visibility::Inherited);
             continue;
         }
-
-        commands.trigger(CommandSpawnButton {
-            key: key.into(),
-            entity: None,
-        });
+        for &element_entity in &entities.all {
+            commands.entity(element_entity).insert(Visibility::Hidden);
+        }
     }
 }
 
-fn on_command_spawn_button(
-    trigger: On<CommandSpawnButton>,
+pub fn update_button(
     mut commands: Commands,
-    res_assets_ui_element_group_button_data: Res<Assets<UiElementGroupButtonData>>,
-    res_ui_region: Res<Assets<UiElementRegionData>>,
+    mut interaction_query: Query<(&Interaction, &UIButtonEntities), Changed<Interaction>>,
 ) {
-    let key = trigger.key;
-    let Some(ui_element_group_button_data) = res_assets_ui_element_group_button_data.load_hash(key)
-    else {
-        return;
-    };
+    for (interaction, entities) in &mut interaction_query {
+        let interaction_entity = match *interaction {
+            Interaction::Pressed => entities.clicked,
+            Interaction::Hovered => entities.hover,
+            Interaction::None => entities.default,
+        };
 
-    let hit_region = res_ui_region
-        .load_hash(ui_element_group_button_data.hit_region_element)
-        .unwrap();
-    let bundle = (
-        Node::default(),
-        UIElement {
-            key: ui_element_group_button_data.hit_region_element.to_string(),
-            position: hit_region.position.clone().unwrap(),
-            update_child: false,
-        },
-        UIButton { key },
-    );
-
-    if let Some(entity) = trigger.entity {
-        commands.entity(entity).insert(bundle);
-    } else {
-        commands.spawn(bundle);
-    }
-}
-
-fn on_command_despawn_button(
-    trigger: On<CommandDespawnButton>,
-    mut commands: Commands,
-    q_ui_button: Query<&UIButton>,
-    res_assets_ui_element_group_button_data: Res<Assets<UiElementGroupButtonData>>,
-    res_ui_element_entity: Res<UIElementEntity>,
-) {
-    commands.entity(trigger.entity).despawn();
-
-    let Ok(button) = q_ui_button.get(trigger.entity) else {
-        return;
-    };
-
-    let ui_element_group_button_data = res_assets_ui_element_group_button_data
-        .load_hash(button.key)
-        .unwrap();
-
-    for element in ui_element_group_button_data.elements.iter() {
-        let Some(&element_entity) = res_ui_element_entity.map.get(element) else {
+        let Some(interaction_entity) = interaction_entity else {
             continue;
         };
-        commands.entity(element_entity).insert(Visibility::Hidden);
-    }
-}
 
-fn update_button(
-    mut commands: Commands,
-    mut interaction_query: Query<(&Interaction, &UIButton), Changed<Interaction>>,
-    res_assets_ui_element_group_button_data: Res<Assets<UiElementGroupButtonData>>,
-    res_ui_element_entity: Res<UIElementEntity>,
-) {
-    for (interaction, button) in &mut interaction_query {
-        let ui_element_group_button_data = res_assets_ui_element_group_button_data
-            .load_hash(button.key)
-            .unwrap();
-
-        let interaction_entity = match *interaction {
-            Interaction::Pressed => {
-                debug!("按下 {}", ui_element_group_button_data.name);
-                let Some(&clicked_entity) = ui_element_group_button_data
-                    .clicked_state_elements
-                    .as_ref()
-                    .and_then(|v| v.display_element_list.as_ref())
-                    .and_then(|v| v.get(0))
-                    .and_then(|v| res_ui_element_entity.map.get(v))
-                else {
-                    continue;
-                };
-                clicked_entity
-            }
-            Interaction::Hovered => {
-                debug!("悬停 {}", ui_element_group_button_data.name);
-                let &hover_entity = ui_element_group_button_data
-                    .hover_state_elements
-                    .as_ref()
-                    .and_then(|v| v.display_element_list.as_ref())
-                    .and_then(|v| v.get(0))
-                    .and_then(|v| res_ui_element_entity.map.get(v))
-                    .unwrap();
-                hover_entity
-            }
-            Interaction::None => {
-                debug!("恢复 {}", ui_element_group_button_data.name);
-                let &default_entity = ui_element_group_button_data
-                    .default_state_elements
-                    .as_ref()
-                    .and_then(|v| v.display_element_list.as_ref())
-                    .and_then(|v| v.get(0))
-                    .and_then(|v| res_ui_element_entity.map.get(v))
-                    .unwrap();
-                default_entity
-            }
-        };
-
-        for element in ui_element_group_button_data.elements.iter() {
-            let Some(&element_entity) = res_ui_element_entity.map.get(element) else {
-                continue;
-            };
+        for &element_entity in &entities.all {
             commands.entity(element_entity).insert(Visibility::Hidden);
         }
 
         commands
             .entity(interaction_entity)
-            .insert(Visibility::Visible);
+            .insert(Visibility::Inherited);
+    }
+}
+
+fn update_button_entities(
+    mut commands: Commands,
+    q_button: Query<(Entity, &UIButton), Without<UIButtonEntities>>,
+    button_assets: Res<Assets<LOLUiElementGroupButtonData>>,
+    res_ui_element_entity: Res<UIElementEntity>,
+) {
+    for (entity, button) in &q_button {
+        let Some(button_data) = button_assets.load_hash(button.0) else {
+            warn!("未找到按钮 {:?} 的 UIButtonData", entity);
+            continue;
+        };
+
+        let get_state = |state: &Option<LOLUiElementGroupButtonState>| {
+            let hash = state.as_ref()?.display_element_list.as_ref()?.get(0)?;
+            res_ui_element_entity.map.get(hash).copied()
+        };
+
+        let default = get_state(&button_data.default_state_elements);
+        let hover = get_state(&button_data.hover_state_elements);
+        let clicked = get_state(&button_data.clicked_state_elements);
+
+        let mut all = Vec::new();
+        if let Some(e) = default {
+            all.push(e);
+        }
+        if let Some(e) = hover {
+            all.push(e);
+        }
+        if let Some(e) = clicked {
+            all.push(e);
+        }
+
+        // 初始隐藏所有状态
+        for &e in &all {
+            commands.entity(e).insert(Visibility::Hidden);
+        }
+
+        // 默认显示 default 状态
+        if let Some(e) = default {
+            commands.entity(e).insert(Visibility::Inherited);
+        }
+
+        commands.entity(entity).insert((
+            UIElement::Region(button_data.hit_region_element),
+            Pickable::default(),
+            UIButtonEntities {
+                default,
+                hover,
+                clicked,
+                all,
+            },
+        ));
     }
 }

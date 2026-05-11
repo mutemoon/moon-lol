@@ -2,7 +2,7 @@ pub mod buffs;
 
 use bevy::prelude::*;
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -62,10 +62,6 @@ fn cast_kayle_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Kayle_Q_Cast"),
-    });
 
     // Q is a skillshot that slows
     commands.trigger(ActionDamage {
@@ -93,10 +89,6 @@ fn cast_kayle_w(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Kayle_W_Cast"),
-    });
 
     // W heals and grants movespeed
     commands
@@ -111,10 +103,6 @@ fn cast_kayle_e(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Kayle_E_Cast"),
-    });
 
     // E enhances next attack
 }
@@ -125,10 +113,6 @@ fn cast_kayle_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
         hash: "spell4".to_string(),
         repeat: false,
         duration: None,
-    });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Kayle_R_Cast"),
     });
 
     // R makes Kayle invulnerable and deals damage after delay

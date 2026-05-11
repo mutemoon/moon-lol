@@ -12,6 +12,7 @@
         ),
         "lol_base::character::Skin": (
           scale: 1.85,
+          avatar: "ASSETS/Characters/Shaco/HUD/Jester_Circle.png",
         ),
       },
     ),

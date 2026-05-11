@@ -5,12 +5,6 @@ use league_utils::{get_shader_handle_by_hash, hash_wad};
 use lol_base::shader::ResourceShaderPackage;
 use serde::{Deserialize, Serialize};
 
-use crate::particle::environment::unlit_decal::ParticleMaterialUnlitDecal;
-use crate::particle::particle::distortion::ParticleMaterialDistortion;
-use crate::particle::particle::quad::ParticleMaterialQuad;
-use crate::particle::particle::quad_slice::ParticleMaterialQuadSlice;
-use crate::particle::utils::MaterialPath;
-
 #[derive(Resource, Default)]
 pub struct ResourceShaderHandles(pub Vec<(String, Handle<ResourceShaderPackage>)>);
 
@@ -36,16 +30,8 @@ pub fn startup_load_shaders(
     asset_server: Res<AssetServer>,
     mut res_resource_shader_handles: ResMut<ResourceShaderHandles>,
 ) {
-    let paths = HashSet::from([
-        ParticleMaterialQuadSlice::FRAG_PATH,
-        ParticleMaterialQuadSlice::VERT_PATH,
-        ParticleMaterialQuad::FRAG_PATH,
-        ParticleMaterialQuad::VERT_PATH,
-        ParticleMaterialUnlitDecal::FRAG_PATH,
-        ParticleMaterialUnlitDecal::VERT_PATH,
-        ParticleMaterialDistortion::FRAG_PATH,
-        ParticleMaterialDistortion::VERT_PATH,
-    ]);
+    // Particle shader paths removed - particle system disabled
+    let paths = HashSet::new();
 
     for path in paths {
         let handle = asset_server.load_shader_toc(path);

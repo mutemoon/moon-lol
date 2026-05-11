@@ -1,20 +1,13 @@
 use bevy::prelude::*;
-use league_core::extract::{EnumData, EnumUiPosition, UiElementEffectAnimationData};
-use league_utils::hash_bin;
+use league_utils::HashKey;
 use lol_base::prop::LoadHashKeyTrait;
-
-use crate::ui::element::spawn_ui_atom;
+use lol_base::ui::{LOLEnumData, LOLUiElementEffectAnimationData};
 
 #[derive(Component)]
 pub struct UiAnimationState {
-    key: String,
-    current_frame: u32,
-    timer: f32,
-}
-
-#[derive(Event)]
-pub struct CommandUiAnimationStart {
-    pub key: String,
+    pub handle: HashKey<LOLUiElementEffectAnimationData>,
+    pub current_frame: u32,
+    pub timer: f32,
 }
 
 #[derive(Default)]
@@ -23,50 +16,21 @@ pub struct PluginUIAnimation;
 impl Plugin for PluginUIAnimation {
     fn build(&self, app: &mut App) {
         app.add_systems(Update, update_ui_animation);
-        app.add_observer(on_command_ui_animation_start);
     }
-}
-
-fn on_command_ui_animation_start(
-    event: On<CommandUiAnimationStart>,
-    mut commands: Commands,
-    res_asset_server: Res<AssetServer>,
-    res_ui_animation: Res<Assets<UiElementEffectAnimationData>>,
-) {
-    let ui_animation = res_ui_animation.load_hash(&hash_bin(&event.key)).unwrap();
-    let Some(entity) = spawn_ui_atom(
-        &mut commands,
-        &res_asset_server,
-        &ui_animation.name,
-        &EnumUiPosition::UiPositionRect(ui_animation.position.clone()),
-        &ui_animation.layer,
-        &Some(ui_animation.texture_data.clone()),
-    ) else {
-        return;
-    };
-
-    commands.entity(entity).insert((
-        UiAnimationState {
-            key: event.key.clone(),
-            current_frame: 0,
-            timer: 0.0,
-        },
-        Visibility::Visible,
-    ));
 }
 
 fn update_ui_animation(
     mut commands: Commands,
     mut q_ui_animation_state: Query<(Entity, &mut UiAnimationState)>,
-    res_ui_animation: Res<Assets<UiElementEffectAnimationData>>,
+    anim_assets: Res<Assets<LOLUiElementEffectAnimationData>>,
     q_children: Query<&Children>,
     mut q_image_node: Query<&mut ImageNode>,
     time: Res<Time>,
 ) {
     for (entity, mut ui_animation_state) in q_ui_animation_state.iter_mut() {
-        let ui_animation = res_ui_animation
-            .load_hash(&hash_bin(&ui_animation_state.key))
-            .unwrap();
+        let Some(ui_animation) = anim_assets.load_hash(&ui_animation_state.handle) else {
+            continue;
+        };
 
         let frames_per_second = ui_animation.frames_per_second.unwrap_or(30.0);
 
@@ -78,8 +42,7 @@ fn update_ui_animation(
 
         ui_animation_state.current_frame += 1;
 
-        // let is_loop = ui_animation.m_finish_behavior.unwrap_or(0) == 1;
-        let is_loop = true;
+        let is_loop = ui_animation.finish_behavior.unwrap_or(0) == 1;
 
         if ui_animation_state.current_frame
             >= ui_animation.total_number_of_frames.unwrap_or(1.0) as u32
@@ -88,10 +51,11 @@ fn update_ui_animation(
                 ui_animation_state.current_frame = 0;
             } else {
                 commands.entity(entity).despawn();
+                continue;
             }
         }
 
-        let EnumData::AtlasData(ref atlas_data) = ui_animation.texture_data else {
+        let Some(LOLEnumData::AtlasData(atlas_data)) = ui_animation.texture_data.as_ref() else {
             continue;
         };
         let Some(m_texture_uv) = atlas_data.m_texture_uv else {
@@ -112,8 +76,18 @@ fn update_ui_animation(
         let z = x + width;
         let w = y + height;
 
-        let &child = q_children.get(entity).unwrap().first().unwrap();
-        let mut image_node = q_image_node.get_mut(child).unwrap();
+        let Ok(children) = q_children.get(entity) else {
+            // warn!("未找到动画实体的子实体");
+            continue;
+        };
+        let Some(&child) = children.first() else {
+            warn!("未找到动画实体的第一个子实体");
+            continue;
+        };
+        let Ok(mut image_node) = q_image_node.get_mut(child) else {
+            warn!("未找到动画实体的第一个子实体的 image_node");
+            continue;
+        };
         image_node.rect = Some(Rect::new(x, y, z, w));
     }
 }

@@ -2,7 +2,7 @@ pub mod buffs;
 
 use bevy::prelude::*;
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -60,11 +60,6 @@ fn cast_samira_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Samira_Q_Cast"),
-    });
-
     // Q is flonen - damage
     commands.trigger(ActionDamage {
         entity,
@@ -91,11 +86,6 @@ fn cast_samira_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Samira_W_Cast"),
-    });
-
     // W is blade storm - AoE damage
     commands.trigger(ActionDamage {
         entity,
@@ -119,11 +109,6 @@ fn cast_samira_e(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Samira_E_Cast"),
-    });
-
     // E is blade rush - dash
 }
 
@@ -134,11 +119,6 @@ fn cast_samira_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Samira_R_Cast"),
-    });
-
     // R is infernum - large AoE damage
     commands.trigger(ActionDamage {
         entity,

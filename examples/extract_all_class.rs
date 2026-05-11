@@ -43,6 +43,7 @@ fn main() {
     let hashes = get_hashes(&hash_paths);
 
     let need_extract = HashSet::from([
+        hash_bin("PlayerFrameViewController"),
         hash_bin("ItemData"),
         hash_bin("AnimationGraphData"),
         hash_bin("BarracksConfig"),
@@ -58,8 +59,11 @@ fn main() {
         hash_bin("StructureFloatingInfoBarData"),
         hash_bin("UiElementEffectAnimationData"),
         hash_bin("UiElementGroupButtonData"),
+        hash_bin("UiElementTextData"),
         hash_bin("UiElementIconData"),
         hash_bin("UiElementRegionData"),
+        hash_bin("UiElementEffectDesaturateData"),
+        hash_bin("UiElementEffectInstancedData"),
         hash_bin("UiPropertyLoadable"),
         hash_bin("UISceneData"),
         hash_bin("UnitFloatingInfoBarData"),

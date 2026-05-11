@@ -2,7 +2,7 @@ pub mod buffs;
 
 use bevy::prelude::*;
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -71,10 +71,6 @@ fn cast_sett_q(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Sett_Q_Cast"),
-    });
     // Q is a buff that enhances next 2 attacks with bonus damage and move speed
     commands.trigger(CommandAttackReset { entity });
     commands
@@ -88,10 +84,6 @@ fn cast_sett_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spel
         hash: "spell2".to_string(),
         repeat: false,
         duration: None,
-    });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Sett_W_Cast"),
     });
     // W deals true damage in a cone and grants shield based on damage taken
     commands.trigger(ActionDamage {
@@ -122,10 +114,6 @@ fn cast_sett_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spel
         hash: "spell3".to_string(),
         repeat: false,
         duration: None,
-    });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Sett_E_Cast"),
     });
     // E is a两边拉扯 that damages and stuns enemies caught by both sides
     commands.trigger(ActionDamage {
@@ -158,10 +146,6 @@ fn cast_sett_r(
         hash: "spell4".to_string(),
         repeat: false,
         duration: None,
-    });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Sett_R_Cast"),
     });
     // R is a dash that carries enemy to target location and deals damage
     commands.trigger(ActionDash {

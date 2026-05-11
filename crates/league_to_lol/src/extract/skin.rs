@@ -17,7 +17,9 @@ use ron::ser::{PrettyConfig, to_string_pretty};
 
 use crate::animation::load_animation_file;
 use crate::extract::animation::animation_graph_to_config;
-use crate::skin_gltf_export::{decode_texture_to_png, export_skin_to_glb};
+use crate::extract::utils::extract_texture;
+use crate::skin_gltf_export::export_skin_to_glb;
+use crate::utils::decode_texture_to_png;
 
 /// 导出角色的皮肤 GLB 和皮肤场景文件
 pub fn extract_skin_for_champion(
@@ -106,7 +108,7 @@ pub fn extract_skin_for_champion(
             .and_then(|buf| LeagueSkeleton::parse(&buf).ok().map(|(_, s)| s))
     });
 
-    let output_glb_path = format!("assets/characters/{}/skins/{}.glb", champ_name, skin_id);
+    let output_glb_path = format!("characters/{}/skins/{}.glb", champ_name, skin_id);
 
     // 加载动画数据并导出到 GLB
     let (animations, hash_to_glb_index) =
@@ -178,7 +180,7 @@ pub fn extract_skin_for_champion(
         println!("[WARN] 皮肤 GLB 导出失败: {}", e);
         return;
     } else {
-        println!("{:?}", skin_mesh_properties.material_override);
+        // println!("{:?}", skin_mesh_properties.material_override);
     }
 
     // 获取 scale 和 bar_type
@@ -188,6 +190,17 @@ pub fn extract_skin_for_champion(
         .as_ref()
         .and_then(|h| h.unit_health_bar_style)
         .unwrap_or(0);
+    let avatar_name = skin_data
+        .icon_avatar
+        .as_ref()
+        .or(skin_data.icon_circle.as_ref());
+
+    // 导出头像纹理
+    let avatar = if let Some(name) = avatar_name {
+        extract_texture(loader, name)
+    } else {
+        String::new()
+    };
 
     // 构建皮肤场景 skin.ron
     let mut app = App::new();
@@ -235,7 +248,7 @@ pub fn extract_skin_for_champion(
     });
 
     let mut entity_builder = world.spawn((
-        Skin { scale },
+        Skin { scale, avatar },
         HealthBar { bar_type },
         Visibility::default(),
         WorldAssetRoot(skin_handle),
@@ -266,7 +279,7 @@ pub fn extract_skin_for_champion(
         .build();
     let serialized_scene = scene.serialize(&type_registry).unwrap();
 
-    let output_skin_path = format!("assets/characters/{}/skins/{}.ron", champ_name, skin_id);
+    let output_skin_path = format!("characters/{}/skins/{}.ron", champ_name, skin_id);
     super::utils::write_to_file(&output_skin_path, serialized_scene);
 }
 
@@ -337,7 +350,7 @@ fn load_animations_for_skin(
         hash_to_glb_index.insert(*hash, idx);
     }
 
-    println!("{:?}", hash_to_glb_index);
+    // println!("{:?}", hash_to_glb_index);
 
     (animations, hash_to_glb_index)
 }
@@ -395,9 +408,8 @@ fn export_animation_for_skin(
 
     // Export to .ron file
     let anim_path = format!("characters/{}/animations/{}.ron", champ_name, skin_id);
-    let output_path = format!("assets/{}", anim_path);
     let serialized = to_string_pretty(&config_animation, PrettyConfig::default()).unwrap();
-    super::utils::write_to_file(&output_path, &serialized);
+    super::utils::write_to_file(&anim_path, &serialized);
 
     Some(anim_path)
 }

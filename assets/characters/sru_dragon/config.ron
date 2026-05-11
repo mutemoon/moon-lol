@@ -104,6 +104,13 @@
         "lol_core::movement::Movement": (
           speed: 330.0,
         ),
+        "lol_core::skill::LOLSpells": ({
+          "DragonFireball": Path("characters/SRU_Dragon/spells/DragonFireball.ron"),
+          "DragonFireball2": Path("characters/SRU_Dragon/spells/DragonFireball2.ron"),
+          "DragonIncinerate": Path("characters/SRU_Dragon/spells/DragonIncinerate.ron"),
+          "DragonTakeoff": Path("characters/SRU_Dragon/spells/DragonTakeoff.ron"),
+          "SRUDragonBasicAttack": Path("characters/SRU_Dragon/spells/SRUDragonBasicAttack.ron"),
+        }),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

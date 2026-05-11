@@ -2,7 +2,7 @@ pub mod buffs;
 
 use bevy::prelude::*;
 use league_utils::hash_bin;
-use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -71,11 +71,6 @@ fn cast_aurora_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Aurora_Q_Cast"),
-    });
-
     // Q is a projectile
     commands.trigger(ActionDamage {
         entity,
@@ -113,11 +108,6 @@ fn cast_aurora_w(
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Aurora_W_Cast"),
-    });
-
     // W creates a portal - dash to it
     commands.trigger(ActionDash {
         entity,
@@ -143,11 +133,6 @@ fn cast_aurora_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Aurora_E_Cast"),
-    });
-
     // E creates a path
     commands.trigger(ActionDamage {
         entity,
@@ -174,11 +159,6 @@ fn cast_aurora_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
         repeat: false,
         duration: None,
     });
-    commands.trigger(CommandSkinParticleSpawn {
-        entity,
-        hash: hash_bin("Aurora_R_Cast"),
-    });
-
     // R is area damage and freeze
     commands.trigger(ActionDamage {
         entity,
