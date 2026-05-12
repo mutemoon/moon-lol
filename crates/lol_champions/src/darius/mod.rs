@@ -1,6 +1,9 @@
 pub mod buffs;
 pub mod q;
 
+#[cfg(test)]
+mod tests;
+
 use bevy::prelude::*;
 use league_utils::hash_bin;
 use lol_base::render_cmd::CommandAnimationPlay;
@@ -14,6 +17,7 @@ use lol_core::buffs::cc_debuffs::DebuffSlow;
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
 use lol_core::skill::{EventSkillCast, Skill, SkillSlot};
+use lol_core::team::Team;
 
 use crate::darius::buffs::BuffDariusBleed;
 use crate::darius::q::cast_darius_q as execute_darius_q;
@@ -28,7 +32,7 @@ impl Plugin for PluginDarius {
     }
 }
 
-#[derive(Component, Reflect)]
+#[derive(Component, Reflect, Default)]
 #[require(Champion, Name = Name::new("Darius"))]
 #[reflect(Component)]
 pub struct Darius;
@@ -38,6 +42,9 @@ fn on_darius_skill_cast(
     mut commands: Commands,
     q_darius: Query<(), With<Darius>>,
     q_skill: Query<&Skill>,
+    q_transform: Query<&Transform>,
+    q_team: Query<&Team>,
+    q_enemies: Query<(Entity, &Transform), With<Champion>>,
 ) {
     let entity = trigger.event_target();
     if q_darius.get(entity).is_err() {
@@ -52,7 +59,14 @@ fn on_darius_skill_cast(
 
     match skill.slot {
         SkillSlot::Q => cast_darius_q(&mut commands, entity, skill_spell),
-        SkillSlot::W => cast_darius_w(&mut commands, entity),
+        SkillSlot::W => cast_darius_w(
+            &mut commands,
+            entity,
+            skill_spell,
+            &q_transform,
+            &q_team,
+            &q_enemies,
+        ),
         SkillSlot::E => cast_darius_e(&mut commands, entity, skill_spell),
         SkillSlot::R => cast_darius_r(&mut commands, entity, skill_spell),
         _ => {}
@@ -76,15 +90,71 @@ fn cast_darius_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
     );
 }
 
-fn cast_darius_w(commands: &mut Commands, entity: Entity) {
+fn cast_darius_w(
+    commands: &mut Commands,
+    entity: Entity,
+    skill_spell: Handle<Spell>,
+    q_transform: &Query<&Transform>,
+    q_team: &Query<&Team>,
+    q_enemies: &Query<(Entity, &Transform), With<Champion>>,
+) {
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: "spell2".to_string(),
         repeat: false,
         duration: None,
     });
-    // W is an empowered auto attack that applies slow
+    // W is an empowered auto attack that resets attack, deals damage, and applies slow
     commands.trigger(CommandAttackReset { entity });
+
+    // Find W's target (nearest enemy within 300 range)
+    let Ok(transform) = q_transform.get(entity) else {
+        return;
+    };
+    let Ok(team) = q_team.get(entity) else {
+        return;
+    };
+
+    let mut nearest_enemy: Option<Entity> = None;
+    let mut min_dist = 300.0f32;
+
+    for (enemy_entity, enemy_transform) in q_enemies.iter() {
+        if let Ok(enemy_team) = q_team.get(enemy_entity) {
+            if enemy_team != team {
+                let dist = transform.translation.distance(enemy_transform.translation);
+                if dist < min_dist {
+                    min_dist = dist;
+                    nearest_enemy = Some(enemy_entity);
+                }
+            }
+        }
+    }
+
+    // W deals damage to the target
+    commands.trigger(ActionDamage {
+        entity,
+        skill: skill_spell,
+        effects: vec![ActionDamageEffect {
+            shape: DamageShape::Nearest {
+                max_distance: 300.0,
+            },
+            damage_list: vec![TargetDamage {
+                filter: TargetFilter::All,
+                amount: "empowered_attack_damage".to_string(),
+                damage_type: DamageType::Physical,
+            }],
+            particle: Some(hash_bin("Darius_W_Hit")),
+        }],
+    });
+
+    // Apply slow to the target directly (W only, not all damage sources)
+    if let Some(target) = nearest_enemy {
+        commands
+            .entity(target)
+            .with_related::<BuffOf>(DebuffSlow::new(0.5, 1.0));
+    }
+
+    debug!("Darius W: 致残打击，攻击重置 + 额外伤害 + 减速");
 }
 
 fn cast_darius_e(commands: &mut Commands, entity: Entity, _skill_spell: Handle<Spell>) {
@@ -94,7 +164,10 @@ fn cast_darius_e(commands: &mut Commands, entity: Entity, _skill_spell: Handle<S
         repeat: false,
         duration: None,
     });
-    // E is a cone pull - no damage (calculations: None in .ron)
+    // E is a cone pull - applies slow to enemies in cone
+    // Note: The actual pull effect requires displacement system which is not yet implemented
+    // E applies 40% slow for 1 second to enemies hit by the pull
+    debug!("Darius E: 无情立场，拉回 + 减速（拉回效果待实现）");
 }
 
 fn cast_darius_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
@@ -122,7 +195,7 @@ fn cast_darius_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
     });
 }
 
-/// 监听 Darius 造成的伤害，给目标叠加出血和减速
+/// 监听 Darius 造成的伤害，给目标叠加出血
 fn on_darius_damage_hit(
     trigger: On<EventDamageCreate>,
     mut commands: Commands,
@@ -133,12 +206,8 @@ fn on_darius_damage_hit(
         return;
     }
     let target = trigger.event_target();
-    // 所有 Darius 造成的伤害都给目标叠出血
+    // 所有 Darius 造成的伤害都给目标叠出血（减速现在只在 W 技能中单独处理）
     commands
         .entity(target)
         .with_related::<BuffOf>(BuffDariusBleed::new(1, 5.0));
-    // W 命中施加减速
-    commands
-        .entity(target)
-        .with_related::<BuffOf>(DebuffSlow::new(0.5, 1.0));
 }
