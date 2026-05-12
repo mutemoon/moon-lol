@@ -17,6 +17,7 @@ mod tests;
 mod w_tests;
 
 use bevy::prelude::*;
+use lol_base::animation_names::{ANIM_SPELL1, ANIM_SPELL2, ANIM_SPELL3, ANIM_SPELL4};
 use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::attack::Attack;

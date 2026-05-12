@@ -7,6 +7,7 @@ mod tests;
 
 use bevy::prelude::*;
 use league_utils::hash_bin;
+use lol_base::animation_names::{ANIM_SPELL1, ANIM_SPELL2, ANIM_SPELL3, ANIM_SPELL4};
 use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
@@ -88,7 +89,7 @@ fn cast_fiora_q(
 ) {
     commands.trigger(CommandAnimationPlay {
         entity,
-        hash: "spell1".to_string(),
+        hash: ANIM_SPELL1.to_string(),
         repeat: false,
         duration: None,
     });
@@ -126,7 +127,7 @@ fn cast_fiora_w(commands: &mut Commands, entity: Entity) {
     });
     commands.trigger(CommandAnimationPlay {
         entity,
-        hash: "spell2".to_string(),
+        hash: ANIM_SPELL2.to_string(),
         repeat: false,
         duration: None,
     });

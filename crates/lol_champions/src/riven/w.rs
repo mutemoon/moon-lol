@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use lol_base::animation_names::ANIM_SPELL2;
 use lol_base::render_cmd::CommandAnimationPlay;
 use lol_core::buffs::cc_debuffs::DebuffStun;
 use lol_core::buffs::common_buffs::BuffCastBlock;
@@ -22,7 +23,7 @@ impl Plugin for PluginRivenW {
 pub fn cast_riven_w(commands: &mut Commands, entity: Entity, damage_amount: f32) {
     commands.trigger(CommandAnimationPlay {
         entity,
-        hash: "Spell2".to_string(),
+        hash: ANIM_SPELL2.to_string(),
         repeat: false,
         duration: None,
     });

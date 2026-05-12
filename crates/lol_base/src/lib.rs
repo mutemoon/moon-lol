@@ -1,4 +1,5 @@
 pub mod animation;
+pub mod animation_names;
 pub mod barrack;
 pub mod character;
 pub mod character_record;
