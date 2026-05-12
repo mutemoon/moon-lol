@@ -2,6 +2,7 @@ pub mod buffs;
 
 use bevy::prelude::{Handle, *};
 use league_utils::hash_bin;
+use lol_base::animation_names::{ANIM_SPELL1, ANIM_SPELL2, ANIM_SPELL3, ANIM_SPELL4};
 use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
@@ -65,7 +66,7 @@ fn on_olaf_skill_cast(
 fn cast_olaf_q(commands: &mut Commands, entity: Entity, _point: Vec2) {
     commands.trigger(CommandAnimationPlay {
         entity,
-        hash: "spell1".to_string(),
+        hash: ANIM_SPELL1.to_string(),
         repeat: false,
         duration: None,
     });
@@ -75,7 +76,7 @@ fn cast_olaf_q(commands: &mut Commands, entity: Entity, _point: Vec2) {
 fn cast_olaf_w(commands: &mut Commands, entity: Entity) {
     commands.trigger(CommandAnimationPlay {
         entity,
-        hash: "spell2".to_string(),
+        hash: ANIM_SPELL2.to_string(),
         repeat: false,
         duration: None,
     });
@@ -100,7 +101,7 @@ fn cast_olaf_w(commands: &mut Commands, entity: Entity) {
 fn cast_olaf_e(commands: &mut Commands, entity: Entity, _point: Vec2, skill_spell: Handle<Spell>) {
     commands.trigger(CommandAnimationPlay {
         entity,
-        hash: "spell3".to_string(),
+        hash: ANIM_SPELL3.to_string(),
         repeat: false,
         duration: None,
     });
@@ -125,7 +126,7 @@ fn cast_olaf_e(commands: &mut Commands, entity: Entity, _point: Vec2, skill_spel
 fn cast_olaf_r(commands: &mut Commands, entity: Entity) {
     commands.trigger(CommandAnimationPlay {
         entity,
-        hash: "spell4".to_string(),
+        hash: ANIM_SPELL4.to_string(),
         repeat: false,
         duration: None,
     });

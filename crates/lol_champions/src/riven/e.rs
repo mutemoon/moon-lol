@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use lol_base::animation_names::ANIM_SPELL3;
 use lol_base::debug_sphere::DebugSphere;
 use lol_base::render_cmd::CommandAnimationPlay;
 use lol_core::action::dash::{ActionDash, DashMoveType};
@@ -22,7 +23,7 @@ pub fn cast_riven_e(
 ) {
     commands.trigger(CommandAnimationPlay {
         entity,
-        hash: "Spell3".to_string(),
+        hash: ANIM_SPELL3.to_string(),
         repeat: false,
         duration: None,
     });

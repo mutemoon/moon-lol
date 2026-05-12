@@ -7,6 +7,7 @@
 //! Outer radius: ~350
 
 use bevy::prelude::*;
+use lol_base::animation_names::ANIM_SPELL1;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
@@ -53,7 +54,7 @@ pub fn cast_darius_q(
     // Play Q animation
     commands.trigger(lol_base::render_cmd::CommandAnimationPlay {
         entity,
-        hash: "spell1".to_string(),
+        hash: ANIM_SPELL1.to_string(),
         repeat: false,
         duration: None,
     });
