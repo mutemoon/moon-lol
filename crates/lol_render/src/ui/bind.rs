@@ -1,5 +1,4 @@
 use bevy::prelude::*;
-use bevy::window::PrimaryWindow;
 use lol_base::ui_components::{UIBindData, UIBindOf};
 
 use crate::camera::CameraState;

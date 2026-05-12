@@ -6,6 +6,7 @@
     "fix": "cargo fix --allow-dirty --workspace",
     "format": "cargo +nightly fmt",
     "hot:patch": "dx serve --hot-patch --features \"bevy/hotpatching\"",
+    "release": "cargo run --release --example",
     "test": "cargo run --example test",
     "wasm": "cargo build --release --example lol --target wasm32-unknown-unknown",
     "wasm:bindgen": "wasm-bindgen --out-name lol --out-dir packages/lol --target web target/wasm32-unknown-unknown/release/examples/lol.wasm",

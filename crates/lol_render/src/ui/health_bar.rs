@@ -1,5 +1,3 @@
-use std::collections::BTreeMap;
-
 use bevy::prelude::*;
 use league_utils::hash_bin;
 use lol_base::character::HealthBar;
@@ -25,7 +23,10 @@ impl Plugin for PluginUIHealthBar {
             Update,
             update_spawn_health_bar.run_if(in_state(UIState::Loaded)),
         );
-        app.add_systems(Update, (update_health, update_health_ticks, update_level_text));
+        app.add_systems(
+            Update,
+            (update_health, update_health_ticks, update_level_text),
+        );
     }
 }
 
@@ -57,7 +58,7 @@ fn update_spawn_health_bar(
         return;
     };
 
-    for (entity, health_bar, bounding, name) in q_added_health_bar.iter() {
+    for (entity, health_bar, bounding, _name) in q_added_health_bar.iter() {
         let health_bar_entity = commands
             .spawn((Node {
                 position_type: PositionType::Absolute,

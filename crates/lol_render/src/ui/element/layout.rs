@@ -76,7 +76,7 @@ pub fn update_element_layout(
             let Some(text_data) = text_assets.load_hash(handle) else {
                 return;
             };
- 
+
             (
                 &text_data.position,
                 &None,

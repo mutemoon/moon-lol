@@ -8,7 +8,6 @@ use lol_base::barrack::{
     RotatingWaveBehavior, TimedVariableWaveBehavior,
 };
 
-use crate::entities::minion::Minion;
 use crate::lane::Lane;
 use crate::loaders::barrack::ConfigBarracksLoader;
 use crate::team::Team;
@@ -118,7 +117,7 @@ fn barracks_spawning_system(
     time: Res<Time>,
     asset_server: Res<AssetServer>,
 ) {
-    for (transform, config_handler, mut barrack_state, team, lane) in query.iter_mut() {
+    for (transform, config_handler, mut barrack_state, _team, lane) in query.iter_mut() {
         let Some(barracks_config) = res_barracks_config.get(&config_handler.config_handle) else {
             continue;
         };
