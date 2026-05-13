@@ -80,7 +80,7 @@
       components: {
         "bevy_ecs::name::Name": "Yunara",
         "lol_core::attack::Attack": (
-          range: 800.0,
+          range: 575.0,
           base_attack_speed: 0.65019506,
           bonus_attack_speed: 0.0,
           buff_bonus_attack_speed: 0.0,

@@ -7,6 +7,7 @@ use crate::action::damage::{TargetDamage, TargetFilter};
 use crate::damage::{CommandDamageCreate, Damage};
 use crate::entities::champion::Champion;
 use crate::entities::minion::Minion;
+use crate::life::Death;
 use crate::movement::{CommandMovement, MovementAction, MovementWay};
 use crate::skill::{Skill, Skills, get_skill_value};
 use crate::team::Team;
@@ -152,13 +153,16 @@ pub fn on_dash_end(
 pub fn update_dash_damage(
     mut commands: Commands,
     mut q_dasher: Query<(Entity, &Transform, &mut DashDamageComponent, &Team)>,
-    q_target: Query<(
-        Entity,
-        &Transform,
-        &Team,
-        Option<&Champion>,
-        Option<&Minion>,
-    )>,
+    q_target: Query<
+        (
+            Entity,
+            &Transform,
+            &Team,
+            Option<&Champion>,
+            Option<&Minion>,
+        ),
+        Without<Death>,
+    >,
     q_skills: Query<&Skills>,
     q_skill: Query<&Skill>,
     q_damage: Query<&Damage>,
@@ -232,11 +236,12 @@ pub fn update_dash_damage(
                 .distance(target_transform.translation)
                 <= current_radius
             {
-                commands.trigger(CommandDamageCreate {
-                    entity: target,
+                commands.entity(target).trigger(|e| CommandDamageCreate {
+                    entity: e,
                     source: entity,
                     damage_type: dash_damage.damage.damage.damage_type,
                     amount: damage_amount,
+                    tag: None,
                 });
                 dash_damage.hit_entities.insert(target);
             }

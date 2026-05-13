@@ -17,12 +17,11 @@ mod tests;
 mod w_tests;
 
 use bevy::prelude::*;
-use lol_base::animation_names::{ANIM_SPELL1, ANIM_SPELL2, ANIM_SPELL3, ANIM_SPELL4};
 use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::attack::Attack;
 use lol_core::base::buff::BuffOf;
-use lol_core::buffs::cc_debuffs::{DebuffStun, update_debuff_stun};
+use lol_core::buffs::cc_debuffs::{DebuffStun, update_debuff_knockup, update_debuff_stun};
 use lol_core::buffs::common_buffs::update_buff_cast_block;
 use lol_core::damage::Damage;
 use lol_core::entities::champion::Champion;
@@ -46,6 +45,7 @@ impl Plugin for PluginRiven {
         app.add_observer(q::on_riven_dash_end);
         app.add_systems(FixedUpdate, r::update_riven_buffs);
         app.add_systems(FixedUpdate, update_debuff_stun);
+        app.add_systems(FixedUpdate, update_debuff_knockup);
         app.add_systems(FixedUpdate, update_buff_cast_block);
         app.add_systems(FixedUpdate, buffs::update_shield_visuals);
         app.add_systems(FixedUpdate, buffs::cleanup_shield_visuals);

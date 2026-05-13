@@ -329,6 +329,7 @@ impl ChampionTestHarness {
             source,
             damage_type: DamageType::Physical,
             amount,
+            tag: None,
         });
         self
     }

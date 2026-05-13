@@ -1,10 +1,12 @@
 pub mod damage;
 pub mod dash;
+pub mod knockback;
 use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
 
 use crate::action::damage::on_action_damage;
 use crate::action::dash::{on_action_dash, on_dash_end, update_dash_damage};
+use crate::action::knockback::on_command_knockback;
 use crate::attack_auto::{CommandAttackAutoStart, CommandAttackAutoStop};
 use crate::movement::{CommandMovement, MovementAction};
 use crate::run::{CommandRunStart, RunTarget};
@@ -18,6 +20,7 @@ impl Plugin for PluginAction {
         app.add_observer(on_action_dash);
         app.add_observer(on_dash_end);
         app.add_observer(on_action_damage);
+        app.add_observer(on_command_knockback);
 
         app.add_observer(on_command_action);
 

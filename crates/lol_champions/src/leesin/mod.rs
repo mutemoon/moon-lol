@@ -9,11 +9,11 @@ use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
 };
 use lol_core::action::dash::{ActionDash, DashDamage, DashMoveType};
+use lol_core::action::knockback::CommandKnockback;
 use lol_core::base::buff::BuffOf;
-use lol_core::buffs::cc_debuffs::{DebuffSlow, DebuffStun};
+use lol_core::buffs::cc_debuffs::{DebuffSlow, update_debuff_knockup};
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
-use lol_core::movement::{CommandMovement, MovementAction, MovementWay};
 use lol_core::skill::{CoolDown, EventSkillCast, Skill, SkillRecastWindow, SkillSlot};
 
 use crate::leesin::buffs::BuffLeeSinIronWill;
@@ -27,6 +27,7 @@ impl Plugin for PluginLeeSin {
     fn build(&self, app: &mut App) {
         app.add_observer(on_leesin_skill_cast);
         app.add_observer(on_leesin_damage_hit);
+        app.add_systems(FixedUpdate, update_debuff_knockup);
     }
 }
 
@@ -314,11 +315,10 @@ fn cast_leesin_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
 fn on_leesin_damage_hit(
     trigger: On<EventDamageCreate>,
     mut commands: Commands,
-    q_leesin: Query<(Entity, &LeeSinActiveAbility, &GlobalTransform)>,
-    q_target: Query<&GlobalTransform>,
+    q_leesin: Query<(Entity, &LeeSinActiveAbility)>,
 ) {
     let target_entity = trigger.event_target();
-    let Ok((leesin_entity, active_ability, leesin_transform)) = q_leesin.get(trigger.source) else {
+    let Ok((leesin_entity, active_ability)) = q_leesin.get(trigger.source) else {
         return;
     };
 
@@ -330,32 +330,16 @@ fn on_leesin_damage_hit(
                 .with_related::<BuffOf>(DebuffSlow::new(0.6, 2.0));
         }
         3 => {
-            // R命中：眩晕 + 击退
+            // R命中：击退
             commands
                 .entity(target_entity)
-                .with_related::<BuffOf>(DebuffStun::new(1.0));
-
-            // 计算击退方向（推向远离李青的方向）
-            if let Ok(target_transform) = q_target.get(target_entity) {
-                let knockback_dir = target_transform.translation() - leesin_transform.translation();
-                if knockback_dir.length() > 0.1 {
-                    let knockback_pos =
-                        target_transform.translation() + knockback_dir.normalize() * 200.0;
-                    commands.trigger(CommandMovement {
-                        entity: target_entity,
-                        priority: 100,
-                        action: MovementAction::Start {
-                            way: MovementWay::Pathfind(Vec3::new(
-                                knockback_pos.x,
-                                target_transform.translation().y,
-                                knockback_pos.z,
-                            )),
-                            speed: Some(1200.0),
-                            source: "LeeSinR".to_string(),
-                        },
-                    });
-                }
-            }
+                .trigger(|e| CommandKnockback {
+                    entity: e,
+                    source: leesin_entity,
+                    distance: 200.0,
+                    speed: 1200.0,
+                    duration: Some(1.0),
+                });
 
             // R用完后移除标记
             commands

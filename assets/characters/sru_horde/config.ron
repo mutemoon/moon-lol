@@ -5,7 +5,7 @@
       components: {
         "bevy_ecs::name::Name": "SRU_Horde",
         "lol_core::attack::Attack": (
-          range: 600.0,
+          range: 500.0,
           base_attack_speed: 0.6666667,
           bonus_attack_speed: 0.0,
           buff_bonus_attack_speed: 0.0,

@@ -80,7 +80,7 @@
       components: {
         "bevy_ecs::name::Name": "Senna",
         "lol_core::attack::Attack": (
-          range: 800.0,
+          range: 600.0,
           base_attack_speed: 0.625,
           bonus_attack_speed: 0.0,
           buff_bonus_attack_speed: 0.0,

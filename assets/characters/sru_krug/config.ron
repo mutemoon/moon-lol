@@ -5,7 +5,7 @@
       components: {
         "bevy_ecs::name::Name": "SRU_Krug",
         "lol_core::attack::Attack": (
-          range: 300.0,
+          range: 150.0,
           base_attack_speed: 0.61349696,
           bonus_attack_speed: 0.0,
           buff_bonus_attack_speed: 0.0,

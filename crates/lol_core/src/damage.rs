@@ -46,6 +46,8 @@ pub struct CommandDamageCreate {
     pub damage_type: DamageType,
     /// 伤害数值
     pub amount: f32,
+    /// 伤害标签，用于区分同一技能的不同伤害来源（如 Darius Q 内外圈）
+    pub tag: Option<u32>,
 }
 
 #[derive(EntityEvent, Debug)]
@@ -54,6 +56,8 @@ pub struct EventDamageCreate {
     pub source: Entity,
     pub damage_type: DamageType,
     pub damage_result: DamageResult,
+    /// 伤害标签，透传自 CommandDamageCreate
+    pub tag: Option<u32>,
 }
 
 /// 伤害计算结果
@@ -82,6 +86,11 @@ pub fn on_command_damage_create(
     mut q_shield_magic: Query<&mut BuffShieldMagic>,
     q_damage_reduction: Query<&BuffDamageReduction>,
 ) {
+    info!(
+        "伤害请求: {:?} 对 {:?} 造成 {:.1} 点 {:?} 伤害, tag: {:?}",
+        trigger.source, trigger.entity, trigger.amount, trigger.damage_type, trigger.tag
+    );
+
     debug!(
         "{:?} 对 {:?} 造成 {:.1} 点 {:?} 伤害",
         trigger.source,
@@ -94,6 +103,11 @@ pub fn on_command_damage_create(
         debug!("未找到伤害目标实体 {:?}", trigger.event_target());
         return;
     };
+
+    // 已死亡实体不再造成伤害
+    if health.value <= 0.0 {
+        return;
+    }
 
     let health_before = health.value;
     let armor_value = armor.map(|a| a.0);
@@ -200,6 +214,7 @@ pub fn on_command_damage_create(
         source: trigger.source,
         damage_type: trigger.damage_type,
         damage_result: result,
+        tag: trigger.tag,
     });
 
     if health.value <= 0.0 {

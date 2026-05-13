@@ -2,6 +2,7 @@ use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
 
 use crate::damage::EventDamageCreate;
+use crate::entities::champion::Champion;
 
 #[derive(Default)]
 pub struct PluginLife;
@@ -12,6 +13,10 @@ impl Plugin for PluginLife {
         app.add_observer(on_event_damage_create);
     }
 }
+
+#[derive(Component, Reflect, Clone, Debug, Default)]
+#[reflect(Component)]
+pub struct Death;
 
 #[derive(Component, Reflect, Serialize, Deserialize, Clone)]
 #[reflect(Component)]
@@ -51,6 +56,7 @@ fn on_event_damage_create(
     trigger: On<EventDamageCreate>,
     mut commands: Commands,
     q_health: Query<&Health>,
+    q_champion: Query<&Champion>,
 ) {
     let entity = trigger.event_target();
 
@@ -61,6 +67,11 @@ fn on_event_damage_create(
     if health.value <= 0.0 {
         debug!("{:?} 死了", entity);
         commands.trigger(EventDead { entity });
-        commands.entity(entity).despawn();
+
+        if q_champion.get(entity).is_ok() {
+            commands.entity(entity).insert(Death);
+        } else {
+            commands.entity(entity).despawn();
+        }
     }
 }

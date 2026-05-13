@@ -80,7 +80,7 @@
       components: {
         "bevy_ecs::name::Name": "Rakan",
         "lol_core::attack::Attack": (
-          range: 475.0,
+          range: 300.0,
           base_attack_speed: 0.6349206,
           bonus_attack_speed: 0.0,
           buff_bonus_attack_speed: 0.0,

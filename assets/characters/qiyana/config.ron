@@ -80,7 +80,7 @@
       components: {
         "bevy_ecs::name::Name": "Qiyana",
         "lol_core::attack::Attack": (
-          range: 0.0,
+          range: 150.0,
           base_attack_speed: 0.6666667,
           bonus_attack_speed: 0.0,
           buff_bonus_attack_speed: 0.0,

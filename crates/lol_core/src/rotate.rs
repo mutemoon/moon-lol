@@ -3,6 +3,7 @@ use bevy::prelude::*;
 use crate::base::pipeline::{
     ArbitrationPipelinePlugin, FinalDecision, LastDecision, PipelineStages, RequestBuffer,
 };
+use crate::life::Death;
 use crate::movement::MovementPipeline;
 use crate::utils::{direction_to_angle, lerp_angle_with_velocity};
 
@@ -69,7 +70,10 @@ impl PipelineStages for RotatePipeline {
     }
 }
 
-fn fixed_update(mut query: Query<(&mut Rotate, &mut Transform)>, time: Res<Time<Fixed>>) {
+fn fixed_update(
+    mut query: Query<(&mut Rotate, &mut Transform), Without<Death>>,
+    time: Res<Time<Fixed>>,
+) {
     for (mut rotate, mut transform) in query.iter_mut() {
         let delta_time = time.delta_secs();
 

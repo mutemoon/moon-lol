@@ -185,12 +185,15 @@ pub fn on_action_damage(
                     .unwrap();
 
                 if apply {
-                    commands.trigger(CommandDamageCreate {
-                        entity: target_entity,
-                        source: entity,
-                        damage_type: damage.damage_type,
-                        amount: damage_amount,
-                    });
+                    commands
+                        .entity(target_entity)
+                        .trigger(|e| CommandDamageCreate {
+                            entity: e,
+                            source: entity,
+                            damage_type: damage.damage_type,
+                            amount: damage_amount,
+                            tag: None,
+                        });
                 }
             }
         }

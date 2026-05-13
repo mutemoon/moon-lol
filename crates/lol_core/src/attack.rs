@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::base::buff::Buffs;
 use crate::damage::{CommandDamageCreate, Damage, DamageType};
-use crate::life::EventDead;
+use crate::life::{Death, EventDead};
 use crate::missile::CommandMissileCreate;
 use crate::rotate::CommandRotate;
 
@@ -366,7 +366,7 @@ fn on_event_dead(
 }
 
 fn fixed_update(
-    mut query: Query<(Entity, &mut AttackState, &Attack, Option<&Damage>)>,
+    mut query: Query<(Entity, &mut AttackState, &Attack, Option<&Damage>), Without<Death>>,
     mut commands: Commands,
     res_assets_spell_object: Option<Res<Assets<Spell>>>,
     time: Res<Time<Fixed>>,
@@ -404,6 +404,7 @@ fn fixed_update(
                                         source: entity,
                                         damage_type: DamageType::Physical,
                                         amount: damage.0,
+                                        tag: None,
                                     });
                                 }
                             }
@@ -415,6 +416,7 @@ fn fixed_update(
                                     source: entity,
                                     damage_type: DamageType::Physical,
                                     amount: damage.0,
+                                    tag: None,
                                 });
                             }
                         }

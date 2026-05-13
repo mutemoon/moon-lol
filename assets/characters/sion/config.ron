@@ -80,7 +80,7 @@
       components: {
         "bevy_ecs::name::Name": "Sion",
         "lol_core::attack::Attack": (
-          range: 600.0,
+          range: 175.0,
           base_attack_speed: 1.4285715,
           bonus_attack_speed: 0.0,
           buff_bonus_attack_speed: 0.0,

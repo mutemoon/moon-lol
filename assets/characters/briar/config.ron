@@ -80,7 +80,7 @@
       components: {
         "bevy_ecs::name::Name": "Briar",
         "lol_core::attack::Attack": (
-          range: 400.0,
+          range: 125.0,
           base_attack_speed: 0.643915,
           bonus_attack_speed: 0.0,
           buff_bonus_attack_speed: 0.0,

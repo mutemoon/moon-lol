@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 
+use crate::life::Death;
 use crate::movement::{CommandMovement, EventMovementEnd, MovementAction, MovementWay};
 
 #[derive(Default)]
@@ -65,7 +66,11 @@ fn on_command_run_stop(trigger: On<CommandRunStop>, mut commands: Commands) {
     });
 }
 
-fn fixed_update(mut commands: Commands, q: Query<(Entity, &Run)>, q_transform: Query<&Transform>) {
+fn fixed_update(
+    mut commands: Commands,
+    q: Query<(Entity, &Run), Without<Death>>,
+    q_transform: Query<&Transform>,
+) {
     for (entity, run) in q.iter() {
         match run.target {
             RunTarget::Position(position) => {

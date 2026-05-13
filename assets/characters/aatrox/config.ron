@@ -80,7 +80,7 @@
       components: {
         "bevy_ecs::name::Name": "Aatrox",
         "lol_core::attack::Attack": (
-          range: 475.0,
+          range: 175.0,
           base_attack_speed: 0.65789473,
           bonus_attack_speed: 0.0,
           buff_bonus_attack_speed: 0.0,

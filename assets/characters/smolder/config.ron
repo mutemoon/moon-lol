@@ -80,7 +80,7 @@
       components: {
         "bevy_ecs::name::Name": "Smolder",
         "lol_core::attack::Attack": (
-          range: 900.0,
+          range: 550.0,
           base_attack_speed: 0.6381621,
           bonus_attack_speed: 0.0,
           buff_bonus_attack_speed: 0.0,

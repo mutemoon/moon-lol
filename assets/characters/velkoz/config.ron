@@ -80,7 +80,7 @@
       components: {
         "bevy_ecs::name::Name": "Velkoz",
         "lol_core::attack::Attack": (
-          range: 575.0,
+          range: 525.0,
           base_attack_speed: 1.4285715,
           bonus_attack_speed: 0.0,
           buff_bonus_attack_speed: 0.0,

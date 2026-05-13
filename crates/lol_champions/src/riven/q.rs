@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use lol_base::render_cmd::CommandAnimationPlay;
 use lol_core::action::dash::{ActionDash, DashMoveType};
+use lol_core::action::knockback::CommandKnockback;
 use lol_core::base::buff::BuffOf;
 use lol_core::missile::CommandAttachedFieldCreate;
 use lol_core::movement::EventMovementEnd;
@@ -14,8 +15,6 @@ const RIVEN_Q_RECAST_WINDOW: f32 = 4.0;
 const RIVEN_Q3_KNOCKBACK_DISTANCE: f32 = 75.0;
 const RIVEN_Q3_KNOCKBACK_RADIUS: f32 = 250.0;
 const RIVEN_Q_FIELD_DURATION: f32 = 0.5;
-
-/// Q 段对应的半径：Q1 < Q2 < Q3
 const RIVEN_Q_RADII: [f32; 3] = [100.0, 100.0, 100.0];
 
 pub struct PluginRivenQ;
@@ -119,11 +118,12 @@ pub fn on_riven_dash_end(
             continue;
         }
 
-        let direction = diff / distance;
-        let new_pos = target_transform.translation + direction * RIVEN_Q3_KNOCKBACK_DISTANCE;
-        commands.entity(target).insert(Transform {
-            translation: new_pos,
-            ..*target_transform
+        commands.entity(target).trigger(|e| CommandKnockback {
+            entity: e,
+            source: entity,
+            distance: RIVEN_Q3_KNOCKBACK_DISTANCE,
+            speed: 1200.0,
+            duration: Some(0.75),
         });
     }
 

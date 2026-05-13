@@ -274,5 +274,6 @@ pub fn on_passive_damage_create(
         source: trigger.source,
         damage_type: DamageType::True,
         amount: hp.max * 0.05,
+        tag: None,
     });
 }

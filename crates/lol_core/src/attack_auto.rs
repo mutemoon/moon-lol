@@ -2,6 +2,7 @@ use bevy::prelude::*;
 
 use crate::attack::{Attack, AttackState, AttackStatus, CommandAttackStart, CommandAttackStop};
 use crate::base::bounding::Bounding;
+use crate::life::Death;
 use crate::run::{CommandRunStart, CommandRunStop, RunTarget};
 
 #[derive(Default)]
@@ -70,14 +71,17 @@ fn on_command_attack_auto_stop(trigger: On<CommandAttackAutoStop>, mut commands:
 
 fn update_attack_auto(
     mut commands: Commands,
-    q_attacker: Query<(
-        Entity,
-        &AttackAuto,
-        &Attack,
-        Option<&AttackState>,
-        &Transform,
-        &Bounding,
-    )>,
+    q_attacker: Query<
+        (
+            Entity,
+            &AttackAuto,
+            &Attack,
+            Option<&AttackState>,
+            &Transform,
+            &Bounding,
+        ),
+        Without<Death>,
+    >,
     q_target: Query<(&Transform, &Bounding)>,
 ) {
     for (entity, attack_auto, attack, attack_state, transform, bounding) in q_attacker.iter() {

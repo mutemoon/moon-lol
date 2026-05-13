@@ -11,6 +11,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::attack::EntityCommandsTrigger;
 use crate::damage::{CommandDamageCreate, Damage, DamageType};
+use crate::life::Death;
 use crate::movement::{CommandMovement, EventMovementEnd, Movement, MovementAction, MovementWay};
 use crate::team::Team;
 
@@ -138,7 +139,7 @@ fn linear_missile_collision(
         &mut LinearMissile,
         &mut Transform,
     )>,
-    q_targets: Query<(Entity, &Team, &Transform), Without<LinearMissile>>,
+    q_targets: Query<(Entity, &Team, &Transform), (Without<LinearMissile>, Without<Death>)>,
     q_source_team: Query<&Team>,
     time: Res<Time<Fixed>>,
 ) {
@@ -185,6 +186,7 @@ fn linear_missile_collision(
                     source: state.source,
                     damage_type: DamageType::Physical,
                     amount: linear.damage,
+                    tag: None,
                 });
             }
         }
@@ -382,6 +384,7 @@ fn on_event_movement_end(
             source: state.source,
             damage_type: DamageType::Physical,
             amount: damage.0,
+            tag: None,
         });
     }
 }
@@ -420,7 +423,7 @@ fn update_attached_fields(
     mut commands: Commands,
     mut q_fields: Query<(Entity, &mut AttachedField, &ChildOf, &mut Transform)>,
     q_parent_transform: Query<&Transform, Without<AttachedField>>,
-    q_enemies: Query<(Entity, &Team, &Transform), Without<AttachedField>>,
+    q_enemies: Query<(Entity, &Team, &Transform), (Without<AttachedField>, Without<Death>)>,
     q_parent_team: Query<&Team, Without<AttachedField>>,
     time: Res<Time<Fixed>>,
 ) {
@@ -464,11 +467,12 @@ fn update_attached_fields(
             let dist = enemy_transform.translation.distance(field_pos);
             if dist <= field.radius {
                 field.hit_enemies.push(enemy);
-                commands.trigger(CommandDamageCreate {
-                    entity: enemy,
+                commands.entity(enemy).trigger(|e| CommandDamageCreate {
+                    entity: e,
                     source: parent_entity,
                     damage_type: DamageType::Physical,
                     amount: field.damage_amount,
+                    tag: None,
                 });
             }
         }

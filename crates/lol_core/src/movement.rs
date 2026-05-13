@@ -9,6 +9,7 @@ use crate::base::bounding::Bounding;
 use crate::base::pipeline::{
     ArbitrationPipelinePlugin, FinalDecision, LastDecision, PipelineStages, RequestBuffer,
 };
+use crate::life::Death;
 use crate::navigation::grid::ResourceGrid;
 use crate::navigation::navigation::{
     NavigationDebugState, NavigationStats, get_nav_path_with_debug, is_path_blocked,
@@ -180,7 +181,10 @@ fn calculate_and_set_exclude_cells(grid: &mut ConfigNavigationGrid, entity_pos: 
 
 fn update_path_movement(
     mut commands: Commands,
-    mut query: Query<(Entity, &Movement, &mut MovementState), Without<MovementBlock>>,
+    mut query: Query<
+        (Entity, &Movement, &mut MovementState),
+        (Without<MovementBlock>, Without<Death>),
+    >,
     mut q_transform: Query<&mut Transform>,
     time: Res<Time<Fixed>>,
 ) {

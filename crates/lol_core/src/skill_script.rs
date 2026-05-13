@@ -2,6 +2,7 @@ use bevy::prelude::*;
 
 use crate::action::{Action, CommandAction};
 use crate::game::FixedFrameCount;
+use crate::life::Death;
 use crate::skill::SkillPoints;
 
 #[derive(Component, Clone, Default, Reflect)]
@@ -61,12 +62,15 @@ impl Plugin for PluginSkillScript {
 pub fn run_skill_script(
     mut commands: Commands,
     frame: Option<Res<FixedFrameCount>>,
-    mut q_actor: Query<(
-        Entity,
-        &SkillScript,
-        &mut SkillScriptCursor,
-        Option<&mut SkillPoints>,
-    )>,
+    mut q_actor: Query<
+        (
+            Entity,
+            &SkillScript,
+            &mut SkillScriptCursor,
+            Option<&mut SkillPoints>,
+        ),
+        Without<Death>,
+    >,
 ) {
     let Some(frame) = frame else {
         return;

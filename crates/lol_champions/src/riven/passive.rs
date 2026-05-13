@@ -45,6 +45,7 @@ pub fn on_damage_create_trigger_bonus(
             source,
             damage_type: DamageType::Physical,
             amount: bonus_damage,
+            tag: None,
         });
 
         commands.entity(buff).despawn();

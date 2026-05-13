@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use lol_base::animation_names::{ANIM_SPELL1, ANIM_SPELL2, ANIM_SPELL3, ANIM_SPELL4};
+use lol_base::animation_names::ANIM_SPELL1;
 use lol_base::render_cmd::CommandAnimationPlay;
 use lol_core::entities::champion::Champion;
 use lol_core::skill::{EventSkillCast, Skill};

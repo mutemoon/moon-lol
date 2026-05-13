@@ -1,7 +1,8 @@
 use bevy::prelude::*;
 
 use crate::base::buff::Buff;
-use crate::movement::MovementBlock;
+use crate::life::Death;
+use crate::movement::{CastBlock, MovementBlock};
 
 /// 眩晕
 #[derive(Component, Debug, Clone)]
@@ -21,7 +22,7 @@ impl DebuffStun {
 /// 更新眩晕计时，结束后移除眩晕和移动阻塞
 pub fn update_debuff_stun(
     mut commands: Commands,
-    mut q_stun: Query<(Entity, &mut DebuffStun)>,
+    mut q_stun: Query<(Entity, &mut DebuffStun), Without<Death>>,
     time: Res<Time<Fixed>>,
 ) {
     for (entity, mut stun) in q_stun.iter_mut() {
@@ -76,6 +77,37 @@ impl DebuffFear {
     pub fn new(duration: f32) -> Self {
         Self {
             timer: Timer::from_seconds(duration, TimerMode::Once),
+        }
+    }
+}
+
+/// 击飞（不受韧性减免）
+#[derive(Component, Debug, Clone)]
+#[require(Buff = Buff { name: "Knockup" })]
+pub struct DebuffKnockup {
+    pub timer: Timer,
+}
+
+impl DebuffKnockup {
+    pub fn new(duration: f32) -> Self {
+        Self {
+            timer: Timer::from_seconds(duration, TimerMode::Once),
+        }
+    }
+}
+
+/// 更新击飞计时，结束后移除击飞和移动阻塞/施法阻塞
+pub fn update_debuff_knockup(
+    mut commands: Commands,
+    mut q_knockup: Query<(Entity, &mut DebuffKnockup), Without<Death>>,
+    time: Res<Time<Fixed>>,
+) {
+    for (entity, mut knockup) in q_knockup.iter_mut() {
+        knockup.timer.tick(time.delta());
+        if knockup.timer.is_finished() {
+            commands.entity(entity).remove::<DebuffKnockup>();
+            commands.entity(entity).remove::<MovementBlock>();
+            commands.entity(entity).remove::<CastBlock>();
         }
     }
 }

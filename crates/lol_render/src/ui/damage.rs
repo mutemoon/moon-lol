@@ -23,8 +23,10 @@ pub struct DamageNumber {
     pub lifetime: f32,
     /// 最大生存时间
     pub max_lifetime: f32,
-    /// 初始位置
+    /// 初始世界坐标
     pub start_position: Vec3,
+    /// 当前 Y 轴偏移（基于 start_position）
+    pub current_y_offset: f32,
     /// 垂直速度
     pub velocity_y: f32,
     /// 重力加速度
@@ -73,10 +75,11 @@ fn on_event_damage_create(
         DamageNumber {
             damage: damage_result.final_damage,
             lifetime: 0.0,
-            max_lifetime: 1.0, // 2秒生存时间
+            max_lifetime: 1.0,
             start_position: world_position,
-            velocity_y: 250.0, // 初始向上速度
-            gravity: -200.0,   // 重力加速度
+            current_y_offset: 0.0,
+            velocity_y: 250.0,
+            gravity: -200.0,
             final_scale: 0.5,
         },
     ));
@@ -98,8 +101,8 @@ fn update_damage_numbers(
     let (camera, camera_global_transform) = camera_info.into_inner();
     let delta_time = time.delta_secs();
 
-    for (i, (entity, mut transform, mut damage_number, mut node, mut text_color)) in
-        damage_numbers.iter_mut().enumerate()
+    for (entity, mut transform, mut damage_number, mut node, mut text_color) in
+        damage_numbers.iter_mut()
     {
         // 更新生存时间
         damage_number.lifetime += delta_time;
@@ -116,19 +119,18 @@ fn update_damage_numbers(
         // 更新垂直速度（重力影响）
         damage_number.velocity_y += damage_number.gravity * delta_time;
 
-        // 计算当前位置
-        let current_y_offset = damage_number.velocity_y * damage_number.lifetime
-            + 0.5 * damage_number.gravity * damage_number.lifetime * damage_number.lifetime;
+        // 更新 Y 轴偏移
+        damage_number.current_y_offset += damage_number.velocity_y * delta_time;
 
         let current_world_pos =
-            damage_number.start_position + Vec3::new(0.0, current_y_offset, 0.0);
+            damage_number.start_position + Vec3::new(0.0, damage_number.current_y_offset, 0.0);
 
         // 转换到屏幕坐标
         if let Ok(viewport_position) =
             camera.world_to_viewport(camera_global_transform, current_world_pos)
         {
             node.left = Val::Px(viewport_position.x - 20.0); // 居中偏移
-            node.top = Val::Px(viewport_position.y + i as f32 * 20.);
+            node.top = Val::Px(viewport_position.y);
         }
 
         // // 字体大小动画：从大到小

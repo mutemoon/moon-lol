@@ -80,7 +80,7 @@
       components: {
         "bevy_ecs::name::Name": "Tristana",
         "lol_core::attack::Attack": (
-          range: 800.0,
+          range: 550.0,
           base_attack_speed: 1.4285715,
           bonus_attack_speed: 0.0,
           buff_bonus_attack_speed: 0.0,

@@ -57,8 +57,18 @@ pub fn create_champion_components_from_record(
     Option<AbilityResource>,
 ) {
     // Attack
-    let range = record.acquisition_range.unwrap_or(0.0);
+    let range = record
+        .attack_range_modifiable
+        .as_ref()
+        .map(|v| v.base_value)
+        .unwrap_or(0.0);
     let windup_config = if let Some(basic_attack) = &record.basic_attack {
+        if let Some(cast_time) = basic_attack.m_attack_cast_time {
+            println!(
+                "m_attack_cast_time: {:?} {}",
+                record.m_character_name, cast_time
+            );
+        }
         let cast_time = basic_attack.m_attack_cast_time.unwrap_or(0.3);
         let total_time = basic_attack.m_attack_total_time.unwrap_or(0.7);
         WindupConfig::Modern {

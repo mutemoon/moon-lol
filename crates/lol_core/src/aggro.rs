@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use bevy::prelude::*;
 
 use crate::damage::{DamageType, EventDamageCreate};
-use crate::life::EventDead;
+use crate::life::{Death, EventDead};
 use crate::team::Team;
 
 #[derive(Default)]
@@ -36,8 +36,8 @@ pub struct EventAggroTargetFound {
 
 pub fn aggro_scan(
     mut commands: Commands,
-    q_aggro: Query<(Entity, &Team, &Transform, &Aggro, &AggroState)>,
-    q_attackable: Query<(Entity, &Team, &Transform)>,
+    q_aggro: Query<(Entity, &Team, &Transform, &Aggro, &AggroState), Without<Death>>,
+    q_attackable: Query<(Entity, &Team, &Transform), Without<Death>>,
 ) {
     for (entity, team, transform, aggro, aggro_state) in q_aggro.iter() {
         let mut best_aggro = 0.0;
@@ -278,6 +278,7 @@ mod tests {
             source: attacker,
             damage_type: DamageType::Physical,
             damage_result: mock_damage_result(),
+            tag: None,
         });
 
         app.update();

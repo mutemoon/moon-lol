@@ -5,7 +5,7 @@
       components: {
         "bevy_ecs::name::Name": "SRU_ChaosMinionSuper",
         "lol_core::attack::Attack": (
-          range: 600.0,
+          range: 170.0,
           base_attack_speed: 0.6944444,
           bonus_attack_speed: 0.0,
           buff_bonus_attack_speed: 0.0,
