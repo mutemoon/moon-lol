@@ -29,8 +29,8 @@ fn main() {
             DefaultPlugins.build().set(log_plugin).set(WindowPlugin {
                 primary_window: Some(Window {
                     title: "classic 1v1 fiora".to_string(),
-                    resolution: (1920, 1000).into(),
-                    position: WindowPosition::At((0, 0).into()),
+                    resolution: (300, 300).into(),
+                    position: WindowPosition::At((0, 1000).into()),
                     ..default()
                 }),
                 ..default()

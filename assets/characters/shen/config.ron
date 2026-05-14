@@ -94,12 +94,12 @@
         ),
         "lol_core::base::ability_resource::AbilityResource": (
           ar_type: Energy,
-          value: 0.0,
-          max: 0.0,
-          base: 0.0,
+          value: 400.0,
+          max: 400.0,
+          base: 400.0,
           per_level: 0.0,
-          base_static_regen: 0.0,
-          regen_per_level: 400.0,
+          base_static_regen: 10.0,
+          regen_per_level: 0.0,
         ),
         "lol_core::base::bounding::Bounding": (
           radius: 35.0,

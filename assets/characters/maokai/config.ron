@@ -94,12 +94,12 @@
         ),
         "lol_core::base::ability_resource::AbilityResource": (
           ar_type: Mana,
-          value: 0.12,
-          max: 0.12,
-          base: 0.12,
-          per_level: 0.0,
-          base_static_regen: 43.0,
-          regen_per_level: 375.0,
+          value: 375.0,
+          max: 375.0,
+          base: 375.0,
+          per_level: 43.0,
+          base_static_regen: 1.2,
+          regen_per_level: 0.12,
         ),
         "lol_core::base::bounding::Bounding": (
           radius: 50.0,

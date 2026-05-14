@@ -151,22 +151,22 @@ fn create_ability_resource_from_record(
 
     let ar_type = AbilityResourceType::from(slot_info.ar_type);
     let base = slot_info
-        .unk_0x3a509002
+        .unk_0x726ee5cd
         .as_ref()
         .map(|v| v.base_value)
         .unwrap_or(0.0);
     let per_level = slot_info
-        .unk_0x452033bb
-        .as_ref()
-        .map(|v| v.base_value)
-        .unwrap_or(0.0);
-    let base_static_regen = slot_info
         .unk_0x6216bf7b
         .as_ref()
         .map(|v| v.base_value)
         .unwrap_or(0.0);
+    let base_static_regen = slot_info
+        .unk_0xc4ab3550
+        .as_ref()
+        .map(|v| v.base_value)
+        .unwrap_or(0.0);
     let regen_per_level = slot_info
-        .unk_0x726ee5cd
+        .unk_0x3a509002
         .as_ref()
         .map(|v| v.base_value)
         .unwrap_or(0.0);
