@@ -1,5 +1,7 @@
 use bevy::color::palettes::css::{BLUE, RED, WHITE};
 use bevy::prelude::*;
+use rand::Rng;
+
 use lol_core::damage::{DamageType, EventDamageCreate};
 
 use crate::camera::CameraState;
@@ -25,8 +27,12 @@ pub struct DamageNumber {
     pub max_lifetime: f32,
     /// 初始世界坐标
     pub start_position: Vec3,
+    /// 当前 X 轴偏移（基于 start_position）
+    pub current_x_offset: f32,
     /// 当前 Y 轴偏移（基于 start_position）
     pub current_y_offset: f32,
+    /// 水平速度
+    pub velocity_x: f32,
     /// 垂直速度
     pub velocity_y: f32,
     /// 重力加速度
@@ -76,10 +82,12 @@ fn on_event_damage_create(
             damage: damage_result.final_damage,
             lifetime: 0.0,
             max_lifetime: 1.0,
-            start_position: world_position,
+            start_position: world_position + Vec3::new(0.0, 150.0, 0.0),
+            current_x_offset: rand::rng().random_range(-50.0..50.0),
             current_y_offset: 0.0,
-            velocity_y: 250.0,
-            gravity: -200.0,
+            velocity_x: rand::rng().random_range(-100.0..100.0),
+            velocity_y: -50.0,
+            gravity: -500.0,
             final_scale: 0.5,
         },
     ));
@@ -119,11 +127,18 @@ fn update_damage_numbers(
         // 更新垂直速度（重力影响）
         damage_number.velocity_y += damage_number.gravity * delta_time;
 
+        // 更新 X 轴偏移
+        damage_number.current_x_offset += damage_number.velocity_x * delta_time;
+
         // 更新 Y 轴偏移
         damage_number.current_y_offset += damage_number.velocity_y * delta_time;
 
-        let current_world_pos =
-            damage_number.start_position + Vec3::new(0.0, damage_number.current_y_offset, 0.0);
+        let current_world_pos = damage_number.start_position
+            + Vec3::new(
+                damage_number.current_x_offset,
+                damage_number.current_y_offset,
+                0.0,
+            );
 
         // 转换到屏幕坐标
         if let Ok(viewport_position) =

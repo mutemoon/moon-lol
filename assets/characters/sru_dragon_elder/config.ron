@@ -66,10 +66,10 @@
         ),
         "lol_core::character::Character": (),
         "lol_core::damage::Armor": (8.0),
-        "lol_core::damage::Damage": (75.0),
+        "lol_core::damage::Damage": (150.0),
         "lol_core::life::Health": (
-          value: 13000.0,
-          max: 13000.0,
+          value: 11500.0,
+          max: 11500.0,
         ),
         "lol_core::movement::Movement": (
           speed: 330.0,

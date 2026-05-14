@@ -6,13 +6,12 @@
         "bevy_ecs::name::Name": "Turret",
         "lol_core::attack::Attack": (
           range: 750.0,
-          base_attack_speed: 1.4285715,
+          base_attack_speed: 0.833,
           bonus_attack_speed: 0.0,
           buff_bonus_attack_speed: 0.0,
           attack_speed_cap: 2.5,
-          windup_config: Modern(
-            attack_cast_time: 0.3,
-            attack_total_time: 0.7,
+          windup_config: Legacy(
+            attack_offset: -0.161,
           ),
           windup_modifier: 1.0,
           spell_key: None,
@@ -28,14 +27,14 @@
         ),
         "lol_core::base::bounding::Bounding": (
           radius: 125.0,
-          height: 525.0,
+          height: 485.0,
         ),
         "lol_core::character::Character": (),
         "lol_core::damage::Armor": (0.0),
-        "lol_core::damage::Damage": (182.0),
+        "lol_core::damage::Damage": (187.0),
         "lol_core::life::Health": (
-          value: 9000.0,
-          max: 9000.0,
+          value: 5000.0,
+          max: 5000.0,
         ),
         "lol_core::movement::Movement": (
           speed: 0.0,

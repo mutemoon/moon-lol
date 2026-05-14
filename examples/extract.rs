@@ -1,14 +1,26 @@
 use std::process::Command;
 
-use league_to_lol::extract::{extract_all, extract_ui_all};
+use league_to_lol::extract::{extract_ui_all, extract_with_options, ExtractOptions};
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 
 fn main() {
+    let args: Vec<String> = std::env::args().collect();
+    let skip_map_geo = args.iter().any(|arg| arg == "--no-mapgeo");
+
     let game_path = r"D:\WeGameApps\英雄联盟\Game";
     let hashes_dir = "assets/hashes";
-    extract_all(game_path, hashes_dir);
+
+    extract_with_options(
+        game_path,
+        hashes_dir,
+        ExtractOptions { skip_map_geo },
+    );
+
     extract_ui_all(game_path);
-    post_process_mapgeo();
+
+    if !skip_map_geo {
+        post_process_mapgeo();
+    }
     // post_process_all_skin_glb();
 }
 

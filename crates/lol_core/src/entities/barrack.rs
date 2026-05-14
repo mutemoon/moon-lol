@@ -67,11 +67,20 @@ fn init_barrack_state_system(
     mut commands: Commands,
     query: Query<(Entity, &BarrackConfigHandler), Without<BarrackState>>,
     res_barracks_config: Res<Assets<ConfigBarracks>>,
+    asset_server: Res<AssetServer>,
 ) {
     for (entity, config_handler) in query.iter() {
         let Some(config) = res_barracks_config.get(&config_handler.config_handle) else {
             continue;
         };
+
+        let minion_handles: Vec<Handle<DynamicWorld>> = config
+            .units
+            .iter()
+            .map(|unit| asset_server.load(&unit.minion_template))
+            .collect::<Vec<_>>();
+
+        info!("Minion handles: {:?}", minion_handles);
 
         commands.entity(entity).insert(BarrackState {
             // 第一波兵有初始延迟

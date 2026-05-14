@@ -39,8 +39,6 @@ pub fn extract_skin_for_champion(
         .unwrap_or("skin0")
         .trim_end_matches(".bin");
 
-    println!("[DEBUG] 正在加载 {} skin {}", champ_name, skin_id);
-
     let skin_prop_group = match loader.get_prop_group_by_paths(vec![skin_bin_path]) {
         Ok(group) => group,
         Err(_) => {

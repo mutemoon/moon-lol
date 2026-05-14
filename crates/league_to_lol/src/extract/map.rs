@@ -15,6 +15,9 @@ use league_property::extract::get_hashes;
 use lol_base::character::{ConfigCharacterRecord, ConfigSkin};
 use lol_base::map::MapPaths;
 use lol_core::entities::barrack::BarrackConfigHandler;
+use lol_core::entities::inhibitor::Inhibitor;
+use lol_core::entities::nexus::Nexus;
+use lol_core::entities::turret::Turret;
 use lol_core::lane::Lane;
 use lol_core::map::MinionPath;
 use lol_core::navigation::grid::ResourceGrid;
@@ -92,6 +95,7 @@ pub fn extract_phase_2_champions(loader: &LeagueLoader, hashes: &HashMap<u32, St
                 loader,
                 &character_name,
                 true,
+                None,
                 skin_bin_path.as_deref(),
                 hashes,
             );
@@ -327,6 +331,7 @@ pub fn extract_phase_6_map_character_records(
                     loader,
                     &character_name,
                     false,
+                    Some(&record_data.char_record_path),
                     skin_bin_path.as_deref(),
                     hashes,
                 );
@@ -440,12 +445,41 @@ pub fn spawn_character_record<B: Bundle>(
 
         if let Some(team) = unk0xad65d8c4.team.as_ref().map(|x| x.team) {
             entity_mut.insert(Team::from(team));
+        } else {
+            entity_mut.insert(Team::default());
+        }
+
+        // 识别防御塔、水晶、枢纽: attackable_unit.type 0=Turret, 1=Inhibitor, 2=Nexus
+        if let Some(attackable_unit) = unk0xad65d8c4.attackable_unit.as_ref() {
+            match attackable_unit.r#type {
+                Some(0) => {
+                    entity_mut.insert(Turret);
+                }
+                Some(1) => {
+                    entity_mut.insert(Inhibitor);
+                }
+                Some(2) => {
+                    entity_mut.insert(Nexus);
+                }
+                _ => {}
+            }
         }
     }
 }
 
+/// 提取选项
+#[derive(Default, Clone)]
+pub struct ExtractOptions {
+    pub skip_map_geo: bool,
+}
+
 /// 一键提取所有数据（英雄 + 地图）
 pub fn extract_all(game_path: &str, hashes_dir: &str) {
+    extract_with_options(game_path, hashes_dir, ExtractOptions::default());
+}
+
+/// 带选项的一键提取
+pub fn extract_with_options(game_path: &str, hashes_dir: &str, options: ExtractOptions) {
     let loader = extract_phase_1_create_loader(game_path);
     let map_paths = MapPaths::default();
 
@@ -481,7 +515,9 @@ pub fn extract_all(game_path: &str, hashes_dir: &str) {
     extract_phase_4_nav_grid(world, &loader, &map_paths);
 
     // Phase 5: 导出地图几何
-    extract_phase_5_map_geo(&loader, &map_paths);
+    if !options.skip_map_geo {
+        extract_phase_5_map_geo(&loader, &map_paths);
+    }
 
     // Phase 6: 从地图提取角色记录
     extract_phase_6_map_character_records(&loader, &map_character_records, &hashes);

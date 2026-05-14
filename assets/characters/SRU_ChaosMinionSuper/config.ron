@@ -30,15 +30,19 @@
           radius: 55.5208,
           height: 77.0,
         ),
+        "lol_core::base::level::ExperienceDrop": (
+          exp_given_on_death: 75.0,
+          experience_radius: 1400.0,
+        ),
         "lol_core::character::Character": (),
         "lol_core::damage::Armor": (0.0),
-        "lol_core::damage::Damage": (350.0),
+        "lol_core::damage::Damage": (180.0),
         "lol_core::life::Health": (
-          value: 1162.5,
-          max: 1162.5,
+          value: 1500.0,
+          max: 1500.0,
         ),
         "lol_core::movement::Movement": (
-          speed: 325.0,
+          speed: 350.0,
         ),
         "lol_core::skill::LOLSpells": ({
           "SRU_ChaosMinionSuperBasicAttack": Path("characters/SRU_ChaosMinionSuper/spells/SRU_ChaosMinionSuperBasicAttack.ron"),

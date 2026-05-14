@@ -31,15 +31,15 @@
           height: 48.0,
         ),
         "lol_core::base::level::ExperienceDrop": (
-          exp_given_on_death: 60.0,
-          experience_radius: 800.0,
+          exp_given_on_death: 15.0,
+          experience_radius: -1.0,
         ),
         "lol_core::character::Character": (),
         "lol_core::damage::Armor": (0.0),
-        "lol_core::damage::Damage": (18.0),
+        "lol_core::damage::Damage": (0.0),
         "lol_core::life::Health": (
-          value: 800.0,
-          max: 800.0,
+          value: 630.0,
+          max: 630.0,
         ),
         "lol_core::movement::Movement": (
           speed: 525.0,

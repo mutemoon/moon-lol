@@ -30,15 +30,19 @@
           radius: 35.7437,
           height: 47.0,
         ),
+        "lol_core::base::level::ExperienceDrop": (
+          exp_given_on_death: 62.0,
+          experience_radius: 1400.0,
+        ),
         "lol_core::character::Character": (),
         "lol_core::damage::Armor": (0.0),
-        "lol_core::damage::Damage": (20.0),
+        "lol_core::damage::Damage": (11.0),
         "lol_core::life::Health": (
-          value: 550.0,
-          max: 550.0,
+          value: 430.0,
+          max: 430.0,
         ),
         "lol_core::movement::Movement": (
-          speed: 325.0,
+          speed: 350.0,
         ),
         "lol_core::skill::LOLSpells": ({
           "SRU_OrderMinionMeleeBasicAttack": Path("characters/SRU_OrderMinionMelee/spells/SRU_OrderMinionMeleeBasicAttack.ron"),

@@ -20,6 +20,7 @@ use lol_core::skill::{
 use super::skin::extract_skin_for_champion;
 use super::spell::extract_spells_for_champion;
 use super::utils::write_to_file;
+use league_utils::hash_bin;
 
 /// Champion 记录数据
 #[derive(Clone)]
@@ -48,7 +49,7 @@ pub fn skin_path_to_skin_bin_path(character_name: &str, skin_path: &str) -> Stri
 pub fn create_champion_components_from_record(
     record: &CharacterRecord,
 ) -> (
-    Attack,
+    Option<Attack>,
     Health,
     Damage,
     Armor,
@@ -62,28 +63,46 @@ pub fn create_champion_components_from_record(
         .as_ref()
         .map(|v| v.base_value)
         .unwrap_or(0.0);
-    let windup_config = if let Some(basic_attack) = &record.basic_attack {
-        if let Some(cast_time) = basic_attack.m_attack_cast_time {
-            println!(
-                "m_attack_cast_time: {:?} {}",
-                record.m_character_name, cast_time
-            );
-        }
-        let cast_time = basic_attack.m_attack_cast_time.unwrap_or(0.3);
-        let total_time = basic_attack.m_attack_total_time.unwrap_or(0.7);
-        WindupConfig::Modern {
-            attack_cast_time: cast_time,
-            attack_total_time: total_time,
+    let attack_speed = record
+        .attack_speed_modifiable
+        .as_ref()
+        .map(|v| v.base_value)
+        .unwrap_or(0.0);
+
+    let attack = if let Some(basic_attack) = record.basic_attack.as_ref() {
+        let windup_config = if let (Some(attack_cast_time), Some(attack_total_time)) = (
+            basic_attack.m_attack_cast_time,
+            basic_attack.m_attack_total_time,
+        ) {
+            WindupConfig::Modern {
+                attack_cast_time,
+                attack_total_time,
+            }
+        } else {
+            if basic_attack.m_attack_delay_cast_offset_percent.is_none() {
+                println!(
+                    "[DEBUG] 什么都没有 {:?} {:?}",
+                    record.m_character_name, basic_attack
+                );
+            }
+            WindupConfig::Legacy {
+                attack_offset: basic_attack
+                    .m_attack_delay_cast_offset_percent
+                    .unwrap_or(0.0),
+            }
+        };
+
+        match windup_config {
+            WindupConfig::Modern {
+                attack_cast_time,
+                attack_total_time,
+            } => Some(Attack::new(range, attack_cast_time, attack_total_time)),
+            WindupConfig::Legacy { attack_offset } => {
+                Some(Attack::from_legacy(range, attack_speed, attack_offset))
+            }
         }
     } else {
-        WindupConfig::Legacy { attack_offset: 0.3 }
-    };
-    let attack = match windup_config {
-        WindupConfig::Modern {
-            attack_cast_time,
-            attack_total_time,
-        } => Attack::new(range, attack_cast_time, attack_total_time),
-        WindupConfig::Legacy { attack_offset } => Attack::from_legacy(range, 1.0, attack_offset),
+        None
     };
 
     let health = Health::new(
@@ -187,6 +206,7 @@ pub fn extract_character_from_record(
     loader: &LeagueLoader,
     character_name: &str,
     is_champion: bool,
+    char_record_path: Option<&str>,
     skin_bin_path: Option<&str>,
     hashes: &HashMap<u32, String>,
 ) -> bool {
@@ -197,7 +217,12 @@ pub fn extract_character_from_record(
         return false;
     };
 
-    let Some(record) = prop_group.get_by_class::<CharacterRecord>() else {
+    let character_record = if is_champion {
+        format!("Characters/{}/CharacterRecords/Root", character_name)
+    } else {
+        char_record_path.unwrap_or("").to_string()
+    };
+    let Some(record) = prop_group.get_data_option::<CharacterRecord>(hash_bin(&character_record)) else {
         println!("[WARN] 无法获取 CharacterRecord: {}", bin_path);
         return false;
     };
@@ -242,7 +267,6 @@ pub fn extract_character_from_record(
         Character,
         Name::new(character_name_string.clone()),
         bounding,
-        attack,
         health,
         damage,
         armor,
@@ -252,6 +276,10 @@ pub fn extract_character_from_record(
 
     if is_champion {
         builder.insert(Champion);
+    }
+
+    if let Some(attack) = attack {
+        builder.insert(attack);
     }
 
     let champion_entity = builder.id();

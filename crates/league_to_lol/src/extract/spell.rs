@@ -29,17 +29,6 @@ pub fn extract_spells_for_champion(
 ) -> Vec<String> {
     let spells = prop_group.get_all_by_class::<SpellObject>();
 
-    if spells.is_empty() {
-        println!("[WARN] 未在 {} bin 中找到 SpellObject", champ_name);
-        return Vec::new();
-    }
-
-    println!(
-        "[INFO] 为 {} 找到 {} 个 SpellObject",
-        champ_name,
-        spells.len()
-    );
-
     let mut spell_names = Vec::new();
 
     for spell_obj in spells {

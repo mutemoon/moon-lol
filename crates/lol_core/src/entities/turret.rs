@@ -12,7 +12,8 @@ impl Plugin for PluginTurret {
     }
 }
 
-#[derive(Component)]
+#[derive(Component, Reflect, Default)]
+#[reflect(Component)]
 #[require(Aggro = Aggro { range: 1000.0 })]
 pub struct Turret;
 

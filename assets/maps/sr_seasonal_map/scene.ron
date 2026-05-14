@@ -213,6 +213,8 @@
         "lol_base::character::ConfigSkin": (
           skin: Path("characters/Nexus/skins/Skin0.ron"),
         ),
+        "lol_core::entities::nexus::Nexus": (),
+        "lol_core::team::Team": Order,
       },
     ),
     4294967192: (
@@ -228,6 +230,8 @@
         "lol_base::character::ConfigSkin": (
           skin: Path("characters/Turret/skins/Skin0.ron"),
         ),
+        "lol_core::entities::turret::Turret": (),
+        "lol_core::team::Team": Order,
       },
     ),
     4294967193: (
@@ -257,6 +261,7 @@
         "lol_base::character::ConfigSkin": (
           skin: Path("characters/SRUAP_MageCrystal/skins/Skin0.ron"),
         ),
+        "lol_core::entities::turret::Turret": (),
         "lol_core::team::Team": Chaos,
       },
     ),
@@ -273,6 +278,7 @@
         "lol_base::character::ConfigSkin": (
           skin: Path("characters/Nexus/skins/Skin3.ron"),
         ),
+        "lol_core::entities::nexus::Nexus": (),
         "lol_core::team::Team": Chaos,
       },
     ),
@@ -289,6 +295,7 @@
         "lol_base::character::ConfigSkin": (
           skin: Path("characters/Turret/skins/Skin3.ron"),
         ),
+        "lol_core::entities::turret::Turret": (),
         "lol_core::team::Team": Chaos,
       },
     ),
@@ -305,6 +312,8 @@
         "lol_base::character::ConfigSkin": (
           skin: Path("characters/Turret/skins/Skin0.ron"),
         ),
+        "lol_core::entities::turret::Turret": (),
+        "lol_core::team::Team": Order,
       },
     ),
     4294967198: (
@@ -320,6 +329,7 @@
         "lol_base::character::ConfigSkin": (
           skin: Path("characters/Turret/skins/Skin3.ron"),
         ),
+        "lol_core::entities::turret::Turret": (),
         "lol_core::team::Team": Chaos,
       },
     ),
@@ -336,6 +346,7 @@
         "lol_base::character::ConfigSkin": (
           skin: Path("characters/Turret/skins/Skin3.ron"),
         ),
+        "lol_core::entities::turret::Turret": (),
         "lol_core::team::Team": Chaos,
       },
     ),
@@ -352,6 +363,8 @@
         "lol_base::character::ConfigSkin": (
           skin: Path("characters/Turret/skins/Skin0.ron"),
         ),
+        "lol_core::entities::turret::Turret": (),
+        "lol_core::team::Team": Order,
       },
     ),
     4294967201: (
@@ -367,6 +380,8 @@
         "lol_base::character::ConfigSkin": (
           skin: Path("characters/Turret/skins/Skin0.ron"),
         ),
+        "lol_core::entities::turret::Turret": (),
+        "lol_core::team::Team": Order,
       },
     ),
     4294967202: (
@@ -382,6 +397,7 @@
         "lol_base::character::ConfigSkin": (
           skin: Path("characters/Turret/skins/Skin3.ron"),
         ),
+        "lol_core::entities::turret::Turret": (),
         "lol_core::team::Team": Chaos,
       },
     ),
@@ -398,6 +414,7 @@
         "lol_base::character::ConfigSkin": (
           skin: Path("characters/Turret/skins/Skin3.ron"),
         ),
+        "lol_core::entities::turret::Turret": (),
         "lol_core::team::Team": Chaos,
       },
     ),
@@ -414,6 +431,7 @@
         "lol_base::character::ConfigSkin": (
           skin: Path("characters/Inhibitor/skins/Skin3.ron"),
         ),
+        "lol_core::entities::inhibitor::Inhibitor": (),
         "lol_core::team::Team": Chaos,
       },
     ),
@@ -430,6 +448,7 @@
         "lol_base::character::ConfigSkin": (
           skin: Path("characters/Inhibitor/skins/Skin3.ron"),
         ),
+        "lol_core::entities::inhibitor::Inhibitor": (),
         "lol_core::team::Team": Chaos,
       },
     ),
@@ -446,6 +465,8 @@
         "lol_base::character::ConfigSkin": (
           skin: Path("characters/Inhibitor/skins/Skin0.ron"),
         ),
+        "lol_core::entities::inhibitor::Inhibitor": (),
+        "lol_core::team::Team": Order,
       },
     ),
     4294967207: (
@@ -461,6 +482,8 @@
         "lol_base::character::ConfigSkin": (
           skin: Path("characters/SRUAP_Turret_Order5/skins/Skin0.ron"),
         ),
+        "lol_core::entities::turret::Turret": (),
+        "lol_core::team::Team": Order,
       },
     ),
     4294967208: (
@@ -476,6 +499,7 @@
         "lol_base::character::ConfigSkin": (
           skin: Path("characters/Turret/skins/Skin3.ron"),
         ),
+        "lol_core::entities::turret::Turret": (),
         "lol_core::team::Team": Chaos,
       },
     ),
@@ -492,6 +516,8 @@
         "lol_base::character::ConfigSkin": (
           skin: Path("characters/Turret/skins/Skin0.ron"),
         ),
+        "lol_core::entities::turret::Turret": (),
+        "lol_core::team::Team": Order,
       },
     ),
     4294967210: (
@@ -521,6 +547,7 @@
         "lol_base::character::ConfigSkin": (
           skin: Path("characters/Turret/skins/Skin3.ron"),
         ),
+        "lol_core::entities::turret::Turret": (),
         "lol_core::team::Team": Chaos,
       },
     ),
@@ -537,6 +564,7 @@
         "lol_base::character::ConfigSkin": (
           skin: Path("characters/Turret/skins/Skin3.ron"),
         ),
+        "lol_core::entities::turret::Turret": (),
         "lol_core::team::Team": Chaos,
       },
     ),
@@ -553,6 +581,7 @@
         "lol_base::character::ConfigSkin": (
           skin: Path("characters/Turret/skins/Skin3.ron"),
         ),
+        "lol_core::entities::turret::Turret": (),
         "lol_core::team::Team": Chaos,
       },
     ),
@@ -583,6 +612,8 @@
         "lol_base::character::ConfigSkin": (
           skin: Path("characters/Turret/skins/Skin0.ron"),
         ),
+        "lol_core::entities::turret::Turret": (),
+        "lol_core::team::Team": Order,
       },
     ),
     4294967216: (
@@ -598,6 +629,7 @@
         "lol_base::character::ConfigSkin": (
           skin: Path("characters/Turret/skins/Skin3.ron"),
         ),
+        "lol_core::entities::turret::Turret": (),
         "lol_core::team::Team": Chaos,
       },
     ),
@@ -614,6 +646,7 @@
         "lol_base::character::ConfigSkin": (
           skin: Path("characters/Turret/skins/Skin3.ron"),
         ),
+        "lol_core::entities::turret::Turret": (),
         "lol_core::team::Team": Chaos,
       },
     ),
@@ -630,6 +663,8 @@
         "lol_base::character::ConfigSkin": (
           skin: Path("characters/Inhibitor/skins/Skin0.ron"),
         ),
+        "lol_core::entities::inhibitor::Inhibitor": (),
+        "lol_core::team::Team": Order,
       },
     ),
     4294967219: (
@@ -659,6 +694,7 @@
         "lol_base::character::ConfigSkin": (
           skin: Path("characters/Inhibitor/skins/Skin3.ron"),
         ),
+        "lol_core::entities::inhibitor::Inhibitor": (),
         "lol_core::team::Team": Chaos,
       },
     ),
@@ -675,6 +711,8 @@
         "lol_base::character::ConfigSkin": (
           skin: Path("characters/Turret/skins/Skin0.ron"),
         ),
+        "lol_core::entities::turret::Turret": (),
+        "lol_core::team::Team": Order,
       },
     ),
     4294967222: (
@@ -690,6 +728,8 @@
         "lol_base::character::ConfigSkin": (
           skin: Path("characters/Turret/skins/Skin0.ron"),
         ),
+        "lol_core::entities::turret::Turret": (),
+        "lol_core::team::Team": Order,
       },
     ),
     4294967223: (
@@ -705,6 +745,8 @@
         "lol_base::character::ConfigSkin": (
           skin: Path("characters/Turret/skins/Skin0.ron"),
         ),
+        "lol_core::entities::turret::Turret": (),
+        "lol_core::team::Team": Order,
       },
     ),
     4294967224: (
@@ -720,6 +762,8 @@
         "lol_base::character::ConfigSkin": (
           skin: Path("characters/Turret/skins/Skin0.ron"),
         ),
+        "lol_core::entities::turret::Turret": (),
+        "lol_core::team::Team": Order,
       },
     ),
     4294967225: (
@@ -735,6 +779,8 @@
         "lol_base::character::ConfigSkin": (
           skin: Path("characters/Inhibitor/skins/Skin0.ron"),
         ),
+        "lol_core::entities::inhibitor::Inhibitor": (),
+        "lol_core::team::Team": Order,
       },
     ),
     4294967226: (
@@ -764,6 +810,8 @@
         "lol_base::character::ConfigSkin": (
           skin: Path("characters/Turret/skins/Skin0.ron"),
         ),
+        "lol_core::entities::turret::Turret": (),
+        "lol_core::team::Team": Order,
       },
     ),
     4294967228: (
@@ -795,6 +843,7 @@
         "lol_base::character::ConfigSkin": (
           skin: Path("characters/SRU_MurkwolfMini/skins/Skin0.ron"),
         ),
+        "lol_core::team::Team": Order,
       },
     ),
     4294967230: (
@@ -1146,6 +1195,7 @@
         "lol_base::character::ConfigSkin": (
           skin: Path("characters/SRU_MurkwolfMini/skins/Skin0.ron"),
         ),
+        "lol_core::team::Team": Order,
       },
     ),
     4294967252: (
