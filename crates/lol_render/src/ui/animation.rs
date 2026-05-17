@@ -1,6 +1,5 @@
 use bevy::prelude::*;
-use league_utils::HashKey;
-use lol_base::prop::LoadHashKeyTrait;
+use lol_base::hash_key::{HashKey, LoadHashKeyTrait};
 use lol_base::ui::{LOLEnumData, LOLUiElementEffectAnimationData};
 
 #[derive(Component)]

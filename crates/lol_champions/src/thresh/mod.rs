@@ -1,7 +1,6 @@
 pub mod buffs;
 
 use bevy::prelude::*;
-use league_utils::hash_bin;
 use lol_base::animation_names::{ANIM_SPELL1, ANIM_SPELL2, ANIM_SPELL3, ANIM_SPELL4};
 use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
@@ -76,7 +75,6 @@ fn cast_thresh_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
                 amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
             }],
-            particle: Some(hash_bin("Thresh_Q_Hit")),
         }],
     });
 }
@@ -110,7 +108,6 @@ fn cast_thresh_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
                 amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
             }],
-            particle: Some(hash_bin("Thresh_E_Hit")),
         }],
     });
 }
@@ -132,7 +129,6 @@ fn cast_thresh_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
                 amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
             }],
-            particle: Some(hash_bin("Thresh_R_Hit")),
         }],
     });
 }

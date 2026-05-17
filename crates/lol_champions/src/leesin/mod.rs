@@ -1,7 +1,6 @@
 pub mod buffs;
 
 use bevy::prelude::*;
-use league_utils::hash_bin;
 use lol_base::animation_names::{ANIM_SPELL1, ANIM_SPELL2, ANIM_SPELL3, ANIM_SPELL4};
 use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
@@ -129,7 +128,6 @@ fn cast_leesin_q(
                     amount: "total_damage".to_string(),
                     damage_type: DamageType::Physical,
                 }],
-                particle: Some(hash_bin("LeeSin_Q_Hit")),
             }],
         });
         // Insert recast window for second cast (Resonating Strike)
@@ -244,7 +242,6 @@ fn cast_leesin_e(
                     amount: "total_damage".to_string(),
                     damage_type: DamageType::Physical,
                 }],
-                particle: Some(hash_bin("LeeSin_E_Hit")),
             }],
         });
         // Insert recast window for second cast (Cripple)
@@ -267,7 +264,6 @@ fn cast_leesin_e(
                     amount: "total_damage".to_string(),
                     damage_type: DamageType::Physical,
                 }],
-                particle: Some(hash_bin("LeeSin_E2_Hit")),
             }],
         });
         commands.entity(skill_entity).remove::<SkillRecastWindow>();
@@ -306,7 +302,6 @@ fn cast_leesin_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
                 amount: "total_damage".to_string(),
                 damage_type: DamageType::Physical,
             }],
-            particle: Some(hash_bin("LeeSin_R_Hit")),
         }],
     });
 }

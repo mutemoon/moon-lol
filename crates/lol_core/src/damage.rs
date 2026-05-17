@@ -86,11 +86,6 @@ pub fn on_command_damage_create(
     mut q_shield_magic: Query<&mut BuffShieldMagic>,
     q_damage_reduction: Query<&BuffDamageReduction>,
 ) {
-    info!(
-        "伤害请求: {:?} 对 {:?} 造成 {:.1} 点 {:?} 伤害, tag: {:?}",
-        trigger.source, trigger.entity, trigger.amount, trigger.damage_type, trigger.tag
-    );
-
     debug!(
         "{:?} 对 {:?} 造成 {:.1} 点 {:?} 伤害",
         trigger.source,

@@ -1,7 +1,6 @@
 pub mod buffs;
 
 use bevy::prelude::*;
-use league_utils::hash_bin;
 use lol_base::animation_names::{ANIM_SPELL1, ANIM_SPELL2, ANIM_SPELL3, ANIM_SPELL4};
 use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
@@ -73,7 +72,6 @@ fn cast_briar_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
                 amount: "total_damage".to_string(),
                 damage_type: DamageType::Physical,
             }],
-            particle: Some(hash_bin("Briar_Q_Hit")),
         }],
     });
 }
@@ -107,7 +105,6 @@ fn cast_briar_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
                 amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
             }],
-            particle: Some(hash_bin("Briar_E_Hit")),
         }],
     });
 }
@@ -131,7 +128,6 @@ fn cast_briar_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
                 amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
             }],
-            particle: Some(hash_bin("Briar_R_Hit")),
         }],
     });
 }

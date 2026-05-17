@@ -1,7 +1,6 @@
 use bevy::animation::AnimationTargetId;
 use bevy::color::palettes::tailwind::RED_500;
 use bevy::prelude::*;
-use league_utils::hash_joint;
 use lol_base::debug_area::DebugArea;
 use lol_base::debug_missile::DebugMissile;
 use lol_base::debug_sphere::DebugSphere;
@@ -199,7 +198,7 @@ fn on_command_missile_create(
     res_assets_spell_object: Res<Assets<Spell>>,
     q_global_transform: Query<&GlobalTransform>,
     q_children: Query<&Children>,
-    q_joint_target: Query<&AnimationTargetId>,
+    q_joint_target: Query<&Name>,
 ) {
     let entity = trigger.event_target();
 
@@ -310,8 +309,7 @@ fn on_command_missile_create(
             let Ok(joint_target) = q_joint_target.get(child) else {
                 continue;
             };
-            let id = joint_target.0.as_u128();
-            if hash_joint(&hit_bone_name) as u128 == id {
+            if joint_target.to_string() == hit_bone_name {
                 end_entity = child;
                 break;
             }
@@ -483,15 +481,14 @@ fn find_bone_translation(
     entity: Entity,
     bone_name: &str,
     q_children: &Query<&Children>,
-    q_joint_target: &Query<&AnimationTargetId>,
+    q_joint_target: &Query<&Name>,
     q_global_transform: &Query<&GlobalTransform>,
 ) -> Option<Vec3> {
     for child in q_children.iter_descendants(entity) {
         let Ok(joint_target) = q_joint_target.get(child) else {
             continue;
         };
-        let id = joint_target.0.as_u128();
-        if hash_joint(bone_name) as u128 == id {
+        if joint_target.to_string() == bone_name {
             return Some(q_global_transform.get(child).unwrap().translation());
         }
     }

@@ -5,7 +5,6 @@ pub mod q;
 mod tests;
 
 use bevy::prelude::*;
-use league_utils::hash_bin;
 use lol_base::animation_names::{ANIM_SPELL2, ANIM_SPELL3, ANIM_SPELL4};
 use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
@@ -144,7 +143,6 @@ fn cast_darius_w(
                 amount: "empowered_attack_damage".to_string(),
                 damage_type: DamageType::Physical,
             }],
-            particle: Some(hash_bin("Darius_W_Hit")),
         }],
     });
 
@@ -191,7 +189,6 @@ fn cast_darius_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
                 amount: "damage".to_string(),
                 damage_type: DamageType::Physical,
             }],
-            particle: Some(hash_bin("Darius_R_Hit")),
         }],
     });
 }

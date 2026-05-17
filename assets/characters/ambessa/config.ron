@@ -24,7 +24,7 @@
         ),
         "lol_core::skill::Skill": (
           spell: Path("characters/Ambessa/spells/AmbessaR.ron"),
-          level: 1,
+          level: 0,
           slot: R,
           cooldown_mode: AfterCast,
         ),
@@ -39,7 +39,7 @@
         ),
         "lol_core::skill::Skill": (
           spell: Path("characters/Ambessa/spells/AmbessaE.ron"),
-          level: 1,
+          level: 0,
           slot: E,
           cooldown_mode: AfterCast,
         ),
@@ -54,7 +54,7 @@
         ),
         "lol_core::skill::Skill": (
           spell: Path("characters/Ambessa/spells/AmbessaW.ron"),
-          level: 1,
+          level: 0,
           slot: W,
           cooldown_mode: AfterCast,
         ),
@@ -69,7 +69,7 @@
         ),
         "lol_core::skill::Skill": (
           spell: Path("characters/Ambessa/spells/AmbessaQ.ron"),
-          level: 1,
+          level: 0,
           slot: Q,
           cooldown_mode: AfterCast,
         ),
@@ -111,7 +111,7 @@
           experience_to_next_level: 280,
         ),
         "lol_core::character::Character": (),
-        "lol_core::damage::Armor": (4.9),
+        "lol_core::damage::Armor": (35.0),
         "lol_core::damage::Damage": (63.0),
         "lol_core::entities::champion::Champion": (),
         "lol_core::life::Health": (

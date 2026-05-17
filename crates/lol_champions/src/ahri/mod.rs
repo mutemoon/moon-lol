@@ -1,7 +1,6 @@
 pub mod buffs;
 
 use bevy::prelude::*;
-use league_utils::hash_bin;
 use lol_base::animation_names::{ANIM_SPELL1, ANIM_SPELL2, ANIM_SPELL3, ANIM_SPELL4};
 use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
@@ -94,7 +93,6 @@ fn cast_ahri_q(
                 amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
             }],
-            particle: Some(hash_bin("Ahri_Q_Hit")),
         }],
     });
 
@@ -127,7 +125,6 @@ fn cast_ahri_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spel
                 amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
             }],
-            particle: Some(hash_bin("Ahri_W_Hit")),
         }],
     });
 }
@@ -153,7 +150,6 @@ fn cast_ahri_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spel
                 amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
             }],
-            particle: Some(hash_bin("Ahri_E_Hit")),
         }],
     });
 }

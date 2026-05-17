@@ -9,7 +9,7 @@
         ),
         "lol_core::skill::Skill": (
           spell: Path("characters/sru_dragon_earth/spells/SRU_Dragon_Mountain_Attack.ron"),
-          level: 1,
+          level: 0,
           slot: W,
           cooldown_mode: AfterCast,
         ),
@@ -50,7 +50,7 @@
           experience_radius: 2000.0,
         ),
         "lol_core::character::Character": (),
-        "lol_core::damage::Armor": (8.0),
+        "lol_core::damage::Armor": (34.0),
         "lol_core::damage::Damage": (105.0),
         "lol_core::life::Health": (
           value: 4200.0,

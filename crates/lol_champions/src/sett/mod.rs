@@ -1,7 +1,6 @@
 pub mod buffs;
 
 use bevy::prelude::*;
-use league_utils::hash_bin;
 use lol_base::animation_names::{ANIM_SPELL1, ANIM_SPELL2, ANIM_SPELL3, ANIM_SPELL4};
 use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
@@ -100,7 +99,6 @@ fn cast_sett_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spel
                 amount: "total_damage".to_string(),
                 damage_type: DamageType::True,
             }],
-            particle: Some(hash_bin("Sett_W_Hit")),
         }],
     });
     // Grit converts to shield
@@ -130,7 +128,6 @@ fn cast_sett_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spel
                 amount: "total_damage".to_string(),
                 damage_type: DamageType::Physical,
             }],
-            particle: Some(hash_bin("Sett_E_Hit")),
         }],
     });
 }

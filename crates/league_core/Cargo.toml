@@ -8,5 +8,6 @@ bevy.workspace = true
 bitflags.workspace = true
 league_utils.workspace = true
 league_property.workspace = true
+lol_base.workspace = true
 ron.workspace = true
 serde.workspace = true

@@ -1,7 +1,6 @@
 pub mod buffs;
 
 use bevy::prelude::{Handle, *};
-use league_utils::hash_bin;
 use lol_base::animation_names::{ANIM_SPELL1, ANIM_SPELL2, ANIM_SPELL3, ANIM_SPELL4};
 use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
@@ -117,7 +116,6 @@ fn cast_olaf_e(commands: &mut Commands, entity: Entity, _point: Vec2, skill_spel
                 amount: "total_damage".to_string(),
                 damage_type: DamageType::True,
             }],
-            particle: Some(hash_bin("Olaf_E_Hit")),
         }],
     });
     // E also deals self-damage

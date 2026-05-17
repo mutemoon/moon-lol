@@ -1,7 +1,6 @@
 pub mod buffs;
 
 use bevy::prelude::*;
-use league_utils::hash_bin;
 use lol_base::animation_names::{ANIM_SPELL1, ANIM_SPELL2, ANIM_SPELL3, ANIM_SPELL4};
 use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
@@ -98,7 +97,6 @@ fn cast_akali_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
                 amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
             }],
-            particle: Some(hash_bin("Akali_Q_Hit")),
         }],
     });
 
@@ -158,7 +156,6 @@ fn cast_akali_e(
                     amount: "total_damage".to_string(),
                     damage_type: DamageType::Magic,
                 }],
-                particle: Some(hash_bin("Akali_E_Hit")),
             }],
         });
         // Mark for recast
@@ -223,7 +220,6 @@ fn cast_akali_r(
                     amount: "total_damage".to_string(),
                     damage_type: DamageType::Magic,
                 }],
-                particle: Some(hash_bin("Akali_R2_Hit")),
             }],
         });
     }

@@ -1,5 +1,4 @@
 use bevy::prelude::*;
-use league_utils::hash_bin;
 use lol_base::animation_names::{ANIM_SPELL1, ANIM_SPELL2, ANIM_SPELL3, ANIM_SPELL4};
 use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
@@ -119,7 +118,6 @@ fn cast_camille_q(
                     amount: "total_damage".to_string(),
                     damage_type: DamageType::Physical,
                 }],
-                particle: Some(hash_bin("Camille_Q2_Hit")),
             }],
         });
         commands.entity(skill_entity).remove::<SkillRecastWindow>();
@@ -151,7 +149,6 @@ fn cast_camille_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<S
                 amount: "total_damage".to_string(),
                 damage_type: DamageType::Physical,
             }],
-            particle: Some(hash_bin("Camille_W_Hit")),
         }],
     });
 }

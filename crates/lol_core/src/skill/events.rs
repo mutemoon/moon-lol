@@ -13,6 +13,7 @@ pub enum SkillCastFailureReason {
     InsufficientAbilityResource,
     CoolingDown,
     Blocked,
+    CasterDead,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

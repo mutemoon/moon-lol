@@ -9,7 +9,7 @@
         ),
         "lol_core::skill::Skill": (
           spell: Path("characters/Sru_Crab/spells/Sru_CrabShrineStats.ron"),
-          level: 1,
+          level: 0,
           slot: E,
           cooldown_mode: AfterCast,
         ),
@@ -24,7 +24,7 @@
         ),
         "lol_core::skill::Skill": (
           spell: Path("characters/Sru_Crab/spells/Sru_CrabDashLong.ron"),
-          level: 1,
+          level: 0,
           slot: W,
           cooldown_mode: AfterCast,
         ),
@@ -39,7 +39,7 @@
         ),
         "lol_core::skill::Skill": (
           spell: Path("characters/Sru_Crab/spells/Sru_CrabDash.ron"),
-          level: 1,
+          level: 0,
           slot: Q,
           cooldown_mode: AfterCast,
         ),
@@ -79,7 +79,7 @@
           experience_radius: -1.0,
         ),
         "lol_core::character::Character": (),
-        "lol_core::damage::Armor": (0.0),
+        "lol_core::damage::Armor": (42.0),
         "lol_core::damage::Damage": (35.0),
         "lol_core::life::Health": (
           value: 1550.0,

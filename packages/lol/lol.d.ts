@@ -115,9 +115,9 @@ export interface InitOutput {
     readonly __wbg_set_streamconfig_channels: (a: number, b: number) => void;
     readonly __wbg_set_streamconfig_sample_rate: (a: number, b: number) => void;
     readonly __wbg_streamconfig_free: (a: number, b: number) => void;
-    readonly wasm_bindgen_5c215077723ed606___convert__closures_____invoke___basisu_c_sys_8319643fc44298e3___web__binding__Basisu__core_c0933739ca4b745e___result__Result_____wasm_bindgen_5c215077723ed606___JsError___true_: (a: number, b: number, c: any) => [number, number];
+    readonly wasm_bindgen_5c215077723ed606___convert__closures_____invoke___basisu_c_sys_2ab5712e2469108a___web__binding__Basisu__core_c0933739ca4b745e___result__Result_____wasm_bindgen_5c215077723ed606___JsError___true_: (a: number, b: number, c: any) => [number, number];
     readonly wasm_bindgen_5c215077723ed606___convert__closures_____invoke___wasm_bindgen_5c215077723ed606___JsValue__core_c0933739ca4b745e___result__Result_____wasm_bindgen_5c215077723ed606___JsError___true_: (a: number, b: number, c: any) => [number, number];
-    readonly wasm_bindgen_5c215077723ed606___convert__closures_____invoke___js_sys_22231fab66d6c031___Array__web_sys_289a6338de913506___features__gen_ResizeObserver__ResizeObserver______true_: (a: number, b: number, c: any, d: any) => void;
+    readonly wasm_bindgen_5c215077723ed606___convert__closures_____invoke___js_sys_cd98ed52bb996ed7___Array__web_sys_5f92e7dd8e485172___features__gen_ResizeObserver__ResizeObserver______true_: (a: number, b: number, c: any, d: any) => void;
     readonly wasm_bindgen_5c215077723ed606___convert__closures_____invoke___wasm_bindgen_5c215077723ed606___JsValue______true__1_: (a: number, b: number, c: any) => void;
     readonly wasm_bindgen_5c215077723ed606___convert__closures_____invoke___wasm_bindgen_5c215077723ed606___JsValue______true__2_: (a: number, b: number, c: any) => void;
     readonly wasm_bindgen_5c215077723ed606___convert__closures_____invoke___wasm_bindgen_5c215077723ed606___JsValue______true_: (a: number, b: number, c: any) => void;
@@ -129,7 +129,7 @@ export interface InitOutput {
     readonly wasm_bindgen_5c215077723ed606___convert__closures_____invoke___wasm_bindgen_5c215077723ed606___JsValue______true__11: (a: number, b: number, c: any) => void;
     readonly wasm_bindgen_5c215077723ed606___convert__closures_____invoke___wasm_bindgen_5c215077723ed606___JsValue______true__12: (a: number, b: number, c: any) => void;
     readonly wasm_bindgen_5c215077723ed606___convert__closures_____invoke___wasm_bindgen_5c215077723ed606___JsValue______true__13: (a: number, b: number, c: any) => void;
-    readonly wasm_bindgen_5c215077723ed606___convert__closures_____invoke___core_c0933739ca4b745e___option__Option_web_sys_289a6338de913506___features__gen_Blob__Blob_______true_: (a: number, b: number, c: number) => void;
+    readonly wasm_bindgen_5c215077723ed606___convert__closures_____invoke___core_c0933739ca4b745e___option__Option_web_sys_5f92e7dd8e485172___features__gen_Blob__Blob_______true_: (a: number, b: number, c: number) => void;
     readonly wasm_bindgen_5c215077723ed606___convert__closures_____invoke_______true__1_: (a: number, b: number) => void;
     readonly wasm_bindgen_5c215077723ed606___convert__closures_____invoke_______true_: (a: number, b: number) => void;
     readonly __wbindgen_malloc: (a: number, b: number) => number;

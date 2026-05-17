@@ -9,8 +9,6 @@ pub mod error;
 pub mod loaders;
 pub mod map;
 pub mod navigation;
-pub mod resource;
-pub mod shader;
 pub mod skin;
 pub mod test_render;
 pub mod ui;
@@ -25,7 +23,6 @@ use debug_missile::PluginDebugMissile;
 use debug_sphere::PluginDebugSphere;
 use map::PluginRenderMap;
 use navigation::PluginRenderNavigation;
-use resource::PluginRenderResource;
 use skin::PluginSkin;
 use ui::PluginUI;
 
@@ -43,8 +40,6 @@ impl Plugin for PluginRender {
         app.add_plugins(PluginDebugSphere);
         app.add_plugins(PluginRenderMap);
         app.add_plugins(PluginRenderNavigation);
-        // app.add_plugins(PluginParticle);
-        app.add_plugins(PluginRenderResource);
         app.add_plugins(PluginSkin);
         app.add_plugins(PluginUI);
     }

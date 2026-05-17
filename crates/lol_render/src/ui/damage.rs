@@ -1,8 +1,7 @@
 use bevy::color::palettes::css::{BLUE, RED, WHITE};
 use bevy::prelude::*;
-use rand::Rng;
-
 use lol_core::damage::{DamageType, EventDamageCreate};
+use rand::Rng;
 
 use crate::camera::CameraState;
 
@@ -82,12 +81,12 @@ fn on_event_damage_create(
             damage: damage_result.final_damage,
             lifetime: 0.0,
             max_lifetime: 1.0,
-            start_position: world_position + Vec3::new(0.0, 150.0, 0.0),
-            current_x_offset: rand::rng().random_range(-50.0..50.0),
+            start_position: world_position + Vec3::new(0.0, 0.0, 0.0),
+            current_x_offset: 0.0,
             current_y_offset: 0.0,
             velocity_x: rand::rng().random_range(-100.0..100.0),
-            velocity_y: -50.0,
-            gravity: -500.0,
+            velocity_y: 500.0,
+            gravity: -1500.0,
             final_scale: 0.5,
         },
     ));

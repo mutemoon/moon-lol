@@ -6,7 +6,6 @@ pub mod r;
 mod tests;
 
 use bevy::prelude::*;
-use league_utils::hash_bin;
 use lol_base::animation_names::{ANIM_SPELL1, ANIM_SPELL2};
 use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
@@ -113,7 +112,6 @@ fn cast_fiora_q(
                 amount: "total_damage".to_string(),
                 damage_type: DamageType::Physical,
             }],
-            particle: Some(hash_bin("Fiora_Q_Slash_Cas")),
         }],
     });
 }

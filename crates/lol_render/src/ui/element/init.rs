@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use bevy::prelude::*;
-use league_utils::hash_key::LoadHashKeyTrait;
+use lol_base::hash_key::LoadHashKeyTrait;
 use lol_base::ui::{
     LOLHeroFloatingInfoBarData, LOLStructureFloatingInfoBarData, LOLUiElementEffectAnimationData,
     LOLUiElementEffectDesaturateData, LOLUiElementEffectInstancedData, LOLUiElementGroupButtonData,

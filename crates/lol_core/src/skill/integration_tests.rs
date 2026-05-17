@@ -6,7 +6,7 @@ use std::collections::BTreeMap;
 use std::time::Duration;
 
 use bevy::prelude::*;
-use league_utils::hash_key::HashKey;
+use lol_base::hash_key::HashKey;
 use lol_base::spell::{DataSpell, Spell, ValuesEffect};
 use lol_base::spell_calc::{CalculationPartEffectValue, CalculationSpell, CalculationType};
 
@@ -106,7 +106,6 @@ fn on_test_damage_skill_cast(
                 amount: DAMAGE_AMOUNT_KEY.to_string(),
                 damage_type: DamageType::Physical,
             }],
-            particle: None,
         }],
     });
 }

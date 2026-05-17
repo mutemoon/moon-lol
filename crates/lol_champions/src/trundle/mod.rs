@@ -1,7 +1,6 @@
 pub mod buffs;
 
 use bevy::prelude::*;
-use league_utils::hash_bin;
 use lol_base::animation_names::{ANIM_SPELL1, ANIM_SPELL2, ANIM_SPELL3, ANIM_SPELL4};
 use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
@@ -91,7 +90,6 @@ fn cast_trundle_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<S
                 amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
             }],
-            particle: Some(hash_bin("Trundle_E_Hit")),
         }],
     });
 }
@@ -115,7 +113,6 @@ fn cast_trundle_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<S
                 amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
             }],
-            particle: Some(hash_bin("Trundle_R_Hit")),
         }],
     });
 }

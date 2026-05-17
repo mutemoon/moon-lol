@@ -8,7 +8,7 @@ use crate::base::state::State;
 use crate::lane::Lane;
 use crate::life::{Death, EventDead};
 use crate::map::MinionPath;
-use crate::movement::{CommandMovement, MovementAction, MovementWay};
+use crate::run::{CommandRunStart, Run, RunTarget};
 use crate::team::Team;
 
 #[derive(Component, Debug, Clone, Copy, PartialEq, Serialize, Deserialize, Reflect)]
@@ -55,12 +55,12 @@ impl Plugin for PluginMinion {
 pub fn fixed_update(
     mut commands: Commands,
     q_minion: Query<
-        (Entity, &Transform, &Team, &Lane, &MinionState),
+        (Entity, &Transform, &Team, &Lane, &MinionState, Option<&Run>),
         (With<Minion>, Without<Death>),
     >,
     res_minion_path: Res<MinionPath>,
 ) {
-    for (entity, transform, team, lane, minion_state) in q_minion.iter() {
+        for (entity, transform, team, lane, minion_state, run) in q_minion.iter() {
         if *minion_state == MinionState::AttackingTarget {
             continue;
         }
@@ -78,20 +78,20 @@ pub fn fixed_update(
             return;
         };
 
-        let target_pos = {
-            let p = *path.get(closest_index + 1).unwrap_or(&path[closest_index]);
-            Vec3::new(p.x, transform.translation.y, p.y)
-        };
+        let target_pos = *path.get(closest_index + 1).unwrap_or(&path[closest_index]);
 
-        debug!("{} 寻路到 {}", entity, path[closest_index]);
-        commands.trigger(CommandMovement {
+        if let Some(run) = run {
+            if let RunTarget::Position(pos) = run.target {
+                if pos == target_pos {
+                    continue;
+                }
+            }
+        }
+
+        debug!("{:?} 寻路到 {:?}", entity, target_pos);
+        commands.trigger(CommandRunStart {
             entity,
-            priority: 0,
-            action: MovementAction::Start {
-                way: MovementWay::Pathfind(target_pos),
-                speed: None,
-                source: "Minion".to_string(),
-            },
+            target: RunTarget::Position(target_pos),
         });
     }
 }

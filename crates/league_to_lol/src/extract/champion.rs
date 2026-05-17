@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use bevy::prelude::*;
 use league_core::extract::{AbilityResourceSlotInfo, CharacterRecord, SpellObject};
 use league_loader::game::{Data, LeagueLoader, PropGroup};
+use league_utils::hash_bin;
 use lol_base::spell::Spell;
 use lol_core::attack::{Attack, WindupConfig};
 use lol_core::base::ability_resource::{AbilityResource, AbilityResourceType};
@@ -20,7 +21,6 @@ use lol_core::skill::{
 use super::skin::extract_skin_for_champion;
 use super::spell::extract_spells_for_champion;
 use super::utils::write_to_file;
-use league_utils::hash_bin;
 
 /// Champion 记录数据
 #[derive(Clone)]
@@ -123,7 +123,7 @@ pub fn create_champion_components_from_record(
 
     let armor = Armor(
         record
-            .armor_per_level_modifiable
+            .base_armor_modifiable
             .as_ref()
             .map(|v| v.base_value)
             .unwrap_or(0.0),
@@ -222,7 +222,8 @@ pub fn extract_character_from_record(
     } else {
         char_record_path.unwrap_or("").to_string()
     };
-    let Some(record) = prop_group.get_data_option::<CharacterRecord>(hash_bin(&character_record)) else {
+    let Some(record) = prop_group.get_data_option::<CharacterRecord>(hash_bin(&character_record))
+    else {
         println!("[WARN] 无法获取 CharacterRecord: {}", bin_path);
         return false;
     };
@@ -359,7 +360,7 @@ fn create_skills_from_record(
                 active_skills.push((
                     Skill {
                         spell: spell_handle,
-                        level: 1,
+                        level: 0,
                         slot,
                         cooldown_mode: SkillCooldownMode::AfterCast,
                     },

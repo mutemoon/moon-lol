@@ -6,7 +6,7 @@ use bevy::reflect::TypePath;
 use league_property::from_entry;
 use league_property::prop::PropFile;
 use league_utils::type_name_to_hash;
-use lol_base::prop::HashKey;
+use lol_base::hash_key::HashKey;
 use serde::de::DeserializeOwned;
 
 use crate::Error;

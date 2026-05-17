@@ -1,6 +1,6 @@
 use std::process::Command;
 
-use league_to_lol::extract::{extract_ui_all, extract_with_options, ExtractOptions};
+use league_to_lol::extract::{ExtractOptions, extract_ui_all, extract_with_options};
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 
 fn main() {
@@ -10,11 +10,7 @@ fn main() {
     let game_path = r"D:\WeGameApps\英雄联盟\Game";
     let hashes_dir = "assets/hashes";
 
-    extract_with_options(
-        game_path,
-        hashes_dir,
-        ExtractOptions { skip_map_geo },
-    );
+    extract_with_options(game_path, hashes_dir, ExtractOptions { skip_map_geo });
 
     extract_ui_all(game_path);
 

@@ -67,11 +67,6 @@ default = ["bevy/dynamic_linking"]
 getrandom_02.workspace = true
 getrandom_03.workspace = true
 bevy.workspace = true
-league_core.workspace = true
-league_loader.workspace = true
-league_property.workspace = true
-league_file.workspace = true
-league_utils.workspace = true
 lol_base.workspace = true
 lol_core.workspace = true
 lol_debug.workspace = true
@@ -86,12 +81,17 @@ bevy_gltf_draco.workspace = true
 tracing = "0.1"
 
 [dev-dependencies]
-league_to_lol.workspace = true
 crossbeam-channel.workspace = true
 image.workspace = true
-serde_json.workspace = true
-ron.workspace = true
+league_core.workspace = true
+league_file.workspace = true
+league_loader.workspace = true
+league_property.workspace = true
+league_to_lol.workspace = true
+league_utils.workspace = true
 rayon.workspace = true
+ron.workspace = true
+serde_json.workspace = true
 
 walkdir = "2.5.0"
 

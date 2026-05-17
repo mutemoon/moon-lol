@@ -1,7 +1,7 @@
 use bevy::prelude::*;
-use league_utils::hash_bin;
 use lol_base::character::HealthBar;
-use lol_base::prop::LoadHashKeyTrait;
+use lol_base::hash::hash_bin;
+use lol_base::hash_key::LoadHashKeyTrait;
 use lol_base::ui::{
     LOLEnumHealthBarTickStyle, LOLEnumUiPosition, LOLFloatingInfoBarViewController,
     LOLHeroFloatingInfoBarData, LOLStructureFloatingInfoBarData, LOLUiElementEffectInstancedData,
@@ -285,6 +285,7 @@ fn update_level_text(
 
         let new_text = level.value.to_string();
         if text_state.text != new_text {
+            info!("更新等级文本: {} -> {}", text_state.text, new_text);
             text_state.text = new_text;
         }
     }

@@ -7,7 +7,8 @@ use bevy::platform::collections::HashMap;
 use bevy::prelude::*;
 use league_property::from_entry;
 use league_property::prop::EntryData;
-use league_utils::{HashKey, type_name_to_hash};
+use league_utils::type_name_to_hash;
+use lol_base::hash_key::HashKey;
 use serde::Serialize;
 use serde::de::DeserializeOwned;
 

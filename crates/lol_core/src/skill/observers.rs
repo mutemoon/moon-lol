@@ -13,6 +13,7 @@ use super::events::{
 use super::{CoolDown, SkillPoints, SkillRecastWindow, Skills};
 use crate::base::ability_resource::AbilityResource;
 use crate::base::level::{EventLevelUp, Level};
+use crate::life::Death;
 use crate::movement::CastBlock;
 use crate::skill::Skill;
 
@@ -25,6 +26,7 @@ pub fn on_skill_cast(
     mut q_skill: Query<(&Skill, &mut CoolDown, Option<&SkillRecastWindow>)>,
     mut q_ability_resource: Query<&mut AbilityResource>,
     mut log: ResMut<SkillCastLog>,
+    q_death: Query<(), With<Death>>,
 ) {
     let entity = trigger.event_target();
     let mut record = SkillCastRecord {
@@ -41,6 +43,13 @@ pub fn on_skill_cast(
         log.push(record);
         return;
     };
+
+    // 检查是否已死亡
+    if q_death.get(entity).is_ok() {
+        record.result = SkillCastResult::Failed(SkillCastFailureReason::CasterDead);
+        log.push(record);
+        return;
+    }
 
     // 检查是否处于施法阻塞状态
     if q_cast_block.get(entity).is_ok() {

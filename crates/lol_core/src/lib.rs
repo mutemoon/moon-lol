@@ -44,10 +44,11 @@ use cooldown::PluginCooldown;
 use damage::PluginDamage;
 use entities::barrack::PluginBarrack;
 use entities::champion::PluginChampion;
-use entities::minion::PluginMinion;
-use entities::turret::PluginTurret;
 use entities::inhibitor::PluginInhibitor;
+use entities::minion::PluginMinion;
 use entities::nexus::PluginNexus;
+use entities::pet::PluginPet;
+use entities::turret::PluginTurret;
 use game::PluginGame;
 use life::PluginLife;
 use lifetime::PluginLifetime;
@@ -89,6 +90,7 @@ plugin_group! {
         :PluginSkillScript,
         :PluginState,
         :PluginTurret,
+        :PluginPet,
         :PluginInhibitor,
         :PluginNexus,
     }

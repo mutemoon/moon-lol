@@ -1,7 +1,6 @@
 pub mod buffs;
 
 use bevy::prelude::{GlobalTransform, *};
-use league_utils::hash_bin;
 use lol_base::animation_names::{ANIM_SPELL1, ANIM_SPELL2, ANIM_SPELL3, ANIM_SPELL4};
 use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
@@ -89,7 +88,6 @@ fn cast_hecarim_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<S
                 amount: "total_damage".to_string(),
                 damage_type: DamageType::Physical,
             }],
-            particle: Some(hash_bin("Hecarim_Q_Hit")),
         }],
     });
     // Q stacks - adds stacking buff for cooldown reduction and bonus damage
@@ -125,7 +123,6 @@ fn cast_hecarim_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<S
                 amount: "total_damage".to_string(),
                 damage_type: DamageType::Physical,
             }],
-            particle: Some(hash_bin("Hecarim_W_Hit")),
         }],
     });
 }

@@ -4,8 +4,10 @@ use bevy::asset::Asset;
 use bevy::math::{Vec2, Vec4};
 use bevy::prelude::{Handle, Resource};
 use bevy::reflect::TypePath;
-pub use league_utils::{HashKey, hash_bin};
 use serde::{Deserialize, Serialize};
+
+use crate::hash::hash_bin;
+use crate::hash_key::HashKey;
 
 #[derive(Serialize, Deserialize, Debug, Clone, Resource, Asset, TypePath)]
 pub struct LOLPlayerFrameViewController {

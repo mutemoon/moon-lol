@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use bevy::window::{PrimaryWindow, WindowResized};
-use lol_base::prop::LoadHashKeyTrait;
+use lol_base::hash_key::LoadHashKeyTrait;
 use lol_base::ui::LOLEnumData;
 use lol_base::ui_components::{UIElement, UIElementChild};
 

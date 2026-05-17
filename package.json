@@ -7,11 +7,13 @@
     "format": "cargo +nightly fmt",
     "hot:patch": "dx serve --hot-patch --features \"bevy/hotpatching\"",
     "release": "cargo run --release --example",
+    "start": "cargo run",
     "test": "cargo run --example test",
-    "wasm": "cargo build --release --example lol --target wasm32-unknown-unknown",
+    "wasm": "cargo build --release --target wasm32-unknown-unknown",
     "wasm:bindgen": "wasm-bindgen --out-name lol --out-dir packages/lol --target web target/wasm32-unknown-unknown/release/examples/lol.wasm",
     "wasm:win": "pnpm wasm && pnpm wasm:bindgen",
-    "watch": "cargo watch -- cargo run --example"
+    "watch": "cargo watch -- cargo run --example",
+    "watch:run": "cargo watch -- cargo run"
   },
   "devDependencies": {
     "@gltf-transform/cli": "^4.3.0",

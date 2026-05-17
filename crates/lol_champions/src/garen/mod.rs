@@ -2,7 +2,6 @@ pub mod q;
 pub mod w;
 
 use bevy::prelude::*;
-use league_utils::hash_bin;
 use lol_base::animation_names::{ANIM_SPELL1, ANIM_SPELL2, ANIM_SPELL3, ANIM_SPELL4};
 use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
@@ -135,7 +134,6 @@ fn cast_garen_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
                 amount: "total_damage".to_string(),
                 damage_type: DamageType::Physical,
             }],
-            particle: Some(hash_bin("Garen_E_Hit")),
         }],
     });
 }
@@ -160,7 +158,6 @@ fn cast_garen_r(commands: &mut Commands, entity: Entity, _point: Vec2, skill_spe
                 amount: "total_damage".to_string(),
                 damage_type: DamageType::Physical,
             }],
-            particle: Some(hash_bin("Garen_R_Hit")),
         }],
     });
 }

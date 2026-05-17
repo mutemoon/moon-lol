@@ -1,7 +1,6 @@
 pub mod buffs;
 
 use bevy::prelude::*;
-use league_utils::hash_bin;
 use lol_base::animation_names::{ANIM_SPELL1, ANIM_SPELL2, ANIM_SPELL3, ANIM_SPELL4};
 use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
@@ -157,7 +156,6 @@ fn cast_irelia_e(
                     amount: "total_damage".to_string(),
                     damage_type: DamageType::Magic,
                 }],
-                particle: Some(hash_bin("Irelia_E_Hit")),
             }],
         });
         commands.entity(skill_entity).remove::<SkillRecastWindow>();
@@ -191,7 +189,6 @@ fn cast_irelia_r(
                 amount: "total_damage".to_string(),
                 damage_type: DamageType::Physical,
             }],
-            particle: Some(hash_bin("Irelia_R_Hit")),
         }],
     });
 }

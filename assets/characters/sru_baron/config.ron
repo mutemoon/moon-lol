@@ -9,7 +9,7 @@
         ),
         "lol_core::skill::Skill": (
           spell: Path("characters/SRU_Baron/spells/BaronSpellCaster.ron"),
-          level: 1,
+          level: 0,
           slot: E,
           cooldown_mode: AfterCast,
         ),
@@ -24,7 +24,7 @@
         ),
         "lol_core::skill::Skill": (
           spell: Path("characters/SRU_Baron/spells/BaronSpike.ron"),
-          level: 1,
+          level: 0,
           slot: W,
           cooldown_mode: AfterCast,
         ),
@@ -39,7 +39,7 @@
         ),
         "lol_core::skill::Skill": (
           spell: Path("characters/SRU_Baron/spells/BaronAttackMelee.ron"),
-          level: 1,
+          level: 0,
           slot: Q,
           cooldown_mode: AfterCast,
         ),
@@ -80,7 +80,7 @@
           experience_radius: 2000.0,
         ),
         "lol_core::character::Character": (),
-        "lol_core::damage::Armor": (8.0),
+        "lol_core::damage::Armor": (34.0),
         "lol_core::damage::Damage": (175.0),
         "lol_core::life::Health": (
           value: 16300.0,

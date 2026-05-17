@@ -9,11 +9,13 @@ pub use init::{
     AnimAssets, ButtonAssets, DesaturateAssets, IconAssets, RegionAssets, SceneAssets,
     startup_load_ui_data,
 };
+use lol_base::hash::hash_bin;
+use lol_base::hash_key::HashKey;
 use lol_base::ui::{
-    HashKey, LOLHeroFloatingInfoBarData, LOLStructureFloatingInfoBarData,
-    LOLUiElementEffectAnimationData, LOLUiElementEffectDesaturateData,
-    LOLUiElementEffectInstancedData, LOLUiElementGroupButtonData, LOLUiElementIconData,
-    LOLUiElementRegionData, LOLUiElementTextData, LOLUiSceneData, LOLUnitFloatingInfoBarData,
+    LOLHeroFloatingInfoBarData, LOLStructureFloatingInfoBarData, LOLUiElementEffectAnimationData,
+    LOLUiElementEffectDesaturateData, LOLUiElementEffectInstancedData, LOLUiElementGroupButtonData,
+    LOLUiElementIconData, LOLUiElementRegionData, LOLUiElementTextData, LOLUiSceneData,
+    LOLUnitFloatingInfoBarData,
 };
 use lol_base::ui_components::UIButton;
 pub use lol_base::ui_components::UIElement;
@@ -85,7 +87,7 @@ pub enum NodeType {
 
 impl UIElementEntity {
     pub fn get_by_string(&self, key: &str) -> Option<&Entity> {
-        self.map.get(&league_utils::hash_bin(key))
+        self.map.get(&hash_bin(key))
     }
 
     pub fn get_entity<T: TypePath>(&self, key: &HashKey<T>) -> Entity {

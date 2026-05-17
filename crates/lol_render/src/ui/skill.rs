@@ -1,5 +1,4 @@
 use bevy::prelude::*;
-// use league_utils::hash_bin;
 use lol_base::spell::Spell;
 use lol_base::ui::LOLEnumData::AtlasData;
 use lol_base::ui::{LOLAtlasData, LOLPlayerFrameViewController, LOLUiElementEffectDesaturateData};
@@ -217,7 +216,9 @@ fn update_skill_cooldown_text(
                 .map(|v| v.remaining_secs())
                 .unwrap_or(0.0);
             if remaining > 0.0 {
-                text_state.text = remaining.ceil().to_string();
+                if text_state.text != remaining.ceil().to_string() {
+                    text_state.text = remaining.ceil().to_string();
+                }
                 if matches!(*visibility, Visibility::Hidden) {
                     *visibility = Visibility::Inherited;
                 }
@@ -225,7 +226,9 @@ fn update_skill_cooldown_text(
                     .entity(disabled_entity)
                     .insert(Visibility::Inherited);
             } else {
-                text_state.text = "".to_string();
+                if text_state.text != "".to_string() {
+                    text_state.text = "".to_string();
+                }
                 if matches!(*visibility, Visibility::Inherited) {
                     *visibility = Visibility::Hidden;
                 }

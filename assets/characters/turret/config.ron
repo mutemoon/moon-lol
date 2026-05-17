@@ -30,7 +30,7 @@
           height: 485.0,
         ),
         "lol_core::character::Character": (),
-        "lol_core::damage::Armor": (0.0),
+        "lol_core::damage::Armor": (60.0),
         "lol_core::damage::Damage": (187.0),
         "lol_core::life::Health": (
           value: 5000.0,

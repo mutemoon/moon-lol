@@ -2,7 +2,6 @@ pub mod buffs;
 
 use bevy::asset::Handle;
 use bevy::prelude::*;
-use league_utils::hash_bin;
 use lol_base::animation_names::{ANIM_SPELL1, ANIM_SPELL2, ANIM_SPELL3, ANIM_SPELL4};
 use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
@@ -78,7 +77,6 @@ fn cast_morgana_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<S
                 amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
             }],
-            particle: Some(hash_bin("Morgana_Q_Hit")),
         }],
     });
 }
@@ -101,7 +99,6 @@ fn cast_morgana_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<S
                 amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
             }],
-            particle: Some(hash_bin("Morgana_W_Hit")),
         }],
     });
 }
@@ -137,7 +134,6 @@ fn cast_morgana_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<S
                 amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
             }],
-            particle: Some(hash_bin("Morgana_R_Hit")),
         }],
     });
 }

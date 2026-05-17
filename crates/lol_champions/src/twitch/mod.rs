@@ -1,7 +1,6 @@
 pub mod buffs;
 
 use bevy::prelude::*;
-use league_utils::hash_bin;
 use lol_base::animation_names::{ANIM_SPELL1, ANIM_SPELL2, ANIM_SPELL3, ANIM_SPELL4};
 use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
@@ -82,7 +81,6 @@ fn cast_twitch_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
                 amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
             }],
-            particle: Some(hash_bin("Twitch_W_Hit")),
         }],
     });
 }
@@ -104,7 +102,6 @@ fn cast_twitch_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
                 amount: "total_damage".to_string(),
                 damage_type: DamageType::Physical,
             }],
-            particle: Some(hash_bin("Twitch_E_Hit")),
         }],
     });
 }

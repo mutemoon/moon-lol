@@ -1,3 +1,4 @@
+use bevy::asset::RecursiveDependencyLoadState;
 use bevy::ecs::entity::EntityHashMap;
 use bevy::prelude::*;
 use bevy::world_serialization::WorldInstanceSpawnError;
@@ -69,17 +70,24 @@ fn try_load_config_characters(
     mut commands: Commands,
     character_record_query: Query<(Entity, &ConfigCharacterRecord)>,
     dynamic_worlds: Res<Assets<DynamicWorld>>,
+    asset_server: Res<AssetServer>,
 ) {
     let char_len = character_record_query.iter().len();
     if char_len == 0 {
         return;
     }
 
-    info!("加载 {} 个角色", char_len);
+    let mut loaded_count = 0;
 
     // 处理 ConfigCharacterRecord - 写入角色数据到世界
     for (entity, config) in &character_record_query {
-        if dynamic_worlds.get(&config.character_record).is_none() {
+        if matches!(
+            asset_server.get_recursive_dependency_load_state(&config.character_record),
+            Some(RecursiveDependencyLoadState::Loaded)
+        ) {
+            // info!("Character config loaded: {:?}", config.character_record);
+        } else {
+            // info!("Character config not loaded: {:?}", config.character_record);
             return;
         }
 
@@ -117,5 +125,19 @@ fn try_load_config_characters(
         });
 
         commands.entity(entity).remove::<ConfigCharacterRecord>();
+
+        loaded_count += 1;
+    }
+
+    if loaded_count > 0 {
+        if char_len - loaded_count > 0 {
+            info!(
+                "加载 {} 个角色，还剩 {} 个角色",
+                loaded_count,
+                char_len - loaded_count
+            );
+        } else {
+            debug!("加载 {} 个角色", loaded_count);
+        }
     }
 }

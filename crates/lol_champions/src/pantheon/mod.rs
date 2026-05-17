@@ -1,7 +1,6 @@
 pub mod buffs;
 
 use bevy::prelude::{Handle, *};
-use league_utils::hash_bin;
 use lol_base::animation_names::{ANIM_SPELL1, ANIM_SPELL2, ANIM_SPELL3, ANIM_SPELL4};
 use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
@@ -97,7 +96,6 @@ fn cast_pantheon_q(
                 amount: "total_damage".to_string(),
                 damage_type: DamageType::Physical,
             }],
-            particle: Some(hash_bin("Pantheon_Q_Hit")),
         }],
     });
 }
@@ -154,7 +152,6 @@ fn cast_pantheon_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<
                 amount: "total_damage".to_string(),
                 damage_type: DamageType::Physical,
             }],
-            particle: Some(hash_bin("Pantheon_E_Hit")),
         }],
     });
     commands

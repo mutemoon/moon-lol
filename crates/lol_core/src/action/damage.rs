@@ -49,7 +49,6 @@ pub struct TargetDamage {
 pub struct ActionDamageEffect {
     pub shape: DamageShape,
     pub damage_list: Vec<TargetDamage>,
-    pub particle: Option<u32>,
 }
 
 #[derive(Debug, Clone, EntityEvent)]

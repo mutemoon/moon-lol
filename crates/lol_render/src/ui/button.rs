@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use lol_base::prop::LoadHashKeyTrait;
+use lol_base::hash_key::LoadHashKeyTrait;
 use lol_base::ui::{LOLUiElementGroupButtonData, LOLUiElementGroupButtonState};
 use lol_base::ui_components::{UIButton, UIButtonEntities, UIElement};
 

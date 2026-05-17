@@ -34,7 +34,7 @@
           experience_radius: -1.0,
         ),
         "lol_core::character::Character": (),
-        "lol_core::damage::Armor": (0.0),
+        "lol_core::damage::Armor": (42.0),
         "lol_core::damage::Damage": (70.0),
         "lol_core::life::Health": (
           value: 2050.0,

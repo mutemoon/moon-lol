@@ -70,7 +70,6 @@ pub fn cast_darius_q(
             amount: "blade_damage".to_string(),
             damage_type: DamageType::Physical,
         }],
-        particle: Some(league_utils::hash_bin("Darius_Q_Inner_Hit")),
     };
 
     // Outer blade damage (Annular ring from inner_radius to outer_radius)
@@ -85,7 +84,6 @@ pub fn cast_darius_q(
             amount: "blade_damage".to_string(),
             damage_type: DamageType::Physical,
         }],
-        particle: Some(league_utils::hash_bin("Darius_Q_Outer_Hit")),
     };
 
     // Trigger the dual-shape damage

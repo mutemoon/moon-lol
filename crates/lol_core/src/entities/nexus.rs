@@ -3,7 +3,7 @@ use bevy::prelude::*;
 #[derive(Default)]
 pub struct PluginNexus;
 impl Plugin for PluginNexus {
-    fn build(&self, app: &mut App) {}
+    fn build(&self, _app: &mut App) {}
 }
 
 #[derive(Component, Reflect, Default)]

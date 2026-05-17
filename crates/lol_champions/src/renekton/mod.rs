@@ -1,7 +1,6 @@
 pub mod buffs;
 
 use bevy::prelude::*;
-use league_utils::hash_bin;
 use lol_base::animation_names::{ANIM_SPELL1, ANIM_SPELL2, ANIM_SPELL3, ANIM_SPELL4};
 use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
@@ -107,7 +106,6 @@ fn cast_renekton_q(
                     amount: "total_damage".to_string(),
                     damage_type: DamageType::Physical,
                 }],
-                particle: Some(hash_bin("Renekton_Q_Hit")),
             }],
         });
         commands
@@ -124,7 +122,6 @@ fn cast_renekton_q(
                     amount: "total_damage".to_string(),
                     damage_type: DamageType::Physical,
                 }],
-                particle: Some(hash_bin("Renekton_Q_Hit")),
             }],
         });
         commands
@@ -154,7 +151,6 @@ fn cast_renekton_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<
                 amount: "total_damage".to_string(),
                 damage_type: DamageType::Physical,
             }],
-            particle: Some(hash_bin("Renekton_W_Hit")),
         }],
     });
 }
@@ -243,7 +239,6 @@ fn cast_renekton_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<
                 amount: "total_damage".to_string(),
                 damage_type: DamageType::Physical,
             }],
-            particle: Some(hash_bin("Renekton_R_Hit")),
         }],
     });
     commands

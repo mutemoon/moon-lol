@@ -6,7 +6,7 @@ use bevy::asset::{Asset, AssetId, Assets, Handle, UntypedHandle};
 use bevy::reflect::TypePath;
 use serde::{Deserialize, Serialize};
 
-use crate::hash_bin;
+use crate::hash::hash_bin;
 
 pub struct HashKey<T: TypePath>(pub (u32, PhantomData<T>));
 

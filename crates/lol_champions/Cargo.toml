@@ -6,9 +6,6 @@ edition = "2024"
 [dependencies]
 bevy.workspace = true
 serde.workspace = true
-league_utils.workspace = true
-league_core.workspace = true
-league_file.workspace = true
 lol_base.workspace = true
 lol_core.workspace = true
 rand.workspace = true

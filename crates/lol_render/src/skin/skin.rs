@@ -1,4 +1,5 @@
 use bevy::animation::graph::AnimationGraphHandle;
+use bevy::asset::RecursiveDependencyLoadState;
 use bevy::ecs::entity::EntityHashMap;
 use bevy::prelude::*;
 use bevy::world_serialization::{WorldInstanceReady, WorldInstanceSpawnError};
@@ -15,17 +16,24 @@ pub fn try_load_config_skin_characters(
     mut commands: Commands,
     skin_query: Query<(Entity, &ConfigSkin)>,
     dynamic_worlds: Res<Assets<DynamicWorld>>,
+    asset_server: Res<AssetServer>,
 ) {
     let skin_len = skin_query.iter().len();
     if skin_len == 0 {
         return;
     }
 
-    info!("加载 {} 个皮肤", skin_len);
+    let mut loaded_count = 0;
 
     // 处理 ConfigSkin - 写入皮肤数据到世界
     for (entity, config) in &skin_query {
-        if dynamic_worlds.get(&config.skin).is_none() {
+        if matches!(
+            asset_server.get_recursive_dependency_load_state(&config.skin),
+            Some(RecursiveDependencyLoadState::Loaded)
+        ) {
+            // info!("Character config loaded: {:?}", config.character_record);
+        } else {
+            // info!("Character config not loaded: {:?}", config.character_record);
             return;
         }
 
@@ -47,6 +55,20 @@ pub fn try_load_config_skin_characters(
             .entity(entity)
             .remove::<ConfigSkin>()
             .observe(migrate_animation_graph_handle);
+
+        loaded_count += 1;
+    }
+
+    if loaded_count > 0 {
+        if skin_len - loaded_count > 0 {
+            info!(
+                "加载 {} 个皮肤，还剩 {} 个皮肤",
+                loaded_count,
+                skin_len - loaded_count
+            );
+        } else {
+            debug!("加载 {} 个皮肤", loaded_count);
+        }
     }
 }
 
@@ -60,13 +82,13 @@ pub struct SkinReady;
 
 pub fn migrate_animation_graph_handle(
     trigger: On<WorldInstanceReady>,
-    mut q_character: Query<(&AnimationGraphHandle, &mut LOLAnimationState)>,
+    q_character: Query<&AnimationGraphHandle>,
     q_children: Query<&Children>,
     q_bone: Query<&AnimationPlayer>,
     mut commands: Commands,
 ) {
     let root_entity = trigger.event_target();
-    let (graph_handle, mut state) = q_character.get_mut(root_entity).unwrap();
+    let graph_handle = q_character.get(root_entity).unwrap();
     for descendant in q_children.iter_descendants(root_entity) {
         if q_bone.contains(descendant) {
             debug!(
@@ -80,7 +102,6 @@ pub fn migrate_animation_graph_handle(
                 .insert(graph_handle.clone())
                 .insert(BoneRoot)
                 .insert(AnimationConfigOf(root_entity));
-            state.current = state.current.clone();
             commands.entity(root_entity).insert(SkinReady);
         }
     }

@@ -9,7 +9,7 @@
         ),
         "lol_core::skill::Skill": (
           spell: Path("characters/SRU_Dragon/spells/DragonFireball2.ron"),
-          level: 1,
+          level: 0,
           slot: R,
           cooldown_mode: AfterCast,
         ),
@@ -24,7 +24,7 @@
         ),
         "lol_core::skill::Skill": (
           spell: Path("characters/SRU_Dragon/spells/DragonFireball.ron"),
-          level: 1,
+          level: 0,
           slot: E,
           cooldown_mode: AfterCast,
         ),
@@ -39,7 +39,7 @@
         ),
         "lol_core::skill::Skill": (
           spell: Path("characters/SRU_Dragon/spells/SRUDragonBasicAttack.ron"),
-          level: 1,
+          level: 0,
           slot: W,
           cooldown_mode: AfterCast,
         ),
@@ -54,7 +54,7 @@
         ),
         "lol_core::skill::Skill": (
           spell: Path("characters/SRU_Dragon/spells/DragonTakeoff.ron"),
-          level: 1,
+          level: 0,
           slot: Q,
           cooldown_mode: AfterCast,
         ),
@@ -95,7 +95,7 @@
           experience_radius: 2000.0,
         ),
         "lol_core::character::Character": (),
-        "lol_core::damage::Armor": (8.0),
+        "lol_core::damage::Armor": (34.0),
         "lol_core::damage::Damage": (100.0),
         "lol_core::life::Health": (
           value: 3625.0,

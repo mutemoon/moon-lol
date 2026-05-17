@@ -7,7 +7,7 @@ use std::time::Duration;
 
 use bevy::prelude::*;
 use bevy::time::TimeUpdateStrategy;
-use league_utils::hash_key::HashKey;
+use lol_base::hash_key::HashKey;
 use lol_base::spell::{DataSpell, Spell, ValuesEffect};
 use lol_base::spell_calc::{CalculationPartEffectValue, CalculationSpell, CalculationType};
 
@@ -84,7 +84,6 @@ fn on_action_damage_skill_cast(
                 amount: DAMAGE_AMOUNT_KEY.to_string(),
                 damage_type: DamageType::Physical,
             }],
-            particle: None,
         }],
     });
 }
@@ -427,4 +426,36 @@ fn test_named_data_value_calculation() {
 
     let result = get_skill_value(&spell, &key, 1, |_| 0.0);
     assert_eq!(result, Some(expected_value));
+}
+
+#[test]
+fn test_dead_caster_cannot_start_skill() {
+    use crate::life::Death;
+    use crate::skill::CommandSkillStart;
+    use crate::skill::SkillCastFailureReason;
+
+    let mut harness = ActionSkillHarness::new();
+    harness.register_spell(10.0, 0.0).add_skill(
+        Skill::new(SkillSlot::Q, spell_handle(SPELL_KEY)).with_level(1),
+        (),
+    );
+
+    // 1. 模拟 caster 死亡
+    harness.app.world_mut().entity_mut(harness.caster).insert(Death);
+
+    // 2. 尝试施放技能
+    harness.app.world_mut().trigger(CommandSkillStart {
+        entity: harness.caster,
+        index: 0,
+        point: Vec2::ZERO,
+    });
+    harness.app.update();
+
+    // 3. 验证失败原因
+    let log = harness.app.world().resource::<SkillCastLog>();
+    let last_record = log.0.last().unwrap();
+    assert!(matches!(
+        last_record.result,
+        SkillCastResult::Failed(SkillCastFailureReason::CasterDead)
+    ));
 }
