@@ -86,6 +86,10 @@ export function useWsClient(url: string) {
     paused: false,
   });
 
+  const agentObserve = ref<any>(null);
+  const agentThinking = ref<string>("");
+  const agentAction = ref<string>("");
+
   let ws: WebSocket | null = null;
   let nextId = 1;
   const pending = new Map<number, (res: WsResponse) => void>();
@@ -220,6 +224,11 @@ export function useWsClient(url: string) {
           event.data.msg as string
         );
         break;
+      case "agent_update":
+        agentObserve.value = event.data.observe;
+        agentThinking.value = event.data.thinking as string;
+        agentAction.value = event.data.action as string;
+        break;
     }
   }
 
@@ -252,5 +261,17 @@ export function useWsClient(url: string) {
     }
   }
 
-  return { connected, connecting, connectTimeout, logs, gameState, connect, disconnect, send };
+  return {
+    connected,
+    connecting,
+    connectTimeout,
+    logs,
+    gameState,
+    agentObserve,
+    agentThinking,
+    agentAction,
+    connect,
+    disconnect,
+    send,
+  };
 }

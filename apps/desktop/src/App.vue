@@ -152,6 +152,9 @@ function stopGame() {
           :connected="ws.connected.value"
           :game-state="ws.gameState.value"
           :logs="ws.logs.value"
+          :agent-observe="ws.agentObserve.value"
+          :agent-thinking="ws.agentThinking.value"
+          :agent-action="ws.agentAction.value"
           @send="(cmd, params) => ws.send(cmd, params)"
           @stop="stopGame"
         />

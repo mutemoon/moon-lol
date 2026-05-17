@@ -75,6 +75,7 @@ defineEmits<{
               @change="$emit('update:mode', ($event.target as HTMLSelectElement).value)"
             >
               <option value="sandbox">Sandbox</option>
+              <option value="agent">AI Agent</option>
             </select>
           </div>
         </div>

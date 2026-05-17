@@ -83,13 +83,13 @@ fn start_dev(
     config: &GameConfig,
 ) -> Result<Child, String> {
     println!(
-        "[tauri] Dev: cargo run --example lol -- --ws-port {} --mode {} --champion {}",
+        "[tauri] Dev: cargo run -- --ws-port {} --mode {} --champion {}",
         port, config.mode, config.champion
     );
 
     Command::new("cargo")
         .current_dir(root)
-        .args(["run", "--example", "lol", "--"])
+        .args(["run", "--"])
         .arg("--ws-port")
         .arg(port.to_string())
         .arg("--mode")

@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+use bevy::ecs::archetype;
 use bevy::prelude::*;
 use league_core::extract::{AbilityResourceSlotInfo, CharacterRecord, SpellObject};
 use league_loader::game::{Data, LeagueLoader, PropGroup};
@@ -8,7 +9,8 @@ use lol_base::spell::Spell;
 use lol_core::attack::{Attack, WindupConfig};
 use lol_core::base::ability_resource::{AbilityResource, AbilityResourceType};
 use lol_core::base::bounding::Bounding;
-use lol_core::base::level::ExperienceDrop;
+use lol_core::base::gold::{Gold, GoldDrop};
+use lol_core::base::level::{ExperienceDrop, Level};
 use lol_core::character::Character;
 use lol_core::damage::{Armor, Damage};
 use lol_core::entities::champion::Champion;
@@ -55,6 +57,7 @@ pub fn create_champion_components_from_record(
     Armor,
     Movement,
     Option<ExperienceDrop>,
+    Option<GoldDrop>,
     Option<AbilityResource>,
 ) {
     // Attack
@@ -148,6 +151,17 @@ pub fn create_champion_components_from_record(
             None
         };
 
+    // 金币掉落
+    let gold_drop =
+        if let (Some(gold), Some(radius)) = (record.gold_given_on_death, record.gold_radius) {
+            Some(GoldDrop {
+                gold_given_on_death: gold,
+                gold_radius: radius,
+            })
+        } else {
+            None
+        };
+
     // 资源数据（蓝条/能量条等）
     let ability_resource = create_ability_resource_from_record(&record.primary_ability_resource);
 
@@ -158,6 +172,7 @@ pub fn create_champion_components_from_record(
         armor,
         movement,
         experience_drop,
+        gold_drop,
         ability_resource,
     )
 }
@@ -246,12 +261,15 @@ pub fn extract_character_from_record(
         height: record.health_bar_height.unwrap_or(200.0),
     };
 
-    let (attack, health, damage, armor, movement, experience_drop, ability_resource) =
+    let (attack, health, damage, armor, movement, experience_drop, gold_drop, ability_resource) =
         create_champion_components_from_record(&record);
 
     let basic_attack_name = format!("{}BasicAttack", character_name);
     let attack = if all_spell_names.contains(&basic_attack_name) {
-        let basic_attack_spell_path = format!("characters/{}/spells/{}.ron", character_name, basic_attack_name);
+        let basic_attack_spell_path = format!(
+            "characters/{}/spells/{}.ron",
+            character_name, basic_attack_name
+        );
         let basic_attack_spell: Handle<Spell> = asset_server.load(&basic_attack_spell_path);
         attack.map(|a| a.with_missile(basic_attack_spell))
     } else {
@@ -298,6 +316,10 @@ pub fn extract_character_from_record(
         world.entity_mut(champion_entity).insert(exp_drop);
     }
 
+    if let Some(gold_drop) = gold_drop {
+        world.entity_mut(champion_entity).insert(gold_drop);
+    }
+
     if let Some(ar) = ability_resource {
         world.entity_mut(champion_entity).insert(ar);
     }
@@ -326,9 +348,26 @@ pub fn extract_character_from_record(
             ));
     }
 
-    let scene = DynamicWorld::from_world(world);
-    let type_registry = app.world().resource::<AppTypeRegistry>();
+    let type_registry = world.resource::<AppTypeRegistry>().clone();
     let type_registry = type_registry.read();
+
+    let scene = DynamicWorldBuilder::from_world(world, &type_registry)
+        .deny_component::<GlobalTransform>()
+        .deny_component::<TransformTreeChanged>()
+        .deny_component::<Gold>()
+        .deny_component::<Level>()
+        .extract_entities(
+            // we do this instead of a query, in order to completely sidestep default query filters.
+            // while we could use `Allow<_>`, this wouldn't account for custom disabled components
+            world
+                .archetypes()
+                .iter()
+                .flat_map(archetype::Archetype::entities)
+                .map(archetype::ArchetypeEntity::id),
+        )
+        .extract_resources()
+        .build();
+
     let serialized_scene = scene.serialize(&type_registry).unwrap();
 
     let output_path = format!("characters/{}/config.ron", character_name);

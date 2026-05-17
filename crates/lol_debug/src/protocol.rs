@@ -109,6 +109,18 @@ impl WsEvent {
             data: serde_json::json!({"level": level, "msg": msg}),
         }
     }
+
+    pub fn agent_update(observe: serde_json::Value, thinking: String, action: String) -> Self {
+        Self {
+            msg_type: "event",
+            event: "agent_update",
+            data: serde_json::json!({
+                "observe": observe,
+                "thinking": thinking,
+                "action": action,
+            }),
+        }
+    }
 }
 
 impl WsResponse {

@@ -6,11 +6,14 @@ pub mod level;
 pub mod pipeline;
 pub mod position;
 pub mod state;
+pub mod gold;
 use bevy::app::{App, Plugin};
 
 #[derive(Default)]
 pub struct PluginBase;
 
 impl Plugin for PluginBase {
-    fn build(&self, _app: &mut App) {}
+    fn build(&self, app: &mut App) {
+        app.add_plugins(gold::PluginGold);
+    }
 }

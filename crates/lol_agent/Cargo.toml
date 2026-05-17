@@ -1,0 +1,16 @@
+[package]
+name = "lol_agent"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+bevy.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+rand.workspace = true
+tokio.workspace = true
+lol_base.workspace = true
+lol_core.workspace = true
+lol_render.workspace = true
+lol_champions.workspace = true
+rig = "0.37.0"

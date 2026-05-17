@@ -14,6 +14,8 @@ use league_loader::prop_bin::LeagueWadLoaderTrait;
 use league_property::extract::get_hashes;
 use lol_base::character::{ConfigCharacterRecord, ConfigSkin};
 use lol_base::map::MapPaths;
+use lol_core::base::gold::Gold;
+use lol_core::base::level::Level;
 use lol_core::entities::barrack::BarrackConfigHandler;
 use lol_core::entities::inhibitor::Inhibitor;
 use lol_core::entities::nexus::Nexus;

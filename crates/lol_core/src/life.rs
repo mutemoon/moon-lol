@@ -35,6 +35,7 @@ pub struct Health {
 #[derive(EntityEvent, Debug)]
 pub struct EventDead {
     pub entity: Entity,
+    pub killer: Option<Entity>,
 }
 
 #[derive(EntityEvent, Debug)]
@@ -74,7 +75,10 @@ fn on_event_damage_create(
 
     if health.value <= 0.0 {
         debug!("{:?} 死了", entity);
-        commands.trigger(EventDead { entity });
+        commands.trigger(EventDead {
+            entity,
+            killer: Some(trigger.source),
+        });
 
         if q_champion.get(entity).is_ok() {
             commands.entity(entity).insert(Death);

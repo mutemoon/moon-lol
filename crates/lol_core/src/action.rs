@@ -87,3 +87,11 @@ fn on_command_action(trigger: On<CommandAction>, mut commands: Commands) {
         }
     }
 }
+
+#[derive(Event, Clone)]
+pub struct EventAgentDecision {
+    pub observe: serde_json::Value,
+    pub thinking: String,
+    pub action: String,
+}
+

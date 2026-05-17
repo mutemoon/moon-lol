@@ -21,6 +21,7 @@ lol_core = { path = "crates/lol_core" }
 lol_debug = { path = "crates/lol_debug" }
 lol_render = { path = "crates/lol_render" }
 lol_champions = { path = "crates/lol_champions" }
+lol_agent = { path = "crates/lol_agent" }
 gltf = "1.4.1"
 serde_json = "1.0"
 
@@ -72,6 +73,7 @@ lol_core.workspace = true
 lol_debug.workspace = true
 lol_render.workspace = true
 lol_champions.workspace = true
+lol_agent.workspace = true
 clap.workspace = true
 serde.workspace = true
 rand.workspace = true
@@ -92,8 +94,10 @@ league_utils.workspace = true
 rayon.workspace = true
 ron.workspace = true
 serde_json.workspace = true
+lol_agent.workspace = true
 
 walkdir = "2.5.0"
+rig = "0.37.0"
 
 [target.'cfg(not(target_arch = "wasm32"))'.dev-dependencies]
 rocket = { version = "*", features = ["json"] }

@@ -362,8 +362,8 @@ mod tests {
         }
 
         // 2. 触发目标死亡事件 (在目标实体上触发)
-        // 注意：根据 on_target_dead 实现，EventDead 需触发在死亡实体上
-        world.trigger(EventDead { entity: enemy });
+        // 注意：根据 on_target_dead implementation，EventDead 需触发在死亡实体上
+        world.trigger(EventDead { entity: enemy, killer: None });
 
         app.update();
 

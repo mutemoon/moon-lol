@@ -104,11 +104,6 @@
           radius: 50.0,
           height: 120.0,
         ),
-        "lol_core::base::level::Level": (
-          value: 1,
-          experience: 0,
-          experience_to_next_level: 280,
-        ),
         "lol_core::character::Character": (),
         "lol_core::damage::Armor": (32.0),
         "lol_core::damage::Damage": (61.0),
