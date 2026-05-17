@@ -5,7 +5,7 @@ use bevy::world_serialization::WorldInstanceSpawnError;
 use lol_base::character::ConfigCharacterRecord;
 
 use crate::base::level::{EventLevelUp, ExperienceDrop, Level};
-use crate::life::EventDead;
+use crate::life::{Death, EventDead};
 use crate::team::Team;
 
 #[derive(Default)]
@@ -29,7 +29,7 @@ pub struct CharacterReady;
 fn on_event_dead(
     event: On<EventDead>,
     query: Query<(Entity, &GlobalTransform, &ExperienceDrop, &Team)>,
-    mut level_query: Query<(Entity, &GlobalTransform, &Team, &mut Level)>,
+    mut level_query: Query<(Entity, &GlobalTransform, &Team, &mut Level, Option<&Death>)>,
     mut commands: Commands,
 ) {
     let entity = event.event_target();
@@ -43,7 +43,11 @@ fn on_event_dead(
     }
 
     let position = transform.translation();
-    for (target_entity, target_transform, target_team, mut level) in level_query.iter_mut() {
+    for (target_entity, target_transform, target_team, mut level, death) in level_query.iter_mut() {
+        if death.is_some() {
+            continue;
+        }
+
         if target_team != team {
             continue;
         }

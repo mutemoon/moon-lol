@@ -20,9 +20,22 @@ pub struct LOLPlayerFrameViewController {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct LOLSpellPipsUiData {
+    pub empty_pips: Vec<HashKey<LOLUiElementIconData>>,
+    pub full_pips: Vec<HashKey<LOLUiElementIconData>>,
+    pub pip_target_rect: HashKey<LOLUiElementRegionData>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct LOLSpellRankPipsUiData {
+    pub rank_pips: Vec<LOLSpellPipsUiData>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct LOLAbilitiesUiData {
     pub champion_spells: Vec<LOLSpellSlotDetailedUiDefinition>,
     pub passive: LOLSpellSlotDetailedUiDefinition,
+    pub spell_rank_pips: LOLSpellRankPipsUiData,
     pub summoner_spells: Vec<LOLSpellSlotDetailedUiDefinition>,
 }
 

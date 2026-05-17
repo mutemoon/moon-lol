@@ -6,6 +6,7 @@ use league_core::extract::{
     HealthBarData, HealthBarExtraBarsData, HealthBarFadeData, HealthBarTextData,
     HeroFloatingInfoBarData, HeroFloatingInfoBorderData, HudPlayerResourceBars,
     PlayerFrameViewController, PlayerPortraitUiData, SpellLevelUpUiData,
+    SpellPipsUiData, SpellRankPipsUiData,
     SpellSlotDetailedUiDefinition, StructureFloatingInfoBarData, UiElementEffectAnimationData,
     UiElementEffectDesaturateData, UiElementEffectInstancedData, UiElementGroupButtonData,
     UiElementIconData, UiElementRegionData, UiElementTextData, UiLevelUp, UiPositionRect,
@@ -21,6 +22,7 @@ use lol_base::ui::{
     LOLLooseUiTextureData, LOLLooseUiTextureData3SliceH, LOLLooseUiTextureData3SliceV,
     LOLLooseUiTextureData9Slice, LOLPlayerFrameViewController, LOLPlayerPortraitUiData,
     LOLSpellLevelUpUiData, LOLSpellSlotBuffTimerData, LOLSpellSlotDetailedUiDefinition,
+    LOLSpellPipsUiData, LOLSpellRankPipsUiData,
     LOLStatPageCategoryData, LOLStatPageViewController, LOLStructureFloatingInfoBarData,
     LOLUiElementEffectAnimationData, LOLUiElementEffectDesaturateData,
     LOLUiElementEffectInstancedData, LOLUiElementIconData, LOLUiElementTextData, LOLUiFile,
@@ -719,11 +721,30 @@ fn convert_abilities_ui_data(data: &AbilitiesUiData) -> LOLAbilitiesUiData {
             .map(convert_spell_slot_detailed_ui_definition)
             .collect(),
         passive: convert_spell_slot_detailed_ui_definition(&data.passive),
+        spell_rank_pips: convert_spell_rank_pips_ui_data(&data.spell_rank_pips),
         summoner_spells: data
             .summoner_spells
             .iter()
             .map(convert_spell_slot_detailed_ui_definition)
             .collect(),
+    }
+}
+
+fn convert_spell_rank_pips_ui_data(data: &SpellRankPipsUiData) -> LOLSpellRankPipsUiData {
+    LOLSpellRankPipsUiData {
+        rank_pips: data
+            .rank_pips
+            .iter()
+            .map(convert_spell_pips_ui_data)
+            .collect(),
+    }
+}
+
+fn convert_spell_pips_ui_data(data: &SpellPipsUiData) -> LOLSpellPipsUiData {
+    LOLSpellPipsUiData {
+        empty_pips: data.empty_pips.iter().map(|&h| h.into()).collect(),
+        full_pips: data.full_pips.iter().map(|&h| h.into()).collect(),
+        pip_target_rect: data.pip_target_rect.into(),
     }
 }
 

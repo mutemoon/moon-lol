@@ -1,14 +1,17 @@
 use bevy::prelude::*;
 use lol_base::spell::Spell;
 use lol_base::ui::LOLEnumData::AtlasData;
-use lol_base::ui::{LOLAtlasData, LOLPlayerFrameViewController, LOLUiElementEffectDesaturateData};
+use lol_base::ui::{
+    LOLAtlasData, LOLPlayerFrameViewController, LOLSpellSlotDetailedUiDefinition,
+    LOLUiElementEffectDesaturateData, LOLUiElementIconData,
+};
 use lol_core::base::level::Level;
 use lol_core::character::CharacterReady;
 use lol_core::skill::{CommandSkillLevelUp, CoolDown, PassiveSkill, Skill, SkillPoints, Skills};
 
 use crate::controller::Controller;
 use crate::ui::button::update_button;
-use crate::ui::element::{UIElementEntity, UIState};
+use crate::ui::element::{UIElement, UIElementEntity, UIState};
 use crate::ui::text::UiTextState;
 
 #[derive(Default)]
@@ -20,20 +23,16 @@ impl Plugin for PluginUISkill {
         app.add_systems(
             Update,
             (
-                update_skill_level_up_button.after(update_button).run_if(
+                update_skill_level_up_buttons.after(update_button).run_if(
                     in_state(UIState::Loaded)
                         .and_then(any_match_filter::<(With<Controller>, With<CharacterReady>)>),
                 ),
-                (
-                    update_player_passive_skill_icon,
-                    update_player_active_skill_icon,
-                )
-                    .run_if(
-                        in_state(UIState::Loaded)
-                            .and_then(any_match_filter::<(With<Controller>, With<CharacterReady>)>)
-                            .and_then(run_once),
-                    ),
-                update_skill_cooldown_text.run_if(
+                (update_passive_skill_icon, update_active_skill_icons).run_if(
+                    in_state(UIState::Loaded)
+                        .and_then(any_match_filter::<(With<Controller>, With<CharacterReady>)>)
+                        .and_then(run_once),
+                ),
+                update_skill_cooldown.run_if(
                     in_state(UIState::Loaded)
                         .and_then(any_match_filter::<(With<Controller>, With<CharacterReady>)>),
                 ),
@@ -47,7 +46,7 @@ struct SkillLevelUpButton {
     pub entities: [Option<Entity>; 4],
 }
 
-fn update_player_passive_skill_icon(
+fn update_passive_skill_icon(
     mut commands: Commands,
     q_skill: Query<&Skill>,
     q_passive_skill: Query<&PassiveSkill, With<Controller>>,
@@ -110,7 +109,7 @@ fn update_player_passive_skill_icon(
         .insert(Visibility::Inherited);
 }
 
-fn update_player_active_skill_icon(
+fn update_active_skill_icons(
     mut commands: Commands,
     q_skill: Query<&Skill>,
     q_skills: Query<&Skills, With<Controller>>,
@@ -182,59 +181,247 @@ fn update_player_active_skill_icon(
     }
 }
 
-fn update_skill_cooldown_text(
+fn update_single_skill_cooldown(
+    commands: &mut Commands,
+    skill: &Skill,
+    cooldown: Option<&CoolDown>,
+    slot_def: &LOLSpellSlotDetailedUiDefinition,
+    res_ui_element_entity: &UIElementEntity,
+    q_ui_text_state: &mut Query<(&mut UiTextState, &mut Visibility)>,
+) {
+    let disabled_entity = res_ui_element_entity.get_entity(&slot_def.overlay_disabled.unwrap());
+    let ui_entity = res_ui_element_entity.get_entity(&slot_def.cooldown);
+    let border_enabled_entity = res_ui_element_entity.get_entity(&slot_def.border_enabled);
+    let border_disabled_entity = res_ui_element_entity.get_entity(&slot_def.border_disabled);
+
+    let Ok((mut text_state, mut visibility)) = q_ui_text_state.get_mut(ui_entity) else {
+        return;
+    };
+
+    if skill.level == 0 {
+        if text_state.text != "" {
+            text_state.text = "".to_string();
+        }
+        if matches!(*visibility, Visibility::Inherited) {
+            *visibility = Visibility::Hidden;
+        }
+        commands
+            .entity(disabled_entity)
+            .insert(Visibility::Inherited);
+        commands
+            .entity(border_disabled_entity)
+            .insert(Visibility::Inherited);
+        commands
+            .entity(border_enabled_entity)
+            .insert(Visibility::Hidden);
+        return;
+    }
+
+    let remaining = cooldown
+        .and_then(|c| c.timer.as_ref())
+        .map(|v| v.remaining_secs())
+        .unwrap_or(0.0);
+
+    if remaining > 0.0 {
+        let text_val = remaining.ceil().to_string();
+        if text_state.text != text_val {
+            text_state.text = text_val;
+        }
+        if matches!(*visibility, Visibility::Hidden) {
+            *visibility = Visibility::Inherited;
+        }
+        commands
+            .entity(disabled_entity)
+            .insert(Visibility::Inherited);
+        commands
+            .entity(border_disabled_entity)
+            .insert(Visibility::Inherited);
+        commands
+            .entity(border_enabled_entity)
+            .insert(Visibility::Hidden);
+    } else {
+        if text_state.text != "" {
+            text_state.text = "".to_string();
+        }
+        if matches!(*visibility, Visibility::Inherited) {
+            *visibility = Visibility::Hidden;
+        }
+        commands.entity(disabled_entity).insert(Visibility::Hidden);
+        commands
+            .entity(border_enabled_entity)
+            .insert(Visibility::Inherited);
+        commands
+            .entity(border_disabled_entity)
+            .insert(Visibility::Hidden);
+    }
+}
+
+fn update_single_skill_rank_pips(
+    commands: &mut Commands,
+    index: usize,
+    skill: &Skill,
+    res_player_frame_vc: &LOLPlayerFrameViewController,
+    res_ui_element_entity: &UIElementEntity,
+    q_ui_element: &Query<&UIElement>,
+    icon_assets: &mut Assets<LOLUiElementIconData>,
+) {
+    let pips_list = &res_player_frame_vc
+        .abilities_ui_data
+        .spell_rank_pips
+        .rank_pips;
+    let Some(pip_def) = pips_list.get(index) else {
+        debug!("【技能等级点】未能在 abilities_ui_data.spell_rank_pips.rank_pips 中找到索引 {} 的定义", index);
+        return;
+    };
+
+    let max_level = match index {
+        3 => 3,
+        _ => 5,
+    };
+
+    debug!(
+        "【技能等级点】开始处理技能索引: {}, 当前技能等级: {}, 最大规格: {}, empty_pips数量: {}, full_pips数量: {}",
+        index, skill.level, max_level, pip_def.empty_pips.len(), pip_def.full_pips.len()
+    );
+
+    for i in 0..pip_def.empty_pips.len() {
+        let empty_key = pip_def.empty_pips[i].0.0;
+        let full_key = pip_def.full_pips[i].0.0;
+        let empty_entity = res_ui_element_entity.map.get(&empty_key).copied();
+        let full_entity = res_ui_element_entity.map.get(&full_key).copied();
+
+        if empty_entity.is_none() || full_entity.is_none() {
+            debug!(
+                "【技能等级点警告】索引 {}, 槽位 {} 实体未找到: empty_key: {} (存在: {}), full_key: {} (存在: {})",
+                index, i, empty_key, empty_entity.is_some(), full_key, full_entity.is_some()
+            );
+            continue;
+        }
+
+        let empty_entity = empty_entity.unwrap();
+        let full_entity = full_entity.unwrap();
+
+        // 动态计算每个技能等级点在各自技能槽位下的正确水平分布坐标
+        let base_x = 545.0 + index as f32 * 74.0;
+        let base_y = 1124.0;
+        let pip_x = if max_level == 5 {
+            base_x + 1.5 + i as f32 * 13.0
+        } else {
+            base_x + 9.5 + i as f32 * 18.0
+        };
+        let pip_y = base_y;
+
+        let new_pos = lol_base::ui::LOLEnumUiPosition::UiPositionRect(lol_base::ui::LOLUiPositionRect {
+            anchors: Some(lol_base::ui::LOLEnumAnchor::AnchorSingle(lol_base::ui::LOLAnchorSingle {
+                anchor: Vec2::new(0.5, 1.0),
+            })),
+            ui_rect: Some(lol_base::ui::LOLUiElementRect {
+                position: Some(Vec2::new(pip_x, pip_y)),
+                size: Some(Vec2::new(9.0, 9.0)),
+                source_resolution_height: Some(1200),
+                source_resolution_width: Some(1600),
+            }),
+            disable_pixel_snapping_x: Some(true),
+            disable_pixel_snapping_y: Some(true),
+            disable_resolution_downscale: None,
+            ignore_global_scale: None,
+            ignore_safe_zone: None,
+        });
+
+        // 仅在坐标真正发生变化时才修改 icon_assets 以触发重新布局计算，并且极为安全高效
+        if let Ok(UIElement::Icon(empty_handle)) = q_ui_element.get(empty_entity) {
+            if let Some(mut empty_data) = icon_assets.get_mut(*empty_handle) {
+                let current_pos = match &empty_data.position {
+                    lol_base::ui::LOLEnumUiPosition::UiPositionRect(rect) => {
+                        rect.ui_rect.as_ref().and_then(|r| r.position)
+                    }
+                    _ => None,
+                };
+                if current_pos != Some(Vec2::new(pip_x, pip_y)) {
+                    empty_data.position = new_pos.clone();
+                }
+            }
+        }
+
+        if let Ok(UIElement::Icon(full_handle)) = q_ui_element.get(full_entity) {
+            if let Some(mut full_data) = icon_assets.get_mut(*full_handle) {
+                let current_pos = match &full_data.position {
+                    lol_base::ui::LOLEnumUiPosition::UiPositionRect(rect) => {
+                        rect.ui_rect.as_ref().and_then(|r| r.position)
+                    }
+                    _ => None,
+                };
+                if current_pos != Some(Vec2::new(pip_x, pip_y)) {
+                    full_data.position = new_pos.clone();
+                }
+            }
+        }
+
+        if i >= max_level {
+            debug!("【技能等级点】索引 {}, 点位 {} 属于未启用等级 (>= {}), 隐藏 empty 和 full", index, i, max_level);
+            commands.entity(empty_entity).insert(Visibility::Hidden);
+            commands.entity(full_entity).insert(Visibility::Hidden);
+        } else if i < skill.level {
+            debug!("【技能等级点】索引 {}, 点位 {} 属于已升级点 (< {}), 显示 full，隐藏 empty", index, i, skill.level);
+            commands.entity(full_entity).insert(Visibility::Inherited);
+            commands.entity(empty_entity).insert(Visibility::Hidden);
+        } else {
+            debug!("【技能等级点】索引 {}, 点位 {} 属于可学习空点, 显示 empty，隐藏 full", index, i);
+            commands.entity(empty_entity).insert(Visibility::Inherited);
+            commands.entity(full_entity).insert(Visibility::Hidden);
+        }
+    }
+}
+
+fn update_skill_cooldown(
     mut commands: Commands,
-    q_skill: Query<&CoolDown>,
+    q_skill: Query<(&Skill, Option<&CoolDown>)>,
     q_skills: Query<&Skills, With<Controller>>,
     res_player_frame_vc: Res<LOLPlayerFrameViewController>,
     res_ui_element_entity: Res<UIElementEntity>,
     mut q_ui_text_state: Query<(&mut UiTextState, &mut Visibility)>,
+    q_ui_element: Query<&UIElement>,
+    mut icon_assets: ResMut<Assets<LOLUiElementIconData>>,
 ) {
     let Ok(skills) = q_skills.single() else {
-        info!("未找到控制器的技能列表");
+        debug!("【技能冷却更新】未找到控制器的技能列表");
         return;
     };
 
+    debug!("【技能冷却更新】已成功定位控制器技能列表，技能数量: {}", skills.len());
+
     for (index, skill_entity) in skills.iter().enumerate() {
         if index >= res_player_frame_vc.abilities_ui_data.champion_spells.len() {
+            debug!("【技能冷却更新警告】索引 {} 超出 champion_spells 最大长度", index);
             break;
         }
 
-        let Ok(cooldown) = q_skill.get(skill_entity) else {
+        let Ok((skill, cooldown)) = q_skill.get(skill_entity) else {
+            debug!("【技能冷却更新警告】技能实体 {:?} 未找到 Skill 组件", skill_entity);
             continue;
         };
 
+        debug!("【技能冷却更新】技能槽位索引: {}, 技能实体: {:?}, 技能等级: {}, Cooldown存在: {}", index, skill_entity, skill.level, cooldown.is_some());
+
         let slot_def = &res_player_frame_vc.abilities_ui_data.champion_spells[index];
-        let disabled_entity = res_ui_element_entity.get_entity(&slot_def.overlay_disabled.unwrap());
+        update_single_skill_cooldown(
+            &mut commands,
+            skill,
+            cooldown,
+            slot_def,
+            &res_ui_element_entity,
+            &mut q_ui_text_state,
+        );
 
-        let ui_entity = res_ui_element_entity.get_entity(&slot_def.cooldown);
-
-        if let Ok((mut text_state, mut visibility)) = q_ui_text_state.get_mut(ui_entity) {
-            let remaining = cooldown
-                .timer
-                .as_ref()
-                .map(|v| v.remaining_secs())
-                .unwrap_or(0.0);
-            if remaining > 0.0 {
-                if text_state.text != remaining.ceil().to_string() {
-                    text_state.text = remaining.ceil().to_string();
-                }
-                if matches!(*visibility, Visibility::Hidden) {
-                    *visibility = Visibility::Inherited;
-                }
-                commands
-                    .entity(disabled_entity)
-                    .insert(Visibility::Inherited);
-            } else {
-                if text_state.text != "".to_string() {
-                    text_state.text = "".to_string();
-                }
-                if matches!(*visibility, Visibility::Inherited) {
-                    *visibility = Visibility::Hidden;
-                }
-                commands.entity(disabled_entity).insert(Visibility::Hidden);
-            }
-        }
+        update_single_skill_rank_pips(
+            &mut commands,
+            index,
+            skill,
+            &res_player_frame_vc,
+            &res_ui_element_entity,
+            &q_ui_element,
+            &mut icon_assets,
+        );
     }
 }
 
@@ -244,7 +431,7 @@ fn update_icon_data(
     assets: &mut Assets<LOLUiElementEffectDesaturateData>,
 ) {
     let Some(mut icon_data) = assets.get_mut(handle) else {
-        info!("未找到图标数据 {:?}", handle);
+        debug!("未找到图标数据 {:?}", handle);
         return;
     };
     icon_data.texture_data = Some(AtlasData(LOLAtlasData {
@@ -253,7 +440,7 @@ fn update_icon_data(
     }));
 }
 
-fn update_skill_level_up_button(
+fn update_skill_level_up_buttons(
     mut commands: Commands,
     q_skill_points: Query<
         (Entity, &Level, &SkillPoints, &Skills),
@@ -293,7 +480,7 @@ fn update_skill_level_up_button(
         }
 
         if should_show {
-            info!("显示技能升级按钮");
+            debug!("显示技能升级按钮");
             commands
                 .entity(res_ui_element_entity.get_entity(&level_up_data.skill_up_button))
                 .insert(Visibility::Visible)
@@ -306,5 +493,5 @@ fn update_skill_level_up_button(
                 .insert(Visibility::Hidden);
         }
     }
-    // info!("技能升级按钮更新完成");
+    // debug!("技能升级按钮更新完成");
 }

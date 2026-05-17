@@ -172,7 +172,6 @@ pub fn update_element_layout(
     if let UIElement::Text(_) = ui_element {
         node.justify_content = JustifyContent::Center;
         node.align_items = AlignItems::Center;
-        commands.entity(child).insert(Text::new(""));
         return;
     }
 

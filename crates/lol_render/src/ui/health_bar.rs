@@ -90,7 +90,7 @@ fn update_spawn_health_bar(
                     UIElement::Text(bar.borders.level_text),
                     LevelTextBind(entity),
                     UiTextState {
-                        text: "".to_string(),
+                        text: "0".to_string(),
                     },
                 ));
 
