@@ -90,7 +90,7 @@
             attack_total_time: 1.52,
           ),
           windup_modifier: 1.0,
-          spell_key: None,
+          spell: Path("characters/Aatrox/spells/AatroxBasicAttack.ron"),
         ),
         "lol_core::base::ability_resource::AbilityResource": (
           ar_type: Unknown(10),

@@ -50,7 +50,7 @@
       components: {
         "lol_core::skill::CoolDown": (
           timer: None,
-          duration: 12.0,
+          duration: 7.0,
         ),
         "lol_core::skill::Skill": (
           spell: Path("characters/LeeSin/spells/LeeSinWOne.ron"),
@@ -89,7 +89,7 @@
             attack_offset: -0.1046875,
           ),
           windup_modifier: 1.0,
-          spell_key: None,
+          spell: Path("characters/LeeSin/spells/LeeSinBasicAttack.ron"),
         ),
         "lol_core::base::ability_resource::AbilityResource": (
           ar_type: Energy,

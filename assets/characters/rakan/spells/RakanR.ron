@@ -5,8 +5,8 @@
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
-                        type: "CalculationPartEffectValue",
-                        effectIndex: Some(1),
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "base_damage",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -115,7 +115,92 @@
                 values: None,
             ),
         ]),
-        dataValues: None,
+        dataValues: Some([
+            (
+                name: "BaseDamage",
+                values: Some([
+                    100.0,
+                    100.0,
+                    200.0,
+                    300.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                ]),
+            ),
+            (
+                name: "Duration",
+                values: Some([
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                    4.0,
+                ]),
+            ),
+            (
+                name: "CharmDuration",
+                values: Some([
+                    1.0,
+                    1.0,
+                    1.25,
+                    1.5,
+                    0.0,
+                    0.0,
+                    0.0,
+                ]),
+            ),
+            (
+                name: "BuffExtensionDuration",
+                values: Some([
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                    0.25,
+                ]),
+            ),
+            (
+                name: "InitialCastSpeed",
+                values: Some([
+                    75.0,
+                    75.0,
+                    75.0,
+                    75.0,
+                    75.0,
+                    75.0,
+                    75.0,
+                ]),
+            ),
+            (
+                name: "TouchSpeed",
+                values: Some([
+                    150.0,
+                    150.0,
+                    150.0,
+                    150.0,
+                    150.0,
+                    150.0,
+                    150.0,
+                ]),
+            ),
+            (
+                name: "TouchRadius",
+                values: Some([
+                    150.0,
+                    150.0,
+                    150.0,
+                    150.0,
+                    150.0,
+                    150.0,
+                    150.0,
+                ]),
+            ),
+        ]),
         mana: Some([
             100.0,
             100.0,

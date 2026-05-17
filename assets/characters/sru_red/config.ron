@@ -15,7 +15,7 @@
             attack_total_time: 2.03,
           ),
           windup_modifier: 1.0,
-          spell_key: None,
+          spell: Path("characters/SRU_Red/spells/SRU_RedBasicAttack.ron"),
         ),
         "lol_core::base::ability_resource::AbilityResource": (
           ar_type: Camp,

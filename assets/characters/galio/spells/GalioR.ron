@@ -14,6 +14,12 @@
                         coefficient: Some(0.7),
                         statFormula: None,
                     ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: Some(6),
+                        coefficient: Some(1.0),
+                        statFormula: Some(2),
+                    ),
                 ]),
                 multiplier: None,
                 precision: None,

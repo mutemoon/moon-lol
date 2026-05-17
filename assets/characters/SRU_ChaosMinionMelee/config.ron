@@ -15,7 +15,7 @@
             attack_total_time: 0.8,
           ),
           windup_modifier: 1.0,
-          spell_key: None,
+          spell: Path("characters/SRU_ChaosMinionMelee/spells/SRU_ChaosMinionMeleeBasicAttack.ron"),
         ),
         "lol_core::base::ability_resource::AbilityResource": (
           ar_type: Mana,

@@ -89,7 +89,7 @@
             attack_offset: -0.111613475,
           ),
           windup_modifier: 1.0,
-          spell_key: None,
+          spell: Path("characters/Ezreal/spells/EzrealBasicAttack.ron"),
         ),
         "lol_core::base::ability_resource::AbilityResource": (
           ar_type: Mana,

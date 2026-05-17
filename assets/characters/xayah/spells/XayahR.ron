@@ -57,6 +57,10 @@
                     1.25,
                 ]),
             ),
+            (
+                name: "RMovementSlow",
+                values: None,
+            ),
         ]),
         mana: Some([
             100.0,

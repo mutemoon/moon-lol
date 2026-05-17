@@ -234,6 +234,42 @@
                     0.5,
                 ]),
             ),
+            (
+                name: "GroundExhaustDuration",
+                values: Some([
+                    30.0,
+                    30.0,
+                    30.0,
+                    30.0,
+                    30.0,
+                    30.0,
+                    30.0,
+                ]),
+            ),
+            (
+                name: "BigRockManaCost",
+                values: Some([
+                    10.0,
+                    10.0,
+                    10.0,
+                    10.0,
+                    10.0,
+                    10.0,
+                    10.0,
+                ]),
+            ),
+            (
+                name: "GroundExhaustRadius",
+                values: Some([
+                    400.0,
+                    400.0,
+                    400.0,
+                    400.0,
+                    400.0,
+                    400.0,
+                    400.0,
+                ]),
+            ),
         ]),
         mana: Some([
             55.0,

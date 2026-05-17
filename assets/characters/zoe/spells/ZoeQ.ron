@@ -56,6 +56,10 @@
                     1.0,
                 ]),
             ),
+            (
+                name: "UnnamedEffectAmount1",
+                values: None,
+            ),
         ]),
         mana: Some([
             40.0,

@@ -9,10 +9,9 @@
                         effectIndex: Some(1),
                     ),
                     (
-                        type: "CalculationPartStatCoefficient",
+                        type: "CalculationPartStatNamedDataValue",
                         stat: Some(2),
-                        coefficient: Some(0.4),
-                        statFormula: Some(2),
+                        dataValue: "bad_ratio",
                     ),
                 ]),
                 multiplier: None,
@@ -67,7 +66,20 @@
                 values: None,
             ),
         ]),
-        dataValues: None,
+        dataValues: Some([
+            (
+                name: "BADRatio",
+                values: Some([
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                    0.4,
+                ]),
+            ),
+        ]),
         mana: Some([
             30.0,
             30.0,

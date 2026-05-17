@@ -113,7 +113,20 @@
                 ]),
             ),
         ]),
-        dataValues: None,
+        dataValues: Some([
+            (
+                name: "BaseDamage",
+                values: Some([
+                    0.0,
+                    30.0,
+                    60.0,
+                    90.0,
+                    120.0,
+                    150.0,
+                    0.0,
+                ]),
+            ),
+        ]),
         mana: None,
         missileSpec: None,
         hitBoneName: None,

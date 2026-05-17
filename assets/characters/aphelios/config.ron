@@ -90,7 +90,7 @@
             attack_total_time: 1.5,
           ),
           windup_modifier: 1.0,
-          spell_key: None,
+          spell: Uuid("97128bb1-2588-480b-bdc6-87b4adbec477"),
         ),
         "lol_core::base::ability_resource::AbilityResource": (
           ar_type: Mana,

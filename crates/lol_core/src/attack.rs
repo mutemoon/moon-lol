@@ -41,8 +41,8 @@ pub struct Attack {
     pub windup_config: WindupConfig,
     /// 前摇修正系数 (默认 1.0，可以被技能修改)
     pub windup_modifier: f32,
-    /// 攻击导弹路径
-    pub spell_key: Option<Handle<Spell>>,
+    /// 攻击技能 (普通攻击 Spell)
+    pub spell: Handle<Spell>,
 }
 
 /// 前摇时间配置方式
@@ -127,7 +127,7 @@ impl Attack {
                 attack_total_time: total_duration_secs,
             },
             windup_modifier: 1.0,
-            spell_key: None,
+            spell: Handle::default(),
         }
     }
 
@@ -142,12 +142,12 @@ impl Attack {
                 attack_offset: windup_offset,
             },
             windup_modifier: 1.0,
-            spell_key: None,
+            spell: Handle::default(),
         }
     }
 
     pub fn with_missile(mut self, missile: Handle<Spell>) -> Self {
-        self.spell_key = Some(missile);
+        self.spell = missile;
         self
     }
 
@@ -382,44 +382,38 @@ fn fixed_update(
                         end_time: now + attack.cooldown_time(),
                     };
 
-                    match &attack.spell_key {
-                        Some(spell_handle) => {
-                            if let Some(spell) = res_assets_spell_object
-                                .as_ref()
-                                .and_then(|assets| assets.get(spell_handle))
-                            {
-                                if spell.spell_data.as_ref().unwrap().cast_type.unwrap_or(0) == 1 {
-                                    commands.trigger(CommandMissileCreate {
-                                        entity,
-                                        target: Some(*target),
-                                        destination: None,
-                                        spell: spell_handle.clone(),
-                                        damage: 0.0,
-                                        speed: None,
-                                        particle_hash: None,
-                                    });
-                                } else if let Some(damage) = damage {
-                                    commands.try_trigger(CommandDamageCreate {
-                                        entity: *target,
-                                        source: entity,
-                                        damage_type: DamageType::Physical,
-                                        amount: damage.0,
-                                        tag: None,
-                                    });
-                                }
-                            }
+                    let spell_handle = &attack.spell;
+                    if let Some(spell) = res_assets_spell_object
+                        .as_ref()
+                        .and_then(|assets| assets.get(spell_handle))
+                    {
+                        if spell.spell_data.as_ref().unwrap().cast_type.unwrap_or(0) == 1 {
+                            commands.trigger(CommandMissileCreate {
+                                entity,
+                                target: Some(*target),
+                                destination: None,
+                                spell: spell_handle.clone(),
+                                damage: 0.0,
+                                speed: None,
+                                particle_hash: None,
+                            });
+                        } else if let Some(damage) = damage {
+                            commands.try_trigger(CommandDamageCreate {
+                                entity: *target,
+                                source: entity,
+                                damage_type: DamageType::Physical,
+                                amount: damage.0,
+                                tag: None,
+                            });
                         }
-                        None => {
-                            if let Some(damage) = damage {
-                                commands.try_trigger(CommandDamageCreate {
-                                    entity: *target,
-                                    source: entity,
-                                    damage_type: DamageType::Physical,
-                                    amount: damage.0,
-                                    tag: None,
-                                });
-                            }
-                        }
+                    } else if let Some(damage) = damage {
+                        commands.try_trigger(CommandDamageCreate {
+                            entity: *target,
+                            source: entity,
+                            damage_type: DamageType::Physical,
+                            amount: damage.0,
+                            tag: None,
+                        });
                     }
                     commands.try_trigger(EventAttackEnd {
                         entity,

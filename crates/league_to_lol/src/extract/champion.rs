@@ -249,6 +249,15 @@ pub fn extract_character_from_record(
     let (attack, health, damage, armor, movement, experience_drop, ability_resource) =
         create_champion_components_from_record(&record);
 
+    let basic_attack_name = format!("{}BasicAttack", character_name);
+    let attack = if all_spell_names.contains(&basic_attack_name) {
+        let basic_attack_spell_path = format!("characters/{}/spells/{}.ron", character_name, basic_attack_name);
+        let basic_attack_spell: Handle<Spell> = asset_server.load(&basic_attack_spell_path);
+        attack.map(|a| a.with_missile(basic_attack_spell))
+    } else {
+        attack
+    };
+
     // 从 spells 哈希创建 Skill 组件和冷却时间（使用 AssetServer 加载路径以获得正确的 Handle）
     let (active_skills, passive_skill) =
         create_skills_from_record(&prop_group, character_name, &record, &asset_server);

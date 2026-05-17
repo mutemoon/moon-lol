@@ -5,8 +5,8 @@
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
-                        type: "CalculationPartEffectValue",
-                        effectIndex: Some(1),
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "base_damage",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -122,6 +122,42 @@
                     2.25,
                     2.25,
                     2.25,
+                ]),
+            ),
+            (
+                name: "BaseDamage",
+                values: Some([
+                    40.0,
+                    70.0,
+                    100.0,
+                    130.0,
+                    160.0,
+                    190.0,
+                    220.0,
+                ]),
+            ),
+            (
+                name: "Range",
+                values: Some([
+                    1125.0,
+                    1125.0,
+                    1125.0,
+                    1125.0,
+                    1125.0,
+                    1125.0,
+                    1125.0,
+                ]),
+            ),
+            (
+                name: "StunScaling_RoughAverageWillBeThisNumber_Every100RangeForTheAdditionalStun_AddedTo_5_",
+                values: Some([
+                    0.17,
+                    0.17,
+                    0.17,
+                    0.17,
+                    0.17,
+                    0.17,
+                    0.17,
                 ]),
             ),
         ]),

@@ -89,7 +89,7 @@
             attack_offset: -0.11,
           ),
           windup_modifier: 1.0,
-          spell_key: None,
+          spell: Path("characters/Tryndamere/spells/TryndamereBasicAttack.ron"),
         ),
         "lol_core::base::ability_resource::AbilityResource": (
           ar_type: Unknown(4),

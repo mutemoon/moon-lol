@@ -89,7 +89,7 @@
             attack_offset: -0.03,
           ),
           windup_modifier: 1.0,
-          spell_key: None,
+          spell: Path("characters/Blitzcrank/spells/BlitzcrankBasicAttack.ron"),
         ),
         "lol_core::base::ability_resource::AbilityResource": (
           ar_type: Mana,

@@ -89,7 +89,7 @@
             attack_offset: -0.1096875,
           ),
           windup_modifier: 1.0,
-          spell_key: None,
+          spell: Path("characters/Pantheon/spells/PantheonBasicAttack.ron"),
         ),
         "lol_core::base::ability_resource::AbilityResource": (
           ar_type: Mana,

@@ -89,7 +89,7 @@
             attack_offset: -0.113,
           ),
           windup_modifier: 1.0,
-          spell_key: None,
+          spell: Path("characters/Seraphine/spells/SeraphineBasicAttack.ron"),
         ),
         "lol_core::base::ability_resource::AbilityResource": (
           ar_type: Mana,

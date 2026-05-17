@@ -90,7 +90,7 @@
             attack_total_time: 2.366,
           ),
           windup_modifier: 1.0,
-          spell_key: None,
+          spell: Path("characters/Mordekaiser/spells/MordekaiserBasicAttack.ron"),
         ),
         "lol_core::base::ability_resource::AbilityResource": (
           ar_type: Unknown(3),

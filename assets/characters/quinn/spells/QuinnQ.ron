@@ -132,6 +132,18 @@
                     1.75,
                 ]),
             ),
+            (
+                name: "BonusMonsterDmgMult",
+                values: Some([
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                    0.5,
+                ]),
+            ),
         ]),
         mana: Some([
             50.0,

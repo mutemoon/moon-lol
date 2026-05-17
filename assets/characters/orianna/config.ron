@@ -89,7 +89,7 @@
             attack_offset: -0.12456141,
           ),
           windup_modifier: 1.0,
-          spell_key: None,
+          spell: Path("characters/Orianna/spells/OriannaBasicAttack.ron"),
         ),
         "lol_core::base::ability_resource::AbilityResource": (
           ar_type: Mana,

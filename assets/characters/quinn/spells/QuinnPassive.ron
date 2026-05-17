@@ -16,6 +16,12 @@
                 )),
                 precision: None,
             ),
+            "unk_0x929bc6f6": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
         }),
         effectAmounts: None,
         dataValues: Some([

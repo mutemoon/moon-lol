@@ -60,7 +60,7 @@
             attack_total_time: 1.6,
           ),
           windup_modifier: 1.0,
-          spell_key: None,
+          spell: Path("characters/SRU_Baron/spells/SRU_BaronBasicAttack.ron"),
         ),
         "lol_core::base::ability_resource::AbilityResource": (
           ar_type: Mana,

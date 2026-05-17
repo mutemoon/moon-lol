@@ -83,13 +83,25 @@
             (
                 name: "DurationIncreasePerHit",
                 values: Some([
-                    1.5,
-                    1.5,
-                    1.5,
-                    1.5,
-                    1.5,
-                    1.5,
-                    1.5,
+                    2.5,
+                    2.5,
+                    2.5,
+                    2.5,
+                    2.5,
+                    2.5,
+                    2.5,
+                ]),
+            ),
+            (
+                name: "MaxHyperchargeDuration",
+                values: Some([
+                    2.5,
+                    2.5,
+                    2.5,
+                    2.5,
+                    2.5,
+                    2.5,
+                    2.5,
                 ]),
             ),
             (
@@ -190,18 +202,6 @@
                     0.15,
                     0.15,
                     0.15,
-                ]),
-            ),
-            (
-                name: "MaxHyperchargeDuration",
-                values: Some([
-                    2.5,
-                    2.5,
-                    2.5,
-                    2.5,
-                    2.5,
-                    2.5,
-                    2.5,
                 ]),
             ),
             (

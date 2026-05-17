@@ -17,7 +17,7 @@
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,
-                precision: None,
+                precision: Some(1),
             ),
             "unk_0xad3d785f": (
                 type: "CalculationSpell",

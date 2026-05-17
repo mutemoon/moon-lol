@@ -15,7 +15,7 @@
             attack_total_time: 1.44,
           ),
           windup_modifier: 1.0,
-          spell_key: None,
+          spell: Path("characters/SRU_OrderMinionSuper/spells/SRU_OrderMinionSuperBasicAttack.ron"),
         ),
         "lol_core::base::ability_resource::AbilityResource": (
           ar_type: Mana,

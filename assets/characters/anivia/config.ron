@@ -89,7 +89,7 @@
             attack_offset: -0.1,
           ),
           windup_modifier: 1.0,
-          spell_key: None,
+          spell: Path("characters/Anivia/spells/AniviaBasicAttack.ron"),
         ),
         "lol_core::base::ability_resource::AbilityResource": (
           ar_type: Mana,
@@ -110,7 +110,7 @@
           experience_to_next_level: 280,
         ),
         "lol_core::character::Character": (),
-        "lol_core::damage::Armor": (21.0),
+        "lol_core::damage::Armor": (19.0),
         "lol_core::damage::Damage": (51.0),
         "lol_core::entities::champion::Champion": (),
         "lol_core::life::Health": (

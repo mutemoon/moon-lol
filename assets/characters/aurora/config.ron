@@ -89,7 +89,7 @@
             attack_offset: -0.099465,
           ),
           windup_modifier: 1.0,
-          spell_key: None,
+          spell: Path("characters/Aurora/spells/AuroraBasicAttack.ron"),
         ),
         "lol_core::base::ability_resource::AbilityResource": (
           ar_type: Mana,

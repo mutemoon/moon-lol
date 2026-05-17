@@ -27,18 +27,6 @@
                     5.0,
                 ]),
             ),
-            (
-                name: "SecondsOutOfCombatTillEmote",
-                values: Some([
-                    3.0,
-                    3.0,
-                    3.0,
-                    3.0,
-                    3.0,
-                    3.0,
-                    3.0,
-                ]),
-            ),
         ]),
         mana: None,
         missileSpec: None,

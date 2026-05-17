@@ -5,8 +5,8 @@
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
-                        type: "CalculationPartEffectValue",
-                        effectIndex: Some(3),
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "base_damage",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -22,8 +22,8 @@
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
-                        type: "CalculationPartEffectValue",
-                        effectIndex: Some(1),
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "shield_amount",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -108,7 +108,56 @@
                 values: None,
             ),
         ]),
-        dataValues: None,
+        dataValues: Some([
+            (
+                name: "ShieldAmount",
+                values: Some([
+                    20.0,
+                    55.0,
+                    90.0,
+                    125.0,
+                    160.0,
+                    195.0,
+                    230.0,
+                ]),
+            ),
+            (
+                name: "DefenseBonus",
+                values: Some([
+                    0.0,
+                    6.0,
+                    12.0,
+                    18.0,
+                    24.0,
+                    30.0,
+                    36.0,
+                ]),
+            ),
+            (
+                name: "BaseDamage",
+                values: Some([
+                    30.0,
+                    60.0,
+                    90.0,
+                    120.0,
+                    150.0,
+                    180.0,
+                    210.0,
+                ]),
+            ),
+            (
+                name: "ShieldDuration",
+                values: Some([
+                    2.5,
+                    2.5,
+                    2.5,
+                    2.5,
+                    2.5,
+                    2.5,
+                    2.5,
+                ]),
+            ),
+        ]),
         mana: Some([
             60.0,
             60.0,
