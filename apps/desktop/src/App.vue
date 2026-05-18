@@ -5,10 +5,11 @@ import { getCurrentWindow } from "@tauri-apps/api/window";
 import { useWsClient } from "./composables/useWsClient";
 import LauncherPanel from "./components/LauncherPanel.vue";
 import DebugPanel from "./components/DebugPanel.vue";
+import SettingsPanel from "./components/SettingsPanel.vue";
 
 const win = getCurrentWindow();
 
-type View = "launcher" | "debug";
+type View = "launcher" | "debug" | "settings";
 
 const currentView = ref<View>("launcher");
 const champion = ref("Riven");
@@ -97,7 +98,13 @@ function stopGame() {
           Debug
         </button>
         <button class="nav-tab" disabled>Stats</button>
-        <button class="nav-tab" disabled>Settings</button>
+        <button
+          class="nav-tab"
+          :class="{ active: currentView === 'settings' }"
+          @click="currentView = 'settings'"
+        >
+          Settings
+        </button>
       </div>
 
       <div class="nav-status">
@@ -148,7 +155,7 @@ function stopGame() {
           @cancel="stopGame"
         />
         <DebugPanel
-          v-else
+          v-else-if="currentView === 'debug'"
           :connected="ws.connected.value"
           :game-state="ws.gameState.value"
           :logs="ws.logs.value"
@@ -157,6 +164,9 @@ function stopGame() {
           :agent-action="ws.agentAction.value"
           @send="(cmd, params) => ws.send(cmd, params)"
           @stop="stopGame"
+        />
+        <SettingsPanel
+          v-else-if="currentView === 'settings'"
         />
       </Transition>
     </main>

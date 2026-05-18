@@ -11,6 +11,7 @@ use lol_core::base::ability_resource::{AbilityResource, AbilityResourceType};
 use lol_core::base::bounding::Bounding;
 use lol_core::base::gold::{Gold, GoldDrop};
 use lol_core::base::level::{ExperienceDrop, Level};
+use lol_core::base::stats::ChampionStats;
 use lol_core::character::Character;
 use lol_core::damage::{Armor, Damage};
 use lol_core::entities::champion::Champion;
@@ -356,6 +357,7 @@ pub fn extract_character_from_record(
         .deny_component::<TransformTreeChanged>()
         .deny_component::<Gold>()
         .deny_component::<Level>()
+        .deny_component::<ChampionStats>()
         .extract_entities(
             // we do this instead of a query, in order to completely sidestep default query filters.
             // while we could use `Allow<_>`, this wouldn't account for custom disabled components

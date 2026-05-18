@@ -5,6 +5,7 @@ use crate::base::state::State;
 use crate::character::Character;
 use crate::skill::SkillPoints;
 use crate::base::gold::Gold;
+use crate::base::stats::ChampionStats;
 
 #[derive(Component, Reflect, Default)]
 #[reflect(Component)]
@@ -13,7 +14,8 @@ use crate::base::gold::Gold;
     Character,
     Level = Level { value: 1, experience: 0, experience_to_next_level: 280 },
     SkillPoints,
-    Gold
+    Gold,
+    ChampionStats
 )]
 pub struct Champion;
 

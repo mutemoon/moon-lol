@@ -5,19 +5,8 @@ use serde::{Deserialize, Serialize};
 #[derive(Deserialize, Debug)]
 pub struct WsRequest {
     pub id: u64,
-    pub cmd: CmdKind,
+    pub cmd: String,
     pub params: serde_json::Value,
-}
-
-#[derive(Deserialize, Debug, Clone, Copy)]
-#[serde(rename_all = "snake_case")]
-pub enum CmdKind {
-    SwitchChampion,
-    GodMode,
-    ToggleCooldown,
-    ResetPosition,
-    TogglePause,
-    GetState,
 }
 
 // ── Outgoing (game → panel) ──
@@ -30,7 +19,7 @@ pub struct WsEvent {
     pub data: serde_json::Value,
 }
 
-#[derive(Serialize, Debug)]
+#[derive(Serialize, Debug, Clone)]
 pub struct WsResponse {
     pub id: u64,
     #[serde(rename = "type")]

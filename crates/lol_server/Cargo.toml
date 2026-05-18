@@ -1,5 +1,5 @@
 [package]
-name = "lol_debug"
+name = "lol_server"
 version = "0.1.0"
 edition = "2024"
 
@@ -8,7 +8,12 @@ bevy.workspace = true
 lol_base.workspace = true
 lol_core.workspace = true
 lol_champions.workspace = true
-lol_server.workspace = true
 serde.workspace = true
 serde_json.workspace = true
+async-channel.workspace = true
+futures-util.workspace = true
 tracing = "0.1"
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+tokio = { workspace = true }
+tokio-tungstenite = { workspace = true }

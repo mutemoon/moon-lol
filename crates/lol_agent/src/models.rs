@@ -4,11 +4,7 @@ use lol_core::action::Action;
 use lol_core::attack::AttackState;
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum ActorPhase {
-    Thinking,  // 决策中，虚拟时间暂停，持续 5 秒
-    Executing, // 执行中，虚拟时间运行，持续 2 秒
-}
+
 
 #[derive(Component)]
 pub struct AttackTarget;
@@ -62,30 +58,9 @@ pub struct ObserveMyself {
     pub skill_points: u32,
     pub skills: Vec<ObserveSkill>,
     pub gold: f32,
+    pub kills: u32,
+    pub deaths: u32,
+    pub assists: u32,
+    pub minion_kills: u32,
 }
 
-pub struct AgentDecisionResult {
-    pub observe: Observe,
-    pub thinking: String,
-    pub action: Option<Action>,
-}
-
-pub trait Actor {
-    fn act(&mut self, observe: &Observe) -> Option<Action>;
-}
-
-pub struct AiActor {
-    pub rx: Option<std::sync::Mutex<std::sync::mpsc::Receiver<AgentDecisionResult>>>,
-}
-
-impl Default for AiActor {
-    fn default() -> Self {
-        Self { rx: None }
-    }
-}
-
-impl Actor for AiActor {
-    fn act(&mut self, _observe: &Observe) -> Option<Action> {
-        None
-    }
-}

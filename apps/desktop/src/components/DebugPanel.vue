@@ -280,6 +280,24 @@ const mpPercent = computed(() => {
                 <span class="gold-value-neon">{{ myself.gold.toFixed(0) }} <span class="gold-currency">g</span></span>
               </div>
 
+              <!-- KDA & CS Monitor -->
+              <div class="kda-cs-monitor" v-if="myself.minion_kills !== undefined">
+                <div class="kda-box">
+                  <span class="kda-lbl">KDA</span>
+                  <span class="kda-val">
+                    <span class="k-val">{{ myself.kills }}</span>
+                    <span class="divider">/</span>
+                    <span class="d-val">{{ myself.deaths }}</span>
+                    <span class="divider">/</span>
+                    <span class="a-val">{{ myself.assists }}</span>
+                  </span>
+                </div>
+                <div class="cs-box">
+                  <span class="cs-lbl">Creep Score (CS)</span>
+                  <span class="cs-val">{{ myself.minion_kills }}</span>
+                </div>
+              </div>
+
               <!-- Fight stats -->
               <div class="stats-grid">
                 <div class="stat-card">
@@ -1362,5 +1380,68 @@ const mpPercent = computed(() => {
   font-size: 11px;
   font-weight: 600;
   color: var(--gold-muted);
+}
+
+/* ── KDA & CS Monitor Styling ── */
+.kda-cs-monitor {
+  margin: -4px 0 16px 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.kda-box, .cs-box {
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.01);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.kda-lbl, .cs-lbl {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--text-muted);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.kda-val {
+  font-family: var(--font-mono);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-bright);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.k-val {
+  color: #4a9e5a;
+  text-shadow: 0 0 8px rgba(74, 158, 90, 0.3);
+}
+
+.d-val {
+  color: #c84a4a;
+  text-shadow: 0 0 8px rgba(200, 74, 74, 0.3);
+}
+
+.a-val {
+  color: var(--text-bright);
+}
+
+.divider {
+  color: var(--border-default);
+  font-weight: 400;
+}
+
+.cs-val {
+  font-family: var(--font-mono);
+  font-size: 16px;
+  font-weight: 800;
+  color: #4a9e5a;
+  text-shadow: 0 0 8px rgba(74, 158, 90, 0.4);
 }
 </style>

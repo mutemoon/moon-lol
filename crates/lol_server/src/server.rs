@@ -14,13 +14,13 @@ use tokio::sync::Mutex as TokioMutex;
 #[cfg(not(target_arch = "wasm32"))]
 use tokio_tungstenite::accept_async;
 
-use crate::protocol::{CmdKind, WsEvent, WsRequest};
+use crate::protocol::{WsEvent, WsRequest};
 
 /// Channel for Bevy ← WS communication.
 #[derive(Resource)]
 pub struct DebugWsChannel {
     /// Receives commands from WS connections.
-    pub cmd_rx: Receiver<(u64, CmdKind, serde_json::Value)>,
+    pub cmd_rx: Receiver<(u64, String, serde_json::Value)>,
     /// Sends JSON-serialized WsResponse / WsEvent strings to all connected WS clients.
     pub out_tx: Sender<String>,
 }
@@ -29,7 +29,7 @@ pub struct DebugWsChannel {
 /// Inserts DebugWsChannel into the world so Bevy systems can poll it.
 #[cfg(not(target_arch = "wasm32"))]
 pub fn start(world: &mut World, port: u16) {
-    let (cmd_tx, cmd_rx) = async_channel::unbounded::<(u64, CmdKind, serde_json::Value)>();
+    let (cmd_tx, cmd_rx) = async_channel::unbounded::<(u64, String, serde_json::Value)>();
     let (out_tx, out_rx) = async_channel::unbounded::<String>();
 
     thread::spawn(move || {
@@ -108,18 +108,18 @@ pub fn start(world: &mut World, port: u16) {
 /// On Web, we only use channels for communication.
 #[cfg(target_arch = "wasm32")]
 pub fn start(world: &mut World, _port: u16) {
-    let (cmd_tx, cmd_rx) = async_channel::unbounded::<(u64, CmdKind, serde_json::Value)>();
+    let (cmd_tx, cmd_rx) = async_channel::unbounded::<(u64, String, serde_json::Value)>();
     let (out_tx, out_rx) = async_channel::unbounded::<String>();
 
     // On Web, the out_rx could be polled by a UI system or wasm-bindgen bridge.
     // For now, we just keep the channels available.
     // We need to keep cmd_tx somewhere if we want to send commands to Bevy from JS.
-    
+
     world.insert_resource(DebugWsChannel { cmd_rx, out_tx });
     // To prevent out_rx from being dropped (and out_tx failing), we might need to store it or handle it.
     // However, if nothing reads from it, it's fine as long as we don't expect events to be delivered yet.
     // We'll leak it or ignore it for now to satisfy the "use channel" requirement.
-    std::mem::forget(out_rx); 
+    std::mem::forget(out_rx);
     std::mem::forget(cmd_tx);
 }
 

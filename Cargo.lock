@@ -7537,8 +7537,8 @@ dependencies = [
  "lol_champions",
  "lol_core",
  "lol_render",
+ "lol_server",
  "rand 0.9.4",
- "rig",
  "serde",
  "serde_json",
  "tokio",
@@ -7572,6 +7572,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "lol_cli"
+version = "0.1.0"
+dependencies = [
+ "clap",
+ "futures-util",
+ "serde",
+ "serde_json",
+ "tokio",
+ "tokio-tungstenite 0.24.0",
+]
+
+[[package]]
 name = "lol_core"
 version = "0.1.0"
 dependencies = [
@@ -7591,16 +7603,13 @@ dependencies = [
 name = "lol_debug"
 version = "0.1.0"
 dependencies = [
- "async-channel",
  "bevy",
- "futures-util",
  "lol_base",
  "lol_champions",
  "lol_core",
+ "lol_server",
  "serde",
  "serde_json",
- "tokio",
- "tokio-tungstenite 0.24.0",
  "tracing",
 ]
 
@@ -7621,6 +7630,23 @@ dependencies = [
  "serde",
  "serde_json",
  "thiserror 2.0.18",
+]
+
+[[package]]
+name = "lol_server"
+version = "0.1.0"
+dependencies = [
+ "async-channel",
+ "bevy",
+ "futures-util",
+ "lol_base",
+ "lol_champions",
+ "lol_core",
+ "serde",
+ "serde_json",
+ "tokio",
+ "tokio-tungstenite 0.24.0",
+ "tracing",
 ]
 
 [[package]]
@@ -7920,6 +7946,7 @@ dependencies = [
  "lol_core",
  "lol_debug",
  "lol_render",
+ "lol_server",
  "rand 0.9.4",
  "rayon",
  "rig",

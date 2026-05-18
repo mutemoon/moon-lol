@@ -1,23 +1,15 @@
 pub mod models;
-pub mod tools;
 pub mod systems;
 
 pub use models::*;
-pub use tools::*;
 pub use systems::*;
 
 use bevy::prelude::*;
 
-pub struct PluginAgent;
+pub struct PluginAgentObserver;
 
-impl Plugin for PluginAgent {
+impl Plugin for PluginAgentObserver {
     fn build(&self, app: &mut App) {
-        app.insert_resource(ActorResource {
-            actor: AiActor::default(),
-            timer: Timer::from_seconds(5.0, TimerMode::Once),
-            phase: ActorPhase::Thinking,
-            cached_action: None,
-        })
-        .add_systems(Update, update_actor);
+        app.add_observer(on_command_ws_request);
     }
 }
