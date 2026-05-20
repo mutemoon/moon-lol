@@ -3,6 +3,7 @@
   "scripts": {
     "example": "cargo run --example",
     "extract": "cargo run --example extract",
+    "extract:bin": "cargo run --example extract -- --no-mapgeo",
     "fix": "cargo fix --allow-dirty --workspace",
     "format": "cargo +nightly fmt",
     "hot:patch": "dx serve --hot-patch --features \"bevy/hotpatching\"",

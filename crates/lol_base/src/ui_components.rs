@@ -3,8 +3,9 @@ use serde::{Deserialize, Serialize};
 
 use crate::hash_key::HashKey;
 use crate::ui::{
-    LOLUiElementEffectAnimationData, LOLUiElementEffectDesaturateData, LOLUiElementGroupButtonData,
-    LOLUiElementIconData, LOLUiElementRegionData, LOLUiElementTextData,
+    LOLUiElementEffectAnimationData, LOLUiElementEffectDesaturateData,
+    LOLUiElementEffectFillPercentageData, LOLUiElementGroupButtonData, LOLUiElementIconData,
+    LOLUiElementRegionData, LOLUiElementTextData,
 };
 
 /// UI 元素组件
@@ -16,6 +17,7 @@ pub enum UIElement {
     Animation(HashKey<LOLUiElementEffectAnimationData>),
     Desaturate(HashKey<LOLUiElementEffectDesaturateData>),
     Text(HashKey<LOLUiElementTextData>),
+    FillPercentage(HashKey<LOLUiElementEffectFillPercentageData>),
 }
 
 /// UI 元素组件

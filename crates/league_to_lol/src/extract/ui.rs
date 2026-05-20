@@ -1,32 +1,44 @@
-use std::collections::HashMap;
+use std::collections::{BTreeMap, HashMap};
 
 use bevy::prelude::*;
 use league_core::extract::{
-    AbilitiesUiData, BarTypeMap, EnumData, EnumUiPosition, FloatingInfoBarViewController,
-    HealthBarData, HealthBarExtraBarsData, HealthBarFadeData, HealthBarTextData,
-    HeroFloatingInfoBarData, HeroFloatingInfoBorderData, HudPlayerResourceBars,
-    PlayerFrameViewController, PlayerPortraitUiData, SpellLevelUpUiData,
-    SpellPipsUiData, SpellRankPipsUiData,
+    AbilitiesUiData, AbilityResourceBarData, BarTypeMap, EnumData, EnumResourceMeter, EnumUiMetric,
+    EnumUiPosition, FloatingInfoBarViewController, HealthBarData, HealthBarExtraBarsData,
+    HealthBarFadeData, HealthBarTextData, HealthMeter, HeroFloatingInfoBarData,
+    HeroFloatingInfoBorderData, HudAbilityResourceThresholdIndicator, HudPlayerResourceBars,
+    LolGameStateViewController, PlayerFrameViewController, PlayerInventoryViewController,
+    PlayerPortraitUiData, SpellLevelUpUiData, SpellPipsUiData, SpellRankPipsUiData,
     SpellSlotDetailedUiDefinition, StructureFloatingInfoBarData, UiElementEffectAnimationData,
-    UiElementEffectDesaturateData, UiElementEffectInstancedData, UiElementGroupButtonData,
-    UiElementIconData, UiElementRegionData, UiElementTextData, UiLevelUp, UiPositionRect,
-    UiPropertyLoadable, UiSceneData, UnitFloatingInfoBarData, Unk0x1e2d1428, Unk0xc3f95838,
+    UiElementEffectDesaturateData, UiElementEffectFillPercentageData, UiElementEffectInstancedData,
+    UiElementGroupButtonData, UiElementIconData, UiElementMeterSkin, UiElementRegionData,
+    UiElementTextData, UiLevelUp,
+    UiPositionRect, UiPropertyLoadable, UiSceneData, UnitFloatingInfoBarData, Unk0x1e2d1428,
+    Unk0xc3f95838,
 };
 use league_loader::game::{Data, LeagueLoader};
 use league_loader::prop_bin::LeagueWadLoaderTrait;
 use league_utils::hash_bin;
 use lol_base::ui::{
-    LOLAbilitiesUiData, LOLAtlasData, LOLAtlasData3SliceH, LOLAtlasData3SliceV, LOLAtlasData9Slice,
-    LOLCooldownEffectUiData, LOLCooldownGemUiData, LOLEnumAnchor, LOLEnumData, LOLEnumUiPosition,
-    LOLFloatingInfoBarViewController, LOLHeroFloatingInfoBarData, LOLHudPlayerResourceBars,
+    LOLAbilitiesUiData, LOLAbilityResourceBarData, LOLAtlasData, LOLAtlasData3SliceH,
+    LOLAtlasData3SliceV, LOLAtlasData9Slice, LOLCooldownEffectUiData, LOLCooldownGemUiData,
+    LOLDrawAreaList, LOLEnumAnchor, LOLEnumData, LOLEnumResourceMeter, LOLEnumUiMetric,
+    LOLEnumUiPosition, LOLFloatingInfoBarViewController, LOLHealthMeter,
+    LOLHeroFloatingInfoBarData, LOLHudAbilityResourceThresholdIndicator, LOLHudPlayerResourceBars,
+    LOLHudShopButton, LOLItemSlotDetailedUiData, LOLLolGameStateViewController,
     LOLLooseUiTextureData, LOLLooseUiTextureData3SliceH, LOLLooseUiTextureData3SliceV,
-    LOLLooseUiTextureData9Slice, LOLPlayerFrameViewController, LOLPlayerPortraitUiData,
-    LOLSpellLevelUpUiData, LOLSpellSlotBuffTimerData, LOLSpellSlotDetailedUiDefinition,
-    LOLSpellPipsUiData, LOLSpellRankPipsUiData,
-    LOLStatPageCategoryData, LOLStatPageViewController, LOLStructureFloatingInfoBarData,
+    LOLLooseUiTextureData9Slice, LOLPlayerFrameViewController, LOLPlayerInventoryViewController,
+    LOLPlayerPortraitUiData, LOLResourceMeterGroupData, LOLResourceMeterIconData,
+    LOLResourceMeterSkinData, LOLSpellLevelUpUiData, LOLSpellPipsUiData, LOLSpellRankPipsUiData,
+    LOLSpellSlotBuffTimerData, LOLSpellSlotDetailedUiDefinition, LOLStatPageCategoryData,
+    LOLStatPageViewController, LOLStructureFloatingInfoBarData, LOLUiClashTeam,
     LOLUiElementEffectAnimationData, LOLUiElementEffectDesaturateData,
-    LOLUiElementEffectInstancedData, LOLUiElementIconData, LOLUiElementTextData, LOLUiFile,
-    LOLUiLevelUp, LOLUiPaths, LOLUiPositionRect, LOLUnitFloatingInfoBarData,
+    LOLUiElementEffectFillPercentageData, LOLUiElementEffectInstancedData,
+    LOLUiElementIconData, LOLUiElementMeterSkin,
+    LOLUiElementTextData, LOLUiFile, LOLUiLevelUp, LOLUiMetricClash, LOLUiMetricCreepScore,
+    LOLUiMetricFps, LOLUiMetricGameTime, LOLUiMetricKda, LOLUiMetricLatencyText,
+    LOLUiMetricTeamKills, LOLUiMetricTeamScoreMeters, LOLUiPaths, LOLUiPositionRect,
+    LOLUnitFloatingInfoBarData, LOLUnk0x5ab5b20f, LOLUnk0x7a19656, LOLUnk0x767adcf7,
+    LOLUnk0xa8c6f5f0, LOLUnk0xb8a49c96, LOLUnk0xb62c8675, LOLUnk0xe228ce4a, LOLUnk0xf43ad1ce,
 };
 
 use crate::extract::utils::write_to_file;
@@ -61,6 +73,7 @@ pub fn extract_ui_data(
     let mut all_ui_animation_datas: Vec<UiElementEffectAnimationData> = Vec::new();
     let mut all_ui_desaturate_datas: Vec<UiElementEffectDesaturateData> = Vec::new();
     let mut all_ui_instanced_datas: Vec<UiElementEffectInstancedData> = Vec::new();
+    let mut all_ui_fill_percentage_datas: Vec<UiElementEffectFillPercentageData> = Vec::new();
     let mut all_ui_button_datas: Vec<UiElementGroupButtonData> = Vec::new();
     let mut all_ui_region_datas: Vec<UiElementRegionData> = Vec::new();
     let mut all_ui_text_datas: Vec<UiElementTextData> = Vec::new();
@@ -76,6 +89,8 @@ pub fn extract_ui_data(
                     league_utils::type_name_to_hash("UiElementEffectDesaturateData");
                 let instanced_hash =
                     league_utils::type_name_to_hash("UiElementEffectInstancedData");
+                let fill_percentage_hash =
+                    league_utils::type_name_to_hash("UiElementEffectFillPercentageData");
                 let button_hash = league_utils::type_name_to_hash("UiElementGroupButtonData");
                 let icon_hash = league_utils::type_name_to_hash("UiElementIconData");
                 let region_hash = league_utils::type_name_to_hash("UiElementRegionData");
@@ -101,6 +116,13 @@ pub fn extract_ui_data(
                         league_property::from_entry::<UiElementEffectInstancedData>(entry)
                     {
                         all_ui_instanced_datas.push(instanced_data);
+                    }
+                }
+                for entry in prop_file.iter_entry_by_class(fill_percentage_hash) {
+                    if let Ok(fill_percentage_data) =
+                        league_property::from_entry::<UiElementEffectFillPercentageData>(entry)
+                    {
+                        all_ui_fill_percentage_datas.push(fill_percentage_data);
                     }
                 }
                 for entry in prop_file.iter_entry_by_class(button_hash) {
@@ -165,6 +187,19 @@ pub fn extract_ui_data(
         ui_prop_group.get_all_by_class::<PlayerFrameViewController>();
     if let Some(vc) = player_frame_view_controller.first() {
         assets.player_frame_view_controller = Some(convert_player_frame_view_controller(vc));
+    }
+
+    let player_inventory_view_controller =
+        ui_prop_group.get_all_by_class::<PlayerInventoryViewController>();
+    if let Some(vc) = player_inventory_view_controller.first() {
+        assets.player_inventory_view_controller =
+            Some(convert_player_inventory_view_controller(vc));
+    }
+
+    let game_state_view_controllers =
+        ui_prop_group.get_all_by_class::<LolGameStateViewController>();
+    if let Some(vc) = game_state_view_controllers.first() {
+        assets.lol_game_state_view_controller = Some(convert_lol_game_state_view_controller(vc));
     }
 
     let mut all_texture_names: Vec<String> = Vec::new();
@@ -387,6 +422,19 @@ pub fn extract_ui_data(
         assets.add_instanced(lol_instanced);
     }
 
+    for fill_percentage_data in all_ui_fill_percentage_datas {
+        // 收集原始纹理路径用于提取
+        let atlas = &fill_percentage_data.texture_data;
+        if !atlas.m_texture_name.is_empty()
+            && !all_texture_names.contains(&atlas.m_texture_name)
+        {
+            all_texture_names.push(atlas.m_texture_name.clone());
+        }
+
+        let lol_fill_percentage = convert_ui_fill_percentage_data(&fill_percentage_data);
+        assets.add_fill_percentage(lol_fill_percentage);
+    }
+
     for button_data in all_ui_button_datas {
         let lol_button = convert_ui_button_data(&button_data);
         assets.add_button(lol_button);
@@ -442,7 +490,7 @@ fn convert_ui_animation_data(
 ) -> LOLUiElementEffectAnimationData {
     LOLUiElementEffectAnimationData {
         name: anim.name.clone(),
-        position: convert_ui_position(&anim.position),
+        position: convert_ui_position_to_enum(&anim.position),
         layer: anim.layer,
         texture_data: convert_texture_data(&anim.texture_data),
         frames_per_second: anim.frames_per_second,
@@ -460,7 +508,7 @@ fn convert_ui_desaturate_data(
 ) -> LOLUiElementEffectDesaturateData {
     LOLUiElementEffectDesaturateData {
         name: desaturate.name.clone(),
-        position: convert_ui_position(&desaturate.position),
+        position: convert_ui_position_to_enum(&desaturate.position),
         layer: desaturate.layer,
         texture_data: desaturate
             .texture_data
@@ -478,12 +526,27 @@ fn convert_ui_instanced_data(
 ) -> LOLUiElementEffectInstancedData {
     LOLUiElementEffectInstancedData {
         name: instanced.name.clone(),
-        position: convert_ui_position(&instanced.position),
+        position: convert_ui_position_to_enum(&instanced.position),
         layer: instanced.layer,
         texture_data: instanced.texture_data.as_ref().map(convert_atlas_data),
         color: instanced.m_color,
         scene: instanced.scene,
         enabled: instanced.enabled.unwrap_or(false),
+    }
+}
+
+/// 转换 UiElementEffectFillPercentageData 到 lol_base 稳定类型
+fn convert_ui_fill_percentage_data(
+    fill_percentage: &UiElementEffectFillPercentageData,
+) -> LOLUiElementEffectFillPercentageData {
+    LOLUiElementEffectFillPercentageData {
+        name: fill_percentage.name.clone(),
+        position: convert_ui_position_to_enum(&fill_percentage.position),
+        layer: fill_percentage.layer,
+        texture_data: convert_atlas_data(&fill_percentage.texture_data),
+        scene: fill_percentage.scene,
+        enabled: fill_percentage.enabled.unwrap_or(false),
+        m_per_pixel_uvs_x: fill_percentage.m_per_pixel_uvs_x,
     }
 }
 
@@ -575,6 +638,11 @@ fn convert_ui_position(pos: &EnumUiPosition) -> LOLEnumUiPosition {
             })
         }
     }
+}
+
+/// 转换 EnumUiPosition 到 LOLEnumUiPosition
+fn convert_ui_position_to_enum(pos: &UiPositionRect) -> LOLEnumUiPosition {
+    LOLEnumUiPosition::UiPositionRect(convert_ui_position_rect(pos))
 }
 
 /// 转换 UiPositionRect 到 LOLUiPositionRect
@@ -673,6 +741,63 @@ fn convert_floating_info_bar_view_controller(
 ) -> LOLFloatingInfoBarViewController {
     LOLFloatingInfoBarViewController {
         info_bar_style_source_map: vc.info_bar_style_source_map.clone(),
+    }
+}
+
+fn convert_player_inventory_view_controller(
+    vc: &PlayerInventoryViewController,
+) -> LOLPlayerInventoryViewController {
+    LOLPlayerInventoryViewController {
+        item_slot_ui_data: vc
+            .item_slot_ui_data
+            .iter()
+            .map(convert_item_slot_detailed_ui_data)
+            .collect(),
+        scene: vc.scene.into(),
+        shop_button: convert_hud_shop_button(&vc.shop_button),
+    }
+}
+
+fn convert_item_slot_detailed_ui_data(
+    data: &league_core::extract::ItemSlotDetailedUiData,
+) -> LOLItemSlotDetailedUiData {
+    LOLItemSlotDetailedUiData {
+        ammo_fx: data.ammo_fx,
+        backdrop: data.backdrop.into(),
+        border_default: data.border_default.into(),
+        border_disabled: data.border_disabled.into(),
+        border_enabled: data.border_enabled.into(),
+        border_selected: data.border_selected.map(|v| v.into()),
+        complete_fx: data.complete_fx,
+        cooldown_effects: data
+            .cooldown_effects
+            .as_ref()
+            .map(convert_cooldown_effect_ui_data),
+        hit_area: data.hit_area.into(),
+        hotkey_text: data.hotkey_text.into(),
+        icon: data.icon.into(),
+        major_active: data.major_active,
+        overlay_disabled: data.overlay_disabled.into(),
+        overlay_hover: data.overlay_hover.into(),
+        overlay_loc: data.overlay_loc.into(),
+        overlay_oom: data.overlay_oom.map(|v| v.into()),
+        stack_text: data.stack_text.map(|v| v.into()),
+        toggle_fx: Some(data.toggle_fx),
+    }
+}
+
+fn convert_hud_shop_button(data: &league_core::extract::HudShopButton) -> LOLHudShopButton {
+    LOLHudShopButton {
+        inactive_icon: data.inactive_icon.into(),
+        shop_button: data.shop_button.into(),
+        text_link: data.text_link.into(),
+        unk_0x34a1434b: data.unk_0x34a1434b,
+        unk_0x40aa9d58: data.unk_0x40aa9d58,
+        unk_0x697f8b6b: data.unk_0x697f8b6b,
+        unk_0x778e26c6: data.unk_0x778e26c6,
+        unk_0x7dffe581: data.unk_0x7dffe581.clone(),
+        unk_0x8031b7a0: data.unk_0x8031b7a0,
+        unk_0xb77375ae: data.unk_0xb77375ae,
     }
 }
 
@@ -823,11 +948,86 @@ fn convert_player_portrait_ui_data(data: &PlayerPortraitUiData) -> LOLPlayerPort
 
 fn convert_hud_player_resource_bars(data: &HudPlayerResourceBars) -> LOLHudPlayerResourceBars {
     LOLHudPlayerResourceBars {
+        ar_threshold_indicator: data
+            .ar_threshold_indicator
+            .as_ref()
+            .map(convert_hud_ability_resource_threshold_indicator),
         experience_bar: data.experience_bar.into(),
+        experience_hit_region: data.experience_hit_region.into(),
+        health_animated_meter_skin: convert_ui_element_meter_skin(&data.health_animated_meter_skin),
         health_hit_region: data.health_hit_region.into(),
-        health_regen_text: data.health_regen_text,
+        health_meter: convert_health_meter(&data.health_meter),
+        health_regen_text: data.health_regen_text.into(),
         par_hit_region: data.par_hit_region.into(),
-        par_regen_text: data.par_regen_text,
+        par_meter_data: convert_ability_resource_bar_data(&data.par_meter_data),
+        par_regen_text: data.par_regen_text.into(),
+        sar_text: data.sar_text.into(),
+    }
+}
+
+fn convert_hud_ability_resource_threshold_indicator(
+    data: &HudAbilityResourceThresholdIndicator,
+) -> LOLHudAbilityResourceThresholdIndicator {
+    LOLHudAbilityResourceThresholdIndicator {
+        threshold_indicator_elements: data
+            .threshold_indicator_elements
+            .iter()
+            .map(|&v| v.into())
+            .collect(),
+    }
+}
+
+fn convert_ui_element_meter_skin(data: &UiElementMeterSkin) -> LOLUiElementMeterSkin {
+    LOLUiElementMeterSkin {
+        bar_elements: data.bar_elements.iter().map(|&v| v.into()).collect(),
+    }
+}
+
+fn convert_health_meter(data: &HealthMeter) -> LOLHealthMeter {
+    LOLHealthMeter {
+        fade_bar: data.fade_bar.into(),
+        meter: data.meter.into(),
+        value_text: data.value_text.into(),
+    }
+}
+
+fn convert_ability_resource_bar_data(data: &AbilityResourceBarData) -> LOLAbilityResourceBarData {
+    LOLAbilityResourceBarData {
+        ability_resource_bars: convert_enum_resource_meter(&data.ability_resource_bars),
+        backdrop: data.backdrop.map(|v| v.into()),
+        standard_tick: data.standard_tick.map(|v| v.into()),
+        use_animated_skins: data.use_animated_skins,
+        value_text: data.value_text.map(|v| v.into()),
+    }
+}
+
+fn convert_enum_resource_meter(data: &EnumResourceMeter) -> LOLEnumResourceMeter {
+    match data {
+        EnumResourceMeter::ResourceMeterGroupData(m) => {
+            LOLEnumResourceMeter::ResourceMeterGroupData(LOLResourceMeterGroupData {
+                meter: m.meter.into(),
+                meter_skins: LOLResourceMeterSkinData {
+                    additional_meter_skins: m
+                        .meter_skins
+                        .additional_meter_skins
+                        .iter()
+                        .map(|(&k, v)| (k, convert_ui_element_meter_skin(v)))
+                        .collect(),
+                    default_meter_skin: convert_ui_element_meter_skin(
+                        &m.meter_skins.default_meter_skin,
+                    ),
+                },
+            })
+        }
+        EnumResourceMeter::ResourceMeterIconData(m) => {
+            LOLEnumResourceMeter::ResourceMeterIconData(LOLResourceMeterIconData {
+                additional_bar_types: m
+                    .additional_bar_types
+                    .as_ref()
+                    .map(|map| map.iter().map(|(&k, &v)| (k, v.into())).collect()),
+                default_bar: m.default_bar.into(),
+            })
+        }
     }
 }
 
@@ -1058,9 +1258,26 @@ pub fn extract_ui_all(game_path: &str) {
     let export_configs = vec![
         ("gameplay.playerframe.bin", ui_paths.player_frame_ron()),
         (
+            "gameplay.playerinventory.bin",
+            ui_paths.player_inventory_ron(),
+        ),
+        (
+            "gameplay.playeraugments.bin",
+            ui_paths.player_augments_ron(),
+        ),
+        ("gameplay.playermute.bin", ui_paths.player_mute_ron()),
+        ("gameplay.playerperks.bin", ui_paths.player_perks_ron()),
+        ("gameplay.playerreport.bin", ui_paths.player_report_ron()),
+        ("gameplay.playerstats.bin", ui_paths.player_stats_ron()),
+        (
+            "gameplay.playerstatstones.bin",
+            ui_paths.player_statstones_ron(),
+        ),
+        (
             "gameplay.lolfloatinginfobars.bin",
             ui_paths.floating_info_bars_ron(),
         ),
+        ("gameplay.lolgameheader.bin", ui_paths.lol_game_header_ron()),
     ];
 
     for (bin_path, ron_path) in export_configs {
@@ -1077,5 +1294,157 @@ pub fn extract_ui_all(game_path: &str) {
         for texture_name in &result.texture_names {
             crate::extract::utils::extract_texture(&loader, texture_name);
         }
+    }
+}
+
+fn convert_lol_game_state_view_controller(
+    vc: &LolGameStateViewController,
+) -> LOLLolGameStateViewController {
+    LOLLolGameStateViewController {
+        base_loadable: vc.base_loadable,
+        draw_area_list: vc.draw_area_list.as_ref().map(|d| LOLDrawAreaList {
+            draw_regions: d.draw_regions.iter().map(|&h| h.into()).collect(),
+        }),
+        metrics: vc.metrics.iter().map(convert_enum_ui_metric).collect(),
+        path_hash_to_self: vc.path_hash_to_self,
+        scene: vc.scene.into(),
+    }
+}
+
+fn convert_enum_ui_metric(metric: &EnumUiMetric) -> LOLEnumUiMetric {
+    match metric {
+        EnumUiMetric::UiMetricClash(c) => LOLEnumUiMetric::UiMetricClash(LOLUiMetricClash {
+            clash_frame: c.clash_frame.into(),
+            clash_frame_mirror: c.clash_frame_mirror.into(),
+            clash_round_icon: c.clash_round_icon.into(),
+            clash_round_text: c.clash_round_text.into(),
+            device_ux: c.device_ux,
+            team1: LOLUiClashTeam {
+                logo_icon: c.team1.logo_icon.into(),
+                tag_text: c.team1.tag_text.into(),
+            },
+            team2: LOLUiClashTeam {
+                logo_icon: c.team2.logo_icon.into(),
+                tag_text: c.team2.tag_text.into(),
+            },
+        }),
+        EnumUiMetric::UiMetricCreepScore(c) => {
+            LOLEnumUiMetric::UiMetricCreepScore(LOLUiMetricCreepScore {
+                device_ux: c.device_ux,
+                icon: c.icon.into(),
+                text: c.text.into(),
+            })
+        }
+        EnumUiMetric::UiMetricFps(f) => LOLEnumUiMetric::UiMetricFps(LOLUiMetricFps {
+            device_ux: f.device_ux,
+            fps_text: f.fps_text.into(),
+        }),
+        EnumUiMetric::UiMetricGameTime(gt) => {
+            LOLEnumUiMetric::UiMetricGameTime(LOLUiMetricGameTime {
+                device_ux: gt.device_ux,
+                time_text: gt.time_text.into(),
+            })
+        }
+        EnumUiMetric::UiMetricKda(k) => LOLEnumUiMetric::UiMetricKda(LOLUiMetricKda {
+            device_ux: k.device_ux,
+            icon: k.icon.into(),
+            text: k.text.into(),
+        }),
+        EnumUiMetric::UiMetricLatencyText(l) => {
+            LOLEnumUiMetric::UiMetricLatencyText(LOLUiMetricLatencyText {
+                device_ux: l.device_ux,
+                latency_text: l.latency_text.into(),
+            })
+        }
+        EnumUiMetric::UiMetricTeamKills(tk) => {
+            LOLEnumUiMetric::UiMetricTeamKills(LOLUiMetricTeamKills {
+                device_ux: tk.device_ux,
+                team1_kill_text: tk.team1_kill_text.into(),
+                team2_kill_text: tk.team2_kill_text.into(),
+                team_kills_icon: tk.team_kills_icon.into(),
+            })
+        }
+        EnumUiMetric::UiMetricTeamScoreMeters(tsm) => {
+            LOLEnumUiMetric::UiMetricTeamScoreMeters(LOLUiMetricTeamScoreMeters {
+                device_ux: tsm.device_ux,
+                frame: tsm.frame.into(),
+                team1_meter: tsm.team1_meter.into(),
+                team1_meter_blue_skin: tsm.team1_meter_blue_skin.into(),
+                team1_meter_red_skin: tsm.team1_meter_red_skin.into(),
+                team2_meter: tsm.team2_meter.into(),
+                team2_meter_blue_skin: tsm.team2_meter_blue_skin.into(),
+                team2_meter_red_skin: tsm.team2_meter_red_skin.into(),
+            })
+        }
+        EnumUiMetric::Unk0x5ab5b20f(u) => LOLEnumUiMetric::Unk0x5ab5b20f(LOLUnk0x5ab5b20f {
+            device_ux: u.device_ux,
+            time_text: u.time_text.into(),
+            unk_0xadbcc5ee: u.unk_0xadbcc5ee.into(),
+        }),
+        EnumUiMetric::Unk0x767adcf7(u) => LOLEnumUiMetric::Unk0x767adcf7(LOLUnk0x767adcf7 {
+            device_ux: u.device_ux,
+            frame: u.frame.into(),
+            time_text: u.time_text.into(),
+        }),
+        EnumUiMetric::Unk0xb62c8675(u) => LOLEnumUiMetric::Unk0xb62c8675(LOLUnk0xb62c8675 {
+            base_loadable: u.base_loadable,
+            crown_icons: LOLUnk0xa8c6f5f0 {
+                unk_0x1793d323: u.crown_icons.unk_0x1793d323.into(),
+                unk_0x4297f4f9: u.crown_icons.unk_0x4297f4f9.into(),
+                unk_0x5329572e: u.crown_icons.unk_0x5329572e.into(),
+                unk_0xb80015ba: u.crown_icons.unk_0xb80015ba.into(),
+            },
+            details_panel: LOLUnk0x7a19656 {
+                detail_panel: u.details_panel.detail_panel.into(),
+                detail_text_t1: u.details_panel.detail_text_t1.into(),
+                detail_text_t2: u.details_panel.detail_text_t2.into(),
+                timer_panel: u.details_panel.timer_panel.into(),
+                timer_text: u.details_panel.timer_text.into(),
+                unk_0x6188e7b7: u.details_panel.unk_0x6188e7b7.into(),
+            },
+            device_ux: u.device_ux,
+            meters_panel: LOLUnk0xf43ad1ce {
+                frame: u.meters_panel.frame.into(),
+                icon_shadow_t1: u.meters_panel.icon_shadow_t1.into(),
+                icon_shadow_t2: u.meters_panel.icon_shadow_t2.into(),
+                team1_meter: LOLUnk0xb8a49c96 {
+                    blue_skin: u.meters_panel.team1_meter.blue_skin.into(),
+                    meter: u.meters_panel.team1_meter.meter.into(),
+                    red_skin: u.meters_panel.team1_meter.red_skin.into(),
+                },
+                team2_meter: LOLUnk0xb8a49c96 {
+                    blue_skin: u.meters_panel.team2_meter.blue_skin.into(),
+                    meter: u.meters_panel.team2_meter.meter.into(),
+                    red_skin: u.meters_panel.team2_meter.red_skin.into(),
+                },
+            },
+            scene: u.scene,
+            soraka_icons: LOLUnk0xa8c6f5f0 {
+                unk_0x1793d323: u.soraka_icons.unk_0x1793d323.into(),
+                unk_0x4297f4f9: u.soraka_icons.unk_0x4297f4f9.into(),
+                unk_0x5329572e: u.soraka_icons.unk_0x5329572e.into(),
+                unk_0xb80015ba: u.soraka_icons.unk_0xb80015ba.into(),
+            },
+            tower_icons: LOLUnk0xa8c6f5f0 {
+                unk_0x1793d323: u.tower_icons.unk_0x1793d323.into(),
+                unk_0x4297f4f9: u.tower_icons.unk_0x4297f4f9.into(),
+                unk_0x5329572e: u.tower_icons.unk_0x5329572e.into(),
+                unk_0xb80015ba: u.tower_icons.unk_0xb80015ba.into(),
+            },
+            unk_0x462800b7: LOLUnk0xa8c6f5f0 {
+                unk_0x1793d323: u.unk_0x462800b7.unk_0x1793d323.into(),
+                unk_0x4297f4f9: u.unk_0x462800b7.unk_0x4297f4f9.into(),
+                unk_0x5329572e: u.unk_0x462800b7.unk_0x5329572e.into(),
+                unk_0xb80015ba: u.unk_0x462800b7.unk_0xb80015ba.into(),
+            },
+            unk_0xb057cf4b: u.unk_0xb057cf4b,
+        }),
+        EnumUiMetric::Unk0xe228ce4a(u) => LOLEnumUiMetric::Unk0xe228ce4a(LOLUnk0xe228ce4a {
+            device_ux: u.device_ux,
+            frame: u.frame.into(),
+            team1_text: u.team1_text.into(),
+            team2_text: u.team2_text.into(),
+            unk_0x3a568777: u.unk_0x3a568777.clone(),
+        }),
     }
 }

@@ -43,6 +43,8 @@ fn main() {
     let hashes = get_hashes(&hash_paths);
 
     let need_extract = HashSet::from([
+        hash_bin("LolGameStateViewController"),
+        hash_bin("PlayerInventoryViewController"),
         hash_bin("PlayerFrameViewController"),
         hash_bin("ItemData"),
         hash_bin("AnimationGraphData"),
@@ -64,6 +66,7 @@ fn main() {
         hash_bin("UiElementRegionData"),
         hash_bin("UiElementEffectDesaturateData"),
         hash_bin("UiElementEffectInstancedData"),
+        hash_bin("UiElementEffectFillPercentageData"),
         hash_bin("UiPropertyLoadable"),
         hash_bin("UISceneData"),
         hash_bin("UnitFloatingInfoBarData"),
@@ -128,7 +131,7 @@ fn main() {
         class_map_to_rust_code(&mut class_map, &hashes, &need_extract, &need_defaults).unwrap();
 
     write("league.rs", rust_code).unwrap();
-    write("init_league_asset.rs", init_code).unwrap();
+    // write("init_league_asset.rs", init_code).unwrap();
 
     println!("耗时: {:?}", start.elapsed());
 }

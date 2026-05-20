@@ -32,8 +32,9 @@ pub fn extract_texture(loader: &LeagueLoader, texture_name: &str) -> String {
         return target_path;
     };
 
-    // 如果是 dds 则直接保存
-    if texture_name.to_lowercase().ends_with(".dds") {
+    // 如果是 dds 或 png 则直接保存
+    let texture_name_lc = texture_name.to_lowercase();
+    if texture_name_lc.ends_with(".dds") || texture_name_lc.ends_with(".png") {
         write_to_file(&target_path, buf);
         println!("[EXTRACT] 已提取纹理: {}", target_path);
         return target_path;

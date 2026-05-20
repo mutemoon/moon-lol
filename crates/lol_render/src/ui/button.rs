@@ -24,6 +24,9 @@ fn update_visibility(
     q_ui_button: Query<(&UIButtonEntities, &InheritedVisibility), Changed<InheritedVisibility>>,
 ) {
     for (entities, visibility) in q_ui_button.iter() {
+        if entities.default.is_none() {
+            continue;
+        }
         if visibility.get() {
             commands
                 .entity(entities.default.unwrap())

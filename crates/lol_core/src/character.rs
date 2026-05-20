@@ -48,7 +48,7 @@ fn on_event_dead(
             continue;
         }
 
-        if target_team != team {
+        if target_team == team {
             continue;
         }
 

@@ -199,8 +199,10 @@ fn on_command_missile_create(
     q_global_transform: Query<&GlobalTransform>,
     q_children: Query<&Children>,
     q_joint_target: Query<&Name>,
+    q_team: Query<&Team>,
 ) {
     let entity = trigger.event_target();
+    let opt_team = q_team.get(entity).ok().cloned();
 
     let spell_data = res_assets_spell_object
         .get(&trigger.spell)
@@ -254,27 +256,31 @@ fn on_command_missile_create(
             return;
         };
 
-        let missile_entity = commands
-            .spawn((
-                Missile {
-                    key: trigger.spell.clone(),
-                    speed,
-                },
-                MissileState {
-                    source: entity,
-                    target: None,
-                    target_bone: None,
-                    destination: Some(destination),
-                },
-                LinearMissile {
-                    width: missile_width.unwrap_or(100.0),
-                    damage: trigger.damage,
-                    hit_enemies: Vec::new(),
-                },
-                Transform::from_translation(translation),
-                Movement { speed },
-            ))
-            .id();
+        let mut cmd = commands.spawn((
+            Missile {
+                key: trigger.spell.clone(),
+                speed,
+            },
+            MissileState {
+                source: entity,
+                target: None,
+                target_bone: None,
+                destination: Some(destination),
+            },
+            LinearMissile {
+                width: missile_width.unwrap_or(100.0),
+                damage: trigger.damage,
+                hit_enemies: Vec::new(),
+            },
+            Transform::from_translation(translation),
+            Movement { speed },
+        ));
+
+        if let Some(team) = opt_team.clone() {
+            cmd.insert(team);
+        }
+
+        let missile_entity = cmd.id();
 
         commands.trigger(CommandMovement {
             entity: missile_entity,
@@ -317,22 +323,26 @@ fn on_command_missile_create(
     }
 
     debug!("{} 发射导弹 {:?}", entity, trigger.spell);
-    let missile_entity = commands
-        .spawn((
-            Missile {
-                key: trigger.spell.clone(),
-                speed,
-            },
-            MissileState {
-                source: entity,
-                target: Some(target),
-                target_bone: Some(end_entity),
-                destination: None,
-            },
-            Transform::from_translation(translation),
-            Movement { speed },
-        ))
-        .id();
+    let mut cmd = commands.spawn((
+        Missile {
+            key: trigger.spell.clone(),
+            speed,
+        },
+        MissileState {
+            source: entity,
+            target: Some(target),
+            target_bone: Some(end_entity),
+            destination: None,
+        },
+        Transform::from_translation(translation),
+        Movement { speed },
+    ));
+
+    if let Some(team) = opt_team.clone() {
+        cmd.insert(team);
+    }
+
+    let missile_entity = cmd.id();
 
     q_children.iter_descendants(entity);
 

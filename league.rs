@@ -1,10 +1,3 @@
-use std::collections::BTreeMap;
-
-use bevy::asset::Asset;
-use bevy::math::{Mat4, Vec2, Vec3, Vec4};
-use bevy::reflect::TypePath;
-use serde::{Deserialize, Serialize};
-
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct AbilitiesUiData {

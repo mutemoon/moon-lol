@@ -4,9 +4,10 @@ use bevy::prelude::*;
 use lol_base::hash_key::LoadHashKeyTrait;
 use lol_base::ui::{
     LOLHeroFloatingInfoBarData, LOLStructureFloatingInfoBarData, LOLUiElementEffectAnimationData,
-    LOLUiElementEffectDesaturateData, LOLUiElementEffectInstancedData, LOLUiElementGroupButtonData,
-    LOLUiElementIconData, LOLUiElementRegionData, LOLUiElementTextData, LOLUiFile, LOLUiPaths,
-    LOLUiSceneData, LOLUnitFloatingInfoBarData,
+    LOLUiElementEffectDesaturateData, LOLUiElementEffectFillPercentageData,
+    LOLUiElementEffectInstancedData, LOLUiElementGroupButtonData, LOLUiElementIconData,
+    LOLUiElementRegionData, LOLUiElementTextData, LOLUiFile, LOLUiPaths, LOLUiSceneData,
+    LOLUnitFloatingInfoBarData,
 };
 use lol_base::ui_components::{UIButton, UIElement};
 
@@ -20,6 +21,7 @@ pub type ButtonAssets = Assets<LOLUiElementGroupButtonData>;
 pub type RegionAssets = Assets<LOLUiElementRegionData>;
 pub type TextAssets = Assets<LOLUiElementTextData>;
 pub type InstancedAssets = Assets<LOLUiElementEffectInstancedData>;
+pub type FillPercentageAssets = Assets<LOLUiElementEffectFillPercentageData>;
 pub type SceneAssets = Assets<LOLUiSceneData>;
 
 pub fn startup_load_ui_data(
@@ -32,6 +34,7 @@ pub fn startup_load_ui_data(
     mut region_assets: ResMut<RegionAssets>,
     mut text_assets: ResMut<TextAssets>,
     mut instanced_assets: ResMut<InstancedAssets>,
+    mut fill_percentage_assets: ResMut<FillPercentageAssets>,
     mut scene_assets: ResMut<SceneAssets>,
     mut unit_floating_info_bar_assets: ResMut<Assets<LOLUnitFloatingInfoBarData>>,
     mut hero_floating_info_bar_assets: ResMut<Assets<LOLHeroFloatingInfoBarData>>,
@@ -40,7 +43,15 @@ pub fn startup_load_ui_data(
     let ui_paths = LOLUiPaths::default();
     let ron_paths = vec![
         ui_paths.player_frame_ron(),
+        ui_paths.player_inventory_ron(),
+        ui_paths.player_augments_ron(),
+        ui_paths.player_mute_ron(),
+        ui_paths.player_perks_ron(),
+        ui_paths.player_report_ron(),
+        ui_paths.player_stats_ron(),
+        ui_paths.player_statstones_ron(),
         ui_paths.floating_info_bars_ron(),
+        ui_paths.lol_game_header_ron(),
     ];
 
     let mut all_ui_files = Vec::new();
@@ -66,6 +77,7 @@ pub fn startup_load_ui_data(
     let mut combined_regions = HashMap::new();
     let mut combined_texts = HashMap::new();
     let mut combined_instanceds = HashMap::new();
+    let mut combined_fill_percentages = HashMap::new();
 
     // 第一阶段：创建所有 Asset 并收集数据
     for data in &all_ui_files {
@@ -109,6 +121,11 @@ pub fn startup_load_ui_data(
             combined_instanceds.insert(*hash, instanced_data.clone());
         }
 
+        for (hash, fill_percentage_data) in &data.fill_percentage_elements {
+            fill_percentage_assets.add_hash(*hash, fill_percentage_data.clone());
+            combined_fill_percentages.insert(*hash, fill_percentage_data.clone());
+        }
+
         for (hash, bar_data) in &data.unit_floating_info_bars {
             unit_floating_info_bar_assets.add_hash(*hash, bar_data.clone());
         }
@@ -126,6 +143,14 @@ pub fn startup_load_ui_data(
         }
 
         if let Some(vc) = &data.player_frame_view_controller {
+            commands.insert_resource(vc.clone());
+        }
+
+        if let Some(vc) = &data.player_inventory_view_controller {
+            commands.insert_resource(vc.clone());
+        }
+
+        if let Some(vc) = &data.lol_game_state_view_controller {
             commands.insert_resource(vc.clone());
         }
     }
@@ -272,6 +297,25 @@ pub fn startup_load_ui_data(
             .id();
 
         let scene_entity = res_ui_element_entity.get(text_data.scene);
+        commands.entity(scene_entity).add_child(entity);
+        res_ui_element_entity.add(*hash, entity);
+    }
+
+    // 9. 创建 FillPercentage 实体并挂载到场景
+    for (hash, fill_percentage_data) in &combined_fill_percentages {
+        let entity = commands
+            .spawn((
+                UIElement::FillPercentage(hash.into()),
+                if fill_percentage_data.enabled {
+                    Visibility::Inherited
+                } else {
+                    Visibility::Hidden
+                },
+                Name::new(format!("FillPercentage: {}", fill_percentage_data.name)),
+            ))
+            .id();
+
+        let scene_entity = res_ui_element_entity.get(fill_percentage_data.scene);
         commands.entity(scene_entity).add_child(entity);
         res_ui_element_entity.add(*hash, entity);
     }

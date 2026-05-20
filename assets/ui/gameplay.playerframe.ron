@@ -7893,6 +7893,35 @@
         ),
     },
     instanced_elements: {},
+    fill_percentage_elements: {
+        1801962005: (
+            name: "ClientStates/Gameplay/UX/LoL/PlayerFrame/UIBase/Player_Frame_Root/Player_Frame/PlayerExp_BarTexture",
+            position: UiPositionRect((
+                anchors: Some(AnchorSingle((
+                    anchor: (0.5, 1.0),
+                ))),
+                ui_rect: Some((
+                    position: Some((428.0, 1044.0)),
+                    size: Some((48.0, 120.0)),
+                    source_resolution_height: Some(1200),
+                    source_resolution_width: Some(1600),
+                )),
+                disable_pixel_snapping_x: Some(true),
+                disable_pixel_snapping_y: Some(true),
+                disable_resolution_downscale: None,
+                ignore_global_scale: None,
+                ignore_safe_zone: None,
+            )),
+            layer: 2,
+            texture_data: (
+                m_texture_name: "ASSETS/UX/LoL/Clarity_HUDAtlas.png",
+                m_texture_uv: Some((631.0, 869.0, 679.0, 989.0)),
+            ),
+            scene: 3452923175,
+            enabled: true,
+            m_per_pixel_uvs_x: true,
+        ),
+    },
     button_elements: {
         334487992: (
             name: "ClientStates/Gameplay/UX/LoL/PlayerFrame/UIBase/Player_Frame_Root/LevelUp/Evolve0_Button",
@@ -10195,11 +10224,102 @@
             tooltip_region: 1354713250,
         ),
         resource_bars: (
+            ar_threshold_indicator: None,
             experience_bar: 1801962005,
+            experience_hit_region: 3453122127,
+            health_animated_meter_skin: (
+                bar_elements: [
+                    2880157502,
+                ],
+            ),
             health_hit_region: 2243188997,
+            health_meter: (
+                fade_bar: 716806630,
+                meter: 3245149038,
+                value_text: 2315490259,
+            ),
             health_regen_text: 3909164179,
             par_hit_region: 1515028685,
+            par_meter_data: (
+                ability_resource_bars: ResourceMeterGroupData((
+                    meter: 994134589,
+                    meter_skins: (
+                        additional_meter_skins: {
+                            96429129: (
+                                bar_elements: [
+                                    1379511195,
+                                ],
+                            ),
+                            737199892: (
+                                bar_elements: [
+                                    3416702039,
+                                    2271931591,
+                                ],
+                            ),
+                            1089765596: (
+                                bar_elements: [
+                                    2080677654,
+                                ],
+                            ),
+                            1169454059: (
+                                bar_elements: [
+                                    1787782565,
+                                ],
+                            ),
+                            1190679805: (
+                                bar_elements: [
+                                    2080677654,
+                                    4137842258,
+                                ],
+                            ),
+                            1372126875: (
+                                bar_elements: [
+                                    4237312904,
+                                    3944224764,
+                                ],
+                            ),
+                            2197550541: (
+                                bar_elements: [
+                                    3416702039,
+                                ],
+                            ),
+                            2590900991: (
+                                bar_elements: [
+                                    2698760117,
+                                ],
+                            ),
+                            2697481464: (
+                                bar_elements: [
+                                    1379511195,
+                                    1369536967,
+                                ],
+                            ),
+                            3251277590: (
+                                bar_elements: [
+                                    1787782565,
+                                    428688953,
+                                ],
+                            ),
+                            3724674918: (
+                                bar_elements: [
+                                    4237312904,
+                                ],
+                            ),
+                        },
+                        default_meter_skin: (
+                            bar_elements: [
+                                3416702039,
+                            ],
+                        ),
+                    ),
+                )),
+                backdrop: Some(1515028685),
+                standard_tick: None,
+                use_animated_skins: Some(true),
+                value_text: Some(2200282955),
+            ),
             par_regen_text: 408065643,
+            sar_text: 206769248,
         ),
         level_up_display: (
             buttons_scene: 2280481987,
@@ -10278,6 +10398,8 @@
             ),
         ],
     )),
+    player_inventory_view_controller: None,
+    lol_game_state_view_controller: None,
     unit_floating_info_bars: {},
     hero_floating_info_bars: {},
     structure_floating_info_bars: {},

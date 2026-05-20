@@ -4,7 +4,9 @@ use lol_base::hash_key::LoadHashKeyTrait;
 use lol_base::ui::LOLEnumData;
 use lol_base::ui_components::{UIElement, UIElementChild};
 
-use super::init::{AnimAssets, DesaturateAssets, IconAssets, RegionAssets, TextAssets};
+use super::init::{
+    AnimAssets, DesaturateAssets, FillPercentageAssets, IconAssets, RegionAssets, TextAssets,
+};
 
 pub fn update_element_layout(
     commands: &mut Commands,
@@ -17,12 +19,15 @@ pub fn update_element_layout(
     desaturate_assets: &DesaturateAssets,
     region_assets: &RegionAssets,
     text_assets: &TextAssets,
+    fill_percentage_assets: &FillPercentageAssets,
     q_node: &mut Query<&mut Node>,
     q_children: &Query<&Children>,
 ) {
     let Ok(mut node) = q_node.get_mut(entity) else {
         return;
     };
+
+    let mut temp_texture_data: Option<LOLEnumData> = None;
 
     let (ui_position, texture_data, name, layer) = match ui_element {
         UIElement::Icon(handle) => {
@@ -82,6 +87,20 @@ pub fn update_element_layout(
                 &None,
                 Some(&text_data.name),
                 text_data.layer.unwrap_or(0) as i32,
+            )
+        }
+        UIElement::FillPercentage(handle) => {
+            let Some(fill_percentage_data) = fill_percentage_assets.load_hash(handle) else {
+                return;
+            };
+            temp_texture_data = Some(LOLEnumData::AtlasData(
+                fill_percentage_data.texture_data.clone(),
+            ));
+            (
+                &fill_percentage_data.position,
+                &temp_texture_data,
+                Some(&fill_percentage_data.name),
+                fill_percentage_data.layer as i32,
             )
         }
     };
@@ -153,7 +172,7 @@ pub fn update_element_layout(
     node.width = Val::Px(size_new.x);
     node.height = Val::Px(size_new.y);
 
-    commands.entity(entity).insert(ZIndex(layer));
+    commands.entity(entity).insert((ZIndex(layer), super::OriginalPosition(position_new)));
 
     let child = if let Ok(children) = q_children.get(entity) {
         if let Some(&child) = children.first() {
@@ -244,6 +263,7 @@ pub fn update_on_add_ui_element(
     desaturate_assets: Res<DesaturateAssets>,
     region_assets: Res<RegionAssets>,
     text_assets: Res<TextAssets>,
+    fill_percentage_assets: Res<FillPercentageAssets>,
     asset_server: Res<AssetServer>,
 ) {
     let Ok(window) = q_window.single() else {
@@ -264,6 +284,7 @@ pub fn update_on_add_ui_element(
                 &desaturate_assets,
                 &region_assets,
                 &text_assets,
+                &fill_percentage_assets,
                 &mut q_node,
                 &q_children,
             );
@@ -276,7 +297,8 @@ pub fn update_on_add_ui_element(
              anim_assets: Res<AnimAssets>,
              desaturate_assets: Res<DesaturateAssets>,
              region_assets: Res<RegionAssets>,
-             text_assets: Res<TextAssets>| {
+             text_assets: Res<TextAssets>,
+             fill_percentage_assets: Res<FillPercentageAssets>| {
                 let ui_element = q_ui_element.get(event.entity).unwrap();
                 let name = match ui_element {
                     UIElement::Icon(handle) => {
@@ -294,6 +316,9 @@ pub fn update_on_add_ui_element(
                     UIElement::Text(handle) => {
                         text_assets.load_hash(*handle).map(|v| v.name.as_str())
                     }
+                    UIElement::FillPercentage(handle) => fill_percentage_assets
+                        .load_hash(*handle)
+                        .map(|v| v.name.as_str()),
                 };
                 let name = name.unwrap_or("dynamic");
                 println!("点击了 {}", name);
@@ -314,6 +339,7 @@ pub fn update_on_window_resized(
     desaturate_assets: Res<DesaturateAssets>,
     region_assets: Res<RegionAssets>,
     text_assets: Res<TextAssets>,
+    fill_percentage_assets: Res<FillPercentageAssets>,
 ) {
     for e in resize_reader.read() {
         let window_size = vec2(e.width, e.height);
@@ -330,6 +356,7 @@ pub fn update_on_window_resized(
                     &desaturate_assets,
                     &region_assets,
                     &text_assets,
+                    &fill_percentage_assets,
                     &mut q_node,
                     &q_children,
                 );

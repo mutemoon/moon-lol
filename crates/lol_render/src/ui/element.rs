@@ -13,9 +13,9 @@ use lol_base::hash::hash_bin;
 use lol_base::hash_key::HashKey;
 use lol_base::ui::{
     LOLHeroFloatingInfoBarData, LOLStructureFloatingInfoBarData, LOLUiElementEffectAnimationData,
-    LOLUiElementEffectDesaturateData, LOLUiElementEffectInstancedData, LOLUiElementGroupButtonData,
-    LOLUiElementIconData, LOLUiElementRegionData, LOLUiElementTextData, LOLUiSceneData,
-    LOLUnitFloatingInfoBarData,
+    LOLUiElementEffectDesaturateData, LOLUiElementEffectFillPercentageData,
+    LOLUiElementEffectInstancedData, LOLUiElementGroupButtonData, LOLUiElementIconData,
+    LOLUiElementRegionData, LOLUiElementTextData, LOLUiSceneData, LOLUnitFloatingInfoBarData,
 };
 use lol_base::ui_components::UIButton;
 pub use lol_base::ui_components::UIElement;
@@ -31,6 +31,7 @@ impl Plugin for PluginUIElement {
         app.init_asset::<LOLUiElementIconData>();
         app.init_asset::<LOLUiElementEffectAnimationData>();
         app.init_asset::<LOLUiElementEffectDesaturateData>();
+        app.init_asset::<LOLUiElementEffectFillPercentageData>();
         app.init_asset::<LOLUiElementEffectInstancedData>();
         app.init_asset::<LOLUiElementGroupButtonData>();
         app.init_asset::<LOLUiElementRegionData>();
@@ -71,6 +72,7 @@ pub struct CommandUpdateUIElement {
     pub size_type: SizeType,
     pub value: f32,
     pub node_type: NodeType,
+    pub flip: bool,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Reflect)]
@@ -84,6 +86,9 @@ pub enum NodeType {
     Parent,
     Child,
 }
+
+#[derive(Component, Debug, Clone, Copy)]
+pub struct OriginalPosition(pub Vec2);
 
 impl UIElementEntity {
     pub fn get_by_string(&self, key: &str) -> Option<&Entity> {
@@ -107,6 +112,7 @@ fn on_command_update_ui_element(
     trigger: On<CommandUpdateUIElement>,
     q_children: Query<&Children>,
     mut q_node: Query<&mut Node>,
+    q_original_position: Query<&OriginalPosition>,
 ) {
     let entity = trigger.entity;
     let size_type = trigger.size_type;
@@ -165,12 +171,47 @@ fn on_command_update_ui_element(
         }
     };
 
-    let Ok(mut target_node) = q_node.get_mut(target_entity) else {
-        return;
-    };
+    let target_size = standard_size * value;
+    {
+        let Ok(mut target_node) = q_node.get_mut(target_entity) else {
+            return;
+        };
+        match size_type {
+            SizeType::Width => {
+                target_node.width = Val::Px(target_size);
+            }
+            SizeType::Height => {
+                target_node.height = Val::Px(target_size);
+            }
+        }
+    }
 
-    match size_type {
-        SizeType::Width => target_node.width = Val::Px(standard_size * value),
-        SizeType::Height => target_node.height = Val::Px(standard_size * value),
+    if trigger.flip {
+        let original_top = q_original_position
+            .get(entity)
+            .map(|o| o.0.y)
+            .unwrap_or(0.0);
+        match size_type {
+            SizeType::Width => {
+                let Ok(mut child_node) = q_node.get_mut(children[0]) else {
+                    return;
+                };
+                child_node.left = Val::Px(standard_size - target_size);
+            }
+            SizeType::Height => {
+                {
+                    let Ok(mut target_node) = q_node.get_mut(target_entity) else {
+                        return;
+                    };
+                    target_node.top = Val::Px(original_top + standard_size - target_size);
+                }
+                {
+                    let Ok(mut child_node) = q_node.get_mut(children[0]) else {
+                        return;
+                    };
+                    child_node.top = Val::Px(-standard_size + target_size);
+                }
+            }
+        }
     }
 }

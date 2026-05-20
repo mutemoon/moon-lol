@@ -1,0 +1,576 @@
+(
+    elements: {
+        149082143: (
+            name: "ClientStates/Gameplay/UX/LoL/PlayerStatStones/UIBase/Stat_Stones/StatsPanel_StatStones_PrevButton/StatsPanel_StatStones_Prev_ButtonDefault",
+            position: UiPositionRect((
+                anchors: Some(AnchorSingle((
+                    anchor: (0.5, 1.0),
+                ))),
+                ui_rect: Some((
+                    position: Some((129.0, 1046.0)),
+                    size: Some((40.0, 32.0)),
+                    source_resolution_height: Some(1200),
+                    source_resolution_width: Some(1600),
+                )),
+                disable_pixel_snapping_x: None,
+                disable_pixel_snapping_y: None,
+                disable_resolution_downscale: None,
+                ignore_global_scale: None,
+                ignore_safe_zone: None,
+            )),
+            layer: Some(3),
+            texture_data: Some(AtlasData((
+                m_texture_name: "ASSETS/UX/LoL/StatsPanel_Atlas.png",
+                m_texture_uv: Some((230.0, 359.0, 270.0, 391.0)),
+            ))),
+            enabled: false,
+            scene: 2085677635,
+        ),
+        441497544: (
+            name: "ClientStates/Gameplay/UX/LoL/PlayerStatStones/UIBase/Stat_Stones/StatsPanel_StatStones_NextButton/StatsPanel_StatStones_Next_ButtonHover",
+            position: UiPositionRect((
+                anchors: Some(AnchorSingle((
+                    anchor: (0.5, 1.0),
+                ))),
+                ui_rect: Some((
+                    position: Some((307.0, 1045.0)),
+                    size: Some((40.0, 32.0)),
+                    source_resolution_height: Some(1200),
+                    source_resolution_width: Some(1600),
+                )),
+                disable_pixel_snapping_x: None,
+                disable_pixel_snapping_y: None,
+                disable_resolution_downscale: None,
+                ignore_global_scale: None,
+                ignore_safe_zone: None,
+            )),
+            layer: Some(4),
+            texture_data: Some(AtlasData((
+                m_texture_name: "ASSETS/UX/LoL/StatsPanel_Atlas.png",
+                m_texture_uv: Some((271.0, 359.0, 311.0, 391.0)),
+            ))),
+            enabled: false,
+            scene: 2085677635,
+        ),
+        692700239: (
+            name: "ClientStates/Gameplay/UX/LoL/PlayerStatStones/UIBase/Stat_Stones/StatsPanel_StatStones_Frame_AdvSide",
+            position: UiPositionRect((
+                anchors: Some(AnchorSingle((
+                    anchor: (0.5, 1.0),
+                ))),
+                ui_rect: Some((
+                    position: Some((-100.0, 889.0)),
+                    size: Some((228.0, 159.0)),
+                    source_resolution_height: Some(1200),
+                    source_resolution_width: Some(1600),
+                )),
+                disable_pixel_snapping_x: None,
+                disable_pixel_snapping_y: None,
+                disable_resolution_downscale: None,
+                ignore_global_scale: None,
+                ignore_safe_zone: None,
+            )),
+            layer: Some(1),
+            texture_data: None,
+            enabled: true,
+            scene: 2085677635,
+        ),
+        739981111: (
+            name: "ClientStates/Gameplay/UX/LoL/PlayerStatStones/UIBase/Stat_Stones/StatsPanel_StatStones_NextButton/StatsPanel_StatStones_Next_ButtonClicked",
+            position: UiPositionRect((
+                anchors: Some(AnchorSingle((
+                    anchor: (0.5, 1.0),
+                ))),
+                ui_rect: Some((
+                    position: Some((307.0, 1045.0)),
+                    size: Some((40.0, 32.0)),
+                    source_resolution_height: Some(1200),
+                    source_resolution_width: Some(1600),
+                )),
+                disable_pixel_snapping_x: None,
+                disable_pixel_snapping_y: None,
+                disable_resolution_downscale: None,
+                ignore_global_scale: None,
+                ignore_safe_zone: None,
+            )),
+            layer: Some(5),
+            texture_data: Some(AtlasData((
+                m_texture_name: "ASSETS/UX/LoL/StatsPanel_Atlas.png",
+                m_texture_uv: Some((312.0, 359.0, 352.0, 391.0)),
+            ))),
+            enabled: false,
+            scene: 2085677635,
+        ),
+        2420262942: (
+            name: "ClientStates/Gameplay/UX/LoL/PlayerStatStones/UIBase/Stat_Stones/StatsPanel_StatStones_NextButton/StatsPanel_StatStones_Next_ButtonDisabled",
+            position: UiPositionRect((
+                anchors: Some(AnchorSingle((
+                    anchor: (0.5, 1.0),
+                ))),
+                ui_rect: Some((
+                    position: Some((307.0, 1045.0)),
+                    size: Some((40.0, 32.0)),
+                    source_resolution_height: Some(1200),
+                    source_resolution_width: Some(1600),
+                )),
+                disable_pixel_snapping_x: None,
+                disable_pixel_snapping_y: None,
+                disable_resolution_downscale: None,
+                ignore_global_scale: None,
+                ignore_safe_zone: None,
+            )),
+            layer: Some(6),
+            texture_data: Some(AtlasData((
+                m_texture_name: "ASSETS/UX/LoL/StatsPanel_Atlas.png",
+                m_texture_uv: Some((366.0, 453.0, 406.0, 485.0)),
+            ))),
+            enabled: false,
+            scene: 2085677635,
+        ),
+        2431063348: (
+            name: "ClientStates/Gameplay/UX/LoL/PlayerStatStones/UIBase/Stat_Stones/StatsPanel_StatStones_PrevButton/StatsPanel_StatStones_Prev_ButtonHover",
+            position: UiPositionRect((
+                anchors: Some(AnchorSingle((
+                    anchor: (0.5, 1.0),
+                ))),
+                ui_rect: Some((
+                    position: Some((129.0, 1046.0)),
+                    size: Some((40.0, 32.0)),
+                    source_resolution_height: Some(1200),
+                    source_resolution_width: Some(1600),
+                )),
+                disable_pixel_snapping_x: None,
+                disable_pixel_snapping_y: None,
+                disable_resolution_downscale: None,
+                ignore_global_scale: None,
+                ignore_safe_zone: None,
+            )),
+            layer: Some(4),
+            texture_data: Some(AtlasData((
+                m_texture_name: "ASSETS/UX/LoL/StatsPanel_Atlas.png",
+                m_texture_uv: Some((271.0, 359.0, 311.0, 391.0)),
+            ))),
+            enabled: false,
+            scene: 2085677635,
+        ),
+        2497734059: (
+            name: "ClientStates/Gameplay/UX/LoL/PlayerStatStones/UIBase/Stat_Stones/StatsPanel_StatStones_NextButton/StatsPanel_StatStones_Next_ButtonDefault",
+            position: UiPositionRect((
+                anchors: Some(AnchorSingle((
+                    anchor: (0.5, 1.0),
+                ))),
+                ui_rect: Some((
+                    position: Some((307.0, 1045.0)),
+                    size: Some((40.0, 32.0)),
+                    source_resolution_height: Some(1200),
+                    source_resolution_width: Some(1600),
+                )),
+                disable_pixel_snapping_x: None,
+                disable_pixel_snapping_y: None,
+                disable_resolution_downscale: None,
+                ignore_global_scale: None,
+                ignore_safe_zone: None,
+            )),
+            layer: Some(3),
+            texture_data: Some(AtlasData((
+                m_texture_name: "ASSETS/UX/LoL/StatsPanel_Atlas.png",
+                m_texture_uv: Some((230.0, 359.0, 270.0, 391.0)),
+            ))),
+            enabled: false,
+            scene: 2085677635,
+        ),
+        2662903015: (
+            name: "ClientStates/Gameplay/UX/LoL/PlayerStatStones/UIBase/Stat_Stones/StatsPanel_StatStones_Frame_AdvTop",
+            position: UiPositionRect((
+                anchors: Some(AnchorSingle((
+                    anchor: (0.5, 1.0),
+                ))),
+                ui_rect: Some((
+                    position: Some((124.0, 579.0)),
+                    size: Some((228.0, 159.0)),
+                    source_resolution_height: Some(1200),
+                    source_resolution_width: Some(1600),
+                )),
+                disable_pixel_snapping_x: None,
+                disable_pixel_snapping_y: None,
+                disable_resolution_downscale: None,
+                ignore_global_scale: None,
+                ignore_safe_zone: None,
+            )),
+            layer: Some(1),
+            texture_data: None,
+            enabled: true,
+            scene: 2085677635,
+        ),
+        3453566339: (
+            name: "ClientStates/Gameplay/UX/LoL/PlayerStatStones/UIBase/Stat_Stones/StatsPanel_StatStones_PrevButton/StatsPanel_StatStones_Prev_ButtonClicked",
+            position: UiPositionRect((
+                anchors: Some(AnchorSingle((
+                    anchor: (0.5, 1.0),
+                ))),
+                ui_rect: Some((
+                    position: Some((129.0, 1046.0)),
+                    size: Some((40.0, 32.0)),
+                    source_resolution_height: Some(1200),
+                    source_resolution_width: Some(1600),
+                )),
+                disable_pixel_snapping_x: None,
+                disable_pixel_snapping_y: None,
+                disable_resolution_downscale: None,
+                ignore_global_scale: None,
+                ignore_safe_zone: None,
+            )),
+            layer: Some(5),
+            texture_data: Some(AtlasData((
+                m_texture_name: "ASSETS/UX/LoL/StatsPanel_Atlas.png",
+                m_texture_uv: Some((312.0, 359.0, 352.0, 391.0)),
+            ))),
+            enabled: false,
+            scene: 2085677635,
+        ),
+        3841515818: (
+            name: "ClientStates/Gameplay/UX/LoL/PlayerStatStones/UIBase/Stat_Stones/StatsPanel_StatStones_PrevButton/StatsPanel_StatStones_Prev_ButtonDisabled",
+            position: UiPositionRect((
+                anchors: Some(AnchorSingle((
+                    anchor: (0.5, 1.0),
+                ))),
+                ui_rect: Some((
+                    position: Some((129.0, 1046.0)),
+                    size: Some((40.0, 32.0)),
+                    source_resolution_height: Some(1200),
+                    source_resolution_width: Some(1600),
+                )),
+                disable_pixel_snapping_x: None,
+                disable_pixel_snapping_y: None,
+                disable_resolution_downscale: None,
+                ignore_global_scale: None,
+                ignore_safe_zone: None,
+            )),
+            layer: Some(6),
+            texture_data: Some(AtlasData((
+                m_texture_name: "ASSETS/UX/LoL/StatsPanel_Atlas.png",
+                m_texture_uv: Some((366.0, 453.0, 406.0, 485.0)),
+            ))),
+            enabled: false,
+            scene: 2085677635,
+        ),
+        4197435720: (
+            name: "ClientStates/Gameplay/UX/LoL/PlayerStatStones/UIBase/Stat_Stones/StatsPanel_StatStones_Frame_Default",
+            position: UiPositionRect((
+                anchors: Some(AnchorSingle((
+                    anchor: (0.5, 1.0),
+                ))),
+                ui_rect: Some((
+                    position: Some((124.0, 1041.0)),
+                    size: Some((228.0, 159.0)),
+                    source_resolution_height: Some(1200),
+                    source_resolution_width: Some(1600),
+                )),
+                disable_pixel_snapping_x: None,
+                disable_pixel_snapping_y: None,
+                disable_resolution_downscale: None,
+                ignore_global_scale: None,
+                ignore_safe_zone: None,
+            )),
+            layer: Some(1),
+            texture_data: Some(AtlasData((
+                m_texture_name: "ASSETS/UX/LoL/StatsPanel_Atlas.png",
+                m_texture_uv: Some((1.0, 314.0, 229.0, 473.0)),
+            ))),
+            enabled: true,
+            scene: 2085677635,
+        ),
+        4278152821: (
+            name: "ClientStates/Gameplay/UX/LoL/PlayerStatStones/UIBase/Stat_Stones/StatsPanel_StatStones_0/StatsPanel_StatStones_0_Icon",
+            position: UiPositionRect((
+                anchors: Some(AnchorSingle((
+                    anchor: (0.5, 1.0),
+                ))),
+                ui_rect: Some((
+                    position: Some((138.0, 1091.0)),
+                    size: Some((27.0, 27.0)),
+                    source_resolution_height: Some(1200),
+                    source_resolution_width: Some(1600),
+                )),
+                disable_pixel_snapping_x: None,
+                disable_pixel_snapping_y: None,
+                disable_resolution_downscale: None,
+                ignore_global_scale: None,
+                ignore_safe_zone: None,
+            )),
+            layer: Some(3),
+            texture_data: None,
+            enabled: true,
+            scene: 4142422331,
+        ),
+    },
+    animation_elements: {},
+    desaturate_elements: {},
+    instanced_elements: {},
+    fill_percentage_elements: {},
+    button_elements: {
+        762822672: (
+            name: "ClientStates/Gameplay/UX/LoL/PlayerStatStones/UIBase/Stat_Stones/StatsPanel_StatStones_NextButton",
+            is_enabled: None,
+            hit_region_element: 1008360447,
+            elements: [
+                739981111,
+                2497734059,
+                2420262942,
+                1008360447,
+                441497544,
+            ],
+            clicked_state_elements: Some((
+                display_element_list: Some([
+                    739981111,
+                ]),
+            )),
+            hover_state_elements: Some((
+                display_element_list: Some([
+                    441497544,
+                ]),
+            )),
+            default_state_elements: Some((
+                display_element_list: Some([
+                    2497734059,
+                ]),
+            )),
+            scene: 2085677635,
+        ),
+        3847333808: (
+            name: "ClientStates/Gameplay/UX/LoL/PlayerStatStones/UIBase/Stat_Stones/StatsPanel_StatStones_PrevButton",
+            is_enabled: None,
+            hit_region_element: 2626445451,
+            elements: [
+                3453566339,
+                149082143,
+                3841515818,
+                2626445451,
+                2431063348,
+            ],
+            clicked_state_elements: Some((
+                display_element_list: Some([
+                    3453566339,
+                ]),
+            )),
+            hover_state_elements: Some((
+                display_element_list: Some([
+                    2431063348,
+                ]),
+            )),
+            default_state_elements: Some((
+                display_element_list: Some([
+                    149082143,
+                ]),
+            )),
+            scene: 2085677635,
+        ),
+    },
+    region_elements: {
+        761723015: (
+            name: "ClientStates/Gameplay/UX/LoL/PlayerStatStones/UIBase/Stat_Stones/StatsPanel_StatStones_1_Tooltip_HitArea",
+            position: Some(UiPositionRect((
+                anchors: Some(AnchorSingle((
+                    anchor: (0.5, 1.0),
+                ))),
+                ui_rect: Some((
+                    position: Some((138.0, 1129.0)),
+                    size: Some((196.0, 27.0)),
+                    source_resolution_height: Some(1200),
+                    source_resolution_width: Some(1600),
+                )),
+                disable_pixel_snapping_x: None,
+                disable_pixel_snapping_y: None,
+                disable_resolution_downscale: None,
+                ignore_global_scale: None,
+                ignore_safe_zone: None,
+            ))),
+            scene: 2085677635,
+        ),
+        1008360447: (
+            name: "ClientStates/Gameplay/UX/LoL/PlayerStatStones/UIBase/Stat_Stones/StatsPanel_StatStones_NextButton/StatsPanel_StatStones_Next_ButtonHitRegion",
+            position: Some(UiPositionRect((
+                anchors: Some(AnchorSingle((
+                    anchor: (0.5, 1.0),
+                ))),
+                ui_rect: Some((
+                    position: Some((307.0, 1045.0)),
+                    size: Some((40.0, 32.0)),
+                    source_resolution_height: Some(1200),
+                    source_resolution_width: Some(1600),
+                )),
+                disable_pixel_snapping_x: None,
+                disable_pixel_snapping_y: None,
+                disable_resolution_downscale: None,
+                ignore_global_scale: None,
+                ignore_safe_zone: None,
+            ))),
+            scene: 2085677635,
+        ),
+        1330885350: (
+            name: "ClientStates/Gameplay/UX/LoL/PlayerStatStones/UIBase/Stat_Stones/StatsPanel_StatStones_2_Tooltip_HitArea",
+            position: Some(UiPositionRect((
+                anchors: Some(AnchorSingle((
+                    anchor: (0.5, 1.0),
+                ))),
+                ui_rect: Some((
+                    position: Some((138.0, 1166.0)),
+                    size: Some((196.0, 27.0)),
+                    source_resolution_height: Some(1200),
+                    source_resolution_width: Some(1600),
+                )),
+                disable_pixel_snapping_x: None,
+                disable_pixel_snapping_y: None,
+                disable_resolution_downscale: None,
+                ignore_global_scale: None,
+                ignore_safe_zone: None,
+            ))),
+            scene: 2085677635,
+        ),
+        2626445451: (
+            name: "ClientStates/Gameplay/UX/LoL/PlayerStatStones/UIBase/Stat_Stones/StatsPanel_StatStones_PrevButton/StatsPanel_StatStones_Prev_ButtonHitRegion",
+            position: Some(UiPositionRect((
+                anchors: Some(AnchorSingle((
+                    anchor: (0.5, 1.0),
+                ))),
+                ui_rect: Some((
+                    position: Some((129.0, 1046.0)),
+                    size: Some((40.0, 32.0)),
+                    source_resolution_height: Some(1200),
+                    source_resolution_width: Some(1600),
+                )),
+                disable_pixel_snapping_x: None,
+                disable_pixel_snapping_y: None,
+                disable_resolution_downscale: None,
+                ignore_global_scale: None,
+                ignore_safe_zone: None,
+            ))),
+            scene: 2085677635,
+        ),
+        2805645212: (
+            name: "ClientStates/Gameplay/UX/LoL/PlayerStatStones/UIBase/Stat_Stones/StatsPanel_StatStones_0_Tooltip_HitArea",
+            position: Some(UiPositionRect((
+                anchors: Some(AnchorSingle((
+                    anchor: (0.5, 1.0),
+                ))),
+                ui_rect: Some((
+                    position: Some((138.0, 1091.0)),
+                    size: Some((196.0, 27.0)),
+                    source_resolution_height: Some(1200),
+                    source_resolution_width: Some(1600),
+                )),
+                disable_pixel_snapping_x: None,
+                disable_pixel_snapping_y: None,
+                disable_resolution_downscale: None,
+                ignore_global_scale: None,
+                ignore_safe_zone: None,
+            ))),
+            scene: 2085677635,
+        ),
+    },
+    text_elements: {
+        2945307959: (
+            name: "ClientStates/Gameplay/UX/LoL/PlayerStatStones/UIBase/Stat_Stones/StatsPanel_StatStones_Set_Text",
+            position: UiPositionRect((
+                anchors: Some(AnchorSingle((
+                    anchor: (0.5, 1.0),
+                ))),
+                ui_rect: Some((
+                    position: Some((169.0, 1056.0)),
+                    size: Some((138.0, 12.0)),
+                    source_resolution_height: Some(1200),
+                    source_resolution_width: Some(1600),
+                )),
+                disable_pixel_snapping_x: Some(true),
+                disable_pixel_snapping_y: Some(true),
+                disable_resolution_downscale: None,
+                ignore_global_scale: None,
+                ignore_safe_zone: None,
+            )),
+            layer: Some(2),
+            font_description: 2040453948,
+            text_alignment_horizontal: Some(1),
+            text_alignment_vertical: None,
+            tra_key: None,
+            color: None,
+            scene: 2085677635,
+            enabled: true,
+        ),
+        3197019682: (
+            name: "ClientStates/Gameplay/UX/LoL/PlayerStatStones/UIBase/Stat_Stones/StatsPanel_StatStones_0/StatsPanel_StatStones_0_Text_Title",
+            position: UiPositionRect((
+                anchors: Some(AnchorSingle((
+                    anchor: (0.5, 1.0),
+                ))),
+                ui_rect: Some((
+                    position: Some((171.0, 1097.0)),
+                    size: Some((164.0, 15.0)),
+                    source_resolution_height: Some(1200),
+                    source_resolution_width: Some(1600),
+                )),
+                disable_pixel_snapping_x: Some(true),
+                disable_pixel_snapping_y: Some(true),
+                disable_resolution_downscale: None,
+                ignore_global_scale: None,
+                ignore_safe_zone: None,
+            )),
+            layer: Some(3),
+            font_description: 1324566917,
+            text_alignment_horizontal: None,
+            text_alignment_vertical: None,
+            tra_key: None,
+            color: None,
+            scene: 4142422331,
+            enabled: false,
+        ),
+        3520471627: (
+            name: "ClientStates/Gameplay/UX/LoL/PlayerStatStones/UIBase/Stat_Stones/StatsPanel_StatStones_0/StatsPanel_StatStones_0_Text_Count",
+            position: UiPositionRect((
+                anchors: Some(AnchorSingle((
+                    anchor: (0.5, 1.0),
+                ))),
+                ui_rect: Some((
+                    position: Some((171.0, 1097.0)),
+                    size: Some((164.0, 15.0)),
+                    source_resolution_height: Some(1200),
+                    source_resolution_width: Some(1600),
+                )),
+                disable_pixel_snapping_x: Some(true),
+                disable_pixel_snapping_y: Some(true),
+                disable_resolution_downscale: None,
+                ignore_global_scale: None,
+                ignore_safe_zone: None,
+            )),
+            layer: Some(2),
+            font_description: 1866873026,
+            text_alignment_horizontal: None,
+            text_alignment_vertical: None,
+            tra_key: None,
+            color: None,
+            scene: 4142422331,
+            enabled: true,
+        ),
+    },
+    scenes: {
+        2085677635: (
+            name: "ClientStates/Gameplay/UX/LoL/PlayerStatStones/UIBase/Stat_Stones",
+            enabled: false,
+            parent_scene: None,
+            layer: Some(20),
+        ),
+        4142422331: (
+            name: "ClientStates/Gameplay/UX/LoL/PlayerStatStones/UIBase/Stat_Stones/StatsPanel_StatStones_0",
+            enabled: true,
+            parent_scene: Some(2085677635),
+            layer: Some(21),
+        ),
+    },
+    floating_info_bar_view_controller: None,
+    player_frame_view_controller: None,
+    player_inventory_view_controller: None,
+    lol_game_state_view_controller: None,
+    unit_floating_info_bars: {},
+    hero_floating_info_bars: {},
+    structure_floating_info_bars: {},
+    stat_page_view_controller: None,
+)
