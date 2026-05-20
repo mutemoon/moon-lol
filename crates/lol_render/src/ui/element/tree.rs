@@ -42,7 +42,7 @@ pub fn save_ui_tree_to_json(
     let mut icon_to_button: HashMap<u32, u32> = HashMap::new();
     for (hash, button) in buttons {
         for icon_hash in &button.elements {
-            icon_to_button.insert(icon_hash.0.0, *hash);
+            icon_to_button.insert(icon_hash.0, *hash);
         }
     }
 
@@ -66,7 +66,7 @@ pub fn save_ui_tree_to_json(
 
         // 将属于该 Button 的 Icon 加入其 children
         for icon_hash in &button.elements {
-            if let Some(icon) = elements.get(&icon_hash.0.0) {
+            if let Some(icon) = elements.get(&icon_hash.0) {
                 button_node.children.push(UITreeNode {
                     name: icon.name.clone(),
                     kind: "Icon".to_string(),
@@ -74,12 +74,12 @@ pub fn save_ui_tree_to_json(
                     layer: icon.layer.map(|l| l as i32),
                     children: vec![],
                 });
-                processed_hashes.insert(icon_hash.0.0);
+                processed_hashes.insert(icon_hash.0);
             }
         }
 
         scene_content
-            .entry(button.scene.0.0)
+            .entry(button.scene.0)
             .or_default()
             .push(button_node);
     }
@@ -93,7 +93,7 @@ pub fn save_ui_tree_to_json(
             continue;
         }
         scene_content
-            .entry(element.scene.0.0)
+            .entry(element.scene.0)
             .or_default()
             .push(UITreeNode {
                 name: element.name.clone(),

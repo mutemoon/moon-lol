@@ -10757,25 +10757,6 @@
             layer: Some(11),
         ),
     },
-    floating_info_bar_view_controller: Some((
-        info_bar_style_source_map: {
-            0: 322894968,
-            1: 3139602458,
-            2: 2073949744,
-            3: 798537324,
-            4: 532119953,
-            5: 2316067138,
-            6: 322894968,
-            7: 3140432995,
-            8: 2407490817,
-            9: 2717592325,
-            10: 963455396,
-            12: 1689180083,
-        },
-    )),
-    player_frame_view_controller: None,
-    player_inventory_view_controller: None,
-    lol_game_state_view_controller: None,
     unit_floating_info_bars: {
         322894968: (
             anchor: 2637646274,
@@ -11372,5 +11353,4 @@
             ),
         ),
     },
-    stat_page_view_controller: None,
 )

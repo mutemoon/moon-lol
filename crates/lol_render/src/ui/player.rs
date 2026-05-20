@@ -208,12 +208,9 @@ fn update_player_icon(
     q_skin: Query<&Skin, (With<Controller>, With<SkinReady>)>,
     q_children: Query<&Children>,
     res_ui_element_entity: Res<UIElementEntity>,
+    res_player_frame_vc: Res<LOLPlayerFrameViewController>,
 ) {
-    let key = "ClientStates/Gameplay/UX/LoL/PlayerFrame/UIBase/Player_Frame_Root/Player_Frame/PlayerIcon_Base";
-    let Some(&entity) = res_ui_element_entity.get_by_string(key) else {
-        info!("未找到玩家头像的父节点");
-        return;
-    };
+    let entity = res_ui_element_entity.get_entity(&res_player_frame_vc.portrait_ui_data.icon);
 
     let Ok(skin) = q_skin.single() else {
         info!("未找到玩家的皮肤");
@@ -261,16 +258,12 @@ fn update_stat_page_buttons(
 }
 
 fn update_gold(
-    res_player_inventory: Option<Res<LOLPlayerInventoryViewController>>,
+    res_player_inventory: Res<LOLPlayerInventoryViewController>,
     res_ui_element_entity: Res<UIElementEntity>,
     q_gold: Query<&Gold, With<Controller>>,
     mut q_ui_text_state: Query<(&mut UiTextState, &mut Visibility)>,
     mut q_visibility: Query<&mut Visibility, Without<UiTextState>>,
 ) {
-    let Some(res_player_inventory) = res_player_inventory else {
-        return;
-    };
-
     let Ok(gold) = q_gold.single() else {
         return;
     };

@@ -40,6 +40,110 @@ impl Plugin for PluginUIElement {
         app.init_asset::<LOLHeroFloatingInfoBarData>();
         app.init_asset::<LOLStructureFloatingInfoBarData>();
 
+        app.init_resource::<lol_base::ui::LOLPlayerFrameViewController>();
+        app.init_resource::<lol_base::ui::LOLFloatingInfoBarViewController>();
+        app.init_resource::<lol_base::ui::LOLPlayerInventoryViewController>();
+        app.init_resource::<lol_base::ui::LOLLolGameStateViewController>();
+
+        app.register_type::<lol_base::ui::LOLPlayerFrameViewController>();
+        app.register_type::<lol_base::ui::LOLFloatingInfoBarViewController>();
+        app.register_type::<lol_base::ui::LOLPlayerInventoryViewController>();
+        app.register_type::<lol_base::ui::LOLLolGameStateViewController>();
+
+        app.register_type::<lol_base::ui::LOLAbilitiesUiData>();
+        app.register_type::<lol_base::ui::LOLSpellPipsUiData>();
+        app.register_type::<lol_base::ui::LOLSpellRankPipsUiData>();
+        app.register_type::<lol_base::ui::LOLSpellSlotDetailedUiDefinition>();
+        app.register_type::<lol_base::ui::LOLSpellSlotBuffTimerData>();
+        app.register_type::<lol_base::ui::LOLCooldownGemUiData>();
+        app.register_type::<lol_base::ui::LOLCooldownEffectUiData>();
+        app.register_type::<lol_base::ui::LOLPlayerPortraitUiData>();
+        app.register_type::<lol_base::ui::LOLHudAbilityResourceThresholdIndicator>();
+        app.register_type::<lol_base::ui::LOLUiElementMeterSkin>();
+        app.register_type::<lol_base::ui::LOLHealthMeter>();
+        app.register_type::<lol_base::ui::LOLAbilityResourceBarData>();
+        app.register_type::<lol_base::ui::LOLEnumResourceMeter>();
+        app.register_type::<lol_base::ui::LOLResourceMeterGroupData>();
+        app.register_type::<lol_base::ui::LOLResourceMeterSkinData>();
+        app.register_type::<lol_base::ui::LOLResourceMeterIconData>();
+        app.register_type::<lol_base::ui::LOLHudPlayerResourceBars>();
+        app.register_type::<lol_base::ui::LOLUiLevelUp>();
+        app.register_type::<lol_base::ui::LOLSpellLevelUpUiData>();
+        app.register_type::<lol_base::ui::LOLStatPageViewController>();
+        app.register_type::<lol_base::ui::LOLStatPageCategoryData>();
+        app.register_type::<lol_base::ui::LOLItemSlotDetailedUiData>();
+        app.register_type::<lol_base::ui::LOLHudShopButton>();
+        app.register_type::<lol_base::ui::LOLDrawAreaList>();
+        app.register_type::<lol_base::ui::LOLEnumUiMetric>();
+        app.register_type::<lol_base::ui::LOLUiClashTeam>();
+        app.register_type::<lol_base::ui::LOLUiMetricClash>();
+        app.register_type::<lol_base::ui::LOLUiMetricCreepScore>();
+        app.register_type::<lol_base::ui::LOLUiMetricFps>();
+        app.register_type::<lol_base::ui::LOLUiMetricGameTime>();
+        app.register_type::<lol_base::ui::LOLUiMetricKda>();
+        app.register_type::<lol_base::ui::LOLUiMetricLatencyText>();
+        app.register_type::<lol_base::ui::LOLUiMetricTeamKills>();
+        app.register_type::<lol_base::ui::LOLUiMetricTeamScoreMeters>();
+        app.register_type::<lol_base::ui::LOLUnk0x5ab5b20f>();
+        app.register_type::<lol_base::ui::LOLUnk0x767adcf7>();
+        app.register_type::<lol_base::ui::LOLUnk0xa8c6f5f0>();
+        app.register_type::<lol_base::ui::LOLUnk0x7a19656>();
+        app.register_type::<lol_base::ui::LOLUnk0xb8a49c96>();
+        app.register_type::<lol_base::ui::LOLUnk0xf43ad1ce>();
+        app.register_type::<lol_base::ui::LOLUnk0xb62c8675>();
+        app.register_type::<lol_base::ui::LOLUnk0xe228ce4a>();
+        app.register_type::<lol_base::ui::LOLEnumUiPosition>();
+        app.register_type::<lol_base::ui::LOLUiPositionPolygon>();
+        app.register_type::<lol_base::ui::LOLUiPositionRect>();
+        app.register_type::<lol_base::ui::LOLUiElementRect>();
+        app.register_type::<lol_base::ui::LOLEnumAnchor>();
+        app.register_type::<lol_base::ui::LOLAnchorDouble>();
+        app.register_type::<lol_base::ui::LOLAnchorSingle>();
+        app.register_type::<lol_base::ui::LOLEnumData>();
+        app.register_type::<lol_base::ui::LOLAtlasData3SliceH>();
+        app.register_type::<lol_base::ui::LOLAtlasData3SliceV>();
+        app.register_type::<lol_base::ui::LOLAtlasData9Slice>();
+        app.register_type::<lol_base::ui::LOLLooseUiTextureData3SliceH>();
+        app.register_type::<lol_base::ui::LOLLooseUiTextureData3SliceV>();
+        app.register_type::<lol_base::ui::LOLLooseUiTextureData9Slice>();
+        app.register_type::<lol_base::ui::LOLAtlasData>();
+        app.register_type::<lol_base::ui::LOLLooseUiTextureData>();
+        app.register_type::<lol_base::ui::LOLHeroFloatingInfoBarData>();
+        app.register_type::<lol_base::ui::LOLHeroFloatingInfoBorderData>();
+        app.register_type::<lol_base::ui::LOLHeroFloatingInfoBorderDefenseIconData>();
+        app.register_type::<lol_base::ui::LOLHeroFloatingInfoBorderDefenseIconThresholdData>();
+        app.register_type::<lol_base::ui::LOLHeroFloatingInfoBorderTypeData>();
+        app.register_type::<lol_base::ui::LOLHealthBarData>();
+        app.register_type::<lol_base::ui::LOLHealthBarExtraBarsData>();
+        app.register_type::<lol_base::ui::LOLHealthBarFadeData>();
+        app.register_type::<lol_base::ui::LOLHealthBarTextData>();
+        app.register_type::<lol_base::ui::LOLEnumHealthBarTickStyle>();
+        app.register_type::<lol_base::ui::LOLHealthBarTickStyleHero>();
+        app.register_type::<lol_base::ui::LOLHealthBarTickStyleTftCompanion>();
+        app.register_type::<lol_base::ui::LOLHealthBarTickStyleUnit>();
+        app.register_type::<lol_base::ui::LOLMicroTicksPerStandardTickData>();
+        app.register_type::<lol_base::ui::LOLBarTypeMap>();
+        app.register_type::<lol_base::ui::LOLStructureFloatingInfoBarData>();
+        app.register_type::<lol_base::ui::LOLUnitFloatingInfoBarData>();
+        app.register_type::<lol_base::ui::LOLUiElementIconData>();
+        app.register_type::<lol_base::ui::LOLUiElementRegionData>();
+        app.register_type::<lol_base::ui::LOLUiElementGroupButtonData>();
+        app.register_type::<lol_base::ui::LOLUiElementGroupButtonState>();
+        app.register_type::<lol_base::ui::LOLUiElementEffectAnimationData>();
+        app.register_type::<lol_base::ui::LOLUiElementEffectDesaturateData>();
+        app.register_type::<lol_base::ui::LOLUiElementEffectInstancedData>();
+        app.register_type::<lol_base::ui::LOLUiElementEffectFillPercentageData>();
+        app.register_type::<lol_base::ui::LOLUiElementTextData>();
+        app.register_type::<lol_base::ui::LOLUiSceneData>();
+
+        app.register_type::<HashKey<lol_base::ui::LOLUiSceneData>>();
+        app.register_type::<HashKey<lol_base::ui::LOLUiElementIconData>>();
+        app.register_type::<HashKey<lol_base::ui::LOLUiElementRegionData>>();
+        app.register_type::<HashKey<lol_base::ui::LOLUiElementEffectDesaturateData>>();
+        app.register_type::<HashKey<lol_base::ui::LOLUiElementGroupButtonData>>();
+        app.register_type::<HashKey<lol_base::ui::LOLUiElementTextData>>();
+
+
         app.add_systems(Startup, startup_load_ui_data);
         app.add_systems(
             Update,
@@ -96,7 +200,7 @@ impl UIElementEntity {
     }
 
     pub fn get_entity<T: TypePath>(&self, key: &HashKey<T>) -> Entity {
-        self.map.get(&key.0.0).copied().unwrap()
+        self.map.get(&key.0).copied().unwrap()
     }
 
     pub fn add(&mut self, key: u32, entity: Entity) {

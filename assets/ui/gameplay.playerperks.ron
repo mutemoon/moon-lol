@@ -586,12 +586,7 @@
             layer: Some(23),
         ),
     },
-    floating_info_bar_view_controller: None,
-    player_frame_view_controller: None,
-    player_inventory_view_controller: None,
-    lol_game_state_view_controller: None,
     unit_floating_info_bars: {},
     hero_floating_info_bars: {},
     structure_floating_info_bars: {},
-    stat_page_view_controller: None,
 )

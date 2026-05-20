@@ -5,7 +5,7 @@ use lol_core::team::Team;
 
 use crate::controller::Controller;
 use crate::ui::element::{UIElementEntity, UIState};
-use crate::ui::text::{UiTextState, update_ui_text};
+use crate::ui::text::UiTextState;
 
 #[derive(Default)]
 pub struct PluginUIGame;

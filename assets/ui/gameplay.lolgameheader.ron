@@ -357,51 +357,7 @@
             layer: Some(21),
         ),
     },
-    floating_info_bar_view_controller: None,
-    player_frame_view_controller: None,
-    player_inventory_view_controller: None,
-    lol_game_state_view_controller: Some((
-        base_loadable: 3986485090,
-        draw_area_list: Some((
-            draw_regions: [
-                4263889082,
-            ],
-        )),
-        metrics: [
-            UiMetricFps((
-                device_ux: 2,
-                fps_text: 213919944,
-            )),
-            UiMetricLatencyText((
-                device_ux: 2,
-                latency_text: 995572794,
-            )),
-            UiMetricKda((
-                device_ux: 2,
-                icon: 210380972,
-                text: 580480338,
-            )),
-            UiMetricTeamKills((
-                device_ux: 2,
-                team1_kill_text: 4246091078,
-                team2_kill_text: 401825989,
-                team_kills_icon: 3795596249,
-            )),
-            UiMetricCreepScore((
-                device_ux: 2,
-                icon: 1729411672,
-                text: 4261604742,
-            )),
-            UiMetricGameTime((
-                device_ux: 2,
-                time_text: 4232168630,
-            )),
-        ],
-        path_hash_to_self: 17306688221782629590,
-        scene: 2839759880,
-    )),
     unit_floating_info_bars: {},
     hero_floating_info_bars: {},
     structure_floating_info_bars: {},
-    stat_page_view_controller: None,
 )

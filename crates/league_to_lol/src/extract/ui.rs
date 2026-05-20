@@ -1,6 +1,7 @@
 use std::collections::{BTreeMap, HashMap};
 
 use bevy::prelude::*;
+use image::ImageFormat;
 use league_core::extract::{
     AbilitiesUiData, AbilityResourceBarData, BarTypeMap, EnumData, EnumResourceMeter, EnumUiMetric,
     EnumUiPosition, FloatingInfoBarViewController, HealthBarData, HealthBarExtraBarsData,
@@ -46,6 +47,10 @@ use crate::extract::utils::write_to_file;
 /// UI 元素提取结果
 pub struct UiExtractResult {
     pub texture_names: Vec<String>, // 所有用到的 m_texture_name
+    pub floating_info_bar_vc: Option<LOLFloatingInfoBarViewController>,
+    pub player_frame_vc: Option<LOLPlayerFrameViewController>,
+    pub player_inventory_vc: Option<LOLPlayerInventoryViewController>,
+    pub lol_game_state_vc: Option<LOLLolGameStateViewController>,
 }
 
 /// Phase UI 1: 提取 UI 元素数据
@@ -60,6 +65,10 @@ pub fn extract_ui_data(
             println!("[WARN] 无法加载 UI bin 文件 {}: {:?}", bin_path, e);
             return UiExtractResult {
                 texture_names: Vec::new(),
+                floating_info_bar_vc: None,
+                player_frame_vc: None,
+                player_inventory_vc: None,
+                lol_game_state_vc: None,
             };
         }
     };
@@ -162,9 +171,9 @@ pub fn extract_ui_data(
 
     // 提取浮动信息条数据
     let view_controllers = ui_prop_group.get_all_by_class::<FloatingInfoBarViewController>();
-    if let Some(vc) = view_controllers.first() {
-        assets.set_floating_info_bar_view_controller(convert_floating_info_bar_view_controller(vc));
-    }
+    let floating_info_bar_vc = view_controllers
+        .first()
+        .map(convert_floating_info_bar_view_controller);
 
     let unit_info_bars = ui_prop_group.get_all_by_class_with_hash::<UnitFloatingInfoBarData>();
     for (hash, data) in unit_info_bars {
@@ -185,22 +194,21 @@ pub fn extract_ui_data(
 
     let player_frame_view_controller =
         ui_prop_group.get_all_by_class::<PlayerFrameViewController>();
-    if let Some(vc) = player_frame_view_controller.first() {
-        assets.player_frame_view_controller = Some(convert_player_frame_view_controller(vc));
-    }
+    let player_frame_vc = player_frame_view_controller
+        .first()
+        .map(convert_player_frame_view_controller);
 
     let player_inventory_view_controller =
         ui_prop_group.get_all_by_class::<PlayerInventoryViewController>();
-    if let Some(vc) = player_inventory_view_controller.first() {
-        assets.player_inventory_view_controller =
-            Some(convert_player_inventory_view_controller(vc));
-    }
+    let player_inventory_vc = player_inventory_view_controller
+        .first()
+        .map(convert_player_inventory_view_controller);
 
     let game_state_view_controllers =
         ui_prop_group.get_all_by_class::<LolGameStateViewController>();
-    if let Some(vc) = game_state_view_controllers.first() {
-        assets.lol_game_state_view_controller = Some(convert_lol_game_state_view_controller(vc));
-    }
+    let lol_game_state_vc = game_state_view_controllers
+        .first()
+        .map(convert_lol_game_state_view_controller);
 
     let mut all_texture_names: Vec<String> = Vec::new();
     for ui_data in all_ui_element_datas {
@@ -465,6 +473,10 @@ pub fn extract_ui_data(
 
     UiExtractResult {
         texture_names: all_texture_names,
+        floating_info_bar_vc,
+        player_frame_vc,
+        player_inventory_vc,
+        lol_game_state_vc,
     }
 }
 
@@ -1280,9 +1292,28 @@ pub fn extract_ui_all(game_path: &str) {
         ("gameplay.lolgameheader.bin", ui_paths.lol_game_header_ron()),
     ];
 
+    let mut player_frame_vc = None;
+    let mut player_inventory_vc = None;
+    let mut lol_game_state_vc = None;
+    let mut floating_info_bar_vc = None;
+
     for (bin_path, ron_path) in export_configs {
         let mut assets = LOLUiFile::default();
         let result = extract_ui_data(&loader, bin_path, &mut assets);
+
+        // 收集控制器数据
+        if let Some(vc) = result.player_frame_vc.clone() {
+            player_frame_vc = Some(vc);
+        }
+        if let Some(vc) = result.player_inventory_vc.clone() {
+            player_inventory_vc = Some(vc);
+        }
+        if let Some(vc) = result.lol_game_state_vc.clone() {
+            lol_game_state_vc = Some(vc);
+        }
+        if let Some(vc) = result.floating_info_bar_vc.clone() {
+            floating_info_bar_vc = Some(vc);
+        }
 
         // 序列化到 RON
         let ron_config = ron::ser::PrettyConfig::default();
@@ -1294,6 +1325,57 @@ pub fn extract_ui_all(game_path: &str) {
         for texture_name in &result.texture_names {
             crate::extract::utils::extract_texture(&loader, texture_name);
         }
+    }
+
+    // 将所有视图控制器导出到统一的 ui.ron 场景文件
+    let mut resources = std::collections::BTreeMap::new();
+    let ron_config = ron::ser::PrettyConfig::default();
+
+    if let Some(vc) = &player_frame_vc {
+        let serialized = ron::ser::to_string_pretty(vc, ron_config.clone()).unwrap();
+        resources.insert("lol_base::ui::LOLPlayerFrameViewController".to_string(), serialized);
+    }
+    if let Some(vc) = &player_inventory_vc {
+        let serialized = ron::ser::to_string_pretty(vc, ron_config.clone()).unwrap();
+        resources.insert("lol_base::ui::LOLPlayerInventoryViewController".to_string(), serialized);
+    }
+    if let Some(vc) = &lol_game_state_vc {
+        let serialized = ron::ser::to_string_pretty(vc, ron_config.clone()).unwrap();
+        resources.insert("lol_base::ui::LOLLolGameStateViewController".to_string(), serialized);
+    }
+    if let Some(vc) = &floating_info_bar_vc {
+        let serialized = ron::ser::to_string_pretty(vc, ron_config.clone()).unwrap();
+        resources.insert("lol_base::ui::LOLFloatingInfoBarViewController".to_string(), serialized);
+    }
+
+    let mut scene_str = String::new();
+    scene_str.push_str("(\n  resources: {\n");
+    for (type_name, value) in &resources {
+        scene_str.push_str(&format!("    \"{}\": {},\n", type_name, value));
+    }
+    scene_str.push_str("  },\n  entities: {},\n)\n");
+
+    let ui_ron_path = ui_paths.ui_ron();
+    write_to_file(&ui_ron_path, &scene_str);
+    println!("[UI] 已成功整合并导出所有核心 UI 控制器到 {}", ui_ron_path);
+
+    // 额外提取 Cursors 资源 (ASSETS/UX/Cursors/hand1.tga)
+    let cursor_tga_path = "ASSETS/UX/Cursors/hand1.tga";
+    if let Ok(buf) = loader.get_wad_entry_buffer_by_path(cursor_tga_path) {
+        write_to_file(cursor_tga_path, &buf);
+        println!("[UI] 已提取 Cursors: {}", cursor_tga_path);
+
+        // 如果可能，同时转换为 PNG 以便其他用途/兼容性
+        if let Ok(img) = image::load_from_memory(&buf) {
+            let mut png_buf = std::io::Cursor::new(Vec::new());
+            if img.write_to(&mut png_buf, ImageFormat::Png).is_ok() {
+                let cursor_png_path = "ASSETS/UX/Cursors/hand1.png";
+                write_to_file(cursor_png_path, png_buf.into_inner());
+                println!("[UI] 已将 Cursors 转换为 PNG 并保存: {}", cursor_png_path);
+            }
+        }
+    } else {
+        println!("[WARN] WAD 中未找到 Cursors 资源: {}", cursor_tga_path);
     }
 }
 

@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use bevy::prelude::*;
+use bevy::world_serialization::WorldInstanceReady;
 use lol_base::hash_key::LoadHashKeyTrait;
 use lol_base::ui::{
     LOLHeroFloatingInfoBarData, LOLStructureFloatingInfoBarData, LOLUiElementEffectAnimationData,
@@ -39,6 +40,7 @@ pub fn startup_load_ui_data(
     mut unit_floating_info_bar_assets: ResMut<Assets<LOLUnitFloatingInfoBarData>>,
     mut hero_floating_info_bar_assets: ResMut<Assets<LOLHeroFloatingInfoBarData>>,
     mut structure_floating_info_bar_assets: ResMut<Assets<LOLStructureFloatingInfoBarData>>,
+    res_asset_server: Res<AssetServer>,
 ) {
     let ui_paths = LOLUiPaths::default();
     let ron_paths = vec![
@@ -133,25 +135,8 @@ pub fn startup_load_ui_data(
         for (hash, bar_data) in &data.hero_floating_info_bars {
             hero_floating_info_bar_assets.add_hash(*hash, bar_data.clone());
         }
-
         for (hash, bar_data) in &data.structure_floating_info_bars {
             structure_floating_info_bar_assets.add_hash(*hash, bar_data.clone());
-        }
-
-        if let Some(vc) = &data.floating_info_bar_view_controller {
-            commands.insert_resource(vc.clone());
-        }
-
-        if let Some(vc) = &data.player_frame_view_controller {
-            commands.insert_resource(vc.clone());
-        }
-
-        if let Some(vc) = &data.player_inventory_view_controller {
-            commands.insert_resource(vc.clone());
-        }
-
-        if let Some(vc) = &data.lol_game_state_view_controller {
-            commands.insert_resource(vc.clone());
         }
     }
 
@@ -198,7 +183,7 @@ pub fn startup_load_ui_data(
             ))
             .id();
 
-        let scene_entity = res_ui_element_entity.get(icon_data.scene.0.0);
+        let scene_entity = res_ui_element_entity.get(icon_data.scene.0);
         commands.entity(scene_entity).add_child(entity);
         res_ui_element_entity.add(*hash, entity);
     }
@@ -217,7 +202,7 @@ pub fn startup_load_ui_data(
             ))
             .id();
 
-        let scene_entity = res_ui_element_entity.get(button_data.scene.0.0);
+        let scene_entity = res_ui_element_entity.get(button_data.scene.0);
         commands.entity(scene_entity).add_child(entity);
         res_ui_element_entity.add(*hash, entity);
     }
@@ -335,5 +320,12 @@ pub fn startup_load_ui_data(
     //     &combined_instanceds,
     // );
 
-    commands.set_state(UIState::Loaded);
+    commands
+        .spawn(DynamicWorldRoot(res_asset_server.load("ui/ui.ron")))
+        .observe(
+            move |event: On<WorldInstanceReady>, mut commands: Commands| {
+                info!("UI 场景加载完成并就绪: {:?}", event.event_target());
+                commands.set_state(UIState::Loaded);
+            },
+        );
 }

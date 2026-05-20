@@ -3,6 +3,7 @@ pub mod bind;
 pub mod button;
 pub mod damage;
 pub mod element;
+pub mod game;
 pub mod health_bar;
 pub mod player;
 pub mod skill;
@@ -14,6 +15,7 @@ use bind::PluginUIBind;
 use button::PluginUIButton;
 use damage::PluginUIDamage;
 use element::PluginUIElement;
+use game::PluginUIGame;
 use health_bar::PluginUIHealthBar;
 use player::PluginUIPlayer;
 use skill::PluginUISkill;
@@ -33,5 +35,6 @@ impl Plugin for PluginUI {
         app.add_plugins(PluginUIDamage);
         app.add_plugins(PluginUIAnimation);
         app.add_plugins(PluginUIText);
+        app.add_plugins(PluginUIGame);
     }
 }

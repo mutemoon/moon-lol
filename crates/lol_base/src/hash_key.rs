@@ -3,19 +3,27 @@ use std::marker::PhantomData;
 
 use bevy::asset::uuid::Uuid;
 use bevy::asset::{Asset, AssetId, Assets, Handle, UntypedHandle};
-use bevy::reflect::TypePath;
+use bevy::reflect::{Reflect, ReflectDeserialize, ReflectSerialize, TypePath};
 use serde::{Deserialize, Serialize};
 
 use crate::hash::hash_bin;
 
-pub struct HashKey<T: TypePath>(pub (u32, PhantomData<T>));
+#[derive(Reflect)]
+#[reflect(PartialEq, Serialize, Deserialize)]
+pub struct HashKey<T: TypePath>(pub u32, #[reflect(ignore)] pub PhantomData<T>);
+
+impl<T: TypePath> Default for HashKey<T> {
+    fn default() -> Self {
+        Self(0, PhantomData)
+    }
+}
 
 impl<T: TypePath> Serialize for HashKey<T> {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: serde::Serializer,
     {
-        serializer.serialize_u32(self.0.0)
+        serializer.serialize_u32(self.0)
     }
 }
 
@@ -25,49 +33,49 @@ impl<'de, T: TypePath> Deserialize<'de> for HashKey<T> {
         D: serde::Deserializer<'de>,
     {
         let val = u32::deserialize(deserializer)?;
-        Ok(HashKey((val, PhantomData)))
+        Ok(HashKey(val, PhantomData))
     }
 }
 
 impl<T: TypePath> Debug for HashKey<T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_str(&format!("{:x}: {}", self.0.0, T::short_type_path()))
+        f.write_str(&format!("{:x}: {}", self.0, T::short_type_path()))
     }
 }
 
 impl<T: TypePath> From<&u32> for HashKey<T> {
     fn from(value: &u32) -> Self {
-        Self((*value, PhantomData))
+        Self(*value, PhantomData)
     }
 }
 
 impl<T: TypePath> From<u32> for HashKey<T> {
     fn from(value: u32) -> Self {
-        Self((value, PhantomData))
+        Self(value, PhantomData)
     }
 }
 
 impl<T: TypePath> From<&str> for HashKey<T> {
     fn from(value: &str) -> Self {
-        Self((hash_bin(value), PhantomData))
+        Self(hash_bin(value), PhantomData)
     }
 }
 
 impl<T: TypePath> From<&String> for HashKey<T> {
     fn from(value: &String) -> Self {
-        Self((hash_bin(value), PhantomData))
+        Self(hash_bin(value), PhantomData)
     }
 }
 
 impl<T: TypePath> From<String> for HashKey<T> {
     fn from(value: String) -> Self {
-        Self((hash_bin(&value), PhantomData))
+        Self(hash_bin(&value), PhantomData)
     }
 }
 
 impl<T: TypePath> From<&HashKey<T>> for HashKey<T> {
     fn from(value: &HashKey<T>) -> Self {
-        Self((value.0.0, PhantomData))
+        Self(value.0, PhantomData)
     }
 }
 
@@ -81,14 +89,14 @@ impl<T: TypePath> Copy for HashKey<T> {}
 
 impl<T: TypePath> PartialEq for HashKey<T> {
     fn eq(&self, other: &Self) -> bool {
-        self.0.0 == other.0.0
+        self.0 == other.0
     }
 }
 
 impl<T: Asset> From<HashKey<T>> for AssetId<T> {
     fn from(value: HashKey<T>) -> Self {
         AssetId::Uuid {
-            uuid: Uuid::from_u128(value.0.0 as u128),
+            uuid: Uuid::from_u128(value.0 as u128),
         }
     }
 }
@@ -96,7 +104,7 @@ impl<T: Asset> From<HashKey<T>> for AssetId<T> {
 impl<T: Asset> From<AssetId<T>> for HashKey<T> {
     fn from(value: AssetId<T>) -> Self {
         match value {
-            AssetId::Uuid { uuid } => HashKey((uuid.as_u128() as u32, PhantomData)),
+            AssetId::Uuid { uuid } => HashKey(uuid.as_u128() as u32, PhantomData),
             _ => panic!("AssetId is not Uuid"),
         }
     }
@@ -104,7 +112,7 @@ impl<T: Asset> From<AssetId<T>> for HashKey<T> {
 
 impl<T: Asset> From<HashKey<T>> for Handle<T> {
     fn from(value: HashKey<T>) -> Self {
-        Handle::Uuid(Uuid::from_u128(value.0.0 as u128), PhantomData)
+        Handle::Uuid(Uuid::from_u128(value.0 as u128), PhantomData)
     }
 }
 

@@ -2,14 +2,14 @@ use std::collections::{BTreeMap, HashMap};
 
 use bevy::asset::Asset;
 use bevy::math::{Vec2, Vec4};
-use bevy::prelude::{Handle, Resource};
-use bevy::reflect::TypePath;
+use bevy::prelude::{Handle, Resource, Reflect, ReflectResource};
 use serde::{Deserialize, Serialize};
 
 use crate::hash::hash_bin;
 use crate::hash_key::HashKey;
 
-#[derive(Serialize, Deserialize, Debug, Clone, Resource, Asset, TypePath)]
+#[derive(Serialize, Deserialize, Debug, Clone, Resource, Asset, Reflect, Default)]
+#[reflect(Resource)]
 pub struct LOLPlayerFrameViewController {
     pub abilities_ui_data: LOLAbilitiesUiData,
     pub portrait_ui_data: LOLPlayerPortraitUiData,
@@ -19,19 +19,19 @@ pub struct LOLPlayerFrameViewController {
     pub stat_pages: Vec<LOLStatPageViewController>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Reflect, Default)]
 pub struct LOLSpellPipsUiData {
     pub empty_pips: Vec<HashKey<LOLUiElementIconData>>,
     pub full_pips: Vec<HashKey<LOLUiElementIconData>>,
     pub pip_target_rect: HashKey<LOLUiElementRegionData>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Reflect, Default)]
 pub struct LOLSpellRankPipsUiData {
     pub rank_pips: Vec<LOLSpellPipsUiData>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Reflect, Default)]
 pub struct LOLAbilitiesUiData {
     pub champion_spells: Vec<LOLSpellSlotDetailedUiDefinition>,
     pub passive: LOLSpellSlotDetailedUiDefinition,
@@ -39,7 +39,7 @@ pub struct LOLAbilitiesUiData {
     pub summoner_spells: Vec<LOLSpellSlotDetailedUiDefinition>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Reflect, Default)]
 pub struct LOLSpellSlotDetailedUiDefinition {
     pub ammo_fx: Option<u32>,
     pub ammo_text: Option<u32>,
@@ -60,7 +60,7 @@ pub struct LOLSpellSlotDetailedUiDefinition {
     pub toggle_fx: Option<u32>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Reflect, Default)]
 pub struct LOLSpellSlotBuffTimerData {
     pub timer_bar_bg: u32,
     pub timer_bar_fill: u32,
@@ -68,7 +68,7 @@ pub struct LOLSpellSlotBuffTimerData {
     pub timer_border_fx: u32,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Reflect, Default)]
 pub struct LOLCooldownEffectUiData {
     pub cooldown_complete_effect: u32,
     pub cooldown_jump_effect: Option<u32>,
@@ -76,14 +76,14 @@ pub struct LOLCooldownEffectUiData {
     pub radial_effect: u32,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Reflect, Default)]
 pub struct LOLCooldownGemUiData {
     pub ally_gem: u32,
     pub cooldown_effects: LOLCooldownEffectUiData,
     pub gem_background: u32,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Reflect, Default)]
 pub struct LOLPlayerPortraitUiData {
     pub icon: HashKey<LOLUiElementIconData>,
     pub level_text: u32,
@@ -91,24 +91,24 @@ pub struct LOLPlayerPortraitUiData {
     pub tooltip_region: HashKey<LOLUiElementRegionData>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Reflect, Default)]
 pub struct LOLHudAbilityResourceThresholdIndicator {
     pub threshold_indicator_elements: Vec<HashKey<LOLUiElementIconData>>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Reflect, Default)]
 pub struct LOLUiElementMeterSkin {
     pub bar_elements: Vec<HashKey<LOLUiElementIconData>>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Reflect, Default)]
 pub struct LOLHealthMeter {
     pub fade_bar: HashKey<LOLUiElementIconData>,
     pub meter: HashKey<LOLUiElementIconData>,
     pub value_text: HashKey<LOLUiElementTextData>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Reflect, Default)]
 pub struct LOLAbilityResourceBarData {
     pub ability_resource_bars: LOLEnumResourceMeter,
     pub backdrop: Option<HashKey<LOLUiElementIconData>>,
@@ -117,31 +117,37 @@ pub struct LOLAbilityResourceBarData {
     pub value_text: Option<HashKey<LOLUiElementTextData>>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Reflect)]
 pub enum LOLEnumResourceMeter {
     ResourceMeterGroupData(LOLResourceMeterGroupData),
     ResourceMeterIconData(LOLResourceMeterIconData),
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+impl Default for LOLEnumResourceMeter {
+    fn default() -> Self {
+        Self::ResourceMeterGroupData(LOLResourceMeterGroupData::default())
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, Reflect, Default)]
 pub struct LOLResourceMeterGroupData {
     pub meter: HashKey<LOLUiElementIconData>,
     pub meter_skins: LOLResourceMeterSkinData,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Reflect, Default)]
 pub struct LOLResourceMeterSkinData {
     pub additional_meter_skins: BTreeMap<u32, LOLUiElementMeterSkin>,
     pub default_meter_skin: LOLUiElementMeterSkin,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Reflect, Default)]
 pub struct LOLResourceMeterIconData {
     pub additional_bar_types: Option<BTreeMap<u32, HashKey<LOLUiElementIconData>>>,
     pub default_bar: HashKey<LOLUiElementIconData>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Reflect, Default)]
 pub struct LOLHudPlayerResourceBars {
     pub ar_threshold_indicator: Option<LOLHudAbilityResourceThresholdIndicator>,
     pub experience_bar: HashKey<LOLUiElementIconData>,
@@ -156,7 +162,7 @@ pub struct LOLHudPlayerResourceBars {
     pub sar_text: HashKey<LOLUiElementTextData>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Reflect, Default)]
 pub struct LOLUiLevelUp {
     pub buttons_scene: u32,
     pub fx_in_scene: u32,
@@ -164,7 +170,7 @@ pub struct LOLUiLevelUp {
     pub title: u32,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Reflect, Default)]
 pub struct LOLSpellLevelUpUiData {
     pub ability_fx_in: u32,
     pub button_fx_in: u32,
@@ -190,11 +196,11 @@ impl LOLUiPaths {
     }
 
     pub fn ui_ron(&self) -> String {
-        "assets/ui/ui.ron".to_string()
+        "ui/ui.ron".to_string()
     }
 
     pub fn ui_scene_ron(&self) -> String {
-        "assets/ui/ui_scene.ron".to_string()
+        "ui/ui_scene.ron".to_string()
     }
 
     pub fn player_frame_ron(&self) -> String {
@@ -239,20 +245,20 @@ impl LOLUiPaths {
 }
 
 /// UI 场景数据（用于序列化到 .ron）
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Reflect, Default)]
 pub struct LOLUiSceneExport {
     pub elements: HashMap<u32, String>, // hash -> element asset path
     pub scenes: HashMap<u32, LOLSceneDataExport>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Reflect, Default)]
 pub struct LOLSceneDataExport {
     pub name: String,
     pub enabled: Option<bool>,
     pub elements: Vec<u32>,
 }
 
-#[derive(Default, Serialize, Deserialize, Debug, Clone)]
+#[derive(Default, Serialize, Deserialize, Debug, Clone, Reflect)]
 pub struct LOLUiFile {
     pub elements: BTreeMap<u32, LOLUiElementIconData>,
     pub animation_elements: BTreeMap<u32, LOLUiElementEffectAnimationData>,
@@ -263,24 +269,19 @@ pub struct LOLUiFile {
     pub region_elements: BTreeMap<u32, LOLUiElementRegionData>,
     pub text_elements: BTreeMap<u32, LOLUiElementTextData>,
     pub scenes: BTreeMap<u32, LOLUiSceneData>,
-    pub floating_info_bar_view_controller: Option<LOLFloatingInfoBarViewController>,
-    pub player_frame_view_controller: Option<LOLPlayerFrameViewController>,
-    pub player_inventory_view_controller: Option<LOLPlayerInventoryViewController>,
-    pub lol_game_state_view_controller: Option<LOLLolGameStateViewController>,
     pub unit_floating_info_bars: BTreeMap<u32, LOLUnitFloatingInfoBarData>,
     pub hero_floating_info_bars: BTreeMap<u32, LOLHeroFloatingInfoBarData>,
     pub structure_floating_info_bars: BTreeMap<u32, LOLStructureFloatingInfoBarData>,
-    pub stat_page_view_controller: Option<LOLStatPageViewController>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Reflect)]
 pub enum LOLFloatingInfoBarDataHandle {
     Unit(Handle<LOLUnitFloatingInfoBarData>),
     Hero(Handle<LOLHeroFloatingInfoBarData>),
     Structure(Handle<LOLStructureFloatingInfoBarData>),
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Asset, TypePath)]
+#[derive(Serialize, Deserialize, Debug, Clone, Asset, Reflect, Default)]
 pub struct LOLUiSceneData {
     pub name: String,
     pub enabled: bool,
@@ -326,13 +327,6 @@ impl LOLUiFile {
         self.text_elements.insert(hash_bin(&element.name), element);
     }
 
-    pub fn set_floating_info_bar_view_controller(
-        &mut self,
-        controller: LOLFloatingInfoBarViewController,
-    ) {
-        self.floating_info_bar_view_controller = Some(controller);
-    }
-
     pub fn add_unit_floating_info_bar(&mut self, hash: u32, data: LOLUnitFloatingInfoBarData) {
         self.unit_floating_info_bars.insert(hash, data);
     }
@@ -366,33 +360,35 @@ impl LOLUiFile {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Resource, Asset, TypePath)]
+#[derive(Serialize, Deserialize, Debug, Clone, Resource, Asset, Reflect, Default)]
+#[reflect(Resource)]
 pub struct LOLFloatingInfoBarViewController {
     pub info_bar_style_source_map: BTreeMap<u8, u32>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Resource, Asset, TypePath)]
+#[derive(Serialize, Deserialize, Debug, Clone, Resource, Asset, Reflect, Default)]
+#[reflect(Resource)]
 pub struct LOLStatPageViewController {
     pub button: HashKey<LOLUiElementGroupButtonData>,
     pub stat_page_view_controller: u32,
     pub categories: Option<BTreeMap<u32, LOLStatPageCategoryData>>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Reflect, Default)]
 pub struct LOLStatPageCategoryData {
     pub button: HashKey<LOLUiElementGroupButtonData>,
     pub stat_page_view_controller: u32,
     pub is_selected: Option<bool>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Asset, TypePath)]
+#[derive(Serialize, Deserialize, Debug, Clone, Asset, Reflect, Default)]
 pub struct LOLHeroFloatingInfoBarData {
     pub anchor: HashKey<LOLUiElementRegionData>,
     pub borders: LOLHeroFloatingInfoBorderData,
     pub health_bar: LOLHealthBarData,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Reflect, Default)]
 pub struct LOLHeroFloatingInfoBorderData {
     pub additional_status_icons: Option<BTreeMap<u32, HashKey<LOLUiElementIconData>>>,
     pub default_border: LOLHeroFloatingInfoBorderTypeData,
@@ -407,14 +403,14 @@ pub struct LOLHeroFloatingInfoBorderData {
     pub spell_shield_border: Option<LOLHeroFloatingInfoBorderTypeData>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Reflect, Default)]
 pub struct LOLHeroFloatingInfoBorderDefenseIconData {
     pub defense_down_icons: Vec<LOLHeroFloatingInfoBorderDefenseIconThresholdData>,
     pub defense_up_icon: LOLHeroFloatingInfoBorderDefenseIconThresholdData,
     pub left_icon_region: HashKey<LOLUiElementRegionData>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Reflect, Default)]
 pub struct LOLHeroFloatingInfoBorderDefenseIconThresholdData {
     pub armor_icon: HashKey<LOLUiElementIconData>,
     pub combo_icon: HashKey<LOLUiElementIconData>,
@@ -422,7 +418,7 @@ pub struct LOLHeroFloatingInfoBorderDefenseIconThresholdData {
     pub magic_resist_icon: HashKey<LOLUiElementIconData>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Reflect, Default)]
 pub struct LOLHeroFloatingInfoBorderTypeData {
     pub border: HashKey<LOLUiElementIconData>,
     pub level_box_overlay_ally: Option<HashKey<LOLUiElementIconData>>,
@@ -431,7 +427,7 @@ pub struct LOLHeroFloatingInfoBorderTypeData {
     pub level_box_overlay_self_colorblind: Option<HashKey<LOLUiElementIconData>>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Reflect, Default)]
 pub struct LOLHealthBarData {
     pub extra_bars: Option<LOLHealthBarExtraBarsData>,
     pub fade_data: Option<LOLHealthBarFadeData>,
@@ -443,7 +439,7 @@ pub struct LOLHealthBarData {
     pub tick_style: Option<LOLEnumHealthBarTickStyle>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Reflect, Default)]
 pub struct LOLHealthBarExtraBarsData {
     pub all_shield_bar: HashKey<LOLUiElementIconData>,
     pub champ_specific_bar: Option<LOLBarTypeMap>,
@@ -453,69 +449,75 @@ pub struct LOLHealthBarExtraBarsData {
     pub physical_shield_bar: Option<HashKey<LOLUiElementIconData>>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Reflect, Default)]
 pub struct LOLHealthBarFadeData {
     pub fade_bar: LOLBarTypeMap,
     pub fade_speed: Option<f32>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Reflect, Default)]
 pub struct LOLHealthBarTextData {
     pub health_value_text: HashKey<LOLUiElementTextData>,
     pub include_max_health: bool,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Reflect)]
 pub enum LOLEnumHealthBarTickStyle {
     HealthBarTickStyleHero(LOLHealthBarTickStyleHero),
     HealthBarTickStyleTftCompanion(LOLHealthBarTickStyleTftCompanion),
     HealthBarTickStyleUnit(LOLHealthBarTickStyleUnit),
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+impl Default for LOLEnumHealthBarTickStyle {
+    fn default() -> Self {
+        Self::HealthBarTickStyleHero(LOLHealthBarTickStyleHero::default())
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, Reflect, Default)]
 pub struct LOLHealthBarTickStyleHero {
     pub micro_tick: HashKey<LOLUiElementEffectInstancedData>,
     pub micro_tick_per_standard_tick_data: Vec<LOLMicroTicksPerStandardTickData>,
     pub standard_tick: HashKey<LOLUiElementEffectInstancedData>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Reflect, Default)]
 pub struct LOLHealthBarTickStyleTftCompanion {
     pub standard_tick: HashKey<LOLUiElementEffectInstancedData>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Reflect, Default)]
 pub struct LOLHealthBarTickStyleUnit {
     pub standard_tick: HashKey<LOLUiElementEffectInstancedData>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Reflect, Default)]
 pub struct LOLMicroTicksPerStandardTickData {
     pub micro_ticks_between: u32,
     pub min_health: f32,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Reflect, Default)]
 pub struct LOLBarTypeMap {
     pub additional_bar_types: Option<BTreeMap<u32, HashKey<LOLUiElementIconData>>>,
     pub default_bar: HashKey<LOLUiElementIconData>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Asset, TypePath)]
+#[derive(Serialize, Deserialize, Debug, Clone, Asset, Reflect, Default)]
 pub struct LOLStructureFloatingInfoBarData {
     pub anchor: HashKey<LOLUiElementRegionData>,
     pub border: HashKey<LOLUiElementIconData>,
     pub health_bar: LOLHealthBarData,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Asset, TypePath)]
+#[derive(Serialize, Deserialize, Debug, Clone, Asset, Reflect, Default)]
 pub struct LOLUnitFloatingInfoBarData {
     pub anchor: HashKey<LOLUiElementRegionData>,
     pub border: HashKey<LOLUiElementIconData>,
     pub health_bar: LOLHealthBarData,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Asset, TypePath)]
+#[derive(Serialize, Deserialize, Debug, Clone, Asset, Reflect, Default)]
 pub struct LOLUiElementIconData {
     pub name: String,
     pub position: LOLEnumUiPosition,
@@ -525,14 +527,14 @@ pub struct LOLUiElementIconData {
     pub scene: HashKey<LOLUiSceneData>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Asset, TypePath)]
+#[derive(Serialize, Deserialize, Debug, Clone, Asset, Reflect, Default)]
 pub struct LOLUiElementRegionData {
     pub name: String,
     pub position: Option<LOLEnumUiPosition>,
     pub scene: u32,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Asset, TypePath)]
+#[derive(Serialize, Deserialize, Debug, Clone, Asset, Reflect, Default)]
 pub struct LOLUiElementGroupButtonData {
     pub name: String,
     pub is_enabled: Option<bool>,
@@ -544,12 +546,12 @@ pub struct LOLUiElementGroupButtonData {
     pub scene: HashKey<LOLUiSceneData>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Reflect, Default)]
 pub struct LOLUiElementGroupButtonState {
     pub display_element_list: Option<Vec<u32>>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Asset, TypePath)]
+#[derive(Serialize, Deserialize, Debug, Clone, Asset, Reflect, Default)]
 pub struct LOLUiElementEffectAnimationData {
     pub name: String,
     pub position: LOLEnumUiPosition,
@@ -563,7 +565,7 @@ pub struct LOLUiElementEffectAnimationData {
     pub enabled: bool,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Asset, TypePath)]
+#[derive(Serialize, Deserialize, Debug, Clone, Asset, Reflect, Default)]
 pub struct LOLUiElementEffectDesaturateData {
     pub name: String,
     pub position: LOLEnumUiPosition,
@@ -574,7 +576,7 @@ pub struct LOLUiElementEffectDesaturateData {
     pub minimum_saturation: Option<f32>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Asset, TypePath)]
+#[derive(Serialize, Deserialize, Debug, Clone, Asset, Reflect, Default)]
 pub struct LOLUiElementEffectInstancedData {
     pub name: String,
     pub position: LOLEnumUiPosition,
@@ -585,7 +587,7 @@ pub struct LOLUiElementEffectInstancedData {
     pub enabled: bool,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Asset, TypePath)]
+#[derive(Serialize, Deserialize, Debug, Clone, Asset, Reflect, Default)]
 pub struct LOLUiElementEffectFillPercentageData {
     pub name: String,
     pub position: LOLEnumUiPosition,
@@ -596,7 +598,7 @@ pub struct LOLUiElementEffectFillPercentageData {
     pub m_per_pixel_uvs_x: bool,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Asset, TypePath)]
+#[derive(Serialize, Deserialize, Debug, Clone, Asset, Reflect, Default)]
 pub struct LOLUiElementTextData {
     pub name: String,
     pub position: LOLEnumUiPosition,
@@ -610,14 +612,15 @@ pub struct LOLUiElementTextData {
     pub enabled: bool,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Reflect, Default)]
 pub enum LOLEnumUiPosition {
     UiPositionRect(LOLUiPositionRect),
     UiPositionPolygon(LOLUiPositionPolygon),
+    #[default]
     UiPositionFullScreen,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Reflect, Default)]
 pub struct LOLUiPositionPolygon {
     pub anchors: LOLEnumAnchor,
     pub ui_rect: Option<LOLUiElementRect>,
@@ -626,7 +629,7 @@ pub struct LOLUiPositionPolygon {
     pub disable_pixel_snapping_y: Option<bool>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Reflect, Default)]
 pub struct LOLUiPositionRect {
     pub anchors: Option<LOLEnumAnchor>,
     pub ui_rect: Option<LOLUiElementRect>,
@@ -637,7 +640,7 @@ pub struct LOLUiPositionRect {
     pub ignore_safe_zone: Option<bool>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Reflect, Default)]
 pub struct LOLUiElementRect {
     pub position: Option<Vec2>,
     pub size: Option<Vec2>,
@@ -663,25 +666,26 @@ impl LOLEnumUiPosition {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Reflect, Default)]
 pub enum LOLEnumAnchor {
     AnchorSingle(LOLAnchorSingle),
     AnchorDouble(LOLAnchorDouble),
+    #[default]
     Unk0xf090d2e7,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Reflect, Default)]
 pub struct LOLAnchorDouble {
     pub anchor_left: Option<Vec2>,
     pub anchor_right: Option<Vec2>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Reflect, Default)]
 pub struct LOLAnchorSingle {
     pub anchor: Vec2,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Reflect, Default)]
 pub enum LOLEnumData {
     AtlasData(LOLAtlasData),
     AtlasData3SliceH(LOLAtlasData3SliceH),
@@ -691,64 +695,66 @@ pub enum LOLEnumData {
     LooseUiTextureData3SliceH(LOLLooseUiTextureData3SliceH),
     LooseUiTextureData3SliceV(LOLLooseUiTextureData3SliceV),
     LooseUiTextureData9Slice(LOLLooseUiTextureData9Slice),
+    #[default]
     Unk0x5eaead1a,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Reflect, Default)]
 pub struct LOLAtlasData3SliceH {
     pub m_texture_name: String,
     pub texture_us: Vec4,
     pub texture_vs: Vec2,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Reflect, Default)]
 pub struct LOLAtlasData3SliceV {
     pub m_texture_name: String,
     pub texture_us: Vec2,
     pub texture_vs: Vec4,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Reflect, Default)]
 pub struct LOLAtlasData9Slice {
     pub m_texture_name: String,
     pub texture_us: Vec4,
     pub texture_vs: Vec4,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Reflect, Default)]
 pub struct LOLLooseUiTextureData3SliceH {
     pub texture_name: String,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Reflect, Default)]
 pub struct LOLLooseUiTextureData3SliceV {
     pub texture_name: String,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Reflect, Default)]
 pub struct LOLLooseUiTextureData9Slice {
     pub texture_name: String,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Reflect, Default)]
 pub struct LOLAtlasData {
     pub m_texture_name: String,
     pub m_texture_uv: Option<Vec4>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Reflect, Default)]
 pub struct LOLLooseUiTextureData {
     pub texture_name: String,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Resource, Asset, TypePath)]
+#[derive(Serialize, Deserialize, Debug, Clone, Resource, Asset, Reflect, Default)]
+#[reflect(Resource)]
 pub struct LOLPlayerInventoryViewController {
     pub item_slot_ui_data: Vec<LOLItemSlotDetailedUiData>,
     pub scene: HashKey<LOLUiSceneData>,
     pub shop_button: LOLHudShopButton,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Reflect, Default)]
 pub struct LOLItemSlotDetailedUiData {
     pub ammo_fx: Option<u32>,
     pub backdrop: HashKey<LOLUiElementIconData>,
@@ -770,7 +776,7 @@ pub struct LOLItemSlotDetailedUiData {
     pub toggle_fx: Option<u32>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Reflect, Default)]
 pub struct LOLHudShopButton {
     pub inactive_icon: HashKey<LOLUiElementIconData>,
     pub shop_button: HashKey<LOLUiElementGroupButtonData>,
@@ -784,16 +790,16 @@ pub struct LOLHudShopButton {
     pub unk_0xb77375ae: Option<u32>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Reflect, Default)]
 pub struct LOLDrawAreaList {
     pub draw_regions: Vec<HashKey<LOLUiElementRegionData>>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Reflect)]
 pub enum LOLEnumUiMetric {
+    UiMetricFps(LOLUiMetricFps),
     UiMetricClash(LOLUiMetricClash),
     UiMetricCreepScore(LOLUiMetricCreepScore),
-    UiMetricFps(LOLUiMetricFps),
     UiMetricGameTime(LOLUiMetricGameTime),
     UiMetricKda(LOLUiMetricKda),
     UiMetricLatencyText(LOLUiMetricLatencyText),
@@ -805,13 +811,19 @@ pub enum LOLEnumUiMetric {
     Unk0xe228ce4a(LOLUnk0xe228ce4a),
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+impl Default for LOLEnumUiMetric {
+    fn default() -> Self {
+        Self::UiMetricFps(LOLUiMetricFps::default())
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, Reflect, Default)]
 pub struct LOLUiClashTeam {
     pub logo_icon: HashKey<LOLUiElementIconData>,
     pub tag_text: HashKey<LOLUiElementTextData>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Reflect, Default)]
 pub struct LOLUiMetricClash {
     pub clash_frame: HashKey<LOLUiElementIconData>,
     pub clash_frame_mirror: HashKey<LOLUiElementIconData>,
@@ -822,39 +834,39 @@ pub struct LOLUiMetricClash {
     pub team2: LOLUiClashTeam,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Reflect, Default)]
 pub struct LOLUiMetricCreepScore {
     pub device_ux: i32,
     pub icon: HashKey<LOLUiElementIconData>,
     pub text: HashKey<LOLUiElementTextData>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Reflect, Default)]
 pub struct LOLUiMetricFps {
     pub device_ux: i32,
     pub fps_text: HashKey<LOLUiElementTextData>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Reflect, Default)]
 pub struct LOLUiMetricGameTime {
     pub device_ux: i32,
     pub time_text: HashKey<LOLUiElementTextData>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Reflect, Default)]
 pub struct LOLUiMetricKda {
     pub device_ux: i32,
     pub icon: HashKey<LOLUiElementIconData>,
     pub text: HashKey<LOLUiElementTextData>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Reflect, Default)]
 pub struct LOLUiMetricLatencyText {
     pub device_ux: i32,
     pub latency_text: HashKey<LOLUiElementTextData>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Reflect, Default)]
 pub struct LOLUiMetricTeamKills {
     pub device_ux: i32,
     pub team1_kill_text: HashKey<LOLUiElementTextData>,
@@ -862,7 +874,7 @@ pub struct LOLUiMetricTeamKills {
     pub team_kills_icon: HashKey<LOLUiElementIconData>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Reflect, Default)]
 pub struct LOLUiMetricTeamScoreMeters {
     pub device_ux: Option<i32>,
     pub frame: HashKey<LOLUiElementIconData>,
@@ -874,21 +886,21 @@ pub struct LOLUiMetricTeamScoreMeters {
     pub team2_meter_red_skin: HashKey<LOLUiElementIconData>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Reflect, Default)]
 pub struct LOLUnk0x5ab5b20f {
     pub device_ux: i32,
     pub time_text: HashKey<LOLUiElementTextData>,
     pub unk_0xadbcc5ee: HashKey<LOLUiElementIconData>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Reflect, Default)]
 pub struct LOLUnk0x767adcf7 {
     pub device_ux: i32,
     pub frame: HashKey<LOLUiElementIconData>,
     pub time_text: HashKey<LOLUiElementTextData>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Reflect, Default)]
 pub struct LOLUnk0xa8c6f5f0 {
     pub unk_0x1793d323: HashKey<LOLUiElementIconData>,
     pub unk_0x4297f4f9: HashKey<LOLUiElementIconData>,
@@ -896,7 +908,7 @@ pub struct LOLUnk0xa8c6f5f0 {
     pub unk_0xb80015ba: HashKey<LOLUiElementIconData>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Reflect, Default)]
 pub struct LOLUnk0x7a19656 {
     pub detail_panel: HashKey<LOLUiElementRegionData>,
     pub detail_text_t1: HashKey<LOLUiElementTextData>,
@@ -906,14 +918,14 @@ pub struct LOLUnk0x7a19656 {
     pub unk_0x6188e7b7: HashKey<LOLUiElementIconData>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Reflect, Default)]
 pub struct LOLUnk0xb8a49c96 {
     pub blue_skin: HashKey<LOLUiElementIconData>,
     pub meter: HashKey<LOLUiElementIconData>,
     pub red_skin: HashKey<LOLUiElementIconData>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Reflect, Default)]
 pub struct LOLUnk0xf43ad1ce {
     pub frame: HashKey<LOLUiElementIconData>,
     pub icon_shadow_t1: HashKey<LOLUiElementIconData>,
@@ -922,7 +934,7 @@ pub struct LOLUnk0xf43ad1ce {
     pub team2_meter: LOLUnk0xb8a49c96,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Reflect, Default)]
 pub struct LOLUnk0xb62c8675 {
     pub base_loadable: u32,
     pub crown_icons: LOLUnk0xa8c6f5f0,
@@ -936,7 +948,7 @@ pub struct LOLUnk0xb62c8675 {
     pub unk_0xb057cf4b: u8,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Reflect, Default)]
 pub struct LOLUnk0xe228ce4a {
     pub device_ux: i32,
     pub frame: HashKey<LOLUiElementIconData>,
@@ -945,7 +957,8 @@ pub struct LOLUnk0xe228ce4a {
     pub unk_0x3a568777: String,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Resource, Asset, TypePath)]
+#[derive(Serialize, Deserialize, Debug, Clone, Resource, Asset, Reflect, Default)]
+#[reflect(Resource)]
 pub struct LOLLolGameStateViewController {
     pub base_loadable: u32,
     pub draw_area_list: Option<LOLDrawAreaList>,

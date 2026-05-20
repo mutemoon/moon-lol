@@ -285,8 +285,8 @@ fn update_single_skill_rank_pips(
     );
 
     for i in 0..pip_def.empty_pips.len() {
-        let empty_key = pip_def.empty_pips[i].0.0;
-        let full_key = pip_def.full_pips[i].0.0;
+        let empty_key = pip_def.empty_pips[i].0;
+        let full_key = pip_def.full_pips[i].0;
         let empty_entity = res_ui_element_entity.map.get(&empty_key).copied();
         let full_entity = res_ui_element_entity.map.get(&full_key).copied();
 
