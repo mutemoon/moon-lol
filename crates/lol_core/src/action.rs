@@ -94,4 +94,3 @@ pub struct EventAgentDecision {
     pub thinking: String,
     pub action: String,
 }
-

@@ -1,11 +1,11 @@
 use bevy::prelude::*;
 
+use crate::base::gold::Gold;
 use crate::base::level::Level;
 use crate::base::state::State;
+use crate::base::stats::ChampionStats;
 use crate::character::Character;
 use crate::skill::SkillPoints;
-use crate::base::gold::Gold;
-use crate::base::stats::ChampionStats;
 
 #[derive(Component, Reflect, Default)]
 #[reflect(Component)]

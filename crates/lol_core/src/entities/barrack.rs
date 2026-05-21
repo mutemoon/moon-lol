@@ -139,7 +139,7 @@ fn barracks_spawning_system(
         // --- 2. 处理属性和移速升级 ---
         if barrack_state.upgrade_timer.just_finished() {
             barrack_state.upgrade_count += 1;
-            info!(
+            debug!(
                 "Barrack upgraded! New count: {}",
                 barrack_state.upgrade_count
             );
@@ -150,7 +150,7 @@ fn barracks_spawning_system(
                 < barracks_config.move_speed_increase_max_times
             {
                 barrack_state.move_speed_upgrade_count += 1;
-                info!(
+                debug!(
                     "Minion move speed upgraded! New count: {}",
                     barrack_state.move_speed_upgrade_count
                 );

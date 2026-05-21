@@ -43,7 +43,10 @@ pub fn on_event_dead(
     if q_champion.get(dead_entity).is_ok() {
         if let Ok(mut dead_stats) = q_stats.get_mut(dead_entity) {
             dead_stats.deaths += 1;
-            debug!("{:?} 死亡数加一，当前死亡数: {}", dead_entity, dead_stats.deaths);
+            debug!(
+                "{:?} 死亡数加一，当前死亡数: {}",
+                dead_entity, dead_stats.deaths
+            );
         }
     }
 
@@ -59,12 +62,18 @@ pub fn on_event_dead(
 
     if q_minion.get(dead_entity).is_ok() {
         killer_stats.minion_kills += 1;
-        debug!("{:?} 击杀了小兵 {:?}，当前补刀数: {}", killer_entity, dead_entity, killer_stats.minion_kills);
+        debug!(
+            "{:?} 击杀了小兵 {:?}，当前补刀数: {}",
+            killer_entity, dead_entity, killer_stats.minion_kills
+        );
         return;
     }
 
     if q_champion.get(dead_entity).is_ok() {
         killer_stats.kills += 1;
-        debug!("{:?} 击杀了英雄 {:?}，当前击杀数: {}", killer_entity, dead_entity, killer_stats.kills);
+        debug!(
+            "{:?} 击杀了英雄 {:?}，当前击杀数: {}",
+            killer_entity, dead_entity, killer_stats.kills
+        );
     }
 }

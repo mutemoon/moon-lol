@@ -1,6 +1,5 @@
 use bevy::prelude::*;
 use lol_champions::fiora::passive::Vital;
-use lol_core::action::CommandAction;
 use lol_core::attack::{Attack, AttackState};
 use lol_core::base::ability_resource::AbilityResource;
 use lol_core::base::gold::Gold;
@@ -63,7 +62,7 @@ pub fn get_observe(
     time: f32,
 ) -> Option<Observe> {
     let Ok((
-        (player_entity, transform, attack_state, run, player_team, _controller),
+        (_player_entity, transform, attack_state, run, player_team, _controller),
         (health, opt_level, opt_ability, opt_damage),
         (opt_armor, opt_attack, opt_skill_points, opt_gold, opt_stats, opt_skills),
     )) = player_q.single()

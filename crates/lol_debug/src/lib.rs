@@ -5,7 +5,6 @@ use lol_champions::riven::Riven;
 use lol_core::buffs::damage_reduction::BuffDamageReduction;
 use lol_core::entities::champion::Champion;
 use lol_core::skill::{CoolDown, Skill, SkillCooldownMode};
-
 use lol_server::events::CommandWsRequest;
 use lol_server::protocol::{GodModeParams, SwitchChampionParams, ToggleCooldownParams, WsResponse};
 
@@ -46,7 +45,11 @@ fn on_command_ws_request(
                 .map_err(|e| format!("invalid params: {e}"))?;
 
             let name = p.name;
-            let champion_entity = champions.iter().map(|(e, _, _)| e).next().ok_or("no champion found")?;
+            let champion_entity = champions
+                .iter()
+                .map(|(e, _, _)| e)
+                .next()
+                .ok_or("no champion found")?;
 
             let name_lower = name.to_lowercase();
             let config_path = format!("characters/{name_lower}/config.ron");
@@ -60,12 +63,18 @@ fn on_command_ws_request(
             e.remove::<Fiora>();
 
             match name.as_str() {
-                "Riven" => { e.insert(Riven); },
-                "Fiora" => { e.insert(Fiora); },
+                "Riven" => {
+                    e.insert(Riven);
+                }
+                "Fiora" => {
+                    e.insert(Fiora);
+                }
                 _ => return Err("unknown champion".to_string()),
             };
 
-            e.insert(ConfigCharacterRecord { character_record: config_record });
+            e.insert(ConfigCharacterRecord {
+                character_record: config_record,
+            });
             e.insert(ConfigSkin { skin: config_skin });
 
             Ok(serde_json::json!({"name": name}))
@@ -77,7 +86,10 @@ fn on_command_ws_request(
             for (entity, _, _) in champions.iter() {
                 let mut e = commands.entity(entity);
                 if p.enabled {
-                    e.insert(BuffDamageReduction { percentage: 1.0, damage_type: None });
+                    e.insert(BuffDamageReduction {
+                        percentage: 1.0,
+                        damage_type: None,
+                    });
                 } else {
                     e.remove::<BuffDamageReduction>();
                 }
@@ -91,7 +103,11 @@ fn on_command_ws_request(
                 .map_err(|e| format!("invalid params: {e}"))?;
 
             for (_, mut skill, cd_opt) in skills.iter_mut() {
-                skill.cooldown_mode = if p.enabled { SkillCooldownMode::Manual } else { SkillCooldownMode::AfterCast };
+                skill.cooldown_mode = if p.enabled {
+                    SkillCooldownMode::Manual
+                } else {
+                    SkillCooldownMode::AfterCast
+                };
                 if p.enabled {
                     if let Some(mut cd) = cd_opt {
                         cd.timer = None;
@@ -121,7 +137,9 @@ fn on_command_ws_request(
             Ok(serde_json::json!({"paused": paused}))
         })(),
         "get_state" => (|| -> Result<serde_json::Value, String> {
-            let champion_name = champions.iter().next()
+            let champion_name = champions
+                .iter()
+                .next()
                 .and_then(|(_, _, name)| name.map(|n| n.to_string()))
                 .unwrap_or_default();
 

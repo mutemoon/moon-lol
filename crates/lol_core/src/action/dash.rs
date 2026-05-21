@@ -8,7 +8,7 @@ use crate::damage::{CommandDamageCreate, Damage};
 use crate::entities::champion::Champion;
 use crate::entities::minion::Minion;
 use crate::life::Death;
-use crate::movement::{CommandMovement, MovementAction, MovementWay};
+use crate::movement::{CommandMovement, MovementAction, MovementSource, MovementWay};
 use crate::skill::{Skill, Skills, get_skill_value};
 use crate::team::Team;
 
@@ -134,7 +134,7 @@ pub fn on_action_dash(
         action: MovementAction::Start {
             way: MovementWay::Path(vec![Vec3::new(destination.x, current_pos.y, destination.y)]),
             speed: Some(trigger.speed),
-            source: "Dash".to_string(),
+            source: MovementSource::Dash,
         },
     });
 }
@@ -170,10 +170,10 @@ pub fn update_dash_damage(
 ) {
     for (entity, dasher_transform, mut dash_damage, team) in q_dasher.iter_mut() {
         let Some(skill_object) = res_assets_spell_object.get(&dash_damage.skill) else {
-            return;
+            continue;
         };
         let Ok(skills) = q_skills.get(entity) else {
-            return;
+            continue;
         };
         let skill = skills
             .iter()

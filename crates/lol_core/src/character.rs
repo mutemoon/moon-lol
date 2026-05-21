@@ -73,7 +73,7 @@ fn on_event_dead(
 fn try_load_config_characters(
     mut commands: Commands,
     character_record_query: Query<(Entity, &ConfigCharacterRecord)>,
-    dynamic_worlds: Res<Assets<DynamicWorld>>,
+    _dynamic_worlds: Res<Assets<DynamicWorld>>,
     asset_server: Res<AssetServer>,
 ) {
     let char_len = character_record_query.iter().len();
@@ -92,7 +92,7 @@ fn try_load_config_characters(
             // info!("Character config loaded: {:?}", config.character_record);
         } else {
             // info!("Character config not loaded: {:?}", config.character_record);
-            return;
+            continue;
         }
 
         let handle = config.character_record.clone();

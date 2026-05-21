@@ -270,7 +270,10 @@ fn update_single_skill_rank_pips(
         .spell_rank_pips
         .rank_pips;
     let Some(pip_def) = pips_list.get(index) else {
-        debug!("【技能等级点】未能在 abilities_ui_data.spell_rank_pips.rank_pips 中找到索引 {} 的定义", index);
+        debug!(
+            "【技能等级点】未能在 abilities_ui_data.spell_rank_pips.rank_pips 中找到索引 {} 的定义",
+            index
+        );
         return;
     };
 
@@ -281,7 +284,11 @@ fn update_single_skill_rank_pips(
 
     debug!(
         "【技能等级点】开始处理技能索引: {}, 当前技能等级: {}, 最大规格: {}, empty_pips数量: {}, full_pips数量: {}",
-        index, skill.level, max_level, pip_def.empty_pips.len(), pip_def.full_pips.len()
+        index,
+        skill.level,
+        max_level,
+        pip_def.empty_pips.len(),
+        pip_def.full_pips.len()
     );
 
     for i in 0..pip_def.empty_pips.len() {
@@ -293,7 +300,12 @@ fn update_single_skill_rank_pips(
         if empty_entity.is_none() || full_entity.is_none() {
             debug!(
                 "【技能等级点警告】索引 {}, 槽位 {} 实体未找到: empty_key: {} (存在: {}), full_key: {} (存在: {})",
-                index, i, empty_key, empty_entity.is_some(), full_key, full_entity.is_some()
+                index,
+                i,
+                empty_key,
+                empty_entity.is_some(),
+                full_key,
+                full_entity.is_some()
             );
             continue;
         }
@@ -311,22 +323,25 @@ fn update_single_skill_rank_pips(
         };
         let pip_y = base_y;
 
-        let new_pos = lol_base::ui::LOLEnumUiPosition::UiPositionRect(lol_base::ui::LOLUiPositionRect {
-            anchors: Some(lol_base::ui::LOLEnumAnchor::AnchorSingle(lol_base::ui::LOLAnchorSingle {
-                anchor: Vec2::new(0.5, 1.0),
-            })),
-            ui_rect: Some(lol_base::ui::LOLUiElementRect {
-                position: Some(Vec2::new(pip_x, pip_y)),
-                size: Some(Vec2::new(9.0, 9.0)),
-                source_resolution_height: Some(1200),
-                source_resolution_width: Some(1600),
-            }),
-            disable_pixel_snapping_x: Some(true),
-            disable_pixel_snapping_y: Some(true),
-            disable_resolution_downscale: None,
-            ignore_global_scale: None,
-            ignore_safe_zone: None,
-        });
+        let new_pos =
+            lol_base::ui::LOLEnumUiPosition::UiPositionRect(lol_base::ui::LOLUiPositionRect {
+                anchors: Some(lol_base::ui::LOLEnumAnchor::AnchorSingle(
+                    lol_base::ui::LOLAnchorSingle {
+                        anchor: Vec2::new(0.5, 1.0),
+                    },
+                )),
+                ui_rect: Some(lol_base::ui::LOLUiElementRect {
+                    position: Some(Vec2::new(pip_x, pip_y)),
+                    size: Some(Vec2::new(9.0, 9.0)),
+                    source_resolution_height: Some(1200),
+                    source_resolution_width: Some(1600),
+                }),
+                disable_pixel_snapping_x: Some(true),
+                disable_pixel_snapping_y: Some(true),
+                disable_resolution_downscale: None,
+                ignore_global_scale: None,
+                ignore_safe_zone: None,
+            });
 
         // 仅在坐标真正发生变化时才修改 icon_assets 以触发重新布局计算，并且极为安全高效
         if let Ok(UIElement::Icon(empty_handle)) = q_ui_element.get(empty_entity) {
@@ -358,15 +373,24 @@ fn update_single_skill_rank_pips(
         }
 
         if i >= max_level {
-            debug!("【技能等级点】索引 {}, 点位 {} 属于未启用等级 (>= {}), 隐藏 empty 和 full", index, i, max_level);
+            debug!(
+                "【技能等级点】索引 {}, 点位 {} 属于未启用等级 (>= {}), 隐藏 empty 和 full",
+                index, i, max_level
+            );
             commands.entity(empty_entity).insert(Visibility::Hidden);
             commands.entity(full_entity).insert(Visibility::Hidden);
         } else if i < skill.level {
-            debug!("【技能等级点】索引 {}, 点位 {} 属于已升级点 (< {}), 显示 full，隐藏 empty", index, i, skill.level);
+            debug!(
+                "【技能等级点】索引 {}, 点位 {} 属于已升级点 (< {}), 显示 full，隐藏 empty",
+                index, i, skill.level
+            );
             commands.entity(full_entity).insert(Visibility::Inherited);
             commands.entity(empty_entity).insert(Visibility::Hidden);
         } else {
-            debug!("【技能等级点】索引 {}, 点位 {} 属于可学习空点, 显示 empty，隐藏 full", index, i);
+            debug!(
+                "【技能等级点】索引 {}, 点位 {} 属于可学习空点, 显示 empty，隐藏 full",
+                index, i
+            );
             commands.entity(empty_entity).insert(Visibility::Inherited);
             commands.entity(full_entity).insert(Visibility::Hidden);
         }
@@ -388,20 +412,35 @@ fn update_skill_cooldown(
         return;
     };
 
-    debug!("【技能冷却更新】已成功定位控制器技能列表，技能数量: {}", skills.len());
+    debug!(
+        "【技能冷却更新】已成功定位控制器技能列表，技能数量: {}",
+        skills.len()
+    );
 
     for (index, skill_entity) in skills.iter().enumerate() {
         if index >= res_player_frame_vc.abilities_ui_data.champion_spells.len() {
-            debug!("【技能冷却更新警告】索引 {} 超出 champion_spells 最大长度", index);
+            debug!(
+                "【技能冷却更新警告】索引 {} 超出 champion_spells 最大长度",
+                index
+            );
             break;
         }
 
         let Ok((skill, cooldown)) = q_skill.get(skill_entity) else {
-            debug!("【技能冷却更新警告】技能实体 {:?} 未找到 Skill 组件", skill_entity);
+            debug!(
+                "【技能冷却更新警告】技能实体 {:?} 未找到 Skill 组件",
+                skill_entity
+            );
             continue;
         };
 
-        debug!("【技能冷却更新】技能槽位索引: {}, 技能实体: {:?}, 技能等级: {}, Cooldown存在: {}", index, skill_entity, skill.level, cooldown.is_some());
+        debug!(
+            "【技能冷却更新】技能槽位索引: {}, 技能实体: {:?}, 技能等级: {}, Cooldown存在: {}",
+            index,
+            skill_entity,
+            skill.level,
+            cooldown.is_some()
+        );
 
         let slot_def = &res_player_frame_vc.abilities_ui_data.champion_spells[index];
         update_single_skill_cooldown(

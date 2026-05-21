@@ -13,7 +13,9 @@ use lol_core::buffs::cc_debuffs::DebuffFear;
 use lol_core::buffs::common_buffs::{BuffMoveSpeed, BuffSelfHeal};
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
-use lol_core::movement::{CommandMovement, EventMovementEnd, MovementAction, MovementWay};
+use lol_core::movement::{
+    CommandMovement, EventMovementEnd, MovementAction, MovementSource, MovementWay,
+};
 use lol_core::skill::{EventSkillCast, Skill, SkillSlot};
 use lol_core::team::Team;
 
@@ -214,7 +216,7 @@ fn on_hecarim_e_dash_end(
     if q_hecarim.get(entity).is_err() {
         return;
     }
-    if trigger.source != "HecarimE" {
+    if trigger.source != MovementSource::Skill("HecarimE".to_string()) {
         return;
     }
 
@@ -257,7 +259,7 @@ fn on_hecarim_e_dash_end(
                         knockback_pos.z,
                     )),
                     speed: Some(800.0),
-                    source: "HecarimE".to_string(),
+                    source: MovementSource::Skill("HecarimE".to_string()),
                 },
             });
         }

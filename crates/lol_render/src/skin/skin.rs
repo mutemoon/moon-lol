@@ -3,7 +3,7 @@ use bevy::asset::RecursiveDependencyLoadState;
 use bevy::ecs::entity::EntityHashMap;
 use bevy::prelude::*;
 use bevy::world_serialization::{WorldInstanceReady, WorldInstanceSpawnError};
-use lol_base::animation::{AnimationConfigOf, LOLAnimationState};
+use lol_base::animation::AnimationConfigOf;
 use lol_base::character::{ConfigSkin, Skin};
 
 pub fn update_skin_scale(mut query: Query<(&Skin, &mut Transform)>) {
@@ -15,7 +15,7 @@ pub fn update_skin_scale(mut query: Query<(&Skin, &mut Transform)>) {
 pub fn try_load_config_skin_characters(
     mut commands: Commands,
     skin_query: Query<(Entity, &ConfigSkin)>,
-    dynamic_worlds: Res<Assets<DynamicWorld>>,
+    _dynamic_worlds: Res<Assets<DynamicWorld>>,
     asset_server: Res<AssetServer>,
 ) {
     let skin_len = skin_query.iter().len();
@@ -34,7 +34,7 @@ pub fn try_load_config_skin_characters(
             // info!("Character config loaded: {:?}", config.character_record);
         } else {
             // info!("Character config not loaded: {:?}", config.character_record);
-            return;
+            continue;
         }
 
         let handle = config.skin.clone();

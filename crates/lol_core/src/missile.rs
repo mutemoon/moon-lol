@@ -1,4 +1,3 @@
-use bevy::animation::AnimationTargetId;
 use bevy::color::palettes::tailwind::RED_500;
 use bevy::prelude::*;
 use lol_base::debug_area::DebugArea;
@@ -11,7 +10,9 @@ use serde::{Deserialize, Serialize};
 use crate::attack::EntityCommandsTrigger;
 use crate::damage::{CommandDamageCreate, Damage, DamageType};
 use crate::life::Death;
-use crate::movement::{CommandMovement, EventMovementEnd, Movement, MovementAction, MovementWay};
+use crate::movement::{
+    CommandMovement, EventMovementEnd, Movement, MovementAction, MovementSource, MovementWay,
+};
 use crate::team::Team;
 
 #[derive(Default)]
@@ -123,7 +124,7 @@ fn fixed_update(
             action: MovementAction::Start {
                 way: MovementWay::Path(vec![target_translation]),
                 speed: Some(missile.speed),
-                source: "Missile".to_string(),
+                source: MovementSource::Missile,
             },
         });
     }
@@ -288,7 +289,7 @@ fn on_command_missile_create(
             action: MovementAction::Start {
                 way: MovementWay::Path(vec![destination]),
                 speed: Some(speed),
-                source: "Missile".to_string(),
+                source: MovementSource::Missile,
             },
         });
 
@@ -352,7 +353,7 @@ fn on_command_missile_create(
         action: MovementAction::Start {
             way: MovementWay::Path(vec![target_translation]),
             speed: Some(speed),
-            source: "Missile".to_string(),
+            source: MovementSource::Missile,
         },
     });
     commands.entity(missile_entity).insert(DebugSphere {

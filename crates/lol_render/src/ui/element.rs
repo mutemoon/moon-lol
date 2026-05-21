@@ -143,7 +143,6 @@ impl Plugin for PluginUIElement {
         app.register_type::<HashKey<lol_base::ui::LOLUiElementGroupButtonData>>();
         app.register_type::<HashKey<lol_base::ui::LOLUiElementTextData>>();
 
-
         app.add_systems(Startup, startup_load_ui_data);
         app.add_systems(
             Update,

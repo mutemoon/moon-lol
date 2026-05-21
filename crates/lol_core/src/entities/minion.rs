@@ -60,7 +60,7 @@ pub fn fixed_update(
     >,
     res_minion_path: Res<MinionPath>,
 ) {
-        for (entity, transform, team, lane, minion_state, run) in q_minion.iter() {
+    for (entity, transform, team, lane, minion_state, run) in q_minion.iter() {
         if *minion_state == MinionState::AttackingTarget {
             continue;
         }
@@ -75,7 +75,7 @@ pub fn fixed_update(
 
         let Some(closest_index) = find_closest_point_index(&path, transform.translation.xz())
         else {
-            return;
+            continue;
         };
 
         let target_pos = *path.get(closest_index + 1).unwrap_or(&path[closest_index]);

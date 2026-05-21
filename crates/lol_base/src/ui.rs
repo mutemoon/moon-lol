@@ -2,7 +2,7 @@ use std::collections::{BTreeMap, HashMap};
 
 use bevy::asset::Asset;
 use bevy::math::{Vec2, Vec4};
-use bevy::prelude::{Handle, Resource, Reflect, ReflectResource};
+use bevy::prelude::{Handle, Reflect, ReflectResource, Resource};
 use serde::{Deserialize, Serialize};
 
 use crate::hash::hash_bin;

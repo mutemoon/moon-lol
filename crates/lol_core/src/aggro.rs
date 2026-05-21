@@ -3,11 +3,11 @@ use std::collections::HashMap;
 use bevy::prelude::*;
 
 use crate::damage::{DamageType, EventDamageCreate};
-use crate::life::{Death, EventDead};
 use crate::entities::champion::Champion;
 use crate::entities::minion::Minion;
 use crate::entities::pet::Pet;
 use crate::entities::turret::Turret;
+use crate::life::{Death, EventDead};
 use crate::team::Team;
 
 #[derive(Default)]
@@ -40,7 +40,17 @@ pub struct EventAggroTargetFound {
 
 pub fn aggro_scan(
     mut commands: Commands,
-    q_aggro: Query<(Entity, &Team, &Transform, &Aggro, &AggroState, Option<&Turret>), Without<Death>>,
+    q_aggro: Query<
+        (
+            Entity,
+            &Team,
+            &Transform,
+            &Aggro,
+            &AggroState,
+            Option<&Turret>,
+        ),
+        Without<Death>,
+    >,
     q_attackable: Query<
         (
             Entity,
@@ -59,14 +69,8 @@ pub fn aggro_scan(
         let mut target_entity = Entity::PLACEHOLDER;
 
         // 遍历所有可攻击单位筛选目标
-        for (
-            attackable_entity,
-            attackable_team,
-            attackable_transform,
-            champion,
-            minion,
-            pet,
-        ) in q_attackable.iter()
+        for (attackable_entity, attackable_team, attackable_transform, champion, minion, pet) in
+            q_attackable.iter()
         {
             // 忽略友方单位
             if attackable_team == team || *attackable_team == Team::Neutral {
@@ -363,7 +367,10 @@ mod tests {
 
         // 2. 触发目标死亡事件 (在目标实体上触发)
         // 注意：根据 on_target_dead implementation，EventDead 需触发在死亡实体上
-        world.trigger(EventDead { entity: enemy, killer: None });
+        world.trigger(EventDead {
+            entity: enemy,
+            killer: None,
+        });
 
         app.update();
 

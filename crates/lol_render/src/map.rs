@@ -1,6 +1,5 @@
 use bevy::asset::RenderAssetUsages;
 use bevy::gltf::GltfLoaderSettings;
-use bevy::light::CascadeShadowConfigBuilder;
 use bevy::prelude::*;
 use bevy_gltf_draco::GltfDracoDecoderPlugin;
 use lol_base::map::MapPaths;

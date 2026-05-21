@@ -1,5 +1,7 @@
-use bevy::prelude::*;
 use std::sync::{Arc, Mutex};
+
+use bevy::prelude::*;
+
 use crate::protocol::WsResponse;
 
 #[derive(Event)]

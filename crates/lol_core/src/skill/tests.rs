@@ -431,8 +431,7 @@ fn test_named_data_value_calculation() {
 #[test]
 fn test_dead_caster_cannot_start_skill() {
     use crate::life::Death;
-    use crate::skill::CommandSkillStart;
-    use crate::skill::SkillCastFailureReason;
+    use crate::skill::{CommandSkillStart, SkillCastFailureReason};
 
     let mut harness = ActionSkillHarness::new();
     harness.register_spell(10.0, 0.0).add_skill(
@@ -441,7 +440,11 @@ fn test_dead_caster_cannot_start_skill() {
     );
 
     // 1. 模拟 caster 死亡
-    harness.app.world_mut().entity_mut(harness.caster).insert(Death);
+    harness
+        .app
+        .world_mut()
+        .entity_mut(harness.caster)
+        .insert(Death);
 
     // 2. 尝试施放技能
     harness.app.world_mut().trigger(CommandSkillStart {

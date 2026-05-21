@@ -1,13 +1,13 @@
 use bevy::prelude::*;
 use clap::Parser;
+use lol_agent::PluginAgentObserver;
 use lol_champions::PluginChampions;
 use lol_core::PluginCore;
 use lol_core::game::GameScenes;
 use lol_core::log::create_log_plugin;
-use lol_server::PluginServer;
-use lol_render::PluginRender;
-use lol_agent::PluginAgentObserver;
 use lol_debug::PluginDebug;
+use lol_render::PluginRender;
+use lol_server::PluginServer;
 
 #[derive(Parser)]
 #[command(name = "moon_lol")]
@@ -18,7 +18,6 @@ struct Args {
     #[arg(long, default_value = "sandbox")]
     mode: String,
 
-
     #[arg(long, default_value = "Riven")]
     champion: String,
 }
@@ -26,8 +25,6 @@ struct Args {
 fn main() {
     let args = Args::parse();
     let (log_plugin, log_rx) = create_log_plugin();
-
-
 
     let mut app = App::new();
     app.add_plugins((
@@ -50,8 +47,6 @@ fn main() {
         PluginDebug,
         PluginAgentObserver,
     ));
-
-
 
     app.insert_resource(GameScenes::new(vec!["games/classic_fiora.ron".to_owned()]))
         .run();

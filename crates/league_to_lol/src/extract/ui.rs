@@ -1,4 +1,4 @@
-use std::collections::{BTreeMap, HashMap};
+use std::collections::HashMap;
 
 use bevy::prelude::*;
 use image::ImageFormat;
@@ -12,9 +12,8 @@ use league_core::extract::{
     SpellSlotDetailedUiDefinition, StructureFloatingInfoBarData, UiElementEffectAnimationData,
     UiElementEffectDesaturateData, UiElementEffectFillPercentageData, UiElementEffectInstancedData,
     UiElementGroupButtonData, UiElementIconData, UiElementMeterSkin, UiElementRegionData,
-    UiElementTextData, UiLevelUp,
-    UiPositionRect, UiPropertyLoadable, UiSceneData, UnitFloatingInfoBarData, Unk0x1e2d1428,
-    Unk0xc3f95838,
+    UiElementTextData, UiLevelUp, UiPositionRect, UiPropertyLoadable, UiSceneData,
+    UnitFloatingInfoBarData, Unk0x1e2d1428, Unk0xc3f95838,
 };
 use league_loader::game::{Data, LeagueLoader};
 use league_loader::prop_bin::LeagueWadLoaderTrait;
@@ -33,13 +32,13 @@ use lol_base::ui::{
     LOLSpellSlotBuffTimerData, LOLSpellSlotDetailedUiDefinition, LOLStatPageCategoryData,
     LOLStatPageViewController, LOLStructureFloatingInfoBarData, LOLUiClashTeam,
     LOLUiElementEffectAnimationData, LOLUiElementEffectDesaturateData,
-    LOLUiElementEffectFillPercentageData, LOLUiElementEffectInstancedData,
-    LOLUiElementIconData, LOLUiElementMeterSkin,
-    LOLUiElementTextData, LOLUiFile, LOLUiLevelUp, LOLUiMetricClash, LOLUiMetricCreepScore,
-    LOLUiMetricFps, LOLUiMetricGameTime, LOLUiMetricKda, LOLUiMetricLatencyText,
-    LOLUiMetricTeamKills, LOLUiMetricTeamScoreMeters, LOLUiPaths, LOLUiPositionRect,
-    LOLUnitFloatingInfoBarData, LOLUnk0x5ab5b20f, LOLUnk0x7a19656, LOLUnk0x767adcf7,
-    LOLUnk0xa8c6f5f0, LOLUnk0xb8a49c96, LOLUnk0xb62c8675, LOLUnk0xe228ce4a, LOLUnk0xf43ad1ce,
+    LOLUiElementEffectFillPercentageData, LOLUiElementEffectInstancedData, LOLUiElementIconData,
+    LOLUiElementMeterSkin, LOLUiElementTextData, LOLUiFile, LOLUiLevelUp, LOLUiMetricClash,
+    LOLUiMetricCreepScore, LOLUiMetricFps, LOLUiMetricGameTime, LOLUiMetricKda,
+    LOLUiMetricLatencyText, LOLUiMetricTeamKills, LOLUiMetricTeamScoreMeters, LOLUiPaths,
+    LOLUiPositionRect, LOLUnitFloatingInfoBarData, LOLUnk0x5ab5b20f, LOLUnk0x7a19656,
+    LOLUnk0x767adcf7, LOLUnk0xa8c6f5f0, LOLUnk0xb8a49c96, LOLUnk0xb62c8675, LOLUnk0xe228ce4a,
+    LOLUnk0xf43ad1ce,
 };
 
 use crate::extract::utils::write_to_file;
@@ -433,9 +432,7 @@ pub fn extract_ui_data(
     for fill_percentage_data in all_ui_fill_percentage_datas {
         // 收集原始纹理路径用于提取
         let atlas = &fill_percentage_data.texture_data;
-        if !atlas.m_texture_name.is_empty()
-            && !all_texture_names.contains(&atlas.m_texture_name)
-        {
+        if !atlas.m_texture_name.is_empty() && !all_texture_names.contains(&atlas.m_texture_name) {
             all_texture_names.push(atlas.m_texture_name.clone());
         }
 
@@ -1333,19 +1330,31 @@ pub fn extract_ui_all(game_path: &str) {
 
     if let Some(vc) = &player_frame_vc {
         let serialized = ron::ser::to_string_pretty(vc, ron_config.clone()).unwrap();
-        resources.insert("lol_base::ui::LOLPlayerFrameViewController".to_string(), serialized);
+        resources.insert(
+            "lol_base::ui::LOLPlayerFrameViewController".to_string(),
+            serialized,
+        );
     }
     if let Some(vc) = &player_inventory_vc {
         let serialized = ron::ser::to_string_pretty(vc, ron_config.clone()).unwrap();
-        resources.insert("lol_base::ui::LOLPlayerInventoryViewController".to_string(), serialized);
+        resources.insert(
+            "lol_base::ui::LOLPlayerInventoryViewController".to_string(),
+            serialized,
+        );
     }
     if let Some(vc) = &lol_game_state_vc {
         let serialized = ron::ser::to_string_pretty(vc, ron_config.clone()).unwrap();
-        resources.insert("lol_base::ui::LOLLolGameStateViewController".to_string(), serialized);
+        resources.insert(
+            "lol_base::ui::LOLLolGameStateViewController".to_string(),
+            serialized,
+        );
     }
     if let Some(vc) = &floating_info_bar_vc {
         let serialized = ron::ser::to_string_pretty(vc, ron_config.clone()).unwrap();
-        resources.insert("lol_base::ui::LOLFloatingInfoBarViewController".to_string(), serialized);
+        resources.insert(
+            "lol_base::ui::LOLFloatingInfoBarViewController".to_string(),
+            serialized,
+        );
     }
 
     let mut scene_str = String::new();

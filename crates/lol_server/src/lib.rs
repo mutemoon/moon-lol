@@ -1,7 +1,7 @@
+pub mod events;
 pub mod handlers;
 pub mod protocol;
 pub mod server;
-pub mod events;
 
 use bevy::prelude::*;
 
@@ -66,8 +66,6 @@ fn forward_logs(world: &mut World) {
         server::send_event(world, protocol::WsEvent::log(level, msg));
     }
 }
-
-
 
 #[derive(Resource)]
 pub struct LogReceiver(pub async_channel::Receiver<String>);

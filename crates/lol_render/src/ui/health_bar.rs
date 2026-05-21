@@ -47,17 +47,13 @@ pub struct HealthTick;
 fn update_spawn_health_bar(
     mut commands: Commands,
     q_added_health_bar: Query<(Entity, &HealthBar, &Bounding, &Name), Without<UIBindTarget>>,
-    res_floating_info_bar_view_controller: Option<Res<LOLFloatingInfoBarViewController>>,
+    res_floating_info_bar_view_controller: Res<LOLFloatingInfoBarViewController>,
     res_assets_unit_floating_info_bar_data: Res<Assets<LOLUnitFloatingInfoBarData>>,
     res_assets_hero_floating_info_bar_data: Res<Assets<LOLHeroFloatingInfoBarData>>,
     res_assets_structure_floating_info_bar_data: Res<Assets<LOLStructureFloatingInfoBarData>>,
     res_assets_ui_element_region_data: Res<Assets<LOLUiElementRegionData>>,
     res_assets_ui_element_icon_data: Res<Assets<LOLUiElementIconData>>,
 ) {
-    let Some(controller) = res_floating_info_bar_view_controller.as_deref() else {
-        return;
-    };
-
     for (entity, health_bar, bounding, _name) in q_added_health_bar.iter() {
         let health_bar_entity = commands
             .spawn((Node {
@@ -66,7 +62,7 @@ fn update_spawn_health_bar(
             },))
             .id();
 
-        let Some(&hash) = controller
+        let Some(&hash) = res_floating_info_bar_view_controller
             .info_bar_style_source_map
             .get(&health_bar.bar_type)
         else {
@@ -103,13 +99,13 @@ fn update_spawn_health_bar(
             (None, None, Some(bar)) => (&bar.health_bar, bar.border, bar.anchor),
             _ => {
                 info!("未找到健康条样式 hash: {}", hash);
-                return;
+                continue;
             }
         };
 
         let Some(anchor_region) = res_assets_ui_element_region_data.load_hash(&anchor) else {
             info!("未找到健康条锚点 hash: {:?}", anchor);
-            return;
+            continue;
         };
 
         if let Some(LOLEnumUiPosition::UiPositionRect(anchor_position)) = &anchor_region.position {

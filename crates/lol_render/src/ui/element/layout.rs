@@ -172,7 +172,9 @@ pub fn update_element_layout(
     node.width = Val::Px(size_new.x);
     node.height = Val::Px(size_new.y);
 
-    commands.entity(entity).insert((ZIndex(layer), super::OriginalPosition(position_new)));
+    commands
+        .entity(entity)
+        .insert((ZIndex(layer), super::OriginalPosition(position_new)));
 
     let child = if let Ok(children) = q_children.get(entity) {
         if let Some(&child) = children.first() {
@@ -191,6 +193,9 @@ pub fn update_element_layout(
     if let UIElement::Text(_) = ui_element {
         node.justify_content = JustifyContent::Center;
         node.align_items = AlignItems::Center;
+        commands
+            .entity(child)
+            .insert(TextLayout::new_with_no_wrap());
         return;
     }
 

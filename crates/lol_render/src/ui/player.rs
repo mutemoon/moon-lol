@@ -67,12 +67,13 @@ fn update_player_health(
     res_player_frame: Res<LOLPlayerFrameViewController>,
     res_ui_element_entity: Res<UIElementEntity>,
     q_health: Query<&Health, With<Controller>>,
+    mut q_ui_text_state: Query<&mut UiTextState>,
 ) {
-    let value = if let Ok(health) = q_health.single() {
-        health.value as f32 / health.max as f32
-    } else {
-        0.0
+    let Ok(health) = q_health.single() else {
+        return;
     };
+
+    let value = health.value as f32 / health.max as f32;
 
     // Update Green Bar (Immediate) using health_animated_meter_skin
     let Some(first_bar) = res_player_frame
@@ -92,6 +93,18 @@ fn update_player_health(
         node_type: NodeType::Parent,
         flip: false,
     });
+
+    // Update Health Value Text
+    let text_entity =
+        res_ui_element_entity.get_entity(&res_player_frame.resource_bars.health_meter.value_text);
+    let Ok(mut text_state) = q_ui_text_state.get_mut(text_entity) else {
+        return;
+    };
+
+    let new_text = format!("{}/{}", health.value as u32, health.max as u32);
+    if text_state.text != new_text {
+        text_state.text = new_text;
+    }
 }
 
 fn update_player_health_fade(

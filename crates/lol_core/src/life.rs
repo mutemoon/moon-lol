@@ -85,10 +85,9 @@ fn on_event_damage_create(
 
             let level = q_level.get(entity).map(|l| l.value).unwrap_or(1);
             let duration = 5.0 + level as f32 * 2.0;
-            commands.entity(entity).insert(RespawnTimer(Timer::from_seconds(
-                duration,
-                TimerMode::Once,
-            )));
+            commands
+                .entity(entity)
+                .insert(RespawnTimer(Timer::from_seconds(duration, TimerMode::Once)));
             debug!("{:?} 将在 {:.1} 秒后复活", entity, duration);
         } else {
             commands.entity(entity).despawn();
@@ -137,11 +136,11 @@ pub fn update_respawn(
 #[cfg(test)]
 mod tests {
     use std::time::Duration;
+
     use bevy::ecs::system::RunSystemOnce;
 
-    use crate::damage::{DamageResult, EventDamageCreate};
-    use crate::damage::DamageType;
     use super::*;
+    use crate::damage::{DamageResult, DamageType, EventDamageCreate};
 
     fn setup_app() -> App {
         let mut app = App::new();
@@ -195,7 +194,7 @@ mod tests {
             },
             tag: None,
         });
-        
+
         // 触发伤害事件处理
         app.update();
 
@@ -210,7 +209,7 @@ mod tests {
                 let mut time = app.world_mut().resource_mut::<Time<Fixed>>();
                 time.advance_by(delta);
             }
-            
+
             // 手动执行系统以确保其运行
             let _ = app.world_mut().run_system_once(update_respawn);
         }
@@ -218,13 +217,13 @@ mod tests {
         // 4. 检查是否复活
         assert!(app.world().get::<Death>(hero).is_none());
         assert!(app.world().get::<RespawnTimer>(hero).is_none());
-        
+
         let health = app.world().get::<Health>(hero).unwrap();
         assert_eq!(health.value, 100.0);
 
         let ar = app.world().get::<AbilityResource>(hero).unwrap();
         assert_eq!(ar.value, 100.0, "复活后蓝量应回满");
-        
+
         let transform = app.world().get::<Transform>(hero).unwrap();
         assert_eq!(transform.translation, Vec3::new(1000.0, 0.0, 1000.0));
     }

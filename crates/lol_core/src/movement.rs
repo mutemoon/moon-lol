@@ -47,6 +47,24 @@ pub struct Movement {
     pub speed: f32,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub enum MovementSource {
+    Run,
+    Dash,
+    Knockback,
+    Missile,
+    Player,
+    AI,
+    Skill(String),
+    Pathfind,
+}
+
+impl Default for MovementSource {
+    fn default() -> Self {
+        Self::Run
+    }
+}
+
 #[derive(Component, Default, Debug)]
 pub struct MovementState {
     pub path: Vec<Vec3>,
@@ -56,7 +74,7 @@ pub struct MovementState {
     pub current_target_index: usize,
     pub completed: bool,
     pub pathfind: Option<(Vec3, f32)>,
-    pub source: String,
+    pub source: MovementSource,
 }
 
 #[derive(Component, Default)]
@@ -78,7 +96,7 @@ pub enum MovementAction {
     Start {
         way: MovementWay,
         speed: Option<f32>,
-        source: String,
+        source: MovementSource,
     },
     Stop,
 }
@@ -97,7 +115,7 @@ pub struct EventMovementStart {
 #[derive(EntityEvent, Debug)]
 pub struct EventMovementEnd {
     pub entity: Entity,
-    pub source: String,
+    pub source: MovementSource,
 }
 
 #[derive(SystemSet, Debug, Hash, PartialEq, Eq, Clone)]
@@ -125,10 +143,10 @@ impl PipelineStages for MovementPipeline {
 }
 
 impl MovementState {
-    pub fn reset_path(&mut self, path: &Vec<Vec3>, source: &str) -> &mut Self {
+    pub fn reset_path(&mut self, path: &Vec<Vec3>, source: MovementSource) -> &mut Self {
         *self = MovementState {
             path: path.clone(),
-            source: source.to_string(),
+            source,
             ..default()
         };
         self
@@ -360,105 +378,106 @@ fn apply_final_movement_decision(
         return;
     };
     for (entity, transform, decision, mut movement_state, bounding) in query.iter_mut() {
-        match &decision.0.action {
-            MovementAction::Start { way, speed, source } => {
-                match way {
-                    MovementWay::Pathfind(target) => {
-                        // let start = Instant::now();
+        if matches!(&decision.0.action, MovementAction::Stop) {
+            movement_state.clear_path();
+            continue;
+        }
 
-                        if let Some(bounding) = bounding {
-                            calculate_and_set_exclude_cells(
-                                &mut grid,
-                                transform.translation.xz(),
-                                bounding.radius,
-                            );
-                        };
+        let MovementAction::Start { way, speed, source } = &decision.0.action else {
+            unreachable!()
+        };
 
-                        // stats.exclude_time += start.elapsed();
-                        stats.exclude_count += 1;
+        match way {
+            MovementWay::Pathfind(target) => {
+                // let start = Instant::now();
 
-                        // 检查是否需要重新规划路径
-                        let need_replan = if let Some((last_target, _)) = movement_state.pathfind {
-                            // let start = Instant::now();
+                if let Some(bounding) = bounding {
+                    calculate_and_set_exclude_cells(
+                        &mut grid,
+                        transform.translation.xz(),
+                        bounding.radius,
+                    );
+                };
 
-                            // 目标位置发生变化
-                            let target_changed =
-                                (target - last_target).xz().length() > f32::EPSILON;
-                            // 路径上有障碍物阻挡
-                            let path_blocked = is_path_blocked(
-                                &grid,
-                                &movement_state.path,
-                                movement_state.current_target_index,
-                            );
+                // stats.exclude_time += start.elapsed();
+                stats.exclude_count += 1;
 
-                            if target_changed {
-                                debug!("{} 的目标位置发生变化: {}", entity, target_changed);
-                            }
-                            if path_blocked {
-                                debug!("{} 的路径上有障碍物阻挡: {}", entity, path_blocked);
-                            }
+                // 检查是否需要重新规划路径
+                let need_replan = if let Some((last_target, _)) = movement_state.pathfind {
+                    // let start = Instant::now();
 
-                            stats.check_path_count += 1;
-                            // stats.check_path_time += start.elapsed();
+                    // 目标位置发生变化
+                    let target_changed = (target - last_target).xz().length() > f32::EPSILON;
+                    // 路径上有障碍物阻挡
+                    let path_blocked = is_path_blocked(
+                        &grid,
+                        &movement_state.path,
+                        movement_state.current_target_index,
+                    );
 
-                            target_changed || path_blocked
-                        } else {
-                            // 第一次规划
-                            debug!("{} 第一次规划", entity);
-                            true
-                        };
-
-                        if !need_replan {
-                            debug!("{} 不需要重新规划，{:#?}", entity, movement_state);
-                            continue;
-                        }
-
-                        debug!("{} 寻路到 {:?}", entity, target);
-
-                        let debug_ref = nav_debug.as_mut().map(|d| &mut **d);
-
-                        if let Some(path) = get_nav_path_with_debug(
-                            &transform.translation.xz(),
-                            &target.xz(),
-                            &grid,
-                            &mut stats,
-                            debug_ref,
-                        ) {
-                            let start_y = transform.translation.y;
-                            let total = path.len() as f32;
-                            let path_3d = path
-                                .into_iter()
-                                .enumerate()
-                                .map(|(i, p)| {
-                                    let t = (i as f32 + 1.0) / total;
-                                    let y = start_y + (target.y - start_y) * t;
-                                    Vec3::new(p.x, y, p.y)
-                                })
-                                .collect();
-                            movement_state
-                                .reset_path(&path_3d, source)
-                                .with_pathfind((*target, time.elapsed_secs()));
-                        } else {
-                            debug!("{} 寻路失败", entity);
-                        }
+                    if target_changed {
+                        debug!("{} 的目标位置发生变化: {}", entity, target_changed);
                     }
-                    MovementWay::Path(path) => {
-                        debug!("{} 设置路径 {:?}", entity, path);
-                        movement_state.reset_path(path, source);
+                    if path_blocked {
+                        debug!("{} 的路径上有障碍物阻挡: {}", entity, path_blocked);
                     }
+
+                    stats.check_path_count += 1;
+                    // stats.check_path_time += start.elapsed();
+
+                    target_changed || path_blocked
+                } else {
+                    // 第一次规划
+                    debug!("{} 第一次规划", entity);
+                    true
+                };
+
+                if !need_replan {
+                    debug!("{} 不需要重新规划，{:#?}", entity, movement_state);
+                    continue;
                 }
 
-                if let Some(speed) = speed {
-                    debug!("{} 设置速度 {:?}", entity, speed);
-                    movement_state.with_speed(*speed);
-                }
+                debug!("{} 寻路到 {:?}", entity, target);
 
-                commands.trigger(EventMovementStart { entity });
+                let debug_ref = nav_debug.as_mut().map(|d| &mut **d);
+
+                if let Some(path) = get_nav_path_with_debug(
+                    &transform.translation.xz(),
+                    &target.xz(),
+                    &grid,
+                    &mut stats,
+                    debug_ref,
+                ) {
+                    let start_y = transform.translation.y;
+                    let total = path.len() as f32;
+                    let path_3d = path
+                        .into_iter()
+                        .enumerate()
+                        .map(|(i, p)| {
+                            let t = (i as f32 + 1.0) / total;
+                            let y = start_y + (target.y - start_y) * t;
+                            Vec3::new(p.x, y, p.y)
+                        })
+                        .collect();
+                    movement_state
+                        .reset_path(&path_3d, source.clone())
+                        .with_pathfind((*target, time.elapsed_secs()));
+                } else {
+                    info!("{} 寻路失败", entity);
+                }
             }
-            MovementAction::Stop => {
-                movement_state.clear_path();
+            MovementWay::Path(path) => {
+                debug!("{} 设置路径 {:?}", entity, path);
+                movement_state.reset_path(path, source.clone());
             }
         }
+
+        if let Some(speed) = speed {
+            debug!("{} 设置速度 {:?}", entity, speed);
+            movement_state.with_speed(*speed);
+        }
+
+        commands.trigger(EventMovementStart { entity });
     }
 }
 

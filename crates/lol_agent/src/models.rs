@@ -1,10 +1,7 @@
 use bevy::prelude::*;
 use lol_champions::fiora::passive::Vital;
-use lol_core::action::Action;
 use lol_core::attack::AttackState;
 use serde::{Deserialize, Serialize};
-
-
 
 #[derive(Component)]
 pub struct AttackTarget;
@@ -63,4 +60,3 @@ pub struct ObserveMyself {
     pub assists: u32,
     pub minion_kills: u32,
 }
-

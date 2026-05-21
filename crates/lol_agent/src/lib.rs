@@ -1,10 +1,9 @@
 pub mod models;
 pub mod systems;
 
+use bevy::prelude::*;
 pub use models::*;
 pub use systems::*;
-
-use bevy::prelude::*;
 
 pub struct PluginAgentObserver;
 

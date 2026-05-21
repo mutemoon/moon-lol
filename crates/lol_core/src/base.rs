@@ -2,11 +2,11 @@ pub mod ability_resource;
 pub mod bounding;
 pub mod buff;
 pub mod direction;
+pub mod gold;
 pub mod level;
 pub mod pipeline;
 pub mod position;
 pub mod state;
-pub mod gold;
 pub mod stats;
 use bevy::app::{App, Plugin};
 

@@ -1,9 +1,9 @@
 use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
 
-use crate::life::{Death, EventDead};
-use crate::entities::minion::Minion;
 use crate::entities::champion::Champion;
+use crate::entities::minion::Minion;
+use crate::life::{Death, EventDead};
 
 /// 金币资产组件，支持 Bevy ECS 反射和序列化
 #[derive(Component, Reflect, Serialize, Deserialize, Clone, Debug)]
@@ -57,10 +57,7 @@ impl Plugin for PluginGold {
 }
 
 /// 每秒给存活英雄增加 2.04 金币
-pub fn update_passive_gold(
-    mut q_gold: Query<&mut Gold, Without<Death>>,
-    time: Res<Time<Fixed>>,
-) {
+pub fn update_passive_gold(mut q_gold: Query<&mut Gold, Without<Death>>, time: Res<Time<Fixed>>) {
     let gold_per_sec = 2.04;
     let amount = gold_per_sec * time.delta_secs();
     for mut gold in q_gold.iter_mut() {
@@ -88,7 +85,7 @@ pub fn on_event_dead(
     };
 
     let mut gold_gain = 0.0;
-    
+
     // 优先读取 GoldDrop 掉落数据
     if let Ok(gold_drop) = q_gold_drop.get(dead_entity) {
         gold_gain = gold_drop.gold_given_on_death;

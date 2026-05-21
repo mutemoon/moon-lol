@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
 use crate::buffs::cc_debuffs::DebuffKnockup;
-use crate::movement::{CastBlock, CommandMovement, MovementAction, MovementWay};
+use crate::movement::{CastBlock, CommandMovement, MovementAction, MovementSource, MovementWay};
 
 #[derive(EntityEvent, Debug, Clone)]
 pub struct CommandKnockback {
@@ -54,7 +54,7 @@ pub fn on_command_knockback(
         action: MovementAction::Start {
             way: MovementWay::Path(vec![destination]),
             speed: Some(trigger.speed),
-            source: "Knockback".to_string(),
+            source: MovementSource::Knockback,
         },
     });
 
