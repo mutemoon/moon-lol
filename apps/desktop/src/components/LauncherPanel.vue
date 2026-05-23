@@ -22,20 +22,6 @@ defineEmits<{
     <div class="launcher-inner">
       <!-- Hero branding -->
       <div class="hero text-center">
-        <div class="mb-4">
-          <svg viewBox="0 0 64 64" width="64" height="64" fill="none" aria-hidden="true">
-            <circle cx="32" cy="32" r="28" stroke="url(#goldGrad)" stroke-width="1.5" />
-            <path d="M16 32 L48 32 M32 16 L32 48" stroke="url(#goldGrad)" stroke-width="2" stroke-linecap="round" />
-            <circle cx="32" cy="32" r="8" fill="none" stroke="url(#goldGrad)" stroke-width="1" />
-            <defs>
-              <linearGradient id="goldGrad" x1="0" y1="0" x2="64" y2="64">
-                <stop offset="0%" stop-color="#927136" />
-                <stop offset="50%" stop-color="#d4af5c" />
-                <stop offset="100%" stop-color="#785b28" />
-              </linearGradient>
-            </defs>
-          </svg>
-        </div>
         <h1 class="hero-title">MoonLOL</h1>
         <p class="hero-subtitle">League Launcher</p>
       </div>
@@ -47,7 +33,7 @@ defineEmits<{
           <div v-if="connecting" class="connecting-overlay">
             <div class="spinner"></div>
             <p class="connecting-text" :class="{ timeout: connectTimeout }">
-              {{ connectTimeout ? 'Still connecting… game may be slow to start.' : 'Connecting to game…' }}
+              {{ connectTimeout ? "Still connecting… game may be slow to start." : "Connecting to game…" }}
             </p>
             <button class="cancel-btn" @click="$emit('cancel')">Cancel</button>
           </div>
@@ -80,13 +66,9 @@ defineEmits<{
           </div>
         </div>
 
-        <button
-          class="btn-primary"
-          :disabled="isStarting"
-          @click="$emit('start')"
-        >
+        <button class="btn-primary" :disabled="isStarting" @click="$emit('start')">
           <span class="btn-shine" aria-hidden="true"></span>
-          <span class="btn-label">{{ isStarting ? 'Starting…' : 'Launch Game' }}</span>
+          <span class="btn-label">{{ isStarting ? "Starting…" : "Launch Game" }}</span>
         </button>
 
         <Transition name="fade">
@@ -122,7 +104,7 @@ defineEmits<{
   color: var(--color-gold-bright);
   letter-spacing: 0.06em;
   line-height: 1.15;
-  text-shadow: 0 0 30px rgba(212,175,92,0.15);
+  text-shadow: 0 0 30px rgba(212, 175, 92, 0.15);
 }
 
 .hero-subtitle {
@@ -141,17 +123,21 @@ defineEmits<{
   border: 1px solid var(--color-border-subtle);
   border-radius: 0.625rem;
   padding: 1.75rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5), 0 0 2px rgba(120, 91, 40, 0.2);
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.5),
+    0 0 2px rgba(120, 91, 40, 0.2);
 }
 
 .launch-card::before {
-  content: '';
+  content: "";
   position: absolute;
   inset: 0;
   border-radius: 0.625rem;
   padding: 1px;
-  background: linear-gradient(180deg, rgba(185,145,71,0.15), transparent 60%);
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  background: linear-gradient(180deg, rgba(185, 145, 71, 0.15), transparent 60%);
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   pointer-events: none;
@@ -181,7 +167,9 @@ defineEmits<{
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .connecting-text {
@@ -233,7 +221,7 @@ defineEmits<{
 }
 
 .select-wrap::after {
-  content: '';
+  content: "";
   position: absolute;
   right: 0.75rem;
   top: 50%;
@@ -256,8 +244,10 @@ select {
   padding: 0.625rem 2.25rem 0.625rem 0.875rem;
   font-size: 0.875rem;
   font-weight: 400;
-  box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
-  transition: border-color 0.2s, box-shadow 0.2s;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
   cursor: pointer;
 }
 
@@ -267,7 +257,10 @@ select:hover {
 
 select:focus {
   border-color: var(--color-gold-default);
-  box-shadow: inset 0 2px 4px rgba(0,0,0,0.5), 0 0 12px rgba(201, 170, 113, 0.25), 0 0 4px rgba(201, 170, 113, 0.4);
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.5),
+    0 0 12px rgba(201, 170, 113, 0.25),
+    0 0 4px rgba(201, 170, 113, 0.4);
   outline: none;
 }
 
@@ -291,19 +284,24 @@ select:disabled {
   border: 1px solid transparent;
   border-radius: 0.375rem;
   background-clip: padding-box;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 0 1px rgba(120, 91, 40, 0.15), inset 0 1px 0 rgba(212,175,92,0.12);
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.4),
+    0 0 1px rgba(120, 91, 40, 0.15),
+    inset 0 1px 0 rgba(212, 175, 92, 0.12);
   transition: all 0.2s;
   cursor: pointer;
 }
 
 .btn-primary::before {
-  content: '';
+  content: "";
   position: absolute;
   inset: 0;
   border-radius: 0.375rem;
   padding: 1px;
   background: linear-gradient(135deg, var(--color-gold-dimmer), var(--color-gold-default), var(--color-gold-bright));
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   pointer-events: none;
@@ -311,8 +309,11 @@ select:disabled {
 
 .btn-primary:hover:not(:disabled) {
   color: var(--color-gold-glow);
-  box-shadow: 0 0 12px rgba(201, 170, 113, 0.25), 0 0 4px rgba(201, 170, 113, 0.4), inset 0 1px 0 rgba(232,201,122,0.2);
-  text-shadow: 0 0 8px rgba(232,201,122,0.3);
+  box-shadow:
+    0 0 12px rgba(201, 170, 113, 0.25),
+    0 0 4px rgba(201, 170, 113, 0.4),
+    inset 0 1px 0 rgba(232, 201, 122, 0.2);
+  text-shadow: 0 0 8px rgba(232, 201, 122, 0.3);
 }
 
 .btn-primary:active:not(:disabled) {
@@ -331,7 +332,7 @@ select:disabled {
   left: -50%;
   width: 50%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(232,201,122,0.1), transparent);
+  background: linear-gradient(90deg, transparent, rgba(232, 201, 122, 0.1), transparent);
   transform: skewX(-20deg);
   transition: none;
   pointer-events: none;

@@ -149,6 +149,12 @@ pub fn create_log_plugin() -> (bevy::log::LogPlugin, PathBuf) {
         std::fs::create_dir_all(parent).expect("无法创建日志目录");
     }
 
+    if db_path.exists() {
+        let _ = std::fs::remove_file(&db_path);
+        let _ = std::fs::remove_file(db_path.with_extension("db-wal"));
+        let _ = std::fs::remove_file(db_path.with_extension("db-shm"));
+    }
+
     // 初始化 SQLite
     let conn = Connection::open(&db_path).expect("无法打开日志 SQLite");
     conn.execute_batch(
