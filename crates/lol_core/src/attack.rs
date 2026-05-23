@@ -7,6 +7,7 @@ use serde::{Deserialize, Serialize};
 use crate::base::buff::Buffs;
 use crate::damage::{CommandDamageCreate, Damage, DamageType};
 use crate::life::{Death, EventDead};
+use crate::log::{CommandLog, EnumLogCategory};
 use crate::missile::CommandMissileCreate;
 use crate::rotate::CommandRotate;
 
@@ -293,7 +294,11 @@ fn on_command_attack_start(
                 return;
             }
 
-            debug!("{} 移除攻击状态：攻击目标改变", entity);
+            commands.trigger(CommandLog {
+                entity,
+                info: "移除攻击状态：攻击目标改变".to_string(),
+                category: EnumLogCategory::Attack,
+            });
             commands.entity(entity).try_remove::<AttackState>();
             commands.trigger(CommandAttackStart { entity, target });
         }
@@ -315,7 +320,11 @@ fn on_command_attack_reset(
         return;
     };
 
-    debug!("{} 移除攻击状态：攻击重置", entity);
+    commands.trigger(CommandLog {
+        entity,
+        info: "移除攻击状态：攻击重置".to_string(),
+        category: EnumLogCategory::Attack,
+    });
     commands.entity(entity).try_remove::<AttackState>();
 
     let Some(target) = attack_state.target else {
@@ -338,11 +347,19 @@ fn on_command_attack_stop(
 
     match attack_state.status {
         AttackStatus::Windup { .. } => {
-            debug!("{} 移除攻击状态：停止攻击", entity);
+            commands.trigger(CommandLog {
+                entity,
+                info: "移除攻击状态：停止攻击".to_string(),
+                category: EnumLogCategory::Attack,
+            });
             commands.entity(entity).try_remove::<AttackState>();
         }
         AttackStatus::Cooldown { .. } => {
-            debug!("{} 攻击冷却中，停止下一次攻击", entity);
+            commands.trigger(CommandLog {
+                entity,
+                info: "攻击冷却中，停止下一次攻击".to_string(),
+                category: EnumLogCategory::Attack,
+            });
             attack_state.target = None;
         }
     };
@@ -358,7 +375,11 @@ fn on_event_dead(
     for (entity, attack_state) in q_attack_state.iter() {
         if let AttackStatus::Windup { target, .. } = &attack_state.status {
             if *target == dead_entity {
-                debug!("{} 移除攻击状态：攻击目标 {} 死亡", dead_entity, entity);
+                commands.trigger(CommandLog {
+                    entity,
+                    info: format!("{:?} 死亡，导致攻击者 {:?} 移除攻击状态", dead_entity, entity),
+                    category: EnumLogCategory::Attack,
+                });
                 commands.entity(entity).try_remove::<AttackState>();
             }
         }
@@ -424,15 +445,20 @@ fn fixed_update(
             AttackStatus::Cooldown { end_time } => {
                 // 检查后摇是否完成
                 if *end_time <= now {
-                    debug!("{} 移除攻击状态：攻击冷却结束", entity);
+                    commands.trigger(CommandLog {
+                        entity,
+                        info: "移除攻击状态：攻击冷却结束".to_string(),
+                        category: EnumLogCategory::Attack,
+                    });
                     commands.entity(entity).try_remove::<AttackState>();
                     commands.try_trigger(EventAttackReady { entity });
 
                     if let Some(target) = attack_state.target {
-                        debug!(
-                            "{} 攻击冷却结束时依然存在攻击目标，继续攻击 {}",
-                            entity, target
-                        );
+                        commands.trigger(CommandLog {
+                            entity,
+                            info: format!("攻击冷却结束，继续对 {:?} 发起攻击", target),
+                            category: EnumLogCategory::Attack,
+                        });
                         commands.try_trigger(CommandAttackStart { entity, target });
                     };
                 }

@@ -13,6 +13,10 @@ impl Plugin for PluginCooldown {
 
 fn fixed_update_cooldown(time: Res<Time>, mut q_cooldown: Query<&mut CoolDown>) {
     for mut cooldown_state in q_cooldown.iter_mut() {
+        if cooldown_state.timer.is_none() {
+            continue;
+        }
+
         if let Some(ref mut timer) = cooldown_state.timer {
             timer.tick(time.delta());
         }

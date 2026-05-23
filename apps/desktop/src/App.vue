@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import { invoke } from "@tauri-apps/api/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { useWsClient } from "./composables/useWsClient";
+import { createLogContext } from "./composables/useLogPoller";
 import LauncherPanel from "./components/LauncherPanel.vue";
 import DebugPanel from "./components/DebugPanel.vue";
 import SettingsPanel from "./components/SettingsPanel.vue";
+import "./style.css";
 
 const win = getCurrentWindow();
 
@@ -20,6 +22,15 @@ const isStarting = ref(false);
 const champions = ["Riven", "Fiora"];
 
 const ws = useWsClient("ws://127.0.0.1:9001");
+const log = createLogContext();
+watch(
+  () => ws.selectedEntityId.value,
+  (entityId) => {
+    if (entityId !== null) {
+      log.setEntityFilter(entityId);
+    }
+  },
+);
 
 function minimize() {
   win.minimize();
@@ -32,7 +43,6 @@ function closeWindow() {
 }
 
 async function onNavMouseDown(e: MouseEvent) {
-  // Don't start drag when clicking interactive elements
   const target = e.target as HTMLElement;
   if (target.closest("button, select, input, a")) return;
   try {
@@ -57,6 +67,7 @@ async function startGame() {
   }
 
   ws.connect().then(() => {
+    log.start();
     isStarting.value = false;
     currentView.value = "debug";
   });
@@ -64,6 +75,7 @@ async function startGame() {
 
 function stopGame() {
   ws.disconnect();
+  log.stop();
   invoke("stop_game").catch(() => {});
   currentView.value = "launcher";
 }
@@ -77,43 +89,52 @@ function stopGame() {
 
     <!-- Navigation -->
     <nav class="navbar" @mousedown="onNavMouseDown">
-      <div class="nav-brand">
-        <!-- <svg class="nav-logo" viewBox="0 0 28 28" width="28" height="28" fill="none" aria-hidden="true">
-          <circle cx="14" cy="14" r="12" stroke="currentColor" stroke-width="1.5" />
-          <path d="M8 14 L20 14 M14 8 L14 20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-        </svg> -->
-        <span class="nav-title">MoonLOL</span>
+      <div class="mr-8 flex shrink-0 items-center gap-2.5">
+        <span class="font-display text-gold-bright text-base font-bold tracking-widest">MoonLOL</span>
       </div>
 
-      <div class="nav-tabs">
-        <button class="nav-tab" :class="{ active: currentView === 'launcher' }" @click="currentView = 'launcher'">
+      <div class="ml-auto flex items-center gap-0.5">
+        <button
+          class="nav-tab"
+          :class="{ 'nav-tab-active': currentView === 'launcher' }"
+          @click="currentView = 'launcher'"
+        >
           Home
         </button>
         <button
           class="nav-tab"
-          :class="{ active: currentView === 'debug' }"
+          :class="{ 'nav-tab-active': currentView === 'debug' }"
           :disabled="!ws.connected.value"
           @click="currentView = 'debug'"
         >
           Debug
         </button>
-        <button class="nav-tab" disabled>Stats</button>
+        <button class="nav-tab disabled:cursor-not-allowed disabled:opacity-35" disabled>Stats</button>
         <button
           class="nav-tab"
-          :class="{ active: currentView === 'settings' }"
+          :class="{ 'nav-tab-active': currentView === 'settings' }"
           @click="currentView = 'settings'"
         >
           Settings
         </button>
       </div>
 
-      <div class="nav-status">
-        <span class="status-dot" :class="ws.connected.value ? 'connected' : 'disconnected'"></span>
-        <span class="status-label">{{ ws.connected.value ? "Connected" : "Offline" }}</span>
+      <div class="border-border-subtle ml-4 flex items-center gap-2 border-l pl-4">
+        <span
+          class="h-1.5 w-1.5 shrink-0 rounded-full transition-shadow"
+          :class="
+            ws.connected.value
+              ? 'bg-green shadow-[0_0_8px_rgba(74,158,90,0.5)]'
+              : 'bg-red shadow-[0_0_8px_rgba(200,74,74,0.3)]'
+          "
+        ></span>
+        <span class="text-text-muted text-xs font-medium tracking-wider uppercase">
+          {{ ws.connected.value ? "Connected" : "Offline" }}
+        </span>
       </div>
 
       <!-- Window Controls -->
-      <div class="window-controls">
+      <div class="-mr-4 flex h-full items-center">
         <button class="win-btn" @click="minimize" aria-label="Minimize">
           <svg viewBox="0 0 12 12" width="12" height="12" fill="none">
             <path d="M2 6 L10 6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
@@ -124,7 +145,7 @@ function stopGame() {
             <rect x="1.5" y="1.5" width="9" height="9" rx="1" stroke="currentColor" stroke-width="1.2" />
           </svg>
         </button>
-        <button class="win-btn win-close" @click="closeWindow" aria-label="Close">
+        <button class="win-btn win-btn-close" @click="closeWindow" aria-label="Close">
           <svg viewBox="0 0 12 12" width="12" height="12" fill="none">
             <path
               d="M2.5 2.5 L9.5 9.5 M9.5 2.5 L2.5 9.5"
@@ -158,144 +179,17 @@ function stopGame() {
           v-else-if="currentView === 'debug'"
           :connected="ws.connected.value"
           :game-state="ws.gameState.value"
-          :logs="ws.logs.value"
           :agent-observe="ws.agentObserve.value"
           :agent-thinking="ws.agentThinking.value"
           :agent-action="ws.agentAction.value"
           @send="(cmd, params) => ws.send(cmd, params)"
           @stop="stopGame"
         />
-        <SettingsPanel
-          v-else-if="currentView === 'settings'"
-        />
+        <SettingsPanel v-else-if="currentView === 'settings'" />
       </Transition>
     </main>
   </div>
 </template>
-
-<style>
-/* ── Design Tokens ── */
-:root {
-  /* Neutral palette */
-  --bg-deep: #070608;
-  --bg-surface: #121013;
-  --bg-elevated: #1c1820;
-  --bg-raised: #292231;
-  --border-subtle: #352c3d;
-  --border-default: #443a50;
-  --text-muted: #685e5a;
-  --text-default: #9a9282;
-  --text-bright: #dbd6c5;
-
-  /* Gold accent */
-  --gold-dimmer: #785b28;
-  --gold-muted: #927136;
-  --gold-default: #b99147;
-  --gold-bright: #d4af5c;
-  --gold-glow: #e8c97a;
-
-  /* Semantic */
-  --red: #c84a4a;
-  --green: #4a9e5a;
-  --blue: #4a7ec4;
-
-  /* Typography */
-  --font-display: "Noto Serif SC", "Noto Serif", Georgia, serif;
-  --font-body: "Noto Sans SC", "Noto Sans", "Segoe UI", Arial, sans-serif;
-  --font-mono: "Cascadia Code", "JetBrains Mono", "Fira Code", Consolas, monospace;
-
-  --fs-display: 40px;
-  --fs-h1: 28px;
-  --fs-h2: 20px;
-  --fs-h3: 16px;
-  --fs-body: 14px;
-  --fs-small: 12px;
-  --fs-tiny: 11px;
-  --fs-mono: 13px;
-
-  /* Shadows */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4), 0 0 1px rgba(120, 91, 40, 0.15);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5), 0 0 2px rgba(120, 91, 40, 0.2);
-  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.6), 0 0 4px rgba(120, 91, 40, 0.15);
-  --shadow-glow-gold: 0 0 12px rgba(201, 170, 113, 0.25), 0 0 4px rgba(201, 170, 113, 0.4);
-
-  /* Radii */
-  --radius-sm: 3px;
-  --radius-md: 6px;
-  --radius-lg: 10px;
-  --radius-xl: 16px;
-
-  /* Motion */
-  --dur-instant: 0.1s;
-  --dur-fast: 0.2s;
-  --dur-normal: 0.3s;
-  --dur-slow: 0.5s;
-}
-
-*,
-*::before,
-*::after {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-html,
-body {
-  height: 100%;
-  overflow: hidden;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-body {
-  font-family: var(--font-body);
-  font-size: var(--fs-body);
-  color: var(--text-default);
-  background: var(--bg-deep);
-  line-height: 1.5;
-}
-
-/* Selection */
-::selection {
-  background: rgba(185, 145, 71, 0.3);
-  color: var(--text-bright);
-}
-
-/* Scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: var(--border-default);
-  border-radius: 3px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: var(--gold-muted);
-}
-
-/* Focus ring */
-:focus-visible {
-  outline: 1px solid var(--gold-default);
-  outline-offset: 2px;
-}
-
-/* Button reset */
-button {
-  font-family: inherit;
-  cursor: pointer;
-  border: none;
-  background: none;
-}
-
-/* Select reset */
-select {
-  font-family: inherit;
-}
-</style>
 
 <style scoped>
 .app {
@@ -322,161 +216,88 @@ select {
 /* Warm gold ambient glow */
 .bg-glow {
   position: fixed;
+  pointer-events: none;
+  z-index: 0;
   top: -30vh;
   left: 50%;
   transform: translateX(-50%);
   width: 80vw;
   height: 60vh;
-  pointer-events: none;
-  z-index: 0;
   background: radial-gradient(ellipse at center, rgba(120, 91, 40, 0.08) 0%, transparent 70%);
 }
 
-/* ── Nav Bar ── */
+/* Nav Bar */
 .navbar {
   position: relative;
   z-index: 10;
   display: flex;
   align-items: center;
-  height: 64px;
-  padding: 0 24px;
-  gap: 8px;
+  height: 4rem;
+  padding: 0 1.5rem;
+  gap: 0.5rem;
   background: rgba(7, 6, 8, 0.85);
   backdrop-filter: blur(40px);
   -webkit-backdrop-filter: blur(40px);
-  border-bottom: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--color-border-subtle);
   flex-shrink: 0;
 }
 
-.nav-brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-right: 32px;
-  flex-shrink: 0;
-}
-
-.nav-logo {
-  color: var(--gold-bright);
-}
-
-.nav-title {
-  font-family: var(--font-display);
-  font-size: var(--fs-h3);
-  font-weight: 700;
-  color: var(--gold-bright);
-  letter-spacing: 0.06em;
-}
-
-.nav-tabs {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  margin-left: auto;
-}
-
+/* Nav Tab */
 .nav-tab {
   position: relative;
-  padding: 8px 18px;
-  font-size: var(--fs-small);
+  padding: 0.5rem 1rem;
+  font-size: 0.75rem;
   font-weight: 500;
-  color: var(--text-muted);
+  color: var(--color-text-muted);
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  transition: color var(--dur-fast) ease-out;
-  border-radius: var(--radius-sm);
+  transition: color 0.2s;
+  border-radius: 3px;
 }
 
 .nav-tab:hover:not(:disabled) {
-  color: var(--text-bright);
+  color: var(--color-text-bright);
 }
 
-.nav-tab.active {
-  color: var(--gold-bright);
+.nav-tab-active {
+  color: var(--color-gold-bright);
 }
 
-.nav-tab.active::after {
+.nav-tab-active::after {
   content: "";
   position: absolute;
-  bottom: -2px;
+  bottom: 0;
   left: 50%;
   transform: translateX(-50%);
-  width: 24px;
+  width: 1.5rem;
   height: 2px;
-  background: var(--gold-default);
+  background: var(--color-gold-default);
   border-radius: 1px;
 }
 
-.nav-tab:disabled {
-  opacity: 0.35;
-  cursor: not-allowed;
-}
-
-.nav-status {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-left: 16px;
-  padding-left: 16px;
-  border-left: 1px solid var(--border-subtle);
-}
-
-.status-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  flex-shrink: 0;
-  transition: box-shadow var(--dur-normal) ease-out;
-}
-
-.status-dot.connected {
-  background: var(--green);
-  box-shadow: 0 0 8px rgba(74, 158, 90, 0.5);
-}
-
-.status-dot.disconnected {
-  background: var(--red);
-  box-shadow: 0 0 8px rgba(200, 74, 74, 0.3);
-}
-
-.status-label {
-  font-size: var(--fs-tiny);
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  font-weight: 500;
-}
-
-/* ── Window Controls ── */
-.window-controls {
-  display: flex;
-  align-items: center;
-  margin-right: -16px;
-  height: 100%;
-}
-
+/* Window Controls */
 .win-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
+  width: 2.5rem;
   height: 100%;
-  color: var(--text-muted);
-  transition: all var(--dur-instant) ease-out;
+  color: var(--color-text-muted);
+  transition: all 0.1s;
   border-radius: 0;
 }
 
 .win-btn:hover {
-  background: var(--bg-elevated);
-  color: var(--text-bright);
+  background: var(--color-bg-elevated);
+  color: var(--color-text-bright);
 }
 
-.win-btn.win-close:hover {
-  background: var(--red);
+.win-btn-close:hover {
+  background: var(--color-red);
   color: #fff;
 }
 
-/* ── Content ── */
+/* Content */
 .content {
   position: relative;
   z-index: 1;
@@ -485,10 +306,10 @@ select {
   overflow-y: auto;
 }
 
-/* ── Transitions ── */
+/* Transitions */
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity var(--dur-normal) ease-out;
+  transition: opacity 0.3s ease-out;
 }
 
 .fade-enter-from,

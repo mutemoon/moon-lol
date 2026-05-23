@@ -7,6 +7,7 @@ use crate::attack_auto::{AttackAuto, CommandAttackAutoStart, CommandAttackAutoSt
 use crate::base::state::State;
 use crate::lane::Lane;
 use crate::life::{Death, EventDead};
+use crate::log::{CommandLog, EnumLogCategory};
 use crate::map::MinionPath;
 use crate::run::{CommandRunStart, Run, RunTarget};
 use crate::team::Team;
@@ -60,8 +61,8 @@ pub fn fixed_update(
     >,
     res_minion_path: Res<MinionPath>,
 ) {
-    for (entity, transform, team, lane, minion_state, run) in q_minion.iter() {
-        if *minion_state == MinionState::AttackingTarget {
+    for (entity, transform, team, lane, minion_state, _run) in q_minion.iter() {
+        if *minion_state != MinionState::MovingOnPath {
             continue;
         }
 
@@ -73,22 +74,25 @@ pub fn fixed_update(
             path.reverse();
         }
 
-        let Some(closest_index) = find_closest_point_index(&path, transform.translation.xz())
-        else {
+        let Some(closest_index) = find_next_point_index(&path, transform.translation.xz()) else {
             continue;
         };
 
-        let target_pos = *path.get(closest_index + 1).unwrap_or(&path[closest_index]);
+        let target_pos = *path.get(closest_index).unwrap();
 
-        if let Some(run) = run {
-            if let RunTarget::Position(pos) = run.target {
-                if pos == target_pos {
-                    continue;
-                }
-            }
-        }
+        // if let Some(run) = run {
+        //     if let RunTarget::Position(pos) = run.target {
+        //         if pos == target_pos {
+        //             continue;
+        //         }
+        //     }
+        // }
 
-        debug!("{:?} 寻路到 {:?}", entity, target_pos);
+        commands.trigger(CommandLog {
+            entity,
+            info: format!("寻路到 {:?}", target_pos),
+            category: EnumLogCategory::Minion,
+        });
         commands.trigger(CommandRunStart {
             entity,
             target: RunTarget::Position(target_pos),
@@ -111,12 +115,29 @@ fn on_event_aggro_target_found(
 
     if *minion_state == MinionState::MovingOnPath {
         *minion_state = MinionState::AttackingTarget;
+        commands.trigger(CommandLog {
+            entity,
+            info: format!("路径移动中发现仇恨目标 {:?}，开始自动攻击", target),
+            category: EnumLogCategory::Minion,
+        });
         commands.trigger(CommandAttackAutoStart { entity, target });
     } else if *minion_state == MinionState::AttackingTarget {
         if let Some(attack_auto) = attack_auto {
             if attack_auto.target != target {
+                commands.trigger(CommandLog {
+                    entity,
+                    info: format!("切换攻击目标为新发现的仇恨目标 {:?}", target),
+                    category: EnumLogCategory::Minion,
+                });
                 commands.trigger(CommandAttackAutoStart { entity, target });
             }
+        } else {
+            commands.trigger(CommandLog {
+                entity,
+                info: format!("发现仇恨目标 {:?}，开始自动攻击", target),
+                category: EnumLogCategory::Minion,
+            });
+            commands.trigger(CommandAttackAutoStart { entity, target });
         }
     }
 }
@@ -137,12 +158,17 @@ fn on_event_dead(
 
         if *minion_state == MinionState::AttackingTarget {
             *minion_state = MinionState::MovingOnPath;
+            commands.trigger(CommandLog {
+                entity,
+                info: "目标死亡，转为沿路移动".to_string(),
+                category: EnumLogCategory::Minion,
+            });
             commands.trigger(CommandAttackAutoStop { entity });
         }
     }
 }
 
-fn find_closest_point_index(path: &Vec<Vec2>, position: Vec2) -> Option<usize> {
+fn find_next_point_index(path: &Vec<Vec2>, position: Vec2) -> Option<usize> {
     if path.is_empty() {
         return None;
     }
@@ -158,21 +184,26 @@ fn find_closest_point_index(path: &Vec<Vec2>, position: Vec2) -> Option<usize> {
         }
     }
 
-    // 确保不往回走，如果找到的最近点不是第一个点，检查是否应该选择下一个点
-    if closest_index > 0 {
-        let prev_point = path[closest_index - 1];
-        let curr_point = path[closest_index];
+    // // 确保不往回走。如果找到的最近点不是第一个点，检查小兵是否还没有越过该点
+    // if closest_index > 0 {
+    //     let prev_point = path[closest_index - 1];
+    //     let curr_point = path[closest_index];
 
-        // 计算从前一个点到当前点的方向向量
-        let path_direction = (curr_point - prev_point).normalize();
-        // 计算从前一个点到当前位置的向量
-        let position_direction = (position - prev_point).normalize();
+    //     // 当前路段的方向向量
+    //     let path_direction = curr_point - prev_point;
+    //     // 目标相对于最近点的偏移向量
+    //     let position_offset = position - curr_point;
 
-        // 如果当前位置在路径方向的前方，选择当前点；否则选择下一个点（如果存在）
-        if path_direction.dot(position_direction) > 0.0 && closest_index + 1 < path.len() {
-            closest_index += 1;
-        }
-    }
+    //     // 如果点积小于或等于 0，说明还没有越过最近点，应该将 closest_index 减 1。
+    //     // 这样外部 fixed_update 取 closest_index + 1 时，目标正好是 curr_point。
+    //     if path_direction.dot(position_offset) > 0.0 {
+    //         closest_index += 1;
+    //     }
+    // }
 
-    Some(closest_index)
+    Some(if closest_index + 1 >= path.len() {
+        closest_index
+    } else {
+        closest_index + 1
+    })
 }

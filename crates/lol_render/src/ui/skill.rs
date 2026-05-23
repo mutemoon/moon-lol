@@ -32,7 +32,7 @@ impl Plugin for PluginUISkill {
                         .and_then(any_match_filter::<(With<Controller>, With<CharacterReady>)>)
                         .and_then(run_once),
                 ),
-                update_skill_cooldown.run_if(
+                (update_skill_cooldown, update_skill_rank_pips).run_if(
                     in_state(UIState::Loaded)
                         .and_then(any_match_filter::<(With<Controller>, With<CharacterReady>)>),
                 ),
@@ -184,7 +184,7 @@ fn update_active_skill_icons(
 fn update_single_skill_cooldown(
     commands: &mut Commands,
     skill: &Skill,
-    cooldown: Option<&CoolDown>,
+    cooldown: &CoolDown,
     slot_def: &LOLSpellSlotDetailedUiDefinition,
     res_ui_element_entity: &UIElementEntity,
     q_ui_text_state: &mut Query<(&mut UiTextState, &mut Visibility)>,
@@ -218,7 +218,8 @@ fn update_single_skill_cooldown(
     }
 
     let remaining = cooldown
-        .and_then(|c| c.timer.as_ref())
+        .timer
+        .as_ref()
         .map(|v| v.remaining_secs())
         .unwrap_or(0.0);
 
@@ -399,23 +400,16 @@ fn update_single_skill_rank_pips(
 
 fn update_skill_cooldown(
     mut commands: Commands,
-    q_skill: Query<(&Skill, Option<&CoolDown>)>,
+    q_skill: Query<(&Skill, &CoolDown), Changed<CoolDown>>,
     q_skills: Query<&Skills, With<Controller>>,
     res_player_frame_vc: Res<LOLPlayerFrameViewController>,
     res_ui_element_entity: Res<UIElementEntity>,
     mut q_ui_text_state: Query<(&mut UiTextState, &mut Visibility)>,
-    q_ui_element: Query<&UIElement>,
-    mut icon_assets: ResMut<Assets<LOLUiElementIconData>>,
 ) {
     let Ok(skills) = q_skills.single() else {
         debug!("【技能冷却更新】未找到控制器的技能列表");
         return;
     };
-
-    debug!(
-        "【技能冷却更新】已成功定位控制器技能列表，技能数量: {}",
-        skills.len()
-    );
 
     for (index, skill_entity) in skills.iter().enumerate() {
         if index >= res_player_frame_vc.abilities_ui_data.champion_spells.len() {
@@ -427,19 +421,12 @@ fn update_skill_cooldown(
         }
 
         let Ok((skill, cooldown)) = q_skill.get(skill_entity) else {
-            debug!(
-                "【技能冷却更新警告】技能实体 {:?} 未找到 Skill 组件",
-                skill_entity
-            );
             continue;
         };
 
         debug!(
-            "【技能冷却更新】技能槽位索引: {}, 技能实体: {:?}, 技能等级: {}, Cooldown存在: {}",
-            index,
-            skill_entity,
-            skill.level,
-            cooldown.is_some()
+            "【技能冷却更新】技能槽位索引: {}, 技能实体: {:?}, 技能等级: {}",
+            index, skill_entity, skill.level
         );
 
         let slot_def = &res_player_frame_vc.abilities_ui_data.champion_spells[index];
@@ -451,7 +438,29 @@ fn update_skill_cooldown(
             &res_ui_element_entity,
             &mut q_ui_text_state,
         );
+    }
+}
 
+fn update_skill_rank_pips(
+    mut commands: Commands,
+    q_changed_skill: Query<(Entity, &Skill), Changed<Skill>>,
+    q_skills: Query<&Skills, With<Controller>>,
+    res_player_frame_vc: Res<LOLPlayerFrameViewController>,
+    res_ui_element_entity: Res<UIElementEntity>,
+    q_ui_element: Query<&UIElement>,
+    mut icon_assets: ResMut<Assets<LOLUiElementIconData>>,
+) {
+    let Ok(skills) = q_skills.single() else {
+        return;
+    };
+
+    for (skill_entity, skill) in q_changed_skill.iter() {
+        let Some(index) = skills.as_slice().iter().position(|&e| e == skill_entity) else {
+            continue;
+        };
+        if index >= res_player_frame_vc.abilities_ui_data.champion_spells.len() {
+            continue;
+        }
         update_single_skill_rank_pips(
             &mut commands,
             index,

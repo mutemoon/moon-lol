@@ -23,62 +23,12 @@ export interface WsEvent {
   data: Record<string, unknown>;
 }
 
-export interface LogEntry {
-  id: number;
-  level: "info" | "warn" | "error";
-  /** Raw formatted line from Bevy tracing. */
-  raw: string;
-  /** Parsed timestamp string, e.g. "04:02:48.528" */
-  timestamp?: string;
-  /** Source file path, e.g. "crates\\lol_render\\src\\skin\\skin.rs" */
-  source?: string;
-  /** Source line number. */
-  sourceLine?: number;
-  /** The actual log message. */
-  message?: string;
-  /** Number of consecutive repeats of this entry. */
-  count: number;
-}
-
-// ── Log line parsing ──
-
-/** Strip ANSI escape sequences (\x1b[...m) */
-function stripAnsi(s: string): string {
-  return s.replace(/\x1b\[[0-9;]*m/g, "");
-}
-
-/**
- * Parse a Bevy tracing formatted line:
- *   "2026-05-03T04:02:48.528760Z  INFO crates\\lol_render\\src\\skin\\skin.rs:67: message text"
- */
-function parseLogLine(raw: string): Partial<LogEntry> {
-  const cleaned = stripAnsi(raw);
-  const re = /^(\S+)\s+(INFO|WARN|ERROR|DEBUG|TRACE)\s+(.+?):(\d+):\s+(.+)$/;
-  const m = cleaned.match(re);
-  if (m) {
-    // Extract HH:MM:SS.mmm from ISO timestamp
-    const tsMatch = m[1].match(/T(\d{2}:\d{2}:\d{2}\.\d+)/);
-    // Shorten source path to last 2 segments
-    const source = m[3];
-    const shortSource = source.replace(/^.*[\\/]([^\\/]+[\\/][^\\/]+)$/, "$1");
-    return {
-      timestamp: tsMatch ? tsMatch[1].slice(0, 12) : m[1],
-      level: m[2].toLowerCase() as LogEntry["level"],
-      source: shortSource,
-      sourceLine: parseInt(m[4]),
-      message: m[5],
-    };
-  }
-  return {};
-}
-
 // ── Composable ──
 
 export function useWsClient(url: string) {
   const connected = ref(false);
   const connecting = ref(false);
   const connectTimeout = ref(false);
-  const logs = ref<LogEntry[]>([]);
   const gameState = ref({
     champion: "",
     godMode: false,
@@ -89,17 +39,16 @@ export function useWsClient(url: string) {
   const agentObserve = ref<any>(null);
   const agentThinking = ref<string>("");
   const agentAction = ref<string>("");
+  const selectedEntityId = ref<number | null>(null);
 
   let ws: WebSocket | null = null;
   let nextId = 1;
   const pending = new Map<number, (res: WsResponse) => void>();
-  let logIdCounter = 0;
   let cancelRetry: (() => void) | null = null;
 
   /** Attempt a single WS connection. Rejects on failure. */
   function tryConnect(): Promise<void> {
     return new Promise((resolve, reject) => {
-      // Close any previous failed socket
       if (ws) {
         ws.onclose = null;
         ws.close();
@@ -139,7 +88,9 @@ export function useWsClient(url: string) {
     const startTime = Date.now();
 
     let cancelled = false;
-    cancelRetry = () => { cancelled = true; };
+    cancelRetry = () => {
+      cancelled = true;
+    };
 
     while (!cancelled) {
       try {
@@ -152,7 +103,6 @@ export function useWsClient(url: string) {
         if (Date.now() - startTime > 30_000) {
           connectTimeout.value = true;
         }
-        // Wait 1.5s between retries
         await new Promise((r) => setTimeout(r, 1500));
       }
     }
@@ -162,7 +112,6 @@ export function useWsClient(url: string) {
   }
 
   function disconnect() {
-    // Cancel any in-progress retry loop
     if (cancelRetry) {
       cancelRetry();
       cancelRetry = null;
@@ -199,7 +148,6 @@ export function useWsClient(url: string) {
   function handleEvent(event: WsEvent) {
     switch (event.event) {
       case "game_loaded":
-        addLog("info", "Game loaded");
         send("get_state").then((res) => {
           if (res.ok && res.data) {
             gameState.value = { ...gameState.value, ...(res.data as any) };
@@ -208,56 +156,21 @@ export function useWsClient(url: string) {
         break;
       case "game_paused":
         gameState.value.paused = event.data.paused as boolean;
-        addLog("info", event.data.paused ? "Game paused" : "Game resumed");
         break;
       case "champion_changed":
         gameState.value.champion = event.data.name as string;
-        addLog("info", `Champion changed to ${event.data.name}`);
         break;
       case "game_close":
-        addLog("warn", `Game closed: ${event.data.reason}`);
         connected.value = false;
-        break;
-      case "log":
-        addLog(
-          (event.data.level as "info" | "warn" | "error") || "info",
-          event.data.msg as string
-        );
         break;
       case "agent_update":
         agentObserve.value = event.data.observe;
         agentThinking.value = event.data.thinking as string;
         agentAction.value = event.data.action as string;
         break;
-    }
-  }
-
-  function addLog(level: "info" | "warn" | "error", raw: string) {
-    const cleaned = stripAnsi(raw);
-    const parsed = parseLogLine(raw);
-    const entry: LogEntry = {
-      id: logIdCounter++,
-      level: parsed.level || level,
-      raw: cleaned,
-      timestamp: parsed.timestamp,
-      source: parsed.source,
-      sourceLine: parsed.sourceLine,
-      message: parsed.message || raw,
-      count: 1,
-    };
-
-    // Group consecutive identical messages
-    const last = logs.value[logs.value.length - 1];
-    if (last && last.message === entry.message && last.source === entry.source && last.level === entry.level) {
-      last.count++;
-      last.id = entry.id;
-    } else {
-      logs.value.push(entry);
-    }
-
-    // Keep last 200 entries
-    if (logs.value.length > 200) {
-      logs.value.splice(0, logs.value.length - 200);
+      case "entity_selected":
+        selectedEntityId.value = event.data.entity_id as number;
+        break;
     }
   }
 
@@ -265,11 +178,11 @@ export function useWsClient(url: string) {
     connected,
     connecting,
     connectTimeout,
-    logs,
     gameState,
     agentObserve,
     agentThinking,
     agentAction,
+    selectedEntityId,
     connect,
     disconnect,
     send,

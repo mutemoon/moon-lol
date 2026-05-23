@@ -60,6 +60,7 @@ use rotate::PluginRotate;
 use run::PluginRun;
 use skill::PluginSkill;
 use skill_script::PluginSkillScript;
+use log::PluginLog;
 
 plugin_group! {
     pub struct PluginCore {
@@ -77,6 +78,7 @@ plugin_group! {
         :PluginGame,
         :PluginLife,
         :PluginLifetime,
+        :PluginLog,
         :PluginMap,
         :PluginMinion,
         :PluginMissile,

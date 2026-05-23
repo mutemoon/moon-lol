@@ -5,8 +5,11 @@ use lol_champions::riven::Riven;
 use lol_core::buffs::damage_reduction::BuffDamageReduction;
 use lol_core::entities::champion::Champion;
 use lol_core::skill::{CoolDown, Skill, SkillCooldownMode};
+use lol_core::team::Team;
+use lol_render::camera::CameraState;
 use lol_server::events::CommandWsRequest;
 use lol_server::protocol::{GodModeParams, SwitchChampionParams, ToggleCooldownParams, WsResponse};
+use lol_server::server::send_event;
 
 pub struct PluginDebug;
 
@@ -14,6 +17,7 @@ impl Plugin for PluginDebug {
     fn build(&self, app: &mut App) {
         app.insert_resource(GlobalDebugState::default());
         app.add_observer(on_command_ws_request);
+        app.add_systems(PreUpdate, on_d_key_select_entity);
     }
 }
 
@@ -159,4 +163,82 @@ fn on_command_ws_request(
             Err(e) => WsResponse::err(id, e),
         });
     }
+}
+
+/// System: Listen for D key press and select entity via raycast for log filtering.
+fn on_d_key_select_entity(
+    world: &World,
+    camera: Single<(&Camera, &GlobalTransform), With<CameraState>>,
+    mut ray_cast: MeshRayCast,
+    res_input: Res<ButtonInput<KeyCode>>,
+    window: Single<&Window>,
+    q_target: Query<(Entity, &Transform), With<Team>>,
+) {
+    // 无按键输入则跳过
+    if res_input.get_just_pressed().next().is_none() {
+        return;
+    }
+
+    debug!("=== on_key_pressed 开始 ===");
+    debug!(
+        "刚刚按下的键: {:?}",
+        res_input.get_just_pressed().collect::<Vec<_>>()
+    );
+
+    // Only trigger on D key just pressed
+    if !res_input.just_pressed(KeyCode::KeyD) {
+        return;
+    }
+
+    let Some(viewport_position) = window.cursor_position() else {
+        debug!("[Debug] No cursor position");
+        return;
+    };
+
+    let (camera, camera_transform) = *camera;
+
+    let Ok(ray) = camera.viewport_to_world(camera_transform, viewport_position) else {
+        debug!("[Debug] Failed to create ray from viewport position");
+        return;
+    };
+
+    // Filter to only pickable entities
+    let filter = |_entity| {
+        // Accept all entities that might have a mesh
+        true
+    };
+    let settings = MeshRayCastSettings::default().with_filter(&filter);
+
+    let hits = ray_cast.cast_ray(ray, &settings);
+    debug!("[Debug] D key raycast hits: {:?}", hits.len());
+
+    let Some(hit) = hits.first() else {
+        return;
+    };
+
+    let position = hit.1.point;
+    let mut min_distance = f32::MAX;
+    let mut selected_entity = None;
+
+    for (entity, transform) in q_target.iter() {
+        let distance = position.distance(transform.translation);
+        if distance < min_distance {
+            min_distance = distance;
+            selected_entity = Some(entity);
+        }
+    }
+
+    let Some(entity) = selected_entity else {
+        return;
+    };
+
+    debug!(
+        "[Debug] Selected entity: {:?}, distance: {:.2}",
+        entity, min_distance
+    );
+
+    // Send entity_selected event via WebSocket
+    let event =
+        lol_server::protocol::WsEvent::entity_selected(entity.index_u32(), "debug_select", "");
+    send_event(world, event);
 }

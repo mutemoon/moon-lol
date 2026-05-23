@@ -3,6 +3,7 @@ use bevy::prelude::*;
 use crate::attack::{Attack, AttackState, AttackStatus, CommandAttackStart, CommandAttackStop};
 use crate::base::bounding::Bounding;
 use crate::life::Death;
+use crate::log::{CommandLog, EnumLogCategory};
 use crate::run::{CommandRunStart, CommandRunStop, RunTarget};
 
 #[derive(Default)]
@@ -42,10 +43,20 @@ fn on_command_attack_auto_start(
     let target = trigger.target;
 
     let Ok((transform, bounding, Some(attack))) = q.get(entity) else {
+        commands.trigger(CommandLog {
+            entity,
+            info: "自动攻击目标失败（攻击组件不存在）".to_string(),
+            category: EnumLogCategory::AttackAuto,
+        });
         return;
     };
 
     let Ok((target_transform, target_bounding, _)) = q.get(target) else {
+        commands.trigger(CommandLog {
+            entity,
+            info: "自动攻击目标失败（目标不存在或无碰撞体）".to_string(),
+            category: EnumLogCategory::AttackAuto,
+        });
         return;
     };
 
@@ -65,6 +76,11 @@ fn on_command_attack_auto_start(
 
 fn on_command_attack_auto_stop(trigger: On<CommandAttackAutoStop>, mut commands: Commands) {
     let entity = trigger.event_target();
+    commands.trigger(CommandLog {
+        entity,
+        info: "停止自动攻击".to_string(),
+        category: EnumLogCategory::AttackAuto,
+    });
     commands.entity(entity).remove::<AttackAuto>();
     commands.trigger(CommandAttackStop { entity });
 }
@@ -80,7 +96,7 @@ fn update_attack_auto(
             &Transform,
             &Bounding,
         ),
-        Without<Death>,
+        (Without<Death>, Changed<Transform>),
     >,
     q_target: Query<(&Transform, &Bounding)>,
 ) {
@@ -134,12 +150,20 @@ fn process_attack_logic(
             target: RunTarget::Target(target),
         });
 
-        debug!("{} 停止攻击：离开攻击范围", entity);
+        commands.trigger(CommandLog {
+            entity,
+            info: "离开攻击范围，停止攻击".to_string(),
+            category: EnumLogCategory::AttackAuto,
+        });
         commands.trigger(CommandAttackStop { entity });
     } else {
         commands.trigger(CommandRunStop { entity });
 
-        debug!("{} 开始攻击：进入攻击范围", entity);
+        commands.trigger(CommandLog {
+            entity,
+            info: "进入攻击范围，开始攻击".to_string(),
+            category: EnumLogCategory::AttackAuto,
+        });
         commands.trigger(CommandAttackStart { entity, target });
     }
 }

@@ -75,7 +75,7 @@ impl WsEvent {
         }
     }
 
-    pub fn entity_selected(entity_id: u64, kind: &str, name: &str) -> Self {
+    pub fn entity_selected(entity_id: u32, kind: &str, name: &str) -> Self {
         Self {
             msg_type: "event",
             event: "entity_selected",
@@ -88,14 +88,6 @@ impl WsEvent {
             msg_type: "event",
             event: "game_close",
             data: serde_json::json!({"reason": reason}),
-        }
-    }
-
-    pub fn log(level: &str, msg: String) -> Self {
-        Self {
-            msg_type: "event",
-            event: "log",
-            data: serde_json::json!({"level": level, "msg": msg}),
         }
     }
 

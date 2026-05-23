@@ -49,12 +49,14 @@ onMounted(() => {
 <template>
   <div class="settings">
     <div class="settings-inner">
-      <div class="header">
+      <!-- Header -->
+      <div class="text-center">
         <h1 class="settings-title">Settings</h1>
         <p class="settings-subtitle">AI Agent Configuration</p>
       </div>
 
-      <div class="settings-card">
+      <!-- Settings Card -->
+      <div class="settings-card relative w-full">
         <div class="field">
           <label class="field-label">Anthropic API Key</label>
           <div class="input-wrap">
@@ -106,57 +108,52 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   min-height: 100%;
-  padding: 40px 24px;
+  padding: 2.5rem 1.5rem;
 }
 
 .settings-inner {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 32px;
+  gap: 2rem;
   width: 100%;
-  max-width: 400px;
-}
-
-/* ── Header ── */
-.header {
-  text-align: center;
+  max-width: 28rem;
 }
 
 .settings-title {
   font-family: var(--font-display);
-  font-size: var(--fs-display);
+  font-size: 2.5rem;
   font-weight: 700;
-  color: var(--gold-bright);
+  color: var(--color-gold-bright);
   letter-spacing: 0.06em;
   line-height: 1.15;
   text-shadow: 0 0 30px rgba(212,175,92,0.15);
 }
 
 .settings-subtitle {
-  margin-top: 6px;
-  font-size: var(--fs-small);
-  color: var(--text-muted);
+  margin-top: 0.375rem;
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
 
-/* ── Settings Card ── */
+/* Settings Card */
 .settings-card {
   position: relative;
   width: 100%;
-  background: var(--bg-surface);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
-  padding: 28px;
-  box-shadow: var(--shadow-md);
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 0.625rem;
+  padding: 1.75rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5), 0 0 2px rgba(120, 91, 40, 0.2);
 }
 
 .settings-card::before {
   content: '';
   position: absolute;
   inset: 0;
-  border-radius: var(--radius-lg);
+  border-radius: 0.625rem;
   padding: 1px;
   background: linear-gradient(180deg, rgba(185,145,71,0.15), transparent 60%);
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
@@ -167,19 +164,19 @@ onMounted(() => {
 
 /* Fields */
 .field {
-  margin-bottom: 20px;
+  margin-bottom: 1.25rem;
 }
 
 .field:last-of-type {
-  margin-bottom: 24px;
+  margin-bottom: 1.5rem;
 }
 
 .field-label {
   display: block;
-  margin-bottom: 6px;
-  font-size: var(--fs-small);
+  margin-bottom: 0.375rem;
+  font-size: 0.75rem;
   font-weight: 500;
-  color: var(--text-muted);
+  color: var(--color-text-muted);
   letter-spacing: 0.03em;
   text-transform: uppercase;
 }
@@ -191,29 +188,29 @@ onMounted(() => {
 input {
   width: 100%;
   appearance: none;
-  background: var(--bg-deep);
-  color: var(--text-bright);
-  border: 1px solid var(--gold-dimmer);
-  border-radius: var(--radius-md);
-  padding: 10px 14px;
-  font-size: var(--fs-body);
+  background: var(--color-bg-deep);
+  color: var(--color-text-bright);
+  border: 1px solid var(--color-gold-dimmer);
+  border-radius: 0.375rem;
+  padding: 0.625rem 0.875rem;
+  font-size: 0.875rem;
   font-weight: 400;
   box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
-  transition: border-color var(--dur-fast) ease-out, box-shadow var(--dur-fast) ease-out;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 input::placeholder {
-  color: var(--text-muted);
+  color: var(--color-text-muted);
   opacity: 0.6;
 }
 
 input:hover {
-  border-color: var(--gold-muted);
+  border-color: var(--color-gold-muted);
 }
 
 input:focus {
-  border-color: var(--gold-default);
-  box-shadow: inset 0 2px 4px rgba(0,0,0,0.5), var(--shadow-glow-gold);
+  border-color: var(--color-gold-default);
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.5), 0 0 12px rgba(201, 170, 113, 0.25), 0 0 4px rgba(201, 170, 113, 0.4);
   outline: none;
 }
 
@@ -222,25 +219,23 @@ input:disabled {
   cursor: not-allowed;
 }
 
-/* ── Primary Button ── */
+/* Primary Button */
 .btn-primary {
   position: relative;
   width: 100%;
   overflow: hidden;
-  padding: 12px 24px;
-  font-size: var(--fs-body);
+  padding: 0.75rem 1.5rem;
+  font-size: 0.875rem;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--gold-bright);
-  background: var(--bg-surface);
+  color: var(--color-gold-bright);
+  background: var(--color-bg-surface);
   border: 1px solid transparent;
-  border-radius: var(--radius-md);
+  border-radius: 0.375rem;
   background-clip: padding-box;
-  box-shadow:
-    var(--shadow-sm),
-    inset 0 1px 0 rgba(212,175,92,0.12);
-  transition: all var(--dur-fast) ease-out;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 0 1px rgba(120, 91, 40, 0.15), inset 0 1px 0 rgba(212,175,92,0.12);
+  transition: all 0.2s;
   cursor: pointer;
 }
 
@@ -248,9 +243,9 @@ input:disabled {
   content: '';
   position: absolute;
   inset: 0;
-  border-radius: var(--radius-md);
+  border-radius: 0.375rem;
   padding: 1px;
-  background: linear-gradient(135deg, var(--gold-dimmer), var(--gold-default), var(--gold-bright));
+  background: linear-gradient(135deg, var(--color-gold-dimmer), var(--color-gold-default), var(--color-gold-bright));
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
@@ -258,10 +253,8 @@ input:disabled {
 }
 
 .btn-primary:hover:not(:disabled) {
-  color: var(--gold-glow);
-  box-shadow:
-    var(--shadow-glow-gold),
-    inset 0 1px 0 rgba(232,201,122,0.2);
+  color: var(--color-gold-glow);
+  box-shadow: 0 0 12px rgba(201, 170, 113, 0.25), 0 0 4px rgba(201, 170, 113, 0.4), inset 0 1px 0 rgba(232,201,122,0.2);
   text-shadow: 0 0 8px rgba(232,201,122,0.3);
 }
 
@@ -281,12 +274,7 @@ input:disabled {
   left: -50%;
   width: 50%;
   height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(232,201,122,0.1),
-    transparent
-  );
+  background: linear-gradient(90deg, transparent, rgba(232,201,122,0.1), transparent);
   transform: skewX(-20deg);
   transition: none;
   pointer-events: none;
@@ -304,23 +292,23 @@ input:disabled {
 
 /* Success & Error */
 .success-msg {
-  margin-top: 12px;
-  font-size: var(--fs-small);
-  color: var(--green);
+  margin-top: 0.75rem;
+  font-size: 0.75rem;
+  color: var(--color-green);
   text-align: center;
 }
 
 .error-msg {
-  margin-top: 12px;
-  font-size: var(--fs-small);
-  color: var(--red);
+  margin-top: 0.75rem;
+  font-size: 0.75rem;
+  color: var(--color-red);
   text-align: center;
 }
 
-/* ── Transitions ── */
+/* Transitions */
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity var(--dur-fast) ease-out;
+  transition: opacity 0.2s ease-out;
 }
 
 .fade-enter-from,

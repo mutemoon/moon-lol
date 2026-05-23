@@ -7,14 +7,11 @@ use bevy::prelude::*;
 
 pub struct PluginServer {
     pub ws_port: u16,
-    pub log_receiver: async_channel::Receiver<String>,
 }
 
 impl Plugin for PluginServer {
     fn build(&self, app: &mut App) {
         let port = self.ws_port;
-
-        app.insert_resource(LogReceiver(self.log_receiver.clone()));
 
         app.add_observer(on_event_agent_decision);
 
@@ -23,12 +20,9 @@ impl Plugin for PluginServer {
             server::send_event(world, protocol::WsEvent::game_loaded());
         });
 
-        app.add_systems(
-            Update,
-            (forward_logs, |world: &mut World| {
-                server::poll_commands(world);
-            }),
-        );
+        app.add_systems(Update, |world: &mut World| {
+            server::poll_commands(world);
+        });
     }
 }
 
@@ -46,26 +40,3 @@ fn on_event_agent_decision(
         let _ = ch.out_tx.try_send(json);
     }
 }
-
-/// Drain the log bridge channel and forward entries to the WS debug panel.
-fn forward_logs(world: &mut World) {
-    let rx = world.get_resource::<LogReceiver>().map(|r| r.0.clone());
-
-    let Some(rx) = rx else {
-        return;
-    };
-
-    while let Ok(msg) = rx.try_recv() {
-        let level = if msg.contains("ERROR") || msg.contains(" ERROR ") {
-            "error"
-        } else if msg.contains("WARN") || msg.contains(" WARN ") {
-            "warn"
-        } else {
-            "info"
-        };
-        server::send_event(world, protocol::WsEvent::log(level, msg));
-    }
-}
-
-#[derive(Resource)]
-pub struct LogReceiver(pub async_channel::Receiver<String>);

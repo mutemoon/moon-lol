@@ -7,7 +7,8 @@ use crate::entities::champion::Champion;
 use crate::entities::minion::Minion;
 use crate::entities::pet::Pet;
 use crate::entities::turret::Turret;
-use crate::life::{Death, EventDead};
+use crate::life::{Death, EventDead, Health};
+use crate::log::{CommandLog, EnumLogCategory};
 use crate::team::Team;
 
 #[derive(Default)]
@@ -60,7 +61,7 @@ pub fn aggro_scan(
             Option<&Minion>,
             Option<&Pet>,
         ),
-        Without<Death>,
+        (Without<Death>, With<Health>),
     >,
 ) {
     for (entity, team, transform, aggro, aggro_state, is_turret) in q_aggro.iter() {
@@ -126,7 +127,11 @@ pub fn aggro_scan(
 
         // 如果找到有效目标则触发
         if target_entity != Entity::PLACEHOLDER {
-            debug!("{} 找到仇恨目标 {}", entity, target_entity);
+            commands.trigger(CommandLog {
+                entity,
+                info: format!("找到仇恨目标 {:?}", target_entity),
+                category: EnumLogCategory::Aggro,
+            });
             commands.trigger(EventAggroTargetFound {
                 entity,
                 target: target_entity,

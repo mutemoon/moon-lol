@@ -4,6 +4,7 @@ use crate::aggro::{Aggro, EventAggroTargetFound};
 use crate::attack_auto::{CommandAttackAutoStart, CommandAttackAutoStop};
 use crate::damage::{Damage, EventDamageCreate};
 use crate::entities::champion::Champion;
+use crate::log::{CommandLog, EnumLogCategory};
 
 #[derive(Default)]
 pub struct PluginTurret;
@@ -46,10 +47,18 @@ fn on_event_aggro_target_found(
         if heat.last_target != Some(target) {
             heat.last_target = Some(target);
             heat.heat_level = 0;
-            debug!("{} 目标改变，防御塔加热重置", entity);
+            commands.trigger(CommandLog {
+                entity,
+                info: "目标改变，防御塔加热重置".to_string(),
+                category: EnumLogCategory::Turret,
+            });
         }
 
-        debug!("{} 对仇恨目标 {} 发起攻击", entity, target);
+        commands.trigger(CommandLog {
+            entity,
+            info: format!("对仇恨目标 {:?} 发起攻击", target),
+            category: EnumLogCategory::Turret,
+        });
 
         commands.trigger(CommandAttackAutoStart { entity, target });
     }
@@ -57,18 +66,24 @@ fn on_event_aggro_target_found(
 
 fn on_command_attack_auto_stop(
     trigger: On<CommandAttackAutoStop>,
+    mut commands: Commands,
     mut q_turret: Query<&mut TurretHeat, With<Turret>>,
 ) {
     let entity = trigger.event_target();
     if let Ok(mut heat) = q_turret.get_mut(entity) {
         heat.last_target = None;
         heat.heat_level = 0;
-        debug!("{} 停止攻击，防御塔加热重置", entity);
+        commands.trigger(CommandLog {
+            entity,
+            info: "停止攻击，防御塔加热重置".to_string(),
+            category: EnumLogCategory::Turret,
+        });
     }
 }
 
 fn on_event_damage_create(
     trigger: On<EventDamageCreate>,
+    mut commands: Commands,
     mut q_turret: Query<(&mut TurretHeat, &mut Damage), With<Turret>>,
     q_champion: Query<&Champion>,
 ) {
@@ -89,7 +104,11 @@ fn on_event_damage_create(
     // 增加加热层数（最高 3 层，即第 4 次攻击达到最大伤害）
     if heat.heat_level < 3 {
         heat.heat_level += 1;
-        debug!("{} 攻击英雄，加热层数提升至 {}", source, heat.heat_level);
+        commands.trigger(CommandLog {
+            entity: source,
+            info: format!("攻击英雄，加热层数提升至 {}", heat.heat_level),
+            category: EnumLogCategory::Turret,
+        });
     }
 
     // 更新伤害：基础伤害 * (1 + 0.4 * 层数)
@@ -98,7 +117,11 @@ fn on_event_damage_create(
     }
 
     damage.0 = heat.base_damage * (1.0 + 0.4 * heat.heat_level as f32);
-    debug!("{} 当前伤害提升至 {:.1}", source, damage.0);
+    commands.trigger(CommandLog {
+        entity: source,
+        info: format!("当前伤害提升至 {:.1}", damage.0),
+        category: EnumLogCategory::Turret,
+    });
 }
 
 #[cfg(test)]

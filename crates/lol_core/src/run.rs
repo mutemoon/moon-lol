@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 
 use crate::life::Death;
+use crate::log::{CommandLog, EnumLogCategory};
 use crate::movement::{
     CommandMovement, EventMovementEnd, MovementAction, MovementSource, MovementWay,
 };
@@ -78,13 +79,18 @@ fn fixed_update(
     q_transform: Query<&Transform>,
 ) {
     for (entity, run) in q.iter() {
+
         match run.target {
             RunTarget::Position(position) => {
                 let Ok(transform) = q_transform.get(entity) else {
                     continue;
                 };
 
-                debug!("{} 寻路到 Vec3({})", entity, position);
+                commands.trigger(CommandLog {
+                    entity,
+                    info: format!("寻路到 {:?}", position),
+                    category: EnumLogCategory::Run,
+                });
                 commands.trigger(CommandMovement {
                     entity,
                     priority: 0,
@@ -104,10 +110,11 @@ fn fixed_update(
                     continue;
                 };
 
-                debug!(
-                    "{} 寻路到实体 {} Vec3({})",
-                    entity, target, transform.translation
-                );
+                commands.trigger(CommandLog {
+                    entity,
+                    info: format!("寻路到实体 {:?} Vec3({})", target, transform.translation),
+                    category: EnumLogCategory::Run,
+                });
                 commands.trigger(CommandMovement {
                     entity,
                     priority: 0,

@@ -1,3 +1,4 @@
+use std::path::PathBuf;
 use std::process::Child;
 
 /// Global application state.
@@ -9,6 +10,7 @@ pub struct AppState {
 pub struct BevyProcess {
     pub child: Child,
     pub port: u16,
+    pub log_db_path: PathBuf,
 }
 
 impl AppState {

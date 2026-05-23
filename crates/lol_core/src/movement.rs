@@ -10,6 +10,7 @@ use crate::base::pipeline::{
     ArbitrationPipelinePlugin, FinalDecision, LastDecision, PipelineStages, RequestBuffer,
 };
 use crate::life::Death;
+use crate::log::{CommandLog, EnumLogCategory};
 use crate::navigation::grid::ResourceGrid;
 use crate::navigation::navigation::{
     NavigationDebugState, NavigationStats, get_nav_path_with_debug, is_path_blocked,
@@ -255,14 +256,17 @@ fn update_path_movement(
                 let new_pos_xz = current_pos_xz + last_direction * remaining_distance_this_frame;
                 let new_y = transform.translation.y.lerp(target.y, move_fraction);
 
-                debug!("{} 移动一小步 {}", entity, remaining_distance_this_frame);
                 transform.translation.x = new_pos_xz.x;
                 transform.translation.z = new_pos_xz.y;
                 transform.translation.y = new_y;
 
                 remaining_distance_this_frame = 0.0;
             } else {
-                debug!("{} 移动最后一小步到达转折点 {}", entity, target);
+                commands.trigger(CommandLog {
+                    entity,
+                    info: format!("移动最后一小步到达转折点 {:?}", target),
+                    category: EnumLogCategory::Movement,
+                });
                 transform.translation.x = target.x;
                 transform.translation.z = target.z;
                 transform.translation.y = target.y;
@@ -416,10 +420,18 @@ fn apply_final_movement_decision(
                     );
 
                     if target_changed {
-                        debug!("{} 的目标位置发生变化: {}", entity, target_changed);
+                        commands.trigger(CommandLog {
+                            entity,
+                            info: format!("目标位置发生变化: {}", target_changed),
+                            category: EnumLogCategory::Movement,
+                        });
                     }
                     if path_blocked {
-                        debug!("{} 的路径上有障碍物阻挡: {}", entity, path_blocked);
+                        commands.trigger(CommandLog {
+                            entity,
+                            info: format!("路径上有障碍物阻挡: {}", path_blocked),
+                            category: EnumLogCategory::Movement,
+                        });
                     }
 
                     stats.check_path_count += 1;
@@ -428,16 +440,29 @@ fn apply_final_movement_decision(
                     target_changed || path_blocked
                 } else {
                     // 第一次规划
-                    debug!("{} 第一次规划", entity);
+                    commands.trigger(CommandLog {
+                        entity,
+                        info: "第一次规划".to_string(),
+                        category: EnumLogCategory::Movement,
+                    });
                     true
                 };
 
                 if !need_replan {
-                    debug!("{} 不需要重新规划，{:#?}", entity, movement_state);
+                    // debug!(
+                    //     category = "movement",
+                    //     entity_id = entity.index_u32(),
+                    //     entity_name = name,
+                    //     "不需要重新规划",
+                    // );
                     continue;
                 }
 
-                debug!("{} 寻路到 {:?}", entity, target);
+                commands.trigger(CommandLog {
+                    entity,
+                    info: format!("寻路到 {:?}", target),
+                    category: EnumLogCategory::Movement,
+                });
 
                 let debug_ref = nav_debug.as_mut().map(|d| &mut **d);
 
@@ -463,17 +488,29 @@ fn apply_final_movement_decision(
                         .reset_path(&path_3d, source.clone())
                         .with_pathfind((*target, time.elapsed_secs()));
                 } else {
-                    info!("{} 寻路失败", entity);
+                    commands.trigger(CommandLog {
+                        entity,
+                        info: "寻路失败".to_string(),
+                        category: EnumLogCategory::Movement,
+                    });
                 }
             }
             MovementWay::Path(path) => {
-                debug!("{} 设置路径 {:?}", entity, path);
+                commands.trigger(CommandLog {
+                    entity,
+                    info: format!("设置路径 {:?}", path),
+                    category: EnumLogCategory::Movement,
+                });
                 movement_state.reset_path(path, source.clone());
             }
         }
 
         if let Some(speed) = speed {
-            debug!("{} 设置速度 {:?}", entity, speed);
+            commands.trigger(CommandLog {
+                entity,
+                info: format!("设置速度 {:?}", speed),
+                category: EnumLogCategory::Movement,
+            });
             movement_state.with_speed(*speed);
         }
 

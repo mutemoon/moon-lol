@@ -21,8 +21,8 @@ defineEmits<{
   <div class="launcher">
     <div class="launcher-inner">
       <!-- Hero branding -->
-      <div class="hero">
-        <div class="hero-emblem">
+      <div class="hero text-center">
+        <div class="mb-4">
           <svg viewBox="0 0 64 64" width="64" height="64" fill="none" aria-hidden="true">
             <circle cx="32" cy="32" r="28" stroke="url(#goldGrad)" stroke-width="1.5" />
             <path d="M16 32 L48 32 M32 16 L32 48" stroke="url(#goldGrad)" stroke-width="2" stroke-linecap="round" />
@@ -41,7 +41,7 @@ defineEmits<{
       </div>
 
       <!-- Launch Card -->
-      <div class="launch-card">
+      <div class="launch-card relative w-full">
         <!-- Connecting overlay -->
         <Transition name="fade">
           <div v-if="connecting" class="connecting-overlay">
@@ -103,62 +103,52 @@ defineEmits<{
   align-items: center;
   justify-content: center;
   min-height: 100%;
-  padding: 40px 24px;
+  padding: 2.5rem 1.5rem;
 }
 
 .launcher-inner {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 32px;
+  gap: 2rem;
   width: 100%;
-  max-width: 400px;
-}
-
-/* ── Hero ── */
-.hero {
-  text-align: center;
-}
-
-.hero-emblem {
-  margin-bottom: 16px;
-  filter: drop-shadow(0 0 20px rgba(212,175,92,0.15));
+  max-width: 28rem;
 }
 
 .hero-title {
   font-family: var(--font-display);
-  font-size: var(--fs-display);
+  font-size: 2.5rem;
   font-weight: 700;
-  color: var(--gold-bright);
+  color: var(--color-gold-bright);
   letter-spacing: 0.06em;
   line-height: 1.15;
   text-shadow: 0 0 30px rgba(212,175,92,0.15);
 }
 
 .hero-subtitle {
-  margin-top: 6px;
-  font-size: var(--fs-small);
-  color: var(--text-muted);
+  margin-top: 0.375rem;
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
 
-/* ── Launch Card ── */
+/* Launch Card */
 .launch-card {
   position: relative;
   width: 100%;
-  background: var(--bg-surface);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
-  padding: 28px;
-  box-shadow: var(--shadow-md);
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 0.625rem;
+  padding: 1.75rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5), 0 0 2px rgba(120, 91, 40, 0.2);
 }
 
 .launch-card::before {
   content: '';
   position: absolute;
   inset: 0;
-  border-radius: var(--radius-lg);
+  border-radius: 0.625rem;
   padding: 1px;
   background: linear-gradient(180deg, rgba(185,145,71,0.15), transparent 60%);
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
@@ -171,21 +161,21 @@ defineEmits<{
 .connecting-overlay {
   position: absolute;
   inset: -1px;
-  background: var(--bg-surface);
-  border-radius: var(--radius-lg);
+  background: var(--color-bg-surface);
+  border-radius: 0.625rem;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 16px;
+  gap: 1rem;
   z-index: 5;
 }
 
 .spinner {
-  width: 32px;
-  height: 32px;
-  border: 2px solid var(--border-subtle);
-  border-top-color: var(--gold-default);
+  width: 2rem;
+  height: 2rem;
+  border: 2px solid var(--color-border-subtle);
+  border-top-color: var(--color-gold-default);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
@@ -195,45 +185,45 @@ defineEmits<{
 }
 
 .connecting-text {
-  font-size: var(--fs-small);
-  color: var(--text-muted);
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
   text-align: center;
-  padding: 0 16px;
+  padding: 0 1rem;
 }
 
 .connecting-text.timeout {
-  color: var(--gold-dimmer);
+  color: var(--color-gold-dimmer);
 }
 
 .cancel-btn {
-  padding: 6px 24px;
-  font-size: var(--fs-small);
-  color: var(--text-muted);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  transition: all var(--dur-fast) ease-out;
+  padding: 0.375rem 1.5rem;
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 0.375rem;
+  transition: all 0.2s;
 }
 
 .cancel-btn:hover {
-  color: var(--text-default);
-  border-color: var(--gold-muted);
+  color: var(--color-text-default);
+  border-color: var(--color-gold-muted);
 }
 
 /* Fields */
 .field {
-  margin-bottom: 20px;
+  margin-bottom: 1.25rem;
 }
 
 .field:last-of-type {
-  margin-bottom: 24px;
+  margin-bottom: 1.5rem;
 }
 
 .field-label {
   display: block;
-  margin-bottom: 6px;
-  font-size: var(--fs-small);
+  margin-bottom: 0.375rem;
+  font-size: 0.75rem;
   font-weight: 500;
-  color: var(--text-muted);
+  color: var(--color-text-muted);
   letter-spacing: 0.03em;
   text-transform: uppercase;
 }
@@ -245,39 +235,39 @@ defineEmits<{
 .select-wrap::after {
   content: '';
   position: absolute;
-  right: 12px;
+  right: 0.75rem;
   top: 50%;
   transform: translateY(-50%);
   width: 0;
   height: 0;
   border-left: 4px solid transparent;
   border-right: 4px solid transparent;
-  border-top: 5px solid var(--gold-muted);
+  border-top: 5px solid var(--color-gold-muted);
   pointer-events: none;
 }
 
 select {
   width: 100%;
   appearance: none;
-  background: var(--bg-deep);
-  color: var(--text-bright);
-  border: 1px solid var(--gold-dimmer);
-  border-radius: var(--radius-md);
-  padding: 10px 36px 10px 14px;
-  font-size: var(--fs-body);
+  background: var(--color-bg-deep);
+  color: var(--color-text-bright);
+  border: 1px solid var(--color-gold-dimmer);
+  border-radius: 0.375rem;
+  padding: 0.625rem 2.25rem 0.625rem 0.875rem;
+  font-size: 0.875rem;
   font-weight: 400;
   box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
-  transition: border-color var(--dur-fast) ease-out, box-shadow var(--dur-fast) ease-out;
+  transition: border-color 0.2s, box-shadow 0.2s;
   cursor: pointer;
 }
 
 select:hover {
-  border-color: var(--gold-muted);
+  border-color: var(--color-gold-muted);
 }
 
 select:focus {
-  border-color: var(--gold-default);
-  box-shadow: inset 0 2px 4px rgba(0,0,0,0.5), var(--shadow-glow-gold);
+  border-color: var(--color-gold-default);
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.5), 0 0 12px rgba(201, 170, 113, 0.25), 0 0 4px rgba(201, 170, 113, 0.4);
   outline: none;
 }
 
@@ -286,37 +276,33 @@ select:disabled {
   cursor: not-allowed;
 }
 
-/* ── Primary Button ── */
+/* Primary Button */
 .btn-primary {
   position: relative;
   width: 100%;
   overflow: hidden;
-  padding: 12px 24px;
-  font-size: var(--fs-body);
+  padding: 0.75rem 1.5rem;
+  font-size: 0.875rem;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--gold-bright);
-  background: var(--bg-surface);
+  color: var(--color-gold-bright);
+  background: var(--color-bg-surface);
   border: 1px solid transparent;
-  border-radius: var(--radius-md);
+  border-radius: 0.375rem;
   background-clip: padding-box;
-  box-shadow:
-    var(--shadow-sm),
-    inset 0 1px 0 rgba(212,175,92,0.12);
-  transition: all var(--dur-fast) ease-out;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 0 1px rgba(120, 91, 40, 0.15), inset 0 1px 0 rgba(212,175,92,0.12);
+  transition: all 0.2s;
   cursor: pointer;
-
-  /* Gold gradient border via pseudo */
 }
 
 .btn-primary::before {
   content: '';
   position: absolute;
   inset: 0;
-  border-radius: var(--radius-md);
+  border-radius: 0.375rem;
   padding: 1px;
-  background: linear-gradient(135deg, var(--gold-dimmer), var(--gold-default), var(--gold-bright));
+  background: linear-gradient(135deg, var(--color-gold-dimmer), var(--color-gold-default), var(--color-gold-bright));
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
@@ -324,10 +310,8 @@ select:disabled {
 }
 
 .btn-primary:hover:not(:disabled) {
-  color: var(--gold-glow);
-  box-shadow:
-    var(--shadow-glow-gold),
-    inset 0 1px 0 rgba(232,201,122,0.2);
+  color: var(--color-gold-glow);
+  box-shadow: 0 0 12px rgba(201, 170, 113, 0.25), 0 0 4px rgba(201, 170, 113, 0.4), inset 0 1px 0 rgba(232,201,122,0.2);
   text-shadow: 0 0 8px rgba(232,201,122,0.3);
 }
 
@@ -347,12 +331,7 @@ select:disabled {
   left: -50%;
   width: 50%;
   height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(232,201,122,0.1),
-    transparent
-  );
+  background: linear-gradient(90deg, transparent, rgba(232,201,122,0.1), transparent);
   transform: skewX(-20deg);
   transition: none;
   pointer-events: none;
@@ -370,16 +349,16 @@ select:disabled {
 
 /* Error */
 .error-msg {
-  margin-top: 12px;
-  font-size: var(--fs-small);
-  color: var(--red);
+  margin-top: 0.75rem;
+  font-size: 0.75rem;
+  color: var(--color-red);
   text-align: center;
 }
 
-/* ── Transitions ── */
+/* Transitions */
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity var(--dur-fast) ease-out;
+  transition: opacity 0.2s ease-out;
 }
 
 .fade-enter-from,

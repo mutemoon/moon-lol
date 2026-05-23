@@ -295,7 +295,7 @@ fn apply_animation_speed(
         &AnimationGraphHandle,
         &AnimationConfigOf,
     )>,
-    q_state: Query<(&LOLAnimationGraphHandle, &LOLAnimationState)>,
+    q_state: Query<(&LOLAnimationGraphHandle, &LOLAnimationState), Changed<LOLAnimationState>>,
     res_animation_graph: Res<Assets<AnimationGraph>>,
     res_animation_clip: Res<Assets<AnimationClip>>,
     res_animation: Res<Assets<LOLAnimationGraph>>,

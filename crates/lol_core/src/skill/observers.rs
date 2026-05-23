@@ -1,5 +1,4 @@
 use bevy::ecs::event::EntityEvent;
-use bevy::log::debug;
 use bevy::prelude::{
     Assets, Commands, Entity, Fixed, On, Query, Res, ResMut, Time, Timer, TimerMode, With,
 };
@@ -14,6 +13,7 @@ use super::{CoolDown, SkillPoints, SkillRecastWindow, Skills};
 use crate::base::ability_resource::AbilityResource;
 use crate::base::level::{EventLevelUp, Level};
 use crate::life::Death;
+use crate::log::{CommandLog, EnumLogCategory};
 use crate::movement::CastBlock;
 use crate::skill::Skill;
 
@@ -141,6 +141,7 @@ pub fn on_skill_cast(
 
 pub fn on_skill_level_up(
     trigger: On<CommandSkillLevelUp>,
+    mut commands: Commands,
     skills: Query<&Skills>,
     mut q_skill: Query<&mut Skill>,
     mut q_skill_points: Query<(&Level, &mut SkillPoints)>,
@@ -159,47 +160,72 @@ pub fn on_skill_level_up(
         return;
     };
 
-    debug!("{} 尝试升级技能: 索引 {}", entity, trigger.index);
+    commands.trigger(CommandLog {
+        entity,
+        info: format!("尝试升级技能: 索引 {}", trigger.index),
+        category: EnumLogCategory::Skill,
+    });
 
     if skill_points.0 == 0 {
-        debug!("{} 升级失败: 技能点不足", entity);
+        commands.trigger(CommandLog {
+            entity,
+            info: "升级失败: 技能点不足".to_string(),
+            category: EnumLogCategory::Skill,
+        });
         return;
     }
 
     // 1 级只能加点 q w e，6 级才能加点 r，6 级前一个技能最多加 3 点
     if level.value < 6 {
         if trigger.index == 3 {
-            debug!(
-                "{} 升级失败: 等级 {} 小于 6 级不能升级大招",
-                entity, level.value
-            );
+            commands.trigger(CommandLog {
+                entity,
+                info: format!("升级失败: 等级 {} 小于 6 级不能升级大招", level.value),
+                category: EnumLogCategory::Skill,
+            });
             return;
         }
         if skill.level >= 3 {
-            debug!(
-                "{} 升级失败: 等级 {} 小于 6 级，技能 {} 已达上限 (3)",
-                entity, level.value, trigger.index
-            );
+            commands.trigger(CommandLog {
+                entity,
+                info: format!(
+                    "升级失败: 等级 {} 小于 6 级，技能 {} 已达上限 (3)",
+                    level.value, trigger.index
+                ),
+                category: EnumLogCategory::Skill,
+            });
             return;
         }
     }
 
     skill.level += 1;
     skill_points.0 -= 1;
-    debug!(
-        "{} 技能升级成功: 索引 {}, 新等级 {}, 剩余技能点 {}",
-        entity, trigger.index, skill.level, skill_points.0
-    );
+    commands.trigger(CommandLog {
+        entity,
+        info: format!(
+            "技能升级成功: 索引 {}, 新等级 {}, 剩余技能点 {}",
+            trigger.index, skill.level, skill_points.0
+        ),
+        category: EnumLogCategory::Skill,
+    });
 }
 
-pub fn on_level_up(event: On<EventLevelUp>, mut q_skill_points: Query<&mut SkillPoints>) {
+pub fn on_level_up(
+    event: On<EventLevelUp>,
+    mut commands: Commands,
+    mut q_skill_points: Query<&mut SkillPoints>,
+) {
     let entity = event.event_target();
     if let Ok(mut skill_points) = q_skill_points.get_mut(entity) {
         skill_points.0 += event.delta;
-        debug!(
-            "{} 升级: 获得 {} 技能点，当前技能点 {}",
-            entity, event.delta, skill_points.0
-        );
+        commands.trigger(CommandLog {
+            entity,
+            info: format!(
+                "升级: 获得 {} 技能点，当前技能点 {}",
+                event.delta, skill_points.0
+            ),
+            category: EnumLogCategory::Skill,
+        });
     }
 }
 

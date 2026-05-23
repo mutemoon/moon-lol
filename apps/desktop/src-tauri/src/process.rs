@@ -25,6 +25,17 @@ fn workspace_root() -> Result<std::path::PathBuf, String> {
         .ok_or("cannot find workspace root".into())
 }
 
+/// Returns the log database path at ~/.moon-lol/logs/debug.db
+fn log_db_path(app: &tauri::AppHandle) -> Result<std::path::PathBuf, String> {
+    let base = app.path().home_dir().map_err(|e| e.to_string())?;
+    let path = base.join(".moon-lol").join("logs").join("debug.db");
+    // Ensure parent directories exist
+    if let Some(parent) = path.parent() {
+        std::fs::create_dir_all(parent).map_err(|e| e.to_string())?;
+    }
+    Ok(path)
+}
+
 /// Check if we're in dev mode (no bundled binary available).
 fn is_dev(app: &tauri::AppHandle) -> bool {
     #[cfg(target_os = "windows")]
@@ -64,6 +75,7 @@ pub fn start_game(
 
     let port: u16 = 9001;
     let root = workspace_root()?;
+    let log_db_path = log_db_path(app)?;
 
     let child = if is_dev(app) {
         start_dev(&root, port, &config)?
@@ -71,7 +83,11 @@ pub fn start_game(
         start_release(app, &root, port, &config)?
     };
 
-    s.bevy = Some(BevyProcess { child, port });
+    s.bevy = Some(BevyProcess {
+        child,
+        port,
+        log_db_path,
+    });
     println!("[tauri] Bevy process started on port {}", port);
     Ok(())
 }
@@ -87,6 +103,10 @@ fn start_dev(
         port, config.mode, config.champion
     );
 
+    let rust_log = std::env::var("RUST_LOG").unwrap_or_else(|_| {
+        "info,lol_core=debug,lol_server=debug,lol_champions=debug,lol_render=debug,moon_lol=debug".to_string()
+    });
+
     Command::new("cargo")
         .current_dir(root)
         .args(["run", "--"])
@@ -96,8 +116,9 @@ fn start_dev(
         .arg(&config.mode)
         .arg("--champion")
         .arg(&config.champion)
-        .stdout(Stdio::inherit())
-        .stderr(Stdio::inherit())
+        .env("RUST_LOG", &rust_log)
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
         .spawn()
         .map_err(|e| format!("failed to start game: {e}"))
 }
@@ -129,6 +150,10 @@ fn start_release(
         config.champion
     );
 
+    let rust_log = std::env::var("RUST_LOG").unwrap_or_else(|_| {
+        "info,lol_core=debug,lol_server=debug,lol_champions=debug,lol_render=debug,moon_lol=debug".to_string()
+    });
+
     Command::new(&binary)
         .current_dir(root)
         .arg("--ws-port")
@@ -137,6 +162,7 @@ fn start_release(
         .arg(&config.mode)
         .arg("--champion")
         .arg(&config.champion)
+        .env("RUST_LOG", &rust_log)
         .stdout(Stdio::null())
         .stderr(Stdio::null())
         .spawn()
