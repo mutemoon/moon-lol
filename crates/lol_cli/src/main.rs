@@ -22,13 +22,10 @@ enum Commands {
     #[command(alias = "obs")]
     Observe,
 
-    /// 下达英雄动作指令，接受 Action JSON 格式的数据
+    /// 下达英雄动作指令
+    #[command(subcommand)]
     #[command(alias = "act")]
-    Action {
-        /// 动作 JSON 字符串，例如：'{"type":"move","data":[10.0,20.0]}' 或 '{"type":"stop"}'
-        #[arg(index = 1)]
-        action_json: String,
-    },
+    Action(ActionSubcommand),
 
     /// 暂停游戏时间流速
     Pause,
@@ -38,6 +35,43 @@ enum Commands {
 
     /// 获取调试服务当前的基本状态
     State,
+}
+
+#[derive(Subcommand, Clone, Debug)]
+enum ActionSubcommand {
+    /// 移动到指定坐标
+    Move {
+        /// 目标 X 坐标
+        x: f32,
+        /// 目标 Y 坐标
+        y: f32,
+    },
+
+    /// 攻击指定目标实体
+    Attack {
+        /// 目标实体 ID
+        entity: u64,
+    },
+
+    /// 停止所有动作
+    Stop,
+
+    /// 释放指定索引的技能到指定坐标
+    Skill {
+        /// 技能索引 (0-3)
+        index: usize,
+        /// 目标 X 坐标
+        x: f32,
+        /// 目标 Y 坐标
+        y: f32,
+    },
+
+    /// 升级指定索引的技能
+    #[command(alias = "upgrade")]
+    SkillLevelUp {
+        /// 技能索引 (0-3)
+        index: usize,
+    },
 }
 
 #[derive(Serialize)]
@@ -125,15 +159,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // 组装并发送请求包
     let (cmd_str, params) = match &cli.command {
         Commands::Observe => ("get_observe".to_string(), serde_json::Value::Null),
-        Commands::Action { action_json } => {
-            let parsed_val: serde_json::Value = match serde_json::from_str(action_json) {
-                Ok(v) => v,
-                Err(e) => {
-                    eprintln!("错误: 输入的动作 JSON 格式不合法: {}", e);
-                    std::process::exit(1);
-                }
+        Commands::Action(subcmd) => {
+            let val = match subcmd {
+                ActionSubcommand::Move { x, y } => serde_json::json!({ "Move": [x, y] }),
+                ActionSubcommand::Attack { entity } => serde_json::json!({ "Attack": entity }),
+                ActionSubcommand::Stop => serde_json::json!("Stop"),
+                ActionSubcommand::Skill { index, x, y } => serde_json::json!({
+                    "Skill": { "index": index, "point": [x, y] }
+                }),
+                ActionSubcommand::SkillLevelUp { index } => serde_json::json!({ "SkillLevelUp": index }),
             };
-            ("action".to_string(), parsed_val)
+            ("action".to_string(), val)
         }
         Commands::Pause | Commands::Unpause => {
             ("toggle_pause".to_string(), serde_json::Value::Null)

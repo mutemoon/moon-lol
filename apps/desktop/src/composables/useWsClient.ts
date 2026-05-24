@@ -1,4 +1,6 @@
 import { ref } from "vue";
+import { invoke } from "@tauri-apps/api/core";
+import { listen, type UnlistenFn } from "@tauri-apps/api/event";
 
 // ── WS Protocol types ──
 
@@ -25,7 +27,7 @@ export interface WsEvent {
 
 // ── Composable ──
 
-export function useWsClient(url: string) {
+export function useWsClient() {
   const connected = ref(false);
   const connecting = ref(false);
   const connectTimeout = ref(false);
@@ -36,113 +38,69 @@ export function useWsClient(url: string) {
     paused: false,
   });
 
-  const agentObserve = ref<any>(null);
-  const agentThinking = ref<string>("");
-  const agentAction = ref<string>("");
   const selectedEntityId = ref<number | null>(null);
 
-  let ws: WebSocket | null = null;
-  let nextId = 1;
-  const pending = new Map<number, (res: WsResponse) => void>();
-  let cancelRetry: (() => void) | null = null;
+  let unlisten: UnlistenFn | null = null;
 
-  /** Attempt a single WS connection. Rejects on failure. */
-  function tryConnect(): Promise<void> {
-    return new Promise((resolve, reject) => {
-      if (ws) {
-        ws.onclose = null;
-        ws.close();
-        ws = null;
-      }
-      ws = new WebSocket(url);
-      ws.onopen = () => {
-        connected.value = true;
-        resolve();
-      };
-      ws.onerror = () => {
-        connected.value = false;
-        reject(new Error("WS connection failed"));
-      };
-      ws.onclose = () => {
-        connected.value = false;
-      };
-      ws.onmessage = (msg) => {
-        const data = JSON.parse(msg.data);
-        if (data.type === "result") {
-          const resolve = pending.get(data.id);
-          if (resolve) {
-            pending.delete(data.id);
-            resolve(data);
-          }
-        } else if (data.type === "event") {
-          handleEvent(data);
-        }
-      };
-    });
-  }
-
-  /** Keep retrying WS connection until it succeeds or cancelled. */
   async function connect(): Promise<void> {
     connecting.value = true;
     connectTimeout.value = false;
-    const startTime = Date.now();
 
-    let cancelled = false;
-    cancelRetry = () => {
-      cancelled = true;
-    };
-
-    while (!cancelled) {
-      try {
-        await tryConnect();
-        connecting.value = false;
-        cancelRetry = null;
-        return;
-      } catch {
-        if (cancelled) break;
-        if (Date.now() - startTime > 30_000) {
-          connectTimeout.value = true;
-        }
-        await new Promise((r) => setTimeout(r, 1500));
+    try {
+      if (unlisten) {
+        unlisten();
       }
-    }
+      unlisten = await listen<any>("ws-event", (event) => {
+        handleEvent(event.payload);
+      });
 
-    connecting.value = false;
-    cancelRetry = null;
+      await invoke("connect_ws");
+      connected.value = true;
+      connecting.value = false;
+    } catch (err) {
+      connected.value = false;
+      connecting.value = false;
+      connectTimeout.value = true;
+      if (unlisten) {
+        unlisten();
+        unlisten = null;
+      }
+      throw err;
+    }
   }
 
-  function disconnect() {
-    if (cancelRetry) {
-      cancelRetry();
-      cancelRetry = null;
+  async function disconnect() {
+    if (unlisten) {
+      unlisten();
+      unlisten = null;
     }
-    if (ws) {
-      ws.onclose = null;
-      ws.close();
-      ws = null;
+    try {
+      await invoke("disconnect_ws");
+    } catch {
+      /* ignore */
     }
     connected.value = false;
     connecting.value = false;
     connectTimeout.value = false;
   }
 
-  function send(cmd: string, params: Record<string, unknown> = {}): Promise<WsResponse> {
-    return new Promise((resolve, reject) => {
-      if (!ws || ws.readyState !== WebSocket.OPEN) {
-        reject(new Error("WS not connected"));
-        return;
-      }
-      const id = nextId++;
-      pending.set(id, resolve);
-      ws.send(JSON.stringify({ id, type: "cmd", cmd, params }));
-
-      setTimeout(() => {
-        if (pending.has(id)) {
-          pending.delete(id);
-          reject(new Error(`Command ${cmd} timed out`));
-        }
-      }, 5000);
-    });
+  async function send(cmd: string, params: Record<string, unknown> = {}): Promise<WsResponse> {
+    try {
+      const data = await invoke<any>("send_ws_cmd", { cmd, params });
+      return {
+        id: 0,
+        type: "result",
+        ok: true,
+        data,
+      };
+    } catch (error: any) {
+      return {
+        id: 0,
+        type: "result",
+        ok: false,
+        error: typeof error === "string" ? error : error.message || "Unknown error",
+      };
+    }
   }
 
   function handleEvent(event: WsEvent) {
@@ -162,11 +120,10 @@ export function useWsClient(url: string) {
         break;
       case "game_close":
         connected.value = false;
-        break;
-      case "agent_update":
-        agentObserve.value = event.data.observe;
-        agentThinking.value = event.data.thinking as string;
-        agentAction.value = event.data.action as string;
+        if (unlisten) {
+          unlisten();
+          unlisten = null;
+        }
         break;
       case "entity_selected":
         selectedEntityId.value = event.data.entity_id as number;
@@ -179,9 +136,6 @@ export function useWsClient(url: string) {
     connecting,
     connectTimeout,
     gameState,
-    agentObserve,
-    agentThinking,
-    agentAction,
     selectedEntityId,
     connect,
     disconnect,

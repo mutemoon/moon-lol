@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 use lol_champions::fiora::passive::Vital;
+use lol_core::action::{self, CommandAction};
 use lol_core::attack::{Attack, AttackState};
 use lol_core::base::ability_resource::AbilityResource;
 use lol_core::base::gold::Gold;
@@ -13,6 +14,9 @@ use lol_core::run::{Run, RunTarget};
 use lol_core::skill::{CoolDown, Skill, SkillPoints, Skills};
 use lol_core::team::Team;
 use lol_render::controller::Controller;
+use lol_server::events::CommandWsRequest;
+use lol_server::protocol::WsResponse;
+use serde_json::{from_value, json, to_value, Value};
 
 use crate::models::{
     AttackTarget, Observe, ObserveEnemyHero, ObserveMinion, ObserveMyself, ObserveSkill,
@@ -217,7 +221,7 @@ fn get_world_enemy_hero(
 }
 
 pub fn on_command_ws_request(
-    event: On<lol_server::events::CommandWsRequest>,
+    event: On<CommandWsRequest>,
     mut commands: Commands,
     time_res: Res<Time>,
     player_q: PlayerQ,
@@ -231,21 +235,14 @@ pub fn on_command_ws_request(
         (With<AttackTarget>, Without<Death>, Without<Controller>),
     >,
     transforms_q: Query<&Transform>,
-    action_player_q: Query<
-        Entity,
-        (
-            With<lol_core::character::Character>,
-            With<lol_core::entities::champion::Champion>,
-            Without<lol_core::life::Death>,
-        ),
-    >,
+    action_player_q: Query<Entity, (With<Controller>, Without<Death>)>,
 ) {
     let cmd = event.cmd.as_str();
     let id = event.id;
     let params = &event.params;
 
     let result = match cmd {
-        "get_observe" => (|| -> Result<serde_json::Value, String> {
+        "get_observe" => (|| -> Result<Value, String> {
             let obs = get_observe(
                 &player_q,
                 &skills_q,
@@ -255,10 +252,10 @@ pub fn on_command_ws_request(
                 time_res.elapsed_secs(),
             )
             .ok_or_else(|| "无法获取当前游戏局势观测数据".to_string())?;
-            serde_json::to_value(obs).map_err(|e| format!("序列化观测数据失败: {}", e))
+            to_value(obs).map_err(|e| format!("序列化观测数据失败: {}", e))
         })(),
-        "action" => (|| -> Result<serde_json::Value, String> {
-            let action: lol_core::action::Action = serde_json::from_value(params.clone())
+        "action" => (|| -> Result<Value, String> {
+            let action: action::Action = from_value(params.clone())
                 .map_err(|e| format!("无效的游戏动作指令数据: {}", e))?;
 
             let player_entity = action_player_q
@@ -266,20 +263,20 @@ pub fn on_command_ws_request(
                 .next()
                 .ok_or_else(|| "未找到存活的玩家英雄实体".to_string())?;
 
-            commands.trigger(lol_core::action::CommandAction {
+            commands.trigger(CommandAction {
                 entity: player_entity,
                 action,
             });
 
-            Ok(serde_json::json!({ "status": "success" }))
+            Ok(json!({ "status": "success" }))
         })(),
         _ => return, // 未知指令不处理
     };
 
     if let Ok(mut lock) = event.response.lock() {
         *lock = Some(match result {
-            Ok(data) => lol_server::protocol::WsResponse::ok_with_data(id, data),
-            Err(e) => lol_server::protocol::WsResponse::err(id, e),
+            Ok(data) => WsResponse::ok_with_data(id, data),
+            Err(e) => WsResponse::err(id, e),
         });
     }
 }

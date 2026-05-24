@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from "vue";
-import AgentCockpit from "./AgentCockpit.vue";
+import { ref } from "vue";
 import GameConsoleLogs from "./GameConsoleLogs.vue";
 
 const props = defineProps<{
@@ -11,9 +10,6 @@ const props = defineProps<{
     cooldownDisabled: boolean;
     paused: boolean;
   };
-  agentObserve?: any;
-  agentThinking?: string;
-  agentAction?: string;
 }>();
 
 const emit = defineEmits<{
@@ -22,9 +18,6 @@ const emit = defineEmits<{
 }>();
 
 const switchTarget = ref("Riven");
-
-// 仅用于状态栏的简单计算
-const simulationTime = computed(() => props.agentObserve?.time || 0);
 
 function toggleGodMode() {
   emit("send", "god_mode", { enabled: !props.gameState.godMode });
@@ -47,8 +40,8 @@ function switchChampion() {
 }
 
 const champions = ["Riven", "Fiora"];
-const activeTab = ref<"cockpit" | "logs">("cockpit");
 </script>
+
 
 <template>
   <div class="debug-container">
@@ -64,13 +57,6 @@ const activeTab = ref<"cockpit" | "logs">("cockpit");
           <span class="champ-label">Champion</span>
           <span class="champ-value">{{ gameState.champion || "—" }}</span>
         </span>
-        <template v-if="simulationTime > 0">
-          <span class="status-divider"></span>
-          <span class="status-champ">
-            <span class="champ-label">Sim Time</span>
-            <span class="champ-value gold">{{ simulationTime.toFixed(1) }}s</span>
-          </span>
-        </template>
       </div>
       <button class="stop-btn" @click="$emit('stop')">Stop Game</button>
     </div>
@@ -115,32 +101,10 @@ const activeTab = ref<"cockpit" | "logs">("cockpit");
         </div>
       </div>
 
-      <!-- RIGHT COLUMN: Interactive Tabs Workspace -->
+      <!-- RIGHT COLUMN: Game Console Logs Workspace -->
       <div class="main-tabs-col">
-        <!-- Tab Navigation Bar -->
-        <div class="tabs-nav-bar">
-          <button class="tab-nav-btn" :class="{ active: activeTab === 'cockpit' }" @click="activeTab = 'cockpit'">
-            <span>🤖</span>
-            AI Agent Cockpit
-          </button>
-          <button class="tab-nav-btn" :class="{ active: activeTab === 'logs' }" @click="activeTab = 'logs'">
-            <span>📋</span>
-            Game Console Logs
-          </button>
-        </div>
-
-        <!-- Tab Contents Viewport -->
         <div class="tab-viewport">
-          <!-- Cockpit Tab -->
-          <AgentCockpit
-            v-show="activeTab === 'cockpit'"
-            :agent-observe="agentObserve"
-            :agent-thinking="agentThinking"
-            :agent-action="agentAction"
-          />
-
-          <!-- Logs Tab -->
-          <GameConsoleLogs v-show="activeTab === 'logs'" />
+          <GameConsoleLogs />
         </div>
       </div>
     </div>

@@ -178,5 +178,8 @@ pub fn stop_game(state: &Mutex<AppState>) -> Result<(), String> {
         let _ = proc.child.kill();
     }
 
+    s.ws = None;
+
     Ok(())
 }
+
