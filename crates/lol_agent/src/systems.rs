@@ -1,5 +1,7 @@
 use bevy::prelude::*;
+use lol_champions::fiora::Fiora;
 use lol_champions::fiora::passive::Vital;
+use lol_champions::riven::Riven;
 use lol_core::action::{self, CommandAction};
 use lol_core::attack::{Attack, AttackState};
 use lol_core::base::ability_resource::AbilityResource;
@@ -7,6 +9,7 @@ use lol_core::base::gold::Gold;
 use lol_core::base::level::Level;
 use lol_core::base::stats::ChampionStats;
 use lol_core::damage::{Armor, Damage};
+use lol_core::entities::champion::Champion;
 use lol_core::entities::minion::Minion;
 use lol_core::lane::Lane;
 use lol_core::life::{Death, Health};
@@ -16,11 +19,9 @@ use lol_core::team::Team;
 use lol_render::controller::Controller;
 use lol_server::events::CommandWsRequest;
 use lol_server::protocol::WsResponse;
-use serde_json::{from_value, json, to_value, Value};
+use serde_json::{Value, from_value, json, to_value};
 
-use crate::models::{
-    AttackTarget, Observe, ObserveEnemyHero, ObserveMinion, ObserveMyself, ObserveSkill,
-};
+use crate::models::{Observe, ObserveHero, ObserveMinion, ObserveMyself, ObserveSkill};
 
 type PlayerQ<'w, 's> = Query<
     'w,
@@ -32,7 +33,7 @@ type PlayerQ<'w, 's> = Query<
             Option<&'static AttackState>,
             Option<&'static Run>,
             &'static Team,
-            &'static Controller,
+            &'static Champion,
         ),
         (
             &'static Health,
@@ -52,16 +53,14 @@ type PlayerQ<'w, 's> = Query<
 >;
 
 pub fn get_observe(
+    player_entity: Entity,
     player_q: &PlayerQ,
     skills_q: &Query<(&Skill, Option<&CoolDown>)>,
     minions_q: &Query<
         (Entity, &Transform, &Health, Option<&Vital>, &Team, &Lane),
         (With<Minion>, Without<Death>),
     >,
-    enemy_hero_q: &Query<
-        (Entity, &Transform, &Health, &Team),
-        (With<AttackTarget>, Without<Death>, Without<Controller>),
-    >,
+    champion_q: &Query<(Entity, &Transform, &Health, &Team), (With<Champion>, Without<Death>)>,
     transforms_q: &Query<&Transform>,
     time: f32,
 ) -> Option<Observe> {
@@ -69,7 +68,7 @@ pub fn get_observe(
         (_player_entity, transform, attack_state, run, player_team, _controller),
         (health, opt_level, opt_ability, opt_damage),
         (opt_armor, opt_attack, opt_skill_points, opt_gold, opt_stats, opt_skills),
-    )) = player_q.single()
+    )) = player_q.get(player_entity)
     else {
         return None;
     };
@@ -138,13 +137,15 @@ pub fn get_observe(
     };
 
     let minions = get_world_minions(minions_q, player_pos, &player_team);
-    let enemy_hero = get_world_enemy_hero(enemy_hero_q, player_pos, &player_team);
+    let (friendly_heroes, enemy_heroes) =
+        get_world_heroes(champion_q, player_entity, player_pos, &player_team);
 
     Some(Observe {
         time,
         myself,
         minions,
-        enemy_hero,
+        friendly_heroes,
+        enemy_heroes,
     })
 }
 
@@ -191,33 +192,48 @@ fn get_world_minions(
     minions.into_iter().map(|(_, m)| m).collect()
 }
 
-fn get_world_enemy_hero(
-    enemy_hero_q: &Query<
-        (Entity, &Transform, &Health, &Team),
-        (With<AttackTarget>, Without<Death>, Without<Controller>),
-    >,
+fn get_world_heroes(
+    champion_q: &Query<(Entity, &Transform, &Health, &Team), (With<Champion>, Without<Death>)>,
+    player_entity: Entity,
     player_pos: Vec3,
     player_team: &Team,
-) -> Option<ObserveEnemyHero> {
-    let mut enemy_hero = None;
-    let mut min_hero_distance = f32::MAX;
-    for (hero_entity, hero_transform, health, hero_team) in enemy_hero_q.iter() {
-        if hero_team == player_team {
+) -> (Vec<ObserveHero>, Vec<ObserveHero>) {
+    let mut friendly_heroes = Vec::new();
+    let mut enemy_heroes = Vec::new();
+    for (hero_entity, hero_transform, health, hero_team) in champion_q.iter() {
+        if hero_entity == player_entity {
             continue;
         }
         let distance = player_pos.distance(hero_transform.translation);
-        if distance >= min_hero_distance {
+        if distance > 2000.0 {
             continue;
         }
-        min_hero_distance = distance;
-        enemy_hero = Some(ObserveEnemyHero {
+        let observe_hero = ObserveHero {
             entity: hero_entity,
             position: hero_transform.translation.xz(),
             health: health.value,
             max_health: health.max,
-        });
+            distance,
+        };
+        if hero_team == player_team {
+            friendly_heroes.push((distance, observe_hero));
+        } else {
+            enemy_heroes.push((distance, observe_hero));
+        }
     }
-    enemy_hero
+    friendly_heroes.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
+    enemy_heroes.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
+
+    (
+        friendly_heroes.into_iter().map(|(_, h)| h).collect(),
+        enemy_heroes.into_iter().map(|(_, h)| h).collect(),
+    )
+}
+
+#[derive(serde::Deserialize)]
+struct ActionWithEntity {
+    entity_id: Option<u64>,
+    action: action::Action,
 }
 
 pub fn on_command_ws_request(
@@ -230,24 +246,58 @@ pub fn on_command_ws_request(
         (Entity, &Transform, &Health, Option<&Vital>, &Team, &Lane),
         (With<Minion>, Without<Death>),
     >,
-    enemy_hero_q: Query<
-        (Entity, &Transform, &Health, &Team),
-        (With<AttackTarget>, Without<Death>, Without<Controller>),
-    >,
+    champion_q: Query<(Entity, &Transform, &Health, &Team), (With<Champion>, Without<Death>)>,
     transforms_q: Query<&Transform>,
-    action_player_q: Query<Entity, (With<Controller>, Without<Death>)>,
+    riven_q: Query<Entity, With<Riven>>,
+    fiora_q: Query<Entity, With<Fiora>>,
 ) {
     let cmd = event.cmd.as_str();
     let id = event.id;
     let params = &event.params;
 
     let result = match cmd {
+        "get_controllable_heroes" => (|| -> Result<Value, String> {
+            let mut list = Vec::new();
+            for ((entity, transform, _, _, team, _), _, _) in player_q.iter() {
+                let champion_name = if riven_q.get(entity).is_ok() {
+                    "Riven"
+                } else if fiora_q.get(entity).is_ok() {
+                    "Fiora"
+                } else {
+                    "Unknown"
+                };
+                list.push(json!({
+                    "entity_id": entity.to_bits(),
+                    "team": format!("{:?}", team),
+                    "champion": champion_name,
+                    "position": [transform.translation.x, transform.translation.z]
+                }));
+            }
+            Ok(json!(list))
+        })(),
         "get_observe" => (|| -> Result<Value, String> {
+            let target_entity_id = params.get("entity_id").and_then(|v| v.as_u64());
+
+            let target_entity = if let Some(eid) = target_entity_id {
+                let ent = Entity::from_bits(eid);
+                if player_q.get(ent).is_err() {
+                    return Err(format!("未找到指定的英雄实体 ID: {}", eid));
+                }
+                ent
+            } else {
+                player_q
+                    .iter()
+                    .next()
+                    .map(|((entity, ..), ..)| entity)
+                    .ok_or_else(|| "未找到存活的英雄实体".to_string())?
+            };
+
             let obs = get_observe(
+                target_entity,
                 &player_q,
                 &skills_q,
                 &minions_q,
-                &enemy_hero_q,
+                &champion_q,
                 &transforms_q,
                 time_res.elapsed_secs(),
             )
@@ -255,16 +305,31 @@ pub fn on_command_ws_request(
             to_value(obs).map_err(|e| format!("序列化观测数据失败: {}", e))
         })(),
         "action" => (|| -> Result<Value, String> {
-            let action: action::Action = from_value(params.clone())
-                .map_err(|e| format!("无效的游戏动作指令数据: {}", e))?;
+            let (action, target_entity_id) =
+                if let Ok(wrapper) = from_value::<ActionWithEntity>(params.clone()) {
+                    (wrapper.action, wrapper.entity_id)
+                } else {
+                    let action = from_value::<action::Action>(params.clone())
+                        .map_err(|e| format!("无效的游戏动作指令数据: {}", e))?;
+                    (action, None)
+                };
 
-            let player_entity = action_player_q
-                .iter()
-                .next()
-                .ok_or_else(|| "未找到存活的玩家英雄实体".to_string())?;
+            let target_entity = if let Some(eid) = target_entity_id {
+                let ent = Entity::from_bits(eid);
+                if player_q.get(ent).is_err() {
+                    return Err(format!("未找到指定的英雄实体 ID: {}", eid));
+                }
+                ent
+            } else {
+                player_q
+                    .iter()
+                    .next()
+                    .map(|((entity, ..), ..)| entity)
+                    .ok_or_else(|| "未找到存活的英雄实体".to_string())?
+            };
 
             commands.trigger(CommandAction {
-                entity: player_entity,
+                entity: target_entity,
                 action,
             });
 

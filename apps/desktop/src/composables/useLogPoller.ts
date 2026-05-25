@@ -82,8 +82,8 @@ export function createLogContext() {
 
   const logEntities = ref<{ entity_id: number; entity_name: string }[]>([]);
   const logCategories = ref<string[]>([]);
-  let intervalId: any = null;
-  let queryTimeout: any = null;
+  let intervalId: ReturnType<typeof setInterval> | null = null;
+  let queryTimeout: ReturnType<typeof setTimeout> | null = null;
   let isAutoUpdatingPage = false;
 
   const totalPages = computed(() => Math.ceil(totalLogsCount.value / pageSize.value) || 1);
@@ -333,9 +333,9 @@ export function createLogContext() {
 export type LogPoller = ReturnType<typeof createLogContext>;
 
 export function useLog() {
-  const poller = inject(LOG_CONTEXT_KEY) as LogPoller;
+  const poller = inject<LogPoller>(LOG_CONTEXT_KEY);
   if (!poller) {
-    throw new Error("useLog() must be used inside a component descended from createLogContext()");
+    throw new Error("[MoonLOL] useLog() must be used inside a component descended from createLogContext()!");
   }
   return poller;
 }

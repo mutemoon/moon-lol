@@ -12,6 +12,10 @@ struct Cli {
     #[arg(long, default_value = "9001")]
     port: u16,
 
+    /// 指定操作或观测的英雄实体 ID
+    #[arg(long)]
+    entity_id: Option<u64>,
+
     #[command(subcommand)]
     command: Commands,
 }
@@ -158,7 +162,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // 组装并发送请求包
     let (cmd_str, params) = match &cli.command {
-        Commands::Observe => ("get_observe".to_string(), serde_json::Value::Null),
+        Commands::Observe => {
+            let p = if let Some(eid) = cli.entity_id {
+                serde_json::json!({ "entity_id": eid })
+            } else {
+                serde_json::Value::Null
+            };
+            ("get_observe".to_string(), p)
+        }
         Commands::Action(subcmd) => {
             let val = match subcmd {
                 ActionSubcommand::Move { x, y } => serde_json::json!({ "Move": [x, y] }),
@@ -169,7 +180,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 }),
                 ActionSubcommand::SkillLevelUp { index } => serde_json::json!({ "SkillLevelUp": index }),
             };
-            ("action".to_string(), val)
+            let p = if let Some(eid) = cli.entity_id {
+                serde_json::json!({ "entity_id": eid, "action": val })
+            } else {
+                val
+            };
+            ("action".to_string(), p)
         }
         Commands::Pause | Commands::Unpause => {
             ("toggle_pause".to_string(), serde_json::Value::Null)

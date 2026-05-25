@@ -11,6 +11,7 @@ use crate::state::{AppState, BevyProcess};
 pub struct GameConfig {
     pub mode: String,
     pub champion: String,
+    pub scene_name: Option<String>,
 }
 
 /// Find the workspace root directory.
@@ -107,16 +108,21 @@ fn start_dev(
         "info,lol_core=debug,lol_server=debug,lol_champions=debug,lol_render=debug,moon_lol=debug".to_string()
     });
 
-    Command::new("cargo")
-        .current_dir(root)
+    let mut cmd = Command::new("cargo");
+    cmd.current_dir(root)
         .args(["run", "--"])
         .arg("--ws-port")
         .arg(port.to_string())
         .arg("--mode")
         .arg(&config.mode)
         .arg("--champion")
-        .arg(&config.champion)
-        .env("RUST_LOG", &rust_log)
+        .arg(&config.champion);
+
+    if let Some(ref scene) = config.scene_name {
+        cmd.arg("--scene").arg(format!("user_games://{}.ron", scene));
+    }
+
+    cmd.env("RUST_LOG", &rust_log)
         .stdout(Stdio::null())
         .stderr(Stdio::null())
         .spawn()
@@ -154,15 +160,20 @@ fn start_release(
         "info,lol_core=debug,lol_server=debug,lol_champions=debug,lol_render=debug,moon_lol=debug".to_string()
     });
 
-    Command::new(&binary)
-        .current_dir(root)
+    let mut cmd = Command::new(&binary);
+    cmd.current_dir(root)
         .arg("--ws-port")
         .arg(port.to_string())
         .arg("--mode")
         .arg(&config.mode)
         .arg("--champion")
-        .arg(&config.champion)
-        .env("RUST_LOG", &rust_log)
+        .arg(&config.champion);
+
+    if let Some(ref scene) = config.scene_name {
+        cmd.arg("--scene").arg(format!("user_games://{}.ron", scene));
+    }
+
+    cmd.env("RUST_LOG", &rust_log)
         .stdout(Stdio::null())
         .stderr(Stdio::null())
         .spawn()

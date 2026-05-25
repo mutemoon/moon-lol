@@ -7,11 +7,12 @@ use serde::{Deserialize, Serialize};
 pub struct AttackTarget;
 
 #[derive(Clone, Serialize, Deserialize)]
-pub struct ObserveEnemyHero {
+pub struct ObserveHero {
     pub entity: Entity,
     pub position: Vec2,
     pub health: f32,
     pub max_health: f32,
+    pub distance: f32,
 }
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -19,7 +20,8 @@ pub struct Observe {
     pub time: f32,
     pub myself: ObserveMyself,
     pub minions: Vec<ObserveMinion>,
-    pub enemy_hero: Option<ObserveEnemyHero>,
+    pub friendly_heroes: Vec<ObserveHero>,
+    pub enemy_heroes: Vec<ObserveHero>,
 }
 
 #[derive(Clone, Serialize, Deserialize)]

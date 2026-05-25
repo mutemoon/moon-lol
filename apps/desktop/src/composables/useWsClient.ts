@@ -21,7 +21,7 @@ export interface WsResponse {
 
 export interface WsEvent {
   type: "event";
-  event: string;
+  event: "game_loaded" | "game_paused" | "champion_changed" | "game_close" | "entity_selected";
   data: Record<string, unknown>;
 }
 
@@ -50,7 +50,7 @@ export function useWsClient() {
       if (unlisten) {
         unlisten();
       }
-      unlisten = await listen<any>("ws-event", (event) => {
+      unlisten = await listen<WsEvent>("ws-event", (event) => {
         handleEvent(event.payload);
       });
 

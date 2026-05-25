@@ -22,6 +22,7 @@ pub fn update_element_layout(
     fill_percentage_assets: &FillPercentageAssets,
     q_node: &mut Query<&mut Node>,
     q_children: &Query<&Children>,
+    q_image: &Query<&ImageNode>,
 ) {
     let Ok(mut node) = q_node.get_mut(entity) else {
         return;
@@ -200,36 +201,9 @@ pub fn update_element_layout(
     }
 
     // 更新子实体的 ImageNode
-    if let Some(texture_data) = texture_data {
-        match texture_data {
-            LOLEnumData::AtlasData(atlas_data) => {
-                if let Some(m_texture_uv) = atlas_data.m_texture_uv {
-                    commands.entity(child).insert(ImageNode {
-                        image: asset_server.load(&atlas_data.m_texture_name),
-                        rect: Some(Rect::new(
-                            m_texture_uv.x,
-                            m_texture_uv.y,
-                            m_texture_uv.z,
-                            m_texture_uv.w,
-                        )),
-                        ..default()
-                    });
-                } else {
-                    commands.entity(child).insert(ImageNode {
-                        image: asset_server.load(&atlas_data.m_texture_name),
-                        ..default()
-                    });
-                }
-            }
-            LOLEnumData::LooseUiTextureData(loose_data) => {
-                commands.entity(child).insert(ImageNode {
-                    image: asset_server.load(&loose_data.texture_name),
-                    ..default()
-                });
-            }
-            _ => {
-                warn!("{name:?} 渲染器暂不支持的纹理数据类型: {texture_data:?}",);
-            }
+    if !q_image.contains(child) {
+        if let Some(texture_data) = texture_data {
+            init_child_image_node(commands, asset_server, child, texture_data, name);
         }
     }
 
@@ -262,6 +236,7 @@ pub fn update_on_add_ui_element(
     >,
     mut q_node: Query<&mut Node>,
     q_children: Query<&Children>,
+    q_image: Query<&ImageNode>,
     q_window: Query<&Window, With<PrimaryWindow>>,
     icon_assets: Res<IconAssets>,
     anim_assets: Res<AnimAssets>,
@@ -292,6 +267,7 @@ pub fn update_on_add_ui_element(
                 &fill_percentage_assets,
                 &mut q_node,
                 &q_children,
+                &q_image,
             );
         }
 
@@ -339,6 +315,7 @@ pub fn update_on_window_resized(
     mut q_element: Query<(Entity, &UIElement, &InheritedVisibility)>,
     mut q_node: Query<&mut Node>,
     q_children: Query<&Children>,
+    q_image: Query<&ImageNode>,
     icon_assets: Res<IconAssets>,
     anim_assets: Res<AnimAssets>,
     desaturate_assets: Res<DesaturateAssets>,
@@ -364,8 +341,48 @@ pub fn update_on_window_resized(
                     &fill_percentage_assets,
                     &mut q_node,
                     &q_children,
+                    &q_image,
                 );
             }
+        }
+    }
+}
+
+fn init_child_image_node(
+    commands: &mut Commands,
+    asset_server: &AssetServer,
+    child: Entity,
+    texture_data: &LOLEnumData,
+    name: Option<&String>,
+) {
+    match texture_data {
+        LOLEnumData::AtlasData(atlas_data) => {
+            let Some(m_texture_uv) = atlas_data.m_texture_uv else {
+                commands.entity(child).insert(ImageNode {
+                    image: asset_server.load(&atlas_data.m_texture_name),
+                    ..default()
+                });
+                return;
+            };
+            commands.entity(child).insert(ImageNode {
+                image: asset_server.load(&atlas_data.m_texture_name),
+                rect: Some(Rect::new(
+                    m_texture_uv.x,
+                    m_texture_uv.y,
+                    m_texture_uv.z,
+                    m_texture_uv.w,
+                )),
+                ..default()
+            });
+        }
+        LOLEnumData::LooseUiTextureData(loose_data) => {
+            commands.entity(child).insert(ImageNode {
+                image: asset_server.load(&loose_data.texture_name),
+                ..default()
+            });
+        }
+        _ => {
+            warn!("{name:?} 渲染器暂不支持的纹理数据类型: {texture_data:?}",);
         }
     }
 }

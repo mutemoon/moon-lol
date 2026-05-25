@@ -91,9 +91,13 @@ pub fn on_action_damage(
     };
     let skill = skills
         .iter()
-        .map(|v| q_skill.get(v))
-        .find_map(|v| v.ok())
-        .unwrap();
+        .filter_map(|v| q_skill.get(v).ok())
+        .find(|s| s.spell == event.skill)
+        .or_else(|| skills.iter().filter_map(|v| q_skill.get(v).ok()).next());
+
+    let Some(skill) = skill else {
+        return;
+    };
 
     let forward = transform.forward().xz();
 

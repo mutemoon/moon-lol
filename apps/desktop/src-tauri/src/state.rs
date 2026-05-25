@@ -9,6 +9,8 @@ pub struct AppState {
     pub bevy: Option<BevyProcess>,
     /// Active WebSocket session, if any.
     pub ws: Option<WsSession>,
+    /// Active custom scene name, if any.
+    pub active_scene: Option<String>,
 }
 
 pub struct BevyProcess {
@@ -22,6 +24,7 @@ impl AppState {
         Self {
             bevy: None,
             ws: None,
+            active_scene: None,
         }
     }
 }

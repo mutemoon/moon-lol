@@ -20,6 +20,9 @@ struct Args {
 
     #[arg(long, default_value = "Riven")]
     champion: String,
+
+    #[arg(long)]
+    scene: Option<String>,
 }
 
 fn main() {
@@ -28,6 +31,23 @@ fn main() {
 
     let mut app = App::new();
     app.insert_resource(LogDbPath(log_db_path));
+
+    // Register user_games custom asset source for absolute home dir loading
+    let home = std::env::var("USERPROFILE")
+        .or_else(|_| std::env::var("HOME"))
+        .unwrap_or_else(|_| ".".to_string());
+    let user_games_path = std::path::Path::new(&home)
+        .join(".moon-lol")
+        .join("games");
+    let _ = std::fs::create_dir_all(&user_games_path);
+    app.register_asset_source(
+        "user_games",
+        bevy::asset::io::AssetSourceBuilder::platform_default(
+            &user_games_path.to_string_lossy(),
+            None,
+        ),
+    );
+
     app.add_plugins((
         DefaultPlugins.build().set(log_plugin).set(WindowPlugin {
             primary_window: Some(Window {
@@ -48,6 +68,8 @@ fn main() {
         PluginAgentObserver,
     ));
 
-    app.insert_resource(GameScenes::new(vec!["games/classic_fiora.ron".to_owned()]))
+    let scene_path = args.scene.unwrap_or_else(|| "games/classic_fiora.ron".to_string());
+    app.insert_resource(GameScenes::new(vec![scene_path]))
         .run();
 }
+

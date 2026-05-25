@@ -30,10 +30,8 @@ impl Plugin for PluginUIPlayer {
                 update_player_health,
                 update_player_health_fade,
                 update_player_ability_resource,
-                update_player_icon.run_if(
-                    any_match_filter::<(With<Controller>, With<SkinReady>)>.and_then(run_once),
-                ),
-                update_stat_page_buttons.run_if(run_once),
+                update_player_icon.run_if(any_match_filter::<(With<Controller>, With<SkinReady>)>),
+                update_stat_page_buttons,
                 update_gold,
             )
                 .run_if(in_state(UIState::Loaded)),
@@ -245,7 +243,6 @@ fn update_player_icon(
     };
 
     if q_image_node.get(child).is_ok() {
-        info!("玩家头像已经加载");
         return;
     }
 
@@ -266,7 +263,7 @@ fn update_stat_page_buttons(
     for stat_page in &res_player_frame.stat_pages {
         let entity = res_ui_element_entity.get_entity(&stat_page.button);
 
-        commands.entity(entity).insert(Visibility::Visible);
+        commands.entity(entity).insert(Visibility::Inherited);
     }
 }
 

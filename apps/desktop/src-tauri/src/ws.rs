@@ -5,6 +5,7 @@ use tauri::{AppHandle, Emitter};
 use futures_util::{StreamExt, SinkExt};
 use tokio_tungstenite::connect_async;
 use tokio_tungstenite::tungstenite::protocol::Message;
+use std::sync::atomic::{AtomicU64, Ordering};
 use serde::{Serialize, Deserialize};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -38,17 +39,12 @@ pub struct WsEvent {
 pub struct WsSession {
     tx: mpsc::Sender<Message>,
     pending: Arc<Mutex<HashMap<u64, oneshot::Sender<WsResponse>>>>,
-    next_id: Arc<Mutex<u64>>,
+    next_id: Arc<AtomicU64>,
 }
 
 impl WsSession {
     pub async fn send_cmd(&self, cmd: String, params: serde_json::Value) -> Result<WsResponse, String> {
-        let id = {
-            let mut id_lock = self.next_id.lock().unwrap();
-            let curr = *id_lock;
-            *id_lock += 1;
-            curr
-        };
+        let id = self.next_id.fetch_add(1, Ordering::SeqCst);
 
         let req = WsRequest {
             id,
@@ -102,7 +98,7 @@ pub async fn start_ws_client(app: AppHandle, port: u16) -> Result<WsSession, Str
     let (mut write, mut read) = stream.split();
     let (tx, mut rx) = mpsc::channel::<Message>(32);
     let pending = Arc::new(Mutex::new(HashMap::<u64, oneshot::Sender<WsResponse>>::new()));
-    let next_id = Arc::new(Mutex::new(1u64));
+    let next_id = Arc::new(AtomicU64::new(1));
 
     let pending_clone = pending.clone();
     let app_clone = app.clone();

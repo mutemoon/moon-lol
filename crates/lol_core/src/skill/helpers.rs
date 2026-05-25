@@ -15,21 +15,54 @@ pub fn get_skill_value(
     let calculations = spell.calculations.as_ref()?;
     let calculation = calculations.get(name)?;
 
-    match calculation {
-        CalculationType::CalculationSpell(calc) => {
-            let mut value = 0.0;
-            if let Some(parts) = &calc.formula_parts {
-                for part in parts {
-                    value += calculate_part(part, skill_object, level, &get_stat);
-                }
-            }
+    let CalculationType::CalculationSpell(calc) = calculation;
+    let mut value = 0.0;
 
-            if let Some(multiplier) = &calc.multiplier {
-                value *= calculate_part(multiplier, skill_object, level, &get_stat);
-            }
-            Some(value)
+    if let Some(parts) = &calc.formula_parts {
+        for part in parts {
+            value += calculate_part(part, skill_object, level, &get_stat);
         }
     }
+
+    if let Some(multiplier) = &calc.multiplier {
+        value *= calculate_part(multiplier, skill_object, level, &get_stat);
+    }
+    Some(value)
+}
+
+fn get_named_data_value(
+    skill_object: &Spell,
+    target_name: &str,
+    level: usize,
+) -> Option<f32> {
+    let spell_data = skill_object.spell_data.as_ref()?;
+    let data_values = spell_data.data_values.as_ref()?;
+    let norm_target = target_name.to_lowercase().replace('_', "");
+
+    for dv in data_values {
+        let norm_name = dv.name.to_lowercase().replace('_', "");
+        if norm_name != norm_target {
+            continue;
+        }
+        let values = dv.values.as_ref()?;
+        let lvl_idx = if level > 0 { level - 1 } else { 0 };
+        return Some(*values.get(lvl_idx).unwrap_or(&0.0));
+    }
+    None
+}
+
+fn get_effect_value(
+    skill_object: &Spell,
+    effect_index: Option<i32>,
+    level: usize,
+) -> Option<f32> {
+    let index = effect_index.unwrap_or(1) - 1;
+    let spell_data = skill_object.spell_data.as_ref()?;
+    let effect_amounts = spell_data.effect_amounts.as_ref()?;
+    let effect_amount = effect_amounts.get(index as usize)?;
+    let values = effect_amount.values.as_ref()?;
+    let lvl_idx = if level > 0 { level - 1 } else { 0 };
+    Some(*values.get(lvl_idx).unwrap_or(&0.0))
 }
 
 fn calculate_part(
@@ -42,21 +75,7 @@ fn calculate_part(
         CalculationPart::CalculationPartEffectValue(CalculationPartEffectValue {
             effect_index,
         }) => {
-            let index = effect_index.unwrap_or(1) - 1;
-            if let Some(effect_amount) = skill_object
-                .spell_data
-                .as_ref()
-                .and_then(|s| s.effect_amounts.as_ref())
-                .and_then(|v| v.get(index as usize))
-            {
-                if let Some(values) = &effect_amount.values {
-                    // level is 1-based, so index is level - 1
-                    // Ensure level is at least 1
-                    let lvl_idx = if level > 0 { level - 1 } else { 0 };
-                    return *values.get(lvl_idx).unwrap_or(&0.0);
-                }
-            }
-            0.0
+            get_effect_value(skill_object, *effect_index, level).unwrap_or(0.0)
         }
         CalculationPart::CalculationPartStatCoefficient(CalculationPartStatCoefficient {
             stat,
@@ -70,22 +89,7 @@ fn calculate_part(
         CalculationPart::CalculationPartNamedDataValue(CalculationPartNamedDataValue {
             data_value,
         }) => {
-            if let Some(data_values) = skill_object
-                .spell_data
-                .as_ref()
-                .and_then(|s| s.data_values.as_ref())
-            {
-                for dv in data_values {
-                    // 直接通过名称匹配
-                    if &dv.name == data_value {
-                        if let Some(values) = &dv.values {
-                            let lvl_idx = if level > 0 { level - 1 } else { 0 };
-                            return *values.get(lvl_idx).unwrap_or(&0.0);
-                        }
-                    }
-                }
-            }
-            0.0
+            get_named_data_value(skill_object, data_value, level).unwrap_or(0.0)
         }
         CalculationPart::CalculationPartStatSub(CalculationPartStatSub {
             stat, subpart, ..
@@ -104,23 +108,8 @@ fn calculate_part(
             ..
         }) => {
             let stat = stat.unwrap_or(0);
-            let mut data_val = 0.0;
-            if let Some(data_values) = skill_object
-                .spell_data
-                .as_ref()
-                .and_then(|s| s.data_values.as_ref())
-            {
-                for dv in data_values {
-                    if &dv.name == data_value {
-                        if let Some(values) = &dv.values {
-                            let lvl_idx = if level > 0 { level - 1 } else { 0 };
-                            data_val = *values.get(lvl_idx).unwrap_or(&0.0);
-                            break;
-                        }
-                    }
-                }
-            }
-            get_stat(stat) * data_val
+            let val = get_named_data_value(skill_object, data_value, level).unwrap_or(0.0);
+            get_stat(stat) * val
         }
     }
 }
