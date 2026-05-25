@@ -461,7 +461,7 @@ async function handleLaunchAgentMode() {
             </div>
 
             <!-- Save & Launch actions -->
-            <div class="flex w-full shrink-0 items-center justify-end gap-3 sm:w-auto">
+            <div class="flex w-full items-center justify-end gap-3 sm:w-auto">
               <Button
                 variant="outline"
                 class="border-gold-dimmer text-gold-bright hover:bg-gold-dimmer/15 h-9 cursor-pointer px-4 text-xs font-medium transition-all"

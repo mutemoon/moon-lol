@@ -13,6 +13,9 @@ use std::sync::Mutex;
 use state::AppState;
 use tauri::Manager;
 
+use rig::tool::Tool;
+use tools::{BashArgs, BashTool};
+
 #[derive(serde::Serialize, serde::Deserialize, Clone)]
 pub struct AiConfig {
     pub api_key: String,
@@ -108,6 +111,7 @@ fn set_ai_config(app: tauri::AppHandle, config: AiConfig) -> Result<(), error::A
 
 #[derive(serde::Serialize, serde::Deserialize, Clone, Debug)]
 pub struct FrontAgentConfig {
+    pub id: Option<String>,
     pub champion: String,
     pub team: String,
     pub prompt: String,
@@ -125,9 +129,19 @@ fn save_custom_scenario(
         fs::create_dir_all(&dir)?;
     }
 
+    let mut resolved_agents = Vec::new();
+    for (idx, agent) in agents.into_iter().enumerate() {
+        let mut resolved = agent.clone();
+        if resolved.id.is_none() {
+            let champ_lower = agent.champion.to_lowercase();
+            resolved.id = Some(format!("{}_{}", champ_lower, idx));
+        }
+        resolved_agents.push(resolved);
+    }
+
     // Save JSON
     let json_path = dir.join(format!("{}.json", scene_name));
-    let json_content = serde_json::to_string_pretty(&agents)
+    let json_content = serde_json::to_string_pretty(&resolved_agents)
         .map_err(|e| error::AppError::Generic(format!("JSON 序列化失败: {e}")))?;
     fs::write(&json_path, json_content)?;
 
@@ -138,13 +152,14 @@ fn save_custom_scenario(
     let mut ron_content = String::new();
     ron_content.push_str("(\n    resources: {},\n    entities: {\n");
 
-    for (idx, agent) in agents.iter().enumerate() {
+    for (idx, agent) in resolved_agents.iter().enumerate() {
         let entity_id = 4294967185 + idx as u64;
         let x = agent.spawn_point[0];
         let z = agent.spawn_point[1];
         let y = if agent.champion == "Fiora" { 38.0 } else { 0.0 };
         let team = &agent.team; // "Order" or "Chaos"
         let champ_lower = agent.champion.to_lowercase();
+        let agent_id = agent.id.as_ref().unwrap();
 
         ron_content.push_str(&format!("        {entity_id}: (\n"));
         ron_content.push_str("            components: {\n");
@@ -171,6 +186,10 @@ fn save_custom_scenario(
             ron_content.push_str("                \"lol_render::camera::Focus\": (),\n");
         }
         ron_content.push_str("                \"lol_core::entities::champion::Champion\": (),\n");
+        ron_content.push_str(&format!(
+            "                \"lol_core::entities::champion::AgentId\": (\"{}\"),\n",
+            agent_id
+        ));
         ron_content.push_str(&format!(
             "                \"lol_base::character::ConfigCharacterRecord\": (\n"
         ));
@@ -342,6 +361,14 @@ async fn send_ws_cmd(
     Ok(resp.data.unwrap_or(serde_json::Value::Null))
 }
 
+#[tauri::command]
+async fn run_bash_tool(cmd: String) -> Result<String, error::AppError> {
+    let tool = BashTool;
+    let args = BashArgs { cmd };
+    let output = tool.call(args).await.unwrap();
+    Ok(output)
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -376,7 +403,11 @@ pub fn run() {
             log::clear_logs,
             connect_ws,
             disconnect_ws,
-            send_ws_cmd
+            send_ws_cmd,
+            agent::list_game_histories,
+            agent::get_game_history_detail,
+            agent::delete_game_history,
+            run_bash_tool
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

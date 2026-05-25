@@ -37,6 +37,34 @@ declare module 'vue-router/auto-routes' {
       Record<never, never>,
       | never
     >,
+    '/history': RouteRecordInfo<
+      '/history',
+      '/history',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/mock/': RouteRecordInfo<
+      '/mock/',
+      '/mock',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/mock/chat': RouteRecordInfo<
+      '/mock/chat',
+      '/mock/chat',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/mock/command': RouteRecordInfo<
+      '/mock/command',
+      '/mock/command',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
     '/settings': RouteRecordInfo<
       '/settings',
       '/settings',
@@ -66,6 +94,30 @@ declare module 'vue-router/auto-routes' {
     'src/pages/debug.vue': {
       routes:
         | '/debug'
+      views:
+        | never
+    }
+    'src/pages/history.vue': {
+      routes:
+        | '/history'
+      views:
+        | never
+    }
+    'src/pages/mock/index.vue': {
+      routes:
+        | '/mock/'
+      views:
+        | never
+    }
+    'src/pages/mock/chat.vue': {
+      routes:
+        | '/mock/chat'
+      views:
+        | never
+    }
+    'src/pages/mock/command.vue': {
+      routes:
+        | '/mock/command'
       views:
         | never
     }

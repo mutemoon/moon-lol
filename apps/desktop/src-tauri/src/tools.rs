@@ -8,6 +8,19 @@ pub struct BashArgs {
 
 pub struct BashTool;
 
+fn is_dev() -> bool {
+    cfg!(debug_assertions)
+}
+
+fn workspace_root() -> Option<std::path::PathBuf> {
+    let manifest_dir = std::env::var("CARGO_MANIFEST_DIR").ok()?;
+    std::path::Path::new(&manifest_dir)
+        .parent()
+        .and_then(|p| p.parent())
+        .and_then(|p| p.parent())
+        .map(|p| p.to_path_buf())
+}
+
 impl Tool for BashTool {
     const NAME: &'static str = "bash";
     type Error = std::convert::Infallible;
@@ -17,7 +30,7 @@ impl Tool for BashTool {
     async fn definition(&self, _prompt: String) -> ToolDefinition {
         ToolDefinition {
             name: "bash".to_string(),
-            description: "运行本地命令行指令。例如使用 `cargo run --bin lol-cli -- obs` 获取局势观测，或者 `cargo run --bin lol-cli -- act move --x 7500 --y 7500` 移动坐标。".to_string(),
+            description: "运行本地命令行指令。".to_string(),
             parameters: serde_json::json!({
                 "type": "object",
                 "properties": {
@@ -33,27 +46,39 @@ impl Tool for BashTool {
 
     async fn call(&self, args: Self::Args) -> Result<Self::Output, Self::Error> {
         let cmd_trimmed = args.cmd.trim();
-        if !cmd_trimmed.starts_with("lol_cli")
-            && !cmd_trimmed.starts_with("lol-cli")
-            && !cmd_trimmed.starts_with("cargo run --bin lol_cli")
-            && !cmd_trimmed.starts_with("cargo run --bin lol-cli")
-        {
+        if !cmd_trimmed.starts_with("lol_cli") {
             return Ok("错误: 安全策略限制，只允许执行以 lol_cli 开头的命令。".to_string());
         }
 
+        let mut final_cmd = args.cmd.clone();
+        if is_dev() {
+            if cmd_trimmed.starts_with("lol_cli") {
+                final_cmd = final_cmd.replacen("lol_cli", "cargo run -p lol_cli --", 1);
+            }
+        }
+
         let output = {
-            #[cfg(target_os = "windows")]
-            {
-                std::process::Command::new("cmd")
-                    .args(["/C", &args.cmd])
-                    .output()
+            let mut cmd = {
+                #[cfg(target_os = "windows")]
+                {
+                    let mut c = std::process::Command::new("cmd");
+                    c.args(["/C", &final_cmd]);
+                    c
+                }
+                #[cfg(not(target_os = "windows"))]
+                {
+                    let mut c = std::process::Command::new("sh");
+                    c.args(["-c", &final_cmd]);
+                    c
+                }
+            };
+
+            if is_dev() {
+                if let Some(root) = workspace_root() {
+                    cmd.current_dir(root);
+                }
             }
-            #[cfg(not(target_os = "windows"))]
-            {
-                std::process::Command::new("sh")
-                    .args(["-c", &args.cmd])
-                    .output()
-            }
+            cmd.output()
         };
 
         match output {

@@ -1,5 +1,5 @@
 [package]
-name = "moon-lol"
+name = "moon-lol-desktop"
 version = "0.1.0"
 description = "A Tauri App"
 authors = ["you"]
@@ -28,5 +28,4 @@ tokio = { version = "1", features = ["full"] }
 tokio-tungstenite = "0.24"
 futures-util = "0.3"
 thiserror = "2.0.12"
-
-
+chrono = { version = "0.4", features = ["serde"] }

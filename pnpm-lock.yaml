@@ -53,6 +53,9 @@ importers:
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
+      markstream-vue:
+        specifier: 0.0.2-beta.4
+        version: 0.0.2-beta.4(katex@0.16.27)(mermaid@11.12.2)(shiki@3.19.0)(vue@3.5.25(typescript@5.9.3))
       pinia:
         specifier: ^3.0.4
         version: 3.0.4(typescript@5.9.3)(vue@3.5.25(typescript@5.9.3))

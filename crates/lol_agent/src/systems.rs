@@ -9,7 +9,7 @@ use lol_core::base::gold::Gold;
 use lol_core::base::level::Level;
 use lol_core::base::stats::ChampionStats;
 use lol_core::damage::{Armor, Damage};
-use lol_core::entities::champion::Champion;
+use lol_core::entities::champion::{Champion, AgentId};
 use lol_core::entities::minion::Minion;
 use lol_core::lane::Lane;
 use lol_core::life::{Death, Health};
@@ -250,27 +250,19 @@ pub fn on_command_ws_request(
     transforms_q: Query<&Transform>,
     riven_q: Query<Entity, With<Riven>>,
     fiora_q: Query<Entity, With<Fiora>>,
+    agent_id_q: Query<(Entity, &AgentId)>,
 ) {
     let cmd = event.cmd.as_str();
     let id = event.id;
     let params = &event.params;
 
     let result = match cmd {
-        "get_controllable_heroes" => (|| -> Result<Value, String> {
+        "get_agents" => (|| -> Result<Value, String> {
             let mut list = Vec::new();
-            for ((entity, transform, _, _, team, _), _, _) in player_q.iter() {
-                let champion_name = if riven_q.get(entity).is_ok() {
-                    "Riven"
-                } else if fiora_q.get(entity).is_ok() {
-                    "Fiora"
-                } else {
-                    "Unknown"
-                };
+            for (entity, agent_id) in agent_id_q.iter() {
                 list.push(json!({
                     "entity_id": entity.to_bits(),
-                    "team": format!("{:?}", team),
-                    "champion": champion_name,
-                    "position": [transform.translation.x, transform.translation.z]
+                    "agent_id": agent_id.0
                 }));
             }
             Ok(json!(list))

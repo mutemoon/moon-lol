@@ -19,9 +19,14 @@ use crate::skill::SkillPoints;
 )]
 pub struct Champion;
 
+#[derive(Component, Reflect, Default, Debug, Clone, PartialEq, Eq, Hash)]
+#[reflect(Component)]
+pub struct AgentId(pub String);
+
 #[derive(Default)]
 pub struct PluginChampion;
 
 impl Plugin for PluginChampion {
     fn build(&self, _app: &mut App) {}
 }
+

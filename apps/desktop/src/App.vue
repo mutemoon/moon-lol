@@ -21,11 +21,13 @@ const { ws } = store;
 // Provide the log poller context to all child pages/components
 provide(LOG_CONTEXT_KEY, store.log);
 
-type View = "launcher" | "debug" | "settings";
+type View = "launcher" | "debug" | "settings" | "mock" | "history";
 
 const currentView = computed<View>(() => {
   if (route.path === "/debug") return "debug";
   if (route.path === "/settings") return "settings";
+  if (route.path === "/history") return "history";
+  if (route.path.startsWith("/mock")) return "mock";
   return "launcher";
 });
 
@@ -89,6 +91,18 @@ async function onNavMouseDown(e: MouseEvent) {
         </Button>
         <Button
           variant="ghost"
+          class="relative rounded-[3px] px-4 py-2 text-xs font-medium tracking-[0.04em] uppercase transition-colors duration-200 hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
+          :class="
+            currentView === 'mock'
+              ? 'text-gold-bright after:bg-gold-default after:absolute after:bottom-0 after:left-1/2 after:h-[2px] after:w-6 after:-translate-x-1/2 after:rounded-[1px] after:content-[\'\']'
+              : 'text-text-muted hover:text-text-bright'
+          "
+          @click="router.push('/mock')"
+        >
+          Mock
+        </Button>
+        <Button
+          variant="ghost"
           class="relative rounded-[3px] px-4 py-2 text-xs font-medium tracking-[0.04em] uppercase transition-colors duration-200 hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-35"
           :class="
             currentView === 'debug'
@@ -102,10 +116,15 @@ async function onNavMouseDown(e: MouseEvent) {
         </Button>
         <Button
           variant="ghost"
-          class="text-text-muted relative rounded-[3px] px-4 py-2 text-xs font-medium tracking-[0.04em] uppercase transition-colors duration-200 hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-35"
-          disabled
+          class="relative rounded-[3px] px-4 py-2 text-xs font-medium tracking-[0.04em] uppercase transition-colors duration-200 hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
+          :class="
+            currentView === 'history'
+              ? 'text-gold-bright after:bg-gold-default after:absolute after:bottom-0 after:left-1/2 after:h-[2px] after:w-6 after:-translate-x-1/2 after:rounded-[1px] after:content-[\'\']'
+              : 'text-text-muted hover:text-text-bright'
+          "
+          @click="router.push('/history')"
         >
-          Stats
+          History
         </Button>
         <Button
           variant="ghost"

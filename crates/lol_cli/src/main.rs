@@ -12,10 +12,6 @@ struct Cli {
     #[arg(long, default_value = "9001")]
     port: u16,
 
-    /// 指定操作或观测的英雄实体 ID
-    #[arg(long)]
-    entity_id: Option<u64>,
-
     #[command(subcommand)]
     command: Commands,
 }
@@ -23,13 +19,21 @@ struct Cli {
 #[derive(Subcommand, Clone, Debug)]
 enum Commands {
     /// 获取当前英雄的局势观测数据 (Observe JSON)
-    #[command(alias = "obs")]
-    Observe,
+    Observe {
+        /// 指定操作或观测的英雄实体 ID
+        #[arg(short, long)]
+        entity_id: u64,
+    },
 
     /// 下达英雄动作指令
-    #[command(subcommand)]
-    #[command(alias = "act")]
-    Action(ActionSubcommand),
+    Action {
+        /// 指定操作或观测的英雄实体 ID
+        #[arg(short, long)]
+        entity_id: u64,
+
+        #[command(subcommand)]
+        subcommand: ActionSubcommand,
+    },
 
     /// 暂停游戏时间流速
     Pause,
@@ -87,6 +91,7 @@ struct WsRequest {
 
 #[derive(Deserialize, Debug)]
 struct WsResponse {
+    #[allow(dead_code)]
     pub id: u64,
     ok: bool,
     data: Option<serde_json::Value>,
@@ -162,29 +167,26 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // 组装并发送请求包
     let (cmd_str, params) = match &cli.command {
-        Commands::Observe => {
-            let p = if let Some(eid) = cli.entity_id {
-                serde_json::json!({ "entity_id": eid })
-            } else {
-                serde_json::Value::Null
-            };
+        Commands::Observe { entity_id } => {
+            let p = serde_json::json!({ "entity_id": entity_id });
             ("get_observe".to_string(), p)
         }
-        Commands::Action(subcmd) => {
-            let val = match subcmd {
+        Commands::Action {
+            entity_id,
+            subcommand,
+        } => {
+            let val = match subcommand {
                 ActionSubcommand::Move { x, y } => serde_json::json!({ "Move": [x, y] }),
                 ActionSubcommand::Attack { entity } => serde_json::json!({ "Attack": entity }),
                 ActionSubcommand::Stop => serde_json::json!("Stop"),
                 ActionSubcommand::Skill { index, x, y } => serde_json::json!({
                     "Skill": { "index": index, "point": [x, y] }
                 }),
-                ActionSubcommand::SkillLevelUp { index } => serde_json::json!({ "SkillLevelUp": index }),
+                ActionSubcommand::SkillLevelUp { index } => {
+                    serde_json::json!({ "SkillLevelUp": index })
+                }
             };
-            let p = if let Some(eid) = cli.entity_id {
-                serde_json::json!({ "entity_id": eid, "action": val })
-            } else {
-                val
-            };
+            let p = serde_json::json!({ "entity_id": entity_id, "action": val });
             ("action".to_string(), p)
         }
         Commands::Pause | Commands::Unpause => {
