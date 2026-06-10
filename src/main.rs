@@ -56,6 +56,10 @@ fn main() {
             log_plugin,
             PluginCore,
             PluginChampions,
+            PluginServer {
+                ws_port: args.ws_port,
+            },
+            PluginAgentObserver,
         ));
     } else {
         app.add_plugins((

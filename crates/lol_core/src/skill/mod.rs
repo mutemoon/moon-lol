@@ -147,7 +147,8 @@ pub struct CoolDown {
     pub duration: f32,
 }
 
-#[derive(Component)]
+#[derive(Component, Reflect)]
+#[reflect(Component)]
 pub struct SkillPoints(pub u32);
 
 impl Default for SkillPoints {

@@ -44,15 +44,5 @@
                 ),
             },
         ),
-        4294967187: (
-            components: {
-                "lol_core::skill_script::SkillScriptStep": (
-                    frame: 60,
-                    command: Action(Attack(4294967186)),
-                ),
-                "lol_core::skill_script::SkillScriptSource": (4294967185),
-                "lol_core::skill_script::SkillScriptTarget": (4294967186),
-            },
-        ),
     },
 )
