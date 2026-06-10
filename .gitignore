@@ -23,4 +23,4 @@ artifacts
 
 packages/lol/lol_bg.wasm
 
-*.local.json
+*.local.*
