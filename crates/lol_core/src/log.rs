@@ -11,10 +11,6 @@ use tracing::field::{Field, Visit};
 /// 全局 SQLite 连接，用于在 tracing Layer 中写入日志
 static LOG_DB: Mutex<Option<Connection>> = Mutex::new(None);
 
-/// 存储 db 文件绝对路径的 Bevy Resource
-#[derive(Resource, Clone)]
-pub struct LogDbPath(pub PathBuf);
-
 #[derive(Serialize, Clone, Debug)]
 pub struct StructuredLog {
     pub timestamp: u64,
@@ -135,8 +131,40 @@ impl<S: tracing::Subscriber> Layer<S> for StructuredLogLayer {
     }
 }
 
-/// 初始化 SQLite 日志数据库并返回 Bevy LogPlugin + db 路径
-pub fn create_log_plugin() -> (bevy::log::LogPlugin, PathBuf) {
+struct FilteredLayer<L> {
+    inner: L,
+    headless: bool,
+}
+
+impl<S: tracing::Subscriber, L: Layer<S>> Layer<S> for FilteredLayer<L> {
+    fn on_event(
+        &self,
+        event: &Event<'_>,
+        ctx: bevy::log::tracing_subscriber::layer::Context<'_, S>,
+    ) {
+        if self.headless {
+            let mut visitor = StructuredLogVisitor {
+                message: String::new(),
+                entity_id: None,
+                entity_name: None,
+                category: None,
+            };
+            event.record(&mut visitor);
+            let message = if visitor.message.is_empty() {
+                event.metadata().name()
+            } else {
+                &visitor.message
+            };
+            if message.contains("Could not find an asset loader") {
+                return;
+            }
+        }
+        self.inner.on_event(event, ctx);
+    }
+}
+
+/// 初始化 SQLite 日志数据库并返回 Bevy LogPlugin
+pub fn create_log_plugin() -> bevy::log::LogPlugin {
     let db_path = {
         let base = std::env::var("HOME")
             .map(PathBuf::from)
@@ -188,12 +216,17 @@ pub fn create_log_plugin() -> (bevy::log::LogPlugin, PathBuf) {
                 .with_thread_names(false);
 
             let combined = format_layer.and_then(StructuredLogLayer);
-            Some(Box::new(combined))
+            let headless = std::env::args().any(|arg| arg == "--headless");
+            let filtered = FilteredLayer {
+                inner: combined,
+                headless,
+            };
+            Some(Box::new(filtered))
         },
         ..Default::default()
     };
 
-    (plugin, db_path)
+    plugin
 }
 
 #[derive(Clone, Copy, Debug, Serialize)]
@@ -224,10 +257,7 @@ impl Plugin for PluginLog {
     }
 }
 
-fn on_command_log(
-    event: On<CommandLog>,
-    q_name: Query<Option<&Name>>,
-) {
+fn on_command_log(event: On<CommandLog>, q_name: Query<Option<&Name>>) {
     let log_event = event.event();
     let entity = log_event.entity;
     let name = q_name

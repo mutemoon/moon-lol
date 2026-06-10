@@ -1,0 +1,52 @@
+(
+    resources: {},
+    entities: {
+        4294967185: (
+            components: {
+                "bevy_transform::components::transform::Transform": (
+                    translation: (1981.0, 0.0, 11441.0),
+                    rotation: (0.0, 0.0, 0.0, 1.0),
+                    scale: (1.0, 1.0, 1.0),
+                ),
+                "lol_champions::riven::Riven": (),
+                "lol_core::team::Team": Order,
+                "lol_base::character::ConfigCharacterRecord": (
+                    character_record: Path("characters/riven/config.ron"),
+                ),
+                "lol_base::character::ConfigSkin": (
+                    skin: Path("characters/riven/skins/skin0.ron"),
+                ),
+            },
+        ),
+        4294967186: (
+            components: {
+                "bevy_transform::components::transform::Transform": (
+                    translation: (3318.0, 38.0, 12875.0),
+                    rotation: (0.0, 0.0, 0.0, 1.0),
+                    scale: (1.0, 1.0, 1.0),
+                ),
+                "lol_core::team::Team": Chaos,
+                "lol_core::life::Health": (
+                    value: 6000.0,
+                    max: 6000.0,
+                ),
+                "lol_base::character::ConfigCharacterRecord": (
+                    character_record: Path("characters/fiora/config.ron"),
+                ),
+                "lol_base::character::ConfigSkin": (
+                    skin: Path("characters/fiora/skins/skin0.ron"),
+                ),
+            },
+        ),
+        4294967187: (
+            components: {
+                "lol_core::skill_script::SkillScriptStep": (
+                    frame: 60,
+                    command: Action(Attack(4294967186)),
+                ),
+                "lol_core::skill_script::SkillScriptSource": (4294967185),
+                "lol_core::skill_script::SkillScriptTarget": (4294967186),
+            },
+        ),
+    },
+)

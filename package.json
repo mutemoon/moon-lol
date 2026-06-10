@@ -14,7 +14,7 @@
     "wasm:bindgen": "wasm-bindgen --out-name lol --out-dir packages/lol --target web target/wasm32-unknown-unknown/release/examples/lol.wasm",
     "wasm:win": "pnpm wasm && pnpm wasm:bindgen",
     "watch": "cargo watch -- cargo run --example",
-    "watch:run": "cargo watch -- cargo run"
+    "watch:run": "cargo watch -- cargo run --"
   },
   "devDependencies": {
     "@gltf-transform/cli": "^4.3.0",

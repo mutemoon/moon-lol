@@ -95,7 +95,7 @@ impl ChampionTestHarness {
             file_path: workspace_root.join("assets").to_string_lossy().to_string(),
             ..Default::default()
         };
-        let (log_plugin, _) = create_log_plugin();
+        let log_plugin = create_log_plugin();
         match mode {
             HarnessMode::Headless => {
                 app.add_plugins((

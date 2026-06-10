@@ -5,20 +5,28 @@ use crate::game::FixedFrameCount;
 use crate::life::Death;
 use crate::skill::SkillPoints;
 
-#[derive(Component, Clone, Default, Reflect)]
+#[derive(Component, Debug, Clone, Reflect)]
 #[reflect(Component)]
-#[require(SkillScriptCursor)]
-pub struct SkillScript {
-    pub steps: Vec<SkillScriptStep>,
-}
+#[relationship(relationship_target = SkillScriptTargets)]
+pub struct SkillScriptTarget(pub Entity);
 
-impl SkillScript {
-    pub fn new(steps: Vec<SkillScriptStep>) -> Self {
-        Self { steps }
-    }
-}
+#[derive(Component, Debug, Clone, Reflect)]
+#[relationship_target(relationship = SkillScriptTarget, linked_spawn)]
+#[reflect(Component)]
+pub struct SkillScriptTargets(Vec<Entity>);
 
-#[derive(Clone, Debug, Reflect)]
+#[derive(Component, Debug, Clone, Reflect)]
+#[reflect(Component)]
+#[relationship(relationship_target = SkillScriptSources)]
+pub struct SkillScriptSource(pub Entity);
+
+#[derive(Component, Debug, Clone, Reflect)]
+#[relationship_target(relationship = SkillScriptSource, linked_spawn)]
+#[reflect(Component)]
+pub struct SkillScriptSources(Vec<Entity>);
+
+#[derive(Component, Clone, Debug, Reflect)]
+#[reflect(Component)]
 pub struct SkillScriptStep {
     pub frame: u32,
     pub command: SkillScriptCommand,
@@ -48,53 +56,61 @@ pub enum SkillScriptCommand {
 
 #[derive(Component, Default, Reflect)]
 #[reflect(Component)]
-pub struct SkillScriptCursor(pub usize);
+pub struct SkillScriptStepExecuted;
 
 #[derive(Default)]
 pub struct PluginSkillScript;
 
 impl Plugin for PluginSkillScript {
     fn build(&self, app: &mut App) {
-        app.add_systems(FixedUpdate, run_skill_script);
+        app.add_systems(FixedUpdate, run_skill_script_steps);
     }
 }
 
-pub fn run_skill_script(
+pub fn run_skill_script_steps(
     mut commands: Commands,
     frame: Option<Res<FixedFrameCount>>,
-    mut q_actor: Query<
+    q_steps: Query<
         (
             Entity,
-            &SkillScript,
-            &mut SkillScriptCursor,
-            Option<&mut SkillPoints>,
+            &SkillScriptStep,
+            &SkillScriptSource,
+            Option<&SkillScriptTarget>,
         ),
-        Without<Death>,
+        Without<SkillScriptStepExecuted>,
     >,
+    mut q_actor: Query<Option<&mut SkillPoints>, Without<Death>>,
 ) {
     let Some(frame) = frame else {
         return;
     };
 
-    let Ok((actor, script, mut cursor, mut skill_points)) = q_actor.single_mut() else {
-        return;
-    };
-
-    while let Some(step) = script.steps.get(cursor.0) {
+    for (step_entity, step, source, target) in q_steps.iter() {
         if step.frame > frame.0 {
-            break;
+            continue;
         }
+        commands.entity(step_entity).insert(SkillScriptStepExecuted);
 
+        let actor = source.0;
         info!(
-            "[SkillScript] frame={} actor={:?} step={:?}",
-            frame.0, actor, step
+            "[SkillScriptStep] frame={} actor={:?} step={:?} target={:?}",
+            frame.0, actor, step, target
         );
 
+        let Ok(mut skill_points) = q_actor.get_mut(actor) else {
+            continue;
+        };
         match &step.command {
             SkillScriptCommand::Action(action) => {
+                let mut action = action.clone();
+                if let Some(target) = target {
+                    if let Action::Attack(ref mut entity) = action {
+                        *entity = target.0;
+                    }
+                }
                 commands.trigger(CommandAction {
                     entity: actor,
-                    action: action.clone(),
+                    action,
                 });
             }
             SkillScriptCommand::SetSkillPoints(value) => {
@@ -103,7 +119,5 @@ pub fn run_skill_script(
                 }
             }
         }
-
-        cursor.0 += 1;
     }
 }

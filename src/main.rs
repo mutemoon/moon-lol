@@ -4,7 +4,7 @@ use lol_agent::PluginAgentObserver;
 use lol_champions::PluginChampions;
 use lol_core::PluginCore;
 use lol_core::game::GameScenes;
-use lol_core::log::{LogDbPath, create_log_plugin};
+use lol_core::log::create_log_plugin;
 use lol_debug::PluginDebug;
 use lol_render::PluginRender;
 use lol_server::PluginServer;
@@ -23,14 +23,16 @@ struct Args {
 
     #[arg(long)]
     scene: Option<String>,
+
+    #[arg(long)]
+    headless: bool,
 }
 
 fn main() {
     let args = Args::parse();
-    let (log_plugin, log_db_path) = create_log_plugin();
+    let log_plugin = create_log_plugin();
 
     let mut app = App::new();
-    app.insert_resource(LogDbPath(log_db_path));
 
     // Register user_games custom asset source for absolute home dir loading
     let home = std::env::var("USERPROFILE")
@@ -48,25 +50,36 @@ fn main() {
         ),
     );
 
-    app.add_plugins((
-        DefaultPlugins.build().set(log_plugin).set(WindowPlugin {
-            primary_window: Some(Window {
-                title: "classic 1v1 fiora".to_string(),
-                resolution: (300, 300).into(),
-                position: WindowPosition::At((0, 1000).into()),
+    if args.headless {
+        app.add_plugins((
+            MinimalPlugins,
+            AssetPlugin::default(),
+            bevy::world_serialization::WorldSerializationPlugin,
+            log_plugin,
+            PluginCore,
+            PluginChampions,
+        ));
+    } else {
+        app.add_plugins((
+            DefaultPlugins.build().set(log_plugin).set(WindowPlugin {
+                primary_window: Some(Window {
+                    title: "classic 1v1 fiora".to_string(),
+                    resolution: (300, 300).into(),
+                    position: WindowPosition::At((0, 1000).into()),
+                    ..default()
+                }),
                 ..default()
             }),
-            ..default()
-        }),
-        PluginCore,
-        PluginRender,
-        PluginChampions,
-        PluginServer {
-            ws_port: args.ws_port,
-        },
-        PluginDebug,
-        PluginAgentObserver,
-    ));
+            PluginCore,
+            PluginRender,
+            PluginChampions,
+            PluginServer {
+                ws_port: args.ws_port,
+            },
+            PluginDebug,
+            PluginAgentObserver,
+        ));
+    }
 
     let scene_path = args.scene.unwrap_or_else(|| "games/classic_fiora.ron".to_string());
     app.insert_resource(GameScenes::new(vec![scene_path]))

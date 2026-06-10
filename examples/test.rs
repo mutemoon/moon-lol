@@ -8,7 +8,7 @@ use lol_core::navigation::navigation::NavigationDebug;
 use lol_render::PluginRender;
 
 fn main() {
-    let (log_plugin, _) = create_log_plugin();
+    let log_plugin = create_log_plugin();
     App::new()
         .add_plugins((
             DefaultPlugins.build().set(log_plugin).set(WindowPlugin {
