@@ -9,14 +9,13 @@ use lol_core::base::gold::Gold;
 use lol_core::base::level::Level;
 use lol_core::base::stats::ChampionStats;
 use lol_core::damage::{Armor, Damage};
-use lol_core::entities::champion::{Champion, AgentId};
+use lol_core::entities::champion::{AgentId, Champion};
 use lol_core::entities::minion::Minion;
 use lol_core::lane::Lane;
 use lol_core::life::{Death, Health};
 use lol_core::run::{Run, RunTarget};
 use lol_core::skill::{CoolDown, Skill, SkillPoints, Skills};
 use lol_core::team::Team;
-use lol_render::controller::Controller;
 use lol_server::events::CommandWsRequest;
 use lol_server::protocol::WsResponse;
 use serde_json::{Value, from_value, json, to_value};
@@ -248,8 +247,8 @@ pub fn on_command_ws_request(
     >,
     champion_q: Query<(Entity, &Transform, &Health, &Team), (With<Champion>, Without<Death>)>,
     transforms_q: Query<&Transform>,
-    riven_q: Query<Entity, With<Riven>>,
-    fiora_q: Query<Entity, With<Fiora>>,
+    _riven_q: Query<Entity, With<Riven>>,
+    _fiora_q: Query<Entity, With<Fiora>>,
     agent_id_q: Query<(Entity, &AgentId)>,
 ) {
     let cmd = event.cmd.as_str();

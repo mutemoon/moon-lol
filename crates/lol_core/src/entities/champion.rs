@@ -29,4 +29,3 @@ pub struct PluginChampion;
 impl Plugin for PluginChampion {
     fn build(&self, _app: &mut App) {}
 }
-

@@ -92,7 +92,6 @@ impl WsEvent {
     }
 }
 
-
 impl WsResponse {
     pub fn ok(id: u64) -> Self {
         Self {

@@ -79,7 +79,6 @@ fn fixed_update(
     q_transform: Query<&Transform>,
 ) {
     for (entity, run) in q.iter() {
-
         match run.target {
             RunTarget::Position(position) => {
                 let Ok(transform) = q_transform.get(entity) else {

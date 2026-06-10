@@ -10,10 +10,9 @@ use std::fs;
 use std::path::PathBuf;
 use std::sync::Mutex;
 
+use rig::tool::Tool;
 use state::AppState;
 use tauri::Manager;
-
-use rig::tool::Tool;
 use tools::{BashArgs, BashTool};
 
 #[derive(serde::Serialize, serde::Deserialize, Clone)]

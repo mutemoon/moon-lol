@@ -377,7 +377,10 @@ fn on_event_dead(
             if *target == dead_entity {
                 commands.trigger(CommandLog {
                     entity,
-                    info: format!("{:?} 死亡，导致攻击者 {:?} 移除攻击状态", dead_entity, entity),
+                    info: format!(
+                        "{:?} 死亡，导致攻击者 {:?} 移除攻击状态",
+                        dead_entity, entity
+                    ),
                     category: EnumLogCategory::Attack,
                 });
                 commands.entity(entity).try_remove::<AttackState>();

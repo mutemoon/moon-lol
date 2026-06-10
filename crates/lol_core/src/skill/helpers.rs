@@ -30,11 +30,7 @@ pub fn get_skill_value(
     Some(value)
 }
 
-fn get_named_data_value(
-    skill_object: &Spell,
-    target_name: &str,
-    level: usize,
-) -> Option<f32> {
+fn get_named_data_value(skill_object: &Spell, target_name: &str, level: usize) -> Option<f32> {
     let spell_data = skill_object.spell_data.as_ref()?;
     let data_values = spell_data.data_values.as_ref()?;
     let norm_target = target_name.to_lowercase().replace('_', "");
@@ -51,11 +47,7 @@ fn get_named_data_value(
     None
 }
 
-fn get_effect_value(
-    skill_object: &Spell,
-    effect_index: Option<i32>,
-    level: usize,
-) -> Option<f32> {
+fn get_effect_value(skill_object: &Spell, effect_index: Option<i32>, level: usize) -> Option<f32> {
     let index = effect_index.unwrap_or(1) - 1;
     let spell_data = skill_object.spell_data.as_ref()?;
     let effect_amounts = spell_data.effect_amounts.as_ref()?;
@@ -74,9 +66,7 @@ fn calculate_part(
     match part {
         CalculationPart::CalculationPartEffectValue(CalculationPartEffectValue {
             effect_index,
-        }) => {
-            get_effect_value(skill_object, *effect_index, level).unwrap_or(0.0)
-        }
+        }) => get_effect_value(skill_object, *effect_index, level).unwrap_or(0.0),
         CalculationPart::CalculationPartStatCoefficient(CalculationPartStatCoefficient {
             stat,
             coefficient,
@@ -88,9 +78,7 @@ fn calculate_part(
         }
         CalculationPart::CalculationPartNamedDataValue(CalculationPartNamedDataValue {
             data_value,
-        }) => {
-            get_named_data_value(skill_object, data_value, level).unwrap_or(0.0)
-        }
+        }) => get_named_data_value(skill_object, data_value, level).unwrap_or(0.0),
         CalculationPart::CalculationPartStatSub(CalculationPartStatSub {
             stat, subpart, ..
         }) => {

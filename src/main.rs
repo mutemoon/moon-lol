@@ -38,9 +38,7 @@ fn main() {
     let home = std::env::var("USERPROFILE")
         .or_else(|_| std::env::var("HOME"))
         .unwrap_or_else(|_| ".".to_string());
-    let user_games_path = std::path::Path::new(&home)
-        .join(".moon-lol")
-        .join("games");
+    let user_games_path = std::path::Path::new(&home).join(".moon-lol").join("games");
     let _ = std::fs::create_dir_all(&user_games_path);
     app.register_asset_source(
         "user_games",
@@ -81,8 +79,8 @@ fn main() {
         ));
     }
 
-    let scene_path = args.scene.unwrap_or_else(|| "games/classic_fiora.ron".to_string());
-    app.insert_resource(GameScenes::new(vec![scene_path]))
-        .run();
+    let scene_path = args
+        .scene
+        .unwrap_or_else(|| "games/classic_fiora.ron".to_string());
+    app.insert_resource(GameScenes::new(vec![scene_path])).run();
 }
-

@@ -1,12 +1,13 @@
 use std::collections::HashMap;
+use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::{Arc, Mutex};
-use tokio::sync::{mpsc, oneshot};
+
+use futures_util::{SinkExt, StreamExt};
+use serde::{Deserialize, Serialize};
 use tauri::{AppHandle, Emitter};
-use futures_util::{StreamExt, SinkExt};
+use tokio::sync::{mpsc, oneshot};
 use tokio_tungstenite::connect_async;
 use tokio_tungstenite::tungstenite::protocol::Message;
-use std::sync::atomic::{AtomicU64, Ordering};
-use serde::{Serialize, Deserialize};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct WsRequest {
@@ -43,7 +44,11 @@ pub struct WsSession {
 }
 
 impl WsSession {
-    pub async fn send_cmd(&self, cmd: String, params: serde_json::Value) -> Result<WsResponse, String> {
+    pub async fn send_cmd(
+        &self,
+        cmd: String,
+        params: serde_json::Value,
+    ) -> Result<WsResponse, String> {
         let id = self.next_id.fetch_add(1, Ordering::SeqCst);
 
         let req = WsRequest {
@@ -97,7 +102,9 @@ pub async fn start_ws_client(app: AppHandle, port: u16) -> Result<WsSession, Str
 
     let (mut write, mut read) = stream.split();
     let (tx, mut rx) = mpsc::channel::<Message>(32);
-    let pending = Arc::new(Mutex::new(HashMap::<u64, oneshot::Sender<WsResponse>>::new()));
+    let pending = Arc::new(Mutex::new(
+        HashMap::<u64, oneshot::Sender<WsResponse>>::new(),
+    ));
     let next_id = Arc::new(AtomicU64::new(1));
 
     let pending_clone = pending.clone();
@@ -115,8 +122,12 @@ pub async fn start_ws_client(app: AppHandle, port: u16) -> Result<WsSession, Str
     // 读取循环
     tokio::spawn(async move {
         while let Some(msg_res) = read.next().await {
-            let Ok(msg) = msg_res else { break; };
-            let Message::Text(text) = msg else { continue; };
+            let Ok(msg) = msg_res else {
+                break;
+            };
+            let Message::Text(text) = msg else {
+                continue;
+            };
 
             if let Ok(resp) = serde_json::from_str::<WsResponse>(&text) {
                 if resp.msg_type == "result" {

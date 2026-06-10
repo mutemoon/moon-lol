@@ -1,6 +1,8 @@
 use std::sync::Mutex;
+
+use rusqlite::{params_from_iter, Connection, OpenFlags, ToSql};
 use tauri::State;
-use rusqlite::{Connection, OpenFlags, ToSql, params_from_iter};
+
 use crate::state::AppState;
 
 #[derive(serde::Serialize, serde::Deserialize, Clone)]
@@ -45,11 +47,17 @@ pub fn query_logs(
 ) -> Result<QueryLogsResult, String> {
     let s = state.lock().map_err(|e| e.to_string())?;
     let Some(ref proc) = s.bevy else {
-        return Ok(QueryLogsResult { rows: vec![], total_count: 0 });
+        return Ok(QueryLogsResult {
+            rows: vec![],
+            total_count: 0,
+        });
     };
 
     if !proc.log_db_path.exists() {
-        return Ok(QueryLogsResult { rows: vec![], total_count: 0 });
+        return Ok(QueryLogsResult {
+            rows: vec![],
+            total_count: 0,
+        });
     }
 
     let conn = Connection::open_with_flags(
@@ -91,7 +99,11 @@ pub fn query_logs(
     // 1. 查询符合过滤条件的总记录数
     let sql_count = format!("SELECT COUNT(*) {}", sql_base);
     let total_count: i64 = conn
-        .query_row(&sql_count, params_from_iter(params.iter().map(|p| p.as_ref())), |r| r.get(0))
+        .query_row(
+            &sql_count,
+            params_from_iter(params.iter().map(|p| p.as_ref())),
+            |r| r.get(0),
+        )
         .map_err(|e| e.to_string())?;
 
     // 2. 如果 offset < 0，自动计算为最后一页
@@ -111,32 +123,36 @@ pub fn query_logs(
 
     let mut stmt = conn.prepare(&sql_data).map_err(|e| e.to_string())?;
     let rows = stmt
-        .query_map(params_from_iter(data_params.iter().map(|p| p.as_ref())), |row| {
-            Ok(LogRow {
-                id: row.get(0)?,
-                timestamp: row.get(1)?,
-                level: row.get(2)?,
-                file: row.get(3)?,
-                line: row.get(4)?,
-                entity_id: row.get(5)?,
-                entity_name: row.get(6)?,
-                category: row.get(7)?,
-                message: row.get(8)?,
-            })
-        })
+        .query_map(
+            params_from_iter(data_params.iter().map(|p| p.as_ref())),
+            |row| {
+                Ok(LogRow {
+                    id: row.get(0)?,
+                    timestamp: row.get(1)?,
+                    level: row.get(2)?,
+                    file: row.get(3)?,
+                    line: row.get(4)?,
+                    entity_id: row.get(5)?,
+                    entity_name: row.get(6)?,
+                    category: row.get(7)?,
+                    message: row.get(8)?,
+                })
+            },
+        )
         .map_err(|e| e.to_string())?;
 
     let mut result = Vec::new();
     for row in rows {
         result.push(row.map_err(|e| e.to_string())?);
     }
-    Ok(QueryLogsResult { rows: result, total_count })
+    Ok(QueryLogsResult {
+        rows: result,
+        total_count,
+    })
 }
 
 #[tauri::command]
-pub fn query_log_entities(
-    state: State<'_, Mutex<AppState>>,
-) -> Result<Vec<EntityOption>, String> {
+pub fn query_log_entities(state: State<'_, Mutex<AppState>>) -> Result<Vec<EntityOption>, String> {
     let s = state.lock().map_err(|e| e.to_string())?;
     let Some(ref proc) = s.bevy else {
         return Ok(vec![]);
@@ -209,8 +225,7 @@ pub fn clear_logs(state: State<'_, Mutex<AppState>>) -> Result<(), String> {
     if !proc.log_db_path.exists() {
         return Ok(());
     }
-    let conn = Connection::open(&proc.log_db_path)
-        .map_err(|e| e.to_string())?;
+    let conn = Connection::open(&proc.log_db_path).map_err(|e| e.to_string())?;
     conn.execute("DELETE FROM logs", [])
         .map_err(|e| e.to_string())?;
     Ok(())

@@ -87,4 +87,3 @@ fn on_command_action(trigger: On<CommandAction>, mut commands: Commands) {
         }
     }
 }
-

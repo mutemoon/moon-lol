@@ -23,4 +23,3 @@ impl Plugin for PluginServer {
         });
     }
 }
-

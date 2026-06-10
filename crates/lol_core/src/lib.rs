@@ -52,6 +52,7 @@ use entities::turret::PluginTurret;
 use game::PluginGame;
 use life::PluginLife;
 use lifetime::PluginLifetime;
+use log::PluginLog;
 use map::PluginMap;
 use missile::PluginMissile;
 use movement::PluginMovement;
@@ -60,7 +61,6 @@ use rotate::PluginRotate;
 use run::PluginRun;
 use skill::PluginSkill;
 use skill_script::PluginSkillScript;
-use log::PluginLog;
 
 plugin_group! {
     pub struct PluginCore {

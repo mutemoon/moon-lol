@@ -94,11 +94,7 @@ pub fn start_game(
 }
 
 /// Dev mode: use `cargo run` to handle all DLL/PATH automatically.
-fn start_dev(
-    root: &std::path::Path,
-    port: u16,
-    config: &GameConfig,
-) -> Result<Child, String> {
+fn start_dev(root: &std::path::Path, port: u16, config: &GameConfig) -> Result<Child, String> {
     println!(
         "[tauri] Dev: cargo run -- --ws-port {} --mode {} --champion {}",
         port, config.mode, config.champion
@@ -119,7 +115,8 @@ fn start_dev(
         .arg(&config.champion);
 
     if let Some(ref scene) = config.scene_name {
-        cmd.arg("--scene").arg(format!("user_games://{}.ron", scene));
+        cmd.arg("--scene")
+            .arg(format!("user_games://{}.ron", scene));
     }
 
     cmd.env("RUST_LOG", &rust_log)
@@ -170,7 +167,8 @@ fn start_release(
         .arg(&config.champion);
 
     if let Some(ref scene) = config.scene_name {
-        cmd.arg("--scene").arg(format!("user_games://{}.ron", scene));
+        cmd.arg("--scene")
+            .arg(format!("user_games://{}.ron", scene));
     }
 
     cmd.env("RUST_LOG", &rust_log)
@@ -193,4 +191,3 @@ pub fn stop_game(state: &Mutex<AppState>) -> Result<(), String> {
 
     Ok(())
 }
-
