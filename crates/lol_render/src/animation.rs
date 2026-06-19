@@ -48,7 +48,9 @@ fn on_command_animation_play(
     let event = trigger.event();
     let entity = trigger.event_target();
 
-    let mut animation_state = query.get_mut(entity).unwrap();
+    let Ok(mut animation_state) = query.get_mut(entity) else {
+        return;
+    };
 
     animation_state
         .update(event.hash.clone())

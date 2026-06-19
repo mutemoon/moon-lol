@@ -17,6 +17,10 @@ impl Plugin for PluginController {
     }
 }
 
+#[derive(Component, Reflect, Default)]
+#[reflect(Component, Default)]
+pub struct SelfPlayer;
+
 #[derive(Component, Reflect)]
 #[reflect(Component, Default)]
 pub struct Controller {

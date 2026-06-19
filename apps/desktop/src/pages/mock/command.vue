@@ -3,6 +3,7 @@ import { ref } from "vue";
 import { invoke } from "@tauri-apps/api/core";
 import { Button } from "../../components/ui/button";
 import { Badge } from "../../components/ui/badge";
+import { TerminalIcon, Trash2Icon, RefreshCwIcon, ChevronRightIcon } from "@lucide/vue";
 
 // 定义预设指令
 interface PresetCmd {
@@ -117,44 +118,39 @@ function clearConsole() {
 </script>
 
 <template>
-  <div class="bg-bg-deep flex h-full flex-col gap-4 overflow-hidden p-6 font-sans">
+  <div class="bg-background flex h-full flex-col gap-4 overflow-hidden p-6 font-sans">
     <!-- Header -->
     <div
-      class="bg-bg-surface border-border-subtle relative flex shrink-0 items-center justify-between overflow-hidden rounded-lg border px-5 py-3 shadow-[0_4px_12px_rgba(0,0,0,0.3)]"
+      class="bg-card border-border relative flex shrink-0 items-center justify-between overflow-hidden rounded-lg border px-5 py-3 shadow-sm"
     >
-      <!-- 金色发光边框效果 -->
+      <!-- Gradient Border Line -->
       <div
-        class="from-gold-muted via-gold-default to-gold-bright absolute top-0 left-0 h-[3px] w-full bg-gradient-to-r"
+        class="from-primary/40 via-primary to-primary/80 absolute top-0 left-0 h-1 w-full bg-gradient-to-r"
       ></div>
 
       <div class="flex items-center gap-3">
         <div
-          class="bg-gold-dimmer/10 border-gold-dimmer/30 flex h-10 w-10 items-center justify-center rounded-lg border shadow-[0_0_15px_rgba(212,175,92,0.1)]"
+          class="bg-primary/10 border-primary/30 flex h-10 w-10 items-center justify-center rounded-lg border"
         >
-          <!-- 终端 Icon -->
-          <svg class="text-gold-bright h-5.5 w-5.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-            />
-          </svg>
+          <TerminalIcon class="text-primary size-5" />
         </div>
         <div>
-          <h1 class="text-text-bright text-base font-bold tracking-wide">BashTool 命令行测试床</h1>
-          <p class="text-text-muted text-[11px]">Command Mock Bench & Execution Sandbox</p>
+          <h1 class="text-foreground text-base font-bold tracking-wide">Bash 命令行调试工具</h1>
+          <p class="text-muted-foreground text-[11px]">Direct BashTool Sandbox & Command-line Bed</p>
         </div>
       </div>
 
       <div class="flex items-center gap-2">
+        <Badge variant="outline" class="border-primary/20 text-primary bg-primary/5 px-2.5 py-1">
+          当前环境: sandboxed
+        </Badge>
         <router-link to="/debug">
           <Button
             variant="outline"
             size="sm"
-            class="border-border-subtle text-text-muted hover:text-text-bright hover:border-gold-muted h-8 cursor-pointer rounded px-3.5 text-xs transition-all duration-300"
+            class="border-border text-muted-foreground hover:text-foreground hover:border-primary/40 h-8 cursor-pointer rounded px-3 text-xs transition-all"
           >
-            返回调试页 (Back to Debug)
+            返回调试页
           </Button>
         </router-link>
       </div>
@@ -162,104 +158,70 @@ function clearConsole() {
 
     <!-- Main Content Area -->
     <div class="flex min-h-0 flex-1 gap-5 overflow-hidden">
-      <!-- LEFT PANEL: Preset Library -->
-      <div class="flex min-h-0 w-80 shrink-0 flex-col gap-4 overflow-y-auto">
-        <!-- 核心安全策略卡片 -->
-        <div class="bg-bg-surface border-border-subtle relative flex flex-col gap-2.5 rounded-lg border p-4 shadow-sm">
-          <span
-            class="text-text-muted border-border-subtle/30 border-b pb-1.5 text-[10px] font-bold tracking-wider uppercase"
-          >
-            ⚠️ 安全准则 (Security Policy)
-          </span>
-          <p class="text-text-bright text-[11px] leading-relaxed">
-            此命令行沙盒直接对接后端的 <code class="text-gold-bright bg-black/40 font-mono px-1 py-0.5 rounded">BashTool</code>。由于安全策略限制，目前只允许执行以
-            <code class="text-gold-bright font-bold">lol_cli</code> 开头的指令。
-          </p>
-        </div>
+      <!-- LEFT PANEL: Preset Commands list -->
+      <div class="flex min-h-0 w-80 flex-col gap-4">
+        <div class="bg-card border-border flex flex-1 flex-col overflow-hidden rounded-lg border shadow-sm">
+          <div class="border-border border-b px-4 py-3.5">
+            <h2 class="text-foreground text-xs font-bold uppercase tracking-wider">内置预设指令</h2>
+          </div>
 
-        <!-- 预设快速测试 -->
-        <div class="bg-bg-surface border-border-subtle flex flex-1 flex-col gap-3 rounded-lg border p-4 shadow-sm">
-          <span
-            class="text-text-muted border-border-subtle/30 border-b pb-1.5 text-[10px] font-bold tracking-wider uppercase"
-          >
-            💡 预设测试指令 (Presets)
-          </span>
-
-          <div class="flex flex-1 flex-col gap-3 overflow-y-auto pr-1">
-            <div
-              v-for="preset in presets"
-              :key="preset.name"
-              class="border-border-subtle/30 bg-bg-deep/50 hover:border-gold-dimmer/40 hover:bg-gold-dimmer/5 group flex flex-col gap-1.5 rounded-md border p-3 transition-all duration-300"
-            >
-              <div class="flex items-center justify-between">
-                <span class="text-text-bright text-[11px] font-semibold tracking-wide">{{ preset.name }}</span>
-                <div class="flex items-center gap-1.5 opacity-60 transition-opacity group-hover:opacity-100">
+          <ScrollArea class="flex-1 w-full">
+            <div class="flex flex-col gap-2 p-3 pr-4">
+              <div
+                v-for="p in presets"
+                :key="p.name"
+                class="border-border bg-muted/10 hover:border-primary/40 hover:bg-primary/5 group flex flex-col gap-1.5 rounded-md border p-3 transition-colors cursor-pointer"
+                @click="fillCommand(p.cmd)"
+              >
+                <div class="flex items-center justify-between">
+                  <span class="text-foreground text-xs font-bold group-hover:text-primary transition-colors">
+                    {{ p.name }}
+                  </span>
                   <button
-                    class="text-text-muted hover:text-gold-bright text-[10px] cursor-pointer font-medium"
-                    title="填入输入框"
-                    @click="fillCommand(preset.cmd)"
+                    class="text-muted-foreground hover:text-primary text-[10px] cursor-pointer font-medium flex items-center"
+                    @click.stop="executePreset(p.cmd)"
                   >
-                    填入
-                  </button>
-                  <span class="text-text-muted/40 text-[9px]">•</span>
-                  <button
-                    class="text-gold-bright hover:text-gold-glow text-[10px] cursor-pointer font-semibold"
-                    title="一键直接测试"
-                    @click="executePreset(preset.cmd)"
-                  >
-                    执行
+                    <span>直接运行</span>
+                    <ChevronRightIcon class="size-3 ml-0.5" />
                   </button>
                 </div>
+                <p class="text-muted-foreground text-[10px] leading-relaxed">
+                  {{ p.description }}
+                </p>
+                <code class="bg-muted/80 text-foreground border border-border block overflow-x-auto rounded px-2 py-1 text-[10px] font-normal font-mono select-all">
+                  {{ p.cmd }}
+                </code>
               </div>
-              <p class="text-text-muted text-[10px] leading-relaxed">{{ preset.description }}</p>
-              <code
-                class="bg-black/50 text-gold-bright/90 border-border-subtle/10 block overflow-x-auto rounded border px-2 py-1 text-[10px] font-normal leading-normal select-all font-mono"
-              >
-                {{ preset.cmd }}
-              </code>
             </div>
-          </div>
+          </ScrollArea>
         </div>
       </div>
 
-      <!-- RIGHT PANEL: Command Input & Terminal Console Output -->
+      <!-- RIGHT PANEL: Command Box & Terminal Console -->
       <div class="flex min-h-0 flex-1 flex-col gap-4">
-        <!-- 1. Command Input Panel -->
-        <div class="bg-bg-surface border-border-subtle flex flex-col gap-3 rounded-lg border p-4 shadow-sm">
-          <span
-            class="text-text-muted border-border-subtle/30 border-b pb-1.5 text-[10px] font-bold tracking-wider uppercase"
-          >
-            💻 命令控制台输入 (Console Input)
-          </span>
-
-          <div class="flex gap-3">
-            <div class="bg-bg-deep border-border-subtle focus-within:border-gold-default flex flex-1 items-center rounded-md border px-3 transition-all">
-              <span class="text-gold-dimmer font-mono text-xs mr-2 select-none">$</span>
+        <!-- 1. Custom Command input card -->
+        <div class="bg-card border-border rounded-lg border p-4 shadow-sm flex flex-col gap-3">
+          <label class="text-muted-foreground text-[10px] font-bold uppercase tracking-wide">自定义指令执行</label>
+          <div class="flex items-center gap-3">
+            <div class="bg-muted/40 border-border focus-within:border-primary flex flex-1 items-center rounded-md border px-3 transition-colors">
+              <span class="text-muted-foreground font-mono text-xs select-none mr-1.5">$</span>
               <input
                 v-model="currentCmd"
-                placeholder="在此输入 lol_cli 命令..."
-                class="text-text-bright placeholder:text-text-muted/30 h-10 w-full bg-transparent font-mono text-xs focus:outline-none"
-                :disabled="isExecuting"
+                type="text"
+                placeholder="lol_cli observe -e <ENTITY_ID>"
+                class="text-foreground font-mono placeholder:text-muted-foreground/30 h-8 flex-1 bg-transparent text-xs outline-none"
                 @keyup.enter="runCommand"
               />
             </div>
-
+            
             <Button
-              size="sm"
-              class="text-gold-bright bg-bg-surface hover:text-gold-glow hover:shadow-glow-gold relative cursor-pointer overflow-hidden rounded-[4px] border border-transparent px-6 font-semibold transition-all active:scale-[0.98] h-10 shrink-0"
+              class="relative h-8 px-4 cursor-pointer font-semibold rounded"
               :disabled="isExecuting || !currentCmd.trim()"
               @click="runCommand"
             >
-              <!-- 边框金色渐变 -->
-              <div
-                class="pointer-events-none absolute inset-0 rounded-[4px] border border-transparent [mask-composite:exclude] [-webkit-mask-composite:xor] [background:linear-gradient(135deg,var(--color-gold-dimmer),var(--color-gold-default),var(--color-gold-bright))_border-box] [mask:linear-gradient(#fff_0_0)_content-box,linear-gradient(#fff_0_0)]"
-              ></div>
               <span class="relative z-1 flex items-center gap-1.5 text-xs">
-                <svg v-if="isExecuting" class="h-3 w-3 animate-spin text-gold-bright" fill="none" viewBox="0 0 24 24">
-                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                {{ isExecuting ? "正在执行..." : "运行命令" }}
+                <RefreshCwIcon v-if="isExecuting" class="h-3.5 w-3.5 animate-spin mr-1 text-primary-foreground" />
+                <span>{{ isExecuting ? "正在执行..." : "运行命令" }}</span>
               </span>
             </Button>
           </div>
@@ -267,41 +229,39 @@ function clearConsole() {
 
         <!-- 2. Terminal Output Viewer -->
         <div
-          class="bg-bg-surface border-border-subtle relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border shadow-lg"
+          class="bg-card border-border relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border shadow-lg"
         >
-          <!-- Terminal Header (模仿黑客终端) -->
+          <!-- Terminal Header -->
           <div
-            class="border-border-subtle flex shrink-0 items-center justify-between border-b bg-[#0d0b0f] px-4 py-2.5"
+            class="border-border flex shrink-0 items-center justify-between border-b bg-muted/40 px-4 py-2.5"
           >
             <div class="flex items-center gap-2">
-              <div class="flex items-center gap-1.5">
-                <span class="h-2.5 w-2.5 rounded-full bg-red-500/80"></span>
-                <span class="h-2.5 w-2.5 rounded-full bg-yellow-500/80"></span>
-                <span class="h-2.5 w-2.5 rounded-full bg-green-500/80"></span>
+              <div class="flex items-center gap-1">
+                <span class="h-2 w-2 rounded-full bg-red-500/80"></span>
+                <span class="h-2 w-2 rounded-full bg-yellow-500/80"></span>
+                <span class="h-2 w-2 rounded-full bg-green-500/80"></span>
               </div>
-              <span class="text-text-bright font-mono text-[10px] ml-2 tracking-wider">
+              <span class="text-foreground font-mono text-[10px] ml-2 tracking-wider">
                 bash_output_console.log
               </span>
             </div>
 
             <button
               v-if="historyLogs.length > 0"
-              class="text-text-muted hover:text-text-bright text-[10px] cursor-pointer flex items-center gap-1 transition-colors"
+              class="text-muted-foreground hover:text-foreground text-[10px] cursor-pointer flex items-center gap-1 transition-colors"
               @click="clearConsole"
             >
-              🧹 清空控制台
+              <Trash2Icon class="size-3.5" />
+              <span>清空控制台</span>
             </button>
           </div>
 
           <!-- Console Terminal Body -->
-          <div class="min-h-0 flex-1 overflow-y-auto bg-[#070509] p-5 font-mono text-[11px] text-zinc-300">
+          <div class="min-h-0 flex-1 overflow-y-auto bg-muted/10 p-5 font-mono text-[11px] text-foreground">
             <!-- Loading Indicator -->
             <div v-if="isExecuting && historyLogs.length === 0" class="flex flex-col items-center justify-center py-16 gap-3">
-              <svg class="h-6 w-6 animate-spin text-gold-bright" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              <span class="text-text-muted animate-pulse">正在向 Tauri 唤起 Bash 命令行测试，请稍候...</span>
+              <RefreshCwIcon class="h-6 w-6 animate-spin text-primary" />
+              <span class="text-muted-foreground animate-pulse">正在向 Tauri 唤起 Bash 命令行测试，请稍候...</span>
             </div>
 
             <!-- Empty State -->
@@ -309,16 +269,9 @@ function clearConsole() {
               v-else-if="historyLogs.length === 0"
               class="flex h-full flex-col items-center justify-center py-16 text-center"
             >
-              <svg class="text-text-muted/20 h-10 w-10 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="1.5"
-                  d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"
-                />
-              </svg>
-              <h3 class="text-text-bright text-xs font-semibold mb-1">暂无控制台运行记录</h3>
-              <p class="text-text-muted/60 max-w-[280px] text-[10px] leading-relaxed">
+              <TerminalIcon class="text-muted-foreground/30 h-10 w-10 mb-3" />
+              <h3 class="text-foreground text-xs font-semibold mb-1">暂无控制台运行记录</h3>
+              <p class="text-muted-foreground/60 max-w-[280px] text-[10px] leading-relaxed">
                 在上方输入或在左侧选择一则预设命令，点击「运行命令」即可启动对 Bash 终端的连接测试。
               </p>
             </div>
@@ -328,21 +281,21 @@ function clearConsole() {
               <div
                 v-for="log in historyLogs"
                 :key="log.id"
-                class="border-border-subtle/15 bg-black/40 overflow-hidden rounded-md border"
+                class="border-border bg-card/60 overflow-hidden rounded-md border"
               >
                 <!-- Log Header -->
-                <div class="bg-black/60 border-border-subtle/10 flex items-center justify-between border-b px-3.5 py-2">
+                <div class="bg-muted/40 border-border flex items-center justify-between border-b px-3.5 py-2">
                   <div class="flex items-center gap-2">
-                    <span class="text-text-muted text-[10px] select-none">[{{ log.timestamp }}]</span>
-                    <span class="text-gold-bright font-bold select-all">$ {{ log.command }}</span>
+                    <span class="text-muted-foreground text-[10px] select-none">[{{ log.timestamp }}]</span>
+                    <span class="text-primary font-bold select-all">$ {{ log.command }}</span>
                   </div>
                   
                   <Badge
                     variant="outline"
                     :class="[
                       log.status === 'success'
-                        ? 'border-green/20 text-green bg-green/5'
-                        : 'border-red/20 text-red bg-red/5',
+                        ? 'border-green-500/20 text-green-500 bg-green-500/5'
+                        : 'border-destructive/20 text-destructive bg-destructive/5',
                       'px-1.5 py-0 text-[8px] scale-90'
                     ]"
                   >
@@ -351,8 +304,8 @@ function clearConsole() {
                 </div>
 
                 <!-- Log Output Panel -->
-                <div class="overflow-x-auto p-3.5 bg-black/25">
-                  <pre class="text-text-bright/95 text-[10.5px] leading-relaxed font-normal whitespace-pre-wrap select-all">{{ log.output }}</pre>
+                <div class="overflow-x-auto p-3.5 bg-muted/10">
+                  <pre class="text-foreground/95 text-[10.5px] leading-relaxed font-normal whitespace-pre-wrap select-all">{{ log.output }}</pre>
                 </div>
               </div>
             </div>
@@ -364,35 +317,18 @@ function clearConsole() {
 </template>
 
 <style scoped>
-.bg-bg-deep {
-  background-color: #070509;
+/* Scrollbar styles inside command view */
+::-webkit-scrollbar {
+  width: 4px;
 }
-.bg-bg-surface {
-  background-color: #120e16;
+::-webkit-scrollbar-track {
+  background: transparent;
 }
-.border-border-subtle {
-  border-color: rgba(212, 175, 92, 0.12);
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 2px;
 }
-.text-text-bright {
-  color: #f1ede4;
-}
-.text-text-muted {
-  color: #a39e93;
-}
-.text-gold-bright {
-  color: #e8c97a;
-}
-.text-gold-glow {
-  color: #ffebbc;
-  text-shadow: 0 0 10px rgba(232, 201, 122, 0.4);
-}
-.text-gold-dimmer {
-  color: #d4af5c;
-}
-.text-green {
-  color: #4ade80;
-}
-.text-red {
-  color: #f87171;
+::-webkit-scrollbar-thumb:hover {
+  background: var(--muted-foreground);
 }
 </style>

@@ -46,28 +46,19 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
 
-  /* Neutral palette (desktop custom) */
-  --color-bg-deep: #070608;
-  --color-bg-surface: #121013;
-  --color-bg-elevated: #1c1820;
-  --color-bg-raised: #292231;
-  --color-border-subtle: #352c3d;
-  --color-border-default: #443a50;
-  --color-text-muted: #685e5a;
-  --color-text-default: #9a9282;
-  --color-text-bright: #dbd6c5;
-
-  /* Gold accent (desktop custom) */
-  --color-gold-dimmer: #785b28;
-  --color-gold-muted: #927136;
-  --color-gold-default: #b99147;
-  --color-gold-bright: #d4af5c;
-  --color-gold-glow: #e8c97a;
-
   /* Semantic (desktop custom) */
-  --color-red: #c84a4a;
-  --color-green: #4a9e5a;
-  --color-blue: #4a7ec4;
+  --color-red: var(--destructive);
+  --color-green: oklch(0.627 0.265 149.213);
+  --color-blue: oklch(0.627 0.194 256.367);
+
+  /* Target custom colors */
+  --color-background-alt: var(--background-alt);
+  --color-surface-hover: var(--surface-hover);
+  --color-foreground-subtle: var(--foreground-subtle);
+  --color-foreground-subtlest: var(--foreground-subtlest);
+  --color-tag: var(--tag);
+  --color-border-hover: var(--border-hover);
+  --color-selected: var(--selected);
 
   /* Typography (desktop custom) */
   --font-display: "Noto Serif SC", "Noto Serif", Georgia, serif;
@@ -75,10 +66,9 @@
   --font-mono: "Cascadia Code", "JetBrains Mono", "Fira Code", Consolas, monospace;
 
   /* Shadows (desktop custom) */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4), 0 0 1px rgba(120, 91, 40, 0.15);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5), 0 0 2px rgba(120, 91, 40, 0.2);
-  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.6), 0 0 4px rgba(120, 91, 40, 0.15);
-  --shadow-glow-gold: 0 0 12px rgba(201, 170, 113, 0.25), 0 0 4px rgba(201, 170, 113, 0.4);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.6);
 }
 
 :root {
@@ -105,7 +95,7 @@
   --chart-3: oklch(0.439 0 0);
   --chart-4: oklch(0.371 0 0);
   --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
+  --radius: 0.3rem;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: oklch(0.205 0 0);
@@ -114,6 +104,15 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+
+  /* Target colors - light mode */
+  --background-alt: oklch(0.96 0 0);
+  --surface-hover: oklch(0 0 0 / 5%);
+  --foreground-subtle: oklch(0.45 0 0);
+  --foreground-subtlest: oklch(0.65 0 0);
+  --tag: oklch(0 0 0 / 5%);
+  --border-hover: oklch(0.85 0 0);
+  --selected: oklch(0.92 0 0);
 }
 
 .dark {
@@ -148,28 +147,15 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
-}
 
-html,
-body {
-  height: 100%;
-  overflow: hidden;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-body {
-  font-family: "Noto Sans SC", "Noto Sans", "Segoe UI", Arial, sans-serif;
-  font-size: 14px;
-  color: #9a9282;
-  background: #070608;
-  line-height: 1.5;
-}
-
-/* Selection */
-::selection {
-  background: rgba(185, 145, 71, 0.3);
-  color: #dbd6c5;
+  /* Target colors - dark mode */
+  --background-alt: oklch(0.12 0 0);
+  --surface-hover: oklch(1 0 0 / 6%);
+  --foreground-subtle: oklch(0.708 0 0);
+  --foreground-subtlest: oklch(0.5 0 0);
+  --tag: oklch(1 0 0 / 6%);
+  --border-hover: oklch(1 0 0 / 15%);
+  --selected: oklch(0.24 0 0);
 }
 
 /* Scrollbar */
@@ -180,30 +166,11 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #443a50;
+  background: var(--border);
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #927136;
-}
-
-/* Focus ring */
-:focus-visible {
-  outline: 1px solid #b99147;
-  outline-offset: 2px;
-}
-
-/* Button reset */
-button {
-  font-family: inherit;
-  cursor: pointer;
-  border: none;
-  background: none;
-}
-
-/* Select reset */
-select {
-  font-family: inherit;
+  background: var(--muted-foreground);
 }
 
 @layer base {
@@ -213,9 +180,5 @@ select {
   body {
     @apply bg-background text-foreground;
     @apply font-sans;
-  }
-  button:not(:disabled),
-  [role="button"]:not(:disabled) {
-    cursor: pointer;
   }
 }

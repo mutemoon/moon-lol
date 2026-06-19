@@ -12,3 +12,4 @@ trigger: always_on
 6. event 命名规范为 CommandXXX 或者 EventXXX，Command 为供外部用于调用的命令，可以降低耦合，Event 为供外部监听的事件
 7. despawn_recursive 已经被废弃了，改用 despawn，despawn 已经是递归销毁了
 8. get_single 已经废弃了，改为 single() 了
+9. 不需要 register_type ，derive Reflect 时已经注册好了

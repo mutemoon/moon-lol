@@ -28,7 +28,7 @@ function toggleLevel(level: string) {
 
 <template>
   <!-- 搜索与多维过滤 -->
-  <div class="border-border-subtle flex shrink-0 flex-col gap-2 border-b bg-[rgba(0,0,0,0.15)] px-3.5 py-2">
+  <div class="border-border flex shrink-0 flex-col gap-2 border-b bg-muted/20 px-3.5 py-2">
     <div class="flex items-center justify-between gap-2">
       <!-- 级别过滤 -->
       <div class="flex gap-1">
@@ -40,14 +40,12 @@ function toggleLevel(level: string) {
           :class="[
             selectedLevels.includes(lvl)
               ? {
-                  info: 'text-text-bright border-[rgba(154,146,130,0.3)] bg-[rgba(154,146,130,0.15)] hover:bg-[rgba(154,146,130,0.2)]',
-                  warn: 'border-[rgba(251,191,36,0.3)] bg-[rgba(251,191,36,0.1)] text-[#fbbf24] hover:bg-[rgba(251,191,36,0.15)]',
-                  error:
-                    'border-[rgba(248,113,113,0.3)] bg-[rgba(248,113,113,0.1)] text-[#f87171] hover:bg-[rgba(248,113,113,0.15)]',
-                  debug:
-                    'border-[rgba(56,189,248,0.3)] bg-[rgba(56,189,248,0.1)] text-[#38bdf8] hover:bg-[rgba(56,189,248,0.15)]',
+                  info: 'text-foreground border-border/40 bg-muted/40 hover:bg-muted/60',
+                  warn: 'border-yellow-500/20 bg-yellow-500/10 text-yellow-600 hover:bg-yellow-500/15',
+                  error: 'border-destructive/20 bg-destructive/10 text-destructive hover:bg-destructive/15',
+                  debug: 'border-blue-500/20 bg-blue-500/10 text-blue-500 hover:bg-blue-500/15',
                 }[lvl]
-              : 'text-text-muted border-transparent bg-[rgba(255,255,255,0.02)] hover:bg-[rgba(255,255,255,0.05)]',
+              : 'text-muted-foreground border-transparent bg-muted/20 hover:bg-muted/30',
           ]"
           @click="toggleLevel(lvl)"
         >
@@ -63,18 +61,18 @@ function toggleLevel(level: string) {
     <!-- 搜索过滤栏 -->
     <div class="flex items-center gap-3">
       <div
-        class="bg-bg-deep border-gold-dimmer relative flex flex-1 items-center rounded border px-2 py-1 shadow-[inset_0_2px_4px_rgba(0,0,0,0.4)]"
+        class="bg-muted/40 border-border relative flex flex-1 items-center rounded border px-2 py-1 shadow-sm"
       >
-        <SearchIcon class="text-text-muted mr-1.5 h-3.5 w-3.5 shrink-0 opacity-50" />
+        <SearchIcon class="text-muted-foreground mr-1.5 h-3.5 w-3.5 shrink-0 opacity-50" />
         <input
           v-model="searchText"
           type="text"
           placeholder="输入检索词进行模糊或正则匹配（双击日志行可直接复制）..."
-          class="text-text-bright placeholder:text-text-muted w-full bg-transparent text-xs outline-none"
+          class="text-foreground placeholder:text-muted-foreground w-full bg-transparent text-xs outline-none"
         />
         <button
           v-if="searchText"
-          class="text-text-muted hover:text-text-bright absolute right-2 text-sm font-semibold transition-colors duration-100"
+          class="text-muted-foreground hover:text-foreground absolute right-2 text-sm font-semibold transition-colors duration-100"
           @click="searchText = ''"
           title="清空检索词"
         >
@@ -90,15 +88,15 @@ function toggleLevel(level: string) {
           class="inline-flex h-7 cursor-pointer items-center gap-1 rounded border px-2.5 py-1 text-[10px] whitespace-nowrap transition-all duration-200"
           :class="
             regexEnabled
-              ? 'text-gold-bright border-gold-dimmer bg-[rgba(185,145,71,0.06)] hover:bg-[rgba(185,145,71,0.1)]'
-              : 'text-text-muted bg-bg-deep border-border-subtle hover:text-text-default hover:border-gold-muted'
+              ? 'text-primary border-primary bg-primary/10 hover:bg-primary/20'
+              : 'text-muted-foreground bg-muted/40 border-border hover:text-foreground hover:border-primary/40'
           "
           @click="regexEnabled = !regexEnabled"
           title="开启后支持使用 JS 正则语法检索日志"
         >
           <span
             class="h-1 w-1 rounded-full"
-            :class="regexEnabled ? 'bg-gold-default shadow-[0_0_6px_rgba(185,145,71,0.5)]' : 'bg-border-default'"
+            :class="regexEnabled ? 'bg-primary' : 'bg-muted-foreground/30'"
           ></span>
           正则匹配
         </Button>
@@ -110,15 +108,15 @@ function toggleLevel(level: string) {
           class="inline-flex h-7 cursor-pointer items-center gap-1 rounded border px-2.5 py-1 text-[10px] whitespace-nowrap transition-all duration-200"
           :class="
             autoRefresh
-              ? 'text-gold-bright border-gold-dimmer bg-[rgba(185,145,71,0.06)] hover:bg-[rgba(185,145,71,0.1)]'
-              : 'text-text-muted bg-bg-deep border-border-subtle hover:text-text-default hover:border-gold-muted'
+              ? 'text-primary border-primary bg-primary/10 hover:bg-primary/20'
+              : 'text-muted-foreground bg-muted/40 border-border hover:text-foreground hover:border-primary/40'
           "
           @click="autoRefresh = !autoRefresh"
           title="每秒自动从 SQLite 数据库轮询最新日志"
         >
           <span
             class="h-1 w-1 rounded-full"
-            :class="autoRefresh ? 'bg-gold-default shadow-[0_0_6px_rgba(185,145,71,0.5)]' : 'bg-border-default'"
+            :class="autoRefresh ? 'bg-primary' : 'bg-muted-foreground/30'"
           ></span>
           自动刷新
         </Button>
@@ -130,15 +128,15 @@ function toggleLevel(level: string) {
           class="inline-flex h-7 cursor-pointer items-center gap-1 rounded border px-2.5 py-1 text-[10px] whitespace-nowrap transition-all duration-200"
           :class="
             autoScroll
-              ? 'text-gold-bright border-gold-dimmer bg-[rgba(185,145,71,0.06)] hover:bg-[rgba(185,145,71,0.1)]'
-              : 'text-text-muted bg-bg-deep border-border-subtle hover:text-text-default hover:border-gold-muted'
+              ? 'text-primary border-primary bg-primary/10 hover:bg-primary/20'
+              : 'text-muted-foreground bg-muted/40 border-border hover:text-foreground hover:border-primary/40'
           "
           @click="autoScroll = !autoScroll"
           title="新日志产生时自动滚动到底部"
         >
           <span
             class="h-1 w-1 rounded-full"
-            :class="autoScroll ? 'bg-gold-default shadow-[0_0_6px_rgba(185,145,71,0.5)]' : 'bg-border-default'"
+            :class="autoScroll ? 'bg-primary' : 'bg-muted-foreground/30'"
           ></span>
           自动滚动
         </Button>

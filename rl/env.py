@@ -1,13 +1,9 @@
 import gymnasium as gym
 from gymnasium import spaces
 import numpy as np
-import subprocess
-import json
-import asyncio
-import websockets
 import time
-import threading
-import atexit
+
+from sdk import MoonLoLClient
 
 class MoonLoLEnv(gym.Env):
     metadata = {"render_modes": []}
@@ -16,17 +12,7 @@ class MoonLoLEnv(gym.Env):
         super().__init__()
         self.port = port
         self.max_steps = max_steps
-        self.proc = None
-        self.websocket = None
-        self.req_id = 1
-        
-        # Register atexit to ensure Bevy is killed when Python exits
-        atexit.register(self.close)
-        
-        # Start a background thread with its own asyncio event loop
-        self.loop = asyncio.new_event_loop()
-        self.loop_thread = threading.Thread(target=self._start_background_loop, daemon=True)
-        self.loop_thread.start()
+        self.client = MoonLoLClient(port=port)
         
         # 11 continuous features:
         # dx, dy, distance, myself_hp_ratio, fiora_hp_ratio, q_cd, w_cd, e_cd, r_cd, is_windup, is_cooldown
@@ -52,116 +38,18 @@ class MoonLoLEnv(gym.Env):
         self.myself_hp = 630.0
         self.myself_pos = [0.0, 0.0]
         self.current_step = 0
-        self.controlled_entity_id = None
         self.has_seen_fiora = False
 
-    def _start_background_loop(self):
-        asyncio.set_event_loop(self.loop)
-        self.loop.run_forever()
-
-    def _run_async(self, coro):
-        future = asyncio.run_coroutine_threadsafe(coro, self.loop)
-        return future.result()
-
-    async def _close_conn_async(self):
-        if self.websocket:
-            try:
-                await self.websocket.close()
-            except Exception:
-                pass
-            self.websocket = None
-
-    def _close_conn(self):
-        self._run_async(self._close_conn_async())
-
     def close(self):
-        self._close_conn()
-        if self.proc:
-            try:
-                self.proc.terminate()
-                self.proc.wait(timeout=2.0)
-            except Exception:
-                try:
-                    self.proc.kill()
-                except Exception:
-                    pass
-            self.proc = None
-
-    async def _send_and_recv_async(self, req):
-        if not self.websocket:
-            raise ConnectionError("Not connected")
-        await self.websocket.send(json.dumps(req))
-        resp = await self.websocket.recv()
-        return json.loads(resp)
-
-    def _send_and_recv(self, req):
-        return self._run_async(self._send_and_recv_async(req))
-
-    async def _connect_and_wait_async(self):
-        uri = f"ws://127.0.0.1:{self.port}"
-        websocket = None
-        for attempt in range(1, 30):
-            try:
-                websocket = await websockets.connect(uri)
-                break
-            except Exception:
-                await asyncio.sleep(0.5)
-        if not websocket:
-            raise ConnectionError(f"Failed to connect to Bevy server on port {self.port}")
-        
-        self.websocket = websocket
-        
-        # Wait for champion to spawn
-        for attempt in range(1, 30):
-            req = {"id": self.req_id, "cmd": "get_observe", "params": {}}
-            self.req_id += 1
-            await websocket.send(json.dumps(req))
-            resp = json.loads(await websocket.recv())
-            if resp.get("ok"):
-                obs_data = resp.get("data")
-                myself = obs_data.get("myself", {})
-                level = myself.get("level", 1)
-                if level == 18:
-                    # We are Riven by default!
-                    self.controlled_entity_id = None
-                else:
-                    # We are Fiora, so Riven is in enemy_heroes
-                    enemies = obs_data.get("enemy_heroes", [])
-                    if len(enemies) > 0:
-                        self.controlled_entity_id = enemies[0].get("entity")
-                break
-            await asyncio.sleep(0.5)
-
-    def _connect_and_wait(self):
-        self._run_async(self._connect_and_wait_async())
+        self.client.close()
 
     def _level_up_skills(self):
-        # Q W E R upgrades
         upgrades = [0]*5 + [1]*5 + [2]*5 + [3]*3
         for idx in upgrades:
-            params = {
-                "action": {"SkillLevelUp": idx}
-            }
-            if self.controlled_entity_id is not None:
-                params["entity_id"] = self.controlled_entity_id
-            req = {
-                "id": self.req_id,
-                "cmd": "action",
-                "params": params
-            }
-            self.req_id += 1
-            self._send_and_recv(req)
+            self.client.level_up_skill(idx)
 
     def _get_obs_data(self):
-        params = {}
-        if self.controlled_entity_id is not None:
-            params["entity_id"] = self.controlled_entity_id
-        req = {"id": self.req_id, "cmd": "get_observe", "params": params}
-        self.req_id += 1
-        resp = self._send_and_recv(req)
-        if resp.get("ok"):
-            return resp.get("data")
-        return None
+        return self.client.get_observe()
 
     def _get_obs_vector(self, obs_data):
         if not obs_data:
@@ -181,22 +69,22 @@ class MoonLoLEnv(gym.Env):
         for s in skills:
             idx = s.get("index")
             cd = s.get("cooldown_remaining")
-            if cd is not None:
-                if idx == 0: q_cd = cd
-                elif idx == 1: w_cd = cd
-                elif idx == 2: e_cd = cd
-                elif idx == 3: r_cd = cd
+            if cd is None:
+                continue
+            if idx == 0:
+                q_cd = cd
+            elif idx == 1:
+                w_cd = cd
+            elif idx == 2:
+                e_cd = cd
+            elif idx == 3:
+                r_cd = cd
                 
         # Attack state
-        attack_state = myself.get("attack_state")
-        is_windup = 0.0
-        is_cooldown = 0.0
-        if attack_state is not None:
-            status = attack_state.get("status", {})
-            if "Windup" in status:
-                is_windup = 1.0
-            elif "Cooldown" in status:
-                is_cooldown = 1.0
+        attack_state = myself.get("attack_state") or {}
+        status = attack_state.get("status", {})
+        is_windup = 1.0 if "Windup" in status else 0.0
+        is_cooldown = 1.0 if "Cooldown" in status else 0.0
                 
         # Enemy Fiora
         fiora_id = None
@@ -241,20 +129,7 @@ class MoonLoLEnv(gym.Env):
 
     def reset(self, seed=None, options=None):
         super().reset(seed=seed)
-        self.close()
-        self.controlled_entity_id = None
-        self.has_seen_fiora = False
-        
-        # Start Bevy
-        self.proc = subprocess.Popen([
-            "cargo", "run", "--",
-            "--headless",
-            "--scene", "games/headless-env-kill-fiora.ron",
-            "--ws-port", str(self.port)
-        ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        
-        # Connect & Level Up
-        self._connect_and_wait()
+        self.client.start()
         self._level_up_skills()
         
         self.current_step = 0
@@ -267,35 +142,19 @@ class MoonLoLEnv(gym.Env):
             return
             
         if action_idx == 0:
-            action_payload = {"Move": self.fiora_pos}
+            self.client.move(self.fiora_pos)
         elif action_idx == 1:
-            action_payload = {"Attack": self.fiora_id}
+            self.client.attack(self.fiora_id)
         elif action_idx == 2:
-            action_payload = {"Skill": {"index": 0, "point": self.fiora_pos}}
+            self.client.cast_skill(0, self.fiora_pos)
         elif action_idx == 3:
-            action_payload = {"Skill": {"index": 1, "point": self.myself_pos}}
+            self.client.cast_skill(1, self.myself_pos)
         elif action_idx == 4:
-            action_payload = {"Skill": {"index": 2, "point": self.fiora_pos}}
+            self.client.cast_skill(2, self.fiora_pos)
         elif action_idx == 5:
-            action_payload = {"Skill": {"index": 3, "point": self.fiora_pos}}
+            self.client.cast_skill(3, self.fiora_pos)
         elif action_idx == 6:
-            action_payload = "Stop"
-        else:
-            return
-            
-        params = {
-            "action": action_payload
-        }
-        if self.controlled_entity_id is not None:
-            params["entity_id"] = self.controlled_entity_id
-            
-        req = {
-            "id": self.req_id,
-            "cmd": "action",
-            "params": params
-        }
-        self.req_id += 1
-        self._send_and_recv(req)
+            self.client.stop()
 
     def step(self, action):
         prev_fiora_hp = self.fiora_hp

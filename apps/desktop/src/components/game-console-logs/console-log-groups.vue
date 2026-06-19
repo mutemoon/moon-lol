@@ -60,42 +60,42 @@ function getShortFile(path?: string) {
   <div class="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto p-1.5">
     <div
       v-if="logsByEntity.length === 0"
-      class="text-text-muted flex h-full flex-col items-center justify-center gap-2 text-xs"
+      class="text-muted-foreground flex h-full flex-col items-center justify-center gap-2 text-xs"
     >
-      <SearchIcon class="h-5 w-5 animate-pulse text-text-muted" />
+      <SearchIcon class="h-5 w-5 animate-pulse text-muted-foreground" />
       <span>暂无匹配的实体分组日志...</span>
     </div>
 
     <div
       v-for="group in logsByEntity"
       :key="group.id"
-      class="border-border-subtle hover:border-border-default rounded border bg-[rgba(255,255,255,0.02)] transition-all duration-200"
+      class="border-border rounded border bg-muted/10 transition-colors"
     >
       <div
-        class="flex cursor-pointer items-center justify-between bg-[rgba(255,255,255,0.03)] p-2 select-none hover:bg-[rgba(255,255,255,0.06)]"
+        class="flex cursor-pointer items-center justify-between bg-muted/20 p-2 select-none hover:bg-muted/40"
         @click="toggleGroup(group.id)"
       >
         <div class="flex items-center gap-2">
           <ChevronRightIcon
-            class="text-text-muted h-3.5 w-3.5 transition-transform duration-200"
+            class="text-muted-foreground h-3.5 w-3.5 transition-transform duration-200"
             :class="{ 'rotate-90': !collapsedGroups.includes(group.id as number) }"
           />
-          <span class="text-text-bright text-xs font-semibold flex items-center">
+          <span class="text-foreground text-xs font-semibold flex items-center">
             <template v-if="group.name">
               <Badge
                 variant="outline"
-                class="text-gold-bright border-gold-dimmer mr-1.5 bg-[rgba(185,145,71,0.08)] px-2 py-0.5 text-xs font-semibold inline-flex items-center gap-1"
+                class="text-primary border-primary/30 mr-1.5 bg-primary/10 px-2 py-0.5 text-xs font-semibold inline-flex items-center gap-1"
               >
-                <BotIcon class="h-2.5 w-2.5 shrink-0 text-gold-bright" /> 实体 {{ group.id }}
+                <BotIcon class="h-2.5 w-2.5 shrink-0 text-primary" /> 实体 {{ group.id }}
               </Badge>
-              <span class="text-text-bright text-xs font-semibold">{{ group.name }}</span>
+              <span class="text-foreground text-xs font-semibold">{{ group.name }}</span>
             </template>
             <template v-else>💻 系统与常规运行日志</template>
           </span>
         </div>
         <Badge
           variant="secondary"
-          class="text-text-muted inline-flex h-4 items-center rounded-xl border-none bg-[rgba(0,0,0,0.2)] px-1.5 py-0.5 text-[10px] hover:bg-[rgba(0,0,0,0.3)]"
+          class="text-muted-foreground inline-flex h-4 items-center rounded-xl border-none bg-muted px-1.5 py-0.5 text-[10px] hover:bg-muted/80"
         >
           {{ group.logs.length }} 个事件
         </Badge>
@@ -103,33 +103,33 @@ function getShortFile(path?: string) {
 
       <div
         v-show="!collapsedGroups.includes(group.id as number)"
-        class="border-border-subtle border-t bg-[rgba(0,0,0,0.15)] py-1"
+        class="border-border border-t bg-muted/10 py-1"
       >
         <div
           v-for="entry in group.logs"
           :key="entry.id"
-          class="flex cursor-pointer items-center gap-2 border-b border-[rgba(255,255,255,0.01)] py-0.5 pr-3.5 pl-7 whitespace-nowrap transition-colors duration-100 hover:bg-[rgba(255,255,255,0.02)] active:bg-[rgba(185,145,71,0.06)]"
+          class="flex cursor-pointer items-center gap-2 border-b border-border/20 py-0.5 pr-3.5 pl-7 whitespace-nowrap transition-colors duration-100 hover:bg-muted/20 active:bg-primary/10"
           :class="
             {
-              info: 'text-text-default',
-              warn: 'bg-[rgba(251,191,36,0.02)] text-[#fbbf24]',
-              error: 'bg-[rgba(248,113,113,0.03)] text-[#f87171]',
-              debug: 'text-[#38bdf8]',
+              info: 'text-foreground/80',
+              warn: 'bg-yellow-500/5 text-yellow-600',
+              error: 'bg-destructive/5 text-destructive',
+              debug: 'text-blue-500',
             }[entry.level]
           "
           @dblclick="$emit('copy', entry.message)"
           title="双击可直接复制日志内容"
         >
-          <span class="border-border-default min-w-20 shrink-0 text-[10px]">{{ formatTime(entry.timestamp) }}</span>
+          <span class="border-border min-w-20 shrink-0 text-[10px]">{{ formatTime(entry.timestamp) }}</span>
           <Badge
             variant="outline"
             class="inline-flex h-4 min-w-9 shrink-0 items-center justify-center border-none px-1 py-0 text-center text-[9px] font-bold uppercase"
             :class="
               {
-                info: 'text-text-muted bg-[rgba(154,146,130,0.08)]',
-                warn: 'bg-[rgba(251,191,36,0.12)] text-[#fbbf24]',
-                error: 'bg-[rgba(248,113,113,0.15)] text-[#f87171]',
-                debug: 'bg-[rgba(56,189,248,0.12)] text-[#38bdf8]',
+                info: 'text-muted-foreground bg-muted/40',
+                warn: 'bg-yellow-500/10 text-yellow-600',
+                error: 'bg-destructive/10 text-destructive',
+                debug: 'bg-blue-500/10 text-blue-500',
               }[entry.level]
             "
           >
@@ -138,13 +138,13 @@ function getShortFile(path?: string) {
           <Badge
             v-if="entry.category"
             variant="outline"
-            class="text-text-muted border-border-subtle inline-flex h-4 shrink-0 items-center justify-center bg-[rgba(255,255,255,0.04)] px-1.5 py-0 text-[9px] gap-1"
+            class="text-muted-foreground border-border inline-flex h-4 shrink-0 items-center justify-center bg-muted/30 px-1.5 py-0 text-[9px] gap-1"
           >
-            <FolderIcon class="h-2.5 w-2.5 shrink-0 text-text-muted" />
+            <FolderIcon class="h-2.5 w-2.5 shrink-0 text-muted-foreground" />
             {{ entry.category }}
           </Badge>
-          <span class="flex-1 overflow-hidden text-ellipsis">{{ entry.message }}</span>
-          <span v-if="entry.file" class="border-border-default ml-2 shrink-0 text-[10px]" :title="entry.file">
+          <span class="flex-1 overflow-hidden text-ellipsis text-foreground">{{ entry.message }}</span>
+          <span v-if="entry.file" class="border-border ml-2 shrink-0 text-[10px]" :title="entry.file">
             {{ getShortFile(entry.file) }}:{{ entry.line }}
           </span>
         </div>

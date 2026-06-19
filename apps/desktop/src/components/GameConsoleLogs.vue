@@ -54,7 +54,7 @@ function copyLogMessage(msg: string) {
     <Transition name="fade">
       <div
         v-if="copySuccessMsg"
-        class="bg-gold-default text-bg-deep border-gold-bright pointer-events-none fixed bottom-8 left-1/2 z-50 -translate-x-1/2 rounded-full border px-4 py-2 text-xs font-bold shadow-[0_4px_16px_rgba(0,0,0,0.8),0_0_12px_rgba(185,145,71,0.4)]"
+        class="bg-primary text-primary-foreground border-primary pointer-events-none fixed bottom-8 left-1/2 z-50 -translate-x-1/2 rounded-full border px-4 py-2 text-xs font-bold shadow-md shadow-primary/20"
       >
         <span>✨ {{ copySuccessMsg }}</span>
       </div>

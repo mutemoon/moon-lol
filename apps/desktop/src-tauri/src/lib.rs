@@ -115,6 +115,185 @@ pub struct FrontAgentConfig {
     pub team: String,
     pub prompt: String,
     pub spawn_point: [f32; 2],
+    // Agent 驱动类型："llm" | "rl" | "script"。仅用于前端配置展示与持久化，
+    // 不写入生成的 RON 场景（运行时一律按 LLM 决策处理），避免破坏启动流程。
+    // 向后兼容：旧场景 JSON 无此字段时默认为 "llm"。
+    #[serde(default = "default_agent_type")]
+    pub agent_type: String,
+}
+
+fn default_agent_type() -> String {
+    "llm".to_string()
+}
+
+/// Agent 预设：可复用的"策略大脑"（类型 + Prompt + 可选模型/前言），英雄无关。
+/// 在英雄预设管理页绑定到具体英雄；编排页只选英雄预设，不再直接选 Agent 预设。
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug)]
+pub struct AgentPreset {
+    pub name: String,
+    #[serde(default = "default_agent_type")]
+    pub agent_type: String,
+    #[serde(default)]
+    pub prompt: String,
+    /// 仅 LLM 类型有意义：覆盖全局 preamble 的英雄级前言。
+    #[serde(default)]
+    pub preamble: String,
+    /// 仅 LLM 类型有意义：指定模型名（留空则用全局默认）。
+    #[serde(default)]
+    pub model: String,
+    // 向后兼容：旧 agent_presets.json 可能含 champion 字段，反序列化时忽略（不报错）。
+    #[serde(default, skip_serializing)]
+    pub champion: String,
+}
+
+/// 英雄预设：编排页槽位的唯一选择单元。
+/// 内部绑定具体英雄 + 一个 Agent 预设（大脑）+ 一个出生点预设（坐标）。
+/// 保存场景时，前端展开为具体的 FrontAgentConfig（champion/prompt/spawn_point/agent_type）。
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug)]
+pub struct HeroPreset {
+    pub name: String,
+    pub champion: String,
+    /// 绑定的 Agent 预设名（"大脑"）。为空时展开为默认 LLM + 空 prompt。
+    #[serde(default)]
+    pub agent_preset_name: String,
+    /// 绑定的出生点预设名。为空时展开为默认坐标 [1500, 2000]。
+    #[serde(default)]
+    pub spawn_preset_name: String,
+}
+
+fn hero_presets_path(app: &tauri::AppHandle) -> Result<PathBuf, error::AppError> {
+    Ok(get_config_dir(app)?.join("hero_presets.json"))
+}
+
+fn load_hero_preset_list(app: &tauri::AppHandle) -> Result<Vec<HeroPreset>, error::AppError> {
+    let path = hero_presets_path(app)?;
+    if !path.exists() {
+        return Ok(Vec::new());
+    }
+    let content = fs::read_to_string(&path)?;
+    let presets: Vec<HeroPreset> = serde_json::from_str(&content)
+        .map_err(|e| error::AppError::Generic(format!("英雄预设解析失败: {e}")))?;
+    Ok(presets)
+}
+
+#[tauri::command]
+fn list_hero_presets(app: tauri::AppHandle) -> Result<Vec<HeroPreset>, error::AppError> {
+    load_hero_preset_list(&app)
+}
+
+#[tauri::command]
+fn save_hero_preset(app: tauri::AppHandle, preset: HeroPreset) -> Result<(), error::AppError> {
+    if preset.name.trim().is_empty() {
+        return Err(error::AppError::Generic("英雄预设名称不能为空".to_string()));
+    }
+    let mut presets = load_hero_preset_list(&app)?;
+    if let Some(existing) = presets.iter_mut().find(|p| p.name == preset.name) {
+        *existing = preset; // 同名覆盖
+    } else {
+        presets.push(preset);
+    }
+    let path = hero_presets_path(&app)?;
+    let json = serde_json::to_string_pretty(&presets)
+        .map_err(|e| error::AppError::Generic(format!("JSON 序列化失败: {e}")))?;
+    fs::write(&path, json)?;
+    Ok(())
+}
+
+#[tauri::command]
+fn delete_hero_preset(app: tauri::AppHandle, name: String) -> Result<(), error::AppError> {
+    let mut presets = load_hero_preset_list(&app)?;
+    let before = presets.len();
+    presets.retain(|p| p.name != name);
+    if presets.len() != before {
+        let path = hero_presets_path(&app)?;
+        let json = serde_json::to_string_pretty(&presets)
+            .map_err(|e| error::AppError::Generic(format!("JSON 序列化失败: {e}")))?;
+        fs::write(&path, json)?;
+    }
+    Ok(())
+}
+
+fn agent_presets_path(app: &tauri::AppHandle) -> Result<PathBuf, error::AppError> {
+    Ok(get_config_dir(app)?.join("agent_presets.json"))
+}
+
+fn load_agent_preset_list(app: &tauri::AppHandle) -> Result<Vec<AgentPreset>, error::AppError> {
+    let path = agent_presets_path(app)?;
+    if !path.exists() {
+        return Ok(Vec::new());
+    }
+    let content = fs::read_to_string(&path)?;
+    let presets: Vec<AgentPreset> = serde_json::from_str(&content)
+        .map_err(|e| error::AppError::Generic(format!("Agent 预设解析失败: {e}")))?;
+    Ok(presets)
+}
+
+#[tauri::command]
+fn list_agent_presets(app: tauri::AppHandle) -> Result<Vec<AgentPreset>, error::AppError> {
+    load_agent_preset_list(&app)
+}
+
+#[tauri::command]
+fn save_agent_preset(app: tauri::AppHandle, preset: AgentPreset) -> Result<(), error::AppError> {
+    if preset.name.trim().is_empty() {
+        return Err(error::AppError::Generic(
+            "Agent 预设名称不能为空".to_string(),
+        ));
+    }
+    let mut presets = load_agent_preset_list(&app)?;
+    if let Some(existing) = presets.iter_mut().find(|p| p.name == preset.name) {
+        *existing = preset; // 同名覆盖
+    } else {
+        presets.push(preset);
+    }
+    let path = agent_presets_path(&app)?;
+    let json = serde_json::to_string_pretty(&presets)
+        .map_err(|e| error::AppError::Generic(format!("JSON 序列化失败: {e}")))?;
+    fs::write(&path, json)?;
+    Ok(())
+}
+
+#[tauri::command]
+fn delete_agent_preset(app: tauri::AppHandle, name: String) -> Result<(), error::AppError> {
+    let mut presets = load_agent_preset_list(&app)?;
+    let before = presets.len();
+    presets.retain(|p| p.name != name);
+    if presets.len() != before {
+        let path = agent_presets_path(&app)?;
+        let json = serde_json::to_string_pretty(&presets)
+            .map_err(|e| error::AppError::Generic(format!("JSON 序列化失败: {e}")))?;
+        fs::write(&path, json)?;
+    }
+    Ok(())
+}
+
+/// 出生点预设：可复用的命名坐标，纯前端持久化，无运行时副作用。
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug)]
+pub struct SpawnPreset {
+    pub name: String,
+    pub x: f32,
+    pub z: f32,
+    #[serde(default = "default_team")]
+    pub team: String,
+}
+
+fn default_team() -> String {
+    "Order".to_string()
+}
+
+fn spawn_presets_path(app: &tauri::AppHandle) -> Result<PathBuf, error::AppError> {
+    Ok(get_config_dir(app)?.join("spawn_presets.json"))
+}
+
+fn load_spawn_preset_list(app: &tauri::AppHandle) -> Result<Vec<SpawnPreset>, error::AppError> {
+    let path = spawn_presets_path(app)?;
+    if !path.exists() {
+        return Ok(Vec::new());
+    }
+    let content = fs::read_to_string(&path)?;
+    let presets: Vec<SpawnPreset> = serde_json::from_str(&content)
+        .map_err(|e| error::AppError::Generic(format!("出生点预设解析失败: {e}")))?;
+    Ok(presets)
 }
 
 #[tauri::command]
@@ -182,6 +361,7 @@ fn save_custom_scenario(
         ));
         if idx == 0 {
             ron_content.push_str("                \"lol_render::controller::Controller\": (),\n");
+            ron_content.push_str("                \"lol_render::controller::SelfPlayer\": (),\n");
             ron_content.push_str("                \"lol_render::camera::Focus\": (),\n");
         }
         ron_content.push_str("                \"lol_core::entities::champion::Champion\": (),\n");
@@ -258,6 +438,90 @@ fn list_custom_scenarios(app: tauri::AppHandle) -> Result<Vec<String>, error::Ap
         }
     }
     Ok(scenarios)
+}
+
+#[tauri::command]
+fn list_spawn_presets(app: tauri::AppHandle) -> Result<Vec<SpawnPreset>, error::AppError> {
+    load_spawn_preset_list(&app)
+}
+
+#[tauri::command]
+fn save_spawn_preset(app: tauri::AppHandle, preset: SpawnPreset) -> Result<(), error::AppError> {
+    if preset.name.trim().is_empty() {
+        return Err(error::AppError::Generic(
+            "出生点预设名称不能为空".to_string(),
+        ));
+    }
+    let mut presets = load_spawn_preset_list(&app)?;
+    if let Some(existing) = presets.iter_mut().find(|p| p.name == preset.name) {
+        *existing = preset; // 同名覆盖
+    } else {
+        presets.push(preset);
+    }
+    let path = spawn_presets_path(&app)?;
+    let json = serde_json::to_string_pretty(&presets)
+        .map_err(|e| error::AppError::Generic(format!("JSON 序列化失败: {e}")))?;
+    fs::write(&path, json)?;
+    Ok(())
+}
+
+#[tauri::command]
+fn delete_spawn_preset(app: tauri::AppHandle, name: String) -> Result<(), error::AppError> {
+    let mut presets = load_spawn_preset_list(&app)?;
+    let before = presets.len();
+    presets.retain(|p| p.name != name);
+    if presets.len() != before {
+        let path = spawn_presets_path(&app)?;
+        let json = serde_json::to_string_pretty(&presets)
+            .map_err(|e| error::AppError::Generic(format!("JSON 序列化失败: {e}")))?;
+        fs::write(&path, json)?;
+    }
+    Ok(())
+}
+
+/// 胜利条件按场景独立存储为 `<scene>.win.json`，仅持久化结构，
+/// 不参与游戏运行时评估（评估逻辑尚未接入；当前对局仍以 120s 计时结束）。
+fn win_condition_path(
+    app: &tauri::AppHandle,
+    scene_name: &str,
+) -> Result<PathBuf, error::AppError> {
+    Ok(get_config_dir(app)?
+        .join("games")
+        .join(format!("{}.win.json", scene_name)))
+}
+
+#[tauri::command]
+fn save_scenario_win_condition(
+    app: tauri::AppHandle,
+    scene_name: String,
+    condition: serde_json::Value,
+) -> Result<(), error::AppError> {
+    let path = win_condition_path(&app, &scene_name)?;
+    let dir = path
+        .parent()
+        .ok_or_else(|| error::AppError::Generic("无效路径".to_string()))?;
+    if !dir.exists() {
+        fs::create_dir_all(dir)?;
+    }
+    let json = serde_json::to_string_pretty(&condition)
+        .map_err(|e| error::AppError::Generic(format!("JSON 序列化失败: {e}")))?;
+    fs::write(&path, json)?;
+    Ok(())
+}
+
+#[tauri::command]
+fn load_scenario_win_condition(
+    app: tauri::AppHandle,
+    scene_name: String,
+) -> Result<Option<serde_json::Value>, error::AppError> {
+    let path = win_condition_path(&app, &scene_name)?;
+    if !path.exists() {
+        return Ok(None);
+    }
+    let content = fs::read_to_string(&path)?;
+    let value: serde_json::Value = serde_json::from_str(&content)
+        .map_err(|e| error::AppError::Generic(format!("胜利条件解析失败: {e}")))?;
+    Ok(Some(value))
 }
 
 #[tauri::command]
@@ -396,6 +660,17 @@ pub fn run() {
             delete_custom_scenario,
             list_custom_scenarios,
             load_custom_scenario,
+            list_spawn_presets,
+            save_spawn_preset,
+            delete_spawn_preset,
+            list_agent_presets,
+            save_agent_preset,
+            delete_agent_preset,
+            list_hero_presets,
+            save_hero_preset,
+            delete_hero_preset,
+            save_scenario_win_condition,
+            load_scenario_win_condition,
             log::query_logs,
             log::query_log_entities,
             log::query_log_categories,

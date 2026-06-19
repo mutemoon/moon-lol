@@ -24,3 +24,7 @@ artifacts
 packages/lol/lol_bg.wasm
 
 *.local.*
+
+runs
+agent.pth
+rl/__pycache__

@@ -30,9 +30,23 @@ declare module 'vue-router/auto-routes' {
       Record<never, never>,
       | never
     >,
+    '/agents': RouteRecordInfo<
+      '/agents',
+      '/agents',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
     '/debug': RouteRecordInfo<
       '/debug',
       '/debug',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/heroes': RouteRecordInfo<
+      '/heroes',
+      '/heroes',
       Record<never, never>,
       Record<never, never>,
       | never
@@ -72,6 +86,13 @@ declare module 'vue-router/auto-routes' {
       Record<never, never>,
       | never
     >,
+    '/spawn-presets': RouteRecordInfo<
+      '/spawn-presets',
+      '/spawn-presets',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
   }
 
   /**
@@ -91,9 +112,21 @@ declare module 'vue-router/auto-routes' {
       views:
         | never
     }
+    'src/pages/agents.vue': {
+      routes:
+        | '/agents'
+      views:
+        | never
+    }
     'src/pages/debug.vue': {
       routes:
         | '/debug'
+      views:
+        | never
+    }
+    'src/pages/heroes.vue': {
+      routes:
+        | '/heroes'
       views:
         | never
     }
@@ -124,6 +157,12 @@ declare module 'vue-router/auto-routes' {
     'src/pages/settings.vue': {
       routes:
         | '/settings'
+      views:
+        | never
+    }
+    'src/pages/spawn-presets.vue': {
+      routes:
+        | '/spawn-presets'
       views:
         | never
     }

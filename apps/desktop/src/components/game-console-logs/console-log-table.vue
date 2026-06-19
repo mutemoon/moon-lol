@@ -86,7 +86,7 @@ const columns: ColumnDef<StructuredLog>[] = [
     accessorKey: "timestamp",
     header: "时间",
     cell: ({ row }) =>
-      h("span", { class: "text-[10px] font-mono text-text-muted shrink-0" }, formatTime(row.getValue("timestamp"))),
+      h("span", { class: "text-[10px] font-mono text-muted-foreground shrink-0" }, formatTime(row.getValue("timestamp"))),
   },
   {
     accessorKey: "level",
@@ -99,10 +99,10 @@ const columns: ColumnDef<StructuredLog>[] = [
           variant: "outline",
           class: `min-w-[45px] inline-flex items-center justify-center shrink-0 rounded px-1.5 py-0.5 text-[9px] font-bold uppercase border-none h-4 ${
             {
-              info: "text-text-muted bg-[rgba(154,146,130,0.08)]",
-              warn: "bg-[rgba(251,191,36,0.12)] text-[#fbbf24]",
-              error: "bg-[rgba(248,113,113,0.15)] text-[#f87171]",
-              debug: "bg-[rgba(56,189,248,0.12)] text-[#38bdf8]",
+              info: "text-muted-foreground bg-muted/40",
+              warn: "bg-yellow-500/10 text-yellow-600",
+              error: "bg-destructive/10 text-destructive",
+              debug: "bg-blue-500/10 text-blue-500",
             }[lvl] || ""
           }`,
         },
@@ -122,7 +122,7 @@ const columns: ColumnDef<StructuredLog>[] = [
         {
           variant: "outline",
           class:
-            "text-gold-bright border-gold-dimmer bg-[rgba(185,145,71,0.08)] px-1.5 py-0 text-[9px] font-semibold transition-all duration-200 hover:bg-[rgba(185,145,71,0.2)] hover:shadow-[0_0_6px_rgba(185,145,71,0.2)] cursor-pointer h-4 inline-flex items-center justify-center gap-1",
+            "text-primary border-primary/30 bg-primary/10 px-1.5 py-0 text-[9px] font-semibold transition-colors hover:bg-primary/20 cursor-pointer h-4 inline-flex items-center justify-center gap-1",
           onClick: (e: MouseEvent) => {
             e.stopPropagation();
             if (original.entity_id !== undefined) {
@@ -131,7 +131,7 @@ const columns: ColumnDef<StructuredLog>[] = [
           },
         },
         () => [
-          h(BotIcon, { class: "h-2.5 w-2.5 shrink-0 text-gold-bright" }),
+          h(BotIcon, { class: "h-2.5 w-2.5 shrink-0 text-primary" }),
           h("span", {}, `${original.entity_name} (${original.entity_id})`)
         ]
       );
@@ -148,10 +148,10 @@ const columns: ColumnDef<StructuredLog>[] = [
         {
           variant: "outline",
           class:
-            "text-text-muted border-border-subtle shrink-0 bg-[rgba(255,255,255,0.04)] px-1.5 py-0 text-[9px] h-4 inline-flex items-center justify-center gap-1",
+            "text-muted-foreground border-border shrink-0 bg-muted/30 px-1.5 py-0 text-[9px] h-4 inline-flex items-center justify-center gap-1",
         },
         () => [
-          h(FolderIcon, { class: "h-2.5 w-2.5 shrink-0 text-text-muted" }),
+          h(FolderIcon, { class: "h-2.5 w-2.5 shrink-0 text-muted-foreground" }),
           h("span", {}, val)
         ]
       );
@@ -167,7 +167,7 @@ const columns: ColumnDef<StructuredLog>[] = [
         original.count > 1
           ? h(
               "span",
-              { class: "text-text-muted shrink-0 rounded-md bg-[rgba(255,255,255,0.05)] px-1 py-0 text-[9px]" },
+              { class: "text-muted-foreground shrink-0 rounded-md bg-muted/50 px-1 py-0 text-[9px]" },
               `${original.count}×`,
             )
           : null,
@@ -184,7 +184,7 @@ const columns: ColumnDef<StructuredLog>[] = [
       return h(
         "span",
         {
-          class: "text-text-muted text-[10px] shrink-0 font-mono",
+          class: "text-muted-foreground text-[10px] shrink-0 font-mono",
           title: original.file,
         },
         `${getShortFile(original.file)}:${original.line}`,
@@ -226,18 +226,18 @@ defineExpose({
   <div id="log-list-container" class="relative min-h-0 flex-1 overflow-y-auto">
     <div
       v-if="logs.length === 0"
-      class="text-text-muted flex h-full flex-col items-center justify-center gap-2 py-10 text-xs"
+      class="text-muted-foreground flex h-full flex-col items-center justify-center gap-2 py-10 text-xs"
     >
-      <SearchIcon class="text-text-muted h-5 w-5 animate-pulse" />
+      <SearchIcon class="text-muted-foreground h-5 w-5 animate-pulse" />
       <span>没有匹配当前过滤条件的日志...</span>
     </div>
     <div v-else class="min-w-full">
       <Table>
-        <TableHeader class="bg-bg-elevated border-border-subtle hover:bg-bg-elevated sticky top-0 z-10">
+        <TableHeader class="bg-muted/50 border-border hover:bg-muted/60 sticky top-0 z-10">
           <TableRow
             v-for="headerGroup in table.getHeaderGroups()"
             :key="headerGroup.id"
-            class="border-border-subtle hover:bg-transparent"
+            class="border-border hover:bg-transparent"
           >
             <TableHead
               v-for="header in headerGroup.headers"
@@ -248,7 +248,7 @@ defineExpose({
                 header.id === 'entity' ? 'w-36' : '',
                 header.id === 'category' ? 'w-24' : '',
                 header.id === 'source' ? 'w-44' : '',
-                'text-text-bright border-border-subtle h-8 py-1 text-[11px] font-bold',
+                'text-foreground border-border h-8 py-1 text-[11px] font-bold',
               ]"
             >
               <FlexRender
@@ -263,14 +263,14 @@ defineExpose({
           <TableRow
             v-for="row in table.getRowModel().rows"
             :key="row.id"
-            class="cursor-pointer border-b border-[rgba(255,255,255,0.01)] hover:bg-[rgba(255,255,255,0.02)] active:bg-[rgba(185,145,71,0.06)]"
+            class="cursor-pointer border-b border-border/20 hover:bg-muted/20 active:bg-primary/10"
             :class="
               (
                 {
-                  info: 'text-text-default',
-                  warn: 'bg-[rgba(251,191,36,0.02)] text-[#fbbf24]',
-                  error: 'bg-[rgba(248,113,113,0.03)] text-[#f87171]',
-                  debug: 'text-[#38bdf8]',
+                  info: 'text-foreground/80',
+                  warn: 'bg-yellow-500/5 text-yellow-600',
+                  error: 'bg-destructive/5 text-destructive',
+                  debug: 'text-blue-500',
                 } as Record<string, string>
               )[row.original.level]
             "

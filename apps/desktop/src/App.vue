@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, provide } from "vue";
+import { computed, provide, onMounted } from "vue";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { listen } from "@tauri-apps/api/event";
 import { useRoute, useRouter } from "vue-router";
@@ -7,29 +7,58 @@ import { storeToRefs } from "pinia";
 import { useGameStore } from "./stores/gameStore";
 import { LOG_CONTEXT_KEY } from "./composables/useLogPoller";
 import { Button } from "./components/ui/button";
-import { MinusIcon, SquareIcon, XIcon, TrophyIcon } from "@lucide/vue";
+import { ScrollArea } from "./components/ui/scroll-area";
+import { Badge } from "./components/ui/badge";
+import { useEventListener } from "@vueuse/core";
+import {
+  TrophyIcon,
+  PlusIcon,
+  SettingsIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  TerminalIcon,
+  BotIcon,
+  MapPinIcon,
+  SwordsIcon,
+} from "@lucide/vue";
 import "./style.css";
 
-const win = getCurrentWindow();
+const isTauri = (window as any).__TAURI__ !== undefined;
+const win = isTauri ? getCurrentWindow() : {
+  minimize: () => {},
+  toggleMaximize: () => {},
+  close: () => {}
+};
 const route = useRoute();
 const router = useRouter();
 
 const store = useGameStore();
-const { statsResult, showStatsModal } = storeToRefs(store);
+const { statsResult, showStatsModal, scenariosList, histories, selectedScenario } = storeToRefs(store);
 const { ws } = store;
 
-// Provide the log poller context to all child pages/components
 provide(LOG_CONTEXT_KEY, store.log);
 
-type View = "launcher" | "debug" | "settings" | "mock" | "history";
+type View = "launcher" | "debug" | "settings" | "history" | "agents" | "spawnPresets" | "heroes";
 
 const currentView = computed<View>(() => {
   if (route.path === "/debug") return "debug";
   if (route.path === "/settings") return "settings";
   if (route.path === "/history") return "history";
-  if (route.path.startsWith("/mock")) return "mock";
+  if (route.path === "/agents") return "agents";
+  if (route.path === "/spawn-presets") return "spawnPresets";
+  if (route.path === "/heroes") return "heroes";
   return "launcher";
 });
+
+const viewTitles: Record<View, string> = {
+  launcher: "对局编排",
+  debug: "实时调试控制台",
+  history: "对局回放",
+  settings: "设置",
+  agents: "Agent 预设管理",
+  spawnPresets: "出生点预设管理",
+  heroes: "英雄预设管理",
+};
 
 interface AgentFinishedPayload {
   minion_kills: number;
@@ -54,127 +83,266 @@ function closeWindow() {
   win.close();
 }
 
-async function onNavMouseDown(e: MouseEvent) {
-  const target = e.target as HTMLElement;
-  if (target.closest("button, select, input, a")) return;
-  try {
-    await win.startDragging();
-  } catch {
-    /* ignore */
+useEventListener("keydown", (e) => {
+  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "n") {
+    e.preventDefault();
+    handleNewMatch();
   }
+});
+
+function handleNewMatch() {
+  selectedScenario.value = "";
+  router.push("/");
 }
+
+function handleSelectScenario(s: string) {
+  selectedScenario.value = s;
+  router.push("/");
+}
+
+function handleSelectHistory(datetime: string) {
+  router.push(`/history?datetime=${datetime}`);
+}
+
+onMounted(() => {
+  store.loadScenariosList();
+  store.loadHistoriesList();
+});
 </script>
 
 <template>
-  <div class="relative flex h-screen flex-col overflow-hidden">
-    <!-- Navigation -->
-    <nav
-      class="border-border-subtle bg-bg-deep/85 relative z-10 flex h-12 shrink-0 items-center gap-2 border-b px-6 backdrop-blur-2xl"
-      @mousedown="onNavMouseDown"
-    >
-      <div class="mr-8 flex shrink-0 items-center gap-2.5">
-        <span class="font-display text-gold-bright text-base font-bold tracking-widest">MoonLOL</span>
+  <div class="relative flex h-screen w-screen flex-row overflow-hidden bg-background-alt text-foreground font-sans">
+    <!-- 1. Left Sidebar -->
+    <aside class="flex w-[264px] shrink-0 flex-col border-r border-border bg-background-alt select-none">
+      <!-- Top Window Control & Navigation -->
+      <div class="flex h-12 shrink-0 items-center justify-between px-4" data-tauri-drag-region>
+        <!-- macOS Style Window Buttons -->
+        <div class="flex items-center gap-2">
+          <button
+            class="size-3 rounded-full bg-red-500/90 hover:bg-red-500 transition-colors"
+            @click="closeWindow"
+            aria-label="Close"
+          />
+          <button
+            class="size-3 rounded-full bg-yellow-500/90 hover:bg-yellow-500 transition-colors"
+            @click="minimize"
+            aria-label="Minimize"
+          />
+          <button
+            class="size-3 rounded-full bg-green-500/90 hover:bg-green-500 transition-colors"
+            @click="toggleMaximize"
+            aria-label="Maximize"
+          />
+        </div>
+
+        <!-- Navigation Buttons -->
+        <div class="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            class="size-7 rounded-sm"
+            @click="router.back()"
+            aria-label="Go back"
+          >
+            <ChevronLeftIcon class="size-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            class="size-7 rounded-sm"
+            @click="router.forward()"
+            aria-label="Go forward"
+          >
+            <ChevronRightIcon class="size-4" />
+          </Button>
+        </div>
       </div>
 
-      <div class="ml-auto flex items-center gap-0.5">
-        <Button
-          variant="ghost"
-          class="relative rounded-[3px] px-4 py-2 text-xs font-medium tracking-[0.04em] uppercase transition-colors duration-200 hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
-          :class="
-            currentView === 'launcher'
-              ? 'text-gold-bright after:bg-gold-default after:absolute after:bottom-0 after:left-1/2 after:h-[2px] after:w-6 after:-translate-x-1/2 after:rounded-[1px] after:content-[\'\']'
-              : 'text-text-muted hover:text-text-bright'
-          "
-          @click="router.push('/')"
+      <!-- Core Shortcuts -->
+      <div class="flex flex-col gap-1 px-2 py-3 border-b border-border/10">
+        <div
+          role="group"
+          class="group hover:bg-surface-hover hover:text-foreground inline-flex h-8 w-full shrink-0 cursor-pointer items-center justify-stretch gap-2 overflow-hidden rounded-lg pr-2.5 pl-2.5 active:translate-y-0"
+          @click="handleNewMatch"
         >
-          Home
-        </Button>
-        <Button
-          variant="ghost"
-          class="relative rounded-[3px] px-4 py-2 text-xs font-medium tracking-[0.04em] uppercase transition-colors duration-200 hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
-          :class="
-            currentView === 'mock'
-              ? 'text-gold-bright after:bg-gold-default after:absolute after:bottom-0 after:left-1/2 after:h-[2px] after:w-6 after:-translate-x-1/2 after:rounded-[1px] after:content-[\'\']'
-              : 'text-text-muted hover:text-text-bright'
-          "
-          @click="router.push('/mock')"
-        >
-          Mock
-        </Button>
-        <Button
-          variant="ghost"
-          class="relative rounded-[3px] px-4 py-2 text-xs font-medium tracking-[0.04em] uppercase transition-colors duration-200 hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-35"
-          :class="
-            currentView === 'debug'
-              ? 'text-gold-bright after:bg-gold-default after:absolute after:bottom-0 after:left-1/2 after:h-[2px] after:w-6 after:-translate-x-1/2 after:rounded-[1px] after:content-[\'\']'
-              : 'text-text-muted hover:text-text-bright'
-          "
-          :disabled="!ws.connected"
-          @click="router.push('/debug')"
-        >
-          Debug
-        </Button>
-        <Button
-          variant="ghost"
-          class="relative rounded-[3px] px-4 py-2 text-xs font-medium tracking-[0.04em] uppercase transition-colors duration-200 hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
-          :class="
-            currentView === 'history'
-              ? 'text-gold-bright after:bg-gold-default after:absolute after:bottom-0 after:left-1/2 after:h-[2px] after:w-6 after:-translate-x-1/2 after:rounded-[1px] after:content-[\'\']'
-              : 'text-text-muted hover:text-text-bright'
-          "
-          @click="router.push('/history')"
-        >
-          History
-        </Button>
-        <Button
-          variant="ghost"
-          class="relative rounded-[3px] px-4 py-2 text-xs font-medium tracking-[0.04em] uppercase transition-colors duration-200 hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
-          :class="
-            currentView === 'settings'
-              ? 'text-gold-bright after:bg-gold-default after:absolute after:bottom-0 after:left-1/2 after:h-[2px] after:w-6 after:-translate-x-1/2 after:rounded-[1px] after:content-[\'\']'
-              : 'text-text-muted hover:text-text-bright'
-          "
+          <div class="flex min-w-0 flex-1 items-center gap-2 text-[13px]">
+            <PlusIcon class="size-4 shrink-0 text-foreground-subtle group-hover:text-foreground" />
+            <span class="truncate">新建对局</span>
+            <span class="text-foreground-subtlest ml-auto shrink-0 text-[11px] font-normal font-mono">⌘N</span>
+          </div>
+        </div>
+
+        <div
+          role="button"
+          class="group hover:bg-surface-hover hover:text-foreground inline-flex h-8 w-full shrink-0 cursor-pointer items-center justify-stretch gap-2 overflow-hidden rounded-lg pr-2.5 pl-2.5 active:translate-y-0 text-foreground"
+          :class="{ 'bg-selected font-semibold': currentView === 'settings' }"
           @click="router.push('/settings')"
         >
-          Settings
-        </Button>
+          <div class="flex min-w-0 flex-1 items-center gap-2 text-[13px]">
+            <SettingsIcon class="size-4 shrink-0 text-foreground-subtle group-hover:text-foreground" />
+            <span class="truncate">设置</span>
+          </div>
+        </div>
+
+        <!-- 预设管理入口（编排页「＋ 新建预设」跳转目标） -->
+        <div
+          role="button"
+          class="group hover:bg-surface-hover hover:text-foreground inline-flex h-8 w-full shrink-0 cursor-pointer items-center justify-stretch gap-2 overflow-hidden rounded-lg pr-2.5 pl-2.5 active:translate-y-0 text-foreground"
+          :class="{ 'bg-selected font-semibold': currentView === 'heroes' }"
+          @click="router.push('/heroes')"
+        >
+          <div class="flex min-w-0 flex-1 items-center gap-2 text-[13px]">
+            <SwordsIcon class="size-4 shrink-0 text-foreground-subtle group-hover:text-foreground" />
+            <span class="truncate">英雄预设</span>
+          </div>
+        </div>
+
+        <div
+          role="button"
+          class="group hover:bg-surface-hover hover:text-foreground inline-flex h-8 w-full shrink-0 cursor-pointer items-center justify-stretch gap-2 overflow-hidden rounded-lg pr-2.5 pl-2.5 active:translate-y-0 text-foreground"
+          :class="{ 'bg-selected font-semibold': currentView === 'agents' }"
+          @click="router.push('/agents')"
+        >
+          <div class="flex min-w-0 flex-1 items-center gap-2 text-[13px]">
+            <BotIcon class="size-4 shrink-0 text-foreground-subtle group-hover:text-foreground" />
+            <span class="truncate">Agent 预设</span>
+          </div>
+        </div>
+
+        <div
+          role="button"
+          class="group hover:bg-surface-hover hover:text-foreground inline-flex h-8 w-full shrink-0 cursor-pointer items-center justify-stretch gap-2 overflow-hidden rounded-lg pr-2.5 pl-2.5 active:translate-y-0 text-foreground"
+          :class="{ 'bg-selected font-semibold': currentView === 'spawnPresets' }"
+          @click="router.push('/spawn-presets')"
+        >
+          <div class="flex min-w-0 flex-1 items-center gap-2 text-[13px]">
+            <MapPinIcon class="size-4 shrink-0 text-foreground-subtle group-hover:text-foreground" />
+            <span class="truncate">出生点预设</span>
+          </div>
+        </div>
       </div>
 
-      <!-- Window Controls -->
-      <div class="-mr-4 flex h-full items-center">
-        <Button
-          variant="ghost"
-          class="text-text-muted hover:bg-bg-elevated hover:text-text-bright flex h-full w-10 items-center justify-center rounded-none p-0 transition-all duration-100 focus-visible:ring-0 focus-visible:ring-offset-0"
-          @click="minimize"
-          aria-label="Minimize"
-        >
-          <MinusIcon class="size-3" :stroke-width="1.5" />
-        </Button>
-        <Button
-          variant="ghost"
-          class="text-text-muted hover:bg-bg-elevated hover:text-text-bright flex h-full w-10 items-center justify-center rounded-none p-0 transition-all duration-100 focus-visible:ring-0 focus-visible:ring-offset-0"
-          @click="toggleMaximize"
-          aria-label="Toggle maximize"
-        >
-          <SquareIcon class="size-3" :stroke-width="1.5" />
-        </Button>
-        <Button
-          variant="ghost"
-          class="text-text-muted hover:bg-red flex h-full w-10 items-center justify-center rounded-none p-0 transition-all duration-100 hover:text-white focus-visible:ring-0 focus-visible:ring-offset-0"
-          @click="closeWindow"
-          aria-label="Close"
-        >
-          <XIcon class="size-3" :stroke-width="1.5" />
-        </Button>
+      <!-- Workspace Section -->
+      <div class="flex-1 min-h-0 flex flex-col p-2 gap-3">
+        <!-- Active Debug Session -->
+        <div class="flex flex-col gap-1">
+          <span class="text-[11px] text-foreground-subtlest font-semibold px-2.5 uppercase tracking-wider">调试会话</span>
+          <div class="flex flex-col gap-0.5 pl-1">
+            <button
+              class="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-[13px] transition-colors"
+              :class="
+                currentView === 'debug'
+                  ? 'bg-selected text-foreground font-semibold'
+                  : 'text-foreground hover:bg-surface-hover'
+              "
+              :disabled="!ws.connected && !store.isStarting"
+              @click="router.push('/debug')"
+            >
+              <TerminalIcon class="size-4 shrink-0 text-foreground-subtle" />
+              <span class="truncate font-medium">当前调试窗口</span>
+              <span v-if="ws.connected" class="ml-auto size-2 rounded-full bg-green animate-pulse" />
+              <span v-else-if="store.isStarting" class="ml-auto text-[10px] text-foreground-subtlest animate-pulse">启动中</span>
+              <span v-else class="ml-auto size-2 rounded-full bg-foreground-subtlest/30" />
+            </button>
+          </div>
+        </div>
+
+        <!-- Scrollable Lists -->
+        <ScrollArea class="flex-1 w-full">
+          <div class="flex flex-col gap-4 pr-3 py-1">
+            <!-- Scenario Templates List -->
+            <div v-if="scenariosList.length > 0" class="flex flex-col gap-1">
+              <div class="flex items-center justify-between pr-1">
+                <span class="text-[11px] text-foreground-subtlest font-semibold px-2.5 uppercase tracking-wider">对局配置模板</span>
+                <Badge variant="outline" class="text-[9px] px-1.5 py-0 border-border text-foreground-subtlest font-normal scale-90">
+                  {{ scenariosList.length }}
+                </Badge>
+              </div>
+              <div class="flex flex-col gap-0.5 pl-1">
+                <button
+                  v-for="s in scenariosList"
+                  :key="s"
+                  class="flex w-full items-center justify-between rounded-lg px-2.5 py-1 text-left text-[13px] transition-colors"
+                  :class="
+                    currentView === 'launcher' && selectedScenario === s
+                      ? 'bg-selected text-foreground font-semibold'
+                      : 'text-foreground hover:bg-surface-hover'
+                  "
+                  @click="handleSelectScenario(s)"
+                >
+                  <span class="truncate pr-2 text-foreground-subtle">{{ s }}</span>
+                  <Badge variant="secondary" class="text-[9px] px-1 py-0 scale-95 border-transparent bg-tag/40 text-foreground-subtle">配置</Badge>
+                </button>
+              </div>
+            </div>
+
+            <!-- History Archives List -->
+            <div v-if="histories.length > 0" class="flex flex-col gap-1">
+              <div class="flex items-center justify-between pr-1">
+                <span class="text-[11px] text-foreground-subtlest font-semibold px-2.5 uppercase tracking-wider">已完成对局</span>
+                <Badge variant="outline" class="text-[9px] px-1.5 py-0 border-border text-foreground-subtlest font-normal scale-90">
+                  {{ histories.length }}
+                </Badge>
+              </div>
+              <div class="flex flex-col gap-0.5 pl-1">
+                <button
+                  v-for="h in histories"
+                  :key="h.datetime"
+                  class="flex w-full items-center justify-between rounded-lg px-2.5 py-1 text-left text-[13px] transition-colors"
+                  :class="
+                    currentView === 'history' && route.query.datetime === h.datetime
+                      ? 'bg-selected text-foreground font-semibold'
+                      : 'text-foreground hover:bg-surface-hover'
+                  "
+                  @click="handleSelectHistory(h.datetime)"
+                >
+                  <span class="truncate pr-1 text-[11.5px] font-mono text-foreground-subtle">{{ h.datetime.replace('_', ' ').substring(5) }}</span>
+                  <Badge variant="secondary" class="text-[9px] px-1 py-0 scale-95 border-transparent bg-tag/40 text-foreground-subtlest">已归档</Badge>
+                </button>
+              </div>
+            </div>
+          </div>
+        </ScrollArea>
       </div>
-    </nav>
+    </aside>
 
-    <!-- Content -->
-    <main class="relative z-1 min-h-0 flex-1 overflow-y-auto">
-      <router-view />
-    </main>
+    <!-- 2. Main Workspace -->
+    <div class="flex flex-1 flex-col overflow-hidden bg-background-alt p-2 pt-0 pl-0">
+      <div class="h-2 w-full select-none" data-tauri-drag-region></div>
+      <section class="border-border bg-background relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border">
+        <!-- Header -->
+        <header
+          data-testid="workspace-header"
+          class="border-border flex h-12 w-full shrink-0 border-b select-none"
+        >
+          <div class="flex h-12 min-w-0 flex-1 items-center justify-between gap-2 overflow-hidden px-3 py-2 pl-4" data-tauri-drag-region>
+            <!-- Header Left: View Title -->
+            <div class="flex min-w-0 items-center gap-2 overflow-hidden">
+              <h1 class="text-foreground flex max-w-100 min-w-12 shrink items-center gap-2 truncate text-sm font-semibold">
+                <span class="min-w-0 truncate">{{ viewTitles[currentView] }}</span>
+              </h1>
 
-    <!-- Premium Agent Stats Modal -->
+              <!-- Connection Status Indicator -->
+              <div v-if="ws.connected" class="flex items-center gap-1.5 rounded-full bg-green/10 px-2 py-0.5">
+                <span class="size-1.5 rounded-full bg-green animate-pulse" />
+                <span class="text-[11px] text-green font-medium">已连接</span>
+              </div>
+              <div v-else-if="store.isStarting" class="flex items-center gap-1.5 rounded-full bg-yellow-500/10 px-2 py-0.5">
+                <span class="size-1.5 rounded-full bg-yellow-500 animate-pulse" />
+                <span class="text-[11px] text-yellow-500 font-medium">启动中</span>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <!-- Main Content Viewport -->
+        <main class="flex-1 overflow-y-auto min-h-0 relative">
+          <router-view />
+        </main>
+      </section>
+    </div>
+
+    <!-- Stats Modal Popup -->
     <Transition
       enter-active-class="transition-opacity duration-300 ease-out"
       leave-active-class="transition-opacity duration-300 ease-out"
@@ -183,66 +351,52 @@ async function onNavMouseDown(e: MouseEvent) {
     >
       <div
         v-if="showStatsModal"
-        class="bg-bg-deep/85 fixed inset-0 z-[1000] flex items-center justify-center p-6 backdrop-blur-md"
+        class="fixed inset-0 z-[1000] flex items-center justify-center p-6 bg-black/80 backdrop-blur-md"
       >
         <div
-          class="border-gold-muted relative flex w-full max-w-[480px] flex-col gap-6 overflow-hidden rounded-lg border bg-[#110e14] p-[2.2rem] shadow-[0_24px_64px_rgba(0,0,0,0.8),0_0_40px_rgba(185,145,71,0.15)]"
+          class="relative flex w-full max-w-[480px] flex-col gap-6 overflow-hidden rounded-lg border border-border bg-card p-[2.2rem] shadow-2xl"
         >
           <div
             class="pointer-events-none absolute top-[-100px] left-1/2 h-[150px] w-[300px] -translate-x-1/2"
-            style="background: radial-gradient(circle, rgba(185, 145, 71, 0.25) 0%, transparent 70%)"
+            style="background: radial-gradient(circle, var(--primary) 0%, transparent 70%); opacity: 0.15"
           ></div>
           <div class="z-1 flex items-center gap-3">
-            <TrophyIcon class="animate-float text-gold-bright size-8 drop-shadow-[0_0_8px_rgba(185,145,71,0.5)]" />
-            <h2 class="font-display text-gold-bright m-0 text-[1.4rem] font-bold tracking-wider">
+            <TrophyIcon class="animate-float text-primary size-8" />
+            <h2 class="text-foreground m-0 text-[1.4rem] font-bold tracking-wider">
               AI Agent 模拟测试报告
             </h2>
           </div>
 
-          <div
-            class="h-px"
-            style="
-              background: linear-gradient(
-                to right,
-                transparent,
-                var(--color-gold-muted) 20%,
-                var(--color-gold-muted) 80%,
-                transparent
-              );
-              filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4));
-            "
-          ></div>
+          <div class="h-px bg-border" />
 
           <div class="z-1 flex flex-col gap-[1.2rem]">
-            <p class="text-text-muted m-0 text-[0.9rem] leading-normal">
+            <p class="text-muted-foreground m-0 text-[0.9rem] leading-normal">
               AI 代理已成功运行并自主决策满 2 分钟，累计运行数据统计如下：
             </p>
             <div class="grid grid-cols-2 gap-4">
               <div
-                class="flex flex-col items-center gap-2 rounded-[6px] border border-[rgba(185,145,71,0.12)] bg-white/2 p-[1.2rem]"
+                class="flex flex-col items-center gap-2 rounded-[6px] border border-border bg-muted/30 p-[1.2rem]"
               >
-                <span class="text-text-muted text-[0.8rem] font-semibold tracking-wider uppercase">
+                <span class="text-muted-foreground text-[0.8rem] font-semibold tracking-wider uppercase">
                   总击杀小兵 (补刀)
                 </span>
                 <span
-                  class="text-gold-bright font-mono text-[2.2rem] leading-none font-extrabold"
-                  style="text-shadow: 0 0 16px rgba(212, 175, 92, 0.4)"
+                  class="text-foreground font-mono text-[2.2rem] leading-none font-extrabold"
                 >
                   {{ statsResult.minionKills }}
                 </span>
               </div>
               <div
-                class="flex flex-col items-center gap-2 rounded-[6px] border border-[rgba(185,145,71,0.12)] bg-white/2 p-[1.2rem]"
+                class="flex flex-col items-center gap-2 rounded-[6px] border border-border bg-muted/30 p-[1.2rem]"
               >
-                <span class="text-text-muted text-[0.8rem] font-semibold tracking-wider uppercase">
+                <span class="text-muted-foreground text-[0.8rem] font-semibold tracking-wider uppercase">
                   总累计金币 (Gold)
                 </span>
                 <span
-                  class="text-gold-bright font-mono text-[2.2rem] leading-none font-extrabold"
-                  style="text-shadow: 0 0 16px rgba(212, 175, 92, 0.4)"
+                  class="text-foreground font-mono text-[2.2rem] leading-none font-extrabold"
                 >
                   {{ statsResult.gold.toFixed(0) }}
-                  <span class="text-gold-muted text-[1.2rem] font-semibold">g</span>
+                  <span class="text-muted-foreground text-[1.2rem] font-semibold">g</span>
                 </span>
               </div>
             </div>
@@ -250,10 +404,7 @@ async function onNavMouseDown(e: MouseEvent) {
 
           <div class="z-1 flex justify-center">
             <Button
-              class="border-gold-bright font-display cursor-pointer rounded-[4px] border px-10 py-3 text-[0.95rem] font-bold text-white shadow-[0_4px_16px_rgba(185,145,71,0.25)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_6px_24px_rgba(185,145,71,0.45)]"
-              style="
-                background: linear-gradient(135deg, var(--color-gold-default) 0%, var(--color-gold-dark, #785b28) 100%);
-              "
+              class="w-full py-3"
               @click="showStatsModal = false"
             >
               确认并返回

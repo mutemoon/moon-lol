@@ -3,7 +3,7 @@ use lol_base::ui::{LOLEnumUiMetric, LOLLolGameStateViewController, LOLUiElementT
 use lol_core::base::stats::ChampionStats;
 use lol_core::team::Team;
 
-use crate::controller::Controller;
+use crate::controller::SelfPlayer;
 use crate::ui::element::{UIElementEntity, UIState};
 use crate::ui::text::UiTextState;
 
@@ -24,7 +24,7 @@ fn update_game_metrics(
     res_ui_element_entity: Res<UIElementEntity>,
     time: Res<Time>,
     q_stats: Query<(&ChampionStats, Option<&Team>)>,
-    q_player_stats: Query<&ChampionStats, With<Controller>>,
+    q_player_stats: Query<&ChampionStats, With<SelfPlayer>>,
     mut q_ui_text_state: Query<&mut UiTextState>,
 ) {
     // 格式化游戏时间 (分:秒)

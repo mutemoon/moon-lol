@@ -4,9 +4,10 @@ import { useGameStore } from "../stores/gameStore";
 import GameConsoleLogs from "../components/GameConsoleLogs.vue";
 import AgentChatHistory from "../components/AgentChatHistory.vue";
 import { Button } from "../components/ui/button";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
 import { Badge } from "../components/ui/badge";
 import { listen } from "@tauri-apps/api/event";
+import { CommandIcon, StopCircleIcon } from "@lucide/vue";
 
 const store = useGameStore();
 const { ws } = store;
@@ -90,30 +91,30 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="bg-bg-deep flex h-full flex-col gap-3 overflow-hidden p-4">
+  <div class="flex h-full flex-col gap-3 overflow-hidden p-4 bg-background">
     <!-- Status Bar -->
     <div
-      class="bg-bg-surface border-border-subtle flex shrink-0 items-center justify-between rounded border px-3.5 py-2 shadow-[0_1px_2px_rgba(0,0,0,0.4)]"
+      class="flex shrink-0 items-center justify-between rounded border border-border bg-card px-3.5 py-2 shadow-sm"
     >
       <div class="flex items-center gap-3">
         <span
           class="inline-flex items-center gap-1.5 rounded border px-2 py-0.5 text-[11px] font-semibold tracking-wider uppercase transition-colors"
-          :class="connected ? 'text-green border-green/15 bg-green/8' : 'text-red border-red/15 bg-red/8'"
+          :class="connected ? 'text-green-500 border-green-500/15 bg-green-500/10' : 'text-destructive border-destructive/15 bg-destructive/10'"
         >
           <span
             class="h-1.5 w-1.5 rounded-full transition-shadow"
             :class="
               connected
-                ? 'bg-green shadow-[0_0_6px_rgba(74,158,90,0.6)]'
-                : 'bg-red shadow-[0_0_6px_rgba(200,74,74,0.4)]'
+                ? 'bg-green-500 shadow-[0_0_6px_rgba(34,197,94,0.5)]'
+                : 'bg-destructive shadow-[0_0_6px_rgba(239,68,68,0.4)]'
             "
           ></span>
-          {{ connected ? "Connected" : "Disconnected" }}
+          {{ connected ? "已连接" : "未连接" }}
         </span>
-        <span class="bg-border-subtle h-3.5 w-px"></span>
+        <span class="h-3.5 w-px bg-border"></span>
         <span class="flex items-center gap-1.5">
-          <span class="text-text-muted text-[11px] uppercase">Champion</span>
-          <span class="text-text-bright text-xs font-semibold">{{ gameState.champion || "—" }}</span>
+          <span class="text-muted-foreground text-[11px] uppercase">当前调试英雄</span>
+          <span class="text-foreground text-xs font-semibold">{{ gameState.champion || "—" }}</span>
         </span>
       </div>
       <div class="flex items-center gap-2">
@@ -121,18 +122,20 @@ onUnmounted(() => {
           <Button
             variant="outline"
             size="sm"
-            class="border-gold-dimmer/20 text-gold-bright hover:border-gold-default hover:text-gold-glow bg-gold-dimmer/5 h-7 cursor-pointer rounded px-3 py-1 text-xs font-medium transition-all duration-200"
+            class="h-7 text-xs font-medium border-primary/20 text-primary hover:border-primary hover:bg-primary/10 bg-primary/5"
           >
-            💻 命令行测试床
+            <CommandIcon class="size-3.5 mr-1" />
+            <span>命令行测试床</span>
           </Button>
         </router-link>
         <Button
           variant="outline"
           size="sm"
-          class="text-red hover:text-red hover:bg-red/12 hover:border-red/45 border-red/25 bg-red/4 h-7 cursor-pointer rounded px-3 py-1 text-xs font-medium transition-all duration-200"
+          class="h-7 text-xs font-medium text-destructive hover:bg-destructive hover:text-destructive-foreground border-destructive/20 bg-destructive/5"
           @click="stopGame"
         >
-          Stop Game
+          <StopCircleIcon class="size-3.5 mr-1" />
+          <span>停止对局</span>
         </Button>
       </div>
     </div>
@@ -142,141 +145,139 @@ onUnmounted(() => {
       <!-- LEFT COLUMN: Global Control Sidebar -->
       <div class="flex min-h-0 w-44 flex-col gap-3 overflow-hidden">
         <!-- Toggles Group -->
-        <div class="bg-bg-surface border-border-subtle flex flex-col gap-1.5 rounded border p-2.5">
-          <span class="text-text-muted text-[11px] font-semibold uppercase">Toggles</span>
+        <div class="flex flex-col gap-1.5 rounded border border-border bg-card p-2.5">
+          <span class="text-muted-foreground text-[11px] font-semibold uppercase">开关设置</span>
           <div class="flex flex-col gap-1">
             <Button
               variant="outline"
               size="sm"
-              class="text-text-muted bg-bg-deep border-border-subtle hover:text-text-default hover:border-gold-muted flex h-8 w-full cursor-pointer items-center justify-start gap-1.5 rounded px-2.5 py-1 text-xs whitespace-nowrap transition-all duration-200"
-              :class="{ 'text-gold-bright border-gold-dimmer bg-[rgba(185,145,71,0.06)]': gameState.godMode }"
+              class="flex h-8 w-full cursor-pointer items-center justify-start gap-1.5 rounded border border-border bg-muted/20 px-2.5 py-1 text-xs transition-colors hover:text-foreground hover:border-primary/40"
+              :class="{ 'text-primary border-primary bg-primary/10': gameState.godMode }"
               @click="toggleGodMode"
             >
               <span
                 class="h-1.5 w-1.5 rounded-full transition-all"
                 :class="
-                  gameState.godMode ? 'bg-gold-default shadow-[0_0_6px_rgba(185,145,71,0.5)]' : 'bg-border-default'
+                  gameState.godMode ? 'bg-primary' : 'bg-muted-foreground/40'
                 "
               ></span>
-              God Mode
+              上帝模式
             </Button>
             <Button
               variant="outline"
               size="sm"
-              class="text-text-muted bg-bg-deep border-border-subtle hover:text-text-default hover:border-gold-muted flex h-8 w-full cursor-pointer items-center justify-start gap-1.5 rounded px-2.5 py-1 text-xs whitespace-nowrap transition-all duration-200"
-              :class="{ 'text-gold-bright border-gold-dimmer bg-[rgba(185,145,71,0.06)]': gameState.cooldownDisabled }"
+              class="flex h-8 w-full cursor-pointer items-center justify-start gap-1.5 rounded border border-border bg-muted/20 px-2.5 py-1 text-xs transition-colors hover:text-foreground hover:border-primary/40"
+              :class="{ 'text-primary border-primary bg-primary/10': gameState.cooldownDisabled }"
               @click="toggleCooldown"
             >
               <span
                 class="h-1.5 w-1.5 rounded-full transition-all"
                 :class="
                   gameState.cooldownDisabled
-                    ? 'bg-gold-default shadow-[0_0_6px_rgba(185,145,71,0.5)]'
-                    : 'bg-border-default'
+                    ? 'bg-primary'
+                    : 'bg-muted-foreground/40'
                 "
               ></span>
-              No Cooldown
+              无冷却时间
             </Button>
             <Button
               variant="outline"
               size="sm"
-              class="text-text-muted bg-bg-deep border-border-subtle hover:text-text-default hover:border-gold-muted flex h-8 w-full cursor-pointer items-center justify-start gap-1.5 rounded px-2.5 py-1 text-xs whitespace-nowrap transition-all duration-200"
-              :class="{ 'text-gold-bright border-gold-dimmer bg-[rgba(185,145,71,0.06)]': gameState.paused }"
+              class="flex h-8 w-full cursor-pointer items-center justify-start gap-1.5 rounded border border-border bg-muted/20 px-2.5 py-1 text-xs transition-colors hover:text-foreground hover:border-primary/40"
+              :class="{ 'text-primary border-primary bg-primary/10': gameState.paused }"
               @click="togglePause"
             >
               <span
                 class="h-1.5 w-1.5 rounded-full transition-all"
                 :class="
-                  gameState.paused ? 'bg-gold-default shadow-[0_0_6px_rgba(185,145,71,0.5)]' : 'bg-border-default'
+                  gameState.paused ? 'bg-primary' : 'bg-muted-foreground/40'
                 "
               ></span>
-              {{ gameState.paused ? "Resume" : "Pause" }}
+              {{ gameState.paused ? "恢复运行" : "暂停游戏" }}
             </Button>
           </div>
         </div>
 
         <!-- Champion Group -->
-        <div class="bg-bg-surface border-border-subtle flex flex-col gap-1.5 rounded border p-2.5">
-          <span class="text-text-muted text-[11px] font-semibold uppercase">Champion</span>
+        <div class="flex flex-col gap-1.5 rounded border border-border bg-card p-2.5">
+          <span class="text-muted-foreground text-[11px] font-semibold uppercase">角色控制</span>
           <div class="flex w-full flex-col gap-1.5">
             <Select v-model="switchTarget">
               <SelectTrigger
-                class="bg-bg-deep border-gold-dimmer text-text-bright hover:border-gold-muted focus:border-gold-default focus-visible:ring-gold-default/30 h-8 w-full cursor-pointer px-2 text-xs focus-visible:ring-1"
+                class="bg-muted/40 border-border text-foreground hover:border-primary/40 focus:border-primary focus-visible:ring-primary/20 h-8 w-full cursor-pointer px-2 text-xs focus-visible:ring-1"
               >
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent class="border-border-subtle text-text-bright border bg-[#110e14]">
-                <SelectGroup>
-                  <SelectItem
-                    v-for="c in champions"
-                    :key="c"
-                    :value="c"
-                    class="cursor-pointer text-xs hover:bg-white/[0.04]"
-                  >
-                    {{ c }}
-                  </SelectItem>
-                </SelectGroup>
+              <SelectContent class="border-border bg-popover text-foreground">
+                <SelectItem
+                  v-for="c in champions"
+                  :key="c"
+                  :value="c"
+                  class="cursor-pointer text-xs"
+                >
+                  {{ c }}
+                </SelectItem>
               </SelectContent>
             </Select>
             <Button
               variant="outline"
               size="xs"
-              class="text-text-muted border-border-subtle hover:text-gold-bright hover:border-gold-muted h-8 w-full cursor-pointer rounded bg-transparent px-2.5 py-1 text-xs transition-all duration-200"
+              class="text-muted-foreground border-border hover:text-primary hover:border-primary/40 h-8 w-full cursor-pointer rounded bg-transparent px-2.5 py-1 text-xs transition-all"
               @click="switchChampion"
             >
-              Switch Champion
+              切换当前英雄
             </Button>
           </div>
         </div>
 
         <!-- Actions Group -->
-        <div class="bg-bg-surface border-border-subtle flex flex-col gap-1.5 rounded border p-2.5">
-          <span class="text-text-muted text-[11px] font-semibold uppercase">Actions</span>
+        <div class="flex flex-col gap-1.5 rounded border border-border bg-card p-2.5">
+          <span class="text-muted-foreground text-[11px] font-semibold uppercase">快捷操作</span>
           <Button
             variant="outline"
             size="xs"
-            class="text-text-muted border-border-subtle hover:text-gold-bright hover:border-gold-muted h-8 w-full cursor-pointer rounded bg-transparent px-2.5 py-1 text-xs transition-all duration-200"
+            class="text-muted-foreground border-border hover:text-primary hover:border-primary/40 h-8 w-full cursor-pointer rounded bg-transparent px-2.5 py-1 text-xs transition-all"
             @click="resetPosition"
           >
-            Reset Position
+            重置位置坐标
           </Button>
         </div>
       </div>
 
       <!-- RIGHT COLUMN: Game Workspace (Tabs layout) -->
-      <div class="bg-bg-surface border-border-subtle flex min-h-0 flex-1 flex-col overflow-hidden rounded border">
+      <div class="flex min-h-0 flex-1 flex-col overflow-hidden rounded border border-border bg-card">
         <!-- Tabs Header -->
-        <div class="border-border-subtle flex shrink-0 items-center justify-between border-b bg-[#0c0a0e]/40 px-4 py-2">
+        <div class="flex shrink-0 items-center justify-between border-b border-border bg-muted/40 px-4 py-2">
           <div class="flex gap-2">
             <button
-              class="hover:text-text-default rounded px-3 py-1.5 text-xs font-semibold transition-all duration-200"
+              class="rounded px-3 py-1.5 text-xs font-semibold transition-all"
               :class="
                 activeTab === 'logs'
-                  ? 'bg-gold-dimmer/15 text-gold-bright border-gold-dimmer/30 border'
-                  : 'text-text-muted border border-transparent hover:bg-white/[0.02]'
+                  ? 'bg-primary/10 text-primary border-primary/30 border'
+                  : 'text-muted-foreground border border-transparent hover:bg-muted/50'
               "
               @click="activeTab = 'logs'"
             >
-              控制台日志 (Console Logs)
+              控制台日志
             </button>
             <button
-              class="hover:text-text-default flex items-center gap-1.5 rounded px-3 py-1.5 text-xs font-semibold transition-all duration-200"
+              class="flex items-center gap-1.5 rounded px-3 py-1.5 text-xs font-semibold transition-all"
               :class="
                 activeTab === 'ai_agents'
-                  ? 'bg-gold-dimmer/15 text-gold-bright border-gold-dimmer/30 border'
-                  : 'text-text-muted border border-transparent hover:bg-white/[0.02]'
+                  ? 'bg-primary/10 text-primary border-primary/30 border'
+                  : 'text-muted-foreground border border-transparent hover:bg-muted/50'
               "
               @click="activeTab = 'ai_agents'"
             >
               <span
                 v-if="Object.keys(agentHistories).length > 0"
-                class="bg-gold-bright h-1.5 w-1.5 animate-pulse rounded-full"
+                class="bg-primary h-1.5 w-1.5 animate-pulse rounded-full"
               ></span>
-              AI 决策思维 (AI Mind Watcher)
+              AI 决策思维
             </button>
           </div>
-          <Badge variant="outline" class="border-gold-dimmer/30 text-gold-bright text-[10px]">
-            {{ activeTab === "logs" ? "系统日志" : "实时决策流" }}
+          <Badge variant="outline" class="border-primary/30 text-primary text-[10px]">
+            {{ activeTab === "logs" ? "系统运行日志" : "Agent 实时决策对话" }}
           </Badge>
         </div>
 
@@ -294,13 +295,13 @@ onUnmounted(() => {
           >
             <!-- Left sidebar: Agent Tabs -->
             <div
-              class="border-border-subtle/40 flex min-h-0 flex-col gap-2 overflow-y-auto border-r pr-3 md:col-span-1"
+              class="flex min-h-0 flex-col gap-2 overflow-y-auto border-r border-border pr-3 md:col-span-1"
             >
-              <span class="text-text-muted mb-1 text-[10px] font-semibold tracking-wider uppercase">活动代理</span>
+              <span class="text-muted-foreground mb-1 text-[10px] font-semibold tracking-wider uppercase">活动代理</span>
               <div class="flex flex-col gap-1.5">
                 <div
                   v-if="Object.keys(agentHistories).length === 0"
-                  class="text-text-muted py-6 text-center text-xs italic"
+                  class="text-muted-foreground py-6 text-center text-xs italic"
                 >
                   暂无活动代理决策数据
                 </div>
@@ -308,24 +309,24 @@ onUnmounted(() => {
                   v-else
                   v-for="(historyData, agentId) in agentHistories"
                   :key="agentId"
-                  class="flex w-full cursor-pointer items-center justify-between rounded border p-2 text-left font-sans text-xs transition-all duration-200"
+                  class="flex w-full cursor-pointer items-center justify-between rounded border p-2 text-left font-sans text-xs transition-colors"
                   :class="
                     selectedHistoryAgentId === agentId
-                      ? 'bg-gold-dimmer/10 border-gold-dimmer text-gold-bright font-semibold'
-                      : 'text-text-muted hover:text-text-bright border-transparent bg-transparent hover:bg-white/[0.02]'
+                      ? 'bg-primary/10 border-primary text-primary font-semibold'
+                      : 'text-muted-foreground hover:text-foreground border-transparent bg-transparent hover:bg-muted/40'
                   "
                   @click="selectedHistoryAgentId = agentId"
                 >
                   <div class="flex items-center gap-1.5 truncate">
                     <span
                       class="h-1.5 w-1.5 rounded-full"
-                      :class="agentId.includes('single') || agentId.includes('riven') ? 'bg-blue-400' : 'bg-red-400'"
+                      :class="agentId.includes('single') || agentId.includes('riven') ? 'bg-blue-500' : 'bg-red-500'"
                     ></span>
                     <span class="truncate font-medium">{{ historyData.champion }}</span>
                   </div>
                   <Badge
                     variant="outline"
-                    class="border-border-subtle bg-bg-deep text-text-muted px-1.5 py-0 text-[9px]"
+                    class="border-border bg-muted/30 text-muted-foreground px-1.5 py-0 text-[9px]"
                   >
                     {{ historyData.history.length }} 轮
                   </Badge>
@@ -347,3 +348,20 @@ onUnmounted(() => {
     </div>
   </div>
 </template>
+
+<style scoped>
+/* Custom styled premium glassmorphism shadow */
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 2px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--muted-foreground);
+}
+</style>

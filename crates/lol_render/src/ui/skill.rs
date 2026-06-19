@@ -9,7 +9,7 @@ use lol_core::base::level::Level;
 use lol_core::character::CharacterReady;
 use lol_core::skill::{CommandSkillLevelUp, CoolDown, PassiveSkill, Skill, SkillPoints, Skills};
 
-use crate::controller::Controller;
+use crate::controller::SelfPlayer;
 use crate::ui::button::update_button;
 use crate::ui::element::{UIElement, UIElementEntity, UIState};
 use crate::ui::text::UiTextState;
@@ -25,16 +25,16 @@ impl Plugin for PluginUISkill {
             (
                 update_skill_level_up_buttons.after(update_button).run_if(
                     in_state(UIState::Loaded)
-                        .and_then(any_match_filter::<(With<Controller>, With<CharacterReady>)>),
+                        .and_then(any_match_filter::<(With<SelfPlayer>, With<CharacterReady>)>),
                 ),
                 (update_passive_skill_icon, update_active_skill_icons).run_if(
                     in_state(UIState::Loaded)
-                        .and_then(any_match_filter::<(With<Controller>, With<CharacterReady>)>)
+                        .and_then(any_match_filter::<(With<SelfPlayer>, With<CharacterReady>)>)
                         .and_then(run_once),
                 ),
                 (update_skill_cooldown, update_skill_rank_pips).run_if(
                     in_state(UIState::Loaded)
-                        .and_then(any_match_filter::<(With<Controller>, With<CharacterReady>)>),
+                        .and_then(any_match_filter::<(With<SelfPlayer>, With<CharacterReady>)>),
                 ),
             ),
         );
@@ -49,14 +49,14 @@ struct SkillLevelUpButton {
 fn update_passive_skill_icon(
     mut commands: Commands,
     q_skill: Query<&Skill>,
-    q_passive_skill: Query<&PassiveSkill, With<Controller>>,
+    q_passive_skill: Query<&PassiveSkill, With<SelfPlayer>>,
     res_ui_element_entity: Res<UIElementEntity>,
     res_assets_spell_object: Res<Assets<Spell>>,
     mut res_assets_desaturate_data: ResMut<Assets<LOLUiElementEffectDesaturateData>>,
     res_player_frame_vc: Res<LOLPlayerFrameViewController>,
 ) {
     let Ok(passive_skill) = q_passive_skill.single() else {
-        info!("未找到控制器的被动技能");
+        info!("未找到 SelfPlayer 的被动技能");
         return;
     };
 
@@ -112,14 +112,14 @@ fn update_passive_skill_icon(
 fn update_active_skill_icons(
     mut commands: Commands,
     q_skill: Query<&Skill>,
-    q_skills: Query<&Skills, With<Controller>>,
+    q_skills: Query<&Skills, With<SelfPlayer>>,
     res_ui_element_entity: Res<UIElementEntity>,
     res_assets_spell_object: Res<Assets<Spell>>,
     mut res_assets_desaturate_data: ResMut<Assets<LOLUiElementEffectDesaturateData>>,
     res_player_frame_vc: Res<LOLPlayerFrameViewController>,
 ) {
     let Ok(skills) = q_skills.single() else {
-        info!("未找到控制器的技能列表");
+        info!("未找到 SelfPlayer 的技能列表");
         return;
     };
 
@@ -401,13 +401,13 @@ fn update_single_skill_rank_pips(
 fn update_skill_cooldown(
     mut commands: Commands,
     q_skill: Query<(&Skill, &CoolDown), Changed<CoolDown>>,
-    q_skills: Query<&Skills, With<Controller>>,
+    q_skills: Query<&Skills, With<SelfPlayer>>,
     res_player_frame_vc: Res<LOLPlayerFrameViewController>,
     res_ui_element_entity: Res<UIElementEntity>,
     mut q_ui_text_state: Query<(&mut UiTextState, &mut Visibility)>,
 ) {
     let Ok(skills) = q_skills.single() else {
-        debug!("【技能冷却更新】未找到控制器的技能列表");
+        debug!("【技能冷却更新】未找到 SelfPlayer 的技能列表");
         return;
     };
 
@@ -444,7 +444,7 @@ fn update_skill_cooldown(
 fn update_skill_rank_pips(
     mut commands: Commands,
     q_changed_skill: Query<(Entity, &Skill), Changed<Skill>>,
-    q_skills: Query<&Skills, With<Controller>>,
+    q_skills: Query<&Skills, With<SelfPlayer>>,
     res_player_frame_vc: Res<LOLPlayerFrameViewController>,
     res_ui_element_entity: Res<UIElementEntity>,
     q_ui_element: Query<&UIElement>,
@@ -492,7 +492,7 @@ fn update_skill_level_up_buttons(
     mut commands: Commands,
     q_skill_points: Query<
         (Entity, &Level, &SkillPoints, &Skills),
-        (Changed<SkillPoints>, With<Controller>),
+        (Changed<SkillPoints>, With<SelfPlayer>),
     >,
     res_player_frame: Res<LOLPlayerFrameViewController>,
     q_skill: Query<&Skill>,

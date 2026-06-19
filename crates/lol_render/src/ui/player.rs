@@ -6,7 +6,7 @@ use lol_core::base::gold::Gold;
 use lol_core::base::level::Level;
 use lol_core::life::Health;
 
-use crate::controller::Controller;
+use crate::controller::SelfPlayer;
 use crate::skin::skin::SkinReady;
 use crate::ui::element::{CommandUpdateUIElement, NodeType, SizeType, UIElementEntity, UIState};
 use crate::ui::text::UiTextState;
@@ -30,7 +30,7 @@ impl Plugin for PluginUIPlayer {
                 update_player_health,
                 update_player_health_fade,
                 update_player_ability_resource,
-                update_player_icon.run_if(any_match_filter::<(With<Controller>, With<SkinReady>)>),
+                update_player_icon.run_if(any_match_filter::<(With<SelfPlayer>, With<SkinReady>)>),
                 update_stat_page_buttons,
                 update_gold,
             )
@@ -43,7 +43,7 @@ fn update_level(
     mut commands: Commands,
     res_player_frame: Res<LOLPlayerFrameViewController>,
     res_ui_element_entity: Res<UIElementEntity>,
-    q_level: Query<&Level, With<Controller>>,
+    q_level: Query<&Level, With<SelfPlayer>>,
 ) {
     let entity = res_ui_element_entity.get_entity(&res_player_frame.resource_bars.experience_bar);
 
@@ -64,7 +64,7 @@ fn update_player_health(
     mut commands: Commands,
     res_player_frame: Res<LOLPlayerFrameViewController>,
     res_ui_element_entity: Res<UIElementEntity>,
-    q_health: Query<&Health, With<Controller>>,
+    q_health: Query<&Health, With<SelfPlayer>>,
     mut q_ui_text_state: Query<&mut UiTextState>,
 ) {
     let Ok(health) = q_health.single() else {
@@ -110,7 +110,7 @@ fn update_player_health_fade(
     time: Res<Time>,
     res_player_frame: Res<LOLPlayerFrameViewController>,
     res_ui_element_entity: Res<UIElementEntity>,
-    q_health: Query<&Health, With<Controller>>,
+    q_health: Query<&Health, With<SelfPlayer>>,
     mut q_health_fade: Query<&mut HealthFade>,
 ) {
     let health_data = q_health.single().ok();
@@ -177,7 +177,7 @@ fn update_player_ability_resource(
     mut commands: Commands,
     res_player_frame: Res<LOLPlayerFrameViewController>,
     res_ui_element_entity: Res<UIElementEntity>,
-    q_ability_resource: Query<&AbilityResource, With<Controller>>,
+    q_ability_resource: Query<&AbilityResource, With<SelfPlayer>>,
 ) {
     let lol_base::ui::LOLEnumResourceMeter::ResourceMeterGroupData(ref group_data) =
         res_player_frame
@@ -216,7 +216,7 @@ fn update_player_icon(
     asset_server: Res<AssetServer>,
     mut commands: Commands,
     q_image_node: Query<&ImageNode>,
-    q_skin: Query<&Skin, (With<Controller>, With<SkinReady>)>,
+    q_skin: Query<&Skin, (With<SelfPlayer>, With<SkinReady>)>,
     q_children: Query<&Children>,
     res_ui_element_entity: Res<UIElementEntity>,
     res_player_frame_vc: Res<LOLPlayerFrameViewController>,
@@ -270,7 +270,7 @@ fn update_stat_page_buttons(
 fn update_gold(
     res_player_inventory: Res<LOLPlayerInventoryViewController>,
     res_ui_element_entity: Res<UIElementEntity>,
-    q_gold: Query<&Gold, With<Controller>>,
+    q_gold: Query<&Gold, With<SelfPlayer>>,
     mut q_ui_text_state: Query<(&mut UiTextState, &mut Visibility)>,
     mut q_visibility: Query<&mut Visibility, Without<UiTextState>>,
 ) {

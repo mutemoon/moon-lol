@@ -26,20 +26,20 @@ const totalPages = computed(() => Math.ceil(totalLogsCount.value / pageSize.valu
 <template>
   <!-- 分页控制条 -->
   <div
-    class="border-border-subtle flex shrink-0 items-center justify-between gap-3 border-t bg-[rgba(0,0,0,0.18)] px-4 py-2 select-none"
+    class="border-border flex shrink-0 items-center justify-between gap-3 border-t bg-muted/20 px-4 py-2 select-none"
   >
     <div class="flex items-center gap-2">
-      <span class="text-text-muted text-[11px] whitespace-nowrap">
+      <span class="text-muted-foreground text-[11px] whitespace-nowrap">
         显示第
-        <strong class="text-gold-bright">{{ totalLogsCount > 0 ? (currentPage - 1) * pageSize + 1 : 0 }}</strong>
+        <strong class="text-primary">{{ totalLogsCount > 0 ? (currentPage - 1) * pageSize + 1 : 0 }}</strong>
         -
-        <strong class="text-gold-bright">{{ Math.min(currentPage * pageSize, totalLogsCount) }}</strong>
+        <strong class="text-primary">{{ Math.min(currentPage * pageSize, totalLogsCount) }}</strong>
         条， 共
-        <strong class="text-gold-bright">{{ totalLogsCount }}</strong>
+        <strong class="text-primary">{{ totalLogsCount }}</strong>
         条
       </span>
 
-      <span class="bg-border-subtle mx-2 h-3.5 w-[1px]"></span>
+      <span class="bg-border mx-2 h-3.5 w-[1px]"></span>
 
       <!-- PageSize Select -->
       <Select
@@ -52,11 +52,11 @@ const totalPages = computed(() => Math.ceil(totalLogsCount.value / pageSize.valu
         "
       >
         <SelectTrigger
-          class="bg-bg-deep text-text-bright border-gold-dimmer flex h-7 w-28 items-center justify-between px-2 text-xs"
+          class="bg-muted/40 text-foreground border-border flex h-7 w-28 items-center justify-between px-2 text-xs"
         >
           <SelectValue />
         </SelectTrigger>
-        <SelectContent class="bg-bg-surface border-border-subtle text-text-default">
+        <SelectContent class="bg-popover border-border text-foreground/80">
           <SelectItem class="text-xs" value="50">50 条/页</SelectItem>
           <SelectItem class="text-xs" value="100">100 条/页</SelectItem>
           <SelectItem class="text-xs" value="200">200 条/页</SelectItem>
@@ -68,7 +68,7 @@ const totalPages = computed(() => Math.ceil(totalLogsCount.value / pageSize.valu
     <div class="flex items-center gap-2">
       <Button
         variant="outline"
-        class="border-border-subtle text-text-muted hover:text-gold-bright hover:border-gold-muted flex size-8 items-center justify-center bg-[rgba(255,255,255,0.01)] p-0"
+        class="border-border text-muted-foreground hover:text-primary hover:border-primary/40 flex size-8 items-center justify-center bg-transparent p-0"
         :disabled="currentPage === 1"
         @click="currentPage = 1"
         title="第一页"
@@ -77,7 +77,7 @@ const totalPages = computed(() => Math.ceil(totalLogsCount.value / pageSize.valu
       </Button>
       <Button
         variant="outline"
-        class="border-border-subtle text-text-muted hover:text-gold-bright hover:border-gold-muted flex size-8 items-center justify-center bg-[rgba(255,255,255,0.01)] p-0"
+        class="border-border text-muted-foreground hover:text-primary hover:border-primary/40 flex size-8 items-center justify-center bg-transparent p-0"
         :disabled="currentPage === 1"
         @click="currentPage--"
         title="上一页"
@@ -86,19 +86,19 @@ const totalPages = computed(() => Math.ceil(totalLogsCount.value / pageSize.valu
       </Button>
 
       <div class="mx-1 flex items-center gap-1.5 text-[11px]">
-        <span class="text-text-muted">页码</span>
+        <span class="text-muted-foreground">页码</span>
         <span
-          class="text-gold-bright rounded border border-[rgba(185,145,71,0.15)] bg-[rgba(185,145,71,0.06)] px-1.5 py-0.5 font-mono font-bold shadow-[0_0_8px_rgba(185,145,71,0.2)]"
+          class="text-primary rounded border border-primary/20 bg-primary/10 px-1.5 py-0.5 font-mono font-bold shadow-sm"
         >
           {{ currentPage }}
         </span>
-        <span class="text-text-muted">/</span>
-        <span class="text-text-default font-mono">{{ totalPages }}</span>
+        <span class="text-muted-foreground">/</span>
+        <span class="text-foreground/80 font-mono">{{ totalPages }}</span>
       </div>
 
       <Button
         variant="outline"
-        class="border-border-subtle text-text-muted hover:text-gold-bright hover:border-gold-muted flex size-8 items-center justify-center bg-[rgba(255,255,255,0.01)] p-0"
+        class="border-border text-muted-foreground hover:text-primary hover:border-primary/40 flex size-8 items-center justify-center bg-transparent p-0"
         :disabled="currentPage === totalPages"
         @click="currentPage++"
         title="下一页"
@@ -107,7 +107,7 @@ const totalPages = computed(() => Math.ceil(totalLogsCount.value / pageSize.valu
       </Button>
       <Button
         variant="outline"
-        class="border-border-subtle text-text-muted hover:text-gold-bright hover:border-gold-muted flex size-8 items-center justify-center bg-[rgba(255,255,255,0.01)] p-0"
+        class="border-border text-muted-foreground hover:text-primary hover:border-primary/40 flex size-8 items-center justify-center bg-transparent p-0"
         :disabled="currentPage === totalPages"
         @click="currentPage = totalPages"
         title="最后一页"
