@@ -2,7 +2,7 @@
 import { ref, onMounted, computed, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useGameStore } from "../stores/gameStore";
-import { invoke } from "@tauri-apps/api/core";
+import { backendClient } from "../services/backend";
 import AgentChatHistory from "../components/AgentChatHistory.vue";
 import { Button } from "../components/ui/button";
 import { Trash2Icon, InboxIcon } from "@lucide/vue";
@@ -48,7 +48,7 @@ async function selectGame(datetime: string) {
   selectedDatetime.value = datetime;
   loadingDetail.value = true;
   try {
-    const details = await invoke<SavedAgentHistory[]>("get_game_history_detail", { datetime });
+    const details = await backendClient.getGameHistoryDetail(datetime);
     selectedGameAgents.value = details;
     if (details.length > 0) {
       selectedAgentId.value = details[0].agent_id;
@@ -68,7 +68,7 @@ async function deleteHistory(datetime: string) {
     return;
   }
   try {
-    await invoke("delete_game_history", { datetime });
+    await backendClient.deleteGameHistory(datetime);
     await store.loadHistoriesList();
     if (selectedDatetime.value === datetime) {
       router.push("/history");

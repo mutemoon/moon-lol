@@ -1,5 +1,5 @@
 import { ref, computed, onUnmounted, provide, inject, watch } from "vue";
-import { invoke } from "@tauri-apps/api/core";
+import { backendClient } from "../services/backend";
 
 export const LOG_CONTEXT_KEY = Symbol("log");
 
@@ -88,16 +88,11 @@ export function createLogContext() {
 
   const totalPages = computed(() => Math.ceil(totalLogsCount.value / pageSize.value) || 1);
 
-  interface QueryLogsResult {
-    rows: LogRow[];
-    total_count: number;
-  }
-
   async function refreshLogMetadata() {
     try {
       const [ents, cats] = await Promise.all([
-        invoke<{ entity_id: number | null; entity_name: string | null }[]>("query_log_entities"),
-        invoke<{ category: string | null }[]>("query_log_categories"),
+        backendClient.queryLogEntities(),
+        backendClient.queryLogCategories(),
       ]);
       logEntities.value = ents
         .filter((e) => e.entity_id !== null)
@@ -110,7 +105,7 @@ export function createLogContext() {
 
   async function clearLogsDb() {
     try {
-      await invoke("clear_logs");
+      await backendClient.clearLogs();
     } catch {
       // ignore
     }
@@ -127,7 +122,7 @@ export function createLogContext() {
         offset = -1;
       }
 
-      const res = await invoke<QueryLogsResult>("query_logs", {
+      const res = await backendClient.queryLogs({
         offset,
         limit: pageSize.value,
         levels: selectedLevels.value.length < 4 ? selectedLevels.value : null,

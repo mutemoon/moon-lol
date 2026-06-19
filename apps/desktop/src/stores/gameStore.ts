@@ -1,36 +1,12 @@
 import { ref, watch } from "vue";
 import { defineStore } from "pinia";
-import { invoke } from "@tauri-apps/api/core";
 import { useWsClient } from "../composables/useWsClient";
 import { createLogContext } from "../composables/useLogPoller";
 import { router } from "../router";
+import { backendClient } from "../services/backend";
+import type { SpawnPreset, AgentPreset, HeroPreset } from "../services/backend";
 
-export interface SpawnPreset {
-  name: string;
-  x: number;
-  z: number;
-  team: string;
-}
-
-// Agent 预设：可复用的"策略大脑"（类型 + Prompt + 模型/前言），英雄无关。
-// 不再绑定具体英雄——英雄由"英雄预设"决定，英雄预设再引用 Agent 预设。
-export interface AgentPreset {
-  name: string;
-  agent_type: string;
-  prompt: string;
-  preamble?: string;
-  model?: string;
-}
-
-// 英雄预设：编排页槽位的唯一选择单元。
-// 内部绑定具体英雄 + 一个 Agent 预设（大脑）+ 一个出生点预设（坐标）。
-// 保存场景时，由编排页展开为具体 champion/prompt/spawn_point/agent_type 写入场景。
-export interface HeroPreset {
-  name: string;
-  champion: string;
-  agent_preset_name: string;
-  spawn_preset_name: string;
-}
+export type { SpawnPreset, AgentPreset, HeroPreset };
 
 export const BUILTIN_SPAWN_PRESETS: SpawnPreset[] = [
   {
@@ -103,7 +79,7 @@ export const useGameStore = defineStore("game", () => {
 
   async function loadSpawnPresets() {
     try {
-      const presets = await invoke<SpawnPreset[]>("list_spawn_presets");
+      const presets = await backendClient.listSpawnPresets();
       const merged = [...presets];
       for (const b of BUILTIN_SPAWN_PRESETS) {
         if (!merged.some((p) => p.name === b.name)) {
@@ -118,12 +94,12 @@ export const useGameStore = defineStore("game", () => {
   }
 
   async function saveSpawnPreset(preset: SpawnPreset) {
-    await invoke("save_spawn_preset", { preset });
+    await backendClient.saveSpawnPreset(preset);
     await loadSpawnPresets();
   }
 
   async function deleteSpawnPreset(name: string) {
-    await invoke("delete_spawn_preset", { name });
+    await backendClient.deleteSpawnPreset(name);
     await loadSpawnPresets();
   }
 
@@ -134,7 +110,7 @@ export const useGameStore = defineStore("game", () => {
 
   async function loadAgentPresets() {
     try {
-      const presets = await invoke<AgentPreset[]>("list_agent_presets");
+      const presets = await backendClient.listAgentPresets();
       const merged = [...presets];
       for (const b of BUILTIN_AGENT_PRESETS) {
         if (!merged.some((p) => p.name === b.name)) {
@@ -149,12 +125,12 @@ export const useGameStore = defineStore("game", () => {
   }
 
   async function saveAgentPreset(preset: AgentPreset) {
-    await invoke("save_agent_preset", { preset });
+    await backendClient.saveAgentPreset(preset);
     await loadAgentPresets();
   }
 
   async function deleteAgentPreset(name: string) {
-    await invoke("delete_agent_preset", { name });
+    await backendClient.deleteAgentPreset(name);
     await loadAgentPresets();
   }
 
@@ -164,7 +140,7 @@ export const useGameStore = defineStore("game", () => {
 
   async function loadHeroPresets() {
     try {
-      const presets = await invoke<HeroPreset[]>("list_hero_presets");
+      const presets = await backendClient.listHeroPresets();
       const merged = [...presets];
       for (const b of BUILTIN_HERO_PRESETS) {
         if (!merged.some((p) => p.name === b.name)) {
@@ -179,12 +155,12 @@ export const useGameStore = defineStore("game", () => {
   }
 
   async function saveHeroPreset(preset: HeroPreset) {
-    await invoke("save_hero_preset", { preset });
+    await backendClient.saveHeroPreset(preset);
     await loadHeroPresets();
   }
 
   async function deleteHeroPreset(name: string) {
-    await invoke("delete_hero_preset", { name });
+    await backendClient.deleteHeroPreset(name);
     await loadHeroPresets();
   }
 
@@ -194,9 +170,7 @@ export const useGameStore = defineStore("game", () => {
 
   async function loadWinCondition(sceneName: string) {
     try {
-      winCondition.value = await invoke<any | null>("load_scenario_win_condition", {
-        sceneName,
-      });
+      winCondition.value = await backendClient.loadScenarioWinCondition(sceneName);
     } catch (e) {
       console.error("加载胜利条件失败", e);
       winCondition.value = null;
@@ -205,12 +179,12 @@ export const useGameStore = defineStore("game", () => {
 
   async function saveWinCondition(sceneName: string, condition: any) {
     if (!sceneName.trim()) return;
-    await invoke("save_scenario_win_condition", { sceneName, condition });
+    await backendClient.saveScenarioWinCondition(sceneName, condition);
   }
 
   async function loadScenariosList() {
     try {
-      scenariosList.value = await invoke<string[]>("list_custom_scenarios");
+      scenariosList.value = await backendClient.listCustomScenarios();
     } catch (e) {
       console.error("加载自定义场景列表失败", e);
     }
@@ -218,7 +192,7 @@ export const useGameStore = defineStore("game", () => {
 
   async function loadHistoriesList() {
     try {
-      histories.value = await invoke<any[]>("list_game_histories");
+      histories.value = await backendClient.listGameHistories();
     } catch (e) {
       console.error("加载游戏历史记录失败", e);
     }
@@ -247,12 +221,10 @@ export const useGameStore = defineStore("game", () => {
     isStarting.value = true;
 
     try {
-      await invoke("start_game", {
-        config: {
-          mode: mode.value,
-          champion: champion.value,
-          sceneName: sceneName || null,
-        },
+      await backendClient.startGame({
+        mode: mode.value,
+        champion: champion.value,
+        sceneName: sceneName || null,
       });
     } catch (e: any) {
       launchError.value = typeof e === "string" ? e : e.message || "Unknown error";
@@ -270,7 +242,7 @@ export const useGameStore = defineStore("game", () => {
   function stopGame() {
     ws.disconnect();
     log.stop();
-    invoke("stop_game").catch(() => {});
+    backendClient.stopGame().catch(() => {});
     router.push("/");
   }
 

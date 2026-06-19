@@ -6,7 +6,8 @@ import AgentChatHistory from "../components/AgentChatHistory.vue";
 import { Button } from "../components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
 import { Badge } from "../components/ui/badge";
-import { listen } from "@tauri-apps/api/event";
+import { backendClient } from "../services/backend";
+import type { UnsubscribeFn } from "../services/backend";
 import { CommandIcon, StopCircleIcon } from "@lucide/vue";
 
 const store = useGameStore();
@@ -57,12 +58,12 @@ interface AgentHistory {
 const agentHistories = ref<Record<string, AgentHistory>>({});
 const selectedHistoryAgentId = ref<string>("");
 
-let unlistenHistory: (() => void) | null = null;
+let unlistenHistory: UnsubscribeFn | null = null;
 
 onMounted(async () => {
-  unlistenHistory = await listen<any>("agent-history-updated", (event) => {
-    console.log("[Debug Page] agent-history-updated", event);
-    const { agent_id, champion, history } = event.payload;
+  unlistenHistory = await backendClient.onAgentHistoryUpdated((payload) => {
+    console.log("[Debug Page] agent-history-updated", payload);
+    const { agent_id, champion, history } = payload;
     const formattedHistory = (history || []).map((msg: any) => {
       if (msg.User) {
         return { role: "user", content: msg.User.content };

@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed, provide, onMounted } from "vue";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { listen } from "@tauri-apps/api/event";
 import { useRoute, useRouter } from "vue-router";
+import { backendClient } from "./services/backend";
 import { storeToRefs } from "pinia";
 import { useGameStore } from "./stores/gameStore";
 import { LOG_CONTEXT_KEY } from "./composables/useLogPoller";
@@ -60,15 +60,10 @@ const viewTitles: Record<View, string> = {
   heroes: "英雄预设管理",
 };
 
-interface AgentFinishedPayload {
-  minion_kills: number;
-  gold: number;
-}
-
-listen<AgentFinishedPayload>("agent-finished", (event) => {
+backendClient.onAgentFinished((data) => {
   statsResult.value = {
-    minionKills: event.payload.minion_kills,
-    gold: event.payload.gold,
+    minionKills: data.minion_kills,
+    gold: data.gold,
   };
   showStatsModal.value = true;
 });

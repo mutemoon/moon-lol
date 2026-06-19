@@ -5,7 +5,7 @@ import { useGameStore } from "../stores/gameStore";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
 import { Input } from "../components/ui/input";
-import { invoke } from "@tauri-apps/api/core";
+import { backendClient } from "../services/backend";
 import { PlayIcon, SaveIcon, SparklesIcon } from "@lucide/vue";
 import TeamSlots from "../components/TeamSlots.vue";
 import {
@@ -107,7 +107,7 @@ const validSlots = computed(
 async function handleLoadScenario(name: string) {
   if (!name) return;
   try {
-    const agents = await invoke<any[]>("load_custom_scenario", { sceneName: name });
+    const agents = await backendClient.loadCustomScenario(name);
     // 确保预设列表已加载，反向匹配才有意义
     await Promise.all([store.loadHeroPresets(), store.loadAgentPresets(), store.loadSpawnPresets()]);
     blueSlots.value = fromBackend(
@@ -166,7 +166,7 @@ async function handleSaveConfig() {
     return;
   }
   try {
-    await invoke("save_custom_scenario", { sceneName: name, agents: buildAgents() });
+    await backendClient.saveCustomScenario(name, buildAgents());
     await store.saveWinCondition(name, store.winCondition);
     await loadScenariosList();
     selectedScenario.value = name;
@@ -186,7 +186,7 @@ async function handleLaunch() {
   }
   const name = currentSceneName.value.trim() || `custom_agents_${Date.now()}`;
   try {
-    await invoke("save_custom_scenario", { sceneName: name, agents: buildAgents() });
+    await backendClient.saveCustomScenario(name, buildAgents());
     await startGame(name);
   } catch (e: any) {
     error.value = typeof e === "string" ? e : e.message || "无法拉起自定义 AI 对战";

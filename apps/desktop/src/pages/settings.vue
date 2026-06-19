@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
-import { invoke } from "@tauri-apps/api/core";
+import { backendClient } from "../services/backend";
 import { useRouter } from "vue-router";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
@@ -89,7 +89,7 @@ const DEFAULT_PREAMBLE = `你是一个运行在 MOBA 游戏环境中的 AI Agent
 
 async function loadConfig() {
   try {
-    const config: any = await invoke("get_ai_config");
+    const config: any = await backendClient.getAiConfig();
     apiKey.value = config.api_key;
     baseUrl.value = config.base_url;
     preamble.value = config.preamble || DEFAULT_PREAMBLE;
@@ -104,12 +104,10 @@ async function saveConfig() {
   isSaving.value = true;
 
   try {
-    await invoke("set_ai_config", {
-      config: {
-        api_key: apiKey.value,
-        base_url: baseUrl.value,
-        preamble: preamble.value,
-      },
+    await backendClient.setAiConfig({
+      api_key: apiKey.value,
+      base_url: baseUrl.value,
+      preamble: preamble.value,
     });
     saveSuccess.value = true;
     setTimeout(() => {

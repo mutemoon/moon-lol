@@ -1,6 +1,6 @@
 import { ref } from "vue";
-import { invoke } from "@tauri-apps/api/core";
-import { listen, type UnlistenFn } from "@tauri-apps/api/event";
+import { backendClient } from "../services/backend";
+import type { WsResponse, WsEvent, UnsubscribeFn } from "../services/backend";
 
 // ── WS Protocol types ──
 
@@ -11,19 +11,7 @@ export interface WsRequest {
   params: Record<string, unknown>;
 }
 
-export interface WsResponse {
-  id: number;
-  type: "result";
-  ok: boolean;
-  data?: unknown;
-  error?: string;
-}
-
-export interface WsEvent {
-  type: "event";
-  event: "game_loaded" | "game_paused" | "champion_changed" | "game_close" | "entity_selected";
-  data: Record<string, unknown>;
-}
+export type { WsResponse, WsEvent };
 
 // ── Composable ──
 
@@ -40,7 +28,7 @@ export function useWsClient() {
 
   const selectedEntityId = ref<number | null>(null);
 
-  let unlisten: UnlistenFn | null = null;
+  let unlisten: UnsubscribeFn | null = null;
 
   async function connect(): Promise<void> {
     connecting.value = true;
@@ -50,11 +38,11 @@ export function useWsClient() {
       if (unlisten) {
         unlisten();
       }
-      unlisten = await listen<WsEvent>("ws-event", (event) => {
-        handleEvent(event.payload);
+      unlisten = await backendClient.onWsEvent((event) => {
+        handleEvent(event);
       });
 
-      await invoke("connect_ws");
+      await backendClient.connectWs();
       connected.value = true;
       connecting.value = false;
     } catch (err) {
@@ -75,7 +63,7 @@ export function useWsClient() {
       unlisten = null;
     }
     try {
-      await invoke("disconnect_ws");
+      await backendClient.disconnectWs();
     } catch {
       /* ignore */
     }
@@ -86,7 +74,7 @@ export function useWsClient() {
 
   async function send(cmd: string, params: Record<string, unknown> = {}): Promise<WsResponse> {
     try {
-      const data = await invoke<any>("send_ws_cmd", { cmd, params });
+      const data = await backendClient.sendWsCmd(cmd, params);
       return {
         id: 0,
         type: "result",
@@ -142,3 +130,4 @@ export function useWsClient() {
     send,
   };
 }
+
