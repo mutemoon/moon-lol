@@ -1,0 +1,28 @@
+[package]
+name = "lol_web_server"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+# Inherited from workspace
+tokio = { workspace = true, features = ["full"] }
+serde = { workspace = true, features = ["derive"] }
+serde_json.workspace = true
+futures-util.workspace = true
+tokio-tungstenite.workspace = true
+
+# Crate-specific dependencies
+axum = { version = "0.7.9", features = ["ws"] }
+tower-http = { version = "0.5.2", features = ["cors", "trace"] }
+tracing = "0.1.40"
+tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
+async-trait = "0.1.80"
+sqlx = { version = "0.8.3", default-features = false, features = ["runtime-tokio-native-tls", "postgres"] }
+bcrypt = "0.15"
+jsonwebtoken = "9.3"
+
+
+# Local crates in the workspace (we can depend on them if needed)
+rusqlite = { workspace = true, features = ["bundled"] }
+lol_core = { path = "../lol_core" }
+lol_server = { path = "../lol_server" }

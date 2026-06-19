@@ -6,6 +6,7 @@
   "scripts": {
     "build": "vue-tsc -b && vite build",
     "dev": "vite",
+    "dev:server": "cargo run -p lol_web_server",
     "preview": "vite preview"
   },
   "dependencies": {
