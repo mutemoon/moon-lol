@@ -1,20 +1,19 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
-import { CheckIcon, ChevronsUpDownIcon, PlusIcon } from "@lucide/vue";
+import { computed, ref, watch } from "vue";
+import { ChevronsUpDownIcon, PlusIcon, SearchIcon } from "@lucide/vue";
 import { Button } from "./ui/button";
 import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-  CommandSeparator,
-} from "./ui/command";
-import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+  DropdownMenuCheckboxItem,
+  DropdownMenuSeparator,
+  DropdownMenuItem,
+} from "./ui/dropdown-menu";
+import { InputGroup, InputGroupAddon, InputGroupInput } from "./ui/input-group";
 import { cn } from "@/lib/utils";
 
-// 通用「预设选择器」：combobox（Popover + Command），支持搜索，末尾内置「＋ 新建预设」入口。
+// 通用「预设选择器」：采用 DropdownMenu + DropdownMenuCheckboxItem 结构，支持搜索，末尾内置「＋ 新建预设」入口。
 // 这是产品文档 §3.0 设计原则的核心交互：编排页只做下拉选择，新建走独立管理页。
 //
 // 用法：
@@ -54,10 +53,31 @@ const emit = defineEmits<{
 }>();
 
 const open = ref(false);
+const searchQuery = ref("");
 
 // 直接使用父组件传入的 presets（store 的 load* 已把内置预设 merge 进去）。
-// 不再在此按 subtitleKey 猜测补全——那会把出生点内置预设错塞进 Agent 选择器。
 const selectedLabel = computed(() => props.presets.find((p) => p.name === props.modelValue)?.name ?? "");
+
+const filteredPresets = computed(() => {
+  const query = searchQuery.value.trim().toLowerCase();
+  if (!query) return props.presets;
+  return props.presets.filter((p) => {
+    const nameMatch = p.name.toLowerCase().includes(query);
+    if (props.subtitleKey) {
+      const sub = p[props.subtitleKey];
+      if (sub && String(sub).toLowerCase().includes(query)) {
+        return true;
+      }
+    }
+    return nameMatch;
+  });
+});
+
+watch(open, (val) => {
+  if (!val) {
+    searchQuery.value = "";
+  }
+});
 
 function subtitle(p: Preset): string {
   if (!props.subtitleKey) return "";
@@ -77,12 +97,10 @@ function onNew() {
 </script>
 
 <template>
-  <Popover v-model:open="open">
-    <PopoverTrigger as-child>
+  <DropdownMenu v-model:open="open">
+    <DropdownMenuTrigger as-child>
       <Button
         variant="outline"
-        role="combobox"
-        :aria-expanded="open"
         :disabled="disabled"
         :class="cn('justify-between font-normal', triggerClass)"
         class="bg-muted/40 border-border text-foreground hover:bg-muted/40 h-8 px-2.5 text-xs"
@@ -91,42 +109,55 @@ function onNew() {
         <span v-else class="text-muted-foreground truncate">{{ placeholder }}</span>
         <ChevronsUpDownIcon class="text-muted-foreground ml-2 size-3.5 shrink-0 opacity-50" />
       </Button>
-    </PopoverTrigger>
-    <PopoverContent
-      class="popover-content-width bg-popover text-popover-foreground w-[var(--reka-popover-trigger-width)] min-w-52 p-0"
+    </DropdownMenuTrigger>
+    <DropdownMenuContent
+      class="bg-popover text-popover-foreground w-[var(--reka-dropdown-menu-trigger-width)] min-w-52 p-0"
     >
-      <Command>
-        <CommandInput :placeholder="searchPlaceholder" class="h-8" />
-        <CommandList>
-          <CommandEmpty>未找到匹配的预设</CommandEmpty>
-          <CommandGroup>
-            <CommandItem
-              v-for="p in presets"
-              :key="p.name"
-              :value="p.name"
-              @select="() => pick(p.name)"
-              class="text-xs"
-            >
-              <CheckIcon :class="cn('mr-2 size-3.5', modelValue === p.name ? 'opacity-100' : 'opacity-0')" />
-              <span class="flex min-w-0 flex-1 items-center justify-between gap-2">
-                <span class="truncate font-medium">{{ p.name }}</span>
-                <span v-if="subtitle(p)" class="text-muted-foreground truncate text-[10px]">
-                  {{ subtitle(p) }}
-                </span>
-              </span>
-            </CommandItem>
-          </CommandGroup>
+      <div data-slot="command-input-wrapper" class="p-1 border-b border-border">
+        <InputGroup class="border-0 !bg-transparent hover:border-input-border-hover h-8">
+          <InputGroupInput
+            v-model="searchQuery"
+            data-slot="command-input"
+            :placeholder="searchPlaceholder"
+            class="w-full text-[13px]/relaxed text-foreground outline-hidden placeholder:text-foreground-subtlest disabled:cursor-not-allowed disabled:opacity-50"
+          />
+          <InputGroupAddon align="inline-start" class="pl-2">
+            <SearchIcon class="size-4 shrink-0 text-foreground-subtlest" />
+          </InputGroupAddon>
+        </InputGroup>
+      </div>
 
-          <CommandSeparator />
-          <!-- 新建入口：刻意放在 CommandGroup 之外，避免被搜索过滤或当作可选预设 -->
-          <CommandGroup>
-            <CommandItem :value="`__new__${newLabel}`" @select="onNew" class="text-xs">
-              <PlusIcon class="text-primary mr-2 size-3.5" />
-              <span class="text-primary font-semibold">{{ newLabel }}</span>
-            </CommandItem>
-          </CommandGroup>
-        </CommandList>
-      </Command>
-    </PopoverContent>
-  </Popover>
+      <div class="p-1">
+        <div v-if="filteredPresets.length === 0" class="text-muted-foreground p-3 text-center text-xs">
+          未找到匹配的预设
+        </div>
+
+        <DropdownMenuCheckboxItem
+          v-for="p in filteredPresets"
+          :key="p.name"
+          :checked="modelValue === p.name"
+          @select="() => pick(p.name)"
+          class="text-xs"
+        >
+          <span class="flex min-w-0 flex-1 items-center justify-between gap-2">
+            <span class="truncate font-medium">{{ p.name }}</span>
+            <span v-if="subtitle(p)" class="text-muted-foreground truncate text-[10px]">
+              {{ subtitle(p) }}
+            </span>
+          </span>
+        </DropdownMenuCheckboxItem>
+
+        <DropdownMenuSeparator />
+
+        <DropdownMenuItem
+          @select="onNew"
+          class="text-xs"
+        >
+          <PlusIcon class="text-primary mr-2 size-3.5" />
+          <span class="text-primary font-semibold">{{ newLabel }}</span>
+        </DropdownMenuItem>
+      </div>
+    </DropdownMenuContent>
+  </DropdownMenu>
 </template>
+
