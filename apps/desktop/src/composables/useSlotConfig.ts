@@ -67,12 +67,13 @@ export function overrideSpawn(slot: Slot, name: string) {
 }
 
 // 槽位副标题：英雄 · Agent 类型（取当前展开值，而非反查预设）
+// 槽位副标题：英雄 · Agent 类型（取当前展开值，而非反查预设）
 export function slotSubtitle(slot: Slot, agentPresets: AgentPreset[]): string {
   if (!slot.champion) return "";
   const agent = slot.agentPresetName
     ? agentPresets.find((p) => p.name === slot.agentPresetName)
     : undefined;
-  const typeTag = agent ? agent.agent_type.toUpperCase() : "默认";
+  const typeTag = agent ? agent.agent_type.toUpperCase() : "DEFAULT";
   return `${slot.champion} · ${typeTag}`;
 }
 
@@ -171,12 +172,12 @@ export function fromBackend(
 }
 
 // 「存为新预设」自动命名：重名时追加 · 副本 2/3…
-export function uniquePresetName(base: string, heroPresets: HeroPreset[]): string {
+export function uniquePresetName(base: string, heroPresets: HeroPreset[], suffix: string = "副本"): string {
   const exists = (n: string) => heroPresets.some((p) => p.name === n);
   if (!exists(base)) return base;
   let i = 2;
-  while (exists(`${base} · 副本 ${i}`)) i++;
-  return `${base} · 副本 ${i}`;
+  while (exists(`${base} · ${suffix} ${i}`)) i++;
+  return `${base} · ${suffix} ${i}`;
 }
 
 // 把槽位的预设引用绑定回某个英雄预设名（存为新预设后回填用）

@@ -3,6 +3,7 @@ import { ref, computed, onMounted } from "vue";
 import { storeToRefs } from "pinia";
 import { useGameStore, type HeroPreset } from "../stores/gameStore";
 import { useRouter, useRoute } from "vue-router";
+import { useLocale } from "../composables/useLocale";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
 import { Input } from "../components/ui/input";
@@ -32,6 +33,7 @@ const store = useGameStore();
 const { heroPresets, champions, agentPresets, spawnPresets } = storeToRefs(store);
 const router = useRouter();
 const route = useRoute();
+const { t } = useLocale();
 
 const selectedName = ref<string | null>(null);
 const errorMsg = ref("");
@@ -70,15 +72,15 @@ async function handleSave() {
   errorMsg.value = "";
   const name = draft.value.name.trim();
   if (!name) {
-    errorMsg.value = "请填写预设名称";
+    errorMsg.value = t("heroes.errorFillName");
     return;
   }
   try {
     await store.saveHeroPreset({ ...draft.value, name });
     selectedName.value = name;
-    errorMsg.value = "保存成功";
+    errorMsg.value = t("heroes.successSave");
   } catch (e: any) {
-    errorMsg.value = e.message || "保存失败";
+    errorMsg.value = e.message || t("heroes.errorSave");
   }
 }
 
@@ -90,7 +92,7 @@ async function confirmDelete() {
     draft.value = emptyDraft();
     showDeleteConfirm.value = false;
   } catch (e: any) {
-    errorMsg.value = e.message || "删除失败";
+    errorMsg.value = e.message || t("heroes.errorDelete");
   }
 }
 
@@ -122,13 +124,13 @@ onMounted(async () => {
           <SwordsIcon class="text-primary size-4" />
         </div>
         <div class="flex items-baseline gap-2">
-          <h1 class="text-foreground text-sm font-bold tracking-tight">英雄预设管理</h1>
-          <Badge variant="secondary" class="text-[10px]">{{ heroPresets.length }} 个</Badge>
+          <h1 class="text-foreground text-sm font-bold tracking-tight">{{ t("heroes.title") }}</h1>
+          <Badge variant="secondary" class="text-[10px]">{{ heroPresets.length }}{{ t("heroes.countUnit") }}</Badge>
         </div>
       </div>
       <Button variant="outline" size="xs" class="h-7 gap-1 text-[11px]" @click="startNew">
         <PlusIcon class="size-3" />
-        新建预设
+        {{ t("heroes.newPreset") }}
       </Button>
     </header>
 
@@ -136,11 +138,11 @@ onMounted(async () => {
       <!-- 左：预设列表 -->
       <aside class="border-border bg-card w-60 shrink-0 overflow-hidden rounded-lg border shadow-sm">
         <div class="border-border shrink-0 border-b px-3 py-2 text-[11px] font-bold uppercase tracking-wide">
-          预设列表
+          {{ t("heroes.listTitle") }}
         </div>
         <div class="min-h-0 flex-1 overflow-y-auto p-2">
           <div v-if="heroPresets.length === 0" class="text-muted-foreground py-6 text-center text-xs italic">
-            暂无预设
+            {{ t("heroes.emptyList") }}
           </div>
           <div v-else class="flex flex-col gap-1">
             <button
@@ -162,7 +164,7 @@ onMounted(async () => {
       <!-- 右：编辑表单 -->
       <section class="border-border bg-card min-w-0 flex-1 overflow-y-auto rounded-lg border p-5 shadow-sm">
         <div v-if="errorMsg" class="border-border mb-3 rounded border-l-2 px-3 py-1.5 text-xs"
-          :class="errorMsg === '保存成功' ? 'border-green-500 text-green-500 bg-green-500/5' : 'border-destructive text-destructive bg-destructive/5'">
+          :class="errorMsg === t('heroes.successSave') ? 'border-green-500 text-green-500 bg-green-500/5' : 'border-destructive text-destructive bg-destructive/5'">
           {{ errorMsg }}
         </div>
 
@@ -171,17 +173,17 @@ onMounted(async () => {
           <div class="grid grid-cols-2 gap-3">
             <div>
               <label class="text-muted-foreground mb-1 block text-[10px] font-semibold uppercase tracking-wider">
-                预设名称
+                {{ t("heroes.presetName") }}
               </label>
               <Input
                 v-model="draft.name"
-                placeholder="如：锐雯 · 激进压制"
+                :placeholder="t('heroes.presetNamePlaceholder')"
                 class="border-border bg-muted/40 h-9 text-sm"
               />
             </div>
             <div>
               <label class="text-muted-foreground mb-1 block text-[10px] font-semibold uppercase tracking-wider">
-                英雄
+                {{ t("heroes.heroLabel") }}
               </label>
               <Select v-model="draft.champion">
                 <SelectTrigger class="bg-muted/40 border-border h-9 text-sm">
@@ -199,13 +201,13 @@ onMounted(async () => {
           <!-- 绑定的 Agent 预设 -->
           <div>
             <label class="text-muted-foreground mb-1 block text-[10px] font-semibold uppercase tracking-wider">
-              绑定 Agent 预设（大脑）
+              {{ t("heroes.bindAgent") }}
             </label>
             <PresetSelect
               :presets="agentPresets"
               :model-value="draft.agent_preset_name"
-              placeholder="选择 Agent 预设…"
-              new-label="＋ 新建 Agent 预设"
+              :placeholder="t('heroes.selectAgentPlaceholder')"
+              :new-label="t('heroes.newAgentLabel')"
               :subtitle-key="'agent_type'"
               @update:model-value="(v) => (draft.agent_preset_name = v)"
               @new="router.push('/agents')"
@@ -215,13 +217,13 @@ onMounted(async () => {
           <!-- 绑定的出生点预设 -->
           <div>
             <label class="text-muted-foreground mb-1 block text-[10px] font-semibold uppercase tracking-wider">
-              绑定出生点预设
+              {{ t("heroes.bindSpawn") }}
             </label>
             <PresetSelect
               :presets="spawnPresets"
               :model-value="draft.spawn_preset_name"
-              placeholder="选择出生点预设…"
-              new-label="＋ 新建出生点预设"
+              :placeholder="t('heroes.selectSpawnPlaceholder')"
+              :new-label="t('heroes.newSpawnLabel')"
               @update:model-value="(v) => (draft.spawn_preset_name = v)"
               @new="router.push('/spawn-presets')"
             />
@@ -229,14 +231,16 @@ onMounted(async () => {
 
           <!-- 绑定摘要 -->
           <div v-if="draft.agent_preset_name || draft.spawn_preset_name" class="bg-muted/40 border-border rounded-md border px-3 py-2">
-            <div class="text-muted-foreground mb-1 text-[10px] font-semibold uppercase tracking-wider">展开预览</div>
-            <div class="text-foreground font-mono text-xs leading-relaxed">
-              英雄 <strong>{{ draft.champion }}</strong> · Agent
-              <strong class="text-primary">{{ draft.agent_preset_name || "（未选）" }}</strong>
-              <span v-if="boundAgentSubtitle" class="text-muted-foreground">[{{ boundAgentSubtitle }}]</span>
-              · 出生点
-              <strong>{{ draft.spawn_preset_name || "（未选）" }}</strong>
-              <span v-if="boundSpawnSubtitle" class="text-muted-foreground">[{{ boundSpawnSubtitle }}]</span>
+            <div class="text-muted-foreground mb-1 text-[10px] font-semibold uppercase tracking-wider">{{ t("heroes.previewTitle") }}</div>
+            <div class="text-foreground font-mono text-xs leading-relaxed"
+              v-html="t('heroes.previewText', {
+                champion: draft.champion,
+                agent: draft.agent_preset_name || t('heroes.notSelected'),
+                agentSub: boundAgentSubtitle ? `[${boundAgentSubtitle}]` : '',
+                spawn: draft.spawn_preset_name || t('heroes.notSelected'),
+                spawnSub: boundSpawnSubtitle ? `[${boundSpawnSubtitle}]` : ''
+              })"
+            >
             </div>
           </div>
 
@@ -244,7 +248,7 @@ onMounted(async () => {
           <div class="border-border mt-2 flex items-center gap-2 border-t pt-4">
             <Button class="gap-1.5" :disabled="!draft.name.trim()" @click="handleSave">
               <SaveIcon class="size-3.5" />
-              保存预设
+              {{ t("heroes.saveBtn") }}
             </Button>
             <Button
               v-if="selectedName"
@@ -253,7 +257,7 @@ onMounted(async () => {
               @click="showDeleteConfirm = true"
             >
               <Trash2Icon class="size-3.5" />
-              删除
+              {{ t("heroes.deleteBtn") }}
             </Button>
           </div>
         </div>
@@ -264,14 +268,14 @@ onMounted(async () => {
     <Dialog :open="showDeleteConfirm" @update:open="(v) => (showDeleteConfirm = v)">
       <DialogContent class="border-border bg-card text-foreground max-w-sm p-6">
         <DialogHeader>
-          <DialogTitle class="text-foreground text-sm">删除预设「{{ selectedName }}」？</DialogTitle>
+          <DialogTitle class="text-foreground text-sm">{{ t("heroes.deleteConfirmTitle", { name: selectedName }) }}</DialogTitle>
           <DialogDescription class="text-muted-foreground text-[11px]">
-            该操作不可撤销。引用此预设的场景槽位需手动重新选择。
+            {{ t("heroes.deleteConfirmDesc") }}
           </DialogDescription>
         </DialogHeader>
         <DialogFooter class="gap-2">
-          <Button variant="outline" size="sm" @click="showDeleteConfirm = false">取消</Button>
-          <Button variant="destructive" size="sm" @click="confirmDelete">删除</Button>
+          <Button variant="outline" size="sm" @click="showDeleteConfirm = false">{{ t("heroes.cancelBtn") }}</Button>
+          <Button variant="destructive" size="sm" @click="confirmDelete">{{ t("heroes.confirmDeleteBtn") }}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

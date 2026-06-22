@@ -2,11 +2,11 @@
 import { ref, computed, watch, onMounted } from "vue";
 import { storeToRefs } from "pinia";
 import { useGameStore } from "../stores/gameStore";
+import { useLocale } from "../composables/useLocale";
 import { Button } from "../components/ui/button";
-import { Badge } from "../components/ui/badge";
 import { Input } from "../components/ui/input";
 import { backendClient } from "../services/backend";
-import { PlayIcon, SaveIcon, SparklesIcon } from "@lucide/vue";
+import { PlayIcon, SaveIcon } from "@lucide/vue";
 import TeamSlots from "../components/TeamSlots.vue";
 import {
   Dialog,
@@ -43,6 +43,7 @@ const {
 } = storeToRefs(store);
 const { ws } = store;
 const { startGame, stopGame, loadScenariosList } = store;
+const { t, locale } = useLocale();
 
 const blueSlots = ref<Slot[]>([emptySlot()]);
 const redSlots = ref<Slot[]>([emptySlot()]);
@@ -50,10 +51,10 @@ const redSlots = ref<Slot[]>([emptySlot()]);
 const currentSceneName = ref("default_scenario");
 
 // 阵营配色：唯一区分红蓝的地方。
-const TEAMS = {
+const TEAMS = computed(() => ({
   blue: {
     team: {
-      label: "Order / 秩序",
+      label: t("spawnPresets.teamOrder"),
       dot: "bg-muted-foreground/60",
       titleText: "text-foreground",
       panel: "border-blue-500 bg-card",
@@ -70,7 +71,7 @@ const TEAMS = {
   },
   red: {
     team: {
-      label: "Chaos / 混沌",
+      label: t("spawnPresets.teamChaos"),
       dot: "bg-muted-foreground/60",
       titleText: "text-foreground",
       panel: "border-red-500 bg-card",
@@ -85,7 +86,7 @@ const TEAMS = {
       inheritBadge: "border-border text-muted-foreground",
     },
   },
-} as const;
+}));
 
 
 // 各阵营槽位操作的统一封装（避免模板里写两遍）
@@ -98,7 +99,6 @@ function makeHandlers(slotsRef: typeof blueSlots) {
 const blueHandlers = makeHandlers(blueSlots);
 const redHandlers = makeHandlers(redSlots);
 
-const totalSlots = computed(() => blueSlots.value.length + redSlots.value.length);
 const validSlots = computed(
   () => blueSlots.value.filter((s) => s.champion).length + redSlots.value.filter((s) => s.champion).length,
 );
@@ -126,12 +126,12 @@ async function handleLoadScenario(name: string) {
     error.value = "";
     await store.loadWinCondition(name);
   } catch (e: any) {
-    error.value = e.message || (typeof e === "string" ? e : "无法加载指定的配置");
+    error.value = e.message || (typeof e === "string" ? e : t("launcher.loadFailed"));
   }
 }
 
 function handleNewScenario() {
-  currentSceneName.value = "new_scenario";
+  currentSceneName.value = locale.value === "zh" ? t("launcher.newScenarioDefaultZh") : t("launcher.newScenarioDefaultEn");
   blueSlots.value = [emptySlot()];
   redSlots.value = [emptySlot()];
   store.winCondition = null;
@@ -158,11 +158,11 @@ async function handleSaveConfig() {
   error.value = "";
   const name = currentSceneName.value.trim();
   if (!name) {
-    error.value = "请输入场景命名！";
+    error.value = t("launcher.errorSceneNameRequired");
     return;
   }
   if (validSlots.value === 0) {
-    error.value = "每个槽位需选择一个英雄预设";
+    error.value = t("launcher.errorHeroPresetRequired");
     return;
   }
   try {
@@ -170,9 +170,9 @@ async function handleSaveConfig() {
     await store.saveWinCondition(name, store.winCondition);
     await loadScenariosList();
     selectedScenario.value = name;
-    error.value = `配置 "${name}" 保存成功！`;
+    error.value = t("launcher.saveSuccess", { name });
   } catch (e: any) {
-    error.value = e.message || (typeof e === "string" ? e : "保存配置失败");
+    error.value = e.message || (typeof e === "string" ? e : t("launcher.saveFailed"));
   }
 }
 
@@ -180,7 +180,7 @@ async function handleLaunch() {
   isStarting.value = true;
   error.value = "";
   if (validSlots.value === 0) {
-    error.value = "请至少为一个槽位选择英雄预设！";
+    error.value = t("launcher.errorLaunchHeroPresetRequired");
     isStarting.value = false;
     return;
   }
@@ -189,7 +189,7 @@ async function handleLaunch() {
     await backendClient.saveCustomScenario(name, buildAgents());
     await startGame(name);
   } catch (e: any) {
-    error.value = typeof e === "string" ? e : e.message || "无法拉起自定义 AI 对战";
+    error.value = typeof e === "string" ? e : e.message || t("launcher.errorLaunchFailed");
     isStarting.value = false;
   }
 }
@@ -205,10 +205,10 @@ function openSaveAs(slot: Slot) {
   // 预填命名：原预设名优先；否则 英雄 · Agent类型
   const base =
     slot.heroPresetName ||
-    `${slot.champion || "英雄"} · ${
+    `${slot.champion || t("heroes.heroLabel")} · ${
       agentPresets.value.find((p) => p.name === slot.agentPresetName)?.agent_type.toUpperCase() ?? "LLM"
     }`;
-  saveAsName.value = uniquePresetName(`${base} · 副本`, heroPresets.value);
+  saveAsName.value = uniquePresetName(`${base} · ${t("launcher.copySuffix")}`, heroPresets.value);
   saveAsError.value = "";
   showSaveAsDialog.value = true;
 }
@@ -218,7 +218,7 @@ async function confirmSaveAs() {
   saveAsError.value = "";
   const name = saveAsName.value.trim();
   if (!name) {
-    saveAsError.value = "请填写预设名称";
+    saveAsError.value = t("heroes.errorFillName");
     return;
   }
   const slot = saveAsTarget.value;
@@ -229,12 +229,12 @@ async function confirmSaveAs() {
       agent_preset_name: slot.agentPresetName,
       spawn_preset_name: slot.spawnPresetName,
     });
-    // 回填：槽位重新绑定到新预设，恢复"继承"态
+    // 回填：槽位重新绑定 to 新预设，恢复"继承"态
     rebindSlot(slot, name);
     showSaveAsDialog.value = false;
     saveAsTarget.value = null;
   } catch (e: any) {
-    saveAsError.value = e.message || (typeof e === "string" ? e : "保存失败");
+    saveAsError.value = e.message || (typeof e === "string" ? e : t("heroes.errorSave"));
   }
 }
 
@@ -254,48 +254,19 @@ onMounted(() => {
       class="bg-background/90 fixed inset-0 z-50 flex flex-col items-center justify-center gap-4 backdrop-blur-md"
     >
       <div class="border-border border-t-primary h-10 w-10 animate-spin rounded-full border-2"></div>
-      <p class="text-foreground text-sm font-medium tracking-wide">正在连接 Bevy 游戏进程...</p>
+      <p class="text-foreground text-sm font-medium tracking-wide">{{ t("launcher.connecting") }}</p>
       <Button
         variant="outline"
         size="sm"
         class="hover:bg-destructive hover:text-destructive-foreground mt-2 h-9 px-8 text-xs"
         @click="stopGame"
       >
-        取消并终止进程
+        {{ t("launcher.cancelLaunch") }}
       </Button>
     </div>
 
-    <!-- 顶部紧凑 Header：场景命名 + 保存 -->
-    <header
-      class="border-border bg-card flex shrink-0 flex-wrap items-center justify-between gap-3 rounded-lg border px-4 py-2.5 shadow-sm"
-    >
-      <div class="flex items-center gap-2.5">
-        <div class="from-primary to-primary/60 flex size-8 items-center justify-center rounded-lg bg-gradient-to-tr">
-          <SparklesIcon class="text-primary-foreground size-4" />
-        </div>
-        <div class="flex items-baseline gap-2">
-          <h1 class="text-foreground text-sm font-bold tracking-tight">对局编排</h1>
-          <Badge variant="secondary" class="text-[10px]">{{ validSlots }}/{{ totalSlots }} 槽位</Badge>
-        </div>
-      </div>
-
-      <div class="flex flex-wrap items-center gap-2">
-        <span class="text-muted-foreground text-[10px] font-semibold tracking-wider uppercase">场景</span>
-        <Input
-          v-model="currentSceneName"
-          type="text"
-          class="border-border bg-muted/50 text-foreground h-7 w-44 rounded px-2 font-mono text-[11px]"
-          placeholder="scenario name"
-        />
-        <Button variant="outline" size="xs" class="h-7 gap-1 text-[11px]" @click="handleSaveConfig">
-          <SaveIcon class="size-3" />
-          保存
-        </Button>
-      </div>
-    </header>
-
     <!-- 双阵营并排卡片（结构一致，配色由 TEAMS 注入） -->
-    <div class="mt-3 grid min-h-0 flex-1 grid-cols-1 gap-3 md:grid-cols-2">
+    <div class="grid min-h-0 flex-1 grid-cols-1 gap-3 md:grid-cols-2">
       <TeamSlots
         :slots="blueSlots"
         :hero-presets="heroPresets"
@@ -320,68 +291,93 @@ onMounted(() => {
       />
     </div>
 
-    <!-- 底栏：模式 + 启动 -->
+    <!-- 合并控制底栏 -->
     <footer
-      class="border-border bg-card mt-3 flex shrink-0 items-center justify-between gap-3 rounded-lg border px-4 py-2.5 shadow-sm"
+      class="border-border bg-card mt-3 flex shrink-0 flex-wrap items-center justify-between gap-3 rounded-lg border px-4 py-2.5 shadow-sm"
     >
-      <div class="flex flex-wrap items-center gap-3">
-        <span class="text-muted-foreground text-[10px] font-semibold tracking-wider uppercase">模式</span>
-        <div class="bg-muted flex rounded-md p-0.5">
-          <button
-            class="rounded px-2.5 py-0.5 text-[11px] font-semibold transition-colors"
-            :class="mode === 'agent' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground'"
-            @click="mode = 'agent'"
-          >
-            AI 决策
-          </button>
-          <button
-            class="rounded px-2.5 py-0.5 text-[11px] font-semibold transition-colors"
-            :class="mode === 'sandbox' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground'"
-            @click="mode = 'sandbox'"
-          >
-            沙盒
-          </button>
+      <!-- 左侧控制：对局模式 -->
+      <div class="flex flex-wrap items-center gap-4">
+
+        <div class="flex items-center gap-2">
+          <span class="text-muted-foreground text-[10px] font-semibold tracking-wider uppercase">{{ t("launcher.modeLabel") }}</span>
+          <div class="bg-muted flex rounded-md p-0.5">
+            <button
+              class="rounded px-2.5 py-0.5 text-[11px] font-semibold transition-colors"
+              :class="mode === 'agent' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground'"
+              @click="mode = 'agent'"
+            >
+              {{ t("launcher.modeAgent") }}
+            </button>
+            <button
+              class="rounded px-2.5 py-0.5 text-[11px] font-semibold transition-colors"
+              :class="mode === 'sandbox' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground'"
+              @click="mode = 'sandbox'"
+            >
+              {{ t("launcher.modeSandbox") }}
+            </button>
+          </div>
         </div>
-        <div v-if="error" class="text-destructive text-[11px] font-medium">{{ error }}</div>
       </div>
-      <Button
-        size="sm"
-        class="bg-primary text-primary-foreground hover:bg-primary/90 h-8 gap-1.5 px-6 font-semibold shadow"
-        :disabled="isStarting || validSlots === 0"
-        @click="handleLaunch"
-      >
-        <PlayIcon class="size-3.5" />
-        启动对局
-      </Button>
+
+      <!-- 右侧控制：错误信息、场景配置、保存、启动对局 -->
+      <div class="flex flex-wrap items-center gap-3">
+        <div v-if="error" class="text-destructive text-[11px] font-medium mr-2">{{ error }}</div>
+
+        <div class="flex items-center gap-2">
+          <span class="text-muted-foreground text-[10px] font-semibold tracking-wider uppercase">{{ t("launcher.scenarioLabel") }}</span>
+          <Input
+            v-model="currentSceneName"
+            type="text"
+            class="border-border bg-muted/50 text-foreground h-7 w-36 rounded px-2 font-mono text-[11px]"
+            :placeholder="t('launcher.scenarioPlaceholder')"
+          />
+          <Button variant="outline" size="xs" class="h-7 gap-1 text-[11px]" @click="handleSaveConfig">
+            <SaveIcon class="size-3" />
+            {{ t("launcher.saveBtn") }}
+          </Button>
+        </div>
+
+        <div class="h-4 w-px bg-border/60" />
+
+        <Button
+          size="sm"
+          class="bg-primary text-primary-foreground hover:bg-primary/90 h-8 gap-1.5 px-6 font-semibold shadow"
+          :disabled="isStarting || validSlots === 0"
+          @click="handleLaunch"
+        >
+          <PlayIcon class="size-3.5" />
+          {{ t("launcher.launchBtn") }}
+        </Button>
+      </div>
     </footer>
 
     <!-- 「存为新预设」Dialog -->
     <Dialog :open="showSaveAsDialog" @update:open="(v) => (showSaveAsDialog = v)">
       <DialogContent class="border-border bg-card text-foreground max-w-sm p-6">
         <DialogHeader>
-          <DialogTitle class="text-foreground text-sm">将临时配置存为新英雄预设</DialogTitle>
+          <DialogTitle class="text-foreground text-sm">{{ t("launcher.dialogTitle") }}</DialogTitle>
           <DialogDescription class="text-muted-foreground text-[11px]">
-            当前槽位已与原预设解绑。保存后槽位会重新绑定到这个新预设，原预设不会被修改。
+            {{ t("launcher.dialogDesc") }}
           </DialogDescription>
         </DialogHeader>
         <div class="flex flex-col gap-2 py-1">
-          <label class="text-muted-foreground text-[10px] font-semibold tracking-wider uppercase">新预设名称</label>
+          <label class="text-muted-foreground text-[10px] font-semibold tracking-wider uppercase">{{ t("launcher.dialogNameLabel") }}</label>
           <Input
             v-model="saveAsName"
-            placeholder="如：锐雯 · 激进压制 · 副本"
+            :placeholder="t('launcher.dialogNamePlaceholder')"
             class="border-border bg-muted/40 h-9 text-sm"
           />
           <div v-if="saveAsTarget" class="text-muted-foreground mt-1 font-mono text-[10px]">
-            {{ saveAsTarget.champion }} · {{ saveAsTarget.agentPresetName || "（无大脑）" }} ·
-            {{ saveAsTarget.spawnPresetName || "（默认出生点）" }}
+            {{ saveAsTarget.champion }} · {{ saveAsTarget.agentPresetName || t("launcher.noBrain") }} ·
+            {{ saveAsTarget.spawnPresetName || t("launcher.defaultSpawn") }}
           </div>
           <div v-if="saveAsError" class="text-destructive text-[11px] font-medium">{{ saveAsError }}</div>
         </div>
         <DialogFooter class="gap-2">
-          <Button variant="outline" size="sm" @click="showSaveAsDialog = false">取消</Button>
+          <Button variant="outline" size="sm" @click="showSaveAsDialog = false">{{ t("launcher.dialogCancelBtn") }}</Button>
           <Button size="sm" class="gap-1.5" @click="confirmSaveAs">
             <SaveIcon class="size-3.5" />
-            保存为新预设
+            {{ t("launcher.dialogSaveBtn") }}
           </Button>
         </DialogFooter>
       </DialogContent>

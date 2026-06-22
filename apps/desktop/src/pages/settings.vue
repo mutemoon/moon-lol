@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
 import { backendClient } from "../services/backend";
 import { useRouter } from "vue-router";
+import { useLocale } from "../composables/useLocale";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Textarea } from "../components/ui/textarea";
@@ -24,6 +25,7 @@ import {
 } from "@lucide/vue";
 
 const router = useRouter();
+const { t, locale, availableLocales } = useLocale();
 
 const currentTab = ref<
   | "general"
@@ -38,8 +40,18 @@ const currentTab = ref<
 >("general");
 
 // General settings state (ZCode mock configs)
-const selectedTheme = ref("dark");
-const selectedLanguage = ref("zh");
+const selectedTheme = ref(localStorage.getItem("theme") || "dark");
+
+watch(selectedTheme, (val) => {
+  localStorage.setItem("theme", val);
+  if (val === "dark") {
+    document.documentElement.classList.add("dark");
+  } else {
+    document.documentElement.classList.remove("dark");
+  }
+}, { immediate: true });
+
+// locale 切换由 useLocale().locale 的 setter 接管（写 localStorage + 切 i18n 实例）
 const textScale = ref("normal"); // small | normal | large
 const inheritTerminalProfile = ref(true);
 const terminalFont = ref("MesloLGS NF, monospace");
@@ -94,7 +106,7 @@ async function loadConfig() {
     baseUrl.value = config.base_url;
     preamble.value = config.preamble || DEFAULT_PREAMBLE;
   } catch (e: any) {
-    saveError.value = "加载 AI 核心配置失败: " + e;
+    saveError.value = t("settings.model.loadFailed", { error: e.message || e });
   }
 }
 
@@ -114,7 +126,7 @@ async function saveConfig() {
       saveSuccess.value = false;
     }, 3000);
   } catch (e: any) {
-    saveError.value = typeof e === "string" ? e : e.message || "未知错误";
+    saveError.value = typeof e === "string" ? e : e.message || t("settings.model.unknownError");
   } finally {
     isSaving.value = false;
   }
@@ -136,7 +148,7 @@ onMounted(() => {
         @click="router.push('/')"
       >
         <ArrowLeftIcon class="size-3.5" />
-        <span>返回工作区</span>
+        <span>{{ t('settings.backToWorkspace') }}</span>
       </Button>
 
       <!-- Category Categories -->
@@ -147,7 +159,7 @@ onMounted(() => {
           @click="currentTab = 'general'"
         >
           <SettingsIcon class="size-3.5" />
-          <span>常规设置</span>
+          <span>{{ t('settings.nav.general') }}</span>
         </button>
 
         <button
@@ -156,7 +168,7 @@ onMounted(() => {
           @click="currentTab = 'model_settings'"
         >
           <CpuIcon class="size-3.5" />
-          <span>模型设置</span>
+          <span>{{ t('settings.nav.modelSettings') }}</span>
         </button>
 
         <button
@@ -165,7 +177,7 @@ onMounted(() => {
           @click="currentTab = 'code_preview'"
         >
           <CodeIcon class="size-3.5" />
-          <span>代码预览</span>
+          <span>{{ t('settings.nav.codePreview') }}</span>
         </button>
 
         <button
@@ -174,7 +186,7 @@ onMounted(() => {
           @click="currentTab = 'skills'"
         >
           <HammerIcon class="size-3.5" />
-          <span>技能配置</span>
+          <span>{{ t('settings.nav.skills') }}</span>
         </button>
 
         <button
@@ -183,7 +195,7 @@ onMounted(() => {
           @click="currentTab = 'mcp'"
         >
           <CpuIcon class="size-3.5" />
-          <span>MCP 服务器</span>
+          <span>{{ t('settings.nav.mcp') }}</span>
         </button>
 
         <button
@@ -192,7 +204,7 @@ onMounted(() => {
           @click="currentTab = 'plugins'"
         >
           <CpuIcon class="size-3.5" />
-          <span>插件管理</span>
+          <span>{{ t('settings.nav.plugins') }}</span>
         </button>
 
         <button
@@ -201,7 +213,7 @@ onMounted(() => {
           @click="currentTab = 'commands'"
         >
           <TerminalIcon class="size-3.5" />
-          <span>内置命令</span>
+          <span>{{ t('settings.nav.commands') }}</span>
         </button>
 
         <button
@@ -210,7 +222,7 @@ onMounted(() => {
           @click="currentTab = 'indexes'"
         >
           <DatabaseIcon class="size-3.5" />
-          <span>索引库</span>
+          <span>{{ t('settings.nav.indexes') }}</span>
         </button>
 
         <button
@@ -219,7 +231,7 @@ onMounted(() => {
           @click="currentTab = 'usage'"
         >
           <BarChart4Icon class="size-3.5" />
-          <span>使用统计</span>
+          <span>{{ t('settings.nav.usage') }}</span>
         </button>
       </nav>
 
@@ -227,7 +239,7 @@ onMounted(() => {
       <div class="mt-auto border-t border-border pt-3 flex flex-col gap-2">
         <button class="flex items-center gap-2 px-2.5 py-1 text-left text-xs font-medium text-muted-foreground hover:text-foreground">
           <RocketIcon class="size-3.5" />
-          <span>引导教程</span>
+          <span>{{ t('settings.auxiliary.tutorial') }}</span>
         </button>
         <div class="flex items-center gap-2 px-2.5 py-1">
           <SettingsIcon class="size-3.5 text-muted-foreground" />
@@ -241,10 +253,10 @@ onMounted(() => {
       <!-- Tab 1: General (常规) -->
       <div v-show="currentTab === 'general'" class="flex flex-col gap-6">
         <div>
-          <h1 class="text-xl font-bold tracking-tight text-foreground mb-1">常规设置</h1>
+          <h1 class="text-xl font-bold tracking-tight text-foreground mb-1">{{ t('settings.general.title') }}</h1>
           <div class="flex gap-2">
-            <Badge variant="outline" class="border-border text-muted-foreground">深色模式</Badge>
-            <Badge variant="outline" class="border-border text-muted-foreground">简体中文</Badge>
+            <Badge variant="outline" class="border-border text-muted-foreground">{{ t('settings.general.darkModeBadge') }}</Badge>
+            <Badge variant="outline" class="border-border text-muted-foreground">{{ t('settings.general.chineseBadge') }}</Badge>
           </div>
         </div>
 
@@ -252,34 +264,35 @@ onMounted(() => {
         <div class="border border-border rounded-lg bg-card p-5 flex flex-col gap-5">
           <h2 class="text-sm font-bold text-foreground border-b border-border pb-1.5 flex items-center gap-1.5">
             <MoonIcon class="size-4 text-primary" />
-            <span>外观与语言</span>
+            <span>{{ t('settings.general.appearance.title') }}</span>
           </h2>
 
           <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <!-- Theme select -->
             <div class="flex flex-col gap-1.5">
-              <label class="text-xs font-semibold text-muted-foreground uppercase">界面主题</label>
+              <label class="text-xs font-semibold text-muted-foreground uppercase">{{ t('settings.general.appearance.themeLabel') }}</label>
               <Select v-model="selectedTheme">
                 <SelectTrigger class="h-9 border-border bg-muted/40 text-xs">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent class="border-border bg-popover text-foreground">
-                  <SelectItem value="dark" class="text-xs">深色 (Dark)</SelectItem>
-                  <SelectItem value="light" class="text-xs">浅色 (Light)</SelectItem>
+                  <SelectItem value="dark" class="text-xs">{{ t('settings.general.appearance.themeDark') }}</SelectItem>
+                  <SelectItem value="light" class="text-xs">{{ t('settings.general.appearance.themeLight') }}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <!-- Language select -->
             <div class="flex flex-col gap-1.5">
-              <label class="text-xs font-semibold text-muted-foreground uppercase">界面语言</label>
-              <Select v-model="selectedLanguage">
+              <label class="text-xs font-semibold text-muted-foreground uppercase">{{ t('settings.general.appearance.languageLabel') }}</label>
+              <Select v-model="locale">
                 <SelectTrigger class="h-9 border-border bg-muted/40 text-xs">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent class="border-border bg-popover text-foreground">
-                  <SelectItem value="zh" class="text-xs">简体中文</SelectItem>
-                  <SelectItem value="en" class="text-xs">English</SelectItem>
+                  <SelectItem v-for="l in availableLocales" :key="l.value" :value="l.value" class="text-xs">
+                    {{ l.native }}
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -287,28 +300,28 @@ onMounted(() => {
 
           <!-- Font Scaling -->
           <div class="flex flex-col gap-1.5">
-            <label class="text-xs font-semibold text-muted-foreground uppercase">界面缩放</label>
+            <label class="text-xs font-semibold text-muted-foreground uppercase">{{ t('settings.general.appearance.scaleLabel') }}</label>
             <div class="flex gap-1 bg-muted p-1 rounded-md max-w-xs">
               <button
                 class="flex-1 text-xs py-1.5 rounded-sm font-semibold transition-colors"
                 :class="textScale === 'small' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'"
                 @click="textScale = 'small'"
               >
-                偏小
+                {{ t('settings.general.appearance.scaleSmall') }}
               </button>
               <button
                 class="flex-1 text-xs py-1.5 rounded-sm font-semibold transition-colors"
                 :class="textScale === 'normal' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'"
                 @click="textScale = 'normal'"
               >
-                正常
+                {{ t('settings.general.appearance.scaleNormal') }}
               </button>
               <button
                 class="flex-1 text-xs py-1.5 rounded-sm font-semibold transition-colors"
                 :class="textScale === 'large' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'"
                 @click="textScale = 'large'"
               >
-                偏大
+                {{ t('settings.general.appearance.scaleLarge') }}
               </button>
             </div>
           </div>
@@ -318,18 +331,18 @@ onMounted(() => {
         <div class="border border-border rounded-lg bg-card p-5 flex flex-col gap-5">
           <h2 class="text-sm font-bold text-foreground border-b border-border pb-1.5 flex items-center gap-1.5">
             <TerminalIcon class="size-4 text-primary" />
-            <span>继承系统终端 Profile</span>
+            <span>{{ t('settings.general.terminal.title') }}</span>
           </h2>
 
           <div class="flex items-center gap-2 select-none">
             <Checkbox id="terminalToggle" :checked="inheritTerminalProfile" @update:checked="(val: any) => inheritTerminalProfile = !!val" />
             <label for="terminalToggle" class="cursor-pointer text-xs font-medium text-muted-foreground hover:text-foreground">
-              启动内置终端时，自动继承登录 shell 环境、代理、Kube 变量和本机终端字体
+              {{ t('settings.general.terminal.inheritHint') }}
             </label>
           </div>
 
           <div class="flex flex-col gap-1.5">
-            <label class="text-xs font-semibold text-muted-foreground uppercase">终端字体</label>
+            <label class="text-xs font-semibold text-muted-foreground uppercase">{{ t('settings.general.terminal.fontLabel') }}</label>
             <div class="flex gap-2">
               <Input
                 v-model="terminalFont"
@@ -338,7 +351,7 @@ onMounted(() => {
                 placeholder="MesloLGS NF, monospace"
               />
               <Button size="sm" class="h-9 px-4 text-xs font-semibold">
-                保存字体
+                {{ t('settings.general.terminal.saveFont') }}
               </Button>
             </div>
           </div>
@@ -348,11 +361,11 @@ onMounted(() => {
         <div class="border border-border rounded-lg bg-card p-5 flex flex-col gap-5">
           <h2 class="text-sm font-bold text-foreground border-b border-border pb-1.5 flex items-center gap-1.5">
             <GlobeIcon class="size-4 text-primary" />
-            <span>HTTP 代理</span>
+            <span>{{ t('settings.general.proxy.title') }}</span>
           </h2>
 
           <div class="flex flex-col gap-1.5">
-            <label class="text-xs font-semibold text-muted-foreground uppercase">代理服务器地址</label>
+            <label class="text-xs font-semibold text-muted-foreground uppercase">{{ t('settings.general.proxy.addressLabel') }}</label>
             <div class="flex gap-2">
               <Input
                 v-model="httpProxy"
@@ -361,11 +374,11 @@ onMounted(() => {
                 placeholder="http://127.0.0.1:7890"
               />
               <Button size="sm" class="h-9 px-4 text-xs font-semibold">
-                保存代理
+                {{ t('settings.general.proxy.save') }}
               </Button>
             </div>
             <p class="text-[10px] text-muted-foreground leading-normal mt-1">
-              用于配置模型、MCP 和命令工具出口流量的代理服务器。留空则自动沿用系统环境变量。
+              {{ t('settings.general.proxy.hint') }}
             </p>
           </div>
         </div>
@@ -374,12 +387,12 @@ onMounted(() => {
         <div class="border border-border rounded-lg bg-card p-5 flex flex-col gap-4">
           <h2 class="text-sm font-bold text-foreground border-b border-border pb-1.5 flex items-center gap-1.5">
             <BellIcon class="size-4 text-primary" />
-            <span>任务通知</span>
+            <span>{{ t('settings.general.notification.title') }}</span>
           </h2>
           <div class="flex items-center gap-2 select-none">
             <Checkbox id="notificationToggle" :checked="taskNotifications" @update:checked="(val: any) => taskNotifications = !!val" />
             <label for="notificationToggle" class="cursor-pointer text-xs font-medium text-muted-foreground hover:text-foreground">
-              允许在后台模拟进程运行完毕时，向本机系统推送弹窗通知
+              {{ t('settings.general.notification.hint') }}
             </label>
           </div>
         </div>
@@ -388,19 +401,19 @@ onMounted(() => {
       <!-- Tab 2: Model Settings (模型设置) -->
       <div v-show="currentTab === 'model_settings'" class="flex flex-col gap-6">
         <div>
-          <h1 class="text-xl font-bold tracking-tight text-foreground mb-1">模型配置</h1>
-          <p class="text-xs text-muted-foreground">在此配置连接 LLM 决策核心所需的 Key 和系统预置 Preamble 提示词</p>
+          <h1 class="text-xl font-bold tracking-tight text-foreground mb-1">{{ t("settings.model.title") }}</h1>
+          <p class="text-xs text-muted-foreground">{{ t("settings.model.description") }}</p>
         </div>
 
         <!-- Configuration Form -->
         <div class="border border-border rounded-lg bg-card p-5 flex flex-col gap-5">
           <!-- API Key -->
           <div class="flex flex-col gap-1.5">
-            <label class="text-xs font-bold text-muted-foreground uppercase">Anthropic API Key</label>
+            <label class="text-xs font-bold text-muted-foreground uppercase">{{ t("settings.model.apiKeyLabel") }}</label>
             <Input
               v-model="apiKey"
               type="password"
-              placeholder="Enter your Anthropic API Key"
+              :placeholder="t('settings.model.apiKeyPlaceholder')"
               :disabled="isSaving"
               class="h-9 bg-muted/40 border-border text-xs"
             />
@@ -408,11 +421,11 @@ onMounted(() => {
 
           <!-- Base URL -->
           <div class="flex flex-col gap-1.5">
-            <label class="text-xs font-bold text-muted-foreground uppercase">Anthropic Base URL</label>
+            <label class="text-xs font-bold text-muted-foreground uppercase">{{ t("settings.model.baseUrlLabel") }}</label>
             <Input
               v-model="baseUrl"
               type="text"
-              placeholder="e.g. https://api.deepseek.com/anthropic"
+              :placeholder="t('settings.model.baseUrlPlaceholder')"
               :disabled="isSaving"
               class="h-9 bg-muted/40 border-border text-xs font-mono"
             />
@@ -420,10 +433,10 @@ onMounted(() => {
 
           <!-- Preamble Prompt -->
           <div class="flex flex-col gap-1.5">
-            <label class="text-xs font-bold text-muted-foreground uppercase">Agent Preamble (Prompt)</label>
+            <label class="text-xs font-bold text-muted-foreground uppercase">{{ t("settings.model.preambleLabel") }}</label>
             <Textarea
               v-model="preamble"
-              placeholder="输入系统预置 Preamble Prompt"
+              :placeholder="t('settings.model.preamblePlaceholder')"
               :disabled="isSaving"
               rows="10"
               class="min-h-56 font-mono text-xs bg-muted/40 border-border leading-relaxed"
@@ -437,7 +450,7 @@ onMounted(() => {
               :disabled="isSaving"
               @click="saveConfig"
             >
-              {{ isSaving ? "正在保存核心参数..." : "保存模型核心参数" }}
+              {{ isSaving ? t("settings.model.saving") : t("settings.model.save") }}
             </Button>
 
             <Transition
@@ -447,7 +460,7 @@ onMounted(() => {
               leave-to-class="opacity-0"
             >
               <p v-if="saveSuccess" class="text-green-500 text-center text-xs font-semibold">
-                ✓ 配置已成功持久化保存至本地环境！
+                {{ t("settings.model.saveSuccess") }}
               </p>
             </Transition>
 
@@ -458,7 +471,7 @@ onMounted(() => {
               leave-to-class="opacity-0"
             >
               <p v-if="saveError" class="text-destructive text-center text-xs font-semibold">
-                ✗ 保存失败：{{ saveError }}
+                {{ t("settings.model.saveFailed", { error: saveError }) }}
               </p>
             </Transition>
           </div>
@@ -468,9 +481,9 @@ onMounted(() => {
       <!-- Other Mock Tabs -->
       <div v-show="currentTab !== 'general' && currentTab !== 'model_settings'" class="py-12 text-center">
         <CpuIcon class="size-10 text-muted-foreground/30 mx-auto mb-3" />
-        <h2 class="text-sm font-semibold text-foreground">该设置模块正在等待对接</h2>
+        <h2 class="text-sm font-semibold text-foreground">{{ t('settings.placeholder.title') }}</h2>
         <p class="text-xs text-muted-foreground mt-1.5 max-w-sm mx-auto leading-relaxed">
-          高级 AI 辅助编程客户端 ZCode 系统检测到该模块需要关联到远端云端实例。如需提前测试，请先连接并启动您的本地仿真模拟环境。
+          {{ t('settings.placeholder.body') }}
         </p>
       </div>
     </main>

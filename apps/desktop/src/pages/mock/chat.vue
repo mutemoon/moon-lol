@@ -2,7 +2,10 @@
 import { ref } from "vue";
 import { Badge } from "../../components/ui/badge";
 import { Button } from "../../components/ui/button";
+import { useLocale } from "../../composables/useLocale";
 import AgentChatHistory from "../../components/AgentChatHistory.vue";
+
+const { t } = useLocale();
 
 const currentChampion = ref("Riven");
 const currentAgentId = ref("mock-agent-12345");
@@ -102,7 +105,7 @@ stderr: ""`;
 </script>
 
 <template>
-  <div class="bg-background flex h-full flex-col gap-4 overflow-hidden p-6 font-sans">
+  <div class="bg-background flex h-full w-full flex-col gap-4 overflow-hidden p-6 font-sans">
     <!-- Header -->
     <div
       class="bg-card border-border relative flex shrink-0 items-center justify-between overflow-hidden rounded-lg border px-5 py-3 shadow-sm"
@@ -125,14 +128,14 @@ stderr: ""`;
           </svg>
         </div>
         <div>
-          <h1 class="text-foreground text-base font-bold tracking-wide">对话渲染测试平台</h1>
-          <p class="text-muted-foreground text-[11px]">Chat Rendering Mock Bench & Interactive Debugger</p>
+          <h1 class="text-foreground text-base font-bold tracking-wide">{{ t("mock.chat.title") }}</h1>
+          <p class="text-muted-foreground text-[11px]">{{ t("mock.chat.subtitle") }}</p>
         </div>
       </div>
 
       <div class="flex items-center gap-2">
         <Badge variant="outline" class="border-primary/20 text-primary bg-primary/5 px-2.5 py-1">
-          数据源: mock.json
+          {{ t("mock.chat.dataSource") }}: mock.json
         </Badge>
         <router-link to="/debug">
           <Button
@@ -140,7 +143,7 @@ stderr: ""`;
             size="sm"
             class="border-border text-muted-foreground hover:text-foreground hover:border-primary/40 h-8 cursor-pointer rounded px-3 text-xs transition-all"
           >
-            返回调试页
+            {{ t("mock.chat.backBtn") }}
           </Button>
         </router-link>
       </div>
@@ -155,7 +158,7 @@ stderr: ""`;
           <span
             class="text-muted-foreground border-border border-b pb-1.5 text-[10px] font-bold tracking-wider uppercase"
           >
-            当前渲染代理 (Mock Agent)
+            {{ t("mock.chat.currentAgent") }}
           </span>
 
           <div class="flex flex-col gap-2">
@@ -169,12 +172,12 @@ stderr: ""`;
 
             <div class="text-muted-foreground mt-1 grid grid-cols-2 gap-2 text-[10px]">
               <div class="border-border rounded border bg-muted/30 p-2">
-                <span class="text-muted-foreground mb-0.5 block">决策周期</span>
-                <span class="text-primary font-mono text-xs font-bold">{{ totalTurns }} 轮</span>
+                <span class="text-muted-foreground mb-0.5 block">{{ t("mock.chat.decisionCycle") }}</span>
+                <span class="text-primary font-mono text-xs font-bold">{{ t("mock.chat.turnsCount", { count: totalTurns }) }}</span>
               </div>
               <div class="border-border rounded border bg-muted/30 p-2">
-                <span class="text-muted-foreground mb-0.5 block">消息总数</span>
-                <span class="text-foreground font-mono text-xs font-bold">{{ currentHistory.length }} 条</span>
+                <span class="text-muted-foreground mb-0.5 block">{{ t("mock.chat.messagesCount") }}</span>
+                <span class="text-foreground font-mono text-xs font-bold">{{ t("mock.chat.messagesCount", { count: currentHistory.length }) }}</span>
               </div>
             </div>
 
@@ -184,7 +187,7 @@ stderr: ""`;
               class="hover:bg-primary/10 hover:text-primary hover:border-primary/50 mt-2 h-7 w-full cursor-pointer text-[11px] font-medium transition-all"
               @click="resetData"
             >
-              🔄 重置 Mock 初始数据
+              {{ t("mock.chat.resetBtn") }}
             </Button>
           </div>
         </div>
@@ -194,25 +197,25 @@ stderr: ""`;
           <span
             class="text-muted-foreground border-border border-b pb-1.5 text-[10px] font-bold tracking-wider uppercase"
           >
-            渲染模拟控制器 (Mock Injector)
+            {{ t("mock.chat.injectorTitle") }}
           </span>
 
           <!-- Preset Complex Actions -->
           <div class="flex flex-col gap-2">
-            <span class="text-muted-foreground text-[10px] font-semibold">复杂行为模拟</span>
+            <span class="text-muted-foreground text-[10px] font-semibold">{{ t("mock.chat.complexSim") }}</span>
             <Button
               size="xs"
               class="h-8 w-full cursor-pointer justify-start rounded border-0 bg-blue-600 pl-3 text-xs font-semibold text-white transition-all hover:bg-blue-500"
               @click="addComplexAssistantMessage"
             >
-              🧠 1. 模拟 AI 复杂决策 (Thought+Tool)
+              {{ t("mock.chat.simDecisionBtn") }}
             </Button>
             <Button
               size="xs"
               class="h-8 w-full cursor-pointer justify-start rounded border-0 bg-green-600 pl-3 text-xs font-semibold text-white transition-all hover:bg-green-500"
               @click="addToolResultMessage"
             >
-              ⚙️ 2. 模拟返回工具执行结果
+              {{ t("mock.chat.simResultBtn") }}
             </Button>
           </div>
 
@@ -220,13 +223,13 @@ stderr: ""`;
 
           <!-- Custom Messages Insertion -->
           <div class="flex flex-col gap-3">
-            <span class="text-muted-foreground text-[10px] font-semibold">手动追加普通消息</span>
+            <span class="text-muted-foreground text-[10px] font-semibold">{{ t("mock.chat.manualAdd") }}</span>
 
             <!-- User environment message -->
             <div class="flex flex-col gap-1.5">
               <input
                 v-model="newUserText"
-                placeholder="输入环境观测/用户消息..."
+                :placeholder="t('mock.chat.inputUserPlaceholder')"
                 class="bg-muted/40 border-border focus:border-primary text-foreground placeholder:text-muted-foreground/40 h-8 rounded px-2 text-xs transition-all focus:outline-none"
                 @keyup.enter="addUserMessage"
               />
@@ -236,7 +239,7 @@ stderr: ""`;
                 class="text-muted-foreground hover:text-foreground hover:border-primary/40 h-7 w-full cursor-pointer text-[10px]"
                 @click="addUserMessage"
               >
-                ➕ 插入用户/环境指令
+                {{ t("mock.chat.insertUserBtn") }}
               </Button>
             </div>
 
@@ -244,7 +247,7 @@ stderr: ""`;
             <div class="mt-1 flex flex-col gap-1.5">
               <input
                 v-model="newAssistantText"
-                placeholder="输入 AI 决策文本发言..."
+                :placeholder="t('mock.chat.inputAiPlaceholder')"
                 class="bg-muted/40 border-border focus:border-primary text-foreground placeholder:text-muted-foreground/40 h-8 rounded px-2 text-xs transition-all focus:outline-none"
                 @keyup.enter="addAssistantMessage"
               />
@@ -254,7 +257,7 @@ stderr: ""`;
                 class="text-muted-foreground hover:text-foreground hover:border-primary/40 h-7 w-full cursor-pointer text-[10px]"
                 @click="addAssistantMessage"
               >
-                ➕ 插入 AI 普通发言
+                {{ t("mock.chat.insertAiBtn") }}
               </Button>
             </div>
           </div>
@@ -272,7 +275,7 @@ stderr: ""`;
           <div class="flex items-center gap-2">
             <span class="bg-green-500 h-2 w-2 animate-pulse rounded-full"></span>
             <span class="text-foreground text-xs font-bold tracking-wide">
-              组件渲染实时观察面板
+              {{ t("mock.chat.observerPanel") }}
             </span>
           </div>
           <Badge
@@ -289,7 +292,7 @@ stderr: ""`;
             :history="currentHistory"
             :champion="currentChampion"
             :loading="simulateLoading"
-            placeholder-text="正在等待重新加载 Mock 对话历史流..."
+            :placeholder-text="t('mock.chat.loadingPlaceholder')"
           />
         </div>
       </div>

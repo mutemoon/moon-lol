@@ -29,7 +29,7 @@ const { filterState } = useCommand()
     data-slot="command-input-wrapper"
     class="p-1 pb-0"
   >
-    <InputGroup class="bg-input/50 h-9">
+    <InputGroup class="bg-input/30 border-input/30 h-8! rounded-lg! shadow-none! *:data-[slot=input-group-addon]:pl-2!">
       <ListboxFilter
         v-bind="{ ...forwardedProps, ...$attrs }"
         v-model="filterState.search"

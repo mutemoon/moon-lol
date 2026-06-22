@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from "vue";
 import { useGameStore } from "../stores/gameStore";
+import { useLocale } from "../composables/useLocale";
 import GameConsoleLogs from "../components/GameConsoleLogs.vue";
 import AgentChatHistory from "../components/AgentChatHistory.vue";
 import { Button } from "../components/ui/button";
@@ -13,6 +14,7 @@ import { CommandIcon, StopCircleIcon } from "@lucide/vue";
 const store = useGameStore();
 const { ws } = store;
 const { stopGame } = store;
+const { t } = useLocale();
 
 // Access unwrapped values reactively via computed properties
 const connected = computed(() => ws.connected);
@@ -110,11 +112,11 @@ onUnmounted(() => {
                 : 'bg-destructive shadow-[0_0_6px_rgba(239,68,68,0.4)]'
             "
           ></span>
-          {{ connected ? "已连接" : "未连接" }}
+          {{ connected ? t("debug.connected") : t("debug.disconnected") }}
         </span>
         <span class="h-3.5 w-px bg-border"></span>
         <span class="flex items-center gap-1.5">
-          <span class="text-muted-foreground text-[11px] uppercase">当前调试英雄</span>
+          <span class="text-muted-foreground text-[11px] uppercase">{{ t("debug.currentHero") }}</span>
           <span class="text-foreground text-xs font-semibold">{{ gameState.champion || "—" }}</span>
         </span>
       </div>
@@ -126,7 +128,7 @@ onUnmounted(() => {
             class="h-7 text-xs font-medium border-primary/20 text-primary hover:border-primary hover:bg-primary/10 bg-primary/5"
           >
             <CommandIcon class="size-3.5 mr-1" />
-            <span>命令行测试床</span>
+            <span>{{ t("debug.commandBed") }}</span>
           </Button>
         </router-link>
         <Button
@@ -136,7 +138,7 @@ onUnmounted(() => {
           @click="stopGame"
         >
           <StopCircleIcon class="size-3.5 mr-1" />
-          <span>停止对局</span>
+          <span>{{ t("debug.stopMatch") }}</span>
         </Button>
       </div>
     </div>
@@ -147,7 +149,7 @@ onUnmounted(() => {
       <div class="flex min-h-0 w-44 flex-col gap-3 overflow-hidden">
         <!-- Toggles Group -->
         <div class="flex flex-col gap-1.5 rounded border border-border bg-card p-2.5">
-          <span class="text-muted-foreground text-[11px] font-semibold uppercase">开关设置</span>
+          <span class="text-muted-foreground text-[11px] font-semibold uppercase">{{ t("debug.switchLabel") }}</span>
           <div class="flex flex-col gap-1">
             <Button
               variant="outline"
@@ -162,7 +164,7 @@ onUnmounted(() => {
                   gameState.godMode ? 'bg-primary' : 'bg-muted-foreground/40'
                 "
               ></span>
-              上帝模式
+              {{ t("debug.godMode") }}
             </Button>
             <Button
               variant="outline"
@@ -179,7 +181,7 @@ onUnmounted(() => {
                     : 'bg-muted-foreground/40'
                 "
               ></span>
-              无冷却时间
+              {{ t("debug.cooldown") }}
             </Button>
             <Button
               variant="outline"
@@ -194,14 +196,14 @@ onUnmounted(() => {
                   gameState.paused ? 'bg-primary' : 'bg-muted-foreground/40'
                 "
               ></span>
-              {{ gameState.paused ? "恢复运行" : "暂停游戏" }}
+              {{ gameState.paused ? t("debug.resume") : t("debug.paused") }}
             </Button>
           </div>
         </div>
 
         <!-- Champion Group -->
         <div class="flex flex-col gap-1.5 rounded border border-border bg-card p-2.5">
-          <span class="text-muted-foreground text-[11px] font-semibold uppercase">角色控制</span>
+          <span class="text-muted-foreground text-[11px] font-semibold uppercase">{{ t("debug.championControl") }}</span>
           <div class="flex w-full flex-col gap-1.5">
             <Select v-model="switchTarget">
               <SelectTrigger
@@ -226,21 +228,21 @@ onUnmounted(() => {
               class="text-muted-foreground border-border hover:text-primary hover:border-primary/40 h-8 w-full cursor-pointer rounded bg-transparent px-2.5 py-1 text-xs transition-all"
               @click="switchChampion"
             >
-              切换当前英雄
+              {{ t("debug.switchChampion") }}
             </Button>
           </div>
         </div>
 
         <!-- Actions Group -->
         <div class="flex flex-col gap-1.5 rounded border border-border bg-card p-2.5">
-          <span class="text-muted-foreground text-[11px] font-semibold uppercase">快捷操作</span>
+          <span class="text-muted-foreground text-[11px] font-semibold uppercase">{{ t("debug.quickActions") }}</span>
           <Button
             variant="outline"
             size="xs"
             class="text-muted-foreground border-border hover:text-primary hover:border-primary/40 h-8 w-full cursor-pointer rounded bg-transparent px-2.5 py-1 text-xs transition-all"
             @click="resetPosition"
           >
-            重置位置坐标
+            {{ t("debug.resetCoords") }}
           </Button>
         </div>
       </div>
@@ -259,7 +261,7 @@ onUnmounted(() => {
               "
               @click="activeTab = 'logs'"
             >
-              控制台日志
+              {{ t("debug.consoleLogsTab") }}
             </button>
             <button
               class="flex items-center gap-1.5 rounded px-3 py-1.5 text-xs font-semibold transition-all"
@@ -274,11 +276,11 @@ onUnmounted(() => {
                 v-if="Object.keys(agentHistories).length > 0"
                 class="bg-primary h-1.5 w-1.5 animate-pulse rounded-full"
               ></span>
-              AI 决策思维
+              {{ t("debug.aiMindTab") }}
             </button>
           </div>
           <Badge variant="outline" class="border-primary/30 text-primary text-[10px]">
-            {{ activeTab === "logs" ? "系统运行日志" : "Agent 实时决策对话" }}
+            {{ activeTab === "logs" ? t("debug.runningLogsBadge") : t("debug.aiMindBadge") }}
           </Badge>
         </div>
 
@@ -298,13 +300,13 @@ onUnmounted(() => {
             <div
               class="flex min-h-0 flex-col gap-2 overflow-y-auto border-r border-border pr-3 md:col-span-1"
             >
-              <span class="text-muted-foreground mb-1 text-[10px] font-semibold tracking-wider uppercase">活动代理</span>
+              <span class="text-muted-foreground mb-1 text-[10px] font-semibold tracking-wider uppercase">{{ t("debug.activeAgents") }}</span>
               <div class="flex flex-col gap-1.5">
                 <div
                   v-if="Object.keys(agentHistories).length === 0"
                   class="text-muted-foreground py-6 text-center text-xs italic"
                 >
-                  暂无活动代理决策数据
+                  {{ t("debug.noActiveAgents") }}
                 </div>
                 <button
                   v-else
@@ -329,7 +331,7 @@ onUnmounted(() => {
                     variant="outline"
                     class="border-border bg-muted/30 text-muted-foreground px-1.5 py-0 text-[9px]"
                   >
-                    {{ historyData.history.length }} 轮
+                    {{ t("debug.roundsCount", { count: historyData.history.length }) }}
                   </Badge>
                 </button>
               </div>
@@ -339,7 +341,7 @@ onUnmounted(() => {
             <div class="flex h-full min-h-0 flex-col overflow-hidden md:col-span-3">
               <AgentChatHistory
                 :history="selectedHistoryAgentId && agentHistories[selectedHistoryAgentId] ? agentHistories[selectedHistoryAgentId].history : []"
-                :champion="selectedHistoryAgentId && agentHistories[selectedHistoryAgentId] ? agentHistories[selectedHistoryAgentId].champion : 'AI Agent'"
+                :champion="selectedHistoryAgentId && agentHistories[selectedHistoryAgentId] ? agentHistories[selectedHistoryAgentId].champion : t('debug.defaultAgentName')"
                 :loading="!selectedHistoryAgentId || !agentHistories[selectedHistoryAgentId]"
               />
             </div>

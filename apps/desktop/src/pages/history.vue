@@ -2,6 +2,7 @@
 import { ref, onMounted, computed, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useGameStore } from "../stores/gameStore";
+import { useLocale } from "../composables/useLocale";
 import { backendClient } from "../services/backend";
 import AgentChatHistory from "../components/AgentChatHistory.vue";
 import { Button } from "../components/ui/button";
@@ -11,6 +12,7 @@ const route = useRoute();
 const router = useRouter();
 
 const store = useGameStore();
+const { t } = useLocale();
 
 interface SavedAgentHistory {
   agent_id: string;
@@ -64,7 +66,7 @@ async function selectGame(datetime: string) {
 
 // Delete a history entry
 async function deleteHistory(datetime: string) {
-  if (!confirm("确定要删除这局游戏历史记录吗？此操作无法撤销。")) {
+  if (!confirm(t("history.deleteConfirm"))) {
     return;
   }
   try {
@@ -118,11 +120,11 @@ onMounted(() => {
     >
       <div class="flex items-center gap-3">
         <span class="text-xs font-bold uppercase tracking-wider text-primary">
-          对局历史档案库
+          {{ t("history.title") }}
         </span>
         <span class="h-3.5 w-px bg-border"></span>
         <span class="text-xs text-muted-foreground">
-          当前选择：<span class="font-semibold text-foreground font-mono">{{ selectedDatetime ? formatDatetime(selectedDatetime) : '无' }}</span>
+          {{ t("history.currentSelection") }}<span class="font-semibold text-foreground font-mono">{{ selectedDatetime ? formatDatetime(selectedDatetime) : t("history.none") }}</span>
         </span>
       </div>
       <div class="flex items-center gap-2">
@@ -134,7 +136,7 @@ onMounted(() => {
           @click="deleteHistory(selectedDatetime)"
         >
           <Trash2Icon class="size-3.5 mr-1" />
-          <span>删除此对局</span>
+          <span>{{ t("history.deleteBtn") }}</span>
         </Button>
         <Button
           variant="outline"
@@ -142,7 +144,7 @@ onMounted(() => {
           class="h-7 text-xs"
           @click="store.loadHistoriesList()"
         >
-          刷新列表
+          {{ t("history.refreshBtn") }}
         </Button>
       </div>
     </div>
@@ -155,18 +157,18 @@ onMounted(() => {
         class="flex flex-1 flex-col items-center justify-center gap-3 p-8 text-center text-sm text-muted-foreground italic"
       >
         <InboxIcon class="size-8 text-muted-foreground/40 animate-pulse" />
-        <span>请从左侧“最近对局”的已完成列表中选择一局游戏历史记录进行查看</span>
+        <span>{{ t("history.noSelectionHint") }}</span>
       </div>
 
       <div v-else-if="loadingDetail" class="flex flex-1 items-center justify-center text-xs text-muted-foreground italic">
-        正在载入该局游戏历史档案详情...
+        {{ t("history.loadingDetail") }}
       </div>
 
       <!-- Selected Game Content -->
       <div v-else class="grid h-full w-full grid-cols-1 gap-4 overflow-hidden p-4 md:grid-cols-4">
         <!-- Sub-Sidebar: Active Game Agents Selector list -->
         <div class="flex min-h-0 flex-col gap-3 overflow-y-auto border-r border-border pr-3.5 md:col-span-1">
-          <span class="text-[10px] font-bold tracking-wider uppercase text-muted-foreground">对局活动代理</span>
+          <span class="text-[10px] font-bold tracking-wider uppercase text-muted-foreground">{{ t("history.activeAgents") }}</span>
 
           <div class="flex flex-col gap-1.5">
             <button
@@ -189,9 +191,9 @@ onMounted(() => {
               </div>
               <div class="flex items-center justify-between text-[9px] mt-1 uppercase tracking-wide">
                 <span :class="agent.team === 'Order' ? 'text-blue-500/80' : 'text-red-500/80'">
-                  {{ agent.team === 'Order' ? '秩序 Order' : '混沌 Chaos' }}
+                  {{ agent.team === 'Order' ? t("history.teamOrder") : t("history.teamChaos") }}
                 </span>
-                <span class="text-muted-foreground/70 font-mono">{{ agent.history.length }} 轮对话</span>
+                <span class="text-muted-foreground/70 font-mono">{{ t("history.roundsCount", { count: agent.history.length }) }}</span>
               </div>
             </button>
           </div>
@@ -199,19 +201,19 @@ onMounted(() => {
           <!-- Agent static details and Prompt settings display -->
           <div v-if="activeAgentData" class="flex flex-col gap-3 mt-2">
             <div class="flex flex-col gap-1.5">
-              <span class="text-[10px] font-bold tracking-wider uppercase text-muted-foreground">系统级全局提示词</span>
+              <span class="text-[10px] font-bold tracking-wider uppercase text-muted-foreground">{{ t("history.globalPrompt") }}</span>
               <div class="border border-border bg-muted/30 rounded p-2 max-h-28 overflow-y-auto">
                 <p class="text-muted-foreground font-sans text-[10px] leading-relaxed whitespace-pre-wrap select-text">
-                  {{ activeAgentData.system_prompt || '无系统级全局提示词设定。' }}
+                  {{ activeAgentData.system_prompt || t("history.noGlobalPrompt") }}
                 </p>
               </div>
             </div>
 
             <div class="flex flex-col gap-1.5">
-              <span class="text-[10px] font-bold tracking-wider uppercase text-muted-foreground">英雄级个性化提示词</span>
+              <span class="text-[10px] font-bold tracking-wider uppercase text-muted-foreground">{{ t("history.heroPrompt") }}</span>
               <div class="border border-border bg-muted/30 rounded p-2 max-h-32 overflow-y-auto">
                 <p class="text-muted-foreground font-sans text-[10px] leading-relaxed whitespace-pre-wrap select-text">
-                  {{ activeAgentData.prompt || '无系统提示词设定。' }}
+                  {{ activeAgentData.prompt || t("history.noHeroPrompt") }}
                 </p>
               </div>
             </div>

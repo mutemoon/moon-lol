@@ -5,6 +5,7 @@ import { PlusIcon } from "@lucide/vue";
 import SlotCard from "./SlotCard.vue";
 import type { Slot } from "../composables/useSlotConfig";
 import type { HeroPreset, AgentPreset, SpawnPreset } from "../stores/gameStore";
+import { useLocale } from "../composables/useLocale";
 
 // 阵营列：标题/点/徽标 + 槽位列表 + 新增槽位。红蓝复用同一组件，差异只在 accent 配置。
 
@@ -42,6 +43,8 @@ const emit = defineEmits<{
   remove: [index: number];
   saveAs: [slot: Slot];
 }>();
+
+const { t } = useLocale();
 </script>
 
 <template>
@@ -60,7 +63,7 @@ const emit = defineEmits<{
       </div>
       <Button variant="outline" size="xs" class="h-6 text-[10px]" :class="team.addButton" @click="emit('add')">
         <PlusIcon class="size-3" />
-        槽位
+        {{ t('common.teamSlots.addSlotBtn') }}
       </Button>
     </div>
     <!-- 槽位列表 -->

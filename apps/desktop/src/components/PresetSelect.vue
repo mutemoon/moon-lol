@@ -12,6 +12,7 @@ import {
 } from "./ui/dropdown-menu";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "./ui/input-group";
 import { cn } from "@/lib/utils";
+import { useLocale } from "../composables/useLocale";
 
 // 通用「预设选择器」：采用 DropdownMenu + DropdownMenuCheckboxItem 结构，支持搜索，末尾内置「＋ 新建预设」入口。
 // 这是产品文档 §3.0 设计原则的核心交互：编排页只做下拉选择，新建走独立管理页。
@@ -40,9 +41,6 @@ const props = withDefaults(
     triggerClass?: string;
   }>(),
   {
-    placeholder: "选择预设…",
-    searchPlaceholder: "搜索预设…",
-    newLabel: "新建预设",
     disabled: false,
   },
 );
@@ -51,6 +49,8 @@ const emit = defineEmits<{
   "update:modelValue": [value: string];
   new: [];
 }>();
+
+const { t } = useLocale();
 
 const open = ref(false);
 const searchQuery = ref("");
@@ -106,7 +106,7 @@ function onNew() {
         class="bg-muted/40 border-border text-foreground hover:bg-muted/40 h-8 px-2.5 text-xs"
       >
         <span v-if="selectedLabel" class="text-foreground truncate">{{ selectedLabel }}</span>
-        <span v-else class="text-muted-foreground truncate">{{ placeholder }}</span>
+        <span v-else class="text-muted-foreground truncate">{{ placeholder ?? t('common.presetSelect.placeholder') }}</span>
         <ChevronsUpDownIcon class="text-muted-foreground ml-2 size-3.5 shrink-0 opacity-50" />
       </Button>
     </DropdownMenuTrigger>
@@ -118,7 +118,7 @@ function onNew() {
           <InputGroupInput
             v-model="searchQuery"
             data-slot="command-input"
-            :placeholder="searchPlaceholder"
+            :placeholder="searchPlaceholder ?? t('common.presetSelect.searchPlaceholder')"
             class="w-full text-[13px]/relaxed text-foreground outline-hidden placeholder:text-foreground-subtlest disabled:cursor-not-allowed disabled:opacity-50"
           />
           <InputGroupAddon align="inline-start" class="pl-2">
@@ -129,7 +129,7 @@ function onNew() {
 
       <div class="p-1">
         <div v-if="filteredPresets.length === 0" class="text-muted-foreground p-3 text-center text-xs">
-          未找到匹配的预设
+          {{ t('common.presetSelect.noMatch') }}
         </div>
 
         <DropdownMenuCheckboxItem
@@ -154,7 +154,7 @@ function onNew() {
           class="text-xs"
         >
           <PlusIcon class="text-primary mr-2 size-3.5" />
-          <span class="text-primary font-semibold">{{ newLabel }}</span>
+          <span class="text-primary font-semibold">{{ newLabel ?? t('common.presetSelect.newLabel') }}</span>
         </DropdownMenuItem>
       </div>
     </DropdownMenuContent>

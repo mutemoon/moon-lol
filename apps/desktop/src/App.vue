@@ -10,6 +10,7 @@ import { Button } from "./components/ui/button";
 import { ScrollArea } from "./components/ui/scroll-area";
 import { Badge } from "./components/ui/badge";
 import { useEventListener } from "@vueuse/core";
+import { useLocale } from "./composables/useLocale";
 import {
   TrophyIcon,
   PlusIcon,
@@ -22,6 +23,8 @@ import {
   SwordsIcon,
 } from "@lucide/vue";
 import "./style.css";
+
+const { t } = useLocale();
 
 const isTauri = (window as any).__TAURI__ !== undefined;
 const win = isTauri ? getCurrentWindow() : {
@@ -50,15 +53,15 @@ const currentView = computed<View>(() => {
   return "launcher";
 });
 
-const viewTitles: Record<View, string> = {
-  launcher: "对局编排",
-  debug: "实时调试控制台",
-  history: "对局回放",
-  settings: "设置",
-  agents: "Agent 预设管理",
-  spawnPresets: "出生点预设管理",
-  heroes: "英雄预设管理",
-};
+const viewTitles = computed<Record<View, string>>(() => ({
+  launcher: t("app.viewTitles.launcher"),
+  debug: t("app.viewTitles.debug"),
+  history: t("app.viewTitles.history"),
+  settings: t("app.viewTitles.settings"),
+  agents: t("app.viewTitles.agents"),
+  spawnPresets: t("app.viewTitles.spawnPresets"),
+  heroes: t("app.viewTitles.heroes"),
+}));
 
 backendClient.onAgentFinished((data) => {
   statsResult.value = {
@@ -162,8 +165,8 @@ onMounted(() => {
         >
           <div class="flex min-w-0 flex-1 items-center gap-2 text-[13px]">
             <PlusIcon class="size-4 shrink-0 text-foreground-subtle group-hover:text-foreground" />
-            <span class="truncate">新建对局</span>
-            <span class="text-foreground-subtlest ml-auto shrink-0 text-[11px] font-normal font-mono">⌘N</span>
+            <span class="truncate">{{ t('app.sidebar.newMatch') }}</span>
+            <span class="text-foreground-subtlest ml-auto shrink-0 text-[11px] font-normal font-mono">{{ t('app.sidebar.newMatchShortcut') }}</span>
           </div>
         </div>
 
@@ -175,7 +178,7 @@ onMounted(() => {
         >
           <div class="flex min-w-0 flex-1 items-center gap-2 text-[13px]">
             <SettingsIcon class="size-4 shrink-0 text-foreground-subtle group-hover:text-foreground" />
-            <span class="truncate">设置</span>
+            <span class="truncate">{{ t('app.sidebar.settings') }}</span>
           </div>
         </div>
 
@@ -188,7 +191,7 @@ onMounted(() => {
         >
           <div class="flex min-w-0 flex-1 items-center gap-2 text-[13px]">
             <SwordsIcon class="size-4 shrink-0 text-foreground-subtle group-hover:text-foreground" />
-            <span class="truncate">英雄预设</span>
+            <span class="truncate">{{ t('app.sidebar.heroPresets') }}</span>
           </div>
         </div>
 
@@ -200,7 +203,7 @@ onMounted(() => {
         >
           <div class="flex min-w-0 flex-1 items-center gap-2 text-[13px]">
             <BotIcon class="size-4 shrink-0 text-foreground-subtle group-hover:text-foreground" />
-            <span class="truncate">Agent 预设</span>
+            <span class="truncate">{{ t('app.sidebar.agentPresets') }}</span>
           </div>
         </div>
 
@@ -212,7 +215,7 @@ onMounted(() => {
         >
           <div class="flex min-w-0 flex-1 items-center gap-2 text-[13px]">
             <MapPinIcon class="size-4 shrink-0 text-foreground-subtle group-hover:text-foreground" />
-            <span class="truncate">出生点预设</span>
+            <span class="truncate">{{ t('app.sidebar.spawnPresets') }}</span>
           </div>
         </div>
       </div>
@@ -221,7 +224,7 @@ onMounted(() => {
       <div class="flex-1 min-h-0 flex flex-col p-2 gap-3">
         <!-- Active Debug Session -->
         <div class="flex flex-col gap-1">
-          <span class="text-[11px] text-foreground-subtlest font-semibold px-2.5 uppercase tracking-wider">调试会话</span>
+          <span class="text-[11px] text-foreground-subtlest font-semibold px-2.5 uppercase tracking-wider">{{ t('app.sidebar.debugSessions') }}</span>
           <div class="flex flex-col gap-0.5 pl-1">
             <button
               class="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-[13px] transition-colors"
@@ -234,9 +237,9 @@ onMounted(() => {
               @click="router.push('/debug')"
             >
               <TerminalIcon class="size-4 shrink-0 text-foreground-subtle" />
-              <span class="truncate font-medium">当前调试窗口</span>
+              <span class="truncate font-medium">{{ t('app.sidebar.currentDebug') }}</span>
               <span v-if="ws.connected" class="ml-auto size-2 rounded-full bg-green animate-pulse" />
-              <span v-else-if="store.isStarting" class="ml-auto text-[10px] text-foreground-subtlest animate-pulse">启动中</span>
+              <span v-else-if="store.isStarting" class="ml-auto text-[10px] text-foreground-subtlest animate-pulse">{{ t('app.sidebar.starting') }}</span>
               <span v-else class="ml-auto size-2 rounded-full bg-foreground-subtlest/30" />
             </button>
           </div>
@@ -248,7 +251,7 @@ onMounted(() => {
             <!-- Scenario Templates List -->
             <div v-if="scenariosList.length > 0" class="flex flex-col gap-1">
               <div class="flex items-center justify-between pr-1">
-                <span class="text-[11px] text-foreground-subtlest font-semibold px-2.5 uppercase tracking-wider">对局配置模板</span>
+                <span class="text-[11px] text-foreground-subtlest font-semibold px-2.5 uppercase tracking-wider">{{ t('app.sidebar.scenarioTemplates') }}</span>
                 <Badge variant="outline" class="text-[9px] px-1.5 py-0 border-border text-foreground-subtlest font-normal scale-90">
                   {{ scenariosList.length }}
                 </Badge>
@@ -266,7 +269,7 @@ onMounted(() => {
                   @click="handleSelectScenario(s)"
                 >
                   <span class="truncate pr-2 text-foreground-subtle">{{ s }}</span>
-                  <Badge variant="secondary" class="text-[9px] px-1 py-0 scale-95 border-transparent bg-tag/40 text-foreground-subtle">配置</Badge>
+                  <Badge variant="secondary" class="text-[9px] px-1 py-0 scale-95 border-transparent bg-tag/40 text-foreground-subtle">{{ t('app.sidebar.config') }}</Badge>
                 </button>
               </div>
             </div>
@@ -274,7 +277,7 @@ onMounted(() => {
             <!-- History Archives List -->
             <div v-if="histories.length > 0" class="flex flex-col gap-1">
               <div class="flex items-center justify-between pr-1">
-                <span class="text-[11px] text-foreground-subtlest font-semibold px-2.5 uppercase tracking-wider">已完成对局</span>
+                <span class="text-[11px] text-foreground-subtlest font-semibold px-2.5 uppercase tracking-wider">{{ t('app.sidebar.completedMatches') }}</span>
                 <Badge variant="outline" class="text-[9px] px-1.5 py-0 border-border text-foreground-subtlest font-normal scale-90">
                   {{ histories.length }}
                 </Badge>
@@ -292,7 +295,7 @@ onMounted(() => {
                   @click="handleSelectHistory(h.datetime)"
                 >
                   <span class="truncate pr-1 text-[11.5px] font-mono text-foreground-subtle">{{ h.datetime.replace('_', ' ').substring(5) }}</span>
-                  <Badge variant="secondary" class="text-[9px] px-1 py-0 scale-95 border-transparent bg-tag/40 text-foreground-subtlest">已归档</Badge>
+                  <Badge variant="secondary" class="text-[9px] px-1 py-0 scale-95 border-transparent bg-tag/40 text-foreground-subtle">{{ t('app.sidebar.archived') }}</Badge>
                 </button>
               </div>
             </div>
@@ -320,11 +323,11 @@ onMounted(() => {
               <!-- Connection Status Indicator -->
               <div v-if="ws.connected" class="flex items-center gap-1.5 rounded-full bg-green/10 px-2 py-0.5">
                 <span class="size-1.5 rounded-full bg-green animate-pulse" />
-                <span class="text-[11px] text-green font-medium">已连接</span>
+                <span class="text-[11px] text-green font-medium">{{ t('app.header.connected') }}</span>
               </div>
               <div v-else-if="store.isStarting" class="flex items-center gap-1.5 rounded-full bg-yellow-500/10 px-2 py-0.5">
                 <span class="size-1.5 rounded-full bg-yellow-500 animate-pulse" />
-                <span class="text-[11px] text-yellow-500 font-medium">启动中</span>
+                <span class="text-[11px] text-yellow-500 font-medium">{{ t('app.header.starting') }}</span>
               </div>
             </div>
           </div>
@@ -358,7 +361,7 @@ onMounted(() => {
           <div class="z-1 flex items-center gap-3">
             <TrophyIcon class="animate-float text-primary size-8" />
             <h2 class="text-foreground m-0 text-[1.4rem] font-bold tracking-wider">
-              AI Agent 模拟测试报告
+              {{ t('app.statsModal.title') }}
             </h2>
           </div>
 
@@ -366,14 +369,14 @@ onMounted(() => {
 
           <div class="z-1 flex flex-col gap-[1.2rem]">
             <p class="text-muted-foreground m-0 text-[0.9rem] leading-normal">
-              AI 代理已成功运行并自主决策满 2 分钟，累计运行数据统计如下：
+              {{ t('app.statsModal.description') }}
             </p>
             <div class="grid grid-cols-2 gap-4">
               <div
                 class="flex flex-col items-center gap-2 rounded-[6px] border border-border bg-muted/30 p-[1.2rem]"
               >
                 <span class="text-muted-foreground text-[0.8rem] font-semibold tracking-wider uppercase">
-                  总击杀小兵 (补刀)
+                  {{ t('app.statsModal.minionKills') }}
                 </span>
                 <span
                   class="text-foreground font-mono text-[2.2rem] leading-none font-extrabold"
@@ -385,7 +388,7 @@ onMounted(() => {
                 class="flex flex-col items-center gap-2 rounded-[6px] border border-border bg-muted/30 p-[1.2rem]"
               >
                 <span class="text-muted-foreground text-[0.8rem] font-semibold tracking-wider uppercase">
-                  总累计金币 (Gold)
+                  {{ t('app.statsModal.gold') }}
                 </span>
                 <span
                   class="text-foreground font-mono text-[2.2rem] leading-none font-extrabold"
@@ -402,7 +405,7 @@ onMounted(() => {
               class="w-full py-3"
               @click="showStatsModal = false"
             >
-              确认并返回
+              {{ t('app.statsModal.confirm') }}
             </Button>
           </div>
         </div>
