@@ -8939,6 +8939,7 @@ dependencies = [
  "tokio",
  "tokio-test",
  "tokio-tungstenite 0.24.0",
+ "tower",
  "tower-http 0.5.2",
  "tracing",
  "tracing-subscriber",

@@ -310,13 +310,13 @@ fn update_path_movement(
 
 fn reduce_movement_by_priority(
     mut commands: Commands,
-    query: Query<(
+    mut query: Query<(
         Entity,
-        &RequestBuffer<CommandMovement>,
+        &mut RequestBuffer<CommandMovement>,
         Option<&LastDecision<CommandMovement>>,
     )>,
 ) {
-    for (entity, buffer, last_decision) in query.iter() {
+    for (entity, mut buffer, last_decision) in query.iter_mut() {
         if buffer.0.is_empty() {
             continue;
         }
@@ -360,6 +360,8 @@ fn reduce_movement_by_priority(
                     .insert(FinalDecision(decision.clone()));
             }
         }
+
+        buffer.0.clear();
     }
 }
 

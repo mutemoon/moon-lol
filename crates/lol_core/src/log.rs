@@ -186,24 +186,26 @@ pub fn create_log_plugin() -> bevy::log::LogPlugin {
         std::fs::create_dir_all(parent).expect("无法创建日志目录");
     }
 
-    // 每次启动重置日志 DB（沿用原行为）
-    if db_path.exists() {
-        let _ = std::fs::remove_file(&db_path);
-        let _ = std::fs::remove_file(db_path.with_extension("db-wal"));
-        let _ = std::fs::remove_file(db_path.with_extension("db-shm"));
+    if LOG_TX.get().is_none() {
+        // 每次启动重置日志 DB（沿用原行为）
+        if db_path.exists() {
+            let _ = std::fs::remove_file(&db_path);
+            let _ = std::fs::remove_file(db_path.with_extension("db-wal"));
+            let _ = std::fs::remove_file(db_path.with_extension("db-shm"));
+        }
+
+        // channel：Layer（生产）→ writer 线程（消费）
+        let (tx, rx) = unbounded::<StructuredLog>();
+        if LOG_TX.set(tx).is_ok() {
+            // writer 线程：独立 current_thread runtime，sqlx async 写
+            std::thread::Builder::new()
+                .name("lol-core-log-writer".into())
+                .spawn(move || {
+                    log_writer_main(db_path, rx);
+                })
+                .expect("无法启动日志 writer 线程");
+        }
     }
-
-    // channel：Layer（生产）→ writer 线程（消费）
-    let (tx, rx) = unbounded::<StructuredLog>();
-    LOG_TX.set(tx).expect("LOG_TX 已初始化");
-
-    // writer 线程：独立 current_thread runtime，sqlx async 写
-    std::thread::Builder::new()
-        .name("lol-core-log-writer".into())
-        .spawn(move || {
-            log_writer_main(db_path, rx);
-        })
-        .expect("无法启动日志 writer 线程");
 
     let plugin = bevy::log::LogPlugin {
         filter: "bevy_gltf_draco=off".to_owned(),

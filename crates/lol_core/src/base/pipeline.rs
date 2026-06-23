@@ -87,17 +87,15 @@ fn accumulate_requests<T, P>(
 
 fn cleanup_buffer<T, R, P>(
     mut commands: Commands,
-    mut buffer_query: Query<(Entity, &mut RequestBuffer<T>)>,
+    buffer_query: Query<(Entity, &RequestBuffer<T>)>,
 ) where
     T: Send + Sync + 'static,
     R: Send + Sync + 'static,
     P: PipelineStages,
 {
-    for (entity, mut buffer) in buffer_query.iter_mut() {
+    for (entity, buffer) in buffer_query.iter() {
         if buffer.0.is_empty() {
             commands.entity(entity).remove::<RequestBuffer<T>>();
-        } else {
-            buffer.0.clear();
         }
     }
 }

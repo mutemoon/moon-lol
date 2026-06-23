@@ -105,13 +105,13 @@ fn remove_rotate_component(mut commands: Commands, query: Query<(Entity, &Rotate
 
 fn reduce_rotate_by_priority(
     mut commands: Commands,
-    query: Query<(
+    mut query: Query<(
         Entity,
-        &RequestBuffer<CommandRotate>,
+        &mut RequestBuffer<CommandRotate>,
         Option<&LastDecision<CommandRotate>>,
     )>,
 ) {
-    for (entity, buffer, last_decision) in query.iter() {
+    for (entity, mut buffer, last_decision) in query.iter_mut() {
         if buffer.0.is_empty() {
             continue;
         }
@@ -141,6 +141,8 @@ fn reduce_rotate_by_priority(
                     .insert(FinalDecision(decision.clone()));
             }
         }
+
+        buffer.0.clear();
     }
 }
 

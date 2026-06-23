@@ -10,8 +10,11 @@ use crate::domain::match_::{
 use crate::domain::spawn_preset::Team;
 use crate::domain::{ServiceError, ServiceResult};
 use crate::repository::match_repo::{
-    MatchEventInput, MatchEventRepo, MatchInput, MatchParticipantRepo, MatchRepo,
+    MatchEventInput, MatchEventRepo, MatchInput, MatchParticipantRepo, MatchRepo, ParticipantInput,
 };
+use crate::service::rank_service::RankMatchCreator;
+use crate::repository::rank_repo::RankQueueEntry;
+use crate::domain::match_::MatchForm;
 
 const DEFAULT_LIST_LIMIT: i64 = 100;
 
@@ -203,6 +206,51 @@ impl MatchService for MatchServiceImpl {
     ) -> ServiceResult<Vec<MatchEvent>> {
         self.get_owned(requester_id, id).await?;
         Ok(self.event_repo.list_by_match(id, from_seq, limit).await?)
+    }
+}
+
+#[async_trait]
+impl RankMatchCreator for MatchServiceImpl {
+    async fn create_rank_match(
+        &self,
+        entry_a: &RankQueueEntry,
+        entry_b: &RankQueueEntry,
+    ) -> ServiceResult<Uuid> {
+        let m = self.repo.insert(
+            entry_a.user_id,
+            &MatchInput {
+                form: MatchForm::Rank,
+                room_id: None,
+                mode: entry_a.mode.clone(),
+                scenario_id: None,
+                win_condition: None,
+            },
+        )
+        .await?;
+
+        self.participant_repo.insert(
+            m.id,
+            &ParticipantInput {
+                agent_snapshot_id: entry_a.agent_snapshot_id,
+                agent_id: entry_a.agent_id,
+                user_id: entry_a.user_id,
+                team: Team::Order,
+            },
+        )
+        .await?;
+
+        self.participant_repo.insert(
+            m.id,
+            &ParticipantInput {
+                agent_snapshot_id: entry_b.agent_snapshot_id,
+                agent_id: entry_b.agent_id,
+                user_id: entry_b.user_id,
+                team: Team::Chaos,
+            },
+        )
+        .await?;
+
+        Ok(m.id)
     }
 }
 

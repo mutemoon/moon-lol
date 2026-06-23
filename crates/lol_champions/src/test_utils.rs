@@ -215,6 +215,18 @@ impl ChampionTestHarness {
         );
         assert!(grid_loaded, "ResourceGrid asset failed to load");
 
+        // Automatically level up all skills to level 1 for testing
+        if let Some(skills) = app.world().get::<Skills>(champion) {
+            let skill_entities = skills.to_vec();
+            for skill_entity in skill_entities {
+                if let Some(mut skill) = app.world_mut().get_mut::<Skill>(skill_entity) {
+                    if skill.level == 0 {
+                        skill.level = 1;
+                    }
+                }
+            }
+        }
+
         Self {
             app,
             mode,
@@ -255,6 +267,7 @@ impl ChampionTestHarness {
             Transform::from_translation(position),
             Health::new(6000.0),
             lol_core::damage::Armor(0.0),
+            lol_core::movement::Movement { speed: 340.0 },
         ));
         if is_render {
             e.insert((Mesh3d(capsule.unwrap()), MeshMaterial3d(mat_red.unwrap())));
@@ -292,6 +305,7 @@ impl ChampionTestHarness {
             Transform::from_translation(position),
             Health::new(6000.0),
             lol_core::damage::Armor(0.0),
+            lol_core::movement::Movement { speed: 340.0 },
         ));
         if is_render {
             a.insert((Mesh3d(capsule.unwrap()), MeshMaterial3d(mat_green.unwrap())));

@@ -152,7 +152,7 @@ fn riven_q_field_damages_enemy_once() {
 #[test]
 fn riven_q_field_spawns_per_stage() {
     let mut h = build_headless("riven_q_field_stages");
-    let enemy = h.add_enemy(Vec3::new(200.0, 0.0, 0.0));
+    let enemy = h.add_enemy(Vec3::new(150.0, 0.0, 0.0));
     let q_entity = h.skill_entity(0);
 
     // Q1 释放

@@ -4,7 +4,7 @@
 //! 进程状态不持久化——服务重启后所有运行中的本地对局视为 crashed。
 
 use async_trait::async_trait;
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 use tokio::sync::Mutex;
 use uuid::Uuid;
@@ -229,6 +229,58 @@ impl LocalGameService for LocalGameServiceImpl {
     async fn cleanup(&self) -> ServiceResult<usize> {
         let mut state = self.state.lock().await;
         Ok(state.cleanup_terminated())
+    }
+}
+
+/// 命令行进程启动实现（生产用）。
+pub struct CommandProcessLauncher {
+    /// 端口对子进程的映射，用于手动 stop 时 kill 对应进程。
+    pub processes: Mutex<HashMap<i32, tokio::process::Child>>,
+}
+
+impl Default for CommandProcessLauncher {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl CommandProcessLauncher {
+    pub fn new() -> Self {
+        Self {
+            processes: Mutex::new(HashMap::new()),
+        }
+    }
+}
+
+#[async_trait]
+impl ProcessLauncher for CommandProcessLauncher {
+    async fn launch(&self, port: i32, _match_id: Uuid) -> ServiceResult<()> {
+        let child = tokio::process::Command::new("cargo")
+            .args(&[
+                "run",
+                "--bin",
+                "moon_lol",
+                "--",
+                "--ws-port",
+                &port.to_string(),
+                "--headless",
+            ])
+            .stdout(std::process::Stdio::null())
+            .stderr(std::process::Stdio::null())
+            .spawn()
+            .map_err(|e| ServiceError::Internal(format!("启动对局进程失败: {e}")))?;
+
+        let mut procs = self.processes.lock().await;
+        procs.insert(port, child);
+        Ok(())
+    }
+
+    async fn kill(&self, port: i32) -> ServiceResult<()> {
+        let mut procs = self.processes.lock().await;
+        if let Some(mut child) = procs.remove(&port) {
+            let _ = child.kill().await;
+        }
+        Ok(())
     }
 }
 

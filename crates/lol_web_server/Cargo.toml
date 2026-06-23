@@ -54,3 +54,5 @@ testcontainers = { version = "0.25", features = ["properties-config"] }
 testcontainers-modules = { version = "0.13", features = ["postgres"] }
 pretty_assertions = "1.4"
 tokio-test = "0.4"
+tower = { version = "0.5.2", features = ["util"] }
+

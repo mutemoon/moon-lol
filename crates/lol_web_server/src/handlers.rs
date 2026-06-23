@@ -95,13 +95,13 @@ pub struct JwtClaims {
 
 // ── 统一响应包装 ──
 
-#[derive(Serialize)]
-pub struct ApiResponse<T: Serialize> {
+#[derive(Serialize, Deserialize)]
+pub struct ApiResponse<T> {
     pub data: Option<T>,
     pub error: Option<ApiError>,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize)]
 pub struct ApiError {
     pub code: String,
     pub message: String,
@@ -251,13 +251,13 @@ pub struct RegisterRequest {
     pub code: String,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize)]
 pub struct AuthResponse {
     pub token: String,
     pub user: AuthUserDto,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize)]
 pub struct AuthUserDto {
     pub id: i32,
     pub phone: String,
