@@ -14,6 +14,12 @@ bincode.workspace = true
 async-channel.workspace = true
 futures-util.workspace = true
 serde_json.workspace = true
-rusqlite.workspace = true
+crossbeam-channel.workspace = true
+tokio = { version = "1", features = ["rt", "macros", "time"] }
 tracing = "0.1"
-
+# sqlx 用于日志落盘（writer 线程）。仅 sqlite + runtime-tokio，不开 type features
+# 以避免与可能的其他 sqlite linker 冲突；日志表的字段类型都是基础类型。
+sqlx = { version = "0.8.3", default-features = false, features = [
+    "runtime-tokio-native-tls",
+    "sqlite",
+] }

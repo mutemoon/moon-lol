@@ -1,6 +1,8 @@
+use std::path::PathBuf;
 use std::sync::Mutex;
 
-use rusqlite::{params_from_iter, Connection, OpenFlags, ToSql};
+use sqlx::sqlite::{SqliteConnectOptions, SqlitePoolOptions};
+use sqlx::{Row, SqlitePool};
 use tauri::State;
 
 use crate::state::AppState;
@@ -35,8 +37,33 @@ pub struct CategoryOption {
     pub category: Option<String>,
 }
 
+/// 从 AppState 取出当前对局的日志 DB 路径。
+/// 返回 None 表示没有运行中的对局或 DB 文件不存在。
+fn current_log_db_path(state: &State<'_, Mutex<AppState>>) -> Option<PathBuf> {
+    let s = state.lock().ok()?;
+    let proc = s.bevy.as_ref()?;
+    if proc.log_db_path.exists() {
+        Some(proc.log_db_path.clone())
+    } else {
+        None
+    }
+}
+
+/// 以只读模式打开 SQLite 文件，返回一个临时连接池。
+async fn open_read_only(path: &PathBuf) -> Result<SqlitePool, String> {
+    let opts = SqliteConnectOptions::new()
+        .filename(path)
+        .read_only(true)
+        .immutable(true);
+    SqlitePoolOptions::new()
+        .max_connections(1)
+        .connect_with(opts)
+        .await
+        .map_err(|e| e.to_string())
+}
+
 #[tauri::command]
-pub fn query_logs(
+pub async fn query_logs(
     state: State<'_, Mutex<AppState>>,
     offset: i64,
     limit: i64,
@@ -45,106 +72,111 @@ pub fn query_logs(
     category: Option<String>,
     search_text: Option<String>,
 ) -> Result<QueryLogsResult, String> {
-    let s = state.lock().map_err(|e| e.to_string())?;
-    let Some(ref proc) = s.bevy else {
-        return Ok(QueryLogsResult {
-            rows: vec![],
-            total_count: 0,
-        });
+    let db_path = match current_log_db_path(&state) {
+        Some(p) => p,
+        None => {
+            return Ok(QueryLogsResult {
+                rows: vec![],
+                total_count: 0,
+            })
+        }
     };
 
-    if !proc.log_db_path.exists() {
-        return Ok(QueryLogsResult {
-            rows: vec![],
-            total_count: 0,
-        });
-    }
-
-    let conn = Connection::open_with_flags(
-        &proc.log_db_path,
-        OpenFlags::SQLITE_OPEN_READ_ONLY | OpenFlags::SQLITE_OPEN_NO_MUTEX,
-    )
-    .map_err(|e| e.to_string())?;
-
+    let pool = open_read_only(&db_path).await?;
     let limit = limit.clamp(0, 1000);
 
-    let mut sql_base = String::from("FROM logs WHERE 1=1");
-    let mut params: Vec<Box<dyn ToSql>> = vec![];
+    // ── 构造 WHERE 子句与绑定参数（全部走 bind，不内联，防注入）──
+    let mut where_clause = String::from("WHERE 1=1");
+    let mut levels_args: Vec<String> = vec![];
+    let mut entity_id_arg: Option<i64> = None;
+    let mut category_arg: Option<String> = None;
+    let mut search_arg: Option<String> = None;
 
     if let Some(ref lvl) = levels {
         if !lvl.is_empty() {
             let placeholders: Vec<&str> = lvl.iter().map(|_| "?").collect();
-            sql_base = format!("{} AND level IN ({})", sql_base, placeholders.join(","));
-            for l in lvl {
-                params.push(Box::new(l.clone()));
-            }
+            where_clause.push_str(&format!(" AND level IN ({})", placeholders.join(",")));
+            levels_args = lvl.clone();
         }
     }
     if let Some(eid) = entity_id {
-        sql_base.push_str(" AND entity_id = ?");
-        params.push(Box::new(eid));
+        where_clause.push_str(" AND entity_id = ?");
+        entity_id_arg = Some(eid);
     }
     if let Some(ref cat) = category {
-        sql_base.push_str(" AND category = ?");
-        params.push(Box::new(cat.clone()));
+        where_clause.push_str(" AND category = ?");
+        category_arg = Some(cat.clone());
     }
     if let Some(ref search) = search_text {
         let search = search.trim();
         if !search.is_empty() {
-            sql_base.push_str(" AND message LIKE ?");
-            params.push(Box::new(format!("%{search}%")));
+            where_clause.push_str(" AND message LIKE ?");
+            search_arg = Some(format!("%{search}%"));
         }
     }
 
-    // 1. 查询符合过滤条件的总记录数
-    let sql_count = format!("SELECT COUNT(*) {}", sql_base);
-    let total_count: i64 = conn
-        .query_row(
-            &sql_count,
-            params_from_iter(params.iter().map(|p| p.as_ref())),
-            |r| r.get(0),
-        )
-        .map_err(|e| e.to_string())?;
+    // 1. COUNT
+    let sql_count = format!("SELECT COUNT(*) FROM logs {where_clause}");
+    let total_count: i64 = {
+        let mut q = sqlx::query_scalar::<_, i64>(&sql_count);
+        for l in &levels_args {
+            q = q.bind(l);
+        }
+        if let Some(eid) = entity_id_arg {
+            q = q.bind(eid);
+        }
+        if let Some(ref cat) = category_arg {
+            q = q.bind(cat);
+        }
+        if let Some(ref search) = search_arg {
+            q = q.bind(search);
+        }
+        q.fetch_one(&pool).await.map_err(|e| e.to_string())?
+    };
 
-    // 2. 如果 offset < 0，自动计算为最后一页
+    // 2. 负 offset 自动算最后一页
     let mut real_offset = offset;
     if real_offset < 0 {
         real_offset = std::cmp::max(0, total_count - limit);
     }
 
-    // 3. 查询具体的当前页数据
+    // 3. 数据查询
     let sql_data = format!(
-        "SELECT id, timestamp, level, file, line, entity_id, entity_name, category, message {} ORDER BY id ASC LIMIT ? OFFSET ?",
-        sql_base
+        "SELECT id, timestamp, level, file, line, entity_id, entity_name, category, message \
+         FROM logs {where_clause} ORDER BY id ASC LIMIT ? OFFSET ?"
     );
-    let mut data_params = params;
-    data_params.push(Box::new(limit));
-    data_params.push(Box::new(real_offset));
-
-    let mut stmt = conn.prepare(&sql_data).map_err(|e| e.to_string())?;
-    let rows = stmt
-        .query_map(
-            params_from_iter(data_params.iter().map(|p| p.as_ref())),
-            |row| {
-                Ok(LogRow {
-                    id: row.get(0)?,
-                    timestamp: row.get(1)?,
-                    level: row.get(2)?,
-                    file: row.get(3)?,
-                    line: row.get(4)?,
-                    entity_id: row.get(5)?,
-                    entity_name: row.get(6)?,
-                    category: row.get(7)?,
-                    message: row.get(8)?,
-                })
-            },
-        )
-        .map_err(|e| e.to_string())?;
-
-    let mut result = Vec::new();
-    for row in rows {
-        result.push(row.map_err(|e| e.to_string())?);
+    let mut q = sqlx::query(&sql_data);
+    for l in &levels_args {
+        q = q.bind(l);
     }
+    if let Some(eid) = entity_id_arg {
+        q = q.bind(eid);
+    }
+    if let Some(ref cat) = category_arg {
+        q = q.bind(cat);
+    }
+    if let Some(ref search) = search_arg {
+        q = q.bind(search);
+    }
+    q = q.bind(limit);
+    q = q.bind(real_offset);
+
+    let rows = q.fetch_all(&pool).await.map_err(|e| e.to_string())?;
+    let mut result = Vec::with_capacity(rows.len());
+    for row in rows {
+        result.push(LogRow {
+            id: row.try_get(0).map_err(|e| e.to_string())?,
+            timestamp: row.try_get(1).map_err(|e| e.to_string())?,
+            level: row.try_get(2).map_err(|e| e.to_string())?,
+            file: row.try_get(3).map_err(|e| e.to_string())?,
+            line: row.try_get(4).map_err(|e| e.to_string())?,
+            entity_id: row.try_get(5).map_err(|e| e.to_string())?,
+            entity_name: row.try_get(6).map_err(|e| e.to_string())?,
+            category: row.try_get(7).map_err(|e| e.to_string())?,
+            message: row.try_get(8).map_err(|e| e.to_string())?,
+        });
+    }
+
     Ok(QueryLogsResult {
         rows: result,
         total_count,
@@ -152,81 +184,75 @@ pub fn query_logs(
 }
 
 #[tauri::command]
-pub fn query_log_entities(state: State<'_, Mutex<AppState>>) -> Result<Vec<EntityOption>, String> {
-    let s = state.lock().map_err(|e| e.to_string())?;
-    let Some(ref proc) = s.bevy else {
-        return Ok(vec![]);
+pub async fn query_log_entities(
+    state: State<'_, Mutex<AppState>>,
+) -> Result<Vec<EntityOption>, String> {
+    let db_path = match current_log_db_path(&state) {
+        Some(p) => p,
+        None => return Ok(vec![]),
     };
-    if !proc.log_db_path.exists() {
-        return Ok(vec![]);
-    }
-    let conn = Connection::open_with_flags(
-        &proc.log_db_path,
-        OpenFlags::SQLITE_OPEN_READ_ONLY | OpenFlags::SQLITE_OPEN_NO_MUTEX,
+    let pool = open_read_only(&db_path).await?;
+
+    let rows = sqlx::query(
+        "SELECT DISTINCT entity_id, entity_name FROM logs \
+         WHERE entity_id IS NOT NULL ORDER BY entity_id",
     )
+    .fetch_all(&pool)
+    .await
     .map_err(|e| e.to_string())?;
-    let mut stmt = conn
-        .prepare("SELECT DISTINCT entity_id, entity_name FROM logs WHERE entity_id IS NOT NULL ORDER BY entity_id")
-        .map_err(|e| e.to_string())?;
-    let rows = stmt
-        .query_map([], |row| {
-            Ok(EntityOption {
-                entity_id: row.get(0)?,
-                entity_name: row.get(1)?,
-            })
-        })
-        .map_err(|e| e.to_string())?;
-    let mut result = Vec::new();
+
+    let mut result = Vec::with_capacity(rows.len());
     for row in rows {
-        result.push(row.map_err(|e| e.to_string())?);
+        result.push(EntityOption {
+            entity_id: row.try_get(0).map_err(|e| e.to_string())?,
+            entity_name: row.try_get(1).map_err(|e| e.to_string())?,
+        });
     }
     Ok(result)
 }
 
 #[tauri::command]
-pub fn query_log_categories(
+pub async fn query_log_categories(
     state: State<'_, Mutex<AppState>>,
 ) -> Result<Vec<CategoryOption>, String> {
-    let s = state.lock().map_err(|e| e.to_string())?;
-    let Some(ref proc) = s.bevy else {
-        return Ok(vec![]);
+    let db_path = match current_log_db_path(&state) {
+        Some(p) => p,
+        None => return Ok(vec![]),
     };
-    if !proc.log_db_path.exists() {
-        return Ok(vec![]);
-    }
-    let conn = Connection::open_with_flags(
-        &proc.log_db_path,
-        OpenFlags::SQLITE_OPEN_READ_ONLY | OpenFlags::SQLITE_OPEN_NO_MUTEX,
+    let pool = open_read_only(&db_path).await?;
+
+    let rows = sqlx::query(
+        "SELECT DISTINCT category FROM logs WHERE category IS NOT NULL ORDER BY category",
     )
+    .fetch_all(&pool)
+    .await
     .map_err(|e| e.to_string())?;
-    let mut stmt = conn
-        .prepare("SELECT DISTINCT category FROM logs WHERE category IS NOT NULL ORDER BY category")
-        .map_err(|e| e.to_string())?;
-    let rows = stmt
-        .query_map([], |row| {
-            Ok(CategoryOption {
-                category: row.get(0)?,
-            })
-        })
-        .map_err(|e| e.to_string())?;
-    let mut result = Vec::new();
+
+    let mut result = Vec::with_capacity(rows.len());
     for row in rows {
-        result.push(row.map_err(|e| e.to_string())?);
+        result.push(CategoryOption {
+            category: row.try_get(0).map_err(|e| e.to_string())?,
+        });
     }
     Ok(result)
 }
 
 #[tauri::command]
-pub fn clear_logs(state: State<'_, Mutex<AppState>>) -> Result<(), String> {
-    let s = state.lock().map_err(|e| e.to_string())?;
-    let Some(ref proc) = s.bevy else {
-        return Ok(());
+pub async fn clear_logs(state: State<'_, Mutex<AppState>>) -> Result<(), String> {
+    let db_path = match current_log_db_path(&state) {
+        Some(p) => p,
+        None => return Ok(()),
     };
-    if !proc.log_db_path.exists() {
-        return Ok(());
-    }
-    let conn = Connection::open(&proc.log_db_path).map_err(|e| e.to_string())?;
-    conn.execute("DELETE FROM logs", [])
+    let opts = SqliteConnectOptions::new().filename(&db_path);
+    let pool = SqlitePoolOptions::new()
+        .max_connections(1)
+        .connect_with(opts)
+        .await
         .map_err(|e| e.to_string())?;
+    sqlx::query("DELETE FROM logs")
+        .execute(&pool)
+        .await
+        .map_err(|e| e.to_string())?;
+    pool.close().await;
     Ok(())
 }

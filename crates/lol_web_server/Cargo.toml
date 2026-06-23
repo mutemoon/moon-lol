@@ -3,6 +3,14 @@ name = "lol_web_server"
 version = "0.1.0"
 edition = "2024"
 
+[lib]
+name = "lol_web_server"
+path = "src/lib.rs"
+
+[[bin]]
+name = "lol_web_server"
+path = "src/main.rs"
+
 [dependencies]
 # Inherited from workspace
 tokio = { workspace = true, features = ["full"] }
@@ -17,12 +25,32 @@ tower-http = { version = "0.5.2", features = ["cors", "trace"] }
 tracing = "0.1.40"
 tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
 async-trait = "0.1.80"
-sqlx = { version = "0.8.3", default-features = false, features = ["runtime-tokio-native-tls", "postgres"] }
+# sqlx：postgres + sqlite（经 lol_core 间接引入）共享同一 libsqlite3-sys，
+# 现在整个 workspace 已无 rusqlite，sqlx-sqlite 是唯一 sqlite linker，无冲突。
+# 因此可以开全套 type features，享受 UUID/chrono/JSONB 自动编解码。
+sqlx = { version = "0.8.3", default-features = false, features = [
+    "runtime-tokio-native-tls",
+    "postgres",
+    "sqlite",
+    "uuid",
+    "chrono",
+    "json",
+] }
 bcrypt = "0.15"
 jsonwebtoken = "9.3"
-
+uuid = { version = "1", features = ["v4", "serde"] }
+chrono = { version = "0.4", features = ["serde"] }
+moka = { version = "0.12", features = ["future"] }
+thiserror = "2.0"
+rand.workspace = true
 
 # Local crates in the workspace (we can depend on them if needed)
-rusqlite = { workspace = true, features = ["bundled"] }
 lol_core = { path = "../lol_core" }
 lol_server = { path = "../lol_server" }
+
+[dev-dependencies]
+mockall = "0.13"
+testcontainers = { version = "0.25", features = ["properties-config"] }
+testcontainers-modules = { version = "0.13", features = ["postgres"] }
+pretty_assertions = "1.4"
+tokio-test = "0.4"

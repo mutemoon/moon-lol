@@ -58,7 +58,7 @@ importers:
         version: 1.0.0(vue@3.5.38(typescript@5.9.3))
       markstream-vue:
         specifier: 0.0.2-beta.4
-        version: 0.0.2-beta.4(katex@0.16.47)(mermaid@11.15.0)(shiki@3.19.0)(vue@3.5.38(typescript@5.9.3))
+        version: 0.0.2-beta.4(katex@0.16.47)(mermaid@11.15.0)(shiki@3.19.0)(vue-i18n@11.4.6(vue@3.5.38(typescript@5.9.3)))(vue@3.5.38(typescript@5.9.3))
       pinia:
         specifier: ^3.0.4
         version: 3.0.4(typescript@5.9.3)(vue@3.5.38(typescript@5.9.3))
@@ -77,6 +77,9 @@ importers:
       vue:
         specifier: ^3.5.13
         version: 3.5.38(typescript@5.9.3)
+      vue-i18n:
+        specifier: ^11.4.6
+        version: 11.4.6(vue@3.5.38(typescript@5.9.3))
       vue-router:
         specifier: ^4.6.3
         version: 4.6.4(vue@3.5.38(typescript@5.9.3))
@@ -134,7 +137,7 @@ importers:
         version: 0.552.0(vue@3.5.38(typescript@5.9.3))
       markstream-vue:
         specifier: 0.0.2-beta.4
-        version: 0.0.2-beta.4(katex@0.16.47)(mermaid@11.15.0)(shiki@3.19.0)(vue@3.5.38(typescript@5.9.3))
+        version: 0.0.2-beta.4(katex@0.16.47)(mermaid@11.15.0)(shiki@3.19.0)(vue-i18n@11.4.6(vue@3.5.38(typescript@5.9.3)))(vue@3.5.38(typescript@5.9.3))
       mermaid:
         specifier: ^11.12.1
         version: 11.15.0
@@ -865,6 +868,22 @@ packages:
 
   '@internationalized/number@3.6.5':
     resolution: {integrity: sha512-6hY4Kl4HPBvtfS62asS/R22JzNNy8vi/Ssev7x6EobfCp+9QIB2hKvI2EtbdJ0VSQacxVNtqhE/NmF/NZ0gm6g==}
+
+  '@intlify/core-base@11.4.6':
+    resolution: {integrity: sha512-EOeHO95XESK9IFHgHeZXunsM/WBAoCA0DlaWODvx14vKmetAuS97t+l6Xe9hTUqntPpF93vtVSjjUDafw3wXMw==}
+    engines: {node: '>= 22'}
+
+  '@intlify/devtools-types@11.4.6':
+    resolution: {integrity: sha512-wowQPpNem56b2d43IJmqbrzG2FeBKe5f/kUGlpNuBmXs6OSqncF8m1+1lxHuW8ISZJF0ma2RkW3iLkw0g0G4VA==}
+    engines: {node: '>= 22'}
+
+  '@intlify/message-compiler@11.4.6':
+    resolution: {integrity: sha512-5nj3jULqeTAC1WovwMs1LQWgatTa2pM/rXN9T3XW8rdOtXW9ZF6/GLSNFTKDQmPLwclhPdgUWLJ/4w3fMeeC/Q==}
+    engines: {node: '>= 22'}
+
+  '@intlify/shared@11.4.6':
+    resolution: {integrity: sha512-m1p1HHAMLhqSpTRH7VnXdrN0CQ4y+9vunFkpLkbD8soIuBsnQdawZXqMCgvwI2UVF9Ww7sVaw7g9tV2VO7shoA==}
+    engines: {node: '>= 22'}
 
   '@isaacs/cliui@8.0.2':
     resolution: {integrity: sha512-O8jcjabXaleOG9DQ0+ARXWZBTfnP4WNAqzuiJK7ll44AmxGKv/J2M4TPjxjY3znBCfvBXFzucm1twdyFybFqEA==}
@@ -4878,6 +4897,12 @@ packages:
     peerDependencies:
       eslint: ^8.57.0 || ^9.0.0 || ^10.0.0
 
+  vue-i18n@11.4.6:
+    resolution: {integrity: sha512-l0gE7Rfy0phCa5ChKYkOq543Wgd39BCK6hkktfr1Ed4D99oRkgPK9ffShASZdeC8OJxGfdWmpYoAaAH6iLEuIg==}
+    engines: {node: '>= 22'}
+    peerDependencies:
+      vue: ^3.0.0
+
   vue-metamorph@3.3.4:
     resolution: {integrity: sha512-WZ1xzHrmYh9UiZ7OC9eG1ASzgSybEB10jhop+k5KzMY9I1JmRKdreqUYzbV3hOnOMvLhyDn7y6f62mLE2jHFSg==}
     hasBin: true
@@ -5667,6 +5692,24 @@ snapshots:
   '@internationalized/number@3.6.5':
     dependencies:
       '@swc/helpers': 0.5.17
+
+  '@intlify/core-base@11.4.6':
+    dependencies:
+      '@intlify/devtools-types': 11.4.6
+      '@intlify/message-compiler': 11.4.6
+      '@intlify/shared': 11.4.6
+
+  '@intlify/devtools-types@11.4.6':
+    dependencies:
+      '@intlify/core-base': 11.4.6
+      '@intlify/shared': 11.4.6
+
+  '@intlify/message-compiler@11.4.6':
+    dependencies:
+      '@intlify/shared': 11.4.6
+      source-map-js: 1.2.1
+
+  '@intlify/shared@11.4.6': {}
 
   '@isaacs/cliui@8.0.2':
     dependencies:
@@ -8219,7 +8262,7 @@ snapshots:
 
   marked@16.4.2: {}
 
-  markstream-vue@0.0.2-beta.4(katex@0.16.47)(mermaid@11.15.0)(shiki@3.19.0)(vue@3.5.38(typescript@5.9.3)):
+  markstream-vue@0.0.2-beta.4(katex@0.16.47)(mermaid@11.15.0)(shiki@3.19.0)(vue-i18n@11.4.6(vue@3.5.38(typescript@5.9.3)))(vue@3.5.38(typescript@5.9.3)):
     dependencies:
       '@floating-ui/dom': 1.7.4
       vue: 3.5.38(typescript@5.9.3)
@@ -8227,6 +8270,7 @@ snapshots:
       katex: 0.16.47
       mermaid: 11.15.0
       shiki: 3.19.0
+      vue-i18n: 11.4.6(vue@3.5.38(typescript@5.9.3))
 
   math-intrinsics@1.1.0: {}
 
@@ -9960,6 +10004,14 @@ snapshots:
       semver: 7.7.4
     transitivePeerDependencies:
       - supports-color
+
+  vue-i18n@11.4.6(vue@3.5.38(typescript@5.9.3)):
+    dependencies:
+      '@intlify/core-base': 11.4.6
+      '@intlify/devtools-types': 11.4.6
+      '@intlify/shared': 11.4.6
+      '@vue/devtools-api': 6.6.4
+      vue: 3.5.38(typescript@5.9.3)
 
   vue-metamorph@3.3.4(eslint@10.4.0(jiti@2.7.0)):
     dependencies:

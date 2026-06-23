@@ -1,15 +1,25 @@
 use std::path::PathBuf;
-use std::sync::Mutex;
+use std::sync::OnceLock;
 
 use bevy::log::tracing_subscriber::{Layer, fmt};
 use bevy::prelude::*;
-use rusqlite::Connection;
+use crossbeam_channel::{unbounded, Sender};
 use serde::Serialize;
+use sqlx::sqlite::{SqliteConnectOptions, SqlitePoolOptions};
+use sqlx::SqlitePool;
 use tracing::Event;
 use tracing::field::{Field, Visit};
 
-/// 全局 SQLite 连接，用于在 tracing Layer 中写入日志
-static LOG_DB: Mutex<Option<Connection>> = Mutex::new(None);
+/// 写入端：tracing Layer 把日志发到这个 channel，writer 线程异步落盘。
+///
+/// 设计说明：tracing 的 `Layer::on_event` 是同步签名（`fn`），而 sqlx 的所有
+/// API 都是 async。两者无法直接对接。用 crossbeam 无界 channel 解耦：
+/// - Layer 回调只做 `send`（同步、非阻塞），不碰任何 async/DB
+/// - writer 线程跑独立的 current_thread tokio runtime，循环 recv → sqlx INSERT
+///
+/// 这样 `lol_core` 不再依赖 rusqlite，整个 workspace 的 sqlite linker 统一为
+/// sqlx-sqlite，避免 `links="sqlite3"` 冲突。
+static LOG_TX: OnceLock<Sender<StructuredLog>> = OnceLock::new();
 
 #[derive(Serialize, Clone, Debug)]
 pub struct StructuredLog {
@@ -106,28 +116,24 @@ impl<S: tracing::Subscriber> Layer<S> for StructuredLogLayer {
             .as_millis() as u64;
         let level = metadata.level().to_string().to_lowercase();
         let file = metadata.file().map(|f| f.to_string());
-        let line = metadata.line().map(|l| l as i64);
+        let line = metadata.line();
 
-        let Ok(guard) = LOG_DB.lock() else {
-            return;
+        let log = StructuredLog {
+            timestamp,
+            level,
+            file,
+            line,
+            entity_id: visitor.entity_id,
+            entity_name: visitor.entity_name,
+            category: visitor.category,
+            message: visitor.message,
         };
-        let Some(conn) = guard.as_ref() else {
-            return;
-        };
-        let _ = conn.execute(
-            "INSERT INTO logs (timestamp, level, file, line, entity_id, entity_name, category, message)
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)",
-            rusqlite::params![
-                timestamp,
-                level,
-                file,
-                line,
-                visitor.entity_id,
-                visitor.entity_name,
-                visitor.category,
-                visitor.message,
-            ],
-        );
+
+        // send 到 channel；channel 持有方是 OnceLock，初始化后永远存在。
+        // send 失败仅当 writer 线程退出（程序结束），此时丢弃日志是正确的。
+        if let Some(tx) = LOG_TX.get() {
+            let _ = tx.send(log);
+        }
     }
 }
 
@@ -163,7 +169,10 @@ impl<S: tracing::Subscriber, L: Layer<S>> Layer<S> for FilteredLayer<L> {
     }
 }
 
-/// 初始化 SQLite 日志数据库并返回 Bevy LogPlugin
+/// 初始化 SQLite 日志：建表 + 启动 writer 线程。返回 Bevy LogPlugin。
+///
+/// writer 线程在自己的 current_thread tokio runtime 上跑，避免和 Bevy 主线程
+/// 的 runtime 冲突。channel sender 存入 OnceLock 供 Layer 回调使用。
 pub fn create_log_plugin() -> bevy::log::LogPlugin {
     let db_path = {
         let base = std::env::var("HOME")
@@ -177,33 +186,24 @@ pub fn create_log_plugin() -> bevy::log::LogPlugin {
         std::fs::create_dir_all(parent).expect("无法创建日志目录");
     }
 
+    // 每次启动重置日志 DB（沿用原行为）
     if db_path.exists() {
         let _ = std::fs::remove_file(&db_path);
         let _ = std::fs::remove_file(db_path.with_extension("db-wal"));
         let _ = std::fs::remove_file(db_path.with_extension("db-shm"));
     }
 
-    // 初始化 SQLite
-    let conn = Connection::open(&db_path).expect("无法打开日志 SQLite");
-    conn.execute_batch(
-        "PRAGMA journal_mode = WAL;
-         PRAGMA synchronous = NORMAL;
-         DROP TABLE IF EXISTS logs;
-         CREATE TABLE logs (
-             id INTEGER PRIMARY KEY AUTOINCREMENT,
-             timestamp INTEGER NOT NULL,
-             level TEXT NOT NULL,
-             file TEXT,
-             line INTEGER,
-             entity_id INTEGER,
-             entity_name TEXT,
-             category TEXT,
-             message TEXT NOT NULL
-         );",
-    )
-    .expect("无法初始化日志表");
+    // channel：Layer（生产）→ writer 线程（消费）
+    let (tx, rx) = unbounded::<StructuredLog>();
+    LOG_TX.set(tx).expect("LOG_TX 已初始化");
 
-    *LOG_DB.lock().unwrap() = Some(conn);
+    // writer 线程：独立 current_thread runtime，sqlx async 写
+    std::thread::Builder::new()
+        .name("lol-core-log-writer".into())
+        .spawn(move || {
+            log_writer_main(db_path, rx);
+        })
+        .expect("无法启动日志 writer 线程");
 
     let plugin = bevy::log::LogPlugin {
         filter: "bevy_gltf_draco=off".to_owned(),
@@ -227,6 +227,90 @@ pub fn create_log_plugin() -> bevy::log::LogPlugin {
     };
 
     plugin
+}
+
+/// writer 线程主循环：建表 → 循环 recv → INSERT；sender 全部 drop 后排空退出。
+fn log_writer_main(db_path: PathBuf, rx: crossbeam_channel::Receiver<StructuredLog>) {
+    let rt = match tokio::runtime::Builder::new_current_thread()
+        .enable_all()
+        .build()
+    {
+        Ok(rt) => rt,
+        Err(e) => {
+            eprintln!("[lol-core-log] 无法创建 tokio runtime: {e}");
+            return;
+        }
+    };
+
+    rt.block_on(async move {
+        let pool = match open_and_init_db(&db_path).await {
+            Ok(p) => p,
+            Err(e) => {
+                eprintln!("[lol-core-log] 无法初始化 SQLite: {e}");
+                return;
+            }
+        };
+
+        // 循环消费 channel；rx 持有方在 LOG_TX 的 sender 全部 drop 后会返回 Err(Disconnected)，
+        // 此时排空剩余日志后退出。
+        while let Ok(log) = rx.recv() {
+            if let Err(e) = insert_log(&pool, &log).await {
+                eprintln!("[lol-core-log] 写入失败: {e}");
+            }
+        }
+
+        // 优雅关闭：关闭连接池
+        pool.close().await;
+    });
+}
+
+async fn open_and_init_db(db_path: &PathBuf) -> Result<SqlitePool, sqlx::Error> {
+    let opts = SqliteConnectOptions::new()
+        .filename(db_path)
+        .create_if_missing(true)
+        .journal_mode(sqlx::sqlite::SqliteJournalMode::Wal)
+        .synchronous(sqlx::sqlite::SqliteSynchronous::Normal);
+
+    let pool = SqlitePoolOptions::new()
+        .max_connections(1)
+        .connect_with(opts)
+        .await?;
+
+    sqlx::query(
+        "CREATE TABLE IF NOT EXISTS logs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            timestamp INTEGER NOT NULL,
+            level TEXT NOT NULL,
+            file TEXT,
+            line INTEGER,
+            entity_id INTEGER,
+            entity_name TEXT,
+            category TEXT,
+            message TEXT NOT NULL
+        );",
+    )
+    .execute(&pool)
+    .await?;
+
+    Ok(pool)
+}
+
+async fn insert_log(pool: &SqlitePool, log: &StructuredLog) -> Result<(), sqlx::Error> {
+    sqlx::query(
+        "INSERT INTO logs (timestamp, level, file, line, entity_id, entity_name, category, message)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+    )
+    .bind(log.timestamp as i64)
+    .bind(&log.level)
+    .bind(&log.file)
+    .bind(log.line.map(|l| l as i64))
+    .bind(log.entity_id.map(|e| e as i64))
+    .bind(&log.entity_name)
+    .bind(&log.category)
+    .bind(&log.message)
+    .execute(pool)
+    .await?;
+    Ok(())
 }
 
 #[derive(Clone, Copy, Debug, Serialize)]

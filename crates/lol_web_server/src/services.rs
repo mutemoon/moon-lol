@@ -3,7 +3,6 @@ use std::path::{Path, PathBuf};
 use std::process::{Child, Command, Stdio};
 use std::sync::Mutex;
 use async_trait::async_trait;
-use rusqlite::{params_from_iter, Connection, OpenFlags, ToSql};
 use sqlx::{PgPool, Row};
 use bcrypt::{hash, verify, DEFAULT_COST};
 use jsonwebtoken::{encode, Header, EncodingKey};
@@ -1017,6 +1016,10 @@ impl HistoryService for HistoryServiceImpl {
 }
 
 // ── Log Service Implementation ──
+//
+// 说明：web server 是远程服务，生产环境通常没有本地 Bevy 的 debug.db 可读。
+// 此实现保留是为了迁移期兼容；后续新架构中日志读取会改为按 match_id 从
+// match_events 表（Postgres）查询，或经 Bevy 进程的 WS 拉取。
 
 pub struct LogServiceImpl;
 
@@ -1029,6 +1032,20 @@ fn log_db_path() -> Result<PathBuf, String> {
     Ok(path)
 }
 
+/// 以只读模式打开 SQLite 日志库（sqlx async，与 lol_core 的 writer 共享同一文件）。
+async fn open_log_db_readonly(path: &PathBuf) -> Result<sqlx::SqlitePool, String> {
+    use sqlx::sqlite::{SqliteConnectOptions, SqlitePoolOptions};
+    let opts = SqliteConnectOptions::new()
+        .filename(path)
+        .read_only(true)
+        .immutable(true);
+    SqlitePoolOptions::new()
+        .max_connections(1)
+        .connect_with(opts)
+        .await
+        .map_err(|e| e.to_string())
+}
+
 #[async_trait]
 impl LogService for LogServiceImpl {
     async fn query_log_entities(&self, _user_id: i32) -> Result<Vec<serde_json::Value>, String> {
@@ -1036,29 +1053,22 @@ impl LogService for LogServiceImpl {
         if !db_path.exists() {
             return Ok(Vec::new());
         }
+        let pool = open_log_db_readonly(&db_path).await?;
 
-        let conn = Connection::open_with_flags(
-            &db_path,
-            OpenFlags::SQLITE_OPEN_READ_ONLY | OpenFlags::SQLITE_OPEN_NO_MUTEX,
+        let rows = sqlx::query(
+            "SELECT DISTINCT entity_id, entity_name FROM logs \
+             WHERE entity_id IS NOT NULL ORDER BY entity_id",
         )
+        .fetch_all(&pool)
+        .await
         .map_err(|e| e.to_string())?;
-
-        let mut stmt = conn
-            .prepare("SELECT DISTINCT entity_id, entity_name FROM logs WHERE entity_id IS NOT NULL ORDER BY entity_id")
-            .map_err(|e| e.to_string())?;
-
-        let rows = stmt
-            .query_map([], |row| {
-                Ok(serde_json::json!({
-                    "entity_id": row.get::<_, Option<i64>>(0)?,
-                    "entity_name": row.get::<_, Option<String>>(1)?,
-                }))
-            })
-            .map_err(|e| e.to_string())?;
 
         let mut result = Vec::new();
         for row in rows {
-            result.push(row.map_err(|e| e.to_string())?);
+            result.push(serde_json::json!({
+                "entity_id": row.try_get::<Option<i64>, _>(0).map_err(|e| e.to_string())?,
+                "entity_name": row.try_get::<Option<String>, _>(1).map_err(|e| e.to_string())?,
+            }));
         }
         Ok(result)
     }
@@ -1068,33 +1078,29 @@ impl LogService for LogServiceImpl {
         if !db_path.exists() {
             return Ok(Vec::new());
         }
+        let pool = open_log_db_readonly(&db_path).await?;
 
-        let conn = Connection::open_with_flags(
-            &db_path,
-            OpenFlags::SQLITE_OPEN_READ_ONLY | OpenFlags::SQLITE_OPEN_NO_MUTEX,
+        let rows = sqlx::query(
+            "SELECT DISTINCT category FROM logs WHERE category IS NOT NULL ORDER BY category",
         )
+        .fetch_all(&pool)
+        .await
         .map_err(|e| e.to_string())?;
-
-        let mut stmt = conn
-            .prepare("SELECT DISTINCT category FROM logs WHERE category IS NOT NULL ORDER BY category")
-            .map_err(|e| e.to_string())?;
-
-        let rows = stmt
-            .query_map([], |row| {
-                Ok(serde_json::json!({
-                    "category": row.get::<_, Option<String>>(0)?,
-                }))
-            })
-            .map_err(|e| e.to_string())?;
 
         let mut result = Vec::new();
         for row in rows {
-            result.push(row.map_err(|e| e.to_string())?);
+            result.push(serde_json::json!({
+                "category": row.try_get::<Option<String>, _>(0).map_err(|e| e.to_string())?,
+            }));
         }
         Ok(result)
     }
 
-    async fn query_logs(&self, _user_id: i32, params: QueryLogsParams) -> Result<QueryLogsResult, String> {
+    async fn query_logs(
+        &self,
+        _user_id: i32,
+        params: QueryLogsParams,
+    ) -> Result<QueryLogsResult, String> {
         let db_path = log_db_path()?;
         if !db_path.exists() {
             return Ok(QueryLogsResult {
@@ -1102,87 +1108,108 @@ impl LogService for LogServiceImpl {
                 total_count: 0,
             });
         }
+        let pool = open_log_db_readonly(&db_path).await?;
 
-        let conn = Connection::open_with_flags(
-            &db_path,
-            OpenFlags::SQLITE_OPEN_READ_ONLY | OpenFlags::SQLITE_OPEN_NO_MUTEX,
-        )
-        .map_err(|e| e.to_string())?;
+        let limit = params.limit.clamp(0, 1000) as i64;
 
-        let limit = params.limit.clamp(0, 1000);
-
-        let mut sql_base = String::from("FROM logs WHERE 1=1");
-        let mut sql_params: Vec<Box<dyn ToSql>> = vec![];
+        // ── 构造 WHERE 子句与绑定参数（全部走 bind，不内联，防注入）──
+        let mut where_clause = String::from("WHERE 1=1");
+        let mut levels_args: Vec<String> = vec![];
+        let mut entity_id_arg: Option<i64> = None;
+        let mut category_arg: Option<String> = None;
+        let mut search_arg: Option<String> = None;
 
         if let Some(ref lvl) = params.levels {
             if !lvl.is_empty() {
                 let placeholders: Vec<&str> = lvl.iter().map(|_| "?").collect();
-                sql_base = format!("{sql_base} AND level IN ({})", placeholders.join(","));
-                for l in lvl {
-                    sql_params.push(Box::new(l.clone()));
-                }
+                where_clause.push_str(&format!(" AND level IN ({})", placeholders.join(",")));
+                levels_args = lvl.clone();
             }
         }
         if let Some(eid) = params.entity_id {
-            sql_base.push_str(" AND entity_id = ?");
-            sql_params.push(Box::new(eid as i64));
+            where_clause.push_str(" AND entity_id = ?");
+            entity_id_arg = Some(eid as i64);
         }
         if let Some(ref cat) = params.category {
-            sql_base.push_str(" AND category = ?");
-            sql_params.push(Box::new(cat.clone()));
+            where_clause.push_str(" AND category = ?");
+            category_arg = Some(cat.clone());
         }
         if let Some(ref search) = params.search_text {
             let search = search.trim();
             if !search.is_empty() {
-                sql_base.push_str(" AND message LIKE ?");
-                sql_params.push(Box::new(format!("%{search}%")));
+                where_clause.push_str(" AND message LIKE ?");
+                search_arg = Some(format!("%{search}%"));
             }
         }
 
-        let sql_count = format!("SELECT COUNT(*) {sql_base}");
-        let total_count: i64 = conn
-            .query_row(
-                &sql_count,
-                params_from_iter(sql_params.iter().map(|p| p.as_ref())),
-                |r| r.get(0),
-            )
-            .map_err(|e| e.to_string())?;
+        // 1. COUNT
+        let sql_count = format!("SELECT COUNT(*) FROM logs {where_clause}");
+        let total_count: i64 = {
+            let mut q = sqlx::query_scalar::<_, i64>(&sql_count);
+            for l in &levels_args {
+                q = q.bind(l);
+            }
+            if let Some(eid) = entity_id_arg {
+                q = q.bind(eid);
+            }
+            if let Some(ref cat) = category_arg {
+                q = q.bind(cat);
+            }
+            if let Some(ref search) = search_arg {
+                q = q.bind(search);
+            }
+            q.fetch_one(&pool)
+                .await
+                .map_err(|e| e.to_string())?
+        };
 
+        // 2. 负 offset 自动算最后一页
         let mut real_offset = params.offset;
         if real_offset < 0 {
-            real_offset = std::cmp::max(0, total_count - limit as i64);
+            real_offset = std::cmp::max(0, total_count - limit);
         }
 
+        // 3. 数据查询
         let sql_data = format!(
-            "SELECT id, timestamp, level, file, line, entity_id, entity_name, category, message {sql_base} ORDER BY id ASC LIMIT ? OFFSET ?"
+            "SELECT id, timestamp, level, file, line, entity_id, entity_name, category, message \
+             FROM logs {where_clause} ORDER BY id ASC LIMIT ? OFFSET ?"
         );
-        let mut data_params = sql_params;
-        data_params.push(Box::new(limit as i64));
-        data_params.push(Box::new(real_offset));
+        let mut q = sqlx::query(&sql_data);
+        for l in &levels_args {
+            q = q.bind(l);
+        }
+        if let Some(eid) = entity_id_arg {
+            q = q.bind(eid);
+        }
+        if let Some(ref cat) = category_arg {
+            q = q.bind(cat);
+        }
+        if let Some(ref search) = search_arg {
+            q = q.bind(search);
+        }
+        q = q.bind(limit);
+        q = q.bind(real_offset);
 
-        let mut stmt = conn.prepare(&sql_data).map_err(|e| e.to_string())?;
-        let rows = stmt
-            .query_map(
-                params_from_iter(data_params.iter().map(|p| p.as_ref())),
-                |row| {
-                    Ok(LogRow {
-                        id: row.get(0)?,
-                        timestamp: row.get(1)?,
-                        level: row.get(2)?,
-                        file: row.get(3)?,
-                        line: row.get::<_, Option<i64>>(4)?.map(|l| l as i32),
-                        entity_id: row.get::<_, Option<i64>>(5)?.map(|e| e as i32),
-                        entity_name: row.get(6)?,
-                        category: row.get(7)?,
-                        message: row.get(8)?,
-                    })
-                },
-            )
-            .map_err(|e| e.to_string())?;
-
+        let rows = q.fetch_all(&pool).await.map_err(|e| e.to_string())?;
         let mut result = Vec::new();
         for row in rows {
-            result.push(row.map_err(|e| e.to_string())?);
+            result.push(LogRow {
+                id: row.try_get(0).map_err(|e| e.to_string())?,
+                timestamp: row.try_get(1).map_err(|e| e.to_string())?,
+                level: row.try_get(2).map_err(|e| e.to_string())?,
+                file: row.try_get(3).map_err(|e| e.to_string())?,
+                line: row
+                    .try_get::<Option<i64>, _>(4)
+                    .map_err(|e| e.to_string())?
+                    .map(|l| l as i32),
+                entity_id: row
+                    .try_get::<Option<i64>, _>(5)
+                    .map_err(|e| e.to_string())?
+                    .map(|e| e as i32),
+                entity_name: row.try_get(6).map_err(|e| e.to_string())?,
+                category: row.try_get(7).map_err(|e| e.to_string())?,
+                message: row.try_get(8).map_err(|e| e.to_string())?,
+            });
         }
         Ok(QueryLogsResult {
             rows: result,
@@ -1195,8 +1222,18 @@ impl LogService for LogServiceImpl {
         if !db_path.exists() {
             return Ok(());
         }
-        let conn = Connection::open(&db_path).map_err(|e| e.to_string())?;
-        conn.execute("DELETE FROM logs", []).map_err(|e| e.to_string())?;
+        use sqlx::sqlite::{SqliteConnectOptions, SqlitePoolOptions};
+        let opts = SqliteConnectOptions::new().filename(&db_path);
+        let pool = SqlitePoolOptions::new()
+            .max_connections(1)
+            .connect_with(opts)
+            .await
+            .map_err(|e| e.to_string())?;
+        sqlx::query("DELETE FROM logs")
+            .execute(&pool)
+            .await
+            .map_err(|e| e.to_string())?;
+        pool.close().await;
         Ok(())
     }
 }
