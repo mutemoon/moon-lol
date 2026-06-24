@@ -19,8 +19,6 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   TerminalIcon,
-  BotIcon,
-  MapPinIcon,
   SwordsIcon,
   CpuIcon,
   CodeIcon,
@@ -290,30 +288,6 @@ onMounted(() => {
               <div class="flex min-w-0 flex-1 items-center gap-2 text-[13px]">
                 <SwordsIcon class="text-foreground-subtle group-hover:text-foreground size-4 shrink-0" />
                 <span class="truncate">{{ t("app.sidebar.heroPresets") }}</span>
-              </div>
-            </div>
-
-            <div
-              role="button"
-              class="group hover:bg-surface-hover hover:text-foreground text-foreground inline-flex h-8 w-full shrink-0 cursor-pointer items-center justify-stretch gap-2 overflow-hidden rounded-lg pr-2.5 pl-2.5 active:translate-y-0"
-              :class="{ 'bg-selected font-semibold': currentView === 'agents' }"
-              @click="router.push('/agents')"
-            >
-              <div class="flex min-w-0 flex-1 items-center gap-2 text-[13px]">
-                <BotIcon class="text-foreground-subtle group-hover:text-foreground size-4 shrink-0" />
-                <span class="truncate">{{ t("app.sidebar.agentPresets") }}</span>
-              </div>
-            </div>
-
-            <div
-              role="button"
-              class="group hover:bg-surface-hover hover:text-foreground text-foreground inline-flex h-8 w-full shrink-0 cursor-pointer items-center justify-stretch gap-2 overflow-hidden rounded-lg pr-2.5 pl-2.5 active:translate-y-0"
-              :class="{ 'bg-selected font-semibold': currentView === 'spawnPresets' }"
-              @click="router.push('/spawn-presets')"
-            >
-              <div class="flex min-w-0 flex-1 items-center gap-2 text-[13px]">
-                <MapPinIcon class="text-foreground-subtle group-hover:text-foreground size-4 shrink-0" />
-                <span class="truncate">{{ t("app.sidebar.spawnPresets") }}</span>
               </div>
             </div>
           </div>
