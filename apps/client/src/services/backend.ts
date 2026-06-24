@@ -7,19 +7,14 @@ export interface SpawnPreset {
   team: string;
 }
 
-export interface AgentPreset {
+export interface HeroPreset {
   name: string;
+  champion: string;
   agent_type: string;
   prompt: string;
   preamble?: string;
   model?: string;
-}
-
-export interface HeroPreset {
-  name: string;
-  champion: string;
-  agent_preset_name: string;
-  spawn_preset_name: string;
+  config_json?: any;
 }
 
 export interface AiConfig {
@@ -89,10 +84,6 @@ export interface IBackendClient {
   saveSpawnPreset(preset: SpawnPreset): Promise<void>;
   deleteSpawnPreset(name: string): Promise<void>;
 
-  // Agent Presets
-  listAgentPresets(): Promise<AgentPreset[]>;
-  saveAgentPreset(preset: AgentPreset): Promise<void>;
-  deleteAgentPreset(name: string): Promise<void>;
 
   // Hero Presets
   listHeroPresets(): Promise<HeroPreset[]>;

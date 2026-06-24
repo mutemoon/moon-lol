@@ -64,12 +64,15 @@ impl CommunityService for CommunityServiceImpl {
 
         let name = resolve_fork_name(new_name.as_deref(), &source.name);
 
-        // 创建 Fork 副本：引用同一 config/spawn，visibility 默认 private
+        // 创建 Fork 副本：拷贝策略配置，visibility 默认 private
         let input = AgentInput {
             name,
             champion: source.champion.clone(),
-            agent_config_id: source.agent_config_id,
-            spawn_preset_id: source.spawn_preset_id,
+            agent_type: source.agent_type,
+            prompt: source.prompt.clone(),
+            preamble: source.preamble.clone(),
+            model: source.model.clone(),
+            config_json: source.config_json.clone(),
             visibility: Visibility::Private,
         };
         // 注意：agent_config 归属属于 source owner，create 时会校验归属失败。
@@ -110,8 +113,11 @@ mod tests {
             owner_id: owner,
             name: "锐雯".into(),
             champion: "Riven".into(),
-            agent_config_id: Uuid::new_v4(),
-            spawn_preset_id: None,
+            agent_type: crate::domain::agent::AgentType::Llm,
+            prompt: "prompt".into(),
+            preamble: "preamble".into(),
+            model: "model".into(),
+            config_json: serde_json::json!({}),
             visibility: vis,
             forked_from: None,
             upstream_agent_id: None,

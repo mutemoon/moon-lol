@@ -11,7 +11,7 @@ use async_trait::async_trait;
 
 use lol_web_server::domain::{
     auth::User, config::AiConfig, spawn_preset::{SpawnPreset, SpawnPresetInput, Team, Visibility},
-    agent_config::AgentConfigInput, agent::{Agent, AgentInput}, agent_snapshot::AgentSnapshot,
+    agent::{Agent, AgentInput, AgentType}, agent_snapshot::AgentSnapshot,
     scenario::{Scenario, ScenarioInput}, room::{Room, RoomConstraints, RoomAgentSlot}, match_::{Match, MatchEvent, MatchStatus, Winner},
     essence::{BillingPlan, EssenceTransaction},
     ServiceError, ServiceResult,
@@ -54,18 +54,6 @@ mockall::mock! {
         async fn create(&self, user_id: i32, input: SpawnPresetInput) -> ServiceResult<SpawnPreset>;
         async fn get(&self, user_id: i32, id: Uuid) -> ServiceResult<SpawnPreset>;
         async fn update(&self, user_id: i32, id: Uuid, input: SpawnPresetInput) -> ServiceResult<()>;
-        async fn delete(&self, user_id: i32, id: Uuid) -> ServiceResult<()>;
-    }
-}
-
-mockall::mock! {
-    pub AgentConfigService {}
-    #[async_trait]
-    impl AgentConfigService for AgentConfigService {
-        async fn list(&self, user_id: i32) -> ServiceResult<Vec<AgentConfigView>>;
-        async fn create(&self, user_id: i32, input: AgentConfigInput) -> ServiceResult<AgentConfigView>;
-        async fn get(&self, user_id: i32, id: Uuid, include_secret: bool) -> ServiceResult<AgentConfigView>;
-        async fn update(&self, user_id: i32, id: Uuid, input: AgentConfigInput) -> ServiceResult<()>;
         async fn delete(&self, user_id: i32, id: Uuid) -> ServiceResult<()>;
     }
 }
@@ -212,13 +200,23 @@ mockall::mock! {
     }
 }
 
+mockall::mock! {
+    pub LogService {}
+    #[async_trait]
+    impl LogService for LogService {
+        async fn entities(&self) -> ServiceResult<Vec<serde_json::Value>>;
+        async fn categories(&self) -> ServiceResult<Vec<serde_json::Value>>;
+        async fn logs(&self, params: QueryLogsParams) -> ServiceResult<QueryLogsResult>;
+        async fn clear(&self) -> ServiceResult<()>;
+    }
+}
+
 // ── Helper structures ──
 
 struct Mocks {
     user: MockUserService,
     config: MockConfigService,
     spawn: MockSpawnPresetService,
-    agent_config: MockAgentConfigService,
     agent: MockAgentService,
     snapshot: MockAgentSnapshotService,
     scenario: MockScenarioService,
@@ -230,6 +228,7 @@ struct Mocks {
     comm: MockCommunityService,
     local: MockLocalGameService,
     admin: MockAdminService,
+    log: MockLogService,
 }
 
 impl Mocks {
@@ -238,7 +237,6 @@ impl Mocks {
             user: MockUserService::new(),
             config: MockConfigService::new(),
             spawn: MockSpawnPresetService::new(),
-            agent_config: MockAgentConfigService::new(),
             agent: MockAgentService::new(),
             snapshot: MockAgentSnapshotService::new(),
             scenario: MockScenarioService::new(),
@@ -250,6 +248,7 @@ impl Mocks {
             comm: MockCommunityService::new(),
             local: MockLocalGameService::new(),
             admin: MockAdminService::new(),
+            log: MockLogService::new(),
         }
     }
 }
@@ -265,7 +264,6 @@ where
         user_service: Arc::new(mocks.user),
         config_service: Arc::new(mocks.config),
         spawn_preset_service: Arc::new(mocks.spawn),
-        agent_config_service: Arc::new(mocks.agent_config),
         agent_service: Arc::new(mocks.agent),
         agent_snapshot_service: Arc::new(mocks.snapshot),
         scenario_service: Arc::new(mocks.scenario),
@@ -277,6 +275,7 @@ where
         community_service: Arc::new(mocks.comm),
         local_game_service: Arc::new(mocks.local),
         admin_service: Arc::new(mocks.admin),
+        log_service: Arc::new(mocks.log),
     }
 }
 
@@ -448,8 +447,11 @@ async fn test_list_agents_success() {
                         owner_id,
                         name: "Fiora Agent".to_string(),
                         champion: "Fiora".to_string(),
-                        agent_config_id: Uuid::new_v4(),
-                        spawn_preset_id: None,
+                        agent_type: AgentType::Llm,
+                        prompt: "prompt".to_string(),
+                        preamble: "preamble".to_string(),
+                        model: "model".to_string(),
+                        config_json: serde_json::json!({}),
                         visibility: Visibility::Private,
                         forked_from: None,
                         upstream_agent_id: None,

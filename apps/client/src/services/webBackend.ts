@@ -1,7 +1,6 @@
 import type {
   IBackendClient,
   SpawnPreset,
-  AgentPreset,
   HeroPreset,
   AiConfig,
   FrontAgentConfig,
@@ -21,7 +20,6 @@ export class WebBackendClient implements IBackendClient {
 
   // Name-to-UUID maps for cached resolution
   private spawnPresetIds = new Map<string, string>();
-  private agentPresetIds = new Map<string, string>();
   private heroPresetIds = new Map<string, string>();
   private scenarioIds = new Map<string, string>();
 
@@ -176,107 +174,33 @@ export class WebBackendClient implements IBackendClient {
     this.spawnPresetIds.delete(name);
   }
 
-  // Agent Presets
-  async listAgentPresets(): Promise<AgentPreset[]> {
-    const list = await this.request<any[]>("/api/agent-configs");
-    return list.map(item => {
-      this.agentPresetIds.set(item.name, item.id);
-      return {
-        name: item.name,
-        agent_type: item.agent_type,
-        prompt: item.prompt,
-        preamble: item.preamble || undefined,
-        model: item.model || undefined
-      };
-    });
-  }
-
-  async saveAgentPreset(preset: AgentPreset): Promise<void> {
-    const id = this.agentPresetIds.get(preset.name);
-    const body = {
-      name: preset.name,
-      agent_type: preset.agent_type,
-      prompt: preset.prompt,
-      preamble: preset.preamble || "",
-      model: preset.model || "",
-      config_json: {},
-      visibility: "private"
-    };
-    if (id) {
-      await this.request(`/api/agent-configs/${id}`, {
-        method: "PUT",
-        body: JSON.stringify(body)
-      });
-    } else {
-      const created = await this.request("/api/agent-configs", {
-        method: "POST",
-        body: JSON.stringify(body)
-      });
-      this.agentPresetIds.set(created.name, created.id);
-    }
-  }
-
-  async deleteAgentPreset(name: string): Promise<void> {
-    const id = this.agentPresetIds.get(name);
-    if (!id) {
-      throw new Error(`Agent preset not found: ${name}`);
-    }
-    await this.request(`/api/agent-configs/${id}`, {
-      method: "DELETE"
-    });
-    this.agentPresetIds.delete(name);
-  }
-
   // Hero Presets
   async listHeroPresets(): Promise<HeroPreset[]> {
-    await Promise.all([this.listSpawnPresets(), this.listAgentPresets()]);
-    
     const list = await this.request<any[]>("/api/agents");
     return list.map(item => {
       this.heroPresetIds.set(item.name, item.id);
-      
-      let agentPresetName = "";
-      for (const [name, id] of this.agentPresetIds.entries()) {
-        if (id === item.agent_config_id) {
-          agentPresetName = name;
-          break;
-        }
-      }
-      let spawnPresetName = "";
-      if (item.spawn_preset_id) {
-        for (const [name, id] of this.spawnPresetIds.entries()) {
-          if (id === item.spawn_preset_id) {
-            spawnPresetName = name;
-            break;
-          }
-        }
-      }
-
       return {
         name: item.name,
         champion: item.champion,
-        agent_preset_name: agentPresetName,
-        spawn_preset_name: spawnPresetName
+        agent_type: item.agent_type,
+        prompt: item.prompt,
+        preamble: item.preamble || undefined,
+        model: item.model || undefined,
+        config_json: item.config_json
       };
     });
   }
 
   async saveHeroPreset(preset: HeroPreset): Promise<void> {
-    if (this.agentPresetIds.size === 0) await this.listAgentPresets();
-    if (this.spawnPresetIds.size === 0) await this.listSpawnPresets();
-
-    const agent_config_id = this.agentPresetIds.get(preset.agent_preset_name);
-    if (!agent_config_id) {
-      throw new Error(`Agent preset not found: ${preset.agent_preset_name}`);
-    }
-    const spawn_preset_id = preset.spawn_preset_name ? this.spawnPresetIds.get(preset.spawn_preset_name) : null;
-
     const id = this.heroPresetIds.get(preset.name);
     const body = {
       name: preset.name,
       champion: preset.champion,
-      agent_config_id,
-      spawn_preset_id,
+      agent_type: preset.agent_type,
+      prompt: preset.prompt,
+      preamble: preset.preamble || "",
+      model: preset.model || "",
+      config_json: preset.config_json || {},
       visibility: "private"
     };
 

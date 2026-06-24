@@ -115,9 +115,6 @@ pub struct FrontAgentConfig {
     pub team: String,
     pub prompt: String,
     pub spawn_point: [f32; 2],
-    // Agent 驱动类型："llm" | "rl" | "script"。仅用于前端配置展示与持久化，
-    // 不写入生成的 RON 场景（运行时一律按 LLM 决策处理），避免破坏启动流程。
-    // 向后兼容：旧场景 JSON 无此字段时默认为 "llm"。
     #[serde(default = "default_agent_type")]
     pub agent_type: String,
 }
@@ -126,39 +123,21 @@ fn default_agent_type() -> String {
     "llm".to_string()
 }
 
-/// Agent 预设：可复用的"策略大脑"（类型 + Prompt + 可选模型/前言），英雄无关。
-/// 在英雄预设管理页绑定到具体英雄；编排页只选英雄预设，不再直接选 Agent 预设。
-#[derive(serde::Serialize, serde::Deserialize, Clone, Debug)]
-pub struct AgentPreset {
-    pub name: String,
-    #[serde(default = "default_agent_type")]
-    pub agent_type: String,
-    #[serde(default)]
-    pub prompt: String,
-    /// 仅 LLM 类型有意义：覆盖全局 preamble 的英雄级前言。
-    #[serde(default)]
-    pub preamble: String,
-    /// 仅 LLM 类型有意义：指定模型名（留空则用全局默认）。
-    #[serde(default)]
-    pub model: String,
-    // 向后兼容：旧 agent_presets.json 可能含 champion 字段，反序列化时忽略（不报错）。
-    #[serde(default, skip_serializing)]
-    pub champion: String,
-}
-
-/// 英雄预设：编排页槽位的唯一选择单元。
-/// 内部绑定具体英雄 + 一个 Agent 预设（大脑）+ 一个出生点预设（坐标）。
-/// 保存场景时，前端展开为具体的 FrontAgentConfig（champion/prompt/spawn_point/agent_type）。
+/// 选手预设（我的选手）：包含英雄与具体的驱动策略配置。
 #[derive(serde::Serialize, serde::Deserialize, Clone, Debug)]
 pub struct HeroPreset {
     pub name: String,
     pub champion: String,
-    /// 绑定的 Agent 预设名（"大脑"）。为空时展开为默认 LLM + 空 prompt。
+    #[serde(default = "default_agent_type")]
+    pub agent_type: String,
     #[serde(default)]
-    pub agent_preset_name: String,
-    /// 绑定的出生点预设名。为空时展开为默认坐标 [1500, 2000]。
+    pub prompt: String,
     #[serde(default)]
-    pub spawn_preset_name: String,
+    pub preamble: String,
+    #[serde(default)]
+    pub model: String,
+    #[serde(default)]
+    pub config_json: serde_json::Value,
 }
 
 fn hero_presets_path(app: &tauri::AppHandle) -> Result<PathBuf, error::AppError> {
@@ -172,7 +151,7 @@ fn load_hero_preset_list(app: &tauri::AppHandle) -> Result<Vec<HeroPreset>, erro
     }
     let content = fs::read_to_string(&path)?;
     let presets: Vec<HeroPreset> = serde_json::from_str(&content)
-        .map_err(|e| error::AppError::Generic(format!("英雄预设解析失败: {e}")))?;
+        .map_err(|e| error::AppError::Generic(format!("选手预设解析失败: {e}")))?;
     Ok(presets)
 }
 
@@ -184,7 +163,7 @@ fn list_hero_presets(app: tauri::AppHandle) -> Result<Vec<HeroPreset>, error::Ap
 #[tauri::command]
 fn save_hero_preset(app: tauri::AppHandle, preset: HeroPreset) -> Result<(), error::AppError> {
     if preset.name.trim().is_empty() {
-        return Err(error::AppError::Generic("英雄预设名称不能为空".to_string()));
+        return Err(error::AppError::Generic("选手预设名称不能为空".to_string()));
     }
     let mut presets = load_hero_preset_list(&app)?;
     if let Some(existing) = presets.iter_mut().find(|p| p.name == preset.name) {
@@ -213,59 +192,6 @@ fn delete_hero_preset(app: tauri::AppHandle, name: String) -> Result<(), error::
     Ok(())
 }
 
-fn agent_presets_path(app: &tauri::AppHandle) -> Result<PathBuf, error::AppError> {
-    Ok(get_config_dir(app)?.join("agent_presets.json"))
-}
-
-fn load_agent_preset_list(app: &tauri::AppHandle) -> Result<Vec<AgentPreset>, error::AppError> {
-    let path = agent_presets_path(app)?;
-    if !path.exists() {
-        return Ok(Vec::new());
-    }
-    let content = fs::read_to_string(&path)?;
-    let presets: Vec<AgentPreset> = serde_json::from_str(&content)
-        .map_err(|e| error::AppError::Generic(format!("Agent 预设解析失败: {e}")))?;
-    Ok(presets)
-}
-
-#[tauri::command]
-fn list_agent_presets(app: tauri::AppHandle) -> Result<Vec<AgentPreset>, error::AppError> {
-    load_agent_preset_list(&app)
-}
-
-#[tauri::command]
-fn save_agent_preset(app: tauri::AppHandle, preset: AgentPreset) -> Result<(), error::AppError> {
-    if preset.name.trim().is_empty() {
-        return Err(error::AppError::Generic(
-            "Agent 预设名称不能为空".to_string(),
-        ));
-    }
-    let mut presets = load_agent_preset_list(&app)?;
-    if let Some(existing) = presets.iter_mut().find(|p| p.name == preset.name) {
-        *existing = preset; // 同名覆盖
-    } else {
-        presets.push(preset);
-    }
-    let path = agent_presets_path(&app)?;
-    let json = serde_json::to_string_pretty(&presets)
-        .map_err(|e| error::AppError::Generic(format!("JSON 序列化失败: {e}")))?;
-    fs::write(&path, json)?;
-    Ok(())
-}
-
-#[tauri::command]
-fn delete_agent_preset(app: tauri::AppHandle, name: String) -> Result<(), error::AppError> {
-    let mut presets = load_agent_preset_list(&app)?;
-    let before = presets.len();
-    presets.retain(|p| p.name != name);
-    if presets.len() != before {
-        let path = agent_presets_path(&app)?;
-        let json = serde_json::to_string_pretty(&presets)
-            .map_err(|e| error::AppError::Generic(format!("JSON 序列化失败: {e}")))?;
-        fs::write(&path, json)?;
-    }
-    Ok(())
-}
 
 /// 出生点预设：可复用的命名坐标，纯前端持久化，无运行时副作用。
 #[derive(serde::Serialize, serde::Deserialize, Clone, Debug)]

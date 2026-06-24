@@ -4,7 +4,7 @@ import { Badge } from "./ui/badge";
 import { PlusIcon } from "@lucide/vue";
 import SlotCard from "./SlotCard.vue";
 import type { Slot } from "../composables/useSlotConfig";
-import type { HeroPreset, AgentPreset, SpawnPreset } from "../stores/gameStore";
+import type { HeroPreset, SpawnPreset } from "../stores/gameStore";
 import { useLocale } from "../composables/useLocale";
 
 // 阵营列：标题/点/徽标 + 槽位列表 + 新增槽位。红蓝复用同一组件，差异只在 accent 配置。
@@ -12,7 +12,6 @@ import { useLocale } from "../composables/useLocale";
 defineProps<{
   slots: Slot[];
   heroPresets: HeroPreset[];
-  agentPresets: AgentPreset[];
   spawnPresets: SpawnPreset[];
   /** 阵营显示配置（标题、点、徽标、强调色）。 */
   team: {
@@ -41,7 +40,6 @@ defineProps<{
 const emit = defineEmits<{
   add: [];
   remove: [index: number];
-  saveAs: [slot: Slot];
 }>();
 
 const { t } = useLocale();
@@ -72,11 +70,9 @@ const { t } = useLocale();
           :slot="slot"
           :index="idx"
           :hero-presets="heroPresets"
-          :agent-presets="agentPresets"
           :spawn-presets="spawnPresets"
           :accent="accent"
           @remove="emit('remove', idx)"
-          @save-as="emit('saveAs', slot)"
         />
       </div>
     </div>

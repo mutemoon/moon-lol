@@ -4,7 +4,7 @@ meta:
 </route>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
+import { ref, onMounted } from "vue";
 import { storeToRefs } from "pinia";
 import { useGameStore, type HeroPreset } from "@/stores/gameStore";
 import { useRouter, useRoute } from "vue-router";
@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
@@ -21,15 +22,13 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
-import PresetSelect from "@/components/PresetSelect.vue";
 import { SwordsIcon, PlusIcon, Trash2Icon, SaveIcon, ArrowLeftIcon } from "@lucide/vue";
 
-// 英雄预设管理页（产品文档 §3.0）：编排页槽位选择的唯一单元。
-// 每个英雄预设 = 具体英雄 + Agent 预设（大脑）+ 出生点预设（坐标）。
-// 后两者通过 PresetSelect 下拉选择，下拉末尾带「＋ 新建」跳转对应管理页。
+// 英雄预设管理页（产品文档 §3.0）：管理自定义选手的属性与运行策略。
+// 每个选手包含：英雄、决策类型以及对应的决策配置参数（LLM、RL 或脚本配置）。
 
 const store = useGameStore();
-const { heroPresets, champions, agentPresets, spawnPresets } = storeToRefs(store);
+const { heroPresets, champions } = storeToRefs(store);
 const router = useRouter();
 const route = useRoute();
 const { t } = useLocale();
@@ -41,30 +40,28 @@ const showDeleteConfirm = ref(false);
 const emptyDraft = (): HeroPreset => ({
   name: "",
   champion: "Riven",
-  agent_preset_name: "",
-  spawn_preset_name: "",
+  agent_type: "llm",
+  prompt: "",
+  preamble: "",
+  model: "",
+  config_json: {},
 });
 const draft = ref<HeroPreset>(emptyDraft());
-
-// 展示用：当前选中英雄预设绑定的 Agent/出生点副标题
-const boundAgentSubtitle = computed(() => {
-  const a = agentPresets.value.find((p) => p.name === draft.value.agent_preset_name);
-  return a ? a.agent_type.toUpperCase() : "";
-});
-const boundSpawnSubtitle = computed(() => {
-  const s = spawnPresets.value.find((p) => p.name === draft.value.spawn_preset_name);
-  return s ? `${Math.round(s.x)},${Math.round(s.z)}` : "";
-});
+const configJsonStr = ref("{}");
 
 function selectPreset(name: string) {
   selectedName.value = name;
   const p = heroPresets.value.find((x) => x.name === name);
-  if (p) draft.value = { ...p };
+  if (p) {
+    draft.value = { ...p };
+    configJsonStr.value = JSON.stringify(p.config_json || {}, null, 2);
+  }
 }
 
 function startNew() {
   selectedName.value = null;
   draft.value = emptyDraft();
+  configJsonStr.value = "{}";
 }
 
 async function handleSave() {
@@ -73,6 +70,16 @@ async function handleSave() {
   if (!name) {
     errorMsg.value = t("heroes.errorFillName");
     return;
+  }
+  if (draft.value.agent_type !== "llm") {
+    try {
+      draft.value.config_json = JSON.parse(configJsonStr.value || "{}");
+    } catch (e) {
+      errorMsg.value = t("heroes.invalidJson");
+      return;
+    }
+  } else {
+    draft.value.config_json = {};
   }
   try {
     await store.saveHeroPreset({ ...draft.value, name });
@@ -89,6 +96,7 @@ async function confirmDelete() {
     await store.deleteHeroPreset(selectedName.value);
     selectedName.value = null;
     draft.value = emptyDraft();
+    configJsonStr.value = "{}";
     showDeleteConfirm.value = false;
   } catch (e: any) {
     errorMsg.value = e.message || t("heroes.errorDelete");
@@ -96,7 +104,7 @@ async function confirmDelete() {
 }
 
 onMounted(async () => {
-  await Promise.all([store.loadHeroPresets(), store.loadAgentPresets(), store.loadSpawnPresets()]);
+  await store.loadHeroPresets();
   // 深链编辑：编排页「编辑」按钮跳转 /heroes?edit=<name>，自动选中并填表
   const editName = route.query.edit;
   if (typeof editName === "string" && editName && heroPresets.value.some((p) => p.name === editName)) {
@@ -149,7 +157,7 @@ onMounted(async () => {
             >
               <span class="flex min-w-0 flex-col">
                 <span class="text-foreground truncate text-xs font-medium">{{ p.name }}</span>
-                <span class="text-muted-foreground truncate text-[10px]">{{ p.champion }}</span>
+                <span class="text-muted-foreground truncate text-[10px]">{{ p.champion }} · {{ p.agent_type.toUpperCase() }}</span>
               </span>
             </button>
           </div>
@@ -200,57 +208,87 @@ onMounted(async () => {
             </div>
           </div>
 
-          <!-- 绑定的 Agent 预设 -->
+          <!-- 决策类型 -->
           <div>
             <label class="text-muted-foreground mb-1 block text-[10px] font-semibold tracking-wider uppercase">
-              {{ t("heroes.bindAgent") }}
+              {{ t("heroes.agentType") }}
             </label>
-            <PresetSelect
-              :presets="agentPresets"
-              :model-value="draft.agent_preset_name"
-              :placeholder="t('heroes.selectAgentPlaceholder')"
-              :new-label="t('heroes.newAgentLabel')"
-              :subtitle-key="'agent_type'"
-              @update:model-value="(v) => (draft.agent_preset_name = v)"
-              @new="router.push('/agents')"
-            />
+            <Select v-model="draft.agent_type">
+              <SelectTrigger class="bg-muted/40 border-border h-9 text-sm">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent class="border-border bg-popover text-foreground">
+                <SelectItem value="llm" class="text-sm">
+                  {{ t("agents.types.llm") }}
+                </SelectItem>
+                <SelectItem value="rl" class="text-sm">
+                  {{ t("agents.types.rl") }}
+                </SelectItem>
+                <SelectItem value="script" class="text-sm">
+                  {{ t("agents.types.script") }}
+                </SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
-          <!-- 绑定的出生点预设 -->
-          <div>
-            <label class="text-muted-foreground mb-1 block text-[10px] font-semibold tracking-wider uppercase">
-              {{ t("heroes.bindSpawn") }}
-            </label>
-            <PresetSelect
-              :presets="spawnPresets"
-              :model-value="draft.spawn_preset_name"
-              :placeholder="t('heroes.selectSpawnPlaceholder')"
-              :new-label="t('heroes.newSpawnLabel')"
-              @update:model-value="(v) => (draft.spawn_preset_name = v)"
-              @new="router.push('/spawn-presets')"
-            />
-          </div>
-
-          <!-- 绑定摘要 -->
+          <!-- 警告提示 (针对尚未完全集成的 RL / Script 类型) -->
           <div
-            v-if="draft.agent_preset_name || draft.spawn_preset_name"
-            class="bg-muted/40 border-border rounded-md border px-3 py-2"
-          >
-            <div class="text-muted-foreground mb-1 text-[10px] font-semibold tracking-wider uppercase">
-              {{ t("heroes.previewTitle") }}
+            v-if="draft.agent_type !== 'llm'"
+            class="border-yellow-500/20 bg-yellow-500/5 text-yellow-500 rounded border p-3 text-xs leading-normal"
+            v-html="t('agents.typeWarning', { type: draft.agent_type.toUpperCase() })"
+          ></div>
+
+          <!-- 动态策略配置区域 -->
+          <div v-if="draft.agent_type === 'llm'" class="flex flex-col gap-4">
+            <!-- Prompt -->
+            <div>
+              <label class="text-muted-foreground mb-1 block text-[10px] font-semibold tracking-wider uppercase">
+                {{ t("heroes.promptLabel") }}
+              </label>
+              <Textarea
+                v-model="draft.prompt"
+                :placeholder="t('heroes.promptPlaceholder')"
+                class="border-border bg-muted/40 min-h-[120px] text-xs font-mono leading-relaxed"
+              />
             </div>
-            <div
-              class="text-foreground font-mono text-xs leading-relaxed"
-              v-html="
-                t('heroes.previewText', {
-                  champion: draft.champion,
-                  agent: draft.agent_preset_name || t('heroes.notSelected'),
-                  agentSub: boundAgentSubtitle ? `[${boundAgentSubtitle}]` : '',
-                  spawn: draft.spawn_preset_name || t('heroes.notSelected'),
-                  spawnSub: boundSpawnSubtitle ? `[${boundSpawnSubtitle}]` : '',
-                })
-              "
-            ></div>
+
+            <!-- Model -->
+            <div>
+              <label class="text-muted-foreground mb-1 block text-[10px] font-semibold tracking-wider uppercase">
+                {{ t("heroes.modelLabel") }}
+              </label>
+              <Input
+                v-model="draft.model"
+                :placeholder="t('heroes.modelPlaceholder')"
+                class="border-border bg-muted/40 h-9 text-sm"
+              />
+            </div>
+
+            <!-- Preamble -->
+            <div>
+              <label class="text-muted-foreground mb-1 block text-[10px] font-semibold tracking-wider uppercase">
+                {{ t("heroes.preambleLabel") }}
+              </label>
+              <Textarea
+                v-model="draft.preamble"
+                :placeholder="t('heroes.preamblePlaceholder')"
+                class="border-border bg-muted/40 min-h-[60px] text-xs font-mono leading-relaxed"
+              />
+            </div>
+          </div>
+
+          <div v-else class="flex flex-col gap-4">
+            <!-- Config JSON -->
+            <div>
+              <label class="text-muted-foreground mb-1 block text-[10px] font-semibold tracking-wider uppercase">
+                {{ t("heroes.configJsonLabel") }}
+              </label>
+              <Textarea
+                v-model="configJsonStr"
+                :placeholder="t('heroes.configJsonPlaceholder')"
+                class="border-border bg-muted/40 min-h-[180px] text-xs font-mono leading-relaxed"
+              />
+            </div>
           </div>
 
           <!-- 操作 -->

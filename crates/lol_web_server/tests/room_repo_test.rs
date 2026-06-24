@@ -196,44 +196,11 @@ async fn list_lobby_shows_visible_rooms() {
     assert_eq!(lobby.len(), 1);
 }
 
-/// 为用户创建一个完整 agent（含 config），返回 agent_id。
+/// 为用户创建一个完整 agent，返回 agent_id。
 async fn create_agent_for_user(pool: &sqlx::PgPool, owner: i32) -> Uuid {
-    use lol_web_server::domain::agent::AgentInput;
-    use lol_web_server::domain::agent_config::{AgentConfigInput, AgentType};
-    use lol_web_server::domain::spawn_preset::{SpawnPresetInput, Visibility};
-    use lol_web_server::repository::agent_config_repo::{AgentConfigRepo, PgAgentConfigRepo};
+    use lol_web_server::domain::agent::{AgentInput, AgentType};
+    use lol_web_server::domain::spawn_preset::Visibility;
     use lol_web_server::repository::agent_repo::{AgentRepo, PgAgentRepo};
-    use lol_web_server::repository::spawn_preset_repo::{PgSpawnPresetRepo, SpawnPresetRepo};
-
-    let cfg = PgAgentConfigRepo { pool: pool.clone() }
-        .insert(
-            owner,
-            &AgentConfigInput {
-                name: "room_cfg".into(),
-                agent_type: AgentType::Llm,
-                prompt: "".into(),
-                preamble: "".into(),
-                model: "".into(),
-                config_json: serde_json::json!({}),
-                visibility: Visibility::Private,
-            },
-        )
-        .await
-        .unwrap();
-
-    let spawn = PgSpawnPresetRepo { pool: pool.clone() }
-        .insert(
-            owner,
-            &SpawnPresetInput {
-                name: "room_sp".into(),
-                x: 1000.0,
-                z: 1000.0,
-                team: Team::Order,
-                visibility: Visibility::Private,
-            },
-        )
-        .await
-        .unwrap();
 
     let agent = PgAgentRepo { pool: pool.clone() }
         .insert(
@@ -241,8 +208,11 @@ async fn create_agent_for_user(pool: &sqlx::PgPool, owner: i32) -> Uuid {
             &AgentInput {
                 name: "room_agent".into(),
                 champion: "Riven".into(),
-                agent_config_id: cfg.id,
-                spawn_preset_id: Some(spawn.id),
+                agent_type: AgentType::Llm,
+                prompt: "prompt".into(),
+                preamble: "preamble".into(),
+                model: "model".into(),
+                config_json: serde_json::json!({}),
                 visibility: Visibility::Private,
             },
         )

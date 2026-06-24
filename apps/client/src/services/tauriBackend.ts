@@ -3,7 +3,6 @@ import { listen } from "@tauri-apps/api/event";
 import type {
   IBackendClient,
   SpawnPreset,
-  AgentPreset,
   HeroPreset,
   AiConfig,
   FrontAgentConfig,
@@ -36,18 +35,7 @@ export class TauriBackendClient implements IBackendClient {
     return invoke("delete_spawn_preset", { name });
   }
 
-  // Agent Presets
-  async listAgentPresets(): Promise<AgentPreset[]> {
-    return invoke<AgentPreset[]>("list_agent_presets");
-  }
 
-  async saveAgentPreset(preset: AgentPreset): Promise<void> {
-    return invoke("save_agent_preset", { preset });
-  }
-
-  async deleteAgentPreset(name: string): Promise<void> {
-    return invoke("delete_agent_preset", { name });
-  }
 
   // Hero Presets
   async listHeroPresets(): Promise<HeroPreset[]> {

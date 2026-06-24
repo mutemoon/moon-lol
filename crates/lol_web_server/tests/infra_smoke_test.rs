@@ -27,22 +27,25 @@ async fn pg_container_starts_and_schema_loads() {
     let phone: String = row.try_get("phone").unwrap();
     assert_eq!(phone, "13800000001");
 
-    // 验证 UUID 主键的表（agent_configs）能插入
-    let cfg_id = uuid::Uuid::new_v4();
+    let user_id: i32 = row.try_get("id").unwrap();
+
+    // 验证 UUID 主键的表（agents）能插入
+    let agent_id = uuid::Uuid::new_v4();
     sqlx::query(
-        "INSERT INTO agent_configs (id, owner_id, name, agent_type) VALUES ($1, $2, $3, $4)",
+        "INSERT INTO agents (id, owner_id, name, champion, agent_type) VALUES ($1, $2, $3, $4, $5)",
     )
-    .bind(cfg_id)
-    .bind(1)
+    .bind(agent_id)
+    .bind(user_id)
     .bind("激进压制")
+    .bind("Riven")
     .bind("llm")
     .execute(&fx.pool)
     .await
-    .expect("插入 agent_configs 失败");
+    .expect("插入 agents 失败");
 
     // 验证 JSONB 字段能用 sqlx::types::Json
-    let row = sqlx::query("SELECT config_json FROM agent_configs WHERE id = $1")
-        .bind(cfg_id)
+    let row = sqlx::query("SELECT config_json FROM agents WHERE id = $1")
+        .bind(agent_id)
         .fetch_one(&fx.pool)
         .await
         .unwrap();

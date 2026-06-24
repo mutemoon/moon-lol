@@ -9,7 +9,7 @@ use std::sync::Arc;
 use tokio::net::TcpListener;
 use tracing::info;
 
-use lol_web_server::cache::{MokaAgentConfigCache, MokaConfigCache};
+use lol_web_server::cache::MokaConfigCache;
 use lol_web_server::handlers::{AppState, create_router};
 use lol_web_server::repository::*;
 use lol_web_server::service::*;
@@ -40,7 +40,6 @@ async fn main() {
     let user_repo = Arc::new(PgUserRepo { pool: pool.clone() });
     let config_repo = Arc::new(PgConfigRepo { pool: pool.clone() });
     let spawn_preset_repo = Arc::new(PgSpawnPresetRepo { pool: pool.clone() });
-    let agent_config_repo = Arc::new(PgAgentConfigRepo { pool: pool.clone() });
     let agent_repo = Arc::new(PgAgentRepo { pool: pool.clone() });
     let agent_snapshot_repo = Arc::new(PgAgentSnapshotRepo { pool: pool.clone() });
     let scenario_repo = Arc::new(PgScenarioRepo { pool: pool.clone() });
@@ -58,21 +57,17 @@ async fn main() {
 
     // 4. 初始化缓存层
     let config_cache = Arc::new(MokaConfigCache::new());
-    let agent_config_cache = Arc::new(MokaAgentConfigCache::new());
 
     // 5. 初始化服务层
     let user_service = Arc::new(UserServiceImpl::new(user_repo.clone(), jwt_secret));
     let config_service = Arc::new(ConfigServiceImpl::new(config_repo.clone(), config_cache));
     let spawn_preset_service = Arc::new(SpawnPresetServiceImpl::new(spawn_preset_repo.clone()));
-    let agent_config_service = Arc::new(AgentConfigServiceImpl::new(agent_config_repo.clone(), agent_config_cache));
     
     // SubscriptionServiceImpl 同时实现了 SubscriptionService 和 AgentLimitProvider
     let subscription_service = Arc::new(SubscriptionServiceImpl::new(subscription_repo.clone()));
     
     let agent_service = Arc::new(AgentServiceImpl::new(
         agent_repo.clone(),
-        agent_config_repo.clone(),
-        spawn_preset_repo.clone(),
         subscription_service.clone(), // 传入 limit_provider
     ));
     let agent_snapshot_service = Arc::new(AgentSnapshotServiceImpl::new(
@@ -124,7 +119,6 @@ async fn main() {
         user_service,
         config_service,
         spawn_preset_service,
-        agent_config_service,
         agent_service,
         agent_snapshot_service,
         scenario_service,

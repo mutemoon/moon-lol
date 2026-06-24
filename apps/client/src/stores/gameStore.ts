@@ -4,9 +4,9 @@ import { useWsClient } from "../composables/useWsClient";
 import { createLogContext } from "../composables/useLogPoller";
 import { router } from "../router";
 import { backendClient } from "../services/backend";
-import type { SpawnPreset, AgentPreset, HeroPreset } from "../services/backend";
+import type { SpawnPreset, HeroPreset } from "../services/backend";
 
-export type { SpawnPreset, AgentPreset, HeroPreset };
+export type { SpawnPreset, HeroPreset };
 
 export const BUILTIN_SPAWN_PRESETS: SpawnPreset[] = [
   {
@@ -23,36 +23,22 @@ export const BUILTIN_SPAWN_PRESETS: SpawnPreset[] = [
   },
 ];
 
-export const BUILTIN_AGENT_PRESETS: AgentPreset[] = [
-  {
-    name: "激进压制 (LLM)",
-    agent_type: "llm",
-    prompt: "你是一个激进、好斗的玩家。在对线中主动寻找敌方的破绽，频繁消耗并伺机斩杀对手。",
-  },
-  {
-    name: "稳健发育 (LLM)",
-    agent_type: "llm",
-    prompt: "你是一个冷静、稳健的玩家。优先保证补刀与发育，在取得装备或等级优势后再寻找击杀机会。",
-  },
-  {
-    name: "游走支援 (LLM)",
-    agent_type: "llm",
-    prompt: "你是一个重视全局的玩家。在对线之余寻找游走支援队友的机会，用人数优势建立胜势。",
-  },
-];
-
 export const BUILTIN_HERO_PRESETS: HeroPreset[] = [
   {
     name: "锐雯 · 激进压制",
     champion: "Riven",
-    agent_preset_name: "激进压制 (LLM)",
-    spawn_preset_name: "上路一塔前 (秩序方)",
+    agent_type: "llm",
+    prompt: "你是一个激进、好斗的玩家。在对线中主动寻找敌方的破绽，频繁消耗并伺机斩杀对手。",
+    preamble: "",
+    model: "",
   },
   {
     name: "菲奥娜 · 稳健发育",
     champion: "Fiora",
-    agent_preset_name: "稳健发育 (LLM)",
-    spawn_preset_name: "上路一塔前 (混沌方)",
+    agent_type: "llm",
+    prompt: "你是一个冷静、稳健的玩家。优先保证补刀与发育，在取得装备或等级优势后再寻找击杀机会。",
+    preamble: "",
+    model: "",
   },
 ];
 
@@ -103,39 +89,7 @@ export const useGameStore = defineStore("game", () => {
     await loadSpawnPresets();
   }
 
-  // Agent 预设：可复用的 Agent 资产（英雄 + 类型 + Prompt + 模型/前言）。
-  // 在编排页通过下拉框选择；深度配置在 Agent 预设管理页完成。
-  // 编排页保存场景时，由前端把所选预设展开为具体 champion/prompt/agent_type 写入场景。
-  const agentPresets = ref<AgentPreset[]>([]);
-
-  async function loadAgentPresets() {
-    try {
-      const presets = await backendClient.listAgentPresets();
-      const merged = [...presets];
-      for (const b of BUILTIN_AGENT_PRESETS) {
-        if (!merged.some((p) => p.name === b.name)) {
-          merged.push(b);
-        }
-      }
-      agentPresets.value = merged;
-    } catch (e) {
-      console.error("加载 Agent 预设失败", e);
-      agentPresets.value = [...BUILTIN_AGENT_PRESETS];
-    }
-  }
-
-  async function saveAgentPreset(preset: AgentPreset) {
-    await backendClient.saveAgentPreset(preset);
-    await loadAgentPresets();
-  }
-
-  async function deleteAgentPreset(name: string) {
-    await backendClient.deleteAgentPreset(name);
-    await loadAgentPresets();
-  }
-
-  // 英雄预设：编排页槽位的唯一选择单元。
-  // 内部绑定英雄 + Agent 预设（大脑）+ 出生点预设（坐标）。
+  // 选手预设（我的选手）：直接由英雄名、配置类型与具体的 Prompt/策略组成。
   const heroPresets = ref<HeroPreset[]>([]);
 
   async function loadHeroPresets() {
@@ -149,7 +103,7 @@ export const useGameStore = defineStore("game", () => {
       }
       heroPresets.value = merged;
     } catch (e) {
-      console.error("加载英雄预设失败", e);
+      console.error("加载选手预设失败", e);
       heroPresets.value = [...BUILTIN_HERO_PRESETS];
     }
   }
@@ -264,10 +218,6 @@ export const useGameStore = defineStore("game", () => {
     loadSpawnPresets,
     saveSpawnPreset,
     deleteSpawnPreset,
-    agentPresets,
-    loadAgentPresets,
-    saveAgentPreset,
-    deleteAgentPreset,
     heroPresets,
     loadHeroPresets,
     saveHeroPreset,

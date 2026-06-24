@@ -1,8 +1,36 @@
-//! Agent 子系统的领域层（"选手" = 英雄 + 配置 + 出生点）。
+//! Agent 子系统的领域层（"选手" = 英雄 + 配置）。
 
 use serde::{Deserialize, Serialize};
 
 use super::spawn_preset::Visibility;
+
+/// Agent 类型：LLM / RL / Script。
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "lowercase")]
+pub enum AgentType {
+    Llm,
+    Rl,
+    Script,
+}
+
+impl AgentType {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            AgentType::Llm => "llm",
+            AgentType::Rl => "rl",
+            AgentType::Script => "script",
+        }
+    }
+
+    pub fn from_str(s: &str) -> Option<Self> {
+        match s.to_lowercase().as_str() {
+            "llm" => Some(AgentType::Llm),
+            "rl" => Some(AgentType::Rl),
+            "script" => Some(AgentType::Script),
+            _ => None,
+        }
+    }
+}
 
 /// Agent（"选手"）：参赛/ELO/排行榜主体。
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
@@ -11,20 +39,26 @@ pub struct Agent {
     pub owner_id: i32,
     pub name: String,
     pub champion: String,
-    pub agent_config_id: uuid::Uuid,
-    pub spawn_preset_id: Option<uuid::Uuid>,
+    pub agent_type: AgentType,
+    pub prompt: String,
+    pub preamble: String,
+    pub model: String,
+    pub config_json: serde_json::Value,
     pub visibility: Visibility,
     pub forked_from: Option<uuid::Uuid>,
     pub upstream_agent_id: Option<uuid::Uuid>,
 }
 
-/// 创建输入。
+/// 创建/更新输入。
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AgentInput {
     pub name: String,
     pub champion: String,
-    pub agent_config_id: uuid::Uuid,
-    pub spawn_preset_id: Option<uuid::Uuid>,
+    pub agent_type: AgentType,
+    pub prompt: String,
+    pub preamble: String,
+    pub model: String,
+    pub config_json: serde_json::Value,
     pub visibility: Visibility,
 }
 
@@ -57,13 +91,24 @@ pub fn validate_name(name: &str) -> bool {
     !n.is_empty() && n.len() <= 64
 }
 
-/// 可见性判定（与 AgentConfig 的敏感字段判定不同：Agent 基础信息对 public 可见，
-/// 但不暴露 prompt/model —— 那些在 agent_config 上）。
+/// 可见性判定（选手基础信息及不暴露敏感配置字段时的访问控制）。
 pub fn can_view(agent: &Agent, requester_id: i32) -> bool {
     if agent.owner_id == requester_id {
         return true;
     }
     matches!(agent.visibility, Visibility::Public | Visibility::Friends)
+}
+
+/// 敏感配置字段（prompt/model/config_json）是否对请求者可见。
+pub fn can_view_sensitive(agent: &Agent, requester_id: i32, is_friend: bool) -> bool {
+    if agent.owner_id == requester_id {
+        return true;
+    }
+    match agent.visibility {
+        Visibility::Private => false,
+        Visibility::Friends => is_friend,
+        Visibility::Public => is_friend, // public 基础可见，但敏感字段仍需 friend
+    }
 }
 
 /// Fork 一个 Agent 时，新 Agent 的默认命名。
@@ -82,8 +127,11 @@ mod tests {
             owner_id: owner,
             name: "锐雯 · 激进".into(),
             champion: "Riven".into(),
-            agent_config_id: Uuid::new_v4(),
-            spawn_preset_id: Some(Uuid::new_v4()),
+            agent_type: AgentType::Llm,
+            prompt: "aggressive".into(),
+            preamble: "".into(),
+            model: "gemini".into(),
+            config_json: serde_json::json!({}),
             visibility: vis,
             forked_from: None,
             upstream_agent_id: None,
@@ -141,5 +189,19 @@ mod tests {
     fn fork_name_appends_suffix() {
         assert_eq!(fork_name("锐雯 · 激进"), "锐雯 · 激进 · 副本");
         assert_eq!(fork_name("X"), "X · 副本");
+    }
+
+    #[test]
+    fn non_owner_cannot_view_sensitive_when_private() {
+        let agent = sample_agent(1, Visibility::Private);
+        assert!(!can_view_sensitive(&agent, 2, false));
+        assert!(!can_view_sensitive(&agent, 2, true));
+    }
+
+    #[test]
+    fn non_owner_friend_can_view_sensitive_when_friends() {
+        let agent = sample_agent(1, Visibility::Friends);
+        assert!(!can_view_sensitive(&agent, 2, false));
+        assert!(can_view_sensitive(&agent, 2, true));
     }
 }

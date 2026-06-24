@@ -25,7 +25,6 @@ pub struct AppState {
     pub user_service: Arc<dyn UserService>,
     pub config_service: Arc<dyn ConfigService>,
     pub spawn_preset_service: Arc<dyn SpawnPresetService>,
-    pub agent_config_service: Arc<dyn AgentConfigService>,
     pub agent_service: Arc<dyn AgentService>,
     pub agent_snapshot_service: Arc<dyn AgentSnapshotService>,
     pub scenario_service: Arc<dyn ScenarioService>,
@@ -37,6 +36,7 @@ pub struct AppState {
     pub community_service: Arc<dyn CommunityService>,
     pub local_game_service: Arc<dyn LocalGameService>,
     pub admin_service: Arc<dyn AdminService>,
+    pub log_service: Arc<dyn LogService>,
 }
 
 // ── JWT Claims Extractor ──
@@ -178,17 +178,6 @@ pub fn create_router(state: AppState) -> Router {
             get(get_spawn_preset)
                 .put(update_spawn_preset)
                 .delete(delete_spawn_preset),
-        )
-        // Agent Configs
-        .route(
-            "/api/agent-configs",
-            get(list_agent_configs).post(create_agent_config),
-        )
-        .route(
-            "/api/agent-configs/:id",
-            get(get_agent_config)
-                .put(update_agent_config)
-                .delete(delete_agent_config),
         )
         // Agents
         .route("/api/agents", get(list_agents).post(create_agent))
@@ -432,63 +421,6 @@ async fn delete_spawn_preset(
     Path(id): Path<Uuid>,
 ) -> ApiResponse<()> {
     match s.spawn_preset_service.delete(auth.user_id, id).await {
-        Ok(_) => ApiResponse::ok(()),
-        Err(e) => ApiResponse::from_error(e),
-    }
-}
-
-// ════════════ Agent Configs ════════════
-
-async fn list_agent_configs(
-    auth: AuthUser,
-    State(s): State<AppState>,
-) -> ApiResponse<Vec<AgentConfigView>> {
-    match s.agent_config_service.list(auth.user_id).await {
-        Ok(list) => ApiResponse::ok(list),
-        Err(e) => ApiResponse::from_error(e),
-    }
-}
-
-async fn create_agent_config(
-    auth: AuthUser,
-    State(s): State<AppState>,
-    Json(input): Json<crate::domain::agent_config::AgentConfigInput>,
-) -> ApiResponse<AgentConfigView> {
-    match s.agent_config_service.create(auth.user_id, input).await {
-        Ok(v) => ApiResponse::ok(v),
-        Err(e) => ApiResponse::from_error(e),
-    }
-}
-
-async fn get_agent_config(
-    auth: AuthUser,
-    State(s): State<AppState>,
-    Path(id): Path<Uuid>,
-) -> ApiResponse<AgentConfigView> {
-    match s.agent_config_service.get(auth.user_id, id, false).await {
-        Ok(v) => ApiResponse::ok(v),
-        Err(e) => ApiResponse::from_error(e),
-    }
-}
-
-async fn update_agent_config(
-    auth: AuthUser,
-    State(s): State<AppState>,
-    Path(id): Path<Uuid>,
-    Json(input): Json<crate::domain::agent_config::AgentConfigInput>,
-) -> ApiResponse<()> {
-    match s.agent_config_service.update(auth.user_id, id, input).await {
-        Ok(_) => ApiResponse::ok(()),
-        Err(e) => ApiResponse::from_error(e),
-    }
-}
-
-async fn delete_agent_config(
-    auth: AuthUser,
-    State(s): State<AppState>,
-    Path(id): Path<Uuid>,
-) -> ApiResponse<()> {
-    match s.agent_config_service.delete(auth.user_id, id).await {
         Ok(_) => ApiResponse::ok(()),
         Err(e) => ApiResponse::from_error(e),
     }

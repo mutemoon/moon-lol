@@ -14,26 +14,14 @@ import { backendClient } from "@/services/backend";
 import { PlayIcon, SaveIcon } from "@lucide/vue";
 import TeamSlots from "@/components/TeamSlots.vue";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import {
   type Slot,
   emptySlot,
   toBackend,
   fromBackend,
-  uniquePresetName,
-  rebindSlot,
 } from "@/composables/useSlotConfig";
 
-// 编排页（产品文档 §3.0 / §3.1.1）：只做"从预设里选 + 临时覆盖"，不做内联深度编辑。
-// 每个槽位 = 一个英雄预设（内含英雄 + Agent 预设 + 出生点预设）。
-// 拖入后 Agent / 出生点选择器始终展开，初始显示继承值；改任一项即解绑（dirty），
-// 槽位提供「编辑」(跳管理页原地编辑) 与「存为新预设」(把临时配置固化成新预设)。
+// 编排页：只做"从选手预设里选 + 独立的出生点选择"，不做内联深度编辑。
+// 每个槽位 = 一个选手预设（英雄+AI配置） + 一个出生点预设。
 // 红蓝两阵营结构完全一致，差异只在 accent 配色，复用 TeamSlots 组件。
 
 const store = useGameStore();
@@ -43,7 +31,6 @@ const {
   launchError: error,
   selectedScenario,
   heroPresets,
-  agentPresets,
   spawnPresets,
 } = storeToRefs(store);
 const { ws } = store;
@@ -93,7 +80,7 @@ const TEAMS = computed(() => ({
   },
 }));
 
-// 各阵营槽位操作的统一封装（避免模板里写两遍）
+// 各阵营槽位操作的统一封装
 function makeHandlers(slotsRef: typeof blueSlots) {
   return {
     add: () => slotsRef.value.push(emptySlot()),
@@ -113,17 +100,15 @@ async function handleLoadScenario(name: string) {
   try {
     const agents = await backendClient.loadCustomScenario(name);
     // 确保预设列表已加载，反向匹配才有意义
-    await Promise.all([store.loadHeroPresets(), store.loadAgentPresets(), store.loadSpawnPresets()]);
+    await Promise.all([store.loadHeroPresets(), store.loadSpawnPresets()]);
     blueSlots.value = fromBackend(
       agents.filter((a) => a.team === "Order"),
       heroPresets.value,
-      agentPresets.value,
       spawnPresets.value,
     );
     redSlots.value = fromBackend(
       agents.filter((a) => a.team === "Chaos"),
       heroPresets.value,
-      agentPresets.value,
       spawnPresets.value,
     );
     currentSceneName.value = name;
@@ -154,8 +139,8 @@ watch(
 
 function buildAgents() {
   return [
-    ...toBackend("Order", blueSlots.value, agentPresets.value, spawnPresets.value),
-    ...toBackend("Chaos", redSlots.value, agentPresets.value, spawnPresets.value),
+    ...toBackend("Order", blueSlots.value, heroPresets.value, spawnPresets.value),
+    ...toBackend("Chaos", redSlots.value, heroPresets.value, spawnPresets.value),
   ];
 }
 
@@ -199,54 +184,9 @@ async function handleLaunch() {
   }
 }
 
-// 「存为新预设」Dialog
-const showSaveAsDialog = ref(false);
-const saveAsTarget = ref<Slot | null>(null);
-const saveAsName = ref("");
-const saveAsError = ref("");
-
-function openSaveAs(slot: Slot) {
-  saveAsTarget.value = slot;
-  // 预填命名：原预设名优先；否则 英雄 · Agent类型
-  const base =
-    slot.heroPresetName ||
-    `${slot.champion || t("heroes.heroLabel")} · ${
-      agentPresets.value.find((p) => p.name === slot.agentPresetName)?.agent_type.toUpperCase() ?? "LLM"
-    }`;
-  saveAsName.value = uniquePresetName(`${base} · ${t("launcher.copySuffix")}`, heroPresets.value);
-  saveAsError.value = "";
-  showSaveAsDialog.value = true;
-}
-
-async function confirmSaveAs() {
-  if (!saveAsTarget.value) return;
-  saveAsError.value = "";
-  const name = saveAsName.value.trim();
-  if (!name) {
-    saveAsError.value = t("heroes.errorFillName");
-    return;
-  }
-  const slot = saveAsTarget.value;
-  try {
-    await store.saveHeroPreset({
-      name,
-      champion: slot.champion || "Riven",
-      agent_preset_name: slot.agentPresetName,
-      spawn_preset_name: slot.spawnPresetName,
-    });
-    // 回填：槽位重新绑定 to 新预设，恢复"继承"态
-    rebindSlot(slot, name);
-    showSaveAsDialog.value = false;
-    saveAsTarget.value = null;
-  } catch (e: any) {
-    saveAsError.value = e.message || (typeof e === "string" ? e : t("heroes.errorSave"));
-  }
-}
-
 onMounted(() => {
   loadScenariosList();
   store.loadHeroPresets();
-  store.loadAgentPresets();
   store.loadSpawnPresets();
 });
 </script>
@@ -270,29 +210,25 @@ onMounted(() => {
       </Button>
     </div>
 
-    <!-- 双阵营并排卡片（结构一致，配色由 TEAMS 注入） -->
+    <!-- 双阵营并排卡片 -->
     <div class="grid min-h-0 flex-1 grid-cols-1 gap-3 md:grid-cols-2">
       <TeamSlots
         :slots="blueSlots"
         :hero-presets="heroPresets"
-        :agent-presets="agentPresets"
         :spawn-presets="spawnPresets"
         :team="TEAMS.blue.team"
         :accent="TEAMS.blue.accent"
         @add="blueHandlers.add"
         @remove="blueHandlers.remove"
-        @save-as="openSaveAs"
       />
       <TeamSlots
         :slots="redSlots"
         :hero-presets="heroPresets"
-        :agent-presets="agentPresets"
         :spawn-presets="spawnPresets"
         :team="TEAMS.red.team"
         :accent="TEAMS.red.accent"
         @add="redHandlers.add"
         @remove="redHandlers.remove"
-        @save-as="openSaveAs"
       />
     </div>
 
@@ -358,42 +294,6 @@ onMounted(() => {
         </Button>
       </div>
     </footer>
-
-    <!-- 「存为新预设」Dialog -->
-    <Dialog :open="showSaveAsDialog" @update:open="(v) => (showSaveAsDialog = v)">
-      <DialogContent class="border-border bg-card text-foreground max-w-sm p-6">
-        <DialogHeader>
-          <DialogTitle class="text-foreground text-sm">{{ t("launcher.dialogTitle") }}</DialogTitle>
-          <DialogDescription class="text-muted-foreground text-[11px]">
-            {{ t("launcher.dialogDesc") }}
-          </DialogDescription>
-        </DialogHeader>
-        <div class="flex flex-col gap-2 py-1">
-          <label class="text-muted-foreground text-[10px] font-semibold tracking-wider uppercase">
-            {{ t("launcher.dialogNameLabel") }}
-          </label>
-          <Input
-            v-model="saveAsName"
-            :placeholder="t('launcher.dialogNamePlaceholder')"
-            class="border-border bg-muted/40 h-9 text-sm"
-          />
-          <div v-if="saveAsTarget" class="text-muted-foreground mt-1 font-mono text-[10px]">
-            {{ saveAsTarget.champion }} · {{ saveAsTarget.agentPresetName || t("launcher.noBrain") }} ·
-            {{ saveAsTarget.spawnPresetName || t("launcher.defaultSpawn") }}
-          </div>
-          <div v-if="saveAsError" class="text-destructive text-[11px] font-medium">{{ saveAsError }}</div>
-        </div>
-        <DialogFooter class="gap-2">
-          <Button variant="outline" size="sm" @click="showSaveAsDialog = false">
-            {{ t("launcher.dialogCancelBtn") }}
-          </Button>
-          <Button size="sm" class="gap-1.5" @click="confirmSaveAs">
-            <SaveIcon class="size-3.5" />
-            {{ t("launcher.dialogSaveBtn") }}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
   </div>
 </template>
 

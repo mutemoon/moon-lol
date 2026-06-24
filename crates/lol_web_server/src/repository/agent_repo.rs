@@ -29,20 +29,26 @@ pub struct PgAgentRepo {
     pub pool: PgPool,
 }
 
-const SELECT_COLS: &str = "id, owner_id, name, champion, agent_config_id, spawn_preset_id, \
-     visibility, forked_from, upstream_agent_id";
+const SELECT_COLS: &str = "id, owner_id, name, champion, agent_type, prompt, preamble, model, \
+     config_json, visibility, forked_from, upstream_agent_id";
 
 fn parse_row(r: &sqlx::postgres::PgRow) -> RepoResult<Agent> {
     let vis_str: String = r.try_get("visibility")?;
     let visibility = Visibility::from_str(&vis_str)
         .ok_or_else(|| RepoError::Internal(format!("unknown visibility: {vis_str}")))?;
+    let type_str: String = r.try_get("agent_type")?;
+    let agent_type = crate::domain::agent::AgentType::from_str(&type_str)
+        .ok_or_else(|| RepoError::Internal(format!("unknown agent_type: {type_str}")))?;
     Ok(Agent {
         id: r.try_get("id")?,
         owner_id: r.try_get("owner_id")?,
         name: r.try_get("name")?,
         champion: r.try_get("champion")?,
-        agent_config_id: r.try_get("agent_config_id")?,
-        spawn_preset_id: r.try_get("spawn_preset_id")?,
+        agent_type,
+        prompt: r.try_get("prompt")?,
+        preamble: r.try_get("preamble")?,
+        model: r.try_get("model")?,
+        config_json: r.try_get("config_json")?,
         visibility,
         forked_from: r.try_get("forked_from")?,
         upstream_agent_id: r.try_get("upstream_agent_id")?,
@@ -101,8 +107,8 @@ impl AgentRepo for PgAgentRepo {
         let id = Uuid::new_v4();
         let sql = format!(
             "INSERT INTO agents \
-             (id, owner_id, name, champion, agent_config_id, spawn_preset_id, visibility) \
-             VALUES ($1, $2, $3, $4, $5, $6, $7) \
+             (id, owner_id, name, champion, agent_type, prompt, preamble, model, config_json, visibility) \
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) \
              RETURNING {SELECT_COLS}"
         );
         let row = sqlx::query(&sql)
@@ -110,8 +116,11 @@ impl AgentRepo for PgAgentRepo {
             .bind(owner_id)
             .bind(&input.name)
             .bind(&input.champion)
-            .bind(input.agent_config_id)
-            .bind(input.spawn_preset_id)
+            .bind(input.agent_type.as_str())
+            .bind(&input.prompt)
+            .bind(&input.preamble)
+            .bind(&input.model)
+            .bind(&input.config_json)
             .bind(input.visibility.as_str())
             .fetch_one(&self.pool)
             .await
@@ -131,13 +140,17 @@ impl AgentRepo for PgAgentRepo {
 
     async fn update(&self, id: Uuid, input: &AgentInput) -> RepoResult<()> {
         let result = sqlx::query(
-            "UPDATE agents SET name = $1, champion = $2, agent_config_id = $3, \
-             spawn_preset_id = $4, visibility = $5, updated_at = CURRENT_TIMESTAMP WHERE id = $6",
+            "UPDATE agents SET name = $1, champion = $2, agent_type = $3, \
+             prompt = $4, preamble = $5, model = $6, config_json = $7, \
+             visibility = $8, updated_at = CURRENT_TIMESTAMP WHERE id = $9",
         )
         .bind(&input.name)
         .bind(&input.champion)
-        .bind(input.agent_config_id)
-        .bind(input.spawn_preset_id)
+        .bind(input.agent_type.as_str())
+        .bind(&input.prompt)
+        .bind(&input.preamble)
+        .bind(&input.model)
+        .bind(&input.config_json)
         .bind(input.visibility.as_str())
         .bind(id)
         .execute(&self.pool)

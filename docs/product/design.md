@@ -79,7 +79,6 @@
 | 子系统 | domain 模块 | repository trait | cache trait | service trait |
 |---|---|---|---|---|
 | Auth | `auth` | `UserRepo` | — | `UserService` |
-| 大脑（策略配置） | `agent_config` | `AgentConfigRepo` | `AgentConfigCache` | `AgentConfigService` |
 | Agent（选手） | `agent` | `AgentRepo` | `AgentCache` | `AgentService` |
 | Agent 快照 | `agent_snapshot` | `AgentSnapshotRepo` | — | `AgentSnapshotService` |
 | 出生点预设 | `spawn_preset` | `SpawnPresetRepo` | — | `SpawnPresetService` |
@@ -147,10 +146,9 @@ JWT claims（沿用现有）：
 users                       用户账号
 ai_config                   BYO 模型配置
 
-── Agent 资产三件套（重构）──
+── Agent 资产与出生点（重构）──
 spawn_presets               出生点预设
-agent_configs               「大脑」（原 agent_presets 演化，曾称 Agent 配置）
-agents                      「选手」= 英雄 + 大脑（替代 hero_presets，本地/房间对局中可额外关联出生点）
+agents                      「选手」= 英雄 + 决策类型 + 策略配置（替代 hero_presets 与 agent_configs）
 
 ── Agent 资产扩展 ──
 agent_snapshots             参赛快照（Rank 专用，§2.5）
@@ -223,24 +221,28 @@ CREATE TABLE spawn_presets (
 );
 ```
 
-#### 2.2.4 agent_configs（原 agent_presets 演化，「大脑」）
+#### 2.2.4 agents（替代 hero_presets 与 agent_configs，「选手」）
 
-> 语义：英雄无关的"策略大脑"（大脑配置）——含 Agent 类型、Prompt、模型/权重等。可被多个 Agent 引用。
+> 语义：一个 Agent = 英雄 + 决策类型 + 策略配置。是参赛/ELO/排行榜的主体。
 
 ```sql
-CREATE TABLE agent_configs (
-    id           UUID PRIMARY KEY,
-    owner_id     INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    name         TEXT NOT NULL,
-    agent_type   TEXT NOT NULL,        -- 'llm' | 'rl' | 'script'
-    prompt       TEXT NOT NULL DEFAULT '',
-    preamble     TEXT NOT NULL DEFAULT '',
-    model        TEXT NOT NULL DEFAULT '',         -- LLM 模型名 / RL 权重路径 / 脚本标识
-    config_json  JSONB NOT NULL DEFAULT '{}',      -- 类型专属扩展配置（如 RL 推理端点、脚本内容）
-    visibility   TEXT NOT NULL DEFAULT 'private',
-    forked_from  UUID NULL REFERENCES agent_configs(id) ON DELETE SET NULL,
-    created_at   TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-    updated_at   TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+CREATE TABLE agents (
+    id                UUID PRIMARY KEY,
+    owner_id          INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    name              TEXT NOT NULL,            -- 「锐雯 · 激进压制」
+    champion          TEXT NOT NULL,            -- 'Riven' | 'Fiora' | ...
+    agent_type        TEXT NOT NULL,            -- 'llm' | 'rl' | 'script'
+    prompt            TEXT NOT NULL DEFAULT '',
+    preamble          TEXT NOT NULL DEFAULT '',
+    model             TEXT NOT NULL DEFAULT '', -- 模型名称或路径
+    config_json       JSONB NOT NULL DEFAULT '{}', -- 额外配置 JSON
+    visibility        TEXT NOT NULL DEFAULT 'private',
+    forked_from       UUID NULL REFERENCES agents(id) ON DELETE SET NULL,
+                                                -- 若为 Fork 别人来的，指向原 Agent
+    upstream_agent_id UUID NULL REFERENCES agents(id) ON DELETE SET NULL,
+                                                -- Fork 的"上游"（拉取更新的来源）
+    created_at        TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    updated_at        TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     UNIQUE (owner_id, name)
 );
 ```
@@ -253,33 +255,9 @@ CREATE TABLE agent_configs (
 | `rl` | `{ inference_endpoint: string, model_version: string }` |
 | `script` | `{ script_body: string, language: "javascript" }` |
 
-#### 2.2.5 agents（替代 hero_presets，「选手」）
-
-> 语义：一个 Agent = 英雄 + 大脑，是参赛/ELO/排行榜的主体。在本地/房间对局中，Agent 可以额外关联一个出生点预设。
-
-```sql
-CREATE TABLE agents (
-    id               UUID PRIMARY KEY,
-    owner_id         INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    name             TEXT NOT NULL,            -- 「锐雯 · 激进压制」
-    champion         TEXT NOT NULL,            -- 'Riven' | 'Fiora' | ...
-    agent_config_id  UUID NOT NULL REFERENCES agent_configs(id) ON DELETE RESTRICT,
-    spawn_preset_id  UUID NULL REFERENCES spawn_presets(id) ON DELETE SET NULL,
-                                                   -- NULL：Rank 模式由规则覆盖
-    visibility       TEXT NOT NULL DEFAULT 'private',
-    forked_from      UUID NULL REFERENCES agents(id) ON DELETE SET NULL,
-                                                   -- 若为 Fork 别人来的，指向原 Agent
-    upstream_agent_id UUID NULL REFERENCES agents(id) ON DELETE SET NULL,
-                                                   -- Fork 的"上游"（拉取更新的来源）
-    created_at       TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-    updated_at       TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE (owner_id, name)
-);
-```
-
 **Fork 关系**：
 - 用户 A 把公开 Agent X Fork 成自己的 Agent Y → `Y.forked_from = X.id`，`Y.upstream_agent_id = X.id`
-- 后续 X 有更新，A 在 Y 上点"拉取上游" → 把 X 的当前配置拷贝到 Y 的关联 agent_config（创建新 agent_config 版本或覆盖）
+- 后续 X 有更新，A 在 Y 上点"拉取上游" → 直接把 X 的当前属性（Prompt / Model 等）同步更新至 Y
 - Fork 链可多层，但 `upstream_agent_id` 始终指向"可拉取更新的源"
 
 #### 2.2.6 agent_snapshots（参赛快照，Rank 专用）
@@ -293,9 +271,7 @@ CREATE TABLE agent_snapshots (
     version       INT NOT NULL,                -- 1, 2, 3, ...
     config_freeze JSONB NOT NULL,
                   -- {
-                  --   champion, agent_config_snapshot: {...完整 agent_configs 行...},
-                  --   spawn_snapshot: {...} | null,
-                  --   win_condition: {...} | null
+                  --   name, champion, agent_type, prompt, preamble, model, config_json
                   -- }
     published_at  TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     UNIQUE (agent_id, version)
@@ -546,7 +522,7 @@ CREATE INDEX idx_subscriptions_user ON subscriptions(user_id, status);
 
 | PRODUCT.md 章节 | 主要表 |
 |---|---|
-| §2.1 Agent（英雄+配置+出生点） | `agents` + `agent_configs` + `spawn_presets` |
+| §2.1 Agent（选手预设） | `agents` + `spawn_presets` |
 | §2.4 可见性/Fork | `agents.visibility` + `agents.forked_from/upstream_agent_id` |
 | §2.5 参赛快照 | `agent_snapshots` |
 | §3.A 本地对局 | `matches (form='local')` |
@@ -611,50 +587,30 @@ CREATE INDEX idx_subscriptions_user ON subscriptions(user_id, status);
 
 ### 3.3 Agent 资产子系统
 
-#### 3.3.1 大脑（"策略大脑"，原 Agent 配置）
-
-| 方法 | 路径 | 说明 |
-|---|---|---|
-| GET | `/api/agent-configs` | 列出我的配置（`?agent_type=` 可选过滤） |
-| POST | `/api/agent-configs` | 创建配置 |
-| GET | `/api/agent-configs/:id` | 详情（按可见性校验访问） |
-| PUT | `/api/agent-configs/:id` | 更新（仅 owner） |
-| DELETE | `/api/agent-configs/:id` | 删除（被 Agent 引用时 RESTRICT） |
-
-**POST/PUT 请求体**：
-```json
-{
-  "name": "激进压制",
-  "agent_type": "llm",
-  "prompt": "你是一个上单锐雯...",
-  "preamble": "全局策略：...",
-  "model": "claude-sonnet-4",
-  "config_json": { "thinking_depth": 2, "tools": [] },
-  "visibility": "private"
-}
-```
-
-#### 3.3.2 Agent（"选手"）
+#### 3.3.1 Agent（"选手"）
 
 | 方法 | 路径 | 说明 |
 |---|---|---|
 | GET | `/api/agents` | 列出我的 Agent（`?visibility=&forked_only=`） |
-| POST | `/api/agents` | 创建 Agent（绑定 champion + config + spawn） |
+| POST | `/api/agents` | 创建 Agent |
 | GET | `/api/agents/:id` | 详情 |
-| PUT | `/api/agents/:id` | 更新（改 champion/config/spawn/visibility） |
+| PUT | `/api/agents/:id` | 更新 Agent |
 | DELETE | `/api/agents/:id` | 删除 |
 | PATCH | `/api/agents/:id/visibility` | 单独改可见性 |
 | POST | `/api/agents/:id/publish` | **发布参赛快照**，返回新 snapshot |
 | GET | `/api/agents/:id/snapshots` | 快照版本列表 |
 | GET | `/api/agents/:id/elo` | ELO（`?mode=top_solo&season=<id>`） |
 
-**POST `/api/agents` 请求体**：
+**POST / PUT `/api/agents` 请求体**：
 ```json
 {
   "name": "锐雯 · 激进压制",
   "champion": "Riven",
-  "agent_config_id": "<uuid>",
-  "spawn_preset_id": "<uuid>",
+  "agent_type": "llm",
+  "prompt": "你是一个上单锐雯...",
+  "preamble": "全局策略：...",
+  "model": "claude-sonnet-4",
+  "config_json": { "thinking_depth": 2 },
   "visibility": "private"
 }
 ```
@@ -2077,11 +2033,11 @@ cargo test --all
 - [ ] 迁移首个子系统（建议从 Config 开始，最简单）走通完整的 domain → repo → service → handler 四层 + 各层测试，作为后续子系统的模板
 
 **数据模型与业务**：
-- [ ] 落地 §2.2.3 ~ §2.2.6 表结构（spawn_presets / agent_configs / agents / agent_snapshots）
-- [ ] 拆分旧 `PresetService` → `SpawnPresetRepo`+`SpawnPresetService` + `AgentConfigRepo`+`AgentConfigService` + `AgentRepo`+`AgentService`（§3.13.4 迁移路径）
+- [ ] 落地 §2.2.3 ~ §2.2.5 表结构（spawn_presets / agents / agent_snapshots）
+- [ ] 拆分旧 `PresetService` → `SpawnPresetRepo`+`SpawnPresetService` + `AgentRepo`+`AgentService`（§3.13.4 迁移路径）
 - [ ] 提取 domain 纯函数：可见性判定（§6.3）、槽位限制校验
 - [ ] 实现 §3.3 / §3.4 路由
-- [ ] 补 §5.1 的 auth 方法 + agent/config CRUD
+- [ ] 补 §5.1 的 auth 方法 + agent CRUD
 - [ ] Agent 槽位上限校验（`agent_count < agent_limit`，免费=5，走 SubscriptionService）
 - [ ] 删除旧的 `hero_presets` 表与 `interfaces.rs`（开发阶段无迁移负担）
 
@@ -2162,12 +2118,10 @@ cargo test --all
 | Rank 掉线宽限 | 30 秒 | |
 | JWT 有效期 | 30 天 | |
 | 服务器日志留存 | 24 小时 | |
-
 ## 附录 B：术语对照（PRODUCT.md ↔ API_DESIGN.md）
 
 | PRODUCT.md 术语 | 数据库表 | API 资源 |
 |---|---|---|
-| 大脑（"策略大脑"） | `agent_configs` | `/api/agent-configs` |
 | Agent（"选手"） | `agents` | `/api/agents` |
 | 参赛快照 | `agent_snapshots` | `/api/agents/:id/snapshots` |
 | 出生点预设 | `spawn_presets` | `/api/spawn-presets` |

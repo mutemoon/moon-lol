@@ -11,20 +11,19 @@ use crate::repository::agent_snapshot_repo::AgentSnapshotRepo;
 
 /// 构造 publish 时冻结的 config_freeze（纯函数）。
 pub fn build_config_freeze(
-    champion: &str,
-    agent_config: &crate::domain::agent_config::AgentConfig,
+    agent: &crate::domain::agent::Agent,
     spawn: Option<&crate::domain::spawn_preset::SpawnPreset>,
     win_condition: Option<&serde_json::Value>,
 ) -> serde_json::Value {
     serde_json::json!({
-        "champion": champion,
-        "agent_config": {
-            "id": agent_config.id,
-            "agent_type": agent_config.agent_type.as_str(),
-            "prompt": agent_config.prompt,
-            "preamble": agent_config.preamble,
-            "model": agent_config.model,
-            "config_json": agent_config.config_json,
+        "champion": agent.champion,
+        "agent": {
+            "id": agent.id,
+            "agent_type": agent.agent_type.as_str(),
+            "prompt": agent.prompt,
+            "preamble": agent.preamble,
+            "model": agent.model,
+            "config_json": agent.config_json,
         },
         "spawn": spawn.map(|s| serde_json::json!({
             "id": s.id, "x": s.x, "z": s.z, "team": s.team.as_str(),
@@ -91,8 +90,7 @@ impl AgentSnapshotService for AgentSnapshotServiceImpl {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::domain::agent::Agent;
-    use crate::domain::agent_config::{AgentConfig, AgentType};
+    use crate::domain::agent::{Agent, AgentType};
     use crate::domain::spawn_preset::{SpawnPreset, Team, Visibility};
     use crate::domain::{RepoError, RepoResult};
     use chrono::Utc;
@@ -144,8 +142,11 @@ mod tests {
             owner_id: owner,
             name: "锐雯".into(),
             champion: "Riven".into(),
-            agent_config_id: Uuid::new_v4(),
-            spawn_preset_id: Some(Uuid::new_v4()),
+            agent_type: AgentType::Llm,
+            prompt: "prompt".into(),
+            preamble: "preamble".into(),
+            model: "model".into(),
+            config_json: serde_json::json!({}),
             visibility: Visibility::Private,
             forked_from: None,
             upstream_agent_id: None,
@@ -285,10 +286,11 @@ mod tests {
 
     #[test]
     fn build_config_freeze_includes_all_fields() {
-        let cfg = AgentConfig {
+        let agent = Agent {
             id: Uuid::new_v4(),
             owner_id: 1,
-            name: "cfg".into(),
+            name: "锐雯".into(),
+            champion: "Riven".into(),
             agent_type: AgentType::Llm,
             prompt: "p".into(),
             preamble: "pb".into(),
@@ -296,6 +298,7 @@ mod tests {
             config_json: serde_json::json!({"k": 1}),
             visibility: Visibility::Private,
             forked_from: None,
+            upstream_agent_id: None,
         };
         let spawn = SpawnPreset {
             id: Uuid::new_v4(),
@@ -307,19 +310,20 @@ mod tests {
             visibility: Visibility::Private,
         };
         let win = serde_json::json!({"type": "eliminate"});
-        let freeze = build_config_freeze("Riven", &cfg, Some(&spawn), Some(&win));
+        let freeze = build_config_freeze(&agent, Some(&spawn), Some(&win));
         assert_eq!(freeze["champion"], "Riven");
-        assert_eq!(freeze["agent_config"]["agent_type"], "llm");
+        assert_eq!(freeze["agent"]["agent_type"], "llm");
         assert_eq!(freeze["spawn"]["team"], "order");
         assert_eq!(freeze["win_condition"]["type"], "eliminate");
     }
 
     #[test]
     fn build_config_freeze_null_optionals() {
-        let cfg = AgentConfig {
+        let agent = Agent {
             id: Uuid::new_v4(),
             owner_id: 1,
-            name: "cfg".into(),
+            name: "菲奥娜".into(),
+            champion: "Fiora".into(),
             agent_type: AgentType::Script,
             prompt: "".into(),
             preamble: "".into(),
@@ -327,8 +331,9 @@ mod tests {
             config_json: serde_json::json!({}),
             visibility: Visibility::Private,
             forked_from: None,
+            upstream_agent_id: None,
         };
-        let freeze = build_config_freeze("Fiora", &cfg, None, None);
+        let freeze = build_config_freeze(&agent, None, None);
         assert_eq!(freeze["spawn"], serde_json::Value::Null);
         assert_eq!(freeze["win_condition"], serde_json::Value::Null);
     }

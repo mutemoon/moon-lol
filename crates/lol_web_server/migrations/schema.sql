@@ -30,29 +30,16 @@ CREATE TABLE IF NOT EXISTS spawn_presets (
     UNIQUE (owner_id, name)
 );
 
-CREATE TABLE IF NOT EXISTS agent_configs (
-    id           UUID PRIMARY KEY,
-    owner_id     INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    name         TEXT NOT NULL,
-    agent_type   TEXT NOT NULL,
-    prompt       TEXT NOT NULL DEFAULT '',
-    preamble     TEXT NOT NULL DEFAULT '',
-    model        TEXT NOT NULL DEFAULT '',
-    config_json  JSONB NOT NULL DEFAULT '{}',
-    visibility   TEXT NOT NULL DEFAULT 'private',
-    forked_from  UUID NULL REFERENCES agent_configs(id) ON DELETE SET NULL,
-    created_at   TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at   TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE (owner_id, name)
-);
-
 CREATE TABLE IF NOT EXISTS agents (
     id                UUID PRIMARY KEY,
     owner_id          INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     name              TEXT NOT NULL,
     champion          TEXT NOT NULL,
-    agent_config_id   UUID NOT NULL REFERENCES agent_configs(id) ON DELETE RESTRICT,
-    spawn_preset_id   UUID NULL REFERENCES spawn_presets(id) ON DELETE SET NULL,
+    agent_type        TEXT NOT NULL,
+    prompt            TEXT NOT NULL DEFAULT '',
+    preamble          TEXT NOT NULL DEFAULT '',
+    model             TEXT NOT NULL DEFAULT '',
+    config_json       JSONB NOT NULL DEFAULT '{}',
     visibility        TEXT NOT NULL DEFAULT 'private',
     forked_from       UUID NULL REFERENCES agents(id) ON DELETE SET NULL,
     upstream_agent_id UUID NULL REFERENCES agents(id) ON DELETE SET NULL,
@@ -111,12 +98,13 @@ CREATE TABLE IF NOT EXISTS room_members (
 );
 
 CREATE TABLE IF NOT EXISTS room_agent_slots (
-    id         UUID PRIMARY KEY,
-    room_id    UUID NOT NULL REFERENCES rooms(id) ON DELETE CASCADE,
-    user_id    INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    agent_id   UUID NOT NULL REFERENCES agents(id) ON DELETE CASCADE,
-    team       TEXT NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+    id              UUID PRIMARY KEY,
+    room_id         UUID NOT NULL REFERENCES rooms(id) ON DELETE CASCADE,
+    user_id         INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    agent_id        UUID NOT NULL REFERENCES agents(id) ON DELETE CASCADE,
+    team            TEXT NOT NULL,
+    spawn_preset_id UUID NULL REFERENCES spawn_presets(id) ON DELETE SET NULL,
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 -- ── 对局实例（核心表）──

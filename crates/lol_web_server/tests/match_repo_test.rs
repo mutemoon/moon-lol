@@ -4,18 +4,15 @@ mod common;
 
 use common::setup_pg;
 use lol_web_server::domain::RepoError;
-use lol_web_server::domain::agent::AgentInput;
-use lol_web_server::domain::agent_config::{AgentConfigInput, AgentType};
+use lol_web_server::domain::agent::{AgentInput, AgentType};
 use lol_web_server::domain::match_::{MatchForm, MatchStatus, ParticipantResult, Winner};
-use lol_web_server::domain::spawn_preset::{SpawnPresetInput, Team, Visibility};
-use lol_web_server::repository::agent_config_repo::{AgentConfigRepo, PgAgentConfigRepo};
+use lol_web_server::domain::spawn_preset::{Team, Visibility};
 use lol_web_server::repository::agent_repo::{AgentRepo, PgAgentRepo};
 use lol_web_server::repository::agent_snapshot_repo::{AgentSnapshotRepo, PgAgentSnapshotRepo};
 use lol_web_server::repository::match_repo::{
     MatchEventInput, MatchEventRepo, MatchInput, MatchParticipantRepo, MatchRepo, ParticipantInput,
     PgMatchEventRepo, PgMatchParticipantRepo, PgMatchRepo,
 };
-use lol_web_server::repository::spawn_preset_repo::{PgSpawnPresetRepo, SpawnPresetRepo};
 use uuid::Uuid;
 
 async fn create_user(pool: &sqlx::PgPool, phone: &str) -> i32 {
@@ -30,42 +27,17 @@ async fn create_user(pool: &sqlx::PgPool, phone: &str) -> i32 {
 }
 
 async fn create_agent_with_snapshot(pool: &sqlx::PgPool, owner: i32, name: &str) -> (Uuid, Uuid) {
-    let cfg = PgAgentConfigRepo { pool: pool.clone() }
-        .insert(
-            owner,
-            &AgentConfigInput {
-                name: format!("cfg_{name}"),
-                agent_type: AgentType::Llm,
-                prompt: "".into(),
-                preamble: "".into(),
-                model: "".into(),
-                config_json: serde_json::json!({}),
-                visibility: Visibility::Private,
-            },
-        )
-        .await
-        .unwrap();
-    let spawn = PgSpawnPresetRepo { pool: pool.clone() }
-        .insert(
-            owner,
-            &SpawnPresetInput {
-                name: format!("sp_{name}"),
-                x: 1000.0,
-                z: 1000.0,
-                team: Team::Order,
-                visibility: Visibility::Private,
-            },
-        )
-        .await
-        .unwrap();
     let agent = PgAgentRepo { pool: pool.clone() }
         .insert(
             owner,
             &AgentInput {
                 name: name.into(),
                 champion: "Riven".into(),
-                agent_config_id: cfg.id,
-                spawn_preset_id: Some(spawn.id),
+                agent_type: AgentType::Llm,
+                prompt: "prompt".into(),
+                preamble: "preamble".into(),
+                model: "model".into(),
+                config_json: serde_json::json!({}),
                 visibility: Visibility::Private,
             },
         )

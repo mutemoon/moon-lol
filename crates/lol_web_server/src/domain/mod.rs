@@ -4,7 +4,6 @@
 use thiserror::Error;
 
 pub mod agent;
-pub mod agent_config;
 pub mod agent_snapshot;
 pub mod auth;
 pub mod community;
