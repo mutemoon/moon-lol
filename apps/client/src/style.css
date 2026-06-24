@@ -3,7 +3,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn-vue/tailwind.css";
-@import "markstream-vue/index.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -65,11 +64,6 @@
   --font-body: "Noto Sans SC", "Noto Sans", "Segoe UI", Arial, sans-serif;
   --font-mono: "Cascadia Code", "JetBrains Mono", "Fira Code", Consolas, monospace;
 
-  /* Shadows (desktop custom) */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5);
-  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.6);
-
   /* Acid Theme Colors (web custom) */
   --color-acid-blue: #00ffff;
   --color-acid-green: #39ff14;
@@ -109,7 +103,7 @@
 }
 
 :root {
-  --background: oklch(1 0 0);
+  --background: oklch(0.98 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);

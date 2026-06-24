@@ -32,6 +32,7 @@ if (!post.value) {
 </template>
 
 <style>
+@import "markstream-vue/index.css";
 @reference "@/style.css";
 
 /* Custom styles for markstream-vue content if needed */

@@ -12,6 +12,7 @@
     "tauri:dev": "tauri dev"
   },
   "dependencies": {
+    "@guolao/vue-monaco-editor": "^1.6.0",
     "@lucide/vue": "^1.16.0",
     "@tailwindcss/vite": "^4.1.17",
     "@tanstack/vue-table": "^8.21.3",
@@ -25,6 +26,7 @@
     "lucide-vue-next": "^0.552.0",
     "markstream-vue": "0.0.2-beta.4",
     "mermaid": "^11.12.1",
+    "monaco-editor": "^0.55.1",
     "ollama": "^0.6.2",
     "openai": "^6.8.1",
     "pinia": "^3.0.4",

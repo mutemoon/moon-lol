@@ -48,12 +48,9 @@ const { t } = useLocale();
 </script>
 
 <template>
-  <div class="flex min-h-0 flex-col overflow-hidden rounded-lg border shadow-sm" :class="team.panel">
+  <div class="flex min-h-0 flex-col overflow-hidden rounded-lg border" :class="team.panel">
     <!-- 头部 -->
-    <div
-      class="flex shrink-0 items-center justify-between border-b px-3.5 py-2.5"
-      :class="team.divider"
-    >
+    <div class="flex shrink-0 items-center justify-between border-b px-3.5 py-2.5" :class="team.divider">
       <div class="flex items-center gap-2">
         <span class="size-2.5 rounded-full" :class="team.dot"></span>
         <span class="text-xs font-bold tracking-wide uppercase" :class="team.titleText">{{ team.label }}</span>
@@ -63,7 +60,7 @@ const { t } = useLocale();
       </div>
       <Button variant="outline" size="xs" class="h-6 text-[10px]" :class="team.addButton" @click="emit('add')">
         <PlusIcon class="size-3" />
-        {{ t('common.teamSlots.addSlotBtn') }}
+        {{ t("common.teamSlots.addSlotBtn") }}
       </Button>
     </div>
     <!-- 槽位列表 -->

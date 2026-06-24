@@ -13,6 +13,25 @@ export const router = createRouter({
   routes: setupLayouts(routes as RouteRecordRaw[]),
 });
 
+router.beforeEach((to, _from, next) => {
+  if (isDesktop) {
+    next();
+    return;
+  }
+  // 本地对局 + 大日志调试相关仅桌面模式可见。
+  // /rl-training 也仅桌面端可用（产品文档 §2.3）。
+  const isLocalOnly =
+    to.path === "/" ||
+    to.path === "/debug" ||
+    to.path === "/history" ||
+    to.path === "/rl-training";
+  if (isLocalOnly) {
+    next("/rooms");
+    return;
+  }
+  next();
+});
+
 if (import.meta.hot) {
   handleHotUpdate(router);
 }

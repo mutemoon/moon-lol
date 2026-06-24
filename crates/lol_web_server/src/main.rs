@@ -4,6 +4,7 @@
 //! 构建 AppState 与 Axum 路由，并启动 HTTP 服务器。
 
 use std::net::SocketAddr;
+use std::path::PathBuf;
 use std::sync::Arc;
 use tokio::net::TcpListener;
 use tracing::info;
@@ -109,6 +110,15 @@ async fn main() {
         local_game_service.clone(),
     ));
 
+    let db_path = {
+        let base = std::env::var("HOME")
+            .map(PathBuf::from)
+            .unwrap_or_else(|_| std::env::current_dir().unwrap_or_default());
+        base.join(".moon-lol").join("logs").join("debug.db")
+    };
+    let log_reader = Arc::new(SqliteLogReader::new(db_path));
+    let log_service = Arc::new(LogServiceImpl::new(log_reader));
+
     // 6. 装配 AppState
     let state = AppState {
         user_service,
@@ -126,6 +136,7 @@ async fn main() {
         community_service: Arc::new(CommunityServiceImpl::new(agent_repo.clone())),
         local_game_service,
         admin_service,
+        log_service,
     };
 
     // 7. 构建 Router 并启动服务器

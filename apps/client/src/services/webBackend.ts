@@ -11,169 +11,414 @@ import type {
   UnsubscribeFn
 } from "./backend";
 
+const BASE_URL = import.meta.env.VITE_BASE_URL || "http://localhost:3000";
+
 export class WebBackendClient implements IBackendClient {
   private ws: WebSocket | null = null;
   private wsCallbacks: ((event: WsEvent) => void)[] = [];
   private agentFinishedCallbacks: ((data: { minion_kills: number; gold: number }) => void)[] = [];
   private agentHistoryUpdatedCallbacks: ((data: { agent_id: string; champion: string; history: any[] }) => void)[] = [];
 
-  // Helper for localStorage
-  private getStorageItem<T>(key: string, defaultValue: T): T {
-    const item = localStorage.getItem(`moon_lol_${key}`);
-    return item ? JSON.parse(item) : defaultValue;
+  // Name-to-UUID maps for cached resolution
+  private spawnPresetIds = new Map<string, string>();
+  private agentPresetIds = new Map<string, string>();
+  private heroPresetIds = new Map<string, string>();
+  private scenarioIds = new Map<string, string>();
+
+  // Token cache
+  private token: string | null = null;
+
+  constructor() {
+    this.token = localStorage.getItem("moon_lol_auth_token");
   }
 
-  private setStorageItem<T>(key: string, value: T): void {
-    localStorage.setItem(`moon_lol_${key}`, JSON.stringify(value));
+  // Helper for requests
+  private async request<T = any>(path: string, options: RequestInit = {}): Promise<T> {
+    if (!this.token && !path.startsWith("/api/auth/")) {
+      await this.ensureAuth();
+    }
+
+    const headers = new Headers(options.headers);
+    if (this.token) {
+      headers.set("Authorization", `Bearer ${this.token}`);
+    }
+    headers.set("Content-Type", "application/json");
+
+    const url = `${BASE_URL}${path}`;
+    const response = await fetch(url, {
+      ...options,
+      headers
+    });
+
+    if (response.status === 401 && !path.startsWith("/api/auth/")) {
+      this.token = null;
+      localStorage.removeItem("moon_lol_auth_token");
+      await this.ensureAuth();
+      headers.set("Authorization", `Bearer ${this.token}`);
+      const retryResponse = await fetch(url, {
+        ...options,
+        headers
+      });
+      return this.handleResponse<T>(retryResponse);
+    }
+
+    return this.handleResponse<T>(response);
+  }
+
+  private async handleResponse<T>(response: Response): Promise<T> {
+    if (!response.ok) {
+      const errText = await response.text();
+      let errMsg = `Request failed: ${response.status}`;
+      try {
+        const errJson = JSON.parse(errText);
+        errMsg = errJson.error?.message || errMsg;
+      } catch {
+        // ignore
+      }
+      throw new Error(errMsg);
+    }
+    const json = await response.json();
+    return json.data;
+  }
+
+  private async ensureAuth(): Promise<void> {
+    const phone = "13800000000";
+    const password = "admin_password";
+    
+    // Try login
+    try {
+      const res = await fetch(`${BASE_URL}/api/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone, password })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        this.token = data.data.token;
+        localStorage.setItem("moon_lol_auth_token", this.token!);
+        return;
+      }
+    } catch (e) {
+      console.warn("[WebBackend] Login failed, attempting auto-register", e);
+    }
+
+    // Try register
+    const regRes = await fetch(`${BASE_URL}/api/auth/register`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ phone, password, code: "111111" })
+    });
+    if (!regRes.ok) {
+      throw new Error(`Auto-authentication registration failed: ${regRes.status}`);
+    }
+    const regData = await regRes.json();
+    this.token = regData.data.token;
+    localStorage.setItem("moon_lol_auth_token", this.token!);
   }
 
   // AI Config
   async getAiConfig(): Promise<AiConfig> {
-    return this.getStorageItem<AiConfig>("ai_config", {
-      api_key: "",
-      base_url: "",
-      preamble: ""
-    });
+    return this.request<AiConfig>("/api/config");
   }
 
   async setAiConfig(config: AiConfig): Promise<void> {
-    this.setStorageItem("ai_config", config);
+    await this.request("/api/config", {
+      method: "POST",
+      body: JSON.stringify(config)
+    });
   }
 
   // Spawn Presets
   async listSpawnPresets(): Promise<SpawnPreset[]> {
-    return this.getStorageItem<SpawnPreset[]>("spawn_presets", []);
+    const list = await this.request<any[]>("/api/spawn-presets");
+    return list.map(item => {
+      this.spawnPresetIds.set(item.name, item.id);
+      return {
+        name: item.name,
+        x: item.x,
+        z: item.z,
+        team: item.team === "order" ? "Order" : "Chaos"
+      };
+    });
   }
 
   async saveSpawnPreset(preset: SpawnPreset): Promise<void> {
-    const presets = await this.listSpawnPresets();
-    const existingIdx = presets.findIndex(p => p.name === preset.name);
-    if (existingIdx !== -1) {
-      presets[existingIdx] = preset;
+    const id = this.spawnPresetIds.get(preset.name);
+    const body = {
+      name: preset.name,
+      x: preset.x,
+      z: preset.z,
+      team: preset.team.toLowerCase(),
+      visibility: "private"
+    };
+    if (id) {
+      await this.request(`/api/spawn-presets/${id}`, {
+        method: "PUT",
+        body: JSON.stringify(body)
+      });
     } else {
-      presets.push(preset);
+      const created = await this.request("/api/spawn-presets", {
+        method: "POST",
+        body: JSON.stringify(body)
+      });
+      this.spawnPresetIds.set(created.name, created.id);
     }
-    this.setStorageItem("spawn_presets", presets);
   }
 
   async deleteSpawnPreset(name: string): Promise<void> {
-    const presets = await this.listSpawnPresets();
-    this.setStorageItem("spawn_presets", presets.filter(p => p.name !== name));
+    const id = this.spawnPresetIds.get(name);
+    if (!id) {
+      throw new Error(`Spawn preset not found: ${name}`);
+    }
+    await this.request(`/api/spawn-presets/${id}`, {
+      method: "DELETE"
+    });
+    this.spawnPresetIds.delete(name);
   }
 
   // Agent Presets
   async listAgentPresets(): Promise<AgentPreset[]> {
-    return this.getStorageItem<AgentPreset[]>("agent_presets", []);
+    const list = await this.request<any[]>("/api/agent-configs");
+    return list.map(item => {
+      this.agentPresetIds.set(item.name, item.id);
+      return {
+        name: item.name,
+        agent_type: item.agent_type,
+        prompt: item.prompt,
+        preamble: item.preamble || undefined,
+        model: item.model || undefined
+      };
+    });
   }
 
   async saveAgentPreset(preset: AgentPreset): Promise<void> {
-    const presets = await this.listAgentPresets();
-    const existingIdx = presets.findIndex(p => p.name === preset.name);
-    if (existingIdx !== -1) {
-      presets[existingIdx] = preset;
+    const id = this.agentPresetIds.get(preset.name);
+    const body = {
+      name: preset.name,
+      agent_type: preset.agent_type,
+      prompt: preset.prompt,
+      preamble: preset.preamble || "",
+      model: preset.model || "",
+      config_json: {},
+      visibility: "private"
+    };
+    if (id) {
+      await this.request(`/api/agent-configs/${id}`, {
+        method: "PUT",
+        body: JSON.stringify(body)
+      });
     } else {
-      presets.push(preset);
+      const created = await this.request("/api/agent-configs", {
+        method: "POST",
+        body: JSON.stringify(body)
+      });
+      this.agentPresetIds.set(created.name, created.id);
     }
-    this.setStorageItem("agent_presets", presets);
   }
 
   async deleteAgentPreset(name: string): Promise<void> {
-    const presets = await this.listAgentPresets();
-    this.setStorageItem("agent_presets", presets.filter(p => p.name !== name));
+    const id = this.agentPresetIds.get(name);
+    if (!id) {
+      throw new Error(`Agent preset not found: ${name}`);
+    }
+    await this.request(`/api/agent-configs/${id}`, {
+      method: "DELETE"
+    });
+    this.agentPresetIds.delete(name);
   }
 
   // Hero Presets
   async listHeroPresets(): Promise<HeroPreset[]> {
-    return this.getStorageItem<HeroPreset[]>("hero_presets", []);
+    await Promise.all([this.listSpawnPresets(), this.listAgentPresets()]);
+    
+    const list = await this.request<any[]>("/api/agents");
+    return list.map(item => {
+      this.heroPresetIds.set(item.name, item.id);
+      
+      let agentPresetName = "";
+      for (const [name, id] of this.agentPresetIds.entries()) {
+        if (id === item.agent_config_id) {
+          agentPresetName = name;
+          break;
+        }
+      }
+      let spawnPresetName = "";
+      if (item.spawn_preset_id) {
+        for (const [name, id] of this.spawnPresetIds.entries()) {
+          if (id === item.spawn_preset_id) {
+            spawnPresetName = name;
+            break;
+          }
+        }
+      }
+
+      return {
+        name: item.name,
+        champion: item.champion,
+        agent_preset_name: agentPresetName,
+        spawn_preset_name: spawnPresetName
+      };
+    });
   }
 
   async saveHeroPreset(preset: HeroPreset): Promise<void> {
-    const presets = await this.listHeroPresets();
-    const existingIdx = presets.findIndex(p => p.name === preset.name);
-    if (existingIdx !== -1) {
-      presets[existingIdx] = preset;
-    } else {
-      presets.push(preset);
+    if (this.agentPresetIds.size === 0) await this.listAgentPresets();
+    if (this.spawnPresetIds.size === 0) await this.listSpawnPresets();
+
+    const agent_config_id = this.agentPresetIds.get(preset.agent_preset_name);
+    if (!agent_config_id) {
+      throw new Error(`Agent preset not found: ${preset.agent_preset_name}`);
     }
-    this.setStorageItem("hero_presets", presets);
+    const spawn_preset_id = preset.spawn_preset_name ? this.spawnPresetIds.get(preset.spawn_preset_name) : null;
+
+    const id = this.heroPresetIds.get(preset.name);
+    const body = {
+      name: preset.name,
+      champion: preset.champion,
+      agent_config_id,
+      spawn_preset_id,
+      visibility: "private"
+    };
+
+    if (id) {
+      await this.request(`/api/agents/${id}`, {
+        method: "PUT",
+        body: JSON.stringify(body)
+      });
+    } else {
+      const created = await this.request("/api/agents", {
+        method: "POST",
+        body: JSON.stringify(body)
+      });
+      this.heroPresetIds.set(created.name, created.id);
+    }
   }
 
   async deleteHeroPreset(name: string): Promise<void> {
-    const presets = await this.listHeroPresets();
-    this.setStorageItem("hero_presets", presets.filter(p => p.name !== name));
+    const id = this.heroPresetIds.get(name);
+    if (!id) {
+      throw new Error(`Hero preset not found: ${name}`);
+    }
+    await this.request(`/api/agents/${id}`, {
+      method: "DELETE"
+    });
+    this.heroPresetIds.delete(name);
   }
 
   // Custom Scenarios & Win Conditions
   async listCustomScenarios(): Promise<string[]> {
-    return this.getStorageItem<string[]>("custom_scenarios_list", []);
+    const list = await this.request<any[]>("/api/scenarios");
+    return list.map(item => {
+      this.scenarioIds.set(item.name, item.id);
+      return item.name;
+    });
   }
 
   async loadCustomScenario(sceneName: string): Promise<FrontAgentConfig[]> {
-    return this.getStorageItem<FrontAgentConfig[]>(`scenario_${sceneName}`, []);
+    const id = this.scenarioIds.get(sceneName);
+    if (!id) {
+      await this.listCustomScenarios();
+    }
+    const activeId = this.scenarioIds.get(sceneName);
+    if (!activeId) {
+      throw new Error(`Scenario not found: ${sceneName}`);
+    }
+    const scenario = await this.request<any>(`/api/scenarios/${activeId}`);
+    return scenario.agents;
   }
 
   async saveCustomScenario(sceneName: string, agents: FrontAgentConfig[]): Promise<void> {
-    const list = await this.listCustomScenarios();
-    if (!list.includes(sceneName)) {
-      list.push(sceneName);
-      this.setStorageItem("custom_scenarios_list", list);
+    let id = this.scenarioIds.get(sceneName);
+    if (!id) {
+      await this.listCustomScenarios();
+      id = this.scenarioIds.get(sceneName);
     }
-    this.setStorageItem(`scenario_${sceneName}`, agents);
+    const body = {
+      name: sceneName,
+      agents
+    };
+    if (id) {
+      await this.request(`/api/scenarios/${id}`, {
+        method: "PUT",
+        body: JSON.stringify(body)
+      });
+    } else {
+      const created = await this.request("/api/scenarios", {
+        method: "POST",
+        body: JSON.stringify(body)
+      });
+      this.scenarioIds.set(created.name, created.id);
+    }
   }
 
   async deleteCustomScenario(sceneName: string): Promise<void> {
-    const list = await this.listCustomScenarios();
-    this.setStorageItem("custom_scenarios_list", list.filter(s => s !== sceneName));
-    localStorage.removeItem(`moon_lol_scenario_${sceneName}`);
-    localStorage.removeItem(`moon_lol_win_condition_${sceneName}`);
+    const id = this.scenarioIds.get(sceneName);
+    if (!id) {
+      throw new Error(`Scenario not found: ${sceneName}`);
+    }
+    await this.request(`/api/scenarios/${id}`, {
+      method: "DELETE"
+    });
+    this.scenarioIds.delete(sceneName);
   }
 
   async loadScenarioWinCondition(sceneName: string): Promise<any> {
-    return this.getStorageItem(`win_condition_${sceneName}`, null);
+    const id = this.scenarioIds.get(sceneName);
+    if (!id) {
+      await this.listCustomScenarios();
+    }
+    const activeId = this.scenarioIds.get(sceneName);
+    if (!activeId) return null;
+    return this.request(`/api/scenarios/${activeId}/win-condition`);
   }
 
   async saveScenarioWinCondition(sceneName: string, condition: any): Promise<void> {
-    this.setStorageItem(`win_condition_${sceneName}`, condition);
+    const id = this.scenarioIds.get(sceneName);
+    if (!id) {
+      await this.listCustomScenarios();
+    }
+    const activeId = this.scenarioIds.get(sceneName);
+    if (!activeId) {
+      throw new Error(`Scenario not found for win condition: ${sceneName}`);
+    }
+    await this.request(`/api/scenarios/${activeId}/win-condition`, {
+      method: "PUT",
+      body: JSON.stringify(condition)
+    });
   }
 
   // Game Control
-  async startGame(config: GameConfig): Promise<void> {
-    console.log("[WebBackend] start_game invoked:", config);
-    // In web mode, we assume the game server is already running standalone or launched by some other means.
-    // We just simulate success and expect standard WS connect next.
-    return Promise.resolve();
+  async startGame(_config: GameConfig): Promise<void> {
+    throw new Error("Local battle is not supported in the Web environment.");
   }
 
   async stopGame(): Promise<void> {
-    console.log("[WebBackend] stop_game invoked");
-    return Promise.resolve();
+    // noop on web
   }
 
-  // Game Histories
+  // Game Histories (Web environment does not support local histories)
   async listGameHistories(): Promise<any[]> {
-    return this.getStorageItem<any[]>("game_histories", []);
+    return [];
   }
 
-  async getGameHistoryDetail(datetime: string): Promise<any[]> {
-    return this.getStorageItem<any[]>(`history_detail_${datetime}`, []);
+  async getGameHistoryDetail(_datetime: string): Promise<any[]> {
+    return [];
   }
 
-  async deleteGameHistory(datetime: string): Promise<void> {
-    const histories = await this.listGameHistories();
-    this.setStorageItem("game_histories", histories.filter(h => h.datetime !== datetime));
-    localStorage.removeItem(`moon_lol_history_detail_${datetime}`);
+  async deleteGameHistory(_datetime: string): Promise<void> {
+    // noop on web
   }
 
-  // Logs Querying
+  // Logs Querying (Web environment does not support logs querying)
   async queryLogEntities(): Promise<{ entity_id: number | null; entity_name: string | null }[]> {
-    return this.getStorageItem("log_entities", []);
+    return [];
   }
 
   async queryLogCategories(): Promise<{ category: string | null }[]> {
-    return this.getStorageItem("log_categories", []);
+    return [];
   }
 
-  async queryLogs(params: {
+  async queryLogs(_params: {
     offset: number;
     limit: number;
     levels: string[] | null;
@@ -181,69 +426,16 @@ export class WebBackendClient implements IBackendClient {
     category: string | null;
     searchText: string | null;
   }): Promise<QueryLogsResult> {
-    // Basic local mock querying
-    const allLogs = this.getStorageItem<any[]>("logs", []);
-    const filtered = allLogs.filter(log => {
-      if (params.levels && !params.levels.includes(log.level)) return false;
-      if (params.entityId !== null && log.entity_id !== params.entityId) return false;
-      if (params.category !== null && log.category !== params.category) return false;
-      if (params.searchText && !log.message.includes(params.searchText)) return false;
-      return true;
-    });
-
-    const offset = params.offset === -1 ? Math.max(0, filtered.length - params.limit) : params.offset;
-    const rows = filtered.slice(offset, offset + params.limit);
-    return {
-      rows,
-      total_count: filtered.length
-    };
+    return { rows: [], total_count: 0 };
   }
 
   async clearLogs(): Promise<void> {
-    this.setStorageItem("logs", []);
+    // noop on web
   }
 
-  // WebSocket proxy communication
+  // WebSocket proxy communication (Not supported in Web environment)
   async connectWs(): Promise<void> {
-    return new Promise((resolve, reject) => {
-      // Connect directly to local Bevy server running on default WS port
-      const url = "ws://127.0.0.1:9001";
-      this.ws = new WebSocket(url);
-
-      this.ws.onopen = () => {
-        console.log("[WebBackend] Connected to Bevy WS Server at", url);
-        resolve();
-      };
-
-      this.ws.onerror = (err) => {
-        console.error("[WebBackend] WebSocket connection error:", err);
-        reject(err);
-      };
-
-      this.ws.onclose = () => {
-        console.log("[WebBackend] WebSocket closed");
-        this.triggerEvent({ type: "event", event: "game_close", data: {} });
-      };
-
-      this.ws.onmessage = (msg) => {
-        try {
-          const data = JSON.parse(msg.data);
-          if (data.type === "event") {
-            this.triggerEvent(data as WsEvent);
-          } else if (data.type === "result") {
-            // Handled via promises if we had request-response tracking,
-            // or just broadcast it.
-            this.triggerEvent({
-              type: "event",
-              event: "game_loaded", // simple default mappings
-              data: data.data || {}
-            });
-          }
-        } catch (e) {
-          console.error("[WebBackend] Failed to parse WebSocket message:", e);
-        }
-      };
-    });
+    throw new Error("Local game WebSocket connection is not supported in the Web environment.");
   }
 
   async disconnectWs(): Promise<void> {
@@ -266,12 +458,7 @@ export class WebBackendClient implements IBackendClient {
     };
 
     this.ws.send(JSON.stringify(payload));
-    return Promise.resolve(); // Async send, mock response wrapper
-  }
-
-  // Event Trigger helpers
-  private triggerEvent(event: WsEvent) {
-    this.wsCallbacks.forEach(cb => cb(event));
+    return Promise.resolve();
   }
 
   // Event Listeners

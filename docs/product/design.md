@@ -79,7 +79,7 @@
 | 子系统 | domain 模块 | repository trait | cache trait | service trait |
 |---|---|---|---|---|
 | Auth | `auth` | `UserRepo` | — | `UserService` |
-| Agent 配置 | `agent_config` | `AgentConfigRepo` | `AgentConfigCache` | `AgentConfigService` |
+| 大脑（策略配置） | `agent_config` | `AgentConfigRepo` | `AgentConfigCache` | `AgentConfigService` |
 | Agent（选手） | `agent` | `AgentRepo` | `AgentCache` | `AgentService` |
 | Agent 快照 | `agent_snapshot` | `AgentSnapshotRepo` | — | `AgentSnapshotService` |
 | 出生点预设 | `spawn_preset` | `SpawnPresetRepo` | — | `SpawnPresetService` |
@@ -149,8 +149,8 @@ ai_config                   BYO 模型配置
 
 ── Agent 资产三件套（重构）──
 spawn_presets               出生点预设
-agent_configs               「策略大脑」（原 agent_presets 演化）
-agents                      「选手」= 英雄 + 配置 + 出生点（替代 hero_presets）
+agent_configs               「大脑」（原 agent_presets 演化，曾称 Agent 配置）
+agents                      「选手」= 英雄 + 大脑（替代 hero_presets，本地/房间对局中可额外关联出生点）
 
 ── Agent 资产扩展 ──
 agent_snapshots             参赛快照（Rank 专用，§2.5）
@@ -223,9 +223,9 @@ CREATE TABLE spawn_presets (
 );
 ```
 
-#### 2.2.4 agent_configs（原 agent_presets 演化，「策略大脑」）
+#### 2.2.4 agent_configs（原 agent_presets 演化，「大脑」）
 
-> 语义：英雄无关的"策略大脑"——含 Agent 类型、Prompt、模型/权重等。可被多个 Agent 引用。
+> 语义：英雄无关的"策略大脑"（大脑配置）——含 Agent 类型、Prompt、模型/权重等。可被多个 Agent 引用。
 
 ```sql
 CREATE TABLE agent_configs (
@@ -255,7 +255,7 @@ CREATE TABLE agent_configs (
 
 #### 2.2.5 agents（替代 hero_presets，「选手」）
 
-> 语义：一个 Agent = 英雄 + Agent 配置（大脑）+ 出生点预设，是参赛/ELO/排行榜的主体。
+> 语义：一个 Agent = 英雄 + 大脑，是参赛/ELO/排行榜的主体。在本地/房间对局中，Agent 可以额外关联一个出生点预设。
 
 ```sql
 CREATE TABLE agents (
@@ -611,7 +611,7 @@ CREATE INDEX idx_subscriptions_user ON subscriptions(user_id, status);
 
 ### 3.3 Agent 资产子系统
 
-#### 3.3.1 Agent 配置（"策略大脑"）
+#### 3.3.1 大脑（"策略大脑"，原 Agent 配置）
 
 | 方法 | 路径 | 说明 |
 |---|---|---|
@@ -1002,7 +1002,7 @@ CREATE INDEX idx_subscriptions_user ON subscriptions(user_id, status);
 |---|---|---|---|---|
 | Auth | `auth` | `UserRepo` (`PgUserRepo`) | — | `UserService` (`UserServiceImpl`) |
 | 配置 | `config` | `ConfigRepo` (`PgConfigRepo`) | — | `ConfigService` (`ConfigServiceImpl`) |
-| Agent 配置 | `agent_config` | `AgentConfigRepo` (`PgAgentConfigRepo`) | `AgentConfigCache` (`MokaAgentConfigCache`/`Noop`) | `AgentConfigService` (`AgentConfigServiceImpl`) |
+| 大脑（大脑配置） | `agent_config` | `AgentConfigRepo` (`PgAgentConfigRepo`) | `AgentConfigCache` (`MokaAgentConfigCache`/`Noop`) | `AgentConfigService` (`AgentConfigServiceImpl`) |
 | Agent | `agent` | `AgentRepo` (`PgAgentRepo`) | `AgentCache` (`MokaAgentCache`/`Noop`) | `AgentService` (`AgentServiceImpl`) |
 | Agent 快照 | `agent_snapshot` | `AgentSnapshotRepo` (`PgAgentSnapshotRepo`) | — | `AgentSnapshotService` (`AgentSnapshotServiceImpl`) |
 | 出生点预设 | `spawn_preset` | `SpawnPresetRepo` (`PgSpawnPresetRepo`) | — | `SpawnPresetService` (`SpawnPresetServiceImpl`) |
@@ -1396,7 +1396,7 @@ impl WsEvent {
 
 ### 5.1 IBackendClient 扩展点
 
-`apps/desktop/src/services/backend.ts` 的 `IBackendClient` 接口需扩展。**新增方法分组**：
+`apps/client/src/services/backend.ts` 的 `IBackendClient` 接口需扩展。**新增方法分组**：
 
 ```ts
 // ── Auth（当前缺失，必须补）──
@@ -2167,7 +2167,7 @@ cargo test --all
 
 | PRODUCT.md 术语 | 数据库表 | API 资源 |
 |---|---|---|
-| Agent 配置（"策略大脑"） | `agent_configs` | `/api/agent-configs` |
+| 大脑（"策略大脑"） | `agent_configs` | `/api/agent-configs` |
 | Agent（"选手"） | `agents` | `/api/agents` |
 | 参赛快照 | `agent_snapshots` | `/api/agents/:id/snapshots` |
 | 出生点预设 | `spawn_presets` | `/api/spawn-presets` |

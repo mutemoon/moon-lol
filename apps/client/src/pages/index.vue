@@ -1,6 +1,6 @@
 <route lang="yaml">
 meta:
-  layout: desktop
+  layout: dashboard
 </route>
 
 <script setup lang="ts">
@@ -298,7 +298,7 @@ onMounted(() => {
 
     <!-- 合并控制底栏 -->
     <footer
-      class="border-border bg-card mt-3 flex shrink-0 flex-wrap items-center justify-between gap-3 rounded-lg border px-4 py-2.5 shadow-sm"
+      class="border-border bg-card mt-3 flex shrink-0 flex-wrap items-center justify-between gap-3 rounded-lg border px-4 py-2.5"
     >
       <!-- 左侧控制：对局模式 -->
       <div class="flex flex-wrap items-center gap-4">
@@ -309,14 +309,14 @@ onMounted(() => {
           <div class="bg-muted flex rounded-md p-0.5">
             <button
               class="rounded px-2.5 py-0.5 text-[11px] font-semibold transition-colors"
-              :class="mode === 'agent' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground'"
+              :class="mode === 'agent' ? 'bg-card text-foreground' : 'text-muted-foreground'"
               @click="mode = 'agent'"
             >
               {{ t("launcher.modeAgent") }}
             </button>
             <button
               class="rounded px-2.5 py-0.5 text-[11px] font-semibold transition-colors"
-              :class="mode === 'sandbox' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground'"
+              :class="mode === 'sandbox' ? 'bg-card text-foreground' : 'text-muted-foreground'"
               @click="mode = 'sandbox'"
             >
               {{ t("launcher.modeSandbox") }}

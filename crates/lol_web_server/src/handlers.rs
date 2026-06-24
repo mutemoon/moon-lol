@@ -6,11 +6,11 @@
 use std::sync::Arc;
 
 use axum::{
+    Json, Router,
     extract::{Path, Query, State},
-    http::{request::Parts, StatusCode},
+    http::{StatusCode, request::Parts},
     response::IntoResponse,
     routing::{delete, get, patch, post},
-    Json, Router,
 };
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -54,15 +54,13 @@ where
 
     async fn from_request_parts(parts: &mut Parts, _state: &S) -> Result<Self, Self::Rejection> {
         use axum::http::header::AUTHORIZATION;
-        use jsonwebtoken::{decode, DecodingKey, Validation};
+        use jsonwebtoken::{DecodingKey, Validation, decode};
 
         let auth_header = parts
             .headers
             .get(AUTHORIZATION)
             .and_then(|v| v.to_str().ok())
-            .ok_or_else(|| {
-                ApiResponse::<()>::from_error(ServiceError::Unauthorized)
-            })?;
+            .ok_or_else(|| ApiResponse::<()>::from_error(ServiceError::Unauthorized))?;
 
         let token = if let Some(stripped) = auth_header.strip_prefix("Bearer ") {
             stripped
@@ -129,10 +127,8 @@ impl<T: Serialize> ApiResponse<T> {
 impl<T: Serialize> IntoResponse for ApiResponse<T> {
     fn into_response(self) -> axum::response::Response {
         let status = match &self.error {
-            Some(e) => StatusCode::from_u16(
-                ServiceError::from_api_error(e).status_code(),
-            )
-            .unwrap_or(StatusCode::INTERNAL_SERVER_ERROR),
+            Some(e) => StatusCode::from_u16(ServiceError::from_api_error(e).status_code())
+                .unwrap_or(StatusCode::INTERNAL_SERVER_ERROR),
             None => StatusCode::OK,
         };
         (status, Json(self)).into_response()
@@ -147,8 +143,14 @@ impl ServiceError {
             "NOT_FOUND" => ServiceError::NotFound,
             "VALIDATION_FAILED" => ServiceError::Validation(e.message.clone()),
             "CONFLICT" => ServiceError::Conflict(e.message.clone()),
-            "AGENT_SLOT_LIMIT" => ServiceError::AgentSlotLimit { current: 0, limit: 0 },
-            "INSUFFICIENT_ESSENCE" => ServiceError::InsufficientEssence { required: 0, balance: 0 },
+            "AGENT_SLOT_LIMIT" => ServiceError::AgentSlotLimit {
+                current: 0,
+                limit: 0,
+            },
+            "INSUFFICIENT_ESSENCE" => ServiceError::InsufficientEssence {
+                required: 0,
+                balance: 0,
+            },
             "RATE_LIMITED" => ServiceError::RateLimited,
             _ => ServiceError::Internal(e.message.clone()),
         }
@@ -173,7 +175,9 @@ pub fn create_router(state: AppState) -> Router {
         )
         .route(
             "/api/spawn-presets/:id",
-            get(get_spawn_preset).put(update_spawn_preset).delete(delete_spawn_preset),
+            get(get_spawn_preset)
+                .put(update_spawn_preset)
+                .delete(delete_spawn_preset),
         )
         // Agent Configs
         .route(
@@ -182,7 +186,9 @@ pub fn create_router(state: AppState) -> Router {
         )
         .route(
             "/api/agent-configs/:id",
-            get(get_agent_config).put(update_agent_config).delete(delete_agent_config),
+            get(get_agent_config)
+                .put(update_agent_config)
+                .delete(delete_agent_config),
         )
         // Agents
         .route("/api/agents", get(list_agents).post(create_agent))
@@ -199,20 +205,30 @@ pub fn create_router(state: AppState) -> Router {
         .route("/api/scenarios", get(list_scenarios).post(create_scenario))
         .route(
             "/api/scenarios/:id",
-            get(get_scenario).put(update_scenario).delete(delete_scenario),
+            get(get_scenario)
+                .put(update_scenario)
+                .delete(delete_scenario),
         )
-        .route("/api/scenarios/:id/win-condition", get(get_win_condition).put(save_win_condition))
+        .route(
+            "/api/scenarios/:id/win-condition",
+            get(get_win_condition).put(save_win_condition),
+        )
         // Rooms
         .route("/api/rooms", get(list_my_rooms).post(create_room))
         .route("/api/rooms/lobby", get(list_lobby_rooms))
         .route("/api/rooms/join-by-code", post(join_room_by_code))
         .route(
             "/api/rooms/:id",
-            get(get_room).delete(dissolve_room).patch(update_room_constraints),
+            get(get_room)
+                .delete(dissolve_room)
+                .patch(update_room_constraints),
         )
         .route("/api/rooms/:id/join", post(join_room))
         .route("/api/rooms/:id/leave", post(leave_room))
-        .route("/api/rooms/:id/agents", get(list_room_slots).post(add_room_slot))
+        .route(
+            "/api/rooms/:id/agents",
+            get(list_room_slots).post(add_room_slot),
+        )
         .route("/api/rooms/:id/agents/:slot_id", delete(remove_room_slot))
         .route("/api/rooms/:id/start", post(start_room_match))
         // Matches
@@ -546,7 +562,11 @@ async fn update_agent_visibility(
     Path(id): Path<Uuid>,
     Json(req): Json<UpdateVisibilityRequest>,
 ) -> ApiResponse<()> {
-    match s.agent_service.update_visibility(auth.user_id, id, req.visibility).await {
+    match s
+        .agent_service
+        .update_visibility(auth.user_id, id, req.visibility)
+        .await
+    {
         Ok(_) => ApiResponse::ok(()),
         Err(e) => ApiResponse::from_error(e),
     }
@@ -599,7 +619,11 @@ async fn browse_community(
         .as_deref()
         .and_then(crate::domain::community::CommunitySort::from_str)
         .unwrap_or(crate::domain::community::CommunitySort::Recent);
-    match s.community_service.browse_public(sort, q.limit.unwrap_or(50)).await {
+    match s
+        .community_service
+        .browse_public(sort, q.limit.unwrap_or(50))
+        .await
+    {
         Ok(list) => ApiResponse::ok(list),
         Err(e) => ApiResponse::from_error(e),
     }
@@ -616,7 +640,11 @@ async fn fork_agent(
     Path(id): Path<Uuid>,
     Json(req): Json<ForkRequest>,
 ) -> ApiResponse<crate::domain::agent::Agent> {
-    match s.community_service.fork(auth.user_id, id, req.new_name).await {
+    match s
+        .community_service
+        .fork(auth.user_id, id, req.new_name)
+        .await
+    {
         Ok(a) => ApiResponse::ok(a),
         Err(e) => ApiResponse::from_error(e),
     }
@@ -696,7 +724,11 @@ async fn save_win_condition(
     Path(id): Path<Uuid>,
     Json(cond): Json<serde_json::Value>,
 ) -> ApiResponse<()> {
-    match s.scenario_service.save_win_condition(auth.user_id, id, cond).await {
+    match s
+        .scenario_service
+        .save_win_condition(auth.user_id, id, cond)
+        .await
+    {
         Ok(_) => ApiResponse::ok(()),
         Err(e) => ApiResponse::from_error(e),
     }
@@ -725,7 +757,11 @@ async fn create_room(
     State(s): State<AppState>,
     Json(req): Json<CreateRoomRequest>,
 ) -> ApiResponse<crate::domain::room::Room> {
-    match s.room_service.create(auth.user_id, req.name, req.constraints).await {
+    match s
+        .room_service
+        .create(auth.user_id, req.name, req.constraints)
+        .await
+    {
         Ok(r) => ApiResponse::ok(r),
         Err(e) => ApiResponse::from_error(e),
     }
@@ -785,7 +821,11 @@ async fn update_room_constraints(
     Path(id): Path<Uuid>,
     Json(constraints): Json<crate::domain::room::RoomConstraints>,
 ) -> ApiResponse<()> {
-    match s.room_service.update_constraints(auth.user_id, id, constraints).await {
+    match s
+        .room_service
+        .update_constraints(auth.user_id, id, constraints)
+        .await
+    {
         Ok(_) => ApiResponse::ok(()),
         Err(e) => ApiResponse::from_error(e),
     }
@@ -836,7 +876,11 @@ async fn add_room_slot(
     Path(id): Path<Uuid>,
     Json(req): Json<AddSlotRequest>,
 ) -> ApiResponse<crate::domain::room::RoomAgentSlot> {
-    match s.room_service.add_slot(auth.user_id, id, req.agent_id, req.team).await {
+    match s
+        .room_service
+        .add_slot(auth.user_id, id, req.agent_id, req.team)
+        .await
+    {
         Ok(slot) => ApiResponse::ok(slot),
         Err(e) => ApiResponse::from_error(e),
     }
@@ -936,7 +980,12 @@ async fn get_match_events(
 ) -> ApiResponse<Vec<crate::domain::match_::MatchEvent>> {
     match s
         .match_service
-        .get_events(auth.user_id, id, q.from_seq.unwrap_or(0), q.limit.unwrap_or(100))
+        .get_events(
+            auth.user_id,
+            id,
+            q.from_seq.unwrap_or(0),
+            q.limit.unwrap_or(100),
+        )
         .await
     {
         Ok(events) => ApiResponse::ok(events),
@@ -971,10 +1020,7 @@ async fn local_start(
     }
 }
 
-async fn local_stop(
-    auth: AuthUser,
-    State(s): State<AppState>,
-) -> ApiResponse<()> {
+async fn local_stop(auth: AuthUser, State(s): State<AppState>) -> ApiResponse<()> {
     // 简化：local_stop 需要 match_id，此处用 body 传递
     ApiResponse::ok(())
 }
@@ -1025,7 +1071,11 @@ async fn rank_leaderboard(
     Query(q): Query<LeaderboardQuery>,
 ) -> ApiResponse<Vec<crate::repository::rank_repo::EloRating>> {
     let mode = q.mode.as_deref().unwrap_or("top_solo");
-    match s.rank_service.leaderboard(mode, q.limit.unwrap_or(50)).await {
+    match s
+        .rank_service
+        .leaderboard(mode, q.limit.unwrap_or(50))
+        .await
+    {
         Ok(list) => ApiResponse::ok(list),
         Err(e) => ApiResponse::from_error(e),
     }
@@ -1043,10 +1093,7 @@ async fn current_season(
 
 // ════════════ Essence ════════════
 
-async fn essence_balance(
-    auth: AuthUser,
-    State(s): State<AppState>,
-) -> ApiResponse<i64> {
+async fn essence_balance(auth: AuthUser, State(s): State<AppState>) -> ApiResponse<i64> {
     match s.essence_service.get_balance(auth.user_id).await {
         Ok(b) => ApiResponse::ok(b),
         Err(e) => ApiResponse::from_error(e),
@@ -1060,10 +1107,7 @@ pub struct CheckInDto {
     pub balance: i64,
 }
 
-async fn essence_check_in(
-    auth: AuthUser,
-    State(s): State<AppState>,
-) -> ApiResponse<CheckInDto> {
+async fn essence_check_in(auth: AuthUser, State(s): State<AppState>) -> ApiResponse<CheckInDto> {
     let date = chrono::Utc::now().format("%Y-%m-%d").to_string();
     match s.essence_service.check_in(auth.user_id, &date).await {
         Ok(r) => ApiResponse::ok(CheckInDto {
@@ -1118,7 +1162,11 @@ async fn subscribe(
     State(s): State<AppState>,
     Json(req): Json<SubscribeRequest>,
 ) -> ApiResponse<crate::repository::essence_repo::Subscription> {
-    match s.subscription_service.subscribe(auth.user_id, &req.plan_id).await {
+    match s
+        .subscription_service
+        .subscribe(auth.user_id, &req.plan_id)
+        .await
+    {
         Ok(sub) => ApiResponse::ok(sub),
         Err(e) => ApiResponse::from_error(e),
     }
@@ -1130,10 +1178,7 @@ async fn list_plans(_auth: AuthUser) -> ApiResponse<Vec<crate::domain::essence::
 
 // ════════════ Admin ════════════
 
-async fn admin_metrics(
-    _auth: AuthUser,
-    State(s): State<AppState>,
-) -> ApiResponse<AdminMetrics> {
+async fn admin_metrics(_auth: AuthUser, State(s): State<AppState>) -> ApiResponse<AdminMetrics> {
     match s.admin_service.metrics().await {
         Ok(m) => ApiResponse::ok(m),
         Err(e) => ApiResponse::from_error(e),

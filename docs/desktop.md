@@ -3,7 +3,7 @@
 ## 架构
 
 ```
-apps/desktop (Tauri 2 + Vue 3)        crates/lol_core/src/debug/
+apps/client (运行时检测为桌面模式)     crates/lol_core/src/debug/
 ┌────────────────────────────┐        ┌──────────────────────┐
 │  Launcher → Debug Panel    │  WS    │  PluginDebugPanel     │
 │         ↓ invoke           │ ←───→  │  tokio WS server      │
@@ -25,7 +25,7 @@ apps/desktop (Tauri 2 + Vue 3)        crates/lol_core/src/debug/
 ## 文件结构
 
 ```
-apps/desktop/
+apps/client/
 ├── src/
 │   ├── App.vue                     # Launcher + Debug Panel 切换
 │   ├── main.ts                     # 入口
@@ -101,13 +101,13 @@ crates/lol_core/src/debug/
 
 ```bash
 # 终端 1：Tauri dev（自动 cargo run 启动 Bevy）
-cd apps/desktop && pnpm tauri dev
+cd apps/client && pnpm tauri dev
 ```
 
 ### 打包
 
 ```bash
-cd apps/desktop && pnpm tauri build
+cd apps/client && pnpm tauri build
 # beforeBuildCommand = pnpm build ; cargo build --release --example lol --no-default-features
 ```
 
@@ -152,6 +152,6 @@ start_game(config)
 
 `handlers.rs` 定义 `ChampionSwitchQueue(pub Vec<String>)` 资源。handler 写入，`lol_champions/src/lib.rs` 的 `process_champion_switch_queue` 系统读取并 spawn 对应英雄（Riven / Fiora）。
 
-## apps/web（Web 端）
+## apps/client 中的 Web 模式
 
-不变。保持现有 wasm 模式 + AI Battle Panel。
+当检测不到 Tauri 环境时，`apps/client` 自动降级为 Web 模式（直接在浏览器中打开），不进行本地 Bevy 子进程的 spawn 管理，而是通过 HTTP/WebSocket 连接远程服务器（`lol_web_server`）进行房间、Rank 对局和云端观战管理。

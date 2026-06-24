@@ -1,6 +1,6 @@
 <route lang="yaml">
 meta:
-  layout: desktop
+  layout: dashboard
 </route>
 
 <script setup lang="ts">
