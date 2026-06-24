@@ -118,13 +118,15 @@ const viewTitles = computed<Record<View, string>>(() => ({
   logsArchive: "日志归档",
 }));
 
-backendClient.onAgentFinished((data) => {
-  statsResult.value = {
-    minionKills: data.minion_kills,
-    gold: data.gold,
-  };
-  showStatsModal.value = true;
-});
+if (isTauri) {
+  backendClient.onAgentFinished((data) => {
+    statsResult.value = {
+      minionKills: data.minion_kills,
+      gold: data.gold,
+    };
+    showStatsModal.value = true;
+  });
+}
 
 function minimize() {
   win.minimize();

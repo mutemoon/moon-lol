@@ -185,12 +185,19 @@ onMounted(async () => {
           <Label>参赛快照</Label>
           <Select v-model="selectedSnapshot" :disabled="snapshots.length === 0">
             <SelectTrigger>
-              <SelectValue :placeholder="snapshots.length ? '选择快照' : '先去 Agent 页发布'" />
+              <SelectValue :placeholder="snapshots.length ? '选择快照' : '尚未发布快照'" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem v-for="s in snapshots" :key="s.id" :value="s.id">v{{ s.version }} · {{ ago(s.created_at) }} 前</SelectItem>
             </SelectContent>
           </Select>
+          <button
+            v-if="selectedAgent && snapshots.length === 0"
+            class="text-muted-foreground hover:text-foreground text-xs underline-offset-2 hover:underline"
+            @click="router.push('/heroes')"
+          >
+            去「我的选手」发布首个快照 →
+          </button>
         </div>
       </div>
 

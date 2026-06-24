@@ -558,6 +558,39 @@ async fn run_bash_tool(cmd: String) -> Result<String, error::AppError> {
     Ok(output)
 }
 
+#[tauri::command]
+fn get_local_cache(
+    app: tauri::AppHandle,
+    key: String,
+) -> Result<Option<serde_json::Value>, error::AppError> {
+    let dir = get_config_dir(&app)?.join("cache");
+    let path = dir.join(format!("{}.json", key));
+    if !path.exists() {
+        return Ok(None);
+    }
+    let content = fs::read_to_string(&path)?;
+    let value: serde_json::Value = serde_json::from_str(&content)
+        .map_err(|e| error::AppError::Generic(format!("缓存解析失败: {e}")))?;
+    Ok(Some(value))
+}
+
+#[tauri::command]
+fn set_local_cache(
+    app: tauri::AppHandle,
+    key: String,
+    data: serde_json::Value,
+) -> Result<(), error::AppError> {
+    let dir = get_config_dir(&app)?.join("cache");
+    if !dir.exists() {
+        fs::create_dir_all(&dir)?;
+    }
+    let path = dir.join(format!("{}.json", key));
+    let json = serde_json::to_string_pretty(&data)
+        .map_err(|e| error::AppError::Generic(format!("JSON 序列化失败: {e}")))?;
+    fs::write(&path, json)?;
+    Ok(())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -589,9 +622,7 @@ pub fn run() {
             list_spawn_presets,
             save_spawn_preset,
             delete_spawn_preset,
-            list_agent_presets,
-            save_agent_preset,
-            delete_agent_preset,
+
             list_hero_presets,
             save_hero_preset,
             delete_hero_preset,
@@ -607,7 +638,9 @@ pub fn run() {
             agent::list_game_histories,
             agent::get_game_history_detail,
             agent::delete_game_history,
-            run_bash_tool
+            run_bash_tool,
+            get_local_cache,
+            set_local_cache
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

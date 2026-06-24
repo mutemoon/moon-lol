@@ -25,9 +25,9 @@ async fn main() {
     let jwt_secret = std::env::var("JWT_SECRET")
         .unwrap_or_else(|_| "moon-lol-secret-key-12345".to_string());
     let port = std::env::var("PORT")
-        .unwrap_or_else(|_| "3000".to_string())
+        .unwrap_or_else(|_| "8000".to_string())
         .parse::<u16>()
-        .unwrap_or(3000);
+        .unwrap_or(8000);
 
     info!("连接 Postgres 数据库: {}", db_url);
     let pool = sqlx::postgres::PgPoolOptions::new()
