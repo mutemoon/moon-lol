@@ -351,6 +351,11 @@ const en = {
     },
   },
 
+  champions: {
+    Riven: "Riven",
+    Fiora: "Fiora",
+  },
+
   common: {
     slotCard: {
       slotLabel: "Slot",

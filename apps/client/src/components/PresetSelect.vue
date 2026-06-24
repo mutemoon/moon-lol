@@ -50,7 +50,7 @@ const emit = defineEmits<{
   new: [];
 }>();
 
-const { t } = useLocale();
+const { t, te } = useLocale();
 
 const open = ref(false);
 const searchQuery = ref("");
@@ -65,8 +65,12 @@ const filteredPresets = computed(() => {
     const nameMatch = p.name.toLowerCase().includes(query);
     if (props.subtitleKey) {
       const sub = p[props.subtitleKey];
-      if (sub && String(sub).toLowerCase().includes(query)) {
-        return true;
+      if (sub) {
+        const subStr = String(sub).toLowerCase();
+        const translatedSub = subtitle(p).toLowerCase();
+        if (subStr.includes(query) || translatedSub.includes(query)) {
+          return true;
+        }
       }
     }
     return nameMatch;
@@ -82,7 +86,17 @@ watch(open, (val) => {
 function subtitle(p: Preset): string {
   if (!props.subtitleKey) return "";
   const v = p[props.subtitleKey];
-  return v == null || v === "" ? "" : String(v);
+  if (v == null || v === "") return "";
+  const str = String(v);
+  if (props.subtitleKey === "champion") {
+    const key = `champions.${str}`;
+    return te(key) ? t(key) : str;
+  }
+  if (props.subtitleKey === "agent_type") {
+    const key = `agents.types.${str.toLowerCase()}`;
+    return te(key) ? t(key) : str;
+  }
+  return str;
 }
 
 function pick(name: string) {

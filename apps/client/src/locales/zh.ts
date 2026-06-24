@@ -351,6 +351,11 @@ const zh = {
     },
   },
 
+  champions: {
+    Riven: "锐雯",
+    Fiora: "菲奥娜",
+  },
+
   common: {
     slotCard: {
       slotLabel: "槽位",

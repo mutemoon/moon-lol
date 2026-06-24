@@ -23,6 +23,7 @@ const global = i18n.global as unknown as Composer;
 
 export function useLocale() {
   const t = global.t;
+  const te = global.te.bind(global);
 
   const locale = computed<AppLocale>({
     get: () => global.locale.value as AppLocale,
@@ -35,5 +36,5 @@ export function useLocale() {
     document.documentElement.setAttribute("lang", val);
   }
 
-  return { t, locale, setLocale, availableLocales };
+  return { t, te, locale, setLocale, availableLocales };
 }

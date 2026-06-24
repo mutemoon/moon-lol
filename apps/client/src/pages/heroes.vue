@@ -157,7 +157,7 @@ onMounted(async () => {
             >
               <span class="flex min-w-0 flex-col">
                 <span class="text-foreground truncate text-xs font-medium">{{ p.name }}</span>
-                <span class="text-muted-foreground truncate text-[10px]">{{ p.champion }} · {{ p.agent_type.toUpperCase() }}</span>
+                <span class="text-muted-foreground truncate text-[10px]">{{ t('champions.' + p.champion) }} · {{ p.agent_type.toUpperCase() }}</span>
               </span>
             </button>
           </div>
@@ -201,7 +201,7 @@ onMounted(async () => {
                 </SelectTrigger>
                 <SelectContent class="border-border bg-popover text-foreground">
                   <SelectItem v-for="c in champions" :key="c" :value="c" class="text-sm">
-                    {{ c }}
+                    {{ t('champions.' + c) }}
                   </SelectItem>
                 </SelectContent>
               </Select>
