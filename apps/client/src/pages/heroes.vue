@@ -179,33 +179,33 @@ onMounted(async () => {
         </div>
 
         <div class="mx-auto flex max-w-xl flex-col gap-4">
-          <!-- 名称 + 英雄 -->
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label class="text-muted-foreground mb-1 block text-[10px] font-semibold tracking-wider uppercase">
-                {{ t("heroes.presetName") }}
-              </label>
-              <Input
-                v-model="draft.name"
-                :placeholder="t('heroes.presetNamePlaceholder')"
-                class="border-border bg-muted/40 h-9 text-sm"
-              />
-            </div>
-            <div>
-              <label class="text-muted-foreground mb-1 block text-[10px] font-semibold tracking-wider uppercase">
-                {{ t("heroes.heroLabel") }}
-              </label>
-              <Select v-model="draft.champion">
-                <SelectTrigger class="bg-muted/40 border-border h-9 text-sm">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent class="border-border bg-popover text-foreground">
-                  <SelectItem v-for="c in champions" :key="c" :value="c" class="text-sm">
-                    {{ t('champions.' + c) }}
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+          <!-- 预设名称 -->
+          <div>
+            <label class="text-muted-foreground mb-1 block text-[10px] font-semibold tracking-wider uppercase">
+              {{ t("heroes.presetName") }}
+            </label>
+            <Input
+              v-model="draft.name"
+              :placeholder="t('heroes.presetNamePlaceholder')"
+              class="border-border bg-muted/40 h-9 text-sm"
+            />
+          </div>
+
+          <!-- 英雄 -->
+          <div>
+            <label class="text-muted-foreground mb-1 block text-[10px] font-semibold tracking-wider uppercase">
+              {{ t("heroes.heroLabel") }}
+            </label>
+            <Select v-model="draft.champion">
+              <SelectTrigger class="bg-muted/40 border-border h-9 text-sm">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent class="border-border bg-popover text-foreground">
+                <SelectItem v-for="c in champions" :key="c" :value="c" class="text-sm">
+                  {{ t('champions.' + c) }}
+                </SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           <!-- 决策类型 -->
