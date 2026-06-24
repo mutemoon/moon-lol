@@ -53,7 +53,7 @@ export const useGameStore = defineStore("game", () => {
   const ws = useWsClient();
   const log = createLogContext();
 
-  const champions = ["Riven", "Fiora"];
+  const champions = ref(["Riven", "Fiora"]);
 
   const scenariosList = ref<string[]>([]);
   const histories = ref<any[]>([]);
