@@ -11,6 +11,7 @@
     "start": "cargo run",
     "start:all": "docker compose up -d && until docker exec moon-lol-postgres pg_isready -U postgres -d moon_lol 2>/dev/null; do sleep 1; done && pnpm start:server",
     "start:server": "cargo run -p lol_web_server",
+    "db:reset": "node scripts/reset-db.js",
     "test": "cargo run --example test",
     "wasm": "cargo build --release --target wasm32-unknown-unknown",
     "wasm:bindgen": "wasm-bindgen --out-name lol --out-dir packages/lol --target web target/wasm32-unknown-unknown/release/examples/lol.wasm",

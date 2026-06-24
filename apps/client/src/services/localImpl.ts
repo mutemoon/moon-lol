@@ -47,7 +47,7 @@ export class TauriLocalServiceImpl implements ILocalService {
   }
 
   async queryLogs(params: LogQueryParams): Promise<QueryLogsResult> {
-    return invoke<QueryLogsResult>('query_logs', params)
+    return invoke<QueryLogsResult>('query_logs', params as any)
   }
 
   async clearLogs(): Promise<void> {

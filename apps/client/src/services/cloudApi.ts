@@ -42,7 +42,7 @@ export const roomsApi = {
   listLobby: () => services.cloud.listLobbyRooms(),
   create: (name: string, constraints: any) => services.cloud.createRoom(name, constraints),
   joinByCode: (code: string) => services.cloud.joinRoomByCode(code),
-  get: (id: string) => services.cloud.listMyRooms().then(rs => rs.find(r => r.id === id)!),
+  get: (id: string) => services.cloud.getRoom(id),
   dissolve: (id: string) => services.cloud.dissolveRoom(id),
   updateConstraints: (id: string, c: any) => services.cloud.updateRoomConstraints(id, c),
   join: (id: string) => services.cloud.joinRoom(id),

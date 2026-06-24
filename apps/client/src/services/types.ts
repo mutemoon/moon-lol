@@ -220,20 +220,20 @@ export interface SavedAgentHistory {
 export interface RoomConstraints {
   max_members: number
   max_agents_per_member: number
-  team_strategy: 'single' | 'free'
+  team_policy: 'single_team' | 'free'
   lobby_visible: boolean
-  reveal_prompts: boolean
+  prompt_visible: boolean
 }
 
 export interface Room {
   id: string
   name: string
-  owner_user_id: number
+  owner_id: number
   constraints: RoomConstraints
   invite_code: string
-  member_count: number
-  status: 'pending' | 'running' | 'finished'
-  created_at: string
+  member_count?: number
+  status: 'lobby' | 'running' | 'closed'
+  created_at?: string
 }
 
 export interface RoomAgentSlot {

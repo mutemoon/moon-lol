@@ -5,6 +5,16 @@ import { useRoute, useRouter } from "vue-router";
 import { backendClient } from "../services/backend";
 import { storeToRefs } from "pinia";
 import { useGameStore } from "../stores/gameStore";
+import { useAuthStore } from "../stores/authStore";
+import AuthDialog from "../components/auth/AuthDialog.vue";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+} from "../components/ui/dropdown-menu";
 import { LOG_CONTEXT_KEY } from "../composables/useLogPoller";
 import { useSettingsTab } from "../composables/useSettingsTab";
 import { Button } from "../components/ui/button";
@@ -59,6 +69,7 @@ const route = useRoute();
 const router = useRouter();
 
 const store = useGameStore();
+const authStore = useAuthStore();
 const { statsResult, showStatsModal, scenariosList, histories, selectedScenario } = storeToRefs(store);
 const { ws } = store;
 
@@ -153,11 +164,6 @@ function handleNewMatch() {
 function handleSelectScenario(s: string) {
   selectedScenario.value = s;
   router.push("/");
-}
-
-// Stub for account settings/profile navigation or details modal
-function handleAccountClick() {
-  console.log("Account profile clicked");
 }
 
 function handleSelectHistory(datetime: string) {
@@ -511,18 +517,58 @@ onMounted(() => {
         </div>
 
         <!-- Account Info -->
+        <DropdownMenu v-if="authStore.isAuthenticated">
+          <DropdownMenuTrigger as-child>
+            <div
+              role="button"
+              class="group hover:bg-surface-hover hover:text-foreground text-foreground inline-flex h-9 w-full shrink-0 cursor-pointer items-center justify-stretch gap-2 overflow-hidden rounded-lg pr-2.5 pl-2.5 active:translate-y-0"
+            >
+              <div class="flex min-w-0 flex-1 items-center gap-2">
+                <div class="bg-primary/10 flex size-6 shrink-0 items-center justify-center rounded-full">
+                  <UserIcon class="text-primary size-3.5" />
+                </div>
+                <div class="flex min-w-0 flex-col text-left">
+                  <span class="text-foreground truncate text-[12px] font-semibold">
+                    {{ authStore.user?.phone }}
+                  </span>
+                  <span class="text-foreground-subtle truncate text-[10px]">
+                    {{ t("auth.roleEsportsManager") }} (已登录)
+                  </span>
+                </div>
+              </div>
+            </div>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" class="bg-background border-border w-56 rounded-lg p-1 text-xs shadow-2xl">
+            <DropdownMenuLabel
+              class="text-muted-foreground px-2 py-1.5 text-[10px] font-semibold tracking-wider uppercase"
+            >
+              {{ t("auth.title") }}
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator class="bg-border" />
+            <DropdownMenuItem
+              class="hover:bg-muted text-destructive hover:text-destructive focus:bg-muted/80 flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5"
+              @click="authStore.logout"
+            >
+              <span>{{ t("auth.logout") }}</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
         <div
+          v-else
           role="button"
           class="group hover:bg-surface-hover hover:text-foreground text-foreground inline-flex h-9 w-full shrink-0 cursor-pointer items-center justify-stretch gap-2 overflow-hidden rounded-lg pr-2.5 pl-2.5 active:translate-y-0"
-          @click="handleAccountClick"
+          @click="authStore.showAuthDialog = true"
         >
           <div class="flex min-w-0 flex-1 items-center gap-2">
-            <div class="bg-primary/10 flex size-6 shrink-0 items-center justify-center rounded-full">
-              <UserIcon class="text-primary size-3.5" />
+            <div class="bg-muted flex size-6 shrink-0 items-center justify-center rounded-full">
+              <UserIcon class="text-muted-foreground size-3.5" />
             </div>
             <div class="flex min-w-0 flex-col text-left">
-              <span class="text-foreground truncate text-[12px] font-semibold">电竞经理</span>
-              <span class="text-foreground-subtle truncate text-[10px]">已登录</span>
+              <span class="text-foreground truncate text-[12px] font-semibold">
+                {{ t("auth.unauthenticated") }}
+              </span>
+              <span class="text-foreground-subtle truncate text-[10px]">点击登录账号</span>
             </div>
           </div>
         </div>
@@ -632,6 +678,8 @@ onMounted(() => {
         </div>
       </div>
     </Transition>
+
+    <AuthDialog />
   </div>
 </template>
 

@@ -37,10 +37,13 @@ import type {
 export interface ICloudService {
   // ── Auth ──
   login(phone: string, password: string): Promise<AuthToken>
+  codeLogin(phone: string, code: string): Promise<AuthToken>
   register(phone: string, password: string, code: string): Promise<AuthToken>
   resetPassword(phone: string, code: string, newPassword: string): Promise<void>
   isAuthenticated(): boolean
   getToken(): string | null
+  logout(): void
+  getCurrentUser(): Promise<{ id: number; phone: string }>
 
   // ── AI Config (云端同步) ──
   getAiConfig(): Promise<AiConfig>
@@ -86,6 +89,7 @@ export interface ICloudService {
   // ── Rooms ──
   listMyRooms(): Promise<Room[]>
   listLobbyRooms(): Promise<Room[]>
+  getRoom(id: string): Promise<Room>
   createRoom(name: string, constraints: RoomConstraints): Promise<Room>
   joinRoom(id: string): Promise<void>
   joinRoomByCode(code: string): Promise<Room>

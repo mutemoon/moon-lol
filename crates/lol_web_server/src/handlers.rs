@@ -164,6 +164,7 @@ pub fn create_router(state: AppState) -> Router {
         // Auth
         .route("/api/auth/register", post(auth_register))
         .route("/api/auth/login", post(auth_login))
+        .route("/api/auth/code-login", post(auth_code_login))
         .route("/api/auth/reset-password", post(auth_reset_password))
         .route("/api/auth/me", get(auth_me))
         // AI Config
@@ -311,6 +312,28 @@ async fn auth_login(
 }
 
 #[derive(Deserialize)]
+pub struct CodeLoginRequest {
+    pub phone: String,
+    pub code: String,
+}
+
+async fn auth_code_login(
+    State(s): State<AppState>,
+    Json(req): Json<CodeLoginRequest>,
+) -> ApiResponse<AuthResponse> {
+    match s.user_service.login_with_code(&req.phone, &req.code).await {
+        Ok(result) => ApiResponse::ok(AuthResponse {
+            token: result.token,
+            user: AuthUserDto {
+                id: result.user.id,
+                phone: result.user.phone,
+            },
+        }),
+        Err(e) => ApiResponse::from_error(e),
+    }
+}
+
+#[derive(Deserialize)]
 pub struct ResetPasswordRequest {
     pub phone: String,
     pub new_password: String,
@@ -331,20 +354,30 @@ async fn auth_reset_password(
     }
 }
 
-async fn auth_me(auth: AuthUser, State(s): State<AppState>) -> ApiResponse<AuthUserDto> {
-    // JWT 已验证身份，直接用 user_id 构造响应。
-    // 如需完整 user 信息，可通过 verify_token 反查，但 auth_me 场景只需 id。
-    match s.user_service.verify_token(&format!("placeholder")).await {
-        Ok(_) => ApiResponse::ok(AuthUserDto {
-            id: auth.user_id,
-            phone: String::new(),
-        }),
-        Err(_) => ApiResponse::ok(AuthUserDto {
-            id: auth.user_id,
-            phone: String::new(),
-        }),
+async fn auth_me(
+    auth: AuthUser,
+    headers: axum::http::HeaderMap,
+    State(s): State<AppState>,
+) -> ApiResponse<AuthUserDto> {
+    use axum::http::header::AUTHORIZATION;
+    if let Some(token) = headers
+        .get(AUTHORIZATION)
+        .and_then(|v| v.to_str().ok())
+        .and_then(|v| v.strip_prefix("Bearer ").or(Some(v)))
+    {
+        if let Ok(user) = s.user_service.verify_token(token).await {
+            return ApiResponse::ok(AuthUserDto {
+                id: user.id,
+                phone: user.phone,
+            });
+        }
     }
+    ApiResponse::ok(AuthUserDto {
+        id: auth.user_id,
+        phone: String::new(),
+    })
 }
+
 
 // ════════════ Config ════════════
 

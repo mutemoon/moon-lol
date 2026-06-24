@@ -207,7 +207,7 @@ onUnmounted(() => {
           </Button>
           <h1 class="text-2xl font-semibold tracking-tight">{{ room.name }}</h1>
           <Badge variant="outline">
-            {{ room.status === "pending" ? "待开始" : room.status === "running" ? "对局中" : "已结束" }}
+            {{ room.status === "lobby" ? "待开始" : room.status === "running" ? "对局中" : "已结束" }}
           </Badge>
         </div>
 
@@ -218,9 +218,9 @@ onUnmounted(() => {
             {{ room.member_count }} / {{ room.constraints.max_members }} 成员
           </span>
           <span>每人最多 {{ room.constraints.max_agents_per_member }} 个 Agent</span>
-          <span>{{ room.constraints.team_strategy === "single" ? "单阵营策略" : "自由阵营" }}</span>
+          <span>{{ room.constraints.team_policy === "single_team" ? "单阵营策略" : "自由阵营" }}</span>
           <span>{{ room.constraints.lobby_visible ? "大厅公开" : "邀请码加入" }}</span>
-          <span>{{ room.constraints.reveal_prompts ? "Prompt 公开" : "Prompt 隐藏" }}</span>
+          <span>{{ room.constraints.prompt_visible ? "Prompt 公开" : "Prompt 隐藏" }}</span>
           <span class="flex items-center gap-1.5">
             <span class="font-mono uppercase">{{ room.invite_code }}</span>
             <button

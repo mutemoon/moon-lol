@@ -6,7 +6,9 @@
 use std::net::SocketAddr;
 use std::path::PathBuf;
 use std::sync::Arc;
+use axum::http::HeaderValue;
 use tokio::net::TcpListener;
+use tower_http::cors::{Any, CorsLayer};
 use tracing::info;
 
 use lol_web_server::cache::MokaConfigCache;
@@ -134,7 +136,12 @@ async fn main() {
     };
 
     // 7. 构建 Router 并启动服务器
-    let router = create_router(state);
+    let cors = CorsLayer::new()
+        .allow_origin(HeaderValue::from_static("http://localhost:1420"))
+        .allow_methods(Any)
+        .allow_headers(Any);
+
+    let router = create_router(state).layer(cors);
     
     let addr = SocketAddr::from(([0, 0, 0, 0], port));
     info!("MoonLOL Web Server 正在启动，监听地址: {}", addr);

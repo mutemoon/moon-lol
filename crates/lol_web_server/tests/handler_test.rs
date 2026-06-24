@@ -31,6 +31,7 @@ mockall::mock! {
     impl UserService for UserService {
         async fn register(&self, phone: &str, password: &str, code: &str) -> ServiceResult<AuthResult>;
         async fn login(&self, phone: &str, password: &str) -> ServiceResult<AuthResult>;
+        async fn login_with_code(&self, phone: &str, code: &str) -> ServiceResult<AuthResult>;
         async fn reset_password(&self, phone: &str, new_password: &str, code: &str) -> ServiceResult<()>;
         async fn verify_token(&self, token: &str) -> ServiceResult<User>;
         fn jwt_secret(&self) -> &str;

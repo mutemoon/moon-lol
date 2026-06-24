@@ -96,6 +96,16 @@ export class CloudServiceImpl implements ICloudService {
     return res
   }
 
+  async codeLogin(phone: string, code: string): Promise<AuthToken> {
+    const res = await this.request<AuthToken>('/api/auth/code-login', {
+      method: 'POST',
+      body: JSON.stringify({ phone, code }),
+    })
+    this.token = res.token
+    localStorage.setItem(TOKEN_KEY, res.token)
+    return res
+  }
+
   async register(phone: string, password: string, code: string): Promise<AuthToken> {
     const res = await this.request<AuthToken>('/api/auth/register', {
       method: 'POST',
@@ -119,6 +129,15 @@ export class CloudServiceImpl implements ICloudService {
 
   getToken(): string | null {
     return this.token
+  }
+
+  logout(): void {
+    this.token = null
+    localStorage.removeItem(TOKEN_KEY)
+  }
+
+  async getCurrentUser(): Promise<{ id: number; phone: string }> {
+    return this.request<{ id: number; phone: string }>('/api/auth/me')
   }
 
   // ── AI Config ──
@@ -284,6 +303,10 @@ export class CloudServiceImpl implements ICloudService {
 
   async listLobbyRooms(): Promise<Room[]> {
     return this.request<Room[]>('/api/rooms/lobby')
+  }
+
+  async getRoom(id: string): Promise<Room> {
+    return this.request<Room>(`/api/rooms/${id}`)
   }
 
   async createRoom(name: string, constraints: RoomConstraints): Promise<Room> {

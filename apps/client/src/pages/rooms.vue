@@ -50,9 +50,9 @@ const draft = ref<{ name: string; constraints: RoomConstraints }>({
   constraints: {
     max_members: 10,
     max_agents_per_member: 3,
-    team_strategy: "free",
+    team_policy: "free",
     lobby_visible: true,
-    reveal_prompts: false,
+    prompt_visible: false,
   },
 });
 
@@ -116,7 +116,7 @@ async function handleJoin(room: Room) {
 }
 
 const statusLabel = (s: Room["status"]) =>
-  ({ pending: "待开始", running: "对局中", finished: "已结束" }[s] || s);
+  ({ lobby: "待开始", running: "对局中", closed: "已结束" }[s] || s);
 
 const visibleLobby = computed(() => lobbyRooms.value);
 
@@ -198,7 +198,7 @@ onMounted(refresh);
                 <Users2Icon class="size-3.5" />
                 {{ r.member_count }} / {{ r.constraints.max_members }}
               </span>
-              <span>{{ r.constraints.team_strategy === "single" ? "单阵营" : "自由阵营" }}</span>
+              <span>{{ r.constraints.team_policy === "single_team" ? "单阵营" : "自由阵营" }}</span>
             </div>
           </button>
         </div>
@@ -262,13 +262,13 @@ onMounted(refresh);
 
           <div class="space-y-1.5">
             <Label>阵营策略</Label>
-            <Select v-model="draft.constraints.team_strategy">
+            <Select v-model="draft.constraints.team_policy">
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="free">自由（红蓝皆可）</SelectItem>
-                <SelectItem value="single">单阵营（每人只能在一方）</SelectItem>
+                <SelectItem value="single_team">单阵营（每人只能在一方）</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -279,7 +279,7 @@ onMounted(refresh);
               <span>公开到大厅</span>
             </label>
             <label class="flex items-center gap-2 text-sm">
-              <Checkbox v-model="draft.constraints.reveal_prompts" />
+              <Checkbox v-model="draft.constraints.prompt_visible" />
               <span class="space-y-0.5">
                 <span class="block">公开 Prompt 与模型配置</span>
                 <span class="text-muted-foreground block text-xs">关闭则成员只能看到 Agent 名称</span>

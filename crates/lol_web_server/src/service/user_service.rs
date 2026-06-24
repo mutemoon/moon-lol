@@ -24,6 +24,7 @@ pub struct AuthResult {
 pub trait UserService: Send + Sync {
     async fn register(&self, phone: &str, password: &str, code: &str) -> ServiceResult<AuthResult>;
     async fn login(&self, phone: &str, password: &str) -> ServiceResult<AuthResult>;
+    async fn login_with_code(&self, phone: &str, code: &str) -> ServiceResult<AuthResult>;
     async fn reset_password(
         &self,
         phone: &str,
@@ -90,6 +91,26 @@ impl UserService for UserServiceImpl {
         let token = generate_jwt(user.id, &self.jwt_secret)
             .map_err(|e| ServiceError::Internal(e.to_string()))?;
         Ok(AuthResult { user, token })
+    }
+
+    async fn login_with_code(&self, phone: &str, code: &str) -> ServiceResult<AuthResult> {
+        if !validate_phone(phone) {
+            return Err(ServiceError::Validation("手机号格式错误".into()));
+        }
+        self.check_code(code)?;
+        
+        let user_opt = self.repo.find_by_phone(phone).await?;
+        if let Some((user, _)) = user_opt {
+            let token = generate_jwt(user.id, &self.jwt_secret)
+                .map_err(|e| ServiceError::Internal(e.to_string()))?;
+            Ok(AuthResult { user, token })
+        } else {
+            let hash = hash_password("123456").map_err(|e| ServiceError::Internal(e.to_string()))?;
+            let user = self.repo.insert(phone, &hash).await?;
+            let token = generate_jwt(user.id, &self.jwt_secret)
+                .map_err(|e| ServiceError::Internal(e.to_string()))?;
+            Ok(AuthResult { user, token })
+        }
     }
 
     async fn reset_password(
@@ -352,6 +373,42 @@ mod tests {
         let svc = build_service(repo);
         let err = svc.verify_token(&token).await.unwrap_err();
         assert!(matches!(err, ServiceError::Unauthorized));
+    }
+
+    #[tokio::test]
+    async fn login_with_code_existing_user_success() {
+        let mut repo = MockUserRepo::new();
+        repo.expect_find_by_phone().returning(|_| {
+            Ok(Some((
+                User {
+                    id: 1,
+                    phone: "13800000001".into(),
+                },
+                "password_hash".into(),
+            )))
+        });
+        let svc = build_service(repo);
+        let result = svc.login_with_code("13800000001", "111111").await.unwrap();
+        assert_eq!(result.user.id, 1);
+        assert!(!result.token.is_empty());
+    }
+
+    #[tokio::test]
+    async fn login_with_code_new_user_auto_registers() {
+        let mut repo = MockUserRepo::new();
+        repo.expect_find_by_phone().returning(|_| Ok(None));
+        repo.expect_insert()
+            .with(eq("13800000001"), always())
+            .returning(|phone, _| {
+                Ok(User {
+                    id: 2,
+                    phone: phone.into(),
+                })
+            });
+        let svc = build_service(repo);
+        let result = svc.login_with_code("13800000001", "111111").await.unwrap();
+        assert_eq!(result.user.id, 2);
+        assert!(!result.token.is_empty());
     }
 
     // 确认 auth domain 函数被引用（避免 unused import 警告）

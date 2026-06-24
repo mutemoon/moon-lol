@@ -148,6 +148,9 @@ export const backendClient: IBackendClient = new Proxy({} as IBackendClient, {
             deleteGameHistory: "delete_game_history",
           };
           const tauriCmd = cmdMap[prop];
+          if (!tauriCmd) {
+            throw new Error(`Tauri command mapping not found for method ${String(prop)}`);
+          }
           // 参数映射
           const paramMap: Record<string, (a: any[]) => any> = {
             set_ai_config: (a) => ({ config: a[0] }),
