@@ -15,7 +15,7 @@
 
 ## 设计目标
 
-`docs/champions` 中的英雄技能包含大量固定动作表无法正确表达的机制：
+`docs/game/champions` 中的英雄技能包含大量固定动作表无法正确表达的机制：
 
 - 分段技能：锐雯 Q、剑魔 Q、鳄鱼 E、刀妹 E
 - 二段窗口：盲僧 Q/W/E、卡蜜尔 E
@@ -288,7 +288,7 @@ observer 可以直接：
 
 ## 面向英雄文档的建模建议
 
-根据 `docs/champions`，后续技能可以按以下方式建模：
+根据 `docs/game/champions`，后续技能可以按以下方式建模：
 
 ### A. 分段/重施技能
 
@@ -359,4 +359,4 @@ observer 可以直接：
 - **统一施法管线只做通用校验和派发**
 - **不再依赖任何静态 effect 配置**
 
-这套设计才能覆盖 `docs/champions` 中那些真正复杂的英雄机制，并在 `lol_core::skill::tests` / `lol_champions::<hero>::tests` 中保持足够高的可测试性。
+这套设计才能覆盖 `docs/game/champions` 中那些真正复杂的英雄机制，并在 `lol_core::skill::tests` / `lol_champions::<hero>::tests` 中保持足够高的可测试性。

@@ -4,7 +4,7 @@
 
 当前项目已完成 **纯代码驱动的 ECS + Observer** 技能架构，以 Riven 为标杆实现了完整的分段技能、被动联动、自增益/护盾/位移/控制等机制。`lol_champions` crate 下 **118 个英雄目录**已注册为模块和 Plugin，但大多数仅有骨架 `on_xxx_skill_cast` observer + 基础 `ActionDamage` 调用，尚未实现百科所描述的核心机制。
 
-本文档从 Riven 代码出发，归纳现有实现模式，结合 `docs/champions/*/wiki.md` 中的机制复杂度，为后续英雄技能开发提供 **分层分类的实现路径和可复用框架**。
+本文档从 Riven 代码出发，归纳现有实现模式，结合 `docs/game/champions/*/wiki.md` 中的机制复杂度，为后续英雄技能开发提供 **分层分类的实现路径和可复用框架**。
 
 ---
 
@@ -126,7 +126,7 @@ R2 → 释放 Wind Slash(导弹) + remove RecastWindow + 手动启动 CoolDown
 
 ## 三、技能机制分类与实现路径
 
-根据 `docs/champions/*/wiki.md` 百科文档，所有英雄技能可归为以下 **6 大类**：
+根据 `docs/game/champions/*/wiki.md` 百科文档，所有英雄技能可归为以下 **6 大类**：
 
 ### 第 1 类：纯单段技能（最简单）
 
@@ -399,7 +399,7 @@ fn xxx_q_deals_damage() {
 ## 六、建议下一步具体行动
 
 > [!TIP]
-> 每个英雄的 `docs/champions/<hero>/todo.md` 应作为实现进度追踪文件，按优先级列出待办项。当前只有 Riven 和 Darius 有 todo.md。
+> 每个英雄的 `docs/game/champions/<hero>/todo.md` 应作为实现进度追踪文件，按优先级列出待办项。当前只有 Riven 和 Darius 有 todo.md。
 
 ### 短期（1-2 周）
 

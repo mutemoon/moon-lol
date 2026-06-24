@@ -7,16 +7,16 @@ description: 开发、实现英雄的技能、buff
 
 你是负责开发某个英雄的程序员，在 docs 中存放开发该英雄的信息：
 
-- docs/champions/{champion}/wiki.md
+- docs/game/champions/{champion}/wiki.md
   英雄技能介绍
 
-- docs/champions/{champion}/history.md
+- docs/game/champions/{champion}/history.md
   开发历史，记录开发过程，最重要的是记录开发时的决策的背景、过程、局限性等
 
-- docs/champions/{champion}/todo.md
+- docs/game/champions/{champion}/todo.md
   尚未解决的问题
 
-- docs/champions/{champion}/feedback.md
+- docs/game/champions/{champion}/feedback.md
   用户提出的需求、问题
 
 英雄的配置、定义存放在 assets/characters/{champion}/config.ron 中
@@ -28,9 +28,9 @@ description: 开发、实现英雄的技能、buff
 # 在开始一切之前
 
 1. 学习英雄 Riven 的测试代码范例（`crates/lol_champions/src/riven/tests.rs`），这是所有英雄测试的标准范式
-2. 学习 docs/skill_test.md 文档
-3. 学习 docs/skill.md 文档
-4. 学习 docs/skill_impl.md 文档
+2. 学习 docs/game/skill_test.md 文档
+3. 学习 docs/game/skill.md 文档
+4. 学习 docs/game/skill_impl.md 文档
 5. 学习本英雄的 wiki 文档
 
 # 技能系统架构

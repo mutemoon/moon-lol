@@ -203,7 +203,7 @@ fn try_load_config_skin_characters(
 | `ConfigCharacterRecord` | `lol_base/src/character.rs` | 持有 `Handle<DynamicWorld>` 指向 `config.ron` |
 | `ConfigSkin` | `lol_base/src/character.rs` | 持有 `Handle<DynamicWorld>` 指向 `skin.ron` |
 
-在 `load.md` 重构完成后，将合并为单一 `CharacterSkin` 组件，详见 [load-refactor](docs/load.md)（重构皮肤渲染：从运行时加载到 GLTF 导出）。
+在 `load.md` 重构完成后，将合并为单一 `CharacterSkin` 组件，详见 [load-refactor](docs/game/load.md)（重构皮肤渲染：从运行时加载到 GLTF 导出）。
 
 ## 3. 地图加载
 
