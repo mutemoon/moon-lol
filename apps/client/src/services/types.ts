@@ -106,7 +106,7 @@ export interface LogQueryParams {
 
 export interface Agent {
   id: string
-  owner_user_id: number
+  owner_id: number
   name: string
   champion: string
   agent_type: string
@@ -115,7 +115,8 @@ export interface Agent {
   model?: string
   config_json?: any
   visibility: Visibility
-  forked_from_agent_id: string | null
+  forked_from: string | null
+  upstream_agent_id: string | null
   created_at: string
   updated_at: string
 }

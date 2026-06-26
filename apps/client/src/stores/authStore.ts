@@ -61,6 +61,10 @@ export const useAuthStore = defineStore("auth", () => {
   }
 
   async function init() {
+    services.events.on("unauthorized", () => {
+      showAuthDialog.value = true;
+      user.value = null;
+    });
     if (services.cloud.isAuthenticated()) {
       await fetchMe();
     }

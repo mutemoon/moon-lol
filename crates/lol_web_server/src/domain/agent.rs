@@ -118,8 +118,9 @@ pub fn fork_name(original_name: &str) -> String {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use uuid::Uuid;
+
+    use super::*;
 
     fn sample_agent(owner: i32, vis: Visibility) -> Agent {
         Agent {

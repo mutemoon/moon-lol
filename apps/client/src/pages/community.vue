@@ -127,9 +127,9 @@ onMounted(refresh);
         <header class="flex items-start justify-between gap-2">
           <div class="min-w-0 space-y-0.5">
             <h3 class="truncate text-sm font-semibold">{{ a.name }}</h3>
-            <p class="text-muted-foreground text-xs">{{ a.champion }} · 经理 #{{ a.owner_user_id }}</p>
+            <p class="text-muted-foreground text-xs">{{ a.champion }} · 经理 #{{ a.owner_id }}</p>
           </div>
-          <Badge v-if="a.forked_from_agent_id" variant="outline" class="shrink-0 text-[10px]">
+          <Badge v-if="a.forked_from" variant="outline" class="shrink-0 text-[10px]">
             <GitForkIcon class="size-3" />
             Fork
           </Badge>

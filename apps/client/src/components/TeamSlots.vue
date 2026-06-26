@@ -2,61 +2,40 @@
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { PlusIcon } from "@lucide/vue";
-import SlotCard from "./SlotCard.vue";
-import type { Slot } from "../composables/useSlotConfig";
-import type { HeroPreset, SpawnPreset } from "../stores/gameStore";
 import { useLocale } from "../composables/useLocale";
 
-// 阵营列：标题/点/徽标 + 槽位列表 + 新增槽位。红蓝复用同一组件，差异只在 accent 配置。
+// 阵营列容器：标题/点/徽标 + 自定义槽位列表 + 新增槽位。红蓝复用同一组件。
 
-defineProps<{
-  slots: Slot[];
-  heroPresets: HeroPreset[];
-  spawnPresets: SpawnPreset[];
-  /** 阵营显示配置（标题、点、徽标、强调色）。 */
-  team: {
-    label: string;
-    /** 圆点 + 头部文字色，如 "bg-blue-500" / "text-blue-500" */
-    dot: string;
-    titleText: string;
-    /** 列容器边框/底色，如 "border-blue-500/20 bg-blue-500/5" */
-    panel: string;
-    /** 头部分隔线，如 "border-blue-500/10" */
-    divider: string;
-    /** 「槽位数」徽标，如 "border-blue-500/20 text-blue-500" */
-    countBadge: string;
-    /** 「＋ 槽位」按钮，如 "border-blue-500/30 text-blue-500 hover:bg-blue-500/10" */
-    addButton: string;
-  };
-  /** 传给 SlotCard 的强调色（色相相关 class）。 */
-  accent: {
-    border: string;
-    edit: string;
-    indexText: string;
-    inheritBadge: string;
-  };
-}>();
+interface Props {
+  count: number;
+  label: string;
+  color: "blue" | "red";
+  showAdd?: boolean;
+}
+
+withDefaults(defineProps<Props>(), {
+  showAdd: true,
+});
 
 const emit = defineEmits<{
   add: [];
-  remove: [index: number];
 }>();
 
 const { t } = useLocale();
 </script>
 
 <template>
-  <div class="flex min-h-0 flex-col overflow-hidden rounded-lg border" :class="team.panel">
+  <div class="bg-card flex min-h-0 flex-col overflow-hidden rounded-lg border border-border">
     <!-- 头部 -->
-    <div class="flex shrink-0 items-center justify-between border-b px-3.5 py-2.5" :class="team.divider">
+    <div class="border-border flex shrink-0 items-center justify-between border-b px-3.5 py-2.5">
       <div class="flex items-center gap-2">
-        <span class="size-2.5 rounded-full" :class="team.dot"></span>
-        <span class="text-xs font-bold tracking-wide uppercase" :class="team.titleText">{{ team.label }}</span>
-        <Badge variant="outline" class="text-[9px]" :class="team.countBadge">
-          {{ slots.length }}
+        <span class="size-2.5 rounded-full" :class="color === 'blue' ? 'bg-blue-500' : 'bg-red-500'"></span>
+        <span class="text-foreground text-xs font-bold tracking-wide uppercase">{{ label }}</span>
+        <Badge variant="outline" class="border-border text-muted-foreground text-[9px]">
+          {{ count }}
         </Badge>
       </div>
-      <Button variant="outline" size="xs" class="h-6 text-[10px]" :class="team.addButton" @click="emit('add')">
+      <Button v-if="showAdd" variant="outline" size="xs" class="text-muted-foreground hover:bg-muted hover:text-foreground h-6 text-[10px]" @click="emit('add')" :data-testid="`add-slot-${color}`">
         <PlusIcon class="size-3" />
         {{ t("common.teamSlots.addSlotBtn") }}
       </Button>
@@ -64,16 +43,7 @@ const { t } = useLocale();
     <!-- 槽位列表 -->
     <div class="min-h-0 flex-1 overflow-y-auto p-2.5">
       <div class="flex flex-col gap-2">
-        <SlotCard
-          v-for="(slot, idx) in slots"
-          :key="slot.id"
-          :slot="slot"
-          :index="idx"
-          :hero-presets="heroPresets"
-          :spawn-presets="spawnPresets"
-          :accent="accent"
-          @remove="emit('remove', idx)"
-        />
+        <slot />
       </div>
     </div>
   </div>

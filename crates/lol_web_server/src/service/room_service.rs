@@ -1,7 +1,8 @@
 //! Room 子系统的 service 层。
 
-use async_trait::async_trait;
 use std::sync::Arc;
+
+use async_trait::async_trait;
 use uuid::Uuid;
 
 use crate::domain::room::{
@@ -286,11 +287,12 @@ impl RoomService for RoomServiceImpl {
 
 #[cfg(test)]
 mod tests {
+    use mockall::mock;
+    use mockall::predicate::*;
+
     use super::*;
     use crate::domain::room::{Room, RoomConstraints, RoomStatus, TeamPolicy};
     use crate::domain::{RepoError, RepoResult};
-    use mockall::mock;
-    use mockall::predicate::*;
 
     mock! {
         pub RoomRepo {}

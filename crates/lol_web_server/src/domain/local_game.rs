@@ -3,8 +3,9 @@
 //! 职责：管理 Bevy 子进程的端口分配、启动/停止生命周期。
 //! 端口池范围 [9100, 9200)，最多 100 个并发对局。
 
-use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
+
+use serde::{Deserialize, Serialize};
 
 /// 端口池范围。
 pub const PORT_POOL_START: i32 = 9100;

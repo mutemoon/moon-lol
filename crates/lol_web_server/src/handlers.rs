@@ -5,17 +5,16 @@
 
 use std::sync::Arc;
 
-use axum::{
-    Json, Router,
-    extract::{Path, Query, State},
-    http::{StatusCode, request::Parts},
-    response::IntoResponse,
-    routing::{delete, get, patch, post},
-};
+use axum::extract::{Path, Query, State};
+use axum::http::StatusCode;
+use axum::http::request::Parts;
+use axum::response::IntoResponse;
+use axum::routing::{delete, get, patch, post};
+use axum::{Json, Router};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::domain::{ServiceError, ServiceResult};
+use crate::domain::ServiceError;
 use crate::service::*;
 
 // ── AppState ──
@@ -191,6 +190,7 @@ pub fn create_router(state: AppState) -> Router {
         .route("/api/agents/:id/snapshots", get(list_snapshots))
         .route("/api/agents/community", get(browse_community))
         .route("/api/agents/:id/fork", post(fork_agent))
+        .route("/api/agents/:id/pull-upstream", post(pull_upstream_agent))
         // Scenarios
         .route("/api/scenarios", get(list_scenarios).post(create_scenario))
         .route(
@@ -377,7 +377,6 @@ async fn auth_me(
         phone: String::new(),
     })
 }
-
 
 // ════════════ Config ════════════
 
@@ -610,6 +609,17 @@ async fn fork_agent(
         .fork(auth.user_id, id, req.new_name)
         .await
     {
+        Ok(a) => ApiResponse::ok(a),
+        Err(e) => ApiResponse::from_error(e),
+    }
+}
+
+async fn pull_upstream_agent(
+    auth: AuthUser,
+    State(s): State<AppState>,
+    Path(id): Path<Uuid>,
+) -> ApiResponse<crate::domain::agent::Agent> {
+    match s.community_service.pull_upstream(auth.user_id, id).await {
         Ok(a) => ApiResponse::ok(a),
         Err(e) => ApiResponse::from_error(e),
     }
@@ -871,7 +881,7 @@ pub struct StartRoomResponse {
 async fn start_room_match(
     auth: AuthUser,
     State(s): State<AppState>,
-    Path(id): Path<Uuid>,
+    Path(_id): Path<Uuid>,
 ) -> ApiResponse<StartRoomResponse> {
     // 简化：room start 复用 local_game 启动（实际应由 MatchService 编排）
     match s
@@ -985,7 +995,7 @@ async fn local_start(
     }
 }
 
-async fn local_stop(auth: AuthUser, State(s): State<AppState>) -> ApiResponse<()> {
+async fn local_stop(_auth: AuthUser, State(_s): State<AppState>) -> ApiResponse<()> {
     // 简化：local_stop 需要 match_id，此处用 body 传递
     ApiResponse::ok(())
 }

@@ -8,6 +8,7 @@ import { ref, computed, onMounted, onUnmounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { storeToRefs } from "pinia";
 import { useGameStore } from "@/stores/gameStore";
+import { useAuthStore } from "@/stores/authStore";
 import {
   roomsApi,
   agentsApi,
@@ -20,6 +21,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Label } from "@/components/ui/label";
+import TeamSlots from "@/components/TeamSlots.vue";
 import {
   Dialog,
   DialogContent,
@@ -37,11 +39,12 @@ import {
 import {
   CopyIcon,
   PlayIcon,
-  PlusIcon,
   Trash2Icon,
   Users2Icon,
   LogOutIcon,
   ArrowLeftIcon,
+  Loader2Icon,
+  RotateCwIcon,
 } from "@lucide/vue";
 
 // 房间详情：成员、约束、双阵营 Agent 槽位。
@@ -59,6 +62,9 @@ const loading = ref(true);
 
 const store = useGameStore();
 const { heroPresets } = storeToRefs(store);
+const authStore = useAuthStore();
+
+
 
 // 添加槽位
 const showAdd = ref(false);
@@ -69,7 +75,14 @@ const addError = ref("");
 
 // 启动对局
 const starting = ref(false);
+const refreshing = ref(false);
 let pollTimer: number | null = null;
+
+async function handleManualRefresh() {
+  refreshing.value = true;
+  await refresh();
+  refreshing.value = false;
+}
 
 async function refresh() {
   try {
@@ -104,8 +117,8 @@ const orderSlots = computed(() => slots.value.filter((s) => s.team === "order"))
 const chaosSlots = computed(() => slots.value.filter((s) => s.team === "chaos"));
 
 const isOwner = computed(() => {
-  // 简化：第一个成员视为房主（实际由 owner_user_id 比对 me）
-  return room.value !== null;
+  if (!room.value || !authStore.user) return false;
+  return room.value.owner_id === authStore.user.id;
 });
 
 async function copyInvite() {
@@ -164,24 +177,75 @@ async function handleStart() {
   }
 }
 
-async function handleLeave() {
-  if (!confirm("确认离开房间？")) return;
-  try {
-    await roomsApi.leave(roomId.value);
-    router.push("/rooms");
-  } catch (e) {
-    console.error(e);
-  }
+const confirmDialog = ref<{
+  open: boolean;
+  title: string;
+  desc: string;
+  confirmBtnText: string;
+  onConfirm: () => Promise<void>;
+  loading: boolean;
+  error: string;
+}>({
+  open: false,
+  title: "",
+  desc: "",
+  confirmBtnText: "确认",
+  onConfirm: async () => {},
+  loading: false,
+  error: "",
+});
+
+function showConfirm(params: {
+  title: string;
+  desc: string;
+  confirmBtnText?: string;
+  action: () => Promise<void>;
+}) {
+  confirmDialog.value = {
+    open: true,
+    title: params.title,
+    desc: params.desc,
+    confirmBtnText: params.confirmBtnText || "确认",
+    onConfirm: async () => {
+      confirmDialog.value.loading = true;
+      confirmDialog.value.error = "";
+      try {
+        await params.action();
+        confirmDialog.value.open = false;
+      } catch (e: any) {
+        console.error(e);
+        confirmDialog.value.error = e.message || "操作失败";
+      } finally {
+        confirmDialog.value.loading = false;
+      }
+    },
+    loading: false,
+    error: "",
+  };
 }
 
-async function handleDissolve() {
-  if (!confirm("解散后房间将永久关闭，确认继续？")) return;
-  try {
-    await roomsApi.dissolve(roomId.value);
-    router.push("/rooms");
-  } catch (e) {
-    console.error(e);
-  }
+function handleLeave() {
+  showConfirm({
+    title: "确认离开房间？",
+    desc: "离开后，你将不再是该房间的成员，你在此房间中分配的 Agent 槽位也将被移除。",
+    confirmBtnText: "确认离开",
+    action: async () => {
+      await roomsApi.leave(roomId.value);
+      router.push("/rooms");
+    },
+  });
+}
+
+function handleDissolve() {
+  showConfirm({
+    title: "解散房间？",
+    desc: "解散后房间将永久关闭，所有成员及槽位信息将被清空且无法恢复，确认继续？",
+    confirmBtnText: "确认解散",
+    action: async () => {
+      await roomsApi.dissolve(roomId.value);
+      router.push("/rooms");
+    },
+  });
 }
 
 onMounted(async () => {
@@ -201,14 +265,20 @@ onUnmounted(() => {
     <template v-else-if="room">
       <!-- 顶部：标题 + 操作 -->
       <header class="space-y-3">
-        <div class="flex items-center gap-2">
-          <Button variant="ghost" size="icon" @click="router.push('/rooms')">
-            <ArrowLeftIcon class="size-4" />
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <Button variant="ghost" size="icon" @click="router.push('/rooms')">
+              <ArrowLeftIcon class="size-4" />
+            </Button>
+            <h1 class="text-2xl font-semibold tracking-tight">{{ room.name }}</h1>
+            <Badge variant="outline">
+              {{ room.status === "lobby" ? "待开始" : room.status === "running" ? "对局中" : "已结束" }}
+            </Badge>
+          </div>
+          <Button variant="outline" size="icon" @click="handleManualRefresh" :disabled="refreshing" title="手动刷新">
+            <Loader2Icon v-if="refreshing" class="size-4 animate-spin" />
+            <RotateCwIcon v-else class="size-4" />
           </Button>
-          <h1 class="text-2xl font-semibold tracking-tight">{{ room.name }}</h1>
-          <Badge variant="outline">
-            {{ room.status === "lobby" ? "待开始" : room.status === "running" ? "对局中" : "已结束" }}
-          </Badge>
         </div>
 
         <!-- 一行 chip 表达约束 -->
@@ -239,84 +309,70 @@ onUnmounted(() => {
       <!-- 阵营编排：两栏对称 -->
       <section class="grid flex-1 grid-cols-1 gap-6 lg:grid-cols-2">
         <!-- Order -->
-        <div class="space-y-3">
-          <div class="flex items-center justify-between">
-            <div class="space-y-0.5">
-              <h2 class="text-sm font-semibold tracking-tight">Order · 蓝色方</h2>
-              <p class="text-muted-foreground text-xs">{{ orderSlots.length }} 个 Agent</p>
+        <TeamSlots
+          :count="orderSlots.length"
+          label="Order · 蓝色方"
+          color="blue"
+          @add="openAdd('order')"
+        >
+          <div
+            v-for="s in orderSlots"
+            :key="s.id"
+            class="bg-background/50 hover:bg-muted/40 group flex items-center justify-between gap-3 rounded-md border p-2.5 transition-colors border-border"
+          >
+            <div class="min-w-0 space-y-0.5">
+              <p class="truncate text-sm font-medium text-foreground">{{ agentName(s.agent_id) }}</p>
+              <p class="text-muted-foreground truncate text-xs">{{ agentChampion(s.agent_id) }} · 成员 #{{ s.member_user_id }}</p>
             </div>
-            <Button variant="outline" size="sm" @click="openAdd('order')">
-              <PlusIcon class="size-3.5" />
-              添加
+            <Button
+              variant="ghost"
+              size="icon"
+              class="text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 size-7"
+              @click="handleRemove(s)"
+            >
+              <Trash2Icon class="size-3.5" />
             </Button>
           </div>
-          <div class="space-y-2">
-            <div
-              v-for="s in orderSlots"
-              :key="s.id"
-              class="hover:bg-muted/40 group flex items-center justify-between gap-3 rounded-lg border px-4 py-3"
-            >
-              <div class="min-w-0 space-y-0.5">
-                <p class="truncate text-sm font-medium">{{ agentName(s.agent_id) }}</p>
-                <p class="text-muted-foreground truncate text-xs">{{ agentChampion(s.agent_id) }} · 成员 #{{ s.member_user_id }}</p>
-              </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                class="text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100"
-                @click="handleRemove(s)"
-              >
-                <Trash2Icon class="size-3.5" />
-              </Button>
-            </div>
-            <div
-              v-if="orderSlots.length === 0"
-              class="text-muted-foreground rounded-lg border border-dashed py-8 text-center text-xs"
-            >
-              暂无 Agent
-            </div>
+          <div
+            v-if="orderSlots.length === 0"
+            class="text-muted-foreground py-8 text-center text-xs"
+          >
+            暂无 Agent
           </div>
-        </div>
+        </TeamSlots>
 
         <!-- Chaos -->
-        <div class="space-y-3">
-          <div class="flex items-center justify-between">
-            <div class="space-y-0.5">
-              <h2 class="text-sm font-semibold tracking-tight">Chaos · 红色方</h2>
-              <p class="text-muted-foreground text-xs">{{ chaosSlots.length }} 个 Agent</p>
+        <TeamSlots
+          :count="chaosSlots.length"
+          label="Chaos · 红色方"
+          color="red"
+          @add="openAdd('chaos')"
+        >
+          <div
+            v-for="s in chaosSlots"
+            :key="s.id"
+            class="bg-background/50 hover:bg-muted/40 group flex items-center justify-between gap-3 rounded-md border p-2.5 transition-colors border-border"
+          >
+            <div class="min-w-0 space-y-0.5">
+              <p class="truncate text-sm font-medium text-foreground">{{ agentName(s.agent_id) }}</p>
+              <p class="text-muted-foreground truncate text-xs">{{ agentChampion(s.agent_id) }} · 成员 #{{ s.member_user_id }}</p>
             </div>
-            <Button variant="outline" size="sm" @click="openAdd('chaos')">
-              <PlusIcon class="size-3.5" />
-              添加
+            <Button
+              variant="ghost"
+              size="icon"
+              class="text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 size-7"
+              @click="handleRemove(s)"
+            >
+              <Trash2Icon class="size-3.5" />
             </Button>
           </div>
-          <div class="space-y-2">
-            <div
-              v-for="s in chaosSlots"
-              :key="s.id"
-              class="hover:bg-muted/40 group flex items-center justify-between gap-3 rounded-lg border px-4 py-3"
-            >
-              <div class="min-w-0 space-y-0.5">
-                <p class="truncate text-sm font-medium">{{ agentName(s.agent_id) }}</p>
-                <p class="text-muted-foreground truncate text-xs">{{ agentChampion(s.agent_id) }} · 成员 #{{ s.member_user_id }}</p>
-              </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                class="text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100"
-                @click="handleRemove(s)"
-              >
-                <Trash2Icon class="size-3.5" />
-              </Button>
-            </div>
-            <div
-              v-if="chaosSlots.length === 0"
-              class="text-muted-foreground rounded-lg border border-dashed py-8 text-center text-xs"
-            >
-              暂无 Agent
-            </div>
+          <div
+            v-if="chaosSlots.length === 0"
+            class="text-muted-foreground py-8 text-center text-xs"
+          >
+            暂无 Agent
           </div>
-        </div>
+        </TeamSlots>
       </section>
 
       <Separator />
@@ -324,7 +380,7 @@ onUnmounted(() => {
       <!-- 底部操作 -->
       <footer class="flex items-center justify-between">
         <div class="flex gap-2">
-          <Button variant="ghost" size="sm" @click="handleLeave">
+          <Button variant="ghost" size="sm" @click="handleLeave" data-testid="room-leave-btn">
             <LogOutIcon class="size-3.5" />
             离开房间
           </Button>
@@ -334,6 +390,7 @@ onUnmounted(() => {
             size="sm"
             class="text-destructive hover:text-destructive"
             @click="handleDissolve"
+            data-testid="room-dissolve-btn"
           >
             解散房间
           </Button>
@@ -341,6 +398,7 @@ onUnmounted(() => {
         <Button
           :disabled="slots.length === 0 || starting"
           @click="handleStart"
+          data-testid="room-start-match-btn"
         >
           <PlayIcon class="size-4" />
           {{ starting ? "启动中…" : "开始对局" }}
@@ -360,7 +418,7 @@ onUnmounted(() => {
           <div class="space-y-1.5">
             <Label>选择 Agent</Label>
             <Select v-model="addAgentId">
-              <SelectTrigger>
+              <SelectTrigger data-testid="room-add-agent-select">
                 <SelectValue placeholder="选择 Agent…" />
               </SelectTrigger>
               <SelectContent>
@@ -374,7 +432,34 @@ onUnmounted(() => {
         </div>
         <DialogFooter>
           <Button variant="ghost" @click="showAdd = false">取消</Button>
-          <Button :disabled="adding" @click="handleAdd">添加</Button>
+          <Button :disabled="adding" @click="handleAdd" data-testid="room-confirm-add-btn">添加</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+
+    <!-- 确认操作对话框 -->
+    <Dialog :open="confirmDialog.open" @update:open="(v) => (confirmDialog.open = v)">
+      <DialogContent class="max-w-sm">
+        <DialogHeader>
+          <DialogTitle>{{ confirmDialog.title }}</DialogTitle>
+        </DialogHeader>
+        <div class="space-y-3 py-2 text-sm text-muted-foreground">
+          <p>{{ confirmDialog.desc }}</p>
+          <p v-if="confirmDialog.error" class="text-destructive text-xs">{{ confirmDialog.error }}</p>
+        </div>
+        <DialogFooter>
+          <Button variant="ghost" :disabled="confirmDialog.loading" @click="confirmDialog.open = false" data-testid="confirm-dialog-cancel-btn">
+            取消
+          </Button>
+          <Button
+            :variant="confirmDialog.confirmBtnText.includes('解散') || confirmDialog.confirmBtnText.includes('删除') ? 'destructive' : 'default'"
+            :disabled="confirmDialog.loading"
+            @click="confirmDialog.onConfirm"
+            data-testid="confirm-dialog-submit-btn"
+          >
+            <Loader2Icon v-if="confirmDialog.loading" class="size-4 animate-spin mr-1.5" />
+            {{ confirmDialog.confirmBtnText }}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

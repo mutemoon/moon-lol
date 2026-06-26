@@ -3,12 +3,13 @@
 //! 黄金示例：service 编排 repo（持久）+ cache（缓存）。
 //! service 单测会用 mockall mock repo 和 cache，完全不碰 DB。
 
-use async_trait::async_trait;
 use std::sync::Arc;
 
+use async_trait::async_trait;
+
 use crate::cache::config_cache::ConfigCache;
+use crate::domain::ServiceResult;
 use crate::domain::config::AiConfig;
-use crate::domain::{ServiceError, ServiceResult};
 use crate::repository::config_repo::ConfigRepo;
 
 /// Config service trait（业务接口）。
@@ -58,10 +59,11 @@ impl ConfigService for ConfigServiceImpl {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use crate::domain::{RepoError, RepoResult};
     use mockall::mock;
     use mockall::predicate::*;
+
+    use super::*;
+    use crate::domain::{RepoError, RepoResult};
 
     // ── 用 mockall 生成 repo 和 cache 的 mock ──
     mock! {

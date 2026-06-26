@@ -3,9 +3,8 @@
 //! 含用户领域类型、密码哈希校验、JWT token 生成与解析（纯逻辑，无 IO）。
 
 use chrono::{Duration, Utc};
-use jsonwebtoken::{
-    DecodingKey, EncodingKey, Header, Validation, decode, encode, errors::Error as JwtError,
-};
+use jsonwebtoken::errors::Error as JwtError;
+use jsonwebtoken::{DecodingKey, EncodingKey, Header, Validation, decode, encode};
 use serde::{Deserialize, Serialize};
 
 /// 用户领域类型。

@@ -40,6 +40,7 @@ const TOKEN_KEY = 'moon_lol_auth_token'
 export class CloudServiceImpl implements ICloudService {
   private baseUrl: string
   private token: string | null = null
+  public onUnauthorized?: () => void
 
   constructor(baseUrl?: string) {
     this.baseUrl = baseUrl || (import.meta as any).env?.VITE_BASE_URL || 'http://localhost:3000'
@@ -63,6 +64,7 @@ export class CloudServiceImpl implements ICloudService {
     if (response.status === 401 && !path.startsWith('/api/auth/')) {
       this.token = null
       localStorage.removeItem(TOKEN_KEY)
+      this.onUnauthorized?.()
       throw new Error('Authentication required')
     }
 
@@ -208,6 +210,12 @@ export class CloudServiceImpl implements ICloudService {
     return this.request<Agent>(`/api/agents/${agentId}/fork`, {
       method: 'POST',
       body: JSON.stringify({ new_name: newName ?? null }),
+    })
+  }
+
+  async pullUpstream(agentId: string): Promise<Agent> {
+    return this.request<Agent>(`/api/agents/${agentId}/pull-upstream`, {
+      method: 'POST',
     })
   }
 

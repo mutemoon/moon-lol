@@ -9,7 +9,8 @@
     "dev:server": "cargo run -p lol_web_server",
     "preview": "vite preview",
     "tauri": "tauri",
-    "tauri:dev": "tauri dev"
+    "tauri:dev": "tauri dev",
+    "test:ui": "playwright test --ui"
   },
   "dependencies": {
     "@guolao/vue-monaco-editor": "^1.6.0",
@@ -42,6 +43,7 @@
     "vue-router": "^4.6.3"
   },
   "devDependencies": {
+    "@playwright/test": "^1.61.1",
     "@tauri-apps/cli": "^2.11.0",
     "@types/node": "^24.6.0",
     "@vitejs/plugin-vue": "^6.0.1",

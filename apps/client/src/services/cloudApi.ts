@@ -3,6 +3,7 @@
 // 最终目标是消费者直接 import services/provider
 
 import { services } from './provider'
+import type { CreateAgentDto, UpdateAgentDto } from './types'
 
 // ── 类型重导出 ──
 export type {
@@ -28,6 +29,8 @@ export type {
 export const agentsApi = {
   list: () => services.cloud.listAgents(),
   get: (id: string) => services.cloud.getAgent(id),
+  create: (data: CreateAgentDto) => services.cloud.createAgent(data),
+  update: (id: string, data: UpdateAgentDto) => services.cloud.updateAgent(id, data),
   updateVisibility: (id: string, visibility: 'private' | 'friends' | 'public') =>
     services.cloud.updateAgentVisibility(id, visibility),
   publishSnapshot: (id: string) => services.cloud.publishSnapshot(id),
@@ -35,6 +38,7 @@ export const agentsApi = {
   browseCommunity: (sort: 'recent' | 'popular' | 'elo' = 'recent', limit = 50) =>
     services.cloud.browseCommunityAgents(sort, limit),
   fork: (id: string, newName?: string) => services.cloud.forkAgent(id, newName),
+  pullUpstream: (id: string) => services.cloud.pullUpstream(id),
 }
 
 export const roomsApi = {

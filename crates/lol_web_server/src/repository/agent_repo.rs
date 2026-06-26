@@ -21,6 +21,13 @@ pub trait AgentRepo: Send + Sync {
     async fn insert(&self, owner_id: i32, input: &AgentInput) -> RepoResult<Agent>;
     async fn update(&self, id: Uuid, input: &AgentInput) -> RepoResult<()>;
     async fn update_visibility(&self, id: Uuid, visibility: Visibility) -> RepoResult<()>;
+    /// 设置 Fork 溯源关系：forked_from（来源）与 upstream_agent_id（上游同步目标）。
+    async fn set_fork_linkage(
+        &self,
+        id: Uuid,
+        forked_from: Option<Uuid>,
+        upstream: Option<Uuid>,
+    ) -> RepoResult<()>;
     async fn delete(&self, id: Uuid) -> RepoResult<()>;
     async fn count_by_owner(&self, owner_id: i32) -> RepoResult<i64>;
 }
@@ -167,6 +174,25 @@ impl AgentRepo for PgAgentRepo {
             .bind(id)
             .execute(&self.pool)
             .await?;
+        if result.rows_affected() == 0 {
+            return Err(RepoError::NotFound);
+        }
+        Ok(())
+    }
+
+    async fn set_fork_linkage(
+        &self,
+        id: Uuid,
+        forked_from: Option<Uuid>,
+        upstream: Option<Uuid>,
+    ) -> RepoResult<()> {
+        let result =
+            sqlx::query("UPDATE agents SET forked_from = $1, upstream_agent_id = $2 WHERE id = $3")
+                .bind(forked_from)
+                .bind(upstream)
+                .bind(id)
+                .execute(&self.pool)
+                .await?;
         if result.rows_affected() == 0 {
             return Err(RepoError::NotFound);
         }

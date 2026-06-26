@@ -1,7 +1,8 @@
 //! Rank 子系统的 service 层（匹配队列 + ELO 更新 + 排行榜）。
 
-use async_trait::async_trait;
 use std::sync::Arc;
+
+use async_trait::async_trait;
 use uuid::Uuid;
 
 use crate::domain::rank::{ELO_INITIAL, Outcome, elo_exchange, match_window_after_wait};
@@ -199,14 +200,15 @@ impl RankService for RankServiceImpl {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use crate::domain::RepoResult;
-    use crate::domain::rank::{Outcome, QueueStatus, SeasonStatus};
-    use crate::repository::rank_repo::NewSeason;
     use chrono::{Duration, Utc};
     use mockall::mock;
     use mockall::predicate::*;
     use uuid::Uuid;
+
+    use super::*;
+    use crate::domain::RepoResult;
+    use crate::domain::rank::{Outcome, QueueStatus, SeasonStatus};
+    use crate::repository::rank_repo::NewSeason;
 
     mock! {
         pub SeasonRepo {}

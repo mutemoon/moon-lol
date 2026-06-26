@@ -1,8 +1,9 @@
 //! Essence + Subscription 子系统的 service 层。
 
+use std::sync::Arc;
+
 use async_trait::async_trait;
 use chrono::{DateTime, Duration, Utc};
-use std::sync::Arc;
 
 use crate::domain::essence::{
     BillingPlan, DAILY_CHECKIN_REWARD, EssenceError, EssenceReason, EssenceTransaction, PLAN_FREE,
@@ -186,10 +187,11 @@ impl AgentLimitProvider for SubscriptionServiceImpl {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use crate::domain::RepoResult;
     use mockall::mock;
     use uuid::Uuid;
+
+    use super::*;
+    use crate::domain::RepoResult;
 
     mock! {
         pub EssenceRepo {}

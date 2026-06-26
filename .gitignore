@@ -27,6 +27,6 @@ packages/lol/lol_bg.wasm
 
 runs
 agent.pth
-rl/__pycache__
+__pycache__
 
 .zcode

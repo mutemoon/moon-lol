@@ -3,11 +3,12 @@
 //! 这是只读消费端：Bevy 进程（lol_core）写日志到 SQLite，此 service 读取。
 //! 远程服务器没有本地 Bevy 的 debug.db，此 service 主要供 desktop 使用。
 
-use async_trait::async_trait;
 use std::path::PathBuf;
 use std::sync::Arc;
-use sqlx::{SqlitePool, Row};
+
+use async_trait::async_trait;
 use sqlx::sqlite::{SqliteConnectOptions, SqlitePoolOptions};
+use sqlx::{Row, SqlitePool};
 
 use crate::domain::{ServiceError, ServiceResult};
 
@@ -133,8 +134,12 @@ impl LogReader for SqliteLogReader {
 
         let mut result = Vec::new();
         for row in rows {
-            let entity_id: Option<i64> = row.try_get(0).map_err(|e| ServiceError::Internal(e.to_string()))?;
-            let entity_name: Option<String> = row.try_get(1).map_err(|e| ServiceError::Internal(e.to_string()))?;
+            let entity_id: Option<i64> = row
+                .try_get(0)
+                .map_err(|e| ServiceError::Internal(e.to_string()))?;
+            let entity_name: Option<String> = row
+                .try_get(1)
+                .map_err(|e| ServiceError::Internal(e.to_string()))?;
             result.push(serde_json::json!({
                 "entity_id": entity_id,
                 "entity_name": entity_name,
@@ -158,7 +163,9 @@ impl LogReader for SqliteLogReader {
 
         let mut result = Vec::new();
         for row in rows {
-            let category: Option<String> = row.try_get(0).map_err(|e| ServiceError::Internal(e.to_string()))?;
+            let category: Option<String> = row
+                .try_get(0)
+                .map_err(|e| ServiceError::Internal(e.to_string()))?;
             result.push(serde_json::json!({
                 "category": category,
             }));
@@ -169,10 +176,12 @@ impl LogReader for SqliteLogReader {
     async fn query_logs(&self, params: QueryLogsParams) -> ServiceResult<QueryLogsResult> {
         let pool = match self.open_pool().await {
             Some(p) => p,
-            None => return Ok(QueryLogsResult {
-                rows: Vec::new(),
-                total_count: 0,
-            }),
+            None => {
+                return Ok(QueryLogsResult {
+                    rows: Vec::new(),
+                    total_count: 0,
+                });
+            }
         };
 
         let limit = params.limit as i64;
@@ -222,7 +231,10 @@ impl LogReader for SqliteLogReader {
         if let Some(ref search) = search_arg {
             q_count = q_count.bind(search);
         }
-        let total_count: i64 = q_count.fetch_one(&pool).await.map_err(|e| ServiceError::Internal(e.to_string()))?;
+        let total_count: i64 = q_count
+            .fetch_one(&pool)
+            .await
+            .map_err(|e| ServiceError::Internal(e.to_string()))?;
 
         // 2. 负 offset 自动算最后一页
         let mut real_offset = params.offset;
@@ -251,21 +263,42 @@ impl LogReader for SqliteLogReader {
         q_data = q_data.bind(limit);
         q_data = q_data.bind(real_offset);
 
-        let rows = q_data.fetch_all(&pool).await.map_err(|e| ServiceError::Internal(e.to_string()))?;
+        let rows = q_data
+            .fetch_all(&pool)
+            .await
+            .map_err(|e| ServiceError::Internal(e.to_string()))?;
         let mut result = Vec::new();
         for row in rows {
-            let line: Option<i64> = row.try_get(4).map_err(|e| ServiceError::Internal(e.to_string()))?;
-            let entity_id: Option<i64> = row.try_get(5).map_err(|e| ServiceError::Internal(e.to_string()))?;
+            let line: Option<i64> = row
+                .try_get(4)
+                .map_err(|e| ServiceError::Internal(e.to_string()))?;
+            let entity_id: Option<i64> = row
+                .try_get(5)
+                .map_err(|e| ServiceError::Internal(e.to_string()))?;
             result.push(LogRow {
-                id: row.try_get(0).map_err(|e| ServiceError::Internal(e.to_string()))?,
-                timestamp: row.try_get(1).map_err(|e| ServiceError::Internal(e.to_string()))?,
-                level: row.try_get(2).map_err(|e| ServiceError::Internal(e.to_string()))?,
-                file: row.try_get(3).map_err(|e| ServiceError::Internal(e.to_string()))?,
+                id: row
+                    .try_get(0)
+                    .map_err(|e| ServiceError::Internal(e.to_string()))?,
+                timestamp: row
+                    .try_get(1)
+                    .map_err(|e| ServiceError::Internal(e.to_string()))?,
+                level: row
+                    .try_get(2)
+                    .map_err(|e| ServiceError::Internal(e.to_string()))?,
+                file: row
+                    .try_get(3)
+                    .map_err(|e| ServiceError::Internal(e.to_string()))?,
                 line,
                 entity_id,
-                entity_name: row.try_get(6).map_err(|e| ServiceError::Internal(e.to_string()))?,
-                category: row.try_get(7).map_err(|e| ServiceError::Internal(e.to_string()))?,
-                message: row.try_get(8).map_err(|e| ServiceError::Internal(e.to_string()))?,
+                entity_name: row
+                    .try_get(6)
+                    .map_err(|e| ServiceError::Internal(e.to_string()))?,
+                category: row
+                    .try_get(7)
+                    .map_err(|e| ServiceError::Internal(e.to_string()))?,
+                message: row
+                    .try_get(8)
+                    .map_err(|e| ServiceError::Internal(e.to_string()))?,
             });
         }
         Ok(QueryLogsResult {
@@ -295,8 +328,9 @@ impl LogReader for SqliteLogReader {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use mockall::mock;
+
+    use super::*;
 
     mock! {
         pub Reader {}

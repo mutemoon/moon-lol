@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { backendClient } from "@/services/backend";
 import { PlayIcon, SaveIcon } from "@lucide/vue";
 import TeamSlots from "@/components/TeamSlots.vue";
+import SlotCard from "@/components/SlotCard.vue";
 import {
   type Slot,
   emptySlot,
@@ -42,43 +43,15 @@ const redSlots = ref<Slot[]>([emptySlot()]);
 
 const currentSceneName = ref("default_scenario");
 
-// 阵营配色：唯一区分红蓝的地方。
-const TEAMS = computed(() => ({
-  blue: {
-    team: {
-      label: t("spawnPresets.teamOrder"),
-      dot: "bg-blue-500",
-      titleText: "text-foreground",
-      panel: "bg-card",
-      divider: "border-border",
-      countBadge: "border-border text-muted-foreground",
-      addButton: "text-muted-foreground hover:bg-muted hover:text-foreground",
-    },
-    accent: {
-      border: "border-border",
-      edit: "text-muted-foreground hover:bg-muted hover:text-foreground",
-      indexText: "text-muted-foreground",
-      inheritBadge: "border-border text-muted-foreground",
-    },
-  },
-  red: {
-    team: {
-      label: t("spawnPresets.teamChaos"),
-      dot: "bg-red-500",
-      titleText: "text-foreground",
-      panel: "bg-card",
-      divider: "border-border",
-      countBadge: "border-border text-muted-foreground",
-      addButton: "text-muted-foreground hover:bg-muted hover:text-foreground",
-    },
-    accent: {
-      border: "border-border",
-      edit: "text-muted-foreground hover:bg-muted hover:text-foreground",
-      indexText: "text-muted-foreground",
-      inheritBadge: "border-border text-muted-foreground",
-    },
-  },
-}));
+const blueLabel = computed(() => t("spawnPresets.teamOrder"));
+const redLabel = computed(() => t("spawnPresets.teamChaos"));
+
+const ACCENT = {
+  border: "border-border",
+  edit: "text-muted-foreground hover:bg-muted hover:text-foreground",
+  indexText: "text-muted-foreground",
+  inheritBadge: "border-border text-muted-foreground",
+};
 
 // 各阵营槽位操作的统一封装
 function makeHandlers(slotsRef: typeof blueSlots) {
@@ -213,23 +186,39 @@ onMounted(() => {
     <!-- 双阵营并排卡片 -->
     <div class="grid min-h-0 flex-1 grid-cols-1 gap-3 md:grid-cols-2">
       <TeamSlots
-        :slots="blueSlots"
-        :hero-presets="heroPresets"
-        :spawn-presets="spawnPresets"
-        :team="TEAMS.blue.team"
-        :accent="TEAMS.blue.accent"
+        :count="blueSlots.length"
+        :label="blueLabel"
+        color="blue"
         @add="blueHandlers.add"
-        @remove="blueHandlers.remove"
-      />
+      >
+        <SlotCard
+          v-for="(slot, idx) in blueSlots"
+          :key="slot.id"
+          :slot="slot"
+          :index="idx"
+          :hero-presets="heroPresets"
+          :spawn-presets="spawnPresets"
+          :accent="ACCENT"
+          @remove="blueHandlers.remove(idx)"
+        />
+      </TeamSlots>
       <TeamSlots
-        :slots="redSlots"
-        :hero-presets="heroPresets"
-        :spawn-presets="spawnPresets"
-        :team="TEAMS.red.team"
-        :accent="TEAMS.red.accent"
+        :count="redSlots.length"
+        :label="redLabel"
+        color="red"
         @add="redHandlers.add"
-        @remove="redHandlers.remove"
-      />
+      >
+        <SlotCard
+          v-for="(slot, idx) in redSlots"
+          :key="slot.id"
+          :slot="slot"
+          :index="idx"
+          :hero-presets="heroPresets"
+          :spawn-presets="spawnPresets"
+          :accent="ACCENT"
+          @remove="redHandlers.remove(idx)"
+        />
+      </TeamSlots>
     </div>
 
     <!-- 合并控制底栏 -->

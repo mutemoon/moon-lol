@@ -3,9 +3,10 @@
 //! 编排：端口池（内存 HashSet）+ 进程抽象（ProcessLauncher trait）+ MatchRepo（记录对局）。
 //! 进程状态不持久化——服务重启后所有运行中的本地对局视为 crashed。
 
-use async_trait::async_trait;
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
+
+use async_trait::async_trait;
 use tokio::sync::Mutex;
 use uuid::Uuid;
 
@@ -124,7 +125,7 @@ impl LocalGameService for LocalGameServiceImpl {
 
         // 1. 分配端口
         let port = {
-            let mut state = self.state.lock().await;
+            let state = self.state.lock().await;
             allocate_port(&state.used_ports)
                 .ok_or(ServiceError::Conflict("端口池已满，无法启动新对局".into()))?
         };
@@ -286,13 +287,14 @@ impl ProcessLauncher for CommandProcessLauncher {
 
 #[cfg(test)]
 mod tests {
+    use mockall::mock;
+    use mockall::predicate::*;
+    use uuid::Uuid;
+
     use super::*;
     use crate::domain::RepoResult;
     use crate::domain::local_game::ProcessStatus;
     use crate::domain::match_::{Match, MatchForm, MatchStatus};
-    use mockall::mock;
-    use mockall::predicate::*;
-    use uuid::Uuid;
 
     mock! {
         pub MatchRepo {}

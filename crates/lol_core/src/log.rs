@@ -3,10 +3,10 @@ use std::sync::OnceLock;
 
 use bevy::log::tracing_subscriber::{Layer, fmt};
 use bevy::prelude::*;
-use crossbeam_channel::{unbounded, Sender};
+use crossbeam_channel::{Sender, unbounded};
 use serde::Serialize;
-use sqlx::sqlite::{SqliteConnectOptions, SqlitePoolOptions};
 use sqlx::SqlitePool;
+use sqlx::sqlite::{SqliteConnectOptions, SqlitePoolOptions};
 use tracing::Event;
 use tracing::field::{Field, Visit};
 

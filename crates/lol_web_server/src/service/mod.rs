@@ -27,10 +27,12 @@ pub use essence_service::{
     CheckInResult, EssenceService, EssenceServiceImpl, SubscriptionService, SubscriptionServiceImpl,
 };
 pub use local_game_service::{
-    CommandProcessLauncher, LocalGameService, LocalGameServiceImpl, LocalGameState, LocalStartInput,
-    ProcessLauncher,
+    CommandProcessLauncher, LocalGameService, LocalGameServiceImpl, LocalGameState,
+    LocalStartInput, ProcessLauncher,
 };
-pub use log_service::{LogReader, LogService, LogServiceImpl, QueryLogsParams, QueryLogsResult, SqliteLogReader};
+pub use log_service::{
+    LogReader, LogService, LogServiceImpl, QueryLogsParams, QueryLogsResult, SqliteLogReader,
+};
 pub use match_service::{MatchService, MatchServiceImpl};
 pub use rank_service::{RankMatchCreator, RankService, RankServiceImpl};
 pub use room_service::{RoomService, RoomServiceImpl};

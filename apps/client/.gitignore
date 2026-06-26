@@ -26,3 +26,7 @@ dist-ssr
 auto-imports.d.ts
 components.d.ts
 typed-router.d.ts
+
+.playwright-cli
+playwright-report
+test-results

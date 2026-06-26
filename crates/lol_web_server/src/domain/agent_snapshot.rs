@@ -23,8 +23,9 @@ pub fn next_version(current_max: Option<i32>) -> i32 {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use uuid::Uuid;
+
+    use super::*;
 
     fn sample_snapshot() -> AgentSnapshot {
         AgentSnapshot {

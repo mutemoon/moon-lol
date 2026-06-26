@@ -2,11 +2,12 @@
 //!
 //! 复用 AgentRepo / AgentConfigRepo，不新建表。
 
-use async_trait::async_trait;
 use std::sync::Arc;
+
+use async_trait::async_trait;
 use uuid::Uuid;
 
-use crate::domain::agent::{Agent, AgentInput, fork_name};
+use crate::domain::agent::{Agent, AgentInput, can_view};
 use crate::domain::community::{CommunitySort, can_fork, resolve_fork_name};
 use crate::domain::spawn_preset::Visibility;
 use crate::domain::{ServiceError, ServiceResult};
@@ -24,6 +25,10 @@ pub trait CommunityService: Send + Sync {
         source_id: Uuid,
         new_name: Option<String>,
     ) -> ServiceResult<Agent>;
+
+    /// 从上游拉取最新策略，覆盖当前 Fork 副本的编辑态（保留自己的名称与可见性）。
+    /// 拉取后视为「待发布」改动，需用户重新发布快照才在 Rank 生效。
+    async fn pull_upstream(&self, requester_id: i32, id: Uuid) -> ServiceResult<Agent>;
 }
 
 pub struct CommunityServiceImpl {
@@ -76,20 +81,71 @@ impl CommunityService for CommunityServiceImpl {
             visibility: Visibility::Private,
         };
         // 注意：agent_config 归属属于 source owner，create 时会校验归属失败。
-        // Fork 路径跳过归属校验，直接 insert（forked_from/upstream 字段后续通过 repo 补充）。
-        let forked = self.agent_repo.insert(requester_id, &input).await?;
+        // Fork 路径跳过归属校验，直接 insert，随后补写 forked_from / upstream 溯源关系。
+        let mut forked = self.agent_repo.insert(requester_id, &input).await?;
+        self.agent_repo
+            .set_fork_linkage(forked.id, Some(source.id), Some(source.id))
+            .await?;
+        forked.forked_from = Some(source.id);
+        forked.upstream_agent_id = Some(source.id);
         Ok(forked)
+    }
+
+    async fn pull_upstream(&self, requester_id: i32, id: Uuid) -> ServiceResult<Agent> {
+        let agent = self
+            .agent_repo
+            .find_by_id(id)
+            .await?
+            .ok_or(ServiceError::NotFound)?;
+        if agent.owner_id != requester_id {
+            return Err(ServiceError::Forbidden);
+        }
+
+        let upstream_id = agent.upstream_agent_id.ok_or_else(|| {
+            ServiceError::Validation("该选手不是 Fork 副本，没有可拉取的上游".into())
+        })?;
+        let upstream = self
+            .agent_repo
+            .find_by_id(upstream_id)
+            .await?
+            .ok_or(ServiceError::NotFound)?;
+        // 上游若已转为私有则不再允许拉取（可见性即权限）。
+        if !can_view(&upstream, requester_id) {
+            return Err(ServiceError::Forbidden);
+        }
+
+        // 用上游策略覆盖编辑态，保留自己的名称与可见性；update 会刷新 updated_at，
+        // 因此前端的「未发布改动」指示会随之点亮，提醒重新发布快照。
+        let input = AgentInput {
+            name: agent.name.clone(),
+            champion: upstream.champion.clone(),
+            agent_type: upstream.agent_type,
+            prompt: upstream.prompt.clone(),
+            preamble: upstream.preamble.clone(),
+            model: upstream.model.clone(),
+            config_json: upstream.config_json.clone(),
+            visibility: agent.visibility,
+        };
+        self.agent_repo.update(id, &input).await?;
+
+        let updated = self
+            .agent_repo
+            .find_by_id(id)
+            .await?
+            .ok_or(ServiceError::NotFound)?;
+        Ok(updated)
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use crate::domain::RepoResult;
-    use crate::domain::agent::Agent;
     use mockall::mock;
     use mockall::predicate::*;
     use uuid::Uuid;
+
+    use super::*;
+    use crate::domain::RepoResult;
+    use crate::domain::agent::Agent;
 
     mock! {
         pub AgentRepo {}
@@ -102,6 +158,7 @@ mod tests {
             async fn insert(&self, owner_id: i32, input: &AgentInput) -> RepoResult<Agent>;
             async fn update(&self, id: Uuid, input: &AgentInput) -> RepoResult<()>;
             async fn update_visibility(&self, id: Uuid, visibility: Visibility) -> RepoResult<()>;
+            async fn set_fork_linkage(&self, id: Uuid, forked_from: Option<Uuid>, upstream: Option<Uuid>) -> RepoResult<()>;
             async fn delete(&self, id: Uuid) -> RepoResult<()>;
             async fn count_by_owner(&self, owner_id: i32) -> RepoResult<i64>;
         }
@@ -163,6 +220,7 @@ mod tests {
             .returning(move |_| Ok(Some(source_clone.clone())));
         repo.expect_insert()
             .returning(|owner, _| Ok(sample_agent(owner, Visibility::Private)));
+        repo.expect_set_fork_linkage().returning(|_, _, _| Ok(()));
         let svc = build_service(repo);
         let forked = svc
             .fork(2, source.id, Some("我的锐雯".into()))
@@ -216,7 +274,73 @@ mod tests {
             .returning(move |_| Ok(Some(source_clone.clone())));
         repo.expect_insert()
             .returning(|owner, _| Ok(sample_agent(owner, Visibility::Private)));
+        repo.expect_set_fork_linkage().returning(|_, _, _| Ok(()));
         let svc = build_service(repo);
         svc.fork(2, source.id, None).await.unwrap();
+    }
+
+    fn agent_with(owner: i32, id: Uuid, upstream: Option<Uuid>) -> Agent {
+        Agent {
+            id,
+            owner_id: owner,
+            name: "我的锐雯".into(),
+            champion: "Riven".into(),
+            agent_type: crate::domain::agent::AgentType::Llm,
+            prompt: "mine".into(),
+            preamble: "".into(),
+            model: "model".into(),
+            config_json: serde_json::json!({}),
+            visibility: Visibility::Private,
+            forked_from: upstream,
+            upstream_agent_id: upstream,
+        }
+    }
+
+    #[tokio::test]
+    async fn pull_upstream_overwrites_from_source() {
+        let upstream_id = Uuid::new_v4();
+        let agent_id = Uuid::new_v4();
+        let agent = agent_with(2, agent_id, Some(upstream_id));
+        let mut upstream = sample_agent(1, Visibility::Public);
+        upstream.id = upstream_id;
+        upstream.prompt = "upstream-strategy".into();
+        let mut repo = MockAgentRepo::new();
+        repo.expect_find_by_id().returning(move |qid| {
+            if qid == upstream_id {
+                Ok(Some(upstream.clone()))
+            } else {
+                Ok(Some(agent.clone()))
+            }
+        });
+        repo.expect_update().returning(|_, _| Ok(()));
+        let svc = build_service(repo);
+        let updated = svc.pull_upstream(2, agent_id).await.unwrap();
+        assert_eq!(updated.owner_id, 2);
+    }
+
+    #[tokio::test]
+    async fn pull_upstream_non_owner_forbidden() {
+        let agent_id = Uuid::new_v4();
+        let agent = agent_with(2, agent_id, Some(Uuid::new_v4()));
+        let mut repo = MockAgentRepo::new();
+        repo.expect_find_by_id()
+            .returning(move |_| Ok(Some(agent.clone())));
+        repo.expect_update().times(0);
+        let svc = build_service(repo);
+        let err = svc.pull_upstream(99, agent_id).await.unwrap_err();
+        assert!(matches!(err, ServiceError::Forbidden));
+    }
+
+    #[tokio::test]
+    async fn pull_upstream_without_upstream_is_validation_error() {
+        let agent_id = Uuid::new_v4();
+        let agent = agent_with(2, agent_id, None);
+        let mut repo = MockAgentRepo::new();
+        repo.expect_find_by_id()
+            .returning(move |_| Ok(Some(agent.clone())));
+        repo.expect_update().times(0);
+        let svc = build_service(repo);
+        let err = svc.pull_upstream(2, agent_id).await.unwrap_err();
+        assert!(matches!(err, ServiceError::Validation(_)));
     }
 }

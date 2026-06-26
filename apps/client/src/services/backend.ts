@@ -124,7 +124,6 @@ export const backendClient: IBackendClient = new Proxy({} as IBackendClient, {
     };
 
     if (prop in legacyLocalMethods) {
-      // Desktop 环境：通过 Tauri invoke（保持原有行为）
       if (services.isDesktop) {
         return async (...args: any[]) => {
           const { invoke } = await import("@tauri-apps/api/core");
@@ -169,9 +168,141 @@ export const backendClient: IBackendClient = new Proxy({} as IBackendClient, {
           const params = paramMap[tauriCmd]?.(args);
           return params ? invoke(tauriCmd, params) : invoke(tauriCmd);
         };
+      } else {
+        // Web 环境：走云端（映射到 services.cloud 实现，解决兼容层未实现报错）
+        const webMap: Record<string, (...args: any[]) => Promise<any>> = {
+          getAiConfig: () => services.cloud.getAiConfig(),
+          setAiConfig: (a) => services.cloud.setAiConfig(a[0]),
+          listSpawnPresets: () => services.cloud.listSpawnPresets().then(list =>
+            list.map(p => ({
+              id: p.id,
+              name: p.name,
+              x: p.x,
+              z: p.z,
+              team: p.team.toLowerCase() === "order" ? "Order" : "Chaos"
+            }))
+          ),
+          saveSpawnPreset: async (a) => {
+            const preset = a[0];
+            const list = await services.cloud.listSpawnPresets();
+            const existing = list.find(p => p.name === preset.name);
+            const body = {
+              name: preset.name,
+              x: preset.x,
+              z: preset.z,
+              team: preset.team.toLowerCase(),
+              visibility: preset.visibility || 'private'
+            };
+            if (existing?.id) {
+              await services.cloud.updateSpawnPreset(existing.id, body);
+            } else {
+              await services.cloud.createSpawnPreset(body);
+            }
+          },
+          deleteSpawnPreset: async (a) => {
+            const name = a[0];
+            const list = await services.cloud.listSpawnPresets();
+            const existing = list.find(p => p.name === name);
+            if (existing?.id) {
+              await services.cloud.deleteSpawnPreset(existing.id);
+            }
+          },
+          listHeroPresets: () => services.cloud.listAgents().then(list =>
+            list.map(item => ({
+              id: item.id,
+              name: item.name,
+              champion: item.champion,
+              agent_type: item.agent_type,
+              prompt: item.prompt,
+              preamble: item.preamble,
+              model: item.model,
+              config_json: item.config_json
+            }))
+          ),
+          saveHeroPreset: async (a) => {
+            const preset = a[0];
+            const list = await services.cloud.listAgents();
+            const existing = list.find(p => p.name === preset.name);
+            const body = {
+              name: preset.name,
+              champion: preset.champion,
+              agent_type: preset.agent_type,
+              prompt: preset.prompt,
+              preamble: preset.preamble || "",
+              model: preset.model || "",
+              config_json: preset.config_json || {},
+              visibility: preset.visibility || 'private'
+            };
+            if (existing?.id) {
+              await services.cloud.updateAgent(existing.id, body);
+            } else {
+              await services.cloud.createAgent(body);
+            }
+          },
+          deleteHeroPreset: async (a) => {
+            const name = a[0];
+            const list = await services.cloud.listAgents();
+            const existing = list.find(p => p.name === name);
+            if (existing?.id) {
+              await services.cloud.deleteAgent(existing.id);
+            }
+          },
+          listCustomScenarios: () => services.cloud.listScenarios().then(list => list.map(s => s.name)),
+          loadCustomScenario: async (a) => {
+            const sceneName = a[0];
+            const list = await services.cloud.listScenarios();
+            const existing = list.find(s => s.name === sceneName);
+            if (!existing) throw new Error(`Scenario not found: ${sceneName}`);
+            return existing.agents;
+          },
+          saveCustomScenario: async (a) => {
+            const sceneName = a[0];
+            const agents = a[1];
+            const list = await services.cloud.listScenarios();
+            const existing = list.find(s => s.name === sceneName);
+            const body = {
+              name: sceneName,
+              agents
+            };
+            if (existing?.id) {
+              await services.cloud.updateScenario(existing.id, body);
+            } else {
+              await services.cloud.createScenario(body);
+            }
+          },
+          deleteCustomScenario: async (a) => {
+            const sceneName = a[0];
+            const list = await services.cloud.listScenarios();
+            const existing = list.find(s => s.name === sceneName);
+            if (existing?.id) {
+              await services.cloud.deleteScenario(existing.id);
+            }
+          },
+          loadScenarioWinCondition: async (a) => {
+            const sceneName = a[0];
+            const list = await services.cloud.listScenarios();
+            const existing = list.find(s => s.name === sceneName);
+            if (!existing) return null;
+            return services.cloud.getScenarioWinCondition(existing.id);
+          },
+          saveScenarioWinCondition: async (a) => {
+            const sceneName = a[0];
+            const condition = a[1];
+            const list = await services.cloud.listScenarios();
+            const existing = list.find(s => s.name === sceneName);
+            if (!existing) throw new Error(`Scenario not found: ${sceneName}`);
+            await services.cloud.setScenarioWinCondition(existing.id, condition);
+          },
+          listGameHistories: () => services.cloud.listGameHistories(),
+          getGameHistoryDetail: (a) => services.cloud.getGameHistoryDetail(a[0]),
+          deleteGameHistory: (a) => services.cloud.deleteGameHistory(a[0]),
+        };
+
+        const handler = webMap[prop];
+        if (handler) {
+          return (...args: any[]) => handler(args);
+        }
       }
-      // Web 环境：走云端（保持原有 WebBackendClient 行为）
-      // 后续可以在这里做在线/离线自动切换
     }
 
     throw new Error(`[backendClient] Method "${prop}" not implemented in compatibility layer`);

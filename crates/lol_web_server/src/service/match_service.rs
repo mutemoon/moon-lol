@@ -1,20 +1,20 @@
 //! Match 子系统的 service 层。
 
-use async_trait::async_trait;
 use std::sync::Arc;
+
+use async_trait::async_trait;
 use uuid::Uuid;
 
 use crate::domain::match_::{
-    Match, MatchEvent, MatchStatus, ParticipantResult, Winner, can_transition,
+    Match, MatchEvent, MatchForm, MatchStatus, ParticipantResult, Winner, can_transition,
 };
 use crate::domain::spawn_preset::Team;
 use crate::domain::{ServiceError, ServiceResult};
 use crate::repository::match_repo::{
     MatchEventInput, MatchEventRepo, MatchInput, MatchParticipantRepo, MatchRepo, ParticipantInput,
 };
-use crate::service::rank_service::RankMatchCreator;
 use crate::repository::rank_repo::RankQueueEntry;
-use crate::domain::match_::MatchForm;
+use crate::service::rank_service::RankMatchCreator;
 
 const DEFAULT_LIST_LIMIT: i64 = 100;
 
@@ -216,39 +216,43 @@ impl RankMatchCreator for MatchServiceImpl {
         entry_a: &RankQueueEntry,
         entry_b: &RankQueueEntry,
     ) -> ServiceResult<Uuid> {
-        let m = self.repo.insert(
-            entry_a.user_id,
-            &MatchInput {
-                form: MatchForm::Rank,
-                room_id: None,
-                mode: entry_a.mode.clone(),
-                scenario_id: None,
-                win_condition: None,
-            },
-        )
-        .await?;
+        let m = self
+            .repo
+            .insert(
+                entry_a.user_id,
+                &MatchInput {
+                    form: MatchForm::Rank,
+                    room_id: None,
+                    mode: entry_a.mode.clone(),
+                    scenario_id: None,
+                    win_condition: None,
+                },
+            )
+            .await?;
 
-        self.participant_repo.insert(
-            m.id,
-            &ParticipantInput {
-                agent_snapshot_id: entry_a.agent_snapshot_id,
-                agent_id: entry_a.agent_id,
-                user_id: entry_a.user_id,
-                team: Team::Order,
-            },
-        )
-        .await?;
+        self.participant_repo
+            .insert(
+                m.id,
+                &ParticipantInput {
+                    agent_snapshot_id: entry_a.agent_snapshot_id,
+                    agent_id: entry_a.agent_id,
+                    user_id: entry_a.user_id,
+                    team: Team::Order,
+                },
+            )
+            .await?;
 
-        self.participant_repo.insert(
-            m.id,
-            &ParticipantInput {
-                agent_snapshot_id: entry_b.agent_snapshot_id,
-                agent_id: entry_b.agent_id,
-                user_id: entry_b.user_id,
-                team: Team::Chaos,
-            },
-        )
-        .await?;
+        self.participant_repo
+            .insert(
+                m.id,
+                &ParticipantInput {
+                    agent_snapshot_id: entry_b.agent_snapshot_id,
+                    agent_id: entry_b.agent_id,
+                    user_id: entry_b.user_id,
+                    team: Team::Chaos,
+                },
+            )
+            .await?;
 
         Ok(m.id)
     }
@@ -256,16 +260,16 @@ impl RankMatchCreator for MatchServiceImpl {
 
 #[cfg(test)]
 mod tests {
+    use mockall::mock;
+    use mockall::predicate::*;
+
     use super::*;
     use crate::domain::RepoResult;
-    use crate::domain::match_::MatchParticipant;
     use crate::domain::match_::{
-        Match, MatchEvent, MatchForm, MatchStatus, ParticipantResult, Winner,
+        Match, MatchEvent, MatchForm, MatchParticipant, MatchStatus, ParticipantResult, Winner,
     };
     use crate::domain::spawn_preset::Team;
     use crate::repository::match_repo::ParticipantInput;
-    use mockall::mock;
-    use mockall::predicate::*;
 
     mock! {
         pub MatchRepo {}

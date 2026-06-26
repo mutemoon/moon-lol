@@ -2,6 +2,8 @@
 
 mod common;
 
+use std::sync::Arc;
+
 use chrono::{Duration, Utc};
 use common::setup_pg;
 use lol_web_server::domain::ServiceError;
@@ -13,7 +15,6 @@ use lol_web_server::service::essence_service::{
     EssenceService, EssenceServiceImpl, SubscriptionService, SubscriptionServiceImpl,
 };
 use sqlx::Row;
-use std::sync::Arc;
 
 async fn create_user(pool: &sqlx::PgPool, phone: &str) -> i32 {
     let row = sqlx::query("INSERT INTO users (phone, password_hash) VALUES ($1, $2) RETURNING id")

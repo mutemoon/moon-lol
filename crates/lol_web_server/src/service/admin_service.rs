@@ -2,15 +2,16 @@
 //!
 //! 复用 MatchRepo / RankQueueRepo / LocalGameService，不新建表。
 
-use async_trait::async_trait;
 use std::sync::Arc;
+
+use async_trait::async_trait;
+use uuid::Uuid;
 
 use crate::domain::match_::MatchStatus;
 use crate::domain::{ServiceError, ServiceResult};
 use crate::repository::match_repo::MatchRepo;
 use crate::repository::rank_repo::RankQueueRepo;
 use crate::service::local_game_service::LocalGameService;
-use uuid::Uuid;
 
 /// 算力监控快照。
 #[derive(Debug, Clone, serde::Serialize)]
@@ -95,16 +96,16 @@ impl AdminService for AdminServiceImpl {
 
 #[cfg(test)]
 mod tests {
+    use mockall::mock;
+    use mockall::predicate::*;
+    use uuid::Uuid;
+
     use super::*;
     use crate::domain::RepoResult;
     use crate::domain::local_game::ManagedProcess;
     use crate::domain::match_::{Match, MatchForm, MatchStatus, Winner};
     use crate::repository::match_repo::MatchInput;
-    use crate::repository::rank_repo::NewQueueEntry;
-    use crate::repository::rank_repo::RankQueueEntry;
-    use mockall::mock;
-    use mockall::predicate::*;
-    use uuid::Uuid;
+    use crate::repository::rank_repo::{NewQueueEntry, RankQueueEntry};
 
     mock! {
         pub MatchRepo {}

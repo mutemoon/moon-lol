@@ -3,9 +3,10 @@
 //! Config 读多写少（设置页频繁加载），适合缓存。cache key 是 user_id。
 //! Moka impl 用于生产，Noop impl 用于测试（service 单测默认不依赖缓存）。
 
+use std::sync::Arc;
+
 use async_trait::async_trait;
 use moka::future::Cache;
-use std::sync::Arc;
 
 use crate::domain::config::AiConfig;
 

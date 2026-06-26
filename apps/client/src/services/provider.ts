@@ -66,7 +66,11 @@ class ServiceProvider {
     if (this._initialized) return
 
     // 初始化云端服务（Desktop + Web 共用）
-    this._cloud = new CloudServiceImpl()
+    const cloud = new CloudServiceImpl()
+    cloud.onUnauthorized = () => {
+      this._eventBus.emit('unauthorized', null)
+    }
+    this._cloud = cloud
 
     // Desktop：初始化本地服务
     if (isTauriEnv) {

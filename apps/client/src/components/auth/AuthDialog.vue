@@ -137,6 +137,7 @@ async function handleSubmit(e: Event) {
             maxlength="11"
             :placeholder="t('auth.phonePlaceholder')"
             class="bg-muted/35 border-border text-xs h-10"
+            data-testid="login-phone-input"
             required
           />
         </div>
@@ -189,6 +190,7 @@ async function handleSubmit(e: Event) {
               maxlength="6"
               :placeholder="t('auth.codePlaceholder')"
               class="bg-muted/35 border-border text-xs h-10 pr-24"
+              data-testid="login-code-input"
               required
             />
             <span class="absolute right-3 text-[10px] font-mono text-muted-foreground bg-muted px-2 py-1 rounded">
@@ -206,6 +208,7 @@ async function handleSubmit(e: Event) {
             type="submit"
             class="w-full text-xs font-bold py-5 bg-primary hover:bg-primary/95 text-primary-foreground shadow-lg transition-transform active:scale-[0.98] h-10 flex items-center justify-center gap-2"
             :disabled="isSubmitting"
+            data-testid="login-submit-btn"
           >
             <span v-if="isSubmitting" class="animate-spin size-3.5 border-2 border-current border-t-transparent rounded-full" />
             <span>

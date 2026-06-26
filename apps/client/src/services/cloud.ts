@@ -64,6 +64,7 @@ export interface ICloudService {
   // ── 社区 ──
   browseCommunityAgents(sort?: string, limit?: number): Promise<Agent[]>
   forkAgent(agentId: string, newName?: string): Promise<Agent>
+  pullUpstream(agentId: string): Promise<Agent>
 
   // ── Spawn Presets ──
   listSpawnPresets(): Promise<SpawnPreset[]>

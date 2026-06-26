@@ -85,10 +85,8 @@ fn accumulate_requests<T, P>(
     }
 }
 
-fn cleanup_buffer<T, R, P>(
-    mut commands: Commands,
-    buffer_query: Query<(Entity, &RequestBuffer<T>)>,
-) where
+fn cleanup_buffer<T, R, P>(mut commands: Commands, buffer_query: Query<(Entity, &RequestBuffer<T>)>)
+where
     T: Send + Sync + 'static,
     R: Send + Sync + 'static,
     P: PipelineStages,

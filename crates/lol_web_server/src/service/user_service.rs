@@ -3,11 +3,12 @@
 //! 编排 UserRepo + domain 的密码/JWT 逻辑。
 //! service 单测 mock repo，完全不碰 DB。
 
-use async_trait::async_trait;
 use std::sync::Arc;
 
+use async_trait::async_trait;
+
 use crate::domain::auth::{
-    self, User, generate_jwt, hash_password, parse_jwt, validate_password, validate_phone,
+    User, generate_jwt, hash_password, parse_jwt, validate_password, validate_phone,
     verify_password,
 };
 use crate::domain::{ServiceError, ServiceResult};
@@ -98,14 +99,15 @@ impl UserService for UserServiceImpl {
             return Err(ServiceError::Validation("手机号格式错误".into()));
         }
         self.check_code(code)?;
-        
+
         let user_opt = self.repo.find_by_phone(phone).await?;
         if let Some((user, _)) = user_opt {
             let token = generate_jwt(user.id, &self.jwt_secret)
                 .map_err(|e| ServiceError::Internal(e.to_string()))?;
             Ok(AuthResult { user, token })
         } else {
-            let hash = hash_password("123456").map_err(|e| ServiceError::Internal(e.to_string()))?;
+            let hash =
+                hash_password("123456").map_err(|e| ServiceError::Internal(e.to_string()))?;
             let user = self.repo.insert(phone, &hash).await?;
             let token = generate_jwt(user.id, &self.jwt_secret)
                 .map_err(|e| ServiceError::Internal(e.to_string()))?;
@@ -151,10 +153,11 @@ impl UserService for UserServiceImpl {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use crate::domain::{RepoError, RepoResult};
     use mockall::mock;
     use mockall::predicate::*;
+
+    use super::*;
+    use crate::domain::{RepoError, RepoResult};
 
     mock! {
         pub UserRepo {}

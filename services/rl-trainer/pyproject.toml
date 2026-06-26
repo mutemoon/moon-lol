@@ -1,0 +1,20 @@
+[project]
+name = "moonlol-trainer"
+version = "0.1.0"
+description = "MoonLoL RL training control daemon (stdlib-only REST + WebSocket telemetry)"
+requires-python = ">=3.8"
+dependencies = []
+
+[project.optional-dependencies]
+# 连接 Bevy MoonLoLEnv（rl_reset/rl_step）所需的 WS 客户端。
+bevy = ["websockets>=11"]
+
+[project.scripts]
+moonlol-trainer = "moonlol_trainer.__main__:main"
+
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["moonlol_trainer"]

@@ -1,27 +1,27 @@
 //! Handler 集成测试：使用 axum oneshot 和 mock service 验证路由。
 
 use std::sync::Arc;
-use axum::{
-    body::Body,
-    http::{Request, StatusCode},
-};
+
+use async_trait::async_trait;
+use axum::body::Body;
+use axum::http::{Request, StatusCode};
+use lol_web_server::domain::agent::{Agent, AgentInput, AgentType};
+use lol_web_server::domain::agent_snapshot::AgentSnapshot;
+use lol_web_server::domain::auth::User;
+use lol_web_server::domain::config::AiConfig;
+use lol_web_server::domain::essence::{BillingPlan, EssenceTransaction};
+use lol_web_server::domain::match_::{Match, MatchEvent, MatchStatus, Winner};
+use lol_web_server::domain::room::{Room, RoomAgentSlot, RoomConstraints};
+use lol_web_server::domain::scenario::{Scenario, ScenarioInput};
+use lol_web_server::domain::spawn_preset::{SpawnPreset, SpawnPresetInput, Team, Visibility};
+use lol_web_server::domain::{ServiceError, ServiceResult};
+use lol_web_server::handlers::{ApiResponse, AppState, AuthUserDto, create_router};
+use lol_web_server::repository::essence_repo::Subscription;
+use lol_web_server::repository::match_repo::{MatchEventInput, MatchInput};
+use lol_web_server::repository::rank_repo::{EloRating, RankQueueEntry, Season};
+use lol_web_server::service::*;
 use tower::util::ServiceExt;
 use uuid::Uuid;
-use async_trait::async_trait;
-
-use lol_web_server::domain::{
-    auth::User, config::AiConfig, spawn_preset::{SpawnPreset, SpawnPresetInput, Team, Visibility},
-    agent::{Agent, AgentInput, AgentType}, agent_snapshot::AgentSnapshot,
-    scenario::{Scenario, ScenarioInput}, room::{Room, RoomConstraints, RoomAgentSlot}, match_::{Match, MatchEvent, MatchStatus, Winner},
-    essence::{BillingPlan, EssenceTransaction},
-    ServiceError, ServiceResult,
-};
-use lol_web_server::repository::{
-    essence_repo::Subscription, rank_repo::{RankQueueEntry, EloRating, Season},
-    match_repo::{MatchInput, MatchEventInput},
-};
-use lol_web_server::service::*;
-use lol_web_server::handlers::{AppState, create_router, ApiResponse, AuthUserDto};
 
 // ── Mock Services ──
 
@@ -177,6 +177,7 @@ mockall::mock! {
     impl CommunityService for CommunityService {
         async fn browse_public(&self, sort: lol_web_server::domain::community::CommunitySort, limit: i64) -> ServiceResult<Vec<Agent>>;
         async fn fork(&self, requester_id: i32, source_id: Uuid, new_name: Option<String>) -> ServiceResult<Agent>;
+        async fn pull_upstream(&self, requester_id: i32, id: Uuid) -> ServiceResult<Agent>;
     }
 }
 
@@ -281,17 +282,22 @@ where
 }
 
 fn generate_test_token(user_id: i32) -> String {
-    use jsonwebtoken::{encode, Header, EncodingKey};
+    use jsonwebtoken::{EncodingKey, Header, encode};
     let exp = std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
         .unwrap()
-        .as_secs() + 3600;
-    let claims = lol_web_server::handlers::JwtClaims { user_id, exp: exp as usize };
+        .as_secs()
+        + 3600;
+    let claims = lol_web_server::handlers::JwtClaims {
+        user_id,
+        exp: exp as usize,
+    };
     encode(
         &Header::default(),
         &claims,
         &EncodingKey::from_secret("moon-lol-secret-key-12345".as_bytes()),
-    ).unwrap()
+    )
+    .unwrap()
 }
 
 // ── Integration Tests ──
@@ -303,13 +309,15 @@ async fn test_auth_register_success() {
     let token_clone = token.clone();
 
     let state = build_test_state(move |mocks| {
-        mocks.user.expect_register()
-            .returning(move |phone, _, _| {
-                Ok(AuthResult {
-                    user: User { id: user_id, phone: phone.to_string() },
-                    token: token_clone.clone(),
-                })
-            });
+        mocks.user.expect_register().returning(move |phone, _, _| {
+            Ok(AuthResult {
+                user: User {
+                    id: user_id,
+                    phone: phone.to_string(),
+                },
+                token: token_clone.clone(),
+            })
+        });
     });
     let app = create_router(state);
 
@@ -332,10 +340,13 @@ async fn test_auth_register_success() {
         .unwrap();
 
     assert_eq!(response.status(), StatusCode::OK);
-    
-    let body_bytes = axum::body::to_bytes(response.into_body(), 2048).await.unwrap();
-    let res: ApiResponse<lol_web_server::handlers::AuthResponse> = serde_json::from_slice(&body_bytes).unwrap();
-    
+
+    let body_bytes = axum::body::to_bytes(response.into_body(), 2048)
+        .await
+        .unwrap();
+    let res: ApiResponse<lol_web_server::handlers::AuthResponse> =
+        serde_json::from_slice(&body_bytes).unwrap();
+
     assert!(res.data.is_some());
     let data = res.data.unwrap();
     assert_eq!(data.token, "register-test-token");
@@ -369,10 +380,12 @@ async fn test_auth_me_with_valid_jwt() {
     let jwt = generate_test_token(user_id);
 
     let state = build_test_state(move |mocks| {
-        mocks.user.expect_verify_token()
-            .returning(move |_| {
-                Ok(User { id: user_id, phone: "13800000001".to_string() })
-            });
+        mocks.user.expect_verify_token().returning(move |_| {
+            Ok(User {
+                id: user_id,
+                phone: "13800000001".to_string(),
+            })
+        });
     });
     let app = create_router(state);
 
@@ -390,7 +403,9 @@ async fn test_auth_me_with_valid_jwt() {
 
     assert_eq!(response.status(), StatusCode::OK);
 
-    let body_bytes = axum::body::to_bytes(response.into_body(), 2048).await.unwrap();
+    let body_bytes = axum::body::to_bytes(response.into_body(), 2048)
+        .await
+        .unwrap();
     let res: ApiResponse<AuthUserDto> = serde_json::from_slice(&body_bytes).unwrap();
     assert_eq!(res.data.unwrap().id, user_id);
 }
@@ -401,7 +416,9 @@ async fn test_get_config_success() {
     let jwt = generate_test_token(user_id);
 
     let state = build_test_state(move |mocks| {
-        mocks.config.expect_get_config()
+        mocks
+            .config
+            .expect_get_config()
             .with(mockall::predicate::eq(user_id))
             .returning(|_| {
                 Ok(AiConfig {
@@ -426,8 +443,10 @@ async fn test_get_config_success() {
         .unwrap();
 
     assert_eq!(response.status(), StatusCode::OK);
-    
-    let body_bytes = axum::body::to_bytes(response.into_body(), 2048).await.unwrap();
+
+    let body_bytes = axum::body::to_bytes(response.into_body(), 2048)
+        .await
+        .unwrap();
     let res: ApiResponse<AiConfig> = serde_json::from_slice(&body_bytes).unwrap();
     let cfg = res.data.unwrap();
     assert_eq!(cfg.api_key, "sk-proj-testkey");
@@ -439,25 +458,25 @@ async fn test_list_agents_success() {
     let jwt = generate_test_token(user_id);
 
     let state = build_test_state(move |mocks| {
-        mocks.agent.expect_list()
+        mocks
+            .agent
+            .expect_list()
             .with(mockall::predicate::eq(user_id))
             .returning(|owner_id| {
-                Ok(vec![
-                    Agent {
-                        id: Uuid::new_v4(),
-                        owner_id,
-                        name: "Fiora Agent".to_string(),
-                        champion: "Fiora".to_string(),
-                        agent_type: AgentType::Llm,
-                        prompt: "prompt".to_string(),
-                        preamble: "preamble".to_string(),
-                        model: "model".to_string(),
-                        config_json: serde_json::json!({}),
-                        visibility: Visibility::Private,
-                        forked_from: None,
-                        upstream_agent_id: None,
-                    }
-                ])
+                Ok(vec![Agent {
+                    id: Uuid::new_v4(),
+                    owner_id,
+                    name: "Fiora Agent".to_string(),
+                    champion: "Fiora".to_string(),
+                    agent_type: AgentType::Llm,
+                    prompt: "prompt".to_string(),
+                    preamble: "preamble".to_string(),
+                    model: "model".to_string(),
+                    config_json: serde_json::json!({}),
+                    visibility: Visibility::Private,
+                    forked_from: None,
+                    upstream_agent_id: None,
+                }])
             });
     });
     let app = create_router(state);
@@ -475,8 +494,10 @@ async fn test_list_agents_success() {
         .unwrap();
 
     assert_eq!(response.status(), StatusCode::OK);
-    
-    let body_bytes = axum::body::to_bytes(response.into_body(), 2048).await.unwrap();
+
+    let body_bytes = axum::body::to_bytes(response.into_body(), 2048)
+        .await
+        .unwrap();
     let res: ApiResponse<Vec<Agent>> = serde_json::from_slice(&body_bytes).unwrap();
     assert_eq!(res.data.unwrap().len(), 1);
 }
@@ -488,8 +509,13 @@ async fn test_room_join_success() {
     let room_id = Uuid::new_v4();
 
     let state = build_test_state(move |mocks| {
-        mocks.room.expect_join()
-            .with(mockall::predicate::eq(user_id), mockall::predicate::eq(room_id))
+        mocks
+            .room
+            .expect_join()
+            .with(
+                mockall::predicate::eq(user_id),
+                mockall::predicate::eq(room_id),
+            )
             .returning(|_, _| Ok(()));
     });
     let app = create_router(state);
@@ -515,7 +541,9 @@ async fn test_essence_balance_error_mapping() {
     let jwt = generate_test_token(user_id);
 
     let state = build_test_state(move |mocks| {
-        mocks.essence.expect_get_balance()
+        mocks
+            .essence
+            .expect_get_balance()
             .with(mockall::predicate::eq(user_id))
             .returning(|_| Err(ServiceError::Forbidden));
     });

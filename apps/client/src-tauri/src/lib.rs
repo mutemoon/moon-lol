@@ -192,7 +192,6 @@ fn delete_hero_preset(app: tauri::AppHandle, name: String) -> Result<(), error::
     Ok(())
 }
 
-
 /// 出生点预设：可复用的命名坐标，纯前端持久化，无运行时副作用。
 #[derive(serde::Serialize, serde::Deserialize, Clone, Debug)]
 pub struct SpawnPreset {
@@ -622,7 +621,6 @@ pub fn run() {
             list_spawn_presets,
             save_spawn_preset,
             delete_spawn_preset,
-
             list_hero_presets,
             save_hero_preset,
             delete_hero_preset,

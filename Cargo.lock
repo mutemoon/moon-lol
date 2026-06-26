@@ -6754,6 +6754,8 @@ version = "0.17.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4f467dd6dccf739c208452f8014c75c18bb8301b050ad1cfb27153803edb0f51"
 dependencies = [
+ "allocator-api2",
+ "equivalent",
  "foldhash 0.2.0",
 ]
 
@@ -8792,6 +8794,7 @@ checksum = "5e5032e24019045c762d3c0f28f5b6b8bbf38563a65908389bf7978758920897"
 name = "lol_agent"
 version = "0.1.0"
 dependencies = [
+ "base64 0.22.1",
  "bevy",
  "lol_base",
  "lol_champions",
@@ -8799,6 +8802,8 @@ dependencies = [
  "lol_render",
  "lol_server",
  "rand 0.9.4",
+ "rmp-serde",
+ "rquickjs",
  "serde",
  "serde_json",
  "tokio",
@@ -11700,6 +11705,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "dc897dd8d9e8bd1ed8cdad82b5966c3e0ecae09fb1907d58efaa013543185d0a"
 
 [[package]]
+name = "relative-path"
+version = "2.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bca40a312222d8ba74837cb474edef44b37f561da5f773981007a10bbaa992b0"
+dependencies = [
+ "serde",
+]
+
+[[package]]
 name = "renderdoc-sys"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -11957,6 +11971,25 @@ dependencies = [
 ]
 
 [[package]]
+name = "rmp"
+version = "0.8.15"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4ba8be72d372b2c9b35542551678538b562e7cf86c3315773cae48dfbfe7790c"
+dependencies = [
+ "num-traits",
+]
+
+[[package]]
+name = "rmp-serde"
+version = "1.3.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "72f81bee8c8ef9b577d1681a70ebbc962c232461e397b22c208c43c04b67a155"
+dependencies = [
+ "rmp",
+ "serde",
+]
+
+[[package]]
 name = "roaring"
 version = "0.10.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -12109,6 +12142,35 @@ dependencies = [
  "serde_derive",
  "typeid",
  "unicode-ident",
+]
+
+[[package]]
+name = "rquickjs"
+version = "0.12.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c0688f8b0192998cca685adefdfad3483da295fa40a0ec406b4c14ecd729e858"
+dependencies = [
+ "rquickjs-core",
+]
+
+[[package]]
+name = "rquickjs-core"
+version = "0.12.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2fee8c5383f0cfda3b980a80ca4520e726e09b593c59562f579daa51b6c20411"
+dependencies = [
+ "hashbrown 0.17.0",
+ "relative-path",
+ "rquickjs-sys",
+]
+
+[[package]]
+name = "rquickjs-sys"
+version = "0.12.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "698077537c286a169de8693b216672bcef148bf2e2e112ebf50758c68e9afa09"
+dependencies = [
+ "cc",
 ]
 
 [[package]]

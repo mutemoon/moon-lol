@@ -20,7 +20,12 @@ use lol_server::events::CommandWsRequest;
 use lol_server::protocol::WsResponse;
 use serde_json::{Value, from_value, json, to_value};
 
+use crate::driver::{AgentDriver, DEFAULT_TICK_BUDGET, ScriptAgent, ScriptDriver, ScriptRuntimes};
 use crate::models::{Observe, ObserveHero, ObserveMinion, ObserveMyself, ObserveSkill};
+use crate::rl::{
+    DEFAULT_MAX_STEPS, MoonLoLEnv, RewardShaper, RlEnvs, b64_decode, b64_encode, pack_observe,
+    unpack_action,
+};
 
 type PlayerQ<'w, 's> = Query<
     'w,
@@ -235,6 +240,23 @@ struct ActionWithEntity {
     action: action::Action,
 }
 
+/// 从指令 params 解析目标英雄实体：优先 `entity_id`，否则取首个存活英雄。
+fn resolve_target(player_q: &PlayerQ, params: &Value) -> Result<Entity, String> {
+    if let Some(eid) = params.get("entity_id").and_then(|v| v.as_u64()) {
+        let ent = Entity::from_bits(eid);
+        if player_q.get(ent).is_err() {
+            return Err(format!("未找到指定的英雄实体 ID: {}", eid));
+        }
+        Ok(ent)
+    } else {
+        player_q
+            .iter()
+            .next()
+            .map(|((entity, ..), ..)| entity)
+            .ok_or_else(|| "未找到存活的英雄实体".to_string())
+    }
+}
+
 pub fn on_command_ws_request(
     event: On<CommandWsRequest>,
     mut commands: Commands,
@@ -250,6 +272,7 @@ pub fn on_command_ws_request(
     _riven_q: Query<Entity, With<Riven>>,
     _fiora_q: Query<Entity, With<Fiora>>,
     agent_id_q: Query<(Entity, &AgentId)>,
+    mut rl_envs: ResMut<RlEnvs>,
 ) {
     let cmd = event.cmd.as_str();
     let id = event.id;
@@ -326,6 +349,102 @@ pub fn on_command_ws_request(
 
             Ok(json!({ "status": "success" }))
         })(),
+        "set_script" => (|| -> Result<Value, String> {
+            // 运行时为指定实体附加/热重载 Script Agent 脚本。
+            let eid = params
+                .get("entity_id")
+                .and_then(|v| v.as_u64())
+                .ok_or_else(|| "缺少 entity_id".to_string())?;
+            let source = params
+                .get("source")
+                .and_then(|v| v.as_str())
+                .ok_or_else(|| "缺少 source".to_string())?
+                .to_string();
+            let ent = Entity::from_bits(eid);
+            if player_q.get(ent).is_err() {
+                return Err(format!("未找到指定的英雄实体 ID: {}", eid));
+            }
+            commands.entity(ent).insert(ScriptAgent { source });
+            Ok(json!({ "status": "success" }))
+        })(),
+        "get_observe_packed" => (|| -> Result<Value, String> {
+            // 高频推理：msgpack(+base64) 编码的观测流。
+            let target_entity = resolve_target(&player_q, params)?;
+            let obs = get_observe(
+                target_entity,
+                &player_q,
+                &skills_q,
+                &minions_q,
+                &champion_q,
+                &transforms_q,
+                time_res.elapsed_secs(),
+            )
+            .ok_or_else(|| "无法获取当前游戏局势观测数据".to_string())?;
+            let bytes = pack_observe(&obs)?;
+            Ok(json!({ "msgpack_b64": b64_encode(&bytes) }))
+        })(),
+        "action_packed" => (|| -> Result<Value, String> {
+            // 高频推理：从 msgpack(+base64) 解码动作并下发。
+            let b64 = params
+                .get("msgpack_b64")
+                .and_then(|v| v.as_str())
+                .ok_or_else(|| "缺少 msgpack_b64".to_string())?;
+            let action = unpack_action(&b64_decode(b64)?)?;
+            let target_entity = resolve_target(&player_q, params)?;
+            commands.trigger(CommandAction {
+                entity: target_entity,
+                action,
+            });
+            Ok(json!({ "status": "success" }))
+        })(),
+        "rl_reset" => (|| -> Result<Value, String> {
+            // Gym reset：初始化 MoonLoLEnv，返回初始观测（msgpack+base64）。
+            let target_entity = resolve_target(&player_q, params)?;
+            let obs = get_observe(
+                target_entity,
+                &player_q,
+                &skills_q,
+                &minions_q,
+                &champion_q,
+                &transforms_q,
+                time_res.elapsed_secs(),
+            )
+            .ok_or_else(|| "无法获取当前游戏局势观测数据".to_string())?;
+            let shaper = params
+                .get("config_json")
+                .map(RewardShaper::from_config_json)
+                .unwrap_or_default();
+            let mut env = MoonLoLEnv::new(shaper, DEFAULT_MAX_STEPS);
+            let bytes = pack_observe(&obs)?;
+            env.reset(obs);
+            rl_envs.0.insert(target_entity, env);
+            Ok(json!({ "observation_b64": b64_encode(&bytes) }))
+        })(),
+        "rl_step" => (|| -> Result<Value, String> {
+            // Gym step：以当前观测计算 reward 分项与终止/截断，返回 StepResult + 新观测。
+            let target_entity = resolve_target(&player_q, params)?;
+            let obs = get_observe(
+                target_entity,
+                &player_q,
+                &skills_q,
+                &minions_q,
+                &champion_q,
+                &transforms_q,
+                time_res.elapsed_secs(),
+            )
+            .ok_or_else(|| "无法获取当前游戏局势观测数据".to_string())?;
+            let env = rl_envs
+                .0
+                .get_mut(&target_entity)
+                .ok_or_else(|| "请先调用 rl_reset 初始化环境".to_string())?;
+            let bytes = pack_observe(&obs)?;
+            let result = env.step(obs);
+            let mut v = serde_json::to_value(&result).map_err(|e| e.to_string())?;
+            if let Value::Object(ref mut map) = v {
+                map.insert("observation_b64".into(), json!(b64_encode(&bytes)));
+            }
+            Ok(v)
+        })(),
         _ => return, // 未知指令不处理
     };
 
@@ -335,4 +454,70 @@ pub fn on_command_ws_request(
             Err(e) => WsResponse::err(id, e),
         });
     }
+}
+
+/// 每 FixedUpdate 驱动所有 Script Agent：构建观测 → 运行脚本 → 下发动作。
+///
+/// - 首帧为实体创建 [`ScriptDriver`]；`ScriptAgent.source` 变更则热重载（脚本 `state` 保留）。
+/// - 脚本执行受时间片熔断保护，死循环不会挂起引擎。
+/// - 已不再携带 `ScriptAgent` 的实体（如已销毁）会被清理出运行时表。
+pub fn drive_script_agents(
+    mut commands: Commands,
+    time: Res<Time>,
+    mut runtimes: NonSendMut<ScriptRuntimes>,
+    script_q: Query<(Entity, Ref<ScriptAgent>)>,
+    player_q: PlayerQ,
+    skills_q: Query<(&Skill, Option<&CoolDown>)>,
+    minions_q: Query<
+        (Entity, &Transform, &Health, Option<&Vital>, &Team, &Lane),
+        (With<Minion>, Without<Death>),
+    >,
+    champion_q: Query<(Entity, &Transform, &Health, &Team), (With<Champion>, Without<Death>)>,
+    transforms_q: Query<&Transform>,
+) {
+    for (entity, script) in script_q.iter() {
+        if !runtimes.0.contains_key(&entity) {
+            match ScriptDriver::new(DEFAULT_TICK_BUDGET) {
+                Ok(mut d) => {
+                    d.reload(&script.source);
+                    runtimes.0.insert(entity, d);
+                }
+                Err(e) => {
+                    warn!("创建 Script 驱动失败 ({entity}): {e}");
+                    continue;
+                }
+            }
+        } else if script.is_changed() {
+            if let Some(d) = runtimes.0.get_mut(&entity) {
+                d.reload(&script.source);
+            }
+        }
+
+        let Some(driver) = runtimes.0.get_mut(&entity) else {
+            continue;
+        };
+
+        let Some(obs) = get_observe(
+            entity,
+            &player_q,
+            &skills_q,
+            &minions_q,
+            &champion_q,
+            &transforms_q,
+            time.elapsed_secs(),
+        ) else {
+            continue;
+        };
+
+        driver.observe(&obs);
+        for action in driver.actions() {
+            commands.trigger(CommandAction { entity, action });
+        }
+        if let Some(err) = driver.last_error() {
+            warn!("Script Agent {entity} 执行错误: {err}");
+        }
+    }
+
+    // 清理已不存在 ScriptAgent 的实体对应的运行时。
+    runtimes.0.retain(|e, _| script_q.get(*e).is_ok());
 }

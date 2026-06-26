@@ -1,0 +1,18 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "pnpm fix"
+          },
+          {
+            "type": "command",
+            "command": "pnpm format"
+          }
+        ]
+      }
+    ]
+  }
+}

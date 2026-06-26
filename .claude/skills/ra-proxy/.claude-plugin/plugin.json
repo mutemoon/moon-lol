@@ -1,0 +1,19 @@
+{
+  "name": "ra-proxy",
+  "version": "0.1.0",
+  "description": "LSP proxy to rust-analyzer with priming gate and message logging (bevy workaround).",
+  "author": {
+    "name": "赵浩然",
+    "email": "1036066414@qq.com"
+  },
+  "lspServers": {
+    "rust-analyzer": {
+      "command": "node",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/ra-proxy.js"],
+      "extensionToLanguage": {
+        ".rs": "rust"
+      },
+      "maxRestarts": 5
+    }
+  }
+}

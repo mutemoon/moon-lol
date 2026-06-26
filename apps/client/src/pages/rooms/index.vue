@@ -23,7 +23,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Users2Icon, KeyRoundIcon, PlusIcon, Loader2Icon } from "@lucide/vue";
+import { Users2Icon, KeyRoundIcon, PlusIcon, Loader2Icon, RotateCwIcon } from "@lucide/vue";
 
 // 房间大厅与我的房间。
 // 数据特点：每个房间是一组结构化属性（名称 / 人数 / 模式 / 状态），适合卡片网格而非长列表。
@@ -56,8 +56,9 @@ const draft = ref<{ name: string; constraints: RoomConstraints }>({
   },
 });
 
+const refreshing = ref(false);
+
 async function refresh() {
-  loading.value = true;
   try {
     const [mine, lobby] = await Promise.all([
       roomsApi.listMine().catch(() => [] as Room[]),
@@ -68,6 +69,12 @@ async function refresh() {
   } finally {
     loading.value = false;
   }
+}
+
+async function handleManualRefresh() {
+  refreshing.value = true;
+  await refresh();
+  refreshing.value = false;
 }
 
 async function handleJoinByCode() {
@@ -107,11 +114,20 @@ async function handleCreate() {
 }
 
 async function handleJoin(room: Room) {
+  // 如果已经是该房间成员，直接进入，无需重复调用 join 接口
+  const isMember = myRooms.value.some((r) => r.id === room.id);
+  if (isMember) {
+    router.push(`/rooms/${room.id}`);
+    return;
+  }
   try {
     await roomsApi.join(room.id);
     router.push(`/rooms/${room.id}`);
   } catch (e: any) {
     console.error(e);
+    if (e.message !== "Authentication required") {
+      alert(e.message || "加入房间失败");
+    }
   }
 }
 
@@ -131,10 +147,16 @@ onMounted(refresh);
         <h1 class="text-2xl font-semibold tracking-tight">房间</h1>
         <p class="text-muted-foreground text-sm">与好友组局对战、社交观战 AI 对打</p>
       </div>
-      <Button @click="showCreate = true">
-        <PlusIcon class="size-4" />
-        创建房间
-      </Button>
+      <div class="flex items-center gap-2">
+        <Button variant="outline" size="icon" @click="handleManualRefresh" :disabled="refreshing || loading" title="刷新列表" data-testid="rooms-refresh-btn">
+          <Loader2Icon v-if="refreshing" class="size-4 animate-spin" />
+          <RotateCwIcon v-else class="size-4" />
+        </Button>
+        <Button @click="showCreate = true" data-testid="create-room-btn">
+          <PlusIcon class="size-4" />
+          创建房间
+        </Button>
+      </div>
     </header>
 
     <!-- 双入口：加入邀请码 + Tabs -->
@@ -167,11 +189,11 @@ onMounted(refresh);
     <!-- Tabs: 大厅 / 我的 -->
     <Tabs v-model="activeTab" class="flex min-h-0 flex-1 flex-col gap-6">
       <TabsList>
-        <TabsTrigger value="lobby">
+        <TabsTrigger value="lobby" data-testid="rooms-tab-lobby">
           公开大厅
           <Badge variant="secondary" class="ml-1">{{ visibleLobby.length }}</Badge>
         </TabsTrigger>
-        <TabsTrigger value="mine">
+        <TabsTrigger value="mine" data-testid="rooms-tab-mine">
           我的房间
           <Badge variant="secondary" class="ml-1">{{ myRooms.length }}</Badge>
         </TabsTrigger>
@@ -188,6 +210,7 @@ onMounted(refresh);
             :key="r.id"
             class="hover:bg-muted/50 group flex flex-col gap-3 rounded-lg border p-5 text-left transition-colors"
             @click="handleJoin(r)"
+            data-testid="room-card"
           >
             <div class="flex items-start justify-between gap-2">
               <h3 class="truncate text-sm font-semibold leading-tight">{{ r.name }}</h3>
@@ -214,6 +237,7 @@ onMounted(refresh);
             :key="r.id"
             class="hover:bg-muted/50 group flex flex-col gap-3 rounded-lg border p-5 text-left transition-colors"
             @click="router.push(`/rooms/${r.id}`)"
+            data-testid="room-card"
           >
             <div class="flex items-start justify-between gap-2">
               <h3 class="truncate text-sm font-semibold leading-tight">{{ r.name }}</h3>
@@ -246,7 +270,7 @@ onMounted(refresh);
         <div class="space-y-4 py-2">
           <div class="space-y-1.5">
             <Label>房间名称</Label>
-            <Input v-model="draft.name" placeholder="周末野队挑战" />
+            <Input v-model="draft.name" placeholder="周末野队挑战" data-testid="create-room-name-input" />
           </div>
 
           <div class="grid grid-cols-2 gap-3">
@@ -292,7 +316,7 @@ onMounted(refresh);
 
         <DialogFooter>
           <Button variant="ghost" @click="showCreate = false">取消</Button>
-          <Button :disabled="creating" @click="handleCreate">
+          <Button :disabled="creating" @click="handleCreate" data-testid="create-room-submit-btn">
             <Loader2Icon v-if="creating" class="size-4 animate-spin" />
             创建
           </Button>

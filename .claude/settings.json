@@ -47,19 +47,10 @@
     "Stop": [
       {
         "hooks": [
-          {
-            "type": "command",
-            "command": "pnpm fix"
-          },
-          {
-            "type": "command",
-            "command": "pnpm format"
-          }
+          { "type": "command", "command": "pnpm fix" },
+          { "type": "command", "command": "pnpm format" }
         ]
       }
     ]
-  },
-  "enabledPlugins": {
-    "rust-analyzer-lsp@claude-plugins-official": true
   }
 }

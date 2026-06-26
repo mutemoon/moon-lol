@@ -12,6 +12,14 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Loader2Icon } from "@lucide/vue";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import {
   ArrowLeftIcon,
   PauseIcon,
@@ -78,7 +86,7 @@ const chaosAgents = computed(() => {
 async function refresh() {
   if (paused.value) return;
   try {
-    if (!match.value) {
+    if (!match.value || match.value.status === "running") {
       match.value = await matchesApi.get(matchId.value);
     }
     const delta = await matchesApi.getEvents(matchId.value, lastSeq, 200);
@@ -124,13 +132,27 @@ function eventTone(e: MatchEvent): string {
   return "text-muted-foreground";
 }
 
-async function stopMatch() {
-  if (!confirm("结束此对局？")) return;
+const confirmDialogOpen = ref(false);
+const confirmDialogLoading = ref(false);
+const confirmDialogError = ref("");
+
+function triggerStopMatch() {
+  confirmDialogOpen.value = true;
+  confirmDialogError.value = "";
+}
+
+async function handleConfirmStop() {
+  confirmDialogLoading.value = true;
+  confirmDialogError.value = "";
   try {
     await matchesApi.stop(matchId.value);
+    confirmDialogOpen.value = false;
     await refresh();
-  } catch (e) {
+  } catch (e: any) {
     console.error(e);
+    confirmDialogError.value = e.message || "结束对局失败";
+  } finally {
+    confirmDialogLoading.value = false;
   }
 }
 
@@ -176,7 +198,8 @@ onUnmounted(() => {
           variant="ghost"
           size="sm"
           class="text-destructive"
-          @click="stopMatch"
+          @click="triggerStopMatch"
+          data-testid="stop-match-btn"
         >
           <SquareIcon class="size-3.5" />
           结束对局
@@ -296,5 +319,32 @@ onUnmounted(() => {
         </div>
       </aside>
     </div>
+
+    <!-- 结束对局确认对话框 -->
+    <Dialog :open="confirmDialogOpen" @update:open="(v) => (confirmDialogOpen = v)">
+      <DialogContent class="max-w-sm">
+        <DialogHeader>
+          <DialogTitle>结束此对局？</DialogTitle>
+        </DialogHeader>
+        <div class="space-y-3 py-2 text-sm text-muted-foreground">
+          <p>强制结束对局将直接中断当前 Bevy 仿真环境，并且不可逆。确认要继续吗？</p>
+          <p v-if="confirmDialogError" class="text-destructive text-xs">{{ confirmDialogError }}</p>
+        </div>
+        <DialogFooter>
+          <Button variant="ghost" :disabled="confirmDialogLoading" @click="confirmDialogOpen = false" data-testid="confirm-dialog-cancel-btn">
+            取消
+          </Button>
+          <Button
+            variant="destructive"
+            :disabled="confirmDialogLoading"
+            @click="handleConfirmStop"
+            data-testid="confirm-dialog-submit-btn"
+          >
+            <Loader2Icon v-if="confirmDialogLoading" class="size-4 animate-spin mr-1.5" />
+            确认结束
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   </div>
 </template>

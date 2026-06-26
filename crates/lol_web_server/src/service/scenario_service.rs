@@ -1,7 +1,8 @@
 //! Scenario 子系统的 service 层。
 
-use async_trait::async_trait;
 use std::sync::Arc;
+
+use async_trait::async_trait;
 use uuid::Uuid;
 
 use crate::domain::scenario::{Scenario, ScenarioInput, validate_name};
@@ -120,11 +121,12 @@ impl ScenarioService for ScenarioServiceImpl {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use crate::domain::RepoResult;
     use chrono::Utc;
     use mockall::mock;
     use mockall::predicate::*;
+
+    use super::*;
+    use crate::domain::RepoResult;
 
     mock! {
         pub ScenarioRepo {}

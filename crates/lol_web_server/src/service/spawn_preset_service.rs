@@ -1,7 +1,8 @@
 //! SpawnPreset 子系统的 service 层。
 
-use async_trait::async_trait;
 use std::sync::Arc;
+
+use async_trait::async_trait;
 use uuid::Uuid;
 
 use crate::domain::spawn_preset::{SpawnPreset, SpawnPresetInput, validate_coord, validate_name};
@@ -98,11 +99,12 @@ impl SpawnPresetService for SpawnPresetServiceImpl {
 
 #[cfg(test)]
 mod tests {
+    use mockall::mock;
+    use mockall::predicate::*;
+
     use super::*;
     use crate::domain::RepoResult;
     use crate::domain::spawn_preset::{Team, Visibility};
-    use mockall::mock;
-    use mockall::predicate::*;
 
     mock! {
         pub SpawnPresetRepo {}

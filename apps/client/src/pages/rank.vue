@@ -170,7 +170,7 @@ onMounted(async () => {
         <div class="space-y-1.5">
           <Label>Agent</Label>
           <Select v-model="selectedAgent" @update:modelValue="loadSnapshots">
-            <SelectTrigger>
+            <SelectTrigger data-testid="rank-agent-select">
               <SelectValue placeholder="选择 Agent" />
             </SelectTrigger>
             <SelectContent>
@@ -184,7 +184,7 @@ onMounted(async () => {
         <div class="space-y-1.5">
           <Label>参赛快照</Label>
           <Select v-model="selectedSnapshot" :disabled="snapshots.length === 0">
-            <SelectTrigger>
+            <SelectTrigger data-testid="rank-snapshot-select">
               <SelectValue :placeholder="snapshots.length ? '选择快照' : '尚未发布快照'" />
             </SelectTrigger>
             <SelectContent>
@@ -206,7 +206,7 @@ onMounted(async () => {
         <span v-else class="text-muted-foreground text-xs">
           赛季：{{ season ? new Date(season.starts_at).toLocaleDateString() : "—" }}
         </span>
-        <Button :disabled="enqueueing" @click="handleEnqueue">
+        <Button :disabled="enqueueing" @click="handleEnqueue" data-testid="rank-enqueue-btn">
           <RocketIcon class="size-4" />
           {{ enqueueing ? "入队中…" : "加入匹配池" }}
         </Button>
@@ -240,7 +240,7 @@ onMounted(async () => {
               入队 {{ ago(q.enqueued_at) }} 前 · Agent {{ q.agent_id.slice(0, 8) }}
             </div>
           </div>
-          <Button variant="ghost" size="sm">
+          <Button variant="ghost" size="sm" data-testid="rank-dequeue-btn">
             <XIcon class="size-3.5" />
             退出
           </Button>

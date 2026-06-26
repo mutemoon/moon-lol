@@ -1,7 +1,8 @@
 //! AgentSnapshot 子系统的 service 层。
 
-use async_trait::async_trait;
 use std::sync::Arc;
+
+use async_trait::async_trait;
 use uuid::Uuid;
 
 use crate::domain::agent_snapshot::{AgentSnapshot, next_version};
@@ -89,13 +90,14 @@ impl AgentSnapshotService for AgentSnapshotServiceImpl {
 
 #[cfg(test)]
 mod tests {
+    use chrono::Utc;
+    use mockall::mock;
+    use mockall::predicate::*;
+
     use super::*;
     use crate::domain::agent::{Agent, AgentType};
     use crate::domain::spawn_preset::{SpawnPreset, Team, Visibility};
     use crate::domain::{RepoError, RepoResult};
-    use chrono::Utc;
-    use mockall::mock;
-    use mockall::predicate::*;
 
     mock! {
         pub SnapshotRepo {}
@@ -121,6 +123,7 @@ mod tests {
             async fn insert(&self, owner_id: i32, input: &crate::domain::agent::AgentInput) -> RepoResult<Agent>;
             async fn update(&self, id: Uuid, input: &crate::domain::agent::AgentInput) -> RepoResult<()>;
             async fn update_visibility(&self, id: Uuid, visibility: Visibility) -> RepoResult<()>;
+            async fn set_fork_linkage(&self, id: Uuid, forked_from: Option<Uuid>, upstream: Option<Uuid>) -> RepoResult<()>;
             async fn delete(&self, id: Uuid) -> RepoResult<()>;
             async fn count_by_owner(&self, owner_id: i32) -> RepoResult<i64>;
         }

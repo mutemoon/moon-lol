@@ -6,6 +6,7 @@ export type GameEventType =
   | 'agent-finished'
   | 'agent-history-updated'
   | 'connection-status'
+  | 'unauthorized'
 
 export interface IEventBus {
   on<T = any>(event: GameEventType, handler: (data: T) => void): () => void

@@ -28,6 +28,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import ScriptEditor from "@/components/agent/ScriptEditor.vue";
+import ForkDiffDialog from "@/components/agent/ForkDiffDialog.vue";
+import { DEFAULT_SCRIPT } from "@/services/scriptAgentTemplates";
 import {
   Card,
   CardHeader,
@@ -55,6 +58,10 @@ import {
   ArrowLeftIcon,
   RocketIcon,
   CheckIcon,
+  DownloadIcon,
+  UploadIcon,
+  AlertCircleIcon,
+  CloudUploadIcon,
 } from "@lucide/vue";
 
 // 我的选手 (Agent) 管理页（产品文档 §2.1 / §2.5）。
@@ -85,6 +92,36 @@ const emptyDraft = (): HeroPreset => ({
 });
 const draft = ref<HeroPreset>(emptyDraft());
 const configJsonStr = ref("{}");
+// Script Agent 的脚本源码单独维护，保存时写入 config_json.script。
+const scriptSource = ref("");
+// LLM Agent 的思考深度（1-5），保存时写入 config_json.thinking_depth。
+const thinkingDepth = ref(2);
+// RL Agent 配置：权重路径 (.pth)、BYO 推理端点、Reward Shaper 权重表。
+const RL_REWARD_KEYS = [
+  "last_hit",
+  "kill",
+  "death",
+  "assist",
+  "gold",
+  "level",
+  "health",
+  "time",
+  "proximity",
+] as const;
+const defaultRlRewards = (): Record<string, number> => ({
+  last_hit: 1.0,
+  kill: 5.0,
+  death: -5.0,
+  assist: 2.0,
+  gold: 0.0,
+  level: 1.0,
+  health: 1.0,
+  time: -0.001,
+  proximity: 0.0,
+});
+const rlModelPath = ref("");
+const rlEndpoint = ref("");
+const rlRewards = ref<Record<string, number>>(defaultRlRewards());
 
 const errorMsg = ref("");
 const successMsg = ref("");
@@ -94,6 +131,10 @@ const showDeleteConfirm = ref(false);
 const cloudAgents = ref<Agent[]>([]);
 const snapshotsByAgentId = ref<Record<string, AgentSnapshot[]>>({});
 const publishing = ref(false);
+// Fork 上游同步：解析出的上游 Agent、差异对话框开关、拉取中状态。
+const upstreamAgent = ref<Agent | null>(null);
+const showForkDiff = ref(false);
+const pulling = ref(false);
 
 function cloudAgentByName(name: string): Agent | undefined {
   return cloudAgents.value.find((a) => a.name === name);
@@ -140,15 +181,30 @@ function enterEdit(name: string) {
   editingName.value = name;
   draft.value = { ...p };
   configJsonStr.value = JSON.stringify(p.config_json || {}, null, 2);
+  scriptSource.value =
+    typeof p.config_json?.script === "string" ? p.config_json.script : DEFAULT_SCRIPT;
+  thinkingDepth.value =
+    typeof p.config_json?.thinking_depth === "number" ? p.config_json.thinking_depth : 2;
+  rlModelPath.value = typeof p.config_json?.model_path === "string" ? p.config_json.model_path : "";
+  rlEndpoint.value =
+    typeof p.config_json?.inference_endpoint === "string" ? p.config_json.inference_endpoint : "";
+  rlRewards.value = { ...defaultRlRewards(), ...(p.config_json?.reward_shaper || {}) };
   errorMsg.value = "";
   successMsg.value = "";
   mode.value = "edit";
+  void loadUpstream();
 }
 
 function startNew() {
   editingName.value = null;
   draft.value = emptyDraft();
   configJsonStr.value = "{}";
+  scriptSource.value = DEFAULT_SCRIPT;
+  thinkingDepth.value = 2;
+  rlModelPath.value = "";
+  rlEndpoint.value = "";
+  rlRewards.value = defaultRlRewards();
+  upstreamAgent.value = null;
   errorMsg.value = "";
   successMsg.value = "";
   mode.value = "edit";
@@ -169,22 +225,100 @@ async function handleSave() {
     errorMsg.value = t("heroes.errorFillName");
     return;
   }
-  if (draft.value.agent_type !== "llm") {
-    try {
-      draft.value.config_json = JSON.parse(configJsonStr.value || "{}");
-    } catch {
-      errorMsg.value = t("heroes.invalidJson");
-      return;
-    }
+  if (draft.value.agent_type === "script") {
+    draft.value.config_json = { script: scriptSource.value };
+  } else if (draft.value.agent_type === "rl") {
+    draft.value.config_json = {
+      model_path: rlModelPath.value.trim(),
+      inference_endpoint: rlEndpoint.value.trim(),
+      reward_shaper: { ...rlRewards.value },
+    };
   } else {
-    draft.value.config_json = {};
+    draft.value.config_json = { thinking_depth: thinkingDepth.value };
   }
   try {
     await store.saveHeroPreset({ ...draft.value, name });
     editingName.value = name;
+    await loadCloudAgents();
     successMsg.value = t("heroes.successSave");
   } catch (e: any) {
     errorMsg.value = e.message || t("heroes.errorSave");
+  }
+}
+
+// ── 一键同步本地选手到云端 ──
+const syncing = ref(false);
+
+// 按当前编辑态的决策类型组装 config_json（与保存逻辑一致）。
+function buildDraftConfigJson(): Record<string, unknown> {
+  if (draft.value.agent_type === "script") return { script: scriptSource.value };
+  if (draft.value.agent_type === "rl") {
+    return {
+      model_path: rlModelPath.value.trim(),
+      inference_endpoint: rlEndpoint.value.trim(),
+      reward_shaper: { ...rlRewards.value },
+    };
+  }
+  return { thinking_depth: thinkingDepth.value };
+}
+
+// 把一个本地预设 upsert 到云端 Axum 服务器（按名称对齐：存在则更新，否则创建）。
+async function uploadPresetToCloud(preset: HeroPreset) {
+  const body = {
+    name: preset.name,
+    champion: preset.champion,
+    agent_type: preset.agent_type,
+    prompt: preset.prompt,
+    preamble: preset.preamble || "",
+    model: preset.model || "",
+    config_json: preset.config_json || {},
+  };
+  const existing = cloudAgentByName(preset.name);
+  if (existing) {
+    await agentsApi.update(existing.id, body);
+  } else {
+    await agentsApi.create({ ...body, visibility: "private" });
+  }
+}
+
+// 编辑页：同步当前选手（含未保存的编辑态）到云端。
+async function syncCurrentToCloud() {
+  errorMsg.value = "";
+  successMsg.value = "";
+  const name = draft.value.name.trim();
+  if (!name) {
+    errorMsg.value = t("heroes.errorFillName");
+    return;
+  }
+  syncing.value = true;
+  try {
+    await uploadPresetToCloud({ ...draft.value, name, config_json: buildDraftConfigJson() });
+    await loadCloudAgents();
+    successMsg.value = t("heroes.syncSuccess");
+  } catch (e: any) {
+    errorMsg.value = e?.message || t("heroes.syncFailed");
+  } finally {
+    syncing.value = false;
+  }
+}
+
+// 列表页：把全部本地选手同步到云端。
+async function syncAllToCloud() {
+  errorMsg.value = "";
+  successMsg.value = "";
+  syncing.value = true;
+  try {
+    let count = 0;
+    for (const p of heroPresets.value) {
+      await uploadPresetToCloud(p);
+      count += 1;
+    }
+    await loadCloudAgents();
+    successMsg.value = t("heroes.syncAllSuccess", { count });
+  } catch (e: any) {
+    errorMsg.value = e?.message || t("heroes.syncFailed");
+  } finally {
+    syncing.value = false;
   }
 }
 
@@ -205,6 +339,42 @@ async function handlePublishSnapshot() {
     errorMsg.value = e.message || t("heroes.publishFailed");
   } finally {
     publishing.value = false;
+  }
+}
+
+// ── 上游同步（Fork 溯源） ──
+const upstreamId = computed<string | null>(() => {
+  const ca = currentCloudAgent.value;
+  return ca ? ca.upstream_agent_id ?? ca.forked_from ?? null : null;
+});
+
+async function loadUpstream() {
+  upstreamAgent.value = null;
+  const id = upstreamId.value;
+  if (!id) return;
+  try {
+    upstreamAgent.value = await agentsApi.get(id);
+  } catch {
+    upstreamAgent.value = null;
+  }
+}
+
+async function applyPull() {
+  const ca = currentCloudAgent.value;
+  if (!ca) return;
+  pulling.value = true;
+  errorMsg.value = "";
+  successMsg.value = "";
+  try {
+    await agentsApi.pullUpstream(ca.id);
+    await Promise.all([store.loadHeroPresets(), loadCloudAgents()]);
+    if (editingName.value) enterEdit(editingName.value);
+    showForkDiff.value = false;
+    successMsg.value = t("heroes.pullSuccess");
+  } catch (e: any) {
+    errorMsg.value = e?.message || t("heroes.pullFailed");
+  } finally {
+    pulling.value = false;
   }
 }
 
@@ -248,6 +418,64 @@ function latestSnapshotLabel(name: string): string {
   return `v${first.version}`;
 }
 
+// 未发布改动指示：云端 Agent 的 updated_at 晚于最新快照，说明改了配置但没重新发布。
+// 从未发布过快照的（且已注册云端）也视为「有未发布改动」。
+function hasUnpublishedChanges(name: string): boolean {
+  const ca = cloudAgentByName(name);
+  if (!ca) return false;
+  const snaps = snapshotsFor(name);
+  const latest = snaps[0];
+  if (!latest) return true;
+  return new Date(ca.updated_at).getTime() > new Date(latest.created_at).getTime();
+}
+
+const currentHasUnpublished = computed(() =>
+  draft.value.name ? hasUnpublishedChanges(draft.value.name) : false,
+);
+
+// ── JSON 导入导出 ──
+const importInput = ref<HTMLInputElement | null>(null);
+
+function exportPresets() {
+  const data = JSON.stringify(heroPresets.value, null, 2);
+  const blob = new Blob([data], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `moonlol-agents-${new Date().toISOString().slice(0, 10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function triggerImport() {
+  importInput.value?.click();
+}
+
+async function importPresets(ev: Event) {
+  const target = ev.target as HTMLInputElement;
+  const file = target.files?.[0];
+  errorMsg.value = "";
+  successMsg.value = "";
+  if (!file) return;
+  try {
+    const parsed = JSON.parse(await file.text());
+    const list: HeroPreset[] = Array.isArray(parsed) ? parsed : [parsed];
+    let imported = 0;
+    for (const p of list) {
+      if (p && typeof p.name === "string" && p.name.trim()) {
+        await store.saveHeroPreset({ ...emptyDraft(), ...p, name: p.name.trim() });
+        imported += 1;
+      }
+    }
+    await Promise.all([store.loadHeroPresets(), loadCloudAgents()]);
+    successMsg.value = t("heroes.importSuccess", { count: imported });
+  } catch {
+    errorMsg.value = t("heroes.importFailed");
+  } finally {
+    target.value = "";
+  }
+}
+
 onMounted(async () => {
   await Promise.all([store.loadHeroPresets(), loadCloudAgents()]);
   // 深链编辑：编排页「编辑」按钮跳转 /heroes?edit=<name>，自动进入编辑态。
@@ -277,10 +505,43 @@ onMounted(async () => {
         <h1 class="text-lg font-semibold tracking-tight">{{ t("heroes.title") }}</h1>
         <span class="text-muted-foreground text-sm tabular-nums">{{ heroPresets.length }}</span>
       </div>
-      <Button v-if="mode === 'browse'" size="sm" @click="startNew">
-        <PlusIcon class="size-4" />
-        {{ t("heroes.newPreset") }}
-      </Button>
+      <div v-if="mode === 'browse'" class="flex items-center gap-2">
+        <input
+          ref="importInput"
+          type="file"
+          accept="application/json,.json"
+          class="hidden"
+          @change="importPresets"
+        />
+        <Button variant="ghost" size="sm" @click="triggerImport" data-testid="import-presets-btn">
+          <UploadIcon class="size-4" />
+          {{ t("heroes.importBtn") }}
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          :disabled="heroPresets.length === 0"
+          @click="exportPresets"
+          data-testid="export-presets-btn"
+        >
+          <DownloadIcon class="size-4" />
+          {{ t("heroes.exportBtn") }}
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          :disabled="heroPresets.length === 0 || syncing"
+          @click="syncAllToCloud"
+          data-testid="sync-all-btn"
+        >
+          <CloudUploadIcon class="size-4" />
+          {{ syncing ? t("heroes.syncing") : t("heroes.syncAllBtn") }}
+        </Button>
+        <Button size="sm" @click="startNew" data-testid="new-preset-btn">
+          <PlusIcon class="size-4" />
+          {{ t("heroes.newPreset") }}
+        </Button>
+      </div>
     </header>
     <Separator />
 
@@ -303,6 +564,7 @@ onMounted(async () => {
             :key="p.name"
             size="sm"
             class="hover:bg-accent/40 cursor-pointer transition"
+            data-testid="preset-card"
             @click="enterEdit(p.name)"
           >
             <CardHeader>
@@ -320,7 +582,18 @@ onMounted(async () => {
               <Badge variant="secondary" class="font-normal">
                 {{ t("heroes.visibility." + visibilityFor(p.name)) }}
               </Badge>
-              <span class="font-mono tabular-nums">{{ latestSnapshotLabel(p.name) }}</span>
+              <div class="flex items-center gap-2">
+                <Badge
+                  v-if="hasUnpublishedChanges(p.name)"
+                  variant="outline"
+                  class="text-amber-500 gap-1 text-[10px]"
+                  data-testid="preset-dirty-badge"
+                >
+                  <AlertCircleIcon class="size-3" />
+                  {{ t("heroes.unpublished") }}
+                </Badge>
+                <span class="font-mono tabular-nums">{{ latestSnapshotLabel(p.name) }}</span>
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -343,6 +616,7 @@ onMounted(async () => {
             size="sm"
             class="text-destructive hover:text-destructive"
             @click="showDeleteConfirm = true"
+            data-testid="preset-delete-btn"
           >
             <Trash2Icon class="size-4" />
             {{ t("heroes.deleteBtn") }}
@@ -352,7 +626,7 @@ onMounted(async () => {
         <Tabs default-value="config">
           <TabsList>
             <TabsTrigger value="config">{{ t("heroes.tabConfig") }}</TabsTrigger>
-            <TabsTrigger value="publish">
+            <TabsTrigger value="publish" data-testid="preset-tab-publish">
               {{ t("heroes.tabPublish") }}
               <Badge
                 v-if="currentSnapshots[0]"
@@ -371,6 +645,7 @@ onMounted(async () => {
               <Input
                 v-model="draft.name"
                 :placeholder="t('heroes.presetNamePlaceholder')"
+                data-testid="preset-name-input"
               />
             </div>
 
@@ -416,6 +691,7 @@ onMounted(async () => {
                   v-model="draft.prompt"
                   :placeholder="t('heroes.promptPlaceholder')"
                   class="min-h-[140px] font-mono text-xs leading-relaxed"
+                  data-testid="preset-prompt-input"
                 />
               </div>
               <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -435,16 +711,67 @@ onMounted(async () => {
                   />
                 </div>
               </div>
+              <div class="space-y-2">
+                <div class="flex items-center justify-between">
+                  <Label>{{ t("heroes.thinkingDepthLabel") }}</Label>
+                  <span class="text-muted-foreground font-mono text-xs tabular-nums">
+                    {{ thinkingDepth }} / 5
+                  </span>
+                </div>
+                <input
+                  v-model.number="thinkingDepth"
+                  type="range"
+                  min="1"
+                  max="5"
+                  step="1"
+                  class="accent-primary h-1.5 w-full cursor-pointer"
+                  data-testid="thinking-depth-slider"
+                />
+                <p class="text-muted-foreground text-[11px] leading-relaxed">
+                  {{ t("heroes.thinkingDepthDesc") }}
+                </p>
+              </div>
+            </template>
+
+            <template v-else-if="draft.agent_type === 'script'">
+              <div class="space-y-2">
+                <Label>{{ t("heroes.scriptLabel") }}</Label>
+                <ScriptEditor v-model="scriptSource" />
+              </div>
             </template>
 
             <template v-else>
               <div class="space-y-2">
-                <Label>{{ t("heroes.configJsonLabel") }}</Label>
-                <Textarea
-                  v-model="configJsonStr"
-                  :placeholder="t('heroes.configJsonPlaceholder')"
-                  class="min-h-[200px] font-mono text-xs leading-relaxed"
+                <Label>{{ t("heroes.rlModelPathLabel") }}</Label>
+                <Input
+                  v-model="rlModelPath"
+                  :placeholder="t('heroes.rlModelPathPlaceholder')"
+                  class="font-mono text-xs"
+                  data-testid="rl-model-path-input"
                 />
+              </div>
+              <div class="space-y-2">
+                <Label>{{ t("heroes.rlEndpointLabel") }}</Label>
+                <Input
+                  v-model="rlEndpoint"
+                  :placeholder="t('heroes.rlEndpointPlaceholder')"
+                  class="font-mono text-xs"
+                  data-testid="rl-endpoint-input"
+                />
+              </div>
+              <div class="space-y-2">
+                <Label>{{ t("heroes.rlRewardShaperLabel") }}</Label>
+                <div class="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                  <div v-for="k in RL_REWARD_KEYS" :key="k" class="space-y-1">
+                    <Label class="text-muted-foreground text-[11px]">{{ k }}</Label>
+                    <Input
+                      v-model.number="rlRewards[k]"
+                      type="number"
+                      step="0.1"
+                      class="h-8 font-mono text-xs"
+                    />
+                  </div>
+                </div>
               </div>
             </template>
 
@@ -453,14 +780,57 @@ onMounted(async () => {
                 <span v-if="errorMsg" class="text-destructive">{{ errorMsg }}</span>
                 <span v-else-if="successMsg" class="text-foreground">{{ successMsg }}</span>
               </div>
-              <Button :disabled="!draft.name.trim()" @click="handleSave">
-                {{ t("heroes.saveBtn") }}
-              </Button>
+              <div class="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  :disabled="!draft.name.trim() || syncing"
+                  @click="syncCurrentToCloud"
+                  data-testid="sync-cloud-btn"
+                >
+                  <CloudUploadIcon class="size-4" />
+                  {{ syncing ? t("heroes.syncing") : t("heroes.syncBtn") }}
+                </Button>
+                <Button :disabled="!draft.name.trim()" @click="handleSave" data-testid="preset-save-btn">
+                  {{ t("heroes.saveBtn") }}
+                </Button>
+              </div>
             </div>
           </TabsContent>
 
           <!-- 发布与快照 -->
           <TabsContent value="publish" class="space-y-8 pt-6">
+            <!-- 上游同步（Fork 溯源） -->
+            <section v-if="upstreamId" class="space-y-3">
+              <div>
+                <h3 class="text-sm font-semibold">{{ t("heroes.upstreamSyncTitle") }}</h3>
+                <p class="text-muted-foreground text-xs leading-relaxed">
+                  {{ t("heroes.upstreamSyncDesc") }}
+                </p>
+              </div>
+              <div class="flex items-center justify-between gap-4 rounded-md border px-4 py-3">
+                <div class="min-w-0 text-sm">
+                  <span class="text-muted-foreground">{{ t("heroes.forkFromLabel") }}</span>
+                  <span class="font-medium" data-testid="fork-from-name">
+                    「{{ upstreamAgent?.name ?? "…" }}」
+                  </span>
+                  <span class="text-muted-foreground text-xs" v-if="upstreamAgent">
+                    · {{ t("heroes.forkAuthor") }} #{{ upstreamAgent.owner_id }}
+                  </span>
+                </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  :disabled="!upstreamAgent"
+                  @click="showForkDiff = true"
+                  data-testid="pull-upstream-btn"
+                >
+                  {{ t("heroes.pullUpstreamBtn") }}
+                </Button>
+              </div>
+            </section>
+
+            <Separator v-if="upstreamId" />
+
             <!-- 可见性 -->
             <section class="space-y-3">
               <div>
@@ -495,10 +865,19 @@ onMounted(async () => {
                   <p class="text-muted-foreground text-xs leading-relaxed">
                     {{ t("heroes.publishDesc") }}
                   </p>
+                  <p
+                    v-if="currentHasUnpublished"
+                    class="mt-1 flex items-center gap-1 text-[11px] text-amber-500"
+                    data-testid="publish-dirty-hint"
+                  >
+                    <AlertCircleIcon class="size-3" />
+                    {{ t("heroes.unpublishedHint") }}
+                  </p>
                 </div>
                 <Button
                   :disabled="publishing || !editingName"
                   @click="handlePublishSnapshot"
+                  data-testid="preset-publish-btn"
                 >
                   <RocketIcon class="size-4" />
                   {{ publishing ? t("heroes.publishing") : t("heroes.publishBtn") }}
@@ -555,6 +934,20 @@ onMounted(async () => {
       </div>
     </div>
 
+    <!-- 拉取上游更新：差异对比与合并预览 -->
+    <ForkDiffDialog
+      :open="showForkDiff"
+      :upstream-name="upstreamAgent?.name ?? ''"
+      :upstream-author="upstreamAgent?.owner_id ?? null"
+      :current-prompt="currentCloudAgent?.prompt ?? ''"
+      :upstream-prompt="upstreamAgent?.prompt ?? ''"
+      :current-config="JSON.stringify(currentCloudAgent?.config_json ?? {}, null, 2)"
+      :upstream-config="JSON.stringify(upstreamAgent?.config_json ?? {}, null, 2)"
+      :applying="pulling"
+      @update:open="(v) => (showForkDiff = v)"
+      @apply="applyPull"
+    />
+
     <!-- 删除确认 -->
     <Dialog :open="showDeleteConfirm" @update:open="(v) => (showDeleteConfirm = v)">
       <DialogContent class="max-w-sm">
@@ -568,7 +961,7 @@ onMounted(async () => {
           <Button variant="outline" @click="showDeleteConfirm = false">
             {{ t("heroes.cancelBtn") }}
           </Button>
-          <Button variant="destructive" @click="confirmDelete">
+          <Button variant="destructive" @click="confirmDelete" data-testid="preset-delete-confirm-btn">
             {{ t("heroes.confirmDeleteBtn") }}
           </Button>
         </DialogFooter>
