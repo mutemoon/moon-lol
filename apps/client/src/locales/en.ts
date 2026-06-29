@@ -51,16 +51,6 @@ const en = {
     nav: {
       general: "General",
       modelSettings: "Model Settings",
-      codePreview: "Code Preview",
-      skills: "Skills",
-      mcp: "MCP Servers",
-      plugins: "Plugins",
-      commands: "Built-in Commands",
-      indexes: "Indexes",
-      usage: "Usage",
-    },
-    auxiliary: {
-      tutorial: "Tutorial",
     },
     general: {
       title: "General Settings",
@@ -74,31 +64,7 @@ const en = {
         languageLabel: "Language",
         languageZh: "简体中文",
         languageEn: "English",
-        scaleLabel: "Interface Scale",
-        scaleSmall: "Small",
-        scaleNormal: "Normal",
-        scaleLarge: "Large",
       },
-      terminal: {
-        title: "Inherit System Terminal Profile",
-        inheritHint: "When launching the built-in terminal, automatically inherit the login shell environment, proxy, Kube vars, and local terminal font",
-        fontLabel: "Terminal Font",
-        saveFont: "Save Font",
-      },
-      proxy: {
-        title: "HTTP Proxy",
-        addressLabel: "Proxy Server Address",
-        save: "Save Proxy",
-        hint: "Proxy server for outbound traffic of model, MCP, and command tools. Leave empty to fall back to system environment variables.",
-      },
-      notification: {
-        title: "Task Notifications",
-        hint: "Allow system notifications when a background simulation process finishes",
-      },
-    },
-    placeholder: {
-      title: "This module is pending integration",
-      body: "The ZCode advanced AI coding client detected that this module needs to link to a remote cloud instance. To test early, please connect and start your local simulation environment first.",
     },
     model: {
       title: "Model Configuration",

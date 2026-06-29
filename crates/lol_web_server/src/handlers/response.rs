@@ -1,9 +1,9 @@
 //! 统一响应包装 `ApiResponse<T>` / `ApiError`，以及
 //! `ServiceError ↔ ApiError` 的反向映射（响应状态码用）。
 
+use axum::Json;
 use axum::http::StatusCode;
 use axum::response::IntoResponse;
-use axum::Json;
 use serde::{Deserialize, Serialize};
 
 use crate::domain::ServiceError;

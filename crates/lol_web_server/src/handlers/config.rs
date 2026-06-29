@@ -1,7 +1,7 @@
 //! AI Config 路由：获取 / 设置用户 AI 配置。
 
-use axum::extract::State;
 use axum::Json;
+use axum::extract::State;
 
 use super::response::ApiResponse;
 use super::{AppState, AuthUser};

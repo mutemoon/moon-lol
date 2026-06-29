@@ -1,7 +1,7 @@
 //! Room 路由：房间 CRUD / 大厅 / 加入离开 / 槽位 / 开赛。
 
-use axum::extract::{Path, State};
 use axum::Json;
+use axum::extract::{Path, State};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -190,6 +190,7 @@ pub async fn start_room_match(
                 mode: "room".into(),
                 scenario_id: None,
                 win_condition: None,
+                scenario_agents: Vec::new(),
             },
         )
         .await

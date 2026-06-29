@@ -129,6 +129,8 @@ mockall::mock! {
         async fn finish(&self, requester_id: i32, id: Uuid, winner: Winner) -> ServiceResult<Match>;
         async fn abort(&self, requester_id: i32, id: Uuid, reason: String) -> ServiceResult<Match>;
         async fn append_event(&self, requester_id: i32, id: Uuid, event: MatchEventInput) -> ServiceResult<MatchEvent>;
+        async fn finish_internal(&self, id: Uuid, winner: Winner) -> ServiceResult<Match>;
+        async fn append_event_internal(&self, id: Uuid, event: MatchEventInput) -> ServiceResult<MatchEvent>;
         async fn get_events(&self, requester_id: i32, id: Uuid, from_seq: i32, limit: i64) -> ServiceResult<Vec<MatchEvent>>;
     }
 }

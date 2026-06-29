@@ -22,7 +22,6 @@ tauri = { version = "2", features = [] }
 tauri-plugin-opener = "2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-rig = "0.37.0"
 tokio = { version = "1", features = ["full"] }
 tokio-tungstenite = "0.24"
 futures-util = "0.3"
@@ -32,3 +31,7 @@ sqlx = { version = "0.8.3", default-features = false, features = [
     "runtime-tokio-native-tls",
     "sqlite",
 ] }
+rig.workspace = true
+rig-core.workspace = true
+rmcp.workspace = true
+lol_client.workspace = true

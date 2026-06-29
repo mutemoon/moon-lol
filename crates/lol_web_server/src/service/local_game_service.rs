@@ -14,8 +14,9 @@ use crate::domain::local_game::{ManagedProcess, ProcessStatus, allocate_port, is
 use crate::domain::match_::{MatchForm, MatchStatus};
 use crate::domain::{ServiceError, ServiceResult};
 use crate::repository::match_repo::{MatchInput, MatchRepo};
+use crate::service::agent_orchestrator::SceneAgentConfig;
 use crate::service::match_service::MatchService;
-use crate::service::match_supervisor;
+use crate::service::{agent_orchestrator, match_supervisor};
 
 /// 进程启动抽象（可 mock，真实 impl 用 tokio::process::Command）。
 #[async_trait]
@@ -34,6 +35,9 @@ pub struct LocalStartInput {
     pub mode: String,
     pub scenario_id: Option<Uuid>,
     pub win_condition: Option<serde_json::Value>,
+    /// 场景 agent 阵容：非空时启动 AI 决策环（接入进程内 rmcp 工具层）。
+    #[serde(default)]
+    pub scenario_agents: Vec<SceneAgentConfig>,
 }
 
 #[async_trait]
@@ -195,6 +199,15 @@ impl LocalGameService for LocalGameServiceImpl {
         tokio::spawn(async move {
             match_supervisor::run_supervisor(match_id, port, match_service).await;
         });
+
+        // 7. 启动 AI Agent 决策环：仅当配置了场景 agent 且存在 LLM 凭据时才接入
+        //    进程内 rmcp 工具层（observe + action）。无凭据时编排环内部静默跳过。
+        let scenario_agents = input.scenario_agents.clone();
+        if !scenario_agents.is_empty() {
+            tokio::spawn(async move {
+                agent_orchestrator::run_agent_orchestrator(port, scenario_agents).await;
+            });
+        }
 
         Ok((match_record.id, port))
     }
@@ -372,6 +385,7 @@ mod tests {
             mode: "1v1".into(),
             scenario_id: None,
             win_condition: None,
+            scenario_agents: Vec::new(),
         }
     }
 

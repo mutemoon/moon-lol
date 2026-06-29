@@ -5,6 +5,7 @@ use std::time::Duration;
 use std::{env, fs};
 
 use chrono::Local;
+use lol_client::{serve_inprocess, GameClient};
 use rig::agent::Agent;
 use rig::client::CompletionClient;
 use rig::completion::{Chat, Message};
@@ -15,7 +16,6 @@ use tauri::{Emitter, Manager};
 use tokio::time::sleep;
 
 use crate::state::AppState;
-use crate::tools::BashTool;
 use crate::ws::WsSession;
 
 static WARMUP_DURATION: f64 = 40.0;
@@ -126,6 +126,8 @@ pub fn create_agent(
     base_url: String,
     model: String,
     preamble: String,
+    tools: Vec<rmcp::model::Tool>,
+    peer: rmcp::service::ServerSink,
 ) -> Agent<CompletionModel> {
     let client = anthropic::Client::builder()
         .api_key(&api_key)
@@ -138,7 +140,7 @@ pub fn create_agent(
         .max_tokens(200 * 1000)
         .default_max_turns(20)
         .preamble(&preamble)
-        .tool(BashTool)
+        .rmcp_tools(tools, peer)
         .build()
 }
 
@@ -149,7 +151,7 @@ pub async fn on_thinking(
     entity_id: u64,
 ) -> Result<String, String> {
     let prompt = format!(
-        "开始第 {} 轮决策，使用 -e {} 来指定当前代理的 ID。",
+        "开始第 {} 轮决策，你的英雄实体 ID 为 {}。使用 observe 工具观测局势，使用 action 工具下达动作。",
         cycle, entity_id
     );
     let response = agent
@@ -219,6 +221,16 @@ impl Orchestrator {
             hero_entity_ids
         );
 
+        // 进程内 rmcp 工具层：用内存 duplex 取代 BashTool → lol_cli 子进程桥，
+        // 同一套 GameToolServer（observe + action）供所有 rig agent 共享。
+        let (tools, peer) = match serve_inprocess(GameClient::new(ws.clone())).await {
+            Ok(pair) => pair,
+            Err(e) => {
+                println!("[Agent Orchestrator] 启动进程内 rmcp 工具层失败: {}", e);
+                return None;
+            }
+        };
+
         // 实例化对应的 Rig Agents
         let mut rig_agents = Vec::new();
         for agent_cfg in &custom_agents {
@@ -232,6 +244,8 @@ impl Orchestrator {
                 base_url.clone(),
                 model.clone(),
                 combined_prompt,
+                tools.clone(),
+                peer.clone(),
             );
             rig_agents.push((agent_cfg.clone(), rig_agent, Vec::<Message>::new()));
         }

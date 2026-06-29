@@ -4,11 +4,13 @@ use axum::extract::{Path, State};
 use uuid::Uuid;
 
 use super::response::ApiResponse;
-use super::AppState;
-use super::AuthUser;
+use super::{AppState, AuthUser};
 use crate::service::AdminMetrics;
 
-pub async fn admin_metrics(_auth: AuthUser, State(s): State<AppState>) -> ApiResponse<AdminMetrics> {
+pub async fn admin_metrics(
+    _auth: AuthUser,
+    State(s): State<AppState>,
+) -> ApiResponse<AdminMetrics> {
     match s.admin_service.metrics().await {
         Ok(m) => ApiResponse::ok(m),
         Err(e) => ApiResponse::from_error(e),

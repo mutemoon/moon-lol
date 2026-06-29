@@ -2,6 +2,7 @@
 //! service 编排 repo + cache + domain，是 handler 的直接调用对象。
 
 pub mod admin_service;
+pub mod agent_orchestrator;
 pub mod agent_service;
 pub mod agent_snapshot_service;
 pub mod community_service;
@@ -18,6 +19,7 @@ pub mod spawn_preset_service;
 pub mod user_service;
 
 pub use admin_service::{AdminMetrics, AdminService, AdminServiceImpl};
+pub use agent_orchestrator::{SceneAgentConfig, run_agent_orchestrator};
 pub use agent_service::{AgentLimitProvider, AgentService, AgentServiceImpl};
 pub use agent_snapshot_service::{
     AgentSnapshotService, AgentSnapshotServiceImpl, build_config_freeze,

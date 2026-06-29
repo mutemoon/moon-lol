@@ -1,8 +1,7 @@
+use std::process::exit;
+
 use clap::{Parser, Subcommand};
-use futures_util::{SinkExt, StreamExt};
-use serde::{Deserialize, Serialize};
-use tokio_tungstenite::connect_async;
-use tokio_tungstenite::tungstenite::protocol::Message;
+use lol_client::{Action, GameClient, WsResponse, start_ws_client};
 
 #[derive(Parser)]
 #[command(name = "lol-cli")]
@@ -35,45 +34,81 @@ enum Commands {
         subcommand: ActionSubcommand,
     },
 
-    /// 暂停游戏时间流速
+    /// 暂停游戏时间流速（幂等：已暂停则不操作）
     Pause,
 
-    /// 继续/恢复游戏时间流速
+    /// 继续/恢复游戏时间流速（幂等：已运行则不操作）
     Unpause,
 
     /// 获取调试服务当前的基本状态
     State,
+
+    /// 列出当前所有英雄实体及其 agent_id
+    Agents,
+
+    /// 切换当前英雄
+    SwitchChampion {
+        /// 英雄名称 (如 Riven / Fiora)
+        name: String,
+    },
+
+    /// 开关上帝模式（免疫伤害）
+    GodMode {
+        /// true 启用，false 关闭
+        enabled: bool,
+    },
+
+    /// 开关技能冷却
+    ToggleCooldown {
+        /// true 关闭冷却（Manual），false 恢复冷却
+        enabled: bool,
+    },
+
+    /// 重置当前英雄位置到原点
+    ResetPosition,
+
+    /// 为指定实体附加/热重载 Script Agent 脚本
+    SetScript {
+        /// 目标英雄实体 ID
+        #[arg(short, long)]
+        entity_id: u64,
+        /// 脚本源码
+        source: String,
+    },
+
+    /// RL 环境 reset：初始化并返回初始观测
+    RlReset {
+        /// 目标英雄实体 ID
+        #[arg(short, long)]
+        entity_id: u64,
+        /// 可选的 reward 配置 JSON
+        #[arg(long)]
+        config_json: Option<String>,
+    },
+
+    /// RL 环境 step：推进一帧并返回 reward 与新观测
+    RlStep {
+        /// 目标英雄实体 ID
+        #[arg(short, long)]
+        entity_id: u64,
+    },
 }
 
 #[derive(Subcommand, Clone, Debug)]
 enum ActionSubcommand {
     /// 移动到指定坐标
-    Move {
-        /// 目标 X 坐标
-        x: f32,
-        /// 目标 Y 坐标
-        y: f32,
-    },
-
+    Move { x: f32, y: f32 },
     /// 攻击指定目标实体
-    Attack {
-        /// 目标实体 ID
-        entity: u64,
-    },
-
+    Attack { entity: u64 },
     /// 停止所有动作
     Stop,
-
     /// 释放指定索引的技能到指定坐标
     Skill {
         /// 技能索引 (0-3)
         index: usize,
-        /// 目标 X 坐标
         x: f32,
-        /// 目标 Y 坐标
         y: f32,
     },
-
     /// 升级指定索引的技能
     #[command(alias = "upgrade")]
     SkillLevelUp {
@@ -82,147 +117,101 @@ enum ActionSubcommand {
     },
 }
 
-#[derive(Serialize)]
-struct WsRequest {
-    id: u64,
-    cmd: String,
-    params: serde_json::Value,
-}
-
-#[derive(Deserialize, Debug)]
-struct WsResponse {
-    #[allow(dead_code)]
-    pub id: u64,
-    ok: bool,
-    data: Option<serde_json::Value>,
-    error: Option<String>,
-}
-
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
+async fn main() {
     let cli = Cli::parse();
     let url = format!("ws://127.0.0.1:{}", cli.port);
 
-    // 建立 WebSocket 连接
-    let (ws_stream, _) = match connect_async(&url).await {
-        Ok(v) => v,
+    let session = match start_ws_client(cli.port, None).await {
+        Ok(s) => s,
         Err(e) => {
             eprintln!(
                 "错误: 无法连接到游戏 WebSocket 服务端 {}。请确保游戏主程序已启动并在该端口监听。",
                 url
             );
             eprintln!("底层错误详情: {}", e);
-            std::process::exit(1);
+            exit(1);
         }
     };
 
-    let (mut write, mut read) = ws_stream.split();
+    let client = GameClient::new(session);
 
-    // 针对 Pause/Unpause 进行幂等性预检测
-    match &cli.command {
-        Commands::Pause | Commands::Unpause => {
-            // 首先查询状态
-            let req = WsRequest {
-                id: 1,
-                cmd: "get_state".to_string(),
-                params: serde_json::Value::Null,
-            };
-            write
-                .send(Message::Text(serde_json::to_string(&req)?.into()))
-                .await?;
-
-            if let Some(msg_res) = read.next().await {
-                let msg = msg_res?;
-                if let Message::Text(text) = msg {
-                    let resp: WsResponse = serde_json::from_str(&text)?;
-                    if resp.ok {
-                        if let Some(data) = resp.data {
-                            let current_paused = data
-                                .get("paused")
-                                .and_then(|p| p.as_bool())
-                                .unwrap_or(false);
-
-                            match &cli.command {
-                                Commands::Pause => {
-                                    if current_paused {
-                                        println!("游戏时间流速已经是暂停状态，无需操作。");
-                                        return Ok(());
-                                    }
-                                }
-                                Commands::Unpause => {
-                                    if !current_paused {
-                                        println!("游戏时间流速已经是运行状态，无需操作。");
-                                        return Ok(());
-                                    }
-                                }
-                                _ => unreachable!(),
-                            }
-                        }
-                    }
-                }
-            }
+    match run(&client, cli.command).await {
+        Ok(()) => {}
+        Err(e) => {
+            eprintln!("错误: {}", e);
+            exit(1);
         }
-        _ => {}
     }
+}
 
-    // 组装并发送请求包
-    let (cmd_str, params) = match &cli.command {
-        Commands::Observe { entity_id } => {
-            let p = serde_json::json!({ "entity_id": entity_id });
-            ("get_observe".to_string(), p)
-        }
+async fn run(client: &GameClient, command: Commands) -> Result<(), String> {
+    match command {
+        Commands::Observe { entity_id } => print_data(client.observe(entity_id).await?),
         Commands::Action {
             entity_id,
             subcommand,
         } => {
-            let val = match subcommand {
-                ActionSubcommand::Move { x, y } => serde_json::json!({ "Move": [x, y] }),
-                ActionSubcommand::Attack { entity } => serde_json::json!({ "Attack": entity }),
-                ActionSubcommand::Stop => serde_json::json!("Stop"),
-                ActionSubcommand::Skill { index, x, y } => serde_json::json!({
-                    "Skill": { "index": index, "point": [x, y] }
-                }),
-                ActionSubcommand::SkillLevelUp { index } => {
-                    serde_json::json!({ "SkillLevelUp": index })
-                }
+            let action = match subcommand {
+                ActionSubcommand::Move { x, y } => Action::Move([x, y]),
+                ActionSubcommand::Attack { entity } => Action::Attack(entity),
+                ActionSubcommand::Stop => Action::Stop,
+                ActionSubcommand::Skill { index, x, y } => Action::Skill {
+                    index,
+                    point: [x, y],
+                },
+                ActionSubcommand::SkillLevelUp { index } => Action::SkillLevelUp(index),
             };
-            let p = serde_json::json!({ "entity_id": entity_id, "action": val });
-            ("action".to_string(), p)
+            print_data(client.action(entity_id, action).await?)
         }
-        Commands::Pause | Commands::Unpause => {
-            ("toggle_pause".to_string(), serde_json::Value::Null)
-        }
-        Commands::State => ("get_state".to_string(), serde_json::Value::Null),
-    };
-
-    let req = WsRequest {
-        id: 2,
-        cmd: cmd_str,
-        params,
-    };
-
-    let req_text = serde_json::to_string(&req)?;
-    write.send(Message::Text(req_text.into())).await?;
-
-    // 读取并漂亮打印结果
-    if let Some(msg_res) = read.next().await {
-        let msg = msg_res?;
-        if let Message::Text(text) = msg {
-            let resp: WsResponse = serde_json::from_str(&text)?;
-            if resp.ok {
-                if let Some(data) = resp.data {
-                    // 格式化输出 JSON 数据供 Agent 完美读取
-                    println!("{}", serde_json::to_string_pretty(&data)?);
-                } else {
-                    println!("指令执行成功。");
-                }
+        Commands::Pause => {
+            if client.pause().await? {
+                println!("已暂停游戏时间流速。");
             } else {
-                let err_msg = resp.error.unwrap_or_else(|| "未知错误".to_string());
-                eprintln!("错误: 指令执行失败: {}", err_msg);
-                std::process::exit(1);
+                println!("游戏时间流速已经是暂停状态，无需操作。");
             }
+            Ok(())
         }
+        Commands::Unpause => {
+            if client.unpause().await? {
+                println!("已恢复游戏时间流速。");
+            } else {
+                println!("游戏时间流速已经是运行状态，无需操作。");
+            }
+            Ok(())
+        }
+        Commands::State => print_data(client.state().await?),
+        Commands::Agents => print_data(client.agents().await?),
+        Commands::SwitchChampion { name } => print_data(client.switch_champion(&name).await?),
+        Commands::GodMode { enabled } => print_data(client.god_mode(enabled).await?),
+        Commands::ToggleCooldown { enabled } => print_data(client.toggle_cooldown(enabled).await?),
+        Commands::ResetPosition => print_data(client.reset_position().await?),
+        Commands::SetScript { entity_id, source } => {
+            print_data(client.set_script(entity_id, &source).await?)
+        }
+        Commands::RlReset {
+            entity_id,
+            config_json,
+        } => {
+            let cfg = match config_json {
+                Some(s) => Some(serde_json::from_str(&s).map_err(|e| e.to_string())?),
+                None => None,
+            };
+            print_data(client.rl_reset(entity_id, cfg).await?)
+        }
+        Commands::RlStep { entity_id } => print_data(client.rl_step(entity_id).await?),
     }
+}
 
-    Ok(())
+/// 漂亮打印响应：成功时输出 data（无 data 则提示成功），失败时返回错误。
+fn print_data(resp: WsResponse) -> Result<(), String> {
+    if resp.ok {
+        match resp.data {
+            Some(data) => println!("{}", serde_json::to_string_pretty(&data).unwrap()),
+            None => println!("指令执行成功。"),
+        }
+        Ok(())
+    } else {
+        Err(resp.error.unwrap_or_else(|| "未知错误".to_string()))
+    }
 }

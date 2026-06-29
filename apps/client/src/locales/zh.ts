@@ -51,16 +51,6 @@ const zh = {
     nav: {
       general: "常规设置",
       modelSettings: "模型设置",
-      codePreview: "代码预览",
-      skills: "技能配置",
-      mcp: "MCP 服务器",
-      plugins: "插件管理",
-      commands: "内置命令",
-      indexes: "索引库",
-      usage: "使用统计",
-    },
-    auxiliary: {
-      tutorial: "引导教程",
     },
     general: {
       title: "常规设置",
@@ -74,31 +64,7 @@ const zh = {
         languageLabel: "界面语言",
         languageZh: "简体中文",
         languageEn: "English",
-        scaleLabel: "界面缩放",
-        scaleSmall: "偏小",
-        scaleNormal: "正常",
-        scaleLarge: "偏大",
       },
-      terminal: {
-        title: "继承系统终端 Profile",
-        inheritHint: "启动内置终端时，自动继承登录 shell 环境、代理、Kube 变量和本机终端字体",
-        fontLabel: "终端字体",
-        saveFont: "保存字体",
-      },
-      proxy: {
-        title: "HTTP 代理",
-        addressLabel: "代理服务器地址",
-        save: "保存代理",
-        hint: "用于配置模型、MCP 和命令工具出口流量的代理服务器。留空则自动沿用系统环境变量。",
-      },
-      notification: {
-        title: "任务通知",
-        hint: "允许在后台模拟进程运行完毕时，向本机系统推送弹窗通知",
-      },
-    },
-    placeholder: {
-      title: "该设置模块正在等待对接",
-      body: "高级 AI 辅助编程客户端 ZCode 系统检测到该模块需要关联到远端云端实例。如需提前测试，请先连接并启动您的本地仿真模拟环境。",
     },
     model: {
       title: "模型配置",

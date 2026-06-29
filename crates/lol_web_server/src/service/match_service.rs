@@ -42,8 +42,11 @@ pub trait MatchService: Send + Sync {
         event: MatchEventInput,
     ) -> ServiceResult<MatchEvent>;
     /// 内部追加事件（不校验 requester 归属）：供 match supervisor 转发引擎事件流。
-    async fn append_event_internal(&self, id: Uuid, event: MatchEventInput)
-        -> ServiceResult<MatchEvent>;
+    async fn append_event_internal(
+        &self,
+        id: Uuid,
+        event: MatchEventInput,
+    ) -> ServiceResult<MatchEvent>;
     async fn get_events(
         &self,
         requester_id: i32,

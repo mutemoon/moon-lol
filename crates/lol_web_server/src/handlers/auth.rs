@@ -1,7 +1,7 @@
 //! Auth 路由：注册 / 登录 / 验证码登录 / 重置密码 / me。
 
-use axum::extract::State;
 use axum::Json;
+use axum::extract::State;
 use serde::{Deserialize, Serialize};
 
 use super::response::ApiResponse;

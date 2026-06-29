@@ -12,20 +12,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import {
-  MoonIcon,
-  TerminalIcon,
-  GlobeIcon,
-  BellIcon,
-  CpuIcon,
-} from "@lucide/vue";
+import { MoonIcon } from "@lucide/vue";
 
 const { t, locale, availableLocales } = useLocale();
 const { currentTab } = useSettingsTab();
 
-// General settings state (ZCode mock configs)
 const selectedTheme = ref(localStorage.getItem("theme") || "dark");
 
 watch(
@@ -42,13 +34,7 @@ watch(
 );
 
 // locale 切换由 useLocale().locale 的 setter 接管（写 localStorage + 切 i18n 实例）
-const textScale = ref("normal"); // small | normal | large
-const inheritTerminalProfile = ref(true);
-const terminalFont = ref("MesloLGS NF, monospace");
-const httpProxy = ref("http://127.0.0.1:7890");
-const taskNotifications = ref(true);
 
-// AI Config state (Original MoonLOL config)
 const apiKey = ref("");
 const baseUrl = ref("");
 const preamble = ref("");
@@ -129,7 +115,7 @@ onMounted(() => {
 
 <template>
   <div class="bg-background flex h-full w-full flex-col overflow-hidden">
-    <main class="bg-background max-w-2xl flex-1 overflow-y-auto p-8">
+    <main class="bg-background mx-auto max-w-2xl flex-1 overflow-y-auto p-8">
       <!-- Tab 1: General (常规) -->
       <div v-show="currentTab === 'general'" class="flex flex-col gap-6">
         <div>
@@ -186,136 +172,6 @@ onMounted(() => {
                 </SelectContent>
               </Select>
             </div>
-          </div>
-
-          <!-- Font Scaling -->
-          <div class="flex flex-col gap-1.5">
-            <label class="text-muted-foreground text-xs font-semibold uppercase">
-              {{ t("settings.general.appearance.scaleLabel") }}
-            </label>
-            <div class="bg-muted flex max-w-xs gap-1 rounded-md p-1">
-              <button
-                class="flex-1 rounded-sm py-1.5 text-xs font-semibold transition-colors"
-                :class="
-                  textScale === 'small'
-                    ? 'bg-card text-foreground shadow-sm'
-                    : 'text-muted-foreground hover:text-foreground'
-                "
-                @click="textScale = 'small'"
-              >
-                {{ t("settings.general.appearance.scaleSmall") }}
-              </button>
-              <button
-                class="flex-1 rounded-sm py-1.5 text-xs font-semibold transition-colors"
-                :class="
-                  textScale === 'normal'
-                    ? 'bg-card text-foreground shadow-sm'
-                    : 'text-muted-foreground hover:text-foreground'
-                "
-                @click="textScale = 'normal'"
-              >
-                {{ t("settings.general.appearance.scaleNormal") }}
-              </button>
-              <button
-                class="flex-1 rounded-sm py-1.5 text-xs font-semibold transition-colors"
-                :class="
-                  textScale === 'large'
-                    ? 'bg-card text-foreground shadow-sm'
-                    : 'text-muted-foreground hover:text-foreground'
-                "
-                @click="textScale = 'large'"
-              >
-                {{ t("settings.general.appearance.scaleLarge") }}
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Terminal Profile Card -->
-        <div class="border-border bg-card flex flex-col gap-5 rounded-lg border p-5">
-          <h2 class="text-foreground border-border flex items-center gap-1.5 border-b pb-1.5 text-sm font-bold">
-            <TerminalIcon class="text-primary size-4" />
-            <span>{{ t("settings.general.terminal.title") }}</span>
-          </h2>
-
-          <div class="flex items-center gap-2 select-none">
-            <Checkbox
-              id="terminalToggle"
-              :checked="inheritTerminalProfile"
-              @update:checked="(val: any) => (inheritTerminalProfile = !!val)"
-            />
-            <label
-              for="terminalToggle"
-              class="text-muted-foreground hover:text-foreground cursor-pointer text-xs font-medium"
-            >
-              {{ t("settings.general.terminal.inheritHint") }}
-            </label>
-          </div>
-
-          <div class="flex flex-col gap-1.5">
-            <label class="text-muted-foreground text-xs font-semibold uppercase">
-              {{ t("settings.general.terminal.fontLabel") }}
-            </label>
-            <div class="flex gap-2">
-              <Input
-                v-model="terminalFont"
-                type="text"
-                class="bg-muted/40 border-border h-9 flex-1 font-mono text-xs"
-                placeholder="MesloLGS NF, monospace"
-              />
-              <Button size="sm" class="h-9 px-4 text-xs font-semibold">
-                {{ t("settings.general.terminal.saveFont") }}
-              </Button>
-            </div>
-          </div>
-        </div>
-
-        <!-- HTTP Proxy Card -->
-        <div class="border-border bg-card flex flex-col gap-5 rounded-lg border p-5">
-          <h2 class="text-foreground border-border flex items-center gap-1.5 border-b pb-1.5 text-sm font-bold">
-            <GlobeIcon class="text-primary size-4" />
-            <span>{{ t("settings.general.proxy.title") }}</span>
-          </h2>
-
-          <div class="flex flex-col gap-1.5">
-            <label class="text-muted-foreground text-xs font-semibold uppercase">
-              {{ t("settings.general.proxy.addressLabel") }}
-            </label>
-            <div class="flex gap-2">
-              <Input
-                v-model="httpProxy"
-                type="text"
-                class="bg-muted/40 border-border h-9 flex-1 font-mono text-xs"
-                placeholder="http://127.0.0.1:7890"
-              />
-              <Button size="sm" class="h-9 px-4 text-xs font-semibold">
-                {{ t("settings.general.proxy.save") }}
-              </Button>
-            </div>
-            <p class="text-muted-foreground mt-1 text-[10px] leading-normal">
-              {{ t("settings.general.proxy.hint") }}
-            </p>
-          </div>
-        </div>
-
-        <!-- Notification Card -->
-        <div class="border-border bg-card flex flex-col gap-4 rounded-lg border p-5">
-          <h2 class="text-foreground border-border flex items-center gap-1.5 border-b pb-1.5 text-sm font-bold">
-            <BellIcon class="text-primary size-4" />
-            <span>{{ t("settings.general.notification.title") }}</span>
-          </h2>
-          <div class="flex items-center gap-2 select-none">
-            <Checkbox
-              id="notificationToggle"
-              :checked="taskNotifications"
-              @update:checked="(val: any) => (taskNotifications = !!val)"
-            />
-            <label
-              for="notificationToggle"
-              class="text-muted-foreground hover:text-foreground cursor-pointer text-xs font-medium"
-            >
-              {{ t("settings.general.notification.hint") }}
-            </label>
           </div>
         </div>
       </div>
@@ -400,15 +256,6 @@ onMounted(() => {
             </Transition>
           </div>
         </div>
-      </div>
-
-      <!-- Other Mock Tabs -->
-      <div v-show="currentTab !== 'general' && currentTab !== 'model_settings'" class="py-12 text-center">
-        <CpuIcon class="text-muted-foreground/30 mx-auto mb-3 size-10" />
-        <h2 class="text-foreground text-sm font-semibold">{{ t("settings.placeholder.title") }}</h2>
-        <p class="text-muted-foreground mx-auto mt-1.5 max-w-sm text-xs leading-relaxed">
-          {{ t("settings.placeholder.body") }}
-        </p>
       </div>
     </main>
   </div>

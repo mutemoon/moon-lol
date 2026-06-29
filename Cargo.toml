@@ -22,6 +22,8 @@ lol_debug = { path = "crates/lol_debug" }
 lol_render = { path = "crates/lol_render" }
 lol_champions = { path = "crates/lol_champions" }
 lol_agent = { path = "crates/lol_agent" }
+lol_client = { path = "crates/lol_client" }
+rmcp = { version = "1.8", features = ["client", "macros", "server"] }
 gltf = "1.4.1"
 serde_json = "1.0"
 
@@ -60,6 +62,8 @@ tokio = { version = "1", features = ["full"] }
 tokio-tungstenite = "0.24"
 async-channel = "2"
 futures-util = "0.3"
+rig = { version = "0.39.0", features = ["rmcp"] }
+rig-core = { version = "0.39.0", features = ["rmcp"] }
 
 [features]
 default = ["bevy/dynamic_linking"]
@@ -98,7 +102,6 @@ serde_json.workspace = true
 lol_agent.workspace = true
 
 walkdir = "2.5.0"
-rig = "0.37.0"
 
 [target.'cfg(not(target_arch = "wasm32"))'.dev-dependencies]
 rocket = { version = "*", features = ["json"] }

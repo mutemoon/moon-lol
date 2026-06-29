@@ -5,7 +5,6 @@ pub mod server;
 
 use async_channel::Receiver;
 use bevy::prelude::*;
-
 use lol_core::match_events::{MatchEventChannel, MatchEventOut};
 
 pub struct PluginServer {

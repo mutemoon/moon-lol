@@ -13,7 +13,9 @@
 use std::sync::Arc;
 
 use futures_util::StreamExt;
-use tokio_tungstenite::{connect_async, tungstenite::Message};
+use lol_client::WsEvent;
+use tokio_tungstenite::connect_async;
+use tokio_tungstenite::tungstenite::Message;
 use tracing::{debug, info, warn};
 use uuid::Uuid;
 
@@ -21,15 +23,6 @@ use crate::domain::match_::Winner;
 use crate::domain::solo_rules::{SoloRule, SoloState, SoloVerdict, evaluate};
 use crate::repository::match_repo::MatchEventInput;
 use crate::service::match_service::MatchService;
-
-/// WS 推送的 WsEvent 反序列化结构（只关心 match_event）。
-#[derive(serde::Deserialize, Debug)]
-struct WsEventEnvelope {
-    #[serde(rename = "type")]
-    msg_type: String,
-    event: String,
-    data: serde_json::Value,
-}
 
 /// 引擎产出的 match_event.data 反序列化结构（对应 lol_core::MatchEventOut）。
 #[derive(serde::Deserialize, Debug)]
@@ -79,11 +72,7 @@ impl TeamSide {
 ///
 /// 连接 `ws://127.0.0.1:<ws_port>`，循环读取事件直到 WS 关闭或胜负落库。
 /// 由 [`LocalGameService`](crate::service::local_game_service) 在启动子进程后 spawn。
-pub async fn run_supervisor(
-    match_id: Uuid,
-    ws_port: i32,
-    match_service: Arc<dyn MatchService>,
-) {
+pub async fn run_supervisor(match_id: Uuid, ws_port: i32, match_service: Arc<dyn MatchService>) {
     info!(
         "[supervisor] 启动 match {} supervisor，连接 ws://127.0.0.1:{}",
         match_id, ws_port
@@ -98,7 +87,10 @@ pub async fn run_supervisor(
     let ws_stream = match connect_with_retry(&url).await {
         Some(s) => s,
         None => {
-            warn!("[supervisor] match {} 无法连接 Bevy WS，supervisor 退出", match_id);
+            warn!(
+                "[supervisor] match {} 无法连接 Bevy WS，supervisor 退出",
+                match_id
+            );
             return;
         }
     };
@@ -111,7 +103,7 @@ pub async fn run_supervisor(
             Ok(_) => continue,
         };
 
-        let env: WsEventEnvelope = match serde_json::from_str(&text) {
+        let env: WsEvent = match serde_json::from_str(&text) {
             Ok(e) => e,
             Err(_) => continue,
         };
@@ -125,7 +117,10 @@ pub async fn run_supervisor(
         let payload: MatchEventPayload = match serde_json::from_value(raw_data.clone()) {
             Ok(p) => p,
             Err(e) => {
-                debug!("[supervisor] match {} 解析 match_event 失败: {}", match_id, e);
+                debug!(
+                    "[supervisor] match {} 解析 match_event 失败: {}",
+                    match_id, e
+                );
                 continue;
             }
         };
@@ -159,7 +154,10 @@ pub async fn run_supervisor(
                     state.decided = true;
                 }
                 Err(e) => {
-                    warn!("[supervisor] match {} finish_internal 失败: {:?}", match_id, e);
+                    warn!(
+                        "[supervisor] match {} finish_internal 失败: {:?}",
+                        match_id, e
+                    );
                 }
             }
         }
@@ -178,7 +176,10 @@ fn advance_state(state: &mut SoloState, payload: &MatchEventPayload) -> (String,
                     TeamSide::Chaos => state.chaos_kills += 1,
                 }
             }
-            ("champion_kill".to_string(), (state.elapsed_secs as i64) * 1000)
+            (
+                "champion_kill".to_string(),
+                (state.elapsed_secs as i64) * 1000,
+            )
         }
         MatchEventPayload::TurretDestroyed { killer_team } => {
             if let Some(side) = killer_team.to_winner_side() {
@@ -187,7 +188,10 @@ fn advance_state(state: &mut SoloState, payload: &MatchEventPayload) -> (String,
                     TeamSide::Chaos => state.chaos_towers += 1,
                 }
             }
-            ("turret_destroyed".to_string(), (state.elapsed_secs as i64) * 1000)
+            (
+                "turret_destroyed".to_string(),
+                (state.elapsed_secs as i64) * 1000,
+            )
         }
         MatchEventPayload::CsThreshold { team, cs } => {
             if let Some(side) = team.to_winner_side() {
@@ -196,7 +200,10 @@ fn advance_state(state: &mut SoloState, payload: &MatchEventPayload) -> (String,
                     TeamSide::Chaos => state.chaos_cs = state.chaos_cs.max(*cs),
                 }
             }
-            ("cs_threshold".to_string(), (state.elapsed_secs as i64) * 1000)
+            (
+                "cs_threshold".to_string(),
+                (state.elapsed_secs as i64) * 1000,
+            )
         }
         MatchEventPayload::TimeProgress { elapsed_secs } => {
             state.elapsed_secs = *elapsed_secs as u32;
@@ -208,8 +215,9 @@ fn advance_state(state: &mut SoloState, payload: &MatchEventPayload) -> (String,
 /// 重试连接 Bevy WS：最多 30 秒，每 500ms 一次。
 async fn connect_with_retry(
     url: &str,
-) -> Option<tokio_tungstenite::WebSocketStream<tokio_tungstenite::MaybeTlsStream<tokio::net::TcpStream>>>
-{
+) -> Option<
+    tokio_tungstenite::WebSocketStream<tokio_tungstenite::MaybeTlsStream<tokio::net::TcpStream>>,
+> {
     for _ in 0..60 {
         match connect_async(url).await {
             Ok((stream, _)) => return Some(stream),
@@ -268,7 +276,9 @@ mod tests {
         let mut s = SoloState::default();
         let (_, ms) = advance_state(
             &mut s,
-            &MatchEventPayload::TimeProgress { elapsed_secs: 900.0 },
+            &MatchEventPayload::TimeProgress {
+                elapsed_secs: 900.0,
+            },
         );
         assert_eq!(s.elapsed_secs, 900);
         assert_eq!(ms, 900000);

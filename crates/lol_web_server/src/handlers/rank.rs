@@ -1,7 +1,7 @@
 //! Rank 路由：排队 / 队列状态 / 排行榜 / 当前赛季。
 
-use axum::extract::{Query, State};
 use axum::Json;
+use axum::extract::{Query, State};
 use serde::Deserialize;
 use uuid::Uuid;
 

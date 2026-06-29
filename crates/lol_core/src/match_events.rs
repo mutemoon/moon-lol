@@ -116,10 +116,7 @@ fn on_event_dead(
 
 /// 检查每方补刀是否达到阈值，首次达到时上报（用 CsThresholdReached 去重）。
 fn check_cs_threshold(
-    mut q: Query<
-        (Entity, &ChampionStats, &Team, Option<&CsThresholdReached>),
-        Without<Death>,
-    >,
+    mut q: Query<(Entity, &ChampionStats, &Team, Option<&CsThresholdReached>), Without<Death>>,
     mut commands: Commands,
     channel: Option<Res<MatchEventChannel>>,
 ) {
@@ -198,7 +195,9 @@ mod tests {
         let events = drain(&rx);
         assert!(events.iter().any(|e| matches!(
             e,
-            MatchEventOut::ChampionKill { killer_team: Team::Order }
+            MatchEventOut::ChampionKill {
+                killer_team: Team::Order
+            }
         )));
     }
 
@@ -218,7 +217,9 @@ mod tests {
         let events = drain(&rx);
         assert!(events.iter().any(|e| matches!(
             e,
-            MatchEventOut::TurretDestroyed { killer_team: Team::Chaos }
+            MatchEventOut::TurretDestroyed {
+                killer_team: Team::Chaos
+            }
         )));
     }
 

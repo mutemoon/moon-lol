@@ -1,7 +1,9 @@
 use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
 
-#[derive(Component, Reflect, Debug, Default, PartialEq, Eq, Clone, Copy, Serialize, Deserialize)]
+#[derive(
+    Component, Reflect, Debug, Default, PartialEq, Eq, Clone, Copy, Serialize, Deserialize,
+)]
 #[reflect(Component)]
 pub enum Team {
     #[default]

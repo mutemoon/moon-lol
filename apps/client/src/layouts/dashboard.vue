@@ -31,10 +31,7 @@ import {
   TerminalIcon,
   SwordsIcon,
   CpuIcon,
-  CodeIcon,
   DatabaseIcon,
-  BarChart4Icon,
-  HammerIcon,
   RocketIcon,
   ArrowLeftIcon,
   UserIcon,
@@ -240,13 +237,6 @@ onMounted(() => {
               v-for="item in [
                 { key: 'general', icon: SettingsIcon, label: t('settings.nav.general') },
                 { key: 'model_settings', icon: CpuIcon, label: t('settings.nav.modelSettings') },
-                { key: 'code_preview', icon: CodeIcon, label: t('settings.nav.codePreview') },
-                { key: 'skills', icon: HammerIcon, label: t('settings.nav.skills') },
-                { key: 'mcp', icon: CpuIcon, label: t('settings.nav.mcp') },
-                { key: 'plugins', icon: CpuIcon, label: t('settings.nav.plugins') },
-                { key: 'commands', icon: TerminalIcon, label: t('settings.nav.commands') },
-                { key: 'indexes', icon: DatabaseIcon, label: t('settings.nav.indexes') },
-                { key: 'usage', icon: BarChart4Icon, label: t('settings.nav.usage') },
               ]"
               :key="item.key"
               class="group hover:bg-surface-hover hover:text-foreground inline-flex h-8 w-full shrink-0 cursor-pointer items-center gap-2 overflow-hidden rounded-lg pr-2.5 pl-2.5 text-[13px] transition-colors"
@@ -256,15 +246,6 @@ onMounted(() => {
               <component :is="item.icon" class="size-4 shrink-0" />
               <span class="truncate">{{ item.label }}</span>
             </button>
-
-            <div class="border-border mt-auto flex flex-col gap-1 border-t pt-3">
-              <button
-                class="text-foreground-subtle hover:text-foreground inline-flex h-8 w-full items-center gap-2 rounded-lg px-2.5 text-[13px]"
-              >
-                <RocketIcon class="size-4 shrink-0" />
-                <span class="truncate">{{ t("settings.auxiliary.tutorial") }}</span>
-              </button>
-            </div>
           </div>
         </template>
 

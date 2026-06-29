@@ -20,7 +20,10 @@ pub struct CheckInDto {
     pub balance: i64,
 }
 
-pub async fn essence_check_in(auth: AuthUser, State(s): State<AppState>) -> ApiResponse<CheckInDto> {
+pub async fn essence_check_in(
+    auth: AuthUser,
+    State(s): State<AppState>,
+) -> ApiResponse<CheckInDto> {
     let date = chrono::Utc::now().format("%Y-%m-%d").to_string();
     match s.essence_service.check_in(auth.user_id, &date).await {
         Ok(r) => ApiResponse::ok(CheckInDto {
