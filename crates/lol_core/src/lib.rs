@@ -18,6 +18,7 @@ pub mod lifetime;
 pub mod loaders;
 pub mod log;
 pub mod map;
+pub mod match_events;
 pub mod missile;
 pub mod movement;
 pub mod navigation;
@@ -54,6 +55,7 @@ use life::PluginLife;
 use lifetime::PluginLifetime;
 use log::PluginLog;
 use map::PluginMap;
+use match_events::PluginMatchEvents;
 use missile::PluginMissile;
 use movement::PluginMovement;
 use navigation::navigation::PluginNavigaton;
@@ -80,6 +82,7 @@ plugin_group! {
         :PluginLifetime,
         :PluginLog,
         :PluginMap,
+        :PluginMatchEvents,
         :PluginMinion,
         :PluginMissile,
         :PluginMovement,

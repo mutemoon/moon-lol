@@ -29,6 +29,10 @@ export class TauriLocalServiceImpl implements ILocalService {
     return invoke('connect_ws')
   }
 
+  async connectWsObserve(): Promise<void> {
+    return invoke('connect_ws_observe')
+  }
+
   async disconnectWs(): Promise<void> {
     return invoke('disconnect_ws')
   }

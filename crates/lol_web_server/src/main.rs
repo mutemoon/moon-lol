@@ -89,6 +89,7 @@ async fn main() {
     let local_game_service = Arc::new(LocalGameServiceImpl::new(
         match_repo.clone(),
         process_launcher.clone(),
+        match_service.clone(), // supervisor 用它落库胜负与事件
     ));
 
     let rank_service = Arc::new(RankServiceImpl::new(

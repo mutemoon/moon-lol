@@ -4,6 +4,8 @@
 
 ## 一、已完成任务列表
 
+- [x] **SOLO 胜负判定管线**：`lol_core::match_events` 插件产出英雄击杀/推塔/补刀阈值/时间事件，经 `lol_server` 转发到 WS；web server 的 `match_supervisor` 订阅并套用 `solo_rules` 纯函数裁决器（一血/一塔/100刀/15分钟补刀判胜负），命中后 `finish_internal` 落库并 `append_event_internal` 写入事件流。
+- [x] **桌面端观战起本地进程重放**：`/observe/:id` 桌面端起本地 Bevy 进程 + `connectWsObserve` 连 WS（不启动 AI），原生窗口渲染；Web 端维持占位。
 - [x] **Web 服务端骨架与 Auth 隔离**：Axum 后端骨架就绪，支持按 `user_id` 隔离的 Preset, Scenario, Game CRUD 接口。
 - [x] **场景与胜利条件存储**：支持在 `scenario_service` 中保存自定义场景及 AND/OR 嵌套胜利条件树。
 - [x] **胜利条件配置 UI**：主页集成了胜利条件构建器与节点可视化组件，可与场景一同保存。
@@ -27,14 +29,15 @@
 
 #### 服务端 (Server)
 - [ ] **胜利条件动态判定引擎**：使 Bevy 引擎在对局运行时解析 Scenario 的胜利条件树（如 `minion_kills >= N`、`kills >= N`、一塔被摧毁），改变目前固定 120 秒计时的逻辑。
-- [ ] **上单 SOLO 玩法固定规则**：在 Bevy 中实现上路 1v1 SOLO 玩法的边界规则限制与资源刷新定义。
+- [x] **上单 SOLO 玩法固定规则**：实现 SOLO 胜负判定。架构上判定由 web server 侧的 `match_supervisor` 执行（而非 Bevy 进程内）：Bevy 经 `match_events` 插件产出 `champion_kill`/`turret_destroyed`/`cs_threshold`/`time_progress` 事件，supervisor 订阅 WS、按事件到达顺序套用纯函数裁决器 `solo_rules::evaluate`，命中后调 `finish_internal` 落库。胜利条件为：先达成任一即胜——拿一血 / 推掉对方一塔 / 补刀满 100；若游戏超过 15 分钟仍未分胜负，则按补刀数判定胜负（多者胜，相等为平局）。
 
 ---
 
 ### 2. 操作流实时观战与渲染
 
 #### 客户端 (Client)
-- [ ] **WebGPU Canvas 渲染挂载**：引入 `lol_render` 的 WebGPU/WASM 打包产物，与观战页的占位 `<canvas>` 对接，渲染 3D 游戏画面。
+- [ ] **WebGPU Canvas 渲染挂载（Web 端）**：引入 `lol_render` 的 WebGPU/WASM 打包产物，与 Web 端观战页的占位 `<canvas>` 对接，渲染 3D 游戏画面（Desktop 端直接起游戏进程渲染，无此任务）。
+- [x] **桌面端观战起本地进程重放**：`/observe/:id` 在桌面端检测到 `isDesktop` 后，调用 `startGame` 起本地 Bevy 进程并以 `connectWsObserve`（不启动 AI 编排器）连 WS，原生窗口渲染；Web 端维持占位。新增 Tauri 命令 `connect_ws_observe` 与服务层 `connectWsObserve`。
 - [ ] **观战进度与镜头控制条**：支持观战的暂停、回拖进度重放与倍速调节；支持跟随特定选手、自由镜头及鸟瞰模式。
 
 #### 服务端 (Server)

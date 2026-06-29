@@ -14,6 +14,8 @@ use crate::domain::local_game::{ManagedProcess, ProcessStatus, allocate_port, is
 use crate::domain::match_::{MatchForm, MatchStatus};
 use crate::domain::{ServiceError, ServiceResult};
 use crate::repository::match_repo::{MatchInput, MatchRepo};
+use crate::service::match_service::MatchService;
+use crate::service::match_supervisor;
 
 /// 进程启动抽象（可 mock，真实 impl 用 tokio::process::Command）。
 #[async_trait]
@@ -53,6 +55,7 @@ pub trait LocalGameService: Send + Sync {
 pub struct LocalGameServiceImpl {
     pub match_repo: Arc<dyn MatchRepo>,
     pub launcher: Arc<dyn ProcessLauncher>,
+    pub match_service: Arc<dyn MatchService>,
     /// 端口池 + 进程表（内存状态）。
     pub state: Arc<Mutex<LocalGameState>>,
 }
@@ -104,10 +107,15 @@ impl LocalGameState {
 }
 
 impl LocalGameServiceImpl {
-    pub fn new(match_repo: Arc<dyn MatchRepo>, launcher: Arc<dyn ProcessLauncher>) -> Self {
+    pub fn new(
+        match_repo: Arc<dyn MatchRepo>,
+        launcher: Arc<dyn ProcessLauncher>,
+        match_service: Arc<dyn MatchService>,
+    ) -> Self {
         Self {
             match_repo,
             launcher,
+            match_service,
             state: Arc::new(Mutex::new(LocalGameState::default())),
         }
     }
@@ -180,6 +188,13 @@ impl LocalGameService for LocalGameServiceImpl {
                 status: ProcessStatus::Running,
             });
         }
+
+        // 6. 启动 match supervisor：订阅 Bevy WS，套用 SOLO 胜负规则并落库。
+        let match_id = match_record.id;
+        let match_service = self.match_service.clone();
+        tokio::spawn(async move {
+            match_supervisor::run_supervisor(match_id, port, match_service).await;
+        });
 
         Ok((match_record.id, port))
     }
@@ -320,6 +335,24 @@ mod tests {
         }
     }
 
+    mock! {
+        pub MatchSvc {}
+        #[async_trait]
+        impl MatchService for MatchSvc {
+            async fn create(&self, owner_id: i32, input: MatchInput) -> ServiceResult<Match>;
+            async fn get(&self, requester_id: i32, id: Uuid) -> ServiceResult<Match>;
+            async fn list_mine(&self, owner_id: i32) -> ServiceResult<Vec<Match>>;
+            async fn list_by_status(&self, status: MatchStatus) -> ServiceResult<Vec<Match>>;
+            async fn start(&self, requester_id: i32, id: Uuid, bevy_port: i32, ws_port: i32) -> ServiceResult<Match>;
+            async fn finish(&self, requester_id: i32, id: Uuid, winner: crate::domain::match_::Winner) -> ServiceResult<Match>;
+            async fn finish_internal(&self, id: Uuid, winner: crate::domain::match_::Winner) -> ServiceResult<Match>;
+            async fn abort(&self, requester_id: i32, id: Uuid, reason: String) -> ServiceResult<Match>;
+            async fn append_event(&self, requester_id: i32, id: Uuid, event: crate::repository::match_repo::MatchEventInput) -> ServiceResult<crate::domain::match_::MatchEvent>;
+            async fn append_event_internal(&self, id: Uuid, event: crate::repository::match_repo::MatchEventInput) -> ServiceResult<crate::domain::match_::MatchEvent>;
+            async fn get_events(&self, requester_id: i32, id: Uuid, from_seq: i32, limit: i64) -> ServiceResult<Vec<crate::domain::match_::MatchEvent>>;
+        }
+    }
+
     fn sample_match(owner: i32, port: Option<i32>, status: MatchStatus) -> Match {
         Match {
             id: Uuid::new_v4(),
@@ -346,6 +379,7 @@ mod tests {
         LocalGameServiceImpl {
             match_repo: Arc::new(repo),
             launcher: Arc::new(launcher),
+            match_service: Arc::new(MockMatchSvc::new()),
             state: Arc::new(Mutex::new(LocalGameState::default())),
         }
     }

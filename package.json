@@ -1,6 +1,7 @@
 {
-  "name": "fsm-demo-rust",
+  "name": "@moon-lol/workspace",
   "scripts": {
+    "db:reset": "node scripts/reset-db.js",
     "example": "cargo run --example",
     "extract": "cargo run --example extract",
     "extract:bin": "cargo run --example extract -- --no-mapgeo",
@@ -10,8 +11,8 @@
     "release": "cargo run --release --example",
     "start": "cargo run",
     "start:all": "docker compose up -d && until docker exec moon-lol-postgres pg_isready -U postgres -d moon_lol 2>/dev/null; do sleep 1; done && pnpm start:server",
+    "start:client": "pnpm --filter @moon-lol/client run tauri:dev",
     "start:server": "cargo run -p lol_web_server",
-    "db:reset": "node scripts/reset-db.js",
     "test": "cargo run --example test",
     "wasm": "cargo build --release --target wasm32-unknown-unknown",
     "wasm:bindgen": "wasm-bindgen --out-name lol --out-dir packages/lol --target web target/wasm32-unknown-unknown/release/examples/lol.wasm",

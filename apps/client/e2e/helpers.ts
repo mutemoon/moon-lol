@@ -87,9 +87,10 @@ export async function createAgentPreset(
   // 删除按钮仅在 editingName 存在（即预设已落库）时渲染——以它出现作为保存成功的
   // 行为信号，而非依赖「已保存」这类可能来自旧渲染的通用文案。
   await expect(page.getByTestId("preset-delete-btn")).toBeVisible();
-  // 「已保存」在云端 Agent 同步（loadCloudAgents）完成后才置位；等它出现可确保后续
-  // 发布快照时 currentCloudAgent 已就绪，避免发布按钮空转。
-  await expect(page.getByText("已保存")).toBeVisible();
+  // 保存成功的状态文案在云端 Agent 同步（loadCloudAgents）完成后才置位；等它出现
+  // 可确保后续发布快照时 currentCloudAgent 已就绪，避免发布按钮空转。
+  // 用绑定到该状态 span 的 data-testid 定位，而非匹配「已保存」这类通用文案。
+  await expect(page.getByTestId("preset-save-success")).toBeVisible();
 }
 
 /**
@@ -100,9 +101,10 @@ export async function publishSnapshot(page: Page): Promise<void> {
   await page.getByTestId("preset-tab-publish").click();
   await page.getByTestId("preset-publish-btn").click();
   // 发布成功后，发布 Tab 文案追加版本徽章（如「发布与快照 v1」），且历史列表顶部
-  // 出现「当前最新」标记——后者明确绑定到刚发布的这条快照。
+  // 出现「最新」标记——后者明确绑定到刚发布的这条快照。
   await expect(page.getByTestId("preset-tab-publish")).toContainText(/v\d+/);
-  await expect(page.getByText("当前最新")).toBeVisible();
+  // 用绑定到列表首项「最新」徽章的 data-testid 断言，而非全局匹配「当前最新」文案。
+  await expect(page.getByTestId("snapshot-latest-badge")).toBeVisible();
 }
 
 /**

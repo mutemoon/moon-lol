@@ -63,7 +63,7 @@ mod tests {
     use mockall::predicate::*;
 
     use super::*;
-    use crate::domain::{RepoError, RepoResult};
+    use crate::domain::{RepoError, RepoResult, ServiceError};
 
     // ── 用 mockall 生成 repo 和 cache 的 mock ──
     mock! {

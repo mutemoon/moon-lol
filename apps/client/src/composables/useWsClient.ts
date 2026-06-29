@@ -30,7 +30,11 @@ export function useWsClient() {
 
   let unlisten: UnsubscribeFn | null = null;
 
-  async function connect(): Promise<void> {
+  /**
+   * 建立 WS 连接。
+   * @param observe 若为 true，使用 connectWsObserve（不启动 AI 编排器），供观战/回放。
+   */
+  async function connect(observe = false): Promise<void> {
     connecting.value = true;
     connectTimeout.value = false;
 
@@ -42,7 +46,11 @@ export function useWsClient() {
         handleEvent(event);
       });
 
-      await backendClient.connectWs();
+      if (observe) {
+        await backendClient.connectWsObserve();
+      } else {
+        await backendClient.connectWs();
+      }
       connected.value = true;
       connecting.value = false;
     } catch (err) {

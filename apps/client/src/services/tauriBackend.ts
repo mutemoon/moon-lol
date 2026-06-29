@@ -126,6 +126,11 @@ export class TauriBackendClient implements IBackendClient {
     return invoke("connect_ws");
   }
 
+  /** 仅建连 WS、不启动 AI 编排器，供观战/回放场景使用。 */
+  async connectWsObserve(): Promise<void> {
+    return invoke("connect_ws_observe");
+  }
+
   async disconnectWs(): Promise<void> {
     return invoke("disconnect_ws");
   }

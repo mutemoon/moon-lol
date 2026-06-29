@@ -516,6 +516,32 @@ async fn connect_ws(
     Ok(())
 }
 
+/// 仅建立 WS 连接、不启动 AI Agent 编排器。
+/// 供桌面端"观战/回放"场景使用：起本地游戏进程渲染，但不驱动 AI。
+#[tauri::command]
+async fn connect_ws_observe(
+    app: tauri::AppHandle,
+    state: tauri::State<'_, Mutex<AppState>>,
+) -> Result<(), error::AppError> {
+    let port = {
+        let s = state.lock().map_err(|_| error::AppError::LockError)?;
+        let Some(ref bevy) = s.bevy else {
+            return Err(error::AppError::StateError(
+                "游戏未启动，无法获取端口".to_string(),
+            ));
+        };
+        bevy.port
+    };
+
+    let session = ws::start_ws_client(app, port)
+        .await
+        .map_err(error::AppError::Generic)?;
+    let mut s = state.lock().map_err(|_| error::AppError::LockError)?;
+    s.ws = Some(session);
+
+    Ok(())
+}
+
 #[tauri::command]
 fn disconnect_ws(state: tauri::State<'_, Mutex<AppState>>) -> Result<(), error::AppError> {
     let mut s = state.lock().map_err(|_| error::AppError::LockError)?;
@@ -631,6 +657,7 @@ pub fn run() {
             log::query_log_categories,
             log::clear_logs,
             connect_ws,
+            connect_ws_observe,
             disconnect_ws,
             send_ws_cmd,
             agent::list_game_histories,

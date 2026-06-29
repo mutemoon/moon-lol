@@ -50,6 +50,9 @@ importers:
       '@vueuse/core':
         specifier: ^14.3.0
         version: 14.3.0(vue@3.5.38(typescript@5.9.3))
+      '@xstate/vue':
+        specifier: ^5.0.0
+        version: 5.0.0(vue@3.5.38(typescript@5.9.3))(xstate@5.32.2)
       axios:
         specifier: ^1.13.2
         version: 1.18.0
@@ -116,6 +119,9 @@ importers:
       vue-router:
         specifier: ^4.6.3
         version: 4.6.4(vue@3.5.38(typescript@5.9.3))
+      xstate:
+        specifier: ^5.32.2
+        version: 5.32.2
     devDependencies:
       '@playwright/test':
         specifier: ^1.61.1
@@ -1684,6 +1690,15 @@ packages:
     resolution: {integrity: sha512-bZpge9eSXwa4ToSiqJ7j6KRwhAsneMFoSz3LMWKQDkqimm3D/tbFlrklrs/IOqC8tEcYmXQZJ6N0UrjhBirVCg==}
     peerDependencies:
       vue: ^3.5.0
+
+  '@xstate/vue@5.0.0':
+    resolution: {integrity: sha512-9TyJV4yz5QLJdEU44Ly9LBooEyZmv0nht3qEvDflxXAJmSn1dzaZeESdHFm+ANHtxoUed5jGqH6NT86BusvXQg==}
+    peerDependencies:
+      vue: ^3.0.0
+      xstate: ^5.20.0
+    peerDependenciesMeta:
+      xstate:
+        optional: true
 
   '@zip.js/zip.js@2.8.26':
     resolution: {integrity: sha512-RQ4h9F6DOiHxpdocUDrOl6xBM+yOtz+LkUol47AVWcfebGBDpZ7w7Xvz9PS24JgXvLGiXXzSAfdCdVy1tPlaFA==}
@@ -4717,6 +4732,9 @@ packages:
     resolution: {integrity: sha512-h3Fbisa2nKGPxCpm89Hk33lBLsnaGBvctQopaBSOW/uIs6FTe1ATyAnKFJrzVs9vpGdsTe73WF3V4lIsk4Gacw==}
     engines: {node: '>=18'}
 
+  xstate@5.32.2:
+    resolution: {integrity: sha512-uDrojEQYYb4cEeB/SpKDBQlnL2969N5ltmVak4jUMUC6VVRuhi7PCnTBxe4YlQ8YLzdaOEOuVR48CRQPE2o0Uw==}
+
   y18n@5.0.8:
     resolution: {integrity: sha512-0pfFzegeDWJHJIAmTLRP2DwHjdF5s7jo9tuztdQxAhINCdvS+3nGINqPd00AphqJR/0LhANUS6/+7SCb98YOfA==}
     engines: {node: '>=10'}
@@ -6220,6 +6238,12 @@ snapshots:
   '@vueuse/shared@14.3.0(vue@3.5.38(typescript@5.9.3))':
     dependencies:
       vue: 3.5.38(typescript@5.9.3)
+
+  '@xstate/vue@5.0.0(vue@3.5.38(typescript@5.9.3))(xstate@5.32.2)':
+    dependencies:
+      vue: 3.5.38(typescript@5.9.3)
+    optionalDependencies:
+      xstate: 5.32.2
 
   '@zip.js/zip.js@2.8.26': {}
 
@@ -9649,6 +9673,8 @@ snapshots:
   wsl-utils@0.1.0:
     dependencies:
       is-wsl: 3.1.1
+
+  xstate@5.32.2: {}
 
   y18n@5.0.8: {}
 

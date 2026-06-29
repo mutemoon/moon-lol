@@ -4,7 +4,7 @@ meta:
 </route>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, onBeforeUnmount, computed } from "vue";
 import { storeToRefs } from "pinia";
 import { useGameStore, type HeroPreset } from "@/stores/gameStore";
 import { useRouter, useRoute } from "vue-router";
@@ -15,6 +15,13 @@ import {
   type AgentSnapshot,
   type Visibility,
 } from "@/services/cloudApi";
+import { services } from "@/services/provider";
+import {
+  useAgentSyncMachine,
+  type Divergence,
+  type DivergenceKind,
+  type SyncChoice,
+} from "@/composables/useAgentSyncMachine";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -30,6 +37,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import ScriptEditor from "@/components/agent/ScriptEditor.vue";
 import ForkDiffDialog from "@/components/agent/ForkDiffDialog.vue";
+import SyncConflictDialog from "@/components/agent/SyncConflictDialog.vue";
 import { DEFAULT_SCRIPT } from "@/services/scriptAgentTemplates";
 import {
   Card,
@@ -61,7 +69,7 @@ import {
   DownloadIcon,
   UploadIcon,
   AlertCircleIcon,
-  CloudUploadIcon,
+  RefreshCwIcon,
 } from "@lucide/vue";
 
 // 我的选手 (Agent) 管理页（产品文档 §2.1 / §2.5）。
@@ -136,6 +144,98 @@ const upstreamAgent = ref<Agent | null>(null);
 const showForkDiff = ref(false);
 const pulling = ref(false);
 
+// 桌面端本地选手缓存：云端是主存储，本地仅作离线兜底。在线保存会镜像到本地，
+// 因此正常情况下本地 ≈ 云端；只有离线编辑或远端变更才会产生「差异 / 冲突」。
+const isDesktop = services.isDesktop;
+const localPresets = ref<HeroPreset[]>([]);
+
+async function loadLocalPresets() {
+  if (!isDesktop) return;
+  try {
+    const { invoke } = await import("@tauri-apps/api/core");
+    localPresets.value = await invoke<HeroPreset[]>("list_hero_presets");
+  } catch {
+    localPresets.value = [];
+  }
+}
+
+// 云端 Agent 映射为 HeroPreset 形状，便于与本地逐字段比较。
+const cloudPresets = computed<HeroPreset[]>(() =>
+  cloudAgents.value.map((a) => ({
+    name: a.name,
+    champion: a.champion,
+    agent_type: a.agent_type,
+    prompt: a.prompt,
+    preamble: a.preamble,
+    model: a.model,
+    config_json: a.config_json,
+  })),
+);
+
+function samePreset(a: HeroPreset | null, b: HeroPreset | null): boolean {
+  if (!a || !b) return false;
+  return (
+    a.champion === b.champion &&
+    a.agent_type === b.agent_type &&
+    (a.prompt || "") === (b.prompt || "") &&
+    (a.preamble || "") === (b.preamble || "") &&
+    (a.model || "") === (b.model || "") &&
+    JSON.stringify(a.config_json ?? {}) === JSON.stringify(b.config_json ?? {})
+  );
+}
+
+// 本地与云端的差异集合：冲突（两边都有且不同）/ 仅本地 / 仅云端。
+// 非桌面端或离线时返回空（离线无法获知云端状态，避免假「未同步」徽标）。
+function computeDivergences(): Divergence[] {
+  if (!isDesktop || !services.isOnline) return [];
+  const out: Divergence[] = [];
+  const localByName = new Map(localPresets.value.map((p) => [p.name, p]));
+  const cloudByName = new Map(cloudPresets.value.map((p) => [p.name, p]));
+  const names = new Set<string>([...localByName.keys(), ...cloudByName.keys()]);
+  for (const name of names) {
+    const l = localByName.get(name) ?? null;
+    const c = cloudByName.get(name) ?? null;
+    if (l && c && samePreset(l, c)) continue; // 一致，无差异
+    const kind: DivergenceKind = l && c ? "conflict" : l ? "local_only" : "cloud_only";
+    out.push({ name, kind, local: l, cloud: c });
+  }
+  return out;
+}
+
+// 同步生命周期：离线 / 已同步 / 有差异 / 同步中。数据驱动，mode 由
+// (online, divergences) 纯派生；交互子流（对话框 / 落盘中）由 send 驱动。
+const {
+  mode: syncMode,
+  dialogOpen: syncDialogOpen,
+  applying: syncApplying,
+  divergences,
+  recheck: recheckSync,
+  send: sendSync,
+} = useAgentSyncMachine(isDesktop);
+
+function recheckDivergences() {
+  recheckSync(services.isOnline, computeDivergences());
+}
+
+const hasDivergence = computed(() => syncMode.value === "divergent");
+
+function divergenceOf(name: string): DivergenceKind | null {
+  return divergences.value.find((d) => d.name === name)?.kind ?? null;
+}
+
+const currentDivergence = computed<DivergenceKind | null>(() =>
+  draft.value.name ? divergenceOf(draft.value.name) : null,
+);
+
+// 显示用预设：桌面端合并本地与云端（冲突取本地优先），Web 端即云端。
+const displayPresets = computed<HeroPreset[]>(() => {
+  if (!isDesktop) return heroPresets.value;
+  const byName = new Map<string, HeroPreset>();
+  for (const c of cloudPresets.value) byName.set(c.name, c);
+  for (const l of localPresets.value) byName.set(l.name, l); // 本地优先覆盖
+  return [...byName.values()];
+});
+
 function cloudAgentByName(name: string): Agent | undefined {
   return cloudAgents.value.find((a) => a.name === name);
 }
@@ -176,7 +276,7 @@ async function loadCloudAgents() {
 }
 
 function enterEdit(name: string) {
-  const p = heroPresets.value.find((x) => x.name === name);
+  const p = displayPresets.value.find((x) => x.name === name);
   if (!p) return;
   editingName.value = name;
   draft.value = { ...p };
@@ -237,32 +337,26 @@ async function handleSave() {
     draft.value.config_json = { thinking_depth: thinkingDepth.value };
   }
   try {
-    await store.saveHeroPreset({ ...draft.value, name });
-    editingName.value = name;
-    await loadCloudAgents();
+    if (isDesktop && currentDivergence.value === "conflict") {
+      // 冲突态：同步前只能改本地，不触碰云端，等用户在同步对话框里决定保留哪边。
+      const { invoke } = await import("@tauri-apps/api/core");
+      await invoke("save_hero_preset", { preset: { ...draft.value, name } });
+      await loadLocalPresets();
+    } else {
+      await store.saveHeroPreset({ ...draft.value, name });
+      editingName.value = name;
+      await loadCloudAgents();
+      await loadLocalPresets();
+    }
     successMsg.value = t("heroes.successSave");
+    recheckDivergences();
   } catch (e: any) {
     errorMsg.value = e.message || t("heroes.errorSave");
   }
 }
 
-// ── 一键同步本地选手到云端 ──
-const syncing = ref(false);
-
-// 按当前编辑态的决策类型组装 config_json（与保存逻辑一致）。
-function buildDraftConfigJson(): Record<string, unknown> {
-  if (draft.value.agent_type === "script") return { script: scriptSource.value };
-  if (draft.value.agent_type === "rl") {
-    return {
-      model_path: rlModelPath.value.trim(),
-      inference_endpoint: rlEndpoint.value.trim(),
-      reward_shaper: { ...rlRewards.value },
-    };
-  }
-  return { thinking_depth: thinkingDepth.value };
-}
-
-// 把一个本地预设 upsert 到云端 Axum 服务器（按名称对齐：存在则更新，否则创建）。
+// ── 冲突解决（本地 ↔ 云端） ──
+// 把一个本地预设 upsert 到云端（按名称对齐：存在则更新，否则创建）。保留本地时复用。
 async function uploadPresetToCloud(preset: HeroPreset) {
   const body = {
     name: preset.name,
@@ -281,44 +375,46 @@ async function uploadPresetToCloud(preset: HeroPreset) {
   }
 }
 
-// 编辑页：同步当前选手（含未保存的编辑态）到云端。
-async function syncCurrentToCloud() {
-  errorMsg.value = "";
-  successMsg.value = "";
-  const name = draft.value.name.trim();
-  if (!name) {
-    errorMsg.value = t("heroes.errorFillName");
-    return;
-  }
-  syncing.value = true;
-  try {
-    await uploadPresetToCloud({ ...draft.value, name, config_json: buildDraftConfigJson() });
-    await loadCloudAgents();
-    successMsg.value = t("heroes.syncSuccess");
-  } catch (e: any) {
-    errorMsg.value = e?.message || t("heroes.syncFailed");
-  } finally {
-    syncing.value = false;
-  }
+// 把云端预设拉取覆盖到本地缓存。保留云端时复用。
+async function pullCloudToLocal(preset: HeroPreset) {
+  if (!isDesktop) return;
+  const { invoke } = await import("@tauri-apps/api/core");
+  await invoke("save_hero_preset", { preset });
 }
 
-// 列表页：把全部本地选手同步到云端。
-async function syncAllToCloud() {
+// 打开冲突解决对话框（重新检测差异后进入 dialogOpen 态）。
+function openSyncDialog() {
+  recheckDivergences();
+  sendSync({ type: "OPEN_DIALOG" });
+}
+
+// 应用用户在对话框里的逐项选择：保留本地=推送覆盖云端；保留云端=拉取覆盖本地。
+async function applySync(choices: SyncChoice[]) {
+  sendSync({ type: "APPLY" });
   errorMsg.value = "";
   successMsg.value = "";
-  syncing.value = true;
   try {
-    let count = 0;
-    for (const p of heroPresets.value) {
-      await uploadPresetToCloud(p);
-      count += 1;
+    for (const ch of choices) {
+      const div = divergences.value.find((d) => d.name === ch.name);
+      if (!div) continue;
+      if (ch.keep === "local" && div.local) {
+        await uploadPresetToCloud(div.local);
+      } else if (ch.keep === "cloud" && div.cloud) {
+        await pullCloudToLocal(div.cloud);
+      } else if (ch.keep === "cloud" && !div.cloud && isDesktop) {
+        // 选保留云端但云端无（即丢弃本地）：删除本地缓存。
+        const { invoke } = await import("@tauri-apps/api/core");
+        await invoke("delete_hero_preset", { name: ch.name });
+      }
+      // keep === 'local' && !div.local：本地无却选保留本地 → 忽略云端，无操作。
     }
-    await loadCloudAgents();
-    successMsg.value = t("heroes.syncAllSuccess", { count });
+    await Promise.all([store.loadHeroPresets(), loadCloudAgents(), loadLocalPresets()]);
+    recheckDivergences();
+    sendSync({ type: "RESOLVED" });
+    successMsg.value = t("heroes.syncResolved");
   } catch (e: any) {
     errorMsg.value = e?.message || t("heroes.syncFailed");
-  } finally {
-    syncing.value = false;
+    sendSync({ type: "ERROR", message: e?.message });
   }
 }
 
@@ -367,9 +463,10 @@ async function applyPull() {
   successMsg.value = "";
   try {
     await agentsApi.pullUpstream(ca.id);
-    await Promise.all([store.loadHeroPresets(), loadCloudAgents()]);
+    await Promise.all([store.loadHeroPresets(), loadCloudAgents(), loadLocalPresets()]);
     if (editingName.value) enterEdit(editingName.value);
     showForkDiff.value = false;
+    recheckDivergences();
     successMsg.value = t("heroes.pullSuccess");
   } catch (e: any) {
     errorMsg.value = e?.message || t("heroes.pullFailed");
@@ -467,7 +564,8 @@ async function importPresets(ev: Event) {
         imported += 1;
       }
     }
-    await Promise.all([store.loadHeroPresets(), loadCloudAgents()]);
+    await Promise.all([store.loadHeroPresets(), loadCloudAgents(), loadLocalPresets()]);
+    recheckDivergences();
     successMsg.value = t("heroes.importSuccess", { count: imported });
   } catch {
     errorMsg.value = t("heroes.importFailed");
@@ -476,17 +574,28 @@ async function importPresets(ev: Event) {
   }
 }
 
+// 窗口聚焦时重新评估在线状态与差异（离线↔在线切换、远端变更后能及时刷新徽标）。
+function onFocusRecheck() {
+  recheckDivergences();
+}
+
 onMounted(async () => {
-  await Promise.all([store.loadHeroPresets(), loadCloudAgents()]);
+  await Promise.all([store.loadHeroPresets(), loadCloudAgents(), loadLocalPresets()]);
+  recheckDivergences();
+  window.addEventListener("focus", onFocusRecheck);
   // 深链编辑：编排页「编辑」按钮跳转 /heroes?edit=<name>，自动进入编辑态。
   const editName = route.query.edit;
   if (
     typeof editName === "string" &&
     editName &&
-    heroPresets.value.some((p) => p.name === editName)
+    displayPresets.value.some((p) => p.name === editName)
   ) {
     enterEdit(editName);
   }
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener("focus", onFocusRecheck);
 });
 </script>
 
@@ -503,7 +612,7 @@ onMounted(async () => {
           <ArrowLeftIcon class="size-4" />
         </Button>
         <h1 class="text-lg font-semibold tracking-tight">{{ t("heroes.title") }}</h1>
-        <span class="text-muted-foreground text-sm tabular-nums">{{ heroPresets.length }}</span>
+        <span class="text-muted-foreground text-sm tabular-nums">{{ displayPresets.length }}</span>
       </div>
       <div v-if="mode === 'browse'" class="flex items-center gap-2">
         <input
@@ -520,7 +629,7 @@ onMounted(async () => {
         <Button
           variant="ghost"
           size="sm"
-          :disabled="heroPresets.length === 0"
+          :disabled="displayPresets.length === 0"
           @click="exportPresets"
           data-testid="export-presets-btn"
         >
@@ -528,14 +637,15 @@ onMounted(async () => {
           {{ t("heroes.exportBtn") }}
         </Button>
         <Button
+          v-if="isDesktop && hasDivergence"
           variant="ghost"
           size="sm"
-          :disabled="heroPresets.length === 0 || syncing"
-          @click="syncAllToCloud"
-          data-testid="sync-all-btn"
+          :disabled="syncApplying || syncMode === 'offline'"
+          @click="openSyncDialog"
+          data-testid="sync-btn"
         >
-          <CloudUploadIcon class="size-4" />
-          {{ syncing ? t("heroes.syncing") : t("heroes.syncAllBtn") }}
+          <RefreshCwIcon class="size-4" />
+          {{ syncApplying ? t("heroes.syncing") : t("heroes.syncBtn") }}
         </Button>
         <Button size="sm" @click="startNew" data-testid="new-preset-btn">
           <PlusIcon class="size-4" />
@@ -549,7 +659,7 @@ onMounted(async () => {
       <!-- Browse：响应式 Card 网格，把"选手"当作可平铺的对象 -->
       <div v-if="mode === 'browse'" class="px-6 py-6">
         <div
-          v-if="heroPresets.length === 0"
+          v-if="displayPresets.length === 0"
           class="text-muted-foreground flex flex-col items-center gap-4 py-24"
         >
           <span class="text-sm">{{ t("heroes.emptyList") }}</span>
@@ -560,7 +670,7 @@ onMounted(async () => {
         </div>
         <div v-else class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <Card
-            v-for="p in heroPresets"
+            v-for="p in displayPresets"
             :key="p.name"
             size="sm"
             class="hover:bg-accent/40 cursor-pointer transition"
@@ -583,6 +693,20 @@ onMounted(async () => {
                 {{ t("heroes.visibility." + visibilityFor(p.name)) }}
               </Badge>
               <div class="flex items-center gap-2">
+                <Badge
+                  v-if="isDesktop && divergenceOf(p.name)"
+                  variant="outline"
+                  class="gap-1 text-[10px]"
+                  :class="{
+                    'text-amber-500': divergenceOf(p.name) === 'conflict',
+                    'text-blue-500': divergenceOf(p.name) === 'local_only',
+                    'text-muted-foreground': divergenceOf(p.name) === 'cloud_only',
+                  }"
+                  data-testid="preset-div-badge"
+                >
+                  <AlertCircleIcon class="size-3" />
+                  {{ t(`heroes.divBadge.${divergenceOf(p.name)}`) }}
+                </Badge>
                 <Badge
                   v-if="hasUnpublishedChanges(p.name)"
                   variant="outline"
@@ -778,17 +902,18 @@ onMounted(async () => {
             <div class="flex items-center justify-between pt-2">
               <div class="text-xs">
                 <span v-if="errorMsg" class="text-destructive">{{ errorMsg }}</span>
-                <span v-else-if="successMsg" class="text-foreground">{{ successMsg }}</span>
+                <span v-else-if="successMsg" class="text-foreground" data-testid="preset-save-success">{{ successMsg }}</span>
               </div>
               <div class="flex items-center gap-2">
                 <Button
+                  v-if="isDesktop && currentDivergence"
                   variant="outline"
-                  :disabled="!draft.name.trim() || syncing"
-                  @click="syncCurrentToCloud"
+                  :disabled="!draft.name.trim() || syncApplying"
+                  @click="openSyncDialog"
                   data-testid="sync-cloud-btn"
                 >
-                  <CloudUploadIcon class="size-4" />
-                  {{ syncing ? t("heroes.syncing") : t("heroes.syncBtn") }}
+                  <RefreshCwIcon class="size-4" />
+                  {{ syncApplying ? t("heroes.syncing") : t("heroes.syncBtn") }}
                 </Button>
                 <Button :disabled="!draft.name.trim()" @click="handleSave" data-testid="preset-save-btn">
                   {{ t("heroes.saveBtn") }}
@@ -914,6 +1039,7 @@ onMounted(async () => {
                         v-if="idx === 0"
                         variant="secondary"
                         class="gap-1 text-[10px]"
+                        data-testid="snapshot-latest-badge"
                       >
                         <CheckIcon class="size-3" />
                         {{ t("heroes.currentLatest") }}
@@ -933,6 +1059,15 @@ onMounted(async () => {
         </Tabs>
       </div>
     </div>
+
+    <!-- 本地 ↔ 云端 冲突解决 -->
+    <SyncConflictDialog
+      :open="syncDialogOpen"
+      :divergences="divergences"
+      :applying="syncApplying"
+      @update:open="(v) => { if (!v) sendSync({ type: 'CLOSE' }); }"
+      @apply="applySync"
+    />
 
     <!-- 拉取上游更新：差异对比与合并预览 -->
     <ForkDiffDialog

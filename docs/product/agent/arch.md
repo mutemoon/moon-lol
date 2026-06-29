@@ -74,4 +74,6 @@ Agent（选手）的生命周期包括：创建选手、修改策略、发布快
 
 - **`heroes.vue`**: 选手的详情与管理页面。包含选手卡片网格、属性编辑（模型、Prompt、Preamble）、Monaco 脚本编辑器、快照发布控制及版本时间线。
 - Monaco 脚本编辑器集成了 `.d.ts` 类型声明文件，为 JS Agent 的 `observe()` 和 `action()` 等 API 提供代码高亮与自动补全。
+- **桌面端云优先与冲突解决**：选手以云端为主存储。`backend.ts` 兼容代理对桌面端把选手 CRUD 路由为「在线走云端 + 写后镜像本地缓存，离线降级 Tauri 本地」。`heroes.vue` 把本地缓存与云端按名称合并为 `displayPresets`（冲突取本地优先），并在卡片上显示 `冲突 / 未同步 / 仅云端` 差异徽标。冲突态下保存只写本地（同步前只改本地）；点「同步」弹出 `SyncConflictDialog` 左右两列对比云端/本地，逐项选择保留哪边（保留本地=推送覆盖云端，保留云端=拉取覆盖本地）。
+- 同步生命周期由 **xstate 状态机** 驱动（`composables/useAgentSyncMachine.ts`），状态包含 `loading / offline / synced / divergent / dialogOpen / applying`，把「差异态禁止写云端」「离线态无同步按钮」收敛为显式 guard。Web 端无本地源，机器返回恒 `synced` 的 stub。
 - **`rl-training.vue`**: RL 选手的遥测监控面板。包含训练实时数据波形、Reward 构成比饼图以及 Value 估计的可视化展示。

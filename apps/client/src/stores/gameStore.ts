@@ -23,25 +23,6 @@ export const BUILTIN_SPAWN_PRESETS: SpawnPreset[] = [
   },
 ];
 
-export const BUILTIN_HERO_PRESETS: HeroPreset[] = [
-  {
-    name: "锐雯 · 激进压制",
-    champion: "Riven",
-    agent_type: "llm",
-    prompt: "你是一个激进、好斗的玩家。在对线中主动寻找敌方的破绽，频繁消耗并伺机斩杀对手。",
-    preamble: "",
-    model: "",
-  },
-  {
-    name: "菲奥娜 · 稳健发育",
-    champion: "Fiora",
-    agent_type: "llm",
-    prompt: "你是一个冷静、稳健的玩家。优先保证补刀与发育，在取得装备或等级优势后再寻找击杀机会。",
-    preamble: "",
-    model: "",
-  },
-];
-
 export const useGameStore = defineStore("game", () => {
   const champion = ref(localStorage.getItem("moon_lol_last_champion") || "Riven");
   const mode = ref(localStorage.getItem("moon_lol_last_mode") || "sandbox");
@@ -94,17 +75,11 @@ export const useGameStore = defineStore("game", () => {
 
   async function loadHeroPresets() {
     try {
-      const presets = await backendClient.listHeroPresets();
-      const merged = [...presets];
-      for (const b of BUILTIN_HERO_PRESETS) {
-        if (!merged.some((p) => p.name === b.name)) {
-          merged.push(b);
-        }
-      }
-      heroPresets.value = merged;
+      // 选手预设：纯用户数据，不再注入静态默认项；列表为空即真的没有选手。
+      heroPresets.value = await backendClient.listHeroPresets();
     } catch (e) {
       console.error("加载选手预设失败", e);
-      heroPresets.value = [...BUILTIN_HERO_PRESETS];
+      heroPresets.value = [];
     }
   }
 

@@ -7,6 +7,9 @@ meta:
 import { ref, computed, onMounted, onUnmounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { matchesApi, type Match, type MatchEvent } from "@/services/cloudApi";
+import { backendClient } from "@/services/backend";
+import { services } from "@/services/provider";
+import { useWsClient } from "@/composables/useWsClient";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -32,6 +35,10 @@ import {
 // 观战与回放：操作流时间线 + 状态摘要。
 // 数据特点：高频时序事件 + 关键状态指示（BYO Agent 掉线、对局暂停等）。
 // 主区域用三段：摘要带 / 阵营状态对照 / 事件时间线。
+// 桌面端额外起本地 Bevy 进程做原生窗口重放（不走 canvas）；Web 端仅时间线。
+
+const isDesktop = services.isDesktop;
+const ws = useWsClient();
 
 const route = useRoute();
 const router = useRouter();
@@ -41,6 +48,8 @@ const match = ref<Match | null>(null);
 const events = ref<MatchEvent[]>([]);
 const loading = ref(true);
 const paused = ref(false);
+const replayStatus = ref<"idle" | "starting" | "running" | "failed">("idle");
+const replayError = ref("");
 let pollTimer: number | null = null;
 let lastSeq = 0;
 
@@ -156,13 +165,59 @@ async function handleConfirmStop() {
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
   refresh();
   pollTimer = window.setInterval(refresh, 1000);
+
+  // 桌面端：起本地 Bevy 进程做原生窗口重放（不走 canvas）。
+  if (isDesktop) {
+    await startDesktopReplay();
+  }
 });
+
 onUnmounted(() => {
   if (pollTimer) clearInterval(pollTimer);
+  // 桌面端：离开页面时停掉本地重放进程与 WS。
+  if (isDesktop) {
+    stopDesktopReplay();
+  }
 });
+
+/** 桌面端起本地游戏进程并连 WS（observe 模式，不启动 AI 编排器）。 */
+async function startDesktopReplay() {
+  if (replayStatus.value === "starting" || replayStatus.value === "running") return;
+  replayStatus.value = "starting";
+  replayError.value = "";
+  try {
+    const mode = match.value?.mode ?? "1v1";
+    await backendClient.startGame({
+      mode,
+      // 观战不指定具体英雄；引擎会加载默认场景。
+      champion: "Fiora",
+      sceneName: null,
+    });
+    await ws.connect(true);
+    replayStatus.value = "running";
+  } catch (e: any) {
+    replayStatus.value = "failed";
+    replayError.value = typeof e === "string" ? e : e?.message || "本地重放进程启动失败";
+  }
+}
+
+/** 桌面端停止本地重放进程。 */
+async function stopDesktopReplay() {
+  try {
+    await ws.disconnect();
+  } catch {
+    /* ignore */
+  }
+  try {
+    await backendClient.stopGame();
+  } catch {
+    /* ignore */
+  }
+  replayStatus.value = "idle";
+}
 </script>
 
 <template>
@@ -178,12 +233,12 @@ onUnmounted(() => {
             <h1 class="text-lg font-semibold">观战</h1>
             <span class="text-muted-foreground font-mono text-xs">{{ matchId.slice(0, 8) }}</span>
             <Badge v-if="match" variant="outline">{{ match.mode }}</Badge>
-            <Badge v-if="match?.status === 'running'" class="gap-1">
+            <Badge v-if="match?.status === 'running'" class="gap-1" data-testid="match-status">
               <span class="bg-emerald-500 size-1.5 animate-pulse rounded-full" />
               直播中
             </Badge>
-            <Badge v-else-if="match?.status === 'aborted'" variant="destructive">已中止</Badge>
-            <Badge v-else-if="match?.status === 'finished'" variant="secondary">已结束</Badge>
+            <Badge v-else-if="match?.status === 'aborted'" variant="destructive" data-testid="match-status">已中止</Badge>
+            <Badge v-else-if="match?.status === 'finished'" variant="secondary" data-testid="match-status">已结束</Badge>
           </div>
         </div>
       </div>
@@ -275,8 +330,44 @@ onUnmounted(() => {
           </div>
         </div>
 
-        <!-- 渲染占位（未来 WASM/WebGPU 渲染） -->
+        <!-- 渲染区域：桌面端起本地 Bevy 进程渲染（原生窗口），Web 端留占位 -->
         <div
+          v-if="isDesktop"
+          class="bg-muted/30 text-muted-foreground flex min-h-0 flex-1 flex-col items-center justify-center gap-3 rounded-lg border border-dashed p-6 text-xs"
+        >
+          <template v-if="replayStatus === 'starting'">
+            <Loader2Icon class="size-5 animate-spin" />
+            <span>正在启动本地游戏进程进行原生窗口重放…</span>
+          </template>
+          <template v-else-if="replayStatus === 'running'">
+            <CircleDotIcon class="size-5 text-emerald-500" />
+            <span class="text-center">
+              本地重放进程已启动 · 原生窗口渲染中
+              <br />
+              <span class="text-muted-foreground/70">游戏画面在独立的 Bevy 窗口内呈现，视角可自由操作。</span>
+            </span>
+            <Button variant="outline" size="sm" class="mt-1" @click="stopDesktopReplay">
+              <SquareIcon class="size-3.5" />
+              停止本地重放
+            </Button>
+          </template>
+          <template v-else-if="replayStatus === 'failed'">
+            <AlertTriangleIcon class="size-5 text-amber-500" />
+            <span class="text-destructive">{{ replayError }}</span>
+            <Button variant="outline" size="sm" @click="startDesktopReplay">
+              <PlayIcon class="size-3.5" />
+              重试启动
+            </Button>
+          </template>
+          <template v-else>
+            <Button variant="outline" size="sm" @click="startDesktopReplay">
+              <PlayIcon class="size-3.5" />
+              启动本地重放进程
+            </Button>
+          </template>
+        </div>
+        <div
+          v-else
           class="bg-muted/30 text-muted-foreground flex min-h-0 flex-1 items-center justify-center rounded-lg border border-dashed text-xs"
         >
           操作流渲染区域 · WASM/WebGPU 同步重放（开发中）

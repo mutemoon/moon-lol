@@ -14,6 +14,7 @@ pub mod match_;
 pub mod rank;
 pub mod room;
 pub mod scenario;
+pub mod solo_rules;
 pub mod spawn_preset;
 
 /// 服务层错误：业务逻辑错误，会被 handler 映射为 HTTP 状态码。

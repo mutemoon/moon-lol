@@ -32,6 +32,8 @@ pub trait MatchService: Send + Sync {
         ws_port: i32,
     ) -> ServiceResult<Match>;
     async fn finish(&self, requester_id: i32, id: Uuid, winner: Winner) -> ServiceResult<Match>;
+    /// 内部结束对局（不校验 requester 归属）：供 match supervisor 在引擎产出胜负后调用。
+    async fn finish_internal(&self, id: Uuid, winner: Winner) -> ServiceResult<Match>;
     async fn abort(&self, requester_id: i32, id: Uuid, reason: String) -> ServiceResult<Match>;
     async fn append_event(
         &self,
@@ -39,6 +41,9 @@ pub trait MatchService: Send + Sync {
         id: Uuid,
         event: MatchEventInput,
     ) -> ServiceResult<MatchEvent>;
+    /// 内部追加事件（不校验 requester 归属）：供 match supervisor 转发引擎事件流。
+    async fn append_event_internal(&self, id: Uuid, event: MatchEventInput)
+        -> ServiceResult<MatchEvent>;
     async fn get_events(
         &self,
         requester_id: i32,
@@ -142,7 +147,16 @@ impl MatchService for MatchServiceImpl {
     }
 
     async fn finish(&self, requester_id: i32, id: Uuid, winner: Winner) -> ServiceResult<Match> {
-        let m = self.get_owned(requester_id, id).await?;
+        self.get_owned(requester_id, id).await?;
+        self.finish_internal(id, winner).await
+    }
+
+    async fn finish_internal(&self, id: Uuid, winner: Winner) -> ServiceResult<Match> {
+        let m = self
+            .repo
+            .find_by_id(id)
+            .await?
+            .ok_or(ServiceError::NotFound)?;
         if !can_transition(m.status, MatchStatus::Finished) {
             return Err(ServiceError::Conflict(format!(
                 "不能从 {} 结束对局",
@@ -194,6 +208,14 @@ impl MatchService for MatchServiceImpl {
         event: MatchEventInput,
     ) -> ServiceResult<MatchEvent> {
         self.get_owned(requester_id, id).await?;
+        Ok(self.event_repo.append(id, &event).await?)
+    }
+
+    async fn append_event_internal(
+        &self,
+        id: Uuid,
+        event: MatchEventInput,
+    ) -> ServiceResult<MatchEvent> {
         Ok(self.event_repo.append(id, &event).await?)
     }
 

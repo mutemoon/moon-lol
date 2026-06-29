@@ -362,6 +362,11 @@ export class WebBackendClient implements IBackendClient {
     throw new Error("Local game WebSocket connection is not supported in the Web environment.");
   }
 
+  /** 观战/回放专用 WS 连接：Web 端不支持本地进程，直接抛错。 */
+  async connectWsObserve(): Promise<void> {
+    throw new Error("Local game WebSocket connection is not supported in the Web environment.");
+  }
+
   async disconnectWs(): Promise<void> {
     if (this.ws) {
       this.ws.close();

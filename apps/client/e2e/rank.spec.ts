@@ -45,7 +45,8 @@ test.describe("Rank 报名匹配池", () => {
       await expect(page.getByTestId("rank-dequeue-btn")).toHaveCount(1);
       await expect(page.getByTestId("rank-dequeue-btn")).toBeVisible();
       await expect(page.getByText("当前未在任何队列中。")).not.toBeVisible();
-      await expect(page.getByText("top_solo")).toBeVisible();
+      // 用绑定到队列项内 mode 文本的 data-testid 断言，而非全局匹配「top_solo」。
+      await expect(page.getByTestId("rank-queue-mode")).toHaveText("top_solo");
     } finally {
       // 清理：删除选手，释放云端 Agent。
       await deleteAgentPreset(page, agentName);

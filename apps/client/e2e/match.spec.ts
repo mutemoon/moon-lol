@@ -47,12 +47,12 @@ test.describe("对局端到端冒烟", () => {
 
       // 观战页头部展示本场 match id 前 8 位与「直播中」状态，绑定到刚启动的对局。
       await expect(page.getByText(matchId.slice(0, 8))).toBeVisible();
-      await expect(page.getByText("直播中")).toBeVisible();
+      await expect(page.getByTestId("match-status")).toHaveText("直播中");
 
       // 结束对局：经二次确认弹窗后，状态变为「已中止」。
       await page.getByTestId("stop-match-btn").click();
       await confirmDialog(page);
-      await expect(page.getByText("已中止")).toBeVisible();
+      await expect(page.getByTestId("match-status")).toHaveText("已中止");
     } finally {
       // 清理：解散房间（若已建）与删除选手，避免残留污染后续运行。
       if (roomId) {

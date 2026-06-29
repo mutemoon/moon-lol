@@ -19,6 +19,8 @@ export interface ILocalService {
 
   // ── WS 连接与命令 ──
   connectWs(): Promise<void>
+  /** 仅建连 WS、不启动 AI 编排器，供观战/回放场景使用。 */
+  connectWsObserve(): Promise<void>
   disconnectWs(): Promise<void>
   sendWsCmd(cmd: string, params?: Record<string, any>): Promise<any>
 

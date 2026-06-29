@@ -157,7 +157,7 @@ mod tests {
     use mockall::predicate::*;
 
     use super::*;
-    use crate::domain::{RepoError, RepoResult};
+    use crate::domain::{RepoError, RepoResult, auth};
 
     mock! {
         pub UserRepo {}

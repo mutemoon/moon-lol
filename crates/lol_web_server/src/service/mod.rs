@@ -10,6 +10,7 @@ pub mod essence_service;
 pub mod local_game_service;
 pub mod log_service;
 pub mod match_service;
+pub mod match_supervisor;
 pub mod rank_service;
 pub mod room_service;
 pub mod scenario_service;

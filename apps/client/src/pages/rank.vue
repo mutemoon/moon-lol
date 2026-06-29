@@ -228,11 +228,12 @@ onMounted(async () => {
           v-for="q in queue"
           :key="`${q.agent_id}-${q.mode}`"
           class="flex items-center justify-between rounded-lg border px-4 py-3"
+          data-testid="rank-queue-item"
         >
           <div class="space-y-0.5">
             <div class="flex items-center gap-2 text-sm font-medium">
               <ZapIcon class="size-3.5" />
-              {{ q.mode }}
+              <span data-testid="rank-queue-mode">{{ q.mode }}</span>
               <Badge variant="secondary" class="font-mono">{{ q.rating }} ELO</Badge>
             </div>
             <div class="text-muted-foreground flex items-center gap-1 text-xs">

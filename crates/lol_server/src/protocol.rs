@@ -90,6 +90,16 @@ impl WsEvent {
             data: serde_json::json!({"reason": reason}),
         }
     }
+
+    /// 对局结构化事件（champion_kill / turret_destroyed / cs_threshold / time_progress）。
+    /// 由 lol_core 的 match_events 插件产出，经 WS 转发给 web server 的 match supervisor。
+    pub fn match_event(payload: serde_json::Value) -> Self {
+        Self {
+            msg_type: "event",
+            event: "match_event",
+            data: payload,
+        }
+    }
 }
 
 impl WsResponse {

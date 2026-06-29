@@ -5,7 +5,11 @@
   "permissions": {
     "allow": [
       "Agent",
+      "AskUserQuestion",
       "Bash",
+      "CronCreate",
+      "CronDelete",
+      "CronList",
       "Edit",
       "EnterPlanMode",
       "ExitPlanMode",
@@ -28,10 +32,6 @@
       "Write"
     ],
     "deny": [
-      "AskUserQuestion",
-      "CronCreate",
-      "CronDelete",
-      "CronList",
       "EnterWorktree",
       "ExitWorktree",
       "ListMcpResourcesTool",
