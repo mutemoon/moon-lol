@@ -8,7 +8,7 @@ use std::path::PathBuf;
 use std::sync::Arc;
 
 use axum::http::HeaderValue;
-use lol_web_server::cache::MokaConfigCache;
+use lol_web_server::cache::MokaModelProviderCache;
 use lol_web_server::handlers::{AppState, create_router};
 use lol_web_server::repository::*;
 use lol_web_server::service::*;
@@ -40,7 +40,7 @@ async fn main() {
 
     // 3. 初始化持久层 PgXxxRepo
     let user_repo = Arc::new(PgUserRepo { pool: pool.clone() });
-    let config_repo = Arc::new(PgConfigRepo { pool: pool.clone() });
+    let model_provider_repo = Arc::new(PgModelProviderRepo { pool: pool.clone() });
     let spawn_preset_repo = Arc::new(PgSpawnPresetRepo { pool: pool.clone() });
     let agent_repo = Arc::new(PgAgentRepo { pool: pool.clone() });
     let agent_snapshot_repo = Arc::new(PgAgentSnapshotRepo { pool: pool.clone() });
@@ -58,11 +58,14 @@ async fn main() {
     let season_repo = Arc::new(PgSeasonRepo { pool: pool.clone() });
 
     // 4. 初始化缓存层
-    let config_cache = Arc::new(MokaConfigCache::new());
+    let model_provider_cache = Arc::new(MokaModelProviderCache::new());
 
     // 5. 初始化服务层
     let user_service = Arc::new(UserServiceImpl::new(user_repo.clone(), jwt_secret));
-    let config_service = Arc::new(ConfigServiceImpl::new(config_repo.clone(), config_cache));
+    let model_provider_service = Arc::new(ModelProviderServiceImpl::new(
+        model_provider_repo.clone(),
+        model_provider_cache,
+    ));
     let spawn_preset_service = Arc::new(SpawnPresetServiceImpl::new(spawn_preset_repo.clone()));
 
     // SubscriptionServiceImpl 同时实现了 SubscriptionService 和 AgentLimitProvider
@@ -89,7 +92,8 @@ async fn main() {
     let local_game_service = Arc::new(LocalGameServiceImpl::new(
         match_repo.clone(),
         process_launcher.clone(),
-        match_service.clone(), // supervisor 用它落库胜负与事件
+        match_service.clone(),          // supervisor 用它落库胜负与事件
+        model_provider_service.clone(), // 编排器按 provider 解析 LLM 凭证
     ));
 
     let rank_service = Arc::new(RankServiceImpl::new(
@@ -120,7 +124,6 @@ async fn main() {
     // 6. 装配 AppState
     let state = AppState {
         user_service,
-        config_service,
         spawn_preset_service,
         agent_service,
         agent_snapshot_service,
@@ -134,6 +137,7 @@ async fn main() {
         local_game_service,
         admin_service,
         log_service,
+        model_provider_service,
     };
 
     // 7. 构建 Router 并启动服务器

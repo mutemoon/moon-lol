@@ -4,7 +4,6 @@
 
 import type { ICloudService } from './cloud'
 import type {
-  AiConfig,
   Agent,
   CreateAgentDto,
   UpdateAgentDto,
@@ -33,6 +32,8 @@ import type {
   AuthToken,
   Visibility,
   WinCondition,
+  ModelProvider,
+  ModelProviderInput,
 } from './types'
 
 const TOKEN_KEY = 'moon_lol_auth_token'
@@ -142,17 +143,34 @@ export class CloudServiceImpl implements ICloudService {
     return this.request<{ id: number; phone: string }>('/api/auth/me')
   }
 
-  // ── AI Config ──
+  // ── Model Providers ──
 
-  async getAiConfig(): Promise<AiConfig> {
-    return this.request<AiConfig>('/api/config')
+  async listModelProviders(): Promise<ModelProvider[]> {
+    return this.request<ModelProvider[]>('/api/model-providers')
   }
 
-  async setAiConfig(config: AiConfig): Promise<void> {
-    await this.request('/api/config', {
+  async createModelProvider(input: ModelProviderInput): Promise<ModelProvider> {
+    return this.request<ModelProvider>('/api/model-providers', {
       method: 'POST',
-      body: JSON.stringify(config),
+      body: JSON.stringify(input),
     })
+  }
+
+  async updateModelProvider(id: string, input: ModelProviderInput): Promise<void> {
+    await this.request(`/api/model-providers/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(input),
+    })
+  }
+
+  async deleteModelProvider(id: string): Promise<void> {
+    await this.request(`/api/model-providers/${id}`, { method: 'DELETE' })
+  }
+
+  // ── Platform Models ──
+
+  async listPlatformModels(): Promise<string[]> {
+    return this.request<string[]>('/api/platform-models')
   }
 
   // ── Agent CRUD ──

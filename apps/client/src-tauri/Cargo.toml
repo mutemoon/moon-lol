@@ -35,3 +35,5 @@ rig.workspace = true
 rig-core.workspace = true
 rmcp.workspace = true
 lol_client.workspace = true
+lol_agent_runtime.workspace = true
+async-trait = "0.1"

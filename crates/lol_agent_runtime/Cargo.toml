@@ -1,0 +1,15 @@
+[package]
+name = "lol_agent_runtime"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+lol_client.workspace = true
+rig.workspace = true
+rig-core.workspace = true
+rmcp.workspace = true
+tokio = { workspace = true }
+tracing = "0.1"
+async-trait = "0.1"
+serde.workspace = true
+serde_json.workspace = true

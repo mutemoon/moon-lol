@@ -84,6 +84,8 @@
    - 统一屏蔽 Tauri event 与 WebSocket 消息差异。将本地事件与云端 WS 帧消息转为统一的总线事件输出。
 4. **`ServiceProvider` (数据源动态切换器)**:
    - 封装 `services` 单例。自动检测用户的登录状态及网络环境：在线时直连云端，离线时自动读取本地离线 KV 缓存。
+5. **模型供应商表**:
+   - 模型供应商是独立子系统（服务端 `model_providers` 表 + 桌面端 `providers.json`），LLM 选手运行时由编排器按 `config_json.provider_id` 解析 `baseUrl / apiKey / apiFormat`，配合 `agents.model` 发起请求。数据模型、六层架构与运行时贯通见 [模型供应商与模型设置](../llm-provider-setting/arch.md)。
 
 ---
 

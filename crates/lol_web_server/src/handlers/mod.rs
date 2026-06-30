@@ -21,10 +21,11 @@ pub mod agent;
 pub mod agent_snapshot;
 pub mod auth;
 pub mod community;
-pub mod config;
 pub mod essence;
 pub mod local_game;
 pub mod match_;
+pub mod model_provider;
+pub mod platform_model;
 pub mod rank;
 pub mod response;
 pub mod room;
@@ -51,7 +52,6 @@ pub use subscription::SubscribeRequest;
 #[derive(Clone)]
 pub struct AppState {
     pub user_service: Arc<dyn UserService>,
-    pub config_service: Arc<dyn ConfigService>,
     pub spawn_preset_service: Arc<dyn SpawnPresetService>,
     pub agent_service: Arc<dyn AgentService>,
     pub agent_snapshot_service: Arc<dyn AgentSnapshotService>,
@@ -65,6 +65,7 @@ pub struct AppState {
     pub local_game_service: Arc<dyn LocalGameService>,
     pub admin_service: Arc<dyn AdminService>,
     pub log_service: Arc<dyn LogService>,
+    pub model_provider_service: Arc<dyn ModelProviderService>,
 }
 
 // ── JWT Claims Extractor ──
@@ -129,10 +130,20 @@ pub fn create_router(state: AppState) -> Router {
         .route("/api/auth/code-login", post(auth::auth_code_login))
         .route("/api/auth/reset-password", post(auth::auth_reset_password))
         .route("/api/auth/me", get(auth::auth_me))
-        // AI Config
+        // Model Providers
         .route(
-            "/api/config",
-            get(config::get_config).post(config::set_config),
+            "/api/model-providers",
+            get(model_provider::list_model_providers).post(model_provider::create_model_provider),
+        )
+        .route(
+            "/api/model-providers/:id",
+            axum::routing::put(model_provider::update_model_provider)
+                .delete(model_provider::delete_model_provider),
+        )
+        // Platform Models（管理员 env 配置的可选模型名）
+        .route(
+            "/api/platform-models",
+            get(platform_model::list_platform_models),
         )
         // Spawn Presets
         .route(

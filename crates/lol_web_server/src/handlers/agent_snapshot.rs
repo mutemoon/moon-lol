@@ -5,16 +5,22 @@ use uuid::Uuid;
 
 use super::response::ApiResponse;
 use super::{AppState, AuthUser};
+use crate::service::agent_snapshot_service::build_config_freeze;
 
 pub async fn publish_snapshot(
     auth: AuthUser,
     State(s): State<AppState>,
     Path(id): Path<Uuid>,
 ) -> ApiResponse<crate::domain::agent_snapshot::AgentSnapshot> {
-    // 简化：config_freeze 传空对象，实际应由前端构造
+    // 冻结当前 Agent 配置（含 model 与 config_json.provider_id）作为参赛快照。
+    let agent = match s.agent_service.get(auth.user_id, id).await {
+        Ok(a) => a,
+        Err(e) => return ApiResponse::from_error(e),
+    };
+    let freeze = build_config_freeze(&agent, None, None);
     match s
         .agent_snapshot_service
-        .publish(auth.user_id, id, serde_json::json!({}))
+        .publish(auth.user_id, id, freeze)
         .await
     {
         Ok(snap) => ApiResponse::ok(snap),

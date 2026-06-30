@@ -3,7 +3,6 @@
 // 合并了原 webBackend.ts 中的预设 CRUD 和 cloudApi.ts 中的房间/Rank/精粹等高阶 API
 
 import type {
-  AiConfig,
   Agent,
   CreateAgentDto,
   UpdateAgentDto,
@@ -32,6 +31,8 @@ import type {
   AuthToken,
   Visibility,
   WinCondition,
+  ModelProvider,
+  ModelProviderInput,
 } from './types'
 
 export interface ICloudService {
@@ -45,9 +46,14 @@ export interface ICloudService {
   logout(): void
   getCurrentUser(): Promise<{ id: number; phone: string }>
 
-  // ── AI Config (云端同步) ──
-  getAiConfig(): Promise<AiConfig>
-  setAiConfig(config: AiConfig): Promise<void>
+  // ── Model Providers (云端同步) ──
+  listModelProviders(): Promise<ModelProvider[]>
+  createModelProvider(input: ModelProviderInput): Promise<ModelProvider>
+  updateModelProvider(id: string, input: ModelProviderInput): Promise<void>
+  deleteModelProvider(id: string): Promise<void>
+
+  // ── Platform Models (管理员 env 配置的可选模型名) ──
+  listPlatformModels(): Promise<string[]>
 
   // ── Agent (选手) CRUD ──
   listAgents(): Promise<Agent[]>

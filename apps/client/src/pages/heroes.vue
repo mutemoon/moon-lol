@@ -39,6 +39,8 @@ import ScriptEditor from "@/components/agent/ScriptEditor.vue";
 import ForkDiffDialog from "@/components/agent/ForkDiffDialog.vue";
 import SyncConflictDialog from "@/components/agent/SyncConflictDialog.vue";
 import { DEFAULT_SCRIPT } from "@/services/scriptAgentTemplates";
+import { useProviders } from "@/stores/providersStore";
+import { PLATFORM_PROVIDER_ID } from "@/config/providerPresets";
 import {
   Card,
   CardHeader,
@@ -81,6 +83,7 @@ import {
 
 const store = useGameStore();
 const { heroPresets, champions } = storeToRefs(store);
+const providersStore = useProviders();
 const router = useRouter();
 const route = useRoute();
 const { t } = useLocale();
@@ -104,6 +107,45 @@ const configJsonStr = ref("{}");
 const scriptSource = ref("");
 // LLM Agent 的思考深度（1-5），保存时写入 config_json.thinking_depth。
 const thinkingDepth = ref(2);
+// LLM Agent 的模型供应商（写 config_json.provider_id）与模型名（写 draft.model）。
+const providerId = ref<string>(PLATFORM_PROVIDER_ID);
+const manualModel = ref(false);
+// 平台模型：管理员在服务端 env 配置的可选模型名，用户只能选不能手填。
+const platformModels = ref<string[]>([]);
+
+const enabledProviders = computed(() => providersStore.providers.filter((p) => p.enabled));
+const isPlatform = computed(() => providerId.value === PLATFORM_PROVIDER_ID);
+const selectedProvider = computed(() =>
+  enabledProviders.value.find((p) => p.id === providerId.value),
+);
+// 平台模型用管理员提供的清单；BYO 供应商用其 models 列表。
+const modelOptions = computed(() =>
+  isPlatform.value ? platformModels.value : selectedProvider.value?.models ?? [],
+);
+// 当前 model 是否不在所选供应商的模型列表里 → 自动切手填（平台模型不允许手填）。
+const modelIsManual = computed(
+  () =>
+    !isPlatform.value &&
+    (manualModel.value || (!!draft.value.model && !modelOptions.value.includes(draft.value.model))),
+);
+
+async function loadPlatformModels() {
+  try {
+    platformModels.value = await services.cloud.listPlatformModels();
+  } catch {
+    platformModels.value = [];
+  }
+}
+
+function onProviderChange(v: any) {
+  providerId.value = String(v);
+  manualModel.value = false;
+}
+
+function onModelSelect(v: any) {
+  draft.value.model = String(v);
+  manualModel.value = false;
+}
 // RL Agent 配置：权重路径 (.pth)、BYO 推理端点、Reward Shaper 权重表。
 const RL_REWARD_KEYS = [
   "last_hit",
@@ -285,6 +327,9 @@ function enterEdit(name: string) {
     typeof p.config_json?.script === "string" ? p.config_json.script : DEFAULT_SCRIPT;
   thinkingDepth.value =
     typeof p.config_json?.thinking_depth === "number" ? p.config_json.thinking_depth : 2;
+  providerId.value =
+    typeof p.config_json?.provider_id === "string" ? p.config_json.provider_id : PLATFORM_PROVIDER_ID;
+  manualModel.value = false;
   rlModelPath.value = typeof p.config_json?.model_path === "string" ? p.config_json.model_path : "";
   rlEndpoint.value =
     typeof p.config_json?.inference_endpoint === "string" ? p.config_json.inference_endpoint : "";
@@ -301,6 +346,8 @@ function startNew() {
   configJsonStr.value = "{}";
   scriptSource.value = DEFAULT_SCRIPT;
   thinkingDepth.value = 2;
+  providerId.value = PLATFORM_PROVIDER_ID;
+  manualModel.value = false;
   rlModelPath.value = "";
   rlEndpoint.value = "";
   rlRewards.value = defaultRlRewards();
@@ -334,7 +381,12 @@ async function handleSave() {
       reward_shaper: { ...rlRewards.value },
     };
   } else {
-    draft.value.config_json = { thinking_depth: thinkingDepth.value };
+    draft.value.config_json = {
+      thinking_depth: thinkingDepth.value,
+      ...(providerId.value && providerId.value !== PLATFORM_PROVIDER_ID
+        ? { provider_id: providerId.value }
+        : {}),
+    };
   }
   try {
     if (isDesktop && currentDivergence.value === "conflict") {
@@ -580,7 +632,7 @@ function onFocusRecheck() {
 }
 
 onMounted(async () => {
-  await Promise.all([store.loadHeroPresets(), loadCloudAgents(), loadLocalPresets()]);
+  await Promise.all([store.loadHeroPresets(), loadCloudAgents(), loadLocalPresets(), providersStore.load(), loadPlatformModels()]);
   recheckDivergences();
   window.addEventListener("focus", onFocusRecheck);
   // 深链编辑：编排页「编辑」按钮跳转 /heroes?edit=<name>，自动进入编辑态。
@@ -819,12 +871,45 @@ onBeforeUnmount(() => {
                 />
               </div>
               <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <div class="space-y-2">
-                  <Label>{{ t("heroes.modelLabel") }}</Label>
-                  <Input
-                    v-model="draft.model"
-                    :placeholder="t('heroes.modelPlaceholder')"
-                  />
+                <div class="space-y-3">
+                  <div class="space-y-2">
+                    <Label>{{ t("heroes.providerLabel") }}</Label>
+                    <Select :model-value="providerId" @update:model-value="onProviderChange">
+                      <SelectTrigger class="w-full">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem :value="PLATFORM_PROVIDER_ID">{{ t("heroes.providerPlatform") }}</SelectItem>
+                        <SelectItem v-for="p in enabledProviders" :key="p.id" :value="p.id">
+                          {{ p.name }}
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div class="space-y-2">
+                    <div class="flex items-center justify-between">
+                      <Label>{{ t("heroes.modelSelectLabel") }}</Label>
+                      <Button v-if="!isPlatform" variant="ghost" size="sm" class="h-6 text-[11px]" @click="manualModel = !manualModel">
+                        {{ t("heroes.modelManual") }}
+                      </Button>
+                    </div>
+                    <Input
+                      v-if="!isPlatform && (modelIsManual || modelOptions.length === 0)"
+                      v-model="draft.model"
+                      :placeholder="t('heroes.modelPlaceholder')"
+                    />
+                    <Select v-else :model-value="draft.model" @update:model-value="onModelSelect">
+                      <SelectTrigger class="w-full">
+                        <SelectValue :placeholder="t('heroes.modelPlaceholder')" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem v-for="m in modelOptions" :key="m" :value="m">{{ m }}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <p v-if="isPlatform && platformModels.length === 0" class="text-muted-foreground text-[11px]">
+                      {{ t("heroes.platformModelsEmpty") }}
+                    </p>
+                  </div>
                 </div>
                 <div class="space-y-2">
                   <Label>{{ t("heroes.preambleLabel") }}</Label>

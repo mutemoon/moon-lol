@@ -4,6 +4,7 @@
 
 pub mod action;
 pub mod game_client;
+pub mod launch;
 pub mod mcp;
 pub mod protocol;
 pub mod session;

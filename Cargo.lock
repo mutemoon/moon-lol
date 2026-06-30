@@ -8713,6 +8713,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "lol_agent_runtime"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "lol_client",
+ "rig",
+ "rig-core",
+ "rmcp",
+ "serde",
+ "serde_json",
+ "tokio",
+ "tracing",
+]
+
+[[package]]
 name = "lol_base"
 version = "0.1.0"
 dependencies = [
@@ -8844,6 +8859,7 @@ dependencies = [
  "chrono",
  "futures-util",
  "jsonwebtoken",
+ "lol_agent_runtime",
  "lol_client",
  "lol_core",
  "lol_server",
@@ -8851,9 +8867,6 @@ dependencies = [
  "moka",
  "pretty_assertions",
  "rand 0.9.4",
- "rig",
- "rig-core",
- "rmcp",
  "serde",
  "serde_json",
  "sqlx",
@@ -9170,8 +9183,10 @@ dependencies = [
 name = "moon-lol-desktop"
 version = "0.1.0"
 dependencies = [
+ "async-trait",
  "chrono",
  "futures-util",
+ "lol_agent_runtime",
  "lol_client",
  "rig",
  "rig-core",

@@ -7,6 +7,7 @@ use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 
 use async_trait::async_trait;
+use lol_agent_runtime::AgentConfig;
 use tokio::sync::Mutex;
 use uuid::Uuid;
 
@@ -14,8 +15,8 @@ use crate::domain::local_game::{ManagedProcess, ProcessStatus, allocate_port, is
 use crate::domain::match_::{MatchForm, MatchStatus};
 use crate::domain::{ServiceError, ServiceResult};
 use crate::repository::match_repo::{MatchInput, MatchRepo};
-use crate::service::agent_orchestrator::SceneAgentConfig;
 use crate::service::match_service::MatchService;
+use crate::service::model_provider_service::ModelProviderService;
 use crate::service::{agent_orchestrator, match_supervisor};
 
 /// 进程启动抽象（可 mock，真实 impl 用 tokio::process::Command）。
@@ -37,7 +38,7 @@ pub struct LocalStartInput {
     pub win_condition: Option<serde_json::Value>,
     /// 场景 agent 阵容：非空时启动 AI 决策环（接入进程内 rmcp 工具层）。
     #[serde(default)]
-    pub scenario_agents: Vec<SceneAgentConfig>,
+    pub scenario_agents: Vec<AgentConfig>,
 }
 
 #[async_trait]
@@ -60,6 +61,7 @@ pub struct LocalGameServiceImpl {
     pub match_repo: Arc<dyn MatchRepo>,
     pub launcher: Arc<dyn ProcessLauncher>,
     pub match_service: Arc<dyn MatchService>,
+    pub model_provider_service: Arc<dyn ModelProviderService>,
     /// 端口池 + 进程表（内存状态）。
     pub state: Arc<Mutex<LocalGameState>>,
 }
@@ -115,11 +117,13 @@ impl LocalGameServiceImpl {
         match_repo: Arc<dyn MatchRepo>,
         launcher: Arc<dyn ProcessLauncher>,
         match_service: Arc<dyn MatchService>,
+        model_provider_service: Arc<dyn ModelProviderService>,
     ) -> Self {
         Self {
             match_repo,
             launcher,
             match_service,
+            model_provider_service,
             state: Arc::new(Mutex::new(LocalGameState::default())),
         }
     }
@@ -204,8 +208,15 @@ impl LocalGameService for LocalGameServiceImpl {
         //    进程内 rmcp 工具层（observe + action）。无凭据时编排环内部静默跳过。
         let scenario_agents = input.scenario_agents.clone();
         if !scenario_agents.is_empty() {
+            let providers = self.model_provider_service.clone();
             tokio::spawn(async move {
-                agent_orchestrator::run_agent_orchestrator(port, scenario_agents).await;
+                agent_orchestrator::run_agent_orchestrator(
+                    port,
+                    scenario_agents,
+                    owner_id,
+                    providers,
+                )
+                .await;
             });
         }
 
@@ -284,16 +295,13 @@ impl CommandProcessLauncher {
 #[async_trait]
 impl ProcessLauncher for CommandProcessLauncher {
     async fn launch(&self, port: i32, _match_id: Uuid) -> ServiceResult<()> {
+        let cfg = lol_client::launch::BevyGameConfig {
+            headless: true,
+            ..Default::default()
+        };
         let child = tokio::process::Command::new("cargo")
-            .args(&[
-                "run",
-                "--bin",
-                "moon_lol",
-                "--",
-                "--ws-port",
-                &port.to_string(),
-                "--headless",
-            ])
+            .args(["run", "--bin", "moon_lol", "--"])
+            .args(lol_client::launch::bevy_args(port as u16, &cfg))
             .stdout(std::process::Stdio::null())
             .stderr(std::process::Stdio::null())
             .spawn()
@@ -323,6 +331,7 @@ mod tests {
     use crate::domain::RepoResult;
     use crate::domain::local_game::ProcessStatus;
     use crate::domain::match_::{Match, MatchForm, MatchStatus};
+    use crate::domain::model_provider::{ModelProvider, ModelProviderDto, ModelProviderInput};
 
     mock! {
         pub MatchRepo {}
@@ -366,6 +375,18 @@ mod tests {
         }
     }
 
+    mock! {
+        pub ModelProviderSvc {}
+        #[async_trait]
+        impl ModelProviderService for ModelProviderSvc {
+            async fn list(&self, owner_id: i32) -> ServiceResult<Vec<ModelProviderDto>>;
+            async fn create(&self, owner_id: i32, input: ModelProviderInput) -> ServiceResult<ModelProviderDto>;
+            async fn update(&self, owner_id: i32, id: Uuid, input: ModelProviderInput) -> ServiceResult<()>;
+            async fn delete(&self, owner_id: i32, id: Uuid) -> ServiceResult<()>;
+            async fn resolve_for_runtime(&self, provider_id: Uuid, owner_id: i32) -> ServiceResult<Option<ModelProvider>>;
+        }
+    }
+
     fn sample_match(owner: i32, port: Option<i32>, status: MatchStatus) -> Match {
         Match {
             id: Uuid::new_v4(),
@@ -394,6 +415,7 @@ mod tests {
             match_repo: Arc::new(repo),
             launcher: Arc::new(launcher),
             match_service: Arc::new(MockMatchSvc::new()),
+            model_provider_service: Arc::new(MockModelProviderSvc::new()),
             state: Arc::new(Mutex::new(LocalGameState::default())),
         }
     }

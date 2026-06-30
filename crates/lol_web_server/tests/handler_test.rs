@@ -8,9 +8,9 @@ use axum::http::{Request, StatusCode};
 use lol_web_server::domain::agent::{Agent, AgentInput, AgentType};
 use lol_web_server::domain::agent_snapshot::AgentSnapshot;
 use lol_web_server::domain::auth::User;
-use lol_web_server::domain::config::AiConfig;
 use lol_web_server::domain::essence::{BillingPlan, EssenceTransaction};
 use lol_web_server::domain::match_::{Match, MatchEvent, MatchStatus, Winner};
+use lol_web_server::domain::model_provider::{ModelProvider, ModelProviderDto, ModelProviderInput};
 use lol_web_server::domain::room::{Room, RoomAgentSlot, RoomConstraints};
 use lol_web_server::domain::scenario::{Scenario, ScenarioInput};
 use lol_web_server::domain::spawn_preset::{SpawnPreset, SpawnPresetInput, Team, Visibility};
@@ -35,15 +35,6 @@ mockall::mock! {
         async fn reset_password(&self, phone: &str, new_password: &str, code: &str) -> ServiceResult<()>;
         async fn verify_token(&self, token: &str) -> ServiceResult<User>;
         fn jwt_secret(&self) -> &str;
-    }
-}
-
-mockall::mock! {
-    pub ConfigService {}
-    #[async_trait]
-    impl ConfigService for ConfigService {
-        async fn get_config(&self, user_id: i32) -> ServiceResult<AiConfig>;
-        async fn set_config(&self, user_id: i32, config: AiConfig) -> ServiceResult<()>;
     }
 }
 
@@ -215,11 +206,22 @@ mockall::mock! {
     }
 }
 
+mockall::mock! {
+    pub ModelProviderService {}
+    #[async_trait]
+    impl ModelProviderService for ModelProviderService {
+        async fn list(&self, owner_id: i32) -> ServiceResult<Vec<ModelProviderDto>>;
+        async fn create(&self, owner_id: i32, input: ModelProviderInput) -> ServiceResult<ModelProviderDto>;
+        async fn update(&self, owner_id: i32, id: Uuid, input: ModelProviderInput) -> ServiceResult<()>;
+        async fn delete(&self, owner_id: i32, id: Uuid) -> ServiceResult<()>;
+        async fn resolve_for_runtime(&self, provider_id: Uuid, owner_id: i32) -> ServiceResult<Option<ModelProvider>>;
+    }
+}
+
 // ── Helper structures ──
 
 struct Mocks {
     user: MockUserService,
-    config: MockConfigService,
     spawn: MockSpawnPresetService,
     agent: MockAgentService,
     snapshot: MockAgentSnapshotService,
@@ -233,13 +235,13 @@ struct Mocks {
     local: MockLocalGameService,
     admin: MockAdminService,
     log: MockLogService,
+    model_provider: MockModelProviderService,
 }
 
 impl Mocks {
     fn new() -> Self {
         Self {
             user: MockUserService::new(),
-            config: MockConfigService::new(),
             spawn: MockSpawnPresetService::new(),
             agent: MockAgentService::new(),
             snapshot: MockAgentSnapshotService::new(),
@@ -253,6 +255,7 @@ impl Mocks {
             local: MockLocalGameService::new(),
             admin: MockAdminService::new(),
             log: MockLogService::new(),
+            model_provider: MockModelProviderService::new(),
         }
     }
 }
@@ -266,7 +269,6 @@ where
 
     AppState {
         user_service: Arc::new(mocks.user),
-        config_service: Arc::new(mocks.config),
         spawn_preset_service: Arc::new(mocks.spawn),
         agent_service: Arc::new(mocks.agent),
         agent_snapshot_service: Arc::new(mocks.snapshot),
@@ -280,6 +282,7 @@ where
         local_game_service: Arc::new(mocks.local),
         admin_service: Arc::new(mocks.admin),
         log_service: Arc::new(mocks.log),
+        model_provider_service: Arc::new(mocks.model_provider),
     }
 }
 
@@ -410,48 +413,6 @@ async fn test_auth_me_with_valid_jwt() {
         .unwrap();
     let res: ApiResponse<AuthUserDto> = serde_json::from_slice(&body_bytes).unwrap();
     assert_eq!(res.data.unwrap().id, user_id);
-}
-
-#[tokio::test]
-async fn test_get_config_success() {
-    let user_id = 99;
-    let jwt = generate_test_token(user_id);
-
-    let state = build_test_state(move |mocks| {
-        mocks
-            .config
-            .expect_get_config()
-            .with(mockall::predicate::eq(user_id))
-            .returning(|_| {
-                Ok(AiConfig {
-                    api_key: "sk-proj-testkey".to_string(),
-                    base_url: "https://api.openai.com".to_string(),
-                    preamble: "system instructions".to_string(),
-                })
-            });
-    });
-    let app = create_router(state);
-
-    let response = app
-        .oneshot(
-            Request::builder()
-                .method("GET")
-                .uri("/api/config")
-                .header("Authorization", format!("Bearer {jwt}"))
-                .body(Body::empty())
-                .unwrap(),
-        )
-        .await
-        .unwrap();
-
-    assert_eq!(response.status(), StatusCode::OK);
-
-    let body_bytes = axum::body::to_bytes(response.into_body(), 2048)
-        .await
-        .unwrap();
-    let res: ApiResponse<AiConfig> = serde_json::from_slice(&body_bytes).unwrap();
-    let cfg = res.data.unwrap();
-    assert_eq!(cfg.api_key, "sk-proj-testkey");
 }
 
 #[tokio::test]

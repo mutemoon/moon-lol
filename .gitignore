@@ -30,3 +30,5 @@ agent.pth
 __pycache__
 
 .zcode
+
+.playwright-cli

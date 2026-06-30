@@ -15,13 +15,6 @@ use state::AppState;
 use tauri::Manager;
 use tools::{BashArgs, BashTool};
 
-#[derive(serde::Serialize, serde::Deserialize, Clone)]
-pub struct AiConfig {
-    pub api_key: String,
-    pub base_url: String,
-    pub preamble: String,
-}
-
 fn get_config_dir(app: &tauri::AppHandle) -> Result<PathBuf, error::AppError> {
     let home = app.path().home_dir()?;
     let dir = home.join(".moon-lol");
@@ -31,80 +24,50 @@ fn get_config_dir(app: &tauri::AppHandle) -> Result<PathBuf, error::AppError> {
     Ok(dir)
 }
 
-fn parse_legacy_env(content: &str) -> AiConfig {
-    let mut api_key = String::new();
-    let mut base_url = String::new();
-    let mut preamble = String::new();
+/// 模型供应商（桌面端本地存储，与前端 ModelProvider 接口及云端 DTO 对齐，snake_case）。
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug)]
+pub struct ModelProvider {
+    pub id: String,
+    pub name: String,
+    pub category: String,
+    pub preset_type: String,
+    pub base_url: String,
+    pub api_key: String,
+    pub api_format: String,
+    pub models: Vec<String>,
+    pub enabled: bool,
+    pub website_url: String,
+    pub api_key_url: String,
+    pub icon: String,
+    pub icon_color: String,
+    pub sort_order: i32,
+}
 
-    for line in content.lines() {
-        let line = line.trim();
-        if line.starts_with('#') || line.is_empty() {
-            continue;
-        }
-        let Some((key, val)) = line.split_once('=') else {
-            continue;
-        };
-        let key = key.trim();
-        let val = val.trim().trim_matches('"').trim_matches('\'').trim();
-        if key == "ANTHROPIC_API_KEY" {
-            api_key = val.to_string();
-        } else if key == "ANTHROPIC_BASE_URL" {
-            base_url = val.to_string();
-        } else if key == "ANTHROPIC_PREAMBLE" {
-            preamble = val.replace("\\n", "\n");
-        }
-    }
-
-    AiConfig {
-        api_key,
-        base_url,
-        preamble,
-    }
+fn providers_path(app: &tauri::AppHandle) -> Result<PathBuf, error::AppError> {
+    Ok(get_config_dir(app)?.join("providers.json"))
 }
 
 #[tauri::command]
-fn get_ai_config(app: tauri::AppHandle) -> Result<AiConfig, error::AppError> {
-    let dir = get_config_dir(&app)?;
-    let json_path = dir.join("config.json");
-    let env_path = dir.join(".env");
-
-    if json_path.exists() {
-        let content = fs::read_to_string(&json_path)?;
-        let config: AiConfig = serde_json::from_str(&content)
-            .map_err(|e| error::AppError::Generic(format!("JSON 解析失败: {e}")))?;
-        return Ok(config);
+fn get_model_providers(app: tauri::AppHandle) -> Result<Vec<ModelProvider>, error::AppError> {
+    let path = providers_path(&app)?;
+    if !path.exists() {
+        return Ok(Vec::new());
     }
-
-    if env_path.exists() {
-        let content = fs::read_to_string(&env_path)?;
-        let config = parse_legacy_env(&content);
-        // 自动迁移保存为新格式
-        let content_json = serde_json::to_string_pretty(&config)
-            .map_err(|e| error::AppError::Generic(format!("JSON 序列化失败: {e}")))?;
-        fs::write(&json_path, content_json)?;
-        return Ok(config);
-    }
-
-    Ok(AiConfig {
-        api_key: String::new(),
-        base_url: String::new(),
-        preamble: String::new(),
-    })
+    let content = fs::read_to_string(&path)?;
+    let providers: Vec<ModelProvider> = serde_json::from_str(&content)
+        .map_err(|e| error::AppError::Generic(format!("供应商配置解析失败: {e}")))?;
+    Ok(providers)
 }
 
 #[tauri::command]
-fn set_ai_config(app: tauri::AppHandle, config: AiConfig) -> Result<(), error::AppError> {
-    let dir = get_config_dir(&app)?;
-    let json_path = dir.join("config.json");
-
-    let content_json = serde_json::to_string_pretty(&config)
+fn set_model_providers(
+    app: tauri::AppHandle,
+    providers: Vec<ModelProvider>,
+) -> Result<(), error::AppError> {
+    let path = providers_path(&app)?;
+    let content = serde_json::to_string_pretty(&providers)
         .map_err(|e| error::AppError::Generic(format!("JSON 序列化失败: {e}")))?;
-    fs::write(&json_path, content_json)?;
-
-    std::env::set_var("ANTHROPIC_API_KEY", config.api_key.trim());
-    std::env::set_var("ANTHROPIC_BASE_URL", config.base_url.trim());
-    std::env::set_var("ANTHROPIC_PREAMBLE", config.preamble.trim());
-
+    fs::write(&path, content)?;
     Ok(())
 }
 
@@ -117,6 +80,15 @@ pub struct FrontAgentConfig {
     pub spawn_point: [f32; 2],
     #[serde(default = "default_agent_type")]
     pub agent_type: String,
+    /// 选手指定的模型名（缺省走全局 env ANTHROPIC_MODEL）。
+    #[serde(default)]
+    pub model: Option<String>,
+    /// 选手绑定的模型供应商 id（缺省走平台默认）。
+    #[serde(default)]
+    pub provider_id: Option<String>,
+    /// 透传的策略配置（含 provider_id 等），原样序列化进场景。
+    #[serde(default)]
+    pub config_json: Option<serde_json::Value>,
 }
 
 fn default_agent_type() -> String {
@@ -621,25 +593,12 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .manage(Mutex::new(AppState::new()))
-        .setup(|app| {
-            if let Ok(config) = get_ai_config(app.handle().clone()) {
-                if !config.api_key.is_empty() {
-                    std::env::set_var("ANTHROPIC_API_KEY", &config.api_key);
-                }
-                if !config.base_url.is_empty() {
-                    std::env::set_var("ANTHROPIC_BASE_URL", &config.base_url);
-                }
-                if !config.preamble.is_empty() {
-                    std::env::set_var("ANTHROPIC_PREAMBLE", &config.preamble);
-                }
-            }
-            Ok(())
-        })
+        .setup(|_app| Ok(()))
         .invoke_handler(tauri::generate_handler![
             start_game,
             stop_game,
-            get_ai_config,
-            set_ai_config,
+            get_model_providers,
+            set_model_providers,
             save_custom_scenario,
             delete_custom_scenario,
             list_custom_scenarios,

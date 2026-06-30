@@ -98,7 +98,7 @@ async function runCommand() {
     });
   } catch (e: any) {
     const timestamp = new Date().toLocaleTimeString();
-    const errorMsg = typeof e === "string" ? e : e.message || t("settings.model.unknownError");
+    const errorMsg = typeof e === "string" ? e : e.message || "未知错误";
     executionError.value = errorMsg;
 
     historyLogs.value.unshift({

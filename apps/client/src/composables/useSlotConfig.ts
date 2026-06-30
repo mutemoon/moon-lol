@@ -76,6 +76,10 @@ export function expandSlot(
     prompt: hero?.prompt ?? "",
     spawn_point: spawn ? [spawn.x, spawn.z] : (team === "Order" ? [1981, 11441] : [3318, 12875]),
     agent_type: hero?.agent_type ?? "llm",
+    // 透传选手的模型与策略配置（含 provider_id），供运行时编排器按供应商解析凭证。
+    model: hero?.model || undefined,
+    provider_id: hero?.config_json?.provider_id,
+    config_json: hero?.config_json,
   };
 }
 

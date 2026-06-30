@@ -9,13 +9,15 @@
 //! - 命中胜负 → 调 [`MatchService::finish_internal`] 落库；同时把每条事件
 //!   [`MatchService::append_event_internal`] 写入 match_events 供 observe 轮询。
 //! - Bevy 进程退出（WS 断开）→ task 结束。
+//!
+//! WS 连接与重试复用 `lol_client::start_ws_client`（含 30s 重试 + 事件 channel），
+//! 本 supervisor 仅从事件 channel 消费 `WsEvent`，不再自持裸 tungstenite 连接。
 
 use std::sync::Arc;
 
-use futures_util::StreamExt;
-use lol_client::WsEvent;
-use tokio_tungstenite::connect_async;
-use tokio_tungstenite::tungstenite::Message;
+use lol_client::{WsEvent, start_ws_client};
+use serde_json::Value;
+use tokio::sync::mpsc;
 use tracing::{debug, info, warn};
 use uuid::Uuid;
 
@@ -78,38 +80,29 @@ pub async fn run_supervisor(match_id: Uuid, ws_port: i32, match_service: Arc<dyn
         match_id, ws_port
     );
 
-    let url = format!("ws://127.0.0.1:{ws_port}");
+    // 复用 lol_client 的 WS 连接（含 30s 重试）与事件 channel。
+    let (event_tx, mut event_rx) = mpsc::channel::<Value>(64);
+    if let Err(e) = start_ws_client(ws_port as u16, Some(event_tx)).await {
+        warn!(
+            "[supervisor] match {} 无法连接 Bevy WS: {}，supervisor 退出",
+            match_id, e
+        );
+        return;
+    }
+
     let mut state = SoloState::default();
     let rule = SoloRule::default();
     let mut decided = false;
 
-    // 重试连接：Bevy 进程刚启动，WS 可能尚未就绪。
-    let ws_stream = match connect_with_retry(&url).await {
-        Some(s) => s,
-        None => {
-            warn!(
-                "[supervisor] match {} 无法连接 Bevy WS，supervisor 退出",
-                match_id
-            );
-            return;
-        }
-    };
-    let (_write, mut read) = ws_stream.split();
-
-    while let Some(msg) = read.next().await {
-        let text = match msg {
-            Ok(Message::Text(t)) => t.to_string(),
-            Ok(Message::Close(_)) | Err(_) => break,
-            Ok(_) => continue,
-        };
-
-        let env: WsEvent = match serde_json::from_str(&text) {
+    // channel 关闭（WS 读循环结束、所有 sender 释放）即 Bevy 进程退出。
+    while let Some(val) = event_rx.recv().await {
+        let env: WsEvent = match serde_json::from_value(val.clone()) {
             Ok(e) => e,
             Err(_) => continue,
         };
 
         if env.event != "match_event" {
-            // 其他事件（game_loaded 等）忽略。
+            // 其他事件（game_loaded / game_close 等）忽略。
             continue;
         }
 
@@ -210,21 +203,6 @@ fn advance_state(state: &mut SoloState, payload: &MatchEventPayload) -> (String,
             ("time_progress".to_string(), (*elapsed_secs * 1000.0) as i64)
         }
     }
-}
-
-/// 重试连接 Bevy WS：最多 30 秒，每 500ms 一次。
-async fn connect_with_retry(
-    url: &str,
-) -> Option<
-    tokio_tungstenite::WebSocketStream<tokio_tungstenite::MaybeTlsStream<tokio::net::TcpStream>>,
-> {
-    for _ in 0..60 {
-        match connect_async(url).await {
-            Ok((stream, _)) => return Some(stream),
-            Err(_) => tokio::time::sleep(std::time::Duration::from_millis(500)).await,
-        }
-    }
-    None
 }
 
 #[cfg(test)]

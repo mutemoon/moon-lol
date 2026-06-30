@@ -2,7 +2,6 @@ import type {
   IBackendClient,
   SpawnPreset,
   HeroPreset,
-  AiConfig,
   FrontAgentConfig,
   QueryLogsResult,
   GameConfig,
@@ -112,18 +111,6 @@ export class WebBackendClient implements IBackendClient {
     const regData = await regRes.json();
     this.token = regData.data.token;
     localStorage.setItem("moon_lol_auth_token", this.token!);
-  }
-
-  // AI Config
-  async getAiConfig(): Promise<AiConfig> {
-    return this.request<AiConfig>("/api/config");
-  }
-
-  async setAiConfig(config: AiConfig): Promise<void> {
-    await this.request("/api/config", {
-      method: "POST",
-      body: JSON.stringify(config)
-    });
   }
 
   // Spawn Presets

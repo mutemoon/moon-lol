@@ -4,7 +4,6 @@ import type {
   IBackendClient,
   SpawnPreset,
   HeroPreset,
-  AiConfig,
   FrontAgentConfig,
   QueryLogsResult,
   GameConfig,
@@ -13,15 +12,6 @@ import type {
 } from "./backend";
 
 export class TauriBackendClient implements IBackendClient {
-  // AI Config
-  async getAiConfig(): Promise<AiConfig> {
-    return invoke<AiConfig>("get_ai_config");
-  }
-
-  async setAiConfig(config: AiConfig): Promise<void> {
-    return invoke("set_ai_config", { config });
-  }
-
   // Spawn Presets
   async listSpawnPresets(): Promise<SpawnPreset[]> {
     return invoke<SpawnPreset[]>("list_spawn_presets");

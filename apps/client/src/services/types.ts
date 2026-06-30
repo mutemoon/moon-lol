@@ -26,12 +26,6 @@ export interface HeroPreset {
   config_json?: any
 }
 
-export interface AiConfig {
-  api_key: string
-  base_url: string
-  preamble: string
-}
-
 export interface FrontAgentConfig {
   id?: string
   champion: string
@@ -39,7 +33,37 @@ export interface FrontAgentConfig {
   prompt: string
   spawn_point: number[]
   agent_type: string
+  model?: string
+  provider_id?: string
+  config_json?: any
 }
+
+// ── 模型供应商 ──
+
+export type ApiFormat = 'anthropic' | 'openai_chat' | 'openai_responses' | 'gemini_native'
+export type ProviderCategory = 'preset' | 'custom' | 'platform'
+
+export interface ModelProvider {
+  id: string
+  name: string
+  category: ProviderCategory
+  preset_type: string
+  base_url: string
+  /** 写入时携带；云端读取时为空串，用 has_api_key 判断是否已设置。 */
+  api_key: string
+  has_api_key?: boolean
+  api_format: ApiFormat
+  models: string[]
+  enabled: boolean
+  website_url?: string
+  api_key_url?: string
+  icon?: string
+  icon_color?: string
+  sort_order: number
+}
+
+/** 创建/更新供应商的输入（不含 id）。api_key 空串表示更新时保留旧值。 */
+export type ModelProviderInput = Omit<ModelProvider, 'id' | 'has_api_key'>
 
 // ── 游戏配置 ──
 

@@ -80,3 +80,14 @@ LLM 与 Script 选手的对局运行时已贯通（Script 经 `lol_agent::driver
 
 #### 服务端 (Server)
 - [x] **创建/更新端点规范化**：实现 `/api/agents` 的 `POST` 和 `PUT` API，统一校验 `AgentLimitProvider` 规定的选手槽位限额（免费版上限为 5 个）。（`agent_service.rs` create/update + `assert_within_slot_limit`）
+
+---
+
+### 5. LLM 模型配置改为供应商/模型下拉选择
+
+模型字段不再手填，改为「供应商 + 模型名」级联下拉，供应商目录与设置页详见 [模型供应商与模型设置](../llm-provider-setting/todo.md)。
+
+#### 客户端 (Client)
+- [ ] **供应商 + 模型级联下拉**：`heroes.vue` 的 LLM 模型字段改为两个下拉——供应商下拉列出设置页所有启用供应商（平台模型 / 预设 / 自定义分组），模型名下拉随供应商切换刷新其 `models` 列表；选中写入 `agents.model` 与 `config_json.provider_id`。
+- [ ] **手填兜底与回写**：模型名下拉保留「手填」入口以覆盖预设外新模型，手填值回写进该供应商的 `models` 以便复用。
+- [ ] **运行时凭证解析联动**：LLM 执行器按 `config_json.provider_id` 在本地供应商表查 `baseUrl / apiKey / apiFormat`，配合 `agents.model` 发起请求。

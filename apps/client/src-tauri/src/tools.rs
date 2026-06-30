@@ -13,12 +13,7 @@ fn is_dev() -> bool {
 }
 
 fn workspace_root() -> Option<std::path::PathBuf> {
-    let manifest_dir = std::env::var("CARGO_MANIFEST_DIR").ok()?;
-    std::path::Path::new(&manifest_dir)
-        .parent()
-        .and_then(|p| p.parent())
-        .and_then(|p| p.parent())
-        .map(|p| p.to_path_buf())
+    lol_client::launch::workspace_root()
 }
 
 impl Tool for BashTool {

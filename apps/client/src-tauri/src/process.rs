@@ -1,6 +1,9 @@
 use std::process::{Child, Command, Stdio};
 use std::sync::Mutex;
 
+use lol_client::launch::{
+    bevy_args, binary_name, default_rust_log, workspace_root, BevyGameConfig,
+};
 use serde::Deserialize;
 use tauri::Manager;
 
@@ -12,18 +15,6 @@ pub struct GameConfig {
     pub mode: String,
     pub champion: String,
     pub scene_name: Option<String>,
-}
-
-/// Find the workspace root directory.
-fn workspace_root() -> Result<std::path::PathBuf, String> {
-    let manifest_dir = std::env::var("CARGO_MANIFEST_DIR").unwrap_or_default();
-    // apps/desktop/src-tauri → apps/desktop → apps → workspace root
-    std::path::Path::new(&manifest_dir)
-        .parent()
-        .and_then(|p| p.parent())
-        .and_then(|p| p.parent())
-        .map(|p| p.to_path_buf())
-        .ok_or("cannot find workspace root".into())
 }
 
 /// Returns the log database path at ~/.moon-lol/logs/debug.db
@@ -39,16 +30,21 @@ fn log_db_path(app: &tauri::AppHandle) -> Result<std::path::PathBuf, String> {
 
 /// Check if we're in dev mode (no bundled binary available).
 fn is_dev(app: &tauri::AppHandle) -> bool {
-    #[cfg(target_os = "windows")]
-    let binary_name = "lol.exe";
-    #[cfg(not(target_os = "windows"))]
-    let binary_name = "lol";
-
     let resource_dir = app
         .path()
         .resource_dir()
-        .map(|p| p.join("bin").join(binary_name));
+        .map(|p| p.join("bin").join(binary_name()));
     !resource_dir.is_ok_and(|p| p.exists())
+}
+
+/// 把桌面端 GameConfig 转成共享的 BevyGameConfig（非 headless，带场景）。
+fn game_config(config: &GameConfig) -> BevyGameConfig {
+    BevyGameConfig {
+        mode: Some(config.mode.clone()),
+        champion: Some(config.champion.clone()),
+        scene: config.scene_name.clone(),
+        headless: false,
+    }
 }
 
 /// Start the Bevy game process.
@@ -75,7 +71,7 @@ pub fn start_game(
     }
 
     let port: u16 = 9001;
-    let root = workspace_root()?;
+    let root = workspace_root().ok_or("cannot find workspace root")?;
     let log_db_path = log_db_path(app)?;
 
     let child = if is_dev(app) {
@@ -100,24 +96,12 @@ fn start_dev(root: &std::path::Path, port: u16, config: &GameConfig) -> Result<C
         port, config.mode, config.champion
     );
 
-    let rust_log = std::env::var("RUST_LOG").unwrap_or_else(|_| {
-        "info,lol_core=debug,lol_server=debug,lol_champions=debug,lol_render=debug,moon_lol=debug".to_string()
-    });
+    let rust_log = std::env::var("RUST_LOG").unwrap_or_else(|_| default_rust_log().to_string());
 
     let mut cmd = Command::new("cargo");
     cmd.current_dir(root)
         .args(["run", "--"])
-        .arg("--ws-port")
-        .arg(port.to_string())
-        .arg("--mode")
-        .arg(&config.mode)
-        .arg("--champion")
-        .arg(&config.champion);
-
-    if let Some(ref scene) = config.scene_name {
-        cmd.arg("--scene")
-            .arg(format!("user_games://{}.ron", scene));
-    }
+        .args(bevy_args(port, &game_config(config)));
 
     cmd.env("RUST_LOG", &rust_log)
         .stdout(Stdio::null())
@@ -133,17 +117,12 @@ fn start_release(
     port: u16,
     config: &GameConfig,
 ) -> Result<Child, String> {
-    #[cfg(target_os = "windows")]
-    let binary_name = "lol.exe";
-    #[cfg(not(target_os = "windows"))]
-    let binary_name = "lol";
-
     let binary = app
         .path()
         .resource_dir()
         .map_err(|e| e.to_string())?
         .join("bin")
-        .join(binary_name);
+        .join(binary_name());
 
     println!(
         "[tauri] Release: {} --ws-port {} --mode {} --champion {}",
@@ -153,23 +132,11 @@ fn start_release(
         config.champion
     );
 
-    let rust_log = std::env::var("RUST_LOG").unwrap_or_else(|_| {
-        "info,lol_core=debug,lol_server=debug,lol_champions=debug,lol_render=debug,moon_lol=debug".to_string()
-    });
+    let rust_log = std::env::var("RUST_LOG").unwrap_or_else(|_| default_rust_log().to_string());
 
     let mut cmd = Command::new(&binary);
     cmd.current_dir(root)
-        .arg("--ws-port")
-        .arg(port.to_string())
-        .arg("--mode")
-        .arg(&config.mode)
-        .arg("--champion")
-        .arg(&config.champion);
-
-    if let Some(ref scene) = config.scene_name {
-        cmd.arg("--scene")
-            .arg(format!("user_games://{}.ron", scene));
-    }
+        .args(bevy_args(port, &game_config(config)));
 
     cmd.env("RUST_LOG", &rust_log)
         .stdout(Stdio::null())

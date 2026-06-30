@@ -6,7 +6,6 @@ import { initServices, services } from "./provider";
 
 // ── 类型重导出（保持现有 import 兼容） ──
 export type {
-  AiConfig,
   FrontAgentConfig,
   GameConfig,
   HeroPreset,
@@ -22,10 +21,6 @@ export type {
 // 现有消费者通过 backendClient.xxx() 调用，这个 Proxy 自动路由到 local 或 cloud
 
 export interface IBackendClient {
-  // AI Config
-  getAiConfig(): Promise<any>;
-  setAiConfig(config: any): Promise<void>;
-
   // Spawn Presets
   listSpawnPresets(): Promise<any[]>;
   saveSpawnPreset(preset: any): Promise<void>;
@@ -123,8 +118,6 @@ const cloudHeroPresetHandlers: Record<string, (args: any[]) => Promise<any>> = {
 
 // Web 环境的云端映射（选手预设已由 cloudHeroPresetHandlers 处理，此处只含其余项）。
 const webCloudHandlers: Record<string, (...args: any[]) => Promise<any>> = {
-  getAiConfig: () => services.cloud.getAiConfig(),
-  setAiConfig: (a) => services.cloud.setAiConfig(a[0]),
   listSpawnPresets: () =>
     services.cloud.listSpawnPresets().then((list) =>
       list.map((p) => ({
@@ -212,8 +205,6 @@ const webCloudHandlers: Record<string, (...args: any[]) => Promise<any>> = {
 async function invokeTauriLegacy(prop: string, args: any[]): Promise<any> {
   const { invoke } = await import("@tauri-apps/api/core");
   const cmdMap: Record<string, string> = {
-    getAiConfig: "get_ai_config",
-    setAiConfig: "set_ai_config",
     listSpawnPresets: "list_spawn_presets",
     saveSpawnPreset: "save_spawn_preset",
     deleteSpawnPreset: "delete_spawn_preset",
@@ -235,7 +226,6 @@ async function invokeTauriLegacy(prop: string, args: any[]): Promise<any> {
     throw new Error(`Tauri command mapping not found for method ${String(prop)}`);
   }
   const paramMap: Record<string, (a: any[]) => any> = {
-    set_ai_config: (a) => ({ config: a[0] }),
     save_spawn_preset: (a) => ({ preset: a[0] }),
     delete_spawn_preset: (a) => ({ name: a[0] }),
     save_hero_preset: (a) => ({ preset: a[0] }),
@@ -304,8 +294,6 @@ export const backendClient: IBackendClient = new Proxy({} as IBackendClient, {
     // 预设 / 场景 CRUD：桌面端本地 Tauri 兜底，Web 走云端。
     // 选手预设单独走「云优先」策略（见下）。
     const legacyLocalMethods: Record<string, string> = {
-      getAiConfig: "getAiConfig",
-      setAiConfig: "setAiConfig",
       listSpawnPresets: "listSpawnPresets",
       saveSpawnPreset: "saveSpawnPreset",
       deleteSpawnPreset: "deleteSpawnPreset",

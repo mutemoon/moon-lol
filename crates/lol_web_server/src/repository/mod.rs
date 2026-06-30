@@ -3,9 +3,9 @@
 
 pub mod agent_repo;
 pub mod agent_snapshot_repo;
-pub mod config_repo;
 pub mod essence_repo;
 pub mod match_repo;
+pub mod model_provider_repo;
 pub mod rank_repo;
 pub mod room_repo;
 pub mod scenario_repo;
@@ -14,7 +14,6 @@ pub mod user_repo;
 
 pub use agent_repo::{AgentRepo, PgAgentRepo};
 pub use agent_snapshot_repo::{AgentSnapshotRepo, PgAgentSnapshotRepo};
-pub use config_repo::{ConfigRepo, PgConfigRepo};
 pub use essence_repo::{
     EssenceRepo, PgEssenceRepo, PgSubscriptionRepo, Subscription, SubscriptionRepo,
 };
@@ -22,6 +21,7 @@ pub use match_repo::{
     MatchEventInput, MatchEventRepo, MatchInput, MatchParticipantRepo, MatchRepo, ParticipantInput,
     PgMatchEventRepo, PgMatchParticipantRepo, PgMatchRepo,
 };
+pub use model_provider_repo::{ModelProviderRepo, PgModelProviderRepo};
 pub use rank_repo::{EloRepo, PgEloRepo, PgRankQueueRepo, PgSeasonRepo, RankQueueRepo, SeasonRepo};
 pub use room_repo::{PgRoomRepo, RoomRepo};
 pub use scenario_repo::{PgScenarioRepo, ScenarioRepo};

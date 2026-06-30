@@ -10,11 +10,26 @@ CREATE TABLE IF NOT EXISTS users (
     created_at    TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE IF NOT EXISTS ai_config (
-    user_id  INT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
-    api_key  TEXT NOT NULL DEFAULT '',
-    base_url TEXT NOT NULL DEFAULT '',
-    preamble TEXT NOT NULL DEFAULT ''
+-- 模型供应商：预设/自定义/平台，按 user_id 隔离，含明文 API Key（运行时解析用）。
+CREATE TABLE IF NOT EXISTS model_providers (
+    id          UUID PRIMARY KEY,
+    user_id     INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    name        TEXT NOT NULL,
+    category    TEXT NOT NULL DEFAULT 'custom',
+    preset_type TEXT NOT NULL DEFAULT '',
+    base_url    TEXT NOT NULL DEFAULT '',
+    api_key     TEXT NOT NULL DEFAULT '',
+    api_format  TEXT NOT NULL DEFAULT 'anthropic',
+    models      JSONB NOT NULL DEFAULT '[]',
+    enabled     BOOLEAN NOT NULL DEFAULT TRUE,
+    website_url TEXT NOT NULL DEFAULT '',
+    api_key_url TEXT NOT NULL DEFAULT '',
+    icon        TEXT NOT NULL DEFAULT '',
+    icon_color  TEXT NOT NULL DEFAULT '',
+    sort_order  INT NOT NULL DEFAULT 0,
+    created_at  TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at  TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (user_id, name)
 );
 
 -- ── Agent 资产三件套 ──
