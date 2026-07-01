@@ -6,7 +6,8 @@ meta:
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from "vue";
 import { useRouter } from "vue-router";
-import { agentsApi, type Agent } from "@/services/cloudApi";
+import { services } from "@/services/provider";
+import type { Agent } from "@/services/types";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -39,7 +40,7 @@ const forking = ref(false);
 async function refresh() {
   loading.value = true;
   try {
-    list.value = await agentsApi.browseCommunity(sort.value, 60);
+    list.value = await services.cloud.browseCommunityAgents(sort.value, 60);
   } catch (e) {
     list.value = [];
   } finally {
@@ -64,7 +65,7 @@ async function confirmFork() {
   if (!forkTarget.value) return;
   forking.value = true;
   try {
-    const created = await agentsApi.fork(forkTarget.value.id, forkName.value);
+    const created = await services.cloud.forkAgent(forkTarget.value.id, forkName.value);
     forkTarget.value = null;
     router.push(`/agents?focus=${created.id}`);
   } catch (e: any) {

@@ -1,13 +1,12 @@
-use std::process::{Child, Command, Stdio};
-use std::sync::Mutex;
+use std::collections::HashMap;
+use std::path::PathBuf;
 
-use lol_client::launch::{
-    bevy_args, binary_name, default_rust_log, workspace_root, BevyGameConfig,
-};
+use async_trait::async_trait;
+use lol_client::launch::{binary_name, build_command, default_rust_log, BevyGameConfig, BevySpawnRequest};
+use lol_game_process_manager::{ManagerError, ProcessLauncher};
 use serde::Deserialize;
 use tauri::Manager;
-
-use crate::state::{AppState, BevyProcess};
+use tokio::sync::Mutex;
 
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
@@ -15,30 +14,12 @@ pub struct GameConfig {
     pub mode: String,
     pub champion: String,
     pub scene_name: Option<String>,
-}
-
-/// Returns the log database path at ~/.moon-lol/logs/debug.db
-fn log_db_path(app: &tauri::AppHandle) -> Result<std::path::PathBuf, String> {
-    let base = app.path().home_dir().map_err(|e| e.to_string())?;
-    let path = base.join(".moon-lol").join("logs").join("debug.db");
-    // Ensure parent directories exist
-    if let Some(parent) = path.parent() {
-        std::fs::create_dir_all(parent).map_err(|e| e.to_string())?;
-    }
-    Ok(path)
-}
-
-/// Check if we're in dev mode (no bundled binary available).
-fn is_dev(app: &tauri::AppHandle) -> bool {
-    let resource_dir = app
-        .path()
-        .resource_dir()
-        .map(|p| p.join("bin").join(binary_name()));
-    !resource_dir.is_ok_and(|p| p.exists())
+    pub agents: Option<Vec<crate::FrontAgentConfig>>,
+    pub providers: Option<Vec<crate::ModelProvider>>,
 }
 
 /// 把桌面端 GameConfig 转成共享的 BevyGameConfig（非 headless，带场景）。
-fn game_config(config: &GameConfig) -> BevyGameConfig {
+pub fn game_config(config: &GameConfig) -> BevyGameConfig {
     BevyGameConfig {
         mode: Some(config.mode.clone()),
         champion: Some(config.champion.clone()),
@@ -47,114 +28,87 @@ fn game_config(config: &GameConfig) -> BevyGameConfig {
     }
 }
 
-/// Start the Bevy game process.
-pub fn start_game(
-    state: &Mutex<AppState>,
-    app: &tauri::AppHandle,
-    config: GameConfig,
-) -> Result<(), String> {
-    let mut s = state.lock().map_err(|e| e.to_string())?;
-
-    // If the previous process died on its own, clear the stale handle.
-    if let Some(ref mut proc) = s.bevy {
-        match proc.child.try_wait() {
-            Ok(Some(_)) => {
-                println!("[tauri] Previous Bevy process already exited, clearing stale state");
-                s.bevy = None;
-            }
-            Ok(None) => return Err("game already running".into()),
-            Err(e) => {
-                println!("[tauri] Error checking Bevy process status: {e}, clearing state");
-                s.bevy = None;
-            }
-        }
-    }
-
-    let port: u16 = 9001;
-    let root = workspace_root().ok_or("cannot find workspace root")?;
-    let log_db_path = log_db_path(app)?;
-
-    let child = if is_dev(app) {
-        start_dev(&root, port, &config)?
-    } else {
-        start_release(app, &root, port, &config)?
-    };
-
-    s.bevy = Some(BevyProcess {
-        child,
-        port,
-        log_db_path,
-    });
-    println!("[tauri] Bevy process started on port {}", port);
-    Ok(())
+/// 默认 RUST_LOG（桌面端 dev/release 共用）。
+pub fn rust_log() -> String {
+    std::env::var("RUST_LOG").unwrap_or_else(|_| default_rust_log().to_string())
 }
 
-/// Dev mode: use `cargo run` to handle all DLL/PATH automatically.
-fn start_dev(root: &std::path::Path, port: u16, config: &GameConfig) -> Result<Child, String> {
-    println!(
-        "[tauri] Dev: cargo run -- --ws-port {} --mode {} --champion {}",
-        port, config.mode, config.champion
-    );
-
-    let rust_log = std::env::var("RUST_LOG").unwrap_or_else(|_| default_rust_log().to_string());
-
-    let mut cmd = Command::new("cargo");
-    cmd.current_dir(root)
-        .args(["run", "--"])
-        .args(bevy_args(port, &game_config(config)));
-
-    cmd.env("RUST_LOG", &rust_log)
-        .stdout(Stdio::null())
-        .stderr(Stdio::null())
-        .spawn()
-        .map_err(|e| format!("failed to start game: {e}"))
+/// workspace 根目录（复用 lol_client::launch::workspace_root）。
+pub fn workspace_root() -> Option<PathBuf> {
+    lol_client::launch::workspace_root()
 }
 
-/// Release mode: run the bundled binary directly.
-fn start_release(
-    app: &tauri::AppHandle,
-    root: &std::path::Path,
-    port: u16,
-    config: &GameConfig,
-) -> Result<Child, String> {
-    let binary = app
+/// 检查是否处于 dev 模式（无打包二进制可用）。
+fn is_dev(app: &tauri::AppHandle) -> bool {
+    let resource_dir = app
         .path()
         .resource_dir()
-        .map_err(|e| e.to_string())?
-        .join("bin")
-        .join(binary_name());
-
-    println!(
-        "[tauri] Release: {} --ws-port {} --mode {} --champion {}",
-        binary.display(),
-        port,
-        config.mode,
-        config.champion
-    );
-
-    let rust_log = std::env::var("RUST_LOG").unwrap_or_else(|_| default_rust_log().to_string());
-
-    let mut cmd = Command::new(&binary);
-    cmd.current_dir(root)
-        .args(bevy_args(port, &game_config(config)));
-
-    cmd.env("RUST_LOG", &rust_log)
-        .stdout(Stdio::null())
-        .stderr(Stdio::null())
-        .spawn()
-        .map_err(|e| format!("failed to start game: {e}"))
+        .map(|p| p.join("bin").join(binary_name()));
+    !resource_dir.is_ok_and(|p| p.exists())
 }
 
-/// Stop the Bevy game process.
-pub fn stop_game(state: &Mutex<AppState>) -> Result<(), String> {
-    let mut s = state.lock().map_err(|e| e.to_string())?;
+/// 据环境决定程序与前缀：dev 用 `cargo run --`，release 用打包二进制。
+fn program_and_prefix(app: &tauri::AppHandle) -> (String, Vec<String>) {
+    if is_dev(app) {
+        ("cargo".to_string(), vec!["run".into(), "--".into()])
+    } else {
+        let binary = app
+            .path()
+            .resource_dir()
+            .map(|p| p.join("bin").join(binary_name()))
+            .map(|p| p.display().to_string())
+            .unwrap_or_else(|_| binary_name().to_string());
+        (binary, Vec::new())
+    }
+}
 
-    if let Some(mut proc) = s.bevy.take() {
-        println!("[tauri] Stopping Bevy process");
-        let _ = proc.child.kill();
+/// 桌面端进程启动实现：dev `cargo run --` / release 打包二进制、非 headless、
+/// tokio spawn、按 port 维护子进程表供 kill。spawn 命令构建复用 `lol_client::launch::build_command`。
+pub struct DesktopProcessLauncher {
+    app: tauri::AppHandle,
+    processes: Mutex<HashMap<i32, tokio::process::Child>>,
+}
+
+impl DesktopProcessLauncher {
+    pub fn new(app: tauri::AppHandle) -> Self {
+        Self {
+            app,
+            processes: Mutex::new(HashMap::new()),
+        }
+    }
+}
+
+#[async_trait]
+impl ProcessLauncher for DesktopProcessLauncher {
+    async fn launch(&self, port: i32, req: &BevySpawnRequest) -> Result<(), ManagerError> {
+        let (program, prefix_args) = program_and_prefix(&self.app);
+        let mut req = req.clone();
+        req.program = program;
+        req.prefix_args = prefix_args;
+        req.port = port as u16;
+
+        let child = tokio::process::Command::from(build_command(&req))
+            .spawn()
+            .map_err(|e| ManagerError::Internal(format!("启动游戏进程失败: {e}")))?;
+
+        let mut procs = self.processes.lock().await;
+        procs.insert(port, child);
+        Ok(())
     }
 
-    s.ws = None;
+    async fn kill(&self, port: i32) -> Result<(), ManagerError> {
+        let mut procs = self.processes.lock().await;
+        if let Some(mut child) = procs.remove(&port) {
+            let _ = child.kill().await;
+        }
+        Ok(())
+    }
+}
 
-    Ok(())
+/// 每局日志 SQLite 路径：`~/.moon-lol/logs/{id}.db`，确保父目录存在。
+pub fn log_db_path_for(app: &tauri::AppHandle, id: uuid::Uuid) -> Result<PathBuf, String> {
+    let home = app.path().home_dir().map_err(|e| e.to_string())?;
+    let dir = home.join(".moon-lol").join("logs");
+    std::fs::create_dir_all(&dir).map_err(|e| e.to_string())?;
+    Ok(dir.join(format!("{id}.db")))
 }

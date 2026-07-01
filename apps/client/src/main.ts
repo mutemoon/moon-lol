@@ -5,7 +5,7 @@ import Persist from "pinia-plugin-persistedstate";
 import App from "./App.vue";
 import { router } from "./router";
 import { i18n } from "./i18n";
-import { getBackendClient } from "./services/backend";
+import { initServices } from "./services/provider";
 import { useAuthStore } from "./stores/authStore";
 
 const app = createApp(App);
@@ -17,7 +17,7 @@ app.use(pinia);
 app.use(router);
 app.use(i18n);
 
-getBackendClient().then(async () => {
+initServices().then(async () => {
   const authStore = useAuthStore();
   await authStore.init();
   app.mount("#app");

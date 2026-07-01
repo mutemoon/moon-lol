@@ -51,6 +51,14 @@ export interface ICloudService {
   createModelProvider(input: ModelProviderInput): Promise<ModelProvider>
   updateModelProvider(id: string, input: ModelProviderInput): Promise<void>
   deleteModelProvider(id: string): Promise<void>
+  testModelProvider(input: {
+    provider_id?: string
+    base_url: string
+    api_key?: string
+    api_format: string
+    model: string
+    max_tokens?: number
+  }): Promise<{ success: boolean; message: string }>
 
   // ── Platform Models (管理员 env 配置的可选模型名) ──
   listPlatformModels(): Promise<string[]>

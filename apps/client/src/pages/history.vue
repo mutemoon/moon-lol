@@ -8,7 +8,7 @@ import { ref, onMounted, computed, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useGameStore } from "@/stores/gameStore";
 import { useLocale } from "@/composables/useLocale";
-import { backendClient } from "@/services/backend";
+import { services } from "@/services/provider";
 import AgentChatHistory from "@/components/AgentChatHistory.vue";
 import { Button } from "@/components/ui/button";
 import { Trash2Icon, InboxIcon } from "@lucide/vue";
@@ -55,9 +55,9 @@ async function selectGame(datetime: string) {
   selectedDatetime.value = datetime;
   loadingDetail.value = true;
   try {
-    const details = await backendClient.getGameHistoryDetail(datetime);
+    const details = await services.getGameHistoryDetail(datetime);
     selectedGameAgents.value = details;
-    if (details.length > 0) {
+    if (details.length > 0 && details[0]) {
       selectedAgentId.value = details[0].agent_id;
     } else {
       selectedAgentId.value = "";
@@ -75,7 +75,7 @@ async function deleteHistory(datetime: string) {
     return;
   }
   try {
-    await backendClient.deleteGameHistory(datetime);
+    await services.deleteGameHistory(datetime);
     await store.loadHistoriesList();
     if (selectedDatetime.value === datetime) {
       router.push("/history");

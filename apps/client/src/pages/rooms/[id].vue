@@ -9,14 +9,8 @@ import { useRoute, useRouter } from "vue-router";
 import { storeToRefs } from "pinia";
 import { useGameStore } from "@/stores/gameStore";
 import { useAuthStore } from "@/stores/authStore";
-import {
-  roomsApi,
-  agentsApi,
-  type Room,
-  type RoomAgentSlot,
-  type Agent,
-  type Team,
-} from "@/services/cloudApi";
+import { services } from "@/services/provider";
+import type { Room, RoomAgentSlot, Agent, Team } from "@/services/types";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -87,9 +81,9 @@ async function handleManualRefresh() {
 async function refresh() {
   try {
     const [r, list, agents] = await Promise.all([
-      roomsApi.get(roomId.value),
-      roomsApi.listSlots(roomId.value).catch(() => [] as RoomAgentSlot[]),
-      agentsApi.list().catch(() => [] as Agent[]),
+      services.cloud.getRoom(roomId.value),
+      services.cloud.listRoomSlots(roomId.value).catch(() => [] as RoomAgentSlot[]),
+      services.cloud.listAgents().catch(() => [] as Agent[]),
     ]);
     room.value = r;
     slots.value = list;
@@ -145,7 +139,7 @@ async function handleAdd() {
   adding.value = true;
   addError.value = "";
   try {
-    await roomsApi.addSlot(roomId.value, addAgentId.value, addTeam.value);
+    await services.cloud.addRoomSlot(roomId.value, addAgentId.value, addTeam.value);
     showAdd.value = false;
     await refresh();
   } catch (e: any) {
@@ -157,7 +151,7 @@ async function handleAdd() {
 
 async function handleRemove(slot: RoomAgentSlot) {
   try {
-    await roomsApi.removeSlot(roomId.value, slot.id);
+    await services.cloud.removeRoomSlot(roomId.value, slot.id);
     await refresh();
   } catch (e) {
     console.error(e);
@@ -167,7 +161,7 @@ async function handleRemove(slot: RoomAgentSlot) {
 async function handleStart() {
   starting.value = true;
   try {
-    const res = await roomsApi.start(roomId.value);
+    const res = await services.cloud.startRoomMatch(roomId.value);
     router.push(`/observe/${res.match_id}`);
   } catch (e: any) {
     console.error(e);
@@ -230,7 +224,7 @@ function handleLeave() {
     desc: "离开后，你将不再是该房间的成员，你在此房间中分配的 Agent 槽位也将被移除。",
     confirmBtnText: "确认离开",
     action: async () => {
-      await roomsApi.leave(roomId.value);
+      await services.cloud.leaveRoom(roomId.value);
       router.push("/rooms");
     },
   });
@@ -242,7 +236,7 @@ function handleDissolve() {
     desc: "解散后房间将永久关闭，所有成员及槽位信息将被清空且无法恢复，确认继续？",
     confirmBtnText: "确认解散",
     action: async () => {
-      await roomsApi.dissolve(roomId.value);
+      await services.cloud.dissolveRoom(roomId.value);
       router.push("/rooms");
     },
   });

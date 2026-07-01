@@ -52,3 +52,5 @@ pnpm dlx shadcn-vue@latest add table
 16. 移除底栏冗余标题与槽位徽章：移除了重复的「对局编排」标题及「0/2 槽位」徽章，并同步删除了未使用的 `totalSlots` 计算属性，仅保留对局模式选择等实际控制组件。
 
 17. 场景默认名称本地化：重构 `index.vue` 中 `handleNewScenario` 的场景命名逻辑，根据 `localStorage` 中的语言设置动态切换默认场景名（中文为「新建场景」，英文为「new_scenario」）。
+
+18. 新增模型连接测试及多模型上下文限制编辑：将 `models` 字段从简单的 `string[]` 重构为结构化的 `ModelConfig[]` 以保存最大 token 限制；增加了添加/编辑模型的 `ModelEditDialog` 弹出框以支持配置模型 ID 与最大 token，并在列表项中支持点击铅笔按钮编辑或点击播放按钮触发后端 `lol_agent_runtime` 中的 rig 连接测试，且完美通过前后端编译。

@@ -4,285 +4,191 @@ meta:
 </route>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from "vue";
-import { storeToRefs } from "pinia";
+import { onMounted } from "vue";
+import { useRouter } from "vue-router";
 import { useGameStore } from "@/stores/gameStore";
-import { useLocale } from "@/composables/useLocale";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { backendClient } from "@/services/backend";
-import { PlayIcon, SaveIcon } from "@lucide/vue";
-import TeamSlots from "@/components/TeamSlots.vue";
-import SlotCard from "@/components/SlotCard.vue";
+import { Badge } from "@/components/ui/badge";
 import {
-  type Slot,
-  emptySlot,
-  toBackend,
-  fromBackend,
-} from "@/composables/useSlotConfig";
+  TerminalIcon,
+  PlusIcon,
+  HistoryIcon,
+  FileTextIcon,
+} from "@lucide/vue";
 
-// 编排页：只做"从选手预设里选 + 独立的出生点选择"，不做内联深度编辑。
-// 每个槽位 = 一个选手预设（英雄+AI配置） + 一个出生点预设。
-// 红蓝两阵营结构完全一致，差异只在 accent 配色，复用 TeamSlots 组件。
-
+const router = useRouter();
 const store = useGameStore();
-const {
-  mode,
-  isStarting,
-  launchError: error,
-  selectedScenario,
-  heroPresets,
-  spawnPresets,
-} = storeToRefs(store);
-const { ws } = store;
-const { startGame, stopGame, loadScenariosList } = store;
-const { t, locale } = useLocale();
 
-const blueSlots = ref<Slot[]>([emptySlot()]);
-const redSlots = ref<Slot[]>([emptySlot()]);
-
-const currentSceneName = ref("default_scenario");
-
-const blueLabel = computed(() => t("spawnPresets.teamOrder"));
-const redLabel = computed(() => t("spawnPresets.teamChaos"));
-
-const ACCENT = {
-  border: "border-border",
-  edit: "text-muted-foreground hover:bg-muted hover:text-foreground",
-  indexText: "text-muted-foreground",
-  inheritBadge: "border-border text-muted-foreground",
-};
-
-// 各阵营槽位操作的统一封装
-function makeHandlers(slotsRef: typeof blueSlots) {
-  return {
-    add: () => slotsRef.value.push(emptySlot()),
-    remove: (idx: number) => slotsRef.value.splice(idx, 1),
-  };
-}
-const blueHandlers = makeHandlers(blueSlots);
-const redHandlers = makeHandlers(redSlots);
-
-const validSlots = computed(
-  () => blueSlots.value.filter((s) => s.champion).length + redSlots.value.filter((s) => s.champion).length,
-);
-
-// --- 场景存取 ---
-async function handleLoadScenario(name: string) {
-  if (!name) return;
-  try {
-    const agents = await backendClient.loadCustomScenario(name);
-    // 确保预设列表已加载，反向匹配才有意义
-    await Promise.all([store.loadHeroPresets(), store.loadSpawnPresets()]);
-    blueSlots.value = fromBackend(
-      agents.filter((a) => a.team === "Order"),
-      heroPresets.value,
-      spawnPresets.value,
-    );
-    redSlots.value = fromBackend(
-      agents.filter((a) => a.team === "Chaos"),
-      heroPresets.value,
-      spawnPresets.value,
-    );
-    currentSceneName.value = name;
-    error.value = "";
-    await store.loadWinCondition(name);
-  } catch (e: any) {
-    error.value = e.message || (typeof e === "string" ? e : t("launcher.loadFailed"));
-  }
-}
-
-function handleNewScenario() {
-  currentSceneName.value =
-    locale.value === "zh" ? t("launcher.newScenarioDefaultZh") : t("launcher.newScenarioDefaultEn");
-  blueSlots.value = [emptySlot()];
-  redSlots.value = [emptySlot()];
-  store.winCondition = null;
-  error.value = "";
-}
-
-watch(
-  () => selectedScenario.value,
-  (newVal) => {
-    if (newVal) handleLoadScenario(newVal);
-    else handleNewScenario();
-  },
-  { immediate: true },
-);
-
-function buildAgents() {
-  return [
-    ...toBackend("Order", blueSlots.value, heroPresets.value, spawnPresets.value),
-    ...toBackend("Chaos", redSlots.value, heroPresets.value, spawnPresets.value),
-  ];
-}
-
-async function handleSaveConfig() {
-  error.value = "";
-  const name = currentSceneName.value.trim();
-  if (!name) {
-    error.value = t("launcher.errorSceneNameRequired");
-    return;
-  }
-  if (validSlots.value === 0) {
-    error.value = t("launcher.errorHeroPresetRequired");
-    return;
-  }
-  try {
-    await backendClient.saveCustomScenario(name, buildAgents());
-    await store.saveWinCondition(name, store.winCondition);
-    await loadScenariosList();
-    selectedScenario.value = name;
-    error.value = t("launcher.saveSuccess", { name });
-  } catch (e: any) {
-    error.value = e.message || (typeof e === "string" ? e : t("launcher.saveFailed"));
-  }
-}
-
-async function handleLaunch() {
-  isStarting.value = true;
-  error.value = "";
-  if (validSlots.value === 0) {
-    error.value = t("launcher.errorLaunchHeroPresetRequired");
-    isStarting.value = false;
-    return;
-  }
-  const name = currentSceneName.value.trim() || `custom_agents_${Date.now()}`;
-  try {
-    await backendClient.saveCustomScenario(name, buildAgents());
-    await startGame(name);
-  } catch (e: any) {
-    error.value = typeof e === "string" ? e : e.message || t("launcher.errorLaunchFailed");
-    isStarting.value = false;
-  }
-}
-
-onMounted(() => {
-  loadScenariosList();
-  store.loadHeroPresets();
-  store.loadSpawnPresets();
+onMounted(async () => {
+  await store.refreshRunningGames();
+  store.loadScenariosList();
+  store.loadHistoriesList();
 });
+
+function handleNewMatch() {
+  store.selectedScenario = "";
+  router.push("/launcher");
+}
+
+function handleSelectScenario(s: string) {
+  store.selectedScenario = s;
+  router.push("/launcher");
+}
 </script>
 
 <template>
-  <div class="bg-background flex h-full w-full flex-col overflow-hidden p-4">
-    <!-- 连接遮罩 -->
-    <div
-      v-if="ws.connecting"
-      class="bg-background/90 fixed inset-0 z-50 flex flex-col items-center justify-center gap-4 backdrop-blur-md"
-    >
-      <div class="border-border border-t-primary h-10 w-10 animate-spin rounded-full border-2"></div>
-      <p class="text-foreground text-sm font-medium tracking-wide">{{ t("launcher.connecting") }}</p>
-      <Button
-        variant="outline"
-        size="sm"
-        class="hover:bg-destructive hover:text-destructive-foreground mt-2 h-9 px-8 text-xs"
-        @click="stopGame"
-      >
-        {{ t("launcher.cancelLaunch") }}
-      </Button>
+  <div class="bg-background flex h-full w-full flex-col overflow-hidden p-6 gap-6">
+    <!-- Header -->
+    <div class="flex items-center justify-between shrink-0">
+      <div class="space-y-1">
+        <h1 class="text-2xl font-bold tracking-tight text-foreground">仿真工作台</h1>
+        <p class="text-sm text-muted-foreground">
+          欢迎使用 Moon-LOL 本地仿真控制台。在这里管理和监控仿真环境，配置选手并启动对局。
+        </p>
+      </div>
     </div>
 
-    <!-- 双阵营并排卡片 -->
-    <div class="grid min-h-0 flex-1 grid-cols-1 gap-3 md:grid-cols-2">
-      <TeamSlots
-        :count="blueSlots.length"
-        :label="blueLabel"
-        color="blue"
-        @add="blueHandlers.add"
+    <!-- Quick Actions / Welcome -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 shrink-0">
+      <!-- Card: Launch New Game -->
+      <div
+        class="border border-border bg-card/40 rounded-lg p-5 flex flex-col justify-between h-40 hover:border-primary/40 transition-colors group cursor-pointer"
+        @click="handleNewMatch"
       >
-        <SlotCard
-          v-for="(slot, idx) in blueSlots"
-          :key="slot.id"
-          :slot="slot"
-          :index="idx"
-          :hero-presets="heroPresets"
-          :spawn-presets="spawnPresets"
-          :accent="ACCENT"
-          @remove="blueHandlers.remove(idx)"
-        />
-      </TeamSlots>
-      <TeamSlots
-        :count="redSlots.length"
-        :label="redLabel"
-        color="red"
-        @add="redHandlers.add"
-      >
-        <SlotCard
-          v-for="(slot, idx) in redSlots"
-          :key="slot.id"
-          :slot="slot"
-          :index="idx"
-          :hero-presets="heroPresets"
-          :spawn-presets="spawnPresets"
-          :accent="ACCENT"
-          @remove="redHandlers.remove(idx)"
-        />
-      </TeamSlots>
-    </div>
+        <div class="flex items-start justify-between">
+          <div class="space-y-1.5">
+            <h3 class="font-semibold text-foreground group-hover:text-primary transition-colors text-base">新建本地对局</h3>
+            <p class="text-xs text-muted-foreground pr-4">自主选择选手配置与出生点，自定义 Bevy 本地仿真场景。</p>
+          </div>
+          <div class="bg-primary/10 text-primary p-2 rounded-lg">
+            <PlusIcon class="size-5" />
+          </div>
+        </div>
+        <div class="text-[11px] text-muted-foreground font-mono">快捷键: ⌘N</div>
+      </div>
 
-    <!-- 合并控制底栏 -->
-    <footer
-      class="border-border bg-card mt-3 flex shrink-0 flex-wrap items-center justify-between gap-3 rounded-lg border px-4 py-2.5"
-    >
-      <!-- 左侧控制：对局模式 -->
-      <div class="flex flex-wrap items-center gap-4">
+      <!-- Card: Running Games Count -->
+      <div
+        class="border border-border bg-card/40 rounded-lg p-5 flex flex-col justify-between h-40 hover:border-primary/40 transition-colors group cursor-pointer"
+        @click="router.push('/games')"
+      >
+        <div class="flex items-start justify-between">
+          <div class="space-y-1.5">
+            <h3 class="font-semibold text-foreground group-hover:text-primary transition-colors text-base">对局进程管理</h3>
+            <p class="text-xs text-muted-foreground pr-4">监控在本地运行的 Bevy 子进程，查看分配端口与状态。</p>
+          </div>
+          <div class="bg-primary/10 text-primary p-2 rounded-lg">
+            <TerminalIcon class="size-5" />
+          </div>
+        </div>
         <div class="flex items-center gap-2">
-          <span class="text-muted-foreground text-[10px] font-semibold tracking-wider uppercase">
-            {{ t("launcher.modeLabel") }}
-          </span>
-          <div class="bg-muted flex rounded-md p-0.5">
-            <button
-              class="rounded px-2.5 py-0.5 text-[11px] font-semibold transition-colors"
-              :class="mode === 'agent' ? 'bg-card text-foreground' : 'text-muted-foreground'"
-              @click="mode = 'agent'"
-            >
-              {{ t("launcher.modeAgent") }}
-            </button>
-            <button
-              class="rounded px-2.5 py-0.5 text-[11px] font-semibold transition-colors"
-              :class="mode === 'sandbox' ? 'bg-card text-foreground' : 'text-muted-foreground'"
-              @click="mode = 'sandbox'"
-            >
-              {{ t("launcher.modeSandbox") }}
-            </button>
+          <span class="bg-emerald-500 size-2 animate-pulse rounded-full" />
+          <span class="text-xs text-foreground font-medium">{{ store.runningGames.length }} 个对局运行中</span>
+        </div>
+      </div>
+
+      <!-- Card: Match History -->
+      <div
+        class="border border-border bg-card/40 rounded-lg p-5 flex flex-col justify-between h-40 hover:border-primary/40 transition-colors group cursor-pointer"
+        @click="router.push('/history')"
+      >
+        <div class="flex items-start justify-between">
+          <div class="space-y-1.5">
+            <h3 class="font-semibold text-foreground group-hover:text-primary transition-colors text-base">对局历史记录</h3>
+            <p class="text-xs text-muted-foreground pr-4">查看历史对局决策对话与补刀等核心统计，重放游戏场景。</p>
+          </div>
+          <div class="bg-primary/10 text-primary p-2 rounded-lg">
+            <HistoryIcon class="size-5" />
+          </div>
+        </div>
+        <div class="text-xs text-muted-foreground">{{ store.histories.length }} 条对局记录</div>
+      </div>
+    </div>
+
+    <!-- Main Lists Section (Running games & Scenarios) -->
+    <div class="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 min-h-0">
+      <!-- Left: Running Games List -->
+      <div class="border border-border rounded-lg bg-card/20 flex flex-col min-h-0">
+        <div class="border-b border-border px-4 py-3 flex items-center justify-between shrink-0">
+          <span class="text-sm font-semibold text-foreground">活跃运行中对局</span>
+          <Badge variant="secondary" class="bg-primary/10 text-primary font-mono text-[10px]">
+            {{ store.runningGames.length }}
+          </Badge>
+        </div>
+        <div class="flex-1 overflow-y-auto p-4 flex flex-col gap-2">
+          <div
+            v-for="game in store.runningGames"
+            :key="game.id"
+            class="border border-border bg-card flex items-center justify-between gap-4 rounded-lg px-4 py-2 text-xs transition-colors hover:border-primary/20"
+          >
+            <div class="flex items-center gap-2">
+              <span class="bg-emerald-500 size-2 animate-pulse rounded-full" />
+              <span class="font-mono text-foreground font-semibold">端口: {{ game.port }}</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <Button
+                variant="outline"
+                size="xs"
+                class="h-7 border-primary/20 text-primary hover:border-primary hover:bg-primary/10 bg-primary/5 px-3"
+                @click="router.push(`/debug/${game.id}`)"
+              >
+                调试
+              </Button>
+              <Button
+                variant="outline"
+                size="xs"
+                class="h-7 text-destructive hover:bg-destructive hover:text-destructive-foreground border-destructive/20 bg-destructive/5 px-3"
+                @click="store.stopGame(game.id)"
+              >
+                停止
+              </Button>
+            </div>
+          </div>
+          <div
+            v-if="store.runningGames.length === 0"
+            class="flex-1 flex flex-col items-center justify-center text-muted-foreground text-xs italic py-12"
+          >
+            暂无活跃运行中对局
           </div>
         </div>
       </div>
 
-      <!-- 右侧控制：错误信息、场景配置、保存、启动对局 -->
-      <div class="flex flex-wrap items-center gap-3">
-        <div v-if="error" class="text-destructive mr-2 text-[11px] font-medium">{{ error }}</div>
-
-        <div class="flex items-center gap-2">
-          <span class="text-muted-foreground text-[10px] font-semibold tracking-wider uppercase">
-            {{ t("launcher.scenarioLabel") }}
-          </span>
-          <Input
-            v-model="currentSceneName"
-            type="text"
-            class="border-border bg-muted/50 text-foreground h-7 w-36 rounded px-2 font-mono text-[11px]"
-            :placeholder="t('launcher.scenarioPlaceholder')"
-          />
-          <Button variant="outline" size="xs" class="h-7 gap-1 text-[11px]" @click="handleSaveConfig">
-            <SaveIcon class="size-3" />
-            {{ t("launcher.saveBtn") }}
-          </Button>
+      <!-- Right: Scenario Templates List -->
+      <div class="border border-border rounded-lg bg-card/20 flex flex-col min-h-0">
+        <div class="border-b border-border px-4 py-3 flex items-center justify-between shrink-0">
+          <span class="text-sm font-semibold text-foreground">场景配置模板</span>
+          <Badge variant="secondary" class="bg-tag text-foreground-subtle font-mono text-[10px]">
+            {{ store.scenariosList.length }}
+          </Badge>
         </div>
-
-        <div class="bg-border/60 h-4 w-px" />
-
-        <Button
-          size="sm"
-          class="bg-primary text-primary-foreground hover:bg-primary/90 h-8 gap-1.5 px-6 font-semibold shadow"
-          :disabled="isStarting || validSlots === 0"
-          @click="handleLaunch"
-        >
-          <PlayIcon class="size-3.5" />
-          {{ t("launcher.launchBtn") }}
-        </Button>
+        <div class="flex-1 overflow-y-auto p-4 flex flex-col gap-2">
+          <div
+            v-for="s in store.scenariosList"
+            :key="s"
+            class="border border-border bg-card flex items-center justify-between gap-4 rounded-lg px-4 py-2 text-xs transition-colors hover:border-primary/20 cursor-pointer"
+            @click="handleSelectScenario(s)"
+          >
+            <div class="flex items-center gap-2 truncate">
+              <FileTextIcon class="size-4 text-muted-foreground" />
+              <span class="font-medium text-foreground truncate">{{ s }}</span>
+            </div>
+            <Button
+              variant="ghost"
+              size="xs"
+              class="h-7 text-[11px] text-primary hover:bg-primary/5"
+            >
+              载入编排
+            </Button>
+          </div>
+          <div
+            v-if="store.scenariosList.length === 0"
+            class="flex-1 flex flex-col items-center justify-center text-muted-foreground text-xs italic py-12"
+          >
+            暂无自定义场景配置模板
+          </div>
+        </div>
       </div>
-    </footer>
+    </div>
   </div>
 </template>
 

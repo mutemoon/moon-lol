@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { computed, provide, onMounted } from "vue";
+import { computed, onMounted } from "vue";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { useRoute, useRouter } from "vue-router";
-import { backendClient } from "../services/backend";
+import { services } from "../services/provider";
 import { storeToRefs } from "pinia";
 import { useGameStore } from "../stores/gameStore";
 import { useAuthStore } from "../stores/authStore";
@@ -15,7 +15,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
 } from "../components/ui/dropdown-menu";
-import { LOG_CONTEXT_KEY } from "../composables/useLogPoller";
+import { isDesktop } from "@/lib/utils";
 import { useSettingsTab } from "../composables/useSettingsTab";
 import { Button } from "../components/ui/button";
 import { ScrollArea } from "../components/ui/scroll-area";
@@ -23,6 +23,7 @@ import { Badge } from "../components/ui/badge";
 import { useEventListener } from "@vueuse/core";
 import { useLocale } from "../composables/useLocale";
 import {
+  HomeIcon,
   TrophyIcon,
   PlusIcon,
   SettingsIcon,
@@ -47,15 +48,7 @@ const { currentTab: settingsTab } = useSettingsTab();
 
 const { t } = useLocale();
 
-const isTauri = (window as any).__TAURI__ !== undefined;
-const isDesktop = computed(() => {
-  return (
-    typeof window !== "undefined" &&
-    ((window as any).IS_DESKTOP ??
-      ((window as any).__TAURI__ !== undefined || (window as any).__TAURI_INTERNALS__ !== undefined))
-  );
-});
-const win = isTauri
+const win = isDesktop
   ? getCurrentWindow()
   : {
       minimize: () => {},
@@ -67,12 +60,10 @@ const router = useRouter();
 
 const store = useGameStore();
 const authStore = useAuthStore();
-const { statsResult, showStatsModal, scenariosList, histories, selectedScenario } = storeToRefs(store);
-const { ws } = store;
-
-provide(LOG_CONTEXT_KEY, store.log);
+const { statsResult, showStatsModal, histories } = storeToRefs(store);
 
 type View =
+  | "home"
   | "launcher"
   | "debug"
   | "settings"
@@ -87,10 +78,14 @@ type View =
   | "billing"
   | "admin"
   | "rlTraining"
-  | "logsArchive";
+  | "logsArchive"
+  | "games";
 
 const currentView = computed<View>(() => {
-  if (route.path === "/debug") return "debug";
+  if (route.path === "/") return "home";
+  if (route.path === "/launcher") return "launcher";
+  if (route.path.startsWith("/debug")) return "debug";
+  if (route.path === "/games") return "games";
   if (route.path === "/settings") return "settings";
   if (route.path === "/history") return "history";
   if (route.path === "/agents") return "agents";
@@ -105,11 +100,12 @@ const currentView = computed<View>(() => {
   if (route.path === "/admin") return "admin";
   if (route.path === "/rl-training") return "rlTraining";
   if (route.path === "/logs-archive") return "logsArchive";
-  return "launcher";
+  return "home";
 });
 
 const viewTitles = computed<Record<View, string>>(() => ({
-  launcher: t("app.viewTitles.launcher"),
+  home: "仿真工作台",
+  launcher: "对局编排",
   debug: t("app.viewTitles.debug"),
   history: t("app.viewTitles.history"),
   settings: t("app.viewTitles.settings"),
@@ -124,21 +120,33 @@ const viewTitles = computed<Record<View, string>>(() => ({
   admin: "对局池监控",
   rlTraining: "RL 训练面板",
   logsArchive: "日志归档",
+  games: "运行中对局",
 }));
 
-if (isTauri) {
-  backendClient.onAgentFinished((data) => {
+
+if (isDesktop) {
+  services.local.onAgentFinished((data) => {
     statsResult.value = {
       minionKills: data.minion_kills,
       gold: data.gold,
     };
     showStatsModal.value = true;
   });
+
+  services.events.on('match-history-ready', async (histories: any) => {
+    try {
+      await services.cloud.uploadGameHistory(histories);
+      await store.loadHistoriesList();
+    } catch (e) {
+      console.error("Failed to upload game history to cloud:", e);
+    }
+  });
 }
 
 function minimize() {
   win.minimize();
 }
+// Note: Window maximize toggling is supported in desktop
 function toggleMaximize() {
   win.toggleMaximize();
 }
@@ -154,13 +162,8 @@ useEventListener("keydown", (e) => {
 });
 
 function handleNewMatch() {
-  selectedScenario.value = "";
-  router.push("/");
-}
-
-function handleSelectScenario(s: string) {
-  selectedScenario.value = s;
-  router.push("/");
+  store.selectedScenario = "";
+  router.push("/launcher");
 }
 
 function handleSelectHistory(datetime: string) {
@@ -249,14 +252,26 @@ onMounted(() => {
           </div>
         </template>
 
-        <!-- Normal Sidebar (non-settings views) -->
         <template v-else>
           <!-- Core Shortcuts -->
           <div class="border-border/10 flex flex-col gap-1 border-b px-2 py-3">
             <div
+              role="button"
+              class="group hover:bg-surface-hover hover:text-foreground text-foreground inline-flex h-8 w-full shrink-0 cursor-pointer items-center justify-stretch gap-2 overflow-hidden rounded-lg pr-2.5 pl-2.5 active:translate-y-0"
+              :class="{ 'bg-selected font-semibold': currentView === 'home' }"
+              @click="router.push('/')"
+            >
+              <div class="flex min-w-0 flex-1 items-center gap-2 text-[13px]">
+                <HomeIcon class="text-foreground-subtle group-hover:text-foreground size-4 shrink-0" />
+                <span class="truncate">工作台首页</span>
+              </div>
+            </div>
+
+            <div
               v-if="isDesktop"
               role="group"
               class="group hover:bg-surface-hover hover:text-foreground inline-flex h-8 w-full shrink-0 cursor-pointer items-center justify-stretch gap-2 overflow-hidden rounded-lg pr-2.5 pl-2.5 active:translate-y-0"
+              :class="{ 'bg-selected font-semibold': currentView === 'launcher' }"
               @click="handleNewMatch"
             >
               <div class="flex min-w-0 flex-1 items-center gap-2 text-[13px]">
@@ -370,75 +385,36 @@ onMounted(() => {
 
           <!-- Workspace Section -->
           <div v-if="isDesktop" class="flex min-h-0 flex-1 flex-col gap-3 p-2">
-            <!-- Active Debug Session -->
+            <!-- Active Debug Sessions -->
             <div class="flex flex-col gap-1">
               <span class="text-foreground-subtlest px-2.5 text-[11px] font-semibold tracking-wider uppercase">
-                {{ t("app.sidebar.debugSessions") }}
+                运行中对局
               </span>
-              <div class="flex flex-col gap-0.5 pl-1">
+              <div class="flex flex-col gap-0.5 pl-1 max-h-[160px] overflow-y-auto pr-2">
                 <button
+                  v-for="game in store.runningGames"
+                  :key="game.id"
                   class="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-[13px] transition-colors"
                   :class="
-                    currentView === 'debug'
+                    route.path === `/debug/${game.id}`
                       ? 'bg-selected text-foreground font-semibold'
                       : 'text-foreground hover:bg-surface-hover'
                   "
-                  :disabled="!ws.connected && !store?.isStarting"
-                  @click="router.push('/debug')"
+                  @click="router.push(`/debug/${game.id}`)"
                 >
                   <TerminalIcon class="text-foreground-subtle size-4 shrink-0" />
-                  <span class="truncate font-medium">{{ t("app.sidebar.currentDebug") }}</span>
-                  <span v-if="ws.connected" class="bg-green ml-auto size-2 animate-pulse rounded-full" />
-                  <span
-                    v-else-if="store?.isStarting"
-                    class="text-foreground-subtlest ml-auto animate-pulse text-[10px]"
-                  >
-                    {{ t("app.sidebar.starting") }}
-                  </span>
-                  <span v-else class="bg-foreground-subtlest/30 ml-auto size-2 rounded-full" />
+                  <span class="truncate font-medium">端口: {{ game.port }}</span>
+                  <span class="bg-emerald-500 ml-auto size-2 animate-pulse rounded-full" />
                 </button>
+                <div v-if="store.runningGames.length === 0" class="text-foreground-subtlest px-2.5 py-1.5 text-[11px]">
+                  暂无运行中对局
+                </div>
               </div>
             </div>
 
             <!-- Scrollable Lists -->
             <ScrollArea class="w-full flex-1">
               <div class="flex flex-col gap-4 py-1 pr-3">
-                <!-- Scenario Templates List -->
-                <div v-if="scenariosList.length > 0" class="flex flex-col gap-1">
-                  <div class="flex items-center justify-between pr-1">
-                    <span class="text-foreground-subtlest px-2.5 text-[11px] font-semibold tracking-wider uppercase">
-                      {{ t("app.sidebar.scenarioTemplates") }}
-                    </span>
-                    <Badge
-                      variant="outline"
-                      class="border-border text-foreground-subtlest scale-90 px-1.5 py-0 text-[9px] font-normal"
-                    >
-                      {{ scenariosList.length }}
-                    </Badge>
-                  </div>
-                  <div class="flex flex-col gap-0.5 pl-1">
-                    <button
-                      v-for="s in scenariosList"
-                      :key="s"
-                      class="flex w-full items-center justify-between rounded-lg px-2.5 py-1 text-left text-[13px] transition-colors"
-                      :class="
-                        currentView === 'launcher' && selectedScenario === s
-                          ? 'bg-selected text-foreground font-semibold'
-                          : 'text-foreground hover:bg-surface-hover'
-                      "
-                      @click="handleSelectScenario(s)"
-                    >
-                      <span class="text-foreground-subtle truncate pr-2">{{ s }}</span>
-                      <Badge
-                        variant="secondary"
-                        class="bg-tag/40 text-foreground-subtle scale-95 border-transparent px-1 py-0 text-[9px]"
-                      >
-                        {{ t("app.sidebar.config") }}
-                      </Badge>
-                    </button>
-                  </div>
-                </div>
-
                 <!-- History Archives List -->
                 <div v-if="histories.length > 0" class="flex flex-col gap-1">
                   <div class="flex items-center justify-between pr-1">
@@ -575,19 +551,6 @@ onMounted(() => {
               >
                 <span class="min-w-0 truncate">{{ viewTitles[currentView] }}</span>
               </h1>
-
-              <!-- Connection Status Indicator -->
-              <div v-if="ws.connected" class="bg-green/10 flex items-center gap-1.5 rounded-full px-2 py-0.5">
-                <span class="bg-green size-1.5 animate-pulse rounded-full" />
-                <span class="text-green text-[11px] font-medium">{{ t("app.header.connected") }}</span>
-              </div>
-              <div
-                v-else-if="store?.isStarting"
-                class="flex items-center gap-1.5 rounded-full bg-yellow-500/10 px-2 py-0.5"
-              >
-                <span class="size-1.5 animate-pulse rounded-full bg-yellow-500" />
-                <span class="text-[11px] font-medium text-yellow-500">{{ t("app.header.starting") }}</span>
-              </div>
             </div>
           </div>
         </header>

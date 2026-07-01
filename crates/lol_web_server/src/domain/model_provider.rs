@@ -41,7 +41,7 @@ pub struct ModelProvider {
     pub base_url: String,
     pub api_key: String,
     pub api_format: String,
-    pub models: Vec<String>,
+    pub models: Vec<lol_agent_runtime::ModelConfig>,
     pub enabled: bool,
     pub website_url: String,
     pub api_key_url: String,
@@ -59,7 +59,7 @@ pub struct ModelProviderInput {
     pub base_url: String,
     pub api_key: String,
     pub api_format: String,
-    pub models: Vec<String>,
+    pub models: Vec<lol_agent_runtime::ModelConfig>,
     pub enabled: bool,
     pub website_url: String,
     pub api_key_url: String,
@@ -88,7 +88,7 @@ impl Default for ModelProviderInput {
     }
 }
 
-/// 返回给前端的脱敏 DTO：不含 api_key，附 has_api_key。
+/// 返回给前端的 DTO（包含 api_key）。
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ModelProviderDto {
     pub id: Uuid,
@@ -96,9 +96,10 @@ pub struct ModelProviderDto {
     pub category: String,
     pub preset_type: String,
     pub base_url: String,
+    pub api_key: String,
     pub has_api_key: bool,
     pub api_format: String,
-    pub models: Vec<String>,
+    pub models: Vec<lol_agent_runtime::ModelConfig>,
     pub enabled: bool,
     pub website_url: String,
     pub api_key_url: String,
@@ -115,6 +116,7 @@ impl ModelProvider {
             category: self.category.clone(),
             preset_type: self.preset_type.clone(),
             base_url: self.base_url.clone(),
+            api_key: self.api_key.clone(),
             has_api_key: !self.api_key.trim().is_empty(),
             api_format: self.api_format.clone(),
             models: self.models.clone(),
@@ -142,7 +144,7 @@ mod tests {
     }
 
     #[test]
-    fn dto_masks_api_key() {
+    fn dto_contains_api_key() {
         let p = ModelProvider {
             id: Uuid::new_v4(),
             owner_id: 1,
@@ -152,7 +154,10 @@ mod tests {
             base_url: "https://open.bigmodel.cn/api/anthropic".into(),
             api_key: "sk-secret".into(),
             api_format: "anthropic".into(),
-            models: vec!["glm-5.1".into()],
+            models: vec![lol_agent_runtime::ModelConfig {
+                name: "glm-5.1".into(),
+                max_tokens: 1024,
+            }],
             enabled: true,
             website_url: String::new(),
             api_key_url: String::new(),
@@ -162,10 +167,14 @@ mod tests {
         };
         let dto = p.to_dto();
         assert!(dto.has_api_key);
-        assert_eq!(dto.models, vec!["glm-5.1".to_string()]);
-        // 序列化不含明文密钥
+        assert_eq!(dto.api_key, "sk-secret");
+        assert_eq!(dto.models, vec![lol_agent_runtime::ModelConfig {
+            name: "glm-5.1".into(),
+            max_tokens: 1024,
+        }]);
+        // 序列化包含明文密钥
         let json = serde_json::to_string(&dto).unwrap();
-        assert!(!json.contains("sk-secret"));
+        assert!(json.contains("sk-secret"));
     }
 
     #[test]

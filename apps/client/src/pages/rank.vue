@@ -6,14 +6,8 @@ meta:
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
-import {
-  rankApi,
-  agentsApi,
-  type RankQueueEntry,
-  type Season,
-  type Agent,
-  type AgentSnapshot,
-} from "@/services/cloudApi";
+import { services } from "@/services/provider";
+import type { RankQueueEntry, Season, Agent, AgentSnapshot } from "@/services/types";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
@@ -51,7 +45,7 @@ const MODES = [
 
 async function loadAgents() {
   try {
-    agents.value = await agentsApi.list();
+    agents.value = await services.cloud.listAgents();
     if (!selectedAgent.value && agents.value[0]) {
       selectedAgent.value = agents.value[0].id;
       await loadSnapshots();
@@ -67,7 +61,7 @@ async function loadSnapshots() {
     return;
   }
   try {
-    snapshots.value = await agentsApi.listSnapshots(selectedAgent.value);
+    snapshots.value = await services.cloud.listSnapshots(selectedAgent.value);
     selectedSnapshot.value = snapshots.value[0]?.id || "";
   } catch (e) {
     snapshots.value = [];
@@ -76,7 +70,7 @@ async function loadSnapshots() {
 
 async function loadQueue() {
   try {
-    queue.value = await rankApi.status();
+    queue.value = await services.cloud.getRankStatus();
   } catch (e) {
     queue.value = [];
   }
@@ -84,7 +78,7 @@ async function loadQueue() {
 
 async function loadSeason() {
   try {
-    season.value = await rankApi.currentSeason();
+    season.value = await services.cloud.getCurrentSeason();
   } catch (e) {
     season.value = null;
   }
@@ -102,7 +96,7 @@ async function handleEnqueue() {
   }
   enqueueing.value = true;
   try {
-    await rankApi.enqueue(selectedAgent.value, selectedSnapshot.value, mode.value);
+    await services.cloud.enqueueRank(selectedAgent.value, selectedSnapshot.value, mode.value);
     await loadQueue();
   } catch (e: any) {
     errorMsg.value = e.message || "入队失败";

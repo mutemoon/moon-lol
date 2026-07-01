@@ -3,17 +3,16 @@ mod error;
 mod log;
 mod process;
 mod state;
-mod tools;
 mod ws;
 
 use std::fs;
 use std::path::PathBuf;
-use std::sync::Mutex;
 
-use rig::tool::Tool;
+use lol_game_process_manager::{ManagerError, StartGameInput};
+use serde::Serialize;
 use state::AppState;
 use tauri::Manager;
-use tools::{BashArgs, BashTool};
+use uuid::Uuid;
 
 fn get_config_dir(app: &tauri::AppHandle) -> Result<PathBuf, error::AppError> {
     let home = app.path().home_dir()?;
@@ -32,43 +31,20 @@ pub struct ModelProvider {
     pub category: String,
     pub preset_type: String,
     pub base_url: String,
+    #[serde(default)]
     pub api_key: String,
     pub api_format: String,
-    pub models: Vec<String>,
+    pub models: Vec<lol_agent_runtime::ModelConfig>,
     pub enabled: bool,
+    #[serde(default)]
     pub website_url: String,
+    #[serde(default)]
     pub api_key_url: String,
+    #[serde(default)]
     pub icon: String,
+    #[serde(default)]
     pub icon_color: String,
     pub sort_order: i32,
-}
-
-fn providers_path(app: &tauri::AppHandle) -> Result<PathBuf, error::AppError> {
-    Ok(get_config_dir(app)?.join("providers.json"))
-}
-
-#[tauri::command]
-fn get_model_providers(app: tauri::AppHandle) -> Result<Vec<ModelProvider>, error::AppError> {
-    let path = providers_path(&app)?;
-    if !path.exists() {
-        return Ok(Vec::new());
-    }
-    let content = fs::read_to_string(&path)?;
-    let providers: Vec<ModelProvider> = serde_json::from_str(&content)
-        .map_err(|e| error::AppError::Generic(format!("供应商配置解析失败: {e}")))?;
-    Ok(providers)
-}
-
-#[tauri::command]
-fn set_model_providers(
-    app: tauri::AppHandle,
-    providers: Vec<ModelProvider>,
-) -> Result<(), error::AppError> {
-    let path = providers_path(&app)?;
-    let content = serde_json::to_string_pretty(&providers)
-        .map_err(|e| error::AppError::Generic(format!("JSON 序列化失败: {e}")))?;
-    fs::write(&path, content)?;
-    Ok(())
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Clone, Debug)]
@@ -80,14 +56,8 @@ pub struct FrontAgentConfig {
     pub spawn_point: [f32; 2],
     #[serde(default = "default_agent_type")]
     pub agent_type: String,
-    /// 选手指定的模型名（缺省走全局 env ANTHROPIC_MODEL）。
-    #[serde(default)]
     pub model: Option<String>,
-    /// 选手绑定的模型供应商 id（缺省走平台默认）。
-    #[serde(default)]
     pub provider_id: Option<String>,
-    /// 透传的策略配置（含 provider_id 等），原样序列化进场景。
-    #[serde(default)]
     pub config_json: Option<serde_json::Value>,
 }
 
@@ -95,117 +65,20 @@ fn default_agent_type() -> String {
     "llm".to_string()
 }
 
-/// 选手预设（我的选手）：包含英雄与具体的驱动策略配置。
-#[derive(serde::Serialize, serde::Deserialize, Clone, Debug)]
-pub struct HeroPreset {
-    pub name: String,
-    pub champion: String,
-    #[serde(default = "default_agent_type")]
-    pub agent_type: String,
-    #[serde(default)]
-    pub prompt: String,
-    #[serde(default)]
-    pub preamble: String,
-    #[serde(default)]
-    pub model: String,
-    #[serde(default)]
-    pub config_json: serde_json::Value,
-}
-
-fn hero_presets_path(app: &tauri::AppHandle) -> Result<PathBuf, error::AppError> {
-    Ok(get_config_dir(app)?.join("hero_presets.json"))
-}
-
-fn load_hero_preset_list(app: &tauri::AppHandle) -> Result<Vec<HeroPreset>, error::AppError> {
-    let path = hero_presets_path(app)?;
-    if !path.exists() {
-        return Ok(Vec::new());
-    }
-    let content = fs::read_to_string(&path)?;
-    let presets: Vec<HeroPreset> = serde_json::from_str(&content)
-        .map_err(|e| error::AppError::Generic(format!("选手预设解析失败: {e}")))?;
-    Ok(presets)
-}
-
-#[tauri::command]
-fn list_hero_presets(app: tauri::AppHandle) -> Result<Vec<HeroPreset>, error::AppError> {
-    load_hero_preset_list(&app)
-}
-
-#[tauri::command]
-fn save_hero_preset(app: tauri::AppHandle, preset: HeroPreset) -> Result<(), error::AppError> {
-    if preset.name.trim().is_empty() {
-        return Err(error::AppError::Generic("选手预设名称不能为空".to_string()));
-    }
-    let mut presets = load_hero_preset_list(&app)?;
-    if let Some(existing) = presets.iter_mut().find(|p| p.name == preset.name) {
-        *existing = preset; // 同名覆盖
-    } else {
-        presets.push(preset);
-    }
-    let path = hero_presets_path(&app)?;
-    let json = serde_json::to_string_pretty(&presets)
-        .map_err(|e| error::AppError::Generic(format!("JSON 序列化失败: {e}")))?;
-    fs::write(&path, json)?;
-    Ok(())
-}
-
-#[tauri::command]
-fn delete_hero_preset(app: tauri::AppHandle, name: String) -> Result<(), error::AppError> {
-    let mut presets = load_hero_preset_list(&app)?;
-    let before = presets.len();
-    presets.retain(|p| p.name != name);
-    if presets.len() != before {
-        let path = hero_presets_path(&app)?;
-        let json = serde_json::to_string_pretty(&presets)
-            .map_err(|e| error::AppError::Generic(format!("JSON 序列化失败: {e}")))?;
-        fs::write(&path, json)?;
-    }
-    Ok(())
-}
-
-/// 出生点预设：可复用的命名坐标，纯前端持久化，无运行时副作用。
-#[derive(serde::Serialize, serde::Deserialize, Clone, Debug)]
-pub struct SpawnPreset {
-    pub name: String,
-    pub x: f32,
-    pub z: f32,
-    #[serde(default = "default_team")]
-    pub team: String,
-}
-
-fn default_team() -> String {
-    "Order".to_string()
-}
-
-fn spawn_presets_path(app: &tauri::AppHandle) -> Result<PathBuf, error::AppError> {
-    Ok(get_config_dir(app)?.join("spawn_presets.json"))
-}
-
-fn load_spawn_preset_list(app: &tauri::AppHandle) -> Result<Vec<SpawnPreset>, error::AppError> {
-    let path = spawn_presets_path(app)?;
-    if !path.exists() {
-        return Ok(Vec::new());
-    }
-    let content = fs::read_to_string(&path)?;
-    let presets: Vec<SpawnPreset> = serde_json::from_str(&content)
-        .map_err(|e| error::AppError::Generic(format!("出生点预设解析失败: {e}")))?;
-    Ok(presets)
-}
-
-#[tauri::command]
-fn save_custom_scenario(
-    app: tauri::AppHandle,
-    scene_name: String,
-    agents: Vec<FrontAgentConfig>,
+fn write_scene_ron(
+    app: &tauri::AppHandle,
+    scene_name: &str,
+    agents: &[FrontAgentConfig],
 ) -> Result<(), error::AppError> {
-    let dir = get_config_dir(&app)?.join("games");
+    let dir = get_config_dir(app)?.join("games");
     if !dir.exists() {
         fs::create_dir_all(&dir)?;
     }
 
+    let ron_path = dir.join(format!("{}.ron", scene_name));
+
     let mut resolved_agents = Vec::new();
-    for (idx, agent) in agents.into_iter().enumerate() {
+    for (idx, agent) in agents.iter().enumerate() {
         let mut resolved = agent.clone();
         if resolved.id.is_none() {
             let champ_lower = agent.champion.to_lowercase();
@@ -213,15 +86,6 @@ fn save_custom_scenario(
         }
         resolved_agents.push(resolved);
     }
-
-    // Save JSON
-    let json_path = dir.join(format!("{}.json", scene_name));
-    let json_content = serde_json::to_string_pretty(&resolved_agents)
-        .map_err(|e| error::AppError::Generic(format!("JSON 序列化失败: {e}")))?;
-    fs::write(&json_path, json_content)?;
-
-    // Save RON dynamic scene
-    let ron_path = dir.join(format!("{}.ron", scene_name));
 
     // Construct Bevy dynamic scene RON string
     let mut ron_content = String::new();
@@ -289,342 +153,318 @@ fn save_custom_scenario(
     ron_content.push_str("    },\n)\n");
 
     fs::write(&ron_path, ron_content)?;
-
     Ok(())
 }
 
+/// 运行中的对局摘要（前端列表用）。
+#[derive(Serialize, Clone)]
+#[serde(rename_all = "camelCase")]
+struct RunningGame {
+    id: String,
+    port: i32,
+    status: String,
+}
+
+fn map_manager_error(e: ManagerError) -> error::AppError {
+    use ManagerError as E;
+    match e {
+        E::NotFound => error::AppError::Generic("对局不存在".into()),
+        E::Conflict(msg) => error::AppError::Generic(msg),
+        E::Validation(msg) => error::AppError::Generic(msg),
+        E::Internal(msg) => error::AppError::Generic(msg),
+    }
+}
+
+/// 启动一局本地游戏：分配端口、spawn Bevy 进程、登记进程表；有场景 agent 则自动起 AI 决策环。
 #[tauri::command]
-fn delete_custom_scenario(
+async fn start_game(
     app: tauri::AppHandle,
-    scene_name: String,
-) -> Result<(), error::AppError> {
-    let dir = get_config_dir(&app)?.join("games");
-    if !dir.exists() {
-        return Ok(());
+    state: tauri::State<'_, AppState>,
+    config: process::GameConfig,
+) -> Result<RunningGame, error::AppError> {
+    let id = Uuid::new_v4();
+    let log_db = process::log_db_path_for(&app, id).map_err(error::AppError::Generic)?;
+
+    if let Some(providers) = &config.providers {
+        *state.model_providers.lock().unwrap() = providers.clone();
     }
 
-    let json_path = dir.join(format!("{}.json", scene_name));
-    let ron_path = dir.join(format!("{}.ron", scene_name));
+    let scenario_agents = config.agents.clone().unwrap_or_default();
 
-    if json_path.exists() {
-        fs::remove_file(json_path)?;
-    }
-    if ron_path.exists() {
-        fs::remove_file(ron_path)?;
-    }
-
-    Ok(())
-}
-
-#[tauri::command]
-fn list_custom_scenarios(app: tauri::AppHandle) -> Result<Vec<String>, error::AppError> {
-    let dir = get_config_dir(&app)?.join("games");
-    if !dir.exists() {
-        return Ok(Vec::new());
-    }
-
-    let mut scenarios = Vec::new();
-    if let Ok(entries) = fs::read_dir(dir) {
-        for entry in entries.flatten() {
-            let path = entry.path();
-            if path.is_file() && path.extension().is_some_and(|ext| ext == "json") {
-                if let Some(stem) = path.file_stem().and_then(|s| s.to_str()) {
-                    scenarios.push(stem.to_string());
-                }
-            }
+    if let Some(scene_name) = &config.scene_name {
+        if !scenario_agents.is_empty() {
+            write_scene_ron(&app, scene_name, &scenario_agents)?;
         }
     }
-    Ok(scenarios)
-}
 
-#[tauri::command]
-fn list_spawn_presets(app: tauri::AppHandle) -> Result<Vec<SpawnPreset>, error::AppError> {
-    load_spawn_preset_list(&app)
-}
+    let scenario_agents_runtime: Vec<lol_agent_runtime::AgentConfig> = scenario_agents
+        .iter()
+        .map(|a| lol_agent_runtime::AgentConfig {
+            id: a.id.clone().unwrap_or_default(),
+            champion: a.champion.clone(),
+            team: a.team.clone(),
+            prompt: a.prompt.clone(),
+            model: a.model.clone(),
+            provider_id: a.provider_id.clone(),
+        })
+        .collect();
 
-#[tauri::command]
-fn save_spawn_preset(app: tauri::AppHandle, preset: SpawnPreset) -> Result<(), error::AppError> {
-    if preset.name.trim().is_empty() {
-        return Err(error::AppError::Generic(
-            "出生点预设名称不能为空".to_string(),
-        ));
-    }
-    let mut presets = load_spawn_preset_list(&app)?;
-    if let Some(existing) = presets.iter_mut().find(|p| p.name == preset.name) {
-        *existing = preset; // 同名覆盖
-    } else {
-        presets.push(preset);
-    }
-    let path = spawn_presets_path(&app)?;
-    let json = serde_json::to_string_pretty(&presets)
-        .map_err(|e| error::AppError::Generic(format!("JSON 序列化失败: {e}")))?;
-    fs::write(&path, json)?;
-    Ok(())
-}
-
-#[tauri::command]
-fn delete_spawn_preset(app: tauri::AppHandle, name: String) -> Result<(), error::AppError> {
-    let mut presets = load_spawn_preset_list(&app)?;
-    let before = presets.len();
-    presets.retain(|p| p.name != name);
-    if presets.len() != before {
-        let path = spawn_presets_path(&app)?;
-        let json = serde_json::to_string_pretty(&presets)
-            .map_err(|e| error::AppError::Generic(format!("JSON 序列化失败: {e}")))?;
-        fs::write(&path, json)?;
-    }
-    Ok(())
-}
-
-/// 胜利条件按场景独立存储为 `<scene>.win.json`，仅持久化结构，
-/// 不参与游戏运行时评估（评估逻辑尚未接入；当前对局仍以 120s 计时结束）。
-fn win_condition_path(
-    app: &tauri::AppHandle,
-    scene_name: &str,
-) -> Result<PathBuf, error::AppError> {
-    Ok(get_config_dir(app)?
-        .join("games")
-        .join(format!("{}.win.json", scene_name)))
-}
-
-#[tauri::command]
-fn save_scenario_win_condition(
-    app: tauri::AppHandle,
-    scene_name: String,
-    condition: serde_json::Value,
-) -> Result<(), error::AppError> {
-    let path = win_condition_path(&app, &scene_name)?;
-    let dir = path
-        .parent()
-        .ok_or_else(|| error::AppError::Generic("无效路径".to_string()))?;
-    if !dir.exists() {
-        fs::create_dir_all(dir)?;
-    }
-    let json = serde_json::to_string_pretty(&condition)
-        .map_err(|e| error::AppError::Generic(format!("JSON 序列化失败: {e}")))?;
-    fs::write(&path, json)?;
-    Ok(())
-}
-
-#[tauri::command]
-fn load_scenario_win_condition(
-    app: tauri::AppHandle,
-    scene_name: String,
-) -> Result<Option<serde_json::Value>, error::AppError> {
-    let path = win_condition_path(&app, &scene_name)?;
-    if !path.exists() {
-        return Ok(None);
-    }
-    let content = fs::read_to_string(&path)?;
-    let value: serde_json::Value = serde_json::from_str(&content)
-        .map_err(|e| error::AppError::Generic(format!("胜利条件解析失败: {e}")))?;
-    Ok(Some(value))
-}
-
-#[tauri::command]
-fn load_custom_scenario(
-    app: tauri::AppHandle,
-    scene_name: String,
-) -> Result<Vec<FrontAgentConfig>, error::AppError> {
-    let path = get_config_dir(&app)?
-        .join("games")
-        .join(format!("{}.json", scene_name));
-
-    if !path.exists() {
-        return Err(error::AppError::Generic(format!(
-            "场景配置文件不存在: {}",
-            scene_name
-        )));
-    }
-
-    let content = fs::read_to_string(path)?;
-    let agents: Vec<FrontAgentConfig> = serde_json::from_str(&content)
-        .map_err(|e| error::AppError::Generic(format!("JSON 解析失败: {e}")))?;
-
-    Ok(agents)
-}
-
-#[tauri::command]
-fn start_game(
-    app: tauri::AppHandle,
-    state: tauri::State<'_, Mutex<AppState>>,
-    config: process::GameConfig,
-) -> Result<(), error::AppError> {
-    if let Ok(mut s) = state.lock() {
-        s.active_scene = config.scene_name.clone();
-    }
-    process::start_game(&state, &app, config).map_err(error::AppError::Generic)
-}
-
-#[tauri::command]
-fn stop_game(state: tauri::State<'_, Mutex<AppState>>) -> Result<(), error::AppError> {
-    process::stop_game(&state).map_err(error::AppError::Generic)
-}
-
-#[tauri::command]
-async fn connect_ws(
-    app: tauri::AppHandle,
-    state: tauri::State<'_, Mutex<AppState>>,
-) -> Result<(), error::AppError> {
-    let port = {
-        let s = state.lock().map_err(|_| error::AppError::LockError)?;
-        let Some(ref bevy) = s.bevy else {
-            return Err(error::AppError::StateError(
-                "游戏未启动，无法获取端口".to_string(),
-            ));
-        };
-        bevy.port
+    let spawn = lol_client::launch::BevySpawnRequest {
+        program: String::new(), // 由 launcher 覆写
+        prefix_args: vec![],
+        port: 0,                // 由 manager 覆写
+        game_config: process::game_config(&config),
+        cwd: process::workspace_root(),
+        rust_log: Some(process::rust_log()),
+        log_db: Some(log_db),
     };
+    let input = StartGameInput {
+        id,
+        spawn,
+        scenario_agents: scenario_agents_runtime,
+    };
+    let (_proc_id, port) = state
+        .manager
+        .start(input)
+        .await
+        .map_err(map_manager_error)?;
+    println!("[tauri] 游戏进程启动 id={id} port={port}");
 
-    let session = ws::start_ws_client(app.clone(), port)
+    // 自动建立与游戏进程的 WS 连接并登记会话
+    let session = ws::start_ws_client(state.event_channels.clone(), id, port as u16)
         .await
         .map_err(error::AppError::Generic)?;
-    let mut s = state.lock().map_err(|_| error::AppError::LockError)?;
-    s.ws = Some(session.clone());
+    state.ws_sessions.lock().unwrap().insert(id, session);
 
-    // 启动 AI Agent 自动化观测决策流
-    tokio::spawn(agent::run_agent_orchestrator(app, session));
-
-    Ok(())
+    Ok(RunningGame {
+        id: id.to_string(),
+        port,
+        status: "running".into(),
+    })
 }
 
-/// 仅建立 WS 连接、不启动 AI Agent 编排器。
-/// 供桌面端"观战/回放"场景使用：起本地游戏进程渲染，但不驱动 AI。
+/// 按 id 停止对局：kill 进程 + 释放端口 + 清理该端口的 WS 会话。
 #[tauri::command]
-async fn connect_ws_observe(
-    app: tauri::AppHandle,
-    state: tauri::State<'_, Mutex<AppState>>,
+async fn stop_game(
+    state: tauri::State<'_, AppState>,
+    id: String,
 ) -> Result<(), error::AppError> {
-    let port = {
-        let s = state.lock().map_err(|_| error::AppError::LockError)?;
-        let Some(ref bevy) = s.bevy else {
-            return Err(error::AppError::StateError(
-                "游戏未启动，无法获取端口".to_string(),
-            ));
-        };
-        bevy.port
-    };
-
-    let session = ws::start_ws_client(app, port)
-        .await
-        .map_err(error::AppError::Generic)?;
-    let mut s = state.lock().map_err(|_| error::AppError::LockError)?;
-    s.ws = Some(session);
-
+    let id = Uuid::parse_str(&id).map_err(|e| error::AppError::Generic(format!("无效对局 id: {e}")))?;
+    state.manager.stop(id).await.map_err(map_manager_error)?;
+    state.ws_sessions.lock().unwrap().remove(&id);
+    state.event_channels.lock().unwrap().remove(&id);
     Ok(())
 }
 
+/// 订阅本地对局的实时事件流（使用 Tauri 2.x Channel 进行单播）。
 #[tauri::command]
-fn disconnect_ws(state: tauri::State<'_, Mutex<AppState>>) -> Result<(), error::AppError> {
-    let mut s = state.lock().map_err(|_| error::AppError::LockError)?;
-    s.ws = None;
+fn subscribe_match_events(
+    state: tauri::State<'_, AppState>,
+    id: String,
+    channel: tauri::ipc::Channel<serde_json::Value>,
+) -> Result<(), error::AppError> {
+    let id = Uuid::parse_str(&id).map_err(|e| error::AppError::Generic(format!("无效对局 id: {e}")))?;
+    let mut event_channels = state.event_channels.lock().unwrap();
+    event_channels.entry(id).or_insert_with(Vec::new).push(channel);
     Ok(())
 }
 
+/// 暂停本地对局（幂等，返回是否触发了暂停状态切换）。
 #[tauri::command]
-async fn send_ws_cmd(
-    state: tauri::State<'_, Mutex<AppState>>,
-    cmd: String,
-    params: serde_json::Value,
-) -> Result<serde_json::Value, error::AppError> {
+async fn pause_match(
+    state: tauri::State<'_, AppState>,
+    id: String,
+) -> Result<bool, error::AppError> {
+    let id = Uuid::parse_str(&id).map_err(|e| error::AppError::Generic(format!("无效对局 id: {e}")))?;
     let session = {
-        let s = state.lock().map_err(|_| error::AppError::LockError)?;
-        let Some(ref ws) = s.ws else {
-            return Err(error::AppError::Generic("WS 未连接".to_string()));
-        };
-        ws.clone()
+        let sessions = state.ws_sessions.lock().unwrap();
+        sessions
+            .get(&id)
+            .cloned()
+            .ok_or_else(|| error::AppError::Generic("对局 WS 未连接".to_string()))?
     };
-
-    let resp = session
-        .send_cmd(cmd, params)
-        .await
-        .map_err(error::AppError::Generic)?;
-    if !resp.ok {
-        return Err(error::AppError::Generic(
-            resp.error.unwrap_or_else(|| "未知错误".to_string()),
-        ));
-    }
-    Ok(resp.data.unwrap_or(serde_json::Value::Null))
+    let client = lol_client::GameClient::new(session);
+    let triggered = client.pause().await.map_err(error::AppError::Generic)?;
+    Ok(triggered)
 }
 
+/// 恢复本地对局（幂等，返回是否触发了暂停状态切换）。
 #[tauri::command]
-async fn run_bash_tool(cmd: String) -> Result<String, error::AppError> {
-    let tool = BashTool;
-    let args = BashArgs { cmd };
-    let output = tool.call(args).await.unwrap();
-    Ok(output)
+async fn resume_match(
+    state: tauri::State<'_, AppState>,
+    id: String,
+) -> Result<bool, error::AppError> {
+    let id = Uuid::parse_str(&id).map_err(|e| error::AppError::Generic(format!("无效对局 id: {e}")))?;
+    let session = {
+        let sessions = state.ws_sessions.lock().unwrap();
+        sessions
+            .get(&id)
+            .cloned()
+            .ok_or_else(|| error::AppError::Generic("对局 WS 未连接".to_string()))?
+    };
+    let client = lol_client::GameClient::new(session);
+    let triggered = client.unpause().await.map_err(error::AppError::Generic)?;
+    Ok(triggered)
 }
 
+/// 设置本地对局的上帝模式状态。
 #[tauri::command]
-fn get_local_cache(
-    app: tauri::AppHandle,
-    key: String,
-) -> Result<Option<serde_json::Value>, error::AppError> {
-    let dir = get_config_dir(&app)?.join("cache");
-    let path = dir.join(format!("{}.json", key));
-    if !path.exists() {
-        return Ok(None);
-    }
-    let content = fs::read_to_string(&path)?;
-    let value: serde_json::Value = serde_json::from_str(&content)
-        .map_err(|e| error::AppError::Generic(format!("缓存解析失败: {e}")))?;
-    Ok(Some(value))
-}
-
-#[tauri::command]
-fn set_local_cache(
-    app: tauri::AppHandle,
-    key: String,
-    data: serde_json::Value,
+async fn set_god_mode(
+    state: tauri::State<'_, AppState>,
+    id: String,
+    enabled: bool,
 ) -> Result<(), error::AppError> {
-    let dir = get_config_dir(&app)?.join("cache");
-    if !dir.exists() {
-        fs::create_dir_all(&dir)?;
-    }
-    let path = dir.join(format!("{}.json", key));
-    let json = serde_json::to_string_pretty(&data)
-        .map_err(|e| error::AppError::Generic(format!("JSON 序列化失败: {e}")))?;
-    fs::write(&path, json)?;
+    let id = Uuid::parse_str(&id).map_err(|e| error::AppError::Generic(format!("无效对局 id: {e}")))?;
+    let session = {
+        let sessions = state.ws_sessions.lock().unwrap();
+        sessions
+            .get(&id)
+            .cloned()
+            .ok_or_else(|| error::AppError::Generic("对局 WS 未连接".to_string()))?
+    };
+    let client = lol_client::GameClient::new(session);
+    client.god_mode(enabled).await.map_err(error::AppError::Generic)?;
     Ok(())
 }
+
+/// 设置本地对局的冷却状态。
+#[tauri::command]
+async fn toggle_cooldown(
+    state: tauri::State<'_, AppState>,
+    id: String,
+    enabled: bool,
+) -> Result<(), error::AppError> {
+    let id = Uuid::parse_str(&id).map_err(|e| error::AppError::Generic(format!("无效对局 id: {e}")))?;
+    let session = {
+        let sessions = state.ws_sessions.lock().unwrap();
+        sessions
+            .get(&id)
+            .cloned()
+            .ok_or_else(|| error::AppError::Generic("对局 WS 未连接".to_string()))?
+    };
+    let client = lol_client::GameClient::new(session);
+    client.toggle_cooldown(enabled).await.map_err(error::AppError::Generic)?;
+    Ok(())
+}
+
+/// 重置本地对局中的英雄位置。
+#[tauri::command]
+async fn reset_position(
+    state: tauri::State<'_, AppState>,
+    id: String,
+) -> Result<(), error::AppError> {
+    let id = Uuid::parse_str(&id).map_err(|e| error::AppError::Generic(format!("无效对局 id: {e}")))?;
+    let session = {
+        let sessions = state.ws_sessions.lock().unwrap();
+        sessions
+            .get(&id)
+            .cloned()
+            .ok_or_else(|| error::AppError::Generic("对局 WS 未连接".to_string()))?
+    };
+    let client = lol_client::GameClient::new(session);
+    client.reset_position().await.map_err(error::AppError::Generic)?;
+    Ok(())
+}
+
+/// 切换本地对局中的调试视角英雄。
+#[tauri::command]
+async fn switch_champion(
+    state: tauri::State<'_, AppState>,
+    id: String,
+    name: String,
+) -> Result<(), error::AppError> {
+    let id = Uuid::parse_str(&id).map_err(|e| error::AppError::Generic(format!("无效对局 id: {e}")))?;
+    let session = {
+        let sessions = state.ws_sessions.lock().unwrap();
+        sessions
+            .get(&id)
+            .cloned()
+            .ok_or_else(|| error::AppError::Generic("对局 WS 未连接".to_string()))?
+    };
+    let client = lol_client::GameClient::new(session);
+    client.switch_champion(&name).await.map_err(error::AppError::Generic)?;
+    Ok(())
+}
+
+/// 设置本地对局中某个角色的运行脚本代码。
+#[tauri::command]
+async fn set_script(
+    state: tauri::State<'_, AppState>,
+    id: String,
+    entity_id: u64,
+    source: String,
+) -> Result<(), error::AppError> {
+    let id = Uuid::parse_str(&id).map_err(|e| error::AppError::Generic(format!("无效对局 id: {e}")))?;
+    let session = {
+        let sessions = state.ws_sessions.lock().unwrap();
+        sessions
+            .get(&id)
+            .cloned()
+            .ok_or_else(|| error::AppError::Generic("对局 WS 未连接".to_string()))?
+    };
+    let client = lol_client::GameClient::new(session);
+    client.set_script(entity_id, &source).await.map_err(error::AppError::Generic)?;
+    Ok(())
+}
+
+
+/// 列出所有运行中的本地对局（前端侧栏/列表页用）。
+#[tauri::command]
+async fn list_running_games(
+    state: tauri::State<'_, AppState>,
+) -> Result<Vec<RunningGame>, error::AppError> {
+    let procs = state.manager.list_processes().await.map_err(map_manager_error)?;
+    Ok(procs
+        .into_iter()
+        .map(|p| RunningGame {
+            id: p.id.to_string(),
+            port: p.port,
+            status: p.status.as_str().to_string(),
+        })
+        .collect())
+}
+
+/// 按 id 查询单个运行中对局（调试页确认端口用）。
+#[tauri::command]
+async fn get_running_game(
+    state: tauri::State<'_, AppState>,
+    id: String,
+) -> Result<Option<RunningGame>, error::AppError> {
+    let id = Uuid::parse_str(&id).map_err(|e| error::AppError::Generic(format!("无效对局 id: {e}")))?;
+    let procs = state.manager.list_processes().await.map_err(map_manager_error)?;
+    Ok(procs.into_iter().find(|p| p.id == id).map(|p| RunningGame {
+        id: p.id.to_string(),
+        port: p.port,
+        status: p.status.as_str().to_string(),
+    }))
+}
+
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
-        .manage(Mutex::new(AppState::new()))
-        .setup(|_app| Ok(()))
+        .setup(|app| {
+            app.manage(AppState::new(app.handle().clone()));
+            Ok(())
+        })
         .invoke_handler(tauri::generate_handler![
             start_game,
             stop_game,
-            get_model_providers,
-            set_model_providers,
-            save_custom_scenario,
-            delete_custom_scenario,
-            list_custom_scenarios,
-            load_custom_scenario,
-            list_spawn_presets,
-            save_spawn_preset,
-            delete_spawn_preset,
-            list_hero_presets,
-            save_hero_preset,
-            delete_hero_preset,
-            save_scenario_win_condition,
-            load_scenario_win_condition,
+            list_running_games,
+            get_running_game,
             log::query_logs,
             log::query_log_entities,
             log::query_log_categories,
             log::clear_logs,
-            connect_ws,
-            connect_ws_observe,
-            disconnect_ws,
-            send_ws_cmd,
-            agent::list_game_histories,
-            agent::get_game_history_detail,
-            agent::delete_game_history,
-            run_bash_tool,
-            get_local_cache,
-            set_local_cache
+            subscribe_match_events,
+            pause_match,
+            resume_match,
+            set_god_mode,
+            toggle_cooldown,
+            reset_position,
+            switch_champion,
+            set_script
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

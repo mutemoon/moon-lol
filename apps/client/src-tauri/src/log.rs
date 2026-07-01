@@ -1,11 +1,9 @@
 use std::path::PathBuf;
-use std::sync::Mutex;
 
 use sqlx::sqlite::{SqliteConnectOptions, SqlitePoolOptions};
 use sqlx::{Row, SqlitePool};
-use tauri::State;
+use tauri::Manager;
 
-use crate::state::AppState;
 
 #[derive(serde::Serialize, serde::Deserialize, Clone)]
 pub struct LogRow {
@@ -37,16 +35,15 @@ pub struct CategoryOption {
     pub category: Option<String>,
 }
 
-/// 从 AppState 取出当前对局的日志 DB 路径。
-/// 返回 None 表示没有运行中的对局或 DB 文件不存在。
-fn current_log_db_path(state: &State<'_, Mutex<AppState>>) -> Option<PathBuf> {
-    let s = state.lock().ok()?;
-    let proc = s.bevy.as_ref()?;
-    if proc.log_db_path.exists() {
-        Some(proc.log_db_path.clone())
-    } else {
-        None
-    }
+/// 按对局 id 取出该局的日志 DB 路径（`~/.moon-lol/logs/{game_id}.db`）。
+/// 文件不存在返回 None（对局可能尚未写入或已停止）。
+fn log_db_path(app: &tauri::AppHandle, game_id: &str) -> Option<PathBuf> {
+    let home = app.path().home_dir().ok()?;
+    let path = home
+        .join(".moon-lol")
+        .join("logs")
+        .join(format!("{game_id}.db"));
+    path.exists().then_some(path)
 }
 
 /// 以只读模式打开 SQLite 文件，返回一个临时连接池。
@@ -64,7 +61,8 @@ async fn open_read_only(path: &PathBuf) -> Result<SqlitePool, String> {
 
 #[tauri::command]
 pub async fn query_logs(
-    state: State<'_, Mutex<AppState>>,
+    app: tauri::AppHandle,
+    game_id: String,
     offset: i64,
     limit: i64,
     levels: Option<Vec<String>>,
@@ -72,7 +70,7 @@ pub async fn query_logs(
     category: Option<String>,
     search_text: Option<String>,
 ) -> Result<QueryLogsResult, String> {
-    let db_path = match current_log_db_path(&state) {
+    let db_path = match log_db_path(&app, &game_id) {
         Some(p) => p,
         None => {
             return Ok(QueryLogsResult {
@@ -185,9 +183,10 @@ pub async fn query_logs(
 
 #[tauri::command]
 pub async fn query_log_entities(
-    state: State<'_, Mutex<AppState>>,
+    app: tauri::AppHandle,
+    game_id: String,
 ) -> Result<Vec<EntityOption>, String> {
-    let db_path = match current_log_db_path(&state) {
+    let db_path = match log_db_path(&app, &game_id) {
         Some(p) => p,
         None => return Ok(vec![]),
     };
@@ -213,9 +212,10 @@ pub async fn query_log_entities(
 
 #[tauri::command]
 pub async fn query_log_categories(
-    state: State<'_, Mutex<AppState>>,
+    app: tauri::AppHandle,
+    game_id: String,
 ) -> Result<Vec<CategoryOption>, String> {
-    let db_path = match current_log_db_path(&state) {
+    let db_path = match log_db_path(&app, &game_id) {
         Some(p) => p,
         None => return Ok(vec![]),
     };
@@ -238,8 +238,8 @@ pub async fn query_log_categories(
 }
 
 #[tauri::command]
-pub async fn clear_logs(state: State<'_, Mutex<AppState>>) -> Result<(), String> {
-    let db_path = match current_log_db_path(&state) {
+pub async fn clear_logs(app: tauri::AppHandle, game_id: String) -> Result<(), String> {
+    let db_path = match log_db_path(&app, &game_id) {
         Some(p) => p,
         None => return Ok(()),
     };

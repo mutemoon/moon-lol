@@ -5,7 +5,7 @@ meta:
 
 <script setup lang="ts">
 import { useRouter } from "vue-router";
-import { MessageSquareIcon, TerminalIcon, ChevronRightIcon } from "@lucide/vue";
+import { MessageSquareIcon, ChevronRightIcon } from "@lucide/vue";
 
 const router = useRouter();
 
@@ -33,8 +33,8 @@ function navigateTo(path: string) {
         </p>
       </div>
 
-      <!-- 卡片网格 -->
-      <div class="grid w-full grid-cols-1 gap-6 md:grid-cols-2">
+      <!-- 模拟测试卡片 -->
+      <div class="w-full max-w-lg">
         <!-- 卡片 1: 决策对话模拟 -->
         <div
           class="group bg-bg-surface/50 border-border-subtle hover:border-gold-dimmer/50 hover:bg-bg-elevated hover:shadow-[0_12px_32px_rgba(0,0,0,0.6),0_0_24px_rgba(185,145,71,0.12)] relative flex cursor-pointer flex-col justify-between overflow-hidden rounded-xl border p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1"
@@ -54,34 +54,6 @@ function navigateTo(path: string) {
             
             <p class="text-text-muted mt-3 text-xs leading-relaxed">
               基于本地 mock.json 数据源，模拟 AI 代理的实时决策思维链生成。测试 Markdown 渲染格式、折叠面板及自定义工具调用展示的排版交互。
-            </p>
-          </div>
-
-          <div class="text-gold-bright mt-6 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider">
-            进入测试床
-            <ChevronRightIcon class="h-4 w-4 transform transition-transform group-hover:translate-x-1" />
-          </div>
-        </div>
-
-        <!-- 卡片 2: 指令验证沙盒 -->
-        <div
-          class="group bg-bg-surface/50 border-border-subtle hover:border-gold-dimmer/50 hover:bg-bg-elevated hover:shadow-[0_12px_32px_rgba(0,0,0,0.6),0_0_24px_rgba(185,145,71,0.12)] relative flex cursor-pointer flex-col justify-between overflow-hidden rounded-xl border p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1"
-          @click="navigateTo('/mock/command')"
-        >
-          <!-- 边角金色装饰条 -->
-          <div class="bg-gold-default absolute top-0 left-0 h-[2px] w-0 transition-all duration-300 group-hover:w-full"></div>
-
-          <div>
-            <div class="border-gold-dimmer/20 bg-gold-dimmer/5 text-gold-bright flex h-12 w-12 items-center justify-center rounded-lg border transition-colors group-hover:bg-gold-dimmer/10">
-              <TerminalIcon class="h-6 w-6" />
-            </div>
-
-            <h2 class="text-text-bright mt-5 text-xl font-bold tracking-wide transition-colors group-hover:text-gold-bright">
-              游戏指令测试沙盒
-            </h2>
-
-            <p class="text-text-muted mt-3 text-xs leading-relaxed">
-              调试与 Tauri 后端及 Bevy 引擎交互的底层游戏指令。包括英雄属性查询、God Mode 开关、冷却消除以及自定义事件的注入和执行观测。
             </p>
           </div>
 

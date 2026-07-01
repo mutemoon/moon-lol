@@ -1,0 +1,16 @@
+[package]
+name = "lol_game_process_manager"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+lol_client.workspace = true
+lol_agent_runtime.workspace = true
+async-trait = "0.1"
+tokio = { workspace = true }
+tracing = "0.1"
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+uuid = { version = "1", features = ["v4", "serde"] }
+

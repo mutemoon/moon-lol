@@ -8813,6 +8813,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "lol_game_process_manager"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "lol_agent_runtime",
+ "lol_client",
+ "serde",
+ "serde_json",
+ "thiserror 2.0.18",
+ "tokio",
+ "tracing",
+ "uuid",
+]
+
+[[package]]
 name = "lol_render"
 version = "0.1.0"
 dependencies = [
@@ -8862,6 +8877,7 @@ dependencies = [
  "lol_agent_runtime",
  "lol_client",
  "lol_core",
+ "lol_game_process_manager",
  "lol_server",
  "mockall",
  "moka",
@@ -9188,6 +9204,7 @@ dependencies = [
  "futures-util",
  "lol_agent_runtime",
  "lol_client",
+ "lol_game_process_manager",
  "rig",
  "rig-core",
  "rmcp",
@@ -9200,6 +9217,7 @@ dependencies = [
  "thiserror 2.0.18",
  "tokio",
  "tokio-tungstenite 0.24.0",
+ "uuid",
 ]
 
 [[package]]

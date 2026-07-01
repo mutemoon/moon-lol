@@ -29,12 +29,12 @@ pub use essence_service::{
     CheckInResult, EssenceService, EssenceServiceImpl, SubscriptionService, SubscriptionServiceImpl,
 };
 pub use local_game_service::{
-    CommandProcessLauncher, LocalGameService, LocalGameServiceImpl, LocalGameState,
-    LocalStartInput, ProcessLauncher,
+    CommandProcessLauncher, LocalGameService, LocalGameServiceImpl, LocalStartInput,
 };
 pub use log_service::{
     LogReader, LogService, LogServiceImpl, QueryLogsParams, QueryLogsResult, SqliteLogReader,
 };
+pub use lol_game_process_manager::ProcessLauncher;
 pub use match_service::{MatchService, MatchServiceImpl};
 pub use model_provider_service::{ModelProviderService, ModelProviderServiceImpl};
 pub use rank_service::{RankMatchCreator, RankService, RankServiceImpl};

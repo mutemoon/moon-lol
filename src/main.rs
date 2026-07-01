@@ -26,11 +26,15 @@ struct Args {
 
     #[arg(long)]
     headless: bool,
+
+    /// 每局日志 SQLite 路径；缺省沿用 ~/.moon-lol/logs/debug.db。
+    #[arg(long)]
+    log_db: Option<std::path::PathBuf>,
 }
 
 fn main() {
     let args = Args::parse();
-    let log_plugin = create_log_plugin();
+    let log_plugin = create_log_plugin(args.log_db);
 
     let mut app = App::new();
 

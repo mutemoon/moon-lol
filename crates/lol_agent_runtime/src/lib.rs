@@ -8,10 +8,13 @@ pub mod credentials;
 pub mod orchestrator;
 pub mod resolver;
 pub mod sink;
+pub mod testing;
 
 pub use credentials::{
     AgentConfig, PlatformEnv, ProviderCredentials, ResolvedCredentials, resolve_credentials,
+    ModelConfig,
 };
 pub use orchestrator::run_orchestrator;
 pub use resolver::CredentialResolver;
 pub use sink::{AgentRunResult, NoopSink, OrchestratorSink};
+pub use testing::test_model_connection;

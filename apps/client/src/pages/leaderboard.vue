@@ -5,7 +5,8 @@ meta:
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from "vue";
-import { rankApi, type EloRating } from "@/services/cloudApi";
+import { services } from "@/services/provider";
+import type { EloRating } from "@/services/types";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import {
@@ -32,7 +33,7 @@ const MODES = [{ value: "top_solo", label: "上单 SOLO" }];
 async function refresh() {
   loading.value = true;
   try {
-    data.value = await rankApi.leaderboard(mode.value, 100);
+    data.value = await services.cloud.getLeaderboard(mode.value, 100);
   } catch (e) {
     data.value = [];
   } finally {

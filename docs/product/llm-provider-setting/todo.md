@@ -6,9 +6,9 @@
 
 - [x] **服务端六层子系统**：新增 `model_providers` 表与 domain/repository/cache/service/handler 六层，镜像 config 子系统；`AppState` + `main.rs` 注入；路由 `/api/model-providers`；service 单测覆盖脱敏 / 空 key 保留旧值 / resolve_for_runtime 缓存命中与回退。
 - [x] **服务端编排器按 provider 解析凭证**：`SceneAgentConfig` 增 `model`/`provider_id`，`Orchestrator::new` 按 `provider_id`+owner 调 `resolve_for_runtime`，缺省回退 env；`local_game_service` 注入 owner_id 与服务。
-- [x] **桌面端编排器贯通**：`agent.rs` 的 `AgentConfig` 增字段、`load_providers` 读 providers.json、`resolve_credentials` 按 provider 解析凭证、缺省回退 env。
+- [x] **桌面端编排器凭证传递**：运行时由前端将所有模型供应商配置随 `start_game` 传递给 Tauri 后端，在内存中解析并映射每个选手的模型与凭证，避免了本地配置文件的读写。
 - [x] **快照冻结接线**：`publish_snapshot` 改为加载 Agent 并调用 `build_config_freeze`，使参赛快照冻结 `model` + `config_json.provider_id`。
-- [x] **前端服务层**：types.ts 加 `ModelProvider`/`ModelProviderInput` + `FrontAgentConfig` 字段；cloud/cloudImpl 加 CRUD；backend.ts 三映射；Tauri `get/set_model_providers` 命令读写 providers.json。
+- [x] **前端服务层**：types.ts 加 `ModelProvider`/`ModelProviderInput` + `FrontAgentConfig` 字段；cloud/cloudImpl 加 CRUD；Tauri 配合在启动对局时接收凭证并在内存中解析映射。
 - [x] **预设目录**：`config/providerPresets.ts` 落地国内外厂商预设（智谱、DeepSeek、火山方舟、Kimi、MiniMax 等），数据整理自 cc-switch。
 - [x] **设置页供应商管理 UI**：`model_settings` tab 重写为左侧导航（仅列平台 + 已配置供应商）+ 右侧表单；新增供应商时通过「供应商类型」下拉选预设自动预填厂商参数或选自定义手填，CRUD、刷新探测。
 - [x] **选手编辑页级联下拉**：`heroes.vue` LLM 模型字段改为供应商 + 模型名级联下拉，写 `model` + `config_json.provider_id`，保留手填兜底。
@@ -33,7 +33,7 @@
 
 ### 3. 存储与同步
 
-- [ ] **桌面端云端同步**：桌面端供应商目前仅存本地 `providers.json`，未镜像云端。复用选手资产的云优先同步机制（在线写云端 + 镜像本地、离线降级）。
+- [x] **桌面端全量数据上云**：去除了本地 `providers.json` 持久化，桌面端供应商与 Web 端统一走云端模型供应商 CRUD 接口。
 - [ ] **刷新探测健壮性**：`{baseUrl}/v1/models` 探测兼容剥离已知子路径后的变体（`/models` 等），并处理无 api_key 或鉴权失败的优雅降级。
 
 ### 4. 体验打磨

@@ -132,6 +132,10 @@ pub fn create_router(state: AppState) -> Router {
         .route("/api/auth/me", get(auth::auth_me))
         // Model Providers
         .route(
+            "/api/model-providers/test",
+            post(model_provider::test_model_provider),
+        )
+        .route(
             "/api/model-providers",
             get(model_provider::list_model_providers).post(model_provider::create_model_provider),
         )
@@ -228,6 +232,7 @@ pub fn create_router(state: AppState) -> Router {
         .route("/api/matches", get(match_::list_matches))
         .route("/api/matches/:id", get(match_::get_match))
         .route("/api/matches/:id/events", get(match_::get_match_events))
+        .route("/api/matches/:id/events/ws", get(match_::get_match_events_ws))
         .route("/api/matches/:id/stop", post(match_::stop_match))
         // Local Game
         .route("/api/local/start", post(local_game::local_start))

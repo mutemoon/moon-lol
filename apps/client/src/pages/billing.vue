@@ -5,12 +5,8 @@ meta:
 
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
-import {
-  essenceApi,
-  subscriptionsApi,
-  type BillingPlan,
-  type EssenceTransaction,
-} from "@/services/cloudApi";
+import { services } from "@/services/provider";
+import type { BillingPlan, EssenceTransaction } from "@/services/types";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -40,10 +36,10 @@ const subscribing = ref<string | null>(null);
 async function refresh() {
   try {
     const [b, tx, p, cur] = await Promise.all([
-      essenceApi.balance().catch(() => 0),
-      essenceApi.transactions(50, 0).catch(() => [] as EssenceTransaction[]),
-      subscriptionsApi.listPlans().catch(() => [] as BillingPlan[]),
-      subscriptionsApi.current().catch(() => null),
+      services.cloud.getEssenceBalance().catch(() => 0),
+      services.cloud.getEssenceTransactions(50, 0).catch(() => [] as EssenceTransaction[]),
+      services.cloud.listBillingPlans().catch(() => [] as BillingPlan[]),
+      services.cloud.getCurrentSubscription().catch(() => null),
     ]);
     balance.value = b;
     transactions.value = tx;
@@ -56,7 +52,7 @@ async function refresh() {
 
 async function handleCheckIn() {
   try {
-    const res = await essenceApi.checkIn();
+    const res = await services.cloud.checkInEssence();
     checkInState.value = { already: res.already_checked_in, granted: res.granted };
     balance.value = res.balance;
   } catch (e) {
@@ -67,7 +63,7 @@ async function handleCheckIn() {
 async function handleSubscribe(plan: BillingPlan) {
   subscribing.value = plan.id;
   try {
-    await subscriptionsApi.subscribe(plan.id);
+    await services.cloud.subscribe(plan.id);
     await refresh();
   } catch (e: any) {
     alert(e.message || "订阅失败");

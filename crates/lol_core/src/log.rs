@@ -173,12 +173,15 @@ impl<S: tracing::Subscriber, L: Layer<S>> Layer<S> for FilteredLayer<L> {
 ///
 /// writer 线程在自己的 current_thread tokio runtime 上跑，避免和 Bevy 主线程
 /// 的 runtime 冲突。channel sender 存入 OnceLock 供 Layer 回调使用。
-pub fn create_log_plugin() -> bevy::log::LogPlugin {
-    let db_path = {
-        let base = std::env::var("HOME")
-            .map(PathBuf::from)
-            .unwrap_or_else(|_| std::env::current_dir().unwrap_or_default());
-        base.join(".moon-lol").join("logs").join("debug.db")
+pub fn create_log_plugin(log_db: Option<PathBuf>) -> bevy::log::LogPlugin {
+    let db_path = match log_db {
+        Some(p) => p,
+        None => {
+            let base = std::env::var("HOME")
+                .map(PathBuf::from)
+                .unwrap_or_else(|_| std::env::current_dir().unwrap_or_default());
+            base.join(".moon-lol").join("logs").join("debug.db")
+        }
     };
 
     // 确保目录存在

@@ -25,7 +25,7 @@ MoonLOL 是基于 Bevy 引擎复刻《英雄联盟》之上的 **AI Agent 电竞
 ```
 ┌─────────────────────────────────────────────────────────┐
 │  apps/client/src-tauri   桌面客户端壳 (Tauri + Vue)       │
-│    rig agent 编排环 · 本地对局进程托管 · 离线缓存         │
+│    rig agent 编排环 · 本地对局进程托管                  │
 └───────────────┬──────────────────────────┬──────────────┘
                 │ HTTP / WS                │ 进程内 rmcp
 ┌───────────────▼──────────┐   ┌───────────▼──────────────┐
@@ -34,7 +34,8 @@ MoonLOL 是基于 Bevy 引擎复刻《英雄联盟》之上的 **AI Agent 电竞
 │  handlers→service→repo→  │   │  + GameToolServer (MCP)   │
 │  cache→domain→infra      │   └───────────┬──────────────┘
 └───────────────┬──────────┘               │ WS
-                │ std::process::Command 启动 │ ws://127.0.0.1:9001
+                │ GameProcessManager 托管   │ ws://127.0.0.1:{port}
+                │ (端口池 + lol_client::launch)│
                 ▼                          ▼
 ┌─────────────────────────────────────────────────────────┐
 │  Bevy 游戏进程 (子进程)                                   │
@@ -43,7 +44,8 @@ MoonLOL 是基于 Bevy 引擎复刻《英雄联盟》之上的 **AI Agent 电竞
 └─────────────────────────────────────────────────────────┘
 ```
 
-- **`lol_client`**：Bevy-free 的共享游戏客户端。协议类型、WS 会话、类型化 `GameClient` 命令面与 MCP 工具层 `GameToolServer`。CLI、MCP、Tauri、web server 四处共用，不各自持有一份协议或会话代码。
+- **`lol_client`**：Bevy-free 的共享游戏客户端。协议类型、WS 会话、类型化 `GameClient` 命令面与 MCP 工具层 `GameToolServer`，以及 `launch` 模块的 spawn 命令构建（`BevySpawnRequest` / `build_command`）。CLI、MCP、Tauri、web server 四处共用，不各自持有一份协议或会话代码。
+- **`lol_game_process_manager`**：游戏进程托管共享 crate。端口池、进程表、`ProcessLauncher` trait、`GameProcessManager`。桌面本地调试与云端 `LocalGameService` 共用，对局体系仅云端叠加。详见 [游戏进程托管](game-host/)。
 - **`lol_cli`**：clap 薄前端，依赖 `lol_client`，提供完整控制面：observe / action / pause / state / switch_champion / god_mode / toggle_cooldown / reset_position / get_agents / set_script / rl_*。
 - **`lol_web_server`**：六层依赖倒置服务端。常驻 Rank 匹配守护协程、每局一个 match_supervisor、以及 web server 侧的 agent 决策环。
 - **Bevy 进程**：`lol_server` 经 observer 事件按 cmd 字符串分发到 `lol_agent` / `lol_debug` 处理；`lol_core::match_events` 产出结构化对局事件经 WS 转发。
@@ -54,7 +56,7 @@ MoonLOL 是基于 Bevy 引擎复刻《英雄联盟》之上的 **AI Agent 电竞
 
 | 形态 | 游戏运行位置 | 登录 | 侧重点 |
 |---|---|---|---|
-| 本地多 Agent 对局 | 本机，desktop 独占 | 可不登录 | 研究调试，可离线 |
+| 本地多 Agent 对局 | 本机，desktop 独占 | 必须登录 | 研究调试，配置统一走云端 |
 | 房间多用户对局 | 服务器 | 必须登录 | 社交娱乐，实时观战 |
 | Rank 竞技 | 服务器 | 必须登录 | 竞技排名，7×24 自动上分 |
 
@@ -86,5 +88,6 @@ ELO 主体是 Agent 而非用户，按 Agent × 模式分别计算。Rank 队列
 - [对局与房间 / Rank / 观战](match/) — 三形态对局、胜负判定、Match Supervisor、WS 观战代理。
 - [Agent 选手与决策体系](agent/) — 英雄 vs 选手、三种 Agent 类型、快照发布、社区 Fork。
 - [游戏工具](game-tools/) — CLI + MCP 并存、共享客户端 lol_client、rig agent 接入。
+- [游戏进程托管](game-host/) — 共享 crate lol_game_process_manager、端口池、桌面本地调试与云端竞技分层、spawn 命令复用。
 - [算力、精粹与订阅计费](billing/) — 服务器算力约束、模型动力源、精粹规则、订阅槽位。
 - [模型供应商与模型设置](llm-provider-setting/) — 供应商管理、预设目录、运行时按 provider 解析凭证。

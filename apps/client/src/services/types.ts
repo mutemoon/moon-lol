@@ -24,6 +24,7 @@ export interface HeroPreset {
   preamble?: string
   model?: string
   config_json?: any
+  visibility?: Visibility
 }
 
 export interface FrontAgentConfig {
@@ -43,6 +44,11 @@ export interface FrontAgentConfig {
 export type ApiFormat = 'anthropic' | 'openai_chat' | 'openai_responses' | 'gemini_native'
 export type ProviderCategory = 'preset' | 'custom' | 'platform'
 
+export interface ModelConfig {
+  name: string
+  max_tokens: number
+}
+
 export interface ModelProvider {
   id: string
   name: string
@@ -53,7 +59,7 @@ export interface ModelProvider {
   api_key: string
   has_api_key?: boolean
   api_format: ApiFormat
-  models: string[]
+  models: ModelConfig[]
   enabled: boolean
   website_url?: string
   api_key_url?: string
@@ -71,6 +77,16 @@ export interface GameConfig {
   mode: string
   champion: string
   sceneName: string | null
+  agents?: FrontAgentConfig[]
+  providers?: ModelProvider[]
+}
+
+// ── 运行中对局 ──
+
+export interface RunningGame {
+  id: string
+  port: number
+  status: string
 }
 
 // ── WS 协议类型 ──

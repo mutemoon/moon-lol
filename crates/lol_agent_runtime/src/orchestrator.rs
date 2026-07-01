@@ -101,6 +101,7 @@ impl Orchestrator {
                 agent_cfg.prompt.clone(),
                 tools.clone(),
                 peer.clone(),
+                creds.max_tokens,
             );
             rig_agents.push((agent_cfg.clone(), rig_agent, Vec::<Message>::new()));
         }
@@ -258,6 +259,7 @@ fn create_agent(
     preamble: String,
     tools: Vec<rmcp::model::Tool>,
     peer: rmcp::service::ServerSink,
+    max_tokens: Option<u32>,
 ) -> Agent<CompletionModel> {
     let client = anthropic::Client::builder()
         .api_key(&api_key)
@@ -265,9 +267,11 @@ fn create_agent(
         .build()
         .expect("初始化 rig Anthropic 客户端失败");
 
+    let limit = max_tokens.unwrap_or(200 * 1000);
+
     client
         .agent(&model)
-        .max_tokens(200 * 1000)
+        .max_tokens(limit as u64)
         .default_max_turns(20)
         .preamble(&preamble)
         .rmcp_tools(tools, peer)

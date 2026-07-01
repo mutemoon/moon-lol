@@ -12,19 +12,32 @@
 //!
 //! WS 连接与重试复用 `lol_client::start_ws_client`（含 30s 重试 + 事件 channel），
 //! 本 supervisor 仅从事件 channel 消费 `WsEvent`，不再自持裸 tungstenite 连接。
-
-use std::sync::Arc;
+use std::collections::HashMap;
+use std::sync::{Arc, Mutex, OnceLock};
 
 use lol_client::{WsEvent, start_ws_client};
 use serde_json::Value;
-use tokio::sync::mpsc;
+use tokio::sync::{broadcast, mpsc};
 use tracing::{debug, info, warn};
 use uuid::Uuid;
 
-use crate::domain::match_::Winner;
+use crate::domain::match_::{MatchEvent, Winner};
 use crate::domain::solo_rules::{SoloRule, SoloState, SoloVerdict, evaluate};
 use crate::repository::match_repo::MatchEventInput;
 use crate::service::match_service::MatchService;
+
+#[derive(serde::Serialize, Clone, Debug)]
+#[serde(tag = "type", content = "data", rename_all = "snake_case")]
+pub enum SpectatorMessage {
+    Event(MatchEvent),
+    Close { reason: String },
+}
+
+pub static BROADCASTERS: OnceLock<Mutex<HashMap<Uuid, broadcast::Sender<SpectatorMessage>>>> = OnceLock::new();
+
+pub fn get_broadcasters() -> &'static Mutex<HashMap<Uuid, broadcast::Sender<SpectatorMessage>>> {
+    BROADCASTERS.get_or_init(|| Mutex::new(HashMap::new()))
+}
 
 /// 引擎产出的 match_event.data 反序列化结构（对应 lol_core::MatchEventOut）。
 #[derive(serde::Deserialize, Debug)]
@@ -90,6 +103,13 @@ pub async fn run_supervisor(match_id: Uuid, ws_port: i32, match_service: Arc<dyn
         return;
     }
 
+    // 创建该对局的内存广播通道并注册
+    let (broadcaster_tx, _) = broadcast::channel::<SpectatorMessage>(1024);
+    {
+        let mut lock = get_broadcasters().lock().unwrap();
+        lock.insert(match_id, broadcaster_tx.clone());
+    }
+
     let mut state = SoloState::default();
     let rule = SoloRule::default();
     let mut decided = false;
@@ -111,7 +131,7 @@ pub async fn run_supervisor(match_id: Uuid, ws_port: i32, match_service: Arc<dyn
             Ok(p) => p,
             Err(e) => {
                 debug!(
-                    "[supervisor] match {} 解析 match_event 失败: {}",
+                    "[supervisor] match {} 转换事件数据失败: {}",
                     match_id, e
                 );
                 continue;
@@ -120,7 +140,7 @@ pub async fn run_supervisor(match_id: Uuid, ws_port: i32, match_service: Arc<dyn
 
         // 推进 SoloState 并落库事件（落库用原始 data，保留引擎原文）。
         let (event_type, game_time_ms) = advance_state(&mut state, &payload);
-        let _ = match_service
+        if let Ok(match_event) = match_service
             .append_event_internal(
                 match_id,
                 MatchEventInput {
@@ -130,7 +150,11 @@ pub async fn run_supervisor(match_id: Uuid, ws_port: i32, match_service: Arc<dyn
                     game_time_ms,
                 },
             )
-            .await;
+            .await
+        {
+            // 广播给 WS 观众
+            let _ = broadcaster_tx.send(SpectatorMessage::Event(match_event));
+        }
 
         if decided {
             continue;
@@ -154,6 +178,16 @@ pub async fn run_supervisor(match_id: Uuid, ws_port: i32, match_service: Arc<dyn
                 }
             }
         }
+    }
+
+    // 广播结束消息给所有观众
+    let _ = broadcaster_tx.send(SpectatorMessage::Close {
+        reason: "match supervisor finished".to_string(),
+    });
+
+    {
+        let mut lock = get_broadcasters().lock().unwrap();
+        lock.remove(&match_id);
     }
 
     info!("[supervisor] match {} supervisor 结束", match_id);

@@ -15,11 +15,11 @@
 ### 1. 本地/云端服务分层与接口迁移
 
 #### 客户端 (Client)
-- [ ] **接口类型重构与合并**：建立 `services/types.ts` 统一存放前端与 Axum 接口共享的数据类型。
-- [ ] **实现 Local 与 Cloud 服务**：创建 `TauriLocalService`（调用本地 Tauri 进程）与 `CloudServiceImpl`（通过 Fetch 访问云端服务器），拆分原有混合接口。
-- [ ] **完成 ServiceProvider 单例**：实现 `ServiceProvider` 提供 `services.local` 与 `services.cloud` 的动态路由。
-- [ ] **Vue 组件业务层迁移**：将所有页面中调用原有 backend 客户端的代码切换到 `services` 下的对应服务接口。
-- [ ] **移除冗余老代码**：删除 `tauriBackend.ts`、`webBackend.ts` 和 `cloudApi.ts` 等废弃旧文件。
+- [x] **接口类型重构与合并**：建立 `services/types.ts` 统一存放前端与 Axum 接口共享的数据类型。
+- [x] **实现 Local 与 Cloud 服务**：创建 `TauriLocalService`（调用本地 Tauri 进程）与 `CloudServiceImpl`（通过 Fetch 访问云端服务器），拆分原有混合接口。
+- [x] **完成 ServiceProvider 单例**：实现 `ServiceProvider` 提供 `services.local` 与 `services.cloud` 的动态路由。
+- [x] **Vue 组件业务层迁移**：将所有页面中调用原有 backend 客户端的代码切换到 `services` 下的对应服务接口。
+- [x] **移除冗余老代码**：已删除 `tauriBackend.ts`、`webBackend.ts`；待完成 `cloudApi.ts` 的迁移与清理。
 
 ---
 

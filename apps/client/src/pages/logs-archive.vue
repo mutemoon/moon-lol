@@ -6,7 +6,10 @@ meta:
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
-import { matchesApi, BASE, type Match } from "@/services/cloudApi";
+import { services } from "@/services/provider";
+import type { Match } from "@/services/types";
+
+const BASE = import.meta.env.VITE_BASE_URL || 'http://localhost:3000';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -53,7 +56,7 @@ function expireIn(iso: string | null): string {
 
 async function refresh() {
   try {
-    matches.value = await matchesApi.listMine();
+    matches.value = await services.cloud.listMyMatches();
   } catch (e) {
     matches.value = [];
   } finally {

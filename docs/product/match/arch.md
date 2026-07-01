@@ -22,7 +22,7 @@
 ### 1. 房间生命周期与进程调度
 
 - **`room_service.rs`**: 负责房间大厅加入、邀请码验证与阵营槽位分配。
-- **开始对局进程调度**: 房主点击开局后，`RoomService` 调用 `MatchService`。`MatchService` 从端口池动态获取可用端口，并通过 Rust `std::process::Command` 启动一个独立的 Bevy 引擎子进程，将快照与条件参数传递给 Bevy。
+- **开始对局进程调度**: 房主点击开局后，`RoomService` 调用 `LocalGameService::start`。进程托管（端口池分配 + spawn + 进程表）由共享 crate `lol_game_process_manager` 承担，spawn 命令构建复用 `lol_client::launch`；本层在其上叠加 match 记录、状态机与 supervisor。详见 [游戏进程托管](../game-host/)。
 - 参见：[room_service.rs](/crates/lol_web_server/src/service/room_service.rs) 与 [match_service.rs](/crates/lol_web_server/src/service/match_service.rs)
 
 ### 2. Rank 匹配逻辑
@@ -39,18 +39,20 @@
 - **SOLO 规则**：先达成任一即胜——拿一血 / 推掉对方一塔 / 补刀满 100；若游戏超过 15 分钟仍未分胜负，则按补刀数判定胜负（多者胜，相等为平局）。"先到先得"由事件到达顺序天然保证。
 - 参见：[solo_rules.rs](/crates/lol_web_server/src/domain/solo_rules.rs)、[match_supervisor.rs](/crates/lol_web_server/src/service/match_supervisor.rs)、[match_events.rs](/crates/lol_core/src/match_events.rs)
 
-### 4. WS 观战反向代理与操作流
+### 4. WS 观战事件流与操作流同步
 
-- **WebSocket 代理**: 前端在观战或调试时连接 Axum 暴露的统一 WS 端点 `/api/ws/:match_id`。Axum 后端解析 Token 并校验权限后，通过网络中继将 WS 连接透明代理转发到 Bevy 子进程的具体运行端口。
-- **操作流同步**: Bevy 对局每 tick 将产生的操作流事件写入 PostgreSQL 并通过 WS 广播。前端通过 `GET /api/matches/:id/events?from_seq=<last_seq+1>` 增量轮询或监听中继 WS 实时渲染。
-- 参见：[handlers.rs](/crates/lol_web_server/src/handlers.rs) (WS 代理入口)
+- **WebSocket 观战订阅**: 前端在观战或回放时，连接 Axum 暴露的 WS 端点 `/api/matches/:id/events/ws?token=<jwt_token>`。Axum 后端校验 Token 与权限后，返回与该对局关联的内存广播通道（由对局 Match Supervisor 在拉起 Bevy 子进程后自动创建并管理会话）。
+- **增量防丢包同步**: 客户端建立 WebSocket 链接后，Axum 处理器首先通过数据库读取从 `from_seq` 开始的所有历史事件，然后接入实时广播流并根据 `seq` 进行去重过滤，以推送给客户端完整的操作流事件包。
+- 参见：[match_.rs](/crates/lol_web_server/src/handlers/match_.rs) (WS 观战订阅实现)
 
 ---
 
 ## 三、前端模块与接口对接
 
 - **`/rooms` & `/rooms/:id`**: 房间大厅、邀请码弹窗与多人编排面板。展示阵营约束、用户身份（房主/普通成员/观众），支持槽位占位与修改。
-- **`/observe/:id`**: 观战面板。整合了事件流时间线，左侧对比阵营，下部为重放渲染容器：Web 端接入 Bevy 公共 `lol_render` 的 WebGPU/WASM 画布，实现对操作流的本地实时重构渲染；Desktop 端直接起游戏进程渲染，不走画布。
+- **`/observe/:id`**: 观战面板。整合了事件流时间线，左侧对比阵营，下部为重放渲染容器，使用统一的 `SpectatorDriver` 驱动底层渲染：
+  - **Web 端** (`WasmSpectatorDriver`)：接入 Canvas 中的 Bevy WASM 画布。JS 缓存全部操作流事件，当用户拖拉时间轴 Seek 后退时，JS 重置 WASM Canvas，并从第 0 帧到目标帧一次性批量注入事件（Fast-forward），快速还原状态。
+  - **Desktop 端** (`LocalSpectatorDriver`)：直接调本地 Tauri 命令控制游戏子进程，不走画布。
 - **`/rank` & `/leaderboard`**: 选手天梯报名面板与积分榜。表格展示 ELO 总排行与日榜增量，并以奖牌图标标识前三名。
 - **`/logs-archive`**: 近 24 小时对局日志归档页。支持打包并下载 SQLite DB 日志文件，由 `/debug` 组件载入还原分析。
 - 参见：`apps/client` 下的 Vue 页面结构。

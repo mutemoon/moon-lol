@@ -9,12 +9,14 @@ import { useLocale } from "@/composables/useLocale";
 import { useSettingsTab } from "@/composables/useSettingsTab";
 import { useProviders } from "@/stores/providersStore";
 import { providerPresets, PLATFORM_PROVIDER_ID } from "@/config/providerPresets";
-import type { ApiFormat, ProviderCategory } from "@/services/types";
+import type { ApiFormat, ProviderCategory, ModelConfig } from "@/services/types";
+import { services } from "@/services/provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { MoonIcon, RefreshCwIcon, PlusIcon, TrashIcon, PackageIcon } from "@lucide/vue";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { MoonIcon, RefreshCwIcon, PlusIcon, TrashIcon, PackageIcon, PlayIcon, Loader2Icon, PencilIcon } from "@lucide/vue";
 
 const { t, locale, availableLocales } = useLocale();
 const { currentTab } = useSettingsTab();
@@ -45,7 +47,7 @@ interface ProviderForm {
   base_url: string;
   api_key: string;
   api_format: ApiFormat;
-  models: string[];
+  models: ModelConfig[];
   enabled: boolean;
   website_url: string;
   api_key_url: string;
@@ -104,7 +106,7 @@ function applyPreset(choice: string) {
     preset_type: preset.presetType,
     base_url: preset.baseUrl,
     api_format: preset.apiFormat,
-    models: [...preset.defaultModels],
+    models: preset.defaultModels.map((name) => ({ name, max_tokens: 200000 })),
     website_url: preset.websiteUrl ?? "",
     api_key_url: preset.apiKeyUrl ?? "",
     icon: preset.icon ?? "",
@@ -152,12 +154,83 @@ function loadForm(key: string) {
   hasApiKey.value = !!p.has_api_key;
 }
 
-function addModel() {
-  form.value.models.push("");
+const showModelEditDialog = ref(false);
+const editingModelIndex = ref<number | null>(null);
+const modelFormName = ref("");
+const modelFormMaxTokens = ref(200000);
+
+function openAddModelDialog() {
+  editingModelIndex.value = null;
+  modelFormName.value = "";
+  modelFormMaxTokens.value = 200000;
+  showModelEditDialog.value = true;
+}
+
+function openEditModelDialog(i: number) {
+  const m = form.value.models[i];
+  if (!m) return;
+  editingModelIndex.value = i;
+  modelFormName.value = m.name;
+  modelFormMaxTokens.value = m.max_tokens;
+  showModelEditDialog.value = true;
+}
+
+function saveModelConfig() {
+  const name = modelFormName.value.trim();
+  if (!name) return;
+  const max_tokens = Number(modelFormMaxTokens.value) || 200000;
+
+  if (editingModelIndex.value === null) {
+    form.value.models.push({ name, max_tokens });
+  } else {
+    form.value.models[editingModelIndex.value] = { name, max_tokens };
+  }
+  showModelEditDialog.value = false;
 }
 
 function removeModel(i: number) {
   form.value.models.splice(i, 1);
+}
+
+const testingIndex = ref<number | null>(null);
+const showTestResultDialog = ref(false);
+const testResult = ref<{ success: boolean; message: string } | null>(null);
+
+async function testModel(i: number) {
+  providerError.value = "";
+  const modelCfg = form.value.models[i];
+  if (!modelCfg || !modelCfg.name?.trim()) {
+    providerError.value = "模型名称不能为空";
+    return;
+  }
+  if (!form.value.base_url.trim()) {
+    providerError.value = "供应商基础地址 Base URL 不能为空";
+    return;
+  }
+
+  testingIndex.value = i;
+  testResult.value = null;
+
+  try {
+    const res = await services.cloud.testModelProvider({
+      provider_id: form.value.id,
+      base_url: form.value.base_url.trim(),
+      api_key: form.value.api_key,
+      api_format: form.value.api_format,
+      model: modelCfg.name.trim(),
+      max_tokens: modelCfg.max_tokens,
+    });
+    testResult.value = res;
+    showTestResultDialog.value = true;
+  } catch (e: any) {
+    testResult.value = {
+      success: false,
+      message: typeof e === "string" ? e : e.message || String(e),
+    };
+    showTestResultDialog.value = true;
+  } finally {
+    testingIndex.value = null;
+  }
 }
 
 async function saveProvider() {
@@ -175,7 +248,7 @@ async function saveProvider() {
       base_url: form.value.base_url.trim(),
       api_key: form.value.api_key,
       api_format: form.value.api_format,
-      models: form.value.models.map((m) => m.trim()).filter(Boolean),
+      models: form.value.models.filter((m) => m.name.trim() !== ""),
       enabled: form.value.enabled,
       website_url: form.value.website_url,
       api_key_url: form.value.api_key_url,
@@ -209,8 +282,14 @@ async function refreshModels() {
     const remote: string[] = (data?.data ?? data?.models ?? [])
       .map((m: any) => (typeof m === "string" ? m : m?.id))
       .filter(Boolean);
-    const merged = Array.from(new Set([...form.value.models, ...remote]));
-    form.value.models = merged;
+    
+    // Merge existing models with remote models (dedup by name)
+    const existingNames = new Set(form.value.models.map(m => m.name));
+    for (const modelName of remote) {
+      if (!existingNames.has(modelName)) {
+        form.value.models.push({ name: modelName, max_tokens: 200000 });
+      }
+    }
   } catch (e: any) {
     providerError.value = t("settings.providers.refreshFailed", { error: e.message || e });
   }
@@ -402,14 +481,39 @@ onMounted(() => {
                   <div>
                     <label class="text-muted-foreground mb-1 block text-[13px]">{{ t("settings.providers.modelsLabel") }}</label>
                     <div class="flex flex-col gap-1.5">
-                      <div v-for="(_, i) in form.models" :key="i" class="flex items-center gap-1.5">
-                        <Input v-model="form.models[i]" :placeholder="t('settings.providers.modelPlaceholder')" class="bg-muted/40 border-border h-8 font-mono text-[13px]" />
-                        <Button variant="ghost" size="icon" class="size-8 shrink-0" @click="removeModel(i)">
+                      <div v-for="(modelCfg, i) in form.models" :key="i" class="flex items-center gap-1.5">
+                        <Input
+                          :model-value="`${modelCfg.name} (${modelCfg.max_tokens} max tokens)`"
+                          readonly
+                          class="bg-muted/30 border-border h-8 font-mono text-[13px] cursor-pointer hover:bg-muted/50 transition-colors"
+                          @click="openEditModelDialog(i)"
+                        />
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          class="size-8 shrink-0 text-muted-foreground hover:text-foreground"
+                          title="测试模型连接"
+                          :disabled="testingIndex !== null"
+                          @click="testModel(i)"
+                        >
+                          <Loader2Icon v-if="testingIndex === i" class="size-3.5 animate-spin text-primary" />
+                          <PlayIcon v-else class="size-3.5" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          class="size-8 shrink-0 text-muted-foreground hover:text-foreground"
+                          title="编辑模型参数"
+                          @click="openEditModelDialog(i)"
+                        >
+                          <PencilIcon class="size-3.5" />
+                        </Button>
+                        <Button variant="ghost" size="icon" class="size-8 shrink-0 text-destructive hover:bg-destructive/10" @click="removeModel(i)">
                           <TrashIcon class="size-3.5" />
                         </Button>
                       </div>
                     </div>
-                    <Button variant="secondary" class="mt-1.5 h-8 gap-1 text-[13px]" @click="addModel">
+                    <Button variant="secondary" class="mt-1.5 h-8 gap-1 text-[13px]" @click="openAddModelDialog">
                       <PlusIcon class="size-3.5" /> {{ t("settings.providers.addModel") }}
                     </Button>
                   </div>
@@ -433,6 +537,77 @@ onMounted(() => {
         </div>
       </div>
     </main>
+    
+    <!-- 连接测试结果对话框 -->
+    <Dialog :open="showTestResultDialog" @update:open="(v) => (showTestResultDialog = v)">
+      <DialogContent class="max-w-md border border-border bg-background text-foreground shadow-lg">
+        <DialogHeader>
+          <DialogTitle class="flex items-center gap-2 text-base font-semibold">
+            <span v-if="testResult?.success" class="flex size-5 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-500 text-xs">✓</span>
+            <span v-else class="flex size-5 items-center justify-center rounded-full bg-destructive/15 text-destructive text-xs">✗</span>
+            {{ testResult?.success ? "连接测试成功" : "连接测试失败" }}
+          </DialogTitle>
+          <DialogDescription class="text-muted-foreground text-xs mt-1.5">
+            {{ testResult?.success ? "模型成功回复了消息：" : "测试未成功，详细错误信息如下：" }}
+          </DialogDescription>
+        </DialogHeader>
+
+        <div class="mt-4 rounded-md border border-border bg-muted/40 p-3">
+          <p class="font-mono text-[13px] whitespace-pre-wrap leading-relaxed max-h-[200px] overflow-y-auto break-all">
+            {{ testResult?.message }}
+          </p>
+        </div>
+
+        <DialogFooter class="mt-6 flex justify-end">
+          <Button class="h-8 text-[13px]" @click="showTestResultDialog = false">
+            确定
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+    
+    <!-- 模型编辑/新增参数对话框 -->
+    <Dialog :open="showModelEditDialog" @update:open="(v) => (showModelEditDialog = v)">
+      <DialogContent class="max-w-sm border border-border bg-background text-foreground shadow-lg">
+        <DialogHeader>
+          <DialogTitle class="text-base font-semibold">
+            {{ editingModelIndex === null ? "添加模型" : "编辑模型" }}
+          </DialogTitle>
+          <DialogDescription class="text-muted-foreground text-xs mt-1">
+            请配置该模型的 ID/名称以及最大上下文 Token 限制。
+          </DialogDescription>
+        </DialogHeader>
+
+        <div class="mt-4 flex flex-col gap-4">
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[13px] font-medium text-muted-foreground">模型 ID</label>
+            <Input
+              v-model="modelFormName"
+              placeholder="例如: gpt-4o, claude-3-5-sonnet"
+              class="bg-muted/40 border-border h-9 text-[13px] font-mono"
+            />
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[13px] font-medium text-muted-foreground">最大上下文 Token 数 (max_tokens)</label>
+            <Input
+              v-model="modelFormMaxTokens"
+              type="number"
+              placeholder="例如: 200000"
+              class="bg-muted/40 border-border h-9 text-[13px]"
+            />
+          </div>
+        </div>
+
+        <DialogFooter class="mt-6 flex justify-end gap-2">
+          <Button variant="ghost" class="h-8 text-[13px]" @click="showModelEditDialog = false">
+            取消
+          </Button>
+          <Button class="h-8 text-[13px]" :disabled="!modelFormName.trim()" @click="saveModelConfig">
+            确定
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   </div>
 </template>
 

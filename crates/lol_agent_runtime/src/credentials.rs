@@ -22,6 +22,13 @@ pub struct AgentConfig {
     pub provider_id: Option<String>,
 }
 
+/// 模型具体配置（模型 ID/名称与最大上下文 token 数）。
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct ModelConfig {
+    pub name: String,
+    pub max_tokens: u32,
+}
+
 /// 平台网关 env 凭证（无供应商时的回退）。
 #[derive(Debug, Clone)]
 pub struct PlatformEnv {
@@ -48,6 +55,7 @@ pub struct ProviderCredentials {
     pub api_key: String,
     pub base_url: String,
     pub api_format: String,
+    pub max_tokens: Option<u32>,
 }
 
 /// 解析后的单 agent LLM 凭证。
@@ -56,6 +64,7 @@ pub struct ResolvedCredentials {
     pub api_key: String,
     pub base_url: String,
     pub model: String,
+    pub max_tokens: Option<u32>,
 }
 
 /// 纯解析：有供应商且 api_key 非空走供应商，否则走平台 env；env api_key 空返回 None。
@@ -73,6 +82,7 @@ pub fn resolve_credentials(
             api_key: p.api_key,
             base_url: p.base_url,
             model,
+            max_tokens: p.max_tokens,
         }),
         _ => {
             if env.api_key.is_empty() {
@@ -82,6 +92,7 @@ pub fn resolve_credentials(
                 api_key: env.api_key.clone(),
                 base_url: env.base_url.clone(),
                 model,
+                max_tokens: None,
             })
         }
     }
@@ -116,11 +127,13 @@ mod tests {
             api_key: "sk-prov".into(),
             base_url: "https://prov".into(),
             api_format: "anthropic".into(),
+            max_tokens: Some(4096),
         };
         let r = resolve_credentials(&agent(Some("m"), Some("pid")), Some(p), &env()).unwrap();
         assert_eq!(r.api_key, "sk-prov");
         assert_eq!(r.base_url, "https://prov");
         assert_eq!(r.model, "m");
+        assert_eq!(r.max_tokens, Some(4096));
     }
 
     #[test]
@@ -129,6 +142,7 @@ mod tests {
             api_key: "  ".into(),
             base_url: "https://prov".into(),
             api_format: "anthropic".into(),
+            max_tokens: None,
         };
         let r = resolve_credentials(&agent(None, Some("pid")), Some(p), &env()).unwrap();
         assert_eq!(r.api_key, "env-key");

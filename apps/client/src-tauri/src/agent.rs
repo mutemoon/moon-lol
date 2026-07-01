@@ -1,6 +1,5 @@
-use std::fs;
-use std::path::PathBuf;
-use std::sync::{Arc, Mutex};
+use std::pin::Pin;
+use std::sync::{Arc, Weak};
 
 use async_trait::async_trait;
 use chrono::Local;
@@ -8,13 +7,11 @@ use lol_agent_runtime::{
     resolve_credentials, run_orchestrator, AgentConfig, AgentRunResult, CredentialResolver,
     OrchestratorSink, PlatformEnv, ProviderCredentials, ResolvedCredentials,
 };
-use lol_client::GameClient;
+use lol_client::{start_ws_client, GameClient};
+use lol_game_process_manager::{AgentRunner, GameProcessManager};
 use rig::completion::Message;
 use serde_json::Value;
 use tauri::{Emitter, Manager};
-
-use crate::state::AppState;
-use crate::ws::WsSession;
 
 #[derive(serde::Serialize, serde::Deserialize, Clone, Debug)]
 pub struct SavedAgentHistory {
@@ -53,18 +50,26 @@ impl CredentialResolver for DesktopCredentialResolver {
             .provider_id
             .as_deref()
             .and_then(|pid| self.providers.iter().find(|p| p.id == pid));
-        let creds = provider.map(|p| ProviderCredentials {
-            api_key: p.api_key.clone(),
-            base_url: p.base_url.clone(),
-            api_format: p.api_format.clone(),
+        let creds = provider.map(|p| {
+            let max_tokens = agent.model.as_deref().and_then(|m| {
+                p.models.iter().find(|model| model.name == m).map(|model| model.max_tokens)
+            });
+            ProviderCredentials {
+                api_key: p.api_key.clone(),
+                base_url: p.base_url.clone(),
+                api_format: p.api_format.clone(),
+                max_tokens,
+            }
         });
         resolve_credentials(agent, creds, env)
     }
 }
 
-/// 桌面端副作用出口：emit 对话历史 / 终结事件、写盘历史、停游戏进程。
+/// 桌面端副作用出口：emit 对话历史 / 终结事件、写盘历史、停游戏进程（按 port 委托 manager）。
 pub struct DesktopSink {
     app: tauri::AppHandle,
+    port: i32,
+    weak: Weak<GameProcessManager>,
     start_time_str: String,
     system_prompt: String,
 }
@@ -107,259 +112,73 @@ impl OrchestratorSink for DesktopSink {
             AgentFinishedPayload { minion_kills, gold },
         );
 
-        // 保存本局所有的 Agent 对话历史记录
-        self.save_histories(results, last_game_time);
-
-        // 终结并关闭游戏
-        if let Some(state) = self.app.try_state::<Mutex<AppState>>() {
-            let _ = crate::process::stop_game(&state);
-        }
-    }
-
-    async fn is_running(&self) -> bool {
-        self.app
-            .try_state::<Mutex<AppState>>()
-            .and_then(|m| m.lock().ok().map(|s| s.ws.is_some()))
-            .unwrap_or(false)
-    }
-}
-
-impl DesktopSink {
-    fn save_histories(&self, results: &[AgentRunResult], game_duration: f64) {
-        let home = self.app.path().home_dir().unwrap_or_default();
-        let session_dir = home
-            .join(".moon-lol")
-            .join("history")
-            .join(&self.start_time_str);
-
-        if let Err(e) = fs::create_dir_all(&session_dir) {
-            println!("[Agent Orchestrator] 创建历史目录失败: {:?}", e);
-            return;
-        }
-
-        for r in results {
-            let saved = SavedAgentHistory {
+        let histories: Vec<SavedAgentHistory> = results
+            .iter()
+            .map(|r| SavedAgentHistory {
                 agent_id: r.agent.id.clone(),
                 champion: r.agent.champion.clone(),
                 team: r.agent.team.clone(),
                 prompt: r.agent.prompt.clone(),
                 system_prompt: self.system_prompt.clone(),
                 history: r.history.clone(),
-                game_duration,
+                game_duration: last_game_time,
                 datetime: self.start_time_str.clone(),
-            };
+            })
+            .collect();
 
-            let json_path = session_dir.join(format!("{}.json", r.agent.id));
-            let json_content = match serde_json::to_string_pretty(&saved) {
-                Ok(content) => content,
-                Err(e) => {
-                    println!("[Agent Orchestrator] 序列化历史记录失败: {:?}", e);
-                    continue;
-                }
-            };
+        let _ = self.app.emit("match-history-ready", histories);
 
-            if let Err(e) = fs::write(&json_path, json_content) {
-                println!("[Agent Orchestrator] 写入历史记录文件失败: {:?}", e);
-            }
+        // 终结并关闭游戏（按 port 委托 manager）
+        if let Some(m) = self.weak.upgrade() {
+            let _ = m.stop_by_port(self.port).await;
         }
-        println!(
-            "[Agent Orchestrator] 成功保存对局历史对话到目录: {:?}",
-            session_dir
-        );
+    }
+
+    async fn is_running(&self) -> bool {
+        let Some(m) = self.weak.upgrade() else {
+            return false;
+        };
+        m.find_by_port(self.port).await.is_ok()
     }
 }
 
-/// 从 `~/.moon-lol/providers.json` 读取供应商列表（失败返回空）。
-fn load_providers(app: &tauri::AppHandle) -> Vec<crate::ModelProvider> {
-    let home = app.path().home_dir().unwrap_or_default();
-    let path = home.join(".moon-lol").join("providers.json");
-    let Ok(content) = fs::read_to_string(&path) else {
-        return Vec::new();
-    };
-    serde_json::from_str(&content).unwrap_or_default()
-}
-
-/// 从 `~/.moon-lol/games/{scene}.json` 读取场景 agent 配置；任一环节缺失返回空。
-fn load_scene_agents(app: &tauri::AppHandle) -> Vec<AgentConfig> {
-    let Some(name) = app
-        .try_state::<Mutex<AppState>>()
-        .and_then(|m| m.lock().ok().and_then(|s| s.active_scene.clone()))
-    else {
-        return Vec::new();
-    };
-
-    let home = app.path().home_dir().unwrap_or_default();
-    let json_path = home
-        .join(".moon-lol")
-        .join("games")
-        .join(format!("{}.json", name));
-    let Ok(content) = fs::read_to_string(&json_path) else {
-        return Vec::new();
-    };
-    serde_json::from_str(&content).unwrap_or_default()
-}
-
-/// 后台协调器循环：在 WARMUP_DURATION 时暂停游戏，运行 Agent 决策，继续游戏 1s，周而复始，在 GAME_END_TIME 时终止并统计。
+/// 构造桌面端 AI 决策环启动器（注入 GameProcessManager）。
 ///
-/// 纯编排逻辑由 `lol_agent_runtime::run_orchestrator` 承载，本函数仅负责桌面端的
-/// 凭证解析、副作用出口与场景配置加载。
-pub async fn run_agent_orchestrator(app: tauri::AppHandle, ws: WsSession) {
-    println!("[Agent Orchestrator] 启动 AI Agent 后台生命周期循环");
+/// runner 闭包在 start 时由 manager 调用：自建一条独立 WS（不转发事件，避免与调试会话重复），
+/// 解析本地 providers.json 凭证，跑 `run_orchestrator`；sink 通过 weak manager 引用在终结时停进程。
+pub fn make_desktop_runner(app: tauri::AppHandle, weak: Weak<GameProcessManager>) -> AgentRunner {
+    Arc::new(move |port: i32, agents: Vec<AgentConfig>| {
+        let app = app.clone();
+        let weak = weak.clone();
+        Box::pin(async move {
+            println!("[Agent Orchestrator] 启动 AI Agent 后台生命周期循环 port={port}");
 
-    let agents = load_scene_agents(&app);
-    if agents.is_empty() {
-        println!("[Agent Orchestrator] 未检测到自定义场景配置代理，拒绝开启 AI Agent 决策环");
-        return;
-    }
-    println!(
-        "[Agent Orchestrator] 成功加载自定义场景配置代理: {:?}",
-        agents
-    );
-
-    let env = PlatformEnv::from_env();
-    let resolver = Arc::new(DesktopCredentialResolver {
-        providers: load_providers(&app),
-    });
-    let start_time_str = Local::now().format("%Y-%m-%d_%H-%M-%S").to_string();
-    let sink = Arc::new(DesktopSink {
-        app: app.clone(),
-        start_time_str,
-        system_prompt: String::new(),
-    });
-    let client = GameClient::new(ws);
-
-    run_orchestrator(client, agents, resolver, env, sink).await;
-}
-
-#[derive(serde::Serialize, Clone, Debug)]
-pub struct AgentSummary {
-    pub agent_id: String,
-    pub champion: String,
-    pub team: String,
-}
-
-#[derive(serde::Serialize, Clone, Debug)]
-pub struct GameHistorySummary {
-    pub datetime: String,
-    pub duration: f64,
-    pub agents: Vec<AgentSummary>,
-}
-
-fn read_agents_from_dir(dir_path: &PathBuf) -> Option<(Vec<AgentSummary>, f64)> {
-    let files = fs::read_dir(dir_path).ok()?;
-    let mut agents = Vec::new();
-    let mut game_duration = 0.0;
-
-    for sub_entry in files.flatten() {
-        let sub_path = sub_entry.path();
-        if !sub_path.is_file() || !sub_path.extension().is_some_and(|ext| ext == "json") {
-            continue;
-        }
-        let content = fs::read_to_string(&sub_path).ok()?;
-        let parsed: SavedAgentHistory = serde_json::from_str(&content).ok()?;
-        agents.push(AgentSummary {
-            agent_id: parsed.agent_id,
-            champion: parsed.champion,
-            team: parsed.team,
-        });
-        game_duration = parsed.game_duration;
-    }
-
-    if agents.is_empty() {
-        return None;
-    }
-    Some((agents, game_duration))
-}
-
-#[tauri::command]
-pub fn list_game_histories(
-    app: tauri::AppHandle,
-) -> Result<Vec<GameHistorySummary>, crate::error::AppError> {
-    let home = app
-        .path()
-        .home_dir()
-        .map_err(|e| crate::error::AppError::Generic(e.to_string()))?;
-    let history_dir = home.join(".moon-lol").join("history");
-    if !history_dir.exists() {
-        return Ok(Vec::new());
-    }
-
-    let mut summaries = Vec::new();
-    let entries =
-        fs::read_dir(history_dir).map_err(|e| crate::error::AppError::Generic(e.to_string()))?;
-
-    for entry in entries.flatten() {
-        let path = entry.path();
-        let Some(datetime_str) = path.file_name().and_then(|n| n.to_str()) else {
-            continue;
-        };
-
-        if !path.is_dir() {
-            continue;
-        }
-
-        let Some((agents, game_duration)) = read_agents_from_dir(&path) else {
-            continue;
-        };
-
-        summaries.push(GameHistorySummary {
-            datetime: datetime_str.to_string(),
-            duration: game_duration,
-            agents,
-        });
-    }
-
-    summaries.sort_by(|a, b| b.datetime.cmp(&a.datetime));
-    Ok(summaries)
-}
-
-#[tauri::command]
-pub fn get_game_history_detail(
-    app: tauri::AppHandle,
-    datetime: String,
-) -> Result<Vec<SavedAgentHistory>, crate::error::AppError> {
-    let home = app
-        .path()
-        .home_dir()
-        .map_err(|e| crate::error::AppError::Generic(e.to_string()))?;
-    let session_dir = home.join(".moon-lol").join("history").join(datetime);
-    if !session_dir.exists() {
-        return Err(crate::error::AppError::Generic(
-            "指定的游戏历史记录不存在".to_string(),
-        ));
-    }
-
-    let mut details = Vec::new();
-    let entries =
-        fs::read_dir(session_dir).map_err(|e| crate::error::AppError::Generic(e.to_string()))?;
-
-    for entry in entries.flatten() {
-        let path = entry.path();
-        if path.is_file() && path.extension().is_some_and(|ext| ext == "json") {
-            if let Ok(content) = fs::read_to_string(path) {
-                if let Ok(parsed) = serde_json::from_str::<SavedAgentHistory>(&content) {
-                    details.push(parsed);
+            let ws = match start_ws_client(port as u16, None).await {
+                Ok(ws) => ws,
+                Err(e) => {
+                    println!("[Agent Orchestrator] 连接 Bevy WS 失败: {e}");
+                    return;
                 }
-            }
-        }
-    }
+            };
 
-    Ok(details)
-}
+            let env = PlatformEnv::from_env();
+            let providers = if let Some(state) = app.try_state::<crate::state::AppState>() {
+                state.model_providers.lock().unwrap().clone()
+            } else {
+                Vec::new()
+            };
+            let resolver = Arc::new(DesktopCredentialResolver { providers });
+            let start_time_str = Local::now().format("%Y-%m-%d_%H-%M-%S").to_string();
+            let sink = Arc::new(DesktopSink {
+                app: app.clone(),
+                port,
+                weak,
+                start_time_str,
+                system_prompt: String::new(),
+            });
+            let client = GameClient::new(ws);
 
-#[tauri::command]
-pub fn delete_game_history(
-    app: tauri::AppHandle,
-    datetime: String,
-) -> Result<(), crate::error::AppError> {
-    let home = app
-        .path()
-        .home_dir()
-        .map_err(|e| crate::error::AppError::Generic(e.to_string()))?;
-    let session_dir = home.join(".moon-lol").join("history").join(datetime);
-    if session_dir.exists() {
-        fs::remove_dir_all(session_dir)
-            .map_err(|e| crate::error::AppError::Generic(e.to_string()))?;
-    }
-    Ok(())
+            run_orchestrator(client, agents, resolver, env, sink).await;
+        }) as Pin<Box<dyn std::future::Future<Output = ()> + Send>>
+    })
 }

@@ -350,7 +350,6 @@ const en = {
     connected: "Connected",
     disconnected: "Disconnected",
     currentHero: "Debugging Hero",
-    commandBed: "Commandbed",
     stopMatch: "Stop Match",
     switchLabel: "Toggles",
     godMode: "God Mode",
@@ -412,48 +411,6 @@ const en = {
       insertAiBtn: "➕ Insert AI Regular Speech",
       observerPanel: "Real-time Component Rendering Observer Panel",
       loadingPlaceholder: "Waiting to reload Mock dialogue history stream...",
-    },
-    command: {
-      title: "Bash Command Line Debugger",
-      subtitle: "Direct BashTool Sandbox & Command-line Bed",
-      currentEnv: "Current Environment",
-      backBtn: "Back to Debug Page",
-      presetTitle: "Built-in Preset Commands",
-      runBtn: "Run Directly",
-      customTitle: "Custom Command Execution",
-      executing: "Executing...",
-      runCommandBtn: "Run Command",
-      clearConsoleBtn: "Clear Console",
-      executingHint: "Invoking Bash command test to Tauri, please wait...",
-      noRecord: "No console execution records",
-      runHint: "Enter command above or select preset on the left, click \"Run Command\" to test Bash terminal connection.",
-      systemException: "System Exception",
-      presets: {
-        help: {
-          name: "Command Help",
-          description: "View complete command-line help for lol_cli",
-        },
-        observe: {
-          name: "Observe",
-          description: "Get current status of specified hero and nearby minions",
-        },
-        move: {
-          name: "Move",
-          description: "Move the hero to the initial minion meeting point (2649, 12875)",
-        },
-        attack: {
-          name: "Attack",
-          description: "Attack the specified entity (e.g. nearby enemy minions)",
-        },
-        skill: {
-          name: "Cast Skill",
-          description: "Cast Q skill (Index 0) at (2750, 12320)",
-        },
-        stop: {
-          name: "Stop",
-          description: "Stop moving, attacking or casting and stand in place",
-        },
-      },
     },
   },
 

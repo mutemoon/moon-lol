@@ -1,5 +1,5 @@
 import { ref, computed, onUnmounted, provide, inject, watch } from "vue";
-import { backendClient } from "../services/backend";
+import { services } from "../services/provider";
 
 export const LOG_CONTEXT_KEY = Symbol("log");
 
@@ -65,7 +65,8 @@ function processLogRows(rows: LogRow[]): LogEntry[] {
   return newLogs;
 }
 
-export function createLogContext() {
+export function createLogContext(initialGameId?: string) {
+  const activeGameId = ref<string | null>(initialGameId || null);
   const logs = ref<LogEntry[]>([]);
   const totalLogsCount = ref(0);
   const currentPage = ref(1);
@@ -89,10 +90,11 @@ export function createLogContext() {
   const totalPages = computed(() => Math.ceil(totalLogsCount.value / pageSize.value) || 1);
 
   async function refreshLogMetadata() {
+    if (!activeGameId.value) return;
     try {
       const [ents, cats] = await Promise.all([
-        backendClient.queryLogEntities(),
-        backendClient.queryLogCategories(),
+        services.local.queryLogEntities(activeGameId.value),
+        services.local.queryLogCategories(activeGameId.value),
       ]);
       logEntities.value = ents
         .filter((e) => e.entity_id !== null)
@@ -104,14 +106,16 @@ export function createLogContext() {
   }
 
   async function clearLogsDb() {
+    if (!activeGameId.value) return;
     try {
-      await backendClient.clearLogs();
+      await services.local.clearLogs(activeGameId.value);
     } catch {
       // ignore
     }
   }
 
   async function query(isTimerRefresh = false) {
+    if (!activeGameId.value) return;
     try {
       const backendSearchText = !regexEnabled.value && searchText.value ? searchText.value : null;
 
@@ -122,7 +126,8 @@ export function createLogContext() {
         offset = -1;
       }
 
-      const res = await backendClient.queryLogs({
+      const res = await services.local.queryLogs({
+        gameId: activeGameId.value,
         offset,
         limit: pageSize.value,
         levels: selectedLevels.value.length < 4 ? selectedLevels.value : null,
@@ -176,7 +181,10 @@ export function createLogContext() {
     await Promise.all([refreshLogMetadata(), query(false)]);
   }
 
-  async function start() {
+  async function start(gameId?: string) {
+    if (gameId) {
+      activeGameId.value = gameId;
+    }
     await clearLogsDb();
     logs.value = [];
     logEntities.value = [];
@@ -296,6 +304,7 @@ export function createLogContext() {
   }
 
   const res = {
+    activeGameId,
     logs,
     totalLogsCount,
     currentPage,

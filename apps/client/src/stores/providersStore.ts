@@ -25,10 +25,6 @@ function emptyInput(): ModelProviderInput {
   };
 }
 
-async function invokeTauri<T>(cmd: string, args?: Record<string, unknown>): Promise<T> {
-  const { invoke } = await import("@tauri-apps/api/core");
-  return invoke<T>(cmd, args);
-}
 
 export const useProviders = defineStore("providers", () => {
   const providers = ref<ModelProvider[]>([]);
@@ -37,11 +33,7 @@ export const useProviders = defineStore("providers", () => {
   async function load() {
     loading.value = true;
     try {
-      if (services.isDesktop) {
-        providers.value = await invokeTauri<ModelProvider[]>("get_model_providers");
-      } else {
-        providers.value = await services.cloud.listModelProviders();
-      }
+      providers.value = await services.cloud.listModelProviders();
     } catch (e) {
       console.error("加载模型供应商失败", e);
       providers.value = [];
@@ -50,41 +42,9 @@ export const useProviders = defineStore("providers", () => {
     }
   }
 
-  async function persistDesktop() {
-    if (!services.isDesktop) return;
-    await invokeTauri("set_model_providers", { providers: providers.value });
-  }
 
   /** 创建或更新。返回落库后的供应商。 */
   async function save(input: ModelProviderInput, id?: string): Promise<ModelProvider | undefined> {
-    if (services.isDesktop) {
-      const targetId = id ?? crypto.randomUUID();
-      const idx = providers.value.findIndex((p) => p.id === targetId);
-      const existing = idx >= 0 ? providers.value[idx] : undefined;
-      // 桌面端整存：api_key 空串表示沿用旧值。
-      const record: ModelProvider = {
-        id: targetId,
-        name: input.name,
-        category: input.category,
-        preset_type: input.preset_type,
-        base_url: input.base_url,
-        api_key: input.api_key || existing?.api_key || "",
-        has_api_key: !!(input.api_key || existing?.api_key),
-        api_format: input.api_format,
-        models: [...input.models],
-        enabled: input.enabled,
-        website_url: input.website_url ?? "",
-        api_key_url: input.api_key_url ?? "",
-        icon: input.icon ?? "",
-        icon_color: input.icon_color ?? "",
-        sort_order: input.sort_order,
-      };
-      if (idx >= 0) providers.value[idx] = record;
-      else providers.value.push(record);
-      await persistDesktop();
-      return record;
-    }
-
     if (id) {
       await services.cloud.updateModelProvider(id, input);
       await load();
@@ -96,11 +56,6 @@ export const useProviders = defineStore("providers", () => {
   }
 
   async function remove(id: string) {
-    if (services.isDesktop) {
-      providers.value = providers.value.filter((p) => p.id !== id);
-      await persistDesktop();
-      return;
-    }
     await services.cloud.deleteModelProvider(id);
     providers.value = providers.value.filter((p) => p.id !== id);
   }

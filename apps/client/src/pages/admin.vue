@@ -5,7 +5,8 @@ meta:
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed } from "vue";
-import { adminApi, type AdminMetrics, type Match } from "@/services/cloudApi";
+import { services } from "@/services/provider";
+import type { AdminMetrics, Match } from "@/services/types";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -43,8 +44,8 @@ const aborting = ref(false);
 async function refresh() {
   try {
     const [m, r] = await Promise.all([
-      adminApi.metrics().catch(() => null),
-      adminApi.listRunning().catch(() => [] as Match[]),
+      services.cloud.getAdminMetrics().catch(() => null),
+      services.cloud.listRunningMatches().catch(() => [] as Match[]),
     ]);
     metrics.value = m;
     running.value = r;
@@ -57,7 +58,7 @@ async function confirmAbort() {
   if (!abortTarget.value) return;
   aborting.value = true;
   try {
-    await adminApi.forceAbort(abortTarget.value.id);
+    await services.cloud.forceAbortMatch(abortTarget.value.id);
     abortTarget.value = null;
     await refresh();
   } catch (e: any) {

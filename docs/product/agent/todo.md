@@ -16,7 +16,7 @@ LLM 与 Script 选手的对局运行时已贯通（Script 经 `lol_agent::driver
 - [x] **社区 Fork 功能**：在 `community_service` 中实现了浏览公开选手、Fork 生成自身副本的 API 以及前端一键克隆的交互。
 - [x] **LLM 实时决策流观察**：支持在 `/debug` 中展示 LLM Agent 的 CoT (思考链) 以及观测/动作的实时流。
 - [x] **常用英雄技能框架**：实现了锐雯 (Riven) 和菲奥娜 (Fiora) 的核心战斗与招式机制。
-- [x] **桌面端云优先与冲突解决**：选手以云端为主存储，桌面端在线云优先 + 本地镜像、离线降级；本地与云端差异以 `冲突 / 未同步 / 仅云端` 徽标呈现，冲突态只改本地，同步对话框逐项选择保留哪边（详见第 4 节）。
+- [x] **全量数据上云与离线机制废弃**：将所有选手预设、场景、胜利条件以及大模型供应商 100% 迁移至云端，彻底废弃原有的离线数据落盘、冲突同步与降级逻辑，从而简化架构（未登录/离线状态下发起请求会自动拦截并弹出登录对话框）。对局启动时，仅在本地动态生成 Bevy 场景文件 (`.ron`)。
 
 ---
 
@@ -67,14 +67,14 @@ LLM 与 Script 选手的对局运行时已贯通（Script 经 `lol_agent::driver
 
 ---
 
-### 4. 账号与同步优化 (云优先 + 冲突解决)
+### 4. 账号与同步优化 (全量数据上云与离线同步机制废弃)
 
 #### 客户端 (Client)
-- [x] **桌面端云优先 + 本地镜像**：选手以云端为主存储，桌面端在线时 CRUD 走云端、写后镜像本地缓存，离线降级 Tauri 本地；Web 端始终云端。（`backend.ts` 共享 `cloudHeroPresetHandlers` + `mirrorHeroPresetToLocal`，桌面在线分支优先云端、失败回退本地）
+- [x] **全量数据上云**：所有选手数据 100% 存在云端，桌面端本地不落盘。前端 CRUD 直连云端服务，废弃了原有的本地落盘镜像逻辑与降级机制。
 - [x] **去除静态默认选手**：移除 `BUILTIN_HERO_PRESETS` 演示假数据，列表为空即真的没有选手。（`stores/gameStore.ts`；`BUILTIN_SPAWN_PRESETS` 保留）
-- [x] **本地 ↔ 云端冲突解决**：回到在线后若本地与云端有差异，卡片显示 `冲突 / 未同步 / 仅云端` 徽标；冲突态下保存只写本地；点「同步」弹出对话框左右两列对比云端/本地，逐项选择保留哪边（保留本地=推送覆盖云端，保留云端=拉取覆盖本地）。（`heroes.vue` `computeDivergences`/`displayPresets` + `SyncConflictDialog.vue`，复用 `uploadPresetToCloud`/`pullCloudToLocal`）
-- [x] **同步生命周期状态机**：用 xstate 集中管理 `offline / synced / divergent / dialogOpen / applying` 流程态，差异态禁止写云端、离线态无同步按钮由显式 guard 表达。（`composables/useAgentSyncMachine.ts`；Web 端 stub）
-- [x] **选手脏状态与未发布指示**：选手策略被修改后，卡片和发布面板应有视觉高亮（如”有未发布改动”），提醒重新发布快照。（`hasUnpublishedChanges`：云端 `updated_at` 晚于最新快照即标记）
+- [x] **移除本地 ↔ 云端冲突解决与状态机**：物理删除了 `useAgentSyncMachine.ts` 和 `SyncConflictDialog.vue`，彻底废弃脏标记同步机制和 Conflict Modal。
+- [x] **未登录前置拦截**：当前端在未登录时发起云端网络请求，会被底层网络层拦截，自动唤起登录弹窗。
+- [x] **选手脏状态与未发布指示**：选手策略被修改后，卡片和发布面板有视觉提示（如”有未发布改动”），提醒重新发布快照。
 - [x] **Thinking Depth 调节组件**：在选手配置中直接提供 LLM 思考深度的调节滑块。（写入 `config_json.thinking_depth`）
 - [x] **JSON 导入导出**：在选手列表页支持将选手策略导出为 JSON/RON 文件或从本地文件导入。
 

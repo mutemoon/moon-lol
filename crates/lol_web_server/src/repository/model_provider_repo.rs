@@ -28,7 +28,7 @@ const SELECT_COLS: &str = "id, owner_id, name, category, preset_type, base_url, 
 
 fn parse_row(r: &sqlx::postgres::PgRow) -> RepoResult<ModelProvider> {
     let models_val: serde_json::Value = r.try_get("models")?;
-    let models: Vec<String> = serde_json::from_value(models_val)
+    let models: Vec<lol_agent_runtime::ModelConfig> = serde_json::from_value(models_val)
         .map_err(|e| RepoError::Internal(format!("models JSON 解析失败: {e}")))?;
     Ok(ModelProvider {
         id: r.try_get("id")?,

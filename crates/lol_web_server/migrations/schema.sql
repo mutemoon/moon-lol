@@ -10,10 +10,10 @@ CREATE TABLE IF NOT EXISTS users (
     created_at    TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
--- 模型供应商：预设/自定义/平台，按 user_id 隔离，含明文 API Key（运行时解析用）。
+-- 模型供应商：预设/自定义/平台，按 owner_id 隔离，含明文 API Key（运行时解析用）。
 CREATE TABLE IF NOT EXISTS model_providers (
     id          UUID PRIMARY KEY,
-    user_id     INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    owner_id    INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     name        TEXT NOT NULL,
     category    TEXT NOT NULL DEFAULT 'custom',
     preset_type TEXT NOT NULL DEFAULT '',
@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS model_providers (
     sort_order  INT NOT NULL DEFAULT 0,
     created_at  TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at  TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE (user_id, name)
+    UNIQUE (owner_id, name)
 );
 
 -- ── Agent 资产三件套 ──

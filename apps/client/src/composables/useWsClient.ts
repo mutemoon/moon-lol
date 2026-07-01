@@ -1,6 +1,6 @@
 import { ref } from "vue";
-import { backendClient } from "../services/backend";
-import type { WsResponse, WsEvent, UnsubscribeFn } from "../services/backend";
+import { services } from "../services/provider";
+import type { WsResponse, WsEvent, UnsubscribeFn } from "../services/types";
 
 // ── WS Protocol types ──
 
@@ -19,6 +19,7 @@ export function useWsClient() {
   const connected = ref(false);
   const connecting = ref(false);
   const connectTimeout = ref(false);
+  const matchId = ref<string | null>(null);
   const gameState = ref({
     champion: "",
     godMode: false,
@@ -31,10 +32,10 @@ export function useWsClient() {
   let unlisten: UnsubscribeFn | null = null;
 
   /**
-   * 建立 WS 连接。
-   * @param observe 若为 true，使用 connectWsObserve（不启动 AI 编排器），供观战/回放。
+   * 订阅对局事件流。
+   * @param id 对局 ID (match_id)
    */
-  async function connect(observe = false): Promise<void> {
+  async function connect(id: string): Promise<void> {
     connecting.value = true;
     connectTimeout.value = false;
 
@@ -42,18 +43,15 @@ export function useWsClient() {
       if (unlisten) {
         unlisten();
       }
-      unlisten = await backendClient.onWsEvent((event) => {
+      unlisten = await services.local.subscribeMatchEvents(id, (event) => {
         handleEvent(event);
       });
 
-      if (observe) {
-        await backendClient.connectWsObserve();
-      } else {
-        await backendClient.connectWs();
-      }
+      matchId.value = id;
       connected.value = true;
       connecting.value = false;
     } catch (err) {
+      matchId.value = null;
       connected.value = false;
       connecting.value = false;
       connectTimeout.value = true;
@@ -70,19 +68,43 @@ export function useWsClient() {
       unlisten();
       unlisten = null;
     }
-    try {
-      await backendClient.disconnectWs();
-    } catch {
-      /* ignore */
-    }
+    matchId.value = null;
     connected.value = false;
     connecting.value = false;
     connectTimeout.value = false;
   }
 
   async function send(cmd: string, params: Record<string, unknown> = {}): Promise<WsResponse> {
+    if (!matchId.value) {
+      return { id: 0, type: "result", ok: false, error: "对局未连接" };
+    }
     try {
-      const data = await backendClient.sendWsCmd(cmd, params);
+      let data: any = null;
+      if (cmd === 'god_mode') {
+        await services.local.setGodMode(matchId.value, params.enabled as boolean);
+        gameState.value.godMode = params.enabled as boolean;
+      } else if (cmd === 'toggle_cooldown') {
+        await services.local.toggleCooldown(matchId.value, params.enabled as boolean);
+        gameState.value.cooldownDisabled = params.enabled as boolean;
+      } else if (cmd === 'toggle_pause') {
+        const nextPaused = !gameState.value.paused;
+        if (gameState.value.paused) {
+          await services.local.resumeMatch(matchId.value);
+        } else {
+          await services.local.pauseMatch(matchId.value);
+        }
+        gameState.value.paused = nextPaused;
+      } else if (cmd === 'reset_position') {
+        await services.local.resetPosition(matchId.value);
+      } else if (cmd === 'switch_champion') {
+        await services.local.switchChampion(matchId.value, params.name as string);
+        gameState.value.champion = params.name as string;
+      } else if (cmd === 'set_script') {
+        await services.local.setScript(matchId.value, params.entity_id as number, params.source as string);
+      } else {
+        console.warn(`Unknown control command: ${cmd}`);
+      }
+
       return {
         id: 0,
         type: "result",
@@ -102,11 +124,7 @@ export function useWsClient() {
   function handleEvent(event: WsEvent) {
     switch (event.event) {
       case "game_loaded":
-        send("get_state").then((res) => {
-          if (res.ok && res.data) {
-            gameState.value = { ...gameState.value, ...(res.data as any) };
-          }
-        });
+        // 游戏加载后更新状态
         break;
       case "game_paused":
         gameState.value.paused = event.data.paused as boolean;
@@ -116,6 +134,7 @@ export function useWsClient() {
         break;
       case "game_close":
         connected.value = false;
+        matchId.value = null;
         if (unlisten) {
           unlisten();
           unlisten = null;
@@ -131,6 +150,7 @@ export function useWsClient() {
     connected,
     connecting,
     connectTimeout,
+    matchId,
     gameState,
     selectedEntityId,
     connect,

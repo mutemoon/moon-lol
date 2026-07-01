@@ -92,7 +92,7 @@ lol_cli action -e mock-agent-12345 move 1500 2000`;
 }
 
 function addToolResultMessage() {
-  const toolResult = `【执行工具 BashTool 结果】
+  const toolResult = `【执行工具 game_action 结果】
 stdout:
 {
   "status": "success",

@@ -1,10 +1,10 @@
 import { ref, watch } from "vue";
 import { defineStore } from "pinia";
-import { useWsClient } from "../composables/useWsClient";
-import { createLogContext } from "../composables/useLogPoller";
 import { router } from "../router";
-import { backendClient } from "../services/backend";
-import type { SpawnPreset, HeroPreset } from "../services/backend";
+import { services } from "../services/provider";
+import { isDesktop } from "@/lib/utils";
+import type { SpawnPreset, HeroPreset, RunningGame, FrontAgentConfig } from "../services/types";
+import { useProviders } from "./providersStore";
 
 export type { SpawnPreset, HeroPreset };
 
@@ -31,8 +31,9 @@ export const useGameStore = defineStore("game", () => {
   const showStatsModal = ref(false);
   const statsResult = ref({ minionKills: 0, gold: 0.0 });
 
-  const ws = useWsClient();
-  const log = createLogContext();
+  const runningGames = ref<RunningGame[]>([]);
+  const currentGameId = ref<string | null>(null);
+  const currentGamePort = ref<number | null>(null);
 
   const champions = ref(["Riven", "Fiora"]);
 
@@ -46,7 +47,7 @@ export const useGameStore = defineStore("game", () => {
 
   async function loadSpawnPresets() {
     try {
-      const presets = await backendClient.listSpawnPresets();
+      const presets = await services.listSpawnPresets();
       const merged = [...presets];
       for (const b of BUILTIN_SPAWN_PRESETS) {
         if (!merged.some((p) => p.name === b.name)) {
@@ -61,12 +62,12 @@ export const useGameStore = defineStore("game", () => {
   }
 
   async function saveSpawnPreset(preset: SpawnPreset) {
-    await backendClient.saveSpawnPreset(preset);
+    await services.saveSpawnPreset(preset);
     await loadSpawnPresets();
   }
 
   async function deleteSpawnPreset(name: string) {
-    await backendClient.deleteSpawnPreset(name);
+    await services.deleteSpawnPreset(name);
     await loadSpawnPresets();
   }
 
@@ -75,8 +76,7 @@ export const useGameStore = defineStore("game", () => {
 
   async function loadHeroPresets() {
     try {
-      // 选手预设：纯用户数据，不再注入静态默认项；列表为空即真的没有选手。
-      heroPresets.value = await backendClient.listHeroPresets();
+      heroPresets.value = await services.listHeroPresets();
     } catch (e) {
       console.error("加载选手预设失败", e);
       heroPresets.value = [];
@@ -84,12 +84,12 @@ export const useGameStore = defineStore("game", () => {
   }
 
   async function saveHeroPreset(preset: HeroPreset) {
-    await backendClient.saveHeroPreset(preset);
+    await services.saveHeroPreset(preset);
     await loadHeroPresets();
   }
 
   async function deleteHeroPreset(name: string) {
-    await backendClient.deleteHeroPreset(name);
+    await services.deleteHeroPreset(name);
     await loadHeroPresets();
   }
 
@@ -99,7 +99,7 @@ export const useGameStore = defineStore("game", () => {
 
   async function loadWinCondition(sceneName: string) {
     try {
-      winCondition.value = await backendClient.loadScenarioWinCondition(sceneName);
+      winCondition.value = await services.loadScenarioWinCondition(sceneName);
     } catch (e) {
       console.error("加载胜利条件失败", e);
       winCondition.value = null;
@@ -108,12 +108,12 @@ export const useGameStore = defineStore("game", () => {
 
   async function saveWinCondition(sceneName: string, condition: any) {
     if (!sceneName.trim()) return;
-    await backendClient.saveScenarioWinCondition(sceneName, condition);
+    await services.saveScenarioWinCondition(sceneName, condition);
   }
 
   async function loadScenariosList() {
     try {
-      scenariosList.value = await backendClient.listCustomScenarios();
+      scenariosList.value = await services.listCustomScenarios();
     } catch (e) {
       console.error("加载自定义场景列表失败", e);
     }
@@ -121,21 +121,24 @@ export const useGameStore = defineStore("game", () => {
 
   async function loadHistoriesList() {
     try {
-      histories.value = await backendClient.listGameHistories();
+      histories.value = await services.listGameHistories();
     } catch (e) {
       console.error("加载游戏历史记录失败", e);
     }
   }
 
-  // Sync log filter when ws selected entity changes
-  watch(
-    () => ws.selectedEntityId.value,
-    (entityId) => {
-      if (entityId !== null) {
-        log.setEntityFilter(entityId);
-      }
-    },
-  );
+  async function refreshRunningGames() {
+    try {
+      runningGames.value = await services.local.listRunningGames();
+    } catch (e) {
+      console.error("加载运行中对局失败", e);
+    }
+  }
+
+  // Desktop automatic polling of running games
+  if (isDesktop) {
+    setInterval(refreshRunningGames, 3000);
+  }
 
   watch(champion, (val) => {
     localStorage.setItem("moon_lol_last_champion", val);
@@ -145,34 +148,48 @@ export const useGameStore = defineStore("game", () => {
     localStorage.setItem("moon_lol_last_mode", val);
   });
 
-  async function startGame(sceneName?: string) {
+  async function startGame(sceneName?: string, customAgents?: FrontAgentConfig[]) {
     launchError.value = "";
     isStarting.value = true;
 
     try {
-      await backendClient.startGame({
+      const providersStore = useProviders();
+      await providersStore.load();
+
+      let agents = customAgents;
+      if (!agents && sceneName) {
+        agents = await services.loadCustomScenario(sceneName);
+      }
+
+      const res = await services.local.startGame({
         mode: mode.value,
         champion: champion.value,
         sceneName: sceneName || null,
+        agents: agents || [],
+        providers: providersStore.providers,
       });
+      currentGameId.value = res.id;
+      currentGamePort.value = res.port;
+      isStarting.value = false;
+      await refreshRunningGames();
+      router.push(`/debug/${res.id}`);
     } catch (e: any) {
       launchError.value = typeof e === "string" ? e : e.message || "Unknown error";
       isStarting.value = false;
-      return;
     }
-
-    ws.connect().then(() => {
-      log.start();
-      isStarting.value = false;
-      router.push("/debug");
-    });
   }
 
-  function stopGame() {
-    ws.disconnect();
-    log.stop();
-    backendClient.stopGame().catch(() => {});
-    router.push("/");
+  async function stopGame(id: string) {
+    try {
+      await services.local.stopGame(id);
+      if (currentGameId.value === id) {
+        currentGameId.value = null;
+        currentGamePort.value = null;
+      }
+      await refreshRunningGames();
+    } catch (e: any) {
+      console.error("停止游戏失败", e);
+    }
   }
 
   return {
@@ -182,8 +199,9 @@ export const useGameStore = defineStore("game", () => {
     isStarting,
     showStatsModal,
     statsResult,
-    ws,
-    log,
+    runningGames,
+    currentGameId,
+    currentGamePort,
     champions,
     scenariosList,
     histories,
@@ -202,6 +220,7 @@ export const useGameStore = defineStore("game", () => {
     saveWinCondition,
     loadScenariosList,
     loadHistoriesList,
+    refreshRunningGames,
     startGame,
     stopGame,
   };

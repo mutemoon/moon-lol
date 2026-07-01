@@ -86,7 +86,10 @@ mod tests {
             base_url: "https://open.bigmodel.cn/api/anthropic".into(),
             api_key: "sk".into(),
             api_format: "anthropic".into(),
-            models: vec!["glm-5.1".into()],
+            models: vec![lol_agent_runtime::ModelConfig {
+                name: "glm-5.1".into(),
+                max_tokens: 1024,
+            }],
             enabled: true,
             website_url: String::new(),
             api_key_url: String::new(),

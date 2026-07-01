@@ -55,11 +55,63 @@ pub fn binary_name() -> &'static str {
     }
 }
 
-/// workspace 根目录（基于编译期 `CARGO_MANIFEST_DIR`；`lol_client` 位于 `crates/lol_client`，parent×2 即根）。
+/// workspace 根目录（开发阶段从 `CARGO_MANIFEST_DIR` 向上遍历寻找含有 rust-toolchain.toml 或 pnpm-workspace.yaml 的目录作为根）。
 pub fn workspace_root() -> Option<PathBuf> {
     let manifest_dir = std::env::var("CARGO_MANIFEST_DIR").ok()?;
-    std::path::Path::new(&manifest_dir)
-        .parent()
-        .and_then(|p| p.parent())
-        .map(|p| p.to_path_buf())
+    let mut path = std::path::PathBuf::from(manifest_dir);
+    loop {
+        if path.join("rust-toolchain.toml").exists() || path.join("pnpm-workspace.yaml").exists() {
+            return Some(path);
+        }
+        if let Some(parent) = path.parent() {
+            path = parent.to_path_buf();
+        } else {
+            break;
+        }
+    }
+    None
+}
+
+/// 启动一个 Bevy 进程所需的可配置项。
+///
+/// 桌面端与云端的差异（dev/release 二进制、`cargo run` 前缀、cwd、RUST_LOG、
+/// 是否 headless）全部收敛到这里；[`build_command`] 据此构建配置好的（未 spawn 的）
+/// `std::process::Command`，stdio=null、env、cwd、program、前缀、游戏参数只此一份。
+/// 桌面端同步 `.spawn()` 得 `std::process::Child`；
+/// 云端用 `tokio::process::Command::from(cmd).spawn()` 得 `tokio::process::Child`。
+#[derive(Debug, Clone)]
+pub struct BevySpawnRequest {
+    /// 可执行程序：dev 为 `cargo`，release 为打包二进制路径。
+    pub program: String,
+    /// 程序名之后的固定前缀（如 `["run", "--"]` 或 `["run", "--bin", "moon_lol", "--"]`）。
+    pub prefix_args: Vec<String>,
+    pub port: u16,
+    pub game_config: BevyGameConfig,
+    /// 工作目录；`None` 表示沿用调用进程的 cwd。
+    pub cwd: Option<PathBuf>,
+    /// RUST_LOG 值；`None` 表示不设置（沿用进程环境）。
+    pub rust_log: Option<String>,
+    /// 每局日志 SQLite 路径；`None` 时 Bevy 进程沿用默认 `~/.moon-lol/logs/debug.db`。
+    pub log_db: Option<PathBuf>,
+}
+
+/// 据请求构建配置好的（未 spawn 的）`std::process::Command`。
+///
+/// 配置：stdout/stderr=null、可选 cwd、可选 RUST_LOG、program、前缀、`bevy_args`。
+pub fn build_command(req: &BevySpawnRequest) -> std::process::Command {
+    let mut cmd = std::process::Command::new(&req.program);
+    cmd.args(&req.prefix_args)
+        .args(bevy_args(req.port, &req.game_config))
+        .stdout(std::process::Stdio::null())
+        .stderr(std::process::Stdio::null());
+    if let Some(cwd) = &req.cwd {
+        cmd.current_dir(cwd);
+    }
+    if let Some(rust_log) = &req.rust_log {
+        cmd.env("RUST_LOG", rust_log);
+    }
+    if let Some(log_db) = &req.log_db {
+        cmd.arg("--log-db").arg(log_db);
+    }
+    cmd
 }

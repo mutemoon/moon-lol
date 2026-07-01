@@ -4,56 +4,30 @@ meta:
 </route>
 
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount, computed } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { storeToRefs } from "pinia";
 import { useGameStore, type HeroPreset } from "@/stores/gameStore";
 import { useRouter, useRoute } from "vue-router";
 import { useLocale } from "@/composables/useLocale";
-import {
-  agentsApi,
-  type Agent,
-  type AgentSnapshot,
-  type Visibility,
-} from "@/services/cloudApi";
 import { services } from "@/services/provider";
-import {
-  useAgentSyncMachine,
-  type Divergence,
-  type DivergenceKind,
-  type SyncChoice,
-} from "@/composables/useAgentSyncMachine";
+
+import type { Agent, AgentSnapshot, Visibility } from "@/services/types";
+
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import ScriptEditor from "@/components/agent/ScriptEditor.vue";
 import ForkDiffDialog from "@/components/agent/ForkDiffDialog.vue";
-import SyncConflictDialog from "@/components/agent/SyncConflictDialog.vue";
+
 import { DEFAULT_SCRIPT } from "@/services/scriptAgentTemplates";
 import { useProviders } from "@/stores/providersStore";
 import { PLATFORM_PROVIDER_ID } from "@/config/providerPresets";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-} from "@/components/ui/card";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Dialog,
   DialogContent,
@@ -71,7 +45,6 @@ import {
   DownloadIcon,
   UploadIcon,
   AlertCircleIcon,
-  RefreshCwIcon,
 } from "@lucide/vue";
 
 // 我的选手 (Agent) 管理页（产品文档 §2.1 / §2.5）。
@@ -115,13 +88,15 @@ const platformModels = ref<string[]>([]);
 
 const enabledProviders = computed(() => providersStore.providers.filter((p) => p.enabled));
 const isPlatform = computed(() => providerId.value === PLATFORM_PROVIDER_ID);
-const selectedProvider = computed(() =>
-  enabledProviders.value.find((p) => p.id === providerId.value),
-);
+const selectedProvider = computed(() => enabledProviders.value.find((p) => p.id === providerId.value));
 // 平台模型用管理员提供的清单；BYO 供应商用其 models 列表。
-const modelOptions = computed(() =>
-  isPlatform.value ? platformModels.value : selectedProvider.value?.models ?? [],
-);
+const modelOptions = computed(() => {
+  if (isPlatform.value) {
+    return platformModels.value;
+  }
+  const models = selectedProvider.value?.models ?? [];
+  return models.map((m: any) => typeof m === "string" ? m : m.name);
+});
 // 当前 model 是否不在所选供应商的模型列表里 → 自动切手填（平台模型不允许手填）。
 const modelIsManual = computed(
   () =>
@@ -147,17 +122,7 @@ function onModelSelect(v: any) {
   manualModel.value = false;
 }
 // RL Agent 配置：权重路径 (.pth)、BYO 推理端点、Reward Shaper 权重表。
-const RL_REWARD_KEYS = [
-  "last_hit",
-  "kill",
-  "death",
-  "assist",
-  "gold",
-  "level",
-  "health",
-  "time",
-  "proximity",
-] as const;
+const RL_REWARD_KEYS = ["last_hit", "kill", "death", "assist", "gold", "level", "health", "time", "proximity"] as const;
 const defaultRlRewards = (): Record<string, number> => ({
   last_hit: 1.0,
   kill: 5.0,
@@ -186,114 +151,23 @@ const upstreamAgent = ref<Agent | null>(null);
 const showForkDiff = ref(false);
 const pulling = ref(false);
 
-// 桌面端本地选手缓存：云端是主存储，本地仅作离线兜底。在线保存会镜像到本地，
-// 因此正常情况下本地 ≈ 云端；只有离线编辑或远端变更才会产生「差异 / 冲突」。
-const isDesktop = services.isDesktop;
-const localPresets = ref<HeroPreset[]>([]);
-
-async function loadLocalPresets() {
-  if (!isDesktop) return;
-  try {
-    const { invoke } = await import("@tauri-apps/api/core");
-    localPresets.value = await invoke<HeroPreset[]>("list_hero_presets");
-  } catch {
-    localPresets.value = [];
-  }
-}
-
-// 云端 Agent 映射为 HeroPreset 形状，便于与本地逐字段比较。
-const cloudPresets = computed<HeroPreset[]>(() =>
-  cloudAgents.value.map((a) => ({
-    name: a.name,
-    champion: a.champion,
-    agent_type: a.agent_type,
-    prompt: a.prompt,
-    preamble: a.preamble,
-    model: a.model,
-    config_json: a.config_json,
-  })),
-);
-
-function samePreset(a: HeroPreset | null, b: HeroPreset | null): boolean {
-  if (!a || !b) return false;
-  return (
-    a.champion === b.champion &&
-    a.agent_type === b.agent_type &&
-    (a.prompt || "") === (b.prompt || "") &&
-    (a.preamble || "") === (b.preamble || "") &&
-    (a.model || "") === (b.model || "") &&
-    JSON.stringify(a.config_json ?? {}) === JSON.stringify(b.config_json ?? {})
-  );
-}
-
-// 本地与云端的差异集合：冲突（两边都有且不同）/ 仅本地 / 仅云端。
-// 非桌面端或离线时返回空（离线无法获知云端状态，避免假「未同步」徽标）。
-function computeDivergences(): Divergence[] {
-  if (!isDesktop || !services.isOnline) return [];
-  const out: Divergence[] = [];
-  const localByName = new Map(localPresets.value.map((p) => [p.name, p]));
-  const cloudByName = new Map(cloudPresets.value.map((p) => [p.name, p]));
-  const names = new Set<string>([...localByName.keys(), ...cloudByName.keys()]);
-  for (const name of names) {
-    const l = localByName.get(name) ?? null;
-    const c = cloudByName.get(name) ?? null;
-    if (l && c && samePreset(l, c)) continue; // 一致，无差异
-    const kind: DivergenceKind = l && c ? "conflict" : l ? "local_only" : "cloud_only";
-    out.push({ name, kind, local: l, cloud: c });
-  }
-  return out;
-}
-
-// 同步生命周期：离线 / 已同步 / 有差异 / 同步中。数据驱动，mode 由
-// (online, divergences) 纯派生；交互子流（对话框 / 落盘中）由 send 驱动。
-const {
-  mode: syncMode,
-  dialogOpen: syncDialogOpen,
-  applying: syncApplying,
-  divergences,
-  recheck: recheckSync,
-  send: sendSync,
-} = useAgentSyncMachine(isDesktop);
-
-function recheckDivergences() {
-  recheckSync(services.isOnline, computeDivergences());
-}
-
-const hasDivergence = computed(() => syncMode.value === "divergent");
-
-function divergenceOf(name: string): DivergenceKind | null {
-  return divergences.value.find((d) => d.name === name)?.kind ?? null;
-}
-
-const currentDivergence = computed<DivergenceKind | null>(() =>
-  draft.value.name ? divergenceOf(draft.value.name) : null,
-);
-
-// 显示用预设：桌面端合并本地与云端（冲突取本地优先），Web 端即云端。
-const displayPresets = computed<HeroPreset[]>(() => {
-  if (!isDesktop) return heroPresets.value;
-  const byName = new Map<string, HeroPreset>();
-  for (const c of cloudPresets.value) byName.set(c.name, c);
-  for (const l of localPresets.value) byName.set(l.name, l); // 本地优先覆盖
-  return [...byName.values()];
-});
+// 显示用预设：直接显示云端/Store中的预设
+const displayPresets = computed<HeroPreset[]>(() => heroPresets.value);
 
 function cloudAgentByName(name: string): Agent | undefined {
   return cloudAgents.value.find((a) => a.name === name);
 }
 
-const currentCloudAgent = computed(() =>
-  draft.value.name ? cloudAgentByName(draft.value.name) : undefined,
-);
+const currentCloudAgent = computed(() => (draft.value.name ? cloudAgentByName(draft.value.name) : undefined));
 
 const currentSnapshots = computed<AgentSnapshot[]>(() => {
   const ca = currentCloudAgent.value;
-  return ca ? snapshotsByAgentId.value[ca.id] ?? [] : [];
+  return ca ? (snapshotsByAgentId.value[ca.id] ?? []) : [];
 });
 
 function snapshotsFor(name: string): AgentSnapshot[] {
   const ca = cloudAgentByName(name);
-  return ca ? snapshotsByAgentId.value[ca.id] ?? [] : [];
+  return ca ? (snapshotsByAgentId.value[ca.id] ?? []) : [];
 }
 
 function visibilityFor(name: string): Visibility {
@@ -302,11 +176,11 @@ function visibilityFor(name: string): Visibility {
 
 async function loadCloudAgents() {
   try {
-    cloudAgents.value = await agentsApi.list();
+    cloudAgents.value = await services.cloud.listAgents();
     await Promise.all(
       cloudAgents.value.map(async (a) => {
         try {
-          snapshotsByAgentId.value[a.id] = await agentsApi.listSnapshots(a.id);
+          snapshotsByAgentId.value[a.id] = await services.cloud.listSnapshots(a.id);
         } catch {
           snapshotsByAgentId.value[a.id] = [];
         }
@@ -323,16 +197,12 @@ function enterEdit(name: string) {
   editingName.value = name;
   draft.value = { ...p };
   configJsonStr.value = JSON.stringify(p.config_json || {}, null, 2);
-  scriptSource.value =
-    typeof p.config_json?.script === "string" ? p.config_json.script : DEFAULT_SCRIPT;
-  thinkingDepth.value =
-    typeof p.config_json?.thinking_depth === "number" ? p.config_json.thinking_depth : 2;
-  providerId.value =
-    typeof p.config_json?.provider_id === "string" ? p.config_json.provider_id : PLATFORM_PROVIDER_ID;
+  scriptSource.value = typeof p.config_json?.script === "string" ? p.config_json.script : DEFAULT_SCRIPT;
+  thinkingDepth.value = typeof p.config_json?.thinking_depth === "number" ? p.config_json.thinking_depth : 2;
+  providerId.value = typeof p.config_json?.provider_id === "string" ? p.config_json.provider_id : PLATFORM_PROVIDER_ID;
   manualModel.value = false;
   rlModelPath.value = typeof p.config_json?.model_path === "string" ? p.config_json.model_path : "";
-  rlEndpoint.value =
-    typeof p.config_json?.inference_endpoint === "string" ? p.config_json.inference_endpoint : "";
+  rlEndpoint.value = typeof p.config_json?.inference_endpoint === "string" ? p.config_json.inference_endpoint : "";
   rlRewards.value = { ...defaultRlRewards(), ...(p.config_json?.reward_shaper || {}) };
   errorMsg.value = "";
   successMsg.value = "";
@@ -383,92 +253,20 @@ async function handleSave() {
   } else {
     draft.value.config_json = {
       thinking_depth: thinkingDepth.value,
-      ...(providerId.value && providerId.value !== PLATFORM_PROVIDER_ID
-        ? { provider_id: providerId.value }
-        : {}),
+      ...(providerId.value && providerId.value !== PLATFORM_PROVIDER_ID ? { provider_id: providerId.value } : {}),
     };
   }
   try {
-    if (isDesktop && currentDivergence.value === "conflict") {
-      // 冲突态：同步前只能改本地，不触碰云端，等用户在同步对话框里决定保留哪边。
-      const { invoke } = await import("@tauri-apps/api/core");
-      await invoke("save_hero_preset", { preset: { ...draft.value, name } });
-      await loadLocalPresets();
-    } else {
-      await store.saveHeroPreset({ ...draft.value, name });
-      editingName.value = name;
-      await loadCloudAgents();
-      await loadLocalPresets();
-    }
+    await store.saveHeroPreset({ ...draft.value, name });
+    editingName.value = name;
+    await loadCloudAgents();
     successMsg.value = t("heroes.successSave");
-    recheckDivergences();
   } catch (e: any) {
     errorMsg.value = e.message || t("heroes.errorSave");
   }
 }
 
-// ── 冲突解决（本地 ↔ 云端） ──
-// 把一个本地预设 upsert 到云端（按名称对齐：存在则更新，否则创建）。保留本地时复用。
-async function uploadPresetToCloud(preset: HeroPreset) {
-  const body = {
-    name: preset.name,
-    champion: preset.champion,
-    agent_type: preset.agent_type,
-    prompt: preset.prompt,
-    preamble: preset.preamble || "",
-    model: preset.model || "",
-    config_json: preset.config_json || {},
-  };
-  const existing = cloudAgentByName(preset.name);
-  if (existing) {
-    await agentsApi.update(existing.id, body);
-  } else {
-    await agentsApi.create({ ...body, visibility: "private" });
-  }
-}
 
-// 把云端预设拉取覆盖到本地缓存。保留云端时复用。
-async function pullCloudToLocal(preset: HeroPreset) {
-  if (!isDesktop) return;
-  const { invoke } = await import("@tauri-apps/api/core");
-  await invoke("save_hero_preset", { preset });
-}
-
-// 打开冲突解决对话框（重新检测差异后进入 dialogOpen 态）。
-function openSyncDialog() {
-  recheckDivergences();
-  sendSync({ type: "OPEN_DIALOG" });
-}
-
-// 应用用户在对话框里的逐项选择：保留本地=推送覆盖云端；保留云端=拉取覆盖本地。
-async function applySync(choices: SyncChoice[]) {
-  sendSync({ type: "APPLY" });
-  errorMsg.value = "";
-  successMsg.value = "";
-  try {
-    for (const ch of choices) {
-      const div = divergences.value.find((d) => d.name === ch.name);
-      if (!div) continue;
-      if (ch.keep === "local" && div.local) {
-        await uploadPresetToCloud(div.local);
-      } else if (ch.keep === "cloud" && div.cloud) {
-        await pullCloudToLocal(div.cloud);
-      } else if (ch.keep === "cloud" && !div.cloud && isDesktop) {
-        // 选保留云端但云端无（即丢弃本地）：删除本地缓存。
-        const { invoke } = await import("@tauri-apps/api/core");
-        await invoke("delete_hero_preset", { name: ch.name });
-      }
-      // keep === 'local' && !div.local：本地无却选保留本地 → 忽略云端，无操作。
-    }
-    await Promise.all([store.loadHeroPresets(), loadCloudAgents(), loadLocalPresets()]);
-    recheckDivergences();
-    sendSync({ type: "RESOLVED" });
-    successMsg.value = t("heroes.syncResolved");
-  } catch (e: any) {
-    errorMsg.value = e?.message || t("heroes.syncFailed");
-    sendSync({ type: "ERROR", message: e?.message });
-  }
-}
 
 async function handlePublishSnapshot() {
   errorMsg.value = "";
@@ -480,7 +278,7 @@ async function handlePublishSnapshot() {
   }
   publishing.value = true;
   try {
-    const snap = await agentsApi.publishSnapshot(ca.id);
+    const snap = await services.cloud.publishSnapshot(ca.id);
     snapshotsByAgentId.value[ca.id] = [snap, ...(snapshotsByAgentId.value[ca.id] || [])];
     successMsg.value = t("heroes.publishSuccess", { version: snap.version });
   } catch (e: any) {
@@ -493,7 +291,7 @@ async function handlePublishSnapshot() {
 // ── 上游同步（Fork 溯源） ──
 const upstreamId = computed<string | null>(() => {
   const ca = currentCloudAgent.value;
-  return ca ? ca.upstream_agent_id ?? ca.forked_from ?? null : null;
+  return ca ? (ca.upstream_agent_id ?? ca.forked_from ?? null) : null;
 });
 
 async function loadUpstream() {
@@ -501,7 +299,7 @@ async function loadUpstream() {
   const id = upstreamId.value;
   if (!id) return;
   try {
-    upstreamAgent.value = await agentsApi.get(id);
+    upstreamAgent.value = await services.cloud.getAgent(id);
   } catch {
     upstreamAgent.value = null;
   }
@@ -514,11 +312,10 @@ async function applyPull() {
   errorMsg.value = "";
   successMsg.value = "";
   try {
-    await agentsApi.pullUpstream(ca.id);
-    await Promise.all([store.loadHeroPresets(), loadCloudAgents(), loadLocalPresets()]);
+    await services.cloud.pullUpstream(ca.id);
+    await Promise.all([store.loadHeroPresets(), loadCloudAgents()]);
     if (editingName.value) enterEdit(editingName.value);
     showForkDiff.value = false;
-    recheckDivergences();
     successMsg.value = t("heroes.pullSuccess");
   } catch (e: any) {
     errorMsg.value = e?.message || t("heroes.pullFailed");
@@ -533,7 +330,7 @@ async function handleVisibilityChange(v: Visibility) {
   const ca = currentCloudAgent.value;
   if (!ca) return;
   try {
-    await agentsApi.updateVisibility(ca.id, v);
+    await services.cloud.updateAgentVisibility(ca.id, v);
     ca.visibility = v;
     successMsg.value = t("heroes.visibilityUpdated");
   } catch (e: any) {
@@ -578,9 +375,7 @@ function hasUnpublishedChanges(name: string): boolean {
   return new Date(ca.updated_at).getTime() > new Date(latest.created_at).getTime();
 }
 
-const currentHasUnpublished = computed(() =>
-  draft.value.name ? hasUnpublishedChanges(draft.value.name) : false,
-);
+const currentHasUnpublished = computed(() => (draft.value.name ? hasUnpublishedChanges(draft.value.name) : false));
 
 // ── JSON 导入导出 ──
 const importInput = ref<HTMLInputElement | null>(null);
@@ -616,8 +411,7 @@ async function importPresets(ev: Event) {
         imported += 1;
       }
     }
-    await Promise.all([store.loadHeroPresets(), loadCloudAgents(), loadLocalPresets()]);
-    recheckDivergences();
+    await Promise.all([store.loadHeroPresets(), loadCloudAgents()]);
     successMsg.value = t("heroes.importSuccess", { count: imported });
   } catch {
     errorMsg.value = t("heroes.importFailed");
@@ -626,28 +420,18 @@ async function importPresets(ev: Event) {
   }
 }
 
-// 窗口聚焦时重新评估在线状态与差异（离线↔在线切换、远端变更后能及时刷新徽标）。
-function onFocusRecheck() {
-  recheckDivergences();
-}
-
 onMounted(async () => {
-  await Promise.all([store.loadHeroPresets(), loadCloudAgents(), loadLocalPresets(), providersStore.load(), loadPlatformModels()]);
-  recheckDivergences();
-  window.addEventListener("focus", onFocusRecheck);
+  await Promise.all([
+    store.loadHeroPresets(),
+    loadCloudAgents(),
+    providersStore.load(),
+    loadPlatformModels(),
+  ]);
   // 深链编辑：编排页「编辑」按钮跳转 /heroes?edit=<name>，自动进入编辑态。
   const editName = route.query.edit;
-  if (
-    typeof editName === "string" &&
-    editName &&
-    displayPresets.value.some((p) => p.name === editName)
-  ) {
+  if (typeof editName === "string" && editName && displayPresets.value.some((p) => p.name === editName)) {
     enterEdit(editName);
   }
-});
-
-onBeforeUnmount(() => {
-  window.removeEventListener("focus", onFocusRecheck);
 });
 </script>
 
@@ -656,24 +440,14 @@ onBeforeUnmount(() => {
     <!-- 顶栏：单行紧凑，靠留白与字号建立层级，不依赖边框 -->
     <header class="flex shrink-0 items-center justify-between px-6 py-4">
       <div class="flex items-center gap-3">
-        <Button
-          variant="ghost"
-          size="icon"
-          @click="mode === 'edit' ? backToBrowse() : router.push('/')"
-        >
+        <Button variant="ghost" size="icon" @click="mode === 'edit' ? backToBrowse() : router.push('/')">
           <ArrowLeftIcon class="size-4" />
         </Button>
         <h1 class="text-lg font-semibold tracking-tight">{{ t("heroes.title") }}</h1>
         <span class="text-muted-foreground text-sm tabular-nums">{{ displayPresets.length }}</span>
       </div>
       <div v-if="mode === 'browse'" class="flex items-center gap-2">
-        <input
-          ref="importInput"
-          type="file"
-          accept="application/json,.json"
-          class="hidden"
-          @change="importPresets"
-        />
+        <input ref="importInput" type="file" accept="application/json,.json" class="hidden" @change="importPresets" />
         <Button variant="ghost" size="sm" @click="triggerImport" data-testid="import-presets-btn">
           <UploadIcon class="size-4" />
           {{ t("heroes.importBtn") }}
@@ -688,17 +462,7 @@ onBeforeUnmount(() => {
           <DownloadIcon class="size-4" />
           {{ t("heroes.exportBtn") }}
         </Button>
-        <Button
-          v-if="isDesktop && hasDivergence"
-          variant="ghost"
-          size="sm"
-          :disabled="syncApplying || syncMode === 'offline'"
-          @click="openSyncDialog"
-          data-testid="sync-btn"
-        >
-          <RefreshCwIcon class="size-4" />
-          {{ syncApplying ? t("heroes.syncing") : t("heroes.syncBtn") }}
-        </Button>
+
         <Button size="sm" @click="startNew" data-testid="new-preset-btn">
           <PlusIcon class="size-4" />
           {{ t("heroes.newPreset") }}
@@ -710,10 +474,7 @@ onBeforeUnmount(() => {
     <div class="min-h-0 flex-1 overflow-y-auto">
       <!-- Browse：响应式 Card 网格，把"选手"当作可平铺的对象 -->
       <div v-if="mode === 'browse'" class="px-6 py-6">
-        <div
-          v-if="displayPresets.length === 0"
-          class="text-muted-foreground flex flex-col items-center gap-4 py-24"
-        >
+        <div v-if="displayPresets.length === 0" class="text-muted-foreground flex flex-col items-center gap-4 py-24">
           <span class="text-sm">{{ t("heroes.emptyList") }}</span>
           <Button variant="outline" @click="startNew">
             <PlusIcon class="size-4" />
@@ -738,31 +499,16 @@ onBeforeUnmount(() => {
               </div>
               <CardDescription>{{ t("champions." + p.champion) }}</CardDescription>
             </CardHeader>
-            <CardContent
-              class="text-muted-foreground flex items-center justify-between text-xs"
-            >
+            <CardContent class="text-muted-foreground flex items-center justify-between text-xs">
               <Badge variant="secondary" class="font-normal">
                 {{ t("heroes.visibility." + visibilityFor(p.name)) }}
               </Badge>
               <div class="flex items-center gap-2">
-                <Badge
-                  v-if="isDesktop && divergenceOf(p.name)"
-                  variant="outline"
-                  class="gap-1 text-[10px]"
-                  :class="{
-                    'text-amber-500': divergenceOf(p.name) === 'conflict',
-                    'text-blue-500': divergenceOf(p.name) === 'local_only',
-                    'text-muted-foreground': divergenceOf(p.name) === 'cloud_only',
-                  }"
-                  data-testid="preset-div-badge"
-                >
-                  <AlertCircleIcon class="size-3" />
-                  {{ t(`heroes.divBadge.${divergenceOf(p.name)}`) }}
-                </Badge>
+
                 <Badge
                   v-if="hasUnpublishedChanges(p.name)"
                   variant="outline"
-                  class="text-amber-500 gap-1 text-[10px]"
+                  class="gap-1 text-[10px] text-amber-500"
                   data-testid="preset-dirty-badge"
                 >
                   <AlertCircleIcon class="size-3" />
@@ -804,11 +550,7 @@ onBeforeUnmount(() => {
             <TabsTrigger value="config">{{ t("heroes.tabConfig") }}</TabsTrigger>
             <TabsTrigger value="publish" data-testid="preset-tab-publish">
               {{ t("heroes.tabPublish") }}
-              <Badge
-                v-if="currentSnapshots[0]"
-                variant="secondary"
-                class="ml-2 font-mono text-[10px]"
-              >
+              <Badge v-if="currentSnapshots[0]" variant="secondary" class="ml-2 font-mono text-[10px]">
                 v{{ currentSnapshots[0].version }}
               </Badge>
             </TabsTrigger>
@@ -889,7 +631,13 @@ onBeforeUnmount(() => {
                   <div class="space-y-2">
                     <div class="flex items-center justify-between">
                       <Label>{{ t("heroes.modelSelectLabel") }}</Label>
-                      <Button v-if="!isPlatform" variant="ghost" size="sm" class="h-6 text-[11px]" @click="manualModel = !manualModel">
+                      <Button
+                        v-if="!isPlatform"
+                        variant="ghost"
+                        size="sm"
+                        class="h-6 text-[11px]"
+                        @click="manualModel = !manualModel"
+                      >
                         {{ t("heroes.modelManual") }}
                       </Button>
                     </div>
@@ -923,9 +671,7 @@ onBeforeUnmount(() => {
               <div class="space-y-2">
                 <div class="flex items-center justify-between">
                   <Label>{{ t("heroes.thinkingDepthLabel") }}</Label>
-                  <span class="text-muted-foreground font-mono text-xs tabular-nums">
-                    {{ thinkingDepth }} / 5
-                  </span>
+                  <span class="text-muted-foreground font-mono text-xs tabular-nums">{{ thinkingDepth }} / 5</span>
                 </div>
                 <input
                   v-model.number="thinkingDepth"
@@ -973,12 +719,7 @@ onBeforeUnmount(() => {
                 <div class="grid grid-cols-2 gap-2 sm:grid-cols-3">
                   <div v-for="k in RL_REWARD_KEYS" :key="k" class="space-y-1">
                     <Label class="text-muted-foreground text-[11px]">{{ k }}</Label>
-                    <Input
-                      v-model.number="rlRewards[k]"
-                      type="number"
-                      step="0.1"
-                      class="h-8 font-mono text-xs"
-                    />
+                    <Input v-model.number="rlRewards[k]" type="number" step="0.1" class="h-8 font-mono text-xs" />
                   </div>
                 </div>
               </div>
@@ -987,19 +728,12 @@ onBeforeUnmount(() => {
             <div class="flex items-center justify-between pt-2">
               <div class="text-xs">
                 <span v-if="errorMsg" class="text-destructive">{{ errorMsg }}</span>
-                <span v-else-if="successMsg" class="text-foreground" data-testid="preset-save-success">{{ successMsg }}</span>
+                <span v-else-if="successMsg" class="text-foreground" data-testid="preset-save-success">
+                  {{ successMsg }}
+                </span>
               </div>
               <div class="flex items-center gap-2">
-                <Button
-                  v-if="isDesktop && currentDivergence"
-                  variant="outline"
-                  :disabled="!draft.name.trim() || syncApplying"
-                  @click="openSyncDialog"
-                  data-testid="sync-cloud-btn"
-                >
-                  <RefreshCwIcon class="size-4" />
-                  {{ syncApplying ? t("heroes.syncing") : t("heroes.syncBtn") }}
-                </Button>
+
                 <Button :disabled="!draft.name.trim()" @click="handleSave" data-testid="preset-save-btn">
                   {{ t("heroes.saveBtn") }}
                 </Button>
@@ -1020,9 +754,7 @@ onBeforeUnmount(() => {
               <div class="flex items-center justify-between gap-4 rounded-md border px-4 py-3">
                 <div class="min-w-0 text-sm">
                   <span class="text-muted-foreground">{{ t("heroes.forkFromLabel") }}</span>
-                  <span class="font-medium" data-testid="fork-from-name">
-                    「{{ upstreamAgent?.name ?? "…" }}」
-                  </span>
+                  <span class="font-medium" data-testid="fork-from-name">「{{ upstreamAgent?.name ?? "…" }}」</span>
                   <span class="text-muted-foreground text-xs" v-if="upstreamAgent">
                     · {{ t("heroes.forkAuthor") }} #{{ upstreamAgent.owner_id }}
                   </span>
@@ -1096,10 +828,7 @@ onBeforeUnmount(() => {
 
               <p v-if="errorMsg" class="text-destructive text-xs">{{ errorMsg }}</p>
               <p v-else-if="successMsg" class="text-foreground text-xs">{{ successMsg }}</p>
-              <p
-                v-else-if="editingName && !currentCloudAgent"
-                class="text-muted-foreground text-xs leading-relaxed"
-              >
+              <p v-else-if="editingName && !currentCloudAgent" class="text-muted-foreground text-xs leading-relaxed">
                 {{ t("heroes.publishNeedsSync") }}
               </p>
 
@@ -1109,10 +838,7 @@ onBeforeUnmount(() => {
                 <div class="text-muted-foreground text-[11px] font-medium tracking-wider uppercase">
                   {{ t("heroes.historyTitle") }}
                 </div>
-                <ul
-                  v-if="currentSnapshots.length"
-                  class="divide-border divide-y rounded-md border"
-                >
+                <ul v-if="currentSnapshots.length" class="divide-border divide-y rounded-md border">
                   <li
                     v-for="(s, idx) in currentSnapshots"
                     :key="s.id"
@@ -1145,14 +871,7 @@ onBeforeUnmount(() => {
       </div>
     </div>
 
-    <!-- 本地 ↔ 云端 冲突解决 -->
-    <SyncConflictDialog
-      :open="syncDialogOpen"
-      :divergences="divergences"
-      :applying="syncApplying"
-      @update:open="(v) => { if (!v) sendSync({ type: 'CLOSE' }); }"
-      @apply="applySync"
-    />
+
 
     <!-- 拉取上游更新：差异对比与合并预览 -->
     <ForkDiffDialog

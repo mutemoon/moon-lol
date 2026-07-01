@@ -1,61 +1,88 @@
-// ── TauriLocalServiceImpl ──
-// 基于 Tauri invoke() 的 ILocalService 实现
-
-import { invoke } from '@tauri-apps/api/core'
+import { invoke, Channel } from '@tauri-apps/api/core'
 import { listen } from '@tauri-apps/api/event'
 import type { ILocalService } from './local'
 import type {
   GameConfig,
   LogEntity,
   LogCategory,
-  LogQueryParams,
   QueryLogsResult,
   WsEvent,
   UnsubscribeFn,
+  RunningGame,
 } from './types'
 
-export class TauriLocalServiceImpl implements ILocalService {
+export class TauriLocalService implements ILocalService {
   // ── 游戏进程控制 ──
-  async startGame(config: GameConfig): Promise<void> {
+  async startGame(config: GameConfig): Promise<{ id: string; port: number }> {
     return invoke('start_game', { config })
   }
 
-  async stopGame(): Promise<void> {
-    return invoke('stop_game')
+  async stopGame(id: string): Promise<void> {
+    return invoke('stop_game', { id })
   }
 
-  // ── WS 连接与命令 ──
-  async connectWs(): Promise<void> {
-    return invoke('connect_ws')
+  // ── 实时事件与控制 ──
+  async subscribeMatchEvents(id: string, callback: (event: any) => void): Promise<UnsubscribeFn> {
+    const channel = new Channel<any>()
+    channel.onmessage = callback
+    await invoke('subscribe_match_events', { id, channel })
+    return () => {
+      channel.onmessage = () => {}
+    }
   }
 
-  async connectWsObserve(): Promise<void> {
-    return invoke('connect_ws_observe')
+  async pauseMatch(id: string): Promise<boolean> {
+    return invoke('pause_match', { id })
   }
 
-  async disconnectWs(): Promise<void> {
-    return invoke('disconnect_ws')
+  async resumeMatch(id: string): Promise<boolean> {
+    return invoke('resume_match', { id })
   }
 
-  async sendWsCmd(cmd: string, params: Record<string, any> = {}): Promise<any> {
-    return invoke('send_ws_cmd', { cmd, params })
+  async setGodMode(id: string, enabled: boolean): Promise<void> {
+    return invoke('set_god_mode', { id, enabled })
+  }
+
+  async toggleCooldown(id: string, enabled: boolean): Promise<void> {
+    return invoke('toggle_cooldown', { id, enabled })
+  }
+
+  async resetPosition(id: string): Promise<void> {
+    return invoke('reset_position', { id })
+  }
+
+  async switchChampion(id: string, name: string): Promise<void> {
+    return invoke('switch_champion', { id, name })
+  }
+
+  async setScript(id: string, entityId: number, source: string): Promise<void> {
+    return invoke('set_script', { id, entityId, source })
+  }
+
+  // ── 运行中对局列表 ──
+  async listRunningGames(): Promise<RunningGame[]> {
+    return invoke<RunningGame[]>('list_running_games')
+  }
+
+  async getRunningGame(id: string): Promise<RunningGame | null> {
+    return invoke<RunningGame | null>('get_running_game', { id })
   }
 
   // ── 本地游戏日志查询 ──
-  async queryLogEntities(): Promise<LogEntity[]> {
-    return invoke<LogEntity[]>('query_log_entities')
+  async queryLogEntities(gameId: string): Promise<LogEntity[]> {
+    return invoke<LogEntity[]>('query_log_entities', { gameId })
   }
 
-  async queryLogCategories(): Promise<LogCategory[]> {
-    return invoke<LogCategory[]>('query_log_categories')
+  async queryLogCategories(gameId: string): Promise<LogCategory[]> {
+    return invoke<LogCategory[]>('query_log_categories', { gameId })
   }
 
-  async queryLogs(params: LogQueryParams): Promise<QueryLogsResult> {
-    return invoke<QueryLogsResult>('query_logs', params as any)
+  async queryLogs(params: { gameId: string; offset: number; limit: number; levels: string[] | null; entityId: number | null; category: string | null; searchText: string | null }): Promise<QueryLogsResult> {
+    return invoke<QueryLogsResult>('query_logs', params)
   }
 
-  async clearLogs(): Promise<void> {
-    return invoke('clear_logs')
+  async clearLogs(gameId: string): Promise<void> {
+    return invoke('clear_logs', { gameId })
   }
 
   // ── 事件监听 ──
@@ -69,23 +96,5 @@ export class TauriLocalServiceImpl implements ILocalService {
 
   async onAgentHistoryUpdated(callback: (data: { agent_id: string; champion: string; history: any[] }) => void): Promise<UnsubscribeFn> {
     return listen<{ agent_id: string; champion: string; history: any[] }>('agent-history-updated', (e) => callback(e.payload))
-  }
-
-  // ── 本地离线缓存 ──
-  async getLocalCache<T>(key: string): Promise<T | null> {
-    try {
-      return await invoke<T | null>('get_local_cache', { key })
-    } catch {
-      return null
-    }
-  }
-
-  async setLocalCache<T>(key: string, data: T): Promise<void> {
-    return invoke('set_local_cache', { key, data })
-  }
-
-  // ── Bash 工具 ──
-  async runBashTool(cmd: string): Promise<string> {
-    return invoke<string>('run_bash_tool', { cmd })
   }
 }

@@ -7,6 +7,7 @@ export type GameEventType =
   | 'agent-history-updated'
   | 'connection-status'
   | 'unauthorized'
+  | 'match-history-ready'
 
 export interface IEventBus {
   on<T = any>(event: GameEventType, handler: (data: T) => void): () => void
@@ -62,8 +63,11 @@ export class TauriEventAdapter {
     const u3 = await listen<any>('agent-history-updated', (e) => {
       bus.emit('agent-history-updated', e.payload)
     })
+    const u4 = await listen<any>('match-history-ready', (e) => {
+      bus.emit('match-history-ready', e.payload)
+    })
 
-    this.unlisteners.push(u1, u2, u3)
+    this.unlisteners.push(u1, u2, u3, u4)
   }
 
   dispose(): void {

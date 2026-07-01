@@ -350,7 +350,6 @@ const zh = {
     connected: "已连接",
     disconnected: "未连接",
     currentHero: "当前调试英雄",
-    commandBed: "命令行测试床",
     stopMatch: "停止对局",
     switchLabel: "开关设置",
     godMode: "上帝模式",
@@ -412,48 +411,6 @@ const zh = {
       insertAiBtn: "➕ 插入 AI 普通发言",
       observerPanel: "组件渲染实时观察面板",
       loadingPlaceholder: "正在等待重新加载 Mock 对话历史流...",
-    },
-    command: {
-      title: "Bash 命令行调试工具",
-      subtitle: "Direct BashTool Sandbox & Command-line Bed",
-      currentEnv: "当前环境",
-      backBtn: "返回调试页",
-      presetTitle: "内置预设指令",
-      runBtn: "直接运行",
-      customTitle: "自定义指令执行",
-      executing: "正在执行...",
-      runCommandBtn: "运行命令",
-      clearConsoleBtn: "清空控制台",
-      executingHint: "正在向 Tauri 唤起 Bash 命令行测试，请稍候...",
-      noRecord: "暂无控制台运行记录",
-      runHint: "在上方输入或在左侧选择一则预设命令，点击「运行命令」即可启动对 Bash 终端的连接测试。",
-      systemException: "系统异常",
-      presets: {
-        help: {
-          name: "命令帮助",
-          description: "查看 lol_cli 的完整命令行帮助说明",
-        },
-        observe: {
-          name: "系统观测",
-          description: "获取指定 ID 英雄（如 Order 阵营）的当前状态及周边小兵",
-        },
-        move: {
-          name: "移动指令",
-          description: "让英雄移动到双方小兵最初的碰撞交汇点 (2649, 12875)",
-        },
-        attack: {
-          name: "普通攻击",
-          description: "让英雄普通攻击指定的实体（例如附近敌方的近战兵/远程兵）",
-        },
-        skill: {
-          name: "释放技能",
-          description: "在坐标 (2750, 12320) 处对目标区域释放 Q 技能 (Index 0)",
-        },
-        stop: {
-          name: "紧急停止",
-          description: "中止英雄正在进行的移动、普通攻击或施法状态，立于原地",
-        },
-      },
     },
   },
 

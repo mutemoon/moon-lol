@@ -24,6 +24,7 @@ lol_champions = { path = "crates/lol_champions" }
 lol_agent = { path = "crates/lol_agent" }
 lol_client = { path = "crates/lol_client" }
 lol_agent_runtime = { path = "crates/lol_agent_runtime" }
+lol_game_process_manager = { path = "crates/lol_game_process_manager" }
 rmcp = { version = "1.8", features = ["client", "macros", "server"] }
 gltf = "1.4.1"
 serde_json = "1.0"

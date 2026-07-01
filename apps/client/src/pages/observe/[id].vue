@@ -6,9 +6,9 @@ meta:
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { matchesApi, type Match, type MatchEvent } from "@/services/cloudApi";
-import { backendClient } from "@/services/backend";
 import { services } from "@/services/provider";
+import { isDesktop } from "@/lib/utils";
+import type { Match, MatchEvent } from "@/services/types";
 import { useWsClient } from "@/composables/useWsClient";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -37,8 +37,9 @@ import {
 // 主区域用三段：摘要带 / 阵营状态对照 / 事件时间线。
 // 桌面端额外起本地 Bevy 进程做原生窗口重放（不走 canvas）；Web 端仅时间线。
 
-const isDesktop = services.isDesktop;
 const ws = useWsClient();
+const localGameId = ref<string | null>(null);
+const localGamePort = ref<number | null>(null);
 
 const route = useRoute();
 const router = useRouter();
@@ -96,9 +97,9 @@ async function refresh() {
   if (paused.value) return;
   try {
     if (!match.value || match.value.status === "running") {
-      match.value = await matchesApi.get(matchId.value);
+      match.value = await services.cloud.getMatch(matchId.value);
     }
-    const delta = await matchesApi.getEvents(matchId.value, lastSeq, 200);
+    const delta = await services.cloud.getMatchEvents(matchId.value, lastSeq, 200);
     if (delta.length) {
       events.value.push(...delta);
       const last = delta[delta.length - 1];
@@ -154,7 +155,7 @@ async function handleConfirmStop() {
   confirmDialogLoading.value = true;
   confirmDialogError.value = "";
   try {
-    await matchesApi.stop(matchId.value);
+    await services.cloud.stopMatch(matchId.value);
     confirmDialogOpen.value = false;
     await refresh();
   } catch (e: any) {
@@ -190,13 +191,15 @@ async function startDesktopReplay() {
   replayError.value = "";
   try {
     const mode = match.value?.mode ?? "1v1";
-    await backendClient.startGame({
+    const res = await services.local.startGame({
       mode,
       // 观战不指定具体英雄；引擎会加载默认场景。
       champion: "Fiora",
       sceneName: null,
     });
-    await ws.connect(true);
+    localGameId.value = res.id;
+    localGamePort.value = res.port;
+    await ws.connect(res.id);
     replayStatus.value = "running";
   } catch (e: any) {
     replayStatus.value = "failed";
@@ -212,10 +215,14 @@ async function stopDesktopReplay() {
     /* ignore */
   }
   try {
-    await backendClient.stopGame();
+    if (localGameId.value) {
+      await services.local.stopGame(localGameId.value);
+    }
   } catch {
     /* ignore */
   }
+  localGameId.value = null;
+  localGamePort.value = null;
   replayStatus.value = "idle";
 }
 </script>

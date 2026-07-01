@@ -6,7 +6,8 @@ meta:
 <script setup lang="ts">
 import { ref, onMounted, computed } from "vue";
 import { useRouter } from "vue-router";
-import { roomsApi, type Room, type RoomConstraints } from "@/services/cloudApi";
+import { services } from "@/services/provider";
+import type { Room, RoomConstraints } from "@/services/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -61,8 +62,8 @@ const refreshing = ref(false);
 async function refresh() {
   try {
     const [mine, lobby] = await Promise.all([
-      roomsApi.listMine().catch(() => [] as Room[]),
-      roomsApi.listLobby().catch(() => [] as Room[]),
+      services.cloud.listMyRooms().catch(() => [] as Room[]),
+      services.cloud.listLobbyRooms().catch(() => [] as Room[]),
     ]);
     myRooms.value = mine;
     lobbyRooms.value = lobby;
@@ -86,7 +87,7 @@ async function handleJoinByCode() {
   }
   joining.value = true;
   try {
-    const room = await roomsApi.joinByCode(c);
+    const room = await services.cloud.joinRoomByCode(c);
     router.push(`/rooms/${room.id}`);
   } catch (e: any) {
     joinError.value = e.message || "加入失败";
@@ -103,7 +104,7 @@ async function handleCreate() {
   }
   creating.value = true;
   try {
-    const room = await roomsApi.create(draft.value.name.trim(), draft.value.constraints);
+    const room = await services.cloud.createRoom(draft.value.name.trim(), draft.value.constraints);
     showCreate.value = false;
     router.push(`/rooms/${room.id}`);
   } catch (e: any) {
@@ -121,7 +122,7 @@ async function handleJoin(room: Room) {
     return;
   }
   try {
-    await roomsApi.join(room.id);
+    await services.cloud.joinRoom(room.id);
     router.push(`/rooms/${room.id}`);
   } catch (e: any) {
     console.error(e);
