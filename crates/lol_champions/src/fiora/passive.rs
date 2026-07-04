@@ -372,18 +372,19 @@ pub fn update_vital_visuals(
 
     // 更新已存在的视觉；目标已无 Vital 的视觉加入回收列表
     let mut existing_targets: HashSet<Entity> = HashSet::new();
-    let mut to_despawn: Vec<Entity> = Vec::new();
+    let mut to_despawn: Vec<(Entity, Entity)> = Vec::new();
     for (visual_entity, visual, mut transform) in q_visual.iter_mut() {
         if let Some((pos, direction)) = vital_map.get(&visual.target) {
             transform.translation = Vec3::new(pos.x, VITAL_SECTOR_Y, pos.z);
             transform.rotation = vital_direction_rotation(direction);
             existing_targets.insert(visual.target);
         } else {
-            to_despawn.push(visual_entity);
+            to_despawn.push((visual_entity, visual.target));
         }
     }
-    for entity in to_despawn {
+    for (entity, target) in to_despawn {
         commands.entity(entity).despawn();
+        info!("已销毁目标 {:?} 的剑姬要害视觉", target);
     }
 
     // 仅在渲染模式（资源可用）下 lazily 创建并缓存 Mesh / 材质
@@ -427,6 +428,10 @@ pub fn update_vital_visuals(
         if let (Some(mesh), Some(material)) = (mesh_handle.as_ref(), material_handle.as_ref()) {
             cmd.insert((Mesh3d(mesh.clone()), MeshMaterial3d(material.clone())));
         }
+        info!(
+            "已生成目标 {:?} 的剑姬要害视觉，朝向 {:?}",
+            target, vital.direction
+        );
     }
 }
 
