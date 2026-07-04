@@ -24,7 +24,7 @@ fn main() {
             PluginRender,
             PluginChampions,
         ))
-        .insert_resource(GameScenes::new(vec!["games/test.ron".to_owned()]))
+        .insert_resource(GameScenes::new(vec!["games/test-fiora.ron".to_owned()]))
         .insert_resource(MapPaths::new("test"))
         .insert_resource(NavigationDebug)
         .run();

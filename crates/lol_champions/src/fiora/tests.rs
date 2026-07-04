@@ -6,7 +6,7 @@ use bevy::math::Vec2;
 use crate::fiora::Fiora;
 use crate::test_utils::*;
 
-fn fiora_config() -> ChampionHarnessConfig {
+pub fn fiora_config() -> ChampionHarnessConfig {
     ChampionHarnessConfig {
         champion_dir: "fiora",
         config_path: "characters/fiora/config.ron",
@@ -17,10 +17,10 @@ fn fiora_config() -> ChampionHarnessConfig {
     }
 }
 
-fn build_headless(name: &str) -> ChampionTestHarness {
+pub fn build_headless(name: &str) -> ChampionTestHarness {
     ChampionTestHarness::build::<Fiora>(name, HarnessMode::Headless, &fiora_config())
 }
 
-fn build_render(name: &str) -> ChampionTestHarness {
+pub fn build_render(name: &str) -> ChampionTestHarness {
     ChampionTestHarness::build::<Fiora>(name, HarnessMode::Render, &fiora_config())
 }

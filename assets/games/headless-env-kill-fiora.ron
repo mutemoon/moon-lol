@@ -16,6 +16,7 @@
                 ),
                 "lol_core::skill::SkillPoints": (18),
                 "lol_core::team::Team": Order,
+                "lol_render::controller::SelfPlayer": (),
                 "lol_base::character::ConfigCharacterRecord": (
                     character_record: Path("characters/riven/config.ron"),
                 ),

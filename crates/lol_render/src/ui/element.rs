@@ -7,7 +7,7 @@ use std::collections::HashMap;
 use bevy::prelude::*;
 pub use init::{
     AnimAssets, ButtonAssets, DesaturateAssets, IconAssets, RegionAssets, SceneAssets,
-    startup_load_ui_data,
+    UiFileAssets, UiLoadProgress, poll_ui_load, startup_load_ui_data,
 };
 use lol_base::hash::hash_bin;
 use lol_base::hash_key::HashKey;
@@ -15,7 +15,8 @@ use lol_base::ui::{
     LOLHeroFloatingInfoBarData, LOLStructureFloatingInfoBarData, LOLUiElementEffectAnimationData,
     LOLUiElementEffectDesaturateData, LOLUiElementEffectFillPercentageData,
     LOLUiElementEffectInstancedData, LOLUiElementGroupButtonData, LOLUiElementIconData,
-    LOLUiElementRegionData, LOLUiElementTextData, LOLUiSceneData, LOLUnitFloatingInfoBarData,
+    LOLUiElementRegionData, LOLUiElementTextData, LOLUiFile, LOLUiSceneData,
+    LOLUnitFloatingInfoBarData,
 };
 use lol_base::ui_components::UIButton;
 pub use lol_base::ui_components::UIElement;
@@ -39,6 +40,9 @@ impl Plugin for PluginUIElement {
         app.init_asset::<LOLUnitFloatingInfoBarData>();
         app.init_asset::<LOLHeroFloatingInfoBarData>();
         app.init_asset::<LOLStructureFloatingInfoBarData>();
+        app.init_asset::<LOLUiFile>();
+        app.init_asset_loader::<crate::loaders::ui::UiFileLoader>();
+        app.init_resource::<UiLoadProgress>();
 
         app.init_resource::<lol_base::ui::LOLPlayerFrameViewController>();
         app.init_resource::<lol_base::ui::LOLFloatingInfoBarViewController>();
@@ -144,6 +148,7 @@ impl Plugin for PluginUIElement {
         app.register_type::<HashKey<lol_base::ui::LOLUiElementTextData>>();
 
         app.add_systems(Startup, startup_load_ui_data);
+        app.add_systems(Update, poll_ui_load.run_if(in_state(UIState::Loading)));
         app.add_systems(
             Update,
             (

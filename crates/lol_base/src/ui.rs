@@ -258,7 +258,7 @@ pub struct LOLSceneDataExport {
     pub elements: Vec<u32>,
 }
 
-#[derive(Default, Serialize, Deserialize, Debug, Clone, Reflect)]
+#[derive(Default, Serialize, Deserialize, Debug, Clone, Asset, Reflect)]
 pub struct LOLUiFile {
     pub elements: BTreeMap<u32, LOLUiElementIconData>,
     pub animation_elements: BTreeMap<u32, LOLUiElementEffectAnimationData>,

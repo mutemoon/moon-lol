@@ -15,6 +15,9 @@ assets/*
 .vs
 
 *.db
+*.db-shm
+*.db-wal
+
 .docs-cache
 hashes
 

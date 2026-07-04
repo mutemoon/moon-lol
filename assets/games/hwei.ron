@@ -12,6 +12,7 @@
                 "lol_core::damage::Damage": (100.0),
                 "lol_champions::hwei::Hwei": (),
                 "lol_render::controller::Controller": (),
+                "lol_render::controller::SelfPlayer": (),
                 "lol_render::camera::Focus": (),
                 "lol_base::character::ConfigCharacterRecord": (
                     character_record: Path("characters/hwei/config.ron"),

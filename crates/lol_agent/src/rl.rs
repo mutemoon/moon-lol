@@ -225,8 +225,6 @@ impl MoonLoLEnv {
 #[derive(Resource, Default)]
 pub struct RlEnvs(pub HashMap<Entity, MoonLoLEnv>);
 
-
-
 #[cfg(test)]
 mod tests {
     use bevy::prelude::Vec2;
@@ -357,8 +355,6 @@ mod tests {
         assert!(!env.step(obs(myself(0, 0, 0, 0, 100.0), None)).truncated);
         assert!(env.step(obs(myself(0, 0, 0, 0, 100.0), None)).truncated);
     }
-
-
 
     #[test]
     fn step_result_serializes_for_telemetry() {

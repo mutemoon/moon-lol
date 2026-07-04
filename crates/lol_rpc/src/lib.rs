@@ -114,8 +114,6 @@ pub fn resolve_target(
     }
 }
 
-
-
 #[cfg(test)]
 mod tests {
     use super::*;

@@ -24,22 +24,25 @@ pub type TextAssets = Assets<LOLUiElementTextData>;
 pub type InstancedAssets = Assets<LOLUiElementEffectInstancedData>;
 pub type FillPercentageAssets = Assets<LOLUiElementEffectFillPercentageData>;
 pub type SceneAssets = Assets<LOLUiSceneData>;
+pub type UiFileAssets = Assets<LOLUiFile>;
 
+/// 跟踪 UI 配置的异步加载进度。
+///
+/// `handles` 由 `startup_load_ui_data` 在启动时填充；`poll_ui_load` 据此等待
+/// 所有 `LOLUiFile` 加载完成后再注册资产、spawn 实体；`ui_ron_ready` 由
+/// `ui/ui.ron` 的 `WorldInstanceReady` observer 置位。两者均就绪后才进入
+/// `UIState::Loaded`。
+#[derive(Resource, Default)]
+pub struct UiLoadProgress {
+    pub handles: Vec<Handle<LOLUiFile>>,
+    pub elements_spawned: bool,
+    pub ui_ron_ready: bool,
+}
+
+/// 启动阶段：通过 `asset_server` 发起所有 UI 配置的异步加载。
 pub fn startup_load_ui_data(
     mut commands: Commands,
-    mut res_ui_element_entity: ResMut<UIElementEntity>,
-    mut icon_assets: ResMut<IconAssets>,
-    mut anim_assets: ResMut<AnimAssets>,
-    mut desaturate_assets: ResMut<DesaturateAssets>,
-    mut button_assets: ResMut<ButtonAssets>,
-    mut region_assets: ResMut<RegionAssets>,
-    mut text_assets: ResMut<TextAssets>,
-    mut instanced_assets: ResMut<InstancedAssets>,
-    mut fill_percentage_assets: ResMut<FillPercentageAssets>,
-    mut scene_assets: ResMut<SceneAssets>,
-    mut unit_floating_info_bar_assets: ResMut<Assets<LOLUnitFloatingInfoBarData>>,
-    mut hero_floating_info_bar_assets: ResMut<Assets<LOLHeroFloatingInfoBarData>>,
-    mut structure_floating_info_bar_assets: ResMut<Assets<LOLStructureFloatingInfoBarData>>,
+    mut progress: ResMut<UiLoadProgress>,
     res_asset_server: Res<AssetServer>,
 ) {
     let ui_paths = LOLUiPaths::default();
@@ -56,21 +59,105 @@ pub fn startup_load_ui_data(
         ui_paths.lol_game_header_ron(),
     ];
 
-    let mut all_ui_files = Vec::new();
-
     for path in ron_paths {
-        let Ok(content) = std::fs::read_to_string(format!("assets/{}", path)) else {
-            warn!("无法读取 UI 数据文件: {}", path);
-            continue;
-        };
-
-        let Ok(data) = ron::from_str::<LOLUiFile>(&content) else {
-            warn!("无法解析 UI 数据文件: {}", path);
-            continue;
-        };
-        all_ui_files.push(data);
+        // 类型推断走 UiFileLoader（按 Asset 类型消歧 .ron 扩展名）
+        progress.handles.push(res_asset_server.load(path));
     }
 
+    // ui/ui.ron 是 DynamicWorld，负责写入视图控制器 Resource；就绪后置位标志。
+    commands
+        .spawn(DynamicWorldRoot(res_asset_server.load(ui_paths.ui_ron())))
+        .observe(
+            |trigger: On<WorldInstanceReady>, mut progress: ResMut<UiLoadProgress>| {
+                info!("UI 场景加载完成并就绪: {:?}", trigger.event_target());
+                progress.ui_ron_ready = true;
+            },
+        );
+}
+
+/// 等待 `LOLUiFile` 资产就绪后注册元素资产、spawn 实体，并在 ui.ron 也就绪时
+/// 切换到 `UIState::Loaded`。
+pub fn poll_ui_load(
+    mut commands: Commands,
+    mut progress: ResMut<UiLoadProgress>,
+    ui_file_assets: Res<UiFileAssets>,
+    mut res_ui_element_entity: ResMut<UIElementEntity>,
+    mut icon_assets: ResMut<IconAssets>,
+    mut anim_assets: ResMut<AnimAssets>,
+    mut desaturate_assets: ResMut<DesaturateAssets>,
+    mut button_assets: ResMut<ButtonAssets>,
+    mut region_assets: ResMut<RegionAssets>,
+    mut text_assets: ResMut<TextAssets>,
+    mut instanced_assets: ResMut<InstancedAssets>,
+    mut fill_percentage_assets: ResMut<FillPercentageAssets>,
+    mut scene_assets: ResMut<SceneAssets>,
+    mut unit_floating_info_bar_assets: ResMut<Assets<LOLUnitFloatingInfoBarData>>,
+    mut hero_floating_info_bar_assets: ResMut<Assets<LOLHeroFloatingInfoBarData>>,
+    mut structure_floating_info_bar_assets: ResMut<Assets<LOLStructureFloatingInfoBarData>>,
+) {
+    if !progress.elements_spawned {
+        let all_loaded = progress
+            .handles
+            .iter()
+            .all(|h| ui_file_assets.get(h).is_some());
+        if !all_loaded {
+            return;
+        }
+
+        let all_ui_files: Vec<LOLUiFile> = progress
+            .handles
+            .iter()
+            .map(|h| ui_file_assets.get(h).cloned().unwrap())
+            .collect();
+
+        spawn_ui_elements(
+            &mut commands,
+            &mut res_ui_element_entity,
+            &mut icon_assets,
+            &mut anim_assets,
+            &mut desaturate_assets,
+            &mut button_assets,
+            &mut region_assets,
+            &mut text_assets,
+            &mut instanced_assets,
+            &mut fill_percentage_assets,
+            &mut scene_assets,
+            &mut unit_floating_info_bar_assets,
+            &mut hero_floating_info_bar_assets,
+            &mut structure_floating_info_bar_assets,
+            &all_ui_files,
+        );
+
+        progress.elements_spawned = true;
+        info!(
+            "UI 元素初始化完成，一共 {} 个实体",
+            res_ui_element_entity.map.len()
+        );
+    }
+
+    if progress.elements_spawned && progress.ui_ron_ready {
+        commands.set_state(UIState::Loaded);
+    }
+}
+
+#[allow(clippy::too_many_arguments)]
+fn spawn_ui_elements(
+    commands: &mut Commands,
+    res_ui_element_entity: &mut UIElementEntity,
+    icon_assets: &mut IconAssets,
+    anim_assets: &mut AnimAssets,
+    desaturate_assets: &mut DesaturateAssets,
+    button_assets: &mut ButtonAssets,
+    region_assets: &mut RegionAssets,
+    text_assets: &mut TextAssets,
+    instanced_assets: &mut InstancedAssets,
+    fill_percentage_assets: &mut FillPercentageAssets,
+    scene_assets: &mut SceneAssets,
+    unit_floating_info_bar_assets: &mut Assets<LOLUnitFloatingInfoBarData>,
+    hero_floating_info_bar_assets: &mut Assets<LOLHeroFloatingInfoBarData>,
+    structure_floating_info_bar_assets: &mut Assets<LOLStructureFloatingInfoBarData>,
+    all_ui_files: &[LOLUiFile],
+) {
     let mut combined_scenes = HashMap::new();
     let mut combined_elements = HashMap::new();
     let mut combined_buttons = HashMap::new();
@@ -82,7 +169,7 @@ pub fn startup_load_ui_data(
     let mut combined_fill_percentages = HashMap::new();
 
     // 第一阶段：创建所有 Asset 并收集数据
-    for data in &all_ui_files {
+    for data in all_ui_files {
         for (hash, scene_data) in &data.scenes {
             scene_assets.add_hash(*hash, scene_data.clone());
             combined_scenes.insert(*hash, scene_data.clone());
@@ -305,11 +392,6 @@ pub fn startup_load_ui_data(
         res_ui_element_entity.add(*hash, entity);
     }
 
-    info!(
-        "UI 元素初始化完成，一共 {} 个实体",
-        res_ui_element_entity.map.len()
-    );
-
     // save_ui_tree_to_json(
     //     &combined_scenes,
     //     &combined_elements,
@@ -319,13 +401,4 @@ pub fn startup_load_ui_data(
     //     &combined_texts,
     //     &combined_instanceds,
     // );
-
-    commands
-        .spawn(DynamicWorldRoot(res_asset_server.load("ui/ui.ron")))
-        .observe(
-            move |event: On<WorldInstanceReady>, mut commands: Commands| {
-                info!("UI 场景加载完成并就绪: {:?}", event.event_target());
-                commands.set_state(UIState::Loaded);
-            },
-        );
 }

@@ -21,6 +21,7 @@ use lol_core::navigation::navigation::NavigationDebug;
 use lol_core::skill::{CoolDown, Skill, SkillRecastWindow, Skills, get_skill_value};
 use lol_core::team::Team;
 use lol_render::PluginRender;
+use lol_render::controller::SelfPlayer;
 use lol_render::test_render::{
     CommandRenderVideo, PluginSkillTestRender, SkillTestRenderConfig, SkillTestVideoFormat,
     SkillTestVideoOutput,
@@ -155,6 +156,7 @@ impl ChampionTestHarness {
                 ConfigCharacterRecord {
                     character_record: config_handle.clone(),
                 },
+                SelfPlayer,
             ))
             .id();
 
@@ -479,7 +481,8 @@ pub fn render_output_dir(workspace_root: &PathBuf, champion: &str) -> PathBuf {
 }
 
 pub fn should_run_render_tests() -> bool {
-    std::env::var("MOON_LOL_RUN_RENDER_TESTS").as_deref() == Ok("1")
+    // std::env::var("MOON_LOL_RUN_RENDER_TESTS").as_deref() == Ok("1")
+    true
 }
 
 pub fn render_test_guard() -> bool {

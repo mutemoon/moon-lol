@@ -53,7 +53,10 @@ pub fn on_rl_step(
         let step_result = env.step(obs.clone());
         let mut v = serde_json::to_value(&step_result).map_err(|e| e.to_string())?;
         if let Value::Object(ref mut map) = v {
-            map.insert("observation".into(), serde_json::to_value(&obs).map_err(|e| e.to_string())?);
+            map.insert(
+                "observation".into(),
+                serde_json::to_value(&obs).map_err(|e| e.to_string())?,
+            );
         }
 
         Ok(v)

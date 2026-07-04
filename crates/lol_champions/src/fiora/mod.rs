@@ -1,21 +1,20 @@
 pub mod e;
 pub mod passive;
+pub mod q;
 pub mod r;
 
+#[cfg(test)]
+mod passive_tests;
+#[cfg(test)]
+mod q_tests;
 #[cfg(test)]
 mod tests;
 
 use bevy::prelude::*;
-use lol_base::animation_names::{ANIM_SPELL1, ANIM_SPELL2};
+use lol_base::animation_names::ANIM_SPELL2;
 use lol_base::render_cmd::CommandAnimationPlay;
-use lol_base::spell::Spell;
-use lol_core::action::damage::{
-    ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
-};
-use lol_core::action::dash::{ActionDash, DashMoveType};
 use lol_core::attack::{BuffAttack, CommandAttackReset};
 use lol_core::base::buff::BuffOf;
-use lol_core::damage::DamageType;
 use lol_core::entities::champion::Champion;
 use lol_core::skill::{EventSkillCast, Skill, SkillSlot};
 
@@ -31,12 +30,15 @@ impl Plugin for PluginFiora {
         app.add_systems(
             FixedUpdate,
             (
+                passive::attach_fiora_passive_ability,
                 passive::update_add_vital,
                 passive::update_remove_vital,
                 r::fixed_update,
+                passive::update_vital_visuals,
             ),
         );
         app.add_observer(on_fiora_skill_cast);
+        app.add_observer(q::on_fiora_q_dash_end);
         app.add_observer(passive::on_passive_damage_create);
         app.add_observer(e::on_event_attack_end);
         app.add_observer(r::on_r_damage_create);
@@ -52,7 +54,6 @@ fn on_fiora_skill_cast(
     trigger: On<EventSkillCast>,
     mut commands: Commands,
     q_fiora: Query<(), With<Fiora>>,
-    q_transform: Query<&Transform>,
     q_skill: Query<&Skill>,
 ) {
     let entity = trigger.event_target();
@@ -65,55 +66,18 @@ fn on_fiora_skill_cast(
     };
 
     match skill.slot {
-        SkillSlot::Q => cast_fiora_q(
+        SkillSlot::Q => q::cast_fiora_q(
             &mut commands,
-            &q_transform,
             entity,
             trigger.point,
             skill.spell.clone(),
+            skill.level,
         ),
         SkillSlot::W => cast_fiora_w(&mut commands, entity),
         SkillSlot::E => cast_fiora_e(&mut commands, entity),
         SkillSlot::R => cast_fiora_r(&mut commands, entity),
         _ => {}
     }
-}
-
-fn cast_fiora_q(
-    commands: &mut Commands,
-    _q_transform: &Query<&Transform>,
-    entity: Entity,
-    point: Vec2,
-    skill_spell: Handle<Spell>,
-) {
-    commands.trigger(CommandAnimationPlay {
-        entity,
-        hash: ANIM_SPELL1.to_string(),
-        repeat: false,
-        duration: None,
-    });
-    commands.trigger(ActionDash {
-        entity,
-        point: point,
-        skill: skill_spell.clone(),
-        move_type: DashMoveType::Pointer { max: 300.0 },
-        damage: None,
-        speed: 1000.0,
-    });
-    commands.trigger(ActionDamage {
-        entity,
-        skill: skill_spell,
-        effects: vec![ActionDamageEffect {
-            shape: DamageShape::Nearest {
-                max_distance: 300.0,
-            },
-            damage_list: vec![TargetDamage {
-                filter: TargetFilter::All,
-                amount: "total_damage".to_string(),
-                damage_type: DamageType::Physical,
-            }],
-        }],
-    });
 }
 
 fn cast_fiora_w(commands: &mut Commands, entity: Entity) {
