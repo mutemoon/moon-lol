@@ -22,8 +22,8 @@ tokio-tungstenite.workspace = true
 # Crate-specific dependencies
 axum = { version = "0.7.9", features = ["ws"] }
 tower-http = { version = "0.5.2", features = ["cors", "trace"] }
-tracing = "0.1.40"
-tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
+tracing.workspace = true
+tracing-subscriber.workspace = true
 async-trait = "0.1.80"
 # sqlx：postgres + sqlite（经 lol_core 间接引入）共享同一 libsqlite3-sys，
 # 现在整个 workspace 已无 rusqlite，sqlx-sqlite 是唯一 sqlite linker，无冲突。

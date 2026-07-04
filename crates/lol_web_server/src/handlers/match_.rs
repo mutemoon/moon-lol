@@ -1,16 +1,16 @@
 //! Match 路由：列表 / 查询 / 事件流 / 停止对局。
 
-use axum::extract::{Path, Query, State};
 use axum::extract::ws::{Message, WebSocket, WebSocketUpgrade};
-use axum::http::header::AUTHORIZATION;
+use axum::extract::{Path, Query, State};
 use axum::http::HeaderMap;
-use jsonwebtoken::{decode, DecodingKey, Validation};
+use axum::http::header::AUTHORIZATION;
+use jsonwebtoken::{DecodingKey, Validation, decode};
 use serde::Deserialize;
 use uuid::Uuid;
 
 use super::response::ApiResponse;
 use super::{AppState, AuthUser, JwtClaims};
-use crate::service::match_supervisor::{get_broadcasters, SpectatorMessage};
+use crate::service::match_supervisor::{SpectatorMessage, get_broadcasters};
 
 #[derive(Deserialize)]
 pub struct ListMatchesQuery {
@@ -99,8 +99,12 @@ pub async fn get_match_events_ws(
     Query(q): Query<WsEventsQuery>,
 ) -> impl axum::response::IntoResponse {
     // 1. 从 Header 或 Query 参数中获取并验证 Token
-    let token = if let Some(auth_header) = headers.get(AUTHORIZATION).and_then(|v| v.to_str().ok()) {
-        auth_header.strip_prefix("Bearer ").unwrap_or(auth_header).to_string()
+    let token = if let Some(auth_header) = headers.get(AUTHORIZATION).and_then(|v| v.to_str().ok())
+    {
+        auth_header
+            .strip_prefix("Bearer ")
+            .unwrap_or(auth_header)
+            .to_string()
     } else if let Some(token_param) = q.token.clone() {
         token_param
     } else {
@@ -159,7 +163,11 @@ async fn handle_ws_events(
     let limit = 200;
     let mut current_from = from_seq;
     loop {
-        match state.match_service.get_events(user_id, match_id, current_from, limit).await {
+        match state
+            .match_service
+            .get_events(user_id, match_id, current_from, limit)
+            .await
+        {
             Ok(events) => {
                 if events.is_empty() {
                     break;

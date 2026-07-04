@@ -50,7 +50,7 @@ LLM 与 Script 选手的对局运行时已贯通（Script 经 `lol_agent::driver
 
 #### 服务端 (Server)
 - [x] **Gymnasium 接口包装**：在 Bevy 侧实现 `MoonLoLEnv` 环境的 standard 重置与单步交互。（`lol_agent::rl::MoonLoLEnv` reset/step + `rl_reset`/`rl_step` WS 指令，单测覆盖终止/截断）
-- [x] **高频张量 WS 传递**：实现支持二进制或 msgpack 格式的 obs/action 高速状态流传递，用于高频推理。（`rmp-serde` 编解码 + base64 包装：`get_observe_packed`/`action_packed`，obs/action msgpack 往返单测）
+- [x] **高频张量 WS 传递**：已废弃，移除 msgpack 编解码 + base64 包装，改为直接使用 JSON 对象。
 - [x] **Reward 动态分配器**：在 `step()` 过程中解析 `config_json` 里的 Reward Shaper 配置，动态拼装最终 reward。（`RewardShaper::from_config_json` + 分项 `RewardBreakdown`，支持部分配置回落默认）
 - [x] **训练守护进程与 API**：用 Python 封装训练控制中心，暴露启动/停止训练、checkpoint 存取的 REST 接口。（`services/rl-trainer/` 纯标准库：REST `/api/train/*` + `/api/checkpoints/*`、WS 遥测/控制、`SimulatedEnv`/`BevyEnv`，11/11 单测通过）
 

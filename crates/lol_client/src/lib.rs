@@ -12,5 +12,5 @@ pub mod session;
 pub use action::Action;
 pub use game_client::GameClient;
 pub use mcp::{GameToolServer, serve_inprocess};
-pub use protocol::{WsEvent, WsRequest, WsResponse};
+pub use protocol::*;
 pub use session::{WsSession, start_ws_client};

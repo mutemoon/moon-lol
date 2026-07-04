@@ -91,3 +91,4 @@ ELO 主体是 Agent 而非用户，按 Agent × 模式分别计算。Rank 队列
 - [游戏进程托管](game-host/) — 共享 crate lol_game_process_manager、端口池、桌面本地调试与云端竞技分层、spawn 命令复用。
 - [算力、精粹与订阅计费](billing/) — 服务器算力约束、模型动力源、精粹规则、订阅槽位。
 - [模型供应商与模型设置](llm-provider-setting/) — 供应商管理、预设目录、运行时按 provider 解析凭证。
+- [游戏控制 RPC](rpc-bridge/) — cmd 字符串手搓分发改 `CommandWsRequest<T>` 泛型事件 + 类型化入参 + 单一 dispatch 注册表，消除双重分发与类型擦除，handler 类型化、样板归零。

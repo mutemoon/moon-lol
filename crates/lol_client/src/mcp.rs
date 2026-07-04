@@ -17,13 +17,53 @@ pub struct ObserveArgs {
     pub entity_id: u64,
 }
 
-/// `action` 工具入参。
+/// `move_to` 工具入参。
 #[derive(Serialize, Deserialize, JsonSchema)]
-pub struct ActionArgs {
+pub struct MoveToArgs {
     /// 操作的英雄实体 ID
     pub entity_id: u64,
-    /// 下达的动作
-    pub action: Action,
+    /// 目标位置 X 坐标
+    pub x: f32,
+    /// 目标位置 Y 坐标
+    pub y: f32,
+}
+
+/// `attack` 工具入参。
+#[derive(Serialize, Deserialize, JsonSchema)]
+pub struct AttackArgs {
+    /// 操作的英雄实体 ID
+    pub entity_id: u64,
+    /// 目标实体 ID
+    pub target_id: u64,
+}
+
+/// `stop` 工具入参。
+#[derive(Serialize, Deserialize, JsonSchema)]
+pub struct StopArgs {
+    /// 操作的英雄实体 ID
+    pub entity_id: u64,
+}
+
+/// `cast_skill` 工具入参。
+#[derive(Serialize, Deserialize, JsonSchema)]
+pub struct CastSkillArgs {
+    /// 操作的英雄实体 ID
+    pub entity_id: u64,
+    /// 技能索引 (0: Q, 1: W, 2: E, 3: R)
+    pub index: usize,
+    /// 目标位置 X 坐标
+    pub x: f32,
+    /// 目标位置 Y 坐标
+    pub y: f32,
+}
+
+/// `level_up_skill` 工具入参。
+#[derive(Serialize, Deserialize, JsonSchema)]
+pub struct LevelUpSkillArgs {
+    /// 操作的英雄实体 ID
+    pub entity_id: u64,
+    /// 技能索引 (0: Q, 1: W, 2: E, 3: R)
+    pub index: usize,
 }
 
 /// MCP 工具层：仅暴露 observe / action，委托 [`GameClient`]。
@@ -48,22 +88,83 @@ impl GameToolServer {
     /// 获取指定英雄的局势观测数据
     #[tool(
         name = "observe",
-        description = "获取指定英雄实体的局势观测数据 (Observe JSON)，包含自身状态、附近小兵与英雄等"
+        description = "获取指定英雄实体的局势观测数据，返回高密度自然语言中文描述"
     )]
     async fn observe(&self, Parameters(args): Parameters<ObserveArgs>) -> String {
-        match self.client.observe(args.entity_id).await {
+        match self.client.observe(args.entity_id, false).await {
+            Ok(resp) => {
+                if resp.ok {
+                    match resp.data {
+                        Some(serde_json::Value::String(s)) => s,
+                        Some(data) => serde_json::to_string_pretty(&data)
+                            .unwrap_or_else(|_| "数据格式化失败".to_string()),
+                        None => "没有获取到观测数据".to_string(),
+                    }
+                } else {
+                    format!(
+                        "错误: {}",
+                        resp.error.unwrap_or_else(|| "未知错误".to_string())
+                    )
+                }
+            }
+            Err(e) => format!("错误: {}", e),
+        }
+    }
+
+    /// 移动指定英雄实体到目标坐标 [x, y]
+    #[tool(name = "move_to", description = "移动指定英雄实体到目标坐标 [x, y]")]
+    async fn move_to(&self, Parameters(args): Parameters<MoveToArgs>) -> String {
+        let action = Action::Move([args.x, args.y]);
+        match self.client.action(args.entity_id, action).await {
             Ok(resp) => format_response(resp),
             Err(e) => format!("错误: {}", e),
         }
     }
 
-    /// 下达英雄动作指令
+    /// 令指定英雄实体攻击目标实体
+    #[tool(name = "attack", description = "令指定英雄实体攻击目标实体")]
+    async fn attack(&self, Parameters(args): Parameters<AttackArgs>) -> String {
+        let action = Action::Attack(args.target_id);
+        match self.client.action(args.entity_id, action).await {
+            Ok(resp) => format_response(resp),
+            Err(e) => format!("错误: {}", e),
+        }
+    }
+
+    /// 令指定英雄实体停止当前动作
+    #[tool(name = "stop", description = "令指定英雄实体停止当前动作")]
+    async fn stop(&self, Parameters(args): Parameters<StopArgs>) -> String {
+        let action = Action::Stop;
+        match self.client.action(args.entity_id, action).await {
+            Ok(resp) => format_response(resp),
+            Err(e) => format!("错误: {}", e),
+        }
+    }
+
+    /// 令指定英雄实体对目标坐标 [x, y] 释放指定索引的技能
     #[tool(
-        name = "action",
-        description = "对指定英雄实体下达动作指令。action 可为 {\"Move\":[x,y]}、{\"Attack\":entity_id}、\"Stop\"、{\"Skill\":{\"index\":0,\"point\":[x,y]}}、{\"SkillLevelUp\":index}"
+        name = "cast_skill",
+        description = "令指定英雄实体对目标坐标 [x, y] 释放指定索引的技能 (0: Q, 1: W, 2: E, 3: R)"
     )]
-    async fn action(&self, Parameters(args): Parameters<ActionArgs>) -> String {
-        match self.client.action(args.entity_id, args.action).await {
+    async fn cast_skill(&self, Parameters(args): Parameters<CastSkillArgs>) -> String {
+        let action = Action::Skill {
+            index: args.index,
+            point: [args.x, args.y],
+        };
+        match self.client.action(args.entity_id, action).await {
+            Ok(resp) => format_response(resp),
+            Err(e) => format!("错误: {}", e),
+        }
+    }
+
+    /// 升级指定英雄实体的指定索引技能
+    #[tool(
+        name = "level_up_skill",
+        description = "升级指定英雄实体的指定索引技能 (0: Q, 1: W, 2: E, 3: R)"
+    )]
+    async fn level_up_skill(&self, Parameters(args): Parameters<LevelUpSkillArgs>) -> String {
+        let action = Action::SkillLevelUp(args.index);
+        match self.client.action(args.entity_id, action).await {
             Ok(resp) => format_response(resp),
             Err(e) => format!("错误: {}", e),
         }

@@ -116,3 +116,19 @@ impl WsResponse {
         }
     }
 }
+
+// ── WebSocket 命令字常量定义 ──
+pub const CMD_OBSERVE: &str = "observe";
+pub const CMD_ACTION: &str = "action";
+pub const CMD_GET_AGENTS: &str = "get_agents";
+pub const CMD_GET_STATE: &str = "get_state";
+pub const CMD_GET_TIME: &str = "get_time";
+pub const CMD_TOGGLE_PAUSE: &str = "toggle_pause";
+pub const CMD_SET_SPEED: &str = "set_speed";
+pub const CMD_SWITCH_CHAMPION: &str = "switch_champion";
+pub const CMD_GOD_MODE: &str = "god_mode";
+pub const CMD_TOGGLE_COOLDOWN: &str = "toggle_cooldown";
+pub const CMD_RESET_POSITION: &str = "reset_position";
+pub const CMD_SET_SCRIPT: &str = "set_script";
+pub const CMD_RL_RESET: &str = "rl_reset";
+pub const CMD_RL_STEP: &str = "rl_step";

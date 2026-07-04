@@ -1,7 +1,8 @@
 // 协议类型与会话逻辑统一在 Bevy-free 的 lol_client 中，此处仅做 Tauri 事件桥接。
-pub use lol_client::{start_ws_client as start_ws_client_inner, WsSession};
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
+
+pub use lol_client::{start_ws_client as start_ws_client_inner, WsSession};
 use tauri::ipc::Channel;
 use tokio::sync::mpsc;
 use uuid::Uuid;

@@ -55,7 +55,7 @@
   - `state()` → `get_state`
   - `switch_champion` / `god_mode` / `toggle_cooldown` / `reset_position` / `get_agents` / `set_script` / `rl_reset` / `rl_step` …
 - 命令面的服务端处理位于：
-  - 参见：[systems.rs](/crates/lol_agent/src/systems.rs)（`get_agents` / `get_observe` / `action` / `set_script` / `get_observe_packed` / `action_packed` / `rl_reset` / `rl_step`）
+  - 参见：[systems.rs](/crates/lol_agent/src/systems.rs)（`get_agents` / `get_observe` / `action` / `set_script` / `rl_reset` / `rl_step`）
   - 参见：[lib.rs](/crates/lol_debug/src/lib.rs)（`switch_champion` / `god_mode` / `toggle_cooldown` / `reset_position` / `toggle_pause` / `get_state`）
   - 参见：[action.rs](/crates/lol_core/src/action.rs)（`Action` 枚举，JSON 形状的权威来源）
 

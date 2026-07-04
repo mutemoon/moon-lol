@@ -1,5 +1,4 @@
-// 权威协议类型统一在 Bevy-free 的 lol_client 中定义，此处 re-export 供服务端使用。
-pub use lol_client::protocol::{WsEvent, WsRequest, WsResponse};
+pub use lol_client::protocol::*;
 use serde::Deserialize;
 
 // ── Command params（仅服务端解析使用）──
@@ -17,4 +16,9 @@ pub struct GodModeParams {
 #[derive(Deserialize, Debug)]
 pub struct ToggleCooldownParams {
     pub enabled: bool,
+}
+
+#[derive(Deserialize, Debug)]
+pub struct SetSpeedParams {
+    pub speed: f32,
 }

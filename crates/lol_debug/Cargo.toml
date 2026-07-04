@@ -10,6 +10,7 @@ lol_core.workspace = true
 lol_champions.workspace = true
 lol_render.workspace = true
 lol_server.workspace = true
+lol_rpc.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 tracing = "0.1"

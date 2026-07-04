@@ -7,16 +7,44 @@ use lol_core::entities::champion::Champion;
 use lol_core::skill::{CoolDown, Skill, SkillCooldownMode};
 use lol_core::team::Team;
 use lol_render::camera::CameraState;
-use lol_server::events::CommandWsRequest;
-use lol_server::protocol::{GodModeParams, SwitchChampionParams, ToggleCooldownParams, WsResponse};
+use lol_rpc::{CommandWsRequest as TypedCommandWsRequest, RpcAppExt};
 use lol_server::server::send_event;
+
+mod params;
+#[cfg(debug_assertions)]
+pub use params::{
+    GetStateParams, GetTimeParams, GodModeParams, ResetPositionParams, SetSpeedParams,
+    SwitchChampionParams, ToggleCooldownParams, TogglePauseParams,
+};
 
 pub struct PluginDebug;
 
 impl Plugin for PluginDebug {
     fn build(&self, app: &mut App) {
         app.insert_resource(GlobalDebugState::default());
-        app.add_observer(on_command_ws_request);
+
+        #[cfg(debug_assertions)]
+        {
+            // 注册 debug 面 RPC 命令
+            app.register_rpc::<SwitchChampionParams>("switch_champion");
+            app.register_rpc::<GodModeParams>("god_mode");
+            app.register_rpc::<ToggleCooldownParams>("toggle_cooldown");
+            app.register_rpc::<ResetPositionParams>("reset_position");
+            app.register_rpc::<TogglePauseParams>("toggle_pause");
+            app.register_rpc::<SetSpeedParams>("set_speed");
+            app.register_rpc::<GetStateParams>("get_state");
+            app.register_rpc::<GetTimeParams>("get_time");
+
+            app.add_observer(on_switch_champion)
+                .add_observer(on_god_mode)
+                .add_observer(on_toggle_cooldown)
+                .add_observer(on_reset_position)
+                .add_observer(on_toggle_pause)
+                .add_observer(on_set_speed)
+                .add_observer(on_get_state)
+                .add_observer(on_get_time);
+        }
+
         app.add_systems(PreUpdate, on_d_key_select_entity);
     }
 }
@@ -27,142 +55,6 @@ pub struct GlobalDebugState {
     pub cooldown_disabled: bool,
     pub god_mode: bool,
     pub paused: bool,
-}
-
-fn on_command_ws_request(
-    event: On<CommandWsRequest>,
-    mut commands: Commands,
-    asset_server: Res<AssetServer>,
-    mut debug_state: ResMut<GlobalDebugState>,
-    mut time: ResMut<Time<Virtual>>,
-    champions: Query<(Entity, &Champion, Option<&Name>)>,
-    mut skills: Query<(Entity, &mut Skill, Option<&mut CoolDown>)>,
-    mut transforms: Query<&mut Transform>,
-) {
-    let cmd = event.cmd.as_str();
-    let id = event.id;
-    let params = &event.params;
-
-    let result: Result<serde_json::Value, String> = match cmd {
-        "switch_champion" => (|| -> Result<serde_json::Value, String> {
-            let p: SwitchChampionParams = serde_json::from_value(params.clone())
-                .map_err(|e| format!("invalid params: {e}"))?;
-
-            let name = p.name;
-            let champion_entity = champions
-                .iter()
-                .map(|(e, _, _)| e)
-                .next()
-                .ok_or("no champion found")?;
-
-            let name_lower = name.to_lowercase();
-            let config_path = format!("characters/{name_lower}/config.ron");
-            let skin_path = format!("characters/{name_lower}/skins/skin0.ron");
-
-            let config_record = asset_server.load(&config_path);
-            let config_skin = asset_server.load(&skin_path);
-
-            let mut e = commands.entity(champion_entity);
-            e.remove::<Riven>();
-            e.remove::<Fiora>();
-
-            match name.as_str() {
-                "Riven" => {
-                    e.insert(Riven);
-                }
-                "Fiora" => {
-                    e.insert(Fiora);
-                }
-                _ => return Err("unknown champion".to_string()),
-            };
-
-            e.insert(ConfigCharacterRecord {
-                character_record: config_record,
-            });
-            e.insert(ConfigSkin { skin: config_skin });
-
-            Ok(serde_json::json!({"name": name}))
-        })(),
-        "god_mode" => (|| -> Result<serde_json::Value, String> {
-            let p: GodModeParams = serde_json::from_value(params.clone())
-                .map_err(|e| format!("invalid params: {e}"))?;
-
-            for (entity, _, _) in champions.iter() {
-                let mut e = commands.entity(entity);
-                if p.enabled {
-                    e.insert(BuffDamageReduction {
-                        percentage: 1.0,
-                        damage_type: None,
-                    });
-                } else {
-                    e.remove::<BuffDamageReduction>();
-                }
-            }
-
-            debug_state.god_mode = p.enabled;
-            Ok(serde_json::json!({"enabled": p.enabled}))
-        })(),
-        "toggle_cooldown" => (|| -> Result<serde_json::Value, String> {
-            let p: ToggleCooldownParams = serde_json::from_value(params.clone())
-                .map_err(|e| format!("invalid params: {e}"))?;
-
-            for (_, mut skill, cd_opt) in skills.iter_mut() {
-                skill.cooldown_mode = if p.enabled {
-                    SkillCooldownMode::Manual
-                } else {
-                    SkillCooldownMode::AfterCast
-                };
-                if p.enabled {
-                    if let Some(mut cd) = cd_opt {
-                        cd.timer = None;
-                    }
-                }
-            }
-
-            debug_state.cooldown_disabled = p.enabled;
-            Ok(serde_json::json!({"enabled": p.enabled}))
-        })(),
-        "reset_position" => (|| -> Result<serde_json::Value, String> {
-            if let Some((entity, _, _)) = champions.iter().next() {
-                if let Ok(mut t) = transforms.get_mut(entity) {
-                    t.translation = Vec3::ZERO;
-                    Ok(serde_json::json!({}))
-                } else {
-                    Err("no transform".to_string())
-                }
-            } else {
-                Err("no champion found".to_string())
-            }
-        })(),
-        "toggle_pause" => (|| -> Result<serde_json::Value, String> {
-            let paused = !debug_state.paused;
-            time.set_relative_speed(if paused { 0.0 } else { 1.0 });
-            debug_state.paused = paused;
-            Ok(serde_json::json!({"paused": paused}))
-        })(),
-        "get_state" => (|| -> Result<serde_json::Value, String> {
-            let champion_name = champions
-                .iter()
-                .next()
-                .and_then(|(_, _, name)| name.map(|n| n.to_string()))
-                .unwrap_or_default();
-
-            Ok(serde_json::json!({
-                "champion": champion_name,
-                "god_mode": debug_state.god_mode,
-                "cooldown_disabled": debug_state.cooldown_disabled,
-                "paused": debug_state.paused,
-            }))
-        })(),
-        _ => return,
-    };
-
-    if let Ok(mut lock) = event.response.lock() {
-        *lock = Some(match result {
-            Ok(data) => WsResponse::ok_with_data(id, data),
-            Err(e) => WsResponse::err(id, e),
-        });
-    }
 }
 
 /// System: Listen for D key press and select entity via raycast for log filtering.
@@ -241,4 +133,161 @@ fn on_d_key_select_entity(
     let event =
         lol_server::protocol::WsEvent::entity_selected(entity.index_u32(), "debug_select", "");
     send_event(world, event);
+}
+
+// ── Typed Debug Observers ──
+
+fn on_switch_champion(
+    event: On<TypedCommandWsRequest<SwitchChampionParams>>,
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    champions: Query<(Entity, &Champion, Option<&Name>)>,
+) {
+    let name = event.params.name.clone();
+    let result = (|| -> Result<serde_json::Value, String> {
+        let champion_entity = champions
+            .iter()
+            .map(|(e, _, _)| e)
+            .next()
+            .ok_or("no champion found")?;
+
+        let name_lower = name.to_lowercase();
+        let config_path = format!("characters/{name_lower}/config.ron");
+        let skin_path = format!("characters/{name_lower}/skins/skin0.ron");
+
+        let config_record = asset_server.load(&config_path);
+        let config_skin = asset_server.load(&skin_path);
+
+        let mut e = commands.entity(champion_entity);
+        e.remove::<Riven>();
+        e.remove::<Fiora>();
+
+        match name.as_str() {
+            "Riven" => {
+                e.insert(Riven);
+            }
+            "Fiora" => {
+                e.insert(Fiora);
+            }
+            _ => return Err("unknown champion".to_string()),
+        };
+
+        e.insert(ConfigCharacterRecord {
+            character_record: config_record,
+        });
+        e.insert(ConfigSkin { skin: config_skin });
+
+        Ok(serde_json::json!({"name": name}))
+    })();
+    lol_rpc::respond(&event, result);
+}
+
+fn on_god_mode(
+    event: On<TypedCommandWsRequest<GodModeParams>>,
+    mut commands: Commands,
+    champions: Query<(Entity, &Champion, Option<&Name>)>,
+    mut debug_state: ResMut<GlobalDebugState>,
+) {
+    let enabled = event.params.enabled;
+    for (entity, _, _) in champions.iter() {
+        let mut e = commands.entity(entity);
+        if enabled {
+            e.insert(BuffDamageReduction {
+                percentage: 1.0,
+                damage_type: None,
+            });
+        } else {
+            e.remove::<BuffDamageReduction>();
+        }
+    }
+    debug_state.god_mode = enabled;
+    lol_rpc::respond(&event, Ok(serde_json::json!({"enabled": enabled})));
+}
+
+fn on_toggle_cooldown(
+    event: On<TypedCommandWsRequest<ToggleCooldownParams>>,
+    mut skills: Query<(Entity, &mut Skill, Option<&mut CoolDown>)>,
+    mut debug_state: ResMut<GlobalDebugState>,
+) {
+    let enabled = event.params.enabled;
+    for (_, mut skill, cd_opt) in skills.iter_mut() {
+        skill.cooldown_mode = if enabled {
+            SkillCooldownMode::Manual
+        } else {
+            SkillCooldownMode::AfterCast
+        };
+        if enabled {
+            if let Some(mut cd) = cd_opt {
+                cd.timer = None;
+            }
+        }
+    }
+    debug_state.cooldown_disabled = enabled;
+    lol_rpc::respond(&event, Ok(serde_json::json!({"enabled": enabled})));
+}
+
+fn on_reset_position(
+    event: On<TypedCommandWsRequest<ResetPositionParams>>,
+    champions: Query<(Entity, &Champion, Option<&Name>)>,
+    mut transforms: Query<&mut Transform>,
+) {
+    let result = (|| -> Result<serde_json::Value, String> {
+        if let Some((entity, _, _)) = champions.iter().next() {
+            if let Ok(mut t) = transforms.get_mut(entity) {
+                t.translation = Vec3::ZERO;
+                Ok(serde_json::json!({}))
+            } else {
+                Err("no transform".to_string())
+            }
+        } else {
+            Err("no champion found".to_string())
+        }
+    })();
+    lol_rpc::respond(&event, result);
+}
+
+fn on_toggle_pause(
+    event: On<TypedCommandWsRequest<TogglePauseParams>>,
+    mut debug_state: ResMut<GlobalDebugState>,
+    mut time: ResMut<Time<Virtual>>,
+) {
+    let paused = !debug_state.paused;
+    time.set_relative_speed(if paused { 0.0 } else { 1.0 });
+    debug_state.paused = paused;
+    lol_rpc::respond(&event, Ok(serde_json::json!({"paused": paused})));
+}
+
+fn on_set_speed(event: On<TypedCommandWsRequest<SetSpeedParams>>, mut time: ResMut<Time<Virtual>>) {
+    let speed = event.params.speed;
+    time.set_relative_speed(speed);
+    lol_rpc::respond(&event, Ok(serde_json::json!({"speed": speed})));
+}
+
+fn on_get_state(
+    event: On<TypedCommandWsRequest<GetStateParams>>,
+    champions: Query<(Entity, &Champion, Option<&Name>)>,
+    debug_state: Res<GlobalDebugState>,
+) {
+    let champion_name = champions
+        .iter()
+        .next()
+        .and_then(|(_, _, name)| name.map(|n| n.to_string()))
+        .unwrap_or_default();
+
+    lol_rpc::respond(
+        &event,
+        Ok(serde_json::json!({
+            "champion": champion_name,
+            "god_mode": debug_state.god_mode,
+            "cooldown_disabled": debug_state.cooldown_disabled,
+            "paused": debug_state.paused,
+        })),
+    );
+}
+
+fn on_get_time(event: On<TypedCommandWsRequest<GetTimeParams>>, time: Res<Time>) {
+    lol_rpc::respond(
+        &event,
+        Ok(serde_json::json!({ "time": time.elapsed_secs() })),
+    );
 }

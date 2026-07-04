@@ -2,7 +2,9 @@ use std::collections::HashMap;
 use std::path::PathBuf;
 
 use async_trait::async_trait;
-use lol_client::launch::{binary_name, build_command, default_rust_log, BevyGameConfig, BevySpawnRequest};
+use lol_client::launch::{
+    binary_name, build_command, default_rust_log, BevyGameConfig, BevySpawnRequest,
+};
 use lol_game_process_manager::{ManagerError, ProcessLauncher};
 use serde::Deserialize;
 use tauri::Manager;
@@ -86,6 +88,44 @@ impl ProcessLauncher for DesktopProcessLauncher {
         req.program = program;
         req.prefix_args = prefix_args;
         req.port = port as u16;
+
+        if req.program == "cargo" {
+            let mut build_args = vec!["build".to_string()];
+            if req.prefix_args.contains(&"--release".to_string()) {
+                build_args.push("--release".to_string());
+            }
+            build_args.push("--bin".to_string());
+            build_args.push("moon_lol".to_string());
+
+            let mut build_cmd = tokio::process::Command::new("cargo");
+            build_cmd.args(&build_args);
+
+            let build_cwd = req.cwd.clone().or_else(lol_client::launch::workspace_root);
+            if let Some(cwd) = build_cwd {
+                build_cmd.current_dir(cwd);
+            }
+
+            tracing::info!(
+                "开发模式检测到 cargo 运行，正在预编译 Bevy 游戏服务端: cargo {:?}",
+                build_args
+            );
+            match build_cmd.status().await {
+                Ok(status) if status.success() => {
+                    tracing::info!("cargo 编译完成，准备启动对局进程");
+                }
+                Ok(status) => {
+                    return Err(ManagerError::Internal(format!(
+                        "cargo 编译失败，无法启动对局进程。退出码: {:?}",
+                        status.code()
+                    )));
+                }
+                Err(e) => {
+                    return Err(ManagerError::Internal(format!(
+                        "执行 cargo build 失败: {e}"
+                    )));
+                }
+            }
+        }
 
         let child = tokio::process::Command::from(build_command(&req))
             .spawn()

@@ -4,7 +4,6 @@ use sqlx::sqlite::{SqliteConnectOptions, SqlitePoolOptions};
 use sqlx::{Row, SqlitePool};
 use tauri::Manager;
 
-
 #[derive(serde::Serialize, serde::Deserialize, Clone)]
 pub struct LogRow {
     pub id: i64,

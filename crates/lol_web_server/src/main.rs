@@ -19,7 +19,12 @@ use tracing::info;
 #[tokio::main]
 async fn main() {
     // 1. 初始化日志
-    tracing_subscriber::fmt::init();
+    tracing_subscriber::fmt()
+        .with_env_filter(
+            tracing_subscriber::EnvFilter::try_from_default_env()
+                .unwrap_or_else(|_| tracing_subscriber::EnvFilter::new("info")),
+        )
+        .init();
 
     // 2. 加载环境变量与配置
     let db_url = std::env::var("DATABASE_URL")

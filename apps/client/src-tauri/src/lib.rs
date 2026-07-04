@@ -189,7 +189,13 @@ async fn start_game(
         *state.model_providers.lock().unwrap() = providers.clone();
     }
 
-    let scenario_agents = config.agents.clone().unwrap_or_default();
+    let mut scenario_agents = config.agents.clone().unwrap_or_default();
+    for (idx, agent) in scenario_agents.iter_mut().enumerate() {
+        if agent.id.is_none() {
+            let champ_lower = agent.champion.to_lowercase();
+            agent.id = Some(format!("{}_{}", champ_lower, idx));
+        }
+    }
 
     if let Some(scene_name) = &config.scene_name {
         if !scenario_agents.is_empty() {
@@ -212,7 +218,7 @@ async fn start_game(
     let spawn = lol_client::launch::BevySpawnRequest {
         program: String::new(), // 由 launcher 覆写
         prefix_args: vec![],
-        port: 0,                // 由 manager 覆写
+        port: 0, // 由 manager 覆写
         game_config: process::game_config(&config),
         cwd: process::workspace_root(),
         rust_log: Some(process::rust_log()),
@@ -245,11 +251,9 @@ async fn start_game(
 
 /// 按 id 停止对局：kill 进程 + 释放端口 + 清理该端口的 WS 会话。
 #[tauri::command]
-async fn stop_game(
-    state: tauri::State<'_, AppState>,
-    id: String,
-) -> Result<(), error::AppError> {
-    let id = Uuid::parse_str(&id).map_err(|e| error::AppError::Generic(format!("无效对局 id: {e}")))?;
+async fn stop_game(state: tauri::State<'_, AppState>, id: String) -> Result<(), error::AppError> {
+    let id =
+        Uuid::parse_str(&id).map_err(|e| error::AppError::Generic(format!("无效对局 id: {e}")))?;
     state.manager.stop(id).await.map_err(map_manager_error)?;
     state.ws_sessions.lock().unwrap().remove(&id);
     state.event_channels.lock().unwrap().remove(&id);
@@ -263,9 +267,13 @@ fn subscribe_match_events(
     id: String,
     channel: tauri::ipc::Channel<serde_json::Value>,
 ) -> Result<(), error::AppError> {
-    let id = Uuid::parse_str(&id).map_err(|e| error::AppError::Generic(format!("无效对局 id: {e}")))?;
+    let id =
+        Uuid::parse_str(&id).map_err(|e| error::AppError::Generic(format!("无效对局 id: {e}")))?;
     let mut event_channels = state.event_channels.lock().unwrap();
-    event_channels.entry(id).or_insert_with(Vec::new).push(channel);
+    event_channels
+        .entry(id)
+        .or_insert_with(Vec::new)
+        .push(channel);
     Ok(())
 }
 
@@ -275,7 +283,8 @@ async fn pause_match(
     state: tauri::State<'_, AppState>,
     id: String,
 ) -> Result<bool, error::AppError> {
-    let id = Uuid::parse_str(&id).map_err(|e| error::AppError::Generic(format!("无效对局 id: {e}")))?;
+    let id =
+        Uuid::parse_str(&id).map_err(|e| error::AppError::Generic(format!("无效对局 id: {e}")))?;
     let session = {
         let sessions = state.ws_sessions.lock().unwrap();
         sessions
@@ -294,7 +303,8 @@ async fn resume_match(
     state: tauri::State<'_, AppState>,
     id: String,
 ) -> Result<bool, error::AppError> {
-    let id = Uuid::parse_str(&id).map_err(|e| error::AppError::Generic(format!("无效对局 id: {e}")))?;
+    let id =
+        Uuid::parse_str(&id).map_err(|e| error::AppError::Generic(format!("无效对局 id: {e}")))?;
     let session = {
         let sessions = state.ws_sessions.lock().unwrap();
         sessions
@@ -314,7 +324,8 @@ async fn set_god_mode(
     id: String,
     enabled: bool,
 ) -> Result<(), error::AppError> {
-    let id = Uuid::parse_str(&id).map_err(|e| error::AppError::Generic(format!("无效对局 id: {e}")))?;
+    let id =
+        Uuid::parse_str(&id).map_err(|e| error::AppError::Generic(format!("无效对局 id: {e}")))?;
     let session = {
         let sessions = state.ws_sessions.lock().unwrap();
         sessions
@@ -323,7 +334,10 @@ async fn set_god_mode(
             .ok_or_else(|| error::AppError::Generic("对局 WS 未连接".to_string()))?
     };
     let client = lol_client::GameClient::new(session);
-    client.god_mode(enabled).await.map_err(error::AppError::Generic)?;
+    client
+        .god_mode(enabled)
+        .await
+        .map_err(error::AppError::Generic)?;
     Ok(())
 }
 
@@ -334,7 +348,8 @@ async fn toggle_cooldown(
     id: String,
     enabled: bool,
 ) -> Result<(), error::AppError> {
-    let id = Uuid::parse_str(&id).map_err(|e| error::AppError::Generic(format!("无效对局 id: {e}")))?;
+    let id =
+        Uuid::parse_str(&id).map_err(|e| error::AppError::Generic(format!("无效对局 id: {e}")))?;
     let session = {
         let sessions = state.ws_sessions.lock().unwrap();
         sessions
@@ -343,7 +358,10 @@ async fn toggle_cooldown(
             .ok_or_else(|| error::AppError::Generic("对局 WS 未连接".to_string()))?
     };
     let client = lol_client::GameClient::new(session);
-    client.toggle_cooldown(enabled).await.map_err(error::AppError::Generic)?;
+    client
+        .toggle_cooldown(enabled)
+        .await
+        .map_err(error::AppError::Generic)?;
     Ok(())
 }
 
@@ -353,7 +371,8 @@ async fn reset_position(
     state: tauri::State<'_, AppState>,
     id: String,
 ) -> Result<(), error::AppError> {
-    let id = Uuid::parse_str(&id).map_err(|e| error::AppError::Generic(format!("无效对局 id: {e}")))?;
+    let id =
+        Uuid::parse_str(&id).map_err(|e| error::AppError::Generic(format!("无效对局 id: {e}")))?;
     let session = {
         let sessions = state.ws_sessions.lock().unwrap();
         sessions
@@ -362,7 +381,10 @@ async fn reset_position(
             .ok_or_else(|| error::AppError::Generic("对局 WS 未连接".to_string()))?
     };
     let client = lol_client::GameClient::new(session);
-    client.reset_position().await.map_err(error::AppError::Generic)?;
+    client
+        .reset_position()
+        .await
+        .map_err(error::AppError::Generic)?;
     Ok(())
 }
 
@@ -373,7 +395,8 @@ async fn switch_champion(
     id: String,
     name: String,
 ) -> Result<(), error::AppError> {
-    let id = Uuid::parse_str(&id).map_err(|e| error::AppError::Generic(format!("无效对局 id: {e}")))?;
+    let id =
+        Uuid::parse_str(&id).map_err(|e| error::AppError::Generic(format!("无效对局 id: {e}")))?;
     let session = {
         let sessions = state.ws_sessions.lock().unwrap();
         sessions
@@ -382,7 +405,10 @@ async fn switch_champion(
             .ok_or_else(|| error::AppError::Generic("对局 WS 未连接".to_string()))?
     };
     let client = lol_client::GameClient::new(session);
-    client.switch_champion(&name).await.map_err(error::AppError::Generic)?;
+    client
+        .switch_champion(&name)
+        .await
+        .map_err(error::AppError::Generic)?;
     Ok(())
 }
 
@@ -394,7 +420,8 @@ async fn set_script(
     entity_id: u64,
     source: String,
 ) -> Result<(), error::AppError> {
-    let id = Uuid::parse_str(&id).map_err(|e| error::AppError::Generic(format!("无效对局 id: {e}")))?;
+    let id =
+        Uuid::parse_str(&id).map_err(|e| error::AppError::Generic(format!("无效对局 id: {e}")))?;
     let session = {
         let sessions = state.ws_sessions.lock().unwrap();
         sessions
@@ -403,17 +430,23 @@ async fn set_script(
             .ok_or_else(|| error::AppError::Generic("对局 WS 未连接".to_string()))?
     };
     let client = lol_client::GameClient::new(session);
-    client.set_script(entity_id, &source).await.map_err(error::AppError::Generic)?;
+    client
+        .set_script(entity_id, &source)
+        .await
+        .map_err(error::AppError::Generic)?;
     Ok(())
 }
-
 
 /// 列出所有运行中的本地对局（前端侧栏/列表页用）。
 #[tauri::command]
 async fn list_running_games(
     state: tauri::State<'_, AppState>,
 ) -> Result<Vec<RunningGame>, error::AppError> {
-    let procs = state.manager.list_processes().await.map_err(map_manager_error)?;
+    let procs = state
+        .manager
+        .list_processes()
+        .await
+        .map_err(map_manager_error)?;
     Ok(procs
         .into_iter()
         .map(|p| RunningGame {
@@ -430,8 +463,13 @@ async fn get_running_game(
     state: tauri::State<'_, AppState>,
     id: String,
 ) -> Result<Option<RunningGame>, error::AppError> {
-    let id = Uuid::parse_str(&id).map_err(|e| error::AppError::Generic(format!("无效对局 id: {e}")))?;
-    let procs = state.manager.list_processes().await.map_err(map_manager_error)?;
+    let id =
+        Uuid::parse_str(&id).map_err(|e| error::AppError::Generic(format!("无效对局 id: {e}")))?;
+    let procs = state
+        .manager
+        .list_processes()
+        .await
+        .map_err(map_manager_error)?;
     Ok(procs.into_iter().find(|p| p.id == id).map(|p| RunningGame {
         id: p.id.to_string(),
         port: p.port,
@@ -439,9 +477,15 @@ async fn get_running_game(
     }))
 }
 
-
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    tracing_subscriber::fmt()
+        .with_env_filter(
+            tracing_subscriber::EnvFilter::try_from_default_env()
+                .unwrap_or_else(|_| tracing_subscriber::EnvFilter::new("info")),
+        )
+        .init();
+
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .setup(|app| {

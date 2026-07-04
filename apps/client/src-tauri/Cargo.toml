@@ -39,3 +39,5 @@ lol_agent_runtime.workspace = true
 lol_game_process_manager = { path = "../../../crates/lol_game_process_manager" }
 async-trait = "0.1"
 uuid = { version = "1", features = ["v4"] }
+tracing.workspace = true
+tracing-subscriber.workspace = true

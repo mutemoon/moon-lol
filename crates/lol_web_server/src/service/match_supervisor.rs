@@ -33,7 +33,8 @@ pub enum SpectatorMessage {
     Close { reason: String },
 }
 
-pub static BROADCASTERS: OnceLock<Mutex<HashMap<Uuid, broadcast::Sender<SpectatorMessage>>>> = OnceLock::new();
+pub static BROADCASTERS: OnceLock<Mutex<HashMap<Uuid, broadcast::Sender<SpectatorMessage>>>> =
+    OnceLock::new();
 
 pub fn get_broadcasters() -> &'static Mutex<HashMap<Uuid, broadcast::Sender<SpectatorMessage>>> {
     BROADCASTERS.get_or_init(|| Mutex::new(HashMap::new()))
@@ -130,10 +131,7 @@ pub async fn run_supervisor(match_id: Uuid, ws_port: i32, match_service: Arc<dyn
         let payload: MatchEventPayload = match serde_json::from_value(raw_data.clone()) {
             Ok(p) => p,
             Err(e) => {
-                debug!(
-                    "[supervisor] match {} 转换事件数据失败: {}",
-                    match_id, e
-                );
+                debug!("[supervisor] match {} 转换事件数据失败: {}", match_id, e);
                 continue;
             }
         };

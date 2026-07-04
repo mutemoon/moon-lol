@@ -1,18 +1,14 @@
 //! Section 2 服务端 RL 接入（Bevy 引擎侧）。
 //!
-//! 提供三块能力，供外部 Python 训练守护进程（Gymnasium 客户端）经 WebSocket 高频驱动：
+//! 提供两块能力，供外部 Python 训练守护进程（Gymnasium 客户端）经 WebSocket 高频驱动：
 //!   1. [`MoonLoLEnv`]：Gym 风格的环境状态机，`reset()` / `step()` 维护回合状态并计算 reward；
 //!   2. [`RewardShaper`]：解析 Agent `config_json` 中的 Reward Shaper 权重，按观测增量动态拼装最终 reward；
-//!   3. msgpack 编解码 + base64 包装：obs/action 的高速二进制传递（[`pack_observe`] / [`unpack_action`] 等）。
 //!
-//! 真正的环境交互通过 `systems.rs` 的 WS 指令暴露：`rl_reset` / `rl_step` / `get_observe_packed` /
-//! `action_packed`。本模块只承载可单测的纯逻辑与编解码，不直接持有 Bevy 查询。
+//! 真正的环境交互通过 `systems.rs` 的 WS 指令暴露：`rl_reset` / `rl_step`。本模块只承载可单测的纯逻辑，不直接持有 Bevy 查询。
 
 use std::collections::HashMap;
 
-use base64::Engine;
 use bevy::prelude::{Entity, Resource};
-use lol_core::action::Action;
 use serde::{Deserialize, Serialize};
 
 use crate::models::Observe;
@@ -179,7 +175,7 @@ pub struct StepResult {
 
 /// Gym 风格环境：维护回合状态并据 [`RewardShaper`] 计算 reward。
 ///
-/// 动作的施加由既有 action 系统完成（`action_packed` / `action` 指令），本结构聚焦
+/// 动作的施加由既有 action 系统完成（`action` 指令），本结构聚焦
 /// 观测 → reward 的转换与回合记账，对应 `MoonLoLEnv.reset()` / `step()` 语义。
 #[derive(Clone)]
 pub struct MoonLoLEnv {
@@ -229,39 +225,7 @@ impl MoonLoLEnv {
 #[derive(Resource, Default)]
 pub struct RlEnvs(pub HashMap<Entity, MoonLoLEnv>);
 
-// ════════════════════════ msgpack / base64 编解码 ════════════════════════
 
-/// 把观测编码为 msgpack（命名字段，便于 Python 侧按名读取）。
-pub fn pack_observe(obs: &Observe) -> Result<Vec<u8>, String> {
-    rmp_serde::to_vec_named(obs).map_err(|e| e.to_string())
-}
-
-/// 从 msgpack 解码观测。
-pub fn unpack_observe(bytes: &[u8]) -> Result<Observe, String> {
-    rmp_serde::from_slice(bytes).map_err(|e| e.to_string())
-}
-
-/// 把动作编码为 msgpack。
-pub fn pack_action(action: &Action) -> Result<Vec<u8>, String> {
-    rmp_serde::to_vec(action).map_err(|e| e.to_string())
-}
-
-/// 从 msgpack 解码动作。
-pub fn unpack_action(bytes: &[u8]) -> Result<Action, String> {
-    rmp_serde::from_slice(bytes).map_err(|e| e.to_string())
-}
-
-/// base64 编码（用于在文本 WS 通道上承载 msgpack 二进制）。
-pub fn b64_encode(bytes: &[u8]) -> String {
-    base64::engine::general_purpose::STANDARD.encode(bytes)
-}
-
-/// base64 解码。
-pub fn b64_decode(s: &str) -> Result<Vec<u8>, String> {
-    base64::engine::general_purpose::STANDARD
-        .decode(s)
-        .map_err(|e| e.to_string())
-}
 
 #[cfg(test)]
 mod tests {
@@ -394,31 +358,7 @@ mod tests {
         assert!(env.step(obs(myself(0, 0, 0, 0, 100.0), None)).truncated);
     }
 
-    #[test]
-    fn observe_msgpack_round_trip() {
-        let o = obs(myself(5, 1, 0, 2, 80.0), Some(300.0));
-        let packed = pack_observe(&o).unwrap();
-        let back = unpack_observe(&packed).unwrap();
-        assert_eq!(back.myself.minion_kills, 5);
-        assert_eq!(back.myself.assists, 2);
-        assert_eq!(back.enemy_heroes.len(), 1);
-        // base64 包装往返
-        let b64 = b64_encode(&packed);
-        assert_eq!(b64_decode(&b64).unwrap(), packed);
-    }
 
-    #[test]
-    fn action_msgpack_round_trip() {
-        let a = Action::Move(Vec2::new(12.0, -3.0));
-        let packed = pack_action(&a).unwrap();
-        match unpack_action(&packed).unwrap() {
-            Action::Move(p) => {
-                assert!((p.x - 12.0).abs() < 1e-4);
-                assert!((p.y + 3.0).abs() < 1e-4);
-            }
-            other => panic!("expected Move, got {other:?}"),
-        }
-    }
 
     #[test]
     fn step_result_serializes_for_telemetry() {

@@ -147,7 +147,7 @@ async fn main() {
 
 async fn run(client: &GameClient, command: Commands) -> Result<(), String> {
     match command {
-        Commands::Observe { entity_id } => print_data(client.observe(entity_id).await?),
+        Commands::Observe { entity_id } => print_data(client.observe(entity_id, false).await?),
         Commands::Action {
             entity_id,
             subcommand,
@@ -207,6 +207,7 @@ async fn run(client: &GameClient, command: Commands) -> Result<(), String> {
 fn print_data(resp: WsResponse) -> Result<(), String> {
     if resp.ok {
         match resp.data {
+            Some(serde_json::Value::String(s)) => println!("{}", s),
             Some(data) => println!("{}", serde_json::to_string_pretty(&data).unwrap()),
             None => println!("指令执行成功。"),
         }

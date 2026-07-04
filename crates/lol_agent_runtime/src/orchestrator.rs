@@ -63,21 +63,18 @@ impl Orchestrator {
         env: &PlatformEnv,
     ) -> Option<Self> {
         if agents.is_empty() {
-            info!("[Orchestrator] 无场景 agent 配置，跳过 AI Agent 决策环");
+            info!("无场景 agent 配置，跳过 AI Agent 决策环");
             return None;
         }
 
         let hero_entity_ids = wait_and_map_hero_entity_ids(client, agents.len()).await;
-        info!(
-            "[Orchestrator] 已映射英雄实体 ID 字典: {:?}",
-            hero_entity_ids
-        );
+        info!("已映射英雄实体 ID 字典: {:?}", hero_entity_ids);
 
         // 进程内 rmcp 工具层（observe + action），所有 rig agent 共享同一对。
         let (tools, peer) = match serve_inprocess(client.clone()).await {
             Ok(pair) => pair,
             Err(e) => {
-                warn!("[Orchestrator] 启动进程内 rmcp 工具层失败: {}", e);
+                warn!("启动进程内 rmcp 工具层失败: {}", e);
                 return None;
             }
         };
@@ -88,7 +85,7 @@ impl Orchestrator {
                 Some(c) => c,
                 None => {
                     warn!(
-                        "[Orchestrator] Agent [{}] 无 LLM 凭证（未配供应商且平台 env 为空），跳过",
+                        "Agent [{}] 无 LLM 凭证（未配供应商且平台 env 为空），跳过",
                         agent_cfg.id
                     );
                     continue;
@@ -107,7 +104,7 @@ impl Orchestrator {
         }
 
         if rig_agents.is_empty() {
-            info!("[Orchestrator] 所有 agent 均无 LLM 凭证，跳过 AI 决策环");
+            info!("所有 agent 均无 LLM 凭证，跳过 AI 决策环");
             return None;
         }
 
@@ -121,15 +118,15 @@ impl Orchestrator {
     }
 
     async fn step(&mut self, client: &GameClient, sink: &Arc<dyn OrchestratorSink>) -> bool {
-        if !sink.is_running().await {
-            info!("[Orchestrator] 游戏进程已销毁或连接会话已被清空，退出 AI 决策生命周期控制环。");
+        if !sink.is_running().await || client.is_closed() {
+            info!("游戏进程已销毁或连接已断开，退出 AI 决策生命周期控制环。");
             return false;
         }
 
         let obs = match get_observation(client).await {
             Ok(obs) => obs,
             Err(e) => {
-                warn!("[Orchestrator] 获取观测数据异常: {}, 500ms 后重试...", e);
+                warn!("获取观测数据异常: {}, 500ms 后重试...", e);
                 sleep(Duration::from_millis(500)).await;
                 return true;
             }
@@ -137,10 +134,7 @@ impl Orchestrator {
 
         let time = obs.time;
         self.last_game_time = time;
-        info!(
-            "[Orchestrator] 游戏内实时时间: {:.2}s, 当前状态: {:?}",
-            time, self.state
-        );
+        info!("游戏内实时时间: {:.2}s, 当前状态: {:?}", time, self.state);
 
         match self.state {
             AgentState::Warmup => {
@@ -154,7 +148,7 @@ impl Orchestrator {
             }
             AgentState::Thinking => {
                 if let Err(e) = self.handle_thinking(client, sink).await {
-                    warn!("[Orchestrator] Thinking 处理异常: {}", e);
+                    warn!("Thinking 处理异常: {}", e);
                 }
                 self.state = AgentState::Playing;
             }
@@ -182,16 +176,13 @@ impl Orchestrator {
         sink: &Arc<dyn OrchestratorSink>,
     ) -> Result<(), String> {
         info!(
-            "[Orchestrator] 游戏时间 >= {}s，暂停游戏准备 AI 观测与行动...",
+            "游戏时间 >= {}s，暂停游戏准备 AI 观测与行动...",
             WARMUP_DURATION
         );
         client.pause().await?;
 
         self.cycle_count += 1;
-        info!(
-            "[Orchestrator] 触发第 {} 次 AI 思考决策环...",
-            self.cycle_count
-        );
+        info!("触发第 {} 次 AI 思考决策环...", self.cycle_count);
 
         for (agent_cfg, rig_agent, history) in &mut self.rig_agents {
             let entity_id = self
@@ -201,25 +192,41 @@ impl Orchestrator {
                 .ok_or_else(|| format!("未找到代理 {} 的 entity_id", agent_cfg.id))?;
 
             info!(
-                "[Orchestrator] AI Agent [Champion: {}, Team: {}, ID: {}] 正在思考决策...",
+                "AI Agent [Champion: {}, Team: {}, ID: {}] 正在思考决策...",
                 agent_cfg.champion, agent_cfg.team, entity_id
             );
             let prompt = format!(
-                "开始第 {} 轮决策，你的英雄实体 ID 为 {}。使用 observe 工具观测局势，使用 action 工具下达动作。",
+                "开始第 {} 轮决策，你的英雄实体 ID 为 {}。使用 observe 工具观测局势，使用 move_to、attack、stop、cast_skill、level_up_skill 工具下达动作。",
                 self.cycle_count, entity_id
             );
-            match rig_agent.chat(&prompt, history).await {
-                Ok(reply) => {
-                    info!(
-                        "[Orchestrator] Agent [{}, {}] 决策回复:\n{}",
-                        agent_cfg.champion, agent_cfg.team, reply
-                    );
+            let chat_fut = rig_agent.chat(&prompt, history);
+            tokio::select! {
+                res = chat_fut => {
+                    match res {
+                        Ok(reply) => {
+                            info!(
+                                "Agent [{}, {}] 决策回复:\n{}",
+                                agent_cfg.champion, agent_cfg.team, reply
+                            );
+                        }
+                        Err(e) => {
+                            warn!(
+                                "Agent [{}, {}] 决策执行失败: {}",
+                                agent_cfg.champion, agent_cfg.team, e
+                            );
+                        }
+                    }
                 }
-                Err(e) => {
-                    warn!(
-                        "[Orchestrator] Agent [{}, {}] 决策执行失败: {}",
-                        agent_cfg.champion, agent_cfg.team, e
-                    );
+                _ = async {
+                    loop {
+                        if !sink.is_running().await || client.is_closed() {
+                            break;
+                        }
+                        sleep(Duration::from_millis(200)).await;
+                    }
+                } => {
+                    info!("检测到对局已停止或连接已断开，中断当前 Agent 决策/思考");
+                    return Err("对局已停止".to_string());
                 }
             }
 
@@ -227,16 +234,13 @@ impl Orchestrator {
                 .await;
         }
 
-        info!("[Orchestrator] AI 决策执行完毕，继续运行游戏 1s 后再次决策...");
+        info!("AI 决策执行完毕，继续运行游戏 1s 后再次决策...");
         client.unpause().await?;
         Ok(())
     }
 
     async fn handle_finished(&self, sink: &Arc<dyn OrchestratorSink>, raw_data: Value) {
-        info!(
-            "[Orchestrator] 游戏时间已达 {:.0}s，终结 AI 决策环",
-            GAME_END_TIME
-        );
+        info!("游戏时间已达 {:.0}s，终结 AI 决策环", GAME_END_TIME);
 
         let results: Vec<AgentRunResult> = self
             .rig_agents
@@ -319,21 +323,22 @@ async fn wait_and_map_hero_entity_ids(
 }
 
 async fn get_observation(client: &GameClient) -> Result<Observation, String> {
+    // time 单独走 get_time；observe 返回格式化文本（raw_data）供 sink 落盘。
+    let time = client.get_time().await?;
     let resp = client
         .session()
-        .send_cmd("get_observe".to_string(), Value::Null)
+        .send_cmd(lol_client::CMD_OBSERVE.to_string(), serde_json::json!({}))
         .await
         .map_err(|e| e.to_string())?;
     if !resp.ok {
-        return Err("获取观测失败：返回结果为 false".into());
+        return Err(format!(
+            "获取观测失败: {}",
+            resp.error.unwrap_or_else(|| "返回结果为 false".to_string())
+        ));
     }
     let raw_data = resp
         .data
         .ok_or_else(|| "获取观测失败：未包含数据".to_string())?;
-    let time = raw_data
-        .get("time")
-        .and_then(|t| t.as_f64())
-        .ok_or_else(|| "获取观测失败：时间字段缺失".to_string())?;
     Ok(Observation { raw_data, time })
 }
 
@@ -349,13 +354,18 @@ pub async fn run_orchestrator(
     env: PlatformEnv,
     sink: Arc<dyn OrchestratorSink>,
 ) {
-    info!("[Orchestrator] 启动 AI Agent 后台生命周期循环");
+    info!("启动 AI Agent 后台生命周期循环");
 
     let Some(mut orchestrator) = Orchestrator::new(&client, agents, &resolver, &env).await else {
         return;
     };
 
+    info!("设置 Warmup 阶段游戏快进速度为 10.0");
+    if let Err(e) = client.set_speed(10.0).await {
+        warn!("设置快进速度失败: {}", e);
+    }
+
     while orchestrator.step(&client, &sink).await {}
 
-    info!("[Orchestrator] 决策环退出");
+    info!("决策环退出");
 }

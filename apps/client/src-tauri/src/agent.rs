@@ -12,6 +12,7 @@ use lol_game_process_manager::{AgentRunner, GameProcessManager};
 use rig::completion::Message;
 use serde_json::Value;
 use tauri::{Emitter, Manager};
+use tracing::{debug, error, info, warn};
 
 #[derive(serde::Serialize, serde::Deserialize, Clone, Debug)]
 pub struct SavedAgentHistory {
@@ -46,14 +47,28 @@ pub struct DesktopCredentialResolver {
 #[async_trait]
 impl CredentialResolver for DesktopCredentialResolver {
     async fn resolve(&self, agent: &AgentConfig, env: &PlatformEnv) -> Option<ResolvedCredentials> {
-        let provider = agent
-            .provider_id
-            .as_deref()
-            .and_then(|pid| self.providers.iter().find(|p| p.id == pid));
+        info!(
+            "开始解析凭证: agent_id={}, champion={}, provider_id={:?}, model={:?}",
+            agent.id, agent.champion, agent.provider_id, agent.model
+        );
+        let provider = agent.provider_id.as_deref().and_then(|pid| {
+            let found = self.providers.iter().find(|p| p.id == pid);
+            if found.is_none() {
+                warn!("未能找到 provider_id 为 {:?} 的 model provider", pid);
+            }
+            found
+        });
         let creds = provider.map(|p| {
             let max_tokens = agent.model.as_deref().and_then(|m| {
-                p.models.iter().find(|model| model.name == m).map(|model| model.max_tokens)
+                p.models
+                    .iter()
+                    .find(|model| model.name == m)
+                    .map(|model| model.max_tokens)
             });
+            debug!(
+                "匹配到 provider ({}): base_url={:?}, api_format={:?}, max_tokens={:?}",
+                p.name, p.base_url, p.api_format, max_tokens
+            );
             ProviderCredentials {
                 api_key: p.api_key.clone(),
                 base_url: p.base_url.clone(),
@@ -61,7 +76,18 @@ impl CredentialResolver for DesktopCredentialResolver {
                 max_tokens,
             }
         });
-        resolve_credentials(agent, creds, env)
+        let res = resolve_credentials(agent, creds, env);
+        if let Some(ref r) = res {
+            info!(
+                "凭证解析成功 (agent_id={}): base_url={}, has_api_key={}",
+                agent.id,
+                r.base_url,
+                !r.api_key.is_empty()
+            );
+        } else {
+            warn!("凭证解析未成功 (agent_id={})", agent.id);
+        }
+        res
     }
 }
 
@@ -93,7 +119,7 @@ impl OrchestratorSink for DesktopSink {
         last_game_time: f64,
         results: &[AgentRunResult],
     ) {
-        println!("[Agent Orchestrator] 游戏时间已达 2 分钟，正在终结并进行成绩统计...");
+        info!("游戏时间已达 2 分钟，正在终结并进行成绩统计...");
 
         let minion_kills = final_observation
             .get("myself")
@@ -151,20 +177,33 @@ pub fn make_desktop_runner(app: tauri::AppHandle, weak: Weak<GameProcessManager>
         let app = app.clone();
         let weak = weak.clone();
         Box::pin(async move {
-            println!("[Agent Orchestrator] 启动 AI Agent 后台生命周期循环 port={port}");
+            info!("启动 AI Agent 后台生命周期循环 port={port}");
+            info!(
+                "参与游戏编排的 Agents: {:?}",
+                agents.iter().map(|a| &a.champion).collect::<Vec<_>>()
+            );
 
             let ws = match start_ws_client(port as u16, None).await {
-                Ok(ws) => ws,
+                Ok(ws) => {
+                    info!("成功连接 Bevy WS (port={port})");
+                    ws
+                }
                 Err(e) => {
-                    println!("[Agent Orchestrator] 连接 Bevy WS 失败: {e}");
+                    error!("连接 Bevy WS 失败: {e}");
                     return;
                 }
             };
 
             let env = PlatformEnv::from_env();
             let providers = if let Some(state) = app.try_state::<crate::state::AppState>() {
-                state.model_providers.lock().unwrap().clone()
+                let providers = state.model_providers.lock().unwrap().clone();
+                info!(
+                    "成功从 AppState 获取 model providers, 数量: {}",
+                    providers.len()
+                );
+                providers
             } else {
+                warn!("警告: 未能获取 AppState, model providers 列表为空");
                 Vec::new()
             };
             let resolver = Arc::new(DesktopCredentialResolver { providers });
@@ -178,7 +217,9 @@ pub fn make_desktop_runner(app: tauri::AppHandle, weak: Weak<GameProcessManager>
             });
             let client = GameClient::new(ws);
 
+            info!("启动 Bevy 游戏客户端，开始运行决策环 run_orchestrator...");
             run_orchestrator(client, agents, resolver, env, sink).await;
+            info!("决策环 run_orchestrator 已结束");
         }) as Pin<Box<dyn std::future::Future<Output = ()> + Send>>
     })
 }

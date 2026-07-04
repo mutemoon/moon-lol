@@ -11,8 +11,8 @@ pub mod sink;
 pub mod testing;
 
 pub use credentials::{
-    AgentConfig, PlatformEnv, ProviderCredentials, ResolvedCredentials, resolve_credentials,
-    ModelConfig,
+    AgentConfig, ModelConfig, PlatformEnv, ProviderCredentials, ResolvedCredentials,
+    resolve_credentials,
 };
 pub use orchestrator::run_orchestrator;
 pub use resolver::CredentialResolver;

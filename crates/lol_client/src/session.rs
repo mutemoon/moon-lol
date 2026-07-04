@@ -18,6 +18,11 @@ pub struct WsSession {
 }
 
 impl WsSession {
+    /// 检查连接是否已关闭。
+    pub fn is_closed(&self) -> bool {
+        self.tx.is_closed()
+    }
+
     /// 发送指令并等待对应 id 的响应（5s 超时）。
     pub async fn send_cmd(
         &self,

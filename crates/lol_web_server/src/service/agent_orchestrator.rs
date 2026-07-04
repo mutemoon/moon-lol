@@ -61,7 +61,10 @@ impl CredentialResolver for WebCredentialResolver {
                 );
             }
             let max_tokens = agent.model.as_deref().and_then(|m| {
-                p.models.iter().find(|model| model.name == m).map(|model| model.max_tokens)
+                p.models
+                    .iter()
+                    .find(|model| model.name == m)
+                    .map(|model| model.max_tokens)
             });
             ProviderCredentials {
                 api_key: p.api_key,

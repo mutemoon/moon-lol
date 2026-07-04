@@ -168,10 +168,13 @@ mod tests {
         let dto = p.to_dto();
         assert!(dto.has_api_key);
         assert_eq!(dto.api_key, "sk-secret");
-        assert_eq!(dto.models, vec![lol_agent_runtime::ModelConfig {
-            name: "glm-5.1".into(),
-            max_tokens: 1024,
-        }]);
+        assert_eq!(
+            dto.models,
+            vec![lol_agent_runtime::ModelConfig {
+                name: "glm-5.1".into(),
+                max_tokens: 1024,
+            }]
+        );
         // 序列化包含明文密钥
         let json = serde_json::to_string(&dto).unwrap();
         assert!(json.contains("sk-secret"));

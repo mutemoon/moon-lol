@@ -32,7 +32,11 @@ pub async fn test_model_provider(
     let api_key = if let Some(key) = input.api_key.filter(|k| !k.is_empty()) {
         key
     } else if let Some(provider_id) = input.provider_id {
-        match s.model_provider_service.resolve_for_runtime(provider_id, auth.user_id).await {
+        match s
+            .model_provider_service
+            .resolve_for_runtime(provider_id, auth.user_id)
+            .await
+        {
             Ok(Some(provider)) => provider.api_key,
             Ok(None) => {
                 return ApiResponse::ok(TestModelProviderResponse {
@@ -52,7 +56,14 @@ pub async fn test_model_provider(
     };
 
     // 2. 调用 lol_agent_runtime 中的测试方法进行连接测试
-    match lol_agent_runtime::test_model_connection(&api_key, &input.base_url, &input.model, input.max_tokens).await {
+    match lol_agent_runtime::test_model_connection(
+        &api_key,
+        &input.base_url,
+        &input.model,
+        input.max_tokens,
+    )
+    .await
+    {
         Ok(reply) => ApiResponse::ok(TestModelProviderResponse {
             success: true,
             message: reply,
