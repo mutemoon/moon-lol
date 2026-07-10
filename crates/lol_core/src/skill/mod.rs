@@ -13,7 +13,7 @@ use std::ops::Deref;
 use bevy::prelude::{Component, Handle, Reflect, ReflectComponent, *};
 pub use enums::*;
 pub use events::*;
-pub use helpers::get_skill_value;
+pub use helpers::{get_skill_data_value, get_skill_value};
 use lol_base::spell::Spell;
 pub use observers::*;
 

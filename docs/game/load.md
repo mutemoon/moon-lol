@@ -55,7 +55,7 @@ FixedUpdate
 
 ### 1.2 加载系统：PluginGame
 
-**文件：** [lol_core/src/game.rs](file:///d:/Users/admin/workspace/moon-lol-minimax/crates/lol_core/src/game.rs)
+**文件：** [lol_core/src/game.rs](/crates/lol_core/src/game.rs)
 
 ```rust
 pub struct PluginGame {
@@ -77,7 +77,7 @@ fn startup_load_game_scenes(
 
 ### 1.3 ConfigCharacterRecord 消费
 
-**文件：** [lol_core/src/character.rs](file:///d:/Users/admin/workspace/moon-lol-minimax/crates/lol_core/src/character.rs)
+**文件：** [lol_core/src/character.rs](/crates/lol_core/src/character.rs)
 
 ```rust
 fn try_load_config_characters(
@@ -107,7 +107,7 @@ fn try_load_config_characters(
 
 ### 1.4 ConfigSkin 消费
 
-**文件：** [lol_render/src/skin/skin.rs](file:///d:/Users/admin/workspace/moon-lol-minimax/crates/lol_render/src/skin/skin.rs)
+**文件：** [lol_render/src/skin/skin.rs](/crates/lol_render/src/skin/skin.rs)
 
 ```rust
 fn try_load_config_skin_characters(
@@ -198,10 +198,10 @@ fn try_load_config_skin_characters(
 
 当前实现使用两个独立组件：
 
-| 组件 | 文件 | 用途 |
-|------|------|------|
+| 组件                    | 文件                        | 用途                                          |
+| ----------------------- | --------------------------- | --------------------------------------------- |
 | `ConfigCharacterRecord` | `lol_base/src/character.rs` | 持有 `Handle<DynamicWorld>` 指向 `config.ron` |
-| `ConfigSkin` | `lol_base/src/character.rs` | 持有 `Handle<DynamicWorld>` 指向 `skin.ron` |
+| `ConfigSkin`            | `lol_base/src/character.rs` | 持有 `Handle<DynamicWorld>` 指向 `skin.ron`   |
 
 在 `load.md` 重构完成后，将合并为单一 `CharacterSkin` 组件，详见 [load-refactor](docs/game/load.md)（重构皮肤渲染：从运行时加载到 GLTF 导出）。
 
@@ -209,7 +209,7 @@ fn try_load_config_skin_characters(
 
 ### 3.1 地图场景加载
 
-**文件：** [lol_core/src/map.rs](file:///d:/Users/admin/workspace/moon-lol-minimax/crates/lol_core/src/map.rs)
+**文件：** [lol_core/src/map.rs](/crates/lol_core/src/map.rs)
 
 ```rust
 fn startup_load_map_geometry(
@@ -229,12 +229,12 @@ fn startup_load_map_geometry(
 
 `maps/{map_name}/scene.ron` 包含地图上所有可放置对象：
 
-| 对象类型 | 组件 | 说明 |
-|----------|------|------|
-| 防御塔 | `ConfigCharacterRecord` + `ConfigSkin` + `Team` | 归属蓝/红方 |
-| 水晶/兵营 | `ConfigCharacterRecord` + `ConfigSkin` + `Team` | 归属蓝/红方 |
-| 野怪营地 | `ConfigCharacterRecord` + `ConfigSkin` + `MinionPath` | 包含刷新路径 |
-| 草丛/障碍物 | 仅 `Transform` + `Visibility` | 无角色逻辑 |
+| 对象类型    | 组件                                                  | 说明         |
+| ----------- | ----------------------------------------------------- | ------------ |
+| 防御塔      | `ConfigCharacterRecord` + `ConfigSkin` + `Team`       | 归属蓝/红方  |
+| 水晶/兵营   | `ConfigCharacterRecord` + `ConfigSkin` + `Team`       | 归属蓝/红方  |
+| 野怪营地    | `ConfigCharacterRecord` + `ConfigSkin` + `MinionPath` | 包含刷新路径 |
+| 草丛/障碍物 | 仅 `Transform` + `Visibility`                         | 无角色逻辑   |
 
 **地图场景结构示例：**
 
@@ -289,7 +289,7 @@ fn startup_load_map_geometry(
 
 ### 3.4 地图几何加载
 
-**文件：** [lol_render/src/map.rs](file:///d:/Users/admin/workspace/moon-lol-minimax/crates/lol_render/src/map.rs)
+**文件：** [lol_render/src/map.rs](/crates/lol_render/src/map.rs)
 
 ```rust
 fn setup(
@@ -313,7 +313,7 @@ fn setup(
 
 ### 3.5 UI 数据加载
 
-**文件：** [lol_render/src/ui/element.rs](file:///d:/Users/admin/workspace/moon-lol/crates/lol_render/src/ui/element.rs)
+**文件：** [lol_render/src/ui/element.rs](file:///d:/Users/admin/workspace/moon-lol//crates/lol_render/src/ui/element.rs)
 
 UI 系统不再使用 Bevy 场景系统加载，而是在启动时解析 RON 数据文件并注册到 `Assets`。
 
@@ -346,18 +346,20 @@ fn startup_load_ui_data(
             UIElement::Handle(handle),
             if is_visible { Visibility::Visible } else { Visibility::Hidden },
         )).id();
-        
+
         res_ui_element_entity.map.insert(hash, entity);
     }
 }
 ```
 
 **关键资源**：
+
 - **`LOLUiHandles`**：存储所有 UI 元素的 `Handle<T>`，用于后续查找。
 - **`LOLUiScenes`**：存储场景的 `enabled` 状态，用于运行时可见性控制。
 - **`UIElementEntity`**：存储 `u32` 哈希到 `Entity` 的映射，用于脚本化控制。
 
 **加载时序**：
+
 1. `startup_load_ui_data` 在 Startup 阶段直接解析 RON 并注册资产。
 2. 实体被创建后挂载 `UIElement` 组件。
 3. `update_element_layout` 系统检测到新实体，自动为其创建子实体 `UIElementChild` 并挂载 `ImageNode`。
@@ -369,22 +371,23 @@ fn startup_load_ui_data(
 
 ### lol_base vs lol_core
 
-| 层 | 类型 | 用途 |
-|----|------|------|
-| `lol_base` | `ConfigCharacterRecord`, `ConfigSkin`, `Skin`, `HealthBar`, `Team` | 配置数据，直接序列化到场景文件 |
-| `lol_core` | `Character`, `Health`, `Attack`, `Movement`, `Skills` | 运行时逻辑组件，通过 `config.ron` 写入 |
+| 层         | 类型                                                               | 用途                                   |
+| ---------- | ------------------------------------------------------------------ | -------------------------------------- |
+| `lol_base` | `ConfigCharacterRecord`, `ConfigSkin`, `Skin`, `HealthBar`, `Team` | 配置数据，直接序列化到场景文件         |
+| `lol_core` | `Character`, `Health`, `Attack`, `Movement`, `Skills`              | 运行时逻辑组件，通过 `config.ron` 写入 |
 
 配置数据（`lol_base`）与逻辑数据（`lol_core`）分离的好处：
+
 - `lol_base` 类型可直接序列化到 RON 文件
 - `lol_core` 类型可自由增删，不影响场景文件兼容性
 
 ### Component vs Asset
 
-| 类型 | 存储位置 | 加载方式 |
-|------|----------|----------|
-| `DynamicWorld` (Asset) | `lol_base` | 通过 `Handle<DynamicWorld>` 引用 |
-| `Gltf` (Asset) | Bevy 内置 | 通过 `Handle<Gltf>` 引用 |
-| 组件 (Component) | ECS World | 通过 `DynamicWorld.write_to_world` 写入 |
+| 类型                   | 存储位置   | 加载方式                                |
+| ---------------------- | ---------- | --------------------------------------- |
+| `DynamicWorld` (Asset) | `lol_base` | 通过 `Handle<DynamicWorld>` 引用        |
+| `Gltf` (Asset)         | Bevy 内置  | 通过 `Handle<Gltf>` 引用                |
+| 组件 (Component)       | ECS World  | 通过 `DynamicWorld.write_to_world` 写入 |
 
 ## 5. glTF 加载后自动处理
 
@@ -395,7 +398,7 @@ fn startup_load_ui_data(
 3. 为带骨骼的 Mesh 生成 `SkinnedMesh` + `InverseBindMatrices` 组件
 4. 为动画片段生成 `AnimationPlayer` 组件
 
-`lol_render` 中无需额外系统处理这些原生组件，动画迁移通过 Observer 模式实现（见 [lol_render/src/skin/skin.rs](file:///d:/Users/admin/workspace/moon-lol-minimax/crates/lol_render/src/skin/skin.rs) 的 `migrate_animation_graph_handle`）。
+`lol_render` 中无需额外系统处理这些原生组件，动画迁移通过 Observer 模式实现（见 [lol_render/src/skin/skin.rs](/crates/lol_render/src/skin/skin.rs) 的 `migrate_animation_graph_handle`）。
 
 ## 6. 完整时序
 

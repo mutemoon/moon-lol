@@ -4,11 +4,12 @@ use bevy::asset::RenderAssetUsages;
 use bevy::ecs::relationship::Relationship;
 use bevy::prelude::*;
 use bevy::render::mesh::{Indices, PrimitiveTopology};
-use lol_core::base::buff::BuffOf;
+use lol_core::base::buff::{Buff, BuffOf};
 use lol_core::base::direction::{Direction, is_in_direction};
 use lol_core::damage::{CommandDamageCreate, DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
 use lol_core::life::Health;
+use lol_core::movement::Movement;
 use lol_core::skill::PassiveSkillOf;
 use lol_core::team::Team;
 use rand::random;
@@ -33,6 +34,57 @@ const VITAL_SECTOR_SEGMENTS: usize = 16;
 const VITAL_SECTOR_Y: f32 = 0.3;
 /// 扇形颜色（剑姬要害的浅蓝色，半透明）。
 const VITAL_SECTOR_COLOR: Color = Color::srgba(0.4, 0.85, 1.0, 0.45);
+
+// ── 击破要害移速加成 ──
+/// 被动击破要害后的移速加成比例（wiki：8%）。
+pub(crate) const FIORA_PASSIVE_MS_PERCENT: f32 = 0.08;
+/// 被动击破要害后移速加成持续时间（wiki：1.5s）。
+pub(crate) const FIORA_PASSIVE_MS_DURATION: f32 = 1.5;
+/// 被动击破要害后的治疗量。
+///
+/// wiki 仅说明「治疗菲奥娜」未给数值，ron `passive_heal_amount` 公式为空，
+/// 此处为占位常量，待真实数值就绪后替换。
+pub(crate) const FIORA_PASSIVE_HEAL: f32 = 40.0;
+
+/// 通用移速加成 buff：按持有者当前移速的 `percent` 提升移速，到期回退。
+///
+/// 被动击破要害（8%）与 R 大招期间（30%）共用此 buff，仅 `percent`/`timer` 不同。
+/// `applied` 标记首次应用，避免重复叠加；`applied_bonus` 记录实际加成以便精确回退。
+#[derive(Component, Clone, Debug)]
+#[require(Buff = Buff { name: "FioraMS" })]
+pub struct BuffFioraMS {
+    pub percent: f32,
+    pub timer: Timer,
+    pub applied: bool,
+    pub applied_bonus: f32,
+}
+
+/// 计时并回退 `BuffFioraMS`：首次 tick 把 `percent * 当前移速` 加到持有者移速，
+/// 计时结束后减回并移除 buff。
+pub fn update_fiora_ms_buff(
+    mut commands: Commands,
+    mut q_buff: Query<(Entity, &BuffOf, &mut BuffFioraMS)>,
+    mut q_movement: Query<&mut Movement>,
+    time: Res<Time<Fixed>>,
+) {
+    for (buff_entity, buff_of, mut buff) in q_buff.iter_mut() {
+        let holder = buff_of.0;
+        if !buff.applied {
+            if let Ok(mut mov) = q_movement.get_mut(holder) {
+                buff.applied_bonus = mov.speed * buff.percent;
+                mov.speed += buff.applied_bonus;
+                buff.applied = true;
+            }
+        }
+        buff.timer.tick(time.delta());
+        if buff.timer.is_finished() && buff.applied {
+            if let Ok(mut mov) = q_movement.get_mut(holder) {
+                mov.speed -= buff.applied_bonus;
+            }
+            commands.entity(buff_entity).despawn();
+        }
+    }
+}
 
 #[derive(Default)]
 pub struct PluginFioraPassive;
@@ -213,8 +265,11 @@ pub fn update_remove_vital(
 pub fn on_passive_damage_create(
     trigger: On<EventDamageCreate>,
     mut commands: Commands,
-    q_target_with_vital: Query<(&GlobalTransform, &Team, &Health, &Vital)>,
-    q_transform: Query<(&GlobalTransform, &Team)>,
+    q_target_with_vital: Query<(&Transform, &Team, &Health, &Vital)>,
+    q_transform: Query<(&Transform, &Team)>,
+    // 菲奥娜自身生命值（用于击破要害治疗）。用 `Without<Vital>` 与目标查询的
+    // `&Health` 划分互斥集，避免可变/不可变 Health 访问冲突。
+    mut q_source_health: Query<&mut Health, Without<Vital>>,
     mut last_direction: ResMut<FioraVitalLastDirection>,
 ) {
     let target_entity = trigger.event_target();
@@ -235,8 +290,8 @@ pub fn on_passive_damage_create(
         return;
     }
 
-    let source_position = transform.translation().xz();
-    let target_position = target_transform.translation().xz();
+    let source_position = transform.translation.xz();
+    let target_position = target_transform.translation.xz();
 
     if !is_in_direction(source_position, target_position, &vital.direction) {
         return;
@@ -291,6 +346,19 @@ pub fn on_passive_damage_create(
         amount: hp.max * 0.05,
         tag: None,
     });
+
+    // 击破要害：治疗菲奥娜 + 8% 移速（1.5s）
+    if let Ok(mut source_hp) = q_source_health.get_mut(trigger.source) {
+        source_hp.value = (source_hp.value + FIORA_PASSIVE_HEAL).min(source_hp.max);
+    }
+    commands
+        .entity(trigger.source)
+        .with_related::<BuffOf>(BuffFioraMS {
+            percent: FIORA_PASSIVE_MS_PERCENT,
+            timer: Timer::from_seconds(FIORA_PASSIVE_MS_DURATION, TimerMode::Once),
+            applied: false,
+            applied_bonus: 0.0,
+        });
 }
 
 // ── Vital 扇形视觉指示器 ──

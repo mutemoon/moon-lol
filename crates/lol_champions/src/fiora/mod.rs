@@ -4,22 +4,24 @@ pub mod q;
 pub mod r;
 
 #[cfg(test)]
+mod e_tests;
+#[cfg(test)]
 mod passive_tests;
 #[cfg(test)]
 mod q_tests;
+#[cfg(test)]
+mod r_tests;
 #[cfg(test)]
 mod tests;
 
 use bevy::prelude::*;
 use lol_base::animation_names::ANIM_SPELL2;
 use lol_base::render_cmd::CommandAnimationPlay;
-use lol_core::attack::{BuffAttack, CommandAttackReset};
-use lol_core::base::buff::BuffOf;
+use lol_base::spell::Spell;
 use lol_core::entities::champion::Champion;
-use lol_core::skill::{EventSkillCast, Skill, SkillSlot};
-
-use crate::fiora::e::BuffFioraE;
-use crate::fiora::r::BuffFioraR;
+use lol_core::life::Death;
+use lol_core::skill::{EventSkillCast, Skill, SkillSlot, get_skill_data_value};
+use lol_core::team::Team;
 
 #[derive(Default)]
 pub struct PluginFiora;
@@ -33,7 +35,10 @@ impl Plugin for PluginFiora {
                 passive::attach_fiora_passive_ability,
                 passive::update_add_vital,
                 passive::update_remove_vital,
+                passive::update_fiora_ms_buff,
                 r::fixed_update,
+                r::update_fiora_r_heal,
+                e::update_fiora_e_buff,
                 passive::update_vital_visuals,
             ),
         );
@@ -55,6 +60,10 @@ fn on_fiora_skill_cast(
     mut commands: Commands,
     q_fiora: Query<(), With<Fiora>>,
     q_skill: Query<&Skill>,
+    q_transform: Query<&Transform>,
+    q_team: Query<&Team>,
+    q_targets: Query<(Entity, &Transform, &Team), (With<Champion>, Without<Death>)>,
+    res_spells: Res<Assets<Spell>>,
 ) {
     let entity = trigger.event_target();
     if q_fiora.get(entity).is_err() {
@@ -72,10 +81,31 @@ fn on_fiora_skill_cast(
             trigger.point,
             skill.spell.clone(),
             skill.level,
+            trigger.skill_entity,
         ),
         SkillSlot::W => cast_fiora_w(&mut commands, entity),
-        SkillSlot::E => cast_fiora_e(&mut commands, entity),
-        SkillSlot::R => cast_fiora_r(&mut commands, entity),
+        SkillSlot::E => {
+            // E 攻速比例与第二击暴击比例来自 ron dataValues（ASPercent / AttackTwoPercentTAD）。
+            let as_percent = res_spells
+                .get(&skill.spell)
+                .and_then(|s| get_skill_data_value(s, "ASPercent", skill.level))
+                .unwrap_or(0.4);
+            let crit_ratio = res_spells
+                .get(&skill.spell)
+                .and_then(|s| get_skill_data_value(s, "AttackTwoPercentTAD", skill.level))
+                .map(|v| (v - 1.0).max(0.0))
+                .unwrap_or(0.5);
+            e::cast_fiora_e(&mut commands, entity, as_percent, crit_ratio);
+        }
+        SkillSlot::R => r::cast_fiora_r(
+            &mut commands,
+            entity,
+            trigger.point,
+            &q_transform,
+            &q_team,
+            &q_targets,
+            skill.level,
+        ),
         _ => {}
     }
 }
@@ -93,20 +123,4 @@ fn cast_fiora_w(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-}
-
-fn cast_fiora_e(commands: &mut Commands, entity: Entity) {
-    commands.entity(entity).insert((BuffAttack {
-        bonus_attack_speed: 0.5,
-    },));
-    commands
-        .entity(entity)
-        .with_related::<BuffOf>(BuffFioraE::default());
-    commands.trigger(CommandAttackReset { entity });
-}
-
-fn cast_fiora_r(commands: &mut Commands, entity: Entity) {
-    commands
-        .entity(entity)
-        .with_related::<BuffOf>(BuffFioraR::default());
 }

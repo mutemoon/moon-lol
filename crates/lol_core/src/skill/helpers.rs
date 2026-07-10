@@ -30,6 +30,15 @@ pub fn get_skill_value(
     Some(value)
 }
 
+/// 读取技能的原始 `dataValues`（按名称），不受 `calculations` 公式约束。
+///
+/// 与 [`get_skill_value`] 互补：后者只能读 `calculations` 里的计算键，
+/// 而很多数值（如冷却退还没收、攻速比例、每秒治疗量）只存在于 `dataValues`。
+/// `level` 为 1-based 技能等级；名称匹配忽略大小写与下划线。
+pub fn get_skill_data_value(skill_object: &Spell, name: &str, level: usize) -> Option<f32> {
+    get_named_data_value(skill_object, name, level)
+}
+
 fn get_named_data_value(skill_object: &Spell, target_name: &str, level: usize) -> Option<f32> {
     let spell_data = skill_object.spell_data.as_ref()?;
     let data_values = spell_data.data_values.as_ref()?;

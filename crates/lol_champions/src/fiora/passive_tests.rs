@@ -11,6 +11,9 @@
 use bevy::math::{Vec2, Vec3};
 use bevy::prelude::{Entity, Quat, Transform};
 use lol_core::base::direction::Direction;
+use lol_core::damage::{CommandDamageCreate, DamageType};
+use lol_core::life::Health;
+use lol_core::movement::Movement;
 
 use super::tests::build_headless;
 use crate::fiora::passive::{
@@ -150,5 +153,96 @@ fn fiora_passive_vital_sector_render() {
     );
     // 推进一段时间以便录像
     h.advance(2.0);
+    h.finish();
+}
+
+// ── 击破要害的治疗与移速 ──
+
+/// 从匹配方向击破要害后，菲奥娜应获得移速加成（wiki：8%，1.5s）。
+#[test]
+fn fiora_passive_break_grants_move_speed() {
+    let mut h = build_headless("fiora_passive_ms");
+    let enemy = h.add_enemy(Vec3::new(450.0, 0.0, 0.0));
+    // 菲奥娜在原点，敌人在 (450,0)：source.x < target.x -> 命中 Left 要害
+    spawn_vital(&mut h, enemy, Direction::Left);
+    h.advance(1.8); // 等要害进入活跃态
+
+    let base_speed = h
+        .app
+        .world()
+        .get::<Movement>(h.champion)
+        .expect("菲奥娜应有 Movement")
+        .speed;
+
+    // 菲奥娜对敌人造成伤害 -> 触发 on_passive_damage_create -> 击破要害 -> 移速 buff
+    h.app.world_mut().trigger(CommandDamageCreate {
+        entity: enemy,
+        source: h.champion,
+        damage_type: DamageType::Physical,
+        amount: 10.0,
+        tag: None,
+    });
+    h.advance(0.2); // 让 update_fiora_ms_buff 应用 bonus
+
+    let speed_after = h
+        .app
+        .world()
+        .get::<Movement>(h.champion)
+        .expect("菲奥娜应有 Movement")
+        .speed;
+    assert!(
+        speed_after > base_speed + 20.0,
+        "击破要害应获得移速加成：{} > {}",
+        speed_after,
+        base_speed
+    );
+
+    h.finish();
+}
+
+/// 从匹配方向击破要害后，菲奥娜应被治疗（生命值回升）。
+#[test]
+fn fiora_passive_break_heals_fiora() {
+    let mut h = build_headless("fiora_passive_heal");
+    let enemy = h.add_enemy(Vec3::new(450.0, 0.0, 0.0));
+    spawn_vital(&mut h, enemy, Direction::Left);
+    h.advance(1.8);
+
+    let fiora_max = h
+        .app
+        .world()
+        .get::<Health>(h.champion)
+        .expect("菲奥娜应有 Health")
+        .max;
+
+    // 先让菲奥娜受伤（低于满血），便于观察治疗
+    h.app.world_mut().trigger(CommandDamageCreate {
+        entity: h.champion,
+        source: enemy,
+        damage_type: DamageType::Physical,
+        amount: 100.0,
+        tag: None,
+    });
+    h.advance(0.1);
+    let hp_damaged = h.health(h.champion);
+    assert!(hp_damaged < fiora_max, "菲奥娜应已受伤");
+
+    // 菲奥娜击破要害 -> 治疗菲奥娜
+    h.app.world_mut().trigger(CommandDamageCreate {
+        entity: enemy,
+        source: h.champion,
+        damage_type: DamageType::Physical,
+        amount: 10.0,
+        tag: None,
+    });
+    h.advance(0.1);
+    let hp_after = h.health(h.champion);
+    assert!(
+        hp_after > hp_damaged,
+        "击破要害应治疗菲奥娜：{} > {}",
+        hp_after,
+        hp_damaged
+    );
+
     h.finish();
 }
