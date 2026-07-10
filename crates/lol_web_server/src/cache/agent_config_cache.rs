@@ -75,7 +75,6 @@ mod tests {
             name: "test".into(),
             agent_type: AgentType::Llm,
             prompt: "".into(),
-            preamble: "".into(),
             model: "".into(),
             config_json: serde_json::json!({}),
             visibility: Visibility::Private,

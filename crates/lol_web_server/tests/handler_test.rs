@@ -433,7 +433,6 @@ async fn test_list_agents_success() {
                     champion: "Fiora".to_string(),
                     agent_type: AgentType::Llm,
                     prompt: "prompt".to_string(),
-                    preamble: "preamble".to_string(),
                     model: "model".to_string(),
                     config_json: serde_json::json!({}),
                     visibility: Visibility::Private,

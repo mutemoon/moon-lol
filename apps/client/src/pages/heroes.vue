@@ -70,7 +70,6 @@ const emptyDraft = (): HeroPreset => ({
   champion: "Riven",
   agent_type: "llm",
   prompt: "",
-  preamble: "",
   model: "",
   config_json: {},
 });
@@ -659,14 +658,7 @@ onMounted(async () => {
                     </p>
                   </div>
                 </div>
-                <div class="space-y-2">
-                  <Label>{{ t("heroes.preambleLabel") }}</Label>
-                  <Textarea
-                    v-model="draft.preamble"
-                    :placeholder="t('heroes.preamblePlaceholder')"
-                    class="min-h-[40px] font-mono text-xs leading-relaxed"
-                  />
-                </div>
+
               </div>
               <div class="space-y-2">
                 <div class="flex items-center justify-between">

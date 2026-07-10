@@ -52,7 +52,6 @@ CREATE TABLE IF NOT EXISTS agents (
     champion          TEXT NOT NULL,
     agent_type        TEXT NOT NULL,
     prompt            TEXT NOT NULL DEFAULT '',
-    preamble          TEXT NOT NULL DEFAULT '',
     model             TEXT NOT NULL DEFAULT '',
     config_json       JSONB NOT NULL DEFAULT '{}',
     visibility        TEXT NOT NULL DEFAULT 'private',

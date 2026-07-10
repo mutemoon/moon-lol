@@ -260,7 +260,7 @@ fn create_agent(
     api_key: String,
     base_url: String,
     model: String,
-    preamble: String,
+    prompt: String,
     tools: Vec<rmcp::model::Tool>,
     peer: rmcp::service::ServerSink,
     max_tokens: Option<u32>,
@@ -277,7 +277,7 @@ fn create_agent(
         .agent(&model)
         .max_tokens(limit as u64)
         .default_max_turns(20)
-        .preamble(&preamble)
+        .preamble(&prompt)
         .rmcp_tools(tools, peer)
         .build()
 }

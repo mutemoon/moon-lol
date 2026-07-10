@@ -36,7 +36,7 @@ pub struct PgAgentRepo {
     pub pool: PgPool,
 }
 
-const SELECT_COLS: &str = "id, owner_id, name, champion, agent_type, prompt, preamble, model, \
+const SELECT_COLS: &str = "id, owner_id, name, champion, agent_type, prompt, model, \
      config_json, visibility, forked_from, upstream_agent_id";
 
 fn parse_row(r: &sqlx::postgres::PgRow) -> RepoResult<Agent> {
@@ -53,7 +53,6 @@ fn parse_row(r: &sqlx::postgres::PgRow) -> RepoResult<Agent> {
         champion: r.try_get("champion")?,
         agent_type,
         prompt: r.try_get("prompt")?,
-        preamble: r.try_get("preamble")?,
         model: r.try_get("model")?,
         config_json: r.try_get("config_json")?,
         visibility,
@@ -114,8 +113,8 @@ impl AgentRepo for PgAgentRepo {
         let id = Uuid::new_v4();
         let sql = format!(
             "INSERT INTO agents \
-             (id, owner_id, name, champion, agent_type, prompt, preamble, model, config_json, visibility) \
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) \
+             (id, owner_id, name, champion, agent_type, prompt, model, config_json, visibility) \
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) \
              RETURNING {SELECT_COLS}"
         );
         let row = sqlx::query(&sql)
@@ -125,7 +124,6 @@ impl AgentRepo for PgAgentRepo {
             .bind(&input.champion)
             .bind(input.agent_type.as_str())
             .bind(&input.prompt)
-            .bind(&input.preamble)
             .bind(&input.model)
             .bind(&input.config_json)
             .bind(input.visibility.as_str())
@@ -148,14 +146,13 @@ impl AgentRepo for PgAgentRepo {
     async fn update(&self, id: Uuid, input: &AgentInput) -> RepoResult<()> {
         let result = sqlx::query(
             "UPDATE agents SET name = $1, champion = $2, agent_type = $3, \
-             prompt = $4, preamble = $5, model = $6, config_json = $7, \
-             visibility = $8, updated_at = CURRENT_TIMESTAMP WHERE id = $9",
+             prompt = $4, model = $5, config_json = $6, \
+             visibility = $7, updated_at = CURRENT_TIMESTAMP WHERE id = $8",
         )
         .bind(&input.name)
         .bind(&input.champion)
         .bind(input.agent_type.as_str())
         .bind(&input.prompt)
-        .bind(&input.preamble)
         .bind(&input.model)
         .bind(&input.config_json)
         .bind(input.visibility.as_str())

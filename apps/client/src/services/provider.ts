@@ -121,7 +121,6 @@ class ServiceProvider {
       champion: item.champion,
       agent_type: item.agent_type,
       prompt: item.prompt,
-      preamble: item.preamble,
       model: item.model,
       config_json: item.config_json,
     }))
@@ -133,7 +132,6 @@ class ServiceProvider {
       champion: preset.champion,
       agent_type: preset.agent_type,
       prompt: preset.prompt,
-      preamble: preset.preamble || '',
       model: preset.model || '',
       config_json: preset.config_json || {},
       visibility: preset.visibility || 'private',

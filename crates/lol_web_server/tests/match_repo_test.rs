@@ -35,7 +35,6 @@ async fn create_agent_with_snapshot(pool: &sqlx::PgPool, owner: i32, name: &str)
                 champion: "Riven".into(),
                 agent_type: AgentType::Llm,
                 prompt: "prompt".into(),
-                preamble: "preamble".into(),
                 model: "model".into(),
                 config_json: serde_json::json!({}),
                 visibility: Visibility::Private,

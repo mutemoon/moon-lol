@@ -34,7 +34,6 @@ async fn create_full_agent(
                 champion: "Riven".into(),
                 agent_type: AgentType::Llm,
                 prompt: "prompt".into(),
-                preamble: "preamble".into(),
                 model: "model".into(),
                 config_json: serde_json::json!({}),
                 visibility: Visibility::Private,

@@ -21,7 +21,6 @@ export interface HeroPreset {
   champion: string
   agent_type: string
   prompt: string
-  preamble?: string
   model?: string
   config_json?: any
   visibility?: Visibility
@@ -151,7 +150,6 @@ export interface Agent {
   champion: string
   agent_type: string
   prompt: string
-  preamble?: string
   model?: string
   config_json?: any
   visibility: Visibility
@@ -166,7 +164,6 @@ export interface CreateAgentDto {
   champion: string
   agent_type: string
   prompt: string
-  preamble?: string
   model?: string
   config_json?: any
   visibility?: Visibility
@@ -177,7 +174,6 @@ export interface UpdateAgentDto {
   champion?: string
   agent_type?: string
   prompt?: string
-  preamble?: string
   model?: string
   config_json?: any
   visibility?: Visibility
