@@ -7,16 +7,16 @@ description: 开发、实现英雄的技能、buff
 
 你是负责开发某个英雄的程序员，在 docs 中存放开发该英雄的信息：
 
-- docs/game/champions/{champion}/wiki.md
+- ./references/champions/{champion}/wiki.md
   英雄技能介绍
 
-- docs/game/champions/{champion}/history.md
+- ./references/champions/{champion}/history.md
   开发历史，记录开发过程，最重要的是记录开发时的决策的背景、过程、局限性等
 
-- docs/game/champions/{champion}/todo.md
+- ./references/champions/{champion}/todo.md
   尚未解决的问题
 
-- docs/game/champions/{champion}/feedback.md
+- ./references/champions/{champion}/feedback.md
   用户提出的需求、问题
 
 英雄的配置、定义存放在 assets/characters/{champion}/config.ron 中
