@@ -360,8 +360,8 @@ pub async fn run_orchestrator(
         return;
     };
 
-    info!("设置 Warmup 阶段游戏快进速度为 10.0");
-    if let Err(e) = client.set_speed(10.0).await {
+    info!("设置 Warmup 阶段游戏快进速度为 1.0");
+    if let Err(e) = client.set_speed(1.0).await {
         warn!("设置快进速度失败: {}", e);
     }
 
