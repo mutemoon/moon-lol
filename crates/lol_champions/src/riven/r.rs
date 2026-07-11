@@ -86,6 +86,7 @@ pub fn cast_riven_wind_slash(
             damage,
             speed: None,
             particle_hash: None,
+            sticky: false,
         });
     }
 }

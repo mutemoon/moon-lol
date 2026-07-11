@@ -1,5 +1,38 @@
 # Darius 开发历史
 
+## 2026-07-10 - E 技能拉回 + 击飞 + 减速实现
+
+### 背景
+位移框架组合化重构（Phase 1 已完成启用新原语）。E 此前是纯 stub（只播动画，
+`mod.rs` 注释"拉回效果待实现"）。Phase 4.1 用 Darius E 验证"灵活组合大于上帝参数"
+的论点：拉回技能不需要专属字段，由通用原语组合而成。
+
+### 实现内容
+1. 新建 `crates/lol_champions/src/darius/e.rs`，`mod.rs` 的 stub `cast_darius_e` 删除。
+2. TDD：先写 `e_tests.rs`（锥形内拉到脚边 / 锥形外不动 / 被拉挂 40% 减速），红→绿。
+
+### 组合表达（核心决策）
+E 是纯 CC（wiki 无伤害值），**不走 `ActionDamage`**（否则会触发出血），而是三原语组合：
+- **锥形查询**：复用 `DamageShape::Sector` 的几何（朝向、半径、半角），但直接空间
+  查询敌人。朝向取施法点方向（`trigger.point - pos`），施法点与自身重合时退回
+  `Transform::forward()`。
+- **拉回 + 击飞**：`CommandKnockback { direction: Toward, distance: 535, duration: 0.75 }`。
+  `Toward` 自动钳制不越过 source，故 distance 传范围上限即可拉到脚下；击飞
+  （`DebuffKnockup`）由 `on_command_knockback` 自动施加，无需另写。
+- **减速**：`DebuffSlow(0.4, 1.0)`，作为副作用挂在每个被拉敌人上。
+- Darius 自身不位移（只对敌人触发 `CommandKnockback`）。
+
+### 数值
+- 范围 535、锥角 90°、击飞 0.75s、拉回速度 1200、减速 40%/1s。
+
+### 局限性 / 待解决
+- 护甲穿透被动未实现（待护甲穿透系统）。
+- 锥角 90° 是估算值，wiki 未给出精确角度。
+- 拉到 source 精确重叠（Toward 语义），未保留小偏移；后续若需"拉到身前一段"可改
+  `CommandKnockback` 的 distance 或引入 offset。
+- 测试中 `darius_e_does_not_pull_outside_cone` 在 stub 阶段也过（stub 谁都不拉），
+  实现后靠锥形过滤继续通过。
+
 ## 2026-05-11 - 技能测试框架和基础实现
 
 ### 完成的工作

@@ -404,3 +404,20 @@ impl ConfigNavigationGridCell {
         !self.is_wall()
     }
 }
+
+/// 默认格子：可通行（无 Wall 标记）、其余标志为空/默认值。
+impl Default for ConfigNavigationGridCell {
+    fn default() -> Self {
+        Self {
+            heuristic: 0.0,
+            vision_pathing_flags: GridFlagsVisionPathing::empty(),
+            river_region_flags: GridFlagsRiverRegion::empty(),
+            jungle_quadrant_flags: GridFlagsJungleQuadrant::empty(),
+            main_region_flags: GridFlagsMainRegion::Spawn,
+            nearest_lane_flags: GridFlagsNearestLane::BlueSideTopLane,
+            poi_flags: GridFlagsPOI::None,
+            ring_flags: GridFlagsRing::BlueSpawnToNexus,
+            srx_flags: GridFlagsSRX::Walkable,
+        }
+    }
+}

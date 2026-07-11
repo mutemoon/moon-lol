@@ -7,7 +7,7 @@ use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
 };
-use lol_core::action::dash::{ActionDash, DashDamage, DashMoveType};
+use lol_core::action::dash::{ActionDash, DashDamage, DashDamageIntent, DashMoveType};
 use lol_core::attack::CommandAttackReset;
 use lol_core::base::buff::BuffOf;
 use lol_core::buffs::cc_debuffs::DebuffStun;
@@ -146,19 +146,21 @@ fn cast_sett_r(
         duration: None,
     });
     // R is a dash that carries enemy to target location and deals damage
-    commands.trigger(ActionDash {
-        entity,
-        point: point,
-        skill: skill_spell,
-        move_type: DashMoveType::Pointer { max: 400.0 },
-        damage: Some(DashDamage {
+    commands.entity(entity).insert(DashDamageIntent {
+        damage: DashDamage {
             radius_end: 200.0,
             damage: TargetDamage {
                 filter: TargetFilter::All,
                 amount: "total_damage".to_string(),
                 damage_type: DamageType::Physical,
             },
-        }),
+        },
+        skill: skill_spell,
+    });
+    commands.trigger(ActionDash {
+        entity,
+        point,
+        move_type: DashMoveType::Pointer { max: 400.0 },
         speed: 700.0,
     });
 }

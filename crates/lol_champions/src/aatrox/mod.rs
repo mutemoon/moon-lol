@@ -5,7 +5,7 @@ use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
 };
-use lol_core::action::dash::{ActionDash, DashDamage, DashMoveType};
+use lol_core::action::dash::{ActionDash, DashDamage, DashDamageIntent, DashMoveType};
 use lol_core::base::buff::BuffOf;
 use lol_core::buffs::cc_debuffs::DebuffSlow;
 use lol_core::buffs::common_buffs::{BuffMoveSpeed, BuffSelfHeal};
@@ -97,19 +97,21 @@ fn cast_aatrox_q(
     });
     // Q is a 3-hit combo, each hit has different damage shape
     // Using circular damage similar to Riven
-    commands.trigger(ActionDash {
-        entity,
-        point: point,
-        skill: skill_spell,
-        move_type: DashMoveType::Fixed(200.0),
-        damage: Some(DashDamage {
+    commands.entity(entity).insert(DashDamageIntent {
+        damage: DashDamage {
             radius_end: 200.0,
             damage: TargetDamage {
                 filter: TargetFilter::All,
                 amount: "total_damage".to_string(),
                 damage_type: DamageType::Physical,
             },
-        }),
+        },
+        skill: skill_spell,
+    });
+    commands.trigger(ActionDash {
+        entity,
+        point,
+        move_type: DashMoveType::Fixed(200.0),
         speed: 800.0,
     });
 
@@ -164,7 +166,7 @@ fn cast_aatrox_e(
     _q_transform: &Query<&Transform>,
     entity: Entity,
     point: Vec2,
-    skill_spell: Handle<Spell>,
+    _skill_spell: Handle<Spell>,
 ) {
     commands.trigger(CommandAnimationPlay {
         entity,
@@ -175,10 +177,8 @@ fn cast_aatrox_e(
     // E is a dash that heals based on damage dealt
     commands.trigger(ActionDash {
         entity,
-        point: point,
-        skill: skill_spell,
+        point,
         move_type: DashMoveType::Pointer { max: 250.0 },
-        damage: None,
         speed: 900.0,
     });
     // Self-heal based on damage

@@ -5,7 +5,7 @@ use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
 };
-use lol_core::action::dash::{ActionDash, DashDamage, DashMoveType};
+use lol_core::action::dash::{ActionDash, DashDamage, DashDamageIntent, DashMoveType};
 use lol_core::attack::CommandAttackReset;
 use lol_core::base::buff::BuffOf;
 use lol_core::buffs::cc_debuffs::DebuffSlow;
@@ -179,19 +179,21 @@ fn cast_camille_e(
             .insert(SkillRecastWindow::new(2, 2, CAMILLE_E_RECAST_WINDOW));
     } else {
         // Second cast: Dash toward hooked terrain
-        commands.trigger(ActionDash {
-            entity,
-            point: point,
-            skill: skill_spell,
-            move_type: DashMoveType::Pointer { max: 400.0 },
-            damage: Some(DashDamage {
+        commands.entity(entity).insert(DashDamageIntent {
+            damage: DashDamage {
                 radius_end: 150.0,
                 damage: TargetDamage {
                     filter: TargetFilter::All,
                     amount: "total_damage".to_string(),
                     damage_type: DamageType::Physical,
                 },
-            }),
+            },
+            skill: skill_spell,
+        });
+        commands.trigger(ActionDash {
+            entity,
+            point,
+            move_type: DashMoveType::Pointer { max: 400.0 },
             speed: 900.0,
         });
         commands.entity(skill_entity).remove::<SkillRecastWindow>();
@@ -216,19 +218,21 @@ fn cast_camille_r(
         duration: None,
     });
     // R is a hookshot-like leap that marks and traps target champion
-    commands.trigger(ActionDash {
-        entity,
-        point: point,
-        skill: skill_spell,
-        move_type: DashMoveType::Pointer { max: 350.0 },
-        damage: Some(DashDamage {
+    commands.entity(entity).insert(DashDamageIntent {
+        damage: DashDamage {
             radius_end: 150.0,
             damage: TargetDamage {
                 filter: TargetFilter::Champion,
                 amount: "total_damage".to_string(),
                 damage_type: DamageType::Physical,
             },
-        }),
+        },
+        skill: skill_spell,
+    });
+    commands.trigger(ActionDash {
+        entity,
+        point,
+        move_type: DashMoveType::Pointer { max: 350.0 },
         speed: 800.0,
     });
 }

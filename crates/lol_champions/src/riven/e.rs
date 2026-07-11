@@ -64,9 +64,7 @@ pub fn cast_riven_e(
     commands.trigger(ActionDash {
         entity,
         point,
-        skill: Handle::default(),
         move_type: DashMoveType::Fixed(250.0),
-        damage: None,
         speed: 1000.0,
     });
 }

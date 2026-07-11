@@ -7,7 +7,7 @@ use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
 };
-use lol_core::action::dash::{ActionDash, DashDamage, DashMoveType};
+use lol_core::action::dash::{ActionDash, DashDamage, DashDamageIntent, DashMoveType};
 use lol_core::base::buff::BuffOf;
 use lol_core::buffs::cc_debuffs::DebuffStun;
 use lol_core::buffs::damage_reduction::BuffDamageReduction;
@@ -88,19 +88,21 @@ fn cast_irelia_q(
         duration: None,
     });
     // Q is a dash that resets on kill and marks enemies as Unsteady
-    commands.trigger(ActionDash {
-        entity,
-        point: point,
-        skill: skill_spell,
-        move_type: DashMoveType::Pointer { max: 250.0 },
-        damage: Some(DashDamage {
+    commands.entity(entity).insert(DashDamageIntent {
+        damage: DashDamage {
             radius_end: 80.0,
             damage: TargetDamage {
                 filter: TargetFilter::All,
                 amount: "total_damage".to_string(),
                 damage_type: DamageType::Physical,
             },
-        }),
+        },
+        skill: skill_spell,
+    });
+    commands.trigger(ActionDash {
+        entity,
+        point,
+        move_type: DashMoveType::Pointer { max: 250.0 },
         speed: 800.0,
     });
 }

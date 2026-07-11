@@ -420,6 +420,7 @@ fn fixed_update(
                                 damage: 0.0,
                                 speed: None,
                                 particle_hash: None,
+                                sticky: false,
                             });
                         } else if let Some(damage) = damage {
                             commands.try_trigger(CommandDamageCreate {

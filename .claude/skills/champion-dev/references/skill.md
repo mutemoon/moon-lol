@@ -37,5 +37,6 @@
 - 分段重施技能：[skill-multi-stage.md](./skill-multi-stage.md)
 - 被动联动技能：[skill-passive.md](./skill-passive.md)
 - 飞弹与投射物：[skill-missile.md](./skill-missile.md)
+- 位移系统：[skill-dash.md](./skill-dash.md)
 - 冷却控制机制：[skill-cooldown.md](./skill-cooldown.md)
 - 测试与调试实践：[skill-test.md](./skill-test.md)

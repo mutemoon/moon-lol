@@ -8,7 +8,7 @@ use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
 };
 use lol_core::action::dash::{ActionDash, DashDamage, DashMoveType};
-use lol_core::action::knockback::CommandKnockback;
+use lol_core::action::knockback::{CommandKnockback, DisplaceDirection};
 use lol_core::base::buff::BuffOf;
 use lol_core::buffs::cc_debuffs::{DebuffSlow, update_debuff_knockup};
 use lol_core::damage::{DamageType, EventDamageCreate};
@@ -334,6 +334,7 @@ fn on_leesin_damage_hit(
                     distance: 200.0,
                     speed: 1200.0,
                     duration: Some(1.0),
+                    direction: DisplaceDirection::Away,
                 });
 
             // R用完后移除标记

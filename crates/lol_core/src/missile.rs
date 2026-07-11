@@ -3,6 +3,7 @@ use bevy::prelude::*;
 use lol_base::debug_area::DebugArea;
 use lol_base::debug_missile::DebugMissile;
 use lol_base::debug_sphere::DebugSphere;
+use lol_base::grid::ConfigNavigationGrid;
 use lol_base::movement::{MissileBehavior, MovementType};
 use lol_base::spell::Spell;
 use serde::{Deserialize, Serialize};
@@ -13,6 +14,7 @@ use crate::life::Death;
 use crate::movement::{
     CommandMovement, EventMovementEnd, Movement, MovementAction, MovementSource, MovementWay,
 };
+use crate::navigation::grid::ResourceGrid;
 use crate::team::Team;
 
 #[derive(Default)]
@@ -27,6 +29,7 @@ impl Plugin for PluginMissile {
         app.add_systems(FixedUpdate, fixed_update);
         app.add_systems(FixedUpdate, linear_missile_collision);
         app.add_systems(FixedUpdate, update_attached_fields);
+        app.add_systems(FixedUpdate, update_wall_anchors);
     }
 }
 
@@ -54,6 +57,8 @@ pub struct LinearMissile {
     pub width: f32,
     pub damage: f32,
     pub hit_enemies: Vec<Entity>,
+    /// 粘性飞弹：检测地形碰撞，碰墙即锚定（不做实体碰撞）。
+    pub sticky: bool,
 }
 
 #[derive(EntityEvent, Debug)]
@@ -70,7 +75,27 @@ pub struct CommandMissileCreate {
     pub speed: Option<f32>,
     /// 覆盖 missile effect particle（None 则使用 spell data 中的 missileEffectKey）
     pub particle_hash: Option<u32>,
+    /// 粘性飞弹：碰墙锚定并发出 `EventMissileHit`，用于青钢影 E 钩索等
+    pub sticky: bool,
 }
+
+/// 粘性飞弹碰墙后留下的锚点实体（世界定点，带生命周期）。
+#[derive(Component, Debug)]
+pub struct WallAnchor {
+    pub timer: Timer,
+}
+
+/// 粘性飞弹碰墙事件，触发于 source（施法者），携带墙点与 spell 句柄供英雄观察者按技能分发。
+#[derive(EntityEvent, Debug, Clone)]
+pub struct EventMissileHit {
+    #[event_target]
+    pub source: Entity,
+    pub spell: Handle<Spell>,
+    pub point: Vec3,
+}
+
+/// WallAnchor 默认存活时长（秒），覆盖二段技能窗口
+const WALL_ANCHOR_DURATION: f32 = 5.0;
 
 /// 附着在施法者身上的范围伤害场组件
 ///
@@ -141,6 +166,8 @@ fn linear_missile_collision(
     )>,
     q_targets: Query<(Entity, &Team, &Transform), (Without<LinearMissile>, Without<Death>)>,
     q_source_team: Query<&Team>,
+    res_grid: Option<Res<ResourceGrid>>,
+    assets_grid: Option<Res<Assets<ConfigNavigationGrid>>>,
     time: Res<Time<Fixed>>,
 ) {
     let dt = time.delta_secs();
@@ -164,6 +191,33 @@ fn linear_missile_collision(
         transform.translation = current + direction * step;
         // 旋转矩形条面朝移动方向（Cuboid 沿 Z 轴伸长）
         transform.rotation = Quat::from_rotation_arc(Vec3::Z, direction);
+
+        // 粘性飞弹：检测地形碰撞，碰墙即锚定，不做实体碰撞
+        if linear.sticky {
+            if let (Some(res_grid), Some(assets_grid)) = (res_grid.as_ref(), assets_grid.as_ref()) {
+                if let Some(grid) = assets_grid.get(&res_grid.0) {
+                    let cell = grid.get_cell_xy_by_position(&transform.translation.xz());
+                    if !grid.is_walkable_by_xy(cell) {
+                        let hit_point = transform.translation;
+                        commands.entity(missile_entity).despawn();
+                        commands.spawn((
+                            WallAnchor {
+                                timer: Timer::from_seconds(WALL_ANCHOR_DURATION, TimerMode::Once),
+                            },
+                            Transform::from_translation(hit_point),
+                        ));
+                        commands.entity(state.source).trigger(|e| EventMissileHit {
+                            source: e,
+                            spell: missile.key.clone(),
+                            point: hit_point,
+                        });
+                        continue;
+                    }
+                }
+            }
+            // 仍可走：继续飞行，不做实体碰撞
+            continue;
+        }
 
         let Ok(source_team) = q_source_team.get(state.source) else {
             continue;
@@ -189,6 +243,20 @@ fn linear_missile_collision(
                     tag: None,
                 });
             }
+        }
+    }
+}
+
+/// 墙锚点生命周期：到期销毁
+fn update_wall_anchors(
+    mut commands: Commands,
+    mut q: Query<(Entity, &mut WallAnchor)>,
+    time: Res<Time<Fixed>>,
+) {
+    for (entity, mut anchor) in q.iter_mut() {
+        anchor.timer.tick(time.delta());
+        if anchor.timer.is_finished() {
+            commands.entity(entity).despawn();
         }
     }
 }
@@ -272,6 +340,7 @@ fn on_command_missile_create(
                 width: missile_width.unwrap_or(100.0),
                 damage: trigger.damage,
                 hit_enemies: Vec::new(),
+                sticky: trigger.sticky,
             },
             Transform::from_translation(translation),
             Movement { speed },
@@ -504,4 +573,143 @@ fn find_bone_translation(
         }
     }
     None
+}
+
+#[cfg(test)]
+mod tests {
+    use bevy::time::TimeUpdateStrategy;
+    use lol_base::grid::{ConfigNavigationGrid, ConfigNavigationGridCell};
+    use lol_base::hash_key::HashKey;
+
+    use super::*;
+    use crate::movement::PluginMovement;
+    use crate::navigation::grid::ResourceGrid;
+    use crate::navigation::navigation::PluginNavigaton;
+    use crate::team::Team;
+
+    const MISSILE_SPELL_KEY: u32 = 0x7001;
+
+    fn spell_handle() -> Handle<Spell> {
+        Handle::from(HashKey::<Spell>::from(MISSILE_SPELL_KEY))
+    }
+
+    #[derive(Resource, Default)]
+    struct HitTrace(Vec<Vec3>);
+
+    fn on_missile_hit(trigger: On<EventMissileHit>, mut trace: ResMut<HitTrace>) {
+        trace.0.push(trigger.point);
+    }
+
+    /// 2x2 可走网格（cell_size 100，min 0,0），可走区域 x,y ∈ [0,200]；超出即视为墙体。
+    fn app_with_grid() -> App {
+        let mut app = App::new();
+        app.add_plugins(MinimalPlugins);
+        app.add_plugins(AssetPlugin::default());
+        app.add_plugins(PluginMissile);
+        app.add_plugins(PluginMovement);
+        app.add_plugins(PluginNavigaton);
+        app.init_asset::<Spell>();
+        app.init_resource::<HitTrace>();
+        app.add_observer(on_missile_hit);
+        app.insert_resource(Time::<Fixed>::from_hz(30.0));
+        app.insert_resource(TimeUpdateStrategy::FixedTimesteps(1));
+
+        let grid = ConfigNavigationGrid {
+            min_position: Vec2::ZERO,
+            cell_size: 100.0,
+            x_len: 2,
+            y_len: 2,
+            cells: vec![
+                vec![ConfigNavigationGridCell::default(); 2],
+                vec![ConfigNavigationGridCell::default(); 2],
+            ],
+            ..Default::default()
+        };
+        let grid_handle = app
+            .world_mut()
+            .resource_mut::<Assets<ConfigNavigationGrid>>()
+            .add(grid);
+        app.insert_resource(ResourceGrid(grid_handle));
+        app
+    }
+
+    fn count<T: Component>(app: &mut App) -> usize {
+        let mut q = app.world_mut().query::<&T>();
+        q.iter(app.world()).count()
+    }
+
+    #[test]
+    fn sticky_missile_anchors_at_wall() {
+        let mut app = app_with_grid();
+        let spell = spell_handle();
+        let caster = app
+            .world_mut()
+            .spawn((Team::Order, Transform::from_xyz(100.0, 0.0, 100.0)))
+            .id();
+
+        app.world_mut()
+            .entity_mut(caster)
+            .trigger(|e| CommandMissileCreate {
+                entity: e,
+                target: None,
+                destination: Some(Vec3::new(1000.0, 0.0, 100.0)),
+                spell,
+                damage: 0.0,
+                speed: Some(1200.0),
+                particle_hash: None,
+                sticky: true,
+            });
+        for _ in 0..15 {
+            app.update();
+        }
+
+        let trace = app.world().resource::<HitTrace>();
+        assert_eq!(
+            trace.0.len(),
+            1,
+            "粘性飞弹碰墙应发一次 EventMissileHit，实际 {:?}",
+            trace.0
+        );
+        let x = trace.0[0].x;
+        assert!(
+            (190.0..=300.0).contains(&x),
+            "锚点应在可走区边界 x≈200 附近，实际 x = {x}"
+        );
+        assert_eq!(count::<LinearMissile>(&mut app), 0, "粘性飞弹应已销毁");
+        assert_eq!(count::<WallAnchor>(&mut app), 1, "应生成一个 WallAnchor");
+    }
+
+    #[test]
+    fn non_sticky_missile_ignores_wall() {
+        let mut app = app_with_grid();
+        let spell = spell_handle();
+        let caster = app
+            .world_mut()
+            .spawn((Team::Order, Transform::from_xyz(100.0, 0.0, 100.0)))
+            .id();
+
+        app.world_mut()
+            .entity_mut(caster)
+            .trigger(|e| CommandMissileCreate {
+                entity: e,
+                target: None,
+                destination: Some(Vec3::new(1000.0, 0.0, 100.0)),
+                spell,
+                damage: 0.0,
+                speed: Some(1200.0),
+                particle_hash: None,
+                sticky: false,
+            });
+        for _ in 0..5 {
+            app.update();
+        }
+
+        let trace = app.world().resource::<HitTrace>();
+        assert!(
+            trace.0.is_empty(),
+            "非粘性飞弹不做地形检测，不应发 EventMissileHit，实际 {:?}",
+            trace.0
+        );
+        assert_eq!(count::<WallAnchor>(&mut app), 0, "不应生成 WallAnchor");
+    }
 }

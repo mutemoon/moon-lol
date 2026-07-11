@@ -1,11 +1,14 @@
 pub mod buffs;
+pub mod e;
 pub mod q;
 
+#[cfg(test)]
+mod e_tests;
 #[cfg(test)]
 mod tests;
 
 use bevy::prelude::*;
-use lol_base::animation_names::{ANIM_SPELL2, ANIM_SPELL3, ANIM_SPELL4};
+use lol_base::animation_names::{ANIM_SPELL2, ANIM_SPELL4};
 use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{
@@ -20,6 +23,7 @@ use lol_core::skill::{EventSkillCast, Skill, SkillSlot};
 use lol_core::team::Team;
 
 use crate::darius::buffs::BuffDariusBleed;
+use crate::darius::e::cast_darius_e as execute_darius_e;
 use crate::darius::q::cast_darius_q as execute_darius_q;
 
 #[derive(Default)]
@@ -67,7 +71,15 @@ fn on_darius_skill_cast(
             &q_team,
             &q_enemies,
         ),
-        SkillSlot::E => cast_darius_e(&mut commands, entity, skill_spell),
+        SkillSlot::E => execute_darius_e(
+            &mut commands,
+            entity,
+            skill_spell,
+            trigger.point,
+            &q_transform,
+            &q_team,
+            &q_enemies,
+        ),
         SkillSlot::R => cast_darius_r(&mut commands, entity, skill_spell),
         _ => {}
     }
@@ -154,19 +166,6 @@ fn cast_darius_w(
     }
 
     debug!("Darius W: 致残打击，攻击重置 + 额外伤害 + 减速");
-}
-
-fn cast_darius_e(commands: &mut Commands, entity: Entity, _skill_spell: Handle<Spell>) {
-    commands.trigger(CommandAnimationPlay {
-        entity,
-        hash: ANIM_SPELL3.to_string(),
-        repeat: false,
-        duration: None,
-    });
-    // E is a cone pull - applies slow to enemies in cone
-    // Note: The actual pull effect requires displacement system which is not yet implemented
-    // E applies 40% slow for 1 second to enemies hit by the pull
-    debug!("Darius E: 无情立场，拉回 + 减速（拉回效果待实现）");
 }
 
 fn cast_darius_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {

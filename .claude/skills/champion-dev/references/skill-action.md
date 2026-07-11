@@ -7,9 +7,9 @@
 
 - `CommandAnimationPlay`：播放技能动画，需提供实体、动画哈希名称、是否循环及强制覆盖的持续时间。
 - `ActionDamage`：范围伤害，会自动读取技能关联的公式配置。需要指定实体、技能句柄与包含伤害特效的列表。
-- `ActionDash`：冲刺位移，控制实体向目标点冲刺，可传入固定的冲刺距离或按指针位置指向最大值，并可附加冲刺终点碰撞伤害。
+- `ActionDash`：冲刺位移，控制实体向目标点冲刺（固定距离 / 指针最大值 / 绝对世界点 / 追踪实体），只含运动字段；沿途伤害通过 `DashDamageIntent` 组件挂载，详见 [位移系统](./skill-dash.md)。
 - `CommandDamageCreate`：直接造成固定数值的单体物理、魔法或真实伤害。
-- `CommandKnockback`：击退或击飞，包含被击退的目标、来源实体、击退距离和速度。
+- `CommandKnockback`：击退或拉回，包含目标、来源实体、距离、速度、击飞持续时间与方向（`Away` 击退 / `Toward` 拉回），详见 [位移系统](./skill-dash.md)。
 - `CommandAttachedFieldCreate`：创建随身附着的圆形持续伤害力场，支持设置最终半径、基础伤害、持续时间及可选的力场半径成长动画。
 - `CommandAttackReset`：重置普攻后摇计时器，从而允许无缝衔接下一次普通攻击。
 

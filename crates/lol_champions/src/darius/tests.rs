@@ -8,7 +8,7 @@ use crate::darius::Darius;
 use crate::test_utils::*;
 
 /// Give Darius enough mana to cast skills (fixes exported config having 0.07 mana)
-fn give_mana(h: &mut ChampionTestHarness) {
+pub fn give_mana(h: &mut ChampionTestHarness) {
     if let Some(mut ar) = h.app.world_mut().get_mut::<AbilityResource>(h.champion) {
         ar.value = 1000.0;
         ar.max = 1000.0;

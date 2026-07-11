@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use lol_base::render_cmd::CommandAnimationPlay;
 use lol_core::action::dash::{ActionDash, DashMoveType};
-use lol_core::action::knockback::CommandKnockback;
+use lol_core::action::knockback::{CommandKnockback, DisplaceDirection};
 use lol_core::base::buff::BuffOf;
 use lol_core::missile::CommandAttachedFieldCreate;
 use lol_core::movement::EventMovementEnd;
@@ -52,9 +52,7 @@ pub fn cast_riven_q(
     commands.trigger(ActionDash {
         entity,
         point,
-        skill: Handle::default(),
         move_type: DashMoveType::Fixed(250.0),
-        damage: None,
         speed: 1000.0,
     });
 
@@ -124,6 +122,7 @@ pub fn on_riven_dash_end(
             distance: RIVEN_Q3_KNOCKBACK_DISTANCE,
             speed: 1200.0,
             duration: Some(0.75),
+            direction: DisplaceDirection::Away,
         });
     }
 

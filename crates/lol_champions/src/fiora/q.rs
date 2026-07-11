@@ -62,16 +62,13 @@ pub fn cast_fiora_q(
         duration: None,
     });
 
-    // 纯位移：damage 为 None，不产生 DashDamageComponent，
-    // 因此不会像 Riven Q 那样对路径上的敌人造成碰撞伤害。
+    // 纯位移：不挂 DashDamageIntent，因此不会产生沿途碰撞伤害。
     commands.trigger(ActionDash {
         entity,
         point,
-        skill: Handle::default(),
         move_type: DashMoveType::Pointer {
             max: FIORA_Q_DASH_MAX,
         },
-        damage: None,
         speed: FIORA_Q_DASH_SPEED,
     });
 

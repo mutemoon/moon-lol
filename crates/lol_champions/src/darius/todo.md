@@ -56,17 +56,12 @@
 
 ### 已完成
 - [x] 播放动画 (spell3)
+- [x] 拉回效果（锥形查询 + `CommandKnockback{Toward}` 拉到脚下，见 `e.rs`）
+- [x] 击飞 0.75s（由 `CommandKnockback` 自动施加 `DebuffKnockup`）
+- [x] 减速效果（40% 减速 1s，`DebuffSlow`）
 
 ### 待实现
-1. **拉回效果（位移系统）**
-   - E 将敌人拉向自己
-   - 需要位移系统支持
-
-2. **减速效果**
-   - 40% 减速，持续 1 秒
-   - 对拉回的敌人施加
-
-3. **被动护甲穿透**
+1. **被动护甲穿透**
    - 被动: 获得 20/25/30/35/40% 护甲穿透
    - 需要护甲穿透系统支持
 
@@ -117,4 +112,7 @@
 - darius_w_resets_attack: W 重置攻击 ✓
 - darius_w_applies_slow: W 施加减速 ✓
 - darius_e_cast_success: E 可以施放 ✓
+- darius_e_pulls_enemies_in_cone_to_feet: E 锥形内拉回脚边 ✓
+- darius_e_does_not_pull_outside_cone: E 锥形外不拉回 ✓
+- darius_e_applies_slow_to_pulled: E 被拉敌人挂减速 ✓
 - darius_r_deals_damage: R 造成伤害 ✓
