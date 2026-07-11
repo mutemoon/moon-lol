@@ -10,6 +10,9 @@
                 ),
                 "lol_core::team::Team": Order,
                 "lol_champions::riven::Riven": (),
+                "lol_render::controller::Controller": (),
+                "lol_render::controller::SelfPlayer": (),
+                "lol_render::camera::Focus": (),
                 "lol_base::character::ConfigCharacterRecord": (
                     character_record: Path("characters/riven/config.ron"),
                 ),
@@ -27,10 +30,6 @@
                 ),
                 "lol_core::team::Team": Chaos,
                 "lol_champions::fiora::Fiora": (),
-                "lol_render::controller::Controller": (),
-                "lol_render::controller::SelfPlayer": (),
-                "lol_render::camera::Focus": (),
-                "lol_core::entities::champion::Champion": (),
                 "lol_base::character::ConfigCharacterRecord": (
                     character_record: Path("characters/fiora/config.ron"),
                 ),
