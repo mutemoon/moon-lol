@@ -7,7 +7,10 @@ use lol_base::ui::{
 };
 use lol_core::base::level::Level;
 use lol_core::character::CharacterReady;
-use lol_core::skill::{CommandSkillLevelUp, CoolDown, PassiveSkill, Skill, SkillPoints, Skills};
+use lol_core::skill::{
+    CommandSkillLevelUp, CoolDown, PassiveSkill, Skill, SkillPoints, SkillRecastWindow, Skills,
+    is_skill_ready,
+};
 
 use crate::controller::SelfPlayer;
 use crate::ui::button::update_button;
@@ -185,6 +188,7 @@ fn update_single_skill_cooldown(
     commands: &mut Commands,
     skill: &Skill,
     cooldown: &CoolDown,
+    recast: Option<&SkillRecastWindow>,
     slot_def: &LOLSpellSlotDetailedUiDefinition,
     res_ui_element_entity: &UIElementEntity,
     q_ui_text_state: &mut Query<(&mut UiTextState, &mut Visibility)>,
@@ -217,13 +221,16 @@ fn update_single_skill_cooldown(
         return;
     }
 
-    let remaining = cooldown
-        .timer
-        .as_ref()
-        .map(|v| v.remaining_secs())
-        .unwrap_or(0.0);
+    // 存在未过期的重施窗口时（如锐雯 Q 的多段重施），技能仍可释放下一段，
+    // 应显示为就绪而非冷却倒计时——即使主冷却已在计时。
+    let show_cooldown = !is_skill_ready(cooldown, recast);
 
-    if remaining > 0.0 {
+    if show_cooldown {
+        let remaining = cooldown
+            .timer
+            .as_ref()
+            .map(|v| v.remaining_secs())
+            .unwrap_or(0.0);
         let text_val = remaining.ceil().to_string();
         if text_state.text != text_val {
             text_state.text = text_val;
@@ -400,7 +407,7 @@ fn update_single_skill_rank_pips(
 
 fn update_skill_cooldown(
     mut commands: Commands,
-    q_skill: Query<(&Skill, &CoolDown), Changed<CoolDown>>,
+    q_skill: Query<(&Skill, &CoolDown, Option<&SkillRecastWindow>), Changed<CoolDown>>,
     q_skills: Query<&Skills, With<SelfPlayer>>,
     res_player_frame_vc: Res<LOLPlayerFrameViewController>,
     res_ui_element_entity: Res<UIElementEntity>,
@@ -420,7 +427,7 @@ fn update_skill_cooldown(
             break;
         }
 
-        let Ok((skill, cooldown)) = q_skill.get(skill_entity) else {
+        let Ok((skill, cooldown, recast)) = q_skill.get(skill_entity) else {
             continue;
         };
 
@@ -434,6 +441,7 @@ fn update_skill_cooldown(
             &mut commands,
             skill,
             cooldown,
+            recast,
             slot_def,
             &res_ui_element_entity,
             &mut q_ui_text_state,

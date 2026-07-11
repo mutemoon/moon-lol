@@ -18,7 +18,9 @@ use lol_core::life::Health;
 use lol_core::log::create_log_plugin;
 use lol_core::navigation::grid::ResourceGrid;
 use lol_core::navigation::navigation::NavigationDebug;
-use lol_core::skill::{CoolDown, Skill, SkillRecastWindow, Skills, get_skill_value};
+use lol_core::skill::{
+    CoolDown, Skill, SkillRecastWindow, Skills, get_skill_value, is_skill_ready,
+};
 use lol_core::team::Team;
 use lol_render::PluginRender;
 use lol_render::controller::SelfPlayer;
@@ -393,21 +395,18 @@ impl ChampionTestHarness {
             .get::<Skills>(self.champion)
             .expect("skills should exist");
         let skill_entity = skills[index];
+        self.is_skill_ready(skill_entity)
+    }
 
-        // If there's an active recast window, the skill is ready (can cast next stage)
-        if let Some(recast) = self.app.world().get::<SkillRecastWindow>(skill_entity) {
-            if !recast.timer.is_finished() {
-                return true;
-            }
-        }
-
-        self.app
-            .world()
+    /// 技能是否处于"就绪/可施放"状态：存在未过期的重施窗口（如锐雯 Q 多段）
+    /// 或主冷却已结束。与 UI 冷却遮罩显示逻辑共用同一判定，确保显示与施法语义一致。
+    pub fn is_skill_ready(&self, skill_entity: Entity) -> bool {
+        let world = self.app.world();
+        let cooldown = world
             .get::<CoolDown>(skill_entity)
-            .expect("cooldown state should exist")
-            .timer
-            .as_ref()
-            .map_or(true, |t| t.is_finished())
+            .expect("cooldown state should exist");
+        let recast = world.get::<SkillRecastWindow>(skill_entity);
+        is_skill_ready(cooldown, recast)
     }
 
     /// Returns the entity ID for the skill in slot `index` (0=Q, 1=W, 2=E, 3=R).

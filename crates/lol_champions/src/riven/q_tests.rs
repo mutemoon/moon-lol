@@ -186,3 +186,35 @@ fn riven_q_field_spawns_per_stage() {
     h.advance(1.0);
     h.finish();
 }
+
+/// Q1 释放后，虽然主冷却（13s）已开始计时，但在 4s 重施窗口内
+/// 技能应显示为"就绪（可释放 Q2）"而非直接显示冷却倒计时。
+/// 重施窗口过期后，主冷却仍在进行时才应显示冷却。
+#[test]
+fn riven_q_shows_ready_during_recast_window() {
+    let mut h = build_headless("riven_q_display_ready");
+    let q_entity = h.skill_entity(0);
+
+    // 初始：无冷却、无重施窗口 -> 就绪
+    assert!(h.is_skill_ready(q_entity), "初始 Q 应显示为就绪");
+
+    // Q1 释放：AfterCast 模式下立即进入 13s 主冷却，同时开启 4s 的 Q2 重施窗口
+    h.cast_skill(0, Vec2::new(140.0, 0.0)).advance(0.4);
+
+    assert!(h.has_recast_window(q_entity), "Q1 后应存在重施窗口");
+    // 关键：重施窗口内虽然冷却在计时，但应显示"可释放 Q2"而非 CD
+    assert!(
+        h.is_skill_ready(q_entity),
+        "重施窗口内 Q 应显示为就绪（可释放 Q2），而非直接显示 CD"
+    );
+
+    // 重施窗口 4s 过期，但主冷却（13s）仍在计时 -> 应显示 CD
+    h.advance(4.0);
+    assert!(!h.has_recast_window(q_entity), "4s 后重施窗口应消失");
+    assert!(
+        !h.is_skill_ready(q_entity),
+        "重施窗口过期后冷却仍未结束，应显示 CD"
+    );
+
+    h.finish();
+}

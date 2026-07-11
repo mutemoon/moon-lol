@@ -5,6 +5,22 @@ use lol_base::spell_calc::{
     CalculationType,
 };
 
+use super::{CoolDown, SkillRecastWindow};
+
+/// 技能是否处于"可施放/就绪"状态，供 UI 显示与施法前置判断共用同一语义。
+///
+/// 存在未过期的重施窗口时（如锐雯 Q 的多段重施、盲僧 Q 的二段冲刺），
+/// 即使主冷却已在计时，技能仍可释放下一段，因此视为就绪；
+/// 否则取决于冷却计时器是否结束。
+pub fn is_skill_ready(cooldown: &CoolDown, recast: Option<&SkillRecastWindow>) -> bool {
+    if let Some(window) = recast {
+        if !window.timer.is_finished() {
+            return true;
+        }
+    }
+    cooldown.timer.as_ref().map_or(true, |t| t.is_finished())
+}
+
 pub fn get_skill_value(
     skill_object: &Spell,
     name: &str,

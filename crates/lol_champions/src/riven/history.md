@@ -1,5 +1,33 @@
 # Riven 开发历史
 
+## 2026-07-11 - Q 重施窗口内 UI 显示为就绪而非冷却
+
+### 背景
+
+用户反馈：锐雯 Q1 释放后，虽然主冷却（13s）已开始计时，但 4 秒重施窗口内技能仍可释放 Q2，UI 应显示"可释放 Q2"而非直接显示冷却倒计时。
+
+### 决策
+
+- **冷却机制不变**: Riven Q 采用 `SkillCooldownMode::AfterCast`，冷却从 Q1 开始计时（13s），这符合 LoL 实际机制（Q 冷却从第一段起算），非 bug，保持原状。多段重施通过 `SkillRecastWindow`（4s）实现，与主冷却并行存在。
+- **问题定位在 UI 显示层**: `lol_render/src/ui/skill.rs` 的 `update_single_skill_cooldown` 仅根据 `cooldown.timer.remaining > 0` 决定是否显示冷却遮罩，完全忽略 `SkillRecastWindow`。因此 Q1 后冷却在跑、重施窗口也在跑时，UI 错误地显示了 CD。
+- **抽提共享语义**: 在 `lol_core::skill` 新增纯函数 `is_skill_ready(cooldown, recast)` 作为"技能是否就绪可施放"的唯一判定（重施窗口未过期 -> 就绪；否则看冷却是否结束）。UI 显示与测试 harness 的 `can_cast` 都改为复用该函数，避免显示与施法语义再次分叉。
+
+### 实现内容
+
+- `lol_core::skill::is_skill_ready(cooldown, recast)` 新增并导出
+- `lol_render/src/ui/skill.rs`: `update_skill_cooldown` 查询增加 `Option<&SkillRecastWindow>`，`update_single_skill_cooldown` 改用 `is_skill_ready` 决定遮罩
+- `crates/lol_champions/src/test_utils.rs`: `can_cast` 重构为调用 `is_skill_ready`，并暴露同名 harness 方法供测试直接断言显示语义
+
+### 局限性
+
+- UI 冷却遮罩更新依赖 `Changed<CoolDown>` 触发。Riven Q 在重施窗口内主冷却每帧 tick，能持续触发更新；对 `Manual` 冷却模式的多段技能（重施窗口内无冷却 tick）无影响（其窗口内本就 remaining=0 显示就绪）。若将来出现"重施窗口内既无冷却 tick、又需要从 CD 切回就绪"的模式，需额外监听 `SkillRecastWindow` 的添加/移除。
+- 当前仅修复人类可见 UI；`lol_agent` 的 observation（`cooldown_remaining`）仍未感知重施窗口，AI 可能在窗口内误判 Q 不可施放，留待后续处理。
+
+### 测试
+
+- 新增 `riven_q_shows_ready_during_recast_window`：验证 Q1 后重施窗口内 `is_skill_ready` 为 true（显示就绪），窗口 4s 过期后、冷却未结束时为 false（显示 CD）
+- 全部 48 个 lol_champions 测试通过
+
 ## 2026-05-05 — 直线 missile 系统 + 完整 spell 导出
 
 ### 实现内容
