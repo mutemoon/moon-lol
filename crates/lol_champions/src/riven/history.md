@@ -1,5 +1,41 @@
 # Riven 开发历史
 
+## 2026-07-12 - 每段 Q 重置普攻；Q3 改为落点范围伤害 + 震退
+
+### 背景
+
+用户反馈两点需求：
+1. 锐雯每段 Q 都应能重置普攻（wiki「隐藏机制」第 7 条：Q 可以重置普攻，Q 后可立即接平A）。
+2. Q3 不应再对位移路径上的敌人造成伤害，而是改为在位移最后落点以圆形范围造成震退和伤害。
+
+此前 Q3 与 Q1/Q2 一样生成附着伤害场（`CommandAttachedFieldCreate`，随锐雯移动、半径 65→100）沿途伤害敌人，并在位移结束 observer 里额外对落点 250 半径内敌人击退（仅击退、无伤害）。
+
+### 决策
+
+- **重置普攻（Q1/Q2/Q3 通用）**：在 `cast_riven_q` 位移后触发 `CommandAttackReset { entity }`，与 Fiora Q / Darius W 等已有「攻击重置」英雄一致。三段共用同一函数，故一处即覆盖每段。
+- **Q3 伤害几何变更**：Q3 不再生成附着伤害场（移除 `CommandAttachedFieldCreate` 调用），改为位移落点圆心 250 半径内一次性结算「伤害 + 震退」。Q1/Q2 保持原附着场沿途伤害不变。
+- **伤害数值来源不变**：Q3 落点伤害仍用 `first_slash_damage`（与 Q1/Q2 同公式），只是结算时机从「位移途中跟随场」改为「位移结束 observer」。
+- **落点 observer 兼顾伤害与击退**：`on_riven_dash_end` 对落点 250 半径内每个敌方单位先 `CommandDamageCreate` 再 `CommandKnockback`，并移除了原先 `distance < 0.001` 的跳过分支——重叠敌人也应吃到伤害（击退方向由 `CommandKnockback` 在零向量时退回默认 `(0,1)`，不会崩溃）。
+
+### 实现内容
+
+- `buffs.rs`：`RivenQ3Pending` 从单元结构体改为 `{ damage: f32 }`，携带落点伤害数值。
+- `q.rs::cast_riven_q`：所有段位移后触发 `CommandAttackReset`；Q3 分支不再 `CommandAttachedFieldCreate`，改 `insert(RivenQ3Pending { damage })`；Q1/Q2 分支保持附着场 + 重施窗口。
+- `q.rs::on_riven_dash_end`：读取 `pending.damage`，对落点半径内敌人 `CommandDamageCreate` + `CommandKnockback`。
+
+### 测试（TDD）
+
+- 新增 `riven_q_each_stage_resets_attack_timer`：起手普攻进入 Windup → 施放该段 Q → 断言全新 Windup 的 `end_time` 被刷新到更晚。对 Q1/Q2/Q3 三段循环验证（point 取 (100,0) 让 Riven 在 0↔250 间往复，始终处于普攻射程内；每段前清除残留 `AttackState`/`AttackAuto` 并移除 `AttackAuto` 隔离 `update_attack_auto` 干扰，参照 Fiora `fiora_q_resets_attack_timer`）。
+- 新增 `riven_q3_damages_at_landing_not_along_path`：位移过程中（0.1s < 0.25s 位移时长）落点附近敌人不受伤（证明无路径场）；位移落地后落点圆内敌人受伤、圆外敌人不受伤（证明落点圆形范围）。
+- 更新 `riven_q_field_spawns_per_stage` → `riven_q_damages_each_stage`：Q3 断言改为等位移结束（advance 0.4s）后落点范围伤害扣血，而非 0.1s 时路径场扣血。
+- 全部 50 个 lol_champions 测试通过。
+
+### 局限性
+
+- 落点伤害为一次性结算（位移结束 observer），若 Q3 位移被打断（硬 CC 取消位移，目前位移系统尚未支持），`RivenQ3Pending` 可能残留导致下一次任意 `EventMovementEnd` 误触发。当前测试未覆盖该路径，依赖 `RivenQ3Pending` 仅在 Q3 位移期间存在的假设；未像 Fiora Q 那样校验 `trigger.source == MovementSource::Dash`（`RivenQ3Pending` 标记本身已足够区分，但不够严谨）。
+- Q3 落点伤害与 Q1/Q2 路径伤害共用 `first_slash_damage`，未区分第三段是否有独立伤害系数（wiki 数值表三段相同，故合理）。
+- 测试 timestep 为 1/64s（自定义 bevy 分支 `TimeUpdateStrategy::FixedTimesteps(1)` + 默认 `Time::<Fixed>`），`advance(t)` 实际推进 `ceil(t / (1/64)) * (1/64)` 秒；攻击重置测试的 advance 取值（0.1/0.05）已留足 Windup（≈0.167s）裕度。
+
 ## 2026-07-11 - Q 重施窗口内 UI 显示为就绪而非冷却
 
 ### 背景

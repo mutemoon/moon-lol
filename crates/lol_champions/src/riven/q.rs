@@ -2,7 +2,9 @@ use bevy::prelude::*;
 use lol_base::render_cmd::CommandAnimationPlay;
 use lol_core::action::dash::{ActionDash, DashMoveType};
 use lol_core::action::knockback::{CommandKnockback, DisplaceDirection};
+use lol_core::attack::CommandAttackReset;
 use lol_core::base::buff::BuffOf;
+use lol_core::damage::{CommandDamageCreate, DamageType};
 use lol_core::missile::CommandAttachedFieldCreate;
 use lol_core::movement::EventMovementEnd;
 use lol_core::skill::SkillRecastWindow;
@@ -48,7 +50,7 @@ pub fn cast_riven_q(
         duration: None,
     });
 
-    // 纯位移（伤害由 AttachedField 处理）
+    // 纯位移（Q1/Q2 伤害由 AttachedField 处理，Q3 伤害由落地 observer 结算）
     commands.trigger(ActionDash {
         entity,
         point,
@@ -56,26 +58,31 @@ pub fn cast_riven_q(
         speed: 1000.0,
     });
 
-    // 生成附着在锐雯身上的通用伤害场，随锐雯移动
-    // 半径从小变大，匹配位移过程中的碰撞区增长
-    commands.trigger(CommandAttachedFieldCreate {
-        entity,
-        radius,
-        damage: damage_amount,
-        duration: RIVEN_Q_FIELD_DURATION,
-        grow_from: Some(65.0),
-        grow_duration: Some(0.25), // dash 250unit @ 1000speed = 0.25s
-    });
+    // 每段 Q 重置普攻计时器（wiki：Q 可重置普攻，Q 后可立即接平A）
+    commands.trigger(CommandAttackReset { entity });
 
     commands
         .entity(entity)
         .with_related::<BuffOf>(BuffRivenPassive);
 
     if stage >= 3 {
-        // Q3：标记击退，位移结束后触发
-        commands.entity(entity).insert(RivenQ3Pending);
+        // Q3：不在位移路径上造成伤害，标记待落地结算；位移结束后以落点为圆心
+        // 造成范围伤害 + 震退（见 on_riven_dash_end）
+        commands.entity(entity).insert(RivenQ3Pending {
+            damage: damage_amount,
+        });
         commands.entity(skill_entity).remove::<SkillRecastWindow>();
     } else {
+        // Q1/Q2：生成附着在锐雯身上的通用伤害场，随锐雯移动
+        // 半径从小变大，匹配位移过程中的碰撞区增长
+        commands.trigger(CommandAttachedFieldCreate {
+            entity,
+            radius,
+            damage: damage_amount,
+            duration: RIVEN_Q_FIELD_DURATION,
+            grow_from: Some(65.0),
+            grow_duration: Some(0.25), // dash 250unit @ 1000speed = 0.25s
+        });
         commands.entity(skill_entity).insert(SkillRecastWindow::new(
             stage + 1,
             3,
@@ -84,7 +91,7 @@ pub fn cast_riven_q(
     }
 }
 
-/// 锐雯 Q3 位移结束后触发击退
+/// 锐雯 Q3 位移结束后，以落点为圆心造成范围伤害 + 震退
 pub fn on_riven_dash_end(
     trigger: On<EventMovementEnd>,
     mut commands: Commands,
@@ -94,7 +101,7 @@ pub fn on_riven_dash_end(
     q_team: Query<&Team>,
 ) {
     let entity = trigger.event_target();
-    let Ok(_) = q_pending.get(entity) else {
+    let Ok(pending) = q_pending.get(entity) else {
         return;
     };
     let Ok(riven_transform) = q_transform.get(entity) else {
@@ -105,17 +112,27 @@ pub fn on_riven_dash_end(
     };
 
     let riven_pos = riven_transform.translation;
+    let damage = pending.damage;
 
     for (target, target_team, target_transform) in q_targets.iter() {
         if target_team == riven_team {
             continue;
         }
-        let diff = target_transform.translation - riven_pos;
-        let distance = diff.length();
-        if distance > RIVEN_Q3_KNOCKBACK_RADIUS || distance < 0.001 {
+        let distance = (target_transform.translation - riven_pos).length();
+        if distance > RIVEN_Q3_KNOCKBACK_RADIUS {
             continue;
         }
 
+        // 落点圆形范围伤害
+        commands.entity(target).trigger(|e| CommandDamageCreate {
+            entity: e,
+            source: entity,
+            damage_type: DamageType::Physical,
+            amount: damage,
+            tag: None,
+        });
+
+        // 震退（方向由 CommandKnockback 按 source->target 计算，重叠时退回默认方向）
         commands.entity(target).trigger(|e| CommandKnockback {
             entity: e,
             source: entity,

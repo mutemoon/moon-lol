@@ -9,9 +9,12 @@ pub struct BuffRivenR {
     pub timer: Timer,
 }
 
-/// 标记 Q3 位移中，落地后触发击退
+/// 标记 Q3 位移中，落地后以落点为圆心触发范围伤害 + 震退
 #[derive(Component, Debug, Default)]
-pub struct RivenQ3Pending;
+pub struct RivenQ3Pending {
+    /// Q3 落点范围伤害数值（位移结束时一次性结算）
+    pub damage: f32,
+}
 
 /// E 护盾环绕视觉组件
 /// 存储 3 个环绕子体，自动旋转表示护盾激活
