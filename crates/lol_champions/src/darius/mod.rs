@@ -16,7 +16,7 @@ use lol_core::action::damage::{
 };
 use lol_core::attack::CommandAttackReset;
 use lol_core::base::buff::BuffOf;
-use lol_core::buffs::cc_debuffs::DebuffSlow;
+use lol_core::buffs::on_hit::{BuffOnHitBonusDamage, BuffOnHitCounter, BuffOnHitSlow};
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
 use lol_core::skill::{EventSkillCast, Skill, SkillSlot};
@@ -70,9 +70,6 @@ fn on_darius_w(
     mut commands: Commands,
     q_darius: Query<(), With<Darius>>,
     q_skill: Query<&Skill>,
-    q_transform: Query<&Transform>,
-    q_team: Query<&Team>,
-    q_enemies: Query<(Entity, &Transform), With<Champion>>,
 ) {
     let entity = trigger.event_target();
     if q_darius.get(entity).is_err() {
@@ -86,14 +83,7 @@ fn on_darius_w(
         return;
     }
 
-    cast_darius_w(
-        &mut commands,
-        entity,
-        skill.spell.clone(),
-        &q_transform,
-        &q_team,
-        &q_enemies,
-    );
+    cast_darius_w(&mut commands, entity, skill.level);
 }
 
 fn on_darius_e(
@@ -166,70 +156,32 @@ fn cast_darius_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
     );
 }
 
-fn cast_darius_w(
-    commands: &mut Commands,
-    entity: Entity,
-    skill_spell: Handle<Spell>,
-    q_transform: &Query<&Transform>,
-    q_team: &Query<&Team>,
-    q_enemies: &Query<(Entity, &Transform), With<Champion>>,
-) {
+fn cast_darius_w(commands: &mut Commands, entity: Entity, level: usize) {
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: ANIM_SPELL2.to_string(),
         repeat: false,
         duration: None,
     });
-    // W is an empowered auto attack that resets attack, deals damage, and applies slow
+    // W 组合：攻击重置 + 强化普攻（额外伤害 + 减速）
     commands.trigger(CommandAttackReset { entity });
 
-    // Find W's target (nearest enemy within 300 range)
-    let Ok(transform) = q_transform.get(entity) else {
-        return;
-    };
-    let Ok(team) = q_team.get(entity) else {
-        return;
-    };
+    // 伤害比例：40% + 5% per level (40/45/50/55/60%)
+    let ratio = 0.35 + (level as f32) * 0.05;
 
-    let mut nearest_enemy: Option<Entity> = None;
-    let mut min_dist = 300.0f32;
+    commands
+        .entity(entity)
+        .with_related::<BuffOf>(BuffOnHitCounter::new(1, 1.0))
+        .with_related::<BuffOf>(BuffOnHitBonusDamage { flat: 0.0, ratio })
+        .with_related::<BuffOf>(BuffOnHitSlow {
+            percent: 0.5,
+            duration: 1.0,
+        });
 
-    for (enemy_entity, enemy_transform) in q_enemies.iter() {
-        if let Ok(enemy_team) = q_team.get(enemy_entity) {
-            if enemy_team != team {
-                let dist = transform.translation.distance(enemy_transform.translation);
-                if dist < min_dist {
-                    min_dist = dist;
-                    nearest_enemy = Some(enemy_entity);
-                }
-            }
-        }
-    }
-
-    // W deals damage to the target
-    commands.trigger(ActionDamage {
-        entity,
-        skill: skill_spell,
-        effects: vec![ActionDamageEffect {
-            shape: DamageShape::Nearest {
-                max_distance: 300.0,
-            },
-            damage_list: vec![TargetDamage {
-                filter: TargetFilter::All,
-                amount: "empowered_attack_damage".to_string(),
-                damage_type: DamageType::Physical,
-            }],
-        }],
-    });
-
-    // Apply slow to the target directly (W only, not all damage sources)
-    if let Some(target) = nearest_enemy {
-        commands
-            .entity(target)
-            .with_related::<BuffOf>(DebuffSlow::new(0.5, 1.0));
-    }
-
-    debug!("Darius W: 致残打击，攻击重置 + 额外伤害 + 减速");
+    debug!(
+        "Darius W: 强化普攻（伤害比例 {:.0}% + 减速 50% 1s）",
+        ratio * 100.0
+    );
 }
 
 fn cast_darius_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {

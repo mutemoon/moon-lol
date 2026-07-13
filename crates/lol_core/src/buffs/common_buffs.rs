@@ -83,20 +83,3 @@ impl BuffSelfHeal {
         Self { amount }
     }
 }
-
-/// 强化下次攻击 buff（通用）
-#[derive(Component, Debug, Clone)]
-#[require(Buff = Buff { name: "EmpoweredAttack" })]
-pub struct BuffEmpoweredAttack {
-    pub bonus_damage: f32,
-    pub remaining_hits: u8,
-}
-
-impl BuffEmpoweredAttack {
-    pub fn new(bonus_damage: f32, hits: u8) -> Self {
-        Self {
-            bonus_damage,
-            remaining_hits: hits,
-        }
-    }
-}

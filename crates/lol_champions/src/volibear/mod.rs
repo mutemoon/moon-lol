@@ -11,13 +11,14 @@ use lol_core::action::dash::{ActionDash, DashDamage, DashDamageIntent, DashMoveT
 use lol_core::attack::CommandAttackReset;
 use lol_core::base::buff::BuffOf;
 use lol_core::buffs::cc_debuffs::DebuffSlow;
-use lol_core::buffs::common_buffs::BuffSelfHeal;
+use lol_core::buffs::common_buffs::{BuffMoveSpeed, BuffSelfHeal};
+use lol_core::buffs::on_hit::{BuffOnHitCounter, BuffOnHitStun};
 use lol_core::buffs::shield_white::BuffShieldWhite;
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
 use lol_core::skill::{CoolDown, EventSkillCast, Skill, SkillRecastWindow, SkillSlot};
 
-use crate::volibear::buffs::{BuffVolibearQ, DebuffVolibearWMark};
+use crate::volibear::buffs::DebuffVolibearWMark;
 
 const VOLIBEAR_W_RECAST_WINDOW: f32 = 2.0;
 
@@ -145,11 +146,13 @@ fn cast_volibear_q(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    // Q is movement speed boost + stun on contact
+    // Q 组合：加速 + 下次普攻眩晕
     commands.trigger(CommandAttackReset { entity });
     commands
         .entity(entity)
-        .with_related::<BuffOf>(BuffVolibearQ::new(0.3, 1.0, 4.0));
+        .with_related::<BuffOf>(BuffOnHitCounter::new(1, 4.0))
+        .with_related::<BuffOf>(BuffOnHitStun { duration: 1.0 })
+        .with_related::<BuffOf>(BuffMoveSpeed::new(0.3, 4.0));
 }
 
 fn cast_volibear_w(

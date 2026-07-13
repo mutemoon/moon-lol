@@ -38,6 +38,7 @@ use base::PluginBase;
 use base::state::PluginState;
 use bevy::app::plugin_group;
 use buffs::damage_reduction::PluginDamageReduction;
+use buffs::on_hit::PluginOnHit;
 use buffs::shield_magic::PluginShieldMagic;
 use buffs::shield_white::PluginShieldWhite;
 use character::PluginCharacter;
@@ -87,6 +88,7 @@ plugin_group! {
         :PluginMissile,
         :PluginMovement,
         :PluginNavigaton,
+        :PluginOnHit,
         :PluginRotate,
         :PluginRun,
         :PluginShieldMagic,

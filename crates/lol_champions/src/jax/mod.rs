@@ -9,7 +9,8 @@ use lol_core::action::damage::{
 use lol_core::action::dash::{ActionDash, DashMoveType};
 use lol_core::attack::CommandAttackReset;
 use lol_core::base::buff::BuffOf;
-use lol_core::buffs::common_buffs::{BuffEmpoweredAttack, BuffResist};
+use lol_core::buffs::common_buffs::BuffResist;
+use lol_core::buffs::on_hit::{BuffOnHitBonusDamage, BuffOnHitCounter};
 use lol_core::damage::DamageType;
 use lol_core::entities::champion::Champion;
 use lol_core::skill::{EventSkillCast, Skill, SkillSlot};
@@ -97,11 +98,15 @@ fn on_jax_w(
         repeat: false,
         duration: None,
     });
-    // W resets attack timer and enhances next attack
+    // W 组合：攻击重置 + 强化下次普攻（50 额外伤害）
     commands.trigger(CommandAttackReset { entity });
     commands
         .entity(entity)
-        .with_related::<BuffOf>(BuffEmpoweredAttack::new(50.0, 1));
+        .with_related::<BuffOf>(BuffOnHitCounter::new(1, 1.0))
+        .with_related::<BuffOf>(BuffOnHitBonusDamage {
+            flat: 50.0,
+            ratio: 0.0,
+        });
 }
 
 fn on_jax_e(

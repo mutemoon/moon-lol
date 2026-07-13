@@ -11,12 +11,12 @@ use lol_core::action::dash::{ActionDash, DashDamage, DashDamageIntent, DashMoveT
 use lol_core::attack::CommandAttackReset;
 use lol_core::base::buff::BuffOf;
 use lol_core::buffs::cc_debuffs::DebuffStun;
+use lol_core::buffs::common_buffs::BuffMoveSpeed;
+use lol_core::buffs::on_hit::{BuffOnHitBonusDamage, BuffOnHitCounter};
 use lol_core::buffs::shield_white::BuffShieldWhite;
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
 use lol_core::skill::{EventSkillCast, Skill, SkillSlot};
-
-use crate::sett::buffs::BuffSettQ;
 
 #[derive(Default)]
 pub struct PluginSett;
@@ -134,11 +134,16 @@ fn cast_sett_q(commands: &mut Commands, entity: Entity) {
         repeat: false,
         duration: None,
     });
-    // Q is a buff that enhances next 2 attacks with bonus damage and move speed
+    // Q 组合：强化下 2 次普攻 + 额外伤害 + 移速
     commands.trigger(CommandAttackReset { entity });
     commands
         .entity(entity)
-        .with_related::<BuffOf>(BuffSettQ::new(2, 0.3, 4.0));
+        .with_related::<BuffOf>(BuffOnHitCounter::new(2, 4.0))
+        .with_related::<BuffOf>(BuffOnHitBonusDamage {
+            flat: 0.0, // TODO: 实际值来自 get_skill_value
+            ratio: 0.0,
+        })
+        .with_related::<BuffOf>(BuffMoveSpeed::new(0.3, 4.0));
 }
 
 fn cast_sett_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
