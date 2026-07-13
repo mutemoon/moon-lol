@@ -3,11 +3,10 @@ pub mod buffs;
 use bevy::prelude::*;
 use lol_base::animation_names::{ANIM_SPELL1, ANIM_SPELL2, ANIM_SPELL3, ANIM_SPELL4};
 use lol_base::render_cmd::CommandAnimationPlay;
-use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
 };
-use lol_core::action::dash::{ActionDash, DashDamage, DashMoveType};
+use lol_core::action::dash::{ActionDash, DashMoveType};
 use lol_core::base::buff::BuffOf;
 use lol_core::buffs::cc_debuffs::DebuffSlow;
 use lol_core::damage::{DamageType, EventDamageCreate};
@@ -19,7 +18,10 @@ pub struct PluginFizz;
 
 impl Plugin for PluginFizz {
     fn build(&self, app: &mut App) {
-        app.add_observer(on_fizz_skill_cast);
+        app.add_observer(on_fizz_q);
+        app.add_observer(on_fizz_w);
+        app.add_observer(on_fizz_e);
+        app.add_observer(on_fizz_r);
         app.add_observer(on_fizz_damage_hit);
     }
 }
@@ -29,11 +31,11 @@ impl Plugin for PluginFizz {
 #[reflect(Component)]
 pub struct Fizz;
 
-fn on_fizz_skill_cast(
+fn on_fizz_q(
     trigger: On<EventSkillCast>,
     mut commands: Commands,
     q_fizz: Query<(), With<Fizz>>,
-    q_transform: Query<&Transform>,
+    _q_transform: Query<&Transform>,
     q_skill: Query<&Skill>,
 ) {
     let entity = trigger.event_target();
@@ -44,35 +46,12 @@ fn on_fizz_skill_cast(
     let Ok(skill) = q_skill.get(trigger.skill_entity) else {
         return;
     };
-
-    match skill.slot {
-        SkillSlot::Q => cast_fizz_q(
-            &mut commands,
-            &q_transform,
-            entity,
-            trigger.point,
-            skill.spell.clone(),
-        ),
-        SkillSlot::W => cast_fizz_w(&mut commands, entity),
-        SkillSlot::E => cast_fizz_e(
-            &mut commands,
-            &q_transform,
-            entity,
-            trigger.point,
-            skill.spell.clone(),
-        ),
-        SkillSlot::R => cast_fizz_r(&mut commands, entity, skill.spell.clone()),
-        _ => {}
+    if !matches!(skill.slot, SkillSlot::Q) {
+        return;
     }
-}
 
-fn cast_fizz_q(
-    commands: &mut Commands,
-    _q_transform: &Query<&Transform>,
-    entity: Entity,
-    point: Vec2,
-    skill_spell: Handle<Spell>,
-) {
+    let point = trigger.point;
+    let _skill_spell = skill.spell.clone();
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: ANIM_SPELL1.to_string(),
@@ -83,37 +62,59 @@ fn cast_fizz_q(
     commands.trigger(ActionDash {
         entity,
         point: point,
-        skill: skill_spell.clone(),
         move_type: DashMoveType::Pointer { max: 550.0 },
-        damage: Some(DashDamage {
-            radius_end: 100.0,
-            damage: TargetDamage {
-                filter: TargetFilter::All,
-                amount: "total_damage".to_string(),
-                damage_type: DamageType::Magic,
-            },
-        }),
         speed: 1000.0,
     });
 }
 
-fn cast_fizz_w(commands: &mut Commands, entity: Entity) {
+fn on_fizz_w(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_fizz: Query<(), With<Fizz>>,
+    q_skill: Query<&Skill>,
+) {
+    let entity = trigger.event_target();
+    if q_fizz.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::W) {
+        return;
+    }
+
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: ANIM_SPELL2.to_string(),
         repeat: false,
         duration: None,
     });
-    // W is a damage buff on next attack
+    // W is a damage buff on next attack;
 }
 
-fn cast_fizz_e(
-    commands: &mut Commands,
-    _q_transform: &Query<&Transform>,
-    entity: Entity,
-    point: Vec2,
-    skill_spell: Handle<Spell>,
+fn on_fizz_e(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_fizz: Query<(), With<Fizz>>,
+    _q_transform: Query<&Transform>,
+    q_skill: Query<&Skill>,
 ) {
+    let entity = trigger.event_target();
+    if q_fizz.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::E) {
+        return;
+    }
+
+    let point = trigger.point;
+    let _skill_spell = skill.spell.clone();
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: ANIM_SPELL3.to_string(),
@@ -124,21 +125,30 @@ fn cast_fizz_e(
     commands.trigger(ActionDash {
         entity,
         point: point,
-        skill: skill_spell.clone(),
         move_type: DashMoveType::Pointer { max: 400.0 },
-        damage: Some(DashDamage {
-            radius_end: 150.0,
-            damage: TargetDamage {
-                filter: TargetFilter::All,
-                amount: "total_damage".to_string(),
-                damage_type: DamageType::Magic,
-            },
-        }),
         speed: 800.0,
     });
 }
 
-fn cast_fizz_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
+fn on_fizz_r(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_fizz: Query<(), With<Fizz>>,
+    q_skill: Query<&Skill>,
+) {
+    let entity = trigger.event_target();
+    if q_fizz.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::R) {
+        return;
+    }
+
+    let skill_spell = skill.spell.clone();
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: ANIM_SPELL4.to_string(),

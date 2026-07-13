@@ -20,7 +20,10 @@ pub struct PluginAatrox;
 
 impl Plugin for PluginAatrox {
     fn build(&self, app: &mut App) {
-        app.add_observer(on_aatrox_skill_cast);
+        app.add_observer(on_aatrox_q);
+        app.add_observer(on_aatrox_w);
+        app.add_observer(on_aatrox_e);
+        app.add_observer(on_aatrox_r);
         app.add_observer(on_aatrox_damage_hit);
     }
 }
@@ -30,7 +33,7 @@ impl Plugin for PluginAatrox {
 #[reflect(Component)]
 pub struct Aatrox;
 
-fn on_aatrox_skill_cast(
+fn on_aatrox_q(
     trigger: On<EventSkillCast>,
     mut commands: Commands,
     q_aatrox: Query<(), With<Aatrox>>,
@@ -45,29 +48,90 @@ fn on_aatrox_skill_cast(
     let Ok((skill, cooldown, recast)) = q_skill.get(trigger.skill_entity) else {
         return;
     };
-
-    match skill.slot {
-        SkillSlot::Q => cast_aatrox_q(
-            &mut commands,
-            &q_transform,
-            entity,
-            trigger.skill_entity,
-            trigger.point,
-            cooldown,
-            recast,
-            skill.spell.clone(),
-        ),
-        SkillSlot::W => cast_aatrox_w(&mut commands, entity, skill.spell.clone()),
-        SkillSlot::E => cast_aatrox_e(
-            &mut commands,
-            &q_transform,
-            entity,
-            trigger.point,
-            skill.spell.clone(),
-        ),
-        SkillSlot::R => cast_aatrox_r(&mut commands, entity, skill.spell.clone()),
-        _ => {}
+    if !matches!(skill.slot, SkillSlot::Q) {
+        return;
     }
+
+    cast_aatrox_q(
+        &mut commands,
+        &q_transform,
+        entity,
+        trigger.skill_entity,
+        trigger.point,
+        cooldown,
+        recast,
+        skill.spell.clone(),
+    );
+}
+
+fn on_aatrox_w(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_aatrox: Query<(), With<Aatrox>>,
+    q_skill: Query<&Skill>,
+) {
+    let entity = trigger.event_target();
+    if q_aatrox.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::W) {
+        return;
+    }
+
+    cast_aatrox_w(&mut commands, entity, skill.spell.clone());
+}
+
+fn on_aatrox_e(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_aatrox: Query<(), With<Aatrox>>,
+    q_transform: Query<&Transform>,
+    q_skill: Query<&Skill>,
+) {
+    let entity = trigger.event_target();
+    if q_aatrox.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::E) {
+        return;
+    }
+
+    cast_aatrox_e(
+        &mut commands,
+        &q_transform,
+        entity,
+        trigger.point,
+        skill.spell.clone(),
+    );
+}
+
+fn on_aatrox_r(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_aatrox: Query<(), With<Aatrox>>,
+    q_skill: Query<&Skill>,
+) {
+    let entity = trigger.event_target();
+    if q_aatrox.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::R) {
+        return;
+    }
+
+    cast_aatrox_r(&mut commands, entity, skill.spell.clone());
 }
 
 fn cast_aatrox_q(

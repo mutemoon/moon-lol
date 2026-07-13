@@ -3,16 +3,15 @@ pub mod buffs;
 use bevy::prelude::*;
 use lol_base::animation_names::{ANIM_SPELL1, ANIM_SPELL2, ANIM_SPELL3, ANIM_SPELL4};
 use lol_base::render_cmd::CommandAnimationPlay;
-use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
 };
-use lol_core::action::dash::{ActionDash, DashDamage, DashMoveType};
+use lol_core::action::dash::{ActionDash, DashMoveType};
 use lol_core::base::buff::BuffOf;
 use lol_core::buffs::cc_debuffs::DebuffStun;
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
-use lol_core::skill::{CoolDown, EventSkillCast, Skill, SkillSlot};
+use lol_core::skill::{EventSkillCast, Skill, SkillSlot};
 
 use crate::blitzcrank::buffs::BuffBlitzcrankW;
 
@@ -21,7 +20,10 @@ pub struct PluginBlitzcrank;
 
 impl Plugin for PluginBlitzcrank {
     fn build(&self, app: &mut App) {
-        app.add_observer(on_blitzcrank_skill_cast);
+        app.add_observer(on_blitzcrank_q);
+        app.add_observer(on_blitzcrank_w);
+        app.add_observer(on_blitzcrank_e);
+        app.add_observer(on_blitzcrank_r);
         app.add_observer(on_blitzcrank_damage_hit);
     }
 }
@@ -31,46 +33,27 @@ impl Plugin for PluginBlitzcrank {
 #[reflect(Component)]
 pub struct Blitzcrank;
 
-fn on_blitzcrank_skill_cast(
+fn on_blitzcrank_q(
     trigger: On<EventSkillCast>,
     mut commands: Commands,
     q_blitzcrank: Query<(), With<Blitzcrank>>,
-    q_transform: Query<&Transform>,
-    q_skill: Query<(&Skill, &CoolDown)>,
+    _q_transform: Query<&Transform>,
+    q_skill: Query<&Skill>,
 ) {
     let entity = trigger.event_target();
     if q_blitzcrank.get(entity).is_err() {
         return;
     }
 
-    let Ok((skill, _cooldown)) = q_skill.get(trigger.skill_entity) else {
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
         return;
     };
-
-    let skill_spell = skill.spell.clone();
-
-    match skill.slot {
-        SkillSlot::Q => cast_blitzcrank_q(
-            &mut commands,
-            &q_transform,
-            entity,
-            skill_spell,
-            trigger.point,
-        ),
-        SkillSlot::W => cast_blitzcrank_w(&mut commands, entity),
-        SkillSlot::E => cast_blitzcrank_e(&mut commands, entity, skill_spell),
-        SkillSlot::R => cast_blitzcrank_r(&mut commands, entity, skill_spell),
-        _ => {}
+    if !matches!(skill.slot, SkillSlot::Q) {
+        return;
     }
-}
 
-fn cast_blitzcrank_q(
-    commands: &mut Commands,
-    _q_transform: &Query<&Transform>,
-    entity: Entity,
-    skill_spell: Handle<Spell>,
-    point: Vec2,
-) {
+    let _skill_spell = skill.spell.clone();
+    let point = trigger.point;
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: ANIM_SPELL1.to_string(),
@@ -81,21 +64,29 @@ fn cast_blitzcrank_q(
     commands.trigger(ActionDash {
         entity,
         point: point,
-        skill: skill_spell,
         move_type: DashMoveType::Pointer { max: 1115.0 },
-        damage: Some(DashDamage {
-            radius_end: 100.0,
-            damage: TargetDamage {
-                filter: TargetFilter::Champion,
-                amount: "total_damage".to_string(),
-                damage_type: DamageType::Magic,
-            },
-        }),
         speed: 900.0,
     });
 }
 
-fn cast_blitzcrank_w(commands: &mut Commands, entity: Entity) {
+fn on_blitzcrank_w(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_blitzcrank: Query<(), With<Blitzcrank>>,
+    q_skill: Query<&Skill>,
+) {
+    let entity = trigger.event_target();
+    if q_blitzcrank.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::W) {
+        return;
+    }
+
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: ANIM_SPELL2.to_string(),
@@ -108,7 +99,25 @@ fn cast_blitzcrank_w(commands: &mut Commands, entity: Entity) {
         .with_related::<BuffOf>(BuffBlitzcrankW::new());
 }
 
-fn cast_blitzcrank_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
+fn on_blitzcrank_e(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_blitzcrank: Query<(), With<Blitzcrank>>,
+    q_skill: Query<&Skill>,
+) {
+    let entity = trigger.event_target();
+    if q_blitzcrank.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::E) {
+        return;
+    }
+
+    let skill_spell = skill.spell.clone();
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: ANIM_SPELL3.to_string(),
@@ -132,7 +141,25 @@ fn cast_blitzcrank_e(commands: &mut Commands, entity: Entity, skill_spell: Handl
     });
 }
 
-fn cast_blitzcrank_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
+fn on_blitzcrank_r(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_blitzcrank: Query<(), With<Blitzcrank>>,
+    q_skill: Query<&Skill>,
+) {
+    let entity = trigger.event_target();
+    if q_blitzcrank.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::R) {
+        return;
+    }
+
+    let skill_spell = skill.spell.clone();
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: ANIM_SPELL4.to_string(),

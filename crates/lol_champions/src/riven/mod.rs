@@ -40,7 +40,10 @@ pub struct PluginRiven;
 
 impl Plugin for PluginRiven {
     fn build(&self, app: &mut App) {
-        app.add_observer(on_riven_skill_cast);
+        app.add_observer(on_riven_q);
+        app.add_observer(on_riven_w);
+        app.add_observer(on_riven_e);
+        app.add_observer(on_riven_r);
         app.add_observer(passive::on_damage_create_trigger_bonus);
         app.add_observer(q::on_riven_dash_end);
         app.add_systems(FixedUpdate, r::update_riven_buffs);
@@ -66,17 +69,156 @@ fn get_r_cooldown(level: usize) -> f32 {
     }
 }
 
-fn on_riven_skill_cast(
+fn on_riven_q(
     trigger: On<EventSkillCast>,
     mut commands: Commands,
     q_riven: Query<(), With<Riven>>,
+    q_skill: Query<(&Skill, Option<&SkillRecastWindow>)>,
+    q_stun: Query<&DebuffStun>,
+    q_damage: Query<&Damage>,
+    res_spells: Res<Assets<Spell>>,
+) {
+    let entity = trigger.event_target();
+    if q_riven.get(entity).is_err() {
+        return;
+    }
+
+    // 眩晕中无法施放技能
+    if q_stun.get(entity).is_ok() {
+        return;
+    }
+
+    let Ok((skill, recast)) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::Q) {
+        return;
+    }
+
+    let Some(spell_obj) = res_spells.get(&skill.spell) else {
+        return;
+    };
+
+    let damage_value = q_damage.get(entity).map(|d| d.0).unwrap_or(64.0);
+
+    let q_damage = get_skill_value(spell_obj, "first_slash_damage", skill.level, |stat| {
+        if stat == 2 { damage_value } else { 0.0 }
+    })
+    .unwrap_or(0.0);
+    q::cast_riven_q(
+        &mut commands,
+        entity,
+        trigger.skill_entity,
+        trigger.point,
+        recast,
+        q_damage,
+    );
+}
+
+fn on_riven_w(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_riven: Query<(), With<Riven>>,
+    q_skill: Query<&Skill>,
+    q_stun: Query<&DebuffStun>,
+    q_damage: Query<&Damage>,
     q_transform: Query<&Transform>,
+    q_team: Query<&Team>,
+    q_targets: Query<(Entity, &Team, &Transform, &Health)>,
+    res_spells: Res<Assets<Spell>>,
+) {
+    let entity = trigger.event_target();
+    if q_riven.get(entity).is_err() {
+        return;
+    }
+
+    // 眩晕中无法施放技能
+    if q_stun.get(entity).is_ok() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::W) {
+        return;
+    }
+
+    let Some(spell_obj) = res_spells.get(&skill.spell) else {
+        return;
+    };
+
+    let damage_value = q_damage.get(entity).map(|d| d.0).unwrap_or(64.0);
+
+    let w_damage = get_skill_value(spell_obj, "total_damage", skill.level, |stat| {
+        if stat == 2 { damage_value } else { 0.0 }
+    })
+    .unwrap_or(150.0);
+
+    w::cast_riven_w(&mut commands, entity, w_damage);
+
+    // 对范围内敌人施加眩晕
+    w::apply_w_stun_to_targets(&mut commands, entity, &q_transform, &q_team, &q_targets);
+}
+
+fn on_riven_e(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_riven: Query<(), With<Riven>>,
+    q_skill: Query<&Skill>,
+    q_stun: Query<&DebuffStun>,
+    q_damage: Query<&Damage>,
+    q_transform: Query<&Transform>,
+    res_spells: Res<Assets<Spell>>,
+) {
+    let entity = trigger.event_target();
+    if q_riven.get(entity).is_err() {
+        return;
+    }
+
+    // 眩晕中无法施放技能
+    if q_stun.get(entity).is_ok() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::E) {
+        return;
+    }
+
+    let Some(spell_obj) = res_spells.get(&skill.spell) else {
+        return;
+    };
+
+    let damage_value = q_damage.get(entity).map(|d| d.0).unwrap_or(64.0);
+
+    let shield_value = get_skill_value(spell_obj, "total_shield", skill.level, |stat| {
+        if stat == 2 { damage_value } else { 0.0 }
+    })
+    .unwrap_or(100.0);
+
+    e::cast_riven_e(
+        &mut commands,
+        &q_transform,
+        entity,
+        trigger.point,
+        shield_value,
+    );
+}
+
+fn on_riven_r(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_riven: Query<(), With<Riven>>,
     mut q_skill: Query<(&Skill, &mut CoolDown, Option<&SkillRecastWindow>)>,
+    q_stun: Query<&DebuffStun>,
     mut q_damage: Query<&mut Damage>,
     mut q_attack: Query<&mut Attack>,
-    q_stun: Query<&DebuffStun>,
-    q_targets: Query<(Entity, &Team, &Transform, &Health)>,
+    q_transform: Query<&Transform>,
     q_team: Query<&Team>,
+    q_targets: Query<(Entity, &Team, &Transform, &Health)>,
     res_spells: Res<Assets<Spell>>,
     res_asset_server: Res<AssetServer>,
 ) {
@@ -93,57 +235,20 @@ fn on_riven_skill_cast(
     let Ok((skill, mut cooldown, recast)) = q_skill.get_mut(trigger.skill_entity) else {
         return;
     };
+    if !matches!(skill.slot, SkillSlot::R) {
+        return;
+    }
 
     let Some(spell_obj) = res_spells.get(&skill.spell) else {
         return;
     };
 
-    // 预读取伤害值（后面可能修改）
     let damage_value = q_damage.get(entity).map(|d| d.0).unwrap_or(64.0);
 
     let stage = recast.map(|w| w.stage).unwrap_or(1);
 
-    match (skill.slot, stage) {
-        (SkillSlot::Q, _) => {
-            let q_damage = get_skill_value(spell_obj, "first_slash_damage", skill.level, |stat| {
-                if stat == 2 { damage_value } else { 0.0 }
-            })
-            .unwrap_or(0.0);
-            q::cast_riven_q(
-                &mut commands,
-                entity,
-                trigger.skill_entity,
-                trigger.point,
-                recast,
-                q_damage,
-            );
-        }
-        (SkillSlot::W, _) => {
-            let w_damage = get_skill_value(spell_obj, "total_damage", skill.level, |stat| {
-                if stat == 2 { damage_value } else { 0.0 }
-            })
-            .unwrap_or(150.0);
-
-            w::cast_riven_w(&mut commands, entity, w_damage);
-
-            // 对范围内敌人施加眩晕
-            w::apply_w_stun_to_targets(&mut commands, entity, &q_transform, &q_team, &q_targets);
-        }
-        (SkillSlot::E, _) => {
-            let shield_value = get_skill_value(spell_obj, "total_shield", skill.level, |stat| {
-                if stat == 2 { damage_value } else { 0.0 }
-            })
-            .unwrap_or(100.0);
-
-            e::cast_riven_e(
-                &mut commands,
-                &q_transform,
-                entity,
-                trigger.point,
-                shield_value,
-            );
-        }
-        (SkillSlot::R, 2) => {
+    match stage {
+        2 => {
             // Wind Slash
             let missile_handles = [
                 res_asset_server.load("characters/riven/spells/RivenWindslashMissileRight.ron"),
@@ -170,7 +275,7 @@ fn on_riven_skill_cast(
             cooldown.duration = r_cd;
             cooldown.timer = Some(Timer::from_seconds(r_cd, TimerMode::Once));
         }
-        (SkillSlot::R, 1) => {
+        _ => {
             // 初次 R - 获取增伤、开启连招窗口
             let bonus_ad = damage_value * 0.25;
             let bonus_range = 75.0;
@@ -202,6 +307,5 @@ fn on_riven_skill_cast(
                 duration: None,
             });
         }
-        _ => {}
     }
 }

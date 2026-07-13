@@ -23,7 +23,10 @@ pub struct PluginSett;
 
 impl Plugin for PluginSett {
     fn build(&self, app: &mut App) {
-        app.add_observer(on_sett_skill_cast);
+        app.add_observer(on_sett_q);
+        app.add_observer(on_sett_w);
+        app.add_observer(on_sett_e);
+        app.add_observer(on_sett_r);
         app.add_observer(on_sett_damage_hit);
     }
 }
@@ -33,7 +36,70 @@ impl Plugin for PluginSett {
 #[reflect(Component)]
 pub struct Sett;
 
-fn on_sett_skill_cast(
+fn on_sett_q(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_sett: Query<(), With<Sett>>,
+    q_skill: Query<&Skill>,
+) {
+    let entity = trigger.event_target();
+    if q_sett.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::Q) {
+        return;
+    }
+
+    cast_sett_q(&mut commands, entity);
+}
+
+fn on_sett_w(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_sett: Query<(), With<Sett>>,
+    q_skill: Query<&Skill>,
+) {
+    let entity = trigger.event_target();
+    if q_sett.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::W) {
+        return;
+    }
+
+    cast_sett_w(&mut commands, entity, skill.spell.clone());
+}
+
+fn on_sett_e(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_sett: Query<(), With<Sett>>,
+    q_skill: Query<&Skill>,
+) {
+    let entity = trigger.event_target();
+    if q_sett.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::E) {
+        return;
+    }
+
+    cast_sett_e(&mut commands, entity, skill.spell.clone());
+}
+
+fn on_sett_r(
     trigger: On<EventSkillCast>,
     mut commands: Commands,
     q_sett: Query<(), With<Sett>>,
@@ -48,20 +114,17 @@ fn on_sett_skill_cast(
     let Ok(skill) = q_skill.get(trigger.skill_entity) else {
         return;
     };
-
-    match skill.slot {
-        SkillSlot::Q => cast_sett_q(&mut commands, entity),
-        SkillSlot::W => cast_sett_w(&mut commands, entity, skill.spell.clone()),
-        SkillSlot::E => cast_sett_e(&mut commands, entity, skill.spell.clone()),
-        SkillSlot::R => cast_sett_r(
-            &mut commands,
-            &q_transform,
-            entity,
-            trigger.point,
-            skill.spell.clone(),
-        ),
-        _ => {}
+    if !matches!(skill.slot, SkillSlot::R) {
+        return;
     }
+
+    cast_sett_r(
+        &mut commands,
+        &q_transform,
+        entity,
+        trigger.point,
+        skill.spell.clone(),
+    );
 }
 
 fn cast_sett_q(commands: &mut Commands, entity: Entity) {

@@ -3,14 +3,13 @@ pub mod buffs;
 use bevy::prelude::*;
 use lol_base::animation_names::{ANIM_SPELL1, ANIM_SPELL2, ANIM_SPELL3, ANIM_SPELL4};
 use lol_base::render_cmd::CommandAnimationPlay;
-use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
 };
 use lol_core::base::buff::BuffOf;
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
-use lol_core::skill::{CoolDown, EventSkillCast, Skill, SkillSlot};
+use lol_core::skill::{EventSkillCast, Skill, SkillSlot};
 
 use crate::rammus::buffs::{BuffRammusE, BuffRammusQ, BuffRammusR};
 
@@ -19,7 +18,10 @@ pub struct PluginRammus;
 
 impl Plugin for PluginRammus {
     fn build(&self, app: &mut App) {
-        app.add_observer(on_rammus_skill_cast);
+        app.add_observer(on_rammus_q);
+        app.add_observer(on_rammus_w);
+        app.add_observer(on_rammus_e);
+        app.add_observer(on_rammus_r);
         app.add_observer(on_rammus_damage_hit);
     }
 }
@@ -29,31 +31,25 @@ impl Plugin for PluginRammus {
 #[reflect(Component)]
 pub struct Rammus;
 
-fn on_rammus_skill_cast(
+fn on_rammus_q(
     trigger: On<EventSkillCast>,
     mut commands: Commands,
     q_rammus: Query<(), With<Rammus>>,
-    q_skill: Query<(&Skill, &CoolDown)>,
+    q_skill: Query<&Skill>,
 ) {
     let entity = trigger.event_target();
     if q_rammus.get(entity).is_err() {
         return;
     }
 
-    let Ok((skill, _cooldown)) = q_skill.get(trigger.skill_entity) else {
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
         return;
     };
-
-    match skill.slot {
-        SkillSlot::Q => cast_rammus_q(&mut commands, entity, skill.spell.clone()),
-        SkillSlot::W => cast_rammus_w(&mut commands, entity),
-        SkillSlot::E => cast_rammus_e(&mut commands, entity, skill.spell.clone()),
-        SkillSlot::R => cast_rammus_r(&mut commands, entity, skill.spell.clone()),
-        _ => {}
+    if !matches!(skill.slot, SkillSlot::Q) {
+        return;
     }
-}
 
-fn cast_rammus_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
+    let skill_spell = skill.spell.clone();
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: ANIM_SPELL1.to_string(),
@@ -75,17 +71,52 @@ fn cast_rammus_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
     });
 }
 
-fn cast_rammus_w(commands: &mut Commands, entity: Entity) {
+fn on_rammus_w(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_rammus: Query<(), With<Rammus>>,
+    q_skill: Query<&Skill>,
+) {
+    let entity = trigger.event_target();
+    if q_rammus.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::W) {
+        return;
+    }
+
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: ANIM_SPELL2.to_string(),
         repeat: false,
         duration: None,
     });
-    // W is defensive ball curl - damage reflection
+    // W is defensive ball curl - damage reflection;
 }
 
-fn cast_rammus_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
+fn on_rammus_e(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_rammus: Query<(), With<Rammus>>,
+    q_skill: Query<&Skill>,
+) {
+    let entity = trigger.event_target();
+    if q_rammus.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::E) {
+        return;
+    }
+
+    let skill_spell = skill.spell.clone();
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: ANIM_SPELL3.to_string(),
@@ -107,7 +138,25 @@ fn cast_rammus_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
     });
 }
 
-fn cast_rammus_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
+fn on_rammus_r(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_rammus: Query<(), With<Rammus>>,
+    q_skill: Query<&Skill>,
+) {
+    let entity = trigger.event_target();
+    if q_rammus.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::R) {
+        return;
+    }
+
+    let skill_spell = skill.spell.clone();
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: ANIM_SPELL4.to_string(),

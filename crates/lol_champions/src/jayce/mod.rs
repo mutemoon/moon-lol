@@ -3,15 +3,14 @@ pub mod buffs;
 use bevy::prelude::*;
 use lol_base::animation_names::{ANIM_SPELL1, ANIM_SPELL2, ANIM_SPELL3, ANIM_SPELL4};
 use lol_base::render_cmd::CommandAnimationPlay;
-use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
 };
-use lol_core::action::dash::{ActionDash, DashDamage, DashMoveType};
+use lol_core::action::dash::{ActionDash, DashMoveType};
 use lol_core::base::buff::BuffOf;
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
-use lol_core::skill::{CoolDown, EventSkillCast, Skill, SkillSlot};
+use lol_core::skill::{EventSkillCast, Skill, SkillSlot};
 
 use crate::jayce::buffs::BuffJaycePassive;
 
@@ -20,7 +19,10 @@ pub struct PluginJayce;
 
 impl Plugin for PluginJayce {
     fn build(&self, app: &mut App) {
-        app.add_observer(on_jayce_skill_cast);
+        app.add_observer(on_jayce_q);
+        app.add_observer(on_jayce_w);
+        app.add_observer(on_jayce_e);
+        app.add_observer(on_jayce_r);
         app.add_observer(on_jayce_damage_hit);
     }
 }
@@ -30,40 +32,25 @@ impl Plugin for PluginJayce {
 #[reflect(Component)]
 pub struct Jayce;
 
-fn on_jayce_skill_cast(
+fn on_jayce_q(
     trigger: On<EventSkillCast>,
     mut commands: Commands,
     q_jayce: Query<(), With<Jayce>>,
-    q_transform: Query<&Transform>,
-    q_skill: Query<(&Skill, &CoolDown)>,
+    q_skill: Query<&Skill>,
 ) {
     let entity = trigger.event_target();
     if q_jayce.get(entity).is_err() {
         return;
     }
 
-    let Ok((skill, _cooldown)) = q_skill.get(trigger.skill_entity) else {
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
         return;
     };
+    if !matches!(skill.slot, SkillSlot::Q) {
+        return;
+    }
 
     let skill_spell = skill.spell.clone();
-
-    match skill.slot {
-        SkillSlot::Q => cast_jayce_q(&mut commands, entity, skill_spell),
-        SkillSlot::W => cast_jayce_w(&mut commands, entity, skill_spell),
-        SkillSlot::E => cast_jayce_e(
-            &mut commands,
-            &q_transform,
-            entity,
-            trigger.point,
-            skill_spell,
-        ),
-        SkillSlot::R => cast_jayce_r(&mut commands, entity),
-        _ => {}
-    }
-}
-
-fn cast_jayce_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: ANIM_SPELL1.to_string(),
@@ -88,7 +75,25 @@ fn cast_jayce_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
     });
 }
 
-fn cast_jayce_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
+fn on_jayce_w(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_jayce: Query<(), With<Jayce>>,
+    q_skill: Query<&Skill>,
+) {
+    let entity = trigger.event_target();
+    if q_jayce.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::W) {
+        return;
+    }
+
+    let skill_spell = skill.spell.clone();
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: ANIM_SPELL2.to_string(),
@@ -110,13 +115,27 @@ fn cast_jayce_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
     });
 }
 
-fn cast_jayce_e(
-    commands: &mut Commands,
-    _q_transform: &Query<&Transform>,
-    entity: Entity,
-    point: Vec2,
-    skill_spell: Handle<Spell>,
+fn on_jayce_e(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_jayce: Query<(), With<Jayce>>,
+    _q_transform: Query<&Transform>,
+    q_skill: Query<&Skill>,
 ) {
+    let entity = trigger.event_target();
+    if q_jayce.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::E) {
+        return;
+    }
+
+    let point = trigger.point;
+    let _skill_spell = skill.spell.clone();
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: ANIM_SPELL3.to_string(),
@@ -127,28 +146,36 @@ fn cast_jayce_e(
     commands.trigger(ActionDash {
         entity,
         point: point,
-        skill: skill_spell,
         move_type: DashMoveType::Pointer { max: 500.0 },
-        damage: Some(DashDamage {
-            radius_end: 100.0,
-            damage: TargetDamage {
-                filter: TargetFilter::All,
-                amount: "total_damage".to_string(),
-                damage_type: DamageType::Magic,
-            },
-        }),
         speed: 1000.0,
     });
 }
 
-fn cast_jayce_r(commands: &mut Commands, entity: Entity) {
+fn on_jayce_r(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_jayce: Query<(), With<Jayce>>,
+    q_skill: Query<&Skill>,
+) {
+    let entity = trigger.event_target();
+    if q_jayce.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::R) {
+        return;
+    }
+
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: ANIM_SPELL4.to_string(),
         repeat: false,
         duration: None,
     });
-    // R transforms between hammer and cannon forms
+    // R transforms between hammer and cannon forms;
 }
 
 fn on_jayce_damage_hit(

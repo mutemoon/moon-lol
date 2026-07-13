@@ -3,7 +3,6 @@ pub mod buffs;
 use bevy::prelude::*;
 use lol_base::animation_names::{ANIM_SPELL1, ANIM_SPELL2, ANIM_SPELL3, ANIM_SPELL4};
 use lol_base::render_cmd::CommandAnimationPlay;
-use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
 };
@@ -19,7 +18,10 @@ pub struct PluginKennen;
 
 impl Plugin for PluginKennen {
     fn build(&self, app: &mut App) {
-        app.add_observer(on_kennen_skill_cast);
+        app.add_observer(on_kennen_q);
+        app.add_observer(on_kennen_w);
+        app.add_observer(on_kennen_e);
+        app.add_observer(on_kennen_r);
         app.add_observer(on_kennen_damage_hit);
     }
 }
@@ -29,7 +31,7 @@ impl Plugin for PluginKennen {
 #[reflect(Component)]
 pub struct Kennen;
 
-fn on_kennen_skill_cast(
+fn on_kennen_q(
     trigger: On<EventSkillCast>,
     mut commands: Commands,
     q_kennen: Query<(), With<Kennen>>,
@@ -43,19 +45,11 @@ fn on_kennen_skill_cast(
     let Ok(skill) = q_skill.get(trigger.skill_entity) else {
         return;
     };
+    if !matches!(skill.slot, SkillSlot::Q) {
+        return;
+    }
 
     let skill_spell = skill.spell.clone();
-
-    match skill.slot {
-        SkillSlot::Q => cast_kennen_q(&mut commands, entity, skill_spell),
-        SkillSlot::W => cast_kennen_w(&mut commands, entity, skill_spell),
-        SkillSlot::E => cast_kennen_e(&mut commands, entity),
-        SkillSlot::R => cast_kennen_r(&mut commands, entity, skill_spell),
-        _ => {}
-    }
-}
-
-fn cast_kennen_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: ANIM_SPELL1.to_string(),
@@ -81,7 +75,25 @@ fn cast_kennen_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
     });
 }
 
-fn cast_kennen_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
+fn on_kennen_w(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_kennen: Query<(), With<Kennen>>,
+    q_skill: Query<&Skill>,
+) {
+    let entity = trigger.event_target();
+    if q_kennen.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::W) {
+        return;
+    }
+
+    let skill_spell = skill.spell.clone();
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: ANIM_SPELL2.to_string(),
@@ -104,7 +116,24 @@ fn cast_kennen_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
     });
 }
 
-fn cast_kennen_e(commands: &mut Commands, entity: Entity) {
+fn on_kennen_e(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_kennen: Query<(), With<Kennen>>,
+    q_skill: Query<&Skill>,
+) {
+    let entity = trigger.event_target();
+    if q_kennen.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::E) {
+        return;
+    }
+
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: ANIM_SPELL3.to_string(),
@@ -118,7 +147,25 @@ fn cast_kennen_e(commands: &mut Commands, entity: Entity) {
         .with_related::<BuffOf>(BuffKennenE::new(1.0, 0.6, 2.0));
 }
 
-fn cast_kennen_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
+fn on_kennen_r(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_kennen: Query<(), With<Kennen>>,
+    q_skill: Query<&Skill>,
+) {
+    let entity = trigger.event_target();
+    if q_kennen.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::R) {
+        return;
+    }
+
+    let skill_spell = skill.spell.clone();
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: ANIM_SPELL4.to_string(),

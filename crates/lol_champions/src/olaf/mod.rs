@@ -1,9 +1,8 @@
 pub mod buffs;
 
-use bevy::prelude::{Handle, *};
+use bevy::prelude::*;
 use lol_base::animation_names::{ANIM_SPELL1, ANIM_SPELL2, ANIM_SPELL3, ANIM_SPELL4};
 use lol_base::render_cmd::CommandAnimationPlay;
-use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
 };
@@ -27,7 +26,10 @@ pub struct PluginOlaf;
 
 impl Plugin for PluginOlaf {
     fn build(&self, app: &mut App) {
-        app.add_observer(on_olaf_skill_cast);
+        app.add_observer(on_olaf_q);
+        app.add_observer(on_olaf_w);
+        app.add_observer(on_olaf_e);
+        app.add_observer(on_olaf_r);
     }
 }
 
@@ -36,7 +38,7 @@ impl Plugin for PluginOlaf {
 #[reflect(Component)]
 pub struct Olaf;
 
-fn on_olaf_skill_cast(
+fn on_olaf_q(
     trigger: On<EventSkillCast>,
     mut commands: Commands,
     q_olaf: Query<(), With<Olaf>>,
@@ -50,29 +52,38 @@ fn on_olaf_skill_cast(
     let Ok(skill) = q_skill.get(trigger.skill_entity) else {
         return;
     };
-
-    let skill_spell = skill.spell.clone();
-
-    match skill.slot {
-        SkillSlot::Q => cast_olaf_q(&mut commands, entity, trigger.point),
-        SkillSlot::W => cast_olaf_w(&mut commands, entity),
-        SkillSlot::E => cast_olaf_e(&mut commands, entity, trigger.point, skill_spell),
-        SkillSlot::R => cast_olaf_r(&mut commands, entity),
-        _ => {}
+    if !matches!(skill.slot, SkillSlot::Q) {
+        return;
     }
-}
 
-fn cast_olaf_q(commands: &mut Commands, entity: Entity, _point: Vec2) {
+    let _point = trigger.point;
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: ANIM_SPELL1.to_string(),
         repeat: false,
         duration: None,
     });
-    // Q is a linear axe throw - could add dash damage or just particle
+    // Q is a linear axe throw - could add dash damage or just particle;
 }
 
-fn cast_olaf_w(commands: &mut Commands, entity: Entity) {
+fn on_olaf_w(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_olaf: Query<(), With<Olaf>>,
+    q_skill: Query<&Skill>,
+) {
+    let entity = trigger.event_target();
+    if q_olaf.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::W) {
+        return;
+    }
+
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: ANIM_SPELL2.to_string(),
@@ -97,7 +108,26 @@ fn cast_olaf_w(commands: &mut Commands, entity: Entity) {
     );
 }
 
-fn cast_olaf_e(commands: &mut Commands, entity: Entity, _point: Vec2, skill_spell: Handle<Spell>) {
+fn on_olaf_e(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_olaf: Query<(), With<Olaf>>,
+    q_skill: Query<&Skill>,
+) {
+    let entity = trigger.event_target();
+    if q_olaf.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::E) {
+        return;
+    }
+
+    let _point = trigger.point;
+    let skill_spell = skill.spell.clone();
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: ANIM_SPELL3.to_string(),
@@ -118,10 +148,27 @@ fn cast_olaf_e(commands: &mut Commands, entity: Entity, _point: Vec2, skill_spel
             }],
         }],
     });
-    // E also deals self-damage
+    // E also deals self-damage;
 }
 
-fn cast_olaf_r(commands: &mut Commands, entity: Entity) {
+fn on_olaf_r(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_olaf: Query<(), With<Olaf>>,
+    q_skill: Query<&Skill>,
+) {
+    let entity = trigger.event_target();
+    if q_olaf.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::R) {
+        return;
+    }
+
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: ANIM_SPELL4.to_string(),

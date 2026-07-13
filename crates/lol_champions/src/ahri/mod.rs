@@ -3,11 +3,10 @@ pub mod buffs;
 use bevy::prelude::*;
 use lol_base::animation_names::{ANIM_SPELL1, ANIM_SPELL2, ANIM_SPELL3, ANIM_SPELL4};
 use lol_base::render_cmd::CommandAnimationPlay;
-use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
 };
-use lol_core::action::dash::{ActionDash, DashDamage, DashMoveType};
+use lol_core::action::dash::{ActionDash, DashMoveType};
 use lol_core::base::buff::BuffOf;
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
@@ -20,7 +19,10 @@ pub struct PluginAhri;
 
 impl Plugin for PluginAhri {
     fn build(&self, app: &mut App) {
-        app.add_observer(on_ahri_skill_cast);
+        app.add_observer(on_ahri_q);
+        app.add_observer(on_ahri_w);
+        app.add_observer(on_ahri_e);
+        app.add_observer(on_ahri_r);
         app.add_observer(on_ahri_damage_hit);
     }
 }
@@ -30,48 +32,26 @@ impl Plugin for PluginAhri {
 #[reflect(Component)]
 pub struct Ahri;
 
-fn on_ahri_skill_cast(
+fn on_ahri_q(
     trigger: On<EventSkillCast>,
     mut commands: Commands,
     q_ahri: Query<(), With<Ahri>>,
-    q_transform: Query<&Transform>,
-    q_skill: Query<(&Skill, &CoolDown, Option<&SkillRecastWindow>)>,
+    _q_transform: Query<&Transform>,
+    q_skill: Query<&Skill>,
 ) {
     let entity = trigger.event_target();
     if q_ahri.get(entity).is_err() {
         return;
     }
 
-    let Ok((skill, cooldown, recast)) = q_skill.get(trigger.skill_entity) else {
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
         return;
     };
+    if !matches!(skill.slot, SkillSlot::Q) {
+        return;
+    }
 
     let skill_spell = skill.spell.clone();
-
-    match skill.slot {
-        SkillSlot::Q => cast_ahri_q(&mut commands, &q_transform, entity, skill_spell),
-        SkillSlot::W => cast_ahri_w(&mut commands, entity, skill_spell),
-        SkillSlot::E => cast_ahri_e(&mut commands, entity, skill_spell),
-        SkillSlot::R => cast_ahri_r(
-            &mut commands,
-            &q_transform,
-            entity,
-            skill_spell,
-            trigger.skill_entity,
-            trigger.point,
-            cooldown,
-            recast,
-        ),
-        _ => {}
-    }
-}
-
-fn cast_ahri_q(
-    commands: &mut Commands,
-    _q_transform: &Query<&Transform>,
-    entity: Entity,
-    skill_spell: Handle<Spell>,
-) {
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: ANIM_SPELL1.to_string(),
@@ -102,7 +82,25 @@ fn cast_ahri_q(
         .with_related::<BuffOf>(BuffAhriFoxFire::new(3));
 }
 
-fn cast_ahri_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
+fn on_ahri_w(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_ahri: Query<(), With<Ahri>>,
+    q_skill: Query<&Skill>,
+) {
+    let entity = trigger.event_target();
+    if q_ahri.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::W) {
+        return;
+    }
+
+    let skill_spell = skill.spell.clone();
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: ANIM_SPELL2.to_string(),
@@ -129,7 +127,25 @@ fn cast_ahri_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spel
     });
 }
 
-fn cast_ahri_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
+fn on_ahri_e(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_ahri: Query<(), With<Ahri>>,
+    q_skill: Query<&Skill>,
+) {
+    let entity = trigger.event_target();
+    if q_ahri.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::E) {
+        return;
+    }
+
+    let skill_spell = skill.spell.clone();
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: ANIM_SPELL3.to_string(),
@@ -154,16 +170,28 @@ fn cast_ahri_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spel
     });
 }
 
-fn cast_ahri_r(
-    commands: &mut Commands,
-    _q_transform: &Query<&Transform>,
-    entity: Entity,
-    skill_spell: Handle<Spell>,
-    skill_entity: Entity,
-    point: Vec2,
-    cooldown: &CoolDown,
-    recast: Option<&SkillRecastWindow>,
+fn on_ahri_r(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_ahri: Query<(), With<Ahri>>,
+    _q_transform: Query<&Transform>,
+    q_skill: Query<(&Skill, &CoolDown, Option<&SkillRecastWindow>)>,
 ) {
+    let entity = trigger.event_target();
+    if q_ahri.get(entity).is_err() {
+        return;
+    }
+
+    let Ok((skill, cooldown, recast)) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::R) {
+        return;
+    }
+
+    let _skill_spell = skill.spell.clone();
+    let skill_entity = trigger.skill_entity;
+    let point = trigger.point;
     let stage = recast.map(|w| w.stage).unwrap_or(1);
 
     commands.trigger(CommandAnimationPlay {
@@ -177,16 +205,7 @@ fn cast_ahri_r(
     commands.trigger(ActionDash {
         entity,
         point: point,
-        skill: skill_spell,
         move_type: DashMoveType::Pointer { max: 500.0 },
-        damage: Some(DashDamage {
-            radius_end: 300.0,
-            damage: TargetDamage {
-                filter: TargetFilter::Champion,
-                amount: "total_damage".to_string(),
-                damage_type: DamageType::Magic,
-            },
-        }),
         speed: 600.0,
     });
 
@@ -201,7 +220,7 @@ fn cast_ahri_r(
         commands
             .entity(skill_entity)
             .insert(SkillRecastWindow::new(stage + 1, 3, 15.0));
-    }
+    };
 }
 
 /// Listen for Ahri damage hits to apply effects

@@ -4,7 +4,6 @@ pub mod w;
 use bevy::prelude::*;
 use lol_base::animation_names::{ANIM_SPELL1, ANIM_SPELL2, ANIM_SPELL3, ANIM_SPELL4};
 use lol_base::render_cmd::CommandAnimationPlay;
-use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
 };
@@ -32,7 +31,10 @@ pub struct PluginGaren;
 
 impl Plugin for PluginGaren {
     fn build(&self, app: &mut App) {
-        app.add_observer(on_garen_skill_cast);
+        app.add_observer(on_garen_q);
+        app.add_observer(on_garen_w);
+        app.add_observer(on_garen_e);
+        app.add_observer(on_garen_r);
     }
 }
 
@@ -41,7 +43,7 @@ impl Plugin for PluginGaren {
 #[reflect(Component)]
 pub struct Garen;
 
-fn on_garen_skill_cast(
+fn on_garen_q(
     trigger: On<EventSkillCast>,
     mut commands: Commands,
     q_garen: Query<(), With<Garen>>,
@@ -55,17 +57,10 @@ fn on_garen_skill_cast(
     let Ok(skill) = q_skill.get(trigger.skill_entity) else {
         return;
     };
-
-    match skill.slot {
-        SkillSlot::Q => cast_garen_q(&mut commands, entity),
-        SkillSlot::W => cast_garen_w(&mut commands, entity),
-        SkillSlot::E => cast_garen_e(&mut commands, entity, skill.spell.clone()),
-        SkillSlot::R => cast_garen_r(&mut commands, entity, trigger.point, skill.spell.clone()),
-        _ => {}
+    if !matches!(skill.slot, SkillSlot::Q) {
+        return;
     }
-}
 
-fn cast_garen_q(commands: &mut Commands, entity: Entity) {
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: ANIM_SPELL1.to_string(),
@@ -90,7 +85,24 @@ fn cast_garen_q(commands: &mut Commands, entity: Entity) {
     );
 }
 
-fn cast_garen_w(commands: &mut Commands, entity: Entity) {
+fn on_garen_w(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_garen: Query<(), With<Garen>>,
+    q_skill: Query<&Skill>,
+) {
+    let entity = trigger.event_target();
+    if q_garen.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::W) {
+        return;
+    }
+
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: ANIM_SPELL2.to_string(),
@@ -117,7 +129,25 @@ fn cast_garen_w(commands: &mut Commands, entity: Entity) {
     );
 }
 
-fn cast_garen_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
+fn on_garen_e(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_garen: Query<(), With<Garen>>,
+    q_skill: Query<&Skill>,
+) {
+    let entity = trigger.event_target();
+    if q_garen.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::E) {
+        return;
+    }
+
+    let skill_spell = skill.spell.clone();
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: ANIM_SPELL3.to_string(),
@@ -138,7 +168,26 @@ fn cast_garen_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
     });
 }
 
-fn cast_garen_r(commands: &mut Commands, entity: Entity, _point: Vec2, skill_spell: Handle<Spell>) {
+fn on_garen_r(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_garen: Query<(), With<Garen>>,
+    q_skill: Query<&Skill>,
+) {
+    let entity = trigger.event_target();
+    if q_garen.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::R) {
+        return;
+    }
+
+    let _point = trigger.point;
+    let skill_spell = skill.spell.clone();
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: ANIM_SPELL4.to_string(),

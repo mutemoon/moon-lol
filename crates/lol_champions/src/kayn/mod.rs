@@ -3,11 +3,10 @@ pub mod buffs;
 use bevy::prelude::*;
 use lol_base::animation_names::{ANIM_SPELL1, ANIM_SPELL2, ANIM_SPELL3, ANIM_SPELL4};
 use lol_base::render_cmd::CommandAnimationPlay;
-use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
 };
-use lol_core::action::dash::{ActionDash, DashDamage, DashMoveType};
+use lol_core::action::dash::{ActionDash, DashMoveType};
 use lol_core::base::buff::BuffOf;
 use lol_core::buffs::cc_debuffs::DebuffSlow;
 use lol_core::buffs::common_buffs::BuffMoveSpeed;
@@ -22,7 +21,10 @@ pub struct PluginKayn;
 
 impl Plugin for PluginKayn {
     fn build(&self, app: &mut App) {
-        app.add_observer(on_kayn_skill_cast);
+        app.add_observer(on_kayn_q);
+        app.add_observer(on_kayn_w);
+        app.add_observer(on_kayn_e);
+        app.add_observer(on_kayn_r);
         app.add_observer(on_kayn_damage_hit);
     }
 }
@@ -43,11 +45,11 @@ pub enum KaynForm {
     Red,  // Bruiser form
 }
 
-fn on_kayn_skill_cast(
+fn on_kayn_q(
     trigger: On<EventSkillCast>,
     mut commands: Commands,
     q_kayn: Query<(), With<Kayn>>,
-    q_transform: Query<&Transform>,
+    _q_transform: Query<&Transform>,
     q_skill: Query<&Skill>,
 ) {
     let entity = trigger.event_target();
@@ -58,31 +60,12 @@ fn on_kayn_skill_cast(
     let Ok(skill) = q_skill.get(trigger.skill_entity) else {
         return;
     };
-
-    let skill_spell = skill.spell.clone();
-
-    match skill.slot {
-        SkillSlot::Q => cast_kayn_q(
-            &mut commands,
-            &q_transform,
-            entity,
-            trigger.point,
-            skill_spell,
-        ),
-        SkillSlot::W => cast_kayn_w(&mut commands, entity, skill_spell),
-        SkillSlot::E => cast_kayn_e(&mut commands, &q_transform, entity, trigger.point),
-        SkillSlot::R => cast_kayn_r(&mut commands, entity),
-        _ => {}
+    if !matches!(skill.slot, SkillSlot::Q) {
+        return;
     }
-}
 
-fn cast_kayn_q(
-    commands: &mut Commands,
-    _q_transform: &Query<&Transform>,
-    entity: Entity,
-    point: Vec2,
-    skill_spell: Handle<Spell>,
-) {
+    let point = trigger.point;
+    let _skill_spell = skill.spell.clone();
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: ANIM_SPELL1.to_string(),
@@ -93,21 +76,30 @@ fn cast_kayn_q(
     commands.trigger(ActionDash {
         entity,
         point: point,
-        skill: skill_spell,
         move_type: DashMoveType::Fixed(250.0),
-        damage: Some(DashDamage {
-            radius_end: 150.0,
-            damage: TargetDamage {
-                filter: TargetFilter::All,
-                amount: "total_damage".to_string(),
-                damage_type: DamageType::Physical,
-            },
-        }),
         speed: 700.0,
     });
 }
 
-fn cast_kayn_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
+fn on_kayn_w(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_kayn: Query<(), With<Kayn>>,
+    q_skill: Query<&Skill>,
+) {
+    let entity = trigger.event_target();
+    if q_kayn.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::W) {
+        return;
+    }
+
+    let skill_spell = skill.spell.clone();
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: ANIM_SPELL2.to_string(),
@@ -132,12 +124,26 @@ fn cast_kayn_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spel
     });
 }
 
-fn cast_kayn_e(
-    commands: &mut Commands,
-    _q_transform: &Query<&Transform>,
-    entity: Entity,
-    _point: Vec2,
+fn on_kayn_e(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_kayn: Query<(), With<Kayn>>,
+    _q_transform: Query<&Transform>,
+    q_skill: Query<&Skill>,
 ) {
+    let entity = trigger.event_target();
+    if q_kayn.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::E) {
+        return;
+    }
+
+    let _point = trigger.point;
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: ANIM_SPELL3.to_string(),
@@ -151,7 +157,24 @@ fn cast_kayn_e(
         .with_related::<BuffOf>(BuffMoveSpeed::new(0.4, 1.5));
 }
 
-fn cast_kayn_r(commands: &mut Commands, entity: Entity) {
+fn on_kayn_r(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_kayn: Query<(), With<Kayn>>,
+    q_skill: Query<&Skill>,
+) {
+    let entity = trigger.event_target();
+    if q_kayn.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::R) {
+        return;
+    }
+
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: ANIM_SPELL4.to_string(),

@@ -24,7 +24,10 @@ pub struct PluginIrelia;
 
 impl Plugin for PluginIrelia {
     fn build(&self, app: &mut App) {
-        app.add_observer(on_irelia_skill_cast);
+        app.add_observer(on_irelia_q);
+        app.add_observer(on_irelia_w);
+        app.add_observer(on_irelia_e);
+        app.add_observer(on_irelia_r);
         app.add_observer(on_irelia_damage_hit);
     }
 }
@@ -34,11 +37,59 @@ impl Plugin for PluginIrelia {
 #[reflect(Component)]
 pub struct Irelia;
 
-fn on_irelia_skill_cast(
+fn on_irelia_q(
     trigger: On<EventSkillCast>,
     mut commands: Commands,
     q_irelia: Query<(), With<Irelia>>,
     q_transform: Query<&Transform>,
+    q_skill: Query<&Skill>,
+) {
+    let entity = trigger.event_target();
+    if q_irelia.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::Q) {
+        return;
+    }
+
+    cast_irelia_q(
+        &mut commands,
+        &q_transform,
+        entity,
+        trigger.point,
+        skill.spell.clone(),
+    );
+}
+
+fn on_irelia_w(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_irelia: Query<(), With<Irelia>>,
+    q_skill: Query<&Skill>,
+) {
+    let entity = trigger.event_target();
+    if q_irelia.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::W) {
+        return;
+    }
+
+    cast_irelia_w(&mut commands, entity);
+}
+
+fn on_irelia_e(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_irelia: Query<(), With<Irelia>>,
     q_skill: Query<(&Skill, &CoolDown, Option<&SkillRecastWindow>)>,
 ) {
     let entity = trigger.event_target();
@@ -49,29 +100,39 @@ fn on_irelia_skill_cast(
     let Ok((skill, cooldown, recast)) = q_skill.get(trigger.skill_entity) else {
         return;
     };
-
-    let skill_spell = skill.spell.clone();
-
-    match skill.slot {
-        SkillSlot::Q => cast_irelia_q(
-            &mut commands,
-            &q_transform,
-            entity,
-            trigger.point,
-            skill_spell,
-        ),
-        SkillSlot::W => cast_irelia_w(&mut commands, entity),
-        SkillSlot::E => cast_irelia_e(
-            &mut commands,
-            entity,
-            trigger.skill_entity,
-            cooldown,
-            recast,
-            skill_spell,
-        ),
-        SkillSlot::R => cast_irelia_r(&mut commands, entity, trigger.point, skill_spell),
-        _ => {}
+    if !matches!(skill.slot, SkillSlot::E) {
+        return;
     }
+
+    cast_irelia_e(
+        &mut commands,
+        entity,
+        trigger.skill_entity,
+        cooldown,
+        recast,
+        skill.spell.clone(),
+    );
+}
+
+fn on_irelia_r(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_irelia: Query<(), With<Irelia>>,
+    q_skill: Query<&Skill>,
+) {
+    let entity = trigger.event_target();
+    if q_irelia.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::R) {
+        return;
+    }
+
+    cast_irelia_r(&mut commands, entity, trigger.point, skill.spell.clone());
 }
 
 fn cast_irelia_q(

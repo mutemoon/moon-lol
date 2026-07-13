@@ -17,7 +17,10 @@ pub struct PluginMordekaiser;
 
 impl Plugin for PluginMordekaiser {
     fn build(&self, app: &mut App) {
-        app.add_observer(on_mordekaiser_skill_cast);
+        app.add_observer(on_mordekaiser_q);
+        app.add_observer(on_mordekaiser_w);
+        app.add_observer(on_mordekaiser_e);
+        app.add_observer(on_mordekaiser_r);
     }
 }
 
@@ -26,11 +29,7 @@ impl Plugin for PluginMordekaiser {
 #[reflect(Component)]
 pub struct Mordekaiser;
 
-/// 莫德凯撒施法观察者：统一管线校验通过后派发，按技能槽位分发到各技能模块。
-///
-/// 当前为基础框架阶段，各技能以 stub 形式占位，仅播放动画并记录施法意图，
-/// 具体伤害 / 位移 / 状态逻辑待后续按 TDD 流程实现。
-fn on_mordekaiser_skill_cast(
+fn on_mordekaiser_q(
     trigger: On<EventSkillCast>,
     mut commands: Commands,
     q_morde: Query<(), With<Mordekaiser>>,
@@ -44,12 +43,72 @@ fn on_mordekaiser_skill_cast(
     let Ok(skill) = q_skill.get(trigger.skill_entity) else {
         return;
     };
-
-    match skill.slot {
-        SkillSlot::Q => q::cast_mordekaiser_q(&mut commands, entity, trigger.point),
-        SkillSlot::W => w::cast_mordekaiser_w(&mut commands, entity),
-        SkillSlot::E => e::cast_mordekaiser_e(&mut commands, entity, trigger.point),
-        SkillSlot::R => r::cast_mordekaiser_r(&mut commands, entity, trigger.point),
-        _ => {}
+    if !matches!(skill.slot, SkillSlot::Q) {
+        return;
     }
+
+    q::cast_mordekaiser_q(&mut commands, entity, trigger.point);
+}
+
+fn on_mordekaiser_w(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_morde: Query<(), With<Mordekaiser>>,
+    q_skill: Query<&Skill>,
+) {
+    let entity = trigger.event_target();
+    if q_morde.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::W) {
+        return;
+    }
+
+    w::cast_mordekaiser_w(&mut commands, entity);
+}
+
+fn on_mordekaiser_e(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_morde: Query<(), With<Mordekaiser>>,
+    q_skill: Query<&Skill>,
+) {
+    let entity = trigger.event_target();
+    if q_morde.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::E) {
+        return;
+    }
+
+    e::cast_mordekaiser_e(&mut commands, entity, trigger.point);
+}
+
+fn on_mordekaiser_r(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_morde: Query<(), With<Mordekaiser>>,
+    q_skill: Query<&Skill>,
+) {
+    let entity = trigger.event_target();
+    if q_morde.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::R) {
+        return;
+    }
+
+    r::cast_mordekaiser_r(&mut commands, entity, trigger.point);
 }

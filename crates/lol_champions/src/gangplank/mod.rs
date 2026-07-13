@@ -3,7 +3,6 @@ pub mod buffs;
 use bevy::prelude::*;
 use lol_base::animation_names::{ANIM_SPELL1, ANIM_SPELL2, ANIM_SPELL3, ANIM_SPELL4};
 use lol_base::render_cmd::CommandAnimationPlay;
-use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
 };
@@ -19,7 +18,10 @@ pub struct PluginGangplank;
 
 impl Plugin for PluginGangplank {
     fn build(&self, app: &mut App) {
-        app.add_observer(on_gangplank_skill_cast);
+        app.add_observer(on_gangplank_q);
+        app.add_observer(on_gangplank_w);
+        app.add_observer(on_gangplank_e);
+        app.add_observer(on_gangplank_r);
         app.add_observer(on_gangplank_damage_hit);
     }
 }
@@ -29,7 +31,7 @@ impl Plugin for PluginGangplank {
 #[reflect(Component)]
 pub struct Gangplank;
 
-fn on_gangplank_skill_cast(
+fn on_gangplank_q(
     trigger: On<EventSkillCast>,
     mut commands: Commands,
     q_gangplank: Query<(), With<Gangplank>>,
@@ -43,17 +45,11 @@ fn on_gangplank_skill_cast(
     let Ok(skill) = q_skill.get(trigger.skill_entity) else {
         return;
     };
-
-    match skill.slot {
-        SkillSlot::Q => cast_gangplank_q(&mut commands, entity, skill.spell.clone()),
-        SkillSlot::W => cast_gangplank_w(&mut commands, entity),
-        SkillSlot::E => cast_gangplank_e(&mut commands, entity),
-        SkillSlot::R => cast_gangplank_r(&mut commands, entity, skill.spell.clone()),
-        _ => {}
+    if !matches!(skill.slot, SkillSlot::Q) {
+        return;
     }
-}
 
-fn cast_gangplank_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
+    let skill_spell = skill.spell.clone();
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: ANIM_SPELL1.to_string(),
@@ -77,27 +73,79 @@ fn cast_gangplank_q(commands: &mut Commands, entity: Entity, skill_spell: Handle
     });
 }
 
-fn cast_gangplank_w(commands: &mut Commands, entity: Entity) {
+fn on_gangplank_w(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_gangplank: Query<(), With<Gangplank>>,
+    q_skill: Query<&Skill>,
+) {
+    let entity = trigger.event_target();
+    if q_gangplank.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::W) {
+        return;
+    }
+
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: ANIM_SPELL2.to_string(),
         repeat: false,
         duration: None,
     });
-    // W removes CC and heals
+    // W removes CC and heals;
 }
 
-fn cast_gangplank_e(commands: &mut Commands, entity: Entity) {
+fn on_gangplank_e(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_gangplank: Query<(), With<Gangplank>>,
+    q_skill: Query<&Skill>,
+) {
+    let entity = trigger.event_target();
+    if q_gangplank.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::E) {
+        return;
+    }
+
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: ANIM_SPELL3.to_string(),
         repeat: false,
         duration: None,
     });
-    // E places barrel
+    // E places barrel;
 }
 
-fn cast_gangplank_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
+fn on_gangplank_r(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_gangplank: Query<(), With<Gangplank>>,
+    q_skill: Query<&Skill>,
+) {
+    let entity = trigger.event_target();
+    if q_gangplank.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::R) {
+        return;
+    }
+
+    let skill_spell = skill.spell.clone();
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: ANIM_SPELL4.to_string(),

@@ -3,14 +3,13 @@ pub mod buffs;
 use bevy::prelude::*;
 use lol_base::animation_names::{ANIM_SPELL1, ANIM_SPELL2, ANIM_SPELL3, ANIM_SPELL4};
 use lol_base::render_cmd::CommandAnimationPlay;
-use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
 };
 use lol_core::base::buff::BuffOf;
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
-use lol_core::skill::{CoolDown, EventSkillCast, Skill, SkillSlot};
+use lol_core::skill::{EventSkillCast, Skill, SkillSlot};
 
 use crate::tryndamere::buffs::BuffTryndamereW;
 
@@ -19,7 +18,10 @@ pub struct PluginTryndamere;
 
 impl Plugin for PluginTryndamere {
     fn build(&self, app: &mut App) {
-        app.add_observer(on_tryndamere_skill_cast);
+        app.add_observer(on_tryndamere_q);
+        app.add_observer(on_tryndamere_w);
+        app.add_observer(on_tryndamere_e);
+        app.add_observer(on_tryndamere_r);
         app.add_observer(on_tryndamere_damage_hit);
     }
 }
@@ -29,33 +31,24 @@ impl Plugin for PluginTryndamere {
 #[reflect(Component)]
 pub struct Tryndamere;
 
-fn on_tryndamere_skill_cast(
+fn on_tryndamere_q(
     trigger: On<EventSkillCast>,
     mut commands: Commands,
     q_tryndamere: Query<(), With<Tryndamere>>,
-    q_skill: Query<(&Skill, &CoolDown)>,
+    q_skill: Query<&Skill>,
 ) {
     let entity = trigger.event_target();
     if q_tryndamere.get(entity).is_err() {
         return;
     }
 
-    let Ok((skill, _cooldown)) = q_skill.get(trigger.skill_entity) else {
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
         return;
     };
-
-    let skill_spell = skill.spell.clone();
-
-    match skill.slot {
-        SkillSlot::Q => cast_tryndamere_q(&mut commands, entity),
-        SkillSlot::W => cast_tryndamere_w(&mut commands, entity, skill_spell),
-        SkillSlot::E => cast_tryndamere_e(&mut commands, entity, skill_spell),
-        SkillSlot::R => cast_tryndamere_r(&mut commands, entity),
-        _ => {}
+    if !matches!(skill.slot, SkillSlot::Q) {
+        return;
     }
-}
 
-fn cast_tryndamere_q(commands: &mut Commands, entity: Entity) {
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: ANIM_SPELL1.to_string(),
@@ -64,7 +57,25 @@ fn cast_tryndamere_q(commands: &mut Commands, entity: Entity) {
     });
 }
 
-fn cast_tryndamere_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
+fn on_tryndamere_w(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_tryndamere: Query<(), With<Tryndamere>>,
+    q_skill: Query<&Skill>,
+) {
+    let entity = trigger.event_target();
+    if q_tryndamere.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::W) {
+        return;
+    }
+
+    let skill_spell = skill.spell.clone();
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: ANIM_SPELL2.to_string(),
@@ -88,7 +99,25 @@ fn cast_tryndamere_w(commands: &mut Commands, entity: Entity, skill_spell: Handl
     });
 }
 
-fn cast_tryndamere_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
+fn on_tryndamere_e(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_tryndamere: Query<(), With<Tryndamere>>,
+    q_skill: Query<&Skill>,
+) {
+    let entity = trigger.event_target();
+    if q_tryndamere.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::E) {
+        return;
+    }
+
+    let skill_spell = skill.spell.clone();
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: ANIM_SPELL3.to_string(),
@@ -109,7 +138,24 @@ fn cast_tryndamere_e(commands: &mut Commands, entity: Entity, skill_spell: Handl
     });
 }
 
-fn cast_tryndamere_r(commands: &mut Commands, entity: Entity) {
+fn on_tryndamere_r(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_tryndamere: Query<(), With<Tryndamere>>,
+    q_skill: Query<&Skill>,
+) {
+    let entity = trigger.event_target();
+    if q_tryndamere.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::R) {
+        return;
+    }
+
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: ANIM_SPELL4.to_string(),

@@ -3,7 +3,6 @@ pub mod buffs;
 use bevy::prelude::*;
 use lol_base::animation_names::{ANIM_SPELL1, ANIM_SPELL2, ANIM_SPELL3, ANIM_SPELL4};
 use lol_base::render_cmd::CommandAnimationPlay;
-use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
 };
@@ -11,7 +10,7 @@ use lol_core::action::dash::{ActionDash, DashMoveType};
 use lol_core::base::buff::BuffOf;
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
-use lol_core::skill::{CoolDown, EventSkillCast, Skill, SkillSlot};
+use lol_core::skill::{EventSkillCast, Skill, SkillSlot};
 
 use crate::kalista::buffs::{BuffKalistaE, BuffKalistaR};
 
@@ -20,7 +19,10 @@ pub struct PluginKalista;
 
 impl Plugin for PluginKalista {
     fn build(&self, app: &mut App) {
-        app.add_observer(on_kalista_skill_cast);
+        app.add_observer(on_kalista_q);
+        app.add_observer(on_kalista_w);
+        app.add_observer(on_kalista_e);
+        app.add_observer(on_kalista_r);
         app.add_observer(on_kalista_damage_hit);
     }
 }
@@ -30,40 +32,25 @@ impl Plugin for PluginKalista {
 #[reflect(Component)]
 pub struct Kalista;
 
-fn on_kalista_skill_cast(
+fn on_kalista_q(
     trigger: On<EventSkillCast>,
     mut commands: Commands,
     q_kalista: Query<(), With<Kalista>>,
-    q_transform: Query<&Transform>,
-    q_skill: Query<(&Skill, &CoolDown)>,
+    q_skill: Query<&Skill>,
 ) {
     let entity = trigger.event_target();
     if q_kalista.get(entity).is_err() {
         return;
     }
 
-    let Ok((skill, _cooldown)) = q_skill.get(trigger.skill_entity) else {
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
         return;
     };
+    if !matches!(skill.slot, SkillSlot::Q) {
+        return;
+    }
 
     let skill_spell = skill.spell.clone();
-
-    match skill.slot {
-        SkillSlot::Q => cast_kalista_q(&mut commands, entity, skill_spell),
-        SkillSlot::W => cast_kalista_w(&mut commands, entity),
-        SkillSlot::E => cast_kalista_e(&mut commands, entity, skill_spell),
-        SkillSlot::R => cast_kalista_r(
-            &mut commands,
-            &q_transform,
-            entity,
-            trigger.point,
-            skill_spell,
-        ),
-        _ => {}
-    }
-}
-
-fn cast_kalista_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: ANIM_SPELL1.to_string(),
@@ -89,7 +76,24 @@ fn cast_kalista_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<S
     });
 }
 
-fn cast_kalista_w(commands: &mut Commands, entity: Entity) {
+fn on_kalista_w(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_kalista: Query<(), With<Kalista>>,
+    q_skill: Query<&Skill>,
+) {
+    let entity = trigger.event_target();
+    if q_kalista.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::W) {
+        return;
+    }
+
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: ANIM_SPELL2.to_string(),
@@ -97,10 +101,28 @@ fn cast_kalista_w(commands: &mut Commands, entity: Entity) {
         duration: None,
     });
 
-    // W is a sentinel that provides vision and deals damage on basic attacks
+    // W is a sentinel that provides vision and deals damage on basic attacks;
 }
 
-fn cast_kalista_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
+fn on_kalista_e(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_kalista: Query<(), With<Kalista>>,
+    q_skill: Query<&Skill>,
+) {
+    let entity = trigger.event_target();
+    if q_kalista.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::E) {
+        return;
+    }
+
+    let skill_spell = skill.spell.clone();
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: ANIM_SPELL3.to_string(),
@@ -123,13 +145,27 @@ fn cast_kalista_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<S
     });
 }
 
-fn cast_kalista_r(
-    commands: &mut Commands,
-    _q_transform: &Query<&Transform>,
-    entity: Entity,
-    point: Vec2,
-    skill_spell: Handle<Spell>,
+fn on_kalista_r(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_kalista: Query<(), With<Kalista>>,
+    _q_transform: Query<&Transform>,
+    q_skill: Query<&Skill>,
 ) {
+    let entity = trigger.event_target();
+    if q_kalista.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::R) {
+        return;
+    }
+
+    let point = trigger.point;
+    let _skill_spell = skill.spell.clone();
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: ANIM_SPELL4.to_string(),
@@ -145,9 +181,7 @@ fn cast_kalista_r(
     commands.trigger(ActionDash {
         entity,
         point: point,
-        skill: skill_spell,
         move_type: DashMoveType::Pointer { max: 1200.0 },
-        damage: None,
         speed: 1000.0,
     });
 }

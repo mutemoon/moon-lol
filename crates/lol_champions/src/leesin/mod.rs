@@ -3,11 +3,10 @@ pub mod buffs;
 use bevy::prelude::*;
 use lol_base::animation_names::{ANIM_SPELL1, ANIM_SPELL2, ANIM_SPELL3, ANIM_SPELL4};
 use lol_base::render_cmd::CommandAnimationPlay;
-use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
 };
-use lol_core::action::dash::{ActionDash, DashDamage, DashMoveType};
+use lol_core::action::dash::{ActionDash, DashMoveType};
 use lol_core::action::knockback::{CommandKnockback, DisplaceDirection};
 use lol_core::base::buff::BuffOf;
 use lol_core::buffs::cc_debuffs::{DebuffSlow, update_debuff_knockup};
@@ -24,7 +23,10 @@ pub struct PluginLeeSin;
 
 impl Plugin for PluginLeeSin {
     fn build(&self, app: &mut App) {
-        app.add_observer(on_leesin_skill_cast);
+        app.add_observer(on_leesin_q);
+        app.add_observer(on_leesin_w);
+        app.add_observer(on_leesin_e);
+        app.add_observer(on_leesin_r);
         app.add_observer(on_leesin_damage_hit);
         app.add_systems(FixedUpdate, update_debuff_knockup);
     }
@@ -42,7 +44,7 @@ pub struct LeeSinActiveAbility {
     pub stage: u8,
 }
 
-fn on_leesin_skill_cast(
+fn on_leesin_q(
     trigger: On<EventSkillCast>,
     mut commands: Commands,
     q_leesin: Query<(), With<LeeSin>>,
@@ -57,53 +59,14 @@ fn on_leesin_skill_cast(
     let Ok((skill, cooldown, recast)) = q_skill.get(trigger.skill_entity) else {
         return;
     };
-
-    let skill_spell = skill.spell.clone();
-
-    match skill.slot {
-        SkillSlot::Q => cast_leesin_q(
-            &mut commands,
-            &q_transform,
-            entity,
-            trigger.skill_entity,
-            trigger.point,
-            skill_spell,
-            cooldown,
-            recast,
-        ),
-        SkillSlot::W => cast_leesin_w(
-            &mut commands,
-            &q_transform,
-            entity,
-            trigger.skill_entity,
-            trigger.point,
-            skill_spell,
-            cooldown,
-            recast,
-        ),
-        SkillSlot::E => cast_leesin_e(
-            &mut commands,
-            entity,
-            trigger.skill_entity,
-            skill_spell,
-            cooldown,
-            recast,
-        ),
-        SkillSlot::R => cast_leesin_r(&mut commands, entity, skill_spell),
-        _ => {}
+    if !matches!(skill.slot, SkillSlot::Q) {
+        return;
     }
-}
 
-fn cast_leesin_q(
-    commands: &mut Commands,
-    _q_transform: &Query<&Transform>,
-    entity: Entity,
-    skill_entity: Entity,
-    point: Vec2,
-    skill_spell: Handle<Spell>,
-    cooldown: &CoolDown,
-    recast: Option<&SkillRecastWindow>,
-) {
+    let _q_transform = &q_transform;
+    let skill_entity = trigger.skill_entity;
+    let point = trigger.point;
+    let skill_spell = skill.spell.clone();
     let stage = recast.map(|w| w.stage).unwrap_or(1);
 
     commands.trigger(CommandAnimationPlay {
@@ -139,16 +102,7 @@ fn cast_leesin_q(
         commands.trigger(ActionDash {
             entity,
             point: point,
-            skill: skill_spell,
             move_type: DashMoveType::Pointer { max: 500.0 },
-            damage: Some(DashDamage {
-                radius_end: 100.0,
-                damage: TargetDamage {
-                    filter: TargetFilter::All,
-                    amount: "total_damage".to_string(),
-                    damage_type: DamageType::Physical,
-                },
-            }),
             speed: 800.0,
         });
         commands.entity(skill_entity).remove::<SkillRecastWindow>();
@@ -160,19 +114,32 @@ fn cast_leesin_q(
             "{:?} 释放了 {} 技能，当前阶段 {}，开始冷却",
             entity, "Lee Sin Q", stage
         );
-    }
+    };
 }
 
-fn cast_leesin_w(
-    commands: &mut Commands,
-    _q_transform: &Query<&Transform>,
-    entity: Entity,
-    skill_entity: Entity,
-    point: Vec2,
-    skill_spell: Handle<Spell>,
-    cooldown: &CoolDown,
-    recast: Option<&SkillRecastWindow>,
+fn on_leesin_w(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_leesin: Query<(), With<LeeSin>>,
+    q_transform: Query<&Transform>,
+    q_skill: Query<(&Skill, &CoolDown, Option<&SkillRecastWindow>)>,
 ) {
+    let entity = trigger.event_target();
+    if q_leesin.get(entity).is_err() {
+        return;
+    }
+
+    let Ok((skill, cooldown, recast)) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::W) {
+        return;
+    }
+
+    let _q_transform = &q_transform;
+    let skill_entity = trigger.skill_entity;
+    let point = trigger.point;
+    let _skill_spell = skill.spell.clone();
     let stage = recast.map(|w| w.stage).unwrap_or(1);
 
     commands.trigger(CommandAnimationPlay {
@@ -187,9 +154,7 @@ fn cast_leesin_w(
         commands.trigger(ActionDash {
             entity,
             point: point,
-            skill: skill_spell,
             move_type: DashMoveType::Pointer { max: 300.0 },
-            damage: None,
             speed: 700.0,
         });
         // Insert recast window for second cast (Iron Will)
@@ -210,17 +175,29 @@ fn cast_leesin_w(
             "{:?} 释放了 {} 技能，当前阶段 {}，开始冷却",
             entity, "Lee Sin W", stage
         );
-    }
+    };
 }
 
-fn cast_leesin_e(
-    commands: &mut Commands,
-    entity: Entity,
-    skill_entity: Entity,
-    skill_spell: Handle<Spell>,
-    cooldown: &CoolDown,
-    recast: Option<&SkillRecastWindow>,
+fn on_leesin_e(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_leesin: Query<(), With<LeeSin>>,
+    q_skill: Query<(&Skill, &CoolDown, Option<&SkillRecastWindow>)>,
 ) {
+    let entity = trigger.event_target();
+    if q_leesin.get(entity).is_err() {
+        return;
+    }
+
+    let Ok((skill, cooldown, recast)) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::E) {
+        return;
+    }
+
+    let skill_entity = trigger.skill_entity;
+    let skill_spell = skill.spell.clone();
     let stage = recast.map(|w| w.stage).unwrap_or(1);
 
     commands.trigger(CommandAnimationPlay {
@@ -275,10 +252,28 @@ fn cast_leesin_e(
             "{:?} 释放了 {} 技能，当前阶段 {}，开始冷却",
             entity, "Lee Sin E", stage
         );
-    }
+    };
 }
 
-fn cast_leesin_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
+fn on_leesin_r(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_leesin: Query<(), With<LeeSin>>,
+    q_skill: Query<&Skill>,
+) {
+    let entity = trigger.event_target();
+    if q_leesin.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::R) {
+        return;
+    }
+
+    let skill_spell = skill.spell.clone();
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: ANIM_SPELL4.to_string(),

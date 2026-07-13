@@ -3,7 +3,6 @@ pub mod buffs;
 use bevy::prelude::*;
 use lol_base::animation_names::{ANIM_SPELL1, ANIM_SPELL2, ANIM_SPELL3, ANIM_SPELL4};
 use lol_base::render_cmd::CommandAnimationPlay;
-use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
 };
@@ -22,7 +21,10 @@ pub struct PluginAnivia;
 
 impl Plugin for PluginAnivia {
     fn build(&self, app: &mut App) {
-        app.add_observer(on_anivia_skill_cast);
+        app.add_observer(on_anivia_q);
+        app.add_observer(on_anivia_w);
+        app.add_observer(on_anivia_e);
+        app.add_observer(on_anivia_r);
         app.add_observer(on_anivia_damage_hit);
     }
 }
@@ -32,11 +34,10 @@ impl Plugin for PluginAnivia {
 #[reflect(Component)]
 pub struct Anivia;
 
-fn on_anivia_skill_cast(
+fn on_anivia_q(
     trigger: On<EventSkillCast>,
     mut commands: Commands,
     q_anivia: Query<(), With<Anivia>>,
-    _q_transform: Query<&Transform>,
     q_skill: Query<(&Skill, &CoolDown, Option<&SkillRecastWindow>)>,
 ) {
     let entity = trigger.event_target();
@@ -47,33 +48,12 @@ fn on_anivia_skill_cast(
     let Ok((skill, cooldown, recast)) = q_skill.get(trigger.skill_entity) else {
         return;
     };
+    if !matches!(skill.slot, SkillSlot::Q) {
+        return;
+    }
 
     let skill_spell = skill.spell.clone();
-
-    match skill.slot {
-        SkillSlot::Q => cast_anivia_q(
-            &mut commands,
-            entity,
-            skill_spell,
-            trigger.skill_entity,
-            cooldown,
-            recast,
-        ),
-        SkillSlot::W => cast_anivia_w(&mut commands, entity),
-        SkillSlot::E => cast_anivia_e(&mut commands, entity, skill_spell),
-        SkillSlot::R => cast_anivia_r(&mut commands, entity, skill_spell),
-        _ => {}
-    }
-}
-
-fn cast_anivia_q(
-    commands: &mut Commands,
-    entity: Entity,
-    skill_spell: Handle<Spell>,
-    skill_entity: Entity,
-    cooldown: &CoolDown,
-    recast: Option<&SkillRecastWindow>,
-) {
+    let skill_entity = trigger.skill_entity;
     let stage = recast.map(|w| w.stage).unwrap_or(1);
 
     commands.trigger(CommandAnimationPlay {
@@ -107,20 +87,55 @@ fn cast_anivia_q(
             duration: cooldown.duration,
             timer: Some(Timer::from_seconds(cooldown.duration, TimerMode::Once)),
         });
-    }
+    };
 }
 
-fn cast_anivia_w(commands: &mut Commands, entity: Entity) {
+fn on_anivia_w(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_anivia: Query<(), With<Anivia>>,
+    q_skill: Query<&Skill>,
+) {
+    let entity = trigger.event_target();
+    if q_anivia.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::W) {
+        return;
+    }
+
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: ANIM_SPELL2.to_string(),
         repeat: false,
         duration: None,
     });
-    // W creates a wall that blocks movement
+    // W creates a wall that blocks movement;
 }
 
-fn cast_anivia_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
+fn on_anivia_e(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_anivia: Query<(), With<Anivia>>,
+    q_skill: Query<&Skill>,
+) {
+    let entity = trigger.event_target();
+    if q_anivia.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::E) {
+        return;
+    }
+
+    let skill_spell = skill.spell.clone();
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: ANIM_SPELL3.to_string(),
@@ -142,7 +157,25 @@ fn cast_anivia_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
     });
 }
 
-fn cast_anivia_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
+fn on_anivia_r(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_anivia: Query<(), With<Anivia>>,
+    q_skill: Query<&Skill>,
+) {
+    let entity = trigger.event_target();
+    if q_anivia.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::R) {
+        return;
+    }
+
+    let skill_spell = skill.spell.clone();
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: ANIM_SPELL4.to_string(),

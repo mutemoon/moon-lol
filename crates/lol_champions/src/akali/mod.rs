@@ -3,11 +3,10 @@ pub mod buffs;
 use bevy::prelude::*;
 use lol_base::animation_names::{ANIM_SPELL1, ANIM_SPELL2, ANIM_SPELL3, ANIM_SPELL4};
 use lol_base::render_cmd::CommandAnimationPlay;
-use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
 };
-use lol_core::action::dash::{ActionDash, DashDamage, DashMoveType};
+use lol_core::action::dash::{ActionDash, DashMoveType};
 use lol_core::base::buff::BuffOf;
 use lol_core::buffs::cc_debuffs::DebuffSlow;
 use lol_core::damage::{DamageType, EventDamageCreate};
@@ -21,7 +20,10 @@ pub struct PluginAkali;
 
 impl Plugin for PluginAkali {
     fn build(&self, app: &mut App) {
-        app.add_observer(on_akali_skill_cast);
+        app.add_observer(on_akali_q);
+        app.add_observer(on_akali_w);
+        app.add_observer(on_akali_e);
+        app.add_observer(on_akali_r);
         app.add_observer(on_akali_damage_hit);
     }
 }
@@ -31,52 +33,25 @@ impl Plugin for PluginAkali {
 #[reflect(Component)]
 pub struct Akali;
 
-fn on_akali_skill_cast(
+fn on_akali_q(
     trigger: On<EventSkillCast>,
     mut commands: Commands,
     q_akali: Query<(), With<Akali>>,
-    q_transform: Query<&Transform>,
-    q_skill: Query<(&Skill, &CoolDown, Option<&SkillRecastWindow>)>,
+    q_skill: Query<&Skill>,
 ) {
     let entity = trigger.event_target();
     if q_akali.get(entity).is_err() {
         return;
     }
 
-    let Ok((skill, cooldown, recast)) = q_skill.get(trigger.skill_entity) else {
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
         return;
     };
+    if !matches!(skill.slot, SkillSlot::Q) {
+        return;
+    }
 
     let skill_spell = skill.spell.clone();
-
-    match skill.slot {
-        SkillSlot::Q => cast_akali_q(&mut commands, entity, skill_spell),
-        SkillSlot::W => cast_akali_w(&mut commands, entity),
-        SkillSlot::E => cast_akali_e(
-            &mut commands,
-            &q_transform,
-            entity,
-            skill_spell,
-            trigger.skill_entity,
-            trigger.point,
-            cooldown,
-            recast,
-        ),
-        SkillSlot::R => cast_akali_r(
-            &mut commands,
-            &q_transform,
-            entity,
-            skill_spell,
-            trigger.skill_entity,
-            trigger.point,
-            cooldown,
-            recast,
-        ),
-        _ => {}
-    }
-}
-
-fn cast_akali_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: ANIM_SPELL1.to_string(),
@@ -106,7 +81,24 @@ fn cast_akali_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
         .with_related::<BuffOf>(BuffAkaliPassive::new());
 }
 
-fn cast_akali_w(commands: &mut Commands, entity: Entity) {
+fn on_akali_w(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_akali: Query<(), With<Akali>>,
+    q_skill: Query<&Skill>,
+) {
+    let entity = trigger.event_target();
+    if q_akali.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::W) {
+        return;
+    }
+
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: ANIM_SPELL2.to_string(),
@@ -122,16 +114,28 @@ fn cast_akali_w(commands: &mut Commands, entity: Entity) {
         .with_related::<BuffOf>(BuffAkaliStealth::new());
 }
 
-fn cast_akali_e(
-    commands: &mut Commands,
-    _q_transform: &Query<&Transform>,
-    entity: Entity,
-    skill_spell: Handle<Spell>,
-    skill_entity: Entity,
-    point: Vec2,
-    cooldown: &CoolDown,
-    recast: Option<&SkillRecastWindow>,
+fn on_akali_e(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_akali: Query<(), With<Akali>>,
+    _q_transform: Query<&Transform>,
+    q_skill: Query<(&Skill, &CoolDown, Option<&SkillRecastWindow>)>,
 ) {
+    let entity = trigger.event_target();
+    if q_akali.get(entity).is_err() {
+        return;
+    }
+
+    let Ok((skill, cooldown, recast)) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::E) {
+        return;
+    }
+
+    let skill_spell = skill.spell.clone();
+    let skill_entity = trigger.skill_entity;
+    let point = trigger.point;
     let stage = recast.map(|w| w.stage).unwrap_or(1);
 
     commands.trigger(CommandAnimationPlay {
@@ -167,16 +171,7 @@ fn cast_akali_e(
         commands.trigger(ActionDash {
             entity,
             point: point,
-            skill: skill_spell,
             move_type: DashMoveType::Pointer { max: 825.0 },
-            damage: Some(DashDamage {
-                radius_end: 100.0,
-                damage: TargetDamage {
-                    filter: TargetFilter::All,
-                    amount: "total_damage".to_string(),
-                    damage_type: DamageType::Magic,
-                },
-            }),
             speed: 1200.0,
         });
         commands.entity(skill_entity).remove::<SkillRecastWindow>();
@@ -184,19 +179,31 @@ fn cast_akali_e(
             duration: cooldown.duration,
             timer: Some(Timer::from_seconds(cooldown.duration, TimerMode::Once)),
         },));
-    }
+    };
 }
 
-fn cast_akali_r(
-    commands: &mut Commands,
-    _q_transform: &Query<&Transform>,
-    entity: Entity,
-    skill_spell: Handle<Spell>,
-    skill_entity: Entity,
-    point: Vec2,
-    cooldown: &CoolDown,
-    recast: Option<&SkillRecastWindow>,
+fn on_akali_r(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_akali: Query<(), With<Akali>>,
+    _q_transform: Query<&Transform>,
+    q_skill: Query<(&Skill, &CoolDown, Option<&SkillRecastWindow>)>,
 ) {
+    let entity = trigger.event_target();
+    if q_akali.get(entity).is_err() {
+        return;
+    }
+
+    let Ok((skill, cooldown, recast)) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::R) {
+        return;
+    }
+
+    let skill_spell = skill.spell.clone();
+    let skill_entity = trigger.skill_entity;
+    let point = trigger.point;
     let stage = recast.map(|w| w.stage).unwrap_or(1);
 
     commands.trigger(CommandAnimationPlay {
@@ -228,20 +235,7 @@ fn cast_akali_r(
     commands.trigger(ActionDash {
         entity,
         point: point,
-        skill: skill_spell,
         move_type: DashMoveType::Pointer { max: 675.0 },
-        damage: if stage == 1 {
-            Some(DashDamage {
-                radius_end: 150.0,
-                damage: TargetDamage {
-                    filter: TargetFilter::Champion,
-                    amount: "total_damage".to_string(),
-                    damage_type: DamageType::Magic,
-                },
-            })
-        } else {
-            None
-        },
         speed: 900.0,
     });
 
@@ -255,7 +249,7 @@ fn cast_akali_r(
         commands
             .entity(skill_entity)
             .insert(SkillRecastWindow::new(2, 2, 10.0));
-    }
+    };
 }
 
 /// Listen for Akali damage hits

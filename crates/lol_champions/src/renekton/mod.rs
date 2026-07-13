@@ -3,11 +3,10 @@ pub mod buffs;
 use bevy::prelude::*;
 use lol_base::animation_names::{ANIM_SPELL1, ANIM_SPELL2, ANIM_SPELL3, ANIM_SPELL4};
 use lol_base::render_cmd::CommandAnimationPlay;
-use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
 };
-use lol_core::action::dash::{ActionDash, DashDamage, DashMoveType};
+use lol_core::action::dash::{ActionDash, DashMoveType};
 use lol_core::attack::CommandAttackReset;
 use lol_core::base::ability_resource::AbilityResource;
 use lol_core::base::buff::BuffOf;
@@ -25,7 +24,10 @@ pub struct PluginRenekton;
 
 impl Plugin for PluginRenekton {
     fn build(&self, app: &mut App) {
-        app.add_observer(on_renekton_skill_cast);
+        app.add_observer(on_renekton_q);
+        app.add_observer(on_renekton_w);
+        app.add_observer(on_renekton_e);
+        app.add_observer(on_renekton_r);
     }
 }
 
@@ -34,52 +36,26 @@ impl Plugin for PluginRenekton {
 #[reflect(Component)]
 pub struct Renekton;
 
-fn on_renekton_skill_cast(
+fn on_renekton_q(
     trigger: On<EventSkillCast>,
     mut commands: Commands,
     q_renekton: Query<(), With<Renekton>>,
-    q_transform: Query<&Transform>,
-    q_skill: Query<(&Skill, &CoolDown, Option<&SkillRecastWindow>)>,
     mut q_ability_resource: Query<&mut AbilityResource>,
+    q_skill: Query<&Skill>,
 ) {
     let entity = trigger.event_target();
     if q_renekton.get(entity).is_err() {
         return;
     }
 
-    let Ok((skill, cooldown, recast)) = q_skill.get(trigger.skill_entity) else {
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
         return;
     };
-
-    match skill.slot {
-        SkillSlot::Q => cast_renekton_q(
-            &mut commands,
-            entity,
-            &mut q_ability_resource,
-            skill.spell.clone(),
-        ),
-        SkillSlot::W => cast_renekton_w(&mut commands, entity, skill.spell.clone()),
-        SkillSlot::E => cast_renekton_e(
-            &mut commands,
-            &q_transform,
-            entity,
-            trigger.skill_entity,
-            trigger.point,
-            cooldown,
-            recast,
-            skill.spell.clone(),
-        ),
-        SkillSlot::R => cast_renekton_r(&mut commands, entity, skill.spell.clone()),
-        _ => {}
+    if !matches!(skill.slot, SkillSlot::Q) {
+        return;
     }
-}
 
-fn cast_renekton_q(
-    commands: &mut Commands,
-    entity: Entity,
-    q_ability_resource: &mut Query<&mut AbilityResource>,
-    skill_spell: Handle<Spell>,
-) {
+    let skill_spell = skill.spell.clone();
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: ANIM_SPELL1.to_string(),
@@ -127,10 +103,28 @@ fn cast_renekton_q(
         commands
             .entity(entity)
             .with_related::<BuffOf>(BuffSelfHeal::new(40.0));
-    }
+    };
 }
 
-fn cast_renekton_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
+fn on_renekton_w(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_renekton: Query<(), With<Renekton>>,
+    q_skill: Query<&Skill>,
+) {
+    let entity = trigger.event_target();
+    if q_renekton.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::W) {
+        return;
+    }
+
+    let skill_spell = skill.spell.clone();
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: ANIM_SPELL2.to_string(),
@@ -155,16 +149,28 @@ fn cast_renekton_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<
     });
 }
 
-fn cast_renekton_e(
-    commands: &mut Commands,
-    _q_transform: &Query<&Transform>,
-    entity: Entity,
-    skill_entity: Entity,
-    point: Vec2,
-    cooldown: &CoolDown,
-    recast: Option<&SkillRecastWindow>,
-    skill_spell: Handle<Spell>,
+fn on_renekton_e(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_renekton: Query<(), With<Renekton>>,
+    _q_transform: Query<&Transform>,
+    q_skill: Query<(&Skill, &CoolDown, Option<&SkillRecastWindow>)>,
 ) {
+    let entity = trigger.event_target();
+    if q_renekton.get(entity).is_err() {
+        return;
+    }
+
+    let Ok((skill, cooldown, recast)) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::E) {
+        return;
+    }
+
+    let skill_entity = trigger.skill_entity;
+    let point = trigger.point;
+    let _skill_spell = skill.spell.clone();
     let stage = recast.map(|w| w.stage).unwrap_or(1);
 
     commands.trigger(CommandAnimationPlay {
@@ -179,16 +185,7 @@ fn cast_renekton_e(
         commands.trigger(ActionDash {
             entity,
             point: point,
-            skill: skill_spell,
             move_type: DashMoveType::Pointer { max: 200.0 },
-            damage: Some(DashDamage {
-                radius_end: 100.0,
-                damage: TargetDamage {
-                    filter: TargetFilter::All,
-                    amount: "total_damage".to_string(),
-                    damage_type: DamageType::Physical,
-                },
-            }),
             speed: 700.0,
         });
         commands.entity(skill_entity).insert(SkillRecastWindow::new(
@@ -201,16 +198,7 @@ fn cast_renekton_e(
         commands.trigger(ActionDash {
             entity,
             point: point,
-            skill: skill_spell,
             move_type: DashMoveType::Pointer { max: 200.0 },
-            damage: Some(DashDamage {
-                radius_end: 100.0,
-                damage: TargetDamage {
-                    filter: TargetFilter::All,
-                    amount: "total_damage".to_string(),
-                    damage_type: DamageType::Physical,
-                },
-            }),
             speed: 700.0,
         });
         commands.entity(skill_entity).remove::<SkillRecastWindow>();
@@ -218,10 +206,28 @@ fn cast_renekton_e(
             duration: cooldown.duration,
             timer: Some(Timer::from_seconds(cooldown.duration, TimerMode::Once)),
         },));
-    }
+    };
 }
 
-fn cast_renekton_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
+fn on_renekton_r(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_renekton: Query<(), With<Renekton>>,
+    q_skill: Query<&Skill>,
+) {
+    let entity = trigger.event_target();
+    if q_renekton.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::R) {
+        return;
+    }
+
+    let skill_spell = skill.spell.clone();
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: ANIM_SPELL4.to_string(),

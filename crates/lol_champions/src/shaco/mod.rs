@@ -3,14 +3,13 @@ pub mod buffs;
 use bevy::prelude::*;
 use lol_base::animation_names::{ANIM_SPELL1, ANIM_SPELL2, ANIM_SPELL3, ANIM_SPELL4};
 use lol_base::render_cmd::CommandAnimationPlay;
-use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
 };
 use lol_core::base::buff::BuffOf;
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
-use lol_core::skill::{CoolDown, EventSkillCast, Skill, SkillSlot};
+use lol_core::skill::{EventSkillCast, Skill, SkillSlot};
 
 use crate::shaco::buffs::BuffShacoW;
 
@@ -19,7 +18,10 @@ pub struct PluginShaco;
 
 impl Plugin for PluginShaco {
     fn build(&self, app: &mut App) {
-        app.add_observer(on_shaco_skill_cast);
+        app.add_observer(on_shaco_q);
+        app.add_observer(on_shaco_w);
+        app.add_observer(on_shaco_e);
+        app.add_observer(on_shaco_r);
         app.add_observer(on_shaco_damage_hit);
     }
 }
@@ -29,43 +31,52 @@ impl Plugin for PluginShaco {
 #[reflect(Component)]
 pub struct Shaco;
 
-fn on_shaco_skill_cast(
+fn on_shaco_q(
     trigger: On<EventSkillCast>,
     mut commands: Commands,
     q_shaco: Query<(), With<Shaco>>,
-    q_skill: Query<(&Skill, &CoolDown)>,
+    q_skill: Query<&Skill>,
 ) {
     let entity = trigger.event_target();
     if q_shaco.get(entity).is_err() {
         return;
     }
 
-    let Ok((skill, _cooldown)) = q_skill.get(trigger.skill_entity) else {
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
         return;
     };
-
-    let skill_spell = skill.spell.clone();
-
-    match skill.slot {
-        SkillSlot::Q => cast_shaco_q(&mut commands, entity),
-        SkillSlot::W => cast_shaco_w(&mut commands, entity, skill_spell),
-        SkillSlot::E => cast_shaco_e(&mut commands, entity, skill_spell),
-        SkillSlot::R => cast_shaco_r(&mut commands, entity),
-        _ => {}
+    if !matches!(skill.slot, SkillSlot::Q) {
+        return;
     }
-}
 
-fn cast_shaco_q(commands: &mut Commands, entity: Entity) {
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: ANIM_SPELL1.to_string(),
         repeat: false,
         duration: None,
     });
-    // Q is vanish - invisibility
+    // Q is vanish - invisibility;
 }
 
-fn cast_shaco_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
+fn on_shaco_w(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_shaco: Query<(), With<Shaco>>,
+    q_skill: Query<&Skill>,
+) {
+    let entity = trigger.event_target();
+    if q_shaco.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::W) {
+        return;
+    }
+
+    let skill_spell = skill.spell.clone();
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: ANIM_SPELL2.to_string(),
@@ -87,7 +98,25 @@ fn cast_shaco_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
     });
 }
 
-fn cast_shaco_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
+fn on_shaco_e(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_shaco: Query<(), With<Shaco>>,
+    q_skill: Query<&Skill>,
+) {
+    let entity = trigger.event_target();
+    if q_shaco.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::E) {
+        return;
+    }
+
+    let skill_spell = skill.spell.clone();
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: ANIM_SPELL3.to_string(),
@@ -111,14 +140,31 @@ fn cast_shaco_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spe
     });
 }
 
-fn cast_shaco_r(commands: &mut Commands, entity: Entity) {
+fn on_shaco_r(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_shaco: Query<(), With<Shaco>>,
+    q_skill: Query<&Skill>,
+) {
+    let entity = trigger.event_target();
+    if q_shaco.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::R) {
+        return;
+    }
+
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: ANIM_SPELL4.to_string(),
         repeat: false,
         duration: None,
     });
-    // R is halluate - explosion
+    // R is halluate - explosion;
 }
 
 fn on_shaco_damage_hit(

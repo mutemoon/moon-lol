@@ -10,7 +10,7 @@ use lol_core::action::damage::{
 use lol_core::base::buff::BuffOf;
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
-use lol_core::skill::{CoolDown, EventSkillCast, Skill, SkillSlot};
+use lol_core::skill::{EventSkillCast, Skill, SkillSlot};
 
 use crate::heimerdinger::buffs::BuffHeimerPassive;
 
@@ -19,7 +19,10 @@ pub struct PluginHeimerdinger;
 
 impl Plugin for PluginHeimerdinger {
     fn build(&self, app: &mut App) {
-        app.add_observer(on_heimerdinger_skill_cast);
+        app.add_observer(on_heimerdinger_q);
+        app.add_observer(on_heimerdinger_w);
+        app.add_observer(on_heimerdinger_e);
+        app.add_observer(on_heimerdinger_r);
         app.add_observer(on_heimerdinger_damage_hit);
     }
 }
@@ -29,30 +32,88 @@ impl Plugin for PluginHeimerdinger {
 #[reflect(Component)]
 pub struct Heimerdinger;
 
-fn on_heimerdinger_skill_cast(
+fn on_heimerdinger_q(
     trigger: On<EventSkillCast>,
     mut commands: Commands,
-    q_heimer: Query<(), With<Heimerdinger>>,
-    q_skill: Query<(&Skill, &CoolDown)>,
+    q_heimerdinger: Query<(), With<Heimerdinger>>,
+    q_skill: Query<&Skill>,
 ) {
     let entity = trigger.event_target();
-    if q_heimer.get(entity).is_err() {
+    if q_heimerdinger.get(entity).is_err() {
         return;
     }
 
-    let Ok((skill, _cooldown)) = q_skill.get(trigger.skill_entity) else {
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
         return;
     };
-
-    let skill_spell = skill.spell.clone();
-
-    match skill.slot {
-        SkillSlot::Q => cast_heimer_q(&mut commands, entity),
-        SkillSlot::W => cast_heimer_w(&mut commands, entity, skill_spell),
-        SkillSlot::E => cast_heimer_e(&mut commands, entity, skill_spell),
-        SkillSlot::R => cast_heimer_r(&mut commands, entity),
-        _ => {}
+    if !matches!(skill.slot, SkillSlot::Q) {
+        return;
     }
+
+    cast_heimer_q(&mut commands, entity);
+}
+
+fn on_heimerdinger_w(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_heimerdinger: Query<(), With<Heimerdinger>>,
+    q_skill: Query<&Skill>,
+) {
+    let entity = trigger.event_target();
+    if q_heimerdinger.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::W) {
+        return;
+    }
+
+    cast_heimer_w(&mut commands, entity, skill.spell.clone());
+}
+
+fn on_heimerdinger_e(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_heimerdinger: Query<(), With<Heimerdinger>>,
+    q_skill: Query<&Skill>,
+) {
+    let entity = trigger.event_target();
+    if q_heimerdinger.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::E) {
+        return;
+    }
+
+    cast_heimer_e(&mut commands, entity, skill.spell.clone());
+}
+
+fn on_heimerdinger_r(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_heimerdinger: Query<(), With<Heimerdinger>>,
+    q_skill: Query<&Skill>,
+) {
+    let entity = trigger.event_target();
+    if q_heimerdinger.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::R) {
+        return;
+    }
+
+    cast_heimer_r(&mut commands, entity);
 }
 
 fn cast_heimer_q(commands: &mut Commands, entity: Entity) {

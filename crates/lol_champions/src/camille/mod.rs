@@ -21,7 +21,10 @@ pub struct PluginCamille;
 
 impl Plugin for PluginCamille {
     fn build(&self, app: &mut App) {
-        app.add_observer(on_camille_skill_cast);
+        app.add_observer(on_camille_q);
+        app.add_observer(on_camille_w);
+        app.add_observer(on_camille_e);
+        app.add_observer(on_camille_r);
         app.add_observer(on_camille_damage_hit);
     }
 }
@@ -31,7 +34,56 @@ impl Plugin for PluginCamille {
 #[reflect(Component)]
 pub struct Camille;
 
-fn on_camille_skill_cast(
+fn on_camille_q(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_camille: Query<(), With<Camille>>,
+    q_skill: Query<(&Skill, &CoolDown, Option<&SkillRecastWindow>)>,
+) {
+    let entity = trigger.event_target();
+    if q_camille.get(entity).is_err() {
+        return;
+    }
+
+    let Ok((skill, cooldown, recast)) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::Q) {
+        return;
+    }
+
+    cast_camille_q(
+        &mut commands,
+        entity,
+        trigger.skill_entity,
+        cooldown,
+        recast,
+        skill.spell.clone(),
+    );
+}
+
+fn on_camille_w(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_camille: Query<(), With<Camille>>,
+    q_skill: Query<&Skill>,
+) {
+    let entity = trigger.event_target();
+    if q_camille.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::W) {
+        return;
+    }
+
+    cast_camille_w(&mut commands, entity, skill.spell.clone());
+}
+
+fn on_camille_e(
     trigger: On<EventSkillCast>,
     mut commands: Commands,
     q_camille: Query<(), With<Camille>>,
@@ -46,38 +98,48 @@ fn on_camille_skill_cast(
     let Ok((skill, cooldown, recast)) = q_skill.get(trigger.skill_entity) else {
         return;
     };
-
-    let skill_spell = skill.spell.clone();
-
-    match skill.slot {
-        SkillSlot::Q => cast_camille_q(
-            &mut commands,
-            entity,
-            trigger.skill_entity,
-            cooldown,
-            recast,
-            skill_spell,
-        ),
-        SkillSlot::W => cast_camille_w(&mut commands, entity, skill_spell),
-        SkillSlot::E => cast_camille_e(
-            &mut commands,
-            &q_transform,
-            entity,
-            trigger.skill_entity,
-            trigger.point,
-            cooldown,
-            recast,
-            skill_spell,
-        ),
-        SkillSlot::R => cast_camille_r(
-            &mut commands,
-            &q_transform,
-            entity,
-            trigger.point,
-            skill_spell,
-        ),
-        _ => {}
+    if !matches!(skill.slot, SkillSlot::E) {
+        return;
     }
+
+    cast_camille_e(
+        &mut commands,
+        &q_transform,
+        entity,
+        trigger.skill_entity,
+        trigger.point,
+        cooldown,
+        recast,
+        skill.spell.clone(),
+    );
+}
+
+fn on_camille_r(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_camille: Query<(), With<Camille>>,
+    q_transform: Query<&Transform>,
+    q_skill: Query<&Skill>,
+) {
+    let entity = trigger.event_target();
+    if q_camille.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::R) {
+        return;
+    }
+
+    cast_camille_r(
+        &mut commands,
+        &q_transform,
+        entity,
+        trigger.point,
+        skill.spell.clone(),
+    );
 }
 
 fn cast_camille_q(

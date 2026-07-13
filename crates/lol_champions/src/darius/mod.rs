@@ -31,7 +31,10 @@ pub struct PluginDarius;
 
 impl Plugin for PluginDarius {
     fn build(&self, app: &mut App) {
-        app.add_observer(on_darius_skill_cast);
+        app.add_observer(on_darius_q);
+        app.add_observer(on_darius_w);
+        app.add_observer(on_darius_e);
+        app.add_observer(on_darius_r);
         app.add_observer(on_darius_damage_hit);
     }
 }
@@ -41,7 +44,28 @@ impl Plugin for PluginDarius {
 #[reflect(Component)]
 pub struct Darius;
 
-fn on_darius_skill_cast(
+fn on_darius_q(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_darius: Query<(), With<Darius>>,
+    q_skill: Query<&Skill>,
+) {
+    let entity = trigger.event_target();
+    if q_darius.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::Q) {
+        return;
+    }
+
+    cast_darius_q(&mut commands, entity, skill.spell.clone());
+}
+
+fn on_darius_w(
     trigger: On<EventSkillCast>,
     mut commands: Commands,
     q_darius: Query<(), With<Darius>>,
@@ -58,31 +82,71 @@ fn on_darius_skill_cast(
     let Ok(skill) = q_skill.get(trigger.skill_entity) else {
         return;
     };
-
-    let skill_spell = skill.spell.clone();
-
-    match skill.slot {
-        SkillSlot::Q => cast_darius_q(&mut commands, entity, skill_spell),
-        SkillSlot::W => cast_darius_w(
-            &mut commands,
-            entity,
-            skill_spell,
-            &q_transform,
-            &q_team,
-            &q_enemies,
-        ),
-        SkillSlot::E => execute_darius_e(
-            &mut commands,
-            entity,
-            skill_spell,
-            trigger.point,
-            &q_transform,
-            &q_team,
-            &q_enemies,
-        ),
-        SkillSlot::R => cast_darius_r(&mut commands, entity, skill_spell),
-        _ => {}
+    if !matches!(skill.slot, SkillSlot::W) {
+        return;
     }
+
+    cast_darius_w(
+        &mut commands,
+        entity,
+        skill.spell.clone(),
+        &q_transform,
+        &q_team,
+        &q_enemies,
+    );
+}
+
+fn on_darius_e(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_darius: Query<(), With<Darius>>,
+    q_skill: Query<&Skill>,
+    q_transform: Query<&Transform>,
+    q_team: Query<&Team>,
+    q_enemies: Query<(Entity, &Transform), With<Champion>>,
+) {
+    let entity = trigger.event_target();
+    if q_darius.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::E) {
+        return;
+    }
+
+    execute_darius_e(
+        &mut commands,
+        entity,
+        skill.spell.clone(),
+        trigger.point,
+        &q_transform,
+        &q_team,
+        &q_enemies,
+    );
+}
+
+fn on_darius_r(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_darius: Query<(), With<Darius>>,
+    q_skill: Query<&Skill>,
+) {
+    let entity = trigger.event_target();
+    if q_darius.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::R) {
+        return;
+    }
+
+    cast_darius_r(&mut commands, entity, skill.spell.clone());
 }
 
 fn cast_darius_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {

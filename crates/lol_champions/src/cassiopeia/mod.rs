@@ -10,7 +10,7 @@ use lol_core::action::damage::{
 use lol_core::base::buff::BuffOf;
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
-use lol_core::skill::{CoolDown, EventSkillCast, Skill, SkillSlot};
+use lol_core::skill::{EventSkillCast, Skill, SkillSlot};
 
 use crate::cassiopeia::buffs::BuffCassioPoison;
 
@@ -19,7 +19,10 @@ pub struct PluginCassiopeia;
 
 impl Plugin for PluginCassiopeia {
     fn build(&self, app: &mut App) {
-        app.add_observer(on_cassiopeia_skill_cast);
+        app.add_observer(on_cassiopeia_q);
+        app.add_observer(on_cassiopeia_w);
+        app.add_observer(on_cassiopeia_e);
+        app.add_observer(on_cassiopeia_r);
         app.add_observer(on_cassiopeia_damage_hit);
     }
 }
@@ -29,31 +32,88 @@ impl Plugin for PluginCassiopeia {
 #[reflect(Component)]
 pub struct Cassiopeia;
 
-fn on_cassiopeia_skill_cast(
+fn on_cassiopeia_q(
     trigger: On<EventSkillCast>,
     mut commands: Commands,
-    q_cassio: Query<(), With<Cassiopeia>>,
-    _q_transform: Query<&Transform>,
-    q_skill: Query<(&Skill, &CoolDown)>,
+    q_cassiopeia: Query<(), With<Cassiopeia>>,
+    q_skill: Query<&Skill>,
 ) {
     let entity = trigger.event_target();
-    if q_cassio.get(entity).is_err() {
+    if q_cassiopeia.get(entity).is_err() {
         return;
     }
 
-    let Ok((skill, _cooldown)) = q_skill.get(trigger.skill_entity) else {
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
         return;
     };
-
-    let skill_spell = skill.spell.clone();
-
-    match skill.slot {
-        SkillSlot::Q => cast_cassio_q(&mut commands, entity, skill_spell),
-        SkillSlot::W => cast_cassio_w(&mut commands, entity, skill_spell),
-        SkillSlot::E => cast_cassio_e(&mut commands, entity, skill_spell),
-        SkillSlot::R => cast_cassio_r(&mut commands, entity, skill_spell),
-        _ => {}
+    if !matches!(skill.slot, SkillSlot::Q) {
+        return;
     }
+
+    cast_cassio_q(&mut commands, entity, skill.spell.clone());
+}
+
+fn on_cassiopeia_w(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_cassiopeia: Query<(), With<Cassiopeia>>,
+    q_skill: Query<&Skill>,
+) {
+    let entity = trigger.event_target();
+    if q_cassiopeia.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::W) {
+        return;
+    }
+
+    cast_cassio_w(&mut commands, entity, skill.spell.clone());
+}
+
+fn on_cassiopeia_e(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_cassiopeia: Query<(), With<Cassiopeia>>,
+    q_skill: Query<&Skill>,
+) {
+    let entity = trigger.event_target();
+    if q_cassiopeia.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::E) {
+        return;
+    }
+
+    cast_cassio_e(&mut commands, entity, skill.spell.clone());
+}
+
+fn on_cassiopeia_r(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_cassiopeia: Query<(), With<Cassiopeia>>,
+    q_skill: Query<&Skill>,
+) {
+    let entity = trigger.event_target();
+    if q_cassiopeia.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::R) {
+        return;
+    }
+
+    cast_cassio_r(&mut commands, entity, skill.spell.clone());
 }
 
 fn cast_cassio_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {

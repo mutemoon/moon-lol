@@ -1,13 +1,12 @@
 pub mod buffs;
 
-use bevy::prelude::{Handle, *};
+use bevy::prelude::*;
 use lol_base::animation_names::{ANIM_SPELL1, ANIM_SPELL2, ANIM_SPELL3, ANIM_SPELL4};
 use lol_base::render_cmd::CommandAnimationPlay;
-use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
 };
-use lol_core::action::dash::{ActionDash, DashDamage, DashMoveType};
+use lol_core::action::dash::{ActionDash, DashMoveType};
 use lol_core::base::buff::BuffOf;
 use lol_core::buffs::cc_debuffs::DebuffStun;
 use lol_core::damage::{DamageType, EventDamageCreate};
@@ -21,7 +20,10 @@ pub struct PluginPantheon;
 
 impl Plugin for PluginPantheon {
     fn build(&self, app: &mut App) {
-        app.add_observer(on_pantheon_skill_cast);
+        app.add_observer(on_pantheon_q);
+        app.add_observer(on_pantheon_w);
+        app.add_observer(on_pantheon_e);
+        app.add_observer(on_pantheon_r);
         app.add_observer(on_pantheon_damage_hit);
     }
 }
@@ -31,11 +33,10 @@ impl Plugin for PluginPantheon {
 #[reflect(Component)]
 pub struct Pantheon;
 
-fn on_pantheon_skill_cast(
+fn on_pantheon_q(
     trigger: On<EventSkillCast>,
     mut commands: Commands,
     q_pantheon: Query<(), With<Pantheon>>,
-    q_transform: Query<&Transform>,
     q_skill: Query<&Skill>,
 ) {
     let entity = trigger.event_target();
@@ -46,36 +47,12 @@ fn on_pantheon_skill_cast(
     let Ok(skill) = q_skill.get(trigger.skill_entity) else {
         return;
     };
-
-    let skill_spell = skill.spell.clone();
-
-    match skill.slot {
-        SkillSlot::Q => cast_pantheon_q(&mut commands, entity, trigger.point, skill_spell),
-        SkillSlot::W => cast_pantheon_w(
-            &mut commands,
-            &q_transform,
-            entity,
-            trigger.point,
-            skill_spell,
-        ),
-        SkillSlot::E => cast_pantheon_e(&mut commands, entity, skill_spell),
-        SkillSlot::R => cast_pantheon_r(
-            &mut commands,
-            &q_transform,
-            entity,
-            trigger.point,
-            skill_spell,
-        ),
-        _ => {}
+    if !matches!(skill.slot, SkillSlot::Q) {
+        return;
     }
-}
 
-fn cast_pantheon_q(
-    commands: &mut Commands,
-    entity: Entity,
-    _point: Vec2,
-    skill_spell: Handle<Spell>,
-) {
+    let _point = trigger.point;
+    let skill_spell = skill.spell.clone();
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: ANIM_SPELL1.to_string(),
@@ -100,13 +77,27 @@ fn cast_pantheon_q(
     });
 }
 
-fn cast_pantheon_w(
-    commands: &mut Commands,
-    _q_transform: &Query<&Transform>,
-    entity: Entity,
-    point: Vec2,
-    skill_spell: Handle<Spell>,
+fn on_pantheon_w(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_pantheon: Query<(), With<Pantheon>>,
+    _q_transform: Query<&Transform>,
+    q_skill: Query<&Skill>,
 ) {
+    let entity = trigger.event_target();
+    if q_pantheon.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::W) {
+        return;
+    }
+
+    let point = trigger.point;
+    let _skill_spell = skill.spell.clone();
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: ANIM_SPELL2.to_string(),
@@ -117,21 +108,30 @@ fn cast_pantheon_w(
     commands.trigger(ActionDash {
         entity,
         point: point,
-        skill: skill_spell,
         move_type: DashMoveType::Pointer { max: 200.0 },
-        damage: Some(DashDamage {
-            radius_end: 100.0,
-            damage: TargetDamage {
-                filter: TargetFilter::All,
-                amount: "total_damage".to_string(),
-                damage_type: DamageType::Physical,
-            },
-        }),
         speed: 1000.0,
     });
 }
 
-fn cast_pantheon_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
+fn on_pantheon_e(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_pantheon: Query<(), With<Pantheon>>,
+    q_skill: Query<&Skill>,
+) {
+    let entity = trigger.event_target();
+    if q_pantheon.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::E) {
+        return;
+    }
+
+    let skill_spell = skill.spell.clone();
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: ANIM_SPELL3.to_string(),
@@ -159,13 +159,27 @@ fn cast_pantheon_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<
         .with_related::<BuffOf>(BuffPantheonE::new(Vec2::ZERO, 1.5));
 }
 
-fn cast_pantheon_r(
-    commands: &mut Commands,
-    _q_transform: &Query<&Transform>,
-    entity: Entity,
-    point: Vec2,
-    skill_spell: Handle<Spell>,
+fn on_pantheon_r(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_pantheon: Query<(), With<Pantheon>>,
+    _q_transform: Query<&Transform>,
+    q_skill: Query<&Skill>,
 ) {
+    let entity = trigger.event_target();
+    if q_pantheon.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::R) {
+        return;
+    }
+
+    let point = trigger.point;
+    let _skill_spell = skill.spell.clone();
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: ANIM_SPELL4.to_string(),
@@ -176,16 +190,7 @@ fn cast_pantheon_r(
     commands.trigger(ActionDash {
         entity,
         point: point,
-        skill: skill_spell,
         move_type: DashMoveType::Pointer { max: 2000.0 },
-        damage: Some(DashDamage {
-            radius_end: 200.0,
-            damage: TargetDamage {
-                filter: TargetFilter::All,
-                amount: "total_damage".to_string(),
-                damage_type: DamageType::Physical,
-            },
-        }),
         speed: 1500.0,
     });
 }

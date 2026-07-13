@@ -26,7 +26,10 @@ pub struct PluginVolibear;
 
 impl Plugin for PluginVolibear {
     fn build(&self, app: &mut App) {
-        app.add_observer(on_volibear_skill_cast);
+        app.add_observer(on_volibear_q);
+        app.add_observer(on_volibear_w);
+        app.add_observer(on_volibear_e);
+        app.add_observer(on_volibear_r);
         app.add_observer(on_volibear_damage_hit);
     }
 }
@@ -36,11 +39,31 @@ impl Plugin for PluginVolibear {
 #[reflect(Component)]
 pub struct Volibear;
 
-fn on_volibear_skill_cast(
+fn on_volibear_q(
     trigger: On<EventSkillCast>,
     mut commands: Commands,
     q_volibear: Query<(), With<Volibear>>,
-    q_transform: Query<&Transform>,
+    q_skill: Query<&Skill>,
+) {
+    let entity = trigger.event_target();
+    if q_volibear.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::Q) {
+        return;
+    }
+
+    cast_volibear_q(&mut commands, entity);
+}
+
+fn on_volibear_w(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_volibear: Query<(), With<Volibear>>,
     q_skill: Query<(&Skill, &CoolDown, Option<&SkillRecastWindow>)>,
 ) {
     let entity = trigger.event_target();
@@ -51,30 +74,68 @@ fn on_volibear_skill_cast(
     let Ok((skill, cooldown, recast)) = q_skill.get(trigger.skill_entity) else {
         return;
     };
-
-    let skill_spell = skill.spell.clone();
-
-    match skill.slot {
-        SkillSlot::Q => cast_volibear_q(&mut commands, entity),
-        SkillSlot::W => cast_volibear_w(
-            &mut commands,
-            entity,
-            skill_spell,
-            trigger.skill_entity,
-            trigger.point,
-            cooldown,
-            recast,
-        ),
-        SkillSlot::E => cast_volibear_e(&mut commands, entity, skill_spell),
-        SkillSlot::R => cast_volibear_r(
-            &mut commands,
-            &q_transform,
-            entity,
-            skill_spell,
-            trigger.point,
-        ),
-        _ => {}
+    if !matches!(skill.slot, SkillSlot::W) {
+        return;
     }
+
+    cast_volibear_w(
+        &mut commands,
+        entity,
+        skill.spell.clone(),
+        trigger.skill_entity,
+        trigger.point,
+        cooldown,
+        recast,
+    );
+}
+
+fn on_volibear_e(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_volibear: Query<(), With<Volibear>>,
+    q_skill: Query<&Skill>,
+) {
+    let entity = trigger.event_target();
+    if q_volibear.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::E) {
+        return;
+    }
+
+    cast_volibear_e(&mut commands, entity, skill.spell.clone());
+}
+
+fn on_volibear_r(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_volibear: Query<(), With<Volibear>>,
+    q_transform: Query<&Transform>,
+    q_skill: Query<&Skill>,
+) {
+    let entity = trigger.event_target();
+    if q_volibear.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::R) {
+        return;
+    }
+
+    cast_volibear_r(
+        &mut commands,
+        &q_transform,
+        entity,
+        skill.spell.clone(),
+        trigger.point,
+    );
 }
 
 fn cast_volibear_q(commands: &mut Commands, entity: Entity) {

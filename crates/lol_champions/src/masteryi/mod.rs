@@ -1,10 +1,8 @@
 pub mod buffs;
 
-use bevy::asset::Handle;
 use bevy::prelude::*;
 use lol_base::animation_names::{ANIM_SPELL1, ANIM_SPELL2, ANIM_SPELL3, ANIM_SPELL4};
 use lol_base::render_cmd::CommandAnimationPlay;
-use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
 };
@@ -12,7 +10,7 @@ use lol_core::base::buff::BuffOf;
 use lol_core::buffs::common_buffs::BuffMoveSpeed;
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
-use lol_core::skill::{CoolDown, EventSkillCast, Skill, SkillSlot};
+use lol_core::skill::{EventSkillCast, Skill, SkillSlot};
 
 use crate::masteryi::buffs::{BuffMasterYiE, BuffMasterYiR};
 
@@ -21,7 +19,10 @@ pub struct PluginMasterYi;
 
 impl Plugin for PluginMasterYi {
     fn build(&self, app: &mut App) {
-        app.add_observer(on_masteryi_skill_cast);
+        app.add_observer(on_masteryi_q);
+        app.add_observer(on_masteryi_w);
+        app.add_observer(on_masteryi_e);
+        app.add_observer(on_masteryi_r);
         app.add_observer(on_masteryi_damage_hit);
     }
 }
@@ -31,33 +32,25 @@ impl Plugin for PluginMasterYi {
 #[reflect(Component)]
 pub struct MasterYi;
 
-fn on_masteryi_skill_cast(
+fn on_masteryi_q(
     trigger: On<EventSkillCast>,
     mut commands: Commands,
     q_masteryi: Query<(), With<MasterYi>>,
-    q_skill: Query<(&Skill, &CoolDown)>,
+    q_skill: Query<&Skill>,
 ) {
     let entity = trigger.event_target();
     if q_masteryi.get(entity).is_err() {
         return;
     }
 
-    let Ok((skill, _cooldown)) = q_skill.get(trigger.skill_entity) else {
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
         return;
     };
+    if !matches!(skill.slot, SkillSlot::Q) {
+        return;
+    }
 
     let skill_spell = skill.spell.clone();
-
-    match skill.slot {
-        SkillSlot::Q => cast_masteryi_q(&mut commands, entity, skill_spell),
-        SkillSlot::W => cast_masteryi_w(&mut commands, entity),
-        SkillSlot::E => cast_masteryi_e(&mut commands, entity),
-        SkillSlot::R => cast_masteryi_r(&mut commands, entity),
-        _ => {}
-    }
-}
-
-fn cast_masteryi_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: ANIM_SPELL1.to_string(),
@@ -79,17 +72,51 @@ fn cast_masteryi_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<
     });
 }
 
-fn cast_masteryi_w(commands: &mut Commands, entity: Entity) {
+fn on_masteryi_w(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_masteryi: Query<(), With<MasterYi>>,
+    q_skill: Query<&Skill>,
+) {
+    let entity = trigger.event_target();
+    if q_masteryi.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::W) {
+        return;
+    }
+
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: ANIM_SPELL2.to_string(),
         repeat: false,
         duration: None,
     });
-    // W is meditate (heal and damage reduction)
+    // W is meditate (heal and damage reduction);
 }
 
-fn cast_masteryi_e(commands: &mut Commands, entity: Entity) {
+fn on_masteryi_e(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_masteryi: Query<(), With<MasterYi>>,
+    q_skill: Query<&Skill>,
+) {
+    let entity = trigger.event_target();
+    if q_masteryi.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::E) {
+        return;
+    }
+
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: ANIM_SPELL3.to_string(),
@@ -102,7 +129,24 @@ fn cast_masteryi_e(commands: &mut Commands, entity: Entity) {
         .with_related::<BuffOf>(BuffMasterYiE::new(0.3, 5.0));
 }
 
-fn cast_masteryi_r(commands: &mut Commands, entity: Entity) {
+fn on_masteryi_r(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_masteryi: Query<(), With<MasterYi>>,
+    q_skill: Query<&Skill>,
+) {
+    let entity = trigger.event_target();
+    if q_masteryi.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::R) {
+        return;
+    }
+
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: ANIM_SPELL4.to_string(),

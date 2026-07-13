@@ -3,14 +3,13 @@ pub mod buffs;
 use bevy::prelude::*;
 use lol_base::animation_names::{ANIM_SPELL1, ANIM_SPELL2, ANIM_SPELL3, ANIM_SPELL4};
 use lol_base::render_cmd::CommandAnimationPlay;
-use lol_base::spell::Spell;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
 };
 use lol_core::base::buff::BuffOf;
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
-use lol_core::skill::{CoolDown, EventSkillCast, Skill, SkillSlot};
+use lol_core::skill::{EventSkillCast, Skill, SkillSlot};
 
 use crate::seraphine::buffs::{BuffSeraphineE, BuffSeraphineW};
 
@@ -19,7 +18,10 @@ pub struct PluginSeraphine;
 
 impl Plugin for PluginSeraphine {
     fn build(&self, app: &mut App) {
-        app.add_observer(on_seraphine_skill_cast);
+        app.add_observer(on_seraphine_q);
+        app.add_observer(on_seraphine_w);
+        app.add_observer(on_seraphine_e);
+        app.add_observer(on_seraphine_r);
         app.add_observer(on_seraphine_damage_hit);
     }
 }
@@ -29,31 +31,25 @@ impl Plugin for PluginSeraphine {
 #[reflect(Component)]
 pub struct Seraphine;
 
-fn on_seraphine_skill_cast(
+fn on_seraphine_q(
     trigger: On<EventSkillCast>,
     mut commands: Commands,
     q_seraphine: Query<(), With<Seraphine>>,
-    q_skill: Query<(&Skill, &CoolDown)>,
+    q_skill: Query<&Skill>,
 ) {
     let entity = trigger.event_target();
     if q_seraphine.get(entity).is_err() {
         return;
     }
 
-    let Ok((skill, _cooldown)) = q_skill.get(trigger.skill_entity) else {
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
         return;
     };
-
-    match skill.slot {
-        SkillSlot::Q => cast_seraphine_q(&mut commands, entity, skill.spell.clone()),
-        SkillSlot::W => cast_seraphine_w(&mut commands, entity),
-        SkillSlot::E => cast_seraphine_e(&mut commands, entity, skill.spell.clone()),
-        SkillSlot::R => cast_seraphine_r(&mut commands, entity, skill.spell.clone()),
-        _ => {}
+    if !matches!(skill.slot, SkillSlot::Q) {
+        return;
     }
-}
 
-fn cast_seraphine_q(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
+    let skill_spell = skill.spell.clone();
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: ANIM_SPELL1.to_string(),
@@ -75,7 +71,24 @@ fn cast_seraphine_q(commands: &mut Commands, entity: Entity, skill_spell: Handle
     });
 }
 
-fn cast_seraphine_w(commands: &mut Commands, entity: Entity) {
+fn on_seraphine_w(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_seraphine: Query<(), With<Seraphine>>,
+    q_skill: Query<&Skill>,
+) {
+    let entity = trigger.event_target();
+    if q_seraphine.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::W) {
+        return;
+    }
+
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: ANIM_SPELL2.to_string(),
@@ -88,7 +101,25 @@ fn cast_seraphine_w(commands: &mut Commands, entity: Entity) {
         .with_related::<BuffOf>(BuffSeraphineW::new(50.0, 2.5));
 }
 
-fn cast_seraphine_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
+fn on_seraphine_e(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_seraphine: Query<(), With<Seraphine>>,
+    q_skill: Query<&Skill>,
+) {
+    let entity = trigger.event_target();
+    if q_seraphine.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::E) {
+        return;
+    }
+
+    let skill_spell = skill.spell.clone();
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: ANIM_SPELL3.to_string(),
@@ -113,7 +144,25 @@ fn cast_seraphine_e(commands: &mut Commands, entity: Entity, skill_spell: Handle
     });
 }
 
-fn cast_seraphine_r(commands: &mut Commands, entity: Entity, skill_spell: Handle<Spell>) {
+fn on_seraphine_r(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_seraphine: Query<(), With<Seraphine>>,
+    q_skill: Query<&Skill>,
+) {
+    let entity = trigger.event_target();
+    if q_seraphine.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::R) {
+        return;
+    }
+
+    let skill_spell = skill.spell.clone();
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: ANIM_SPELL4.to_string(),
