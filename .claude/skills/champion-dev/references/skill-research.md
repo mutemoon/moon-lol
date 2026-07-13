@@ -4,25 +4,16 @@
 
 本研究方法论采用**优先级递减**的信息获取策略：
 
-| 优先级  | 来源            | 用途                               |
-| ------- | --------------- | ---------------------------------- |
-| **1st** | LoL Wiki        | 技能描述、数值、机制的**主要来源** |
-| 2nd     | CommunityDragon | JSON 原始数据、用于交叉验证        |
-| 3rd     | 社区讨论        | 隐藏机制、连招技巧、边缘案例       |
+| 优先级  | 来源     | 用途                               |
+| ------- | -------- | ---------------------------------- |
+| **1st** | LoL Wiki | 技能描述、数值、机制的**主要来源** |
+| 2rd     | 社区讨论 | 隐藏机制、连招技巧、边缘案例       |
 
 ---
 
 ## 第一优先级：LoL Wiki
 
 **URL**: `https://wiki.leagueoflegends.com/en-us/{champion}`
-
-### 访问方式
-
-**必须使用 `/browser-use` 技能**进行浏览，该网站有反爬机制。
-
-```bash
-browser-use open "https://wiki.leagueoflegends.com/en-us/riven"
-```
 
 ### 获取的信息
 
@@ -46,36 +37,6 @@ browser-use open "https://wiki.leagueoflegends.com/en-us/riven"
 - Wiki 描述已包含游戏内实际数值
 - 注意 "based on level" 和 "based on target's missing health" 等动态描述
 - 确认技能是 "Physical" / "Magic" / "True" 伤害类型
-
----
-
-## 第二优先级：CommunityDragon
-
-**URL**: `https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/champions/{id}.json`
-
-### Champion ID 速查表
-
-| 英雄     | ID  | 英雄    | ID  | 英雄     | ID  |
-| -------- | --- | ------- | --- | -------- | --- |
-| Riven    | 92  | Fiora   | 114 | Camille  | 164 |
-| Irelia   | 39  | Darius  | 122 | Renekton | 58  |
-| Aatrox   | 266 | Sylas   | 517 | Kayn     | 141 |
-| Jax      | 24  | Gnar    | 150 | Sett     | 875 |
-| Urgot    | 6   | Hecarim | 120 | Garen    | 86  |
-| Olaf     | 2   | LeeSin  | 64  | Pantheon | 80  |
-| Volibear | 106 | Kled    | 240 | Rengar   | 107 |
-| Kha'Zix  | 121 | Viego   | 234 | Vi       | 254 |
-| Wukong   | 62  |         |     |          |     |
-
-### 获取的数据
-
-- `effectAmounts` - 技能效果数值数组
-- `coefficients` - AD/AP 加成系数
-- 技能冷却、消耗、范围原始数据
-
-### 变量占位符
-
-CommunityDragon JSON 使用游戏内部变量（如 `@Damage@`、`@BonusAD@`），需要结合 Wiki 描述进行替换解读。
 
 ---
 
@@ -119,14 +80,7 @@ site:wiki.leagueoflegends.com "{champion} abilities"
 3. 记录完整数值：伤害、冷却、消耗、范围、持续时间
 4. 标注伤害类型（Physical/Magic/True）
 
-### 第二阶段：CommunityDragon 交叉验证
-
-1. 根据 Champion ID 获取 JSON 数据
-2. 对比 `effectAmounts` 与 Wiki 数值是否一致
-3. 提取 `coefficients` 确认 AD/AP 加成
-4. 记录任何差异并以 Wiki 为准
-
-### 第三阶段：社区补充
+### 第二阶段：社区补充
 
 1. 搜索 "champion ability mechanic reddit"
 2. 查询技能协同效果（combo、synergy）
@@ -137,10 +91,8 @@ site:wiki.leagueoflegends.com "{champion} abilities"
 
 ## 验证方法
 
-- **一致性检验**：Wiki 与 CommunityDragon 数值是否匹配
 - **补丁历史**：Riot 官方补丁说明
 - **Skill Rework**：技能重做历史记录
-- **实测验证**：游戏内测试（如果可能）
 
 ---
 

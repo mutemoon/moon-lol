@@ -9,6 +9,7 @@ pub mod camille;
 pub mod darius;
 pub mod fiora;
 pub mod irelia;
+pub mod mordekaiser;
 pub mod riven;
 pub mod sett;
 pub mod volibear;
@@ -26,6 +27,7 @@ impl Plugin for PluginChampions {
         app.add_plugins(darius::PluginDarius);
         app.add_plugins(fiora::PluginFiora);
         app.add_plugins(irelia::PluginIrelia);
+        app.add_plugins(mordekaiser::PluginMordekaiser);
         app.add_plugins(riven::PluginRiven);
         app.add_plugins(sett::PluginSett);
         app.add_plugins(volibear::PluginVolibear);
