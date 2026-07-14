@@ -1,7 +1,8 @@
 use bevy::prelude::*;
 
+use crate::base::buff::BuffOf;
 use crate::buffs::cc_debuffs::DebuffKnockup;
-use crate::movement::{CastBlock, CommandMovement, MovementAction, MovementSource, MovementWay};
+use crate::movement::{CommandMovement, MovementAction, MovementSource, MovementWay};
 
 /// 相对 source 的位移方向：`Away` 为击退（背离 source），`Toward` 为拉回（朝向 source）。
 /// `Toward` 会把距离钳制到不越过 source，故传一个大于间距的 distance 即可"拉到脚下"。
@@ -81,10 +82,12 @@ pub fn on_command_knockback(
         },
     });
 
-    // 注入击飞控制（不添加 MovementBlock，否则位移系统会跳过该实体）
+    // 注入击飞控制（独立 buff 实体，逻辑在 Buff）。
+    // 不加 MovementBlock：击退位移本身需经过 update_path_movement，加了会被跳过。
+    // CastBlock 由 PluginCc 的 On<Add, ControlTag> 观察者自动桥接到角色。
     commands
         .entity(target)
-        .insert((DebuffKnockup::new(duration), CastBlock));
+        .with_related::<BuffOf>(DebuffKnockup::new(duration));
 }
 
 #[cfg(test)]

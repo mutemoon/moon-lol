@@ -9,13 +9,10 @@
 use bevy::prelude::*;
 use lol_base::animation_names::ANIM_SPELL1;
 use lol_base::spell::Spell;
-use lol_core::action::damage::{
-    ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
-};
-use lol_core::base::buff::BuffOf;
-use lol_core::damage::{DamageType, EventDamageCreate};
-
-use super::buffs::BuffDariusBleed;
+use lol_core::action::damage::{ActionDamageEffect, DamageShape, TargetDamage, TargetFilter};
+use lol_core::action::delayed_damage::{ActionDelayedDamage, AoEIndicator, AoEOrigin};
+use lol_core::damage::DamageType;
+use lol_core::skill::delay_from_cast_frame;
 
 /// Darius Q skill - inner and outer blade damage values
 ///
@@ -39,19 +36,22 @@ pub const DARIUS_Q_INNER_RADIUS: f32 = 150.0;
 /// Outer blade radius (the "blade" of the axe)
 pub const DARIUS_Q_OUTER_RADIUS: f32 = 350.0;
 
-/// Cast Darius Q - applies inner and outer blade damage
+/// Cast Darius Q - 前摇延迟的双形劈砍伤害
 ///
-/// Inner blade: deals [inner_damage] physical damage (half of outer)
-/// Outer blade: deals [outer_damage] physical damage, stacks 1 hemorrhage
+/// 组合表达（验证 `AoEOrigin::Caster` + 双 `ActionDamageEffect` 原语）：
+/// - 原点 = Caster（劈砍以施法者为中心，全向）
+/// - 延迟 = castFrame 7.5 → 0.25s（前摇）
+/// - 形状 = [Circle{150} 内圈, Annular{150,350} 外圈]（双形空间划分）
+/// - 伤害 = spell ron 的 `blade_damage`（物理）
+/// - 出血由 `on_darius_damage_hit` observer 在伤害结算时施加
 pub fn cast_darius_q(
     commands: &mut Commands,
     entity: Entity,
     skill_spell: Handle<Spell>,
-    inner_damage: f32,
-    outer_damage: f32,
-    _apply_hemorrhage_outer: bool,
+    skill_level: usize,
+    spell_obj: &Spell,
+    point: Vec2,
 ) {
-    // Play Q animation
     commands.trigger(lol_base::render_cmd::CommandAnimationPlay {
         entity,
         hash: ANIM_SPELL1.to_string(),
@@ -59,8 +59,10 @@ pub fn cast_darius_q(
         duration: None,
     });
 
-    // Inner blade damage (Circle, radius = inner_radius)
-    // Inner blade does NOT apply hemorrhage
+    let delay = delay_from_cast_frame(spell_obj);
+    let _ = skill_level; // 半径用常量，伤害由 spell ron 的 blade_damage 计算
+
+    // 内圈（Circle）+ 外圈（Annular）双形，均用 blade_damage 物理伤害
     let inner_effect = ActionDamageEffect {
         shape: DamageShape::Circle {
             radius: DARIUS_Q_INNER_RADIUS,
@@ -69,11 +71,10 @@ pub fn cast_darius_q(
             filter: TargetFilter::All,
             amount: "blade_damage".to_string(),
             damage_type: DamageType::Physical,
+            ..Default::default()
         }],
+        ..Default::default()
     };
-
-    // Outer blade damage (Annular ring from inner_radius to outer_radius)
-    // Outer blade DOES apply hemorrhage
     let outer_effect = ActionDamageEffect {
         shape: DamageShape::Annular {
             inner_radius: DARIUS_Q_INNER_RADIUS,
@@ -83,48 +84,32 @@ pub fn cast_darius_q(
             filter: TargetFilter::All,
             amount: "blade_damage".to_string(),
             damage_type: DamageType::Physical,
+            ..Default::default()
         }],
+        ..Default::default()
     };
 
-    // Trigger the dual-shape damage
-    commands.trigger(ActionDamage {
+    commands.trigger(ActionDelayedDamage {
         entity,
         skill: skill_spell,
+        skill_level,
+        delay,
+        point,
+        origin: AoEOrigin::Caster,
         effects: vec![inner_effect, outer_effect],
+        indicator: AoEIndicator {
+            color: Color::srgba(0.9, 0.2, 0.2, 0.4),
+            pulse: false,
+            grow_from_zero: true,
+            impact_burst_scale: 1.4,
+            fade_duration: 0.3,
+        },
     });
 
     debug!(
-        "Darius Q: inner={} (r={}), outer={} (r={}-{})",
-        inner_damage,
-        DARIUS_Q_INNER_RADIUS,
-        outer_damage,
-        DARIUS_Q_INNER_RADIUS,
-        DARIUS_Q_OUTER_RADIUS
+        "Darius Q: 延迟 {:.2}s 双形劈砍（内圈 r={}, 外圈 r={}-{}）",
+        delay, DARIUS_Q_INNER_RADIUS, DARIUS_Q_INNER_RADIUS, DARIUS_Q_OUTER_RADIUS
     );
-}
-
-/// Observer: Handle Darius Q outer blade hemorrhage application
-///
-/// This observer triggers after damage is dealt. For Q outer blade hits,
-/// we need to apply hemorrhage stacks.
-pub fn on_darius_q_damage(
-    trigger: On<EventDamageCreate>,
-    mut commands: Commands,
-    q_darius: Query<(), With<super::Darius>>,
-) {
-    let source = trigger.source;
-    if q_darius.get(source).is_err() {
-        return;
-    }
-
-    let target = trigger.event_target();
-
-    // Apply 1 stack of hemorrhage for Q outer blade hit
-    // Note: In a full implementation, we'd distinguish inner vs outer hit
-    // For now, Q applies hemorrhage (testing purposes)
-    commands
-        .entity(target)
-        .with_related::<BuffOf>(BuffDariusBleed::new(1, 5.0));
 }
 
 #[cfg(test)]

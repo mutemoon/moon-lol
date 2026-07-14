@@ -69,7 +69,9 @@ fn on_sion_q(
                 filter: TargetFilter::All,
                 amount: "total_damage".to_string(),
                 damage_type: DamageType::Physical,
+                ..Default::default()
             }],
+            ..Default::default()
         }],
     });
 }
@@ -109,7 +111,9 @@ fn on_sion_w(
                 filter: TargetFilter::All,
                 amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
+                ..Default::default()
             }],
+            ..Default::default()
         }],
     });
 }
@@ -152,7 +156,9 @@ fn on_sion_e(
                 filter: TargetFilter::All,
                 amount: "total_damage".to_string(),
                 damage_type: DamageType::Physical,
+                ..Default::default()
             }],
+            ..Default::default()
         }],
     });
 }

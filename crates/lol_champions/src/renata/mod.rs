@@ -69,7 +69,9 @@ fn on_renata_q(
                 filter: TargetFilter::All,
                 amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
+                ..Default::default()
             }],
+            ..Default::default()
         }],
     });
 }
@@ -142,7 +144,9 @@ fn on_renata_e(
                 filter: TargetFilter::All,
                 amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
+                ..Default::default()
             }],
+            ..Default::default()
         }],
     });
 }
@@ -185,7 +189,9 @@ fn on_renata_r(
                 filter: TargetFilter::All,
                 amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
+                ..Default::default()
             }],
+            ..Default::default()
         }],
     });
 }

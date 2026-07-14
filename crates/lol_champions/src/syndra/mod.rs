@@ -65,7 +65,9 @@ fn on_syndra_q(
                 filter: TargetFilter::All,
                 amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
+                ..Default::default()
             }],
+            ..Default::default()
         }],
     });
 }
@@ -104,7 +106,9 @@ fn on_syndra_w(
                 filter: TargetFilter::All,
                 amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
+                ..Default::default()
             }],
+            ..Default::default()
         }],
     });
 }
@@ -146,7 +150,9 @@ fn on_syndra_e(
                 filter: TargetFilter::All,
                 amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
+                ..Default::default()
             }],
+            ..Default::default()
         }],
     });
 }
@@ -187,7 +193,9 @@ fn on_syndra_r(
                 filter: TargetFilter::All,
                 amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
+                ..Default::default()
             }],
+            ..Default::default()
         }],
     });
 }

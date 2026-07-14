@@ -93,7 +93,9 @@ fn on_nasus_w(
                 filter: TargetFilter::All,
                 amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
+                ..Default::default()
             }],
+            ..Default::default()
         }],
     });
 }
@@ -133,7 +135,9 @@ fn on_nasus_e(
                 filter: TargetFilter::All,
                 amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
+                ..Default::default()
             }],
+            ..Default::default()
         }],
     });
 }
@@ -173,7 +177,9 @@ fn on_nasus_r(
                 filter: TargetFilter::All,
                 amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
+                ..Default::default()
             }],
+            ..Default::default()
         }],
     });
 }

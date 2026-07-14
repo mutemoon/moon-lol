@@ -1,11 +1,11 @@
 use bevy::prelude::*;
 use lol_base::animation_names::ANIM_SPELL2;
 use lol_base::render_cmd::CommandAnimationPlay;
+use lol_core::base::buff::BuffOf;
 use lol_core::buffs::cc_debuffs::DebuffStun;
 use lol_core::buffs::common_buffs::BuffCastBlock;
 use lol_core::life::Health;
 use lol_core::missile::CommandAttachedFieldCreate;
-use lol_core::movement::MovementBlock;
 use lol_core::team::Team;
 
 const RIVEN_W_STUN_DURATION: f32 = 0.75;
@@ -38,11 +38,11 @@ pub fn cast_riven_w(commands: &mut Commands, entity: Entity, damage_amount: f32)
         grow_duration: None,
     });
 
-    // W 施法期间添加阻塞：阻止移动和其他技能
-    commands.entity(entity).insert(MovementBlock);
+    // W 施法期间自阻塞（阻止移动和其他技能）。
+    // MovementBlock/CastBlock 由 PluginCc 的 On<Add, BuffCastBlock> 观察者自动桥接到自身。
     commands
         .entity(entity)
-        .insert(BuffCastBlock::new(RIVEN_W_CAST_BLOCK_DURATION));
+        .with_related::<BuffOf>(BuffCastBlock::new(RIVEN_W_CAST_BLOCK_DURATION));
 }
 
 pub fn apply_w_stun_to_targets(
@@ -58,10 +58,10 @@ pub fn apply_w_stun_to_targets(
                 continue;
             }
             if target_transform.translation.distance(transform.translation) <= RIVEN_W_STUN_RADIUS {
+                // 眩晕：独立 buff 实体，标记由 PluginCc 观察者桥接（Buff 自己管自己）
                 commands
                     .entity(target)
-                    .insert(DebuffStun::new(RIVEN_W_STUN_DURATION));
-                commands.entity(target).insert(MovementBlock);
+                    .with_related::<BuffOf>(DebuffStun::new(RIVEN_W_STUN_DURATION));
             }
         }
     }

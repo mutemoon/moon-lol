@@ -85,6 +85,13 @@ pub struct MovementBlock;
 #[derive(Component, Default)]
 pub struct CastBlock;
 
+/// 减速标记：由 CC 系统按最强活跃减速写入角色（percent 0.0-1.0）。
+/// 移动系统据此按比例降低本帧位移速度。轻量标记，逻辑在 DebuffSlow buff 实体上。
+#[derive(Component, Debug, Clone, Default)]
+pub struct MovementSlow {
+    pub percent: f32,
+}
+
 #[derive(EntityEvent, Debug, Clone, PartialEq)]
 pub struct CommandMovement {
     pub entity: Entity,
@@ -201,7 +208,7 @@ fn calculate_and_set_exclude_cells(grid: &mut ConfigNavigationGrid, entity_pos: 
 fn update_path_movement(
     mut commands: Commands,
     mut query: Query<
-        (Entity, &Movement, &mut MovementState),
+        (Entity, &Movement, &mut MovementState, Option<&MovementSlow>),
         (Without<MovementBlock>, Without<Death>),
     >,
     mut q_transform: Query<&mut Transform>,
@@ -209,7 +216,7 @@ fn update_path_movement(
 ) {
     let dt = time.delta_secs();
 
-    for (entity, movement, mut movement_state) in query.iter_mut() {
+    for (entity, movement, mut movement_state, slow) in query.iter_mut() {
         if movement_state.completed || movement_state.path.is_empty() {
             continue;
         }
@@ -217,6 +224,8 @@ fn update_path_movement(
         let mut transform = q_transform.get_mut(entity).unwrap();
 
         let speed = movement_state.speed.unwrap_or(movement.speed);
+        // 减速：按最强活跃减速比例降低本帧速度（系统只认 MovementSlow 标记）
+        let speed = speed * slow.map_or(1.0, |s| 1.0 - s.percent);
 
         let mut remaining_distance_this_frame = speed * dt;
 

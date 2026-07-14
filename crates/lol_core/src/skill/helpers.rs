@@ -55,6 +55,27 @@ pub fn get_skill_data_value(skill_object: &Spell, name: &str, level: usize) -> O
     get_named_data_value(skill_object, name, level)
 }
 
+/// 从技能资产的 `castFrame`（30fps 帧数）推算延迟秒数。
+///
+/// 用于延迟范围伤害（`ActionDelayedDamage`）等需要前摇延迟的技能：
+/// 如诺手 Q（7.5）、狗熊 E（25）、瑟提 W（5.265）。
+pub fn delay_from_cast_frame(skill_object: &Spell) -> f32 {
+    skill_object
+        .spell_data
+        .as_ref()
+        .and_then(|d| d.cast_frame)
+        .map(|f| f / 30.0)
+        .unwrap_or(0.0)
+}
+
+/// 读取技能资产的 `castRadius`（按等级），常作为 AoE 效果半径。
+pub fn get_skill_cast_radius(skill_object: &Spell, level: usize) -> Option<f32> {
+    let spell_data = skill_object.spell_data.as_ref()?;
+    let radii = spell_data.cast_radius.as_ref()?;
+    let lvl_idx = if level > 0 { level - 1 } else { 0 };
+    Some(*radii.get(lvl_idx).unwrap_or(&0.0))
+}
+
 fn get_named_data_value(skill_object: &Spell, target_name: &str, level: usize) -> Option<f32> {
     let spell_data = skill_object.spell_data.as_ref()?;
     let data_values = spell_data.data_values.as_ref()?;

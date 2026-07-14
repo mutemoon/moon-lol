@@ -1,10 +1,11 @@
 use bevy::prelude::*;
 use lol_base::spell::Spell;
 
+use crate::action::delayed_damage::DelayedDamageInstance;
 use crate::damage::{CommandDamageCreate, Damage, DamageType};
 use crate::entities::champion::Champion;
 use crate::entities::minion::Minion;
-use crate::skill::{Skill, Skills, get_skill_value};
+use crate::skill::{Skill, Skills, get_skill_data_value, get_skill_value};
 use crate::team::Team;
 
 #[derive(Debug, Clone)]
@@ -23,6 +24,12 @@ pub enum DamageShape {
     Nearest {
         max_distance: f32,
     },
+    /// 面朝方向的矩形：沿 forward 从 start_distance 延伸到 start_distance + length，左右各 width/2
+    Rectangle {
+        width: f32,
+        length: f32,
+        start_distance: f32,
+    },
 }
 
 impl Default for DamageShape {
@@ -31,24 +38,45 @@ impl Default for DamageShape {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub enum TargetFilter {
+    #[default]
     All,
     Champion,
     Minion,
 }
 
+/// 单条伤害的修饰器：在伤害结算时按目标聚合状态调整
 #[derive(Debug, Clone)]
+pub enum DamageModifier {
+    None,
+    /// 孤立增伤：当该 effect 形状内（排除后）仅命中 1 个目标时，
+    /// 从 spell data values 读取标量值乘算伤害（如铁男 Q 的 IsolationScalar）
+    Isolation {
+        scalar_data_value: String,
+    },
+}
+
+impl Default for DamageModifier {
+    fn default() -> Self {
+        Self::None
+    }
+}
+
+#[derive(Debug, Clone, Default)]
 pub struct TargetDamage {
     pub filter: TargetFilter,
     pub amount: String,
     pub damage_type: DamageType,
+    pub modifier: DamageModifier,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct ActionDamageEffect {
     pub shape: DamageShape,
     pub damage_list: Vec<TargetDamage>,
+    /// 排除区：在此子形状内的目标跳过本 effect（用于空间分区，如万豪 W 中心/两边）
+    pub exclude: Vec<DamageShape>,
 }
 
 #[derive(Debug, Clone, EntityEvent)]
@@ -58,18 +86,211 @@ pub struct ActionDamage {
     pub effects: Vec<ActionDamageEffect>,
 }
 
+/// 判定目标是否在形状内（相对 origin/forward）
+///
+/// forward 为 XZ 平面单位方向向量（扇形/矩形以此定向）。
+pub fn is_in_shape(target_pos: Vec3, origin: Vec3, forward: Vec2, shape: &DamageShape) -> bool {
+    match shape {
+        DamageShape::Circle { radius } => target_pos.distance(origin) <= *radius,
+        DamageShape::Sector { radius, angle } => {
+            let diff = (target_pos - origin).xz();
+            let distance = diff.length();
+            if distance > *radius {
+                return false;
+            }
+            // 距离为 0（目标在施法者身上）视为命中扇形顶点
+            if distance == 0.0 {
+                return true;
+            }
+            let half_angle = angle.to_radians() / 2.0;
+            let target_dir = diff.normalize();
+            forward.dot(target_dir).acos() <= half_angle
+        }
+        DamageShape::Annular {
+            inner_radius,
+            outer_radius,
+        } => {
+            let d = target_pos.distance(origin);
+            d >= *inner_radius && d <= *outer_radius
+        }
+        DamageShape::Nearest { max_distance } => target_pos.distance(origin) <= *max_distance,
+        DamageShape::Rectangle {
+            width,
+            length,
+            start_distance,
+        } => {
+            // 以 origin 为起点、forward 方向延伸的矩形（从 start_distance 到 start_distance+length）
+            let diff = (target_pos - origin).xz();
+            let along = forward.dot(diff); // 沿 forward 投影
+            if along < *start_distance || along > *start_distance + *length {
+                return false;
+            }
+            // forward 的左侧法向量 (-y, x)
+            let lateral = -forward.y * diff.x + forward.x * diff.y;
+            lateral.abs() <= *width / 2.0
+        }
+    }
+}
+
+/// 在形状内收集敌方目标（同队跳过）。Nearest 仅返回最近单体。
+pub fn collect_targets_in_shape(
+    origin: Vec3,
+    forward: Vec2,
+    shape: &DamageShape,
+    team: &Team,
+    q_target: &Query<
+        (
+            Entity,
+            &Team,
+            Option<&Champion>,
+            Option<&Minion>,
+            &Transform,
+        ),
+        Without<DelayedDamageInstance>,
+    >,
+) -> Vec<Entity> {
+    let mut targets = Vec::new();
+    match shape {
+        DamageShape::Nearest { max_distance } => {
+            let mut min_dist = *max_distance;
+            let mut nearest = None;
+            for (target, target_team, _, _, target_transform) in q_target.iter() {
+                if target_team == team {
+                    continue;
+                }
+                let distance = target_transform.translation.distance(origin);
+                if distance < min_dist {
+                    min_dist = distance;
+                    nearest = Some(target);
+                }
+            }
+            if let Some(target) = nearest {
+                targets.push(target);
+            }
+        }
+        _ => {
+            for (target, target_team, _, _, target_transform) in q_target.iter() {
+                if target_team == team {
+                    continue;
+                }
+                if is_in_shape(target_transform.translation, origin, forward, shape) {
+                    targets.push(target);
+                }
+            }
+        }
+    }
+    targets
+}
+
+/// 对一组 effect 执行伤害结算（瞬发 ActionDamage 与延迟 DelayedDamageInstance 共用）。
+///
+/// - `origin`/`forward` 为伤害快照位置与朝向（延迟伤害为施法瞬间快照）
+/// - 对每个 effect：先收集形状内目标，再剔除 exclude 区内目标，
+///   最后对每条 damage 按 filter 与 modifier（Isolation 仅当唯一目标）结算
+pub fn apply_damage_effects(
+    commands: &mut Commands,
+    caster: Entity,
+    origin: Vec3,
+    forward: Vec2,
+    team: &Team,
+    effects: &[ActionDamageEffect],
+    skill_object: &Spell,
+    skill_level: usize,
+    q_target: &Query<
+        (
+            Entity,
+            &Team,
+            Option<&Champion>,
+            Option<&Minion>,
+            &Transform,
+        ),
+        Without<DelayedDamageInstance>,
+    >,
+    q_damage: &Query<&Damage>,
+) {
+    for effect in effects {
+        let mut targets = collect_targets_in_shape(origin, forward, &effect.shape, team, q_target);
+
+        // 排除区：在任意 exclude 子形状内的目标跳过本 effect
+        if !effect.exclude.is_empty() {
+            targets.retain(|t| {
+                let Ok((_, _, _, _, tf)) = q_target.get(*t) else {
+                    return true;
+                };
+                !effect
+                    .exclude
+                    .iter()
+                    .any(|ex| is_in_shape(tf.translation, origin, forward, ex))
+            });
+        }
+
+        let isolated = targets.len() == 1;
+
+        for target_entity in targets {
+            let Ok((_, _, champion, minion, _)) = q_target.get(target_entity) else {
+                continue;
+            };
+
+            for damage in &effect.damage_list {
+                let apply = match damage.filter {
+                    TargetFilter::All => true,
+                    TargetFilter::Champion => champion.is_some(),
+                    TargetFilter::Minion => minion.is_some(),
+                };
+                if !apply {
+                    continue;
+                }
+
+                let mut damage_amount =
+                    get_skill_value(&skill_object, &damage.amount, skill_level, |stat| {
+                        if stat == 2 {
+                            if let Ok(damage) = q_damage.get(caster) {
+                                return damage.0;
+                            }
+                        }
+                        0.0
+                    })
+                    .unwrap();
+
+                // 修饰器：孤立增伤
+                if let DamageModifier::Isolation { scalar_data_value } = &damage.modifier {
+                    if isolated {
+                        let scalar =
+                            get_skill_data_value(skill_object, scalar_data_value, skill_level)
+                                .unwrap_or(1.0);
+                        damage_amount *= scalar;
+                    }
+                }
+
+                commands
+                    .entity(target_entity)
+                    .trigger(|e| CommandDamageCreate {
+                        entity: e,
+                        source: caster,
+                        damage_type: damage.damage_type,
+                        amount: damage_amount,
+                        tag: None,
+                    });
+            }
+        }
+    }
+}
+
 pub fn on_action_damage(
     event: On<ActionDamage>,
     mut commands: Commands,
     res_assets_spell_object: Res<Assets<Spell>>,
     q_transform: Query<&Transform>,
-    q_target: Query<(
-        Entity,
-        &Team,
-        Option<&Champion>,
-        Option<&Minion>,
-        &Transform,
-    )>,
+    q_target: Query<
+        (
+            Entity,
+            &Team,
+            Option<&Champion>,
+            Option<&Minion>,
+            &Transform,
+        ),
+        Without<DelayedDamageInstance>,
+    >,
     q_team: Query<&Team>,
     q_skills: Query<&Skills>,
     q_skill: Query<&Skill>,
@@ -99,106 +320,212 @@ pub fn on_action_damage(
         return;
     };
 
+    let origin = transform.translation;
     let forward = transform.forward().xz();
 
-    for effect in &event.effects {
-        let mut targets = Vec::new();
+    apply_damage_effects(
+        &mut commands,
+        entity,
+        origin,
+        forward,
+        team,
+        &event.effects,
+        skill_object,
+        skill.level,
+        &q_target,
+        &q_damage,
+    );
+}
 
-        match effect.shape {
-            DamageShape::Circle { radius } => {
-                for (target, target_team, _c, _m, target_transform) in q_target.iter() {
-                    if target_team == team {
-                        continue;
-                    }
-                    if target_transform.translation.distance(transform.translation) <= radius {
-                        targets.push(target);
-                    }
-                }
-            }
-            DamageShape::Sector { radius, angle } => {
-                let half_angle = angle.to_radians() / 2.0;
-                for (target, target_team, _c, _m, target_transform) in q_target.iter() {
-                    if target_team == team {
-                        continue;
-                    }
-                    let diff = (target_transform.translation - transform.translation).xz();
-                    let distance = diff.length();
-                    if distance <= radius {
-                        let target_dir = diff.normalize();
-                        if forward.dot(target_dir).acos() <= half_angle {
-                            targets.push(target);
-                        }
-                    }
-                }
-            }
-            DamageShape::Annular {
-                inner_radius,
-                outer_radius,
-            } => {
-                for (target, target_team, _c, _m, target_transform) in q_target.iter() {
-                    if target_team == team {
-                        continue;
-                    }
-                    let distance = target_transform.translation.distance(transform.translation);
-                    if distance >= inner_radius && distance <= outer_radius {
-                        targets.push(target);
-                    }
-                }
-            }
-            DamageShape::Nearest { max_distance } => {
-                let mut min_dist = max_distance;
-                let mut nearest = None;
-                for (target, target_team, _, _, target_transform) in q_target.iter() {
-                    if target_team == team {
-                        continue;
-                    }
-                    let distance = target_transform.translation.distance(transform.translation);
-                    if distance < min_dist {
-                        min_dist = distance;
-                        nearest = Some(target);
-                    }
-                }
-                if let Some(target) = nearest {
-                    targets.push(target);
-                }
-            }
-        }
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-        for target_entity in targets {
-            let Ok((_, _, champion, minion, _)) = q_target.get(target_entity) else {
-                continue;
-            };
+    const FORWARD_X: Vec2 = Vec2::new(1.0, 0.0);
+    const ORIGIN: Vec3 = Vec3::ZERO;
 
-            for damage in &effect.damage_list {
-                let apply = match damage.filter {
-                    TargetFilter::All => true,
-                    TargetFilter::Champion => champion.is_some(),
-                    TargetFilter::Minion => minion.is_some(),
-                };
+    #[test]
+    fn rectangle_includes_target_along_forward() {
+        let shape = DamageShape::Rectangle {
+            width: 160.0,
+            length: 625.0,
+            start_distance: 0.0,
+        };
+        // 正前方 300 单位，居中
+        assert!(is_in_shape(
+            Vec3::new(300.0, 0.0, 0.0),
+            ORIGIN,
+            FORWARD_X,
+            &shape,
+        ));
+    }
 
-                let damage_amount =
-                    get_skill_value(&skill_object, &damage.amount, skill.level, |stat| {
-                        if stat == 2 {
-                            if let Ok(damage) = q_damage.get(entity) {
-                                return damage.0;
-                            }
-                        }
-                        0.0
-                    })
-                    .unwrap();
+    #[test]
+    fn rectangle_excludes_target_outside_length() {
+        let shape = DamageShape::Rectangle {
+            width: 160.0,
+            length: 625.0,
+            start_distance: 0.0,
+        };
+        // 超出长度
+        assert!(!is_in_shape(
+            Vec3::new(700.0, 0.0, 0.0),
+            ORIGIN,
+            FORWARD_X,
+            &shape,
+        ));
+        // 身后
+        assert!(!is_in_shape(
+            Vec3::new(-50.0, 0.0, 0.0),
+            ORIGIN,
+            FORWARD_X,
+            &shape,
+        ));
+    }
 
-                if apply {
-                    commands
-                        .entity(target_entity)
-                        .trigger(|e| CommandDamageCreate {
-                            entity: e,
-                            source: entity,
-                            damage_type: damage.damage_type,
-                            amount: damage_amount,
-                            tag: None,
-                        });
-                }
-            }
-        }
+    #[test]
+    fn rectangle_excludes_target_outside_width() {
+        let shape = DamageShape::Rectangle {
+            width: 160.0,
+            length: 625.0,
+            start_distance: 0.0,
+        };
+        // 前方 300 但横向偏移 100（> 80 半宽）
+        assert!(!is_in_shape(
+            Vec3::new(300.0, 0.0, 100.0),
+            ORIGIN,
+            FORWARD_X,
+            &shape,
+        ));
+        // 横向偏移 70（< 80 半宽）应命中
+        assert!(is_in_shape(
+            Vec3::new(300.0, 0.0, 70.0),
+            ORIGIN,
+            FORWARD_X,
+            &shape,
+        ));
+    }
+
+    #[test]
+    fn rectangle_respects_forward_rotation() {
+        let shape = DamageShape::Rectangle {
+            width: 160.0,
+            length: 625.0,
+            start_distance: 0.0,
+        };
+        // forward 朝 +Z
+        let forward_z = Vec2::new(0.0, 1.0);
+        assert!(is_in_shape(
+            Vec3::new(0.0, 0.0, 300.0),
+            ORIGIN,
+            forward_z,
+            &shape,
+        ));
+        assert!(!is_in_shape(
+            Vec3::new(300.0, 0.0, 0.0),
+            ORIGIN,
+            forward_z,
+            &shape,
+        ));
+    }
+
+    #[test]
+    fn rectangle_respects_start_distance() {
+        // 起始距离 400，长度 625 -> 命中区间 [400, 1025]
+        let shape = DamageShape::Rectangle {
+            width: 160.0,
+            length: 625.0,
+            start_distance: 400.0,
+        };
+        // 死区（< 400）不命中
+        assert!(!is_in_shape(
+            Vec3::new(300.0, 0.0, 0.0),
+            ORIGIN,
+            FORWARD_X,
+            &shape,
+        ));
+        // 区间内（600）命中
+        assert!(is_in_shape(
+            Vec3::new(600.0, 0.0, 0.0),
+            ORIGIN,
+            FORWARD_X,
+            &shape,
+        ));
+        // 超出（1100）不命中
+        assert!(!is_in_shape(
+            Vec3::new(1100.0, 0.0, 0.0),
+            ORIGIN,
+            FORWARD_X,
+            &shape,
+        ));
+    }
+
+    #[test]
+    fn sector_includes_within_angle() {
+        let shape = DamageShape::Sector {
+            radius: 300.0,
+            angle: 90.0,
+        };
+        // 正前方
+        assert!(is_in_shape(
+            Vec3::new(200.0, 0.0, 0.0),
+            ORIGIN,
+            FORWARD_X,
+            &shape,
+        ));
+        // 边界 45° 内（扇形半角 45°）
+        let edge = Vec3::new(200.0, 0.0, 200.0); // 45°
+        assert!(is_in_shape(edge, ORIGIN, FORWARD_X, &shape));
+    }
+
+    #[test]
+    fn sector_excludes_outside_angle_or_radius() {
+        let shape = DamageShape::Sector {
+            radius: 300.0,
+            angle: 90.0,
+        };
+        // 超出半径
+        assert!(!is_in_shape(
+            Vec3::new(400.0, 0.0, 0.0),
+            ORIGIN,
+            FORWARD_X,
+            &shape,
+        ));
+        // 角度过大（~90°，超出 45° 半角）
+        assert!(!is_in_shape(
+            Vec3::new(10.0, 0.0, 200.0),
+            ORIGIN,
+            FORWARD_X,
+            &shape,
+        ));
+    }
+
+    #[test]
+    fn annular_excludes_inner_circle() {
+        let shape = DamageShape::Annular {
+            inner_radius: 150.0,
+            outer_radius: 350.0,
+        };
+        // 内圈
+        assert!(!is_in_shape(
+            Vec3::new(100.0, 0.0, 0.0),
+            ORIGIN,
+            FORWARD_X,
+            &shape,
+        ));
+        // 环内
+        assert!(is_in_shape(
+            Vec3::new(250.0, 0.0, 0.0),
+            ORIGIN,
+            FORWARD_X,
+            &shape,
+        ));
+        // 外圈外
+        assert!(!is_in_shape(
+            Vec3::new(400.0, 0.0, 0.0),
+            ORIGIN,
+            FORWARD_X,
+            &shape,
+        ));
     }
 }

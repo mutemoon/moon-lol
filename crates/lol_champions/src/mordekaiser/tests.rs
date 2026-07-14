@@ -1,9 +1,19 @@
 #![cfg(test)]
 
-//! 莫德凯撒集成测试。当前为框架阶段，仅含冒烟测试；
-//! 各技能行为测试待 TDD 阶段在对应 `*_tests.rs` 中补充。
+//! 莫德凯撒集成测试公共夹具与辅助函数。
+
+use bevy::ecs::entity::Entity;
+use bevy::math::{Vec2, Vec3};
+use lol_core::base::buff::Buffs;
+use lol_core::damage::{AbilityPower, Armor, CommandDamageCreate, Damage, DamageType};
+use lol_core::life::Health;
+use lol_core::movement::Movement;
 
 use crate::mordekaiser::Mordekaiser;
+use crate::mordekaiser::buffs::{
+    BuffMordekaiserWShield, MordekaiserRealm, MordekaiserStatSteal, MordekaiserWStorage,
+};
+use crate::mordekaiser::passive::MordekaiserDarkness;
 use crate::test_utils::*;
 
 pub fn mordekaiser_config() -> ChampionHarnessConfig {
@@ -21,11 +31,165 @@ pub fn build_headless(name: &str) -> ChampionTestHarness {
     ChampionTestHarness::build::<Mordekaiser>(name, HarnessMode::Headless, &mordekaiser_config())
 }
 
+// ── 属性注入 / 读取 ──
+
+/// 注入法术强度（莫德凯撒基础 AP 为 0，需由测试注入以验证 AP 加成）。
+pub fn give_ap(h: &mut ChampionTestHarness, ap: f32) {
+    h.app
+        .world_mut()
+        .entity_mut(h.champion)
+        .insert(AbilityPower(ap));
+}
+
+pub fn morde_ap(h: &ChampionTestHarness) -> f32 {
+    h.app
+        .world()
+        .get::<AbilityPower>(h.champion)
+        .map(|a| a.0)
+        .unwrap_or(0.0)
+}
+
+pub fn morde_ad(h: &ChampionTestHarness) -> f32 {
+    h.app
+        .world()
+        .get::<Damage>(h.champion)
+        .map(|d| d.0)
+        .unwrap_or(0.0)
+}
+
+pub fn morde_armor(h: &ChampionTestHarness) -> f32 {
+    h.app
+        .world()
+        .get::<Armor>(h.champion)
+        .map(|a| a.0)
+        .unwrap_or(0.0)
+}
+
+pub fn morde_max_hp(h: &ChampionTestHarness) -> f32 {
+    h.app
+        .world()
+        .get::<Health>(h.champion)
+        .map(|h| h.max)
+        .unwrap_or(0.0)
+}
+
+pub fn morde_speed(h: &ChampionTestHarness) -> f32 {
+    h.app
+        .world()
+        .get::<Movement>(h.champion)
+        .map(|m| m.speed)
+        .unwrap_or(0.0)
+}
+
+// ── 伤害触发 ──
+
+/// 莫德凯撒对敌人造成一次物理伤害（模拟普攻命中，触发被动叠层 + 附伤）。
+pub fn morde_hit(h: &mut ChampionTestHarness, enemy: Entity, amount: f32) {
+    let source = h.champion;
+    h.app.world_mut().trigger(CommandDamageCreate {
+        entity: enemy,
+        source,
+        damage_type: DamageType::Physical,
+        amount,
+        tag: None,
+    });
+}
+
+/// 莫德凯撒对敌人造成一次魔法伤害（模拟 Q/E 命中，触发被动叠层）。
+pub fn morde_hit_magic(h: &mut ChampionTestHarness, enemy: Entity, amount: f32) {
+    let source = h.champion;
+    h.app.world_mut().trigger(CommandDamageCreate {
+        entity: enemy,
+        source,
+        damage_type: DamageType::Magic,
+        amount,
+        tag: None,
+    });
+}
+
+/// 敌人对莫德凯撒造成一次物理伤害（触发 W 储存）。
+pub fn morde_take_damage(h: &mut ChampionTestHarness, source: Entity, amount: f32) {
+    h.app.world_mut().trigger(CommandDamageCreate {
+        entity: h.champion,
+        source,
+        damage_type: DamageType::Physical,
+        amount,
+        tag: None,
+    });
+}
+
+// ── 被动 / W / R 状态读取 ──
+
+pub fn darkness_stacks(h: &ChampionTestHarness) -> Option<u8> {
+    h.app
+        .world()
+        .get::<MordekaiserDarkness>(h.champion)
+        .map(|d| d.stacks)
+}
+
+pub fn darkness_active(h: &ChampionTestHarness) -> bool {
+    h.app
+        .world()
+        .get::<MordekaiserDarkness>(h.champion)
+        .map(|d| d.active)
+        .unwrap_or(false)
+}
+
+pub fn w_storage(h: &ChampionTestHarness) -> Option<f32> {
+    h.app
+        .world()
+        .get::<MordekaiserWStorage>(h.champion)
+        .map(|s| s.stored)
+}
+
+pub fn w_shield_elapsed(h: &ChampionTestHarness) -> Option<f32> {
+    let buffs = h.app.world().get::<Buffs>(h.champion)?;
+    for b in buffs.iter() {
+        if let Some(ws) = h.app.world().get::<BuffMordekaiserWShield>(*b) {
+            return Some(ws.elapsed);
+        }
+    }
+    None
+}
+
+pub fn has_realm(h: &ChampionTestHarness) -> bool {
+    h.app.world().get::<MordekaiserRealm>(h.champion).is_some()
+}
+
+pub fn realm_target(h: &ChampionTestHarness) -> Option<Entity> {
+    h.app
+        .world()
+        .get::<MordekaiserRealm>(h.champion)
+        .map(|r| r.target)
+}
+
+pub fn stat_steal(h: &ChampionTestHarness) -> Option<MordekaiserStatSteal> {
+    h.app
+        .world()
+        .get::<MordekaiserStatSteal>(h.champion)
+        .cloned()
+}
+
+// ── 技能等级 ──
+
+/// 将指定技能槽等级提升到指定值（0=Q,1=W,2=E,3=R）。
+pub fn level_skill(h: &mut ChampionTestHarness, index: usize, level: usize) {
+    let skill_entity = h.skill_entity(index);
+    if let Some(mut skill) = h
+        .app
+        .world_mut()
+        .get_mut::<lol_core::skill::Skill>(skill_entity)
+    {
+        skill.level = level;
+    }
+}
+
 /// 框架冒烟测试：莫德凯撒能被正常构造并加载配置。
 #[test]
 fn mordekaiser_smoke_spawn() {
     let mut h = build_headless("morde_smoke");
     let pos = h.position(h.champion);
     assert!(pos.x.is_finite() && pos.y.is_finite() && pos.z.is_finite());
+    let _ = Vec2::ZERO;
     h.finish();
 }

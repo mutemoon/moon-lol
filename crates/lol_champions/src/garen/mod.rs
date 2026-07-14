@@ -1,13 +1,18 @@
 pub mod q;
 pub mod w;
 
+#[cfg(test)]
+mod tests;
+
 use bevy::prelude::*;
 use lol_base::animation_names::{ANIM_SPELL1, ANIM_SPELL2, ANIM_SPELL3, ANIM_SPELL4};
 use lol_base::render_cmd::CommandAnimationPlay;
 use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
 };
-use lol_core::base::buff::BuffOf;
+use lol_core::attack::EventAttackEnd;
+use lol_core::base::buff::{BuffOf, Buffs};
+use lol_core::buffs::cc_debuffs::DebuffSilence;
 use lol_core::damage::DamageType;
 use lol_core::entities::champion::Champion;
 use lol_core::skill::{EventSkillCast, Skill, SkillSlot};
@@ -35,10 +40,11 @@ impl Plugin for PluginGaren {
         app.add_observer(on_garen_w);
         app.add_observer(on_garen_e);
         app.add_observer(on_garen_r);
+        app.add_observer(on_garen_attack_end_silence);
     }
 }
 
-#[derive(Component, Reflect)]
+#[derive(Component, Default, Reflect)]
 #[require(Champion, Name = Name::new("Garen"))]
 #[reflect(Component)]
 pub struct Garen;
@@ -83,6 +89,35 @@ fn on_garen_q(
         "Garen Q",
         (GAREN_Q_MOVE_SPEED_BONUS * 100.0) as i32
     );
+}
+
+/// Garen Q 强化普攻命中：对目标施加沉默（DebuffSilence），并消费 BuffGarenQAttack。
+/// 沉默的 CastBlock 标记由 PluginCc 观察者自动桥接（系统只认标记）。
+fn on_garen_attack_end_silence(
+    trigger: On<EventAttackEnd>,
+    mut commands: Commands,
+    q_garen: Query<(), With<Garen>>,
+    q_buffs: Query<&Buffs>,
+    q_qattack: Query<&BuffGarenQAttack>,
+) {
+    let attacker = trigger.event_target();
+    if q_garen.get(attacker).is_err() {
+        return;
+    }
+    let Ok(buffs) = q_buffs.get(attacker) else {
+        return;
+    };
+    let Some(qattack_entity) = buffs.iter().find(|b| q_qattack.get(*b).is_ok()) else {
+        return;
+    };
+    let Ok(qattack) = q_qattack.get(qattack_entity) else {
+        return;
+    };
+    commands
+        .entity(trigger.target)
+        .with_related::<BuffOf>(DebuffSilence::new(qattack.silence_duration));
+    commands.entity(qattack_entity).despawn();
+    debug!("Garen Q 强化普攻命中 {:?}，施加沉默", trigger.target);
 }
 
 fn on_garen_w(
@@ -163,7 +198,9 @@ fn on_garen_e(
                 filter: TargetFilter::All,
                 amount: "total_damage".to_string(),
                 damage_type: DamageType::Physical,
+                ..Default::default()
             }],
+            ..Default::default()
         }],
     });
 }
@@ -206,7 +243,9 @@ fn on_garen_r(
                 filter: TargetFilter::Champion,
                 amount: "total_damage".to_string(),
                 damage_type: DamageType::Physical,
+                ..Default::default()
             }],
+            ..Default::default()
         }],
     });
 }

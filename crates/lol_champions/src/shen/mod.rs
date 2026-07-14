@@ -69,7 +69,9 @@ fn on_shen_q(
                 filter: TargetFilter::All,
                 amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
+                ..Default::default()
             }],
+            ..Default::default()
         }],
     });
 }

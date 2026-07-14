@@ -44,7 +44,7 @@
 
 - `CommandKnockback { entity, source, distance, speed, duration, direction }`：EntityEvent。
 - `direction: DisplaceDirection`：`Away`（默认，背离 source 击退）/ `Toward`（朝 source 拉回，`distance` 钳制不越过 source，故传大于间距的值即可拉到脚下）。
-- 底层：触发 `CommandMovement`（`MovementSource::Knockback`，priority 100），并插入 `DebuffKnockup(duration)` + `CastBlock`。`duration` 为 `None` 时按 `distance/speed` 计算。
+- 底层：触发 `CommandMovement`（`MovementSource::Knockback`，priority 100），并用 `with_related::<BuffOf>(DebuffKnockup::new(duration))` 注入击飞 buff 实体（`CastBlock` 由 `PluginCc` 观察者自动桥接到角色，详见 [控制系统（CC）](./skill-cc.md)）。`duration` 为 `None` 时按 `distance/speed` 计算。
 - 关键约束：击退**不**加 `MovementBlock`（否则位移系统会跳过该实体），故击飞期间位移仍进行；自身 CC 不会取消自身击退位移。
 
 # 粘性飞弹钩墙

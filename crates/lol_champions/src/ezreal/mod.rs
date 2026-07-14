@@ -70,7 +70,9 @@ fn on_ezreal_q(
                 filter: TargetFilter::All,
                 amount: "total_damage".to_string(),
                 damage_type: DamageType::Physical,
+                ..Default::default()
             }],
+            ..Default::default()
         }],
     });
 }
@@ -113,7 +115,9 @@ fn on_ezreal_w(
                 filter: TargetFilter::All,
                 amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
+                ..Default::default()
             }],
+            ..Default::default()
         }],
     });
 }
@@ -192,7 +196,9 @@ fn on_ezreal_r(
                 filter: TargetFilter::All,
                 amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
+                ..Default::default()
             }],
+            ..Default::default()
         }],
     });
 }

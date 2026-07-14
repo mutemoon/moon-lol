@@ -83,7 +83,9 @@ fn on_action_damage_skill_cast(
                 filter: TargetFilter::All,
                 amount: DAMAGE_AMOUNT_KEY.to_string(),
                 damage_type: DamageType::Physical,
+                ..Default::default()
             }],
+            ..Default::default()
         }],
     });
 }

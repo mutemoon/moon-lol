@@ -78,7 +78,9 @@ fn on_hecarim_q(
                 filter: TargetFilter::All,
                 amount: "total_damage".to_string(),
                 damage_type: DamageType::Physical,
+                ..Default::default()
             }],
+            ..Default::default()
         }],
     });
     // Q stacks - adds stacking buff for cooldown reduction and bonus damage
@@ -131,7 +133,9 @@ fn on_hecarim_w(
                 filter: TargetFilter::All,
                 amount: "total_damage".to_string(),
                 damage_type: DamageType::Physical,
+                ..Default::default()
             }],
+            ..Default::default()
         }],
     });
 }

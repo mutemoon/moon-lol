@@ -1,9 +1,7 @@
 #![cfg(test)]
 
 use bevy::math::{Vec2, Vec3};
-use lol_core::buffs::cc_debuffs::DebuffStun;
-use lol_core::buffs::common_buffs::BuffCastBlock;
-use lol_core::movement::MovementBlock;
+use lol_core::movement::{CastBlock, MovementBlock};
 
 use super::tests::build_headless;
 use crate::riven::w::RIVEN_W_CAST_BLOCK_DURATION;
@@ -57,31 +55,35 @@ fn riven_w_stuns_enemies_in_range() {
 
     h.cast_skill(1, Vec2::new(140.0, 0.0)).advance(0.1);
 
-    // 近距离敌人被眩晕
-    assert!(
-        h.app.world().get::<DebuffStun>(enemy_near).is_some(),
-        "范围内敌人应被 W 眩晕"
-    );
+    // 系统只认标记：眩晕敌人身上应有 MovementBlock + CastBlock
     assert!(
         h.app.world().get::<MovementBlock>(enemy_near).is_some(),
-        "眩晕敌人应有 MovementBlock"
+        "范围内敌人应被 W 眩晕（MovementBlock）"
+    );
+    assert!(
+        h.app.world().get::<CastBlock>(enemy_near).is_some(),
+        "范围内敌人应被 W 眩晕（CastBlock）"
     );
 
     // 远距离敌人不被眩晕
     assert!(
-        h.app.world().get::<DebuffStun>(enemy_far).is_none(),
+        h.app.world().get::<MovementBlock>(enemy_far).is_none(),
         "范围外敌人不应被眩晕"
     );
+    assert!(
+        h.app.world().get::<CastBlock>(enemy_far).is_none(),
+        "范围外敌人不应有 CastBlock"
+    );
 
-    // 等待眩晕过期
+    // 等待眩晕过期（标记随 buff 死亡自动清除）
     h.advance(0.8);
     assert!(
-        h.app.world().get::<DebuffStun>(enemy_near).is_none(),
-        "0.75 秒后眩晕应过期"
+        h.app.world().get::<MovementBlock>(enemy_near).is_none(),
+        "0.75 秒后眩晕应过期（MovementBlock 移除）"
     );
     assert!(
-        h.app.world().get::<MovementBlock>(enemy_near).is_none(),
-        "眩晕过期后 MovementBlock 应移除"
+        h.app.world().get::<CastBlock>(enemy_near).is_none(),
+        "眩晕过期后 CastBlock 应移除"
     );
 
     h.finish();
@@ -96,10 +98,14 @@ fn riven_w_casting_blocks_skill_and_movement() {
     h.cast_skill(1, Vec2::new(0.0, 0.0));
     h.advance(0.05); // 推进一点让系统处理事件
 
-    // W 施法期间应有阻塞组件
+    // W 施法期间自阻塞：MovementBlock + CastBlock 由 BuffCastBlock 观察者桥接
     assert!(
-        h.app.world().get::<BuffCastBlock>(h.champion).is_some(),
-        "W 施法期间应有 BuffCastBlock"
+        h.app.world().get::<MovementBlock>(h.champion).is_some(),
+        "W 施法期间应有 MovementBlock"
+    );
+    assert!(
+        h.app.world().get::<CastBlock>(h.champion).is_some(),
+        "W 施法期间应有 CastBlock"
     );
     let q_entity = h.skill_entity(0);
     assert!(
@@ -119,10 +125,14 @@ fn riven_w_casting_blocks_skill_and_movement() {
 
     h.advance(RIVEN_W_CAST_BLOCK_DURATION + 0.05);
 
-    // 阻塞结束后应移除
+    // 阻塞结束后标记应移除
     assert!(
-        h.app.world().get::<BuffCastBlock>(h.champion).is_none(),
-        "W 施法阻塞结束后 BuffCastBlock 应移除"
+        h.app.world().get::<MovementBlock>(h.champion).is_none(),
+        "W 施法阻塞结束后 MovementBlock 应移除"
+    );
+    assert!(
+        h.app.world().get::<CastBlock>(h.champion).is_none(),
+        "W 施法阻塞结束后 CastBlock 应移除"
     );
 
     // 此时施放 Q 应该成功

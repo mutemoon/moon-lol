@@ -71,7 +71,9 @@ fn on_akali_q(
                 filter: TargetFilter::All,
                 amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
+                ..Default::default()
             }],
+            ..Default::default()
         }],
     });
 
@@ -159,7 +161,9 @@ fn on_akali_e(
                     filter: TargetFilter::All,
                     amount: "total_damage".to_string(),
                     damage_type: DamageType::Magic,
+                    ..Default::default()
                 }],
+                ..Default::default()
             }],
         });
         // Mark for recast
@@ -226,7 +230,9 @@ fn on_akali_r(
                     filter: TargetFilter::Champion,
                     amount: "total_damage".to_string(),
                     damage_type: DamageType::Magic,
+                    ..Default::default()
                 }],
+                ..Default::default()
             }],
         });
     }

@@ -3,7 +3,6 @@ use lol_base::render_cmd::CommandAnimationPlay;
 use lol_core::action::dash::{ActionDash, DashMoveType};
 use lol_core::action::knockback::{CommandKnockback, DisplaceDirection};
 use lol_core::attack::CommandAttackReset;
-use lol_core::base::buff::BuffOf;
 use lol_core::damage::{CommandDamageCreate, DamageType};
 use lol_core::missile::CommandAttachedFieldCreate;
 use lol_core::movement::EventMovementEnd;
@@ -11,7 +10,6 @@ use lol_core::skill::SkillRecastWindow;
 use lol_core::team::Team;
 
 use crate::riven::buffs::RivenQ3Pending;
-use crate::riven::passive::BuffRivenPassive;
 
 const RIVEN_Q_RECAST_WINDOW: f32 = 4.0;
 const RIVEN_Q3_KNOCKBACK_DISTANCE: f32 = 75.0;
@@ -61,9 +59,8 @@ pub fn cast_riven_q(
     // 每段 Q 重置普攻计时器（wiki：Q 可重置普攻，Q 后可立即接平A）
     commands.trigger(CommandAttackReset { entity });
 
-    commands
-        .entity(entity)
-        .with_related::<BuffOf>(BuffRivenPassive);
+    // 被动层数由统一的 on_riven_skill_cast_charge_passive 观察者在 EventSkillCast 上授予，
+    // 此处无需再单独授予
 
     if stage >= 3 {
         // Q3：不在位移路径上造成伤害，标记待落地结算；位移结束后以落点为圆心

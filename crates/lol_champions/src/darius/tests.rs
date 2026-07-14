@@ -1,13 +1,16 @@
 #![cfg(test)]
 
+use bevy::ecs::entity::Entity;
 use bevy::math::{Vec2, Vec3};
 use lol_core::attack::CommandAttackStart;
 use lol_core::base::ability_resource::AbilityResource;
 use lol_core::base::buff::Buffs;
 use lol_core::buffs::cc_debuffs::DebuffSlow;
 use lol_core::buffs::on_hit::{BuffOnHitBonusDamage, BuffOnHitCounter, BuffOnHitSlow};
+use lol_core::damage::{CommandDamageCreate, Damage, DamageType};
 
 use crate::darius::Darius;
+use crate::darius::buffs::{BuffDariusBleed, BuffDariusMight};
 use crate::test_utils::*;
 
 /// Give Darius enough mana to cast skills (fixes exported config having 0.07 mana)
@@ -16,6 +19,48 @@ pub fn give_mana(h: &mut ChampionTestHarness) {
         ar.value = 1000.0;
         ar.max = 1000.0;
     }
+}
+
+/// Darius 的当前攻击力。
+pub fn darius_ad(h: &ChampionTestHarness) -> f32 {
+    h.app
+        .world()
+        .get::<Damage>(h.champion)
+        .map(|d| d.0)
+        .unwrap_or(0.0)
+}
+
+/// 让 Darius 对敌人造成一次物理伤害（触发出血叠加）。
+pub fn darius_hit(h: &mut ChampionTestHarness, enemy: Entity, amount: f32) {
+    let source = h.champion;
+    h.app.world_mut().trigger(CommandDamageCreate {
+        entity: enemy,
+        source,
+        damage_type: DamageType::Physical,
+        amount,
+        tag: None,
+    });
+}
+
+/// 读取敌人身上的出血层数（无出血返回 None）。
+pub fn bleed_stacks(h: &ChampionTestHarness, enemy: Entity) -> Option<u8> {
+    let buffs = h.app.world().get::<Buffs>(enemy)?;
+    for b in buffs.iter() {
+        if let Some(bleed) = h.app.world().get::<BuffDariusBleed>(*b) {
+            return Some(bleed.stacks);
+        }
+    }
+    None
+}
+
+/// 判断 Darius 是否处于诺克萨斯之力（血怒）状态。
+pub fn has_might(h: &ChampionTestHarness) -> bool {
+    let Some(buffs) = h.app.world().get::<Buffs>(h.champion) else {
+        return false;
+    };
+    buffs
+        .iter()
+        .any(|b| h.app.world().get::<BuffDariusMight>(*b).is_some())
 }
 
 pub fn darius_config() -> ChampionHarnessConfig {
@@ -171,17 +216,12 @@ fn darius_w_applies_on_hit_buffs() {
     assert!(found_slow, "W 应添加 BuffOnHitSlow");
 
     // 验证：W 强化普攻命中后减速生效
-    // 先开始一次普攻，消耗掉风防前摇（让 W 的重置有效）
+    // 开始普攻：强化普攻会在命中时消耗 on-hit 并对敌人施加减速（持续 1s）
     h.app.world_mut().trigger(CommandAttackStart {
         entity: h.champion,
         target: enemy,
     });
-    h.advance(0.6);
-
-    // W 重置普攻，挂上 on-hit buffs
-    h.cast_skill(1, Vec2::new(200.0, 0.0)).advance(0.1);
-
-    // 等待强化普攻命中
+    // 推进到命中；减速持续 1s，需在其过期前检查
     h.advance(0.6);
 
     // 检查敌人是否有减速

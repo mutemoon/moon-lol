@@ -79,7 +79,9 @@ fn on_anivia_q(
                     filter: TargetFilter::All,
                     amount: "total_damage".to_string(),
                     damage_type: DamageType::Magic,
+                    ..Default::default()
                 }],
+                ..Default::default()
             }],
         });
         commands.entity(skill_entity).remove::<SkillRecastWindow>();
@@ -152,7 +154,9 @@ fn on_anivia_e(
                 filter: TargetFilter::All,
                 amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
+                ..Default::default()
             }],
+            ..Default::default()
         }],
     });
 }
@@ -192,7 +196,9 @@ fn on_anivia_r(
                 filter: TargetFilter::All,
                 amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
+                ..Default::default()
             }],
+            ..Default::default()
         }],
     });
 

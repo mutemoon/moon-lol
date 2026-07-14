@@ -4,8 +4,8 @@
 //! Individual skill tests are in their respective *_tests.rs files.
 
 use bevy::math::{Vec2, Vec3};
+use lol_core::base::buff::BuffOf;
 use lol_core::buffs::cc_debuffs::DebuffStun;
-use lol_core::movement::MovementBlock;
 
 use crate::riven::Riven;
 use crate::test_utils::*;
@@ -42,15 +42,13 @@ fn riven_stun_prevents_skill_cast() {
     h.cast_skill(1, Vec2::new(300.0, 0.0)).advance(0.1);
 
     // 敌人在眩晕中不应该能施放技能……但没有敌人技能系统可以测试
-    // 而是通过 Riven 自身模拟：给自己加一个眩晕
+    // 而是通过 Riven 自身模拟：给自己加一个眩晕（独立 buff 实体，
+    // PluginCc 观察者自动加 CastBlock，统一施法管线据此拦截）
     h.app
         .world_mut()
         .entity_mut(h.champion)
-        .insert(DebuffStun::new(10.0));
-    h.app
-        .world_mut()
-        .entity_mut(h.champion)
-        .insert(MovementBlock);
+        .with_related::<BuffOf>(DebuffStun::new(10.0));
+    h.advance(0.05); // 让观察者把 CastBlock 桥接到角色
 
     let before_cast_hp = h.health(enemy);
     // 眩晕中尝试施放 Q，应被阻止

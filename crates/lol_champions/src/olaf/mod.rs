@@ -1,5 +1,8 @@
 pub mod buffs;
 
+#[cfg(test)]
+mod tests;
+
 use bevy::prelude::*;
 use lol_base::animation_names::{ANIM_SPELL1, ANIM_SPELL2, ANIM_SPELL3, ANIM_SPELL4};
 use lol_base::render_cmd::CommandAnimationPlay;
@@ -7,6 +10,7 @@ use lol_core::action::damage::{
     ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
 };
 use lol_core::base::buff::BuffOf;
+use lol_core::buffs::cc_debuffs::{CommandCleanse, ImmuneToCC};
 use lol_core::damage::DamageType;
 use lol_core::entities::champion::Champion;
 use lol_core::skill::{EventSkillCast, Skill, SkillSlot};
@@ -30,10 +34,14 @@ impl Plugin for PluginOlaf {
         app.add_observer(on_olaf_w);
         app.add_observer(on_olaf_e);
         app.add_observer(on_olaf_r);
+        // ImmuneToCC 标记：施法时由 on_olaf_r 直接挂角色（施法者已知），
+        // BuffOlafR 消亡时由 On<Remove> 观察者移除--事件驱动，非轮询。
+        app.add_observer(on_remove_olaf_r);
+        app.add_systems(FixedUpdate, update_olaf_r_timer);
     }
 }
 
-#[derive(Component, Reflect)]
+#[derive(Component, Default, Reflect)]
 #[require(Champion, Name = Name::new("Olaf"))]
 #[reflect(Component)]
 pub struct Olaf;
@@ -145,7 +153,9 @@ fn on_olaf_e(
                 filter: TargetFilter::All,
                 amount: "total_damage".to_string(),
                 damage_type: DamageType::True,
+                ..Default::default()
             }],
+            ..Default::default()
         }],
     });
     // E also deals self-damage;
@@ -179,9 +189,54 @@ fn on_olaf_r(
     commands
         .entity(entity)
         .with_related::<BuffOf>(BuffOlafR::new(OLAF_R_DURATION));
+    // 免控标记直接挂角色（施法者已知）；BuffOlafR 消亡时由 On<Remove> 移除
+    commands.entity(entity).insert(ImmuneToCC);
+    // 激活即解控：净化自身所有控制
+    commands
+        .entity(entity)
+        .trigger(|e| CommandCleanse { entity: e });
 
     debug!(
         "{:?} 释放了 {} 技能，免疫控制效果持续 {} 秒",
         entity, "Olaf R", OLAF_R_DURATION
     );
+}
+
+/// `On<Remove, BuffOlafR>`：BuffOlafR 消亡（过期/销毁）时触发。
+/// 若角色身上已无其它存活的 BuffOlafR，移除 ImmuneToCC 标记（系统只认标记）。
+/// 事件驱动：despawn 同步触发本观察者，标记在 buff 死亡当帧清除。
+fn on_remove_olaf_r(
+    trigger: On<Remove, BuffOlafR>,
+    mut commands: Commands,
+    q_buffof: Query<(Entity, &BuffOf)>,
+    q_olaf_r: Query<(), With<BuffOlafR>>,
+) {
+    let buff_entity = trigger.entity;
+    let Ok((_, buffof)) = q_buffof.get(buff_entity) else {
+        // buff 实体在 despawn 过程中已不可查，无需处理
+        return;
+    };
+    let char = buffof.0;
+    // 仍有其它存活 BuffOlafR（R 刷新场景）-> 保留免控
+    let still_immune = q_buffof
+        .iter()
+        .any(|(e, b)| b.0 == char && e != buff_entity && q_olaf_r.get(e).is_ok());
+    if !still_immune {
+        commands.entity(char).remove::<ImmuneToCC>();
+    }
+}
+
+/// BuffOlafR 计时，过期销毁（触发 `On<Remove, BuffOlafR>` -> 移除 ImmuneToCC）。
+fn update_olaf_r_timer(
+    mut commands: Commands,
+    time: Res<Time<Fixed>>,
+    mut q: Query<(Entity, &mut BuffOlafR)>,
+) {
+    let delta = time.delta();
+    for (entity, mut buff) in q.iter_mut() {
+        buff.timer.tick(delta);
+        if buff.timer.is_finished() {
+            commands.entity(entity).despawn();
+        }
+    }
 }

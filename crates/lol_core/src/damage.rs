@@ -25,10 +25,20 @@ pub struct Damage(pub f32);
 #[reflect(Component)]
 pub struct Armor(pub f32);
 
+/// 法术强度（Ability Power）。
+///
+/// 法系英雄魔法伤害的加成来源。绝大多数英雄基础 AP 为 0（AP 来自装备/符文），
+/// 故默认 0；需要 AP 加成的技能（如莫德凯撒被动/E/R）通过 `Query<&AbilityPower>`
+/// 读取，缺失时按 0 处理。对应 spell 公式中的 `stat == 0`（`stat: None`）。
+#[derive(Component, Clone, Serialize, Deserialize, Reflect, Default)]
+#[reflect(Component)]
+pub struct AbilityPower(pub f32);
+
 /// 伤害类型枚举
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum DamageType {
     /// 物理伤害
+    #[default]
     Physical,
     /// 魔法伤害
     Magic,

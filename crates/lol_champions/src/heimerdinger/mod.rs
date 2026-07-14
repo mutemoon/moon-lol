@@ -146,7 +146,9 @@ fn cast_heimer_w(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
                 filter: TargetFilter::All,
                 amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
+                ..Default::default()
             }],
+            ..Default::default()
         }],
     });
 }
@@ -168,7 +170,9 @@ fn cast_heimer_e(commands: &mut Commands, entity: Entity, skill_spell: Handle<Sp
                 filter: TargetFilter::All,
                 amount: "total_damage".to_string(),
                 damage_type: DamageType::Magic,
+                ..Default::default()
             }],
+            ..Default::default()
         }],
     });
 }

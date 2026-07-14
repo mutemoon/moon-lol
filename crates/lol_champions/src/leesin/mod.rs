@@ -9,7 +9,7 @@ use lol_core::action::damage::{
 use lol_core::action::dash::{ActionDash, DashMoveType};
 use lol_core::action::knockback::{CommandKnockback, DisplaceDirection};
 use lol_core::base::buff::BuffOf;
-use lol_core::buffs::cc_debuffs::{DebuffSlow, update_debuff_knockup};
+use lol_core::buffs::cc_debuffs::DebuffSlow;
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
 use lol_core::skill::{CoolDown, EventSkillCast, Skill, SkillRecastWindow, SkillSlot};
@@ -28,7 +28,6 @@ impl Plugin for PluginLeeSin {
         app.add_observer(on_leesin_e);
         app.add_observer(on_leesin_r);
         app.add_observer(on_leesin_damage_hit);
-        app.add_systems(FixedUpdate, update_debuff_knockup);
     }
 }
 
@@ -90,7 +89,9 @@ fn on_leesin_q(
                     filter: TargetFilter::All,
                     amount: "total_damage".to_string(),
                     damage_type: DamageType::Physical,
+                    ..Default::default()
                 }],
+                ..Default::default()
             }],
         });
         // Insert recast window for second cast (Resonating Strike)
@@ -218,7 +219,9 @@ fn on_leesin_e(
                     filter: TargetFilter::All,
                     amount: "total_damage".to_string(),
                     damage_type: DamageType::Physical,
+                    ..Default::default()
                 }],
+                ..Default::default()
             }],
         });
         // Insert recast window for second cast (Cripple)
@@ -240,7 +243,9 @@ fn on_leesin_e(
                     filter: TargetFilter::All,
                     amount: "total_damage".to_string(),
                     damage_type: DamageType::Physical,
+                    ..Default::default()
                 }],
+                ..Default::default()
             }],
         });
         commands.entity(skill_entity).remove::<SkillRecastWindow>();
@@ -296,7 +301,9 @@ fn on_leesin_r(
                 filter: TargetFilter::Champion,
                 amount: "total_damage".to_string(),
                 damage_type: DamageType::Physical,
+                ..Default::default()
             }],
+            ..Default::default()
         }],
     });
 }

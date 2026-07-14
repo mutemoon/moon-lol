@@ -16,10 +16,9 @@
 # 状态控制与限制组件
 
 - `BuffShieldWhite`：挂载于 Buff 实体的吸收类型白色护盾。
-- `DebuffStun`：眩晕效果组件，禁止一切玩家操作与走位。
-- `DebuffSlow`：减速效果组件，降低移动速度百分比。
-- `CastBlock`：施法阻塞标记，禁止释放其他主动技能。
-- `MovementBlock`：移动阻塞标记，禁止通过寻路移动。
+- CC debuff（`DebuffStun`/`DebuffSlow`/`DebuffSilence`/`DebuffFear`/`DebuffKnockup`）与标记（`MovementBlock`/`CastBlock`/`MovementSlow`）：以「独立 Buff 实体 + 角色标记」解耦，由 `PluginCc` 观察者自动桥接，**不要手动 insert 标记**。详见 [控制系统（CC）](./skill-cc.md)。
+- `CastBlock`：施法阻塞标记，禁止释放其他主动技能（由 CC Buff / `BuffCastBlock` 桥接）。
+- `MovementBlock`：移动阻塞标记，禁止通过寻路移动（由 CC Buff 桥接）。
 
 # 范围伤害几何与过滤参数
 

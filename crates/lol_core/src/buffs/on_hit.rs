@@ -4,6 +4,7 @@ use crate::attack::{BuffAttack, EventAttackEnd};
 use crate::base::buff::{Buff, BuffOf, Buffs};
 use crate::buffs::cc_debuffs::{DebuffSlow, DebuffStun};
 use crate::damage::{CommandDamageCreate, Damage, DamageType};
+use crate::life::Health;
 
 /// 强化普攻计数器 — 控制"下次攻击强化"的次数和过期时间
 #[derive(Component, Debug, Clone)]
@@ -32,6 +33,14 @@ pub struct BuffOnHitBonusDamage {
     pub ratio: f32,
 }
 
+/// 强化普攻基于目标最大生命值的额外伤害（如 Sett Q）
+#[derive(Component, Debug, Clone)]
+#[require(Buff = Buff { name: "OnHitTargetMaxHp" })]
+pub struct BuffOnHitTargetMaxHp {
+    /// 目标最大生命百分比（如 0.03 = 3%）
+    pub ratio: f32,
+}
+
 /// 强化普攻减速
 #[derive(Component, Debug, Clone)]
 #[require(Buff = Buff { name: "OnHitSlow" })]
@@ -57,9 +66,11 @@ pub fn on_event_attack_end_consume_on_hit(
     q_buffs: Query<&Buffs>,
     mut q_counter: Query<&mut BuffOnHitCounter>,
     q_bonus_damage: Query<&BuffOnHitBonusDamage>,
+    q_target_max_hp: Query<&BuffOnHitTargetMaxHp>,
     q_slow: Query<&BuffOnHitSlow>,
     q_stun: Query<&BuffOnHitStun>,
     q_damage: Query<&Damage>,
+    q_target_health: Query<&Health>,
 ) {
     let attacker = trigger.event_target();
     let target = trigger.target;
@@ -80,6 +91,21 @@ pub fn on_event_attack_end_consume_on_hit(
     if let Some(bonus) = buffs.iter().find_map(|b| q_bonus_damage.get(b).ok()) {
         let base_dmg = q_damage.get(attacker).map(|d| d.0).unwrap_or(0.0);
         let extra = bonus.flat + base_dmg * bonus.ratio;
+        if extra > 0.0 {
+            commands.entity(target).trigger(|e| CommandDamageCreate {
+                entity: e,
+                source: attacker,
+                damage_type: DamageType::Physical,
+                amount: extra,
+                tag: None,
+            });
+        }
+    }
+
+    // 基于目标最大生命的额外伤害
+    if let Some(maxhp) = buffs.iter().find_map(|b| q_target_max_hp.get(b).ok()) {
+        let target_max = q_target_health.get(target).map(|h| h.max).unwrap_or(0.0);
+        let extra = target_max * maxhp.ratio;
         if extra > 0.0 {
             commands.entity(target).trigger(|e| CommandDamageCreate {
                 entity: e,
@@ -116,6 +142,7 @@ pub fn update_on_hit_buff_timers(
     q_buffs: Query<&Buffs>,
     mut q_counters: Query<(Entity, &BuffOf, &mut BuffOnHitCounter)>,
     q_bonus_damage: Query<Entity, With<BuffOnHitBonusDamage>>,
+    q_target_max_hp: Query<Entity, With<BuffOnHitTargetMaxHp>>,
     q_slow: Query<Entity, With<BuffOnHitSlow>>,
     q_stun: Query<Entity, With<BuffOnHitStun>>,
     time: Res<Time<Fixed>>,
@@ -135,6 +162,7 @@ pub fn update_on_hit_buff_timers(
 
         for buff_entity in buffs.iter() {
             if q_bonus_damage.get(buff_entity).is_ok()
+                || q_target_max_hp.get(buff_entity).is_ok()
                 || q_slow.get(buff_entity).is_ok()
                 || q_stun.get(buff_entity).is_ok()
                 || buff_entity == counter_entity

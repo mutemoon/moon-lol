@@ -2,6 +2,7 @@ pub mod e;
 pub mod passive;
 pub mod q;
 pub mod r;
+pub mod w;
 
 #[cfg(test)]
 mod e_tests;
@@ -13,10 +14,10 @@ mod q_tests;
 mod r_tests;
 #[cfg(test)]
 mod tests;
+#[cfg(test)]
+mod w_tests;
 
 use bevy::prelude::*;
-use lol_base::animation_names::ANIM_SPELL2;
-use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::entities::champion::Champion;
 use lol_core::life::Death;
@@ -40,6 +41,7 @@ impl Plugin for PluginFiora {
                 r::update_fiora_r_heal,
                 e::update_fiora_e_buff,
                 passive::update_vital_visuals,
+                w::update_fiora_w,
             ),
         );
         app.add_observer(on_fiora_q);
@@ -50,6 +52,7 @@ impl Plugin for PluginFiora {
         app.add_observer(passive::on_passive_damage_create);
         app.add_observer(e::on_event_attack_end);
         app.add_observer(r::on_r_damage_create);
+        app.add_observer(w::on_fiora_w_parried_cc);
     }
 }
 
@@ -91,6 +94,7 @@ fn on_fiora_w(
     mut commands: Commands,
     q_fiora: Query<(), With<Fiora>>,
     q_skill: Query<&Skill>,
+    res_spells: Res<Assets<Spell>>,
 ) {
     let entity = trigger.event_target();
     if q_fiora.get(entity).is_err() {
@@ -104,7 +108,30 @@ fn on_fiora_w(
         return;
     }
 
-    cast_fiora_w(&mut commands, entity);
+    // W 参数来自 ron dataValues（BaseDamage / ParryDuration / CCDuration / MSSlowPercent）。
+    let spell = res_spells.get(&skill.spell);
+    let stab_damage = spell
+        .and_then(|s| get_skill_data_value(s, "BaseDamage", skill.level))
+        .unwrap_or(70.0);
+    let _parry_duration = spell
+        .and_then(|s| get_skill_data_value(s, "ParryDuration", skill.level))
+        .unwrap_or(w::FIORA_W_PARRY_DURATION);
+    let cc_duration = spell
+        .and_then(|s| get_skill_data_value(s, "CCDuration", skill.level))
+        .unwrap_or(w::FIORA_W_SLOW_DURATION.max(2.0));
+    let slow_percent = spell
+        .and_then(|s| get_skill_data_value(s, "MSSlowPercent", skill.level))
+        .map(|v| v.abs())
+        .unwrap_or(0.5);
+
+    w::cast_fiora_w(
+        &mut commands,
+        entity,
+        trigger.point,
+        stab_damage,
+        slow_percent,
+        cc_duration,
+    );
 }
 
 fn on_fiora_e(
@@ -169,19 +196,4 @@ fn on_fiora_r(
         &q_targets,
         skill.level,
     );
-}
-
-fn cast_fiora_w(commands: &mut Commands, entity: Entity) {
-    commands.trigger(CommandAnimationPlay {
-        entity,
-        hash: "spell2_in".to_string(),
-        repeat: false,
-        duration: None,
-    });
-    commands.trigger(CommandAnimationPlay {
-        entity,
-        hash: ANIM_SPELL2.to_string(),
-        repeat: false,
-        duration: None,
-    });
 }

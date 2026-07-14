@@ -8,6 +8,8 @@ pub mod w;
 #[cfg(test)]
 mod e_tests;
 #[cfg(test)]
+mod passive_tests;
+#[cfg(test)]
 mod q_tests;
 #[cfg(test)]
 mod r_tests;
@@ -21,8 +23,6 @@ use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::attack::Attack;
 use lol_core::base::buff::BuffOf;
-use lol_core::buffs::cc_debuffs::{DebuffStun, update_debuff_knockup, update_debuff_stun};
-use lol_core::buffs::common_buffs::update_buff_cast_block;
 use lol_core::damage::Damage;
 use lol_core::entities::champion::Champion;
 use lol_core::life::Health;
@@ -44,12 +44,11 @@ impl Plugin for PluginRiven {
         app.add_observer(on_riven_w);
         app.add_observer(on_riven_e);
         app.add_observer(on_riven_r);
+        app.add_observer(passive::on_riven_skill_cast_charge_passive);
         app.add_observer(passive::on_damage_create_trigger_bonus);
         app.add_observer(q::on_riven_dash_end);
         app.add_systems(FixedUpdate, r::update_riven_buffs);
-        app.add_systems(FixedUpdate, update_debuff_stun);
-        app.add_systems(FixedUpdate, update_debuff_knockup);
-        app.add_systems(FixedUpdate, update_buff_cast_block);
+        app.add_systems(FixedUpdate, passive::update_riven_passive_timer);
         app.add_systems(FixedUpdate, buffs::update_shield_visuals);
         app.add_systems(FixedUpdate, buffs::cleanup_shield_visuals);
     }
@@ -74,17 +73,11 @@ fn on_riven_q(
     mut commands: Commands,
     q_riven: Query<(), With<Riven>>,
     q_skill: Query<(&Skill, Option<&SkillRecastWindow>)>,
-    q_stun: Query<&DebuffStun>,
     q_damage: Query<&Damage>,
     res_spells: Res<Assets<Spell>>,
 ) {
     let entity = trigger.event_target();
     if q_riven.get(entity).is_err() {
-        return;
-    }
-
-    // 眩晕中无法施放技能
-    if q_stun.get(entity).is_ok() {
         return;
     }
 
@@ -120,7 +113,6 @@ fn on_riven_w(
     mut commands: Commands,
     q_riven: Query<(), With<Riven>>,
     q_skill: Query<&Skill>,
-    q_stun: Query<&DebuffStun>,
     q_damage: Query<&Damage>,
     q_transform: Query<&Transform>,
     q_team: Query<&Team>,
@@ -132,10 +124,8 @@ fn on_riven_w(
         return;
     }
 
-    // 眩晕中无法施放技能
-    if q_stun.get(entity).is_ok() {
-        return;
-    }
+    // 眩晕/被控由统一施法管线（CastBlock）拦截，此处无需重复检查
+    let _ = entity;
 
     let Ok(skill) = q_skill.get(trigger.skill_entity) else {
         return;
@@ -166,7 +156,6 @@ fn on_riven_e(
     mut commands: Commands,
     q_riven: Query<(), With<Riven>>,
     q_skill: Query<&Skill>,
-    q_stun: Query<&DebuffStun>,
     q_damage: Query<&Damage>,
     q_transform: Query<&Transform>,
     res_spells: Res<Assets<Spell>>,
@@ -176,10 +165,8 @@ fn on_riven_e(
         return;
     }
 
-    // 眩晕中无法施放技能
-    if q_stun.get(entity).is_ok() {
-        return;
-    }
+    // 眩晕/被控由统一施法管线（CastBlock）拦截，此处无需重复检查
+    let _ = entity;
 
     let Ok(skill) = q_skill.get(trigger.skill_entity) else {
         return;
@@ -213,7 +200,6 @@ fn on_riven_r(
     mut commands: Commands,
     q_riven: Query<(), With<Riven>>,
     mut q_skill: Query<(&Skill, &mut CoolDown, Option<&SkillRecastWindow>)>,
-    q_stun: Query<&DebuffStun>,
     mut q_damage: Query<&mut Damage>,
     mut q_attack: Query<&mut Attack>,
     q_transform: Query<&Transform>,
@@ -227,10 +213,8 @@ fn on_riven_r(
         return;
     }
 
-    // 眩晕中无法施放技能
-    if q_stun.get(entity).is_ok() {
-        return;
-    }
+    // 眩晕/被控由统一施法管线（CastBlock）拦截，此处无需重复检查
+    let _ = entity;
 
     let Ok((skill, mut cooldown, recast)) = q_skill.get_mut(trigger.skill_entity) else {
         return;

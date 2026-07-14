@@ -1,4 +1,5 @@
 pub mod animation;
+pub mod aoe_visual;
 pub mod camera;
 pub mod controller;
 pub mod cursor;
@@ -14,6 +15,7 @@ pub mod test_render;
 pub mod ui;
 
 use animation::PluginAnimation;
+use aoe_visual::PluginAoEVisual;
 use bevy::prelude::{App, Plugin};
 use camera::PluginCamera;
 use controller::PluginController;
@@ -32,6 +34,7 @@ pub struct PluginRender;
 impl Plugin for PluginRender {
     fn build(&self, app: &mut App) {
         app.add_plugins(PluginAnimation);
+        app.add_plugins(PluginAoEVisual);
         app.add_plugins(PluginCamera);
         app.add_plugins(PluginController);
         app.add_plugins(PluginCursor);
