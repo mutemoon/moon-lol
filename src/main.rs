@@ -9,6 +9,9 @@ use lol_debug::PluginDebug;
 use lol_render::PluginRender;
 use lol_server::PluginServer;
 
+mod player_champion;
+use player_champion::{PlayerChampion, PluginPlayerChampion};
+
 #[derive(Parser)]
 #[command(name = "moon_lol")]
 struct Args {
@@ -69,7 +72,7 @@ fn main() {
         app.add_plugins((
             DefaultPlugins.build().set(log_plugin).set(WindowPlugin {
                 primary_window: Some(Window {
-                    title: "classic 1v1 fiora".to_string(),
+                    title: format!("classic 1v1 · {}", args.champion),
                     resolution: (300, 300).into(),
                     position: WindowPosition::At((0, 1000).into()),
                     ..default()
@@ -89,6 +92,9 @@ fn main() {
 
     let scene_path = args
         .scene
-        .unwrap_or_else(|| "games/classic_fiora.ron".to_string());
+        .unwrap_or_else(|| "games/classic.ron".to_string());
+
+    app.insert_resource(PlayerChampion(args.champion.to_lowercase()));
+    app.add_plugins(PluginPlayerChampion);
     app.insert_resource(GameScenes::new(vec![scene_path])).run();
 }

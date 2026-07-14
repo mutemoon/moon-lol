@@ -3,9 +3,10 @@ use std::collections::hash_map::Iter;
 
 use bevy::prelude::*;
 use lol_core::action::{Action, CommandAction};
+use lol_core::entities::champion::Champion;
 use lol_core::team::Team;
 
-use crate::camera::CameraState;
+use crate::camera::{CameraState, Focus};
 use crate::map::Map;
 
 #[derive(Default)]
@@ -13,7 +14,8 @@ pub struct PluginController;
 
 impl Plugin for PluginController {
     fn build(&self, app: &mut App) {
-        app.add_systems(PreUpdate, on_key_pressed);
+        // 焦点切换先于按键输入处理，确保同帧 Shift+技能 能命中新焦点
+        app.add_systems(PreUpdate, (on_shift_focus_switch, on_key_pressed).chain());
     }
 }
 
@@ -162,4 +164,71 @@ pub fn on_key_pressed(
         commands.trigger(CommandAction { entity, action });
     }
     debug!("=== on_key_pressed 结束 ===");
+}
+
+/// 按下 Shift 时，将 SelfPlayer / Controller / Focus 迁移到离指针最近的英雄上。
+fn on_shift_focus_switch(
+    mut commands: Commands,
+    camera: Single<(&Camera, &GlobalTransform), With<CameraState>>,
+    mut ray_cast: MeshRayCast,
+    res_input: Res<ButtonInput<KeyCode>>,
+    window: Single<&Window>,
+    q_map: Query<Entity, With<Map>>,
+    q_self: Query<Entity, With<SelfPlayer>>,
+    q_champions: Query<(Entity, &Transform), With<Champion>>,
+) {
+    if !res_input.just_pressed(KeyCode::ShiftLeft) && !res_input.just_pressed(KeyCode::ShiftRight) {
+        return;
+    }
+
+    let Some(viewport_position) = window.cursor_position() else {
+        return;
+    };
+
+    let (camera, camera_transform) = *camera;
+    let Ok(ray) = camera.viewport_to_world(camera_transform, viewport_position) else {
+        return;
+    };
+
+    // 射线打到地图上得到指针的地面落点
+    let filter = |v| q_map.contains(v);
+    let settings = MeshRayCastSettings::default().with_filter(&filter);
+    let Some(hit) = ray_cast.cast_ray(ray, &settings).first() else {
+        return;
+    };
+    let position = hit.1.point;
+
+    // 找到离落点最近的英雄
+    let mut min_distance = f32::MAX;
+    let mut nearest = None;
+    for (entity, transform) in q_champions.iter() {
+        let distance = position.distance(transform.translation);
+        if distance < min_distance {
+            min_distance = distance;
+            nearest = Some(entity);
+        }
+    }
+    let Some(nearest) = nearest else {
+        return;
+    };
+
+    // 当前自机即最近英雄，无需切换
+    let Ok(current) = q_self.single() else {
+        return;
+    };
+    if current == nearest {
+        return;
+    }
+
+    // 将自机相关组件从当前英雄迁移到最近英雄
+    commands
+        .entity(current)
+        .remove::<SelfPlayer>()
+        .remove::<Controller>()
+        .remove::<Focus>();
+    commands
+        .entity(nearest)
+        .insert((SelfPlayer, Controller::default(), Focus));
+
+    info!("切换自机焦点: {:?} -> {:?}", current, nearest);
 }

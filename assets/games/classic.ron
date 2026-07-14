@@ -1,0 +1,22 @@
+(
+    resources: {},
+    entities: {
+        4294967186: (
+            components: {
+                "bevy_transform::components::transform::Transform": (
+                    translation: (3318.0, 38.0, 12875.0),
+                    rotation: (0.0, 0.0, 0.0, 1.0),
+                    scale: (1.0, 1.0, 1.0),
+                ),
+                "lol_core::team::Team": Chaos,
+                "lol_champions::fiora::Fiora": (),
+                "lol_base::character::ConfigCharacterRecord": (
+                    character_record: Path("characters/fiora/config.ron"),
+                ),
+                "lol_base::character::ConfigSkin": (
+                    skin: Path("characters/fiora/skins/skin0.ron"),
+                ),
+            },
+        ),
+    },
+)
