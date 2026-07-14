@@ -93,6 +93,7 @@ cargo test -p lol_champions
 - 延迟范围伤害（地面警示器）：[skill-delayed-aoe.md](./references/skill-delayed-aoe.md)
 - 位移系统：[skill-dash.md](./references/skill-dash.md)
 - 控制系统（CC）：[skill-cc.md](./references/skill-cc.md)
+- 动画系统：[skill-animation.md](./references/skill-animation.md)
 - 冷却控制机制：[skill-cooldown.md](./references/skill-cooldown.md)
 - 测试与调试实践：[skill-test.md](./references/skill-test.md)
 - 搜索研究英雄技能的详细介绍：[skill-research.md](./references/skill-research.md)
