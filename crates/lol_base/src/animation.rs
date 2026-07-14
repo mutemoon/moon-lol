@@ -195,9 +195,8 @@ impl LOLAnimationGraph {
             }
             ConfigAnimationNode::ConditionFloat { conditions, .. } => conditions
                 .iter()
-                .last()
-                .map(|v| self.figure_node_indices(&v.key, state))
-                .unwrap(),
+                .flat_map(|v| self.figure_node_indices(&v.key, state))
+                .collect(),
             ConfigAnimationNode::Selector { probably_nodes } => {
                 let index = state
                     .selector_states

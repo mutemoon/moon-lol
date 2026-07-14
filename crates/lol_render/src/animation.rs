@@ -124,7 +124,11 @@ pub fn on_animation_state_change(
                 "[动画] 骨骼实体 {:?} 停止过渡动画 {}",
                 bone_entity, transition_out.hash
             );
-            animation.stop(&mut player, &transition_out.hash, &mut state);
+            animation.stop(
+                &mut player,
+                &transition_out.hash,
+                state.bypass_change_detection(),
+            );
         }
 
         let last_hash = state.last.clone();
@@ -145,7 +149,7 @@ pub fn on_animation_state_change(
                         "[动画] 骨骼实体 {:?} 停止不重复动画 {}",
                         bone_entity, last_hash
                     );
-                    animation.stop(&mut player, last_hash, &mut state);
+                    animation.stop(&mut player, last_hash, state.bypass_change_detection());
                 }
             } else {
                 debug!(
@@ -201,7 +205,11 @@ fn update_transition_out(
                 "[动画] 骨骼实体 {:?} 过渡完成，停止动画 {}",
                 bone_entity, transition_out.hash
             );
-            animation.stop(&mut player, &transition_out.hash, &mut state);
+            animation.stop(
+                &mut player,
+                &transition_out.hash,
+                state.bypass_change_detection(),
+            );
             commands
                 .entity(bone_entity)
                 .remove::<AnimationTransitionOut>();
