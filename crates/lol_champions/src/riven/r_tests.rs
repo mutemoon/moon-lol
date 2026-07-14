@@ -82,6 +82,7 @@ fn riven_r_wind_slash_deals_more_damage_to_low_hp_targets() {
     h.app.world_mut().entity_mut(enemy_low).insert(Health {
         value: 600.0,
         max: 6000.0,
+        ..Default::default()
     });
 
     let initial_low = h.health(enemy_low);

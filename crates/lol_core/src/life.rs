@@ -12,7 +12,7 @@ pub struct PluginLife;
 
 impl Plugin for PluginLife {
     fn build(&self, app: &mut App) {
-        app.add_systems(FixedUpdate, (spawn_event, update_respawn));
+        app.add_systems(FixedUpdate, (spawn_event, update_respawn, regen));
         app.add_observer(on_event_damage_create);
     }
 }
@@ -25,11 +25,15 @@ pub struct Death;
 #[reflect(Component)]
 pub struct RespawnTimer(pub Timer);
 
-#[derive(Component, Reflect, Serialize, Deserialize, Clone)]
-#[reflect(Component)]
+#[derive(Component, Reflect, Serialize, Deserialize, Clone, Default)]
+#[reflect(Component, Default)]
 pub struct Health {
     pub value: f32,
     pub max: f32,
+    /// 基础每秒生命回复（1 级时的回复速率）
+    pub base_static_regen: f32,
+    /// 每级额外每秒生命回复
+    pub regen_per_level: f32,
 }
 
 #[derive(EntityEvent, Debug)]
@@ -45,7 +49,12 @@ pub struct EventSpawn {
 
 impl Health {
     pub fn new(max: f32) -> Health {
-        Health { value: max, max }
+        Health {
+            value: max,
+            max,
+            base_static_regen: 0.0,
+            regen_per_level: 0.0,
+        }
     }
 }
 
@@ -57,6 +66,51 @@ pub fn spawn_event(mut commands: Commands, q_alive: Query<Entity, Added<Health>>
 
     for entity in q_alive.iter() {
         commands.trigger(EventSpawn { entity });
+    }
+}
+
+/// 持续回复生命与蓝量：每秒回复 `base_static_regen + regen_per_level * (level - 1)`，
+/// 按 FixedUpdate 的 delta 累加并夹取到 `[0, max]`；死亡中的实体不回复。
+pub fn regen(
+    time: Res<Time<Fixed>>,
+    mut q: Query<
+        (
+            Option<&mut Health>,
+            Option<&mut AbilityResource>,
+            Option<&Level>,
+        ),
+        (Without<Death>, Or<(With<Health>, With<AbilityResource>)>),
+    >,
+) {
+    let dt = time.delta().as_secs_f32();
+    if dt <= 0.0 {
+        return;
+    }
+
+    for (health, ar, level) in q.iter_mut() {
+        // 缺少 Level 组件时按 1 级处理（仅基础回复）
+        let lvl = level.map(|l| l.value).unwrap_or(1);
+        let lvl_factor = lvl.saturating_sub(1) as f32;
+
+        // 生命回复
+        if let Some(mut health) = health {
+            if health.max > 0.0 && health.value < health.max {
+                let rate = health.base_static_regen + health.regen_per_level * lvl_factor;
+                if rate > 0.0 {
+                    health.value = (health.value + rate * dt).min(health.max);
+                }
+            }
+        }
+
+        // 蓝量/能量回复
+        if let Some(mut ar) = ar {
+            if ar.max > 0.0 && ar.value < ar.max {
+                let rate = ar.base_static_regen + ar.regen_per_level * lvl_factor;
+                if rate > 0.0 {
+                    ar.value = (ar.value + rate * dt).min(ar.max);
+                }
+            }
+        }
     }
 }
 
@@ -226,5 +280,231 @@ mod tests {
 
         let transform = app.world().get::<Transform>(hero).unwrap();
         assert_eq!(transform.translation, Vec3::new(1000.0, 0.0, 1000.0));
+    }
+
+    /// 推进固定时间并执行一次 `regen` 系统。
+    fn advance_and_regen(app: &mut App, delta: Duration) {
+        {
+            let mut time = app.world_mut().resource_mut::<Time<Fixed>>();
+            time.advance_by(delta);
+        }
+        let _ = app.world_mut().run_system_once(regen);
+    }
+
+    #[test]
+    fn test_mana_regen_basic() {
+        let mut app = setup_app();
+        let e = app
+            .world_mut()
+            .spawn(AbilityResource {
+                value: 10.0,
+                max: 100.0,
+                base_static_regen: 2.0,
+                regen_per_level: 0.0,
+                ..default()
+            })
+            .id();
+
+        advance_and_regen(&mut app, Duration::from_secs(1));
+        assert_eq!(app.world().get::<AbilityResource>(e).unwrap().value, 12.0);
+
+        advance_and_regen(&mut app, Duration::from_secs(1));
+        assert_eq!(
+            app.world().get::<AbilityResource>(e).unwrap().value,
+            14.0,
+            "蓝量应持续回复"
+        );
+    }
+
+    #[test]
+    fn test_mana_regen_clamps_to_max() {
+        let mut app = setup_app();
+        let e = app
+            .world_mut()
+            .spawn(AbilityResource {
+                value: 99.0,
+                max: 100.0,
+                base_static_regen: 5.0,
+                ..default()
+            })
+            .id();
+
+        advance_and_regen(&mut app, Duration::from_secs(1));
+        assert_eq!(
+            app.world().get::<AbilityResource>(e).unwrap().value,
+            100.0,
+            "蓝量不应超过上限"
+        );
+    }
+
+    #[test]
+    fn test_mana_regen_scales_with_level() {
+        let mut app = setup_app();
+        // level 3 -> regen/sec = 2.0 + 1.0 * (3 - 1) = 4.0
+        let e = app
+            .world_mut()
+            .spawn((
+                AbilityResource {
+                    value: 10.0,
+                    max: 100.0,
+                    base_static_regen: 2.0,
+                    regen_per_level: 1.0,
+                    ..default()
+                },
+                Level {
+                    value: 3,
+                    ..default()
+                },
+            ))
+            .id();
+
+        advance_and_regen(&mut app, Duration::from_secs(1));
+        assert_eq!(app.world().get::<AbilityResource>(e).unwrap().value, 14.0);
+    }
+
+    #[test]
+    fn test_mana_regen_zero_rate_no_change() {
+        let mut app = setup_app();
+        let e = app
+            .world_mut()
+            .spawn(AbilityResource {
+                value: 10.0,
+                max: 100.0,
+                base_static_regen: 0.0,
+                regen_per_level: 0.0,
+                ..default()
+            })
+            .id();
+
+        advance_and_regen(&mut app, Duration::from_secs(1));
+        assert_eq!(
+            app.world().get::<AbilityResource>(e).unwrap().value,
+            10.0,
+            "回复速率为 0 时蓝量不变"
+        );
+    }
+
+    #[test]
+    fn test_regen_skipped_when_dead() {
+        let mut app = setup_app();
+        let e = app
+            .world_mut()
+            .spawn((
+                Health {
+                    value: 10.0,
+                    max: 100.0,
+                    base_static_regen: 5.0,
+                    ..default()
+                },
+                AbilityResource {
+                    value: 10.0,
+                    max: 100.0,
+                    base_static_regen: 5.0,
+                    ..default()
+                },
+                Death,
+            ))
+            .id();
+
+        advance_and_regen(&mut app, Duration::from_secs(1));
+        assert_eq!(
+            app.world().get::<Health>(e).unwrap().value,
+            10.0,
+            "死亡时不回复血量"
+        );
+        assert_eq!(
+            app.world().get::<AbilityResource>(e).unwrap().value,
+            10.0,
+            "死亡时不回复蓝量"
+        );
+    }
+
+    #[test]
+    fn test_health_regen_basic() {
+        let mut app = setup_app();
+        let e = app
+            .world_mut()
+            .spawn(Health {
+                value: 10.0,
+                max: 100.0,
+                base_static_regen: 3.0,
+                ..default()
+            })
+            .id();
+
+        advance_and_regen(&mut app, Duration::from_secs(1));
+        assert_eq!(app.world().get::<Health>(e).unwrap().value, 13.0);
+    }
+
+    #[test]
+    fn test_health_regen_clamps_to_max() {
+        let mut app = setup_app();
+        let e = app
+            .world_mut()
+            .spawn(Health {
+                value: 99.0,
+                max: 100.0,
+                base_static_regen: 5.0,
+                ..default()
+            })
+            .id();
+
+        advance_and_regen(&mut app, Duration::from_secs(1));
+        assert_eq!(
+            app.world().get::<Health>(e).unwrap().value,
+            100.0,
+            "血量不应超过上限"
+        );
+    }
+
+    #[test]
+    fn test_health_regen_scales_with_level() {
+        let mut app = setup_app();
+        // level 3 -> regen/sec = 2.0 + 1.5 * (3 - 1) = 5.0
+        let e = app
+            .world_mut()
+            .spawn((
+                Health {
+                    value: 10.0,
+                    max: 100.0,
+                    base_static_regen: 2.0,
+                    regen_per_level: 1.5,
+                    ..default()
+                },
+                Level {
+                    value: 3,
+                    ..default()
+                },
+            ))
+            .id();
+
+        advance_and_regen(&mut app, Duration::from_secs(1));
+        assert_eq!(app.world().get::<Health>(e).unwrap().value, 15.0);
+    }
+
+    #[test]
+    fn test_regen_both_health_and_mana() {
+        let mut app = setup_app();
+        let e = app
+            .world_mut()
+            .spawn((
+                Health {
+                    value: 10.0,
+                    max: 100.0,
+                    base_static_regen: 2.0,
+                    ..default()
+                },
+                AbilityResource {
+                    value: 20.0,
+                    max: 100.0,
+                    base_static_regen: 3.0,
+                    ..default()
+                },
+            ))
+            .id();
+
+        advance_and_regen(&mut app, Duration::from_secs(1));
+        assert_eq!(app.world().get::<Health>(e).unwrap().value, 12.0);
+        assert_eq!(app.world().get::<AbilityResource>(e).unwrap().value, 23.0);
     }
 }

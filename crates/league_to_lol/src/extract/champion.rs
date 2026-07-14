@@ -109,13 +109,27 @@ pub fn create_champion_components_from_record(
         None
     };
 
-    let health = Health::new(
-        record
-            .base_hp_modifiable
-            .as_ref()
-            .map(|v| v.base_value)
-            .unwrap_or(0.0),
-    );
+    let base_hp = record
+        .base_hp_modifiable
+        .as_ref()
+        .map(|v| v.base_value)
+        .unwrap_or(0.0);
+    let base_static_hp_regen = record
+        .base_static_hp_regen_modifiable
+        .as_ref()
+        .map(|v| v.base_value)
+        .unwrap_or(0.0);
+    let hp_regen_per_level = record
+        .hp_regen_per_level_modifiable
+        .as_ref()
+        .map(|v| v.base_value)
+        .unwrap_or(0.0);
+    let health = Health {
+        value: base_hp,
+        max: base_hp,
+        base_static_regen: base_static_hp_regen,
+        regen_per_level: hp_regen_per_level,
+    };
 
     let damage = Damage(
         record
