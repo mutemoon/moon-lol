@@ -11,6 +11,7 @@ fn irelia_w1_grants_50_percent_damage_reduction() {
     let mut h = build_headless("irelia_w_dr");
     let enemy = h.add_enemy(Vec3::new(500.0, 0.0, 0.0));
     let max_hp = h.health(h.champion);
+    let mana_before = h.mana();
 
     h.cast_skill(1, Vec2::new(0.0, 0.0));
     h.advance(0.05);
@@ -22,6 +23,14 @@ fn irelia_w1_grants_50_percent_damage_reduction() {
         (h.health(h.champion) - (max_hp - 50.0)).abs() < 1.0,
         "W1 减伤 50%：100 伤害应只扣 50，实际 {}",
         h.health(h.champion)
+    );
+    assert!(h.mana() < mana_before, "W 施放应消耗法力");
+
+    // W1 开启 1.5s 重施窗口，窗口过期后进入冷却
+    h.advance(2.0);
+    assert!(
+        !h.can_cast(1),
+        "W 重施窗口过期后应进入冷却"
     );
     h.finish();
 }

@@ -17,6 +17,7 @@ fn volibear_r_landing_damage() {
     let mut h = build_headless("volibear_r_damage");
     let enemy = h.add_enemy(Vec3::new(300.0, 0.0, 0.0));
     let hp_before = h.health(enemy);
+    let mana_before = h.mana();
 
     h.cast_skill(3, Vec2::new(300.0, 0.0)).advance(0.6);
 
@@ -25,6 +26,11 @@ fn volibear_r_landing_damage() {
         (dealt - 262.5).abs() < 2.0,
         "R 落地应造成 262.5 物理伤害，实际 {dealt}"
     );
+    assert!(
+        !h.can_cast(3),
+        "R 施放后应进入冷却"
+    );
+    assert!(h.mana() < mana_before, "R 施放应消耗法力");
     h.finish();
 }
 

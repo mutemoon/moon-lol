@@ -7,6 +7,10 @@ use lol_core::buffs::shield_white::BuffShieldWhite;
 #[require(Buff = Buff { name: "RivenR" })]
 pub struct BuffRivenR {
     pub timer: Timer,
+    /// 存储开启时增加的 AD 比例（从 RON PercentBonusAD 读取），用于到期恢复
+    pub bonus_ad_ratio: f32,
+    /// 存储开启时增加的攻击距离（从 RON TooltipAttackRange 读取），用于到期恢复
+    pub bonus_range: f32,
 }
 
 /// 标记 Q3 位移中，落地后以落点为圆心触发范围伤害 + 震退

@@ -13,7 +13,7 @@ use bevy::prelude::*;
 use lol_base::spell::Spell;
 
 use crate::action::damage::{ActionDamageEffect, DamageShape, apply_damage_effects};
-use crate::damage::Damage;
+use crate::damage::{AbilityPower, Damage};
 use crate::entities::champion::Champion;
 use crate::entities::minion::Minion;
 use crate::team::Team;
@@ -231,6 +231,7 @@ pub fn update_delayed_damage(
         Without<DelayedDamageInstance>,
     >,
     q_damage: Query<&Damage>,
+    q_ap: Query<&AbilityPower>,
     time: Res<Time<Fixed>>,
 ) {
     for (entity, mut inst, mut transform, mut visual) in q_inst.iter_mut() {
@@ -275,6 +276,7 @@ pub fn update_delayed_damage(
                             inst.skill_level,
                             &q_target,
                             &q_damage,
+                            &q_ap,
                         );
                     }
                     inst.applied = true;

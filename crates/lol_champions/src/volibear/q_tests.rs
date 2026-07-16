@@ -17,6 +17,7 @@ fn volibear_q_empowers_next_attack_bonus_damage() {
     let mut h = build_headless("volibear_q_bonus");
     let enemy = h.add_enemy(Vec3::new(100.0, 0.0, 0.0));
     let hp_before = h.health(enemy);
+    let mana_before = h.mana();
 
     h.cast_skill(0, Vec2::new(100.0, 0.0)).advance(0.1);
     attack_end(&mut h, enemy);
@@ -27,6 +28,7 @@ fn volibear_q_empowers_next_attack_bonus_damage() {
         (dealt - 169.0).abs() < 1.5,
         "Q 强化普攻应造成 2.6*AD=169 额外物理伤害，实际 {dealt}"
     );
+    assert!(h.mana() < mana_before, "Q 施放应消耗法力（冷却为 0.0 不检查 is_cooling）");
     h.finish();
 }
 

@@ -8,7 +8,9 @@ use bevy::prelude::*;
 use bevy::time::{Timer, TimerMode};
 use lol_core::attack::EventAttackEnd;
 use lol_core::base::buff::{Buff, BuffOf};
+use lol_core::buffs::cc_debuffs::DebuffSlow;
 use lol_core::buffs::shield_white::BuffShieldWhite;
+use lol_core::damage::EventDamageCreate;
 use lol_core::entities::champion::Champion;
 use lol_core::life::Health;
 use lol_core::team::Team;
@@ -98,4 +100,20 @@ pub fn update_camille_passive(
         }
         commands.entity(timer_entity).despawn();
     }
+}
+
+/// 监听 Camille 造成的伤害，给目标施加减速。
+pub fn on_camille_damage_hit(
+    trigger: On<EventDamageCreate>,
+    mut commands: Commands,
+    q_camille: Query<(), With<Camille>>,
+) {
+    let source = trigger.source;
+    if q_camille.get(source).is_err() {
+        return;
+    }
+    let target = trigger.event_target();
+    commands
+        .entity(target)
+        .with_related::<BuffOf>(DebuffSlow::new(0.8, 2.0));
 }

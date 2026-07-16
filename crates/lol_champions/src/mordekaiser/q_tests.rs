@@ -3,7 +3,7 @@
 use bevy::math::{Vec2, Vec3};
 use lol_core::action::delayed_damage::DelayedDamageInstance;
 
-use super::tests::build_headless;
+use super::tests::{build_headless, give_ap};
 use crate::test_utils::*;
 
 /// 矩形内敌人应在延迟结束后受到魔法伤害；延迟结束前不受伤。
@@ -108,4 +108,42 @@ fn mordekaiser_q_indicator_lifecycle() {
     };
     assert_eq!(remaining, 0, "延迟+褪去结束后指示器应销毁");
     h.finish();
+}
+
+/// F1 回归：Q 公式 `q_damage` 含 70% AP 加成（stat=None -> AP）。
+/// 法强从 0 提升到 100 时，单目标 Q 伤害应明显增加（约 70 * 孤立系数）。
+/// 当前 `apply_damage_effects` 的 stat 闭包对 stat==0 返回 0.0，AP 加成丢失 -> 此测试应失败。
+#[test]
+fn mordekaiser_q_scales_with_ap() {
+    let enemy_pos = Vec3::new(600.0, 0.0, 0.0);
+
+    // 基线：AP=0
+    let mut h0 = build_headless("morde_q_ap0");
+    let e0 = h0.add_enemy(enemy_pos);
+    let hp0_before = h0.health(e0);
+    h0.cast_skill(0, Vec2::new(800.0, 0.0)).advance(0.5);
+    let dmg_ap0 = hp0_before - h0.health(e0);
+    h0.finish();
+
+    // 法强 100：应多约 0.7*100=70（孤立 1.25 起乘）
+    let mut h1 = build_headless("morde_q_ap100");
+    give_ap(&mut h1, 100.0);
+    let e1 = h1.add_enemy(enemy_pos);
+    let hp1_before = h1.health(e1);
+    h1.cast_skill(0, Vec2::new(800.0, 0.0)).advance(0.5);
+    let dmg_ap100 = hp1_before - h1.health(e1);
+    h1.finish();
+
+    assert!(
+        dmg_ap0 > 0.0,
+        "基线（AP=0）也应造成伤害 dmg_ap0={}",
+        dmg_ap0
+    );
+    assert!(
+        dmg_ap100 > dmg_ap0 + 30.0,
+        "AP=100 应使 Q 伤害明显增加：dmg_ap0={}, dmg_ap100={}, 增量={}",
+        dmg_ap0,
+        dmg_ap100,
+        dmg_ap100 - dmg_ap0
+    );
 }

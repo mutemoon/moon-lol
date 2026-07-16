@@ -12,9 +12,9 @@ use crate::test_utils::*;
 fn darius_e_pulls_enemies_in_cone_to_feet() {
     let mut h = build_headless("darius_e_pull");
     give_mana(&mut h);
-    // 锥形朝 +X：敌人在 +X 方向 300 处（在 535 范围内）
     let enemy = h.add_enemy(Vec3::new(300.0, 0.0, 0.0));
     let darius_before = h.position(h.champion);
+    let mana_before = h.mana();
 
     h.cast_skill(2, Vec2::new(500.0, 0.0)).advance(1.0);
 
@@ -30,6 +30,11 @@ fn darius_e_pulls_enemies_in_cone_to_feet() {
         "Darius 自身不应位移，实际移动 {}",
         (darius_after - darius_before).length()
     );
+    assert!(
+        !h.can_cast(2),
+        "E 施放后应进入冷却"
+    );
+    assert!(h.mana() < mana_before, "E 施放应消耗法力");
     h.finish();
 }
 

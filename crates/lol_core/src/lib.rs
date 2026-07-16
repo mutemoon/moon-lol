@@ -38,6 +38,7 @@ use base::PluginBase;
 use base::state::PluginState;
 use bevy::app::plugin_group;
 use buffs::cc_debuffs::PluginCc;
+use buffs::common_buffs::PluginCommonBuffs;
 use buffs::damage_reduction::PluginDamageReduction;
 use buffs::on_hit::PluginOnHit;
 use buffs::shield_magic::PluginShieldMagic;
@@ -77,6 +78,7 @@ plugin_group! {
         :PluginCc,
         :PluginChampion,
         :PluginCharacter,
+        :PluginCommonBuffs,
         :PluginCooldown,
         :PluginDamage,
         :PluginDamageReduction,

@@ -26,6 +26,7 @@ fn fiora_r_attaches_vitals_to_target() {
     let mut h = build_headless("fiora_r_target_attach");
     let enemy = h.add_enemy(Vec3::new(300.0, 0.0, 0.0)); // 在 R 射程 500 内
     let caster = h.champion;
+    let mana_before = h.mana();
 
     h.cast_skill(3, Vec2::new(300.0, 0.0)).advance(0.1);
 
@@ -40,6 +41,11 @@ fn fiora_r_attaches_vitals_to_target() {
     // 四个要害方向齐全
     let vitals = r_buff_vitals(&h, enemy).expect("目标应有 R 要害");
     assert_eq!(vitals.len(), 4, "R 应揭露四个要害");
+    assert!(
+        !h.can_cast(3),
+        "R 施放后应进入冷却"
+    );
+    assert!(h.mana() < mana_before, "R 施放应消耗法力");
 
     h.finish();
 }

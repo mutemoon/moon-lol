@@ -17,8 +17,10 @@ use lol_base::spell::Spell;
 use lol_core::action::knockback::{CommandKnockback, DisplaceDirection};
 use lol_core::damage::{AbilityPower, CommandDamageCreate, DamageType};
 use lol_core::entities::champion::Champion;
-use lol_core::skill::{get_skill_data_value, get_skill_value};
+use lol_core::skill::{EventSkillCast, Skill, SkillSlot, get_skill_data_value, get_skill_value};
 use lol_core::team::Team;
+
+use crate::mordekaiser::Mordekaiser;
 
 /// E 锥形半径（拽回范围，ron `MaxDistance` = 550）
 pub const MORDE_E_RANGE: f32 = 550.0;
@@ -31,19 +33,33 @@ pub const MORDE_E_PULL_SPEED: f32 = 1500.0;
 /// E 拽回持续时间（秒）
 pub const MORDE_E_PULL_DURATION: f32 = 0.4;
 
-/// 施放 Mordekaiser E：朝 [point] 方向锥形拽回敌人并造成魔法伤害。
-pub fn cast_mordekaiser_e(
-    commands: &mut Commands,
-    entity: Entity,
-    _skill_spell: Handle<Spell>,
-    point: Vec2,
-    skill_level: usize,
-    spell_obj: &Spell,
-    q_transform: &Query<&Transform>,
-    q_team: &Query<&Team>,
-    q_enemies: &Query<(Entity, &Transform), With<Champion>>,
-    q_ap: &Query<&AbilityPower>,
+pub fn on_mordekaiser_e(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_morde: Query<(), With<Mordekaiser>>,
+    q_skill: Query<&Skill>,
+    res_spells: Res<Assets<Spell>>,
+    q_transform: Query<&Transform>,
+    q_team: Query<&Team>,
+    q_enemies: Query<(Entity, &Transform), With<Champion>>,
+    q_ap: Query<&AbilityPower>,
 ) {
+    let entity = trigger.event_target();
+    if q_morde.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::E) {
+        return;
+    }
+
+    let Some(spell_obj) = res_spells.get(&skill.spell) else {
+        return;
+    };
+
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: ANIM_SPELL3.to_string(),
@@ -60,7 +76,7 @@ pub fn cast_mordekaiser_e(
 
     let pos = transform.translation.xz();
     // 锥形朝向：施法点方向；施法点与自身重合时退回面向方向
-    let forward = (point - pos).normalize_or_zero();
+    let forward = (trigger.point - pos).normalize_or_zero();
     let forward = if forward == Vec2::ZERO {
         transform.forward().xz()
     } else {
@@ -69,11 +85,11 @@ pub fn cast_mordekaiser_e(
     let half_angle = MORDE_E_CONE_HALF_ANGLE.to_radians();
 
     let max_distance =
-        get_skill_data_value(spell_obj, "MaxDistance", skill_level).unwrap_or(MORDE_E_RANGE);
-    let pull_distance = get_skill_data_value(spell_obj, "KnockTowardsDistance", skill_level)
+        get_skill_data_value(spell_obj, "MaxDistance", skill.level).unwrap_or(MORDE_E_RANGE);
+    let pull_distance = get_skill_data_value(spell_obj, "KnockTowardsDistance", skill.level)
         .unwrap_or(MORDE_E_PULL_DISTANCE);
     let ap = q_ap.get(entity).map(|a| a.0).unwrap_or(0.0);
-    let damage = get_skill_value(spell_obj, "total_damage", skill_level, |stat| {
+    let damage = get_skill_value(spell_obj, "total_damage", skill.level, |stat| {
         if stat == 0 { ap } else { 0.0 }
     })
     .unwrap_or(0.0);

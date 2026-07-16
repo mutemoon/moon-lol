@@ -17,7 +17,7 @@ use lol_base::spell::Spell;
 use lol_core::damage::{AbilityPower, Armor, Damage};
 use lol_core::entities::champion::Champion;
 use lol_core::life::Health;
-use lol_core::skill::get_skill_data_value;
+use lol_core::skill::{EventSkillCast, Skill, SkillSlot, get_skill_data_value};
 use lol_core::team::Team;
 
 use crate::mordekaiser::Mordekaiser;
@@ -25,18 +25,33 @@ use crate::mordekaiser::buffs::{
     MORDE_R_DURATION, MORDE_R_STAT_STEAL_RATIO, MordekaiserRealm, MordekaiserStatSteal,
 };
 
-/// 施放 Mordekaiser R：诅咒 [point] 附近最近的敌方英雄，开启死亡领域。
-pub fn cast_mordekaiser_r(
-    commands: &mut Commands,
-    entity: Entity,
-    _point: Vec2,
-    skill_level: usize,
-    spell_obj: &Spell,
-    q_transform: &Query<&Transform>,
-    q_team: &Query<&Team>,
-    q_enemies: &Query<(Entity, &Transform), With<Champion>>,
-    q_realm: &Query<&MordekaiserRealm>,
+pub fn on_mordekaiser_r(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_morde: Query<(), With<Mordekaiser>>,
+    q_skill: Query<&Skill>,
+    res_spells: Res<Assets<Spell>>,
+    q_transform: Query<&Transform>,
+    q_team: Query<&Team>,
+    q_enemies: Query<(Entity, &Transform), With<Champion>>,
+    q_realm: Query<&MordekaiserRealm>,
 ) {
+    let entity = trigger.event_target();
+    if q_morde.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::R) {
+        return;
+    }
+
+    let Some(spell_obj) = res_spells.get(&skill.spell) else {
+        return;
+    };
+
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: ANIM_SPELL4.to_string(),
@@ -56,8 +71,8 @@ pub fn cast_mordekaiser_r(
         return;
     };
     let pos = transform.translation.xz();
-    let cast_range = get_skill_data_value(spell_obj, "castRange", skill_level).unwrap_or(650.0);
-    let duration = get_skill_data_value(spell_obj, "SpiritRealmDuration", skill_level)
+    let cast_range = get_skill_data_value(spell_obj, "castRange", skill.level).unwrap_or(650.0);
+    let duration = get_skill_data_value(spell_obj, "SpiritRealmDuration", skill.level)
         .unwrap_or(MORDE_R_DURATION);
 
     // 范围内最近敌方英雄

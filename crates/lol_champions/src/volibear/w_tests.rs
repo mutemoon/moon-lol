@@ -11,11 +11,13 @@ use bevy::math::{Vec2, Vec3};
 use super::tests::{build_headless, has_mark};
 
 /// W1 应对最近敌人造成 90.5 物理伤害并标记。
+/// W1 开启 2s 重施窗口，窗口过期后进入冷却。
 #[test]
 fn volibear_w1_damages_and_marks() {
     let mut h = build_headless("volibear_w1_mark");
     let enemy = h.add_enemy(Vec3::new(200.0, 0.0, 0.0));
     let hp_before = h.health(enemy);
+    let mana_before = h.mana();
 
     h.cast_skill(1, Vec2::new(200.0, 0.0)).advance(0.1);
 
@@ -25,6 +27,14 @@ fn volibear_w1_damages_and_marks() {
         "W1 应造成 90.5 物理伤害，实际 {dealt}"
     );
     assert!(has_mark(&h, enemy), "W1 应标记目标 8s");
+    assert!(h.mana() < mana_before, "W 施放应消耗法力");
+
+    // W1 开启 2s 重施窗口，窗口过期后才进入 5s 冷却
+    h.advance(2.5);
+    assert!(
+        !h.can_cast(1),
+        "W 重施窗口过期后应进入冷却"
+    );
     h.finish();
 }
 

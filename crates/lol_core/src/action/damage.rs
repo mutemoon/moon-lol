@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use lol_base::spell::Spell;
 
 use crate::action::delayed_damage::DelayedDamageInstance;
-use crate::damage::{CommandDamageCreate, Damage, DamageType};
+use crate::damage::{AbilityPower, CommandDamageCreate, Damage, DamageType};
 use crate::entities::champion::Champion;
 use crate::entities::minion::Minion;
 use crate::skill::{Skill, Skills, get_skill_data_value, get_skill_value};
@@ -77,6 +77,10 @@ pub struct ActionDamageEffect {
     pub damage_list: Vec<TargetDamage>,
     /// 排除区：在此子形状内的目标跳过本 effect（用于空间分区，如万豪 W 中心/两边）
     pub exclude: Vec<DamageShape>,
+    /// 伤害来源标记：透传至本 effect 所有 `CommandDamageCreate.tag`，供全局伤害
+    /// 观察者区分一次伤害来自哪个技能/形状分区（如 Darius Q 内圈不叠层、仅外圈减速）。
+    /// 粒度为 effect：同一 effect 内的多条 damage 共享同一来源标记。
+    pub tag: Option<u32>,
 }
 
 #[derive(Debug, Clone, EntityEvent)]
@@ -207,6 +211,7 @@ pub fn apply_damage_effects(
         Without<DelayedDamageInstance>,
     >,
     q_damage: &Query<&Damage>,
+    q_ap: &Query<&AbilityPower>,
 ) {
     for effect in effects {
         let mut targets = collect_targets_in_shape(origin, forward, &effect.shape, team, q_target);
@@ -243,9 +248,15 @@ pub fn apply_damage_effects(
 
                 let mut damage_amount =
                     get_skill_value(&skill_object, &damage.amount, skill_level, |stat| {
+                        // stat==2 -> AD（物理攻击力），stat==0/None -> AP（法术强度）
                         if stat == 2 {
                             if let Ok(damage) = q_damage.get(caster) {
                                 return damage.0;
+                            }
+                        }
+                        if stat == 0 {
+                            if let Ok(ap) = q_ap.get(caster) {
+                                return ap.0;
                             }
                         }
                         0.0
@@ -269,7 +280,7 @@ pub fn apply_damage_effects(
                         source: caster,
                         damage_type: damage.damage_type,
                         amount: damage_amount,
-                        tag: None,
+                        tag: effect.tag,
                     });
             }
         }
@@ -295,6 +306,7 @@ pub fn on_action_damage(
     q_skills: Query<&Skills>,
     q_skill: Query<&Skill>,
     q_damage: Query<&Damage>,
+    q_ap: Query<&AbilityPower>,
 ) {
     let entity = event.event_target();
 
@@ -334,6 +346,7 @@ pub fn on_action_damage(
         skill.level,
         &q_target,
         &q_damage,
+        &q_ap,
     );
 }
 

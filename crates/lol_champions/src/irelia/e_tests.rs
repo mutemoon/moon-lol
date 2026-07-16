@@ -72,6 +72,7 @@ fn irelia_e1_only_opens_recast_window() {
     let mut h = build_headless("irelia_e1_recast");
     let enemy = h.add_enemy(Vec3::new(300.0, 0.0, 0.0));
     let skill_e = h.skill_entity(2);
+    let mana_before = h.mana();
 
     h.cast_skill(2, Vec2::new(300.0, 0.0));
     h.advance(0.1);
@@ -85,6 +86,14 @@ fn irelia_e1_only_opens_recast_window() {
     assert!(
         h.app.world().get::<MovementBlock>(enemy).is_none(),
         "E1 不应眩晕"
+    );
+    assert!(h.mana() < mana_before, "E1 施放应消耗法力");
+
+    // E1 开启 4s 重施窗口，窗口过期后进入 16s 冷却
+    h.advance(4.5);
+    assert!(
+        !h.can_cast(2),
+        "E1 重施窗口过期后应进入冷却"
     );
     h.finish();
 }

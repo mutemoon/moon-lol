@@ -45,3 +45,12 @@ impl Default for VolibearPStacks {
         Self::new()
     }
 }
+
+/// R 突进中，落地后以落点为圆心触发 AoE 伤害 + 减速 + 增加最大生命。
+#[derive(Component, Debug, Default)]
+pub struct VolibearRLandingPending {
+    pub damage: f32,
+    pub slow_percent: f32,
+    pub slow_duration: f32,
+    pub bonus_hp: f32,
+}

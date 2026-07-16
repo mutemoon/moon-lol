@@ -182,7 +182,7 @@ fn fiora_passive_break_grants_move_speed() {
         amount: 10.0,
         tag: None,
     });
-    h.advance(0.2); // 让 update_fiora_ms_buff 应用 bonus
+    h.advance(0.2); // 让通用 update_move_speed_buff 应用 bonus
 
     let speed_after = h
         .app

@@ -10,10 +10,12 @@ use bevy::prelude::*;
 use bevy::time::{Timer, TimerMode};
 use lol_core::attack::{BuffAttack, EventAttackEnd};
 use lol_core::base::buff::{Buff, BuffOf, Buffs};
-use lol_core::damage::{CommandDamageCreate, Damage, DamageType};
+use lol_core::buffs::cc_debuffs::{DebuffSlow, DebuffStun};
+use lol_core::damage::{CommandDamageCreate, Damage, DamageType, EventDamageCreate};
 use lol_core::skill::EventSkillCast;
 
 use crate::irelia::Irelia;
+use crate::irelia::buffs::DebuffIreliaUnsteady;
 
 /// 被动持续时间（秒）：每次施法刷新
 pub const IRELIA_FERVOR_DURATION: f32 = 6.0;
@@ -122,6 +124,41 @@ pub fn on_irelia_passive_attack_end(
         amount: bonus,
         tag: None,
     });
+}
+
+/// 监听 Irelia 造成的伤害：仅 E2/R 标签命中施加控制与标记。
+pub fn on_irelia_damage_hit(
+    trigger: On<EventDamageCreate>,
+    mut commands: Commands,
+    q_irelia: Query<(), With<Irelia>>,
+) {
+    let source = trigger.source;
+    if q_irelia.get(source).is_err() {
+        return;
+    }
+    let Some(tag) = trigger.event().tag else {
+        return;
+    };
+    let target = trigger.event_target();
+
+    if tag == super::IRELIA_E2_DAMAGE_TAG {
+        commands
+            .entity(target)
+            .with_related::<BuffOf>(DebuffStun::new(super::IRELIA_E_STUN_DURATION));
+        commands
+            .entity(target)
+            .with_related::<BuffOf>(DebuffIreliaUnsteady::new(super::IRELIA_MARK_DURATION));
+    } else if tag == super::IRELIA_R_DAMAGE_TAG {
+        commands
+            .entity(target)
+            .with_related::<BuffOf>(DebuffIreliaUnsteady::new(super::IRELIA_MARK_DURATION));
+        commands
+            .entity(target)
+            .with_related::<BuffOf>(DebuffSlow::new(
+                super::IRELIA_R_SLOW_PERCENT,
+                super::IRELIA_R_SLOW_DURATION,
+            ));
+    }
 }
 
 /// FixedUpdate：tick 被动计时器，到期后移除攻速 buff 与层数 buff。

@@ -44,6 +44,7 @@ fn fiora_q_strikes_after_dash_not_at_cast() {
     let mut h = build_headless("fiora_q_timing");
     let enemy = h.add_enemy(Vec3::new(300.0, 0.0, 0.0));
     let hp_before = h.health(enemy);
+    let mana_before = h.mana();
 
     // 位移 300 单位 @ 1000 速度 ≈ 0.3s；0.1s 时位移尚未结束，不应有戳刺伤害
     h.cast_skill(0, Vec2::new(300.0, 0.0)).advance(0.1);
@@ -59,6 +60,11 @@ fn fiora_q_strikes_after_dash_not_at_cast() {
         h.health(enemy) < hp_before,
         "位移停止后应戳刺最近敌人造成伤害"
     );
+    assert!(
+        !h.can_cast(0),
+        "Q 施放后应进入冷却"
+    );
+    assert!(h.mana() < mana_before, "Q 施放应消耗法力");
 
     h.finish();
 }

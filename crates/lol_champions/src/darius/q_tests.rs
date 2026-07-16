@@ -25,6 +25,7 @@ fn darius_q_delayed_windup() {
     give_mana(&mut h);
     let enemy = h.add_enemy(Vec3::new(200.0, 0.0, 0.0));
     let hp_before = h.health(enemy);
+    let mana_before = h.mana();
 
     h.cast_skill(0, Vec2::new(200.0, 0.0)).advance(0.2);
     assert!(
@@ -37,6 +38,7 @@ fn darius_q_delayed_windup() {
         h.health(enemy) < hp_before,
         "前摇结束后外圈敌人应受到物理伤害"
     );
+    assert!(h.mana() < mana_before, "Q 施放应消耗法力");
     h.finish();
 }
 
@@ -47,6 +49,7 @@ fn darius_q_inner_blade_hits() {
     give_mana(&mut h);
     let enemy = h.add_enemy(Vec3::new(100.0, 0.0, 0.0));
     let hp_before = h.health(enemy);
+    let mana_before = h.mana();
 
     h.cast_skill(0, Vec2::new(200.0, 0.0)).advance(0.4);
 
@@ -54,6 +57,8 @@ fn darius_q_inner_blade_hits() {
         h.health(enemy) < hp_before,
         "内圈（150 内）应受 blade_damage 伤害"
     );
+    assert!(!h.can_cast(0), "Q 施放后应进入冷却");
+    assert!(h.mana() < mana_before, "Q 施放应消耗法力");
     h.finish();
 }
 
@@ -66,6 +71,7 @@ fn darius_q_outer_blade_boundary() {
     let outside = h.add_enemy(Vec3::new(400.0, 0.0, 0.0)); // 350 外
     let hp_in = h.health(inside);
     let hp_out = h.health(outside);
+    let mana_before = h.mana();
 
     h.cast_skill(0, Vec2::new(300.0, 0.0)).advance(0.4);
 
@@ -74,6 +80,8 @@ fn darius_q_outer_blade_boundary() {
         (h.health(outside) - hp_out).abs() < 0.01,
         "外圈之外（>350）不应受伤"
     );
+    assert!(!h.can_cast(0), "Q 施放后应进入冷却");
+    assert!(h.mana() < mana_before, "Q 施放应消耗法力");
     h.finish();
 }
 
@@ -83,6 +91,7 @@ fn darius_q_delayed_hemorrhage() {
     let mut h = build_headless("darius_q_delayed_hemo");
     give_mana(&mut h);
     let enemy = h.add_enemy(Vec3::new(200.0, 0.0, 0.0));
+    let mana_before = h.mana();
 
     h.cast_skill(0, Vec2::new(200.0, 0.0)).advance(0.4);
 
@@ -96,5 +105,7 @@ fn darius_q_delayed_hemorrhage() {
         }
     }
     assert!(found_bleed, "延迟伤害应触发 on_darius_damage_hit 叠出血");
+    assert!(!h.can_cast(0), "Q 施放后应进入冷却");
+    assert!(h.mana() < mana_before, "Q 施放应消耗法力");
     h.finish();
 }

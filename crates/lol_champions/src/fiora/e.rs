@@ -1,12 +1,16 @@
 use bevy::prelude::*;
+use lol_base::render_cmd::CommandAnimationPlay;
+use lol_base::spell::Spell;
 use lol_core::attack::{BuffAttack, CommandAttackReset, EventAttackEnd};
 use lol_core::base::buff::{Buff, BuffOf, Buffs};
 use lol_core::buffs::cc_debuffs::DebuffSlow;
 use lol_core::damage::{CommandDamageCreate, Damage, DamageType};
+use lol_core::skill::{EventSkillCast, Skill, SkillSlot, get_skill_data_value};
+
+use crate::fiora::Fiora;
 
 /// E 持续时间（ron BuffDuration = 3s）。
 const FIORA_E_DURATION: f32 = 3.0;
-/// 第一击减速比例（wiki：40%）与持续时间（1s）。
 const FIORA_E_SLOW_PERCENT: f32 = 0.4;
 const FIORA_E_SLOW_DURATION: f32 = 1.0;
 
@@ -14,7 +18,6 @@ const FIORA_E_SLOW_DURATION: f32 = 1.0;
 #[require(Buff = Buff { name: "FioraE" })]
 pub struct BuffFioraE {
     pub left: i32,
-    /// 第二击暴击的额外伤害比例（AttackTwoPercentTAD - 1，1 级 = 0.5）。
     pub crit_bonus_ratio: f32,
     pub timer: Timer,
 }
@@ -29,19 +32,41 @@ impl Default for BuffFioraE {
     }
 }
 
-/// E 施法：按等级赋予攻速，挂上 BuffFioraE（下两次普攻增强），重置普攻。
-pub fn cast_fiora_e(
-    commands: &mut Commands,
-    entity: Entity,
-    as_percent: f32,
-    crit_bonus_ratio: f32,
+pub fn on_fiora_e(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_fiora: Query<(), With<Fiora>>,
+    q_skill: Query<&Skill>,
+    res_spells: Res<Assets<Spell>>,
 ) {
+    let entity = trigger.event_target();
+    if q_fiora.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::E) {
+        return;
+    }
+
+    let as_percent = res_spells
+        .get(&skill.spell)
+        .and_then(|s| get_skill_data_value(s, "ASPercent", skill.level))
+        .unwrap_or(0.4);
+    let crit_ratio = res_spells
+        .get(&skill.spell)
+        .and_then(|s| get_skill_data_value(s, "AttackTwoPercentTAD", skill.level))
+        .map(|v| (v - 1.0).max(0.0))
+        .unwrap_or(0.5);
+
     commands.entity(entity).insert(BuffAttack {
         bonus_attack_speed: as_percent,
     });
     commands.entity(entity).with_related::<BuffOf>(BuffFioraE {
         left: 2,
-        crit_bonus_ratio,
+        crit_bonus_ratio: crit_ratio,
         timer: Timer::from_seconds(FIORA_E_DURATION, TimerMode::Once),
     });
     commands.trigger(CommandAttackReset { entity });
@@ -72,7 +97,6 @@ pub fn on_event_attack_end(
 
         match was {
             2 => {
-                // 第一击：减速
                 commands
                     .entity(target)
                     .with_related::<BuffOf>(DebuffSlow::new(
@@ -81,7 +105,6 @@ pub fn on_event_attack_end(
                     ));
             }
             1 => {
-                // 第二击：暴击额外伤害 = (AttackTwoPercentTAD - 1) × AD
                 let bonus = buff_fiora_e.crit_bonus_ratio * ad;
                 if bonus > 0.0 {
                     commands.entity(target).trigger(|e| CommandDamageCreate {

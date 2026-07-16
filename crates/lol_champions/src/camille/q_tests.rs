@@ -50,6 +50,7 @@ fn attack_end(h: &mut ChampionTestHarness, target: Entity) {
 #[test]
 fn camille_q1_grants_on_hit_bonus() {
     let mut h = build_headless("camille_q1_bonus");
+    let mana_before = h.mana();
     h.cast_skill(0, Vec2::new(100.0, 0.0)).advance(0.2);
 
     let bonus = on_hit_bonus(&h).expect("Q1 后应有强化普攻额外伤害 buff");
@@ -59,6 +60,14 @@ fn camille_q1_grants_on_hit_bonus() {
         bonus.ratio
     );
     assert!(bonus.flat.abs() < 1e-3, "Q1 flat 应为 0");
+    assert!(h.mana() < mana_before, "Q 施放应消耗法力");
+
+    // Q1 开启 3.5s 重施窗口，窗口过期后进入 9s 冷却
+    h.advance(4.0);
+    assert!(
+        !h.can_cast(0),
+        "Q 重施窗口过期后应进入冷却"
+    );
     h.finish();
 }
 

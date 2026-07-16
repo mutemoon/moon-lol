@@ -1,23 +1,126 @@
 use bevy::prelude::*;
+use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::attack::Attack;
-use lol_core::base::buff::Buffs;
+use lol_core::base::buff::{BuffOf, Buffs};
 use lol_core::damage::Damage;
 use lol_core::life::Health;
 use lol_core::missile::CommandMissileCreate;
-use lol_core::skill::get_skill_value;
+use lol_core::skill::{
+    CoolDown, EventSkillCast, Skill, SkillRecastWindow, SkillSlot, get_skill_data_value,
+    get_skill_value,
+};
 use lol_core::team::Team;
 
 use crate::riven::Riven;
 use crate::riven::buffs::BuffRivenR;
 
-pub struct PluginRivenR;
+pub fn on_riven_r(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_riven: Query<(), With<Riven>>,
+    mut q_skill: Query<(&Skill, &mut CoolDown, Option<&SkillRecastWindow>)>,
+    mut q_damage: Query<&mut Damage>,
+    mut q_attack: Query<&mut Attack>,
+    q_transform: Query<&Transform>,
+    q_team: Query<&Team>,
+    q_targets: Query<(Entity, &Team, &Transform, &Health)>,
+    res_spells: Res<Assets<Spell>>,
+    res_asset_server: Res<AssetServer>,
+) {
+    let entity = trigger.event_target();
+    if q_riven.get(entity).is_err() {
+        return;
+    }
 
-impl Plugin for PluginRivenR {
-    fn build(&self, _app: &mut App) {}
+    let Ok((skill, mut cooldown, recast)) = q_skill.get_mut(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::R) {
+        return;
+    }
+
+    let Some(spell_obj) = res_spells.get(&skill.spell) else {
+        return;
+    };
+
+    let damage_value = q_damage.get(entity).map(|d| d.0).unwrap_or(64.0);
+
+    let stage = recast.map(|w| w.stage).unwrap_or(1);
+
+    match stage {
+        2 => {
+            // Wind Slash — 三枚导弹
+            let missile_handles = [
+                res_asset_server.load("characters/riven/spells/RivenWindslashMissileRight.ron"),
+                res_asset_server.load("characters/riven/spells/RivenWindslashMissileCenter.ron"),
+                res_asset_server.load("characters/riven/spells/RivenWindslashMissileLeft.ron"),
+            ];
+            cast_riven_wind_slash(
+                &mut commands,
+                entity,
+                &missile_handles,
+                &q_transform,
+                &q_team,
+                &q_targets,
+                spell_obj,
+                skill.level,
+                damage_value,
+            );
+
+            commands
+                .entity(trigger.skill_entity)
+                .remove::<SkillRecastWindow>();
+        }
+        _ => {
+            // 初次 R — 从 RON 读取增伤、攻击距离加成、持续时间，开启连招窗口
+            let bonus_ad_ratio =
+                get_skill_data_value(spell_obj, "PercentBonusAD", skill.level).unwrap_or(0.25);
+            let bonus_range =
+                get_skill_data_value(spell_obj, "TooltipAttackRange", skill.level).unwrap_or(75.0);
+            let duration =
+                get_skill_data_value(spell_obj, "Duration", skill.level).unwrap_or(15.0);
+
+            let bonus_ad = damage_value * bonus_ad_ratio;
+
+            if let Ok(mut dmg) = q_damage.get_mut(entity) {
+                dmg.0 += bonus_ad;
+            }
+            if let Ok(mut atk) = q_attack.get_mut(entity) {
+                atk.range += bonus_range;
+            }
+
+            commands.entity(entity).with_related::<BuffOf>(BuffRivenR {
+                timer: Timer::from_seconds(duration, TimerMode::Once),
+                bonus_ad_ratio,
+                bonus_range,
+            });
+
+            // 覆盖冷却为真实 R 冷却（cooldownTime 数组以 level 为索引以避免 nil 占位）
+            let r_cd = spell_obj
+                .spell_data
+                .as_ref()
+                .and_then(|d| d.cooldown_time.as_ref())
+                .and_then(|v| v.get(skill.level).copied())
+                .unwrap_or(120.0);
+            cooldown.duration = r_cd;
+            cooldown.timer = Some(Timer::from_seconds(r_cd, TimerMode::Once));
+
+            commands
+                .entity(trigger.skill_entity)
+                .insert(SkillRecastWindow::new(2, 2, duration));
+
+            commands.trigger(CommandAnimationPlay {
+                entity,
+                hash: "Spell4A".to_string(),
+                repeat: false,
+                duration: None,
+            });
+        }
+    }
 }
 
-pub fn cast_riven_wind_slash(
+fn cast_riven_wind_slash(
     commands: &mut Commands,
     entity: Entity,
     missile_handles: &[Handle<Spell>; 3],
@@ -98,12 +201,13 @@ pub fn update_riven_buffs(
     mut q_buff_r: Query<(Entity, &mut BuffRivenR)>,
     time: Res<Time<Fixed>>,
 ) {
-    let mut expired = Vec::new();
+    // 收集到期的 buff 及其存储的加成值，避免二次借用
+    let mut expired: Vec<(Entity, f32, f32)> = Vec::new();
 
     for (buff_entity, mut buff) in q_buff_r.iter_mut() {
         buff.timer.tick(time.delta());
         if buff.timer.is_finished() {
-            expired.push(buff_entity);
+            expired.push((buff_entity, buff.bonus_ad_ratio, buff.bonus_range));
         }
     }
 
@@ -111,17 +215,23 @@ pub fn update_riven_buffs(
         return;
     }
 
+    let expired_entities: Vec<Entity> = expired.iter().map(|(e, _, _)| *e).collect();
+
     // 遍历所有 Riven 实体，检查它们的 buffs 是否有过期的 R 被动
     for (buffs, mut damage, mut attack) in q_champion.iter_mut() {
-        for buff in buffs.iter() {
-            if expired.contains(&buff) {
-                // R 到期，恢复基础属性
-                // 伤害和攻击距离已在初次 R 时直接修改，这里回退
-                damage.0 = damage.0 * (1.0 - 0.25 / 1.25); // base_ad = total / 1.25
-                attack.range -= 75.0;
-                commands.entity(buff).despawn();
+        for buff_entity in buffs.iter() {
+            if let Some((_, bonus_ad_ratio, bonus_range)) =
+                expired.iter().find(|(e, _, _)| *e == buff_entity)
+            {
+                // R 到期，用 BuffRivenR 中存储的数值恢复属性
+                damage.0 /= 1.0 + bonus_ad_ratio;
+                attack.range -= bonus_range;
                 break;
             }
         }
+    }
+
+    for buff_entity in expired_entities {
+        commands.entity(buff_entity).despawn();
     }
 }

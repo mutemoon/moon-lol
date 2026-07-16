@@ -1,7 +1,7 @@
 #![cfg(test)]
 
 use bevy::prelude::*;
-use lol_core::attack::EventAttackEnd;
+use lol_core::attack::{BuffAttack, EventAttackEnd};
 use lol_core::base::buff::Buffs;
 use lol_core::life::Health;
 
@@ -36,19 +36,34 @@ pub fn level_skill(h: &mut ChampionTestHarness, index: usize, level: usize) {
 }
 
 /// 手动触发一次普攻命中（仅触发 on-hit/被动，不造成基础 AA 伤害）。
+/// 触发后推进 1 帧以刷新 deferred commands，使 BuffAttack 实体生效。
 pub fn attack_end(h: &mut ChampionTestHarness, target: Entity) {
     h.app.world_mut().trigger(EventAttackEnd {
         entity: h.champion,
         target,
     });
+    h.app.update();
 }
 
 /// 读取英雄当前来自 buff 的额外攻击速度（被动层数 × 每层比例）。
+/// 优先查 BuffAttack 实体（通过 Buffs 关系），其次查 champion 自身。
 pub fn attack_speed_bonus(h: &ChampionTestHarness) -> f32 {
+    // 先从 buff 实体查找
+    if let Some(buffs) = h.app.world().get::<Buffs>(h.champion) {
+        let sum: f32 = buffs
+            .iter()
+            .filter_map(|e| h.app.world().get::<BuffAttack>(e))
+            .map(|b| b.bonus_attack_speed)
+            .sum();
+        if sum > 0.0 {
+            return sum;
+        }
+    }
+    // 再查 champion 自身（直接 insert 模式）
     h.app
         .world()
-        .get::<lol_core::attack::Attack>(h.champion)
-        .map(|a| a.buff_bonus_attack_speed)
+        .get::<BuffAttack>(h.champion)
+        .map(|b| b.bonus_attack_speed)
         .unwrap_or(0.0)
 }
 

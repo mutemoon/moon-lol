@@ -23,6 +23,7 @@ fn fiora_w_parry_negates_physical_damage() {
     let enemy = h.add_enemy(Vec3::new(-200.0, 0.0, 0.0)); // 远处敌人作为伤害来源
     let caster = h.champion;
     let hp_before = h.health(caster);
+    let mana_before = h.mana();
 
     h.cast_skill(1, Vec2::new(400.0, 0.0)).advance(0.1);
     assert!(fiora_w_active(&h), "招架期内应存在 BuffFioraW");
@@ -35,6 +36,11 @@ fn fiora_w_parry_negates_physical_damage() {
         "招架应完全减免物理伤害，实际损失 {:.1}",
         hp_loss
     );
+    assert!(
+        !h.can_cast(1),
+        "W 施放后应进入冷却"
+    );
+    assert!(h.mana() < mana_before, "W 施放应消耗法力");
     h.finish();
 }
 

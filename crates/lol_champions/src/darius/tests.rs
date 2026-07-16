@@ -87,43 +87,61 @@ pub fn build_render(name: &str) -> ChampionTestHarness {
 fn darius_q_deals_damage() {
     let mut h = build_headless("darius_q_damage");
     give_mana(&mut h);
-    // Place enemy at 200 units (within Q range of 270)
     let enemy = h.add_enemy(Vec3::new(200.0, 0.0, 0.0));
     let hp_before = h.health(enemy);
-    // Cast Q at enemy position
+    let mana_before = h.mana();
+
     h.cast_skill(0, Vec2::new(200.0, 0.0)).advance(0.5);
+
     assert!(h.health(enemy) < hp_before, "Q 应造成伤害，敌人血量应下降");
+    assert!(!h.can_cast(0), "Q 施放后应进入冷却");
+    assert!(h.mana() < mana_before, "Q 施放应消耗法力");
     h.finish();
 }
 
-/// Test that W resets auto-attack timer
+/// Test that W puts skill on cooldown and consumes mana
 #[test]
-fn darius_w_resets_attack() {
-    let mut h = build_headless("darius_w_attack_reset");
+fn darius_w_goes_on_cooldown() {
+    let mut h = build_headless("darius_w_cooldown");
     give_mana(&mut h);
     let _enemy = h.add_enemy(Vec3::new(200.0, 0.0, 0.0));
+    let mana_before = h.mana();
 
     // Cast W
     h.cast_skill(1, Vec2::new(200.0, 0.0)).advance(0.1);
 
-    // W should have been cast (verify by checking no error occurred)
-    // The actual attack reset behavior would be verified by timing
+    // W should be on cooldown after casting
+    assert!(
+        !h.can_cast(1),
+        "W 施放后应进入冷却"
+    );
+    assert!(
+        h.mana() < mana_before,
+        "W 施放应消耗法力"
+    );
     h.finish();
 }
 
-/// Test that E plays animation
+/// Test that E cast goes on cooldown
 #[test]
-fn darius_e_cast_success() {
-    let mut h = build_headless("darius_e_cast");
+fn darius_e_cast_goes_on_cooldown() {
+    let mut h = build_headless("darius_e_cooldown");
     give_mana(&mut h);
     let _enemy = h.add_enemy(Vec3::new(400.0, 0.0, 0.0));
+    let mana_before = h.mana();
 
     // E has 535 range, enemy is at 400
-    let can_cast_before = h.can_cast(2);
     h.cast_skill(2, Vec2::new(400.0, 0.0)).advance(0.3);
 
-    // E should have been triggered (no assertion on cooldown since E might not be implemented yet)
-    assert!(can_cast_before, "E should be castable initially");
+    // E should be on cooldown after casting
+    assert!(
+        !h.can_cast(2),
+        "E 施放后应进入冷却"
+    );
+    assert!(
+        h.mana() < mana_before,
+        "E 施放应消耗法力"
+    );
     h.finish();
 }
 
@@ -132,14 +150,15 @@ fn darius_e_cast_success() {
 fn darius_r_deals_damage() {
     let mut h = build_headless("darius_r_damage");
     give_mana(&mut h);
-    // R has 475 range, place enemy at 300
     let enemy = h.add_enemy(Vec3::new(300.0, 0.0, 0.0));
     let hp_before = h.health(enemy);
+    let mana_before = h.mana();
 
-    // Cast R
     h.cast_skill(3, Vec2::new(300.0, 0.0)).advance(0.5);
 
     assert!(h.health(enemy) < hp_before, "R 应造成伤害");
+    assert!(!h.can_cast(3), "R 施放后应进入冷却");
+    assert!(h.mana() < mana_before, "R 施放应消耗法力");
     h.finish();
 }
 

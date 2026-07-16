@@ -14,6 +14,7 @@ impl Plugin for PluginLife {
     fn build(&self, app: &mut App) {
         app.add_systems(FixedUpdate, (spawn_event, update_respawn, regen));
         app.add_observer(on_event_damage_create);
+        app.add_observer(on_command_heal);
     }
 }
 
@@ -40,6 +41,16 @@ pub struct Health {
 pub struct EventDead {
     pub entity: Entity,
     pub killer: Option<Entity>,
+}
+
+/// 治疗命令：对目标实体施加瞬时治疗，不超过 health.max。
+///
+/// 用法：`commands.trigger(CommandHeal { entity, source, amount });`
+#[derive(EntityEvent, Debug)]
+pub struct CommandHeal {
+    pub entity: Entity,
+    pub source: Entity,
+    pub amount: f32,
 }
 
 #[derive(EntityEvent, Debug)]
@@ -112,6 +123,26 @@ pub fn regen(
             }
         }
     }
+}
+
+/// 处理瞬时治疗命令。治疗量夹取到 health.max，死亡目标不生效。
+pub fn on_command_heal(trigger: On<CommandHeal>, mut q_health: Query<&mut Health>) {
+    let Ok(mut health) = q_health.get_mut(trigger.entity) else {
+        return;
+    };
+    if health.value <= 0.0 || health.max <= 0.0 {
+        return;
+    }
+    let before = health.value;
+    health.value = (health.value + trigger.amount).min(health.max);
+    debug!(
+        "{:?} 治疗 {:?} {:.1} HP（{:.1} → {:.1}）",
+        trigger.source,
+        trigger.entity,
+        trigger.amount,
+        before,
+        health.value,
+    );
 }
 
 fn on_event_damage_create(

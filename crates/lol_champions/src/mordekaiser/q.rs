@@ -17,25 +17,36 @@ use lol_core::action::damage::{
 };
 use lol_core::action::delayed_damage::{ActionDelayedDamage, AoEIndicator, AoEOrigin};
 use lol_core::damage::DamageType;
-use lol_core::skill::get_skill_data_value;
+use lol_core::skill::{EventSkillCast, Skill, SkillSlot, get_skill_data_value};
+
+use crate::mordekaiser::Mordekaiser;
 
 /// Q 延迟秒数（ron 未提供 castFrame，取权杖挥砸前摇近似值）
 const MORDEKAISER_Q_DELAY: f32 = 0.3;
 
-/// 施放 Mordekaiser Q：延迟后在面前矩形区域造成魔法伤害，孤立目标增伤。
-///
-/// 矩形尺寸与孤立系数均从 spell ron 的 dataValues 读取：
-/// - `MaceStartDistance` / `MaceLength` / `RectangleWidth` -> 矩形几何
-/// - `IsolationScalar` -> 孤立增伤系数（由框架在 Impact 时按命中数判定）
-/// - `q_damage` 计算公式（QBaseDamage + AD*ADRatio + AP*APRatio）由框架在 Impact 时结算
-pub fn cast_mordekaiser_q(
-    commands: &mut Commands,
-    entity: Entity,
-    skill_spell: Handle<Spell>,
-    skill_level: usize,
-    point: Vec2,
-    spell_obj: &Spell,
+pub fn on_mordekaiser_q(
+    trigger: On<EventSkillCast>,
+    mut commands: Commands,
+    q_morde: Query<(), With<Mordekaiser>>,
+    q_skill: Query<&Skill>,
+    res_spells: Res<Assets<Spell>>,
 ) {
+    let entity = trigger.event_target();
+    if q_morde.get(entity).is_err() {
+        return;
+    }
+
+    let Ok(skill) = q_skill.get(trigger.skill_entity) else {
+        return;
+    };
+    if !matches!(skill.slot, SkillSlot::Q) {
+        return;
+    }
+
+    let Some(spell_obj) = res_spells.get(&skill.spell) else {
+        return;
+    };
+
     commands.trigger(CommandAnimationPlay {
         entity,
         hash: ANIM_SPELL1.to_string(),
@@ -44,17 +55,17 @@ pub fn cast_mordekaiser_q(
     });
 
     let start_distance =
-        get_skill_data_value(spell_obj, "MaceStartDistance", skill_level).unwrap_or(400.0);
-    let mace_length = get_skill_data_value(spell_obj, "MaceLength", skill_level).unwrap_or(625.0);
+        get_skill_data_value(spell_obj, "MaceStartDistance", skill.level).unwrap_or(400.0);
+    let mace_length = get_skill_data_value(spell_obj, "MaceLength", skill.level).unwrap_or(625.0);
     let rect_width =
-        get_skill_data_value(spell_obj, "RectangleWidth", skill_level).unwrap_or(160.0);
+        get_skill_data_value(spell_obj, "RectangleWidth", skill.level).unwrap_or(160.0);
 
     commands.trigger(ActionDelayedDamage {
         entity,
-        skill: skill_spell,
-        skill_level,
+        skill: skill.spell.clone(),
+        skill_level: skill.level,
         delay: MORDEKAISER_Q_DELAY,
-        point,
+        point: trigger.point,
         origin: AoEOrigin::Caster,
         effects: vec![ActionDamageEffect {
             shape: DamageShape::Rectangle {

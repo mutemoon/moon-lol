@@ -19,6 +19,7 @@ use crate::test_utils::ChampionTestHarness;
 #[test]
 fn fiora_e_grants_attack_speed() {
     let mut h = build_headless("fiora_e_as");
+    let mana_before = h.mana();
     h.cast_skill(2, bevy::math::Vec2::ZERO).advance(0.1);
 
     let as_bonus = h
@@ -32,6 +33,11 @@ fn fiora_e_grants_attack_speed() {
         "E 应按等级赋予 0.4 攻速，实际 {:.3}",
         as_bonus
     );
+    assert!(
+        !h.can_cast(2),
+        "E 施放后应进入冷却"
+    );
+    assert!(h.mana() < mana_before, "E 施放应消耗法力");
 
     h.finish();
 }

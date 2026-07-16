@@ -14,6 +14,7 @@ use super::tests::build_headless;
 #[test]
 fn camille_e2_grants_attack_speed() {
     let mut h = build_headless("camille_e_as");
+    let mana_before = h.mana();
     // E1 开启重施窗口，E2 命中后挂攻速
     h.cast_skill(2, Vec2::new(100.0, 0.0)).advance(0.2);
     h.cast_skill(2, Vec2::new(100.0, 0.0)).advance(0.2);
@@ -29,6 +30,11 @@ fn camille_e2_grants_attack_speed() {
         "E2 应赋予 0.35 攻速，实际 {:.3}",
         as_bonus
     );
+    assert!(
+        !h.can_cast(2),
+        "E1 施放后应进入冷却"
+    );
+    assert!(h.mana() < mana_before, "E 施放应消耗法力");
     h.finish();
 }
 

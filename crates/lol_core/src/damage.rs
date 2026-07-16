@@ -230,3 +230,87 @@ pub fn on_command_damage_create(
         );
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// 测试用捕获资源：收集所有 `EventDamageCreate` 的 tag。
+    #[derive(Resource, Default)]
+    struct CapturedDamageTags(Vec<Option<u32>>);
+
+    fn on_capture_damage_event(
+        trigger: On<EventDamageCreate>,
+        mut captured: ResMut<CapturedDamageTags>,
+    ) {
+        captured.0.push(trigger.event().tag);
+    }
+
+    /// 伤害来源标记应从 `CommandDamageCreate` 完整透传至 `EventDamageCreate`，
+    /// 这是英雄观察者按 `tag` 区分伤害分区（如 Darius Q 内外圈）所依赖的契约。
+    #[test]
+    fn command_damage_create_passes_tag_to_event() {
+        let mut app = App::new();
+        app.add_plugins(MinimalPlugins);
+        app.add_plugins(PluginDamage);
+        app.init_resource::<CapturedDamageTags>();
+        app.add_observer(on_capture_damage_event);
+
+        let target = app.world_mut().spawn(Health::new(1000.0)).id();
+        let source = app.world_mut().spawn_empty().id();
+
+        app.world_mut()
+            .entity_mut(target)
+            .trigger(|e| CommandDamageCreate {
+                entity: e,
+                source,
+                damage_type: DamageType::True,
+                amount: 10.0,
+                tag: Some(42),
+            });
+        // 观察者链（CommandDamageCreate -> EventDamageCreate）跨两次命令刷新，多跑几帧确保落地
+        for _ in 0..3 {
+            app.update();
+        }
+
+        let captured = app.world().resource::<CapturedDamageTags>();
+        assert!(
+            captured.0.iter().any(|t| *t == Some(42)),
+            "CommandDamageCreate.tag 应透传至 EventDamageCreate.tag，实际捕获 {:?}",
+            captured.0
+        );
+    }
+
+    /// 无 tag 的伤害应保持 `None` 透传，不影响既有不带 tag 的技能。
+    #[test]
+    fn command_damage_create_passes_none_tag() {
+        let mut app = App::new();
+        app.add_plugins(MinimalPlugins);
+        app.add_plugins(PluginDamage);
+        app.init_resource::<CapturedDamageTags>();
+        app.add_observer(on_capture_damage_event);
+
+        let target = app.world_mut().spawn(Health::new(1000.0)).id();
+        let source = app.world_mut().spawn_empty().id();
+
+        app.world_mut()
+            .entity_mut(target)
+            .trigger(|e| CommandDamageCreate {
+                entity: e,
+                source,
+                damage_type: DamageType::True,
+                amount: 10.0,
+                tag: None,
+            });
+        for _ in 0..3 {
+            app.update();
+        }
+
+        let captured = app.world().resource::<CapturedDamageTags>();
+        assert!(
+            captured.0.iter().any(|t| t.is_none()),
+            "None tag 应原样透传，实际捕获 {:?}",
+            captured.0
+        );
+    }
+}

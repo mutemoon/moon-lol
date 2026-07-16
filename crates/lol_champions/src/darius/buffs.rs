@@ -16,6 +16,9 @@ pub const DARIUS_NOXIAN_MIGHT_AD_RATIO: f32 = 0.5;
 /// 诺克萨斯之力持续时间（秒）。
 pub const DARIUS_NOXIAN_MIGHT_DURATION: f32 = 5.0;
 
+/// 标记 Q 内圈伤害，wiki 规定内圈不叠出血。
+pub const DARIUS_Q_INNER_TAG: u32 = 2;
+
 /// 诺手被动 - 出血标记，最多 5 层。
 ///
 /// 挂在受击目标身上（作为子 buff）。`source` 记录施加者以便 DoT 读取其 AD。

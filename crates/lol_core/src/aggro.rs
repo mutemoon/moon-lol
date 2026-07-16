@@ -142,10 +142,18 @@ pub fn aggro_scan(
 
 pub fn on_team_get_damage(
     trigger: On<EventDamageCreate>,
-    mut q_aggro: Query<(&Team, &Transform, &Aggro, &mut AggroState, Option<&Turret>)>,
+    mut q_aggro: Query<(
+        Entity,
+        &Team,
+        &Transform,
+        &Aggro,
+        &mut AggroState,
+        Option<&Turret>,
+    )>,
     q_transform: Query<&Transform>,
     q_team: Query<&Team>,
     q_champion: Query<&Champion>,
+    q_minion: Query<&Minion>,
 ) {
     let source = trigger.source;
     let target = trigger.event_target();
@@ -164,11 +172,16 @@ pub fn on_team_get_damage(
     };
 
     let is_source_champion = q_champion.contains(source);
-    let is_target_champion = q_champion.contains(target);
+    let is_target_minion = q_minion.contains(target);
 
-    for (team, transform, aggro, mut aggro_state, turret) in q_aggro.iter_mut() {
+    for (entity, team, transform, aggro, mut aggro_state, turret) in q_aggro.iter_mut() {
         // 只有队友受袭才会引起愤怒
         if target_team != team {
+            continue;
+        }
+
+        // 英雄攻击小兵时，小兵不增加仇恨值
+        if is_source_champion && is_target_minion && q_minion.contains(entity) {
             continue;
         }
 
@@ -178,6 +191,7 @@ pub fn on_team_get_damage(
             continue;
         }
 
+        let is_target_champion = q_champion.contains(target);
         let bonus = if turret.is_some() && is_source_champion && is_target_champion {
             // 英雄在塔下攻击己方英雄：获得极高仇恨（1000），强制转移
             1000.0
