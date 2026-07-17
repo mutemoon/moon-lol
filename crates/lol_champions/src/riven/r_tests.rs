@@ -5,9 +5,7 @@ use lol_core::attack::Attack;
 use lol_core::damage::Damage;
 use lol_core::life::Health;
 
-use super::tests::{build_headless, riven_config};
-use crate::riven::Riven;
-use crate::test_utils::*;
+use super::tests::build_headless;
 
 const EPSILON: f32 = 1e-3;
 
@@ -74,11 +72,11 @@ fn riven_r_wind_slash_deals_damage_in_cone() {
 #[test]
 fn riven_r_wind_slash_deals_more_damage_to_low_hp_targets() {
     let mut h = build_headless("riven_r_wind_slash_missing_hp");
-    // 默认 forward 方向是 -Z
+    // 默认 forward 方向是 -Z，三枚导弹都在 -Z 扇形内
     let enemy_low = h.add_enemy(Vec3::new(0.0, 0.0, -300.0));
     let enemy_full = h.add_enemy(Vec3::new(0.0, 0.0, -500.0));
 
-    // 设置低血量敌人（10% HP）
+    // 低血量敌人：10% HP（斩杀段位应触发最大伤害）
     h.app.world_mut().entity_mut(enemy_low).insert(Health {
         value: 600.0,
         max: 6000.0,
@@ -103,9 +101,10 @@ fn riven_r_wind_slash_deals_more_damage_to_low_hp_targets() {
         "满血敌人也应受到 Wind Slash 伤害 ({})",
         damage_full
     );
+    // 斩杀缩放按每个目标自身 HP 独立计算：低血量敌人应比满血敌人承受更多伤害
     assert!(
-        (damage_low - damage_full).abs() < EPSILON,
-        "导弹系统使用平均 HP 计算伤害，两个敌人应受到相近伤害 (低: {}, 满: {})",
+        damage_low > damage_full,
+        "Wind Slash 应对低血量目标造成更高伤害（斩杀），实际 低: {}, 满: {}",
         damage_low,
         damage_full
     );

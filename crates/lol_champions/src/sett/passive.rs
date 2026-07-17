@@ -6,17 +6,17 @@
 use bevy::prelude::*;
 use lol_core::attack::EventAttackEnd;
 use lol_core::base::buff::BuffOf;
-use lol_core::buffs::cc_debuffs::{DebuffSlow, DebuffStun};
+use lol_core::buffs::cc_debuffs::DebuffSlow;
 use lol_core::damage::{CommandDamageCreate, Damage, DamageType, EventDamageCreate};
 use lol_core::life::Health;
 
 use crate::sett::Sett;
 use crate::sett::buffs::{
-    SettGrit, SettPunchState, SETT_E_STUN_DURATION, SETT_E_TAG, SETT_GRIT_CAP_RATIO,
+    SettGrit, SettPunchState, SETT_GRIT_CAP_RATIO,
     SETT_R_SLOW_DURATION, SETT_R_SLOW_PERCENT, SETT_R_TAG, SETT_PASSIVE_RIGHT_PUNCH_RATIO,
 };
 
-/// 监听 Sett 造成的伤害：仅 E 标签眩晕、仅 R 标签减速（Q/被动/W 不附带 CC）。
+/// 监听 Sett 造成的伤害：仅 R 标签减速（E/被动/W 不附带 CC，E 的眩晕/减速由 ConeHitPolicy 管理）。
 pub fn on_sett_damage_hit(
     trigger: On<EventDamageCreate>,
     mut commands: Commands,
@@ -27,18 +27,10 @@ pub fn on_sett_damage_hit(
         return;
     }
     let target = trigger.event_target();
-    match trigger.event().tag {
-        Some(SETT_E_TAG) => {
-            commands
-                .entity(target)
-                .with_related::<BuffOf>(DebuffStun::new(SETT_E_STUN_DURATION));
-        }
-        Some(SETT_R_TAG) => {
-            commands
-                .entity(target)
-                .with_related::<BuffOf>(DebuffSlow::new(SETT_R_SLOW_PERCENT, SETT_R_SLOW_DURATION));
-        }
-        _ => {}
+    if trigger.event().tag == Some(SETT_R_TAG) {
+        commands
+            .entity(target)
+            .with_related::<BuffOf>(DebuffSlow::new(SETT_R_SLOW_PERCENT, SETT_R_SLOW_DURATION));
     }
 }
 

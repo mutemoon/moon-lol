@@ -14,6 +14,7 @@ use lol_core::base::buff::{Buff, BuffOf};
 use lol_core::buffs::cc_debuffs::{ControlTag, DebuffSlow, DebuffStun, ImmuneToCC};
 use lol_core::buffs::common_buffs::BuffCastBlock;
 use lol_core::buffs::damage_reduction::BuffDamageReduction;
+use lol_core::action::damage::{DamageShape, is_in_shape};
 use lol_core::damage::{CommandDamageCreate, DamageType};
 use lol_core::entities::champion::Champion;
 use lol_core::life::Death;
@@ -177,29 +178,29 @@ fn counter_thrust(
     let Ok(caster_team) = q_team.get(caster) else {
         return;
     };
-    let caster_pos = caster_tf.translation.xz();
+    let caster_pos = caster_tf.translation;
 
-    let mut dir = buff.cast_point - caster_pos;
+    let mut dir = buff.cast_point - caster_pos.xz();
     if dir.length_squared() < 1e-6 {
         dir = Vec2::new(1.0, 0.0);
     }
     let dir = dir.normalize_or_zero();
-    let half_width = FIORA_W_THRUST_WIDTH * 0.5;
+
+    let shape = DamageShape::Rectangle {
+        width: FIORA_W_THRUST_WIDTH,
+        length: FIORA_W_THRUST_RANGE,
+        start_distance: 0.0,
+    };
 
     let mut hit: Option<(Entity, f32)> = None;
     for (target, t_tf, t_team) in q_targets.iter() {
         if t_team == caster_team {
             continue;
         }
-        let rel = t_tf.translation.xz() - caster_pos;
-        let proj = rel.dot(dir);
-        if proj < 0.0 || proj > FIORA_W_THRUST_RANGE {
+        if !is_in_shape(t_tf.translation, caster_pos, dir, &shape) {
             continue;
         }
-        let perp = (rel - dir * proj).length();
-        if perp > half_width {
-            continue;
-        }
+        let proj = (t_tf.translation.xz() - caster_pos.xz()).dot(dir);
         if hit.map_or(true, |(_, d)| proj < d) {
             hit = Some((target, proj));
         }

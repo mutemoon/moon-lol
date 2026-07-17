@@ -6,21 +6,11 @@ use lol_core::base::buff::Buffs;
 use lol_core::base::level::Level;
 use lol_core::damage::Damage;
 
-use crate::riven::Riven;
-use crate::riven::passive::BuffRivenPassive;
-use crate::riven::tests::{build_headless, riven_config};
+use crate::riven::passive::{passive_ratio_for_level, BuffRivenPassive};
+use crate::riven::tests::build_headless;
 use crate::test_utils::*;
 
 const EPSILON: f32 = 1e-3;
-
-/// 被动倍率：1级 30% -> 18级 46.76%（与 passive.rs 中常量一致）
-const RIVEN_PASSIVE_RATIO_MIN: f32 = 0.30;
-const RIVEN_PASSIVE_RATIO_MAX: f32 = 0.4676;
-
-fn passive_ratio_for_level(level: u32) -> f32 {
-    let t = level.saturating_sub(1) as f32 / 17.0;
-    RIVEN_PASSIVE_RATIO_MIN + t * (RIVEN_PASSIVE_RATIO_MAX - RIVEN_PASSIVE_RATIO_MIN)
-}
 
 /// 读取锐雯当前被动层数（无被动 buff 返回 None）
 fn passive_charges(h: &ChampionTestHarness) -> Option<u8> {

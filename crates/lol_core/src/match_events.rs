@@ -237,7 +237,7 @@ mod tests {
         ));
 
         // 直接运行系统一次，避免对 FixedUpdate 调度的依赖。
-        app.world_mut().run_system_once(check_cs_threshold);
+        let _ = app.world_mut().run_system_once(check_cs_threshold);
         let count = drain(&rx)
             .iter()
             .filter(|e| matches!(e, MatchEventOut::CsThreshold { .. }))
@@ -245,7 +245,7 @@ mod tests {
         assert_eq!(count, 1);
 
         // 第二次不应再发（已标记 CsThresholdReached）。
-        app.world_mut().run_system_once(check_cs_threshold);
+        let _ = app.world_mut().run_system_once(check_cs_threshold);
         let count2 = drain(&rx)
             .iter()
             .filter(|e| matches!(e, MatchEventOut::CsThreshold { .. }))
@@ -266,7 +266,7 @@ mod tests {
             },
         ));
 
-        app.world_mut().run_system_once(check_cs_threshold);
+        let _ = app.world_mut().run_system_once(check_cs_threshold);
         let count = drain(&rx)
             .iter()
             .filter(|e| matches!(e, MatchEventOut::CsThreshold { .. }))

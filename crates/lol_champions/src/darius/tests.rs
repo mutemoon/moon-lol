@@ -8,6 +8,7 @@ use lol_core::base::buff::Buffs;
 use lol_core::buffs::cc_debuffs::DebuffSlow;
 use lol_core::buffs::on_hit::{BuffOnHitBonusDamage, BuffOnHitCounter, BuffOnHitSlow};
 use lol_core::damage::{CommandDamageCreate, Damage, DamageType};
+use lol_core::skill::{CoolDown, SkillRecastWindow};
 
 use crate::darius::Darius;
 use crate::darius::buffs::{BuffDariusBleed, BuffDariusMight};
@@ -78,10 +79,6 @@ pub fn build_headless(name: &str) -> ChampionTestHarness {
     ChampionTestHarness::build::<Darius>(name, HarnessMode::Headless, &darius_config())
 }
 
-pub fn build_render(name: &str) -> ChampionTestHarness {
-    ChampionTestHarness::build::<Darius>(name, HarnessMode::Render, &darius_config())
-}
-
 /// Test that Q deals damage to enemies in range
 #[test]
 fn darius_q_deals_damage() {
@@ -96,6 +93,37 @@ fn darius_q_deals_damage() {
     assert!(h.health(enemy) < hp_before, "Q 应造成伤害，敌人血量应下降");
     assert!(!h.can_cast(0), "Q 施放后应进入冷却");
     assert!(h.mana() < mana_before, "Q 施放应消耗法力");
+    h.finish();
+}
+
+/// S4：技能冷却应在持续时间过后恢复可施放。
+/// 现有测试只校验"施放后进入冷却"，本测试补齐"冷却结束后恢复"这条关键语义，
+/// 顺带验证 `fixed_update_cooldown` 在测试时钟下确实会 tick `CoolDown.timer`。
+#[test]
+fn darius_q_cooldown_recovers_after_duration() {
+    let mut h = build_headless("darius_q_cooldown_recovery");
+    give_mana(&mut h);
+    let _enemy = h.add_enemy(Vec3::new(200.0, 0.0, 0.0));
+
+    // 施放 Q 进入冷却
+    h.cast_skill(0, Vec2::new(200.0, 0.0)).advance(0.5);
+    assert!(!h.can_cast(0), "Q 施放后应进入冷却");
+
+    // 读取该技能实际配置的冷却时长（1 级 = 10s），推进到刚过期之后
+    let duration = h
+        .app
+        .world()
+        .get::<CoolDown>(h.skill_entity(0))
+        .expect("CoolDown 组件应存在")
+        .duration;
+    h.advance(duration + 0.5);
+
+    assert!(
+        h.can_cast(0),
+        "冷却结束后 Q 应恢复可施放（持续 {}s，已推进 {}s）",
+        duration,
+        duration + 0.5
+    );
     h.finish();
 }
 
@@ -159,6 +187,98 @@ fn darius_r_deals_damage() {
     assert!(h.health(enemy) < hp_before, "R 应造成伤害");
     assert!(!h.can_cast(3), "R 施放后应进入冷却");
     assert!(h.mana() < mana_before, "R 施放应消耗法力");
+    h.finish();
+}
+
+/// R 应跃向最近敌人而非原地施放。
+#[test]
+fn darius_r_leaps_to_nearest_enemy() {
+    let mut h = build_headless("darius_r_leap");
+    give_mana(&mut h);
+    let enemy = h.add_enemy(Vec3::new(300.0, 0.0, 0.0));
+
+    let pos_before = h.position(h.champion);
+    h.cast_skill(3, Vec2::new(300.0, 0.0)).advance(0.5);
+    let pos_after = h.position(h.champion);
+
+    // 冲刺后 Darius 应更靠近敌人
+    let d_before = pos_before.distance(Vec3::new(300.0, 0.0, 0.0));
+    let d_after = pos_after.distance(Vec3::new(300.0, 0.0, 0.0));
+    assert!(
+        d_after < d_before - 50.0,
+        "R 应跃向敌人（before={d_before:.0}, after={d_after:.0}）"
+    );
+    // 确认敌人已受伤害（达阵结算）
+    assert!(
+        h.health(enemy) < 6000.0,
+        "R 命中应造成伤害"
+    );
+    h.finish();
+}
+
+/// R 击杀目标后应重置冷却（R1/R2 添加重施窗口，R3 完全刷新）。
+#[test]
+fn darius_r_resets_on_kill() {
+    let mut h = build_headless("darius_r_reset");
+    give_mana(&mut h);
+    // 敌人 6000 HP，R 至少打几百 → 让敌人残血后 R 斩杀
+    let enemy = h.add_enemy(Vec3::new(300.0, 0.0, 0.0));
+    h.app.world_mut().trigger(CommandDamageCreate {
+        entity: enemy,
+        source: h.champion,
+        damage_type: DamageType::True,
+        amount: 5950.0,
+        tag: None,
+    });
+    h.advance(0.1);
+
+    h.cast_skill(3, Vec2::new(300.0, 0.0)).advance(0.5);
+    let enemy_hp = h.health(enemy);
+    assert!(enemy_hp <= 0.0, "R 应斩杀残血敌人（HP={enemy_hp:.1}）");
+
+    // R1 冷却应被重置且添加重施窗口
+    let skill_entity = h.skill_entity(3);
+    let cd = h.app.world().get::<CoolDown>(skill_entity).unwrap();
+    assert!(
+        cd.timer.is_none(),
+        "R 击杀后冷却应被清除"
+    );
+    // 应有重施窗口（6s）
+    let has_recast = h
+        .app
+        .world()
+        .get::<SkillRecastWindow>(skill_entity)
+        .is_some();
+    assert!(has_recast, "R1/R2 击杀后应有重施窗口");
+    h.finish();
+}
+
+/// R 不击杀目标时不应重置冷却。
+#[test]
+fn darius_r_no_reset_without_kill() {
+    let mut h = build_headless("darius_r_no_reset");
+    give_mana(&mut h);
+    let enemy = h.add_enemy(Vec3::new(300.0, 0.0, 0.0));
+
+    h.cast_skill(3, Vec2::new(300.0, 0.0)).advance(0.5);
+    let enemy_hp = h.health(enemy);
+    assert!(enemy_hp > 0.0, "R 不应斩杀满血敌人");
+
+    // 冷却不应被重置
+    let skill_entity = h.skill_entity(3);
+    let cd = h.app.world().get::<CoolDown>(skill_entity).unwrap();
+    assert!(
+        cd.timer.is_some(),
+        "R 未击杀时冷却应存在"
+    );
+    // 不应有重施窗口
+    assert!(
+        h.app
+            .world()
+            .get::<SkillRecastWindow>(skill_entity)
+            .is_none(),
+        "R 未击杀时不应有重施窗口"
+    );
     h.finish();
 }
 

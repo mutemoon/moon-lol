@@ -2,46 +2,55 @@
 
 //! Sett E（迎面痛击）集成测试（TDD）。
 //!
-//! E：朝施法方向锥形拉回敌人到脚下（+击飞），造成 base+0.6×AD 物理伤害，
-//!    并施加 0.5s 眩晕。Sett 基础 AD=60，1 级伤害 = 30+0.6×60 = 66。
+//! E：双锥形检测 + 拉回 + 物理伤害。
+//! 双侧均命中 → 全部眩晕；单侧命中 → 该侧减速。
+//! Sett 基础 AD=60，1 级伤害 = 30+0.6×60 = 66。
 
 use bevy::math::{Vec2, Vec3};
 
-use super::tests::{build_headless, is_stunned};
+use super::tests::{build_headless, is_slowed, is_stunned};
 
-/// 锥形内敌人应被拉到脚下并受到 66 物理伤害。
+/// 前方单个敌人被 E 拉回 + 伤害 + 减速。
 #[test]
-fn sett_e_pulls_and_damages() {
-    let mut h = build_headless("sett_e_pull_dmg");
+fn sett_e_pulls_and_damages_and_slows_single_side() {
+    let mut h = build_headless("sett_e_pull_single");
     let enemy = h.add_enemy(Vec3::new(300.0, 0.0, 0.0));
+
     let hp_before = h.health(enemy);
+    h.cast_skill(2, Vec2::new(800.0, 0.0)).advance(0.6);
 
-    h.cast_skill(2, Vec2::new(800.0, 0.0)).advance(1.0);
+    // 拉回：敌人应大幅移向 Sett（x 从 300 → 接近 0）
+    let pos = h.position(enemy);
+    assert!(
+        pos.x < 50.0,
+        "前方敌人应被拉回到 Sett 附近，实际 x = {:.1}",
+        pos.x
+    );
 
+    // 伤害：应受 66 物理伤害（30 + 0.6×60）
     let dealt = hp_before - h.health(enemy);
     assert!(
-        (dealt - 66.0).abs() < 1.0,
-        "E 应造成 30+0.6*AD=66 物理伤害，实际 {}",
-        dealt
+        (dealt - 66.0).abs() < 0.5,
+        "E 应造成 66 伤害，实际 = {dealt:.1}"
     );
-    let pos_after = h.position(enemy);
-    assert!(
-        pos_after.x.abs() < 30.0,
-        "E 应把敌人拉到脚下（x≈0），实际 x={}",
-        pos_after.x
-    );
+
+    // 减速：单侧命中 → 减速，非眩晕
+    assert!(is_slowed(&h, enemy), "单侧被 E 命中的敌人应减速");
+    assert!(!is_stunned(&h, enemy), "单侧被 E 命中的敌人不应眩晕");
     h.finish();
 }
 
-/// 锥形内敌人应被眩晕 0.5s。
+/// 前后锥形均命中 → 全部眩晕。
 #[test]
-fn sett_e_stuns_hit_enemies() {
-    let mut h = build_headless("sett_e_stun");
-    let enemy = h.add_enemy(Vec3::new(300.0, 0.0, 0.0));
+fn sett_e_dual_side_stuns_all() {
+    let mut h = build_headless("sett_e_dual_stun");
+    let front = h.add_enemy(Vec3::new(300.0, 0.0, 0.0));
+    let back = h.add_enemy(Vec3::new(-300.0, 0.0, 0.0));
 
     h.cast_skill(2, Vec2::new(800.0, 0.0)).advance(0.3);
 
-    assert!(is_stunned(&h, enemy), "E 命中敌人应被眩晕 0.5s");
+    assert!(is_stunned(&h, front), "前方敌人应被眩晕（双侧命中）");
+    assert!(is_stunned(&h, back), "后方敌人应被眩晕（双侧命中）");
     h.finish();
 }
 

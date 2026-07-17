@@ -4,13 +4,11 @@ use lol_base::spell::Spell;
 use lol_core::attack::Attack;
 use lol_core::base::buff::{BuffOf, Buffs};
 use lol_core::damage::Damage;
-use lol_core::life::Health;
-use lol_core::missile::CommandMissileCreate;
+use lol_core::missile::{CommandMissileCreate, MissileMissingHpScaling};
 use lol_core::skill::{
     CoolDown, EventSkillCast, Skill, SkillRecastWindow, SkillSlot, get_skill_data_value,
     get_skill_value,
 };
-use lol_core::team::Team;
 
 use crate::riven::Riven;
 use crate::riven::buffs::BuffRivenR;
@@ -23,8 +21,6 @@ pub fn on_riven_r(
     mut q_damage: Query<&mut Damage>,
     mut q_attack: Query<&mut Attack>,
     q_transform: Query<&Transform>,
-    q_team: Query<&Team>,
-    q_targets: Query<(Entity, &Team, &Transform, &Health)>,
     res_spells: Res<Assets<Spell>>,
     res_asset_server: Res<AssetServer>,
 ) {
@@ -61,8 +57,6 @@ pub fn on_riven_r(
                 entity,
                 &missile_handles,
                 &q_transform,
-                &q_team,
-                &q_targets,
                 spell_obj,
                 skill.level,
                 damage_value,
@@ -125,16 +119,11 @@ fn cast_riven_wind_slash(
     entity: Entity,
     missile_handles: &[Handle<Spell>; 3],
     q_transform: &Query<&Transform>,
-    q_team: &Query<&Team>,
-    q_targets: &Query<(Entity, &Team, &Transform, &Health)>,
     spell_obj: &Spell,
     skill_level: usize,
     total_ad: f32,
 ) {
     let Ok(transform) = q_transform.get(entity) else {
-        return;
-    };
-    let Ok(_team) = q_team.get(entity) else {
         return;
     };
     let forward = transform.forward();
@@ -149,25 +138,12 @@ fn cast_riven_wind_slash(
     })
     .unwrap_or(150.0);
 
-    // 平均生命值比例用于计算导弹伤害（取目标平均）
-    let avg_hp_ratio = {
-        let mut total_ratio = 0.0f32;
-        let mut count = 0u32;
-        for (_, target_team, _, health) in q_targets.iter() {
-            if target_team == _team {
-                continue;
-            }
-            total_ratio += (health.value / health.max).clamp(0.0, 1.0);
-            count += 1;
-        }
-        if count > 0 {
-            total_ratio / count as f32
-        } else {
-            1.0
-        }
+    // 按目标已损失生命值缩放：命中时由导弹系统逐目标重算，
+    // 血越少越痛（斩杀）。无 Health 数据时回退到 min_damage。
+    let scaling = MissileMissingHpScaling {
+        min_damage,
+        max_damage,
     };
-    let missing_hp_ratio = 1.0 - avg_hp_ratio;
-    let damage = min_damage + (max_damage - min_damage) * missing_hp_ratio;
 
     let range = 1100.0;
     let spread_angle = 7.0_f32.to_radians();
@@ -186,10 +162,13 @@ fn cast_riven_wind_slash(
             target: None,
             destination: Some(destination),
             spell: handle.clone(),
-            damage,
+            damage: min_damage,
             speed: None,
             particle_hash: None,
             sticky: false,
+            pass_through: true,
+            collision_target: default(),
+            missing_hp_scaling: Some(scaling),
         });
     }
 }

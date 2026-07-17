@@ -12,10 +12,12 @@ use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::damage::{ActionDamageEffect, DamageShape, TargetDamage, TargetFilter};
 use lol_core::action::delayed_damage::{ActionDelayedDamage, AoEIndicator, AoEOrigin};
-use lol_core::damage::DamageType;
-use lol_core::skill::{EventSkillCast, Skill, SkillSlot, delay_from_cast_frame};
+use lol_core::damage::{DamageType, EventDamageCreate};
+use lol_core::entities::champion::Champion;
+use lol_core::life::Health;
+use lol_core::skill::{EventSkillCast, Skill, SkillSlot, delay_from_cast_frame, get_skill_data_value};
 
-use crate::darius::buffs::DARIUS_Q_INNER_TAG;
+use crate::darius::buffs::{DARIUS_Q_INNER_TAG, DARIUS_Q_OUTER_TAG, DariusQHealPending};
 use crate::darius::Darius;
 
 /// Inner blade radius (the "handle" of the axe)
@@ -53,6 +55,12 @@ pub fn on_darius_q(
         repeat: false,
         duration: None,
     });
+    // 插入待回血结算组件（新 Q 重制计数）
+    let heal_pct = get_skill_data_value(spell_obj, "MissingHealthHeal", skill.level).unwrap_or(17.0);
+    commands.entity(entity).insert(DariusQHealPending {
+        heal_pct_normalized: heal_pct / 100.0,
+        ..Default::default()
+    });
 
     let delay = delay_from_cast_frame(spell_obj);
 
@@ -81,6 +89,7 @@ pub fn on_darius_q(
             damage_type: DamageType::Physical,
             ..Default::default()
         }],
+        tag: Some(DARIUS_Q_OUTER_TAG),
         ..Default::default()
     };
 
@@ -100,6 +109,49 @@ pub fn on_darius_q(
             fade_duration: 0.3,
         },
     });
+}
+
+/// Q 外圈命中英雄 → 递增待回血计数（上限 3）。
+pub fn on_darius_q_outer_hit(
+    trigger: On<EventDamageCreate>,
+    mut q_pending: Query<&mut DariusQHealPending>,
+    q_champion: Query<(), With<Champion>>,
+) {
+    if trigger.tag != Some(DARIUS_Q_OUTER_TAG) {
+        return;
+    }
+    if q_champion.get(trigger.entity).is_err() {
+        return;
+    }
+    let Ok(mut pending) = q_pending.get_mut(trigger.source) else {
+        return;
+    };
+    pending.hit_count = (pending.hit_count + 1).min(3);
+}
+
+/// FixedUpdate：结算 Q 回血。
+pub fn apply_darius_q_heal(
+    darius_query: Query<Entity, With<Darius>>,
+    mut q_pending: Query<&mut DariusQHealPending>,
+    mut q_health: Query<&mut Health>,
+) {
+    let Some(darius) = darius_query.iter().next() else {
+        return;
+    };
+    let Ok(mut pending) = q_pending.get_mut(darius) else {
+        return;
+    };
+    if pending.hit_count == 0 {
+        return;
+    }
+
+    let Ok(mut health) = q_health.get_mut(darius) else {
+        return;
+    };
+    let missing = health.max - health.value;
+    let heal = missing * pending.heal_pct_normalized * (pending.hit_count as f32);
+    health.value = (health.value + heal).min(health.max);
+    pending.hit_count = 0;
 }
 
 #[cfg(test)]

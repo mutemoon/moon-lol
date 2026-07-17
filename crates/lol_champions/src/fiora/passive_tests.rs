@@ -8,7 +8,7 @@
 //! 视觉系统直接以 `Vital` 组件为驱动源，因此多数用例直接在敌人身上挂一个已知
 //! 方向的 Vital，绕过被动的随机方向，便于断言扇形朝向。
 
-use bevy::math::{Vec2, Vec3};
+use bevy::math::Vec3;
 use bevy::prelude::{Entity, Quat, Transform};
 use lol_core::base::direction::Direction;
 use lol_core::damage::{CommandDamageCreate, DamageType};

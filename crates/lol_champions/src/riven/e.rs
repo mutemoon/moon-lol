@@ -18,7 +18,6 @@ pub fn on_riven_e(
     q_riven: Query<(), With<Riven>>,
     q_skill: Query<&Skill>,
     q_damage: Query<&Damage>,
-    q_transform: Query<&Transform>,
     res_spells: Res<Assets<Spell>>,
 ) {
     let entity = trigger.event_target();

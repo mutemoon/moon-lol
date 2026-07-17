@@ -14,6 +14,7 @@
 
 use bevy::math::{Vec2, Vec3};
 use lol_core::base::buff::Buffs;
+use lol_core::damage::{CommandDamageCreate, DamageType};
 
 use super::tests::{build_headless, give_mana};
 use crate::darius::buffs::BuffDariusBleed;
@@ -107,5 +108,41 @@ fn darius_q_delayed_hemorrhage() {
     assert!(found_bleed, "延迟伤害应触发 on_darius_damage_hit 叠出血");
     assert!(!h.can_cast(0), "Q 施放后应进入冷却");
     assert!(h.mana() < mana_before, "Q 施放应消耗法力");
+    h.finish();
+}
+
+/// Q 外圈命中敌人应回复已损失生命值（每名敌人 17%（来自 config MissingHealthHeal），上限 3 名）。
+#[test]
+fn darius_q_heals_on_outer_blade_hit() {
+    let mut h = build_headless("darius_q_heal");
+    give_mana(&mut h);
+
+    // 先伤害诺手，使其缺失血量（652 max HP，打 300 留 352）
+    let darius_max = h.health(h.champion);
+    h.app.world_mut().trigger(CommandDamageCreate {
+        entity: h.champion,
+        source: h.champion,
+        damage_type: DamageType::True,
+        amount: 300.0,
+        tag: None,
+    });
+    h.advance(0.1);
+    let darius_hp_damaged = h.health(h.champion);
+    assert!(darius_hp_damaged < darius_max, "诺手应先受伤掉血");
+
+    // 放一个敌人在外圈范围（150-350）
+    let _enemy = h.add_enemy(Vec3::new(250.0, 0.0, 0.0));
+
+    h.cast_skill(0, Vec2::new(250.0, 0.0)).advance(0.5);
+
+    let darius_hp_after = h.health(h.champion);
+    assert!(
+        darius_hp_after > darius_hp_damaged,
+        "Q 外圈命中后诺手应回血（damaged={darius_hp_damaged:.1}, after={darius_hp_after:.1}）"
+    );
+    assert!(
+        darius_hp_after <= darius_max,
+        "回血不应超过最大血量"
+    );
     h.finish();
 }

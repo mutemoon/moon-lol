@@ -16,6 +16,7 @@ use lol_core::life::Health;
 use lol_core::team::Team;
 
 use crate::camille::Camille;
+use crate::camille::w::CAMILLE_W_OUTER_TAG;
 
 /// 被动护盾占最大生命值比例（wiki：6%）。
 pub const CAMILLE_PASSIVE_SHIELD_RATIO: f32 = 0.06;
@@ -108,6 +109,10 @@ pub fn on_camille_damage_hit(
     mut commands: Commands,
     q_camille: Query<(), With<Camille>>,
 ) {
+    // 仅 W 外圈命中施加减速
+    if trigger.tag != Some(CAMILLE_W_OUTER_TAG) {
+        return;
+    }
     let source = trigger.source;
     if q_camille.get(source).is_err() {
         return;

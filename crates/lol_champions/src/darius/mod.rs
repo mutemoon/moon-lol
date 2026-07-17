@@ -13,6 +13,8 @@ mod passive_tests;
 mod q_tests;
 #[cfg(test)]
 mod tests;
+#[cfg(test)]
+mod w_tests;
 
 use bevy::prelude::*;
 use lol_core::entities::champion::Champion;
@@ -23,12 +25,18 @@ pub struct PluginDarius;
 impl Plugin for PluginDarius {
     fn build(&self, app: &mut App) {
         app.add_observer(q::on_darius_q);
+        app.add_observer(q::on_darius_q_outer_hit);
         app.add_observer(w::on_darius_w);
+        app.add_observer(w::on_darius_w_attack_end);
         app.add_observer(e::on_darius_e);
         app.add_observer(r::on_darius_r);
+        app.add_observer(r::on_darius_r_arrival);
         app.add_observer(passive::on_darius_damage_hit);
         app.add_systems(FixedUpdate, passive::update_darius_bleed);
         app.add_systems(FixedUpdate, passive::update_darius_might);
+        app.add_systems(FixedUpdate, q::apply_darius_q_heal);
+        app.add_systems(FixedUpdate, w::check_darius_w_kill);
+        app.add_systems(FixedUpdate, r::check_darius_r_kill);
     }
 }
 

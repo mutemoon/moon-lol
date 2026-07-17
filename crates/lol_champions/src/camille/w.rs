@@ -12,6 +12,9 @@ use lol_core::skill::{EventSkillCast, Skill, SkillSlot, get_skill_data_value};
 
 use crate::camille::Camille;
 
+/// W 外圈减速 tag：供 `on_camille_damage_hit` 按标签过滤，仅 W 外圈命中施加减速。
+pub const CAMILLE_W_OUTER_TAG: u32 = 1;
+
 pub fn on_camille_w(
     trigger: On<EventSkillCast>,
     mut commands: Commands,
@@ -61,7 +64,8 @@ pub fn on_camille_w(
                 damage_type: lol_core::damage::DamageType::Physical,
                 ..Default::default()
             }],
-            ..Default::default()
+            exclude: vec![],
+            tag: Some(CAMILLE_W_OUTER_TAG),
         }],
         indicator: AoEIndicator {
             color: Color::srgba(0.9, 0.3, 0.5, 0.4),

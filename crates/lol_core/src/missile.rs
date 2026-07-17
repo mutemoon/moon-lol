@@ -10,7 +10,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::attack::EntityCommandsTrigger;
 use crate::damage::{CommandDamageCreate, Damage, DamageType};
-use crate::life::Death;
+use crate::life::{Death, Health};
 use crate::movement::{
     CommandMovement, EventMovementEnd, Movement, MovementAction, MovementSource, MovementWay,
 };
@@ -59,6 +59,44 @@ pub struct LinearMissile {
     pub hit_enemies: Vec<Entity>,
     /// 粘性飞弹：检测地形碰撞，碰墙即锚定（不做实体碰撞）。
     pub sticky: bool,
+    /// 穿透飞弹：碰撞敌人后不销毁，继续飞行（刀妹 R 飞弹）。
+    pub pass_through: bool,
+    /// 碰撞目标策略：默认 Enemy（伤害敌人），
+    /// EnemyNoDirectDamage 碰撞敌人但不造成伤害，改发 EventMissileHitEntity
+    pub collision_target: MissileCollisionTarget,
+    /// 按目标已损失生命值缩放伤害（锐雯 R 斩杀），None 时用固定 `damage`
+    pub missing_hp_scaling: Option<MissileMissingHpScaling>,
+}
+
+/// 飞弹碰撞目标策略
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum MissileCollisionTarget {
+    /// 碰撞敌方实体并造成伤害（默认）
+    #[default]
+    Enemy,
+    /// 只碰撞地形（sticky 飞弹，青钢影 E1）
+    WallOnly,
+    /// 碰撞敌方实体但不造成伤害，改为发事件（Aatrox W / Fiora W 飞弹模式）
+    EnemyNoDirectDamage,
+}
+
+/// 按目标已损失生命值缩放伤害的参数（如锐雯 R 斩杀、未来科加斯 R/李青 Q）。
+///
+/// 命中时按目标实际 HP 重算：`amount = min + (max - min) * (1 - hp/max)`。
+/// `None` 时使用导弹固定 `damage`，行为不变。
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct MissileMissingHpScaling {
+    pub min_damage: f32,
+    pub max_damage: f32,
+}
+
+impl MissileMissingHpScaling {
+    /// 按目标当前/最大生命值比例重算伤害。
+    pub fn damage_for(&self, health: &Health) -> f32 {
+        let ratio = (health.value / health.max).clamp(0.0, 1.0);
+        let missing = 1.0 - ratio;
+        self.min_damage + (self.max_damage - self.min_damage) * missing
+    }
 }
 
 #[derive(EntityEvent, Debug)]
@@ -77,6 +115,12 @@ pub struct CommandMissileCreate {
     pub particle_hash: Option<u32>,
     /// 粘性飞弹：碰墙锚定并发出 `EventMissileHit`，用于青钢影 E 钩索等
     pub sticky: bool,
+    /// 穿透飞弹：碰撞敌人后不销毁，继续飞行（刀妹 R 飞弹）。
+    pub pass_through: bool,
+    /// 碰撞目标策略
+    pub collision_target: MissileCollisionTarget,
+    /// 按目标已损失生命值缩放伤害（锐雯 R 斩杀），None 时用固定 `damage`
+    pub missing_hp_scaling: Option<MissileMissingHpScaling>,
 }
 
 /// 粘性飞弹碰墙后留下的锚点实体（世界定点，带生命周期）。
@@ -92,6 +136,16 @@ pub struct EventMissileHit {
     pub source: Entity,
     pub spell: Handle<Spell>,
     pub point: Vec3,
+}
+
+/// 飞弹命中实体事件（新增）：触发于 source（施法者），携带命中目标和飞弹信息
+#[derive(EntityEvent, Debug, Clone)]
+pub struct EventMissileHitEntity {
+    #[event_target]
+    pub source: Entity,
+    pub target: Entity,
+    pub spell: Handle<Spell>,
+    pub hit_point: Vec3,
 }
 
 /// WallAnchor 默认存活时长（秒），覆盖二段技能窗口
@@ -164,7 +218,7 @@ fn linear_missile_collision(
         &mut LinearMissile,
         &mut Transform,
     )>,
-    q_targets: Query<(Entity, &Team, &Transform), (Without<LinearMissile>, Without<Death>)>,
+    q_targets: Query<(Entity, &Team, &Transform, Option<&Health>), (Without<LinearMissile>, Without<Death>)>,
     q_source_team: Query<&Team>,
     res_grid: Option<Res<ResourceGrid>>,
     assets_grid: Option<Res<Assets<ConfigNavigationGrid>>>,
@@ -219,11 +273,16 @@ fn linear_missile_collision(
             continue;
         }
 
+        // WallOnly：不做实体碰撞（仅粘性碰墙）
+        if linear.collision_target == MissileCollisionTarget::WallOnly {
+            continue;
+        }
+
         let Ok(source_team) = q_source_team.get(state.source) else {
             continue;
         };
 
-        for (target, team, target_transform) in q_targets.iter() {
+        for (target, team, target_transform, health) in q_targets.iter() {
             if team == source_team {
                 continue;
             }
@@ -235,13 +294,37 @@ fn linear_missile_collision(
             let dist = to_target.length();
             if dist < linear.width {
                 linear.hit_enemies.push(target);
-                commands.trigger(CommandDamageCreate {
-                    entity: target,
-                    source: state.source,
-                    damage_type: DamageType::Physical,
-                    amount: linear.damage,
-                    tag: None,
-                });
+
+                match linear.collision_target {
+                    MissileCollisionTarget::EnemyNoDirectDamage => {
+                        commands.entity(state.source).trigger(|e| EventMissileHitEntity {
+                            source: e,
+                            target,
+                            spell: missile.key.clone(),
+                            hit_point: target_transform.translation,
+                        });
+                    }
+                    _ => {
+                        // 按目标已损失生命值缩放（锐雯 R 斩杀），否则用固定伤害
+                        let amount = match (linear.missing_hp_scaling, health) {
+                            (Some(scaling), Some(health)) => scaling.damage_for(health),
+                            _ => linear.damage,
+                        };
+                        commands.trigger(CommandDamageCreate {
+                            entity: target,
+                            source: state.source,
+                            damage_type: DamageType::Physical,
+                            amount,
+                            tag: None,
+                        });
+                    }
+                }
+
+                // 非穿透飞弹：碰撞后销毁
+                if !linear.pass_through {
+                    commands.entity(missile_entity).despawn();
+                    break;
+                }
             }
         }
     }
@@ -341,6 +424,9 @@ fn on_command_missile_create(
                 damage: trigger.damage,
                 hit_enemies: Vec::new(),
                 sticky: trigger.sticky,
+                pass_through: trigger.pass_through,
+                collision_target: trigger.collision_target,
+                missing_hp_scaling: trigger.missing_hp_scaling,
             },
             Transform::from_translation(translation),
             Movement { speed },
@@ -658,6 +744,9 @@ mod tests {
                 speed: Some(1200.0),
                 particle_hash: None,
                 sticky: true,
+                pass_through: false,
+                collision_target: MissileCollisionTarget::Enemy,
+                missing_hp_scaling: None,
             });
         for _ in 0..15 {
             app.update();
@@ -699,6 +788,9 @@ mod tests {
                 speed: Some(1200.0),
                 particle_hash: None,
                 sticky: false,
+                pass_through: false,
+                collision_target: MissileCollisionTarget::Enemy,
+                missing_hp_scaling: None,
             });
         for _ in 0..5 {
             app.update();

@@ -11,15 +11,18 @@ pub struct DebuffAatroxWMark {
     pub source: Entity,
     pub target: Entity,
     pub damage: f32,
+    /// W 链刃中心点（施法时 Aatrox 位置），引爆时拉回此点
+    pub center: Vec2,
     pub timer: Timer,
 }
 
 impl DebuffAatroxWMark {
-    pub fn new(source: Entity, target: Entity, damage: f32, duration: f32) -> Self {
+    pub fn new(source: Entity, target: Entity, damage: f32, duration: f32, center: Vec2) -> Self {
         Self {
             source,
             target,
             damage,
+            center,
             timer: Timer::from_seconds(duration, TimerMode::Once),
         }
     }

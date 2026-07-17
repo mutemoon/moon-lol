@@ -5,7 +5,6 @@ use lol_core::attack::EventAttackEnd;
 use lol_core::base::buff::Buffs;
 use lol_core::damage::Damage;
 use lol_core::life::Health;
-use lol_core::skill::Skill;
 
 use crate::aatrox::Aatrox;
 use crate::test_utils::{ChampionHarnessConfig, ChampionTestHarness, HarnessMode};
@@ -23,14 +22,6 @@ pub fn aatrox_config() -> ChampionHarnessConfig {
 
 pub fn build_headless(name: &str) -> ChampionTestHarness {
     ChampionTestHarness::build::<Aatrox>(name, HarnessMode::Headless, &aatrox_config())
-}
-
-/// 直接把指定技能槽升到 `level`（harness 默认把所有技能升到 1）。
-pub fn level_skill(h: &mut ChampionTestHarness, index: usize, level: usize) {
-    let skill_entity = h.skill_entity(index);
-    if let Some(mut skill) = h.app.world_mut().get_mut::<Skill>(skill_entity) {
-        skill.level = level;
-    }
 }
 
 /// 触发一次普攻命中事件（无头模式下不模拟基础攻击伤害，仅驱动 on-attack-end 观察者）。

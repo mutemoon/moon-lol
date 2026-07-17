@@ -75,7 +75,7 @@ fn init_barrack_state_system(
         };
 
         config.units.iter().for_each(|unit| {
-            asset_server.load::<DynamicWorld>(&unit.minion_template);
+            let _ = asset_server.load::<DynamicWorld>(&unit.minion_template);
         });
 
         commands.entity(entity).insert(BarrackState {

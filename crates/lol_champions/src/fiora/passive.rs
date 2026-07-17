@@ -90,7 +90,9 @@ pub fn update_add_vital(
     for skill_of in q_skill_of_with_ability.iter() {
         let entity = skill_of.0;
 
-        let (transform, team) = q_transform_team.get(entity).unwrap();
+        let Ok((transform, team)) = q_transform_team.get(entity) else {
+            continue;
+        };
 
         for (target_entity, target_transform, target_team) in q_target_without_vital.iter() {
             if target_entity == entity {
@@ -172,7 +174,9 @@ pub fn update_remove_vital(
     for skill_of in q_skill_of_with_ability.iter() {
         let entity = skill_of.0;
 
-        let (fiora_transform, fiora_team) = q_transform_team.get(entity).unwrap();
+        let Ok((fiora_transform, fiora_team)) = q_transform_team.get(entity) else {
+            continue;
+        };
 
         for (target_entity, target_transform, target_team, mut vital) in
             q_target_with_vital.iter_mut()

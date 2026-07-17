@@ -5,7 +5,6 @@ use lol_core::base::buff::Buffs;
 use lol_core::buffs::cc_debuffs::DebuffSlow;
 
 use super::tests::{build_headless, give_mana};
-use crate::test_utils::*;
 
 /// 锥形内敌人应被拉到 Darius 脚边，且 Darius 自身不位移。
 #[test]

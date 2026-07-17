@@ -9,7 +9,8 @@ use crate::entities::champion::Champion;
 use crate::entities::minion::Minion;
 use crate::life::Death;
 use crate::movement::{
-    CommandMovement, EventMovementEnd, MovementAction, MovementSource, MovementState, MovementWay,
+    CommandMovement, EventMovementEnd, MovementAction, MovementBlock, MovementSource,
+    MovementState, MovementWay,
 };
 use crate::skill::{Skill, Skills, get_skill_value};
 use crate::team::Team;
@@ -199,6 +200,37 @@ pub fn on_action_dash(
         entity,
         start: current_pos,
         destination,
+    });
+}
+
+/// 硬控（`MovementBlock` 添加时）取消活跃位移：清路径、发结束事件、清理追踪/沿途伤害组件。
+///
+/// `MovementBlock` 由 `sync_cc_markers` 在 Stun/Fear/BuffCastBlock 添加时自动桥接到角色。
+/// 本观察者确保：眩晕等硬控到达时，位移立即取消（而非暂停）。
+pub fn on_movement_block_add_cancel_dash(
+    trigger: On<Add, MovementBlock>,
+    mut commands: Commands,
+    q_movement: Query<&MovementState>,
+) {
+    let entity = trigger.entity;
+    let Ok(ms) = q_movement.get(entity) else {
+        return;
+    };
+    if ms.path.is_empty() || ms.source != MovementSource::Dash {
+        return;
+    }
+
+    debug!(
+        "硬控取消位移: entity {:?} 的 dash 被 MovementBlock 取消",
+        entity
+    );
+
+    // 清路径，发结束事件
+    commands.entity(entity).remove::<TrackingDash>();
+    commands.entity(entity).remove::<DashDamageComponent>();
+    commands.trigger(EventMovementEnd {
+        entity,
+        source: MovementSource::Dash,
     });
 }
 

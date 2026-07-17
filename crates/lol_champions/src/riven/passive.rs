@@ -39,7 +39,7 @@ fn fresh_timer() -> Timer {
 }
 
 /// 按等级计算被动额外伤害倍率（1级 30% -> 18级 46.76%，线性插值）
-fn passive_ratio_for_level(level: u32) -> f32 {
+pub(crate) fn passive_ratio_for_level(level: u32) -> f32 {
     let t = level.saturating_sub(1) as f32 / 17.0;
     RIVEN_PASSIVE_RATIO_MIN + t * (RIVEN_PASSIVE_RATIO_MAX - RIVEN_PASSIVE_RATIO_MIN)
 }

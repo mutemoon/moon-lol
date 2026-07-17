@@ -191,6 +191,7 @@ pub fn collect_targets_in_shape(
 /// - `origin`/`forward` 为伤害快照位置与朝向（延迟伤害为施法瞬间快照）
 /// - 对每个 effect：先收集形状内目标，再剔除 exclude 区内目标，
 ///   最后对每条 damage 按 filter 与 modifier（Isolation 仅当唯一目标）结算
+/// - 返回每个 effect 命中的目标列表（用于 AoE 命中报告）
 pub fn apply_damage_effects(
     commands: &mut Commands,
     caster: Entity,
@@ -212,7 +213,9 @@ pub fn apply_damage_effects(
     >,
     q_damage: &Query<&Damage>,
     q_ap: &Query<&AbilityPower>,
-) {
+) -> Vec<Vec<Entity>> {
+    let mut hit_per_effect = Vec::with_capacity(effects.len());
+
     for effect in effects {
         let mut targets = collect_targets_in_shape(origin, forward, &effect.shape, team, q_target);
 
@@ -231,8 +234,11 @@ pub fn apply_damage_effects(
 
         let isolated = targets.len() == 1;
 
-        for target_entity in targets {
-            let Ok((_, _, champion, minion, _)) = q_target.get(target_entity) else {
+        // 记录本次 effect 实际收到伤害的目标
+        let mut actually_hit: Vec<Entity> = Vec::new();
+
+        for target_entity in &targets {
+            let Ok((_, _, champion, minion, _)) = q_target.get(*target_entity) else {
                 continue;
             };
 
@@ -274,7 +280,7 @@ pub fn apply_damage_effects(
                 }
 
                 commands
-                    .entity(target_entity)
+                    .entity(*target_entity)
                     .trigger(|e| CommandDamageCreate {
                         entity: e,
                         source: caster,
@@ -282,9 +288,17 @@ pub fn apply_damage_effects(
                         amount: damage_amount,
                         tag: effect.tag,
                     });
+
+                if !actually_hit.contains(target_entity) {
+                    actually_hit.push(*target_entity);
+                }
             }
         }
+
+        hit_per_effect.push(actually_hit);
     }
+
+    hit_per_effect
 }
 
 pub fn on_action_damage(
@@ -335,7 +349,7 @@ pub fn on_action_damage(
     let origin = transform.translation;
     let forward = transform.forward().xz();
 
-    apply_damage_effects(
+    let _ = apply_damage_effects(
         &mut commands,
         entity,
         origin,

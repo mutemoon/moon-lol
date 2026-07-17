@@ -66,6 +66,8 @@ pub struct SettRLandingPending {
     pub damage: f32,
     pub slow_percent: f32,
     pub slow_duration: f32,
+    /// 被 Sett R 抱起的敌方英雄，落地后投掷
+    pub grabbed_target: Option<Entity>,
 }
 
 impl SettWShield {

@@ -421,6 +421,9 @@ fn fixed_update(
                                 speed: None,
                                 particle_hash: None,
                                 sticky: false,
+                                pass_through: false,
+                                collision_target: default(),
+                                missing_hp_scaling: None,
                             });
                         } else if let Some(damage) = damage {
                             commands.try_trigger(CommandDamageCreate {

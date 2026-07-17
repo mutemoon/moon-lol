@@ -7,7 +7,7 @@ use std::time::Duration;
 
 use bevy::prelude::*;
 use lol_base::hash_key::HashKey;
-use lol_base::spell::{DataSpell, Spell, ValuesEffect};
+use lol_base::spell::{Spell, ValuesEffect};
 use lol_base::spell_calc::{CalculationPartEffectValue, CalculationSpell, CalculationType};
 
 use crate::action::PluginAction;
@@ -156,7 +156,7 @@ impl SkillHarness {
         Self { app, caster, enemy }
     }
 
-    fn register_spell(&mut self, mana_cost: f32, effect_amounts: Vec<f32>) -> &mut Self {
+    fn register_spell(&mut self, _mana_cost: f32, effect_amounts: Vec<f32>) -> &mut Self {
         use lol_base::spell_calc::CalculationPart;
 
         let mut calculations = BTreeMap::new();
@@ -173,7 +173,7 @@ impl SkillHarness {
             }),
         );
 
-        let effect_values = ValuesEffect {
+        let _effect_values = ValuesEffect {
             values: Some(effect_amounts),
         };
 

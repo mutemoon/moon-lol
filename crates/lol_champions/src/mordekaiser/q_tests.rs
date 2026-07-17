@@ -4,7 +4,6 @@ use bevy::math::{Vec2, Vec3};
 use lol_core::action::delayed_damage::DelayedDamageInstance;
 
 use super::tests::{build_headless, give_ap};
-use crate::test_utils::*;
 
 /// 矩形内敌人应在延迟结束后受到魔法伤害；延迟结束前不受伤。
 #[test]

@@ -499,7 +499,7 @@ mod tests {
         apply_cc(&mut app, char, DebuffStun::new(1.0));
         apply_cc(&mut app, char, DebuffStun::new(1.0));
         // 收集角色身上的眩晕 buff 实体
-        let buffs = app.world().get::<Buffs>(char).expect("应有 Buffs").clone();
+        let buffs = app.world().get::<Buffs>(char).expect("应有 Buffs");
         let stun_buffs: Vec<Entity> = buffs
             .iter()
             .filter(|b| app.world().get::<DebuffStun>(*b).is_some())

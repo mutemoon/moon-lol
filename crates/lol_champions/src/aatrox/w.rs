@@ -1,11 +1,14 @@
 //! Aatrox W - 冥府之链 (Infernal Chains)
 //!
-//! 命中伤害 + 减速 + 标记；1.5s 后引爆二次伤害 + 击飞。
+//! 命中伤害 + 减速 + 标记；1.5s 后引爆二次伤害 + 击飞 + 拉回中心。
 
 use bevy::prelude::*;
 use lol_base::animation_names::ANIM_SPELL2;
 use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
+use lol_core::action::displace::{
+    ActionDisplace, DisplaceMotion, DisplaceTargetSelection,
+};
 use lol_core::base::buff::BuffOf;
 use lol_core::buffs::cc_debuffs::DebuffKnockup;
 use lol_core::buffs::cc_debuffs::DebuffSlow;
@@ -105,11 +108,12 @@ pub fn on_aatrox_w(
                 enemy,
                 dmg,
                 AATROX_W_MARK_DURATION,
+                caster_pos,
             ));
     }
 }
 
-/// W 标记引爆：到时造成等额二次伤害 + 击飞，并移除标记。
+/// W 标记引爆：到时造成等额二次伤害 + 击飞 + 拉回中心，并移除标记。
 pub fn update_aatrox_w_marks(
     time: Res<Time>,
     mut commands: Commands,
@@ -121,6 +125,7 @@ pub fn update_aatrox_w_marks(
             let target = mark.target;
             let source = mark.source;
             let damage = mark.damage;
+            let center = mark.center;
             if damage > 0.0 {
                 commands.entity(target).trigger(|e| CommandDamageCreate {
                     entity: e,
@@ -133,6 +138,18 @@ pub fn update_aatrox_w_marks(
             commands
                 .entity(target)
                 .with_related::<BuffOf>(DebuffKnockup::new(0.5));
+            // 拉回 W 中心（椿距离 = 1.5x W 有效范围，确保能拉到）
+            commands.trigger(ActionDisplace {
+                entity: source,
+                targets: DisplaceTargetSelection::Explicit(vec![target]),
+                motion: DisplaceMotion::PullToPoint {
+                    point: center,
+                    distance: 1200.0,
+                    speed: 1200.0,
+                },
+                effects: vec![],
+                cone_hit_policy: None,
+            });
             commands.entity(buff_entity).despawn();
         }
     }

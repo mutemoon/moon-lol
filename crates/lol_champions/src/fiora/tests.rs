@@ -1,8 +1,6 @@
 #![cfg(test)]
 //! Logic and render/video tests for Fiora skills.
 
-use bevy::math::Vec2;
-
 use crate::fiora::Fiora;
 use crate::test_utils::*;
 

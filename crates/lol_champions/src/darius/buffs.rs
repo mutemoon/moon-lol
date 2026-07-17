@@ -18,6 +18,57 @@ pub const DARIUS_NOXIAN_MIGHT_DURATION: f32 = 5.0;
 
 /// 标记 Q 内圈伤害，wiki 规定内圈不叠出血。
 pub const DARIUS_Q_INNER_TAG: u32 = 2;
+/// 标记 Q 外圈伤害，用于回血统计（外圈命中英雄才回血）。
+pub const DARIUS_Q_OUTER_TAG: u32 = 4;
+
+/// Q 外圈命中后的待回血结算。命中每名英雄递增，上限 3 名。
+#[derive(Component, Default)]
+pub struct DariusQHealPending {
+    /// 外圈命中的英雄数（上限 3）
+    pub hit_count: u8,
+    /// 每名英雄的已损失生命值回血百分比（配置 MissingHealthHeal / 100）
+    pub heal_pct_normalized: f32,
+}
+
+/// W 击杀待返蓝减CD标记。
+///
+/// W 施放时插入，`EventAttackEnd` 命中后若击杀目标则返蓝 40 和减 CD 50%。
+#[derive(Component)]
+pub struct DariusWRefundPending {
+    pub skill_entity: Entity,
+}
+
+/// W 击杀延迟检测标记。
+///
+/// `EventAttackEnd` 触发时 W 额外伤害尚在 command 队列中未应用，
+/// 此标记由 `on_darius_w_attack_end` 插入，在 `FixedUpdate` 中
+/// 等延迟伤害执行完毕后再检查目标是否死亡。
+#[derive(Component)]
+pub struct DariusWKillPending {
+    pub skill_entity: Entity,
+    pub target: Entity,
+}
+
+/// R 位移追踪标记。
+///
+/// R 施放时插入，在 `EventMovementEnd` 抵达时根据目标出血层数结算伤害。
+#[derive(Component)]
+pub struct DariusRLeapPending {
+    pub target: Entity,
+    pub skill_entity: Entity,
+    pub skill_level: u8,
+}
+
+/// R 击杀延迟检测标记。
+///
+/// 抵达目标应用伤害后插入，在 `FixedUpdate` 中检查目标是否死亡，
+/// 若击杀则重置冷却/添加重施窗口。
+#[derive(Component)]
+pub struct DariusRKillPending {
+    pub skill_entity: Entity,
+    pub target: Entity,
+    pub skill_level: u8,
+}
 
 /// 诺手被动 - 出血标记，最多 5 层。
 ///

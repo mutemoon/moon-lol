@@ -181,3 +181,51 @@
 
 **Phase E · 框架原语提取**
 - F5 `BuffPeriodicDamage` / `CommandHeal`（消除三处 DoT/heal 重复）
+
+---
+
+## 修复进展（2026-07-15 ~ 2026-07-17 续作）
+
+> 本节记录体检报告发出后实际落地的修复与决议，与上文「建议执行顺序」对照。
+
+### Phase A · 框架根因
+- **F1 AP 解析** —— 已修，`apply_damage_effects` stat 闭包补 `stat==0` 分支查 `AbilityPower`。
+- **F2 tag 透传** —— 已修，`ActionDamageEffect` 加 `tag`，`apply_damage_effects` 透传到 `CommandDamageCreate`；内圈/特定 effect 打 tag，英雄伤害观察者据此过滤。
+- **F3 死组件** —— 已修，`BuffMoveSpeed`/`BuffSelfHeal`/`BuffResist` 各加 tick+apply+despawn 系统（仿 `update_shield_white`）。
+- **F4 AS 覆写** —— 已修，volibear 被动改走 `BuffAttack` 聚合。
+- **F6 dash 取消** —— 已修，位移系统支持硬 CC 取消并广播取消事件；`on_riven_dash_end` 等补 `MovementSource::Dash` 校验。
+- **F5b `BuffPeriodicDamage` 提取** —— **决议：不提取（经核验 DIVERGENT）**。darius 出血与 mordekaiser 黑暗被动 DoT 在 5 条结构轴上分叉：单目标 vs AOE、独立 duration vs combat_timer 门控、AD vs AP 属性源、Physical vs Magic、`Time<Fixed>` vs `Time`。仅 2 个消费者，强行提取的参数化面过大，本身即坏味道。两者已共享底层 `CommandDamageCreate` 原语，上层分叉的 tick 逻辑保留为各英雄自管。`CommandHeal` 治疗原语另案。
+- 全 9 英雄范围内无第三个周期 DoT 消费者，进一步降低提取价值。
+
+### Phase B · 各英雄 P0 功能错误
+darius R 真实伤害 / Q 内圈不叠层、fiora W CC 框架化 + 源过滤、riven R2 冷却 + dash 源校验、sett R 补 dash、volibear R 落地时机 + 减速源过滤、mordekaiser Q AP（随 F1）—— 均随对应框架根因落地。
+
+### Phase C · 系统性模式
+- **S1 riven R Wind Slash pass-for-wrong-reason** —— 已修。原测试断言低血量与满血目标**承受相等伤害**，反向断言了「全局平均 HP」bug：实现把所有目标的 HP 平均成一个值再缩放，斩杀语义完全失效。修复走组合优先：在共享导弹原语 `lol_core::missile` 上新增可选字段 `missing_hp_scaling: Option<MissileMissingHpScaling>`（`None` = 行为不变，平 A / camille E 等不受影响），命中时由 `linear_missile_collision` **逐目标**重算 `damage_for(target_missing_hp)`。riven R 传 `Some(scaling)`，并删去手写的全局平均 HP 块与冗余 `Health`/`Team` 查询参数。测试改断言真相 `damage_low > damage_full`。
+- **S4 darius 冷却恢复测试** —— 已补。原 4 个技能测试只校验「施放后进入冷却」（`!can_cast`），无一校验「冷却结束后恢复」。新增 `darius_q_cooldown_recovers_after_duration`：施放 Q → 断言 `!can_cast(0)` → 读 `CoolDown.duration` → 推进超过该时长 → 断言 `can_cast(0)` 恢复。顺带验证了 `fixed_update_cooldown` 在测试时钟（`TimeUpdateStrategy::FixedTimesteps(1)` 推进虚拟 `Time`）下确实 tick `CoolDown.timer`。`give_mana(1000)` 饱和蓝量的问题仍存（S4 蓝量 magnitude 未测，因配置 mana 值为占位小数，断言会锁死错误数值，暂不做）。
+
+### Phase D · 不完整功能
+- riven R Wind Slash 逐目标斩杀缩放（见 S1）—— 已修，原「所有目标共用全局平均 HP」bug 已消除。
+- **darius Q 外圈回血** —— 已实现。基于 tag 系统 + `DariusQHealPending` 组件，外圈命中后在 `FixedUpdate` 结算已损生命值百分比回血。TDD 验证（`darius_q_heals_on_outer_blade_hit`）。
+- **darius W 击杀返蓝减 CD** —— 已实现。因 W 额外伤害通过 `commands.trigger(CommandDamageCreate)` 延迟执行，`EventAttackEnd` 同步检查时伤害未生效，采用 `DariusWKillPending` + `FixedUpdate` 延迟检测模式。TDD 验证（3 个测试：返蓝/减 CD/无击杀不返）。
+- **darius R 斩杀重置/不可选中** —— 已实现。R 改为 `ActionDash` + `DashMoveType::Entity` 跃向目标，跃起期间挂 `ImmuneToCC` + `BuffDamageReduction(1.0)` 实现不可选中，抵达后结算真实伤害，击杀后 R1/R2 添加 `SkillRecastWindow(6s)`，R3 完全刷新冷却。TDD 验证（3 个新测试）。
+- **camille R 达阵不可选中 + 击退** —— 已实现。R 从 `DashMoveType::Pointer` 改为 `DashMoveType::Entity` 精确定位，跃起期间不可选中，抵达后击退附近其他敌人（`DisplaceMotion::PushAway`）。标记/额外伤害机制保持不变。
+- **fiora R 治疗光环** —— 已实现并测试（`fiora_r_all_four_vitals_trigger_heal_aura`、`fiora_r_target_death_triggers_heal_aura`）。要害全破或目标死亡后，菲奥娜获得持续治疗光环，其 `update_fiora_r_heal` 系统在 `FixedUpdate` 中周期性治疗范围内友军。
+
+### Phase E · 框架原语提取
+- **`MissileMissingHpScaling` 导弹原语** —— 已提取到 `lol_core::missile`。这是 F5 之外的又一处组合优先落点：riven R 的「按目标已损失生命值缩放」是通用斩杀语义，不应藏在 riven 内部手算。提取后由导弹系统在碰撞时统一重算，riven 只需传 `min/max` 上下界。其他导弹（camille E1 等）传 `None` 完全不受影响。
+- F5 `BuffPeriodicDamage` / `CommandHeal` —— 见 Phase A F5b 决议，不提取。
+
+### Phase C 收尾（2026-07-17）
+
+**S2 常量数据驱动 —— 已全部核实修正。** 健康报告列出的 9 项硬编码常量已全部解决：darius W 比例/R 范围/R 每层、riven W 半径/R 冷却/R 导弹路径、camille W 减速/E 重施窗口、fiora R 要害百分比数组均已从 RON 读取或修正为正确常量值。剩余硬编码常量（riven W `castRadius` 250、camille W 减速 0.8、camille E 重施窗口 1.0）已与 RON 值核对一致，非功能性差异。
+
+**S6 AoE 复用核验 —— 已全部核实修正。**
+- **riven W**：眩晕目标筛选已使用 `is_in_shape(DamageShape::Circle)`，伤害场使用同常量 `RIVEN_W_STUN_RADIUS`，半径单一定义无分叉。
+- **fiora W 反刺**：`counter_thrust` 矩形投影从手写点积/法向量检查重构为 `is_in_shape(DamageShape::Rectangle { width, length, start_distance: 0.0 })`。行为与之前一致，测试 27 项全绿。
+- **aatrox Q**：甜点距离检测保留手写 `dist >= AATROX_Q_SWEET_SPOT_MIN`（3 行清晰逻辑），`Circle{200}`+`Annular{200,300}` 在此场景下的封装收益小于开销，决议保留。
+
+### 编译与测试
+- `cargo check --all-targets`：**零新警告**（仅余 `lol_render` 2 个与 `extract` example 若干无关警告，不在本批 9 英雄范围内）。
+- `cargo test -p lol_champions`：**191 passed / 0 failed**（基线 179 → +12：riven Wind Slash 斩杀真测、darius Q 冷却恢复/Q 回血/W 返蓝减 CD/W 无击杀不返/R 斩杀重置/R 不击杀不重置/R 跃击 + darius 测试自动扩容）。
+- 警告清理：删死测试夹具（darius `build_render`、aatrox/mordekaiser 重复的 `level_skill`、mordekaiser `morde_ap`/`morde_hit_magic`/`w_shield_elapsed`）；清未用导入、未用参数加 `_`、`run_system_once` 返回值用 `let _ =` 消费、无效 `.clone()` 移除。

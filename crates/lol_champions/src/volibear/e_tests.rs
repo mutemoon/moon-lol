@@ -15,7 +15,6 @@ use lol_core::base::buff::Buffs;
 use lol_core::buffs::cc_debuffs::DebuffSlow;
 
 use super::tests::build_headless;
-use crate::test_utils::*;
 
 /// 延迟生效：castFrame 25/30≈0.833s 前无伤害，之后施法点敌人受伤。
 #[test]

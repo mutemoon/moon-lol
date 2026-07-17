@@ -18,6 +18,17 @@ use crate::entities::champion::Champion;
 use crate::entities::minion::Minion;
 use crate::team::Team;
 
+/// AoE 命中报告：延迟伤害结算后发出，英雄可观察此事件执行后续效果。
+///
+/// 例如 Darius Q 外圈回血：监听此事件，匹配 tag 后对施法者执行 CommandHeal。
+#[derive(EntityEvent, Debug, Clone)]
+pub struct EventAoEHitReport {
+    pub entity: Entity,
+    pub effect_index: usize,
+    pub hit_targets: Vec<Entity>,
+    pub tag: Option<u32>,
+}
+
 /// 视觉指示器配置（三阶段外观）
 #[derive(Debug, Clone)]
 pub struct AoEIndicator {
@@ -263,9 +274,9 @@ pub fn update_delayed_damage(
                 visual.alpha = alpha.clamp(0.0, 1.0);
 
                 if inst.delay_timer.is_finished() && !inst.applied {
-                    // Impact：结算伤害
+                    // Impact：结算伤害，同时收集命中报告
                     if let Some(skill_object) = res_assets_spell.get(&inst.skill) {
-                        apply_damage_effects(
+                        let hit_per_effect = apply_damage_effects(
                             &mut commands,
                             inst.caster,
                             inst.origin,
@@ -278,6 +289,20 @@ pub fn update_delayed_damage(
                             &q_damage,
                             &q_ap,
                         );
+
+                        // 发出 AoE 命中报告
+                        for (i, hit_targets) in hit_per_effect.iter().enumerate() {
+                            if hit_targets.is_empty() {
+                                continue;
+                            }
+                            let tag = inst.effects.get(i).and_then(|e| e.tag);
+                            commands.trigger(EventAoEHitReport {
+                                entity: inst.caster,
+                                effect_index: i,
+                                hit_targets: hit_targets.clone(),
+                                tag,
+                            });
+                        }
                     }
                     inst.applied = true;
                     // 爆发缩放 + 满 alpha，进入褪去

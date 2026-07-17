@@ -39,7 +39,28 @@ fn w_second_hit_after_delay() {
     );
 }
 
-/// W 标记引爆时附加击飞（首段无击飞）。
+/// W 标记引爆时拉回中心：目标应被移动到 Aatrox 脚下附近。
+#[test]
+fn w_pulls_to_center_on_explosion() {
+    let mut h = build_headless("aatrox_w_pull");
+    // 敌人在 (500, 0, 0)，Aatrox 在原点
+    let enemy = h.add_enemy(Vec3::new(500.0, 0.0, 0.0));
+    h.advance(0.1);
+
+    let pos_before = h.position(enemy);
+    h.cast_skill(1, Vec2::new(500.0, 0.0)).advance(0.1);
+    // 等待标记引爆
+    h.advance(2.0);
+    let pos_after = h.position(enemy);
+
+    // 敌人应被拉回到 Aatrox 附近（原点 ±150）
+    assert!(
+        pos_after.x.abs() < 150.0,
+        "W 标记引爆应将敌人拉回中心，{:.1} → {:.1}",
+        pos_before.x,
+        pos_after.x
+    );
+}
 #[test]
 fn w_knockup_after_delay() {
     let mut h = build_headless("aatrox_w_knockup");

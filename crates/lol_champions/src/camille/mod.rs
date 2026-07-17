@@ -1,3 +1,4 @@
+pub mod buffs;
 pub mod e;
 pub mod passive;
 pub mod q;
@@ -36,7 +37,10 @@ impl Plugin for PluginCamille {
         app.add_observer(q::on_camille_q);
         app.add_observer(w::on_camille_w);
         app.add_observer(e::on_camille_e);
+        app.add_observer(e::on_camille_e_missile_hit);
+        app.add_observer(e::on_camille_e_dash_end);
         app.add_observer(r::on_camille_r);
+        app.add_observer(r::on_camille_r_arrival);
         app.add_observer(passive::on_camille_damage_hit);
         app.add_observer(passive::on_camille_attack_end);
         app.add_observer(r::on_camille_r_attack_end);

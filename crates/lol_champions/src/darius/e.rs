@@ -2,17 +2,16 @@
 //!
 //! 主动：朝施法方向锥形拉回范围内的敌人到 Darius 脚边，击飞 0.75 秒，
 //! 并施加 40% 减速 1 秒。Darius 自身不位移。
+//!
+//! 使用 [`ActionDisplace`] 统一位移体系：Cone{535, 90°} + PullToward + Knockup(0.75) + Slow。
 
 use bevy::prelude::*;
 use lol_base::animation_names::ANIM_SPELL3;
 use lol_base::render_cmd::CommandAnimationPlay;
-use lol_base::spell::Spell;
-use lol_core::action::knockback::{CommandKnockback, DisplaceDirection};
-use lol_core::base::buff::BuffOf;
-use lol_core::buffs::cc_debuffs::DebuffSlow;
-use lol_core::entities::champion::Champion;
+use lol_core::action::displace::{
+    ActionDisplace, DisplaceEffect, DisplaceMotion, DisplaceTargetSelection,
+};
 use lol_core::skill::{EventSkillCast, Skill, SkillSlot};
-use lol_core::team::Team;
 
 use crate::darius::Darius;
 
@@ -35,8 +34,6 @@ pub fn on_darius_e(
     q_darius: Query<(), With<Darius>>,
     q_skill: Query<&Skill>,
     q_transform: Query<&Transform>,
-    q_team: Query<&Team>,
-    q_enemies: Query<(Entity, &Transform), With<Champion>>,
 ) {
     let entity = trigger.event_target();
     if q_darius.get(entity).is_err() {
@@ -60,9 +57,6 @@ pub fn on_darius_e(
     let Ok(transform) = q_transform.get(entity) else {
         return;
     };
-    let Ok(team) = q_team.get(entity) else {
-        return;
-    };
 
     let pos = transform.translation.xz();
     let forward = (trigger.point - pos).normalize_or_zero();
@@ -71,43 +65,30 @@ pub fn on_darius_e(
     } else {
         forward
     };
-    let half_angle = DARIUS_E_CONE_ANGLE.to_radians() / 2.0;
 
-    let mut hit = 0u32;
-    for (enemy, enemy_transform) in q_enemies.iter() {
-        let Ok(enemy_team) = q_team.get(enemy) else {
-            continue;
-        };
-        if enemy_team == team {
-            continue;
-        }
-        let diff = enemy_transform.translation.xz() - pos;
-        let distance = diff.length();
-        if distance > DARIUS_E_RANGE || distance == 0.0 {
-            continue;
-        }
-        let dir = diff.normalize();
-        let angle = forward.dot(dir).clamp(-1.0, 1.0).acos();
-        if angle > half_angle {
-            continue;
-        }
-
-        commands.entity(enemy).trigger(|e| CommandKnockback {
-            entity: e,
-            source: entity,
+    // 使用统一位移体系：锥形拉回 + 击飞 + 减速
+    commands.trigger(ActionDisplace {
+        entity,
+        targets: DisplaceTargetSelection::Cone {
+            range: DARIUS_E_RANGE,
+            angle: DARIUS_E_CONE_ANGLE,
+            direction: forward,
+        },
+        motion: DisplaceMotion::PullToward {
             distance: DARIUS_E_RANGE,
             speed: DARIUS_E_PULL_SPEED,
-            duration: Some(DARIUS_E_KNOCKUP_DURATION),
-            direction: DisplaceDirection::Toward,
-        });
-        commands
-            .entity(enemy)
-            .with_related::<BuffOf>(DebuffSlow::new(
-                DARIUS_E_SLOW_PERCENT,
-                DARIUS_E_SLOW_DURATION,
-            ));
-        hit += 1;
-    }
+        },
+        effects: vec![
+            DisplaceEffect::Knockup {
+                duration: DARIUS_E_KNOCKUP_DURATION,
+            },
+            DisplaceEffect::Slow {
+                percent: DARIUS_E_SLOW_PERCENT,
+                duration: DARIUS_E_SLOW_DURATION,
+            },
+        ],
+        cone_hit_policy: None,
+    });
 
-    debug!("Darius E: 无情立场，锥形拉回 {} 个敌人 + 击飞 + 减速", hit);
+    debug!("Darius E: 无情立场，使用 ActionDisplace 锥形拉回");
 }

@@ -11,7 +11,6 @@ use bevy::prelude::{Entity, Transform};
 use lol_core::base::buff::{BuffOf, Buffs};
 use lol_core::base::direction::Direction;
 use lol_core::damage::{CommandDamageCreate, DamageType};
-use lol_core::life::Health;
 
 use super::tests::build_headless;
 use crate::fiora::passive::Vital;

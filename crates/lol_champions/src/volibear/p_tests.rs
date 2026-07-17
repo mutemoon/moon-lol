@@ -7,6 +7,7 @@
 use bevy::math::Vec3;
 
 use super::tests::{attack_end, attack_speed_bonus, build_headless};
+use crate::volibear::passive::VOLIBEAR_P_ATTACK_SPEED_PER_STACK;
 
 /// 普攻命中一次应获得 1 层（+5% 攻速）。
 #[test]
@@ -18,8 +19,9 @@ fn volibear_p_grants_attack_speed_stack() {
 
     let bonus = attack_speed_bonus(&h);
     assert!(
-        (bonus - 0.05).abs() < 0.001,
-        "普攻一次应获得 5% 攻速加成，实际 {bonus}"
+        (bonus - VOLIBEAR_P_ATTACK_SPEED_PER_STACK).abs() < 0.001,
+        "普攻一次应获得 {} 攻速加成，实际 {bonus}",
+        VOLIBEAR_P_ATTACK_SPEED_PER_STACK,
     );
     h.finish();
 }
@@ -36,8 +38,9 @@ fn volibear_p_stacks_cap_at_five() {
 
     let bonus = attack_speed_bonus(&h);
     assert!(
-        (bonus - 0.25).abs() < 0.001,
-        "6 次普攻应封顶 25% 攻速，实际 {bonus}"
+        (bonus - 5.0 * VOLIBEAR_P_ATTACK_SPEED_PER_STACK).abs() < 0.001,
+        "6 次普攻应封顶 {} 攻速，实际 {bonus}",
+        5.0 * VOLIBEAR_P_ATTACK_SPEED_PER_STACK,
     );
     h.finish();
 }
@@ -49,7 +52,7 @@ fn volibear_p_decays_out_of_combat() {
     let enemy = h.add_enemy(Vec3::new(100.0, 0.0, 0.0));
 
     attack_end(&mut h, enemy);
-    assert!((attack_speed_bonus(&h) - 0.05).abs() < 0.001);
+    assert!((attack_speed_bonus(&h) - VOLIBEAR_P_ATTACK_SPEED_PER_STACK).abs() < 0.001);
 
     h.advance(6.2); // > 6s 持续时间
 

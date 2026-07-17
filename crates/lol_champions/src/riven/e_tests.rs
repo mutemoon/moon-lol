@@ -2,9 +2,7 @@
 
 use bevy::math::{Vec2, Vec3};
 
-use super::tests::{build_headless, riven_config};
-use crate::riven::Riven;
-use crate::test_utils::*;
+use super::tests::build_headless;
 
 const EPSILON: f32 = 1e-3;
 
