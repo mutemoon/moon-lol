@@ -10,7 +10,9 @@ use lol_base::spell::Spell;
 use lol_core::attack::CommandAttackReset;
 use lol_core::base::buff::BuffOf;
 use lol_core::buffs::on_hit::{BuffOnHitBonusDamage, BuffOnHitCounter};
-use lol_core::skill::{CoolDown, EventSkillCast, Skill, SkillRecastWindow, SkillSlot, get_skill_data_value};
+use lol_core::skill::{
+    CoolDown, EventSkillCast, Skill, SkillRecastWindow, SkillSlot, get_skill_data_value,
+};
 
 use crate::camille::Camille;
 
@@ -71,7 +73,13 @@ pub fn on_camille_q(
         duration: None,
     });
 
-    clear_camille_on_hit(&mut commands, entity, &q_buffof, &q_onhit_counter, &q_onhit_bonus);
+    clear_camille_on_hit(
+        &mut commands,
+        entity,
+        &q_buffof,
+        &q_onhit_counter,
+        &q_onhit_bonus,
+    );
 
     commands.trigger(CommandAttackReset { entity });
 
@@ -94,7 +102,9 @@ pub fn on_camille_q(
                 flat: 0.0,
                 ratio: tad_ratio * empowered_amp,
             });
-        commands.entity(trigger.skill_entity).remove::<SkillRecastWindow>();
+        commands
+            .entity(trigger.skill_entity)
+            .remove::<SkillRecastWindow>();
         commands.entity(trigger.skill_entity).insert((CoolDown {
             duration: cooldown.duration,
             timer: Some(Timer::from_seconds(cooldown.duration, TimerMode::Once)),

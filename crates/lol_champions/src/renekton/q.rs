@@ -5,7 +5,9 @@
 use bevy::prelude::*;
 use lol_base::animation_names::ANIM_SPELL1;
 use lol_base::render_cmd::CommandAnimationPlay;
-use lol_core::action::damage::{ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter};
+use lol_core::action::damage::{
+    ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
+};
 use lol_core::base::ability_resource::AbilityResource;
 use lol_core::base::buff::BuffOf;
 use lol_core::buffs::common_buffs::BuffSelfHeal;

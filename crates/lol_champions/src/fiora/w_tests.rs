@@ -36,10 +36,7 @@ fn fiora_w_parry_negates_physical_damage() {
         "招架应完全减免物理伤害，实际损失 {:.1}",
         hp_loss
     );
-    assert!(
-        !h.can_cast(1),
-        "W 施放后应进入冷却"
-    );
+    assert!(!h.can_cast(1), "W 施放后应进入冷却");
     assert!(h.mana() < mana_before, "W 施放应消耗法力");
     h.finish();
 }

@@ -29,10 +29,7 @@ fn darius_e_pulls_enemies_in_cone_to_feet() {
         "Darius 自身不应位移，实际移动 {}",
         (darius_after - darius_before).length()
     );
-    assert!(
-        !h.can_cast(2),
-        "E 施放后应进入冷却"
-    );
+    assert!(!h.can_cast(2), "E 施放后应进入冷却");
     assert!(h.mana() < mana_before, "E 施放应消耗法力");
     h.finish();
 }

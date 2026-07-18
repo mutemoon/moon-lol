@@ -33,6 +33,12 @@ struct Args {
     /// 每局日志 SQLite 路径；缺省沿用 ~/.moon-lol/logs/debug.db。
     #[arg(long)]
     log_db: Option<std::path::PathBuf>,
+
+    #[arg(long)]
+    no_cooldown: bool,
+
+    #[arg(long)]
+    god: bool,
 }
 
 fn main() {
@@ -94,6 +100,8 @@ fn main() {
         .scene
         .unwrap_or_else(|| "games/classic.ron".to_string());
 
+    app.insert_resource(lol_core::skill::GodMode(args.god));
+    app.insert_resource(lol_core::skill::NoCooldown(args.no_cooldown || args.god));
     app.insert_resource(PlayerChampion(args.champion.to_lowercase()));
     app.add_plugins(PluginPlayerChampion);
     app.insert_resource(GameScenes::new(vec![scene_path])).run();

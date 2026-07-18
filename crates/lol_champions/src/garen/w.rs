@@ -5,8 +5,7 @@
 use bevy::prelude::*;
 use lol_base::animation_names::ANIM_SPELL2;
 use lol_base::render_cmd::CommandAnimationPlay;
-use lol_core::base::buff::Buff;
-use lol_core::base::buff::BuffOf;
+use lol_core::base::buff::{Buff, BuffOf};
 use lol_core::damage::DamageType;
 use lol_core::skill::{EventSkillCast, Skill, SkillSlot};
 

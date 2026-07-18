@@ -2,9 +2,7 @@ use bevy::prelude::*;
 use lol_base::character::{ConfigCharacterRecord, ConfigSkin};
 use lol_champions::fiora::Fiora;
 use lol_champions::riven::Riven;
-use lol_core::buffs::damage_reduction::BuffDamageReduction;
 use lol_core::entities::champion::Champion;
-use lol_core::skill::{CoolDown, Skill, SkillCooldownMode};
 use lol_core::team::Team;
 use lol_render::camera::CameraState;
 use lol_rpc::{CommandWsRequest as TypedCommandWsRequest, RpcAppExt};
@@ -21,7 +19,21 @@ pub struct PluginDebug;
 
 impl Plugin for PluginDebug {
     fn build(&self, app: &mut App) {
-        app.insert_resource(GlobalDebugState::default());
+        let god_mode = app
+            .world()
+            .get_resource::<lol_core::skill::GodMode>()
+            .map(|r| r.0)
+            .unwrap_or(false);
+        let no_cooldown = app
+            .world()
+            .get_resource::<lol_core::skill::NoCooldown>()
+            .map(|r| r.0)
+            .unwrap_or(false);
+        app.insert_resource(GlobalDebugState {
+            god_mode,
+            cooldown_disabled: no_cooldown,
+            ..default()
+        });
 
         #[cfg(debug_assertions)]
         {
@@ -184,21 +196,19 @@ fn on_switch_champion(
 
 fn on_god_mode(
     event: On<TypedCommandWsRequest<GodModeParams>>,
-    mut commands: Commands,
-    champions: Query<(Entity, &Champion, Option<&Name>)>,
     mut debug_state: ResMut<GlobalDebugState>,
+    god_mode: Option<ResMut<lol_core::skill::GodMode>>,
+    no_cooldown: Option<ResMut<lol_core::skill::NoCooldown>>,
 ) {
     let enabled = event.params.enabled;
-    for (entity, _, _) in champions.iter() {
-        let mut e = commands.entity(entity);
-        if enabled {
-            e.insert(BuffDamageReduction {
-                percentage: 1.0,
-                damage_type: None,
-            });
-        } else {
-            e.remove::<BuffDamageReduction>();
+    if let Some(mut gm) = god_mode {
+        gm.0 = enabled;
+    }
+    if enabled {
+        if let Some(mut nc) = no_cooldown {
+            nc.0 = true;
         }
+        debug_state.cooldown_disabled = true;
     }
     debug_state.god_mode = enabled;
     lol_rpc::respond(&event, Ok(serde_json::json!({"enabled": enabled})));
@@ -206,21 +216,12 @@ fn on_god_mode(
 
 fn on_toggle_cooldown(
     event: On<TypedCommandWsRequest<ToggleCooldownParams>>,
-    mut skills: Query<(Entity, &mut Skill, Option<&mut CoolDown>)>,
     mut debug_state: ResMut<GlobalDebugState>,
+    no_cooldown: Option<ResMut<lol_core::skill::NoCooldown>>,
 ) {
     let enabled = event.params.enabled;
-    for (_, mut skill, cd_opt) in skills.iter_mut() {
-        skill.cooldown_mode = if enabled {
-            SkillCooldownMode::Manual
-        } else {
-            SkillCooldownMode::AfterCast
-        };
-        if enabled {
-            if let Some(mut cd) = cd_opt {
-                cd.timer = None;
-            }
-        }
+    if let Some(mut nc) = no_cooldown {
+        nc.0 = enabled;
     }
     debug_state.cooldown_disabled = enabled;
     lol_rpc::respond(&event, Ok(serde_json::json!({"enabled": enabled})));

@@ -7,7 +7,9 @@ use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::damage::{CommandDamageCreate, Damage, DamageType};
 use lol_core::entities::champion::Champion;
-use lol_core::skill::{CoolDown, EventSkillCast, Skill, SkillRecastWindow, SkillSlot, get_skill_value};
+use lol_core::skill::{
+    CoolDown, EventSkillCast, Skill, SkillRecastWindow, SkillSlot, get_skill_value,
+};
 use lol_core::team::Team;
 
 use crate::irelia::IRELIA_E2_DAMAGE_TAG;
@@ -75,7 +77,9 @@ pub fn on_irelia_e(
         });
     }
 
-    commands.entity(trigger.skill_entity).remove::<SkillRecastWindow>();
+    commands
+        .entity(trigger.skill_entity)
+        .remove::<SkillRecastWindow>();
     commands.entity(trigger.skill_entity).insert(CoolDown {
         duration: cooldown.duration,
         timer: Some(Timer::from_seconds(cooldown.duration, TimerMode::Once)),

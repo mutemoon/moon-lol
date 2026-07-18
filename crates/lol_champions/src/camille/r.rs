@@ -10,9 +10,7 @@ use lol_base::animation_names::ANIM_SPELL4;
 use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
 use lol_core::action::dash::{ActionDash, DashMoveType};
-use lol_core::action::displace::{
-    ActionDisplace, DisplaceMotion, DisplaceTargetSelection,
-};
+use lol_core::action::displace::{ActionDisplace, DisplaceMotion, DisplaceTargetSelection};
 use lol_core::attack::EventAttackEnd;
 use lol_core::base::buff::{Buff, BuffOf, Buffs};
 use lol_core::buffs::cc_debuffs::ImmuneToCC;
@@ -24,8 +22,8 @@ use lol_core::movement::{EventMovementEnd, MovementSource};
 use lol_core::skill::{EventSkillCast, Skill, SkillSlot, get_skill_data_value};
 use lol_core::team::Team;
 
-use crate::camille::buffs::CamilleRLeapPending;
 use crate::camille::Camille;
+use crate::camille::buffs::CamilleRLeapPending;
 
 /// R 冲刺速度。
 const CAMILLE_R_DASH_SPEED: f32 = 1200.0;

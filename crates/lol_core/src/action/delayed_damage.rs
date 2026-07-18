@@ -139,7 +139,7 @@ fn compute_origin(mode: AoEOrigin, caster_pos: Vec3, point: Vec2) -> Vec3 {
 /// 将 XZ 平面朝向转为绕 Y 轴旋转的四元数（+X 朝向为默认）
 fn forward_to_rotation(forward: Vec2) -> Quat {
     // atan2(z, x)：forward=(x,z) 在 XZ 平面相对 +X 的偏角
-    let angle = forward.y.atan2(forward.x);
+    let angle = (-forward.y).atan2(forward.x);
     Quat::from_rotation_y(angle)
 }
 
@@ -368,6 +368,6 @@ mod tests {
         // +Z 朝向（forward=(0,1) in XZ）应把 +X 旋到 +Z
         let q = forward_to_rotation(Vec2::new(0.0, 1.0));
         let v = q * Vec3::new(1.0, 0.0, 0.0);
-        assert!(v.z.abs() > 0.99, "+Z 朝向应把 +X 旋到 +Z");
+        assert!(v.z > 0.99, "+Z 朝向应把 +X 旋到 +Z");
     }
 }

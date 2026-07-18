@@ -15,10 +15,12 @@ use lol_core::action::delayed_damage::{ActionDelayedDamage, AoEIndicator, AoEOri
 use lol_core::damage::{DamageType, EventDamageCreate};
 use lol_core::entities::champion::Champion;
 use lol_core::life::Health;
-use lol_core::skill::{EventSkillCast, Skill, SkillSlot, delay_from_cast_frame, get_skill_data_value};
+use lol_core::skill::{
+    EventSkillCast, Skill, SkillSlot, delay_from_cast_frame, get_skill_data_value,
+};
 
-use crate::darius::buffs::{DARIUS_Q_INNER_TAG, DARIUS_Q_OUTER_TAG, DariusQHealPending};
 use crate::darius::Darius;
+use crate::darius::buffs::{DARIUS_Q_INNER_TAG, DARIUS_Q_OUTER_TAG, DariusQHealPending};
 
 /// Inner blade radius (the "handle" of the axe)
 pub const DARIUS_Q_INNER_RADIUS: f32 = 150.0;
@@ -56,7 +58,8 @@ pub fn on_darius_q(
         duration: None,
     });
     // 插入待回血结算组件（新 Q 重制计数）
-    let heal_pct = get_skill_data_value(spell_obj, "MissingHealthHeal", skill.level).unwrap_or(17.0);
+    let heal_pct =
+        get_skill_data_value(spell_obj, "MissingHealthHeal", skill.level).unwrap_or(17.0);
     commands.entity(entity).insert(DariusQHealPending {
         heal_pct_normalized: heal_pct / 100.0,
         ..Default::default()

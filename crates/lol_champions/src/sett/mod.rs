@@ -22,7 +22,9 @@ use bevy::prelude::*;
 use lol_core::entities::champion::Champion;
 
 use crate::sett::e::on_sett_e;
-use crate::sett::passive::{on_sett_attack_end, on_sett_damage_hit, on_sett_damage_taken, update_sett_grit};
+use crate::sett::passive::{
+    on_sett_attack_end, on_sett_damage_hit, on_sett_damage_taken, update_sett_grit,
+};
 use crate::sett::q::on_sett_q;
 use crate::sett::r::{on_sett_r, on_sett_r_dash_end};
 use crate::sett::w::{on_sett_w, update_sett_w_shield};

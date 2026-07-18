@@ -12,8 +12,8 @@ use lol_core::life::Health;
 
 use crate::sett::Sett;
 use crate::sett::buffs::{
-    SettGrit, SettPunchState, SETT_GRIT_CAP_RATIO,
-    SETT_R_SLOW_DURATION, SETT_R_SLOW_PERCENT, SETT_R_TAG, SETT_PASSIVE_RIGHT_PUNCH_RATIO,
+    SETT_GRIT_CAP_RATIO, SETT_PASSIVE_RIGHT_PUNCH_RATIO, SETT_R_SLOW_DURATION, SETT_R_SLOW_PERCENT,
+    SETT_R_TAG, SettGrit, SettPunchState,
 };
 
 /// 监听 Sett 造成的伤害：仅 R 标签减速（E/被动/W 不附带 CC，E 的眩晕/减速由 ConeHitPolicy 管理）。

@@ -5,6 +5,16 @@ use crate::entities::champion::Champion;
 use crate::entities::minion::Minion;
 use crate::life::{Death, EventDead};
 
+/// 金币增益事件，击杀单位获得金币时触发
+///
+/// `entity` 为击杀者（获得金币的实体），`world_position` 为死者死亡位置（用于飘字）
+#[derive(EntityEvent, Debug)]
+pub struct EventGoldGain {
+    pub entity: Entity,
+    pub amount: f32,
+    pub world_position: Vec3,
+}
+
 /// 金币资产组件，支持 Bevy ECS 反射和序列化
 #[derive(Component, Reflect, Serialize, Deserialize, Clone, Debug)]
 #[reflect(Component)]
@@ -69,10 +79,12 @@ pub fn update_passive_gold(mut q_gold: Query<&mut Gold, Without<Death>>, time: R
 /// 监听单位死亡事件，若死者携带 GoldDrop 且存在击杀者，则结算金币奖励
 pub fn on_event_dead(
     event: On<EventDead>,
+    mut commands: Commands,
     q_gold_drop: Query<&GoldDrop>,
     q_minion: Query<&Minion>,
     q_champion: Query<&Champion>,
     mut q_gold: Query<&mut Gold>,
+    q_transform: Query<&GlobalTransform>,
 ) {
     let dead_entity = event.entity;
     let Some(killer_entity) = event.killer else {
@@ -109,5 +121,15 @@ pub fn on_event_dead(
             "{:?} 击杀了 {:?}，获得 {:.1} 金币！当前金币: {:.1}",
             killer_entity, dead_entity, gold_gain, killer_gold.current
         );
+
+        let death_position = q_transform
+            .get(dead_entity)
+            .map(|t| t.translation())
+            .unwrap_or_default();
+        commands.trigger(EventGoldGain {
+            entity: killer_entity,
+            amount: gold_gain,
+            world_position: death_position,
+        });
     }
 }

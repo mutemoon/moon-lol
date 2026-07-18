@@ -36,10 +36,7 @@ fn camille_w_delayed() {
     h.advance(0.5); // 总 1.0s > 0.75
     let dealt = hp_before - h.health(enemy);
     assert!(dealt > 0.0, "蓄力结束后前方敌人应受到物理伤害");
-    assert!(
-        !h.can_cast(1),
-        "W 施放后应进入冷却"
-    );
+    assert!(!h.can_cast(1), "W 施放后应进入冷却");
     assert!(h.mana() < mana_before, "W 施放应消耗法力");
     h.finish();
 }

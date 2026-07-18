@@ -33,10 +33,7 @@ fn fiora_e_grants_attack_speed() {
         "E 应按等级赋予 0.4 攻速，实际 {:.3}",
         as_bonus
     );
-    assert!(
-        !h.can_cast(2),
-        "E 施放后应进入冷却"
-    );
+    assert!(!h.can_cast(2), "E 施放后应进入冷却");
     assert!(h.mana() < mana_before, "E 施放应消耗法力");
 
     h.finish();

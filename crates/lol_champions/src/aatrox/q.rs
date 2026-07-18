@@ -6,11 +6,14 @@ use bevy::prelude::*;
 use bevy::time::{Timer, TimerMode};
 use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
-use lol_core::buffs::cc_debuffs::DebuffKnockup;
 use lol_core::base::buff::BuffOf;
+use lol_core::buffs::cc_debuffs::DebuffKnockup;
 use lol_core::damage::{CommandDamageCreate, Damage, DamageType};
 use lol_core::entities::champion::Champion;
-use lol_core::skill::{CoolDown, EventSkillCast, Skill, SkillRecastWindow, SkillSlot, get_skill_data_value, get_skill_value};
+use lol_core::skill::{
+    CoolDown, EventSkillCast, Skill, SkillRecastWindow, SkillSlot, get_skill_data_value,
+    get_skill_value,
+};
 use lol_core::team::Team;
 
 use crate::aatrox::Aatrox;
@@ -120,7 +123,9 @@ pub fn on_aatrox_q(
     }
 
     if stage >= 3 {
-        commands.entity(trigger.skill_entity).remove::<SkillRecastWindow>();
+        commands
+            .entity(trigger.skill_entity)
+            .remove::<SkillRecastWindow>();
         commands.entity(trigger.skill_entity).insert(CoolDown {
             duration: cooldown.duration,
             timer: Some(Timer::from_seconds(cooldown.duration, TimerMode::Once)),

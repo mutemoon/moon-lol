@@ -134,10 +134,9 @@ pub fn on_volibear_r_dash_end(
                 tag: Some(VOLIBEAR_R_TAG),
             });
         }
-        commands.entity(enemy).with_related::<BuffOf>(DebuffSlow::new(
-            pending.slow_percent,
-            pending.slow_duration,
-        ));
+        commands
+            .entity(enemy)
+            .with_related::<BuffOf>(DebuffSlow::new(pending.slow_percent, pending.slow_duration));
     }
 
     // 增加最大生命（HealthAmount，当前生命同步增加）

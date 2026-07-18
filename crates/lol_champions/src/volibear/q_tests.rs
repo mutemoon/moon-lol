@@ -28,7 +28,10 @@ fn volibear_q_empowers_next_attack_bonus_damage() {
         (dealt - 169.0).abs() < 1.5,
         "Q 强化普攻应造成 2.6*AD=169 额外物理伤害，实际 {dealt}"
     );
-    assert!(h.mana() < mana_before, "Q 施放应消耗法力（冷却为 0.0 不检查 is_cooling）");
+    assert!(
+        h.mana() < mana_before,
+        "Q 施放应消耗法力（冷却为 0.0 不检查 is_cooling）"
+    );
     h.finish();
 }
 

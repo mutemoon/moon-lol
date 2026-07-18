@@ -27,6 +27,7 @@ pub fn on_skill_cast(
     mut q_ability_resource: Query<&mut AbilityResource>,
     mut log: ResMut<SkillCastLog>,
     q_death: Query<(), With<Death>>,
+    god_mode: Res<super::GodMode>,
 ) {
     let entity = trigger.event_target();
     let mut record = SkillCastRecord {
@@ -99,23 +100,27 @@ pub fn on_skill_cast(
         return;
     }
 
-    let Ok(mut ability_resource) = q_ability_resource.get_mut(entity) else {
-        record.result = SkillCastResult::Failed(SkillCastFailureReason::MissingAbilityResource);
-        log.push(record);
-        return;
-    };
+    let bypass_mana = god_mode.0;
 
-    if let Some(ref mana) = spell_object.spell_data.as_ref().unwrap().mana {
-        let &current_mana = mana.get(skill.level as usize).unwrap();
-
-        if ability_resource.value < current_mana {
-            record.result =
-                SkillCastResult::Failed(SkillCastFailureReason::InsufficientAbilityResource);
+    if !bypass_mana {
+        let Ok(mut ability_resource) = q_ability_resource.get_mut(entity) else {
+            record.result = SkillCastResult::Failed(SkillCastFailureReason::MissingAbilityResource);
             log.push(record);
             return;
-        }
+        };
 
-        ability_resource.value -= current_mana;
+        if let Some(ref mana) = spell_object.spell_data.as_ref().unwrap().mana {
+            let &current_mana = mana.get(skill.level as usize).unwrap();
+
+            if ability_resource.value < current_mana {
+                record.result =
+                    SkillCastResult::Failed(SkillCastFailureReason::InsufficientAbilityResource);
+                log.push(record);
+                return;
+            }
+
+            ability_resource.value -= current_mana;
+        }
     }
 
     record.result = SkillCastResult::Started;

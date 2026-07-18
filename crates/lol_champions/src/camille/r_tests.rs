@@ -42,10 +42,7 @@ fn camille_r_marks_target() {
 
     h.cast_skill(3, Vec2::new(200.0, 0.0)).advance(0.2);
     assert!(has_r_mark(&h, enemy), "R 应标记施法点附近的敌方英雄");
-    assert!(
-        !h.can_cast(3),
-        "R 施放后应进入冷却"
-    );
+    assert!(!h.can_cast(3), "R 施放后应进入冷却");
     assert!(h.mana() < mana_before, "R 施放应消耗法力");
     h.finish();
 }

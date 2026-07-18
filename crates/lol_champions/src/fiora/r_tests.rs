@@ -40,10 +40,7 @@ fn fiora_r_attaches_vitals_to_target() {
     // 四个要害方向齐全
     let vitals = r_buff_vitals(&h, enemy).expect("目标应有 R 要害");
     assert_eq!(vitals.len(), 4, "R 应揭露四个要害");
-    assert!(
-        !h.can_cast(3),
-        "R 施放后应进入冷却"
-    );
+    assert!(!h.can_cast(3), "R 施放后应进入冷却");
     assert!(h.mana() < mana_before, "R 施放应消耗法力");
 
     h.finish();

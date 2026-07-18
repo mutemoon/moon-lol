@@ -140,9 +140,6 @@ fn darius_q_heals_on_outer_blade_hit() {
         darius_hp_after > darius_hp_damaged,
         "Q 外圈命中后诺手应回血（damaged={darius_hp_damaged:.1}, after={darius_hp_after:.1}）"
     );
-    assert!(
-        darius_hp_after <= darius_max,
-        "回血不应超过最大血量"
-    );
+    assert!(darius_hp_after <= darius_max, "回血不应超过最大血量");
     h.finish();
 }

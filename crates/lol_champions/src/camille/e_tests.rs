@@ -20,13 +20,19 @@ use super::tests::build_headless;
 /// 获取 Camille E 技能的 Spell Handle（用于模拟飞弹命中）。
 fn e_spell_handle(h: &crate::test_utils::ChampionTestHarness) -> Handle<Spell> {
     let skill_entity = h.skill_entity(2);
-    h.app.world().get::<Skill>(skill_entity).unwrap().spell.clone()
+    h.app
+        .world()
+        .get::<Skill>(skill_entity)
+        .unwrap()
+        .spell
+        .clone()
 }
 
 /// 模拟 E 粘性飞弹命中墙壁，触发 `EventMissileHit`。
 fn trigger_e_missile_hit(h: &mut crate::test_utils::ChampionTestHarness, point: Vec3) {
     let spell = e_spell_handle(h);
-    h.app.world_mut()
+    h.app
+        .world_mut()
         .entity_mut(h.champion)
         .trigger(|e| EventMissileHit {
             source: e,
@@ -37,10 +43,10 @@ fn trigger_e_missile_hit(h: &mut crate::test_utils::ChampionTestHarness, point: 
 
 /// 辅助断言：敌方实体是否存在 DebuffStun（在子 buff 实体上）。
 fn has_stun(h: &crate::test_utils::ChampionTestHarness, entity: Entity) -> bool {
-    h.app
-        .world()
-        .get::<Buffs>(entity)
-        .map_or(false, |b| b.iter().any(|e| h.app.world().get::<DebuffStun>(e).is_some()))
+    h.app.world().get::<Buffs>(entity).map_or(false, |b| {
+        b.iter()
+            .any(|e| h.app.world().get::<DebuffStun>(e).is_some())
+    })
 }
 
 // ── E1 阶段 ──
@@ -52,10 +58,7 @@ fn camille_e1_sets_recast_window() {
     h.cast_skill(2, Vec2::new(100.0, 0.0)).advance(0.1);
 
     let skill_e = h.skill_entity(2);
-    assert!(
-        h.has_recast_window(skill_e),
-        "E1 后应存在重施窗口"
-    );
+    assert!(h.has_recast_window(skill_e), "E1 后应存在重施窗口");
     assert_eq!(
         h.recast_window_stage(skill_e),
         Some(2),
@@ -87,11 +90,7 @@ fn camille_e1_missile_hit_creates_wall_cling() {
 
     // 检查朝向墙壁移动（冠军初始位置 (0,0,0)，墙壁点 (200,0,0)）
     let pos = h.position(h.champion);
-    assert!(
-        pos.x > 1.0,
-        "应开始向墙壁冲刺，实际 x = {:.1}",
-        pos.x
-    );
+    assert!(pos.x > 1.0, "应开始向墙壁冲刺，实际 x = {:.1}", pos.x);
     h.finish();
 }
 
@@ -114,10 +113,7 @@ fn camille_e2_stuns_enemy_in_path() {
     h.cast_skill(2, Vec2::new(500.0, 0.0)).advance(0.5);
 
     // 敌人应被眩晕
-    assert!(
-        has_stun(&h, enemy),
-        "E2 路径上的敌人应被眩晕"
-    );
+    assert!(has_stun(&h, enemy), "E2 路径上的敌人应被眩晕");
 
     // 冠军应有攻速加成
     let as_bonus = h
@@ -149,11 +145,7 @@ fn camille_e2_no_enemy_dashes_without_stun() {
 
     // 冠军位置应发生变化（已冲刺）
     let pos = h.position(h.champion);
-    assert!(
-        pos.x > 10.0,
-        "E2 无敌人时也应冲刺，实际 x = {:.1}",
-        pos.x
-    );
+    assert!(pos.x > 10.0, "E2 无敌人时也应冲刺，实际 x = {:.1}", pos.x);
 
     // 攻速加成应生效
     let as_bonus = h

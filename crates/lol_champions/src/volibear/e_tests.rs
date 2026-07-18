@@ -34,10 +34,7 @@ fn volibear_e_delayed_at_cast_point() {
     h.advance(0.5); // 总 1.0s > 0.833
     let dealt = hp_before - h.health(enemy);
     assert!(dealt > 0.0, "延迟结束后施法点敌人应受到魔法伤害");
-    assert!(
-        !h.can_cast(2),
-        "E 施放后应进入冷却"
-    );
+    assert!(!h.can_cast(2), "E 施放后应进入冷却");
     assert!(h.mana() < mana_before, "E 施放应消耗法力");
     h.finish();
 }

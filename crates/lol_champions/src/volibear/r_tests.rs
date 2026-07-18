@@ -26,10 +26,7 @@ fn volibear_r_landing_damage() {
         (dealt - 262.5).abs() < 2.0,
         "R 落地应造成 262.5 物理伤害，实际 {dealt}"
     );
-    assert!(
-        !h.can_cast(3),
-        "R 施放后应进入冷却"
-    );
+    assert!(!h.can_cast(3), "R 施放后应进入冷却");
     assert!(h.mana() < mana_before, "R 施放应消耗法力");
     h.finish();
 }

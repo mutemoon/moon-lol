@@ -91,9 +91,6 @@ fn irelia_e1_only_opens_recast_window() {
 
     // E1 开启 4s 重施窗口，窗口过期后进入 16s 冷却
     h.advance(4.5);
-    assert!(
-        !h.can_cast(2),
-        "E1 重施窗口过期后应进入冷却"
-    );
+    assert!(!h.can_cast(2), "E1 重施窗口过期后应进入冷却");
     h.finish();
 }

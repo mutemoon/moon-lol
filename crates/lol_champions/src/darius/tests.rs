@@ -139,14 +139,8 @@ fn darius_w_goes_on_cooldown() {
     h.cast_skill(1, Vec2::new(200.0, 0.0)).advance(0.1);
 
     // W should be on cooldown after casting
-    assert!(
-        !h.can_cast(1),
-        "W 施放后应进入冷却"
-    );
-    assert!(
-        h.mana() < mana_before,
-        "W 施放应消耗法力"
-    );
+    assert!(!h.can_cast(1), "W 施放后应进入冷却");
+    assert!(h.mana() < mana_before, "W 施放应消耗法力");
     h.finish();
 }
 
@@ -162,14 +156,8 @@ fn darius_e_cast_goes_on_cooldown() {
     h.cast_skill(2, Vec2::new(400.0, 0.0)).advance(0.3);
 
     // E should be on cooldown after casting
-    assert!(
-        !h.can_cast(2),
-        "E 施放后应进入冷却"
-    );
-    assert!(
-        h.mana() < mana_before,
-        "E 施放应消耗法力"
-    );
+    assert!(!h.can_cast(2), "E 施放后应进入冷却");
+    assert!(h.mana() < mana_before, "E 施放应消耗法力");
     h.finish();
 }
 
@@ -209,10 +197,7 @@ fn darius_r_leaps_to_nearest_enemy() {
         "R 应跃向敌人（before={d_before:.0}, after={d_after:.0}）"
     );
     // 确认敌人已受伤害（达阵结算）
-    assert!(
-        h.health(enemy) < 6000.0,
-        "R 命中应造成伤害"
-    );
+    assert!(h.health(enemy) < 6000.0, "R 命中应造成伤害");
     h.finish();
 }
 
@@ -239,10 +224,7 @@ fn darius_r_resets_on_kill() {
     // R1 冷却应被重置且添加重施窗口
     let skill_entity = h.skill_entity(3);
     let cd = h.app.world().get::<CoolDown>(skill_entity).unwrap();
-    assert!(
-        cd.timer.is_none(),
-        "R 击杀后冷却应被清除"
-    );
+    assert!(cd.timer.is_none(), "R 击杀后冷却应被清除");
     // 应有重施窗口（6s）
     let has_recast = h
         .app
@@ -267,10 +249,7 @@ fn darius_r_no_reset_without_kill() {
     // 冷却不应被重置
     let skill_entity = h.skill_entity(3);
     let cd = h.app.world().get::<CoolDown>(skill_entity).unwrap();
-    assert!(
-        cd.timer.is_some(),
-        "R 未击杀时冷却应存在"
-    );
+    assert!(cd.timer.is_some(), "R 未击杀时冷却应存在");
     // 不应有重施窗口
     assert!(
         h.app

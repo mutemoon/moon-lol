@@ -94,7 +94,9 @@ pub fn on_mordekaiser_w(
             });
         }
         commands.entity(shield_entity).despawn();
-        commands.entity(trigger.skill_entity).remove::<SkillRecastWindow>();
+        commands
+            .entity(trigger.skill_entity)
+            .remove::<SkillRecastWindow>();
         debug!(
             "莫德凯撒 W 重施：消耗剩余护盾 {:.1}，治疗 {:.1}",
             remaining, heal
@@ -108,7 +110,9 @@ pub fn on_mordekaiser_w(
         .map(|w| !w.timer.is_finished())
         .unwrap_or(false);
     if recast_active {
-        commands.entity(trigger.skill_entity).remove::<SkillRecastWindow>();
+        commands
+            .entity(trigger.skill_entity)
+            .remove::<SkillRecastWindow>();
         debug!("莫德凯撒 W 护盾已耗尽，重施窗口关闭");
         return;
     }

@@ -31,8 +31,8 @@ use lol_core::skill::{
 };
 use lol_core::team::Team;
 
-use crate::camille::buffs::{BuffCamilleWallCling, CamilleE2State};
 use crate::camille::Camille;
+use crate::camille::buffs::{BuffCamilleWallCling, CamilleE2State};
 
 // ── 常量 ──
 
@@ -88,10 +88,7 @@ pub fn on_camille_e(
     q_skill: Query<(&Skill, &CoolDown, Option<&SkillRecastWindow>)>,
     q_damage: Query<&Damage>,
     q_wall_cling_buff: Query<(Entity, &BuffOf, &BuffCamilleWallCling)>,
-    q_enemies: Query<
-        (Entity, &Team, &Transform),
-        (Without<Camille>, Without<Death>),
-    >,
+    q_enemies: Query<(Entity, &Team, &Transform), (Without<Camille>, Without<Death>)>,
     q_team: Query<&Team>,
     res_spells: Res<Assets<Spell>>,
 ) {
@@ -189,15 +186,10 @@ pub fn on_camille_e(
 
         // 读取伤害值
         let ad = q_damage.get(entity).map(|d| d.0).unwrap_or(0.0);
-        let e2_damage =
-            get_skill_value(spell_obj, "total_damage", level, |stat| {
-                if stat == 2 {
-                    ad
-                } else {
-                    0.0
-                }
-            })
-            .unwrap_or(0.0);
+        let e2_damage = get_skill_value(spell_obj, "total_damage", level, |stat| {
+            if stat == 2 { ad } else { 0.0 }
+        })
+        .unwrap_or(0.0);
 
         // 设置冲刺类型与状态
         let target_entity = nearest_target.map(|(e, _)| e);
@@ -251,12 +243,10 @@ pub fn on_camille_e(
         commands
             .entity(trigger.skill_entity)
             .remove::<SkillRecastWindow>();
-        commands.entity(trigger.skill_entity).insert((
-            CoolDown {
-                duration: cooldown.duration,
-                timer: Some(Timer::from_seconds(cooldown.duration, TimerMode::Once)),
-            },
-        ));
+        commands.entity(trigger.skill_entity).insert((CoolDown {
+            duration: cooldown.duration,
+            timer: Some(Timer::from_seconds(cooldown.duration, TimerMode::Once)),
+        },));
     }
 }
 

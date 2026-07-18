@@ -17,8 +17,8 @@ use lol_core::action::displace::{
     ActionDisplace, DisplaceCenter, DisplaceEffect, DisplaceMotion, DisplaceTargetSelection,
     GrabbedBy,
 };
-use lol_core::buffs::cc_debuffs::DebuffKnockup;
 use lol_core::base::buff::BuffOf;
+use lol_core::buffs::cc_debuffs::DebuffKnockup;
 use lol_core::damage::{Damage, DamageType};
 use lol_core::entities::champion::Champion;
 use lol_core::movement::{EventMovementEnd, MovementSource};
@@ -26,7 +26,9 @@ use lol_core::skill::{EventSkillCast, Skill, SkillSlot, get_skill_value};
 use lol_core::team::Team;
 
 use crate::sett::Sett;
-use crate::sett::buffs::{SettRLandingPending, SETT_R_TAG, SETT_R_SLOW_PERCENT, SETT_R_SLOW_DURATION};
+use crate::sett::buffs::{
+    SETT_R_SLOW_DURATION, SETT_R_SLOW_PERCENT, SETT_R_TAG, SettRLandingPending,
+};
 
 /// R AoE 半径
 pub const SETT_R_RADIUS: f32 = 200.0;
@@ -98,7 +100,9 @@ pub fn on_sett_r(
 
     // 2. 抓取目标：挂 GrabbedBy + 击飞视觉效果
     if let Some(target) = grabbed {
-        commands.entity(target).insert(GrabbedBy { grabber: entity });
+        commands
+            .entity(target)
+            .insert(GrabbedBy { grabber: entity });
         commands
             .entity(target)
             .with_related::<BuffOf>(DebuffKnockup::new(SETT_R_KNOCKUP_DURATION));

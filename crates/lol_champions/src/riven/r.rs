@@ -72,8 +72,7 @@ pub fn on_riven_r(
                 get_skill_data_value(spell_obj, "PercentBonusAD", skill.level).unwrap_or(0.25);
             let bonus_range =
                 get_skill_data_value(spell_obj, "TooltipAttackRange", skill.level).unwrap_or(75.0);
-            let duration =
-                get_skill_data_value(spell_obj, "Duration", skill.level).unwrap_or(15.0);
+            let duration = get_skill_data_value(spell_obj, "Duration", skill.level).unwrap_or(15.0);
 
             let bonus_ad = damage_value * bonus_ad_ratio;
 

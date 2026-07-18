@@ -12,7 +12,14 @@ pub struct PluginLife;
 
 impl Plugin for PluginLife {
     fn build(&self, app: &mut App) {
+        if !app.world().contains_resource::<crate::skill::GodMode>() {
+            app.init_resource::<crate::skill::GodMode>();
+        }
+        if !app.world().contains_resource::<crate::skill::NoCooldown>() {
+            app.init_resource::<crate::skill::NoCooldown>();
+        }
         app.add_systems(FixedUpdate, (spawn_event, update_respawn, regen));
+        app.add_systems(Update, apply_god_mode);
         app.add_observer(on_event_damage_create);
         app.add_observer(on_command_heal);
     }
@@ -137,11 +144,7 @@ pub fn on_command_heal(trigger: On<CommandHeal>, mut q_health: Query<&mut Health
     health.value = (health.value + trigger.amount).min(health.max);
     debug!(
         "{:?} 治疗 {:?} {:.1} HP（{:.1} → {:.1}）",
-        trigger.source,
-        trigger.entity,
-        trigger.amount,
-        before,
-        health.value,
+        trigger.source, trigger.entity, trigger.amount, before, health.value,
     );
 }
 
@@ -537,5 +540,50 @@ mod tests {
         advance_and_regen(&mut app, Duration::from_secs(1));
         assert_eq!(app.world().get::<Health>(e).unwrap().value, 12.0);
         assert_eq!(app.world().get::<AbilityResource>(e).unwrap().value, 23.0);
+    }
+}
+
+fn apply_god_mode(
+    god_mode: Res<crate::skill::GodMode>,
+    mut commands: Commands,
+    mut q_champions: Query<
+        (
+            Entity,
+            &mut Health,
+            Option<&mut AbilityResource>,
+            &mut Level,
+            Option<&mut crate::skill::SkillPoints>,
+        ),
+        With<Champion>,
+    >,
+) {
+    if god_mode.is_changed() && !god_mode.0 {
+        // 变为禁用时，移除无敌 buff
+        for (entity, _, _, _, _) in q_champions.iter() {
+            commands
+                .entity(entity)
+                .remove::<crate::buffs::damage_reduction::BuffDamageReduction>();
+        }
+    } else if god_mode.0 {
+        // 启用时，提升等级到 6 并加相应技能点，每帧回满生命值和能量值，并附加无敌 buff
+        for (entity, mut health, ar_opt, mut level, skill_points_opt) in q_champions.iter_mut() {
+            if level.value < 6 {
+                let delta = 6 - level.value;
+                level.value = 6;
+                if let Some(mut sp) = skill_points_opt {
+                    sp.0 += delta;
+                }
+            }
+            health.value = health.max;
+            if let Some(mut ar) = ar_opt {
+                ar.value = ar.max;
+            }
+            commands
+                .entity(entity)
+                .insert(crate::buffs::damage_reduction::BuffDamageReduction {
+                    percentage: 1.0,
+                    damage_type: None,
+                });
+        }
     }
 }

@@ -5,7 +5,9 @@
 use bevy::prelude::*;
 use lol_base::animation_names::ANIM_SPELL4;
 use lol_base::render_cmd::CommandAnimationPlay;
-use lol_core::action::damage::{ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter};
+use lol_core::action::damage::{
+    ActionDamage, ActionDamageEffect, DamageShape, TargetDamage, TargetFilter,
+};
 use lol_core::base::buff::BuffOf;
 use lol_core::damage::DamageType;
 use lol_core::skill::{EventSkillCast, Skill, SkillSlot};

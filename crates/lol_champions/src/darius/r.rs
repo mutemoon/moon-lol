@@ -15,11 +15,14 @@ use lol_core::damage::{CommandDamageCreate, Damage, DamageType};
 use lol_core::entities::champion::Champion;
 use lol_core::life::Health;
 use lol_core::movement::{EventMovementEnd, MovementSource};
-use lol_core::skill::{CoolDown, EventSkillCast, Skill, SkillSlot, SkillRecastWindow, get_skill_data_value, get_skill_value};
+use lol_core::skill::{
+    CoolDown, EventSkillCast, Skill, SkillRecastWindow, SkillSlot, get_skill_data_value,
+    get_skill_value,
+};
 use lol_core::team::Team;
 
-use crate::darius::buffs::{DariusRLeapPending, DariusRKillPending, BuffDariusBleed};
 use crate::darius::Darius;
+use crate::darius::buffs::{BuffDariusBleed, DariusRKillPending, DariusRLeapPending};
 
 /// R 冲刺速度。
 const DARIUS_R_DASH_SPEED: f32 = 1800.0;
@@ -167,8 +170,8 @@ pub fn on_darius_r_arrival(
                 .unwrap_or(0)
         })
         .unwrap_or(0);
-    let per_stack = get_skill_data_value(spell_obj, "RDamagePercentPerHemoStack", skill.level)
-        .unwrap_or(0.2);
+    let per_stack =
+        get_skill_data_value(spell_obj, "RDamagePercentPerHemoStack", skill.level).unwrap_or(0.2);
     let amount = base * (1.0 + per_stack * stacks as f32);
 
     // 应用伤害
@@ -197,9 +200,7 @@ pub fn check_darius_r_kill(
     mut q_cooldown: Query<&mut CoolDown>,
 ) {
     for (attacker, pending) in q_pending.iter() {
-        let killed = q_health
-            .get(pending.target)
-            .is_ok_and(|h| h.value <= 0.0);
+        let killed = q_health.get(pending.target).is_ok_and(|h| h.value <= 0.0);
 
         if killed {
             // 清除冷却

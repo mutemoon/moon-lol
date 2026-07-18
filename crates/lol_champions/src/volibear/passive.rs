@@ -83,9 +83,11 @@ pub fn on_volibear_attack_end(
         }
     }
     if new_count > 0 {
-        commands.entity(attacker).with_related::<BuffOf>(BuffAttack {
-            bonus_attack_speed: new_count as f32 * VOLIBEAR_P_ATTACK_SPEED_PER_STACK,
-        });
+        commands
+            .entity(attacker)
+            .with_related::<BuffOf>(BuffAttack {
+                bonus_attack_speed: new_count as f32 * VOLIBEAR_P_ATTACK_SPEED_PER_STACK,
+            });
     }
 
     // 满层触发连锁闪电（附近敌人受魔法伤害）

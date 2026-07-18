@@ -16,7 +16,9 @@ use lol_core::damage::{CommandDamageCreate, Damage, DamageType};
 use lol_core::entities::champion::Champion;
 use lol_core::life::Death;
 use lol_core::movement::{EventMovementEnd, MovementSource};
-use lol_core::skill::{CoolDown, EventSkillCast, Skill, SkillSlot, get_skill_data_value, get_skill_value};
+use lol_core::skill::{
+    CoolDown, EventSkillCast, Skill, SkillSlot, get_skill_data_value, get_skill_value,
+};
 use lol_core::team::Team;
 
 use crate::fiora::Fiora;

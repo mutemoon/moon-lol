@@ -64,10 +64,7 @@ fn camille_q1_grants_on_hit_bonus() {
 
     // Q1 开启 3.5s 重施窗口，窗口过期后进入 9s 冷却
     h.advance(4.0);
-    assert!(
-        !h.can_cast(0),
-        "Q 重施窗口过期后应进入冷却"
-    );
+    assert!(!h.can_cast(0), "Q 重施窗口过期后应进入冷却");
     h.finish();
 }
 

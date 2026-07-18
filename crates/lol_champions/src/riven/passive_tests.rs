@@ -6,7 +6,7 @@ use lol_core::base::buff::Buffs;
 use lol_core::base::level::Level;
 use lol_core::damage::Damage;
 
-use crate::riven::passive::{passive_ratio_for_level, BuffRivenPassive};
+use crate::riven::passive::{BuffRivenPassive, passive_ratio_for_level};
 use crate::riven::tests::build_headless;
 use crate::test_utils::*;
 

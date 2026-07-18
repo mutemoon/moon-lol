@@ -191,15 +191,22 @@ pub fn on_fiora_r(
     let duration = get_skill_data_value(spell_obj, "MarkDuration", skill.level).unwrap_or(8.0);
     let ms_percent = get_skill_data_value(spell_obj, "PercentMS", skill.level).unwrap_or(0.3);
     let vital_pct = get_skill_data_value(spell_obj, "VitalPercent", skill.level).unwrap_or(0.03);
-    let heal_per_second = get_skill_data_value(spell_obj, "HealPerSecond", skill.level).unwrap_or(50.0);
+    let heal_per_second =
+        get_skill_data_value(spell_obj, "HealPerSecond", skill.level).unwrap_or(50.0);
     let heal_duration = get_skill_data_value(spell_obj, "HealDuration", skill.level).unwrap_or(5.0);
-    let heal_radius = get_skill_data_value(spell_obj, "HealRingRadius", skill.level).unwrap_or(550.0);
+    let heal_radius =
+        get_skill_data_value(spell_obj, "HealRingRadius", skill.level).unwrap_or(550.0);
 
     commands
         .entity(target)
         .with_related::<BuffOf>(BuffFioraR::new(
-            skill.level, duration, FIORA_R_ACTIVE_DURATION,
-            vital_pct, heal_per_second, heal_duration, heal_radius,
+            skill.level,
+            duration,
+            FIORA_R_ACTIVE_DURATION,
+            vital_pct,
+            heal_per_second,
+            heal_duration,
+            heal_radius,
         ));
 
     commands

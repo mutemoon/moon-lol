@@ -44,7 +44,8 @@ pub fn on_sett_q(
     });
     commands.trigger(CommandAttackReset { entity });
 
-    let lvl_idx = skill.level
+    let lvl_idx = skill
+        .level
         .saturating_sub(1)
         .min(SETT_Q_MAX_HP_RATIO.len() - 1);
     let ratio = SETT_Q_MAX_HP_RATIO[lvl_idx];

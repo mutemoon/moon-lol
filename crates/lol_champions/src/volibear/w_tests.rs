@@ -31,10 +31,7 @@ fn volibear_w1_damages_and_marks() {
 
     // W1 开启 2s 重施窗口，窗口过期后才进入 5s 冷却
     h.advance(2.5);
-    assert!(
-        !h.can_cast(1),
-        "W 重施窗口过期后应进入冷却"
-    );
+    assert!(!h.can_cast(1), "W 重施窗口过期后应进入冷却");
     h.finish();
 }
 

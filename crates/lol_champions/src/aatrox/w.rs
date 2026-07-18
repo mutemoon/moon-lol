@@ -6,12 +6,9 @@ use bevy::prelude::*;
 use lol_base::animation_names::ANIM_SPELL2;
 use lol_base::render_cmd::CommandAnimationPlay;
 use lol_base::spell::Spell;
-use lol_core::action::displace::{
-    ActionDisplace, DisplaceMotion, DisplaceTargetSelection,
-};
+use lol_core::action::displace::{ActionDisplace, DisplaceMotion, DisplaceTargetSelection};
 use lol_core::base::buff::BuffOf;
-use lol_core::buffs::cc_debuffs::DebuffKnockup;
-use lol_core::buffs::cc_debuffs::DebuffSlow;
+use lol_core::buffs::cc_debuffs::{DebuffKnockup, DebuffSlow};
 use lol_core::damage::{CommandDamageCreate, Damage, DamageType};
 use lol_core::entities::champion::Champion;
 use lol_core::skill::{

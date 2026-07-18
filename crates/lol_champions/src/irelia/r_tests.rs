@@ -40,10 +40,7 @@ fn irelia_r_damages_marks_and_slows() {
         has_buff::<DebuffSlow>(&h, enemy),
         "R 应减速敌人（DebuffSlow）"
     );
-    assert!(
-        !h.can_cast(3),
-        "R 施放后应进入冷却"
-    );
+    assert!(!h.can_cast(3), "R 施放后应进入冷却");
     assert!(h.mana() < mana_before, "R 施放应消耗法力");
     h.finish();
 }

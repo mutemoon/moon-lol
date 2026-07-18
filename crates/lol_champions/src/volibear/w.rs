@@ -129,12 +129,11 @@ pub fn on_volibear_w(
 
     if stage == 1 {
         // W1：开启重施窗口 + 咬最近敌人 + 标记
-        commands.entity(trigger.skill_entity).insert(SkillRecastWindow::new(
-            2,
-            2,
-            VOLIBEAR_W_RECAST_WINDOW,
-        ));
-        if let Some(enemy) = nearest_enemy(caster_pos, cast_range, caster_team, &q_enemies, &q_team) {
+        commands
+            .entity(trigger.skill_entity)
+            .insert(SkillRecastWindow::new(2, 2, VOLIBEAR_W_RECAST_WINDOW));
+        if let Some(enemy) = nearest_enemy(caster_pos, cast_range, caster_team, &q_enemies, &q_team)
+        {
             if total_damage > 0.0 {
                 commands.entity(enemy).trigger(|e| CommandDamageCreate {
                     entity: e,
@@ -150,7 +149,9 @@ pub fn on_volibear_w(
         }
     } else {
         // W2：移除重施 + 重置冷却 + 咬最近敌人（已标记则 1.5x + 治疗）
-        commands.entity(trigger.skill_entity).remove::<SkillRecastWindow>();
+        commands
+            .entity(trigger.skill_entity)
+            .remove::<SkillRecastWindow>();
         commands.entity(trigger.skill_entity).insert(CoolDown {
             duration: cooldown.duration,
             timer: Some(Timer::from_seconds(cooldown.duration, TimerMode::Once)),
@@ -162,7 +163,8 @@ pub fn on_volibear_w(
         let heal_percent =
             get_skill_data_value(spell_obj, "HealPercent", skill.level).unwrap_or(0.05);
 
-        if let Some(enemy) = nearest_enemy(caster_pos, cast_range, caster_team, &q_enemies, &q_team) {
+        if let Some(enemy) = nearest_enemy(caster_pos, cast_range, caster_team, &q_enemies, &q_team)
+        {
             let marked = is_marked_by(enemy, entity, &q_buffs, &q_mark);
             let dmg = total_damage * if marked { w2_mult } else { 1.0 };
             if dmg > 0.0 {

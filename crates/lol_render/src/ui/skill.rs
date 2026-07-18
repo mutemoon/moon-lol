@@ -22,7 +22,6 @@ pub struct PluginUISkill;
 
 impl Plugin for PluginUISkill {
     fn build(&self, app: &mut App) {
-        app.init_resource::<SkillLevelUpButton>();
         app.add_systems(
             Update,
             (
@@ -30,11 +29,16 @@ impl Plugin for PluginUISkill {
                     in_state(UIState::Loaded)
                         .and_then(any_match_filter::<(With<SelfPlayer>, With<CharacterReady>)>),
                 ),
-                (update_passive_skill_icon, update_active_skill_icons).run_if(
-                    in_state(UIState::Loaded)
-                        .and_then(any_match_filter::<(With<SelfPlayer>, With<CharacterReady>)>)
-                        .and_then(run_once),
-                ),
+                (
+                    setup_skill_level_up_buttons,
+                    update_passive_skill_icon,
+                    update_active_skill_icons,
+                )
+                    .run_if(
+                        in_state(UIState::Loaded)
+                            .and_then(any_match_filter::<(With<SelfPlayer>, With<CharacterReady>)>)
+                            .and_then(run_once),
+                    ),
                 (update_skill_cooldown, update_skill_rank_pips).run_if(
                     in_state(UIState::Loaded)
                         .and_then(any_match_filter::<(With<SelfPlayer>, With<CharacterReady>)>),
@@ -42,11 +46,6 @@ impl Plugin for PluginUISkill {
             ),
         );
     }
-}
-
-#[derive(Resource, Default)]
-struct SkillLevelUpButton {
-    pub entities: [Option<Entity>; 4],
 }
 
 fn update_passive_skill_icon(
@@ -506,7 +505,7 @@ fn update_skill_level_up_buttons(
     q_skill: Query<&Skill>,
     res_ui_element_entity: Res<UIElementEntity>,
 ) {
-    let Ok((entity, level, skill_points, skills)) = q_skill_points.single() else {
+    let Ok((_entity, level, skill_points, skills)) = q_skill_points.single() else {
         return;
     };
 
@@ -539,10 +538,7 @@ fn update_skill_level_up_buttons(
             debug!("显示技能升级按钮");
             commands
                 .entity(res_ui_element_entity.get_entity(&level_up_data.skill_up_button))
-                .insert(Visibility::Visible)
-                .observe(move |_: On<Pointer<Click>>, mut commands: Commands| {
-                    commands.trigger(CommandSkillLevelUp { entity, index });
-                });
+                .insert(Visibility::Visible);
         } else {
             commands
                 .entity(res_ui_element_entity.get_entity(&level_up_data.skill_up_button))
@@ -550,4 +546,30 @@ fn update_skill_level_up_buttons(
         }
     }
     // debug!("技能升级按钮更新完成");
+}
+
+fn setup_skill_level_up_buttons(
+    mut commands: Commands,
+    res_player_frame: Res<LOLPlayerFrameViewController>,
+    res_ui_element_entity: Res<UIElementEntity>,
+    q_self_player: Query<Entity, With<SelfPlayer>>,
+) {
+    let Ok(player_entity) = q_self_player.single() else {
+        info!("未找到 SelfPlayer 的实体用于升级按钮绑定");
+        return;
+    };
+    let Some(level_up_spells) = &res_player_frame.level_up_display.spells else {
+        return;
+    };
+    for (index, level_up_data) in level_up_spells.iter().enumerate() {
+        let button_entity = res_ui_element_entity.get_entity(&level_up_data.skill_up_button);
+        commands.entity(button_entity).observe(
+            move |_: On<Pointer<Click>>, mut commands: Commands| {
+                commands.trigger(CommandSkillLevelUp {
+                    entity: player_entity,
+                    index,
+                });
+            },
+        );
+    }
 }

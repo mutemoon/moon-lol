@@ -9,7 +9,9 @@ use lol_core::base::buff::{Buff, BuffOf, Buffs};
 use lol_core::buffs::damage_reduction::BuffDamageReduction;
 use lol_core::damage::{CommandDamageCreate, Damage, DamageType};
 use lol_core::entities::champion::Champion;
-use lol_core::skill::{CoolDown, EventSkillCast, Skill, SkillRecastWindow, SkillSlot, get_skill_value};
+use lol_core::skill::{
+    CoolDown, EventSkillCast, Skill, SkillRecastWindow, SkillSlot, get_skill_value,
+};
 use lol_core::team::Team;
 
 use crate::irelia::Irelia;
@@ -132,7 +134,9 @@ pub fn on_irelia_w(
     }
 
     clear_irelia_w_buffs(&mut commands, entity, &q_buffs, &q_w, &q_dr);
-    commands.entity(trigger.skill_entity).remove::<SkillRecastWindow>();
+    commands
+        .entity(trigger.skill_entity)
+        .remove::<SkillRecastWindow>();
     commands.entity(trigger.skill_entity).insert(CoolDown {
         duration: cooldown.duration,
         timer: Some(Timer::from_seconds(cooldown.duration, TimerMode::Once)),

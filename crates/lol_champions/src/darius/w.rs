@@ -15,8 +15,8 @@ use lol_core::buffs::on_hit::{BuffOnHitBonusDamage, BuffOnHitCounter, BuffOnHitS
 use lol_core::life::Health;
 use lol_core::skill::{CoolDown, EventSkillCast, Skill, SkillSlot, get_skill_value};
 
-use crate::darius::buffs::{DariusWKillPending, DariusWRefundPending};
 use crate::darius::Darius;
+use crate::darius::buffs::{DariusWKillPending, DariusWRefundPending};
 
 pub fn on_darius_w(
     trigger: On<EventSkillCast>,

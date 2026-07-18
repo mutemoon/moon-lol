@@ -28,10 +28,7 @@ fn irelia_w1_grants_50_percent_damage_reduction() {
 
     // W1 开启 1.5s 重施窗口，窗口过期后进入冷却
     h.advance(2.0);
-    assert!(
-        !h.can_cast(1),
-        "W 重施窗口过期后应进入冷却"
-    );
+    assert!(!h.can_cast(1), "W 重施窗口过期后应进入冷却");
     h.finish();
 }
 

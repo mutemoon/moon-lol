@@ -4,7 +4,7 @@ use bevy::prelude::*;
 use bevy::world_serialization::WorldInstanceSpawnError;
 use lol_base::character::ConfigCharacterRecord;
 
-use crate::base::level::{EventLevelUp, ExperienceDrop, Level};
+use crate::base::level::{EventExperienceGain, EventLevelUp, ExperienceDrop, Level};
 use crate::life::{Death, EventDead};
 use crate::team::Team;
 
@@ -57,6 +57,10 @@ fn on_event_dead(
         }
 
         let exp_int = exp_drop.exp_given_on_death as u32;
+        commands.trigger(EventExperienceGain {
+            entity: target_entity,
+            amount: exp_int,
+        });
         let levels_gained = level.add_experience(exp_int);
         if levels_gained == 0 {
             continue;

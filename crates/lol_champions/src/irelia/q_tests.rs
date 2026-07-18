@@ -30,10 +30,7 @@ fn irelia_q_damages_nearest_enemy() {
         (remaining - (6000.0 - expected)).abs() < 1.0,
         "Q 应造成 {expected} 伤害，实际剩余血量 {remaining}"
     );
-    assert!(
-        !h.can_cast(0),
-        "Q 施放后应进入冷却"
-    );
+    assert!(!h.can_cast(0), "Q 施放后应进入冷却");
     assert!(h.mana() < mana_before, "Q 施放应消耗法力");
     h.finish();
 }

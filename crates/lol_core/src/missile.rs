@@ -218,7 +218,10 @@ fn linear_missile_collision(
         &mut LinearMissile,
         &mut Transform,
     )>,
-    q_targets: Query<(Entity, &Team, &Transform, Option<&Health>), (Without<LinearMissile>, Without<Death>)>,
+    q_targets: Query<
+        (Entity, &Team, &Transform, Option<&Health>),
+        (Without<LinearMissile>, Without<Death>),
+    >,
     q_source_team: Query<&Team>,
     res_grid: Option<Res<ResourceGrid>>,
     assets_grid: Option<Res<Assets<ConfigNavigationGrid>>>,
@@ -297,12 +300,14 @@ fn linear_missile_collision(
 
                 match linear.collision_target {
                     MissileCollisionTarget::EnemyNoDirectDamage => {
-                        commands.entity(state.source).trigger(|e| EventMissileHitEntity {
-                            source: e,
-                            target,
-                            spell: missile.key.clone(),
-                            hit_point: target_transform.translation,
-                        });
+                        commands
+                            .entity(state.source)
+                            .trigger(|e| EventMissileHitEntity {
+                                source: e,
+                                target,
+                                spell: missile.key.clone(),
+                                hit_point: target_transform.translation,
+                            });
                     }
                     _ => {
                         // 按目标已损失生命值缩放（锐雯 R 斩杀），否则用固定伤害

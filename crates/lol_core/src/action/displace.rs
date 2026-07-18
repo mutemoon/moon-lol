@@ -39,14 +39,9 @@ pub enum DisplaceTargetSelection {
         direction: Vec2,
     },
     /// 圆形范围内所有敌方英雄（Riven Q3 / Volibear R 落地）
-    Circle {
-        radius: f32,
-        center: DisplaceCenter,
-    },
+    Circle { radius: f32, center: DisplaceCenter },
     /// 最近的单个敌方英雄（Sett R 抓取）
-    Nearest {
-        range: f32,
-    },
+    Nearest { range: f32 },
     /// 由英雄自行筛选后传入
     Explicit(Vec<Entity>),
 }
@@ -62,15 +57,9 @@ pub enum DisplaceCenter {
 #[derive(Debug, Clone)]
 pub enum DisplaceMotion {
     /// 向施法者拉回（Darius E / Mordekaiser E）
-    PullToward {
-        distance: f32,
-        speed: f32,
-    },
+    PullToward { distance: f32, speed: f32 },
     /// 从施法者击退（Riven Q3）
-    PushAway {
-        distance: f32,
-        speed: f32,
-    },
+    PushAway { distance: f32, speed: f32 },
     /// 拉回到指定点（Aatrox W 引爆）
     PullToPoint {
         point: Vec2,
@@ -84,9 +73,16 @@ pub enum DisplaceMotion {
 /// 命中附带效果
 #[derive(Debug, Clone)]
 pub enum DisplaceEffect {
-    Knockup { duration: f32 },
-    Stun { duration: f32 },
-    Slow { percent: f32, duration: f32 },
+    Knockup {
+        duration: f32,
+    },
+    Stun {
+        duration: f32,
+    },
+    Slow {
+        percent: f32,
+        duration: f32,
+    },
     Damage {
         amount: f32,
         damage_type: DamageType,
@@ -131,13 +127,7 @@ pub struct GrabbedBy {
 // ---------------------------------------------------------------------------
 
 /// 判断目标是否在锥形内
-fn in_cone(
-    target_pos: Vec3,
-    origin: Vec3,
-    range: f32,
-    half_angle: f32,
-    direction: Vec2,
-) -> bool {
+fn in_cone(target_pos: Vec3, origin: Vec3, range: f32, half_angle: f32, direction: Vec2) -> bool {
     let diff = (target_pos - origin).xz();
     let distance = diff.length();
     if distance > range || distance == 0.0 {
@@ -152,10 +142,7 @@ fn select_targets(
     selection: &DisplaceTargetSelection,
     entity: Entity,
     q_transform: &Query<&Transform>,
-    q_targets: &Query<
-        (Entity, &Team, &Transform),
-        (Without<Death>, Without<GrabbedBy>),
-    >,
+    q_targets: &Query<(Entity, &Team, &Transform), (Without<Death>, Without<GrabbedBy>)>,
     team: &Team,
 ) -> Vec<Entity> {
     match selection {
@@ -179,16 +166,15 @@ fn select_targets(
         }
         DisplaceTargetSelection::Circle { radius, center } => {
             let origin = match center {
-                DisplaceCenter::Caster => {
-                    q_transform.get(entity).map(|t| t.translation).unwrap_or_default()
-                }
+                DisplaceCenter::Caster => q_transform
+                    .get(entity)
+                    .map(|t| t.translation)
+                    .unwrap_or_default(),
                 DisplaceCenter::Point(p) => Vec3::new(p.x, 0.0, p.y),
             };
             q_targets
                 .iter()
-                .filter(|(_, t, tf)| {
-                    *t != team && tf.translation.distance(origin) <= *radius
-                })
+                .filter(|(_, t, tf)| *t != team && tf.translation.distance(origin) <= *radius)
                 .map(|(e, _, _)| e)
                 .collect()
         }
@@ -271,7 +257,11 @@ fn apply_motion(
                 },
             });
         }
-        DisplaceMotion::PullToPoint { point, distance, speed } => {
+        DisplaceMotion::PullToPoint {
+            point,
+            distance,
+            speed,
+        } => {
             let Ok(target_transform) = q_transform.get(target) else {
                 return;
             };
@@ -297,12 +287,7 @@ fn apply_motion(
 }
 
 /// 应用单个效果到目标
-fn apply_effect(
-    commands: &mut Commands,
-    target: Entity,
-    source: Entity,
-    effect: &DisplaceEffect,
-) {
+fn apply_effect(commands: &mut Commands, target: Entity, source: Entity, effect: &DisplaceEffect) {
     match effect {
         DisplaceEffect::Knockup { duration } => {
             commands
@@ -344,10 +329,7 @@ pub fn on_action_displace(
     trigger: On<ActionDisplace>,
     mut commands: Commands,
     q_transform: Query<&Transform>,
-    q_targets: Query<
-        (Entity, &Team, &Transform),
-        (Without<Death>, Without<GrabbedBy>),
-    >,
+    q_targets: Query<(Entity, &Team, &Transform), (Without<Death>, Without<GrabbedBy>)>,
     q_team: Query<&Team>,
 ) {
     let entity = trigger.event_target();
@@ -386,11 +368,8 @@ pub fn on_action_displace(
             let back_hit = !back_targets.is_empty();
 
             // 收集所有目标（前方锥形 + 后方锥形）
-            let all_targets: Vec<Entity> = targets
-                .iter()
-                .chain(back_targets.iter())
-                .copied()
-                .collect();
+            let all_targets: Vec<Entity> =
+                targets.iter().chain(back_targets.iter()).copied().collect();
             let total_hit = !all_targets.is_empty();
 
             // 所有命中目标执行位移运动 + 效果（伤害）
@@ -410,14 +389,16 @@ pub fn on_action_displace(
                 }
             } else {
                 for t in &targets {
-                    commands
-                        .entity(*t)
-                        .with_related::<BuffOf>(DebuffSlow::new(policy.slow_percent, policy.slow_duration));
+                    commands.entity(*t).with_related::<BuffOf>(DebuffSlow::new(
+                        policy.slow_percent,
+                        policy.slow_duration,
+                    ));
                 }
                 for t in &back_targets {
-                    commands
-                        .entity(*t)
-                        .with_related::<BuffOf>(DebuffSlow::new(policy.slow_percent, policy.slow_duration));
+                    commands.entity(*t).with_related::<BuffOf>(DebuffSlow::new(
+                        policy.slow_percent,
+                        policy.slow_duration,
+                    ));
                 }
             }
             return;
@@ -426,7 +407,13 @@ pub fn on_action_displace(
 
     // 常规处理：位移 + 效果
     for target in &targets {
-        apply_motion(&mut commands, *target, entity, &trigger.motion, &q_transform);
+        apply_motion(
+            &mut commands,
+            *target,
+            entity,
+            &trigger.motion,
+            &q_transform,
+        );
         for effect in &trigger.effects {
             apply_effect(&mut commands, *target, entity, effect);
         }
@@ -440,10 +427,7 @@ pub fn on_action_displace(
 /// 每帧同步被抓取者位置到 grabber
 pub fn update_grabbed_entities(
     q_grabbed: Query<(Entity, &GrabbedBy)>,
-    mut transforms: ParamSet<(
-        Query<&Transform>,
-        Query<&mut Transform>,
-    )>,
+    mut transforms: ParamSet<(Query<&Transform>, Query<&mut Transform>)>,
 ) {
     // 先收集所有 grabber 位置
     let mut updates: Vec<(Entity, Vec3)> = Vec::new();
@@ -464,6 +448,8 @@ pub fn update_grabbed_entities(
 mod tests {
     use bevy::prelude::*;
     use bevy::time::TimeUpdateStrategy;
+    use lol_base::grid::ConfigNavigationGrid;
+    use lol_base::spell::Spell;
 
     use super::*;
     use crate::action::PluginAction;
@@ -472,8 +458,6 @@ mod tests {
     use crate::navigation::grid::ResourceGrid;
     use crate::navigation::navigation::PluginNavigaton;
     use crate::team::Team;
-    use lol_base::grid::ConfigNavigationGrid;
-    use lol_base::spell::Spell;
 
     fn app_with_grid() -> App {
         let mut app = App::new();
@@ -608,17 +592,11 @@ mod tests {
 
         // e1 (距离圆心≈0) 应被推开
         let e1_x = app.world().get::<Transform>(e1).unwrap().translation.x;
-        assert!(
-            e1_x > 10.0,
-            "Circle 命中 e1 应被推开，实际 x = {e1_x}"
-        );
+        assert!(e1_x > 10.0, "Circle 命中 e1 应被推开，实际 x = {e1_x}");
 
         // e2 在 250 外 → Query 检查它未被击退（位置不变 ≈ 300）
         let e2_x = app.world().get::<Transform>(e2).unwrap().translation.x;
-        assert!(
-            e2_x > 250.0,
-            "e2 超出半径不应被推，实际 x = {e2_x}"
-        );
+        assert!(e2_x > 250.0, "e2 超出半径不应被推，实际 x = {e2_x}");
     }
 
     #[test]
@@ -660,9 +638,10 @@ mod tests {
         // 检查 enemy 是否有 Stun buff
         let buffs = app.world().get::<crate::base::buff::Buffs>(enemy);
         assert!(buffs.is_some(), "enemy 应有 Buffs 组件");
-        let has_stun = buffs.unwrap().iter().any(|e| {
-            app.world().get::<DebuffStun>(e).is_some()
-        });
+        let has_stun = buffs
+            .unwrap()
+            .iter()
+            .any(|e| app.world().get::<DebuffStun>(e).is_some());
         assert!(has_stun, "enemy 应有 DebuffStun");
     }
 
@@ -676,10 +655,7 @@ mod tests {
             .id();
         let grabbed = app
             .world_mut()
-            .spawn((
-                Transform::from_xyz(0.0, 0.0, 0.0),
-                GrabbedBy { grabber },
-            ))
+            .spawn((Transform::from_xyz(0.0, 0.0, 0.0), GrabbedBy { grabber }))
             .id();
 
         for _ in 0..5 {

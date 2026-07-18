@@ -45,6 +45,13 @@ pub struct EventLevelUp {
     pub delta: u32,
 }
 
+/// 经验增益事件，获得经验时触发（无论是否升级）
+#[derive(EntityEvent)]
+pub struct EventExperienceGain {
+    pub entity: Entity,
+    pub amount: u32,
+}
+
 impl Level {
     pub fn add_experience(&mut self, experience: u32) -> u32 {
         self.experience += experience;

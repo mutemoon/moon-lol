@@ -456,3 +456,166 @@ fn insufficient_mana_is_recorded_without_starting_cooldown() {
         SkillCastResult::Failed(SkillCastFailureReason::InsufficientAbilityResource)
     ));
 }
+
+#[test]
+fn test_no_cooldown_resource_mode() {
+    let mut app = App::new();
+    app.add_plugins(MinimalPlugins);
+    app.add_plugins(AssetPlugin::default());
+    app.add_plugins(PluginAction);
+    app.add_plugins(PluginCooldown);
+    app.add_plugins(PluginDamage);
+    app.add_plugins(PluginLife);
+    app.add_plugins(PluginMovement);
+
+    // 注入 NoCooldown 资源，初始为 true
+    app.insert_resource(crate::skill::NoCooldown(true));
+
+    app.add_plugins(PluginSkill);
+    app.init_asset::<Spell>();
+
+    let caster = app
+        .world_mut()
+        .spawn((
+            Team::Order,
+            Transform::default(),
+            Level::default(),
+            SkillPoints(1),
+            Skills::default(),
+            make_mana(100.0),
+        ))
+        .id();
+
+    // 默认创建 Skill 并加入 CoolDown 组件
+    let mut timer = Timer::from_seconds(3.0, TimerMode::Once);
+    timer.tick(Duration::from_secs_f32(3.0));
+
+    let skill_entity = app
+        .world_mut()
+        .spawn((
+            SkillOf(caster),
+            Skill::new(SkillSlot::Q, spell_handle(SPELL_KEY)).with_level(1),
+            CoolDown {
+                duration: 3.0,
+                timer: Some(timer),
+            },
+        ))
+        .id();
+
+    app.world_mut()
+        .get_mut::<Skills>(caster)
+        .unwrap()
+        .push(skill_entity);
+
+    app.update();
+
+    // 验证新加入的技能已经被设为 timer 为 None
+    let cd = app.world().get::<CoolDown>(skill_entity).unwrap();
+    assert!(cd.timer.is_none());
+}
+
+#[test]
+fn test_god_mode_mechanics() {
+    let mut app = App::new();
+    app.add_plugins(MinimalPlugins);
+    app.add_plugins(AssetPlugin::default());
+    app.add_plugins(PluginAction);
+    app.add_plugins(PluginCooldown);
+    app.add_plugins(PluginDamage);
+    app.add_plugins(PluginLife);
+    app.add_plugins(PluginMovement);
+
+    // 启用 GodMode
+    app.insert_resource(crate::skill::GodMode(true));
+    app.add_plugins(PluginSkill);
+    app.init_asset::<Spell>();
+
+    let caster = app
+        .world_mut()
+        .spawn((
+            crate::entities::champion::Champion,
+            Team::Order,
+            Transform::default(),
+            Level::default(),
+            SkillPoints(1),
+            Skills::default(),
+            Health::new(100.0),
+            AbilityResource {
+                value: 10.0,
+                max: 100.0,
+                ..default()
+            },
+        ))
+        .id();
+
+    let spell_object = Spell {
+        spell_data: Some(lol_base::spell::DataSpell {
+            mana: Some(vec![30.0; 6]), // 1级需要30蓝
+            ..default()
+        }),
+    };
+    let spell_handle = app
+        .world_mut()
+        .resource_mut::<Assets<Spell>>()
+        .add(spell_object);
+
+    let skill_entity = app
+        .world_mut()
+        .spawn((
+            SkillOf(caster),
+            Skill::new(SkillSlot::Q, spell_handle).with_level(1),
+            CoolDown {
+                duration: 3.0,
+                timer: None,
+            },
+        ))
+        .id();
+
+    app.world_mut()
+        .get_mut::<Skills>(caster)
+        .unwrap()
+        .push(skill_entity);
+
+    // 运行 apply_god_mode 应该把蓝回满，并加上免伤 Buff
+    app.update();
+
+    let health = app.world().get::<Health>(caster).unwrap();
+    let ar = app.world().get::<AbilityResource>(caster).unwrap();
+    assert_eq!(health.value, 100.0);
+    assert_eq!(ar.value, 100.0); // 应该被回满到 max (100.0)
+    assert!(
+        app.world()
+            .get::<crate::buffs::damage_reduction::BuffDamageReduction>(caster)
+            .is_some()
+    );
+    assert_eq!(app.world().get::<Level>(caster).unwrap().value, 6);
+    assert_eq!(app.world().get::<SkillPoints>(caster).unwrap().0, 6);
+
+    // 即使我们把蓝消耗到 10，我们依然可以释放消耗 30 蓝的技能
+    app.world_mut()
+        .get_mut::<AbilityResource>(caster)
+        .unwrap()
+        .value = 10.0;
+    app.world_mut().trigger(CommandSkillStart {
+        entity: caster,
+        index: 0,
+        point: Vec2::ZERO,
+    });
+    app.update();
+
+    // 验证技能释放成功且不扣蓝 (但在这一帧 apply_god_mode 运行后它也会重新回满)
+    let log = app.world().resource::<SkillCastLog>();
+    assert!(matches!(
+        log.0.last().unwrap().result,
+        SkillCastResult::Started
+    ));
+
+    // 测试动态关闭上帝模式
+    app.world_mut().resource_mut::<crate::skill::GodMode>().0 = false;
+    app.update();
+    assert!(
+        app.world()
+            .get::<crate::buffs::damage_reduction::BuffDamageReduction>(caster)
+            .is_none()
+    );
+}

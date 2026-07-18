@@ -9,7 +9,7 @@ use lol_core::attack::CommandAttackReset;
 use lol_core::damage::{Damage, DamageType};
 use lol_core::missile::CommandAttachedFieldCreate;
 use lol_core::movement::{EventMovementEnd, MovementSource};
-use lol_core::skill::{EventSkillCast, Skill, SkillSlot, SkillRecastWindow, get_skill_value};
+use lol_core::skill::{EventSkillCast, Skill, SkillRecastWindow, SkillSlot, get_skill_value};
 
 use crate::riven::Riven;
 use crate::riven::buffs::RivenQ3Pending;
@@ -76,10 +76,12 @@ pub fn on_riven_q(
     commands.trigger(CommandAttackReset { entity });
 
     if stage >= 3 {
-        commands.entity(entity).insert(RivenQ3Pending {
-            damage: q_damage,
-        });
-        commands.entity(trigger.skill_entity).remove::<SkillRecastWindow>();
+        commands
+            .entity(entity)
+            .insert(RivenQ3Pending { damage: q_damage });
+        commands
+            .entity(trigger.skill_entity)
+            .remove::<SkillRecastWindow>();
     } else {
         commands.trigger(CommandAttachedFieldCreate {
             entity,
@@ -89,11 +91,9 @@ pub fn on_riven_q(
             grow_from: Some(65.0),
             grow_duration: Some(0.25),
         });
-        commands.entity(trigger.skill_entity).insert(SkillRecastWindow::new(
-            stage + 1,
-            3,
-            RIVEN_Q_RECAST_WINDOW,
-        ));
+        commands
+            .entity(trigger.skill_entity)
+            .insert(SkillRecastWindow::new(stage + 1, 3, RIVEN_Q_RECAST_WINDOW));
     }
 }
 

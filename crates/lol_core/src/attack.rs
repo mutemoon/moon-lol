@@ -234,10 +234,16 @@ fn on_command_attack_start(
     q_transform: Query<&Transform>,
     q_buff_attack: Query<&BuffAttack>,
     q_buffs: Query<&Buffs>,
+    q_death: Query<&Death>,
     time: Res<Time<Fixed>>,
 ) {
     let entity = trigger.event_target();
     let target = trigger.target;
+
+    // 忽略死亡目标（尸体不攻击）
+    if q_death.get(target).is_ok() {
+        return;
+    }
 
     let now = time.elapsed_secs();
 

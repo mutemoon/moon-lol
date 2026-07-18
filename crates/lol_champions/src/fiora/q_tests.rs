@@ -60,10 +60,7 @@ fn fiora_q_strikes_after_dash_not_at_cast() {
         h.health(enemy) < hp_before,
         "位移停止后应戳刺最近敌人造成伤害"
     );
-    assert!(
-        !h.can_cast(0),
-        "Q 施放后应进入冷却"
-    );
+    assert!(!h.can_cast(0), "Q 施放后应进入冷却");
     assert!(h.mana() < mana_before, "Q 施放应消耗法力");
 
     h.finish();

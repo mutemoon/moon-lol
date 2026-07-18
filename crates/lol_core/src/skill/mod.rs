@@ -22,6 +22,14 @@ pub use observers::*;
 
 use crate::loaders::spell::LoaderSpell;
 
+#[derive(Resource, Default, Debug, Clone, Copy, Reflect)]
+#[reflect(Resource)]
+pub struct NoCooldown(pub bool);
+
+#[derive(Resource, Default, Debug, Clone, Copy, Reflect)]
+#[reflect(Resource)]
+pub struct GodMode(pub bool);
+
 #[derive(Default)]
 pub struct PluginSkill;
 
@@ -31,11 +39,26 @@ impl Plugin for PluginSkill {
         app.init_asset_loader::<LoaderSpell>();
 
         app.init_resource::<SkillCastLog>();
+        app.init_resource::<NoCooldown>();
+        app.register_type::<NoCooldown>();
+        app.init_resource::<GodMode>();
+        app.register_type::<GodMode>();
 
         app.add_observer(on_skill_cast);
         app.add_observer(on_skill_level_up);
         app.add_observer(on_level_up);
         app.add_systems(FixedUpdate, update_skill_recast_windows);
+        app.add_systems(Update, apply_no_cooldown);
+    }
+}
+
+fn apply_no_cooldown(no_cooldown: Res<NoCooldown>, mut q_cooldowns: Query<&mut CoolDown>) {
+    if no_cooldown.0 {
+        for mut cd in q_cooldowns.iter_mut() {
+            if cd.timer.is_some() {
+                cd.timer = None;
+            }
+        }
     }
 }
 
