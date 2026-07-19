@@ -133,7 +133,10 @@ class MoonLoLEnv(gym.Env):
         self._level_up_skills()
         
         self.current_step = 0
-        obs_data = self._get_obs_data()
+        reset_res = self.client.rl_reset()
+        obs_data = reset_res.get("observation") if reset_res else None
+        if obs_data is None:
+            obs_data = self._get_obs_data()
         obs_vec = self._get_obs_vector(obs_data)
         return obs_vec, {}
 
@@ -163,11 +166,11 @@ class MoonLoLEnv(gym.Env):
         # Send action
         self._send_action(action)
         
-        # Tick the environment (real-time sleep)
-        time.sleep(0.1)
-        
-        # Get new observation
-        obs_data = self._get_obs_data()
+        # Precise step: advance Bevy by 6 frames (0.1s at 60Hz)
+        step_res = self.client.rl_step(frames=6)
+        obs_data = step_res.get("observation") if step_res else None
+        if obs_data is None:
+            obs_data = self._get_obs_data()
         obs_vec = self._get_obs_vector(obs_data)
         
         self.current_step += 1

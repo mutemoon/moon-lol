@@ -111,9 +111,12 @@ impl GameClient {
         self.cmd(CMD_RL_RESET, params).await
     }
 
-    pub async fn rl_step(&self, entity_id: u64) -> Result<WsResponse, String> {
-        self.cmd(CMD_RL_STEP, json!({ "entity_id": entity_id }))
-            .await
+    pub async fn rl_step(&self, entity_id: u64, frames: Option<u32>) -> Result<WsResponse, String> {
+        let mut params = json!({ "entity_id": entity_id });
+        if let Some(f) = frames {
+            params["frames"] = json!(f);
+        }
+        self.cmd(CMD_RL_STEP, params).await
     }
 
     // ── 幂等暂停 / 恢复（先 get_state 再决定是否 toggle_pause）──

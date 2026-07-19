@@ -1,0 +1,18 @@
+[project]
+name = "moon-lol"
+version = "0.1.0"
+description = "MoonLoL RL Workspace"
+requires-python = ">=3.8"
+dependencies = [
+    "gymnasium>=0.29.0",
+    "torch>=2.0.0",
+    "tyro>=0.5.0",
+    "websockets>=11.0",
+    "numpy>=1.20.0",
+    "tensorboard>=2.14.0",
+]
+
+[tool.uv.workspace]
+members = [
+    "services/rl-trainer",
+]

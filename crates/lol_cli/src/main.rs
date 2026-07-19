@@ -86,11 +86,14 @@ enum Commands {
         config_json: Option<String>,
     },
 
-    /// RL 环境 step：推进一帧并返回 reward 与新观测
+    /// RL 环境 step：推进指定帧数并返回 reward 与新观测
     RlStep {
         /// 目标英雄实体 ID
         #[arg(short, long)]
         entity_id: u64,
+        /// 可选的推进帧数 (默认由服务端定)
+        #[arg(short, long)]
+        frames: Option<u32>,
     },
 }
 
@@ -199,7 +202,7 @@ async fn run(client: &GameClient, command: Commands) -> Result<(), String> {
             };
             print_data(client.rl_reset(entity_id, cfg).await?)
         }
-        Commands::RlStep { entity_id } => print_data(client.rl_step(entity_id).await?),
+        Commands::RlStep { entity_id, frames } => print_data(client.rl_step(entity_id, frames).await?),
     }
 }
 

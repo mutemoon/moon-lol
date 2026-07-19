@@ -123,18 +123,33 @@ pub fn start(world: &mut World, _port: u16) {
     std::mem::forget(cmd_tx);
 }
 
+/// 用于在自定义步进模式下，主线程暂存从通道中同步阻塞读取出来的命令包。
+#[derive(Resource, Default)]
+pub struct PendingCommands(pub Vec<(u64, String, serde_json::Value)>);
+
 /// Bevy Update system — poll incoming commands and dispatch to handlers.
 /// Runs every frame; non-blocking via try_recv.
 pub fn poll_commands(world: &mut World) {
+    let mut cmds = Vec::new();
+
+    // 1. 先取出暂存的命令
+    if let Some(mut pending) = world.get_resource_mut::<PendingCommands>() {
+        cmds.append(&mut pending.0);
+    }
+
+    // 2. 再读取通道中的新命令
     let cmd_rx = world
         .get_resource::<DebugWsChannel>()
         .map(|ch| ch.cmd_rx.clone());
 
-    let Some(cmd_rx) = cmd_rx else {
-        return;
-    };
+    if let Some(cmd_rx) = cmd_rx {
+        while let Ok(cmd_packet) = cmd_rx.try_recv() {
+            cmds.push(cmd_packet);
+        }
+    }
 
-    while let Ok((id, cmd, params)) = cmd_rx.try_recv() {
+    // 3. 分发并响应所有命令
+    for (id, cmd, params) in cmds {
         let response = crate::handlers::dispatch(world, id, cmd, params);
         let out_tx = world
             .get_resource::<DebugWsChannel>()

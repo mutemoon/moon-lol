@@ -165,3 +165,35 @@ class MoonLoLClient:
 
     def level_up_skill(self, index):
         return self.send_action({"SkillLevelUp": index})
+
+    def rl_reset(self, config_json=None):
+        params = {}
+        if self.controlled_entity_id is not None:
+            params["entity_id"] = self.controlled_entity_id
+        if config_json is not None:
+            params["config_json"] = config_json
+        req = {
+            "id": self.req_id,
+            "cmd": "rl_reset",
+            "params": params
+        }
+        self.req_id += 1
+        resp = self._send_and_recv(req)
+        if resp.get("ok"):
+            return resp.get("data")
+        return None
+
+    def rl_step(self, frames=6):
+        params = {"frames": frames}
+        if self.controlled_entity_id is not None:
+            params["entity_id"] = self.controlled_entity_id
+        req = {
+            "id": self.req_id,
+            "cmd": "rl_step",
+            "params": params
+        }
+        self.req_id += 1
+        resp = self._send_and_recv(req)
+        if resp.get("ok"):
+            return resp.get("data")
+        return None

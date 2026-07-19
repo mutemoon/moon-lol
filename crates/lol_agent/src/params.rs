@@ -58,6 +58,7 @@ pub struct RlResetParams {
 #[derive(Deserialize, Debug, Clone)]
 pub struct RlStepParams {
     pub entity_id: Option<u64>,
+    pub frames: Option<u32>,
 }
 
 #[derive(Debug, Clone, Default)]
