@@ -1,8 +1,8 @@
 use bevy::camera::visibility::RenderLayers;
 use bevy::prelude::*;
-use league_core::extract::{
-    EnumVfxPrimitive, VfxDistortionDefinitionData, VfxEmitterDefinitionData,
-    VfxSystemDefinitionData,
+use lol_base::particle::{
+    ConfigVfxDistortionDefinition, ConfigVfxEmitterDefinition, ConfigVfxPrimitive,
+    ConfigVfxSystemDefinition,
 };
 use lol_core::lifetime::Lifetime;
 
@@ -22,8 +22,8 @@ use crate::particle::utils::ResourceCache;
 pub fn attach_distortion_visuals(
     commands: &mut Commands,
     particle_entity: Entity,
-    vfx_emitter_definition_data: &VfxEmitterDefinitionData,
-    distortion_definition: &VfxDistortionDefinitionData,
+    vfx_emitter_definition_data: &ConfigVfxEmitterDefinition,
+    distortion_definition: &ConfigVfxDistortionDefinition,
     texture: Option<Handle<Image>>,
     particle_color_texture: Option<Handle<Image>>,
     blend_mode: u8,
@@ -103,7 +103,7 @@ pub fn attach_distortion_visuals(
 pub fn update_emitter_distortion(
     mut commands: Commands,
     mut res_mesh: ResMut<Assets<Mesh>>,
-    res_assets_vfx_system_definition_data: Res<Assets<VfxSystemDefinitionData>>,
+    res_assets_vfx_system_definition_data: Res<Assets<ConfigVfxSystemDefinition>>,
     res_asset_server: Res<AssetServer>,
     mut res_resource_cache: ResMut<ResourceCache>,
     mut res_image: ResMut<Assets<Image>>,
@@ -127,13 +127,6 @@ pub fn update_emitter_distortion(
             continue;
         }
 
-        // let vert_path = get_shader_handle(ParticleMaterialDistortion::VERT_PATH, &vec![]);
-        // let frag_path = get_shader_handle(ParticleMaterialDistortion::FRAG_PATH, &vec![]);
-        // let vert = res_shader.get(&vert_path).unwrap();
-        // let frag = res_shader.get(&frag_path).unwrap();
-        // info!("[扭曲发射器] 着色器: {}", vert.source.as_str());
-        // info!("[扭曲发射器] 着色器: {}", frag.source.as_str());
-
         // Check if this emitter has a distortion definition
         let Some(distortion_definition) = &vfx_emitter_definition_data.distortion_definition else {
             continue;
@@ -151,15 +144,15 @@ pub fn update_emitter_distortion(
         let primitive = vfx_emitter_definition_data
             .primitive
             .clone()
-            .unwrap_or(EnumVfxPrimitive::VfxPrimitiveCameraUnitQuad);
+            .unwrap_or(ConfigVfxPrimitive::VfxPrimitiveCameraUnitQuad);
 
         info!("[扭曲发射器] 图元类型: {:?}", primitive);
 
         // Distortion typically works with quad-like primitives
         let is_valid_primitive = matches!(
             primitive,
-            EnumVfxPrimitive::VfxPrimitiveArbitraryQuad
-                | EnumVfxPrimitive::VfxPrimitiveCameraUnitQuad
+            ConfigVfxPrimitive::VfxPrimitiveArbitraryQuad
+                | ConfigVfxPrimitive::VfxPrimitiveCameraUnitQuad
         );
         if !is_valid_primitive {
             info!("[扭曲发射器] 图元类型不支持扭曲效果，跳过");

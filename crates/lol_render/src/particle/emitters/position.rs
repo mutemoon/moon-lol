@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use league_core::extract::VfxSystemDefinitionData;
+use lol_base::particle::ConfigVfxSystemDefinition;
 use lol_core::lifetime::Lifetime;
 
 use super::state::{EmitterOf, ParticleEmitterState};
@@ -13,7 +13,7 @@ pub fn update_emitter_position(
         &ParticleEmitterState,
         &ParticleId,
     )>,
-    res_assets_vfx_system_definition_data: Res<Assets<VfxSystemDefinitionData>>,
+    res_assets_vfx_system_definition_data: Res<Assets<ConfigVfxSystemDefinition>>,
     q_global_transform: Query<&GlobalTransform>,
 ) {
     for (mut transform, emitter_of, lifetime, emitter, particle_id) in query.iter_mut() {

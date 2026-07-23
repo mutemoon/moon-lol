@@ -138,16 +138,31 @@ pub fn type_name_to_hash(type_name: &str) -> u32 {
     }
 }
 
-pub fn get_shader_uuid_by_hash(path: &str, hash: u64) -> Uuid {
-    Uuid::from_u128(hash_shader(&format!("{path}#{hash}")) as u128)
+#[derive(Debug, Copy, Clone, Hash, Eq, PartialEq, Serialize, Deserialize, Reflect)]
+pub enum LeagueShader {
+    QuadPsSlice,
+    QuadVs,
+    QuadPs,
+    UnlitDecalPs,
+    UnlitDecalVs,
+    DistortionPs,
+    DistortionVs,
+    MeshPs,
+    MeshVs,
+    SkinnedMeshParticlePs,
+    SkinnedMeshParticleVs,
 }
 
-pub fn get_shader_handle_by_hash(path: &str, hash: u64) -> Handle<Shader> {
-    Handle::Uuid(get_shader_uuid_by_hash(path, hash), PhantomData)
+pub fn get_shader_uuid_by_hash(shader_type: LeagueShader, hash: u64) -> Uuid {
+    Uuid::from_u128(hash_shader(&format!("{:?}#{hash}", shader_type)) as u128)
 }
 
-pub fn get_shader_handle(path: &str, defs: &Vec<String>) -> Handle<Shader> {
-    get_shader_handle_by_hash(path, hash_shader_spec(defs))
+pub fn get_shader_handle_by_hash(shader_type: LeagueShader, hash: u64) -> Handle<Shader> {
+    Handle::Uuid(get_shader_uuid_by_hash(shader_type, hash), PhantomData)
+}
+
+pub fn get_shader_handle(shader_type: LeagueShader, defs: &Vec<String>) -> Handle<Shader> {
+    get_shader_handle_by_hash(shader_type, hash_shader_spec(defs))
 }
 
 pub fn get_extension_by_bytes(bytes: &[u8]) -> &str {

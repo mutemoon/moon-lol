@@ -14,6 +14,7 @@ pub mod item;
 pub mod map;
 pub mod mesh;
 pub mod movement;
+pub mod particle;
 pub mod register;
 pub mod render_cmd;
 pub mod shader;

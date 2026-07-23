@@ -1,6 +1,6 @@
 use bevy::prelude::*;
-use league_core::extract::{
-    EnumVfxPrimitive, VfxEmitterDefinitionData, VfxPrimitiveMesh, VfxSystemDefinitionData,
+use lol_base::particle::{
+    ConfigVfxEmitterDefinition, ConfigVfxPrimitive, ConfigVfxSystemDefinition,
 };
 use lol_core::lifetime::Lifetime;
 
@@ -13,14 +13,13 @@ use crate::particle::ParticleId;
 use crate::particle::particle::mesh::{
     ParticleMaterialMesh, UniformsPixelMesh, UniformsVertexMesh,
 };
-use crate::particle::utils::ResourceCache;
-use crate::particle::utils::create_black_pixel_texture;
+use crate::particle::utils::{ResourceCache, create_black_pixel_texture};
 
 pub fn attach_mesh_visuals(
     commands: &mut Commands,
     particle_entity: Entity,
-    _vfx_emitter_definition_data: &VfxEmitterDefinitionData,
-    m_mesh: &VfxPrimitiveMesh,
+    _vfx_emitter_definition_data: &ConfigVfxEmitterDefinition,
+    mesh_name: Option<&str>,
     texture: Option<Handle<Image>>,
     particle_color_texture: Option<Handle<Image>>,
     blend_mode: u8,
@@ -30,13 +29,8 @@ pub fn attach_mesh_visuals(
     res_resource_cache: &mut ResMut<ResourceCache>,
     res_asset_server: &Res<AssetServer>,
 ) {
-    let Some(m_mesh_data) = &m_mesh.m_mesh else {
-        println!("VfxPrimitiveMesh: m_mesh is None");
-        return;
-    };
-
-    let Some(mesh_name) = &m_mesh_data.m_simple_mesh_name else {
-        println!("VfxPrimitiveMesh: m_simple_mesh_name is None");
+    let Some(mesh_name) = mesh_name else {
+        println!("VfxPrimitiveMesh: mesh_name is None");
         return;
     };
 
@@ -61,7 +55,7 @@ pub fn attach_mesh_visuals(
 pub fn update_emitter_mesh(
     mut commands: Commands,
     mut res_mesh: ResMut<Assets<Mesh>>,
-    res_assets_vfx_system_definition_data: Res<Assets<VfxSystemDefinitionData>>,
+    res_assets_vfx_system_definition_data: Res<Assets<ConfigVfxSystemDefinition>>,
     res_asset_server: Res<AssetServer>,
     mut res_resource_cache: ResMut<ResourceCache>,
     mut res_image: ResMut<Assets<Image>>,
@@ -87,11 +81,13 @@ pub fn update_emitter_mesh(
         let primitive = vfx_emitter_definition_data
             .primitive
             .clone()
-            .unwrap_or(EnumVfxPrimitive::VfxPrimitiveCameraUnitQuad);
+            .unwrap_or(ConfigVfxPrimitive::VfxPrimitiveCameraUnitQuad);
 
-        // Extract m_mesh from Mesh primitive
-        let m_mesh = match primitive {
-            EnumVfxPrimitive::VfxPrimitiveMesh(ref m) => m,
+        // Extract simple_mesh_name from Mesh primitive
+        let simple_mesh_name = match &primitive {
+            ConfigVfxPrimitive::VfxPrimitiveMesh {
+                simple_mesh_name, ..
+            } => simple_mesh_name.as_deref(),
             _ => continue,
         };
 
@@ -160,12 +156,11 @@ pub fn update_emitter_mesh(
                 adjusted_birth_scale0,
             );
 
-            // Extract m_mesh from Mesh primitive
             attach_mesh_visuals(
                 &mut commands,
                 particle_entity,
                 vfx_emitter_definition_data,
-                m_mesh,
+                simple_mesh_name,
                 texture.clone(),
                 particle_color_texture.clone(),
                 blend_mode,

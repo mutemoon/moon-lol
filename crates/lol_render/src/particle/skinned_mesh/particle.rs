@@ -91,17 +91,19 @@ impl From<&ParticleMaterialSkinnedMeshParticle> for ParticleMaterialKeySkinnedMe
 }
 
 impl MaterialPath for ParticleMaterialSkinnedMeshParticle {
-    const FRAG_PATH: &str = "assets/shaders/hlsl/skinnedmesh/particle_ps.ps.glsl";
-    const VERT_PATH: &str = "assets/shaders/hlsl/skinnedmesh/particle_vs.vs.glsl";
+    const FRAG_SHADER: league_utils::LeagueShader =
+        league_utils::LeagueShader::SkinnedMeshParticlePs;
+    const VERT_SHADER: league_utils::LeagueShader =
+        league_utils::LeagueShader::SkinnedMeshParticleVs;
 }
 
 impl Material for ParticleMaterialSkinnedMeshParticle {
     fn fragment_shader() -> ShaderRef {
-        get_shader_handle(Self::FRAG_PATH, &vec![]).into()
+        get_shader_handle(Self::FRAG_SHADER, &vec![]).into()
     }
 
     fn vertex_shader() -> ShaderRef {
-        get_shader_handle(Self::VERT_PATH, &vec![]).into()
+        get_shader_handle(Self::VERT_SHADER, &vec![]).into()
     }
 
     fn alpha_mode(&self) -> AlphaMode {

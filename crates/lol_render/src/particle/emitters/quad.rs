@@ -1,5 +1,7 @@
 use bevy::prelude::*;
-use league_core::extract::{EnumVfxPrimitive, VfxEmitterDefinitionData, VfxSystemDefinitionData};
+use lol_base::particle::{
+    ConfigVfxEmitterDefinition, ConfigVfxPrimitive, ConfigVfxSystemDefinition,
+};
 use lol_core::lifetime::Lifetime;
 
 use super::state::ParticleEmitterState;
@@ -10,13 +12,12 @@ use super::utils::{
 use crate::particle::ParticleId;
 use crate::particle::particle::quad::{ParticleMaterialQuad, ParticleMeshQuad, UniformsVertexQuad};
 use crate::particle::particle::quad_slice::{ParticleMaterialQuadSlice, UniformsPixelQuadSlice};
-use crate::particle::utils::create_black_pixel_texture;
-use crate::particle::utils::ResourceCache;
+use crate::particle::utils::{ResourceCache, create_black_pixel_texture};
 
 pub fn attach_quad_visuals(
     commands: &mut Commands,
     particle_entity: Entity,
-    vfx_emitter_definition_data: &VfxEmitterDefinitionData,
+    vfx_emitter_definition_data: &ConfigVfxEmitterDefinition,
     texture: Option<Handle<Image>>,
     particle_color_texture: Option<Handle<Image>>,
     texture_mult: Option<Handle<Image>>,
@@ -77,7 +78,7 @@ pub fn attach_quad_visuals(
 pub fn update_emitter_quad(
     mut commands: Commands,
     mut res_mesh: ResMut<Assets<Mesh>>,
-    res_assets_vfx_system_definition_data: Res<Assets<VfxSystemDefinitionData>>,
+    res_assets_vfx_system_definition_data: Res<Assets<ConfigVfxSystemDefinition>>,
     res_asset_server: Res<AssetServer>,
     mut res_resource_cache: ResMut<ResourceCache>,
     mut res_image: ResMut<Assets<Image>>,
@@ -104,7 +105,7 @@ pub fn update_emitter_quad(
         let primitive = vfx_emitter_definition_data
             .primitive
             .clone()
-            .unwrap_or(EnumVfxPrimitive::VfxPrimitiveCameraUnitQuad);
+            .unwrap_or(ConfigVfxPrimitive::VfxPrimitiveCameraUnitQuad);
 
         let Some(EmissionParams {
             particles_to_spawn,

@@ -6,6 +6,7 @@ pub mod skin;
 pub mod spell;
 pub mod ui;
 pub mod utils;
+pub mod vfx;
 
 pub use animation::*;
 pub use champion::*;
@@ -15,3 +16,4 @@ pub use skin::*;
 pub use spell::*;
 pub use ui::*;
 pub use utils::*;
+pub use vfx::*;

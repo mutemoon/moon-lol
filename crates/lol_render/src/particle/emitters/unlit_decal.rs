@@ -1,8 +1,5 @@
 use bevy::prelude::*;
-use league_core::extract::{
-    EnumVfxPrimitive, VfxPrimitivePlanarProjection, VfxProjectionDefinitionData,
-    VfxSystemDefinitionData,
-};
+use lol_base::particle::{ConfigVfxPrimitive, ConfigVfxSystemDefinition};
 use lol_core::lifetime::Lifetime;
 
 use super::state::ParticleEmitterState;
@@ -20,7 +17,7 @@ use crate::particle::utils::ResourceCache;
 pub fn attach_unlit_decal_visuals(
     commands: &mut Commands,
     particle_entity: Entity,
-    m_projection: &VfxProjectionDefinitionData,
+    y_range: f32,
     texture: Option<Handle<Image>>,
     particle_color_texture: Option<Handle<Image>>,
     blend_mode: u8,
@@ -28,7 +25,7 @@ pub fn attach_unlit_decal_visuals(
 ) {
     let material_handle = res_unlit_decal_material.add(ParticleMaterialUnlitDecal {
         uniforms_vertex: UniformsVertexUnlitDecal {
-            decal_projection_y_range: Vec4::splat(m_projection.m_y_range.unwrap()),
+            decal_projection_y_range: Vec4::splat(y_range),
             ..default()
         },
         uniforms_pixel: UniformsPixelUnlitDecal::default(),
@@ -46,7 +43,7 @@ pub fn attach_unlit_decal_visuals(
 /// Update emitters for PlanarProjection (Decal) primitive type
 pub fn update_emitter_decal(
     mut commands: Commands,
-    res_assets_vfx_system_definition_data: Res<Assets<VfxSystemDefinitionData>>,
+    res_assets_vfx_system_definition_data: Res<Assets<ConfigVfxSystemDefinition>>,
     res_asset_server: Res<AssetServer>,
     mut res_resource_cache: ResMut<ResourceCache>,
     mut res_unlit_decal_material: ResMut<Assets<ParticleMaterialUnlitDecal>>,
@@ -71,7 +68,7 @@ pub fn update_emitter_decal(
         let primitive = vfx_emitter_definition_data
             .primitive
             .clone()
-            .unwrap_or(EnumVfxPrimitive::VfxPrimitiveCameraUnitQuad);
+            .unwrap_or(ConfigVfxPrimitive::VfxPrimitiveCameraUnitQuad);
 
         let Some(EmissionParams {
             particles_to_spawn,
@@ -138,16 +135,13 @@ pub fn update_emitter_decal(
                 adjusted_birth_scale0,
             );
 
-            // Extract m_projection from PlanarProjection
-            if let EnumVfxPrimitive::VfxPrimitivePlanarProjection(VfxPrimitivePlanarProjection {
-                ref m_projection,
-            }) = primitive
-            {
-                if let Some(m_projection) = m_projection {
+            // Extract y_range from PlanarProjection
+            if let ConfigVfxPrimitive::VfxPrimitivePlanarProjection { y_range } = primitive {
+                if let Some(y_range_val) = y_range {
                     attach_unlit_decal_visuals(
                         &mut commands,
                         particle_entity,
-                        m_projection,
+                        y_range_val,
                         texture.clone(),
                         particle_color_texture.clone(),
                         blend_mode,

@@ -1,7 +1,5 @@
 use bevy::prelude::*;
-use league_core::extract::VfxEmitterDefinitionData;
-
-use crate::particle::utils::{FromVfxOption, StochasticSampler};
+use lol_base::particle::{ConfigVfxEmitterDefinition, StochasticSampler};
 
 #[derive(Component)]
 #[require(Visibility)]
@@ -24,28 +22,22 @@ pub struct ParticleEmitterState {
 }
 
 impl ParticleEmitterState {
-    pub fn new(def: &VfxEmitterDefinitionData, global_transform: Transform) -> Self {
+    pub fn new(def: &ConfigVfxEmitterDefinition, global_transform: Transform) -> Self {
         Self {
-            birth_acceleration: FromVfxOption::from_option(
-                def.birth_acceleration.clone(),
-                Vec3::ZERO,
-            ),
-            birth_color: FromVfxOption::from_option(def.birth_color.clone(), Vec4::ONE),
-            birth_rotation0: FromVfxOption::from_option(def.birth_rotation0.clone(), Vec3::ZERO),
-            birth_scale0: FromVfxOption::from_option(def.birth_scale0.clone(), Vec3::ONE),
-            birth_uv_offset: FromVfxOption::from_option(def.birth_uv_offset.clone(), Vec2::ONE),
-            birth_uv_scroll_rate: FromVfxOption::from_option(
-                def.birth_uv_scroll_rate.clone(),
-                Vec2::ZERO,
-            ),
-            birth_velocity: FromVfxOption::from_option(def.birth_velocity.clone(), Vec3::ZERO),
-            bind_weight: FromVfxOption::from_option(def.bind_weight.clone(), 0.0),
-            color: FromVfxOption::from_option(def.color.clone(), Vec4::ONE),
-            scale0: FromVfxOption::from_option(def.scale0.clone(), Vec3::ONE),
+            birth_acceleration: def.birth_acceleration.clone(),
+            birth_color: def.birth_color.clone(),
+            birth_rotation0: def.birth_rotation0.clone(),
+            birth_scale0: def.birth_scale0.clone(),
+            birth_uv_offset: def.birth_uv_offset.clone(),
+            birth_uv_scroll_rate: def.birth_uv_scroll_rate.clone(),
+            birth_velocity: def.birth_velocity.clone(),
+            bind_weight: def.bind_weight.clone(),
+            color: def.color.clone(),
+            scale0: def.scale0.clone(),
             emission_debt: 0.,
-            particle_lifetime: FromVfxOption::from_option(def.particle_lifetime.clone(), 1.0),
-            rate: FromVfxOption::from_option(def.rate.clone(), 0.0),
-            emitter_position: FromVfxOption::from_option(def.emitter_position.clone(), Vec3::ZERO),
+            particle_lifetime: def.particle_lifetime.clone(),
+            rate: def.rate.clone(),
+            emitter_position: def.emitter_position.clone(),
             global_transform,
         }
     }

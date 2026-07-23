@@ -133,7 +133,7 @@ impl From<&ParticleMaterialDistortion> for ConditionalMaterialKeyDistortion {
         let shader_frag_defs = vec![];
 
         let shader_frag =
-            get_shader_handle(ParticleMaterialDistortion::FRAG_PATH, &shader_frag_defs);
+            get_shader_handle(ParticleMaterialDistortion::FRAG_SHADER, &shader_frag_defs);
 
         debug!("shader_frag_defs: {:?}", shader_frag_defs);
         match shader_frag {
@@ -151,18 +151,18 @@ impl From<&ParticleMaterialDistortion> for ConditionalMaterialKeyDistortion {
 }
 
 impl MaterialPath for ParticleMaterialDistortion {
-    const FRAG_PATH: &str = "assets/shaders/hlsl/particlesystem/distortion_ps.ps.glsl";
-    const VERT_PATH: &str = "assets/shaders/hlsl/particlesystem/distortion_vs.vs.glsl";
+    const FRAG_SHADER: league_utils::LeagueShader = league_utils::LeagueShader::DistortionPs;
+    const VERT_SHADER: league_utils::LeagueShader = league_utils::LeagueShader::DistortionVs;
 }
 
 impl Material for ParticleMaterialDistortion {
     fn fragment_shader() -> ShaderRef {
-        // get_shader_handle(Self::FRAG_PATH, &vec![]).into()
+        // get_shader_handle(Self::FRAG_SHADER, &vec![]).into()
         "shaders/distortion.frag".into()
     }
 
     fn vertex_shader() -> ShaderRef {
-        // get_shader_handle(Self::VERT_PATH, &vec![]).into()
+        // get_shader_handle(Self::VERT_SHADER, &vec![]).into()
         "shaders/distortion.vert".into()
     }
 

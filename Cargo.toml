@@ -42,6 +42,7 @@ bevy = { git = "https://github.com/mutemoon/bevy", branch = "bevy_basisu", featu
     "serialize",
     "bevy_debug_stepping",
     "webgpu",              # 在 web 平台使用 webgpu
+    "shader_format_spirv",
 ] }
 bevy_gltf_draco = { git = "https://github.com/mutemoon/bevy_gltf_draco", branch = "ktx2" }
 
@@ -106,6 +107,8 @@ rayon.workspace = true
 ron.workspace = true
 serde_json.workspace = true
 lol_agent.workspace = true
+anyhow = "1"
+regex.workspace = true
 
 walkdir = "2.5.0"
 

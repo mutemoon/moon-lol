@@ -75,8 +75,8 @@ pub struct ParticleMaterialKeyUnlitDecal {
 }
 
 impl MaterialPath for ParticleMaterialUnlitDecal {
-    const FRAG_PATH: &str = "assets/shaders/hlsl/environment/unlit_decal_ps.ps.glsl";
-    const VERT_PATH: &str = "assets/shaders/hlsl/environment/unlit_decal_vs.vs.glsl";
+    const FRAG_SHADER: league_utils::LeagueShader = league_utils::LeagueShader::UnlitDecalPs;
+    const VERT_SHADER: league_utils::LeagueShader = league_utils::LeagueShader::UnlitDecalVs;
 }
 
 // 2. 为 Key 实现 From Trait
@@ -90,11 +90,11 @@ impl From<&ParticleMaterialUnlitDecal> for ParticleMaterialKeyUnlitDecal {
 
 impl Material for ParticleMaterialUnlitDecal {
     fn fragment_shader() -> ShaderRef {
-        get_shader_handle(Self::FRAG_PATH, &vec![]).into()
+        get_shader_handle(Self::FRAG_SHADER, &vec![]).into()
     }
 
     fn vertex_shader() -> ShaderRef {
-        get_shader_handle(Self::VERT_PATH, &vec![]).into()
+        get_shader_handle(Self::VERT_SHADER, &vec![]).into()
     }
 
     fn alpha_mode(&self) -> AlphaMode {

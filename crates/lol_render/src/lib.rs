@@ -36,6 +36,7 @@ pub struct PluginRender;
 
 impl Plugin for PluginRender {
     fn build(&self, app: &mut App) {
+        league_core::register::init_league_asset(app);
         app.add_plugins(PluginAnimation);
         app.add_plugins(PluginAoEVisual);
         app.add_plugins(PluginCamera);

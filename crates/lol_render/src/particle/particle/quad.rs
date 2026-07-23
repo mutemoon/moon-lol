@@ -180,7 +180,7 @@ impl From<&ParticleMaterialQuad> for ConditionalMaterialKeyQuad {
             shader_frag_defs.push("MULT_PASS".to_string());
         }
 
-        let shader_frag = get_shader_handle(ParticleMaterialQuad::FRAG_PATH, &shader_frag_defs);
+        let shader_frag = get_shader_handle(ParticleMaterialQuad::FRAG_SHADER, &shader_frag_defs);
 
         debug!("shader_frag_defs: {:?}", shader_frag_defs);
         match shader_frag {
@@ -198,17 +198,17 @@ impl From<&ParticleMaterialQuad> for ConditionalMaterialKeyQuad {
 }
 
 impl MaterialPath for ParticleMaterialQuad {
-    const FRAG_PATH: &str = "assets/shaders/hlsl/particlesystem/quad_ps.ps.glsl";
-    const VERT_PATH: &str = "assets/shaders/hlsl/particlesystem/quad_vs.vs.glsl";
+    const FRAG_SHADER: league_utils::LeagueShader = league_utils::LeagueShader::QuadPs;
+    const VERT_SHADER: league_utils::LeagueShader = league_utils::LeagueShader::QuadVs;
 }
 
 impl Material for ParticleMaterialQuad {
     fn fragment_shader() -> ShaderRef {
-        get_shader_handle(Self::FRAG_PATH, &vec![]).into()
+        get_shader_handle(Self::FRAG_SHADER, &vec![]).into()
     }
 
     fn vertex_shader() -> ShaderRef {
-        get_shader_handle(Self::VERT_PATH, &vec![]).into()
+        get_shader_handle(Self::VERT_SHADER, &vec![]).into()
     }
 
     fn alpha_mode(&self) -> AlphaMode {

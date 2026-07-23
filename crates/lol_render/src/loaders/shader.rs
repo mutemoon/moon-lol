@@ -1,160 +1,67 @@
 use std::collections::HashMap;
 
 use bevy::asset::{AssetLoader, LoadContext};
-use bevy::log::debug;
+use bevy::prelude::Shader;
 use bevy::reflect::TypePath;
-use bevy::render::render_resource::ShaderStage;
-use bevy::shader::{ShaderImport, Source, ValidateShader};
-use league_file::shader::{LeagueShaderChunk, LeagueShaderToc};
-use league_to_lol::shader::{convert_frag, convert_vert};
-use league_utils::{get_shader_uuid_by_hash, hash_wad};
-use lol_base::shader::ResourceShaderPackage;
-use regex::Regex;
+use league_utils::LeagueShader;
 
 use crate::error::Error;
-use crate::shader::ShaderTocSettings;
+
+#[derive(bevy::asset::Asset, TypePath)]
+pub struct ShaderMapAsset {
+    pub entries: HashMap<LeagueShader, HashMap<u64, Shader>>,
+}
 
 #[derive(Default, TypePath)]
-pub struct LeagueLoaderShaderToc;
+pub struct LeagueLoaderShaderMap;
 
-impl AssetLoader for LeagueLoaderShaderToc {
-    type Asset = ResourceShaderPackage;
-
-    type Settings = ShaderTocSettings;
-
+impl AssetLoader for LeagueLoaderShaderMap {
+    type Asset = ShaderMapAsset;
+    type Settings = ();
     type Error = Error;
 
     async fn load(
         &self,
         reader: &mut dyn bevy::asset::io::Reader,
-        settings: &Self::Settings,
+        _settings: &Self::Settings,
         load_context: &mut LoadContext<'_>,
     ) -> Result<Self::Asset, Self::Error> {
-        let mut buf = Vec::new();
-        reader.read_to_end(&mut buf).await?;
+        let mut ron_bytes = Vec::new();
+        reader
+            .read_to_end(&mut ron_bytes)
+            .await
+            .map_err(|e| Error::Parse(format!("Failed to read map.ron: {}", e)))?;
 
-        let (_, shader_toc) =
-            LeagueShaderToc::parse(&buf).map_err(|e| Error::Parse(e.to_string()))?;
-
-        let path = &settings.0;
-
-        let mut handles = HashMap::new();
-
-        let mut chunks = Vec::new();
-
-        let mut max_struct = "".to_string();
-
-        let mut max_uniform_sampler = "".to_string();
-
-        for i in 0..((shader_toc.bundled_shader_count as f32 / 100.0).ceil() as usize) {
-            let chunk_hash = hash_wad(&format!("{}_{}", path, i * 100));
-
-            let chunk = load_context
-                .read_asset_bytes(&format!("data/{:x}.lol", chunk_hash))
-                .await
-                .unwrap();
-
-            let (_, shader_chunk) =
-                LeagueShaderChunk::parse(&chunk).map_err(|e| Error::Parse(e.to_string()))?;
-
-            for shader_file in shader_chunk.files.iter() {
-                let content = shader_file.text.clone();
-
-                // content.matches("struct")
-
-                let re = Regex::new(r"struct[\w\W]*?\}").unwrap(); // 匹配 YYYY-MM-DD 日期格式
-                let matches = re.find_iter(&content);
-
-                for mat in matches {
-                    if mat.as_str().len() > max_struct.len() {
-                        max_struct = mat.as_str().to_string();
-                    }
-                }
-
-                let re = Regex::new(r"uniform sampler2D[\w\W]*?\n\n").unwrap();
-                let matches = re.find_iter(&content);
-
-                for mat in matches {
-                    if mat.as_str().len() > max_uniform_sampler.len() {
-                        max_uniform_sampler = mat.as_str().to_string();
-                    }
-                }
-
-                chunks.push(content);
-            }
+        #[derive(serde::Deserialize)]
+        struct RawShaderMap {
+            pub entries: HashMap<LeagueShader, HashMap<u64, String>>,
         }
 
-        let mut shader_handles = Vec::new();
-        for i in 0..shader_toc.bundled_shader_count {
-            let mut content = chunks[i as usize].clone();
+        let raw_map: RawShaderMap = ron::de::from_bytes(&ron_bytes)
+            .map_err(|e| Error::Parse(format!("Failed to deserialize map.ron: {}", e)))?;
 
-            let re = Regex::new(r"struct[\w\W]*?\}").unwrap(); // 匹配 YYYY-MM-DD 日期格式
-            let matches = re.find_iter(&content);
+        let mut entries = HashMap::new();
 
-            let ranges = matches.map(|mat| mat.range()).collect::<Vec<_>>();
+        for (shader_type, inner_map) in raw_map.entries {
+            let mut shaders = HashMap::new();
+            for (u64_hash, spv_relative_path) in inner_map {
+                let spv_bytes = load_context
+                    .read_asset_bytes(&spv_relative_path)
+                    .await
+                    .map_err(|e| {
+                        Error::Parse(format!("Failed to read {}: {}", spv_relative_path, e))
+                    })?;
 
-            for range in ranges {
-                content.replace_range(range, &max_struct);
+                let shader = Shader::from_spirv(spv_bytes, spv_relative_path.clone());
+                shaders.insert(u64_hash, shader);
             }
-
-            let re = Regex::new(r"uniform sampler2D[\w\W]*?\n\n").unwrap();
-            let matches = re.find_iter(&content);
-
-            let ranges = matches.map(|mat| mat.range()).collect::<Vec<_>>();
-
-            for range in ranges {
-                content.replace_range(range, &max_uniform_sampler);
-            }
-
-            let converted = if shader_toc.shader_type == 0 {
-                convert_vert(&content)
-            } else {
-                convert_frag(&content)
-            };
-
-            let source = if shader_toc.shader_type == 0 {
-                Source::Glsl(converted.clone().into(), ShaderStage::Vertex)
-            } else {
-                Source::Glsl(converted.clone().into(), ShaderStage::Fragment)
-            };
-
-            use bevy::shader::Shader;
-            let shader = Shader {
-                path: path.clone(),
-                imports: Default::default(),
-                import_path: ShaderImport::Custom(path.clone()),
-                source,
-                additional_imports: Default::default(),
-                shader_defs: Default::default(),
-                file_dependencies: Default::default(),
-                validate_shader: ValidateShader::Disabled,
-            };
-
-            shader_handles.push((
-                converted.clone(),
-                load_context.add_labeled_asset(i.to_string(), shader),
-            ));
+            entries.insert(shader_type, shaders);
         }
 
-        for (shader_index, shader_hash) in shader_toc.shader_hashes.into_iter().enumerate() {
-            let shader_id = shader_toc.shader_ids[shader_index];
-
-            let (converted, handle) = &shader_handles[shader_id as usize];
-
-            if get_shader_uuid_by_hash(&path, shader_hash)
-                == bevy::asset::uuid::Uuid::from_u128(0xdee3e40ffaa02909)
-            {
-                debug!("shader_id: {}", shader_id);
-                debug!("converted: {}", converted);
-            }
-
-            handles.insert(shader_hash, handle.clone());
-        }
-
-        Ok(ResourceShaderPackage { handles })
+        Ok(ShaderMapAsset { entries })
     }
 
     fn extensions(&self) -> &[&str] {
-        &["glsl"]
+        &["ron"]
     }
 }

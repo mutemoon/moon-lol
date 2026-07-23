@@ -93,17 +93,17 @@ impl From<&ParticleMaterialMesh> for ParticleMaterialKeyMesh {
 }
 
 impl MaterialPath for ParticleMaterialMesh {
-    const FRAG_PATH: &str = "assets/shaders/hlsl/particlesystem/mesh_ps.ps.glsl";
-    const VERT_PATH: &str = "assets/shaders/hlsl/particlesystem/mesh_vs.vs.glsl";
+    const FRAG_SHADER: league_utils::LeagueShader = league_utils::LeagueShader::MeshPs;
+    const VERT_SHADER: league_utils::LeagueShader = league_utils::LeagueShader::MeshVs;
 }
 
 impl Material for ParticleMaterialMesh {
     fn fragment_shader() -> ShaderRef {
-        get_shader_handle(Self::FRAG_PATH, &vec![]).into()
+        get_shader_handle(Self::FRAG_SHADER, &vec![]).into()
     }
 
     fn vertex_shader() -> ShaderRef {
-        get_shader_handle(Self::VERT_PATH, &vec![]).into()
+        get_shader_handle(Self::VERT_SHADER, &vec![]).into()
     }
 
     fn alpha_mode(&self) -> AlphaMode {

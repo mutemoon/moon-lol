@@ -110,29 +110,40 @@ fn main() {
     if args.headless {
         app.set_runner(|mut app| {
             app.update(); // First update to run startup systems and start WS server
-            
-            let cmd_rx = app.world().get_resource::<lol_server::server::DebugWsChannel>().map(|ch| ch.cmd_rx.clone());
+
+            let cmd_rx = app
+                .world()
+                .get_resource::<lol_server::server::DebugWsChannel>()
+                .map(|ch| ch.cmd_rx.clone());
             if let Some(cmd_rx) = cmd_rx {
                 loop {
                     match cmd_rx.recv_blocking() {
                         Ok(cmd_packet) => {
                             let is_rl_step = cmd_packet.1 == "rl_step";
                             let frames = if is_rl_step {
-                                cmd_packet.2.get("frames").and_then(|f| f.as_u64()).unwrap_or(6) as usize
+                                cmd_packet
+                                    .2
+                                    .get("frames")
+                                    .and_then(|f| f.as_u64())
+                                    .unwrap_or(6) as usize
                             } else {
                                 1
                             };
-                            
+
                             // Advance the game simulation by frames - 1
                             if is_rl_step && frames > 1 {
                                 for _ in 0..(frames - 1) {
                                     app.update();
                                 }
                             }
-                            
+
                             // Now insert the packet and run the final update which dispatches the command
-                            app.world_mut().init_resource::<lol_server::server::PendingCommands>();
-                            app.world_mut().resource_mut::<lol_server::server::PendingCommands>().0.push(cmd_packet);
+                            app.world_mut()
+                                .init_resource::<lol_server::server::PendingCommands>();
+                            app.world_mut()
+                                .resource_mut::<lol_server::server::PendingCommands>()
+                                .0
+                                .push(cmd_packet);
                             app.update();
                         }
                         Err(_) => {

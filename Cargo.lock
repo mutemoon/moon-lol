@@ -9242,6 +9242,7 @@ dependencies = [
 name = "moon_lol"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "bevy",
  "bevy_gltf_draco",
  "bincode",
@@ -9265,6 +9266,7 @@ dependencies = [
  "lol_server",
  "rand 0.9.4",
  "rayon",
+ "regex",
  "rocket",
  "rocket_cors",
  "ron 0.8.1",
@@ -9371,6 +9373,7 @@ dependencies = [
  "log",
  "num-traits",
  "once_cell",
+ "petgraph",
  "pp-rs",
  "rustc-hash 1.1.0",
  "spirv",

@@ -1,7 +1,9 @@
 use bevy::animation::AnimationTargetId;
 use bevy::mesh::skinning::SkinnedMesh;
 use bevy::prelude::*;
-use league_core::extract::{EnumVfxPrimitive, VfxEmitterDefinitionData, VfxSystemDefinitionData};
+use lol_base::particle::{
+    ConfigVfxEmitterDefinition, ConfigVfxPrimitive, ConfigVfxSystemDefinition,
+};
 use lol_core::lifetime::Lifetime;
 
 use super::state::{EmitterOf, ParticleEmitterState};
@@ -14,15 +16,14 @@ use crate::particle::skinned_mesh::particle::{
     ParticleMaterialSkinnedMeshParticle, UniformsPixelSkinnedMeshParticle,
     UniformsVertexSkinnedMeshParticle,
 };
-use crate::particle::utils::create_black_pixel_texture;
-use crate::particle::utils::ResourceCache;
+use crate::particle::utils::{ResourceCache, create_black_pixel_texture};
 use crate::skin::mesh_shadow::spawn_shadow_skin_entity;
 
 pub fn attach_skinned_mesh_visuals(
     commands: &mut Commands,
     particle_entity: Entity,
     emitter_of: &EmitterOf,
-    vfx_emitter_definition_data: &VfxEmitterDefinitionData,
+    vfx_emitter_definition_data: &ConfigVfxEmitterDefinition,
     texture: Option<Handle<Image>>,
     particle_color_texture: Option<Handle<Image>>,
     blend_mode: u8,
@@ -81,7 +82,7 @@ pub fn attach_skinned_mesh_visuals(
 /// Update emitters for AttachedMesh (SkinnedMesh) primitive type
 pub fn update_emitter_skinned_mesh(
     mut commands: Commands,
-    res_assets_vfx_system_definition_data: Res<Assets<VfxSystemDefinitionData>>,
+    res_assets_vfx_system_definition_data: Res<Assets<ConfigVfxSystemDefinition>>,
     res_asset_server: Res<AssetServer>,
     mut res_resource_cache: ResMut<ResourceCache>,
     mut res_image: ResMut<Assets<Image>>,
@@ -114,7 +115,7 @@ pub fn update_emitter_skinned_mesh(
         let primitive = vfx_emitter_definition_data
             .primitive
             .clone()
-            .unwrap_or(EnumVfxPrimitive::VfxPrimitiveCameraUnitQuad);
+            .unwrap_or(ConfigVfxPrimitive::VfxPrimitiveCameraUnitQuad);
 
         let Some(EmissionParams {
             particles_to_spawn,

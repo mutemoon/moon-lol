@@ -202,7 +202,9 @@ async fn run(client: &GameClient, command: Commands) -> Result<(), String> {
             };
             print_data(client.rl_reset(entity_id, cfg).await?)
         }
-        Commands::RlStep { entity_id, frames } => print_data(client.rl_step(entity_id, frames).await?),
+        Commands::RlStep { entity_id, frames } => {
+            print_data(client.rl_step(entity_id, frames).await?)
+        }
     }
 }
 

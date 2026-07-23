@@ -17,7 +17,7 @@ use ron::ser::{PrettyConfig, to_string_pretty};
 
 use crate::animation::load_animation_file;
 use crate::extract::animation::animation_graph_to_config;
-use crate::extract::utils::extract_texture;
+use crate::extract::utils::{extract_texture, get_texture_path, write_to_file};
 use crate::skin_gltf_export::export_skin_to_glb;
 use crate::utils::decode_texture_to_png;
 
@@ -235,6 +235,9 @@ pub fn extract_skin_for_champion(
         &hash_to_glb_index,
     );
 
+    // 导出粒子系统/VFX 资产
+    export_vfx_for_skin(loader, champ_name, &skin_prop_group, &skin_data);
+
     // 如果有动画，创建 AnimationHandler
     let animation_handler = animation_ron_path.map(|anim_path| {
         let anim_handle = asset_server.load(&anim_path);
@@ -410,4 +413,185 @@ fn export_animation_for_skin(
     super::utils::write_to_file(&anim_path, &serialized);
 
     Some(anim_path)
+}
+
+fn export_vfx_for_skin(
+    loader: &LeagueLoader,
+    champ_name: &str,
+    skin_prop_group: &PropGroup,
+    skin_data: &SkinCharacterDataProperties,
+) {
+    use lol_base::particle::{ConfigResourceResolver, ConfigVfx};
+
+    use crate::extract::vfx::convert_system_definition;
+
+    let vfx_ron_path = format!("characters/{}/vfx.ron", champ_name);
+    let mut config_vfx_main = if let Ok(content) =
+        std::fs::read_to_string(std::path::Path::new("assets").join(&vfx_ron_path))
+    {
+        ron::from_str::<ConfigVfx>(&content).unwrap_or_else(|_| ConfigVfx {
+            resolvers: std::collections::BTreeMap::new(),
+            systems: std::collections::BTreeMap::new(),
+        })
+    } else {
+        ConfigVfx {
+            resolvers: std::collections::BTreeMap::new(),
+            systems: std::collections::BTreeMap::new(),
+        }
+    };
+
+    let mut resolvers = Vec::new();
+    if let Some(resolver_hash) = skin_data.m_resource_resolver {
+        if let Some(resolver) =
+            skin_prop_group.get_data_option::<league_core::extract::ResourceResolver>(resolver_hash)
+        {
+            resolvers.push((resolver_hash, resolver));
+        }
+    }
+    if let Some(additional_hashes) = &skin_data.m_additional_resource_resolvers {
+        for hash in additional_hashes {
+            if let Some(resolver) =
+                skin_prop_group.get_data_option::<league_core::extract::ResourceResolver>(*hash)
+            {
+                resolvers.push((*hash, resolver));
+            }
+        }
+    }
+
+    for (resolver_hash, resolver) in resolvers {
+        // Convert and save ResourceResolver
+        let config_resolver = ConfigResourceResolver {
+            resource_map: resolver.resource_map.clone().unwrap_or_default(),
+        };
+        config_vfx_main
+            .resolvers
+            .insert(resolver_hash, config_resolver);
+
+        // Convert and save VfxSystemDefinitionData entries
+        if let Some(ref resource_map) = resolver.resource_map {
+            for (&_trigger_hash, &vfx_hash) in resource_map {
+                if let Some(vfx_system) =
+                    skin_prop_group
+                        .get_data_option::<league_core::extract::VfxSystemDefinitionData>(vfx_hash)
+                {
+                    let mut config_vfx = convert_system_definition(&vfx_system);
+
+                    // Extract textures and meshes referenced by this VFX system
+                    extract_assets_for_vfx(loader, &mut config_vfx);
+
+                    config_vfx_main.systems.insert(vfx_hash, config_vfx);
+                }
+            }
+        }
+    }
+
+    // Clean up old fragmented vfx directory if exists
+    let old_vfx_dir = std::path::Path::new("assets").join(format!("characters/{}/vfx", champ_name));
+    if old_vfx_dir.exists() {
+        let _ = std::fs::remove_dir_all(&old_vfx_dir);
+    }
+
+    // Save ConfigVfx to vfx.ron
+    if let Ok(serialized) = to_string_pretty(&config_vfx_main, PrettyConfig::default()) {
+        super::utils::write_to_file(&vfx_ron_path, &serialized);
+        println!("[EXTRACT] 已将特效资产合并写入到: {}", vfx_ron_path);
+    }
+}
+
+fn extract_assets_for_vfx(
+    loader: &LeagueLoader,
+    config_vfx: &mut lol_base::particle::ConfigVfxSystemDefinition,
+) {
+    if let Some(emitters) = config_vfx.complex_emitter_definition_data.as_mut() {
+        for emitter in emitters {
+            extract_assets_for_emitter(loader, emitter);
+        }
+    }
+    if let Some(emitters) = config_vfx.simple_emitter_definition_data.as_mut() {
+        for emitter in emitters {
+            extract_assets_for_emitter(loader, emitter);
+        }
+    }
+}
+
+fn extract_assets_for_emitter(
+    loader: &LeagueLoader,
+    emitter: &mut lol_base::particle::ConfigVfxEmitterDefinition,
+) {
+    use lol_base::particle::ConfigVfxPrimitive;
+
+    // 1. Emitter texture
+    if let Some(tex_path) = emitter.texture.as_ref() {
+        if !tex_path.is_empty() {
+            extract_texture(loader, tex_path);
+            emitter.texture = Some(get_texture_path(tex_path));
+        }
+    }
+
+    // 2. particle_color_texture
+    if let Some(tex_path) = emitter.particle_color_texture.as_ref() {
+        if !tex_path.is_empty() {
+            extract_texture(loader, tex_path);
+            emitter.particle_color_texture = Some(get_texture_path(tex_path));
+        }
+    }
+
+    // 3. normal_map_texture in distortion_definition
+    if let Some(distortion) = emitter.distortion_definition.as_mut() {
+        if let Some(tex_path) = distortion.normal_map_texture.as_ref() {
+            if !tex_path.is_empty() {
+                extract_texture(loader, tex_path);
+                distortion.normal_map_texture = Some(get_texture_path(tex_path));
+            }
+        }
+    }
+
+    // 4. texture_mult in texture_mult
+    if let Some(tex_mult) = emitter.texture_mult.as_mut() {
+        if let Some(tex_path) = tex_mult.texture_mult.as_ref() {
+            if !tex_path.is_empty() {
+                extract_texture(loader, tex_path);
+                tex_mult.texture_mult = Some(get_texture_path(tex_path));
+            }
+        }
+    }
+
+    // 5. base_texture in material_override_definitions
+    if let Some(overrides) = emitter.material_override_definitions.as_mut() {
+        for material_override in overrides {
+            if let Some(tex_path) = material_override.base_texture.as_ref() {
+                if !tex_path.is_empty() {
+                    extract_texture(loader, tex_path);
+                    material_override.base_texture = Some(get_texture_path(tex_path));
+                }
+            }
+        }
+    }
+
+    // 6. mesh file (.scb) in primitive
+    if let Some(primitive) = emitter.primitive.as_ref() {
+        match primitive {
+            ConfigVfxPrimitive::VfxPrimitiveMesh {
+                simple_mesh_name, ..
+            }
+            | ConfigVfxPrimitive::VfxPrimitiveAttachedMesh {
+                simple_mesh_name, ..
+            } => {
+                if let Some(mesh_path) = simple_mesh_name.as_ref() {
+                    if !mesh_path.is_empty() {
+                        let target_exists = std::path::Path::new("assets").join(mesh_path).exists();
+                        if !target_exists {
+                            if let Ok(buf) = loader.get_wad_entry_buffer_by_path(mesh_path) {
+                                write_to_file(mesh_path, buf);
+                                println!("[EXTRACT] 已提取静态网格: {}", mesh_path);
+                            } else {
+                                println!("[WARN] 无法加载静态网格: {}", mesh_path);
+                            }
+                        }
+                    }
+                }
+            }
+            _ => {}
+        }
+    }
 }

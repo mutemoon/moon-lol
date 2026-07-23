@@ -6,7 +6,7 @@ pub mod quad_slice;
 use bevy::mesh::VertexAttributeValues;
 use bevy::mesh::skinning::{SkinnedMesh, SkinnedMeshInverseBindposes};
 use bevy::prelude::*;
-use league_core::extract::{EnumVfxPrimitive, VfxSystemDefinitionData};
+use lol_base::particle::{ConfigVfxPrimitive, ConfigVfxSystemDefinition};
 use lol_core::lifetime::Lifetime;
 
 use crate::camera::CameraState;
@@ -35,7 +35,7 @@ pub fn update_particle(
     mut res_mesh: ResMut<Assets<Mesh>>,
     mut res_particle_material_unlit_decal: ResMut<Assets<ParticleMaterialUnlitDecal>>,
     mut res_particle_material_mesh: ResMut<Assets<ParticleMaterialMesh>>,
-    res_assets_vfx_system_definition_data: Res<Assets<VfxSystemDefinitionData>>,
+    res_assets_vfx_system_definition_data: Res<Assets<ConfigVfxSystemDefinition>>,
     q_particle_state: Query<(
         Entity,
         &Transform,
@@ -155,7 +155,7 @@ pub fn update_particle(
         if vfx_emitter_definition_data.primitive.is_none()
             || matches!(
                 vfx_emitter_definition_data.primitive,
-                Some(EnumVfxPrimitive::VfxPrimitiveCameraUnitQuad)
+                Some(ConfigVfxPrimitive::VfxPrimitiveCameraUnitQuad)
             )
         {
             let camera_transform = q_camera_transform.single().unwrap();

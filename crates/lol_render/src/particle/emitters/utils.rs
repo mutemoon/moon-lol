@@ -1,14 +1,10 @@
 use bevy::prelude::*;
-use league_core::extract::{
-    EnumVfxPrimitive, EnumVfxShape, Unk0xee39916f, VfxEmitterDefinitionData,
-    VfxPrimitivePlanarProjection, VfxShapeBox, VfxShapeCylinder, VfxShapeLegacy,
-};
+use lol_base::particle::{ConfigVfxEmitterDefinition, ConfigVfxPrimitive, ConfigVfxShape};
 use lol_core::lifetime::Lifetime;
 
 use super::state::ParticleEmitterState;
 use crate::particle::ParticleId;
 use crate::particle::particle::ParticleState;
-use crate::particle::utils::StochasticSampler;
 
 /// Emitter type classification for particle systems
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -22,16 +18,16 @@ pub enum EmitterType {
 }
 
 /// Extract the emitter type from VFX emitter definition data
-pub fn get_emitter_type(vfx_emitter_definition_data: &VfxEmitterDefinitionData) -> EmitterType {
+pub fn get_emitter_type(vfx_emitter_definition_data: &ConfigVfxEmitterDefinition) -> EmitterType {
     let primitive = vfx_emitter_definition_data
         .primitive
         .clone()
-        .unwrap_or(EnumVfxPrimitive::VfxPrimitiveCameraUnitQuad);
+        .unwrap_or(ConfigVfxPrimitive::VfxPrimitiveCameraUnitQuad);
 
     match primitive {
         // Quad primitives - check if it's a distortion effect
-        EnumVfxPrimitive::VfxPrimitiveArbitraryQuad
-        | EnumVfxPrimitive::VfxPrimitiveCameraUnitQuad => {
+        ConfigVfxPrimitive::VfxPrimitiveArbitraryQuad
+        | ConfigVfxPrimitive::VfxPrimitiveCameraUnitQuad => {
             if vfx_emitter_definition_data.distortion_definition.is_some() {
                 EmitterType::Distortion
             } else {
@@ -39,10 +35,10 @@ pub fn get_emitter_type(vfx_emitter_definition_data: &VfxEmitterDefinitionData) 
             }
         }
         // Mesh primitives
-        EnumVfxPrimitive::VfxPrimitiveMesh(_) => EmitterType::Mesh,
-        EnumVfxPrimitive::VfxPrimitiveAttachedMesh(_) => EmitterType::SkinnedMesh,
+        ConfigVfxPrimitive::VfxPrimitiveMesh { .. } => EmitterType::Mesh,
+        ConfigVfxPrimitive::VfxPrimitiveAttachedMesh { .. } => EmitterType::SkinnedMesh,
         // Decal primitives
-        EnumVfxPrimitive::VfxPrimitivePlanarProjection { .. } => EmitterType::Decal,
+        ConfigVfxPrimitive::VfxPrimitivePlanarProjection { .. } => EmitterType::Decal,
         // Unknown/unsupported types
         _ => EmitterType::Unknown,
     }
@@ -114,7 +110,7 @@ pub struct EmissionParams {
 pub fn calculate_emission_params(
     lifetime: &Lifetime,
     emitter: &mut ParticleEmitterState,
-    vfx_emitter_definition_data: &VfxEmitterDefinitionData,
+    vfx_emitter_definition_data: &ConfigVfxEmitterDefinition,
     delta_secs: f32,
 ) -> Option<EmissionParams> {
     if lifetime.is_dead() {
@@ -152,8 +148,8 @@ pub fn calculate_emission_params(
 pub fn calculate_particle_transform_frame(
     birth_params: &ParticleBirthParams,
     is_uniform_scale: bool,
-    vfx_emitter_definition_data: &VfxEmitterDefinitionData,
-    primitive: &EnumVfxPrimitive,
+    vfx_emitter_definition_data: &ConfigVfxEmitterDefinition,
+    primitive: &ConfigVfxPrimitive,
     progress: f32,
 ) -> (Transform, Vec3, f32) {
     let mut birth_scale0 = if is_uniform_scale {
@@ -166,12 +162,13 @@ pub fn calculate_particle_transform_frame(
         .spawn_shape
         .clone()
         .and_then(|v| match v {
-            EnumVfxShape::Unk0xee39916f(Unk0xee39916f { emit_offset }) => emit_offset,
-            EnumVfxShape::VfxShapeLegacy(VfxShapeLegacy { emit_offset, .. }) => emit_offset
-                .and_then(|v| Some(StochasticSampler::<Vec3>::from(v).sample_clamped(progress))),
-            EnumVfxShape::VfxShapeBox(VfxShapeBox { .. }) => Some(Vec3::ZERO),
-            EnumVfxShape::VfxShapeCylinder(VfxShapeCylinder { .. }) => Some(Vec3::ZERO),
-            _ => todo!(),
+            ConfigVfxShape::Unk0xee39916f { emit_offset } => emit_offset,
+            ConfigVfxShape::Legacy { emit_offset, .. } => {
+                Some(emit_offset.sample_clamped(progress))
+            }
+            ConfigVfxShape::Box { size, .. } => size,
+            ConfigVfxShape::Cylinder { .. } => Some(Vec3::ZERO),
+            _ => Some(Vec3::ZERO),
         })
         .unwrap_or(Vec3::ZERO);
 
@@ -182,12 +179,9 @@ pub fn calculate_particle_transform_frame(
         0.,
     );
 
-    if let EnumVfxPrimitive::VfxPrimitivePlanarProjection(VfxPrimitivePlanarProjection {
-        m_projection,
-    }) = primitive
-    {
+    if let ConfigVfxPrimitive::VfxPrimitivePlanarProjection { y_range } = primitive {
         birth_scale0.x = birth_scale0.x * 2.;
-        birth_scale0.y = m_projection.as_ref().unwrap().m_y_range.unwrap();
+        birth_scale0.y = y_range.unwrap_or(1.0);
         birth_scale0.z = birth_scale0.z * 2.;
     }
 
