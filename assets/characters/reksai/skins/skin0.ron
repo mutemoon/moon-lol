@@ -13,6 +13,7 @@
         "lol_base::character::Skin": (
           scale: 0.9,
           avatar: "ASSETS/Characters/RekSai/HUD/RekSai_Circle.png",
+          resolver_key: 3116041924,
         ),
       },
     ),

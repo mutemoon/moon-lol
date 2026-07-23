@@ -13,6 +13,7 @@
         "lol_base::character::Skin": (
           scale: 1.3,
           avatar: "ASSETS/Characters/Naafiri/HUD/Naafiri_Circle.png",
+          resolver_key: 3074969441,
         ),
       },
     ),

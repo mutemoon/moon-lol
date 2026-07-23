@@ -13,6 +13,7 @@
         "lol_base::character::Skin": (
           scale: 0.95,
           avatar: "ASSETS/Characters/Zaahen/HUD/Zaahen_Circle_0.png",
+          resolver_key: 1379643750,
         ),
       },
     ),

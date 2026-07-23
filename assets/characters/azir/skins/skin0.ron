@@ -13,6 +13,7 @@
         "lol_base::character::Skin": (
           scale: 0.8,
           avatar: "ASSETS/Characters/Azir/HUD/Azir_Circle.png",
+          resolver_key: 4137077229,
         ),
       },
     ),

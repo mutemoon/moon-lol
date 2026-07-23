@@ -112,6 +112,8 @@
         "lol_core::life::Health": (
           value: 625.0,
           max: 625.0,
+          base_static_regen: 0.0,
+          regen_per_level: 0.0,
         ),
         "lol_core::movement::Movement": (
           speed: 340.0,
@@ -145,6 +147,7 @@
           "BriarWFrenzyStateBuff": Path("characters/Briar/spells/BriarWFrenzyStateBuff.ron"),
         }),
         "lol_core::skill::PassiveSkill": (4294967266),
+        "lol_core::skill::SkillPoints": (1),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

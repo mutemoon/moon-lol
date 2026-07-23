@@ -13,6 +13,7 @@
         "lol_base::character::Skin": (
           scale: 1.85,
           avatar: "ASSETS/Characters/Rumble/HUD/Rumble_Circle.png",
+          resolver_key: 2121456252,
         ),
       },
     ),

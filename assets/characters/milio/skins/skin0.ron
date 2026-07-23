@@ -11,6 +11,7 @@
         "lol_base::character::Skin": (
           scale: 1.15,
           avatar: "ASSETS/Characters/Milio/HUD/Milio_Circle_0.png",
+          resolver_key: 3642909363,
         ),
       },
     ),

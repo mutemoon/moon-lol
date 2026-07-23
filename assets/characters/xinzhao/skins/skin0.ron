@@ -13,6 +13,7 @@
         "lol_base::character::Skin": (
           scale: 1.0,
           avatar: "ASSETS/Characters/XinZhao/HUD/XinZhaoRework_Circle_0.png",
+          resolver_key: 1557383208,
         ),
       },
     ),

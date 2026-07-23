@@ -13,6 +13,7 @@
         "lol_base::character::Skin": (
           scale: 1.0,
           avatar: "ASSETS/Characters/Twitch/HUD/Twitch_Circle.png",
+          resolver_key: 2988619238,
         ),
       },
     ),

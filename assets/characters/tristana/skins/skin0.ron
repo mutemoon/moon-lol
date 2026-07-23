@@ -13,6 +13,7 @@
         "lol_base::character::Skin": (
           scale: 0.95,
           avatar: "ASSETS/Characters/Tristana/HUD/Tristana_Circle.png",
+          resolver_key: 1066925805,
         ),
       },
     ),

@@ -13,6 +13,7 @@
         "lol_base::character::Skin": (
           scale: 0.7,
           avatar: "ASSETS/Characters/Velkoz/HUD/Velkoz_Circle.png",
+          resolver_key: 2918876860,
         ),
       },
     ),

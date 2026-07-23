@@ -13,6 +13,7 @@
         "lol_base::character::Skin": (
           scale: 1.0,
           avatar: "ASSETS/Characters/Inhibitor/HUD/Inhibitor_Blue_Circle.png",
+          resolver_key: 2407477075,
         ),
       },
     ),

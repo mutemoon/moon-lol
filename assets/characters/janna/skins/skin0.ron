@@ -13,6 +13,7 @@
         "lol_base::character::Skin": (
           scale: 1.31,
           avatar: "ASSETS/Characters/Janna/HUD/Janna_Circle.png",
+          resolver_key: 3355534525,
         ),
       },
     ),

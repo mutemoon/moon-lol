@@ -13,6 +13,7 @@
         "lol_base::character::Skin": (
           scale: 1.0,
           avatar: "ASSETS/Characters/Shyvana/HUD/Shyvana_Circle_0.Shyvana_Rework.png",
+          resolver_key: 954849563,
         ),
       },
     ),

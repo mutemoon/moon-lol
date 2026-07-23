@@ -92,7 +92,12 @@
         "Respawn": Clip(
             node_index: 18,
         ),
-        "Run": Selector(
+        "Run": ConditionBool(
+            updater: IsHomeguard,
+            true_node: "Unk0xbc1ef3fb",
+            false_node: "Unk0xbc1ef3fb",
+        ),
+        "RunBase": Selector(
             probably_nodes: [
                 (
                     key: "Unk0xcffe7c8b",
@@ -150,6 +155,23 @@
         ),
         "Unk0x72d20e44": Clip(
             node_index: 14,
+        ),
+        "Unk0xbc1ef3fb": ConditionFloat(
+            updater: MoveSpeed,
+            conditions: [
+                (
+                    key: "RunSlow",
+                    value: 0.0,
+                ),
+                (
+                    key: "RunBase",
+                    value: 310.0,
+                ),
+                (
+                    key: "RunHaste",
+                    value: 420.0,
+                ),
+            ],
         ),
         "Unk0xcffe7c8b": Clip(
             node_index: 28,

@@ -142,6 +142,30 @@
                     1050.0,
                 ]),
             ),
+            (
+                name: "VisionBubbleRadius",
+                values: Some([
+                    100.0,
+                    100.0,
+                    100.0,
+                    100.0,
+                    100.0,
+                    100.0,
+                    100.0,
+                ]),
+            ),
+            (
+                name: "VisionBubbleDuration",
+                values: Some([
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                ]),
+            ),
         ]),
         mana: Some([
             100.0,

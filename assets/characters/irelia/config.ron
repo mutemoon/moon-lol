@@ -112,6 +112,8 @@
         "lol_core::life::Health": (
           value: 630.0,
           max: 630.0,
+          base_static_regen: 0.7,
+          regen_per_level: 0.17,
         ),
         "lol_core::movement::Movement": (
           speed: 335.0,
@@ -133,6 +135,7 @@
           "IreliaW2": Path("characters/Irelia/spells/IreliaW2.ron"),
         }),
         "lol_core::skill::PassiveSkill": (4294967266),
+        "lol_core::skill::SkillPoints": (1),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

@@ -13,6 +13,7 @@
         "lol_base::character::Skin": (
           scale: 1.3,
           avatar: "ASSETS/Characters/Sona/HUD/Sona_Circle.png",
+          resolver_key: 1838938538,
         ),
       },
     ),

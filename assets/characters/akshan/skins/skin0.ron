@@ -13,6 +13,7 @@
         "lol_base::character::Skin": (
           scale: 1.05,
           avatar: "ASSETS/Characters/Akshan/HUD/Akshan_Circle_0.png",
+          resolver_key: 3739775037,
         ),
       },
     ),

@@ -13,6 +13,7 @@
         "lol_base::character::Skin": (
           scale: 0.76,
           avatar: "ASSETS/Characters/SRU_OrderMinionRanged/HUD/BlueRange_Circle.png",
+          resolver_key: 0,
         ),
       },
     ),

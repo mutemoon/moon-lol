@@ -13,6 +13,7 @@
         "lol_base::character::Skin": (
           scale: 1.2,
           avatar: "ASSETS/Characters/Karma/HUD/Karma_Circle.png",
+          resolver_key: 954659781,
         ),
       },
     ),

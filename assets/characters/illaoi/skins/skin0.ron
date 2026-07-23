@@ -13,6 +13,7 @@
         "lol_base::character::Skin": (
           scale: 1.3,
           avatar: "ASSETS/Characters/Illaoi/HUD/Illaoi_Circle.png",
+          resolver_key: 2545410627,
         ),
       },
     ),

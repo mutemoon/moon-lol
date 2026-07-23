@@ -13,6 +13,7 @@
         "lol_base::character::Skin": (
           scale: 0.95,
           avatar: "ASSETS/Characters/Taric/HUD/Taric_Circle.png",
+          resolver_key: 2644386022,
         ),
       },
     ),

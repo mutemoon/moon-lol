@@ -13,6 +13,7 @@
         "lol_base::character::Skin": (
           scale: 0.9,
           avatar: "ASSETS/Characters/Heimerdinger/HUD/Heimerdinger_Circle.png",
+          resolver_key: 1433988716,
         ),
       },
     ),

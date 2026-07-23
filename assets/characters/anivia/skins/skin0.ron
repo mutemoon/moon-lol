@@ -13,6 +13,7 @@
         "lol_base::character::Skin": (
           scale: 1.4,
           avatar: "ASSETS/Characters/Anivia/HUD/Cryophoenix_Circle.png",
+          resolver_key: 3260850411,
         ),
       },
     ),

@@ -13,6 +13,7 @@
         "lol_base::character::Skin": (
           scale: 1.1,
           avatar: "ASSETS/Characters/Kayn/HUD/Kayn_Circle.png",
+          resolver_key: 22780486,
         ),
       },
     ),

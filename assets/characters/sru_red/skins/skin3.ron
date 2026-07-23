@@ -13,6 +13,7 @@
         "lol_base::character::Skin": (
           scale: 2.075,
           avatar: "ASSETS/Characters/SRU_Red/HUD/Brambleback_Circle.png",
+          resolver_key: 756669984,
         ),
       },
     ),

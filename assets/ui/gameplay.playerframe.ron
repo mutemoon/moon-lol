@@ -545,6 +545,29 @@
             enabled: true,
             scene: 3785546835,
         ),
+        548955995: (
+            name: "ClientStates/Gameplay/UX/LoL/PlayerFrame/UIBase/Player_Frame_Root/PlayerSpells/Ability1/Ability1_Augment/Ability1_AugmentBorder/Ability1_FrameIcon",
+            position: UiPositionRect((
+                anchors: Some(Unk0xf090d2e7),
+                ui_rect: Some((
+                    position: None,
+                    size: Some((66.0, 66.0)),
+                    source_resolution_height: Some(1200),
+                    source_resolution_width: Some(1600),
+                )),
+                disable_pixel_snapping_x: None,
+                disable_pixel_snapping_y: None,
+                disable_resolution_downscale: None,
+                ignore_global_scale: None,
+                ignore_safe_zone: None,
+            )),
+            layer: Some(7),
+            texture_data: Some(LooseUiTextureData((
+                texture_name: "ASSETS/UX/LoL/AbilityAugmentFrame.png",
+            ))),
+            enabled: true,
+            scene: 3880585238,
+        ),
         578348592: (
             name: "ClientStates/Gameplay/UX/LoL/PlayerFrame/UIBase/Player_Frame_Root/LevelUp/LevelUp0_Button/LevelUp0_ButtonDefault",
             position: UiPositionRect((
@@ -1453,6 +1476,29 @@
             ))),
             enabled: false,
             scene: 3785546835,
+        ),
+        1408305575: (
+            name: "ClientStates/Gameplay/UX/LoL/PlayerFrame/UIBase/Player_Frame_Root/PlayerSpells/Ability0/Ability0_Augment/Ability0_AugmentBorder/Ability0_FrameIcon",
+            position: UiPositionRect((
+                anchors: Some(Unk0xf090d2e7),
+                ui_rect: Some((
+                    position: None,
+                    size: Some((66.0, 66.0)),
+                    source_resolution_height: Some(1200),
+                    source_resolution_width: Some(1600),
+                )),
+                disable_pixel_snapping_x: None,
+                disable_pixel_snapping_y: None,
+                disable_resolution_downscale: None,
+                ignore_global_scale: None,
+                ignore_safe_zone: None,
+            )),
+            layer: Some(7),
+            texture_data: Some(LooseUiTextureData((
+                texture_name: "ASSETS/UX/LoL/AbilityAugmentFrame.png",
+            ))),
+            enabled: true,
+            scene: 3880585238,
         ),
         1450038700: (
             name: "ClientStates/Gameplay/UX/LoL/PlayerFrame/UIBase/Player_Frame_Root/LevelUp/LevelUp1_Button/LevelUp1_ButtonClicked",
@@ -4465,6 +4511,29 @@
             enabled: true,
             scene: 3880585238,
         ),
+        3407808867: (
+            name: "ClientStates/Gameplay/UX/LoL/PlayerFrame/UIBase/Player_Frame_Root/PlayerSpells/Ability3/Ability3_Augment/Ability3_AugmentBorder/Ability3_FrameIcon",
+            position: UiPositionRect((
+                anchors: Some(Unk0xf090d2e7),
+                ui_rect: Some((
+                    position: None,
+                    size: Some((66.0, 66.0)),
+                    source_resolution_height: Some(1200),
+                    source_resolution_width: Some(1600),
+                )),
+                disable_pixel_snapping_x: None,
+                disable_pixel_snapping_y: None,
+                disable_resolution_downscale: None,
+                ignore_global_scale: None,
+                ignore_safe_zone: None,
+            )),
+            layer: Some(7),
+            texture_data: Some(LooseUiTextureData((
+                texture_name: "ASSETS/UX/LoL/AbilityAugmentFrame.png",
+            ))),
+            enabled: true,
+            scene: 3880585238,
+        ),
         3416702039: (
             name: "ClientStates/Gameplay/UX/LoL/PlayerFrame/UIBase/Player_Frame_Root/PlayerResourceBars/PlayerPARMeter/PlayerPar_BarTextureBlue",
             position: UiPositionRect((
@@ -4565,6 +4634,29 @@
             texture_data: Some(AtlasData((
                 m_texture_name: "ASSETS/UX/LoL/Clarity_HUDAtlas.png",
                 m_texture_uv: Some((874.0, 272.0, 907.0, 291.0)),
+            ))),
+            enabled: true,
+            scene: 3880585238,
+        ),
+        3465853823: (
+            name: "ClientStates/Gameplay/UX/LoL/PlayerFrame/UIBase/Player_Frame_Root/PlayerSpells/Ability2/Ability2_Augment/Ability2_AugmentBorder/Ability2_FrameIcon",
+            position: UiPositionRect((
+                anchors: Some(Unk0xf090d2e7),
+                ui_rect: Some((
+                    position: None,
+                    size: Some((66.0, 66.0)),
+                    source_resolution_height: Some(1200),
+                    source_resolution_width: Some(1600),
+                )),
+                disable_pixel_snapping_x: None,
+                disable_pixel_snapping_y: None,
+                disable_resolution_downscale: None,
+                ignore_global_scale: None,
+                ignore_safe_zone: None,
+            )),
+            layer: Some(7),
+            texture_data: Some(LooseUiTextureData((
+                texture_name: "ASSETS/UX/LoL/AbilityAugmentFrame.png",
             ))),
             enabled: true,
             scene: 3880585238,
@@ -6512,6 +6604,66 @@
                 ui_rect: Some((
                     position: Some((741.0, 1028.0)),
                     size: Some((116.0, 116.0)),
+                    source_resolution_height: Some(1200),
+                    source_resolution_width: Some(1600),
+                )),
+                disable_pixel_snapping_x: None,
+                disable_pixel_snapping_y: None,
+                disable_resolution_downscale: None,
+                ignore_global_scale: None,
+                ignore_safe_zone: None,
+            )),
+            layer: Some(13),
+            texture_data: Some(AtlasData((
+                m_texture_name: "ASSETS/UX/LoL/HUDResetAtlas.png",
+                m_texture_uv: Some((0.0, 0.0, 110.0, 110.0)),
+            ))),
+            frames_per_second: Some(75.0),
+            total_number_of_frames: Some(56.0),
+            number_of_frames_per_row_in_atlas: Some(7.0),
+            finish_behavior: None,
+            scene: 3880585238,
+            enabled: false,
+        ),
+        1820519339: (
+            name: "ClientStates/Gameplay/UX/LoL/PlayerFrame/UIBase/Player_Frame_Root/PlayerSpells/Ability0/Summoner1_ResetAttentionFX",
+            position: UiPositionRect((
+                anchors: Some(AnchorSingle((
+                    anchor: (0.5, 1.0),
+                ))),
+                ui_rect: Some((
+                    position: Some((842.0, 1046.0)),
+                    size: Some((64.0, 64.0)),
+                    source_resolution_height: Some(1200),
+                    source_resolution_width: Some(1600),
+                )),
+                disable_pixel_snapping_x: None,
+                disable_pixel_snapping_y: None,
+                disable_resolution_downscale: None,
+                ignore_global_scale: None,
+                ignore_safe_zone: None,
+            )),
+            layer: Some(13),
+            texture_data: Some(AtlasData((
+                m_texture_name: "ASSETS/UX/LoL/HUDResetAtlas.png",
+                m_texture_uv: Some((0.0, 0.0, 110.0, 110.0)),
+            ))),
+            frames_per_second: Some(75.0),
+            total_number_of_frames: Some(56.0),
+            number_of_frames_per_row_in_atlas: Some(7.0),
+            finish_behavior: None,
+            scene: 3880585238,
+            enabled: false,
+        ),
+        1910621020: (
+            name: "ClientStates/Gameplay/UX/LoL/PlayerFrame/UIBase/Player_Frame_Root/PlayerSpells/Ability0/Summoner2_ResetAttentionFX",
+            position: UiPositionRect((
+                anchors: Some(AnchorSingle((
+                    anchor: (0.5, 1.0),
+                ))),
+                ui_rect: Some((
+                    position: Some((899.0, 1046.0)),
+                    size: Some((64.0, 64.0)),
                     source_resolution_height: Some(1200),
                     source_resolution_width: Some(1600),
                 )),
@@ -9892,7 +10044,7 @@
             name: "ClientStates/Gameplay/UX/LoL/PlayerFrame/UIBase/Player_Frame_Root/PlayerSpells",
             enabled: true,
             parent_scene: Some(4203864999),
-            layer: Some(28),
+            layer: Some(50),
         ),
         3994571557: (
             name: "ClientStates/Gameplay/UX/LoL/PlayerFrame/UIBase/Player_Frame_Root/PlayerBuffs",

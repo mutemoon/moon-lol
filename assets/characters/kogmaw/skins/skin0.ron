@@ -13,6 +13,7 @@
         "lol_base::character::Skin": (
           scale: 0.7,
           avatar: "ASSETS/Characters/KogMaw/HUD/KogMaw_Circle_0.png",
+          resolver_key: 3811692871,
         ),
       },
     ),

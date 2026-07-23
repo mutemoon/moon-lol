@@ -13,6 +13,7 @@
         "lol_base::character::Skin": (
           scale: 1.2,
           avatar: "ASSETS/Characters/Aphelios/HUD/Aphelios_Circle_0.png",
+          resolver_key: 3500138818,
         ),
       },
     ),

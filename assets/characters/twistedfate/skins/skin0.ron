@@ -13,6 +13,7 @@
         "lol_base::character::Skin": (
           scale: 0.95,
           avatar: "ASSETS/Characters/TwistedFate/HUD/TwistedFate_Circle_0.png",
+          resolver_key: 1022853673,
         ),
       },
     ),

@@ -13,6 +13,7 @@
         "lol_base::character::Skin": (
           scale: 1.22,
           avatar: "ASSETS/Characters/Soraka/HUD/Soraka_Circle.png",
+          resolver_key: 2743942546,
         ),
       },
     ),

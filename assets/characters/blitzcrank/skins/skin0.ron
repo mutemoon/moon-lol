@@ -13,6 +13,7 @@
         "lol_base::character::Skin": (
           scale: 1.35,
           avatar: "ASSETS/Characters/Blitzcrank/HUD/Steamgolem_Circle.png",
+          resolver_key: 2644012935,
         ),
       },
     ),

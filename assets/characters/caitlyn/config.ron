@@ -111,6 +111,8 @@
         "lol_core::life::Health": (
           value: 580.0,
           max: 580.0,
+          base_static_regen: 0.7,
+          regen_per_level: 0.11,
         ),
         "lol_core::movement::Movement": (
           speed: 325.0,
@@ -132,6 +134,7 @@
           "Crepe_JinxVsCaitlyn_JinxLose": Path("characters/Caitlyn/spells/Crepe_JinxVsCaitlyn_JinxLose.ron"),
         }),
         "lol_core::skill::PassiveSkill": (4294967266),
+        "lol_core::skill::SkillPoints": (1),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

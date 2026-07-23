@@ -327,7 +327,7 @@
                 overlay_cced: Some(4068147116),
                 overlay_disabled: Some(2130265621),
                 overlay_oom: Some(2776141031),
-                reset_flash_fx_attention: None,
+                reset_flash_fx_attention: Some(1820519339),
                 toggle_fx: None,
             ),
             (
@@ -360,7 +360,7 @@
                 overlay_cced: Some(1687573884),
                 overlay_disabled: Some(2933395557),
                 overlay_oom: Some(3658344183),
-                reset_flash_fx_attention: None,
+                reset_flash_fx_attention: Some(1910621020),
                 toggle_fx: None,
             ),
         ],

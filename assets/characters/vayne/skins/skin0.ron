@@ -13,6 +13,7 @@
         "lol_base::character::Skin": (
           scale: 1.12,
           avatar: "ASSETS/Characters/Vayne/HUD/Vayne_Circle.png",
+          resolver_key: 1701479024,
         ),
       },
     ),

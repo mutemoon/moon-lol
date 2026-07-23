@@ -13,6 +13,7 @@
         "lol_base::character::Skin": (
           scale: 0.9,
           avatar: "ASSETS/Characters/Turret/HUD/Turret_Blue_Circle.png",
+          resolver_key: 2005705283,
         ),
       },
     ),

@@ -13,6 +13,7 @@
         "lol_base::character::Skin": (
           scale: 1.0,
           avatar: "ASSETS/Characters/Sion/HUD/Sion_Circle.png",
+          resolver_key: 1745741604,
         ),
       },
     ),

@@ -13,6 +13,7 @@
         "lol_base::character::Skin": (
           scale: 1.1,
           avatar: "ASSETS/Characters/Neeko/HUD/Neeko_Circle_0.png",
+          resolver_key: 2054300739,
         ),
       },
     ),

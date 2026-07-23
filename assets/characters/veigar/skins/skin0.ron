@@ -13,6 +13,7 @@
         "lol_base::character::Skin": (
           scale: 1.85,
           avatar: "ASSETS/Characters/Veigar/HUD/Veigar_Circle.png",
+          resolver_key: 3425761363,
         ),
       },
     ),

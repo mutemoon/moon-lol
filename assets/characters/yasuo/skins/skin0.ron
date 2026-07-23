@@ -13,6 +13,7 @@
         "lol_base::character::Skin": (
           scale: 0.93,
           avatar: "ASSETS/Characters/Yasuo/HUD/Yasuo_Circle.png",
+          resolver_key: 1505321430,
         ),
       },
     ),

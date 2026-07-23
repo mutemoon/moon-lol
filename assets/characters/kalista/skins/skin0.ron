@@ -13,6 +13,7 @@
         "lol_base::character::Skin": (
           scale: 0.77,
           avatar: "ASSETS/Characters/Kalista/HUD/Kalista_Circle_0.png",
+          resolver_key: 4106781254,
         ),
       },
     ),

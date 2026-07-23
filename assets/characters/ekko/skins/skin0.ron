@@ -13,6 +13,7 @@
         "lol_base::character::Skin": (
           scale: 1.1,
           avatar: "ASSETS/Characters/Ekko/HUD/Ekko_Circle.png",
+          resolver_key: 2352466251,
         ),
       },
     ),

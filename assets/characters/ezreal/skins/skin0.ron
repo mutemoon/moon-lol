@@ -13,6 +13,7 @@
         "lol_base::character::Skin": (
           scale: 1.1,
           avatar: "ASSETS/Characters/Ezreal/HUD/Ezreal_Circle.png",
+          resolver_key: 2615400114,
         ),
       },
     ),

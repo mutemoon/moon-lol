@@ -112,6 +112,8 @@
         "lol_core::life::Health": (
           value: 642.0,
           max: 642.0,
+          base_static_regen: 1.7,
+          regen_per_level: 0.15,
         ),
         "lol_core::movement::Movement": (
           speed: 335.0,
@@ -137,6 +139,7 @@
           "EvelynnWMissile": Path("characters/Evelynn/spells/EvelynnWMissile.ron"),
         }),
         "lol_core::skill::PassiveSkill": (4294967266),
+        "lol_core::skill::SkillPoints": (1),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

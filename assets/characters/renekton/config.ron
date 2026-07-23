@@ -111,6 +111,8 @@
         "lol_core::life::Health": (
           value: 660.0,
           max: 660.0,
+          base_static_regen: 1.6,
+          regen_per_level: 0.15,
         ),
         "lol_core::movement::Movement": (
           speed: 345.0,
@@ -133,6 +135,7 @@
           "RenektonSuperExecute": Path("characters/Renekton/spells/RenektonSuperExecute.ron"),
         }),
         "lol_core::skill::PassiveSkill": (4294967266),
+        "lol_core::skill::SkillPoints": (1),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

@@ -13,6 +13,7 @@
         "lol_base::character::Skin": (
           scale: 1.15,
           avatar: "ASSETS/Characters/Briar/HUD/Briar_Circle_0.png",
+          resolver_key: 1857918065,
         ),
       },
     ),

@@ -13,6 +13,7 @@
         "lol_base::character::Skin": (
           scale: 1.05,
           avatar: "ASSETS/Characters/Akali/HUD/Akali_Circle.png",
+          resolver_key: 975782333,
         ),
       },
     ),

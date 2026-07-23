@@ -18,46 +18,7 @@
                 precision: None,
             ),
         }),
-        effectAmounts: Some([
-            (
-                values: None,
-            ),
-            (
-                values: Some([
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                ]),
-            ),
-            (
-                values: None,
-            ),
-            (
-                values: None,
-            ),
-            (
-                values: None,
-            ),
-            (
-                values: None,
-            ),
-            (
-                values: None,
-            ),
-            (
-                values: None,
-            ),
-            (
-                values: None,
-            ),
-            (
-                values: None,
-            ),
-        ]),
+        effectAmounts: None,
         dataValues: Some([
             (
                 name: "BaseDamage",

@@ -112,6 +112,8 @@
         "lol_core::life::Health": (
           value: 590.0,
           max: 590.0,
+          base_static_regen: 1.6,
+          regen_per_level: 0.18,
         ),
         "lol_core::movement::Movement": (
           speed: 335.0,
@@ -141,6 +143,7 @@
           "QiyanaWMis_Water": Path("characters/Qiyana/spells/QiyanaWMis_Water.ron"),
         }),
         "lol_core::skill::PassiveSkill": (4294967266),
+        "lol_core::skill::SkillPoints": (1),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

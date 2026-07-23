@@ -13,6 +13,7 @@
         "lol_base::character::Skin": (
           scale: 1.4,
           avatar: "ASSETS/Characters/SRU_Razorbeak/HUD/Razorbeak_Circle.png",
+          resolver_key: 0,
         ),
       },
     ),

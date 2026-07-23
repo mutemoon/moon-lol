@@ -13,6 +13,7 @@
         "lol_base::character::Skin": (
           scale: 1.7,
           avatar: "ASSETS/Characters/Xerath/HUD/Xerath_Circle.png",
+          resolver_key: 2148556299,
         ),
       },
     ),

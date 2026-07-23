@@ -13,6 +13,7 @@
         "lol_base::character::Skin": (
           scale: 1.25,
           avatar: "ASSETS/Characters/Elise/HUD/Elise_Circle.png",
+          resolver_key: 3874890437,
         ),
       },
     ),

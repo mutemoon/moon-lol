@@ -22,10 +22,9 @@
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
-                        type: "CalculationPartStatCoefficient",
+                        type: "CalculationPartStatNamedDataValue",
                         stat: Some(2),
-                        coefficient: Some(8.0),
-                        statFormula: Some(2),
+                        dataValue: "unk_0x6cb0fc88",
                     ),
                 ]),
                 multiplier: None,
@@ -184,6 +183,18 @@
                     30.0,
                     30.0,
                     30.0,
+                ]),
+            ),
+            (
+                name: "DamageStoreMaxBonusADRatio",
+                values: Some([
+                    8.0,
+                    8.0,
+                    8.0,
+                    8.0,
+                    8.0,
+                    8.0,
+                    8.0,
                 ]),
             ),
         ]),

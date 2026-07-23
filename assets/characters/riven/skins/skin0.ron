@@ -13,6 +13,7 @@
         "lol_base::character::Skin": (
           scale: 1.5,
           avatar: "ASSETS/Characters/Riven/HUD/Riven_Circle.png",
+          resolver_key: 1451113607,
         ),
       },
     ),

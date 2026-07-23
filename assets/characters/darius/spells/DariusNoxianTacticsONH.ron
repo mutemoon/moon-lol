@@ -8,8 +8,8 @@
                         type: "CalculationPartStatSub",
                         stat: Some(2),
                         subpart: Some((
-                            type: "CalculationPartEffectValue",
-                            effectIndex: Some(4),
+                            type: "CalculationPartNamedDataValue",
+                            dataValue: "ad_ratio",
                         )),
                     ),
                 ]),
@@ -81,7 +81,56 @@
                 values: None,
             ),
         ]),
-        dataValues: None,
+        dataValues: Some([
+            (
+                name: "SlowPercent",
+                values: Some([
+                    90.0,
+                    90.0,
+                    90.0,
+                    90.0,
+                    90.0,
+                    90.0,
+                    90.0,
+                ]),
+            ),
+            (
+                name: "PercentCDRefund",
+                values: Some([
+                    50.0,
+                    50.0,
+                    50.0,
+                    50.0,
+                    50.0,
+                    50.0,
+                    50.0,
+                ]),
+            ),
+            (
+                name: "ADRatio",
+                values: Some([
+                    1.5,
+                    1.4,
+                    1.45,
+                    1.5,
+                    1.55,
+                    1.6,
+                    1.65,
+                ]),
+            ),
+            (
+                name: "SlowDuration",
+                values: Some([
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                ]),
+            ),
+        ]),
         mana: Some([
             40.0,
             40.0,

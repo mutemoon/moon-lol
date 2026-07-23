@@ -13,6 +13,7 @@
         "lol_base::character::Skin": (
           scale: 1.0,
           avatar: "ASSETS/Characters/LeeSin/HUD/LeeSin_Circle_0.png",
+          resolver_key: 1777722609,
         ),
       },
     ),

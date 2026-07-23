@@ -13,6 +13,7 @@
         "lol_base::character::Skin": (
           scale: 1.1,
           avatar: "ASSETS/Characters/Kindred/HUD/Kindred_Circle.png",
+          resolver_key: 2586909496,
         ),
       },
     ),

@@ -112,6 +112,8 @@
         "lol_core::life::Health": (
           value: 560.0,
           max: 560.0,
+          base_static_regen: 0.0,
+          regen_per_level: 0.1,
         ),
         "lol_core::movement::Movement": (
           speed: 330.0,
@@ -133,6 +135,7 @@
           "MilioWRetarget": Path("characters/Milio/spells/MilioWRetarget.ron"),
         }),
         "lol_core::skill::PassiveSkill": (4294967266),
+        "lol_core::skill::SkillPoints": (1),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

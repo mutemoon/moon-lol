@@ -13,6 +13,7 @@
         "lol_base::character::Skin": (
           scale: 1.2,
           avatar: "ASSETS/Characters/SRU_Murkwolf/HUD/GreaterMurkWolf_Circle.png",
+          resolver_key: 0,
         ),
       },
     ),

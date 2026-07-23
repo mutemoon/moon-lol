@@ -13,6 +13,7 @@
         "lol_base::character::Skin": (
           scale: 1.35,
           avatar: "ASSETS/Characters/Nidalee/HUD/Nidalee_Circle.png",
+          resolver_key: 3266514569,
         ),
       },
     ),

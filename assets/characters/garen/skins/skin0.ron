@@ -13,6 +13,7 @@
         "lol_base::character::Skin": (
           scale: 1.0,
           avatar: "ASSETS/Characters/Garen/HUD/Garen_Circle.png",
+          resolver_key: 1907406496,
         ),
       },
     ),

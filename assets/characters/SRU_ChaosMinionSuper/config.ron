@@ -40,6 +40,8 @@
         "lol_core::life::Health": (
           value: 1500.0,
           max: 1500.0,
+          base_static_regen: 10.0,
+          regen_per_level: 0.0,
         ),
         "lol_core::movement::Movement": (
           speed: 350.0,

@@ -2658,6 +2658,36 @@
             scene: 1023498094,
             enabled: false,
         ),
+        545661584: (
+            name: "ClientStates/Gameplay/UX/LoL/PlayerInventory/UIBase/Inventory/InventoryFX/InventoryItem3_StateBorderFX",
+            position: UiPositionRect((
+                anchors: Some(AnchorSingle((
+                    anchor: (0.5, 1.0),
+                ))),
+                ui_rect: Some((
+                    position: Some((983.0, 1097.0)),
+                    size: Some((60.0, 60.0)),
+                    source_resolution_height: Some(1200),
+                    source_resolution_width: Some(1600),
+                )),
+                disable_pixel_snapping_x: None,
+                disable_pixel_snapping_y: None,
+                disable_resolution_downscale: None,
+                ignore_global_scale: None,
+                ignore_safe_zone: None,
+            )),
+            layer: Some(9),
+            texture_data: Some(AtlasData((
+                m_texture_name: "ASSETS/UX/LoL/Clarity_AbilityAtlas.png",
+                m_texture_uv: Some((2.0, 2.0, 87.0, 88.0)),
+            ))),
+            frames_per_second: Some(30.0),
+            total_number_of_frames: Some(39.0),
+            number_of_frames_per_row_in_atlas: Some(11.0),
+            finish_behavior: Some(1),
+            scene: 3340361153,
+            enabled: false,
+        ),
         549732385: (
             name: "ClientStates/Gameplay/UX/LoL/PlayerInventory/UIBase/Inventory/InventoryFX/InventoryItem2_HitFX",
             position: UiPositionRect((
@@ -2928,6 +2958,36 @@
             scene: 1023498094,
             enabled: false,
         ),
+        1080800025: (
+            name: "ClientStates/Gameplay/UX/LoL/PlayerInventory/UIBase/Inventory/InventoryFX/InventoryItem0_StateBorderFX",
+            position: UiPositionRect((
+                anchors: Some(AnchorSingle((
+                    anchor: (0.5, 1.0),
+                ))),
+                ui_rect: Some((
+                    position: Some((983.0, 1045.0)),
+                    size: Some((60.0, 60.0)),
+                    source_resolution_height: Some(1200),
+                    source_resolution_width: Some(1600),
+                )),
+                disable_pixel_snapping_x: None,
+                disable_pixel_snapping_y: None,
+                disable_resolution_downscale: None,
+                ignore_global_scale: None,
+                ignore_safe_zone: None,
+            )),
+            layer: Some(10),
+            texture_data: Some(AtlasData((
+                m_texture_name: "ASSETS/UX/LoL/Clarity_AbilityAtlas.png",
+                m_texture_uv: Some((2.0, 2.0, 87.0, 88.0)),
+            ))),
+            frames_per_second: Some(30.0),
+            total_number_of_frames: Some(39.0),
+            number_of_frames_per_row_in_atlas: Some(11.0),
+            finish_behavior: Some(1),
+            scene: 3340361153,
+            enabled: false,
+        ),
         1369414720: (
             name: "ClientStates/Gameplay/UX/LoL/PlayerInventory/UIBase/Inventory/InventoryFX/InventoryItem2_ToggleFX",
             position: UiPositionRect((
@@ -3076,6 +3136,36 @@
             number_of_frames_per_row_in_atlas: Some(10.0),
             finish_behavior: None,
             scene: 1023498094,
+            enabled: false,
+        ),
+        1670001231: (
+            name: "ClientStates/Gameplay/UX/LoL/PlayerInventory/UIBase/Inventory/InventoryFX/InventoryItem6_StateBorderFX",
+            position: UiPositionRect((
+                anchors: Some(AnchorSingle((
+                    anchor: (0.5, 1.0),
+                ))),
+                ui_rect: Some((
+                    position: Some((1155.0, 1057.0)),
+                    size: Some((38.0, 38.0)),
+                    source_resolution_height: Some(1200),
+                    source_resolution_width: Some(1600),
+                )),
+                disable_pixel_snapping_x: None,
+                disable_pixel_snapping_y: None,
+                disable_resolution_downscale: None,
+                ignore_global_scale: None,
+                ignore_safe_zone: None,
+            )),
+            layer: Some(9),
+            texture_data: Some(AtlasData((
+                m_texture_name: "ASSETS/UX/LoL/Clarity_AbilityAtlas.png",
+                m_texture_uv: Some((2.0, 2.0, 87.0, 88.0)),
+            ))),
+            frames_per_second: Some(30.0),
+            total_number_of_frames: Some(39.0),
+            number_of_frames_per_row_in_atlas: Some(11.0),
+            finish_behavior: Some(1),
+            scene: 3340361153,
             enabled: false,
         ),
         1770159259: (
@@ -3768,6 +3858,36 @@
             scene: 3340361153,
             enabled: false,
         ),
+        3508039734: (
+            name: "ClientStates/Gameplay/UX/LoL/PlayerInventory/UIBase/Inventory/InventoryFX/InventoryItem1_StateBorderFX",
+            position: UiPositionRect((
+                anchors: Some(AnchorSingle((
+                    anchor: (0.5, 1.0),
+                ))),
+                ui_rect: Some((
+                    position: Some((1037.0, 1045.0)),
+                    size: Some((60.0, 60.0)),
+                    source_resolution_height: Some(1200),
+                    source_resolution_width: Some(1600),
+                )),
+                disable_pixel_snapping_x: None,
+                disable_pixel_snapping_y: None,
+                disable_resolution_downscale: None,
+                ignore_global_scale: None,
+                ignore_safe_zone: None,
+            )),
+            layer: Some(9),
+            texture_data: Some(AtlasData((
+                m_texture_name: "ASSETS/UX/LoL/Clarity_AbilityAtlas.png",
+                m_texture_uv: Some((2.0, 2.0, 87.0, 88.0)),
+            ))),
+            frames_per_second: Some(30.0),
+            total_number_of_frames: Some(39.0),
+            number_of_frames_per_row_in_atlas: Some(11.0),
+            finish_behavior: Some(1),
+            scene: 3340361153,
+            enabled: false,
+        ),
         3717353639: (
             name: "ClientStates/Gameplay/UX/LoL/PlayerInventory/UIBase/Inventory/InventoryFX/InventoryItem1_ToggleFX",
             position: UiPositionRect((
@@ -3807,6 +3927,66 @@
                 ui_rect: Some((
                     position: Some((1155.0, 1057.0)),
                     size: Some((38.0, 38.0)),
+                    source_resolution_height: Some(1200),
+                    source_resolution_width: Some(1600),
+                )),
+                disable_pixel_snapping_x: None,
+                disable_pixel_snapping_y: None,
+                disable_resolution_downscale: None,
+                ignore_global_scale: None,
+                ignore_safe_zone: None,
+            )),
+            layer: Some(9),
+            texture_data: Some(AtlasData((
+                m_texture_name: "ASSETS/UX/LoL/Clarity_AbilityAtlas.png",
+                m_texture_uv: Some((2.0, 2.0, 87.0, 88.0)),
+            ))),
+            frames_per_second: Some(30.0),
+            total_number_of_frames: Some(39.0),
+            number_of_frames_per_row_in_atlas: Some(11.0),
+            finish_behavior: Some(1),
+            scene: 3340361153,
+            enabled: false,
+        ),
+        3835899626: (
+            name: "ClientStates/Gameplay/UX/LoL/PlayerInventory/UIBase/Inventory/InventoryFX/InventoryItem5_StateBorderFX",
+            position: UiPositionRect((
+                anchors: Some(AnchorSingle((
+                    anchor: (0.5, 1.0),
+                ))),
+                ui_rect: Some((
+                    position: Some((1091.0, 1097.0)),
+                    size: Some((60.0, 60.0)),
+                    source_resolution_height: Some(1200),
+                    source_resolution_width: Some(1600),
+                )),
+                disable_pixel_snapping_x: None,
+                disable_pixel_snapping_y: None,
+                disable_resolution_downscale: None,
+                ignore_global_scale: None,
+                ignore_safe_zone: None,
+            )),
+            layer: Some(9),
+            texture_data: Some(AtlasData((
+                m_texture_name: "ASSETS/UX/LoL/Clarity_AbilityAtlas.png",
+                m_texture_uv: Some((2.0, 2.0, 87.0, 88.0)),
+            ))),
+            frames_per_second: Some(30.0),
+            total_number_of_frames: Some(39.0),
+            number_of_frames_per_row_in_atlas: Some(11.0),
+            finish_behavior: Some(1),
+            scene: 3340361153,
+            enabled: false,
+        ),
+        3861412475: (
+            name: "ClientStates/Gameplay/UX/LoL/PlayerInventory/UIBase/Inventory/InventoryFX/InventoryItem2_StateBorderFX",
+            position: UiPositionRect((
+                anchors: Some(AnchorSingle((
+                    anchor: (0.5, 1.0),
+                ))),
+                ui_rect: Some((
+                    position: Some((1091.0, 1045.0)),
+                    size: Some((60.0, 60.0)),
                     source_resolution_height: Some(1200),
                     source_resolution_width: Some(1600),
                 )),
@@ -3886,6 +4066,36 @@
             number_of_frames_per_row_in_atlas: Some(10.0),
             finish_behavior: None,
             scene: 1023498094,
+            enabled: false,
+        ),
+        3935174013: (
+            name: "ClientStates/Gameplay/UX/LoL/PlayerInventory/UIBase/Inventory/InventoryFX/InventoryItem4_StateBorderFX",
+            position: UiPositionRect((
+                anchors: Some(AnchorSingle((
+                    anchor: (0.5, 1.0),
+                ))),
+                ui_rect: Some((
+                    position: Some((1037.0, 1097.0)),
+                    size: Some((60.0, 60.0)),
+                    source_resolution_height: Some(1200),
+                    source_resolution_width: Some(1600),
+                )),
+                disable_pixel_snapping_x: None,
+                disable_pixel_snapping_y: None,
+                disable_resolution_downscale: None,
+                ignore_global_scale: None,
+                ignore_safe_zone: None,
+            )),
+            layer: Some(9),
+            texture_data: Some(AtlasData((
+                m_texture_name: "ASSETS/UX/LoL/Clarity_AbilityAtlas.png",
+                m_texture_uv: Some((2.0, 2.0, 87.0, 88.0)),
+            ))),
+            frames_per_second: Some(30.0),
+            total_number_of_frames: Some(39.0),
+            number_of_frames_per_row_in_atlas: Some(11.0),
+            finish_behavior: Some(1),
+            scene: 3340361153,
             enabled: false,
         ),
         3979496226: (

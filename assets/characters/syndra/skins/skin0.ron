@@ -13,6 +13,7 @@
         "lol_base::character::Skin": (
           scale: 1.25,
           avatar: "ASSETS/Characters/Syndra/HUD/Syndra_Circle_0.png",
+          resolver_key: 1079952534,
         ),
       },
     ),

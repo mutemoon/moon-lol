@@ -112,6 +112,8 @@
         "lol_core::life::Health": (
           value: 620.0,
           max: 620.0,
+          base_static_regen: 1.5,
+          regen_per_level: 0.17,
         ),
         "lol_core::movement::Movement": (
           speed: 315.0,
@@ -142,6 +144,7 @@
           "RellW_MountUp": Path("characters/Rell/spells/RellW_MountUp.ron"),
         }),
         "lol_core::skill::PassiveSkill": (4294967266),
+        "lol_core::skill::SkillPoints": (1),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

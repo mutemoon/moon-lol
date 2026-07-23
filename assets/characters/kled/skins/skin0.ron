@@ -13,6 +13,7 @@
         "lol_base::character::Skin": (
           scale: 1.0,
           avatar: "ASSETS/Characters/Kled/HUD/Kled_Circle.png",
+          resolver_key: 3317409827,
         ),
       },
     ),

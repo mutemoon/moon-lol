@@ -97,7 +97,7 @@
           max: 469.0,
           base: 469.0,
           per_level: 21.0,
-          base_static_regen: 1.8,
+          base_static_regen: 2.2,
           regen_per_level: 0.12,
         ),
         "lol_core::base::bounding::Bounding": (
@@ -105,12 +105,14 @@
           height: 200.0,
         ),
         "lol_core::character::Character": (),
-        "lol_core::damage::Armor": (27.0),
+        "lol_core::damage::Armor": (24.0),
         "lol_core::damage::Damage": (57.0),
         "lol_core::entities::champion::Champion": (),
         "lol_core::life::Health": (
           value: 570.0,
           max: 570.0,
+          base_static_regen: 1.1,
+          regen_per_level: 0.11,
         ),
         "lol_core::movement::Movement": (
           speed: 340.0,
@@ -139,6 +141,7 @@
           "BrandWildfireMissile": Path("characters/Brand/spells/BrandWildfireMissile.ron"),
         }),
         "lol_core::skill::PassiveSkill": (4294967266),
+        "lol_core::skill::SkillPoints": (1),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

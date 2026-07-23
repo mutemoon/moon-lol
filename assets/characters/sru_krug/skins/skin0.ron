@@ -13,6 +13,7 @@
         "lol_base::character::Skin": (
           scale: 1.15,
           avatar: "ASSETS/Characters/SRU_Krug/HUD/AncientKrug_Circle.png",
+          resolver_key: 126038237,
         ),
       },
     ),

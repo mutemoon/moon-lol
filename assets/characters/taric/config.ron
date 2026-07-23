@@ -111,6 +111,8 @@
         "lol_core::life::Health": (
           value: 645.0,
           max: 645.0,
+          base_static_regen: 1.2,
+          regen_per_level: 0.1,
         ),
         "lol_core::movement::Movement": (
           speed: 340.0,
@@ -130,6 +132,7 @@
           "TaricWAllyBuffMissile": Path("characters/Taric/spells/TaricWAllyBuffMissile.ron"),
         }),
         "lol_core::skill::PassiveSkill": (4294967266),
+        "lol_core::skill::SkillPoints": (1),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

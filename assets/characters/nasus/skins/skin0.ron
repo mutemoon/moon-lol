@@ -13,6 +13,7 @@
         "lol_base::character::Skin": (
           scale: 1.23,
           avatar: "ASSETS/Characters/Nasus/HUD/Nasus_Circle.png",
+          resolver_key: 1619087855,
         ),
       },
     ),

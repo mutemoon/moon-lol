@@ -13,6 +13,7 @@
         "lol_base::character::Skin": (
           scale: 1.25,
           avatar: "ASSETS/Characters/Fizz/HUD/Fizz_Circle_0.png",
+          resolver_key: 3086232332,
         ),
       },
     ),

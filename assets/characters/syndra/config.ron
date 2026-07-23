@@ -109,8 +109,10 @@
         "lol_core::damage::Damage": (54.0),
         "lol_core::entities::champion::Champion": (),
         "lol_core::life::Health": (
-          value: 563.0,
-          max: 563.0,
+          value: 583.0,
+          max: 583.0,
+          base_static_regen: 1.3,
+          regen_per_level: 0.12,
         ),
         "lol_core::movement::Movement": (
           speed: 330.0,
@@ -151,6 +153,7 @@
           "SyndraWDebuff": Path("characters/Syndra/spells/SyndraWDebuff.ron"),
         }),
         "lol_core::skill::PassiveSkill": (4294967266),
+        "lol_core::skill::SkillPoints": (1),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

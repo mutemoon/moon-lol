@@ -14,43 +14,43 @@
             ],
         ),
         "Attack1": Clip(
-            node_index: 3,
+            node_index: 2,
         ),
         "Attack2": Clip(
-            node_index: 4,
+            node_index: 3,
         ),
         "Channel": Clip(
             node_index: 1,
         ),
         "ChannelWndup": Clip(
-            node_index: 10,
+            node_index: 9,
         ),
         "Crit": Clip(
-            node_index: 5,
+            node_index: 4,
         ),
         "Dance": Clip(
             node_index: 19,
         ),
         "Death": Clip(
-            node_index: 17,
+            node_index: 16,
         ),
         "Idle1": Clip(
-            node_index: 8,
-        ),
-        "Idle2": Clip(
             node_index: 7,
         ),
-        "Idle3": Clip(
+        "Idle2": Clip(
             node_index: 6,
         ),
+        "Idle3": Clip(
+            node_index: 5,
+        ),
         "Idle4": Clip(
-            node_index: 9,
+            node_index: 8,
         ),
         "Joke": Clip(
-            node_index: 18,
+            node_index: 17,
         ),
         "Laugh": Clip(
-            node_index: 14,
+            node_index: 13,
         ),
         "Recall": Sequence(
             hashes: [
@@ -59,23 +59,41 @@
                 "Idle1",
             ],
         ),
-        "Run": Clip(
-            node_index: 2,
+        "Run": ConditionBool(
+            updater: IsHomeguard,
+            true_node: "RunBase",
+            false_node: "Unk0xbc1ef3fb",
+        ),
+        "RunBase": Clip(
+            node_index: 18,
         ),
         "Spell1": Clip(
-            node_index: 11,
+            node_index: 10,
         ),
         "Spell2": Clip(
-            node_index: 13,
-        ),
-        "Spell3": Clip(
             node_index: 12,
         ),
+        "Spell3": Clip(
+            node_index: 11,
+        ),
         "Spell4": Clip(
-            node_index: 15,
+            node_index: 14,
         ),
         "Taunt": Clip(
-            node_index: 16,
+            node_index: 15,
+        ),
+        "Unk0xbc1ef3fb": ConditionFloat(
+            updater: MoveSpeed,
+            conditions: [
+                (
+                    key: "RunBase",
+                    value: 340.0,
+                ),
+                (
+                    key: "RunBase",
+                    value: 450.0,
+                ),
+            ],
         ),
     },
     blend_data: {

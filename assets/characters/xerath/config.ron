@@ -111,6 +111,8 @@
         "lol_core::life::Health": (
           value: 596.0,
           max: 596.0,
+          base_static_regen: 1.1,
+          regen_per_level: 0.11,
         ),
         "lol_core::movement::Movement": (
           speed: 340.0,
@@ -131,6 +133,7 @@
           "XerathRMissileWrapper": Path("characters/Xerath/spells/XerathRMissileWrapper.ron"),
         }),
         "lol_core::skill::PassiveSkill": (4294967266),
+        "lol_core::skill::SkillPoints": (1),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

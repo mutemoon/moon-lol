@@ -13,6 +13,7 @@
         "lol_base::character::Skin": (
           scale: 0.85,
           avatar: "ASSETS/Characters/Pantheon/HUD/Pantheon_Circle_0.png",
+          resolver_key: 4136375454,
         ),
       },
     ),

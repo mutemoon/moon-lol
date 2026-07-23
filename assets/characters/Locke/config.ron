@@ -1,0 +1,134 @@
+(
+  resources: {},
+  entities: {
+    4294967267: (
+      components: {
+        "lol_core::skill::CoolDown": (
+          timer: None,
+          duration: 120.0,
+        ),
+        "lol_core::skill::Skill": (
+          spell: Path("characters/Locke/spells/LockeR.ron"),
+          level: 0,
+          slot: R,
+          cooldown_mode: AfterCast,
+        ),
+        "lol_core::skill::SkillOf": (4294967271),
+      },
+    ),
+    4294967268: (
+      components: {
+        "lol_core::skill::CoolDown": (
+          timer: None,
+          duration: 0.0,
+        ),
+        "lol_core::skill::Skill": (
+          spell: Path("characters/Locke/spells/LockeE.ron"),
+          level: 0,
+          slot: E,
+          cooldown_mode: AfterCast,
+        ),
+        "lol_core::skill::SkillOf": (4294967271),
+      },
+    ),
+    4294967269: (
+      components: {
+        "lol_core::skill::CoolDown": (
+          timer: None,
+          duration: 20.0,
+        ),
+        "lol_core::skill::Skill": (
+          spell: Path("characters/Locke/spells/LockeW.ron"),
+          level: 0,
+          slot: W,
+          cooldown_mode: AfterCast,
+        ),
+        "lol_core::skill::SkillOf": (4294967271),
+      },
+    ),
+    4294967270: (
+      components: {
+        "lol_core::skill::CoolDown": (
+          timer: None,
+          duration: 10.0,
+        ),
+        "lol_core::skill::Skill": (
+          spell: Path("characters/Locke/spells/LockeQ.ron"),
+          level: 0,
+          slot: Q,
+          cooldown_mode: AfterCast,
+        ),
+        "lol_core::skill::SkillOf": (4294967271),
+      },
+    ),
+    4294967271: (
+      components: {
+        "bevy_ecs::name::Name": "Locke",
+        "lol_core::attack::Attack": (
+          range: 125.0,
+          base_attack_speed: 0.625,
+          bonus_attack_speed: 0.0,
+          buff_bonus_attack_speed: 0.0,
+          attack_speed_cap: 2.5,
+          windup_config: Modern(
+            attack_cast_time: 0.25,
+            attack_total_time: 1.6,
+          ),
+          windup_modifier: 1.0,
+          spell: Path("characters/Locke/spells/LockeBasicAttack.ron"),
+        ),
+        "lol_core::base::ability_resource::AbilityResource": (
+          ar_type: Mana,
+          value: 280.0,
+          max: 280.0,
+          base: 280.0,
+          per_level: 70.0,
+          base_static_regen: 1.4,
+          regen_per_level: 0.16,
+        ),
+        "lol_core::base::bounding::Bounding": (
+          radius: 35.0,
+          height: 200.0,
+        ),
+        "lol_core::character::Character": (),
+        "lol_core::damage::Armor": (32.0),
+        "lol_core::damage::Damage": (58.0),
+        "lol_core::entities::champion::Champion": (),
+        "lol_core::life::Health": (
+          value: 655.0,
+          max: 655.0,
+          base_static_regen: 1.8,
+          regen_per_level: 0.18,
+        ),
+        "lol_core::movement::Movement": (
+          speed: 340.0,
+        ),
+        "lol_core::skill::LOLSpells": ({
+          "LockeBasicAttack": Path("characters/Locke/spells/LockeBasicAttack.ron"),
+          "LockeBasicAttack2": Path("characters/Locke/spells/LockeBasicAttack2.ron"),
+          "LockeConsumeAttack": Path("characters/Locke/spells/LockeConsumeAttack.ron"),
+          "LockeCritAttack": Path("characters/Locke/spells/LockeCritAttack.ron"),
+          "LockeCritAttack2": Path("characters/Locke/spells/LockeCritAttack2.ron"),
+          "LockeE": Path("characters/Locke/spells/LockeE.ron"),
+          "LockeEAttack": Path("characters/Locke/spells/LockeEAttack.ron"),
+          "LockeEDashOut": Path("characters/Locke/spells/LockeEDashOut.ron"),
+          "LockeQ": Path("characters/Locke/spells/LockeQ.ron"),
+          "LockeQMissile": Path("characters/Locke/spells/LockeQMissile.ron"),
+          "LockeR": Path("characters/Locke/spells/LockeR.ron"),
+          "LockeRExecuteVO": Path("characters/Locke/spells/LockeRExecuteVO.ron"),
+          "LockeRNailMissile": Path("characters/Locke/spells/LockeRNailMissile.ron"),
+          "LockeRStack": Path("characters/Locke/spells/LockeRStack.ron"),
+          "LockeW": Path("characters/Locke/spells/LockeW.ron"),
+          "LockeWRecast": Path("characters/Locke/spells/LockeWRecast.ron"),
+        }),
+        "lol_core::skill::SkillPoints": (1),
+        "lol_core::skill::Skills": ([
+          4294967270,
+          4294967269,
+          4294967268,
+          4294967267,
+        ]),
+      },
+    ),
+  },
+)

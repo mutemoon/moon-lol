@@ -13,6 +13,7 @@
         "lol_base::character::Skin": (
           scale: 1.36,
           avatar: "ASSETS/Characters/Xayah/HUD/Xayah_Circle.png",
+          resolver_key: 1525864458,
         ),
       },
     ),

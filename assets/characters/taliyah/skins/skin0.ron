@@ -13,6 +13,7 @@
         "lol_base::character::Skin": (
           scale: 1.3,
           avatar: "ASSETS/Characters/Taliyah/HUD/Taliyah_Circle.png",
+          resolver_key: 585720263,
         ),
       },
     ),

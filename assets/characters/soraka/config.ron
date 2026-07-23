@@ -111,6 +111,8 @@
         "lol_core::life::Health": (
           value: 605.0,
           max: 605.0,
+          base_static_regen: 0.5,
+          regen_per_level: 0.1,
         ),
         "lol_core::movement::Movement": (
           speed: 325.0,
@@ -132,6 +134,7 @@
           "Soraka_BasicAttack": Path("characters/Soraka/spells/Soraka_BasicAttack.ron"),
         }),
         "lol_core::skill::PassiveSkill": (4294967266),
+        "lol_core::skill::SkillPoints": (1),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

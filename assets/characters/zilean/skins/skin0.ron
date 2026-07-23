@@ -13,6 +13,7 @@
         "lol_base::character::Skin": (
           scale: 1.5,
           avatar: "ASSETS/Characters/Zilean/HUD/Chronokeeper_Circle.png",
+          resolver_key: 1423848348,
         ),
       },
     ),

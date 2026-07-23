@@ -21,6 +21,11 @@
                         stat: Some(2),
                         subpart: None,
                     ),
+                    (
+                        type: "CalculationPartStatSub",
+                        stat: None,
+                        subpart: None,
+                    ),
                 ]),
                 multiplier: None,
                 precision: None,

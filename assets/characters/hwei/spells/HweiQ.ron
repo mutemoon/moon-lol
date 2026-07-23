@@ -45,7 +45,7 @@
                     (
                         type: "CalculationPartStatCoefficient",
                         stat: None,
-                        coefficient: Some(0.7),
+                        coefficient: Some(0.8),
                         statFormula: None,
                     ),
                 ]),
@@ -62,7 +62,7 @@
                     (
                         type: "CalculationPartStatCoefficient",
                         stat: None,
-                        coefficient: Some(0.25),
+                        coefficient: Some(0.3),
                         statFormula: None,
                     ),
                 ]),

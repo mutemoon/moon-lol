@@ -13,6 +13,7 @@
         "lol_base::character::Skin": (
           scale: 1.25,
           avatar: "ASSETS/Characters/sru_dragon_water/HUD/Dragon_Circle_Water.png",
+          resolver_key: 181218151,
         ),
       },
     ),

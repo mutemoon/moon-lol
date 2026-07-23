@@ -13,6 +13,7 @@
         "lol_base::character::Skin": (
           scale: 1.0,
           avatar: "ASSETS/Characters/Trundle/HUD/Trundle_Circle.png",
+          resolver_key: 696793817,
         ),
       },
     ),

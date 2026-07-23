@@ -106,11 +106,13 @@
         ),
         "lol_core::character::Character": (),
         "lol_core::damage::Armor": (22.0),
-        "lol_core::damage::Damage": (58.0),
+        "lol_core::damage::Damage": (55.0),
         "lol_core::entities::champion::Champion": (),
         "lol_core::life::Health": (
-          value: 645.0,
-          max: 645.0,
+          value: 620.0,
+          max: 620.0,
+          base_static_regen: 1.6,
+          regen_per_level: 0.16,
         ),
         "lol_core::movement::Movement": (
           speed: 340.0,
@@ -134,6 +136,7 @@
           "RyzeW": Path("characters/Ryze/spells/RyzeW.ron"),
         }),
         "lol_core::skill::PassiveSkill": (4294967266),
+        "lol_core::skill::SkillPoints": (1),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

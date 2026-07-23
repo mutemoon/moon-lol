@@ -1,54 +1,7 @@
 (
     spellData: Some((
         calculations: None,
-        effectAmounts: Some([
-            (
-                values: Some([
-                    110.0,
-                    110.0,
-                    110.0,
-                    110.0,
-                    110.0,
-                    110.0,
-                    110.0,
-                ]),
-            ),
-            (
-                values: Some([
-                    130.0,
-                    130.0,
-                    130.0,
-                    130.0,
-                    130.0,
-                    130.0,
-                    130.0,
-                ]),
-            ),
-            (
-                values: None,
-            ),
-            (
-                values: None,
-            ),
-            (
-                values: None,
-            ),
-            (
-                values: None,
-            ),
-            (
-                values: None,
-            ),
-            (
-                values: None,
-            ),
-            (
-                values: None,
-            ),
-            (
-                values: None,
-            ),
-        ]),
+        effectAmounts: None,
         dataValues: None,
         mana: None,
         missileSpec: Some((

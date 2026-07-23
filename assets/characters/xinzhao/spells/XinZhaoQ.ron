@@ -5,8 +5,8 @@
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
-                        type: "CalculationPartEffectValue",
-                        effectIndex: Some(1),
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "base_damage",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
@@ -18,54 +18,7 @@
                 precision: None,
             ),
         }),
-        effectAmounts: Some([
-            (
-                values: Some([
-                    15.0,
-                    15.0,
-                    30.0,
-                    45.0,
-                    60.0,
-                    75.0,
-                    75.0,
-                ]),
-            ),
-            (
-                values: Some([
-                    0.75,
-                    0.75,
-                    0.75,
-                    0.75,
-                    0.75,
-                    0.75,
-                    0.75,
-                ]),
-            ),
-            (
-                values: None,
-            ),
-            (
-                values: None,
-            ),
-            (
-                values: None,
-            ),
-            (
-                values: None,
-            ),
-            (
-                values: None,
-            ),
-            (
-                values: None,
-            ),
-            (
-                values: None,
-            ),
-            (
-                values: None,
-            ),
-        ]),
+        effectAmounts: None,
         dataValues: Some([
             (
                 name: "BADRatio",
@@ -77,6 +30,30 @@
                     0.4,
                     0.4,
                     0.4,
+                ]),
+            ),
+            (
+                name: "BaseDamage",
+                values: Some([
+                    0.0,
+                    15.0,
+                    30.0,
+                    45.0,
+                    60.0,
+                    75.0,
+                    90.0,
+                ]),
+            ),
+            (
+                name: "KnockUpDuration",
+                values: Some([
+                    0.75,
+                    0.75,
+                    0.75,
+                    0.75,
+                    0.75,
+                    0.75,
+                    0.75,
                 ]),
             ),
         ]),
@@ -129,7 +106,7 @@
         spellRevealsChampion: None,
         affectsTypeFlags: Some(6154),
         alternateName: Some("XinZhaoQ"),
-        coefficient: Some(0.4),
+        coefficient: None,
         hitEffectKey: None,
         selectionPriority: Some(1),
         iconPath: Some([

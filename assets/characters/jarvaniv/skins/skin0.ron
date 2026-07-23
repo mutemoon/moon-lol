@@ -13,6 +13,7 @@
         "lol_base::character::Skin": (
           scale: 1.16,
           avatar: "ASSETS/Characters/JarvanIV/HUD/JarvanIV_Circle_0.png",
+          resolver_key: 2756824216,
         ),
       },
     ),

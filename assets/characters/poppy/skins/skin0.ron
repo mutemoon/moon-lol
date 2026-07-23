@@ -13,6 +13,7 @@
         "lol_base::character::Skin": (
           scale: 0.85,
           avatar: "ASSETS/Characters/Poppy/HUD/Poppy_Circle.png",
+          resolver_key: 2537515077,
         ),
       },
     ),

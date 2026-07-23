@@ -5,8 +5,8 @@
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
-                        type: "CalculationPartEffectValue",
-                        effectIndex: Some(1),
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "shield_amount",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -91,7 +91,44 @@
                 values: None,
             ),
         ]),
-        dataValues: None,
+        dataValues: Some([
+            (
+                name: "ShieldAmount",
+                values: Some([
+                    45.0,
+                    70.0,
+                    95.0,
+                    120.0,
+                    145.0,
+                    170.0,
+                    195.0,
+                ]),
+            ),
+            (
+                name: "BaseShieldAmount",
+                values: Some([
+                    50.0,
+                    70.0,
+                    95.0,
+                    120.0,
+                    145.0,
+                    170.0,
+                    235.0,
+                ]),
+            ),
+            (
+                name: "ShieldDuration",
+                values: Some([
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                    1.5,
+                ]),
+            ),
+        ]),
         mana: None,
         missileSpec: None,
         hitBoneName: None,

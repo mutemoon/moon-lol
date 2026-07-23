@@ -1,8 +1,10 @@
 (
     spellData: Some((
         calculations: None,
-        effectAmounts: Some([
+        effectAmounts: None,
+        dataValues: Some([
             (
+                name: "BaseDamage",
                 values: Some([
                     20.0,
                     50.0,
@@ -13,35 +15,7 @@
                     200.0,
                 ]),
             ),
-            (
-                values: None,
-            ),
-            (
-                values: None,
-            ),
-            (
-                values: None,
-            ),
-            (
-                values: None,
-            ),
-            (
-                values: None,
-            ),
-            (
-                values: None,
-            ),
-            (
-                values: None,
-            ),
-            (
-                values: None,
-            ),
-            (
-                values: None,
-            ),
         ]),
-        dataValues: None,
         mana: None,
         missileSpec: Some((
             movementComponent: (

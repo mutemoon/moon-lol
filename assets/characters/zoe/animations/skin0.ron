@@ -3131,6 +3131,9 @@
         ("Recall", "RunHomeguard"): TransitionClip(
             clip_name: "RunhomeguardInto",
         ),
+        ("Recall", "SkippingRopeRun01"): Time(
+            time: 0.0,
+        ),
         ("Recall", "Spell1"): Time(
             time: 0.0,
         ),
@@ -3176,6 +3179,9 @@
         ("Recall", "Spell4Exit"): Time(
             time: 0.05,
         ),
+        ("Recall", "Unk0x1ede054e"): Time(
+            time: 0.0,
+        ),
         ("Recall", "Unk0x41dae966"): Time(
             time: 0.05,
         ),
@@ -3185,10 +3191,16 @@
         ("Recall", "Unk0x72c85a1d"): Time(
             time: 0.0,
         ),
+        ("Recall", "Unk0x784f5507"): Time(
+            time: 0.0,
+        ),
         ("Recall", "Unk0x81395963"): Time(
             time: 0.0,
         ),
         ("Recall", "Unk0x88115fc0"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Unk0x97f1a9d7"): Time(
             time: 0.0,
         ),
         ("Recall", "Unk0x99d6af6f"): Time(
@@ -3198,6 +3210,9 @@
             time: 0.05,
         ),
         ("Recall", "Unk0xb6982e0"): Time(
+            time: 0.0,
+        ),
+        ("Recall", "Unk0xf3500ef"): Time(
             time: 0.0,
         ),
         ("Recall", "Unk0xff9d4f3c"): Time(

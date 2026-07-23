@@ -13,6 +13,7 @@
         "lol_base::character::Skin": (
           scale: 1.05,
           avatar: "ASSETS/Characters/Ambessa/HUD/Ambessa_Circle_0.png",
+          resolver_key: 2039239013,
         ),
       },
     ),

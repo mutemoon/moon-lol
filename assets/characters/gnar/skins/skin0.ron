@@ -13,6 +13,7 @@
         "lol_base::character::Skin": (
           scale: 0.9,
           avatar: "ASSETS/Characters/Gnar/HUD/Gnar_Circle.png",
+          resolver_key: 266711795,
         ),
       },
     ),

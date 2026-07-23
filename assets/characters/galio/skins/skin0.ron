@@ -13,6 +13,7 @@
         "lol_base::character::Skin": (
           scale: 1.05,
           avatar: "ASSETS/Characters/Galio/HUD/Galio_Circle.png",
+          resolver_key: 2935020361,
         ),
       },
     ),

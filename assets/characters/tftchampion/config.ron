@@ -24,11 +24,14 @@
         "lol_core::life::Health": (
           value: 0.0,
           max: 0.0,
+          base_static_regen: 0.0,
+          regen_per_level: 0.0,
         ),
         "lol_core::movement::Movement": (
           speed: 375.0,
         ),
         "lol_core::skill::LOLSpells": ({}),
+        "lol_core::skill::SkillPoints": (1),
       },
     ),
   },

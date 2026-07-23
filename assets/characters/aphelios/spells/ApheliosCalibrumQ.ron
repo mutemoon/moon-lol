@@ -20,7 +20,7 @@
                     (
                         type: "CalculationPartStatCoefficient",
                         stat: Some(2),
-                        coefficient: Some(0.1),
+                        coefficient: Some(0.15),
                         statFormula: Some(2),
                     ),
                 ]),

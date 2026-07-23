@@ -13,6 +13,7 @@
         "lol_base::character::Skin": (
           scale: 1.2,
           avatar: "ASSETS/Characters/Olaf/HUD/Olaf_Circle.png",
+          resolver_key: 3859808641,
         ),
       },
     ),

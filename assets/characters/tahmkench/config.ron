@@ -112,6 +112,8 @@
         "lol_core::life::Health": (
           value: 640.0,
           max: 640.0,
+          base_static_regen: 1.3,
+          regen_per_level: 0.11,
         ),
         "lol_core::movement::Movement": (
           speed: 335.0,
@@ -131,6 +133,7 @@
           "TahmKenchW": Path("characters/TahmKench/spells/TahmKenchW.ron"),
         }),
         "lol_core::skill::PassiveSkill": (4294967266),
+        "lol_core::skill::SkillPoints": (1),
         "lol_core::skill::Skills": ([
           4294967270,
           4294967269,

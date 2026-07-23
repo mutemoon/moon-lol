@@ -13,6 +13,7 @@
         "lol_base::character::Skin": (
           scale: 1.6,
           avatar: "ASSETS/Characters/Rammus/HUD/Armordillo_Circle.png",
+          resolver_key: 480426350,
         ),
       },
     ),

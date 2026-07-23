@@ -13,6 +13,7 @@
         "lol_base::character::Skin": (
           scale: 0.8,
           avatar: "ASSETS/Characters/SRU_RiftHerald/HUD/SRURiftHerald_Circle.png",
+          resolver_key: 2880155401,
         ),
       },
     ),

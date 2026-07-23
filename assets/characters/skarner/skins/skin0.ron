@@ -13,6 +13,7 @@
         "lol_base::character::Skin": (
           scale: 0.9,
           avatar: "ASSETS/Characters/Skarner/HUD/Skarner_Circle_0.png",
+          resolver_key: 1409454955,
         ),
       },
     ),

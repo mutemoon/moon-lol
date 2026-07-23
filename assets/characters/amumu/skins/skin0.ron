@@ -13,6 +13,7 @@
         "lol_base::character::Skin": (
           scale: 1.8,
           avatar: "ASSETS/Characters/Amumu/HUD/Amumu_Circle_0.png",
+          resolver_key: 864386498,
         ),
       },
     ),

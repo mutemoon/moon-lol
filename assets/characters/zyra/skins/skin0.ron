@@ -13,6 +13,7 @@
         "lol_base::character::Skin": (
           scale: 1.3,
           avatar: "ASSETS/Characters/Zyra/HUD/Zyra_Circle_0.png",
+          resolver_key: 649887565,
         ),
       },
     ),

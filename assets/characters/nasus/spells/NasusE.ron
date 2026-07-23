@@ -5,8 +5,8 @@
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
-                        type: "CalculationPartEffectValue",
-                        effectIndex: Some(4),
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "unk_0xa972eb45",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -22,8 +22,8 @@
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
-                        type: "CalculationPartEffectValue",
-                        effectIndex: Some(1),
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "damage_per_tick",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -33,8 +33,8 @@
                     ),
                 ]),
                 multiplier: Some((
-                    type: "CalculationPartEffectValue",
-                    effectIndex: Some(3),
+                    type: "CalculationPartNamedDataValue",
+                    dataValue: "duration",
                 )),
                 precision: None,
             ),
@@ -103,7 +103,56 @@
                 values: None,
             ),
         ]),
-        dataValues: None,
+        dataValues: Some([
+            (
+                name: "DamagePerTick",
+                values: Some([
+                    10.0,
+                    10.0,
+                    16.0,
+                    22.0,
+                    28.0,
+                    34.0,
+                    34.0,
+                ]),
+            ),
+            (
+                name: "ArmorShredPercent",
+                values: Some([
+                    -0.3,
+                    -0.3,
+                    -0.35,
+                    -0.4,
+                    -0.45,
+                    -0.5,
+                    -0.5,
+                ]),
+            ),
+            (
+                name: "Duration",
+                values: Some([
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                    5.0,
+                ]),
+            ),
+            (
+                name: "InitialHitDamage",
+                values: Some([
+                    50.0,
+                    50.0,
+                    80.0,
+                    110.0,
+                    140.0,
+                    170.0,
+                    170.0,
+                ]),
+            ),
+        ]),
         mana: Some([
             60.0,
             70.0,

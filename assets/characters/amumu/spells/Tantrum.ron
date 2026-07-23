@@ -5,8 +5,8 @@
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
-                        type: "CalculationPartEffectValue",
-                        effectIndex: Some(1),
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "base_damage_reduction",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -28,8 +28,8 @@
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
-                        type: "CalculationPartEffectValue",
-                        effectIndex: Some(2),
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "base_damage",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",
@@ -117,6 +117,54 @@
                     0.5,
                     0.5,
                     0.5,
+                ]),
+            ),
+            (
+                name: "BaseDamage",
+                values: Some([
+                    35.0,
+                    65.0,
+                    95.0,
+                    125.0,
+                    155.0,
+                    185.0,
+                    215.0,
+                ]),
+            ),
+            (
+                name: "BaseDamageReduction",
+                values: Some([
+                    0.0,
+                    5.0,
+                    7.0,
+                    9.0,
+                    11.0,
+                    13.0,
+                    15.0,
+                ]),
+            ),
+            (
+                name: "CDROnHit",
+                values: Some([
+                    0.75,
+                    0.75,
+                    0.75,
+                    0.75,
+                    0.75,
+                    0.75,
+                    0.75,
+                ]),
+            ),
+            (
+                name: "PassiveScaling",
+                values: Some([
+                    0.03,
+                    0.03,
+                    0.03,
+                    0.03,
+                    0.03,
+                    0.03,
+                    0.03,
                 ]),
             ),
         ]),
