@@ -1,77 +1,89 @@
 use bevy::prelude::*;
 use lol_base::character::Skin;
+use lol_base::hash_key::LoadHashKeyTrait;
+use lol_base::particle::ConfigResourceResolver;
 use lol_base::render_cmd::{CommandSkinParticleDespawn, CommandSkinParticleSpawn};
 
-// fn resolve_skin_resource_record<'a>(
-//     entity: Entity,
-//     input_hash: u32, // 假设 trigger.hash 是 u32，请根据实际类型调整
-//     query_skin: &Query<&Skin>,
-//     assets_skin: &Assets<SkinCharacterDataProperties>,
-//     assets_resolver: &'a Assets<ResourceResolver>,
-// ) -> Option<&'a u32> {
-//     // 假设 record 是 u32 或类似的引用
-//     // 1. 获取 Skin 组件
-//     let skin = query_skin.get(entity).ok()?;
-
-//     // 2. 获取角色皮肤数据
-//     let skin_data = assets_skin.load_hash(skin.key)?;
-
-//     // 3. 获取资源解析器句柄
-//     let resolver_handle = skin_data.m_resource_resolver?;
-
-//     // 4. 获取资源解析器资产
-//     let resolver = assets_resolver.load_hash(resolver_handle)?;
-
-//     // 5. 查找具体的资源记录
-//     resolver.resource_map.as_ref()?.get(&input_hash)
-// }
+use crate::particle::{CommandParticleDespawn, CommandParticleSpawn};
 
 pub fn on_command_character_particle_spawn(
     trigger: On<CommandSkinParticleSpawn>,
-    _commands: Commands,
-    _query: Query<&Skin>,
+    mut commands: Commands,
+    q_skin: Query<&Skin>,
+    res_assets_resolver: Res<Assets<ConfigResourceResolver>>,
 ) {
     let entity = trigger.event_target();
-    debug!("{entity} 创建人物特效 {:x}", trigger.hash);
+    info!(
+        "{entity} 收到皮肤粒子创建命令，trigger_key={}",
+        trigger.hash
+    );
 
-    // 使用辅助函数获取记录，如果任何一步失败（返回 None），直接 return
-    // let Some(record) = resolve_skin_resource_record(
-    //     entity,
-    //     trigger.hash,
-    //     &query,
-    //     &res_assets_skin_character_data_properties,
-    //     &res_assets_resource_resolver,
-    // ) else {
-    //     return;
-    // };
+    let Ok(skin) = q_skin.get(entity) else {
+        info!("{entity} 找不到 Skin 组件，跳过粒子创建");
+        return;
+    };
+    info!("{entity} Skin 组件 resolver_key={:08x}", skin.resolver_key);
 
-    // commands.trigger(CommandParticleSpawn {
-    //     entity,
-    //     hash: (*record).into(), // 解引用并转换
-    // });
+    let Some(resolver) = res_assets_resolver.load_hash(skin.resolver_key) else {
+        info!(
+            "{entity} 找不到 ConfigResourceResolver(key={:08x})，跳过粒子创建；可能未提取 vfx.ron 或未重新提取皮肤",
+            skin.resolver_key
+        );
+        return;
+    };
+
+    let Some(&vfx_hash) = resolver.resource_map.get(&trigger.hash) else {
+        info!(
+            "{entity} trigger_key={} 在 resolver 中找不到对应 vfx_hash，可用的 trigger_key 列表：{:?}",
+            trigger.hash,
+            resolver.resource_map.keys().collect::<Vec<_>>()
+        );
+        return;
+    };
+    info!("{entity} 解析到 vfx_hash={:08x}，触发粒子创建", vfx_hash);
+
+    commands.trigger(CommandParticleSpawn {
+        entity,
+        vfx_handle: vfx_hash.into(),
+    });
 }
 
 pub fn on_command_character_particle_despawn(
     trigger: On<CommandSkinParticleDespawn>,
-    _commands: Commands,
-    _query: Query<&Skin>,
+    mut commands: Commands,
+    q_skin: Query<&Skin>,
+    res_assets_resolver: Res<Assets<ConfigResourceResolver>>,
 ) {
     let entity = trigger.event_target();
-    debug!("{entity} 销毁人物特效 {:x}", trigger.hash);
+    info!(
+        "{entity} 收到皮肤粒子销毁命令，trigger_key={}",
+        trigger.hash
+    );
 
-    // 复用相同的逻辑
-    // let Some(record) = resolve_skin_resource_record(
-    //     entity,
-    //     trigger.hash,
-    //     &query,
-    //     &res_assets_skin_character_data_properties,
-    //     &res_assets_resource_resolver,
-    // ) else {
-    //     return;
-    // };
+    let Ok(skin) = q_skin.get(entity) else {
+        info!("{entity} 找不到 Skin 组件，跳过粒子销毁");
+        return;
+    };
 
-    // commands.trigger(CommandParticleDespawn {
-    //     entity,
-    //     hash: (*record).into(),
-    // });
+    let Some(resolver) = res_assets_resolver.load_hash(skin.resolver_key) else {
+        info!(
+            "{entity} 找不到 ConfigResourceResolver(key={:08x})，跳过粒子销毁",
+            skin.resolver_key
+        );
+        return;
+    };
+
+    let Some(&vfx_hash) = resolver.resource_map.get(&trigger.hash) else {
+        info!(
+            "{entity} trigger_key={} 在 resolver 中找不到对应 vfx_hash",
+            trigger.hash
+        );
+        return;
+    };
+    info!("{entity} 解析到 vfx_hash={:08x}，触发粒子销毁", vfx_hash);
+
+    commands.trigger(CommandParticleDespawn {
+        entity,
+        vfx_handle: vfx_hash.into(),
+    });
 }

@@ -204,11 +204,15 @@ impl MaterialPath for ParticleMaterialQuad {
 
 impl Material for ParticleMaterialQuad {
     fn fragment_shader() -> ShaderRef {
-        get_shader_handle(Self::FRAG_SHADER, &vec![]).into()
+        let handle = get_shader_handle(Self::FRAG_SHADER, &vec![]);
+        info!("fragment_shader handle: {:?}", handle);
+        handle.into()
     }
 
     fn vertex_shader() -> ShaderRef {
-        get_shader_handle(Self::VERT_SHADER, &vec![]).into()
+        let handle = get_shader_handle(Self::VERT_SHADER, &vec![]);
+        info!("vertex_shader handle: {:?}", handle);
+        handle.into()
     }
 
     fn alpha_mode(&self) -> AlphaMode {
@@ -227,6 +231,7 @@ impl Material for ParticleMaterialQuad {
     ) -> Result<(), SpecializedMeshPipelineError> {
         descriptor.vertex.entry_point = Some("main".into());
         descriptor.fragment.as_mut().unwrap().entry_point = Some("main".into());
+        info!("key: {:?}", key.bind_group_data.shader_frag);
 
         let fragment = descriptor.fragment.as_mut().unwrap();
         let target = fragment.targets.get_mut(0).unwrap().as_mut().unwrap();

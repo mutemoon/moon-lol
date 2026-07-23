@@ -1,10 +1,12 @@
 use bevy::prelude::*;
 use lol_base::character::{ConfigCharacterRecord, ConfigSkin};
+use lol_base::particle::ConfigVfx;
 use lol_champions::fiora::Fiora;
 use lol_champions::riven::Riven;
 use lol_core::entities::champion::Champion;
 use lol_core::team::Team;
 use lol_render::camera::CameraState;
+use lol_render::particle::VfxHandle;
 use lol_rpc::{CommandWsRequest as TypedCommandWsRequest, RpcAppExt};
 use lol_server::server::send_event;
 
@@ -169,8 +171,12 @@ fn on_switch_champion(
 
         let config_record = asset_server.load(&config_path);
         let config_skin = asset_server.load(&skin_path);
+        // 加载 vfx.ron 并持有 handle，防止资产被卸载
+        let vfx_path = format!("characters/{name_lower}/vfx.ron");
+        let vfx_handle = asset_server.load::<ConfigVfx>(&vfx_path);
 
         let mut e = commands.entity(champion_entity);
+        e.insert(VfxHandle(vfx_handle));
         e.remove::<Riven>();
         e.remove::<Fiora>();
 

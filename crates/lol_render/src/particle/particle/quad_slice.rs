@@ -68,7 +68,10 @@ impl Material for ParticleMaterialQuadSlice {
         _key: MaterialPipelineKey<Self>,
     ) -> Result<(), SpecializedMeshPipelineError> {
         descriptor.vertex.entry_point = Some("main".into());
-        descriptor.fragment.as_mut().unwrap().entry_point = Some("main".into());
+        // 阴影 pass 没有 fragment，跳过粒子材质的自定义（先不开阴影）
+        if let Some(fragment) = descriptor.fragment.as_mut() {
+            fragment.entry_point = Some("main".into());
+        }
 
         // let fragment = descriptor.fragment.as_mut().unwrap();
         // let target = fragment.targets.get_mut(0).unwrap().as_mut().unwrap();

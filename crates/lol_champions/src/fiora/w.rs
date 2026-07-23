@@ -8,7 +8,7 @@
 use bevy::prelude::*;
 use bevy::time::{Timer, TimerMode};
 use lol_base::animation_names::ANIM_SPELL2;
-use lol_base::render_cmd::CommandAnimationPlay;
+use lol_base::render_cmd::{CommandAnimationPlay, CommandSkinParticleSpawn};
 use lol_base::spell::Spell;
 use lol_core::action::damage::{DamageShape, is_in_shape};
 use lol_core::base::buff::{Buff, BuffOf};
@@ -75,6 +75,11 @@ pub fn on_fiora_w(
     if !matches!(skill.slot, SkillSlot::W) {
         return;
     }
+
+    commands.trigger(CommandSkinParticleSpawn {
+        entity,
+        hash: "Fiora_Passive_NW".to_string(),
+    });
 
     let spell = res_spells.get(&skill.spell);
     let stab_damage = spell

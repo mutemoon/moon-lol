@@ -337,7 +337,7 @@ pub enum ConfigVfxShape {
 
 #[derive(Clone, Debug, Serialize, Deserialize, Asset, TypePath)]
 pub struct ConfigResourceResolver {
-    pub resource_map: BTreeMap<u32, u32>,
+    pub resource_map: BTreeMap<String, u32>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, Asset, TypePath)]

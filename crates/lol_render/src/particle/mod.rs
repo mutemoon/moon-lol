@@ -36,7 +36,10 @@ use crate::particle::particle::{
 };
 use crate::particle::skinned_mesh::particle::ParticleMaterialSkinnedMeshParticle;
 use crate::particle::utils::ResourceCache;
-use crate::shader::{ResourceShaderMapHandle, startup_load_shaders, update_shaders};
+use crate::shader::{
+    DebugShaderHandles, ResourceShaderMapHandle, ShaderCheckTimer, debug_check_shaders,
+    startup_load_shaders, update_shaders,
+};
 
 pub const ATTRIBUTE_WORLD_POSITION: MeshVertexAttribute =
     MeshVertexAttribute::new("ATTRIBUTE_WORLD_POSITION", 2020, VertexFormat::Float32x3);
@@ -55,6 +58,10 @@ pub const ATTRIBUTE_LIFETIME: MeshVertexAttribute =
 
 pub const ATTRIBUTE_UV_MULT: MeshVertexAttribute =
     MeshVertexAttribute::new("ATTRIBUTE_UV_MULT", 2024, VertexFormat::Float32x2);
+
+/// 持有 ConfigVfx 的 Handle，防止资产被卸载
+#[derive(Component)]
+pub struct VfxHandle(pub Handle<ConfigVfx>);
 
 #[derive(Default)]
 pub struct PluginParticle;
@@ -91,10 +98,12 @@ impl Plugin for PluginParticle {
 
         app.init_resource::<ParticleMesh>();
         app.init_resource::<ResourceShaderMapHandle>();
+        app.init_resource::<DebugShaderHandles>();
+        app.init_resource::<ShaderCheckTimer>();
         app.init_resource::<ResourceCache>();
 
         app.add_systems(Startup, startup_load_shaders);
-        app.add_systems(Update, update_shaders);
+        app.add_systems(Update, (update_shaders, debug_check_shaders));
 
         app.add_systems(
             PostUpdate,
@@ -186,18 +195,41 @@ fn on_command_particle_spawn(
     q_global_transform: Query<&GlobalTransform>,
 ) {
     let entity = trigger.event_target();
+    info!(
+        "{entity} 系统粒子创建命令，vfx_handle={:08x}",
+        trigger.vfx_handle.0
+    );
 
     let Ok(global_transform) = q_global_transform
         .get(entity)
         .map(|v| v.compute_transform())
     else {
+        info!("{entity} 找不到 GlobalTransform，跳过粒子创建");
         return;
     };
 
     let Some(vfx_system_def) = res_assets_vfx_system_definition_data.load_hash(trigger.vfx_handle)
     else {
+        info!(
+            "{entity} 找不到 ConfigVfxSystemDefinition(vfx_handle={:08x})，跳过粒子创建",
+            trigger.vfx_handle.0
+        );
         return;
     };
+    info!(
+        "{entity} VFX 系统定义已加载，粒子名称={:?}，路径={:?}",
+        vfx_system_def.particle_name, vfx_system_def.particle_path
+    );
+
+    let complex_count = vfx_system_def
+        .complex_emitter_definition_data
+        .as_ref()
+        .map_or(0, |v| v.len());
+    let simple_count = vfx_system_def
+        .simple_emitter_definition_data
+        .as_ref()
+        .map_or(0, |v| v.len());
+    info!("{entity} 发射器数量：complex={complex_count} simple={simple_count}");
 
     let vfx_emitter_definition_datas = vfx_system_def
         .complex_emitter_definition_data
@@ -210,8 +242,15 @@ fn on_command_particle_spawn(
                 .flatten(),
         );
 
-    for (i, vfx_emitter_definition_data) in vfx_emitter_definition_datas.enumerate() {
-        println!("{:?}", vfx_emitter_definition_data.emitter_name);
+    for (i, vfx_emitter_definition_data) in vfx_emitter_definition_datas.enumerate().take(1) {
+        let emitter_name = vfx_emitter_definition_data
+            .emitter_name
+            .as_deref()
+            .unwrap_or("(无名称)");
+        info!(
+            "{entity} 创建发射器[{i}] name={emitter_name:?} lifetime={:?} is_single_particle={:?}",
+            vfx_emitter_definition_data.lifetime, vfx_emitter_definition_data.is_single_particle,
+        );
         commands.entity(entity).with_related::<EmitterOf>((
             ParticleId {
                 vfx_handle: trigger.vfx_handle,
@@ -225,6 +264,10 @@ fn on_command_particle_spawn(
             global_transform,
         ));
     }
+    info!(
+        "{entity} 粒子创建完成，共创建 {} 个发射器",
+        complex_count + simple_count
+    );
 }
 
 fn on_command_particle_despawn(
@@ -258,16 +301,41 @@ fn inject_vfx_assets(
 ) {
     for event in asset_events.read() {
         let id = match event {
-            AssetEvent::Added { id } | AssetEvent::Modified { id } => id,
-            _ => continue,
+            AssetEvent::Added { id } => {
+                info!("检测到 ConfigVfx 加载完成，id={id:?}");
+                id
+            }
+            AssetEvent::Modified { id } => {
+                info!("ConfigVfx 已修改，重新注入，id={id:?}");
+                id
+            }
+            _ => {
+                info!("ConfigVfx 事件类型不匹配，跳过{:?}", event);
+                continue;
+            }
         };
         let Some(config_vfx) = res_assets_vfx.get(*id) else {
+            info!("ConfigVfx(id={id:?}) 已存在事件但无法获取资产内容");
             continue;
         };
+        info!(
+            "注入 {} 个 system 和 {} 个 resolver",
+            config_vfx.systems.len(),
+            config_vfx.resolvers.len(),
+        );
         for (&hash, system_def) in &config_vfx.systems {
+            info!(
+                "  注入 system hash={:08x} name={:?}",
+                hash, system_def.particle_name
+            );
             res_assets_vfx_system.add_hash(hash, system_def.clone());
         }
         for (&hash, resolver) in &config_vfx.resolvers {
+            info!(
+                "  注入 resolver hash={:08x} 条目数={}",
+                hash,
+                resolver.resource_map.len(),
+            );
             res_assets_vfx_resolver.add_hash(hash, resolver.clone());
         }
     }

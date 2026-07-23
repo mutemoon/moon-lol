@@ -49,8 +49,12 @@ struct Args {
     toc_paths: Vec<String>,
 
     /// 是否跳过已存在的输出文件
-    #[arg(long, default_value_t = true)]
+    #[arg(long, default_value_t = false)]
     skip_existing: bool,
+
+    /// 是否同时提取并保存原始 DXBC 文件
+    #[arg(long, default_value_t = false)]
+    save_dxbc: bool,
 }
 
 /// 用于序列化到 RON 的全局 shader map 结构
@@ -166,6 +170,7 @@ fn main() -> anyhow::Result<()> {
             out_dir,
             &dxbc_compiler_path,
             args.skip_existing,
+            args.save_dxbc,
         ) {
             Ok(map_entries) => {
                 global_entries.insert(shader_type, map_entries);
@@ -193,6 +198,7 @@ fn process_toc(
     out_dir: &Path,
     dxbc_compiler_path: &Path,
     skip_existing: bool,
+    save_dxbc: bool,
 ) -> anyhow::Result<HashMap<u64, String>> {
     // 读取 TOC 文件
     let toc_hash = hash_wad(toc_path);
@@ -274,7 +280,15 @@ fn process_toc(
         print!("  [COMPILE] shader_{:04} ... ", idx);
         std::io::stdout().flush().ok();
 
-        match compile_dxbc_to_spirv(&dxbc_blobs[idx], dxbc_compiler_path, &toc_out_dir, idx) {
+        let is_pixel = shader_toc.shader_type != 0;
+        match compile_dxbc_to_spirv(
+            &dxbc_blobs[idx],
+            dxbc_compiler_path,
+            &toc_out_dir,
+            idx,
+            is_pixel,
+            save_dxbc,
+        ) {
             Ok(spv_bytes) => {
                 fs::write(&spv_path, &spv_bytes)?;
                 println!("OK ({} bytes)", spv_bytes.len());
@@ -347,6 +361,8 @@ fn compile_dxbc_to_spirv(
     dxbc_compiler_path: &Path,
     work_dir: &Path,
     idx: usize,
+    is_pixel: bool,
+    save_dxbc: bool,
 ) -> anyhow::Result<Vec<u8>> {
     let prefix = format!("_tmp_{:04}", idx);
     let dxbc_filename = format!("{}.dxbc", prefix);
@@ -360,14 +376,23 @@ fn compile_dxbc_to_spirv(
 
     // ── Step 2: DXBC → SPIR-V via dxbc_compiler ──────────────────────
     // dxbc_compiler.exe --spv <output.spv> <input.dxbc>
-    let compiler_out = Command::new(dxbc_compiler_path)
-        .arg("--spv")
-        .arg(&spv_filename)
-        .arg(&dxbc_filename)
-        .current_dir(work_dir)
+    let mut cmd = Command::new(dxbc_compiler_path);
+    cmd.arg("--spv").arg(&spv_filename).arg("--set").arg("3");
+    if is_pixel {
+        cmd.arg("--binding-shift").arg("2");
+    }
+    cmd.arg(&dxbc_filename).current_dir(work_dir);
+    let compiler_out = cmd
         .output()
         .map_err(|e| anyhow::anyhow!("启动 dxbc_compiler 失败: {}", e))?;
 
+    // 如果指定了 save_dxbc 参数，则保存原始 dxbc 文件
+    if save_dxbc {
+        let _ = fs::copy(
+            &dxbc_path_tmp,
+            work_dir.join(format!("shader_{:04}.dxbc", idx)),
+        );
+    }
     let _ = fs::remove_file(&dxbc_path_tmp);
 
     if !compiler_out.status.success() {
@@ -384,6 +409,9 @@ fn compile_dxbc_to_spirv(
     // ── Step 3: 读取 SPIR-V 文件 ───────────────────────────────────
     let spv_bytes = fs::read(&spv_path_tmp)?;
     let _ = fs::remove_file(&spv_path_tmp);
+
+    // 剥离 wgpu 默认设备不支持的能力（Vulkan 1.2 memory model 等），避免 alpha_blend_mesh_pipeline is invalid
+    let spv_bytes = lol_render::loaders::spirv_strip::strip_spirv(&spv_bytes);
 
     Ok(spv_bytes)
 }

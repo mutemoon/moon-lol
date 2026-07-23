@@ -7,6 +7,7 @@ use bevy::prelude::*;
 use bevy::time::TimeUpdateStrategy;
 use bevy::winit::WinitPlugin;
 use lol_base::character::{ConfigCharacterRecord, ConfigSkin};
+use lol_base::particle::ConfigVfx;
 use lol_base::spell::Spell;
 use lol_core::action::{Action, CommandAction};
 use lol_core::base::ability_resource::AbilityResource;
@@ -24,6 +25,7 @@ use lol_core::skill::{
 use lol_core::team::Team;
 use lol_render::PluginRender;
 use lol_render::controller::SelfPlayer;
+use lol_render::particle::VfxHandle;
 use lol_render::test_render::{
     CommandRenderVideo, PluginSkillTestRender, SkillTestRenderConfig, SkillTestVideoFormat,
     SkillTestVideoOutput,
@@ -149,9 +151,14 @@ impl ChampionTestHarness {
         let asset_server = app.world().resource::<AssetServer>();
         let config_handle = asset_server.load::<DynamicWorld>(config.config_path);
 
+        // 加载 vfx.ron 并持有 handle，防止资产被卸载，触发 inject_vfx_assets
+        let vfx_path = config.config_path.replace("config.ron", "vfx.ron");
+        let vfx_handle = asset_server.load::<ConfigVfx>(&vfx_path);
+
         let champion = app
             .world_mut()
             .spawn((
+                VfxHandle(vfx_handle),
                 C::default(),
                 Transform::default(),
                 Team::Order,

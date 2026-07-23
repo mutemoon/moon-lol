@@ -2,10 +2,12 @@ use bevy::prelude::*;
 
 /// 皮肤组件 - 包含皮肤缩放等信息
 #[derive(Component, Reflect, Debug, Clone, Default)]
-#[reflect(Component)]
+#[reflect(Component, Default)]
 pub struct Skin {
     pub scale: f32,
     pub avatar: String,
+    /// 皮肤对应的 VFX 资源解析器 hash，用于查找 trigger_hash -> vfx_hash 的映射
+    pub resolver_key: u32,
 }
 
 /// 血条组件

@@ -3,13 +3,13 @@ use bevy::prelude::*;
 #[derive(EntityEvent)]
 pub struct CommandSkinParticleSpawn {
     pub entity: Entity,
-    pub hash: u32,
+    pub hash: String,
 }
 
 #[derive(EntityEvent)]
 pub struct CommandSkinParticleDespawn {
     pub entity: Entity,
-    pub hash: u32,
+    pub hash: String,
 }
 
 #[derive(EntityEvent)]

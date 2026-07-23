@@ -8,6 +8,7 @@ assets/*
 !assets/characters
 !assets/maps
 !assets/ui
+vfx.ron
 
 *.glb
 

@@ -236,7 +236,7 @@ pub fn extract_skin_for_champion(
     );
 
     // 导出粒子系统/VFX 资产
-    export_vfx_for_skin(loader, champ_name, &skin_prop_group, &skin_data);
+    export_vfx_for_skin(loader, champ_name, &skin_prop_group, &skin_data, hashes);
 
     // 如果有动画，创建 AnimationHandler
     let animation_handler = animation_ron_path.map(|anim_path| {
@@ -248,8 +248,14 @@ pub fn extract_skin_for_champion(
         )
     });
 
+    let resolver_key = skin_data.m_resource_resolver.unwrap_or(0);
+
     let mut entity_builder = world.spawn((
-        Skin { scale, avatar },
+        Skin {
+            scale,
+            avatar,
+            resolver_key,
+        },
         HealthBar { bar_type },
         Visibility::default(),
         WorldAssetRoot(skin_handle),
@@ -420,6 +426,7 @@ fn export_vfx_for_skin(
     champ_name: &str,
     skin_prop_group: &PropGroup,
     skin_data: &SkinCharacterDataProperties,
+    hashes: &HashMap<u32, String>,
 ) {
     use lol_base::particle::{ConfigResourceResolver, ConfigVfx};
 
@@ -459,9 +466,20 @@ fn export_vfx_for_skin(
     }
 
     for (resolver_hash, resolver) in resolvers {
-        // Convert and save ResourceResolver
+        // Convert and save ResourceResolver with String keys
+        let mut mapped_resource_map = std::collections::BTreeMap::new();
+        if let Some(ref resource_map) = resolver.resource_map {
+            for (&trigger_hash, &vfx_hash) in resource_map {
+                let key = hashes
+                    .get(&trigger_hash)
+                    .cloned()
+                    .unwrap_or_else(|| format!("unk_0x{:x}", trigger_hash));
+                mapped_resource_map.insert(key, vfx_hash);
+            }
+        }
+
         let config_resolver = ConfigResourceResolver {
-            resource_map: resolver.resource_map.clone().unwrap_or_default(),
+            resource_map: mapped_resource_map,
         };
         config_vfx_main
             .resolvers

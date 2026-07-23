@@ -6,6 +6,7 @@
 
 use bevy::prelude::*;
 use lol_base::character::{ConfigCharacterRecord, ConfigSkin};
+use lol_base::particle::ConfigVfx;
 use lol_champions::aatrox::Aatrox;
 use lol_champions::camille::Camille;
 use lol_champions::darius::Darius;
@@ -18,6 +19,7 @@ use lol_champions::volibear::Volibear;
 use lol_core::team::Team;
 use lol_render::camera::Focus;
 use lol_render::controller::{Controller, SelfPlayer};
+use lol_render::particle::VfxHandle;
 
 /// 命令行指定的自机英雄名（小写），如 `"darius"`。
 #[derive(Resource, Default)]
@@ -123,7 +125,12 @@ fn spawn<C: Component>(
     config_path: &'static str,
     skin_path: &'static str,
 ) {
+    // 加载 vfx.ron 并持有 handle，防止资产被卸载，触发 inject_vfx_assets 注入粒子系统定义和解析器
+    let vfx_path = config_path.replace("config.ron", "vfx.ron");
+    let vfx_handle = asset_server.load::<ConfigVfx>(&vfx_path);
+
     commands.spawn((
+        VfxHandle(vfx_handle),
         marker,
         Transform::from_translation(PLAYER_SPAWN_POSITION),
         Team::Order,

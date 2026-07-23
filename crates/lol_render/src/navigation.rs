@@ -170,7 +170,6 @@ fn setup_grid_visualization(
     }
 
     let Some(grid) = assets_grid.get(&res_grid.0) else {
-        info!("没有网格");
         return;
     };
     info!("生成网格");

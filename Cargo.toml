@@ -41,8 +41,9 @@ bevy = { git = "https://github.com/mutemoon/bevy", branch = "bevy_basisu", featu
     "free_camera",
     "serialize",
     "bevy_debug_stepping",
-    "webgpu",              # 在 web 平台使用 webgpu
+    "webgpu",                   # 在 web 平台使用 webgpu
     "shader_format_spirv",
+    "spirv_shader_passthrough",
 ] }
 bevy_gltf_draco = { git = "https://github.com/mutemoon/bevy_gltf_draco", branch = "ktx2" }
 
@@ -111,6 +112,16 @@ anyhow = "1"
 regex.workspace = true
 
 walkdir = "2.5.0"
+
+# 仅 examples/reproduce_quadps_spirv.rs 使用：最小成本复现 QuadPs 空 defs spir-v 在 wgpu/bevy 中无法使用
+naga = { version = "29.0.1", features = ["spv-in"] }
+wgpu = { version = "29.0.1", default-features = false, features = [
+    "vulkan",
+    "spirv",
+    "wgsl",
+    "std",
+] }
+pollster = "0.4"
 
 [target.'cfg(not(target_arch = "wasm32"))'.dev-dependencies]
 rocket = { version = "*", features = ["json"] }
