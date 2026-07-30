@@ -764,10 +764,11 @@ impl Material for ParticleMaterialDynamic {
                 descriptor.vertex.buffers = vec![vertex_layout];
             }
             ParticleRenderKind::Mesh => {
+                // MeshVs BASE 反汇编实际输入：POSITION@0(vec3)、NORMAL@1(vec3)、TEXCOORD@2(vec2)
                 let vertex_layout = layout.0.get_layout(&[
                     Mesh::ATTRIBUTE_POSITION.at_shader_location(0),
-                    Mesh::ATTRIBUTE_NORMAL.at_shader_location(2),
-                    Mesh::ATTRIBUTE_UV_0.at_shader_location(8),
+                    Mesh::ATTRIBUTE_NORMAL.at_shader_location(1),
+                    Mesh::ATTRIBUTE_UV_0.at_shader_location(2),
                 ])?;
                 descriptor.vertex.buffers = vec![vertex_layout];
             }

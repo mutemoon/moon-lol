@@ -134,13 +134,13 @@ pub fn is_in_direction(source: Vec2, target: Vec2, direction: &Direction) -> boo
     let abs_delta_y = delta_y.abs();
 
     match direction {
-        Direction::Up => delta_y > 0.0 && abs_delta_y > abs_delta_x,
+        Direction::Z => delta_y > 0.0 && abs_delta_y > abs_delta_x,
 
-        Direction::Down => delta_y < 0.0 && abs_delta_y > abs_delta_x,
+        Direction::NegZ => delta_y < 0.0 && abs_delta_y > abs_delta_x,
 
-        Direction::Right => delta_x > 0.0 && abs_delta_x > abs_delta_y,
+        Direction::X => delta_x > 0.0 && abs_delta_x > abs_delta_y,
 
-        Direction::Left => delta_x < 0.0 && abs_delta_x > abs_delta_y,
+        Direction::NegX => delta_x < 0.0 && abs_delta_x > abs_delta_y,
     }
 }
 - 当你处于攻击前摇时，最好不要采取行动，否则普通攻击可能会被取消。

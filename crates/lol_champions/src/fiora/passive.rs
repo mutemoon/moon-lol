@@ -4,6 +4,7 @@ use bevy::asset::RenderAssetUsages;
 use bevy::ecs::relationship::Relationship;
 use bevy::prelude::*;
 use bevy::render::mesh::{Indices, PrimitiveTopology};
+use lol_base::render_cmd::{CommandSkinParticleDespawn, CommandSkinParticleSpawn};
 use lol_core::base::buff::BuffOf;
 use lol_core::base::direction::{Direction, is_in_direction};
 use lol_core::buffs::common_buffs::{BuffMoveSpeed, BuffSelfHeal};
@@ -79,6 +80,38 @@ impl Vital {
     }
 }
 
+/// Vital 方向 → 游戏原始粒子触发键的方位后缀。
+/// 因为原始资产按 NW/NE/SW/SE 命名且各方位是独立粒子系统，
+/// 所以按世界轴映射：NW=X 正轴、NE=Z 正轴、SW=Z 负轴、SE=X 负轴。
+fn vital_particle_suffix(direction: &Direction) -> &'static str {
+    match direction {
+        Direction::X => "NW",
+        Direction::Z => "NE",
+        Direction::NegZ => "SW",
+        Direction::NegX => "SE",
+    }
+}
+
+/// 拼出 skin resolver 中的触发键，variant 传 ""、"_Warning" 或 "_Timeout"。
+fn vital_particle_key(direction: &Direction, variant: &str) -> String {
+    format!(
+        "Fiora_Passive_{}{variant}",
+        vital_particle_suffix(direction)
+    )
+}
+
+/// 当前 Vital 阶段所挂粒子的触发键，用于移除 Vital 时撤下对应粒子。
+fn vital_current_particle_key(vital: &Vital) -> String {
+    let variant = if !vital.is_active() {
+        "_Warning"
+    } else if vital.timeout_red_triggered {
+        "_Timeout"
+    } else {
+        ""
+    };
+    vital_particle_key(&vital.direction, variant)
+}
+
 pub fn update_add_vital(
     mut commands: Commands,
     q_target_without_vital: Query<(Entity, &Transform, &Team), (With<Champion>, Without<Vital>)>,
@@ -124,26 +157,26 @@ pub fn update_add_vital(
 
             let direction = match last_direction.entity_to_last_direction.get(&target_entity) {
                 Some(direction) => match direction {
-                    Direction::Up | Direction::Right => {
+                    Direction::Z | Direction::X => {
                         if random::<bool>() {
-                            Direction::Left
+                            Direction::NegX
                         } else {
-                            Direction::Down
+                            Direction::NegZ
                         }
                     }
-                    Direction::Left | Direction::Down => {
+                    Direction::NegX | Direction::NegZ => {
                         if random::<bool>() {
-                            Direction::Up
+                            Direction::Z
                         } else {
-                            Direction::Right
+                            Direction::X
                         }
                     }
                 },
                 None => {
                     if random::<bool>() {
-                        Direction::Up
+                        Direction::Z
                     } else {
-                        Direction::Left
+                        Direction::NegX
                     }
                 }
             };
@@ -157,6 +190,12 @@ pub fn update_add_vital(
                 FIORA_PASSIVE_ACTIVE_DURATION,
                 FIORA_PASSIVE_DURATION,
             ));
+
+            // 预备生成期：挂上预警粒子
+            commands.trigger(CommandSkinParticleSpawn {
+                entity: target_entity,
+                hash: vital_particle_key(&direction, "_Warning"),
+            });
         }
     }
 }
@@ -191,23 +230,51 @@ pub fn update_remove_vital(
                 .distance(fiora_transform.translation.xz());
 
             if distance > VITAL_DISTANCE {
+                commands.trigger(CommandSkinParticleDespawn {
+                    entity: target_entity,
+                    hash: vital_current_particle_key(&vital),
+                });
                 commands.entity(target_entity).remove::<Vital>();
                 continue;
             }
 
             if !vital.is_active() {
                 vital.active_timer.tick(time.delta());
+                // 生成瞬间：撤下预警粒子，换上正式要害粒子
+                if vital.active_timer.just_finished() {
+                    commands.trigger(CommandSkinParticleDespawn {
+                        entity: target_entity,
+                        hash: vital_particle_key(&vital.direction, "_Warning"),
+                    });
+                    commands.trigger(CommandSkinParticleSpawn {
+                        entity: target_entity,
+                        hash: vital_particle_key(&vital.direction, ""),
+                    });
+                }
                 continue;
             }
 
             if !vital.timeout_red_triggered && vital.remove_timer.remaining_secs() <= VITAL_TIMEOUT
             {
                 vital.timeout_red_triggered = true;
+                // 消失前：撤下正式要害粒子，换上超时粒子
+                commands.trigger(CommandSkinParticleDespawn {
+                    entity: target_entity,
+                    hash: vital_particle_key(&vital.direction, ""),
+                });
+                commands.trigger(CommandSkinParticleSpawn {
+                    entity: target_entity,
+                    hash: vital_particle_key(&vital.direction, "_Timeout"),
+                });
             }
 
             vital.remove_timer.tick(time.delta());
 
             if vital.remove_timer.is_finished() {
+                commands.trigger(CommandSkinParticleDespawn {
+                    entity: target_entity,
+                    hash: vital_current_particle_key(&vital),
+                });
                 commands.entity(target_entity).remove::<Vital>();
             }
         }
@@ -257,28 +324,34 @@ pub fn on_passive_damage_create(
         return;
     }
 
+    // 击破：撤下旧 Vital 当前阶段的粒子
+    commands.trigger(CommandSkinParticleDespawn {
+        entity: target_entity,
+        hash: vital_current_particle_key(vital),
+    });
+
     let direction = match last_direction.entity_to_last_direction.get(&target_entity) {
         Some(direction) => match direction {
-            Direction::Up | Direction::Right => {
+            Direction::Z | Direction::X => {
                 if random::<bool>() {
-                    Direction::Left
+                    Direction::NegX
                 } else {
-                    Direction::Down
+                    Direction::NegZ
                 }
             }
-            Direction::Left | Direction::Down => {
+            Direction::NegX | Direction::NegZ => {
                 if random::<bool>() {
-                    Direction::Up
+                    Direction::Z
                 } else {
-                    Direction::Right
+                    Direction::X
                 }
             }
         },
         None => {
             if random::<bool>() {
-                Direction::Up
+                Direction::Z
             } else {
-                Direction::Left
+                Direction::NegX
             }
         }
     };
@@ -292,6 +365,12 @@ pub fn on_passive_damage_create(
         FIORA_PASSIVE_ACTIVE_DURATION,
         FIORA_PASSIVE_DURATION,
     ));
+
+    // 新 Vital 进入预备生成期：挂上预警粒子
+    commands.trigger(CommandSkinParticleSpawn {
+        entity: target_entity,
+        hash: vital_particle_key(&direction, "_Warning"),
+    });
 
     commands.trigger(CommandDamageCreate {
         entity: target_entity,
@@ -336,10 +415,10 @@ pub struct FioraVitalVisual {
 fn vital_direction_rotation(direction: &Direction) -> Quat {
     use std::f32::consts::{FRAC_PI_2, PI};
     match direction {
-        Direction::Up => Quat::IDENTITY,                      // +Z
-        Direction::Right => Quat::from_rotation_y(FRAC_PI_2), // +X
-        Direction::Down => Quat::from_rotation_y(PI),         // -Z
-        Direction::Left => Quat::from_rotation_y(-FRAC_PI_2), // -X
+        Direction::Z => Quat::IDENTITY,                       // +Z
+        Direction::X => Quat::from_rotation_y(FRAC_PI_2),     // +X
+        Direction::NegZ => Quat::from_rotation_y(PI),         // -Z
+        Direction::NegX => Quat::from_rotation_y(-FRAC_PI_2), // -X
     }
 }
 

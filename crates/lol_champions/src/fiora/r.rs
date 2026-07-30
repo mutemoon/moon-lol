@@ -58,12 +58,7 @@ impl BuffFioraR {
         heal_radius: f32,
     ) -> Self {
         Self {
-            vitals: vec![
-                Direction::Up,
-                Direction::Right,
-                Direction::Down,
-                Direction::Left,
-            ],
+            vitals: vec![Direction::Z, Direction::X, Direction::NegZ, Direction::NegX],
             level,
             active_timer: Timer::from_seconds(active_duration, TimerMode::Once),
             remove_timer: Timer::from_seconds(duration, TimerMode::Once),

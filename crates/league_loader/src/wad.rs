@@ -11,6 +11,7 @@ use crate::reader::ArcFileReader;
 use crate::wad_parse::{LeagueWad, LeagueWadEntry, LeagueWadSubchunk, WadDataFormat};
 
 pub struct LeagueWadLoader {
+    pub relative_path: String,
     pub wad: LeagueWad,
     pub file: Arc<File>,
     pub sub_chunk: Option<LeagueWadSubchunk>,
@@ -52,6 +53,7 @@ impl LeagueWadLoader {
         let sub_chunk = Self::get_sub_chunk(&wad, &file, &subchunk_path).ok();
 
         Ok(LeagueWadLoader {
+            relative_path: wad_relative_path.to_string(),
             wad,
             file,
             sub_chunk,

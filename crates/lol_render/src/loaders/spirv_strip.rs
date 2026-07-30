@@ -118,6 +118,358 @@ pub fn strip_spirv(bytes: &[u8]) -> Vec<u8> {
 
 const OP_DECORATE: u32 = 71;
 const DECORATION_BINDING: u32 = 33;
+const DECORATION_LOCATION: u32 = 30;
+const DECORATION_COMPONENT: u32 = 31;
+
+const OP_NAME: u32 = 5;
+const OP_ENTRY_POINT: u32 = 15;
+const OP_TYPE_FLOAT: u32 = 22;
+const OP_TYPE_VECTOR: u32 = 23;
+const OP_TYPE_POINTER: u32 = 32;
+const OP_FUNCTION: u32 = 54;
+const OP_VARIABLE: u32 = 59;
+const OP_ACCESS_CHAIN: u32 = 65;
+const OP_IN_BOUNDS_ACCESS_CHAIN: u32 = 66;
+const OP_EXT_INST: u32 = 12;
+const OP_VECTOR_SHUFFLE: u32 = 79;
+const OP_COMPOSITE_EXTRACT: u32 = 81;
+const OP_COMPOSITE_INSERT: u32 = 82;
+
+/// SPIR-V 存储类：顶点/片元阶段输入。
+pub const STORAGE_INPUT: u32 = 1;
+/// SPIR-V 存储类：顶点/片元阶段输出。
+pub const STORAGE_OUTPUT: u32 = 3;
+
+fn bytes_to_words(bytes: &[u8]) -> Option<Vec<u32>> {
+    if bytes.len() < 20 || bytes.len() % 4 != 0 {
+        return None;
+    }
+    let words: Vec<u32> = bytes
+        .chunks_exact(4)
+        .map(|c| u32::from_le_bytes([c[0], c[1], c[2], c[3]]))
+        .collect();
+    if words[0] != 0x0723_0203 {
+        return None;
+    }
+    Some(words)
+}
+
+/// 解析模块中带 Location 装饰、指定存储类的 float 接口变量，
+/// 返回 (location, component) → 向量分量数（标量记 1，Component 装饰缺省 0）。
+/// 同一 location 可被多个变量按 Component 打包占用，必须分开统计，
+/// 否则跨 component 合并宽度会把窄变量加宽到越过 4 分量边界
+/// （VUID-StandaloneSpirv-Component-04921）。输入不合法返回 None。
+pub fn interface_vector_widths(
+    bytes: &[u8],
+    storage_class: u32,
+) -> Option<std::collections::BTreeMap<(u32, u32), u32>> {
+    let words = bytes_to_words(bytes)?;
+
+    let mut floats: std::collections::BTreeSet<u32> = Default::default();
+    // vector id → (分量类型 id, 分量数)
+    let mut vectors: std::collections::BTreeMap<u32, (u32, u32)> = Default::default();
+    // pointer id → (存储类, 指向类型 id)
+    let mut pointers: std::collections::BTreeMap<u32, (u32, u32)> = Default::default();
+    // 变量 id → (指针类型 id, 存储类)
+    let mut vars: std::collections::BTreeMap<u32, (u32, u32)> = Default::default();
+    // 变量 id → location
+    let mut locations: std::collections::BTreeMap<u32, u32> = Default::default();
+    // 变量 id → component（无装饰即 0）
+    let mut components: std::collections::BTreeMap<u32, u32> = Default::default();
+
+    let mut i = 5;
+    while i < words.len() {
+        let opcode = words[i] & 0xFFFF;
+        let wc = (words[i] >> 16) as usize;
+        if wc == 0 || i + wc > words.len() {
+            return None;
+        }
+        let inst = &words[i..i + wc];
+        match opcode {
+            OP_TYPE_FLOAT if wc >= 3 && inst[2] == 32 => {
+                floats.insert(inst[1]);
+            }
+            OP_TYPE_VECTOR if wc >= 4 => {
+                vectors.insert(inst[1], (inst[2], inst[3]));
+            }
+            OP_TYPE_POINTER if wc >= 4 => {
+                pointers.insert(inst[1], (inst[2], inst[3]));
+            }
+            OP_VARIABLE if wc >= 4 => {
+                vars.insert(inst[2], (inst[1], inst[3]));
+            }
+            OP_DECORATE if wc >= 4 && inst[2] == DECORATION_LOCATION => {
+                locations.insert(inst[1], inst[3]);
+            }
+            OP_DECORATE if wc >= 4 && inst[2] == DECORATION_COMPONENT => {
+                components.insert(inst[1], inst[3]);
+            }
+            _ => {}
+        }
+        i += wc;
+    }
+
+    let mut out: std::collections::BTreeMap<(u32, u32), u32> = Default::default();
+    for (var_id, (ptr_type, storage)) in &vars {
+        if *storage != storage_class {
+            continue;
+        }
+        let Some(&location) = locations.get(var_id) else {
+            continue;
+        };
+        let Some(&(ptr_storage, pointee)) = pointers.get(ptr_type) else {
+            continue;
+        };
+        if ptr_storage != storage_class {
+            continue;
+        }
+        let width = if floats.contains(&pointee) {
+            1
+        } else if let Some(&(comp, count)) = vectors.get(&pointee) {
+            if !floats.contains(&comp) {
+                continue;
+            }
+            count
+        } else {
+            continue;
+        };
+        let key = (location, components.get(var_id).copied().unwrap_or(0));
+        out.insert(key, out.get(&key).copied().unwrap_or(0).max(width));
+    }
+    Some(out)
+}
+
+/// 把 PS 输入接口变量按 (location, component) 加宽到目标分量数（vecN → vecM，M > N）。
+///
+/// 根因：D3D11 允许 VS 输出比 PS 输入宽，dxbc_compiler 原样保留了这种
+/// 不对称（如 MeshVs 输出 TEXCOORD1 为 vec3 而 MeshPs 读 vec2），而 Vulkan
+/// 在未启用 maintenance4 时要求输出分量数 ≤ 输入分量数（触发
+/// VUID-RuntimeSpirv-maintenance4-06817）。加宽输入是安全方向：新增分量
+/// 无人读取，逐分量 OpAccessChain 的结果类型也不变。
+///
+/// 变量存在整向量 OpLoad 等无法安全改写的用法时返回 None（调用方告警
+/// 跳过）；无需改写（宽度已达标）时也返回 None，改写天然幂等。
+/// 目标键为 (location, component)；加宽上限受两重约束：location 的 4
+/// 分量边界（VUID-StandaloneSpirv-Component-04921），以及同 location 上按
+/// Component 打包的下一个变量（如 TEXCOORD2@(3,0) + TEXCOORD6@(3,2)，越界
+/// 重叠触发 VUID-StandaloneSpirv-OpEntryPoint-08721），超限部分截断。
+pub fn widen_ps_inputs(
+    bytes: &[u8],
+    targets: &std::collections::BTreeMap<(u32, u32), u32>,
+) -> Option<Vec<u8>> {
+    let words = bytes_to_words(bytes)?;
+
+    let mut floats: std::collections::BTreeSet<u32> = Default::default();
+    let mut vectors: std::collections::BTreeMap<u32, (u32, u32)> = Default::default();
+    let mut pointers: std::collections::BTreeMap<u32, (u32, u32)> = Default::default();
+    // 变量 id → (指令起始 word 下标, 指针类型 id, 存储类)
+    let mut vars: std::collections::BTreeMap<u32, (usize, u32, u32)> = Default::default();
+    let mut locations: std::collections::BTreeMap<u32, u32> = Default::default();
+    let mut components: std::collections::BTreeMap<u32, u32> = Default::default();
+
+    let mut i = 5;
+    while i < words.len() {
+        let opcode = words[i] & 0xFFFF;
+        let wc = (words[i] >> 16) as usize;
+        if wc == 0 || i + wc > words.len() {
+            return None;
+        }
+        let inst = &words[i..i + wc];
+        match opcode {
+            OP_TYPE_FLOAT if wc >= 3 && inst[2] == 32 => {
+                floats.insert(inst[1]);
+            }
+            OP_TYPE_VECTOR if wc >= 4 => {
+                vectors.insert(inst[1], (inst[2], inst[3]));
+            }
+            OP_TYPE_POINTER if wc >= 4 => {
+                pointers.insert(inst[1], (inst[2], inst[3]));
+            }
+            OP_VARIABLE if wc >= 4 => {
+                vars.insert(inst[2], (i, inst[1], inst[3]));
+            }
+            OP_DECORATE if wc >= 4 && inst[2] == DECORATION_LOCATION => {
+                locations.insert(inst[1], inst[3]);
+            }
+            OP_DECORATE if wc >= 4 && inst[2] == DECORATION_COMPONENT => {
+                components.insert(inst[1], inst[3]);
+            }
+            _ => {}
+        }
+        i += wc;
+    }
+
+    // 同一 location 可能被多个 Input 变量按 Component 打包，加宽不得
+    // 越过同 location 下一个变量的起始 component
+    let mut loc_components: std::collections::BTreeMap<u32, Vec<u32>> = Default::default();
+    for (var_id, (_, _, storage)) in &vars {
+        if *storage != STORAGE_INPUT {
+            continue;
+        }
+        if let Some(&loc) = locations.get(var_id) {
+            loc_components
+                .entry(loc)
+                .or_default()
+                .push(components.get(var_id).copied().unwrap_or(0));
+        }
+    }
+
+    // 筛出需加宽的变量：(变量指令下标, 变量 id, float 分量类型 id, 目标分量数)
+    let mut rewrites: Vec<(usize, u32, u32, u32)> = Vec::new();
+    for (var_id, (inst_idx, ptr_type, storage)) in &vars {
+        if *storage != STORAGE_INPUT {
+            continue;
+        }
+        let Some(&location) = locations.get(var_id) else {
+            continue;
+        };
+        let component = components.get(var_id).copied().unwrap_or(0);
+        let Some(&target_width) = targets.get(&(location, component)) else {
+            continue;
+        };
+        // 上限：同 location 比本变量 component 大的最小起始位，否则 4 分量边界
+        let cap = loc_components
+            .get(&location)
+            .and_then(|cs| cs.iter().filter(|c| **c > component).min().copied())
+            .unwrap_or(4)
+            .min(4);
+        let target_width = target_width.min(cap.saturating_sub(component));
+        let Some(&(_, pointee)) = pointers.get(ptr_type) else {
+            continue;
+        };
+        let Some(&(comp, count)) = vectors.get(&pointee) else {
+            continue;
+        };
+        if !floats.contains(&comp) || count >= target_width {
+            continue;
+        }
+        rewrites.push((*inst_idx, *var_id, comp, target_width));
+    }
+    if rewrites.is_empty() {
+        return None;
+    }
+
+    // 安全检查：目标变量只允许出现在逐分量访问链与声明/装饰性指令里；
+    // 整向量 OpLoad 的结果类型会随加宽失配，遇到则整体放弃改写。
+    // 扫描必须区分 ID 操作数与数字字面量：全局段的 OpMemberName /
+    // OpMemberDecorate / OpConstant 等携带成员索引、常量值字面量，裸 word
+    // 匹配会撞上变量 id 误报（如 $Globals 成员索引 33 撞 TEXCOORD1 id）。
+    // 全局段只有 OpVariable 初始化器能真正引用变量 id；函数体内对
+    // 已知带字面量的指令只检查 ID 操作数位，未知指令保守全扫。
+    let rewrite_ids: std::collections::BTreeSet<u32> =
+        rewrites.iter().map(|(_, id, _, _)| *id).collect();
+    let hits = |ws: &[u32]| ws.iter().any(|w| rewrite_ids.contains(w));
+    let mut in_function = false;
+    let mut i = 5;
+    while i < words.len() {
+        let opcode = words[i] & 0xFFFF;
+        let wc = (words[i] >> 16) as usize;
+        let inst = &words[i..i + wc];
+        if opcode == OP_FUNCTION {
+            in_function = true;
+        }
+        let unsafe_use = if !in_function {
+            // 全局段：类型/常量/调试名/装饰指令均无法引用变量 id，
+            // 只有 OpVariable 初始化器（第 5 个 word）可能引用
+            opcode == OP_VARIABLE && wc >= 5 && hits(&inst[4..])
+        } else {
+            match opcode {
+                OP_ACCESS_CHAIN | OP_IN_BOUNDS_ACCESS_CHAIN => false,
+                // OpExtInst：inst[4] 是指令号字面量；参数 [5..] 是 ID
+                // （InterpolateAt* 系列会直接拿变量指针，必须检查）
+                OP_EXT_INST if wc >= 5 => hits(&inst[5..]),
+                // OpVectorShuffle：[3][4] 是向量 ID，[5..] 是分量字面量
+                OP_VECTOR_SHUFFLE if wc >= 5 => hits(&inst[3..5]),
+                // OpCompositeExtract：[3] 是复合 ID，[4..] 是索引字面量
+                OP_COMPOSITE_EXTRACT if wc >= 4 => hits(&inst[3..4]),
+                // OpCompositeInsert：[3][4] 是 ID，[5..] 是索引字面量
+                OP_COMPOSITE_INSERT if wc >= 5 => hits(&inst[3..5]),
+                _ => hits(&inst[1..]),
+            }
+        };
+        if unsafe_use {
+            return None;
+        }
+        i += wc;
+    }
+
+    // 查找/新建目标向量类型与 Input 指针类型，新 id 从 bound 起分配。
+    // 因为复用的既有类型可能声明在被改写变量之后（def-before-use 会被破坏），
+    // 所以把被改写的 OpVariable 整体挪到全局段末尾（第一个 OpFunction 之前），
+    // 新类型也插在那里；装饰/EntryPoint 对变量的前向引用合法，函数体均在其后。
+    let mut next_id = words[3];
+    let mut new_insts: Vec<u32> = Vec::new();
+
+    let mut vec_type_of: std::collections::BTreeMap<(u32, u32), u32> = Default::default();
+    let mut ptr_type_of: std::collections::BTreeMap<u32, u32> = Default::default();
+    // 变量指令下标 → 新指针类型 id
+    let mut var_new_ptr: std::collections::BTreeMap<usize, u32> = Default::default();
+    for &(inst_idx, _, comp, width) in &rewrites {
+        let vec_id = *vec_type_of.entry((comp, width)).or_insert_with(|| {
+            match vectors.iter().find(|(_, v)| **v == (comp, width)) {
+                Some((&id, _)) => id,
+                None => {
+                    let id = next_id;
+                    next_id += 1;
+                    new_insts.extend_from_slice(&[(4u32 << 16) | OP_TYPE_VECTOR, id, comp, width]);
+                    id
+                }
+            }
+        });
+        let ptr_id = *ptr_type_of.entry(vec_id).or_insert_with(|| {
+            match pointers
+                .iter()
+                .find(|(_, p)| **p == (STORAGE_INPUT, vec_id))
+            {
+                Some((&id, _)) => id,
+                None => {
+                    let id = next_id;
+                    next_id += 1;
+                    new_insts.extend_from_slice(&[
+                        (4u32 << 16) | OP_TYPE_POINTER,
+                        id,
+                        STORAGE_INPUT,
+                        vec_id,
+                    ]);
+                    id
+                }
+            }
+        });
+        var_new_ptr.insert(inst_idx, ptr_id);
+    }
+
+    // 重组模块：跳过原位置的待改写变量，在第一个 OpFunction 前插入
+    // 新类型 + 改写后的变量声明
+    let mut out_words: Vec<u32> = Vec::with_capacity(words.len() + new_insts.len());
+    out_words.extend_from_slice(&words[0..5]);
+    out_words[3] = next_id;
+
+    let mut moved_vars: Vec<u32> = Vec::new();
+    let mut emitted_tail = false;
+    let mut i = 5;
+    while i < words.len() {
+        let opcode = words[i] & 0xFFFF;
+        let wc = (words[i] >> 16) as usize;
+        if !emitted_tail && opcode == OP_FUNCTION {
+            out_words.extend_from_slice(&new_insts);
+            out_words.extend_from_slice(&moved_vars);
+            emitted_tail = true;
+        }
+        if let Some(&ptr_id) = var_new_ptr.get(&i) {
+            let mut inst = words[i..i + wc].to_vec();
+            inst[1] = ptr_id;
+            moved_vars.extend_from_slice(&inst);
+        } else {
+            out_words.extend_from_slice(&words[i..i + wc]);
+        }
+        i += wc;
+    }
+    if !emitted_tail {
+        out_words.extend_from_slice(&new_insts);
+        out_words.extend_from_slice(&moved_vars);
+    }
+    Some(out_words.iter().flat_map(|w| w.to_le_bytes()).collect())
+}
 
 /// 按显式映射表（旧 binding 值 → 新 binding 值）改写 SPIR-V 中所有
 /// `OpDecorate Binding` 装饰，不在表中的 binding 保持不变。

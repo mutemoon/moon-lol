@@ -279,8 +279,8 @@ fn fiora_q_damage_doubled_on_vital() {
         damage
     };
 
-    let d_match = run(Direction::Left, "fiora_q_vital_match");
-    let d_base = run(Direction::Up, "fiora_q_vital_nomatch");
+    let d_match = run(Direction::NegX, "fiora_q_vital_match");
+    let d_base = run(Direction::Z, "fiora_q_vital_nomatch");
 
     assert!(
         d_match - d_base > 350.0,

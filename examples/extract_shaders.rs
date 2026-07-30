@@ -151,6 +151,8 @@ fn main() -> anyhow::Result<()> {
     fs::create_dir_all(out_dir)?;
 
     let mut global_entries = HashMap::new();
+    // 每个家族的变体 hash → def 名字集合，供接口对齐 pass 做 VS/PS 变体配对
+    let mut global_defs: HashMap<LeagueShader, HashMap<u64, Vec<String>>> = HashMap::new();
 
     for toc_path in &toc_paths {
         println!("\n[TOC] 处理: {}", toc_path);
@@ -170,8 +172,9 @@ fn main() -> anyhow::Result<()> {
             args.skip_existing,
             args.save_dxbc,
         ) {
-            Ok(map_entries) => {
+            Ok((map_entries, hash_to_defs)) => {
                 global_entries.insert(shader_type, map_entries);
+                global_defs.insert(shader_type, hash_to_defs);
             }
             Err(e) => {
                 eprintln!("[ERROR] 处理 TOC {} 失败: {}", toc_path, e);
@@ -275,6 +278,9 @@ fn main() -> anyhow::Result<()> {
 
     // ── 离线统一 pass：家族槽位并集布局 + 改写 .spv binding 装饰 ───────────
     let unified = unify_family_layouts(&mut layouts_map, &spv_path_map);
+
+    // ── 离线接口对齐 pass：PS 输入向量加宽到配对 VS 变体输出的精确宽度 ────
+    align_stage_interfaces(&spv_path_map, &global_defs);
 
     // ── 布局去重建池：同家族大量变体共享同一套 cbuffer 布局，只存一份 ────
     // 按家族名 + hash 排序遍历，保证池索引跨次运行稳定（map.ron diff 可读）
@@ -471,7 +477,7 @@ fn process_toc(
     dxbc_compiler_path: &Path,
     skip_existing: bool,
     save_dxbc: bool,
-) -> anyhow::Result<HashMap<u64, String>> {
+) -> anyhow::Result<(HashMap<u64, String>, HashMap<u64, Vec<String>>)> {
     // 读取 TOC 文件
     let toc_hash = hash_wad(toc_path);
     let mut toc_reader = wad_loader
@@ -662,7 +668,7 @@ fn process_toc(
 
     println!("  [DONE] {} 个 shader 编译处理完成", map_entries.len());
 
-    Ok(map_entries)
+    Ok((map_entries, hash_to_defs))
 }
 
 /// 解析 dx11_0 chunk 文件，返回 DXBC blob 列表
@@ -1273,6 +1279,187 @@ fn paired_vs_family(family: LeagueShader) -> Option<LeagueShader> {
         | LeagueShader::DistortionVs
         | LeagueShader::UnlitDecalVs
         | LeagueShader::SkinnedMeshParticleVs => None,
+    }
+}
+
+/// 离线接口对齐 pass：把每个 PS 变体的输入接口向量加宽到配对 VS 变体
+/// 输出的精确宽度。
+///
+/// 根因：D3D11 允许 VS 输出比 PS 输入宽（如 MeshVs 输出 TEXCOORD1 为 vec3
+/// 而 MeshPs 只读 vec2），而 Vulkan 未启用 maintenance4 时要求输出分量数 ≤
+/// 输入分量数（VUID-RuntimeSpirv-maintenance4-06817）；wgpu-hal 仅在请求
+/// EXPERIMENTAL_MESH_SHADER 时才置位 maintenance4，本机 Pascal 显卡无法请求，
+/// 所以离线加宽 PS 输入。但 VUID-RuntimeSpirv-OpEntryPoint-08743 又要求 PS
+/// 每个输入分量都有 VS 输出覆盖，两约束合并即宽度必须与配对 VS 输出精确
+/// 相等，不能按家族全变体取最大宽度，必须按变体配对：运行时
+/// assembly::derive_defs 从同一 emitter 配置派生 (vs_defs, ps_defs)，两家族
+/// 共享的宏必然同开同关，故 PS 变体 defs 投影到 VS 宏名全集即配对 VS 变体
+/// 的 defs，hash_shader_spec 后查表定位其 .spv（与运行时查表同一函数）。
+///
+/// 目标宽度 = 覆盖本输入起始 component 的 VS 输出变量的覆盖终点，受 PS 同
+/// location 下一变量起始与 4 分量边界封顶；已达标文件 widen_ps_inputs 返回
+/// None，二次提取天然幂等。输入已比目标宽的文件无法缩窄（加宽不可逆），
+/// 打 [OVERWIDE] 标记提示删除重建。
+fn align_stage_interfaces(
+    spv_path_map: &HashMap<LeagueShader, HashMap<u64, PathBuf>>,
+    global_defs: &HashMap<LeagueShader, HashMap<u64, Vec<String>>>,
+) {
+    use lol_render::loaders::spirv_strip::{
+        STORAGE_INPUT, STORAGE_OUTPUT, interface_vector_widths, widen_ps_inputs,
+    };
+    use std::collections::{BTreeMap, BTreeSet};
+
+    for (family, variants) in spv_path_map {
+        let Some(vs_family) = paired_vs_family(*family) else {
+            continue;
+        };
+        let Some(vs_variants) = spv_path_map.get(&vs_family) else {
+            continue;
+        };
+        let (Some(ps_defs_map), Some(vs_defs_map)) =
+            (global_defs.get(family), global_defs.get(&vs_family))
+        else {
+            eprintln!("[WARN] {family:?}/{vs_family:?} 缺少 def 反解表，跳过接口对齐");
+            continue;
+        };
+        // VS 家族宏名全集：PS defs 投影到该集合即运行时配对 VS 变体的 defs
+        let vs_macros: HashSet<&str> = vs_defs_map
+            .values()
+            .flatten()
+            .map(|s| s.as_str())
+            .collect();
+
+        // 1. 逐 PS 变体 hash 定位配对 VS 变体，按文件聚合：多个 hash 经
+        //    shader_ids 共享同一 .spv，不同 hash 可能配对不同 VS 文件
+        let mut ps_vs_files: BTreeMap<&PathBuf, BTreeSet<&PathBuf>> = BTreeMap::new();
+        for (ps_hash, ps_path) in variants {
+            let Some(ps_defs) = ps_defs_map.get(ps_hash) else {
+                continue;
+            };
+            let paired_defs: Vec<String> = ps_defs
+                .iter()
+                .filter(|d| vs_macros.contains(d.as_str()))
+                .cloned()
+                .collect();
+            let vs_hash = league_utils::hash_shader_spec(&paired_defs);
+            let Some(vs_path) = vs_variants.get(&vs_hash) else {
+                eprintln!(
+                    "[WARN] {family:?} 变体 {} 的配对 VS 变体 {} 缺失，跳过",
+                    defs_to_stem(ps_defs),
+                    defs_to_stem(&paired_defs)
+                );
+                continue;
+            };
+            ps_vs_files.entry(ps_path).or_default().insert(vs_path);
+        }
+
+        // 2. VS 文件输出宽度缓存（(loc, comp) → 分量数）
+        let mut vs_cover: HashMap<&PathBuf, Option<BTreeMap<(u32, u32), u32>>> = HashMap::new();
+
+        let mut rewritten = 0usize;
+        for (ps_path, vs_paths) in &ps_vs_files {
+            let Ok(bytes) = fs::read(ps_path) else {
+                continue;
+            };
+            let Some(in_widths) = interface_vector_widths(&bytes, STORAGE_INPUT) else {
+                continue;
+            };
+
+            // 每个配对 VS 分别算精确目标宽度，多 VS 时取交集校验一致
+            let mut desired: Option<BTreeMap<(u32, u32), u32>> = None;
+            for vs_path in vs_paths {
+                let vs_out = vs_cover.entry(vs_path).or_insert_with(|| {
+                    fs::read(vs_path)
+                        .ok()
+                        .and_then(|b| interface_vector_widths(&b, STORAGE_OUTPUT))
+                });
+                let Some(vs_out) = vs_out.as_ref() else {
+                    continue;
+                };
+                let mut m: BTreeMap<(u32, u32), u32> = BTreeMap::new();
+                for (&(loc, comp), _) in &in_widths {
+                    // 覆盖本输入起始 component 的 VS 输出：同 loc 起始 ≤ comp 的
+                    // 最大者，其覆盖终点决定精确目标（VS 与 PS 按语义打包一致，
+                    // 但 VS 可能把 PS 拆成两段读的区间合并成一个宽输出）
+                    let cover = vs_out
+                        .range((loc, 0)..=(loc, comp))
+                        .next_back()
+                        .filter(|&(&(_, c0), &w)| c0 + w > comp);
+                    let Some((&(_, c0), &w)) = cover else {
+                        eprintln!(
+                            "[WARN] {} 输入 loc{loc} comp{comp} 在配对 VS {} 无输出覆盖（08743 不可修复）",
+                            ps_path.display(),
+                            vs_path.display()
+                        );
+                        continue;
+                    };
+                    // 封顶：PS 同 location 下一变量起始位，否则 4 分量边界
+                    let cap = in_widths
+                        .range((loc, comp + 1)..(loc + 1, 0))
+                        .map(|(&(_, c), _)| c)
+                        .next()
+                        .unwrap_or(4)
+                        .min(4);
+                    m.insert((loc, comp), (c0 + w).min(cap) - comp);
+                }
+                desired = Some(match desired {
+                    None => m,
+                    Some(prev) => {
+                        let mut merged = BTreeMap::new();
+                        for (k, w) in &prev {
+                            if let Some(w2) = m.get(k) {
+                                if w2 != w {
+                                    eprintln!(
+                                        "[WARN] {} 多个配对 VS 在 {k:?} 目标宽度冲突（{w} vs {w2}），取最小保 08743",
+                                        ps_path.display()
+                                    );
+                                }
+                                merged.insert(*k, (*w).min(*w2));
+                            }
+                        }
+                        merged
+                    }
+                });
+            }
+            let Some(desired) = desired else {
+                continue;
+            };
+
+            // 3. 与当前宽度比对：窄则加宽，宽则标记重建（加宽不可逆）
+            let mut targets: BTreeMap<(u32, u32), u32> = BTreeMap::new();
+            for (&(loc, comp), &cur) in &in_widths {
+                let Some(&want) = desired.get(&(loc, comp)) else {
+                    continue;
+                };
+                if cur > want {
+                    println!(
+                        "[OVERWIDE] {} loc{loc} comp{comp} 当前 {cur} > 目标 {want}，需删除重建",
+                        ps_path.display()
+                    );
+                } else if cur < want {
+                    targets.insert((loc, comp), want);
+                }
+            }
+            if targets.is_empty() {
+                continue;
+            }
+            match widen_ps_inputs(&bytes, &targets) {
+                Some(new_bytes) => match fs::write(ps_path, &new_bytes) {
+                    Ok(()) => rewritten += 1,
+                    Err(e) => eprintln!("[ERROR] 写回 {} 失败: {e}", ps_path.display()),
+                },
+                None => eprintln!(
+                    "[WARN] {} 存在无法安全加宽的接口变量用法，保留原样（targets={targets:?}）",
+                    ps_path.display()
+                ),
+            }
+        }
+        if rewritten > 0 {
+            println!(
+                "[ALIGN] {family:?}: 加宽 {rewritten}/{} 个 .spv 输入接口",
+                ps_vs_files.len()
+            );
+        }
     }
 }
 

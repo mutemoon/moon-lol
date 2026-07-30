@@ -346,10 +346,10 @@ pub fn format_observation(obs: &Observe) -> String {
         for minion in &obs.minions {
             let vital_str = if let Some(vital) = &minion.vital {
                 let dir_zh = match vital.direction {
-                    lol_core::base::direction::Direction::Up => "上",
-                    lol_core::base::direction::Direction::Down => "下",
-                    lol_core::base::direction::Direction::Left => "左",
-                    lol_core::base::direction::Direction::Right => "右",
+                    lol_core::base::direction::Direction::Z => "y正方向",
+                    lol_core::base::direction::Direction::NegZ => "y负方向",
+                    lol_core::base::direction::Direction::X => "x正方向",
+                    lol_core::base::direction::Direction::NegX => "x负方向",
                 };
                 format!(" | 弱点: {}", dir_zh)
             } else {

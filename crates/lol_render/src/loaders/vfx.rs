@@ -40,21 +40,25 @@ impl AssetLoader for ConfigVfxLoader {
             ];
             for emitters in emitter_lists.into_iter().flatten() {
                 for emitter in emitters.iter_mut() {
-                    resolve_texture(&mut emitter.texture, load_context);
-                    resolve_texture(&mut emitter.particle_color_texture, load_context);
+                    resolve_texture(&mut emitter.texture, load_context, false);
+                    resolve_texture(&mut emitter.particle_color_texture, load_context, false);
 
                     if let Some(distortion) = emitter.distortion_definition.as_mut() {
-                        resolve_texture(&mut distortion.normal_map_texture, load_context);
+                        resolve_texture(&mut distortion.normal_map_texture, load_context, false);
                     }
 
                     if let Some(overrides) = emitter.material_override_definitions.as_mut() {
                         for material_override in overrides.iter_mut() {
-                            resolve_texture(&mut material_override.base_texture, load_context);
+                            resolve_texture(
+                                &mut material_override.base_texture,
+                                load_context,
+                                true,
+                            );
                         }
                     }
 
                     if let Some(texture_mult) = emitter.texture_mult.as_mut() {
-                        resolve_texture(&mut texture_mult.texture_mult, load_context);
+                        resolve_texture(&mut texture_mult.texture_mult, load_context, false);
                     }
                 }
             }
@@ -70,12 +74,16 @@ impl AssetLoader for ConfigVfxLoader {
 
 /// 将单个 VfxTexture 的 path 解析为线性（is_srgb=false）加载的 Handle<Image>。
 /// 因为 with_settings 覆盖了 ImageLoader 设置，所以无需为每张贴图生成 .meta 旁车。
-fn resolve_texture(texture: &mut Option<VfxTexture>, load_context: &mut LoadContext<'_>) {
+fn resolve_texture(
+    texture: &mut Option<VfxTexture>,
+    load_context: &mut LoadContext<'_>,
+    is_srgb: bool,
+) {
     if let Some(texture) = texture.as_mut() {
         let path = texture.path.clone();
         texture.handle = load_context
             .load_builder()
-            .with_settings(|settings: &mut ImageLoaderSettings| settings.is_srgb = false)
+            .with_settings(move |settings: &mut ImageLoaderSettings| settings.is_srgb = is_srgb)
             .load(path);
     }
 }

@@ -27,10 +27,10 @@ const EPSILON: f32 = 1e-3;
 /// 要害方向表示攻击者应从哪一侧接近，扇形指向该侧）。
 fn direction_forward(direction: &Direction) -> Vec3 {
     match direction {
-        Direction::Up => Vec3::new(0.0, 0.0, 1.0),
-        Direction::Down => Vec3::new(0.0, 0.0, -1.0),
-        Direction::Right => Vec3::new(1.0, 0.0, 0.0),
-        Direction::Left => Vec3::new(-1.0, 0.0, 0.0),
+        Direction::Z => Vec3::new(0.0, 0.0, 1.0),
+        Direction::NegZ => Vec3::new(0.0, 0.0, -1.0),
+        Direction::X => Vec3::new(1.0, 0.0, 0.0),
+        Direction::NegX => Vec3::new(-1.0, 0.0, 0.0),
     }
 }
 
@@ -57,7 +57,7 @@ fn collect_visuals(h: &mut ChampionTestHarness) -> Vec<(Entity, Entity, Quat)> {
 fn fiora_passive_vital_visual_spawns_and_tracks_direction() {
     let mut h = build_headless("fiora_passive_visual_track");
     let enemy = h.add_enemy(Vec3::new(200.0, 0.0, 0.0));
-    spawn_vital(&mut h, enemy, Direction::Right);
+    spawn_vital(&mut h, enemy, Direction::X);
     h.advance(0.2);
 
     let visuals = collect_visuals(&mut h);
@@ -65,7 +65,7 @@ fn fiora_passive_vital_visual_spawns_and_tracks_direction() {
     let (_, target, rot) = visuals[0];
     assert_eq!(target, enemy, "视觉指示器应指向该敌人");
     assert!(
-        (rot * Vec3::Z - direction_forward(&Direction::Right)).length() < EPSILON,
+        (rot * Vec3::Z - direction_forward(&Direction::X)).length() < EPSILON,
         "视觉扇形应朝向 Right（+X）方向"
     );
 
@@ -75,14 +75,14 @@ fn fiora_passive_vital_visual_spawns_and_tracks_direction() {
         .entity_mut(enemy)
         .get_mut::<Vital>()
         .unwrap()
-        .direction = Direction::Up;
+        .direction = Direction::Z;
     h.advance(0.2);
 
     let visuals = collect_visuals(&mut h);
     assert_eq!(visuals.len(), 1, "Vital 仍在，视觉不应重复生成");
     let (_, _, rot) = visuals[0];
     assert!(
-        (rot * Vec3::Z - direction_forward(&Direction::Up)).length() < EPSILON,
+        (rot * Vec3::Z - direction_forward(&Direction::Z)).length() < EPSILON,
         "改变 Vital 方向后，视觉扇形应朝向 Up（+Z）方向"
     );
 
@@ -94,7 +94,7 @@ fn fiora_passive_vital_visual_spawns_and_tracks_direction() {
 fn fiora_passive_vital_visual_despawns_when_target_gone() {
     let mut h = build_headless("fiora_passive_visual_despawn");
     let enemy = h.add_enemy(Vec3::new(200.0, 0.0, 0.0));
-    spawn_vital(&mut h, enemy, Direction::Up);
+    spawn_vital(&mut h, enemy, Direction::Z);
     h.advance(0.2);
     assert_eq!(
         collect_visuals(&mut h).len(),
@@ -164,7 +164,7 @@ fn fiora_passive_break_grants_move_speed() {
     let mut h = build_headless("fiora_passive_ms");
     let enemy = h.add_enemy(Vec3::new(450.0, 0.0, 0.0));
     // 菲奥娜在原点，敌人在 (450,0)：source.x < target.x -> 命中 Left 要害
-    spawn_vital(&mut h, enemy, Direction::Left);
+    spawn_vital(&mut h, enemy, Direction::NegX);
     h.advance(1.8); // 等要害进入活跃态
 
     let base_speed = h
@@ -205,7 +205,7 @@ fn fiora_passive_break_grants_move_speed() {
 fn fiora_passive_break_heals_fiora() {
     let mut h = build_headless("fiora_passive_heal");
     let enemy = h.add_enemy(Vec3::new(450.0, 0.0, 0.0));
-    spawn_vital(&mut h, enemy, Direction::Left);
+    spawn_vital(&mut h, enemy, Direction::NegX);
     h.advance(1.8);
 
     let fiora_max = h
