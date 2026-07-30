@@ -1,6 +1,12 @@
 (
     spellData: Some((
         calculations: Some({
+            "ammo_cooldown_reset": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
             "missile_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
@@ -18,19 +24,13 @@
                 multiplier: None,
                 precision: None,
             ),
-            "unk_0xac10fc3d": (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: None,
-            ),
-            "unk_0xae806e50": (
+            "nail_damage": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: None,
-                        dataValue: "unk_0xaf1aca13",
+                        dataValue: "mark_ratio",
                     ),
                     (
                         type: "CalculationPartNamedDataValue",

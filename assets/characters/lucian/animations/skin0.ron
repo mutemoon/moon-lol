@@ -68,6 +68,9 @@
         "Idle2Base": Clip(
             node_index: 63,
         ),
+        "Idle3Base": Clip(
+            node_index: 35,
+        ),
         "IdleReady": Clip(
             node_index: 24,
         ),
@@ -87,13 +90,16 @@
         ),
         "Laugh": Sequence(
             hashes: [
-                "Unk0x9e55a33e",
+                "LaughBase",
                 "Idle1Base",
                 "Idle1Base",
                 "Idle1Base",
                 "Idle1Base",
                 "Idle1Base",
             ],
+        ),
+        "LaughBase": Clip(
+            node_index: 47,
         ),
         "Passive": Parallel(
             hashes: [
@@ -139,8 +145,11 @@
         "Run": Sequence(
             hashes: [
                 "Run1In",
-                "Unk0xb910f2d7",
+                "Run1Base",
             ],
+        ),
+        "Run1Base": Clip(
+            node_index: 55,
         ),
         "Run1In": Clip(
             node_index: 23,
@@ -335,9 +344,6 @@
         "Unk0x6d4732da": Clip(
             node_index: 33,
         ),
-        "Unk0x76bbc6a0": Clip(
-            node_index: 35,
-        ),
         "Unk0x7eeb244b": Sequence(
             hashes: [
                 "Unk0x8dfb9419",
@@ -362,7 +368,7 @@
                     value: 0.25,
                 ),
                 (
-                    key: "Unk0x76bbc6a0",
+                    key: "Idle3Base",
                     value: 0.25,
                 ),
             ],
@@ -380,9 +386,6 @@
         ),
         "Unk0x9d46ce26": Clip(
             node_index: 46,
-        ),
-        "Unk0x9e55a33e": Clip(
-            node_index: 47,
         ),
         "Unk0xa44e4faa": Clip(
             node_index: 49,
@@ -413,9 +416,6 @@
                     value: 180.0,
                 ),
             ],
-        ),
-        "Unk0xb910f2d7": Clip(
-            node_index: 55,
         ),
         "Unk0xc8a9aef5": Parametric(
             pairs: [
@@ -790,10 +790,16 @@
         ("Death", "Idle2Base"): Time(
             time: 0.0,
         ),
+        ("Death", "Idle3Base"): Time(
+            time: 0.0,
+        ),
         ("Death", "IdleReady"): Time(
             time: 0.0,
         ),
         ("Death", "IdleReadyOut"): Time(
+            time: 0.0,
+        ),
+        ("Death", "LaughBase"): Time(
             time: 0.0,
         ),
         ("Death", "Passive0"): Time(
@@ -815,6 +821,9 @@
             time: 0.0,
         ),
         ("Death", "RecallWindup"): Time(
+            time: 0.0,
+        ),
+        ("Death", "Run1Base"): Time(
             time: 0.0,
         ),
         ("Death", "Run1In"): Time(
@@ -901,25 +910,16 @@
         ("Death", "Unk0x6d4732da"): Time(
             time: 0.0,
         ),
-        ("Death", "Unk0x76bbc6a0"): Time(
-            time: 0.0,
-        ),
         ("Death", "Unk0x8dfb9419"): Time(
             time: 0.0,
         ),
         ("Death", "Unk0x9d46ce26"): Time(
             time: 0.0,
         ),
-        ("Death", "Unk0x9e55a33e"): Time(
-            time: 0.0,
-        ),
         ("Death", "Unk0xac82079e"): Time(
             time: 0.0,
         ),
         ("Death", "Unk0xb4f31e92"): Time(
-            time: 0.0,
-        ),
-        ("Death", "Unk0xb910f2d7"): Time(
             time: 0.0,
         ),
         ("Death", "Unk0xc8a9aef5"): Time(
@@ -946,6 +946,12 @@
         ("Idle2Base", "Spell2Base"): Time(
             time: 0.1,
         ),
+        ("Idle3Base", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Idle3Base", "Spell2Base"): Time(
+            time: 0.1,
+        ),
         ("IdleReady", "Death"): Time(
             time: 0.0,
         ),
@@ -963,6 +969,12 @@
         ),
         ("Laugh", "Death"): Time(
             time: 0.0,
+        ),
+        ("LaughBase", "Death"): Time(
+            time: 0.0,
+        ),
+        ("LaughBase", "Spell2Base"): Time(
+            time: 0.1,
         ),
         ("Passive", "Death"): Time(
             time: 0.0,
@@ -1003,13 +1015,19 @@
         ("Run", "Death"): Time(
             time: 0.0,
         ),
+        ("Run1Base", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Run1Base", "Spell2Base"): Time(
+            time: 0.1,
+        ),
         ("Run1In", "Death"): Time(
             time: 0.0,
         ),
-        ("Run1In", "Spell2Base"): Time(
+        ("Run1In", "Run1Base"): Time(
             time: 0.1,
         ),
-        ("Run1In", "Unk0xb910f2d7"): Time(
+        ("Run1In", "Spell2Base"): Time(
             time: 0.1,
         ),
         ("Run2In", "Death"): Time(
@@ -1159,12 +1177,6 @@
         ("Unk0x6d4732da", "Death"): Time(
             time: 0.0,
         ),
-        ("Unk0x76bbc6a0", "Death"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x76bbc6a0", "Spell2Base"): Time(
-            time: 0.1,
-        ),
         ("Unk0x7eeb244b", "Death"): Time(
             time: 0.0,
         ),
@@ -1186,12 +1198,6 @@
         ("Unk0x9d46ce26", "Spell2Base"): Time(
             time: 0.1,
         ),
-        ("Unk0x9e55a33e", "Death"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x9e55a33e", "Spell2Base"): Time(
-            time: 0.1,
-        ),
         ("Unk0xac82079e", "Death"): Time(
             time: 0.0,
         ),
@@ -1199,12 +1205,6 @@
             time: 0.0,
         ),
         ("Unk0xb4f31e92", "Spell2Base"): Time(
-            time: 0.1,
-        ),
-        ("Unk0xb910f2d7", "Death"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xb910f2d7", "Spell2Base"): Time(
             time: 0.1,
         ),
         ("Unk0xc8a9aef5", "Death"): Time(

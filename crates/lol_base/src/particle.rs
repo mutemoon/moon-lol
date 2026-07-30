@@ -13,7 +13,7 @@ enum SerializedSampler<T> {
     Curve(Vec<(f32, T)>),
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Reflect)]
 pub enum Sampler<T> {
     Constant(T),
     Curve {
@@ -86,7 +86,7 @@ impl<T: StableInterpolate + Clone + Copy> Curve<T> for Sampler<T> {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Reflect)]
 pub enum ProbabilityCurve {
     Constant(f32),
     Curve {
@@ -224,6 +224,45 @@ impl<T> StochasticSampler<T> {
     }
 }
 
+/// 粒子贴图引用：磁盘序列化为资源路径字符串，运行时由 ConfigVfxLoader 解析填充 handle。
+/// 因为 Handle<Image> 在此 fork 无 serde 实现，所以磁盘只存 path，加载后由 loader 注入 handle。
+#[derive(Clone, Debug, Default)]
+pub struct VfxTexture {
+    pub path: String,
+    pub handle: Handle<Image>,
+}
+
+impl VfxTexture {
+    pub fn from_path(path: impl Into<String>) -> Self {
+        Self {
+            path: path.into(),
+            handle: Handle::default(),
+        }
+    }
+}
+
+impl Serialize for VfxTexture {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.path.serialize(serializer)
+    }
+}
+
+impl<'de> Deserialize<'de> for VfxTexture {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let path = String::deserialize(deserializer)?;
+        Ok(Self {
+            path,
+            handle: Handle::default(),
+        })
+    }
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize, Asset, TypePath)]
 pub struct ConfigVfxSystemDefinition {
     pub particle_name: String,
@@ -259,8 +298,8 @@ pub struct ConfigVfxEmitterDefinition {
     pub is_uniform_scale: Option<bool>,
     pub is_random_start_frame: Option<bool>,
     pub is_local_orientation: Option<bool>,
-    pub texture: Option<String>,
-    pub particle_color_texture: Option<String>,
+    pub texture: Option<VfxTexture>,
+    pub particle_color_texture: Option<VfxTexture>,
     pub tex_div: Option<Vec2>,
     pub slice_technique_range: Option<f32>,
     pub texture_mult: Option<ConfigVfxTextureMult>,
@@ -272,12 +311,12 @@ pub struct ConfigVfxEmitterDefinition {
 pub struct ConfigVfxDistortionDefinition {
     pub distortion: Option<f32>,
     pub distortion_mode: Option<u8>,
-    pub normal_map_texture: Option<String>,
+    pub normal_map_texture: Option<VfxTexture>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ConfigVfxMaterialOverride {
-    pub base_texture: Option<String>,
+    pub base_texture: Option<VfxTexture>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -307,7 +346,7 @@ pub enum ConfigVfxPrimitive {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ConfigVfxTextureMult {
-    pub texture_mult: Option<String>,
+    pub texture_mult: Option<VfxTexture>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -340,8 +379,16 @@ pub struct ConfigResourceResolver {
     pub resource_map: BTreeMap<String, u32>,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, Asset, TypePath)]
+/// 皮肤粒子特效配置，作为可正反序列化的 Asset 单独存放在 skins/skin{N}_vfx.ron 中，
+/// 因为不再支持反射，所以由自定义 ConfigVfxLoader 以纯 RON 加载并解析内部贴图路径为 handle。
+#[derive(Clone, Debug, Default, Serialize, Deserialize, Asset, TypePath)]
 pub struct ConfigVfx {
     pub resolvers: BTreeMap<u32, ConfigResourceResolver>,
     pub systems: BTreeMap<u32, ConfigVfxSystemDefinition>,
 }
+
+/// 皮肤场景 skin{N}.ron 中承载的 ConfigVfx 句柄资源。
+/// 因为需要随皮肤实体场景一起走反射序列化写回主 World，所以此包装类型保留 Reflect。
+#[derive(Clone, Debug, Default, Reflect, Resource)]
+#[reflect(Resource)]
+pub struct ConfigVfxHandle(pub Handle<ConfigVfx>);

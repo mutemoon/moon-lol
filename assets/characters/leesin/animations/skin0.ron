@@ -118,6 +118,9 @@
         "RunHomeguardIn": Clip(
             node_index: 5,
         ),
+        "RuninBase": Clip(
+            node_index: 43,
+        ),
         "Spell1": Clip(
             node_index: 34,
         ),
@@ -272,9 +275,6 @@
         ),
         "Unk0xb1988f04": Clip(
             node_index: 33,
-        ),
-        "Unk0xbdaf4563": Clip(
-            node_index: 43,
         ),
         "Unk0xc380648a": ConditionFloat(
             updater: MoveSpeed,
@@ -835,13 +835,13 @@
             clip_name: "RunHomeguardIn",
         ),
         ("DanceIn", "Unk0x71e46929"): TransitionClip(
-            clip_name: "Unk0xbdaf4563",
+            clip_name: "RuninBase",
         ),
         ("DanceIn", "Unk0x951abda1"): TransitionClip(
-            clip_name: "Unk0xbdaf4563",
+            clip_name: "RuninBase",
         ),
         ("DanceIn", "Unk0xf925da22"): TransitionClip(
-            clip_name: "Unk0xbdaf4563",
+            clip_name: "RuninBase",
         ),
         ("DanceLoop", "DanceIn"): Time(
             time: 0.0,
@@ -856,13 +856,13 @@
             clip_name: "RunHomeguardIn",
         ),
         ("DanceLoop", "Unk0x71e46929"): TransitionClip(
-            clip_name: "Unk0xbdaf4563",
+            clip_name: "RuninBase",
         ),
         ("DanceLoop", "Unk0x951abda1"): TransitionClip(
-            clip_name: "Unk0xbdaf4563",
+            clip_name: "RuninBase",
         ),
         ("DanceLoop", "Unk0xf925da22"): TransitionClip(
-            clip_name: "Unk0xbdaf4563",
+            clip_name: "RuninBase",
         ),
         ("Death", "Attack1"): Time(
             time: 0.1,
@@ -901,16 +901,16 @@
             time: 0.1,
         ),
         ("Death", "Unk0x71e46929"): TransitionClip(
-            clip_name: "Unk0xbdaf4563",
+            clip_name: "RuninBase",
         ),
         ("Death", "Unk0x8050a5c4"): Time(
             time: 0.1,
         ),
         ("Death", "Unk0x951abda1"): TransitionClip(
-            clip_name: "Unk0xbdaf4563",
+            clip_name: "RuninBase",
         ),
         ("Death", "Unk0xf925da22"): TransitionClip(
-            clip_name: "Unk0xbdaf4563",
+            clip_name: "RuninBase",
         ),
         ("Death", "Unk0xfcf701ec"): Time(
             time: 0.0,
@@ -955,16 +955,16 @@
             clip_name: "Unk0x459d6f42",
         ),
         ("IdleActive", "Unk0x71e46929"): TransitionClip(
-            clip_name: "Unk0xbdaf4563",
+            clip_name: "RuninBase",
         ),
         ("IdleActive", "Unk0x8050a5c4"): Time(
             time: 0.1,
         ),
         ("IdleActive", "Unk0x951abda1"): TransitionClip(
-            clip_name: "Unk0xbdaf4563",
+            clip_name: "RuninBase",
         ),
         ("IdleActive", "Unk0xf925da22"): TransitionClip(
-            clip_name: "Unk0xbdaf4563",
+            clip_name: "RuninBase",
         ),
         ("IdleActive", "Unk0xfcf701ec"): Time(
             time: 0.0,
@@ -976,13 +976,13 @@
             clip_name: "RunHomeguardIn",
         ),
         ("IdleVar1", "Unk0x71e46929"): TransitionClip(
-            clip_name: "Unk0xbdaf4563",
+            clip_name: "RuninBase",
         ),
         ("IdleVar1", "Unk0x951abda1"): TransitionClip(
-            clip_name: "Unk0xbdaf4563",
+            clip_name: "RuninBase",
         ),
         ("IdleVar1", "Unk0xf925da22"): TransitionClip(
-            clip_name: "Unk0xbdaf4563",
+            clip_name: "RuninBase",
         ),
         ("Joke", "Attack1"): Time(
             time: 0.1,
@@ -1021,16 +1021,16 @@
             time: 0.1,
         ),
         ("Joke", "Unk0x71e46929"): TransitionClip(
-            clip_name: "Unk0xbdaf4563",
+            clip_name: "RuninBase",
         ),
         ("Joke", "Unk0x8050a5c4"): Time(
             time: 0.1,
         ),
         ("Joke", "Unk0x951abda1"): TransitionClip(
-            clip_name: "Unk0xbdaf4563",
+            clip_name: "RuninBase",
         ),
         ("Joke", "Unk0xf925da22"): TransitionClip(
-            clip_name: "Unk0xbdaf4563",
+            clip_name: "RuninBase",
         ),
         ("Joke", "Unk0xfcf701ec"): Time(
             time: 0.0,
@@ -1072,16 +1072,16 @@
             time: 0.1,
         ),
         ("Laugh", "Unk0x71e46929"): TransitionClip(
-            clip_name: "Unk0xbdaf4563",
+            clip_name: "RuninBase",
         ),
         ("Laugh", "Unk0x8050a5c4"): Time(
             time: 0.1,
         ),
         ("Laugh", "Unk0x951abda1"): TransitionClip(
-            clip_name: "Unk0xbdaf4563",
+            clip_name: "RuninBase",
         ),
         ("Laugh", "Unk0xf925da22"): TransitionClip(
-            clip_name: "Unk0xbdaf4563",
+            clip_name: "RuninBase",
         ),
         ("Laugh", "Unk0xfcf701ec"): Time(
             time: 0.0,
@@ -1543,16 +1543,16 @@
             time: 0.1,
         ),
         ("Unk0x459d6f42", "Unk0x71e46929"): TransitionClip(
-            clip_name: "Unk0xbdaf4563",
+            clip_name: "RuninBase",
         ),
         ("Unk0x459d6f42", "Unk0x8050a5c4"): Time(
             time: 0.1,
         ),
         ("Unk0x459d6f42", "Unk0x951abda1"): TransitionClip(
-            clip_name: "Unk0xbdaf4563",
+            clip_name: "RuninBase",
         ),
         ("Unk0x459d6f42", "Unk0xf925da22"): TransitionClip(
-            clip_name: "Unk0xbdaf4563",
+            clip_name: "RuninBase",
         ),
         ("Unk0x4dae39f3", "IdleActive"): TransitionClip(
             clip_name: "Unk0x4e1f9a9",
@@ -1603,16 +1603,16 @@
             time: 0.1,
         ),
         ("Unk0x4e1f9a9", "Unk0x71e46929"): TransitionClip(
-            clip_name: "Unk0xbdaf4563",
+            clip_name: "RuninBase",
         ),
         ("Unk0x4e1f9a9", "Unk0x8050a5c4"): Time(
             time: 0.1,
         ),
         ("Unk0x4e1f9a9", "Unk0x951abda1"): TransitionClip(
-            clip_name: "Unk0xbdaf4563",
+            clip_name: "RuninBase",
         ),
         ("Unk0x4e1f9a9", "Unk0xf925da22"): TransitionClip(
-            clip_name: "Unk0xbdaf4563",
+            clip_name: "RuninBase",
         ),
         ("Unk0x5922c1d9", "Joke"): Time(
             time: 0.04,
@@ -1735,13 +1735,13 @@
             clip_name: "RunHomeguardIn",
         ),
         ("Unk0x68d16782", "Unk0x71e46929"): TransitionClip(
-            clip_name: "Unk0xbdaf4563",
+            clip_name: "RuninBase",
         ),
         ("Unk0x68d16782", "Unk0x951abda1"): TransitionClip(
-            clip_name: "Unk0xbdaf4563",
+            clip_name: "RuninBase",
         ),
         ("Unk0x68d16782", "Unk0xf925da22"): TransitionClip(
-            clip_name: "Unk0xbdaf4563",
+            clip_name: "RuninBase",
         ),
         ("Unk0x71e46929", "IdleActive"): TransitionClip(
             clip_name: "Unk0x4e1f9a9",

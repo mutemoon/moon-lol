@@ -1,20 +1,17 @@
+pub mod assembly;
 pub mod distortion;
-pub mod mesh;
+pub mod dynamic;
 pub mod quad;
-pub mod quad_slice;
 
 use bevy::mesh::VertexAttributeValues;
-use bevy::mesh::skinning::{SkinnedMesh, SkinnedMeshInverseBindposes};
+use bevy::mesh::skinning::SkinnedMesh;
 use bevy::prelude::*;
 use lol_base::particle::{ConfigVfxPrimitive, ConfigVfxSystemDefinition};
 use lol_core::lifetime::Lifetime;
 
 use crate::camera::CameraState;
 use crate::particle::emitters::state::ParticleEmitterState;
-use crate::particle::environment::unlit_decal::ParticleMaterialUnlitDecal;
-use crate::particle::particle::distortion::ParticleMaterialDistortion;
-use crate::particle::particle::mesh::ParticleMaterialMesh;
-use crate::particle::skinned_mesh::particle::ParticleMaterialSkinnedMeshParticle;
+use crate::particle::particle::dynamic::{ParticleMaterialDynamic, ParticleRenderKind};
 use crate::particle::{
     ATTRIBUTE_LIFETIME, ATTRIBUTE_WORLD_POSITION, ATTRIBUTE_WORLD_POSITION_VEC4, ParticleId,
 };
@@ -33,8 +30,7 @@ pub struct ParticleState {
 
 pub fn update_particle(
     mut res_mesh: ResMut<Assets<Mesh>>,
-    mut res_particle_material_unlit_decal: ResMut<Assets<ParticleMaterialUnlitDecal>>,
-    mut res_particle_material_mesh: ResMut<Assets<ParticleMaterialMesh>>,
+    mut res_particle_material_dynamic: ResMut<Assets<ParticleMaterialDynamic>>,
     res_assets_vfx_system_definition_data: Res<Assets<ConfigVfxSystemDefinition>>,
     q_particle_state: Query<(
         Entity,
@@ -44,20 +40,27 @@ pub fn update_particle(
         &ParticleState,
         &ParticleId,
     )>,
-    q_particle_material_distortion: Query<
-        &MeshMaterial3d<ParticleMaterialDistortion>,
+    q_particle_material_dynamic: Query<
+        &MeshMaterial3d<ParticleMaterialDynamic>,
         With<ParticleState>,
     >,
-    q_particle_material_unlit_decal: Query<
-        &MeshMaterial3d<ParticleMaterialUnlitDecal>,
-        With<ParticleState>,
-    >,
-    q_particle_material_mesh: Query<&MeshMaterial3d<ParticleMaterialMesh>, With<ParticleState>>,
     q_particle_emitter_state: Query<&ParticleEmitterState>,
     q_global_transform: Query<&GlobalTransform>,
     q_mesh3d: Query<&Mesh3d>,
     q_camera_transform: Query<&Transform, With<CameraState>>,
+    q_camera: Query<(&Projection, &GlobalTransform), With<CameraState>>,
 ) {
+    // 取带 CameraState 的窗口主相机：PluginCamera 还会生成一个渲染到 512×512 贴图的
+    // 子相机（aspect=1），若任取第一个可能拿到它的投影矩阵，导致窗口里粒子 X 向被拉宽
+    let cam_data = (|| {
+        let (projection, gtransform) = q_camera.single().ok()?;
+        let clip_from_view: Mat4 = projection.get_clip_from_view();
+        let view_from_world = gtransform.to_matrix().inverse();
+        let clip_from_world = clip_from_view * view_from_world;
+        let cam_pos = gtransform.translation();
+        Some((clip_from_world, cam_pos))
+    })();
+
     for (particle_entity, transform, child_of, lifetime, particle, particle_id) in
         q_particle_state.iter()
     {
@@ -78,49 +81,81 @@ pub fn update_particle(
         let vfx_emitter_definition_data =
             particle_id.get_def(&res_assets_vfx_system_definition_data);
 
-        if let Ok(material) = q_particle_material_unlit_decal.get(particle_entity) {
-            if let Some(mut material) = res_particle_material_unlit_decal.get_mut(material.0.id()) {
-                material.uniforms_vertex.decal_world_to_uv_matrix =
-                    Mat4::from_translation(Vec3::splat(0.5)) * world_matrix.inverse();
-            }
-        }
+        // ── 动态材质统一逐帧更新：按几何族分支，全部走成员名查表写入 ──
+        if let Ok(material_handle) = q_particle_material_dynamic.get(particle_entity) {
+            if let Some(mut material) =
+                res_particle_material_dynamic.get_mut(material_handle.0.id())
+            {
+                // 相机参数全族统一写入（族布局无该成员时安全 no-op）
+                if let Some((clip_from_world, cam_pos)) = &cam_data {
+                    material.set_param("mProj", clip_from_world.transpose());
+                    material.set_param("vCamera", *cam_pos);
+                }
 
-        if let Ok(material) = q_particle_material_mesh.get(particle_entity) {
-            if let Some(mut material) = res_particle_material_mesh.get_mut(material.0.id()) {
-                material.uniforms_vertex.m_world = world_matrix;
-                let frame = particle.frame;
+                match material.kind {
+                    ParticleRenderKind::Quad => {
+                        // 写入 TEXTURE_INFO 及其后面的匿名 uv_scale (offset 4)
+                        let tex_div = vfx_emitter_definition_data.tex_div.unwrap_or(Vec2::ONE);
+                        let num_cols = tex_div.x.max(1.0);
+                        let num_rows = tex_div.y.max(1.0);
 
-                let Vec2 {
-                    x: col_num,
-                    y: row_num,
-                } = vfx_emitter_definition_data.tex_div.unwrap_or(Vec2::ONE);
+                        // 通过成员名 "TEXTURE_INFO" 查表写入列数
+                        if material.set_param("TEXTURE_INFO", num_cols) {
+                            // 紧接 TEXTURE_INFO 之后写入匿名 uv_scale [1/cols, 1/rows, 1] @ offset 4
+                            let uv_scale: [f32; 3] = [1.0 / num_cols, 1.0 / num_rows, 1.0];
+                            let uv_scale_bytes = unsafe {
+                                std::slice::from_raw_parts(
+                                    uv_scale.as_ptr() as *const u8,
+                                    std::mem::size_of::<[f32; 3]>(),
+                                )
+                            };
+                            material.write_after_member("TEXTURE_INFO", 4, uv_scale_bytes);
+                        }
+                    }
+                    ParticleRenderKind::Mesh => {
+                        // mWorld 位于 CharacterPerDrawVertexCB；row-major 存储需转置
+                        material.set_param("mWorld", world_matrix.transpose());
 
-                let scale_x = 1.0 / col_num;
-                let scale_y = 1.0 / row_num;
+                        let frame = particle.frame;
 
-                let current_col = frame % col_num;
-                let current_row = (frame / col_num).floor();
+                        let Vec2 {
+                            x: col_num,
+                            y: row_num,
+                        } = vfx_emitter_definition_data.tex_div.unwrap_or(Vec2::ONE);
 
-                let current_uv_offset: Vec2 = (particle.birth_uv_offset
-                    + particle.birth_uv_scroll_rate * lifetime.elapsed_secs())
-                    % 1.0;
+                        let scale = vec2(1.0 / col_num, 1.0 / row_num);
 
-                let translate_x = current_col * scale_x;
-                let translate_y = current_row * scale_y;
+                        let current_col = frame % col_num;
+                        let current_row = (frame / col_num).floor();
 
-                let final_translate_x = current_uv_offset.x * scale_x + translate_x;
-                let final_translate_y = current_uv_offset.y * scale_y + translate_y;
+                        let current_uv_offset: Vec2 = (particle.birth_uv_offset
+                            + particle.birth_uv_scroll_rate * lifetime.elapsed_secs())
+                            % 1.0;
 
-                material.uniforms_vertex.v_particle_uvtransform = [
-                    vec3(scale_x, 0., 0.),
-                    vec3(0., scale_y, 0.),
-                    vec3(final_translate_x, final_translate_y, 0.),
-                    Vec3::ZERO,
-                ];
+                        let translate =
+                            current_uv_offset * scale + vec2(current_col, current_row) * scale;
 
-                material.uniforms_pixel.color_lookup_uv = vec2(life, life);
-
-                material.uniforms_vertex.k_color_factor = color;
+                        material
+                            .set_param("vParticleUVTransform", uv_transform_rows(scale, translate));
+                        material.set_param("kColorFactor", color);
+                        material.set_param("COLOR_LOOKUP_UV", vec2(life, life));
+                    }
+                    ParticleRenderKind::Distortion => {
+                        // TEXTURE_INFO / 扭曲强度等在发射器装配时一次性写入；
+                        // 逐帧只需重写世界坐标顶点属性（见下方按 kind 的 mesh 属性分支）
+                    }
+                    ParticleRenderKind::SkinnedMesh => {
+                        // UV/颜色在 update_particle_skinned_mesh_particle 中处理
+                        //（需要 SkinnedMesh 组件与关节全局变换）
+                    }
+                    ParticleRenderKind::UnlitDecal => {
+                        material.set_param(
+                            "DECAL_WORLD_TO_UV_MATRIX",
+                            (Mat4::from_translation(Vec3::splat(0.5)) * world_matrix.inverse())
+                                .transpose(),
+                        );
+                    }
+                }
             }
         }
 
@@ -162,8 +197,12 @@ pub fn update_particle(
             world_transform = world_transform.looking_at(camera_transform.translation, Vec3::ZERO);
         }
 
-        // Check if this is a distortion particle (uses Vec4) or regular particle (uses Vec3)
-        let is_distortion = q_particle_material_distortion.get(particle_entity).is_ok();
+        // 世界坐标属性按几何族选择：Distortion 用 Vec4（w=0），其余用 Vec3
+        let is_distortion = q_particle_material_dynamic
+            .get(particle_entity)
+            .ok()
+            .and_then(|handle| res_particle_material_dynamic.get(handle.0.id()))
+            .is_some_and(|material| material.kind == ParticleRenderKind::Distortion);
 
         if is_distortion {
             // Distortion particles use ATTRIBUTE_WORLD_POSITION_VEC4
@@ -229,22 +268,19 @@ pub fn update_particle_transform(
 }
 
 pub fn update_particle_skinned_mesh_particle(
-    mut res_particle_material_skinned_mesh_particle: ResMut<
-        Assets<ParticleMaterialSkinnedMeshParticle>,
+    mut res_particle_material_dynamic: ResMut<Assets<ParticleMaterialDynamic>>,
+    q_particle_state: Query<
+        (
+            &ChildOf,
+            &Lifetime,
+            &ParticleState,
+            &MeshMaterial3d<ParticleMaterialDynamic>,
+        ),
+        With<SkinnedMesh>,
     >,
-    res_inverse_bindposes: Res<Assets<SkinnedMeshInverseBindposes>>,
-    q_particle_state: Query<(
-        Entity,
-        &ChildOf,
-        &Lifetime,
-        &ParticleState,
-        &MeshMaterial3d<ParticleMaterialSkinnedMeshParticle>,
-    )>,
     q_particle_emitter_state: Query<&ParticleEmitterState>,
-    q_global_transform: Query<&GlobalTransform>,
-    q_skinned_mesh: Query<&SkinnedMesh>,
 ) {
-    for (particle_entity, child_of, lifetime, particle, material) in q_particle_state.iter() {
+    for (child_of, lifetime, particle, material_handle) in q_particle_state.iter() {
         let parent = child_of.parent();
 
         let life = lifetime.progress();
@@ -253,58 +289,37 @@ pub fn update_particle_skinned_mesh_particle(
 
         let color = particle.birth_color * emitter.color.sample_clamped(life);
 
-        let mut material = res_particle_material_skinned_mesh_particle
-            .get_mut(material.0.id())
-            .unwrap();
-
-        let skinned_mesh = q_skinned_mesh.get(particle_entity).unwrap();
-
-        let inverse_bindposes = res_inverse_bindposes
-            .get(skinned_mesh.inverse_bindposes.id())
-            .unwrap();
-
-        let mut bones = Vec::new();
-
-        for (i, entity) in skinned_mesh.joints.iter().enumerate() {
-            let g = q_global_transform.get(*entity).unwrap();
-            bones.push(g.to_matrix() * inverse_bindposes[i]);
+        let Some(mut material) = res_particle_material_dynamic.get_mut(material_handle.0.id())
+        else {
+            continue;
+        };
+        if material.kind != ParticleRenderKind::SkinnedMesh {
+            continue;
         }
 
         let current_uv_offset: Vec2 =
             particle.birth_uv_offset + particle.birth_uv_scroll_rate * lifetime.elapsed_secs();
 
-        material.uniforms_vertex.v_particle_uvtransform = [
-            Vec3::X,
-            Vec3::Y,
-            vec3(current_uv_offset.x, current_uv_offset.y, 0.),
-            Vec3::ZERO,
-        ];
+        material.set_param(
+            "vParticleUVTransform",
+            uv_transform_rows(Vec2::ONE, current_uv_offset),
+        );
+        material.set_param("COLOR_LOOKUP_UV", vec2(life, life));
+        material.set_param("kColorFactor", color);
 
-        material.uniforms_pixel.color_lookup_uv = vec2(life, life);
-
-        material.uniforms_vertex.k_color_factor = color;
-
-        material.uniforms_vertex.bones = mat4_vec_to_mat4_array_homogeneous(bones);
-
-        continue;
+        // bones：map.ron 反射出的 SkinnedMeshParticleVs cbuffer（$Globals + PerFrameVertexCB）
+        // 不含骨骼矩阵成员，无法经 cbuffer 上传（按名写入即 no-op），
+        // 因此跳过逐骨骼矩阵计算；旧静态材质的 bones 槽位与该 SPIR-V 布局本就不匹配。
     }
 }
 
-pub fn mat4_vec_to_mat4_array_homogeneous(mats: Vec<Mat4>) -> [[Vec3; 4]; 68] {
-    const IDENTITY_VEC3_ARRAY: [Vec3; 4] = [Vec3::X, Vec3::Y, Vec3::Z, Vec3::ZERO];
-
-    let mut bone_array: [[Vec3; 4]; 68] = [IDENTITY_VEC3_ARRAY; 68];
-
-    for (i, mat) in mats.into_iter().enumerate().take(68) {
-        let cols = mat.to_cols_array();
-
-        bone_array[i] = [
-            Vec3::new(cols[0], cols[1], cols[2]),
-            Vec3::new(cols[4], cols[5], cols[6]),
-            Vec3::new(cols[8], cols[9], cols[10]),
-            Vec3::new(cols[12], cols[13], cols[14]),
-        ];
-    }
-
-    bone_array
+/// 把「列描述」的 UV 仿射变换（scale + translate）转成 unified 布局里
+/// `vParticleUVTransform` 的 row-major float3x4（3 行 float4，共 48 字节）：
+/// rows = (sx, 0, tx, 0) / (0, sy, ty, 0) / (0, 0, 0, 0)。
+fn uv_transform_rows(scale: Vec2, translate: Vec2) -> [[f32; 4]; 3] {
+    [
+        [scale.x, 0.0, translate.x, 0.0],
+        [0.0, scale.y, translate.y, 0.0],
+        [0.0, 0.0, 0.0, 0.0],
+    ]
 }

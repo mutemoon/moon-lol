@@ -258,6 +258,9 @@
         "Spell4Landing": Clip(
             node_index: 27,
         ),
+        "Spell4LandingToidle": Clip(
+            node_index: 28,
+        ),
         "Spell4LandingTorun": Clip(
             node_index: 22,
         ),
@@ -308,9 +311,6 @@
         ),
         "Unk0x4a21da8d": Clip(
             node_index: 26,
-        ),
-        "Unk0x4b0a6e1b": Clip(
-            node_index: 28,
         ),
         "Unk0x55c6965": Parametric(
             pairs: [
@@ -532,6 +532,9 @@
         ("Attack1", "Spell4Landing"): Time(
             time: 0.0,
         ),
+        ("Attack1", "Spell4LandingToidle"): Time(
+            time: 0.0,
+        ),
         ("Attack1", "Spell4LandingTorun"): Time(
             time: 0.0,
         ),
@@ -560,9 +563,6 @@
             time: 0.0,
         ),
         ("Attack1", "Unk0x4a21da8d"): Time(
-            time: 0.0,
-        ),
-        ("Attack1", "Unk0x4b0a6e1b"): Time(
             time: 0.0,
         ),
         ("Attack1", "Unk0x55c6965"): Time(
@@ -1159,6 +1159,9 @@
         ("Attack2", "Spell4Landing"): Time(
             time: 0.0,
         ),
+        ("Attack2", "Spell4LandingToidle"): Time(
+            time: 0.0,
+        ),
         ("Attack2", "Spell4LandingTorun"): Time(
             time: 0.0,
         ),
@@ -1187,9 +1190,6 @@
             time: 0.0,
         ),
         ("Attack2", "Unk0x4a21da8d"): Time(
-            time: 0.0,
-        ),
-        ("Attack2", "Unk0x4b0a6e1b"): Time(
             time: 0.0,
         ),
         ("Attack2", "Unk0x55c6965"): Time(
@@ -1987,6 +1987,9 @@
         ("Channel", "Spell4Landing"): Time(
             time: 0.0,
         ),
+        ("Channel", "Spell4LandingToidle"): Time(
+            time: 0.0,
+        ),
         ("Channel", "Spell4LandingTorun"): Time(
             time: 0.0,
         ),
@@ -2015,9 +2018,6 @@
             time: 0.0,
         ),
         ("Channel", "Unk0x4a21da8d"): Time(
-            time: 0.0,
-        ),
-        ("Channel", "Unk0x4b0a6e1b"): Time(
             time: 0.0,
         ),
         ("Channel", "Unk0x55c6965"): Time(
@@ -2200,6 +2200,9 @@
         ("ChannelWndup", "Spell4Landing"): Time(
             time: 0.0,
         ),
+        ("ChannelWndup", "Spell4LandingToidle"): Time(
+            time: 0.0,
+        ),
         ("ChannelWndup", "Spell4LandingTorun"): Time(
             time: 0.0,
         ),
@@ -2228,9 +2231,6 @@
             time: 0.0,
         ),
         ("ChannelWndup", "Unk0x4a21da8d"): Time(
-            time: 0.0,
-        ),
-        ("ChannelWndup", "Unk0x4b0a6e1b"): Time(
             time: 0.0,
         ),
         ("ChannelWndup", "Unk0x55c6965"): Time(
@@ -2410,6 +2410,9 @@
         ("Crit", "Spell4Landing"): Time(
             time: 0.0,
         ),
+        ("Crit", "Spell4LandingToidle"): Time(
+            time: 0.0,
+        ),
         ("Crit", "Spell4LandingTorun"): Time(
             time: 0.0,
         ),
@@ -2438,9 +2441,6 @@
             time: 0.0,
         ),
         ("Crit", "Unk0x4a21da8d"): Time(
-            time: 0.0,
-        ),
-        ("Crit", "Unk0x4b0a6e1b"): Time(
             time: 0.0,
         ),
         ("Crit", "Unk0x55c6965"): Time(
@@ -2983,6 +2983,9 @@
         ("Death", "Spell4Landing"): Time(
             time: 0.0,
         ),
+        ("Death", "Spell4LandingToidle"): Time(
+            time: 0.0,
+        ),
         ("Death", "Spell4LandingTorun"): Time(
             time: 0.0,
         ),
@@ -3011,9 +3014,6 @@
             time: 0.0,
         ),
         ("Death", "Unk0x4a21da8d"): Time(
-            time: 0.0,
-        ),
-        ("Death", "Unk0x4b0a6e1b"): Time(
             time: 0.0,
         ),
         ("Death", "Unk0x55c6965"): Time(
@@ -3199,6 +3199,9 @@
         ("Idle1", "Spell4Landing"): Time(
             time: 0.0,
         ),
+        ("Idle1", "Spell4LandingToidle"): Time(
+            time: 0.0,
+        ),
         ("Idle1", "Spell4LandingTorun"): Time(
             time: 0.0,
         ),
@@ -3227,9 +3230,6 @@
             time: 0.0,
         ),
         ("Idle1", "Unk0x4a21da8d"): Time(
-            time: 0.0,
-        ),
-        ("Idle1", "Unk0x4b0a6e1b"): Time(
             time: 0.0,
         ),
         ("Idle1", "Unk0x55c6965"): Time(
@@ -3421,6 +3421,9 @@
         ("Idle2", "Spell4Landing"): Time(
             time: 0.0,
         ),
+        ("Idle2", "Spell4LandingToidle"): Time(
+            time: 0.0,
+        ),
         ("Idle2", "Spell4LandingTorun"): Time(
             time: 0.0,
         ),
@@ -3449,9 +3452,6 @@
             time: 0.0,
         ),
         ("Idle2", "Unk0x4a21da8d"): Time(
-            time: 0.0,
-        ),
-        ("Idle2", "Unk0x4b0a6e1b"): Time(
             time: 0.0,
         ),
         ("Idle2", "Unk0x55c6965"): Time(
@@ -3652,6 +3652,9 @@
         ("IdleIn", "Spell4Landing"): Time(
             time: 0.0,
         ),
+        ("IdleIn", "Spell4LandingToidle"): Time(
+            time: 0.0,
+        ),
         ("IdleIn", "Spell4LandingTorun"): Time(
             time: 0.0,
         ),
@@ -3680,9 +3683,6 @@
             time: 0.0,
         ),
         ("IdleIn", "Unk0x4a21da8d"): Time(
-            time: 0.0,
-        ),
-        ("IdleIn", "Unk0x4b0a6e1b"): Time(
             time: 0.0,
         ),
         ("IdleIn", "Unk0x55c6965"): Time(
@@ -3865,6 +3865,9 @@
         ("Joke", "Spell4Landing"): Time(
             time: 0.0,
         ),
+        ("Joke", "Spell4LandingToidle"): Time(
+            time: 0.0,
+        ),
         ("Joke", "Spell4LandingTorun"): Time(
             time: 0.0,
         ),
@@ -3893,9 +3896,6 @@
             time: 0.0,
         ),
         ("Joke", "Unk0x4a21da8d"): Time(
-            time: 0.0,
-        ),
-        ("Joke", "Unk0x4b0a6e1b"): Time(
             time: 0.0,
         ),
         ("Joke", "Unk0x55c6965"): Time(
@@ -4105,6 +4105,9 @@
         ("KnockUpLoop", "Spell4Landing"): Time(
             time: 0.1,
         ),
+        ("KnockUpLoop", "Spell4LandingToidle"): Time(
+            time: 0.1,
+        ),
         ("KnockUpLoop", "Spell4LandingTorun"): Time(
             time: 0.1,
         ),
@@ -4139,9 +4142,6 @@
             time: 0.1,
         ),
         ("KnockUpLoop", "Unk0x4a21da8d"): Time(
-            time: 0.1,
-        ),
-        ("KnockUpLoop", "Unk0x4b0a6e1b"): Time(
             time: 0.1,
         ),
         ("KnockUpLoop", "Unk0x55c6965"): Time(
@@ -4330,6 +4330,9 @@
         ("Laugh", "Spell4Landing"): Time(
             time: 0.0,
         ),
+        ("Laugh", "Spell4LandingToidle"): Time(
+            time: 0.0,
+        ),
         ("Laugh", "Spell4LandingTorun"): Time(
             time: 0.0,
         ),
@@ -4358,9 +4361,6 @@
             time: 0.0,
         ),
         ("Laugh", "Unk0x4a21da8d"): Time(
-            time: 0.0,
-        ),
-        ("Laugh", "Unk0x4b0a6e1b"): Time(
             time: 0.0,
         ),
         ("Laugh", "Unk0x55c6965"): Time(
@@ -4540,6 +4540,9 @@
         ("PassiveAttack", "Spell4Landing"): Time(
             time: 0.0,
         ),
+        ("PassiveAttack", "Spell4LandingToidle"): Time(
+            time: 0.0,
+        ),
         ("PassiveAttack", "Spell4LandingTorun"): Time(
             time: 0.0,
         ),
@@ -4568,9 +4571,6 @@
             time: 0.0,
         ),
         ("PassiveAttack", "Unk0x4a21da8d"): Time(
-            time: 0.0,
-        ),
-        ("PassiveAttack", "Unk0x4b0a6e1b"): Time(
             time: 0.0,
         ),
         ("PassiveAttack", "Unk0x55c6965"): Time(
@@ -4750,6 +4750,9 @@
         ("PassiveAttack2", "Spell4Landing"): Time(
             time: 0.0,
         ),
+        ("PassiveAttack2", "Spell4LandingToidle"): Time(
+            time: 0.0,
+        ),
         ("PassiveAttack2", "Spell4LandingTorun"): Time(
             time: 0.0,
         ),
@@ -4778,9 +4781,6 @@
             time: 0.0,
         ),
         ("PassiveAttack2", "Unk0x4a21da8d"): Time(
-            time: 0.0,
-        ),
-        ("PassiveAttack2", "Unk0x4b0a6e1b"): Time(
             time: 0.0,
         ),
         ("PassiveAttack2", "Unk0x55c6965"): Time(
@@ -4960,6 +4960,9 @@
         ("PassiveRangedAttack", "Spell4Landing"): Time(
             time: 0.0,
         ),
+        ("PassiveRangedAttack", "Spell4LandingToidle"): Time(
+            time: 0.0,
+        ),
         ("PassiveRangedAttack", "Spell4LandingTorun"): Time(
             time: 0.0,
         ),
@@ -4988,9 +4991,6 @@
             time: 0.0,
         ),
         ("PassiveRangedAttack", "Unk0x4a21da8d"): Time(
-            time: 0.0,
-        ),
-        ("PassiveRangedAttack", "Unk0x4b0a6e1b"): Time(
             time: 0.0,
         ),
         ("PassiveRangedAttack", "Unk0x55c6965"): Time(
@@ -5170,6 +5170,9 @@
         ("Recall", "Spell4Landing"): Time(
             time: 0.0,
         ),
+        ("Recall", "Spell4LandingToidle"): Time(
+            time: 0.0,
+        ),
         ("Recall", "Spell4LandingTorun"): Time(
             time: 0.0,
         ),
@@ -5198,9 +5201,6 @@
             time: 0.0,
         ),
         ("Recall", "Unk0x4a21da8d"): Time(
-            time: 0.0,
-        ),
-        ("Recall", "Unk0x4b0a6e1b"): Time(
             time: 0.0,
         ),
         ("Recall", "Unk0x55c6965"): Time(
@@ -5803,6 +5803,9 @@
         ("RunHomeguard", "Spell4Landing"): Time(
             time: 0.0,
         ),
+        ("RunHomeguard", "Spell4LandingToidle"): Time(
+            time: 0.0,
+        ),
         ("RunHomeguard", "Spell4LandingTorun"): Time(
             time: 0.0,
         ),
@@ -5831,9 +5834,6 @@
             time: 0.0,
         ),
         ("RunHomeguard", "Unk0x4a21da8d"): Time(
-            time: 0.0,
-        ),
-        ("RunHomeguard", "Unk0x4b0a6e1b"): Time(
             time: 0.0,
         ),
         ("RunHomeguard", "Unk0x55c6965"): Time(
@@ -6154,6 +6154,9 @@
         ("RunNormal", "Spell4Landing"): Time(
             time: 0.0,
         ),
+        ("RunNormal", "Spell4LandingToidle"): Time(
+            time: 0.0,
+        ),
         ("RunNormal", "Spell4LandingTorun"): Time(
             time: 0.0,
         ),
@@ -6182,9 +6185,6 @@
             time: 0.0,
         ),
         ("RunNormal", "Unk0x4a21da8d"): Time(
-            time: 0.0,
-        ),
-        ("RunNormal", "Unk0x4b0a6e1b"): Time(
             time: 0.0,
         ),
         ("RunNormal", "Unk0x55c6965"): Time(
@@ -6514,6 +6514,9 @@
         ("Spell1", "Spell4Landing"): Time(
             time: 0.0,
         ),
+        ("Spell1", "Spell4LandingToidle"): Time(
+            time: 0.0,
+        ),
         ("Spell1", "Spell4LandingTorun"): Time(
             time: 0.0,
         ),
@@ -6542,9 +6545,6 @@
             time: 0.0,
         ),
         ("Spell1", "Unk0x4a21da8d"): Time(
-            time: 0.0,
-        ),
-        ("Spell1", "Unk0x4b0a6e1b"): Time(
             time: 0.0,
         ),
         ("Spell1", "Unk0x55c6965"): Time(
@@ -7636,6 +7636,9 @@
         ("Spell2Charge", "Spell4Landing"): Time(
             time: 0.0,
         ),
+        ("Spell2Charge", "Spell4LandingToidle"): Time(
+            time: 0.0,
+        ),
         ("Spell2Charge", "Spell4LandingTorun"): Time(
             time: 0.0,
         ),
@@ -7664,9 +7667,6 @@
             time: 0.0,
         ),
         ("Spell2Charge", "Unk0x4a21da8d"): Time(
-            time: 0.0,
-        ),
-        ("Spell2Charge", "Unk0x4b0a6e1b"): Time(
             time: 0.0,
         ),
         ("Spell2Charge", "Unk0x55c6965"): Time(
@@ -8182,6 +8182,9 @@
         ("Spell2Dash", "Spell4Landing"): Time(
             time: 0.0,
         ),
+        ("Spell2Dash", "Spell4LandingToidle"): Time(
+            time: 0.0,
+        ),
         ("Spell2Dash", "Spell4LandingTorun"): Time(
             time: 0.0,
         ),
@@ -8210,9 +8213,6 @@
             time: 0.0,
         ),
         ("Spell2Dash", "Unk0x4a21da8d"): Time(
-            time: 0.0,
-        ),
-        ("Spell2Dash", "Unk0x4b0a6e1b"): Time(
             time: 0.0,
         ),
         ("Spell2Dash", "Unk0x55c6965"): Time(
@@ -8719,6 +8719,9 @@
         ("Spell2DashToidle", "Spell4Landing"): Time(
             time: 0.0,
         ),
+        ("Spell2DashToidle", "Spell4LandingToidle"): Time(
+            time: 0.0,
+        ),
         ("Spell2DashToidle", "Spell4LandingTorun"): Time(
             time: 0.0,
         ),
@@ -8747,9 +8750,6 @@
             time: 0.0,
         ),
         ("Spell2DashToidle", "Unk0x4a21da8d"): Time(
-            time: 0.0,
-        ),
-        ("Spell2DashToidle", "Unk0x4b0a6e1b"): Time(
             time: 0.0,
         ),
         ("Spell2DashToidle", "Unk0x55c6965"): Time(
@@ -9130,6 +9130,9 @@
         ("Spell30", "Spell4Landing"): Time(
             time: 0.0,
         ),
+        ("Spell30", "Spell4LandingToidle"): Time(
+            time: 0.0,
+        ),
         ("Spell30", "Spell4LandingTorun"): Time(
             time: 0.0,
         ),
@@ -9158,9 +9161,6 @@
             time: 0.0,
         ),
         ("Spell30", "Unk0x4a21da8d"): Time(
-            time: 0.0,
-        ),
-        ("Spell30", "Unk0x4b0a6e1b"): Time(
             time: 0.0,
         ),
         ("Spell30", "Unk0x55c6965"): Time(
@@ -9733,6 +9733,9 @@
         ("Spell3Run", "Spell4Landing"): Time(
             time: 0.0,
         ),
+        ("Spell3Run", "Spell4LandingToidle"): Time(
+            time: 0.0,
+        ),
         ("Spell3Run", "Spell4LandingTorun"): Time(
             time: 0.0,
         ),
@@ -9761,9 +9764,6 @@
             time: 0.0,
         ),
         ("Spell3Run", "Unk0x4a21da8d"): Time(
-            time: 0.0,
-        ),
-        ("Spell3Run", "Unk0x4b0a6e1b"): Time(
             time: 0.0,
         ),
         ("Spell3Run", "Unk0x55c6965"): Time(
@@ -9946,6 +9946,9 @@
         ("Spell3ToIdle", "Spell4Landing"): Time(
             time: 0.0,
         ),
+        ("Spell3ToIdle", "Spell4LandingToidle"): Time(
+            time: 0.0,
+        ),
         ("Spell3ToIdle", "Spell4LandingTorun"): Time(
             time: 0.0,
         ),
@@ -9974,9 +9977,6 @@
             time: 0.0,
         ),
         ("Spell3ToIdle", "Unk0x4a21da8d"): Time(
-            time: 0.0,
-        ),
-        ("Spell3ToIdle", "Unk0x4b0a6e1b"): Time(
             time: 0.0,
         ),
         ("Spell3ToIdle", "Unk0x55c6965"): Time(
@@ -10156,6 +10156,9 @@
         ("Spell4", "Spell4Landing"): Time(
             time: 0.0,
         ),
+        ("Spell4", "Spell4LandingToidle"): Time(
+            time: 0.0,
+        ),
         ("Spell4", "Spell4LandingTorun"): Time(
             time: 0.0,
         ),
@@ -10184,9 +10187,6 @@
             time: 0.0,
         ),
         ("Spell4", "Unk0x4a21da8d"): Time(
-            time: 0.0,
-        ),
-        ("Spell4", "Unk0x4b0a6e1b"): Time(
             time: 0.0,
         ),
         ("Spell4", "Unk0x55c6965"): Time(
@@ -10384,6 +10384,9 @@
         ("Spell4Hit", "Spell4Landing"): Time(
             time: 0.0,
         ),
+        ("Spell4Hit", "Spell4LandingToidle"): Time(
+            time: 0.0,
+        ),
         ("Spell4Hit", "Spell4LandingTorun"): Time(
             time: 0.0,
         ),
@@ -10412,9 +10415,6 @@
             time: 0.0,
         ),
         ("Spell4Hit", "Unk0x4a21da8d"): Time(
-            time: 0.0,
-        ),
-        ("Spell4Hit", "Unk0x4b0a6e1b"): Time(
             time: 0.0,
         ),
         ("Spell4Hit", "Unk0x55c6965"): Time(
@@ -10609,6 +10609,9 @@
         ("Spell4HitToIdle", "Spell4Landing"): Time(
             time: 0.0,
         ),
+        ("Spell4HitToIdle", "Spell4LandingToidle"): Time(
+            time: 0.0,
+        ),
         ("Spell4HitToIdle", "Spell4LandingTorun"): Time(
             time: 0.0,
         ),
@@ -10637,9 +10640,6 @@
             time: 0.0,
         ),
         ("Spell4HitToIdle", "Unk0x4a21da8d"): Time(
-            time: 0.0,
-        ),
-        ("Spell4HitToIdle", "Unk0x4b0a6e1b"): Time(
             time: 0.0,
         ),
         ("Spell4HitToIdle", "Unk0x55c6965"): Time(
@@ -10825,6 +10825,9 @@
         ("Spell4HitToRun", "Spell4Landing"): Time(
             time: 0.0,
         ),
+        ("Spell4HitToRun", "Spell4LandingToidle"): Time(
+            time: 0.0,
+        ),
         ("Spell4HitToRun", "Spell4LandingTorun"): Time(
             time: 0.0,
         ),
@@ -10853,9 +10856,6 @@
             time: 0.0,
         ),
         ("Spell4HitToRun", "Unk0x4a21da8d"): Time(
-            time: 0.0,
-        ),
-        ("Spell4HitToRun", "Unk0x4b0a6e1b"): Time(
             time: 0.0,
         ),
         ("Spell4HitToRun", "Unk0x55c6965"): Time(
@@ -11114,10 +11114,10 @@
             time: 0.0,
         ),
         ("Spell4Landing", "Idle1"): TransitionClip(
-            clip_name: "Unk0x4b0a6e1b",
+            clip_name: "Spell4LandingToidle",
         ),
         ("Spell4Landing", "Idle2"): TransitionClip(
-            clip_name: "Unk0x4b0a6e1b",
+            clip_name: "Spell4LandingToidle",
         ),
         ("Spell4Landing", "IdleIn"): Time(
             time: 0.05,
@@ -11239,6 +11239,9 @@
         ("Spell4Landing", "Spell4Landing"): Time(
             time: 0.0,
         ),
+        ("Spell4Landing", "Spell4LandingToidle"): Time(
+            time: 0.0,
+        ),
         ("Spell4Landing", "Spell4LandingTorun"): Time(
             time: 0.0,
         ),
@@ -11267,9 +11270,6 @@
             time: 0.0,
         ),
         ("Spell4Landing", "Unk0x4a21da8d"): Time(
-            time: 0.0,
-        ),
-        ("Spell4Landing", "Unk0x4b0a6e1b"): Time(
             time: 0.0,
         ),
         ("Spell4Landing", "Unk0x55c6965"): Time(
@@ -11304,6 +11304,216 @@
         ),
         ("Spell4Landing", "Walk"): TransitionClip(
             clip_name: "Spell4LandingTowalk",
+        ),
+        ("Spell4LandingToidle", "Attack1"): Time(
+            time: 0.1,
+        ),
+        ("Spell4LandingToidle", "Attack1Torun"): Time(
+            time: 0.0,
+        ),
+        ("Spell4LandingToidle", "Attack1Towalk"): Time(
+            time: 0.1,
+        ),
+        ("Spell4LandingToidle", "Attack2"): Time(
+            time: 0.1,
+        ),
+        ("Spell4LandingToidle", "Attack2Torun"): Time(
+            time: 0.0,
+        ),
+        ("Spell4LandingToidle", "Attack2Towalk"): Time(
+            time: 0.1,
+        ),
+        ("Spell4LandingToidle", "AttackClose"): Time(
+            time: 0.1,
+        ),
+        ("Spell4LandingToidle", "Crit"): Time(
+            time: 0.0,
+        ),
+        ("Spell4LandingToidle", "Crit2"): Time(
+            time: 0.0,
+        ),
+        ("Spell4LandingToidle", "DanceIntro"): Time(
+            time: 0.0,
+        ),
+        ("Spell4LandingToidle", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("Spell4LandingToidle", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell4LandingToidle", "IdleIn"): Time(
+            time: 0.05,
+        ),
+        ("Spell4LandingToidle", "Joke"): Time(
+            time: 0.0,
+        ),
+        ("Spell4LandingToidle", "KnockUpLoop"): Time(
+            time: 0.0,
+        ),
+        ("Spell4LandingToidle", "Laugh"): Time(
+            time: 0.0,
+        ),
+        ("Spell4LandingToidle", "PassiveAttack"): Time(
+            time: 0.0,
+        ),
+        ("Spell4LandingToidle", "PassiveAttack2"): Time(
+            time: 0.0,
+        ),
+        ("Spell4LandingToidle", "PassiveRangedAttack"): Time(
+            time: 0.0,
+        ),
+        ("Spell4LandingToidle", "Recall"): Time(
+            time: 0.1,
+        ),
+        ("Spell4LandingToidle", "RecallWinddown"): Time(
+            time: 0.0,
+        ),
+        ("Spell4LandingToidle", "Respawn"): Time(
+            time: 0.0,
+        ),
+        ("Spell4LandingToidle", "RunIn"): Time(
+            time: 0.0,
+        ),
+        ("Spell4LandingToidle", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("Spell4LandingToidle", "Spell1ToRun"): Time(
+            time: 0.0,
+        ),
+        ("Spell4LandingToidle", "Spell1Torun180"): Time(
+            time: 0.0,
+        ),
+        ("Spell4LandingToidle", "Spell1Torun90"): Time(
+            time: 0.0,
+        ),
+        ("Spell4LandingToidle", "Spell1Towalk180"): Time(
+            time: 0.0,
+        ),
+        ("Spell4LandingToidle", "Spell1Towalk90"): Time(
+            time: 0.0,
+        ),
+        ("Spell4LandingToidle", "Spell2"): Time(
+            time: 0.0,
+        ),
+        ("Spell4LandingToidle", "Spell2Charge"): Time(
+            time: 0.0,
+        ),
+        ("Spell4LandingToidle", "Spell2ChargeMove"): Time(
+            time: 0.0,
+        ),
+        ("Spell4LandingToidle", "Spell2ChargeToidle"): Time(
+            time: 0.0,
+        ),
+        ("Spell4LandingToidle", "Spell2Dash"): Time(
+            time: 0.0,
+        ),
+        ("Spell4LandingToidle", "Spell2DashToRun"): Time(
+            time: 0.1,
+        ),
+        ("Spell4LandingToidle", "Spell2DashToWalk"): Time(
+            time: 0.1,
+        ),
+        ("Spell4LandingToidle", "Spell2DashToidle"): Time(
+            time: 0.0,
+        ),
+        ("Spell4LandingToidle", "Spell3"): Time(
+            time: 0.0,
+        ),
+        ("Spell4LandingToidle", "Spell30"): Time(
+            time: 0.0,
+        ),
+        ("Spell4LandingToidle", "Spell3180"): Time(
+            time: 0.0,
+        ),
+        ("Spell4LandingToidle", "Spell390"): Time(
+            time: 0.0,
+        ),
+        ("Spell4LandingToidle", "Spell3Run"): Time(
+            time: 0.0,
+        ),
+        ("Spell4LandingToidle", "Spell3ToIdle"): Time(
+            time: 0.0,
+        ),
+        ("Spell4LandingToidle", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("Spell4LandingToidle", "Spell4Hit"): Time(
+            time: 0.0,
+        ),
+        ("Spell4LandingToidle", "Spell4HitToIdle"): Time(
+            time: 0.0,
+        ),
+        ("Spell4LandingToidle", "Spell4HitToRun"): Time(
+            time: 0.0,
+        ),
+        ("Spell4LandingToidle", "Spell4HitTowalk"): Time(
+            time: 0.0,
+        ),
+        ("Spell4LandingToidle", "Spell4Landing"): Time(
+            time: 0.0,
+        ),
+        ("Spell4LandingToidle", "Spell4LandingToidle"): Time(
+            time: 0.0,
+        ),
+        ("Spell4LandingToidle", "Spell4LandingTorun"): Time(
+            time: 0.0,
+        ),
+        ("Spell4LandingToidle", "Spell4LandingTowalk"): Time(
+            time: 0.0,
+        ),
+        ("Spell4LandingToidle", "Stunned"): Time(
+            time: 0.0,
+        ),
+        ("Spell4LandingToidle", "TauntIntro"): Time(
+            time: 0.0,
+        ),
+        ("Spell4LandingToidle", "TauntLoop"): Time(
+            time: 0.0,
+        ),
+        ("Spell4LandingToidle", "Unk0x16cf27cb"): Time(
+            time: 0.1,
+        ),
+        ("Spell4LandingToidle", "Unk0x2eb152e1"): Time(
+            time: 0.0,
+        ),
+        ("Spell4LandingToidle", "Unk0x3b82166c"): Time(
+            time: 0.0,
+        ),
+        ("Spell4LandingToidle", "Unk0x4721d5d4"): Time(
+            time: 0.0,
+        ),
+        ("Spell4LandingToidle", "Unk0x4a21da8d"): Time(
+            time: 0.0,
+        ),
+        ("Spell4LandingToidle", "Unk0x55c6965"): Time(
+            time: 0.0,
+        ),
+        ("Spell4LandingToidle", "Unk0x61f9f5f6"): Time(
+            time: 0.0,
+        ),
+        ("Spell4LandingToidle", "Unk0x805e6ea5"): Time(
+            time: 0.1,
+        ),
+        ("Spell4LandingToidle", "Unk0x8c8420c1"): Time(
+            time: 0.0,
+        ),
+        ("Spell4LandingToidle", "Unk0xa24eb64e"): Time(
+            time: 0.0,
+        ),
+        ("Spell4LandingToidle", "Unk0xafc1a749"): Time(
+            time: 0.0,
+        ),
+        ("Spell4LandingToidle", "Unk0xdb2a5f13"): Time(
+            time: 0.1,
+        ),
+        ("Spell4LandingToidle", "Unk0xdb81185a"): Time(
+            time: 0.0,
+        ),
+        ("Spell4LandingToidle", "Unk0xe186a59b"): Time(
+            time: 0.0,
+        ),
+        ("Spell4LandingToidle", "Unk0xf3fd4a93"): Time(
+            time: 0.0,
         ),
         ("Spell4LandingTorun", "Attack1"): Time(
             time: 0.1,
@@ -11458,6 +11668,9 @@
         ("Spell4LandingTorun", "Spell4Landing"): Time(
             time: 0.0,
         ),
+        ("Spell4LandingTorun", "Spell4LandingToidle"): Time(
+            time: 0.0,
+        ),
         ("Spell4LandingTorun", "Spell4LandingTorun"): Time(
             time: 0.0,
         ),
@@ -11486,9 +11699,6 @@
             time: 0.0,
         ),
         ("Spell4LandingTorun", "Unk0x4a21da8d"): Time(
-            time: 0.0,
-        ),
-        ("Spell4LandingTorun", "Unk0x4b0a6e1b"): Time(
             time: 0.0,
         ),
         ("Spell4LandingTorun", "Unk0x55c6965"): Time(
@@ -11674,6 +11884,9 @@
         ("Spell4LandingTowalk", "Spell4Landing"): Time(
             time: 0.0,
         ),
+        ("Spell4LandingTowalk", "Spell4LandingToidle"): Time(
+            time: 0.0,
+        ),
         ("Spell4LandingTowalk", "Spell4LandingTorun"): Time(
             time: 0.0,
         ),
@@ -11702,9 +11915,6 @@
             time: 0.0,
         ),
         ("Spell4LandingTowalk", "Unk0x4a21da8d"): Time(
-            time: 0.0,
-        ),
-        ("Spell4LandingTowalk", "Unk0x4b0a6e1b"): Time(
             time: 0.0,
         ),
         ("Spell4LandingTowalk", "Unk0x55c6965"): Time(
@@ -11968,6 +12178,9 @@
         ("TauntIntro", "Spell4Landing"): Time(
             time: 0.0,
         ),
+        ("TauntIntro", "Spell4LandingToidle"): Time(
+            time: 0.0,
+        ),
         ("TauntIntro", "Spell4LandingTorun"): Time(
             time: 0.0,
         ),
@@ -11996,9 +12209,6 @@
             time: 0.0,
         ),
         ("TauntIntro", "Unk0x4a21da8d"): Time(
-            time: 0.0,
-        ),
-        ("TauntIntro", "Unk0x4b0a6e1b"): Time(
             time: 0.0,
         ),
         ("TauntIntro", "Unk0x55c6965"): Time(
@@ -12628,6 +12838,9 @@
         ("Unk0x2eb152e1", "Spell4Landing"): Time(
             time: 0.0,
         ),
+        ("Unk0x2eb152e1", "Spell4LandingToidle"): Time(
+            time: 0.0,
+        ),
         ("Unk0x2eb152e1", "Spell4LandingTorun"): Time(
             time: 0.0,
         ),
@@ -12656,9 +12869,6 @@
             time: 0.0,
         ),
         ("Unk0x2eb152e1", "Unk0x4a21da8d"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x2eb152e1", "Unk0x4b0a6e1b"): Time(
             time: 0.0,
         ),
         ("Unk0x2eb152e1", "Unk0x55c6965"): Time(
@@ -12850,6 +13060,9 @@
         ("Unk0x3b82166c", "Spell4Landing"): Time(
             time: 0.0,
         ),
+        ("Unk0x3b82166c", "Spell4LandingToidle"): Time(
+            time: 0.0,
+        ),
         ("Unk0x3b82166c", "Spell4LandingTorun"): Time(
             time: 0.0,
         ),
@@ -12878,9 +13091,6 @@
             time: 0.0,
         ),
         ("Unk0x3b82166c", "Unk0x4a21da8d"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x3b82166c", "Unk0x4b0a6e1b"): Time(
             time: 0.0,
         ),
         ("Unk0x3b82166c", "Unk0x55c6965"): Time(
@@ -13063,6 +13273,9 @@
         ("Unk0x4721d5d4", "Spell4Landing"): Time(
             time: 0.0,
         ),
+        ("Unk0x4721d5d4", "Spell4LandingToidle"): Time(
+            time: 0.0,
+        ),
         ("Unk0x4721d5d4", "Spell4LandingTorun"): Time(
             time: 0.0,
         ),
@@ -13091,9 +13304,6 @@
             time: 0.0,
         ),
         ("Unk0x4721d5d4", "Unk0x4a21da8d"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x4721d5d4", "Unk0x4b0a6e1b"): Time(
             time: 0.0,
         ),
         ("Unk0x4721d5d4", "Unk0x55c6965"): Time(
@@ -13285,6 +13495,9 @@
         ("Unk0x4a21da8d", "Spell4Landing"): Time(
             time: 0.0,
         ),
+        ("Unk0x4a21da8d", "Spell4LandingToidle"): Time(
+            time: 0.0,
+        ),
         ("Unk0x4a21da8d", "Spell4LandingTorun"): Time(
             time: 0.0,
         ),
@@ -13313,9 +13526,6 @@
             time: 0.0,
         ),
         ("Unk0x4a21da8d", "Unk0x4a21da8d"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x4a21da8d", "Unk0x4b0a6e1b"): Time(
             time: 0.0,
         ),
         ("Unk0x4a21da8d", "Unk0x55c6965"): Time(
@@ -13350,216 +13560,6 @@
         ),
         ("Unk0x4a21da8d", "Walk"): TransitionClip(
             clip_name: "Unk0x61f9f5f6",
-        ),
-        ("Unk0x4b0a6e1b", "Attack1"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x4b0a6e1b", "Attack1Torun"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x4b0a6e1b", "Attack1Towalk"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x4b0a6e1b", "Attack2"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x4b0a6e1b", "Attack2Torun"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x4b0a6e1b", "Attack2Towalk"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x4b0a6e1b", "AttackClose"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x4b0a6e1b", "Crit"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x4b0a6e1b", "Crit2"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x4b0a6e1b", "DanceIntro"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x4b0a6e1b", "DanceLoop"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x4b0a6e1b", "Death"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x4b0a6e1b", "IdleIn"): Time(
-            time: 0.05,
-        ),
-        ("Unk0x4b0a6e1b", "Joke"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x4b0a6e1b", "KnockUpLoop"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x4b0a6e1b", "Laugh"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x4b0a6e1b", "PassiveAttack"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x4b0a6e1b", "PassiveAttack2"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x4b0a6e1b", "PassiveRangedAttack"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x4b0a6e1b", "Recall"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x4b0a6e1b", "RecallWinddown"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x4b0a6e1b", "Respawn"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x4b0a6e1b", "RunIn"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x4b0a6e1b", "Spell1"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x4b0a6e1b", "Spell1ToRun"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x4b0a6e1b", "Spell1Torun180"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x4b0a6e1b", "Spell1Torun90"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x4b0a6e1b", "Spell1Towalk180"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x4b0a6e1b", "Spell1Towalk90"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x4b0a6e1b", "Spell2"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x4b0a6e1b", "Spell2Charge"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x4b0a6e1b", "Spell2ChargeMove"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x4b0a6e1b", "Spell2ChargeToidle"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x4b0a6e1b", "Spell2Dash"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x4b0a6e1b", "Spell2DashToRun"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x4b0a6e1b", "Spell2DashToWalk"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x4b0a6e1b", "Spell2DashToidle"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x4b0a6e1b", "Spell3"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x4b0a6e1b", "Spell30"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x4b0a6e1b", "Spell3180"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x4b0a6e1b", "Spell390"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x4b0a6e1b", "Spell3Run"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x4b0a6e1b", "Spell3ToIdle"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x4b0a6e1b", "Spell4"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x4b0a6e1b", "Spell4Hit"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x4b0a6e1b", "Spell4HitToIdle"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x4b0a6e1b", "Spell4HitToRun"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x4b0a6e1b", "Spell4HitTowalk"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x4b0a6e1b", "Spell4Landing"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x4b0a6e1b", "Spell4LandingTorun"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x4b0a6e1b", "Spell4LandingTowalk"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x4b0a6e1b", "Stunned"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x4b0a6e1b", "TauntIntro"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x4b0a6e1b", "TauntLoop"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x4b0a6e1b", "Unk0x16cf27cb"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x4b0a6e1b", "Unk0x2eb152e1"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x4b0a6e1b", "Unk0x3b82166c"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x4b0a6e1b", "Unk0x4721d5d4"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x4b0a6e1b", "Unk0x4a21da8d"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x4b0a6e1b", "Unk0x4b0a6e1b"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x4b0a6e1b", "Unk0x55c6965"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x4b0a6e1b", "Unk0x61f9f5f6"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x4b0a6e1b", "Unk0x805e6ea5"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x4b0a6e1b", "Unk0x8c8420c1"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x4b0a6e1b", "Unk0xa24eb64e"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x4b0a6e1b", "Unk0xafc1a749"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x4b0a6e1b", "Unk0xdb2a5f13"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x4b0a6e1b", "Unk0xdb81185a"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x4b0a6e1b", "Unk0xe186a59b"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x4b0a6e1b", "Unk0xf3fd4a93"): Time(
-            time: 0.0,
         ),
         ("Unk0x55c6965", "Attack1"): Time(
             time: 0.1,
@@ -14038,6 +14038,9 @@
         ("Unk0x805e6ea5", "Spell4Landing"): Time(
             time: 0.0,
         ),
+        ("Unk0x805e6ea5", "Spell4LandingToidle"): Time(
+            time: 0.0,
+        ),
         ("Unk0x805e6ea5", "Spell4LandingTorun"): Time(
             time: 0.0,
         ),
@@ -14072,9 +14075,6 @@
             time: 0.0,
         ),
         ("Unk0x805e6ea5", "Unk0x4a21da8d"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x805e6ea5", "Unk0x4b0a6e1b"): Time(
             time: 0.0,
         ),
         ("Unk0x805e6ea5", "Unk0x55c6965"): Time(
@@ -14275,6 +14275,9 @@
         ("Unk0x8bc697b6", "Spell4Landing"): Time(
             time: 0.0,
         ),
+        ("Unk0x8bc697b6", "Spell4LandingToidle"): Time(
+            time: 0.0,
+        ),
         ("Unk0x8bc697b6", "Spell4LandingTorun"): Time(
             time: 0.0,
         ),
@@ -14303,9 +14306,6 @@
             time: 0.0,
         ),
         ("Unk0x8bc697b6", "Unk0x4a21da8d"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x8bc697b6", "Unk0x4b0a6e1b"): Time(
             time: 0.0,
         ),
         ("Unk0x8bc697b6", "Unk0x55c6965"): Time(
@@ -15397,6 +15397,9 @@
         ("Walk", "Spell4Landing"): Time(
             time: 0.0,
         ),
+        ("Walk", "Spell4LandingToidle"): Time(
+            time: 0.0,
+        ),
         ("Walk", "Spell4LandingTorun"): Time(
             time: 0.0,
         ),
@@ -15425,9 +15428,6 @@
             time: 0.0,
         ),
         ("Walk", "Unk0x4a21da8d"): Time(
-            time: 0.0,
-        ),
-        ("Walk", "Unk0x4b0a6e1b"): Time(
             time: 0.0,
         ),
         ("Walk", "Unk0x55c6965"): Time(

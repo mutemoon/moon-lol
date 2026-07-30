@@ -145,6 +145,10 @@ fn write_scene_ron(
             "                    skin: Path(\"characters/{}/skins/skin0.ron\"),\n",
             champ_lower
         ));
+        ron_content.push_str(&format!(
+            "                    vfx: Path(\"characters/{}/skins/skin0_vfx.ron\"),\n",
+            champ_lower
+        ));
         ron_content.push_str("                ),\n");
         ron_content.push_str("            },\n");
         ron_content.push_str("        ),\n");

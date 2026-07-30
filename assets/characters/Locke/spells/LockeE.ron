@@ -6,7 +6,7 @@
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: "unk_0x98829645",
+                        dataValue: "base_dash_damage",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",

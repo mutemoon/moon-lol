@@ -59,12 +59,15 @@
         ),
         "Dance": Sequence(
             hashes: [
-                "Unk0xb4503e42",
+                "DanceInBase",
                 "DanceBase",
             ],
         ),
         "DanceBase": Clip(
             node_index: 10,
+        ),
+        "DanceInBase": Clip(
+            node_index: 26,
         ),
         "Death": Clip(
             node_index: 31,
@@ -189,9 +192,6 @@
         ),
         "Unk0xaa948a27": Clip(
             node_index: 24,
-        ),
-        "Unk0xb4503e42": Clip(
-            node_index: 26,
         ),
         "Unk0xce7c7aad": Clip(
             node_index: 33,
@@ -405,6 +405,27 @@
             time: 0.1,
         ),
         ("DanceBase", "Spell4Channel"): Time(
+            time: 0.1,
+        ),
+        ("DanceInBase", "Attack1Base"): Time(
+            time: 0.1,
+        ),
+        ("DanceInBase", "Attack1P"): Time(
+            time: 0.1,
+        ),
+        ("DanceInBase", "Attack2"): Time(
+            time: 0.1,
+        ),
+        ("DanceInBase", "Attack3"): Time(
+            time: 0.1,
+        ),
+        ("DanceInBase", "Attack4"): Time(
+            time: 0.1,
+        ),
+        ("DanceInBase", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("DanceInBase", "Spell4Channel"): Time(
             time: 0.1,
         ),
         ("Death", "Attack1Base"): Time(
@@ -1108,27 +1129,6 @@
         ),
         ("Unk0xaa948a27", "Unk0xce7c7aad"): TransitionClip(
             clip_name: "Unk0x3195954a",
-        ),
-        ("Unk0xb4503e42", "Attack1Base"): Time(
-            time: 0.1,
-        ),
-        ("Unk0xb4503e42", "Attack1P"): Time(
-            time: 0.1,
-        ),
-        ("Unk0xb4503e42", "Attack2"): Time(
-            time: 0.1,
-        ),
-        ("Unk0xb4503e42", "Attack3"): Time(
-            time: 0.1,
-        ),
-        ("Unk0xb4503e42", "Attack4"): Time(
-            time: 0.1,
-        ),
-        ("Unk0xb4503e42", "Crit"): Time(
-            time: 0.1,
-        ),
-        ("Unk0xb4503e42", "Spell4Channel"): Time(
-            time: 0.1,
         ),
         ("Unk0xce7c7aad", "Attack1Base"): Time(
             time: 0.1,

@@ -54,6 +54,9 @@
         "Idle1Var1": Clip(
             node_index: 11,
         ),
+        "IdleEnterBase": Clip(
+            node_index: 61,
+        ),
         "IdlePassive": Clip(
             node_index: 55,
         ),
@@ -367,7 +370,7 @@
         ),
         "Unk0xe0bca822": Sequence(
             hashes: [
-                "Unk0xe9ba192a",
+                "IdleEnterBase",
                 "IdleSelector",
             ],
         ),
@@ -395,9 +398,6 @@
                     value: 135.0,
                 ),
             ],
-        ),
-        "Unk0xe9ba192a": Clip(
-            node_index: 61,
         ),
         "Unk0xf11f4b03": ConditionBool(
             updater: LogicDriverBool,
@@ -490,8 +490,17 @@
         ("Idle1Var1", "Spell3Base"): Time(
             time: 0.0,
         ),
+        ("IdleEnterBase", "Death"): Time(
+            time: 0.0,
+        ),
+        ("IdleEnterBase", "IdleEnterBase"): Time(
+            time: 0.0,
+        ),
+        ("IdleEnterBase", "Spell3Base"): Time(
+            time: 0.0,
+        ),
         ("IdlePassive", "Idle1Base"): TransitionClip(
-            clip_name: "Unk0xe9ba192a",
+            clip_name: "IdleEnterBase",
         ),
         ("IdlePassive", "Spell3Base"): Time(
             time: 0.0,
@@ -518,7 +527,7 @@
             time: 0.0,
         ),
         ("PassRunToPassIdle", "Idle1Base"): TransitionClip(
-            clip_name: "Unk0xe9ba192a",
+            clip_name: "IdleEnterBase",
         ),
         ("Recall", "Death"): Time(
             time: 0.0,
@@ -542,7 +551,7 @@
             time: 0.0,
         ),
         ("RunBase", "Idle1Base"): TransitionClip(
-            clip_name: "Unk0xe9ba192a",
+            clip_name: "IdleEnterBase",
         ),
         ("RunBase", "RunBase"): Time(
             time: 0.0,
@@ -551,10 +560,10 @@
             time: 0.0,
         ),
         ("RunHaste", "Idle1Base"): TransitionClip(
-            clip_name: "Unk0xe9ba192a",
+            clip_name: "IdleEnterBase",
         ),
         ("RunInjured", "Idle1Base"): TransitionClip(
-            clip_name: "Unk0xe9ba192a",
+            clip_name: "IdleEnterBase",
         ),
         ("RunInjured", "RunInjured"): Time(
             time: 0.0,
@@ -581,7 +590,7 @@
             time: 0.0,
         ),
         ("RunPassiveBuildUp", "Idle1Base"): TransitionClip(
-            clip_name: "Unk0xe9ba192a",
+            clip_name: "IdleEnterBase",
         ),
         ("RunPassiveBuildUp", "Spell3Base"): Time(
             time: 0.0,
@@ -590,7 +599,7 @@
             clip_name: "RunPassiveTransition",
         ),
         ("RunPassiveTransition", "Idle1Base"): TransitionClip(
-            clip_name: "Unk0xe9ba192a",
+            clip_name: "IdleEnterBase",
         ),
         ("RunPassiveTransition", "RunPassiveTransition"): Time(
             time: 0.0,
@@ -599,7 +608,7 @@
             time: 0.0,
         ),
         ("Spell1", "Idle1Base"): TransitionClip(
-            clip_name: "Unk0xe9ba192a",
+            clip_name: "IdleEnterBase",
         ),
         ("Spell1", "Spell1"): Time(
             time: 0.0,
@@ -851,7 +860,7 @@
             time: 0.0,
         ),
         ("Unk0xd66d3970", "Idle1Base"): TransitionClip(
-            clip_name: "Unk0xe9ba192a",
+            clip_name: "IdleEnterBase",
         ),
         ("Unk0xd66d3970", "IdlePassive"): TransitionClip(
             clip_name: "PassRunToPassIdle",
@@ -878,15 +887,6 @@
             time: 0.0,
         ),
         ("Unk0xe6e82eb9", "Unk0xe6e82eb9"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xe9ba192a", "Death"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xe9ba192a", "Spell3Base"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xe9ba192a", "Unk0xe9ba192a"): Time(
             time: 0.0,
         ),
     },

@@ -18,20 +18,20 @@
                 multiplier: None,
                 precision: None,
             ),
+            "execute_bonus_calc": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: Some(1),
+            ),
             "unk_0x6c540a3a": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: "unk_0xefaff808",
+                        dataValue: "execution_threshold",
                     ),
                 ]),
-                multiplier: None,
-                precision: Some(1),
-            ),
-            "unk_0x708b59ae": (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
                 multiplier: None,
                 precision: Some(1),
             ),

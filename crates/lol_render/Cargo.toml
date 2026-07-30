@@ -4,7 +4,6 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-bevy_gltf_draco.workspace = true
 bevy.workspace = true
 bincode.workspace = true
 crossbeam-channel.workspace = true
@@ -22,3 +21,5 @@ ron.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 thiserror.workspace = true
+naga = { version = "29.0.1", features = ["spv-in"] }
+walkdir = "2.5.0"

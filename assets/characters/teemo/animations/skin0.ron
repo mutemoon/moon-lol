@@ -45,16 +45,22 @@
         ),
         "Dance": Sequence(
             hashes: [
-                "Unk0xeffa3581",
+                "Dance1Spam",
                 "DanceLoop",
             ],
         ),
         "Dance1": Clip(
             node_index: 5,
         ),
+        "Dance1Spam": Clip(
+            node_index: 52,
+        ),
+        "Dance2": Clip(
+            node_index: 8,
+        ),
         "DanceLoop": Sequence(
             hashes: [
-                "Unk0x374f09ea",
+                "Dance2",
                 "Dance1",
             ],
         ),
@@ -191,9 +197,6 @@
         "Unk0x37003d73": Clip(
             node_index: 7,
         ),
-        "Unk0x374f09ea": Clip(
-            node_index: 8,
-        ),
         "Unk0x42a610a8": Clip(
             node_index: 10,
         ),
@@ -312,9 +315,6 @@
                 ),
             ],
         ),
-        "Unk0xeffa3581": Clip(
-            node_index: 52,
-        ),
         "Unk0xff061c13": Clip(
             node_index: 54,
         ),
@@ -431,14 +431,17 @@
         ("Dance1", "Dance1"): TransitionClip(
             clip_name: "Unk0x606b67d4",
         ),
+        ("Dance1", "Dance1Spam"): TransitionClip(
+            clip_name: "Unk0x606b67d4",
+        ),
+        ("Dance1", "Dance2"): Time(
+            time: 0.0,
+        ),
         ("Dance1", "Idle1Base"): TransitionClip(
-            clip_name: "Unk0x374f09ea",
+            clip_name: "Dance2",
         ),
         ("Dance1", "Laugh"): Time(
             time: 0.001,
-        ),
-        ("Dance1", "Unk0x374f09ea"): Time(
-            time: 0.0,
         ),
         ("Dance1", "Unk0x606b67d4"): Time(
             time: 0.0,
@@ -446,8 +449,47 @@
         ("Dance1", "Unk0x93f45fa2"): TransitionClip(
             clip_name: "JokeIn",
         ),
-        ("Dance1", "Unk0xeffa3581"): TransitionClip(
+        ("Dance1Spam", "Dance1"): TransitionClip(
             clip_name: "Unk0x606b67d4",
+        ),
+        ("Dance1Spam", "Dance1Spam"): TransitionClip(
+            clip_name: "Unk0x606b67d4",
+        ),
+        ("Dance1Spam", "Dance2"): Time(
+            time: 0.0,
+        ),
+        ("Dance1Spam", "Idle1Base"): TransitionClip(
+            clip_name: "Dance2",
+        ),
+        ("Dance1Spam", "Laugh"): Time(
+            time: 0.001,
+        ),
+        ("Dance1Spam", "Unk0x606b67d4"): Time(
+            time: 0.001,
+        ),
+        ("Dance1Spam", "Unk0x93f45fa2"): TransitionClip(
+            clip_name: "JokeIn",
+        ),
+        ("Dance2", "Dance1"): Time(
+            time: 0.0,
+        ),
+        ("Dance2", "Dance1Spam"): Time(
+            time: 0.0,
+        ),
+        ("Dance2", "Dance2"): Time(
+            time: 0.0,
+        ),
+        ("Dance2", "Idle1Base"): TransitionClip(
+            clip_name: "Dance1",
+        ),
+        ("Dance2", "Laugh"): Time(
+            time: 0.001,
+        ),
+        ("Dance2", "Unk0x606b67d4"): Time(
+            time: 0.0,
+        ),
+        ("Dance2", "Unk0x93f45fa2"): TransitionClip(
+            clip_name: "JokeIn",
         ),
         ("Death", "Death"): Time(
             time: 0.0,
@@ -812,27 +854,6 @@
         ("Unk0x37003d73", "Unk0x98162e94"): Time(
             time: 0.0,
         ),
-        ("Unk0x374f09ea", "Dance1"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x374f09ea", "Idle1Base"): TransitionClip(
-            clip_name: "Dance1",
-        ),
-        ("Unk0x374f09ea", "Laugh"): Time(
-            time: 0.001,
-        ),
-        ("Unk0x374f09ea", "Unk0x374f09ea"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x374f09ea", "Unk0x606b67d4"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x374f09ea", "Unk0x93f45fa2"): TransitionClip(
-            clip_name: "JokeIn",
-        ),
-        ("Unk0x374f09ea", "Unk0xeffa3581"): Time(
-            time: 0.0,
-        ),
         ("Unk0x4599c0b5", "Idle1Base"): TransitionClip(
             clip_name: "IdleIn",
         ),
@@ -863,23 +884,23 @@
         ("Unk0x606b67d4", "Dance1"): Time(
             time: 0.0,
         ),
+        ("Unk0x606b67d4", "Dance1Spam"): Time(
+            time: 0.001,
+        ),
+        ("Unk0x606b67d4", "Dance2"): Time(
+            time: 0.0,
+        ),
         ("Unk0x606b67d4", "Idle1Base"): TransitionClip(
             clip_name: "Dance1",
         ),
         ("Unk0x606b67d4", "Laugh"): Time(
             time: 0.001,
         ),
-        ("Unk0x606b67d4", "Unk0x374f09ea"): Time(
-            time: 0.0,
-        ),
         ("Unk0x606b67d4", "Unk0x606b67d4"): Time(
             time: 0.0,
         ),
         ("Unk0x606b67d4", "Unk0x93f45fa2"): TransitionClip(
             clip_name: "JokeIn",
-        ),
-        ("Unk0x606b67d4", "Unk0xeffa3581"): Time(
-            time: 0.001,
         ),
         ("Unk0x68f955ce", "Idle1Base"): TransitionClip(
             clip_name: "IdleIn",
@@ -1135,27 +1156,6 @@
         ),
         ("Unk0xee8d973f", "Unk0x93f45fa2"): TransitionClip(
             clip_name: "JokeIn",
-        ),
-        ("Unk0xeffa3581", "Dance1"): TransitionClip(
-            clip_name: "Unk0x606b67d4",
-        ),
-        ("Unk0xeffa3581", "Idle1Base"): TransitionClip(
-            clip_name: "Unk0x374f09ea",
-        ),
-        ("Unk0xeffa3581", "Laugh"): Time(
-            time: 0.001,
-        ),
-        ("Unk0xeffa3581", "Unk0x374f09ea"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xeffa3581", "Unk0x606b67d4"): Time(
-            time: 0.001,
-        ),
-        ("Unk0xeffa3581", "Unk0x93f45fa2"): TransitionClip(
-            clip_name: "JokeIn",
-        ),
-        ("Unk0xeffa3581", "Unk0xeffa3581"): TransitionClip(
-            clip_name: "Unk0x606b67d4",
         ),
         ("Unk0xff061c13", "Laugh"): Time(
             time: 0.001,

@@ -51,7 +51,7 @@
         ),
         "Idle1": Sequence(
             hashes: [
-                "Unk0xe9ba192a",
+                "IdleEnterBase",
                 "Idle1Base",
                 "Idle2",
             ],
@@ -71,6 +71,9 @@
         "Idle2Base": Clip(
             node_index: 19,
         ),
+        "IdleEnterBase": Clip(
+            node_index: 20,
+        ),
         "Joke": Sequence(
             hashes: [
                 "Unk0x9d46ce26",
@@ -83,13 +86,16 @@
         ),
         "Laugh": Sequence(
             hashes: [
-                "Unk0x9e55a33e",
+                "LaughBase",
                 "Idle1Base",
                 "Idle1Base",
                 "Idle1Base",
                 "Idle1Base",
                 "Idle1Base",
             ],
+        ),
+        "LaughBase": Clip(
+            node_index: 13,
         ),
         "Recall": Clip(
             node_index: 5,
@@ -153,12 +159,6 @@
         "Unk0x9d46ce26": Clip(
             node_index: 12,
         ),
-        "Unk0x9e55a33e": Clip(
-            node_index: 13,
-        ),
-        "Unk0xe9ba192a": Clip(
-            node_index: 20,
-        ),
     },
     blend_data: {
         ("Attack1", "Death"): Time(
@@ -206,10 +206,16 @@
         ("Idle2Base", "Death"): Time(
             time: 0.0,
         ),
+        ("IdleEnterBase", "Death"): Time(
+            time: 0.0,
+        ),
         ("Joke", "Death"): Time(
             time: 0.0,
         ),
         ("Laugh", "Death"): Time(
+            time: 0.0,
+        ),
+        ("LaughBase", "Death"): Time(
             time: 0.0,
         ),
         ("Recall", "Death"): Time(
@@ -246,12 +252,6 @@
             time: 0.0,
         ),
         ("Unk0x9d46ce26", "Idle1Base"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x9e55a33e", "Death"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xe9ba192a", "Death"): Time(
             time: 0.0,
         ),
     },

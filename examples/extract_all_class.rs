@@ -25,6 +25,7 @@ fn main() {
             "DATA/FINAL/UI.wad.client",
             "DATA/FINAL/UI.zh_CN.wad.client",
             "DATA/FINAL/Maps/Shipping/Map11.wad.client",
+            "DATA/FINAL/Shaders/Shaders.wad.client",
         ],
     )
     .with_all_champions();
@@ -34,10 +35,10 @@ fn main() {
     let start = Instant::now();
 
     let hash_paths = vec![
-        "assets/hashes/hashes.binentries.txt",
-        "assets/hashes/hashes.binfields.txt",
-        "assets/hashes/hashes.binhashes.txt",
-        "assets/hashes/hashes.bintypes.txt",
+        "assets/CommunityDragon-Data/hashes/lol/hashes.binentries.txt",
+        "assets/CommunityDragon-Data/hashes/lol/hashes.binfields.txt",
+        "assets/CommunityDragon-Data/hashes/lol/hashes.binhashes.txt",
+        "assets/CommunityDragon-Data/hashes/lol/hashes.bintypes.txt",
     ];
 
     let hashes = get_hashes(&hash_paths);
@@ -72,6 +73,11 @@ fn main() {
         hash_bin("UnitFloatingInfoBarData"),
         hash_bin("UnitStatusPriorityList"),
         hash_bin("VfxSystemDefinitionData"),
+        hash_bin("X3DSharedData"),
+        hash_bin("X3DSharedSamplerDef"),
+        hash_bin("X3DSharedTextureDef"),
+        hash_bin("X3DSharedConstantBufferDef"),
+        hash_bin("X3DSharedConstantDef"),
         0xad65d8c4,
     ]);
 

@@ -49,27 +49,27 @@
         "Idle1": Sequence(
             hashes: [
                 "Unk0x54d02d78",
-                "Unk0xba9fda17",
+                "RawIdle1",
             ],
         ),
         "Idle2": Sequence(
             hashes: [
-                "Unk0xbb9fdbaa",
-                "Unk0xba9fda17",
-                "Unk0xba9fda17",
-                "Unk0xba9fda17",
-                "Unk0xba9fda17",
-                "Unk0xba9fda17",
+                "RawIdle2",
+                "RawIdle1",
+                "RawIdle1",
+                "RawIdle1",
+                "RawIdle1",
+                "RawIdle1",
             ],
         ),
         "Joke": Sequence(
             hashes: [
                 "Unk0xbbee8205",
-                "Unk0xba9fda17",
-                "Unk0xba9fda17",
-                "Unk0xba9fda17",
-                "Unk0xba9fda17",
-                "Unk0xba9fda17",
+                "RawIdle1",
+                "RawIdle1",
+                "RawIdle1",
+                "RawIdle1",
+                "RawIdle1",
             ],
         ),
         "KnockUp": Clip(
@@ -78,12 +78,18 @@
         "Laugh": Sequence(
             hashes: [
                 "Unk0xe7a9a7b3",
-                "Unk0xba9fda17",
-                "Unk0xba9fda17",
-                "Unk0xba9fda17",
-                "Unk0xba9fda17",
-                "Unk0xba9fda17",
+                "RawIdle1",
+                "RawIdle1",
+                "RawIdle1",
+                "RawIdle1",
+                "RawIdle1",
             ],
+        ),
+        "RawIdle1": Clip(
+            node_index: 22,
+        ),
+        "RawIdle2": Clip(
+            node_index: 23,
         ),
         "Recall": Sequence(
             hashes: [
@@ -122,21 +128,21 @@
         "Taunt": Sequence(
             hashes: [
                 "Unk0xb3d0c366",
-                "Unk0xba9fda17",
-                "Unk0xba9fda17",
-                "Unk0xba9fda17",
-                "Unk0xba9fda17",
-                "Unk0xba9fda17",
+                "RawIdle1",
+                "RawIdle1",
+                "RawIdle1",
+                "RawIdle1",
+                "RawIdle1",
             ],
         ),
         "Taunt2": Sequence(
             hashes: [
                 "Unk0x65a37d3c",
-                "Unk0xba9fda17",
-                "Unk0xba9fda17",
-                "Unk0xba9fda17",
-                "Unk0xba9fda17",
-                "Unk0xba9fda17",
+                "RawIdle1",
+                "RawIdle1",
+                "RawIdle1",
+                "RawIdle1",
+                "RawIdle1",
             ],
         ),
         "Turn": Parametric(
@@ -178,12 +184,6 @@
         ),
         "Unk0xb3d0c366": Clip(
             node_index: 18,
-        ),
-        "Unk0xba9fda17": Clip(
-            node_index: 22,
-        ),
-        "Unk0xbb9fdbaa": Clip(
-            node_index: 23,
         ),
         "Unk0xbbee8205": Clip(
             node_index: 24,
@@ -244,6 +244,12 @@
         ("Laugh", "Death"): Time(
             time: 0.0,
         ),
+        ("RawIdle1", "Death"): Time(
+            time: 0.0,
+        ),
+        ("RawIdle2", "Death"): Time(
+            time: 0.0,
+        ),
         ("Recall", "Death"): Time(
             time: 0.0,
         ),
@@ -284,12 +290,6 @@
             time: 0.0,
         ),
         ("Unk0xb3d0c366", "Death"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xba9fda17", "Death"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xbb9fdbaa", "Death"): Time(
             time: 0.0,
         ),
         ("Unk0xbbee8205", "Death"): Time(

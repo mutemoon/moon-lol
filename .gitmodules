@@ -1,3 +1,6 @@
 [submodule "crates/bevy_gltf_draco"]
 	path = crates/bevy_gltf_draco
 	url = https://github.com/jiangheng90-opensource/bevy_gltf_draco.git
+[submodule "assets/CommunityDragon-Data"]
+	path = assets/CommunityDragon-Data
+	url = https://github.com/CommunityDragon/Data.git

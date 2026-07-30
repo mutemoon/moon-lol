@@ -48,7 +48,7 @@
                     value: 25.0,
                 ),
                 (
-                    key: "Unk0x76bbc6a0",
+                    key: "Idle3Base",
                     value: 25.0,
                 ),
             ],
@@ -58,6 +58,9 @@
         ),
         "Idle2Base": Clip(
             node_index: 21,
+        ),
+        "Idle3Base": Clip(
+            node_index: 7,
         ),
         "Joke": Clip(
             node_index: 18,
@@ -94,9 +97,6 @@
         ),
         "Taunt": Clip(
             node_index: 16,
-        ),
-        "Unk0x76bbc6a0": Clip(
-            node_index: 7,
         ),
         "Unk0xb4dcde19": Clip(
             node_index: 11,
@@ -136,6 +136,9 @@
         ("Idle2Base", "Death"): Time(
             time: 0.0,
         ),
+        ("Idle3Base", "Death"): Time(
+            time: 0.0,
+        ),
         ("Joke", "Death"): Time(
             time: 0.0,
         ),
@@ -164,9 +167,6 @@
             time: 0.0,
         ),
         ("Taunt", "Death"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x76bbc6a0", "Death"): Time(
             time: 0.0,
         ),
     },

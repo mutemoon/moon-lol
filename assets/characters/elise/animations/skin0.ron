@@ -33,8 +33,8 @@
         ),
         "Dance": Sequence(
             hashes: [
-                "Unk0x6f360f58",
-                "Unk0x612f3b96",
+                "RawEliseDanceIn",
+                "RawEliseDance",
             ],
         ),
         "Death": Clip(
@@ -87,6 +87,12 @@
                 "IdleSelector",
             ],
         ),
+        "RawEliseDance": Clip(
+            node_index: 8,
+        ),
+        "RawEliseDanceIn": Clip(
+            node_index: 11,
+        ),
         "Recall": Selector(
             probably_nodes: [
                 (
@@ -125,14 +131,8 @@
         "Unk0x47416e79": Clip(
             node_index: 4,
         ),
-        "Unk0x612f3b96": Clip(
-            node_index: 8,
-        ),
         "Unk0x64121ea4": Clip(
             node_index: 9,
-        ),
-        "Unk0x6f360f58": Clip(
-            node_index: 11,
         ),
         "Unk0xa5506695": Clip(
             node_index: 14,
@@ -211,6 +211,15 @@
         ("Laugh", "Death"): Time(
             time: 0.0,
         ),
+        ("RawEliseDance", "Death"): Time(
+            time: 0.0,
+        ),
+        ("RawEliseDanceIn", "Death"): Time(
+            time: 0.0,
+        ),
+        ("RawEliseDanceIn", "RawEliseDance"): Time(
+            time: 0.0,
+        ),
         ("Recall", "Death"): Time(
             time: 0.0,
         ),
@@ -235,16 +244,7 @@
         ("Unk0x47416e79", "Death"): Time(
             time: 0.0,
         ),
-        ("Unk0x612f3b96", "Death"): Time(
-            time: 0.0,
-        ),
         ("Unk0x64121ea4", "Death"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x6f360f58", "Death"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x6f360f58", "Unk0x612f3b96"): Time(
             time: 0.0,
         ),
         ("Unk0xa5506695", "Death"): Time(

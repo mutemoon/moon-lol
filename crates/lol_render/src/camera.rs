@@ -11,9 +11,9 @@ use bevy::window::{CursorGrabMode, CursorOptions};
 
 // 相机距离和位置配置
 pub const CAMERA_FAR_Z: f32 = 22000.0;
-pub const CAMERA_MIN_X: f32 = 300.0;
+pub const CAMERA_MIN_X: f32 = 0.0;
 pub const CAMERA_MAX_X: f32 = 14400.0;
-pub const CAMERA_MIN_Y: f32 = 520.0;
+pub const CAMERA_MIN_Y: f32 = 0.0;
 pub const CAMERA_MAX_Y: f32 = 14765.0;
 
 // 键盘轨道控制速度
@@ -154,8 +154,19 @@ fn update_focus(mut q_camera: Query<&mut CameraState>, q_focus: Query<&Transform
 
 fn on_wheel(
     mut mouse_wheel_events: MessageReader<MouseWheel>,
-    mut query: Query<&mut CameraState, With<Camera3d>>,
+    mut query: Query<&mut CameraState>,
+    ui_interactions: Query<&Interaction>,
 ) {
+    // 因为指针悬停在 UI 上滚动滚轮时应交由 UI 处理（如面板列表滚动），
+    // 所以此时跳过相机缩放，并丢弃已读事件以免延迟生效
+    if ui_interactions
+        .iter()
+        .any(|interaction| !matches!(interaction, Interaction::None))
+    {
+        for _ in mouse_wheel_events.read() {}
+        return;
+    }
+
     let Ok(mut camera_state) = query.single_mut() else {
         return;
     };
@@ -163,14 +174,14 @@ fn on_wheel(
     for event in mouse_wheel_events.read() {
         let scroll = match event.unit {
             MouseScrollUnit::Line => event.y,
-            MouseScrollUnit::Pixel => event.y / MouseScrollUnit::SCROLL_UNIT_CONVERSION_FACTOR,
+            MouseScrollUnit::Pixel => event.y,
         };
         let new_scale = camera_state.scale - (scroll * 0.1);
         camera_state.set_scale(new_scale);
     }
 }
 
-fn on_mouse_scroll(window: Query<&Window>, mut camera: Query<&mut CameraState, With<Camera3d>>) {
+fn on_mouse_scroll(window: Query<&Window>, mut camera: Query<&mut CameraState>) {
     let Ok(window) = window.single() else {
         return;
     };

@@ -38,6 +38,9 @@ pub fn try_load_config_skin_characters(
         }
 
         let handle = config.skin.clone();
+
+        // 皮肤场景 skin{N}.ron 的 resources 中携带 ConfigVfxHandle，随实体场景一同写回主 World；
+        // ConfigVfx 本体及其粒子贴图由 ConfigVfxLoader 异步加载，就绪后经 AssetEvent 注入 Assets
         commands.queue(move |world: &mut World| {
             world.resource_scope(|world, dynamic_worlds: Mut<Assets<DynamicWorld>>| {
                 let dynamic_world = dynamic_worlds

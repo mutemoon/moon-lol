@@ -8,7 +8,7 @@ fn main() {
     let skip_map_geo = args.iter().any(|arg| arg == "--no-mapgeo");
 
     let game_path = r"D:\WeGameApps\英雄联盟\Game";
-    let hashes_dir = "assets/hashes";
+    let hashes_dir = "assets/CommunityDragon-Data/hashes/lol";
 
     extract_with_options(game_path, hashes_dir, ExtractOptions { skip_map_geo });
 

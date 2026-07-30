@@ -13,11 +13,12 @@ use league_loader::game::{Data, LeagueLoader, PropGroup};
 use league_loader::prop_bin::LeagueWadLoaderTrait;
 use lol_base::animation::{ConfigAnimationClip, LOLAnimationGraph, LOLAnimationGraphHandle};
 use lol_base::character::{HealthBar, Skin};
+use lol_base::particle::{ConfigVfx, ConfigVfxHandle};
 use ron::ser::{PrettyConfig, to_string_pretty};
 
 use crate::animation::load_animation_file;
 use crate::extract::animation::animation_graph_to_config;
-use crate::extract::utils::{extract_texture, get_texture_path, write_to_file};
+use crate::extract::utils::{extract_particle_texture, extract_texture, get_texture_path, write_to_file};
 use crate::skin_gltf_export::export_skin_to_glb;
 use crate::utils::decode_texture_to_png;
 
@@ -210,13 +211,16 @@ pub fn extract_skin_for_champion(
     app.init_asset::<AnimationClip>();
     app.init_asset::<WorldAsset>();
     app.init_asset::<LOLAnimationGraph>();
+    // 注册 ConfigVfx 资产与 ConfigVfxHandle 资源类型，使 skin{N}.ron 能承载指向 skin{N}_vfx.ron 的句柄
+    app.init_asset::<ConfigVfx>();
+    app.register_type::<ConfigVfxHandle>();
 
     app.finish();
     app.cleanup();
 
     let world = app.world_mut();
 
-    let asset_server = world.resource::<AssetServer>();
+    let asset_server = world.resource::<AssetServer>().clone();
     let skin_handle: Handle<WorldAsset> = asset_server.load(
         AssetPath::from(format!("characters/{}/skins/{}.glb", champ_name, skin_id))
             .with_label(GltfAssetLabel::Scene(0).to_string()),
@@ -225,7 +229,7 @@ pub fn extract_skin_for_champion(
     // 导出动画 Asset（保留独立的 ron 文件用于运行时加载）
     let gltf_path = format!("characters/{}/skins/{}.glb", champ_name, skin_id);
     let animation_ron_path = export_animation_for_skin(
-        asset_server,
+        &asset_server,
         champ_name,
         skin_bin_path,
         &skin_prop_group,
@@ -235,8 +239,14 @@ pub fn extract_skin_for_champion(
         &hash_to_glb_index,
     );
 
-    // 导出粒子系统/VFX 资产
-    export_vfx_for_skin(loader, champ_name, &skin_prop_group, &skin_data, hashes);
+    // 导出粒子系统/VFX 配置，作为 Resource 单独序列化为 skin{N}_vfx.ron
+    let config_vfx = export_vfx_for_skin(
+        loader,
+        champ_name,
+        &skin_prop_group,
+        &skin_data,
+        hashes,
+    );
 
     // 如果有动画，创建 AnimationHandler
     let animation_handler = animation_ron_path.map(|anim_path| {
@@ -265,29 +275,42 @@ pub fn extract_skin_for_champion(
     }
     let _entity = entity_builder.id();
 
-    let type_registry = world.resource::<AppTypeRegistry>();
-    let type_registry = type_registry.read();
-    let scene = DynamicWorldBuilder::from_world(&world, &type_registry)
-        .deny_component::<InheritedVisibility>()
-        .deny_component::<ViewVisibility>()
-        .deny_component::<GlobalTransform>()
-        .deny_component::<Transform>()
-        .deny_component::<TransformTreeChanged>()
-        .extract_entities(
-            // we do this instead of a query, in order to completely sidestep default query filters.
-            // while we could use `Allow<_>`, this wouldn't account for custom disabled components
-            world
-                .archetypes()
-                .iter()
-                .flat_map(archetype::Archetype::entities)
-                .map(archetype::ArchetypeEntity::id),
-        )
-        .extract_resources()
-        .build();
-    let serialized_scene = scene.serialize(&type_registry).unwrap();
+    // 先把 ConfigVfx 以纯 RON（serde）写入 skin{N}_vfx.ron，运行时由 ConfigVfxLoader 加载
+    let output_vfx_path = format!("characters/{}/skins/{}_vfx.ron", champ_name, skin_id);
+    let serialized_vfx = to_string_pretty(&config_vfx, PrettyConfig::default()).unwrap();
+    super::utils::write_to_file(&output_vfx_path, &serialized_vfx);
 
-    let output_skin_path = format!("characters/{}/skins/{}.ron", champ_name, skin_id);
-    super::utils::write_to_file(&output_skin_path, serialized_scene);
+    // 在皮肤场景中放入指向 skin{N}_vfx.ron 的 Handle<ConfigVfx> 资源，
+    // 皮肤场景反序列化写入主世界时会触发 ConfigVfxLoader 加载粒子定义
+    let vfx_handle: Handle<ConfigVfx> = asset_server.load(&output_vfx_path);
+    world.insert_resource(ConfigVfxHandle(vfx_handle));
+
+    // 皮肤场景 skin{N}.ron：实体 + ConfigVfxHandle 资源
+    {
+        let type_registry = world.resource::<AppTypeRegistry>();
+        let type_registry = type_registry.read();
+        let scene = DynamicWorldBuilder::from_world(&world, &type_registry)
+            .deny_component::<InheritedVisibility>()
+            .deny_component::<ViewVisibility>()
+            .deny_component::<GlobalTransform>()
+            .deny_component::<Transform>()
+            .deny_component::<TransformTreeChanged>()
+            .extract_entities(
+                // we do this instead of a query, in order to completely sidestep default query filters.
+                // while we could use `Allow<_>`, this wouldn't account for custom disabled components
+                world
+                    .archetypes()
+                    .iter()
+                    .flat_map(archetype::Archetype::entities)
+                    .map(archetype::ArchetypeEntity::id),
+            )
+            .extract_resources()
+            .build();
+        let serialized_scene = scene.serialize(&type_registry).unwrap();
+
+        let output_skin_path = format!("characters/{}/skins/{}.ron", champ_name, skin_id);
+        super::utils::write_to_file(&output_skin_path, serialized_scene);
+    }
 }
 
 /// 加载动画数据并导出到 GLB
@@ -421,30 +444,24 @@ fn export_animation_for_skin(
     Some(anim_path)
 }
 
+/// 提取皮肤的粒子系统/VFX 配置，返回 ConfigVfx Resource（单独序列化为 skin{N}_vfx.ron）
 fn export_vfx_for_skin(
     loader: &LeagueLoader,
     champ_name: &str,
     skin_prop_group: &PropGroup,
     skin_data: &SkinCharacterDataProperties,
     hashes: &HashMap<u32, String>,
-) {
-    use lol_base::particle::{ConfigResourceResolver, ConfigVfx};
+) -> lol_base::particle::ConfigVfx {
+    use lol_base::particle::{ConfigResourceResolver, ConfigVfx, VfxTexture};
 
     use crate::extract::vfx::convert_system_definition;
 
-    let vfx_ron_path = format!("characters/{}/vfx.ron", champ_name);
-    let mut config_vfx_main = if let Ok(content) =
-        std::fs::read_to_string(std::path::Path::new("assets").join(&vfx_ron_path))
-    {
-        ron::from_str::<ConfigVfx>(&content).unwrap_or_else(|_| ConfigVfx {
-            resolvers: std::collections::BTreeMap::new(),
-            systems: std::collections::BTreeMap::new(),
-        })
-    } else {
-        ConfigVfx {
-            resolvers: std::collections::BTreeMap::new(),
-            systems: std::collections::BTreeMap::new(),
-        }
+    let mut config_vfx_main = ConfigVfx::default();
+
+    // 提取贴图并返回 VfxTexture（磁盘只存路径，运行时由 ConfigVfxLoader 填充 handle）
+    let mut load_texture = |path: &str| -> VfxTexture {
+        extract_particle_texture(loader, path);
+        VfxTexture::from_path(get_texture_path(path))
     };
 
     let mut resolvers = Vec::new();
@@ -492,7 +509,7 @@ fn export_vfx_for_skin(
                     skin_prop_group
                         .get_data_option::<league_core::extract::VfxSystemDefinitionData>(vfx_hash)
                 {
-                    let mut config_vfx = convert_system_definition(&vfx_system);
+                    let mut config_vfx = convert_system_definition(&vfx_system, &mut load_texture);
 
                     // Extract textures and meshes referenced by this VFX system
                     extract_assets_for_vfx(loader, &mut config_vfx);
@@ -509,11 +526,14 @@ fn export_vfx_for_skin(
         let _ = std::fs::remove_dir_all(&old_vfx_dir);
     }
 
-    // Save ConfigVfx to vfx.ron
-    if let Ok(serialized) = to_string_pretty(&config_vfx_main, PrettyConfig::default()) {
-        super::utils::write_to_file(&vfx_ron_path, &serialized);
-        println!("[EXTRACT] 已将特效资产合并写入到: {}", vfx_ron_path);
+    // 清理旧的独立 vfx.ron（已改为单独的 skin{N}_vfx.ron 场景序列化）
+    let legacy_vfx_ron =
+        std::path::Path::new("assets").join(format!("characters/{}/vfx.ron", champ_name));
+    if legacy_vfx_ron.exists() {
+        let _ = std::fs::remove_file(&legacy_vfx_ron);
     }
+
+    config_vfx_main
 }
 
 fn extract_assets_for_vfx(
@@ -538,55 +558,10 @@ fn extract_assets_for_emitter(
 ) {
     use lol_base::particle::ConfigVfxPrimitive;
 
-    // 1. Emitter texture
-    if let Some(tex_path) = emitter.texture.as_ref() {
-        if !tex_path.is_empty() {
-            extract_texture(loader, tex_path);
-            emitter.texture = Some(get_texture_path(tex_path));
-        }
-    }
+    // 所有纹理（texture/particle_color_texture/normal_map_texture/texture_mult/base_texture）
+    // 已在 convert_* 的 load_texture 闭包中提取并转为 Handle<Image>，这里仅处理静态网格
 
-    // 2. particle_color_texture
-    if let Some(tex_path) = emitter.particle_color_texture.as_ref() {
-        if !tex_path.is_empty() {
-            extract_texture(loader, tex_path);
-            emitter.particle_color_texture = Some(get_texture_path(tex_path));
-        }
-    }
-
-    // 3. normal_map_texture in distortion_definition
-    if let Some(distortion) = emitter.distortion_definition.as_mut() {
-        if let Some(tex_path) = distortion.normal_map_texture.as_ref() {
-            if !tex_path.is_empty() {
-                extract_texture(loader, tex_path);
-                distortion.normal_map_texture = Some(get_texture_path(tex_path));
-            }
-        }
-    }
-
-    // 4. texture_mult in texture_mult
-    if let Some(tex_mult) = emitter.texture_mult.as_mut() {
-        if let Some(tex_path) = tex_mult.texture_mult.as_ref() {
-            if !tex_path.is_empty() {
-                extract_texture(loader, tex_path);
-                tex_mult.texture_mult = Some(get_texture_path(tex_path));
-            }
-        }
-    }
-
-    // 5. base_texture in material_override_definitions
-    if let Some(overrides) = emitter.material_override_definitions.as_mut() {
-        for material_override in overrides {
-            if let Some(tex_path) = material_override.base_texture.as_ref() {
-                if !tex_path.is_empty() {
-                    extract_texture(loader, tex_path);
-                    material_override.base_texture = Some(get_texture_path(tex_path));
-                }
-            }
-        }
-    }
-
-    // 6. mesh file (.scb) in primitive
+    // mesh file (.scb) in primitive
     if let Some(primitive) = emitter.primitive.as_ref() {
         match primitive {
             ConfigVfxPrimitive::VfxPrimitiveMesh {

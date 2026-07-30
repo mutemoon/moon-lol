@@ -62,7 +62,7 @@
                 "Idle1Base",
                 "Idle1Base",
                 "Idle1Base",
-                "Unk0x76bbc6a0",
+                "Idle3Base",
                 "Idle1Base",
                 "Idle1Base",
                 "Idle1Base",
@@ -70,6 +70,9 @@
         ),
         "Idle2Base": Clip(
             node_index: 27,
+        ),
+        "Idle3Base": Clip(
+            node_index: 13,
         ),
         "IdleStealth": Clip(
             node_index: 10,
@@ -82,9 +85,12 @@
         ),
         "Laugh": Sequence(
             hashes: [
-                "Unk0x9e55a33e",
+                "LaughBase",
                 "Idle2",
             ],
+        ),
+        "LaughBase": Clip(
+            node_index: 16,
         ),
         "Recall": Clip(
             node_index: 8,
@@ -134,14 +140,8 @@
         "Unk0x74d6a951": Clip(
             node_index: 12,
         ),
-        "Unk0x76bbc6a0": Clip(
-            node_index: 13,
-        ),
         "Unk0x9d46ce26": Clip(
             node_index: 15,
-        ),
-        "Unk0x9e55a33e": Clip(
-            node_index: 16,
         ),
     },
     blend_data: {
@@ -250,6 +250,12 @@
         ("Idle2Base", "Idle2Base"): Time(
             time: 0.0,
         ),
+        ("Idle3Base", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Idle3Base", "Idle3Base"): Time(
+            time: 0.0,
+        ),
         ("IdleStealth", "Death"): Time(
             time: 0.0,
         ),
@@ -267,6 +273,12 @@
         ),
         ("Laugh", "Death"): Time(
             time: 0.0,
+        ),
+        ("LaughBase", "Death"): Time(
+            time: 0.0,
+        ),
+        ("LaughBase", "Spell3"): Time(
+            time: 0.06,
         ),
         ("Recall", "Attack1"): Time(
             time: 0.1,
@@ -295,6 +307,9 @@
         ("Recall", "IdleStealth"): Time(
             time: 0.1,
         ),
+        ("Recall", "LaughBase"): Time(
+            time: 0.1,
+        ),
         ("Recall", "Recall"): Time(
             time: 0.1,
         ),
@@ -320,9 +335,6 @@
             time: 0.06,
         ),
         ("Recall", "Unk0x9d46ce26"): Time(
-            time: 0.1,
-        ),
-        ("Recall", "Unk0x9e55a33e"): Time(
             time: 0.1,
         ),
         ("RecallWinddown", "Death"): Time(
@@ -430,6 +442,9 @@
         ("Spell3", "IdleStealth"): Time(
             time: 0.1,
         ),
+        ("Spell3", "LaughBase"): Time(
+            time: 0.1,
+        ),
         ("Spell3", "Recall"): Time(
             time: 0.1,
         ),
@@ -457,9 +472,6 @@
         ("Spell3", "Unk0x9d46ce26"): Time(
             time: 0.1,
         ),
-        ("Spell3", "Unk0x9e55a33e"): Time(
-            time: 0.1,
-        ),
         ("Spell4", "Death"): Time(
             time: 0.0,
         ),
@@ -484,12 +496,6 @@
         ("Unk0x74d6a951", "Unk0x74d6a951"): Time(
             time: 0.0,
         ),
-        ("Unk0x76bbc6a0", "Death"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x76bbc6a0", "Unk0x76bbc6a0"): Time(
-            time: 0.0,
-        ),
         ("Unk0x9d46ce26", "Death"): Time(
             time: 0.0,
         ),
@@ -497,12 +503,6 @@
             time: 0.0,
         ),
         ("Unk0x9d46ce26", "Spell3"): Time(
-            time: 0.06,
-        ),
-        ("Unk0x9e55a33e", "Death"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x9e55a33e", "Spell3"): Time(
             time: 0.06,
         ),
     },

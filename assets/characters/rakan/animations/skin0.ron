@@ -30,8 +30,8 @@
         ),
         "Dance": Sequence(
             hashes: [
-                "Unk0x8d898951",
-                "Unk0xb7c5a9c9",
+                "RakanDanceInto",
+                "RakanDanceLoop",
             ],
         ),
         "Death": Clip(
@@ -88,6 +88,12 @@
         ),
         "MeleeAttack2": Clip(
             node_index: 22,
+        ),
+        "RakanDanceInto": Clip(
+            node_index: 28,
+        ),
+        "RakanDanceLoop": Clip(
+            node_index: 44,
         ),
         "Recall": Clip(
             node_index: 17,
@@ -237,14 +243,8 @@
         "Unk0x73a2fbc7": Clip(
             node_index: 25,
         ),
-        "Unk0x8d898951": Clip(
-            node_index: 28,
-        ),
         "Unk0x94d9a8f6": Clip(
             node_index: 31,
-        ),
-        "Unk0xb7c5a9c9": Clip(
-            node_index: 44,
         ),
         "Unk0xe55009c1": Sequence(
             hashes: [
@@ -862,6 +862,24 @@
         ),
         ("MeleeAttack2", "Unk0x94d9a8f6"): Time(
             time: 0.0,
+        ),
+        ("RakanDanceInto", "ChannelWndup"): Time(
+            time: 0.15,
+        ),
+        ("RakanDanceInto", "DuoRecall"): TransitionClip(
+            clip_name: "DuoRecallInto",
+        ),
+        ("RakanDanceInto", "Unk0x62aadd21"): TransitionClip(
+            clip_name: "Unk0x5b94eec4",
+        ),
+        ("RakanDanceLoop", "ChannelWndup"): Time(
+            time: 0.15,
+        ),
+        ("RakanDanceLoop", "DuoRecall"): TransitionClip(
+            clip_name: "DuoRecallInto",
+        ),
+        ("RakanDanceLoop", "Unk0x62aadd21"): TransitionClip(
+            clip_name: "Unk0x5b94eec4",
         ),
         ("Recall", "Attack1"): Time(
             time: 0.1,
@@ -2654,15 +2672,6 @@
         ("Unk0x827cf93f", "Spell2B"): Time(
             time: 0.0,
         ),
-        ("Unk0x8d898951", "ChannelWndup"): Time(
-            time: 0.15,
-        ),
-        ("Unk0x8d898951", "DuoRecall"): TransitionClip(
-            clip_name: "DuoRecallInto",
-        ),
-        ("Unk0x8d898951", "Unk0x62aadd21"): TransitionClip(
-            clip_name: "Unk0x5b94eec4",
-        ),
         ("Unk0x94d9a8f6", "Attack1"): Time(
             time: 0.1,
         ),
@@ -2707,15 +2716,6 @@
         ),
         ("Unk0x9cbd2553", "Spell2B"): Time(
             time: 0.0,
-        ),
-        ("Unk0xb7c5a9c9", "ChannelWndup"): Time(
-            time: 0.15,
-        ),
-        ("Unk0xb7c5a9c9", "DuoRecall"): TransitionClip(
-            clip_name: "DuoRecallInto",
-        ),
-        ("Unk0xb7c5a9c9", "Unk0x62aadd21"): TransitionClip(
-            clip_name: "Unk0x5b94eec4",
         ),
         ("Unk0xee87798c", "Attack1"): Time(
             time: 0.1,

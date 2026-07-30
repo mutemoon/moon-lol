@@ -46,7 +46,7 @@
         "Idle2": Selector(
             probably_nodes: [
                 (
-                    key: "Unk0xbb9fdbaa",
+                    key: "RawIdle2",
                     value: 25.0,
                 ),
                 (
@@ -68,6 +68,12 @@
         ),
         "Laugh": Clip(
             node_index: 25,
+        ),
+        "RawIdle1": Clip(
+            node_index: 29,
+        ),
+        "RawIdle2": Clip(
+            node_index: 30,
         ),
         "Recall": Sequence(
             hashes: [
@@ -157,12 +163,6 @@
         "Unk0xba128e00": Clip(
             node_index: 28,
         ),
-        "Unk0xba9fda17": Clip(
-            node_index: 29,
-        ),
-        "Unk0xbb9fdbaa": Clip(
-            node_index: 30,
-        ),
         "Unk0xbc9fdd3d": Clip(
             node_index: 32,
         ),
@@ -172,7 +172,7 @@
         "Unk0xfb1255a0": Parallel(
             hashes: [
                 "Unk0xa95c96a7",
-                "Unk0xba9fda17",
+                "RawIdle1",
             ],
         ),
     },
@@ -249,16 +249,16 @@
         ("Idle1", "Idle2"): Time(
             time: 0.0,
         ),
+        ("Idle1", "RawIdle1"): Time(
+            time: 0.0,
+        ),
+        ("Idle1", "RawIdle2"): Time(
+            time: 0.0,
+        ),
         ("Idle1", "Unk0xb59fd238"): Time(
             time: 0.0,
         ),
         ("Idle1", "Unk0xb69fd3cb"): Time(
-            time: 0.0,
-        ),
-        ("Idle1", "Unk0xba9fda17"): Time(
-            time: 0.0,
-        ),
-        ("Idle1", "Unk0xbb9fdbaa"): Time(
             time: 0.0,
         ),
         ("Idle1", "Unk0xbc9fdd3d"): Time(
@@ -301,6 +301,60 @@
             time: 0.0,
         ),
         ("Laugh", "Unk0x7e461654"): Time(
+            time: 0.0,
+        ),
+        ("RawIdle1", "Death"): Time(
+            time: 0.0,
+        ),
+        ("RawIdle1", "Idle1"): Time(
+            time: 0.0,
+        ),
+        ("RawIdle1", "RawIdle1"): Time(
+            time: 0.0,
+        ),
+        ("RawIdle1", "RawIdle2"): Time(
+            time: 0.0,
+        ),
+        ("RawIdle1", "Unk0xb59fd238"): Time(
+            time: 0.0,
+        ),
+        ("RawIdle1", "Unk0xb69fd3cb"): Time(
+            time: 0.0,
+        ),
+        ("RawIdle1", "Unk0xbc9fdd3d"): Time(
+            time: 0.0,
+        ),
+        ("RawIdle2", "Death"): Time(
+            time: 0.0,
+        ),
+        ("RawIdle2", "Idle1"): Time(
+            time: 0.0,
+        ),
+        ("RawIdle2", "Idle1BothArms"): Time(
+            time: 0.0,
+        ),
+        ("RawIdle2", "Idle2"): Time(
+            time: 0.0,
+        ),
+        ("RawIdle2", "RawIdle1"): Time(
+            time: 0.0,
+        ),
+        ("RawIdle2", "RawIdle2"): Time(
+            time: 0.0,
+        ),
+        ("RawIdle2", "Unk0x409a28e2"): Time(
+            time: 0.0,
+        ),
+        ("RawIdle2", "Unk0x7e461654"): Time(
+            time: 0.0,
+        ),
+        ("RawIdle2", "Unk0xa95c96a7"): Time(
+            time: 0.0,
+        ),
+        ("RawIdle2", "Unk0xb59fd238"): Time(
+            time: 0.0,
+        ),
+        ("RawIdle2", "Unk0xbc9fdd3d"): Time(
             time: 0.0,
         ),
         ("Run", "Death"): Time(
@@ -393,6 +447,9 @@
         ("Unk0x1a9fce5b", "Laugh"): Time(
             time: 0.0,
         ),
+        ("Unk0x1a9fce5b", "RawIdle2"): Time(
+            time: 0.0,
+        ),
         ("Unk0x1a9fce5b", "Spell3"): Time(
             time: 0.0,
         ),
@@ -421,9 +478,6 @@
             time: 0.0,
         ),
         ("Unk0x1a9fce5b", "Unk0xba128e00"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x1a9fce5b", "Unk0xbb9fdbaa"): Time(
             time: 0.0,
         ),
         ("Unk0x1a9fce5b", "Unk0xbc9fdd3d"): Time(
@@ -462,6 +516,12 @@
         ("Unk0x2c420cc", "Laugh"): Time(
             time: 0.5,
         ),
+        ("Unk0x2c420cc", "RawIdle1"): Time(
+            time: 0.5,
+        ),
+        ("Unk0x2c420cc", "RawIdle2"): Time(
+            time: 0.5,
+        ),
         ("Unk0x2c420cc", "Taunt"): Time(
             time: 0.5,
         ),
@@ -469,12 +529,6 @@
             time: 0.5,
         ),
         ("Unk0x2c420cc", "Unk0xb69fd3cb"): Time(
-            time: 0.5,
-        ),
-        ("Unk0x2c420cc", "Unk0xba9fda17"): Time(
-            time: 0.5,
-        ),
-        ("Unk0x2c420cc", "Unk0xbb9fdbaa"): Time(
             time: 0.5,
         ),
         ("Unk0x2c420cc", "Unk0xbc9fdd3d"): Time(
@@ -502,6 +556,9 @@
             time: 0.0,
         ),
         ("Unk0x409a28e2", "Laugh"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x409a28e2", "RawIdle2"): Time(
             time: 0.0,
         ),
         ("Unk0x409a28e2", "Spell3"): Time(
@@ -538,9 +595,6 @@
             time: 0.0,
         ),
         ("Unk0x409a28e2", "Unk0xba128e00"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x409a28e2", "Unk0xbb9fdbaa"): Time(
             time: 0.0,
         ),
         ("Unk0x409a28e2", "Unk0xbc9fdd3d"): Time(
@@ -585,6 +639,12 @@
         ("Unk0x7e461654", "Laugh"): Time(
             time: 0.0,
         ),
+        ("Unk0x7e461654", "RawIdle1"): TransitionClip(
+            clip_name: "Unk0xa7bf584a",
+        ),
+        ("Unk0x7e461654", "RawIdle2"): Time(
+            time: 0.0,
+        ),
         ("Unk0x7e461654", "Spell3"): Time(
             time: 0.0,
         ),
@@ -624,12 +684,6 @@
         ("Unk0x7e461654", "Unk0xba128e00"): Time(
             time: 0.0,
         ),
-        ("Unk0x7e461654", "Unk0xba9fda17"): TransitionClip(
-            clip_name: "Unk0xa7bf584a",
-        ),
-        ("Unk0x7e461654", "Unk0xbb9fdbaa"): Time(
-            time: 0.0,
-        ),
         ("Unk0x7e461654", "Unk0xbc9fdd3d"): Time(
             time: 0.0,
         ),
@@ -654,6 +708,12 @@
         ("Unk0xb59fd238", "Idle2"): Time(
             time: 0.0,
         ),
+        ("Unk0xb59fd238", "RawIdle1"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xb59fd238", "RawIdle2"): Time(
+            time: 0.0,
+        ),
         ("Unk0xb59fd238", "Unk0x409a28e2"): Time(
             time: 0.0,
         ),
@@ -664,12 +724,6 @@
             time: 0.0,
         ),
         ("Unk0xb59fd238", "Unk0xb59fd238"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xb59fd238", "Unk0xba9fda17"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xb59fd238", "Unk0xbb9fdbaa"): Time(
             time: 0.0,
         ),
         ("Unk0xb59fd238", "Unk0xbc9fdd3d"): Time(
@@ -684,6 +738,12 @@
         ("Unk0xb69fd3cb", "Idle1"): Time(
             time: 0.0,
         ),
+        ("Unk0xb69fd3cb", "RawIdle1"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xb69fd3cb", "RawIdle2"): Time(
+            time: 0.0,
+        ),
         ("Unk0xb69fd3cb", "Unk0x409a28e2"): Time(
             time: 0.0,
         ),
@@ -691,12 +751,6 @@
             time: 0.0,
         ),
         ("Unk0xb69fd3cb", "Unk0xb59fd238"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xb69fd3cb", "Unk0xba9fda17"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xb69fd3cb", "Unk0xbb9fdbaa"): Time(
             time: 0.0,
         ),
         ("Unk0xb69fd3cb", "Unk0xbc9fdd3d"): Time(
@@ -714,60 +768,6 @@
         ("Unk0xba128e00", "Unk0xba128e00"): Time(
             time: 0.0,
         ),
-        ("Unk0xba9fda17", "Death"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xba9fda17", "Idle1"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xba9fda17", "Unk0xb59fd238"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xba9fda17", "Unk0xb69fd3cb"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xba9fda17", "Unk0xba9fda17"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xba9fda17", "Unk0xbb9fdbaa"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xba9fda17", "Unk0xbc9fdd3d"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xbb9fdbaa", "Death"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xbb9fdbaa", "Idle1"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xbb9fdbaa", "Idle1BothArms"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xbb9fdbaa", "Idle2"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xbb9fdbaa", "Unk0x409a28e2"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xbb9fdbaa", "Unk0x7e461654"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xbb9fdbaa", "Unk0xa95c96a7"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xbb9fdbaa", "Unk0xb59fd238"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xbb9fdbaa", "Unk0xba9fda17"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xbb9fdbaa", "Unk0xbb9fdbaa"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xbb9fdbaa", "Unk0xbc9fdd3d"): Time(
-            time: 0.0,
-        ),
         ("Unk0xbc9fdd3d", "Death"): Time(
             time: 0.0,
         ),
@@ -780,6 +780,12 @@
         ("Unk0xbc9fdd3d", "Idle2"): Time(
             time: 0.0,
         ),
+        ("Unk0xbc9fdd3d", "RawIdle1"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xbc9fdd3d", "RawIdle2"): Time(
+            time: 0.0,
+        ),
         ("Unk0xbc9fdd3d", "Unk0x409a28e2"): Time(
             time: 0.0,
         ),
@@ -790,12 +796,6 @@
             time: 0.0,
         ),
         ("Unk0xbc9fdd3d", "Unk0xb59fd238"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xbc9fdd3d", "Unk0xba9fda17"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xbc9fdd3d", "Unk0xbb9fdbaa"): Time(
             time: 0.0,
         ),
         ("Unk0xbc9fdd3d", "Unk0xbc9fdd3d"): Time(

@@ -6171,3 +6171,75 @@ pub struct WallFollowMovement {
 pub struct WidthPerSecond {
     pub m_width_per_second: f32,
 }
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct Unk0x4bcf438a {
+    pub bind_location: Option<u32>,
+    pub frequency: Option<u8>,
+    pub name: String,
+    pub unk_0x52fc6665: u8,
+    pub unk_0x9d17b3be: u32,
+    pub unk_0xa1d375b5: u8,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, Asset, TypePath)]
+#[serde(rename_all = "camelCase")]
+pub struct X3dSharedConstantBufferDef {
+    pub constants: Vec<X3dSharedConstantDef>,
+    pub frequency: Option<u8>,
+    pub name: String,
+    pub r#type: Option<u32>,
+    pub register: Option<i32>,
+    pub unk_0xa1d375b5: Option<u8>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, Asset, TypePath)]
+#[serde(rename_all = "camelCase")]
+pub struct X3dSharedConstantDef {
+    pub count: Option<u32>,
+    pub name: String,
+    pub platform_mask: Option<u32>,
+    pub r#type: Option<u32>,
+    pub register: Option<i32>,
+    pub set_manually: Option<bool>,
+    pub unk_0xa1d375b5: Option<u8>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, Asset, TypePath)]
+#[serde(rename_all = "camelCase")]
+pub struct X3dSharedData {
+    pub constant_buffers: Vec<u32>,
+    pub data_buffers: Vec<Unk0x4bcf438a>,
+    pub samplers: Vec<u32>,
+    pub textures: Vec<X3dSharedTextureDef>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, Asset, TypePath)]
+#[serde(rename_all = "camelCase")]
+pub struct X3dSharedSamplerDef {
+    pub address_mode_u: Option<u8>,
+    pub address_mode_v: Option<u8>,
+    pub address_mode_w: Option<u8>,
+    pub max_anisotropy: Option<u8>,
+    pub mip_filter: Option<u8>,
+    pub mip_lod_bias: Option<i32>,
+    pub name: String,
+    pub register: Option<i32>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, Asset, TypePath)]
+#[serde(rename_all = "camelCase")]
+pub struct X3dSharedTextureDef {
+    pub bind_location: Option<u32>,
+    pub default_value: Option<Vec4>,
+    pub frequency: Option<u8>,
+    pub is_current_framebuffer_depth_read: Option<bool>,
+    pub name: String,
+    pub platform_mask: Option<u32>,
+    pub r#type: Option<u8>,
+    pub sampler: Option<u32>,
+    pub unk_0x67542274: Option<u8>,
+    pub unk_0xa1d375b5: Option<u8>,
+    pub unk_0xec5a120e: Option<u8>,
+}

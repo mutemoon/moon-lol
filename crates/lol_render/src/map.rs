@@ -1,7 +1,6 @@
 use bevy::asset::RenderAssetUsages;
 use bevy::gltf::GltfLoaderSettings;
 use bevy::prelude::*;
-use bevy_gltf_draco::GltfDracoDecoderPlugin;
 use lol_base::map::MapPaths;
 use lol_core::action::{Action, CommandAction};
 
@@ -12,7 +11,6 @@ pub struct PluginRenderMap;
 
 impl Plugin for PluginRenderMap {
     fn build(&self, app: &mut App) {
-        app.add_plugins(GltfDracoDecoderPlugin);
         app.add_plugins(MeshPickingPlugin);
         app.add_systems(Startup, setup);
         // app.insert_resource(DefaultOpaqueRendererMethod::deferred());

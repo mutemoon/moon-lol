@@ -68,6 +68,9 @@
         "Idle2Base": Clip(
             node_index: 56,
         ),
+        "Idle3Base": Clip(
+            node_index: 26,
+        ),
         "Joke": Sequence(
             hashes: [
                 "Unk0x9d46ce26",
@@ -87,13 +90,16 @@
         ),
         "Laugh": Sequence(
             hashes: [
-                "Unk0x9e55a33e",
+                "LaughBase",
                 "Unk0x914db254",
                 "Unk0x914db254",
                 "Unk0x914db254",
                 "Unk0x914db254",
                 "Unk0x914db254",
             ],
+        ),
+        "LaughBase": Clip(
+            node_index: 35,
         ),
         "Recall": Sequence(
             hashes: [
@@ -166,8 +172,11 @@
         "Spell2": Parallel(
             hashes: [
                 "Unk0x8bc9eaf",
-                "Unk0xc4dd18f",
+                "Spell2UpB",
             ],
+        ),
+        "Spell2UpB": Clip(
+            node_index: 2,
         ),
         "Spell3": Parallel(
             hashes: [
@@ -303,9 +312,6 @@
         "Unk0x6d842852": Clip(
             node_index: 25,
         ),
-        "Unk0x76bbc6a0": Clip(
-            node_index: 26,
-        ),
         "Unk0x879e9b50": Parallel(
             hashes: [
                 "Unk0x6d842852",
@@ -343,7 +349,7 @@
                     value: 20.0,
                 ),
                 (
-                    key: "Unk0x76bbc6a0",
+                    key: "Idle3Base",
                     value: 20.0,
                 ),
                 (
@@ -376,9 +382,6 @@
         ),
         "Unk0x9d46ce26": Clip(
             node_index: 34,
-        ),
-        "Unk0x9e55a33e": Clip(
-            node_index: 35,
         ),
         "Unk0x9eec6832": Clip(
             node_index: 36,
@@ -425,9 +428,6 @@
         ),
         "Unk0xc2818898": Clip(
             node_index: 49,
-        ),
-        "Unk0xc4dd18f": Clip(
-            node_index: 2,
         ),
         "Unk0xce6fbc9e": Clip(
             node_index: 51,
@@ -546,6 +546,12 @@
         ("Idle2Base", "Unk0xf925da22"): Time(
             time: 0.5,
         ),
+        ("Idle3Base", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Idle3Base", "Unk0xf925da22"): Time(
+            time: 0.5,
+        ),
         ("Joke", "Death"): Time(
             time: 0.0,
         ),
@@ -563,6 +569,12 @@
         ),
         ("Laugh", "Death"): Time(
             time: 0.0,
+        ),
+        ("LaughBase", "Death"): Time(
+            time: 0.0,
+        ),
+        ("LaughBase", "Unk0xf925da22"): Time(
+            time: 0.5,
         ),
         ("Recall", "Death"): Time(
             time: 0.0,
@@ -635,6 +647,12 @@
         ),
         ("Spell2", "Death"): Time(
             time: 0.0,
+        ),
+        ("Spell2UpB", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Spell2UpB", "Unk0xf925da22"): Time(
+            time: 0.5,
         ),
         ("Spell3", "Death"): Time(
             time: 0.0,
@@ -747,12 +765,6 @@
         ("Unk0x6d842852", "Death"): Time(
             time: 0.0,
         ),
-        ("Unk0x76bbc6a0", "Death"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x76bbc6a0", "Unk0xf925da22"): Time(
-            time: 0.5,
-        ),
         ("Unk0x879e9b50", "Death"): Time(
             time: 0.0,
         ),
@@ -796,12 +808,6 @@
             time: 0.0,
         ),
         ("Unk0x9d46ce26", "Unk0xf925da22"): Time(
-            time: 0.5,
-        ),
-        ("Unk0x9e55a33e", "Death"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x9e55a33e", "Unk0xf925da22"): Time(
             time: 0.5,
         ),
         ("Unk0x9eec6832", "Death"): Time(
@@ -856,12 +862,6 @@
             time: 0.0,
         ),
         ("Unk0xc2818898", "Unk0xf925da22"): Time(
-            time: 0.5,
-        ),
-        ("Unk0xc4dd18f", "Death"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xc4dd18f", "Unk0xf925da22"): Time(
             time: 0.5,
         ),
         ("Unk0xce6fbc9e", "Death"): Time(
@@ -924,10 +924,16 @@
         ("Unk0xf925da22", "Idle2Base"): Time(
             time: 0.5,
         ),
+        ("Unk0xf925da22", "Idle3Base"): Time(
+            time: 0.5,
+        ),
         ("Unk0xf925da22", "LanternNull"): Time(
             time: 0.5,
         ),
         ("Unk0xf925da22", "LanternOpen"): Time(
+            time: 0.5,
+        ),
+        ("Unk0xf925da22", "LaughBase"): Time(
             time: 0.5,
         ),
         ("Unk0xf925da22", "RecallLoop"): Time(
@@ -955,6 +961,9 @@
             time: 0.5,
         ),
         ("Unk0xf925da22", "Spell1Grab"): Time(
+            time: 0.5,
+        ),
+        ("Unk0xf925da22", "Spell2UpB"): Time(
             time: 0.5,
         ),
         ("Unk0xf925da22", "Spell3P0"): Time(
@@ -999,9 +1008,6 @@
         ("Unk0xf925da22", "Unk0x5e26c18e"): Time(
             time: 0.5,
         ),
-        ("Unk0xf925da22", "Unk0x76bbc6a0"): Time(
-            time: 0.5,
-        ),
         ("Unk0xf925da22", "Unk0x89075e81"): Time(
             time: 0.5,
         ),
@@ -1012,9 +1018,6 @@
             time: 0.5,
         ),
         ("Unk0xf925da22", "Unk0x9d46ce26"): Time(
-            time: 0.5,
-        ),
-        ("Unk0xf925da22", "Unk0x9e55a33e"): Time(
             time: 0.5,
         ),
         ("Unk0xf925da22", "Unk0x9eec6832"): Time(
@@ -1033,9 +1036,6 @@
             time: 0.5,
         ),
         ("Unk0xf925da22", "Unk0xc2818898"): Time(
-            time: 0.5,
-        ),
-        ("Unk0xf925da22", "Unk0xc4dd18f"): Time(
             time: 0.5,
         ),
         ("Unk0xf925da22", "Unk0xcfe332a7"): Time(

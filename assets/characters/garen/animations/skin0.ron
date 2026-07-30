@@ -45,7 +45,7 @@
         ),
         "Idle1": Sequence(
             hashes: [
-                "Unk0xe9ba192a",
+                "IdleEnterBase",
                 "Idle1Base",
                 "Idle2",
             ],
@@ -61,12 +61,18 @@
                 "Idle1Base",
                 "Idle1Base",
                 "Idle1Base",
-                "Unk0x76bbc6a0",
+                "Idle3Base",
                 "Idle1Base",
             ],
         ),
         "Idle2Base": Clip(
             node_index: 32,
+        ),
+        "Idle3Base": Clip(
+            node_index: 20,
+        ),
+        "IdleEnterBase": Clip(
+            node_index: 34,
         ),
         "Joke": Sequence(
             hashes: [
@@ -76,9 +82,12 @@
         ),
         "Laugh": Sequence(
             hashes: [
-                "Unk0x9e55a33e",
+                "LaughBase",
                 "Idle2",
             ],
+        ),
+        "LaughBase": Clip(
+            node_index: 25,
         ),
         "Recall": Clip(
             node_index: 16,
@@ -199,17 +208,11 @@
                 "Unk0x5dbf4f4f",
             ],
         ),
-        "Unk0x76bbc6a0": Clip(
-            node_index: 20,
-        ),
         "Unk0x7b201d91": Clip(
             node_index: 21,
         ),
         "Unk0x9d46ce26": Clip(
             node_index: 24,
-        ),
-        "Unk0x9e55a33e": Clip(
-            node_index: 25,
         ),
         "Unk0xa2d214c6": Sequence(
             hashes: [
@@ -236,9 +239,6 @@
         ),
         "Unk0xc2cae43a": Clip(
             node_index: 31,
-        ),
-        "Unk0xe9ba192a": Clip(
-            node_index: 34,
         ),
     },
     blend_data: {
@@ -509,11 +509,86 @@
         ("Idle2Base", "Unk0x9d46ce26"): Time(
             time: 0.1,
         ),
+        ("Idle3Base", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Idle3Base", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("Idle3Base", "Spell3"): Time(
+            time: 0.0,
+        ),
+        ("Idle3Base", "Spell30"): Time(
+            time: 0.0,
+        ),
+        ("Idle3Base", "Spell3180"): Time(
+            time: 0.0,
+        ),
+        ("Idle3Base", "Spell390"): Time(
+            time: 0.0,
+        ),
+        ("Idle3Base", "Spell4Base"): Time(
+            time: 0.0,
+        ),
+        ("Idle3Base", "Unk0x9d46ce26"): Time(
+            time: 0.1,
+        ),
+        ("IdleEnterBase", "Death"): Time(
+            time: 0.0,
+        ),
+        ("IdleEnterBase", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("IdleEnterBase", "Spell3"): Time(
+            time: 0.0,
+        ),
+        ("IdleEnterBase", "Spell30"): Time(
+            time: 0.0,
+        ),
+        ("IdleEnterBase", "Spell3180"): Time(
+            time: 0.0,
+        ),
+        ("IdleEnterBase", "Spell390"): Time(
+            time: 0.0,
+        ),
+        ("IdleEnterBase", "Spell4Base"): Time(
+            time: 0.0,
+        ),
+        ("IdleEnterBase", "Unk0x9d46ce26"): Time(
+            time: 0.1,
+        ),
         ("Joke", "Death"): Time(
             time: 0.0,
         ),
         ("Laugh", "Death"): Time(
             time: 0.0,
+        ),
+        ("LaughBase", "Death"): Time(
+            time: 0.0,
+        ),
+        ("LaughBase", "Idle1Base"): Time(
+            time: 0.1,
+        ),
+        ("LaughBase", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("LaughBase", "Spell3"): Time(
+            time: 0.0,
+        ),
+        ("LaughBase", "Spell30"): Time(
+            time: 0.0,
+        ),
+        ("LaughBase", "Spell3180"): Time(
+            time: 0.0,
+        ),
+        ("LaughBase", "Spell390"): Time(
+            time: 0.0,
+        ),
+        ("LaughBase", "Spell4Base"): Time(
+            time: 0.0,
+        ),
+        ("LaughBase", "Unk0x9d46ce26"): Time(
+            time: 0.1,
         ),
         ("Recall", "Death"): Time(
             time: 0.0,
@@ -773,6 +848,15 @@
         ("Spell3", "Idle2Base"): Time(
             time: 0.0,
         ),
+        ("Spell3", "Idle3Base"): Time(
+            time: 0.0,
+        ),
+        ("Spell3", "IdleEnterBase"): Time(
+            time: 0.0,
+        ),
+        ("Spell3", "LaughBase"): Time(
+            time: 0.0,
+        ),
         ("Spell3", "Recall"): Time(
             time: 0.0,
         ),
@@ -830,22 +914,13 @@
         ("Spell3", "Unk0x5dbf4f4f"): Time(
             time: 0.0,
         ),
-        ("Spell3", "Unk0x76bbc6a0"): Time(
-            time: 0.0,
-        ),
         ("Spell3", "Unk0x7b201d91"): Time(
             time: 0.0,
         ),
         ("Spell3", "Unk0x9d46ce26"): Time(
             time: 0.0,
         ),
-        ("Spell3", "Unk0x9e55a33e"): Time(
-            time: 0.0,
-        ),
         ("Spell3", "Unk0xc2cae43a"): Time(
-            time: 0.0,
-        ),
-        ("Spell3", "Unk0xe9ba192a"): Time(
             time: 0.0,
         ),
         ("Spell30", "Attack1"): Time(
@@ -876,6 +951,15 @@
             time: 0.0,
         ),
         ("Spell30", "Idle2Base"): Time(
+            time: 0.0,
+        ),
+        ("Spell30", "Idle3Base"): Time(
+            time: 0.0,
+        ),
+        ("Spell30", "IdleEnterBase"): Time(
+            time: 0.0,
+        ),
+        ("Spell30", "LaughBase"): Time(
             time: 0.0,
         ),
         ("Spell30", "Recall"): Time(
@@ -935,22 +1019,13 @@
         ("Spell30", "Unk0x5dbf4f4f"): Time(
             time: 0.0,
         ),
-        ("Spell30", "Unk0x76bbc6a0"): Time(
-            time: 0.0,
-        ),
         ("Spell30", "Unk0x7b201d91"): Time(
             time: 0.0,
         ),
         ("Spell30", "Unk0x9d46ce26"): Time(
             time: 0.0,
         ),
-        ("Spell30", "Unk0x9e55a33e"): Time(
-            time: 0.0,
-        ),
         ("Spell30", "Unk0xc2cae43a"): Time(
-            time: 0.0,
-        ),
-        ("Spell30", "Unk0xe9ba192a"): Time(
             time: 0.0,
         ),
         ("Spell3180", "Attack1"): Time(
@@ -981,6 +1056,15 @@
             time: 0.0,
         ),
         ("Spell3180", "Idle2Base"): Time(
+            time: 0.0,
+        ),
+        ("Spell3180", "Idle3Base"): Time(
+            time: 0.0,
+        ),
+        ("Spell3180", "IdleEnterBase"): Time(
+            time: 0.0,
+        ),
+        ("Spell3180", "LaughBase"): Time(
             time: 0.0,
         ),
         ("Spell3180", "Recall"): Time(
@@ -1040,22 +1124,13 @@
         ("Spell3180", "Unk0x5dbf4f4f"): Time(
             time: 0.0,
         ),
-        ("Spell3180", "Unk0x76bbc6a0"): Time(
-            time: 0.0,
-        ),
         ("Spell3180", "Unk0x7b201d91"): Time(
             time: 0.0,
         ),
         ("Spell3180", "Unk0x9d46ce26"): Time(
             time: 0.0,
         ),
-        ("Spell3180", "Unk0x9e55a33e"): Time(
-            time: 0.0,
-        ),
         ("Spell3180", "Unk0xc2cae43a"): Time(
-            time: 0.0,
-        ),
-        ("Spell3180", "Unk0xe9ba192a"): Time(
             time: 0.0,
         ),
         ("Spell390", "Attack1"): Time(
@@ -1086,6 +1161,15 @@
             time: 0.0,
         ),
         ("Spell390", "Idle2Base"): Time(
+            time: 0.0,
+        ),
+        ("Spell390", "Idle3Base"): Time(
+            time: 0.0,
+        ),
+        ("Spell390", "IdleEnterBase"): Time(
+            time: 0.0,
+        ),
+        ("Spell390", "LaughBase"): Time(
             time: 0.0,
         ),
         ("Spell390", "Recall"): Time(
@@ -1145,22 +1229,13 @@
         ("Spell390", "Unk0x5dbf4f4f"): Time(
             time: 0.0,
         ),
-        ("Spell390", "Unk0x76bbc6a0"): Time(
-            time: 0.0,
-        ),
         ("Spell390", "Unk0x7b201d91"): Time(
             time: 0.0,
         ),
         ("Spell390", "Unk0x9d46ce26"): Time(
             time: 0.0,
         ),
-        ("Spell390", "Unk0x9e55a33e"): Time(
-            time: 0.0,
-        ),
         ("Spell390", "Unk0xc2cae43a"): Time(
-            time: 0.0,
-        ),
-        ("Spell390", "Unk0xe9ba192a"): Time(
             time: 0.0,
         ),
         ("Spell4", "Death"): Time(
@@ -1298,30 +1373,6 @@
         ("Unk0x755f645c", "Death"): Time(
             time: 0.0,
         ),
-        ("Unk0x76bbc6a0", "Death"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x76bbc6a0", "Spell1"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x76bbc6a0", "Spell3"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x76bbc6a0", "Spell30"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x76bbc6a0", "Spell3180"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x76bbc6a0", "Spell390"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x76bbc6a0", "Spell4Base"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x76bbc6a0", "Unk0x9d46ce26"): Time(
-            time: 0.1,
-        ),
         ("Unk0x7b201d91", "Death"): Time(
             time: 0.0,
         ),
@@ -1370,33 +1421,6 @@
         ("Unk0x9d46ce26", "Unk0x9d46ce26"): Time(
             time: 0.1,
         ),
-        ("Unk0x9e55a33e", "Death"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x9e55a33e", "Idle1Base"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x9e55a33e", "Spell1"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x9e55a33e", "Spell3"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x9e55a33e", "Spell30"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x9e55a33e", "Spell3180"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x9e55a33e", "Spell390"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x9e55a33e", "Spell4Base"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x9e55a33e", "Unk0x9d46ce26"): Time(
-            time: 0.1,
-        ),
         ("Unk0xa2d214c6", "Death"): Time(
             time: 0.0,
         ),
@@ -1438,30 +1462,6 @@
         ),
         ("Unk0xc2cae43a", "Spell390"): Time(
             time: 0.0,
-        ),
-        ("Unk0xe9ba192a", "Death"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xe9ba192a", "Spell1"): Time(
-            time: 0.1,
-        ),
-        ("Unk0xe9ba192a", "Spell3"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xe9ba192a", "Spell30"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xe9ba192a", "Spell3180"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xe9ba192a", "Spell390"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xe9ba192a", "Spell4Base"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xe9ba192a", "Unk0x9d46ce26"): Time(
-            time: 0.1,
         ),
     },
 )

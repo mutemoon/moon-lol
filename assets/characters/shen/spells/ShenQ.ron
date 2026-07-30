@@ -29,7 +29,7 @@
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: "unk_0x9987596d",
+                        dataValue: "enhanced_percent_damage",
                     ),
                     (
                         type: "CalculationPartStatCoefficient",

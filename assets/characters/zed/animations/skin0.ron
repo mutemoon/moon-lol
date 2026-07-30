@@ -56,7 +56,7 @@
         "Dance": Sequence(
             hashes: [
                 "Unk0x98ffa803",
-                "Unk0x9b58589d",
+                "RawDance",
             ],
         ),
         "Death": Clip(
@@ -65,13 +65,13 @@
         "Idle1": Sequence(
             hashes: [
                 "Unk0x8ea9425a",
-                "Unk0xba9fda17",
+                "RawIdle1",
             ],
         ),
         "Idle2": Selector(
             probably_nodes: [
                 (
-                    key: "Unk0xbb9fdbaa",
+                    key: "RawIdle2",
                     value: 45.0,
                 ),
                 (
@@ -95,6 +95,21 @@
         ),
         "Laugh": Clip(
             node_index: 36,
+        ),
+        "RawDance": Clip(
+            node_index: 29,
+        ),
+        "RawIdle1": Clip(
+            node_index: 38,
+        ),
+        "RawIdle2": Clip(
+            node_index: 39,
+        ),
+        "RawRun": Clip(
+            node_index: 20,
+        ),
+        "RawRunLeadin": Clip(
+            node_index: 15,
         ),
         "Recall": Sequence(
             hashes: [
@@ -121,8 +136,8 @@
         ),
         "RunNormal": Sequence(
             hashes: [
-                "Unk0x5513f195",
-                "Unk0x7970f94b",
+                "RawRunLeadin",
+                "RawRun",
             ],
         ),
         "Spawn": Clip(
@@ -191,17 +206,11 @@
         "Unk0x5240deb1": Clip(
             node_index: 14,
         ),
-        "Unk0x5513f195": Clip(
-            node_index: 15,
-        ),
         "Unk0x6a638259": Clip(
             node_index: 18,
         ),
         "Unk0x7025230c": Clip(
             node_index: 19,
-        ),
-        "Unk0x7970f94b": Clip(
-            node_index: 20,
         ),
         "Unk0x7b63b438": Clip(
             node_index: 21,
@@ -243,20 +252,11 @@
         "Unk0x98ffa803": Clip(
             node_index: 28,
         ),
-        "Unk0x9b58589d": Clip(
-            node_index: 29,
-        ),
         "Unk0xa5b3b915": Clip(
             node_index: 31,
         ),
         "Unk0xb59fd238": Clip(
             node_index: 34,
-        ),
-        "Unk0xba9fda17": Clip(
-            node_index: 38,
-        ),
-        "Unk0xbb9fdbaa": Clip(
-            node_index: 39,
         ),
         "Unk0xbc1ef3fb": ConditionFloat(
             updater: MoveSpeed,
@@ -713,6 +713,345 @@
         ("Laugh", "Unk0xcaeab15c"): Time(
             time: 0.1,
         ),
+        ("RawDance", "Death"): Time(
+            time: 0.0,
+        ),
+        ("RawDance", "RawDance"): Time(
+            time: 0.0,
+        ),
+        ("RawDance", "Spell2"): Time(
+            time: 0.05,
+        ),
+        ("RawDance", "Spell4"): Time(
+            time: 0.1,
+        ),
+        ("RawDance", "Spell4Strike"): Time(
+            time: 0.0,
+        ),
+        ("RawDance", "Unk0x15a9a5b2"): Time(
+            time: 0.1,
+        ),
+        ("RawDance", "Unk0x1b735632"): Time(
+            time: 0.1,
+        ),
+        ("RawDance", "Unk0x27bf8857"): Time(
+            time: 0.1,
+        ),
+        ("RawDance", "Unk0x28ea03ed"): Time(
+            time: 0.1,
+        ),
+        ("RawDance", "Unk0x2d8938d7"): Time(
+            time: 0.1,
+        ),
+        ("RawDance", "Unk0x34b1b0b9"): Time(
+            time: 0.1,
+        ),
+        ("RawDance", "Unk0x3a74e46c"): Time(
+            time: 0.1,
+        ),
+        ("RawDance", "Unk0x6a638259"): Time(
+            time: 0.1,
+        ),
+        ("RawDance", "Unk0x7025230c"): Time(
+            time: 0.1,
+        ),
+        ("RawDance", "Unk0x7b63b438"): Time(
+            time: 0.1,
+        ),
+        ("RawDance", "Unk0x857596ff"): Time(
+            time: 0.1,
+        ),
+        ("RawDance", "Unk0x8b9dc9d8"): Time(
+            time: 0.1,
+        ),
+        ("RawDance", "Unk0x9337444a"): Time(
+            time: 0.1,
+        ),
+        ("RawDance", "Unk0x9579a375"): Time(
+            time: 0.1,
+        ),
+        ("RawDance", "Unk0xa5b3b915"): Time(
+            time: 0.1,
+        ),
+        ("RawDance", "Unk0xc4d95ec9"): Time(
+            time: 0.1,
+        ),
+        ("RawDance", "Unk0xcaeab15c"): Time(
+            time: 0.1,
+        ),
+        ("RawIdle1", "Death"): Time(
+            time: 0.0,
+        ),
+        ("RawIdle1", "RawIdle1"): Time(
+            time: 0.0,
+        ),
+        ("RawIdle1", "RawRunLeadin"): Time(
+            time: 0.1,
+        ),
+        ("RawIdle1", "Spell2"): Time(
+            time: 0.05,
+        ),
+        ("RawIdle1", "Spell4"): Time(
+            time: 0.1,
+        ),
+        ("RawIdle1", "Spell4Strike"): Time(
+            time: 0.0,
+        ),
+        ("RawIdle1", "Unk0x15a9a5b2"): Time(
+            time: 0.1,
+        ),
+        ("RawIdle1", "Unk0x1b735632"): Time(
+            time: 0.1,
+        ),
+        ("RawIdle1", "Unk0x27bf8857"): Time(
+            time: 0.1,
+        ),
+        ("RawIdle1", "Unk0x28ea03ed"): Time(
+            time: 0.1,
+        ),
+        ("RawIdle1", "Unk0x2d8938d7"): Time(
+            time: 0.1,
+        ),
+        ("RawIdle1", "Unk0x34b1b0b9"): Time(
+            time: 0.1,
+        ),
+        ("RawIdle1", "Unk0x3a74e46c"): Time(
+            time: 0.1,
+        ),
+        ("RawIdle1", "Unk0x6a638259"): Time(
+            time: 0.1,
+        ),
+        ("RawIdle1", "Unk0x7025230c"): Time(
+            time: 0.1,
+        ),
+        ("RawIdle1", "Unk0x7b63b438"): Time(
+            time: 0.1,
+        ),
+        ("RawIdle1", "Unk0x857596ff"): Time(
+            time: 0.1,
+        ),
+        ("RawIdle1", "Unk0x8b9dc9d8"): Time(
+            time: 0.1,
+        ),
+        ("RawIdle1", "Unk0x9337444a"): Time(
+            time: 0.1,
+        ),
+        ("RawIdle1", "Unk0x9579a375"): Time(
+            time: 0.1,
+        ),
+        ("RawIdle1", "Unk0xa5b3b915"): Time(
+            time: 0.1,
+        ),
+        ("RawIdle1", "Unk0xc4d95ec9"): Time(
+            time: 0.1,
+        ),
+        ("RawIdle1", "Unk0xcaeab15c"): Time(
+            time: 0.1,
+        ),
+        ("RawIdle2", "Death"): Time(
+            time: 0.0,
+        ),
+        ("RawIdle2", "RawIdle2"): Time(
+            time: 0.0,
+        ),
+        ("RawIdle2", "Spell2"): Time(
+            time: 0.05,
+        ),
+        ("RawIdle2", "Spell4"): Time(
+            time: 0.1,
+        ),
+        ("RawIdle2", "Spell4Strike"): Time(
+            time: 0.0,
+        ),
+        ("RawIdle2", "Unk0x15a9a5b2"): Time(
+            time: 0.1,
+        ),
+        ("RawIdle2", "Unk0x1b735632"): Time(
+            time: 0.1,
+        ),
+        ("RawIdle2", "Unk0x27bf8857"): Time(
+            time: 0.1,
+        ),
+        ("RawIdle2", "Unk0x28ea03ed"): Time(
+            time: 0.1,
+        ),
+        ("RawIdle2", "Unk0x2d8938d7"): Time(
+            time: 0.1,
+        ),
+        ("RawIdle2", "Unk0x34b1b0b9"): Time(
+            time: 0.1,
+        ),
+        ("RawIdle2", "Unk0x3a74e46c"): Time(
+            time: 0.1,
+        ),
+        ("RawIdle2", "Unk0x6a638259"): Time(
+            time: 0.1,
+        ),
+        ("RawIdle2", "Unk0x7025230c"): Time(
+            time: 0.1,
+        ),
+        ("RawIdle2", "Unk0x7b63b438"): Time(
+            time: 0.1,
+        ),
+        ("RawIdle2", "Unk0x857596ff"): Time(
+            time: 0.1,
+        ),
+        ("RawIdle2", "Unk0x8b9dc9d8"): Time(
+            time: 0.1,
+        ),
+        ("RawIdle2", "Unk0x9337444a"): Time(
+            time: 0.1,
+        ),
+        ("RawIdle2", "Unk0x9579a375"): Time(
+            time: 0.1,
+        ),
+        ("RawIdle2", "Unk0xa5b3b915"): Time(
+            time: 0.1,
+        ),
+        ("RawIdle2", "Unk0xc4d95ec9"): Time(
+            time: 0.1,
+        ),
+        ("RawIdle2", "Unk0xcaeab15c"): Time(
+            time: 0.1,
+        ),
+        ("RawRun", "Death"): Time(
+            time: 0.0,
+        ),
+        ("RawRun", "RawRun"): Time(
+            time: 0.0,
+        ),
+        ("RawRun", "RawRunLeadin"): Time(
+            time: 0.0,
+        ),
+        ("RawRun", "Spell2"): Time(
+            time: 0.05,
+        ),
+        ("RawRun", "Spell4"): Time(
+            time: 0.1,
+        ),
+        ("RawRun", "Spell4Strike"): Time(
+            time: 0.0,
+        ),
+        ("RawRun", "Unk0x15a9a5b2"): Time(
+            time: 0.1,
+        ),
+        ("RawRun", "Unk0x1b735632"): Time(
+            time: 0.1,
+        ),
+        ("RawRun", "Unk0x27bf8857"): Time(
+            time: 0.1,
+        ),
+        ("RawRun", "Unk0x28ea03ed"): Time(
+            time: 0.1,
+        ),
+        ("RawRun", "Unk0x2d8938d7"): Time(
+            time: 0.1,
+        ),
+        ("RawRun", "Unk0x34b1b0b9"): Time(
+            time: 0.1,
+        ),
+        ("RawRun", "Unk0x3a74e46c"): Time(
+            time: 0.1,
+        ),
+        ("RawRun", "Unk0x6a638259"): Time(
+            time: 0.1,
+        ),
+        ("RawRun", "Unk0x7025230c"): Time(
+            time: 0.1,
+        ),
+        ("RawRun", "Unk0x7b63b438"): Time(
+            time: 0.1,
+        ),
+        ("RawRun", "Unk0x857596ff"): Time(
+            time: 0.1,
+        ),
+        ("RawRun", "Unk0x8b9dc9d8"): Time(
+            time: 0.1,
+        ),
+        ("RawRun", "Unk0x9337444a"): Time(
+            time: 0.1,
+        ),
+        ("RawRun", "Unk0x9579a375"): Time(
+            time: 0.1,
+        ),
+        ("RawRun", "Unk0xa5b3b915"): Time(
+            time: 0.1,
+        ),
+        ("RawRun", "Unk0xc4d95ec9"): Time(
+            time: 0.1,
+        ),
+        ("RawRun", "Unk0xcaeab15c"): Time(
+            time: 0.1,
+        ),
+        ("RawRunLeadin", "Death"): Time(
+            time: 0.0,
+        ),
+        ("RawRunLeadin", "RawRun"): Time(
+            time: 0.0,
+        ),
+        ("RawRunLeadin", "RawRunLeadin"): Time(
+            time: 0.0,
+        ),
+        ("RawRunLeadin", "Spell2"): Time(
+            time: 0.05,
+        ),
+        ("RawRunLeadin", "Spell4"): Time(
+            time: 0.1,
+        ),
+        ("RawRunLeadin", "Spell4Strike"): Time(
+            time: 0.0,
+        ),
+        ("RawRunLeadin", "Unk0x15a9a5b2"): Time(
+            time: 0.1,
+        ),
+        ("RawRunLeadin", "Unk0x1b735632"): Time(
+            time: 0.1,
+        ),
+        ("RawRunLeadin", "Unk0x27bf8857"): Time(
+            time: 0.1,
+        ),
+        ("RawRunLeadin", "Unk0x28ea03ed"): Time(
+            time: 0.1,
+        ),
+        ("RawRunLeadin", "Unk0x2d8938d7"): Time(
+            time: 0.1,
+        ),
+        ("RawRunLeadin", "Unk0x34b1b0b9"): Time(
+            time: 0.1,
+        ),
+        ("RawRunLeadin", "Unk0x3a74e46c"): Time(
+            time: 0.1,
+        ),
+        ("RawRunLeadin", "Unk0x6a638259"): Time(
+            time: 0.1,
+        ),
+        ("RawRunLeadin", "Unk0x7025230c"): Time(
+            time: 0.1,
+        ),
+        ("RawRunLeadin", "Unk0x7b63b438"): Time(
+            time: 0.1,
+        ),
+        ("RawRunLeadin", "Unk0x857596ff"): Time(
+            time: 0.1,
+        ),
+        ("RawRunLeadin", "Unk0x8b9dc9d8"): Time(
+            time: 0.1,
+        ),
+        ("RawRunLeadin", "Unk0x9337444a"): Time(
+            time: 0.1,
+        ),
+        ("RawRunLeadin", "Unk0x9579a375"): Time(
+            time: 0.1,
+        ),
+        ("RawRunLeadin", "Unk0xa5b3b915"): Time(
+            time: 0.1,
+        ),
+        ("RawRunLeadin", "Unk0xc4d95ec9"): Time(
+            time: 0.1,
+        ),
+        ("RawRunLeadin", "Unk0xcaeab15c"): Time(
+            time: 0.1,
+        ),
         ("Recall", "Death"): Time(
             time: 0.0,
         ),
@@ -1142,6 +1481,21 @@
         ("Spell4", "Laugh"): Time(
             time: 0.0,
         ),
+        ("Spell4", "RawDance"): Time(
+            time: 0.0,
+        ),
+        ("Spell4", "RawIdle1"): Time(
+            time: 0.0,
+        ),
+        ("Spell4", "RawIdle2"): Time(
+            time: 0.0,
+        ),
+        ("Spell4", "RawRun"): Time(
+            time: 0.0,
+        ),
+        ("Spell4", "RawRunLeadin"): Time(
+            time: 0.0,
+        ),
         ("Spell4", "RunFast"): Time(
             time: 0.0,
         ),
@@ -1193,17 +1547,11 @@
         ("Spell4", "Unk0x5240deb1"): Time(
             time: 0.0,
         ),
-        ("Spell4", "Unk0x5513f195"): Time(
-            time: 0.0,
-        ),
         ("Spell4", "Unk0x6a638259"): Time(
             time: 0.1,
         ),
         ("Spell4", "Unk0x7025230c"): Time(
             time: 0.1,
-        ),
-        ("Spell4", "Unk0x7970f94b"): Time(
-            time: 0.0,
         ),
         ("Spell4", "Unk0x7b63b438"): Time(
             time: 0.1,
@@ -1229,19 +1577,10 @@
         ("Spell4", "Unk0x98ffa803"): Time(
             time: 0.0,
         ),
-        ("Spell4", "Unk0x9b58589d"): Time(
-            time: 0.0,
-        ),
         ("Spell4", "Unk0xa5b3b915"): Time(
             time: 0.1,
         ),
         ("Spell4", "Unk0xb59fd238"): Time(
-            time: 0.0,
-        ),
-        ("Spell4", "Unk0xba9fda17"): Time(
-            time: 0.0,
-        ),
-        ("Spell4", "Unk0xbb9fdbaa"): Time(
             time: 0.0,
         ),
         ("Spell4", "Unk0xbc9fdd3d"): Time(
@@ -1275,6 +1614,21 @@
             time: 0.0,
         ),
         ("Spell4Strike", "Laugh"): Time(
+            time: 0.0,
+        ),
+        ("Spell4Strike", "RawDance"): Time(
+            time: 0.0,
+        ),
+        ("Spell4Strike", "RawIdle1"): Time(
+            time: 0.0,
+        ),
+        ("Spell4Strike", "RawIdle2"): Time(
+            time: 0.0,
+        ),
+        ("Spell4Strike", "RawRun"): Time(
+            time: 0.0,
+        ),
+        ("Spell4Strike", "RawRunLeadin"): Time(
             time: 0.0,
         ),
         ("Spell4Strike", "RunFast"): Time(
@@ -1328,17 +1682,11 @@
         ("Spell4Strike", "Unk0x5240deb1"): Time(
             time: 0.0,
         ),
-        ("Spell4Strike", "Unk0x5513f195"): Time(
-            time: 0.0,
-        ),
         ("Spell4Strike", "Unk0x6a638259"): Time(
             time: 0.1,
         ),
         ("Spell4Strike", "Unk0x7025230c"): Time(
             time: 0.1,
-        ),
-        ("Spell4Strike", "Unk0x7970f94b"): Time(
-            time: 0.0,
         ),
         ("Spell4Strike", "Unk0x7b63b438"): Time(
             time: 0.1,
@@ -1364,19 +1712,10 @@
         ("Spell4Strike", "Unk0x98ffa803"): Time(
             time: 0.0,
         ),
-        ("Spell4Strike", "Unk0x9b58589d"): Time(
-            time: 0.0,
-        ),
         ("Spell4Strike", "Unk0xa5b3b915"): Time(
             time: 0.1,
         ),
         ("Spell4Strike", "Unk0xb59fd238"): Time(
-            time: 0.0,
-        ),
-        ("Spell4Strike", "Unk0xba9fda17"): Time(
-            time: 0.0,
-        ),
-        ("Spell4Strike", "Unk0xbb9fdbaa"): Time(
             time: 0.0,
         ),
         ("Spell4Strike", "Unk0xbc9fdd3d"): Time(
@@ -2102,75 +2441,6 @@
         ("Unk0x5240deb1", "Unk0xcaeab15c"): Time(
             time: 0.1,
         ),
-        ("Unk0x5513f195", "Death"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x5513f195", "Spell2"): Time(
-            time: 0.05,
-        ),
-        ("Unk0x5513f195", "Spell4"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x5513f195", "Spell4Strike"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x5513f195", "Unk0x15a9a5b2"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x5513f195", "Unk0x1b735632"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x5513f195", "Unk0x27bf8857"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x5513f195", "Unk0x28ea03ed"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x5513f195", "Unk0x2d8938d7"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x5513f195", "Unk0x34b1b0b9"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x5513f195", "Unk0x3a74e46c"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x5513f195", "Unk0x5513f195"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x5513f195", "Unk0x6a638259"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x5513f195", "Unk0x7025230c"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x5513f195", "Unk0x7970f94b"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x5513f195", "Unk0x7b63b438"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x5513f195", "Unk0x857596ff"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x5513f195", "Unk0x8b9dc9d8"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x5513f195", "Unk0x9337444a"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x5513f195", "Unk0x9579a375"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x5513f195", "Unk0xa5b3b915"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x5513f195", "Unk0xc4d95ec9"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x5513f195", "Unk0xcaeab15c"): Time(
-            time: 0.1,
-        ),
         ("Unk0x6a638259", "Death"): Time(
             time: 0.0,
         ),
@@ -2295,75 +2565,6 @@
             time: 0.1,
         ),
         ("Unk0x7025230c", "Unk0xcaeab15c"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x7970f94b", "Death"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x7970f94b", "Spell2"): Time(
-            time: 0.05,
-        ),
-        ("Unk0x7970f94b", "Spell4"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x7970f94b", "Spell4Strike"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x7970f94b", "Unk0x15a9a5b2"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x7970f94b", "Unk0x1b735632"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x7970f94b", "Unk0x27bf8857"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x7970f94b", "Unk0x28ea03ed"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x7970f94b", "Unk0x2d8938d7"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x7970f94b", "Unk0x34b1b0b9"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x7970f94b", "Unk0x3a74e46c"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x7970f94b", "Unk0x5513f195"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x7970f94b", "Unk0x6a638259"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x7970f94b", "Unk0x7025230c"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x7970f94b", "Unk0x7970f94b"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x7970f94b", "Unk0x7b63b438"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x7970f94b", "Unk0x857596ff"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x7970f94b", "Unk0x8b9dc9d8"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x7970f94b", "Unk0x9337444a"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x7970f94b", "Unk0x9579a375"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x7970f94b", "Unk0xa5b3b915"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x7970f94b", "Unk0xc4d95ec9"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x7970f94b", "Unk0xcaeab15c"): Time(
             time: 0.1,
         ),
         ("Unk0x7b63b438", "Death"): Time(
@@ -2882,72 +3083,6 @@
         ("Unk0x98ffa803", "Unk0xcaeab15c"): Time(
             time: 0.1,
         ),
-        ("Unk0x9b58589d", "Death"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x9b58589d", "Spell2"): Time(
-            time: 0.05,
-        ),
-        ("Unk0x9b58589d", "Spell4"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x9b58589d", "Spell4Strike"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x9b58589d", "Unk0x15a9a5b2"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x9b58589d", "Unk0x1b735632"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x9b58589d", "Unk0x27bf8857"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x9b58589d", "Unk0x28ea03ed"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x9b58589d", "Unk0x2d8938d7"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x9b58589d", "Unk0x34b1b0b9"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x9b58589d", "Unk0x3a74e46c"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x9b58589d", "Unk0x6a638259"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x9b58589d", "Unk0x7025230c"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x9b58589d", "Unk0x7b63b438"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x9b58589d", "Unk0x857596ff"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x9b58589d", "Unk0x8b9dc9d8"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x9b58589d", "Unk0x9337444a"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x9b58589d", "Unk0x9579a375"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x9b58589d", "Unk0x9b58589d"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x9b58589d", "Unk0xa5b3b915"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x9b58589d", "Unk0xc4d95ec9"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x9b58589d", "Unk0xcaeab15c"): Time(
-            time: 0.1,
-        ),
         ("Unk0xa5b3b915", "Death"): Time(
             time: 0.0,
         ),
@@ -3075,141 +3210,6 @@
             time: 0.1,
         ),
         ("Unk0xb59fd238", "Unk0xcaeab15c"): Time(
-            time: 0.1,
-        ),
-        ("Unk0xba9fda17", "Death"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xba9fda17", "Spell2"): Time(
-            time: 0.05,
-        ),
-        ("Unk0xba9fda17", "Spell4"): Time(
-            time: 0.1,
-        ),
-        ("Unk0xba9fda17", "Spell4Strike"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xba9fda17", "Unk0x15a9a5b2"): Time(
-            time: 0.1,
-        ),
-        ("Unk0xba9fda17", "Unk0x1b735632"): Time(
-            time: 0.1,
-        ),
-        ("Unk0xba9fda17", "Unk0x27bf8857"): Time(
-            time: 0.1,
-        ),
-        ("Unk0xba9fda17", "Unk0x28ea03ed"): Time(
-            time: 0.1,
-        ),
-        ("Unk0xba9fda17", "Unk0x2d8938d7"): Time(
-            time: 0.1,
-        ),
-        ("Unk0xba9fda17", "Unk0x34b1b0b9"): Time(
-            time: 0.1,
-        ),
-        ("Unk0xba9fda17", "Unk0x3a74e46c"): Time(
-            time: 0.1,
-        ),
-        ("Unk0xba9fda17", "Unk0x5513f195"): Time(
-            time: 0.1,
-        ),
-        ("Unk0xba9fda17", "Unk0x6a638259"): Time(
-            time: 0.1,
-        ),
-        ("Unk0xba9fda17", "Unk0x7025230c"): Time(
-            time: 0.1,
-        ),
-        ("Unk0xba9fda17", "Unk0x7b63b438"): Time(
-            time: 0.1,
-        ),
-        ("Unk0xba9fda17", "Unk0x857596ff"): Time(
-            time: 0.1,
-        ),
-        ("Unk0xba9fda17", "Unk0x8b9dc9d8"): Time(
-            time: 0.1,
-        ),
-        ("Unk0xba9fda17", "Unk0x9337444a"): Time(
-            time: 0.1,
-        ),
-        ("Unk0xba9fda17", "Unk0x9579a375"): Time(
-            time: 0.1,
-        ),
-        ("Unk0xba9fda17", "Unk0xa5b3b915"): Time(
-            time: 0.1,
-        ),
-        ("Unk0xba9fda17", "Unk0xba9fda17"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xba9fda17", "Unk0xc4d95ec9"): Time(
-            time: 0.1,
-        ),
-        ("Unk0xba9fda17", "Unk0xcaeab15c"): Time(
-            time: 0.1,
-        ),
-        ("Unk0xbb9fdbaa", "Death"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xbb9fdbaa", "Spell2"): Time(
-            time: 0.05,
-        ),
-        ("Unk0xbb9fdbaa", "Spell4"): Time(
-            time: 0.1,
-        ),
-        ("Unk0xbb9fdbaa", "Spell4Strike"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xbb9fdbaa", "Unk0x15a9a5b2"): Time(
-            time: 0.1,
-        ),
-        ("Unk0xbb9fdbaa", "Unk0x1b735632"): Time(
-            time: 0.1,
-        ),
-        ("Unk0xbb9fdbaa", "Unk0x27bf8857"): Time(
-            time: 0.1,
-        ),
-        ("Unk0xbb9fdbaa", "Unk0x28ea03ed"): Time(
-            time: 0.1,
-        ),
-        ("Unk0xbb9fdbaa", "Unk0x2d8938d7"): Time(
-            time: 0.1,
-        ),
-        ("Unk0xbb9fdbaa", "Unk0x34b1b0b9"): Time(
-            time: 0.1,
-        ),
-        ("Unk0xbb9fdbaa", "Unk0x3a74e46c"): Time(
-            time: 0.1,
-        ),
-        ("Unk0xbb9fdbaa", "Unk0x6a638259"): Time(
-            time: 0.1,
-        ),
-        ("Unk0xbb9fdbaa", "Unk0x7025230c"): Time(
-            time: 0.1,
-        ),
-        ("Unk0xbb9fdbaa", "Unk0x7b63b438"): Time(
-            time: 0.1,
-        ),
-        ("Unk0xbb9fdbaa", "Unk0x857596ff"): Time(
-            time: 0.1,
-        ),
-        ("Unk0xbb9fdbaa", "Unk0x8b9dc9d8"): Time(
-            time: 0.1,
-        ),
-        ("Unk0xbb9fdbaa", "Unk0x9337444a"): Time(
-            time: 0.1,
-        ),
-        ("Unk0xbb9fdbaa", "Unk0x9579a375"): Time(
-            time: 0.1,
-        ),
-        ("Unk0xbb9fdbaa", "Unk0xa5b3b915"): Time(
-            time: 0.1,
-        ),
-        ("Unk0xbb9fdbaa", "Unk0xbb9fdbaa"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xbb9fdbaa", "Unk0xc4d95ec9"): Time(
-            time: 0.1,
-        ),
-        ("Unk0xbb9fdbaa", "Unk0xcaeab15c"): Time(
             time: 0.1,
         ),
         ("Unk0xbc9fdd3d", "Death"): Time(

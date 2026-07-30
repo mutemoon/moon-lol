@@ -18,6 +18,27 @@
                 multiplier: None,
                 precision: None,
             ),
+            "damage_restore_amount": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "base_damage_restore_amount",
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: None,
+                        coefficient: Some(0.6),
+                        statFormula: None,
+                    ),
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "health_cost",
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
             "move_speed": (
                 type: "CalculationSpell",
                 formulaParts: Some([
@@ -30,27 +51,6 @@
                         stat: None,
                         coefficient: Some(0.0005),
                         statFormula: None,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            "unk_0x98c0d8e": (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: "unk_0x6fda3861",
-                    ),
-                    (
-                        type: "CalculationPartStatCoefficient",
-                        stat: None,
-                        coefficient: Some(0.6),
-                        statFormula: None,
-                    ),
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: "health_cost",
                     ),
                 ]),
                 multiplier: None,

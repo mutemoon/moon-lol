@@ -44,7 +44,7 @@
                 multiplier: None,
                 precision: None,
             ),
-            "unk_0x91ffe3d8": (
+            "trigger_range": (
                 type: "CalculationSpell",
                 formulaParts: Some([
                     (

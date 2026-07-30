@@ -49,6 +49,9 @@
         "Idle2Base": Clip(
             node_index: 21,
         ),
+        "Idle3Base": Clip(
+            node_index: 8,
+        ),
         "Joke": Clip(
             node_index: 20,
         ),
@@ -82,9 +85,6 @@
         "Taunt": Clip(
             node_index: 18,
         ),
-        "Unk0x76bbc6a0": Clip(
-            node_index: 8,
-        ),
         "Unk0x87fd6c06": Clip(
             node_index: 9,
         ),
@@ -99,7 +99,7 @@
                     value: 33.33,
                 ),
                 (
-                    key: "Unk0x76bbc6a0",
+                    key: "Idle3Base",
                     value: 33.33,
                 ),
             ],
@@ -205,6 +205,15 @@
         ("Idle2Base", "Spell4"): Time(
             time: 0.1,
         ),
+        ("Idle3Base", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Idle3Base", "Spell1"): Time(
+            time: 0.05,
+        ),
+        ("Idle3Base", "Spell4"): Time(
+            time: 0.1,
+        ),
         ("IdleIn", "Spell4"): Time(
             time: 0.05,
         ),
@@ -253,14 +262,14 @@
         ("Run", "Idle2Base"): TransitionClip(
             clip_name: "RunToIdle",
         ),
+        ("Run", "Idle3Base"): TransitionClip(
+            clip_name: "RunToIdle",
+        ),
         ("Run", "Spell1"): Time(
             time: 0.05,
         ),
         ("Run", "Spell4"): Time(
             time: 0.1,
-        ),
-        ("Run", "Unk0x76bbc6a0"): TransitionClip(
-            clip_name: "RunToIdle",
         ),
         ("RunToIdle", "Death"): Time(
             time: 0.0,
@@ -301,6 +310,9 @@
         ("Spell1", "Idle2Base"): Time(
             time: 0.1,
         ),
+        ("Spell1", "Idle3Base"): Time(
+            time: 0.1,
+        ),
         ("Spell1", "Joke"): Time(
             time: 0.1,
         ),
@@ -332,9 +344,6 @@
             time: 0.1,
         ),
         ("Spell1", "Taunt"): Time(
-            time: 0.1,
-        ),
-        ("Spell1", "Unk0x76bbc6a0"): Time(
             time: 0.1,
         ),
         ("Spell1", "Unk0x87fd6c06"): Time(
@@ -377,15 +386,6 @@
             time: 0.05,
         ),
         ("Taunt", "Spell4"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x76bbc6a0", "Death"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x76bbc6a0", "Spell1"): Time(
-            time: 0.05,
-        ),
-        ("Unk0x76bbc6a0", "Spell4"): Time(
             time: 0.1,
         ),
         ("Unk0x87fd6c06", "Death"): Time(

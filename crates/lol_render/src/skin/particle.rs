@@ -26,7 +26,7 @@ pub fn on_command_character_particle_spawn(
 
     let Some(resolver) = res_assets_resolver.load_hash(skin.resolver_key) else {
         info!(
-            "{entity} 找不到 ConfigResourceResolver(key={:08x})，跳过粒子创建；可能未提取 vfx.ron 或未重新提取皮肤",
+            "{entity} 找不到 ConfigResourceResolver(key={:08x})，跳过粒子创建；可能 vfx 场景 skin{{N}}_vfx.ron 未提取或未加载（缺 ConfigVfx Resource）",
             skin.resolver_key
         );
         return;

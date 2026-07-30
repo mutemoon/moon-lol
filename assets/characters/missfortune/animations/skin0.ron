@@ -48,6 +48,9 @@
         "Idle2Base": Clip(
             node_index: 22,
         ),
+        "Idle3Base": Clip(
+            node_index: 8,
+        ),
         "IdleIn": Clip(
             node_index: 18,
         ),
@@ -59,7 +62,7 @@
         ),
         "Recall": Sequence(
             hashes: [
-                "Unk0x76bbc6a0",
+                "Idle3Base",
                 "Idle2Base",
                 "Idle1Base",
             ],
@@ -108,9 +111,6 @@
         "Unk0x3279c7ac": Clip(
             node_index: 2,
         ),
-        "Unk0x76bbc6a0": Clip(
-            node_index: 8,
-        ),
         "Unk0x914db254": Selector(
             probably_nodes: [
                 (
@@ -122,7 +122,7 @@
                     value: 25.0,
                 ),
                 (
-                    key: "Unk0x76bbc6a0",
+                    key: "Idle3Base",
                     value: 25.0,
                 ),
             ],
@@ -200,6 +200,15 @@
         ("Idle2Base", "Idle2Base"): Time(
             time: 0.0,
         ),
+        ("Idle3Base", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Idle3Base", "Idle3Base"): Time(
+            time: 0.0,
+        ),
+        ("Idle3Base", "Spell1"): Time(
+            time: 0.0,
+        ),
         ("Joke", "Death"): Time(
             time: 0.0,
         ),
@@ -258,15 +267,6 @@
             time: 0.0,
         ),
         ("Taunt", "Spell1"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x76bbc6a0", "Death"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x76bbc6a0", "Spell1"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x76bbc6a0", "Unk0x76bbc6a0"): Time(
             time: 0.0,
         ),
     },

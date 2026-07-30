@@ -36,12 +36,15 @@
         ),
         "Dance": Sequence(
             hashes: [
-                "Unk0xb4503e42",
+                "DanceInBase",
                 "DanceBase",
             ],
         ),
         "DanceBase": Clip(
             node_index: 12,
+        ),
+        "DanceInBase": Clip(
+            node_index: 23,
         ),
         "Death": Clip(
             node_index: 29,
@@ -70,22 +73,31 @@
         ),
         "Laugh": Sequence(
             hashes: [
-                "Unk0x9e55a33e",
+                "LaughBase",
                 "Unk0x914db254",
                 "Unk0x914db254",
                 "Unk0x914db254",
                 "Unk0x914db254",
                 "Unk0x914db254",
             ],
+        ),
+        "LaughBase": Clip(
+            node_index: 20,
         ),
         "Recall": Clip(
             node_index: 11,
         ),
         "Run": Sequence(
             hashes: [
-                "Unk0x86e0eed3",
-                "Unk0xb910f2d7",
+                "Run1InBase",
+                "Run1Base",
             ],
+        ),
+        "Run1Base": Clip(
+            node_index: 28,
+        ),
+        "Run1InBase": Clip(
+            node_index: 15,
         ),
         "Run2": Sequence(
             hashes: [
@@ -161,9 +173,6 @@
                 "Idle1Base",
             ],
         ),
-        "Unk0x86e0eed3": Clip(
-            node_index: 15,
-        ),
         "Unk0x8dfb9419": Clip(
             node_index: 17,
         ),
@@ -182,17 +191,8 @@
         "Unk0x9d46ce26": Clip(
             node_index: 19,
         ),
-        "Unk0x9e55a33e": Clip(
-            node_index: 20,
-        ),
-        "Unk0xb4503e42": Clip(
-            node_index: 23,
-        ),
         "Unk0xb491a3c1": Clip(
             node_index: 24,
-        ),
-        "Unk0xb910f2d7": Clip(
-            node_index: 28,
         ),
         "Unk0xc0933c8a": Clip(
             node_index: 31,
@@ -317,6 +317,9 @@
         ("DanceBase", "Death"): Time(
             time: 0.0,
         ),
+        ("DanceInBase", "Death"): Time(
+            time: 0.0,
+        ),
         ("Death", "Death"): Time(
             time: 0.0,
         ),
@@ -362,6 +365,9 @@
         ("Laugh", "Death"): Time(
             time: 0.0,
         ),
+        ("LaughBase", "Death"): Time(
+            time: 0.0,
+        ),
         ("Recall", "Death"): Time(
             time: 0.0,
         ),
@@ -375,6 +381,15 @@
             time: 0.1,
         ),
         ("Run", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Run1Base", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Run1InBase", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Run1InBase", "Run1Base"): Time(
             time: 0.0,
         ),
         ("Run2", "Death"): Time(
@@ -596,12 +611,6 @@
         ("Unk0x764d87d3", "Death"): Time(
             time: 0.0,
         ),
-        ("Unk0x86e0eed3", "Death"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x86e0eed3", "Unk0xb910f2d7"): Time(
-            time: 0.0,
-        ),
         ("Unk0x8dfb9419", "Death"): Time(
             time: 0.0,
         ),
@@ -623,16 +632,7 @@
         ("Unk0x9d46ce26", "Death"): Time(
             time: 0.0,
         ),
-        ("Unk0x9e55a33e", "Death"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xb4503e42", "Death"): Time(
-            time: 0.0,
-        ),
         ("Unk0xb491a3c1", "Death"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xb910f2d7", "Death"): Time(
             time: 0.0,
         ),
         ("Unk0xc0933c8a", "Death"): Time(

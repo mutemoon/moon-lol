@@ -36,9 +36,12 @@
         ),
         "DanceIn": Parallel(
             hashes: [
-                "Unk0xb4503e42",
+                "DanceInBase",
                 "Unk0x3309a042",
             ],
+        ),
+        "DanceInBase": Clip(
+            node_index: 27,
         ),
         "DanceLoop": Parallel(
             hashes: [
@@ -75,6 +78,9 @@
         ),
         "Idle2Base": Clip(
             node_index: 37,
+        ),
+        "Idle3Base": Clip(
+            node_index: 17,
         ),
         "Joke": Clip(
             node_index: 32,
@@ -260,9 +266,6 @@
                 "Idle1Base",
             ],
         ),
-        "Unk0x76bbc6a0": Clip(
-            node_index: 17,
-        ),
         "Unk0x8dfb9419": Clip(
             node_index: 20,
         ),
@@ -273,16 +276,13 @@
                     value: 0.5,
                 ),
                 (
-                    key: "Unk0x76bbc6a0",
+                    key: "Idle3Base",
                     value: 0.5,
                 ),
             ],
         ),
         "Unk0x943b36a3": Clip(
             node_index: 21,
-        ),
-        "Unk0xb4503e42": Clip(
-            node_index: 27,
         ),
         "Unk0xcf93f48": Clip(
             node_index: 2,
@@ -415,6 +415,27 @@
         ("DanceIn", "Death"): Time(
             time: 0.0,
         ),
+        ("DanceInBase", "DanceLoopIce"): Time(
+            time: 0.0,
+        ),
+        ("DanceInBase", "Death"): Time(
+            time: 0.0,
+        ),
+        ("DanceInBase", "DeathIce"): Time(
+            time: 0.0,
+        ),
+        ("DanceInBase", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("DanceInBase", "Spell2Base"): Time(
+            time: 0.1,
+        ),
+        ("DanceInBase", "Spell3"): Time(
+            time: 0.1,
+        ),
+        ("DanceInBase", "Unk0x3309a042"): Time(
+            time: 0.0,
+        ),
         ("DanceLoop", "Death"): Time(
             time: 0.0,
         ),
@@ -445,6 +466,9 @@
         ("DanceLoopIce", "Crit"): Time(
             time: 0.0,
         ),
+        ("DanceLoopIce", "DanceInBase"): Time(
+            time: 0.0,
+        ),
         ("DanceLoopIce", "DanceLoopBase"): Time(
             time: 0.0,
         ),
@@ -464,6 +488,9 @@
             time: 0.0,
         ),
         ("DanceLoopIce", "Idle2Base"): Time(
+            time: 0.0,
+        ),
+        ("DanceLoopIce", "Idle3Base"): Time(
             time: 0.0,
         ),
         ("DanceLoopIce", "Joke"): Time(
@@ -535,13 +562,7 @@
         ("DanceLoopIce", "Unk0x35d1db39"): Time(
             time: 0.0,
         ),
-        ("DanceLoopIce", "Unk0x76bbc6a0"): Time(
-            time: 0.0,
-        ),
         ("DanceLoopIce", "Unk0x8dfb9419"): Time(
-            time: 0.0,
-        ),
-        ("DanceLoopIce", "Unk0xb4503e42"): Time(
             time: 0.0,
         ),
         ("DanceLoopIce", "Unk0xcf93f48"): Time(
@@ -611,6 +632,18 @@
             time: 0.0,
         ),
         ("Idle2Base", "Unk0x3309a042"): Time(
+            time: 0.0,
+        ),
+        ("Idle3Base", "DanceLoopIce"): Time(
+            time: 0.0,
+        ),
+        ("Idle3Base", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Idle3Base", "DeathIce"): Time(
+            time: 0.0,
+        ),
+        ("Idle3Base", "Unk0x3309a042"): Time(
             time: 0.0,
         ),
         ("Joke", "DanceLoopIce"): Time(
@@ -841,6 +874,9 @@
         ("Spell1", "Crit"): Time(
             time: 0.1,
         ),
+        ("Spell1", "DanceInBase"): Time(
+            time: 0.1,
+        ),
         ("Spell1", "DanceLoopIce"): Time(
             time: 0.0,
         ),
@@ -908,9 +944,6 @@
             time: 0.1,
         ),
         ("Spell1", "Unk0x8dfb9419"): Time(
-            time: 0.1,
-        ),
-        ("Spell1", "Unk0xb4503e42"): Time(
             time: 0.1,
         ),
         ("Spell1", "Unk0xcf93f48"): Time(
@@ -1084,6 +1117,9 @@
         ("Unk0x3309a042", "Crit"): Time(
             time: 0.0,
         ),
+        ("Unk0x3309a042", "DanceInBase"): Time(
+            time: 0.0,
+        ),
         ("Unk0x3309a042", "DanceLoopBase"): Time(
             time: 0.0,
         ),
@@ -1103,6 +1139,9 @@
             time: 0.0,
         ),
         ("Unk0x3309a042", "Idle2Base"): Time(
+            time: 0.0,
+        ),
+        ("Unk0x3309a042", "Idle3Base"): Time(
             time: 0.0,
         ),
         ("Unk0x3309a042", "Joke"): Time(
@@ -1174,13 +1213,7 @@
         ("Unk0x3309a042", "Unk0x35d1db39"): Time(
             time: 0.0,
         ),
-        ("Unk0x3309a042", "Unk0x76bbc6a0"): Time(
-            time: 0.0,
-        ),
         ("Unk0x3309a042", "Unk0x8dfb9419"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x3309a042", "Unk0xb4503e42"): Time(
             time: 0.0,
         ),
         ("Unk0x3309a042", "Unk0xcf93f48"): Time(
@@ -1213,18 +1246,6 @@
         ("Unk0x764d87d3", "Death"): Time(
             time: 0.0,
         ),
-        ("Unk0x76bbc6a0", "DanceLoopIce"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x76bbc6a0", "Death"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x76bbc6a0", "DeathIce"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x76bbc6a0", "Unk0x3309a042"): Time(
-            time: 0.0,
-        ),
         ("Unk0x8dfb9419", "DanceLoopIce"): Time(
             time: 0.0,
         ),
@@ -1250,27 +1271,6 @@
             time: 0.0,
         ),
         ("Unk0x943b36a3", "Death"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xb4503e42", "DanceLoopIce"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xb4503e42", "Death"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xb4503e42", "DeathIce"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xb4503e42", "Spell1"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xb4503e42", "Spell2Base"): Time(
-            time: 0.1,
-        ),
-        ("Unk0xb4503e42", "Spell3"): Time(
-            time: 0.1,
-        ),
-        ("Unk0xb4503e42", "Unk0x3309a042"): Time(
             time: 0.0,
         ),
         ("Unk0xcf93f48", "DanceLoopIce"): Time(

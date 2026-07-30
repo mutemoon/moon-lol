@@ -211,13 +211,16 @@
         ),
         "Laugh": Sequence(
             hashes: [
-                "Unk0x9e55a33e",
+                "LaughBase",
                 "Idle1Base",
                 "Idle1Base",
                 "Idle1Base",
                 "Idle1Base",
                 "Idle1Base",
             ],
+        ),
+        "LaughBase": Clip(
+            node_index: 51,
         ),
         "Recall": Clip(
             node_index: 31,
@@ -453,9 +456,6 @@
         "Unk0x9d46ce26": Clip(
             node_index: 50,
         ),
-        "Unk0x9e55a33e": Clip(
-            node_index: 51,
-        ),
         "Unk0xa0dd2a1a": ConditionBool(
             updater: IsMoving,
             true_node: "Unk0x64a852d",
@@ -513,6 +513,9 @@
         ("Attack1", "Evolve"): Time(
             time: 0.1,
         ),
+        ("Attack1", "LaughBase"): Time(
+            time: 0.05,
+        ),
         ("Attack1", "Spawn"): Time(
             time: 0.0,
         ),
@@ -534,9 +537,6 @@
         ("Attack1", "Unk0x64a852d"): Time(
             time: 0.05,
         ),
-        ("Attack1", "Unk0x9e55a33e"): Time(
-            time: 0.05,
-        ),
         ("Attack1", "Unk0xb31e664b"): Time(
             time: 0.05,
         ),
@@ -545,6 +545,9 @@
         ),
         ("Attack10", "Evolve"): Time(
             time: 0.1,
+        ),
+        ("Attack10", "LaughBase"): Time(
+            time: 0.05,
         ),
         ("Attack10", "Run1In"): Time(
             time: 0.1,
@@ -597,9 +600,6 @@
         ("Attack10", "Unk0x9d46ce26"): Time(
             time: 0.0,
         ),
-        ("Attack10", "Unk0x9e55a33e"): Time(
-            time: 0.05,
-        ),
         ("Attack10", "Unk0xb31e664b"): Time(
             time: 0.05,
         ),
@@ -611,6 +611,9 @@
         ),
         ("Attack1180", "Evolve"): Time(
             time: 0.1,
+        ),
+        ("Attack1180", "LaughBase"): Time(
+            time: 0.05,
         ),
         ("Attack1180", "Run1In"): Time(
             time: 0.1,
@@ -663,9 +666,6 @@
         ("Attack1180", "Unk0x9d46ce26"): Time(
             time: 0.0,
         ),
-        ("Attack1180", "Unk0x9e55a33e"): Time(
-            time: 0.05,
-        ),
         ("Attack1180", "Unk0xb31e664b"): Time(
             time: 0.05,
         ),
@@ -680,6 +680,9 @@
         ),
         ("Attack190", "Evolve"): Time(
             time: 0.1,
+        ),
+        ("Attack190", "LaughBase"): Time(
+            time: 0.05,
         ),
         ("Attack190", "Run1In"): Time(
             time: 0.1,
@@ -732,9 +735,6 @@
         ("Attack190", "Unk0x9d46ce26"): Time(
             time: 0.0,
         ),
-        ("Attack190", "Unk0x9e55a33e"): Time(
-            time: 0.05,
-        ),
         ("Attack190", "Unk0xb31e664b"): Time(
             time: 0.05,
         ),
@@ -746,6 +746,9 @@
         ),
         ("Attack2", "Evolve"): Time(
             time: 0.1,
+        ),
+        ("Attack2", "LaughBase"): Time(
+            time: 0.05,
         ),
         ("Attack2", "Spawn"): Time(
             time: 0.0,
@@ -768,9 +771,6 @@
         ("Attack2", "Unk0x64a852d"): Time(
             time: 0.05,
         ),
-        ("Attack2", "Unk0x9e55a33e"): Time(
-            time: 0.05,
-        ),
         ("Attack2", "Unk0xb31e664b"): Time(
             time: 0.05,
         ),
@@ -779,6 +779,9 @@
         ),
         ("Attack20", "Evolve"): Time(
             time: 0.1,
+        ),
+        ("Attack20", "LaughBase"): Time(
+            time: 0.05,
         ),
         ("Attack20", "Run1In"): Time(
             time: 0.1,
@@ -831,9 +834,6 @@
         ("Attack20", "Unk0x9d46ce26"): Time(
             time: 0.0,
         ),
-        ("Attack20", "Unk0x9e55a33e"): Time(
-            time: 0.05,
-        ),
         ("Attack20", "Unk0xb31e664b"): Time(
             time: 0.05,
         ),
@@ -845,6 +845,9 @@
         ),
         ("Attack2180", "Evolve"): Time(
             time: 0.1,
+        ),
+        ("Attack2180", "LaughBase"): Time(
+            time: 0.05,
         ),
         ("Attack2180", "Run1In"): Time(
             time: 0.1,
@@ -897,9 +900,6 @@
         ("Attack2180", "Unk0x9d46ce26"): Time(
             time: 0.0,
         ),
-        ("Attack2180", "Unk0x9e55a33e"): Time(
-            time: 0.05,
-        ),
         ("Attack2180", "Unk0xb31e664b"): Time(
             time: 0.05,
         ),
@@ -911,6 +911,9 @@
         ),
         ("Attack290", "Evolve"): Time(
             time: 0.1,
+        ),
+        ("Attack290", "LaughBase"): Time(
+            time: 0.05,
         ),
         ("Attack290", "Run1In"): Time(
             time: 0.1,
@@ -963,9 +966,6 @@
         ("Attack290", "Unk0x9d46ce26"): Time(
             time: 0.0,
         ),
-        ("Attack290", "Unk0x9e55a33e"): Time(
-            time: 0.05,
-        ),
         ("Attack290", "Unk0xb31e664b"): Time(
             time: 0.05,
         ),
@@ -977,6 +977,9 @@
         ),
         ("Attack3", "Evolve"): Time(
             time: 0.1,
+        ),
+        ("Attack3", "LaughBase"): Time(
+            time: 0.05,
         ),
         ("Attack3", "Spawn"): Time(
             time: 0.0,
@@ -999,9 +1002,6 @@
         ("Attack3", "Unk0x64a852d"): Time(
             time: 0.05,
         ),
-        ("Attack3", "Unk0x9e55a33e"): Time(
-            time: 0.05,
-        ),
         ("Attack3", "Unk0xb31e664b"): Time(
             time: 0.05,
         ),
@@ -1010,6 +1010,9 @@
         ),
         ("Attack30", "Evolve"): Time(
             time: 0.1,
+        ),
+        ("Attack30", "LaughBase"): Time(
+            time: 0.05,
         ),
         ("Attack30", "Run1In"): Time(
             time: 0.1,
@@ -1062,9 +1065,6 @@
         ("Attack30", "Unk0x9d46ce26"): Time(
             time: 0.0,
         ),
-        ("Attack30", "Unk0x9e55a33e"): Time(
-            time: 0.05,
-        ),
         ("Attack30", "Unk0xb31e664b"): Time(
             time: 0.05,
         ),
@@ -1076,6 +1076,9 @@
         ),
         ("Attack3180", "Evolve"): Time(
             time: 0.1,
+        ),
+        ("Attack3180", "LaughBase"): Time(
+            time: 0.05,
         ),
         ("Attack3180", "Run1In"): Time(
             time: 0.1,
@@ -1128,9 +1131,6 @@
         ("Attack3180", "Unk0x9d46ce26"): Time(
             time: 0.0,
         ),
-        ("Attack3180", "Unk0x9e55a33e"): Time(
-            time: 0.05,
-        ),
         ("Attack3180", "Unk0xb31e664b"): Time(
             time: 0.05,
         ),
@@ -1142,6 +1142,9 @@
         ),
         ("Attack390", "Evolve"): Time(
             time: 0.1,
+        ),
+        ("Attack390", "LaughBase"): Time(
+            time: 0.05,
         ),
         ("Attack390", "Run1In"): Time(
             time: 0.1,
@@ -1194,9 +1197,6 @@
         ("Attack390", "Unk0x9d46ce26"): Time(
             time: 0.0,
         ),
-        ("Attack390", "Unk0x9e55a33e"): Time(
-            time: 0.05,
-        ),
         ("Attack390", "Unk0xb31e664b"): Time(
             time: 0.05,
         ),
@@ -1211,6 +1211,9 @@
         ),
         ("AttackE1", "Evolve"): Time(
             time: 0.1,
+        ),
+        ("AttackE1", "LaughBase"): Time(
+            time: 0.05,
         ),
         ("AttackE1", "Run1In"): Time(
             time: 0.1,
@@ -1263,9 +1266,6 @@
         ("AttackE1", "Unk0x9d46ce26"): Time(
             time: 0.0,
         ),
-        ("AttackE1", "Unk0x9e55a33e"): Time(
-            time: 0.05,
-        ),
         ("AttackE1", "Unk0xb31e664b"): Time(
             time: 0.05,
         ),
@@ -1283,6 +1283,9 @@
         ),
         ("AttackE2", "Evolve"): Time(
             time: 0.1,
+        ),
+        ("AttackE2", "LaughBase"): Time(
+            time: 0.05,
         ),
         ("AttackE2", "Run1In"): Time(
             time: 0.1,
@@ -1338,9 +1341,6 @@
         ("AttackE2", "Unk0x9d46ce26"): Time(
             time: 0.0,
         ),
-        ("AttackE2", "Unk0x9e55a33e"): Time(
-            time: 0.05,
-        ),
         ("AttackE2", "Unk0xb31e664b"): Time(
             time: 0.05,
         ),
@@ -1358,6 +1358,9 @@
         ),
         ("AttackE3", "Evolve"): Time(
             time: 0.1,
+        ),
+        ("AttackE3", "LaughBase"): Time(
+            time: 0.05,
         ),
         ("AttackE3", "Run1In"): Time(
             time: 0.1,
@@ -1410,9 +1413,6 @@
         ("AttackE3", "Unk0x9d46ce26"): Time(
             time: 0.0,
         ),
-        ("AttackE3", "Unk0x9e55a33e"): Time(
-            time: 0.05,
-        ),
         ("AttackE3", "Unk0xb31e664b"): Time(
             time: 0.05,
         ),
@@ -1424,6 +1424,9 @@
         ),
         ("AttackE4", "Evolve"): Time(
             time: 0.1,
+        ),
+        ("AttackE4", "LaughBase"): Time(
+            time: 0.05,
         ),
         ("AttackE4", "Run1In"): Time(
             time: 0.1,
@@ -1476,9 +1479,6 @@
         ("AttackE4", "Unk0x9d46ce26"): Time(
             time: 0.0,
         ),
-        ("AttackE4", "Unk0x9e55a33e"): Time(
-            time: 0.05,
-        ),
         ("AttackE4", "Unk0xb31e664b"): Time(
             time: 0.05,
         ),
@@ -1496,6 +1496,9 @@
         ),
         ("Channel", "Evolve"): Time(
             time: 0.1,
+        ),
+        ("Channel", "LaughBase"): Time(
+            time: 0.05,
         ),
         ("Channel", "Run1In"): Time(
             time: 0.1,
@@ -1548,9 +1551,6 @@
         ("Channel", "Unk0x9d46ce26"): Time(
             time: 0.0,
         ),
-        ("Channel", "Unk0x9e55a33e"): Time(
-            time: 0.05,
-        ),
         ("Channel", "Unk0xb31e664b"): Time(
             time: 0.05,
         ),
@@ -1568,6 +1568,9 @@
         ),
         ("ChannelWndup", "Evolve"): Time(
             time: 0.1,
+        ),
+        ("ChannelWndup", "LaughBase"): Time(
+            time: 0.05,
         ),
         ("ChannelWndup", "Run1In"): Time(
             time: 0.1,
@@ -1620,9 +1623,6 @@
         ("ChannelWndup", "Unk0x9d46ce26"): Time(
             time: 0.0,
         ),
-        ("ChannelWndup", "Unk0x9e55a33e"): Time(
-            time: 0.05,
-        ),
         ("ChannelWndup", "Unk0xb31e664b"): Time(
             time: 0.05,
         ),
@@ -1637,6 +1637,9 @@
         ),
         ("Dance", "Evolve"): Time(
             time: 0.1,
+        ),
+        ("Dance", "LaughBase"): Time(
+            time: 0.05,
         ),
         ("Dance", "Run1In"): Time(
             time: 0.1,
@@ -1689,9 +1692,6 @@
         ("Dance", "Unk0x9d46ce26"): Time(
             time: 0.0,
         ),
-        ("Dance", "Unk0x9e55a33e"): Time(
-            time: 0.05,
-        ),
         ("Dance", "Unk0xb31e664b"): Time(
             time: 0.05,
         ),
@@ -1703,6 +1703,9 @@
         ),
         ("DashToRunE", "Evolve"): Time(
             time: 0.1,
+        ),
+        ("DashToRunE", "LaughBase"): Time(
+            time: 0.05,
         ),
         ("DashToRunE", "Spawn"): Time(
             time: 0.0,
@@ -1746,9 +1749,6 @@
         ("DashToRunE", "Unk0x9d46ce26"): Time(
             time: 0.0,
         ),
-        ("DashToRunE", "Unk0x9e55a33e"): Time(
-            time: 0.05,
-        ),
         ("DashToRunE", "Unk0xb31e664b"): Time(
             time: 0.05,
         ),
@@ -1779,7 +1779,13 @@
         ("Death", "Idle1Base"): Time(
             time: 0.0,
         ),
+        ("Death", "LaughBase"): Time(
+            time: 0.05,
+        ),
         ("Death", "R"): Time(
+            time: 0.0,
+        ),
+        ("Death", "Run1Base"): Time(
             time: 0.0,
         ),
         ("Death", "Run1In"): Time(
@@ -1839,14 +1845,8 @@
         ("Death", "Unk0x9d46ce26"): Time(
             time: 0.0,
         ),
-        ("Death", "Unk0x9e55a33e"): Time(
-            time: 0.05,
-        ),
         ("Death", "Unk0xb31e664b"): Time(
             time: 0.05,
-        ),
-        ("Death", "Unk0xb910f2d7"): Time(
-            time: 0.0,
         ),
         ("Death", "Unk0xc8a9aef5"): Time(
             time: 0.0,
@@ -1862,6 +1862,9 @@
         ),
         ("EIdleIn", "Evolve"): Time(
             time: 0.1,
+        ),
+        ("EIdleIn", "LaughBase"): Time(
+            time: 0.05,
         ),
         ("EIdleIn", "Spawn"): Time(
             time: 0.0,
@@ -1899,9 +1902,6 @@
         ("EIdleIn", "Unk0x9d46ce26"): Time(
             time: 0.0,
         ),
-        ("EIdleIn", "Unk0x9e55a33e"): Time(
-            time: 0.05,
-        ),
         ("EIdleIn", "Unk0xb31e664b"): Time(
             time: 0.05,
         ),
@@ -1919,6 +1919,9 @@
         ),
         ("ERunToRun01", "Evolve"): Time(
             time: 0.1,
+        ),
+        ("ERunToRun01", "LaughBase"): Time(
+            time: 0.05,
         ),
         ("ERunToRun01", "RunFast"): Time(
             time: 0.3,
@@ -1956,9 +1959,6 @@
         ("ERunToRun01", "Unk0x9d46ce26"): Time(
             time: 0.0,
         ),
-        ("ERunToRun01", "Unk0x9e55a33e"): Time(
-            time: 0.05,
-        ),
         ("ERunToRun01", "Unk0xb31e664b"): Time(
             time: 0.05,
         ),
@@ -1982,6 +1982,9 @@
         ),
         ("EWarpToIdle", "Evolve"): Time(
             time: 0.1,
+        ),
+        ("EWarpToIdle", "LaughBase"): Time(
+            time: 0.05,
         ),
         ("EWarpToIdle", "Spawn"): Time(
             time: 0.0,
@@ -2013,9 +2016,6 @@
         ("EWarpToIdle", "Unk0x9d46ce26"): Time(
             time: 0.0,
         ),
-        ("EWarpToIdle", "Unk0x9e55a33e"): Time(
-            time: 0.05,
-        ),
         ("EWarpToIdle", "Unk0xb31e664b"): Time(
             time: 0.05,
         ),
@@ -2034,6 +2034,9 @@
         ("Evolve", "Idle1Base"): TransitionClip(
             clip_name: "EvolveIntoIdle",
         ),
+        ("Evolve", "LaughBase"): Time(
+            time: 0.05,
+        ),
         ("Evolve", "Spawn"): Time(
             time: 0.0,
         ),
@@ -2046,14 +2049,14 @@
         ("Evolve", "Unk0x64a852d"): Time(
             time: 0.05,
         ),
-        ("Evolve", "Unk0x9e55a33e"): Time(
-            time: 0.05,
-        ),
         ("Evolve", "Unk0xf30051d8"): Time(
             time: 0.05,
         ),
         ("Evolve", "Unk0xffa21b1b"): TransitionClip(
             clip_name: "EvolveIntoIdle",
+        ),
+        ("EvolveIntoIdle", "LaughBase"): Time(
+            time: 0.05,
         ),
         ("EvolveIntoIdle", "RunBase"): TransitionClip(
             clip_name: "Unk0x606fc7dc",
@@ -2076,14 +2079,14 @@
         ("EvolveIntoIdle", "Unk0x64a852d"): Time(
             time: 0.05,
         ),
-        ("EvolveIntoIdle", "Unk0x9e55a33e"): Time(
-            time: 0.05,
-        ),
         ("EvolveIntoIdle", "Unk0xf30051d8"): Time(
             time: 0.05,
         ),
         ("HasteToRun", "Evolve"): Time(
             time: 0.1,
+        ),
+        ("HasteToRun", "LaughBase"): Time(
+            time: 0.05,
         ),
         ("HasteToRun", "Run1In"): Time(
             time: 0.1,
@@ -2136,9 +2139,6 @@
         ("HasteToRun", "Unk0x9d46ce26"): Time(
             time: 0.0,
         ),
-        ("HasteToRun", "Unk0x9e55a33e"): Time(
-            time: 0.05,
-        ),
         ("HasteToRun", "Unk0xb31e664b"): Time(
             time: 0.05,
         ),
@@ -2153,6 +2153,9 @@
         ),
         ("Idle1", "Evolve"): Time(
             time: 0.1,
+        ),
+        ("Idle1", "LaughBase"): Time(
+            time: 0.05,
         ),
         ("Idle1", "Run1In"): Time(
             time: 0.1,
@@ -2196,9 +2199,6 @@
         ("Idle1", "Unk0x9d46ce26"): Time(
             time: 0.0,
         ),
-        ("Idle1", "Unk0x9e55a33e"): Time(
-            time: 0.05,
-        ),
         ("Idle1", "Unk0xb31e664b"): Time(
             time: 0.05,
         ),
@@ -2210,6 +2210,9 @@
         ),
         ("Idle1Base", "Evolve"): Time(
             time: 0.1,
+        ),
+        ("Idle1Base", "LaughBase"): Time(
+            time: 0.05,
         ),
         ("Idle1Base", "Run1In"): Time(
             time: 0.1,
@@ -2262,9 +2265,6 @@
         ("Idle1Base", "Unk0x9d46ce26"): Time(
             time: 0.0,
         ),
-        ("Idle1Base", "Unk0x9e55a33e"): Time(
-            time: 0.05,
-        ),
         ("Idle1Base", "Unk0xb31e664b"): Time(
             time: 0.05,
         ),
@@ -2276,6 +2276,9 @@
         ),
         ("Idle1Var1", "Evolve"): Time(
             time: 0.1,
+        ),
+        ("Idle1Var1", "LaughBase"): Time(
+            time: 0.05,
         ),
         ("Idle1Var1", "RunBase"): TransitionClip(
             clip_name: "Unk0x606fc7dc",
@@ -2319,9 +2322,6 @@
         ("Idle1Var1", "Unk0x9d46ce26"): Time(
             time: 0.0,
         ),
-        ("Idle1Var1", "Unk0x9e55a33e"): Time(
-            time: 0.05,
-        ),
         ("Idle1Var1", "Unk0xb31e664b"): Time(
             time: 0.05,
         ),
@@ -2333,6 +2333,9 @@
         ),
         ("Idle1Var2", "Evolve"): Time(
             time: 0.1,
+        ),
+        ("Idle1Var2", "LaughBase"): Time(
+            time: 0.05,
         ),
         ("Idle1Var2", "RunBase"): TransitionClip(
             clip_name: "Unk0x606fc7dc",
@@ -2364,9 +2367,6 @@
         ("Idle1Var2", "Unk0x64a852d"): Time(
             time: 0.05,
         ),
-        ("Idle1Var2", "Unk0x9e55a33e"): Time(
-            time: 0.05,
-        ),
         ("Idle1Var2", "Unk0xb31e664b"): Time(
             time: 0.05,
         ),
@@ -2375,6 +2375,9 @@
         ),
         ("Idle1Var3", "Evolve"): Time(
             time: 0.1,
+        ),
+        ("Idle1Var3", "LaughBase"): Time(
+            time: 0.05,
         ),
         ("Idle1Var3", "RunBase"): TransitionClip(
             clip_name: "Unk0x606fc7dc",
@@ -2409,9 +2412,6 @@
         ("Idle1Var3", "Unk0x9d46ce26"): Time(
             time: 0.0,
         ),
-        ("Idle1Var3", "Unk0x9e55a33e"): Time(
-            time: 0.05,
-        ),
         ("Idle1Var3", "Unk0xb31e664b"): Time(
             time: 0.05,
         ),
@@ -2420,6 +2420,9 @@
         ),
         ("IdleIn2", "Evolve"): Time(
             time: 0.1,
+        ),
+        ("IdleIn2", "LaughBase"): Time(
+            time: 0.05,
         ),
         ("IdleIn2", "RunBase"): TransitionClip(
             clip_name: "Unk0x606fc7dc",
@@ -2454,9 +2457,6 @@
         ("IdleIn2", "Unk0x9d46ce26"): Time(
             time: 0.0,
         ),
-        ("IdleIn2", "Unk0x9e55a33e"): Time(
-            time: 0.05,
-        ),
         ("IdleIn2", "Unk0xb31e664b"): Time(
             time: 0.05,
         ),
@@ -2477,6 +2477,9 @@
         ),
         ("IdleToE", "Evolve"): Time(
             time: 0.1,
+        ),
+        ("IdleToE", "LaughBase"): Time(
+            time: 0.05,
         ),
         ("IdleToE", "Run1In"): Time(
             time: 0.1,
@@ -2532,9 +2535,6 @@
         ("IdleToE", "Unk0x9d46ce26"): Time(
             time: 0.0,
         ),
-        ("IdleToE", "Unk0x9e55a33e"): Time(
-            time: 0.05,
-        ),
         ("IdleToE", "Unk0xb31e664b"): Time(
             time: 0.05,
         ),
@@ -2553,11 +2553,83 @@
         ("Laugh", "Death"): Time(
             time: 0.0,
         ),
+        ("LaughBase", "Death"): Time(
+            time: 0.0,
+        ),
+        ("LaughBase", "Evolve"): Time(
+            time: 0.1,
+        ),
+        ("LaughBase", "LaughBase"): Time(
+            time: 0.05,
+        ),
+        ("LaughBase", "Run1In"): Time(
+            time: 0.1,
+        ),
+        ("LaughBase", "RunBase"): TransitionClip(
+            clip_name: "Unk0x606fc7dc",
+        ),
+        ("LaughBase", "RunFast"): TransitionClip(
+            clip_name: "RunFastIn",
+        ),
+        ("LaughBase", "Spawn"): Time(
+            time: 0.0,
+        ),
+        ("LaughBase", "Spell1"): Time(
+            time: 0.1,
+        ),
+        ("LaughBase", "Spell1Base"): Time(
+            time: 0.1,
+        ),
+        ("LaughBase", "Spell1Upper"): Time(
+            time: 0.0,
+        ),
+        ("LaughBase", "Spell2"): Time(
+            time: 0.08,
+        ),
+        ("LaughBase", "Spell2Base"): Time(
+            time: 0.08,
+        ),
+        ("LaughBase", "Spell4"): Time(
+            time: 0.0,
+        ),
+        ("LaughBase", "Spell4Out"): Time(
+            time: 0.0,
+        ),
+        ("LaughBase", "Taunt"): Time(
+            time: 0.0,
+        ),
+        ("LaughBase", "Unk0x16b4f715"): Time(
+            time: 0.08,
+        ),
+        ("LaughBase", "Unk0x605bc14a"): Time(
+            time: 0.1,
+        ),
+        ("LaughBase", "Unk0x606fc7dc"): Time(
+            time: 0.1,
+        ),
+        ("LaughBase", "Unk0x64a852d"): Time(
+            time: 0.05,
+        ),
+        ("LaughBase", "Unk0x9d46ce26"): Time(
+            time: 0.0,
+        ),
+        ("LaughBase", "Unk0xb31e664b"): Time(
+            time: 0.05,
+        ),
+        ("LaughBase", "Unk0xf30051d8"): Time(
+            time: 0.05,
+        ),
+        ("LaughBase", "Unk0xff10bd3b"): Time(
+            time: 0.0,
+        ),
         ("R", "Death"): Time(
             time: 0.0,
         ),
         ("Recall", "Evolve"): Time(
             time: 0.1,
+        ),
+        ("Recall", "LaughBase"): Time(
+            time: 0.05,
         ),
         ("Recall", "RecallWinddown"): Time(
             time: 0.0,
@@ -2613,9 +2685,6 @@
         ("Recall", "Unk0x9d46ce26"): Time(
             time: 0.0,
         ),
-        ("Recall", "Unk0x9e55a33e"): Time(
-            time: 0.05,
-        ),
         ("Recall", "Unk0xb31e664b"): Time(
             time: 0.05,
         ),
@@ -2627,6 +2696,9 @@
         ),
         ("RecallWinddown", "Evolve"): Time(
             time: 0.1,
+        ),
+        ("RecallWinddown", "LaughBase"): Time(
+            time: 0.05,
         ),
         ("RecallWinddown", "RunBase"): TransitionClip(
             clip_name: "Unk0x606fc7dc",
@@ -2670,9 +2742,6 @@
         ("RecallWinddown", "Unk0x9d46ce26"): Time(
             time: 0.0,
         ),
-        ("RecallWinddown", "Unk0x9e55a33e"): Time(
-            time: 0.05,
-        ),
         ("RecallWinddown", "Unk0xb31e664b"): Time(
             time: 0.05,
         ),
@@ -2684,6 +2753,9 @@
         ),
         ("Respawn", "Evolve"): Time(
             time: 0.1,
+        ),
+        ("Respawn", "LaughBase"): Time(
+            time: 0.05,
         ),
         ("Respawn", "RunBase"): TransitionClip(
             clip_name: "Unk0x606fc7dc",
@@ -2706,9 +2778,6 @@
         ("Respawn", "Unk0x64a852d"): Time(
             time: 0.05,
         ),
-        ("Respawn", "Unk0x9e55a33e"): Time(
-            time: 0.05,
-        ),
         ("Respawn", "Unk0xf30051d8"): Time(
             time: 0.05,
         ),
@@ -2717,6 +2786,9 @@
         ),
         ("Run", "Evolve"): Time(
             time: 0.1,
+        ),
+        ("Run", "LaughBase"): Time(
+            time: 0.05,
         ),
         ("Run", "Spawn"): Time(
             time: 0.0,
@@ -2739,14 +2811,14 @@
         ("Run", "Unk0x64a852d"): Time(
             time: 0.05,
         ),
-        ("Run", "Unk0x9e55a33e"): Time(
-            time: 0.05,
-        ),
         ("Run", "Unk0xb31e664b"): Time(
             time: 0.05,
         ),
         ("Run", "Unk0xf30051d8"): Time(
             time: 0.05,
+        ),
+        ("Run1Base", "Death"): Time(
+            time: 0.0,
         ),
         ("Run1In", "Attack190"): Time(
             time: 0.05,
@@ -2759,6 +2831,9 @@
         ),
         ("Run1In", "Idle1Base"): TransitionClip(
             clip_name: "Unk0x89eb359c",
+        ),
+        ("Run1In", "Run1Base"): Time(
+            time: 0.1,
         ),
         ("Run1In", "Run1In"): Time(
             time: 0.1,
@@ -2799,9 +2874,6 @@
         ("Run1In", "Unk0xb31e664b"): Time(
             time: 0.05,
         ),
-        ("Run1In", "Unk0xb910f2d7"): Time(
-            time: 0.1,
-        ),
         ("Run1In", "Unk0xff10bd3b"): Time(
             time: 0.0,
         ),
@@ -2816,6 +2888,9 @@
         ),
         ("RunBase", "Idle1Base"): TransitionClip(
             clip_name: "Unk0x89eb359c",
+        ),
+        ("RunBase", "LaughBase"): Time(
+            time: 0.05,
         ),
         ("RunBase", "Run1In"): Time(
             time: 0.1,
@@ -2874,9 +2949,6 @@
         ("RunBase", "Unk0x9d46ce26"): Time(
             time: 0.0,
         ),
-        ("RunBase", "Unk0x9e55a33e"): Time(
-            time: 0.05,
-        ),
         ("RunBase", "Unk0xb31e664b"): Time(
             time: 0.05,
         ),
@@ -2903,6 +2975,9 @@
         ),
         ("RunFast", "Idle1Base"): TransitionClip(
             clip_name: "Unk0x89eb359c",
+        ),
+        ("RunFast", "LaughBase"): Time(
+            time: 0.05,
         ),
         ("RunFast", "Run1In"): Time(
             time: 0.1,
@@ -2955,9 +3030,6 @@
         ("RunFast", "Unk0x9d46ce26"): Time(
             time: 0.0,
         ),
-        ("RunFast", "Unk0x9e55a33e"): Time(
-            time: 0.05,
-        ),
         ("RunFast", "Unk0xb31e664b"): Time(
             time: 0.05,
         ),
@@ -2973,6 +3045,9 @@
         ("RunFastIn", "Evolve"): Time(
             time: 0.1,
         ),
+        ("RunFastIn", "LaughBase"): Time(
+            time: 0.05,
+        ),
         ("RunFastIn", "Spawn"): Time(
             time: 0.0,
         ),
@@ -2983,9 +3058,6 @@
             time: 0.0,
         ),
         ("RunFastIn", "Unk0x64a852d"): Time(
-            time: 0.05,
-        ),
-        ("RunFastIn", "Unk0x9e55a33e"): Time(
             time: 0.05,
         ),
         ("RunFastIn", "Unk0xf30051d8"): Time(
@@ -2999,6 +3071,9 @@
         ),
         ("RunHaste", "Idle1Base"): TransitionClip(
             clip_name: "Unk0x89eb359c",
+        ),
+        ("RunHaste", "LaughBase"): Time(
+            time: 0.05,
         ),
         ("RunHaste", "Run1In"): Time(
             time: 0.1,
@@ -3045,9 +3120,6 @@
         ("RunHaste", "Unk0x9d46ce26"): Time(
             time: 0.0,
         ),
-        ("RunHaste", "Unk0x9e55a33e"): Time(
-            time: 0.05,
-        ),
         ("RunHaste", "Unk0xb31e664b"): Time(
             time: 0.05,
         ),
@@ -3059,6 +3131,9 @@
         ),
         ("RunSlow", "Evolve"): Time(
             time: 0.1,
+        ),
+        ("RunSlow", "LaughBase"): Time(
+            time: 0.05,
         ),
         ("RunSlow", "Spawn"): Time(
             time: 0.0,
@@ -3076,9 +3151,6 @@
             time: 0.1,
         ),
         ("RunSlow", "Unk0x64a852d"): Time(
-            time: 0.05,
-        ),
-        ("RunSlow", "Unk0x9e55a33e"): Time(
             time: 0.05,
         ),
         ("RunSlow", "Unk0xb31e664b"): Time(
@@ -3156,6 +3228,9 @@
         ("Spell1Base", "Idle1Base"): TransitionClip(
             clip_name: "Spell1ToIdle",
         ),
+        ("Spell1Base", "LaughBase"): Time(
+            time: 0.05,
+        ),
         ("Spell1Base", "Spawn"): Time(
             time: 0.0,
         ),
@@ -3177,9 +3252,6 @@
         ("Spell1Base", "Unk0x64a852d"): Time(
             time: 0.05,
         ),
-        ("Spell1Base", "Unk0x9e55a33e"): Time(
-            time: 0.05,
-        ),
         ("Spell1Base", "Unk0xb31e664b"): Time(
             time: 0.05,
         ),
@@ -3188,6 +3260,9 @@
         ),
         ("Spell1ToIdle", "Evolve"): Time(
             time: 0.1,
+        ),
+        ("Spell1ToIdle", "LaughBase"): Time(
+            time: 0.05,
         ),
         ("Spell1ToIdle", "Spawn"): Time(
             time: 0.0,
@@ -3210,9 +3285,6 @@
         ("Spell1ToIdle", "Unk0x64a852d"): Time(
             time: 0.05,
         ),
-        ("Spell1ToIdle", "Unk0x9e55a33e"): Time(
-            time: 0.05,
-        ),
         ("Spell1ToIdle", "Unk0xb31e664b"): Time(
             time: 0.05,
         ),
@@ -3221,6 +3293,9 @@
         ),
         ("Spell1Upper", "Evolve"): Time(
             time: 0.1,
+        ),
+        ("Spell1Upper", "LaughBase"): Time(
+            time: 0.05,
         ),
         ("Spell1Upper", "Spawn"): Time(
             time: 0.0,
@@ -3241,9 +3316,6 @@
             time: 0.1,
         ),
         ("Spell1Upper", "Unk0x64a852d"): Time(
-            time: 0.05,
-        ),
-        ("Spell1Upper", "Unk0x9e55a33e"): Time(
             time: 0.05,
         ),
         ("Spell1Upper", "Unk0xb31e664b"): Time(
@@ -3315,6 +3387,9 @@
         ("Spell20", "Evolve"): Time(
             time: 0.1,
         ),
+        ("Spell20", "LaughBase"): Time(
+            time: 0.05,
+        ),
         ("Spell20", "Run1In"): Time(
             time: 0.1,
         ),
@@ -3366,9 +3441,6 @@
         ("Spell20", "Unk0x9d46ce26"): Time(
             time: 0.0,
         ),
-        ("Spell20", "Unk0x9e55a33e"): Time(
-            time: 0.05,
-        ),
         ("Spell20", "Unk0xb31e664b"): Time(
             time: 0.05,
         ),
@@ -3380,6 +3452,9 @@
         ),
         ("Spell290", "Evolve"): Time(
             time: 0.1,
+        ),
+        ("Spell290", "LaughBase"): Time(
+            time: 0.05,
         ),
         ("Spell290", "Spawn"): Time(
             time: 0.0,
@@ -3414,9 +3489,6 @@
         ("Spell290", "Unk0x9d46ce26"): Time(
             time: 0.0,
         ),
-        ("Spell290", "Unk0x9e55a33e"): Time(
-            time: 0.05,
-        ),
         ("Spell290", "Unk0xb31e664b"): Time(
             time: 0.05,
         ),
@@ -3434,6 +3506,9 @@
         ),
         ("Spell2Base", "Idle1Base"): TransitionClip(
             clip_name: "Spell2ToIdle",
+        ),
+        ("Spell2Base", "LaughBase"): Time(
+            time: 0.05,
         ),
         ("Spell2Base", "Run1In"): Time(
             time: 0.1,
@@ -3507,9 +3582,6 @@
         ("Spell2Base", "Unk0x9d46ce26"): Time(
             time: 0.0,
         ),
-        ("Spell2Base", "Unk0x9e55a33e"): Time(
-            time: 0.05,
-        ),
         ("Spell2Base", "Unk0xb31e664b"): Time(
             time: 0.05,
         ),
@@ -3561,6 +3633,9 @@
         ("Spell2ToIdle", "Evolve"): Time(
             time: 0.1,
         ),
+        ("Spell2ToIdle", "LaughBase"): Time(
+            time: 0.05,
+        ),
         ("Spell2ToIdle", "RunBase"): TransitionClip(
             clip_name: "Unk0x606fc7dc",
         ),
@@ -3600,9 +3675,6 @@
         ("Spell2ToIdle", "Unk0x9d46ce26"): Time(
             time: 0.0,
         ),
-        ("Spell2ToIdle", "Unk0x9e55a33e"): Time(
-            time: 0.05,
-        ),
         ("Spell2ToIdle", "Unk0xb31e664b"): Time(
             time: 0.05,
         ),
@@ -3614,6 +3686,9 @@
         ),
         ("Spell2ToRun", "Evolve"): Time(
             time: 0.1,
+        ),
+        ("Spell2ToRun", "LaughBase"): Time(
+            time: 0.05,
         ),
         ("Spell2ToRun", "Run1In"): Time(
             time: 0.1,
@@ -3666,9 +3741,6 @@
         ("Spell2ToRun", "Unk0x9d46ce26"): Time(
             time: 0.0,
         ),
-        ("Spell2ToRun", "Unk0x9e55a33e"): Time(
-            time: 0.05,
-        ),
         ("Spell2ToRun", "Unk0xb31e664b"): Time(
             time: 0.05,
         ),
@@ -3698,6 +3770,9 @@
         ),
         ("Spell4", "Idle1Var3"): TransitionClip(
             clip_name: "Spell4Out",
+        ),
+        ("Spell4", "LaughBase"): Time(
+            time: 0.05,
         ),
         ("Spell4", "RunBase"): TransitionClip(
             clip_name: "Unk0x606fc7dc",
@@ -3750,9 +3825,6 @@
         ("Spell4", "Unk0x9d46ce26"): Time(
             time: 0.0,
         ),
-        ("Spell4", "Unk0x9e55a33e"): Time(
-            time: 0.05,
-        ),
         ("Spell4", "Unk0xb31e664b"): Time(
             time: 0.05,
         ),
@@ -3771,6 +3843,9 @@
         ("Spell4In", "Evolve"): Time(
             time: 0.1,
         ),
+        ("Spell4In", "LaughBase"): Time(
+            time: 0.05,
+        ),
         ("Spell4In", "RunBase"): TransitionClip(
             clip_name: "Unk0x606fc7dc",
         ),
@@ -3786,14 +3861,14 @@
         ("Spell4In", "Unk0x64a852d"): Time(
             time: 0.05,
         ),
-        ("Spell4In", "Unk0x9e55a33e"): Time(
-            time: 0.05,
-        ),
         ("Spell4In", "Unk0xf30051d8"): Time(
             time: 0.05,
         ),
         ("Spell4Out", "Evolve"): Time(
             time: 0.1,
+        ),
+        ("Spell4Out", "LaughBase"): Time(
+            time: 0.05,
         ),
         ("Spell4Out", "RunBase"): TransitionClip(
             clip_name: "Unk0x606fc7dc",
@@ -3813,14 +3888,14 @@
         ("Spell4Out", "Unk0x64a852d"): Time(
             time: 0.05,
         ),
-        ("Spell4Out", "Unk0x9e55a33e"): Time(
-            time: 0.05,
-        ),
         ("Spell4Out", "Unk0xf30051d8"): Time(
             time: 0.05,
         ),
         ("Spell4ReadyIn", "Evolve"): Time(
             time: 0.1,
+        ),
+        ("Spell4ReadyIn", "LaughBase"): Time(
+            time: 0.05,
         ),
         ("Spell4ReadyIn", "Spawn"): Time(
             time: 0.0,
@@ -3858,9 +3933,6 @@
         ("Spell4ReadyIn", "Unk0x9d46ce26"): Time(
             time: 0.0,
         ),
-        ("Spell4ReadyIn", "Unk0x9e55a33e"): Time(
-            time: 0.05,
-        ),
         ("Spell4ReadyIn", "Unk0xb31e664b"): Time(
             time: 0.05,
         ),
@@ -3872,6 +3944,9 @@
         ),
         ("Spell4ReadyLoop", "Evolve"): Time(
             time: 0.1,
+        ),
+        ("Spell4ReadyLoop", "LaughBase"): Time(
+            time: 0.05,
         ),
         ("Spell4ReadyLoop", "Spawn"): Time(
             time: 0.0,
@@ -3909,9 +3984,6 @@
         ("Spell4ReadyLoop", "Unk0x9d46ce26"): Time(
             time: 0.0,
         ),
-        ("Spell4ReadyLoop", "Unk0x9e55a33e"): Time(
-            time: 0.05,
-        ),
         ("Spell4ReadyLoop", "Unk0xb31e664b"): Time(
             time: 0.05,
         ),
@@ -3923,6 +3995,9 @@
         ),
         ("Spell4ReadyVar", "Evolve"): Time(
             time: 0.1,
+        ),
+        ("Spell4ReadyVar", "LaughBase"): Time(
+            time: 0.05,
         ),
         ("Spell4ReadyVar", "Spawn"): Time(
             time: 0.0,
@@ -3960,9 +4035,6 @@
         ("Spell4ReadyVar", "Unk0x9d46ce26"): Time(
             time: 0.0,
         ),
-        ("Spell4ReadyVar", "Unk0x9e55a33e"): Time(
-            time: 0.05,
-        ),
         ("Spell4ReadyVar", "Unk0xb31e664b"): Time(
             time: 0.05,
         ),
@@ -3992,6 +4064,9 @@
         ),
         ("Taunt", "Idle1Var3"): Time(
             time: 0.3,
+        ),
+        ("Taunt", "LaughBase"): Time(
+            time: 0.05,
         ),
         ("Taunt", "Run1In"): Time(
             time: 0.1,
@@ -4044,9 +4119,6 @@
         ("Taunt", "Unk0x9d46ce26"): Time(
             time: 0.0,
         ),
-        ("Taunt", "Unk0x9e55a33e"): Time(
-            time: 0.05,
-        ),
         ("Taunt", "Unk0xb31e664b"): Time(
             time: 0.05,
         ),
@@ -4073,6 +4145,9 @@
         ),
         ("Turn", "Evolve"): Time(
             time: 0.1,
+        ),
+        ("Turn", "LaughBase"): Time(
+            time: 0.05,
         ),
         ("Turn", "Spawn"): Time(
             time: 0.0,
@@ -4107,9 +4182,6 @@
         ("Turn", "Unk0x9d46ce26"): Time(
             time: 0.0,
         ),
-        ("Turn", "Unk0x9e55a33e"): Time(
-            time: 0.05,
-        ),
         ("Turn", "Unk0xb31e664b"): Time(
             time: 0.05,
         ),
@@ -4121,6 +4193,9 @@
         ),
         ("Turn0", "Evolve"): Time(
             time: 0.1,
+        ),
+        ("Turn0", "LaughBase"): Time(
+            time: 0.05,
         ),
         ("Turn0", "Spawn"): Time(
             time: 0.0,
@@ -4155,9 +4230,6 @@
         ("Turn0", "Unk0x9d46ce26"): Time(
             time: 0.0,
         ),
-        ("Turn0", "Unk0x9e55a33e"): Time(
-            time: 0.05,
-        ),
         ("Turn0", "Unk0xb31e664b"): Time(
             time: 0.05,
         ),
@@ -4169,6 +4241,9 @@
         ),
         ("TurnL", "Evolve"): Time(
             time: 0.1,
+        ),
+        ("TurnL", "LaughBase"): Time(
+            time: 0.05,
         ),
         ("TurnL", "Spawn"): Time(
             time: 0.0,
@@ -4203,9 +4278,6 @@
         ("TurnL", "Unk0x9d46ce26"): Time(
             time: 0.0,
         ),
-        ("TurnL", "Unk0x9e55a33e"): Time(
-            time: 0.05,
-        ),
         ("TurnL", "Unk0xb31e664b"): Time(
             time: 0.05,
         ),
@@ -4217,6 +4289,9 @@
         ),
         ("TurnR", "Evolve"): Time(
             time: 0.1,
+        ),
+        ("TurnR", "LaughBase"): Time(
+            time: 0.05,
         ),
         ("TurnR", "Spawn"): Time(
             time: 0.0,
@@ -4251,9 +4326,6 @@
         ("TurnR", "Unk0x9d46ce26"): Time(
             time: 0.0,
         ),
-        ("TurnR", "Unk0x9e55a33e"): Time(
-            time: 0.05,
-        ),
         ("TurnR", "Unk0xb31e664b"): Time(
             time: 0.05,
         ),
@@ -4268,6 +4340,9 @@
         ),
         ("Unk0x1268f384", "Evolve"): Time(
             time: 0.1,
+        ),
+        ("Unk0x1268f384", "LaughBase"): Time(
+            time: 0.05,
         ),
         ("Unk0x1268f384", "Run1In"): Time(
             time: 0.1,
@@ -4317,9 +4392,6 @@
         ("Unk0x1268f384", "Unk0x9d46ce26"): Time(
             time: 0.0,
         ),
-        ("Unk0x1268f384", "Unk0x9e55a33e"): Time(
-            time: 0.05,
-        ),
         ("Unk0x1268f384", "Unk0xb31e664b"): Time(
             time: 0.05,
         ),
@@ -4331,6 +4403,9 @@
         ),
         ("Unk0x14936eb8", "Evolve"): Time(
             time: 0.1,
+        ),
+        ("Unk0x14936eb8", "LaughBase"): Time(
+            time: 0.05,
         ),
         ("Unk0x14936eb8", "Spawn"): Time(
             time: 0.0,
@@ -4355,9 +4430,6 @@
         ),
         ("Unk0x14936eb8", "Unk0x9d46ce26"): Time(
             time: 0.0,
-        ),
-        ("Unk0x14936eb8", "Unk0x9e55a33e"): Time(
-            time: 0.05,
         ),
         ("Unk0x14936eb8", "Unk0xb31e664b"): Time(
             time: 0.05,
@@ -4434,6 +4506,9 @@
         ("Unk0x2788f54b", "Idle1Base"): Time(
             time: 0.1,
         ),
+        ("Unk0x2788f54b", "LaughBase"): Time(
+            time: 0.05,
+        ),
         ("Unk0x2788f54b", "Spawn"): Time(
             time: 0.0,
         ),
@@ -4467,9 +4542,6 @@
         ("Unk0x2788f54b", "Unk0x9d46ce26"): Time(
             time: 0.0,
         ),
-        ("Unk0x2788f54b", "Unk0x9e55a33e"): Time(
-            time: 0.05,
-        ),
         ("Unk0x2788f54b", "Unk0xb31e664b"): Time(
             time: 0.05,
         ),
@@ -4482,6 +4554,9 @@
         ("Unk0x2cbe1b20", "Evolve"): Time(
             time: 0.1,
         ),
+        ("Unk0x2cbe1b20", "LaughBase"): Time(
+            time: 0.05,
+        ),
         ("Unk0x2cbe1b20", "Spawn"): Time(
             time: 0.0,
         ),
@@ -4492,9 +4567,6 @@
             time: 0.0,
         ),
         ("Unk0x2cbe1b20", "Unk0x64a852d"): Time(
-            time: 0.05,
-        ),
-        ("Unk0x2cbe1b20", "Unk0x9e55a33e"): Time(
             time: 0.05,
         ),
         ("Unk0x2cbe1b20", "Unk0xf30051d8"): Time(
@@ -4517,6 +4589,9 @@
         ),
         ("Unk0x45c7993a", "Idle1Base"): TransitionClip(
             clip_name: "Unk0x89eb359c",
+        ),
+        ("Unk0x45c7993a", "LaughBase"): Time(
+            time: 0.05,
         ),
         ("Unk0x45c7993a", "Run1In"): Time(
             time: 0.1,
@@ -4572,9 +4647,6 @@
         ("Unk0x45c7993a", "Unk0x9d46ce26"): Time(
             time: 0.0,
         ),
-        ("Unk0x45c7993a", "Unk0x9e55a33e"): Time(
-            time: 0.05,
-        ),
         ("Unk0x45c7993a", "Unk0xb31e664b"): Time(
             time: 0.05,
         ),
@@ -4620,6 +4692,9 @@
         ("Unk0x5046e3f2", "Evolve"): Time(
             time: 0.1,
         ),
+        ("Unk0x5046e3f2", "LaughBase"): Time(
+            time: 0.05,
+        ),
         ("Unk0x5046e3f2", "Spawn"): Time(
             time: 0.0,
         ),
@@ -4641,9 +4716,6 @@
         ("Unk0x5046e3f2", "Unk0x64a852d"): Time(
             time: 0.05,
         ),
-        ("Unk0x5046e3f2", "Unk0x9e55a33e"): Time(
-            time: 0.05,
-        ),
         ("Unk0x5046e3f2", "Unk0xb31e664b"): Time(
             time: 0.05,
         ),
@@ -4652,6 +4724,9 @@
         ),
         ("Unk0x5d38aee9", "Evolve"): Time(
             time: 0.1,
+        ),
+        ("Unk0x5d38aee9", "LaughBase"): Time(
+            time: 0.05,
         ),
         ("Unk0x5d38aee9", "Spawn"): Time(
             time: 0.0,
@@ -4677,9 +4752,6 @@
         ("Unk0x5d38aee9", "Unk0x9d46ce26"): Time(
             time: 0.0,
         ),
-        ("Unk0x5d38aee9", "Unk0x9e55a33e"): Time(
-            time: 0.05,
-        ),
         ("Unk0x5d38aee9", "Unk0xb31e664b"): Time(
             time: 0.05,
         ),
@@ -4688,6 +4760,9 @@
         ),
         ("Unk0x605bc14a", "Evolve"): Time(
             time: 0.1,
+        ),
+        ("Unk0x605bc14a", "LaughBase"): Time(
+            time: 0.05,
         ),
         ("Unk0x605bc14a", "Spawn"): Time(
             time: 0.0,
@@ -4707,9 +4782,6 @@
         ("Unk0x605bc14a", "Unk0x64a852d"): Time(
             time: 0.05,
         ),
-        ("Unk0x605bc14a", "Unk0x9e55a33e"): Time(
-            time: 0.05,
-        ),
         ("Unk0x605bc14a", "Unk0xb31e664b"): Time(
             time: 0.05,
         ),
@@ -4727,6 +4799,12 @@
         ),
         ("Unk0x606fc7dc", "Idle1Base"): TransitionClip(
             clip_name: "Unk0x89eb359c",
+        ),
+        ("Unk0x606fc7dc", "LaughBase"): Time(
+            time: 0.05,
+        ),
+        ("Unk0x606fc7dc", "Run1Base"): Time(
+            time: 0.1,
         ),
         ("Unk0x606fc7dc", "Spawn"): Time(
             time: 0.0,
@@ -4770,14 +4848,8 @@
         ("Unk0x606fc7dc", "Unk0x9d46ce26"): Time(
             time: 0.0,
         ),
-        ("Unk0x606fc7dc", "Unk0x9e55a33e"): Time(
-            time: 0.05,
-        ),
         ("Unk0x606fc7dc", "Unk0xb31e664b"): Time(
             time: 0.05,
-        ),
-        ("Unk0x606fc7dc", "Unk0xb910f2d7"): Time(
-            time: 0.1,
         ),
         ("Unk0x606fc7dc", "Unk0xf30051d8"): Time(
             time: 0.05,
@@ -4787,6 +4859,9 @@
         ),
         ("Unk0x64a852d", "Evolve"): Time(
             time: 0.1,
+        ),
+        ("Unk0x64a852d", "LaughBase"): Time(
+            time: 0.05,
         ),
         ("Unk0x64a852d", "Run1In"): Time(
             time: 0.1,
@@ -4836,9 +4911,6 @@
         ("Unk0x64a852d", "Unk0x9d46ce26"): Time(
             time: 0.0,
         ),
-        ("Unk0x64a852d", "Unk0x9e55a33e"): Time(
-            time: 0.05,
-        ),
         ("Unk0x64a852d", "Unk0xb31e664b"): Time(
             time: 0.05,
         ),
@@ -4859,6 +4931,9 @@
         ),
         ("Unk0x89eb359c", "Evolve"): Time(
             time: 0.1,
+        ),
+        ("Unk0x89eb359c", "LaughBase"): Time(
+            time: 0.05,
         ),
         ("Unk0x89eb359c", "Spawn"): Time(
             time: 0.0,
@@ -4884,9 +4959,6 @@
         ("Unk0x89eb359c", "Unk0x9d46ce26"): Time(
             time: 0.0,
         ),
-        ("Unk0x89eb359c", "Unk0x9e55a33e"): Time(
-            time: 0.05,
-        ),
         ("Unk0x89eb359c", "Unk0xb31e664b"): Time(
             time: 0.05,
         ),
@@ -4898,6 +4970,9 @@
         ),
         ("Unk0x8dfb9419", "Evolve"): Time(
             time: 0.1,
+        ),
+        ("Unk0x8dfb9419", "LaughBase"): Time(
+            time: 0.05,
         ),
         ("Unk0x8dfb9419", "Run1In"): Time(
             time: 0.1,
@@ -4950,9 +5025,6 @@
         ("Unk0x8dfb9419", "Unk0x9d46ce26"): Time(
             time: 0.0,
         ),
-        ("Unk0x8dfb9419", "Unk0x9e55a33e"): Time(
-            time: 0.05,
-        ),
         ("Unk0x8dfb9419", "Unk0xb31e664b"): Time(
             time: 0.05,
         ),
@@ -4970,6 +5042,9 @@
         ),
         ("Unk0x91b12860", "Idle1Base"): TransitionClip(
             clip_name: "Unk0x89eb359c",
+        ),
+        ("Unk0x91b12860", "LaughBase"): Time(
+            time: 0.05,
         ),
         ("Unk0x91b12860", "Spawn"): Time(
             time: 0.0,
@@ -4994,9 +5069,6 @@
         ),
         ("Unk0x91b12860", "Unk0x9d46ce26"): Time(
             time: 0.0,
-        ),
-        ("Unk0x91b12860", "Unk0x9e55a33e"): Time(
-            time: 0.05,
         ),
         ("Unk0x91b12860", "Unk0xb31e664b"): Time(
             time: 0.05,
@@ -5058,6 +5130,9 @@
         ("Unk0x99afa279", "Idle1Base"): TransitionClip(
             clip_name: "EIdleIn",
         ),
+        ("Unk0x99afa279", "LaughBase"): Time(
+            time: 0.05,
+        ),
         ("Unk0x99afa279", "Spawn"): Time(
             time: 0.0,
         ),
@@ -5090,9 +5165,6 @@
         ),
         ("Unk0x99afa279", "Unk0x9d46ce26"): Time(
             time: 0.0,
-        ),
-        ("Unk0x99afa279", "Unk0x9e55a33e"): Time(
-            time: 0.05,
         ),
         ("Unk0x99afa279", "Unk0xb31e664b"): Time(
             time: 0.05,
@@ -5177,6 +5249,9 @@
         ),
         ("Unk0x9d46ce26", "IdleToE"): Time(
             time: 0.0,
+        ),
+        ("Unk0x9d46ce26", "LaughBase"): Time(
+            time: 0.05,
         ),
         ("Unk0x9d46ce26", "Recall"): Time(
             time: 0.0,
@@ -5301,9 +5376,6 @@
         ("Unk0x9d46ce26", "Unk0x9d46ce26"): Time(
             time: 0.1,
         ),
-        ("Unk0x9d46ce26", "Unk0x9e55a33e"): Time(
-            time: 0.05,
-        ),
         ("Unk0x9d46ce26", "Unk0xb31e664b"): Time(
             time: 0.05,
         ),
@@ -5322,77 +5394,11 @@
         ("Unk0x9d46ce26", "Unk0xffa21b1b"): Time(
             time: 0.0,
         ),
-        ("Unk0x9e55a33e", "Death"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x9e55a33e", "Evolve"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x9e55a33e", "Run1In"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x9e55a33e", "RunBase"): TransitionClip(
-            clip_name: "Unk0x606fc7dc",
-        ),
-        ("Unk0x9e55a33e", "RunFast"): TransitionClip(
-            clip_name: "RunFastIn",
-        ),
-        ("Unk0x9e55a33e", "Spawn"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x9e55a33e", "Spell1"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x9e55a33e", "Spell1Base"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x9e55a33e", "Spell1Upper"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x9e55a33e", "Spell2"): Time(
-            time: 0.08,
-        ),
-        ("Unk0x9e55a33e", "Spell2Base"): Time(
-            time: 0.08,
-        ),
-        ("Unk0x9e55a33e", "Spell4"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x9e55a33e", "Spell4Out"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x9e55a33e", "Taunt"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x9e55a33e", "Unk0x16b4f715"): Time(
-            time: 0.08,
-        ),
-        ("Unk0x9e55a33e", "Unk0x605bc14a"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x9e55a33e", "Unk0x606fc7dc"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x9e55a33e", "Unk0x64a852d"): Time(
-            time: 0.05,
-        ),
-        ("Unk0x9e55a33e", "Unk0x9d46ce26"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x9e55a33e", "Unk0x9e55a33e"): Time(
-            time: 0.05,
-        ),
-        ("Unk0x9e55a33e", "Unk0xb31e664b"): Time(
-            time: 0.05,
-        ),
-        ("Unk0x9e55a33e", "Unk0xf30051d8"): Time(
-            time: 0.05,
-        ),
-        ("Unk0x9e55a33e", "Unk0xff10bd3b"): Time(
-            time: 0.0,
-        ),
         ("Unk0xa30b69d2", "Evolve"): Time(
             time: 0.1,
+        ),
+        ("Unk0xa30b69d2", "LaughBase"): Time(
+            time: 0.05,
         ),
         ("Unk0xa30b69d2", "Spawn"): Time(
             time: 0.0,
@@ -5406,14 +5412,14 @@
         ("Unk0xa30b69d2", "Unk0x64a852d"): Time(
             time: 0.05,
         ),
-        ("Unk0xa30b69d2", "Unk0x9e55a33e"): Time(
-            time: 0.05,
-        ),
         ("Unk0xa30b69d2", "Unk0xf30051d8"): Time(
             time: 0.05,
         ),
         ("Unk0xb31e664b", "Evolve"): Time(
             time: 0.1,
+        ),
+        ("Unk0xb31e664b", "LaughBase"): Time(
+            time: 0.05,
         ),
         ("Unk0xb31e664b", "RunBase"): TransitionClip(
             clip_name: "Unk0x606fc7dc",
@@ -5442,17 +5448,11 @@
         ("Unk0xb31e664b", "Unk0x64a852d"): Time(
             time: 0.05,
         ),
-        ("Unk0xb31e664b", "Unk0x9e55a33e"): Time(
-            time: 0.05,
-        ),
         ("Unk0xb31e664b", "Unk0xb31e664b"): Time(
             time: 0.05,
         ),
         ("Unk0xb31e664b", "Unk0xf30051d8"): Time(
             time: 0.05,
-        ),
-        ("Unk0xb910f2d7", "Death"): Time(
-            time: 0.0,
         ),
         ("Unk0xbb4619db", "Spell4"): Time(
             time: 0.0,
@@ -5477,6 +5477,9 @@
         ),
         ("Unk0xbf95b021", "Idle1Base"): TransitionClip(
             clip_name: "Unk0x89eb359c",
+        ),
+        ("Unk0xbf95b021", "LaughBase"): Time(
+            time: 0.05,
         ),
         ("Unk0xbf95b021", "Run1In"): Time(
             time: 0.1,
@@ -5516,9 +5519,6 @@
         ),
         ("Unk0xbf95b021", "Unk0x9d46ce26"): Time(
             time: 0.0,
-        ),
-        ("Unk0xbf95b021", "Unk0x9e55a33e"): Time(
-            time: 0.05,
         ),
         ("Unk0xbf95b021", "Unk0xb31e664b"): Time(
             time: 0.05,
@@ -5613,6 +5613,9 @@
         ("Unk0xf30051d8", "Evolve"): Time(
             time: 0.1,
         ),
+        ("Unk0xf30051d8", "LaughBase"): Time(
+            time: 0.05,
+        ),
         ("Unk0xf30051d8", "Run1In"): Time(
             time: 0.1,
         ),
@@ -5664,9 +5667,6 @@
         ("Unk0xf30051d8", "Unk0x9d46ce26"): Time(
             time: 0.0,
         ),
-        ("Unk0xf30051d8", "Unk0x9e55a33e"): Time(
-            time: 0.05,
-        ),
         ("Unk0xf30051d8", "Unk0xb31e664b"): Time(
             time: 0.05,
         ),
@@ -5675,6 +5675,9 @@
         ),
         ("Unk0xf30051d8", "Unk0xff10bd3b"): Time(
             time: 0.0,
+        ),
+        ("Unk0xfb992a5a", "LaughBase"): Time(
+            time: 0.05,
         ),
         ("Unk0xfb992a5a", "Spawn"): Time(
             time: 0.0,
@@ -5686,9 +5689,6 @@
             time: 0.0,
         ),
         ("Unk0xfb992a5a", "Unk0x64a852d"): Time(
-            time: 0.05,
-        ),
-        ("Unk0xfb992a5a", "Unk0x9e55a33e"): Time(
             time: 0.05,
         ),
         ("Unk0xfb992a5a", "Unk0xf30051d8"): Time(
@@ -5711,6 +5711,9 @@
         ),
         ("Unk0xff10bd3b", "Idle1Base"): TransitionClip(
             clip_name: "EIdleIn",
+        ),
+        ("Unk0xff10bd3b", "LaughBase"): Time(
+            time: 0.05,
         ),
         ("Unk0xff10bd3b", "Run1In"): Time(
             time: 0.1,
@@ -5759,9 +5762,6 @@
         ),
         ("Unk0xff10bd3b", "Unk0x9d46ce26"): Time(
             time: 0.0,
-        ),
-        ("Unk0xff10bd3b", "Unk0x9e55a33e"): Time(
-            time: 0.05,
         ),
         ("Unk0xff10bd3b", "Unk0xb31e664b"): Time(
             time: 0.05,
@@ -5826,6 +5826,9 @@
         ("Unk0xffa21b1b", "Idle1Base"): TransitionClip(
             clip_name: "Unk0x2788f54b",
         ),
+        ("Unk0xffa21b1b", "LaughBase"): Time(
+            time: 0.05,
+        ),
         ("Unk0xffa21b1b", "Spawn"): Time(
             time: 0.0,
         ),
@@ -5861,9 +5864,6 @@
         ),
         ("Unk0xffa21b1b", "Unk0x9d46ce26"): Time(
             time: 0.0,
-        ),
-        ("Unk0xffa21b1b", "Unk0x9e55a33e"): Time(
-            time: 0.05,
         ),
         ("Unk0xffa21b1b", "Unk0xb31e664b"): Time(
             time: 0.05,

@@ -58,17 +58,20 @@
         "Idle1": Sequence(
             hashes: [
                 "Idle1Base",
-                "Unk0xa3c3efe8",
+                "Idle1LookBase",
                 "Idle1Base",
                 "Idle1Base",
                 "Idle2Base",
                 "Idle1Base",
-                "Unk0xa3c3efe8",
+                "Idle1LookBase",
                 "Idle1Base",
             ],
         ),
         "Idle1Base": Clip(
             node_index: 14,
+        ),
+        "Idle1LookBase": Clip(
+            node_index: 25,
         ),
         "Idle2Base": Clip(
             node_index: 44,
@@ -189,9 +192,6 @@
         ),
         "Unk0x4ad018ac": Clip(
             node_index: 8,
-        ),
-        "Unk0xa3c3efe8": Clip(
-            node_index: 25,
         ),
         "Unk0xb023e0cf": Clip(
             node_index: 30,
@@ -820,6 +820,48 @@
             time: 0.01,
         ),
         ("Idle1Base", "Unk0x67bc7d96"): Time(
+            time: 0.1,
+        ),
+        ("Idle1LookBase", "Attack1"): Time(
+            time: 0.01,
+        ),
+        ("Idle1LookBase", "Attack2"): Time(
+            time: 0.01,
+        ),
+        ("Idle1LookBase", "Attack3"): Time(
+            time: 0.01,
+        ),
+        ("Idle1LookBase", "Crit"): Time(
+            time: 0.0,
+        ),
+        ("Idle1LookBase", "Forge"): Time(
+            time: 0.03,
+        ),
+        ("Idle1LookBase", "ForgeToIdle"): Time(
+            time: 0.06,
+        ),
+        ("Idle1LookBase", "ForgeToRun"): Time(
+            time: 0.06,
+        ),
+        ("Idle1LookBase", "Joke"): Time(
+            time: 0.01,
+        ),
+        ("Idle1LookBase", "Laugh"): Time(
+            time: 0.01,
+        ),
+        ("Idle1LookBase", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("Idle1LookBase", "Spell2"): Time(
+            time: 0.03,
+        ),
+        ("Idle1LookBase", "Spell2Attack"): Time(
+            time: 0.0,
+        ),
+        ("Idle1LookBase", "Taunt"): Time(
+            time: 0.01,
+        ),
+        ("Idle1LookBase", "Unk0x67bc7d96"): Time(
             time: 0.1,
         ),
         ("Idle2Base", "Attack1"): Time(
@@ -2471,48 +2513,6 @@
         ),
         ("Unk0x9cbc4532", "RunBase"): Time(
             time: 0.0,
-        ),
-        ("Unk0xa3c3efe8", "Attack1"): Time(
-            time: 0.01,
-        ),
-        ("Unk0xa3c3efe8", "Attack2"): Time(
-            time: 0.01,
-        ),
-        ("Unk0xa3c3efe8", "Attack3"): Time(
-            time: 0.01,
-        ),
-        ("Unk0xa3c3efe8", "Crit"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xa3c3efe8", "Forge"): Time(
-            time: 0.03,
-        ),
-        ("Unk0xa3c3efe8", "ForgeToIdle"): Time(
-            time: 0.06,
-        ),
-        ("Unk0xa3c3efe8", "ForgeToRun"): Time(
-            time: 0.06,
-        ),
-        ("Unk0xa3c3efe8", "Joke"): Time(
-            time: 0.01,
-        ),
-        ("Unk0xa3c3efe8", "Laugh"): Time(
-            time: 0.01,
-        ),
-        ("Unk0xa3c3efe8", "Spell1"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xa3c3efe8", "Spell2"): Time(
-            time: 0.03,
-        ),
-        ("Unk0xa3c3efe8", "Spell2Attack"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xa3c3efe8", "Taunt"): Time(
-            time: 0.01,
-        ),
-        ("Unk0xa3c3efe8", "Unk0x67bc7d96"): Time(
-            time: 0.1,
         ),
         ("Unk0xb023e0cf", "Attack1"): Time(
             time: 0.01,

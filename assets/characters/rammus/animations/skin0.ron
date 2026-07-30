@@ -64,14 +64,14 @@
         "Spell4": Clip(
             node_index: 14,
         ),
+        "Spell4Jump": Clip(
+            node_index: 17,
+        ),
         "Taunt": Clip(
             node_index: 15,
         ),
         "Unk0xb4dcde19": Clip(
             node_index: 10,
-        ),
-        "Unk0xe08b7a14": Clip(
-            node_index: 17,
         ),
     },
     blend_data: {

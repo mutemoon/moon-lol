@@ -170,6 +170,9 @@
         "Spell2Channel": Clip(
             node_index: 33,
         ),
+        "Spell2ChannelArrive": Clip(
+            node_index: 22,
+        ),
         "Spell3": Clip(
             node_index: 27,
         ),
@@ -213,9 +216,6 @@
                     value: 520.0,
                 ),
             ],
-        ),
-        "Unk0x9e606ad9": Clip(
-            node_index: 22,
         ),
         "Unk0xa3191c19": Clip(
             node_index: 24,
@@ -1410,6 +1410,30 @@
         ("Spell2Channel", "Unk0xf925da22"): Time(
             time: 0.1,
         ),
+        ("Spell2ChannelArrive", "Idle1"): TransitionClip(
+            clip_name: "IdleAggroToIdle",
+        ),
+        ("Spell2ChannelArrive", "Spell1AltUp"): Time(
+            time: 0.0,
+        ),
+        ("Spell2ChannelArrive", "Spell1Base"): Time(
+            time: 0.0,
+        ),
+        ("Spell2ChannelArrive", "Spell1Up"): Time(
+            time: 0.0,
+        ),
+        ("Spell2ChannelArrive", "Spit"): Time(
+            time: 0.1,
+        ),
+        ("Spell2ChannelArrive", "Unk0x57bb7905"): Time(
+            time: 0.0,
+        ),
+        ("Spell2ChannelArrive", "Unk0xa3191c19"): Time(
+            time: 0.0,
+        ),
+        ("Spell2ChannelArrive", "Unk0xcdd06c94"): Time(
+            time: 0.0,
+        ),
         ("Spell3", "Attack1"): Time(
             time: 0.0,
         ),
@@ -1881,6 +1905,9 @@
         ("Unk0x57bb7905", "Spell2Channel"): Time(
             time: 0.0,
         ),
+        ("Unk0x57bb7905", "Spell2ChannelArrive"): Time(
+            time: 0.0,
+        ),
         ("Unk0x57bb7905", "Spell3"): Time(
             time: 0.0,
         ),
@@ -1905,9 +1932,6 @@
         ("Unk0x57bb7905", "Unk0x57bb7905"): Time(
             time: 0.0,
         ),
-        ("Unk0x57bb7905", "Unk0x9e606ad9"): Time(
-            time: 0.0,
-        ),
         ("Unk0x57bb7905", "Unk0xa3191c19"): Time(
             time: 0.0,
         ),
@@ -1921,30 +1945,6 @@
             time: 0.0,
         ),
         ("Unk0x9c9392eb", "Unk0x9c9392eb"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x9e606ad9", "Idle1"): TransitionClip(
-            clip_name: "IdleAggroToIdle",
-        ),
-        ("Unk0x9e606ad9", "Spell1AltUp"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x9e606ad9", "Spell1Base"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x9e606ad9", "Spell1Up"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x9e606ad9", "Spit"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x9e606ad9", "Unk0x57bb7905"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x9e606ad9", "Unk0xa3191c19"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x9e606ad9", "Unk0xcdd06c94"): Time(
             time: 0.0,
         ),
         ("Unk0xa3191c19", "Attack1"): Time(
@@ -2016,6 +2016,9 @@
         ("Unk0xa3191c19", "Spell2Channel"): Time(
             time: 0.0,
         ),
+        ("Unk0xa3191c19", "Spell2ChannelArrive"): Time(
+            time: 0.0,
+        ),
         ("Unk0xa3191c19", "Spell3"): Time(
             time: 0.0,
         ),
@@ -2038,9 +2041,6 @@
             time: 0.0,
         ),
         ("Unk0xa3191c19", "Unk0x57bb7905"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xa3191c19", "Unk0x9e606ad9"): Time(
             time: 0.0,
         ),
         ("Unk0xa3191c19", "Unk0xa3191c19"): Time(

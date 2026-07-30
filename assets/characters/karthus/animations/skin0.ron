@@ -67,9 +67,12 @@
         ),
         "Laugh": Sequence(
             hashes: [
-                "Unk0x9e55a33e",
+                "LaughBase",
                 "Unk0x68e26f73",
             ],
+        ),
+        "LaughBase": Clip(
+            node_index: 20,
         ),
         "Recall": Clip(
             node_index: 11,
@@ -156,9 +159,6 @@
         ),
         "Unk0x9d46ce26": Clip(
             node_index: 19,
-        ),
-        "Unk0x9e55a33e": Clip(
-            node_index: 20,
         ),
         "Unk0xae9fbe8f": Clip(
             node_index: 23,
@@ -272,6 +272,15 @@
         ),
         ("Laugh", "Death"): Time(
             time: 0.0,
+        ),
+        ("LaughBase", "Death"): Time(
+            time: 0.0,
+        ),
+        ("LaughBase", "LaughBase"): Time(
+            time: 0.0,
+        ),
+        ("LaughBase", "RunBase"): Time(
+            time: 0.5,
         ),
         ("Recall", "Death"): Time(
             time: 0.0,
@@ -422,15 +431,6 @@
         ),
         ("Unk0x99892aa", "RunIn"): Time(
             time: 1.2,
-        ),
-        ("Unk0x9e55a33e", "Death"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x9e55a33e", "RunBase"): Time(
-            time: 0.5,
-        ),
-        ("Unk0x9e55a33e", "Unk0x9e55a33e"): Time(
-            time: 0.0,
         ),
         ("Unk0xce1ed0a4", "RunBase"): Time(
             time: 1.2,

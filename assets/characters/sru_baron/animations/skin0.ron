@@ -19,6 +19,12 @@
                 "Unk0xcadb534d",
             ],
         ),
+        "Attack1Melee": Parallel(
+            hashes: [
+                "Unk0xcd05b0e4",
+                "Unk0xe7210d18",
+            ],
+        ),
         "Attack2": Clip(
             node_index: 24,
         ),
@@ -443,12 +449,6 @@
         "Unk0x7f9bcb81": Clip(
             node_index: 42,
         ),
-        "Unk0x8581b507": Parallel(
-            hashes: [
-                "Unk0xcd05b0e4",
-                "Unk0xe7210d18",
-            ],
-        ),
         "Unk0x8dcbd168": Clip(
             node_index: 45,
         ),
@@ -731,6 +731,12 @@
             time: 0.0,
         ),
         ("Attack1", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Melee", "Attack1Melee"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Melee", "Death"): Time(
             time: 0.0,
         ),
         ("Attack2", "Attack2"): Time(
@@ -13137,12 +13143,6 @@
         ),
         ("Unk0x7f9bcb81", "Unk0xf16f255e"): Time(
             time: 0.1,
-        ),
-        ("Unk0x8581b507", "Death"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x8581b507", "Unk0x8581b507"): Time(
-            time: 0.0,
         ),
         ("Unk0x8dcbd168", "Attack2"): Time(
             time: 0.1,

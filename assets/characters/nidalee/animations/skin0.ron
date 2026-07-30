@@ -36,29 +36,29 @@
         ),
         "Idle1": Sequence(
             hashes: [
-                "Unk0xe93edcf8",
-                "Unk0xba9fda17",
+                "RawNidalee2012IdleEnter",
+                "RawIdle1",
                 "Idle2",
             ],
         ),
         "Idle2": Sequence(
             hashes: [
-                "Unk0xba9fda17",
-                "Unk0xba9fda17",
-                "Unk0xba9fda17",
-                "Unk0xbb9fdbaa",
-                "Unk0xba9fda17",
-                "Unk0xba9fda17",
+                "RawIdle1",
+                "RawIdle1",
+                "RawIdle1",
+                "RawIdle2",
+                "RawIdle1",
+                "RawIdle1",
             ],
         ),
         "IdleSelector": Selector(
             probably_nodes: [
                 (
-                    key: "Unk0xba9fda17",
+                    key: "RawIdle1",
                     value: 80.0,
                 ),
                 (
-                    key: "Unk0xbb9fdbaa",
+                    key: "RawIdle2",
                     value: 20.0,
                 ),
             ],
@@ -66,22 +66,31 @@
         "Joke": Sequence(
             hashes: [
                 "Unk0xbbee8205",
-                "Unk0xba9fda17",
-                "Unk0xba9fda17",
-                "Unk0xba9fda17",
-                "Unk0xba9fda17",
-                "Unk0xba9fda17",
+                "RawIdle1",
+                "RawIdle1",
+                "RawIdle1",
+                "RawIdle1",
+                "RawIdle1",
             ],
         ),
         "Laugh": Sequence(
             hashes: [
                 "Unk0xe7a9a7b3",
-                "Unk0xba9fda17",
-                "Unk0xba9fda17",
-                "Unk0xba9fda17",
-                "Unk0xba9fda17",
-                "Unk0xba9fda17",
+                "RawIdle1",
+                "RawIdle1",
+                "RawIdle1",
+                "RawIdle1",
+                "RawIdle1",
             ],
+        ),
+        "RawIdle1": Clip(
+            node_index: 15,
+        ),
+        "RawIdle2": Clip(
+            node_index: 16,
+        ),
+        "RawNidalee2012IdleEnter": Clip(
+            node_index: 20,
         ),
         "Recall": Sequence(
             hashes: [
@@ -110,11 +119,11 @@
         "Taunt": Sequence(
             hashes: [
                 "Unk0xb3d0c366",
-                "Unk0xba9fda17",
-                "Unk0xba9fda17",
-                "Unk0xba9fda17",
-                "Unk0xba9fda17",
-                "Unk0xba9fda17",
+                "RawIdle1",
+                "RawIdle1",
+                "RawIdle1",
+                "RawIdle1",
+                "RawIdle1",
             ],
         ),
         "Unk0x1ad32ce5": Clip(
@@ -126,20 +135,11 @@
         "Unk0xb3d0c366": Clip(
             node_index: 11,
         ),
-        "Unk0xba9fda17": Clip(
-            node_index: 15,
-        ),
-        "Unk0xbb9fdbaa": Clip(
-            node_index: 16,
-        ),
         "Unk0xbbee8205": Clip(
             node_index: 17,
         ),
         "Unk0xe7a9a7b3": Clip(
             node_index: 19,
-        ),
-        "Unk0xe93edcf8": Clip(
-            node_index: 20,
         ),
     },
     blend_data: {
@@ -179,6 +179,15 @@
         ("Laugh", "Death"): Time(
             time: 0.0,
         ),
+        ("RawIdle1", "Death"): Time(
+            time: 0.0,
+        ),
+        ("RawIdle2", "Death"): Time(
+            time: 0.0,
+        ),
+        ("RawNidalee2012IdleEnter", "Death"): Time(
+            time: 0.0,
+        ),
         ("Recall", "Death"): Time(
             time: 0.0,
         ),
@@ -212,19 +221,10 @@
         ("Unk0xb3d0c366", "Death"): Time(
             time: 0.0,
         ),
-        ("Unk0xba9fda17", "Death"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xbb9fdbaa", "Death"): Time(
-            time: 0.0,
-        ),
         ("Unk0xbbee8205", "Death"): Time(
             time: 0.0,
         ),
         ("Unk0xe7a9a7b3", "Death"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xe93edcf8", "Death"): Time(
             time: 0.0,
         ),
     },

@@ -224,11 +224,14 @@
         ),
         "Spell4Out": ConditionBool(
             updater: IsMoving,
-            true_node: "Unk0x84587d36",
+            true_node: "Spell4OutRun",
             false_node: "Spell4OutIdle",
         ),
         "Spell4OutIdle": Clip(
             node_index: 26,
+        ),
+        "Spell4OutRun": Clip(
+            node_index: 27,
         ),
         "Spell4Run": Clip(
             node_index: 50,
@@ -292,9 +295,6 @@
                     value: 90.0,
                 ),
             ],
-        ),
-        "Unk0x84587d36": Clip(
-            node_index: 27,
         ),
         "Unk0x8eb531ff": Clip(
             node_index: 28,
@@ -1803,6 +1803,36 @@
         ("Spell4OutIdle", "Unk0xa410c868"): Time(
             time: 0.05,
         ),
+        ("Spell4OutRun", "Crit"): Time(
+            time: 0.05,
+        ),
+        ("Spell4OutRun", "DanceIn"): Time(
+            time: 0.1,
+        ),
+        ("Spell4OutRun", "DanceLoop"): TransitionClip(
+            clip_name: "DanceIn",
+        ),
+        ("Spell4OutRun", "Joke"): Time(
+            time: 0.1,
+        ),
+        ("Spell4OutRun", "Laugh"): Time(
+            time: 0.1,
+        ),
+        ("Spell4OutRun", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("Spell4OutRun", "Spell3"): Time(
+            time: 0.0,
+        ),
+        ("Spell4OutRun", "Taunt"): Time(
+            time: 0.1,
+        ),
+        ("Spell4OutRun", "Unk0x1d49e55a"): Time(
+            time: 0.05,
+        ),
+        ("Spell4OutRun", "Unk0xa410c868"): Time(
+            time: 0.05,
+        ),
         ("Spell4Run", "Attack1"): Time(
             time: 0.01,
         ),
@@ -2302,36 +2332,6 @@
             time: 0.05,
         ),
         ("Unk0x6cae96c", "Unk0xa410c868"): Time(
-            time: 0.05,
-        ),
-        ("Unk0x84587d36", "Crit"): Time(
-            time: 0.05,
-        ),
-        ("Unk0x84587d36", "DanceIn"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x84587d36", "DanceLoop"): TransitionClip(
-            clip_name: "DanceIn",
-        ),
-        ("Unk0x84587d36", "Joke"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x84587d36", "Laugh"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x84587d36", "Spell1"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x84587d36", "Spell3"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x84587d36", "Taunt"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x84587d36", "Unk0x1d49e55a"): Time(
-            time: 0.05,
-        ),
-        ("Unk0x84587d36", "Unk0xa410c868"): Time(
             time: 0.05,
         ),
         ("Unk0x8eb531ff", "DanceIn"): Time(

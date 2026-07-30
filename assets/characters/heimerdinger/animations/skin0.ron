@@ -79,9 +79,12 @@
         ),
         "Laugh": Sequence(
             hashes: [
-                "Unk0x9e55a33e",
+                "LaughBase",
                 "Unk0xe75f72aa",
             ],
+        ),
+        "LaughBase": Clip(
+            node_index: 24,
         ),
         "Recall": Parallel(
             hashes: [
@@ -267,9 +270,6 @@
         ),
         "Unk0x975cfcc7": Clip(
             node_index: 23,
-        ),
-        "Unk0x9e55a33e": Clip(
-            node_index: 24,
         ),
         "Unk0xa2cb0058": Parallel(
             hashes: [
@@ -470,6 +470,9 @@
         ("DanceWindup", "IdleIn1"): Time(
             time: 0.0,
         ),
+        ("DanceWindup", "LaughBase"): Time(
+            time: 0.0,
+        ),
         ("DanceWindup", "RespawnBase"): Time(
             time: 0.0,
         ),
@@ -513,9 +516,6 @@
             time: 0.0,
         ),
         ("DanceWindup", "Unk0x975cfcc7"): Time(
-            time: 0.0,
-        ),
-        ("DanceWindup", "Unk0x9e55a33e"): Time(
             time: 0.0,
         ),
         ("DanceWindup", "Unk0xabc75b53"): Time(
@@ -630,6 +630,21 @@
             time: 0.0,
         ),
         ("Laugh", "Death"): Time(
+            time: 0.0,
+        ),
+        ("LaughBase", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("LaughBase", "Death"): Time(
+            time: 0.0,
+        ),
+        ("LaughBase", "LaughBase"): Time(
+            time: 0.0,
+        ),
+        ("LaughBase", "Unk0x975cfcc7"): Time(
+            time: 0.0,
+        ),
+        ("LaughBase", "Unk0xb77b9a7a"): Time(
             time: 0.0,
         ),
         ("Recall", "Death"): Time(
@@ -1001,6 +1016,9 @@
         ("Unk0x975cfcc7", "IdleIn1"): Time(
             time: 0.0,
         ),
+        ("Unk0x975cfcc7", "LaughBase"): Time(
+            time: 0.0,
+        ),
         ("Unk0x975cfcc7", "RespawnBase"): Time(
             time: 0.0,
         ),
@@ -1046,9 +1064,6 @@
         ("Unk0x975cfcc7", "Unk0x975cfcc7"): Time(
             time: 0.0,
         ),
-        ("Unk0x975cfcc7", "Unk0x9e55a33e"): Time(
-            time: 0.0,
-        ),
         ("Unk0x975cfcc7", "Unk0xabc75b53"): Time(
             time: 0.0,
         ),
@@ -1065,21 +1080,6 @@
             time: 0.0,
         ),
         ("Unk0x975cfcc7", "Unk0xfb43b3f3"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x9e55a33e", "DanceLoop"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x9e55a33e", "Death"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x9e55a33e", "Unk0x975cfcc7"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x9e55a33e", "Unk0x9e55a33e"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x9e55a33e", "Unk0xb77b9a7a"): Time(
             time: 0.0,
         ),
         ("Unk0xa2cb0058", "Death"): Time(
@@ -1139,6 +1139,9 @@
         ("Unk0xb77b9a7a", "IdleIn1"): Time(
             time: 0.0,
         ),
+        ("Unk0xb77b9a7a", "LaughBase"): Time(
+            time: 0.0,
+        ),
         ("Unk0xb77b9a7a", "RespawnBase"): Time(
             time: 0.0,
         ),
@@ -1182,9 +1185,6 @@
             time: 0.0,
         ),
         ("Unk0xb77b9a7a", "Unk0x975cfcc7"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xb77b9a7a", "Unk0x9e55a33e"): Time(
             time: 0.0,
         ),
         ("Unk0xb77b9a7a", "Unk0xabc75b53"): Time(

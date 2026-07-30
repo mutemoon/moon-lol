@@ -138,10 +138,11 @@ pub fn type_name_to_hash(type_name: &str) -> u32 {
     }
 }
 
-#[derive(Debug, Copy, Clone, Hash, Eq, PartialEq, Serialize, Deserialize, Reflect)]
+#[derive(Debug, Copy, Clone, Hash, Eq, PartialEq, Serialize, Deserialize, Reflect, Default)]
 pub enum LeagueShader {
     QuadPsSlice,
     QuadVs,
+    #[default]
     QuadPs,
     UnlitDecalPs,
     UnlitDecalVs,

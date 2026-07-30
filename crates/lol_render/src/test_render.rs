@@ -341,7 +341,7 @@ fn receive_image_from_buffer(
             continue;
         };
 
-        let _ = sender.send(buffer_slice.get_mapped_range().to_vec());
+        let _ = sender.send(buffer_slice.get_mapped_range().unwrap().to_vec());
         image_copier.buffer.unmap();
     }
 }

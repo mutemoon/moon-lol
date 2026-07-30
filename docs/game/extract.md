@@ -223,7 +223,7 @@ use league_to_lol::extract::extract_all;
 
 fn main() {
     let game_path = r"D:\WeGameApps\英雄联盟\Game";
-    let hashes_dir = "assets/hashes";
+    let hashes_dir = "assets/CommunityDragon-Data/hashes/lol";
     extract_all(game_path, hashes_dir);
 }
 ```
@@ -341,11 +341,21 @@ extract_phase_8_items(&loader);
 
 #### 皮肤场景文件结构
 
-`assets/characters/{name}/skins/{skinN}.ron` 是一个 Bevy DynamicScene RON 文件，包含以下组件：
+`assets/characters/{name}/skins/{skinN}.ron` 是一个 Bevy DynamicScene RON 文件（仅含实体），包含以下组件：
 
-- **Skin** - 包含 `scale`（皮肤缩放）和 `avatar`（头像贴图路径，`.png` 或 `.dds`）
+- **Skin** - 包含 `scale`（皮肤缩放）、`avatar`（头像贴图路径，`.png` 或 `.dds`）和 `resolver_key`（主 ResourceResolver 的 hash）
 - **HealthBar** - 包含 `bar_type`（血条类型）
 - **Visibility** - 默认为 `Visible`
+
+`assets/characters/{name}/skins/{skinN}_vfx.ron` 是配套的 VFX 场景文件（仅含 resources）：
+
+- **ConfigVfx** - 皮肤的粒子特效配置（`resolvers` + `systems`，均以 hash 为 key 的 BTreeMap），
+  作为可序列化 Resource 由 `ConfigSkin.vfx` 句柄加载，随皮肤场景一同 `write_to_world` 写回主 World 成为 `Res<ConfigVfx>`；
+  emitter 的所有纹理字段（`texture` / `particle_color_texture` / `normal_map_texture` / `texture_mult` / `base_texture`）在提取阶段已解析为 `Handle<Image>`（序列化为资产路径，作为嵌套加载依赖）。
+  BTreeMap 走 reflect apply 合并语义，多个皮肤加载时 systems/resolvers 会累积；
+  `lol_render` 的 `inject_vfx_assets` 在 `Res<ConfigVfx>` 变化时将其注入
+  `Assets<ConfigVfxSystemDefinition>` / `Assets<ConfigResourceResolver>`（hash 键）。
+  不再生成独立的 `vfx.ron`，提取时会清理旧的 `characters/{name}/vfx.ron`。
 
 ## 关键方法
 
@@ -417,6 +427,7 @@ let type_hash = type_name_to_hash(type_name);
 | `Spell`                           | `lol_base` (Asset)     | 技能数据配置                                  |
 | `ConfigAnimation`                 | `lol_base` (Asset)     | 动画图配置                                    |
 | `AnimationHandler`                | `lol_core` (Component) | 动画处理器，持有 `Handle<ConfigAnimation>`    |
+| `ConfigVfx`                       | `lol_base` (Resource)  | 粒子特效配置，随 skin{N}.ron 的 resources 写回主 World |
 | `Bounding`, `Attack`, `Health` 等 | `lol_core` (Component) | 角色初始配置，直接序列化到 config.ron         |
 
 ### Asset Loader 注册

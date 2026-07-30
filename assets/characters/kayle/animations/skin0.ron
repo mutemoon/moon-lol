@@ -93,6 +93,12 @@
         "AttackPassiveFast": Clip(
             node_index: 64,
         ),
+        "AttackRanged1fast": Clip(
+            node_index: 25,
+        ),
+        "AttackRanged2fast": Clip(
+            node_index: 101,
+        ),
         "Channel": Clip(
             node_index: 23,
         ),
@@ -425,9 +431,6 @@
         "Unk0x267704ce": Clip(
             node_index: 24,
         ),
-        "Unk0x27f4795b": Clip(
-            node_index: 25,
-        ),
         "Unk0x2b73cead": Clip(
             node_index: 26,
         ),
@@ -538,7 +541,7 @@
                     value: 0.0,
                 ),
                 (
-                    key: "Unk0xfac29276",
+                    key: "AttackRanged2fast",
                     value: 1.6,
                 ),
             ],
@@ -551,7 +554,7 @@
                     value: 0.0,
                 ),
                 (
-                    key: "Unk0x27f4795b",
+                    key: "AttackRanged1fast",
                     value: 1.6,
                 ),
             ],
@@ -595,9 +598,6 @@
         ),
         "Unk0xfa145f61": Clip(
             node_index: 100,
-        ),
-        "Unk0xfac29276": Clip(
-            node_index: 101,
         ),
         "Unk0xfaf598e1": Clip(
             node_index: 102,
@@ -848,6 +848,54 @@
             time: 0.05,
         ),
         ("AttackPassiveFast", "Unk0xc8c9755"): Time(
+            time: 0.02,
+        ),
+        ("AttackRanged1fast", "Laugh"): Time(
+            time: 0.02,
+        ),
+        ("AttackRanged1fast", "LaughIn"): Time(
+            time: 0.01,
+        ),
+        ("AttackRanged1fast", "LaughOut"): Time(
+            time: 0.1,
+        ),
+        ("AttackRanged1fast", "Spell1"): Time(
+            time: 0.15,
+        ),
+        ("AttackRanged1fast", "Spell3L"): Time(
+            time: 0.1,
+        ),
+        ("AttackRanged1fast", "Spell3R"): Time(
+            time: 0.05,
+        ),
+        ("AttackRanged1fast", "Taunt"): Time(
+            time: 0.05,
+        ),
+        ("AttackRanged1fast", "Unk0xc8c9755"): Time(
+            time: 0.02,
+        ),
+        ("AttackRanged2fast", "Laugh"): Time(
+            time: 0.02,
+        ),
+        ("AttackRanged2fast", "LaughIn"): Time(
+            time: 0.01,
+        ),
+        ("AttackRanged2fast", "LaughOut"): Time(
+            time: 0.1,
+        ),
+        ("AttackRanged2fast", "Spell1"): Time(
+            time: 0.15,
+        ),
+        ("AttackRanged2fast", "Spell3L"): Time(
+            time: 0.1,
+        ),
+        ("AttackRanged2fast", "Spell3R"): Time(
+            time: 0.05,
+        ),
+        ("AttackRanged2fast", "Taunt"): Time(
+            time: 0.05,
+        ),
+        ("AttackRanged2fast", "Unk0xc8c9755"): Time(
             time: 0.02,
         ),
         ("Channel", "Death"): Time(
@@ -1540,6 +1588,12 @@
         ("Respawn", "AttackPassiveFast"): Time(
             time: 0.1,
         ),
+        ("Respawn", "AttackRanged1fast"): Time(
+            time: 0.1,
+        ),
+        ("Respawn", "AttackRanged2fast"): Time(
+            time: 0.1,
+        ),
         ("Respawn", "Channel"): Time(
             time: 0.1,
         ),
@@ -1699,9 +1753,6 @@
         ("Respawn", "Unk0x267704ce"): Time(
             time: 0.1,
         ),
-        ("Respawn", "Unk0x27f4795b"): Time(
-            time: 0.1,
-        ),
         ("Respawn", "Unk0x2b73cead"): Time(
             time: 0.1,
         ),
@@ -1748,9 +1799,6 @@
             time: 0.1,
         ),
         ("Respawn", "Unk0xfa145f61"): Time(
-            time: 0.1,
-        ),
-        ("Respawn", "Unk0xfac29276"): Time(
             time: 0.1,
         ),
         ("Run", "Laugh"): Time(
@@ -2731,30 +2779,6 @@
         ("Unk0x267704ce", "Unk0xc8c9755"): Time(
             time: 0.02,
         ),
-        ("Unk0x27f4795b", "Laugh"): Time(
-            time: 0.02,
-        ),
-        ("Unk0x27f4795b", "LaughIn"): Time(
-            time: 0.01,
-        ),
-        ("Unk0x27f4795b", "LaughOut"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x27f4795b", "Spell1"): Time(
-            time: 0.15,
-        ),
-        ("Unk0x27f4795b", "Spell3L"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x27f4795b", "Spell3R"): Time(
-            time: 0.05,
-        ),
-        ("Unk0x27f4795b", "Taunt"): Time(
-            time: 0.05,
-        ),
-        ("Unk0x27f4795b", "Unk0xc8c9755"): Time(
-            time: 0.02,
-        ),
         ("Unk0x2b73cead", "Laugh"): Time(
             time: 0.02,
         ),
@@ -3401,30 +3425,6 @@
             time: 0.05,
         ),
         ("Unk0xfa145f61", "Unk0xc8c9755"): Time(
-            time: 0.02,
-        ),
-        ("Unk0xfac29276", "Laugh"): Time(
-            time: 0.02,
-        ),
-        ("Unk0xfac29276", "LaughIn"): Time(
-            time: 0.01,
-        ),
-        ("Unk0xfac29276", "LaughOut"): Time(
-            time: 0.1,
-        ),
-        ("Unk0xfac29276", "Spell1"): Time(
-            time: 0.15,
-        ),
-        ("Unk0xfac29276", "Spell3L"): Time(
-            time: 0.1,
-        ),
-        ("Unk0xfac29276", "Spell3R"): Time(
-            time: 0.05,
-        ),
-        ("Unk0xfac29276", "Taunt"): Time(
-            time: 0.05,
-        ),
-        ("Unk0xfac29276", "Unk0xc8c9755"): Time(
             time: 0.02,
         ),
         ("Unk0xfaf598e1", "Laugh"): Time(

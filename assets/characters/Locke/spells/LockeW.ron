@@ -1,9 +1,54 @@
 (
     spellData: Some((
         calculations: Some({
+            "additional_heal": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: None,
+                        coefficient: Some(0.2),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
             "attack_speed": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
+            "damage_restore_amount": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "base_damage_restore_amount",
+                    ),
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: None,
+                        coefficient: Some(1.2),
+                        statFormula: None,
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "decay_time_helper": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "decay_time",
+                    ),
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "time_max_power",
+                    ),
+                ]),
                 multiplier: None,
                 precision: None,
             ),
@@ -13,6 +58,19 @@
                     (
                         type: "CalculationPartNamedDataValue",
                         dataValue: "base_duration",
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
+            "max_healing_threshold": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartStatCoefficient",
+                        stat: None,
+                        coefficient: Some(0.6),
+                        statFormula: None,
                     ),
                 ]),
                 multiplier: None,
@@ -30,64 +88,6 @@
                         stat: None,
                         coefficient: Some(0.0002),
                         statFormula: None,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            "unk_0x35921bc": (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartStatCoefficient",
-                        stat: None,
-                        coefficient: Some(0.6),
-                        statFormula: None,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            "unk_0x7ec943a6": (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartStatCoefficient",
-                        stat: None,
-                        coefficient: Some(0.2),
-                        statFormula: None,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            "unk_0x98c0d8e": (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: "unk_0x6fda3861",
-                    ),
-                    (
-                        type: "CalculationPartStatCoefficient",
-                        stat: None,
-                        coefficient: Some(1.2),
-                        statFormula: None,
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            "unk_0xa375ef54": (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: "decay_time",
-                    ),
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: "unk_0x650cc643",
                     ),
                 ]),
                 multiplier: None,

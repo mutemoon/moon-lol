@@ -19,8 +19,20 @@
         "Attack102AllOut": Clip(
             node_index: 9,
         ),
+        "Attack1AllOut": Sequence(
+            hashes: [
+                "Unk0xc112c052",
+                "Attack102AllOut",
+            ],
+        ),
         "Attack2": Clip(
             node_index: 35,
+        ),
+        "Attack2AllOut": Sequence(
+            hashes: [
+                "Unk0xe79536d3",
+                "Unk0x70951710",
+            ],
         ),
         "Attack3": Clip(
             node_index: 33,
@@ -39,6 +51,12 @@
         ),
         "Crit": Clip(
             node_index: 55,
+        ),
+        "CritAllOut": Sequence(
+            hashes: [
+                "Unk0xe0b7f234",
+                "Unk0xe3b7f6ed",
+            ],
         ),
         "Dance": Sequence(
             hashes: [
@@ -59,6 +77,12 @@
             hashes: [
                 "Idle1Base",
                 "Unk0xd5bc96d1",
+            ],
+        ),
+        "Idle1AllOut": Sequence(
+            hashes: [
+                "Unk0xa05e7c82",
+                "Unk0x9445ccb5",
             ],
         ),
         "Idle1Base": Clip(
@@ -104,6 +128,11 @@
             updater: IsHomeguard,
             true_node: "RunHomeguard",
             false_node: "Unk0xbc1ef3fb",
+        ),
+        "RunAllOut": ConditionBool(
+            updater: IsHomeguard,
+            true_node: "Unk0xaa99e733",
+            false_node: "Unk0xe32c203b",
         ),
         "RunBase": Clip(
             node_index: 109,
@@ -197,6 +226,12 @@
         ),
         "Spell4": Clip(
             node_index: 77,
+        ),
+        "Spell4Attack": Sequence(
+            hashes: [
+                "Unk0x3df11470",
+                "Unk0x40f11929",
+            ],
         ),
         "Spell4B": Clip(
             node_index: 83,
@@ -343,12 +378,6 @@
                 ),
             ],
         ),
-        "Unk0x7760e5dc": Sequence(
-            hashes: [
-                "Unk0xc112c052",
-                "Attack102AllOut",
-            ],
-        ),
         "Unk0x77c57164": Clip(
             node_index: 40,
         ),
@@ -368,12 +397,6 @@
             hashes: [
                 "Unk0xce31c6b4",
                 "Unk0x49d57af7",
-            ],
-        ),
-        "Unk0x85595462": Sequence(
-            hashes: [
-                "Unk0xa05e7c82",
-                "Unk0x9445ccb5",
             ],
         ),
         "Unk0x879f46dc": Clip(
@@ -414,18 +437,6 @@
         ),
         "Unk0x97c6766a": Clip(
             node_index: 58,
-        ),
-        "Unk0x998279af": Sequence(
-            hashes: [
-                "Unk0xe0b7f234",
-                "Unk0xe3b7f6ed",
-            ],
-        ),
-        "Unk0x9be305bf": Sequence(
-            hashes: [
-                "Unk0xe79536d3",
-                "Unk0x70951710",
-            ],
         ),
         "Unk0x9f31813a": ConditionFloat(
             updater: LookAtSpellTargetDistance,
@@ -516,11 +527,6 @@
                     value: 390.0,
                 ),
             ],
-        ),
-        "Unk0xbed5650e": ConditionBool(
-            updater: IsHomeguard,
-            true_node: "Unk0xaa99e733",
-            false_node: "Unk0xe32c203b",
         ),
         "Unk0xbf9da5da": Clip(
             node_index: 84,
@@ -618,12 +624,6 @@
         ),
         "Unk0xf15de069": Clip(
             node_index: 110,
-        ),
-        "Unk0xf413474": Sequence(
-            hashes: [
-                "Unk0x3df11470",
-                "Unk0x40f11929",
-            ],
         ),
         "Unk0xf4ed9371": Clip(
             node_index: 111,
@@ -898,6 +898,12 @@
             time: 0.0,
         ),
         ("Attack2", "Unk0xe79536d3"): Time(
+            time: 0.0,
+        ),
+        ("Attack2AllOut", "AttackPassive"): Time(
+            time: 0.0,
+        ),
+        ("Attack2AllOut", "DanceIn"): Time(
             time: 0.0,
         ),
         ("Attack3", "AttackPassive"): Time(
@@ -1485,6 +1491,9 @@
         ("DanceIn", "Run"): Time(
             time: 0.0,
         ),
+        ("DanceIn", "RunAllOut"): Time(
+            time: 0.0,
+        ),
         ("DanceIn", "RunBase"): Time(
             time: 0.0,
         ),
@@ -1716,9 +1725,6 @@
         ("DanceIn", "Unk0xbc1ef3fb"): Time(
             time: 0.0,
         ),
-        ("DanceIn", "Unk0xbed5650e"): Time(
-            time: 0.0,
-        ),
         ("DanceIn", "Unk0xbf9da5da"): Time(
             time: 0.0,
         ),
@@ -1864,6 +1870,9 @@
             time: 0.0,
         ),
         ("DanceLoop", "Run"): Time(
+            time: 0.0,
+        ),
+        ("DanceLoop", "RunAllOut"): Time(
             time: 0.0,
         ),
         ("DanceLoop", "RunBase"): TransitionClip(
@@ -2062,9 +2071,6 @@
             time: 0.0,
         ),
         ("DanceLoop", "Unk0xbc1ef3fb"): Time(
-            time: 0.0,
-        ),
-        ("DanceLoop", "Unk0xbed5650e"): Time(
             time: 0.0,
         ),
         ("DanceLoop", "Unk0xc0393dec"): Time(
@@ -3100,6 +3106,81 @@
             time: 0.0,
         ),
         ("Run", "Unk0xe79536d3"): Time(
+            time: 0.0,
+        ),
+        ("RunAllOut", "AttackPassive"): Time(
+            time: 0.0,
+        ),
+        ("RunAllOut", "Channel"): Time(
+            time: 0.0,
+        ),
+        ("RunAllOut", "ChannelWndup"): Time(
+            time: 0.1,
+        ),
+        ("RunAllOut", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("RunAllOut", "DanceLoop"): Time(
+            time: 0.0,
+        ),
+        ("RunAllOut", "Laugh"): Time(
+            time: 0.1,
+        ),
+        ("RunAllOut", "Spell1A"): Time(
+            time: 0.1,
+        ),
+        ("RunAllOut", "Spell3Base"): Time(
+            time: 0.1,
+        ),
+        ("RunAllOut", "Spell3Short"): Time(
+            time: 0.1,
+        ),
+        ("RunAllOut", "Unk0x496dd469"): Time(
+            time: 0.0,
+        ),
+        ("RunAllOut", "Unk0x49d57af7"): Time(
+            time: 0.0,
+        ),
+        ("RunAllOut", "Unk0x7ac5761d"): Time(
+            time: 0.1,
+        ),
+        ("RunAllOut", "Unk0x7e35a5de"): Time(
+            time: 0.0,
+        ),
+        ("RunAllOut", "Unk0x8cb5991a"): Time(
+            time: 0.0,
+        ),
+        ("RunAllOut", "Unk0x97c6766a"): Time(
+            time: 0.0,
+        ),
+        ("RunAllOut", "Unk0xa05e7c82"): TransitionClip(
+            clip_name: "Unk0xea6bcd49",
+        ),
+        ("RunAllOut", "Unk0xb6d13578"): Time(
+            time: 0.0,
+        ),
+        ("RunAllOut", "Unk0xc112c052"): Time(
+            time: 0.0,
+        ),
+        ("RunAllOut", "Unk0xccab3bb"): Time(
+            time: 0.0,
+        ),
+        ("RunAllOut", "Unk0xce31c6b4"): Time(
+            time: 0.0,
+        ),
+        ("RunAllOut", "Unk0xdec85220"): Time(
+            time: 0.1,
+        ),
+        ("RunAllOut", "Unk0xe0b7f234"): Time(
+            time: 0.0,
+        ),
+        ("RunAllOut", "Unk0xe3b7f6ed"): Time(
+            time: 0.0,
+        ),
+        ("RunAllOut", "Unk0xe3c2a9d4"): Time(
+            time: 0.0,
+        ),
+        ("RunAllOut", "Unk0xe79536d3"): Time(
             time: 0.0,
         ),
         ("RunBase", "AttackPassive"): Time(
@@ -4387,6 +4468,12 @@
             time: 0.0,
         ),
         ("Spell4", "Unk0xe79536d3"): Time(
+            time: 0.0,
+        ),
+        ("Spell4Attack", "Unk0x496dd469"): Time(
+            time: 0.0,
+        ),
+        ("Spell4Attack", "Unk0xc112c052"): Time(
             time: 0.0,
         ),
         ("Spell4B", "AttackPassive"): Time(
@@ -7056,6 +7143,9 @@
         ("Unk0x9735497f", "Laugh"): Time(
             time: 0.1,
         ),
+        ("Unk0x9735497f", "RunAllOut"): Time(
+            time: 0.3,
+        ),
         ("Unk0x9735497f", "Spell1A"): Time(
             time: 0.1,
         ),
@@ -7091,9 +7181,6 @@
         ),
         ("Unk0x9735497f", "Unk0xb9bc1483"): Time(
             time: 0.0,
-        ),
-        ("Unk0x9735497f", "Unk0xbed5650e"): Time(
-            time: 0.3,
         ),
         ("Unk0x9735497f", "Unk0xc112c052"): Time(
             time: 0.0,
@@ -7198,12 +7285,6 @@
             time: 0.0,
         ),
         ("Unk0x97c6766a", "Unk0xe79536d3"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x9be305bf", "AttackPassive"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x9be305bf", "DanceIn"): Time(
             time: 0.0,
         ),
         ("Unk0x9f31813a", "Channel"): Time(
@@ -8184,81 +8265,6 @@
         ("Unk0xbc1ef3fb", "Unk0xe79536d3"): Time(
             time: 0.0,
         ),
-        ("Unk0xbed5650e", "AttackPassive"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xbed5650e", "Channel"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xbed5650e", "ChannelWndup"): Time(
-            time: 0.1,
-        ),
-        ("Unk0xbed5650e", "DanceIn"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xbed5650e", "DanceLoop"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xbed5650e", "Laugh"): Time(
-            time: 0.1,
-        ),
-        ("Unk0xbed5650e", "Spell1A"): Time(
-            time: 0.1,
-        ),
-        ("Unk0xbed5650e", "Spell3Base"): Time(
-            time: 0.1,
-        ),
-        ("Unk0xbed5650e", "Spell3Short"): Time(
-            time: 0.1,
-        ),
-        ("Unk0xbed5650e", "Unk0x496dd469"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xbed5650e", "Unk0x49d57af7"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xbed5650e", "Unk0x7ac5761d"): Time(
-            time: 0.1,
-        ),
-        ("Unk0xbed5650e", "Unk0x7e35a5de"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xbed5650e", "Unk0x8cb5991a"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xbed5650e", "Unk0x97c6766a"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xbed5650e", "Unk0xa05e7c82"): TransitionClip(
-            clip_name: "Unk0xea6bcd49",
-        ),
-        ("Unk0xbed5650e", "Unk0xb6d13578"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xbed5650e", "Unk0xc112c052"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xbed5650e", "Unk0xccab3bb"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xbed5650e", "Unk0xce31c6b4"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xbed5650e", "Unk0xdec85220"): Time(
-            time: 0.1,
-        ),
-        ("Unk0xbed5650e", "Unk0xe0b7f234"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xbed5650e", "Unk0xe3b7f6ed"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xbed5650e", "Unk0xe3c2a9d4"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xbed5650e", "Unk0xe79536d3"): Time(
-            time: 0.0,
-        ),
         ("Unk0xbf9da5da", "Channel"): Time(
             time: 0.0,
         ),
@@ -9159,6 +9165,9 @@
         ("Unk0xe0b7f234", "Run"): Time(
             time: 0.0,
         ),
+        ("Unk0xe0b7f234", "RunAllOut"): Time(
+            time: 0.0,
+        ),
         ("Unk0xe0b7f234", "RunBase"): Time(
             time: 0.0,
         ),
@@ -9346,9 +9355,6 @@
             time: 0.0,
         ),
         ("Unk0xe0b7f234", "Unk0xbc1ef3fb"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xe0b7f234", "Unk0xbed5650e"): Time(
             time: 0.0,
         ),
         ("Unk0xe0b7f234", "Unk0xc0393dec"): Time(
@@ -9970,12 +9976,6 @@
             time: 0.0,
         ),
         ("Unk0xf15de069", "Unk0xe79536d3"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xf413474", "Unk0x496dd469"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xf413474", "Unk0xc112c052"): Time(
             time: 0.0,
         ),
         ("Unk0xf4ed9371", "AttackPassive"): Time(

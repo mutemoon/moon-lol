@@ -23,12 +23,12 @@
                 formulaParts: Some([
                     (
                         type: "CalculationPartNamedDataValue",
-                        dataValue: "unk_0x6318e36f",
+                        dataValue: "base_health_cost",
                     ),
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(2),
-                        dataValue: "unk_0xfa4c3946",
+                        dataValue: "health_cost_ad_ratio",
                     ),
                 ]),
                 multiplier: None,

@@ -45,7 +45,7 @@ fn on_key_m(
     keyboard_input: Res<ButtonInput<KeyCode>>,
     res_grid: Option<Res<ResourceGrid>>,
     assets_grid: Res<Assets<ConfigNavigationGrid>>,
-    mut camera: Query<&mut CameraState, With<Camera3d>>,
+    mut camera: Query<&mut CameraState>,
 ) {
     if keyboard_input.just_pressed(KeyCode::KeyM) {
         let Some(res_grid) = res_grid else {

@@ -16,7 +16,7 @@
                 )),
                 precision: None,
             ),
-            "unk_0x929bc6f6": (
+            "bonus_monster_dmg": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,

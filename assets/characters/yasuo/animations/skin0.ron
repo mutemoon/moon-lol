@@ -36,9 +36,15 @@
         ),
         "Dance": Sequence(
             hashes: [
-                "Unk0x4e29720f",
-                "Unk0x18d5b1ae",
+                "DanceInRaw",
+                "DanceLoopRaw",
             ],
+        ),
+        "DanceInRaw": Clip(
+            node_index: 15,
+        ),
+        "DanceLoopRaw": Clip(
+            node_index: 5,
         ),
         "Death": Clip(
             node_index: 43,
@@ -158,9 +164,6 @@
         "Unk0x138ce20": Clip(
             node_index: 1,
         ),
-        "Unk0x18d5b1ae": Clip(
-            node_index: 5,
-        ),
         "Unk0x2116d5e1": Sequence(
             hashes: [
                 "Unk0x4f62db84",
@@ -208,9 +211,6 @@
         ),
         "Unk0x49b908d9": Clip(
             node_index: 14,
-        ),
-        "Unk0x4e29720f": Clip(
-            node_index: 15,
         ),
         "Unk0x4f00d30c": Clip(
             node_index: 16,
@@ -413,6 +413,12 @@
             time: 0.0,
         ),
         ("Dance", "Death"): Time(
+            time: 0.0,
+        ),
+        ("DanceInRaw", "Death"): Time(
+            time: 0.0,
+        ),
+        ("DanceLoopRaw", "Death"): Time(
             time: 0.0,
         ),
         ("Death", "ChannelWndup"): Time(
@@ -709,9 +715,6 @@
         ("Unk0x138ce20", "Death"): Time(
             time: 0.0,
         ),
-        ("Unk0x18d5b1ae", "Death"): Time(
-            time: 0.0,
-        ),
         ("Unk0x2116d5e1", "Death"): Time(
             time: 0.0,
         ),
@@ -765,9 +768,6 @@
         ),
         ("Unk0x49b908d9", "Spell1Dash"): Time(
             time: 0.1,
-        ),
-        ("Unk0x4e29720f", "Death"): Time(
-            time: 0.0,
         ),
         ("Unk0x4f00d30c", "ChannelWndup"): Time(
             time: 0.1,

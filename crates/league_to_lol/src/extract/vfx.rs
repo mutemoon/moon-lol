@@ -9,7 +9,7 @@ use league_core::extract::{
 use lol_base::particle::{
     ConfigVfxDistortionDefinition, ConfigVfxEmitterDefinition, ConfigVfxMaterialOverride,
     ConfigVfxPrimitive, ConfigVfxShape, ConfigVfxSystemDefinition, ConfigVfxTextureMult,
-    ProbabilityCurve, Sampler, StochasticSampler,
+    ProbabilityCurve, Sampler, StochasticSampler, VfxTexture,
 };
 
 fn convert_sampler_float(value: &ValueFloat, default: f32) -> Sampler<f32> {
@@ -301,35 +301,54 @@ fn convert_primitive(primitive: &Option<EnumVfxPrimitive>) -> Option<ConfigVfxPr
 
 fn convert_distortion(
     dist: &Option<VfxDistortionDefinitionData>,
+    load_texture: &mut dyn FnMut(&str) -> VfxTexture,
 ) -> Option<ConfigVfxDistortionDefinition> {
     dist.as_ref().map(|d| ConfigVfxDistortionDefinition {
         distortion: d.distortion,
         distortion_mode: d.distortion_mode,
-        normal_map_texture: d.normal_map_texture.clone(),
+        normal_map_texture: d
+            .normal_map_texture
+            .as_deref()
+            .filter(|p| !p.is_empty())
+            .map(|p| load_texture(p)),
     })
 }
 
 fn convert_texture_mult(
     mult: &Option<VfxTextureMultDefinitionData>,
+    load_texture: &mut dyn FnMut(&str) -> VfxTexture,
 ) -> Option<ConfigVfxTextureMult> {
     mult.as_ref().map(|m| ConfigVfxTextureMult {
-        texture_mult: m.texture_mult.clone(),
+        texture_mult: m
+            .texture_mult
+            .as_deref()
+            .filter(|p| !p.is_empty())
+            .map(|p| load_texture(p)),
     })
 }
 
 fn convert_material_override(
     overrides: &Option<Vec<VfxMaterialOverrideDefinitionData>>,
+    load_texture: &mut dyn FnMut(&str) -> VfxTexture,
 ) -> Option<Vec<ConfigVfxMaterialOverride>> {
     overrides.as_ref().map(|list| {
         list.iter()
             .map(|o| ConfigVfxMaterialOverride {
-                base_texture: o.base_texture.clone(),
+                base_texture: o
+                    .base_texture
+                    .as_deref()
+                    .filter(|p| !p.is_empty())
+                    .map(|p| load_texture(p)),
             })
             .collect()
     })
 }
 
-pub fn convert_emitter(def: &VfxEmitterDefinitionData) -> ConfigVfxEmitterDefinition {
+/// 转换发射器定义；`load_texture` 负责提取贴图并返回仅含路径的 `VfxTexture`（handle 由 loader 运行时填充）
+pub fn convert_emitter(
+    def: &VfxEmitterDefinitionData,
+    load_texture: &mut dyn FnMut(&str) -> VfxTexture,
+) -> ConfigVfxEmitterDefinition {
     ConfigVfxEmitterDefinition {
         emitter_name: def.emitter_name.clone(),
         lifetime: def.lifetime,
@@ -347,36 +366,50 @@ pub fn convert_emitter(def: &VfxEmitterDefinitionData) -> ConfigVfxEmitterDefini
         rate: convert_stochastic_float(&def.rate, 1.0),
         emitter_position: convert_stochastic_vector3(&def.emitter_position, Vec3::ZERO),
 
-        distortion_definition: convert_distortion(&def.distortion_definition),
+        distortion_definition: convert_distortion(&def.distortion_definition, load_texture),
         num_frames: def.num_frames,
         blend_mode: def.blend_mode,
         material_override_definitions: convert_material_override(
             &def.material_override_definitions,
+            load_texture,
         ),
         primitive: convert_primitive(&def.primitive),
         is_single_particle: def.is_single_particle,
         is_uniform_scale: def.is_uniform_scale,
         is_random_start_frame: def.is_random_start_frame,
         is_local_orientation: def.is_local_orientation,
-        texture: def.texture.clone(),
-        particle_color_texture: def.particle_color_texture.clone(),
+        texture: def
+            .texture
+            .as_deref()
+            .filter(|p| !p.is_empty())
+            .map(|p| load_texture(p)),
+        particle_color_texture: def
+            .particle_color_texture
+            .as_deref()
+            .filter(|p| !p.is_empty())
+            .map(|p| load_texture(p)),
         tex_div: def.tex_div,
         slice_technique_range: def.slice_technique_range,
-        texture_mult: convert_texture_mult(&def.texture_mult),
+        texture_mult: convert_texture_mult(&def.texture_mult, load_texture),
         alpha_ref: def.alpha_ref,
         spawn_shape: convert_shape(&def.spawn_shape),
     }
 }
 
-pub fn convert_system_definition(def: &VfxSystemDefinitionData) -> ConfigVfxSystemDefinition {
-    let complex = def
-        .complex_emitter_definition_data
-        .as_ref()
-        .map(|list| list.iter().map(convert_emitter).collect());
-    let simple = def
-        .simple_emitter_definition_data
-        .as_ref()
-        .map(|list| list.iter().map(convert_emitter).collect());
+pub fn convert_system_definition(
+    def: &VfxSystemDefinitionData,
+    load_texture: &mut dyn FnMut(&str) -> VfxTexture,
+) -> ConfigVfxSystemDefinition {
+    let complex = def.complex_emitter_definition_data.as_ref().map(|list| {
+        list.iter()
+            .map(|e| convert_emitter(e, load_texture))
+            .collect()
+    });
+    let simple = def.simple_emitter_definition_data.as_ref().map(|list| {
+        list.iter()
+            .map(|e| convert_emitter(e, load_texture))
+            .collect()
+    });
     ConfigVfxSystemDefinition {
         particle_name: def.particle_name.clone(),
         particle_path: def.particle_path.clone(),

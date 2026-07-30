@@ -3,7 +3,7 @@ use bevy::platform::collections::HashSet;
 use bevy::prelude::*;
 use lol_core::map::MapGeometry;
 
-use crate::particle::environment::unlit_decal::ParticleMaterialUnlitDecal;
+use crate::particle::particle::dynamic::ParticleMaterialDynamic;
 
 #[derive(Component, Default)]
 pub struct ParticleDecal {
@@ -17,7 +17,7 @@ pub fn update_decal_intersections(
     mut commands: Commands,
     mut q_decals: Query<(
         Entity,
-        &MeshMaterial3d<ParticleMaterialUnlitDecal>,
+        &MeshMaterial3d<ParticleMaterialDynamic>,
         &mut ParticleDecal,
     )>,
     q_map_geo: Query<(Entity, &Mesh3d, &MapGeometry)>,

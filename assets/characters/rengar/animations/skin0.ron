@@ -64,10 +64,16 @@
         "Laugh": Clip(
             node_index: 23,
         ),
+        "RawLionGuyRecall": Clip(
+            node_index: 12,
+        ),
+        "RawLionGuyRecallIdle": Clip(
+            node_index: 13,
+        ),
         "Recall": Sequence(
             hashes: [
-                "Unk0x602b063d",
-                "Unk0x6208af50",
+                "RawLionGuyRecall",
+                "RawLionGuyRecallIdle",
             ],
         ),
         "Run": Clip(
@@ -122,12 +128,6 @@
         ),
         "Taunt": Clip(
             node_index: 27,
-        ),
-        "Unk0x602b063d": Clip(
-            node_index: 12,
-        ),
-        "Unk0x6208af50": Clip(
-            node_index: 13,
         ),
         "Unk0x713ed5b5": Clip(
             node_index: 15,
@@ -234,6 +234,24 @@
             time: 0.0,
         ),
         ("Laugh", "Spell1"): Time(
+            time: 0.025,
+        ),
+        ("RawLionGuyRecall", "Death"): Time(
+            time: 0.0,
+        ),
+        ("RawLionGuyRecall", "RawLionGuyRecall"): Time(
+            time: 0.0,
+        ),
+        ("RawLionGuyRecall", "Spell1"): Time(
+            time: 0.025,
+        ),
+        ("RawLionGuyRecallIdle", "Death"): Time(
+            time: 0.0,
+        ),
+        ("RawLionGuyRecallIdle", "RawLionGuyRecallIdle"): Time(
+            time: 0.0,
+        ),
+        ("RawLionGuyRecallIdle", "Spell1"): Time(
             time: 0.025,
         ),
         ("Recall", "Attack1"): Time(
@@ -426,24 +444,6 @@
             time: 0.025,
         ),
         ("Taunt", "Taunt"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x602b063d", "Death"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x602b063d", "Spell1"): Time(
-            time: 0.025,
-        ),
-        ("Unk0x602b063d", "Unk0x602b063d"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x6208af50", "Death"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x6208af50", "Spell1"): Time(
-            time: 0.025,
-        ),
-        ("Unk0x6208af50", "Unk0x6208af50"): Time(
             time: 0.0,
         ),
         ("Unk0x713ed5b5", "Attack1"): Time(

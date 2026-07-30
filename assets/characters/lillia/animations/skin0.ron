@@ -21,8 +21,14 @@
         "Attack1Idle": Clip(
             node_index: 50,
         ),
+        "Attack1Run180": Clip(
+            node_index: 19,
+        ),
         "Attack1Run90": Clip(
             node_index: 34,
+        ),
+        "Attack1ShortRun180": Clip(
+            node_index: 62,
         ),
         "Attack1ShortRun90": Clip(
             node_index: 32,
@@ -307,7 +313,7 @@
         "Unk0x2318c0bf": Parametric(
             pairs: [
                 (
-                    key: "Unk0x5b784351",
+                    key: "Attack1Run180",
                     value: -179.0,
                 ),
                 (
@@ -323,24 +329,15 @@
                     value: 90.0,
                 ),
                 (
-                    key: "Unk0x5b6b128e",
+                    key: "Attack1Run180",
                     value: 179.0,
                 ),
             ],
-        ),
-        "Unk0x5b6b128e": Clip(
-            node_index: 18,
-        ),
-        "Unk0x5b784351": Clip(
-            node_index: 19,
         ),
         "Unk0x950446a9": ConditionBool(
             updater: IsMoving,
             true_node: "Unk0xbf399072",
             false_node: "Unk0xbf756534",
-        ),
-        "Unk0xa1cc36ef": Clip(
-            node_index: 31,
         ),
         "Unk0xaebaad2c": Clip(
             node_index: 39,
@@ -351,7 +348,7 @@
         "Unk0xbf399072": Parametric(
             pairs: [
                 (
-                    key: "Unk0xfe3c4866",
+                    key: "Attack1ShortRun180",
                     value: -179.0,
                 ),
                 (
@@ -367,16 +364,13 @@
                     value: 90.0,
                 ),
                 (
-                    key: "Unk0xa1cc36ef",
+                    key: "Attack1ShortRun180",
                     value: 179.0,
                 ),
             ],
         ),
         "Unk0xbf756534": Clip(
             node_index: 48,
-        ),
-        "Unk0xfe3c4866": Clip(
-            node_index: 62,
         ),
     },
     blend_data: {
@@ -428,6 +422,24 @@
         ("Attack1Idle", "Unk0xbf756534"): Time(
             time: 0.1,
         ),
+        ("Attack1Run180", "Attack1Idle"): Time(
+            time: 0.1,
+        ),
+        ("Attack1Run180", "JokeIn"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Run180", "JokeLoop"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Run180", "RunHomeguardIn"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Run180", "RunPassive90"): Time(
+            time: 0.05,
+        ),
+        ("Attack1Run180", "Unk0xbf756534"): Time(
+            time: 0.1,
+        ),
         ("Attack1Run90", "Attack1Idle"): Time(
             time: 0.1,
         ),
@@ -444,6 +456,21 @@
             time: 0.05,
         ),
         ("Attack1Run90", "Unk0xbf756534"): Time(
+            time: 0.1,
+        ),
+        ("Attack1ShortRun180", "Attack1Idle"): Time(
+            time: 0.1,
+        ),
+        ("Attack1ShortRun180", "JokeIn"): Time(
+            time: 0.0,
+        ),
+        ("Attack1ShortRun180", "JokeLoop"): Time(
+            time: 0.0,
+        ),
+        ("Attack1ShortRun180", "RunHomeguardIn"): Time(
+            time: 0.0,
+        ),
+        ("Attack1ShortRun180", "Unk0xbf756534"): Time(
             time: 0.1,
         ),
         ("Attack1ShortRun90", "Attack1Idle"): Time(
@@ -1880,42 +1907,6 @@
         ("Unk0x527d3bf1", "Death"): Time(
             time: 0.0,
         ),
-        ("Unk0x5b6b128e", "Attack1Idle"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x5b6b128e", "JokeIn"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x5b6b128e", "JokeLoop"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x5b6b128e", "RunHomeguardIn"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x5b6b128e", "RunPassive90"): Time(
-            time: 0.05,
-        ),
-        ("Unk0x5b6b128e", "Unk0xbf756534"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x5b784351", "Attack1Idle"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x5b784351", "JokeIn"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x5b784351", "JokeLoop"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x5b784351", "RunHomeguardIn"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x5b784351", "RunPassive90"): Time(
-            time: 0.05,
-        ),
-        ("Unk0x5b784351", "Unk0xbf756534"): Time(
-            time: 0.1,
-        ),
         ("Unk0x6be72447", "Death"): Time(
             time: 0.0,
         ),
@@ -1932,21 +1923,6 @@
             time: 0.0,
         ),
         ("Unk0x950446a9", "Unk0xbf756534"): Time(
-            time: 0.1,
-        ),
-        ("Unk0xa1cc36ef", "Attack1Idle"): Time(
-            time: 0.1,
-        ),
-        ("Unk0xa1cc36ef", "JokeIn"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xa1cc36ef", "JokeLoop"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xa1cc36ef", "RunHomeguardIn"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xa1cc36ef", "Unk0xbf756534"): Time(
             time: 0.1,
         ),
         ("Unk0xaebaad2c", "Attack1Idle"): Time(
@@ -2025,21 +2001,6 @@
             time: 0.0,
         ),
         ("Unk0xbf756534", "Unk0xbf756534"): Time(
-            time: 0.1,
-        ),
-        ("Unk0xfe3c4866", "Attack1Idle"): Time(
-            time: 0.1,
-        ),
-        ("Unk0xfe3c4866", "JokeIn"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xfe3c4866", "JokeLoop"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xfe3c4866", "RunHomeguardIn"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xfe3c4866", "Unk0xbf756534"): Time(
             time: 0.1,
         ),
     },

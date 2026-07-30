@@ -10,7 +10,7 @@
                 )),
                 precision: None,
             ),
-            "unk_0x60aa666f": (
+            "health_cost_percent": (
                 type: "CalculationSpell",
                 formulaParts: Some([]),
                 multiplier: None,

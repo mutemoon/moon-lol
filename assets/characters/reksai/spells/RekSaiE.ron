@@ -1,6 +1,22 @@
 (
     spellData: Some((
         calculations: Some({
+            "base_damage_calculation": (
+                type: "CalculationSpell",
+                formulaParts: Some([
+                    (
+                        type: "CalculationPartNamedDataValue",
+                        dataValue: "base_damage",
+                    ),
+                    (
+                        type: "CalculationPartStatNamedDataValue",
+                        stat: Some(2),
+                        dataValue: "bonus_ad",
+                    ),
+                ]),
+                multiplier: None,
+                precision: None,
+            ),
             "dash_speed": (
                 type: "CalculationSpell",
                 formulaParts: Some([
@@ -12,22 +28,6 @@
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(7),
                         dataValue: "dash_speed_mod",
-                    ),
-                ]),
-                multiplier: None,
-                precision: None,
-            ),
-            "unk_0x6178e02": (
-                type: "CalculationSpell",
-                formulaParts: Some([
-                    (
-                        type: "CalculationPartNamedDataValue",
-                        dataValue: "base_damage",
-                    ),
-                    (
-                        type: "CalculationPartStatNamedDataValue",
-                        stat: Some(2),
-                        dataValue: "bonus_ad",
                     ),
                 ]),
                 multiplier: None,

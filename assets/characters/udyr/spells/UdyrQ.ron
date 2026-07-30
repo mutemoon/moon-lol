@@ -87,7 +87,7 @@
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(12),
-                        dataValue: "unk_0x877e2117",
+                        dataValue: "on_hit_bonus_hp_ratio",
                     ),
                 ]),
                 multiplier: None,

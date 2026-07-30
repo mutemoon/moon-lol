@@ -37,7 +37,7 @@
         "Idle1": Selector(
             probably_nodes: [
                 (
-                    key: "Unk0xba9fda17",
+                    key: "RawIdle1",
                     value: 70.0,
                 ),
                 (
@@ -54,6 +54,9 @@
         ),
         "Laugh": Clip(
             node_index: 13,
+        ),
+        "RawIdle1": Clip(
+            node_index: 14,
         ),
         "Recall": Sequence(
             hashes: [
@@ -102,9 +105,6 @@
         "Unk0xb4dcde19": Clip(
             node_index: 11,
         ),
-        "Unk0xba9fda17": Clip(
-            node_index: 14,
-        ),
         "Unk0xbc9fdd3d": Clip(
             node_index: 16,
         ),
@@ -116,11 +116,11 @@
         ("Attack1", "Death"): Time(
             time: 0.0,
         ),
+        ("Attack1", "RawIdle1"): Time(
+            time: 0.4,
+        ),
         ("Attack1", "Spell1"): Time(
             time: 0.0,
-        ),
-        ("Attack1", "Unk0xba9fda17"): Time(
-            time: 0.4,
         ),
         ("Attack1", "Unk0xbc9fdd3d"): Time(
             time: 0.4,
@@ -128,11 +128,11 @@
         ("Attack2", "Death"): Time(
             time: 0.0,
         ),
+        ("Attack2", "RawIdle1"): Time(
+            time: 0.4,
+        ),
         ("Attack2", "Spell1"): Time(
             time: 0.0,
-        ),
-        ("Attack2", "Unk0xba9fda17"): Time(
-            time: 0.4,
         ),
         ("Attack2", "Unk0xbc9fdd3d"): Time(
             time: 0.4,
@@ -140,11 +140,11 @@
         ("Channel", "Death"): Time(
             time: 0.0,
         ),
+        ("Channel", "RawIdle1"): Time(
+            time: 0.4,
+        ),
         ("Channel", "Spell1"): Time(
             time: 0.0,
-        ),
-        ("Channel", "Unk0xba9fda17"): Time(
-            time: 0.4,
         ),
         ("Channel", "Unk0xbc9fdd3d"): Time(
             time: 0.4,
@@ -152,11 +152,11 @@
         ("ChannelWndup", "Death"): Time(
             time: 0.0,
         ),
+        ("ChannelWndup", "RawIdle1"): Time(
+            time: 0.4,
+        ),
         ("ChannelWndup", "Spell1"): Time(
             time: 0.0,
-        ),
-        ("ChannelWndup", "Unk0xba9fda17"): Time(
-            time: 0.4,
         ),
         ("ChannelWndup", "Unk0xbc9fdd3d"): Time(
             time: 0.4,
@@ -164,11 +164,11 @@
         ("Crit", "Death"): Time(
             time: 0.0,
         ),
+        ("Crit", "RawIdle1"): Time(
+            time: 0.4,
+        ),
         ("Crit", "Spell1"): Time(
             time: 0.0,
-        ),
-        ("Crit", "Unk0xba9fda17"): Time(
-            time: 0.4,
         ),
         ("Crit", "Unk0xbc9fdd3d"): Time(
             time: 0.4,
@@ -203,6 +203,9 @@
         ("Dance", "Laugh"): Time(
             time: 0.5,
         ),
+        ("Dance", "RawIdle1"): Time(
+            time: 0.5,
+        ),
         ("Dance", "RunFast"): Time(
             time: 0.5,
         ),
@@ -212,20 +215,17 @@
         ("Dance", "Taunt"): Time(
             time: 0.5,
         ),
-        ("Dance", "Unk0xba9fda17"): Time(
-            time: 0.5,
-        ),
         ("Dance", "Unk0xbc9fdd3d"): Time(
             time: 0.5,
         ),
         ("Death", "Death"): Time(
             time: 0.0,
         ),
+        ("Death", "RawIdle1"): Time(
+            time: 0.4,
+        ),
         ("Death", "Spell1"): Time(
             time: 0.0,
-        ),
-        ("Death", "Unk0xba9fda17"): Time(
-            time: 0.4,
         ),
         ("Death", "Unk0xbc9fdd3d"): Time(
             time: 0.4,
@@ -233,11 +233,11 @@
         ("Idle1", "Death"): Time(
             time: 0.0,
         ),
+        ("Idle1", "RawIdle1"): Time(
+            time: 0.4,
+        ),
         ("Idle1", "Spell1"): Time(
             time: 0.0,
-        ),
-        ("Idle1", "Unk0xba9fda17"): Time(
-            time: 0.4,
         ),
         ("Idle1", "Unk0xbc9fdd3d"): Time(
             time: 0.4,
@@ -245,11 +245,11 @@
         ("IdleIn", "Death"): Time(
             time: 0.0,
         ),
+        ("IdleIn", "RawIdle1"): Time(
+            time: 0.1,
+        ),
         ("IdleIn", "Spell1"): Time(
             time: 0.0,
-        ),
-        ("IdleIn", "Unk0xba9fda17"): Time(
-            time: 0.1,
         ),
         ("IdleIn", "Unk0xbc9fdd3d"): Time(
             time: 0.1,
@@ -257,11 +257,11 @@
         ("Joke", "Death"): Time(
             time: 0.0,
         ),
+        ("Joke", "RawIdle1"): Time(
+            time: 0.4,
+        ),
         ("Joke", "Spell1"): Time(
             time: 0.0,
-        ),
-        ("Joke", "Unk0xba9fda17"): Time(
-            time: 0.4,
         ),
         ("Joke", "Unk0xbc9fdd3d"): Time(
             time: 0.4,
@@ -269,23 +269,35 @@
         ("Laugh", "Death"): Time(
             time: 0.0,
         ),
+        ("Laugh", "RawIdle1"): Time(
+            time: 0.4,
+        ),
         ("Laugh", "Spell1"): Time(
             time: 0.0,
         ),
-        ("Laugh", "Unk0xba9fda17"): Time(
+        ("Laugh", "Unk0xbc9fdd3d"): Time(
             time: 0.4,
         ),
-        ("Laugh", "Unk0xbc9fdd3d"): Time(
+        ("RawIdle1", "Death"): Time(
+            time: 0.0,
+        ),
+        ("RawIdle1", "RawIdle1"): Time(
+            time: 0.4,
+        ),
+        ("RawIdle1", "Spell1"): Time(
+            time: 0.0,
+        ),
+        ("RawIdle1", "Unk0xbc9fdd3d"): Time(
             time: 0.4,
         ),
         ("Run", "Death"): Time(
             time: 0.0,
         ),
+        ("Run", "RawIdle1"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
         ("Run", "Spell1"): Time(
             time: 0.1,
-        ),
-        ("Run", "Unk0xba9fda17"): TransitionClip(
-            clip_name: "IdleIn",
         ),
         ("Run", "Unk0xbc9fdd3d"): TransitionClip(
             clip_name: "IdleIn",
@@ -293,11 +305,11 @@
         ("RunFast", "Death"): Time(
             time: 0.0,
         ),
+        ("RunFast", "RawIdle1"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
         ("RunFast", "Spell1"): Time(
             time: 0.0,
-        ),
-        ("RunFast", "Unk0xba9fda17"): TransitionClip(
-            clip_name: "IdleIn",
         ),
         ("RunFast", "Unk0xbc9fdd3d"): TransitionClip(
             clip_name: "IdleIn",
@@ -305,14 +317,14 @@
         ("RunWalk", "Death"): Time(
             time: 0.0,
         ),
+        ("RunWalk", "RawIdle1"): TransitionClip(
+            clip_name: "IdleIn",
+        ),
         ("RunWalk", "RunWalk"): Time(
             time: 0.0,
         ),
         ("RunWalk", "Spell1"): Time(
             time: 0.0,
-        ),
-        ("RunWalk", "Unk0xba9fda17"): TransitionClip(
-            clip_name: "IdleIn",
         ),
         ("RunWalk", "Unk0xbc9fdd3d"): TransitionClip(
             clip_name: "IdleIn",
@@ -350,6 +362,9 @@
         ("Spell1", "Laugh"): Time(
             time: 0.1,
         ),
+        ("Spell1", "RawIdle1"): Time(
+            time: 0.1,
+        ),
         ("Spell1", "Run"): TransitionClip(
             clip_name: "Spell1ToRun",
         ),
@@ -375,9 +390,6 @@
             time: 0.1,
         ),
         ("Spell1", "Unk0x0"): Time(
-            time: 0.1,
-        ),
-        ("Spell1", "Unk0xba9fda17"): Time(
             time: 0.1,
         ),
         ("Spell1", "Unk0xbc9fdd3d"): Time(
@@ -410,35 +422,23 @@
         ("Taunt", "Death"): Time(
             time: 0.0,
         ),
+        ("Taunt", "RawIdle1"): Time(
+            time: 0.4,
+        ),
         ("Taunt", "Spell1"): Time(
             time: 0.0,
         ),
-        ("Taunt", "Unk0xba9fda17"): Time(
-            time: 0.4,
-        ),
         ("Taunt", "Unk0xbc9fdd3d"): Time(
-            time: 0.4,
-        ),
-        ("Unk0xba9fda17", "Death"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xba9fda17", "Spell1"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xba9fda17", "Unk0xba9fda17"): Time(
-            time: 0.4,
-        ),
-        ("Unk0xba9fda17", "Unk0xbc9fdd3d"): Time(
             time: 0.4,
         ),
         ("Unk0xbc9fdd3d", "Death"): Time(
             time: 0.0,
         ),
+        ("Unk0xbc9fdd3d", "RawIdle1"): Time(
+            time: 0.4,
+        ),
         ("Unk0xbc9fdd3d", "Spell1"): Time(
             time: 0.0,
-        ),
-        ("Unk0xbc9fdd3d", "Unk0xba9fda17"): Time(
-            time: 0.4,
         ),
         ("Unk0xbc9fdd3d", "Unk0xbc9fdd3d"): Time(
             time: 0.4,

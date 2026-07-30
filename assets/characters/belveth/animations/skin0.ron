@@ -68,8 +68,40 @@
                 ),
             ],
         ),
+        "AttackFast1ToRun": Parametric(
+            pairs: [
+                (
+                    key: "Unk0xf66b7cca",
+                    value: -90.0,
+                ),
+                (
+                    key: "Unk0x7ebfdc59",
+                    value: 0.0,
+                ),
+                (
+                    key: "Unk0xfb19522a",
+                    value: 90.0,
+                ),
+            ],
+        ),
         "AttackFast1b": Clip(
             node_index: 52,
+        ),
+        "AttackFast2ToRun": Parametric(
+            pairs: [
+                (
+                    key: "Unk0x265b8afb",
+                    value: -55.0,
+                ),
+                (
+                    key: "Unk0x59472444",
+                    value: 0.0,
+                ),
+                (
+                    key: "Unk0x94ec729d",
+                    value: 55.0,
+                ),
+            ],
         ),
         "AttackFast2a": Clip(
             node_index: 44,
@@ -378,22 +410,6 @@
         "Unk0x440f8252": Clip(
             node_index: 22,
         ),
-        "Unk0x44626a9e": Parametric(
-            pairs: [
-                (
-                    key: "Unk0xf66b7cca",
-                    value: -90.0,
-                ),
-                (
-                    key: "Unk0x7ebfdc59",
-                    value: 0.0,
-                ),
-                (
-                    key: "Unk0xfb19522a",
-                    value: 90.0,
-                ),
-            ],
-        ),
         "Unk0x4a06ec3a": Clip(
             node_index: 23,
         ),
@@ -681,22 +697,6 @@
         "Unk0xcddf51bd": Clip(
             node_index: 98,
         ),
-        "Unk0xcfd587ab": Parametric(
-            pairs: [
-                (
-                    key: "Unk0x265b8afb",
-                    value: -55.0,
-                ),
-                (
-                    key: "Unk0x59472444",
-                    value: 0.0,
-                ),
-                (
-                    key: "Unk0x94ec729d",
-                    value: 55.0,
-                ),
-            ],
-        ),
         "Unk0xd1391269": Clip(
             node_index: 99,
         ),
@@ -969,10 +969,10 @@
             time: 0.0,
         ),
         ("AttackFast1b", "Idle1Base"): TransitionClip(
-            clip_name: "Unk0x44626a9e",
+            clip_name: "AttackFast1ToRun",
         ),
         ("AttackFast1b", "Idle1Var1"): TransitionClip(
-            clip_name: "Unk0x44626a9e",
+            clip_name: "AttackFast1ToRun",
         ),
         ("AttackFast1b", "Joke"): Time(
             time: 0.0,
@@ -990,7 +990,7 @@
             time: 0.0,
         ),
         ("AttackFast1b", "Unk0x12f27f34"): TransitionClip(
-            clip_name: "Unk0x44626a9e",
+            clip_name: "AttackFast1ToRun",
         ),
         ("AttackFast1b", "Unk0x2799ceb9"): Time(
             time: 0.0,
@@ -1002,30 +1002,69 @@
             time: 0.0,
         ),
         ("AttackFast1b", "Unk0x440f8252"): TransitionClip(
-            clip_name: "Unk0x44626a9e",
+            clip_name: "AttackFast1ToRun",
         ),
         ("AttackFast1b", "Unk0x8f42fa22"): Time(
             time: 0.0,
         ),
         ("AttackFast1b", "Unk0xa2c01778"): TransitionClip(
-            clip_name: "Unk0x44626a9e",
+            clip_name: "AttackFast1ToRun",
         ),
         ("AttackFast1b", "Unk0xa5c01c31"): TransitionClip(
-            clip_name: "Unk0x44626a9e",
+            clip_name: "AttackFast1ToRun",
         ),
         ("AttackFast1b", "Unk0xa9d25256"): Time(
             time: 0.05,
         ),
         ("AttackFast1b", "Unk0xbff12509"): TransitionClip(
-            clip_name: "Unk0x44626a9e",
+            clip_name: "AttackFast1ToRun",
         ),
         ("AttackFast1b", "Unk0xcddf51bd"): TransitionClip(
-            clip_name: "Unk0x44626a9e",
+            clip_name: "AttackFast1ToRun",
         ),
         ("AttackFast1b", "Unk0xd7a4411f"): Time(
             time: 0.0,
         ),
         ("AttackFast1b", "Unk0xdaa788fa"): Time(
+            time: 0.0,
+        ),
+        ("AttackFast2ToRun", "AttackFast2ToRun"): Time(
+            time: 0.0,
+        ),
+        ("AttackFast2ToRun", "Death"): Time(
+            time: 0.0,
+        ),
+        ("AttackFast2ToRun", "Joke"): Time(
+            time: 0.0,
+        ),
+        ("AttackFast2ToRun", "KnockUp"): Time(
+            time: 0.0,
+        ),
+        ("AttackFast2ToRun", "Recall"): Time(
+            time: 0.0,
+        ),
+        ("AttackFast2ToRun", "Spell1In"): Time(
+            time: 0.0,
+        ),
+        ("AttackFast2ToRun", "Stunned"): Time(
+            time: 0.0,
+        ),
+        ("AttackFast2ToRun", "Unk0x265b8afb"): Time(
+            time: 0.0,
+        ),
+        ("AttackFast2ToRun", "Unk0x59472444"): Time(
+            time: 0.0,
+        ),
+        ("AttackFast2ToRun", "Unk0x94ec729d"): Time(
+            time: 0.0,
+        ),
+        ("AttackFast2ToRun", "Unk0xa9d25256"): Time(
+            time: 0.05,
+        ),
+        ("AttackFast2ToRun", "Unk0xd7a4411f"): Time(
+            time: 0.0,
+        ),
+        ("AttackFast2ToRun", "Unk0xdaa788fa"): Time(
             time: 0.0,
         ),
         ("AttackFast2a", "AttackFast2b"): Time(
@@ -1080,10 +1119,10 @@
             time: 0.0,
         ),
         ("AttackFast2b", "Idle1Base"): TransitionClip(
-            clip_name: "Unk0xcfd587ab",
+            clip_name: "AttackFast2ToRun",
         ),
         ("AttackFast2b", "Idle1Var1"): TransitionClip(
-            clip_name: "Unk0xcfd587ab",
+            clip_name: "AttackFast2ToRun",
         ),
         ("AttackFast2b", "Joke"): Time(
             time: 0.0,
@@ -1101,7 +1140,7 @@
             time: 0.0,
         ),
         ("AttackFast2b", "Unk0x12f27f34"): TransitionClip(
-            clip_name: "Unk0xcfd587ab",
+            clip_name: "AttackFast2ToRun",
         ),
         ("AttackFast2b", "Unk0x2799ceb9"): Time(
             time: 0.0,
@@ -1113,25 +1152,25 @@
             time: 0.0,
         ),
         ("AttackFast2b", "Unk0x440f8252"): TransitionClip(
-            clip_name: "Unk0xcfd587ab",
+            clip_name: "AttackFast2ToRun",
         ),
         ("AttackFast2b", "Unk0x8f42fa22"): Time(
             time: 0.0,
         ),
         ("AttackFast2b", "Unk0xa2c01778"): TransitionClip(
-            clip_name: "Unk0xcfd587ab",
+            clip_name: "AttackFast2ToRun",
         ),
         ("AttackFast2b", "Unk0xa5c01c31"): TransitionClip(
-            clip_name: "Unk0xcfd587ab",
+            clip_name: "AttackFast2ToRun",
         ),
         ("AttackFast2b", "Unk0xa9d25256"): Time(
             time: 0.05,
         ),
         ("AttackFast2b", "Unk0xbff12509"): TransitionClip(
-            clip_name: "Unk0xcfd587ab",
+            clip_name: "AttackFast2ToRun",
         ),
         ("AttackFast2b", "Unk0xcddf51bd"): TransitionClip(
-            clip_name: "Unk0xcfd587ab",
+            clip_name: "AttackFast2ToRun",
         ),
         ("AttackFast2b", "Unk0xd7a4411f"): Time(
             time: 0.0,
@@ -1268,6 +1307,9 @@
         ("AttackSlow2a", "Unk0xdaa788fa"): Time(
             time: 0.0,
         ),
+        ("AttackSlow2b", "AttackFast2ToRun"): Time(
+            time: 0.0,
+        ),
         ("AttackSlow2b", "AttackSlow1a"): Time(
             time: 0.15,
         ),
@@ -1339,9 +1381,6 @@
         ),
         ("AttackSlow2b", "Unk0xcddf51bd"): TransitionClip(
             clip_name: "Unk0x1dcc2d2e",
-        ),
-        ("AttackSlow2b", "Unk0xcfd587ab"): Time(
-            time: 0.0,
         ),
         ("AttackSlow2b", "Unk0xd7a4411f"): Time(
             time: 0.0,
@@ -2687,6 +2726,9 @@
         ("Unk0x22909b6d", "Unk0xc967b428"): Time(
             time: 0.15,
         ),
+        ("Unk0x265b8afb", "AttackFast2ToRun"): Time(
+            time: 0.0,
+        ),
         ("Unk0x265b8afb", "Death"): Time(
             time: 0.0,
         ),
@@ -2716,9 +2758,6 @@
         ),
         ("Unk0x265b8afb", "Unk0xa9d25256"): Time(
             time: 0.05,
-        ),
-        ("Unk0x265b8afb", "Unk0xcfd587ab"): Time(
-            time: 0.0,
         ),
         ("Unk0x265b8afb", "Unk0xd7a4411f"): Time(
             time: 0.0,
@@ -3167,6 +3206,9 @@
         ("Unk0x585c185f", "Unk0xa9d25256"): Time(
             time: 0.05,
         ),
+        ("Unk0x59472444", "AttackFast2ToRun"): Time(
+            time: 0.0,
+        ),
         ("Unk0x59472444", "Death"): Time(
             time: 0.0,
         ),
@@ -3196,9 +3238,6 @@
         ),
         ("Unk0x59472444", "Unk0xa9d25256"): Time(
             time: 0.05,
-        ),
-        ("Unk0x59472444", "Unk0xcfd587ab"): Time(
-            time: 0.0,
         ),
         ("Unk0x59472444", "Unk0xd7a4411f"): Time(
             time: 0.0,
@@ -3998,6 +4037,9 @@
         ("Unk0x9454d4d3", "Unk0x9454d4d3"): Time(
             time: 0.0,
         ),
+        ("Unk0x94ec729d", "AttackFast2ToRun"): Time(
+            time: 0.0,
+        ),
         ("Unk0x94ec729d", "Death"): Time(
             time: 0.0,
         ),
@@ -4027,9 +4069,6 @@
         ),
         ("Unk0x94ec729d", "Unk0xa9d25256"): Time(
             time: 0.05,
-        ),
-        ("Unk0x94ec729d", "Unk0xcfd587ab"): Time(
-            time: 0.0,
         ),
         ("Unk0x94ec729d", "Unk0xd7a4411f"): Time(
             time: 0.0,
@@ -5465,45 +5504,6 @@
         ("Unk0xcddf51bd", "Unk0xdaa788fa"): Time(
             time: 0.0,
         ),
-        ("Unk0xcfd587ab", "Death"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xcfd587ab", "Joke"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xcfd587ab", "KnockUp"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xcfd587ab", "Recall"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xcfd587ab", "Spell1In"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xcfd587ab", "Stunned"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xcfd587ab", "Unk0x265b8afb"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xcfd587ab", "Unk0x59472444"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xcfd587ab", "Unk0x94ec729d"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xcfd587ab", "Unk0xa9d25256"): Time(
-            time: 0.05,
-        ),
-        ("Unk0xcfd587ab", "Unk0xcfd587ab"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xcfd587ab", "Unk0xd7a4411f"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xcfd587ab", "Unk0xdaa788fa"): Time(
-            time: 0.0,
-        ),
         ("Unk0xd1391269", "AttackSlow1a"): Time(
             time: 0.1,
         ),
@@ -5649,6 +5649,9 @@
             time: 0.0,
         ),
         ("Unk0xdaa788fa", "AttackFast1b"): Time(
+            time: 0.0,
+        ),
+        ("Unk0xdaa788fa", "AttackFast2ToRun"): Time(
             time: 0.0,
         ),
         ("Unk0xdaa788fa", "AttackFast2a"): Time(
@@ -5892,9 +5895,6 @@
             time: 0.0,
         ),
         ("Unk0xdaa788fa", "Unk0xcddf51bd"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xdaa788fa", "Unk0xcfd587ab"): Time(
             time: 0.0,
         ),
         ("Unk0xdaa788fa", "Unk0xd1391269"): Time(

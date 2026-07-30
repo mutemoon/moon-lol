@@ -1,102 +1,142 @@
+use std::collections::HashMap;
+use std::sync::Arc;
+
 use bevy::prelude::*;
-use league_utils::{get_shader_handle, get_shader_handle_by_hash};
+use bevy::reflect::Reflect;
+use league_utils::LeagueShader;
 
-use crate::loaders::shader::ShaderMapAsset;
-use crate::particle::particle::quad::ParticleMaterialQuad;
-use crate::particle::utils::MaterialPath;
+use crate::particle::shader_layout::ShaderLayoutDescriptor;
 
-#[derive(Resource, Default)]
-pub struct ResourceShaderMapHandle(pub Handle<ShaderMapAsset>);
+// ---------------------------------------------------------------------------
+// ShaderMapEntry：单个 (LeagueShader, hash) 对应的 shader + layout
+// ---------------------------------------------------------------------------
+
+#[derive(Reflect, Debug, Clone, Default)]
+#[reflect(Default)]
+pub struct ShaderMapEntry {
+    pub shader_handle: Handle<Shader>,
+    /// 该 shader 变体 cbuffer 布局在 `ShaderMap::layouts` 去重池中的索引
+    /// （VS 和 PS 各自独立存储，合并由材质层完成）
+    pub layout_index: u32,
+}
+
+// ---------------------------------------------------------------------------
+// ShaderMap：主 World 资源，存储全量 shader 变体的 handle + layout
+// ---------------------------------------------------------------------------
+
+#[derive(Resource, Reflect, Default, Debug, Clone)]
+#[reflect(Resource, Default)]
+pub struct ShaderMap {
+    /// 每个 (LeagueShader, 变体 hash) 的 shader handle + 布局池索引
+    pub entries: HashMap<LeagueShader, HashMap<u64, ShaderMapEntry>>,
+    /// 变体 cbuffer 布局去重池：大量变体共享同一套布局，只存一份
+    /// （成员 offset/size 随变体漂移，供 CPU 侧 set_param 写入使用）
+    pub layouts: Vec<ShaderLayoutDescriptor>,
+    /// 每个家族所有变体的槽位并集布局（由 extract_shaders 离线统一 pass 生成，
+    /// binding_index 已归一化为 .spv 实际的 Vulkan 压缩编号：
+    /// VS = 并集排名，PS = |配对 VS 并集| + 并集排名）
+    pub unified: HashMap<LeagueShader, ShaderLayoutDescriptor>,
+}
+
+impl ShaderMap {
+    /// 获取指定 shader 变体的 handle
+    pub fn get_shader_handle(
+        &self,
+        shader_type: LeagueShader,
+        hash: u64,
+    ) -> Option<Handle<Shader>> {
+        self.entries
+            .get(&shader_type)?
+            .get(&hash)
+            .map(|entry| entry.shader_handle.clone())
+    }
+
+    /// 获取指定 shader 变体的 layout 描述符（从去重池取出并克隆）
+    pub fn get_layout(
+        &self,
+        shader_type: LeagueShader,
+        hash: u64,
+    ) -> Option<Arc<ShaderLayoutDescriptor>> {
+        let entry = self.entries.get(&shader_type)?.get(&hash)?;
+        self.layouts
+            .get(entry.layout_index as usize)
+            .map(|layout| Arc::new(layout.clone()))
+    }
+
+    /// 获取指定家族的槽位并集统一布局
+    pub fn get_unified(&self, shader_type: LeagueShader) -> Option<&ShaderLayoutDescriptor> {
+        self.unified.get(&shader_type)
+    }
+
+    /// 查询指定 name 下某成员的物理 offset
+    pub fn get_member_offset(
+        &self,
+        shader_type: LeagueShader,
+        hash: u64,
+        binding_name: &str,
+        member_name: &str,
+    ) -> Option<usize> {
+        let entry = self.entries.get(&shader_type)?.get(&hash)?;
+        self.layouts
+            .get(entry.layout_index as usize)
+            .and_then(|layout| layout.get_member_offset(binding_name, member_name))
+    }
+}
+
+// ---------------------------------------------------------------------------
+// SharedRenderData：共享渲染数据（来自 Shaders.wad.client 内 assets/shaders/shareddata.bin）
+// ---------------------------------------------------------------------------
+
+/// 共享采样器定义。原始 X3DSharedSamplerDef 的语义在离线提取期已归一化：
+/// - address_mode_*：0 = ClampToEdge（原字段缺省），1 = Repeat（原值 0），2 = MirrorRepeat（原值 2）
+/// - mip_filter：0 = 关闭 mipmap 采样，1 = 线性 mip
+#[derive(Reflect, Debug, Clone, Default)]
+#[reflect(Default)]
+pub struct SharedSamplerDef {
+    pub address_mode_u: u8,
+    pub address_mode_v: u8,
+    pub address_mode_w: u8,
+    pub max_anisotropy: u8,
+    pub mip_filter: u8,
+    pub mip_lod_bias: i32,
+    pub register: i32,
+}
+
+/// 共享贴图定义（帧缓冲拷贝 / 系统贴图等，运行期暂以占位贴图绑定）
+#[derive(Reflect, Debug, Clone, Default)]
+#[reflect(Default)]
+pub struct SharedTextureDef {
+    /// 原 X3DSharedTextureDef.type（贴图维度类别）
+    pub kind: u8,
+    /// 关联的共享采样器 link 哈希
+    pub sampler: u32,
+    /// 缺省值（占位绑定时可作为常量回退）
+    pub default_value: Vec4,
+}
+
+/// 主 World 资源：随 shaders/map.ron 一并加载，供动态材质在装配 bind group 时
+/// 解析 `_SharedSampler` / `_SharedTexture` 绑定
+#[derive(Resource, Reflect, Default, Debug, Clone)]
+#[reflect(Resource, Default)]
+pub struct SharedRenderData {
+    /// 采样器名（如 "Clamp_No_Mip"）→ 采样器定义
+    pub samplers: HashMap<String, SharedSamplerDef>,
+    /// 共享贴图名（如 "FOW_MAP"）→ 贴图定义
+    pub textures: HashMap<String, SharedTextureDef>,
+}
+
+// ---------------------------------------------------------------------------
+// 调试辅助资源
+// ---------------------------------------------------------------------------
 
 /// 记录已插入的 Shader handle，用于 debug 检测
 #[derive(Resource, Default)]
 pub struct DebugShaderHandles(pub Vec<Handle<Shader>>);
 
-/// 每 5 秒检测一次 Shader 是否能取出
-#[derive(Resource)]
-pub struct ShaderCheckTimer(pub Timer);
+// ---------------------------------------------------------------------------
+// Startup 系统：加载 map.ron
+// ---------------------------------------------------------------------------
 
-impl Default for ShaderCheckTimer {
-    fn default() -> Self {
-        Self(Timer::from_seconds(5.0, TimerMode::Repeating))
-    }
-}
-
-pub fn startup_load_shaders(
-    asset_server: Res<AssetServer>,
-    mut res_shader_map_handle: ResMut<ResourceShaderMapHandle>,
-) {
-    res_shader_map_handle.0 = asset_server.load("shaders/map.ron");
-}
-
-pub fn update_shaders(
-    mut commands: Commands,
-    res_shader_map_handle: Option<Res<ResourceShaderMapHandle>>,
-    mut res_assets_shader_map: ResMut<Assets<ShaderMapAsset>>,
-    mut res_assets_shader: ResMut<Assets<Shader>>,
-    mut debug_handles: ResMut<DebugShaderHandles>,
-) {
-    let Some(handle) = res_shader_map_handle.as_ref() else {
-        return;
-    };
-    let Some(shader_map) = res_assets_shader_map.remove(handle.0.id()) else {
-        return;
-    };
-
-    for (shader_type, inner_map) in shader_map.entries {
-        for (u64_hash, shader) in inner_map {
-            let shader_handle = get_shader_handle_by_hash(shader_type, u64_hash);
-            let _ = res_assets_shader.insert(shader_handle.id(), shader);
-            debug_handles.0.push(shader_handle);
-        }
-    }
-
-    info!("update_shaders: 已注入 {} 个 Shader", debug_handles.0.len());
-    commands.remove_resource::<ResourceShaderMapHandle>();
-}
-
-pub fn debug_check_shaders(
-    time: Res<Time>,
-    mut timer: ResMut<ShaderCheckTimer>,
-    res_assets_shader: Res<Assets<Shader>>,
-    debug_handles: Res<DebugShaderHandles>,
-) {
-    if !timer.0.tick(time.delta()).just_finished() {
-        return;
-    }
-    let total = debug_handles.0.len();
-    let valid = debug_handles
-        .0
-        .iter()
-        .filter(|h| res_assets_shader.get(h.id()).is_some())
-        .count();
-    let test_handle = get_shader_handle(ParticleMaterialQuad::VERT_SHADER, &vec![]);
-    let has_test_shader = res_assets_shader.get(test_handle.id()).is_some();
-    info!(
-        "debug_check_shaders: ParticleMaterialQuad VERT_SHADER ({:?}) exists: {}",
-        test_handle, has_test_shader
-    );
-
-    let test_frag_handle = get_shader_handle(ParticleMaterialQuad::FRAG_SHADER, &vec![]);
-    let has_test_frag_shader = res_assets_shader.get(test_frag_handle.id()).is_some();
-    info!(
-        "debug_check_shaders: ParticleMaterialQuad FRAG_SHADER ({:?}) exists: {}",
-        test_frag_handle, has_test_frag_shader
-    );
-
-    info!(
-        "debug_check_shaders: Shader 有效 {}/{} ({:.0}%)",
-        valid,
-        total,
-        (valid as f32 / total as f32 * 100.0)
-    );
-    // 如果上次有丢失的，列出丢失的 hash
-    if valid < total {
-        for (i, h) in debug_handles.0.iter().enumerate() {
-            if res_assets_shader.get(h.id()).is_none() {
-                let id = h.id();
-                info!("debug_check_shaders:   丢失[{i}] id={id:?}");
-            }
-        }
-    }
+pub fn startup_load_shaders(mut commands: Commands, asset_server: Res<AssetServer>) {
+    commands.spawn(DynamicWorldRoot(asset_server.load("shaders/map.ron")));
 }

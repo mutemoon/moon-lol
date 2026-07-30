@@ -32,6 +32,9 @@
         "Attack1Fast": Clip(
             node_index: 10,
         ),
+        "Attack1Upper": Clip(
+            node_index: 5,
+        ),
         "Attack2": ConditionFloat(
             updater: AttackSpeed,
             conditions: [
@@ -246,9 +249,6 @@
                 "Unk0x9d46c40a",
             ],
         ),
-        "Unk0x12c9f94b": Clip(
-            node_index: 5,
-        ),
         "Unk0x18329eba": Clip(
             node_index: 7,
         ),
@@ -337,7 +337,7 @@
         "Unk0x92d964b3": Parallel(
             hashes: [
                 "Attack1Base",
-                "Unk0x12c9f94b",
+                "Attack1Upper",
             ],
         ),
         "Unk0x951eb97d": Parallel(
@@ -492,6 +492,18 @@
             time: 0.0,
         ),
         ("Attack1Fast", "RevertScale"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Upper", "DanceIn"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Upper", "DanceLoopBase"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Upper", "RevertScale"): Time(
+            time: 0.0,
+        ),
+        ("Attack1Upper", "Unk0x89779994"): Time(
             time: 0.0,
         ),
         ("Attack2Base", "Attack1Base"): Time(
@@ -674,6 +686,9 @@
         ("Recall", "Attack1Fast"): Time(
             time: 0.0,
         ),
+        ("Recall", "Attack1Upper"): Time(
+            time: 0.0,
+        ),
         ("Recall", "Attack2Base"): Time(
             time: 0.0,
         ),
@@ -765,9 +780,6 @@
             time: 0.0,
         ),
         ("Recall", "TailHairOut"): Time(
-            time: 0.0,
-        ),
-        ("Recall", "Unk0x12c9f94b"): Time(
             time: 0.0,
         ),
         ("Recall", "Unk0x18329eba"): Time(
@@ -969,18 +981,6 @@
             time: 0.0,
         ),
         ("TailHairOut", "Unk0x89779994"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x12c9f94b", "DanceIn"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x12c9f94b", "DanceLoopBase"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x12c9f94b", "RevertScale"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x12c9f94b", "Unk0x89779994"): Time(
             time: 0.0,
         ),
         ("Unk0x18329eba", "DanceIn"): Time(

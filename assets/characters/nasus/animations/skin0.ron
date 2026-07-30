@@ -36,7 +36,7 @@
         ),
         "Idle1": Sequence(
             hashes: [
-                "Unk0xe9ba192a",
+                "IdleEnterBase",
                 "Idle1Base",
                 "Idle2",
             ],
@@ -57,6 +57,9 @@
         "Idle2Base": Clip(
             node_index: 30,
         ),
+        "IdleEnterBase": Clip(
+            node_index: 32,
+        ),
         "Joke": Sequence(
             hashes: [
                 "Unk0x9d46ce26",
@@ -65,9 +68,12 @@
         ),
         "Laugh": Sequence(
             hashes: [
-                "Unk0x9e55a33e",
+                "LaughBase",
                 "Idle2",
             ],
+        ),
+        "LaughBase": Clip(
+            node_index: 21,
         ),
         "Recall": Sequence(
             hashes: [
@@ -180,9 +186,6 @@
         "Unk0x9d46ce26": Clip(
             node_index: 20,
         ),
-        "Unk0x9e55a33e": Clip(
-            node_index: 21,
-        ),
         "Unk0xcb99887e": Clip(
             node_index: 27,
         ),
@@ -191,9 +194,6 @@
                 "Unk0x70075e7e",
                 "Idle2",
             ],
-        ),
-        "Unk0xe9ba192a": Clip(
-            node_index: 32,
         ),
     },
     blend_data: {
@@ -272,6 +272,12 @@
         ("Channel", "Idle2Base"): Time(
             time: 0.1,
         ),
+        ("Channel", "IdleEnterBase"): Time(
+            time: 0.1,
+        ),
+        ("Channel", "LaughBase"): Time(
+            time: 0.1,
+        ),
         ("Channel", "RespawnBase"): Time(
             time: 0.1,
         ),
@@ -332,13 +338,7 @@
         ("Channel", "Unk0x9d46ce26"): Time(
             time: 0.1,
         ),
-        ("Channel", "Unk0x9e55a33e"): Time(
-            time: 0.1,
-        ),
         ("Channel", "Unk0xcb99887e"): Time(
-            time: 0.1,
-        ),
-        ("Channel", "Unk0xe9ba192a"): Time(
             time: 0.1,
         ),
         ("ChannelWndup", "Attack1"): Time(
@@ -464,11 +464,29 @@
         ("Idle2Base", "Death"): Time(
             time: 0.0,
         ),
+        ("IdleEnterBase", "Death"): Time(
+            time: 0.0,
+        ),
+        ("IdleEnterBase", "Spell2Base"): Time(
+            time: 0.1,
+        ),
+        ("IdleEnterBase", "Unk0x432b1d96"): Time(
+            time: 0.1,
+        ),
         ("Joke", "Death"): Time(
             time: 0.0,
         ),
         ("Laugh", "Death"): Time(
             time: 0.0,
+        ),
+        ("LaughBase", "Death"): Time(
+            time: 0.0,
+        ),
+        ("LaughBase", "Spell2Base"): Time(
+            time: 0.1,
+        ),
+        ("LaughBase", "Unk0x432b1d96"): Time(
+            time: 0.1,
         ),
         ("Recall", "Death"): Time(
             time: 0.0,
@@ -716,15 +734,6 @@
         ("Unk0x9d46ce26", "Unk0x432b1d96"): Time(
             time: 0.1,
         ),
-        ("Unk0x9e55a33e", "Death"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x9e55a33e", "Spell2Base"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x9e55a33e", "Unk0x432b1d96"): Time(
-            time: 0.1,
-        ),
         ("Unk0xcb99887e", "Death"): Time(
             time: 0.0,
         ),
@@ -736,15 +745,6 @@
         ),
         ("Unk0xd949c0fe", "Death"): Time(
             time: 0.0,
-        ),
-        ("Unk0xe9ba192a", "Death"): Time(
-            time: 0.0,
-        ),
-        ("Unk0xe9ba192a", "Spell2Base"): Time(
-            time: 0.1,
-        ),
-        ("Unk0xe9ba192a", "Unk0x432b1d96"): Time(
-            time: 0.1,
         ),
     },
 )

@@ -11,7 +11,7 @@
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(2),
-                        dataValue: "unk_0xa0cab191",
+                        dataValue: "q1ad_ratio",
                     ),
                 ]),
                 multiplier: None,

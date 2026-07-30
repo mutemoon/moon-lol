@@ -68,6 +68,9 @@
         "Spell1": Clip(
             node_index: 14,
         ),
+        "Spell2Attack1": Clip(
+            node_index: 2,
+        ),
         "Spell3": Clip(
             node_index: 15,
         ),
@@ -79,9 +82,6 @@
         ),
         "Unk0x1119a88c": Clip(
             node_index: 1,
-        ),
-        "Unk0x1419ad45": Clip(
-            node_index: 2,
         ),
     },
     blend_data: {

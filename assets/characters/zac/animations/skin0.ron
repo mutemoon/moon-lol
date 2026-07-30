@@ -88,6 +88,9 @@
         "Idle2Base": Clip(
             node_index: 51,
         ),
+        "Idle3Base": Clip(
+            node_index: 27,
+        ),
         "Joke": Sequence(
             hashes: [
                 "JokeWindup",
@@ -106,6 +109,9 @@
                 "Idle1Base",
                 "Unk0xe75f72aa",
             ],
+        ),
+        "LaughBase": Clip(
+            node_index: 36,
         ),
         "Pickup": Clip(
             node_index: 23,
@@ -247,7 +253,7 @@
         "Unk0x3715f5e2": Selector(
             probably_nodes: [
                 (
-                    key: "Unk0x9e55a33e",
+                    key: "LaughBase",
                     value: 50.0,
                 ),
                 (
@@ -282,9 +288,6 @@
                     value: 1.35,
                 ),
             ],
-        ),
-        "Unk0x76bbc6a0": Clip(
-            node_index: 27,
         ),
         "Unk0x792ee8b0": Clip(
             node_index: 28,
@@ -321,9 +324,6 @@
         ),
         "Unk0x9d46ce26": Clip(
             node_index: 35,
-        ),
-        "Unk0x9e55a33e": Clip(
-            node_index: 36,
         ),
         "Unk0xabc75b53": Clip(
             node_index: 38,
@@ -386,7 +386,7 @@
                     value: 10.0,
                 ),
                 (
-                    key: "Unk0x76bbc6a0",
+                    key: "Idle3Base",
                     value: 10.0,
                 ),
                 (
@@ -517,6 +517,15 @@
         ("Idle2Base", "Spell1"): Time(
             time: 0.1,
         ),
+        ("Idle3Base", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Idle3Base", "Idle3Base"): Time(
+            time: 0.0,
+        ),
+        ("Idle3Base", "Spell1"): Time(
+            time: 0.1,
+        ),
         ("IdleIn", "Death"): Time(
             time: 0.0,
         ),
@@ -543,6 +552,15 @@
         ),
         ("Laugh", "Death"): Time(
             time: 0.0,
+        ),
+        ("LaughBase", "Death"): Time(
+            time: 0.0,
+        ),
+        ("LaughBase", "LaughBase"): Time(
+            time: 0.0,
+        ),
+        ("LaughBase", "Spell1"): Time(
+            time: 0.1,
         ),
         ("Pickup", "Death"): Time(
             time: 0.0,
@@ -616,14 +634,14 @@
         ("RunBase", "Idle2Base"): TransitionClip(
             clip_name: "Unk0xda0f555e",
         ),
+        ("RunBase", "Idle3Base"): TransitionClip(
+            clip_name: "Unk0xda0f555e",
+        ),
         ("RunBase", "RunBase"): Time(
             time: 0.0,
         ),
         ("RunBase", "Spell1"): Time(
             time: 0.1,
-        ),
-        ("RunBase", "Unk0x76bbc6a0"): TransitionClip(
-            clip_name: "Unk0xda0f555e",
         ),
         ("RunBase", "Unk0xabc75b53"): TransitionClip(
             clip_name: "Unk0xda0f555e",
@@ -679,10 +697,16 @@
         ("Spell1", "Idle2Base"): Time(
             time: 0.1,
         ),
+        ("Spell1", "Idle3Base"): Time(
+            time: 0.1,
+        ),
         ("Spell1", "JokeLoop"): Time(
             time: 0.1,
         ),
         ("Spell1", "JokeWindup"): Time(
+            time: 0.1,
+        ),
+        ("Spell1", "LaughBase"): Time(
             time: 0.1,
         ),
         ("Spell1", "Pickup"): Time(
@@ -769,9 +793,6 @@
         ("Spell1", "Unk0x763545ac"): Time(
             time: 0.1,
         ),
-        ("Spell1", "Unk0x76bbc6a0"): Time(
-            time: 0.1,
-        ),
         ("Spell1", "Unk0x7a76d2b8"): Time(
             time: 0.1,
         ),
@@ -785,9 +806,6 @@
             time: 0.1,
         ),
         ("Spell1", "Unk0x9d46ce26"): Time(
-            time: 0.1,
-        ),
-        ("Spell1", "Unk0x9e55a33e"): Time(
             time: 0.1,
         ),
         ("Spell1", "Unk0xabc75b53"): Time(
@@ -1000,10 +1018,16 @@
         ("Spell3Flying", "Idle2Base"): Time(
             time: 0.0,
         ),
+        ("Spell3Flying", "Idle3Base"): Time(
+            time: 0.0,
+        ),
         ("Spell3Flying", "JokeLoop"): Time(
             time: 0.0,
         ),
         ("Spell3Flying", "JokeWindup"): Time(
+            time: 0.0,
+        ),
+        ("Spell3Flying", "LaughBase"): Time(
             time: 0.0,
         ),
         ("Spell3Flying", "Pickup"): Time(
@@ -1090,9 +1114,6 @@
         ("Spell3Flying", "Unk0x763545ac"): Time(
             time: 0.0,
         ),
-        ("Spell3Flying", "Unk0x76bbc6a0"): Time(
-            time: 0.0,
-        ),
         ("Spell3Flying", "Unk0x792ee8b0"): Time(
             time: 0.0,
         ),
@@ -1109,9 +1130,6 @@
             time: 0.0,
         ),
         ("Spell3Flying", "Unk0x9d46ce26"): Time(
-            time: 0.0,
-        ),
-        ("Spell3Flying", "Unk0x9e55a33e"): Time(
             time: 0.0,
         ),
         ("Spell3Flying", "Unk0xabc75b53"): Time(
@@ -1198,14 +1216,14 @@
         ("Unk0x20eba120", "Idle2Base"): TransitionClip(
             clip_name: "Unk0xda0f555e",
         ),
+        ("Unk0x20eba120", "Idle3Base"): TransitionClip(
+            clip_name: "Unk0xda0f555e",
+        ),
         ("Unk0x20eba120", "Spell1"): Time(
             time: 0.1,
         ),
         ("Unk0x20eba120", "Unk0x20eba120"): Time(
             time: 0.0,
-        ),
-        ("Unk0x20eba120", "Unk0x76bbc6a0"): TransitionClip(
-            clip_name: "Unk0xda0f555e",
         ),
         ("Unk0x20eba120", "Unk0xabc75b53"): TransitionClip(
             clip_name: "Unk0xda0f555e",
@@ -1231,14 +1249,14 @@
         ("Unk0x41472d6f", "Idle2Base"): TransitionClip(
             clip_name: "Unk0xda0f555e",
         ),
+        ("Unk0x41472d6f", "Idle3Base"): TransitionClip(
+            clip_name: "Unk0xda0f555e",
+        ),
         ("Unk0x41472d6f", "Spell1"): Time(
             time: 0.1,
         ),
         ("Unk0x41472d6f", "Unk0x41472d6f"): Time(
             time: 0.0,
-        ),
-        ("Unk0x41472d6f", "Unk0x76bbc6a0"): TransitionClip(
-            clip_name: "Unk0xda0f555e",
         ),
         ("Unk0x41472d6f", "Unk0xabc75b53"): TransitionClip(
             clip_name: "Unk0xda0f555e",
@@ -1262,15 +1280,6 @@
             time: 0.1,
         ),
         ("Unk0x763545ac", "Unk0x763545ac"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x76bbc6a0", "Death"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x76bbc6a0", "Spell1"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x76bbc6a0", "Unk0x76bbc6a0"): Time(
             time: 0.0,
         ),
         ("Unk0x792ee8b0", "Death"): Time(
@@ -1328,15 +1337,6 @@
             time: 0.1,
         ),
         ("Unk0x9d46ce26", "Unk0x9d46ce26"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x9e55a33e", "Death"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x9e55a33e", "Spell1"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x9e55a33e", "Unk0x9e55a33e"): Time(
             time: 0.0,
         ),
         ("Unk0xa7e78d50", "Death"): Time(

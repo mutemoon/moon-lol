@@ -1,6 +1,12 @@
 (
     spellData: Some((
         calculations: Some({
+            "calc_base_heal": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
             "calc_heal_min": (
                 type: "CalculationSpell",
                 formulaParts: Some([
@@ -20,6 +26,12 @@
                 multiplier: None,
                 precision: None,
             ),
+            "calc_missing_health_heal": (
+                type: "CalculationSpell",
+                formulaParts: Some([]),
+                multiplier: None,
+                precision: None,
+            ),
             "calc_shield": (
                 type: "CalculationSpell",
                 formulaParts: Some([
@@ -30,7 +42,7 @@
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(12),
-                        dataValue: "unk_0x1cf2fe1c",
+                        dataValue: "shield_max_health",
                     ),
                 ]),
                 multiplier: None,
@@ -61,18 +73,6 @@
                         dataValue: "base_move_speed",
                     ),
                 ]),
-                multiplier: None,
-                precision: None,
-            ),
-            "unk_0xb35447ff": (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
-                multiplier: None,
-                precision: None,
-            ),
-            "unk_0xf468ef05": (
-                type: "CalculationSpell",
-                formulaParts: Some([]),
                 multiplier: None,
                 precision: None,
             ),

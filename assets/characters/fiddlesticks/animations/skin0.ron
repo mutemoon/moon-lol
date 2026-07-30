@@ -128,7 +128,7 @@
                     value: 33.0,
                 ),
                 (
-                    key: "Unk0xebda56d0",
+                    key: "IdleC",
                     value: 33.0,
                 ),
             ],
@@ -140,6 +140,12 @@
             hashes: [
                 "Unk0x14ba696b",
                 "Unk0x9168a8ca",
+            ],
+        ),
+        "IdleC": Sequence(
+            hashes: [
+                "Unk0x6acf79f6",
+                "Unk0x4ddb80f3",
             ],
         ),
         "IdleIn": Clip(
@@ -385,12 +391,6 @@
         ),
         "Unk0xeb3f8435": Clip(
             node_index: 62,
-        ),
-        "Unk0xebda56d0": Sequence(
-            hashes: [
-                "Unk0x6acf79f6",
-                "Unk0x4ddb80f3",
-            ],
         ),
     },
     blend_data: {

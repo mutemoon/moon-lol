@@ -1,7 +1,9 @@
 (
-  resources: {},
+  resources: {
+    "lol_base::particle::ConfigVfxHandle": (Path("characters/Nunu/skins/skin0_vfx.ron")),
+  },
   entities: {
-    4294967262: (
+    4294967259: (
       components: {
         "bevy_animation::graph::AnimationGraphHandle": (Path("characters/Nunu/animations/skin0.ron")),
         "bevy_camera::visibility::Visibility": Inherited,

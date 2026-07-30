@@ -211,7 +211,7 @@ pub fn create_log_plugin(log_db: Option<PathBuf>) -> bevy::log::LogPlugin {
     }
 
     let plugin = bevy::log::LogPlugin {
-        filter: "bevy_gltf_draco=off".to_owned(),
+        filter: "".to_owned(),
         fmt_layer: |_app| {
             let format_layer = fmt::layer()
                 .with_file(true)

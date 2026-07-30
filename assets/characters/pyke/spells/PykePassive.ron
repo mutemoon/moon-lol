@@ -24,7 +24,7 @@
                     (
                         type: "CalculationPartStatNamedDataValue",
                         stat: Some(2),
-                        dataValue: "unk_0x6cb0fc88",
+                        dataValue: "damage_store_max_bonus_ad_ratio",
                     ),
                 ]),
                 multiplier: None,

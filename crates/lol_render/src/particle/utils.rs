@@ -22,12 +22,28 @@ pub fn create_black_pixel_texture() -> Image {
     image
 }
 
-use std::collections::HashMap;
+pub fn create_white_pixel_texture() -> Image {
+    let image = Image::new_fill(
+        Extent3d {
+            width: 1,
+            height: 1,
+            depth_or_array_layers: 1,
+        },
+        TextureDimension::D2,
+        &[255, 255, 255, 255],
+        TextureFormat::Rgba8UnormSrgb,
+        default(),
+    );
+
+    image
+}
+
+use std::collections::BTreeMap;
 
 #[derive(Resource, Default)]
 pub struct ResourceCache {
-    image: HashMap<String, Handle<Image>>,
-    mesh: HashMap<String, Handle<Mesh>>,
+    image: BTreeMap<String, Handle<Image>>,
+    mesh: BTreeMap<String, Handle<Mesh>>,
 }
 
 impl ResourceCache {

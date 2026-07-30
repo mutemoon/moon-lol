@@ -59,6 +59,9 @@
         "Dance1": Clip(
             node_index: 23,
         ),
+        "Dance2": Clip(
+            node_index: 24,
+        ),
         "Death": Clip(
             node_index: 102,
         ),
@@ -328,9 +331,6 @@
         "Unk0x35f1d78b": Clip(
             node_index: 22,
         ),
-        "Unk0x374f09ea": Clip(
-            node_index: 24,
-        ),
         "Unk0x379b4848": Clip(
             node_index: 25,
         ),
@@ -404,7 +404,7 @@
                     value: 25.0,
                 ),
                 (
-                    key: "Unk0x374f09ea",
+                    key: "Dance2",
                     value: 50.0,
                 ),
                 (
@@ -1977,6 +1977,9 @@
         ("CritToIdle", "Dance1"): Time(
             time: 0.1,
         ),
+        ("CritToIdle", "Dance2"): Time(
+            time: 0.1,
+        ),
         ("CritToIdle", "Death"): Time(
             time: 0.1,
         ),
@@ -2113,9 +2116,6 @@
             time: 0.0,
         ),
         ("CritToIdle", "Unk0x35f1d78b"): Time(
-            time: 0.1,
-        ),
-        ("CritToIdle", "Unk0x374f09ea"): Time(
             time: 0.1,
         ),
         ("CritToIdle", "Unk0x379b4848"): Time(
@@ -2388,6 +2388,9 @@
         ("CritToRun", "Dance1"): Time(
             time: 0.1,
         ),
+        ("CritToRun", "Dance2"): Time(
+            time: 0.1,
+        ),
         ("CritToRun", "Death"): Time(
             time: 0.1,
         ),
@@ -2503,9 +2506,6 @@
             time: 0.0,
         ),
         ("CritToRun", "Unk0x35f1d78b"): Time(
-            time: 0.1,
-        ),
-        ("CritToRun", "Unk0x374f09ea"): Time(
             time: 0.1,
         ),
         ("CritToRun", "Unk0x379b4848"): Time(
@@ -2745,6 +2745,9 @@
         ("Dance1", "Dance1"): Time(
             time: 0.0,
         ),
+        ("Dance1", "Dance2"): Time(
+            time: 0.0,
+        ),
         ("Dance1", "Death"): Time(
             time: 0.0,
         ),
@@ -2795,9 +2798,6 @@
         ),
         ("Dance1", "Unk0x3302e7d4"): Time(
             time: 0.1,
-        ),
-        ("Dance1", "Unk0x374f09ea"): Time(
-            time: 0.0,
         ),
         ("Dance1", "Unk0x384f0b7d"): Time(
             time: 0.0,
@@ -2899,6 +2899,168 @@
             time: 0.0,
         ),
         ("Dance1", "Unk0xfc8d9f50"): Time(
+            time: 0.0,
+        ),
+        ("Dance2", "Crit"): Time(
+            time: 0.1,
+        ),
+        ("Dance2", "Dance1"): Time(
+            time: 0.0,
+        ),
+        ("Dance2", "Dance2"): Time(
+            time: 0.0,
+        ),
+        ("Dance2", "Death"): Time(
+            time: 0.0,
+        ),
+        ("Dance2", "JokeCycle"): Time(
+            time: 0.1,
+        ),
+        ("Dance2", "JokeIntro"): Time(
+            time: 0.05,
+        ),
+        ("Dance2", "Recall"): Time(
+            time: 0.1,
+        ),
+        ("Dance2", "Spell1In"): Time(
+            time: 0.02,
+        ),
+        ("Dance2", "Spell1Out"): Time(
+            time: 0.0,
+        ),
+        ("Dance2", "Spell2Dismount"): Time(
+            time: 0.1,
+        ),
+        ("Dance2", "Spell4"): Time(
+            time: 0.1,
+        ),
+        ("Dance2", "Taunt"): Time(
+            time: 0.05,
+        ),
+        ("Dance2", "Unk0x1cc6d505"): TransitionClip(
+            clip_name: "Unk0x8c693ba2",
+        ),
+        ("Dance2", "Unk0x21aadd3e"): Time(
+            time: 0.0,
+        ),
+        ("Dance2", "Unk0x21f0139b"): Time(
+            time: 0.12,
+        ),
+        ("Dance2", "Unk0x23421129"): Time(
+            time: 0.15,
+        ),
+        ("Dance2", "Unk0x2a0dc125"): Time(
+            time: 0.0,
+        ),
+        ("Dance2", "Unk0x2f44227b"): Time(
+            time: 0.0,
+        ),
+        ("Dance2", "Unk0x324f64d4"): Time(
+            time: 0.15,
+        ),
+        ("Dance2", "Unk0x3302e7d4"): Time(
+            time: 0.1,
+        ),
+        ("Dance2", "Unk0x384f0b7d"): Time(
+            time: 0.0,
+        ),
+        ("Dance2", "Unk0x3a5b95fb"): Time(
+            time: 0.1,
+        ),
+        ("Dance2", "Unk0x3fc4a1ef"): Time(
+            time: 0.0,
+        ),
+        ("Dance2", "Unk0x4d96d102"): Time(
+            time: 0.0,
+        ),
+        ("Dance2", "Unk0x4f996e1c"): Time(
+            time: 0.05,
+        ),
+        ("Dance2", "Unk0x5105295e"): Time(
+            time: 0.05,
+        ),
+        ("Dance2", "Unk0x591c7a7e"): Time(
+            time: 0.0,
+        ),
+        ("Dance2", "Unk0x5a5b3622"): Time(
+            time: 0.1,
+        ),
+        ("Dance2", "Unk0x5c03ec82"): Time(
+            time: 0.0,
+        ),
+        ("Dance2", "Unk0x5e906988"): Time(
+            time: 0.0,
+        ),
+        ("Dance2", "Unk0x6fd9a77c"): Time(
+            time: 0.0,
+        ),
+        ("Dance2", "Unk0x76bdb58"): Time(
+            time: 0.0,
+        ),
+        ("Dance2", "Unk0x7da404c1"): Time(
+            time: 0.1,
+        ),
+        ("Dance2", "Unk0x7db0d2e0"): Time(
+            time: 0.15,
+        ),
+        ("Dance2", "Unk0x8c693ba2"): Time(
+            time: 0.12,
+        ),
+        ("Dance2", "Unk0x920c69d4"): Time(
+            time: 0.0,
+        ),
+        ("Dance2", "Unk0x92f74126"): Time(
+            time: 0.05,
+        ),
+        ("Dance2", "Unk0x9821e7ad"): Time(
+            time: 0.0,
+        ),
+        ("Dance2", "Unk0x99348be9"): Time(
+            time: 0.0,
+        ),
+        ("Dance2", "Unk0xa34176b6"): Time(
+            time: 0.1,
+        ),
+        ("Dance2", "Unk0xa79dc6af"): Time(
+            time: 0.09,
+        ),
+        ("Dance2", "Unk0xa89dc842"): Time(
+            time: 0.09,
+        ),
+        ("Dance2", "Unk0xacffe63b"): Time(
+            time: 0.05,
+        ),
+        ("Dance2", "Unk0xae9cd794"): Time(
+            time: 0.0,
+        ),
+        ("Dance2", "Unk0xaf1627b2"): Time(
+            time: 0.05,
+        ),
+        ("Dance2", "Unk0xc64d75e3"): Time(
+            time: 0.05,
+        ),
+        ("Dance2", "Unk0xd3d67572"): Time(
+            time: 0.05,
+        ),
+        ("Dance2", "Unk0xdb4771f6"): Time(
+            time: 0.0,
+        ),
+        ("Dance2", "Unk0xdd5754a"): Time(
+            time: 0.0,
+        ),
+        ("Dance2", "Unk0xf09eef55"): Time(
+            time: 0.05,
+        ),
+        ("Dance2", "Unk0xf6316f5d"): Time(
+            time: 0.0,
+        ),
+        ("Dance2", "Unk0xf7684bea"): Time(
+            time: 0.1,
+        ),
+        ("Dance2", "Unk0xf915f63d"): Time(
+            time: 0.0,
+        ),
+        ("Dance2", "Unk0xfc8d9f50"): Time(
             time: 0.0,
         ),
         ("Death", "Crit"): Time(
@@ -3363,6 +3525,9 @@
         ("JokeCycle", "Dance1"): Time(
             time: 0.1,
         ),
+        ("JokeCycle", "Dance2"): Time(
+            time: 0.1,
+        ),
         ("JokeCycle", "Death"): Time(
             time: 0.1,
         ),
@@ -3496,9 +3661,6 @@
             time: 0.1,
         ),
         ("JokeCycle", "Unk0x35f1d78b"): Time(
-            time: 0.1,
-        ),
-        ("JokeCycle", "Unk0x374f09ea"): Time(
             time: 0.1,
         ),
         ("JokeCycle", "Unk0x379b4848"): Time(
@@ -3762,6 +3924,9 @@
         ("JokeIntro", "Dance1"): Time(
             time: 0.1,
         ),
+        ("JokeIntro", "Dance2"): Time(
+            time: 0.1,
+        ),
         ("JokeIntro", "Death"): Time(
             time: 0.1,
         ),
@@ -3895,9 +4060,6 @@
             time: 0.1,
         ),
         ("JokeIntro", "Unk0x35f1d78b"): Time(
-            time: 0.1,
-        ),
-        ("JokeIntro", "Unk0x374f09ea"): Time(
             time: 0.1,
         ),
         ("JokeIntro", "Unk0x379b4848"): Time(
@@ -4161,6 +4323,9 @@
         ("Laugh", "Dance1"): Time(
             time: 0.1,
         ),
+        ("Laugh", "Dance2"): Time(
+            time: 0.1,
+        ),
         ("Laugh", "Death"): Time(
             time: 0.1,
         ),
@@ -4297,9 +4462,6 @@
             time: 0.1,
         ),
         ("Laugh", "Unk0x35f1d78b"): Time(
-            time: 0.1,
-        ),
-        ("Laugh", "Unk0x374f09ea"): Time(
             time: 0.1,
         ),
         ("Laugh", "Unk0x379b4848"): Time(
@@ -4566,6 +4728,9 @@
         ("Recall", "Dance1"): Time(
             time: 0.0,
         ),
+        ("Recall", "Dance2"): Time(
+            time: 0.0,
+        ),
         ("Recall", "Death"): Time(
             time: 0.0,
         ),
@@ -4696,9 +4861,6 @@
             time: 0.0,
         ),
         ("Recall", "Unk0x35f1d78b"): Time(
-            time: 0.0,
-        ),
-        ("Recall", "Unk0x374f09ea"): Time(
             time: 0.0,
         ),
         ("Recall", "Unk0x379b4848"): Time(
@@ -6780,6 +6942,9 @@
         ("Taunt", "Dance1"): Time(
             time: 0.1,
         ),
+        ("Taunt", "Dance2"): Time(
+            time: 0.1,
+        ),
         ("Taunt", "Death"): Time(
             time: 0.1,
         ),
@@ -6916,9 +7081,6 @@
             time: 0.1,
         ),
         ("Taunt", "Unk0x35f1d78b"): Time(
-            time: 0.1,
-        ),
-        ("Taunt", "Unk0x374f09ea"): Time(
             time: 0.1,
         ),
         ("Taunt", "Unk0x379b4848"): Time(
@@ -9945,168 +10107,6 @@
         ("Unk0x35f1d78b", "Unk0xfc8d9f50"): Time(
             time: 0.0,
         ),
-        ("Unk0x374f09ea", "Crit"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x374f09ea", "Dance1"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x374f09ea", "Death"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x374f09ea", "JokeCycle"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x374f09ea", "JokeIntro"): Time(
-            time: 0.05,
-        ),
-        ("Unk0x374f09ea", "Recall"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x374f09ea", "Spell1In"): Time(
-            time: 0.02,
-        ),
-        ("Unk0x374f09ea", "Spell1Out"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x374f09ea", "Spell2Dismount"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x374f09ea", "Spell4"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x374f09ea", "Taunt"): Time(
-            time: 0.05,
-        ),
-        ("Unk0x374f09ea", "Unk0x1cc6d505"): TransitionClip(
-            clip_name: "Unk0x8c693ba2",
-        ),
-        ("Unk0x374f09ea", "Unk0x21aadd3e"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x374f09ea", "Unk0x21f0139b"): Time(
-            time: 0.12,
-        ),
-        ("Unk0x374f09ea", "Unk0x23421129"): Time(
-            time: 0.15,
-        ),
-        ("Unk0x374f09ea", "Unk0x2a0dc125"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x374f09ea", "Unk0x2f44227b"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x374f09ea", "Unk0x324f64d4"): Time(
-            time: 0.15,
-        ),
-        ("Unk0x374f09ea", "Unk0x3302e7d4"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x374f09ea", "Unk0x374f09ea"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x374f09ea", "Unk0x384f0b7d"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x374f09ea", "Unk0x3a5b95fb"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x374f09ea", "Unk0x3fc4a1ef"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x374f09ea", "Unk0x4d96d102"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x374f09ea", "Unk0x4f996e1c"): Time(
-            time: 0.05,
-        ),
-        ("Unk0x374f09ea", "Unk0x5105295e"): Time(
-            time: 0.05,
-        ),
-        ("Unk0x374f09ea", "Unk0x591c7a7e"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x374f09ea", "Unk0x5a5b3622"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x374f09ea", "Unk0x5c03ec82"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x374f09ea", "Unk0x5e906988"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x374f09ea", "Unk0x6fd9a77c"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x374f09ea", "Unk0x76bdb58"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x374f09ea", "Unk0x7da404c1"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x374f09ea", "Unk0x7db0d2e0"): Time(
-            time: 0.15,
-        ),
-        ("Unk0x374f09ea", "Unk0x8c693ba2"): Time(
-            time: 0.12,
-        ),
-        ("Unk0x374f09ea", "Unk0x920c69d4"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x374f09ea", "Unk0x92f74126"): Time(
-            time: 0.05,
-        ),
-        ("Unk0x374f09ea", "Unk0x9821e7ad"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x374f09ea", "Unk0x99348be9"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x374f09ea", "Unk0xa34176b6"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x374f09ea", "Unk0xa79dc6af"): Time(
-            time: 0.09,
-        ),
-        ("Unk0x374f09ea", "Unk0xa89dc842"): Time(
-            time: 0.09,
-        ),
-        ("Unk0x374f09ea", "Unk0xacffe63b"): Time(
-            time: 0.05,
-        ),
-        ("Unk0x374f09ea", "Unk0xae9cd794"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x374f09ea", "Unk0xaf1627b2"): Time(
-            time: 0.05,
-        ),
-        ("Unk0x374f09ea", "Unk0xc64d75e3"): Time(
-            time: 0.05,
-        ),
-        ("Unk0x374f09ea", "Unk0xd3d67572"): Time(
-            time: 0.05,
-        ),
-        ("Unk0x374f09ea", "Unk0xdb4771f6"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x374f09ea", "Unk0xdd5754a"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x374f09ea", "Unk0xf09eef55"): Time(
-            time: 0.05,
-        ),
-        ("Unk0x374f09ea", "Unk0xf6316f5d"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x374f09ea", "Unk0xf7684bea"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x374f09ea", "Unk0xf915f63d"): Time(
-            time: 0.0,
-        ),
-        ("Unk0x374f09ea", "Unk0xfc8d9f50"): Time(
-            time: 0.0,
-        ),
         ("Unk0x379b4848", "Crit"): Time(
             time: 0.1,
         ),
@@ -10257,6 +10257,9 @@
         ("Unk0x384f0b7d", "Dance1"): Time(
             time: 0.0,
         ),
+        ("Unk0x384f0b7d", "Dance2"): Time(
+            time: 0.0,
+        ),
         ("Unk0x384f0b7d", "Death"): Time(
             time: 0.0,
         ),
@@ -10307,9 +10310,6 @@
         ),
         ("Unk0x384f0b7d", "Unk0x3302e7d4"): Time(
             time: 0.1,
-        ),
-        ("Unk0x384f0b7d", "Unk0x374f09ea"): Time(
-            time: 0.0,
         ),
         ("Unk0x384f0b7d", "Unk0x384f0b7d"): Time(
             time: 0.0,
@@ -10432,6 +10432,9 @@
             time: 0.1,
         ),
         ("Unk0x3a5b95fb", "Dance1"): Time(
+            time: 0.1,
+        ),
+        ("Unk0x3a5b95fb", "Dance2"): Time(
             time: 0.1,
         ),
         ("Unk0x3a5b95fb", "Death"): Time(
@@ -10570,9 +10573,6 @@
             time: 0.1,
         ),
         ("Unk0x3a5b95fb", "Unk0x35f1d78b"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x3a5b95fb", "Unk0x374f09ea"): Time(
             time: 0.1,
         ),
         ("Unk0x3a5b95fb", "Unk0x379b4848"): Time(
@@ -11412,6 +11412,9 @@
         ("Unk0x3fc4a1ef", "Dance1"): Time(
             time: 0.0,
         ),
+        ("Unk0x3fc4a1ef", "Dance2"): Time(
+            time: 0.0,
+        ),
         ("Unk0x3fc4a1ef", "Death"): Time(
             time: 0.0,
         ),
@@ -11462,9 +11465,6 @@
         ),
         ("Unk0x3fc4a1ef", "Unk0x3302e7d4"): Time(
             time: 0.1,
-        ),
-        ("Unk0x3fc4a1ef", "Unk0x374f09ea"): Time(
-            time: 0.0,
         ),
         ("Unk0x3fc4a1ef", "Unk0x384f0b7d"): Time(
             time: 0.0,
@@ -12231,6 +12231,9 @@
         ("Unk0x5105295e", "Dance1"): Time(
             time: 0.1,
         ),
+        ("Unk0x5105295e", "Dance2"): Time(
+            time: 0.1,
+        ),
         ("Unk0x5105295e", "Death"): Time(
             time: 0.1,
         ),
@@ -12364,9 +12367,6 @@
             time: 0.1,
         ),
         ("Unk0x5105295e", "Unk0x35f1d78b"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x5105295e", "Unk0x374f09ea"): Time(
             time: 0.1,
         ),
         ("Unk0x5105295e", "Unk0x379b4848"): Time(
@@ -13023,6 +13023,9 @@
         ("Unk0x5a5b3622", "Dance1"): Time(
             time: 0.1,
         ),
+        ("Unk0x5a5b3622", "Dance2"): Time(
+            time: 0.1,
+        ),
         ("Unk0x5a5b3622", "Death"): Time(
             time: 0.1,
         ),
@@ -13156,9 +13159,6 @@
             time: 0.1,
         ),
         ("Unk0x5a5b3622", "Unk0x35f1d78b"): Time(
-            time: 0.1,
-        ),
-        ("Unk0x5a5b3622", "Unk0x374f09ea"): Time(
             time: 0.1,
         ),
         ("Unk0x5a5b3622", "Unk0x379b4848"): Time(
@@ -19593,6 +19593,9 @@
         ("Unk0xd3d67572", "Dance1"): Time(
             time: 0.1,
         ),
+        ("Unk0xd3d67572", "Dance2"): Time(
+            time: 0.1,
+        ),
         ("Unk0xd3d67572", "Death"): Time(
             time: 0.1,
         ),
@@ -19729,9 +19732,6 @@
             time: 0.1,
         ),
         ("Unk0xd3d67572", "Unk0x35f1d78b"): Time(
-            time: 0.1,
-        ),
-        ("Unk0xd3d67572", "Unk0x374f09ea"): Time(
             time: 0.1,
         ),
         ("Unk0xd3d67572", "Unk0x379b4848"): Time(
