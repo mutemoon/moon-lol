@@ -19,7 +19,7 @@ use gltf::json::{Index, Node, Root};
 use league_file::mesh_skinned::LeagueSkinnedMesh;
 use league_file::skeleton::LeagueSkeleton;
 use league_utils::{hash_joint, hash_to_type_name};
-use lol_base::animation::ConfigAnimationClip;
+use lol_base_render::animation::ConfigAnimationClip;
 
 use crate::extract::write_to_file;
 use crate::utils::Error;

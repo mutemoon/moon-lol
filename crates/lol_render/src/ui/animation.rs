@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use lol_base::hash_key::{HashKey, LoadHashKeyTrait};
-use lol_base::ui::{LOLEnumData, LOLUiElementEffectAnimationData};
+use lol_base_render::ui::{LOLEnumData, LOLUiElementEffectAnimationData};
 
 #[derive(Component)]
 pub struct UiAnimationState {

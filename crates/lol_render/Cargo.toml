@@ -14,6 +14,7 @@ league_loader.workspace = true
 league_to_lol.workspace = true
 league_utils.workspace = true
 lol_base.workspace = true
+lol_base_render.workspace = true
 lol_core.workspace = true
 rand.workspace = true
 regex.workspace = true

@@ -34,6 +34,7 @@ import {
   CpuIcon,
   DatabaseIcon,
   RocketIcon,
+  SparklesIcon,
   ArrowLeftIcon,
   UserIcon,
   Users2Icon,
@@ -78,6 +79,7 @@ type View =
   | "billing"
   | "admin"
   | "rlTraining"
+  | "particles"
   | "logsArchive"
   | "games";
 
@@ -99,6 +101,7 @@ const currentView = computed<View>(() => {
   if (route.path === "/billing") return "billing";
   if (route.path === "/admin") return "admin";
   if (route.path === "/rl-training") return "rlTraining";
+  if (route.path === "/particles") return "particles";
   if (route.path === "/logs-archive") return "logsArchive";
   return "home";
 });
@@ -119,6 +122,7 @@ const viewTitles = computed<Record<View, string>>(() => ({
   billing: "精粹与订阅",
   admin: "对局池监控",
   rlTraining: "RL 训练面板",
+  particles: "粒子播放",
   logsArchive: "日志归档",
   games: "运行中对局",
 }));
@@ -362,6 +366,16 @@ onMounted(() => {
             >
               <RocketIcon class="text-foreground-subtle group-hover:text-foreground size-4 shrink-0" />
               <span class="truncate text-[13px]">RL 训练面板</span>
+            </div>
+            <div
+              v-if="isDesktop"
+              role="button"
+              class="group hover:bg-surface-hover hover:text-foreground text-foreground inline-flex h-8 w-full cursor-pointer items-center gap-2 overflow-hidden rounded-lg pr-2.5 pl-2.5"
+              :class="{ 'bg-selected font-semibold': currentView === 'particles' }"
+              @click="router.push('/particles')"
+            >
+              <SparklesIcon class="text-foreground-subtle group-hover:text-foreground size-4 shrink-0" />
+              <span class="truncate text-[13px]">粒子播放</span>
             </div>
             <div
               role="button"

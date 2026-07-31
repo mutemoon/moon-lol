@@ -2,12 +2,12 @@ use bevy::prelude::*;
 use lol_base::character::HealthBar;
 use lol_base::hash::hash_bin;
 use lol_base::hash_key::LoadHashKeyTrait;
-use lol_base::ui::{
+use lol_base_render::ui::{
     LOLEnumHealthBarTickStyle, LOLEnumUiPosition, LOLFloatingInfoBarViewController,
     LOLHeroFloatingInfoBarData, LOLStructureFloatingInfoBarData, LOLUiElementEffectInstancedData,
     LOLUiElementIconData, LOLUiElementRegionData, LOLUnitFloatingInfoBarData,
 };
-use lol_base::ui_components::{HealthBind, UIBindData, UIBindOf, UIBindTarget, UIElement};
+use lol_base_render::ui_components::{HealthBind, UIBindData, UIBindOf, UIBindTarget, UIElement};
 use lol_core::base::bounding::Bounding;
 use lol_core::base::level::Level;
 use lol_core::life::Health;

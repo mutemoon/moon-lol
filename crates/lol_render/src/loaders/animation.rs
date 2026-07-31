@@ -2,7 +2,7 @@ use bevy::animation::AnimationClip;
 use bevy::animation::graph::AnimationGraph;
 use bevy::asset::{AssetLoader, LoadContext};
 use bevy::reflect::TypePath;
-use lol_base::animation::{ConfigAnimationNode, LOLAnimationGraph};
+use lol_base_render::animation::{ConfigAnimationNode, LOLAnimationGraph};
 
 use crate::error::Error;
 

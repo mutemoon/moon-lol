@@ -1,6 +1,6 @@
 use bevy::asset::{AssetLoader, LoadContext};
 use bevy::reflect::TypePath;
-use lol_base::ui::LOLUiFile;
+use lol_base_render::ui::LOLUiFile;
 
 use crate::error::Error;
 

@@ -3,14 +3,14 @@ use std::collections::HashMap;
 use bevy::prelude::*;
 use bevy::world_serialization::WorldInstanceReady;
 use lol_base::hash_key::LoadHashKeyTrait;
-use lol_base::ui::{
+use lol_base_render::ui::{
     LOLHeroFloatingInfoBarData, LOLStructureFloatingInfoBarData, LOLUiElementEffectAnimationData,
     LOLUiElementEffectDesaturateData, LOLUiElementEffectFillPercentageData,
     LOLUiElementEffectInstancedData, LOLUiElementGroupButtonData, LOLUiElementIconData,
     LOLUiElementRegionData, LOLUiElementTextData, LOLUiFile, LOLUiPaths, LOLUiSceneData,
     LOLUnitFloatingInfoBarData,
 };
-use lol_base::ui_components::{UIButton, UIElement};
+use lol_base_render::ui_components::{UIButton, UIElement};
 
 use super::{UIElementEntity, UIState};
 use crate::ui::text::UiTextState;

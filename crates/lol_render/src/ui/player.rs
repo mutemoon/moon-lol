@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use lol_base::character::Skin;
-use lol_base::ui::{LOLPlayerFrameViewController, LOLPlayerInventoryViewController};
+use lol_base_render::ui::{LOLPlayerFrameViewController, LOLPlayerInventoryViewController};
 use lol_core::base::ability_resource::AbilityResource;
 use lol_core::base::gold::Gold;
 use lol_core::base::level::Level;
@@ -179,7 +179,7 @@ fn update_player_ability_resource(
     res_ui_element_entity: Res<UIElementEntity>,
     q_ability_resource: Query<&AbilityResource, With<SelfPlayer>>,
 ) {
-    let lol_base::ui::LOLEnumResourceMeter::ResourceMeterGroupData(ref group_data) =
+    let lol_base_render::ui::LOLEnumResourceMeter::ResourceMeterGroupData(ref group_data) =
         res_player_frame
             .resource_bars
             .par_meter_data

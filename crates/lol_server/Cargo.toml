@@ -7,7 +7,6 @@ edition = "2024"
 bevy.workspace = true
 lol_base.workspace = true
 lol_core.workspace = true
-lol_champions.workspace = true
 lol_client.workspace = true
 lol_rpc.workspace = true
 serde.workspace = true

@@ -117,6 +117,7 @@ impl ChampionTestHarness {
                         .disable::<WinitPlugin>(),
                 );
                 app.add_plugins(PluginRender);
+                app.add_plugins(lol_particle::PluginParticle);
                 app.add_plugins(PluginSkillTestRender);
 
                 let output_dir = render_output_dir(&workspace_root, config.champion_dir);

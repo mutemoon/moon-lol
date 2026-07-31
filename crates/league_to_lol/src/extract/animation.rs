@@ -6,7 +6,7 @@ use league_core::extract::{
     EnumBlendData, EnumClipData, EnumParametricUpdater, ParallelClipData, ParametricClipData,
     SelectorClipData, SequencerClipData,
 };
-use lol_base::animation::{
+use lol_base_render::animation::{
     ConfigAnimationNode, ConfigAnimationNodeF32, ConfigBlendData, ConfigParametricUpdater,
     LOLAnimationGraph,
 };

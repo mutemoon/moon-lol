@@ -3,7 +3,7 @@ use std::fs::File;
 use std::io::Write;
 
 use bevy::prelude::info;
-use lol_base::ui::{
+use lol_base_render::ui::{
     LOLUiElementEffectAnimationData, LOLUiElementEffectInstancedData, LOLUiElementGroupButtonData,
     LOLUiElementIconData, LOLUiElementRegionData, LOLUiElementTextData, LOLUiSceneData,
 };

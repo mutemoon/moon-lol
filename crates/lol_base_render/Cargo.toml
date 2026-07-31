@@ -1,0 +1,15 @@
+[package]
+name = "lol_base_render"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+bevy.workspace = true
+bincode.workspace = true
+bitflags.workspace = true
+league_utils.workspace = true
+lol_base.workspace = true
+rand.workspace = true
+ron.workspace = true
+serde.workspace = true
+thiserror.workspace = true

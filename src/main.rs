@@ -6,6 +6,7 @@ use lol_core::PluginCore;
 use lol_core::game::GameScenes;
 use lol_core::log::create_log_plugin;
 use lol_debug::PluginDebug;
+use lol_particle::PluginParticle;
 use lol_render::PluginRender;
 use lol_server::PluginServer;
 
@@ -88,6 +89,7 @@ fn main() {
             }),
             PluginCore,
             PluginRender,
+            PluginParticle,
             PluginChampions,
             PluginServer {
                 ws_port: args.ws_port,

@@ -3,12 +3,12 @@ use bevy::prelude::*;
 use bevy::render::RenderPlugin;
 use bevy::render::settings::{RenderCreation, WgpuFeatures, WgpuSettings};
 use lol_base::hash_key::{HashKey, LoadHashKeyTrait};
-use lol_base::particle::{
+use lol_base_render::particle::{
     ConfigVfxEmitterDefinition, ConfigVfxPrimitive, ConfigVfxShape, ConfigVfxSystemDefinition,
     Sampler, StochasticSampler, VfxTexture,
 };
-use lol_render::camera::PluginCamera;
-use lol_render::particle::{CommandParticleSpawn, PluginParticle};
+use lol_base_render::camera::PluginCamera;
+use lol_particle::{CommandParticleSpawn, PluginParticle};
 
 fn const_sampler<T: Clone>(v: T) -> StochasticSampler<T> {
     StochasticSampler {

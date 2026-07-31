@@ -37,6 +37,9 @@ rmcp.workspace = true
 lol_client.workspace = true
 lol_agent_runtime.workspace = true
 lol_game_process_manager = { path = "../../../crates/lol_game_process_manager" }
+# 粒子播放页：桌面端后端用 lol_share（不依赖 bevy）解析 skin0_vfx.ron 并序列化。
+lol_share.workspace = true
+ron.workspace = true
 async-trait = "0.1"
 uuid = { version = "1", features = ["v4"] }
 tracing.workspace = true

@@ -11,9 +11,9 @@ use league_file::mesh_skinned::LeagueSkinnedMesh;
 use league_file::skeleton::LeagueSkeleton;
 use league_loader::game::{Data, LeagueLoader, PropGroup};
 use league_loader::prop_bin::LeagueWadLoaderTrait;
-use lol_base::animation::{ConfigAnimationClip, LOLAnimationGraph, LOLAnimationGraphHandle};
+use lol_base_render::animation::{ConfigAnimationClip, LOLAnimationGraph, LOLAnimationGraphHandle};
 use lol_base::character::{HealthBar, Skin};
-use lol_base::particle::{ConfigVfx, ConfigVfxHandle};
+use lol_base_render::particle::{ConfigVfx, ConfigVfxHandle};
 use ron::ser::{PrettyConfig, to_string_pretty};
 
 use crate::animation::load_animation_file;
@@ -451,8 +451,8 @@ fn export_vfx_for_skin(
     skin_prop_group: &PropGroup,
     skin_data: &SkinCharacterDataProperties,
     hashes: &HashMap<u32, String>,
-) -> lol_base::particle::ConfigVfx {
-    use lol_base::particle::{ConfigResourceResolver, ConfigVfx, VfxTexture};
+) -> lol_base_render::particle::ConfigVfx {
+    use lol_base_render::particle::{ConfigResourceResolver, ConfigVfx, VfxTexture};
 
     use crate::extract::vfx::convert_system_definition;
 
@@ -538,7 +538,7 @@ fn export_vfx_for_skin(
 
 fn extract_assets_for_vfx(
     loader: &LeagueLoader,
-    config_vfx: &mut lol_base::particle::ConfigVfxSystemDefinition,
+    config_vfx: &mut lol_base_render::particle::ConfigVfxSystemDefinition,
 ) {
     if let Some(emitters) = config_vfx.complex_emitter_definition_data.as_mut() {
         for emitter in emitters {
@@ -554,9 +554,9 @@ fn extract_assets_for_vfx(
 
 fn extract_assets_for_emitter(
     loader: &LeagueLoader,
-    emitter: &mut lol_base::particle::ConfigVfxEmitterDefinition,
+    emitter: &mut lol_base_render::particle::ConfigVfxEmitterDefinition,
 ) {
-    use lol_base::particle::ConfigVfxPrimitive;
+    use lol_base_render::particle::ConfigVfxPrimitive;
 
     // 所有纹理（texture/particle_color_texture/normal_map_texture/texture_mult/base_texture）
     // 已在 convert_* 的 load_texture 闭包中提取并转为 Handle<Image>，这里仅处理静态网格

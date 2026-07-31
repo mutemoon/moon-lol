@@ -15,7 +15,7 @@
 //!   --toc-paths "shaders/unlit_decal_ps.ps.dx11"
 //! ```
 
-use std::collections::{HashMap, HashSet};
+use std::collections::{BTreeMap, HashMap, HashSet};
 use std::fs;
 use std::io::Read;
 use std::path::{Path, PathBuf};
@@ -25,13 +25,240 @@ use bevy::prelude::*;
 use clap::Parser;
 use console::style;
 use indicatif::{ProgressBar, ProgressStyle};
+use league_core::extract::{X3dSharedData, X3dSharedSamplerDef};
 use league_file::shader::LeagueShaderToc;
 use league_loader::prop_bin::LeagueWadLoaderTrait;
 use league_loader::wad::LeagueWadLoader;
 use league_utils::{LeagueShader, hash_wad};
-use league_core::extract::{X3dSharedData, X3dSharedSamplerDef};
-use lol_render::shader::{SharedRenderData, SharedSamplerDef, SharedTextureDef, ShaderMap};
+use lol_base_render::shader_layout::{BindingDescriptor, BindingTypeDesc, ShaderLayoutDescriptor};
+use lol_render::shader::{ShaderMap, SharedRenderData, SharedSamplerDef, SharedTextureDef};
 use rayon::prelude::*;
+
+// ---------------------------------------------------------------------------
+// RDEF 解析：从 DXBC chunk 提取 cbuffer 名/成员/绑定表和资源绑定表
+// ---------------------------------------------------------------------------
+
+#[derive(Debug, Clone)]
+struct RdefVar {
+    name: String,
+    offset: u32,
+    size: u32,
+    #[allow(dead_code)]
+    used: bool,
+}
+
+#[derive(Debug, Clone)]
+struct RdefCbuffer {
+    name: String,
+    size: u32,
+    vars: Vec<RdefVar>,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+enum ResKind {
+    CBuffer,
+    Sampler,
+    Texture,
+    Other(u32),
+}
+
+#[derive(Debug, Clone)]
+struct RdefResource {
+    name: String,
+    kind: ResKind,
+    bind_point: u32,
+}
+
+#[derive(Debug, Clone)]
+struct RdefInfo {
+    cbuffers: Vec<RdefCbuffer>,
+    resources: Vec<RdefResource>,
+    is_pixel: bool,
+}
+
+fn u32_at(b: &[u8], off: usize) -> Option<u32> {
+    Some(u32::from_le_bytes(b.get(off..off + 4)?.try_into().ok()?))
+}
+
+fn cstr_at(b: &[u8], off: usize) -> Option<String> {
+    let end = b[off..].iter().position(|&c| c == 0)? + off;
+    let s = std::str::from_utf8(&b[off..end]).ok()?;
+    Some(s.to_string())
+}
+
+fn parse_rdef(dxbc: &[u8]) -> Result<RdefInfo, String> {
+    if dxbc.get(..4) != Some(b"DXBC") {
+        return Err("非 DXBC 文件（magic 不符）".into());
+    }
+    let chunk_count = u32_at(dxbc, 0x1C).ok_or("读 chunkCount 越界")?;
+    let mut base = None;
+    for c in 0..chunk_count as usize {
+        let off = u32_at(dxbc, 0x20 + 4 * c).ok_or("chunk 偏移表越界")? as usize;
+        if dxbc.get(off..off + 4) == Some(b"RDEF") {
+            base = Some(off + 8);
+            break;
+        }
+    }
+    let base = base.ok_or("无 RDEF chunk")?;
+    let rd = |o: usize| u32_at(dxbc, base + o).ok_or(format!("RDEF+{o} 越界"));
+    let cb_count = rd(0)? as usize;
+    let cb_off = rd(4)? as usize;
+    let res_count = rd(8)? as usize;
+    let res_off = rd(12)? as usize;
+    let major = *dxbc.get(base + 17).ok_or("RDEF 头越界")?;
+    let program_type = u16::from_le_bytes(
+        dxbc.get(base + 18..base + 20)
+            .ok_or("RDEF 头越界")?
+            .try_into()
+            .unwrap(),
+    );
+    let var_stride = if major >= 5 { 40 } else { 24 };
+
+    let mut cbuffers = Vec::new();
+    for i in 0..cb_count {
+        let e = base + cb_off + i * 24;
+        let name = cstr_at(
+            dxbc,
+            base + u32_at(dxbc, e).ok_or("cbuffer 条目越界")? as usize,
+        )
+        .ok_or("cbuffer 名越界")?;
+        let var_count = u32_at(dxbc, e + 4).ok_or("varCount 越界")? as usize;
+        let var_off = u32_at(dxbc, e + 8).ok_or("varOffset 越界")? as usize;
+        let size = u32_at(dxbc, e + 12).ok_or("cbuffer size 越界")?;
+        let mut vars = Vec::new();
+        for v in 0..var_count {
+            let ve = base + var_off + v * var_stride;
+            let vname = cstr_at(
+                dxbc,
+                base + u32_at(dxbc, ve).ok_or("var 条目越界")? as usize,
+            )
+            .ok_or("var 名越界")?;
+            let offset = u32_at(dxbc, ve + 4).ok_or("var offset 越界")?;
+            let vsize = u32_at(dxbc, ve + 8).ok_or("var size 越界")?;
+            let flags = u32_at(dxbc, ve + 12).ok_or("var flags 越界")?;
+            vars.push(RdefVar {
+                name: vname,
+                offset,
+                size: vsize,
+                used: flags & 2 != 0,
+            });
+        }
+        cbuffers.push(RdefCbuffer { name, size, vars });
+    }
+
+    // 资源绑定表：SM5.0 条目 32 字节；名字健全性校验失败则退回 40（SM5.1）
+    let mut resources = Vec::new();
+    'stride: for stride in [32usize, 40] {
+        let mut parsed = Vec::new();
+        for i in 0..res_count {
+            let e = base + res_off + i * stride;
+            let Some(name_off) = u32_at(dxbc, e) else {
+                continue 'stride;
+            };
+            let Some(name) = cstr_at(dxbc, base + name_off as usize) else {
+                continue 'stride;
+            };
+            if name.is_empty() || name.len() > 200 || !name.chars().all(|c| c.is_ascii_graphic()) {
+                continue 'stride;
+            }
+            let input_type = u32_at(dxbc, e + 4).ok_or("res 类型越界")?;
+            let bind_point = u32_at(dxbc, e + 20).ok_or("res bindPoint 越界")?;
+            let kind = match input_type {
+                0 => ResKind::CBuffer,
+                2 => ResKind::Texture,
+                3 => ResKind::Sampler,
+                t => ResKind::Other(t),
+            };
+            parsed.push(RdefResource {
+                name,
+                kind,
+                bind_point,
+            });
+        }
+        resources = parsed;
+        break;
+    }
+
+    Ok(RdefInfo {
+        cbuffers,
+        resources,
+        is_pixel: program_type == 0xFFFF,
+    })
+}
+
+/// 从 DXBC 的 RDEF chunk 构建完整 ShaderLayoutDescriptor。
+/// 与 spirv-reflect 等价——包含所有 cbuffer（含成员名/offset/size）和纹理/采样器绑定。
+/// binding_index 使用与 dxbc-compiler 一致的公式：shift + typeBase + regIndex
+fn build_rdef_layout(dxbc: &[u8]) -> Result<ShaderLayoutDescriptor, String> {
+    use lol_base_render::shader_layout::{BindingDescriptor, BindingTypeDesc, ShaderMemberLayout};
+
+    let rdef = parse_rdef(dxbc)?;
+    let shift: u32 = if rdef.is_pixel { 100 } else { 0 };
+
+    // ── cbuffer 索引：name → (size, vars) ──
+    let cb_map: std::collections::HashMap<&str, (u32, &[RdefVar])> = rdef
+        .cbuffers
+        .iter()
+        .map(|cb| (cb.name.as_str(), (cb.size, cb.vars.as_slice())))
+        .collect();
+
+    let mut bindings: std::collections::BTreeMap<String, BindingDescriptor> =
+        std::collections::BTreeMap::new();
+
+    for res in &rdef.resources {
+        // 公式 binding = shift + typeBase + regIndex
+        let type_base: u32 = match res.kind {
+            ResKind::CBuffer => 0,
+            ResKind::Texture => 16,
+            ResKind::Sampler => 32,
+            ResKind::Other(t) => {
+                eprintln!(
+                    "[RDEF] 未知资源类型 {} (kind={t})，bind_point={} — 跳过",
+                    res.name, res.bind_point
+                );
+                continue;
+            }
+        };
+        let binding_index = shift + type_base + res.bind_point;
+
+        let type_desc = match res.kind {
+            ResKind::CBuffer => {
+                let (total_size, vars) = cb_map.get(res.name.as_str()).copied().unwrap_or((0, &[]));
+                let members: std::collections::BTreeMap<String, ShaderMemberLayout> = vars
+                    .iter()
+                    .map(|v| {
+                        (
+                            v.name.clone(),
+                            ShaderMemberLayout {
+                                name: v.name.clone(),
+                                offset: v.offset as usize,
+                                size: v.size as usize,
+                            },
+                        )
+                    })
+                    .collect();
+                BindingTypeDesc::UniformBuffer {
+                    total_size: total_size as usize,
+                    members,
+                }
+            }
+            ResKind::Texture => BindingTypeDesc::Texture2d,
+            ResKind::Sampler => BindingTypeDesc::Sampler,
+            ResKind::Other(_) => continue,
+        };
+
+        bindings.insert(
+            res.name.clone(),
+            BindingDescriptor {
+                binding_index,
+                name: res.name.clone(),
+                type_desc,
+            },
+        );
+    }
+
+    Ok(ShaderLayoutDescriptor { bindings })
+}
 
 /// 从 ShaderCache.dx11.wad.client 提取 Shader 并转换为 SPIR-V
 #[derive(Parser, Debug)]
@@ -153,6 +380,8 @@ fn main() -> anyhow::Result<()> {
     let mut global_entries = HashMap::new();
     // 每个家族的变体 hash → def 名字集合，供接口对齐 pass 做 VS/PS 变体配对
     let mut global_defs: HashMap<LeagueShader, HashMap<u64, Vec<String>>> = HashMap::new();
+    // 全局 RDEF 布局：spv 绝对路径 → ShaderLayoutDescriptor
+    let mut global_rdef_layouts: HashMap<PathBuf, ShaderLayoutDescriptor> = HashMap::new();
 
     for toc_path in &toc_paths {
         println!("\n[TOC] 处理: {}", toc_path);
@@ -172,15 +401,21 @@ fn main() -> anyhow::Result<()> {
             args.skip_existing,
             args.save_dxbc,
         ) {
-            Ok((map_entries, hash_to_defs)) => {
+            Ok((map_entries, hash_to_defs, rdef_layouts)) => {
                 global_entries.insert(shader_type, map_entries);
                 global_defs.insert(shader_type, hash_to_defs);
+                global_rdef_layouts.extend(rdef_layouts);
             }
             Err(e) => {
                 eprintln!("[ERROR] 处理 TOC {} 失败: {}", toc_path, e);
             }
         }
     }
+
+    println!(
+        "\n[RDEF] 共 {} 个唯一 SPIR-V 文件已从 RDEF 反射布局",
+        global_rdef_layouts.len()
+    );
 
     let mut app = App::new();
     app.add_plugins((
@@ -194,10 +429,10 @@ fn main() -> anyhow::Result<()> {
     app.register_type::<ShaderMap>();
     app.register_type::<lol_render::shader::ShaderMapEntry>();
     app.register_type::<league_utils::LeagueShader>();
-    app.register_type::<lol_render::particle::shader_layout::ShaderMemberLayout>();
-    app.register_type::<lol_render::particle::shader_layout::BindingTypeDesc>();
-    app.register_type::<lol_render::particle::shader_layout::BindingDescriptor>();
-    app.register_type::<lol_render::particle::shader_layout::ShaderLayoutDescriptor>();
+    app.register_type::<lol_base_render::shader_layout::ShaderMemberLayout>();
+    app.register_type::<lol_base_render::shader_layout::BindingTypeDesc>();
+    app.register_type::<lol_base_render::shader_layout::BindingDescriptor>();
+    app.register_type::<lol_base_render::shader_layout::ShaderLayoutDescriptor>();
 
     let asset_server = app.world().resource::<AssetServer>().clone();
 
@@ -217,42 +452,7 @@ fn main() -> anyhow::Result<()> {
         }
     }
 
-    // 多个变体 hash 经 shader_ids 间接索引共享同一 .spv，按唯一路径去重后用
-    // rayon 并行反射（临时 yml 以 spv 路径命名，去重后并发无冲突）
-    let unique_spv_paths: Vec<PathBuf> = reflect_jobs
-        .iter()
-        .map(|(_, _, p, _)| p.clone())
-        .collect::<HashSet<_>>()
-        .into_iter()
-        .collect();
-    let pb_reflect = ProgressBar::new(unique_spv_paths.len() as u64);
-    pb_reflect.set_style(
-        ProgressStyle::default_bar()
-            .template("{spinner:.green} [{elapsed_precise}] [{bar:40.cyan/blue}] {pos}/{len} 反射 SPIR-V 布局 ({eta}) {msg}")
-            .unwrap()
-            .progress_chars("#>-"),
-    );
-    let layout_cache: HashMap<PathBuf, ShaderLayoutDescriptor> = unique_spv_paths
-        .par_iter()
-        .map(|spv_abs_path| {
-            let layout = match reflect_spirv_via_cli(spv_abs_path, Path::new("spirv-reflect.exe")) {
-                Ok(layout) => layout,
-                Err(e) => {
-                    pb_reflect.println(format!(
-                        "  {} {:?} 反射失败: {}",
-                        style("[ERROR]").red().bold(),
-                        spv_abs_path.display(),
-                        e
-                    ));
-                    ShaderLayoutDescriptor::default()
-                }
-            };
-            pb_reflect.inc(1);
-            (spv_abs_path.clone(), layout)
-        })
-        .collect();
-    pb_reflect.finish_with_message("反射提取完成");
-
+    // ── 使用 RDEF 布局（无需 spirv-reflect）──
     let mut metas: HashMap<LeagueShader, HashMap<u64, Handle<Shader>>> = HashMap::new();
     let mut layouts_map: HashMap<LeagueShader, HashMap<u64, ShaderLayoutDescriptor>> =
         HashMap::new();
@@ -273,7 +473,13 @@ fn main() -> anyhow::Result<()> {
         layouts_map
             .entry(shader_type)
             .or_insert_with(HashMap::new)
-            .insert(u64_hash, layout_cache[&spv_abs_path].clone());
+            .insert(
+                u64_hash,
+                global_rdef_layouts
+                    .get(&spv_abs_path)
+                    .cloned()
+                    .unwrap_or_default(),
+            );
     }
 
     // ── 离线统一 pass：家族槽位并集布局 + 改写 .spv binding 装饰 ───────────
@@ -477,7 +683,11 @@ fn process_toc(
     dxbc_compiler_path: &Path,
     skip_existing: bool,
     save_dxbc: bool,
-) -> anyhow::Result<(HashMap<u64, String>, HashMap<u64, Vec<String>>)> {
+) -> anyhow::Result<(
+    HashMap<u64, String>,
+    HashMap<u64, Vec<String>>,
+    HashMap<PathBuf, ShaderLayoutDescriptor>,
+)> {
     // 读取 TOC 文件
     let toc_hash = hash_wad(toc_path);
     let mut toc_reader = wad_loader
@@ -656,6 +866,38 @@ fn process_toc(
         .collect();
     pb_compile.finish_with_message("编译完成");
 
+    // ── RDEF 布局：为每个成功编译的 bundled shader 解析 RDEF ──
+    let mut rdef_layouts: HashMap<PathBuf, ShaderLayoutDescriptor> = HashMap::new();
+    for idx in 0..shader_toc.bundled_shader_count as usize {
+        if spv_paths[idx].is_none() || idx >= dxbc_blobs.len() {
+            continue;
+        }
+        let stem = bundled_defs
+            .get(&idx)
+            .map(|d| defs_to_stem(d))
+            .unwrap_or_else(|| format!("shader_{:04}", idx));
+        let spv_filename = format!("{}.spv", stem);
+        let spv_abs = toc_out_dir.join(&spv_filename);
+        match build_rdef_layout(&dxbc_blobs[idx]) {
+            Ok(layout) => {
+                rdef_layouts.insert(spv_abs, layout);
+            }
+            Err(e) => {
+                eprintln!(
+                    "  {} bundled #{} ({}) RDEF 解析失败: {}",
+                    style("[WARN]").yellow().bold(),
+                    idx,
+                    stem,
+                    e
+                );
+            }
+        }
+    }
+    println!(
+        "  [RDEF] 解析 {} 个 bundled shader RDEF 布局",
+        rdef_layouts.len()
+    );
+
     // 构建 shader_map：shader_hash → spv 路径
     // shader_ids[shader_index] 是到 bundled shaders 的间接索引
     let mut map_entries: HashMap<u64, String> = HashMap::new();
@@ -668,7 +910,7 @@ fn process_toc(
 
     println!("  [DONE] {} 个 shader 编译处理完成", map_entries.len());
 
-    Ok((map_entries, hash_to_defs))
+    Ok((map_entries, hash_to_defs, rdef_layouts))
 }
 
 /// 解析 dx11_0 chunk 文件，返回 DXBC blob 列表
@@ -805,463 +1047,6 @@ fn sanitize_name(path: &str) -> String {
     clean_path.to_string_lossy().replace('\\', "/")
 }
 
-use std::collections::BTreeMap;
-
-use lol_render::particle::shader_layout::{
-    BindingDescriptor, BindingTypeDesc, ShaderLayoutDescriptor, ShaderMemberLayout,
-};
-
-/// 使用外部 spirv-reflect.exe 工具进行反射解析并直接转换为 ShaderLayoutDescriptor
-///
-/// 采用 `-o tmp_file` 写临时文件方式，避免 stdout 中特殊字符（如 $Globals）导致管道解析失败。
-fn reflect_spirv_via_cli(
-    spv_path: &Path,
-    spirv_reflect_path: &Path,
-) -> Result<ShaderLayoutDescriptor, String> {
-    // 临时 yml 放系统 temp 目录，文件名用 spv 路径 hash（短且唯一，并发无冲突）。
-    // 不能直接在 spv 旁边拼长后缀：def 组合文件名本已接近 Windows MAX_PATH（260），
-    // 再加后缀会超限，导致 spirv-reflect 以 0xc0000409 崩溃。
-    let path_hash = league_utils::hash_shader(&spv_path.to_string_lossy());
-    let tmp_yml = std::env::temp_dir().join(format!("spv_reflect_{:016x}.yml", path_hash));
-
-    let status = Command::new(spirv_reflect_path)
-        .arg(spv_path)
-        .arg("-y")
-        .arg("-o")
-        .arg(&tmp_yml)
-        .status()
-        .map_err(|e| format!("启动 spirv-reflect 失败: {}", e))?;
-
-    if !status.success() {
-        return Err(format!("spirv-reflect 执行失败，exit={}", status));
-    }
-
-    let yaml_str = fs::read_to_string(&tmp_yml)
-        .map_err(|e| format!("读取临时 yml 失败 {:?}: {}", tmp_yml, e))?;
-    let _ = fs::remove_file(&tmp_yml);
-
-    parse_spirv_reflect_yaml(&yaml_str)
-}
-
-// ── Block variable（锚点变量）信息 ────────────────────────────────────────────
-
-/// 从 `all_block_variables` 段解析所有 `&bvN` 锚点变量，
-/// 返回 anchor_id → (total_size, members) 的映射。
-///
-/// spirv-reflect YAML 中 `block: *bvN` 引用需要通过这张表来展开。
-fn parse_block_variables(
-    yaml_str: &str,
-) -> BTreeMap<String, (usize, BTreeMap<String, ShaderMemberLayout>)> {
-    // 两阶段：
-    // 1. 扫描所有顶层 bv 条目（`- &bvN` 开头），记录 name/offset/size
-    // 2. 找到 member_count > 0 的顶层 bv（即 struct root），重新关联成员
-    //
-    // 结构特点：顶层 bv 按顺序排列，struct root 的 members 段紧跟其后，
-    // 内容是 `- *bvM` 形式的别名引用。
-
-    // 第一遍：记录每个 anchor 的 (name, offset, size) 和 member_count
-    struct BvEntry {
-        anchor: String, // e.g. "bv15"
-        name: String,
-        offset: usize,
-        size: usize,
-        member_count: usize,
-        // 直接的子成员 anchor id 列表（从 `- *bvM` 解析）
-        child_anchors: Vec<String>,
-    }
-
-    let mut entries: Vec<BvEntry> = Vec::new();
-    let mut in_block_variables = false;
-    let mut in_members_of_current = false;
-
-    for line in yaml_str.lines() {
-        let trimmed = line.trim();
-
-        if trimmed.starts_with("all_block_variables:") {
-            in_block_variables = true;
-            continue;
-        }
-        // 遇到下一个顶层 section 则结束
-        if in_block_variables
-            && !trimmed.is_empty()
-            && !trimmed.starts_with('-')
-            && !trimmed.starts_with('#')
-            && trimmed.ends_with(':')
-            && !line.starts_with(' ')
-            && !line.starts_with('\t')
-        {
-            // 顶层 key（无缩进），说明 all_block_variables 段结束
-            in_block_variables = false;
-            in_members_of_current = false;
-        }
-        if !in_block_variables {
-            continue;
-        }
-
-        // 新顶层 bv 条目：`  - &bvN`
-        if trimmed.starts_with("- &bv") {
-            in_members_of_current = false;
-            let anchor = trimmed
-                .trim_start_matches('-')
-                .trim()
-                .trim_start_matches('&')
-                .to_string();
-            entries.push(BvEntry {
-                anchor,
-                name: String::new(),
-                offset: 0,
-                size: 0,
-                member_count: 0,
-                child_anchors: Vec::new(),
-            });
-            continue;
-        }
-
-        let Some(last) = entries.last_mut() else {
-            continue;
-        };
-
-        if trimmed.starts_with("members:") {
-            in_members_of_current = last.member_count > 0;
-            continue;
-        }
-
-        if in_members_of_current {
-            // `      - *bvM`
-            if trimmed.starts_with("- *bv") {
-                let child = trimmed
-                    .trim_start_matches('-')
-                    .trim()
-                    .trim_start_matches('*')
-                    .to_string();
-                last.child_anchors.push(child);
-            }
-            continue;
-        }
-
-        if let Some(val) = parse_yaml_key_val(trimmed, "name:") {
-            last.name = val.trim_matches('"').to_string();
-        } else if let Some(val) = parse_yaml_key_val(trimmed, "offset:") {
-            last.offset = val
-                .split_whitespace()
-                .next()
-                .unwrap_or("")
-                .parse()
-                .unwrap_or(0);
-        } else if let Some(val) = parse_yaml_key_val(trimmed, "size:") {
-            last.size = val
-                .split_whitespace()
-                .next()
-                .unwrap_or("")
-                .parse()
-                .unwrap_or(0);
-        } else if let Some(val) = parse_yaml_key_val(trimmed, "member_count:") {
-            last.member_count = val
-                .split_whitespace()
-                .next()
-                .unwrap_or("")
-                .parse()
-                .unwrap_or(0);
-        }
-    }
-
-    // 建立 anchor → BvEntry 的快速查找表（按 index）
-    // 用 anchor 字符串做 key
-    let anchor_map: BTreeMap<String, usize> = entries
-        .iter()
-        .enumerate()
-        .map(|(i, e)| (e.anchor.clone(), i))
-        .collect();
-
-    // 对每个顶层 struct root（member_count > 0），展开它的子成员
-    let mut result: BTreeMap<String, (usize, BTreeMap<String, ShaderMemberLayout>)> =
-        BTreeMap::new();
-
-    for entry in &entries {
-        if entry.member_count == 0 {
-            continue;
-        }
-        let mut members: BTreeMap<String, ShaderMemberLayout> = BTreeMap::new();
-        for child_anchor in &entry.child_anchors {
-            let Some(&child_idx) = anchor_map.get(child_anchor) else {
-                continue;
-            };
-            let child = &entries[child_idx];
-            if child.name.is_empty() {
-                // 匿名 padding 成员，跳过
-                continue;
-            }
-            members.insert(
-                child.name.clone(),
-                ShaderMemberLayout {
-                    name: child.name.clone(),
-                    offset: child.offset,
-                    size: child.size,
-                },
-            );
-        }
-        // total_size 直接取 struct root 自身的 size 字段
-        result.insert(entry.anchor.clone(), (entry.size, members));
-    }
-
-    result
-}
-
-/// 解析 spirv-reflect.exe -y 输出的文本并直接填充 ShaderLayoutDescriptor
-///
-/// 策略：
-/// 1. 先调用 `parse_block_variables` 建立锚点表（解决 `*bvN` 别名引用）
-/// 2. 扫描 `all_descriptor_bindings` 段，对每个 binding 通过 `block: *bvN` 查表获取 members
-/// 3. 修正 descriptor_type 映射：UBO = 6（`VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER`），
-///    Sampler = 0，CombinedImageSampler = 1，SampledImage = 2，StorageImage = 3
-fn parse_spirv_reflect_yaml(yaml_str: &str) -> Result<ShaderLayoutDescriptor, String> {
-    // ── 第一步：解析 all_block_variables 锚点表 ────────────────────────────────
-    let block_var_table = parse_block_variables(yaml_str);
-
-    // ── 第二步：解析 all_descriptor_bindings ──────────────────────────────────
-    let mut bindings: BTreeMap<String, BindingDescriptor> = BTreeMap::new();
-
-    let mut in_descriptor_bindings = false;
-    let mut current_spirv_id: Option<u32> = None;
-    let mut current_binding = 0u32;
-    let mut current_binding_name = String::new(); // binding 的名称，如 "$Globals"、"DIFFUSE_MAP__SMP"
-    // descriptor_type 用 i32 存储，-1 表示未知（VK_DESCRIPTOR_TYPE_???），跳过
-    let mut current_descriptor_type: i32 = -1;
-    // block_anchor 记录 `block: *bvN` 中的锚点 id
-    let mut current_block_anchor = String::new();
-    // 对于 Texture/Sampler 这种没有 block 的 binding，也保留 members
-    let mut current_members: BTreeMap<String, ShaderMemberLayout> = BTreeMap::new();
-    let mut current_struct_size = 0usize;
-
-    // 仅在 all_descriptor_bindings 段内且处于顶层 binding 条目中解析成员
-    let mut in_members_inline = false;
-    let mut current_member_name = String::new();
-    let mut current_member_offset = 0usize;
-    let mut current_member_size = 0usize;
-
-    let flush = |bindings: &mut BTreeMap<String, BindingDescriptor>,
-                 spirv_id: Option<u32>,
-                 binding: u32,
-                 binding_name: &str,
-                 descriptor_type: i32,
-                 struct_size: usize,
-                 members: &BTreeMap<String, ShaderMemberLayout>| {
-        if spirv_id.is_none() {
-            return;
-        }
-        // VkDescriptorType 枚举值：
-        //   -1 = VK_DESCRIPTOR_TYPE_??? (UNDEFINED) — 跳过
-        //    0 = VK_DESCRIPTOR_TYPE_SAMPLER
-        //    1 = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
-        //    2 = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE
-        //    3 = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE
-        //    6 = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER
-        //    7 = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER
-        match descriptor_type {
-            6 | 7 => {
-                bindings.insert(
-                    binding_name.to_string(),
-                    BindingDescriptor {
-                        binding_index: binding,
-                        name: binding_name.to_string(),
-                        type_desc: BindingTypeDesc::UniformBuffer {
-                            total_size: struct_size,
-                            members: members.clone(),
-                        },
-                    },
-                );
-            }
-            1 | 2 => {
-                bindings.insert(
-                    binding_name.to_string(),
-                    BindingDescriptor {
-                        binding_index: binding,
-                        name: binding_name.to_string(),
-                        type_desc: BindingTypeDesc::Texture2d,
-                    },
-                );
-            }
-            0 => {
-                bindings.insert(
-                    binding_name.to_string(),
-                    BindingDescriptor {
-                        binding_index: binding,
-                        name: binding_name.to_string(),
-                        type_desc: BindingTypeDesc::Sampler,
-                    },
-                );
-            }
-            _ => {} // 负数(-1)或其他未知类型，跳过
-        }
-    };
-
-    for line in yaml_str.lines() {
-        let trimmed = line.trim();
-
-        if trimmed.starts_with("all_descriptor_bindings:") {
-            in_descriptor_bindings = true;
-            continue;
-        }
-        if in_descriptor_bindings
-            && (trimmed.starts_with("all_interface_variables:") || trimmed.starts_with("module:"))
-        {
-            // flush 最后一条 binding
-            // 若 block_anchor 非空，从锚点表中取成员
-            let (sz, mems) = if !current_block_anchor.is_empty() {
-                if let Some((s, m)) = block_var_table.get(&current_block_anchor) {
-                    (*s, m.clone())
-                } else {
-                    (current_struct_size, current_members.clone())
-                }
-            } else {
-                (current_struct_size, current_members.clone())
-            };
-            flush(
-                &mut bindings,
-                current_spirv_id,
-                current_binding,
-                &current_binding_name,
-                current_descriptor_type,
-                sz,
-                &mems,
-            );
-            break;
-        }
-
-        if !in_descriptor_bindings {
-            continue;
-        }
-
-        // 新 binding 条目
-        if trimmed.starts_with("- &db") || trimmed.starts_with("- spirv_id:") {
-            // flush 上一条
-            let (sz, mems) = if !current_block_anchor.is_empty() {
-                if let Some((s, m)) = block_var_table.get(&current_block_anchor) {
-                    (*s, m.clone())
-                } else {
-                    (current_struct_size, current_members.clone())
-                }
-            } else {
-                (current_struct_size, current_members.clone())
-            };
-            flush(
-                &mut bindings,
-                current_spirv_id,
-                current_binding,
-                &current_binding_name,
-                current_descriptor_type,
-                sz,
-                &mems,
-            );
-            // 重置
-            current_spirv_id = Some(0);
-            current_binding = 0;
-            current_binding_name.clear();
-            current_descriptor_type = -1;
-            current_struct_size = 0;
-            current_block_anchor.clear();
-            current_members.clear();
-            in_members_inline = false;
-
-            // 如果是 `- spirv_id: N` 内联形式，直接解析
-            if let Some(val) = parse_yaml_key_val(trimmed, "spirv_id:") {
-                current_spirv_id = val.parse::<u32>().ok();
-            }
-            continue;
-        }
-
-        // `block: *bvN  # "BlockName"` — 记录锚点
-        if trimmed.starts_with("block:") {
-            in_members_inline = false;
-            if let Some(rest) = trimmed.strip_prefix("block:") {
-                let rest = rest.trim();
-                // rest 形如 `*bv15 # "$Globals"` 或 `*bv15`
-                if let Some(alias) = rest.strip_prefix('*') {
-                    let anchor_id = alias
-                        .split_whitespace()
-                        .next()
-                        .unwrap_or("")
-                        .split('#')
-                        .next()
-                        .unwrap_or("")
-                        .trim();
-                    current_block_anchor = anchor_id.to_string();
-                }
-            }
-            continue;
-        }
-
-        if let Some(val) = parse_yaml_key_val(trimmed, "spirv_id:") {
-            current_spirv_id = val.parse::<u32>().ok();
-        } else if !in_members_inline {
-            // binding 层级的字段（在 members 内部时不应电解析 binding 字段）
-            if trimmed.starts_with("name:") {
-                // binding 的名称，如 "$Globals"、"DIFFUSE_MAP__SMP"
-                if let Some(val) = parse_yaml_key_val(trimmed, "name:") {
-                    current_binding_name = val.trim_matches('"').to_string();
-                }
-            } else if trimmed.starts_with("binding:") {
-                if let Some(val) = parse_yaml_key_val(trimmed, "binding:") {
-                    if let Ok(b) = val.parse::<u32>() {
-                        current_binding = b;
-                    }
-                }
-            } else if let Some(val) = parse_yaml_key_val(trimmed, "descriptor_type:") {
-                // 用 i32 解析，支持 -1 （VK_DESCRIPTOR_TYPE_???)
-                let type_str = val.split('#').next().unwrap_or("").trim();
-                if let Ok(t) = type_str.parse::<i32>() {
-                    current_descriptor_type = t;
-                }
-            } else if trimmed.starts_with("members:") && current_block_anchor.is_empty() {
-                // 只在没有 block 引用时解析内联 members
-                in_members_inline = true;
-            }
-        } else {
-            // in_members_inline: 解析内联 member 字段
-            if trimmed.starts_with("- name:") {
-                if !current_member_name.is_empty() {
-                    current_members.insert(
-                        current_member_name.clone(),
-                        ShaderMemberLayout {
-                            name: current_member_name.clone(),
-                            offset: current_member_offset,
-                            size: current_member_size,
-                        },
-                    );
-                }
-                current_member_name.clear();
-                current_member_offset = 0;
-                current_member_size = 0;
-                if let Some(val) = parse_yaml_key_val(trimmed, "- name:") {
-                    current_member_name = val.trim_matches('"').to_string();
-                }
-            } else if let Some(val) = parse_yaml_key_val(trimmed, "name:") {
-                current_member_name = val.trim_matches('"').to_string();
-            } else if let Some(val) = parse_yaml_key_val(trimmed, "offset:") {
-                if let Ok(o) = val.parse::<usize>() {
-                    current_member_offset = o;
-                }
-            } else if let Some(val) = parse_yaml_key_val(trimmed, "size:") {
-                if let Ok(s) = val.parse::<usize>() {
-                    current_member_size = s;
-                    current_struct_size =
-                        current_struct_size.max(current_member_offset + current_member_size);
-                }
-            }
-        }
-    }
-
-    Ok(ShaderLayoutDescriptor { bindings })
-}
-
-fn parse_yaml_key_val<'a>(line: &'a str, key: &str) -> Option<&'a str> {
-    if let Some(idx) = line.find(key) {
-        let val_part = &line[idx + key.len()..];
-        return Some(val_part.trim());
-    }
-    None
-}
-
 // ---------------------------------------------------------------------------
 // 离线统一 pass：家族槽位并集布局 + 改写 .spv binding 装饰
 // ---------------------------------------------------------------------------
@@ -1304,10 +1089,11 @@ fn align_stage_interfaces(
     spv_path_map: &HashMap<LeagueShader, HashMap<u64, PathBuf>>,
     global_defs: &HashMap<LeagueShader, HashMap<u64, Vec<String>>>,
 ) {
+    use std::collections::{BTreeMap, BTreeSet};
+
     use lol_render::loaders::spirv_strip::{
         STORAGE_INPUT, STORAGE_OUTPUT, interface_vector_widths, widen_ps_inputs,
     };
-    use std::collections::{BTreeMap, BTreeSet};
 
     for (family, variants) in spv_path_map {
         let Some(vs_family) = paired_vs_family(*family) else {
@@ -1323,11 +1109,7 @@ fn align_stage_interfaces(
             continue;
         };
         // VS 家族宏名全集：PS defs 投影到该集合即运行时配对 VS 变体的 defs
-        let vs_macros: HashSet<&str> = vs_defs_map
-            .values()
-            .flatten()
-            .map(|s| s.as_str())
-            .collect();
+        let vs_macros: HashSet<&str> = vs_defs_map.values().flatten().map(|s| s.as_str()).collect();
 
         // 1. 逐 PS 变体 hash 定位配对 VS 变体，按文件聚合：多个 hash 经
         //    shader_ids 共享同一 .spv，不同 hash 可能配对不同 VS 文件

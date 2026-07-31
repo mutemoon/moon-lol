@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use lol_base::hash_key::LoadHashKeyTrait;
-use lol_base::ui::{LOLUiElementGroupButtonData, LOLUiElementGroupButtonState};
-use lol_base::ui_components::{UIButton, UIButtonEntities, UIElement};
+use lol_base_render::ui::{LOLUiElementGroupButtonData, LOLUiElementGroupButtonState};
+use lol_base_render::ui_components::{UIButton, UIButtonEntities, UIElement};
 
 use crate::ui::element::{UIElementEntity, UIState};
 

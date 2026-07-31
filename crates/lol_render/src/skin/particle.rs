@@ -1,10 +1,9 @@
 use bevy::prelude::*;
 use lol_base::character::Skin;
 use lol_base::hash_key::LoadHashKeyTrait;
-use lol_base::particle::ConfigResourceResolver;
 use lol_base::render_cmd::{CommandSkinParticleDespawn, CommandSkinParticleSpawn};
-
-use crate::particle::{CommandParticleDespawn, CommandParticleSpawn};
+use lol_base_render::particle::ConfigResourceResolver;
+use lol_base_render::particle::{CommandParticleDespawn, CommandParticleSpawn};
 
 pub fn on_command_character_particle_spawn(
     trigger: On<CommandSkinParticleSpawn>,

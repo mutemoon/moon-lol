@@ -16,3 +16,4 @@ image.workspace = true
 serde_json.workspace = true
 ron.workspace = true
 lol_render.workspace = true
+lol_particle.workspace = true

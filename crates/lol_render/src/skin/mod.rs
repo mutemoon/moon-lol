@@ -1,8 +1,10 @@
 use bevy::prelude::*;
 
-pub mod mesh_shadow;
 pub mod particle;
 pub mod skin;
+
+// mesh_shadow 已下沉到 lol_base_render（供 lol_particle 复用），在此 re-export 保持路径兼容。
+pub use lol_base_render::mesh_shadow;
 
 use self::particle::{on_command_character_particle_despawn, on_command_character_particle_spawn};
 use self::skin::{try_load_config_skin_characters, update_skin_scale};

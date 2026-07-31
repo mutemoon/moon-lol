@@ -1,0 +1,20 @@
+[package]
+name = "lol_particle"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+bevy.workspace = true
+clap.workspace = true
+league_file.workspace = true
+league_to_lol.workspace = true
+league_utils.workspace = true
+lol_base.workspace = true
+lol_base_render.workspace = true
+lol_core.workspace = true
+lol_rpc.workspace = true
+lol_server.workspace = true
+rand.workspace = true
+ron.workspace = true
+serde.workspace = true
+serde_json.workspace = true

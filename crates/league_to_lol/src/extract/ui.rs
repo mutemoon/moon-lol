@@ -18,7 +18,7 @@ use league_core::extract::{
 use league_loader::game::{Data, LeagueLoader};
 use league_loader::prop_bin::LeagueWadLoaderTrait;
 use league_utils::hash_bin;
-use lol_base::ui::{
+use lol_base_render::ui::{
     LOLAbilitiesUiData, LOLAbilityResourceBarData, LOLAtlasData, LOLAtlasData3SliceH,
     LOLAtlasData3SliceV, LOLAtlasData9Slice, LOLCooldownEffectUiData, LOLCooldownGemUiData,
     LOLDrawAreaList, LOLEnumAnchor, LOLEnumData, LOLEnumResourceMeter, LOLEnumUiMetric,
@@ -459,7 +459,7 @@ pub fn extract_ui_data(
     for (hash, scene_data) in &all_scene_datas {
         assets.scenes.insert(
             *hash,
-            lol_base::ui::LOLUiSceneData {
+            lol_base_render::ui::LOLUiSceneData {
                 name: scene_data.name.clone(),
                 enabled: scene_data.enabled.unwrap_or(false),
                 parent_scene: scene_data.parent_scene,
@@ -569,24 +569,24 @@ fn convert_atlas_data(atlas: &league_core::extract::AtlasData) -> LOLAtlasData {
 /// 转换 UiElementGroupButtonData 到 lol_base 稳定类型
 fn convert_ui_button_data(
     button: &UiElementGroupButtonData,
-) -> lol_base::ui::LOLUiElementGroupButtonData {
-    lol_base::ui::LOLUiElementGroupButtonData {
+) -> lol_base_render::ui::LOLUiElementGroupButtonData {
+    lol_base_render::ui::LOLUiElementGroupButtonData {
         name: button.name.clone(),
         is_enabled: button.is_enabled,
         hit_region_element: button.hit_region_element.into(),
         elements: button.elements.iter().map(|&h| h.into()).collect(),
         clicked_state_elements: button.clicked_state_elements.as_ref().map(|v| {
-            lol_base::ui::LOLUiElementGroupButtonState {
+            lol_base_render::ui::LOLUiElementGroupButtonState {
                 display_element_list: v.display_element_list.clone(),
             }
         }),
         hover_state_elements: button.hover_state_elements.as_ref().map(|v| {
-            lol_base::ui::LOLUiElementGroupButtonState {
+            lol_base_render::ui::LOLUiElementGroupButtonState {
                 display_element_list: v.display_element_list.clone(),
             }
         }),
         default_state_elements: button.default_state_elements.as_ref().map(|v| {
-            lol_base::ui::LOLUiElementGroupButtonState {
+            lol_base_render::ui::LOLUiElementGroupButtonState {
                 display_element_list: v.display_element_list.clone(),
             }
         }),
@@ -595,8 +595,8 @@ fn convert_ui_button_data(
 }
 
 /// 转换 UiElementRegionData 到 lol_base 稳定类型
-fn convert_ui_region_data(region: &UiElementRegionData) -> lol_base::ui::LOLUiElementRegionData {
-    lol_base::ui::LOLUiElementRegionData {
+fn convert_ui_region_data(region: &UiElementRegionData) -> lol_base_render::ui::LOLUiElementRegionData {
+    lol_base_render::ui::LOLUiElementRegionData {
         name: region.name.clone(),
         position: region.position.as_ref().map(convert_ui_position),
         scene: region.scene,
@@ -631,11 +631,11 @@ fn convert_ui_position(pos: &EnumUiPosition) -> LOLEnumUiPosition {
         }
         EnumUiPosition::UiPositionFullScreen => LOLEnumUiPosition::UiPositionFullScreen,
         EnumUiPosition::UiPositionPolygon(poly) => {
-            LOLEnumUiPosition::UiPositionPolygon(lol_base::ui::LOLUiPositionPolygon {
+            LOLEnumUiPosition::UiPositionPolygon(lol_base_render::ui::LOLUiPositionPolygon {
                 anchors: convert_anchor(&league_core::extract::EnumAnchor::AnchorSingle(
                     poly.anchors.clone(),
                 )),
-                ui_rect: Some(lol_base::ui::LOLUiElementRect {
+                ui_rect: Some(lol_base_render::ui::LOLUiElementRect {
                     position: poly.ui_rect.position,
                     size: poly.ui_rect.size,
                     source_resolution_height: poly.ui_rect.source_resolution_height,
@@ -661,7 +661,7 @@ fn convert_ui_position_rect(rect: &UiPositionRect) -> LOLUiPositionRect {
         ui_rect: rect
             .ui_rect
             .as_ref()
-            .map(|r| lol_base::ui::LOLUiElementRect {
+            .map(|r| lol_base_render::ui::LOLUiElementRect {
                 position: r.position,
                 size: r.size,
                 source_resolution_height: r.source_resolution_height,
@@ -679,12 +679,12 @@ fn convert_ui_position_rect(rect: &UiPositionRect) -> LOLUiPositionRect {
 fn convert_anchor(anchor: &league_core::extract::EnumAnchor) -> LOLEnumAnchor {
     match anchor {
         league_core::extract::EnumAnchor::AnchorSingle(single) => {
-            LOLEnumAnchor::AnchorSingle(lol_base::ui::LOLAnchorSingle {
+            LOLEnumAnchor::AnchorSingle(lol_base_render::ui::LOLAnchorSingle {
                 anchor: single.anchor,
             })
         }
         league_core::extract::EnumAnchor::AnchorDouble(dual) => {
-            LOLEnumAnchor::AnchorDouble(lol_base::ui::LOLAnchorDouble {
+            LOLEnumAnchor::AnchorDouble(lol_base_render::ui::LOLAnchorDouble {
                 anchor_left: dual.anchor_left,
                 anchor_right: dual.anchor_right,
             })
@@ -1077,8 +1077,8 @@ fn convert_hero_floating_info_bar_data(
 
 fn convert_hero_floating_info_border_type_data(
     data: &league_core::extract::HeroFloatingInfoBorderTypeData,
-) -> lol_base::ui::LOLHeroFloatingInfoBorderTypeData {
-    lol_base::ui::LOLHeroFloatingInfoBorderTypeData {
+) -> lol_base_render::ui::LOLHeroFloatingInfoBorderTypeData {
+    lol_base_render::ui::LOLHeroFloatingInfoBorderTypeData {
         border: data.border.into(),
         level_box_overlay_ally: data.level_box_overlay_ally.map(|v| v.into()),
         level_box_overlay_enemy: data.level_box_overlay_enemy.map(|v| v.into()),
@@ -1089,8 +1089,8 @@ fn convert_hero_floating_info_border_type_data(
 
 fn convert_hero_floating_info_border_defense_icon_data(
     data: &league_core::extract::HeroFloatingInfoBorderDefenseIconData,
-) -> lol_base::ui::LOLHeroFloatingInfoBorderDefenseIconData {
-    lol_base::ui::LOLHeroFloatingInfoBorderDefenseIconData {
+) -> lol_base_render::ui::LOLHeroFloatingInfoBorderDefenseIconData {
+    lol_base_render::ui::LOLHeroFloatingInfoBorderDefenseIconData {
         defense_down_icons: data
             .defense_down_icons
             .iter()
@@ -1105,8 +1105,8 @@ fn convert_hero_floating_info_border_defense_icon_data(
 
 fn convert_hero_floating_info_border_defense_icon_threshold_data(
     data: &league_core::extract::HeroFloatingInfoBorderDefenseIconThresholdData,
-) -> lol_base::ui::LOLHeroFloatingInfoBorderDefenseIconThresholdData {
-    lol_base::ui::LOLHeroFloatingInfoBorderDefenseIconThresholdData {
+) -> lol_base_render::ui::LOLHeroFloatingInfoBorderDefenseIconThresholdData {
+    lol_base_render::ui::LOLHeroFloatingInfoBorderDefenseIconThresholdData {
         armor_icon: data.armor_icon.into(),
         combo_icon: data.combo_icon.into(),
         defense_modifier_threshold: data.defense_modifier_threshold,
@@ -1116,8 +1116,8 @@ fn convert_hero_floating_info_border_defense_icon_threshold_data(
 
 fn convert_hero_floating_info_border_data(
     data: &HeroFloatingInfoBorderData,
-) -> lol_base::ui::LOLHeroFloatingInfoBorderData {
-    lol_base::ui::LOLHeroFloatingInfoBorderData {
+) -> lol_base_render::ui::LOLHeroFloatingInfoBorderData {
+    lol_base_render::ui::LOLHeroFloatingInfoBorderData {
         additional_status_icons: data
             .additional_status_icons
             .as_ref()
@@ -1167,8 +1167,8 @@ fn convert_structure_floating_info_bar_data(
     }
 }
 
-fn convert_health_bar_data(data: &HealthBarData) -> lol_base::ui::LOLHealthBarData {
-    lol_base::ui::LOLHealthBarData {
+fn convert_health_bar_data(data: &HealthBarData) -> lol_base_render::ui::LOLHealthBarData {
+    lol_base_render::ui::LOLHealthBarData {
         extra_bars: data
             .extra_bars
             .as_ref()
@@ -1185,8 +1185,8 @@ fn convert_health_bar_data(data: &HealthBarData) -> lol_base::ui::LOLHealthBarDa
 
 fn convert_health_bar_extra_bars_data(
     data: &HealthBarExtraBarsData,
-) -> lol_base::ui::LOLHealthBarExtraBarsData {
-    lol_base::ui::LOLHealthBarExtraBarsData {
+) -> lol_base_render::ui::LOLHealthBarExtraBarsData {
+    lol_base_render::ui::LOLHealthBarExtraBarsData {
         all_shield_bar: data.all_shield_bar.into(),
         champ_specific_bar: data.champ_specific_bar.as_ref().map(convert_bar_type_map),
         disguise_health_bar: data.disguise_health_bar.map(|v| v.into()),
@@ -1196,15 +1196,15 @@ fn convert_health_bar_extra_bars_data(
     }
 }
 
-fn convert_health_bar_fade_data(data: &HealthBarFadeData) -> lol_base::ui::LOLHealthBarFadeData {
-    lol_base::ui::LOLHealthBarFadeData {
+fn convert_health_bar_fade_data(data: &HealthBarFadeData) -> lol_base_render::ui::LOLHealthBarFadeData {
+    lol_base_render::ui::LOLHealthBarFadeData {
         fade_bar: convert_bar_type_map(&data.fade_bar),
         fade_speed: data.fade_speed,
     }
 }
 
-fn convert_health_bar_text_data(data: &HealthBarTextData) -> lol_base::ui::LOLHealthBarTextData {
-    lol_base::ui::LOLHealthBarTextData {
+fn convert_health_bar_text_data(data: &HealthBarTextData) -> lol_base_render::ui::LOLHealthBarTextData {
+    lol_base_render::ui::LOLHealthBarTextData {
         health_value_text: data.health_value_text.into(),
         include_max_health: data.include_max_health,
     }
@@ -1212,16 +1212,16 @@ fn convert_health_bar_text_data(data: &HealthBarTextData) -> lol_base::ui::LOLHe
 
 fn convert_health_bar_tick_style(
     data: &league_core::extract::EnumHealthBarTickStyle,
-) -> lol_base::ui::LOLEnumHealthBarTickStyle {
+) -> lol_base_render::ui::LOLEnumHealthBarTickStyle {
     match data {
         league_core::extract::EnumHealthBarTickStyle::HealthBarTickStyleHero(hero) => {
-            lol_base::ui::LOLEnumHealthBarTickStyle::HealthBarTickStyleHero(
-                lol_base::ui::LOLHealthBarTickStyleHero {
+            lol_base_render::ui::LOLEnumHealthBarTickStyle::HealthBarTickStyleHero(
+                lol_base_render::ui::LOLHealthBarTickStyleHero {
                     micro_tick: hero.micro_tick.into(),
                     micro_tick_per_standard_tick_data: hero
                         .micro_tick_per_standard_tick_data
                         .iter()
-                        .map(|d| lol_base::ui::LOLMicroTicksPerStandardTickData {
+                        .map(|d| lol_base_render::ui::LOLMicroTicksPerStandardTickData {
                             micro_ticks_between: d.micro_ticks_between,
                             min_health: d.min_health,
                         })
@@ -1231,15 +1231,15 @@ fn convert_health_bar_tick_style(
             )
         }
         league_core::extract::EnumHealthBarTickStyle::HealthBarTickStyleTftCompanion(tft) => {
-            lol_base::ui::LOLEnumHealthBarTickStyle::HealthBarTickStyleTftCompanion(
-                lol_base::ui::LOLHealthBarTickStyleTftCompanion {
+            lol_base_render::ui::LOLEnumHealthBarTickStyle::HealthBarTickStyleTftCompanion(
+                lol_base_render::ui::LOLHealthBarTickStyleTftCompanion {
                     standard_tick: tft.standard_tick.into(),
                 },
             )
         }
         league_core::extract::EnumHealthBarTickStyle::HealthBarTickStyleUnit(unit) => {
-            lol_base::ui::LOLEnumHealthBarTickStyle::HealthBarTickStyleUnit(
-                lol_base::ui::LOLHealthBarTickStyleUnit {
+            lol_base_render::ui::LOLEnumHealthBarTickStyle::HealthBarTickStyleUnit(
+                lol_base_render::ui::LOLHealthBarTickStyleUnit {
                     standard_tick: unit.standard_tick.into(),
                 },
             )
@@ -1247,8 +1247,8 @@ fn convert_health_bar_tick_style(
     }
 }
 
-fn convert_bar_type_map(data: &BarTypeMap) -> lol_base::ui::LOLBarTypeMap {
-    lol_base::ui::LOLBarTypeMap {
+fn convert_bar_type_map(data: &BarTypeMap) -> lol_base_render::ui::LOLBarTypeMap {
+    lol_base_render::ui::LOLBarTypeMap {
         additional_bar_types: data.additional_bar_types.as_ref().map(|m| {
             m.iter()
                 .map(|(&k, &v)| (k, v.into()))
@@ -1331,28 +1331,28 @@ pub fn extract_ui_all(game_path: &str) {
     if let Some(vc) = &player_frame_vc {
         let serialized = ron::ser::to_string_pretty(vc, ron_config.clone()).unwrap();
         resources.insert(
-            "lol_base::ui::LOLPlayerFrameViewController".to_string(),
+            "lol_base_render::ui::LOLPlayerFrameViewController".to_string(),
             serialized,
         );
     }
     if let Some(vc) = &player_inventory_vc {
         let serialized = ron::ser::to_string_pretty(vc, ron_config.clone()).unwrap();
         resources.insert(
-            "lol_base::ui::LOLPlayerInventoryViewController".to_string(),
+            "lol_base_render::ui::LOLPlayerInventoryViewController".to_string(),
             serialized,
         );
     }
     if let Some(vc) = &lol_game_state_vc {
         let serialized = ron::ser::to_string_pretty(vc, ron_config.clone()).unwrap();
         resources.insert(
-            "lol_base::ui::LOLLolGameStateViewController".to_string(),
+            "lol_base_render::ui::LOLLolGameStateViewController".to_string(),
             serialized,
         );
     }
     if let Some(vc) = &floating_info_bar_vc {
         let serialized = ron::ser::to_string_pretty(vc, ron_config.clone()).unwrap();
         resources.insert(
-            "lol_base::ui::LOLFloatingInfoBarViewController".to_string(),
+            "lol_base_render::ui::LOLFloatingInfoBarViewController".to_string(),
             serialized,
         );
     }

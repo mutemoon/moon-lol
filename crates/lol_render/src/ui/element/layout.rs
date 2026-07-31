@@ -1,8 +1,8 @@
 use bevy::prelude::*;
 use bevy::window::{PrimaryWindow, WindowResized};
 use lol_base::hash_key::LoadHashKeyTrait;
-use lol_base::ui::LOLEnumData;
-use lol_base::ui_components::{UIElement, UIElementChild};
+use lol_base_render::ui::LOLEnumData;
+use lol_base_render::ui_components::{UIElement, UIElementChild};
 
 use super::init::{
     AnimAssets, DesaturateAssets, FillPercentageAssets, IconAssets, RegionAssets, TextAssets,
@@ -72,7 +72,7 @@ pub fn update_element_layout(
                 region_data
                     .position
                     .as_ref()
-                    .unwrap_or(&lol_base::ui::LOLEnumUiPosition::UiPositionFullScreen),
+                    .unwrap_or(&lol_base_render::ui::LOLEnumUiPosition::UiPositionFullScreen),
                 &None,
                 Some(&region_data.name),
                 0,
@@ -106,7 +106,7 @@ pub fn update_element_layout(
         }
     };
 
-    use lol_base::ui::LOLEnumUiPosition;
+    use lol_base_render::ui::LOLEnumUiPosition;
 
     let (ui_rect, anchors) = match ui_position {
         LOLEnumUiPosition::UiPositionRect(rect) => {
@@ -121,7 +121,7 @@ pub fn update_element_layout(
         }
     };
 
-    use lol_base::ui::LOLEnumAnchor;
+    use lol_base_render::ui::LOLEnumAnchor;
 
     let anchor = match anchors {
         Some(anchors) => match anchors {

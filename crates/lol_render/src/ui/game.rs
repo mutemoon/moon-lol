@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use lol_base::ui::{LOLEnumUiMetric, LOLLolGameStateViewController, LOLUiElementTextData};
+use lol_base_render::ui::{LOLEnumUiMetric, LOLLolGameStateViewController, LOLUiElementTextData};
 use lol_core::base::stats::ChampionStats;
 use lol_core::team::Team;
 

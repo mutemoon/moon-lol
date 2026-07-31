@@ -1,33 +1,32 @@
 pub mod animation;
 pub mod aoe_visual;
-pub mod camera;
 pub mod controller;
 pub mod cursor;
 pub mod debug_area;
 pub mod debug_missile;
 pub mod debug_sphere;
-pub mod error;
 pub mod loaders;
 pub mod map;
 pub mod navigation;
-pub mod particle;
-pub mod shader;
 pub mod skin;
 pub mod test_render;
 pub mod ui;
 
+// 因为 camera / shader / error 已下沉到 lol_base_render（供 lol_particle 等下游复用以避免循环依赖），
+// 所以在此 re-export 保持 crate::camera / crate::shader / crate::error 调用路径稳定。
+pub use lol_base_render::{camera, error, shader};
+
 use animation::PluginAnimation;
 use aoe_visual::PluginAoEVisual;
 use bevy::prelude::{App, Plugin};
-use camera::PluginCamera;
 use controller::PluginController;
 use cursor::PluginCursor;
 use debug_area::PluginDebugArea;
 use debug_missile::PluginDebugMissile;
 use debug_sphere::PluginDebugSphere;
+use lol_base_render::camera::PluginCamera;
 use map::PluginRenderMap;
 use navigation::PluginRenderNavigation;
-use particle::PluginParticle;
 use skin::PluginSkin;
 use ui::PluginUI;
 
@@ -47,7 +46,6 @@ impl Plugin for PluginRender {
         app.add_plugins(PluginDebugSphere);
         app.add_plugins(PluginRenderMap);
         app.add_plugins(PluginRenderNavigation);
-        app.add_plugins(PluginParticle);
         app.add_plugins(PluginSkin);
         app.add_plugins(PluginUI);
     }

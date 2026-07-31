@@ -1,6 +1,7 @@
 mod agent;
 mod error;
 mod log;
+mod particle;
 mod process;
 mod state;
 mod ws;
@@ -123,7 +124,7 @@ fn write_scene_ron(
         if idx == 0 {
             ron_content.push_str("                \"lol_render::controller::Controller\": (),\n");
             ron_content.push_str("                \"lol_render::controller::SelfPlayer\": (),\n");
-            ron_content.push_str("                \"lol_render::camera::Focus\": (),\n");
+            ron_content.push_str("                \"lol_base_render::camera::Focus\": (),\n");
         }
         ron_content.push_str("                \"lol_core::entities::champion::Champion\": (),\n");
         ron_content.push_str(&format!(
@@ -512,7 +513,9 @@ pub fn run() {
             toggle_cooldown,
             reset_position,
             switch_champion,
-            set_script
+            set_script,
+            particle::list_particle_heroes,
+            particle::load_hero_particles
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

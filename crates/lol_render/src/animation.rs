@@ -2,7 +2,7 @@ use std::ops::Deref;
 use std::time::Duration;
 
 use bevy::prelude::*;
-use lol_base::animation::{
+use lol_base_render::animation::{
     AnimationConfig, AnimationConfigOf, ConfigParametricUpdater, LOLAnimationGraph,
     LOLAnimationGraphHandle, LOLAnimationState,
 };
@@ -227,7 +227,7 @@ fn update_condition_animation(
     q_movement: Query<&Movement>,
     res_animation: Res<Assets<LOLAnimationGraph>>,
 ) {
-    use lol_base::animation::ConfigAnimationNode;
+    use lol_base_render::animation::ConfigAnimationNode;
 
     let play_list = query
         .iter()

@@ -1,6 +1,6 @@
 (
   resources: {
-    "lol_base::ui::LOLFloatingInfoBarViewController": (
+    "lol_base_render::ui::LOLFloatingInfoBarViewController": (
     info_bar_style_source_map: {
         0: 322894968,
         1: 3139602458,
@@ -16,7 +16,7 @@
         12: 1689180083,
     },
 ),
-    "lol_base::ui::LOLLolGameStateViewController": (
+    "lol_base_render::ui::LOLLolGameStateViewController": (
     base_loadable: 3986485090,
     draw_area_list: Some((
         draw_regions: [
@@ -56,7 +56,7 @@
     path_hash_to_self: 17306688221782629590,
     scene: 2839759880,
 ),
-    "lol_base::ui::LOLPlayerFrameViewController": (
+    "lol_base_render::ui::LOLPlayerFrameViewController": (
     abilities_ui_data: (
         champion_spells: [
             (
@@ -546,7 +546,7 @@
         ),
     ],
 ),
-    "lol_base::ui::LOLPlayerInventoryViewController": (
+    "lol_base_render::ui::LOLPlayerInventoryViewController": (
     item_slot_ui_data: [
         (
             ammo_fx: Some(3216875731),

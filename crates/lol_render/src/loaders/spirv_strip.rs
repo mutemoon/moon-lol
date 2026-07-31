@@ -521,6 +521,165 @@ pub fn remap_bindings(bytes: &[u8], map: &std::collections::BTreeMap<u32, u32>) 
     Some(words.iter().flat_map(|w| w.to_le_bytes()).collect())
 }
 
+// ---------------------------------------------------------------------------
+// cbuffer 内存布局反射：直接从 SPIR-V 二进制读取权威布局
+// ---------------------------------------------------------------------------
+
+const OP_MEMBER_NAME: u32 = 6;
+const OP_TYPE_STRUCT: u32 = 30;
+const OP_MEMBER_DECORATE: u32 = 72;
+const DECORATION_OFFSET: u32 = 35;
+const DECORATION_DESCRIPTOR_SET: u32 = 34;
+const STORAGE_UNIFORM: u32 = 2;
+const STORAGE_PUSH_CONSTANT: u32 = 9;
+
+/// 从 SPIR-V 字流的 `start` 处读取一条 literal string（UTF-8，4 字节对齐、
+/// 以 null 结尾并零填充），返回 (字符串, 消耗的 word 数)。
+fn read_spirv_string(words: &[u32], start: usize) -> (String, usize) {
+    let mut bytes: Vec<u8> = Vec::new();
+    let mut consumed = 0usize;
+    for &w in &words[start..] {
+        consumed += 1;
+        let b = w.to_le_bytes();
+        for &c in &b {
+            if c == 0 {
+                return (String::from_utf8_lossy(&bytes).into_owned(), consumed);
+            }
+            bytes.push(c);
+        }
+    }
+    (String::from_utf8_lossy(&bytes).into_owned(), consumed)
+}
+
+/// 单个 cbuffer（uniform block）从 SPIR-V 直接反射出的权威布局。
+#[derive(Debug, Clone, PartialEq)]
+pub struct SpirvCbufferLayout {
+    /// `OpDecorate <var> Binding` 的值（离线统一 pass 已改写为 Vulkan 压缩编号）
+    pub binding: u32,
+    /// `OpDecorate <var> DescriptorSet` 的值
+    pub set: u32,
+    /// 成员名 → `OpMemberDecorate <struct> <idx> Offset` 的字节偏移。
+    /// 被 DXC 剥离名字的未使用成员（有 offset 无 name）不计入。
+    pub member_offsets: std::collections::BTreeMap<String, u32>,
+}
+
+/// 直接解析 SPIR-V 二进制，反射出全部 Uniform / PushConstant 存储类 cbuffer 的
+/// 权威内存布局（binding + 每个具名成员的 offset）。
+///
+/// 这是 DXBC→SPIR-V 编译产物里 shader 实际读取的地址布局，用作校验 map.ron
+/// 变体布局与 `set_param` 写入偏移正确性的地面真值。返回 key 为 cbuffer 名
+/// （取自 `OpName <var>`，如 `$Globals`/`PerFrameVertexCB`）。输入不合法返回 None。
+pub fn reflect_cbuffer_layouts(
+    bytes: &[u8],
+) -> Option<std::collections::BTreeMap<String, SpirvCbufferLayout>> {
+    use std::collections::BTreeMap;
+    let words = bytes_to_words(bytes)?;
+
+    // id → 名字（OpName）
+    let mut names: BTreeMap<u32, String> = BTreeMap::new();
+    // struct id → (成员下标 → 成员名)（OpMemberName）
+    let mut member_names: BTreeMap<u32, BTreeMap<u32, String>> = BTreeMap::new();
+    // struct id → (成员下标 → offset)（OpMemberDecorate Offset）
+    let mut member_offsets: BTreeMap<u32, BTreeMap<u32, u32>> = BTreeMap::new();
+    // 变量 id → binding / set（OpDecorate）
+    let mut bindings: BTreeMap<u32, u32> = BTreeMap::new();
+    let mut sets: BTreeMap<u32, u32> = BTreeMap::new();
+    // pointer id → (存储类, 指向类型 id)
+    let mut pointers: BTreeMap<u32, (u32, u32)> = BTreeMap::new();
+    // struct 类型 id 集合
+    let mut structs: std::collections::BTreeSet<u32> = Default::default();
+    // 变量：(变量 id, 指针类型 id, 存储类)
+    let mut vars: Vec<(u32, u32, u32)> = Vec::new();
+
+    let mut i = 5;
+    while i < words.len() {
+        let opcode = words[i] & 0xFFFF;
+        let wc = (words[i] >> 16) as usize;
+        if wc == 0 || i + wc > words.len() {
+            return None;
+        }
+        let inst = &words[i..i + wc];
+        match opcode {
+            OP_NAME if wc >= 3 => {
+                let (s, _) = read_spirv_string(words.as_slice(), i + 2);
+                names.insert(inst[1], s);
+            }
+            OP_MEMBER_NAME if wc >= 4 => {
+                let (s, _) = read_spirv_string(words.as_slice(), i + 3);
+                member_names.entry(inst[1]).or_default().insert(inst[2], s);
+            }
+            OP_MEMBER_DECORATE if wc >= 5 && inst[3] == DECORATION_OFFSET => {
+                member_offsets
+                    .entry(inst[1])
+                    .or_default()
+                    .insert(inst[2], inst[4]);
+            }
+            OP_DECORATE if wc >= 4 && inst[2] == DECORATION_BINDING => {
+                bindings.insert(inst[1], inst[3]);
+            }
+            OP_DECORATE if wc >= 4 && inst[2] == DECORATION_DESCRIPTOR_SET => {
+                sets.insert(inst[1], inst[3]);
+            }
+            OP_TYPE_STRUCT if wc >= 2 => {
+                structs.insert(inst[1]);
+            }
+            OP_TYPE_POINTER if wc >= 4 => {
+                pointers.insert(inst[1], (inst[2], inst[3]));
+            }
+            OP_VARIABLE if wc >= 4 => {
+                vars.push((inst[2], inst[1], inst[3]));
+            }
+            _ => {}
+        }
+        i += wc;
+    }
+
+    let mut out: BTreeMap<String, SpirvCbufferLayout> = BTreeMap::new();
+    for (var_id, ptr_type, storage) in vars {
+        if storage != STORAGE_UNIFORM && storage != STORAGE_PUSH_CONSTANT {
+            continue;
+        }
+        let Some(&(ptr_storage, pointee)) = pointers.get(&ptr_type) else {
+            continue;
+        };
+        if ptr_storage != storage {
+            continue;
+        }
+        if !structs.contains(&pointee) {
+            continue;
+        }
+        // cbuffer 名优先取变量名（spirv-reflect 亦以此作 binding 名，如 $Globals）
+        let name = names
+            .get(&var_id)
+            .cloned()
+            .filter(|s| !s.is_empty())
+            .or_else(|| {
+                names
+                    .get(&pointee)
+                    .map(|s| s.trim_start_matches("type.").to_string())
+            })?;
+        let mut offsets_by_idx = member_offsets.get(&pointee).cloned().unwrap_or_default();
+        let names_by_idx = member_names.get(&pointee).cloned().unwrap_or_default();
+        let mut member_offsets_out: BTreeMap<String, u32> = BTreeMap::new();
+        for (idx, off) in offsets_by_idx.iter_mut() {
+            if let Some(mname) = names_by_idx.get(idx) {
+                if !mname.is_empty() {
+                    member_offsets_out.insert(mname.clone(), *off);
+                }
+            }
+        }
+        out.insert(
+            name,
+            SpirvCbufferLayout {
+                binding: bindings.get(&var_id).copied().unwrap_or(u32::MAX),
+                set: sets.get(&var_id).copied().unwrap_or(0),
+                member_offsets: member_offsets_out,
+            },
+        );
+    }
+    Some(out)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

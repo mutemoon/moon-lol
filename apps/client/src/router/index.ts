@@ -18,6 +18,7 @@ router.beforeEach((to, _from, next) => {
 
   // 本地对局 + 大日志调试相关仅桌面模式可见。
   // /rl-training 也仅桌面端可用（产品文档 §2.3）。
+  // /particles 连接本地粒子渲染 server，同样仅桌面端可用。
   const isLocalOnly =
     to.path === "/" ||
     to.path === "/launcher" ||
@@ -25,6 +26,7 @@ router.beforeEach((to, _from, next) => {
     to.path === "/games" ||
     to.path === "/history" ||
     to.path === "/rl-training" ||
+    to.path === "/particles" ||
     to.path === "/logs-archive";
   if (isLocalOnly) {
     next("/rooms");

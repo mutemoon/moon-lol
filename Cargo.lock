@@ -8252,6 +8252,7 @@ dependencies = [
  "league_property",
  "league_utils",
  "lol_base",
+ "lol_base_render",
  "lol_core",
  "nom 8.0.0",
  "png 0.17.16",
@@ -8601,6 +8602,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "lol_base_render"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+ "bincode",
+ "bitflags 2.13.0",
+ "league_utils",
+ "lol_base",
+ "rand 0.9.4",
+ "ron 0.8.1",
+ "serde",
+ "thiserror 2.0.18",
+]
+
+[[package]]
 name = "lol_champions"
 version = "0.1.0"
 dependencies = [
@@ -8609,6 +8625,7 @@ dependencies = [
  "image",
  "lol_base",
  "lol_core",
+ "lol_particle",
  "lol_render",
  "rand 0.9.4",
  "ron 0.8.1",
@@ -8691,6 +8708,26 @@ dependencies = [
 ]
 
 [[package]]
+name = "lol_particle"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+ "clap",
+ "league_file",
+ "league_to_lol",
+ "league_utils",
+ "lol_base",
+ "lol_base_render",
+ "lol_core",
+ "lol_rpc",
+ "lol_server",
+ "rand 0.9.4",
+ "ron 0.8.1",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "lol_render"
 version = "0.1.0"
 dependencies = [
@@ -8704,6 +8741,7 @@ dependencies = [
  "league_to_lol",
  "league_utils",
  "lol_base",
+ "lol_base_render",
  "lol_core",
  "naga 29.0.3",
  "rand 0.9.4",
@@ -8733,7 +8771,6 @@ dependencies = [
  "bevy",
  "futures-util",
  "lol_base",
- "lol_champions",
  "lol_client",
  "lol_core",
  "lol_rpc",
@@ -8742,6 +8779,14 @@ dependencies = [
  "tokio",
  "tokio-tungstenite 0.24.0",
  "tracing",
+]
+
+[[package]]
+name = "lol_share"
+version = "0.1.0"
+dependencies = [
+ "glam",
+ "serde",
 ]
 
 [[package]]
@@ -9085,9 +9130,11 @@ dependencies = [
  "lol_agent_runtime",
  "lol_client",
  "lol_game_process_manager",
+ "lol_share",
  "rig",
  "rig-core",
  "rmcp",
+ "ron 0.8.1",
  "serde",
  "serde_json",
  "sqlx",
@@ -9124,9 +9171,11 @@ dependencies = [
  "league_utils",
  "lol_agent",
  "lol_base",
+ "lol_base_render",
  "lol_champions",
  "lol_core",
  "lol_debug",
+ "lol_particle",
  "lol_render",
  "lol_server",
  "rand 0.9.4",

@@ -1,0 +1,12 @@
+[package]
+name = "lol_share"
+version = "0.1.0"
+edition = "2024"
+
+# 纯 serde 数据模型——不依赖 bevy，只含落盘字段。
+# 用真实类型解析 skin{N}_vfx.ron 并重新序列化每个 system 为 RON，
+# 供桌面端后端读出后交给粒子渲染 server（lol_particle）播放。
+
+[dependencies]
+glam = { version = "0.33", features = ["serde"] }
+serde = { workspace = true, features = ["derive"] }

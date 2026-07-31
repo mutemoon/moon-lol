@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use bevy::prelude::*;
 use league_file::animation::{AnimationFile, CompressedTransformType, UncompressedData};
-use lol_base::animation::ConfigAnimationClip;
+use lol_base_render::animation::ConfigAnimationClip;
 
 pub fn load_animation_file(value: AnimationFile) -> ConfigAnimationClip {
     match value {

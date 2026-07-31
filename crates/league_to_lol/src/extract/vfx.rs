@@ -6,7 +6,7 @@ use league_core::extract::{
     VfxPrimitivePlanarProjection, VfxProbabilityTableData, VfxShapeBox, VfxShapeCylinder,
     VfxShapeLegacy, VfxShapeSphere, VfxSystemDefinitionData, VfxTextureMultDefinitionData,
 };
-use lol_base::particle::{
+use lol_base_render::particle::{
     ConfigVfxDistortionDefinition, ConfigVfxEmitterDefinition, ConfigVfxMaterialOverride,
     ConfigVfxPrimitive, ConfigVfxShape, ConfigVfxSystemDefinition, ConfigVfxTextureMult,
     ProbabilityCurve, Sampler, StochasticSampler, VfxTexture,

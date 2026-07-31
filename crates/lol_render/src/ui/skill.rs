@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use lol_base::spell::Spell;
-use lol_base::ui::LOLEnumData::AtlasData;
-use lol_base::ui::{
+use lol_base_render::ui::LOLEnumData::AtlasData;
+use lol_base_render::ui::{
     LOLAtlasData, LOLPlayerFrameViewController, LOLSpellSlotDetailedUiDefinition,
     LOLUiElementEffectDesaturateData, LOLUiElementIconData,
 };
@@ -331,13 +331,13 @@ fn update_single_skill_rank_pips(
         let pip_y = base_y;
 
         let new_pos =
-            lol_base::ui::LOLEnumUiPosition::UiPositionRect(lol_base::ui::LOLUiPositionRect {
-                anchors: Some(lol_base::ui::LOLEnumAnchor::AnchorSingle(
-                    lol_base::ui::LOLAnchorSingle {
+            lol_base_render::ui::LOLEnumUiPosition::UiPositionRect(lol_base_render::ui::LOLUiPositionRect {
+                anchors: Some(lol_base_render::ui::LOLEnumAnchor::AnchorSingle(
+                    lol_base_render::ui::LOLAnchorSingle {
                         anchor: Vec2::new(0.5, 1.0),
                     },
                 )),
-                ui_rect: Some(lol_base::ui::LOLUiElementRect {
+                ui_rect: Some(lol_base_render::ui::LOLUiElementRect {
                     position: Some(Vec2::new(pip_x, pip_y)),
                     size: Some(Vec2::new(9.0, 9.0)),
                     source_resolution_height: Some(1200),
@@ -354,7 +354,7 @@ fn update_single_skill_rank_pips(
         if let Ok(UIElement::Icon(empty_handle)) = q_ui_element.get(empty_entity) {
             if let Some(mut empty_data) = icon_assets.get_mut(*empty_handle) {
                 let current_pos = match &empty_data.position {
-                    lol_base::ui::LOLEnumUiPosition::UiPositionRect(rect) => {
+                    lol_base_render::ui::LOLEnumUiPosition::UiPositionRect(rect) => {
                         rect.ui_rect.as_ref().and_then(|r| r.position)
                     }
                     _ => None,
@@ -368,7 +368,7 @@ fn update_single_skill_rank_pips(
         if let Ok(UIElement::Icon(full_handle)) = q_ui_element.get(full_entity) {
             if let Some(mut full_data) = icon_assets.get_mut(*full_handle) {
                 let current_pos = match &full_data.position {
-                    lol_base::ui::LOLEnumUiPosition::UiPositionRect(rect) => {
+                    lol_base_render::ui::LOLEnumUiPosition::UiPositionRect(rect) => {
                         rect.ui_rect.as_ref().and_then(|r| r.position)
                     }
                     _ => None,
